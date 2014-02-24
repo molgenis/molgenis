@@ -32,38 +32,38 @@ public class AttributeMetaDataResponse
 		this(entityParentName, attr, null, null);
 	}
 
-	public AttributeMetaDataResponse(final String entityParentName, AttributeMetaData attr, Set<String> fieldSet,
-			final Set<String> expandFieldSet)
+	public AttributeMetaDataResponse(final String entityParentName, AttributeMetaData attr, Set<String> attributesSet,
+			final Set<String> attributeExpandsSet)
 	{
 		String attrName = attr.getName();
 
 		this.href = String.format("%s/%s/meta/%s", RestController.BASE_URI, entityParentName, attrName);
 
-		if (fieldSet == null || fieldSet.contains("fieldType".toLowerCase()))
+		if (attributesSet == null || attributesSet.contains("fieldType".toLowerCase()))
 		{
 			this.fieldType = attr.getDataType().getEnumType();
 		}
 		else this.fieldType = null;
 
-		if (fieldSet == null || fieldSet.contains("name".toLowerCase()))
+		if (attributesSet == null || attributesSet.contains("name".toLowerCase()))
 		{
 			this.name = attrName;
 		}
 		else this.name = null;
 
-		if (fieldSet == null || fieldSet.contains("label".toLowerCase()))
+		if (attributesSet == null || attributesSet.contains("label".toLowerCase()))
 		{
 			this.label = attr.getLabel();
 		}
 		else this.label = null;
 
-		if (fieldSet == null || fieldSet.contains("description".toLowerCase()))
+		if (attributesSet == null || attributesSet.contains("description".toLowerCase()))
 		{
 			this.description = attr.getDescription();
 		}
 		else this.description = null;
 
-		if (fieldSet == null || fieldSet.contains("refEntity".toLowerCase()))
+		if (attributesSet == null || attributesSet.contains("refEntity".toLowerCase()))
 		{
 			EntityMetaData refEntity = attr.getRefEntity();
 			this.refEntity = refEntity != null ? new Href(String.format("%s/%s/meta", RestController.BASE_URI,
@@ -71,7 +71,7 @@ public class AttributeMetaDataResponse
 		}
 		else this.refEntity = null;
 
-		if (fieldSet == null || fieldSet.contains("attributes".toLowerCase()))
+		if (attributesSet == null || attributesSet.contains("attributes".toLowerCase()))
 		{
 			Iterable<AttributeMetaData> attributeParts = attr.getAttributeParts();
 			this.attributes = attributeParts != null ? Lists.newArrayList(Iterables.transform(attributeParts,
@@ -81,7 +81,7 @@ public class AttributeMetaDataResponse
 						@Override
 						public Object apply(AttributeMetaData attributeMetaData)
 						{
-							if (expandFieldSet != null && expandFieldSet.contains("attributes"))
+							if (attributeExpandsSet != null && attributeExpandsSet.contains("attributes"))
 							{
 								return new AttributeMetaDataResponse(entityParentName, attributeMetaData, null, null);
 							}
@@ -95,31 +95,31 @@ public class AttributeMetaDataResponse
 		}
 		else this.attributes = null;
 
-		if (fieldSet == null || fieldSet.contains("nillable".toLowerCase()))
+		if (attributesSet == null || attributesSet.contains("nillable".toLowerCase()))
 		{
 			this.nillable = attr.isNillable();
 		}
 		else this.nillable = null;
 
-		if (fieldSet == null || fieldSet.contains("readOnly".toLowerCase()))
+		if (attributesSet == null || attributesSet.contains("readOnly".toLowerCase()))
 		{
 			this.readOnly = attr.isReadonly();
 		}
 		else this.readOnly = null;
 
-		if (fieldSet == null || fieldSet.contains("defaultValue".toLowerCase()))
+		if (attributesSet == null || attributesSet.contains("defaultValue".toLowerCase()))
 		{
 			this.defaultValue = attr.getDefaultValue();
 		}
 		else this.defaultValue = null;
 
-		if (fieldSet == null || fieldSet.contains("labelAttribute".toLowerCase()))
+		if (attributesSet == null || attributesSet.contains("labelAttribute".toLowerCase()))
 		{
 			this.labelAttribute = attr.isLabelAttribute();
 		}
 		else this.labelAttribute = null;
 
-		if (fieldSet == null || fieldSet.contains("unique".toLowerCase()))
+		if (attributesSet == null || attributesSet.contains("unique".toLowerCase()))
 		{
 			this.unique = attr.isUnique();
 		}

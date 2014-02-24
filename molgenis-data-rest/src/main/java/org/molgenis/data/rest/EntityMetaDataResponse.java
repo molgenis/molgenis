@@ -19,40 +19,40 @@ public class EntityMetaDataResponse
 	private final Map<String, Object> attributes;
 	private final String labelAttribute;
 
-	public EntityMetaDataResponse(EntityMetaData meta, Set<String> fieldSet, Set<String> expandFieldSet)
+	public EntityMetaDataResponse(EntityMetaData meta, Set<String> attributesSet, Set<String> attributeExpandsSet)
 	{
 		this.href = String.format("%s/%s/meta", RestController.BASE_URI, meta.getName());
 
-		if (fieldSet == null || fieldSet.contains("name".toLowerCase()))
+		if (attributesSet == null || attributesSet.contains("name".toLowerCase()))
 		{
 			this.name = meta.getName();
 		}
 		else this.name = null;
 
-		if (fieldSet == null || fieldSet.contains("description".toLowerCase()))
+		if (attributesSet == null || attributesSet.contains("description".toLowerCase()))
 		{
 			this.description = meta.getDescription();
 		}
 		else this.description = null;
 
-		if (fieldSet == null || fieldSet.contains("label".toLowerCase()))
+		if (attributesSet == null || attributesSet.contains("label".toLowerCase()))
 		{
 			label = meta.getLabel();
 		}
 		else this.label = null;
 
-		if (fieldSet == null || fieldSet.contains("attributes".toLowerCase()))
+		if (attributesSet == null || attributesSet.contains("attributes".toLowerCase()))
 		{
 			this.attributes = new LinkedHashMap<String, Object>();
 
 			for (AttributeMetaData attr : meta.getAttributes())
 			{
 				// only include requested fields
-				if (fieldSet != null && !fieldSet.contains(attr.getName().toLowerCase())) continue;
+				if (attributesSet != null && !attributesSet.contains(attr.getName().toLowerCase())) continue;
 
 				if (attr.isVisible() && !attr.getName().equals("__Type"))
 				{
-					if (expandFieldSet != null && expandFieldSet.contains("attributes"))
+					if (attributeExpandsSet != null && attributeExpandsSet.contains("attributes"))
 					{
 						this.attributes.put(attr.getName(), new AttributeMetaDataResponse(name, attr));
 					}
@@ -66,7 +66,7 @@ public class EntityMetaDataResponse
 		}
 		else this.attributes = null;
 
-		if (fieldSet == null || fieldSet.contains("labelAttribute".toLowerCase()))
+		if (attributesSet == null || attributesSet.contains("labelAttribute".toLowerCase()))
 		{
 			AttributeMetaData labelAttribute = meta.getLabelAttribute();
 			this.labelAttribute = labelAttribute != null ? labelAttribute.getName() : null;

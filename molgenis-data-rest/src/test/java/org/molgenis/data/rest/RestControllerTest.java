@@ -127,7 +127,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void deletePost() throws Exception
 	{
-		mockMvc.perform(post(BASE_URI + "/person/1?_method=DELETE")).andExpect(status().isNoContent());
+		mockMvc.perform(post(BASE_URI + "/person/1").param("_method", "DELETE")).andExpect(status().isNoContent());
 		verify(dataService).delete(PERSON, 1);
 	}
 
@@ -146,7 +146,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void getMetaDataSelectAttributes() throws Exception
 	{
-		mockMvc.perform(get(BASE_URI + "/person/meta?fields=name")).andExpect(status().isOk())
+		mockMvc.perform(get(BASE_URI + "/person/meta").param("attributes", "name")).andExpect(status().isOk())
 				.andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(content().string("{\"href\":\"/api/v1/Person/meta\",\"name\":\"Person\"}"));
 
@@ -155,7 +155,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void getMetaDataExpandAttributes() throws Exception
 	{
-		mockMvc.perform(get(BASE_URI + "/person/meta?expand=attributes"))
+		mockMvc.perform(get(BASE_URI + "/person/meta").param("expand", "attributes"))
 				.andExpect(status().isOk())
 				.andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(
@@ -176,7 +176,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void retrieveSelectAttributes() throws Exception
 	{
-		mockMvc.perform(get(BASE_URI + "/person/1?fields=notname")).andExpect(status().isOk())
+		mockMvc.perform(get(BASE_URI + "/person/1").param("attributes", "notname")).andExpect(status().isOk())
 				.andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(content().string("{\"href\":\"/api/v1/person/1\"}"));
 

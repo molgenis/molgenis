@@ -107,15 +107,15 @@ public class RestController
 	@RequestMapping(value = "/{entityName}/meta", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public EntityMetaDataResponse getEntityMetaData(@PathVariable("entityName") String entityNameRaw,
-			@RequestParam(value = "fields", required = false) String[] fields,
-			@RequestParam(value = "expand", required = false) String[] expandFields)
+			@RequestParam(value = "attributes", required = false) String[] attributes,
+			@RequestParam(value = "expand", required = false) String[] attributeExpands)
 	{
 		String entityName = getEntityName(entityNameRaw);
-		Set<String> fieldSet = toFieldSet(fields);
-		Set<String> expandFieldSet = toExpandFieldSet(expandFields);
+		Set<String> attributeSet = toAttributeSet(attributes);
+		Set<String> attributeExpandSet = toAttributeExpandSet(attributeExpands);
 
 		EntityMetaData meta = dataService.getRepositoryByEntityName(entityName);
-		return new EntityMetaDataResponse(meta, fieldSet, expandFieldSet);
+		return new EntityMetaDataResponse(meta, attributeSet, attributeExpandSet);
 	}
 
 	/**
@@ -128,18 +128,18 @@ public class RestController
 	@ResponseBody
 	public AttributeMetaDataResponse getAttributeMetaData(@PathVariable("entityName") String entityNameRaw,
 			@PathVariable("attributeName") String attributeName,
-			@RequestParam(value = "fields", required = false) String[] fields,
-			@RequestParam(value = "expand", required = false) String[] expandFields)
+			@RequestParam(value = "attributes", required = false) String[] attributes,
+			@RequestParam(value = "expand", required = false) String[] attributeExpands)
 	{
 		String entityName = getEntityName(entityNameRaw);
-		Set<String> fieldSet = toFieldSet(fields);
-		Set<String> expandFieldSet = toExpandFieldSet(expandFields);
+		Set<String> attributeSet = toAttributeSet(attributes);
+		Set<String> attributeExpandSet = toAttributeExpandSet(attributeExpands);
 
 		EntityMetaData entityMetaData = dataService.getRepositoryByEntityName(entityName);
 		AttributeMetaData attributeMetaData = entityMetaData.getAttribute(attributeName);
 		if (attributeMetaData != null)
 		{
-			return new AttributeMetaDataResponse(entityNameRaw, attributeMetaData, fieldSet, expandFieldSet);
+			return new AttributeMetaDataResponse(entityNameRaw, attributeMetaData, attributeSet, attributeExpandSet);
 		}
 		else
 		{
@@ -158,19 +158,19 @@ public class RestController
 	 * 
 	 * @param entityNameRaw
 	 * @param id
-	 * @param expandFields
+	 * @param attributeExpands
 	 * @return
 	 * @throws UnknownEntityException
 	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public Map<String, Object> retrieveEntity(@PathVariable("entityName") String entityNameRaw,
-			@PathVariable("id") Integer id, @RequestParam(value = "fields", required = false) String[] fields,
-			@RequestParam(value = "expand", required = false) String[] expandFields)
+			@PathVariable("id") Integer id, @RequestParam(value = "attributes", required = false) String[] attributes,
+			@RequestParam(value = "expand", required = false) String[] attributeExpands)
 	{
 		String entityName = getEntityName(entityNameRaw);// Be backwards compatible
-		Set<String> fieldSet = toFieldSet(fields);
-		Set<String> expandFieldSet = toExpandFieldSet(expandFields);
+		Set<String> attributesSet = toAttributeSet(attributes);
+		Set<String> attributeExpandSet = toAttributeExpandSet(attributeExpands);
 
 		EntityMetaData meta = dataService.getRepositoryByEntityName(entityName);
 		Entity entity = dataService.findOne(entityName, id);
@@ -180,7 +180,7 @@ public class RestController
 			throw new UnknownEntityException(entityName + " " + id + " not found");
 		}
 
-		return getEntityAsMap(entity, meta, fieldSet, expandFieldSet);
+		return getEntityAsMap(entity, meta, attributesSet, attributeExpandSet);
 	}
 
 	/**
@@ -194,7 +194,7 @@ public class RestController
 	 * @param id
 	 * @param refAttributeName
 	 * @param request
-	 * @param expandFields
+	 * @param attributeExpands
 	 * @return
 	 * @throws UnknownEntityException
 	 */
@@ -202,12 +202,13 @@ public class RestController
 	@ResponseBody
 	public Object retrieveEntityAttribute(@PathVariable("entityName") String entityNameRaw,
 			@PathVariable("id") Integer id, @PathVariable("refAttributeName") String refAttributeName,
-			@Valid EntityCollectionRequest request, @RequestParam(value = "fields", required = false) String[] fields,
-			@RequestParam(value = "expand", required = false) String[] expandFields)
+			@Valid EntityCollectionRequest request,
+			@RequestParam(value = "attributes", required = false) String[] attributes,
+			@RequestParam(value = "expand", required = false) String[] attributeExpands)
 	{
 		String entityName = getEntityName(entityNameRaw);// Be backwards compatible
-		Set<String> fieldSet = toFieldSet(fields);
-		Set<String> expandFieldSet = toExpandFieldSet(expandFields);
+		Set<String> attributesSet = toAttributeSet(attributes);
+		Set<String> attributeExpandSet = toAttributeExpandSet(attributeExpands);
 
 		EntityMetaData meta = dataService.getRepositoryByEntityName(entityName);
 
@@ -250,8 +251,8 @@ public class RestController
 				List<Map<String, Object>> refEntityMaps = new ArrayList<Map<String, Object>>();
 				for (Entity refEntity : mrefEntities)
 				{
-					Map<String, Object> refEntityMap = getEntityAsMap(refEntity, attr.getRefEntity(), fieldSet,
-							expandFieldSet);
+					Map<String, Object> refEntityMap = getEntityAsMap(refEntity, attr.getRefEntity(), attributesSet,
+							attributeExpandSet);
 					refEntityMaps.add(refEntityMap);
 				}
 
@@ -259,7 +260,7 @@ public class RestController
 				return new EntityCollectionResponse(pager, refEntityMaps, attrHref);
 			case XREF:
 				Map<String, Object> entityXrefAttributeMap = getEntityAsMap((Entity) entity.get(refAttributeName),
-						attr.getRefEntity(), fieldSet, expandFieldSet);
+						attr.getRefEntity(), attributesSet, attributeExpandSet);
 				entityXrefAttributeMap.put("href", attrHref);
 				return entityXrefAttributeMap;
 			default:
@@ -277,21 +278,22 @@ public class RestController
 	 * 
 	 * @param entityNameRaw
 	 * @param request
-	 * @param expandFields
+	 * @param attributeExpands
 	 * @return
 	 * @throws UnknownEntityException
 	 */
 	@RequestMapping(value = "/{entityName}", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public EntityCollectionResponse retrieveEntityCollection(@PathVariable("entityName") String entityNameRaw,
-			@Valid EntityCollectionRequest request, @RequestParam(value = "fields", required = false) String[] fields,
-			@RequestParam(value = "expand", required = false) String[] expandFields)
+			@Valid EntityCollectionRequest request,
+			@RequestParam(value = "attributes", required = false) String[] attributes,
+			@RequestParam(value = "expand", required = false) String[] attributeExpands)
 	{
 		String entityName = getEntityName(entityNameRaw);// Be backwards compatible
-		Set<String> fieldSet = toFieldSet(fields);
-		Set<String> expandFieldSet = toExpandFieldSet(expandFields);
+		Set<String> attributesSet = toAttributeSet(attributes);
+		Set<String> attributeExpandSet = toAttributeExpandSet(attributeExpands);
 
-		return retrieveEntityCollectionInternal(entityName, request, fieldSet, expandFieldSet);
+		return retrieveEntityCollectionInternal(entityName, request, attributesSet, attributeExpandSet);
 	}
 
 	/**
@@ -303,7 +305,7 @@ public class RestController
 	 * 
 	 * @param entityNameRaw
 	 * @param request
-	 * @param expandFields
+	 * @param attributeExpands
 	 * @return
 	 * @throws UnknownEntityException
 	 */
@@ -311,16 +313,16 @@ public class RestController
 	@ResponseBody
 	public EntityCollectionResponse retrieveEntityCollectionPost(@PathVariable("entityName") String entityNameRaw,
 			@Valid @RequestBody EntityCollectionRequest request,
-			@RequestParam(value = "fields", required = false) String[] fields,
-			@RequestParam(value = "expand", required = false) String[] expandFields)
+			@RequestParam(value = "attributes", required = false) String[] attributes,
+			@RequestParam(value = "expand", required = false) String[] attributeExpands)
 	{
 		String entityName = getEntityName(entityNameRaw);// Be backwards compatible
-		Set<String> fieldSet = toFieldSet(fields);
-		Set<String> expandFieldSet = toExpandFieldSet(expandFields);
+		Set<String> attributesSet = toAttributeSet(attributes);
+		Set<String> attributeExpandSet = toAttributeExpandSet(attributeExpands);
 
 		request = request != null ? request : new EntityCollectionRequest();
 
-		return retrieveEntityCollectionInternal(entityName, request, fieldSet, expandFieldSet);
+		return retrieveEntityCollectionInternal(entityName, request, attributesSet, attributeExpandSet);
 	}
 
 	/**
@@ -617,7 +619,7 @@ public class RestController
 
 	// Handles a Query
 	private EntityCollectionResponse retrieveEntityCollectionInternal(String entityName,
-			EntityCollectionRequest request, Set<String> fieldSet, Set<String> expandFields)
+			EntityCollectionRequest request, Set<String> attributesSet, Set<String> expandFields)
 	{
 		EntityMetaData meta = dataService.getRepositoryByEntityName(entityName);
 
@@ -633,15 +635,15 @@ public class RestController
 		List<Map<String, Object>> entities = new ArrayList<Map<String, Object>>();
 		for (Entity entity : it)
 		{
-			entities.add(getEntityAsMap(entity, meta, fieldSet, expandFields));
+			entities.add(getEntityAsMap(entity, meta, attributesSet, expandFields));
 		}
 
 		return new EntityCollectionResponse(pager, entities, BASE_URI + "/" + entityName);
 	}
 
 	// Transforms an entity to a Map so it can be transformed to json
-	private Map<String, Object> getEntityAsMap(Entity entity, EntityMetaData meta, Set<String> fieldSet,
-			Set<String> expandFields)
+	private Map<String, Object> getEntityAsMap(Entity entity, EntityMetaData meta, Set<String> attributesSet,
+			Set<String> attributeExpandsSet)
 	{
 		Map<String, Object> entityMap = new LinkedHashMap<String, Object>();
 		entityMap.put("href", String.format(BASE_URI + "/%s/%s", meta.getName().toLowerCase(), entity.getIdValue()));
@@ -650,7 +652,7 @@ public class RestController
 		for (AttributeMetaData attr : meta.getAtomicAttributes())
 		{
 			// filter fields
-			if (fieldSet != null && !fieldSet.contains(attr.getName().toLowerCase())) continue;
+			if (attributesSet != null && !attributesSet.contains(attr.getName().toLowerCase())) continue;
 
 			if (attr.isVisible() && !attr.getName().equals("__Type"))// TODO remove __Type from jpa entities
 			{
@@ -659,7 +661,7 @@ public class RestController
 
 				if (attrType == COMPOUND)
 				{
-					if (expandFields.contains(attrName))
+					if (attributeExpandsSet.contains(attrName))
 					{
 						entityMap.put(attrName, new AttributeMetaDataResponse(meta.getName(), attr, null, null));
 					}
@@ -674,7 +676,7 @@ public class RestController
 				{
 					entityMap.put(attrName, entity.get(attr.getName()));
 				}
-				else if (attrType == XREF && expandFields.contains(attrName))
+				else if (attrType == XREF && attributeExpandsSet.contains(attrName))
 				{
 					Entity refEntity = (Entity) entity.get(attr.getName());
 
@@ -687,7 +689,7 @@ public class RestController
 						entityMap.put(attrName, refEntityMap);
 					}
 				}
-				else if (attrType == MREF && expandFields.contains(attrName))
+				else if (attrType == MREF && attributeExpandsSet.contains(attrName))
 				{
 					EntityMetaData refEntityMetaData = dataService.getRepositoryByEntityName(attr.getRefEntity()
 							.getName());
@@ -799,21 +801,21 @@ public class RestController
 		return rules;
 	}
 
-	private Set<String> toFieldSet(String[] fields)
+	private Set<String> toAttributeSet(String[] attributes)
 	{
-		return fields != null ? Sets.newHashSet(Iterables.transform(Arrays.asList(fields),
+		return attributes != null ? Sets.newHashSet(Iterables.transform(Arrays.asList(attributes),
 				new Function<String, String>()
 				{
 					@Override
-					public String apply(String field)
+					public String apply(String attribute)
 					{
-						return field.toLowerCase();
+						return attribute.toLowerCase();
 					}
 				})) : null;
 	}
 
-	private Set<String> toExpandFieldSet(String[] expandFields)
+	private Set<String> toAttributeExpandSet(String[] attributeExpands)
 	{
-		return expandFields != null ? Sets.newHashSet(expandFields) : Collections.<String> emptySet();
+		return attributeExpands != null ? Sets.newHashSet(attributeExpands) : Collections.<String> emptySet();
 	}
 }
