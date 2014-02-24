@@ -55,6 +55,7 @@ public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements 
 	public static final String UNIPROT_ID = "uniprot_id";
 	public static final String NAME = "EBI-CHeMBL";
 	private final DefaultHttpClient httpClient;
+    private List<Object> annotatedInput = new ArrayList<Object>();
 
 	@Autowired
 	DataService dataService;
@@ -81,9 +82,9 @@ public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements 
 	@Override
 	public List<Entity> annotateEntity(Entity entity)
 	{
-		HttpGet httpGet = new HttpGet(getServiceUri(entity));
-		Entity resultEntity = null;
-		List<Object> annotatedInput = new ArrayList<Object>();
+        HttpGet httpGet = new HttpGet(getServiceUri(entity));
+		Entity resultEntity = new MapEntity();
+
 		if (!annotatedInput.contains(entity.get(UNIPROT_ID)))
 		{
 			annotatedInput.add(entity.get(UNIPROT_ID));
