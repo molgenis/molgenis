@@ -7,7 +7,7 @@ import org.molgenis.model.MolgenisModelException;
 import org.molgenis.model.elements.Field;
 
 /**
- * Compound field is a field that consists of multiple fields
+ * Compound field type is a field type for attributes consisting of multiple attributes
  */
 public class CompoundField extends FieldType
 {
