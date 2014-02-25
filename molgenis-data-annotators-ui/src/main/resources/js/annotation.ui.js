@@ -8,7 +8,7 @@
 		// reset
 		restApi.getAsync(dataSetUri, null, null, function(dataSet) {
 			selectedDataSet = dataSet;
-			url: molgenis.getContextUrl();
+			
 		});
 	};
 
@@ -21,6 +21,7 @@
 				selectedDataSet = dataSet;
 			});
 			
+			url: molgenis.getContextUrl();
 			molgenis.onDataSetSelectionChange($(this).val());		
 		});
 		

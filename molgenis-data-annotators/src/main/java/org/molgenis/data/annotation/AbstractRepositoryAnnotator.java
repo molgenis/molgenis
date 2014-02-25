@@ -3,6 +3,7 @@ package org.molgenis.data.annotation;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.support.MapEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -40,7 +41,7 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 				canAnnotate = false;
 				break;
 			}
-			
+
 			// one of the needed attributes not of the correct type? we can not annotate
 			if (!repoMetaData.getAttribute(annotatorAttribute.getName()).getDataType()
 					.equals(annotatorAttribute.getDataType()))
@@ -58,20 +59,37 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 	{
 		return new Iterator<Entity>()
 		{
-			final List<Entity> results = annotateEntity(source.next());
 			int current = 0;
-			int size = results.size();
+			int size = 0;
+			List<Entity> results;
+			Entity result;
 
 			@Override
 			public boolean hasNext()
 			{
-				return current < size;
+				return current < size || source.hasNext();
 			}
 
 			@Override
 			public Entity next()
 			{
-				Entity result = results.get(current);
+				if (current >= size)
+				{
+					if (source.hasNext())
+					{
+						results = annotateEntity(source.next());
+						size = results.size();
+					}
+					current = 0;
+				}
+				if (results.size() > 0)
+				{
+					result = results.get(current);
+				}
+				else
+				{
+					result = new MapEntity();
+				}
 				++current;
 				return result;
 			}

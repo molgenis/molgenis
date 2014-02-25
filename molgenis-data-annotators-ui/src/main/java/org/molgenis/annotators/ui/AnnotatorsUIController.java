@@ -148,7 +148,7 @@ public class AnnotatorsUIController extends MolgenisPluginController
 	public String filterMyVariants(@RequestParam(value = "annotatorNames", required = false)
 	String[] annotatorNames, Model model, String dataSetName)
 	{
-		OmxDataSetAnnotator omxDataSetAnnotator = new OmxDataSetAnnotator(dataService, searchService, indexer);
+		OmxDataSetAnnotator omxDataSetAnnotator = new OmxDataSetAnnotator(dataService, searchService, indexer, null);
 		Repository repository = dataService.getRepositoryByEntityName(dataSetName);
 
 		if (annotatorNames != null && repository != null)
