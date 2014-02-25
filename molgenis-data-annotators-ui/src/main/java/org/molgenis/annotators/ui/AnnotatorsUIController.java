@@ -3,23 +3,18 @@ package org.molgenis.annotators.ui;
 import static org.molgenis.annotators.ui.AnnotatorsUIController.URI;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Resource;
 import javax.servlet.http.Part;
 
 import org.apache.log4j.Logger;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
-import org.molgenis.data.omx.OmxRepository;
 import org.molgenis.data.omx.annotation.OmxDataSetAnnotator;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
@@ -34,11 +29,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.SessionAttributes;
 
 import com.google.common.collect.Lists;
 
@@ -55,7 +52,8 @@ public class AnnotatorsUIController extends MolgenisPluginController
 
 	private static final Logger logger = Logger.getLogger(AnnotatorsUIController.class);
 
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + "annotateUI";
+	private static final String ID = "annotateUI";
+	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
 	private final AnnotatorsUIService pluginAnnotatorsUIService;
 
@@ -74,21 +72,6 @@ public class AnnotatorsUIController extends MolgenisPluginController
 	@Autowired
 	DataSetsIndexer indexer;
 
-	@Resource(name = "ebiService")
-	RepositoryAnnotator ebiServiceAnnotator;
-
-	@Resource(name = "caddService")
-	RepositoryAnnotator caddServiceAnnotator;
-
-	@Resource(name = "dbnsfpVariantService")
-	RepositoryAnnotator dbnsfpVariantServiceAnnotator;
-
-	@Resource(name = "dbnsfpGeneService")
-	RepositoryAnnotator dbnsfpGeneServiceAnnotator;
-
-	@Resource(name = "omimHpoService")
-	RepositoryAnnotator omimHpoAnnotator;
-
 	@Autowired
 	public AnnotatorsUIController(AnnotatorsUIService pluginAnnotatorsUIService)
 	{
@@ -101,13 +84,13 @@ public class AnnotatorsUIController extends MolgenisPluginController
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(String selectedDataSetIdentifier, Model model)
 	{
-
 		List<DataSet> dataSets = Lists.newArrayList(dataService.findAll(DataSet.ENTITY_NAME,
 				new QueryImpl().sort(new Sort(Direction.DESC, DataSet.STARTTIME)), DataSet.class));
 
 		model.addAttribute("dataSets", dataSets);
 
 		DataSet selectedDataSet = null;
+
 		if (dataSets != null && !dataSets.isEmpty())
 		{
 			// determine selected data set and add to model
@@ -133,32 +116,12 @@ public class AnnotatorsUIController extends MolgenisPluginController
 
 			model.addAttribute("selectedDataSet", selectedDataSet);
 		}
-		
-		Map<String, Boolean> mapOfAnnotators = new HashMap<String, Boolean>();
-		
-		Repository repo = dataService.getRepositoryByEntityName(selectedDataSet.getIdentifier());
-		
-		for (RepositoryAnnotator annotator : annotationService.getAllAnnotators())
-		{
-			mapOfAnnotators.put(annotator.getName(), annotator.canAnnotate(repo));
-		}
-		
-		System.out.println(mapOfAnnotators);
 
-		model.addAttribute("allAnnotators", mapOfAnnotators);
-		
+		setMapOfAnnotators(model, selectedDataSet);
+
 		return "view-annotation-ui";
 	}
-
-	@RequestMapping(value = "/change-current-dataset", method = RequestMethod.GET)
-	public String changeSelectedDataSet(@RequestParam("dataset-select")
-	String userSelectedDataSet)
-	{
-
-		System.out.println("CHANGED TO " + userSelectedDataSet);
-		return "view-annotation-ui";
-	}
-
+	
 	@RequestMapping(value = "/create-new-dataset-from-tsv", headers = "content-type=multipart/*", method = RequestMethod.POST)
 	public String handleVcfInput(@RequestParam("file-input-field")
 	Part part, @RequestParam("dataset-name")
@@ -181,15 +144,49 @@ public class AnnotatorsUIController extends MolgenisPluginController
 		return "view-annotation-ui";
 	}
 
-	@RequestMapping(value = "/execute-variant-app", method = RequestMethod.POST)
-	public String filterMyVariants()
+	@RequestMapping(value = "/execute-annotation-app", method = RequestMethod.POST)
+	public String filterMyVariants(@RequestParam(value = "annotatorNames", required = false)
+	String[] annotatorNames, Model model, String dataSetName)
 	{
-
 		OmxDataSetAnnotator omxDataSetAnnotator = new OmxDataSetAnnotator(dataService, searchService, indexer);
+		Repository repository = dataService.getRepositoryByEntityName(dataSetName);
+
+		if (annotatorNames != null && repository != null)
+		{
+			for (String annotatorName : annotatorNames)
+			{
+				RepositoryAnnotator annotator = annotationService.getAnnotatorByName(annotatorName);
+				if (annotator != null)
+				{
+					omxDataSetAnnotator.annotate(annotator, repository, true);
+				}
+				else
+				{
+					System.out.println("This annotator does not exist");
+				}
+			}
+		}
+		else
+		{
+			System.out.println("no annotators selected");
+		}
 
 		return "view-result-page";
 	}
 
+	private void setMapOfAnnotators(Model model, DataSet selectedDataSet)
+	{
+		Repository repo = dataService.getRepositoryByEntityName(selectedDataSet.getIdentifier());
+
+		Map<String, Boolean> mapOfAnnotators = new HashMap<String, Boolean>();
+		for (RepositoryAnnotator annotator : annotationService.getAllAnnotators())
+		{
+			mapOfAnnotators.put(annotator.getName(), annotator.canAnnotate(repo));
+		}
+
+		model.addAttribute("allAnnotators", mapOfAnnotators);
+	}
+	
 	@ExceptionHandler(RuntimeException.class)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
