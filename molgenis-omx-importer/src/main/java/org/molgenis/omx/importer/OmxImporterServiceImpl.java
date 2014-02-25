@@ -27,17 +27,20 @@ import com.google.common.collect.Sets;
 @Service
 public class OmxImporterServiceImpl implements OmxImporterService
 {
-	@Autowired
-	private DataService dataService;
+	private final DataService dataService;
+	private final SearchService searchService;
+	private final EntitiesImporter entitiesImporter;
+	private final EntityValidator entityValidator;
 
 	@Autowired
-	private SearchService searchService;
-
-	@Autowired
-	private EntitiesImporter entitiesImporter;
-
-	@Autowired
-	private EntityValidator entityValidator;
+	public OmxImporterServiceImpl(DataService dataService, SearchService searchService,
+			EntitiesImporter entitiesImporter, EntityValidator entityValidator)
+	{
+		this.dataService = dataService;
+		this.searchService = searchService;
+		this.entitiesImporter = entitiesImporter;
+		this.entityValidator = entityValidator;
+	}
 
 	@Override
 	@Transactional(rollbackFor = IOException.class)

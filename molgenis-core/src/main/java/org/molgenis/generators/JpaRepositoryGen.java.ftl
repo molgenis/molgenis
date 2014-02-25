@@ -11,6 +11,8 @@
  */
 package ${package};
 
+import javax.persistence.EntityManager;
+
 import org.molgenis.data.jpa.JpaRepository;
 import org.molgenis.data.validation.EntityValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,4 +27,11 @@ public class ${JavaName(entity)}Repository extends JpaRepository
 		super(${JavaName(entity)}.class, new ${JavaName(entity)}MetaData(), entityValidator);
 	}
 	
+    /**
+	 * For testing purposes
+	 */
+	public ${JavaName(entity)}Repository(EntityManager entityManager, EntityValidator entityValidator)
+	{
+		super(entityManager, ${JavaName(entity)}.class, new ${JavaName(entity)}MetaData(), entityValidator);
+	}
 }
