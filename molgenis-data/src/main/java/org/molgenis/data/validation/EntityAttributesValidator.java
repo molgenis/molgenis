@@ -186,7 +186,7 @@ public class EntityAttributesValidator
 	private ConstraintViolation createConstraintViolation(Entity entity, AttributeMetaData attribute,
 			EntityMetaData meta)
 	{
-		String key = entity.getString(meta.getLabelAttribute().getName());
+		String key = meta.getLabelAttribute() != null ? entity.getString(meta.getLabelAttribute().getName()) : null;
 		String message;
 
 		if (key == null)
