@@ -619,7 +619,7 @@ public class RestController
 
 	// Handles a Query
 	private EntityCollectionResponse retrieveEntityCollectionInternal(String entityName,
-			EntityCollectionRequest request, Set<String> attributesSet, Set<String> expandFields)
+			EntityCollectionRequest request, Set<String> attributesSet, Set<String> attributeExpandsSet)
 	{
 		EntityMetaData meta = dataService.getRepositoryByEntityName(entityName);
 
@@ -635,7 +635,7 @@ public class RestController
 		List<Map<String, Object>> entities = new ArrayList<Map<String, Object>>();
 		for (Entity entity : it)
 		{
-			entities.add(getEntityAsMap(entity, meta, attributesSet, expandFields));
+			entities.add(getEntityAsMap(entity, meta, attributesSet, attributeExpandsSet));
 		}
 
 		return new EntityCollectionResponse(pager, entities, BASE_URI + "/" + entityName);
