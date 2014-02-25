@@ -17,8 +17,7 @@
 	molgenis.createAttributeTree = function(entityUri) {
 		var entityMetaUri = entityUri + "/meta";
 		
-		restApi.getAsync(entityMetaUri, null, null, 
-			function(entityMetaData) {
+		restApi.getAsync(entityMetaUri, {'expand': ['attributes']}, function(entityMetaData) {
 				selectedRepoMetadata = entityMetaData;
 			
 				var container = $('#feature-selection');
@@ -91,7 +90,7 @@
 		function createChildren(href, featureOpts, protocolOpts) {
 			// FIXME async
 			var children = [];
-			var attributes = restApi.get(href, ['attributes']).attributes;
+			var attributes = restApi.get(href, {'expand': ['attributes']}).attributes;
 			
 			Object.keys(attributes).map(function(prop) {	
 				// compound attributes
@@ -167,8 +166,7 @@
 	};
 	
 	molgenis.openFeatureFilterDialog = function(attributeUri) {
-		restApi.getAsync(attributeUri, null, null,
-			function(feature) {
+		restApi.getAsync(attributeUri, null, function(feature) {
 				var items = [];
 				if (feature.description) {
 					items.push('<h3>Description</h3><p>' + feature.description + '</p>');
@@ -690,6 +688,16 @@
 	
 				break;
 			case "CATEGORICAL" :
+				// http://localhost:8080/api/v1/celiacsprue/meta/<attribute.name>?expand=refEntity
+				// refEntity.labelAttribute is attribute voor category label dat in UI getoond wordt
+				// refEntity.href min "/meta" is de href voor entity collection repsonse met alle categories 
+				// for each item in items
+				//     create input met value item.href en label is item.<refEntity.labelAttribute>
+				
+				// for OMX model the labels will display identifiers and not the valueCodes, we have to change observ.xml to display the info we want
+				//     <entity name="Category" extends="Characteristic"> --> add attribute xref_label="valueCode"
+				
+				// reminder: we also have to fix the case at line 768!!
 				$.ajax({
 					type : 'POST',
 					url : '/api/v1/category?_method=GET',
@@ -885,7 +893,7 @@
 	};
 
 	molgenis.updateFeatureFilter = function(attributeUri, featureFilter) {
-		restApi.getAsync(attributeUri, null, null, function(attribute) {
+		restApi.getAsync(attributeUri, null, function(attribute) {
 			// TODO implement elegant solution for genome browser specific code
 			if(attribute.name === 'start_nucleotide') dalliance.setLocation(dalliance.chr, featureFilter.values[0], featureFilter.values[1]);
 			if(attribute.name === 'chromosome') dalliance.setLocation(featureFilter.values[0], dalliance.viewStart, dalliance.viewEnd);
@@ -940,7 +948,10 @@
 	};
 
 	molgenis.search = function(callback) {
-		restApi.getAsync('/api/v1/' + selectedRepoMetadata.name,null, molgenis.createEntityCollectionRequest(true),callback);
+		var attributes = $.map(selectedFeatures, function(attributeUri) {
+			return attributeUri.substring(attributeUri.lastIndexOf('/') + 1);
+		});
+		restApi.getAsync('/api/v1/' + selectedRepoMetadata.name, {'attributes': attributes, 'q': molgenis.createEntityCollectionRequest(true)}, callback);
 	};
 
 	molgenis.createEntityCollectionRequest = function(includeLimitOffset) {
@@ -1052,7 +1063,7 @@
 
 	molgenis.initializeAggregate = function(entityUri) {
 		var entityMetaUri = entityUri + '/meta';
-		restApi.getAsync(entityMetaUri, ['attributes'], null, function(entityMetaData) {
+		restApi.getAsync(entityMetaUri, {'expand': ['attributes']}, function(entityMetaData) {
 			var selectTag = $('<select id="selectFeature"/>');
 			if(Object.keys(entityMetaData.attributes).length === 0) {
 				selectTag.attr('disabled', 'disabled');
@@ -1120,7 +1131,7 @@
 
 	//--BEGIN genome browser--
 	molgenis.updateGenomeBrowser = function(entityUri) {
-		restApi.getAsync(entityUri + '/meta', null, null, function(entity) {
+		restApi.getAsync(entityUri + '/meta', null, function(entity) {
 			if (entity.name in genomeBrowserDataSets) {
 				document.getElementById('genomebrowser').style.display = 'block';
 				document.getElementById('genomebrowser').style.visibility = 'visible';
@@ -1151,7 +1162,7 @@
 
 	molgenis.setDallianceFilter = function() {
 		var entityName = molgenis.getSelectedEntityName();
-		restApi.getAsync('/api/v1/' + entityName + '/meta', null, null, function(entity) {
+		restApi.getAsync('/api/v1/' + entityName + '/meta', null, function(entity) {
 			$.each(entity.attributes, function(key, attribute) {
 				if(key === 'start_nucleotide') {
 					molgenis.updateFeatureFilter(attribute.href, {

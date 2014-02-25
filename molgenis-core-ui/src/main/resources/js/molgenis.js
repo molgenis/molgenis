@@ -234,25 +234,24 @@ $(function() {
 		this.cache = cache === false ? null : [];
 	};
 
-	molgenis.RestClient.prototype.get = function(resourceUri, expands, q) {
-		var apiUri = this._toApiUri(resourceUri, expands, q);
+	molgenis.RestClient.prototype.get = function(resourceUri, options) {
+		var apiUri = this._toApiUri(resourceUri, options);
 		var cachedResource = this.cache && this.cache[apiUri];
 		if (!cachedResource) {
 			var _this = this;
-			if (q) {
+			if (options && options.q) {
 				$
 						.ajax({
 							type : 'POST',
 							dataType : 'json',
 							url : apiUri,
 							cache : true,
-							data : JSON.stringify(q),
+							data : JSON.stringify(options.q),
 							contentType : 'application/json',
 							async : false,
 							success : function(resource) {
 								if (_this.cache)
-									_this._cachePut(resourceUri, resource,
-											expands);
+									_this._cachePut(resourceUri, resource, options);
 								cachedResource = resource;
 							},
 							error : function(xhr) {
@@ -269,8 +268,7 @@ $(function() {
 							async : false,
 							success : function(resource) {
 								if (_this.cache)
-									_this._cachePut(resourceUri, resource,
-											expands);
+									_this._cachePut(resourceUri, resource, options);
 								cachedResource = resource;
 							},
 							error : function(xhr) {
@@ -282,27 +280,26 @@ $(function() {
 		}
 		return cachedResource;
 	};
-
-	molgenis.RestClient.prototype.getAsync = function(resourceUri, expands, q,
-			callback) {
-		var apiUri = this._toApiUri(resourceUri, expands, q);
+	
+	molgenis.RestClient.prototype.getAsync = function(resourceUri, options, callback) {
+		var apiUri = this._toApiUri(resourceUri, options);
 		var cachedResource = this._cacheGet[apiUri];
 		if (cachedResource) {
 			callback(cachedResource);
 		} else {
 			var _this = this;
-			if (q) {
+			if (options && options.q) {
 				$
 						.ajax({
 							type : 'POST',
 							dataType : 'json',
 							url : apiUri,
 							cache : true,
-							data : JSON.stringify(q),
+							data : JSON.stringify(options.q),
 							contentType : 'application/json',
 							async : true,
 							success : function(resource) {
-								_this._cachePut(resourceUri, resource, expands);
+								_this._cachePut(resourceUri, resource, options);
 								callback(resource);
 							},
 							error : function(xhr) {
@@ -318,7 +315,7 @@ $(function() {
 							cache : true,
 							async : true,
 							success : function(resource) {
-								_this._cachePut(resourceUri, resource, expands);
+								_this._cachePut(resourceUri, resource, options);
 								callback(resource);
 							},
 							error : function(xhr) {
@@ -334,9 +331,8 @@ $(function() {
 		return this.cache !== null ? this.cache[resourceUri] : null;
 	};
 
-	molgenis.RestClient.prototype._cachePut = function(resourceUri, resource,
-			expands) {
-		var apiUri = this._toApiUri(resourceUri, expands);
+	molgenis.RestClient.prototype._cachePut = function(resourceUri, resource, options) {
+		var apiUri = this._toApiUri(resourceUri, options);
 		this.cache[apiUri] = resource;
 		if (resource.items) {
 			for ( var i = 0; i < resource.items.length; i++) {
@@ -344,10 +340,10 @@ $(function() {
 				this.cache[nestedResource.href] = nestedResource;
 			}
 		}
-		if (expands) {
+		if (options && options.expand) {
 			this.cache[resourceUri] = resource;
-			for ( var i = 0; i < expands.length; i++) {
-				var expand = resource[expands[i]];
+			for ( var i = 0; i < options.expand.length; i++) {
+				var expand = resource[options.expand[i]];
 				if (expand) {
 					this.cache[expand.href] = expand;
 					if (expand.items) {
@@ -361,16 +357,18 @@ $(function() {
 		}
 	};
 
-	molgenis.RestClient.prototype._toApiUri = function(resourceUri, expands, q) {
+	molgenis.RestClient.prototype._toApiUri = function(resourceUri, options) {
 		var qs = "";
 		if (resourceUri.indexOf('?') != -1) {
 			var uriParts = resourceUri.split('?');
 			resourceUri = uriParts[0];
 			qs = '?' + uriParts[1];
 		}
-		if (expands)
-			qs += (qs.length == 0 ? '?' : '&') + 'expand=' + expands.join(',');
-		if (q)
+		if (options && options.attributes)
+			qs += (qs.length == 0 ? '?' : '&') + 'attributes=' + options.attributes.join(',');
+		if (options && options.expand)
+			qs += (qs.length == 0 ? '?' : '&') + 'expand=' + options.expand.join(',');
+		if (options && options.q)
 			qs += (qs.length == 0 ? '?' : '&') + '_method=GET';
 		return resourceUri + qs;
 	};
