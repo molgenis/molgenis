@@ -8,6 +8,7 @@ import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.processor.AbstractCellProcessor;
@@ -49,6 +50,11 @@ public class ExcelEntity extends AbstractMetaDataEntity
 	public Object get(String attributeName)
 	{
 		Integer col = colNamesMap.get(attributeName);
+		if (col == null)
+		{
+			col = colNamesMap.get(attributeName.toLowerCase());
+		}
+
 		if (col != null)
 		{
 			Cell cell = row.getCell(col);
@@ -66,6 +72,12 @@ public class ExcelEntity extends AbstractMetaDataEntity
 	 */
 	@Override
 	public void set(String attributeName, Object value)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void set(Entity values)
 	{
 		throw new UnsupportedOperationException();
 	}
@@ -158,4 +170,5 @@ public class ExcelEntity extends AbstractMetaDataEntity
 	{
 		return colNamesMap.keySet();
 	}
+
 }

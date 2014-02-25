@@ -24,6 +24,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	private String label = null;
 	private boolean visible = true;
 	private boolean unique = false;
+	private boolean auto = false;
 
 	public DefaultAttributeMetaData(String name, FieldTypeEnum fieldType)
 	{
@@ -153,6 +154,17 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public void setUnique(boolean unique)
 	{
 		this.unique = unique;
+	}
+
+	@Override
+	public boolean isAuto()
+	{
+		return auto;
+	}
+
+	public void setAuto(boolean auto)
+	{
+		this.auto = auto;
 	}
 
 }

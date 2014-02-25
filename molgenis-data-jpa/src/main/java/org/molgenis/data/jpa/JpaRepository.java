@@ -22,7 +22,6 @@ import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
@@ -30,10 +29,11 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
-import org.molgenis.data.support.AbstractRepository;
+import org.molgenis.data.support.AbstractCrudRepository;
 import org.molgenis.data.support.ConvertingIterable;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.validation.EntityValidator;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,7 +43,7 @@ import com.google.common.collect.Lists;
 /**
  * Repository implementation for (generated) jpa entities
  */
-public class JpaRepository extends AbstractRepository implements CrudRepository
+public class JpaRepository extends AbstractCrudRepository
 {
 	public static final String BASE_URL = "jpa://";
 
@@ -53,16 +53,18 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 	private final EntityMetaData entityMetaData;
 	private final Logger logger = Logger.getLogger(getClass());
 
-	public JpaRepository(Class<? extends Entity> entityClass, EntityMetaData entityMetaData)
+	public JpaRepository(Class<? extends Entity> entityClass, EntityMetaData entityMetaData,
+			EntityValidator entityValidator)
 	{
-		super(BASE_URL + entityClass.getName());
+		super(BASE_URL + entityClass.getName(), entityValidator);
 		this.entityClass = entityClass;
 		this.entityMetaData = entityMetaData;
 	}
 
-	public JpaRepository(EntityManager entityManager, Class<? extends Entity> entityClass, EntityMetaData entityMetaData)
+	public JpaRepository(EntityManager entityManager, Class<? extends Entity> entityClass,
+			EntityMetaData entityMetaData, EntityValidator entityValidator)
 	{
-		this(entityClass, entityMetaData);
+		this(entityClass, entityMetaData, entityValidator);
 		this.entityManager = entityManager;
 	}
 
@@ -78,8 +80,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 	}
 
 	@Override
-	@Transactional
-	public Integer add(Entity entity)
+	protected Integer addInternal(Entity entity)
 	{
 		Entity jpaEntity = getTypedEntity(entity);
 
@@ -92,11 +93,10 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 	}
 
 	@Override
-	@Transactional
-	public void add(Iterable<? extends Entity> entities)
+	protected void addInternal(Iterable<? extends Entity> entities)
 	{
 		for (Entity e : entities)
-			add(e);
+			addInternal(e);
 	}
 
 	@Override
@@ -215,8 +215,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 	}
 
 	@Override
-	@Transactional
-	public void update(Entity entity)
+	protected void updateInternal(Entity entity)
 	{
 		EntityManager em = getEntityManager();
 
@@ -229,8 +228,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 	}
 
 	@Override
-	@Transactional
-	public void update(Iterable<? extends Entity> entities)
+	protected void updateInternal(Iterable<? extends Entity> entities)
 	{
 		EntityManager em = getEntityManager();
 		int batchSize = 500;
@@ -259,8 +257,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 	}
 
 	@Override
-	@Transactional
-	public void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyNames)
+	protected void updateInternal(List<? extends Entity> entities, DatabaseAction dbAction, String... keyNames)
 	{
 		if (keyNames.length == 0) throw new MolgenisDataException("At least one key must be provided, e.g. 'name'");
 
@@ -406,7 +403,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 			case ADD:
 				if (existingEntities.size() == 0)
 				{
-					add(newEntities);
+					addInternal(newEntities);
 				}
 				else
 				{
@@ -426,7 +423,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 			case ADD_IGNORE_EXISTING:
 				if (logger.isDebugEnabled()) logger.debug("updateByName(List<" + entityName + "," + dbAction
 						+ ">) will skip " + existingEntities.size() + " existing entities");
-				add(newEntities);
+				addInternal(newEntities);
 				break;
 
 			// will try to update(existingEntities) entities and
@@ -436,7 +433,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 				if (logger.isDebugEnabled()) logger.debug("updateByName(List<" + entityName + "," + dbAction
 						+ ">)  will try to update " + existingEntities.size() + " existing entities and add "
 						+ newEntities.size() + " new entities");
-				add(newEntities);
+				addInternal(newEntities);
 				update(existingEntities);
 				break;
 
@@ -444,7 +441,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 			case UPDATE:
 				if (newEntities.size() == 0)
 				{
-					update(existingEntities);
+					updateInternal(existingEntities);
 				}
 				else
 				{
@@ -460,7 +457,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 				if (logger.isDebugEnabled()) logger.debug("updateByName(List<" + entityName + "," + dbAction
 						+ ">) will try to update " + existingEntities.size() + " existing entities and skip "
 						+ newEntities.size() + " new entities");
-				update(existingEntities);
+				updateInternal(existingEntities);
 				break;
 
 			// remove all elements in list, test if no elements are missing

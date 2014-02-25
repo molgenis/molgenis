@@ -322,12 +322,6 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 	<#include "DataTypeCommons.java.ftl">	
 	
 	@Override
-	public void set(org.molgenis.data.Entity entity)
-	{
-		set(entity, false);
-	}
-	
-	@Override
 	public String toString()
 	{
 		return this.toString(false);

@@ -12,10 +12,9 @@ public abstract class AbstractEntity implements Entity
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public void set(Entity entity, boolean strict)
+	public void set(Entity entity)
 	{
-		this.set(entity);
-
+		set(entity, false);
 	}
 
 	@Override
