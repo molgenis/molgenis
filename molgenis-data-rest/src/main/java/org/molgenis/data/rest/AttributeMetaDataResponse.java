@@ -20,7 +20,7 @@ public class AttributeMetaDataResponse
 	private final String label;
 	private final String description;
 	private final List<?> attributes;
-	private final Href refEntity;
+	private final Object refEntity;
 	private final Boolean nillable;
 	private final Boolean readOnly;
 	private final Object defaultValue;
@@ -66,8 +66,15 @@ public class AttributeMetaDataResponse
 		if (attributesSet == null || attributesSet.contains("refEntity".toLowerCase()))
 		{
 			EntityMetaData refEntity = attr.getRefEntity();
-			this.refEntity = refEntity != null ? new Href(String.format("%s/%s/meta", RestController.BASE_URI,
-					refEntity.getName())) : null;
+			if (attributeExpandsSet != null && attributeExpandsSet.contains("refEntity"))
+			{
+				this.refEntity = refEntity != null ? new EntityMetaDataResponse(refEntity, null, null) : null;
+			}
+			else
+			{
+				this.refEntity = refEntity != null ? new Href(String.format("%s/%s/meta", RestController.BASE_URI,
+						refEntity.getName())) : null;
+			}
 		}
 		else this.refEntity = null;
 
@@ -156,7 +163,7 @@ public class AttributeMetaDataResponse
 		return attributes;
 	}
 
-	public Href getRefEntity()
+	public Object getRefEntity()
 	{
 		return refEntity;
 	}
