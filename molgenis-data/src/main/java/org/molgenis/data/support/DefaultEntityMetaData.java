@@ -1,8 +1,6 @@
 package org.molgenis.data.support;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -10,10 +8,6 @@ import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
-
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Lists;
 
 public class DefaultEntityMetaData implements EntityMetaData
 {
@@ -64,20 +58,17 @@ public class DefaultEntityMetaData implements EntityMetaData
 	}
 
 	@Override
-	public List<AttributeMetaData> getLabelAttributes()
+	public AttributeMetaData getLabelAttribute()
 	{
-		Collection<AttributeMetaData> labels = Collections2.filter(attributes.values(),
-				new Predicate<AttributeMetaData>()
-				{
-					@Override
-					public boolean apply(AttributeMetaData attr)
-					{
-						return attr.isLabelAttribute();
-					}
+		for (AttributeMetaData attribute : attributes.values())
+		{
+			if (attribute.isLabelAttribute())
+			{
+				return attribute;
+			}
+		}
 
-				});
-
-		return labels.isEmpty() ? Arrays.asList(getIdAttribute()) : Lists.newArrayList(labels);
+		return null;
 	}
 
 	@Override

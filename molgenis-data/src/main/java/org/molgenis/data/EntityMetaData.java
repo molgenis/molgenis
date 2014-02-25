@@ -1,6 +1,5 @@
 package org.molgenis.data;
 
-import java.util.List;
 
 /**
  * EntityMetaData defines the structure and attributes of an Entity. Attributes are unique. Other software components
@@ -36,7 +35,7 @@ public interface EntityMetaData
 	/**
 	 * Attribute that is used as unique label. If no label exist, returns getIdAttribute().
 	 */
-	List<AttributeMetaData> getLabelAttributes();
+	AttributeMetaData getLabelAttribute();
 
 	/**
 	 * Get attribute by name (case insensitive), returns null if not found

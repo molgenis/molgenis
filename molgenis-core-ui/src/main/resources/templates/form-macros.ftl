@@ -86,7 +86,7 @@
 						readOnly:${field.isReadonly()?string('true', 'false')},
 						unique:false,
 						<#if field.refEntity??>
-						xrefLabelName: '${field.refEntity.labelAttributes[0].name?uncap_first}',
+						xrefLabelName: '${field.refEntity.labelAttribute.name?uncap_first}',
 						xrefLabel: '${field.refEntity.name}',
 						xrefEntityName: '${field.refEntity.name?lower_case}'
 						</#if>

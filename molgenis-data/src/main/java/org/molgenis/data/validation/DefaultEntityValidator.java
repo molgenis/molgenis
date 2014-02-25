@@ -73,7 +73,7 @@ public class DefaultEntityValidator implements EntityValidator
 					{
 						String message = String.format(
 								"The attribute '%s' of entity '%s' with key '%s' can not be null.", attr.getName(),
-								meta.getName(), entity.getString(meta.getLabelAttributes().get(0).getName()));
+								meta.getName(), entity.getString(meta.getLabelAttribute().getName()));
 						violations.add(new ConstraintViolation(message, null, entity, attr, meta, rownr));
 					}
 				}
@@ -135,7 +135,7 @@ public class DefaultEntityValidator implements EntityValidator
 									String message = String
 											.format("The attribute '%s' of entity '%s' with key '%s' must be unique, but the value '%s' already exists.",
 													attr.getName(), meta.getName(),
-													entity.getString(meta.getLabelAttributes().get(0).getName()), value);
+													entity.getString(meta.getLabelAttribute().getName()), value);
 									violations.add(new ConstraintViolation(message, value, entity, attr, meta, 0));
 								}
 

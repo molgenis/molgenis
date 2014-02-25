@@ -3,15 +3,11 @@ package org.molgenis.data.support;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
-
-import com.google.common.base.Function;
-import com.google.common.collect.Lists;
 
 public abstract class AbstractMetaDataEntity extends AbstractEntity
 {
@@ -65,17 +61,15 @@ public abstract class AbstractMetaDataEntity extends AbstractEntity
 	@Override
 	public String getLabelValue()
 	{
-		List<String> labels = Lists.transform(metaData.getLabelAttributes(), new Function<AttributeMetaData, String>()
+		AttributeMetaData labelAttribute = metaData.getLabelAttribute();
+		if (labelAttribute == null)
 		{
-			@Override
-			public String apply(AttributeMetaData attr)
-			{
-				Object label = get(attr.getName());
-				return DataConverter.convert(label, String.class);
-			}
-		});
+			return null;
+		}
 
-		return labels.isEmpty() ? null : StringUtils.join(labels, ':');
+		Object label = get(labelAttribute.getName());
+
+		return DataConverter.convert(label, String.class);
 	}
 
 	@Override

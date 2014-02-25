@@ -94,7 +94,7 @@ public class MappingsBuilder
 			case XREF:
 			{
 				// return type of referenced label field
-				return getType(attr.getRefEntity().getLabelAttributes().get(0));
+				return getType(attr.getRefEntity().getLabelAttribute());
 			}
 			case FILE:
 			case IMAGE:

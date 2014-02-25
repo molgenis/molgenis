@@ -81,7 +81,7 @@ public class EntityImportService
 			entitiesToImport.add(new MapEntity(entity));
 		}
 
-		String updateKey = repo.getLabelAttributes().get(0).getName();
+		String updateKey = repo.getLabelAttribute().getName();
 		List<Entity> batch = Lists.newArrayListWithCapacity(BATCH_SIZE);
 		List<Entity> unresolved = Lists.newArrayList();
 
@@ -182,7 +182,7 @@ public class EntityImportService
 							&& attr.getRefEntity().getName().equalsIgnoreCase(entityName)
 							&& !resolveEntityRef(entityName, entity, attr))
 					{
-						long rowNr = getRowNr(entity, source, repo.getLabelAttributes().get(0).getName());
+						long rowNr = getRowNr(entity, source, repo.getLabelAttribute().getName());
 						violations.add(createViolation(attr, repo, entity, rowNr));
 					}
 				}
@@ -225,7 +225,7 @@ public class EntityImportService
 	{
 		List<Object> keyValues = Lists.newArrayList();
 
-		String foreignAttr = attr.getRefEntity().getLabelAttributes().get(0).getName();
+		String foreignAttr = attr.getRefEntity().getLabelAttribute().getName();
 		String key = attr.getName() + "_" + foreignAttr;
 
 		if (attr.getDataType().getEnumType() == MREF)
@@ -302,7 +302,7 @@ public class EntityImportService
 
 	private ConstraintViolation createViolation(AttributeMetaData attr, Repository repo, Entity entity, long rownr)
 	{
-		String foreignAttr = attr.getRefEntity().getLabelAttributes().get(0).getName();
+		String foreignAttr = attr.getRefEntity().getLabelAttribute().getName();
 		String key = attr.getName() + "_" + foreignAttr;
 		Object value = entity.get(key);
 

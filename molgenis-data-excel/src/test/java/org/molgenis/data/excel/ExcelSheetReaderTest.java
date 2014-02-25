@@ -113,10 +113,9 @@ public class ExcelSheetReaderTest
 	}
 
 	@Test
-	public void getLabelAttributes()
+	public void getLabelAttribute()
 	{
-		assertNotNull(excelSheetReader.getLabelAttributes());
-		assertFalse(excelSheetReader.getLabelAttributes().isEmpty());
+		assertNull(excelSheetReader.getLabelAttribute());
 	}
 
 	@Test
