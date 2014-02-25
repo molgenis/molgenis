@@ -92,6 +92,10 @@ public class ObservableFeatureAttributeMetaData implements AttributeMetaData
 		{
 			return new CharacteristicMetaData();
 		}
+		else if (dataType == FieldTypeEnum.CATEGORICAL)
+		{
+			return new OmxLookupTableEntityMetaData(observableFeature);
+		}
 		return null;
 	}
 
