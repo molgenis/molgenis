@@ -49,6 +49,8 @@ import org.molgenis.data.Updateable;
 import org.molgenis.data.Writable;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.validation.ConstraintViolation;
+import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.framework.db.EntityNotFoundException;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
@@ -474,12 +476,28 @@ public class RestController
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
+	@ExceptionHandler(MolgenisValidationException.class)
+	@ResponseStatus(BAD_REQUEST)
+	@ResponseBody
+	public ErrorMessageResponse handleMolgenisValidationException(MolgenisValidationException e)
+	{
+		logger.info("", e);
+
+		List<ErrorMessage> messages = Lists.newArrayList();
+		for (ConstraintViolation violation : e.getViolations())
+		{
+			messages.add(new ErrorMessage(violation.getMessage()));
+		}
+
+		return new ErrorMessageResponse(messages);
+	}
+
 	@ExceptionHandler(ConversionException.class)
 	@ResponseStatus(BAD_REQUEST)
 	@ResponseBody
 	public ErrorMessageResponse handleConversionException(ConversionException e)
 	{
-		logger.error("", e);
+		logger.info("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 

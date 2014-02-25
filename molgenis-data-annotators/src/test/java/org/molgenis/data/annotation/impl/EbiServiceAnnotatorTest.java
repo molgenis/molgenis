@@ -1,9 +1,19 @@
 package org.molgenis.data.annotation.impl;
 
+import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.Matchers.argThat;
 import static org.testng.Assert.assertEquals;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -13,19 +23,13 @@ import org.apache.http.client.methods.HttpGet;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.support.MapEntity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.util.*;
 
 public class EbiServiceAnnotatorTest
 {
@@ -76,7 +80,7 @@ public class EbiServiceAnnotatorTest
 	}
 
 	@Test
-	public void findCatalogs() throws IllegalStateException, IOException
+	public void annotate() throws IllegalStateException, IOException
 	{
 		List<Entity> expectedList = new ArrayList<Entity>();
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
@@ -95,8 +99,6 @@ public class EbiServiceAnnotatorTest
 		expectedEntity.set("preferredName", "Voltage-gated L-type calcium channel alpha-1C subunit");
 		expectedEntity.set("uniprot_id", "Q13936");
 		expectedList.add(expectedEntity);
-
-		Iterator<Entity> expected = expectedList.iterator();
 
 		InputStream ServiceStream = new ByteArrayInputStream(SERVICE_RESPONSE.getBytes(Charset.forName("UTF-8")));
 		HttpEntity catalogReleaseEntity = when(mock(HttpEntity.class).getContent()).thenReturn(ServiceStream).getMock();
@@ -123,7 +125,7 @@ public class EbiServiceAnnotatorTest
 
 		Iterator<Entity> results = annotator.annotate(input.iterator());
 
-		assertEquals(results.next(), expectedEntity);
+		assertEquals(results.next().getString("uniprot_id"), expectedEntity.getString("uniprot_id"));
 	}
 
 	@Test

@@ -44,11 +44,11 @@ public class DataServiceImpl implements DataService
 	public void addRepository(Repository newRepository)
 	{
 		String repositoryName = newRepository.getName();
-		if (repositories.containsKey(repositoryName))
+		if (repositories.containsKey(repositoryName.toLowerCase()))
 		{
 			throw new MolgenisDataException("Entity [" + repositoryName + "] already registered.");
 		}
-		repositories.put(repositoryName, newRepository);
+		repositories.put(repositoryName.toLowerCase(), newRepository);
 	}
 
 	@Override
@@ -60,7 +60,7 @@ public class DataServiceImpl implements DataService
 	@Override
 	public Repository getRepositoryByEntityName(String entityName)
 	{
-		Repository repository = repositories.get(entityName);
+		Repository repository = repositories.get(entityName.toLowerCase());
 		if (repository == null) throw new UnknownEntityException("Unknown entity [" + entityName + "]");
 		else return repository;
 	}

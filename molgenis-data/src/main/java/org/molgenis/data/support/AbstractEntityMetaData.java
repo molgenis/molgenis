@@ -110,6 +110,12 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 			{
 				return getAttributes();
 			}
+
+			@Override
+			public boolean isAuto()
+			{
+				throw new UnsupportedOperationException();
+			}
 		}).skip(1);
 	}
 

@@ -42,9 +42,9 @@ public class DataServiceImplTest
 		assertNotNull(dataService.getEntityNames());
 		Iterator<String> it = dataService.getEntityNames().iterator();
 		assertTrue(it.hasNext());
-		assertEquals(it.next(), entityNames.get(0));
+		assertTrue(it.next().equalsIgnoreCase(entityNames.get(0)));
 		assertTrue(it.hasNext());
-		assertEquals(it.next(), entityNames.get(1));
+		assertTrue(it.next().equalsIgnoreCase(entityNames.get(1)));
 		assertFalse(it.hasNext());
 	}
 

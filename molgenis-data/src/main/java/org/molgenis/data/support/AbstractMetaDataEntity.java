@@ -20,13 +20,14 @@ public abstract class AbstractMetaDataEntity extends AbstractEntity
 		this.metaData = metaData;
 	}
 
+	@Override
 	public EntityMetaData getEntityMetaData()
 	{
 		return metaData;
 	}
 
 	@Override
-	public void set(Entity entity)
+	public void set(Entity entity, boolean strict)
 	{
 		for (AttributeMetaData attribute : metaData.getAttributes())
 		{

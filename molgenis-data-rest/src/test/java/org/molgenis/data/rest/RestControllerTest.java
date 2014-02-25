@@ -18,6 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Arrays;
 
+import org.mockito.Matchers;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -58,8 +59,6 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 
 	private MockMvc mockMvc;
 
-	private Entity newEntity;
-
 	@BeforeMethod
 	public void beforeMethod()
 	{
@@ -74,11 +73,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(dataService.getEntityNames()).thenReturn(Arrays.asList(PERSON));
 		when(dataService.getRepositoryByEntityName(PERSON)).thenReturn(repo);
 
-		newEntity = new MapEntity();
-		newEntity.set("name", "Piet");
-		newEntity.set("id", null);
-
-		when(dataService.add(PERSON, newEntity)).thenReturn(1);
+		when(dataService.add(Matchers.eq(PERSON), Matchers.any(MapEntity.class))).thenReturn(1);
 		when(dataService.findOne(PERSON, 1)).thenReturn(entity);
 
 		Query q = new QueryImpl().eq("name", "Piet").pageSize(10).offset(5);
@@ -105,7 +100,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		mockMvc.perform(post(BASE_URI + "/person").content("{name:Piet}").contentType(APPLICATION_JSON))
 				.andExpect(status().isCreated()).andExpect(header().string("Location", BASE_URI + "/person/1"));
 
-		verify(dataService).add(PERSON, newEntity);
+		verify(dataService).add(Matchers.eq(PERSON), Matchers.any(MapEntity.class));
 	}
 
 	@Test
@@ -114,7 +109,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		mockMvc.perform(post(BASE_URI + "/person").contentType(APPLICATION_FORM_URLENCODED).param("name", "Piet"))
 				.andExpect(status().isCreated()).andExpect(header().string("Location", BASE_URI + "/person/1"));
 
-		verify(dataService).add(PERSON, newEntity);
+		verify(dataService).add(Matchers.eq(PERSON), Matchers.any(MapEntity.class));
 	}
 
 	@Test
@@ -216,11 +211,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		mockMvc.perform(put(BASE_URI + "/person/1").content("{name:Klaas}").contentType(APPLICATION_JSON)).andExpect(
 				status().isOk());
 
-		Entity entity = new MapEntity();
-		entity.set("name", "Klaas");
-		entity.set("id", 1);
-
-		verify(dataService).update(PERSON, entity);
+		verify(dataService).update(Matchers.eq(PERSON), Matchers.any(MapEntity.class));
 	}
 
 	@Test
@@ -230,11 +221,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 				post(BASE_URI + "/person/1").param("_method", "PUT").param("name", "Klaas")
 						.contentType(APPLICATION_FORM_URLENCODED)).andExpect(status().isNoContent());
 
-		Entity entity = new MapEntity();
-		entity.set("name", "Klaas");
-		entity.set("id", 1);
-
-		verify(dataService).update(PERSON, entity);
+		verify(dataService).update(Matchers.eq(PERSON), Matchers.any(MapEntity.class));
 	}
 
 	@Test
@@ -244,11 +231,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 				post(BASE_URI + "/person/1").param("_method", "PUT").content("{name:Klaas}")
 						.contentType(APPLICATION_JSON)).andExpect(status().isOk());
 
-		Entity entity = new MapEntity();
-		entity.set("name", "Klaas");
-		entity.set("id", 1);
-
-		verify(dataService).update(PERSON, entity);
+		verify(dataService).update(Matchers.eq(PERSON), Matchers.any(MapEntity.class));
 	}
 
 	@Test
