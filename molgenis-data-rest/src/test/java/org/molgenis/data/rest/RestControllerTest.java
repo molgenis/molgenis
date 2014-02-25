@@ -127,7 +127,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void deletePost() throws Exception
 	{
-		mockMvc.perform(post(BASE_URI + "/person/1?_method=DELETE")).andExpect(status().isNoContent());
+		mockMvc.perform(post(BASE_URI + "/person/1").param("_method", "DELETE")).andExpect(status().isNoContent());
 		verify(dataService).delete(PERSON, 1);
 	}
 
@@ -139,19 +139,28 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 				.andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(
 						content()
-								.string("{\"name\":\"Person\",\"attributes\":{\"name\":{\"href\":\"/api/v1/Person/meta/name\"}},\"nameAttribute\":\"id\"}"));
+								.string("{\"href\":\"/api/v1/Person/meta\",\"name\":\"Person\",\"attributes\":{\"name\":{\"href\":\"/api/v1/Person/meta/name\"}}}"));
+
+	}
+
+	@Test
+	public void getMetaDataSelectAttributes() throws Exception
+	{
+		mockMvc.perform(get(BASE_URI + "/person/meta").param("attributes", "name")).andExpect(status().isOk())
+				.andExpect(content().contentType(APPLICATION_JSON))
+				.andExpect(content().string("{\"href\":\"/api/v1/Person/meta\",\"name\":\"Person\"}"));
 
 	}
 
 	@Test
 	public void getMetaDataExpandAttributes() throws Exception
 	{
-		mockMvc.perform(get(BASE_URI + "/person/meta?expand=attributes"))
+		mockMvc.perform(get(BASE_URI + "/person/meta").param("expand", "attributes"))
 				.andExpect(status().isOk())
 				.andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(
 						content()
-								.string("{\"name\":\"Person\",\"attributes\":{\"name\":{\"href\":\"/api/v1/Person/meta/name\",\"fieldType\":\"STRING\",\"name\":\"name\",\"label\":\"name\",\"nillable\":true,\"readOnly\":false,\"idAttribute\":false,\"labelAttribute\":false,\"unique\":false}},\"nameAttribute\":\"id\"}"));
+								.string("{\"href\":\"/api/v1/Person/meta\",\"name\":\"Person\",\"attributes\":{\"name\":{\"href\":\"/api/v1/Person/meta/name\",\"fieldType\":\"STRING\",\"name\":\"name\",\"label\":\"name\",\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false}}}"));
 
 	}
 
@@ -161,6 +170,15 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		mockMvc.perform(get(BASE_URI + "/person/1")).andExpect(status().isOk())
 				.andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(content().string("{\"href\":\"/api/v1/person/1\",\"name\":\"Piet\"}"));
+
+	}
+
+	@Test
+	public void retrieveSelectAttributes() throws Exception
+	{
+		mockMvc.perform(get(BASE_URI + "/person/1").param("attributes", "notname")).andExpect(status().isOk())
+				.andExpect(content().contentType(APPLICATION_JSON))
+				.andExpect(content().string("{\"href\":\"/api/v1/person/1\"}"));
 
 	}
 

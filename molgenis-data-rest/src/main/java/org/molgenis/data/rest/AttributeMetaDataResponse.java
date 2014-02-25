@@ -20,60 +20,117 @@ public class AttributeMetaDataResponse
 	private final String label;
 	private final String description;
 	private final List<?> attributes;
-	private final Href refEntity;
-	private final boolean nillable;
-	private final boolean readOnly;
+	private final Object refEntity;
+	private final Boolean nillable;
+	private final Boolean readOnly;
 	private final Object defaultValue;
-	private final boolean idAttribute;
-	private final boolean labelAttribute;
-	private final boolean unique;
+	private final Boolean labelAttribute;
+	private final Boolean unique;
 
 	public AttributeMetaDataResponse(String entityParentName, AttributeMetaData attr)
 	{
-		this(entityParentName, attr, null);
+		this(entityParentName, attr, null, null);
 	}
 
-	public AttributeMetaDataResponse(final String entityParentName, AttributeMetaData attr,
-			final Set<String> expandFieldSet)
+	public AttributeMetaDataResponse(final String entityParentName, AttributeMetaData attr, Set<String> attributesSet,
+			final Set<String> attributeExpandsSet)
 	{
 		String attrName = attr.getName();
 
 		this.href = String.format("%s/%s/meta/%s", RestController.BASE_URI, entityParentName, attrName);
-		this.fieldType = attr.getDataType().getEnumType();
-		this.name = attrName;
-		this.label = attr.getLabel();
-		this.description = attr.getDescription();
 
-		EntityMetaData refEntity = attr.getRefEntity();
-		this.refEntity = refEntity != null ? new Href(String.format("%s/%s/meta", RestController.BASE_URI,
-				entityParentName)) : null;
+		if (attributesSet == null || attributesSet.contains("fieldType".toLowerCase()))
+		{
+			this.fieldType = attr.getDataType().getEnumType();
+		}
+		else this.fieldType = null;
 
-		Iterable<AttributeMetaData> attributeParts = attr.getAttributeParts();
-		this.attributes = attributeParts != null ? Lists.newArrayList(Iterables.transform(attributeParts,
-				new Function<AttributeMetaData, Object>()
-				{
+		if (attributesSet == null || attributesSet.contains("name".toLowerCase()))
+		{
+			this.name = attrName;
+		}
+		else this.name = null;
 
-					@Override
-					public Object apply(AttributeMetaData attributeMetaData)
+		if (attributesSet == null || attributesSet.contains("label".toLowerCase()))
+		{
+			this.label = attr.getLabel();
+		}
+		else this.label = null;
+
+		if (attributesSet == null || attributesSet.contains("description".toLowerCase()))
+		{
+			this.description = attr.getDescription();
+		}
+		else this.description = null;
+
+		if (attributesSet == null || attributesSet.contains("refEntity".toLowerCase()))
+		{
+			EntityMetaData refEntity = attr.getRefEntity();
+			if (attributeExpandsSet != null && attributeExpandsSet.contains("refEntity"))
+			{
+				this.refEntity = refEntity != null ? new EntityMetaDataResponse(refEntity, null, null) : null;
+			}
+			else
+			{
+				this.refEntity = refEntity != null ? new Href(String.format("%s/%s/meta", RestController.BASE_URI,
+						refEntity.getName())) : null;
+			}
+		}
+		else this.refEntity = null;
+
+		if (attributesSet == null || attributesSet.contains("attributes".toLowerCase()))
+		{
+			Iterable<AttributeMetaData> attributeParts = attr.getAttributeParts();
+			this.attributes = attributeParts != null ? Lists.newArrayList(Iterables.transform(attributeParts,
+					new Function<AttributeMetaData, Object>()
 					{
-						if (expandFieldSet != null && expandFieldSet.contains("attributes"))
-						{
-							return new AttributeMetaDataResponse(entityParentName, attributeMetaData, null);
-						}
-						else
-						{
-							return Collections.<String, Object> singletonMap("href", String.format("%s/%s/meta/%s",
-									RestController.BASE_URI, entityParentName, attributeMetaData.getName()));
-						}
-					}
-				})) : null;
 
-		this.nillable = attr.isNillable();
-		this.readOnly = attr.isReadonly();
-		this.defaultValue = attr.getDefaultValue();
-		this.idAttribute = attr.isIdAtrribute();
-		this.labelAttribute = attr.isLabelAttribute();
-		this.unique = attr.isUnique();
+						@Override
+						public Object apply(AttributeMetaData attributeMetaData)
+						{
+							if (attributeExpandsSet != null && attributeExpandsSet.contains("attributes"))
+							{
+								return new AttributeMetaDataResponse(entityParentName, attributeMetaData, null, null);
+							}
+							else
+							{
+								return Collections.<String, Object> singletonMap("href", String.format("%s/%s/meta/%s",
+										RestController.BASE_URI, entityParentName, attributeMetaData.getName()));
+							}
+						}
+					})) : null;
+		}
+		else this.attributes = null;
+
+		if (attributesSet == null || attributesSet.contains("nillable".toLowerCase()))
+		{
+			this.nillable = attr.isNillable();
+		}
+		else this.nillable = null;
+
+		if (attributesSet == null || attributesSet.contains("readOnly".toLowerCase()))
+		{
+			this.readOnly = attr.isReadonly();
+		}
+		else this.readOnly = null;
+
+		if (attributesSet == null || attributesSet.contains("defaultValue".toLowerCase()))
+		{
+			this.defaultValue = attr.getDefaultValue();
+		}
+		else this.defaultValue = null;
+
+		if (attributesSet == null || attributesSet.contains("labelAttribute".toLowerCase()))
+		{
+			this.labelAttribute = attr.isLabelAttribute();
+		}
+		else this.labelAttribute = null;
+
+		if (attributesSet == null || attributesSet.contains("unique".toLowerCase()))
+		{
+			this.unique = attr.isUnique();
+		}
+		else this.unique = null;
 	}
 
 	public String getHref()
@@ -106,7 +163,7 @@ public class AttributeMetaDataResponse
 		return attributes;
 	}
 
-	public Href getRefEntity()
+	public Object getRefEntity()
 	{
 		return refEntity;
 	}
@@ -124,11 +181,6 @@ public class AttributeMetaDataResponse
 	public Object getDefaultValue()
 	{
 		return defaultValue;
-	}
-
-	public boolean isIdAttribute()
-	{
-		return idAttribute;
 	}
 
 	public boolean isLabelAttribute()

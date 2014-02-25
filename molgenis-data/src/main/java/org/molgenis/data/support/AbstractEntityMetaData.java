@@ -27,7 +27,7 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 			public Iterable<AttributeMetaData> children(AttributeMetaData attributeMetaData)
 			{
 				FieldTypeEnum dataType = attributeMetaData.getDataType().getEnumType();
-				if (dataType == FieldTypeEnum.HAS) return attributeMetaData.getAttributeParts();
+				if (dataType == FieldTypeEnum.COMPOUND) return attributeMetaData.getAttributeParts();
 				else return Collections.<AttributeMetaData> emptyList();
 			}
 		}.breadthFirstTraversal(new AttributeMetaData()
@@ -102,7 +102,7 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 			@Override
 			public FieldType getDataType()
 			{
-				return MolgenisFieldTypes.getType(FieldTypeEnum.HAS.toString().toLowerCase());
+				return MolgenisFieldTypes.getType(FieldTypeEnum.COMPOUND.toString().toLowerCase());
 			}
 
 			@Override
@@ -121,7 +121,7 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 			@Override
 			public boolean apply(AttributeMetaData attributeMetaData)
 			{
-				return attributeMetaData.getDataType().getEnumType() != FieldTypeEnum.HAS;
+				return attributeMetaData.getDataType().getEnumType() != FieldTypeEnum.COMPOUND;
 			}
 		});
 	}
