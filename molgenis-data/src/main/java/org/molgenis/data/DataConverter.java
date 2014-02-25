@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.molgenis.data.convert.DateToStringConverter;
+import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.ListEscapeUtils;
 import org.springframework.core.convert.ConversionService;
@@ -36,6 +38,8 @@ public class DataConverter
 			{
 				// We are not in a Spring managed environment
 				conversionService = new DefaultConversionService();
+				((DefaultConversionService) conversionService).addConverter(new DateToStringConverter());
+				((DefaultConversionService) conversionService).addConverter(new StringToDateConverter());
 			}
 			else
 			{
