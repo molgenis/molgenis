@@ -67,7 +67,7 @@ public class AttributeMetaDataResponse
 		{
 			EntityMetaData refEntity = attr.getRefEntity();
 			this.refEntity = refEntity != null ? new Href(String.format("%s/%s/meta", RestController.BASE_URI,
-					entityParentName)) : null;
+					refEntity.getName())) : null;
 		}
 		else this.refEntity = null;
 
