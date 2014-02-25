@@ -1,7 +1,14 @@
 package org.molgenis.data.omx.annotation;
 
-import java.util.*;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 import org.molgenis.data.AttributeMetaData;
@@ -13,6 +20,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.omx.OmxRepository;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.omx.converters.ValueConverter;
 import org.molgenis.omx.converters.ValueConverterException;
 import org.molgenis.omx.observ.DataSet;
@@ -40,6 +48,7 @@ public class OmxDataSetAnnotator
 
 	private static final String PROTOCOL_SUFFIX = "_annotator_id";
 	private final SearchService searchService;
+	private final EntityValidator entityValidator;
 	DataService dataService;
 	DataSetsIndexer indexer;
 
@@ -294,7 +303,7 @@ public class OmxDataSetAnnotator
 		newRootProtocol.setIdentifier(original.getProtocolUsed().getIdentifier() + calendar.getTimeInMillis());
 		newRootProtocol.setName(original.getName() + "_results_" + dateString);
 
-		List subprotocols = new ArrayList<Protocol>();
+		List<Protocol> subprotocols = new ArrayList<Protocol>();
 		subprotocols.add(original.getProtocolUsed());
 		newRootProtocol.setSubprotocols(subprotocols);
 		dataService.add(Protocol.ENTITY_NAME, newRootProtocol);
