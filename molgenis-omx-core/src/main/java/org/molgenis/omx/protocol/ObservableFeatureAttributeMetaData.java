@@ -104,4 +104,10 @@ public class ObservableFeatureAttributeMetaData implements AttributeMetaData
 	{
 		return null;
 	}
+
+	@Override
+	public boolean isAuto()
+	{
+		return false;
+	}
 }

@@ -1,6 +1,7 @@
 package org.molgenis.data.omx;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.search.SearchService;
 import org.molgenis.security.runas.SystemSecurityToken;
@@ -20,14 +21,18 @@ public class OmxRepositoryRegistrator implements ApplicationListener<ContextRefr
 {
 	private final DataService dataService;
 	private final SearchService searchService;
+	private final EntityValidator entityValidator;
 
 	@Autowired
-	public OmxRepositoryRegistrator(DataService dataService, SearchService searchService)
+	public OmxRepositoryRegistrator(DataService dataService, SearchService searchService,
+			EntityValidator entityValidator)
 	{
 		if (dataService == null) throw new IllegalArgumentException("dataService is null");
 		if (searchService == null) throw new IllegalArgumentException("searchService is null");
+		if (entityValidator == null) throw new IllegalArgumentException("entityValidator is null");
 		this.dataService = dataService;
 		this.searchService = searchService;
+		this.entityValidator = entityValidator;
 	}
 
 	@Override
@@ -44,7 +49,8 @@ public class OmxRepositoryRegistrator implements ApplicationListener<ContextRefr
 
 			for (DataSet dataSet : dataService.findAll(DataSet.ENTITY_NAME, DataSet.class))
 			{
-				OmxRepository repo = new OmxRepository(dataService, searchService, dataSet.getIdentifier());
+				OmxRepository repo = new OmxRepository(dataService, searchService, dataSet.getIdentifier(),
+						entityValidator);
 				dataService.addRepository(repo);
 			}
 		}
