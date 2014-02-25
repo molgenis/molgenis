@@ -10,7 +10,7 @@
 			function createTreeNodesRec(tree, selectedNodes, parentNode) {
 				$.each(tree, function(protocolId, subTree) {
 					var protocolUri = restApi.getHref('protocol', protocolId);
-					var protocol = restApi.get(protocolUri, subTree ? ['features'] : []);
+					var protocol = restApi.get(protocolUri, {'expand': subTree ? ['features'] : []});
 					
 					// create protocol node
 					var node = {
@@ -92,7 +92,7 @@
 			lazyload : function (e, data) {
 				var node = data.node;
 				data.result = $.Deferred(function (dfd) {
-					restApi.getAsync(node.key + '/subprotocols?num=' + maxItems, null, null, function(subprotocols) {
+					restApi.getAsync(node.key + '/subprotocols?num=' + maxItems, null, function(subprotocols) {
 						var children = [];
 						if(subprotocols.total > subprotocols.num) {
 							molgenis.createAlert([ {
@@ -112,7 +112,7 @@
 							});
 						});
 						
-						restApi.getAsync(node.key + '/features?num=' + maxItems, null, null, function(features) {
+						restApi.getAsync(node.key + '/features?num=' + maxItems, null, function(features) {
 							if(features.total > features.num) {
 								molgenis.createAlert([ {
 									'message' : 'Protocol contains more than ' + features.num + ' features'
@@ -221,7 +221,7 @@
 							} ],
 							num : maxItems
 						};
-						restApi.getAsync(restApi.getHref('protocol'), [ 'features', 'subprotocols' ], q, function(protocols) {
+						restApi.getAsync(restApi.getHref('protocol'), {'expand': [ 'features', 'subprotocols' ], 'q': q}, function(protocols) {
 							if(protocols.total > protocols.num) {
 								molgenis.createAlert([ {
 									'message' : 'Maximum number of protocols reached (' + protocols.num + ')'

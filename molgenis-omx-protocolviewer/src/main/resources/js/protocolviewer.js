@@ -176,7 +176,7 @@
 							} ],
 							num : maxItems
 						};
-						restApi.getAsync('/api/v1/observablefeature', null, q, function(features) {
+						restApi.getAsync('/api/v1/observablefeature', {'q': q}, function(features) {
 							if (features.total > maxItems) { 
 								molgenis.createAlert([ {
 									'message' : 'Maximum number of selected items reached (' + maxItems + ')'
@@ -197,7 +197,7 @@
 									num : maxItems
 								};
 							// TODO deal with multiple entity pages
-							restApi.getAsync('/api/v1/protocol', null, q, function(protocols) {
+							restApi.getAsync('/api/v1/protocol', {'q': q}, function(protocols) {
 								if (protocols.total > maxItems) { 
 									molgenis.createAlert([ {
 										'message' : 'Maximum number of protocols reached (' + maxItems + ')'

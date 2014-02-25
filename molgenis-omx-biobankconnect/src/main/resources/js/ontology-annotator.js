@@ -116,7 +116,7 @@
 		function createTableRow(feature){
 			var row = $('<tr />').addClass('show-popover').data('feature', feature).click(function(){
 				var featureId = $(this).data('feature').id;
-				var restApiFeature = restApi.get('/api/v1/observablefeature/' + featureId, ["unit", "definitions"], null);
+				var restApiFeature = restApi.get('/api/v1/observablefeature/' + featureId, {'expand': ["unit", "definitions"]}, null);
 				createFeatureModal('Annotate data item', restApiFeature);
 			});
 			
@@ -135,7 +135,7 @@
 			var featureNameDiv = $('<div />').append(feature.name);
 			var annotationDiv = $('<div />').addClass('text-info');
 			var annotationText = '';
-			var featureEntity = restApi.get('/api/v1/observablefeature/' + feature.id, ["unit", "definitions"]);
+			var featureEntity = restApi.get('/api/v1/observablefeature/' + feature.id, {'expand': ["unit", "definitions"]});
 			if(featureEntity.definitions.items !== 0){
 				var moreToShow = featureEntity.definitions.items.length;
 				$.each(featureEntity.definitions.items, function(index, ontologyTerm){
@@ -503,9 +503,7 @@
 				operator : 'EQUALS',
 				value : ns.hrefToId(ontology.href)
 			});
-			var result = restApi.get('/api/v1/ontologyterm/', ['ontology'], {
-					q : queryRules,
-			});
+			var result = restApi.get('/api/v1/ontologyterm/', {'expand': ['ontology'], 'q' : queryRules});
 			var ontologyTermId = null;
 			var ontologyTermRestApi = null;
 			if(result.items.length !== 0) {
@@ -521,7 +519,7 @@
 	}
 	
 	function createFeatureModal(title, feature){
-		restApi.getAsync(feature.href, ["unit", "definitions"], null, function(updatedFeature){
+		restApi.getAsync(feature.href, {'expand': ["unit", "definitions"]}, function(updatedFeature){
 			standardModal.createModalCallback(title, function(modal){
 				var body = modal.find('div.modal-body').addClass('overflow-y-visible');
 				ns.OntologyAnnotator.prototype.createFeatureTable(body, title, updatedFeature);
@@ -536,7 +534,7 @@
 	}
 	
 	function updateModalAfterAnnotation(title, feature, callback){
-		restApi.getAsync(feature.href, ["unit", "definitions"], null, function(updatedFeature){
+		restApi.getAsync(feature.href, {'expand': ["unit", "definitions"]}, function(updatedFeature){
 			standardModal.createModalCallback(title, function(modal){
 				var body = modal.find('div.modal-body').addClass('overflow-y-visible');
 				ns.OntologyAnnotator.prototype.createFeatureTable(body, title, updatedFeature, callback);
@@ -657,7 +655,7 @@
 					value : data.ontologyIRI
 				} ],
 		};
-		var existingOntology = restApi.get('/api/v1/ontology/', null, query);
+		var existingOntology = restApi.get('/api/v1/ontology/', {'q': query});
 		if(existingOntology.items.length === 0){
 			var ontologyData = {};
 			ontologyData.name = data.ontologyName;
@@ -679,7 +677,7 @@
 					console.log(error);
 				} 
 			});
-			existingOntology = restApi.get('/api/v1/ontology/', null, query);
+			existingOntology = restApi.get('/api/v1/ontology/', {'q': query});
 		}
 		return existingOntology.items[0];
 	}
