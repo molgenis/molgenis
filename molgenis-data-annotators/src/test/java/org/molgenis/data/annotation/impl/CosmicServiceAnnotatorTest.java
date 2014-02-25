@@ -9,11 +9,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -31,11 +27,11 @@ import org.molgenis.data.support.MapEntity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class EbiServiceAnnotatorTest
+public class CosmicServiceAnnotatorTest
 {
 	private EntityMetaData metaDataCanAnnotate;
 	private EntityMetaData metaDataCantAnnotate;
-	private EbiServiceAnnotator annotator;
+	private CosmicServiceAnnotator annotator;
 	private AttributeMetaData attributeMetaDataCanAnnotate;
 	private AttributeMetaData attributeMetaDataCantAnnotate;
 	private AttributeMetaData attributeMetaDataCantAnnotate2;
@@ -47,15 +43,15 @@ public class EbiServiceAnnotatorTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		annotator = new EbiServiceAnnotator();
+		annotator = new CosmicServiceAnnotator();
 
 		metaDataCanAnnotate = mock(EntityMetaData.class);
 		attributeMetaDataCanAnnotate = mock(AttributeMetaData.class);
-		when(attributeMetaDataCanAnnotate.getName()).thenReturn("uniprot_id");
+		when(attributeMetaDataCanAnnotate.getName()).thenReturn("ensemblId");
 		when(attributeMetaDataCanAnnotate.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
 
-		when(metaDataCanAnnotate.getAttribute("uniprot_id")).thenReturn(attributeMetaDataCanAnnotate);
+		when(metaDataCanAnnotate.getAttribute("ensemblId")).thenReturn(attributeMetaDataCanAnnotate);
 
 		metaDataCantAnnotate = mock(EntityMetaData.class);
 		attributeMetaDataCantAnnotate = mock(AttributeMetaData.class);
@@ -63,42 +59,68 @@ public class EbiServiceAnnotatorTest
 		when(attributeMetaDataCantAnnotate.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
 		attributeMetaDataCantAnnotate2 = mock(AttributeMetaData.class);
-		when(attributeMetaDataCantAnnotate2.getName()).thenReturn("uniprot_id");
+		when(attributeMetaDataCantAnnotate2.getName()).thenReturn("ensemblId");
 		when(attributeMetaDataCantAnnotate2.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.DATE.toString().toLowerCase()));
 
-		when(metaDataCantAnnotate.getAttribute("uniprot_id")).thenReturn(attributeMetaDataCantAnnotate2);
+		when(metaDataCantAnnotate.getAttribute("ensemblId")).thenReturn(attributeMetaDataCantAnnotate2);
 
 		entity = mock(Entity.class);
-		when(entity.get("uniprot_id")).thenReturn("Q13936");
+		when(entity.get("ensemblId")).thenReturn("ENSG00000186092");
 		input = new ArrayList<Entity>();
 		input.add(entity);
 
 		this.httpClient = mock(HttpClient.class);
 
-		SERVICE_RESPONSE = "{\"target\": {\"targetType\": \"SINGLE PROTEIN\", \"chemblId\": \"CHEMBL1940\", \"geneNames\": \"Unspecified\", \"description\": \"Voltage-gated L-type calcium channel alpha-1C subunit\", \"compoundCount\": 171, \"bioactivityCount\": 239, \"proteinAccession\": \"Q13936\", \"synonyms\": \"CCHL1A1,CACNL1A1,Calcium channel, L type, alpha-1 polypeptide, isoform 1, cardiac muscle,Voltage-gated calcium channel subunit alpha Cav1.2,CACNA1C,CACN2,CACH2 ,Voltage-dependent L-type calcium channel subunit alpha-1C\", \"organism\": \"Homo sapiens\", \"preferredName\": \"Voltage-gated L-type calcium channel alpha-1C subunit\"}}";
+		SERVICE_RESPONSE = "[{\"ID\":\"COSM911918\",\"feature_type\":\"somatic_variation\",\"alt_alleles\":[\"C\",\"A\"],\"end\":69345,\"seq_region_name\":\"1\",\"consequence_type\":\"synonymous_variant\",\"strand\":1,\"start\":69345},{\"ID\":\"COSM426644\",\"feature_type\":\"somatic_variation\",\"alt_alleles\":[\"G\",\"T\"],\"end\":69523,\"seq_region_name\":\"1\",\"consequence_type\":\"missense_variant\",\"strand\":1,\"start\":69523},{\"ID\":\"COSM75742\",\"feature_type\":\"somatic_variation\",\"alt_alleles\":[\"G\",\"A\"],\"end\":69538,\"seq_region_name\":\"1\",\"consequence_type\":\"missense_variant\",\"strand\":1,\"start\":69538}]";
 	}
 
 	@Test
 	public void annotate() throws IllegalStateException, IOException
 	{
 		List<Entity> expectedList = new ArrayList<Entity>();
-		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
-		Entity expectedEntity = new MapEntity(resultMap);
-		expectedEntity.set("targetType", "SINGLE PROTEIN");
-		expectedEntity.set("chemblId", "CHEMBL1940");
-		expectedEntity.set("geneNames", "Unspecified");
-		expectedEntity.set("description", "Voltage-gated L-type calcium channel alpha-1C subunit");
-		expectedEntity.set("compoundCount", 171.0);
-		expectedEntity.set("bioactivityCount", 239.0);
-		expectedEntity.set("proteinAccession", "Q13936");
-		expectedEntity
-				.set("synonyms",
-						"CCHL1A1,CACNL1A1,Calcium channel, L type, alpha-1 polypeptide, isoform 1, cardiac muscle,Voltage-gated calcium channel subunit alpha Cav1.2,CACNA1C,CACN2,CACH2 ,Voltage-dependent L-type calcium channel subunit alpha-1C");
-		expectedEntity.set("organism", "Homo sapiens");
-		expectedEntity.set("preferredName", "Voltage-gated L-type calcium channel alpha-1C subunit");
-		expectedEntity.set("uniprot_id", "Q13936");
-		expectedList.add(expectedEntity);
+		Map<String, Object> resultMap1 = new LinkedHashMap<String, Object>();
+		resultMap1.put("ID", "COSM911918");
+		resultMap1.put("feature_type", "somatic_variation");
+		resultMap1.put("alt_alleles", "C,A");
+		resultMap1.put("end", 69345);
+		resultMap1.put("seq_region_name", "1");
+		resultMap1.put("consequence_type", "synonymous_variant");
+		resultMap1.put("strand", 1);
+		resultMap1.put("start", 69345);
+		resultMap1.put(CosmicServiceAnnotator.ENSEMBLE_ID, "ENSG00000186092");
+
+		Map<String, Object> resultMap2 = new LinkedHashMap<String, Object>();
+		resultMap2.put("ID", "COSM426644");
+		resultMap2.put("feature_type", "somatic_variation");
+		resultMap2.put("alt_alleles", "G,T");
+		resultMap2.put("end", 69523);
+		resultMap2.put("seq_region_name", "1");
+		resultMap2.put("consequence_type", "missense_variant");
+		resultMap2.put("strand", 1);
+		resultMap2.put("start", 69523);
+		resultMap2.put(CosmicServiceAnnotator.ENSEMBLE_ID, "ENSG00000186092");
+
+		Map<String, Object> resultMap3 = new LinkedHashMap<String, Object>();
+		resultMap3.put("ID", "COSM75742");
+		resultMap3.put("feature_type", "somatic_variation");
+		resultMap3.put("alt_alleles", "G,A");
+		resultMap3.put("end", 69538);
+		resultMap3.put("seq_region_name", "1");
+		resultMap3.put("consequence_type", "missense_variant");
+		resultMap3.put("strand", 1);
+		resultMap3.put("start", 69538);
+		resultMap3.put(CosmicServiceAnnotator.ENSEMBLE_ID, "ENSG00000186092");
+
+		Entity expectedEntity1 = new MapEntity(resultMap1);
+		Entity expectedEntity2 = new MapEntity(resultMap2);
+		Entity expectedEntity3 = new MapEntity(resultMap3);
+
+		expectedList.add(expectedEntity1);
+		expectedList.add(expectedEntity2);
+		expectedList.add(expectedEntity3);
+
+		Iterator<Entity> expected = expectedList.iterator();
 
 		InputStream ServiceStream = new ByteArrayInputStream(SERVICE_RESPONSE.getBytes(Charset.forName("UTF-8")));
 		HttpEntity catalogReleaseEntity = when(mock(HttpEntity.class).getContent()).thenReturn(ServiceStream).getMock();
@@ -112,8 +134,10 @@ public class EbiServiceAnnotatorTest
 			@Override
 			public boolean matches(Object item)
 			{
-				return ((HttpGet) item).getURI().toString()
-						.equals("https://www.ebi.ac.uk/chemblws/targets/uniprot/Q13936.json");
+				return ((HttpGet) item)
+						.getURI()
+						.toString()
+						.equals("http://beta.rest.ensembl.org/feature/id/ENSG00000186092.json?feature=somatic_variation");
 			}
 
 			@Override
@@ -125,7 +149,9 @@ public class EbiServiceAnnotatorTest
 
 		Iterator<Entity> results = annotator.annotate(input.iterator());
 
-		assertEquals(results.next().getString("uniprot_id"), expectedEntity.getString("uniprot_id"));
+		assertEquals(results.next(), expectedEntity1);
+		assertEquals(results.next(), expectedEntity2);
+		assertEquals(results.next(), expectedEntity3);
 	}
 
 	@Test

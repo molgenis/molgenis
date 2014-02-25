@@ -21,7 +21,7 @@ public interface RepositoryAnnotator {
     EntityMetaData getOutputMetaData ();
 
     /**
-     * Returns a entityMetaData containing the attirbutes needed for the annotator to work
+     * Returns a entityMetaData containing the attributes needed for the annotator to work
      * @return inputMetaData;
      */
 	EntityMetaData getInputMetaData ();

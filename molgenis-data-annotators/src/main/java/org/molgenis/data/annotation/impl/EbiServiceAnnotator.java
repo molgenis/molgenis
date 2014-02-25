@@ -3,11 +3,13 @@ package org.molgenis.data.annotation.impl;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Map;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -24,9 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
-
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 /**
  * <p>
@@ -54,8 +53,9 @@ public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements 
 	// EBI service is dependant on this ID when the web service is called
 	// If Uniprot ID is not in a data set, the web service cannot be used
 	public static final String UNIPROT_ID = "uniprot_id";
-	public static final String EBI_CHE_MBL = "EBI-CHeMBL";
+	public static final String NAME = "EBI-CHeMBL";
 	private final DefaultHttpClient httpClient;
+    private List<Object> annotatedInput = new ArrayList<Object>();
 
 	@Autowired
 	DataService dataService;
@@ -68,7 +68,7 @@ public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements 
 	@Override
 	public String getName()
 	{
-		return EBI_CHE_MBL;
+		return NAME;
 	}
 
 	@Override
@@ -82,9 +82,9 @@ public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements 
 	@Override
 	public List<Entity> annotateEntity(Entity entity)
 	{
-		HttpGet httpGet = new HttpGet(getServiceUri(entity));
-		Entity resultEntity = null;
-		List<Object> annotatedInput = new ArrayList<Object>();
+        HttpGet httpGet = new HttpGet(getServiceUri(entity));
+		Entity resultEntity = new MapEntity();
+
 		if (!annotatedInput.contains(entity.get(UNIPROT_ID)))
 		{
 			annotatedInput.add(entity.get(UNIPROT_ID));
@@ -128,9 +128,7 @@ public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements 
 		if (!"".equals(json))
 		{
 			Map<String, Object> rootMap = jsonStringToMap(json);
-
-			@SuppressWarnings("unchecked")
-			Map<String, Object> resultMap = (Map<String, Object>) rootMap.get("target");
+			Map<String, Object> resultMap = (Map) rootMap.get("target");
 			resultMap.put(UNIPROT_ID, entity.get(UNIPROT_ID));
 			result = new MapEntity(resultMap);
 		}
