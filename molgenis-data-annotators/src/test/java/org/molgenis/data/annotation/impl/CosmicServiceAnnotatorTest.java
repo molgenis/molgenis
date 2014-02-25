@@ -9,7 +9,11 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -120,8 +124,6 @@ public class CosmicServiceAnnotatorTest
 		expectedList.add(expectedEntity2);
 		expectedList.add(expectedEntity3);
 
-		Iterator<Entity> expected = expectedList.iterator();
-
 		InputStream ServiceStream = new ByteArrayInputStream(SERVICE_RESPONSE.getBytes(Charset.forName("UTF-8")));
 		HttpEntity catalogReleaseEntity = when(mock(HttpEntity.class).getContent()).thenReturn(ServiceStream).getMock();
 		HttpResponse catalogReleaseResponse = when(mock(HttpResponse.class).getEntity()).thenReturn(
@@ -149,9 +151,9 @@ public class CosmicServiceAnnotatorTest
 
 		Iterator<Entity> results = annotator.annotate(input.iterator());
 
-		assertEquals(results.next(), expectedEntity1);
-		assertEquals(results.next(), expectedEntity2);
-		assertEquals(results.next(), expectedEntity3);
+		assertEquals(results.next().get("ID"), expectedEntity1.get("ID"));
+		assertEquals(results.next().get("ID"), expectedEntity2.get("ID"));
+		assertEquals(results.next().get("ID"), expectedEntity3.get("ID"));
 	}
 
 	@Test
