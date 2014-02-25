@@ -29,32 +29,33 @@ import com.google.gson.reflect.TypeToken;
 
 /**
  * <p>
- * This class calls the EBI CHeMBL webservice with a uniprot ID. The webservice returns a map with information on the
- * submitted protein ID.
+ * This class calls the Ensembl webservice with a ensemble ID. The webservice returns a map with information on the
+ * somatic variants associated with the gene
  * </p>
  * 
- * <p>
- * <b>EBI returns:</b> {target={targetType, chemblId, geneNames, description, compoundCount, bioactivityCount,
- * proteinAccession, synonyms, organism, preferredName}}
- * </p>
- * 
- * @author mdehaan
- * 
- * @version EBI: database version 17, prepared on 29th August 2013
+ * @author bcharbon
  * 
  * */
 @Component("cosmicService")
 public class CosmicServiceAnnotator extends AbstractRepositoryAnnotator implements RepositoryAnnotator,
 		ApplicationListener<ContextRefreshedEvent>
 {
-	// Web url to call the EBI web service
+    // Web url to call the ensembl web service
 	private static final String SERVICE_URL = "http://beta.rest.ensembl.org/feature/id/";
 	private static final String SERVICE_POSTFIX = ".json?feature=somatic_variation";
-	// EBI service is dependant on this ID when the web service is called
-	// If Uniprot ID is not in a data set, the web service cannot be used
+	// ensembl service is dependant on this ID when the web service is called
+	// If ensemblId is not in a data set, the web service cannot be used
 	public static final String ENSEMBLE_ID = "ensemblId";
 	public static final String NAME = "Ensemble2Cosmic";
-	private final DefaultHttpClient httpClient;
+    public static final String ID = "ID";
+    public static final String FEATURE_TYPE = "feature_type";
+    public static final String ALT_ALLELES = "alt_alleles";
+    public static final String END = "end";
+    public static final String SEQ_REGION_NAME = "seq_region_name";
+    public static final String CONSEQUENCE_TYPE = "consequence_type";
+    public static final String STRAND = "strand";
+    public static final String START = "start";
+    private final DefaultHttpClient httpClient;
 
 	@Autowired
 	DataService dataService;
@@ -130,14 +131,14 @@ public class CosmicServiceAnnotator extends AbstractRepositoryAnnotator implemen
 			for (CosmicData data : resultCollection)
 			{
 				Entity resultEntity = new MapEntity();
-				resultEntity.set("ID", data.getID());
-				resultEntity.set("feature_type", data.getFeature_type());
-				resultEntity.set("alt_alleles", data.getAlt_alleles()[0] + "," + data.getAlt_alleles()[1]);
-				resultEntity.set("end", data.getEnd());
-				resultEntity.set("seq_region_name", data.getSeq_region_name());
-				resultEntity.set("consequence_type", data.getConsequence_type());
-				resultEntity.set("strand", data.getStrand());
-				resultEntity.set("start", data.getStart());
+				resultEntity.set(ID, data.getID());
+				resultEntity.set(FEATURE_TYPE, data.getFeature_type());
+				resultEntity.set(ALT_ALLELES, data.getAlt_alleles()[0] + "," + data.getAlt_alleles()[1]);
+				resultEntity.set(END, data.getEnd());
+				resultEntity.set(SEQ_REGION_NAME, data.getSeq_region_name());
+				resultEntity.set(CONSEQUENCE_TYPE, data.getConsequence_type());
+				resultEntity.set(STRAND, data.getStrand());
+				resultEntity.set(START, data.getStart());
 				resultEntity.set(ENSEMBLE_ID, entity.get(ENSEMBLE_ID));
 				result.add(resultEntity);
 			}
@@ -160,14 +161,14 @@ public class CosmicServiceAnnotator extends AbstractRepositoryAnnotator implemen
 	public EntityMetaData getOutputMetaData()
 	{
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData("ID", FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData("feature_type", FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData("alt_alleles", FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData("end", FieldTypeEnum.INT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData("seq_region_name", FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData("consequence_type", FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData("strand", FieldTypeEnum.INT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData("start", FieldTypeEnum.INT));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ID, FieldTypeEnum.STRING));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(FEATURE_TYPE, FieldTypeEnum.STRING));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ALT_ALLELES, FieldTypeEnum.STRING));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(END, FieldTypeEnum.INT));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(SEQ_REGION_NAME, FieldTypeEnum.STRING));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CONSEQUENCE_TYPE, FieldTypeEnum.STRING));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(STRAND, FieldTypeEnum.INT));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(START, FieldTypeEnum.INT));
 		return metadata;
 	}
 }
