@@ -2,6 +2,7 @@ package org.molgenis.omx.importer;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.fail;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -23,6 +24,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.DefaultEntityValidator;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.EntityValidator;
+import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.omx.converters.ValueConverterException;
 import org.molgenis.omx.dataset.DataSetMatrixRepository;
@@ -117,7 +119,7 @@ public class OmxImporterServiceTest
 	@Test
 	public void testImportSampleOmx() throws IOException, ValueConverterException
 	{
-		RepositorySource source = dataService.createFileRepositorySource(loadTestFile("example_omx.xls"));
+		RepositorySource source = dataService.createFileRepositorySource(loadTestFile("example-omx.xls"));
 		importer.doImport(source.getRepositories(), DatabaseAction.ADD_UPDATE_EXISTING);
 
 		assertEquals(dataService.count(DataSet.ENTITY_NAME, new QueryImpl()), 1);
@@ -131,6 +133,60 @@ public class OmxImporterServiceTest
 
 		Entity patient44 = dataService.findOne("celiacsprue", new QueryImpl().eq("Celiac_Individual", "patient44"));
 		assertNotNull(patient44);
+	}
+
+	@Test
+	public void testImportMissingXref() throws IOException, ValueConverterException
+	{
+		try
+		{
+			RepositorySource source = dataService.createFileRepositorySource(loadTestFile("missing-xref.xlsx"));
+			importer.doImport(source.getRepositories(), DatabaseAction.ADD_UPDATE_EXISTING);
+			fail("Should have thrown MolgenisValidationException");
+		}
+		catch (MolgenisValidationException e)
+		{
+			assertEquals(e.getViolations().size(), 1);
+			assertEquals(e.getViolations().iterator().next().getRownr(), 2);
+			assertEquals(e.getViolations().iterator().next().getInvalidValue(), "Klaas");
+			assertEquals(e.getViolations().iterator().next().getViolatedAttribute().getName(), "father");
+		}
+	}
+
+	@Test
+	public void testImportMissingMref() throws IOException, ValueConverterException
+	{
+		try
+		{
+			RepositorySource source = dataService.createFileRepositorySource(loadTestFile("missing-mref.xlsx"));
+			importer.doImport(source.getRepositories(), DatabaseAction.ADD_UPDATE_EXISTING);
+			fail("Should have thrown MolgenisValidationException");
+		}
+		catch (MolgenisValidationException e)
+		{
+			assertEquals(e.getViolations().size(), 1);
+			assertEquals(e.getViolations().iterator().next().getRownr(), 3);
+			assertEquals(e.getViolations().iterator().next().getInvalidValue(), "Jaap,Klaas,Marie");
+			assertEquals(e.getViolations().iterator().next().getViolatedAttribute().getName(), "children");
+		}
+	}
+
+	@Test
+	public void testImportWrongEmailValue() throws IOException, ValueConverterException
+	{
+		try
+		{
+			RepositorySource source = dataService.createFileRepositorySource(loadTestFile("wrong-email-value.xlsx"));
+			importer.doImport(source.getRepositories(), DatabaseAction.ADD_UPDATE_EXISTING);
+			fail("Should have thrown MolgenisValidationException");
+		}
+		catch (MolgenisValidationException e)
+		{
+			assertEquals(e.getViolations().size(), 2);
+			assertEquals(e.getViolations().iterator().next().getRownr(), 2);
+			assertEquals(e.getViolations().iterator().next().getInvalidValue(), "Klaas");
+			assertEquals(e.getViolations().iterator().next().getViolatedAttribute().getName(), "email");
+		}
 	}
 
 	@AfterMethod
