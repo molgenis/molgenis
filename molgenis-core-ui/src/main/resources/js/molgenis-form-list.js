@@ -36,7 +36,7 @@
 			entities.items = [];
 			entities.total = 0;
 		} else {
-			entities = restApi.get(uri, expands, null);
+			entities = restApi.get(uri, {'expand': expands});
 		}
 		
 		var items = [];
