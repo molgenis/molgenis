@@ -57,9 +57,6 @@ public class CosmicServiceAnnotator extends AbstractRepositoryAnnotator implemen
     public static final String START = "start";
     private final DefaultHttpClient httpClient;
 
-	@Autowired
-	DataService dataService;
-
 	public CosmicServiceAnnotator()
 	{
 		httpClient = new DefaultHttpClient();
