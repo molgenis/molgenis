@@ -1,167 +1,39 @@
 (function($, molgenis) {
 	"use strict";
-
-	var resultsTable = null;
-	var pager = null;
-	var featureFilters = {};
-	var selectedFeatures = [];
-	var searchQuery = null;
-	var selectedRepoMetadata = null;
-	var restApi = new molgenis.RestClient();
-	var aggregateView = false;
 	
-	molgenis.getSelectedEntityName = function() {
-		return selectedRepoMetadata.name;
+	var restApi = new molgenis.RestClient();
+
+	var selectedEntityMetaData = null;
+	var dataTable = null;
+	var attributeFilters = {};
+	var selectedAttributes = [];
+	var searchQuery = null;
+	
+	molgenis.createEntityMetaTree = function(entityMetaData, selectedAttributes) {
+		var container = $('#feature-selection');
+		container.tree({
+			'entityMetaData' : entityMetaData,
+			'selectedAttributes' : selectedAttributes,
+			'onAttributeSelect' : function(attribute, selected) {
+				var attributes = container.tree('getSelectedAttributes');
+				$(document).trigger('changeAttributeSelection', {'attributes': attributes});
+			},
+			'onAttributeClick' : function(attribute) {
+				$(document).trigger('clickAttribute', {'attribute': attribute});
+			}
+		});
 	};
-
-	molgenis.createAttributeTree = function(entityUri) {
-		var entityMetaUri = entityUri + "/meta";
-		
-		restApi.getAsync(entityMetaUri, {'expand': ['attributes']}, function(entityMetaData) {
-				selectedRepoMetadata = entityMetaData;
-			
-				var container = $('#feature-selection');
-				
-				// Clean #feature-selection
-				if (container.children('ul').length > 0) {
-					container.dynatree('destroy');
-				}
-				container.empty();
-				
-				// Error message
-				if (!entityMetaData) {
-					container.append("<p>No features available</p>"); 
-					return;
-				}
-				
-				// render tree and open first branch
-				container.dynatree({
-					checkbox : !aggregateView,
-					selectMode : 3,
-					minExpandLevel : 2,
-					debugLevel : 0,
-					children : [{
-						key : entityMetaData,
-						title : entityMetaData.label,
-						icon : false,
-						isFolder : true,
-						isLazy : true,
-						children : createChildren("/api/v1/" + entityMetaData.name + "/meta"
-								, {select : true}, {})
-					}],
-					onLazyRead : function(node) {
-						// workaround for dynatree lazy parent node select bug
-						var opts = node.isSelected() ? {expand : true, select : true} : {};						
-						var children = createChildren(node.data.key, opts, opts);
-						node.setLazyNodeStatus(DTNodeStatus_Ok);
-						node.addChild(children);
-					},
-					onClick : function(node, event) {
-						// target type null is filter icon
-						if ((node.getEventTargetType(event) === "title"
-								|| node.getEventTargetType(event) === "icon" 
-									|| node.getEventTargetType(event) === null)
-							&& !node.data.isFolder)
-						{
-							molgenis.openFeatureFilterDialog(node.data.key);
-						}
-						
-						//Clean the select boxes of the charts designer
-						if (molgenis.charts) 
-						{
-							molgenis.charts.dataexplorer.resetChartDesigners();
-						}
-					},
-					onSelect : function(select, node) {
-						// workaround for dynatree lazy parent node select bug
-						if (select) 
-						{
-							expandNodeRec(node);
-						}
-						onNodeSelectionChange(this.getSelectedNodes());
-					},
-					onPostInit : function() {
-						onNodeSelectionChange(this.getSelectedNodes());
-					}
-				});
-			}
-		);
-					
-		function createChildren(href, featureOpts, protocolOpts) {
-			// FIXME async
-			var children = [];
-			var attributes = restApi.get(href, {'expand': ['attributes']}).attributes;
-			
-			Object.keys(attributes).map(function(prop) {	
-				// compound attributes
-				if(attributes[prop].fieldType === 'COMPOUND'){
-					children.push($.extend({
-						key : attributes[prop]["href"],
-						title : attributes[prop].label,
-						tooltip : attributes[prop].description,
-						isFolder : true,
-						isLazy : protocolOpts.expand != true,
-						children : protocolOpts.expand ? createChildren(
-								attributes[prop]["href"], featureOpts, protocolOpts) : null
-					}, protocolOpts));
-				}
-				else {
-					children.push($.extend({
-						key : attributes[prop].href,
-						title : attributes[prop].label,
-						tooltip : attributes[prop].description,
-						icon : "../../img/filter-bw.png",
-						isFolder : false
-					}, featureOpts));
-				}
+	
+	molgenis.createDataTable = function() {
+		if (selectedAttributes.length > 0) {
+			$('#data-table-container').table({
+				'entityMetaData' : selectedEntityMetaData,
+				'attributes' : selectedAttributes,
+				'query' : molgenis.createEntityQuery()
 			});
-
-		
-			return children;		
-		}
-		
-		function expandNodeRec(node) {
-			if (node.childList == undefined) {
-				node.toggleExpand();
-			} else {
-				$.each(node.childList, function() {
-					expandNodeRec(this);
-				});
-			}
-		}
-		
-		function onNodeSelectionChange(selectedNodes) {
-			function getSiblingPos(node) {
-				var pos = 0;
-				do {
-					node = node.getPrevSibling();
-					if (node == null)
-						break;
-					else
-						++pos;
-				} while (true);
-				return pos;
-			}
-			
-			var sortedNodes = selectedNodes.sort(function(node1, node2) {
-				var diff = node1.getLevel() - node2.getLevel();
-				if (diff == 0) {
-					diff = getSiblingPos(node1.getParent())
-							- getSiblingPos(node2.getParent());
-					if (diff == 0)
-						diff = getSiblingPos(node1) - getSiblingPos(node2);
-				}
-				return diff <= 0 ? -1 : 1;
-			});
-			
-			var sortedFeatures = $.map(sortedNodes, function(node) {
-				return node.data.isFolder || node.data.key == 'more'
-						? null
-						: node.data.key;
-			});
-
-			molgenis.onFeatureSelectionChange(sortedFeatures);
-
+			dataTable = $('#data-table-container');
+		} else {
+			$('#data-table-container').html('No items selected');
 		}
 	};
 	
@@ -172,88 +44,13 @@
 					items.push('<h3>Description</h3><p>' + feature.description + '</p>');
 				}
 				items.push('<h3>Filter:</h3>');
-				var config = featureFilters[attributeUri];
+				var config = attributeFilters[attributeUri];
 				var applyButton = $('<input type="button" class="btn pull-left" value="Apply filter">');
 				var divContainer = molgenis.createGenericFeatureField(items, feature, config, applyButton, attributeUri, false);
 				
 				molgenis.createSpecificFeatureField(items, divContainer, feature, config, applyButton, attributeUri);
 			}
 		);
-	};
-
-	molgenis.onDataSetSelectionChange = function(entityUri) {
-		// reset
-		featureFilters = {};
-		$('#feature-filters p').remove();
-		selectedFeatures = [];
-		searchQuery = null;
-		resultsTable.resetSortRule();
-		$("#observationset-search").val("");
-		$('#data-table-pager').empty();
-		pager = null;
-		molgenis.createAttributeTree(entityUri);
-		molgenis.initializeAggregate(entityUri);
-		molgenis.updateGenomeBrowser(entityUri);
-	};
-
-	molgenis.onFeatureSelectionChange = function(attributeUris) {
-		selectedFeatures = attributeUris;
-		molgenis.updateObservationSetsTable();
-	};
-
-	molgenis.searchObservationSets = function(query) {
-		// Reset
-		resultsTable.resetSortRule();
-		searchQuery = query;
-		molgenis.updateObservationSetsTable();
-	};
-
-	molgenis.updateObservationSetsTable = function() {
-		if (selectedFeatures.length > 0) {
-			molgenis.search(function(searchResponse) {
-				var maxRowsPerPage = resultsTable.getMaxRows();
-				var nrRows = searchResponse.total;
-				resultsTable.build(searchResponse, selectedFeatures, restApi);
-				molgenis.onObservationSetsTableChange(nrRows, maxRowsPerPage);
-			});
-		} else {
-			$('#nrOfDataItems').html('no features selected');
-			$('#data-table-pager').empty();
-			$('#data-table').empty();
-		}
-	};
-
-	molgenis.updateObservationSetsTablePage = function() {
-		if (selectedFeatures.length > 0) {
-			molgenis.search(function(searchResponse) {
-				resultsTable.build(searchResponse, selectedFeatures, restApi);
-			});
-		} else {
-			$('#nrOfDataItems').html('no features selected');
-			$('#data-table-pager').empty();
-			$('#data-table').empty();
-		}
-	};
-
-	molgenis.onObservationSetsTableChange = function(nrRows, maxRowsPerPage) {		
-		molgenis.updateObservationSetsTablePager(nrRows, maxRowsPerPage);
-		molgenis.updateObservationSetsTableHeader(nrRows);
-	};
-
-	molgenis.updateObservationSetsTableHeader = function(nrRows) {
-		if (nrRows == 1)
-			$('#nrOfDataItems').html(nrRows + ' data item found');
-		else
-			$('#nrOfDataItems').html(nrRows + ' data items found');
-	};
-
-	molgenis.updateObservationSetsTablePager = function(nrRows, nrRowsPerPage) {
-		$('#data-table-pager').pager({
-			'nrItems' : nrRows,
-			'nrItemsPerPage' : nrRowsPerPage,
-			'onPageChange' : molgenis.updateObservationSetsTablePage
-		});
-		pager = $('#data-table-pager');
 	};
 
 	//Filter dialog for one feature
@@ -881,7 +678,7 @@
 		$.each(elements, function(index, element) {
 			var attributeUri = $(element).attr('data-molgenis-url');
 			
-			var config = featureFilters[attributeUri];
+			var config = attributeFilters[attributeUri];
 			var applyButton = $('<input type="button" class="btn pull-left" value="Apply filter">');
 			var divContainer = molgenis
 					.createGenericFeatureField(null, attributes[attributeUri],
@@ -897,21 +694,21 @@
 			// TODO implement elegant solution for genome browser specific code
 			if(attribute.name === 'start_nucleotide') dalliance.setLocation(dalliance.chr, featureFilter.values[0], featureFilter.values[1]);
 			if(attribute.name === 'chromosome') dalliance.setLocation(featureFilter.values[0], dalliance.viewStart, dalliance.viewEnd);
-			featureFilters[attributeUri] = featureFilter;
-			molgenis.onFeatureFilterChange(featureFilters);
+			attributeFilters[attributeUri] = featureFilter;
+			molgenis.onFeatureFilterChange(attributeFilters);
 		});
 	};
 
 	molgenis.removeFeatureFilter = function(featureUri) {
-		delete featureFilters[featureUri];
-		molgenis.onFeatureFilterChange(featureFilters);
+		delete attributeFilters[featureUri];
+		molgenis.onFeatureFilterChange(attributeFilters);
 	};
 
 	molgenis.onFeatureFilterChange = function(featureFilters) {
 		molgenis.createFeatureFilterList(featureFilters);
-		molgenis.updateObservationSetsTable();
+		molgenis.createDataTable();
 		if ($('#selectFeature').val() != null) {
-			molgenis.loadAggregate($('#selectFeature').val());
+			molgenis.updateAggregatesTable($('#selectFeature').val());
 		}
 	};
 
@@ -947,30 +744,10 @@
 		});
 	};
 
-	molgenis.search = function(callback) {
-		var attributes = $.map(selectedFeatures, function(attributeUri) {
-			return attributeUri.substring(attributeUri.lastIndexOf('/') + 1);
-		});
-		restApi.getAsync('/api/v1/' + selectedRepoMetadata.name, {'attributes': attributes, 'q': molgenis.createEntityCollectionRequest(true)}, callback);
-	};
-
-	molgenis.createEntityCollectionRequest = function(includeLimitOffset) {
+	molgenis.createEntityQuery = function() {
 		var entityCollectionRequest = {
-			start : null,
-			num : null,
-			q : [],
-			sort: resultsTable.getSortRule()
+			q : []
 		};
-	
-		if (includeLimitOffset) {
-			entityCollectionRequest.num = resultsTable.getMaxRows();
-			if (pager != null) {
-				var page = $('#data-table-pager').pager('getPage');
-				if (page > 1) {
-					entityCollectionRequest.start = (page - 1) * resultsTable.getMaxRows();
-				}
-			}
-		}
 		
 		var count = 0;
 
@@ -984,7 +761,7 @@
 			}
 		}
 
-		$.each(featureFilters, function(featureUri, filter) {
+		$.each(attributeFilters, function(featureUri, filter) {
 			if (count > 0) {
 				entityCollectionRequest.q.push({
 					operator : 'AND'
@@ -1036,23 +813,23 @@
 	};
 	
 	molgenis.createDownloadDataRequest = function() {
-		var entityCollectionRequest = molgenis.createEntityCollectionRequest(false);
+		var entityQuery = molgenis.createEntityQuery();
 		
 		var dataRequest = {
-			entityName : selectedRepoMetadata.name,
+			entityName : selectedEntityMetaData.name,
 			attributeNames: [],
 			query : {
-				rules : [entityCollectionRequest.q]
+				rules : [entityQuery.q]
 			}
 		};
 
-		var sortRule = resultsTable.getSortRule();
-		if (sortRule) {
-			searchRequest.query.sort = sortRule;
+		var query = dataTable.table('getQuery');
+		if (query && query.sort) {
+			searchRequest.query.sort = query.sort;
 		}
 		
-		$.each(selectedFeatures, function() {
-			var feature = restApi.get(this);
+		$.each(selectedAttributes, function() {
+			var feature = this;
 			dataRequest.attributeNames.push(feature.name);
 			if (feature.fieldType === 'XREF' || feature.fieldType === 'MREF')
 				dataRequest.attributeNames.push("key-" + feature.name);
@@ -1061,29 +838,26 @@
 		return dataRequest;
 	};
 
-	molgenis.initializeAggregate = function(entityUri) {
-		var entityMetaUri = entityUri + '/meta';
-		restApi.getAsync(entityMetaUri, {'expand': ['attributes']}, function(entityMetaData) {
-			var selectTag = $('<select id="selectFeature"/>');
-			if(Object.keys(entityMetaData.attributes).length === 0) {
-				selectTag.attr('disabled', 'disabled');
-			} else {
-				$.each(entityMetaData.attributes, function(key, attribute) {
-					if(attribute.fieldType === 'BOOL' || attribute.fieldType === 'CATEGORICAL') {
-						selectTag.append('<option value="' + entityMetaUri + '/' + key + '">' + attribute.label + '</option>');
-					}
-				});
-				$('#feature-select').empty().append(selectTag);
-				molgenis.loadAggregate(selectTag.val());
-				selectTag.chosen();
-				selectTag.change(function() {
-					molgenis.loadAggregate($(this).val());
-				});
-			}
-		});
+	molgenis.createAggregatesTable = function() {
+		var attributeSelect = $('<select id="selectFeature"/>');
+		if(Object.keys(selectedEntityMetaData.attributes).length === 0) {
+			attributeSelect.attr('disabled', 'disabled');
+		} else {
+			$.each(selectedEntityMetaData.attributes, function(key, attribute) {
+				if(attribute.fieldType === 'BOOL' || attribute.fieldType === 'CATEGORICAL') {
+					attributeSelect.append('<option value="' + attribute.href + '">' + attribute.label + '</option>');
+				}
+			});
+			$('#feature-select').empty().append(attributeSelect);
+			molgenis.updateAggregatesTable(attributeSelect.val());
+			attributeSelect.chosen();
+			attributeSelect.change(function() {
+				molgenis.loadAggregate($(this).val());
+			});
+		}
 	};
 
-	molgenis.loadAggregate = function(attributeUri) {
+	molgenis.updateAggregatesTable = function(attributeUri) {
 		$.ajax({
 			type : 'POST',
 			url : molgenis.getContextUrl() + '/aggregate',
@@ -1130,79 +904,166 @@
 	};
 
 	//--BEGIN genome browser--
-	molgenis.updateGenomeBrowser = function(entityUri) {
-		restApi.getAsync(entityUri + '/meta', null, function(entity) {
-			if (entity.name in genomeBrowserDataSets) {
-				document.getElementById('genomebrowser').style.display = 'block';
-				document.getElementById('genomebrowser').style.visibility = 'visible';
-				dalliance.reset();
-				var dallianceTrack = [{
-					name : entity.label,
-					uri : '/das/molgenis/dataset_' + entity.name + '/',
-					desc : "Selected dataset",
-					stylesheet_uri : '/css/selected_dataset-track.xml'
-				}];
-				dalliance.addTier(dallianceTrack[0]);
-				$.each(genomeBrowserDataSets, function(entityName, entityLabel) {
-					if (entityName != molgenis.getSelectedEntityName()) {
-						var dallianceTrack = [{
-							name : entityLabel,
-							uri : '/das/molgenis/dataset_' + entityName + '/',
-							desc : "unselected dataset",
-							stylesheet_uri : '/css/not_selected_dataset-track.xml'
-						}];
-						dalliance.addTier(dallianceTrack[0]);
-					}
-				});
-			} else {
-				document.getElementById('genomebrowser').style.display = 'none';
-			}	
-		});
+	molgenis.updateGenomeBrowser = function() {
+		if (selectedEntityMetaData.name in genomeBrowserDataSets) {
+			document.getElementById('genomebrowser').style.display = 'block';
+			document.getElementById('genomebrowser').style.visibility = 'visible';
+			dalliance.reset();
+			var dallianceTrack = [{
+				name : selectedEntityMetaData.label,
+				uri : '/das/molgenis/dataset_' + selectedEntityMetaData.name + '/',
+				desc : "Selected dataset",
+				stylesheet_uri : '/css/selected_dataset-track.xml'
+			}];
+			dalliance.addTier(dallianceTrack[0]);
+			$.each(genomeBrowserDataSets, function(entityName, entityLabel) {
+				if (entityName != selectedEntityMetaData.name) {
+					var dallianceTrack = [{
+						name : entityLabel,
+						uri : '/das/molgenis/dataset_' + entityName + '/',
+						desc : "unselected dataset",
+						stylesheet_uri : '/css/not_selected_dataset-track.xml'
+					}];
+					dalliance.addTier(dallianceTrack[0]);
+				}
+			});
+		} else {
+			document.getElementById('genomebrowser').style.display = 'none';
+		}
 	};
 
 	molgenis.setDallianceFilter = function() {
-		var entityName = molgenis.getSelectedEntityName();
-		restApi.getAsync('/api/v1/' + entityName + '/meta', null, function(entity) {
-			$.each(entity.attributes, function(key, attribute) {
-				if(key === 'start_nucleotide') {
-					molgenis.updateFeatureFilter(attribute.href, {
-						name : attribute.label,
-						identifier : attribute.name,
-						type : attribute.fieldType,
-						range : true,
-						values : [Math.floor(dalliance.viewStart).toString(), Math.floor(dalliance.viewEnd).toString()]
-					});
-				} else if(key === 'chromosome') {
-					molgenis.updateFeatureFilter(attribute.href, {
-						name : attribute.label,
-						identifier : attribute.name,
-						type : attribute.fieldType,
-						values : [dalliance.chr]
-					});
-				}
-			});
+		$.each(selectedEntityMetaData.attributes, function(key, attribute) {
+			if(key === 'start_nucleotide') {
+				molgenis.updateFeatureFilter(attribute.href, {
+					name : attribute.label,
+					identifier : attribute.name,
+					type : attribute.fieldType,
+					range : true,
+					values : [Math.floor(dalliance.viewStart).toString(), Math.floor(dalliance.viewEnd).toString()]
+				});
+			} else if(key === 'chromosome') {
+				molgenis.updateFeatureFilter(attribute.href, {
+					name : attribute.label,
+					identifier : attribute.name,
+					type : attribute.fieldType,
+					values : [dalliance.chr]
+				});
+			}
 		});
 	};
 	//--END genome browser--
 
 	// on document ready
 	$(function() {
+		$(document).on('changeEntity', function(e, entityUri) {
+			// reset			
+			selectedEntityMetaData = null;
+			dataTable = null;
+			attributeFilters = {};
+			selectedAttributes = [];
+			searchQuery = null;
+			
+			$('#feature-filters p').remove();
+			$("#observationset-search").val("");
+			$('#data-table-pager').empty();
+			
+			restApi.getAsync(entityUri + '/meta', {'expand': ['attributes']}, function(entityMetaData) {
+				selectedEntityMetaData = entityMetaData;
+				selectedAttributes = $.map(entityMetaData.attributes, function(attribute) {
+					return attribute.fieldType !== 'COMPOUND' ? attribute : null;
+				});
+				
+				$(document).trigger('changeAttributeSelection', {'attributes': selectedAttributes});
+				molgenis.createEntityMetaTree(entityMetaData, selectedAttributes);
+			});
+		});
+		
+		$(document).on('changeAttributeSelection', function(e, data) {
+			selectedAttributes = data.attributes;
+			
+			switch($("#tabs li.active").attr('id')) {
+				case 'tab-data':
+					if(dataTable)
+						dataTable.table('setSelectedAttributes', data.attributes);
+					else
+						molgenis.createDataTable();
+					molgenis.updateGenomeBrowser();
+					break;
+				case 'tab-aggregates':
+					molgenis.updateAggregatesTable();
+					break;
+				case 'tab-charts':
+					break;
+			}
+		});
+				
+		$(document).on('changeAttributeFilter', function(e, data) {
+			attributeFilters = data.attributeFilters;
+			
+			switch($("#tabs li.active").attr('id')) {
+				case 'tab-data':
+					molgenis.updateDataTable();
+					break;
+				case 'tab-aggregates':
+					molgenis.updateAggregatesTable();
+					break;
+				case 'tab-charts':
+					break;
+			}
+		});
+		
+		$(document).on('changeEntitySearchQuery', function(e, entitySearchQuery) {
+			searchQuery = entitySearchQuery;
+			
+			switch($("#tabs li.active").attr('id')) {
+				case 'tab-data':
+					if(dataTable)
+						dataTable.table('setQuery', molgenis.createEntityQuery());
+					else
+						molgenis.createDataTable();
+					break;
+				case 'tab-aggregates':
+					molgenis.updateAggregatesTable();
+					break;
+				case 'tab-charts':
+					break;
+			}
+		});
+		
+		$(document).on('clickAttribute', function(e, data) {
+			molgenis.openFeatureFilterDialog(data.attribute.href);
+			
+			switch($("#tabs li.active").attr('id')) {
+				case 'tab-charts':
+					//Clean the select boxes of the charts designer
+					if (molgenis.charts) 
+					{
+						molgenis.charts.dataexplorer.resetChartDesigners();
+					}
+					break;
+			}
+		});
+	});
+	
+	$(function() {
 		// use chosen plugin for data set select
 		$('#dataset-select').chosen();
 		$('#dataset-select').change(function() {
-			molgenis.onDataSetSelectionChange($(this).val());
+			$(document).trigger('changeEntity', $(this).val());
 		});
-			
-		resultsTable = new molgenis.ResultsTable();
 
-		$('a[data-toggle="tab"][href="#dataset-aggregate-container"]').on('shown', function(e) {
-			molgenis.initializeAggregate($('#dataset-select').val());
+		$('a[data-toggle="tab"][href="#dataset-data-container"]').on('show', function(e) {
+			molgenis.createDataTable();
+		});
+		$('a[data-toggle="tab"][href="#dataset-aggregate-container"]').on('show', function(e) {
+			molgenis.createAggregatesTable();
 		});
 
 		$("#observationset-search").focus();
 		
 		$("#observationset-search").change(function(e) {
-			molgenis.searchObservationSets($(this).val());
+			$(document).trigger('changeEntitySearchQuery', $(this).val());
 		});
 
 		$('#wizard-button').click(function() {
