@@ -134,7 +134,7 @@ public class OmimHpoAnnotator extends LocusAnnotator
 				loci.add(l);
 			}
 
-			List<HGNCLoc> hgncLocs = getHgncLocs();
+			HashMap<String, HGNCLoc> hgncLocs = getHgncLocs();
 			List<String> geneSymbols = locationToHGNC(hgncLocs, loci);
 			List<HPOTerm> hpoTerms = hpoTerms();
 			List<OMIMTerm> omimTerms = omimTerms();
@@ -300,19 +300,19 @@ public class OmimHpoAnnotator extends LocusAnnotator
 	 * @return
 	 * @throws IOException
 	 */
-	public static List<HGNCLoc> getHgncLocs() throws IOException
+	public static HashMap<String, HGNCLoc> getHgncLocs() throws IOException
 	{
 		ArrayList<String> geneLocs = readLinesFromURL(
 				"https://molgenis26.target.rug.nl/downloads/5gpm/GRCh37p13_HGNC_GeneLocations_noPatches.tsv",
 				"GRCh37p13_HGNC_GeneLocations_noPatches.tsv");
-		List<HGNCLoc> res = new ArrayList<HGNCLoc>();
+        HashMap<String, HGNCLoc> res = new HashMap<String, HGNCLoc>();
 		for (String s : geneLocs)
 		{
 			String[] split = s.split("\t");
 			HGNCLoc h = new HGNCLoc(split[0], Long.parseLong(split[1]), Long.parseLong(split[2]), split[3]);
 			if (h.getChrom().matches("[0-9]+|X"))
 			{
-				res.add(h);
+				res.put(h.getHgnc(), h);
 			}
 		}
 		return res;
@@ -410,13 +410,13 @@ public class OmimHpoAnnotator extends LocusAnnotator
 	//
 	// for each locus in the list, get the HGNC symbol in the output list
 	//
-	public static List<String> locationToHGNC(List<HGNCLoc> hgncLocs, List<Locus> loci) throws Exception
+	public static List<String> locationToHGNC(HashMap<String, HGNCLoc> hgncLocs, List<Locus> loci) throws Exception
 	{
 		List<String> hgncSymbols = new ArrayList<String>();
 		for (Locus l : loci)
 		{
 			boolean variantMapped = false;
-			for (HGNCLoc h : hgncLocs)
+			for (HGNCLoc h : hgncLocs.values())
 			{
 				if (h.getChrom().equals(l.getChrom()) && l.getPos() >= (h.getStart() - 5)
 						&& l.getPos() <= (h.getEnd() + 5))
@@ -447,4 +447,26 @@ public class OmimHpoAnnotator extends LocusAnnotator
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_ALL, MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		return metadata;
 	}
+
+    public static void main(String [ ] args) throws Exception
+    {
+        //includes a gene without HGNC symbol, and a gene not related to OMIM/HPO terms
+        List<Locus> loci = new ArrayList<Locus>(Arrays.asList(new Locus("2", 58453844l), new Locus("2", 71892329l), new Locus("2", 73679116l), new Locus("10", 112360316l), new Locus("11", 2017661l), new Locus("1", 18151726l), new Locus("1", -1l), new Locus("11", 6637740l)));
+
+        List<Entity> inputs = new ArrayList<Entity>();
+        for(Locus l : loci)
+        {
+            HashMap<String, Object> inputMap = new HashMap<String, Object>();
+            inputMap.put(CHROMOSOME, l.getChrom());
+            inputMap.put(POSITION, l.getPos());
+            inputs.add(new MapEntity(inputMap));
+        }
+
+        Iterator<Entity> res = new OmimHpoAnnotator().annotate(inputs.iterator());
+        while(res.hasNext())
+        {
+            System.out.println(res.next().toString());
+        }
+
+    }
 }
