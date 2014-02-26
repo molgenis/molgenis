@@ -110,7 +110,7 @@ public class DbnsfpGeneServiceAnnotator implements RepositoryAnnotator,  Applica
 
 		try
 		{
-			List<HGNCLoc> hgncLocs = OmimHpoAnnotator.getHgncLocs();
+			HashMap<String, HGNCLoc> hgncLocs = OmimHpoAnnotator.getHgncLocs();
 
 			entityIterator: while (source.hasNext())
 			{
