@@ -81,18 +81,19 @@ public class KeggAnnotator extends LocusAnnotator {
                 loci.add(l);
             }
 
-            List<HGNCLoc> hgncLocs = OmimHpoAnnotator.getHgncLocs();
+            HashMap<String, HGNCLoc> hgncLocs = OmimHpoAnnotator.getHgncLocs();
             List<String> geneSymbols = OmimHpoAnnotator.locationToHGNC(hgncLocs, loci);
             Map<String, KeggGene> keggGenes = getKeggGenes();
             Map<String, String> hgncToKeggGeneId = hgncToKeggGeneId(hgncLocs, keggGenes);
+            Map<String, ArrayList<String>> keggPathwayGenes = getKeggPathwayGenes();
+            Map<String, ArrayList<String>> keggGenePathways = getKeggGenePathways(keggPathwayGenes);
+            Map<String, String> pathwayInfo = getKeggPathwayInfo();
 
             for(int i=0; i<loci.size();i++)
             {
 
                 Locus l = loci.get(i);
                 String geneSymbol = geneSymbols.get(i);
-
-
 
                 if(geneSymbol != null)
                 {
@@ -101,7 +102,21 @@ public class KeggAnnotator extends LocusAnnotator {
                     resultMap.put(CHROMOSOME, l.getChrom());
                     resultMap.put(POSITION, l.getPos());
 
+                    resultMap.put(KEGG_GENE_ID, hgncToKeggGeneId.get(geneSymbol));
 
+                    StringBuilder sb = new StringBuilder();
+                    for(String pathwayId : keggGenePathways.get(geneSymbol)){
+                        sb.append(pathwayId + ", ");
+                    }
+                    sb.delete(sb.length()-2, sb.length());
+                    resultMap.put(KEGG_PATHWAYS_IDS, sb.toString());
+
+                    sb = new StringBuilder();
+                    for(String pathwayId : keggGenePathways.get(geneSymbol)){
+                        sb.append(pathwayInfo.get(pathwayId) + ", ");
+                    }
+                    sb.delete(sb.length()-2, sb.length());
+                    resultMap.put(KEGG_PATHWAYS_NAMES, sb.toString());
 
                     results.add(new MapEntity(resultMap));
                 }
@@ -144,6 +159,33 @@ public class KeggAnnotator extends LocusAnnotator {
         return res;
     }
 
+    /**
+     * Convert map of (pathway -> genes) to (gene -> pathways)
+     * @param pathwayGenes
+     * @return
+     */
+    public static Map<String, ArrayList<String>> getKeggGenePathways(Map<String, ArrayList<String>> pathwayGenes)
+    {
+        Map<String, ArrayList<String>> res = new HashMap<String, ArrayList<String>>();
+
+        for(String pathwayId : pathwayGenes.keySet())
+        {
+            for(String geneId : pathwayGenes.get(pathwayId))
+            {
+                if(res.containsKey(geneId))
+                {
+                    res.get(geneId).add(pathwayId);
+                }
+                else
+                {
+                    ArrayList<String> list = new ArrayList<String>();
+                    list.add(pathwayId);
+                    res.put(geneId, list);
+                }
+            }
+        }
+        return  res;
+    }
 
     //
     // KEGG pathway and gene info
@@ -203,7 +245,7 @@ public class KeggAnnotator extends LocusAnnotator {
     //
     // map HGNC to a KeggGene identifier
     //
-    public static Map<String, String> hgncToKeggGeneId(List<HGNCLoc> hgncLocs, Map<String, KeggGene> keggGenes) throws Exception {
+    public static Map<String, String> hgncToKeggGeneId(HashMap<String, HGNCLoc> hgncLocs, Map<String, KeggGene> keggGenes) throws Exception {
         Map<String, String> res = new HashMap<String, String>();
 
         for(String keggId : keggGenes.keySet())
@@ -212,7 +254,7 @@ public class KeggAnnotator extends LocusAnnotator {
 
             for(String symbol : k.getSymbols())
             {
-                if(hgncLocs.contains(symbol))
+                if(hgncLocs.containsKey(symbol))
                 {
                     res.put(symbol, keggId);
                     break;
@@ -221,9 +263,9 @@ public class KeggAnnotator extends LocusAnnotator {
         }
 
         int mapped = 0;
-        for(HGNCLoc hgnc : hgncLocs)
+        for(String hgnc : hgncLocs.keySet())
         {
-            if(res.containsKey(hgnc.getHgnc()))
+            if(res.containsKey(hgnc))
             {
                 mapped++;
             }
