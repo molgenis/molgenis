@@ -80,40 +80,40 @@ public class CosmicServiceAnnotatorTest
 	}
 
 	@Test
-	public void annotate() throws IllegalStateException, IOException
+	public void annotateTest() throws IllegalStateException, IOException
 	{
 		List<Entity> expectedList = new ArrayList<Entity>();
 		Map<String, Object> resultMap1 = new LinkedHashMap<String, Object>();
-		resultMap1.put("ID", "COSM911918");
-		resultMap1.put("feature_type", "somatic_variation");
-		resultMap1.put("alt_alleles", "C,A");
-		resultMap1.put("end", 69345);
-		resultMap1.put("seq_region_name", "1");
-		resultMap1.put("consequence_type", "synonymous_variant");
-		resultMap1.put("strand", 1);
-		resultMap1.put("start", 69345);
+		resultMap1.put(CosmicServiceAnnotator.ID, "COSM911918");
+		resultMap1.put(CosmicServiceAnnotator.FEATURE_TYPE, "somatic_variation");
+		resultMap1.put(CosmicServiceAnnotator.ALT_ALLELES, "C,A");
+		resultMap1.put(CosmicServiceAnnotator.END, 69345);
+		resultMap1.put(CosmicServiceAnnotator.SEQ_REGION_NAME, "1");
+		resultMap1.put(CosmicServiceAnnotator.CONSEQUENCE_TYPE, "synonymous_variant");
+		resultMap1.put(CosmicServiceAnnotator.STRAND, 1);
+		resultMap1.put(CosmicServiceAnnotator.START, 69345);
 		resultMap1.put(CosmicServiceAnnotator.ENSEMBLE_ID, "ENSG00000186092");
 
 		Map<String, Object> resultMap2 = new LinkedHashMap<String, Object>();
-		resultMap2.put("ID", "COSM426644");
-		resultMap2.put("feature_type", "somatic_variation");
-		resultMap2.put("alt_alleles", "G,T");
-		resultMap2.put("end", 69523);
-		resultMap2.put("seq_region_name", "1");
-		resultMap2.put("consequence_type", "missense_variant");
-		resultMap2.put("strand", 1);
-		resultMap2.put("start", 69523);
+		resultMap2.put(CosmicServiceAnnotator.ID, "COSM426644");
+		resultMap2.put(CosmicServiceAnnotator.FEATURE_TYPE, "somatic_variation");
+		resultMap2.put(CosmicServiceAnnotator.ALT_ALLELES, "G,T");
+		resultMap2.put(CosmicServiceAnnotator.END, 69523);
+		resultMap2.put(CosmicServiceAnnotator.SEQ_REGION_NAME, "1");
+		resultMap2.put(CosmicServiceAnnotator.CONSEQUENCE_TYPE, "missense_variant");
+		resultMap2.put(CosmicServiceAnnotator.STRAND, 1);
+		resultMap2.put(CosmicServiceAnnotator.START, 69523);
 		resultMap2.put(CosmicServiceAnnotator.ENSEMBLE_ID, "ENSG00000186092");
 
 		Map<String, Object> resultMap3 = new LinkedHashMap<String, Object>();
-		resultMap3.put("ID", "COSM75742");
-		resultMap3.put("feature_type", "somatic_variation");
-		resultMap3.put("alt_alleles", "G,A");
-		resultMap3.put("end", 69538);
-		resultMap3.put("seq_region_name", "1");
-		resultMap3.put("consequence_type", "missense_variant");
-		resultMap3.put("strand", 1);
-		resultMap3.put("start", 69538);
+		resultMap3.put(CosmicServiceAnnotator.ID, "COSM75742");
+		resultMap3.put(CosmicServiceAnnotator.FEATURE_TYPE, "somatic_variation");
+		resultMap3.put(CosmicServiceAnnotator.ALT_ALLELES, "G,A");
+		resultMap3.put(CosmicServiceAnnotator.END, 69538);
+		resultMap3.put(CosmicServiceAnnotator.SEQ_REGION_NAME, "1");
+		resultMap3.put(CosmicServiceAnnotator.CONSEQUENCE_TYPE, "missense_variant");
+		resultMap3.put(CosmicServiceAnnotator.STRAND, 1);
+		resultMap3.put(CosmicServiceAnnotator.START, 69538);
 		resultMap3.put(CosmicServiceAnnotator.ENSEMBLE_ID, "ENSG00000186092");
 
 		Entity expectedEntity1 = new MapEntity(resultMap1);
@@ -151,9 +151,57 @@ public class CosmicServiceAnnotatorTest
 
 		Iterator<Entity> results = annotator.annotate(input.iterator());
 
-		assertEquals(results.next().get("ID"), expectedEntity1.get("ID"));
-		assertEquals(results.next().get("ID"), expectedEntity2.get("ID"));
-		assertEquals(results.next().get("ID"), expectedEntity3.get("ID"));
+		Entity resultEntity = results.next();
+		assertEquals(resultEntity.get(CosmicServiceAnnotator.ID), expectedEntity1.get(CosmicServiceAnnotator.ID));
+		assertEquals(resultEntity.get(CosmicServiceAnnotator.ENSEMBLE_ID),
+				expectedEntity1.get(CosmicServiceAnnotator.ENSEMBLE_ID));
+		assertEquals(resultEntity.get(CosmicServiceAnnotator.NAME), expectedEntity1.get(CosmicServiceAnnotator.NAME));
+		assertEquals(resultEntity.get(CosmicServiceAnnotator.SEQ_REGION_NAME),
+				expectedEntity1.get(CosmicServiceAnnotator.SEQ_REGION_NAME));
+		assertEquals(resultEntity.get(CosmicServiceAnnotator.ALT_ALLELES),
+				expectedEntity1.get(CosmicServiceAnnotator.ALT_ALLELES));
+		assertEquals(resultEntity.get(CosmicServiceAnnotator.CONSEQUENCE_TYPE),
+				expectedEntity1.get(CosmicServiceAnnotator.CONSEQUENCE_TYPE));
+		assertEquals(resultEntity.get(CosmicServiceAnnotator.END), expectedEntity1.get(CosmicServiceAnnotator.END));
+		assertEquals(resultEntity.get(CosmicServiceAnnotator.FEATURE_TYPE),
+				expectedEntity1.get(CosmicServiceAnnotator.FEATURE_TYPE));
+		assertEquals(resultEntity.get(CosmicServiceAnnotator.START), expectedEntity1.get(CosmicServiceAnnotator.START));
+		assertEquals(resultEntity.get(CosmicServiceAnnotator.STRAND),
+				expectedEntity1.get(CosmicServiceAnnotator.STRAND));
+		resultEntity = results.next();
+		assertEquals(resultEntity.get(CosmicServiceAnnotator.ID), expectedEntity2.get(CosmicServiceAnnotator.ID));
+		assertEquals(resultEntity.get(CosmicServiceAnnotator.ENSEMBLE_ID),
+				expectedEntity2.get(CosmicServiceAnnotator.ENSEMBLE_ID));
+		assertEquals(resultEntity.get(CosmicServiceAnnotator.NAME), expectedEntity2.get(CosmicServiceAnnotator.NAME));
+		assertEquals(resultEntity.get(CosmicServiceAnnotator.SEQ_REGION_NAME),
+				expectedEntity2.get(CosmicServiceAnnotator.SEQ_REGION_NAME));
+		assertEquals(resultEntity.get(CosmicServiceAnnotator.ALT_ALLELES),
+				expectedEntity2.get(CosmicServiceAnnotator.ALT_ALLELES));
+		assertEquals(resultEntity.get(CosmicServiceAnnotator.CONSEQUENCE_TYPE),
+				expectedEntity2.get(CosmicServiceAnnotator.CONSEQUENCE_TYPE));
+		assertEquals(resultEntity.get(CosmicServiceAnnotator.END), expectedEntity2.get(CosmicServiceAnnotator.END));
+		assertEquals(resultEntity.get(CosmicServiceAnnotator.FEATURE_TYPE),
+				expectedEntity2.get(CosmicServiceAnnotator.FEATURE_TYPE));
+		assertEquals(resultEntity.get(CosmicServiceAnnotator.START), expectedEntity2.get(CosmicServiceAnnotator.START));
+		assertEquals(resultEntity.get(CosmicServiceAnnotator.STRAND),
+				expectedEntity2.get(CosmicServiceAnnotator.STRAND));
+		resultEntity = results.next();
+		assertEquals(resultEntity.get(CosmicServiceAnnotator.ID), expectedEntity3.get(CosmicServiceAnnotator.ID));
+		assertEquals(resultEntity.get(CosmicServiceAnnotator.ENSEMBLE_ID),
+				expectedEntity3.get(CosmicServiceAnnotator.ENSEMBLE_ID));
+		assertEquals(resultEntity.get(CosmicServiceAnnotator.NAME), expectedEntity3.get(CosmicServiceAnnotator.NAME));
+		assertEquals(resultEntity.get(CosmicServiceAnnotator.SEQ_REGION_NAME),
+				expectedEntity3.get(CosmicServiceAnnotator.SEQ_REGION_NAME));
+		assertEquals(resultEntity.get(CosmicServiceAnnotator.ALT_ALLELES),
+				expectedEntity3.get(CosmicServiceAnnotator.ALT_ALLELES));
+		assertEquals(resultEntity.get(CosmicServiceAnnotator.CONSEQUENCE_TYPE),
+				expectedEntity3.get(CosmicServiceAnnotator.CONSEQUENCE_TYPE));
+		assertEquals(resultEntity.get(CosmicServiceAnnotator.END), expectedEntity3.get(CosmicServiceAnnotator.END));
+		assertEquals(resultEntity.get(CosmicServiceAnnotator.FEATURE_TYPE),
+				expectedEntity3.get(CosmicServiceAnnotator.FEATURE_TYPE));
+		assertEquals(resultEntity.get(CosmicServiceAnnotator.START), expectedEntity3.get(CosmicServiceAnnotator.START));
+		assertEquals(resultEntity.get(CosmicServiceAnnotator.STRAND),
+				expectedEntity3.get(CosmicServiceAnnotator.STRAND));
 	}
 
 	@Test
