@@ -521,6 +521,14 @@ function toggleCssClass(cssClass) {
 	}
 }
 
+function uncapitalize(s) {
+	if (s && s.length > 0) {
+		return s.charAt(0).toLowerCase() + s.slice(1);
+	}
+	
+	return s;
+}
+
 function showSpinner(callback) {
 	var spinner = $('#spinner');
 	if (spinner.length === 0) {
