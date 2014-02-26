@@ -8,7 +8,7 @@
 		// reset
 		restApi.getAsync(dataSetUri, null, null, function(dataSet) {
 			selectedDataSet = dataSet;
-			
+			alert(selectedDataSet.name);
 		});
 	};
 
@@ -21,13 +21,18 @@
 				selectedDataSet = dataSet;
 			});
 			
-			url: molgenis.getContextUrl();
-			molgenis.onDataSetSelectionChange($(this).val());		
+			molgenis.onDataSetSelectionChange($(this).val());
+			
 		});
 		
 		// fire event handler
 		$('#dataset-select').change();
-				
+			
+		$('#createDataSet').click(function() {
+			var inputFile = $('#file-input-field').val();
+			url:  molgenis.getContextUrl() + '/create-new-dataset-from-tsv';
+		});
+		
 		$("#disabled-tooltip").tooltip();
 		$("#rootwizard").bootstrapWizard({'tabClass': 'nav nav-tabs'});
 			

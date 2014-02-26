@@ -17,6 +17,7 @@ import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.omx.annotation.OmxDataSetAnnotator;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.search.DataSetsIndexer;
@@ -29,14 +30,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.SessionAttributes;
-
 import com.google.common.collect.Lists;
 
 /**
@@ -54,7 +52,7 @@ public class AnnotatorsUIController extends MolgenisPluginController
 
 	private static final String ID = "annotateUI";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
-
+	public int initCount = 0;
 	private final AnnotatorsUIService pluginAnnotatorsUIService;
 
 	@Autowired
@@ -71,6 +69,9 @@ public class AnnotatorsUIController extends MolgenisPluginController
 
 	@Autowired
 	DataSetsIndexer indexer;
+	
+	@Autowired
+	EntityValidator entityValidator;
 
 	@Autowired
 	public AnnotatorsUIController(AnnotatorsUIService pluginAnnotatorsUIService)
@@ -84,6 +85,9 @@ public class AnnotatorsUIController extends MolgenisPluginController
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(String selectedDataSetIdentifier, Model model)
 	{
+		++initCount;
+		System.out.println(initCount);
+
 		List<DataSet> dataSets = Lists.newArrayList(dataService.findAll(DataSet.ENTITY_NAME,
 				new QueryImpl().sort(new Sort(Direction.DESC, DataSet.STARTTIME)), DataSet.class));
 
@@ -121,10 +125,10 @@ public class AnnotatorsUIController extends MolgenisPluginController
 
 		return "view-annotation-ui";
 	}
-	
+
 	@RequestMapping(value = "/create-new-dataset-from-tsv", headers = "content-type=multipart/*", method = RequestMethod.POST)
-	public String handleVcfInput(@RequestParam("file-input-field")
-	Part part, @RequestParam("dataset-name")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void handleVcfInput(@RequestParam("file-input-field") Part part, @RequestParam("dataset-name")
 	String submittedDataSetName, Model model) throws IOException
 	{
 		if (!part.equals(null) && part.getSize() > 5000000)
@@ -140,16 +144,15 @@ public class AnnotatorsUIController extends MolgenisPluginController
 		fileStore.store(part.getInputStream(), file);
 
 		pluginAnnotatorsUIService.tsvToOmxRepository(file, model, submittedDataSetName);
-
-		return "view-annotation-ui";
 	}
 
 	@RequestMapping(value = "/execute-annotation-app", method = RequestMethod.POST)
 	public String filterMyVariants(@RequestParam(value = "annotatorNames", required = false)
-	String[] annotatorNames, Model model, String dataSetName)
+	String[] annotatorNames, Model model, @RequestParam(value = "dataSetIdentifier")
+	String dataSetIdentifier)
 	{
-		OmxDataSetAnnotator omxDataSetAnnotator = new OmxDataSetAnnotator(dataService, searchService, indexer, null);
-		Repository repository = dataService.getRepositoryByEntityName(dataSetName);
+		OmxDataSetAnnotator omxDataSetAnnotator = new OmxDataSetAnnotator(dataService, searchService, indexer, entityValidator);
+		Repository repository = dataService.getRepositoryByEntityName(dataSetIdentifier);
 
 		if (annotatorNames != null && repository != null)
 		{
@@ -158,6 +161,11 @@ public class AnnotatorsUIController extends MolgenisPluginController
 				RepositoryAnnotator annotator = annotationService.getAnnotatorByName(annotatorName);
 				if (annotator != null)
 				{
+					// FIXME do something about the this indexer problem
+					while (indexer.isIndexingRunning())
+					{
+					}
+
 					omxDataSetAnnotator.annotate(annotator, repository, true);
 				}
 				else
@@ -176,17 +184,21 @@ public class AnnotatorsUIController extends MolgenisPluginController
 
 	private void setMapOfAnnotators(Model model, DataSet selectedDataSet)
 	{
-		Repository repo = dataService.getRepositoryByEntityName(selectedDataSet.getIdentifier());
-
-		Map<String, Boolean> mapOfAnnotators = new HashMap<String, Boolean>();
-		for (RepositoryAnnotator annotator : annotationService.getAllAnnotators())
+		if (selectedDataSet != null)
 		{
-			mapOfAnnotators.put(annotator.getName(), annotator.canAnnotate(repo));
-		}
 
-		model.addAttribute("allAnnotators", mapOfAnnotators);
+			Repository repo = dataService.getRepositoryByEntityName(selectedDataSet.getIdentifier());
+
+			Map<String, Boolean> mapOfAnnotators = new HashMap<String, Boolean>();
+			for (RepositoryAnnotator annotator : annotationService.getAllAnnotators())
+			{
+				mapOfAnnotators.put(annotator.getName(), annotator.canAnnotate(repo));
+			}
+
+			model.addAttribute("allAnnotators", mapOfAnnotators);
+		}
 	}
-	
+
 	@ExceptionHandler(RuntimeException.class)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

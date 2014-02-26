@@ -19,11 +19,13 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.RepositoryAnnotator;
+import org.molgenis.data.omx.OmxRepository;
 import org.molgenis.data.support.AbstractEntity;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.generators.EntityMetaDataGen;
 import org.molgenis.omx.converters.ValueConverter;
 import org.molgenis.omx.converters.ValueConverterException;
@@ -34,6 +36,7 @@ import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.observ.value.Value;
 import org.molgenis.omx.search.DataSetsIndexer;
+import org.molgenis.search.SearchService;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -53,10 +56,16 @@ public class AnnotatorsUIServiceImpl implements AnnotatorsUIService
 	DataService dataService;
 
 	@Autowired
+	SearchService searchService;
+	
+	@Autowired
 	FileStore fileStore;
 
 	@Autowired
 	DataSetsIndexer indexer;
+	
+	@Autowired
+	EntityValidator entityValidator;
 
 	@Override
 	public void tsvToOmxRepository(String file, Model model, String submittedDataSetName)
@@ -103,6 +112,7 @@ public class AnnotatorsUIServiceImpl implements AnnotatorsUIService
 
 			// Index the newly created dataSet, this way its visible in the data explorer
 			indexResultDataSet(dataSet);
+			dataService.addRepository(new OmxRepository(dataService, searchService, dataSet.getIdentifier(), entityValidator));
 		}
 		catch (ValueConverterException e)
 		{

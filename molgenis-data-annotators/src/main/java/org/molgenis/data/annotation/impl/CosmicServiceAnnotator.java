@@ -46,7 +46,7 @@ public class CosmicServiceAnnotator extends AbstractRepositoryAnnotator implemen
 	// ensembl service is dependant on this ID when the web service is called
 	// If ensemblId is not in a data set, the web service cannot be used
 	public static final String ENSEMBLE_ID = "ensemblId";
-	public static final String NAME = "Ensemble2Cosmic";
+	public static final String NAME = "Cosmic";
     public static final String ID = "ID";
     public static final String FEATURE_TYPE = "feature_type";
     public static final String ALT_ALLELES = "alt_alleles";
