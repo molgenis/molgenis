@@ -174,8 +174,7 @@
 				items.push('<h3>Filter:</h3>');
 				var config = featureFilters[attributeUri];
 				var applyButton = $('<input type="button" class="btn pull-left" value="Apply filter">');
-				var divContainer = molgenis.createGenericFeatureField(items, feature, config, applyButton, attributeUri, false);
-				
+				var divContainer = molgenis.createGenericFeatureField(feature, config, applyButton, false);
 				molgenis.createSpecificFeatureField(items, divContainer, feature, config, applyButton, attributeUri);
 			}
 		);
@@ -392,31 +391,6 @@
 				});
 				break;
 			case "CATEGORICAL" :
-				if (config && config.values.length > 0) {
-					$(applyButton).prop('disabled', false);
-				} else {
-					$(applyButton).prop('disabled', true);
-				}
-				$('.cat-value').live('change', function() {
-					if ($('.cat-value:checked').length > 0) {
-						applyButton.removeAttr('disabled');
-					} else {
-						$(applyButton).prop('disabled', true);
-					}
-				});
-	
-				applyButton.click(function() {
-					molgenis.updateFeatureFilter(featureUri, {
-						name : attribute.label,
-						identifier : attribute.name,
-						type : attribute.fieldType,
-						values : $.makeArray($('.cat-value:checked').map(
-								function() {
-									return $(this).val();
-								}))
-					});
-					$('.feature-filter-dialog').dialog('close');
-				});
 				break;
 			default :
 				return;
@@ -467,10 +441,13 @@
 	};
 
 	//Generic part for filter fields
-	molgenis.createGenericFeatureField = function(items, attribute, config, applyButton, featureUri, wizard) {
+	//molgenis.createGenericFeatureField = function(items, attribute, config, applyButton, featureUri, wizard) {
+	molgenis.createGenericFeatureField = function(attributeMetaData, config, applyButton, wizard) {
+		//TODO JJ remove featureUri because you have already the info in the attribute object
+		var featureUri = attributeMetaData.href;
 		var divContainer = $('<div />');
 		var filter = null;
-		switch (attribute.fieldType) {
+		switch (attributeMetaData.fieldType) {
 			case "HTML" :
 			case "MREF" :
 			case "XREF" :
@@ -480,22 +457,22 @@
 			case "STRING" :
 				if (config == null) {
 					filter = $('<input type="text" id="text_'
-							+ attribute.name + '">');
+							+ attributeMetaData.name + '">');
 				} else {
 	
 					filter = $('<input type="text" id="text_'
-							+ attribute.name
+							+ attributeMetaData.name
 							+ '" placeholder="filter text" autofocus="autofocus" value="'
 							+ config.values[0] + '">');
 				}
 				divContainer.append(filter);
 				if (wizard) {
-	              $("[id='text_" + attribute.name + "']").change(
+	              $("[id='text_" + attributeMetaData.name + "']").change(
 							function() {
 								molgenis.updateFeatureFilter(featureUri, {
-									name : attribute.label,
-									identifier : attribute.name,
-									type : attribute.fieldType,
+									name : attributeMetaData.label,
+									identifier : attributeMetaData.name,
+									type : attributeMetaData.fieldType,
 									values : [$(this).val()]
 								});
 	
@@ -504,41 +481,41 @@
 				break;
 			case "DATE" :
 			case "DATE_TIME" :
-				var datePickerFrom = $('<div id="from_' + attribute.name
+				var datePickerFrom = $('<div id="from_' + attributeMetaData.name
 						+ '" class="input-append date" />');
 				var filterFrom;
 	
 				if (config == null) {
 					filterFrom = datePickerFrom.append($('<input id="date-feature-from_'
-									+ attribute.name
+									+ attributeMetaData.name
 									+ '"  type="text" /><span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>'));
 				} else {
 					filterFrom = datePickerFrom.append($('<input id="date-feature-from_'
-									+ attribute.name
+									+ attributeMetaData.name
 									+ '"  type="text" value="'
 									+ config.values[0].replace("T", "'T'")
 									+ '" /><span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>'));
 				}
 	
 				datePickerFrom.on('changeDate', function(e) {
-	              $("[id='date-feature-to_" + attribute.name+"']").val(
-	              		$("[id='date-feature-from_" + attribute.name+"']").val()
+	              $("[id='date-feature-to_" + attributeMetaData.name+"']").val(
+	              		$("[id='date-feature-from_" + attributeMetaData.name+"']").val()
 	              );
 				});
 	
-				var datePickerTo = $('<div id="to_' + attribute.name
+				var datePickerTo = $('<div id="to_' + attributeMetaData.name
 						+ '" class="input-append date" />');
 				var filterTo;
 	
 				if (config == null)
 					filterTo = datePickerTo
 							.append($('<input id="date-feature-to_'
-									+ attribute.name
+									+ attributeMetaData.name
 									+ '" type="text"><span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>'));
 				else
 					filterTo = datePickerTo
 							.append($('<input id="date-feature-to_'
-									+ attribute.name
+									+ attributeMetaData.name
 									+ '" type="text" value="'
 									+ config.values[1].replace("T", "'T'")
 									+ '"><span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>'));
@@ -554,26 +531,26 @@
 				var toFilter;
 	
 				if (config == null) {
-					fromFilter = $('<input id="from_' + attribute.name
+					fromFilter = $('<input id="from_' + attributeMetaData.name
 							+ '" type="number" step="any" style="width:100px">');
-					toFilter = $('<input id="to_' + attribute.name
+					toFilter = $('<input id="to_' + attributeMetaData.name
 							+ '" type="number" step="any" style="width:100px">');
 				} else {
 					fromFilter = $('<input id="from_'
-							+ attribute.name
+							+ attributeMetaData.name
 							+ '" type="number" step="any" style="width:100px" value="'
 							+ config.values[0] + '">');
 					toFilter = $('<input id="to_'
-							+ attribute.name
+							+ attributeMetaData.name
 							+ '" type="number" step="any" style="width:100px" value="'
 							+ config.values[1] + '">');
 				}
 	
 				fromFilter.on('keyup input', function() {
 					// If 'from' changed set 'to' at the same value
-					$("[id='to_" + attribute.name+"']").val(
+					$("[id='to_" + attributeMetaData.name+"']").val(
 							$("[id='from_"
-													+ attribute.name + '')
+													+ attributeMetaData.name + '')
 									.val());
 				});
 	
@@ -584,7 +561,7 @@
 				if (wizard) {
 					divContainer
 							.find(
-	                      $("[id='from_" + attribute.name +"']"))
+	                      $("[id='from_" + attributeMetaData.name +"']"))
 							.change(
 									function() {
 	
@@ -592,43 +569,43 @@
 												.updateFeatureFilter(
 														featureUri,
 														{
-															name : attribute.label,
-															identifier : attribute.name,
-															type : attribute.fieldType,
+															name : attributeMetaData.label,
+															identifier : attributeMetaData.name,
+															type : attributeMetaData.fieldType,
 															values : [
 																	$(
 	                                                                  $("[id='from_"
-																							+ attribute.name + "']"))
+																							+ attributeMetaData.name + "']"))
 																			.val(),
 																	$(
 	                                                                  $("[id='to_"
 	
-																							+ attribute.name + "']"))
+																							+ attributeMetaData.name + "']"))
 																			.val()],
 															range : true
 														});
 	
 									});
 					divContainer
-							.find($("[id='to_" + attribute.name + "']"))
+							.find($("[id='to_" + attributeMetaData.name + "']"))
 							.change(
 									function() {
 										molgenis
 												.updateFeatureFilter(
 														featureUri,
 														{
-															name : attribute.label,
-															identifier : attribute.name,
-															type : attribute.fieldType,
+															name : attributeMetaData.label,
+															identifier : attributeMetaData.name,
+															type : attributeMetaData.fieldType,
 															values : [
 																	$(
 	                                                                  $("[id='from_"
-																							+ attribute.name +"']"))
+																							+ attributeMetaData.name +"']"))
 																			.val(),
 																	$(
 	                                                                  $("[id='to_"
 	
-																							+ attribute.name + "']"))
+																							+ attributeMetaData.name + "']"))
 																			.val()],
 															range : true
 														});
@@ -638,47 +615,47 @@
 			case "BOOL" :
 				if (config == null) {
 					filter = $('<label class="radio"><input type="radio" id="bool-feature-true_'
-							+ attribute.name
+							+ attributeMetaData.name
 							+ '" name="bool-feature_'
-							+ attribute.name
+							+ attributeMetaData.name
 							+ '" value="true">True</label><label class="radio"><input type="radio" id="bool-feature-fl_'
-							+ attribute.name
+							+ attributeMetaData.name
 							+ '" name="bool-feature_'
-							+ attribute.name
+							+ attributeMetaData.name
 							+ '" value="false">False</label>');
 	
 				} else {
 					if (config.values[0] == 'true') {
 						filter = $('<label class="radio"><input type="radio" id="bool-feature-true_'
-								+ attribute.name
+								+ attributeMetaData.name
 								+ '" name="bool-feature_'
-								+ attribute.name
+								+ attributeMetaData.name
 								+ '" checked value="true">True</label><label class="radio"><input type="radio" id="bool-feature-fl_'
-								+ attribute.name
+								+ attributeMetaData.name
 								+ '" name="bool-feature_'
-								+ attribute.name
+								+ attributeMetaData.name
 								+ '" value="false">False</label>');
 					} else {
 						filter = $('<label class="radio"><input type="radio" id="bool-feature-true_'
-								+ attribute.name
+								+ attributeMetaData.name
 								+ '" name="bool-feature_'
-								+ attribute.name
+								+ attributeMetaData.name
 								+ '" value="true">True</label><label class="radio"><input type="radio" id="bool-feature-fl_'
-								+ attribute.name
+								+ attributeMetaData.name
 								+ '" name="bool-feature_'
-								+ attribute.name
+								+ attributeMetaData.name
 								+ '" checked value="false">False</label>');
 					}
 				}
 				divContainer.append(filter);
 				if (wizard) {
 					filter.find(
-							'input[name="bool-feature_' + attribute.name
+							'input[name="bool-feature_' + attributeMetaData.name
 									+ '"]').change(function() {
 						molgenis.updateFeatureFilter(featureUri, {
-							name : attribute.label,
-							identifier : attribute.name,
-							type : attribute.fieldType,
+							name : attributeMetaData.label,
+							identifier : attributeMetaData.name,
+							type : attributeMetaData.fieldType,
 							values : [$(this).val()]
 						});
 	
@@ -687,85 +664,75 @@
 	
 				break;
 			case "CATEGORICAL" :
-				// http://localhost:8080/api/v1/celiacsprue/meta/<attribute.name>?expand=refEntity
-				// refEntity.labelAttribute is attribute voor category label dat in UI getoond wordt
-				// refEntity.href min "/meta" is de href voor entity collection repsonse met alle categories 
-				// for each item in items
-				//     create input met value item.href en label is item.<refEntity.labelAttribute>
+				// TODO for OMX model the labels will display identifiers and not the valueCodes, we have to change observ.xml to display the info we want
+				//		<entity name="Category" extends="Characteristic"> --> add attribute xref_label="valueCode" but this is not posible! xref_label is unique. Need to find a solution
+				// TODO reminder: we also have to fix the case at line 757!!
 				
-				// for OMX model the labels will display identifiers and not the valueCodes, we have to change observ.xml to display the info we want
-				//     <entity name="Category" extends="Characteristic"> --> add attribute xref_label="valueCode"
+				var attributeMetaDataExpanded = restApi.get(featureUri + "?expand=refEntity");
+				var categoryMetaData = attributeMetaDataExpanded.refEntity;
+				var labelAttribute = categoryMetaData.labelAttribute.toLowerCase();
+				$('input[name="' + attributeMetaData.name + '"]:checked').remove();
 				
-				// reminder: we also have to fix the case at line 768!!
 				$.ajax({
-					type : 'POST',
-					url : '/api/v1/category?_method=GET',
-					data : JSON.stringify({
-						q : [{
-							"field" : "observableFeature_Identifier",
-							"operator" : "EQUALS",
-							"value" : attribute.name
-						}]
-					}),
+					type : 'GET',
+					url : categoryMetaData.href.replace("\meta", ""),
 					contentType : 'application/json',
 					async : false,
 					success : function(categories) {
 						filter = [];
-						$.each(categories.items,
-								function() {
-									var input;
-									if (config
-											&& ($.inArray(this.name,
-													config.values) > -1)) {
-										input = $('<input type="checkbox" id="'
-												+ this.name + '_'
-												+ attribute.name
-												+ '" "class="cat-value" name="'
-												+ attribute.name
-												+ '" value="' + this.name
-												+ '"checked>');
-									} else {
-										input = $('<input type="checkbox" id="'
-												+ this.name + '_'
-												+ attribute.name
-												+ '" class="cat-value" name="'
-												+ attribute.name
-												+ '" value="' + this.name
-												+ '">');
-									}
-									filter.push($('<label class="checkbox">')
-											.html(' ' + this.name).prepend(
-													input));
-								});
+						$.each(categories.items, function() {
+							var input = $('<input type="checkbox"'
+									+ ' class="cat-value"' 
+									+ ' name="' + attributeMetaData.name + '"' 
+									//TODO this.name moet this[labelAttribute] zijn maar om de search code niet te breken is deze fix 
+									+ ' value="' + this.name + '">');
+							
+							if (config && ($.inArray(this.name, config.values) > -1)) 
+							{
+								input.prop("checked", true);
+							}
+							
+							filter.push($('<label class="checkbox">').html(' ' + this[labelAttribute]).prepend(input));
+						});
 					}
 				});
+				
 				divContainer.append(filter);
+
 				if (wizard) {
-					divContainer.find(
-							'input[name="' + attribute.name + '"]').click(
-							function() {
-								molgenis.updateFeatureFilter(featureUri, {
-									name : attribute.label,
-									identifier : attribute.name,
-									type : attribute.fieldType,
-									values : $.makeArray($(
-											'input[name="' + attribute.name
-													+ '"]:checked').map(
-											function() {
-												return $(this).val();
-											}))
-								});
-							});
+					divContainer.find('input[name="' + attributeMetaData.name + '"]')
+						.click(function(){
+							molgenis.updateCategoryAttributeFilter(attributeMetaData);
+						});
+				} else {
+					if (config && config.values.length > 0) {
+						$(applyButton).prop('disabled', false);
+					} else {
+						$(applyButton).prop('disabled', true);
+					}
+					$('.cat-value').live('change', function() {
+						if ($('.cat-value:checked').length > 0) {
+							applyButton.removeAttr('disabled');
+						} else {
+							$(applyButton).prop('disabled', true);
+						}
+					});
+		
+					applyButton.click(
+						function(){
+							molgenis.updateCategoryAttributeFilter(attributeMetaData);
+							$('.feature-filter-dialog').dialog('close');
+						});
 				}
 				break;
 			default :
 				return;
 		}
 	
-		if ((attribute.fieldType === 'XREF') || (attribute.fieldType == 'MREF')) {
+		if ((attributeMetaData.fieldType === 'XREF') || (attributeMetaData.fieldType == 'MREF')) {
 			// FIXME get working for generic data explorer
 			divContainer
-					.find($("[id='text_" + attribute.name +"']"))
+					.find($("[id='text_" + attributeMetaData.name +"']"))
 					.autocomplete(
 							{
 								source : function(request, response) {
@@ -799,7 +766,7 @@
 							});
 		}
 	
-		if (attribute.fieldType === 'DATE') {
+		if (attributeMetaData.fieldType === 'DATE') {
 			var container = divContainer.find('.date').datetimepicker({
 				format : 'yyyy-MM-dd',
 				language : 'en',
@@ -815,22 +782,22 @@
 											.updateFeatureFilter(
 													featureUri,
 													{
-														name : attribute.label,
-														identifier : attribute.name,
-														type : attribute.fieldType,
+														name : attributeMetaData.label,
+														identifier : attributeMetaData.name,
+														type : attributeMetaData.fieldType,
 														range : true,
 														values : [
-																    $("[id='date-feature-from_"+ attribute.name
+																    $("[id='date-feature-from_"+ attributeMetaData.name
 	                                                                    +"']")
 																		.val(),
 	                                                            $("[id='date-feature-to_"
-																				+ attribute.name
+																				+ attributeMetaData.name
 	                                                                        +"']")
 																		.val()]
 													});
 								});
 			}
-		} else if (attribute.fieldType === 'DATE_TIME') {
+		} else if (attributeMetaData.fieldType === 'DATE_TIME') {
 			// FIXME get working for generic data explorer
 			var container = divContainer.find('.date').datetimepicker({
 				format : "yyyy-MM-dd'T'hh:mm:ss" + getCurrentTimezoneOffset(),
@@ -846,18 +813,18 @@
 											.updateFeatureFilter(
 													featureUri,
 													{
-														name : attribute.label,
-														identifier : attribute.name,
-														type : attribute.fieldType,
+														name : attributeMetaData.label,
+														identifier : attributeMetaData.name,
+														type : attributeMetaData.fieldType,
 														range : true,
 														values : [
-																$("[id='date-feature-from_" + attribute.name + "']")
+																$("[id='date-feature-from_" + attributeMetaData.name + "']")
 	
 																		.val()
 																		.replace(
 																				"'T'",
 																				"T"),
-																$("[id='date-feature-to_"+ attribute.name + "']")
+																$("[id='date-feature-to_"+ attributeMetaData.name + "']")
 																		.val()
 																		.replace(
 																				"'T'",
@@ -883,9 +850,8 @@
 			var config = featureFilters[attributeUri];
 			var applyButton = $('<input type="button" class="btn pull-left" value="Apply filter">');
 			var divContainer = molgenis
-					.createGenericFeatureField(null, attributes[attributeUri],
-							config, applyButton, attributeUri,
-							true);
+					.createGenericFeatureField(attributes[attributeUri],
+							config, applyButton,true);
 			var trElement = $(element).closest('tr');
 			trElement.append(divContainer);
 		});
@@ -898,6 +864,22 @@
 			if(attribute.name === 'chromosome') dalliance.setLocation(featureFilter.values[0], dalliance.viewStart, dalliance.viewEnd);
 			featureFilters[attributeUri] = featureFilter;
 			molgenis.onFeatureFilterChange(featureFilters);
+		});
+	};
+	
+	/**
+	 * Update the category attribute filter
+	 */
+	molgenis.updateCategoryAttributeFilter = function(attributeMetaData) {
+		molgenis.updateFeatureFilter(attributeMetaData.href, {
+			name : attributeMetaData.name,
+			identifier : attributeMetaData.name,
+			type : attributeMetaData.fieldType,
+			values : $.makeArray($(
+					'input[name="' + attributeMetaData.name + '"]:checked').map(
+					function() {
+						return $(this).val();
+					}))
 		});
 	};
 
