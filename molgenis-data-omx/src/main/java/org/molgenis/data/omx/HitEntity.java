@@ -233,4 +233,10 @@ public class HitEntity extends AbstractEntity
 	{
 		return entityMetaData;
 	}
+
+	@Override
+	public void set(Entity entity, boolean strict)
+	{
+		throw new UnsupportedOperationException();
+	}
 }

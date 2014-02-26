@@ -136,4 +136,10 @@ public class ProtocolAttributeMetaData implements AttributeMetaData
 
 		return Lists.newArrayList(allIterable);
 	}
+
+	@Override
+	public boolean isAuto()
+	{
+		return false;
+	}
 }

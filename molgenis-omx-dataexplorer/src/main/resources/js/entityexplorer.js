@@ -11,7 +11,7 @@
 	};
 	
 	ns.onEntityChange = function(name) {
-		restApi.getAsync('/api/v1/' + name, null, null, function(entities) {
+		restApi.getAsync('/api/v1/' + name, null, function(entities) {
 			var items = [];
 			// TODO deal with multiple entity pages
 			$.each(entities.items, function(key, val) {
@@ -26,7 +26,7 @@
 	};
 
 	ns.onEntitySelectionChange = function(entityUrl) {
-		restApi.getAsync(entityUrl, null, null, function(entity) {
+		restApi.getAsync(entityUrl, null, function(entity) {
 			ns.updateEntityTable(entity);
 			ns.updateEntitySearchResults(entity);
 		});
@@ -93,7 +93,7 @@
             });
 
             function getSubProtocols (datasetIdentifier, rootProtocolUri, protocolsMap){
-                var rootProtocol = restApi.get(rootProtocolUri, ["subprotocols"]);
+                var rootProtocol = restApi.get(rootProtocolUri, {'expand' : ['subprotocols']});
                 //check if the protocol was already found in another dataset
                 //add dataset to list of datasets in which the protocol occurs
                 var datasetIdentifiers = protocolsMap[rootProtocol.identifier];
@@ -111,7 +111,7 @@
             }
 
 			// get all protocol features
-            restApi.getAsync('/api/v1/protocol', ['features'], null, function(protocols) {
+            restApi.getAsync('/api/v1/protocol', {'expand': ['features']}, function(protocols) {
                 var items = [];
                 items.push('<div class="accordion" id="accordion">');
 

@@ -729,41 +729,47 @@
 				return;
 		}
 	
-		if ((attributeMetaData.fieldType === 'XREF') || (attributeMetaData.fieldType == 'MREF')) {
-			// FIXME get working for generic data explorer
-			divContainer
-					.find($("[id='text_" + attributeMetaData.name +"']"))
-					.autocomplete(
-							{
+		if ((attribute.fieldType === 'XREF') || (attribute.fieldType == 'MREF')) {
+			
+			restApi.getAsync(featureUri, {attributes:['refEntity'], expand:['refEntity']}, function(entityMetaData) {
+				var refEntity = entityMetaData.refEntity;
+				if (refEntity) {
+					var refEntityName = refEntity.name;
+					var refEntityAttribute = refEntity.labelAttribute;
+					
+					if (refEntityName && refEntityAttribute) {
+					
+						divContainer.find($("[id='text_" + attribute.name +"']"))
+						.autocomplete({
 								source : function(request, response) {
-									$
-											.ajax({
-												type : 'POST',
-												url : '/api/v1/characteristic?_method=GET',
-												data : JSON.stringify({
-													num : 15,
-													q : [{
-														"field" : "name",
-														"operator" : "LIKE",
-														"value" : request.term
-													}]
-												}),
-												contentType : 'application/json',
-												async : true,
-												success : function(
-														characteristicList) {
-													response($
-															.map(
-																	characteristicList.items,
-																	function(
-																			item) {
-																		return item.name;
-																	}));
+									$.ajax({
+											type : 'POST',
+											url : '/api/v1/' + refEntityName + '?_method=GET',
+											data : JSON.stringify({
+												num : 15,
+												q : [{
+													"field" : refEntityAttribute,
+													"operator" : "LIKE",
+													"value" : request.term
+												}]
+											}),
+											contentType : 'application/json',
+											async : true,
+											success : function(resultList) {
+												response($.map(resultList.items, function(item) {
+																				return item[uncapitalize(refEntityAttribute)];
+																			}));
 												}
 											});
 								},
 								minLength : 2
-							});
+						});
+					
+					}
+				}		
+				
+			});
+			
 		}
 	
 		if (attributeMetaData.fieldType === 'DATE') {

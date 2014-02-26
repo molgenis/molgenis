@@ -56,7 +56,7 @@
 
 			$.each(selectedFeatures, function(i, val) {
 				var feature = restApi.get(this);
-				var key = (feature.name).charAt(0).toLowerCase() + feature.name.slice(1);
+				var key = uncapitalize(feature.name);
 				var value = columnValueMap[key];
 				var cellValue = "";
 				if ((value != null) && (value != undefined)) {
