@@ -174,8 +174,7 @@
 				items.push('<h3>Filter:</h3>');
 				var config = featureFilters[attributeUri];
 				var applyButton = $('<input type="button" class="btn pull-left" value="Apply filter">');
-				var divContainer = molgenis.createGenericFeatureField(items, feature, config, applyButton, attributeUri, false);
-				
+				var divContainer = molgenis.createGenericFeatureField(feature, config, applyButton, false);
 				molgenis.createSpecificFeatureField(items, divContainer, feature, config, applyButton, attributeUri);
 			}
 		);
@@ -392,31 +391,6 @@
 				});
 				break;
 			case "CATEGORICAL" :
-				if (config && config.values.length > 0) {
-					$(applyButton).prop('disabled', false);
-				} else {
-					$(applyButton).prop('disabled', true);
-				}
-				$('.cat-value').live('change', function() {
-					if ($('.cat-value:checked').length > 0) {
-						applyButton.removeAttr('disabled');
-					} else {
-						$(applyButton).prop('disabled', true);
-					}
-				});
-	
-				applyButton.click(function() {
-					molgenis.updateFeatureFilter(featureUri, {
-						name : attribute.label,
-						identifier : attribute.name,
-						type : attribute.fieldType,
-						values : $.makeArray($('.cat-value:checked').map(
-								function() {
-									return $(this).val();
-								}))
-					});
-					$('.feature-filter-dialog').dialog('close');
-				});
 				break;
 			default :
 				return;
@@ -467,10 +441,10 @@
 	};
 
 	//Generic part for filter fields
-	molgenis.createGenericFeatureField = function(items, attribute, config, applyButton, featureUri, wizard) {
+	molgenis.createGenericFeatureField = function(attribute, config, applyButton, wizard) {
+		var featureUri = attribute.href;
 		var divContainer = $('<div />');
 		var filter = null;
-		
 		switch (attribute.fieldType) {
 			case "HTML" :
 			case "MREF" :
@@ -687,76 +661,61 @@
 				}
 	
 				break;
-			case "CATEGORICAL" :
-				// http://localhost:8080/api/v1/celiacsprue/meta/<attribute.name>?expand=refEntity
-				// refEntity.labelAttribute is attribute voor category label dat in UI getoond wordt
-				// refEntity.href min "/meta" is de href voor entity collection repsonse met alle categories 
-				// for each item in items
-				//     create input met value item.href en label is item.<refEntity.labelAttribute>
+			case "CATEGORICAL" :			
+				var attributeMetaDataExpanded = restApi.get(featureUri + "?expand=refEntity");
+				var categoryMetaData = attributeMetaDataExpanded.refEntity;
+				var labelAttribute = categoryMetaData.labelAttribute.toLowerCase();
+				$('input[name="' + attribute.name + '"]:checked').remove();
 				
-				// for OMX model the labels will display identifiers and not the valueCodes, we have to change observ.xml to display the info we want
-				//     <entity name="Category" extends="Characteristic"> --> add attribute xref_label="valueCode"
-				
-				// reminder: we also have to fix the case at line 768!!
 				$.ajax({
-					type : 'POST',
-					url : '/api/v1/category?_method=GET',
-					data : JSON.stringify({
-						q : [{
-							"field" : "observableFeature_Identifier",
-							"operator" : "EQUALS",
-							"value" : attribute.name
-						}]
-					}),
+					type : 'GET',
+					url : categoryMetaData.href.replace(new RegExp('/meta[^/]*$'), ""),
 					contentType : 'application/json',
 					async : false,
 					success : function(categories) {
 						filter = [];
-						$.each(categories.items,
-								function() {
-									var input;
-									if (config
-											&& ($.inArray(this.name,
-													config.values) > -1)) {
-										input = $('<input type="checkbox" id="'
-												+ this.name + '_'
-												+ attribute.name
-												+ '" "class="cat-value" name="'
-												+ attribute.name
-												+ '" value="' + this.name
-												+ '"checked>');
-									} else {
-										input = $('<input type="checkbox" id="'
-												+ this.name + '_'
-												+ attribute.name
-												+ '" class="cat-value" name="'
-												+ attribute.name
-												+ '" value="' + this.name
-												+ '">');
-									}
-									filter.push($('<label class="checkbox">')
-											.html(' ' + this.name).prepend(
-													input));
-								});
+						$.each(categories.items, function() {
+							var input = $('<input type="checkbox"'
+									+ ' class="cat-value"' 
+									+ ' name="' + attribute.name + '"' 
+									+ ' value="' + this[labelAttribute] + '">');
+							
+							if (config && ($.inArray(this[labelAttribute], config.values) > -1)) 
+							{
+								input.prop("checked", true);
+							}
+							
+							filter.push($('<label class="checkbox">').html(' ' + this[labelAttribute]).prepend(input));
+						});
 					}
 				});
+				
 				divContainer.append(filter);
+
 				if (wizard) {
-					divContainer.find(
-							'input[name="' + attribute.name + '"]').click(
-							function() {
-								molgenis.updateFeatureFilter(featureUri, {
-									name : attribute.label,
-									identifier : attribute.name,
-									type : attribute.fieldType,
-									values : $.makeArray($(
-											'input[name="' + attribute.name
-													+ '"]:checked').map(
-											function() {
-												return $(this).val();
-											}))
-								});
-							});
+					divContainer.find('input[name="' + attribute.name + '"]')
+						.click(function(){
+							molgenis.updateCategoryAttributeFilter(attribute);
+						});
+				} else {
+					if (config && config.values.length > 0) {
+						$(applyButton).prop('disabled', false);
+					} else {
+						$(applyButton).prop('disabled', true);
+					}
+					$('.cat-value').live('change', function() {
+						if ($('.cat-value:checked').length > 0) {
+							applyButton.removeAttr('disabled');
+						} else {
+							$(applyButton).prop('disabled', true);
+						}
+					});
+		
+					applyButton.click(
+						function(){
+							molgenis.updateCategoryAttributeFilter(attribute);
+							$('.feature-filter-dialog').dialog('close');
+						});
 				}
 				break;
 			default :
@@ -890,9 +849,8 @@
 			var config = featureFilters[attributeUri];
 			var applyButton = $('<input type="button" class="btn pull-left" value="Apply filter">');
 			var divContainer = molgenis
-					.createGenericFeatureField(null, attributes[attributeUri],
-							config, applyButton, attributeUri,
-							true);
+					.createGenericFeatureField(attributes[attributeUri],
+							config, applyButton,true);
 			var trElement = $(element).closest('tr');
 			trElement.append(divContainer);
 		});
@@ -905,6 +863,22 @@
 			if(attribute.name === 'chromosome') dalliance.setLocation(featureFilter.values[0], dalliance.viewStart, dalliance.viewEnd);
 			featureFilters[attributeUri] = featureFilter;
 			molgenis.onFeatureFilterChange(featureFilters);
+		});
+	};
+	
+	/**
+	 * Update the category attribute filter
+	 */
+	molgenis.updateCategoryAttributeFilter = function(attributeMetaData) {
+		molgenis.updateFeatureFilter(attributeMetaData.href, {
+			name : attributeMetaData.name,
+			identifier : attributeMetaData.identifier,
+			type : attributeMetaData.fieldType,
+			values : $.makeArray($(
+					'input[name="' + attributeMetaData.name + '"]:checked').map(
+					function() {
+						return $(this).val();
+					}))
 		});
 	};
 
