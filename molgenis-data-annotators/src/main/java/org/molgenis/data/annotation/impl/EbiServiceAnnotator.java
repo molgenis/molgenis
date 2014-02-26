@@ -57,9 +57,6 @@ public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements 
 	private final DefaultHttpClient httpClient;
     private List<Object> annotatedInput = new ArrayList<Object>();
 
-	@Autowired
-	DataService dataService;
-
 	public EbiServiceAnnotator()
 	{
 		httpClient = new DefaultHttpClient();
