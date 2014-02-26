@@ -4,6 +4,7 @@ import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,11 +34,14 @@ import com.google.common.collect.Maps;
 public class DataServiceImpl implements DataService
 {
 	private final Map<String, Repository> repositories;
-	private final Map<String, Class<? extends FileRepositorySource>> fileRepositorySources = Maps.newHashMap();
+	private final Set<String> repositoryNames;
+	private final Map<String, Class<? extends FileRepositorySource>> fileRepositorySources;
 
 	public DataServiceImpl()
 	{
 		this.repositories = new LinkedHashMap<String, Repository>();
+		this.repositoryNames = new LinkedHashSet<String>();
+		this.fileRepositorySources = Maps.newHashMap();
 	}
 
 	@Override
@@ -48,13 +52,14 @@ public class DataServiceImpl implements DataService
 		{
 			throw new MolgenisDataException("Entity [" + repositoryName + "] already registered.");
 		}
+		repositoryNames.add(repositoryName);
 		repositories.put(repositoryName.toLowerCase(), newRepository);
 	}
 
 	@Override
 	public Iterable<String> getEntityNames()
 	{
-		return repositories.keySet();
+		return repositoryNames;
 	}
 
 	@Override
