@@ -1,4 +1,4 @@
-<#macro filter_by_genomic_region_tab>
+<#macro regionfilter_panel>
 	<#--Panel 2: Input gene panels or genomic locations-->
 	<div class="tab-pane" id="tab2">
 		<div class="checkbox">

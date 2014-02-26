@@ -1,9 +1,23 @@
-<#macro fileupload_tab>
+<#macro fileupload_panel>
 	<#--Panel 1: Input variants, manual or file(s)-->
 	<div class="tab-pane" id="tab1">
 			
 		<@modal_popup_dataset_upload />
 		<a type="button" class="btn" href="#dataset-upload-modal" data-toggle="modal">Upload a new Data set</a>
+		
+		<hr></hr>
+		
+		<div class="row-fluid">
+			<div class="controls">
+				<div id="dataset-select-position-container">
+					<select data-placeholder="Choose a Dataset" id="dataset-select">
+						<#list dataSets as dataSet>
+							<option value="/api/v1/dataset/${dataSet.id?c}" name="${dataSet.name}"<#if dataSet.identifier == selectedDataSet.identifier> selected</#if>>${dataSet.name}</option>
+						</#list>
+					</select>
+				</div>
+			</div>
+		</div>	
 		
 	</div>
 </#macro>
@@ -36,7 +50,7 @@
 			                <a class="btn btn-default btn-file">
 			                    <span class="fileupload-new">Select file</span>
 			                    <span class="fileupload-exists">Change</span>
-			                    <input name="file-input-field" id="file-input-field" type="file" class="file-input"/>
+			                    <input name="file-input-field" type="file" class="file-input"/>
 			            	</a>
 					            	
 			                <a href="#" class="btn btn-default fileupload-exists" data-dismiss="fileupload">

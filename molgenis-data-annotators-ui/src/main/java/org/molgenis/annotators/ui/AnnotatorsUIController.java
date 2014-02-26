@@ -30,11 +30,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
 import com.google.common.collect.Lists;
 
 /**
@@ -69,7 +71,7 @@ public class AnnotatorsUIController extends MolgenisPluginController
 
 	@Autowired
 	DataSetsIndexer indexer;
-	
+
 	@Autowired
 	EntityValidator entityValidator;
 
@@ -121,14 +123,21 @@ public class AnnotatorsUIController extends MolgenisPluginController
 			model.addAttribute("selectedDataSet", selectedDataSet);
 		}
 
-		setMapOfAnnotators(model, selectedDataSet);
-
 		return "view-annotation-ui";
+	}
+
+	@RequestMapping(value = "/changeSelectedDataSet")
+	@ResponseBody
+	public Map<String, Boolean> changeSelectedDataSet(@RequestBody String selectedDataSetIdentifier)
+	{	
+		Map<String, Boolean> annotatorMap = setMapOfAnnotators(selectedDataSetIdentifier);
+		return annotatorMap;
 	}
 
 	@RequestMapping(value = "/create-new-dataset-from-tsv", headers = "content-type=multipart/*", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void handleVcfInput(@RequestParam("file-input-field") Part part, @RequestParam("dataset-name")
+	public void handleVcfInput(@RequestParam("file-input-field")
+	Part part, @RequestParam("dataset-name")
 	String submittedDataSetName, Model model) throws IOException
 	{
 		if (!part.equals(null) && part.getSize() > 5000000)
@@ -151,7 +160,8 @@ public class AnnotatorsUIController extends MolgenisPluginController
 	String[] annotatorNames, Model model, @RequestParam(value = "dataSetIdentifier")
 	String dataSetIdentifier)
 	{
-		OmxDataSetAnnotator omxDataSetAnnotator = new OmxDataSetAnnotator(dataService, searchService, indexer, entityValidator);
+		OmxDataSetAnnotator omxDataSetAnnotator = new OmxDataSetAnnotator(dataService, searchService, indexer,
+				entityValidator);
 		Repository repository = dataService.getRepositoryByEntityName(dataSetIdentifier);
 
 		if (annotatorNames != null && repository != null)
@@ -182,21 +192,23 @@ public class AnnotatorsUIController extends MolgenisPluginController
 		return "view-result-page";
 	}
 
-	private void setMapOfAnnotators(Model model, DataSet selectedDataSet)
+	private Map<String, Boolean> setMapOfAnnotators(String dataSetIdentifier)
 	{
-		if (selectedDataSet != null)
+		Map<String, Boolean> mapOfAnnotators = new HashMap<String, Boolean>();
+
+		if (dataSetIdentifier != null)
 		{
 
-			Repository repo = dataService.getRepositoryByEntityName(selectedDataSet.getIdentifier());
+			Repository repo = dataService.getRepositoryByEntityName(dataSetIdentifier);
 
-			Map<String, Boolean> mapOfAnnotators = new HashMap<String, Boolean>();
 			for (RepositoryAnnotator annotator : annotationService.getAllAnnotators())
 			{
 				mapOfAnnotators.put(annotator.getName(), annotator.canAnnotate(repo));
 			}
 
-			model.addAttribute("allAnnotators", mapOfAnnotators);
 		}
+		
+		return mapOfAnnotators;
 	}
 
 	@ExceptionHandler(RuntimeException.class)

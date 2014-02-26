@@ -1,4 +1,4 @@
-<#macro filter_by_phenotype_tab>
+<#macro phenotypefilter_panel>
 	<#--Panel 3: Phenotype selection-->
 	<div class="tab-pane" id="tab3">
 		<form class="form" role="form">
