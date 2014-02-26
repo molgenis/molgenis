@@ -103,18 +103,17 @@ public class RestController
 	 * 
 	 * Example url: /api/v1/person/meta
 	 * 
-	 * @param entityNameRaw
+	 * @param entityName
 	 * @return EntityMetaData
 	 */
 	@RequestMapping(value = "/{entityName}/meta", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public EntityMetaDataResponse getEntityMetaData(@PathVariable("entityName") String entityNameRaw,
+	public EntityMetaDataResponse getEntityMetaData(@PathVariable("entityName") String entityName,
 			@RequestParam(value = "attributes", required = false) String[] attributes,
 			@RequestParam(value = "expand", required = false) String[] attributeExpands)
 	{
-		String entityName = getEntityName(entityNameRaw);
 		Set<String> attributeSet = toAttributeSet(attributes);
-		Set<String> attributeExpandSet = toAttributeExpandSet(attributeExpands);
+		Set<String> attributeExpandSet = toAttributeSet(attributeExpands);
 
 		EntityMetaData meta = dataService.getRepositoryByEntityName(entityName);
 		return new EntityMetaDataResponse(meta, attributeSet, attributeExpandSet);
@@ -123,25 +122,24 @@ public class RestController
 	/**
 	 * Example url: /api/v1/person/meta/emailaddresses
 	 * 
-	 * @param entityNameRaw
+	 * @param entityName
 	 * @return EntityMetaData
 	 */
 	@RequestMapping(value = "/{entityName}/meta/{attributeName}", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public AttributeMetaDataResponse getAttributeMetaData(@PathVariable("entityName") String entityNameRaw,
+	public AttributeMetaDataResponse getAttributeMetaData(@PathVariable("entityName") String entityName,
 			@PathVariable("attributeName") String attributeName,
 			@RequestParam(value = "attributes", required = false) String[] attributes,
 			@RequestParam(value = "expand", required = false) String[] attributeExpands)
 	{
-		String entityName = getEntityName(entityNameRaw);
 		Set<String> attributeSet = toAttributeSet(attributes);
-		Set<String> attributeExpandSet = toAttributeExpandSet(attributeExpands);
+		Set<String> attributeExpandSet = toAttributeSet(attributeExpands);
 
 		EntityMetaData entityMetaData = dataService.getRepositoryByEntityName(entityName);
 		AttributeMetaData attributeMetaData = entityMetaData.getAttribute(attributeName);
 		if (attributeMetaData != null)
 		{
-			return new AttributeMetaDataResponse(entityNameRaw, attributeMetaData, attributeSet, attributeExpandSet);
+			return new AttributeMetaDataResponse(entityName, attributeMetaData, attributeSet, attributeExpandSet);
 		}
 		else
 		{
@@ -156,9 +154,7 @@ public class RestController
 	 * 
 	 * /api/v1/person/99 Retrieves a person with id 99
 	 * 
-	 * 
-	 * 
-	 * @param entityNameRaw
+	 * @param entityName
 	 * @param id
 	 * @param attributeExpands
 	 * @return
@@ -166,13 +162,12 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Map<String, Object> retrieveEntity(@PathVariable("entityName") String entityNameRaw,
+	public Map<String, Object> retrieveEntity(@PathVariable("entityName") String entityName,
 			@PathVariable("id") Integer id, @RequestParam(value = "attributes", required = false) String[] attributes,
 			@RequestParam(value = "expand", required = false) String[] attributeExpands)
 	{
-		String entityName = getEntityName(entityNameRaw);// Be backwards compatible
 		Set<String> attributesSet = toAttributeSet(attributes);
-		Set<String> attributeExpandSet = toAttributeExpandSet(attributeExpands);
+		Set<String> attributeExpandSet = toAttributeSet(attributeExpands);
 
 		EntityMetaData meta = dataService.getRepositoryByEntityName(entityName);
 		Entity entity = dataService.findOne(entityName, id);
@@ -192,7 +187,7 @@ public class RestController
 	 * 
 	 * /api/v1/person/99/address
 	 * 
-	 * @param entityNameRaw
+	 * @param entityName
 	 * @param id
 	 * @param refAttributeName
 	 * @param request
@@ -202,15 +197,14 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/{id}/{refAttributeName}", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Object retrieveEntityAttribute(@PathVariable("entityName") String entityNameRaw,
+	public Object retrieveEntityAttribute(@PathVariable("entityName") String entityName,
 			@PathVariable("id") Integer id, @PathVariable("refAttributeName") String refAttributeName,
 			@Valid EntityCollectionRequest request,
 			@RequestParam(value = "attributes", required = false) String[] attributes,
 			@RequestParam(value = "expand", required = false) String[] attributeExpands)
 	{
-		String entityName = getEntityName(entityNameRaw);// Be backwards compatible
 		Set<String> attributesSet = toAttributeSet(attributes);
-		Set<String> attributeExpandSet = toAttributeExpandSet(attributeExpands);
+		Set<String> attributeExpandSet = toAttributeSet(attributeExpands);
 
 		EntityMetaData meta = dataService.getRepositoryByEntityName(entityName);
 
@@ -228,8 +222,7 @@ public class RestController
 			throw new UnknownEntityException(entityName + " " + id + " not found");
 		}
 
-		String attrHref = String.format(BASE_URI + "/%s/%s/%s", meta.getName().toLowerCase(), entity.getIdValue(),
-				refAttributeName);
+		String attrHref = String.format(BASE_URI + "/%s/%s/%s", meta.getName(), entity.getIdValue(), refAttributeName);
 		switch (attr.getDataType().getEnumType())
 		{
 			case COMPOUND:
@@ -278,7 +271,7 @@ public class RestController
 	 * 
 	 * Returns json
 	 * 
-	 * @param entityNameRaw
+	 * @param entityName
 	 * @param request
 	 * @param attributeExpands
 	 * @return
@@ -286,14 +279,13 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public EntityCollectionResponse retrieveEntityCollection(@PathVariable("entityName") String entityNameRaw,
+	public EntityCollectionResponse retrieveEntityCollection(@PathVariable("entityName") String entityName,
 			@Valid EntityCollectionRequest request,
 			@RequestParam(value = "attributes", required = false) String[] attributes,
 			@RequestParam(value = "expand", required = false) String[] attributeExpands)
 	{
-		String entityName = getEntityName(entityNameRaw);// Be backwards compatible
 		Set<String> attributesSet = toAttributeSet(attributes);
-		Set<String> attributeExpandSet = toAttributeExpandSet(attributeExpands);
+		Set<String> attributeExpandSet = toAttributeSet(attributeExpands);
 
 		return retrieveEntityCollectionInternal(entityName, request, attributesSet, attributeExpandSet);
 	}
@@ -313,14 +305,13 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public EntityCollectionResponse retrieveEntityCollectionPost(@PathVariable("entityName") String entityNameRaw,
+	public EntityCollectionResponse retrieveEntityCollectionPost(@PathVariable("entityName") String entityName,
 			@Valid @RequestBody EntityCollectionRequest request,
 			@RequestParam(value = "attributes", required = false) String[] attributes,
 			@RequestParam(value = "expand", required = false) String[] attributeExpands)
 	{
-		String entityName = getEntityName(entityNameRaw);// Be backwards compatible
 		Set<String> attributesSet = toAttributeSet(attributes);
-		Set<String> attributeExpandSet = toAttributeExpandSet(attributeExpands);
+		Set<String> attributeExpandSet = toAttributeSet(attributeExpands);
 
 		request = request != null ? request : new EntityCollectionRequest();
 
@@ -330,17 +321,15 @@ public class RestController
 	/**
 	 * Creates a new entity from a html form post.
 	 * 
-	 * @param entityNameRaw
+	 * @param entityName
 	 * @param request
 	 * @param response
 	 * @throws UnknownEntityException
 	 */
 	@RequestMapping(value = "/{entityName}", method = POST, headers = "Content-Type=application/x-www-form-urlencoded")
-	public void createFromFormPost(@PathVariable("entityName") String entityNameRaw, HttpServletRequest request,
+	public void createFromFormPost(@PathVariable("entityName") String entityName, HttpServletRequest request,
 			HttpServletResponse response)
 	{
-		String entityName = getEntityName(entityNameRaw);
-
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		for (String param : request.getParameterMap().keySet())
 		{
@@ -351,7 +340,7 @@ public class RestController
 	}
 
 	@RequestMapping(value = "/{entityName}", method = POST)
-	public void create(@PathVariable("entityName") String entityNameRaw, @RequestBody Map<String, Object> entityMap,
+	public void create(@PathVariable("entityName") String entityName, @RequestBody Map<String, Object> entityMap,
 			HttpServletResponse response) throws EntityNotFoundException
 	{
 		if (entityMap == null)
@@ -359,7 +348,6 @@ public class RestController
 			throw new UnknownEntityException("Missing entity in body");
 		}
 
-		String entityName = getEntityName(entityNameRaw);
 		createInternal(entityName, entityMap, response);
 	}
 
@@ -368,16 +356,15 @@ public class RestController
 	 * 
 	 * Example url: /api/v1/person/99
 	 * 
-	 * @param entityNameRaw
+	 * @param entityName
 	 * @param id
 	 * @param entityMap
 	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = PUT)
 	@ResponseStatus(OK)
-	public void update(@PathVariable("entityName") String entityNameRaw, @PathVariable("id") Integer id,
+	public void update(@PathVariable("entityName") String entityName, @PathVariable("id") Integer id,
 			@RequestBody Map<String, Object> entityMap)
 	{
-		String entityName = getEntityName(entityNameRaw);
 		updateInternal(entityName, id, entityMap);
 	}
 
@@ -386,16 +373,15 @@ public class RestController
 	 * 
 	 * Example url: /api/v1/person/99?_method=PUT
 	 * 
-	 * @param entityNameRaw
+	 * @param entityName
 	 * @param id
 	 * @param entityMap
 	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = POST, params = "_method=PUT")
 	@ResponseStatus(OK)
-	public void updatePost(@PathVariable("entityName") String entityNameRaw, @PathVariable("id") Integer id,
+	public void updatePost(@PathVariable("entityName") String entityName, @PathVariable("id") Integer id,
 			@RequestBody Map<String, Object> entityMap)
 	{
-		String entityName = getEntityName(entityNameRaw);
 		updateInternal(entityName, id, entityMap);
 	}
 
@@ -406,18 +392,16 @@ public class RestController
 	 * 
 	 * Example url: /api/v1/person/99?_method=PUT
 	 * 
-	 * @param entityNameRaw
+	 * @param entityName
 	 * @param id
 	 * @param request
 	 * @throws UnknownEntityException
 	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = POST, params = "_method=PUT", headers = "Content-Type=application/x-www-form-urlencoded")
 	@ResponseStatus(NO_CONTENT)
-	public void updateFromFormPost(@PathVariable("entityName") String entityNameRaw, @PathVariable("id") Integer id,
+	public void updateFromFormPost(@PathVariable("entityName") String entityName, @PathVariable("id") Integer id,
 			HttpServletRequest request)
 	{
-		String entityName = getEntityName(entityNameRaw);
-
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		for (String param : request.getParameterMap().keySet())
 		{
@@ -430,15 +414,14 @@ public class RestController
 	/**
 	 * Deletes an entity by it's id
 	 * 
-	 * @param entityNameRaw
+	 * @param entityName
 	 * @param id
 	 * @throws EntityNotFoundException
 	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = DELETE)
 	@ResponseStatus(NO_CONTENT)
-	public void delete(@PathVariable("entityName") String entityNameRaw, @PathVariable Integer id)
+	public void delete(@PathVariable("entityName") String entityName, @PathVariable Integer id)
 	{
-		String entityName = getEntityName(entityNameRaw);
 		dataService.delete(entityName, id);
 	}
 
@@ -447,7 +430,7 @@ public class RestController
 	 * 
 	 * Example url: /api/v1/person/99?_method=DELETE
 	 * 
-	 * @param entityNameRaw
+	 * @param entityName
 	 * @param id
 	 * @throws EntityNotFoundException
 	 */
@@ -575,7 +558,7 @@ public class RestController
 		Integer id = dataService.add(entityName, entity);
 		if (id != null)
 		{
-			response.addHeader("Location", String.format(BASE_URI + "/%s/%d", entityName.toLowerCase(), id));
+			response.addHeader("Location", String.format(BASE_URI + "/%s/%d", entityName, id));
 		}
 
 		response.setStatus(HttpServletResponse.SC_CREATED);
@@ -664,7 +647,7 @@ public class RestController
 			Set<String> attributeExpandsSet)
 	{
 		Map<String, Object> entityMap = new LinkedHashMap<String, Object>();
-		entityMap.put("href", String.format(BASE_URI + "/%s/%s", meta.getName().toLowerCase(), entity.getIdValue()));
+		entityMap.put("href", String.format(BASE_URI + "/%s/%s", meta.getName(), entity.getIdValue()));
 
 		// TODO system fields
 		for (AttributeMetaData attr : meta.getAtomicAttributes())
@@ -674,19 +657,19 @@ public class RestController
 
 			if (attr.isVisible() && !attr.getName().equals("__Type"))// TODO remove __Type from jpa entities
 			{
-				String attrName = getAttributeName(attr);
+				String attrName = attr.getName();
 				FieldTypeEnum attrType = attr.getDataType().getEnumType();
 
 				if (attrType == COMPOUND)
 				{
-					if (attributeExpandsSet.contains(attrName))
+					if (attributeExpandsSet != null && attributeExpandsSet.contains(attrName.toLowerCase()))
 					{
 						entityMap.put(attrName, new AttributeMetaDataResponse(meta.getName(), attr, null, null));
 					}
 					else
 					{
-						String attrHref = String.format(BASE_URI + "/%s/%s/%s", meta.getName().toLowerCase(),
-								entity.getIdValue(), attrName);
+						String attrHref = String.format(BASE_URI + "/%s/%s/%s", meta.getName(), entity.getIdValue(),
+								attrName);
 						entityMap.put(attrName, Collections.singletonMap("href", attrHref));
 					}
 				}
@@ -694,7 +677,8 @@ public class RestController
 				{
 					entityMap.put(attrName, entity.get(attr.getName()));
 				}
-				else if (attrType == XREF && attributeExpandsSet.contains(attrName))
+				else if (attrType == XREF && attributeExpandsSet != null
+						&& attributeExpandsSet.contains(attrName.toLowerCase()))
 				{
 					Entity refEntity = (Entity) entity.get(attr.getName());
 
@@ -707,7 +691,8 @@ public class RestController
 						entityMap.put(attrName, refEntityMap);
 					}
 				}
-				else if (attrType == MREF && attributeExpandsSet.contains(attrName))
+				else if (attrType == MREF && attributeExpandsSet != null
+						&& attributeExpandsSet.contains(attrName.toLowerCase()))
 				{
 					EntityMetaData refEntityMetaData = dataService.getRepositoryByEntityName(attr.getRefEntity()
 							.getName());
@@ -726,8 +711,7 @@ public class RestController
 					EntityPager pager = new EntityPager(0, new EntityCollectionRequest().getNum(),
 							(long) refEntityMaps.size(), mrefEntities);
 
-					String uri = String.format(BASE_URI + "/%s/%s/%s", meta.getName().toLowerCase(),
-							entity.getIdValue(), attrName);
+					String uri = String.format(BASE_URI + "/%s/%s/%s", meta.getName(), entity.getIdValue(), attrName);
 					EntityCollectionResponse ecr = new EntityCollectionResponse(pager, refEntityMaps, uri);
 					entityMap.put(attrName, ecr);
 				}
@@ -735,8 +719,8 @@ public class RestController
 				{
 					// Add href to ref field
 					Map<String, String> ref = new LinkedHashMap<String, String>();
-					ref.put("href", String.format(BASE_URI + "/%s/%s/%s", meta.getName().toLowerCase(),
-							entity.getIdValue(), attrName));
+					ref.put("href",
+							String.format(BASE_URI + "/%s/%s/%s", meta.getName(), entity.getIdValue(), attrName));
 					entityMap.put(attrName, ref);
 				}
 				else
@@ -749,26 +733,6 @@ public class RestController
 		}
 
 		return entityMap;
-	}
-
-	// In the old EntityControllers all attribute names started with a lowercase, be compatable with this
-	private String getAttributeName(AttributeMetaData attr)
-	{
-		return StringUtils.uncapitalize(attr.getName());
-	}
-
-	// In the old EntityControllers entitynames where lowercase, be compatable with this
-	private String getEntityName(String inputEntityName) throws UnknownEntityException
-	{
-		for (String entityName : dataService.getEntityNames())
-		{
-			if (entityName.equalsIgnoreCase(inputEntityName))
-			{
-				return entityName;
-			}
-		}
-
-		throw new UnknownEntityException("Unknown entity " + inputEntityName);
 	}
 
 	// Handle a bit of lagacy, handle query like 'SELECT FROM Category WHERE observableFeature_Identifier=xxx'
@@ -830,10 +794,5 @@ public class RestController
 						return attribute.toLowerCase();
 					}
 				})) : null;
-	}
-
-	private Set<String> toAttributeExpandSet(String[] attributeExpands)
-	{
-		return attributeExpands != null ? Sets.newHashSet(attributeExpands) : Collections.<String> emptySet();
 	}
 }
