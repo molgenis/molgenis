@@ -441,9 +441,7 @@
 	};
 
 	//Generic part for filter fields
-	//molgenis.createGenericFeatureField = function(items, attribute, config, applyButton, featureUri, wizard) {
 	molgenis.createGenericFeatureField = function(attribute, config, applyButton, wizard) {
-		//TODO JJ remove featureUri because you have already the info in the attribute object
 		var featureUri = attribute.href;
 		var divContainer = $('<div />');
 		var filter = null;
@@ -663,11 +661,7 @@
 				}
 	
 				break;
-			case "CATEGORICAL" :
-				// TODO for OMX model the labels will display identifiers and not the valueCodes, we have to change observ.xml to display the info we want
-				//		<entity name="Category" extends="Characteristic"> --> add attribute xref_label="valueCode" but this is not posible! xref_label is unique. Need to find a solution
-				// TODO reminder: we also have to fix the case at line 757!!
-				
+			case "CATEGORICAL" :			
 				var attributeMetaDataExpanded = restApi.get(featureUri + "?expand=refEntity");
 				var categoryMetaData = attributeMetaDataExpanded.refEntity;
 				var labelAttribute = categoryMetaData.labelAttribute.toLowerCase();
@@ -675,7 +669,7 @@
 				
 				$.ajax({
 					type : 'GET',
-					url : categoryMetaData.href.replace("\meta", ""),
+					url : categoryMetaData.href.replace(new RegExp('/meta[^/]*$'), ""),
 					contentType : 'application/json',
 					async : false,
 					success : function(categories) {
@@ -684,7 +678,6 @@
 							var input = $('<input type="checkbox"'
 									+ ' class="cat-value"' 
 									+ ' name="' + attribute.name + '"' 
-									//TODO this.name moet this[labelAttribute] zijn maar om de search code niet te breken is deze fix 
 									+ ' value="' + this[labelAttribute] + '">');
 							
 							if (config && ($.inArray(this[labelAttribute], config.values) > -1)) 
