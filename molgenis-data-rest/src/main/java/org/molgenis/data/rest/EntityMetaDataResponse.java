@@ -19,6 +19,14 @@ public class EntityMetaDataResponse
 	private final Map<String, Object> attributes;
 	private final String labelAttribute;
 
+	/**
+	 * 
+	 * @param meta
+	 * @param attributesSet
+	 *            set of lowercase attribute names to include in response
+	 * @param attributeExpandsSet
+	 *            set of lowercase attribute names to expand in response
+	 */
 	public EntityMetaDataResponse(EntityMetaData meta, Set<String> attributesSet, Set<String> attributeExpandsSet)
 	{
 		String name = meta.getName();
@@ -50,7 +58,7 @@ public class EntityMetaDataResponse
 			{
 				if (attr.isVisible() && !attr.getName().equals("__Type"))
 				{
-					if (attributeExpandsSet != null && attributeExpandsSet.contains("attributes"))
+					if (attributeExpandsSet != null && attributeExpandsSet.contains("attributes".toLowerCase()))
 					{
 						this.attributes.put(attr.getName(), new AttributeMetaDataResponse(name, attr));
 					}

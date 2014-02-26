@@ -114,7 +114,7 @@ public class RestController
 	{
 		String entityName = getEntityName(entityNameRaw);
 		Set<String> attributeSet = toAttributeSet(attributes);
-		Set<String> attributeExpandSet = toAttributeExpandSet(attributeExpands);
+		Set<String> attributeExpandSet = toAttributeSet(attributeExpands);
 
 		EntityMetaData meta = dataService.getRepositoryByEntityName(entityName);
 		return new EntityMetaDataResponse(meta, attributeSet, attributeExpandSet);
@@ -135,7 +135,7 @@ public class RestController
 	{
 		String entityName = getEntityName(entityNameRaw);
 		Set<String> attributeSet = toAttributeSet(attributes);
-		Set<String> attributeExpandSet = toAttributeExpandSet(attributeExpands);
+		Set<String> attributeExpandSet = toAttributeSet(attributeExpands);
 
 		EntityMetaData entityMetaData = dataService.getRepositoryByEntityName(entityName);
 		AttributeMetaData attributeMetaData = entityMetaData.getAttribute(attributeName);
@@ -172,7 +172,7 @@ public class RestController
 	{
 		String entityName = getEntityName(entityNameRaw);// Be backwards compatible
 		Set<String> attributesSet = toAttributeSet(attributes);
-		Set<String> attributeExpandSet = toAttributeExpandSet(attributeExpands);
+		Set<String> attributeExpandSet = toAttributeSet(attributeExpands);
 
 		EntityMetaData meta = dataService.getRepositoryByEntityName(entityName);
 		Entity entity = dataService.findOne(entityName, id);
@@ -210,7 +210,7 @@ public class RestController
 	{
 		String entityName = getEntityName(entityNameRaw);// Be backwards compatible
 		Set<String> attributesSet = toAttributeSet(attributes);
-		Set<String> attributeExpandSet = toAttributeExpandSet(attributeExpands);
+		Set<String> attributeExpandSet = toAttributeSet(attributeExpands);
 
 		EntityMetaData meta = dataService.getRepositoryByEntityName(entityName);
 
@@ -293,7 +293,7 @@ public class RestController
 	{
 		String entityName = getEntityName(entityNameRaw);// Be backwards compatible
 		Set<String> attributesSet = toAttributeSet(attributes);
-		Set<String> attributeExpandSet = toAttributeExpandSet(attributeExpands);
+		Set<String> attributeExpandSet = toAttributeSet(attributeExpands);
 
 		return retrieveEntityCollectionInternal(entityName, request, attributesSet, attributeExpandSet);
 	}
@@ -320,7 +320,7 @@ public class RestController
 	{
 		String entityName = getEntityName(entityNameRaw);// Be backwards compatible
 		Set<String> attributesSet = toAttributeSet(attributes);
-		Set<String> attributeExpandSet = toAttributeExpandSet(attributeExpands);
+		Set<String> attributeExpandSet = toAttributeSet(attributeExpands);
 
 		request = request != null ? request : new EntityCollectionRequest();
 
@@ -679,7 +679,7 @@ public class RestController
 
 				if (attrType == COMPOUND)
 				{
-					if (attributeExpandsSet.contains(attrName))
+					if (attributeExpandsSet != null && attributeExpandsSet.contains(attrName.toLowerCase()))
 					{
 						entityMap.put(attrName, new AttributeMetaDataResponse(meta.getName(), attr, null, null));
 					}
@@ -694,7 +694,8 @@ public class RestController
 				{
 					entityMap.put(attrName, entity.get(attr.getName()));
 				}
-				else if (attrType == XREF && attributeExpandsSet.contains(attrName))
+				else if (attrType == XREF && attributeExpandsSet != null
+						&& attributeExpandsSet.contains(attrName.toLowerCase()))
 				{
 					Entity refEntity = (Entity) entity.get(attr.getName());
 
@@ -707,7 +708,8 @@ public class RestController
 						entityMap.put(attrName, refEntityMap);
 					}
 				}
-				else if (attrType == MREF && attributeExpandsSet.contains(attrName))
+				else if (attrType == MREF && attributeExpandsSet != null
+						&& attributeExpandsSet.contains(attrName.toLowerCase()))
 				{
 					EntityMetaData refEntityMetaData = dataService.getRepositoryByEntityName(attr.getRefEntity()
 							.getName());
@@ -830,10 +832,5 @@ public class RestController
 						return attribute.toLowerCase();
 					}
 				})) : null;
-	}
-
-	private Set<String> toAttributeExpandSet(String[] attributeExpands)
-	{
-		return attributeExpands != null ? Sets.newHashSet(attributeExpands) : Collections.<String> emptySet();
 	}
 }

@@ -32,6 +32,15 @@ public class AttributeMetaDataResponse
 		this(entityParentName, attr, null, null);
 	}
 
+	/**
+	 * 
+	 * @param entityParentName
+	 * @param attr
+	 * @param attributesSet
+	 *            set of lowercase attribute names to include in response
+	 * @param attributeExpandsSet
+	 *            set of lowercase attribute names to expand in response
+	 */
 	public AttributeMetaDataResponse(final String entityParentName, AttributeMetaData attr, Set<String> attributesSet,
 			final Set<String> attributeExpandsSet)
 	{
@@ -66,7 +75,7 @@ public class AttributeMetaDataResponse
 		if (attributesSet == null || attributesSet.contains("refEntity".toLowerCase()))
 		{
 			EntityMetaData refEntity = attr.getRefEntity();
-			if (attributeExpandsSet != null && attributeExpandsSet.contains("refEntity"))
+			if (attributeExpandsSet != null && attributeExpandsSet.contains("refEntity".toLowerCase()))
 			{
 				this.refEntity = refEntity != null ? new EntityMetaDataResponse(refEntity, null, null) : null;
 			}
@@ -88,7 +97,7 @@ public class AttributeMetaDataResponse
 						@Override
 						public Object apply(AttributeMetaData attributeMetaData)
 						{
-							if (attributeExpandsSet != null && attributeExpandsSet.contains("attributes"))
+							if (attributeExpandsSet != null && attributeExpandsSet.contains("attributes".toLowerCase()))
 							{
 								return new AttributeMetaDataResponse(entityParentName, attributeMetaData, null, null);
 							}
