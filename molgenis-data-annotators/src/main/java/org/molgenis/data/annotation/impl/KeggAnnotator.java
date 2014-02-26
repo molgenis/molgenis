@@ -4,6 +4,7 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.LocusAnnotator;
 import org.molgenis.data.annotation.impl.datastructures.*;
 import org.molgenis.data.support.DefaultAttributeMetaData;
@@ -11,6 +12,7 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
@@ -27,6 +29,15 @@ public class KeggAnnotator extends LocusAnnotator {
     private static final String KEGG_GENE_ID = "KEGG_gene_id";
     private static final String KEGG_PATHWAYS_IDS = "KEGG_pathway_ids";
     private static final String KEGG_PATHWAYS_NAMES = "KEGG_pathway_names";
+
+    @Autowired
+    AnnotationService annotatorService;
+
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event)
+    {
+        annotatorService.addAnnotator(this);
+    }
 
     @Autowired
     DataService dataService;
