@@ -571,7 +571,7 @@ public class RestController
 
 		for (AttributeMetaData attr : meta.getAtomicAttributes())
 		{
-			String paramName = StringUtils.uncapitalize(attr.getName());
+			String paramName = attr.getName();
 			Object paramValue = request.get(paramName);
 			Object value = null;
 
