@@ -5,3 +5,7 @@
 #dataset-select-position-container {
 	position:absolute;
 }
+
+#annotation-select-title {
+	white-space:nowrap;
+}

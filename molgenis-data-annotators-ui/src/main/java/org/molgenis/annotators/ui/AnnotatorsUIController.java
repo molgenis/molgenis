@@ -157,7 +157,7 @@ public class AnnotatorsUIController extends MolgenisPluginController
 
 	@RequestMapping(value = "/execute-annotation-app", method = RequestMethod.POST)
 	public String filterMyVariants(@RequestParam(value = "annotatorNames", required = false)
-	String[] annotatorNames, Model model, @RequestParam(value = "dataSetIdentifier")
+	String[] annotatorNames, Model model, @RequestParam("dataset-identifier")
 	String dataSetIdentifier)
 	{
 		OmxDataSetAnnotator omxDataSetAnnotator = new OmxDataSetAnnotator(dataService, searchService, indexer,
