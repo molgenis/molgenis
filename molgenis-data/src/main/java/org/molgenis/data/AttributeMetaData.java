@@ -62,6 +62,8 @@ public interface AttributeMetaData
 	 */
 	boolean isLabelAttribute();
 
+	boolean isAuto();
+
 	/**
 	 * When getDataType=xref/mref, get other end of xref
 	 */

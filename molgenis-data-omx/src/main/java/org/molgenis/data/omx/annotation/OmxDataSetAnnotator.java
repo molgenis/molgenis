@@ -1,13 +1,15 @@
 package org.molgenis.data.omx.annotation;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.Date;
-import java.util.Calendar;
-import java.text.SimpleDateFormat;
+import java.util.UUID;
 
 import org.apache.log4j.Logger;
 import org.molgenis.data.AttributeMetaData;
@@ -16,9 +18,10 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryAnnotator;
+import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.omx.OmxRepository;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.omx.converters.ValueConverter;
 import org.molgenis.omx.converters.ValueConverterException;
 import org.molgenis.omx.observ.DataSet;
@@ -46,6 +49,7 @@ public class OmxDataSetAnnotator
 
 	private static final String PROTOCOL_SUFFIX = "_annotator_id";
 	private final SearchService searchService;
+	private final EntityValidator entityValidator;
 	DataService dataService;
 	DataSetsIndexer indexer;
 
@@ -55,11 +59,13 @@ public class OmxDataSetAnnotator
 	 * @param indexer
 	 * 
 	 * */
-	public OmxDataSetAnnotator(DataService dataService, SearchService searchService, DataSetsIndexer indexer)
+	public OmxDataSetAnnotator(DataService dataService, SearchService searchService, DataSetsIndexer indexer,
+			EntityValidator entityValidator)
 	{
 		this.dataService = dataService;
 		this.searchService = searchService;
 		this.indexer = indexer;
+		this.entityValidator = entityValidator;
 	}
 
 	/**
@@ -97,15 +103,13 @@ public class OmxDataSetAnnotator
 	@Transactional
 	public Repository annotate(RepositoryAnnotator annotator, Repository repo, boolean createCopy)
 	{
-
 		Iterator<Entity> entityIterator = annotator.annotate(repo.iterator());
-
 		List<String> inputMetadataNames = getMetadataNamesAsList(annotator.getInputMetaData());
 		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME,
 				new QueryImpl().eq(DataSet.IDENTIFIER, repo.getName()), DataSet.class);
 		if (createCopy)
 		{
-			dataSet = copy(dataSet);
+			dataSet = copyDataSet(dataSet);
 		}
 
 		Protocol resultProtocol = dataService.findOne(Protocol.ENTITY_NAME,
@@ -129,33 +133,45 @@ public class OmxDataSetAnnotator
 
 	private void addAnnotationResults(List<String> inputMetadataNames, List<String> outputMetadataNames,
 
-	DataSet dataSet, Iterator<Entity> entityIterator, RepositoryAnnotator annotator)
+	DataSet dataSet, Iterator<Entity> annotationResultIterator, RepositoryAnnotator annotator)
 
 	{
-		Iterable<ObservationSet> osSet = dataService.findAll(ObservationSet.ENTITY_NAME,
+		List<String> processedObservationSets = new ArrayList<String>();
+		Iterable<ObservationSet> ObservationSets = dataService.findAll(ObservationSet.ENTITY_NAME,
 				new QueryImpl().eq(ObservationSet.PARTOFDATASET, dataSet), ObservationSet.class);
 
 		CrudRepository valueRepo = (CrudRepository) dataService.getRepositoryByEntityName(ObservedValue.ENTITY_NAME);
 		Map<String, Object> inputValues;
-		while (entityIterator.hasNext())
+		while (annotationResultIterator.hasNext())
 		{
-			Entity entity = entityIterator.next();
-			for (ObservationSet os : osSet)
+			Entity entity = annotationResultIterator.next();
+			for (ObservationSet observationSet : ObservationSets)
 			{
-				inputValues = createInputValueMap(inputMetadataNames, valueRepo, os);
-
-				if (entityEqualsObservationSet(entity, inputValues, inputMetadataNames))
+				inputValues = createInputValueMap(inputMetadataNames, valueRepo, observationSet);
+				if (inputValues.size() != 0)
 				{
-					for (String columnName : outputMetadataNames)
+					if (entityEqualsObservationSet(entity, inputValues, inputMetadataNames))
 					{
 
-						try
+						if (!processedObservationSets.contains(observationSet.getIdentifier()))
 						{
-							addValue(entity, os, columnName, annotator.getName());
+							processedObservationSets.add(observationSet.getIdentifier());
 						}
-						catch (ValueConverterException e)
+						else
 						{
-							logger.error(e.getMessage());
+							copyObservationSets(Collections.singletonList(observationSet), null);
+							processedObservationSets.add(observationSet.getIdentifier());
+						}
+						for (String columnName : outputMetadataNames)
+						{
+							try
+							{
+								addValue(entity, observationSet, columnName, annotator.getName());
+							}
+							catch (Exception e)
+							{
+								logger.error(e.getMessage());
+							}
 						}
 
 					}
@@ -210,23 +226,23 @@ public class OmxDataSetAnnotator
 		for (AttributeMetaData attributeMetaData : metaData)
 		{
 			ObservableFeature newFeature = new ObservableFeature();
+			String newFeatureName = prefix + attributeMetaData.getName();
 			if (dataService.findOne(ObservableFeature.ENTITY_NAME,
-					new QueryImpl().eq(ObservableFeature.IDENTIFIER, attributeMetaData.getName())) == null)
+					new QueryImpl().eq(ObservableFeature.IDENTIFIER, newFeatureName)) == null)
 			{
-				newFeature.setIdentifier(prefix + attributeMetaData.getName());
+				newFeature.setIdentifier(newFeatureName);
 				newFeature.setName(attributeMetaData.getLabel());
 				newFeature.setDataType(attributeMetaData.getDataType().toString());
 				dataService.add(ObservableFeature.ENTITY_NAME, newFeature);
-
 				resultProtocol.getFeatures().add(newFeature);
 			}
 			dataService.update(Protocol.ENTITY_NAME, resultProtocol);
 		}
 	}
 
-	private void addValue(Entity entity, ObservationSet os, String columnName, String prefix)
+	private void addValue(Entity entity, ObservationSet observationSet, String columnName, String prefix)
+			throws ValueConverterException
 
-	throws ValueConverterException
 	{
 		ObservableFeature thisFeature = dataService.findOne(ObservableFeature.ENTITY_NAME,
 				new QueryImpl().eq(ObservableFeature.IDENTIFIER, prefix + columnName), ObservableFeature.class);
@@ -236,13 +252,13 @@ public class OmxDataSetAnnotator
 
 		ObservedValue observedValue = new ObservedValue();
 		observedValue.setFeature(thisFeature);
-		observedValue.setObservationSet(os);
+		observedValue.setObservationSet(observationSet);
 		observedValue.setValue(value);
 		dataService.add(ObservedValue.ENTITY_NAME, observedValue);
 	}
 
 	private Map<String, Object> createInputValueMap(List<String> inputFeatureNames, CrudRepository valueRepo,
-			ObservationSet os)
+			ObservationSet observationSet)
 	{
 		Map<String, Object> inputValueMap = new TreeMap<String, Object>(String.CASE_INSENSITIVE_ORDER);
 		for (String inputFeatureName : inputFeatureNames)
@@ -251,11 +267,19 @@ public class OmxDataSetAnnotator
 					new QueryImpl().eq(ObservableFeature.IDENTIFIER, inputFeatureName), ObservableFeature.class);
 
 			// retrieve a value from this observation set based on a specified feature
-			ObservedValue value = valueRepo.findOne(
-					new QueryImpl().eq(ObservedValue.OBSERVATIONSET, os).eq(ObservedValue.FEATURE, inputFeature),
-					ObservedValue.class);
-			String inputValue = value.getValue().getString("value");
-			inputValueMap.put(inputFeature.getIdentifier(), inputValue);
+			ObservedValue value = valueRepo.findOne(new QueryImpl().eq(ObservedValue.OBSERVATIONSET, observationSet)
+					.eq(ObservedValue.FEATURE, inputFeature), ObservedValue.class);
+
+			if (value != null)
+			{
+				Value omxValue = value.getValue();
+				if (omxValue != null)
+				{
+					Object inputValue = omxValue.get("value");
+					inputValueMap.put(inputFeature.getIdentifier(), inputValue);
+				}
+			}
+
 		}
 		return inputValueMap;
 	}
@@ -266,7 +290,7 @@ public class OmxDataSetAnnotator
 		boolean areEqual = true;
 		for (String inputFeatureName : inputFeatureNames)
 		{
-			if (!entity.get(inputFeatureName).equals(inputValues.get(inputFeatureName)))
+			if (!inputValues.get(inputFeatureName).equals(entity.get(inputFeatureName)))
 			{
 				areEqual = false;
 				break;
@@ -276,22 +300,19 @@ public class OmxDataSetAnnotator
 	}
 
 	@Transactional
-	public DataSet copy(DataSet original)
+	public DataSet copyDataSet(DataSet original)
 	{
 		Date date = new Date();
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(date);
-		SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy_HH:mm");
-		String dateString = sdf.format(date);
-
-		List<ObservationSet> newObservationSets = new ArrayList<ObservationSet>();
-		List<ObservedValue> newObservedValues = new ArrayList<ObservedValue>();
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MMM-yyyy_HH:mm");
+		String dateString = simpleDateFormat.format(date);
 
 		Protocol newRootProtocol = new Protocol();
-		newRootProtocol.setIdentifier(original.getProtocolUsed().getIdentifier() + cal.getTimeInMillis());
+		newRootProtocol.setIdentifier(original.getProtocolUsed().getIdentifier() + calendar.getTimeInMillis());
 		newRootProtocol.setName(original.getName() + "_results_" + dateString);
 
-		List subprotocols = new ArrayList<Protocol>();
+		List<Protocol> subprotocols = new ArrayList<Protocol>();
 		subprotocols.add(original.getProtocolUsed());
 		newRootProtocol.setSubprotocols(subprotocols);
 		dataService.add(Protocol.ENTITY_NAME, newRootProtocol);
@@ -299,22 +320,35 @@ public class OmxDataSetAnnotator
 		DataSet copy = new DataSet();
 		copy.setProtocolUsed(newRootProtocol);
 		copy.setName(original.getName() + "_results_" + dateString);
-		copy.setIdentifier(original.getIdentifier() + cal.getTimeInMillis());
+		copy.setIdentifier(original.getIdentifier() + calendar.getTimeInMillis());
 		copy.setStartTime(date);
 		copy.setEndTime(date);
 
 		Iterable<ObservationSet> observationSets = dataService.findAll(ObservationSet.ENTITY_NAME,
 				new QueryImpl().eq(ObservationSet.PARTOFDATASET, original), ObservationSet.class);
 		dataService.add(DataSet.ENTITY_NAME, copy);
-		OmxRepository repo = new OmxRepository(dataService, searchService, copy.getIdentifier());
+		OmxRepository repo = new OmxRepository(dataService, searchService, copy.getIdentifier(), entityValidator);
 		dataService.addRepository(repo);
 
+		copyObservationSets(observationSets, copy);
+
+		return copy;
+	}
+
+	private void copyObservationSets(Iterable<ObservationSet> observationSets, DataSet copy)
+	{
+		List<ObservationSet> newObservationSets = new ArrayList<ObservationSet>();
+		List<ObservedValue> newObservedValues = new ArrayList<ObservedValue>();
 		for (ObservationSet observationSet : observationSets)
 		{
+
 			Iterable<ObservedValue> observedValues = dataService.findAll(ObservedValue.ENTITY_NAME,
 					new QueryImpl().eq(ObservedValue.OBSERVATIONSET, observationSet), ObservedValue.class);
-			observationSet.setPartOfDataSet(copy);
-			observationSet.setIdentifier(observationSet.getIdentifier() + new Date().getTime());
+			if (copy != null)
+			{
+				observationSet.setPartOfDataSet(copy);
+			}
+			observationSet.setIdentifier(UUID.randomUUID().toString());
 			observationSet.setId(null);
 			newObservationSets.add(observationSet);
 			for (ObservedValue observedValue : observedValues)
@@ -327,7 +361,5 @@ public class OmxDataSetAnnotator
 
 		dataService.add(ObservationSet.ENTITY_NAME, newObservationSets);
 		dataService.add(ObservedValue.ENTITY_NAME, newObservedValues);
-
-		return copy;
 	}
 }

@@ -1,5 +1,6 @@
 package org.molgenis.elasticsearch;
 
+import static org.elasticsearch.client.Requests.refreshRequest;
 import static org.molgenis.elasticsearch.util.MapperTypeSanitizer.sanitizeMapperType;
 
 import java.io.IOException;
@@ -339,6 +340,12 @@ public class ElasticSearchService implements SearchService
 		}
 
 		LOG.info("Mapping for documentType [" + repository.getName() + "] created");
+	}
+
+	@Override
+	public void refresh()
+	{
+		client.admin().indices().refresh(refreshRequest()).actionGet();
 	}
 
 }

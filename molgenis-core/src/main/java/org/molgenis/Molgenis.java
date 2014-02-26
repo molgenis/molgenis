@@ -40,7 +40,6 @@ import org.molgenis.generators.db.CrudRepositorySecurityDecoratorGen;
 import org.molgenis.generators.db.DatabaseConfigGen;
 import org.molgenis.generators.db.EntitiesImporterGen;
 import org.molgenis.generators.db.EntitiesValidatorGen;
-import org.molgenis.generators.db.EntityImporterGen;
 import org.molgenis.generators.db.JDBCMetaDatabaseGen;
 import org.molgenis.generators.db.PersistenceGen;
 import org.molgenis.generators.doc.DotDocGen;
@@ -225,7 +224,6 @@ public class Molgenis
 			generators.add(new DataTypeGen());
 			generators.add(new EntityMetaDataGen());
 			generators.add(new JpaRepositoryGen());
-			generators.add(new EntityImporterGen());
 			generators.add(new JDBCMetaDatabaseGen());
 
 			if (options.generate_persistence)

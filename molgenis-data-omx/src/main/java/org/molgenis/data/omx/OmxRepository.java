@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
+import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
@@ -16,6 +17,9 @@ import org.molgenis.data.Queryable;
 import org.molgenis.data.Writable;
 import org.molgenis.data.support.ConvertingIterable;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.validation.ConstraintViolation;
+import org.molgenis.data.validation.EntityValidator;
+import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.omx.converters.ValueConverter;
 import org.molgenis.omx.converters.ValueConverterException;
 import org.molgenis.omx.dataset.AbstractDataSetMatrixRepository;
@@ -32,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Sets;
 
 /**
  * Repository around an omx DataSet matrix.
@@ -46,12 +51,15 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Qu
 	private final SearchService searchService;
 	private final ValueConverter valueConverter;
 	private LoadingCache<String, ObservableFeature> observableFeatureCache = null;
+	private final EntityValidator entityValidator;
 
-	public OmxRepository(DataService dataService, SearchService searchService, String dataSetIdentifier)
+	public OmxRepository(DataService dataService, SearchService searchService, String dataSetIdentifier,
+			EntityValidator entityValidator)
 	{
 		super(BASE_URL + dataSetIdentifier, dataService, dataSetIdentifier);
 		this.searchService = searchService;
 		this.valueConverter = new ValueConverter(dataService);
+		this.entityValidator = entityValidator;
 	}
 
 	@Override
@@ -176,12 +184,16 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Qu
 	@Override
 	public void add(Iterable<? extends Entity> entities)
 	{
+		entityValidator.validate(entities, this, DatabaseAction.ADD);
+
 		DataSet dataSet = getDataSet();
 		CrudRepository repo = dataService.getCrudRepository(ObservableFeature.ENTITY_NAME);
 
 		int rownr = 0;
 		for (Entity entity : entities)
 		{
+			rownr++;
+
 			// Skip empty rows
 			if (!EntityUtils.isEmpty(entity))
 			{
@@ -210,16 +222,27 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Qu
 						Value value = null;
 						try
 						{
+							// Create a value for the ObservableFeature to add to the ObservedValue
 							value = valueConverter.fromEntity(entity, observableFeature.getIdentifier(),
 									observableFeature);
+
 						}
 						catch (ValueConverterException e)
 						{
-							throw new MolgenisDataException("Failed to convert ");
+							// Error creating Value, this can only be a wrong xref,mref or catagory. All other datatypes
+							// are already validated by the EntityValidator (see above)
+
+							Object invalidValue = entity.get(observableFeature.getIdentifier());
+							String message = String.format("Invalid value '%s' for attribute '%s' of entity '%s'.",
+									invalidValue, observableFeature.getIdentifier(), getName());
+
+							throw new MolgenisValidationException(Sets.newHashSet(new ConstraintViolation(message,
+									invalidValue, entity, attr, this, rownr)));
 						}
 
 						if (value != null)
 						{
+							// Save the value
 							dataService.add(value.getEntityName(), value);
 
 							// create observed value
@@ -227,14 +250,17 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Qu
 							observedValue.setFeature(observableFeature);
 							observedValue.setValue(value);
 							observedValue.setObservationSet(observationSet);
+
+							// Save ObservedValue
 							dataService.add(ObservedValue.ENTITY_NAME, observedValue);
 						}
+
 					}
 				}
 
 			}
 
-			if (++rownr % FLUSH_SIZE == 0)
+			if (rownr % FLUSH_SIZE == 0)
 			{
 				repo.flush();
 				repo.clearCache();

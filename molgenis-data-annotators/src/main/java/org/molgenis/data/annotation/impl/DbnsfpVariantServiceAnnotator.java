@@ -2,14 +2,19 @@ package org.molgenis.data.annotation.impl;
 
 import java.util.*;
 import java.io.*;
+
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.RepositoryAnnotator;
+import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 /**
@@ -39,7 +44,7 @@ import org.springframework.stereotype.Component;
  * 
  * */
 @Component("dbnsfpVariantService")
-public class DbnsfpVariantServiceAnnotator implements RepositoryAnnotator
+public class DbnsfpVariantServiceAnnotator implements RepositoryAnnotator, ApplicationListener<ContextRefreshedEvent>
 {
 	// the dbnsfp service is dependant on these four values,
 	// without them no annotations can be returned
@@ -53,6 +58,57 @@ public class DbnsfpVariantServiceAnnotator implements RepositoryAnnotator
 
 	// we want to know features, so take the first chromosome file and retrieve them from the header
 	private static final String[] FEATURES = determineFeatures();
+	
+	@Autowired
+	AnnotationService annotatorService;
+	
+	@Override
+	public void onApplicationEvent(ContextRefreshedEvent event)
+	{
+		annotatorService.addAnnotator(this);
+	}
+	
+	@Override
+	public String getName()
+	{
+		return "dbNSFP-Variant";
+	}
+	
+	/**
+	 * <p>
+	 * This method returns the attributes needed to use this annotation tool.
+	 * </p>
+	 * 
+	 * */
+	@Override
+	public EntityMetaData getInputMetaData()
+	{
+		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
+
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CHROMOSOME, FieldTypeEnum.STRING));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(POSITION, FieldTypeEnum.STRING));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(REFERENCE, FieldTypeEnum.STRING));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ALTERNATIVE, FieldTypeEnum.STRING));
+
+		return metadata;
+	}
+	
+	@Override
+	public boolean canAnnotate(EntityMetaData sourceMetaData)
+	{
+		boolean canAnnotate = true;
+		Iterable<AttributeMetaData> inputAttributes = getInputMetaData().getAttributes();
+		for (AttributeMetaData attribute : inputAttributes)
+		{
+			if (sourceMetaData.getAttribute(attribute.getName()) == null)
+			{
+				// all attributes from the inputmetadata must be present to annotate.
+				canAnnotate = false;
+			}
+		}
+
+		return canAnnotate;
+	}
 
 	@Override
 	public Iterator<Entity> annotate(Iterator<Entity> source)
@@ -170,72 +226,6 @@ public class DbnsfpVariantServiceAnnotator implements RepositoryAnnotator
 
 		return results.iterator();
 	}
-
-	/**
-	 * <p>
-	 * This method returns the output that this annotation tool will produce
-	 * </p>
-	 * 
-	 * */
-	@Override
-	public EntityMetaData getOutputMetaData()
-	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
-
-		for (String attribute : FEATURES)
-		{
-			if (attribute != null)
-			{
-				// FIXME not all attributes are strings
-				metadata.addAttributeMetaData(new DefaultAttributeMetaData(attribute, FieldTypeEnum.STRING));
-			}
-		}
-
-		return metadata;
-	}
-
-	/**
-	 * <p>
-	 * This method returns the attributes needed to use this annotation tool.
-	 * </p>
-	 * 
-	 * */
-	@Override
-	public EntityMetaData getInputMetaData()
-	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
-
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CHROMOSOME, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(POSITION, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(REFERENCE, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ALTERNATIVE, FieldTypeEnum.STRING));
-
-		return metadata;
-
-	}
-
-	@Override
-	public Boolean canAnnotate(EntityMetaData sourceMetaData)
-	{
-		boolean canAnnotate = true;
-		Iterable<AttributeMetaData> inputAttributes = getInputMetaData().getAttributes();
-		for (AttributeMetaData attribute : inputAttributes)
-		{
-			if (sourceMetaData.getAttribute(attribute.getName()) == null)
-			{
-				// all attributes from the inputmetadata must be present to annotate.
-				canAnnotate = false;
-			}
-		}
-
-		return canAnnotate;
-	}
-
-	@Override
-	public String getName()
-	{
-		return "dbNSFP-Variant";
-	}
 	
 	private static String[] determineFeatures()
 	{
@@ -265,5 +255,28 @@ public class DbnsfpVariantServiceAnnotator implements RepositoryAnnotator
 		features[3] = null;
 
 		return features;
+	}
+	
+	/**
+	 * <p>
+	 * This method returns the output that this annotation tool will produce
+	 * </p>
+	 * 
+	 * */
+	@Override
+	public EntityMetaData getOutputMetaData()
+	{
+		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
+
+		for (String attribute : FEATURES)
+		{
+			if (attribute != null)
+			{
+				// FIXME not all attributes are strings
+				metadata.addAttributeMetaData(new DefaultAttributeMetaData(attribute, FieldTypeEnum.STRING));
+			}
+		}
+
+		return metadata;
 	}
 }

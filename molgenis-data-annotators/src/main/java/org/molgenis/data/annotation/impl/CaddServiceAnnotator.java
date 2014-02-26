@@ -13,12 +13,15 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.RepositoryAnnotator;
+import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 /**
@@ -37,7 +40,7 @@ import org.springframework.stereotype.Component;
  * 
  * */
 @Component("caddService")
-public class CaddServiceAnnotator implements RepositoryAnnotator
+public class CaddServiceAnnotator implements RepositoryAnnotator, ApplicationListener<ContextRefreshedEvent>
 {
 	// the cadd service is dependant on these four values,
 	// without them no CADD score can be returned
@@ -55,6 +58,51 @@ public class CaddServiceAnnotator implements RepositoryAnnotator
 
 	@Autowired
 	private MolgenisSettings molgenisSettings;
+	
+	@Autowired
+	AnnotationService annotatorService;
+
+	@Override
+	public void onApplicationEvent(ContextRefreshedEvent event)
+	{
+		annotatorService.addAnnotator(this);
+	}
+	
+	@Override
+	public String getName()
+	{
+		return "CADD";
+	}
+	
+	@Override
+	public EntityMetaData getInputMetaData()
+	{
+		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
+
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CHROMOSOME, FieldTypeEnum.STRING));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(POSITION, FieldTypeEnum.LONG));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(REFERENCE, FieldTypeEnum.STRING));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ALTERNATIVE, FieldTypeEnum.STRING));
+
+		return metadata;
+	}
+	
+	@Override
+	public boolean canAnnotate(EntityMetaData inputMetaData)
+	{
+		boolean canAnnotate = true;
+		Iterable<AttributeMetaData> inputAttributes = getInputMetaData().getAttributes();
+		for (AttributeMetaData attribute : inputAttributes)
+		{
+			if (inputMetaData.getAttribute(attribute.getName()) == null) canAnnotate = false;
+			else if (!inputMetaData.getAttribute(attribute.getName()).getDataType().equals(attribute.getDataType()))
+			{
+				canAnnotate = false;
+			}
+		}
+		return canAnnotate;
+	}
+
 
 	@Override
 	public Iterator<Entity> annotate(Iterator<Entity> source)
@@ -139,38 +187,5 @@ public class CaddServiceAnnotator implements RepositoryAnnotator
 		}
 
 		return metadata;
-	}
-
-	@Override
-	public EntityMetaData getInputMetaData()
-	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
-
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CHROMOSOME, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(POSITION, FieldTypeEnum.LONG));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(REFERENCE, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ALTERNATIVE, FieldTypeEnum.STRING));
-
-		return metadata;
-	}
-
-	@Override
-	public Boolean canAnnotate(EntityMetaData sourceMetaData)
-	{
-		boolean canAnnotate = true;
-		Iterable<AttributeMetaData> inputAttributes = getInputMetaData().getAttributes();
-		for(AttributeMetaData attribute : inputAttributes){
-			if(sourceMetaData.getAttribute(attribute.getName()) == null){
-				//all attributes from the inputmetadata must be present to annotate.
-				canAnnotate = false;
-			}
-		}
-		return canAnnotate;
-	}
-
-	@Override
-	public String getName()
-	{
-		return "CADD";
-	}
+	}	
 }
