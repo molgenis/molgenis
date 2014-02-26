@@ -34,7 +34,6 @@
 		    	<@phenotypefilter_panel />
 		    	<@annotationselect_panel />			
 			</div>
-			
 		</div>
 	</div>
 </div>
