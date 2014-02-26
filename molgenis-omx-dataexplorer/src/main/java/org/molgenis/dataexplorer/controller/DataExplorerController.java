@@ -69,8 +69,6 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String ID = "dataexplorer";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
-	private static final String DEFAULT_KEY_TABLE_TYPE = "MultiObservationSetTable.js";
-	private static final String KEY_TABLE_TYPE = "dataexplorer.resultstable.js";
 	private static final String KEY_APP_HREF_CSS = "app.href.css";
 
 	// Including excluding the charts module
@@ -141,9 +139,6 @@ public class DataExplorerController extends MolgenisPluginController
 
 		// Init genome browser
 		model.addAttribute("genomeBrowserSets", getGenomeBrowserSetsToModel());
-
-		String resultsTableJavascriptFile = molgenisSettings.getProperty(KEY_TABLE_TYPE, DEFAULT_KEY_TABLE_TYPE);
-		model.addAttribute("resultsTableJavascriptFile", resultsTableJavascriptFile);
 
 		String appHrefCss = molgenisSettings.getProperty(KEY_APP_HREF_CSS);
 		if (appHrefCss != null) model.addAttribute(KEY_APP_HREF_CSS.replaceAll("\\.", "_"), appHrefCss);
