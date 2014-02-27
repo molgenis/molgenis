@@ -17,19 +17,64 @@
 		settings.container.html(items.join(''));
 		
 		// add data to elements
-		createTableHeader(settings);
-		getTableData(settings, function(data) {
-			createTableBody(data, settings);
-			createTablePager(data, settings);
-			createTableFooter(data, settings);
+		getTableMetaData(settings, function(attributes, refEntitiesMeta) {
+			settings.colAttributes = attributes;
+			settings.refEntitiesMeta = refEntitiesMeta;
+			
+			getTableData(settings, function(data) {
+				createTableHeader(settings);
+				createTableBody(data, settings);
+				createTablePager(data, settings);
+				createTableFooter(data, settings);
+			});
+		});
+	}
+	
+	function getTableMetaData(settings, callback) {
+		// for compound attributes, expand recursively and select all atomic attributes
+		var colAttributes = [];
+		function createColAttributesRec(attributes) {
+			$.each(attributes, function(i, attribute) {
+				if(attribute.fieldType === 'COMPOUND'){
+					// FIXME improve performance by retrieving async 
+					attribute = restApi.get(attribute.href, {'expand': ['attributes']});
+					createColAttributesRec(attribute.attributes);
+				}
+ 				else
+					colAttributes.push(attribute);
+			});	
+		}
+		createColAttributesRec(settings.attributes);
+		
+		// get meta data for referenced entities
+		var refEntitiesMeta = {}; 
+		$.each(colAttributes, function(i, attribute) {
+			if(attribute.fieldType === 'XREF' || attribute.fieldType === 'MREF') {
+				refEntitiesMeta[attribute.refEntity.href] = null;
+			}
+		});
+		
+		var dfds = [];
+		$.each(refEntitiesMeta, function(entityHref) {
+			dfds.push($.Deferred(function(dfd) {
+				restApi.getAsync(entityHref, {'expand' : [ 'attributes' ]}, function(entityMeta) {
+					refEntitiesMeta[entityHref] = entityMeta;
+					dfd.resolve();
+				});
+			}).promise());
+		});
+		
+		// build table after all meta data for referenced entities was loaded
+		$.when.apply($, dfds).done(function() {
+			callback(colAttributes, refEntitiesMeta);
 		});
 	}
 	
 	function getTableData(settings, callback) {
-		var attributeNames = $.map(settings.attributes, function(attribute) {
+		var attributeNames = $.map(settings.colAttributes, function(attribute) {
 			return attribute.name;
 		});
-		var expandAttributeNames = $.map(settings.attributes, function(attribute) {
+		var expandAttributeNames = $.map(settings.colAttributes, function(attribute) {
 			return attribute.fieldType === 'XREF' || attribute.fieldType === 'MREF' ? attribute.name : null; 
 		});
 		
@@ -45,7 +90,7 @@
 		var container = $('.molgenis-table thead', settings.container);
 		
 		var items = [];
-		$.each(settings.attributes, function(i, attribute) {
+		$.each(settings.colAttributes, function(i, attribute) {
 			if (settings.sort && settings.sort.orders[0].property === attribute.name) {
 				if (settings.sort.orders[0].direction == 'ASC') {
 					items.push('<th>' + attribute.label + '<span data-attribute="' + attribute.name
@@ -64,76 +109,55 @@
 	
 	function createTableBody(data, settings) {
 		var container = $('.molgenis-table tbody', settings.container);
-	
-		// get meta data for referenced entities
-		var refEntitiesMeta = {}; 
-		$.each(settings.attributes, function(i, attribute) {
-			if(attribute.fieldType === 'XREF' || attribute.fieldType === 'MREF') {
-				refEntitiesMeta[attribute.refEntity.href] = null;
-			}
-		});
-		
-		var dfds = [];
-		$.each(refEntitiesMeta, function(entityHref) {
-			dfds.push($.Deferred(function(dfd) {
-				restApi.getAsync(entityHref, {'expand' : [ 'attributes' ]}, function(entityMeta) {
-					refEntitiesMeta[entityHref] = entityMeta;
-					dfd.resolve();
-				});
-			}).promise());
-		});
-		
-		// build table after all meta data for referenced entities was loaded
-		$.when.apply($, dfds).done(function() {
-			var items = [];
-			for ( var i = 0; i < data.items.length; ++i) {
-				items.push('<tr>');
-				var entity = data.items[i];
 
-				$.each(settings.attributes, function(i, attribute) {
-					var rawValue = entity[attribute.name];
-					if (rawValue) {
-						var cellValue;
-						switch(attribute.fieldType) {
-							case 'XREF':
-							case 'MREF':
-								var refEntity = refEntitiesMeta[attribute.refEntity.href];
-								var refAttribute = refEntity.labelAttribute;
-								var refAttributeType = refEntity.attributes[refAttribute].fieldType;
-								if (refAttributeType === 'XREF' || refAttributeType === 'MREF' || refAttributeType === 'COMPOUND') {
-									throw 'unsupported field type ' + refAttributeType;
-								}
-								
-								switch(attribute.fieldType) {
-									case 'XREF':
-										cellValue = formatTableCellValue(rawValue[refAttribute], refAttributeType);
-										break;
-									case 'MREF':
-										var cellValueParts = [];
-										$.each(rawValue.items, function(i, rawValue) {
-											var cellValuePart = formatTableCellValue(rawValue[refAttribute], refAttributeType);
-											cellValueParts.push(cellValuePart);
-										});
-										cellValue = cellValueParts.join(',');
-										break;
-									default:
-										throw 'unexpected field type ' + attribute.fieldType;
-								}
-								break;
-							default :
-								cellValue = formatTableCellValue(rawValue, attribute.fieldType);
-								break;
-						}
-						items.push('<td class="multi-os-datacell">' + cellValue + '</td>');
-					} else {
-						items.push('<td></td>');
+		var items = [];
+		for ( var i = 0; i < data.items.length; ++i) {
+			items.push('<tr>');
+			var entity = data.items[i];
+
+			$.each(settings.colAttributes, function(i, attribute) {
+				var rawValue = entity[attribute.name];
+				if (rawValue) {
+					var cellValue;
+					switch(attribute.fieldType) {
+						case 'XREF':
+						case 'MREF':
+							var refEntity = settings.refEntitiesMeta[attribute.refEntity.href];
+							var refAttribute = refEntity.labelAttribute;
+							var refAttributeType = refEntity.attributes[refAttribute].fieldType;
+							if (refAttributeType === 'XREF' || refAttributeType === 'MREF' || refAttributeType === 'COMPOUND') {
+								throw 'unsupported field type ' + refAttributeType;
+							}
+							
+							switch(attribute.fieldType) {
+								case 'XREF':
+									cellValue = formatTableCellValue(rawValue[refAttribute], refAttributeType);
+									break;
+								case 'MREF':
+									var cellValueParts = [];
+									$.each(rawValue.items, function(i, rawValue) {
+										var cellValuePart = formatTableCellValue(rawValue[refAttribute], refAttributeType);
+										cellValueParts.push(cellValuePart);
+									});
+									cellValue = cellValueParts.join(',');
+									break;
+								default:
+									throw 'unexpected field type ' + attribute.fieldType;
+							}
+							break;
+						default :
+							cellValue = formatTableCellValue(rawValue, attribute.fieldType);
+							break;
 					}
-				});
+					items.push('<td class="multi-os-datacell">' + cellValue + '</td>');
+				} else {
+					items.push('<td></td>');
+				}
+			});
 
-				items.push('</tr>');
-			}
-			container.html(items.join(''));
-		});
+			items.push('</tr>');
+		}
+		container.html(items.join(''));
 	}
 	
 	function createTablePager(data, settings) {
