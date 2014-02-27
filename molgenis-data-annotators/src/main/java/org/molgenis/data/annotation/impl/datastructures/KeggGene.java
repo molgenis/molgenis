@@ -1,7 +1,5 @@
 package org.molgenis.data.annotation.impl.datastructures;
 
-import com.sun.org.apache.xalan.internal.xsltc.compiler.sym;
-
 import java.util.List;
 
 /**
