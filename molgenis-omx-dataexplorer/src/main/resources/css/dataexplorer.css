@@ -32,23 +32,27 @@
 	margin-bottom: 0px;
 }
 
-#data-table thead th .ui-icon {
-	display: inline-block;
-	cursor: pointer;
-	cursor: hand;
+.molgenis-table thead th {
+	background-color: #5B82A4;
+	color: white;
 }
 
-#data-table thead th .updown {
+.molgenis-table thead th .ui-icon {
+	display: inline-block;
+	cursor: pointer;
+}
+
+.molgenis-table thead th .updown {
 	vertical-align: middle;
 	background-image: url("images/ui-icons_454545_256x240.png");
 }
 
-#data-table thead th .up {
+.molgenis-table thead th .up {
 	vertical-align: top;
 	background-image: url("images/ui-icons_ffffff_256x240.png");
 }
 
-#data-table thead th .down {
+.molgenis-table thead th .down {
 	vertical-align: bottom;
 	background-image: url("images/ui-icons_ffffff_256x240.png");
 }
@@ -71,11 +75,6 @@
 
 .ui-accordion-header {
 	background: none;
-	background-color: #5B82A4;
-	color: white;
-}
-
-.table thead th {
 	background-color: #5B82A4;
 	color: white;
 }
@@ -280,4 +279,21 @@ input[type=number] {
 #wizard-button{
 	color:white;
 	background:#5B82A4
+}
+
+.#feature-selection .fancytree-ico-e span.fancytree-icon
+{
+	background-position: 0 0;
+	background-image: url("../../img/filter-bw.png");
+}
+
+#feature-selection .fancytree-ico-e span.fancytree-icon:hover {
+	background-position: 0 0;
+	background-image: url("../../img/filter-bw.png");
+	cursor: pointer;
+}
+
+#feature-selection ul.fancytree-container {
+	padding: 0px;
+	border-style: none;
 }
