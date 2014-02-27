@@ -15,6 +15,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.VariantAnnotator;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -26,10 +27,9 @@ import org.springframework.stereotype.Component;
 
 /**
  * <p>
- * This class performs a system call to cross reference a chromosome 
- * and genomic location with a tabix indexed file. A match can result in 1, 2 or 3 hits.
- * These matches are reduced to one based on a reference and alternative nucleotide base.
- * The remaining hit will be used to parse two CADD scores.
+ * This class performs a system call to cross reference a chromosome and genomic location with a tabix indexed file. A
+ * match can result in 1, 2 or 3 hits. These matches are reduced to one based on a reference and alternative nucleotide
+ * base. The remaining hit will be used to parse two CADD scores.
  * </p>
  * 
  * <p>
@@ -40,7 +40,7 @@ import org.springframework.stereotype.Component;
  * 
  * */
 @Component("caddService")
-public class CaddServiceAnnotator implements RepositoryAnnotator, ApplicationListener<ContextRefreshedEvent>
+public class CaddServiceAnnotator extends VariantAnnotator
 {
 	// the cadd service is dependant on these four values,
 	// without them no CADD score can be returned
@@ -58,7 +58,7 @@ public class CaddServiceAnnotator implements RepositoryAnnotator, ApplicationLis
 
 	@Autowired
 	private MolgenisSettings molgenisSettings;
-	
+
 	@Autowired
 	AnnotationService annotatorService;
 
@@ -67,49 +67,19 @@ public class CaddServiceAnnotator implements RepositoryAnnotator, ApplicationLis
 	{
 		annotatorService.addAnnotator(this);
 	}
-	
+
 	@Override
 	public String getName()
 	{
 		return "CADD";
 	}
-	
-	@Override
-	public EntityMetaData getInputMetaData()
-	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
-
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CHROMOSOME, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(POSITION, FieldTypeEnum.LONG));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(REFERENCE, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ALTERNATIVE, FieldTypeEnum.STRING));
-
-		return metadata;
-	}
-	
-	@Override
-	public boolean canAnnotate(EntityMetaData inputMetaData)
-	{
-		boolean canAnnotate = true;
-		Iterable<AttributeMetaData> inputAttributes = getInputMetaData().getAttributes();
-		for (AttributeMetaData attribute : inputAttributes)
-		{
-			if (inputMetaData.getAttribute(attribute.getName()) == null) canAnnotate = false;
-			else if (!inputMetaData.getAttribute(attribute.getName()).getDataType().equals(attribute.getDataType()))
-			{
-				canAnnotate = false;
-			}
-		}
-		return canAnnotate;
-	}
-
 
 	@Override
 	public Iterator<Entity> annotate(Iterator<Entity> source)
 	{
 		List<Entity> results = new ArrayList<Entity>();
 		String systemCall = molgenisSettings.getProperty("CADD_Command");
-		
+
 		while (source.hasNext())
 		{
 			Entity entity = source.next();
@@ -121,7 +91,7 @@ public class CaddServiceAnnotator implements RepositoryAnnotator, ApplicationLis
 
 			String caddAbs = "";
 			String caddScaled = "";
-			
+
 			try
 			{
 				Runtime runTime = Runtime.getRuntime();
@@ -149,6 +119,7 @@ public class CaddServiceAnnotator implements RepositoryAnnotator, ApplicationLis
 				}
 
 				HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
 				resultMap.put(CADD_ABS, caddAbs);
 				resultMap.put(CADD_SCALED, caddScaled);
 				resultMap.put(CHROMOSOME, chromosome);
@@ -176,16 +147,11 @@ public class CaddServiceAnnotator implements RepositoryAnnotator, ApplicationLis
 	@Override
 	public EntityMetaData getOutputMetaData()
 	{
-		String[] caddFeatures = new String[]
-		{ CADD_ABS, CADD_SCALED };
-
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
 
-		for (String attribute : caddFeatures)
-		{
-			metadata.addAttributeMetaData(new DefaultAttributeMetaData(attribute, FieldTypeEnum.INT));
-		}
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CADD_ABS, FieldTypeEnum.DECIMAL));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CADD_SCALED, FieldTypeEnum.DECIMAL));
 
 		return metadata;
-	}	
+	}
 }
