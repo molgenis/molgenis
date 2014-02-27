@@ -7,10 +7,6 @@
 	font-size: 15.4px;
 }
 
-#feature-selection ul {
-	list-style-type: none;
-}
-
 .icon-filter {
 	margin-left: 10px;
 }
@@ -84,6 +80,8 @@ a.accordion-toggle:hover,a.accordion-toggle:focus,a.accordion-toggle:active
 
 #feature-selection {
 	height: 400px;
+	overflow: auto;
+	margin-bottom: 10px;
 }
 
 .ui-accordion-content p,.ui-accordion-content li {
@@ -229,7 +227,7 @@ input[type=number] {
 	background:#5B82A4
 }
 
-.#feature-selection .fancytree-ico-e span.fancytree-icon
+#feature-selection .fancytree-ico-e span.fancytree-icon
 {
 	background-position: 0 0;
 	background-image: url("../../img/filter-bw.png");
