@@ -7,8 +7,10 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.annotation.LocusAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.VariantAnnotator;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -19,9 +21,8 @@ import org.springframework.stereotype.Component;
 
 /**
  * <p>
- * This class uses a chromosome to approach a dbNSFP chromosome variant file, it then checks all locations
- * recorded for a chromosome in the data set, for every line, and uses a matching line to add annotation to
- * the data set variant.
+ * This class uses a chromosome to approach a dbNSFP chromosome variant file, it then checks all locations recorded for
+ * a chromosome in the data set, for every line, and uses a matching line to add annotation to the data set variant.
  * </p>
  * 
  * <p>
@@ -44,8 +45,10 @@ import org.springframework.stereotype.Component;
  * 
  * */
 @Component("dbnsfpVariantService")
-public class DbnsfpVariantServiceAnnotator implements RepositoryAnnotator, ApplicationListener<ContextRefreshedEvent>
+public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 {
+	private static final String NAME = "dbNSFP-Variant";
+	
 	// the dbnsfp service is dependant on these four values,
 	// without them no annotations can be returned
 	private static final String CHROMOSOME = "chrom";
@@ -53,61 +56,25 @@ public class DbnsfpVariantServiceAnnotator implements RepositoryAnnotator, Appli
 	private static final String REFERENCE = "ref";
 	private static final String ALTERNATIVE = "alt";
 
-	//FIXME the prefix for chromosome files, change this into runtime property
+	// FIXME the prefix for chromosome files, change this into runtime property
 	private static final String CHROMOSOME_FILE = "/Users/mdehaan/bin/tools/dbnsfp/dbNSFP2.3_variant.chr";
 
 	// we want to know features, so take the first chromosome file and retrieve them from the header
 	private static final String[] FEATURES = determineFeatures();
-	
+
 	@Autowired
 	AnnotationService annotatorService;
-	
+
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
 		annotatorService.addAnnotator(this);
 	}
-	
+
 	@Override
 	public String getName()
 	{
-		return "dbNSFP-Variant";
-	}
-	
-	/**
-	 * <p>
-	 * This method returns the attributes needed to use this annotation tool.
-	 * </p>
-	 * 
-	 * */
-	@Override
-	public EntityMetaData getInputMetaData()
-	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
-
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CHROMOSOME, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(POSITION, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(REFERENCE, FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ALTERNATIVE, FieldTypeEnum.STRING));
-
-		return metadata;
-	}
-	
-	@Override
-	public boolean canAnnotate(EntityMetaData sourceMetaData)
-	{
-		boolean canAnnotate = true;
-		Iterable<AttributeMetaData> inputAttributes = getInputMetaData().getAttributes();
-		for (AttributeMetaData attribute : inputAttributes)
-		{
-			if (sourceMetaData.getAttribute(attribute.getName()) == null)
-			{
-				// all attributes from the inputmetadata must be present to annotate.
-				canAnnotate = false;
-			}
-		}
-
-		return canAnnotate;
+		return NAME;
 	}
 
 	@Override
@@ -127,7 +94,7 @@ public class DbnsfpVariantServiceAnnotator implements RepositoryAnnotator, Appli
 			String[] triplets = new String[3];
 
 			String chromosome = entity.getString(CHROMOSOME);
-
+			
 			triplets[0] = entity.getString(POSITION);
 			triplets[1] = entity.getString(REFERENCE);
 			triplets[2] = entity.getString(ALTERNATIVE);
@@ -164,7 +131,7 @@ public class DbnsfpVariantServiceAnnotator implements RepositoryAnnotator, Appli
 
 					charArrayReader: for (int i = 0; i < charArraysForThisChromosome.size(); i++)
 					{
-						String position = charArraysForThisChromosome.get(i)[0];
+						Long position = Long.parseLong(charArraysForThisChromosome.get(i)[0]);
 
 						if (lineSplit[1].equals(position))
 						{
@@ -226,7 +193,7 @@ public class DbnsfpVariantServiceAnnotator implements RepositoryAnnotator, Appli
 
 		return results.iterator();
 	}
-	
+
 	private static String[] determineFeatures()
 	{
 		String[] features = null;
@@ -256,13 +223,7 @@ public class DbnsfpVariantServiceAnnotator implements RepositoryAnnotator, Appli
 
 		return features;
 	}
-	
-	/**
-	 * <p>
-	 * This method returns the output that this annotation tool will produce
-	 * </p>
-	 * 
-	 * */
+
 	@Override
 	public EntityMetaData getOutputMetaData()
 	{
