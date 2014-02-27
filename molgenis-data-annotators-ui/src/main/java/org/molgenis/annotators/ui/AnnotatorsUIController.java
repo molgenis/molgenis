@@ -128,8 +128,9 @@ public class AnnotatorsUIController extends MolgenisPluginController
 
 	@RequestMapping(value = "/changeSelectedDataSet")
 	@ResponseBody
-	public Map<String, Boolean> changeSelectedDataSet(@RequestBody String selectedDataSetIdentifier)
-	{	
+	public Map<String, Boolean> changeSelectedDataSet(@RequestBody
+	String selectedDataSetIdentifier)
+	{
 		Map<String, Boolean> annotatorMap = setMapOfAnnotators(selectedDataSetIdentifier);
 		return annotatorMap;
 	}
@@ -178,15 +179,7 @@ public class AnnotatorsUIController extends MolgenisPluginController
 
 					omxDataSetAnnotator.annotate(annotator, repository, true);
 				}
-				else
-				{
-					System.out.println("This annotator does not exist");
-				}
 			}
-		}
-		else
-		{
-			System.out.println("no annotators selected");
 		}
 
 		return "view-result-page";
@@ -207,7 +200,7 @@ public class AnnotatorsUIController extends MolgenisPluginController
 			}
 
 		}
-		
+
 		return mapOfAnnotators;
 	}
 
