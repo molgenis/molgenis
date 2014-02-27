@@ -44,16 +44,22 @@ import java.util.*;
  * 
  */
 @Component("omimHpoService")
-public class OmimHpoAnnotator extends LocusAnnotator 
+public class OmimHpoAnnotator extends LocusAnnotator
 {
-
-	// output
+	private static final String GRCH37P13_HGNC_GENE_LOCATIONS_OUTPUT_FILE = "GRCh37p13_HGNC_GeneLocations_noPatches.tsv";
+	private static final String GRCH37P13_HGNC_GENE_LOCATIONS = "https://molgenis26.target.rug.nl/downloads/5gpm/GRCh37p13_HGNC_GeneLocations_noPatches.tsv";
+	private static final String MORBIDMAP = "morbidmap";
+	private static final String FTP_FTP_OMIM_ORG_OMIM_MORBIDMAP = "ftp://ftp.omim.org/omim/morbidmap";
+	private static final String HPO_ANNOTATIONS_STABLE_BUILD_DISEASES_TO_GENES_TO_PHENOTYPES = "http://compbio.charite.de/hudson/job/hpo.annotations.monthly/lastStableBuild/artifact/annotation/ALL_SOURCES_ALL_FREQUENCIES_diseases_to_genes_to_phenotypes.txt";
+	private static final String DISEASES_TO_GENES_TO_PHENOTYPES_OUTPUT_FILE = "ALL_SOURCES_ALL_FREQUENCIES_diseases_to_genes_to_phenotypes.txt";
 	private static final String OMIM_DISO = "Disease_OMIM";
 	private static final String OMIM_LINK = "Hyperlink_OMIM";
 	private static final String OMIM_ALL = "Full_info_OMIM";
 	private static final String HPO_DESC = "Symptoms_HPO";
 	private static final String HPO_LINK = "Hyperlinks_HPO";
 	private static final String HPO_ALL = "Full_info_HPO";
+
+	private static final String NAME = "OmimHpo";
 
 	/**
 	 * full info fields can be big due to many symptoms or diseases..
@@ -101,19 +107,19 @@ public class OmimHpoAnnotator extends LocusAnnotator
 
 	@Autowired
 	AnnotationService annotatorService;
-	
+
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
 		annotatorService.addAnnotator(this);
 	}
-	
+
 	@Override
 	public String getName()
 	{
-		return "OmimHpo";
+		return NAME;
 	}
-	
+
 	@Override
 	public Iterator<Entity> annotate(Iterator<Entity> source)
 	{
@@ -121,7 +127,6 @@ public class OmimHpoAnnotator extends LocusAnnotator
 
 		try
 		{
-
 			List<Locus> loci = new ArrayList<Locus>();
 
 			while (source.hasNext())
@@ -130,74 +135,66 @@ public class OmimHpoAnnotator extends LocusAnnotator
 
 				String chromosome = entity.getString(CHROMOSOME);
 				Long position = entity.getLong(POSITION);
-				Locus l = new Locus(chromosome, position);
-				loci.add(l);
+				Locus locus = new Locus(chromosome, position);
+				loci.add(locus);
 			}
 
 			HashMap<String, HGNCLoc> hgncLocs = getHgncLocs();
 			List<String> geneSymbols = locationToHGNC(hgncLocs, loci);
+
 			List<HPOTerm> hpoTerms = hpoTerms();
-			List<OMIMTerm> omimTerms = omimTerms();
 			Map<String, List<HPOTerm>> geneToHpoTerm = geneToHpoTerms(hpoTerms);
+
+			List<OMIMTerm> omimTerms = omimTerms();
 			Map<String, List<OMIMTerm>> geneToOmimTerm = geneToOmimTerms(omimTerms);
 
 			for (int i = 0; i < loci.size(); i++)
 			{
-
-				Locus l = loci.get(i);
+				Locus locus = loci.get(i);
 				String geneSymbol = geneSymbols.get(i);
 
 				if (geneSymbol != null && geneToOmimTerm.containsKey(geneSymbol)
 						&& geneToHpoTerm.containsKey(geneSymbol))
 				{
+					StringBuffer omimDisorders = new StringBuffer();
+					StringBuffer omimLinks = new StringBuffer();
+					StringBuffer hpoDescriptions = new StringBuffer();
+					StringBuffer hpoLinks = new StringBuffer();
+
+					for (OMIMTerm omimTerm : geneToOmimTerm.get(geneSymbol))
+					{
+						omimDisorders.append(omimTerm.getName() + " / ");
+						omimLinks.append("<a href=\"http://www.omim.org/entry/" + omimTerm.getEntry() + "\">"
+								+ omimTerm.getEntry() + "</a> / ");
+					}
+
+					omimDisorders.delete(omimDisorders.length() - 3, omimDisorders.length());
+					omimLinks.delete(omimLinks.length() - 3, omimLinks.length());
+
+					for (HPOTerm hpoTerm : geneToHpoTerm.get(geneSymbol))
+					{
+						hpoDescriptions.append(hpoTerm.getDescription() + " / ");
+						hpoLinks.append("<a href=\"http://www.human-phenotype-ontology.org/hpoweb/showterm?id="
+								+ hpoTerm.getId() + "\">" + hpoTerm.getId() + "</a> / ");
+					}
+
+					hpoDescriptions.delete(hpoDescriptions.length() - 3, hpoDescriptions.length());
+					hpoLinks.delete(hpoLinks.length() - 3, hpoLinks.length());
+
 					HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
-					resultMap.put(CHROMOSOME, l.getChrom());
-					resultMap.put(POSITION, l.getPos());
-
-					StringBuffer omimDisorders = new StringBuffer();
-					for (OMIMTerm o : geneToOmimTerm.get(geneSymbol))
-					{
-						omimDisorders.append(o.getName() + " / ");
-					}
-					omimDisorders.delete(omimDisorders.length() - 3, omimDisorders.length());
 					resultMap.put(OMIM_DISO, omimDisorders.toString());
-
-					StringBuffer omimLinks = new StringBuffer();
-					for (OMIMTerm o : geneToOmimTerm.get(geneSymbol))
-					{
-						omimLinks.append("<a href=\"http://www.omim.org/entry/" + o.getEntry() + "\">" + o.getEntry()
-								+ "</a> / ");
-					}
-					omimLinks.delete(omimLinks.length() - 3, omimLinks.length());
 					resultMap.put(OMIM_LINK, omimLinks.toString());
-
 					resultMap.put(OMIM_ALL, geneToOmimTerm.get(geneSymbol));
-
-					StringBuffer hpoDescriptions = new StringBuffer();
-					for (HPOTerm h : geneToHpoTerm.get(geneSymbol))
-					{
-						hpoDescriptions.append(h.getDescription() + " / ");
-					}
-					hpoDescriptions.delete(hpoDescriptions.length() - 3, hpoDescriptions.length());
 					resultMap.put(HPO_DESC, hpoDescriptions.toString());
-
-					StringBuffer hpoLinks = new StringBuffer();
-					for (HPOTerm h : geneToHpoTerm.get(geneSymbol))
-					{
-						hpoLinks.append("<a href=\"http://www.human-phenotype-ontology.org/hpoweb/showterm?id="
-								+ h.getId() + "\">" + h.getId() + "</a> / ");
-					}
-					hpoLinks.delete(hpoLinks.length() - 3, hpoLinks.length());
 					resultMap.put(HPO_LINK, hpoLinks.toString());
-
 					resultMap.put(HPO_ALL, geneToHpoTerm.get(geneSymbol));
+					resultMap.put(CHROMOSOME, locus.getChrom());
+					resultMap.put(POSITION, locus.getPos());
 
 					results.add(new MapEntity(resultMap));
 				}
-
 			}
-
 		}
 		catch (Exception e)
 		{
@@ -205,7 +202,7 @@ public class OmimHpoAnnotator extends LocusAnnotator
 		}
 
 		return results.iterator();
-	}	
+	}
 
 	/**
 	 * e.g. OMIM:614887 PEX14 5195 HP:0002240 Hepatomegaly
@@ -218,30 +215,29 @@ public class OmimHpoAnnotator extends LocusAnnotator
 	 */
 	public static List<HPOTerm> hpoTerms() throws IOException
 	{
-		List<HPOTerm> res = new ArrayList<HPOTerm>();
-		ArrayList<String> hpoRaw = readLinesFromURL(
-				"http://compbio.charite.de/hudson/job/hpo.annotations.monthly/lastStableBuild/artifact/annotation/ALL_SOURCES_ALL_FREQUENCIES_diseases_to_genes_to_phenotypes.txt",
-				"ALL_SOURCES_ALL_FREQUENCIES_diseases_to_genes_to_phenotypes.txt");
+		List<HPOTerm> hpoTermsList = new ArrayList<HPOTerm>();
+		ArrayList<String> hpoRaw = readLinesFromURL(HPO_ANNOTATIONS_STABLE_BUILD_DISEASES_TO_GENES_TO_PHENOTYPES,
+				DISEASES_TO_GENES_TO_PHENOTYPES_OUTPUT_FILE);
 
-		if (hpoRaw.get(0).startsWith("#"))
+		for (String line : hpoRaw)
 		{
-			hpoRaw.remove(0);
+			if (!line.startsWith("#"))
+			{
+				String[] split = line.split("\t");
+				String diseaseDb = split[0].split(":")[0];
+				String geneSymbol = split[1];
+				String hpoId = split[3];
+				String description = split[4];
+
+				Integer diseaseDbID = Integer.parseInt(split[0].split(":")[1]);
+				Integer geneEntrezId = Integer.parseInt(split[2]);
+
+				HPOTerm hpoTerm = new HPOTerm(hpoId, description, diseaseDb, diseaseDbID, geneSymbol, geneEntrezId);
+				hpoTermsList.add(hpoTerm);
+			}
 		}
 
-		for (String s : hpoRaw)
-		{
-			String[] split = s.split("\t");
-			String diseaseDb = split[0].split(":")[0];
-			int diseaseDbID = Integer.parseInt(split[0].split(":")[1]);
-			String geneSymbol = split[1];
-			int geneEntrezId = Integer.parseInt(split[2]);
-			String hpoId = split[3];
-			String description = split[4];
-			HPOTerm h = new HPOTerm(hpoId, description, diseaseDb, diseaseDbID, geneSymbol, geneEntrezId);
-			res.add(h);
-		}
-
-		return res;
+		return hpoTermsList;
 	}
 
 	/**
@@ -260,38 +256,42 @@ public class OmimHpoAnnotator extends LocusAnnotator
 	 */
 	public static List<OMIMTerm> omimTerms() throws IOException
 	{
-		List<OMIMTerm> res = new ArrayList<OMIMTerm>();
-		ArrayList<String> omimRaw = readLinesFromURL("ftp://ftp.omim.org/omim/morbidmap", "morbidmap");
+		List<OMIMTerm> omimTermList = new ArrayList<OMIMTerm>();
+		ArrayList<String> omimRaw = readLinesFromURL(FTP_FTP_OMIM_ORG_OMIM_MORBIDMAP, MORBIDMAP);
 
-		for (String s : omimRaw)
+		for (String line : omimRaw)
 		{
-			String[] pipeSplit = s.split("\\|");
+			String[] split = line.split("\\|");
 			Integer omimEntry = null;
+
 			try
 			{
-				String entry = pipeSplit[0].substring(pipeSplit[0].length() - 10, pipeSplit[0].length() - 4);
-				omimEntry = Integer.parseInt(entry);
+				String entry = split[0].substring(split[0].length() - 10, split[0].length() - 4);
+				if (entry.matches("[0-9]+"))
+				{
+					List<String> genes = Arrays.asList(split[1].split(", "));
+
+					String name = split[0].substring(0, split[0].length() - 12);
+					String cytoLoc = split[3];
+
+					Integer mutationId = Integer.parseInt(split[2]);
+					Integer type = Integer.parseInt(split[0].substring(split[0].length() - 2, split[0].length() - 1));
+
+					omimEntry = Integer.parseInt(entry);
+
+					OMIMTerm omimTerm = new OMIMTerm(omimEntry, name, type, mutationId, cytoLoc, genes);
+
+					omimTermList.add(omimTerm);
+				}
+
 			}
 			catch (Exception e)
 			{
+				throw new RuntimeException(e);
 			}
-			;
-
-			if (omimEntry != null)
-			{
-				String name = pipeSplit[0].substring(0, pipeSplit[0].length() - 12);
-				int type = Integer
-						.parseInt(pipeSplit[0].substring(pipeSplit[0].length() - 2, pipeSplit[0].length() - 1));
-				List<String> genes = Arrays.asList(pipeSplit[1].split(", "));
-				int mutationId = Integer.parseInt(pipeSplit[2]);
-				String cytoLoc = pipeSplit[3];
-				OMIMTerm ot = new OMIMTerm(omimEntry, name, type, mutationId, cytoLoc, genes);
-				res.add(ot);
-			}
-
 		}
 
-		return res;
+		return omimTermList;
 	}
 
 	/**
@@ -302,17 +302,17 @@ public class OmimHpoAnnotator extends LocusAnnotator
 	 */
 	public static HashMap<String, HGNCLoc> getHgncLocs() throws IOException
 	{
-		ArrayList<String> geneLocs = readLinesFromURL(
-				"https://molgenis26.target.rug.nl/downloads/5gpm/GRCh37p13_HGNC_GeneLocations_noPatches.tsv",
-				"GRCh37p13_HGNC_GeneLocations_noPatches.tsv");
-        HashMap<String, HGNCLoc> res = new HashMap<String, HGNCLoc>();
-		for (String s : geneLocs)
+		ArrayList<String> geneLocs = readLinesFromURL(GRCH37P13_HGNC_GENE_LOCATIONS,
+				GRCH37P13_HGNC_GENE_LOCATIONS_OUTPUT_FILE);
+
+		HashMap<String, HGNCLoc> res = new HashMap<String, HGNCLoc>();
+		for (String line : geneLocs)
 		{
-			String[] split = s.split("\t");
-			HGNCLoc h = new HGNCLoc(split[0], Long.parseLong(split[1]), Long.parseLong(split[2]), split[3]);
-			if (h.getChrom().matches("[0-9]+|X"))
+			String[] split = line.split("\t");
+			HGNCLoc hgncLoc = new HGNCLoc(split[0], Long.parseLong(split[1]), Long.parseLong(split[2]), split[3]);
+			if (hgncLoc.getChrom().matches("[0-9]+|X"))
 			{
-				res.put(h.getHgnc(), h);
+				res.put(hgncLoc.getHgnc(), hgncLoc);
 			}
 		}
 		return res;
@@ -321,152 +321,164 @@ public class OmimHpoAnnotator extends LocusAnnotator
 	public static ArrayList<String> readLinesFromFile(String location) throws FileNotFoundException
 	{
 		ArrayList<String> out = new ArrayList<String>();
-		Scanner s = new Scanner(new File(location));
-		while (s.hasNextLine())
+		Scanner scanner = new Scanner(new File(location));
+
+		while (scanner.hasNextLine())
 		{
-			out.add(s.nextLine());
+			out.add(scanner.nextLine());
 		}
+
 		return out;
 	}
 
-	public static ArrayList<String> readLinesFromURL(String url, String cacheName) throws IOException
+	public static ArrayList<String> readLinesFromURL(String webLocation, String cacheName) throws IOException
 	{
-		ArrayList<String> out = new ArrayList<String>();
+		ArrayList<String> outputLines = new ArrayList<String>();
+		File cacheLocation = new File(System.getProperty("java.io.tmpdir"), cacheName);
 
-		File cacheLoc = new File(System.getProperty("java.io.tmpdir"), cacheName);
-		if (cacheLoc.exists())
+		if (cacheLocation.exists())
 		{
-			System.out.println("Retrieving " + cacheName + " from cached location" + cacheLoc.getAbsolutePath());
-			Scanner s = new Scanner(cacheLoc);
-			while (s.hasNextLine())
+			Scanner scanner = new Scanner(cacheLocation);
+
+			while (scanner.hasNextLine())
 			{
-				out.add(s.nextLine());
+				outputLines.add(scanner.nextLine());
 			}
-			s.close();
+
+			scanner.close();
 		}
 		else
 		{
-			System.out.println("Retrieving " + cacheName + " from web and saving to " + cacheLoc.getAbsolutePath());
-			URL urll = new URL(url);
-			BufferedReader in = new BufferedReader(new InputStreamReader(urll.openStream()));
+			URL url = new URL(webLocation);
+
+			BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+			FileWriter writer = new FileWriter(cacheLocation);
 
 			String inputLine;
+
 			while ((inputLine = in.readLine()) != null)
-				out.add(inputLine);
+			{
+				outputLines.add(inputLine);
+			}
+
 			in.close();
 
-			FileWriter writer = new FileWriter(cacheLoc);
-			for (String str : out)
+			for (String line : outputLines)
 			{
-				writer.write(str + "\n");
+				writer.write(line + "\n");
 			}
+
 			writer.close();
 		}
 
-		return out;
+		return outputLines;
 	}
 
-	private static Map<String, List<OMIMTerm>> geneToOmimTerms(List<OMIMTerm> omimTerms)
+	private static Map<String, List<OMIMTerm>> geneToOmimTerms(List<OMIMTerm> omimTermsList)
 	{
-		Map<String, List<OMIMTerm>> res = new HashMap<String, List<OMIMTerm>>();
-		for (OMIMTerm o : omimTerms)
+		Map<String, List<OMIMTerm>> omimTermListMap = new HashMap<String, List<OMIMTerm>>();
+
+		for (OMIMTerm omimTerm : omimTermsList)
 		{
-			for (String geneSymbol : o.getHgncIds())
+			for (String geneSymbol : omimTerm.getHgncIds())
 			{
-				if (res.containsKey(geneSymbol))
+				if (omimTermListMap.containsKey(geneSymbol))
 				{
-					res.get(geneSymbol).add(o);
+					omimTermListMap.get(geneSymbol).add(omimTerm);
 				}
 				else
 				{
-					ArrayList<OMIMTerm> bla = new ArrayList<OMIMTerm>();
-					bla.add(o);
-					res.put(geneSymbol, bla);
+					ArrayList<OMIMTerm> omimTermList = new ArrayList<OMIMTerm>();
+					omimTermList.add(omimTerm);
+					omimTermListMap.put(geneSymbol, omimTermList);
 				}
 			}
 		}
-		return res;
+
+		return omimTermListMap;
 	}
 
-	private static Map<String, List<HPOTerm>> geneToHpoTerms(List<HPOTerm> hpoTerms)
+	private static Map<String, List<HPOTerm>> geneToHpoTerms(List<HPOTerm> hpoTermsList)
 	{
-		Map<String, List<HPOTerm>> res = new HashMap<String, List<HPOTerm>>();
-		for (HPOTerm h : hpoTerms)
+		Map<String, List<HPOTerm>> hpoTermListMap = new HashMap<String, List<HPOTerm>>();
+		for (HPOTerm hpoTerm : hpoTermsList)
 		{
-			if (res.containsKey(h.getGeneName()))
+			if (hpoTermListMap.containsKey(hpoTerm.getGeneName()))
 			{
-				res.get(h.getGeneName()).add(h);
+				hpoTermListMap.get(hpoTerm.getGeneName()).add(hpoTerm);
 			}
 			else
 			{
-				ArrayList<HPOTerm> bla = new ArrayList<HPOTerm>();
-				bla.add(h);
-				res.put(h.getGeneName(), bla);
+				ArrayList<HPOTerm> hpoTermList = new ArrayList<HPOTerm>();
+				hpoTermList.add(hpoTerm);
+				hpoTermListMap.put(hpoTerm.getGeneName(), hpoTermList);
 			}
 		}
-		return res;
+
+		return hpoTermListMap;
 	}
 
-	//
-	// for each locus in the list, get the HGNC symbol in the output list
-	//
-	public static List<String> locationToHGNC(HashMap<String, HGNCLoc> hgncLocs, List<Locus> loci) throws Exception
+	public static List<String> locationToHGNC(HashMap<String, HGNCLoc> hgncLocations, List<Locus> locusList)
+			throws Exception
 	{
 		List<String> hgncSymbols = new ArrayList<String>();
-		for (Locus l : loci)
+
+		for (Locus locus : locusList)
 		{
 			boolean variantMapped = false;
-			for (HGNCLoc h : hgncLocs.values())
+			for (HGNCLoc hgncLocation : hgncLocations.values())
 			{
-				if (h.getChrom().equals(l.getChrom()) && l.getPos() >= (h.getStart() - 5)
-						&& l.getPos() <= (h.getEnd() + 5))
+				if (hgncLocation.getChrom().equals(locus.getChrom()) && locus.getPos() >= (hgncLocation.getStart() - 5)
+						&& locus.getPos() <= (hgncLocation.getEnd() + 5))
 				{
-					hgncSymbols.add(h.getHgnc());
+					hgncSymbols.add(hgncLocation.getHgnc());
 					variantMapped = true;
 					break;
 				}
 			}
+
 			if (!variantMapped)
 			{
-				// throw new Exception("Could not map locus to HGNC: " + l.toString());
 				hgncSymbols.add(null);
 			}
 		}
 		return hgncSymbols;
 	}
-	
+
 	@Override
 	public EntityMetaData getOutputMetaData()
 	{
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_DISO, MolgenisFieldTypes.FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_LINK, MolgenisFieldTypes.FieldTypeEnum.HTML));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_LINK, MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_ALL, MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_DESC, MolgenisFieldTypes.FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_LINK, MolgenisFieldTypes.FieldTypeEnum.HTML));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_LINK, MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_ALL, MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		return metadata;
 	}
 
-    public static void main(String [ ] args) throws Exception
-    {
-        //includes a gene without HGNC symbol, and a gene not related to OMIM/HPO terms
-        List<Locus> loci = new ArrayList<Locus>(Arrays.asList(new Locus("2", 58453844l), new Locus("2", 71892329l), new Locus("2", 73679116l), new Locus("10", 112360316l), new Locus("11", 2017661l), new Locus("1", 18151726l), new Locus("1", -1l), new Locus("11", 6637740l)));
+	public static void main(String[] args) throws Exception
+	{
+		// includes a gene without HGNC symbol, and a gene not related to OMIM/HPO terms
+		List<Locus> loci = new ArrayList<Locus>(Arrays.asList(new Locus("2", 58453844l), new Locus("2", 71892329l),
+				new Locus("2", 73679116l), new Locus("10", 112360316l), new Locus("11", 2017661l), new Locus("1",
+						18151726l), new Locus("1", -1l), new Locus("11", 6637740l)));
 
-        List<Entity> inputs = new ArrayList<Entity>();
-        for(Locus l : loci)
-        {
-            HashMap<String, Object> inputMap = new HashMap<String, Object>();
-            inputMap.put(CHROMOSOME, l.getChrom());
-            inputMap.put(POSITION, l.getPos());
-            inputs.add(new MapEntity(inputMap));
-        }
+		List<Entity> inputs = new ArrayList<Entity>();
+		for (Locus l : loci)
+		{
+			HashMap<String, Object> inputMap = new HashMap<String, Object>();
+			inputMap.put(CHROMOSOME, l.getChrom());
+			inputMap.put(POSITION, l.getPos());
+			inputs.add(new MapEntity(inputMap));
+		}
 
-        Iterator<Entity> res = new OmimHpoAnnotator().annotate(inputs.iterator());
-        while(res.hasNext())
-        {
-            System.out.println(res.next().toString());
-        }
+		Iterator<Entity> res = new OmimHpoAnnotator().annotate(inputs.iterator());
+		while (res.hasNext())
+		{
+			System.out.println(res.next().toString());
+		}
 
-    }
+	}
 }
