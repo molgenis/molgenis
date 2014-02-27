@@ -102,21 +102,33 @@ public class KeggAnnotator extends LocusAnnotator {
                     resultMap.put(CHROMOSOME, l.getChrom());
                     resultMap.put(POSITION, l.getPos());
 
-                    resultMap.put(KEGG_GENE_ID, hgncToKeggGeneId.get(geneSymbol));
+                    String keggGeneId = hgncToKeggGeneId.get(geneSymbol);
 
-                    StringBuilder sb = new StringBuilder();
-                    for(String pathwayId : keggGenePathways.get(geneSymbol)){
-                        sb.append(pathwayId + ", ");
-                    }
-                    sb.delete(sb.length()-2, sb.length());
-                    resultMap.put(KEGG_PATHWAYS_IDS, sb.toString());
+                    resultMap.put(KEGG_GENE_ID, keggGeneId);
 
-                    sb = new StringBuilder();
-                    for(String pathwayId : keggGenePathways.get(geneSymbol)){
-                        sb.append(pathwayInfo.get(pathwayId) + ", ");
+                    if(keggGenePathways.get(keggGeneId) != null)
+                    {
+
+                        StringBuilder sb = new StringBuilder();
+                        for(String pathwayId : keggGenePathways.get(keggGeneId)){
+                            sb.append(pathwayId + ", ");
+                        }
+                        sb.delete(sb.length()-2, sb.length());
+                        resultMap.put(KEGG_PATHWAYS_IDS, sb.toString());
+
+                        sb = new StringBuilder();
+                        for(String pathwayId : keggGenePathways.get(keggGeneId)){
+                            sb.append(pathwayInfo.get(pathwayId) + ", ");
+                        }
+                        sb.delete(sb.length()-2, sb.length());
+                        resultMap.put(KEGG_PATHWAYS_NAMES, sb.toString());
+
                     }
-                    sb.delete(sb.length()-2, sb.length());
-                    resultMap.put(KEGG_PATHWAYS_NAMES, sb.toString());
+
+                    else
+                    {
+                       // System.out.println("no gene-pathways for " + geneSymbol);
+                    }
 
                     results.add(new MapEntity(resultMap));
                 }
