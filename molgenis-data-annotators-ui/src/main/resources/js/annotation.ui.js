@@ -32,12 +32,10 @@
 						}
 					}
 					
-					if(enabledAnnotators.length > 0){
-						enabledAnnotators.push('<hr></hr>');
-					}
-					
 					$('#annotator-checkboxes-enabled').html(enabledAnnotators.join(""));
 					$('#annotator-checkboxes-disabled').html(disabledAnnotators.join(""));
+					$('#selected-dataset-name').html(selectedDataSet.name);
+					$('#dataset-identifier').val(selectedDataSet.identifier);
 				}
 			});
 		});

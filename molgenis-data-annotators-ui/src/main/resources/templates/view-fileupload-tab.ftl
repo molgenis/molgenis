@@ -9,6 +9,7 @@
 		
 		<div class="row-fluid">
 			<div class="controls">
+			<label class="control-label" for="dataset-select">Choose a dataset:</label>
 				<div id="dataset-select-position-container">
 					<select data-placeholder="Choose a Dataset" id="dataset-select">
 						<#list dataSets as dataSet>
