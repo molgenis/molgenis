@@ -16,11 +16,10 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
-import java.net.URL;
 import java.util.*;
 
 /**
- *
+ * @author jvelde
  */
 @Component("KeggService")
 public class KeggAnnotator extends LocusAnnotator
@@ -63,9 +62,10 @@ public class KeggAnnotator extends LocusAnnotator
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(KEGG_GENE_ID,
 				MolgenisFieldTypes.FieldTypeEnum.STRING));
-		//
-		// todo
-		//
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(KEGG_PATHWAYS_IDS,
+				MolgenisFieldTypes.FieldTypeEnum.STRING));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(KEGG_PATHWAYS_NAMES,
+				MolgenisFieldTypes.FieldTypeEnum.STRING));
 		return metadata;
 	}
 
@@ -253,7 +253,8 @@ public class KeggAnnotator extends LocusAnnotator
 	//
 	public static Map<String, String> getKeggPathwayInfo() throws IOException
 	{
-		ArrayList<String> keggPathwayInfo = OmimHpoAnnotator.readLinesFromURL(HTTP_REST_KEGG_JP_LIST_PATHWAY_HSA, KEGG_PATHWAY_INFO);
+		ArrayList<String> keggPathwayInfo = OmimHpoAnnotator.readLinesFromURL(HTTP_REST_KEGG_JP_LIST_PATHWAY_HSA,
+				KEGG_PATHWAY_INFO);
 
 		Map<String, String> res = new HashMap<String, String>();
 
@@ -324,5 +325,4 @@ public class KeggAnnotator extends LocusAnnotator
 		}
 
 	}
-
 }
