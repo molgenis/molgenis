@@ -15,7 +15,6 @@ import javax.measure.unit.SI;
 import javax.measure.unit.Unit;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.jscience.physics.amount.Amount;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
@@ -35,16 +34,10 @@ public class AlgorithmUnitConverter
 	private static final String ONTOLOGYTERM_SYNONYM = "ontologyTermSynonym";
 	private static final String UNIT_DOCUMENT_TYPE = "ontologyTerm-http://purl.obolibrary.org/obo/uo.owl";
 	private static final Map<String, Unit<?>> UnitMap = new HashMap<String, Unit<?>>();
-	private static final Logger logger = Logger.getLogger(AlgorithmUnitConverter.class);
 
 	public AlgorithmUnitConverter() throws IllegalArgumentException, IllegalAccessException
 	{
 		initializeUnitMap();
-	}
-
-	public void match()
-	{
-
 	}
 
 	public String convert(OntologyTerm standardUnitOT, OntologyTerm customUnitOT)
