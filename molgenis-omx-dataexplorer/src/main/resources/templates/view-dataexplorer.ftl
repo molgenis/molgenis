@@ -75,9 +75,11 @@
 								<a class="accordion-toggle" data-toggle="false" data-parent="#feature-selection-container" href="#feature-selection">Data item selection</a>
 							</div>
 							<div class="accordion-body collapse in">
-								<div class="accordion-inner" id="feature-selection"></div>
-								<div id="data-options"> 
-									<a href="#filter-dialog-modal" id="wizard-button" class="btn btn-small" data-toggle="modal"><img src="/img/filter-bw.png">wizard</a>
+								<div class="accordion-inner">
+									<div class="row-fluid" id="feature-selection"></div>
+									<div class="row-fluid" id="data-options">
+										<a href="#filter-dialog-modal" id="wizard-button" class="btn btn-small pull-right" data-toggle="modal"><img src="/img/filter-bw.png"> Wizard</a>
+									</div>
 								</div>
 							</div>
 						</div>
