@@ -37,27 +37,26 @@
 		}
 	};
 	
-	molgenis.openFeatureFilterDialog = function(attribute, attributeFilter) {
+	molgenis.createAttributeFilterDialog = function(attribute, attributeFilter) {
 		var items = [];
 		if (attribute.description) {
 			items.push('<h3>Description</h3><p>' + attribute.description + '</p>');
 		}
 		items.push('<h3>Filter:</h3>');
 		var applyButton = $('<input type="button" class="btn pull-left" value="Apply filter">');
-		var divContainer = molgenis.createGenericFeatureField(attribute, attributeFilter, applyButton, false);
-		molgenis.createSpecificFeatureField(items, divContainer, attribute, attributeFilter, applyButton, attribute.href);
+		var divContainer = molgenis.createGenericAttributeFilterInput(attribute, attributeFilter, applyButton, false);
+		molgenis.createSpecificAttributeFilterInput(items, divContainer, attribute, attributeFilter, applyButton, attribute.href);
 	};
 
-	// Filter dialog for one feature
-	molgenis.createSpecificFeatureField = function(items, divContainer, attribute, config, applyButton, featureUri) {
+	molgenis.createSpecificAttributeFilterInput = function(items, divContainer, attribute, config, applyButton, attributeUri) {
 		switch (attribute.fieldType) {
-		case "HTML":
-		case "MREF":
-		case "XREF":
-		case "EMAIL":
-		case "HYPERLINK":
-		case "TEXT":
-		case "STRING":
+		case 'HTML':
+		case 'MREF':
+		case 'XREF':
+		case 'EMAIL':
+		case 'HYPERLINK':
+		case 'TEXT':
+		case 'STRING':
 			if (divContainer.find($("[id='text_" + attribute.name + "']")).val() === "") {
 				$(applyButton).prop('disabled', true);
 			}
@@ -70,17 +69,18 @@
 			});
 
 			applyButton.click(function() {
-				molgenis.updateFeatureFilter(featureUri, {
-					attribute : attribute,
-					values : [ $("[id='text_" + attribute.name + "']").val() ]
-				});
+				var attributeFilter = {
+						attribute : attribute,
+						values : [ $("[id='text_" + attribute.name + "']").val() ]
+					};
+				$(document).trigger('updateAttributeFilter', {'attributeUri' : attributeUri, 'attributeFilter' : attributeFilter});
 				$('.feature-filter-dialog').dialog('close');
 			});
 
 			break;
 
-		case "DATE":
-		case "DATE_TIME":
+		case 'DATE':
+		case 'DATE_TIME':
 			var datePickerFrom = $('<div id="from" class="input-append date" />');
 			var filterFrom;
 
@@ -122,43 +122,46 @@
 			divContainer.empty().append(filter);
 
 			applyButton.click(function() {
-				molgenis.updateFeatureFilter(featureUri, {
-					attribute : attribute,
-					range : true,
-					values : [ $('#date-feature-from').val().replace("'T'", "T"),
+				var attributeFilter = {
+						attribute : attribute,
+						range : true,
+						values : [ $('#date-feature-from').val().replace("'T'", "T"),
 							$('#date-feature-to').val().replace("'T'", "T") ]
-				});
+					};
+				$(document).trigger('updateAttributeFilter', {'attributeUri' : attributeUri, 'attributeFilter' : attributeFilter});
 				$('.feature-filter-dialog').dialog('close');
 			});
 
 			break;
-		case "LONG":
-		case "INT":
-		case "DECIMAL":
+		case 'LONG':
+		case 'INT':
+		case 'DECIMAL':
 			applyButton.click(function() {
-				molgenis.updateFeatureFilter(featureUri, {
+				var attributeFilter = {
 					attribute : attribute,
 					values : [ $("[id='from_" + attribute.name + "']").val(),
 							$("[id='to_" + attribute.name + "']").val() ],
 					range : true
-				});
+				};
+				$(document).trigger('updateAttributeFilter', {'attributeUri' : attributeUri, 'attributeFilter' : attributeFilter});
 				$('.feature-filter-dialog').dialog('close');
 			});
 			break;
-		case "BOOL":
+		case 'BOOL':
 			$(applyButton).prop('disabled', true);
 			$('input[type=radio]').live('change', function() {
 				$(applyButton).prop('disabled', false);
 			});
 			applyButton.click(function() {
-				molgenis.updateFeatureFilter(featureUri, {
+				var attributeFilter = {
 					attribute : attribute,
 					values : [ $('input[name=bool-feature_' + attribute.name + ']:checked').val() ]
-				});
+				};
+				$(document).trigger('updateAttributeFilter', {'attributeUri' : attributeUri, 'attributeFilter' : attributeFilter});
 				$('.feature-filter-dialog').dialog('close');
 			});
 			break;
-		case "CATEGORICAL":
+		case 'CATEGORICAL':
 			break;
 		default:
 			return;
@@ -215,18 +218,18 @@
 	};
 
 	// Generic part for filter fields
-	molgenis.createGenericFeatureField = function(attribute, config, applyButton, wizard) {
-		var featureUri = attribute.href;
+	molgenis.createGenericAttributeFilterInput = function(attribute, config, applyButton, wizard) {
+		var attributeUri = attribute.href;
 		var divContainer = $('<div />');
 		var filter = null;
 		switch (attribute.fieldType) {
-		case "HTML":
-		case "MREF":
-		case "XREF":
-		case "EMAIL":
-		case "HYPERLINK":
-		case "TEXT":
-		case "STRING":
+		case 'HTML':
+		case 'MREF':
+		case 'XREF':
+		case 'EMAIL':
+		case 'HYPERLINK':
+		case 'TEXT':
+		case 'STRING':
 			if (config == null) {
 				filter = $('<input type="text" id="text_' + attribute.name + '">');
 			} else {
@@ -237,16 +240,16 @@
 			divContainer.append(filter);
 			if (wizard) {
 				$("[id='text_" + attribute.name + "']").change(function() {
-					molgenis.updateFeatureFilter(featureUri, {
+					var attributeFilter = {
 						attribute : attribute,
 						values : [ $(this).val() ]
-					});
-
+					};
+					$(document).trigger('updateAttributeFilter', {'attributeUri' : attributeUri, 'attributeFilter' : attributeFilter});
 				});
 			}
 			break;
-		case "DATE":
-		case "DATE_TIME":
+		case 'DATE':
+		case 'DATE_TIME':
 			var datePickerFrom = $('<div id="from_' + attribute.name + '" class="input-append date" />');
 			var filterFrom;
 
@@ -288,9 +291,9 @@
 			filter = $('<span>From:<span>').after(filterFrom).after($('<span>To:</span>')).after(filterTo);
 			divContainer.append(filter);
 			break;
-		case "LONG":
-		case "INT":
-		case "DECIMAL":
+		case 'LONG':
+		case 'INT':
+		case 'DECIMAL':
 			var fromFilter;
 			var toFilter;
 
@@ -314,28 +317,27 @@
 			divContainer.append(filter);
 			if (wizard) {
 				divContainer.find($("[id='from_" + attribute.name + "']")).change(function() {
-
-					molgenis.updateFeatureFilter(featureUri, {
+					var attributeFilter = {
 						attribute : attribute,
-						values : [ $($("[id='from_" + attribute.name + "']")).val(), $($("[id='to_"
-
-						+ attribute.name + "']")).val() ],
+						values : [ $($("[id='from_" + attribute.name + "']")).val(),
+								$($("[id='to_" + attribute.name + "']")).val() ],
 						range : true
-					});
+					};
+					$(document).trigger('updateAttributeFilter', {'attributeUri' : attributeUri, 'attributeFilter' : attributeFilter});
 
 				});
 				divContainer.find($("[id='to_" + attribute.name + "']")).change(function() {
-					molgenis.updateFeatureFilter(featureUri, {
+					var attributeFilter = {
 						attribute : attribute,
-						values : [ $($("[id='from_" + attribute.name + "']")).val(), $($("[id='to_"
-
-						+ attribute.name + "']")).val() ],
+						values : [ $($("[id='from_" + attribute.name + "']")).val(),
+								$($("[id='to_" + attribute.name + "']")).val() ],
 						range : true
-					});
+					};
+					$(document).trigger('updateAttributeFilter', {'attributeUri' : attributeUri, 'attributeFilter' : attributeFilter});
 				});
 			}
 			break;
-		case "BOOL":
+		case 'BOOL':
 			if (config == null) {
 				filter = $('<label class="radio"><input type="radio" id="bool-feature-true_' + attribute.name
 						+ '" name="bool-feature_' + attribute.name
@@ -364,17 +366,17 @@
 			divContainer.append(filter);
 			if (wizard) {
 				filter.find('input[name="bool-feature_' + attribute.name + '"]').change(function() {
-					molgenis.updateFeatureFilter(featureUri, {
+					var attributeFilter = {
 						attribute : attribute,
 						values : [ $(this).val() ]
-					});
-
+					};
+					$(document).trigger('updateAttributeFilter', {'attributeUri' : attributeUri, 'attributeFilter' : attributeFilter});
 				});
 			}
 
 			break;
-		case "CATEGORICAL":
-			var attributeMetaDataExpanded = restApi.get(featureUri + "?expand=refEntity");
+		case 'CATEGORICAL':
+			var attributeMetaDataExpanded = restApi.get(attributeUri + "?expand=refEntity");
 			var categoryMetaData = attributeMetaDataExpanded.refEntity;
 			var labelAttribute = categoryMetaData.labelAttribute.toLowerCase();
 			$('input[name="' + attribute.name + '"]:checked').remove();
@@ -431,7 +433,7 @@
 
 		if ((attribute.fieldType === 'XREF') || (attribute.fieldType == 'MREF')) {
 
-			restApi.getAsync(featureUri, {
+			restApi.getAsync(attributeUri, {
 				attributes : [ 'refEntity' ],
 				expand : [ 'refEntity' ]
 			}, function(entityMetaData) {
@@ -483,12 +485,13 @@
 
 			if (wizard) {
 				container.on('changeDate', function(e) {
-					molgenis.updateFeatureFilter(featureUri, {
+					var attributeFilter = {
 						attribute : attribute,
 						range : true,
 						values : [ $("[id='date-feature-from_" + attribute.name + "']").val(),
 								$("[id='date-feature-to_" + attribute.name + "']").val() ]
-					});
+					};
+					$(document).trigger('updateAttributeFilter', {'attributeUri' : attributeUri, 'attributeFilter' : attributeFilter});
 				});
 			}
 		} else if (attribute.fieldType === 'DATE_TIME') {
@@ -500,14 +503,13 @@
 			});
 			if (wizard) {
 				container.on('changeDate', function(e) {
-					molgenis.updateFeatureFilter(featureUri, {
+					var attributeFilter = {
 						attribute : attribute,
 						range : true,
-						values : [ $("[id='date-feature-from_" + attribute.name + "']")
-
-						.val().replace("'T'", "T"),
+						values : [ $("[id='date-feature-from_" + attribute.name + "']").val().replace("'T'", "T"),
 								$("[id='date-feature-to_" + attribute.name + "']").val().replace("'T'", "T") ]
-					});
+					};
+					$(document).trigger('updateAttributeFilter', {'attributeUri' : attributeUri, 'attributeFilter' : attributeFilter});
 				});
 			}
 		}
@@ -515,57 +517,39 @@
 		return divContainer;
 	};
 
-	molgenis.createFeatureFilterField = function(elements) {
+	molgenis.createAttributeFilterInput = function(elements) {
 		var attributes = {};
 		$.each(elements, function(index, element) {
-			var attributeUri = $(element).attr('data-molgenis-url');
+			var attributeUri = $(element).attr('data-attribute');
 			attributes[attributeUri] = restApi.get(attributeUri);
 		});
 		
 		$.each(elements, function(index, element) {
-			var attributeUri = $(element).attr('data-molgenis-url');
+			var attributeUri = $(element).attr('data-attribute');
 			
 			var config = attributeFilters[attributeUri];
 			var applyButton = $('<input type="button" class="btn pull-left" value="Apply filter">');
 			var divContainer = molgenis
-					.createGenericFeatureField(attributes[attributeUri],
+					.createGenericAttributeFilterInput(attributes[attributeUri],
 							config, applyButton,true);
 			var trElement = $(element).closest('tr');
 			trElement.append(divContainer);
 		});
-	};
-
-	molgenis.updateFeatureFilter = function(attributeUri, attributeFilter) {
-		$(document).trigger('changeAttributeFilter', {'attributeFilter': attributeFilter});
 	};
 	
 	/**
 	 * Update the category attribute filter
 	 */
 	molgenis.updateCategoryAttributeFilter = function(attributeMetaData) {
-		molgenis.updateFeatureFilter(attributeMetaData.href, {
+		var attributeFilter = {
 			name : attributeMetaData.name,
-			identifier : attributeMetaData.identifier, // FIXME omx specific
+			identifier : attributeMetaData.label, // FIXME label? identifier?
 			type : attributeMetaData.fieldType,
-			values : $.makeArray($(
-					'input[name="' + attributeMetaData.name + '"]:checked').map(
-					function() {
-						return $(this).val();
-					}))
-		});
-	};
-
-	molgenis.removeFeatureFilter = function(featureUri) {
-		delete attributeFilters[featureUri];
-		molgenis.onFeatureFilterChange(attributeFilters);
-	};
-
-	molgenis.onFeatureFilterChange = function(featureFilters) {
-		molgenis.createAttributeFiltersList(featureFilters);
-		molgenis.createDataTable();
-		if ($('#selectFeature').val() != null) {
-			molgenis.updateAggregatesTable($('#selectFeature').val());
-		}
+			values : $.makeArray($('input[name="' + attributeMetaData.name + '"]:checked').map(function() {
+				return $(this).val();
+			}))
+		};
+		$(document).trigger('updateAttributeFilter', {'attributeUri' : attributeUri, 'attributeFilter' : attributeFilter});
 	};
 
 	molgenis.createAttributeFiltersList = function(attributeFilters) {
@@ -605,7 +589,6 @@
 				});
 			}
 			var attribute = attributeFilter.attribute;
-			console.log(attribute);
 			$.each(attributeFilter.values, function(index, value) {
 				if (attributeFilter.range) {
 
@@ -691,7 +674,7 @@
 			molgenis.updateAggregatesTable(attributeSelect.val());
 			attributeSelect.chosen();
 			attributeSelect.change(function() {
-				molgenis.loadAggregate($(this).val());
+				molgenis.updateAggregatesTable($(this).val());
 			});
 		}
 	};
@@ -712,8 +695,8 @@
 				});
 				$('#aggregate-table-container').empty().append(table);
 			},
-			error : function(xhr, tst, err) {
-				$.log('XHR ERROR ' + XMLHttpRequest.status);
+			error : function(xhr) {
+				molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 			}
 		});
 	};
@@ -729,6 +712,9 @@
 					var modal = $('#filter-dialog-modal').html(result);
 					modal.show();
 				});
+			},
+			error : function(xhr) {
+				molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 			}
 		});
 	};
@@ -774,16 +760,18 @@
 	molgenis.setDallianceFilter = function() {
 		$.each(selectedEntityMetaData.attributes, function(key, attribute) {
 			if(key === 'start_nucleotide') {
-				molgenis.updateFeatureFilter(attribute.href, {
-					attribute: attribute,
+				var attributeFilter = {
+					attribute : attribute,
 					range : true,
-					values : [Math.floor(dalliance.viewStart).toString(), Math.floor(dalliance.viewEnd).toString()]
-				});
+					values : [ Math.floor(dalliance.viewStart).toString(), Math.floor(dalliance.viewEnd).toString() ]
+				};
+				$(document).trigger('updateAttributeFilter', {'attributeUri' : attributeUri, 'attributeFilter' : attributeFilter});
 			} else if(key === 'chromosome') {
-				molgenis.updateFeatureFilter(attribute.href, {
-					attribute: attribute,
-					values : [dalliance.chr]
-				});
+				var attributeFilter = {
+					attribute : attribute,
+					values : [ dalliance.chr ]
+				};
+				$(document).trigger('updateAttributeFilter', {'attributeUri' : attributeUri, 'attributeFilter' : attributeFilter});
 			}
 		});
 	};
@@ -833,10 +821,8 @@
 			}
 		});
 
-		$(document).on('changeAttributeFilter', function(e, data) {
-			var attribute = data.attributeFilter.attribute; 
-			attributeFilters[attribute.href] = data.attributeFilter;
-			
+		$(document).on('updateAttributeFilter', function(e, data) {
+			attributeFilters[data.attributeUri] = data.attributeFilter;
 			molgenis.createAttributeFiltersList(attributeFilters);
 			
 			switch($("#tabs li.active").attr('id')) {
@@ -845,8 +831,26 @@
 					
 					// TODO implement elegant solution for genome browser specific code
 					var filterValues = data.attributeFilter.values;
+					var attribute = data.attributeFilter.attribute;
 					if(attribute.name === 'start_nucleotide') dalliance.setLocation(dalliance.chr, filterValues[0], filterValues[1]);
 					if(attribute.name === 'chromosome') dalliance.setLocation(filterValues[0], dalliance.viewStart, dalliance.viewEnd);
+					break;
+				case 'tab-aggregates':
+					molgenis.updateAggregatesTable();
+					break;
+				case 'tab-charts':
+					break;
+			}
+		});
+		
+		$(document).on('removeAttributeFilter', function(e, data) {
+			delete attributeFilters[data.attributeUri];
+			molgenis.createAttributeFiltersList(attributeFilters);
+			
+			switch($("#tabs li.active").attr('id')) {
+				case 'tab-data':
+					molgenis.createDataTable();
+					// TODO what to do for genomebrowser?
 					break;
 				case 'tab-aggregates':
 					molgenis.updateAggregatesTable();
@@ -875,7 +879,7 @@
 		});
 		
 		$(document).on('clickAttribute', function(e, data) {
-			molgenis.openFeatureFilterDialog(data.attribute, attributeFilters[data.attribute.href]);
+			molgenis.createAttributeFilterDialog(data.attribute, attributeFilters[data.attribute.href]);
 			
 			switch($("#tabs li.active").attr('id')) {
 				case 'tab-charts':
@@ -924,12 +928,12 @@
 		$(container).on('click', '.feature-filter-edit', function(e) {
 			e.preventDefault();
 			var attributeFilter = attributeFilters[$(this).data('href')];
-			molgenis.openFeatureFilterDialog(attributeFilter.attribute, attributeFilter);
+			molgenis.createAttributeFilterDialog(attributeFilter.attribute, attributeFilter);
 		});
 		
 		$(container).on('click', '.feature-filter-remove', function(e) {
 			e.preventDefault();
-			molgenis.removeFeatureFilter($(this).data('href'));
+			$(document).trigger('removeAttributeFilter', {'attributeUri': $(this).data('href')});
 		});
 		
 		$('#download-button').click(function() {
