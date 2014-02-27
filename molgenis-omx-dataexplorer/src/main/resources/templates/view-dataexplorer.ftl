@@ -3,11 +3,13 @@
 <#assign css=["jquery-ui-1.9.2.custom.min.css", "chosen.css","jquery.bootstrap.wizard.css", "bootstrap-datetimepicker.min.css", "ui.fancytree.min.css", "dataexplorer.css"]>
 <#assign js=["dalliance-compiled.js", "jquery-ui-1.9.2.custom.min.js", "chosen.jquery.min.js", "dataexplorer.js", "jquery.bootstrap.pager.js", "jquery.bootstrap.wizard.min.js", "bootstrap-datetimepicker.min.js", "dataexplorer-charts.js", "highstock-1.3.6/highstock.js", "highstock-1.3.6/highcharts-more.js","jquery.fancytree.min.js", "jquery.molgenis.tree.js", "jquery.molgenis.table.js"]>
 <@header css js/>
+	<#-- 
 	<#if entityExplorerUrl??>
 		<script>top.molgenis.setEntityExplorerUrl('${entityExplorerUrl}');</script>
     </#if>
+    -->
     <script>
-    <!--instanciate the Dalliance browser with settings from the controller-->
+    <#--instanciate the Dalliance browser with settings from the controller-->
     var genomeBrowserDataSets = {};
     <#if genomeBrowserSets??>
         <#list genomeBrowserSets?keys as prop>
@@ -89,7 +91,7 @@
 				</div>
 			</div>
 			
-			<!--Charts-->
+			<#--Charts-->
 			<#if app_dataexplorer_include_charts?has_content && app_dataexplorer_include_charts>
 				<#include "/charts-forms/view-scatterplot.ftl" parse=false>
 				<#include "/charts-forms/view-boxplot.ftl" parse=false>
@@ -100,7 +102,7 @@
 				<ul id="tabs" class="nav nav-tabs">
 					<li class="active" id="tab-data"><a href="#dataset-data-container" data-toggle="tab"><img src="/img/grid-icon.png"> Data</a></li>  
 					<li id="tab-aggregates"><a href="#dataset-aggregate-container" data-toggle="tab"><img src="/img/aggregate-icon.png"> Aggregates</a></li>
-					<!--Charts-->
+					<#--Charts-->
 					<#if app_dataexplorer_include_charts?has_content && app_dataexplorer_include_charts>
 						<li id="tab-charts"><a href="#chart-container" data-toggle="tab"><img src="/img/chart-icon.png" alt="charts"> Charts</a></li>
 					</#if>
@@ -140,7 +142,7 @@
 							<div id="aggregate-table-container"></div>
 						</div>
 					</div>
-					<!--Charts-->
+					<#--Charts-->
 					<#if app_dataexplorer_include_charts?has_content && app_dataexplorer_include_charts>
 						<div class="tab-pane" id="chart-container">
 							<div class="row-fluid">		
