@@ -56,9 +56,8 @@ public class KeggAnnotator extends LocusAnnotator {
     {
         DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
         metadata.addAttributeMetaData(new DefaultAttributeMetaData(KEGG_GENE_ID, MolgenisFieldTypes.FieldTypeEnum.STRING));
-        //
-        //todo
-        //
+        metadata.addAttributeMetaData(new DefaultAttributeMetaData(KEGG_PATHWAYS_IDS, MolgenisFieldTypes.FieldTypeEnum.STRING));
+        metadata.addAttributeMetaData(new DefaultAttributeMetaData(KEGG_PATHWAYS_NAMES, MolgenisFieldTypes.FieldTypeEnum.STRING));
         return metadata;
     }
 
