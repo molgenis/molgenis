@@ -1,6 +1,6 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
-<#assign css=["jquery-ui-1.9.2.custom.min.css", "chosen.css","jquery.bootstrap.wizard.css", "bootstrap-datetimepicker.min.css", "ui.fancytree.min.css", "dataexplorer.css"]>
+<#assign css=["jquery-ui-1.9.2.custom.min.css", "chosen.css","jquery.bootstrap.wizard.css", "bootstrap-datetimepicker.min.css", "ui.fancytree.min.css", "jquery.molgenis.table.css", "dataexplorer.css"]>
 <#assign js=["dalliance-compiled.js", "jquery-ui-1.9.2.custom.min.js", "chosen.jquery.min.js", "dataexplorer.js", "jquery.bootstrap.pager.js", "jquery.bootstrap.wizard.min.js", "bootstrap-datetimepicker.min.js", "dataexplorer-charts.js", "highstock-1.3.6/highstock.js", "highstock-1.3.6/highcharts-more.js","jquery.fancytree.min.js", "jquery.molgenis.tree.js", "jquery.molgenis.table.js"]>
 <@header css js/>
 	<#-- 
