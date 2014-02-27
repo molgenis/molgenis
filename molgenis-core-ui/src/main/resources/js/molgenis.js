@@ -204,6 +204,61 @@ function formatTableCellValue(value, dataType) {
 	return value;
 };
 
+function createInput(dataType, attrs, val) {
+	function createBasicInput(type, attrs, val) {
+		var input = $('<input type="' + type + '">');
+		if(attrs)
+			input.attr(attrs);
+		if(val)
+			input.val(val);
+		return input;
+	}
+	
+	switch(dataType) {
+		case 'BOOL':
+			return createBasicInput('radio', attrs, val);
+		case 'CATEGORICAL':
+			return createBasicInput('checkbox', attrs, val);
+		case 'DATE':
+		case 'DATE_TIME':
+			var format = dataType === 'DATE' ? 'yyyy-MM-dd' : 'yyyy-MM-dd\'T\'hh:mm:ss' + getCurrentTimezoneOffset();
+			var items = [];
+			items.push('<div class="input-append date">');
+			items.push('<input data-format="' + format + '" data-language="en" type="text">');
+			items.push('<span class="add-on">');
+			items.push('<i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>');
+			items.push('</span>');
+			items.push('</div>');
+			return $(items.join(''));
+		case 'DECIMAL':
+		case 'INT':
+		case 'LONG':
+			return createBasicInput('number', attrs, val);
+		case 'EMAIL':
+			return createBasicInput('email', attrs, val);
+		case 'HTML':
+		case 'HYPERLINK':
+		case 'STRING':
+		case 'TEXT':
+			return createBasicInput('text', attrs, val);
+		case 'MREF':
+		case 'XREF':
+			console.log("TODO integrate with xref dropdown table search");
+			return createBasicInput('text', attrs, val);
+		case 'COMPOUND' :
+		case 'ENUM':
+		case 'FILE':
+		case 'IMAGE':
+			throw 'Unsupported data type: ' + dataType;
+		default:
+			throw 'Unknown data type: ' + dataType;
+	}
+}
+
+$(function() {
+	
+});
+
 $(function() {
 	// disable all ajax request caching
 	$.ajaxSetup({

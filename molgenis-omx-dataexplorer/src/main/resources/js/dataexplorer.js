@@ -218,7 +218,7 @@
 	};
 
 	// Generic part for filter fields
-	molgenis.createGenericAttributeFilterInput = function(attribute, config, applyButton, wizard) {
+	molgenis.createGenericAttributeFilterInput = function(attribute, attributeFilter, applyButton, wizard) {
 		var attributeUri = attribute.href;
 		var divContainer = $('<div />');
 		var filter = null;
@@ -230,13 +230,14 @@
 		case 'HYPERLINK':
 		case 'TEXT':
 		case 'STRING':
-			if (config == null) {
-				filter = $('<input type="text" id="text_' + attribute.name + '">');
-			} else {
-
-				filter = $('<input type="text" id="text_' + attribute.name
-						+ '" placeholder="filter text" autofocus="autofocus" value="' + config.values[0] + '">');
-			}
+			var attrs = {
+				'id': 'text_' + attribute.name,
+				'placeholder': 'filter text',
+				'autofocus': 'autofocus'
+			};
+			var val = attributeFilter ? attributeFilter.values[0] : undefined;
+			filter = createInput(attribute.fieldType, attrs, val);
+			
 			divContainer.append(filter);
 			if (wizard) {
 				$("[id='text_" + attribute.name + "']").change(function() {
@@ -250,43 +251,11 @@
 			break;
 		case 'DATE':
 		case 'DATE_TIME':
-			var datePickerFrom = $('<div id="from_' + attribute.name + '" class="input-append date" />');
-			var filterFrom;
-
-			if (config == null) {
-				filterFrom = datePickerFrom
-						.append($('<input id="date-feature-from_'
-								+ attribute.name
-								+ '"  type="text" /><span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>'));
-			} else {
-				filterFrom = datePickerFrom
-						.append($('<input id="date-feature-from_'
-								+ attribute.name
-								+ '"  type="text" value="'
-								+ config.values[0].replace("T", "'T'")
-								+ '" /><span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>'));
-			}
-
-			datePickerFrom.on('changeDate', function(e) {
-				$("[id='date-feature-to_" + attribute.name + "']").val(
-						$("[id='date-feature-from_" + attribute.name + "']").val());
-			});
-
-			var datePickerTo = $('<div id="to_' + attribute.name + '" class="input-append date" />');
-			var filterTo;
-
-			if (config == null)
-				filterTo = datePickerTo
-						.append($('<input id="date-feature-to_'
-								+ attribute.name
-								+ '" type="text"><span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>'));
-			else
-				filterTo = datePickerTo
-						.append($('<input id="date-feature-to_'
-								+ attribute.name
-								+ '" type="text" value="'
-								+ config.values[1].replace("T", "'T'")
-								+ '"><span class="add-on"><i data-time-icon="icon-time" data-date-icon="icon-calendar"></i></span>'));
+			var valFrom = attributeFilter ? attributeFilter.values[0].replace("T", "'T'") : undefined;
+			var filterFrom = createInput(attribute.fieldType, {'id': 'from_' + attribute.name}, valFrom);
+			
+			var valTo = attributeFilter ? attributeFilter.values[1].replace("T", "'T'") : undefined;
+			var filterTo = createInput(attribute.fieldType, {'id': 'to_' + attribute.name}, valTo);
 
 			filter = $('<span>From:<span>').after(filterFrom).after($('<span>To:</span>')).after(filterTo);
 			divContainer.append(filter);
@@ -294,25 +263,18 @@
 		case 'LONG':
 		case 'INT':
 		case 'DECIMAL':
-			var fromFilter;
-			var toFilter;
+			var valFrom = attributeFilter ? attributeFilter.values[0] : undefined;
+			var filterFrom = createInput(attribute.fieldType, {'id': 'from_' + attribute.name}, valFrom);
+			
+			var valTo = attributeFilter ? attributeFilter.values[1] : undefined;
+			var filterTo = createInput(attribute.fieldType, {'id': 'to_' + attribute.name}, valTo);
 
-			if (config == null) {
-				fromFilter = $('<input id="from_' + attribute.name + '" type="number" step="any" style="width:100px">');
-				toFilter = $('<input id="to_' + attribute.name + '" type="number" step="any" style="width:100px">');
-			} else {
-				fromFilter = $('<input id="from_' + attribute.name
-						+ '" type="number" step="any" style="width:100px" value="' + config.values[0] + '">');
-				toFilter = $('<input id="to_' + attribute.name
-						+ '" type="number" step="any" style="width:100px" value="' + config.values[1] + '">');
-			}
-
-			fromFilter.on('keyup input', function() {
+			filterFrom.on('keyup input', function() {
 				// If 'from' changed set 'to' at the same value
 				$("[id='to_" + attribute.name + "']").val($("[id='from_" + attribute.name + '').val());
 			});
 
-			filter = $('<span>From:<span>').after(fromFilter).after($('<span>To:</span>')).after(toFilter);
+			filter = $('<span>From:<span>').after(filterFrom).after($('<span>To:</span>')).after(filterTo);
 
 			divContainer.append(filter);
 			if (wizard) {
@@ -338,34 +300,21 @@
 			}
 			break;
 		case 'BOOL':
-			if (config == null) {
-				filter = $('<label class="radio"><input type="radio" id="bool-feature-true_' + attribute.name
-						+ '" name="bool-feature_' + attribute.name
-						+ '" value="true">True</label><label class="radio"><input type="radio" id="bool-feature-fl_'
-						+ attribute.name + '" name="bool-feature_' + attribute.name + '" value="false">False</label>');
-
-			} else {
-				if (config.values[0] == 'true') {
-					filter = $('<label class="radio"><input type="radio" id="bool-feature-true_'
-							+ attribute.name
-							+ '" name="bool-feature_'
-							+ attribute.name
-							+ '" checked value="true">True</label><label class="radio"><input type="radio" id="bool-feature-fl_'
-							+ attribute.name + '" name="bool-feature_' + attribute.name
-							+ '" value="false">False</label>');
-				} else {
-					filter = $('<label class="radio"><input type="radio" id="bool-feature-true_'
-							+ attribute.name
-							+ '" name="bool-feature_'
-							+ attribute.name
-							+ '" value="true">True</label><label class="radio"><input type="radio" id="bool-feature-fl_'
-							+ attribute.name + '" name="bool-feature_' + attribute.name
-							+ '" checked value="false">False</label>');
-				}
-			}
+			var groupName = 'bool-feature_' + attribute.name;
+			
+			var valTrue = attributeFilter ? attributeFilter.values[0] === 'true' : undefined;
+			var idTrue = 'bool-feature-true_' + attribute.name;
+			var filterTrue = createInput(attribute.fieldType, {'id': idTrue, 'name': groupName, 'checked': valTrue}, 'true');
+			
+			var valFalse = attributeFilter ? attributeFilter.values[0] === 'false' : undefined;
+			var idFalse = 'bool-feature-fl_' + attribute.name;
+			var filterFalse = createInput(attribute.fieldType, {'id': idFalse, 'name': groupName, 'checked': valFalse}, 'false');
+			
+			filter = filterTrue.after('<label for="' + idTrue + '">True</label>').after(filterFalse).after('<label for="' + idFalse + '">False</label>');
 			divContainer.append(filter);
+			
 			if (wizard) {
-				filter.find('input[name="bool-feature_' + attribute.name + '"]').change(function() {
+				filter.find('input[name="' + groupName + '"]').change(function() {
 					var attributeFilter = {
 						attribute : attribute,
 						values : [ $(this).val() ]
@@ -373,7 +322,6 @@
 					$(document).trigger('updateAttributeFilter', {'attributeUri' : attributeUri, 'attributeFilter' : attributeFilter});
 				});
 			}
-
 			break;
 		case 'CATEGORICAL':
 			var attributeMetaDataExpanded = restApi.get(attributeUri + "?expand=refEntity");
@@ -389,13 +337,14 @@
 				success : function(categories) {
 					filter = [];
 					$.each(categories.items, function() {
-						var input = $('<input type="checkbox"' + ' class="cat-value"' + ' name="' + attribute.name
-								+ '"' + ' value="' + this[labelAttribute] + '">');
-
-						if (config && ($.inArray(this[labelAttribute], config.values) > -1)) {
-							input.prop("checked", true);
-						}
-
+						var checked = attributeFilter && ($.inArray(this[labelAttribute], attributeFilter.values) > -1); 
+						
+						var attrs = {
+								'class': 'cat-value',
+								'name': attribute.name,
+								'checked': checked
+						};
+						var input = createInput(attribute.fieldType, attrs, this[labelAttribute]);
 						filter.push($('<label class="checkbox">').html(' ' + this[labelAttribute]).prepend(input));
 					});
 				}
@@ -408,7 +357,7 @@
 					molgenis.updateCategoryAttributeFilter(attribute);
 				});
 			} else {
-				if (config && config.values.length > 0) {
+				if (attributeFilter && attributeFilter.values.length > 0) {
 					$(applyButton).prop('disabled', false);
 				} else {
 					$(applyButton).prop('disabled', true);
@@ -540,16 +489,17 @@
 	/**
 	 * Update the category attribute filter
 	 */
-	molgenis.updateCategoryAttributeFilter = function(attributeMetaData) {
+	molgenis.updateCategoryAttributeFilter = function(attribute) {
 		var attributeFilter = {
-			name : attributeMetaData.name,
-			identifier : attributeMetaData.label, // FIXME label? identifier?
-			type : attributeMetaData.fieldType,
-			values : $.makeArray($('input[name="' + attributeMetaData.name + '"]:checked').map(function() {
+			attribute: attribute,
+			name : attribute.name,
+			identifier : attribute.label, // FIXME label? identifier?
+			type : attribute.fieldType,
+			values : $.makeArray($('input[name="' + attribute.name + '"]:checked').map(function() {
 				return $(this).val();
 			}))
 		};
-		$(document).trigger('updateAttributeFilter', {'attributeUri' : attributeUri, 'attributeFilter' : attributeFilter});
+		$(document).trigger('updateAttributeFilter', {'attributeUri' : attribute.href, 'attributeFilter' : attributeFilter});
 	};
 
 	molgenis.createAttributeFiltersList = function(attributeFilters) {
