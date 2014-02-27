@@ -15,6 +15,7 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.annotation.LocusAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.impl.datastructures.HGNCLoc;
@@ -50,8 +51,9 @@ import org.springframework.stereotype.Component;
  * 
  * */
 @Component("dbnsfpGeneService")
-public class DbnsfpGeneServiceAnnotator implements RepositoryAnnotator,  ApplicationListener<ContextRefreshedEvent>
+public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 {
+	private static final String NAME = "dbNSFP-Gene";
 	private static final String CHROMOSOME = "chrom";
 	private static final String POSITION = "pos";
 
@@ -72,35 +74,7 @@ public class DbnsfpGeneServiceAnnotator implements RepositoryAnnotator,  Applica
 	@Override
 	public String getName()
 	{
-		return "dbNSFP-Gene";
-	}
-	
-	@Override
-	public EntityMetaData getInputMetaData()
-	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
-
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(POSITION, FieldTypeEnum.LONG));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CHROMOSOME, FieldTypeEnum.STRING));
-
-		return metadata;
-	}
-	
-	@Override
-	public boolean canAnnotate(EntityMetaData sourceMetaData)
-	{
-		boolean canAnnotate = true;
-		Iterable<AttributeMetaData> inputAttributes = getInputMetaData().getAttributes();
-		for (AttributeMetaData attribute : inputAttributes)
-		{
-			if (sourceMetaData.getAttribute(attribute.getName()) == null)
-			{
-				// all attributes from the inputmetadata must be present to annotate.
-				canAnnotate = false;
-			}
-		}
-
-		return canAnnotate;
+		return NAME;
 	}
 	
 	@Override
@@ -152,7 +126,7 @@ public class DbnsfpGeneServiceAnnotator implements RepositoryAnnotator,  Applica
 							}
 
 							resultMap.put(CHROMOSOME, chromosome);
-							resultMap.put(POSITION, position.toString());
+							resultMap.put(POSITION, position);
 
 							results.add(new MapEntity(resultMap));
 						}
