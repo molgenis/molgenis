@@ -49,7 +49,10 @@ import org.testng.annotations.Test;
 @ContextConfiguration(classes = RestControllerConfig.class)
 public class RestControllerTest extends AbstractTestNGSpringContextTests
 {
-	private static String PERSON = "Person";
+	private static String ENTITY_NAME = "Person";
+	private static String HREF_ENTITY = BASE_URI + "/" + ENTITY_NAME;
+	private static String HREF_ENTITY_META = HREF_ENTITY + "/meta";
+	private static String HREF_ENTITY_ID = HREF_ENTITY + "/1";
 
 	@Autowired
 	private RestController restController;
@@ -70,14 +73,14 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		entity.set("id", 1);
 		entity.set("name", "Piet");
 
-		when(dataService.getEntityNames()).thenReturn(Arrays.asList(PERSON));
-		when(dataService.getRepositoryByEntityName(PERSON)).thenReturn(repo);
+		when(dataService.getEntityNames()).thenReturn(Arrays.asList(ENTITY_NAME));
+		when(dataService.getRepositoryByEntityName(ENTITY_NAME)).thenReturn(repo);
 
-		when(dataService.add(Matchers.eq(PERSON), Matchers.any(MapEntity.class))).thenReturn(1);
-		when(dataService.findOne(PERSON, 1)).thenReturn(entity);
+		when(dataService.add(Matchers.eq(ENTITY_NAME), Matchers.any(MapEntity.class))).thenReturn(1);
+		when(dataService.findOne(ENTITY_NAME, 1)).thenReturn(entity);
 
 		Query q = new QueryImpl().eq("name", "Piet").pageSize(10).offset(5);
-		when(dataService.findAll(PERSON, q)).thenReturn(Arrays.asList(entity));
+		when(dataService.findAll(ENTITY_NAME, q)).thenReturn(Arrays.asList(entity));
 
 		AttributeMetaData attrName = new DefaultAttributeMetaData("name", FieldTypeEnum.STRING);
 		DefaultAttributeMetaData attrId = new DefaultAttributeMetaData("id", FieldTypeEnum.INT);
@@ -88,7 +91,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(repo.getIdAttribute()).thenReturn(attrId);
 		when(repo.getAttributes()).thenReturn(Arrays.<AttributeMetaData> asList(attrName, attrId));
 		when(repo.getAtomicAttributes()).thenReturn(Arrays.<AttributeMetaData> asList(attrName, attrId));
-		when(repo.getName()).thenReturn(PERSON);
+		when(repo.getName()).thenReturn(ENTITY_NAME);
 
 		mockMvc = MockMvcBuilders.standaloneSetup(restController).setMessageConverters(new GsonHttpMessageConverter())
 				.build();
@@ -97,83 +100,89 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void create() throws Exception
 	{
-		mockMvc.perform(post(BASE_URI + "/person").content("{name:Piet}").contentType(APPLICATION_JSON))
-				.andExpect(status().isCreated()).andExpect(header().string("Location", BASE_URI + "/person/1"));
+		mockMvc.perform(post(HREF_ENTITY).content("{name:Piet}").contentType(APPLICATION_JSON))
+				.andExpect(status().isCreated()).andExpect(header().string("Location", HREF_ENTITY_ID));
 
-		verify(dataService).add(Matchers.eq(PERSON), Matchers.any(MapEntity.class));
+		verify(dataService).add(Matchers.eq(ENTITY_NAME), Matchers.any(MapEntity.class));
 	}
 
 	@Test
 	public void createFromFormPost() throws Exception
 	{
-		mockMvc.perform(post(BASE_URI + "/person").contentType(APPLICATION_FORM_URLENCODED).param("name", "Piet"))
-				.andExpect(status().isCreated()).andExpect(header().string("Location", BASE_URI + "/person/1"));
+		mockMvc.perform(post(HREF_ENTITY).contentType(APPLICATION_FORM_URLENCODED).param("name", "Piet"))
+				.andExpect(status().isCreated()).andExpect(header().string("Location", HREF_ENTITY_ID));
 
-		verify(dataService).add(Matchers.eq(PERSON), Matchers.any(MapEntity.class));
+		verify(dataService).add(Matchers.eq(ENTITY_NAME), Matchers.any(MapEntity.class));
 	}
 
 	@Test
 	public void deleteDelete() throws Exception
 	{
-		mockMvc.perform(delete(BASE_URI + "/person/1")).andExpect(status().isNoContent());
-		verify(dataService).delete(PERSON, 1);
+		mockMvc.perform(delete(HREF_ENTITY_ID)).andExpect(status().isNoContent());
+		verify(dataService).delete(ENTITY_NAME, 1);
 	}
 
 	@Test
 	public void deletePost() throws Exception
 	{
-		mockMvc.perform(post(BASE_URI + "/person/1").param("_method", "DELETE")).andExpect(status().isNoContent());
-		verify(dataService).delete(PERSON, 1);
+		mockMvc.perform(post(HREF_ENTITY_ID).param("_method", "DELETE")).andExpect(status().isNoContent());
+		verify(dataService).delete(ENTITY_NAME, 1);
 	}
 
 	@Test
-	public void getMetaData() throws Exception
+	public void getEntityMetaData() throws Exception
 	{
-		mockMvc.perform(get(BASE_URI + "/person/meta"))
+		mockMvc.perform(get(HREF_ENTITY_META))
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(APPLICATION_JSON))
+				.andExpect(
+						content().string(
+								"{\"href\":\"" + HREF_ENTITY_META + "\",\"name\":\"" + ENTITY_NAME
+										+ "\",\"attributes\":{\"name\":{\"href\":\"" + HREF_ENTITY_META + "/name\"}}}"));
+	}
+
+	@Test
+	public void getEntityMetaDataSelectAttributes() throws Exception
+	{
+		mockMvc.perform(get(HREF_ENTITY_META).param("attributes", "name"))
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(APPLICATION_JSON))
+				.andExpect(content().string("{\"href\":\"" + HREF_ENTITY_META + "\",\"name\":\"" + ENTITY_NAME + "\"}"));
+	}
+
+	@Test
+	public void getEntityMetaDataExpandAttributes() throws Exception
+	{
+		mockMvc.perform(get(HREF_ENTITY_META).param("expand", "attributes"))
 				.andExpect(status().isOk())
 				.andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(
 						content()
-								.string("{\"href\":\"/api/v1/Person/meta\",\"name\":\"Person\",\"attributes\":{\"name\":{\"href\":\"/api/v1/Person/meta/name\"}}}"));
-
-	}
-
-	@Test
-	public void getMetaDataSelectAttributes() throws Exception
-	{
-		mockMvc.perform(get(BASE_URI + "/person/meta").param("attributes", "name")).andExpect(status().isOk())
-				.andExpect(content().contentType(APPLICATION_JSON))
-				.andExpect(content().string("{\"href\":\"/api/v1/Person/meta\",\"name\":\"Person\"}"));
-
-	}
-
-	@Test
-	public void getMetaDataExpandAttributes() throws Exception
-	{
-		mockMvc.perform(get(BASE_URI + "/person/meta").param("expand", "attributes"))
-				.andExpect(status().isOk())
-				.andExpect(content().contentType(APPLICATION_JSON))
-				.andExpect(
-						content()
-								.string("{\"href\":\"/api/v1/Person/meta\",\"name\":\"Person\",\"attributes\":{\"name\":{\"href\":\"/api/v1/Person/meta/name\",\"fieldType\":\"STRING\",\"name\":\"name\",\"label\":\"name\",\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false}}}"));
+								.string("{\"href\":\""
+										+ HREF_ENTITY_META
+										+ "\",\"name\":\""
+										+ ENTITY_NAME
+										+ "\",\"attributes\":{\"name\":{\"href\":\""
+										+ HREF_ENTITY_META
+										+ "/name\",\"fieldType\":\"STRING\",\"name\":\"name\",\"label\":\"name\",\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false}}}"));
 
 	}
 
 	@Test
 	public void retrieve() throws Exception
 	{
-		mockMvc.perform(get(BASE_URI + "/person/1")).andExpect(status().isOk())
+		mockMvc.perform(get(HREF_ENTITY_ID)).andExpect(status().isOk())
 				.andExpect(content().contentType(APPLICATION_JSON))
-				.andExpect(content().string("{\"href\":\"/api/v1/person/1\",\"name\":\"Piet\"}"));
+				.andExpect(content().string("{\"href\":\"" + HREF_ENTITY_ID + "\",\"name\":\"Piet\"}"));
 
 	}
 
 	@Test
 	public void retrieveSelectAttributes() throws Exception
 	{
-		mockMvc.perform(get(BASE_URI + "/person/1").param("attributes", "notname")).andExpect(status().isOk())
+		mockMvc.perform(get(HREF_ENTITY_ID).param("attributes", "notname")).andExpect(status().isOk())
 				.andExpect(content().contentType(APPLICATION_JSON))
-				.andExpect(content().string("{\"href\":\"/api/v1/person/1\"}"));
+				.andExpect(content().string("{\"href\":\"" + HREF_ENTITY_ID + "\"}"));
 
 	}
 
@@ -181,13 +190,15 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	public void retrieveEntityCollection() throws Exception
 	{
 		mockMvc.perform(
-				get(BASE_URI + "/person").param("start", "5").param("num", "10").param("q[0].operator", "EQUALS")
+				get(HREF_ENTITY).param("start", "5").param("num", "10").param("q[0].operator", "EQUALS")
 						.param("q[0].field", "name").param("q[0].value", "Piet"))
 				.andExpect(status().isOk())
 				.andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(
-						content()
-								.string("{\"href\":\"/api/v1/Person\",\"start\":5,\"num\":10,\"total\":0,\"prevHref\":\"/api/v1/Person?start=0&num=10\",\"items\":[{\"href\":\"/api/v1/person/1\",\"name\":\"Piet\"}]}"));
+						content().string(
+								"{\"href\":\"" + HREF_ENTITY + "\",\"start\":5,\"num\":10,\"total\":0,\"prevHref\":\""
+										+ HREF_ENTITY + "?start=0&num=10\",\"items\":[{\"href\":\"" + HREF_ENTITY_ID
+										+ "\",\"name\":\"Piet\"}]}"));
 
 	}
 
@@ -196,42 +207,44 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	{
 		String json = "{start:5, num:10, q:[{operator:EQUALS,field:name,value:Piet}]}";
 
-		mockMvc.perform(post(BASE_URI + "/person").param("_method", "GET").content(json).contentType(APPLICATION_JSON))
+		mockMvc.perform(post(HREF_ENTITY).param("_method", "GET").content(json).contentType(APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(
-						content()
-								.string("{\"href\":\"/api/v1/Person\",\"start\":5,\"num\":10,\"total\":0,\"prevHref\":\"/api/v1/Person?start=0&num=10\",\"items\":[{\"href\":\"/api/v1/person/1\",\"name\":\"Piet\"}]}"));
+						content().string(
+								"{\"href\":\"" + HREF_ENTITY + "\",\"start\":5,\"num\":10,\"total\":0,\"prevHref\":\""
+										+ HREF_ENTITY + "?start=0&num=10\",\"items\":[{\"href\":\"" + HREF_ENTITY_ID
+										+ "\",\"name\":\"Piet\"}]}"));
 
 	}
 
 	@Test
 	public void update() throws Exception
 	{
-		mockMvc.perform(put(BASE_URI + "/person/1").content("{name:Klaas}").contentType(APPLICATION_JSON)).andExpect(
+		mockMvc.perform(put(HREF_ENTITY_ID).content("{name:Klaas}").contentType(APPLICATION_JSON)).andExpect(
 				status().isOk());
 
-		verify(dataService).update(Matchers.eq(PERSON), Matchers.any(MapEntity.class));
+		verify(dataService).update(Matchers.eq(ENTITY_NAME), Matchers.any(MapEntity.class));
 	}
 
 	@Test
 	public void updateFromFormPost() throws Exception
 	{
 		mockMvc.perform(
-				post(BASE_URI + "/person/1").param("_method", "PUT").param("name", "Klaas")
+				post(HREF_ENTITY_ID).param("_method", "PUT").param("name", "Klaas")
 						.contentType(APPLICATION_FORM_URLENCODED)).andExpect(status().isNoContent());
 
-		verify(dataService).update(Matchers.eq(PERSON), Matchers.any(MapEntity.class));
+		verify(dataService).update(Matchers.eq(ENTITY_NAME), Matchers.any(MapEntity.class));
 	}
 
 	@Test
 	public void updatePost() throws Exception
 	{
 		mockMvc.perform(
-				post(BASE_URI + "/person/1").param("_method", "PUT").content("{name:Klaas}")
-						.contentType(APPLICATION_JSON)).andExpect(status().isOk());
+				post(HREF_ENTITY_ID).param("_method", "PUT").content("{name:Klaas}").contentType(APPLICATION_JSON))
+				.andExpect(status().isOk());
 
-		verify(dataService).update(Matchers.eq(PERSON), Matchers.any(MapEntity.class));
+		verify(dataService).update(Matchers.eq(ENTITY_NAME), Matchers.any(MapEntity.class));
 	}
 
 	@Test
@@ -243,8 +256,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void molgenisDataAccessException() throws Exception
 	{
-		when(dataService.findOne(PERSON, 1)).thenThrow(new MolgenisDataAccessException());
-		mockMvc.perform(get(BASE_URI + "/person/1")).andExpect(status().isUnauthorized());
+		when(dataService.findOne(ENTITY_NAME, 1)).thenThrow(new MolgenisDataAccessException());
+		mockMvc.perform(get(HREF_ENTITY_ID)).andExpect(status().isUnauthorized());
 	}
 
 	@Configuration
