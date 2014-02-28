@@ -8,7 +8,7 @@
 	ns.fillDataSetSelect = function(callback) {
 		var maxNrOfDataSets = 500;
 		
-		restApi.getAsync('/api/v1/dataset', null, {num: maxNrOfDataSets}, function(datasets) {
+		restApi.getAsync('/api/v1/dataset', {'q': {'num': maxNrOfDataSets}}, function(datasets) {
 			var items = [];
 			
 			$.each(datasets.items, function(key, val) {

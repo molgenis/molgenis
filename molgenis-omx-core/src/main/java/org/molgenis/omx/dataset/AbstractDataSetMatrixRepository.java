@@ -1,26 +1,18 @@
 package org.molgenis.omx.dataset;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.support.AbstractRepository;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.observ.DataSet;
-import org.molgenis.omx.observ.ObservableFeature;
-import org.molgenis.omx.observ.Protocol;
 
 /**
  * Base class for DataSetMatrixRepository and OmxRepository
@@ -29,11 +21,12 @@ public abstract class AbstractDataSetMatrixRepository extends AbstractRepository
 {
 	protected final String dataSetIdentifier;
 	protected final DataService dataService;
-	private DefaultEntityMetaData metaData = null;
 
 	public AbstractDataSetMatrixRepository(String url, DataService dataService, String dataSetIdentifier)
 	{
 		super(url);
+		if (dataService == null) throw new IllegalArgumentException("dataService is null");
+		if (dataSetIdentifier == null) throw new IllegalArgumentException("dataSetIdentifier is null");
 		this.dataService = dataService;
 		this.dataSetIdentifier = dataSetIdentifier;
 	}
@@ -53,55 +46,14 @@ public abstract class AbstractDataSetMatrixRepository extends AbstractRepository
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		if (metaData == null)
-		{
-			DataSet dataSet = getDataSet();
-			metaData = new DefaultEntityMetaData(dataSet.getIdentifier());
-			metaData.setLabel(dataSet.getLabelValue());
-
-			Protocol protocol = dataSet.getProtocolUsed();
-			if (protocol != null)
-			{
-				// Get all features from protocol including subprotocols
-				List<ObservableFeature> features = new ArrayList<ObservableFeature>();
-				getFeatures(protocol, features);
-
-				for (ObservableFeature feature : features)
-				{
-					FieldTypeEnum fieldType = MolgenisFieldTypes.getType(feature.getDataType()).getEnumType();
-					if (fieldType.equals(FieldTypeEnum.XREF) || fieldType.equals(FieldTypeEnum.MREF))
-					{
-						fieldType = FieldTypeEnum.STRING;
-					}
-					DefaultAttributeMetaData attr = new DefaultAttributeMetaData(feature.getIdentifier(), fieldType);
-
-					attr.setDescription(feature.getDescription());
-					attr.setLabel(feature.getName());
-					attr.setIdAttribute(false);
-					attr.setLabelAttribute(false);// TODO??
-
-					metaData.addAttributeMetaData(attr);
-				}
-
-				// Add id attribute (is id of ObservationSet)
-				DefaultAttributeMetaData attr = new DefaultAttributeMetaData("id", FieldTypeEnum.INT);
-				attr.setDescription("id");
-				attr.setLabel("id");
-				attr.setIdAttribute(true);
-				attr.setLabelAttribute(false);
-				attr.setVisible(false);
-				metaData.addAttributeMetaData(attr);
-			}
-		}
-
-		return metaData;
+		return new DataSetEntityMetaData(getDataSet());
 	}
 
 	protected Set<String> getAttributeNames()
 	{
 		Set<String> attributeNames = new HashSet<String>();
 
-		for (AttributeMetaData attr : getEntityMetaData().getAttributes())
+		for (AttributeMetaData attr : getEntityMetaData().getAtomicAttributes())
 		{
 			attributeNames.add(attr.getName());
 		}
@@ -121,16 +73,4 @@ public abstract class AbstractDataSetMatrixRepository extends AbstractRepository
 
 		return dataSet;
 	}
-
-	private void getFeatures(Protocol protocol, List<ObservableFeature> features)
-	{
-		// store features
-		features.addAll(protocol.getFeatures());
-
-		for (Protocol subProtocol : protocol.getSubprotocols())
-		{
-			getFeatures(subProtocol, features);
-		}
-	}
-
 }

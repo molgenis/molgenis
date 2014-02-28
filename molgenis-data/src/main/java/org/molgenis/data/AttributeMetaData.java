@@ -69,4 +69,8 @@ public interface AttributeMetaData
 	 */
 	EntityMetaData getRefEntity();
 
+	/**
+	 * Get compound attribute parts
+	 */
+	Iterable<AttributeMetaData> getAttributeParts();
 }

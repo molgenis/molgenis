@@ -1,13 +1,15 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
-<#assign css=["jquery-ui-1.9.2.custom.min.css", "chosen.css","jquery.bootstrap.wizard.css", "bootstrap-datetimepicker.min.css", "dataexplorer.css", "ui.dynatree.css"]>
-<#assign js=["dalliance-compiled.js", "jquery-ui-1.9.2.custom.min.js", "chosen.jquery.min.js", "dataexplorer.js", "${resultsTableJavascriptFile}", "jquery.bootstrap.pager.js", "jquery.dynatree.min.js", "jquery.bootstrap.wizard.min.js","bootstrap-datetimepicker.min.js", "dataexplorer-charts.js", "highstock-1.3.6/highstock.js", "highstock-1.3.6/highcharts-more.js"]>
+<#assign css=["jquery-ui-1.9.2.custom.min.css", "chosen.css","jquery.bootstrap.wizard.css", "bootstrap-datetimepicker.min.css", "ui.fancytree.min.css", "jquery.molgenis.table.css", "dataexplorer.css"]>
+<#assign js=["dalliance-compiled.js", "jquery-ui-1.9.2.custom.min.js", "chosen.jquery.min.js", "dataexplorer.js", "jquery.bootstrap.pager.js", "jquery.bootstrap.wizard.min.js", "bootstrap-datetimepicker.min.js", "dataexplorer-charts.js", "highstock-1.3.6/highstock.js", "highstock-1.3.6/highcharts-more.js","jquery.fancytree.min.js", "jquery.molgenis.tree.js", "jquery.molgenis.table.js"]>
 <@header css js/>
+	<#-- 
 	<#if entityExplorerUrl??>
 		<script>top.molgenis.setEntityExplorerUrl('${entityExplorerUrl}');</script>
     </#if>
+    -->
     <script>
-    <!--instanciate the Dalliance browser with settings from the controller-->
+    <#--instanciate the Dalliance browser with settings from the controller-->
     var genomeBrowserDataSets = {};
     <#if genomeBrowserSets??>
         <#list genomeBrowserSets?keys as prop>
@@ -34,9 +36,9 @@
 			<div id="dataset-select-container" class="pull-right form-horizontal">
 				<label class="control-label" for="dataset-select">Choose a dataset:</label>
 				<div class="controls">
-					<select data-placeholder="Choose a Dataset" id="dataset-select">
-						<#list dataSets as dataSet>
-							<option value="/api/v1/dataset/${dataSet.id?c}"<#if dataSet.identifier == selectedDataSet.identifier> selected</#if>>${dataSet.name}</option>
+					<select data-placeholder="Choose a Entity (example: dataset, protocol..." id="dataset-select">
+						<#list entitiesNames as entityName>
+							<option value="/api/v1/${entityName}" <#if entityName == selectedEntityName> selected</#if>>${entityName}</option>
 						</#list>
 					</select>
 				</div>
@@ -89,7 +91,7 @@
 				</div>
 			</div>
 			
-			<!--Charts-->
+			<#--Charts-->
 			<#if app_dataexplorer_include_charts?has_content && app_dataexplorer_include_charts>
 				<#include "/charts-forms/view-scatterplot.ftl" parse=false>
 				<#include "/charts-forms/view-boxplot.ftl" parse=false>
@@ -98,11 +100,11 @@
 				
 			<div class="tabbable">
 				<ul id="tabs" class="nav nav-tabs">
-					<li class="active"><a href="#dataset-data-container" data-toggle="tab"><img src="/img/grid-icon.png"> Data</a></li>  
-					<li><a href="#dataset-aggregate-container" data-toggle="tab"><img src="/img/aggregate-icon.png"> Aggregates</a></li>
-					<!--Charts-->
+					<li class="active" id="tab-data"><a href="#dataset-data-container" data-toggle="tab"><img src="/img/grid-icon.png"> Data</a></li>  
+					<li id="tab-aggregates"><a href="#dataset-aggregate-container" data-toggle="tab"><img src="/img/aggregate-icon.png"> Aggregates</a></li>
+					<#--Charts-->
 					<#if app_dataexplorer_include_charts?has_content && app_dataexplorer_include_charts>
-						<li><a href="#chart-container" data-toggle="tab"><img src="/img/chart-icon.png" alt="charts"> Charts</a></li>
+						<li id="tab-charts"><a href="#chart-container" data-toggle="tab"><img src="/img/chart-icon.png" alt="charts"> Charts</a></li>
 					</#if>
 				</ul>
 				<div class="tab-content">
@@ -121,9 +123,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="row-fluid data-table-container" >
-								<table id="data-table" class="table table-striped table-condensed"></table>	
-							</div>
+                            <div class="row-fluid data-table-container" id="data-table-container"></div>
 							<div class="row-fluid data-table-pager-container">
 									
 								<div id="nrOfDataItems" class="pull-left"></div>
@@ -142,7 +142,7 @@
 							<div id="aggregate-table-container"></div>
 						</div>
 					</div>
-					<!--Charts-->
+					<#--Charts-->
 					<#if app_dataexplorer_include_charts?has_content && app_dataexplorer_include_charts>
 						<div class="tab-pane" id="chart-container">
 							<div class="row-fluid">		

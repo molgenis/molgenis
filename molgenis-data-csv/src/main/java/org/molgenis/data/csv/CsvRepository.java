@@ -62,8 +62,8 @@ public class CsvRepository extends AbstractRepository
 		this(fileName, reader, DEFAULT_SEPARATOR, entityName, cellProcessors);
 	}
 
-	public CsvRepository(String fileName, Reader reader, char separator, String sheetName, @Nullable
-	List<CellProcessor> cellProcessors)
+	public CsvRepository(String fileName, Reader reader, char separator, String sheetName,
+			@Nullable List<CellProcessor> cellProcessors)
 	{
 		super(BASE_URL + fileName);
 
@@ -241,5 +241,4 @@ public class CsvRepository extends AbstractRepository
 	{
 		return MapEntity.class;
 	}
-
 }

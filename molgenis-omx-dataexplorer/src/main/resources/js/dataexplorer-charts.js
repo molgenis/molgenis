@@ -143,7 +143,7 @@
 		var filterdFeatures = [];
 		$.each(features, function (i) {
 			$.each(acceptableDataTypesList, function (j) {
-				if(features[i].dataType === acceptableDataTypesList[j]) {
+				if(features[i].fieldType === acceptableDataTypesList[j]) {
 					filterdFeatures.push(features[i]);
 					return true;
 				}
@@ -181,23 +181,23 @@
 		var width = 1024;
 		var height = 576; 
 		var title = $('#scatterplot-title').val();
-		var searchRequest = molgenis.createSearchRequest();
+		var searchRequest = molgenis.createEntityCollectionRequest();
 		var query = searchRequest.query;
 		var x, y, xAxisLabel, yAxisLabel, split;
 		
 		if(xAxisFeature) {
-			x = xAxisFeature.identifier;
-			xAxisLabel = xAxisFeature.name;
-			xAxisDataType = xAxisFeature.dataType;
+			x = xAxisFeature.name;
+			xAxisLabel = xAxisFeature.label;
+			xAxisDataType = xAxisFeature.fieldType;
 		} 
 		
 		if(yAxisFeature) {
-			y = yAxisFeature.identifier;
-			yAxisLabel = yAxisFeature.name;
+			y = yAxisFeature.name;
+			yAxisLabel = yAxisFeature.label;
 		}
 		
 		if(splitFeature) {
-			split = splitFeature.identifier;
+			split = splitFeature.name;
 		}
 		
 		$.ajax({
@@ -220,7 +220,7 @@
 			async: true,
 			success : function(options){
 				$('#tabs a:last').tab('show');
-				if(xAxisDataType === "date" || xAxisDataType === "datetime") {
+				if(xAxisDataType === 'DATE' || xAxisDataType === 'DATE_TIME') {
 					$('#chart-view').highcharts('StockChart', options);
 				} else {
 					$('#chart-view').highcharts(options);
@@ -245,15 +245,15 @@
 		if($('#boxplot-scale').val() === "") {
 			scale = 1.5; // Default value
 		} else {
-			scale = new Number($('#boxplot-scale').val())
+			scale = new Number($('#boxplot-scale').val());
 		}
 		
 		if(feature) {
-			featureIdentifier = feature.identifier;		
+			featureIdentifier = feature.name;		
 		}
 		
 		if(splitFeature) {
-			splitIdentifier = splitFeature.identifier;
+			splitIdentifier = splitFeature.name;
 		}
 		
 		$.ajax({
@@ -292,7 +292,7 @@
 		}
 		
 		$("#scatterplot-designer-modal-create-button").prop('disabled', disabled);
-	}
+	};
 	
 	ns.activateDesignerSubmitButtonBoxPlot = function (){
 		var disabled = true;
@@ -303,7 +303,7 @@
 		}
 		
 		$('#boxplot-designer-modal-create-button').prop('disabled', disabled);
-	}
+	};
 
 
 // TODO heatmap
@@ -356,12 +356,12 @@
 			
 			if($('#scatterplot-select-xaxis-feature').has('option').length===0){
 				$('#scatterplot-select-xaxis-feature').append(ns.getSelectedFeaturesSelectOptions(
-						ns.filterFeatures(allSelectedFeatures, ["decimal", "long", "integer", "int", "date", "datetime"])));
+						ns.filterFeatures(allSelectedFeatures, ['DECIMAL', 'LONG', 'INT', 'DATE', 'DATE_TIME'])));
 			}
 
 			if($('#scatterplot-select-yaxis-feature').has('option').length===0){
 				$('#scatterplot-select-yaxis-feature').append(
-						ns.getSelectedFeaturesSelectOptions(ns.filterFeatures(allSelectedFeatures, ["decimal", "long", "integer", "int", "date", "datetime"])));
+						ns.getSelectedFeaturesSelectOptions(ns.filterFeatures(allSelectedFeatures, ['DECIMAL', 'LONG', 'INT', 'DATE', 'DATE_TIME'])));
 			}
 			
 			if($('#scatterplot-select-split-feature').has('option').length===0){
@@ -375,7 +375,7 @@
 			
 			if($('#boxplot-select-feature').has('option').length===0){
 				$('#boxplot-select-feature').append(
-						ns.getSelectedFeaturesSelectOptions(ns.filterFeatures(allSelectedFeatures, ["decimal", "long", "integer", "int"])));
+						ns.getSelectedFeaturesSelectOptions(ns.filterFeatures(allSelectedFeatures, ['DECIMAL', 'LONG', 'INT'])));
 			}
 			
 			if($('#boxplot-select-split-feature').has('option').length===0){
@@ -392,15 +392,12 @@
 //			$('#heatmap-select-xaxis-feature').append(selectedFeaturesSelectOptions);
 //		});
 		
-		// fire event handler
-		$('#dataset-select').change();
-		
 		$('#scatterplot-designer-modal-create-button').click(function(){
-			molgenis.charts.dataexplorer.makeScatterPlot(molgenis.getSelectedDataSetIdentifier());
+			molgenis.charts.dataexplorer.makeScatterPlot(molgenis.getSelectedEntityName());
 		});
 		
 		$('#boxplot-designer-modal-create-button').click(function(){
-			molgenis.charts.dataexplorer.makeBoxPlot(molgenis.getSelectedDataSetIdentifier());
+			molgenis.charts.dataexplorer.makeBoxPlot(molgenis.getSelectedEntityName());
 		});
 		
 		//Scatter plot
@@ -412,7 +409,7 @@
 		
 		// TODO heat map
 		//$('#heatmap-designer-modal-create-button').click(function(){
-		//	molgenis.charts.dataexplorer.makeHeatMap(molgenis.getSelectedDataSetIdentifier());
+		//	molgenis.charts.dataexplorer.makeHeatMap(molgenis.getSelectedEntityName());
 		//});
 	});
 	

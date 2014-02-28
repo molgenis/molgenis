@@ -209,7 +209,7 @@
 			for(var i = 1; i < iterations; i++){
 				var lower = (i - 1) * 500;
 				var upper = (i * 500) < allFeatureCollection.length ? (i * 500) : allFeatureCollection.length; 
-				var listOfFeatures = restApi.get('/api/v1/observablefeature', null, {
+				var listOfFeatures = restApi.get('/api/v1/observablefeature', {
 					q : [{
 						field : 'id',
 						operator : 'IN',
@@ -448,7 +448,7 @@
 			var featureId = ns.hrefToId(feature.href);
 			var title = 'Rematch research variable : ';
 			standardModal.createModalCallback('Rematch research variable : ' + feature.name, function(modal){
-				restApi.getAsync(feature.href, ["unit", "definitions"], null, function(restApiFeature){
+				restApi.getAsync(feature.href, {'expand': ["unit", "definitions"]}, function(restApiFeature){
 					var body = modal.find('div.modal-body:eq(0)').addClass('overflow-y-visible');
 					ns.getOntologyAnnotator().createFeatureTable(body, title, restApiFeature, createAnnotationModal);
 					body.append(ns.getOntologyAnnotator().createSearchDiv(title, restApiFeature, createAnnotationModal));
@@ -659,7 +659,7 @@
 				observationSetIds.push(eachMapping.observationSet);
 			});
 			showMessage('alert alert-info', observationSetIds.length + ' candidate mappings are being deleted!');
-			var observedValues = restApi.get('/api/v1/observedvalue', null, {
+			var observedValues = restApi.get('/api/v1/observedvalue', {
 				q : [{
 					field : 'observationSet',
 					operator : 'IN',
@@ -835,7 +835,7 @@
 				if(changedValue !== null){
 					eachMapping.confirmed = changedValue;
 					if(confirmFeature === null){
-						confirmFeature = restApi.get('/api/v1/observablefeature', null, {
+						confirmFeature = restApi.get('/api/v1/observablefeature', {
 							q : [{
 								field : 'identifier',
 								operator : 'EQUALS',
@@ -844,8 +844,9 @@
 						});
 					}
 					
-					var observedValue = restApi.get('/api/v1/observedvalue', ['value'], {
-						q : [{
+					var observedValue = restApi.get('/api/v1/observedvalue', {
+						'expand': ['value'],
+						'q' : [{
 							field : 'observationSet',
 							operator : 'EQUALS',
 							value : eachMapping.observationSet

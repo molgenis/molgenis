@@ -14,17 +14,18 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 {
 	private final String name;
 	private final FieldTypeEnum fieldType;
-	private String description = null;
+	private String description;
 	private boolean nillable = true;
 	private boolean readOnly = false;
-	private Object defaultValue = null;
+	private Object defaultValue;
 	private boolean idAttribute = false;
 	private boolean labelAttribute = false;
-	private EntityMetaData refEntity = null;
-	private String label = null;
+	private EntityMetaData refEntity;
+	private String label;
 	private boolean visible = true;
 	private boolean unique = false;
 	private boolean auto = false;
+	private Iterable<AttributeMetaData> attributesMetaData;
 
 	public DefaultAttributeMetaData(String name, FieldTypeEnum fieldType)
 	{
@@ -124,6 +125,17 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	}
 
 	@Override
+	public Iterable<AttributeMetaData> getAttributeParts()
+	{
+		return attributesMetaData;
+	}
+
+	public void setAttributesMetaData(Iterable<AttributeMetaData> attributesMetaData)
+	{
+		this.attributesMetaData = attributesMetaData;
+	}
+
+	@Override
 	public String getLabel()
 	{
 		return label == null ? name : label;
@@ -166,5 +178,4 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	{
 		this.auto = auto;
 	}
-
 }

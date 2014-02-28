@@ -178,5 +178,4 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 
 		return entityMetaData;
 	}
-
 }
