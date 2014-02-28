@@ -1,5 +1,6 @@
 (function($, molgenis) {
 	"use strict";
+	var self = molgenis.dataexplorer = molgenis.dataexplorer || {};
 	
 	var restApi = new molgenis.RestClient();
 
@@ -9,7 +10,19 @@
 	var selectedAttributes = [];
 	var searchQuery = null;
 	
-	molgenis.createEntityMetaTree = function(entityMetaData, selectedAttributes) {
+	self.getSelectedEntityMeta = function() {
+		return selectedEntityMetaData;
+	};
+	
+	self.getSelectedAttributes = function() {
+		return selectedAttributes;
+	};
+	
+	self.getEntityQuery = function() {
+		return self.createEntityQuery();
+	};
+	
+	self.createEntityMetaTree = function(entityMetaData, selectedAttributes) {
 		var container = $('#feature-selection');
 		container.tree({
 			'entityMetaData' : entityMetaData,
@@ -24,12 +37,12 @@
 		});
 	};
 	
-	molgenis.createDataTable = function() {
+	self.createDataTable = function() {
 		if (selectedAttributes.length > 0) {
 			$('#data-table-container').table({
 				'entityMetaData' : selectedEntityMetaData,
 				'attributes' : selectedAttributes,
-				'query' : molgenis.createEntityQuery()
+				'query' : self.createEntityQuery()
 			});
 			dataTable = $('#data-table-container');
 		} else {
@@ -37,18 +50,18 @@
 		}
 	};
 	
-	molgenis.createAttributeFilterDialog = function(attribute, attributeFilter) {
+	self.createAttributeFilterDialog = function(attribute, attributeFilter) {
 		var items = [];
 		if (attribute.description) {
 			items.push('<h3>Description</h3><p>' + attribute.description + '</p>');
 		}
-		items.push('<h3>Filter:</h3>');
+		items.push('<h3>Filter</h3>');
 		var applyButton = $('<input type="button" class="btn pull-left" value="Apply filter">');
-		var divContainer = molgenis.createGenericAttributeFilterInput(attribute, attributeFilter, applyButton, false);
-		molgenis.createSpecificAttributeFilterInput(items, divContainer, attribute, attributeFilter, applyButton, attribute.href);
+		var divContainer = self.createGenericAttributeFilterInput(attribute, attributeFilter, applyButton, false);
+		self.createSpecificAttributeFilterInput(items, divContainer, attribute, attributeFilter, applyButton, attribute.href);
 	};
 
-	molgenis.createSpecificAttributeFilterInput = function(items, divContainer, attribute, config, applyButton, attributeUri) {
+	self.createSpecificAttributeFilterInput = function(items, divContainer, attribute, config, applyButton, attributeUri) {
 		switch (attribute.fieldType) {
 		case 'HTML':
 		case 'MREF':
@@ -165,7 +178,6 @@
 			break;
 		default:
 			return;
-
 		}
 
 		var applyButtonHolder = $('<div id="applybutton-holder" />').append(applyButton);
@@ -174,7 +186,9 @@
 		} else {
 			divContainer.after(applyButtonHolder);
 		}
-		$('.feature-filter-dialog').html(items.join('')).append(divContainer);
+		
+		
+		$('.feature-filter-dialog').html(items.join('')).append($('<form class="form-horizontal">').append(divContainer));
 
 		$('.feature-filter-dialog').dialog({
 			title : attribute.label,
@@ -218,9 +232,9 @@
 	};
 
 	// Generic part for filter fields
-	molgenis.createGenericAttributeFilterInput = function(attribute, attributeFilter, applyButton, wizard) {
+	self.createGenericAttributeFilterInput = function(attribute, attributeFilter, applyButton, wizard) {
 		var attributeUri = attribute.href;
-		var divContainer = $('<div />');
+		var divContainer = $('<div class="controls">');
 		var filter = null;
 		switch (attribute.fieldType) {
 		case 'HTML':
@@ -324,7 +338,7 @@
 			}
 			break;
 		case 'CATEGORICAL':
-			var attributeMetaDataExpanded = restApi.get(attributeUri + "?expand=refEntity");
+			var attributeMetaDataExpanded = restApi.get(attributeUri, {'expand': ['refEntity']});
 			var categoryMetaData = attributeMetaDataExpanded.refEntity;
 			var labelAttribute = categoryMetaData.labelAttribute.toLowerCase();
 			$('input[name="' + attribute.name + '"]:checked').remove();
@@ -354,7 +368,7 @@
 
 			if (wizard) {
 				divContainer.find('input[name="' + attribute.name + '"]').click(function() {
-					molgenis.updateCategoryAttributeFilter(attribute);
+					self.updateCategoryAttributeFilter(attribute);
 				});
 			} else {
 				if (attributeFilter && attributeFilter.values.length > 0) {
@@ -371,7 +385,7 @@
 				});
 
 				applyButton.click(function() {
-					molgenis.updateCategoryAttributeFilter(attribute);
+					self.updateCategoryAttributeFilter(attribute);
 					$('.feature-filter-dialog').dialog('close');
 				});
 			}
@@ -444,7 +458,6 @@
 				});
 			}
 		} else if (attribute.fieldType === 'DATE_TIME') {
-			// FIXME get working for generic data explorer
 			var container = divContainer.find('.date').datetimepicker({
 				format : "yyyy-MM-dd'T'hh:mm:ss" + getCurrentTimezoneOffset(),
 				language : 'en',
@@ -466,7 +479,7 @@
 		return divContainer;
 	};
 
-	molgenis.createAttributeFilterInput = function(elements) {
+	self.createAttributeFilterInput = function(elements) {
 		var attributes = {};
 		$.each(elements, function(index, element) {
 			var attributeUri = $(element).attr('data-attribute');
@@ -489,7 +502,7 @@
 	/**
 	 * Update the category attribute filter
 	 */
-	molgenis.updateCategoryAttributeFilter = function(attribute) {
+	self.updateCategoryAttributeFilter = function(attribute) {
 		var attributeFilter = {
 			attribute: attribute,
 			name : attribute.name,
@@ -502,7 +515,7 @@
 		$(document).trigger('updateAttributeFilter', {'attributeUri' : attribute.href, 'attributeFilter' : attributeFilter});
 	};
 
-	molgenis.createAttributeFiltersList = function(attributeFilters) {
+	self.createAttributeFiltersList = function(attributeFilters) {
 		var items = [];
 		$.each(attributeFilters, function(attributeUri, attributeFilter) {
 			var attribute = attributeFilter.attribute;
@@ -515,7 +528,7 @@
 		$('#feature-filters').html(items.join(''));
 	};
 
-	molgenis.createEntityQuery = function() {
+	self.createEntityQuery = function() {
 		var entityCollectionRequest = {
 			q : []
 		};
@@ -584,8 +597,8 @@
 		
 	};
 	
-	molgenis.createDownloadDataRequest = function() {
-		var entityQuery = molgenis.createEntityQuery();
+	self.createDownloadDataRequest = function() {
+		var entityQuery = self.createEntityQuery();
 		
 		var dataRequest = {
 			entityName : selectedEntityMetaData.name,
@@ -610,7 +623,7 @@
 		return dataRequest;
 	};
 
-	molgenis.createAggregatesTable = function() {
+	self.createAggregatesTable = function() {
 		var attributeSelect = $('<select id="selectFeature"/>');
 		if(Object.keys(selectedEntityMetaData.attributes).length === 0) {
 			attributeSelect.attr('disabled', 'disabled');
@@ -621,15 +634,15 @@
 				}
 			});
 			$('#feature-select').empty().append(attributeSelect);
-			molgenis.updateAggregatesTable(attributeSelect.val());
+			self.updateAggregatesTable(attributeSelect.val());
 			attributeSelect.chosen();
 			attributeSelect.change(function() {
-				molgenis.updateAggregatesTable($(this).val());
+				self.updateAggregatesTable($(this).val());
 			});
 		}
 	};
 
-	molgenis.updateAggregatesTable = function(attributeUri) {
+	self.updateAggregatesTable = function(attributeUri) {
 		$.ajax({
 			type : 'POST',
 			url : molgenis.getContextUrl() + '/aggregate',
@@ -651,7 +664,7 @@
 		});
 	};
 
-	molgenis.filterDialog = function() {
+	self.filterDialog = function() {
 		$.ajax({
 			type : 'POST',
 			url : molgenis.getContextUrl() + '/filterdialog',
@@ -669,17 +682,17 @@
 		});
 	};
 
-	molgenis.download = function() {
+	self.download = function() {
 		parent.showSpinner();
 		$.download(molgenis.getContextUrl() + '/download', {
 			// Workaround, see http://stackoverflow.com/a/9970672
-			'dataRequest' : JSON.stringify(molgenis.createDownloadDataRequest())
+			'dataRequest' : JSON.stringify(self.createDownloadDataRequest())
 		});
 		parent.hideSpinner();
 	};
 
 	//--BEGIN genome browser--
-	molgenis.updateGenomeBrowser = function() {
+	self.updateGenomeBrowser = function() {
 		if (selectedEntityMetaData.name in genomeBrowserDataSets) {
 			document.getElementById('genomebrowser').style.display = 'block';
 			document.getElementById('genomebrowser').style.visibility = 'visible';
@@ -707,7 +720,7 @@
 		}
 	};
 
-	molgenis.setDallianceFilter = function() {
+	self.setDallianceFilter = function() {
 		$.each(selectedEntityMetaData.attributes, function(key, attribute) {
 			if(key === 'start_nucleotide') {
 				var attributeFilter = {
@@ -748,7 +761,7 @@
 				});
 				
 				$(document).trigger('changeAttributeSelection', {'attributes': selectedAttributes});
-				molgenis.createEntityMetaTree(entityMetaData, selectedAttributes);
+				self.createEntityMetaTree(entityMetaData, selectedAttributes);
 			});
 		});
 		
@@ -758,13 +771,13 @@
 			switch($("#tabs li.active").attr('id')) {
 				case 'tab-data':
 					if(dataTable)
-						dataTable.table('setSelectedAttributes', data.attributes);
+						dataTable.table('setAttributes', data.attributes);
 					else
-						molgenis.createDataTable();
-					molgenis.updateGenomeBrowser();
+						self.createDataTable();
+					self.updateGenomeBrowser();
 					break;
 				case 'tab-aggregates':
-					molgenis.updateAggregatesTable();
+					self.updateAggregatesTable();
 					break;
 				case 'tab-charts':
 					break;
@@ -773,11 +786,11 @@
 
 		$(document).on('updateAttributeFilter', function(e, data) {
 			attributeFilters[data.attributeUri] = data.attributeFilter;
-			molgenis.createAttributeFiltersList(attributeFilters);
+			self.createAttributeFiltersList(attributeFilters);
 			
 			switch($("#tabs li.active").attr('id')) {
 				case 'tab-data':
-					molgenis.createDataTable();
+					self.createDataTable();
 					
 					// TODO implement elegant solution for genome browser specific code
 					var filterValues = data.attributeFilter.values;
@@ -786,7 +799,7 @@
 					if(attribute.name === 'chromosome') dalliance.setLocation(filterValues[0], dalliance.viewStart, dalliance.viewEnd);
 					break;
 				case 'tab-aggregates':
-					molgenis.updateAggregatesTable();
+					self.updateAggregatesTable();
 					break;
 				case 'tab-charts':
 					break;
@@ -795,15 +808,15 @@
 		
 		$(document).on('removeAttributeFilter', function(e, data) {
 			delete attributeFilters[data.attributeUri];
-			molgenis.createAttributeFiltersList(attributeFilters);
+			self.createAttributeFiltersList(attributeFilters);
 			
 			switch($("#tabs li.active").attr('id')) {
 				case 'tab-data':
-					molgenis.createDataTable();
+					self.createDataTable();
 					// TODO what to do for genomebrowser?
 					break;
 				case 'tab-aggregates':
-					molgenis.updateAggregatesTable();
+					self.updateAggregatesTable();
 					break;
 				case 'tab-charts':
 					break;
@@ -816,12 +829,12 @@
 			switch($("#tabs li.active").attr('id')) {
 				case 'tab-data':
 					if(dataTable)
-						dataTable.table('setQuery', molgenis.createEntityQuery());
+						dataTable.table('setQuery', self.createEntityQuery());
 					else
-						molgenis.createDataTable();
+						self.createDataTable();
 					break;
 				case 'tab-aggregates':
-					molgenis.updateAggregatesTable();
+					self.updateAggregatesTable();
 					break;
 				case 'tab-charts':
 					break;
@@ -829,17 +842,7 @@
 		});
 		
 		$(document).on('clickAttribute', function(e, data) {
-			molgenis.createAttributeFilterDialog(data.attribute, attributeFilters[data.attribute.href]);
-			
-			switch($("#tabs li.active").attr('id')) {
-				case 'tab-charts':
-					//Clean the select boxes of the charts designer
-					if (molgenis.charts) 
-					{
-						molgenis.charts.dataexplorer.resetChartDesigners();
-					}
-					break;
-			}
+			self.createAttributeFilterDialog(data.attribute, attributeFilters[data.attribute.href]);
 		});
 	});
 	
@@ -853,10 +856,10 @@
 		});
 
 		$('a[data-toggle="tab"][href="#dataset-data-container"]').on('show', function(e) {
-			molgenis.createDataTable();
+			self.createDataTable();
 		});
 		$('a[data-toggle="tab"][href="#dataset-aggregate-container"]').on('show', function(e) {
-			molgenis.createAggregatesTable();
+			self.createAggregatesTable();
 		});
 
 		$("#observationset-search").focus();
@@ -866,7 +869,7 @@
 		});
 
 		$('#wizard-button').click(function() {
-			molgenis.filterDialog();
+			self.filterDialog();
 		});
 
 		$('.feature-filter-dialog').dialog({
@@ -878,7 +881,7 @@
 		$(container).on('click', '.feature-filter-edit', function(e) {
 			e.preventDefault();
 			var attributeFilter = attributeFilters[$(this).data('href')];
-			molgenis.createAttributeFilterDialog(attributeFilter.attribute, attributeFilter);
+			self.createAttributeFilterDialog(attributeFilter.attribute, attributeFilter);
 		});
 		
 		$(container).on('click', '.feature-filter-remove', function(e) {
@@ -887,11 +890,11 @@
 		});
 		
 		$('#download-button').click(function() {
-			molgenis.download();
+			self.download();
 		});
 
 		$('#genomebrowser-filter-button').click(function() {
-			molgenis.setDallianceFilter();
+			self.setDallianceFilter();
 		});
 
 		// fire event handler

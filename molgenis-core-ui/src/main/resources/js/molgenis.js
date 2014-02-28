@@ -82,6 +82,30 @@
 		};
 	};
 
+	/**
+	 * Returns all atomic attributes. In case of compound attributes (attributes consisting of multiple atomic
+	 * attributes) only the descendant atomic attributes are returned. The compound attribute itself is not returned.
+	 * 
+	 * @param attributes
+	 * @param restClient
+	 */
+	molgenis.getAtomicAttributes = function(attributes, restClient) {
+		var atomicAttributes = [];
+		function createAtomicAttributesRec(attributes) {
+			$.each(attributes, function(i, attribute) {
+				if(attribute.fieldType === 'COMPOUND'){
+					// FIXME improve performance by retrieving async 
+					attribute = restClient.get(attribute.href, {'expand': ['attributes']});
+					createAtomicAttributesRec(attribute.attributes);
+				}
+					else
+						atomicAttributes.push(attribute);
+			});	
+		}
+		createAtomicAttributesRec(attributes);
+		return atomicAttributes;
+	}
+	
 	/*
 	 * Natural Sort algorithm for Javascript - Version 0.7 - Released under MIT license
 	 * Author: Jim Palmer (based on chunking idea from Dave Koelle)
@@ -204,6 +228,14 @@ function formatTableCellValue(value, dataType) {
 	return value;
 };
 
+/**
+ * Create input element for a molgenis data type
+ * 
+ * @param dataType molgenis data type
+ * @param attrs input attributes
+ * @param val input value
+ * @returns
+ */
 function createInput(dataType, attrs, val) {
 	function createBasicInput(type, attrs, val) {
 		var input = $('<input type="' + type + '">');
@@ -254,10 +286,6 @@ function createInput(dataType, attrs, val) {
 			throw 'Unknown data type: ' + dataType;
 	}
 }
-
-$(function() {
-	
-});
 
 $(function() {
 	// disable all ajax request caching
