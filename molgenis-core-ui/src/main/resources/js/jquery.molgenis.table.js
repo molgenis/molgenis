@@ -145,6 +145,8 @@
 			items.push('</tr>');
 		}
 		container.html(items.join(''));
+		
+		$('.show-popover').popover({trigger:'hover', placement: 'bottom'});
 	}
 	
 	function createTablePager(data, settings) {
@@ -240,8 +242,6 @@
 				createTableBody(data, settings);
 			});
 		});
-		
-		$('.show-popover', container).popover({trigger:'hover', placement: 'bottom'});
 		
 		return this;
 	};
