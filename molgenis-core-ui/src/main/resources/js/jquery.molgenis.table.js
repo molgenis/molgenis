@@ -203,7 +203,7 @@
 		
 		// plugin methods
 		container.data('table', {
-			'setSelectedAttributes' : function(attributes) {
+			'setAttributes' : function(attributes) {
 				settings.attributes = attributes;
 				createTable(settings);
 			},
