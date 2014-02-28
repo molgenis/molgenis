@@ -61,7 +61,7 @@
 		
 		var treeConfig = {
 			'selectMode' : 3,
-			'minExpandLevel' : 2,
+			'minExpandLevel' : 1,
 			'debugLevel' : 0,
 			'checkbox' : true,
 			'keyPathSeparator' : '|',

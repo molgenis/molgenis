@@ -6,16 +6,16 @@
 	function createTable(settings) {
 		// create elements
 		var items = [];
-		items.push('<div class="row-fluid">');
+		items.push('<div class="row-fluid molgenis-table-container">');
 		items.push('<table class="table-striped table-condensed molgenis-table"><thead></thead><tbody></tbody></table>');
 		items.push('</div>');
 		items.push('<div class="row-fluid">');
-		items.push('<div class="span3 molgenis-table-footer pull-left"></div>');
+		items.push('<div class="span3 molgenis-table-info pull-left"></div>');
 		items.push('<div class="span6 molgenis-table-pager"></div>');
 		items.push('<div class="span3"></div>');
 		items.push('</div>');
 		settings.container.html(items.join(''));
-		
+				
 		// add data to elements
 		getTableMetaData(settings, function(attributes, refEntitiesMeta) {
 			settings.colAttributes = attributes;
@@ -178,7 +178,7 @@
 	}
 	
 	function createTableFooter(data, settings) {
-		var container = $('.molgenis-table-footer', settings.container);
+		var container = $('.molgenis-table-info', settings.container);
 		container.html(data.total + ' item' + (data.total !== 1 ? 's' : '') + ' found');
 	}
 	
