@@ -31,20 +31,7 @@
 	}
 	
 	function getTableMetaData(settings, callback) {
-		// for compound attributes, expand recursively and select all atomic attributes
-		var colAttributes = [];
-		function createColAttributesRec(attributes) {
-			$.each(attributes, function(i, attribute) {
-				if(attribute.fieldType === 'COMPOUND'){
-					// FIXME improve performance by retrieving async 
-					attribute = restApi.get(attribute.href, {'expand': ['attributes']});
-					createColAttributesRec(attribute.attributes);
-				}
- 				else
-					colAttributes.push(attribute);
-			});	
-		}
-		createColAttributesRec(settings.attributes);
+		var colAttributes = molgenis.getAtomicAttributes(settings.attributes);
 		
 		// get meta data for referenced entities
 		var refEntitiesMeta = {}; 
