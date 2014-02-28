@@ -48,7 +48,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 
 /**
  * Controller class for the data explorer.
@@ -126,14 +125,20 @@ public class DataExplorerController extends MolgenisPluginController
 			model.addAttribute("entityExplorerUrl", EntityExplorerController.ID);
 		}
 
-		Iterable<String> names = dataService.getEntityNames();
-		List<String> entitiesNames = Lists.newArrayList(names.iterator());
-		if (entitiesNames.isEmpty()) throw new IllegalArgumentException("Entities names are not found");
-		model.addAttribute("entitiesNames", entitiesNames);
+		Iterable<EntityMetaData> entitiesMeta = Iterables.transform(dataService.getEntityNames(),
+				new Function<String, EntityMetaData>()
+				{
+					@Override
+					public EntityMetaData apply(String entityName)
+					{
+						return dataService.getRepositoryByEntityName(entityName);
+					}
+				});
+		model.addAttribute("entitiesMeta", entitiesMeta);
 
 		if (selectedEntityName == null)
 		{
-			selectedEntityName = entitiesNames.get(0);
+			selectedEntityName = entitiesMeta.iterator().next().getName();
 		}
 		model.addAttribute("selectedEntityName", selectedEntityName);
 

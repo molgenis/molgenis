@@ -37,8 +37,8 @@
 				<label class="control-label" for="dataset-select">Choose a dataset:</label>
 				<div class="controls">
 					<select data-placeholder="Choose a Entity (example: dataset, protocol..." id="dataset-select">
-						<#list entitiesNames as entityName>
-							<option value="/api/v1/${entityName}" <#if entityName == selectedEntityName> selected</#if>>${entityName}</option>
+						<#list entitiesMeta.iterator() as entityMeta>
+							<option value="/api/v1/${entityMeta.name}" <#if entityMeta.name == selectedEntityName> selected</#if>><#if entityMeta.label?has_content>${entityMeta.label}<#else>${entityMeta.name}</#if></option>
 						</#list>
 					</select>
 				</div>
@@ -75,9 +75,11 @@
 								<a class="accordion-toggle" data-toggle="false" data-parent="#feature-selection-container" href="#feature-selection">Data item selection</a>
 							</div>
 							<div class="accordion-body collapse in">
-								<div class="accordion-inner" id="feature-selection"></div>
-								<div id="data-options"> 
-									<a href="#filter-dialog-modal" id="wizard-button" class="btn btn-small" data-toggle="modal"><img src="/img/filter-bw.png">wizard</a>
+								<div class="accordion-inner">
+									<div class="row-fluid" id="feature-selection"></div>
+									<div class="row-fluid" id="data-options">
+										<a href="#filter-dialog-modal" id="wizard-button" class="btn btn-small pull-right" data-toggle="modal"><img src="/img/filter-bw.png"> Wizard</a>
+									</div>
 								</div>
 							</div>
 						</div>
