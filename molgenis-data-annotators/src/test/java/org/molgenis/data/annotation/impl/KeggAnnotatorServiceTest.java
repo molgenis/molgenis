@@ -26,8 +26,9 @@ public class KeggAnnotatorServiceTest
 	private KeggServiceAnnotator annotator;
 	private AttributeMetaData attributeMetaDataChrom;
 	private AttributeMetaData attributeMetaDataPos;
-	private AttributeMetaData attributeMetaDataCantAnnotate;
-	private AttributeMetaData attributeMetaDataCantAnnotate2;
+	private AttributeMetaData attributeMetaDataCantAnnotateFeature;
+	private AttributeMetaData attributeMetaDataCantAnnotateChrom;
+	private AttributeMetaData attributeMetaDataCantAnnotatePos;
 	private String annotatorOutput;
 	private Entity entity;
 	private ArrayList<Entity> input;
@@ -52,20 +53,25 @@ public class KeggAnnotatorServiceTest
 		when(metaDataCanAnnotate.getAttribute(KeggServiceAnnotator.POSITION)).thenReturn(attributeMetaDataPos);
 
 		metaDataCantAnnotate = mock(EntityMetaData.class);
-		attributeMetaDataCantAnnotate = mock(AttributeMetaData.class);
-
-		when(attributeMetaDataCantAnnotate.getName()).thenReturn("otherID");
-		when(attributeMetaDataCantAnnotate.getDataType()).thenReturn(
+		
+		attributeMetaDataCantAnnotateFeature = mock(AttributeMetaData.class);
+		when(attributeMetaDataCantAnnotateFeature.getName()).thenReturn("otherID");
+		when(attributeMetaDataCantAnnotateFeature.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
 
-		attributeMetaDataCantAnnotate2 = mock(AttributeMetaData.class);
-		when(attributeMetaDataCantAnnotate2.getName()).thenReturn(KeggServiceAnnotator.POSITION);
-		when(attributeMetaDataCantAnnotate2.getDataType()).thenReturn(
+		attributeMetaDataCantAnnotateChrom = mock(AttributeMetaData.class);
+		when(attributeMetaDataCantAnnotateChrom.getName()).thenReturn(DbnsfpVariantServiceAnnotator.CHROMOSOME);
+		when(attributeMetaDataCantAnnotateFeature.getDataType()).thenReturn(
+				MolgenisFieldTypes.getType(FieldTypeEnum.INT.toString().toLowerCase()));
+
+		attributeMetaDataCantAnnotatePos = mock(AttributeMetaData.class);
+		when(attributeMetaDataCantAnnotatePos.getName()).thenReturn(KeggServiceAnnotator.POSITION);
+		when(attributeMetaDataCantAnnotatePos.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
 
 		when(metaDataCantAnnotate.getAttribute(KeggServiceAnnotator.CHROMOSOME)).thenReturn(attributeMetaDataChrom);
 		when(metaDataCantAnnotate.getAttribute(KeggServiceAnnotator.POSITION)).thenReturn(
-				attributeMetaDataCantAnnotate2);
+				attributeMetaDataCantAnnotatePos);
 
 		entity = mock(Entity.class);
 

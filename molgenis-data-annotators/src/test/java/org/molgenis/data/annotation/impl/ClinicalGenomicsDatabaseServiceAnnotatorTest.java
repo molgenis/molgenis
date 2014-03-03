@@ -26,24 +26,31 @@ public class ClinicalGenomicsDatabaseServiceAnnotatorTest
 	private ClinicalGenomicsDatabaseServiceAnnotator annotator;
 	private AttributeMetaData attributeMetaDataChrom;
 	private AttributeMetaData attributeMetaDataPos;
-	private AttributeMetaData attributeMetaDataCantAnnotate;
-	private AttributeMetaData attributeMetaDataCantAnnotate2;
+	private AttributeMetaData attributeMetaDataCantAnnotateFeature;
+	private AttributeMetaData attributeMetaDataCantAnnotateChrom;
+	private AttributeMetaData attributeMetaDataCantAnnotatePos;
 	private String annotatorOutput;
 	private Entity entity;
 	private ArrayList<Entity> input;
-	
-	// input: 1	66067385
-	// output: LEPR	3953	Leptin receptor deficiency	AR	Pediatric		Allergy/Immunology/Infectious; Endocrine	Allergy/Immunology/Infectious; Endocrine	Standard treatments for obesity, such as gastric surgery, have been described as beneficial	In addition to endocrine manifestations, individuals may be susceptible to infections (eg, respiratory infections), which, coupled with other manifestations (eg, severe obesity) can have severe sequelae such that prophylaxis and rapid treatment may be beneficial	8666155; 9537324; 17229951; 21306929; 23275530; 23616257
-	
+
+	// input: 1 66067385
+	// output: LEPR 3953 Leptin receptor deficiency AR Pediatric Allergy/Immunology/Infectious; Endocrine
+	// Allergy/Immunology/Infectious; Endocrine Standard treatments for obesity, such as gastric surgery, have been
+	// described as beneficial In addition to endocrine manifestations, individuals may be susceptible to infections
+	// (eg, respiratory infections), which, coupled with other manifestations (eg, severe obesity) can have severe
+	// sequelae such that prophylaxis and rapid treatment may be beneficial 8666155; 9537324; 17229951; 21306929;
+	// 23275530; 23616257
+
 	@BeforeMethod
-	public void beforeMethod(){
-		
+	public void beforeMethod()
+	{
+
 		annotator = new ClinicalGenomicsDatabaseServiceAnnotator();
-		
+
 		metaDataCanAnnotate = mock(EntityMetaData.class);
 		attributeMetaDataChrom = mock(AttributeMetaData.class);
 		attributeMetaDataPos = mock(AttributeMetaData.class);
-		
+
 		when(attributeMetaDataChrom.getName()).thenReturn(ClinicalGenomicsDatabaseServiceAnnotator.CHROMOSOME);
 		when(attributeMetaDataPos.getName()).thenReturn(ClinicalGenomicsDatabaseServiceAnnotator.POSITION);
 		when(attributeMetaDataChrom.getDataType()).thenReturn(
@@ -51,81 +58,100 @@ public class ClinicalGenomicsDatabaseServiceAnnotatorTest
 		when(attributeMetaDataPos.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.LONG.toString().toLowerCase()));
 
-		when(metaDataCanAnnotate.getAttribute(ClinicalGenomicsDatabaseServiceAnnotator.CHROMOSOME)).thenReturn(attributeMetaDataChrom);
-		when(metaDataCanAnnotate.getAttribute(ClinicalGenomicsDatabaseServiceAnnotator.POSITION)).thenReturn(attributeMetaDataPos);
-		
+		when(metaDataCanAnnotate.getAttribute(ClinicalGenomicsDatabaseServiceAnnotator.CHROMOSOME)).thenReturn(
+				attributeMetaDataChrom);
+		when(metaDataCanAnnotate.getAttribute(ClinicalGenomicsDatabaseServiceAnnotator.POSITION)).thenReturn(
+				attributeMetaDataPos);
+
 		metaDataCantAnnotate = mock(EntityMetaData.class);
-		attributeMetaDataCantAnnotate = mock(AttributeMetaData.class);
-		
-		when(attributeMetaDataCantAnnotate.getName()).thenReturn("otherID");
-		when(attributeMetaDataCantAnnotate.getDataType()).thenReturn(
-				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
-		
-		
-		attributeMetaDataCantAnnotate2 = mock(AttributeMetaData.class);
-		when(attributeMetaDataCantAnnotate2.getName()).thenReturn(ClinicalGenomicsDatabaseServiceAnnotator.POSITION);
-		when(attributeMetaDataCantAnnotate2.getDataType()).thenReturn(
+
+		attributeMetaDataCantAnnotateFeature = mock(AttributeMetaData.class);
+		when(attributeMetaDataCantAnnotateFeature.getName()).thenReturn("otherID");
+		when(attributeMetaDataCantAnnotateFeature.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
 
-		when(metaDataCantAnnotate.getAttribute(ClinicalGenomicsDatabaseServiceAnnotator.CHROMOSOME)).thenReturn(attributeMetaDataChrom);
-		when(metaDataCantAnnotate.getAttribute(ClinicalGenomicsDatabaseServiceAnnotator.POSITION)).thenReturn(attributeMetaDataCantAnnotate2);
+		attributeMetaDataCantAnnotateChrom = mock(AttributeMetaData.class);
+		when(attributeMetaDataCantAnnotateChrom.getName()).thenReturn(DbnsfpVariantServiceAnnotator.CHROMOSOME);
+		when(attributeMetaDataCantAnnotateFeature.getDataType()).thenReturn(
+				MolgenisFieldTypes.getType(FieldTypeEnum.INT.toString().toLowerCase()));
+
+		attributeMetaDataCantAnnotatePos = mock(AttributeMetaData.class);
+		when(attributeMetaDataCantAnnotatePos.getName()).thenReturn(ClinicalGenomicsDatabaseServiceAnnotator.POSITION);
+		when(attributeMetaDataCantAnnotatePos.getDataType()).thenReturn(
+				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
+
+		when(metaDataCantAnnotate.getAttribute(ClinicalGenomicsDatabaseServiceAnnotator.CHROMOSOME)).thenReturn(
+				attributeMetaDataChrom);
+		when(metaDataCantAnnotate.getAttribute(ClinicalGenomicsDatabaseServiceAnnotator.POSITION)).thenReturn(
+				attributeMetaDataCantAnnotatePos);
 
 		entity = mock(Entity.class);
-		
+
 		when(entity.getString(ClinicalGenomicsDatabaseServiceAnnotator.CHROMOSOME)).thenReturn("1");
 		when(entity.getLong(ClinicalGenomicsDatabaseServiceAnnotator.POSITION)).thenReturn(new Long(66067385));
-		
+
 		input = new ArrayList<Entity>();
 		input.add(entity);
 
 		annotatorOutput = "LEPR	3953	Leptin receptor deficiency	AR	Pediatric		Allergy/Immunology/Infectious; Endocrine	Allergy/Immunology/Infectious; Endocrine	Standard treatments for obesity, such as gastric surgery, have been described as beneficial	In addition to endocrine manifestations, individuals may be susceptible to infections (eg, respiratory infections), which, coupled with other manifestations (eg, severe obesity) can have severe sequelae such that prophylaxis and rapid treatment may be beneficial	8666155; 9537324; 17229951; 21306929; 23275530; 23616257";
 	}
-	
+
 	@Test
-	public void annotateTest(){
+	public void annotateTest()
+	{
 		List<Entity> expectedList = new ArrayList<Entity>();
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
-		
+
 		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.GENE, "LEPR");
 		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.ENTREZ_GENE_ID, "3953");
 		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.CONDITION, "Leptin receptor deficiency");
 		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.INHERITANCE, "AR");
 		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.AGE_GROUP, "Pediatric");
 		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.ALLELIC_CONDITIONS, "");
-		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.MANIFESTATION_CATEGORIES, "Allergy/Immunology/Infectious; Endocrine");
-		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.INTERVENTION_CATEGORIES, "Allergy/Immunology/Infectious; Endocrine");
-		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.COMMENTS, "Standard treatments for obesity, such as gastric surgery, have been described as beneficial");
-		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.INTERVENTION_RATIONALE, "In addition to endocrine manifestations, individuals may be susceptible to infections (eg, respiratory infections), which, coupled with other manifestations (eg, severe obesity) can have severe sequelae such that prophylaxis and rapid treatment may be beneficial");
-		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.REFERENCES, "8666155; 9537324; 17229951; 21306929; 23275530; 23616257");
-		
+		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.MANIFESTATION_CATEGORIES,
+				"Allergy/Immunology/Infectious; Endocrine");
+		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.INTERVENTION_CATEGORIES,
+				"Allergy/Immunology/Infectious; Endocrine");
+		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.COMMENTS,
+				"Standard treatments for obesity, such as gastric surgery, have been described as beneficial");
+		resultMap
+				.put(ClinicalGenomicsDatabaseServiceAnnotator.INTERVENTION_RATIONALE,
+						"In addition to endocrine manifestations, individuals may be susceptible to infections (eg, respiratory infections), which, coupled with other manifestations (eg, severe obesity) can have severe sequelae such that prophylaxis and rapid treatment may be beneficial");
+		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.REFERENCES,
+				"8666155; 9537324; 17229951; 21306929; 23275530; 23616257");
+
 		Entity expectedEntity = new MapEntity(resultMap);
-		
+
 		expectedList.add(expectedEntity);
-		
+
 		Iterator<Entity> results = annotator.annotate(input.iterator());
 
 		Entity resultEntity = results.next();
-		
-		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.GENE), expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.GENE));
+
+		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.GENE),
+				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.GENE));
 		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.ENTREZ_GENE_ID),
 				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.ENTREZ_GENE_ID));
-		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.CONDITION), expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.CONDITION));
+		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.CONDITION),
+				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.CONDITION));
 		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.INHERITANCE),
 				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.INHERITANCE));
 		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.AGE_GROUP),
 				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.AGE_GROUP));
 		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.ALLELIC_CONDITIONS),
 				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.ALLELIC_CONDITIONS));
-		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.MANIFESTATION_CATEGORIES), expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.MANIFESTATION_CATEGORIES));
+		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.MANIFESTATION_CATEGORIES),
+				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.MANIFESTATION_CATEGORIES));
 		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.INTERVENTION_CATEGORIES),
 				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.INTERVENTION_CATEGORIES));
-		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.COMMENTS), expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.COMMENTS));
+		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.COMMENTS),
+				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.COMMENTS));
 		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.INTERVENTION_RATIONALE),
 				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.INTERVENTION_RATIONALE));
 		assertEquals(resultEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.REFERENCES),
 				expectedEntity.get(ClinicalGenomicsDatabaseServiceAnnotator.REFERENCES));
 	}
-	
+
 	@Test
 	public void canAnnotateTrueTest()
 	{
