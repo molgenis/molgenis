@@ -58,7 +58,7 @@ public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 	// FIXME set runtime property for file location
 	private static final String GENE_FILE = "/Users/mdehaan/bin/tools/dbnsfp/dbNSFP2.3_gene";
 
-	private static final String[] FEATURES = determineFeatures();
+	static final String[] FEATURES = determineFeatures();
 
 	@Autowired
 	AnnotationService annotatorService;
