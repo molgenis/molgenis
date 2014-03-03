@@ -6,13 +6,13 @@
 	
 	molgenis.onDataSetSelectionChange = function(dataSetUri) {
 		// reset
-		restApi.getAsync(dataSetUri, null, null, function(dataSet) {
+		restApi.getAsync(dataSetUri, null, function(dataSet) {
 			selectedDataSet = dataSet;
 			
 			$.ajax({
 				type : 'POST',
 				url : molgenis.getContextUrl() + '/changeSelectedDataSet',
-				data : JSON.stringify(selectedDataSet.identifier),
+				data : JSON.stringify(selectedDataSet.Identifier),
 				contentType : 'application/json',
 				success : function(resultMap) {
 					var enabledAnnotators = [];
@@ -34,8 +34,8 @@
 					
 					$('#annotator-checkboxes-enabled').html(enabledAnnotators.join(""));
 					$('#annotator-checkboxes-disabled').html(disabledAnnotators.join(""));
-					$('#selected-dataset-name').html(selectedDataSet.name);
-					$('#dataset-identifier').val(selectedDataSet.identifier);
+					$('#selected-dataset-name').html(selectedDataSet.Name);
+					$('#dataset-identifier').val(selectedDataSet.Identifier);
 				}
 			});
 		});
@@ -46,7 +46,7 @@
 		// use chosen plugin for data set select
 		$('#dataset-select').chosen();
 		$('#dataset-select').change(function() {
-			restApi.getAsync($('#dataset-select').val(), null, null, function(dataSet) {
+			restApi.getAsync($('#dataset-select').val(), null, function(dataSet) {
 				selectedDataSet = dataSet;
 			});
 			
