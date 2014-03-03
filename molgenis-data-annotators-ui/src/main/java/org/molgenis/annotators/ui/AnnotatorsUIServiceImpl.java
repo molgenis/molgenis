@@ -57,13 +57,13 @@ public class AnnotatorsUIServiceImpl implements AnnotatorsUIService
 
 	@Autowired
 	SearchService searchService;
-	
+
 	@Autowired
 	FileStore fileStore;
 
 	@Autowired
 	DataSetsIndexer indexer;
-	
+
 	@Autowired
 	EntityValidator entityValidator;
 
@@ -112,7 +112,8 @@ public class AnnotatorsUIServiceImpl implements AnnotatorsUIService
 
 			// Index the newly created dataSet, this way its visible in the data explorer
 			indexResultDataSet(dataSet);
-			dataService.addRepository(new OmxRepository(dataService, searchService, dataSet.getIdentifier(), entityValidator));
+			dataService.addRepository(new OmxRepository(dataService, searchService, dataSet.getIdentifier(),
+					entityValidator));
 		}
 		catch (ValueConverterException e)
 		{
@@ -128,8 +129,8 @@ public class AnnotatorsUIServiceImpl implements AnnotatorsUIService
 		}
 	}
 
-	private Iterator<Entity> retrieveValuesFromFile(DataSet dataSet, DefaultEntityMetaData metaData, String file, String submittedDataSetName)
-			throws IOException
+	private Iterator<Entity> retrieveValuesFromFile(DataSet dataSet, DefaultEntityMetaData metaData, String file,
+			String submittedDataSetName) throws IOException
 	{
 		List<Entity> results = new ArrayList<Entity>();
 
@@ -162,17 +163,26 @@ public class AnnotatorsUIServiceImpl implements AnnotatorsUIService
 					features = line.split("\t");
 					for (String feature : features)
 					{
-						metaData.addAttributeMetaData(new DefaultAttributeMetaData(feature, FieldTypeEnum.STRING));
+						if (feature.equalsIgnoreCase("POS"))
+						{
+							metaData.addAttributeMetaData(new DefaultAttributeMetaData(feature, FieldTypeEnum.LONG));
+						}
+						else
+						{
+							metaData.addAttributeMetaData(new DefaultAttributeMetaData(feature, FieldTypeEnum.STRING));
+						}
 					}
 
 					// Create a new rootProtocol for this data set
 					Protocol newRootProtocol = dataService.findOne(Protocol.ENTITY_NAME,
-							new QueryImpl().eq(Protocol.IDENTIFIER, submittedDataSetName + "_PROTOCOL_ID"), Protocol.class);
+							new QueryImpl().eq(Protocol.IDENTIFIER, submittedDataSetName + "_PROTOCOL_ID"),
+							Protocol.class);
 
 					// if the protocol does not exist
 					if (newRootProtocol == null)
 					{
-						newRootProtocol = createAnnotationResultProtocol(dataSet, metaData.getAttributes(), submittedDataSetName);
+						newRootProtocol = createAnnotationResultProtocol(dataSet, metaData.getAttributes(),
+								submittedDataSetName);
 					}
 
 					// set which protocol this dataSet should use
@@ -224,7 +234,8 @@ public class AnnotatorsUIServiceImpl implements AnnotatorsUIService
 		return dataSet;
 	}
 
-	private Protocol createAnnotationResultProtocol(DataSet dataSet, Iterable<AttributeMetaData> outputMetadataNames, String submittedDataSetName)
+	private Protocol createAnnotationResultProtocol(DataSet dataSet, Iterable<AttributeMetaData> outputMetadataNames,
+			String submittedDataSetName)
 	{
 		// Creater new protocol with an identifier and name, and add it to the DataService
 		Protocol newRootProtocol = new Protocol();
