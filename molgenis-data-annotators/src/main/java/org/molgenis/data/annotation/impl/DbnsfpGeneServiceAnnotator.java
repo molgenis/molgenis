@@ -54,8 +54,6 @@ import org.springframework.stereotype.Component;
 public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 {
 	private static final String NAME = "dbNSFP-Gene";
-	private static final String CHROMOSOME = "chrom";
-	private static final String POSITION = "pos";
 
 	// FIXME set runtime property for file location
 	private static final String GENE_FILE = "/Users/mdehaan/bin/tools/dbnsfp/dbNSFP2.3_gene";
