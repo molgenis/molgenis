@@ -634,11 +634,13 @@
 				}
 			});
 			$('#feature-select').empty().append(attributeSelect);
-			self.updateAggregatesTable(attributeSelect.val());
-			attributeSelect.chosen();
-			attributeSelect.change(function() {
-				self.updateAggregatesTable($(this).val());
-			});
+			if(attributeSelect.val()){
+				self.updateAggregatesTable(attributeSelect.val());
+				attributeSelect.chosen();
+				attributeSelect.change(function() {
+					self.updateAggregatesTable($(this).val());
+				});
+			}
 		}
 	};
 
