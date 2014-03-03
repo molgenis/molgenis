@@ -22,7 +22,7 @@ import java.util.*;
  * @author jvelde
  */
 @Component("KeggService")
-public class KeggAnnotator extends LocusAnnotator
+public class KeggServiceAnnotator extends LocusAnnotator
 {
 
 	private static final String KEGG_PATHWAY_INFO = "keggPathwayInfo";
@@ -31,9 +31,9 @@ public class KeggAnnotator extends LocusAnnotator
 	private static final String HTTP_REST_KEGG_JP_LIST_HSA = "http://rest.kegg.jp/list/hsa";
 	private static final String KEGG_PATHWAYS_HSA = "keggPathwaysHsa";
 	private static final String HTTP_REST_KEGG_JP_LINK_HSA_PATHWAY = "http://rest.kegg.jp/link/hsa/pathway";
-	private static final String KEGG_GENE_ID = "KEGG_gene_id";
-	private static final String KEGG_PATHWAYS_IDS = "KEGG_pathway_ids";
-	private static final String KEGG_PATHWAYS_NAMES = "KEGG_pathway_names";
+	public static final String KEGG_GENE_ID = "KEGG_gene_id";
+	public static final String KEGG_PATHWAYS_IDS = "KEGG_pathway_ids";
+	public static final String KEGG_PATHWAYS_NAMES = "KEGG_pathway_names";
 
 	@Autowired
 	AnnotationService annotatorService;
@@ -90,12 +90,14 @@ public class KeggAnnotator extends LocusAnnotator
 			}
 
 			HashMap<String, HGNCLoc> hgncLocs = OmimHpoAnnotator.getHgncLocs();
-			List<String> geneSymbols = OmimHpoAnnotator.locationToHGNC(hgncLocs, loci);
-			Map<String, KeggGene> keggGenes = getKeggGenes();
-			Map<String, String> hgncToKeggGeneId = hgncToKeggGeneId(hgncLocs, keggGenes);
 			Map<String, ArrayList<String>> keggPathwayGenes = getKeggPathwayGenes();
-			Map<String, ArrayList<String>> keggGenePathways = getKeggGenePathways(keggPathwayGenes);
 			Map<String, String> pathwayInfo = getKeggPathwayInfo();
+			Map<String, KeggGene> keggGenes = getKeggGenes();
+
+			List<String> geneSymbols = OmimHpoAnnotator.locationToHGNC(hgncLocs, loci);
+
+			Map<String, String> hgncToKeggGeneId = hgncToKeggGeneId(hgncLocs, keggGenes);
+			Map<String, ArrayList<String>> keggGenePathways = getKeggGenePathways(keggPathwayGenes);
 
 			for (int i = 0; i < loci.size(); i++)
 			{
@@ -300,5 +302,35 @@ public class KeggAnnotator extends LocusAnnotator
 		}
 
 		return res;
+	}
+
+	public static void main(String[] args) throws Exception
+	{
+		// includes a gene without HGNC symbol, and a gene not related to OMIM/HPO terms
+		List<Locus> loci = new ArrayList<Locus>(Arrays.asList(new Locus("2", 58453844l), new Locus("2", 71892329l),
+				new Locus("2", 73679116l), new Locus("10", 112360316l), new Locus("11", 2017661l), new Locus("1",
+						18151726l), new Locus("1", -1l), new Locus("11", 6637740l)));
+
+		List<Entity> inputs = new ArrayList<Entity>();
+		for (Locus l : loci)
+		{
+			HashMap<String, Object> inputMap = new HashMap<String, Object>();
+			inputMap.put(CHROMOSOME, l.getChrom());
+			inputMap.put(POSITION, l.getPos());
+			inputs.add(new MapEntity(inputMap));
+		}
+
+		Iterator<Entity> res = new KeggServiceAnnotator().annotate(inputs.iterator());
+		while (res.hasNext())
+		{
+			System.out.println(res.next().toString());
+		}
+	}
+
+	@Override
+	public List<Entity> annotateEntity(Entity entity)
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
