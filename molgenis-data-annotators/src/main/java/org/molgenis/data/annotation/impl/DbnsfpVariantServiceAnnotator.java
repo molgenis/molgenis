@@ -49,18 +49,11 @@ public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 {
 	private static final String NAME = "dbNSFP-Variant";
 	
-	// the dbnsfp service is dependant on these four values,
-	// without them no annotations can be returned
-	private static final String CHROMOSOME = "chrom";
-	private static final String POSITION = "pos";
-	private static final String REFERENCE = "ref";
-	private static final String ALTERNATIVE = "alt";
-
 	// FIXME the prefix for chromosome files, change this into runtime property
 	private static final String CHROMOSOME_FILE = "/Users/mdehaan/bin/tools/dbnsfp/dbNSFP2.3_variant.chr";
 
 	// we want to know features, so take the first chromosome file and retrieve them from the header
-	private static final String[] FEATURES = determineFeatures();
+	public static final String[] FEATURES = determineFeatures();
 
 	@Autowired
 	AnnotationService annotatorService;
@@ -95,7 +88,7 @@ public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 
 			String chromosome = entity.getString(CHROMOSOME);
 			
-			triplets[0] = entity.getString(POSITION);
+			triplets[0] = entity.getLong(POSITION).toString();
 			triplets[1] = entity.getString(REFERENCE);
 			triplets[2] = entity.getString(ALTERNATIVE);
 
@@ -124,16 +117,21 @@ public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 
 				String line = "";
 
-				while (bufferedReader.ready())
+				fileReader: while (bufferedReader.ready())
 				{
+					
 					line = bufferedReader.readLine();
+					if(line.startsWith("#")){
+						continue fileReader;
+					}
+					
 					String[] lineSplit = line.split("\t");
 
 					charArrayReader: for (int i = 0; i < charArraysForThisChromosome.size(); i++)
 					{
 						Long position = Long.parseLong(charArraysForThisChromosome.get(i)[0]);
 
-						if (lineSplit[1].equals(position))
+						if (lineSplit[1].equals(position.toString()))
 						{
 							String reference = charArraysForThisChromosome.get(i)[1];
 							String alternative = charArraysForThisChromosome.get(i)[2];
