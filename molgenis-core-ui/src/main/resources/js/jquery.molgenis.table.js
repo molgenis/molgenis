@@ -36,7 +36,7 @@
 		// get meta data for referenced entities
 		var refEntitiesMeta = {}; 
 		$.each(colAttributes, function(i, attribute) {
-			if(attribute.fieldType === 'XREF' || attribute.fieldType === 'MREF') {
+			if(attribute.fieldType === 'XREF' || attribute.fieldType === 'MREF' || attribute.fieldType === 'CATEGORICAL') {
 				refEntitiesMeta[attribute.refEntity.href] = null;
 			}
 		});
@@ -62,7 +62,7 @@
 			return attribute.name;
 		});
 		var expandAttributeNames = $.map(settings.colAttributes, function(attribute) {
-			return attribute.fieldType === 'XREF' || attribute.fieldType === 'MREF' ? attribute.name : null; 
+			return attribute.fieldType === 'XREF' || attribute.fieldType === 'CATEGORICAL' ||attribute.fieldType === 'MREF' ? attribute.name : null;
 		});
 		
 		// TODO do not construct uri from other uri
@@ -109,7 +109,8 @@
 					switch(attribute.fieldType) {
 						case 'XREF':
 						case 'MREF':
-							var refEntity = settings.refEntitiesMeta[attribute.refEntity.href];
+                        case 'CATEGORICAL':
+                        	var refEntity = settings.refEntitiesMeta[attribute.refEntity.href];
 							var refAttribute = refEntity.labelAttribute;
 							var refAttributeType = refEntity.attributes[refAttribute].fieldType;
 							if (refAttributeType === 'XREF' || refAttributeType === 'MREF' || refAttributeType === 'COMPOUND') {
@@ -117,7 +118,8 @@
 							}
 							
 							switch(attribute.fieldType) {
-								case 'XREF':
+                                case 'CATEGORICAL':
+                                case 'XREF':
 									cellValue = formatTableCellValue(rawValue[refAttribute], refAttributeType);
 									break;
 								case 'MREF':

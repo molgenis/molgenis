@@ -3,6 +3,7 @@ package org.molgenis.data.rest;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL;
 import static org.molgenis.data.rest.RestController.BASE_URI;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -303,12 +304,11 @@ public class RestController
 	 * Example url: /api/v1/person?_method=GET
 	 * 
 	 * Returns json
-	 * 
-	 * @param entityNameRaw
-	 * @param request
+	 *
+     * @param request
+     * @param attributes
 	 * @param attributeExpands
 	 * @return
-	 * @throws UnknownEntityException
 	 */
 	@RequestMapping(value = "/{entityName}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -705,11 +705,11 @@ public class RestController
 						entityMap.put(attrName, Collections.singletonMap("href", attrHref));
 					}
 				}
-				else if (attrType != XREF && attrType != MREF)
+				else if (attrType != XREF && attrType != CATEGORICAL && attrType != MREF)
 				{
 					entityMap.put(attrName, entity.get(attr.getName()));
 				}
-				else if (attrType == XREF && attributeExpandsSet != null
+				else if ((attrType == XREF || attrType == CATEGORICAL) && attributeExpandsSet != null
 						&& attributeExpandsSet.contains(attrName.toLowerCase()))
 				{
 					Entity refEntity = (Entity) entity.get(attr.getName());
@@ -747,7 +747,7 @@ public class RestController
 					EntityCollectionResponse ecr = new EntityCollectionResponse(pager, refEntityMaps, uri);
 					entityMap.put(attrName, ecr);
 				}
-				else if ((attrType == XREF && entity.get(attr.getName()) != null) || attrType == MREF)
+				else if ((attrType == XREF && entity.get(attr.getName()) != null)|| (attrType == CATEGORICAL && entity.get(attr.getName()) != null) || attrType == MREF)
 				{
 					// Add href to ref field
 					Map<String, String> ref = new LinkedHashMap<String, String>();
