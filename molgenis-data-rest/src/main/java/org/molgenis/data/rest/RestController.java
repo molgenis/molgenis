@@ -304,9 +304,9 @@ public class RestController
 	 * Example url: /api/v1/person?_method=GET
 	 * 
 	 * Returns json
-	 *
-     * @param request
-     * @param attributes
+	 * 
+	 * @param request
+	 * @param attributes
 	 * @param attributeExpands
 	 * @return
 	 */
@@ -747,7 +747,8 @@ public class RestController
 					EntityCollectionResponse ecr = new EntityCollectionResponse(pager, refEntityMaps, uri);
 					entityMap.put(attrName, ecr);
 				}
-				else if ((attrType == XREF && entity.get(attr.getName()) != null)|| (attrType == CATEGORICAL && entity.get(attr.getName()) != null) || attrType == MREF)
+				else if ((attrType == XREF && entity.get(attr.getName()) != null)
+						|| (attrType == CATEGORICAL && entity.get(attr.getName()) != null) || attrType == MREF)
 				{
 					// Add href to ref field
 					Map<String, String> ref = new LinkedHashMap<String, String>();
