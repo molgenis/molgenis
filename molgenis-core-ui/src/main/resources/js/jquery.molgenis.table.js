@@ -36,7 +36,7 @@
 		// get meta data for referenced entities
 		var refEntitiesMeta = {};
 		$.each(colAttributes, function(i, attribute) {
-			if(attribute.fieldType === 'XREF' || attribute.fieldType === 'MREF' || attribute.fieldType === 'CATEGORICAL') {
+			if (attribute.fieldType === 'XREF' || attribute.fieldType === 'MREF' || attribute.fieldType === 'CATEGORICAL') {
 				refEntitiesMeta[attribute.refEntity.href] = null;
 			}
 		});
@@ -44,7 +44,9 @@
 		var dfds = [];
 		$.each(refEntitiesMeta, function(entityHref) {
 			dfds.push($.Deferred(function(dfd) {
-				restApi.getAsync(entityHref, {'expand' : [ 'attributes' ]}, function(entityMeta) {
+				restApi.getAsync(entityHref, {
+					'expand' : [ 'attributes' ]
+				}, function(entityMeta) {
 					refEntitiesMeta[entityHref] = entityMeta;
 					dfd.resolve();
 				});
@@ -62,13 +64,21 @@
 			return attribute.name;
 		});
 		var expandAttributeNames = $.map(settings.colAttributes, function(attribute) {
-			return attribute.fieldType === 'XREF' || attribute.fieldType === 'CATEGORICAL' ||attribute.fieldType === 'MREF' ? attribute.name : null;
+			return attribute.fieldType === 'XREF' || attribute.fieldType === 'CATEGORICAL' || attribute.fieldType === 'MREF' ? attribute.name : null;
 		});
 
 		// TODO do not construct uri from other uri
 		var entityCollectionUri = settings.entityMetaData.href.replace("/meta", "");
-		var q = $.extend({}, settings.query, {'start': settings.start, 'num': settings.maxRows, 'sort': settings.sort});
-		restApi.getAsync(entityCollectionUri, {'attributes' : attributeNames, 'expand' : expandAttributeNames, 'q' : q}, function(data) {
+		var q = $.extend({}, settings.query, {
+			'start' : settings.start,
+			'num' : settings.maxRows,
+			'sort' : settings.sort
+		});
+		restApi.getAsync(entityCollectionUri, {
+			'attributes' : attributeNames,
+			'expand' : expandAttributeNames,
+			'q' : q
+		}, function(data) {
 			callback(data);
 		});
 	}
@@ -80,15 +90,12 @@
 		$.each(settings.colAttributes, function(i, attribute) {
 			if (settings.sort && settings.sort.orders[0].property === attribute.name) {
 				if (settings.sort.orders[0].direction == 'ASC') {
-					items.push('<th>' + attribute.label + '<span data-attribute="' + attribute.name
-							+ '" class="ui-icon ui-icon-triangle-1-s down"></span></th>');
+					items.push('<th>' + attribute.label + '<span data-attribute="' + attribute.name + '" class="ui-icon ui-icon-triangle-1-s down"></span></th>');
 				} else {
-					items.push('<th>' + attribute.label + '<span data-attribute="' + attribute.name
-							+ '" class="ui-icon ui-icon-triangle-1-n up"></span></th>');
+					items.push('<th>' + attribute.label + '<span data-attribute="' + attribute.name + '" class="ui-icon ui-icon-triangle-1-n up"></span></th>');
 				}
 			} else {
-				items.push('<th>' + attribute.label + '<span data-attribute="' + attribute.name
-						+ '" class="ui-icon ui-icon-triangle-2-n-s updown"></span></th>');
+				items.push('<th>' + attribute.label + '<span data-attribute="' + attribute.name + '" class="ui-icon ui-icon-triangle-2-n-s updown"></span></th>');
 			}
 		});
 		container.html(items.join(''));
@@ -106,37 +113,37 @@
 				var rawValue = entity[attribute.name];
 				if (rawValue) {
 					var cellValue;
-					switch(attribute.fieldType) {
-						case 'XREF':
-						case 'MREF':
-                        case 'CATEGORICAL':
-                        	var refEntity = settings.refEntitiesMeta[attribute.refEntity.href];
-							var refAttribute = refEntity.labelAttribute;
-							var refAttributeType = refEntity.attributes[refAttribute].fieldType;
-							if (refAttributeType === 'XREF' || refAttributeType === 'MREF' || refAttributeType === 'COMPOUND') {
-								throw 'unsupported field type ' + refAttributeType;
-							}
+					switch (attribute.fieldType) {
+					case 'XREF':
+					case 'MREF':
+					case 'CATEGORICAL':
+						var refEntity = settings.refEntitiesMeta[attribute.refEntity.href];
+						var refAttribute = refEntity.labelAttribute;
+						var refAttributeType = refEntity.attributes[refAttribute].fieldType;
+						if (refAttributeType === 'XREF' || refAttributeType === 'MREF' || refAttributeType === 'COMPOUND') {
+							throw 'unsupported field type ' + refAttributeType;
+						}
 
-							switch(attribute.fieldType) {
-                                case 'CATEGORICAL':
-                                case 'XREF':
-									cellValue = formatTableCellValue(rawValue[refAttribute], refAttributeType);
-									break;
-								case 'MREF':
-									var cellValueParts = [];
-									$.each(rawValue.items, function(i, rawValue) {
-										var cellValuePart = formatTableCellValue(rawValue[refAttribute], refAttributeType);
-										cellValueParts.push(cellValuePart);
-									});
-									cellValue = cellValueParts.join(',');
-									break;
-								default:
-									throw 'unexpected field type ' + attribute.fieldType;
-							}
+						switch (attribute.fieldType) {
+						case 'CATEGORICAL':
+						case 'XREF':
+							cellValue = formatTableCellValue(rawValue[refAttribute], refAttributeType);
 							break;
-						default :
-							cellValue = formatTableCellValue(rawValue, attribute.fieldType);
+						case 'MREF':
+							var cellValueParts = [];
+							$.each(rawValue.items, function(i, rawValue) {
+								var cellValuePart = formatTableCellValue(rawValue[refAttribute], refAttributeType);
+								cellValueParts.push(cellValuePart);
+							});
+							cellValue = cellValueParts.join(',');
 							break;
+						default:
+							throw 'unexpected field type ' + attribute.fieldType;
+						}
+						break;
+					default:
+						cellValue = formatTableCellValue(rawValue, attribute.fieldType);
+						break;
 					}
 					items.push('<td class="multi-os-datacell">' + cellValue + '</td>');
 				} else {
@@ -148,13 +155,16 @@
 		}
 		container.html(items.join(''));
 
-		$('.show-popover').popover({trigger:'hover', placement: 'bottom'});
+		$('.show-popover').popover({
+			trigger : 'hover',
+			placement : 'bottom'
+		});
 	}
 
 	function createTablePager(data, settings) {
 		var container = $('.molgenis-table-pager', settings.container);
 
-		if(data.total > settings.maxRows) {
+		if (data.total > settings.maxRows) {
 			container.pager({
 				'nrItems' : data.total,
 				'nrItemsPerPage' : settings.maxRows,
@@ -165,7 +175,8 @@
 					});
 				}
 			});
-		} else container.hide();
+		} else
+			container.hide();
 	}
 
 	function createTableFooter(data, settings) {
@@ -186,7 +197,9 @@
 		}
 
 		// create tree container
-		var settings = $.extend({}, $.fn.table.defaults, options, {'container': container});
+		var settings = $.extend({}, $.fn.table.defaults, options, {
+			'container' : container
+		});
 
 		// store tree settings
 		container.empty();
@@ -208,7 +221,7 @@
 		});
 
 		createTable(settings, function() {
-			if(settings.onInit)
+			if (settings.onInit)
 				setting.onInit();
 		});
 
@@ -222,13 +235,12 @@
 				order.property = attributeName;
 				order.direction = order.direction === 'ASC' ? 'DESC' : 'ASC';
 
-
 			} else {
 				settings.sort = {
-					orders: [{
-						property: attributeName,
-						direction: 'ASC'
-					}]
+					orders : [ {
+						property : attributeName,
+						direction : 'ASC'
+					} ]
 				};
 			}
 

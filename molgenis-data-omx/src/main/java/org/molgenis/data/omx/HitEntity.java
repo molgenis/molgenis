@@ -75,16 +75,16 @@ public class HitEntity extends AbstractEntity
 				}
 				case CATEGORICAL:
 				{
-                    Object attributeValue = caseInsensitiveColumnValueMap.get(HIT_KEY_PREFIX
-                            + caseInsensitiveAttributeName);
-                    if (attributeValue != null)
-                    {
-                        String categoryIdentifier = (String) attributeValue;
-                        Query categoryQuery = new QueryImpl().eq(Characteristic.IDENTIFIER, categoryIdentifier);
-                        return dataService.findOne(attribute.getRefEntity().getName(), categoryQuery);
-                    }
-                    else return null;
-                }
+					Object attributeValue = caseInsensitiveColumnValueMap.get(HIT_KEY_PREFIX
+							+ caseInsensitiveAttributeName);
+					if (attributeValue != null)
+					{
+						String categoryIdentifier = (String) attributeValue;
+						Query categoryQuery = new QueryImpl().eq(Characteristic.IDENTIFIER, categoryIdentifier);
+						return dataService.findOne(attribute.getRefEntity().getName(), categoryQuery);
+					}
+					else return null;
+				}
 				case DATE:
 				{
 					Object attributeValue = caseInsensitiveColumnValueMap.get(caseInsensitiveAttributeName);
