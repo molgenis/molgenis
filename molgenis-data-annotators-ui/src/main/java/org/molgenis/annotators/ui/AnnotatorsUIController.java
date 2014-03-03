@@ -54,7 +54,7 @@ public class AnnotatorsUIController extends MolgenisPluginController
 
 	private static final String ID = "annotateUI";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
-	public int initCount = 0;
+
 	private final AnnotatorsUIService pluginAnnotatorsUIService;
 
 	@Autowired
@@ -87,9 +87,6 @@ public class AnnotatorsUIController extends MolgenisPluginController
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(String selectedDataSetIdentifier, Model model)
 	{
-		++initCount;
-		System.out.println(initCount);
-
 		List<DataSet> dataSets = Lists.newArrayList(dataService.findAll(DataSet.ENTITY_NAME,
 				new QueryImpl().sort(new Sort(Direction.DESC, DataSet.STARTTIME)), DataSet.class));
 
