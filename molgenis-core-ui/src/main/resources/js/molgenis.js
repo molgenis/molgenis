@@ -391,6 +391,23 @@ $(function() {
 			error : callback.error
 		});
 	};
+	
+	molgenis.RestClient.prototype.entityExists = function(resourceUri) {
+		var result = false;
+		$.ajax({
+			dataType : 'json',
+			url : resourceUri + '/exist',
+			async : false,
+			success : function(exists) {
+				result = exists;
+			},
+			error : function(xhr) {
+				molgenis.createAlert(JSON.parse(xhr.responseText).errors);
+			}
+		});
+		
+		return result;
+	}
 
 }($, window.top.molgenis = window.top.molgenis || {}));
 

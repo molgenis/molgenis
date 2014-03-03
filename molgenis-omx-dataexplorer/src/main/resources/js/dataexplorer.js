@@ -221,7 +221,11 @@
 				$('.feature-filter-dialog').dialog('close');
 			}
 		});
-	
+		
+		if (attribute.fieldType == 'XREF' || attribute.fieldType == 'MREF') {
+			$('.xref').xrefsearch({featureUri: featureUri});
+		}
+
 		if (attribute.fieldType === 'DATE') {
 			$('.date').datetimepicker({
 				format : 'yyyy-MM-dd',
@@ -243,9 +247,13 @@
 		var divContainer = $('<div />');
 		var filter = null;
 		switch (attribute.fieldType) {
-			case "HTML" :
 			case "MREF" :
 			case "XREF" :
+				filter = $('<input type="hidden" class="xref" id="text_' + attribute.name + '">');
+				divContainer.append(filter);
+				break;
+				
+			case "HTML" :
 			case "EMAIL" :
 			case "HYPERLINK" :
 			case "TEXT" :
@@ -519,49 +527,8 @@
 				return;
 		}
 	
-		if ((attribute.fieldType === 'XREF') || (attribute.fieldType == 'MREF')) {
-			
-			restApi.getAsync(featureUri, {attributes:['refEntity'], expand:['refEntity']}, function(entityMetaData) {
-				var refEntity = entityMetaData.refEntity;
-				if (refEntity) {
-					var refEntityName = refEntity.name;
-					var refEntityAttribute = refEntity.labelAttribute;
-					
-					if (refEntityName && refEntityAttribute) {
-					
-						divContainer.find($("[id='text_" + attribute.name +"']"))
-						.autocomplete({
-								source : function(request, response) {
-									$.ajax({
-											type : 'POST',
-											url : '/api/v1/' + refEntityName + '?_method=GET',
-											data : JSON.stringify({
-												num : 15,
-												q : [{
-													"field" : refEntityAttribute,
-													"operator" : "LIKE",
-													"value" : request.term
-												}]
-											}),
-											contentType : 'application/json',
-											async : true,
-											success : function(resultList) {
-												response($.map(resultList.items, function(item) {
-																				return item[uncapitalize(refEntityAttribute)];
-																			}));
-												}
-											});
-								},
-								minLength : 2
-						});
-					
-					}
-				}		
-				
-			});
-			
-		}
-	
+		
+		
 		if (attribute.fieldType === 'DATE') {
 			var container = divContainer.find('.date').datetimepicker({
 				format : 'yyyy-MM-dd',
@@ -956,6 +923,9 @@
 				
 				$(document).trigger('changeAttributeSelection', {'attributes': selectedAttributes});
 				molgenis.createEntityMetaTree(entityMetaData, selectedAttributes);
+				
+				//Save selected entity to cookie so it wil be selected the next time. Expires 7 days from now
+				$.cookie('molgenis.selected.entity', entityUri, { expires: 7 });
 			});
 		});
 		
@@ -1052,7 +1022,7 @@
 
 		$('.feature-filter-dialog').dialog({
 			modal : true,
-			width : 500,
+			width : 700,
 			autoOpen : false
 		});
 
@@ -1063,8 +1033,20 @@
 		$('#genomebrowser-filter-button').click(function() {
 			molgenis.setDallianceFilter();
 		});
-
-		// fire event handler
+		
+		
+		//Select entity based on cookie
+		var resourceUri = $.cookie('molgenis.selected.entity');
+		if (resourceUri) {
+			if (restApi.entityExists(resourceUri)) {
+				$('#dataset-select').val(resourceUri).trigger('liszt:updated');
+			} else {
+				//Entity is deleted
+				$.removeCookie('molgenis.selected.entity');
+			}
+		} 
+		
 		$('#dataset-select').change();
+		
 	});
 }($, window.top.molgenis = window.top.molgenis || {}));

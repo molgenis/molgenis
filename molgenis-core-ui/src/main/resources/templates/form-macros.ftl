@@ -66,7 +66,7 @@
 			primaryKey: '${form.primaryKey}',
 		</#if>
 		<#if form.xrefFieldName??>
-			xrefFieldName: '${form.xrefFieldName?uncap_first}',
+			xrefFieldName: '${form.xrefFieldName}',
 		</#if>
 		baseUri: '${form.getBaseUri(context_url)}'
 	}
@@ -79,14 +79,14 @@
 	//The fieldnames of the entity
 	forms[${index}].meta.fields = [<#list form.metaData.fields as field>
 					{
-						name:'${field.name?uncap_first}', 
+						name:'${field.name}', 
 						xref:${(field.dataType.enumType == 'XREF')?string('true', 'false')},
 						mref:${(field.dataType.enumType == 'MREF')?string('true', 'false')},
 						type:'${field.dataType.enumType}',
 						readOnly:${field.isReadonly()?string('true', 'false')},
 						unique:false,
 						<#if field.refEntity??>
-						xrefLabelName: '${field.refEntity.labelAttribute.name?uncap_first}',
+						xrefLabelName: '${field.refEntity.labelAttribute.name}',
 						xrefLabel: '${field.refEntity.name}',
 						xrefEntityName: '${field.refEntity.name?lower_case}'
 						</#if>
@@ -135,13 +135,13 @@
 	var remoteRules = {
 		<#list form.metaData.fields as field>
 			<#if field.isUnique()?string('true', 'false') == 'true'>
-				${field.name?uncap_first}: {
+				${field.name}: {
 					remote: {
-						url: '/api/v1/${form.metaData.name?lower_case}?q[0].operator=EQUALS&q[0].field=${field.name?uncap_first}',
+						url: '/api/v1/${form.metaData.name?lower_case}?q[0].operator=EQUALS&q[0].field=${field.name}',
 						async: false,
 						data: {
 							'q[0].value': function() {//Bit cheesy, but it works, is appended to the url
-								return $('#${field.name?uncap_first}').val();
+								return $('#${field.name}').val();
 							}
 						},
 						dataFilter: function(data) {
@@ -168,8 +168,8 @@
 	var remoteMessages = {
 		<#list form.metaData.fields as field>
 			<#if field.isUnique()?string('true', 'false') == 'true'>
-				${field.name?uncap_first}: {
-					remote: "This ${field.name?uncap_first} already exists. It must be unique"
+				${field.name}: {
+					remote: "This ${field.name} already exists. It must be unique"
 				},
 			</#if>
 		</#list>

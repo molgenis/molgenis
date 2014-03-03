@@ -110,4 +110,10 @@ public class ObservableFeatureAttributeMetaData implements AttributeMetaData
 	{
 		return false;
 	}
+
+	@Override
+	public boolean isLookupAttribute()
+	{
+		return false;
+	}
 }

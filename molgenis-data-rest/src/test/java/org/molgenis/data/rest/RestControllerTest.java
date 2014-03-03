@@ -164,7 +164,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 										+ ENTITY_NAME
 										+ "\",\"attributes\":{\"name\":{\"href\":\""
 										+ HREF_ENTITY_META
-										+ "/name\",\"fieldType\":\"STRING\",\"name\":\"name\",\"label\":\"name\",\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false}}}"));
+										+ "/name\",\"fieldType\":\"STRING\",\"name\":\"name\",\"label\":\"name\",\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false,\"lookupAttribute\":true}}}"));
 
 	}
 

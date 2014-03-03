@@ -245,3 +245,19 @@ input[type=number] {
 	padding: 0px;
 	border-style: none;
 }
+
+.select2-result {
+	vertical-align: top;
+	padding: 2px;
+	font-size: 12px;
+	height: 26px;
+	color: #333;
+}
+
+.select2-result:nth-child(even) {
+	background-color: #DDD;
+}
+
+.select2-result:nth-child(odd) {
+	background-color: #FFF;
+}
