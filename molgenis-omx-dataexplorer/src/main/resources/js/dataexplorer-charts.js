@@ -3,26 +3,14 @@
  * 
  * @param $
  * @param molgenis
- */
-		
+ */	
 (function($, molgenis) {
 	"use strict";
 	molgenis.charts = molgenis.charts || {};
 	var ns = molgenis.charts.dataexplorer = molgenis.charts.dataexplorer || {};
 	var restApi = new molgenis.RestClient();
-	
-	ns.resetChartDesigners = function(message){
-		$('#scatterplot-select-xaxis-feature').empty();
-		$('#scatterplot-select-yaxis-feature').empty();
-		$('#scatterplot-select-split-feature').empty();
-		$("#scatterplot-designer-modal-create-button").prop('disabled', true);
-		
-		$('#boxplot-select-feature').empty();
-		$('#boxplot-select-split-feature').empty();
-		$("#boxplot-designer-modal-create-button").prop('disabled', true);
-	};
-	
-	ns.createScatterPlotChartRequestPayLoad = function (
+
+	function createScatterPlotChartRequestPayLoad(
 			entity,
 			x, 
 			y, 
@@ -47,9 +35,9 @@
 			"yAxisLabel": yAxisLabel,
 			"split": splitFeature
 		};
-	};
+	}
 	
-	ns.createBoxPlotChartRequestPayLoad = function (
+	function createBoxPlotChartRequestPayLoad(
 			entity,
 			width, 
 			height,
@@ -70,141 +58,51 @@
 			"query":query,
 			"scale" : scale
 		};
-	};
-	
-// TODO heatmap	
-//	ns.createHeatMapRequestPayLoad = function (
-//			entity,
-//			x, 
-//			xAxisLabel,
-//			width,
-//			height,
-//			title,
-//			query) {
-//		
-//		return {
-//			"entity": entity,
-//			"width": width,
-//			"height": height,
-//			"title": title,
-//			"y": x,
-//			"yLabel":xAxisLabel,
-//			"query":query
-//		};
-//	};
+	}
 	
 	/**
-	 * retrieve select options items made from features objects
-	 * Arguments:
-	 * 1.	features: feature objects containing minimal the href and name properties.
-	 */
-	ns.getSelectedFeaturesSelectOptions = function(features) {
-		var listItems = [];
-		listItems.push('<option value='+ '-1' +'>select</option>');
-		$.each(features, function (index) {
-			listItems.push('<option value=' + features[index].href + '>' + features[index].name + '</option>');
-		});
-		return listItems.join('');
-	};
-	
-	/**
-	 * retrieve the selected features from the dynatree of the data-explorer.
-	 */
-	ns.getSelectedFeatures = function() {
-		var tree = $('#feature-selection').dynatree('getTree');
-		var selectedNodes = tree.getSelectedNodes();
-		var selectedFeatures = [];
-		var tempData;
-
-		$.each(selectedNodes, function (index) {
-			tempData = selectedNodes[index].data;
-			if(!tempData.isFolder){
-				selectedFeatures.push(ns.getFeatureByRestApi(tempData.key, restApi));
-			}
-			tempData = null;
-		});
-		return selectedFeatures;
-	};
-	
-	/**
-	 * filter the features based on the data type
+	 * create string of option elements for a select
 	 * 
-	 * Arguments:
-	 * 1.	features:	the features to filter
-	 * 2.	acceptableDataTypesList:	the acceptable data types
-	 * 
-	 * if the acceptableDataTypesList is empty or do'nt exist it return all of the features
+	 * @param attributes
 	 */
-	ns.filterFeatures = function(features, acceptableDataTypesList) {
-		if(undefined === acceptableDataTypesList
-				|| null === acceptableDataTypesList
-				|| acceptableDataTypesList.length === 0) return features;
-
-		var filterdFeatures = [];
-		$.each(features, function (i) {
-			$.each(acceptableDataTypesList, function (j) {
-				if(features[i].dataType === acceptableDataTypesList[j]) {
-					filterdFeatures.push(features[i]);
-					return true;
-				}
-			});
+	function createAttributeSelectOptions(attributes) {
+		var items = [];
+		items.push('<option value='+ '-1' +'>select</option>');
+		$.each(attributes, function() {
+			items.push('<option value=' + this.href + '>' + this.name + '</option>');
 		});
-		return filterdFeatures;
-	};
-	
-	/**
-	 * handle the error and get the features through the rest Api
-	 */
-	ns.getFeatureByRestApi = function(value, restApi) {
-		try
-		{
-			if(value === "-1"){
-				return undefined;
-			}
-			return restApi.get(value);
-		}
-		catch (err) 
-		{
-			console.log(err);
-			return undefined;
-		}
-	};
+		return items.join('');
+	}
 	
 	/**
 	 * make the scatter plot
 	 */
-	ns.makeScatterPlot = function (entity) {
-		var xAxisFeature = ns.getFeatureByRestApi($('#scatterplot-select-xaxis-feature').val(), restApi);
-		var xAxisDataType;
-		var yAxisFeature = ns.getFeatureByRestApi($('#scatterplot-select-yaxis-feature').val(), restApi);
-		var splitFeature = ns.getFeatureByRestApi($('#scatterplot-select-split-feature').val(), restApi);
+	ns.createScatterPlot = function(entity, entityQuery, xAxisFeature, yAxisFeature, splitFeature) {
 		var width = 1024;
 		var height = 576; 
 		var title = $('#scatterplot-title').val();
-		var searchRequest = molgenis.createSearchRequest();
-		var query = searchRequest.query;
-		var x, y, xAxisLabel, yAxisLabel, split;
+		var x, y, xAxisLabel, yAxisLabel, xAxisDataType, split;
 		
 		if(xAxisFeature) {
-			x = xAxisFeature.identifier;
-			xAxisLabel = xAxisFeature.name;
-			xAxisDataType = xAxisFeature.dataType;
+			x = xAxisFeature.name;
+			xAxisLabel = xAxisFeature.label;
+			xAxisDataType = xAxisFeature.fieldType;
 		} 
 		
 		if(yAxisFeature) {
-			y = yAxisFeature.identifier;
-			yAxisLabel = yAxisFeature.name;
+			y = yAxisFeature.name;
+			yAxisLabel = yAxisFeature.label;
 		}
 		
 		if(splitFeature) {
-			split = splitFeature.identifier;
+			split = splitFeature.name;
 		}
 		
 		$.ajax({
 			type : "POST",
 			url : "/charts/xydatachart",
-			data : JSON.stringify(molgenis.charts.dataexplorer.createScatterPlotChartRequestPayLoad(
-					entity,
+			data : JSON.stringify(createScatterPlotChartRequestPayLoad(
+					entity.name,
 					x, 
 					y, 
 					xAxisLabel,
@@ -212,7 +110,7 @@
 					width,
 					height,
 					title,
-					query,
+					entityQuery,
 					split
 			)),
 			contentType : "application/json; charset=utf-8",
@@ -220,7 +118,7 @@
 			async: true,
 			success : function(options){
 				$('#tabs a:last').tab('show');
-				if(xAxisDataType === "date" || xAxisDataType === "datetime") {
+				if(xAxisDataType === 'DATE' || xAxisDataType === 'DATE_TIME') {
 					$('#chart-view').highcharts('StockChart', options);
 				} else {
 					$('#chart-view').highcharts(options);
@@ -231,42 +129,38 @@
 	};
 	
 	//Box Plot
-	ns.makeBoxPlot = function (entity) {
-		var feature = ns.getFeatureByRestApi($('#boxplot-select-feature').val(), restApi);
-		var splitFeature = ns.getFeatureByRestApi($('#boxplot-select-split-feature').val(), restApi);
+	ns.createBoxPlot = function(entity, entityQuery, attribute, splitAttribute) {
 		var title = $('#boxplot-title').val();
 		var width = 1024;
 		var height = 576;
-		var searchRequest = molgenis.createSearchRequest();
-		var query = searchRequest.query;
 		var featureIdentifier, splitIdentifier;
 		var scale;
 		
 		if($('#boxplot-scale').val() === "") {
 			scale = 1.5; // Default value
 		} else {
-			scale = new Number($('#boxplot-scale').val())
+			scale = new Number($('#boxplot-scale').val());
 		}
 		
-		if(feature) {
-			featureIdentifier = feature.identifier;		
+		if(attribute) {
+			featureIdentifier = attribute.name;		
 		}
 		
-		if(splitFeature) {
-			splitIdentifier = splitFeature.identifier;
+		if(splitAttribute) {
+			splitIdentifier = splitAttribute.name;
 		}
 		
 		$.ajax({
 			type : "POST",
 			url : "/charts/boxplot",
-			data : JSON.stringify(molgenis.charts.dataexplorer.createBoxPlotChartRequestPayLoad(
-					entity,
+			data : JSON.stringify(createBoxPlotChartRequestPayLoad(
+					entity.name,
 					width,
 					height,
 					title,
 					featureIdentifier,
 					splitIdentifier,
-					query,
+					entityQuery,
 					scale
 			)),
 			contentType : "application/json; charset=utf-8",
@@ -280,140 +174,112 @@
 		
 	};
 	
-	
-	ns.activateDesignerSubmitButtonScatterPlot = function (){
+	function activateDesignerSubmitButtonScatterPlot() {
 		var disabled = true;
 		var valueOne  = $('#scatterplot-select-yaxis-feature').val();
 		var valueTwo  = $('#scatterplot-select-xaxis-feature').val();
 
-		if(valueOne && (valueOne !== "-1")
-			&& valueTwo && (valueTwo !== "-1")){
+		if (valueOne && (valueOne !== "-1") && valueTwo && (valueTwo !== "-1")) {
 			disabled = false;
 		}
 		
 		$("#scatterplot-designer-modal-create-button").prop('disabled', disabled);
-	}
+	};
 	
-	ns.activateDesignerSubmitButtonBoxPlot = function (){
+	function activateDesignerSubmitButtonBoxPlot() {
 		var disabled = true;
 		var valueOne = $('#boxplot-select-feature').val();
 
-		if(valueOne && (valueOne !== "-1")){
+		if (valueOne && (valueOne !== "-1")) {
 			disabled = false;
 		}
 		
 		$('#boxplot-designer-modal-create-button').prop('disabled', disabled);
+	};
+	
+	/**
+	 * Returns the selected attributes from the data explorer 
+	 */
+	function getAttributes() {
+		var attributes = molgenis.dataexplorer.getSelectedAttributes();
+		return molgenis.getAtomicAttributes(attributes, restApi);
+	};
+	
+	/**
+	 * Returns the selected entity from the data explorer 
+	 */
+	function getEntity() {
+		return molgenis.dataexplorer.getSelectedEntityMeta();
+	};
+	
+	/**
+	 * Returns the selected entity query from the data explorer 
+	 */
+	function getEntityQuery() {
+		var query = molgenis.dataexplorer.getEntityQuery();
+		return {'rules': [query.q]};
+	};
+	
+	/**
+	 * Returns attributes map with attribute.href as key
+	 */
+	function toAttributeMap(attributes) {
+		var attributeMap = {};
+		$.each(attributes, function() {
+			attributeMap[this.href] = this;
+		});
+		return attributeMap;
 	}
-
-
-// TODO heatmap
-//
-//	ns.makeHeatMap = function (entity) {
-//		var xAxisFeature = ns.getFeatureByRestApi($('#heatmap-select-xaxis-feature').val(), restApi);
-//		var width = 1024;
-//		var height = 576; 
-//		var title = $('#heatmap-title').val();
-//		var searchRequest = molgenis.createSearchRequest();
-//		var query = searchRequest.query;
-//		var x, xAxisLabel;
-//		
-//		if(xAxisFeature) {
-//			x = xAxisFeature.identifier;
-//			xAxisLabel = xAxisFeature.name;
-//		} 
-//		
-//		$.ajax({
-//			type : "POST",
-//			url : "/charts/heatmap",
-//			data : JSON.stringify(molgenis.charts.dataexplorer.createHeatMapRequestPayLoad(
-//					entity,
-//					x, 
-//					xAxisLabel,
-//					width,
-//					height,
-//					title,
-//					query
-//			)),
-//			contentType : "application/json; charset=utf-8",
-//			cache: false,
-//			async: true,
-//			success : function(response){
-//				alert(response);
-//			}
-//		});	
-//	};
 	
 	$(function() {
-		/****
-		 * all dataTypes:
-		 * 	"html", "mref", "xref", "email", "hyperlink", "text", "string", "bool", "categorical"
-		 * 	"date", "datetime"
-		 * 	"long", "integer", "int", "decimal"
-		 ****/
+		// scatter plot modal
+		$('#chart-designer-modal-scatterplot').on('show', function() {
+			$("#scatterplot-designer-modal-create-button").prop('disabled', true); // reset
+			
+			var attributes = getAttributes();
+			var xaxisAttributes = $.grep(attributes, function(attribute) {
+				return $.inArray(attribute.fieldType, ['DECIMAL', 'LONG', 'INT', 'DATE', 'DATE_TIME']) !== -1;
+			});
+			var yaxisAttributes = $.grep(attributes, function(attribute) {
+				return $.inArray(attribute.fieldType, ['DECIMAL', 'LONG', 'INT', 'DATE', 'DATE_TIME']) !== -1;
+			});
 
-		$('#chart-designer-modal-scatterplot-button').click(function () {
-			var allSelectedFeatures = ns.getSelectedFeatures();
+			$('#scatterplot-select-xaxis-feature').html(createAttributeSelectOptions(xaxisAttributes));
+			$('#scatterplot-select-yaxis-feature').html(createAttributeSelectOptions(yaxisAttributes));
+			$('#scatterplot-select-split-feature').html(createAttributeSelectOptions(attributes));
 			
-			if($('#scatterplot-select-xaxis-feature').has('option').length===0){
-				$('#scatterplot-select-xaxis-feature').append(ns.getSelectedFeaturesSelectOptions(
-						ns.filterFeatures(allSelectedFeatures, ["decimal", "long", "integer", "int", "date", "datetime"])));
-			}
-
-			if($('#scatterplot-select-yaxis-feature').has('option').length===0){
-				$('#scatterplot-select-yaxis-feature').append(
-						ns.getSelectedFeaturesSelectOptions(ns.filterFeatures(allSelectedFeatures, ["decimal", "long", "integer", "int", "date", "datetime"])));
-			}
-			
-			if($('#scatterplot-select-split-feature').has('option').length===0){
-				$('#scatterplot-select-split-feature').append(
-						ns.getSelectedFeaturesSelectOptions(ns.filterFeatures(allSelectedFeatures)));
-			}
+			$('#scatterplot-designer-modal-create-button').click(function() {
+				var attributeMap = toAttributeMap(attributes);
+				var xaxisAttribute = attributeMap[$('#scatterplot-select-xaxis-feature').val()];
+				var yaxisAttribute = attributeMap[$('#scatterplot-select-yaxis-feature').val()];
+				var splitAttribute = attributeMap[$('#scatterplot-select-split-feature').val()];
+				ns.createScatterPlot(getEntity(), getEntityQuery(), xaxisAttribute, yaxisAttribute, splitAttribute);
+			});
 		});
 		
-		$('#chart-designer-modal-boxplot-button').click(function () {
-			var allSelectedFeatures = ns.getSelectedFeatures();
+		$('#scatterplot-select-xaxis-feature').change(activateDesignerSubmitButtonScatterPlot);
+		$('#scatterplot-select-yaxis-feature').change(activateDesignerSubmitButtonScatterPlot);
+		
+		// box plot modal
+		$('#chart-designer-modal-boxplot').on('show', function() {
+			$("#boxplot-designer-modal-create-button").prop('disabled', true); // reset
 			
-			if($('#boxplot-select-feature').has('option').length===0){
-				$('#boxplot-select-feature').append(
-						ns.getSelectedFeaturesSelectOptions(ns.filterFeatures(allSelectedFeatures, ["decimal", "long", "integer", "int"])));
-			}
+			var attributes = getAttributes();
+			var attributeAttributes = $.grep(attributes, function(attribute) {
+				return $.inArray(attribute.fieldType, ['DECIMAL', 'LONG', 'INT']) !== -1;
+			});
 			
-			if($('#boxplot-select-split-feature').has('option').length===0){
-				$('#boxplot-select-split-feature').append(
-						ns.getSelectedFeaturesSelectOptions(ns.filterFeatures(allSelectedFeatures)));
-			}
-		});
-
-// TODO Heatmap		
-//		$('#chart-designer-modal-heatmap-button').click(function () {
-//			var selectedFeaturesSelectOptions = null;
-//			$('#heatmap-select-xaxis-feature').empty();
-//			selectedFeaturesSelectOptions = ns.getSelectedFeaturesSelectOptions();
-//			$('#heatmap-select-xaxis-feature').append(selectedFeaturesSelectOptions);
-//		});
-		
-		// fire event handler
-		$('#dataset-select').change();
-		
-		$('#scatterplot-designer-modal-create-button').click(function(){
-			molgenis.charts.dataexplorer.makeScatterPlot(molgenis.getSelectedDataSetIdentifier());
+			$('#boxplot-select-feature').html(createAttributeSelectOptions(attributeAttributes));
+			$('#boxplot-select-split-feature').html(createAttributeSelectOptions(attributes));
+			
+			$('#boxplot-designer-modal-create-button').click(function(){
+				var attributeMap = toAttributeMap(attributes);
+				var attribute = attributeMap[$('#boxplot-select-feature').val()];
+				var splitAttribute = attributeMap[$('#boxplot-select-split-feature').val()];
+				ns.createBoxPlot(getEntity(), getEntityQuery(), attribute, splitAttribute);
+			});	
 		});
 		
-		$('#boxplot-designer-modal-create-button').click(function(){
-			molgenis.charts.dataexplorer.makeBoxPlot(molgenis.getSelectedDataSetIdentifier());
-		});
-		
-		//Scatter plot
-		$('#scatterplot-select-xaxis-feature').change(ns.activateDesignerSubmitButtonScatterPlot);
-		$('#scatterplot-select-yaxis-feature').change(ns.activateDesignerSubmitButtonScatterPlot);
-		
-		//Box plot
-		$('#boxplot-select-feature').change(ns.activateDesignerSubmitButtonBoxPlot);
-		
-		// TODO heat map
-		//$('#heatmap-designer-modal-create-button').click(function(){
-		//	molgenis.charts.dataexplorer.makeHeatMap(molgenis.getSelectedDataSetIdentifier());
-		//});
+		$('#boxplot-select-feature').change(activateDesignerSubmitButtonBoxPlot);
 	});
-	
 })($, window.top.molgenis = window.top.molgenis || {});

@@ -7,54 +7,47 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Repository;
 import org.molgenis.data.csv.CsvWriter;
-import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.entityexplorer.controller.EntityExplorerController;
 import org.molgenis.framework.server.MolgenisPermissionService;
 import org.molgenis.framework.server.MolgenisPermissionService.Permission;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.omx.observ.Category;
-import org.molgenis.omx.observ.DataSet;
-import org.molgenis.omx.observ.ObservableFeature;
-import org.molgenis.omx.observ.Protocol;
-import org.molgenis.omx.utils.ProtocolUtils;
-import org.molgenis.search.Hit;
-import org.molgenis.search.SearchRequest;
-import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.google.common.collect.Lists;
-
-//import org.molgenis.data.csv
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 
 /**
  * Controller class for the data explorer.
@@ -75,10 +68,6 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String ID = "dataexplorer";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
-	private static final int DOWNLOAD_SEARCH_LIMIT = 1000;
-
-	private static final String DEFAULT_KEY_TABLE_TYPE = "MultiObservationSetTable.js";
-	private static final String KEY_TABLE_TYPE = "dataexplorer.resultstable.js";
 	private static final String KEY_APP_HREF_CSS = "app.href.css";
 
 	// Including excluding the charts module
@@ -117,17 +106,17 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	/**
+	 * TODO JJ
+	 * 
 	 * Show the explorer page
 	 * 
 	 * @param model
 	 * @return the view name
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(@RequestParam(value = "dataset", required = false)
-	String selectedDataSetIdentifier, Model model) throws Exception
+	public String init(@RequestParam(value = "dataset", required = false) String selectedEntityName, Model model)
+			throws Exception
 	{
-		Map<String, String> genomeBrowserSets = new HashMap<String, String>();
-
 		// set entityExplorer URL for link to EntityExplorer for x/mrefs, but only if the user has permission to see the
 		// plugin
 		if (molgenisPermissionService.hasPermissionOnPlugin(EntityExplorerController.ID, Permission.READ)
@@ -136,47 +125,25 @@ public class DataExplorerController extends MolgenisPluginController
 			model.addAttribute("entityExplorerUrl", EntityExplorerController.ID);
 		}
 
-		List<DataSet> dataSets = Lists.newArrayList(dataService.findAll(DataSet.ENTITY_NAME,
-				new QueryImpl().sort(new Sort(Direction.DESC, DataSet.STARTTIME)), DataSet.class));
-
-		model.addAttribute("dataSets", dataSets);
-
-		if (dataSets != null && !dataSets.isEmpty())
-		{
-			// determine selected data set and add to model
-			DataSet selectedDataSet = null;
-			if (selectedDataSetIdentifier != null)
-			{
-				for (DataSet dataSet : dataSets)
+		Iterable<EntityMetaData> entitiesMeta = Iterables.transform(dataService.getEntityNames(),
+				new Function<String, EntityMetaData>()
 				{
-					if (dataSet.getIdentifier().equals(selectedDataSetIdentifier))
+					@Override
+					public EntityMetaData apply(String entityName)
 					{
-						selectedDataSet = dataSet;
-						break;
+						return dataService.getRepositoryByEntityName(entityName);
 					}
-				}
+				});
+		model.addAttribute("entitiesMeta", entitiesMeta);
 
-				if (selectedDataSet == null) throw new IllegalArgumentException(selectedDataSetIdentifier
-						+ " is not a valid data set identifier");
-			}
-			else
-			{
-				// select first data set by default
-				selectedDataSet = dataSets.iterator().next();
-			}
-			model.addAttribute("selectedDataSet", selectedDataSet);
-			for (DataSet dataSet : dataSets)
-			{
-				if (isGenomeBrowserDataSet(dataSet))
-				{
-					genomeBrowserSets.put(dataSet.getIdentifier(), dataSet.getName());
-				}
-			}
-			model.addAttribute("genomeBrowserSets", genomeBrowserSets);
+		if (selectedEntityName == null)
+		{
+			selectedEntityName = entitiesMeta.iterator().next().getName();
 		}
+		model.addAttribute("selectedEntityName", selectedEntityName);
 
-		String resultsTableJavascriptFile = molgenisSettings.getProperty(KEY_TABLE_TYPE, DEFAULT_KEY_TABLE_TYPE);
-		model.addAttribute("resultsTableJavascriptFile", resultsTableJavascriptFile);
+		// Init genome browser
+		model.addAttribute("genomeBrowserSets", getGenomeBrowserSetsToModel());
 
 		String appHrefCss = molgenisSettings.getProperty(KEY_APP_HREF_CSS);
 		if (appHrefCss != null) model.addAttribute(KEY_APP_HREF_CSS.replaceAll("\\.", "_"), appHrefCss);
@@ -197,200 +164,129 @@ public class DataExplorerController extends MolgenisPluginController
 		return "view-dataexplorer";
 	}
 
-	private boolean isGenomeBrowserDataSet(DataSet selectedDataSet)
+	private Map<String, String> getGenomeBrowserSetsToModel()
 	{
-		Collection<Protocol> protocols = new ArrayList<Protocol>();
-		protocols.add(selectedDataSet.getProtocolUsed());
-		return containsGenomeBrowserProtocol(protocols);
-	}
-
-	private boolean containsGenomeBrowserProtocol(Collection<Protocol> protocols)
-	{
-		boolean hasStartPosition = false;
-		boolean hasChromosome = false;
-		boolean hasId = false;
-		boolean hasGenomeBrowserprotocol = false;
-		boolean hasGenomeBrowserSubprotocol = false;
-
-		for (Protocol protocol : protocols)
+		Map<String, String> genomeBrowserSets = new HashMap<String, String>();
+		for (String entityName : dataService.getEntityNames())
 		{
-			List<ObservableFeature> features = protocol.getFeatures();
-			for (ObservableFeature feature : features)
+			Repository repository = dataService.getRepositoryByEntityName(entityName);
+			AttributeMetaData attributeStartPosition = repository.getAttribute(MUTATION_START_POSITION);
+			AttributeMetaData attributeId = repository.getAttribute(MUTATION_ID);
+			AttributeMetaData attributeChromosome = repository.getAttribute(MUTATION_CHROMOSOME);
+			if (attributeStartPosition != null && attributeId != null && attributeChromosome != null)
 			{
-				if (feature.getIdentifier().equals(MUTATION_START_POSITION)) hasStartPosition = true;
-				else if (feature.getIdentifier().equals(MUTATION_ID)) hasId = true;
-				else if (feature.getIdentifier().equals(MUTATION_CHROMOSOME)) hasChromosome = true;
-			}
-			if (hasStartPosition && hasChromosome && hasId)
-			{
-				hasGenomeBrowserprotocol = true;
-			}
-			else
-			{
-				hasGenomeBrowserSubprotocol = containsGenomeBrowserProtocol(protocol.getSubprotocols());
+				genomeBrowserSets.put(entityName, repository.getLabel());
 			}
 		}
-		return hasGenomeBrowserprotocol || hasGenomeBrowserSubprotocol;
+		return genomeBrowserSets;
 	}
 
 	@RequestMapping(value = "/download", method = POST)
-	public void download(@RequestParam("searchRequest")
-	String searchRequest, HttpServletResponse response) throws IOException
+	public void download(@RequestParam("dataRequest") String dataRequestStr, HttpServletResponse response)
+			throws IOException
 	{
-		searchRequest = URLDecoder.decode(searchRequest, "UTF-8");
-		logger.info("Download request: [" + searchRequest + "]");
+		// Workaround because binding with @RequestBody is not possible:
+		// http://stackoverflow.com/a/9970672
+		dataRequestStr = URLDecoder.decode(dataRequestStr, "UTF-8");
+		logger.info("Download request: [" + dataRequestStr + "]");
+		DataRequest dataRequest = new GsonHttpMessageConverter().getGson().fromJson(dataRequestStr, DataRequest.class);
 
-		SearchRequest request = new GsonHttpMessageConverter().getGson().fromJson(searchRequest, SearchRequest.class);
-		request.getQuery().pageSize(DOWNLOAD_SEARCH_LIMIT).offset(0);
+		String entityName = dataRequest.getEntityName();
+		Repository repository = dataService.getRepositoryByEntityName(entityName);
+		final Set<String> attributes = new HashSet<String>(dataRequest.getAttributeNames());
+		String fileName = entityName + '_' + new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + ".csv";
 
 		response.setContentType("text/csv");
-		response.addHeader("Content-Disposition", "attachment; filename=" + getCsvFileName(request.getDocumentType()));
+		response.addHeader("Content-Disposition", "attachment; filename=" + fileName);
 
-		CsvWriter writer = null;
+		CsvWriter csvWriter = new CsvWriter(response.getOutputStream());
 		try
 		{
-			writer = new CsvWriter(response.getWriter());
-
-			// The fieldsToReturn contain identifiers, we need the names
-			Map<String, String> nameByIdentifier = getFeatureNames(request.getFieldsToReturn());
-
-			// Keep order
-			List<String> names = new ArrayList<String>();
-			for (String identifier : request.getFieldsToReturn())
-			{
-				String name = nameByIdentifier.get(identifier);
-				if (name != null)
-				{
-					names.add(name);
-				}
-			}
-
-			writer.writeAttributeNames(names);
-			int count = 0;
-			SearchResult searchResult;
-
-			do
-			{
-				request.getQuery().offset(count);
-				searchResult = searchService.search(request);
-
-				for (Hit hit : searchResult.getSearchHits())
-				{
-					Entity entity = new MapEntity();
-					for (String field : request.getFieldsToReturn())
+			csvWriter.writeAttributeNames(Iterables.transform(
+					Iterables.filter(repository.getAttributes(), new Predicate<AttributeMetaData>()
 					{
-						entity.set(nameByIdentifier.get(field), hit.getColumnValueMap().get(field));
-					}
-					writer.add(entity);
-				}
-
-				count += searchResult.getSearchHits().size();
-			}
-			while (count < searchResult.getTotalHitCount());
+						@Override
+						public boolean apply(AttributeMetaData attributeMetaData)
+						{
+							return attributes.contains(attributeMetaData.getName());
+						}
+					}), new Function<AttributeMetaData, String>()
+					{
+						@Override
+						public String apply(AttributeMetaData attributeMetaData)
+						{
+							return attributeMetaData.getName();
+						}
+					}));
+			csvWriter.add(dataService.findAll(entityName, dataRequest.getQuery()));
 		}
 		finally
 		{
-			IOUtils.closeQuietly(writer);
+			csvWriter.close();
 		}
 	}
 
 	@RequestMapping(value = "/aggregate", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
 	@ResponseBody
-	public AggregateResponse aggregate(@RequestBody
-	AggregateRequest request)
+	public AggregateResponse aggregate(@Valid @RequestBody AggregateRequest request)
 	{
+		// TODO create utility class to extract info from entity/attribute uris
+		String[] attributeUriTokens = request.getAttributeUri().split("/");
+		String entityName = attributeUriTokens[3];
+		String attributeName = attributeUriTokens[5];
 
-		Map<String, Integer> hashCounts = new HashMap<String, Integer>();
-
-		try
+		Map<String, Integer> aggregateMap = new HashMap<String, Integer>();
+		for (Entity entity : dataService.findAll(entityName))
 		{
-			if (request.getDataType().equals("categorical"))
-			{
-				ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME, request.getFeatureId(),
-						ObservableFeature.class);
-				if (feature != null)
-				{
-					Iterable<Category> categories = dataService.findAll(Category.ENTITY_NAME,
-							new QueryImpl().eq(Category.OBSERVABLEFEATURE, feature), Category.class);
-
-					for (Category category : categories)
-					{
-						hashCounts.put(category.getName(), 0);
-					}
-				}
-			}
-			else if (request.getDataType().equals("bool"))
-			{
-				hashCounts.put("true", 0);
-				hashCounts.put("false", 0);
-			}
-			else
-			{
-				throw new RuntimeException("Illegal datatype");
-			}
-
-			ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME, request.getFeatureId(),
-					ObservableFeature.class);
-			SearchResult searchResult = searchService.search(request.getSearchRequest());
-
-			for (Hit hit : searchResult.getSearchHits())
-			{
-				Map<String, Object> columnValueMap = hit.getColumnValueMap();
-				if (columnValueMap.containsKey(feature.getIdentifier()))
-				{
-					String categoryValue = columnValueMap.get(feature.getIdentifier()).toString();
-					if (hashCounts.containsKey(categoryValue))
-					{
-						Integer countPerCategoricalValue = hashCounts.get(categoryValue);
-						hashCounts.put(categoryValue, ++countPerCategoricalValue);
-					}
-				}
-			}
-
+			String val = entity.getString(attributeName);
+			Integer count = aggregateMap.get(val);
+			if (count == null) aggregateMap.put(val, 1);
+			else aggregateMap.put(val, count + 1);
 		}
-		catch (MolgenisDataException e)
-		{
-			logger.info(e);
-
-		}
-		return new AggregateResponse(hashCounts);
-
+		return new AggregateResponse(aggregateMap);
 	}
 
 	@RequestMapping(value = "/filterdialog", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
-	public String filterwizard(@RequestBody
-	@Valid
-	@NotNull
-	FilterWizardRequest request, Model model)
+	public String filterwizard(@RequestBody @Valid FilterWizardRequest request, Model model)
 	{
-		String dataSetIdentifier = request.getDataSetIdentifier();
-		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME,
-				new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier), DataSet.class);
-		List<Protocol> listOfallProtocols = ProtocolUtils.getProtocolDescendants(dataSet.getProtocolUsed(), true);
+		// TODO create utility class to extract info from entity/attribute uris
+		String[] entityUriTokens = request.getEntityUri().split("/");
+		String entityName = entityUriTokens[entityUriTokens.length - 1];
 
-		model.addAttribute("listOfallProtocols", listOfallProtocols);
-		model.addAttribute("identifier", dataSetIdentifier);
+		Repository repository = dataService.getRepositoryByEntityName(entityName);
+		Iterable<AttributeMetaData> attributeMetaDataIterable = Iterables.filter(repository.getAttributes(),
+				new Predicate<AttributeMetaData>()
+				{
+					@Override
+					public boolean apply(AttributeMetaData attributeMetaData)
+					{
+						if (attributeMetaData.getDataType().getEnumType() == FieldTypeEnum.COMPOUND)
+						{
+							attributeMetaData.getRefEntity().getAttributes();
+						}
+						return attributeMetaData.getDataType().getEnumType() == FieldTypeEnum.COMPOUND;
+					}
+				});
+
+		List<EntityMetaData> entityMetaDataGroups = new ArrayList<EntityMetaData>();
+		entityMetaDataGroups.add(repository);
+		for (AttributeMetaData attributeMetaData : attributeMetaDataIterable)
+		{
+			entityMetaDataGroups.add(attributeMetaData.getRefEntity());
+		}
+
+		model.addAttribute("entityName", entityName);
+		model.addAttribute("entityMetaDataGroups", entityMetaDataGroups);
 		return "view-filter-dialog";
 	}
 
-	// Get feature names by feature identifiers
-	private Map<String, String> getFeatureNames(List<String> identifiers)
+	@ExceptionHandler(RuntimeException.class)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+	public Map<String, String> handleRuntimeException(RuntimeException e)
 	{
-		Iterable<ObservableFeature> features = dataService.findAll(ObservableFeature.ENTITY_NAME,
-				new QueryImpl().in(ObservableFeature.IDENTIFIER, identifiers), ObservableFeature.class);
-
-		Map<String, String> nameByIdentifier = new LinkedHashMap<String, String>();
-		for (ObservableFeature feature : features)
-		{
-			nameByIdentifier.put(feature.getIdentifier(), feature.getName());
-		}
-
-		return nameByIdentifier;
-	}
-
-	private String getCsvFileName(String dataSetName)
-	{
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-		return dataSetName + "_" + dateFormat.format(new Date()) + ".csv";
+		logger.error(null, e);
+		return Collections.singletonMap("errorMessage",
+				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage());
 	}
 }

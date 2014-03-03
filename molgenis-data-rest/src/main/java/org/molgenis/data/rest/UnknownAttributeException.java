@@ -1,6 +1,8 @@
 package org.molgenis.data.rest;
 
-public class UnknownAttributeException extends RuntimeException
+import org.molgenis.data.MolgenisDataException;
+
+public class UnknownAttributeException extends MolgenisDataException
 {
 	private static final long serialVersionUID = 1L;
 
@@ -22,11 +24,4 @@ public class UnknownAttributeException extends RuntimeException
 	{
 		super(message, cause);
 	}
-
-	public UnknownAttributeException(String message, Throwable cause, boolean enableSuppression,
-			boolean writableStackTrace)
-	{
-		super(message, cause, enableSuppression, writableStackTrace);
-	}
-
 }

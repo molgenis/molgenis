@@ -1,5 +1,6 @@
 package org.molgenis.data;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -99,6 +100,18 @@ public class CrudRepositoryDecorator extends RepositoryDecorator implements Crud
 	public Entity findOne(Integer id)
 	{
 		return decoratedRepository.findOne(id);
+	}
+
+	@Override
+	public Iterable<AttributeMetaData> getAttributes()
+	{
+		return decoratedRepository.getAttributes();
+	}
+
+	@Override
+	public void close() throws IOException
+	{
+		decoratedRepository.close();
 	}
 
 	@Override

@@ -826,5 +826,4 @@ public class JpaRepository extends AbstractCrudRepository
 		e.set(entity);
 		return e;
 	}
-
 }

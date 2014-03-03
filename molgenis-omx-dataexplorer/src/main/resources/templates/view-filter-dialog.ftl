@@ -6,26 +6,24 @@
 			<form>
 				<div id="filter-wizard" >
 					<ul id="filter-nav">
-						<#list listOfallProtocols as protocol>
-					   <li><a href="#${protocol.identifier}-tab" data-toggle="tab">${protocol.name}</a></li>
-					   </#list>
+						<#list entityMetaDataGroups as entityMetaData>
+						<li><a href="#${entityMetaData.name}-tab" data-toggle="tab">${entityMetaData.label}</a></li>
+						</#list>
 					</ul>	
 					<div id="filter-nav-content" class="tab-content">
-						<#list listOfallProtocols as protocol>
-							<div class="tab-pane" id="${protocol.identifier}-tab">	
-								<table id="${protocol.identifier}-table">
-									<#if protocol.features?has_content>
-									   	<#list protocol.features as feature> 
-										  	<tr>
-											  	<td>
-											  		<a class="test" data-molgenis-url="/api/v1/observablefeature/${feature.id?c}" style="btn">${feature.name}</a>
-									  			</td>
-							  				</tr>
-									   	</#list>
-								   	<#else>
-								   		No features
-							   		</#if>
+						<#list entityMetaDataGroups as entityMetaData>
+							<div class="tab-pane" id="${entityMetaData.name}-tab">
+							<#list entityMetaData.attributes.iterator() as attributeMetaData>
+								<#if attributeMetaData.dataType.enumType != "COMPOUND">
+								<table id="${attributeMetaData.name}-table">
+									<tr>
+									  	<td>
+									  		<a class="wizard-attribute" data-attribute="/api/v1/${entityName}/meta/${attributeMetaData.name}" style="btn">${attributeMetaData.label}</a>
+							  			</td>
+					  				</tr>
 					   	  	  	</table>
+					   	  	  	</#if>
+							</#list>
 						   </div>
 					   </#list>
 						<ul class="pager wizard">
@@ -52,7 +50,7 @@ $(function() {
 		var $total = navigation.find('li').length;
 		var $current = index+1;
 		
-		// If it's the last tab then hide the last button and show the finish instead
+		<#-- If it's the last tab then hide the last button and show the finish instead -->
 		if($current >= $total) {
 			$('#filter-wizard').find('.pager .next').hide();
 			$('#filter-wizard').find('.pager .finish').show();
@@ -65,6 +63,6 @@ $(function() {
 	$('#filter-wizard .finish').click(function(e) {
         modal.modal('hide');
 	});
-  	molgenis.createFeatureFilterField($('#filter-nav-content a.test'));
+  	molgenis.createAttributeFilterInput($('#filter-nav-content a.wizard-attribute'));
 });
 </script>

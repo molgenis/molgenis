@@ -5,7 +5,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 
-public abstract class AbstractRepository implements Repository
+public abstract class AbstractRepository extends AbstractEntityMetaData implements Repository
 {
 	private final String url;
 
@@ -69,5 +69,4 @@ public abstract class AbstractRepository implements Repository
 	}
 
 	protected abstract EntityMetaData getEntityMetaData();
-
 }

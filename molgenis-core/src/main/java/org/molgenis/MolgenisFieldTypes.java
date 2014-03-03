@@ -6,6 +6,7 @@ import java.util.TreeMap;
 import org.apache.log4j.Logger;
 import org.molgenis.fieldtypes.BoolField;
 import org.molgenis.fieldtypes.CategoricalField;
+import org.molgenis.fieldtypes.CompoundField;
 import org.molgenis.fieldtypes.DateField;
 import org.molgenis.fieldtypes.DatetimeField;
 import org.molgenis.fieldtypes.DecimalField;
@@ -40,7 +41,7 @@ public class MolgenisFieldTypes
 
 	public enum FieldTypeEnum
 	{
-		BOOL, CATEGORICAL, DATE, DATE_TIME, DECIMAL, EMAIL, ENUM, FILE, HTML, HYPERLINK, IMAGE, INT, LONG, MREF, STRING, TEXT, XREF
+		BOOL, CATEGORICAL, COMPOUND, DATE, DATE_TIME, DECIMAL, EMAIL, ENUM, FILE, HTML, HYPERLINK, IMAGE, INT, LONG, MREF, STRING, TEXT, XREF
 	}
 
 	/** Initialize default field types */
@@ -50,6 +51,7 @@ public class MolgenisFieldTypes
 		{
 			addType(new BoolField());
 			addType(new CategoricalField());
+			addType(new CompoundField());
 			addType(new DateField());
 			addType(new DatetimeField());
 			addType(new DecimalField());

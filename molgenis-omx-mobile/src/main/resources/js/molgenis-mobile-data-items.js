@@ -45,7 +45,7 @@ $(function() {
 		
 		//Sort on name
 		var sortQueryRule = 'q[0].operator=SORTASC&q[0].value=name';
-		restApi.getAsync(href + '&' + sortQueryRule, null, null, function(features) {
+		restApi.getAsync(href + '&' + sortQueryRule, null, function(features) {
 			var items = [];
 		
 			nextHref = features.nextHref;

@@ -7,9 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EntityMetaData;
 
-public class DefaultEntityMetaData implements EntityMetaData
+public class DefaultEntityMetaData extends AbstractEntityMetaData
 {
 	private final String name;
 	private String label;
@@ -35,6 +34,18 @@ public class DefaultEntityMetaData implements EntityMetaData
 				"Name of the AttributeMetaData cannot be null");
 
 		attributes.put(attributeMetaData.getName().toLowerCase(), attributeMetaData);
+	}
+
+	public void addAllAttributeMetaData(List<AttributeMetaData> attributeMetaDataList)
+	{
+		for (AttributeMetaData attributeMetaData : attributeMetaDataList)
+		{
+			if (attributeMetaData == null) throw new IllegalArgumentException("AttributeMetaData cannot be null");
+			if (attributeMetaData.getName() == null) throw new IllegalArgumentException(
+					"Name of the AttributeMetaData cannot be null");
+
+			attributes.put(attributeMetaData.getName().toLowerCase(), attributeMetaData);
+		}
 	}
 
 	@Override
@@ -123,5 +134,4 @@ public class DefaultEntityMetaData implements EntityMetaData
 		else if (!name.equals(other.name)) return false;
 		return true;
 	}
-
 }
