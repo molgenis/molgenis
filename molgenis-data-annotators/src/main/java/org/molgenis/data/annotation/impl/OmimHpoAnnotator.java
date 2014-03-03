@@ -457,4 +457,11 @@ public class OmimHpoAnnotator extends LocusAnnotator
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_ALL, MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		return metadata;
 	}
+
+	@Override
+	public List<Entity> annotateEntity(Entity entity)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

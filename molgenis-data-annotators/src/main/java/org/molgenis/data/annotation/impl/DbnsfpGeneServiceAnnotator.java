@@ -196,4 +196,11 @@ public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 		return metadata;
 	}
 
+	@Override
+	public List<Entity> annotateEntity(Entity entity)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

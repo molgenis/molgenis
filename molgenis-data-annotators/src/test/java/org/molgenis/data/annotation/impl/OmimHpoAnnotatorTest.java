@@ -31,4 +31,7 @@ public class OmimHpoAnnotatorTest
 //
 //	    }
 
+	// sample that doesnt return omim disease: 2	179621019	179621019	.	.	C	51
+	// POLG gene no disease?
+	
 }
