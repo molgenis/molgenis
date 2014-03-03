@@ -7,8 +7,8 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 
 public abstract class VariantAnnotator extends LocusAnnotator
 {
-	private static final String REFERENCE = "ref";
-	private static final String ALTERNATIVE = "alt";
+	public static final String REFERENCE = "ref";
+	public static final String ALTERNATIVE = "alt";
 
 	@Override
 	public EntityMetaData getInputMetaData()
