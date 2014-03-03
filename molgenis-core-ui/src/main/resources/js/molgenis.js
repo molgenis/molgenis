@@ -82,6 +82,30 @@
 		};
 	};
 
+	/**
+	 * Returns all atomic attributes. In case of compound attributes (attributes consisting of multiple atomic
+	 * attributes) only the descendant atomic attributes are returned. The compound attribute itself is not returned.
+	 * 
+	 * @param attributes
+	 * @param restClient
+	 */
+	molgenis.getAtomicAttributes = function(attributes, restClient) {
+		var atomicAttributes = [];
+		function createAtomicAttributesRec(attributes) {
+			$.each(attributes, function(i, attribute) {
+				if(attribute.fieldType === 'COMPOUND'){
+					// FIXME improve performance by retrieving async 
+					attribute = restClient.get(attribute.href, {'expand': ['attributes']});
+					createAtomicAttributesRec(attribute.attributes);
+				}
+					else
+						atomicAttributes.push(attribute);
+			});	
+		}
+		createAtomicAttributesRec(attributes);
+		return atomicAttributes;
+	}
+	
 	/*
 	 * Natural Sort algorithm for Javascript - Version 0.7 - Released under MIT license
 	 * Author: Jim Palmer (based on chunking idea from Dave Koelle)
@@ -203,6 +227,65 @@ function formatTableCellValue(value, dataType) {
 
 	return value;
 };
+
+/**
+ * Create input element for a molgenis data type
+ * 
+ * @param dataType molgenis data type
+ * @param attrs input attributes
+ * @param val input value
+ * @returns
+ */
+function createInput(dataType, attrs, val) {
+	function createBasicInput(type, attrs, val) {
+		var input = $('<input type="' + type + '">');
+		if(attrs)
+			input.attr(attrs);
+		if(val)
+			input.val(val);
+		return input;
+	}
+	
+	switch(dataType) {
+		case 'BOOL':
+			return createBasicInput('radio', attrs, val);
+		case 'CATEGORICAL':
+			return createBasicInput('checkbox', attrs, val);
+		case 'DATE':
+		case 'DATE_TIME':
+			var format = dataType === 'DATE' ? 'yyyy-MM-dd' : 'yyyy-MM-dd\'T\'hh:mm:ss' + getCurrentTimezoneOffset();
+			var items = [];
+			items.push('<div class="input-append date">');
+			items.push('<input data-format="' + format + '" data-language="en" type="text">');
+			items.push('<span class="add-on">');
+			items.push('<i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>');
+			items.push('</span>');
+			items.push('</div>');
+			return $(items.join(''));
+		case 'DECIMAL':
+		case 'INT':
+		case 'LONG':
+			return createBasicInput('number', attrs, val);
+		case 'EMAIL':
+			return createBasicInput('email', attrs, val);
+		case 'HTML':
+		case 'HYPERLINK':
+		case 'STRING':
+		case 'TEXT':
+			return createBasicInput('text', attrs, val);
+		case 'MREF':
+		case 'XREF':
+			console.log("TODO integrate with xref dropdown table search");
+			return createBasicInput('text', attrs, val);
+		case 'COMPOUND' :
+		case 'ENUM':
+		case 'FILE':
+		case 'IMAGE':
+			throw 'Unsupported data type: ' + dataType;
+		default:
+			throw 'Unknown data type: ' + dataType;
+	}
+}
 
 $(function() {
 	// disable all ajax request caching

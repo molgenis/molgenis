@@ -497,6 +497,15 @@ public class RestController
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
+	@ExceptionHandler(UnknownAttributeException.class)
+	@ResponseStatus(NOT_FOUND)
+	@ResponseBody
+	public ErrorMessageResponse handleUnknownAttributeException(UnknownAttributeException e)
+	{
+		logger.debug("", e);
+		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
+	}
+
 	@ExceptionHandler(MolgenisValidationException.class)
 	@ResponseStatus(BAD_REQUEST)
 	@ResponseBody
@@ -685,6 +694,10 @@ public class RestController
 	private Map<String, Object> getEntityAsMap(Entity entity, EntityMetaData meta, Set<String> attributesSet,
 			Set<String> attributeExpandsSet)
 	{
+		if (null == entity) throw new IllegalArgumentException("entity is null");
+
+		if (null == meta) throw new IllegalArgumentException("meta is null");
+
 		Map<String, Object> entityMap = new LinkedHashMap<String, Object>();
 		entityMap.put("href", String.format(BASE_URI + "/%s/%s", meta.getName(), entity.getIdValue()));
 

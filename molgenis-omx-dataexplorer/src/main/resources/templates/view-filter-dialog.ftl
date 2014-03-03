@@ -18,7 +18,7 @@
 								<table id="${attributeMetaData.name}-table">
 									<tr>
 									  	<td>
-									  		<a class="test" data-molgenis-url="/api/v1/${entityName}/meta/${attributeMetaData.name}" style="btn">${attributeMetaData.label}</a>
+									  		<a class="wizard-attribute" data-attribute="/api/v1/${entityName}/meta/${attributeMetaData.name}" style="btn">${attributeMetaData.label}</a>
 							  			</td>
 					  				</tr>
 					   	  	  	</table>
@@ -50,7 +50,7 @@ $(function() {
 		var $total = navigation.find('li').length;
 		var $current = index+1;
 		
-		// If it's the last tab then hide the last button and show the finish instead
+		<#-- If it's the last tab then hide the last button and show the finish instead -->
 		if($current >= $total) {
 			$('#filter-wizard').find('.pager .next').hide();
 			$('#filter-wizard').find('.pager .finish').show();
@@ -63,6 +63,6 @@ $(function() {
 	$('#filter-wizard .finish').click(function(e) {
         modal.modal('hide');
 	});
-  	molgenis.createFeatureFilterField($('#filter-nav-content a.test'));
+  	molgenis.createAttributeFilterInput($('#filter-nav-content a.wizard-attribute'));
 });
 </script>

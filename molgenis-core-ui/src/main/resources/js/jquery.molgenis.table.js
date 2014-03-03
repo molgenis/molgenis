@@ -31,20 +31,7 @@
 	}
 	
 	function getTableMetaData(settings, callback) {
-		// for compound attributes, expand recursively and select all atomic attributes
-		var colAttributes = [];
-		function createColAttributesRec(attributes) {
-			$.each(attributes, function(i, attribute) {
-				if(attribute.fieldType === 'COMPOUND'){
-					// FIXME improve performance by retrieving async 
-					attribute = restApi.get(attribute.href, {'expand': ['attributes']});
-					createColAttributesRec(attribute.attributes);
-				}
- 				else
-					colAttributes.push(attribute);
-			});	
-		}
-		createColAttributesRec(settings.attributes);
+		var colAttributes = molgenis.getAtomicAttributes(settings.attributes);
 		
 		// get meta data for referenced entities
 		var refEntitiesMeta = {}; 
@@ -80,8 +67,8 @@
 		
 		// TODO do not construct uri from other uri
 		var entityCollectionUri = settings.entityMetaData.href.replace("/meta", "");
-		var q = $.extend({}, settings.query, {'start': settings.start, 'num': settings.maxRows});
-		restApi.getAsync(entityCollectionUri, {'attributes' : attributeNames, 'expand' : expandAttributeNames, 'q' : q, 'sort' : settings.sort}, function(data) {
+		var q = $.extend({}, settings.query, {'start': settings.start, 'num': settings.maxRows, 'sort': settings.sort});
+		restApi.getAsync(entityCollectionUri, {'attributes' : attributeNames, 'expand' : expandAttributeNames, 'q' : q}, function(data) {
 			callback(data);
 		});
 	}
@@ -158,6 +145,8 @@
 			items.push('</tr>');
 		}
 		container.html(items.join(''));
+		
+		$('.show-popover').popover({trigger:'hover', placement: 'bottom'});
 	}
 	
 	function createTablePager(data, settings) {
@@ -203,7 +192,7 @@
 		
 		// plugin methods
 		container.data('table', {
-			'setSelectedAttributes' : function(attributes) {
+			'setAttributes' : function(attributes) {
 				settings.attributes = attributes;
 				createTable(settings);
 			},
@@ -222,12 +211,16 @@
 		});
 		
 		// sort column ascending/descending
-		$('thead th .ui-icon', container).click(function() {
+		$(container).on('click', 'thead th .ui-icon', function(e) {
+			e.preventDefault();
+			
 			var attributeName = $(this).data('attribute');
 			if (settings.sort) {
 				var order = settings.sort.orders[0];
 				order.property = attributeName;
 				order.direction = order.direction === 'ASC' ? 'DESC' : 'ASC';
+				
+				
 			} else {
 				settings.sort = {
 					orders: [{
@@ -236,14 +229,19 @@
 					}]
 				};
 			}
-
+			
+			var classUp = 'ui-icon-triangle-1-n up', classDown = 'ui-icon-triangle-1-s down', classUpDown = 'ui-icon-triangle-2-n-s updown';
+			$('thead th .ui-icon', container).not(this).removeClass(classUp + ' ' + classDown).addClass(classUpDown);
+			if (settings.sort.orders[0].direction === 'ASC') {
+				$(this).removeClass(classUpDown + ' ' + classUp).addClass(classDown);
+			} else {
+				$(this).removeClass(classUpDown + ' ' + classDown).addClass(classUp);
+			}
+			
 			getTableData(settings, function(data) {
 				createTableBody(data, settings);
 			});
-			return false;
 		});
-		
-		$('.show-popover', container).popover({trigger:'hover', placement: 'bottom'});
 		
 		return this;
 	};
