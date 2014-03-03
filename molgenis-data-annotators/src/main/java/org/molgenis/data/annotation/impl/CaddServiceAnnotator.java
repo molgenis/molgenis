@@ -41,17 +41,13 @@ import org.springframework.stereotype.Component;
  * */
 @Component("caddService")
 public class CaddServiceAnnotator extends VariantAnnotator
-{
-	// the cadd service is dependant on these four values,
-	// without them no CADD score can be returned
-	private static final String CHROMOSOME = "chrom";
-	private static final String POSITION = "pos";
-	private static final String REFERENCE = "ref";
-	private static final String ALTERNATIVE = "alt";
-
+{	
 	// the cadd service returns these two values
-	private static final String CADD_SCALED = "CADD_SCALED";
-	private static final String CADD_ABS = "CADD_ABS";
+	static final String CADD_SCALED = "CADD_SCALED";
+	static final String CADD_ABS = "CADD_ABS";
+	
+	private static final String TABIX_LOCATION = "/Users/mdehaan/bin/tools/tabix-0.2.6/tabix";
+	private static final String CADD_FILE = "/Users/mdehaan/Downloads/1000G.vcf.gz";
 
 	@Autowired
 	DataService dataService;
@@ -78,14 +74,14 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	public Iterator<Entity> annotate(Iterator<Entity> source)
 	{
 		List<Entity> results = new ArrayList<Entity>();
-		String systemCall = molgenisSettings.getProperty("CADD_Command");
+		//String systemCall = molgenisSettings.getProperty("CADD_Command");
 
 		while (source.hasNext())
 		{
 			Entity entity = source.next();
 
 			String chromosome = entity.getString(CHROMOSOME);
-			String position = entity.getString(POSITION);
+			Long position = entity.getLong(POSITION);
 			String reference = entity.getString(REFERENCE);
 			String alternative = entity.getString(ALTERNATIVE);
 
@@ -95,7 +91,7 @@ public class CaddServiceAnnotator extends VariantAnnotator
 			try
 			{
 				Runtime runTime = Runtime.getRuntime();
-				Process process = runTime.exec(systemCall + chromosome + ":" + position + "-" + position);
+				Process process = runTime.exec(TABIX_LOCATION + " " + CADD_FILE + " " + chromosome + ":" + position + "-" + position);
 
 				process.waitFor();
 
