@@ -775,10 +775,6 @@ public class RestController
 							String.format(BASE_URI + "/%s/%s/%s", meta.getName(), entity.getIdValue(), attrName));
 					entityMap.put(attrName, ref);
 				}
-				else
-				{
-
-				}
 
 			}
 
@@ -810,20 +806,23 @@ public class RestController
 					// Resolve xref, mref fields
 					AttributeMetaData attr = meta.getAttribute(r.getField());
 
-					if (attr.getDataType().getEnumType() == MolgenisFieldTypes.FieldTypeEnum.XREF)
+					if ((attr.getDataType().getEnumType() == MolgenisFieldTypes.FieldTypeEnum.XREF)
+							|| (attr.getDataType().getEnumType() == MolgenisFieldTypes.FieldTypeEnum.MREF))
 					{
 						if (r.getOperator() == Operator.IN)
 						{
-							Iterable<?> values = dataService.findAll(
-									attr.getRefEntity().getName(),
-									new QueryImpl().in(attr.getRefEntity().getIdAttribute().getName(),
-											(Iterable<?>) r.getValue()));
+							Iterable<?> values = dataService.findAll(attr.getRefEntity().getName(), new QueryImpl().in(
+									attr.getRefEntity().getLabelAttribute().getName(), (Iterable<?>) r.getValue()));
 							r.setValue(Lists.newArrayList(values));
 						}
 						else
 						{
-							Object value = dataService.findOne(attr.getRefEntity().getName(),
-									new QueryImpl().eq(attr.getRefEntity().getIdAttribute().getName(), r.getValue()));
+							Object value = dataService
+									.findOne(
+											attr.getRefEntity().getName(),
+											new QueryImpl().eq(attr.getRefEntity().getLabelAttribute().getName(),
+													r.getValue()));
+
 							r.setValue(value);
 						}
 					}

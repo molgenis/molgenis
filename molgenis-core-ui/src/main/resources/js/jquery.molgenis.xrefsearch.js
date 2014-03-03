@@ -1,3 +1,10 @@
+/**
+ * An autocomplete search dropdown for xref and mref values for use in the filterdialog
+ * 
+ * usage: $('#id_of_hidden_input)').xrefsearch({attributeUri: 'api/v1/celiacsprue/meta/Celiac_Family'});
+ * 
+ * Depends on select2.js and molgenis.js
+ */
 (function($, molgenis) {
 	"use strict";
 	
@@ -38,15 +45,19 @@
 		var items = [];
 		items.push('<div class="row-fluid">');
 		
-		$.each(lookupAttributeNames, function(index, attrName) {
-			items.push('<div class="span6">');
-			items.push(attrName);
-			items.push(': <b>');
-			items.push(entity[attrName]);
-			items.push('</b>');
-			items.push('</div>');
-		});
-
+		if (lookupAttributeNames.length > 0) {
+			var width = Math.round(12 / lookupAttributeNames.length);
+			var abbr = Math.round(110 / lookupAttributeNames.length);
+			
+			$.each(lookupAttributeNames, function(index, attrName) {
+				var attrValue = entity[attrName] == undefined ?  '' :  entity[attrName];
+				
+				items.push('<div class="span' + width + '">');
+				items.push(abbreviate(attrName + ': <b>' + attrValue + '</b>', abbr));
+				items.push('</div>');
+			});
+		}
+		
 		items.push('</div>');
 		
 		return items.join('');
@@ -56,8 +67,8 @@
 		var lookupAttrNames = getLookupAttributeNames(metaData.refEntity.href);
 		
 		container.select2({
-			width: 570,
-			placeholder: 'Search...',
+			width: 670,
+			placeholder: 'filter text',
 			minimumInputLength: 2,
 			ajax: {
 				quietMillis: 200,
@@ -67,7 +78,7 @@
 				params : {contentType: 'application/json;charset=utf-8'},
 				data: function(term, page) {
 					var q = createQuery(lookupAttrNames, term);
-					return JSON.stringify({num : 10, q : q});
+					return JSON.stringify({num: 10, q: q});
 				},
 				results: function(data, page) {
 					return {
@@ -91,8 +102,8 @@
 	
 	$.fn.xrefsearch = function(options) {
 		var container = this;
-	
-		restApi.getAsync(options.featureUri, {attributes:['refEntity'], expand:['refEntity']}, function(metaData) {
+		
+		restApi.getAsync(options.attributeUri, {attributes:['refEntity'], expand:['refEntity']}, function(metaData) {
 			createSelect2(container, metaData);
 		});
 		

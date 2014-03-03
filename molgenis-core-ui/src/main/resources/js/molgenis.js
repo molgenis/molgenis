@@ -213,7 +213,7 @@ function formatTableCellValue(value, dataType) {
 	} else if (dataType.toLowerCase() != 'html') {
 
 		if (value.length > 50) {
-			var abbr = htmlEscape(value.substr(0, 47)) + '...';
+			var abbr = htmlEscape(abbreviate(value, 50));
 			value = '<span class="show-popover"  data-content="'
 					+ htmlEscape(value) + '" data-toggle="popover">' + abbr
 					+ "</span>";
@@ -227,6 +227,19 @@ function formatTableCellValue(value, dataType) {
 
 	return value;
 };
+
+/**
+ * Is s is longer then maxLength cut it and add ...
+ * @param s
+ * @param maxLength
+ */
+function abbreviate(s, maxLength) {
+	if (s.length <= maxLength) {
+		return s;
+	}
+	
+	return s.substr(0, maxLength-3) + '...';
+}
 
 /**
  * Create input element for a molgenis data type
@@ -275,8 +288,7 @@ function createInput(dataType, attrs, val) {
 			return createBasicInput('text', attrs, val);
 		case 'MREF':
 		case 'XREF':
-			console.log("TODO integrate with xref dropdown table search");
-			return createBasicInput('text', attrs, val);
+			return createBasicInput('hidden', attrs, val);
 		case 'COMPOUND' :
 		case 'ENUM':
 		case 'FILE':

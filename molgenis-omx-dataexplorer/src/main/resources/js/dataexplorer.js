@@ -228,6 +228,8 @@
 				language : 'en',
 				pickTime : true
 			});
+		} else if (attribute.fieldType == 'XREF' || attribute.fieldType == 'MREF') {
+			$('#text_' + attribute.name).xrefsearch({attributeUri: attributeUri});
 		}
 	};
 
@@ -392,51 +394,6 @@
 			break;
 		default:
 			return;
-		}
-
-		if ((attribute.fieldType === 'XREF') || (attribute.fieldType == 'MREF')) {
-
-			restApi.getAsync(attributeUri, {
-				attributes : [ 'refEntity' ],
-				expand : [ 'refEntity' ]
-			}, function(entityMetaData) {
-				var refEntity = entityMetaData.refEntity;
-				if (refEntity) {
-					var refEntityName = refEntity.name;
-					var refEntityAttribute = refEntity.labelAttribute;
-
-					if (refEntityName && refEntityAttribute) {
-
-						divContainer.find($("[id='text_" + attribute.name + "']")).autocomplete({
-							source : function(request, response) {
-								$.ajax({
-									type : 'POST',
-									url : '/api/v1/' + refEntityName + '?_method=GET',
-									data : JSON.stringify({
-										num : 15,
-										q : [ {
-											"field" : refEntityAttribute,
-											"operator" : "LIKE",
-											"value" : request.term
-										} ]
-									}),
-									contentType : 'application/json',
-									async : true,
-									success : function(resultList) {
-										response($.map(resultList.items, function(item) {
-											return item[uncapitalize(refEntityAttribute)];
-										}));
-									}
-								});
-							},
-							minLength : 2
-						});
-
-					}
-				}
-
-			});
-
 		}
 
 		if (attribute.fieldType === 'DATE') {
@@ -762,6 +719,9 @@
 				
 				$(document).trigger('changeAttributeSelection', {'attributes': selectedAttributes});
 				self.createEntityMetaTree(entityMetaData, selectedAttributes);
+				
+				//Save selected entity to cookie, expires after 7 days
+				$.cookie('molgenis.selected.entity.uri', entityUri, { expires: 7 });
 			});
 		});
 		
@@ -874,7 +834,7 @@
 
 		$('.feature-filter-dialog').dialog({
 			modal : true,
-			width : 500,
+			width : 700,
 			autoOpen : false
 		});
 
@@ -896,7 +856,13 @@
 		$('#genomebrowser-filter-button').click(function() {
 			self.setDallianceFilter();
 		});
-
+		
+		//Read previous selected entity from cookie
+		var uri = $.cookie('molgenis.selected.entity.uri');
+		if (uri && restApi.entityExists(uri)) {
+			$('#dataset-select').val(uri).trigger("liszt:updated");
+		}
+		
 		// fire event handler
 		$('#dataset-select').change();
 	});

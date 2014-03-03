@@ -259,3 +259,7 @@ input[type=number] {
 .select2-result:nth-child(odd) {
 	background-color: #FFF;
 }
+
+.feature-filter-dialog .form-horizontal .controls {
+	margin-left: 0px;
+} 
