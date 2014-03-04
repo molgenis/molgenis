@@ -131,7 +131,7 @@ public class OmxImporterServiceTest
 		assertEquals(dataService.count(Protocol.ENTITY_NAME, new QueryImpl()), 6);
 		assertEquals(dataService.count("celiacsprue", new QueryImpl()), 4);
 
-		Entity patient44 = dataService.findOne("celiacsprue", new QueryImpl().eq("Celiac_Individual", "patient44"));
+		Entity patient44 = dataService.findOne("celiacsprue", new QueryImpl().eq("Celiac_Individual", "id_103"));
 		assertNotNull(patient44);
 	}
 
