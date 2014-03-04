@@ -318,7 +318,6 @@
 	 * @memberOf molgenis.dataexplorer
 	 */
 	function createFilters(form) {
-		console.log(form);
 		var filters = {};
 		$(":input", form).not('[type=radio]:not(:checked)').not('[type=checkbox]:not(:checked)').each(function(){
 			var value = $(this).val();
@@ -338,7 +337,6 @@
 				values.push(value);
 			}
 		});
-		console.log(filters);
 		return Object.keys(filters).map(function (key) { return filters[key]; });	
 	}
 	
@@ -460,7 +458,6 @@
 				attributeFilters[this.attribute.href] = this;
 			});
 			createAttributeFiltersList(attributeFilters);
-			console.log(attributeFilters);
 			switch($("#tabs li.active").attr('id')) {
 				case 'tab-data':
 					createDataTable();
