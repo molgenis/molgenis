@@ -36,9 +36,9 @@ public class ${clazzName} extends CrudRepositoryDecorator
 	@Override
 	public long count()
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_READ_${securityName}"))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_COUNT_${securityName}"))
 		{
-			throw new MolgenisDataAccessException("No read permission on ${entityClass}");
+			throw new MolgenisDataAccessException("No count permission on ${entityClass}");
 		}
 		
 		return super.count();
@@ -58,9 +58,9 @@ public class ${clazzName} extends CrudRepositoryDecorator
 	@Override
 	public long count(Query q)
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_READ_${securityName}"))
+		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_COUNT_${securityName}"))
 		{
-			throw new MolgenisDataAccessException("No read permission on ${entityClass}");
+			throw new MolgenisDataAccessException("No count permission on ${entityClass}");
 		}
 		
 		return super.count(q);
@@ -76,7 +76,7 @@ public class ${clazzName} extends CrudRepositoryDecorator
 		
 		super.update(entity);
 	}
-
+	
 	@Override
 	public void add(Iterable<? extends Entity> entities)
 	{
