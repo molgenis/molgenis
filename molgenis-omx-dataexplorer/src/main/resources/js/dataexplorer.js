@@ -79,8 +79,10 @@
 		var items = [];
 		$.each(attributeFilters, function(attributeUri, attributeFilter) {
 			var attribute = attributeFilter.attribute;
+			var joinChars = attributeFilter.operator ? ' ' + attributeFilter.operator + ' ' : ',';
+			
 			items.push('<p><a class="feature-filter-edit" data-href="' + attributeUri + '" href="#">'
-					+ attribute.name + ' (' + attributeFilter.values.join(',')
+					+ attribute.name + ' (' + attributeFilter.values.join(joinChars)
 					+ ')</a><a class="feature-filter-remove" data-href="' + attributeUri + '" href="#" title="Remove '
 					+ attribute.name + ' filter" ><i class="ui-icon ui-icon-closethick"></i></a></p>');
 		});
@@ -142,8 +144,9 @@
 					}
 				} else {
 					if (index > 0) {
+						var operator = attributeFilter.operator ? attributeFilter.operator : 'OR';
 						entityCollectionRequest.q.push({
-							operator : 'OR'
+							operator : operator
 						});
 					}
 					entityCollectionRequest.q.push({
@@ -301,9 +304,10 @@
 			case 'MREF':
 			case 'XREF':
 				label = $('<label class="control-label" for="' + name + '">' + attribute.label + '</label>');
-				var input = createInput(attribute.fieldType, {'name': name, 'id': name}, values ? values[0] : undefined);
-				input.xrefsearch({attribute: attribute});
-				controls.append(input);
+				var element = $('<div />');
+				var operator = attributeFilter ? attributeFilter.operator : 'OR';
+				element.xrefsearch({attribute: attribute, values: values, operator: operator});
+				controls.append(element);
 				break;
 			case 'COMPOUND' :
 			case 'ENUM':
@@ -337,7 +341,12 @@
 					values = [];
 					filter.values = values;
 				}
-				values.push(value);
+				
+				if ($(this).hasClass('operator')) {
+					filter.operator = value;
+				} else {
+					values.push(value);
+				}
 			}
 		});
 		return Object.keys(filters).map(function (key) { return filters[key]; });	
