@@ -104,7 +104,30 @@
 		}
 		createAtomicAttributesRec(attributes);
 		return atomicAttributes;
-	}
+	};
+
+	/**
+	 * Returns all compound attributes. In case of compound attributes (attributes consisting of multiple atomic
+	 * attributes) only the descendant atomic attributes are returned. The compound attribute itself is not returned.
+	 * 
+	 * @param attributes
+	 * @param restClient
+	 */
+	molgenis.getCompoundAttributes = function(attributes, restClient) {
+		var compoundAttributes = [];
+		function createAtomicAttributesRec(attributes) {
+			$.each(attributes, function(i, attribute) {
+				if(attribute.fieldType === 'COMPOUND'){
+					// FIXME improve performance by retrieving async 
+					attribute = restClient.get(attribute.href, {'expand': ['attributes']});
+					compoundAttributes.push(attribute);
+					createAtomicAttributesRec(attribute.attributes);
+				}
+			});	
+		}
+		createAtomicAttributesRec(attributes);
+		return compoundAttributes;
+	};
 	
 	/*
 	 * Natural Sort algorithm for Javascript - Version 0.7 - Released under MIT license
@@ -213,7 +236,7 @@ function formatTableCellValue(value, dataType) {
 	} else if (dataType.toLowerCase() != 'html') {
 
 		if (value.length > 50) {
-			var abbr = htmlEscape(value.substr(0, 47)) + '...';
+			var abbr = htmlEscape(abbreviate(value, 50));
 			value = '<span class="show-popover"  data-content="'
 					+ htmlEscape(value) + '" data-toggle="popover">' + abbr
 					+ "</span>";
@@ -229,28 +252,46 @@ function formatTableCellValue(value, dataType) {
 };
 
 /**
+ * Is s is longer then maxLength cut it and add ...
+ * @param s
+ * @param maxLength
+ */
+function abbreviate(s, maxLength) {
+	if (s.length <= maxLength) {
+		return s;
+	}
+	
+	return s.substr(0, maxLength-3) + '...';
+}
+
+/**
  * Create input element for a molgenis data type
  * 
  * @param dataType molgenis data type
  * @param attrs input attributes
  * @param val input value
+ * @param lbl input label (for checkbox and radio inputs)
  * @returns
  */
-function createInput(dataType, attrs, val) {
+function createInput(dataType, attrs, val, lbl) {
 	function createBasicInput(type, attrs, val) {
 		var input = $('<input type="' + type + '">');
 		if(attrs)
 			input.attr(attrs);
-		if(val)
+		if(val !== undefined)
 			input.val(val);
 		return input;
 	}
 	
 	switch(dataType) {
 		case 'BOOL':
-			return createBasicInput('radio', attrs, val);
+			var label = $('<label class="radio">');
+			var input = createBasicInput('radio', attrs, val); 
+			return label.append(input).append(val ? 'True' : 'False');
 		case 'CATEGORICAL':
-			return createBasicInput('checkbox', attrs, val);
+			var label = $('<label class="checkbox">');
+			var input = createBasicInput('checkbox', attrs, val); 
+			return label.append(input).append(lbl);
 		case 'DATE':
 		case 'DATE_TIME':
 			var format = dataType === 'DATE' ? 'yyyy-MM-dd' : 'yyyy-MM-dd\'T\'hh:mm:ss' + getCurrentTimezoneOffset();
@@ -261,7 +302,12 @@ function createInput(dataType, attrs, val) {
 			items.push('<i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>');
 			items.push('</span>');
 			items.push('</div>');
-			return $(items.join(''));
+			var datepicker = $(items.join(''));
+			if(attrs)
+				$('input', datepicker).attr(attrs);
+			if(val !== undefined)
+				$('input', datepicker).val(val);
+			return datepicker.datetimepicker();
 		case 'DECIMAL':
 		case 'INT':
 		case 'LONG':
@@ -275,8 +321,10 @@ function createInput(dataType, attrs, val) {
 			return createBasicInput('text', attrs, val);
 		case 'MREF':
 		case 'XREF':
-			console.log("TODO integrate with xref dropdown table search");
-			return createBasicInput('text', attrs, val);
+		case 'XREF':
+			var container = $('<div class="xrefsearch" />')
+			container.append(createBasicInput('hidden', attrs, val));
+			return container;
 		case 'COMPOUND' :
 		case 'ENUM':
 		case 'FILE':
@@ -474,6 +522,23 @@ $(function() {
 			error : callback.error
 		});
 	};
+	
+	molgenis.RestClient.prototype.entityExists = function(resourceUri) {
+		var result = false;
+		$.ajax({
+			dataType : 'json',
+			url : resourceUri + '/exist',
+			async : false,
+			success : function(exists) {
+				result = exists;
+			},
+			error : function(xhr) {
+				molgenis.createAlert(JSON.parse(xhr.responseText).errors);
+			}
+		});
+		
+		return result;
+	}
 
 }($, window.top.molgenis = window.top.molgenis || {}));
 

@@ -10,7 +10,7 @@
 		<div class="row-fluid">
 			<div class="controls">
 			<label class="control-label" for="dataset-select">Choose a dataset:</label>
-				<div id="dataset-select-position-container">
+				<div class="dataset-select-position-container">
 					<select data-placeholder="Choose a Dataset" id="dataset-select">
 						<#list dataSets as dataSet>
 							<option value="/api/v1/dataset/${dataSet.id?c}" name="${dataSet.name}"<#if dataSet.identifier == selectedDataSet.identifier> selected</#if>>${dataSet.name}</option>

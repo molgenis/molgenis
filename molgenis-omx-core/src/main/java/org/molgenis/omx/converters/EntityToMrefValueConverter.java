@@ -101,7 +101,7 @@ public class EntityToMrefValueConverter implements EntityToValueConverter<MrefVa
 					@Override
 					public Cell<String> apply(Characteristic characteristic)
 					{
-						return new ValueCell<String>(characteristic.getIdentifier(), characteristic.getName());
+						return new ValueCell<String>(characteristic.getIdentifier(), characteristic.getIdentifier());
 					}
 				});
 		return new ValueCell<List<Cell<String>>>(mrefList);

@@ -3,6 +3,7 @@ package org.molgenis.data.rest;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL;
 import static org.molgenis.data.rest.RestController.BASE_URI;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -96,6 +97,25 @@ public class RestController
 	public RestController(DataService dataService)
 	{
 		this.dataService = dataService;
+	}
+
+	/**
+	 * Checks if an entity exists.
+	 */
+	@RequestMapping(value = "/{entityName}/exist", method = GET, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public boolean entityExists(@PathVariable("entityName")
+	String entityName)
+	{
+		try
+		{
+			dataService.getRepositoryByEntityName(entityName);
+			return true;
+		}
+		catch (UnknownEntityException e)
+		{
+			return false;
+		}
 	}
 
 	/**
@@ -304,11 +324,10 @@ public class RestController
 	 * 
 	 * Returns json
 	 * 
-	 * @param entityNameRaw
 	 * @param request
+	 * @param attributes
 	 * @param attributeExpands
 	 * @return
-	 * @throws UnknownEntityException
 	 */
 	@RequestMapping(value = "/{entityName}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -654,6 +673,7 @@ public class RestController
 
 		// TODO non queryable
 		List<QueryRule> queryRules = request.getQ() == null ? Collections.<QueryRule> emptyList() : request.getQ();
+
 		Query q = new QueryImpl(resolveRefIdentifiers(queryRules, meta)).pageSize(request.getNum())
 				.offset(request.getStart()).sort(request.getSort());
 
@@ -705,11 +725,11 @@ public class RestController
 						entityMap.put(attrName, Collections.singletonMap("href", attrHref));
 					}
 				}
-				else if (attrType != XREF && attrType != MREF)
+				else if (attrType != XREF && attrType != CATEGORICAL && attrType != MREF)
 				{
 					entityMap.put(attrName, entity.get(attr.getName()));
 				}
-				else if (attrType == XREF && attributeExpandsSet != null
+				else if ((attrType == XREF || attrType == CATEGORICAL) && attributeExpandsSet != null
 						&& attributeExpandsSet.contains(attrName.toLowerCase()))
 				{
 					Entity refEntity = (Entity) entity.get(attr.getName());
@@ -747,17 +767,14 @@ public class RestController
 					EntityCollectionResponse ecr = new EntityCollectionResponse(pager, refEntityMaps, uri);
 					entityMap.put(attrName, ecr);
 				}
-				else if ((attrType == XREF && entity.get(attr.getName()) != null) || attrType == MREF)
+				else if ((attrType == XREF && entity.get(attr.getName()) != null)
+						|| (attrType == CATEGORICAL && entity.get(attr.getName()) != null) || attrType == MREF)
 				{
 					// Add href to ref field
 					Map<String, String> ref = new LinkedHashMap<String, String>();
 					ref.put("href",
 							String.format(BASE_URI + "/%s/%s/%s", meta.getName(), entity.getIdValue(), attrName));
 					entityMap.put(attrName, ref);
-				}
-				else
-				{
-
 				}
 
 			}
@@ -790,20 +807,23 @@ public class RestController
 					// Resolve xref, mref fields
 					AttributeMetaData attr = meta.getAttribute(r.getField());
 
-					if (attr.getDataType().getEnumType() == MolgenisFieldTypes.FieldTypeEnum.XREF)
+					if ((attr.getDataType().getEnumType() == MolgenisFieldTypes.FieldTypeEnum.XREF)
+							|| (attr.getDataType().getEnumType() == MolgenisFieldTypes.FieldTypeEnum.MREF))
 					{
 						if (r.getOperator() == Operator.IN)
 						{
-							Iterable<?> values = dataService.findAll(
-									attr.getRefEntity().getName(),
-									new QueryImpl().in(attr.getRefEntity().getIdAttribute().getName(),
-											(Iterable<?>) r.getValue()));
+							Iterable<?> values = dataService.findAll(attr.getRefEntity().getName(), new QueryImpl().in(
+									attr.getRefEntity().getLabelAttribute().getName(), (Iterable<?>) r.getValue()));
 							r.setValue(Lists.newArrayList(values));
 						}
 						else
 						{
-							Object value = dataService.findOne(attr.getRefEntity().getName(),
-									new QueryImpl().eq(attr.getRefEntity().getIdAttribute().getName(), r.getValue()));
+							Object value = dataService
+									.findOne(
+											attr.getRefEntity().getName(),
+											new QueryImpl().eq(attr.getRefEntity().getLabelAttribute().getName(),
+													r.getValue()));
+
 							r.setValue(value);
 						}
 					}

@@ -52,12 +52,13 @@ public class OmimHpoAnnotator extends LocusAnnotator
 	private static final String FTP_FTP_OMIM_ORG_OMIM_MORBIDMAP = "ftp://ftp.omim.org/omim/morbidmap";
 	private static final String HPO_ANNOTATIONS_STABLE_BUILD_DISEASES_TO_GENES_TO_PHENOTYPES = "http://compbio.charite.de/hudson/job/hpo.annotations.monthly/lastStableBuild/artifact/annotation/ALL_SOURCES_ALL_FREQUENCIES_diseases_to_genes_to_phenotypes.txt";
 	private static final String DISEASES_TO_GENES_TO_PHENOTYPES_OUTPUT_FILE = "ALL_SOURCES_ALL_FREQUENCIES_diseases_to_genes_to_phenotypes.txt";
-	private static final String OMIM_DISO = "Disease_OMIM";
-	private static final String OMIM_LINK = "Hyperlink_OMIM";
-	private static final String OMIM_ALL = "Full_info_OMIM";
-	private static final String HPO_DESC = "Symptoms_HPO";
-	private static final String HPO_LINK = "Hyperlinks_HPO";
-	private static final String HPO_ALL = "Full_info_HPO";
+
+	public static final String OMIM_DISO = "Disease_OMIM";
+	public static final String OMIM_LINK = "Hyperlink_OMIM";
+	public static final String OMIM_ALL = "Full_info_OMIM";
+	public static final String HPO_DESC = "Symptoms_HPO";
+	public static final String HPO_LINK = "Hyperlinks_HPO";
+	public static final String HPO_ALL = "Full_info_HPO";
 
 	private static final String NAME = "OmimHpo";
 
@@ -164,8 +165,7 @@ public class OmimHpoAnnotator extends LocusAnnotator
 					for (OMIMTerm omimTerm : geneToOmimTerm.get(geneSymbol))
 					{
 						omimDisorders.append(omimTerm.getName() + " / ");
-						omimLinks.append("<a href=\"http://www.omim.org/entry/" + omimTerm.getEntry() + "\">"
-								+ omimTerm.getEntry() + "</a> / ");
+						omimLinks.append("http://www.omim.org/entry/" + omimTerm.getEntry());
 					}
 
 					omimDisorders.delete(omimDisorders.length() - 3, omimDisorders.length());
@@ -174,8 +174,7 @@ public class OmimHpoAnnotator extends LocusAnnotator
 					for (HPOTerm hpoTerm : geneToHpoTerm.get(geneSymbol))
 					{
 						hpoDescriptions.append(hpoTerm.getDescription() + " / ");
-						hpoLinks.append("<a href=\"http://www.human-phenotype-ontology.org/hpoweb/showterm?id="
-								+ hpoTerm.getId() + "\">" + hpoTerm.getId() + "</a> / ");
+						hpoLinks.append("http://www.human-phenotype-ontology.org/hpoweb/showterm?id=" + hpoTerm.getId());
 					}
 
 					hpoDescriptions.delete(hpoDescriptions.length() - 3, hpoDescriptions.length());
@@ -456,6 +455,30 @@ public class OmimHpoAnnotator extends LocusAnnotator
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_LINK, MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_ALL, MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		return metadata;
+	}
+
+	public static void main(String[] args) throws Exception
+	{
+		// includes a gene without HGNC symbol, and a gene not related to OMIM/HPO terms
+		List<Locus> loci = new ArrayList<Locus>(Arrays.asList(new Locus("2", 58453844l), new Locus("2", 71892329l),
+				new Locus("2", 73679116l), new Locus("10", 112360316l), new Locus("11", 2017661l), new Locus("1",
+						18151726l), new Locus("1", -1l), new Locus("11", 6637740l)));
+
+		List<Entity> inputs = new ArrayList<Entity>();
+		for (Locus l : loci)
+		{
+			HashMap<String, Object> inputMap = new HashMap<String, Object>();
+			inputMap.put(CHROMOSOME, l.getChrom());
+			inputMap.put(POSITION, l.getPos());
+			inputs.add(new MapEntity(inputMap));
+		}
+
+		Iterator<Entity> res = new OmimHpoAnnotator().annotate(inputs.iterator());
+		while (res.hasNext())
+		{
+			System.out.println(res.next().toString());
+		}
+
 	}
 
 	@Override

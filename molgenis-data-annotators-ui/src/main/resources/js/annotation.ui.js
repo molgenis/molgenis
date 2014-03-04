@@ -46,12 +46,13 @@
 		// use chosen plugin for data set select
 		$('#dataset-select').chosen();
 		$('#dataset-select').change(function() {
-			restApi.getAsync($('#dataset-select').val(), null, function(dataSet) {
-				selectedDataSet = dataSet;
-			});
+			if($("#dataset-select").val() != null){
+				restApi.getAsync($('#dataset-select').val(), null, function(dataSet) {
+					selectedDataSet = dataSet;
+				});
 			
-			molgenis.onDataSetSelectionChange($(this).val());
-			
+				molgenis.onDataSetSelectionChange($(this).val());
+			}	
 		});
 		
 		// fire event handler
@@ -63,14 +64,16 @@
 		});
 		
 		$("#disabled-tooltip").tooltip();
-		$("#rootwizard").bootstrapWizard({'tabClass': 'nav nav-tabs'});
-			
-		// disable the filtering tabs for now
-		$("#rootwizard").bootstrapWizard('disable', 1);
-		$(".tab2").click(function(){return false;});
+		$("#remove-button-selected-phenotype").tooltip();
 		
-		$("#rootwizard").bootstrapWizard('disable', 2);
-		$(".tab3").click(function(){return false;});
+		$("#rootwizard").bootstrapWizard({'tabClass': 'nav nav-tabs'});
+		$("#phenotypeSelect").chosen();	
+		// disable the filtering tabs for now
+		//$("#rootwizard").bootstrapWizard('disable', 1);
+		//$(".tab2").click(function(){return false;});
+		
+		//$("#rootwizard").bootstrapWizard('disable', 2);
+		//$(".tab3").click(function(){return false;});
 	
 	});
 	

@@ -174,7 +174,7 @@ public class AnnotatorsUIController extends MolgenisPluginController
 					{
 					}
 
-					omxDataSetAnnotator.annotate(annotator, repository, true);
+					omxDataSetAnnotator.annotate(annotator, repository, false);
 				}
 			}
 		}
