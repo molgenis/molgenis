@@ -321,7 +321,10 @@ function createInput(dataType, attrs, val, lbl) {
 			return createBasicInput('text', attrs, val);
 		case 'MREF':
 		case 'XREF':
-			return createBasicInput('hidden', attrs, val);
+		case 'XREF':
+			var container = $('<div class="xrefsearch" />')
+			container.append(createBasicInput('hidden', attrs, val));
+			return container;
 		case 'COMPOUND' :
 		case 'ENUM':
 		case 'FILE':

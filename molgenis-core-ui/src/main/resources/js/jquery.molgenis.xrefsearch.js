@@ -1,7 +1,13 @@
 /**
  * An autocomplete search dropdown for xref and mref values for use in the filterdialog
  * 
- * usage: $('#id_of_hidden_input)').xrefsearch({attributeUri: 'api/v1/celiacsprue/meta/Celiac_Family'});
+ * usage: 
+ * 
+ * $('#id_of_hidden_input)').xrefsearch({attributeUri: 'api/v1/celiacsprue/meta/Celiac_Family'});
+ * 
+ * or
+ * 
+ * $('#id_of_hidden_input)').xrefsearch({attribute: attribute});
  * 
  * Depends on select2.js and molgenis.js
  */
@@ -30,7 +36,7 @@
 	
 	function getLookupAttributeNames(entityUri) {
 		var attributeNames = [];
-		var refEntityMetaData = restApi.get(entityUri + '?attributes=attributes&expand=attributes');
+		var refEntityMetaData = restApi.get(entityUri,  {attributes: ['attributes'], expand: ['attributes']});
 		
 		$.each(refEntityMetaData.attributes, function(attrName, attr) {
 			if (attr.lookupAttribute) {
@@ -46,8 +52,8 @@
 		items.push('<div class="row-fluid">');
 		
 		if (lookupAttributeNames.length > 0) {
-			var width = Math.round(12 / lookupAttributeNames.length);
-			var abbr = Math.round(110 / lookupAttributeNames.length);
+			var width = Math.round(12 / lookupAttributeNames.length);// 12 is full width in px
+			var abbr = Math.round(110 / lookupAttributeNames.length);// 110 is full width in characters (if you don't change the font size)
 			
 			$.each(lookupAttributeNames, function(index, attrName) {
 				var attrValue = entity[attrName] == undefined ?  '' :  entity[attrName];
@@ -63,17 +69,24 @@
 		return items.join('');
 	}
 	
-	function createSelect2(container, metaData) {
-		var lookupAttrNames = getLookupAttributeNames(metaData.refEntity.href);
+	function createQueryTypeDropdown(container, attributeMetaData) {
+		if (attributeMetaData.fieldType == 'MREF') {
+			container.prepend('<select id="mref-query-type"><option value="OR">ANY match (OR)</option><option value="AND">ALL match (AND)</option></select>');
+		}
+	}
+	
+	function createSelect2(container, attributeMetaData) {
+		var lookupAttrNames = getLookupAttributeNames(attributeMetaData.refEntity.href);
+		var hiddenInput = container.find('input[type=hidden]');
 		
-		container.select2({
+		hiddenInput.select2({
 			width: 670,
 			placeholder: 'filter text',
 			minimumInputLength: 2,
 			ajax: {
 				quietMillis: 200,
 				dataType: 'json',
-				url: '/api/v1/' + metaData.refEntity.name + '?_method=GET',
+				url: '/api/v1/' + attributeMetaData.refEntity.name + '?_method=GET',
 				type: 'POST',
 				params : {contentType: 'application/json;charset=utf-8'},
 				data: function(term, page) {
@@ -91,20 +104,50 @@
 				return formatResult(entity, lookupAttrNames);
 			},
 			formatSelection: function(entity) {
-				return entity[metaData.refEntity.labelAttribute];
+				return entity[attributeMetaData.refEntity.labelAttribute];
 			},
 			id: function(entity) {
-				return entity[metaData.refEntity.labelAttribute];
+				return entity[attributeMetaData.refEntity.labelAttribute];
 			}
 		});
 		
+		var addButton = $('<a href="#" class="add-ref-query-part"><img src="/img/add.png" ></a>');
+		container.append(addButton);
+		
+		addButton.on('click', function() {
+			addQueryPartSelect(container, attributeMetaData);
+		});
+	}
+	
+	function addQueryPartSelect(container, attributeMetaData) {
+		var attrs = {
+				'placeholder': 'filter text',
+				'autofocus': 'autofocus',
+			};
+			
+		var element = createInput(attributeMetaData.fieldType, attrs, undefined)
+		container.parent().append(element);
+		createSelect2(element, attributeMetaData);
+			
+		var removeButton = $('<a href="#" class="remove-ref-query-part"><img src="/img/cancel.png" ></a>');
+		container.find('.add-ref-query-part').replaceWith(removeButton);
+		
+		removeButton.on('click', function() {
+			removeQueryPartSelect($(this).parent());
+		});
+	}
+	
+	function removeQueryPartSelect(element) {
+		element.remove();
 	}
 	
 	$.fn.xrefsearch = function(options) {
 		var container = this;
+		var attributeUri = options.attributeUri ? options.attributeUri : options.attribute.href;
 		
-		restApi.getAsync(options.attributeUri, {attributes:['refEntity'], expand:['refEntity']}, function(metaData) {
-			createSelect2(container, metaData);
+		restApi.getAsync(attributeUri, {attributes:['refEntity', 'fieldType'], expand:['refEntity']}, function(attributeMetaData) {
+			createQueryTypeDropdown(container, attributeMetaData);
+			createSelect2(container, attributeMetaData);
 		});
 		
 		return this;

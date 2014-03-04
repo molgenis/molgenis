@@ -247,6 +247,10 @@ a.accordion-toggle:hover,a.accordion-toggle:focus,a.accordion-toggle:active
 	margin: 0px;	
 }
 
+.modal {
+	width: 1000px;
+}
+
 #filter-wizard-modal .modal-body {
 	min-height: 550px;
 	max-height: 550px;
