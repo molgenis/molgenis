@@ -64,10 +64,6 @@ a.accordion-toggle:hover,a.accordion-toggle:focus,a.accordion-toggle:active
 	background-color: white;
 }
 
-.feature-filter-dialog {
-	display: none;
-}
-
 .feature-filter-remove {
 	margin-left: 4px;
 }
@@ -93,25 +89,8 @@ a.accordion-toggle:hover,a.accordion-toggle:focus,a.accordion-toggle:active
 	border-style: none;
 }
 
-ul.dynatree-container img:hover {
-	cursor: pointer;
-}
-
 .ui-widget {
 	font-family: inherit;
-}
-
-input[type=number] {
-	width: 60px;
-}
-
-#from {
-	margin-left: 10px;
-	margin-right: 10px;
-}
-
-#to {
-	margin-left: 10px;
 }
 
 .ui-widget-header {
@@ -214,15 +193,7 @@ input[type=number] {
 	position:absolute;
 }
 
-#filter-dialog-modal-container{
-	overflow-y: scroll; 
-}
-
-#filter-dialog-modal-container .modal{
-	width:700px;
-}
-
-#wizard-button{
+#filter-wizard-btn { 
 	color:white;
 	background:#5B82A4
 }
@@ -242,4 +213,28 @@ input[type=number] {
 #feature-selection ul.fancytree-container {
 	padding: 0px;
 	border-style: none;
+}
+
+#filter-dialog-modal form {
+	margin: 0px;	
+}
+
+#filter-wizard-modal .modal-body {
+	min-height: 550px;
+	max-height: 550px;
+}
+
+#filter-wizard-modal .well {
+	height: 400px;
+	overflow: auto;
+	margin-bottom: 10px;
+}
+
+#filter-wizard-modal .pager {
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
+
+#filter-wizard-modal .wizard-steps {
+	margin-bottom: 10px
 }
