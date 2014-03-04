@@ -6,12 +6,10 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -19,7 +17,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.apache.log4j.Logger;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -244,40 +241,6 @@ public class DataExplorerController extends MolgenisPluginController
 			else aggregateMap.put(val, count + 1);
 		}
 		return new AggregateResponse(aggregateMap);
-	}
-
-	@RequestMapping(value = "/filterdialog", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
-	public String filterwizard(@RequestBody @Valid FilterWizardRequest request, Model model)
-	{
-		// TODO create utility class to extract info from entity/attribute uris
-		String[] entityUriTokens = request.getEntityUri().split("/");
-		String entityName = entityUriTokens[entityUriTokens.length - 1];
-
-		Repository repository = dataService.getRepositoryByEntityName(entityName);
-		Iterable<AttributeMetaData> attributeMetaDataIterable = Iterables.filter(repository.getAttributes(),
-				new Predicate<AttributeMetaData>()
-				{
-					@Override
-					public boolean apply(AttributeMetaData attributeMetaData)
-					{
-						if (attributeMetaData.getDataType().getEnumType() == FieldTypeEnum.COMPOUND)
-						{
-							attributeMetaData.getRefEntity().getAttributes();
-						}
-						return attributeMetaData.getDataType().getEnumType() == FieldTypeEnum.COMPOUND;
-					}
-				});
-
-		List<EntityMetaData> entityMetaDataGroups = new ArrayList<EntityMetaData>();
-		entityMetaDataGroups.add(repository);
-		for (AttributeMetaData attributeMetaData : attributeMetaDataIterable)
-		{
-			entityMetaDataGroups.add(attributeMetaData.getRefEntity());
-		}
-
-		model.addAttribute("entityName", entityName);
-		model.addAttribute("entityMetaDataGroups", entityMetaDataGroups);
-		return "view-filter-dialog";
 	}
 
 	@ExceptionHandler(RuntimeException.class)

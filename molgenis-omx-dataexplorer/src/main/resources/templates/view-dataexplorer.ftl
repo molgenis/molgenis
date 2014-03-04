@@ -1,7 +1,7 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 <#assign css=["jquery-ui-1.9.2.custom.min.css", "chosen.css","jquery.bootstrap.wizard.css", "bootstrap-datetimepicker.min.css", "ui.fancytree.min.css", "jquery.molgenis.table.css", "dataexplorer.css"]>
-<#assign js=["dalliance-compiled.js", "jquery-ui-1.9.2.custom.min.js", "chosen.jquery.min.js", "dataexplorer.js", "jquery.bootstrap.pager.js", "jquery.bootstrap.wizard.min.js", "bootstrap-datetimepicker.min.js", "dataexplorer-charts.js", "highstock-1.3.6/highstock.js", "highstock-1.3.6/highcharts-more.js","jquery.fancytree.min.js", "jquery.molgenis.tree.js", "jquery.molgenis.table.js"]>
+<#assign js=["dalliance-compiled.js", "jquery-ui-1.9.2.custom.min.js", "chosen.jquery.min.js", "dataexplorer.js", "jquery.bootstrap.pager.js", "jquery.bootstrap.wizard.min.js", "bootstrap-datetimepicker.min.js", "dataexplorer-filter.js", "dataexplorer-wizard.js", "dataexplorer-charts.js", "highstock-1.3.6/highstock.js", "highstock-1.3.6/highcharts-more.js","jquery.fancytree.min.js", "jquery.molgenis.tree.js", "jquery.molgenis.table.js"]>
 <@header css js/>
 	<#-- 
 	<#if entityExplorerUrl??>
@@ -78,7 +78,7 @@
 								<div class="accordion-inner">
 									<div class="row-fluid" id="feature-selection"></div>
 									<div class="row-fluid" id="data-options">
-										<a href="#filter-dialog-modal" id="wizard-button" class="btn btn-small pull-right" data-toggle="modal"><img src="/img/filter-bw.png"> Wizard</a>
+										<a href="#" id="filter-wizard-btn" class="btn btn-small pull-right"><img src="/img/filter-bw.png"> Wizard</a>
 									</div>
 								</div>
 							</div>
@@ -87,12 +87,7 @@
 				</div>			
 			</div>		
 		</div>
-		<div class="span9">
-			<div id="filter-dialog-modal-container">
-				<div id="filter-dialog-modal" class="modal hide" tabindex="-1" role="dialog">
-				</div>
-			</div>
-			
+		<div class="span9">			
 			<#--Charts-->
 			<#if app_dataexplorer_include_charts?has_content && app_dataexplorer_include_charts>
 				<#include "/charts-forms/view-scatterplot.ftl" parse=false>
@@ -164,6 +159,5 @@
 				</div>
 			</div>
 		</div>
-		<div class="feature-filter-dialog"></div>	
 	</div>
 <@footer/>

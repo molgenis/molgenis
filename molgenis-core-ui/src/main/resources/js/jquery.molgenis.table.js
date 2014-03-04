@@ -31,8 +31,8 @@
 	}
 
 	function getTableMetaData(settings, callback) {
-		var colAttributes = molgenis.getAtomicAttributes(settings.attributes);
-
+		var colAttributes = molgenis.getAtomicAttributes(settings.attributes, restApi);
+		
 		// get meta data for referenced entities
 		var refEntitiesMeta = {};
 		$.each(colAttributes, function(i, attribute) {
