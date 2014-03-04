@@ -104,7 +104,30 @@
 		}
 		createAtomicAttributesRec(attributes);
 		return atomicAttributes;
-	}
+	};
+
+	/**
+	 * Returns all compound attributes. In case of compound attributes (attributes consisting of multiple atomic
+	 * attributes) only the descendant atomic attributes are returned. The compound attribute itself is not returned.
+	 * 
+	 * @param attributes
+	 * @param restClient
+	 */
+	molgenis.getCompoundAttributes = function(attributes, restClient) {
+		var compoundAttributes = [];
+		function createAtomicAttributesRec(attributes) {
+			$.each(attributes, function(i, attribute) {
+				if(attribute.fieldType === 'COMPOUND'){
+					// FIXME improve performance by retrieving async 
+					attribute = restClient.get(attribute.href, {'expand': ['attributes']});
+					compoundAttributes.push(attribute);
+					createAtomicAttributesRec(attribute.attributes);
+				}
+			});	
+		}
+		createAtomicAttributesRec(attributes);
+		return compoundAttributes;
+	};
 	
 	/*
 	 * Natural Sort algorithm for Javascript - Version 0.7 - Released under MIT license
@@ -247,23 +270,28 @@ function abbreviate(s, maxLength) {
  * @param dataType molgenis data type
  * @param attrs input attributes
  * @param val input value
+ * @param lbl input label (for checkbox and radio inputs)
  * @returns
  */
-function createInput(dataType, attrs, val) {
+function createInput(dataType, attrs, val, lbl) {
 	function createBasicInput(type, attrs, val) {
 		var input = $('<input type="' + type + '">');
 		if(attrs)
 			input.attr(attrs);
-		if(val)
+		if(val !== undefined)
 			input.val(val);
 		return input;
 	}
 	
 	switch(dataType) {
 		case 'BOOL':
-			return createBasicInput('radio', attrs, val);
+			var label = $('<label class="radio">');
+			var input = createBasicInput('radio', attrs, val); 
+			return label.append(input).append(val ? 'True' : 'False');
 		case 'CATEGORICAL':
-			return createBasicInput('checkbox', attrs, val);
+			var label = $('<label class="checkbox">');
+			var input = createBasicInput('checkbox', attrs, val); 
+			return label.append(input).append(lbl);
 		case 'DATE':
 		case 'DATE_TIME':
 			var format = dataType === 'DATE' ? 'yyyy-MM-dd' : 'yyyy-MM-dd\'T\'hh:mm:ss' + getCurrentTimezoneOffset();
@@ -274,7 +302,12 @@ function createInput(dataType, attrs, val) {
 			items.push('<i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>');
 			items.push('</span>');
 			items.push('</div>');
-			return $(items.join(''));
+			var datepicker = $(items.join(''));
+			if(attrs)
+				$('input', datepicker).attr(attrs);
+			if(val !== undefined)
+				$('input', datepicker).val(val);
+			return datepicker.datetimepicker();
 		case 'DECIMAL':
 		case 'INT':
 		case 'LONG':

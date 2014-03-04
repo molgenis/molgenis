@@ -2,27 +2,45 @@
 	"use strict";
 	var self = molgenis.dataexplorer = molgenis.dataexplorer || {};
 	
+	// module api
+	self.getSelectedEntityMeta = getSelectedEntityMeta;
+	self.getSelectedAttributes = getSelectedAttributes;
+	self.getEntityQuery = getEntityQuery;
+	self.createFilterControls = createFilterControls;
+	self.createFilters = createFilters;
+	
 	var restApi = new molgenis.RestClient();
-
 	var selectedEntityMetaData = null;
 	var dataTable = null;
 	var attributeFilters = {};
 	var selectedAttributes = [];
 	var searchQuery = null;
 	
-	self.getSelectedEntityMeta = function() {
+	/**
+	 * @memberOf molgenis.dataexplorer
+	 */
+	function getSelectedEntityMeta() {
 		return selectedEntityMetaData;
-	};
-	
-	self.getSelectedAttributes = function() {
+	}
+
+	/**
+	 * @memberOf molgenis.dataexplorer
+	 */
+	function getSelectedAttributes() {
 		return selectedAttributes;
-	};
+	}
 	
-	self.getEntityQuery = function() {
+	/**
+	 * @memberOf molgenis.dataexplorer
+	 */
+	function getEntityQuery() {
 		return self.createEntityQuery();
-	};
+	}
 	
-	self.createEntityMetaTree = function(entityMetaData, selectedAttributes) {
+	/**
+	 * @memberOf molgenis.dataexplorer
+	 */
+	function createEntityMetaTree(entityMetaData, selectedAttributes) {
 		var container = $('#feature-selection');
 		container.tree({
 			'entityMetaData' : entityMetaData,
@@ -35,14 +53,17 @@
 				$(document).trigger('clickAttribute', {'attribute': attribute});
 			}
 		});
-	};
+	}
 	
-	self.createDataTable = function() {
+	/**
+	 * @memberOf molgenis.dataexplorer
+	 */
+	function createDataTable() {
 		if (selectedAttributes.length > 0) {
 			$('#data-table-container').table({
 				'entityMetaData' : selectedEntityMetaData,
 				'attributes' : selectedAttributes,
-				'query' : self.createEntityQuery()
+				'query' : createEntityQuery()
 			});
 			dataTable = $('#data-table-container');
 		} else {
@@ -455,24 +476,12 @@
 			trElement.append(divContainer);
 		});
 	};
+
 	
 	/**
-	 * Update the category attribute filter
+	 * @memberOf molgenis.dataexplorer
 	 */
-	self.updateCategoryAttributeFilter = function(attribute) {
-		var attributeFilter = {
-			attribute: attribute,
-			name : attribute.name,
-			identifier : attribute.label, // FIXME label? identifier?
-			type : attribute.fieldType,
-			values : $.makeArray($('input[name="' + attribute.name + '"]:checked').map(function() {
-				return $(this).val();
-			}))
-		};
-		$(document).trigger('updateAttributeFilter', {'attributeUri' : attribute.href, 'attributeFilter' : attributeFilter});
-	};
-
-	self.createAttributeFiltersList = function(attributeFilters) {
+	function createAttributeFiltersList(attributeFilters) {
 		var items = [];
 		$.each(attributeFilters, function(attributeUri, attributeFilter) {
 			var attribute = attributeFilter.attribute;
@@ -483,9 +492,12 @@
 		});
 		items.push('</div>');
 		$('#feature-filters').html(items.join(''));
-	};
+	}
 
-	self.createEntityQuery = function() {
+	/**
+	 * @memberOf molgenis.dataexplorer
+	 */
+	function createEntityQuery() {
 		var entityCollectionRequest = {
 			q : []
 		};
@@ -551,11 +563,13 @@
 		});
 
 		return entityCollectionRequest;
-		
-	};
+	}
 	
-	self.createDownloadDataRequest = function() {
-		var entityQuery = self.createEntityQuery();
+	/**
+	 * @memberOf molgenis.dataexplorer
+	 */
+	function createDownloadDataRequest() {
+		var entityQuery = createEntityQuery();
 		
 		var dataRequest = {
 			entityName : selectedEntityMetaData.name,
@@ -578,9 +592,12 @@
 		});
 
 		return dataRequest;
-	};
+	}
 
-	self.createAggregatesTable = function() {
+	/**
+	 * @memberOf molgenis.dataexplorer
+	 */
+	function createAggregatesTable() {
 		var attributeSelect = $('<select id="selectFeature"/>');
 		if(Object.keys(selectedEntityMetaData.attributes).length === 0) {
 			attributeSelect.attr('disabled', 'disabled');
@@ -591,15 +608,20 @@
 				}
 			});
 			$('#feature-select').empty().append(attributeSelect);
-			self.updateAggregatesTable(attributeSelect.val());
-			attributeSelect.chosen();
-			attributeSelect.change(function() {
-				self.updateAggregatesTable($(this).val());
-			});
+			if(attributeSelect.val()) {
+				updateAggregatesTable(attributeSelect.val());
+				attributeSelect.chosen();
+				attributeSelect.change(function() {
+					updateAggregatesTable($(this).val());
+				});
+			}
 		}
-	};
+	}
 
-	self.updateAggregatesTable = function(attributeUri) {
+	/**
+	 * @memberOf molgenis.dataexplorer
+	 */
+	function updateAggregatesTable(attributeUri) {
 		$.ajax({
 			type : 'POST',
 			url : molgenis.getContextUrl() + '/aggregate',
@@ -619,37 +641,129 @@
 				molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 			}
 		});
-	};
+	}
 
-	self.filterDialog = function() {
-		$.ajax({
-			type : 'POST',
-			url : molgenis.getContextUrl() + '/filterdialog',
-			data : JSON.stringify({'entityUri' : $('#dataset-select').val()}),
-			contentType : 'application/json',
-			success : function(result) {
-				$(function() {
-					var modal = $('#filter-dialog-modal').html(result);
-					modal.show();
+	/**
+	 * @memberOf molgenis.dataexplorer
+	 */
+	function createFilterControls(attribute, attributeFilter) {
+		var label;
+		var controls = $('<div class="controls">');
+		controls.data('attribute', attribute);
+		
+		var name = 'input-' + attribute.name;
+		var values = attributeFilter ? attributeFilter.values : null;
+		switch(attribute.fieldType) {
+			case 'BOOL':
+				label = $('<span class="control-label">' + attribute.label + '</label>');
+				var attrs = {'name': name};
+				var attrsTrue = values && values[0] === 'true' ? $.extend({}, attrs, {'checked': 'checked'}) : attrs;
+				var attrsFalse = values && values[0] === 'false' ? $.extend({}, attrs, {'checked': 'checked'}) : attrs;
+				var inputTrue = createInput(attribute.fieldType, attrsTrue, true);
+				var inputFalse = createInput(attribute.fieldType, attrsFalse, false);
+				controls.append(inputTrue.addClass('inline')).append(inputFalse.addClass('inline'));
+				break;
+			case 'CATEGORICAL':
+				label = $('<label class="control-label" for="' + name + '">' + attribute.label + '</label>');
+				var entityMeta = restApi.get(attribute.refEntity.href);
+				var entitiesUri = entityMeta.href.replace(new RegExp('/meta[^/]*$'), ""); // TODO do not manipulate uri
+
+				var entities = restApi.get(entitiesUri);
+				$.each(entities.items, function() {
+					//var checked = attributeFilter && ($.inArray(this[labelAttribute], attributeFilter.values) > -1);
+					//		'checked': checked
+					controls.append(createInput(attribute.fieldType, {'name': name, 'id': name}, this.href, this[entityMeta.labelAttribute]));
 				});
-			},
-			error : function(xhr) {
-				molgenis.createAlert(JSON.parse(xhr.responseText).errors);
+				break;
+			case 'DATE':
+			case 'DATE_TIME':
+				label = $('<span class="control-label">' + attribute.label + '</label>');
+				var nameFrom = name + '-from', nameTo = name + '-to';
+				var valFrom = values ? values[0] : undefined;
+				var valTo = values ? values[1] : undefined;
+				var inputFrom = $('<div class="control-group">').append(createInput(attribute.fieldType, {'name': nameFrom, 'placeholder': 'Start date'}, valFrom ? valFrom.replace("T", "'T'") : valFrom));
+				var inputTo = createInput(attribute.fieldType, {'name': nameTo, 'placeholder': 'End date'}, valTo ? valTo.replace("T", "'T'") : valTo);
+				controls.append(inputFrom).append(inputTo);
+				break;
+			case 'DECIMAL':
+			case 'INT':
+			case 'LONG':
+				label = $('<span class="control-label">' + attribute.label + '</label>');
+				var nameFrom = name + '-from', nameTo = name + '-to';
+				var labelFrom = $('<label class="horizontal-inline" for="' + nameFrom + '">From</label>');
+				var labelTo = $('<label class="horizontal-inline inbetween" for="' + nameTo + '">To</label>');
+				var inputFrom = createInput(attribute.fieldType, {'name': nameFrom, 'id': nameFrom}, values ? values[0] : undefined).addClass('input-small');
+				var inputTo = createInput(attribute.fieldType, {'name': nameTo, 'id': nameTo}, values ? values[1] : undefined).addClass('input-small');
+				controls.addClass('form-inline').append(labelFrom).append(inputFrom).append(labelTo).append(inputTo);
+				break;
+			case 'EMAIL':
+			case 'HTML':
+			case 'HYPERLINK':
+			case 'STRING':
+			case 'TEXT':
+				label = $('<label class="control-label" for="' + name + '">' + attribute.label + '</label>');
+				controls.append(createInput(attribute.fieldType, {'name': name, 'id': name}, values ? values[0] : undefined)); 
+				break;
+			case 'MREF':
+			case 'XREF':
+				label = $('<label class="control-label" for="' + name + '">' + attribute.label + '</label>');
+				controls.append(createInput(attribute.fieldType, {'name': name, 'id': name}, values ? values[0] : undefined));
+				break;
+			case 'COMPOUND' :
+			case 'ENUM':
+			case 'FILE':
+			case 'IMAGE':
+				throw 'Unsupported data type: ' + dataType;
+			default:
+				throw 'Unknown data type: ' + dataType;			
+		}
+		
+		return $('<div class="control-group">').append(label).append(controls);	
+	}
+
+	/**
+	 * @memberOf molgenis.dataexplorer
+	 */
+	function createFilters(form) {
+		var filters = {};
+		$(":input", form).not('[type=radio]:not(:checked)').not('[type=checkbox]:not(:checked)').each(function(){
+			var value = $(this).val();
+			if(value) {
+				var attribute = $(this).closest('.controls').data('attribute');
+				var filter = filters[attribute.href];
+				if(!filter) {
+					filter = {};
+					filters[attribute.href] = filter;
+					filter.attribute = attribute;
+				}
+				var values = filter.values;
+				if(!values) {
+					values = [];
+					filter.values = values;
+				}
+				values.push(value);
 			}
 		});
-	};
-
-	self.download = function() {
+		return Object.keys(filters).map(function (key) { return filters[key]; });	
+	}
+	
+	/**
+	 * @memberOf molgenis.dataexplorer
+	 */
+	function download() {
 		parent.showSpinner();
 		$.download(molgenis.getContextUrl() + '/download', {
 			// Workaround, see http://stackoverflow.com/a/9970672
-			'dataRequest' : JSON.stringify(self.createDownloadDataRequest())
+			'dataRequest' : JSON.stringify(createDownloadDataRequest())
 		});
 		parent.hideSpinner();
-	};
+	}
 
 	//--BEGIN genome browser--
-	self.updateGenomeBrowser = function() {
+	/**
+	 * @memberOf molgenis.dataexplorer
+	 */
+	function updateGenomeBrowser() {
 		if (selectedEntityMetaData.name in genomeBrowserDataSets) {
 			document.getElementById('genomebrowser').style.display = 'block';
 			document.getElementById('genomebrowser').style.visibility = 'visible';
@@ -675,9 +789,12 @@
 		} else {
 			document.getElementById('genomebrowser').style.display = 'none';
 		}
-	};
+	}
 
-	self.setDallianceFilter = function() {
+	/**
+	 * @memberOf molgenis.dataexplorer
+	 */
+	function setDallianceFilter() {
 		$.each(selectedEntityMetaData.attributes, function(key, attribute) {
 			if(key === 'start_nucleotide') {
 				var attributeFilter = {
@@ -685,19 +802,21 @@
 					range : true,
 					values : [ Math.floor(dalliance.viewStart).toString(), Math.floor(dalliance.viewEnd).toString() ]
 				};
-				$(document).trigger('updateAttributeFilter', {'attributeUri' : attributeUri, 'attributeFilter' : attributeFilter});
+				$(document).trigger('updateAttributeFilters', {'filters': [attributeFilter]});
 			} else if(key === 'chromosome') {
 				var attributeFilter = {
 					attribute : attribute,
 					values : [ dalliance.chr ]
 				};
-				$(document).trigger('updateAttributeFilter', {'attributeUri' : attributeUri, 'attributeFilter' : attributeFilter});
+				$(document).trigger('updateAttributeFilters', {'filters': [attributeFilter]});
 			}
 		});
-	};
+	}
 	//--END genome browser--
 
-	// on document ready
+	/**
+	 * @memberOf molgenis.dataexplorer
+	 */
 	$(function() {
 		$(document).on('changeEntity', function(e, entityUri) {
 			// reset			
@@ -717,11 +836,11 @@
 					return attribute.fieldType !== 'COMPOUND' ? attribute : null;
 				});
 				
-				$(document).trigger('changeAttributeSelection', {'attributes': selectedAttributes});
-				self.createEntityMetaTree(entityMetaData, selectedAttributes);
-				
 				//Save selected entity to cookie, expires after 7 days
 				$.cookie('molgenis.selected.entity.uri', entityUri, { expires: 7 });
+				$(document).trigger('changeAttributeSelection', {'attributes': selectedAttributes});
+				createEntityMetaTree(entityMetaData, selectedAttributes);
+
 			});
 		});
 		
@@ -733,33 +852,34 @@
 					if(dataTable)
 						dataTable.table('setAttributes', data.attributes);
 					else
-						self.createDataTable();
-					self.updateGenomeBrowser();
+						createDataTable();
+					updateGenomeBrowser();
 					break;
 				case 'tab-aggregates':
-					self.updateAggregatesTable();
+					updateAggregatesTable();
 					break;
 				case 'tab-charts':
 					break;
 			}
 		});
 
-		$(document).on('updateAttributeFilter', function(e, data) {
-			attributeFilters[data.attributeUri] = data.attributeFilter;
-			self.createAttributeFiltersList(attributeFilters);
-			
+		$(document).on('updateAttributeFilters', function(e, data) {
+			$.each(data.filters, function() {
+				attributeFilters[this.attribute.href] = this;
+			});
+			createAttributeFiltersList(attributeFilters);
 			switch($("#tabs li.active").attr('id')) {
 				case 'tab-data':
-					self.createDataTable();
+					createDataTable();
 					
 					// TODO implement elegant solution for genome browser specific code
-					var filterValues = data.attributeFilter.values;
-					var attribute = data.attributeFilter.attribute;
-					if(attribute.name === 'start_nucleotide') dalliance.setLocation(dalliance.chr, filterValues[0], filterValues[1]);
-					if(attribute.name === 'chromosome') dalliance.setLocation(filterValues[0], dalliance.viewStart, dalliance.viewEnd);
+					$.each(data.filters, function() {
+						if(this.attribute.name === 'start_nucleotide') dalliance.setLocation(dalliance.chr, this.values[0], this.values[1]);
+						if(this.attribute.name === 'chromosome') dalliance.setLocation(this.values[0], dalliance.viewStart, dalliance.viewEnd);
+					});
 					break;
 				case 'tab-aggregates':
-					self.updateAggregatesTable();
+					updateAggregatesTable();
 					break;
 				case 'tab-charts':
 					break;
@@ -768,15 +888,15 @@
 		
 		$(document).on('removeAttributeFilter', function(e, data) {
 			delete attributeFilters[data.attributeUri];
-			self.createAttributeFiltersList(attributeFilters);
+			createAttributeFiltersList(attributeFilters);
 			
 			switch($("#tabs li.active").attr('id')) {
 				case 'tab-data':
-					self.createDataTable();
+					createDataTable();
 					// TODO what to do for genomebrowser?
 					break;
 				case 'tab-aggregates':
-					self.updateAggregatesTable();
+					updateAggregatesTable();
 					break;
 				case 'tab-charts':
 					break;
@@ -789,12 +909,12 @@
 			switch($("#tabs li.active").attr('id')) {
 				case 'tab-data':
 					if(dataTable)
-						dataTable.table('setQuery', self.createEntityQuery());
+						dataTable.table('setQuery', createEntityQuery());
 					else
-						self.createDataTable();
+						createDataTable();
 					break;
 				case 'tab-aggregates':
-					self.updateAggregatesTable();
+					updateAggregatesTable();
 					break;
 				case 'tab-charts':
 					break;
@@ -802,11 +922,9 @@
 		});
 		
 		$(document).on('clickAttribute', function(e, data) {
-			self.createAttributeFilterDialog(data.attribute, attributeFilters[data.attribute.href]);
+			molgenis.dataexplorer.filter.openFilterModal(data.attribute, attributeFilters[data.attribute.href]);
 		});
-	});
-	
-	$(function() {
+		
 		var container = $("#plugin-container");
 		
 		// use chosen plugin for data set select
@@ -816,10 +934,10 @@
 		});
 
 		$('a[data-toggle="tab"][href="#dataset-data-container"]').on('show', function(e) {
-			self.createDataTable();
+			createDataTable();
 		});
 		$('a[data-toggle="tab"][href="#dataset-aggregate-container"]').on('show', function(e) {
-			self.createAggregatesTable();
+			createAggregatesTable();
 		});
 
 		$("#observationset-search").focus();
@@ -827,21 +945,15 @@
 		$("#observationset-search").change(function(e) {
 			$(document).trigger('changeEntitySearchQuery', $(this).val());
 		});
-
-		$('#wizard-button').click(function() {
-			self.filterDialog();
-		});
-
-		$('.feature-filter-dialog').dialog({
-			modal : true,
-			width : 700,
-			autoOpen : false
+	
+		$('#filter-wizard-btn').click(function() {
+			molgenis.dataexplorer.wizard.openFilterWizardModal(selectedEntityMetaData, attributeFilters);
 		});
 
 		$(container).on('click', '.feature-filter-edit', function(e) {
 			e.preventDefault();
 			var attributeFilter = attributeFilters[$(this).data('href')];
-			self.createAttributeFilterDialog(attributeFilter.attribute, attributeFilter);
+			molgenis.dataexplorer.filter.openFilterModal(attributeFilter.attribute, attributeFilter);
 		});
 		
 		$(container).on('click', '.feature-filter-remove', function(e) {
@@ -850,11 +962,11 @@
 		});
 		
 		$('#download-button').click(function() {
-			self.download();
+			download();
 		});
 
 		$('#genomebrowser-filter-button').click(function() {
-			self.setDallianceFilter();
+			setDallianceFilter();
 		});
 		
 		//Read previous selected entity from cookie
