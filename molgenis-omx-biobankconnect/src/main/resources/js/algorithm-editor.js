@@ -283,7 +283,11 @@
 				success : function(data, textStatus, request) {	
 					createFeatureInfoPanel(feature, featureInfoDiv);
 					$('<div />').addClass('row-fuild').css('margin-bottom', '10px').append('<strong>' + mappedDataSet.name + '</strong>').appendTo(tableDiv);
-					createTableForRetrievedMappings(data.searchHits, tableDiv);
+					var style= {
+						'overflow-y' : 'scroll',
+						'height' : $(document).height()/4
+					};
+					molgenis.AlgorithmEditor.prototype.createTableForRetrievedMappings(data.searchHits, tableDiv, style);
 					$('<div />').addClass('row-fuild').css('margin-bottom', '10px').append('<strong>' + selectedDataSet.name + '</strong>').appendTo(metaInfoDiv);
 					var editor = createEditorInModel(metaInfoDiv, mappedDataSet);
 					$('<div />').addClass('row-fuild').css('margin-bottom', '10px').before(controlDiv);
@@ -312,67 +316,6 @@
 					$('<div />').addClass('row-fluid').append('<div class="span1"><strong>Categories: </strong></div>').append(categoryDiv).appendTo(middleDiv);
 				}
 				parentDiv.append(infoDiv).append(middleDiv);
-			}
-			
-			function createTableForRetrievedMappings(searchHits, parentDiv){
-				if(searchHits.length === 0) {
-					$('<div />').append('No mappings were found!').appendTo(parentDiv);
-					return;
-				}
-				var tableForSuggestedMappings = $('<table />').addClass('table table-bordered'); 
-				var header = $('<thead><tr><th>Name</th><th>Description</th><th>Data type</th><th>Unit</th>/tr></thead>');
-				tableForSuggestedMappings.append(header);
-				$.each(searchHits, function(index, hit){
-					var row = $('<tr />');
-					var featureId = hit.columnValueMap.id;
-					var featureEntity = restApi.get('/api/v1/observablefeature/' + featureId, ['unit']);
-					row.append('<td>' + featureEntity.name + '</td>');
-					row.append('<td>' + featureEntity.description + '</td>');
-					if(featureEntity.unit !== undefined && featureEntity.unit !== null){
-						row.append('<td>' + featureEntity.unit.name + '</td>');
-					}else{
-						row.append('<td />');
-					}
-					row.append('<td>' + featureEntity.dataType + '</td>');
-					tableForSuggestedMappings.append(row);
-					row.css('cursor', 'pointer').click(function(){
-						retrieveAllInfoForFeature(row, featureEntity);
-					});
-				});
-				$('<div />').append(tableForSuggestedMappings).addClass('well').css({
-					'overflow-y' : 'scroll',
-					'height' : $(document).height()/4
-				}).appendTo(parentDiv);
-			}
-			
-			function retrieveAllInfoForFeature(clickedRow, featureEntity){
-				var detailInfoTable = $('<table class="table table-bordered"></table>');
-				detailInfoTable.append('<tr><th>Id</th><td>' + molgenis.hrefToId(featureEntity.href) + '</td></tr>');
-				detailInfoTable.append('<tr><th>Name</th><td>' + featureEntity.name + '</td></tr>');
-				if(featureEntity.unit !== undefined && featureEntity.unit !== null){
-					detailInfoTable.append('<tr><th>Unit</th><td>' + featureEntity.unit.name + '</td></tr>');
-				}
-				detailInfoTable.append('<tr><th>Data type</th><td>' + featureEntity.dataType + '</td></tr>');
-				detailInfoTable.append('<tr><th>Description</th><td>' + featureEntity.description + '</td></tr>');
-				var categories = getCategoriesByFeatureId(molgenis.hrefToId(featureEntity.href));
-				if(categories.length > 0){
-					var categoryDiv = $('<div />');
-					$.each(categories, function(index, category){
-						categoryDiv.append('<div>' + category.valueCode + ' = ' + category.name + '</div>');
-					});
-					detailInfoTable.append('<tr><th>Categories</th><td>' + categoryDiv.html() + '</td></tr>');
-				}
-				var parentTable = clickedRow.parents('table:eq(0)');
-				var backButton = $('<button class="btn btn-primary">Go back</button>');
-				parentTable.hide().before(detailInfoTable).before(backButton);
-				backButton.click(function(){
-					detailInfoTable.remove();
-					backButton.remove();
-					parentTable.show();
-				});
-				detailInfoTable.click(function(){
-					backButton.click();
-				});
 			}
 			
 			function createEditorInModel(parentDiv, mappedDataSet){
@@ -541,6 +484,75 @@
 			table.append('<tr><th>Median</th><td>' + jStat.median(array) + '</td></tr>');
 			table.append('<tr><th>Standard Deviation</th><td>' + jStat.stdev(array) + '</td></tr>');
 			return table;
+		}
+	};
+
+	molgenis.AlgorithmEditor.prototype.createTableForRetrievedMappings = function(searchHits, parentDiv, style){
+		if(searchHits.length === 0) {
+			$('<div />').append('No mappings were found!').appendTo(parentDiv);
+			return;
+		}
+		var tableForSuggestedMappings = $('<table />').addClass('table table-bordered'); 
+		var header = $('<thead><tr><th>Name</th><th>Description</th><th>Data type</th><th>Unit</th>/tr></thead>');
+		tableForSuggestedMappings.append(header);
+		$.each(searchHits, function(index, hit){
+			var row = $('<tr />');
+			var featureId = hit.columnValueMap.id;
+			var featureEntity = restApi.get('/api/v1/observablefeature/' + featureId, ['unit']);
+			row.append('<td>' + featureEntity.name + '</td>');
+			row.append('<td>' + featureEntity.description + '</td>');
+			if(featureEntity.unit !== undefined && featureEntity.unit !== null){
+				row.append('<td>' + featureEntity.unit.name + '</td>');
+			}else{
+				row.append('<td />');
+			}
+			row.append('<td>' + featureEntity.dataType + '</td>');
+			tableForSuggestedMappings.append(row);
+			row.css('cursor', 'pointer').click(function(){
+				retrieveAllInfoForFeature(row, featureEntity);
+			});
+		});
+		$('<div />').append(tableForSuggestedMappings).addClass('well').css(style == undefined || style == null ? {} : style).appendTo(parentDiv);
+		
+		function retrieveAllInfoForFeature(clickedRow, featureEntity){
+			var detailInfoTable = $('<table class="table table-bordered"></table>');
+			detailInfoTable.append('<tr><th>Id</th><td>' + molgenis.hrefToId(featureEntity.href) + '</td></tr>');
+			detailInfoTable.append('<tr><th>Name</th><td>' + featureEntity.name + '</td></tr>');
+			if(featureEntity.unit !== undefined && featureEntity.unit !== null){
+				detailInfoTable.append('<tr><th>Unit</th><td>' + featureEntity.unit.name + '</td></tr>');
+			}
+			detailInfoTable.append('<tr><th>Data type</th><td>' + featureEntity.dataType + '</td></tr>');
+			detailInfoTable.append('<tr><th>Description</th><td>' + featureEntity.description + '</td></tr>');
+			var categories = getCategoriesByFeatureId(molgenis.hrefToId(featureEntity.href));
+			if(categories.length > 0){
+				var categoryDiv = $('<div />');
+				$.each(categories, function(index, category){
+					categoryDiv.append('<div>' + category.valueCode + ' = ' + category.name + '</div>');
+				});
+				detailInfoTable.append('<tr><th>Categories</th><td>' + categoryDiv.html() + '</td></tr>');
+			}
+			var parentTable = clickedRow.parents('table:eq(0)');
+			var backButton = $('<button class="btn btn-primary">Go back</button>');
+			parentTable.hide().before(detailInfoTable).before(backButton);
+			backButton.click(function(){
+				detailInfoTable.remove();
+				backButton.remove();
+				parentTable.show();
+			});
+			detailInfoTable.click(function(){
+				backButton.click();
+			});
+		}
+		
+		function getCategoriesByFeatureId(featureId){
+			var categories = restApi.get('/api/v1/category/', null, {
+				q : [{
+					field : 'observableFeature',
+					operator : 'EQUALS',
+					value : featureId
+				}],
+			});
+			return categories.items; 
 		}
 	};
 	

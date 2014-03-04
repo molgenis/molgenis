@@ -1,14 +1,14 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
-<#assign css=["jquery-ui-1.9.2.custom.min.css", "bootstrap-fileupload.min.css", "biobank-connect.css", "mapping-manager.css"]>
-<#assign js=["jquery-ui-1.9.2.custom.min.js", "bootstrap-fileupload.min.js", "common-component.js", "catalogue-chooser.js", "ontology-annotator.js", "mapping-manager.js", "biobank-connect.js", "simple_statistics.js"]>
+<#assign css=["jquery-ui-1.9.2.custom.min.css", "biobank-connect.css", "mapping-manager.css"]>
+<#assign js=["jquery-ui-1.9.2.custom.min.js", "common-component.js", "catalogue-chooser.js", "ontology-annotator.js", "mapping-manager.js", "biobank-connect.js"]>
 <@header css js/>
-<form id="evaluationForm" class="form-horizontal" enctype="multipart/form-data">
+<form id="biobankanalysis" class="form-horizontal">
 	<div class="row-fluid">
 		<div class="span12 well">
 			<div class="row-fluid">
 				<div class="span12"><legend class="legend-mapping-manager">
-					System performance evaluation
+					Prediction validation
 				</div>
 			</div>
 			<div class="row-fluid">
