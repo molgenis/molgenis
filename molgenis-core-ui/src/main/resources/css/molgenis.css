@@ -81,3 +81,11 @@ body{
     width: 80%; /* respsonsive width */
     margin-left:-40%; /* width/2) */ 
 }
+
+label.horizontal-inline {
+	margin-right: 5px;
+}
+
+label.horizontal-inline.inbetween {
+	margin-left: 5px;
+}
