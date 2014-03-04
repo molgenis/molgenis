@@ -24,7 +24,7 @@ public class TupleToXrefValueConverterTest
 		CharacteristicLoadingCache characteristicLoadingCache = mock(CharacteristicLoadingCache.class);
 		Cell<String> cell = new EntityToXrefValueConverter(characteristicLoadingCache).toCell(value);
 		assertEquals(cell.getKey(), "ch1");
-		assertEquals(cell.getValue(), "ch #1");
+		assertEquals(cell.getValue(), "ch1");
 	}
 
 	@Test

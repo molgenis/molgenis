@@ -215,8 +215,40 @@ a.accordion-toggle:hover,a.accordion-toggle:focus,a.accordion-toggle:active
 	border-style: none;
 }
 
+.select2-result {
+	vertical-align: top;
+	padding: 2px;
+	font-size: 12px;
+	height: 26px;
+	color: #333;
+}
+
+.select2-result:nth-child(even) {
+	background-color: #DDD;
+}
+
+.select2-result:nth-child(odd) {
+	background-color: #FFF;
+}
+
+.feature-filter-dialog .form-horizontal .controls {
+	margin-left: 0px;
+}
+
+.add-ref-query-part, .remove-ref-query-part {
+	margin-left: 10px;
+}
+
+#mref-query-type, .xrefsearch {
+	margin-bottom: 10px;
+}
+
 #filter-dialog-modal form {
 	margin: 0px;	
+}
+
+.modal {
+	width: 1000px;
 }
 
 #filter-wizard-modal .modal-body {

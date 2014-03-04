@@ -100,6 +100,25 @@ public class RestController
 	}
 
 	/**
+	 * Checks if an entity exists.
+	 */
+	@RequestMapping(value = "/{entityName}/exist", method = GET, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public boolean entityExists(@PathVariable("entityName")
+	String entityName)
+	{
+		try
+		{
+			dataService.getRepositoryByEntityName(entityName);
+			return true;
+		}
+		catch (UnknownEntityException e)
+		{
+			return false;
+		}
+	}
+
+	/**
 	 * Gets the metadata for an entity
 	 * 
 	 * Example url: /api/v1/person/meta
@@ -654,6 +673,7 @@ public class RestController
 
 		// TODO non queryable
 		List<QueryRule> queryRules = request.getQ() == null ? Collections.<QueryRule> emptyList() : request.getQ();
+
 		Query q = new QueryImpl(resolveRefIdentifiers(queryRules, meta)).pageSize(request.getNum())
 				.offset(request.getStart()).sort(request.getSort());
 
@@ -756,10 +776,6 @@ public class RestController
 							String.format(BASE_URI + "/%s/%s/%s", meta.getName(), entity.getIdValue(), attrName));
 					entityMap.put(attrName, ref);
 				}
-				else
-				{
-
-				}
 
 			}
 
@@ -791,20 +807,23 @@ public class RestController
 					// Resolve xref, mref fields
 					AttributeMetaData attr = meta.getAttribute(r.getField());
 
-					if (attr.getDataType().getEnumType() == MolgenisFieldTypes.FieldTypeEnum.XREF)
+					if ((attr.getDataType().getEnumType() == MolgenisFieldTypes.FieldTypeEnum.XREF)
+							|| (attr.getDataType().getEnumType() == MolgenisFieldTypes.FieldTypeEnum.MREF))
 					{
 						if (r.getOperator() == Operator.IN)
 						{
-							Iterable<?> values = dataService.findAll(
-									attr.getRefEntity().getName(),
-									new QueryImpl().in(attr.getRefEntity().getIdAttribute().getName(),
-											(Iterable<?>) r.getValue()));
+							Iterable<?> values = dataService.findAll(attr.getRefEntity().getName(), new QueryImpl().in(
+									attr.getRefEntity().getLabelAttribute().getName(), (Iterable<?>) r.getValue()));
 							r.setValue(Lists.newArrayList(values));
 						}
 						else
 						{
-							Object value = dataService.findOne(attr.getRefEntity().getName(),
-									new QueryImpl().eq(attr.getRefEntity().getIdAttribute().getName(), r.getValue()));
+							Object value = dataService
+									.findOne(
+											attr.getRefEntity().getName(),
+											new QueryImpl().eq(attr.getRefEntity().getLabelAttribute().getName(),
+													r.getValue()));
+
 							r.setValue(value);
 						}
 					}

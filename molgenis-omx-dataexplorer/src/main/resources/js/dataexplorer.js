@@ -69,7 +69,8 @@
 		} else {
 			$('#data-table-container').html('No items selected');
 		}
-	}
+	};
+	
 	
 	/**
 	 * @memberOf molgenis.dataexplorer
@@ -300,7 +301,9 @@
 			case 'MREF':
 			case 'XREF':
 				label = $('<label class="control-label" for="' + name + '">' + attribute.label + '</label>');
-				controls.append(createInput(attribute.fieldType, {'name': name, 'id': name}, values ? values[0] : undefined));
+				var input = createInput(attribute.fieldType, {'name': name, 'id': name}, values ? values[0] : undefined);
+				input.xrefsearch({attribute: attribute});
+				controls.append(input);
 				break;
 			case 'COMPOUND' :
 			case 'ENUM':
@@ -429,8 +432,11 @@
 					return attribute.fieldType !== 'COMPOUND' ? attribute : null;
 				});
 				
+				//Save selected entity to cookie, expires after 7 days
+				$.cookie('molgenis.selected.entity.uri', entityUri, { expires: 7 });
 				$(document).trigger('changeAttributeSelection', {'attributes': selectedAttributes});
 				createEntityMetaTree(entityMetaData, selectedAttributes);
+
 			});
 		});
 		
@@ -535,7 +541,7 @@
 		$("#observationset-search").change(function(e) {
 			$(document).trigger('changeEntitySearchQuery', $(this).val());
 		});
-
+	
 		$('#filter-wizard-btn').click(function() {
 			molgenis.dataexplorer.wizard.openFilterWizardModal(selectedEntityMetaData, attributeFilters);
 		});
@@ -558,7 +564,13 @@
 		$('#genomebrowser-filter-button').click(function() {
 			setDallianceFilter();
 		});
-
+		
+		//Read previous selected entity from cookie
+		var uri = $.cookie('molgenis.selected.entity.uri');
+		if (uri && restApi.entityExists(uri)) {
+			$('#dataset-select').val(uri).trigger("liszt:updated");
+		}
+		
 		// fire event handler
 		$('#dataset-select').change();
 	});

@@ -6,6 +6,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
@@ -13,6 +14,7 @@ import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule;
 import org.molgenis.data.Queryable;
 import org.molgenis.data.Writable;
 import org.molgenis.data.support.ConvertingIterable;
@@ -86,6 +88,21 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Qu
 	@Override
 	public Iterable<Entity> findAll(final Query q)
 	{
+		// Set xref/mref search fields on ref identifier
+		for (QueryRule r : q.getRules())
+		{
+			if ((r.getField() != null) && (r.getValue() instanceof Entity))
+			{
+				AttributeMetaData attr = getAttribute(r.getField());
+				if ((attr.getDataType().getEnumType() == MolgenisFieldTypes.FieldTypeEnum.XREF)
+						|| (attr.getDataType().getEnumType() == MolgenisFieldTypes.FieldTypeEnum.MREF))
+				{
+					Object value = ((Entity) r.getValue()).get(attr.getRefEntity().getLabelAttribute().getName());
+					r.setValue(value);
+				}
+			}
+		}
+
 		return new Iterable<Entity>()
 		{
 			@Override

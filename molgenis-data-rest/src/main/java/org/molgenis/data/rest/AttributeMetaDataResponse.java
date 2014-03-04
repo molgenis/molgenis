@@ -26,6 +26,7 @@ public class AttributeMetaDataResponse
 	private final Object defaultValue;
 	private final Boolean labelAttribute;
 	private final Boolean unique;
+	private Boolean lookupAttribute;
 
 	public AttributeMetaDataResponse(String entityParentName, AttributeMetaData attr)
 	{
@@ -140,6 +141,12 @@ public class AttributeMetaDataResponse
 			this.unique = attr.isUnique();
 		}
 		else this.unique = null;
+
+		if (attributesSet == null || attributesSet.contains("lookupAttribute".toLowerCase()))
+		{
+			this.lookupAttribute = attr.isLookupAttribute();
+		}
+		else this.lookupAttribute = null;
 	}
 
 	public String getHref()
@@ -201,4 +208,10 @@ public class AttributeMetaDataResponse
 	{
 		return unique;
 	}
+
+	public Boolean getLookupAttribute()
+	{
+		return lookupAttribute;
+	}
+
 }
