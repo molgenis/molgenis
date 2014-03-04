@@ -4,7 +4,7 @@ public interface MolgenisPermissionService
 {
 	public enum Permission
 	{
-		READ, WRITE;
+		READ, WRITE, COUNT;
 	};
 
 	boolean hasPermissionOnPlugin(String pluginId, Permission permission);
