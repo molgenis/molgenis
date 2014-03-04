@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.jpa.JpaRepository;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
@@ -81,17 +80,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	public List<String> getEntityClassIds()
 	{
-		List<String> jpaEntityNames = Lists.newArrayList();
-
-		for (String entityName : dataService.getEntityNames())
-		{
-			if (dataService.getRepositoryByEntityName(entityName).getUrl().startsWith(JpaRepository.BASE_URL))
-			{
-				jpaEntityNames.add(entityName);
-			}
-		}
-
-		return jpaEntityNames;
+		return Lists.newArrayList(dataService.getEntityNames());
 	}
 
 	@Override
