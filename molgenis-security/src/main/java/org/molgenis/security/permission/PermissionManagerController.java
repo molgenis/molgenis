@@ -111,6 +111,7 @@ public class PermissionManagerController extends MolgenisPluginController
 			String param = "radio-" + plugin.getId();
 			String value = webRequest.getParameter(param);
 			if (value.equalsIgnoreCase(MolgenisPermissionService.Permission.READ.toString())
+					|| value.equalsIgnoreCase(MolgenisPermissionService.Permission.COUNT.toString())
 					|| value.equalsIgnoreCase(MolgenisPermissionService.Permission.WRITE.toString()))
 			{
 				GroupAuthority authority = new GroupAuthority();
@@ -133,6 +134,7 @@ public class PermissionManagerController extends MolgenisPluginController
 			String param = "radio-" + entityClassId;
 			String value = webRequest.getParameter(param);
 			if (value.equalsIgnoreCase(MolgenisPermissionService.Permission.READ.toString())
+					|| value.equalsIgnoreCase(MolgenisPermissionService.Permission.COUNT.toString())
 					|| value.equalsIgnoreCase(MolgenisPermissionService.Permission.WRITE.toString()))
 			{
 				GroupAuthority authority = new GroupAuthority();
@@ -155,6 +157,7 @@ public class PermissionManagerController extends MolgenisPluginController
 			String param = "radio-" + plugin.getId();
 			String value = webRequest.getParameter(param);
 			if (value.equalsIgnoreCase(MolgenisPermissionService.Permission.READ.toString())
+					|| value.equalsIgnoreCase(MolgenisPermissionService.Permission.COUNT.toString())
 					|| value.equalsIgnoreCase(MolgenisPermissionService.Permission.WRITE.toString()))
 			{
 				UserAuthority authority = new UserAuthority();
@@ -177,6 +180,7 @@ public class PermissionManagerController extends MolgenisPluginController
 			String param = "radio-" + entityClassId;
 			String value = webRequest.getParameter(param);
 			if (value.equalsIgnoreCase(MolgenisPermissionService.Permission.READ.toString())
+					|| value.equalsIgnoreCase(MolgenisPermissionService.Permission.COUNT.toString())
 					|| value.equalsIgnoreCase(MolgenisPermissionService.Permission.WRITE.toString()))
 			{
 				UserAuthority authority = new UserAuthority();
