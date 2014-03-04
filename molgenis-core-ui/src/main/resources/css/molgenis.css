@@ -60,10 +60,24 @@ body{
 	margin:0 auto;
 }
 
+.modal-backdrop {
+	opacity: .3;
+}
+
 .modal-backdrop.fade.in {
 	opacity: .3;
 }
 
 .alert {
 	margin-bottom: 10px;
+}
+
+.modal.medium {
+    width: 50%; /* respsonsive width */
+    margin-left:-25%; /* width/2) */ 
+}
+
+.modal.large {
+    width: 80%; /* respsonsive width */
+    margin-left:-40%; /* width/2) */ 
 }
