@@ -341,7 +341,6 @@
 			        getCompletions: function(editor, session, pos, prefix, callback) {
 			            if (prefix.length === 0) { callback(null, []); return }
 			            searchApi.search(searchFeatureByName('protocolTree-' + molgenis.hrefToId(mappedDataSet.href), prefix), function(searchResponse){
-			            	console.log(searchResponse);
 		                    callback(null, searchResponse.searchHits.map(function(hit) {
 		                    	var map = hit.columnValueMap;
 		                        return {name: '$(\'' + map.name + '\')', value: '$(\'' + map.name + '\')', score: map.score, meta: mappedDataSet.name};
@@ -512,7 +511,11 @@
 				retrieveAllInfoForFeature(row, featureEntity);
 			});
 		});
-		$('<div />').append(tableForSuggestedMappings).addClass('well').css(style == undefined || style == null ? {} : style).appendTo(parentDiv);
+		if(style == undefined || style == null){
+			tableForSuggestedMappings.appendTo(parentDiv);
+		}else{
+			$('<div />').append(tableForSuggestedMappings).addClass('well').css(style).appendTo(parentDiv);
+		}
 		
 		function retrieveAllInfoForFeature(clickedRow, featureEntity){
 			var detailInfoTable = $('<table class="table table-bordered"></table>');

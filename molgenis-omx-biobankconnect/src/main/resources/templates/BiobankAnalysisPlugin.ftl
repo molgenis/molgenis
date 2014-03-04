@@ -5,7 +5,7 @@
 <@header css js/>
 <form id="evaluationForm" class="form-horizontal" method="GET">
 	<div class="row-fluid">
-		<div class="span12">
+		<div id="summary-table-div"  class="span12">
 			<div class="row-fluid">
 				<div class="span12 well">
 						<div class="span5">
@@ -38,19 +38,24 @@
 				</div>
 			</div>
 			<div class="row-fluid">
-				<div id="summary-table-div" class="span12 well">
-					<div><strong>Select a source dataset</strong></div></br>
-					<div>
-						<select id="sourceDataSets" name="sourceDataSets">
-							<#if sourceDataSets??>
-								<#list sourceDataSets as dataset>
-									<option value="${dataset.id?c}"<#if dataset_index == 0> selected</#if>>${dataset.name}</option>
-								</#list>
-							</#if>
-						</select>
-						<button id="selectSourceDataSet" class="btn btn-primary" type="button">Select</button>
+				<div class="span12 well">
+					<div class="row-fluid">
+						<div><strong>Select a source dataset</strong></div></br>
 					</div>
-					</br></br>
+					<div class="row-fluid">
+						<div class="span2">
+							<select id="sourceDataSets" name="sourceDataSets">
+								<#if sourceDataSets??>
+									<#list sourceDataSets as dataset>
+										<option value="${dataset.id?c}"<#if dataset_index == 0> selected</#if>>${dataset.name}</option>
+									</#list>
+								</#if>
+							</select>
+						</div>
+						<div class="span2">
+							<button id="selectSourceDataSet" class="btn btn-primary" type="button">Select</button>
+						</div>
+					</div></br>
 				</div>
 			</div>
 		</div>

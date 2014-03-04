@@ -21,7 +21,6 @@ import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.observ.value.IntValue;
 import org.molgenis.omx.observ.value.StringValue;
-import org.molgenis.search.SearchService;
 import org.molgenis.security.user.UserAccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -46,19 +45,16 @@ public class BiobankAnalysisController extends MolgenisPluginController
 	private static final String ANALYSIS_OBSERVATION_IDENTIFIER = "analysis_observation";
 	private static final String ANALYSIS_SOURCEDATA_IDENTIFIER = "analysis_sourcedata";
 
-	private final SearchService searchService;
 	private final DataService dataService;
 
 	@Autowired
 	private UserAccountService userAccountService;
 
 	@Autowired
-	public BiobankAnalysisController(SearchService searchService, DataService dataService)
+	public BiobankAnalysisController(DataService dataService)
 	{
 		super(URI);
-		if (searchService == null) throw new IllegalArgumentException("SearchService is null");
 		if (dataService == null) throw new IllegalArgumentException("Dataservice is null");
-		this.searchService = searchService;
 		this.dataService = dataService;
 	}
 

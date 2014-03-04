@@ -30,6 +30,9 @@
 					parentDiv.append('No datasets are selected for this analysis and please choose a dataset from pulldown!')
 					return;
 				}
+				
+				
+				
 				var table = $('<table />').attr('class', 'table table-bordered');
 				var tableHeader = $('<thead><th style="width:20%;">Edit</th><th style="width:30%;">DataSet</th><th>Script</th><th>Status</th></thead>');
 				var tableBody = $('<tbody />');
@@ -81,6 +84,10 @@
 		});
 	};
 	
+	function defineResult(dataSet){
+		
+	}
+	
 	function retrieveAllFeatures(dataSet, editorContainer){
 		var request = {
 			documentType : 'protocolTree-' + molgenis.hrefToId(dataSet.href),
@@ -93,7 +100,6 @@
 			}
 		};
 		searchApi.search(request, function(searchResponse){
-			console.log($('body').height());
 			var catalogDiv = $('<div />').addClass('span6 well').css({
 				'overflow-y' : 'scroll',
 				'height' : editorHeight
@@ -109,11 +115,14 @@
 	}
 	
 	function editorHeader(dataSet, header){
-		var layoutDiv = $('<div />').addClass('span12');
-		var divRow = $('<div />').addClass('row-fluid').appendTo(layoutDiv);
-		$('<div />').addClass('span6').append('Define analysis script for : <strong>' + dataSet.name + '</strong>').appendTo(divRow);
-		$('<div />').addClass('span6').append('<strong>Data items</strong>').appendTo(divRow);
-		layoutDiv.appendTo(header);
+		var layoutDiv = $('<div />').addClass('span12').appendTo(header);
+		var defineResultDiv = $('<div />').addClass('row-fluid').appendTo(layoutDiv);
+		var featureResultDiv = $('<div />').addClass('offset3 span6 well').appendTo(defineResultDiv);
+		featureResultDiv.append('<div />').append('<strong>Define the result</strong>');
+		
+		var generalInfoDiv = $('<div />').addClass('row-fluid').appendTo(layoutDiv);
+		$('<div />').addClass('span6').append('Define analysis script for : <strong>' + dataSet.name + '</strong>').appendTo(generalInfoDiv);
+		$('<div />').addClass('span6').append('<strong>Data items</strong>').appendTo(generalInfoDiv);
 	}
 	
 	function editorFooter(eachAnalysis, editor, footer, container){
@@ -149,7 +158,6 @@
 	        getCompletions: function(editor, session, pos, prefix, callback) {
 	            if (prefix.length === 0) { callback(null, []); return }
 	            searchApi.search(searchFeatureByName('protocolTree-' + molgenis.hrefToId(dataSet.href), prefix), function(searchResponse){
-	            	console.log(searchResponse);
                     callback(null, searchResponse.searchHits.map(function(hit) {
                     	var map = hit.columnValueMap;
                         return {name: '$(\'' + map.name + '\')', value: '$(\'' + map.name + '\')', score: map.score, meta: dataSet.name};
@@ -169,7 +177,6 @@
 			data : JSON.stringify(analysisRequest),
 			contentType : 'application/json',
 			success : function(data, textStatus, request){	
-				console.log(data);
 				molgenis.BiobankAnalysis.prototype.retrieveAnalyses(analysisRequest, container);
 				editorContainer.remove();
 				container.show();
