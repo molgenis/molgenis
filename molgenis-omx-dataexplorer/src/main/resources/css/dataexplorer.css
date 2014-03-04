@@ -262,4 +262,13 @@ input[type=number] {
 
 .feature-filter-dialog .form-horizontal .controls {
 	margin-left: 0px;
-} 
+}
+
+.add-ref-query-part, .remove-ref-query-part {
+	margin-left: 10px;
+}
+
+#mref-query-type, .xrefsearch {
+	margin-bottom: 10px;
+}
+
