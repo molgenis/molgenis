@@ -217,6 +217,10 @@ function htmlEscape(text) {
  * Is used by the dataexplorer and the forms plugin
  */
 function formatTableCellValue(value, dataType) {
+	if (!value) {
+		return '';
+	}
+	
 	if (dataType.toLowerCase() == "hyperlink") {
 		value = '<a target="_blank" href="' + value + '">' + htmlEscape(value)
 				+ '</a>';
@@ -320,7 +324,6 @@ function createInput(dataType, attrs, val, lbl) {
 		case 'TEXT':
 			return createBasicInput('text', attrs, val);
 		case 'MREF':
-		case 'XREF':
 		case 'XREF':
 			var container = $('<div class="xrefsearch" />')
 			container.append(createBasicInput('hidden', attrs, val));
