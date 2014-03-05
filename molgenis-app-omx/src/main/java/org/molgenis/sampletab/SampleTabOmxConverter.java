@@ -208,7 +208,7 @@ public class SampleTabOmxConverter
 	private List<String> collectColumns(Repository repo) throws IOException
 	{
 		List<String> listOfFeatures = new ArrayList<String>();
-		for (AttributeMetaData attr : repo.getAttributes())
+		for (AttributeMetaData attr : repo.getEntityMetaData().getAttributes())
 		{
 			listOfFeatures.add(attr.getName());
 		}

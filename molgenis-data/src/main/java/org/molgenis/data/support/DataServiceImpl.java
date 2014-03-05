@@ -14,7 +14,7 @@ import java.util.Set;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Queryable;
@@ -62,6 +62,14 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
+	public EntityMetaData getEntityMetaData(String entityName)
+	{
+		Repository repository = repositories.get(entityName.toLowerCase());
+		if (repository == null) throw new UnknownEntityException("Unknown entity [" + entityName + "]");
+		return repository.getEntityMetaData();
+	}
+
+	@Override
 	public Iterable<String> getEntityNames()
 	{
 		return Iterables.filter(repositoryNames, new Predicate<String>()
@@ -78,16 +86,6 @@ public class DataServiceImpl implements DataService
 	public Repository getRepositoryByEntityName(String entityName)
 	{
 		Repository repository = repositories.get(entityName.toLowerCase());
-
-		String role;
-		if (repository instanceof CrudRepository) role = "ROLE_ENTITY_WRITE_" + entityName.toUpperCase();
-		else role = "ROLE_ENTITY_READ_" + entityName.toUpperCase();
-
-		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_" + role + "_" + entityName.toUpperCase()))
-		{
-			throw new MolgenisDataAccessException("No read permission on " + entityName);
-		}
-
 		if (repository == null) throw new UnknownEntityException("Unknown entity [" + entityName + "]");
 		else return repository;
 	}
@@ -97,14 +95,9 @@ public class DataServiceImpl implements DataService
 	{
 		for (Map.Entry<String, Repository> entry : repositories.entrySet())
 		{
-			String entityName = entry.getKey();
 			Repository repository = entry.getValue();
 			if (repository.getUrl().equalsIgnoreCase(url))
 			{
-				if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_COUNT_" + entityName.toUpperCase()))
-				{
-					throw new MolgenisDataAccessException("No read permission on " + entityName);
-				}
 				return repository;
 			}
 		}
@@ -115,50 +108,30 @@ public class DataServiceImpl implements DataService
 	@Override
 	public long count(String entityName, Query q)
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_COUNT_" + entityName.toUpperCase()))
-		{
-			throw new MolgenisDataAccessException("No read permission on " + entityName);
-		}
 		return getQueryable(entityName).count(q);
 	}
 
 	@Override
 	public Iterable<Entity> findAll(String entityName)
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_READ_" + entityName.toUpperCase()))
-		{
-			throw new MolgenisDataAccessException("No read permission on " + entityName);
-		}
 		return findAll(entityName, new QueryImpl());
 	}
 
 	@Override
 	public Iterable<Entity> findAll(String entityName, Query q)
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_READ_" + entityName.toUpperCase()))
-		{
-			throw new MolgenisDataAccessException("No read permission on " + entityName);
-		}
 		return getQueryable(entityName).findAll(q);
 	}
 
 	@Override
 	public Iterable<Entity> findAll(String entityName, Iterable<Integer> ids)
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_READ_" + entityName.toUpperCase()))
-		{
-			throw new MolgenisDataAccessException("No read permission on " + entityName);
-		}
 		return getQueryable(entityName).findAll(ids);
 	}
 
 	@Override
 	public List<Entity> findAllAsList(String entityName, Query q)
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_READ_" + entityName.toUpperCase()))
-		{
-			throw new MolgenisDataAccessException("No read permission on " + entityName);
-		}
 		Iterable<Entity> iterable = findAll(entityName, q);
 		return Lists.newArrayList(iterable);
 	}
@@ -166,60 +139,36 @@ public class DataServiceImpl implements DataService
 	@Override
 	public Entity findOne(String entityName, Integer id)
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_READ_" + entityName.toUpperCase()))
-		{
-			throw new MolgenisDataAccessException("No read permission on " + entityName);
-		}
 		return getQueryable(entityName).findOne(id);
 	}
 
 	@Override
 	public Entity findOne(String entityName, Query q)
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_READ_" + entityName.toUpperCase()))
-		{
-			throw new MolgenisDataAccessException("No read permission on " + entityName);
-		}
 		return getQueryable(entityName).findOne(q);
 	}
 
 	@Override
 	public Integer add(String entityName, Entity entity)
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_WRITE_" + entityName.toUpperCase()))
-		{
-			throw new MolgenisDataAccessException("No read permission on " + entityName);
-		}
 		return getWritable(entityName).add(entity);
 	}
 
 	@Override
 	public void add(String entityName, Iterable<? extends Entity> entities)
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_WRITE_" + entityName.toUpperCase()))
-		{
-			throw new MolgenisDataAccessException("No read permission on " + entityName);
-		}
 		getWritable(entityName).add(entities);
 	}
 
 	@Override
 	public void update(String entityName, Entity entity)
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_WRITE_" + entityName.toUpperCase()))
-		{
-			throw new MolgenisDataAccessException("No read permission on " + entityName);
-		}
 		getUpdateable(entityName).update(entity);
 	}
 
 	@Override
 	public void update(String entityName, Iterable<? extends Entity> entities)
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_WRITE_" + entityName.toUpperCase()))
-		{
-			throw new MolgenisDataAccessException("No read permission on " + entityName);
-		}
 		Updateable updateable = getUpdateable(entityName);
 		updateable.update(entities);
 	}
@@ -227,10 +176,6 @@ public class DataServiceImpl implements DataService
 	@Override
 	public void delete(String entityName, Entity entity)
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_WRITE_" + entityName.toUpperCase()))
-		{
-			throw new MolgenisDataAccessException("No read permission on " + entityName);
-		}
 		Updateable updateable = getUpdateable(entityName);
 		updateable.delete(entity);
 	}
@@ -238,20 +183,12 @@ public class DataServiceImpl implements DataService
 	@Override
 	public void delete(String entityName, Iterable<? extends Entity> entities)
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_WRITE_" + entityName.toUpperCase()))
-		{
-			throw new MolgenisDataAccessException("No read permission on " + entityName);
-		}
 		getUpdateable(entityName).delete(entities);
 	}
 
 	@Override
 	public void delete(String entityName, int id)
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_WRITE_" + entityName.toUpperCase()))
-		{
-			throw new MolgenisDataAccessException("No read permission on " + entityName);
-		}
 		getUpdateable(entityName).deleteById(id);
 	}
 
@@ -291,11 +228,6 @@ public class DataServiceImpl implements DataService
 	@Override
 	public CrudRepository getCrudRepository(String entityName)
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_WRITE_" + entityName.toUpperCase()))
-		{
-			throw new MolgenisDataAccessException("No read permission on " + entityName);
-		}
-
 		Repository repository = getRepositoryByEntityName(entityName);
 		if (repository instanceof CrudRepository)
 		{
@@ -321,50 +253,30 @@ public class DataServiceImpl implements DataService
 	@Override
 	public <E extends Entity> Iterable<E> findAll(String entityName, Query q, Class<E> clazz)
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_READ_" + entityName.toUpperCase()))
-		{
-			throw new MolgenisDataAccessException("No read permission on " + entityName);
-		}
 		return getQueryable(entityName).findAll(q, clazz);
 	}
 
 	@Override
 	public <E extends Entity> Iterable<E> findAll(String entityName, Iterable<Integer> ids, Class<E> clazz)
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_READ_" + entityName.toUpperCase()))
-		{
-			throw new MolgenisDataAccessException("No read permission on " + entityName);
-		}
 		return getQueryable(entityName).findAll(ids, clazz);
 	}
 
 	@Override
 	public <E extends Entity> E findOne(String entityName, Integer id, Class<E> clazz)
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_READ_" + entityName.toUpperCase()))
-		{
-			throw new MolgenisDataAccessException("No read permission on " + entityName);
-		}
 		return getQueryable(entityName).findOne(id, clazz);
 	}
 
 	@Override
 	public <E extends Entity> E findOne(String entityName, Query q, Class<E> clazz)
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_READ_" + entityName.toUpperCase()))
-		{
-			throw new MolgenisDataAccessException("No read permission on " + entityName);
-		}
 		return getQueryable(entityName).findOne(q, clazz);
 	}
 
 	@Override
 	public <E extends Entity> Iterable<E> findAll(String entityName, Class<E> clazz)
 	{
-		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_READ_" + entityName.toUpperCase()))
-		{
-			throw new MolgenisDataAccessException("No read permission on " + entityName);
-		}
 		return findAll(entityName, new QueryImpl(), clazz);
 	}
 

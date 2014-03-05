@@ -80,8 +80,7 @@ public class EvaluationController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(@RequestParam(value = "selectedDataSet", required = false)
-	String selectedDataSetId, Model model)
+	public String init(@RequestParam(value = "selectedDataSet", required = false) String selectedDataSetId, Model model)
 	{
 		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl(), DataSet.class);
 
@@ -113,9 +112,9 @@ public class EvaluationController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/verify", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
-	public void verify(@RequestParam(value = "selectedDataSet", required = false)
-	String selectedDataSetId, @RequestParam
-	Part file, HttpServletResponse response, Model model) throws IOException, InvalidFormatException
+	public void verify(@RequestParam(value = "selectedDataSet", required = false) String selectedDataSetId,
+			@RequestParam Part file, HttpServletResponse response, Model model) throws IOException,
+			InvalidFormatException
 	{
 		ExcelWriter excelWriterRanks = null;
 
@@ -140,7 +139,7 @@ public class EvaluationController extends MolgenisPluginController
 				Repository inputSheet = repositorySource.getRepository("Sheet1");
 
 				List<String> biobankNames = new ArrayList<String>();
-				for (AttributeMetaData attr : inputSheet.getAttributes())
+				for (AttributeMetaData attr : inputSheet.getEntityMetaData().getAttributes())
 				{
 					biobankNames.add(attr.getName());
 				}

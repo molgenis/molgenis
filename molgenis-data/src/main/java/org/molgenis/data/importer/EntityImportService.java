@@ -12,6 +12,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.Updateable;
@@ -81,7 +82,9 @@ public class EntityImportService
 			entitiesToImport.add(new MapEntity(entity));
 		}
 
-		String updateKey = repo.getLabelAttribute().getName();
+		EntityMetaData entityMetaData = repo.getEntityMetaData();
+
+		String updateKey = entityMetaData.getLabelAttribute().getName();
 		List<Entity> batch = Lists.newArrayListWithCapacity(BATCH_SIZE);
 		List<Entity> unresolved = Lists.newArrayList();
 
@@ -93,7 +96,7 @@ public class EntityImportService
 
 			rownr++;
 			boolean resolved = true;
-			for (AttributeMetaData attr : repo.getAttributes())
+			for (AttributeMetaData attr : entityMetaData.getAttributes())
 			{
 				if ((attr.getDataType().getEnumType() == MREF) || (attr.getDataType().getEnumType() == XREF))
 				{
@@ -104,7 +107,7 @@ public class EntityImportService
 					// can stop.
 					if (!attrResolved && !attr.getRefEntity().getName().equalsIgnoreCase(entityName))
 					{
-						throw new MolgenisValidationException(Sets.newHashSet(createViolation(attr, repo,
+						throw new MolgenisValidationException(Sets.newHashSet(createViolation(attr, entityMetaData,
 								entityToImport, rownr)));
 					}
 				}
@@ -145,7 +148,7 @@ public class EntityImportService
 					Entity entityToImport = it.next();
 
 					boolean resolved = true;
-					for (AttributeMetaData attr : repo.getAttributes())
+					for (AttributeMetaData attr : entityMetaData.getAttributes())
 					{
 						if (((attr.getDataType().getEnumType() == MREF) || (attr.getDataType().getEnumType() == XREF))
 								&& attr.getRefEntity().getName().equalsIgnoreCase(entityName))
@@ -176,14 +179,14 @@ public class EntityImportService
 			{
 				// Find the attribute that could not be resolved (we could have multiple ref attributes that point to
 				// this entity)
-				for (AttributeMetaData attr : repo.getAttributes())
+				for (AttributeMetaData attr : entityMetaData.getAttributes())
 				{
 					if (((attr.getDataType().getEnumType() == MREF) || (attr.getDataType().getEnumType() == XREF))
 							&& attr.getRefEntity().getName().equalsIgnoreCase(entityName)
 							&& !resolveEntityRef(entityName, entity, attr))
 					{
-						long rowNr = getRowNr(entity, source, repo.getLabelAttribute().getName());
-						violations.add(createViolation(attr, repo, entity, rowNr));
+						long rowNr = getRowNr(entity, source, entityMetaData.getLabelAttribute().getName());
+						violations.add(createViolation(attr, entityMetaData, entity, rowNr));
 					}
 				}
 
@@ -300,7 +303,8 @@ public class EntityImportService
 		return keyValues.isEmpty();
 	}
 
-	private ConstraintViolation createViolation(AttributeMetaData attr, Repository repo, Entity entity, long rownr)
+	private ConstraintViolation createViolation(AttributeMetaData attr, EntityMetaData entityMetaData, Entity entity,
+			long rownr)
 	{
 		String foreignAttr = attr.getRefEntity().getLabelAttribute().getName();
 		String key = attr.getName() + "_" + foreignAttr;
@@ -308,9 +312,9 @@ public class EntityImportService
 
 		String message = String.format(
 				"Could not resolve attribute '%s' with value '%s' of entity '%s'. This is a reference to entity '%s'.",
-				attr.getName(), value, repo.getName(), attr.getRefEntity().getName());
+				attr.getName(), value, entityMetaData.getName(), attr.getRefEntity().getName());
 
-		return new ConstraintViolation(message, value, entity, attr, repo, rownr);
+		return new ConstraintViolation(message, value, entity, attr, entityMetaData, rownr);
 	}
 
 	private class CacheKey
