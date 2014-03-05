@@ -11,7 +11,7 @@
 
 package ${package};
 
-import static org.molgenis.security.SecurityUtils.currentUserHasRole;
+import static org.molgenis.security.core.utils.SecurityUtils.currentUserHasRole;
 
 import java.util.Iterator;
 import java.util.List;

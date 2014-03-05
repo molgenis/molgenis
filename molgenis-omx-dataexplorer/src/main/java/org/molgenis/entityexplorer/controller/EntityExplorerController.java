@@ -14,11 +14,11 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
-import org.molgenis.framework.server.MolgenisPermissionService;
-import org.molgenis.framework.server.MolgenisPermissionService.Permission;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.observ.Characteristic;
+import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.Permission;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -89,9 +89,9 @@ public class EntityExplorerController extends MolgenisPluginController
 		}
 
 		// select initial entity
-        Class<? extends Characteristic> selectedClazz;
-        selectedClazz = clazzMap.get(entity);
-        if (selectedClazz == null)
+		Class<? extends Characteristic> selectedClazz;
+		selectedClazz = clazzMap.get(entity);
+		if (selectedClazz == null)
 		{
 			if (!clazzMap.isEmpty()) selectedClazz = clazzMap.entrySet().iterator().next().getValue();
 		}

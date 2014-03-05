@@ -7,7 +7,9 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import org.molgenis.data.DataService;
-import org.molgenis.framework.server.MolgenisPermissionService;
+import org.molgenis.security.core.MolgenisPasswordEncoder;
+import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.MolgenisPermissionServiceImpl;
 import org.molgenis.security.user.MolgenisUserDetailsChecker;
 import org.molgenis.security.user.MolgenisUserDetailsService;

@@ -1,4 +1,4 @@
-package org.molgenis.security;
+package org.molgenis.security.core;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;

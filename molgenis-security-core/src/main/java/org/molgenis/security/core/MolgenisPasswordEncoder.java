@@ -1,4 +1,4 @@
-package org.molgenis.security;
+package org.molgenis.security.core;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;

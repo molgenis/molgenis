@@ -564,6 +564,7 @@
 		<module>molgenis-search</module>
 		<module>molgenis-search-elasticsearch</module>
 		<module>molgenis-security</module>
+		<module>molgenis-security-core</module>
 		<module>molgenis-data-annotators</module>
 		<module>molgenis-data-excel</module>
 		<module>molgenis-data-csv</module>
@@ -575,6 +576,5 @@
 		<module>molgenis-r</module>
 		<module>molgenis-charts</module>
 		<module>molgenis-js</module>
-		
 	</modules>
 </project>

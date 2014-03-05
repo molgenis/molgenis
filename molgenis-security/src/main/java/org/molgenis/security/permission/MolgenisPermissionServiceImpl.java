@@ -1,12 +1,13 @@
 package org.molgenis.security.permission;
 
-import static org.molgenis.security.SecurityUtils.AUTHORITY_ENTITY_PREFIX;
-import static org.molgenis.security.SecurityUtils.AUTHORITY_PLUGIN_PREFIX;
-import static org.molgenis.security.SecurityUtils.AUTHORITY_SU;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ENTITY_PREFIX;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_PLUGIN_PREFIX;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_SU;
 
 import java.util.Collection;
 
-import org.molgenis.framework.server.MolgenisPermissionService;
+import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.Permission;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;

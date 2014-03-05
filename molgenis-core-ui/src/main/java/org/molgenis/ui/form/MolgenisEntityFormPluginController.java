@@ -13,10 +13,10 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.server.MolgenisPermissionService;
-import org.molgenis.framework.server.MolgenisPermissionService.Permission;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.model.MolgenisModelException;
+import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.Permission;
 import org.molgenis.ui.MolgenisUiUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapperImpl;
@@ -56,9 +56,9 @@ public class MolgenisEntityFormPluginController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = URI + "{entityName}")
-	public String list(@PathVariable("entityName")
-	String entityName, @RequestParam(value = "subForms", required = false)
-	String[] subForms, Model model) throws MolgenisModelException
+	public String list(@PathVariable("entityName") String entityName,
+			@RequestParam(value = "subForms", required = false) String[] subForms, Model model)
+			throws MolgenisModelException
 	{
 		model.addAttribute("current_uri", MolgenisUiUtils.getCurrentUri());
 
@@ -111,10 +111,8 @@ public class MolgenisEntityFormPluginController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = URI + "{entityName}/{id}")
-	public String edit(@PathVariable("entityName")
-	String entityName, @PathVariable("id")
-	Integer id, @RequestParam(value = "back", required = false)
-	String back, Model model)
+	public String edit(@PathVariable("entityName") String entityName, @PathVariable("id") Integer id,
+			@RequestParam(value = "back", required = false) String back, Model model)
 	{
 		if (StringUtils.isNotBlank(back))
 		{
@@ -130,9 +128,8 @@ public class MolgenisEntityFormPluginController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = URI + "{entityName}/create")
-	public String create(@PathVariable("entityName")
-	String entityName, HttpServletRequest request, @RequestParam(value = "back", required = false)
-	String back, Model model) throws Exception
+	public String create(@PathVariable("entityName") String entityName, HttpServletRequest request,
+			@RequestParam(value = "back", required = false) String back, Model model) throws Exception
 	{
 		if (StringUtils.isNotBlank(back))
 		{
