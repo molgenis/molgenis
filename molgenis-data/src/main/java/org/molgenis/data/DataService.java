@@ -25,6 +25,9 @@ public interface DataService extends RepositoryCollection
 	/**
 	 * Add all repositories of a RepositorySource
 	 * 
+	 * @throws MolgenisDataException
+	 *             if entity name of a repository is already registered
+	 * 
 	 * @param repositorySource
 	 */
 	void addRepositories(RepositorySource repositorySource);
@@ -32,7 +35,9 @@ public interface DataService extends RepositoryCollection
 	/**
 	 * return number of entities matched by query
 	 * 
-	 * throws MolgenisDataException if the repository of the entity isn't a Queryable
+	 * @throws MolgenisDataException
+	 *             if the repository of the entity isn't a Queryable
+	 * @throws MolgenisDataAccessException
 	 * 
 	 * @param entityName
 	 *            entity name (case insensitive)
@@ -42,7 +47,9 @@ public interface DataService extends RepositoryCollection
 	/**
 	 * Find all entities of the given type. Returns empty Iterable if no matches.
 	 * 
-	 * throws MolgenisDataException if the repository of the entity isn't a Queryable
+	 * @throws MolgenisDataException
+	 *             if the repository of the entity isn't a Queryable
+	 * @throws MolgenisDataAccessException
 	 * 
 	 * @param entityName
 	 *            entity name (case insensitive)
@@ -54,6 +61,8 @@ public interface DataService extends RepositoryCollection
 	 * 
 	 * throws MolgenisDataException if the repository of the entity isn't a Queryable
 	 * 
+	 * @throws MolgenisDataAccessException
+	 * 
 	 * @param entityName
 	 *            entity name (case insensitive)
 	 */
@@ -61,6 +70,8 @@ public interface DataService extends RepositoryCollection
 
 	/**
 	 * Find entities based on id. Returns empty Iterable if no matches.
+	 * 
+	 * @throws MolgenisDataAccessException
 	 * 
 	 * @param entityName
 	 *            entity name (case insensitive)
@@ -85,6 +96,8 @@ public interface DataService extends RepositoryCollection
 	 * 
 	 * throws MolgenisDataException if the repository of the entity isn't a Queryable
 	 * 
+	 * @throws MolgenisDataAccessException
+	 * 
 	 * @param entityName
 	 *            entity name (case insensitive)
 	 */
@@ -93,7 +106,9 @@ public interface DataService extends RepositoryCollection
 	/**
 	 * Find one entity based on id. Returns null if not exists
 	 * 
-	 * throws MolgenisDataException if the repository of the entity isn't a Queryable
+	 * @throws MolgenisDataException
+	 *             if the repository of the entity isn't a Queryable
+	 * @throws MolgenisDataAccessException
 	 * 
 	 * @param entityName
 	 *            entity name (case insensitive)
@@ -103,7 +118,9 @@ public interface DataService extends RepositoryCollection
 	/**
 	 * Adds an entity to it's repository
 	 * 
-	 * throws MolgenisDataException if the repository of the entity isn't a Writable
+	 * @throws MolgenisDataException
+	 *             if the repository of the entity isn't a Writable
+	 * @throws MolgenisDataAccessException
 	 * 
 	 * @param entityName
 	 *            entity name (case insensitive)
@@ -112,6 +129,7 @@ public interface DataService extends RepositoryCollection
 	Integer add(String entityName, Entity entity);
 
 	/**
+	 * @throws MolgenisDataAccessException
 	 * 
 	 * @param entityName
 	 *            entity name (case insensitive)
@@ -122,7 +140,9 @@ public interface DataService extends RepositoryCollection
 	/**
 	 * Updates an entity
 	 * 
-	 * throws MolgenisDataException if the repository of the entity isn't an Updateable
+	 * @throws MolgenisDataException
+	 *             if the repository of the entity isn't an Updateable
+	 * @throws MolgenisDataAccessException
 	 * 
 	 * @param entityName
 	 *            entity name (case insensitive)
@@ -130,6 +150,8 @@ public interface DataService extends RepositoryCollection
 	void update(String entityName, Entity entity);
 
 	/**
+	 * 
+	 * @throws MolgenisDataAccessException
 	 * 
 	 * @param entityName
 	 *            entity name (case insensitive)
@@ -140,7 +162,9 @@ public interface DataService extends RepositoryCollection
 	/**
 	 * Deletes an entity
 	 * 
-	 * throws MolgenisDataException if the repository of the entity isn't an Updateable
+	 * @throws MolgenisDataException
+	 *             if the repository of the entity isn't an Updateable
+	 * @throws MolgenisDataAccessException
 	 * 
 	 * @param entityName
 	 *            entity name (case insensitive)
@@ -150,7 +174,9 @@ public interface DataService extends RepositoryCollection
 	/**
 	 * Deletes entities
 	 * 
-	 * throws MolgenisDataException if the repository of the entity isn't an Updateable
+	 * @throws MolgenisDataException
+	 *             if the repository of the entity isn't an Updateable
+	 * @throws MolgenisDataAccessException
 	 * 
 	 * @param entityName
 	 *            entity name (case insensitive)
@@ -159,6 +185,8 @@ public interface DataService extends RepositoryCollection
 
 	/**
 	 * Deletes an entity by it's id
+	 * 
+	 * @throws MolgenisDataAccessException
 	 * 
 	 * @param entityName
 	 *            entity name (case insensitive)
@@ -169,9 +197,12 @@ public interface DataService extends RepositoryCollection
 	/**
 	 * Get a CrudRepository by entity name
 	 * 
-	 * throws UnknownEntityException when the repository can not be found
+	 * @throws UnknownEntityException
+	 *             when the repository can not be found
 	 * 
-	 * throws MolgenisDataException if the repository doesn't implement CrudRepository
+	 * @throws MolgenisDataException
+	 *             if the repository doesn't implement CrudRepository
+	 * @throws MolgenisDataAccessException
 	 * 
 	 * @param entityName
 	 *            entity name (case insensitive)
@@ -181,12 +212,16 @@ public interface DataService extends RepositoryCollection
 	/**
 	 * Returns all entity classes. Returns empty Iterable if no entity classes.
 	 * 
+	 * @throws MolgenisDataAccessException
+	 * 
 	 * @return
 	 */
 	Iterable<Class<? extends Entity>> getEntityClasses();
 
 	/**
 	 * type-safe find entities that match a query
+	 * 
+	 * @throws MolgenisDataAccessException
 	 * 
 	 * @param entityName
 	 *            entity name (case insensitive)
@@ -196,6 +231,8 @@ public interface DataService extends RepositoryCollection
 	/**
 	 * type-safe find all entities
 	 * 
+	 * @throws MolgenisDataAccessException
+	 * 
 	 * @param entityName
 	 *            entity name (case insensitive)
 	 */
@@ -204,12 +241,16 @@ public interface DataService extends RepositoryCollection
 	/**
 	 * type-safe find entities that match a stream of ids
 	 * 
+	 * @throws MolgenisDataAccessException
+	 * 
 	 * @param entityName
 	 *            entity name (case insensitive)
 	 */
 	<E extends Entity> Iterable<E> findAll(String entityName, Iterable<Integer> ids, Class<E> clazz);
 
 	/**
+	 * 
+	 * @throws MolgenisDataAccessException
 	 * 
 	 * @param entityName
 	 *            entity name (case insensitive)
@@ -221,6 +262,8 @@ public interface DataService extends RepositoryCollection
 
 	/**
 	 * type-save find an entity by it's id
+	 * 
+	 * @throws MolgenisDataAccessException
 	 * 
 	 * @param entityName
 	 *            entity name (case insensitive)
