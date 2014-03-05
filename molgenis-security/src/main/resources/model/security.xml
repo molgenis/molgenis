@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <molgenis name="org.molgenis.omx">
 	<module name="auth">
-		<entity name="MolgenisUser" system="true">
+		<entity name="MolgenisUser" system="true" xref_lookup="username,Email,LastName">
 			<description>Anyone who can login</description>
 			<field name="id" type="autoid" hidden="true" description="automatically generated internal id, only for internal use."/>
 			<field name="username" type="string"/>
@@ -23,10 +23,10 @@
 			<field name="tollFreePhone" nillable="true" type="string" description="A toll free phone number for the Contact, including suitable area codes."/>
 			<field name="City" type="string" nillable="true" description="Added from the old definition of MolgenisUser. City of this contact."/>
 			<field name="Country" type="string" nillable="true" description="Added from the old definition of MolgenisUser. Country of this contact."/>
-			<unique fields="Email"/>
 			<unique fields="username"/>
+			<unique fields="Email"/>
 		</entity>
-		<entity name="MolgenisGroup" system="true">
+		<entity name="MolgenisGroup" system="true" xref_lookup="name">
 			<field name="id" type="autoid" hidden="true"/>
 			<field name="name" type="string"/>
 		</entity>
@@ -35,7 +35,7 @@
 			<field name="molgenisUser" type="xref" xref_entity="MolgenisUser"/>
 			<field name="molgenisGroup" type="xref" xref_entity="MolgenisGroup"/>
 		</entity>
-		<entity name="Authority" abstract="true" system="true">
+		<entity name="Authority" abstract="true" system="true" xref_lookup="name">
 			<field name="role" type="string"/>
 		</entity>
 		<entity name="UserAuthority" implements="Authority" system="true">

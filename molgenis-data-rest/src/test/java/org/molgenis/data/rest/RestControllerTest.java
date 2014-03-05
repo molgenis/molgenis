@@ -88,7 +88,9 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		Query q = new QueryImpl().eq("name", "Piet").pageSize(10).offset(5);
 		when(dataService.findAll(ENTITY_NAME, q)).thenReturn(Arrays.asList(entity));
 
-		AttributeMetaData attrName = new DefaultAttributeMetaData("name", FieldTypeEnum.STRING);
+		DefaultAttributeMetaData attrName = new DefaultAttributeMetaData("name", FieldTypeEnum.STRING);
+		attrName.setLookupAttribute(true);
+
 		DefaultAttributeMetaData attrId = new DefaultAttributeMetaData("id", FieldTypeEnum.INT);
 		attrId.setIdAttribute(true);
 		attrId.setVisible(false);
