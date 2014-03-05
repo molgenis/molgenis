@@ -102,7 +102,8 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			csvRepository = new CsvRepository(uploadFile, cellProcessors);
 			List<String> requiredColumns = new ArrayList<String>(Arrays.asList(ObservableFeature.NAME.toLowerCase(),
 					ObservableFeature.DESCRIPTION));
-			Iterator<AttributeMetaData> columnNamesIterator = csvRepository.getAttributes().iterator();
+			Iterator<AttributeMetaData> columnNamesIterator = csvRepository.getEntityMetaData().getAttributes()
+					.iterator();
 			while (columnNamesIterator.hasNext())
 			{
 				requiredColumns.remove(columnNamesIterator.next().getName());

@@ -10,6 +10,7 @@ public interface RepositoryCollection
 	 */
 	Iterable<String> getEntityNames();
 
+	// TODO remove
 	/**
 	 * Get a repository by entity name
 	 * 
@@ -17,6 +18,7 @@ public interface RepositoryCollection
 	 */
 	Repository getRepositoryByEntityName(String name);
 
+	// TODO remove
 	/**
 	 * Get a repository by url
 	 * 

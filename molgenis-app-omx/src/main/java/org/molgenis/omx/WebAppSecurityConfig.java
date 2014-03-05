@@ -44,7 +44,7 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 		expressionInterceptUrlRegistry.accessDecisionManager(new AffirmativeBased(listOfVoters));
 
 		expressionInterceptUrlRegistry.antMatchers("/").permitAll()
-		// DAS datasource uses the database, unautheticated users can
+		// DAS datasource uses the database, unauthenticated users can
 		// not see any data
 				.antMatchers("/das/**").permitAll()
 

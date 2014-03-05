@@ -147,7 +147,7 @@ public class EntitiesValidatorImpl implements EntitiesValidator
 		// collect
 		List<String> detectedFieldNames = new ArrayList<String>();
 		List<String> unknownFieldNames = new ArrayList<String>();
-		for (AttributeMetaData attr : repository.getAttributes())
+		for (AttributeMetaData attr : repository.getEntityMetaData().getAttributes())
 		{
 			String attrName = attr.getName();
 			if (attrName == null || attrName.isEmpty()) continue;

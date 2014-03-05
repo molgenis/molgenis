@@ -77,7 +77,7 @@ public class ExcelSheetReaderTest
 	@Test
 	public void getAttribute()
 	{
-		AttributeMetaData attr = excelSheetReader.getAttribute("col1");
+		AttributeMetaData attr = excelSheetReader.getEntityMetaData().getAttribute("col1");
 		assertNotNull(attr);
 		assertEquals(attr.getDataType().getEnumType(), FieldTypeEnum.STRING);
 		assertEquals(attr.getName(), "col1");
@@ -86,7 +86,7 @@ public class ExcelSheetReaderTest
 	@Test
 	public void getAttributes()
 	{
-		Iterator<AttributeMetaData> it = excelSheetReader.getAttributes().iterator();
+		Iterator<AttributeMetaData> it = excelSheetReader.getEntityMetaData().getAttributes().iterator();
 		assertTrue(it.hasNext());
 		assertEquals(it.next().getName(), "col1");
 		assertTrue(it.hasNext());
@@ -97,25 +97,25 @@ public class ExcelSheetReaderTest
 	@Test
 	public void getDescription()
 	{
-		assertNull(excelSheetReader.getDescription());
+		assertNull(excelSheetReader.getEntityMetaData().getDescription());
 	}
 
 	@Test
 	public void getIdAttribute()
 	{
-		assertNull(excelSheetReader.getIdAttribute());
+		assertNull(excelSheetReader.getEntityMetaData().getIdAttribute());
 	}
 
 	@Test
 	public void getLabel()
 	{
-		assertEquals(excelSheetReader.getLabel(), "test");
+		assertEquals(excelSheetReader.getEntityMetaData().getLabel(), "test");
 	}
 
 	@Test
 	public void getLabelAttribute()
 	{
-		assertNull(excelSheetReader.getLabelAttribute());
+		assertNull(excelSheetReader.getEntityMetaData().getLabelAttribute());
 	}
 
 	@Test
@@ -161,7 +161,7 @@ public class ExcelSheetReaderTest
 	@Test
 	public void attributesAndIterator() throws IOException
 	{
-		Iterator<AttributeMetaData> headerIt = excelSheetReader.getAttributes().iterator();
+		Iterator<AttributeMetaData> headerIt = excelSheetReader.getEntityMetaData().getAttributes().iterator();
 		assertTrue(headerIt.hasNext());
 		assertEquals(headerIt.next().getName(), "col1");
 		assertTrue(headerIt.hasNext());
