@@ -1,6 +1,6 @@
 package org.molgenis.omx;
 
-import static org.molgenis.security.SecurityUtils.getPluginReadAuthority;
+import static org.molgenis.security.core.utils.SecurityUtils.getPluginReadAuthority;
 
 import java.util.ArrayList;
 import java.util.List;
