@@ -81,7 +81,7 @@ public class OmxRepositoryIterator implements Iterator<Entity>
 
 		if (cachedEntityMetaData == null)
 		{
-			cachedEntityMetaData = dataService.getRepositoryByEntityName(dataSetIdentifier);
+			cachedEntityMetaData = dataService.getEntityMetaData(dataSetIdentifier);
 		}
 		return new HitEntity(hit, attributeNames, cachedEntityMetaData, dataService);
 	}

@@ -69,6 +69,12 @@ public class JpaRepository extends AbstractCrudRepository
 	}
 
 	@Override
+	public EntityMetaData getEntityMetaData()
+	{
+		return entityMetaData;
+	}
+
+	@Override
 	public Class<? extends Entity> getEntityClass()
 	{
 		return entityClass;
@@ -148,7 +154,7 @@ public class JpaRepository extends AbstractCrudRepository
 	@Transactional(readOnly = true)
 	public Iterable<Entity> findAll(Iterable<Integer> ids)
 	{
-		String idAttrName = getIdAttribute().getName();
+		String idAttrName = getEntityMetaData().getIdAttribute().getName();
 
 		// TODO why doesn't this work? Should work now (test it)
 		// Query q = new QueryImpl().in(idAttrName, ids);
@@ -317,7 +323,7 @@ public class JpaRepository extends AbstractCrudRepository
 				if ((dbAction.equals(DatabaseAction.ADD) || dbAction.equals(DatabaseAction.ADD_IGNORE_EXISTING) || dbAction
 						.equals(DatabaseAction.ADD_UPDATE_EXISTING))
 						&& keyNames.length == 1
-						&& keyNames[0].equals(getIdAttribute().getName()))
+						&& keyNames[0].equals(getEntityMetaData().getIdAttribute().getName()))
 				{
 					// don't complain is 'id' field is emptyr
 				}
@@ -770,12 +776,6 @@ public class JpaRepository extends AbstractCrudRepository
 	public <E extends Entity> Iterable<E> findAll(Iterable<Integer> ids, Class<E> clazz)
 	{
 		return new ConvertingIterable<E>(clazz, findAll(ids));
-	}
-
-	@Override
-	protected EntityMetaData getEntityMetaData()
-	{
-		return entityMetaData;
 	}
 
 	@Override

@@ -33,6 +33,14 @@ public interface DataService extends RepositoryCollection
 	void addRepositories(RepositorySource repositorySource);
 
 	/**
+	 * Returns the meta data for the given entity
+	 * 
+	 * @param entityName
+	 * @return
+	 */
+	EntityMetaData getEntityMetaData(String entityName);
+
+	/**
 	 * return number of entities matched by query
 	 * 
 	 * @throws MolgenisDataException
@@ -194,6 +202,7 @@ public interface DataService extends RepositoryCollection
 	 */
 	void delete(String entityName, int id);
 
+	// TODO can we remove this?
 	/**
 	 * Get a CrudRepository by entity name
 	 * 
@@ -209,6 +218,7 @@ public interface DataService extends RepositoryCollection
 	 */
 	CrudRepository getCrudRepository(String entityName);
 
+	// TODO remove
 	/**
 	 * Returns all entity classes. Returns empty Iterable if no entity classes.
 	 * 

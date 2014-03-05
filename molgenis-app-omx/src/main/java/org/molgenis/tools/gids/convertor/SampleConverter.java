@@ -68,7 +68,7 @@ public class SampleConverter
 			{
 				this.featureColNames = new ArrayList<String>();
 
-				for (AttributeMetaData attr : repo.getAttributes())
+				for (AttributeMetaData attr : repo.getEntityMetaData().getAttributes())
 				{
 					String colName = attr.getName();
 					if (colName.equals(IDENTIFIER))

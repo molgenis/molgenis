@@ -141,7 +141,7 @@ public class OmxLookupTableRepository extends AbstractRepository implements Quer
 	}
 
 	@Override
-	protected EntityMetaData getEntityMetaData()
+	public EntityMetaData getEntityMetaData()
 	{
 		return new OmxLookupTableEntityMetaData(getObservableFeature());
 	}

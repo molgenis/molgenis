@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.molgenis.data.Repository;
 import org.molgenis.data.CrudRepository;
+import org.molgenis.data.CrudRepositorySecurityDecorator;
 import org.molgenis.data.RepositorySource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -31,9 +32,9 @@ public class JpaRepositorySource implements RepositorySource
 		<#if disable_decorators>
 		repositories.put("${entity.name}", ${name(entity)}Repository);
 		<#elseif entity.decorator?exists>
-		repositories.put("${entity.name}", new ${entity.decorator}(new ${entity.namespace}.db.${JavaName(entity)}SecurityDecorator(${name(entity)}Repository)));	
+		repositories.put("${entity.name}", new ${entity.decorator}(new CrudRepositorySecurityDecorator(${name(entity)}Repository)));	
 		<#else>
-		repositories.put("${entity.name}", new ${entity.namespace}.db.${JavaName(entity)}SecurityDecorator(${name(entity)}Repository));	
+		repositories.put("${entity.name}", new CrudRepositorySecurityDecorator(${name(entity)}Repository));	
 		</#if>
 	}
 	</#if>

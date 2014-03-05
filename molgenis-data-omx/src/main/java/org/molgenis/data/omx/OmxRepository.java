@@ -2,6 +2,7 @@ package org.molgenis.data.omx;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -12,11 +13,10 @@ import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
-import org.molgenis.data.Queryable;
-import org.molgenis.data.Writable;
 import org.molgenis.data.support.ConvertingIterable;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
@@ -45,7 +45,7 @@ import com.google.common.collect.Sets;
  * 
  * Uses the DataService to get the metadata and the SearchService to get the actual data itself
  */
-public class OmxRepository extends AbstractDataSetMatrixRepository implements Queryable, Writable
+public class OmxRepository extends AbstractDataSetMatrixRepository implements CrudRepository
 {
 	public static final String BASE_URL = "omx://";
 	private static int FLUSH_SIZE = 20;
@@ -88,12 +88,13 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Qu
 	@Override
 	public Iterable<Entity> findAll(final Query q)
 	{
+		EntityMetaData entityMetaData = getEntityMetaData();
 		// Set xref/mref search fields on ref identifier
 		for (QueryRule r : q.getRules())
 		{
 			if ((r.getField() != null) && (r.getValue() instanceof Entity))
 			{
-				AttributeMetaData attr = getAttribute(r.getField());
+				AttributeMetaData attr = entityMetaData.getAttribute(r.getField());
 				if ((attr.getDataType().getEnumType() == MolgenisFieldTypes.FieldTypeEnum.XREF)
 						|| (attr.getDataType().getEnumType() == MolgenisFieldTypes.FieldTypeEnum.MREF))
 				{
@@ -204,7 +205,8 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Qu
 	@Override
 	public void add(Iterable<? extends Entity> entities)
 	{
-		entityValidator.validate(entities, this, DatabaseAction.ADD);
+		EntityMetaData entityMetaData = this.getEntityMetaData();
+		entityValidator.validate(entities, entityMetaData, DatabaseAction.ADD);
 
 		DataSet dataSet = getDataSet();
 		CrudRepository repo = dataService.getCrudRepository(ObservableFeature.ENTITY_NAME);
@@ -225,7 +227,7 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Qu
 				observationSet.setPartOfDataSet(dataSet);
 				dataService.add(ObservationSet.ENTITY_NAME, observationSet);
 
-				for (AttributeMetaData attr : getAtomicAttributes())
+				for (AttributeMetaData attr : entityMetaData.getAtomicAttributes())
 				{
 					if (!attr.isIdAtrribute())
 					{
@@ -257,7 +259,7 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Qu
 									invalidValue, observableFeature.getIdentifier(), getName());
 
 							throw new MolgenisValidationException(Sets.newHashSet(new ConstraintViolation(message,
-									invalidValue, entity, attr, this, rownr)));
+									invalidValue, entity, attr, entityMetaData, rownr)));
 						}
 
 						if (value != null)
@@ -313,11 +315,60 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Qu
 	@Override
 	public void flush()
 	{
+		// no-op
 	}
 
 	@Override
 	public void clearCache()
 	{
+		// no-op
 	}
 
+	@Override
+	public void update(Entity entity)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void update(Iterable<? extends Entity> records)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void delete(Entity entity)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void delete(Iterable<? extends Entity> entities)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void deleteById(Integer id)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void deleteById(Iterable<Integer> ids)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void deleteAll()
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
+	{
+		throw new UnsupportedOperationException();
+	}
 }
