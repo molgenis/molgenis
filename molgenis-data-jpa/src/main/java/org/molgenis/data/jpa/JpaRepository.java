@@ -34,6 +34,7 @@ import org.molgenis.data.support.ConvertingIterable;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.EntityValidator;
+import org.molgenis.generators.GeneratorHelper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
@@ -714,11 +715,11 @@ public class JpaRepository extends AbstractCrudRepository
 			{
 				if (sortOrder.isAscending())
 				{
-					orders.add(cb.asc(from.get(sortOrder.getProperty())));
+					orders.add(cb.asc(from.get(GeneratorHelper.firstToLower(sortOrder.getProperty()))));
 				}
 				else
 				{
-					orders.add(cb.desc(from.get(sortOrder.getProperty())));
+					orders.add(cb.desc(from.get(GeneratorHelper.firstToLower(sortOrder.getProperty()))));
 				}
 			}
 		}

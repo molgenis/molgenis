@@ -73,7 +73,7 @@ public class ElasticSearchServiceTest
 
 		when(repoMock.iterator()).thenReturn(Arrays.<Entity> asList(new MapEntity()).iterator());
 		when(repoMock.getName()).thenReturn("beer");
-		when(repoMock.getAttributes()).thenReturn(Collections.<AttributeMetaData> emptyList());
+		when(repoMock.getEntityMetaData().getAttributes()).thenReturn(Collections.<AttributeMetaData> emptyList());
 
 		searchService.indexRepository(repoMock);
 		waitForIndexUpdate();
@@ -109,7 +109,7 @@ public class ElasticSearchServiceTest
 			}
 		});
 		when(repoMock.getName()).thenReturn("person");
-		when(repoMock.getAttributes()).thenReturn(
+		when(repoMock.getEntityMetaData().getAttributes()).thenReturn(
 				Arrays.<AttributeMetaData> asList(new DefaultAttributeMetaData("id", FieldTypeEnum.INT),
 						new DefaultAttributeMetaData("name", FieldTypeEnum.STRING)));
 
@@ -164,7 +164,7 @@ public class ElasticSearchServiceTest
 			}
 		});
 		when(repoMock.getName()).thenReturn("fruit");
-		when(repoMock.getAttributes()).thenReturn(
+		when(repoMock.getEntityMetaData().getAttributes()).thenReturn(
 				Arrays.<AttributeMetaData> asList(new DefaultAttributeMetaData("id", FieldTypeEnum.INT),
 						new DefaultAttributeMetaData("name", FieldTypeEnum.STRING), new DefaultAttributeMetaData(
 								"color", FieldTypeEnum.STRING)));
