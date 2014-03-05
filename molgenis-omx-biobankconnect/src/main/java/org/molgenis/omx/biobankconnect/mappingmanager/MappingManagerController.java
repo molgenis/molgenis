@@ -35,7 +35,7 @@ import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
-import org.molgenis.security.SecurityUtils;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.FileStore;
 import org.molgenis.util.GsonHttpMessageConverter;

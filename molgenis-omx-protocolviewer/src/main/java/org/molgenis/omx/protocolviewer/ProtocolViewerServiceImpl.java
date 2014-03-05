@@ -35,7 +35,7 @@ import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.utils.ProtocolUtils;
-import org.molgenis.security.SecurityUtils;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.study.StudyDefinition;
 import org.molgenis.study.UnknownStudyDefinitionException;

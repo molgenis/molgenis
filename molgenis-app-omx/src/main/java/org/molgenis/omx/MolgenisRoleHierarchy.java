@@ -3,7 +3,7 @@ package org.molgenis.omx;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.molgenis.framework.server.MolgenisPermissionService.Permission;
+import org.molgenis.security.core.Permission;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

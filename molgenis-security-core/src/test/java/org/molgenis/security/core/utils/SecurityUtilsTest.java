@@ -1,12 +1,12 @@
-package org.molgenis.security;
+package org.molgenis.security.core.utils;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
-import static org.molgenis.security.SecurityUtils.ANONYMOUS_USERNAME;
-import static org.molgenis.security.SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX;
-import static org.molgenis.security.SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX;
-import static org.molgenis.security.SecurityUtils.AUTHORITY_SU;
+import static org.molgenis.security.core.utils.SecurityUtils.ANONYMOUS_USERNAME;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_SU;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -14,6 +14,7 @@ import static org.testng.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;

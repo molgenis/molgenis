@@ -9,8 +9,8 @@ import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
 
-import org.molgenis.framework.server.MolgenisPermissionService;
 import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.ui.XmlMolgenisUiTest.Config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

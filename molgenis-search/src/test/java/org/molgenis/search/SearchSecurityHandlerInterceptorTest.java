@@ -5,7 +5,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.AssertJUnit.assertTrue;
 
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.security.SecurityUtils;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.Authentication;

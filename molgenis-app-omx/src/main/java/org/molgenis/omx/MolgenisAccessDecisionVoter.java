@@ -2,8 +2,8 @@ package org.molgenis.omx;
 
 import java.util.Collection;
 
-import org.molgenis.framework.server.MolgenisPermissionService;
-import org.molgenis.framework.server.MolgenisPermissionService.Permission;
+import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.Permission;
 import org.molgenis.ui.MolgenisUi;
 import org.molgenis.ui.MolgenisUiMenu;
 import org.molgenis.ui.MolgenisUiMenuItem;
@@ -28,7 +28,8 @@ public class MolgenisAccessDecisionVoter implements AccessDecisionVoter<FilterIn
 	}
 
 	@Override
-	public int vote(Authentication authentication, FilterInvocation filterInvocation, Collection<ConfigAttribute> attributes)
+	public int vote(Authentication authentication, FilterInvocation filterInvocation,
+			Collection<ConfigAttribute> attributes)
 	{
 		MolgenisPermissionService molgenisPermissionService = ApplicationContextProvider.getApplicationContext()
 				.getBean(MolgenisPermissionService.class);
@@ -58,5 +59,3 @@ public class MolgenisAccessDecisionVoter implements AccessDecisionVoter<FilterIn
 		return urlFragments.length > 0 ? urlFragments[urlFragments.length - 1] : requestUrl;
 	}
 }
-
-

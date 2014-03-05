@@ -20,7 +20,7 @@ import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisGroupMember;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.UserAuthority;
-import org.molgenis.security.SecurityUtils;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.GrantedAuthority;
