@@ -107,14 +107,6 @@ a.accordion-toggle:hover,a.accordion-toggle:focus,a.accordion-toggle:active
 	box-shadow: 10px 10px 5px #888;
 }
 
-.feature-filter-dialog p {
-	margin-bottom: 20px;
-}
-
-.feature-filter-dialog h3 {
-	border-bottom: 1px solid #AAAAAA;
-}
-
 .show-popover {
 	cursor: hand;
 	cursor: pointer;
@@ -229,10 +221,6 @@ a.accordion-toggle:hover,a.accordion-toggle:focus,a.accordion-toggle:active
 
 .select2-result:nth-child(odd) {
 	background-color: #FFF;
-}
-
-.feature-filter-dialog .form-horizontal .controls {
-	margin-left: 0px;
 }
 
 .add-ref-query-part, .remove-ref-query-part {

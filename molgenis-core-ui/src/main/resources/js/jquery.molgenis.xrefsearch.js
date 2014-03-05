@@ -54,10 +54,9 @@
 		if (lookupAttributeNames.length > 0) {
 			var width = Math.round(12 / lookupAttributeNames.length);// 12 is full width in px
 			var abbr = Math.round(110 / lookupAttributeNames.length);// 110 is full width in characters (if you don't change the font size)
-			
+		
 			$.each(lookupAttributeNames, function(index, attrName) {
 				var attrValue = entity[attrName] == undefined ?  '' :  entity[attrName];
-				
 				items.push('<div class="span' + width + '">');
 				items.push(abbreviate(attrName + ': <b>' + attrValue + '</b>', abbr));
 				items.push('</div>');
@@ -69,9 +68,11 @@
 		return items.join('');
 	}
 	
-	function createQueryTypeDropdown(container, attributeMetaData) {
+	function createQueryTypeDropdown(container, attributeMetaData, operator) {
 		if (attributeMetaData.fieldType == 'MREF') {
-			container.prepend('<select id="mref-query-type"><option value="OR">ANY match (OR)</option><option value="AND">ALL match (AND)</option></select>');
+			var element = $('<select id="mref-query-type" class="operator"><option value="OR">ANY match (OR)</option><option value="AND">ALL match (AND)</option></select>');
+			container.prepend(element);
+			element.val(operator);
 		}
 	}
 	
@@ -83,22 +84,18 @@
 			width: 670,
 			placeholder: 'filter text',
 			minimumInputLength: 2,
-			ajax: {
-				quietMillis: 200,
-				dataType: 'json',
-				url: '/api/v1/' + attributeMetaData.refEntity.name + '?_method=GET',
-				type: 'POST',
-				params : {contentType: 'application/json;charset=utf-8'},
-				data: function(term, page) {
-					var q = createQuery(lookupAttrNames, term);
-					return JSON.stringify({num: 10, q: q});
-				},
-				results: function(data, page) {
-					return {
-						results: data.items,
-						more: false
-					};
-				},
+			query: function (options){
+				var query = createQuery(lookupAttrNames, options.term);
+				restApi.getAsync('/api/v1/' + attributeMetaData.refEntity.name, {q: {num: 10, q: query}}, function(data) {
+					 options.callback({results: data.items, more: false});
+				});           
+            },
+			initSelection: function(element, callback) {
+				//Only called when the input has a value
+				var query = createQuery(lookupAttrNames, element.val());
+				restApi.getAsync('/api/v1/' + attributeMetaData.refEntity.name, {q: {num: 1, q: query}}, function(data) {
+					callback(data.items[0]);
+				});
 			},
 			formatResult: function(entity) {
 				return formatResult(entity, lookupAttrNames);
@@ -111,7 +108,7 @@
 			}
 		});
 		
-		var addButton = $('<a href="#" class="add-ref-query-part"><img src="/img/add.png" ></a>');
+		var addButton = $('<a href="#" class="add-ref-query-part" title="add new"><i class="icon-plus"></i></a>');
 		container.append(addButton);
 		
 		addButton.on('click', function() {
@@ -119,18 +116,18 @@
 		});
 	}
 	
-	function addQueryPartSelect(container, attributeMetaData) {
+	function addQueryPartSelect(container, attributeMetaData, value) {
 		var attrs = {
 				'placeholder': 'filter text',
 				'autofocus': 'autofocus',
 			};
 			
-		var element = createInput(attributeMetaData.fieldType, attrs, undefined)
+		var element = createInput(attributeMetaData.fieldType, attrs, value)
 		container.parent().append(element);
-		createSelect2(element, attributeMetaData);
+		createSelect2(element, attributeMetaData, value);
 			
-		var removeButton = $('<a href="#" class="remove-ref-query-part"><img src="/img/cancel.png" ></a>');
-		container.find('.add-ref-query-part').replaceWith(removeButton);
+		var removeButton = $('<a href="#" class="remove-ref-query-part" title="remove"><i class="icon-remove"></i></a>');
+		container.parent().find('.add-ref-query-part:not(:last)').replaceWith(removeButton);
 		
 		removeButton.on('click', function() {
 			removeQueryPartSelect($(this).parent());
@@ -146,8 +143,19 @@
 		var attributeUri = options.attributeUri ? options.attributeUri : options.attribute.href;
 		
 		restApi.getAsync(attributeUri, {attributes:['refEntity', 'fieldType'], expand:['refEntity']}, function(attributeMetaData) {
-			createQueryTypeDropdown(container, attributeMetaData);
-			createSelect2(container, attributeMetaData);
+			createQueryTypeDropdown(container, attributeMetaData, options.operator);
+			
+			if (options.values && options.values.length > 0) {
+				
+				//Preselect values
+				for (var i = 0; i < options.values.length; i++) {
+					addQueryPartSelect(container, attributeMetaData, options.values[i]);
+				}
+				
+			} else {
+				addQueryPartSelect(container, attributeMetaData);
+				
+			}
 		});
 		
 		return this;
