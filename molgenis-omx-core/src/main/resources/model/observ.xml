@@ -35,7 +35,7 @@
 				</li>
 			</ul>
 		</description>
-		<entity name="Characteristic" implements="Identifiable">
+		<entity name="Characteristic" implements="Identifiable" xref_lookup="Identifier,Name,description">
 			<description> Characteristics are yes-no statements about things in
 				the world. These can be used as part of an observation, as parameter
 				of ObservableFeature ('measuredCharacteristic'). For example: 'What
@@ -137,7 +137,7 @@
 			<field auto="true" name="endTime" type="datetime" nillable="true"
 				description="(Optional) time when the protocol ended." />
 		</entity>
-		<entity name="ObservationSet" implements="Autoid" xref_label="Identifier">
+		<entity name="ObservationSet" implements="Autoid" xref_label="Identifier" xref_lookup="identifier">
 			<description>In practice: Observation is one row within a DataSet.
 			</description>
 			<field name="Identifier" type="string" description="user supplied or automatically assigned (using a decorator) unique and short identifier, e.g. MA1234" />
