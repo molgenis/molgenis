@@ -73,12 +73,12 @@ body{
 }
 
 .modal.medium {
-    width: 50%; /* respsonsive width */
+    width: 50%; /* responsive width */
     margin-left:-25%; /* width/2) */ 
 }
 
 .modal.large {
-    width: 80%; /* respsonsive width */
+    width: 80%; /* responsive width */
     margin-left:-40%; /* width/2) */ 
 }
 

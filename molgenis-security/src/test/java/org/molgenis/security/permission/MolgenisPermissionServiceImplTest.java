@@ -36,9 +36,11 @@ public class MolgenisPermissionServiceImplTest
 				SecurityUtils.AUTHORITY_PLUGIN_PREFIX + Permission.READ + "_PLUGIN1").getMock();
 		GrantedAuthority authority4 = when(mock(GrantedAuthority.class).getAuthority()).thenReturn(
 				SecurityUtils.AUTHORITY_PLUGIN_PREFIX + Permission.WRITE + "_PLUGIN2").getMock();
+		GrantedAuthority authority5 = when(mock(GrantedAuthority.class).getAuthority()).thenReturn(
+				SecurityUtils.AUTHORITY_ENTITY_PREFIX + Permission.COUNT + "_ENTITY2").getMock();
 
 		when((Collection<GrantedAuthority>) (authentication.getAuthorities())).thenReturn(
-				Arrays.<GrantedAuthority> asList(authority1, authority2, authority3, authority4));
+				Arrays.<GrantedAuthority> asList(authority1, authority2, authority3, authority4, authority5));
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 	}
 
@@ -56,6 +58,7 @@ public class MolgenisPermissionServiceImplTest
 		assertFalse(new MolgenisPermissionServiceImpl().hasPermissionOnEntity("entity2", Permission.READ));
 		assertTrue(new MolgenisPermissionServiceImpl().hasPermissionOnEntity("entity2", Permission.WRITE));
 		assertFalse(new MolgenisPermissionServiceImpl().hasPermissionOnEntity("entity-unknown", Permission.READ));
+		assertTrue(new MolgenisPermissionServiceImpl().hasPermissionOnEntity("entity2", Permission.COUNT));
 	}
 
 	@Test
