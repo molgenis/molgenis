@@ -52,12 +52,17 @@ public class ${JavaName(entity)}MetaData extends DefaultEntityMetaData
 			<#if xrefLabel == f.name>
 		${name(f)}.setLabelAttribute(true);
 			</#if>
+		</#list>
+		<#list entity.getXrefLookupFields() as xrefLookup>
+			<#if xrefLookup == f.name>
+		${name(f)}.setLookupAttribute(true);
+			</#if>
 		</#list>	
 		<#if f.hidden || f.system>
 		${name(f)}.setVisible(false);
 		</#if>
-		
 		addAttributeMetaData(${name(f)});	
+		
 </#list>
 		
 	}
