@@ -11,13 +11,13 @@ import org.molgenis.security.core.Permission;
 public class CrudRepositorySecurityDecorator extends CrudRepositoryDecorator implements CrudRepository
 {
 	private final CrudRepository decoratedRepository;
-	private final String roleEntityName;
+	private final String entityName;
 
 	public CrudRepositorySecurityDecorator(CrudRepository decoratedRepository)
 	{
 		super(decoratedRepository);
 		this.decoratedRepository = decoratedRepository;
-		this.roleEntityName = decoratedRepository.getName().toUpperCase();
+		this.entityName = decoratedRepository.getName().toUpperCase();
 	}
 
 	@Override
@@ -221,10 +221,10 @@ public class CrudRepositorySecurityDecorator extends CrudRepositoryDecorator imp
 
 	protected void validatePermission(Permission permission)
 	{
-		String role = String.format("ROLE_ENTITY_%s_%s", roleEntityName, permission.toString());
+		String role = String.format("ROLE_ENTITY_%s_%s", permission.toString(), entityName.toUpperCase());
 		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", role))
 		{
-			throw new MolgenisDataAccessException("No read permission on " + roleEntityName);
+			throw new MolgenisDataAccessException("No read permission on " + entityName);
 		}
 	}
 }
