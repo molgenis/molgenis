@@ -379,6 +379,18 @@ public class JpaRepositoryTest extends BaseJpaTest
 	}
 
 	@Test
+	public void testSearchQuery()
+	{
+		Person p1 = new Person("Piet", "Paulusma");
+		Person p2 = new Person("Piet", "de Boskabouter");
+		repo.add(Arrays.asList(p1, p2));
+
+		Iterable<Entity> it = repo.findAll(new QueryImpl().search("Bos"));
+		assertEquals(Iterables.size(it), 1);
+		assertTrue(Iterables.contains(it, p2));
+	}
+
+	@Test
 	public void testSort()
 	{
 		Person p1 = new Person("Piet", "Paulusma");
