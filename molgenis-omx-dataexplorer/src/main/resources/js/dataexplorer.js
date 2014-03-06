@@ -34,7 +34,7 @@
 	 * @memberOf molgenis.dataexplorer
 	 */
 	function getEntityQuery() {
-		return self.createEntityQuery();
+		return createEntityQuery();
 	}
 	
 	/**
