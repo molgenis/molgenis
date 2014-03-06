@@ -81,7 +81,7 @@
 		var hiddenInput = container.find('input[type=hidden]');
 		
 		hiddenInput.select2({
-			width: 670,
+			width: 650,
 			placeholder: 'filter text',
 			minimumInputLength: 2,
 			query: function (options){
