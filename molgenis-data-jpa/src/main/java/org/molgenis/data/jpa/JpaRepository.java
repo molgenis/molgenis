@@ -622,6 +622,8 @@ public class JpaRepository extends AbstractCrudRepository
 		{
 			switch (r.getOperator())
 			{
+				case AND:
+					break;
 				case NESTED:
 					Predicate nested = cb.conjunction();
 					for (Predicate p : createPredicates(from, cb, r.getNestedRules()))
@@ -653,6 +655,7 @@ public class JpaRepository extends AbstractCrudRepository
 				default:
 					// go into comparator based criteria, that need
 					// conversion...
+
 					Path<Comparable> field = from.get(r.getJpaAttribute());
 					Object value = r.getValue();
 					Comparable cValue = null;
