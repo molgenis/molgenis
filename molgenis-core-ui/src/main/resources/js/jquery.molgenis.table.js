@@ -3,6 +3,9 @@
 
 	var restApi = new molgenis.RestClient();
 
+	/**
+	 * @memberOf molgenis.table
+	 */
 	function createTable(settings) {
 		// create elements
 		var items = [];
@@ -29,7 +32,10 @@
 			});
 		});
 	}
-
+	
+	/**
+	 * @memberOf molgenis.table
+	 */
 	function getTableMetaData(settings, callback) {
 		var colAttributes = molgenis.getAtomicAttributes(settings.attributes, restApi);
 		
@@ -57,6 +63,9 @@
 		});
 	}
 
+	/**
+	 * @memberOf molgenis.table
+	 */
 	function getTableData(settings, callback) {
 		var attributeNames = $.map(settings.colAttributes, function(attribute) {
 			return attribute.name;
@@ -73,6 +82,9 @@
 		});
 	}
 
+	/**
+	 * @memberOf molgenis.table
+	 */
 	function createTableHeader(settings) {
 		var container = $('.molgenis-table thead', settings.container);
 
@@ -91,9 +103,13 @@
 						+ '" class="ui-icon ui-icon-triangle-2-n-s updown"></span></th>');
 			}
 		});
+		
 		container.html(items.join(''));
 	}
 
+	/**
+	 * @memberOf molgenis.table
+	 */
 	function createTableBody(data, settings) {
 		var container = $('.molgenis-table tbody', settings.container);
 
@@ -151,6 +167,9 @@
 		$('.show-popover').popover({trigger:'hover', placement: 'bottom'});
 	}
 
+	/**
+	 * @memberOf molgenis.table
+	 */
 	function createTablePager(data, settings) {
 		var container = $('.molgenis-table-pager', settings.container);
 
@@ -168,6 +187,9 @@
 		} else container.hide();
 	}
 
+	/**
+	 * @memberOf molgenis.table
+	 */
 	function createTableFooter(data, settings) {
 		var container = $('.molgenis-table-info', settings.container);
 		container.html(data.total + ' item' + (data.total !== 1 ? 's' : '') + ' found');
@@ -189,6 +211,7 @@
 		var settings = $.extend({}, $.fn.table.defaults, options, {'container': container});
 
 		// store tree settings
+		container.off();
 		container.empty();
 		container.data('settings', settings);
 
@@ -215,7 +238,7 @@
 		// sort column ascending/descending
 		$(container).on('click', 'thead th .ui-icon', function(e) {
 			e.preventDefault();
-
+			
 			var attributeName = $(this).data('attribute');
 			if (settings.sort) {
 				var order = settings.sort.orders[0];
