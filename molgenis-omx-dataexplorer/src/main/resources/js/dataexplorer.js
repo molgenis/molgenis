@@ -267,9 +267,10 @@
 
 				var entities = restApi.get(entitiesUri);
 				$.each(entities.items, function() {
-					//var checked = attributeFilter && ($.inArray(this[labelAttribute], attributeFilter.values) > -1);
-					//		'checked': checked
-					controls.append(createInput(attribute.fieldType, {'name': name, 'id': name}, this.href, this[entityMeta.labelAttribute]));
+					var attrs = {'name': name, 'id': name};
+					if(values && $.inArray(this[entityMeta.labelAttribute], values) > -1)
+						attrs.checked = 'checked';
+					controls.append(createInput(attribute.fieldType, attrs, this[entityMeta.labelAttribute], this[entityMeta.labelAttribute]));
 				});
 				break;
 			case 'DATE':
@@ -461,7 +462,7 @@
 					updateGenomeBrowser();
 					break;
 				case 'tab-aggregates':
-					updateAggregatesTable();
+					createAggregatesTable();
 					break;
 				case 'tab-charts':
 					break;
