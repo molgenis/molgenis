@@ -240,8 +240,8 @@ public class DataExplorerController extends MolgenisPluginController
 			throw new RuntimeException("Unsupported data type " + dataType);
 		}
 
-		EntityMetaData refEntityMeta;
-		String refAttributeName;
+		EntityMetaData refEntityMeta = null;
+		String refAttributeName = null;
 		if (dataType == FieldTypeEnum.CATEGORICAL)
 		{
 			refEntityMeta = attributeMeta.getRefEntity();
