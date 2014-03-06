@@ -9,6 +9,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.processor.AbstractCellProcessor;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractWritable;
@@ -100,6 +101,10 @@ public class ExcelSheetWriter extends AbstractWritable
 		if (obj == null)
 		{
 			value = null;
+		}
+		else if (obj instanceof java.util.Date)
+		{
+			value = new DateToStringConverter().convert((java.util.Date) obj);
 		}
 		else if (obj instanceof Entity)
 		{
