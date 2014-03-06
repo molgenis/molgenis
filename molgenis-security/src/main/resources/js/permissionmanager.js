@@ -67,7 +67,6 @@
 						items.push('<td><span class="muted inherited-permission">inherited from group: ' + perm.group + '</span></td>');
 						items.push('<td><input type="radio"' + (perm.type === "write" ? ' checked' : '') + ' disabled></td>');
 						items.push('<td><input type="radio"' + (perm.type === "read" ? ' checked' : '') + ' disabled></td>');
-						items.push('<td><input type="radio"' + (perm.type === "aggregate" ? ' checked' : '') + ' disabled></td>');
 						items.push('<td><input type="radio"' + (perm.type === "count" ? ' checked' : '') + ' disabled></td>');
 						items.push('<td><input type="radio"' + (perm.type ? '' : ' checked') + ' disabled></td>');
 						items.push('</tr>');						
