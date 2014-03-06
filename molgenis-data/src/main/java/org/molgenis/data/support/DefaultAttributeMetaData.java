@@ -34,10 +34,6 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		if (fieldType == null) throw new IllegalArgumentException("FieldType cannot be null");
 		this.name = name;
 		this.fieldType = fieldType;
-
-		// TODO
-		lookupAttribute = name.equalsIgnoreCase("identifier") || name.equalsIgnoreCase("name")
-				|| name.equalsIgnoreCase("description");
 	}
 
 	@Override

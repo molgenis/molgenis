@@ -21,14 +21,13 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Repository;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.entityexplorer.controller.EntityExplorerController;
-import org.molgenis.framework.server.MolgenisPermissionService;
-import org.molgenis.framework.server.MolgenisPermissionService.Permission;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.search.SearchService;
+import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.Permission;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -128,7 +127,7 @@ public class DataExplorerController extends MolgenisPluginController
 					@Override
 					public EntityMetaData apply(String entityName)
 					{
-						return dataService.getRepositoryByEntityName(entityName);
+						return dataService.getEntityMetaData(entityName);
 					}
 				});
 		model.addAttribute("entitiesMeta", entitiesMeta);
@@ -166,13 +165,13 @@ public class DataExplorerController extends MolgenisPluginController
 		Map<String, String> genomeBrowserSets = new HashMap<String, String>();
 		for (String entityName : dataService.getEntityNames())
 		{
-			Repository repository = dataService.getRepositoryByEntityName(entityName);
-			AttributeMetaData attributeStartPosition = repository.getAttribute(MUTATION_START_POSITION);
-			AttributeMetaData attributeId = repository.getAttribute(MUTATION_ID);
-			AttributeMetaData attributeChromosome = repository.getAttribute(MUTATION_CHROMOSOME);
+			EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
+			AttributeMetaData attributeStartPosition = entityMetaData.getAttribute(MUTATION_START_POSITION);
+			AttributeMetaData attributeId = entityMetaData.getAttribute(MUTATION_ID);
+			AttributeMetaData attributeChromosome = entityMetaData.getAttribute(MUTATION_CHROMOSOME);
 			if (attributeStartPosition != null && attributeId != null && attributeChromosome != null)
 			{
-				genomeBrowserSets.put(entityName, repository.getLabel());
+				genomeBrowserSets.put(entityName, entityMetaData.getLabel());
 			}
 		}
 		return genomeBrowserSets;
@@ -189,7 +188,7 @@ public class DataExplorerController extends MolgenisPluginController
 		DataRequest dataRequest = new GsonHttpMessageConverter().getGson().fromJson(dataRequestStr, DataRequest.class);
 
 		String entityName = dataRequest.getEntityName();
-		Repository repository = dataService.getRepositoryByEntityName(entityName);
+		EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
 		final Set<String> attributes = new HashSet<String>(dataRequest.getAttributeNames());
 		String fileName = entityName + '_' + new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + ".csv";
 
@@ -200,7 +199,7 @@ public class DataExplorerController extends MolgenisPluginController
 		try
 		{
 			csvWriter.writeAttributeNames(Iterables.transform(
-					Iterables.filter(repository.getAttributes(), new Predicate<AttributeMetaData>()
+					Iterables.filter(entityMetaData.getAttributes(), new Predicate<AttributeMetaData>()
 					{
 						@Override
 						public boolean apply(AttributeMetaData attributeMetaData)

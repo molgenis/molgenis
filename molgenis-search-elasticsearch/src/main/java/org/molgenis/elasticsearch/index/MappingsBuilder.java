@@ -26,7 +26,7 @@ public class MappingsBuilder
 		XContentBuilder jsonBuilder = XContentFactory.jsonBuilder().startObject().startObject(documentType)
 				.startObject("properties");
 
-		for (AttributeMetaData attr : repository.getAttributes())
+		for (AttributeMetaData attr : repository.getEntityMetaData().getAttributes())
 		{
 			String esType = getType(attr);
 			if (esType.equals("string"))

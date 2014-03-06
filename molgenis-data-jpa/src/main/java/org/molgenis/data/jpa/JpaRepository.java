@@ -22,6 +22,7 @@ import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
@@ -29,11 +30,13 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.support.AbstractCrudRepository;
 import org.molgenis.data.support.ConvertingIterable;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.EntityValidator;
+import org.molgenis.generators.GeneratorHelper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,6 +69,12 @@ public class JpaRepository extends AbstractCrudRepository
 	{
 		this(entityClass, entityMetaData, entityValidator);
 		this.entityManager = entityManager;
+	}
+
+	@Override
+	public EntityMetaData getEntityMetaData()
+	{
+		return entityMetaData;
 	}
 
 	@Override
@@ -148,7 +157,7 @@ public class JpaRepository extends AbstractCrudRepository
 	@Transactional(readOnly = true)
 	public Iterable<Entity> findAll(Iterable<Integer> ids)
 	{
-		String idAttrName = getIdAttribute().getName();
+		String idAttrName = getEntityMetaData().getIdAttribute().getName();
 
 		// TODO why doesn't this work? Should work now (test it)
 		// Query q = new QueryImpl().in(idAttrName, ids);
@@ -317,7 +326,7 @@ public class JpaRepository extends AbstractCrudRepository
 				if ((dbAction.equals(DatabaseAction.ADD) || dbAction.equals(DatabaseAction.ADD_IGNORE_EXISTING) || dbAction
 						.equals(DatabaseAction.ADD_UPDATE_EXISTING))
 						&& keyNames.length == 1
-						&& keyNames[0].equals(getIdAttribute().getName()))
+						&& keyNames[0].equals(getEntityMetaData().getIdAttribute().getName()))
 				{
 					// don't complain is 'id' field is emptyr
 				}
@@ -599,6 +608,11 @@ public class JpaRepository extends AbstractCrudRepository
 	{ "rawtypes", "unchecked" })
 	private List<Predicate> createPredicates(Root<?> from, CriteriaBuilder cb, List<QueryRule> rules)
 	{
+		if (!rules.isEmpty() && (rules.get(0).getOperator() == Operator.SEARCH))
+		{
+			return createPredicates(from, cb, createSearchQueryRules(rules.get(0).getValue()));
+		}
+
 		// default Query links criteria based on 'and'
 		List<Predicate> andPredicates = new ArrayList<Predicate>();
 		// optionally, subqueries can be formulated seperated by 'or'
@@ -708,11 +722,11 @@ public class JpaRepository extends AbstractCrudRepository
 			{
 				if (sortOrder.isAscending())
 				{
-					orders.add(cb.asc(from.get(sortOrder.getProperty())));
+					orders.add(cb.asc(from.get(GeneratorHelper.firstToLower(sortOrder.getProperty()))));
 				}
 				else
 				{
-					orders.add(cb.desc(from.get(sortOrder.getProperty())));
+					orders.add(cb.desc(from.get(GeneratorHelper.firstToLower(sortOrder.getProperty()))));
 				}
 			}
 		}
@@ -773,12 +787,6 @@ public class JpaRepository extends AbstractCrudRepository
 	}
 
 	@Override
-	protected EntityMetaData getEntityMetaData()
-	{
-		return entityMetaData;
-	}
-
-	@Override
 	@Transactional(readOnly = true)
 	public <E extends Entity> Iterable<E> findAll(Query q, Class<E> clazz)
 	{
@@ -825,5 +833,90 @@ public class JpaRepository extends AbstractCrudRepository
 		E e = BeanUtils.instantiate(clazz);
 		e.set(entity);
 		return e;
+	}
+
+	/*
+	 * Convert a search query to a list of QueryRule, creates for every attribute a QueryRule and 'OR's them
+	 * 
+	 * No search on XREF/MREF possible at the moment
+	 * 
+	 * Replace this by ES indexing??
+	 */
+	private List<QueryRule> createSearchQueryRules(Object searchValue)
+	{
+		List<QueryRule> searchRules = Lists.newArrayList();
+
+		for (AttributeMetaData attr : getEntityMetaData().getAttributes())
+		{
+			QueryRule rule = null;
+			switch (attr.getDataType().getEnumType())
+			{
+				case STRING:
+				case TEXT:
+				case HTML:
+				case HYPERLINK:
+				case EMAIL:
+					rule = new QueryRule(attr.getName(), Operator.LIKE, searchValue);
+					break;
+				case BOOL:
+					if (DataConverter.canConvert(searchValue, Boolean.class))
+					{
+						rule = new QueryRule(attr.getName(), Operator.EQUALS, DataConverter.toBoolean(searchValue));
+					}
+					break;
+				case DATE:
+					if (DataConverter.canConvert(searchValue, java.sql.Date.class))
+					{
+						rule = new QueryRule(attr.getName(), Operator.EQUALS, DataConverter.toDate(searchValue));
+					}
+					break;
+				case DATE_TIME:
+					if (DataConverter.canConvert(searchValue, java.util.Date.class))
+					{
+						rule = new QueryRule(attr.getName(), Operator.EQUALS, DataConverter.toUtilDate(searchValue));
+					}
+					break;
+				case DECIMAL:
+					if (DataConverter.canConvert(searchValue, Double.class))
+					{
+						rule = new QueryRule(attr.getName(), Operator.EQUALS, DataConverter.toDouble(searchValue));
+					}
+					break;
+				case INT:
+					if (DataConverter.canConvert(searchValue, Integer.class))
+					{
+						rule = new QueryRule(attr.getName(), Operator.EQUALS, DataConverter.toInt(searchValue));
+					}
+					break;
+				case LONG:
+					if (DataConverter.canConvert(searchValue, Long.class))
+					{
+						rule = new QueryRule(attr.getName(), Operator.EQUALS, DataConverter.toLong(searchValue));
+					}
+					break;
+
+				// TODO how??
+				case CATEGORICAL:
+				case MREF:
+				case XREF:
+					break;
+				default:
+					break;
+
+			}
+
+			if (rule != null)
+			{
+				if (!searchRules.isEmpty())
+				{
+					searchRules.add(new QueryRule(Operator.OR));
+				}
+
+				searchRules.add(rule);
+			}
+
+		}
+
+		return searchRules;
 	}
 }

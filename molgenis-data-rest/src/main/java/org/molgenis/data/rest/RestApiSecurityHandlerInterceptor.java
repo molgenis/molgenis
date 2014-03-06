@@ -3,7 +3,7 @@ package org.molgenis.data.rest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.molgenis.security.SecurityUtils;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 /**

@@ -124,9 +124,7 @@
                             </div>
                             <div class="row-fluid data-table-container" id="data-table-container"></div>
 							<div class="row-fluid data-table-pager-container">
-								<div id="nrOfDataItems" class="pull-left"></div>
 								<a id="download-button" class="btn" href="#">Download as csv</a>
-								<div id="data-table-pager" class="pagination pagination-centered"></div>
 							</div>
 						</div>
 					</div>

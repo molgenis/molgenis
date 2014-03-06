@@ -119,7 +119,7 @@ public class OmxRepositoryIteratorTest
 		FieldType fieldType = mock(FieldType.class);
 		when(fieldType.getEnumType()).thenReturn(FieldTypeEnum.STRING);
 		when(attributeMetaData.getDataType()).thenReturn(fieldType);
-		when(repository.getAttribute(attrName)).thenReturn(attributeMetaData);
+		when(repository.getEntityMetaData().getAttribute(attrName)).thenReturn(attributeMetaData);
 		when(dataService.getRepositoryByEntityName(dataSetIdentifier)).thenReturn(repository);
 
 		OmxRepositoryIterator it = new OmxRepositoryIterator(dataSetIdentifier, searchService, dataService,
@@ -160,7 +160,7 @@ public class OmxRepositoryIteratorTest
 		FieldType fieldType = mock(FieldType.class);
 		when(fieldType.getEnumType()).thenReturn(FieldTypeEnum.STRING);
 		when(attributeMetaData.getDataType()).thenReturn(fieldType);
-		when(repository.getAttribute(attrName)).thenReturn(attributeMetaData);
+		when(repository.getEntityMetaData().getAttribute(attrName)).thenReturn(attributeMetaData);
 		when(dataService.getRepositoryByEntityName(dataSetIdentifier)).thenReturn(repository);
 
 		Query q = new QueryImpl().pageSize(pageSize).offset(offset);
@@ -202,7 +202,7 @@ public class OmxRepositoryIteratorTest
 		FieldType fieldType = mock(FieldType.class);
 		when(fieldType.getEnumType()).thenReturn(FieldTypeEnum.STRING);
 		when(attributeMetaData.getDataType()).thenReturn(fieldType);
-		when(repository.getAttribute(attrName)).thenReturn(attributeMetaData);
+		when(repository.getEntityMetaData().getAttribute(attrName)).thenReturn(attributeMetaData);
 		when(dataService.getRepositoryByEntityName(dataSetIdentifier)).thenReturn(repository);
 
 		Query q = new QueryImpl().pageSize(pageSize).offset(offset);

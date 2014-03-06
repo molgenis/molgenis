@@ -1,5 +1,7 @@
 package org.molgenis.data.support;
 
+import static org.molgenis.security.core.utils.SecurityUtils.currentUserHasRole;
+
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -12,6 +14,7 @@ import java.util.Set;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Queryable;
@@ -24,6 +27,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -57,9 +62,24 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
+	public EntityMetaData getEntityMetaData(String entityName)
+	{
+		Repository repository = repositories.get(entityName.toLowerCase());
+		if (repository == null) throw new UnknownEntityException("Unknown entity [" + entityName + "]");
+		return repository.getEntityMetaData();
+	}
+
+	@Override
 	public Iterable<String> getEntityNames()
 	{
-		return repositoryNames;
+		return Iterables.filter(repositoryNames, new Predicate<String>()
+		{
+			@Override
+			public boolean apply(String entityName)
+			{
+				return currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_COUNT_" + entityName.toUpperCase());
+			}
+		});
 	}
 
 	@Override
@@ -73,8 +93,9 @@ public class DataServiceImpl implements DataService
 	@Override
 	public Repository getRepositoryByUrl(String url)
 	{
-		for (Repository repository : repositories.values())
+		for (Map.Entry<String, Repository> entry : repositories.entrySet())
 		{
+			Repository repository = entry.getValue();
 			if (repository.getUrl().equalsIgnoreCase(url))
 			{
 				return repository;
@@ -300,5 +321,4 @@ public class DataServiceImpl implements DataService
 			addRepository(repository);
 		}
 	}
-
 }

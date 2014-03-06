@@ -5,6 +5,10 @@
 	font-style: italice;	
 }
 
+.molgenis-table {
+	width: 100%;	
+}
+
 .molgenis-table thead th {
 	background-color: #5B82A4;
 	color: white;
@@ -32,4 +36,14 @@
 
 .molgenis-table-info {
 	font-style: italic;	
+}
+
+.molgenis-table .show-popover {
+	cursor: pointer;
+}
+
+.molgenis-table .multi-os-datacell input[type=checkbox] {
+	margin-left: auto;
+	margin-right: auto;
+	width: 100%;
 }

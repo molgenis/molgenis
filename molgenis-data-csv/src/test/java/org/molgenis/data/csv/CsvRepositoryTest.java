@@ -89,7 +89,7 @@ public class CsvRepositoryTest
 			FileCopyUtils.copy(in, new FileOutputStream(file));
 			csvRepository = new CsvRepository(file, null);
 			assertEquals(csvRepository.getName(), "testdata");
-			Iterator<AttributeMetaData> it = csvRepository.getAttributes().iterator();
+			Iterator<AttributeMetaData> it = csvRepository.getEntityMetaData().getAttributes().iterator();
 			assertTrue(it.hasNext());
 			assertEquals(it.next().getName(), "col1");
 			assertTrue(it.hasNext());
