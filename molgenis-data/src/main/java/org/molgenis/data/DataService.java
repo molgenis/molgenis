@@ -32,7 +32,14 @@ public interface DataService extends RepositoryCollection
 	 */
 	void addRepositories(RepositorySource repositorySource);
 
-	/**
+    /**
+     * check ia a repository for this entity already exists
+     *
+     * @param entityName
+     */
+    boolean hasRepository(String entityName);
+
+    /**
 	 * Returns the meta data for the given entity
 	 * 
 	 * @param entityName

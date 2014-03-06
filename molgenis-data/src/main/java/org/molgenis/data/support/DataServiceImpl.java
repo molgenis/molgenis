@@ -90,6 +90,13 @@ public class DataServiceImpl implements DataService
 		else return repository;
 	}
 
+    @Override
+    public boolean hasRepository(String entityName)
+    {
+        return repositories.containsKey(entityName.toLowerCase());
+
+    }
+
 	@Override
 	public Repository getRepositoryByUrl(String url)
 	{

@@ -7,11 +7,7 @@ import java.util.Set;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataService;
-import org.molgenis.data.DatabaseAction;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Repository;
+import org.molgenis.data.*;
 import org.molgenis.data.omx.OmxLookupTableRepository;
 import org.molgenis.data.omx.OmxRepository;
 import org.molgenis.data.support.QueryImpl;
@@ -94,8 +90,11 @@ public class OmxImporterServiceImpl implements OmxImporterService
 					}
 					for (ObservableFeature categoricalFeature : categoricalFeatures)
 					{
-						dataService.addRepository(new OmxLookupTableRepository(dataService, categoricalFeature
-								.getIdentifier()));
+						if (!dataService.hasRepository(categoricalFeature.getIdentifier() + "-LUT"))
+						{
+							dataService.addRepository(new OmxLookupTableRepository(dataService, categoricalFeature
+									.getIdentifier()));
+						}
 					}
 				}
 
