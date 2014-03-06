@@ -1,12 +1,14 @@
 package org.molgenis.data.support;
 
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
+import org.molgenis.data.convert.DateToStringConverter;
 import org.springframework.beans.BeanUtils;
 
 public abstract class AbstractEntity implements Entity
@@ -22,8 +24,6 @@ public abstract class AbstractEntity implements Entity
 		switch (dataType)
 		{
 			case BOOL:
-			case DATE:
-			case DATE_TIME:
 			case DECIMAL:
 			case EMAIL:
 			case ENUM:
@@ -35,6 +35,10 @@ public abstract class AbstractEntity implements Entity
 			case TEXT:
 				Object obj = get(labelAttributeName);
 				return obj != null ? obj.toString() : null;
+			case DATE:
+			case DATE_TIME:
+				Date date = getUtilDate(labelAttributeName);
+				return new DateToStringConverter().convert(date);
 			case CATEGORICAL:
 			case XREF:
 				Entity refEntity = getEntity(labelAttributeName);
