@@ -31,8 +31,6 @@
 					return;
 				}
 				
-				
-				
 				var table = $('<table />').attr('class', 'table table-bordered');
 				var tableHeader = $('<thead><th style="width:20%;">Edit</th><th style="width:30%;">DataSet</th><th>Script</th><th>Status</th></thead>');
 				var tableBody = $('<tbody />');
@@ -51,7 +49,7 @@
 						'class' : 'btn'
 					}).css('float', 'right').append('<i class="icon-trash"></i>');
 					
-					var dataSet = restApi.get('/api/v1/dataset/' + eachAnalysis.sourceDataSetId);
+					var dataSet = restApi.get('/api/v1/dataset/' + eachAnalysis.sourceDataSetId, ['protocolUsed']);
 					$('<td />').append(editButton).append(' ').append(runningButton).append(removeButton).appendTo(row);
 					$('<td />').append(dataSet.name).appendTo(row);
 					$('<td />').append(eachAnalysis.script).appendTo(row);
@@ -71,6 +69,7 @@
 					});
 					runningButton.click(function(){
 						console.log('runningButton is clicked!');
+						runAnalysis(eachAnalysis);
 					});
 					removeButton.click(function(){
 						console.log('removeButton is clicked!');
@@ -82,16 +81,29 @@
 				console.log(error);
 			}
 		});
-	};
-	
-	function defineResult(dataSet){
 		
-	}
+		function runAnalysis(eachAnalysis){
+			$.ajax({
+				type : 'POST',
+				url : molgenis.getContextUrl() + '/runanalysis',
+				async : false,
+				data : JSON.stringify(analysisRequest),
+				contentType : 'application/json',
+				success : function(data, textStatus, request){	
+					console.log(data);
+				},
+				error : function(request, textStatus, error){
+					console.log(error);
+				}
+			});
+		}
+	};
 	
 	function retrieveAllFeatures(dataSet, editorContainer){
 		var request = {
-			documentType : 'protocolTree-' + molgenis.hrefToId(dataSet.href),
+			documentType : 'protocolTree-' + molgenis.hrefToId(dataSet.protocolUsed.href),
 			query : {
+				pageSize: 1000000,
 				rules : [[{
 					field : 'type',
 					operator : 'EQUALS',
@@ -144,7 +156,7 @@
 	
 	function initEditor (eachAnalysis, editorContainer){
 		var algorithmEditorDiv = $('<div id="algorithmEditorDiv"></div>').addClass('span6 well').css('height', editorHeight).appendTo(editorContainer);
-		var dataSet = restApi.get('/api/v1/dataset/' + eachAnalysis.sourceDataSetId);
+		var dataSet = restApi.get('/api/v1/dataset/' + eachAnalysis.sourceDataSetId, ['protocolUsed']);
 		
 		var langTools = ace.require("ace/ext/language_tools");
 		var editor = ace.edit('algorithmEditorDiv');
@@ -157,7 +169,7 @@
 		var algorithmEditorCompleter = {
 	        getCompletions: function(editor, session, pos, prefix, callback) {
 	            if (prefix.length === 0) { callback(null, []); return }
-	            searchApi.search(searchFeatureByName('protocolTree-' + molgenis.hrefToId(dataSet.href), prefix), function(searchResponse){
+	            searchApi.search(searchFeatureByName('protocolTree-' + molgenis.hrefToId(dataSet.protocolUsed.href), prefix), function(searchResponse){
                     callback(null, searchResponse.searchHits.map(function(hit) {
                     	var map = hit.columnValueMap;
                         return {name: '$(\'' + map.name + '\')', value: '$(\'' + map.name + '\')', score: map.score, meta: dataSet.name};

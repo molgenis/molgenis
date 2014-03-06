@@ -63,6 +63,15 @@ public class ApplyAlgorithms
 	private static final String STORE_MAPPING_FEATURE = "store_mapping_feature";
 	private static final String STORE_MAPPING_ALGORITHM_SCRIPT = "store_mapping_algorithm_script";
 
+	private static final Map<String, Class<?>> entityMap = new HashMap<String, Class<?>>();
+	static
+	{
+		entityMap.put(StringValue.ENTITY_NAME, StringValue.class);
+		entityMap.put(IntValue.ENTITY_NAME, IntValue.class);
+		entityMap.put(DecimalValue.ENTITY_NAME, DecimalValue.class);
+		entityMap.put(CategoricalValue.ENTITY_NAME, CategoricalValue.class);
+	}
+
 	@RunAsSystem
 	@Transactional
 	public void applyAlgorithm(String userName, Integer targetDataSetId, List<Integer> sourceDataSetIds)
@@ -107,7 +116,7 @@ public class ApplyAlgorithms
 				ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME, featureId,
 						ObservableFeature.class);
 				String algorithmScript = hit.getColumnValueMap().get(STORE_MAPPING_ALGORITHM_SCRIPT).toString();
-				for (Entry<Integer, Object> entry : createValueFromAlgorithm(featureId, sourceDataSetId,
+				for (Entry<Integer, Object> entry : createValueFromAlgorithm(feature.getDataType(), sourceDataSetId,
 						algorithmScript).entrySet())
 				{
 					Integer observationSetId = entry.getKey();
@@ -210,7 +219,21 @@ public class ApplyAlgorithms
 				StringUtils.join(sourceDataSetIds, '-'));
 		DataSet derivedDataSet = dataService.findOne(DataSet.ENTITY_NAME,
 				new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier), DataSet.class);
-		if (derivedDataSet != null) dataSetDeleterService.deleteData(dataSetIdentifier, false);
+		if (derivedDataSet != null)
+		{
+			Iterable<ObservationSet> observationSets = dataService.findAll(ObservationSet.ENTITY_NAME,
+					new QueryImpl().eq(ObservationSet.PARTOFDATASET, derivedDataSet), ObservationSet.class);
+			Iterable<ObservedValue> observedValues = dataService.findAll(ObservedValue.ENTITY_NAME,
+					new QueryImpl().in(ObservedValue.OBSERVATIONSET, observationSets), ObservedValue.class);
+
+			for (ObservedValue value : observedValues)
+			{
+				String valueType = value.getValue().get__Type();
+				Integer valueId = value.getId();
+			}
+
+			// dataSetDeleterService.deleteData(dataSetIdentifier, false);
+		}
 	}
 
 	private void createDerivedDataSets(String userName, Integer targetDataSetId, List<Integer> sourceDataSetIds)
@@ -233,7 +256,7 @@ public class ApplyAlgorithms
 		return searchService.search(new SearchRequest(CATALOGUE_PREFIX + targetDataSetId, query, null));
 	}
 
-	public Map<Integer, Object> createValueFromAlgorithm(Integer featureId, Integer sourceDataSetId,
+	public Map<Integer, Object> createValueFromAlgorithm(String dataType, Integer sourceDataSetId,
 			String algorithmScript)
 	{
 		if (algorithmScript.isEmpty()) return Collections.emptyMap();
@@ -257,15 +280,21 @@ public class ApplyAlgorithms
 					new MapEntity());
 			Object valueObject = value.getValue().get("value");
 
-			if (valueObject instanceof String) eachIndividualValues.get(observationSetId).set(
-					value.getFeature().getName(), value.getValue().get("value").toString());
-
-			else if (valueObject instanceof Integer) eachIndividualValues.get(observationSetId).set(
-					value.getFeature().getName(), Integer.parseInt(value.getValue().get("value").toString()));
-
-			else if (valueObject instanceof Double) eachIndividualValues.get(observationSetId).set(
-					value.getFeature().getName(), Double.parseDouble(value.getValue().get("value").toString()));
-
+			if (valueObject instanceof String)
+			{
+				eachIndividualValues.get(observationSetId).set(value.getFeature().getName(),
+						value.getValue().get("value").toString());
+			}
+			else if (valueObject instanceof Integer)
+			{
+				eachIndividualValues.get(observationSetId).set(value.getFeature().getName(),
+						Integer.parseInt(value.getValue().get("value").toString()));
+			}
+			else if (valueObject instanceof Double)
+			{
+				eachIndividualValues.get(observationSetId).set(value.getFeature().getName(),
+						Double.parseDouble(value.getValue().get("value").toString()));
+			}
 			else if (valueObject instanceof Category)
 			{
 				eachIndividualValues.get(observationSetId).set(value.getFeature().getName(),
@@ -273,20 +302,17 @@ public class ApplyAlgorithms
 			}
 		}
 
-		ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME, featureId,
-				ObservableFeature.class);
-
 		Map<Integer, Object> results = new HashMap<Integer, Object>();
 		for (Entry<Integer, MapEntity> entry : eachIndividualValues.entrySet())
 		{
 			if (Iterables.size(entry.getValue().getAttributeNames()) != featureNames.size()) continue;
 			Object result = ScriptEvaluator.eval(algorithmScript, entry.getValue());
-			if (feature.getDataType().equalsIgnoreCase(MolgenisFieldTypes.FieldTypeEnum.INT.toString())) results.put(
+			if (dataType.equalsIgnoreCase(MolgenisFieldTypes.FieldTypeEnum.INT.toString())) results.put(entry.getKey(),
+					Integer.parseInt(Context.toString(result)));
+			else if (dataType.equalsIgnoreCase(MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL.toString())) results.put(
 					entry.getKey(), Integer.parseInt(Context.toString(result)));
-			else if (feature.getDataType().equalsIgnoreCase(MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL.toString())) results
-					.put(entry.getKey(), Integer.parseInt(Context.toString(result)));
-			else if (feature.getDataType().equalsIgnoreCase(MolgenisFieldTypes.FieldTypeEnum.DECIMAL.toString())) results
-					.put(entry.getKey(), Context.toNumber(result));
+			else if (dataType.equalsIgnoreCase(MolgenisFieldTypes.FieldTypeEnum.DECIMAL.toString())) results.put(
+					entry.getKey(), Context.toNumber(result));
 			else results.put(entry.getKey(), Context.toString(result));
 		}
 		return results;
@@ -299,7 +325,7 @@ public class ApplyAlgorithms
 		Matcher matcher = pattern.matcher(algorithmScript);
 		while (matcher.find())
 		{
-			featureNames.add(matcher.group(1));
+			if (!featureNames.contains(matcher.group(1))) featureNames.add(matcher.group(1));
 		}
 		if (featureNames.size() > 0) return featureNames;
 
@@ -307,7 +333,7 @@ public class ApplyAlgorithms
 		matcher = pattern.matcher(algorithmScript);
 		while (matcher.find())
 		{
-			featureNames.add(matcher.group(1));
+			if (!featureNames.contains(matcher.group(1))) featureNames.add(matcher.group(1));
 		}
 		return featureNames;
 	}

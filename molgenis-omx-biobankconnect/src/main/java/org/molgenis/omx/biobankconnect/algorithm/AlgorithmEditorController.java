@@ -24,6 +24,7 @@ import org.molgenis.omx.biobankconnect.wizard.ChooseCataloguePage;
 import org.molgenis.omx.biobankconnect.wizard.CurrentUserStatus;
 import org.molgenis.omx.biobankconnect.wizard.OntologyAnnotatorPage;
 import org.molgenis.omx.observ.DataSet;
+import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchResult;
@@ -196,7 +197,10 @@ public class AlgorithmEditorController extends AbstractWizardController
 		Iterable<ObservationSet> observationSets = dataService.findAll(ObservationSet.ENTITY_NAME,
 				new QueryImpl().eq(ObservationSet.PARTOFDATASET, sourceDataSet), ObservationSet.class);
 
-		Collection<Object> results = applyAlgorithms.createValueFromAlgorithm(request.getFeatureId(),
+		ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME, request.getFeatureId(),
+				ObservableFeature.class);
+
+		Collection<Object> results = applyAlgorithms.createValueFromAlgorithm(feature.getDataType(),
 				request.getSelectedDataSetIds().get(0), request.getAlgorithmScript()).values();
 
 		jsonResults.put("results", results);

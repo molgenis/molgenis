@@ -14,6 +14,7 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.omx.biobankconnect.algorithm.ApplyAlgorithms;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
@@ -49,6 +50,9 @@ public class BiobankAnalysisController extends MolgenisPluginController
 
 	@Autowired
 	private UserAccountService userAccountService;
+
+	@Autowired
+	private ApplyAlgorithms applyAlgorithms;
 
 	@Autowired
 	public BiobankAnalysisController(DataService dataService)
@@ -114,6 +118,16 @@ public class BiobankAnalysisController extends MolgenisPluginController
 		{
 			results.put("analyses", retrieveAnalysisComponents(Integer.parseInt(dataSetId)));
 		}
+		return results;
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/runanalysis")
+	@ResponseBody
+	public Map<Integer, Object> runAnalysis(@RequestBody
+	AnalysisComponent request)
+	{
+		Map<Integer, Object> results = applyAlgorithms.createValueFromAlgorithm("decimal",
+				Integer.parseInt(request.getSourceDataSetId()), request.getScript());
 		return results;
 	}
 
