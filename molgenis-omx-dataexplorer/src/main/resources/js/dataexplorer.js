@@ -204,7 +204,7 @@
 					attributeSelect.append('<option value="' + attribute.href + '">' + attribute.label + '</option>');
 				}
 			});
-			$('#feature-select').empty().append(attributeSelect);
+			$('#feature-select').html(attributeSelect);
 			if(attributeSelect.val()) {
 				updateAggregatesTable(attributeSelect.val());
 				attributeSelect.chosen();
@@ -219,10 +219,11 @@
 	 * @memberOf molgenis.dataexplorer
 	 */
 	function updateAggregatesTable(attributeUri) {
+		console.log(attributeUri);
 		$.ajax({
 			type : 'POST',
 			url : molgenis.getContextUrl() + '/aggregate',
-			data : JSON.stringify({'attributeUri': attributeUri}),
+			data : JSON.stringify({'attributeUri': attributeUri, 'q': createEntityQuery().q}),
 			contentType : 'application/json',
 			success : function(aggregateResult) {
 				var table = $('<table />').addClass('table table-striped');
@@ -485,7 +486,7 @@
 					});
 					break;
 				case 'tab-aggregates':
-					updateAggregatesTable();
+					createAggregatesTable();
 					break;
 				case 'tab-charts':
 					break;
@@ -502,7 +503,7 @@
 					// TODO what to do for genomebrowser?
 					break;
 				case 'tab-aggregates':
-					updateAggregatesTable();
+					createAggregatesTable();
 					break;
 				case 'tab-charts':
 					break;
@@ -520,7 +521,7 @@
 						createDataTable();
 					break;
 				case 'tab-aggregates':
-					updateAggregatesTable();
+					createAggregatesTable();
 					break;
 				case 'tab-charts':
 					break;
