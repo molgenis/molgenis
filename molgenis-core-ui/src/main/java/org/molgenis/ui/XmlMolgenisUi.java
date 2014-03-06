@@ -59,9 +59,7 @@ public class XmlMolgenisUi implements MolgenisUi
 	@Override
 	public MolgenisUiMenu getMenu(String menuId)
 	{
-		MolgenisUiMenu menu = getMenuRecursive(getMenu(), menuId);
-		if (menu == null) throw new RuntimeException("unknown menu or menu with no (accessible) items: " + menuId);
-		return menu;
+		return getMenuRecursive(getMenu(), menuId);
 	}
 
 	private MolgenisUiMenu getMenuRecursive(MolgenisUiMenu menu, String menuId)

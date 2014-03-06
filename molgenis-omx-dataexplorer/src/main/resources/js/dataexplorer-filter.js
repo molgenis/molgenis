@@ -30,7 +30,7 @@
 		var modal = $('#filter-modal');
 		if(!modal.length) {
 			var items = [];
-			items.push('<div class="modal hide" id="filter-modal" tabindex="-1">');
+			items.push('<div class="modal hide medium" id="filter-modal" tabindex="-1">');
 			items.push('<div class="modal-header">');
 			items.push('<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>');
 			items.push('<h3 class="filter-title"></h3>');

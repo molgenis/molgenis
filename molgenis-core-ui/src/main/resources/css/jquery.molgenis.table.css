@@ -37,3 +37,13 @@
 .molgenis-table-info {
 	font-style: italic;	
 }
+
+.molgenis-table .show-popover {
+	cursor: pointer;
+}
+
+.molgenis-table .multi-os-datacell input[type=checkbox] {
+	margin-left: auto;
+	margin-right: auto;
+	width: 100%;
+}

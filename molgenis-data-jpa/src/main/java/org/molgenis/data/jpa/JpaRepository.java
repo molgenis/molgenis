@@ -22,6 +22,7 @@ import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
@@ -29,6 +30,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.support.AbstractCrudRepository;
 import org.molgenis.data.support.ConvertingIterable;
 import org.molgenis.data.support.MapEntity;
@@ -606,6 +608,11 @@ public class JpaRepository extends AbstractCrudRepository
 	{ "rawtypes", "unchecked" })
 	private List<Predicate> createPredicates(Root<?> from, CriteriaBuilder cb, List<QueryRule> rules)
 	{
+		if (!rules.isEmpty() && (rules.get(0).getOperator() == Operator.SEARCH))
+		{
+			return createPredicates(from, cb, createSearchQueryRules(rules.get(0).getValue()));
+		}
+
 		// default Query links criteria based on 'and'
 		List<Predicate> andPredicates = new ArrayList<Predicate>();
 		// optionally, subqueries can be formulated seperated by 'or'
@@ -826,5 +833,90 @@ public class JpaRepository extends AbstractCrudRepository
 		E e = BeanUtils.instantiate(clazz);
 		e.set(entity);
 		return e;
+	}
+
+	/*
+	 * Convert a search query to a list of QueryRule, creates for every attribute a QueryRule and 'OR's them
+	 * 
+	 * No search on XREF/MREF possible at the moment
+	 * 
+	 * Replace this by ES indexing??
+	 */
+	private List<QueryRule> createSearchQueryRules(Object searchValue)
+	{
+		List<QueryRule> searchRules = Lists.newArrayList();
+
+		for (AttributeMetaData attr : getEntityMetaData().getAttributes())
+		{
+			QueryRule rule = null;
+			switch (attr.getDataType().getEnumType())
+			{
+				case STRING:
+				case TEXT:
+				case HTML:
+				case HYPERLINK:
+				case EMAIL:
+					rule = new QueryRule(attr.getName(), Operator.LIKE, searchValue);
+					break;
+				case BOOL:
+					if (DataConverter.canConvert(searchValue, Boolean.class))
+					{
+						rule = new QueryRule(attr.getName(), Operator.EQUALS, DataConverter.toBoolean(searchValue));
+					}
+					break;
+				case DATE:
+					if (DataConverter.canConvert(searchValue, java.sql.Date.class))
+					{
+						rule = new QueryRule(attr.getName(), Operator.EQUALS, DataConverter.toDate(searchValue));
+					}
+					break;
+				case DATE_TIME:
+					if (DataConverter.canConvert(searchValue, java.util.Date.class))
+					{
+						rule = new QueryRule(attr.getName(), Operator.EQUALS, DataConverter.toUtilDate(searchValue));
+					}
+					break;
+				case DECIMAL:
+					if (DataConverter.canConvert(searchValue, Double.class))
+					{
+						rule = new QueryRule(attr.getName(), Operator.EQUALS, DataConverter.toDouble(searchValue));
+					}
+					break;
+				case INT:
+					if (DataConverter.canConvert(searchValue, Integer.class))
+					{
+						rule = new QueryRule(attr.getName(), Operator.EQUALS, DataConverter.toInt(searchValue));
+					}
+					break;
+				case LONG:
+					if (DataConverter.canConvert(searchValue, Long.class))
+					{
+						rule = new QueryRule(attr.getName(), Operator.EQUALS, DataConverter.toLong(searchValue));
+					}
+					break;
+
+				// TODO how??
+				case CATEGORICAL:
+				case MREF:
+				case XREF:
+					break;
+				default:
+					break;
+
+			}
+
+			if (rule != null)
+			{
+				if (!searchRules.isEmpty())
+				{
+					searchRules.add(new QueryRule(Operator.OR));
+				}
+
+				searchRules.add(rule);
+			}
+
+		}
+
+		return searchRules;
 	}
 }
