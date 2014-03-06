@@ -349,7 +349,9 @@
 				}
 			}
 		});
-		return Object.keys(filters).map(function (key) { return filters[key]; });	
+		
+
+		return Object.keys(filters).map(function (key) { return filters[key]; }).filter(function(filter){return filter.values.length > 0;});
 	}
 	
 	/**
@@ -441,11 +443,14 @@
 					return attribute.fieldType !== 'COMPOUND' ? attribute : null;
 				});
 				
-				//Save selected entity to cookie, expires after 7 days
-				$.cookie('molgenis.selected.entity.uri', entityUri, { expires: 7 });
 				$(document).trigger('changeAttributeSelection', {'attributes': selectedAttributes});
 				createEntityMetaTree(entityMetaData, selectedAttributes);
-
+				
+				//Show wizard on show of dataexplorer if url param 'wizard=true' is added
+				if (showWizard) {
+					molgenis.dataexplorer.wizard.openFilterWizardModal(selectedEntityMetaData, attributeFilters);
+					showWizard = false;
+				}
 			});
 		});
 		
@@ -574,11 +579,6 @@
 			setDallianceFilter();
 		});
 		
-		//Read previous selected entity from cookie
-		var uri = $.cookie('molgenis.selected.entity.uri');
-		if (uri && restApi.entityExists(uri)) {
-			$('#dataset-select').val(uri).trigger("liszt:updated");
-		}
 		
 		// fire event handler
 		$('#dataset-select').change();
