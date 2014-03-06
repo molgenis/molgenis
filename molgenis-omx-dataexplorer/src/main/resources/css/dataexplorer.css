@@ -56,7 +56,7 @@ a.accordion-toggle:hover,a.accordion-toggle:focus,a.accordion-toggle:active
 	vertical-align: middle;
 }
 
-#feature-selection {
+#feature-selection .molgenis-tree {
 	height: 400px;
 	overflow: auto;
 	margin-bottom: 10px;

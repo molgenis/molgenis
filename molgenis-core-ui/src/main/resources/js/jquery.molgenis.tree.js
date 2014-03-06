@@ -106,6 +106,7 @@
 			e.preventDefault();
 			
 			var fn = settings.onAttributesSelect; // store handler
+			settings.onAttributesSelect = null; // suppress events
 			
 			var selects = [];
 			tree.fancytree("getRootNode").visit(function(node) {
@@ -126,6 +127,7 @@
 			e.preventDefault();
 			
 			var fn = settings.onAttributesSelect; // store handler
+			settings.onAttributesSelect = null; // suppress events
 			
 			var selects = [];
 			tree.fancytree("getRootNode").visit(function(node) {
