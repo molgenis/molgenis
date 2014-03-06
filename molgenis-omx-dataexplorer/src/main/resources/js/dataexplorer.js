@@ -350,7 +350,9 @@
 				}
 			}
 		});
-		return Object.keys(filters).map(function (key) { return filters[key]; });	
+		
+
+		return Object.keys(filters).map(function (key) { return filters[key]; }).filter(function(filter){return filter.values.length > 0;});
 	}
 	
 	/**
