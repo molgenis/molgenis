@@ -110,8 +110,9 @@ public class DataExplorerController extends MolgenisPluginController
 	 * @return the view name
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(@RequestParam(value = "dataset", required = false) String selectedEntityName, Model model)
-			throws Exception
+	public String init(@RequestParam(value = "dataset", required = false)
+	String selectedEntityName, @RequestParam(value = "wizard", required = false)
+	Boolean wizard, Model model) throws Exception
 	{
 		// set entityExplorer URL for link to EntityExplorer for x/mrefs, but only if the user has permission to see the
 		// plugin
@@ -137,6 +138,7 @@ public class DataExplorerController extends MolgenisPluginController
 			selectedEntityName = entitiesMeta.iterator().next().getName();
 		}
 		model.addAttribute("selectedEntityName", selectedEntityName);
+		model.addAttribute("wizard", (wizard != null) && wizard.booleanValue());
 
 		// Init genome browser
 		model.addAttribute("genomeBrowserSets", getGenomeBrowserSetsToModel());
@@ -178,8 +180,8 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/download", method = POST)
-	public void download(@RequestParam("dataRequest") String dataRequestStr, HttpServletResponse response)
-			throws IOException
+	public void download(@RequestParam("dataRequest")
+	String dataRequestStr, HttpServletResponse response) throws IOException
 	{
 		// Workaround because binding with @RequestBody is not possible:
 		// http://stackoverflow.com/a/9970672
@@ -224,7 +226,9 @@ public class DataExplorerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/aggregate", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
 	@ResponseBody
-	public AggregateResponse aggregate(@Valid @RequestBody AggregateRequest request)
+	public AggregateResponse aggregate(@Valid
+	@RequestBody
+	AggregateRequest request)
 	{
 		// TODO create utility class to extract info from entity/attribute uris
 		String[] attributeUriTokens = request.getAttributeUri().split("/");
