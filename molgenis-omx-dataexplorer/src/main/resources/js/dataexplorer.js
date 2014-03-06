@@ -45,7 +45,7 @@
 		container.tree({
 			'entityMetaData' : entityMetaData,
 			'selectedAttributes' : selectedAttributes,
-			'onAttributeSelect' : function(attribute, selected) {
+			'onAttributesSelect' : function(selects) {
 				var attributes = container.tree('getSelectedAttributes');
 				$(document).trigger('changeAttributeSelection', {'attributes': attributes});
 			},
