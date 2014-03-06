@@ -11,11 +11,7 @@
 						items.push('<td>' + (idx == 0 ? entityName : '') + '</td>');
 						items.push('<td><input type="radio" name="radio-' + entityId + '" value="write"' + (perm.type === "write" ? ' checked' : '') + '></td>');
 						items.push('<td><input type="radio" name="radio-' + entityId + '" value="read"' + (perm.type === "read" ? ' checked' : '') + '></td>');
-<<<<<<< HEAD
-						items.push('<td><input type="radio" name="radio-' + entityId + '" value="aggregate"' + (perm.type === "aggregate" ? ' checked' : '') + '></td>');
-=======
 						items.push('<td><input type="radio" name="radio-' + entityId + '" value="count"' + (perm.type === "count" ? ' checked' : '') + '></td>');
->>>>>>> 6a2ddd0bc5c86315106b18c09f16020d419b7daf
 						items.push('<td><input type="radio" name="radio-' + entityId + '" value="none"' + (perm.type ? '' : ' checked') + '></td>');
 						items.push('</tr>');						
 					});
@@ -24,11 +20,7 @@
 					items.push('<td>' + entityName + '</td>');
 					items.push('<td><input type="radio" name="radio-' + entityId + '" value="write"></td>');
 					items.push('<td><input type="radio" name="radio-' + entityId + '" value="read"></td>');
-<<<<<<< HEAD
-					items.push('<td><input type="radio" name="radio-' + entityId + '" value="aggregate"></td>');
-=======
 					items.push('<td><input type="radio" name="radio-' + entityId + '" value="count"></td>');
->>>>>>> 6a2ddd0bc5c86315106b18c09f16020d419b7daf
 					items.push('<td><input type="radio" name="radio-' + entityId + '" value="none" checked></td>');
 					items.push('</tr>');
 				}
@@ -38,11 +30,7 @@
 						items.push('<td><span class="muted inherited-permission">inherited from hierarchy</span></td>');
 						items.push('<td><input type="radio"' + (perm.type === "write" ? ' checked' : '') + ' disabled></td>');
 						items.push('<td><input type="radio"' + (perm.type === "read" ? ' checked' : '') + ' disabled></td>');
-<<<<<<< HEAD
-						items.push('<td><input type="radio"' + (perm.type === "aggregate" ? ' checked' : '') + ' disabled></td>');
-=======
 						items.push('<td><input type="radio"' + (perm.type === "count" ? ' checked' : '') + ' disabled></td>');
->>>>>>> 6a2ddd0bc5c86315106b18c09f16020d419b7daf
 						items.push('<td><input type="radio"' + (perm.type ? '' : ' checked') + ' disabled></td>');
 						items.push('</tr>');					
 					});
@@ -61,11 +49,7 @@
 						items.push('<td>' + (idx == 0 ? entityName : '') + '</td>');
 						items.push('<td><input type="radio" name="radio-' + entityId + '" value="write"' + (perm.type === "write" ? ' checked' : '') + '></td>');
 						items.push('<td><input type="radio" name="radio-' + entityId + '" value="read"' + (perm.type === "read" ? ' checked' : '') + '></td>');
-<<<<<<< HEAD
-						items.push('<td><input type="radio" name="radio-' + entityId + '" value="aggregate"' + (perm.type === "aggregate" ? ' checked' : '') + '></td>');
-=======
 						items.push('<td><input type="radio" name="radio-' + entityId + '" value="count"' + (perm.type === "count" ? ' checked' : '') + '></td>');
->>>>>>> 6a2ddd0bc5c86315106b18c09f16020d419b7daf
 						items.push('<td><input type="radio" name="radio-' + entityId + '" value="none"' + (perm.type ? '' : ' checked') + '></td>');
 					});
 				} else {
@@ -73,11 +57,7 @@
 					items.push('<td>' + entityName + '</td>');
 					items.push('<td><input type="radio" name="radio-' + entityId + '" value="write"></td>');
 					items.push('<td><input type="radio" name="radio-' + entityId + '" value="read"></td>');
-<<<<<<< HEAD
-					items.push('<td><input type="radio" name="radio-' + entityId + '" value="aggregate"></td>');
-=======
 					items.push('<td><input type="radio" name="radio-' + entityId + '" value="count"></td>');
->>>>>>> 6a2ddd0bc5c86315106b18c09f16020d419b7daf
 					items.push('<td><input type="radio" name="radio-' + entityId + '" value="none" checked></td>');
 					items.push('</tr>');
 				}
@@ -87,11 +67,8 @@
 						items.push('<td><span class="muted inherited-permission">inherited from group: ' + perm.group + '</span></td>');
 						items.push('<td><input type="radio"' + (perm.type === "write" ? ' checked' : '') + ' disabled></td>');
 						items.push('<td><input type="radio"' + (perm.type === "read" ? ' checked' : '') + ' disabled></td>');
-<<<<<<< HEAD
 						items.push('<td><input type="radio"' + (perm.type === "aggregate" ? ' checked' : '') + ' disabled></td>');
-=======
 						items.push('<td><input type="radio"' + (perm.type === "count" ? ' checked' : '') + ' disabled></td>');
->>>>>>> 6a2ddd0bc5c86315106b18c09f16020d419b7daf
 						items.push('<td><input type="radio"' + (perm.type ? '' : ' checked') + ' disabled></td>');
 						items.push('</tr>');						
 					});
