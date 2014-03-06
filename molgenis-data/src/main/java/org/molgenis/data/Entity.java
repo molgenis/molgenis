@@ -41,52 +41,52 @@ public interface Entity extends Serializable
 	 */
 	String getLabelValue();
 
-	public String getString(String attributeName);
+	String getString(String attributeName);
 
 	/**
 	 * Retrieves the value of the designated column as Integer.
 	 */
-	public Integer getInt(String attributeName);
+	Integer getInt(String attributeName);
 
 	/**
 	 * Retrieves the value of the designated column as Long.
 	 */
-	public Long getLong(String attributeName);
+	Long getLong(String attributeName);
 
 	/**
 	 * Retrieves the value of the designated column as Boolean.
 	 */
-	public Boolean getBoolean(String attributeName);
+	Boolean getBoolean(String attributeName);
 
 	/**
 	 * Retrieves the value of the designated column as Double.
 	 */
-	public Double getDouble(String attributeName);
+	Double getDouble(String attributeName);
 
 	/**
 	 * Retrieves the value of the designated column as {@link java.sql.Date}.
 	 */
-	public java.sql.Date getDate(String attributeName);
+	java.sql.Date getDate(String attributeName);
 
 	/**
 	 * Retrieves the value of the designated column as {@link java.util.Date}.
 	 */
-	public java.util.Date getUtilDate(String attributeName);
+	java.util.Date getUtilDate(String attributeName);
 
 	/**
 	 * Retrieves the value of the designated column as {@link java.sql.Timestamp}.
 	 */
-	public Timestamp getTimestamp(String attributeName);
+	Timestamp getTimestamp(String attributeName);
 
 	/**
-	 * Retrieves the value of the designated column as List<?>.
+	 * Retrieves the value of the designated column as List<String>.
 	 */
-	public List<String> getList(String attributeName);
+	List<String> getList(String attributeName);
 
 	/**
 	 * Retrieves the value of the designated column as List<Integer>
 	 */
-	public List<Integer> getIntList(String attributeName);
+	List<Integer> getIntList(String attributeName);
 
 	List<String> getLabelAttributeNames();
 
