@@ -22,6 +22,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.csv.CsvWriter;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.entityexplorer.controller.EntityExplorerController;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
@@ -102,8 +103,6 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	/**
-	 * TODO JJ
-	 * 
 	 * Show the explorer page
 	 * 
 	 * @param model
@@ -235,8 +234,10 @@ public class DataExplorerController extends MolgenisPluginController
 		String entityName = attributeUriTokens[3];
 		String attributeName = attributeUriTokens[5];
 
+		QueryImpl q = request.getQ() != null ? new QueryImpl(request.getQ()) : new QueryImpl();
+
 		Map<String, Integer> aggregateMap = new HashMap<String, Integer>();
-		for (Entity entity : dataService.findAll(entityName))
+		for (Entity entity : dataService.findAll(entityName, q))
 		{
 			String val = entity.getString(attributeName);
 			Integer count = aggregateMap.get(val);
