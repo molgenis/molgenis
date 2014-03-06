@@ -19,18 +19,20 @@
 		items.push('</div>');
 		settings.container.html(items.join(''));
 
-		// add data to elements
-		getTableMetaData(settings, function(attributes, refEntitiesMeta) {
-			settings.colAttributes = attributes;
-			settings.refEntitiesMeta = refEntitiesMeta;
-
-			getTableData(settings, function(data) {
-				createTableHeader(settings);
-				createTableBody(data, settings);
-				createTablePager(data, settings);
-				createTableFooter(data, settings);
+		if(settings.attributes && settings.attributes.length > 0) {
+			// add data to elements
+			getTableMetaData(settings, function(attributes, refEntitiesMeta) {
+				settings.colAttributes = attributes;
+				settings.refEntitiesMeta = refEntitiesMeta;
+	
+				getTableData(settings, function(data) {
+					createTableHeader(settings);
+					createTableBody(data, settings);
+					createTablePager(data, settings);
+					createTableFooter(data, settings);
+				});
 			});
-		});
+		}
 	}
 	
 	/**
