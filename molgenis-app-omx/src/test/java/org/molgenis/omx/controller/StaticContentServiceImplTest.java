@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.security.SecurityUtils;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

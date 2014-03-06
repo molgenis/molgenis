@@ -23,7 +23,7 @@ public abstract class AbstractCrudRepository extends AbstractRepository implemen
 	@Transactional
 	public final Integer add(Entity entity)
 	{
-		validator.validate(Arrays.asList(entity), this, null);
+		validator.validate(Arrays.asList(entity), getEntityMetaData(), null);
 		return addInternal(entity);
 	}
 
@@ -31,7 +31,7 @@ public abstract class AbstractCrudRepository extends AbstractRepository implemen
 	@Transactional
 	public final void add(Iterable<? extends Entity> entities)
 	{
-		validator.validate(entities, this, null);
+		validator.validate(entities, getEntityMetaData(), null);
 		addInternal(entities);
 	}
 
@@ -39,7 +39,7 @@ public abstract class AbstractCrudRepository extends AbstractRepository implemen
 	@Transactional
 	public final void update(Entity entity)
 	{
-		validator.validate(Arrays.asList(entity), this, null);
+		validator.validate(Arrays.asList(entity), getEntityMetaData(), null);
 		updateInternal(entity);
 	}
 
@@ -47,7 +47,7 @@ public abstract class AbstractCrudRepository extends AbstractRepository implemen
 	@Transactional
 	public final void update(Iterable<? extends Entity> entities)
 	{
-		validator.validate(entities, this, null);
+		validator.validate(entities, getEntityMetaData(), null);
 		updateInternal(entities);
 	}
 
@@ -55,7 +55,7 @@ public abstract class AbstractCrudRepository extends AbstractRepository implemen
 	@Transactional
 	public final void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
 	{
-		validator.validate(entities, this, dbAction);
+		validator.validate(entities, getEntityMetaData(), dbAction);
 		updateInternal(entities, dbAction, keyName);
 	}
 

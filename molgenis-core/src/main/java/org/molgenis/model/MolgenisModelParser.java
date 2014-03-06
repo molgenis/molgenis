@@ -63,7 +63,7 @@ public class MolgenisModelParser
 		// check for illegal words
 		String[] keywords = new String[]
 		{ "name", "label", "extends", "implements", "abstract", "description", "system", "decorator", "xref_label",
-				"allocationSize" };
+				"allocationSize", "xref_lookup" };
 		List<String> key_words = new ArrayList<String>(Arrays.asList(keywords));
 		for (int i = 0; i < element.getAttributes().getLength(); i++)
 		{
@@ -127,6 +127,15 @@ public class MolgenisModelParser
 		else
 		{
 			entity.setXrefLabels(null);
+		}
+
+		// XREF_LOOKUP
+		String xref_lookup = element.getAttribute("xref_lookup");
+		if ((xref_lookup != null) && !xref_lookup.isEmpty())
+		{
+			List<String> xref_lookup_fields = new ArrayList<String>();
+			xref_lookup_fields.addAll(Arrays.asList(xref_lookup.split(",")));
+			entity.setXrefLookupFields(xref_lookup_fields);
 		}
 
 		// TRIGGER

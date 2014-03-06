@@ -76,7 +76,7 @@ public class ProtocolTreeRepositoryTest
 	@Test
 	public void getAllColumns()
 	{
-		assertEquals(Iterables.size(protocolTreeRepository.getAttributes()), 9);
+		assertEquals(Iterables.size(protocolTreeRepository.getEntityMetaData().getAttributes()), 9);
 	}
 
 	@Test

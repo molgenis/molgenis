@@ -91,21 +91,9 @@ public class CrudRepositoryDecorator extends RepositoryDecorator implements Crud
 	}
 
 	@Override
-	public String getDescription()
-	{
-		return decoratedRepository.getDescription();
-	}
-
-	@Override
 	public Entity findOne(Integer id)
 	{
 		return decoratedRepository.findOne(id);
-	}
-
-	@Override
-	public Iterable<AttributeMetaData> getAttributes()
-	{
-		return decoratedRepository.getAttributes();
 	}
 
 	@Override

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.molgenis.framework.server.MolgenisPermissionService;
+import org.molgenis.security.core.MolgenisPermissionService;
 
 import com.google.common.collect.Lists;
 

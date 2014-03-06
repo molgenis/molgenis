@@ -26,16 +26,16 @@ public class ValidationFile
 
 	public void readFile(Repository excelSheetReader, String identifier, String identifier2) throws IOException
 	{
-		Iterable<String> iterableFileToCompare = Iterables.transform(excelSheetReader.getAttributes(),
-				new Function<AttributeMetaData, String>()
-				{
-					@Override
-					public String apply(AttributeMetaData input)
-					{
-						return input.getName();
-					}
+		Iterable<String> iterableFileToCompare = Iterables.transform(excelSheetReader.getEntityMetaData()
+				.getAttributes(), new Function<AttributeMetaData, String>()
+		{
+			@Override
+			public String apply(AttributeMetaData input)
+			{
+				return input.getName();
+			}
 
-				});
+		});
 
 		Iterator<String> iteratorFileToCompare = iterableFileToCompare.iterator();
 

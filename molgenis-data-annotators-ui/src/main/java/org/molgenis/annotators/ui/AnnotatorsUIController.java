@@ -12,6 +12,7 @@ import javax.servlet.http.Part;
 
 import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
@@ -189,7 +190,7 @@ public class AnnotatorsUIController extends MolgenisPluginController
 		if (dataSetIdentifier != null)
 		{
 
-			Repository repo = dataService.getRepositoryByEntityName(dataSetIdentifier);
+			EntityMetaData repo = (EntityMetaData) dataService.getRepositoryByEntityName(dataSetIdentifier);
 
 			for (RepositoryAnnotator annotator : annotationService.getAllAnnotators())
 			{

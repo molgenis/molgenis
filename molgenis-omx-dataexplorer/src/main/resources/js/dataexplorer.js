@@ -79,8 +79,10 @@
 		var items = [];
 		$.each(attributeFilters, function(attributeUri, attributeFilter) {
 			var attribute = attributeFilter.attribute;
+			var joinChars = attributeFilter.operator ? ' ' + attributeFilter.operator + ' ' : ',';
+			
 			items.push('<p><a class="feature-filter-edit" data-href="' + attributeUri + '" href="#">'
-					+ attribute.name + ' (' + attributeFilter.values.join(',')
+					+ attribute.name + ' (' + attributeFilter.values.join(joinChars)
 					+ ')</a><a class="feature-filter-remove" data-href="' + attributeUri + '" href="#" title="Remove '
 					+ attribute.name + ' filter" ><i class="ui-icon ui-icon-closethick"></i></a></p>');
 		});
@@ -142,8 +144,9 @@
 					}
 				} else {
 					if (index > 0) {
+						var operator = attributeFilter.operator ? attributeFilter.operator : 'OR';
 						entityCollectionRequest.q.push({
-							operator : 'OR'
+							operator : operator
 						});
 					}
 					entityCollectionRequest.q.push({
@@ -192,17 +195,42 @@
 	 * @memberOf molgenis.dataexplorer
 	 */
 	function createAggregatesTable() {
+		function updateAggregatesTable(attributeUri) {
+			console.log(attributeUri);
+			$.ajax({
+				type : 'POST',
+				url : molgenis.getContextUrl() + '/aggregate',
+				data : JSON.stringify({'attributeUri': attributeUri, 'q': createEntityQuery().q}),
+				contentType : 'application/json',
+				success : function(aggregateResult) {
+					var table = $('<table />').addClass('table table-striped');
+					table.append('<tr><th>Category name</th><th>Count</th></tr>');
+					$.each(aggregateResult.hashCategories, function(categoryName,
+							count) {
+						table.append('<tr><td>' + categoryName + '</td><td>'
+								+ count + '</td></tr>');
+					});
+					$('#aggregate-table-container').html(table);
+				},
+				error : function(xhr) {
+					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
+				}
+			});
+		}
+		
+		var attributes = molgenis.getAtomicAttributes(getSelectedAttributes(), restApi);
 		var attributeSelect = $('<select id="selectFeature"/>');
-		if(Object.keys(selectedEntityMetaData.attributes).length === 0) {
+		if(Object.keys(attributes).length === 0) {
 			attributeSelect.attr('disabled', 'disabled');
 		} else {
-			$.each(selectedEntityMetaData.attributes, function(key, attribute) {
+			$.each(attributes, function(key, attribute) {
 				if(attribute.fieldType === 'BOOL' || attribute.fieldType === 'CATEGORICAL') {
 					attributeSelect.append('<option value="' + attribute.href + '">' + attribute.label + '</option>');
 				}
 			});
-			
-			$('#feature-select').empty().append(attributeSelect);
+
+			$('#feature-select').html(attributeSelect);
+
 			if(attributeSelect.val()) {
 				updateAggregatesTable(attributeSelect.val());
 				attributeSelect.chosen();
@@ -216,37 +244,12 @@
 	/**
 	 * @memberOf molgenis.dataexplorer
 	 */
-	function updateAggregatesTable(attributeUri) {
-		$.ajax({
-			type : 'POST',
-			url : molgenis.getContextUrl() + '/aggregate',
-			data : JSON.stringify({'attributeUri': attributeUri}),
-			contentType : 'application/json',
-			success : function(aggregateResult) {
-				var table = $('<table />').addClass('table table-striped');
-				table.append('<tr><th>Category name</th><th>Count</th></tr>');
-				$.each(aggregateResult.hashCategories, function(categoryName,
-						count) {
-					table.append('<tr><td>' + categoryName + '</td><td>'
-							+ count + '</td></tr>');
-				});
-				$('#aggregate-table-container').empty().append(table);
-			},
-			error : function(xhr) {
-				molgenis.createAlert(JSON.parse(xhr.responseText).errors);
-			}
-		});
-	}
-
-	/**
-	 * @memberOf molgenis.dataexplorer
-	 */
 	function createFilterControls(attribute, attributeFilter) {
 		var label;
 		var controls = $('<div class="controls">');
 		controls.data('attribute', attribute);
 		
-		var name = 'input-' + attribute.name;
+		var name = 'input-' + attribute.name + '-' + new Date().getTime();
 		var values = attributeFilter ? attributeFilter.values : null;
 		switch(attribute.fieldType) {
 			case 'BOOL':
@@ -265,9 +268,10 @@
 
 				var entities = restApi.get(entitiesUri);
 				$.each(entities.items, function() {
-					//var checked = attributeFilter && ($.inArray(this[labelAttribute], attributeFilter.values) > -1);
-					//		'checked': checked
-					controls.append(createInput(attribute.fieldType, {'name': name, 'id': name}, this.href, this[entityMeta.labelAttribute]));
+					var attrs = {'name': name, 'id': name};
+					if(values && $.inArray(this[entityMeta.labelAttribute], values) > -1)
+						attrs.checked = 'checked';
+					controls.append(createInput(attribute.fieldType, attrs, this[entityMeta.labelAttribute], this[entityMeta.labelAttribute]));
 				});
 				break;
 			case 'DATE':
@@ -302,9 +306,10 @@
 			case 'MREF':
 			case 'XREF':
 				label = $('<label class="control-label" for="' + name + '">' + attribute.label + '</label>');
-				var input = createInput(attribute.fieldType, {'name': name, 'id': name}, values ? values[0] : undefined);
-				input.xrefsearch({attribute: attribute});
-				controls.append(input);
+				var element = $('<div />');
+				var operator = attributeFilter ? attributeFilter.operator : 'OR';
+				element.xrefsearch({attribute: attribute, values: values, operator: operator});
+				controls.append(element);
 				break;
 			case 'COMPOUND' :
 			case 'ENUM':
@@ -338,10 +343,17 @@
 					values = [];
 					filter.values = values;
 				}
-				values.push(value);
+				
+				if ($(this).hasClass('operator')) {
+					filter.operator = value;
+				} else {
+					values.push(value);
+				}
 			}
 		});
-		return Object.keys(filters).map(function (key) { return filters[key]; });	
+		
+
+		return Object.keys(filters).map(function (key) { return filters[key]; }).filter(function(filter){return filter.values.length > 0;});
 	}
 	
 	/**
@@ -433,11 +445,14 @@
 					return attribute.fieldType !== 'COMPOUND' ? attribute : null;
 				});
 				
-				//Save selected entity to cookie, expires after 7 days
-				$.cookie('molgenis.selected.entity.uri', entityUri, { expires: 7 });
 				$(document).trigger('changeAttributeSelection', {'attributes': selectedAttributes});
 				createEntityMetaTree(entityMetaData, selectedAttributes);
-
+				
+				//Show wizard on show of dataexplorer if url param 'wizard=true' is added
+				if (showWizard) {
+					molgenis.dataexplorer.wizard.openFilterWizardModal(selectedEntityMetaData, attributeFilters);
+					showWizard = false;
+				}
 			});
 		});
 		
@@ -453,7 +468,7 @@
 					updateGenomeBrowser();
 					break;
 				case 'tab-aggregates':
-					updateAggregatesTable();
+					createAggregatesTable();
 					break;
 				case 'tab-charts':
 					break;
@@ -476,7 +491,7 @@
 					});
 					break;
 				case 'tab-aggregates':
-					updateAggregatesTable();
+					createAggregatesTable();
 					break;
 				case 'tab-charts':
 					break;
@@ -493,7 +508,7 @@
 					// TODO what to do for genomebrowser?
 					break;
 				case 'tab-aggregates':
-					updateAggregatesTable();
+					createAggregatesTable();
 					break;
 				case 'tab-charts':
 					break;
@@ -511,7 +526,7 @@
 						createDataTable();
 					break;
 				case 'tab-aggregates':
-					updateAggregatesTable();
+					createAggregatesTable();
 					break;
 				case 'tab-charts':
 					break;
@@ -566,11 +581,6 @@
 			setDallianceFilter();
 		});
 		
-		//Read previous selected entity from cookie
-		var uri = $.cookie('molgenis.selected.entity.uri');
-		if (uri && restApi.entityExists(uri)) {
-			$('#dataset-select').val(uri).trigger("liszt:updated");
-		}
 		
 		// fire event handler
 		$('#dataset-select').change();

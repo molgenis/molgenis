@@ -19,6 +19,20 @@ public class DataConverter
 {
 	private static ConversionService conversionService;
 
+	public static boolean canConvert(Object source, Class<?> targetType)
+	{
+		try
+		{
+			convert(source, targetType);
+			return true;
+		}
+		catch (Exception e)
+		{
+			return false;
+		}
+
+	}
+
 	@SuppressWarnings("unchecked")
 	public static <T> T convert(Object source, Class<T> targetType)
 	{
@@ -32,23 +46,7 @@ public class DataConverter
 			return (T) source;
 		}
 
-		if (conversionService == null)
-		{
-			if (ApplicationContextProvider.getApplicationContext() == null)
-			{
-				// We are not in a Spring managed environment
-				conversionService = new DefaultConversionService();
-				((DefaultConversionService) conversionService).addConverter(new DateToStringConverter());
-				((DefaultConversionService) conversionService).addConverter(new StringToDateConverter());
-			}
-			else
-			{
-				conversionService = ApplicationContextProvider.getApplicationContext().getBean(ConversionService.class);
-			}
-
-		}
-
-		return conversionService.convert(source, targetType);
+		return getConversionService().convert(source, targetType);
 	}
 
 	public static String toString(Object source)
@@ -152,4 +150,24 @@ public class DataConverter
 		else return null;
 	}
 
+	private static ConversionService getConversionService()
+	{
+		if (conversionService == null)
+		{
+			if (ApplicationContextProvider.getApplicationContext() == null)
+			{
+				// We are not in a Spring managed environment
+				conversionService = new DefaultConversionService();
+				((DefaultConversionService) conversionService).addConverter(new DateToStringConverter());
+				((DefaultConversionService) conversionService).addConverter(new StringToDateConverter());
+			}
+			else
+			{
+				conversionService = ApplicationContextProvider.getApplicationContext().getBean(ConversionService.class);
+			}
+
+		}
+
+		return conversionService;
+	}
 }

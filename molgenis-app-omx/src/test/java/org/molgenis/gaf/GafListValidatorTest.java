@@ -109,7 +109,7 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 		MapEntity entity0 = new MapEntity();
 		entity0.set(GafListValidator.COL_LAB_STATUS_PHASE, GafListValidator.LAB_STATUS_PHASE_FINISHED_SUCCESSFULLY);
 		entity0.set(GafListValidator.COL_INTERNAL_SAMPLE_ID, "123");
-		when(repository.getAttributes()).thenReturn(
+		when(repository.getEntityMetaData().getAttributes()).thenReturn(
 				Arrays.<AttributeMetaData> asList(new DefaultAttributeMetaData(GafListValidator.COL_LAB_STATUS_PHASE,
 						FieldTypeEnum.CATEGORICAL), new DefaultAttributeMetaData(
 						GafListValidator.COL_INTERNAL_SAMPLE_ID, FieldTypeEnum.STRING)));
@@ -124,7 +124,7 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 		MapEntity entity0 = new MapEntity();
 		entity0.set(GafListValidator.COL_LAB_STATUS_PHASE, GafListValidator.LAB_STATUS_PHASE_FINISHED_SUCCESSFULLY);
 		entity0.set(GafListValidator.COL_INTERNAL_SAMPLE_ID, "abc");
-		when(repository.getAttributes()).thenReturn(
+		when(repository.getEntityMetaData().getAttributes()).thenReturn(
 				Arrays.<AttributeMetaData> asList(new DefaultAttributeMetaData(GafListValidator.COL_LAB_STATUS_PHASE,
 						FieldTypeEnum.CATEGORICAL), new DefaultAttributeMetaData(
 						GafListValidator.COL_INTERNAL_SAMPLE_ID, FieldTypeEnum.STRING)));
@@ -139,7 +139,7 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 		MapEntity entity0 = new MapEntity();
 		entity0.set(GafListValidator.COL_LAB_STATUS_PHASE, GafListValidator.LAB_STATUS_PHASE_FINISHED_SUCCESSFULLY);
 		entity0.set(GafListValidator.COL_EXTERNAL_SAMPLE_ID, "123");
-		when(repository.getAttributes()).thenReturn(
+		when(repository.getEntityMetaData().getAttributes()).thenReturn(
 				Arrays.<AttributeMetaData> asList(new DefaultAttributeMetaData(GafListValidator.COL_LAB_STATUS_PHASE,
 						FieldTypeEnum.CATEGORICAL), new DefaultAttributeMetaData(
 						GafListValidator.COL_EXTERNAL_SAMPLE_ID, FieldTypeEnum.STRING)));
@@ -154,7 +154,7 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 		MapEntity entity0 = new MapEntity();
 		entity0.set(GafListValidator.COL_LAB_STATUS_PHASE, GafListValidator.LAB_STATUS_PHASE_FINISHED_SUCCESSFULLY);
 		entity0.set(GafListValidator.COL_EXTERNAL_SAMPLE_ID, "+++");
-		when(repository.getAttributes()).thenReturn(
+		when(repository.getEntityMetaData().getAttributes()).thenReturn(
 				Arrays.<AttributeMetaData> asList(new DefaultAttributeMetaData(GafListValidator.COL_LAB_STATUS_PHASE,
 						FieldTypeEnum.CATEGORICAL), new DefaultAttributeMetaData(
 						GafListValidator.COL_EXTERNAL_SAMPLE_ID, FieldTypeEnum.STRING)));
@@ -169,7 +169,7 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 		MapEntity entity0 = new MapEntity();
 		entity0.set(GafListValidator.COL_LAB_STATUS_PHASE, GafListValidator.LAB_STATUS_PHASE_FINISHED_SUCCESSFULLY);
 		entity0.set(GafListValidator.COL_PROJECT, "abc");
-		when(repository.getAttributes()).thenReturn(
+		when(repository.getEntityMetaData().getAttributes()).thenReturn(
 				Arrays.<AttributeMetaData> asList(new DefaultAttributeMetaData(GafListValidator.COL_LAB_STATUS_PHASE,
 						FieldTypeEnum.CATEGORICAL), new DefaultAttributeMetaData(GafListValidator.COL_PROJECT,
 						FieldTypeEnum.STRING)));
@@ -184,7 +184,7 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 		MapEntity entity0 = new MapEntity();
 		entity0.set(GafListValidator.COL_LAB_STATUS_PHASE, GafListValidator.LAB_STATUS_PHASE_FINISHED_SUCCESSFULLY);
 		entity0.set(GafListValidator.COL_PROJECT, "+++");
-		when(repository.getAttributes()).thenReturn(
+		when(repository.getEntityMetaData().getAttributes()).thenReturn(
 				Arrays.<AttributeMetaData> asList(new DefaultAttributeMetaData(GafListValidator.COL_LAB_STATUS_PHASE,
 						FieldTypeEnum.CATEGORICAL), new DefaultAttributeMetaData(GafListValidator.COL_PROJECT,
 						FieldTypeEnum.STRING)));

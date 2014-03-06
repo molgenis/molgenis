@@ -74,7 +74,7 @@
 				data.result = $.Deferred(function (dfd) {
 					restApi.getAsync(node.key, {'expand': ['attributes']}, function(attributeMetaData) {
 						var children = createChildren(attributeMetaData.attributes, function() {
-							return node.select;
+							return node.selected;
 						});
 						dfd.resolve(children);
 					});

@@ -5,7 +5,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.security.SecurityUtils;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 

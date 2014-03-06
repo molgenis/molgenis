@@ -1,12 +1,13 @@
 package org.molgenis.omx;
 
 import java.util.Collection;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import org.molgenis.framework.server.MolgenisPermissionService;
-import org.molgenis.framework.server.MolgenisPermissionService.Permission;
+import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.Permission;
 import org.molgenis.ui.MolgenisUi;
 import org.molgenis.ui.MolgenisUiMenu;
-import org.molgenis.ui.MolgenisUiMenuItem;
 import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.security.access.AccessDecisionVoter;
 import org.springframework.security.access.ConfigAttribute;
@@ -15,6 +16,9 @@ import org.springframework.security.web.FilterInvocation;
 
 public class MolgenisAccessDecisionVoter implements AccessDecisionVoter<FilterInvocation>
 {
+	private static Pattern PATTERN_MENUID = Pattern.compile("/menu/([^/]+).*");
+	private static Pattern PATTERN_PLUGINID = Pattern.compile("(?:/plugin|/menu/[^/]+)/([^/^?]+).*");
+
 	@Override
 	public boolean supports(ConfigAttribute attribute)
 	{
@@ -28,35 +32,46 @@ public class MolgenisAccessDecisionVoter implements AccessDecisionVoter<FilterIn
 	}
 
 	@Override
-	public int vote(Authentication authentication, FilterInvocation filterInvocation, Collection<ConfigAttribute> attributes)
+	public int vote(Authentication authentication, FilterInvocation filterInvocation,
+			Collection<ConfigAttribute> attributes)
 	{
-		MolgenisPermissionService molgenisPermissionService = ApplicationContextProvider.getApplicationContext()
-				.getBean(MolgenisPermissionService.class);
-		MolgenisUi molgenisUi = ApplicationContextProvider.getApplicationContext().getBean(MolgenisUi.class);
-		String menuId = getPluginId(filterInvocation.getRequestUrl());
+		String requestUrl = filterInvocation.getRequestUrl();
 
-		if (getMenuType(filterInvocation))
+		Matcher pluginMatcher = PATTERN_PLUGINID.matcher(requestUrl);
+		if (pluginMatcher.matches())
 		{
-			MolgenisUiMenu molgenisUiMenu = molgenisUi.getMenu(menuId);
-			for (MolgenisUiMenuItem item : molgenisUiMenu.getItems())
-			{
-				if (molgenisPermissionService.hasPermissionOnPlugin(getPluginId(item.getUrl()), Permission.READ)) return ACCESS_GRANTED;
-			}
+			String pluginId = pluginMatcher.group(1);
+			return getMolgenisPermissionService().hasPermissionOnPlugin(pluginId, Permission.READ) ? ACCESS_GRANTED : ACCESS_DENIED;
 		}
 
-		return molgenisPermissionService.hasPermissionOnPlugin(menuId, Permission.READ) ? ACCESS_GRANTED : ACCESS_DENIED;
+		Matcher menuMatcher = PATTERN_MENUID.matcher(requestUrl);
+		if (menuMatcher.matches())
+		{
+			String menuId = menuMatcher.group(1);
+			MolgenisUiMenu menu = getMolgenisUi().getMenu(menuId);
+			return menu != null ? ACCESS_GRANTED : ACCESS_DENIED;
+		}
+
+		return ACCESS_DENIED;
 	}
 
-	private boolean getMenuType(FilterInvocation object)
+	/**
+	 * Can't be autowired due to circular dependency resolving
+	 * 
+	 * @return
+	 */
+	private MolgenisPermissionService getMolgenisPermissionService()
 	{
-		return object.getRequestUrl().matches("/menu/[^/]*");
+		return ApplicationContextProvider.getApplicationContext().getBean(MolgenisPermissionService.class);
 	}
 
-	private String getPluginId(String requestUrl)
+	/**
+	 * Can't be autowired due to circular dependency resolving
+	 * 
+	 * @return
+	 */
+	private MolgenisUi getMolgenisUi()
 	{
-		String[] urlFragments = requestUrl.split("/");
-		return urlFragments.length > 0 ? urlFragments[urlFragments.length - 1] : requestUrl;
+		return ApplicationContextProvider.getApplicationContext().getBean(MolgenisUi.class);
 	}
 }
-
-

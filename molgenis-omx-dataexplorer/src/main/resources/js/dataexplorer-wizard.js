@@ -16,7 +16,7 @@
 		var modal = $('#filter-wizard-modal');
 		if(!modal.length) {
 			var items = [];
-			items.push('<div class="modal medium hide" id="filter-wizard-modal" tabindex="-1">');
+			items.push('<div class="modal large hide" id="filter-wizard-modal" tabindex="-1">');
 			items.push('<div class="modal-header">');
 			items.push('<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>');
 			items.push('<h3>Filter Wizard</h3>');
@@ -95,7 +95,7 @@
 			pane.append(paneContainer);
 			$.each(compoundAttribute.attributes, function(i, attribute) {
 				if(attribute.fieldType !== 'COMPOUND') {
-					paneContainer.append(molgenis.dataexplorer.createFilterControls(attribute));
+					paneContainer.append(molgenis.dataexplorer.createFilterControls(attribute, attributeFilters[attribute.href]));
 				}
 			});
 			paneItems.push(pane);

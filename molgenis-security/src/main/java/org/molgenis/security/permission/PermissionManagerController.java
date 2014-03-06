@@ -8,13 +8,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.molgenis.framework.server.MolgenisPermissionService;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.auth.GroupAuthority;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.UserAuthority;
-import org.molgenis.security.SecurityUtils;
+import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -70,48 +70,44 @@ public class PermissionManagerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/plugin/group/{groupId}", method = RequestMethod.GET)
 	@ResponseBody
-	public Permissions getGroupPluginPermissions(@PathVariable
-	Integer groupId)
+	public Permissions getGroupPluginPermissions(@PathVariable Integer groupId)
 	{
 		return pluginPermissionManagerService.getGroupPluginPermissions(groupId);
 	}
 
 	@RequestMapping(value = "/entityclass/group/{groupId}", method = RequestMethod.GET)
 	@ResponseBody
-	public Permissions getGroupEntityClassPermissions(@PathVariable
-	Integer groupId)
+	public Permissions getGroupEntityClassPermissions(@PathVariable Integer groupId)
 	{
 		return pluginPermissionManagerService.getGroupEntityClassPermissions(groupId);
 	}
 
 	@RequestMapping(value = "/plugin/user/{userId}", method = RequestMethod.GET)
 	@ResponseBody
-	public Permissions getUserPluginPermissions(@PathVariable
-	Integer userId)
+	public Permissions getUserPluginPermissions(@PathVariable Integer userId)
 	{
 		return pluginPermissionManagerService.getUserPluginPermissions(userId);
 	}
 
 	@RequestMapping(value = "/entityclass/user/{userId}", method = RequestMethod.GET)
 	@ResponseBody
-	public Permissions getUserEntityClassPermissions(@PathVariable
-	Integer userId)
+	public Permissions getUserEntityClassPermissions(@PathVariable Integer userId)
 	{
 		return pluginPermissionManagerService.getUserEntityClassPermissions(userId);
 	}
 
 	@RequestMapping(value = "/update/plugin/group", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
-	public void updateGroupPluginPermissions(@RequestParam
-	Integer groupId, WebRequest webRequest)
+	public void updateGroupPluginPermissions(@RequestParam Integer groupId, WebRequest webRequest)
 	{
 		List<GroupAuthority> authorities = new ArrayList<GroupAuthority>();
 		for (MolgenisPlugin plugin : pluginPermissionManagerService.getPlugins())
 		{
 			String param = "radio-" + plugin.getId();
 			String value = webRequest.getParameter(param);
-			if (value.equalsIgnoreCase(MolgenisPermissionService.Permission.READ.toString())
-					|| value.equalsIgnoreCase(MolgenisPermissionService.Permission.WRITE.toString()))
+			if (value.equalsIgnoreCase(Permission.READ.toString())
+					|| value.equalsIgnoreCase(Permission.COUNT.toString())
+					|| value.equalsIgnoreCase(Permission.WRITE.toString()))
 			{
 				GroupAuthority authority = new GroupAuthority();
 				authority.setRole(SecurityUtils.AUTHORITY_PLUGIN_PREFIX + value.toUpperCase() + "_"
@@ -124,16 +120,16 @@ public class PermissionManagerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/update/entityclass/group", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
-	public void updateGroupEntityClassPermissions(@RequestParam
-	Integer groupId, WebRequest webRequest)
+	public void updateGroupEntityClassPermissions(@RequestParam Integer groupId, WebRequest webRequest)
 	{
 		List<GroupAuthority> authorities = new ArrayList<GroupAuthority>();
 		for (String entityClassId : pluginPermissionManagerService.getEntityClassIds())
 		{
 			String param = "radio-" + entityClassId;
 			String value = webRequest.getParameter(param);
-			if (value.equalsIgnoreCase(MolgenisPermissionService.Permission.READ.toString())
-					|| value.equalsIgnoreCase(MolgenisPermissionService.Permission.WRITE.toString()))
+			if (value.equalsIgnoreCase(Permission.READ.toString())
+					|| value.equalsIgnoreCase(Permission.COUNT.toString())
+					|| value.equalsIgnoreCase(Permission.WRITE.toString()))
 			{
 				GroupAuthority authority = new GroupAuthority();
 				authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_"
@@ -146,16 +142,16 @@ public class PermissionManagerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/update/plugin/user", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
-	public void updateUserPluginPermissions(@RequestParam
-	Integer userId, WebRequest webRequest)
+	public void updateUserPluginPermissions(@RequestParam Integer userId, WebRequest webRequest)
 	{
 		List<UserAuthority> authorities = new ArrayList<UserAuthority>();
 		for (MolgenisPlugin plugin : pluginPermissionManagerService.getPlugins())
 		{
 			String param = "radio-" + plugin.getId();
 			String value = webRequest.getParameter(param);
-			if (value.equalsIgnoreCase(MolgenisPermissionService.Permission.READ.toString())
-					|| value.equalsIgnoreCase(MolgenisPermissionService.Permission.WRITE.toString()))
+			if (value.equalsIgnoreCase(Permission.READ.toString())
+					|| value.equalsIgnoreCase(Permission.COUNT.toString())
+					|| value.equalsIgnoreCase(Permission.WRITE.toString()))
 			{
 				UserAuthority authority = new UserAuthority();
 				authority.setRole(SecurityUtils.AUTHORITY_PLUGIN_PREFIX + value.toUpperCase() + "_"
@@ -168,16 +164,16 @@ public class PermissionManagerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/update/entityclass/user", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
-	public void updateUserEntityClassPermissions(@RequestParam
-	Integer userId, WebRequest webRequest)
+	public void updateUserEntityClassPermissions(@RequestParam Integer userId, WebRequest webRequest)
 	{
 		List<UserAuthority> authorities = new ArrayList<UserAuthority>();
 		for (String entityClassId : pluginPermissionManagerService.getEntityClassIds())
 		{
 			String param = "radio-" + entityClassId;
 			String value = webRequest.getParameter(param);
-			if (value.equalsIgnoreCase(MolgenisPermissionService.Permission.READ.toString())
-					|| value.equalsIgnoreCase(MolgenisPermissionService.Permission.WRITE.toString()))
+			if (value.equalsIgnoreCase(Permission.READ.toString())
+					|| value.equalsIgnoreCase(Permission.COUNT.toString())
+					|| value.equalsIgnoreCase(Permission.WRITE.toString()))
 			{
 				UserAuthority authority = new UserAuthority();
 				authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_"

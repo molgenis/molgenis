@@ -17,18 +17,19 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.apache.log4j.Logger;
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Repository;
 import org.molgenis.data.csv.CsvWriter;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.entityexplorer.controller.EntityExplorerController;
-import org.molgenis.framework.server.MolgenisPermissionService;
-import org.molgenis.framework.server.MolgenisPermissionService.Permission;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.search.SearchService;
+import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.Permission;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -103,16 +104,15 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	/**
-	 * TODO JJ
-	 * 
 	 * Show the explorer page
 	 * 
 	 * @param model
 	 * @return the view name
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(@RequestParam(value = "dataset", required = false) String selectedEntityName, Model model)
-			throws Exception
+	public String init(@RequestParam(value = "dataset", required = false)
+	String selectedEntityName, @RequestParam(value = "wizard", required = false)
+	Boolean wizard, Model model) throws Exception
 	{
 		// set entityExplorer URL for link to EntityExplorer for x/mrefs, but only if the user has permission to see the
 		// plugin
@@ -128,7 +128,7 @@ public class DataExplorerController extends MolgenisPluginController
 					@Override
 					public EntityMetaData apply(String entityName)
 					{
-						return dataService.getRepositoryByEntityName(entityName);
+						return dataService.getEntityMetaData(entityName);
 					}
 				});
 		model.addAttribute("entitiesMeta", entitiesMeta);
@@ -138,6 +138,7 @@ public class DataExplorerController extends MolgenisPluginController
 			selectedEntityName = entitiesMeta.iterator().next().getName();
 		}
 		model.addAttribute("selectedEntityName", selectedEntityName);
+		model.addAttribute("wizard", (wizard != null) && wizard.booleanValue());
 
 		// Init genome browser
 		model.addAttribute("genomeBrowserSets", getGenomeBrowserSetsToModel());
@@ -166,21 +167,21 @@ public class DataExplorerController extends MolgenisPluginController
 		Map<String, String> genomeBrowserSets = new HashMap<String, String>();
 		for (String entityName : dataService.getEntityNames())
 		{
-			Repository repository = dataService.getRepositoryByEntityName(entityName);
-			AttributeMetaData attributeStartPosition = repository.getAttribute(MUTATION_START_POSITION);
-			AttributeMetaData attributeId = repository.getAttribute(MUTATION_ID);
-			AttributeMetaData attributeChromosome = repository.getAttribute(MUTATION_CHROMOSOME);
+			EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
+			AttributeMetaData attributeStartPosition = entityMetaData.getAttribute(MUTATION_START_POSITION);
+			AttributeMetaData attributeId = entityMetaData.getAttribute(MUTATION_ID);
+			AttributeMetaData attributeChromosome = entityMetaData.getAttribute(MUTATION_CHROMOSOME);
 			if (attributeStartPosition != null && attributeId != null && attributeChromosome != null)
 			{
-				genomeBrowserSets.put(entityName, repository.getLabel());
+				genomeBrowserSets.put(entityName, entityMetaData.getLabel());
 			}
 		}
 		return genomeBrowserSets;
 	}
 
 	@RequestMapping(value = "/download", method = POST)
-	public void download(@RequestParam("dataRequest") String dataRequestStr, HttpServletResponse response)
-			throws IOException
+	public void download(@RequestParam("dataRequest")
+	String dataRequestStr, HttpServletResponse response) throws IOException
 	{
 		// Workaround because binding with @RequestBody is not possible:
 		// http://stackoverflow.com/a/9970672
@@ -189,7 +190,7 @@ public class DataExplorerController extends MolgenisPluginController
 		DataRequest dataRequest = new GsonHttpMessageConverter().getGson().fromJson(dataRequestStr, DataRequest.class);
 
 		String entityName = dataRequest.getEntityName();
-		Repository repository = dataService.getRepositoryByEntityName(entityName);
+		EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
 		final Set<String> attributes = new HashSet<String>(dataRequest.getAttributeNames());
 		String fileName = entityName + '_' + new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + ".csv";
 
@@ -200,7 +201,7 @@ public class DataExplorerController extends MolgenisPluginController
 		try
 		{
 			csvWriter.writeAttributeNames(Iterables.transform(
-					Iterables.filter(repository.getAttributes(), new Predicate<AttributeMetaData>()
+					Iterables.filter(entityMetaData.getAttributes(), new Predicate<AttributeMetaData>()
 					{
 						@Override
 						public boolean apply(AttributeMetaData attributeMetaData)
@@ -225,17 +226,49 @@ public class DataExplorerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/aggregate", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
 	@ResponseBody
-	public AggregateResponse aggregate(@Valid @RequestBody AggregateRequest request)
+	public AggregateResponse aggregate(@Valid
+	@RequestBody
+	AggregateRequest request)
 	{
 		// TODO create utility class to extract info from entity/attribute uris
 		String[] attributeUriTokens = request.getAttributeUri().split("/");
 		String entityName = attributeUriTokens[3];
 		String attributeName = attributeUriTokens[5];
+		QueryImpl q = request.getQ() != null ? new QueryImpl(request.getQ()) : new QueryImpl();
 
-		Map<String, Integer> aggregateMap = new HashMap<String, Integer>();
-		for (Entity entity : dataService.findAll(entityName))
+		EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
+		AttributeMetaData attributeMeta = entityMeta.getAttribute(attributeName);
+		FieldTypeEnum dataType = attributeMeta.getDataType().getEnumType();
+		if (dataType != FieldTypeEnum.BOOL && dataType != FieldTypeEnum.CATEGORICAL)
 		{
-			String val = entity.getString(attributeName);
+			throw new RuntimeException("Unsupported data type " + dataType);
+		}
+
+		EntityMetaData refEntityMeta = null;
+		String refAttributeName = null;
+		if (dataType == FieldTypeEnum.CATEGORICAL)
+		{
+			refEntityMeta = attributeMeta.getRefEntity();
+			refAttributeName = refEntityMeta.getLabelAttribute().getName();
+		}
+		Map<String, Integer> aggregateMap = new HashMap<String, Integer>();
+		for (Entity entity : dataService.findAll(entityName, q))
+		{
+			String val;
+			switch (dataType)
+			{
+				case BOOL:
+					val = entity.getString(attributeName);
+					break;
+				case CATEGORICAL:
+					Entity refEntity = (Entity) entity.get(attributeName);
+					val = refEntity.getString(refAttributeName);
+					break;
+				default:
+					throw new RuntimeException("Unsupported data type " + dataType);
+
+			}
+
 			Integer count = aggregateMap.get(val);
 			if (count == null) aggregateMap.put(val, 1);
 			else aggregateMap.put(val, count + 1);
