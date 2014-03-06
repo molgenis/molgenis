@@ -240,8 +240,13 @@ public class DataExplorerController extends MolgenisPluginController
 			throw new RuntimeException("Unsupported data type " + dataType);
 		}
 
-		EntityMetaData refEntityMeta = attributeMeta.getRefEntity();
-		String refAttributeName = refEntityMeta.getLabelAttribute().getName();
+		EntityMetaData refEntityMeta;
+		String refAttributeName;
+		if (dataType == FieldTypeEnum.CATEGORICAL)
+		{
+			refEntityMeta = attributeMeta.getRefEntity();
+			refAttributeName = refEntityMeta.getLabelAttribute().getName();
+		}
 		Map<String, Integer> aggregateMap = new HashMap<String, Integer>();
 		for (Entity entity : dataService.findAll(entityName, q))
 		{
