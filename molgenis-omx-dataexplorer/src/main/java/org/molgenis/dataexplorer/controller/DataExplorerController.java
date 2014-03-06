@@ -103,8 +103,6 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	/**
-	 * TODO JJ
-	 * 
 	 * Show the explorer page
 	 * 
 	 * @param model

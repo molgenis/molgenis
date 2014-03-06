@@ -195,11 +195,35 @@
 	 * @memberOf molgenis.dataexplorer
 	 */
 	function createAggregatesTable() {
+		function updateAggregatesTable(attributeUri) {
+			console.log(attributeUri);
+			$.ajax({
+				type : 'POST',
+				url : molgenis.getContextUrl() + '/aggregate',
+				data : JSON.stringify({'attributeUri': attributeUri, 'q': createEntityQuery().q}),
+				contentType : 'application/json',
+				success : function(aggregateResult) {
+					var table = $('<table />').addClass('table table-striped');
+					table.append('<tr><th>Category name</th><th>Count</th></tr>');
+					$.each(aggregateResult.hashCategories, function(categoryName,
+							count) {
+						table.append('<tr><td>' + categoryName + '</td><td>'
+								+ count + '</td></tr>');
+					});
+					$('#aggregate-table-container').html(table);
+				},
+				error : function(xhr) {
+					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
+				}
+			});
+		}
+		
+		var attributes = molgenis.getAtomicAttributes(getSelectedAttributes(), restApi);
 		var attributeSelect = $('<select id="selectFeature"/>');
-		if(Object.keys(selectedEntityMetaData.attributes).length === 0) {
+		if(Object.keys(attributes).length === 0) {
 			attributeSelect.attr('disabled', 'disabled');
 		} else {
-			$.each(selectedEntityMetaData.attributes, function(key, attribute) {
+			$.each(attributes, function(key, attribute) {
 				if(attribute.fieldType === 'BOOL' || attribute.fieldType === 'CATEGORICAL') {
 					attributeSelect.append('<option value="' + attribute.href + '">' + attribute.label + '</option>');
 				}
@@ -213,32 +237,6 @@
 				});
 			}
 		}
-	}
-
-	/**
-	 * @memberOf molgenis.dataexplorer
-	 */
-	function updateAggregatesTable(attributeUri) {
-		console.log(attributeUri);
-		$.ajax({
-			type : 'POST',
-			url : molgenis.getContextUrl() + '/aggregate',
-			data : JSON.stringify({'attributeUri': attributeUri, 'q': createEntityQuery().q}),
-			contentType : 'application/json',
-			success : function(aggregateResult) {
-				var table = $('<table />').addClass('table table-striped');
-				table.append('<tr><th>Category name</th><th>Count</th></tr>');
-				$.each(aggregateResult.hashCategories, function(categoryName,
-						count) {
-					table.append('<tr><td>' + categoryName + '</td><td>'
-							+ count + '</td></tr>');
-				});
-				$('#aggregate-table-container').empty().append(table);
-			},
-			error : function(xhr) {
-				molgenis.createAlert(JSON.parse(xhr.responseText).errors);
-			}
-		});
 	}
 
 	/**
