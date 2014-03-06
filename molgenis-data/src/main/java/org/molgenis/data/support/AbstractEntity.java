@@ -3,6 +3,8 @@ package org.molgenis.data.support;
 import java.sql.Timestamp;
 import java.util.List;
 
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
 import org.springframework.beans.BeanUtils;
@@ -10,6 +12,54 @@ import org.springframework.beans.BeanUtils;
 public abstract class AbstractEntity implements Entity
 {
 	private static final long serialVersionUID = 1L;
+
+	@Override
+	public String getLabelValue()
+	{
+		AttributeMetaData labelAttribute = getEntityMetaData().getLabelAttribute();
+		String labelAttributeName = labelAttribute.getName();
+		FieldTypeEnum dataType = labelAttribute.getDataType().getEnumType();
+		switch (dataType)
+		{
+			case BOOL:
+			case DATE:
+			case DATE_TIME:
+			case DECIMAL:
+			case EMAIL:
+			case ENUM:
+			case HTML:
+			case HYPERLINK:
+			case INT:
+			case LONG:
+			case STRING:
+			case TEXT:
+				Object obj = get(labelAttributeName);
+				return obj != null ? obj.toString() : null;
+			case CATEGORICAL:
+			case XREF:
+				Entity refEntity = getEntity(labelAttributeName);
+				return refEntity != null ? refEntity.getLabelValue() : null;
+			case MREF:
+				Iterable<Entity> refEntities = getEntities(labelAttributeName);
+				if (refEntities != null)
+				{
+					StringBuilder strBuilder = new StringBuilder();
+					for (Entity mrefEntity : refEntities)
+					{
+						if (strBuilder.length() > 0) strBuilder.append(',');
+						strBuilder.append(mrefEntity.getLabelValue());
+					}
+					return strBuilder.toString();
+				}
+				return null;
+			case COMPOUND:
+			case FILE:
+			case IMAGE:
+				throw new RuntimeException("invalid label data type " + dataType);
+			default:
+				throw new RuntimeException("unsupported label data type " + dataType);
+		}
+	}
 
 	@Override
 	public void set(Entity entity)
@@ -63,6 +113,18 @@ public abstract class AbstractEntity implements Entity
 	public Timestamp getTimestamp(String attributeName)
 	{
 		return DataConverter.toTimestamp(get(attributeName));
+	}
+
+	@Override
+	public Entity getEntity(String attributeName)
+	{
+		return DataConverter.toEntity(get(attributeName));
+	}
+
+	@Override
+	public Iterable<Entity> getEntities(String attributeName)
+	{
+		return DataConverter.toEntities(get(attributeName));
 	}
 
 	@Override

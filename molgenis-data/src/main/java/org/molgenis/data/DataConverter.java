@@ -109,6 +109,21 @@ public class DataConverter
 		return new Timestamp(convert(source, java.util.Date.class).getTime());
 	}
 
+	public static Entity toEntity(Object source)
+	{
+		if (source == null) return null;
+		if (source instanceof Entity) return (Entity) source;
+		return convert(source, Entity.class);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static Iterable<Entity> toEntities(Object source)
+	{
+		if (source == null) return null;
+		if (source instanceof Iterable) return (Iterable<Entity>) source;
+		return null;
+	}
+
 	@SuppressWarnings("unchecked")
 	public static List<String> toList(Object source)
 	{

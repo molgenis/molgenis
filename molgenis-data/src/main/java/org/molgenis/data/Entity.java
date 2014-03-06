@@ -11,25 +11,12 @@ import java.util.List;
  */
 public interface Entity extends Serializable
 {
+	EntityMetaData getEntityMetaData();
+
 	/**
 	 * Get all attribute names
 	 */
 	Iterable<String> getAttributeNames();
-
-	/**
-	 * Get attribute value
-	 */
-	Object get(String attributeName);
-
-	/**
-	 * Change attribute value
-	 */
-	void set(String attributeName, Object value);
-
-	/**
-	 * Copy attribute values from another entity
-	 */
-	void set(Entity values);
 
 	/**
 	 * Optional unique id to identify this Entity. Otherwise return null
@@ -41,6 +28,17 @@ public interface Entity extends Serializable
 	 */
 	String getLabelValue();
 
+	// TODO discuss: move to meta data
+	List<String> getLabelAttributeNames();
+
+	/**
+	 * Get attribute value
+	 */
+	Object get(String attributeName);
+
+	/**
+	 * Retrieves the value of the designated column as String.
+	 */
 	String getString(String attributeName);
 
 	/**
@@ -79,6 +77,16 @@ public interface Entity extends Serializable
 	Timestamp getTimestamp(String attributeName);
 
 	/**
+	 * Retrieves the value of the designated column as entity
+	 */
+	Entity getEntity(String attributeName);
+
+	/**
+	 * Retrieves the value of the designated column as a entity iterable
+	 */
+	Iterable<Entity> getEntities(String attributeName);
+
+	/**
 	 * Retrieves the value of the designated column as List<String>.
 	 */
 	List<String> getList(String attributeName);
@@ -88,9 +96,16 @@ public interface Entity extends Serializable
 	 */
 	List<Integer> getIntList(String attributeName);
 
-	List<String> getLabelAttributeNames();
+	/**
+	 * Change attribute value
+	 */
+	void set(String attributeName, Object value);
 
+	/**
+	 * Copy attribute values from another entity
+	 */
+	void set(Entity values);
+
+	// TODO document strict behavior
 	void set(Entity entity, boolean strict);
-
-	EntityMetaData getEntityMetaData();
 }
