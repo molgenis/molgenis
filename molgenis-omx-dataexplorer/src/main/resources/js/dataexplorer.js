@@ -248,7 +248,7 @@
 		var controls = $('<div class="controls">');
 		controls.data('attribute', attribute);
 		
-		var name = 'input-' + attribute.name;
+		var name = 'input-' + attribute.name + '-' + new Date().getTime();
 		var values = attributeFilter ? attributeFilter.values : null;
 		switch(attribute.fieldType) {
 			case 'BOOL':
