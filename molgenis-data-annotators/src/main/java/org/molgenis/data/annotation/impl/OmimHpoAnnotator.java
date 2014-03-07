@@ -121,7 +121,7 @@ public class OmimHpoAnnotator extends LocusAnnotator
 
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CHROMOSOME, MolgenisFieldTypes.FieldTypeEnum.STRING));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(POSITION, MolgenisFieldTypes.FieldTypeEnum.LONG));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData("not-playing", MolgenisFieldTypes.FieldTypeEnum.STRING));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData("disabled", MolgenisFieldTypes.FieldTypeEnum.STRING));
 
 		return metadata;
 	}
