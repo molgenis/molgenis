@@ -842,7 +842,7 @@ public class RestController
 	}
 
 	/**
-	 * expand is of form 'attr1', 'entity1[attr1]', 'entity1[attr1,attr2]'
+	 * expand is of form 'attr1', 'entity1[attr1]', 'entity1[attr1;attr2]'
 	 * 
 	 * @param expands
 	 * @return map from lower case expand names to a attribute set
@@ -865,7 +865,7 @@ public class RestController
 				if (attrsStr != null && !attrsStr.isEmpty())
 				{
 					attrSet = new HashSet<String>();
-					for (String attr : attrsStr.split(","))
+					for (String attr : attrsStr.split(";"))
 					{
 						attrSet.add(attr.toLowerCase());
 					}
