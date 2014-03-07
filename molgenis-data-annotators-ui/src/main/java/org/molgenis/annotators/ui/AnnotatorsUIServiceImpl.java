@@ -68,7 +68,7 @@ public class AnnotatorsUIServiceImpl implements AnnotatorsUIService
 	EntityValidator entityValidator;
 
 	@Override
-	public void tsvToOmxRepository(String file, Model model, String submittedDataSetName)
+	public void tsvToOmxRepository(String file, String submittedDataSetName)
 	{
 		// define the data set
 		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME,
