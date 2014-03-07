@@ -1,7 +1,9 @@
 <#macro fileupload_panel>
 	<#--Panel 1: Input variants, manual or file(s)-->
 	<div class="tab-pane" id="tab1">
-			
+		
+		<#--<div id="dataset-change-succes-message" style="min-height: 180px"></div>-->	
+		
 		<@modal_popup_dataset_upload />
 		<a type="button" class="btn" href="#dataset-upload-modal" data-toggle="modal">Upload a new Data set</a>
 		
@@ -30,16 +32,15 @@
   		<h4>Create a new data set</h4>
   	</div>
   	
-  	<#--bootstrap - jquery file upload form-->
-  	<form role="form" action="${context_url}/create-new-dataset-from-tsv" method="post" enctype="multipart/form-data" boundary="_FPSEP91465b27654aa128979fb2_">
+  	<#--bootstrap - jquery file upload form -->
+  	<form role="form" id="file-upload-form" action="${context_url}/file-upload" enctype="multipart/form-data" method="post" boundary="_FPSEP91465b27654aa128979fb2_">
   		<div class="modal-body">	
 			<div class="form-group has-succes">	
 				<label>Name of your new dataset</label>
-				<input type="text" id="dataset-name" name="dataset-name" required
-					class="form-control" placeholder="enter your data set name here">
+				<input type="text" id="dataset-name" name="dataset-name" required class="form-control" placeholder="enter your data set name here">
 			</div>
 			
-			<div class="form-group">
+			<div class="form-group" >
 				<div class="fileupload fileupload-new" data-provides="fileupload">
 					<div class="input-group">
 						
@@ -51,7 +52,7 @@
 			                <a class="btn btn-default btn-file">
 			                    <span class="fileupload-new">Select file</span>
 			                    <span class="fileupload-exists">Change</span>
-			                    <input name="file-input-field" type="file" class="file-input"/>
+			                    <input required name="file-input-field" type="file" class="file-input"/>
 			            	</a>
 					            	
 			                <a href="#" class="btn btn-default fileupload-exists" data-dismiss="fileupload">
@@ -65,7 +66,7 @@
 		</div>	
 		
 		<div class="modal-footer">
-	    	<a><button id="createDataSet" type="submit" class="btn btn-primary">Add</button></a>
+	    	<a><button id="create-dataset" type="submit" class="btn btn-primary">Add</button></a>
 	    	<a href="#dataset-upload-modal" data-toggle="modal" class="btn">Cancel</a>
 		</div>
 	</form>

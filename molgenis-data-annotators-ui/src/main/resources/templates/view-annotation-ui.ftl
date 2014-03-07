@@ -2,10 +2,10 @@
 <#include "molgenis-footer.ftl">
 
 <#-- seperate ftl's for every tab panel are included here-->
-<#include "view-annotationselect-tab.ftl">
-<#include "view-filterbyregion-tab.ftl">
-<#include "view-filterbyphenotype-tab.ftl">
-<#include "view-fileupload-tab.ftl">
+<#include "tab-annotationselect.ftl">
+<#include "tab-filterbyregion.ftl">
+<#include "tab-filterbyphenotype.ftl">
+<#include "tab-fileupload.ftl">
 
 <#assign css=["annotate-ui.css", "jquery-ui-1.10.3.custom.css", "chosen.css", "bootstrap-fileupload.css"]>
 <#assign js=["annotation.ui.js", "jquery-ui-1.10.3.custom.min.js", "chosen.jquery.min.js", "bootstrap-fileupload.js", "jquery.bootstrap.wizard.js"]>

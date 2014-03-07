@@ -6,6 +6,6 @@
 	position:absolute;
 }
 
-#annotation-select-title {
-	white-space:nowrap;
+#dataset-change-succes-message {
+	margin-bottom:-100px;
 }

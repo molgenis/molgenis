@@ -2,6 +2,7 @@
 	"use strict";
 	
 	var selectedDataSet = null;
+	
 	var restApi = new molgenis.RestClient();
 	
 	molgenis.onDataSetSelectionChange = function(dataSetUri) {
@@ -9,9 +10,11 @@
 		restApi.getAsync(dataSetUri, null, function(dataSet) {
 			selectedDataSet = dataSet;
 			
+			//$('#dataset-change-succes-message').html('<p><div class="alert alert-block alert-success">Dataset succesfully changed to ' + selectedDataSet.Name + '</div></p>');
+			
 			$.ajax({
 				type : 'POST',
-				url : molgenis.getContextUrl() + '/changeSelectedDataSet',
+				url : molgenis.getContextUrl() + '/change-selected-dataset',
 				data : JSON.stringify(selectedDataSet.Identifier),
 				contentType : 'application/json',
 				success : function(resultMap) {
@@ -43,10 +46,10 @@
 
 	// on document ready
 	$(function() {
-		// use chosen plugin for data set select
 		$('#dataset-select').chosen();
 		$('#dataset-select').change(function() {
 			if($("#dataset-select").val() != null){
+				
 				restApi.getAsync($('#dataset-select').val(), null, function(dataSet) {
 					selectedDataSet = dataSet;
 				});
@@ -58,22 +61,18 @@
 		// fire event handler
 		$('#dataset-select').change();
 			
-		$('#createDataSet').click(function() {
-			var inputFile = $('#file-input-field').val();
-			url:  molgenis.getContextUrl() + '/create-new-dataset-from-tsv';
-		});
-		
 		$("#disabled-tooltip").tooltip();
 		$("#remove-button-selected-phenotype").tooltip();
 		
 		$("#rootwizard").bootstrapWizard({'tabClass': 'nav nav-tabs'});
 		$("#phenotypeSelect").chosen();	
-		// disable the filtering tabs for now
-		//$("#rootwizard").bootstrapWizard('disable', 1);
-		//$(".tab2").click(function(){return false;});
 		
-		//$("#rootwizard").bootstrapWizard('disable', 2);
-		//$(".tab3").click(function(){return false;});
+		// disable the filtering tabs
+		$("#rootwizard").bootstrapWizard('disable', 1);
+		$(".tab2").click(function(){return false;});
+		
+		$("#rootwizard").bootstrapWizard('disable', 2);
+		$(".tab3").click(function(){return false;});
 	
 	});
 	
