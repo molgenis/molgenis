@@ -196,7 +196,6 @@
 	 */
 	function createAggregatesTable() {
 		function updateAggregatesTable(attributeUri) {
-			console.log(attributeUri);
 			$.ajax({
 				type : 'POST',
 				url : molgenis.getContextUrl() + '/aggregate',
@@ -205,10 +204,8 @@
 				success : function(aggregateResult) {
 					var table = $('<table />').addClass('table table-striped');
 					table.append('<tr><th>Category name</th><th>Count</th></tr>');
-					$.each(aggregateResult.hashCategories, function(categoryName,
-							count) {
-						table.append('<tr><td>' + categoryName + '</td><td>'
-								+ count + '</td></tr>');
+					$.each(aggregateResult.hashCategories, function(categoryName, count) {
+						table.append('<tr><td>' + categoryName + '</td><td>' + count + '</td></tr>');
 					});
 					$('#aggregate-table-container').html(table);
 				},
@@ -217,25 +214,29 @@
 				}
 			});
 		}
-		
+
 		var attributes = molgenis.getAtomicAttributes(getSelectedAttributes(), restApi);
-		var attributeSelect = $('<select id="selectFeature"/>');
-		if(Object.keys(attributes).length === 0) {
-			attributeSelect.attr('disabled', 'disabled');
-		} else {
-			$.each(attributes, function(key, attribute) {
-				if(attribute.fieldType === 'BOOL' || attribute.fieldType === 'CATEGORICAL') {
-					attributeSelect.append('<option value="' + attribute.href + '">' + attribute.label + '</option>');
-				}
+		var aggregableAttributes = $.grep(attributes, function(attribute) {
+			return attribute.fieldType === 'BOOL' || attribute.fieldType === 'CATEGORICAL';
+		});
+
+		if (aggregableAttributes.length > 0) {
+			var attributeSelect = $('<select id="selectFeature"/>');
+			$.each(aggregableAttributes, function() {
+				attributeSelect.append('<option value="' + this.href + '">' + this.label + '</option>');
 			});
 			$('#feature-select').html(attributeSelect);
-			if(attributeSelect.val()) {
+			$('#feature-select-container').show();
+			if (attributeSelect.val()) {
 				updateAggregatesTable(attributeSelect.val());
 				attributeSelect.chosen();
 				attributeSelect.change(function() {
 					updateAggregatesTable($(this).val());
 				});
 			}
+		} else {
+			$('#feature-select-container').hide();
+			$('#aggregate-table-container').html('<p>No aggregable items</p>');
 		}
 	}
 
