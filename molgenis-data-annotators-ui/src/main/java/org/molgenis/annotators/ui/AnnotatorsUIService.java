@@ -10,5 +10,5 @@ import org.springframework.ui.Model;
  */
 public interface AnnotatorsUIService
 {
-	void tsvToOmxRepository(String file, Model model, String submittedDataSetName);
+	void tsvToOmxRepository(String file, String submittedDataSetName);
 }
