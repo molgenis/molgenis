@@ -91,6 +91,13 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
+	public boolean hasRepository(String entityName)
+	{
+		return repositories.containsKey(entityName.toLowerCase());
+
+	}
+
+	@Override
 	public Repository getRepositoryByUrl(String url)
 	{
 		for (Map.Entry<String, Repository> entry : repositories.entrySet())

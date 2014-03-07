@@ -65,6 +65,7 @@ public class EntityToXrefValueConverter implements EntityToValueConverter<XrefVa
 			throw new ValueConverterException("value is not a " + XrefValue.class.getSimpleName());
 		}
 		Characteristic xrefCharacteristic = ((XrefValue) value).getValue();
-		return new ValueCell<String>(xrefCharacteristic.getIdentifier(), xrefCharacteristic.getIdentifier());
+		return new ValueCell<String>(xrefCharacteristic.getId(), xrefCharacteristic.getIdentifier(),
+				xrefCharacteristic.getIdentifier());
 	}
 }

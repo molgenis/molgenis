@@ -5,19 +5,18 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Query;
 import org.molgenis.data.support.AbstractEntity;
-import org.molgenis.data.support.QueryImpl;
-import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.search.Hit;
 import org.molgenis.util.MolgenisDateFormat;
 
+import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -56,7 +55,7 @@ public class HitEntity extends AbstractEntity
 	}
 
 	@Override
-	public Object get(String attributeName)
+	public Object get(final String attributeName)
 	{
 		if (caseInsensitiveAttributeNames == null) initCaseInsensitiveAttributeNames();
 		if (caseInsensitiveColumnValueMap == null) initCaseInsensitiveColumnValueMap();
@@ -79,9 +78,10 @@ public class HitEntity extends AbstractEntity
 							+ caseInsensitiveAttributeName);
 					if (attributeValue != null)
 					{
-						String categoryIdentifier = (String) attributeValue;
-						Query categoryQuery = new QueryImpl().eq(Characteristic.IDENTIFIER, categoryIdentifier);
-						return dataService.findOne(attribute.getRefEntity().getName(), categoryQuery);
+						String xrefName = attribute.getRefEntity().getName();
+						String xrefIdentifier = (String) attributeValue;
+						return new HitRefEntity(columnValueMap, xrefName, xrefIdentifier, attributeName, null,
+								dataService);
 					}
 					else return null;
 				}
@@ -149,15 +149,24 @@ public class HitEntity extends AbstractEntity
 				}
 				case MREF:
 				{
-					Object attributeValue = caseInsensitiveColumnValueMap.get(HIT_KEY_PREFIX
+					final Object attributeValue = caseInsensitiveColumnValueMap.get(HIT_KEY_PREFIX
 							+ caseInsensitiveAttributeName);
 					@SuppressWarnings("unchecked")
 					List<String> mrefIdentifiers = (List<String>) attributeValue;
 					if (mrefIdentifiers != null && !mrefIdentifiers.isEmpty())
 					{
-						Query mrefQ = new QueryImpl().in(Characteristic.IDENTIFIER, mrefIdentifiers);
+						final AtomicInteger count = new AtomicInteger();
+						final String xrefName = attribute.getRefEntity().getName();
 						// TODO use iterable, currently gives problems with RestController
-						return Lists.newArrayList(dataService.findAll(attribute.getRefEntity().getName(), mrefQ));
+						return Lists.transform(mrefIdentifiers, new Function<String, Entity>()
+						{
+							@Override
+							public Entity apply(String mrefIdentifier)
+							{
+								return new HitRefEntity(columnValueMap, xrefName, mrefIdentifier, attributeName, count
+										.getAndIncrement(), dataService);
+							}
+						});
 					}
 					else return Collections.emptyList();
 				}
@@ -177,9 +186,10 @@ public class HitEntity extends AbstractEntity
 							+ caseInsensitiveAttributeName);
 					if (attributeValue != null)
 					{
+						String xrefName = attribute.getRefEntity().getName();
 						String xrefIdentifier = (String) attributeValue;
-						Query xrefQ = new QueryImpl().eq(Characteristic.IDENTIFIER, xrefIdentifier);
-						return dataService.findOne(attribute.getRefEntity().getName(), xrefQ);
+						return new HitRefEntity(columnValueMap, xrefName, xrefIdentifier, attributeName, null,
+								dataService);
 					}
 					else return null;
 				}

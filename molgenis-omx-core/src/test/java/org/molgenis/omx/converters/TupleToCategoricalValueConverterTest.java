@@ -23,7 +23,7 @@ public class TupleToCategoricalValueConverterTest
 	{
 		DataService dataService = mock(DataService.class);
 		String catIdentifier = "category1";
-		String catName = "category #1";
+		String catName = "category1";
 		Category category = new Category();
 		category.setIdentifier(catIdentifier);
 		category.setName(catName);

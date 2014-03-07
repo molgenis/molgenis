@@ -31,7 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 
 @Service
@@ -66,7 +65,7 @@ public class OmxImporterServiceImpl implements OmxImporterService
 			{
 				// Import DataSet sheet, create new OmxRepository
 				String identifier = repository.getName().substring(DATASET_SHEET_PREFIX.length());
-				if (!Iterables.contains(dataService.getEntityNames(), identifier))
+				if (!dataService.hasRepository(identifier))
 				{
 					dataService
 							.addRepository(new OmxRepository(dataService, searchService, identifier, entityValidator));
@@ -94,8 +93,11 @@ public class OmxImporterServiceImpl implements OmxImporterService
 					}
 					for (ObservableFeature categoricalFeature : categoricalFeatures)
 					{
-						dataService.addRepository(new OmxLookupTableRepository(dataService, categoricalFeature
-								.getIdentifier()));
+						if (!dataService.hasRepository(categoricalFeature.getIdentifier() + "-LUT"))
+						{
+							dataService.addRepository(new OmxLookupTableRepository(dataService, categoricalFeature
+									.getIdentifier()));
+						}
 					}
 				}
 

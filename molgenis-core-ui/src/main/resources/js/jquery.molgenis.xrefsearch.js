@@ -122,7 +122,7 @@
 				'autofocus': 'autofocus',
 			};
 			
-		var element = createInput(attributeMetaData.fieldType, attrs, value)
+		var element = createInput(attributeMetaData.fieldType, attrs, value);
 		container.parent().append(element);
 		createSelect2(element, attributeMetaData, value);
 			
@@ -159,6 +159,6 @@
 		});
 		
 		return this;
-	}
+	};
 	
 }($, window.top.molgenis = window.top.molgenis || {}));

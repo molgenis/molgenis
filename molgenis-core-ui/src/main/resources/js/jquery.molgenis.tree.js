@@ -40,7 +40,13 @@
 			$('.molgenis-tree', container).fancytree('destroy');
 		
 		// create tree container
-		container.html('<div id="molgenis-tree" class="molgenis-tree"></div>');
+		var items = [];
+		items.push('<div class="row-fluid molgenis-tree-controls">');
+		items.push('<a href="#" class="btn btn-link pull-right tree-deselect-all-btn">Deselect all</a>');
+		items.push('<a href="#" class="btn btn-link pull-right tree-select-all-btn">Select all</a>');
+		items.push('</div>');
+		items.push('<div class="row-fluid molgenis-tree"></div>');
+		container.html(items.join(''));
 
 		// create tree container
 		var tree = $('.molgenis-tree', container);
@@ -90,11 +96,53 @@
 				}
 			},
 			'select' : function(e, data) {
-				if (settings.onAttributeSelect)
-					settings.onAttributeSelect(data.node.data.attribute, data.node.selected);
+				if (settings.onAttributesSelect)
+					settings.onAttributesSelect({'attribute': data.node.data.attribute, 'select': data.node.selected});
 			}
 		};
 		tree.fancytree(treeConfig);
+		
+		$('.tree-select-all-btn', container).click(function(e) {
+			e.preventDefault();
+			
+			var fn = settings.onAttributesSelect; // store handler
+			settings.onAttributesSelect = null; // suppress events
+			
+			var selects = [];
+			tree.fancytree("getRootNode").visit(function(node) {
+				if(!node.isSelected()) {
+					node.setSelected(true);
+					selects.push({'attribute': node.data.attribute, 'select': true});
+				}
+			});
+			
+			settings.onAttributesSelect = fn; // restore handler
+			
+			// fire event for new selects
+			if (selects.length > 0)
+				settings.onAttributesSelect(selects);
+		});
+		
+		$('.tree-deselect-all-btn', container).click(function(e) {
+			e.preventDefault();
+			
+			var fn = settings.onAttributesSelect; // store handler
+			settings.onAttributesSelect = null; // suppress events
+			
+			var selects = [];
+			tree.fancytree("getRootNode").visit(function(node) {
+				if(node.isSelected()) {
+					node.setSelected(false);
+					selects.push({'attribute': node.data.attribute, 'select': false});
+				}
+			});
+			
+			settings.onAttributesSelect = fn; // restore handler
+			
+			// fire event for new deselects
+			if (selects.length > 0)
+				settings.onAttributesSelect(selects);
+		});
 		
 		return this;
 	};
@@ -105,6 +153,6 @@
 		'selectedAttributes' : null,
 		'icon' : null,
 		'onAttributeClick' : null,
-		'onAttributeSelect' : null
+		'onAttributesSelect' : null
 	};
 }($, window.top.molgenis = window.top.molgenis || {}));
