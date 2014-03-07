@@ -19,18 +19,20 @@
 		items.push('</div>');
 		settings.container.html(items.join(''));
 
-		// add data to elements
-		getTableMetaData(settings, function(attributes, refEntitiesMeta) {
-			settings.colAttributes = attributes;
-			settings.refEntitiesMeta = refEntitiesMeta;
-
-			getTableData(settings, function(data) {
-				createTableHeader(settings);
-				createTableBody(data, settings);
-				createTablePager(data, settings);
-				createTableFooter(data, settings);
+		if(settings.attributes && settings.attributes.length > 0) {
+			// add data to elements
+			getTableMetaData(settings, function(attributes, refEntitiesMeta) {
+				settings.colAttributes = attributes;
+				settings.refEntitiesMeta = refEntitiesMeta;
+	
+				getTableData(settings, function(data) {
+					createTableHeader(settings);
+					createTableBody(data, settings);
+					createTablePager(data, settings);
+					createTableFooter(data, settings);
+				});
 			});
-		});
+		}
 	}
 	
 	/**
@@ -71,7 +73,12 @@
 			return attribute.name;
 		});
 		var expandAttributeNames = $.map(settings.colAttributes, function(attribute) {
-			return attribute.fieldType === 'XREF' || attribute.fieldType === 'CATEGORICAL' ||attribute.fieldType === 'MREF' ? attribute.name : null;
+			if(attribute.fieldType === 'XREF' || attribute.fieldType === 'CATEGORICAL' ||attribute.fieldType === 'MREF') {
+				// partially expand reference entities (only request label attribute)
+				var refEntity = settings.refEntitiesMeta[attribute.refEntity.href];
+				return attribute.name + '[' + refEntity.labelAttribute + ']';
+			}
+			return null;
 		});
 
 		// TODO do not construct uri from other uri

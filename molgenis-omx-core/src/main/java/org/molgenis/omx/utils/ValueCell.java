@@ -4,6 +4,7 @@ import org.molgenis.util.Cell;
 
 public class ValueCell<T> implements Cell<T>
 {
+	private final Integer id;
 	private final String key;
 	private final T value;
 
@@ -14,9 +15,21 @@ public class ValueCell<T> implements Cell<T>
 
 	public ValueCell(String key, T value)
 	{
+		this(null, key, value);
+	}
+
+	public ValueCell(Integer id, String key, T value)
+	{
 		if (value == null) throw new IllegalArgumentException("value is null");
+		this.id = id;
 		this.key = key;
 		this.value = value;
+	}
+
+	@Override
+	public Integer getId()
+	{
+		return id;
 	}
 
 	@Override
@@ -42,6 +55,7 @@ public class ValueCell<T> implements Cell<T>
 	{
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		result = prime * result + ((key == null) ? 0 : key.hashCode());
 		result = prime * result + ((value == null) ? 0 : value.hashCode());
 		return result;
@@ -53,7 +67,12 @@ public class ValueCell<T> implements Cell<T>
 		if (this == obj) return true;
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
-		ValueCell<?> other = (ValueCell<?>) obj;
+		ValueCell other = (ValueCell) obj;
+		if (id == null)
+		{
+			if (other.id != null) return false;
+		}
+		else if (!id.equals(other.id)) return false;
 		if (key == null)
 		{
 			if (other.key != null) return false;

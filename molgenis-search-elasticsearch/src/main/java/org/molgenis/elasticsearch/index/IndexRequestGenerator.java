@@ -102,11 +102,13 @@ public class IndexRequestGenerator
 					{
 						// Serialize collections to be able to sort on them, elasticsearch does not support sorting on
 						// list fields
+						Object id = null;
 						Object key = null;
 						Object value = entity.get(attrName);
 						if (value instanceof Cell)
 						{
 							Cell<?> cell = (Cell<?>) value;
+							id = cell.getId();
 							key = cell.getKey();
 							value = cell.getValue();
 						}
@@ -115,21 +117,30 @@ public class IndexRequestGenerator
 							Collection<?> values = (Collection<?>) value;
 							if (!values.isEmpty() && values.iterator().next() instanceof Cell)
 							{
+								List<Integer> mrefIds = null;
 								List<String> mrefKeys = null;
 								for (Iterator<Cell<?>> it = ((Collection<Cell<?>>) values).iterator(); it.hasNext();)
 								{
-									String cellKey = it.next().getKey();
+									Cell<?> cell = it.next();
+									Integer cellId = cell.getId();
+									if (cellId != null)
+									{
+										if (mrefIds == null) mrefIds = new ArrayList<Integer>();
+										mrefIds.add(cellId);
+									}
+									String cellKey = cell.getKey();
 									if (cellKey != null)
 									{
 										if (mrefKeys == null) mrefKeys = new ArrayList<String>();
 										mrefKeys.add(cellKey);
 									}
 								}
+								if (mrefIds != null) id = mrefIds;
 								if (mrefKeys != null) key = mrefKeys;
 							}
 							value = Joiner.on(" , ").join((Collection<?>) value);
 						}
-
+						if (id != null) doc.put("id-" + attrName, id);
 						if (key != null) doc.put("key-" + attrName, key);
 						doc.put(attrName, value);
 					}
