@@ -63,6 +63,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 
 	private MockMvc mockMvc;
 
+	private EntityMetaData entityMetaData;
+
 	@BeforeMethod
 	public void beforeMethod()
 	{
@@ -70,6 +72,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 
 		Repository repo = mock(Repository.class, withSettings().extraInterfaces(Updateable.class, Queryable.class));
 
+		entityMetaData = mock(EntityMetaData.class);
+		when(repo.getEntityMetaData()).thenReturn(entityMetaData);
 		Entity entityXref = new MapEntity("id");
 		entityXref.set("id", 1);
 		entityXref.set("name", "PietXREF");
@@ -98,7 +102,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(repo.getEntityMetaData().getAttribute("name")).thenReturn(attrName);
 		when(repo.getEntityMetaData().getIdAttribute()).thenReturn(attrId);
 		when(repo.getEntityMetaData().getAttributes()).thenReturn(Arrays.<AttributeMetaData> asList(attrName, attrId));
-		when(repo.getEntityMetaData().getAtomicAttributes()).thenReturn(Arrays.<AttributeMetaData> asList(attrName, attrId));
+		when(repo.getEntityMetaData().getAtomicAttributes()).thenReturn(
+				Arrays.<AttributeMetaData> asList(attrName, attrId));
 		when(repo.getName()).thenReturn(ENTITY_NAME);
 
 		mockMvc = MockMvcBuilders.standaloneSetup(restController).setMessageConverters(new GsonHttpMessageConverter())
@@ -284,7 +289,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(repo.getEntityMetaData().getAttribute("name")).thenReturn(attrName);
 		when(repo.getEntityMetaData().getIdAttribute()).thenReturn(attrId);
 		when(repo.getEntityMetaData().getAttributes()).thenReturn(Arrays.<AttributeMetaData> asList(attrName, attrId));
-		when(repo.getEntityMetaData().getAtomicAttributes()).thenReturn(Arrays.<AttributeMetaData> asList(attrName, attrId));
+		when(repo.getEntityMetaData().getAtomicAttributes()).thenReturn(
+				Arrays.<AttributeMetaData> asList(attrName, attrId));
 		when(repo.getName()).thenReturn(ENTITY_NAME);
 
 		mockMvc = MockMvcBuilders.standaloneSetup(restController).setMessageConverters(new GsonHttpMessageConverter())
