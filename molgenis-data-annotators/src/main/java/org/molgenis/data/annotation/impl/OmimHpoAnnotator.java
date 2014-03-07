@@ -116,6 +116,17 @@ public class OmimHpoAnnotator extends LocusAnnotator
 	}
 
 	@Override
+	public EntityMetaData getInputMetaData() {
+		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
+
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CHROMOSOME, MolgenisFieldTypes.FieldTypeEnum.STRING));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(POSITION, MolgenisFieldTypes.FieldTypeEnum.LONG));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData("not-playing", MolgenisFieldTypes.FieldTypeEnum.STRING));
+
+		return metadata;
+	}
+	
+	@Override
 	public String getName()
 	{
 		return NAME;
