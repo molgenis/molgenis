@@ -8,6 +8,7 @@ import java.util.Set;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.CrudRepositorySecurityDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.EntityMetaData;
@@ -31,7 +32,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 
 @Service
@@ -66,10 +66,10 @@ public class OmxImporterServiceImpl implements OmxImporterService
 			{
 				// Import DataSet sheet, create new OmxRepository
 				String identifier = repository.getName().substring(DATASET_SHEET_PREFIX.length());
-				if (!Iterables.contains(dataService.getEntityNames(), identifier))
+				if (!dataService.hasRepository(identifier))
 				{
-					dataService
-							.addRepository(new OmxRepository(dataService, searchService, identifier, entityValidator));
+					dataService.addRepository(new CrudRepositorySecurityDecorator(new OmxRepository(dataService,
+							searchService, identifier, entityValidator)));
 
 					DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME,
 							new QueryImpl().eq(DataSet.IDENTIFIER, identifier), DataSet.class);

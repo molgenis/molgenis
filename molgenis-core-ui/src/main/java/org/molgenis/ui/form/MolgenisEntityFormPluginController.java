@@ -56,9 +56,9 @@ public class MolgenisEntityFormPluginController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = URI + "{entityName}")
-	public String list(@PathVariable("entityName") String entityName,
-			@RequestParam(value = "subForms", required = false) String[] subForms, Model model)
-			throws MolgenisModelException
+	public String list(@PathVariable("entityName")
+	String entityName, @RequestParam(value = "subForms", required = false)
+	String[] subForms, Model model) throws MolgenisModelException
 	{
 		model.addAttribute("current_uri", MolgenisUiUtils.getCurrentUri());
 
@@ -111,8 +111,10 @@ public class MolgenisEntityFormPluginController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = URI + "{entityName}/{id}")
-	public String edit(@PathVariable("entityName") String entityName, @PathVariable("id") Integer id,
-			@RequestParam(value = "back", required = false) String back, Model model)
+	public String edit(@PathVariable("entityName")
+	String entityName, @PathVariable("id")
+	Integer id, @RequestParam(value = "back", required = false)
+	String back, Model model)
 	{
 		if (StringUtils.isNotBlank(back))
 		{
@@ -128,8 +130,9 @@ public class MolgenisEntityFormPluginController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = URI + "{entityName}/create")
-	public String create(@PathVariable("entityName") String entityName, HttpServletRequest request,
-			@RequestParam(value = "back", required = false) String back, Model model) throws Exception
+	public String create(@PathVariable("entityName")
+	String entityName, HttpServletRequest request, @RequestParam(value = "back", required = false)
+	String back, Model model) throws Exception
 	{
 		if (StringUtils.isNotBlank(back))
 		{
