@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
 import org.apache.log4j.Logger;
@@ -37,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.google.common.collect.Lists;
 
@@ -124,20 +126,20 @@ public class AnnotatorsUIController extends MolgenisPluginController
 		return "view-annotation-ui";
 	}
 
-	@RequestMapping(value = "/changeSelectedDataSet")
+	@RequestMapping(value = "/change-selected-dataset")
 	@ResponseBody
 	public Map<String, Boolean> changeSelectedDataSet(@RequestBody
-	String selectedDataSetIdentifier)
+	String selectedDataSetIdentifier, Model model)
 	{
 		Map<String, Boolean> annotatorMap = setMapOfAnnotators(selectedDataSetIdentifier);
 		return annotatorMap;
 	}
 
-	@RequestMapping(value = "/create-new-dataset-from-tsv", headers = "content-type=multipart/*", method = RequestMethod.POST)
+	@RequestMapping(value = "/file-upload", headers = "content-type=multipart/*", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void handleVcfInput(@RequestParam("file-input-field")
 	Part part, @RequestParam("dataset-name")
-	String submittedDataSetName, Model model) throws IOException
+	String submittedDataSetName) throws IOException
 	{
 		if (!part.equals(null) && part.getSize() > 5000000)
 		{ // 5mb limit
@@ -148,10 +150,10 @@ public class AnnotatorsUIController extends MolgenisPluginController
 			throw new RuntimeException("No file submitted");
 		}
 
-		String file = "cartagenia-export-file";
+		String file = "input-file";
 		fileStore.store(part.getInputStream(), file);
 
-		pluginAnnotatorsUIService.tsvToOmxRepository(file, model, submittedDataSetName);
+		pluginAnnotatorsUIService.tsvToOmxRepository(file, submittedDataSetName);
 	}
 
 	@RequestMapping(value = "/execute-annotation-app", method = RequestMethod.POST)
@@ -189,12 +191,11 @@ public class AnnotatorsUIController extends MolgenisPluginController
 
 		if (dataSetIdentifier != null)
 		{
-
-			EntityMetaData repo = (EntityMetaData) dataService.getRepositoryByEntityName(dataSetIdentifier);
+			EntityMetaData entityMetaData = dataService.getEntityMetaData(dataSetIdentifier);
 
 			for (RepositoryAnnotator annotator : annotationService.getAllAnnotators())
 			{
-				mapOfAnnotators.put(annotator.getName(), annotator.canAnnotate(repo));
+				mapOfAnnotators.put(annotator.getName(), annotator.canAnnotate(entityMetaData));
 			}
 
 		}
