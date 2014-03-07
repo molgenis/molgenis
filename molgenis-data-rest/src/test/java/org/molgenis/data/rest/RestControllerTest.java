@@ -63,8 +63,6 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 
 	private MockMvc mockMvc;
 
-	private EntityMetaData entityMetaData;
-
 	@BeforeMethod
 	public void beforeMethod()
 	{
@@ -72,8 +70,6 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 
 		Repository repo = mock(Repository.class, withSettings().extraInterfaces(Updateable.class, Queryable.class));
 
-		entityMetaData = mock(EntityMetaData.class);
-		when(repo.getEntityMetaData()).thenReturn(entityMetaData);
 		Entity entityXref = new MapEntity("id");
 		entityXref.set("id", 1);
 		entityXref.set("name", "PietXREF");
