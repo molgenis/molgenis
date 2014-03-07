@@ -14,6 +14,7 @@ import org.molgenis.data.annotation.VariantAnnotator;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -47,13 +48,17 @@ import org.springframework.stereotype.Component;
 @Component("dbnsfpVariantService")
 public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 {
+	@Autowired
+	private MolgenisSettings molgenisSettings;
+	
 	private static final String NAME = "dbNSFP-Variant";
 	
 	// FIXME the prefix for chromosome files, change this into runtime property
-	private static final String CHROMOSOME_FILE = "/Users/mdehaan/bin/tools/dbnsfp/dbNSFP2.3_variant.chr";
+	private static final String CHROMOSOME_FILE_LOCATION_PROPERTY = "dbsnfp_variant_location";
+	private final String CHROMOSOME_FILE = molgenisSettings.getProperty(CHROMOSOME_FILE_LOCATION_PROPERTY);
 
 	// we want to know features, so take the first chromosome file and retrieve them from the header
-	public static final String[] FEATURES = determineFeatures();
+	public final String[] FEATURES = determineFeatures();
 
 	@Autowired
 	AnnotationService annotatorService;
@@ -192,7 +197,7 @@ public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 		return results.iterator();
 	}
 
-	private static String[] determineFeatures()
+	private String[] determineFeatures()
 	{
 		String[] features = null;
 

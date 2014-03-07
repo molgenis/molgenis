@@ -127,16 +127,16 @@ public class DbnsfpVariantServiceAnnotatorTest
 		List<Entity> expectedList = new ArrayList<Entity>();
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
 		
-		resultMap.put(DbnsfpVariantServiceAnnotator.FEATURES[4], "Q");
-		resultMap.put(DbnsfpVariantServiceAnnotator.FEATURES[5], "H");
-		resultMap.put(DbnsfpVariantServiceAnnotator.FEATURES[6], "2715049");
-		resultMap.put(DbnsfpVariantServiceAnnotator.FEATURES[7], "SRY");
-		resultMap.put(DbnsfpVariantServiceAnnotator.FEATURES[8], ".");
-		resultMap.put(DbnsfpVariantServiceAnnotator.FEATURES[9], ".");
-		resultMap.put(DbnsfpVariantServiceAnnotator.FEATURES[10], ".");
-		resultMap.put(DbnsfpVariantServiceAnnotator.FEATURES[11], ".");
-		resultMap.put(DbnsfpVariantServiceAnnotator.FEATURES[12], "-");
-		resultMap.put(DbnsfpVariantServiceAnnotator.FEATURES[13], "CAG");
+		resultMap.put(annotator.FEATURES[4], "Q");
+		resultMap.put(annotator.FEATURES[5], "H");
+		resultMap.put(annotator.FEATURES[6], "2715049");
+		resultMap.put(annotator.FEATURES[7], "SRY");
+		resultMap.put(annotator.FEATURES[8], ".");
+		resultMap.put(annotator.FEATURES[9], ".");
+		resultMap.put(annotator.FEATURES[10], ".");
+		resultMap.put(annotator.FEATURES[11], ".");
+		resultMap.put(annotator.FEATURES[12], "-");
+		resultMap.put(annotator.FEATURES[13], "CAG");
 
 		Entity expectedEntity = new MapEntity(resultMap);
 
@@ -148,8 +148,8 @@ public class DbnsfpVariantServiceAnnotatorTest
 
 		for (int i = 4; i < 14; i++)
 		{
-			assertEquals(resultEntity.get(DbnsfpVariantServiceAnnotator.FEATURES[i]),
-					expectedEntity.get(DbnsfpVariantServiceAnnotator.FEATURES[i]));
+			assertEquals(resultEntity.get(annotator.FEATURES[i]),
+					expectedEntity.get(annotator.FEATURES[i]));
 		}
 	}
 

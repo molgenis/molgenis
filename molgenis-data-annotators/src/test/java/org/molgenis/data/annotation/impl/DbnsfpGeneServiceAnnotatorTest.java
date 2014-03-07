@@ -21,6 +21,7 @@ import org.testng.annotations.Test;
 
 public class DbnsfpGeneServiceAnnotatorTest
 {
+	
 	private EntityMetaData metaDataCanAnnotate;
 	private EntityMetaData metaDataCantAnnotate;
 	private DbnsfpGeneServiceAnnotator annotator;
@@ -95,17 +96,17 @@ public class DbnsfpGeneServiceAnnotatorTest
 		List<Entity> expectedList = new ArrayList<Entity>();
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
 
-		resultMap.put(DbnsfpGeneServiceAnnotator.FEATURES[0], "USP5");
-		resultMap.put(DbnsfpGeneServiceAnnotator.FEATURES[1], "ENSG00000111667");
-		resultMap.put(DbnsfpGeneServiceAnnotator.FEATURES[2], "12");
-		resultMap.put(DbnsfpGeneServiceAnnotator.FEATURES[3], ".");
-		resultMap.put(DbnsfpGeneServiceAnnotator.FEATURES[4], "IsoT");
-		resultMap.put(DbnsfpGeneServiceAnnotator.FEATURES[5], "P45974");
-		resultMap.put(DbnsfpGeneServiceAnnotator.FEATURES[6], "UBP5_HUMAN");
-		resultMap.put(DbnsfpGeneServiceAnnotator.FEATURES[7], "8078");
-		resultMap.put(DbnsfpGeneServiceAnnotator.FEATURES[8], "CCDS31733.1;CCDS41743.1");
-		resultMap.put(DbnsfpGeneServiceAnnotator.FEATURES[9], "NM_001098536");
-		resultMap.put(DbnsfpGeneServiceAnnotator.FEATURES[10], "uc001qri.4");
+		resultMap.put(annotator.FEATURES[0], "USP5");
+		resultMap.put(annotator.FEATURES[1], "ENSG00000111667");
+		resultMap.put(annotator.FEATURES[2], "12");
+		resultMap.put(annotator.FEATURES[3], ".");
+		resultMap.put(annotator.FEATURES[4], "IsoT");
+		resultMap.put(annotator.FEATURES[5], "P45974");
+		resultMap.put(annotator.FEATURES[6], "UBP5_HUMAN");
+		resultMap.put(annotator.FEATURES[7], "8078");
+		resultMap.put(annotator.FEATURES[8], "CCDS31733.1;CCDS41743.1");
+		resultMap.put(annotator.FEATURES[9], "NM_001098536");
+		resultMap.put(annotator.FEATURES[10], "uc001qri.4");
 
 		Entity expectedEntity = new MapEntity(resultMap);
 
@@ -116,8 +117,8 @@ public class DbnsfpGeneServiceAnnotatorTest
 		Entity resultEntity = results.next();
 		for (int i = 0; i < 11; i++)
 		{
-			assertEquals(resultEntity.get(DbnsfpGeneServiceAnnotator.FEATURES[i]),
-					expectedEntity.get(DbnsfpGeneServiceAnnotator.FEATURES[i]));
+			assertEquals(resultEntity.get(annotator.FEATURES[i]),
+					expectedEntity.get(annotator.FEATURES[i]));
 		}
 	}
 

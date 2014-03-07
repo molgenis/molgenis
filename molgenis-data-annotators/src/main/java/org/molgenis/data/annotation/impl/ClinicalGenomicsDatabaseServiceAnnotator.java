@@ -18,6 +18,7 @@ import org.molgenis.data.annotation.impl.datastructures.Locus;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -25,6 +26,9 @@ import org.springframework.stereotype.Component;
 @Component("CgdService")
 public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 {
+	@Autowired
+	private MolgenisSettings molgenisSettings;
+	
 	public static final String REFERENCES = "REFERENCES";
 	public static final String INTERVENTION_RATIONALE = "INTERVENTION / RATIONALE";
 	public static final String COMMENTS = "COMMENTS";
@@ -38,7 +42,8 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 	public static final String GENE = "Gene";
 	private static final String NAME = "Clinical Genomic Database";
 
-	private static final String CGD_FILE = "/Users/mdehaan/Downloads/CGD.txt";
+	private static final String CGD_FILE_LOCATION_PROPERTY = "/Users/mdehaan/Downloads/CGD.txt";
+	private final String CGD_FILE = molgenisSettings.getProperty(CGD_FILE_LOCATION_PROPERTY);
 
 	@Autowired
 	AnnotationService annotatorService;

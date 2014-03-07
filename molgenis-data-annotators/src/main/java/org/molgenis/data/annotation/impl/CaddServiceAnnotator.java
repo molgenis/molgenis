@@ -46,18 +46,24 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	static final String CADD_SCALED = "CADD_SCALED";
 	static final String CADD_ABS = "CADD_ABS";
 	
-	private static final String TABIX_LOCATION = "/Users/mdehaan/bin/tools/tabix-0.2.6/tabix";
-	private static final String CADD_FILE = "/Users/mdehaan/Downloads/1000G.vcf.gz";
-
+	
+	
+	@Autowired
+	private MolgenisSettings molgenisSettings;
+	
 	@Autowired
 	DataService dataService;
 
 	@Autowired
-	private MolgenisSettings molgenisSettings;
-
-	@Autowired
 	AnnotationService annotatorService;
+	
+	private static final String TABIX_LOCATION_PROPERTY = "tabix_location";
+	private final String TABIX_LOCATION = molgenisSettings.getProperty(TABIX_LOCATION_PROPERTY);
 
+	private static final String CADD_FILE_LOCATION_PROPERTY = "cadd_location";
+	private final String CADD_FILE = molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY);
+
+	
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{

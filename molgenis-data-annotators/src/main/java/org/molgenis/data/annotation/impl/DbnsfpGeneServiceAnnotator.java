@@ -23,6 +23,7 @@ import org.molgenis.data.annotation.impl.datastructures.Locus;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -53,12 +54,16 @@ import org.springframework.stereotype.Component;
 @Component("dbnsfpGeneService")
 public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 {
+	@Autowired
+	private MolgenisSettings molgenisSettings;
+	
 	private static final String NAME = "dbNSFP-Gene";
 
 	// FIXME set runtime property for file location
-	private static final String GENE_FILE = "/Users/mdehaan/bin/tools/dbnsfp/dbNSFP2.3_gene";
+	private static final String GENE_FILE_LOCATION_PROPERTY = "dbnsfp_gene_location";
+	private final String GENE_FILE = molgenisSettings.getProperty(GENE_FILE_LOCATION_PROPERTY);
 
-	static final String[] FEATURES = determineFeatures();
+	public final String[] FEATURES = determineFeatures();
 
 	@Autowired
 	AnnotationService annotatorService;
@@ -149,7 +154,7 @@ public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 
 	}
 
-	private static String[] determineFeatures()
+	private String[] determineFeatures()
 	{
 		String[] features = null;
 
