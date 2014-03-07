@@ -94,8 +94,11 @@ public class OmxImporterServiceImpl implements OmxImporterService
 					}
 					for (ObservableFeature categoricalFeature : categoricalFeatures)
 					{
-						dataService.addRepository(new OmxLookupTableRepository(dataService, categoricalFeature
-								.getIdentifier()));
+						if (!dataService.hasRepository(categoricalFeature.getIdentifier() + "-LUT"))
+						{
+							dataService.addRepository(new OmxLookupTableRepository(dataService, categoricalFeature
+									.getIdentifier()));
+						}
 					}
 				}
 

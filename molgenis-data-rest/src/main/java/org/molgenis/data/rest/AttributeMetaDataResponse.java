@@ -2,6 +2,7 @@ package org.molgenis.data.rest;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -43,7 +44,7 @@ public class AttributeMetaDataResponse
 	 *            set of lowercase attribute names to expand in response
 	 */
 	public AttributeMetaDataResponse(final String entityParentName, AttributeMetaData attr, Set<String> attributesSet,
-			final Set<String> attributeExpandsSet)
+			final Map<String, Set<String>> attributeExpandsSet)
 	{
 		String attrName = attr.getName();
 
@@ -76,9 +77,10 @@ public class AttributeMetaDataResponse
 		if (attributesSet == null || attributesSet.contains("refEntity".toLowerCase()))
 		{
 			EntityMetaData refEntity = attr.getRefEntity();
-			if (attributeExpandsSet != null && attributeExpandsSet.contains("refEntity".toLowerCase()))
+			if (attributeExpandsSet != null && attributeExpandsSet.containsKey("refEntity".toLowerCase()))
 			{
-				this.refEntity = refEntity != null ? new EntityMetaDataResponse(refEntity, null, null) : null;
+				Set<String> subAttributesSet = attributeExpandsSet.get("refEntity".toLowerCase());
+				this.refEntity = refEntity != null ? new EntityMetaDataResponse(refEntity, subAttributesSet, null) : null;
 			}
 			else
 			{
@@ -98,9 +100,12 @@ public class AttributeMetaDataResponse
 						@Override
 						public Object apply(AttributeMetaData attributeMetaData)
 						{
-							if (attributeExpandsSet != null && attributeExpandsSet.contains("attributes".toLowerCase()))
+							if (attributeExpandsSet != null
+									&& attributeExpandsSet.containsKey("attributes".toLowerCase()))
 							{
-								return new AttributeMetaDataResponse(entityParentName, attributeMetaData, null, null);
+								Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
+								return new AttributeMetaDataResponse(entityParentName, attributeMetaData,
+										subAttributesSet, null);
 							}
 							else
 							{

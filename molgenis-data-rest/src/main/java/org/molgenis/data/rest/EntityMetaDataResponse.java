@@ -27,7 +27,8 @@ public class EntityMetaDataResponse
 	 * @param attributeExpandsSet
 	 *            set of lowercase attribute names to expand in response
 	 */
-	public EntityMetaDataResponse(EntityMetaData meta, Set<String> attributesSet, Set<String> attributeExpandsSet)
+	public EntityMetaDataResponse(EntityMetaData meta, Set<String> attributesSet,
+			Map<String, Set<String>> attributeExpandsSet)
 	{
 		String name = meta.getName();
 		this.href = String.format("%s/%s/meta", RestController.BASE_URI, name);
@@ -58,9 +59,11 @@ public class EntityMetaDataResponse
 			{
 				if (attr.isVisible() && !attr.getName().equals("__Type"))
 				{
-					if (attributeExpandsSet != null && attributeExpandsSet.contains("attributes".toLowerCase()))
+					if (attributeExpandsSet != null && attributeExpandsSet.containsKey("attributes".toLowerCase()))
 					{
-						this.attributes.put(attr.getName(), new AttributeMetaDataResponse(name, attr));
+						Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
+						this.attributes.put(attr.getName(), new AttributeMetaDataResponse(name, attr, subAttributesSet,
+								null));
 					}
 					else
 					{

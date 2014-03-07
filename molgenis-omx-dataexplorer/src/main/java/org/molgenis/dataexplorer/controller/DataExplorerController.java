@@ -17,11 +17,13 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.apache.log4j.Logger;
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.csv.CsvWriter;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.entityexplorer.controller.EntityExplorerController;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
@@ -102,16 +104,14 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	/**
-	 * TODO JJ
-	 * 
 	 * Show the explorer page
 	 * 
 	 * @param model
 	 * @return the view name
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(@RequestParam(value = "dataset", required = false) String selectedEntityName, Model model)
-			throws Exception
+	public String init(@RequestParam(value = "dataset", required = false) String selectedEntityName,
+			@RequestParam(value = "wizard", required = false) Boolean wizard, Model model) throws Exception
 	{
 		// set entityExplorer URL for link to EntityExplorer for x/mrefs, but only if the user has permission to see the
 		// plugin
@@ -137,6 +137,7 @@ public class DataExplorerController extends MolgenisPluginController
 			selectedEntityName = entitiesMeta.iterator().next().getName();
 		}
 		model.addAttribute("selectedEntityName", selectedEntityName);
+		model.addAttribute("wizard", (wizard != null) && wizard.booleanValue());
 
 		// Init genome browser
 		model.addAttribute("genomeBrowserSets", getGenomeBrowserSetsToModel());
@@ -199,7 +200,7 @@ public class DataExplorerController extends MolgenisPluginController
 		try
 		{
 			csvWriter.writeAttributeNames(Iterables.transform(
-					Iterables.filter(entityMetaData.getAttributes(), new Predicate<AttributeMetaData>()
+					Iterables.filter(entityMetaData.getAtomicAttributes(), new Predicate<AttributeMetaData>()
 					{
 						@Override
 						public boolean apply(AttributeMetaData attributeMetaData)
@@ -230,11 +231,41 @@ public class DataExplorerController extends MolgenisPluginController
 		String[] attributeUriTokens = request.getAttributeUri().split("/");
 		String entityName = attributeUriTokens[3];
 		String attributeName = attributeUriTokens[5];
+		QueryImpl q = request.getQ() != null ? new QueryImpl(request.getQ()) : new QueryImpl();
 
-		Map<String, Integer> aggregateMap = new HashMap<String, Integer>();
-		for (Entity entity : dataService.findAll(entityName))
+		EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
+		AttributeMetaData attributeMeta = entityMeta.getAttribute(attributeName);
+		FieldTypeEnum dataType = attributeMeta.getDataType().getEnumType();
+		if (dataType != FieldTypeEnum.BOOL && dataType != FieldTypeEnum.CATEGORICAL)
 		{
-			String val = entity.getString(attributeName);
+			throw new RuntimeException("Unsupported data type " + dataType);
+		}
+
+		EntityMetaData refEntityMeta = null;
+		String refAttributeName = null;
+		if (dataType == FieldTypeEnum.CATEGORICAL)
+		{
+			refEntityMeta = attributeMeta.getRefEntity();
+			refAttributeName = refEntityMeta.getLabelAttribute().getName();
+		}
+		Map<String, Integer> aggregateMap = new HashMap<String, Integer>();
+		for (Entity entity : dataService.findAll(entityName, q))
+		{
+			String val;
+			switch (dataType)
+			{
+				case BOOL:
+					val = entity.getString(attributeName);
+					break;
+				case CATEGORICAL:
+					Entity refEntity = (Entity) entity.get(attributeName);
+					val = refEntity.getString(refAttributeName);
+					break;
+				default:
+					throw new RuntimeException("Unsupported data type " + dataType);
+
+			}
+
 			Integer count = aggregateMap.get(val);
 			if (count == null) aggregateMap.put(val, 1);
 			else aggregateMap.put(val, count + 1);

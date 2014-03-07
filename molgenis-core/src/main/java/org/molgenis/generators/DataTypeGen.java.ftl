@@ -407,12 +407,6 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 		set(new MapEntity(attributeName, value), false);
 	}
 
-	@Override
-	public String getLabelValue()
-	{
-		return null;
-	}
-
 <#-- Implement equals() and hashCode() using business key equality -->
 <#assign uniqueKeys = entity.getUniqueKeysWithoutPk()>
 	@Override

@@ -18,6 +18,7 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.QueryImpl;
@@ -116,15 +117,17 @@ public class OmxRepositoryIteratorTest
 		DataService dataService = mock(DataService.class);
 		Repository repository = mock(Repository.class);
 		AttributeMetaData attributeMetaData = mock(AttributeMetaData.class);
+		EntityMetaData entityMetaData = mock(EntityMetaData.class);
 		FieldType fieldType = mock(FieldType.class);
+		when(repository.getEntityMetaData()).thenReturn(entityMetaData);
 		when(fieldType.getEnumType()).thenReturn(FieldTypeEnum.STRING);
 		when(attributeMetaData.getDataType()).thenReturn(fieldType);
-		when(repository.getEntityMetaData().getAttribute(attrName)).thenReturn(attributeMetaData);
+		when(entityMetaData.getAttribute(attrName)).thenReturn(attributeMetaData);
 		when(dataService.getRepositoryByEntityName(dataSetIdentifier)).thenReturn(repository);
+		when(dataService.getEntityMetaData(dataSetIdentifier)).thenReturn(entityMetaData);
 
 		OmxRepositoryIterator it = new OmxRepositoryIterator(dataSetIdentifier, searchService, dataService,
 				new QueryImpl(), new HashSet<String>(attributeNames));
-
 		int count = 0;
 		for (; it.hasNext(); ++count)
 		{
@@ -157,11 +160,14 @@ public class OmxRepositoryIteratorTest
 		DataService dataService = mock(DataService.class);
 		Repository repository = mock(Repository.class);
 		AttributeMetaData attributeMetaData = mock(AttributeMetaData.class);
+		EntityMetaData entityMetaData = mock(EntityMetaData.class);
+		when(repository.getEntityMetaData()).thenReturn(entityMetaData);
 		FieldType fieldType = mock(FieldType.class);
 		when(fieldType.getEnumType()).thenReturn(FieldTypeEnum.STRING);
 		when(attributeMetaData.getDataType()).thenReturn(fieldType);
 		when(repository.getEntityMetaData().getAttribute(attrName)).thenReturn(attributeMetaData);
 		when(dataService.getRepositoryByEntityName(dataSetIdentifier)).thenReturn(repository);
+		when(dataService.getEntityMetaData(dataSetIdentifier)).thenReturn(entityMetaData);
 
 		Query q = new QueryImpl().pageSize(pageSize).offset(offset);
 		OmxRepositoryIterator it = new OmxRepositoryIterator(dataSetIdentifier, searchService, dataService, q,
@@ -199,11 +205,14 @@ public class OmxRepositoryIteratorTest
 		DataService dataService = mock(DataService.class);
 		Repository repository = mock(Repository.class);
 		AttributeMetaData attributeMetaData = mock(AttributeMetaData.class);
+		EntityMetaData entityMetaData = mock(EntityMetaData.class);
+		when(repository.getEntityMetaData()).thenReturn(entityMetaData);
 		FieldType fieldType = mock(FieldType.class);
 		when(fieldType.getEnumType()).thenReturn(FieldTypeEnum.STRING);
 		when(attributeMetaData.getDataType()).thenReturn(fieldType);
 		when(repository.getEntityMetaData().getAttribute(attrName)).thenReturn(attributeMetaData);
 		when(dataService.getRepositoryByEntityName(dataSetIdentifier)).thenReturn(repository);
+		when(dataService.getEntityMetaData(dataSetIdentifier)).thenReturn(entityMetaData);
 
 		Query q = new QueryImpl().pageSize(pageSize).offset(offset);
 		OmxRepositoryIterator it = new OmxRepositoryIterator(dataSetIdentifier, searchService, dataService, q,

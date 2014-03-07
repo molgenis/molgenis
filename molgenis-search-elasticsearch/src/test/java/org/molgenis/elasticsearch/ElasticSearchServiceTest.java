@@ -25,6 +25,7 @@ import org.mockito.stubbing.Answer;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -42,12 +43,15 @@ public class ElasticSearchServiceTest
 	private Client client;
 	private ElasticSearchService searchService;
 	private Repository repoMock;
+	private EntityMetaData entityMetaData;
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
 		searchService = new ElasticSearchService(client, "molgenis");
 		repoMock = mock(Repository.class);
+		entityMetaData = mock(EntityMetaData.class);
+		when(repoMock.getEntityMetaData()).thenReturn(entityMetaData);
 	}
 
 	@BeforeClass
@@ -108,8 +112,9 @@ public class ElasticSearchServiceTest
 				return entities.iterator();
 			}
 		});
+
 		when(repoMock.getName()).thenReturn("person");
-		when(repoMock.getEntityMetaData().getAttributes()).thenReturn(
+		when(entityMetaData.getAttributes()).thenReturn(
 				Arrays.<AttributeMetaData> asList(new DefaultAttributeMetaData("id", FieldTypeEnum.INT),
 						new DefaultAttributeMetaData("name", FieldTypeEnum.STRING)));
 

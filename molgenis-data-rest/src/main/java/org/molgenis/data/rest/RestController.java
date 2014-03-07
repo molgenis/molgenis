@@ -21,10 +21,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -89,9 +92,10 @@ import com.google.common.collect.Sets;
 @RequestMapping(BASE_URI)
 public class RestController
 {
-	public static final String BASE_URI = "/api/v1";
-
 	private static final Logger logger = Logger.getLogger(RestController.class);
+
+	public static final String BASE_URI = "/api/v1";
+	private static final Pattern PATTERN_EXPANDS = Pattern.compile("([^\\[^\\]]+)(?:\\[(.+)\\])?");
 	private final DataService dataService;
 
 	@Autowired
@@ -133,7 +137,7 @@ public class RestController
 			@RequestParam(value = "expand", required = false) String[] attributeExpands)
 	{
 		Set<String> attributeSet = toAttributeSet(attributes);
-		Set<String> attributeExpandSet = toAttributeSet(attributeExpands);
+		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
 
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
 		return new EntityMetaDataResponse(meta, attributeSet, attributeExpandSet);
@@ -153,7 +157,7 @@ public class RestController
 			@RequestParam(value = "expand", required = false) String[] attributeExpands)
 	{
 		Set<String> attributeSet = toAttributeSet(attributes);
-		Set<String> attributeExpandSet = toAttributeSet(attributeExpands);
+		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
 
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
 		AttributeMetaData attributeMetaData = meta.getAttribute(attributeName);
@@ -187,7 +191,7 @@ public class RestController
 			@RequestParam(value = "expand", required = false) String[] attributeExpands)
 	{
 		Set<String> attributesSet = toAttributeSet(attributes);
-		Set<String> attributeExpandSet = toAttributeSet(attributeExpands);
+		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
 
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
 		Entity entity = dataService.findOne(entityName, id);
@@ -224,7 +228,7 @@ public class RestController
 			@RequestParam(value = "expand", required = false) String[] attributeExpands)
 	{
 		Set<String> attributesSet = toAttributeSet(attributes);
-		Set<String> attributeExpandSet = toAttributeSet(attributeExpands);
+		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
 
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
 
@@ -305,7 +309,7 @@ public class RestController
 			@RequestParam(value = "expand", required = false) String[] attributeExpands)
 	{
 		Set<String> attributesSet = toAttributeSet(attributes);
-		Set<String> attributeExpandSet = toAttributeSet(attributeExpands);
+		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
 
 		return retrieveEntityCollectionInternal(entityName, request, attributesSet, attributeExpandSet);
 	}
@@ -330,7 +334,7 @@ public class RestController
 			@RequestParam(value = "expand", required = false) String[] attributeExpands)
 	{
 		Set<String> attributesSet = toAttributeSet(attributes);
-		Set<String> attributeExpandSet = toAttributeSet(attributeExpands);
+		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
 
 		request = request != null ? request : new EntityCollectionRequest();
 
@@ -648,7 +652,7 @@ public class RestController
 
 	// Handles a Query
 	private EntityCollectionResponse retrieveEntityCollectionInternal(String entityName,
-			EntityCollectionRequest request, Set<String> attributesSet, Set<String> attributeExpandsSet)
+			EntityCollectionRequest request, Set<String> attributesSet, Map<String, Set<String>> attributeExpandsSet)
 	{
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
 		Repository repository = dataService.getRepositoryByEntityName(entityName);
@@ -674,7 +678,7 @@ public class RestController
 
 	// Transforms an entity to a Map so it can be transformed to json
 	private Map<String, Object> getEntityAsMap(Entity entity, EntityMetaData meta, Set<String> attributesSet,
-			Set<String> attributeExpandsSet)
+			Map<String, Set<String>> attributeExpandsSet)
 	{
 		if (null == entity) throw new IllegalArgumentException("entity is null");
 
@@ -696,9 +700,11 @@ public class RestController
 
 				if (attrType == COMPOUND)
 				{
-					if (attributeExpandsSet != null && attributeExpandsSet.contains(attrName.toLowerCase()))
+					if (attributeExpandsSet != null && attributeExpandsSet.containsKey(attrName.toLowerCase()))
 					{
-						entityMap.put(attrName, new AttributeMetaDataResponse(meta.getName(), attr, null, null));
+						Set<String> subAttributesSet = attributeExpandsSet.get(attrName.toLowerCase());
+						entityMap.put(attrName, new AttributeMetaDataResponse(meta.getName(), attr, subAttributesSet,
+								null));
 					}
 					else
 					{
@@ -712,31 +718,33 @@ public class RestController
 					entityMap.put(attrName, entity.get(attr.getName()));
 				}
 				else if ((attrType == XREF || attrType == CATEGORICAL) && attributeExpandsSet != null
-						&& attributeExpandsSet.contains(attrName.toLowerCase()))
+						&& attributeExpandsSet.containsKey(attrName.toLowerCase()))
 				{
 					Entity refEntity = (Entity) entity.get(attr.getName());
 
 					if (refEntity != null)
 					{
+						Set<String> subAttributesSet = attributeExpandsSet.get(attrName.toLowerCase());
 						EntityMetaData refEntityMetaData = dataService.getEntityMetaData(attr.getRefEntity().getName());
-						Map<String, Object> refEntityMap = getEntityAsMap(refEntity, refEntityMetaData, null,
-								Collections.<String> emptySet());
+						Map<String, Object> refEntityMap = getEntityAsMap(refEntity, refEntityMetaData,
+								subAttributesSet, null);
 						entityMap.put(attrName, refEntityMap);
 					}
 				}
 				else if (attrType == MREF && attributeExpandsSet != null
-						&& attributeExpandsSet.contains(attrName.toLowerCase()))
+						&& attributeExpandsSet.containsKey(attrName.toLowerCase()))
 				{
 					EntityMetaData refEntityMetaData = dataService.getEntityMetaData(attr.getRefEntity().getName());
 
 					@SuppressWarnings("unchecked")
 					Iterable<Entity> mrefEntities = (Iterable<Entity>) entity.get(attr.getName());
 
+					Set<String> subAttributesSet = attributeExpandsSet.get(attrName.toLowerCase());
 					List<Map<String, Object>> refEntityMaps = new ArrayList<Map<String, Object>>();
 					for (Entity refEntity : mrefEntities)
 					{
-						Map<String, Object> refEntityMap = getEntityAsMap(refEntity, refEntityMetaData, null,
-								Collections.<String> emptySet());
+						Map<String, Object> refEntityMap = getEntityAsMap(refEntity, refEntityMetaData,
+								subAttributesSet, null);
 						refEntityMaps.add(refEntityMap);
 					}
 
@@ -815,6 +823,11 @@ public class RestController
 		return rules;
 	}
 
+	/**
+	 * 
+	 * @param attributes
+	 * @return set of lower case attribute names
+	 */
 	private Set<String> toAttributeSet(String[] attributes)
 	{
 		return attributes != null ? Sets.newHashSet(Iterables.transform(Arrays.asList(attributes),
@@ -826,5 +839,43 @@ public class RestController
 						return attribute.toLowerCase();
 					}
 				})) : null;
+	}
+
+	/**
+	 * expand is of form 'attr1', 'entity1[attr1]', 'entity1[attr1;attr2]'
+	 * 
+	 * @param expands
+	 * @return map from lower case expand names to a attribute set
+	 */
+	private Map<String, Set<String>> toExpandMap(String[] expands)
+	{
+		if (expands != null)
+		{
+			Map<String, Set<String>> expandMap = new HashMap<String, Set<String>>();
+			for (String expand : expands)
+			{
+				// validate
+				Matcher matcher = PATTERN_EXPANDS.matcher(expand);
+				if (!matcher.matches()) throw new MolgenisDataException("invalid expand value: " + expand);
+
+				// for partial expands, create set
+				expand = matcher.group(1);
+				String attrsStr = matcher.group(2);
+				Set<String> attrSet;
+				if (attrsStr != null && !attrsStr.isEmpty())
+				{
+					attrSet = new HashSet<String>();
+					for (String attr : attrsStr.split(";"))
+					{
+						attrSet.add(attr.toLowerCase());
+					}
+				}
+				else attrSet = null;
+
+				expandMap.put(expand.toLowerCase(), attrSet);
+			}
+			return expandMap;
+		}
+		return null;
 	}
 }
