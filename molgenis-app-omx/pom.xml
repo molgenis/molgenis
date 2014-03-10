@@ -222,7 +222,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-data-annotators-ui</artifactId>
+			<artifactId>molgenis-omx-annotators</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
