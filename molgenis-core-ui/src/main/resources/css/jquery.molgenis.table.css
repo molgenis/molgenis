@@ -42,6 +42,10 @@
 	cursor: pointer;
 }
 
+.molgenis-table .popover-content {
+	word-wrap: break-word;	
+}
+
 .molgenis-table .multi-os-datacell input[type=checkbox] {
 	margin-left: auto;
 	margin-right: auto;
