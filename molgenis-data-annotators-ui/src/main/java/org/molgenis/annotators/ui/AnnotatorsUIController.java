@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
 import org.apache.log4j.Logger;
@@ -38,8 +37,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
-
 import com.google.common.collect.Lists;
 
 /**
@@ -137,23 +134,21 @@ public class AnnotatorsUIController extends MolgenisPluginController
 
 	@RequestMapping(value = "/file-upload", headers = "content-type=multipart/*", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void handleVcfInput(@RequestParam("file-input-field")
+	public void handleAnnotatorFileUpload(@RequestParam("file-input-field")
 	Part part, @RequestParam("dataset-name")
 	String submittedDataSetName) throws IOException
 	{
-		if (!part.equals(null) && part.getSize() > 5000000)
-		{ // 5mb limit
-			throw new RuntimeException("File too large");
+		if (part != null)
+		{
+			String file = "input-file";
+			fileStore.store(part.getInputStream(), file);
+
+			pluginAnnotatorsUIService.tsvToOmxRepository(file, submittedDataSetName);
 		}
-		else if (part.equals(null))
+		else
 		{
 			throw new RuntimeException("No file submitted");
 		}
-
-		String file = "input-file";
-		fileStore.store(part.getInputStream(), file);
-
-		pluginAnnotatorsUIService.tsvToOmxRepository(file, submittedDataSetName);
 	}
 
 	@RequestMapping(value = "/execute-annotation-app", method = RequestMethod.POST)
