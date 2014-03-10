@@ -10,8 +10,6 @@
 		restApi.getAsync(dataSetUri, null, function(dataSet) {
 			selectedDataSet = dataSet;
 			
-			//$('#dataset-change-succes-message').html('<p><div class="alert alert-block alert-success">Dataset succesfully changed to ' + selectedDataSet.Name + '</div></p>');
-			
 			$.ajax({
 				type : 'POST',
 				url : molgenis.getContextUrl() + '/change-selected-dataset',
@@ -31,7 +29,6 @@
 							disabledAnnotators.push('<label class="checkbox">\n');
 							disabledAnnotators.push('\t<input type="checkbox" class="checkbox" name="annotatorNames" disabled value="' + key + '">' + key);
 							disabledAnnotators.push('</label>');
-							
 						}
 					}
 					
