@@ -5,15 +5,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.VariantAnnotator;
 import org.molgenis.data.support.DefaultAttributeMetaData;
@@ -21,7 +18,6 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
@@ -41,29 +37,23 @@ import org.springframework.stereotype.Component;
  * */
 @Component("caddService")
 public class CaddServiceAnnotator extends VariantAnnotator
-{	
-	// the cadd service returns these two values
-	static final String CADD_SCALED = "CADD_SCALED";
-	static final String CADD_ABS = "CADD_ABS";
-	
-	
-	
+{
 	@Autowired
 	private MolgenisSettings molgenisSettings;
-	
+
 	@Autowired
 	DataService dataService;
 
 	@Autowired
 	AnnotationService annotatorService;
-	
-	private static final String TABIX_LOCATION_PROPERTY = "tabix_location";
-	private final String TABIX_LOCATION = molgenisSettings.getProperty(TABIX_LOCATION_PROPERTY);
 
-	private static final String CADD_FILE_LOCATION_PROPERTY = "cadd_location";
-	private final String CADD_FILE = molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY);
+	// the cadd service returns these two values
+	static final String CADD_SCALED = "CADD_SCALED";
+	static final String CADD_ABS = "CADD_ABS";
 
-	
+	public static final String TABIX_LOCATION_PROPERTY = "tabix_location";
+	public static final String CADD_FILE_LOCATION_PROPERTY = "cadd_location";
+
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
@@ -76,74 +66,14 @@ public class CaddServiceAnnotator extends VariantAnnotator
 		return "CADD";
 	}
 
-	@Override
-	public Iterator<Entity> annotate(Iterator<Entity> source)
+	private String getFileLocation()
 	{
-		List<Entity> results = new ArrayList<Entity>();
-		//String systemCall = molgenisSettings.getProperty("CADD_Command");
+		return molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY);
+	}
 
-		while (source.hasNext())
-		{
-			Entity entity = source.next();
-
-			String chromosome = entity.getString(CHROMOSOME);
-			Long position = entity.getLong(POSITION);
-			String reference = entity.getString(REFERENCE);
-			String alternative = entity.getString(ALTERNATIVE);
-
-			String caddAbs = "";
-			String caddScaled = "";
-
-			try
-			{
-				Runtime runTime = Runtime.getRuntime();
-				Process process = runTime.exec(TABIX_LOCATION + " " + CADD_FILE + " " + chromosome + ":" + position + "-" + position);
-
-				process.waitFor();
-
-				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-
-				String line = "";
-				String[] split = null;
-
-				while ((line = bufferedReader.readLine()) != null)
-				{
-					if (!line.equals(null))
-					{
-						split = line.split("\t");
-
-						if (split[2].equals(reference) && split[3].equals(alternative))
-						{
-							caddAbs = split[4];
-							caddScaled = split[5];
-						}
-					}
-				}
-
-				HashMap<String, Object> resultMap = new HashMap<String, Object>();
-
-				resultMap.put(CADD_ABS, caddAbs);
-				resultMap.put(CADD_SCALED, caddScaled);
-				resultMap.put(CHROMOSOME, chromosome);
-				resultMap.put(POSITION, position);
-				resultMap.put(ALTERNATIVE, alternative);
-				resultMap.put(REFERENCE, reference);
-
-				results.add(new MapEntity(resultMap));
-
-			}
-			catch (IOException e)
-			{
-				throw new RuntimeException(e);
-			}
-			catch (InterruptedException e)
-			{
-				throw new RuntimeException(e);
-			}
-
-		}
-
-		return results.iterator();
+	private String getToolLocation()
+	{
+		return molgenisSettings.getProperty(TABIX_LOCATION_PROPERTY);
 	}
 
 	@Override
@@ -160,7 +90,78 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	@Override
 	public List<Entity> annotateEntity(Entity entity)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		List<Entity> results = new ArrayList<Entity>();
+		String caddFile = getFileLocation();
+		String tabix = getToolLocation();
+
+		BufferedReader bufferedReader = null;
+
+		String chromosome = entity.getString(CHROMOSOME);
+		Long position = entity.getLong(POSITION);
+		String reference = entity.getString(REFERENCE);
+		String alternative = entity.getString(ALTERNATIVE);
+
+		String caddAbs = "";
+		String caddScaled = "";
+
+		try
+		{
+			Runtime runTime = Runtime.getRuntime();
+			Process process = runTime.exec(tabix + " " + caddFile + " " + chromosome + ":" + position + "-" + position);
+
+			process.waitFor();
+
+			bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+			String line = "";
+			String[] split = null;
+
+			while ((line = bufferedReader.readLine()) != null)
+			{
+				if (!line.equals(null))
+				{
+					split = line.split("\t");
+
+					if (split[2].equals(reference) && split[3].equals(alternative))
+					{
+						caddAbs = split[4];
+						caddScaled = split[5];
+					}
+				}
+			}
+
+			HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+			resultMap.put(CADD_ABS, caddAbs);
+			resultMap.put(CADD_SCALED, caddScaled);
+			resultMap.put(CHROMOSOME, chromosome);
+			resultMap.put(POSITION, position);
+			resultMap.put(ALTERNATIVE, alternative);
+			resultMap.put(REFERENCE, reference);
+
+			results.add(new MapEntity(resultMap));
+
+		}
+		catch (IOException e)
+		{
+			throw new RuntimeException(e);
+		}
+		catch (InterruptedException e)
+		{
+			throw new RuntimeException(e);
+		}
+		finally
+		{
+			try
+			{
+				bufferedReader.close();
+			}
+			catch (IOException e)
+			{
+				throw new RuntimeException(e);
+			}
+		}
+
+		return results;
 	}
 }
