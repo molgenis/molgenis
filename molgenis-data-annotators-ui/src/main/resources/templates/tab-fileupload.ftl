@@ -1,9 +1,7 @@
 <#macro fileupload_panel>
 	<#--Panel 1: Input variants, manual or file(s)-->
 	<div class="tab-pane" id="tab1">
-		
-		<#--<div id="dataset-change-succes-message" style="min-height: 180px"></div>-->	
-		
+	
 		<@modal_popup_dataset_upload />
 		<a type="button" class="btn" href="#dataset-upload-modal" data-toggle="modal">Upload a new Data set</a>
 		
