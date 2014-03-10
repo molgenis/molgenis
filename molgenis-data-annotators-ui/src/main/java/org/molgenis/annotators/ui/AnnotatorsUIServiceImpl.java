@@ -135,92 +135,100 @@ public class AnnotatorsUIServiceImpl implements AnnotatorsUIService
 		List<Entity> results = new ArrayList<Entity>();
 
 		// get file from fileStore
-		File excelFile = fileStore.getFile(file);
+		File uploadedFile = fileStore.getFile(file);
 
-		FileReader reader = new FileReader(excelFile);
+		FileReader reader = new FileReader(uploadedFile);
 		BufferedReader bufferedReader = new BufferedReader(reader);
 
-		boolean reachedData = false;
-		boolean readHeader = false;
-		String[] features = null;
-
-		// start reading file
-		while (bufferedReader.ready())
+		try
 		{
-			String line = bufferedReader.readLine();
+			boolean reachedData = false;
+			boolean readHeader = false;
+			String[] features = null;
 
-			// first lines in cartagenia export are descriptive lines
-			if (!line.startsWith("#"))
+			// start reading file
+			while (bufferedReader.ready())
 			{
-				reachedData = true;
-			}
+				String line = bufferedReader.readLine();
 
-			if (reachedData)
-			{
-				if (!readHeader)
+				// first lines in cartagenia export are descriptive lines
+				if (!line.startsWith("#"))
 				{
-					// put the column headers from the file in the DefaultAttributeMetaData object
-					features = line.split("\t");
-					for (String feature : features)
-					{
-						if (feature.equalsIgnoreCase("POS"))
-						{
-							metaData.addAttributeMetaData(new DefaultAttributeMetaData(feature, FieldTypeEnum.LONG));
-						}
-						else
-						{
-							metaData.addAttributeMetaData(new DefaultAttributeMetaData(feature, FieldTypeEnum.STRING));
-						}
-					}
-
-					// Create a new rootProtocol for this data set
-					Protocol newRootProtocol = dataService.findOne(Protocol.ENTITY_NAME,
-							new QueryImpl().eq(Protocol.IDENTIFIER, submittedDataSetName + "_PROTOCOL_ID"),
-							Protocol.class);
-
-					// if the protocol does not exist
-					if (newRootProtocol == null)
-					{
-						newRootProtocol = createAnnotationResultProtocol(dataSet, metaData.getAttributes(),
-								submittedDataSetName);
-					}
-
-					// set which protocol this dataSet should use
-					dataSet.setProtocolUsed(newRootProtocol);
-
-					// add the dataSet to the dataService
-					dataService.add(DataSet.ENTITY_NAME, dataSet);
-
-					// the header is now a list of features in the protocol
-					readHeader = true;
+					reachedData = true;
 				}
-				else
+
+				if (reachedData)
 				{
-					int count = 0;
-
-					// -1 makes sure the split function does not trim empty strings
-					// makes sure the number of values equals the number of features
-					// even when some values are empty strings
-					String[] values = line.split("\t", -1);
-
-					HashMap<String, Object> resultMap = new HashMap<String, Object>();
-
-					// for every feature
-					for (String columnName : getMetadataNamesAsList(metaData))
+					if (!readHeader)
 					{
-						// the resultMap has a feature + its value
-						// FIXME !! heavily depends on same length for header and every row in the original file !!
-						resultMap.put(columnName, values[count]);
-						count = count + 1;
-					}
+						// put the column headers from the file in the DefaultAttributeMetaData object
+						features = line.split("\t");
+						for (String feature : features)
+						{
+							if (feature.equalsIgnoreCase("POS"))
+							{
+								metaData.addAttributeMetaData(new DefaultAttributeMetaData(feature, FieldTypeEnum.LONG));
+							}
+							else
+							{
+								metaData.addAttributeMetaData(new DefaultAttributeMetaData(feature,
+										FieldTypeEnum.STRING));
+							}
+						}
 
-					// put all the objects with feature-value pairs in the results<Entity> list
-					results.add(new MapEntity(resultMap));
+						// Create a new rootProtocol for this data set
+						Protocol newRootProtocol = dataService.findOne(Protocol.ENTITY_NAME,
+								new QueryImpl().eq(Protocol.IDENTIFIER, submittedDataSetName + "_PROTOCOL_ID"),
+								Protocol.class);
+
+						// if the protocol does not exist
+						if (newRootProtocol == null)
+						{
+							newRootProtocol = createAnnotationResultProtocol(dataSet, metaData.getAttributes(),
+									submittedDataSetName);
+						}
+
+						// set which protocol this dataSet should use
+						dataSet.setProtocolUsed(newRootProtocol);
+
+						// add the dataSet to the dataService
+						dataService.add(DataSet.ENTITY_NAME, dataSet);
+
+						// the header is now a list of features in the protocol
+						readHeader = true;
+					}
+					else
+					{
+						int count = 0;
+
+						// -1 makes sure the split function does not trim empty strings
+						// makes sure the number of values equals the number of features
+						String[] values = line.split("\t", -1);
+
+						HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+						// for every feature
+						for (String columnName : getMetadataNamesAsList(metaData))
+						{
+							// the resultMap has a feature + its value
+							resultMap.put(columnName, values[count]);
+							count = count + 1;
+						}
+
+						// put all the objects with feature-value pairs in the results<Entity> list
+						results.add(new MapEntity(resultMap));
+					}
 				}
 			}
 		}
-
-		bufferedReader.close();
+		catch (Exception e)
+		{
+			throw new RuntimeException(e);
+		}
+		finally
+		{
+			bufferedReader.close();
+		}
 
 		return results.iterator();
 	}
