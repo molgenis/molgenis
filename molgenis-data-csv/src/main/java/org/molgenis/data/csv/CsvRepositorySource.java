@@ -36,6 +36,7 @@ public class CsvRepositorySource extends FileRepositorySource
 	public static final Set<String> EXTENSIONS = ImmutableSet.of("csv", "txt", "tsv", "zip");
 	private static final Charset CHARSET = Charset.forName("UTF-8");
 	private final File file;
+	private ZipFile zipFile = null;
 
 	public CsvRepositorySource(File file) throws InvalidFormatException, IOException
 	{
@@ -54,9 +55,8 @@ public class CsvRepositorySource extends FileRepositorySource
 		String extension = StringUtils.getFilenameExtension(file.getName());
 		List<Repository> repositories = Lists.newArrayList();
 
-		if (extension.equalsIgnoreCase(".zip"))
+		if (extension.equalsIgnoreCase("zip"))
 		{
-			ZipFile zipFile = null;
 			try
 			{
 				zipFile = new ZipFile(file);
@@ -64,18 +64,17 @@ public class CsvRepositorySource extends FileRepositorySource
 				{
 					ZipEntry entry = e.nextElement();
 					InputStream in = zipFile.getInputStream(entry);
-					repositories.add(getRepository(file.getName() + "/" + entry.getName(), in, cellProcessors));
+
+					if (!entry.getName().contains("__MACOSX"))
+					{
+						repositories.add(getRepository(file.getName() + "/" + entry.getName(), in, cellProcessors));
+					}
 				}
 			}
 			catch (Exception e)
 			{
 				throw new MolgenisDataException(e);
 			}
-			finally
-			{
-				IOUtils.closeQuietly(zipFile);
-			}
-
 		}
 		else
 		{
@@ -102,11 +101,20 @@ public class CsvRepositorySource extends FileRepositorySource
 			return new CsvRepository(fileName, reader, name, cellProcessors);
 		}
 
-		if (fileName.toUpperCase().endsWith(".tsv"))
+		if (fileName.toLowerCase().endsWith(".tsv"))
 		{
 			return new CsvRepository(fileName, reader, '\t', StringUtils.getFilename(fileName), cellProcessors);
 		}
 
 		throw new MolgenisDataException("Unknown file type: [" + fileName + "] for csv repository");
+	}
+
+	@Override
+	public void close() throws IOException
+	{
+		if (zipFile != null)
+		{
+			IOUtils.closeQuietly(zipFile);
+		}
 	}
 }
