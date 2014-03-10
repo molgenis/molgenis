@@ -1,11 +1,11 @@
-package org.molgenis.data.annotation.impl;
+ package org.molgenis.data.annotation.impl;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes;
@@ -28,7 +28,10 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 {
 	@Autowired
 	private MolgenisSettings molgenisSettings;
-	
+
+	@Autowired
+	AnnotationService annotatorService;
+
 	public static final String REFERENCES = "REFERENCES";
 	public static final String INTERVENTION_RATIONALE = "INTERVENTION / RATIONALE";
 	public static final String COMMENTS = "COMMENTS";
@@ -39,14 +42,10 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 	public static final String INHERITANCE = "INHERITANCE";
 	public static final String CONDITION = "CONDITION";
 	public static final String ENTREZ_GENE_ID = "ENTREZ GENE ID";
-	public static final String GENE = "Gene";
+	public static final String GENE = "GENE";
 	private static final String NAME = "Clinical Genomic Database";
 
-	private static final String CGD_FILE_LOCATION_PROPERTY = "/Users/mdehaan/Downloads/CGD.txt";
-	private final String CGD_FILE = molgenisSettings.getProperty(CGD_FILE_LOCATION_PROPERTY);
-
-	@Autowired
-	AnnotationService annotatorService;
+	public static final String CGD_FILE_LOCATION_PROPERTY = "cgd_location";
 
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
@@ -58,6 +57,10 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 	public String getName()
 	{
 		return NAME;
+	}
+	
+	private String getFileLocation(){
+		return molgenisSettings.getProperty(CGD_FILE_LOCATION_PROPERTY);
 	}
 
 	@Override
@@ -87,7 +90,9 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 	@Override
 	public List<Entity> annotateEntity(Entity entity)
 	{
+		String cgdFile = getFileLocation();
 		List<Entity> results = new ArrayList<Entity>();
+		BufferedReader bufferedReader = null;
 
 		try
 		{
@@ -99,8 +104,8 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 			List<Locus> locus = new ArrayList<Locus>(Arrays.asList(new Locus(chromosome, position)));
 			List<String> geneSymbols = OmimHpoAnnotator.locationToHGNC(hgncLocs, locus);
 
-			FileReader fileReader = new FileReader(CGD_FILE);
-			BufferedReader bufferedReader = new BufferedReader(fileReader);
+			FileReader fileReader = new FileReader(cgdFile);
+			bufferedReader = new BufferedReader(fileReader);
 
 			while (bufferedReader.ready())
 			{
@@ -110,7 +115,6 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 					String[] split = line.split("\t");
 					for (String gene : geneSymbols)
 					{
-						// This gene (so variant) matches this line (cool)
 						if (gene.equals(split[0]))
 						{
 							HashMap<String, Object> resultMap = new HashMap<String, Object>();
@@ -134,14 +138,23 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 				}
 			}
 
-			bufferedReader.close();
 		}
 		catch (Exception e)
 		{
 			throw new RuntimeException(e);
 		}
+		finally
+		{
+			try
+			{
+				bufferedReader.close();
+			}
+			catch (IOException e)
+			{	
+				throw new RuntimeException(e);
+			}
+		}
 
 		return results;
 	}
-
 }
