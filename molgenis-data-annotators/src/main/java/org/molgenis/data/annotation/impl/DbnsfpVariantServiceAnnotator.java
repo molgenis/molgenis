@@ -50,18 +50,12 @@ public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 {
 	@Autowired
 	private MolgenisSettings molgenisSettings;
-	
-	private static final String NAME = "dbNSFP-Variant";
-	
-	// FIXME the prefix for chromosome files, change this into runtime property
-	private static final String CHROMOSOME_FILE_LOCATION_PROPERTY = "dbsnfp_variant_location";
-	private final String CHROMOSOME_FILE = molgenisSettings.getProperty(CHROMOSOME_FILE_LOCATION_PROPERTY);
-
-	// we want to know features, so take the first chromosome file and retrieve them from the header
-	public final String[] FEATURES = determineFeatures();
 
 	@Autowired
 	AnnotationService annotatorService;
+
+	private static final String NAME = "dbNSFP-Variant";
+	public static final String CHROMOSOME_FILE_LOCATION_PROPERTY = "dbsnfp_variant_location";
 
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
@@ -75,48 +69,71 @@ public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 		return NAME;
 	}
 
-	@Override
-	public Iterator<Entity> annotate(Iterator<Entity> source)
+	private String getFileLocation()
 	{
+		return molgenisSettings.getProperty(CHROMOSOME_FILE_LOCATION_PROPERTY);
+	}
+
+	@Override
+	public EntityMetaData getOutputMetaData()
+	{
+		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
+
+		String geneFile = getFileLocation();
+		String[] features = determineFeatures(geneFile);
+
+		for (String attribute : features)
+		{
+			if (attribute != null)
+			{
+				// FIXME not all attributes are strings
+				metadata.addAttributeMetaData(new DefaultAttributeMetaData(attribute, FieldTypeEnum.STRING));
+			}
+		}
+
+		return metadata;
+	}
+
+	@Override
+	public List<Entity> annotateEntity(Entity entity)
+	{
+		String chromosomeFile = getFileLocation();
+		String[] features = determineFeatures(chromosomeFile);
+
 		List<Entity> results = new ArrayList<Entity>();
 		Map<String, List<String[]>> chromosomeMap = new HashMap<String, List<String[]>>();
+		BufferedReader bufferedReader = null;
 
-		// Make a map with data pulled from every Entity
-		while (source.hasNext())
+		List<String[]> listOfTriplets = new ArrayList<String[]>();
+
+		// a triplet contains position, reference and alternative
+		String[] triplets = new String[3];
+
+		String chromosome = entity.getString(CHROMOSOME);
+
+		triplets[0] = entity.getLong(POSITION).toString();
+		triplets[1] = entity.getString(REFERENCE);
+		triplets[2] = entity.getString(ALTERNATIVE);
+
+		listOfTriplets.add(triplets);
+
+		// Now a chromosome + a triplet belong to one Entity
+		// Entities with the same chromosome are added to one key
+		if (chromosomeMap.containsKey(chromosome))
 		{
-			Entity entity = source.next();
-
-			List<String[]> listOfTriplets = new ArrayList<String[]>();
-
-			// a triplet contains position, reference and alternative
-			String[] triplets = new String[3];
-
-			String chromosome = entity.getString(CHROMOSOME);
-			
-			triplets[0] = entity.getLong(POSITION).toString();
-			triplets[1] = entity.getString(REFERENCE);
-			triplets[2] = entity.getString(ALTERNATIVE);
-
-			listOfTriplets.add(triplets);
-
-			// Now a chromosome + a triplet belong to one Entity
-			// Entities with the same chromosome are added to one key
-			if (chromosomeMap.containsKey(chromosome))
-			{
-				chromosomeMap.get(chromosome).addAll(listOfTriplets);
-			}
-			else
-			{
-				chromosomeMap.put(chromosome, listOfTriplets);
-			}
+			chromosomeMap.get(chromosome).addAll(listOfTriplets);
+		}
+		else
+		{
+			chromosomeMap.put(chromosome, listOfTriplets);
 		}
 
 		try
 		{
 			for (String chromosomeInMap : chromosomeMap.keySet())
 			{
-				FileReader reader = new FileReader(new File(CHROMOSOME_FILE + chromosomeInMap));
-				BufferedReader bufferedReader = new BufferedReader(reader);
+				FileReader reader = new FileReader(new File(chromosomeFile + chromosomeInMap));
+				bufferedReader = new BufferedReader(reader);
 
 				List<String[]> charArraysForThisChromosome = chromosomeMap.get(chromosomeInMap);
 
@@ -124,12 +141,12 @@ public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 
 				fileReader: while (bufferedReader.ready())
 				{
-					
 					line = bufferedReader.readLine();
-					if(line.startsWith("#")){
+					if (line.startsWith("#"))
+					{
 						continue fileReader;
 					}
-					
+
 					String[] lineSplit = line.split("\t");
 
 					charArrayReader: for (int i = 0; i < charArraysForThisChromosome.size(); i++)
@@ -149,7 +166,7 @@ public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 								// we have a match with a line
 								HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
-								for (String feature : FEATURES)
+								for (String feature : features)
 								{
 									if (feature != null)
 									{
@@ -167,20 +184,15 @@ public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 							}
 							else
 							{
-								// TODO no match, next variant
 								continue charArrayReader;
 							}
 						}
 						else
 						{
-							// TODO no match, next variant
 							continue charArrayReader;
 						}
 					}
 				}
-
-				bufferedReader.close();
-
 			}
 		}
 
@@ -193,18 +205,30 @@ public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 		{
 			throw new RuntimeException(e);
 		}
+		finally
+		{
+			try
+			{
+				bufferedReader.close();
+			}
+			catch (IOException e)
+			{
+				throw new RuntimeException(e);
+			}
+		}
 
-		return results.iterator();
+		return results;
 	}
 
-	private String[] determineFeatures()
+	private String[] determineFeatures(String chromosomeFile)
 	{
 		String[] features = null;
+		BufferedReader bufferedReader = null;
 
 		try
 		{
-			FileReader reader = new FileReader(new File(CHROMOSOME_FILE + "1"));
-			BufferedReader bufferedReader = new BufferedReader(reader);
+			FileReader reader = new FileReader(new File(chromosomeFile + "1"));
+			bufferedReader = new BufferedReader(reader);
 
 			String line = bufferedReader.readLine();
 			features = line.split("\t");
@@ -218,6 +242,17 @@ public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 		{
 			throw new RuntimeException(e);
 		}
+		finally
+		{
+			try
+			{
+				bufferedReader.close();
+			}
+			catch (IOException e)
+			{
+				throw new RuntimeException(e);
+			}
+		}
 
 		features[0] = null;
 		features[1] = null;
@@ -225,29 +260,5 @@ public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 		features[3] = null;
 
 		return features;
-	}
-
-	@Override
-	public EntityMetaData getOutputMetaData()
-	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
-
-		for (String attribute : FEATURES)
-		{
-			if (attribute != null)
-			{
-				// FIXME not all attributes are strings
-				metadata.addAttributeMetaData(new DefaultAttributeMetaData(attribute, FieldTypeEnum.STRING));
-			}
-		}
-
-		return metadata;
-	}
-
-	@Override
-	public List<Entity> annotateEntity(Entity entity)
-	{
-		// TODO Auto-generated method stub
-		return null;
 	}
 }
