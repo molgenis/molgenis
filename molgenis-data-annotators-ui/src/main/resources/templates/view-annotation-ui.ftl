@@ -7,8 +7,8 @@
 <#include "tab-filterbyphenotype.ftl">
 <#include "tab-fileupload.ftl">
 
-<#assign css=["annotate-ui.css", "jquery-ui-1.10.3.custom.css", "chosen.css", "bootstrap-fileupload.css"]>
-<#assign js=["annotation.ui.js", "jquery-ui-1.10.3.custom.min.js", "chosen.jquery.min.js", "bootstrap-fileupload.js", "jquery.bootstrap.wizard.js"]>
+<#assign css=["annotate-ui.css", "chosen.css", "bootstrap-fileupload.min.css"]>
+<#assign js=["annotation.ui.js", "molgenis.js", "chosen.jquery.min.js", "jquery.bootstrap.wizard.min.js", "bootstrap-fileupload.min.js"]>
 
 <@header css js />
 
