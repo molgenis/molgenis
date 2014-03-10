@@ -8,15 +8,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.LocusAnnotator;
-import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.impl.datastructures.HGNCLoc;
 import org.molgenis.data.annotation.impl.datastructures.Locus;
@@ -25,7 +22,6 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
@@ -56,56 +52,73 @@ public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 {
 	@Autowired
 	private MolgenisSettings molgenisSettings;
-	
-	private static final String NAME = "dbNSFP-Gene";
-
-	// FIXME set runtime property for file location
-	private static final String GENE_FILE_LOCATION_PROPERTY = "dbnsfp_gene_location";
-	private final String GENE_FILE = molgenisSettings.getProperty(GENE_FILE_LOCATION_PROPERTY);
-
-	public final String[] FEATURES = determineFeatures();
 
 	@Autowired
 	AnnotationService annotatorService;
-	
+
+	private static final String NAME = "dbNSFP-Gene";
+	public static final String GENE_FILE_LOCATION_PROPERTY = "dbnsfp_gene_location";
+
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
 		annotatorService.addAnnotator(this);
 	}
-	
+
 	@Override
 	public String getName()
 	{
 		return NAME;
 	}
-	
+
+	private String getFileLocation()
+	{
+		return molgenisSettings.getProperty(GENE_FILE_LOCATION_PROPERTY);
+	}
+
 	@Override
-	public Iterator<Entity> annotate(Iterator<Entity> source)
+	public EntityMetaData getOutputMetaData()
+	{
+		String geneFile = getFileLocation();
+		String[] features = determineFeatures(geneFile);
+
+		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
+
+		for (String attribute : features)
+		{
+			if (attribute != null)
+			{
+				// FIXME not all attributes are strings
+				metadata.addAttributeMetaData(new DefaultAttributeMetaData(attribute, FieldTypeEnum.TEXT));
+			}
+		}
+
+		return metadata;
+	}
+
+	@Override
+	public List<Entity> annotateEntity(Entity entity)
 	{
 		List<Entity> results = new ArrayList<Entity>();
+		BufferedReader bufferedReader = null;
+		String geneFile = getFileLocation();
+		String[] features = determineFeatures(geneFile);
 
 		try
 		{
+			FileReader reader = new FileReader(new File(geneFile));
+			bufferedReader = new BufferedReader(reader);
+
 			HashMap<String, HGNCLoc> hgncLocs = OmimHpoAnnotator.getHgncLocs();
 
-			entityIterator: while (source.hasNext())
+			Long position = entity.getLong(POSITION);
+			String chromosome = entity.getString(CHROMOSOME);
+
+			List<Locus> locus = new ArrayList<Locus>(Arrays.asList(new Locus(chromosome, position)));
+			List<String> geneSymbols = OmimHpoAnnotator.locationToHGNC(hgncLocs, locus);
+
+			if (geneSymbols != null)
 			{
-				Entity entity = source.next();
-				Long position = entity.getLong(POSITION);
-				String chromosome = entity.getString(CHROMOSOME);
-
-				List<Locus> locus = new ArrayList<Locus>(Arrays.asList(new Locus(chromosome, position)));
-				List<String> geneSymbols = OmimHpoAnnotator.locationToHGNC(hgncLocs, locus);
-
-				if (geneSymbols == null)
-				{
-					continue entityIterator;
-				}
-
-				FileReader reader = new FileReader(new File(GENE_FILE));
-				BufferedReader bufferedReader = new BufferedReader(reader);
-
 				while (bufferedReader.ready())
 				{
 					String line = bufferedReader.readLine();
@@ -118,7 +131,7 @@ public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 							int lineSplitIndex = 0;
 							HashMap<String, Object> resultMap = new HashMap<String, Object>();
 
-							for (String feature : FEATURES)
+							for (String feature : features)
 							{
 								if (feature != null)
 								{
@@ -134,10 +147,7 @@ public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 							results.add(new MapEntity(resultMap));
 						}
 					}
-
 				}
-
-				bufferedReader.close();
 			}
 		}
 
@@ -149,19 +159,29 @@ public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 		{
 			throw new RuntimeException(e);
 		}
+		finally
+		{
+			try
+			{
+				bufferedReader.close();
+			}
+			catch (IOException e)
+			{
+				throw new RuntimeException(e);
+			}
+		}
 
-		return results.iterator();
-
+		return results;
 	}
 
-	private String[] determineFeatures()
+	public String[] determineFeatures(String geneFile)
 	{
 		String[] features = null;
-
+		BufferedReader bufferedReader = null;
 		try
 		{
-			FileReader reader = new FileReader(new File(GENE_FILE));
-			BufferedReader bufferedReader = new BufferedReader(reader);
+			FileReader reader = new FileReader(new File(geneFile));
+			bufferedReader = new BufferedReader(reader);
 
 			String line = bufferedReader.readLine();
 			features = line.split("\t");
@@ -175,35 +195,21 @@ public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 		{
 			throw new RuntimeException(e);
 		}
+		finally
+		{
+			try
+			{
+				bufferedReader.close();
+			}
+			catch (IOException e)
+			{
+				throw new RuntimeException(e);
+			}
+		}
 
 		// remove the # from the first feature in the header
 		features[0] = features[0].replace("#", "");
 
 		return features;
 	}
-	
-	@Override
-	public EntityMetaData getOutputMetaData()
-	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
-
-		for (String attribute : FEATURES)
-		{
-			if (attribute != null)
-			{
-				// FIXME not all attributes are strings
-				metadata.addAttributeMetaData(new DefaultAttributeMetaData(attribute, FieldTypeEnum.TEXT));
-			}
-		}
-
-		return metadata;
-	}
-
-	@Override
-	public List<Entity> annotateEntity(Entity entity)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }
