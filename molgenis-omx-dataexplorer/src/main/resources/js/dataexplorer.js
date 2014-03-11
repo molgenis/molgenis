@@ -585,3 +585,4 @@
 		$('#dataset-select').change();
 	});
 }($, window.top.molgenis = window.top.molgenis || {}));
+
