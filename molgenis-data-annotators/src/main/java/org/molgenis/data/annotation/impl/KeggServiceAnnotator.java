@@ -55,7 +55,16 @@ public class KeggServiceAnnotator extends LocusAnnotator
 	{
 		return "KEGG";
 	}
-
+	
+	@Override
+	public boolean annotationDataExists()
+	{
+		boolean dataExists = true;
+		
+		// TODO Check if the webservices are up
+		
+		return dataExists;
+	}
 	@Override
 	public EntityMetaData getOutputMetaData()
 	{

@@ -135,6 +135,17 @@ public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 	}
 
 	@Override
+	public boolean annotationDataExists()
+	{
+		boolean dataExists = false;
+		if (new File(molgenisSettings.getProperty(CHROMOSOME_FILE_LOCATION_PROPERTY)).exists())
+		{
+			dataExists = true;
+		}
+		return dataExists;
+	}
+
+	@Override
 	public List<Entity> annotateEntity(Entity entity)
 	{
 		List<Entity> results = new ArrayList<Entity>();

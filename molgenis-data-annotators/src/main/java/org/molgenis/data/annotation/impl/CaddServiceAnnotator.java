@@ -1,6 +1,7 @@
 package org.molgenis.data.annotation.impl;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -38,6 +39,7 @@ import org.springframework.stereotype.Component;
 @Component("caddService")
 public class CaddServiceAnnotator extends VariantAnnotator
 {
+
 	@Autowired
 	private MolgenisSettings molgenisSettings;
 
@@ -51,6 +53,8 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	static final String CADD_SCALED = "CADD_SCALED";
 	static final String CADD_ABS = "CADD_ABS";
 
+	private static final String NAME = "CADD";
+
 	public static final String TABIX_LOCATION_PROPERTY = "tabix_location";
 	public static final String CADD_FILE_LOCATION_PROPERTY = "cadd_location";
 
@@ -61,38 +65,29 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	}
 
 	@Override
-	public String getName()
+	public boolean annotationDataExists()
 	{
-		return "CADD";
-	}
-
-	private String getFileLocation()
-	{
-		return molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY);
-	}
-
-	private String getToolLocation()
-	{
-		return molgenisSettings.getProperty(TABIX_LOCATION_PROPERTY);
+		boolean dataExists = false;
+		if (new File(molgenisSettings.getProperty(TABIX_LOCATION_PROPERTY)).exists()
+				&& new File(molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY)).exists())
+		{
+			dataExists = true;
+		}
+		return dataExists;
 	}
 
 	@Override
-	public EntityMetaData getOutputMetaData()
+	public String getName()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
-
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CADD_ABS, FieldTypeEnum.DECIMAL));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CADD_SCALED, FieldTypeEnum.DECIMAL));
-
-		return metadata;
+		return NAME;
 	}
 
 	@Override
 	public List<Entity> annotateEntity(Entity entity)
 	{
 		List<Entity> results = new ArrayList<Entity>();
-		String caddFile = getFileLocation();
-		String tabix = getToolLocation();
+		String caddFile = molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY);
+		String tabix = molgenisSettings.getProperty(TABIX_LOCATION_PROPERTY);
 
 		BufferedReader bufferedReader = null;
 
@@ -164,4 +159,16 @@ public class CaddServiceAnnotator extends VariantAnnotator
 
 		return results;
 	}
+
+	@Override
+	public EntityMetaData getOutputMetaData()
+	{
+		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
+
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CADD_ABS, FieldTypeEnum.DECIMAL));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CADD_SCALED, FieldTypeEnum.DECIMAL));
+
+		return metadata;
+	}
+
 }

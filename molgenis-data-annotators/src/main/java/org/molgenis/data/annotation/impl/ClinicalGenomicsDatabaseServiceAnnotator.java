@@ -1,6 +1,7 @@
- package org.molgenis.data.annotation.impl;
+package org.molgenis.data.annotation.impl;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -58,39 +59,22 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 	{
 		return NAME;
 	}
-	
-	private String getFileLocation(){
-		return molgenisSettings.getProperty(CGD_FILE_LOCATION_PROPERTY);
-	}
 
 	@Override
-	public EntityMetaData getOutputMetaData()
+	public boolean annotationDataExists()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
-
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(GENE, MolgenisFieldTypes.FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ENTREZ_GENE_ID, MolgenisFieldTypes.FieldTypeEnum.INT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CONDITION, MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(INHERITANCE, MolgenisFieldTypes.FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(AGE_GROUP, MolgenisFieldTypes.FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ALLELIC_CONDITIONS,
-				MolgenisFieldTypes.FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(MANIFESTATION_CATEGORIES,
-				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(INTERVENTION_CATEGORIES,
-				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(COMMENTS, MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(INTERVENTION_RATIONALE,
-				MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(REFERENCES, MolgenisFieldTypes.FieldTypeEnum.STRING));
-
-		return metadata;
+		boolean dataExists = false;
+		if (new File(molgenisSettings.getProperty(CGD_FILE_LOCATION_PROPERTY)).exists())
+		{
+			dataExists = true;
+		}
+		return dataExists;
 	}
 
 	@Override
 	public List<Entity> annotateEntity(Entity entity)
 	{
-		String cgdFile = getFileLocation();
+		String cgdFile = molgenisSettings.getProperty(CGD_FILE_LOCATION_PROPERTY);
 		List<Entity> results = new ArrayList<Entity>();
 		BufferedReader bufferedReader = null;
 
@@ -150,11 +134,35 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 				bufferedReader.close();
 			}
 			catch (IOException e)
-			{	
+			{
 				throw new RuntimeException(e);
 			}
 		}
 
 		return results;
+	}
+
+	@Override
+	public EntityMetaData getOutputMetaData()
+	{
+		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
+
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(GENE, MolgenisFieldTypes.FieldTypeEnum.STRING));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ENTREZ_GENE_ID, MolgenisFieldTypes.FieldTypeEnum.INT));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CONDITION, MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(INHERITANCE, MolgenisFieldTypes.FieldTypeEnum.STRING));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(AGE_GROUP, MolgenisFieldTypes.FieldTypeEnum.STRING));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ALLELIC_CONDITIONS,
+				MolgenisFieldTypes.FieldTypeEnum.STRING));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(MANIFESTATION_CATEGORIES,
+				MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(INTERVENTION_CATEGORIES,
+				MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(COMMENTS, MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(INTERVENTION_RATIONALE,
+				MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(REFERENCES, MolgenisFieldTypes.FieldTypeEnum.STRING));
+
+		return metadata;
 	}
 }

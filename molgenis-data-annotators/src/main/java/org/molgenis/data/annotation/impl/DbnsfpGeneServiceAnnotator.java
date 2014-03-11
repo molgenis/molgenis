@@ -2,7 +2,6 @@ package org.molgenis.data.annotation.impl;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -103,6 +102,17 @@ public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 	public String getName()
 	{
 		return NAME;
+	}
+
+	@Override
+	public boolean annotationDataExists()
+	{
+		boolean dataExists = false;
+		if (new File(molgenisSettings.getProperty(GENE_FILE_LOCATION_PROPERTY)).exists())
+		{
+			dataExists = true;
+		}
+		return dataExists;
 	}
 
 	@Override

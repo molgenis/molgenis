@@ -131,6 +131,16 @@ public class OmimHpoAnnotator extends LocusAnnotator
 	{
 		return NAME;
 	}
+	
+	@Override
+	public boolean annotationDataExists()
+	{
+		boolean dataExists = true;
+		
+		// TODO Check if the webservices are up
+		
+		return dataExists;
+	}
 
 	@Override
 	public Iterator<Entity> annotate(Iterator<Entity> source)

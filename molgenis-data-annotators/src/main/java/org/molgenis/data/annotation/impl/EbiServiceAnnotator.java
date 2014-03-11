@@ -10,6 +10,7 @@ import java.util.Collections;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -74,7 +75,17 @@ public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements 
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(UNIPROT_ID, FieldTypeEnum.STRING));
 		return metadata;
 	}
-
+	
+	@Override
+	public boolean annotationDataExists()
+	{
+		boolean dataExists = true;
+		
+		// TODO Check if the webservice is up
+		
+		return dataExists;
+	}
+	
 	@Override
 	public List<Entity> annotateEntity(Entity entity)
 	{
