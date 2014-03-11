@@ -42,13 +42,4 @@ public interface RepositoryAnnotator
 	 * @return name
 	 */
 	String getName();
-
-	/**
-	 * Checks if folder and files that were set with a runtime property actually exist, or if a webservice can be
-	 * reached
-	 * 
-	 * @return annotationDataExists
-	 * */
-	boolean annotationDataExists();
-
 }
