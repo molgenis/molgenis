@@ -225,9 +225,7 @@
 			$.each(aggregableAttributes, function() {
 				attributeSelect.append('<option value="' + this.href + '">' + this.label + '</option>');
 			});
-
 			$('#feature-select').html(attributeSelect);
-
 			$('#feature-select-container').show();
 			if (attributeSelect.val()) {
 				updateAggregatesTable(attributeSelect.val());
