@@ -2,7 +2,6 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=["annotate-ui.css"]>
-<#assign js=["annotation.ui.js"]>
 
 <@header css js />
 
