@@ -484,7 +484,7 @@ public class MolgenisModelParser
 		}
 
 		String jpaCascade = null;
-		if (type.equals("mref") || type.equals("xref"))
+		if (type.equals("mref") || type.equals("xref") || type.equals("categorical"))
 		{
 			if (element.hasAttribute("jpaCascade"))
 			{
@@ -559,7 +559,7 @@ public class MolgenisModelParser
 
 			field.setEnumOptions(options);
 		}
-		else if (type.equals("xref") || type.equals("mref"))
+		else if (type.equals("xref") || type.equals("mref") || type.equals("categorical"))
 		{
 			// xref must be defined unless mref_name is set
 			// caveat, can be both ends!!!
