@@ -22,6 +22,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Query;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.entityexplorer.controller.EntityExplorerController;
@@ -241,34 +242,29 @@ public class DataExplorerController extends MolgenisPluginController
 			throw new RuntimeException("Unsupported data type " + dataType);
 		}
 
-		EntityMetaData refEntityMeta = null;
-		String refAttributeName = null;
-		if (dataType == FieldTypeEnum.CATEGORICAL)
+		Map<String, Long> aggregateMap = new HashMap<String, Long>();
+		if (dataType == FieldTypeEnum.BOOL)
 		{
-			refEntityMeta = attributeMeta.getRefEntity();
-			refAttributeName = refEntityMeta.getLabelAttribute().getName();
+			Query trueQ = new QueryImpl(q).and().eq(attributeName, true);
+			long trueCount = dataService.count(entityName, trueQ);
+			aggregateMap.put("true", trueCount);
+			Query falseQ = new QueryImpl(q).and().eq(attributeName, false);
+			long falseCount = dataService.count(entityName, falseQ);
+			aggregateMap.put("false", falseCount);
 		}
-		Map<String, Integer> aggregateMap = new HashMap<String, Integer>();
-		for (Entity entity : dataService.findAll(entityName, q))
+		else if (dataType == FieldTypeEnum.CATEGORICAL || dataType == FieldTypeEnum.XREF)
 		{
-			String val;
-			switch (dataType)
+
+			EntityMetaData refEntityMeta = attributeMeta.getRefEntity();
+			String refEntityName = refEntityMeta.getName();
+			String refEntityLblAttr = refEntityMeta.getLabelAttribute().getName();
+
+			for (Entity refEntity : dataService.findAll(refEntityName))
 			{
-				case BOOL:
-					val = entity.getString(attributeName);
-					break;
-				case CATEGORICAL:
-					Entity refEntity = (Entity) entity.get(attributeName);
-					val = refEntity.getString(refAttributeName);
-					break;
-				default:
-					throw new RuntimeException("Unsupported data type " + dataType);
-
+				Query refQ = new QueryImpl(q).and().eq(attributeName, refEntity);
+				long refEntityCount = dataService.count(entityName, refQ);
+				aggregateMap.put(refEntity.getString(refEntityLblAttr), refEntityCount);
 			}
-
-			Integer count = aggregateMap.get(val);
-			if (count == null) aggregateMap.put(val, 1);
-			else aggregateMap.put(val, count + 1);
 		}
 		return new AggregateResponse(aggregateMap);
 	}
