@@ -122,7 +122,7 @@ public class ChartDataServiceImpl implements ChartDataService
 		Map<String, XYDataSerie> xYDataSeriesMap = new HashMap<String, XYDataSerie>();
 		for (Entity entity : iterable)
 		{
-			String splitValue = split + "__" + getValueAsString(entity, split);
+			String splitValue = createSplitKey(entity, split);
 			if (!xYDataSeriesMap.containsKey(splitValue))
 			{
 				XYDataSerie serie = new XYDataSerie();
@@ -151,30 +151,40 @@ public class ChartDataServiceImpl implements ChartDataService
 		Object o = entity.get(split);
 		if (o instanceof Entity)
 		{
-			return entity.getLabelValue();
+			return ((Entity) o).getLabelValue();
 		}
 		else if (o instanceof List)
 		{
-			Iterable<Entity> refEntities = (Iterable<Entity>) o;
-			if (refEntities != null)
+			@SuppressWarnings("unchecked")
+			Iterable<Object> refObjects = (Iterable<Object>) o;
+			StringBuilder strBuilder = new StringBuilder();
+			for (Object ob : refObjects)
 			{
-				StringBuilder strBuilder = new StringBuilder();
-				for (Entity mrefEntity : refEntities)
+				if (strBuilder.length() > 0)
 				{
-					if (strBuilder.length() > 0) strBuilder.append(',');
-					strBuilder.append(mrefEntity.getLabelValue());
+					strBuilder.append(',');
 				}
-				return strBuilder.toString();
+
+				if (ob instanceof Entity)
+				{
+					strBuilder.append(((Entity) ob).getLabelValue());
+				}
+				else
+				{
+					strBuilder.append(ob.toString());
+				}
 			}
-			else
-			{
-				return null;
-			}
+			return strBuilder.toString();
 		}
 		else
 		{
 			return "" + o;
 		}
+	}
+
+	public String createSplitKey(Entity entity, String split)
+	{
+		return split + '(' + getValueAsString(entity, split) + ')';
 	}
 
 	@Override
@@ -277,7 +287,7 @@ public class ChartDataServiceImpl implements ChartDataService
 		{
 			for (Entity entity : iterable)
 			{
-				String key = split + "__" + getValueAsString(entity, split);
+				String key = createSplitKey(entity, split);
 				if (!boxPlotDataListMap.containsKey(key))
 				{
 					boxPlotDataListMap.put(key, new ArrayList<Double>());
