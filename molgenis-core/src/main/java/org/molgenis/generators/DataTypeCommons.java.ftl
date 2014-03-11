@@ -16,7 +16,7 @@
 	<#else>
 		//set ${JavaName(f)}
 		// query formal name, else lowercase name
-		<#if f.type == "xref">
+		<#if f.type == "xref" || f.type == "categorical">
 		if( entity.get("${f.name}") != null) { 
 			this.set${JavaName(f)}((${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)})entity.get("${f.name}"));				
 		}

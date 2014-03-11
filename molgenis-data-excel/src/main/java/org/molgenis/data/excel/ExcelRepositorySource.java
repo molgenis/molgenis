@@ -93,4 +93,10 @@ public class ExcelRepositorySource extends FileRepositorySource
 		return new ExcelRepository(name, poiSheet, cellProcessors);
 	}
 
+	@Override
+	public void close() throws IOException
+	{
+		// Nothing
+	}
+
 }

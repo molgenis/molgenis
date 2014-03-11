@@ -8,6 +8,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 
 import javax.persistence.EntityManager;
@@ -57,14 +59,36 @@ import org.molgenis.omx.observ.value.TextValueRepository;
 import org.molgenis.omx.observ.value.ValueRepository;
 import org.molgenis.omx.observ.value.XrefValueRepository;
 import org.molgenis.search.SearchService;
+import org.molgenis.security.core.utils.SecurityUtils;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class OmxImporterServiceTest
 {
+	private static Authentication AUTHENTICATION_PREVIOUS;
+
+	@BeforeClass
+	public void setUpBeforeClass()
+	{
+		AUTHENTICATION_PREVIOUS = SecurityContextHolder.getContext().getAuthentication();
+	}
+
+	@AfterClass
+	public static void tearDownAfterClass()
+	{
+		SecurityContextHolder.getContext().setAuthentication(AUTHENTICATION_PREVIOUS);
+	}
+
 	protected DataService dataService;
 	private EntityManager entityManager;
 	private OmxImporterService importer;
@@ -114,6 +138,12 @@ public class OmxImporterServiceTest
 				validator);
 
 		entityManager.getTransaction().begin();
+
+		// set super user credentials
+		Collection<? extends GrantedAuthority> authorities = Arrays
+				.<SimpleGrantedAuthority> asList(new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_SU));
+		SecurityContextHolder.getContext().setAuthentication(
+				new UsernamePasswordAuthenticationToken(null, null, authorities));
 	}
 
 	@Test

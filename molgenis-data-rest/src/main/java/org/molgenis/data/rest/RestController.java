@@ -35,7 +35,6 @@ import javax.validation.Valid;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
@@ -50,8 +49,6 @@ import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Queryable;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.Updateable;
-import org.molgenis.data.Writable;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
@@ -555,11 +552,6 @@ public class RestController
 	private void updateInternal(String entityName, Integer id, Map<String, Object> entityMap)
 	{
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
-		if (!(meta instanceof Updateable))
-		{
-			throw new IllegalArgumentException(entityName + " is not updateable");
-		}
-
 		if (meta.getIdAttribute() == null)
 		{
 			throw new IllegalArgumentException(entityName + " does not have a id attribute");
@@ -580,10 +572,6 @@ public class RestController
 	private void createInternal(String entityName, Map<String, Object> entityMap, HttpServletResponse response)
 	{
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
-		if (!(meta instanceof Writable))
-		{
-			throw new IllegalArgumentException(entityName + " is not writeable");
-		}
 
 		Entity entity = toEntity(meta, entityMap);
 
@@ -795,8 +783,8 @@ public class RestController
 					// Resolve xref, mref fields
 					AttributeMetaData attr = meta.getAttribute(r.getField());
 
-					if ((attr.getDataType().getEnumType() == MolgenisFieldTypes.FieldTypeEnum.XREF)
-							|| (attr.getDataType().getEnumType() == MolgenisFieldTypes.FieldTypeEnum.MREF))
+					FieldTypeEnum dataType = attr.getDataType().getEnumType();
+					if (dataType == XREF || dataType == MREF || dataType == CATEGORICAL)
 					{
 						if (r.getOperator() == Operator.IN)
 						{
