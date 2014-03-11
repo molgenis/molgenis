@@ -120,6 +120,7 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
     	</#if>
         <#if field.type == "mref">
 			<#assign multipleXrefs = model.getNumberOfReferencesTo(field.xrefEntity)/>
+	@javax.persistence.OrderColumn 	
     @javax.persistence.ManyToMany(<#if field.jpaCascade??>fetch=javax.persistence.FetchType.LAZY, cascade={${field.jpaCascade}}<#else>fetch=javax.persistence.FetchType.LAZY /*cascade={javax.persistence.CascadeType.MERGE, javax.persistence.CascadeType.PERSIST, javax.persistence.CascadeType.REFRESH}*/</#if>)
     @javax.persistence.JoinColumn(name="${SqlName(field)}", insertable=true, updatable=true, nullable=${field.isNillable()?string})
 			<#if multipleXrefs &gt; 1>
@@ -131,7 +132,7 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 			</#if>			
        	<#elseif field.type == "xref" || field.type == "categorical">
     @javax.persistence.ManyToOne(<#if field.jpaCascade??>fetch=javax.persistence.FetchType.EAGER, cascade={${field.jpaCascade}}<#else>fetch=javax.persistence.FetchType.EAGER /*cascade={javax.persistence.CascadeType.MERGE, javax.persistence.CascadeType.PERSIST, javax.persistence.CascadeType.REFRESH}*/</#if>)
-    @javax.persistence.JoinColumn(name="${SqlName(field)}"<#if !field.nillable>, nullable=false</#if>)   	
+    @javax.persistence.JoinColumn(name="${SqlName(field)}"<#if !field.nillable>, nullable=false</#if>)  
        	<#else>
 			<#if isPrimaryKey(field,entity)>
 				<#if !entity.hasAncestor()>
