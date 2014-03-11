@@ -196,12 +196,14 @@
 	 */
 	function createAggregatesTable() {
 		function updateAggregatesTable(attributeUri) {
+			showSpinner();
 			$.ajax({
 				type : 'POST',
 				url : molgenis.getContextUrl() + '/aggregate',
 				data : JSON.stringify({'attributeUri': attributeUri, 'q': createEntityQuery().q}),
 				contentType : 'application/json',
 				success : function(aggregateResult) {
+					hideSpinner();
 					var table = $('<table />').addClass('table table-striped');
 					table.append('<tr><th>Category name</th><th>Count</th></tr>');
 					$.each(aggregateResult.hashCategories, function(categoryName, count) {
@@ -210,6 +212,7 @@
 					$('#aggregate-table-container').html(table);
 				},
 				error : function(xhr) {
+					hideSpinner();
 					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 				}
 			});
