@@ -107,12 +107,7 @@ public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 	@Override
 	public boolean annotationDataExists()
 	{
-		boolean dataExists = false;
-		if (new File(molgenisSettings.getProperty(GENE_FILE_LOCATION_PROPERTY)).exists())
-		{
-			dataExists = true;
-		}
-		return dataExists;
+		return new File(molgenisSettings.getProperty(GENE_FILE_LOCATION_PROPERTY)).exists();
 	}
 
 	@Override

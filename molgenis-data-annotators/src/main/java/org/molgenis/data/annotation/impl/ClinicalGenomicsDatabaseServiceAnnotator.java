@@ -60,15 +60,10 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 		return NAME;
 	}
 
-	@Override
+	@Override 
 	public boolean annotationDataExists()
 	{
-		boolean dataExists = false;
-		if (new File(molgenisSettings.getProperty(CGD_FILE_LOCATION_PROPERTY)).exists())
-		{
-			dataExists = true;
-		}
-		return dataExists;
+		return new File(molgenisSettings.getProperty(CGD_FILE_LOCATION_PROPERTY)).exists();
 	}
 
 	@Override

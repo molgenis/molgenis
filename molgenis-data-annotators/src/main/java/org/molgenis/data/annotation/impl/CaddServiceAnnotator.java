@@ -67,13 +67,8 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	@Override
 	public boolean annotationDataExists()
 	{
-		boolean dataExists = false;
-		if (new File(molgenisSettings.getProperty(TABIX_LOCATION_PROPERTY)).exists()
-				&& new File(molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY)).exists())
-		{
-			dataExists = true;
-		}
-		return dataExists;
+		return new File(molgenisSettings.getProperty(TABIX_LOCATION_PROPERTY)).exists()
+				&& new File(molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY)).exists();
 	}
 
 	@Override
