@@ -122,7 +122,7 @@ public class ChartDataServiceImpl implements ChartDataService
 		Map<String, XYDataSerie> xYDataSeriesMap = new HashMap<String, XYDataSerie>();
 		for (Entity entity : iterable)
 		{
-			String splitValue = split + "__" + entity.get(split);
+			String splitValue = split + "__" + getValueAsString(entity, split);
 			if (!xYDataSeriesMap.containsKey(splitValue))
 			{
 				XYDataSerie serie = new XYDataSerie();
@@ -144,6 +144,37 @@ public class ChartDataServiceImpl implements ChartDataService
 		}
 
 		return series;
+	}
+
+	private String getValueAsString(Entity entity, String split)
+	{
+		Object o = entity.get(split);
+		if (o instanceof Entity)
+		{
+			return entity.getLabelValue();
+		}
+		else if (o instanceof List)
+		{
+			Iterable<Entity> refEntities = (Iterable<Entity>) o;
+			if (refEntities != null)
+			{
+				StringBuilder strBuilder = new StringBuilder();
+				for (Entity mrefEntity : refEntities)
+				{
+					if (strBuilder.length() > 0) strBuilder.append(',');
+					strBuilder.append(mrefEntity.getLabelValue());
+				}
+				return strBuilder.toString();
+			}
+			else
+			{
+				return null;
+			}
+		}
+		else
+		{
+			return "" + o;
+		}
 	}
 
 	@Override
@@ -246,7 +277,7 @@ public class ChartDataServiceImpl implements ChartDataService
 		{
 			for (Entity entity : iterable)
 			{
-				String key = split + "__" + entity.get(split);
+				String key = split + "__" + getValueAsString(entity, split);
 				if (!boxPlotDataListMap.containsKey(key))
 				{
 					boxPlotDataListMap.put(key, new ArrayList<Double>());
