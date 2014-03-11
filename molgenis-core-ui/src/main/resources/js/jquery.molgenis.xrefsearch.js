@@ -77,7 +77,7 @@
 	}
 	
 	function createSelect2(container, attributeMetaData) {
-		var refEntityMetaData = restApi.get(attributeMetaData.refEntity.href,  {attributes: ['name,attributes'], expand: ['attributes']});
+		var refEntityMetaData = restApi.get(attributeMetaData.refEntity.href, {expand: ['attributes']});
 		var lookupAttrNames = getLookupAttributeNames(refEntityMetaData);
 		var hiddenInput = container.find('input[type=hidden]');
 		
