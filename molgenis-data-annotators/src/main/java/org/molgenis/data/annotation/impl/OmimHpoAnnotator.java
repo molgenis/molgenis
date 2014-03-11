@@ -116,7 +116,8 @@ public class OmimHpoAnnotator extends LocusAnnotator
 	}
 
 	@Override
-	public EntityMetaData getInputMetaData() {
+	public EntityMetaData getInputMetaData()
+	{
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
 
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CHROMOSOME, MolgenisFieldTypes.FieldTypeEnum.STRING));
@@ -125,103 +126,21 @@ public class OmimHpoAnnotator extends LocusAnnotator
 
 		return metadata;
 	}
-	
+
 	@Override
 	public String getName()
 	{
 		return NAME;
 	}
-	
+
 	@Override
 	public boolean annotationDataExists()
 	{
 		boolean dataExists = true;
-		
+
 		// TODO Check if the webservices are up
-		
+
 		return dataExists;
-	}
-
-	@Override
-	public Iterator<Entity> annotate(Iterator<Entity> source)
-	{
-		List<Entity> results = new ArrayList<Entity>();
-
-		try
-		{
-			List<Locus> loci = new ArrayList<Locus>();
-
-			while (source.hasNext())
-			{
-				Entity entity = source.next();
-
-				String chromosome = entity.getString(CHROMOSOME);
-				Long position = entity.getLong(POSITION);
-				Locus locus = new Locus(chromosome, position);
-				loci.add(locus);
-			}
-
-			HashMap<String, HGNCLoc> hgncLocs = getHgncLocs();
-			List<String> geneSymbols = locationToHGNC(hgncLocs, loci);
-
-			List<HPOTerm> hpoTerms = hpoTerms();
-			Map<String, List<HPOTerm>> geneToHpoTerm = geneToHpoTerms(hpoTerms);
-
-			List<OMIMTerm> omimTerms = omimTerms();
-			Map<String, List<OMIMTerm>> geneToOmimTerm = geneToOmimTerms(omimTerms);
-
-			for (int i = 0; i < loci.size(); i++)
-			{
-				Locus locus = loci.get(i);
-				String geneSymbol = geneSymbols.get(i);
-
-				if (geneSymbol != null && geneToOmimTerm.containsKey(geneSymbol)
-						&& geneToHpoTerm.containsKey(geneSymbol))
-				{
-					StringBuffer omimDisorders = new StringBuffer();
-					StringBuffer omimLinks = new StringBuffer();
-					StringBuffer hpoDescriptions = new StringBuffer();
-					StringBuffer hpoLinks = new StringBuffer();
-
-					for (OMIMTerm omimTerm : geneToOmimTerm.get(geneSymbol))
-					{
-						omimDisorders.append(omimTerm.getName() + " / ");
-						omimLinks.append("http://www.omim.org/entry/" + omimTerm.getEntry());
-					}
-
-					omimDisorders.delete(omimDisorders.length() - 3, omimDisorders.length());
-					omimLinks.delete(omimLinks.length() - 3, omimLinks.length());
-
-					for (HPOTerm hpoTerm : geneToHpoTerm.get(geneSymbol))
-					{
-						hpoDescriptions.append(hpoTerm.getDescription() + " / ");
-						hpoLinks.append("http://www.human-phenotype-ontology.org/hpoweb/showterm?id=" + hpoTerm.getId());
-					}
-
-					hpoDescriptions.delete(hpoDescriptions.length() - 3, hpoDescriptions.length());
-					hpoLinks.delete(hpoLinks.length() - 3, hpoLinks.length());
-
-					HashMap<String, Object> resultMap = new HashMap<String, Object>();
-
-					resultMap.put(OMIM_DISO, omimDisorders.toString());
-					resultMap.put(OMIM_LINK, omimLinks.toString());
-					resultMap.put(OMIM_ALL, geneToOmimTerm.get(geneSymbol));
-					resultMap.put(HPO_DESC, hpoDescriptions.toString());
-					resultMap.put(HPO_LINK, hpoLinks.toString());
-					resultMap.put(HPO_ALL, geneToHpoTerm.get(geneSymbol));
-					resultMap.put(CHROMOSOME, locus.getChrom());
-					resultMap.put(POSITION, locus.getPos());
-
-					results.add(new MapEntity(resultMap));
-				}
-			}
-		}
-		catch (Exception e)
-		{
-			throw new RuntimeException(e);
-		}
-
-		return results.iterator();
 	}
 
 	/**
@@ -505,7 +424,77 @@ public class OmimHpoAnnotator extends LocusAnnotator
 	@Override
 	public List<Entity> annotateEntity(Entity entity)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		List<Entity> results = new ArrayList<Entity>();
+
+		try
+		{
+			List<Locus> loci = new ArrayList<Locus>();
+
+			String chromosome = entity.getString(CHROMOSOME);
+			Long position = entity.getLong(POSITION);
+			Locus locus = new Locus(chromosome, position);
+			loci.add(locus);
+
+			HashMap<String, HGNCLoc> hgncLocs = getHgncLocs();
+			List<String> geneSymbols = locationToHGNC(hgncLocs, loci);
+
+			List<HPOTerm> hpoTerms = hpoTerms();
+			Map<String, List<HPOTerm>> geneToHpoTerm = geneToHpoTerms(hpoTerms);
+
+			List<OMIMTerm> omimTerms = omimTerms();
+			Map<String, List<OMIMTerm>> geneToOmimTerm = geneToOmimTerms(omimTerms);
+
+			for (int i = 0; i < loci.size(); i++)
+			{
+				locus = loci.get(i);
+				String geneSymbol = geneSymbols.get(i);
+
+				if (geneSymbol != null && geneToOmimTerm.containsKey(geneSymbol)
+						&& geneToHpoTerm.containsKey(geneSymbol))
+				{
+					StringBuffer omimDisorders = new StringBuffer();
+					StringBuffer omimLinks = new StringBuffer();
+					StringBuffer hpoDescriptions = new StringBuffer();
+					StringBuffer hpoLinks = new StringBuffer();
+
+					for (OMIMTerm omimTerm : geneToOmimTerm.get(geneSymbol))
+					{
+						omimDisorders.append(omimTerm.getName() + " / ");
+						omimLinks.append("http://www.omim.org/entry/" + omimTerm.getEntry());
+					}
+
+					omimDisorders.delete(omimDisorders.length() - 3, omimDisorders.length());
+					omimLinks.delete(omimLinks.length() - 3, omimLinks.length());
+
+					for (HPOTerm hpoTerm : geneToHpoTerm.get(geneSymbol))
+					{
+						hpoDescriptions.append(hpoTerm.getDescription() + " / ");
+						hpoLinks.append("http://www.human-phenotype-ontology.org/hpoweb/showterm?id=" + hpoTerm.getId());
+					}
+
+					hpoDescriptions.delete(hpoDescriptions.length() - 3, hpoDescriptions.length());
+					hpoLinks.delete(hpoLinks.length() - 3, hpoLinks.length());
+
+					HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+					resultMap.put(OMIM_DISO, omimDisorders.toString());
+					resultMap.put(OMIM_LINK, omimLinks.toString());
+					resultMap.put(OMIM_ALL, geneToOmimTerm.get(geneSymbol));
+					resultMap.put(HPO_DESC, hpoDescriptions.toString());
+					resultMap.put(HPO_LINK, hpoLinks.toString());
+					resultMap.put(HPO_ALL, geneToHpoTerm.get(geneSymbol));
+					resultMap.put(CHROMOSOME, locus.getChrom());
+					resultMap.put(POSITION, locus.getPos());
+
+					results.add(new MapEntity(resultMap));
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			throw new RuntimeException(e);
+		}
+
+		return results;
 	}
 }
