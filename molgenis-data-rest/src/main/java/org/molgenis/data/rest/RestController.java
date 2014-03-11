@@ -35,7 +35,6 @@ import javax.validation.Valid;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
@@ -784,8 +783,8 @@ public class RestController
 					// Resolve xref, mref fields
 					AttributeMetaData attr = meta.getAttribute(r.getField());
 
-					if ((attr.getDataType().getEnumType() == MolgenisFieldTypes.FieldTypeEnum.XREF)
-							|| (attr.getDataType().getEnumType() == MolgenisFieldTypes.FieldTypeEnum.MREF))
+					FieldTypeEnum dataType = attr.getDataType().getEnumType();
+					if (dataType == XREF || dataType == MREF || dataType == CATEGORICAL)
 					{
 						if (r.getOperator() == Operator.IN)
 						{
