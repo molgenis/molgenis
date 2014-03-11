@@ -3,6 +3,8 @@ package org.molgenis.data.importer;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
@@ -226,9 +228,8 @@ public class EntityImportService
 
 	private boolean resolveEntityRef(String entityName, Entity entityToBeImported, AttributeMetaData attr)
 	{
-		List<Object> keyValues = Lists.newArrayList();
-
-		String foreignAttr = attr.getRefEntity().getLabelAttribute().getName();
+		final List<Object> keyValues = Lists.newArrayList();
+		final String foreignAttr = attr.getRefEntity().getLabelAttribute().getName();
 		String key = attr.getName() + "_" + foreignAttr;
 
 		if (attr.getDataType().getEnumType() == MREF)
@@ -263,6 +264,22 @@ public class EntityImportService
 			{
 				refLoadingCache.invalidate(cacheKey);
 			}
+
+			// Sort entity list the same as the original key list
+			Collections.sort(foundRefEntityList, new Comparator<Entity>()
+			{
+				@Override
+				public int compare(Entity o1, Entity o2)
+				{
+					Object value1 = o1.get(foreignAttr);
+					Object value2 = o2.get(foreignAttr);
+					Integer index1 = keyValues.indexOf(value1);
+					Integer index2 = keyValues.indexOf(value2);
+
+					return index1.compareTo(index2);
+				}
+
+			});
 		}
 		catch (ExecutionException e)
 		{

@@ -1,6 +1,5 @@
 package org.molgenis.data.omx;
 
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -38,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 /**
@@ -197,7 +197,7 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Cr
 	@Override
 	public Integer add(Entity entity)
 	{
-		add(Arrays.asList(entity));
+		add(Lists.newArrayList(entity));
 		return entity.getIdValue();
 	}
 

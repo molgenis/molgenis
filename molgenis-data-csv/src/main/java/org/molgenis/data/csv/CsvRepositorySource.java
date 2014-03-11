@@ -33,9 +33,18 @@ import com.google.common.collect.Lists;
  */
 public class CsvRepositorySource extends FileRepositorySource
 {
-	public static final Set<String> EXTENSIONS = ImmutableSet.of("csv", "txt", "tsv", "zip");
+	private static final String EXTENSION_CSV = "csv";
+	private static final String EXTENSION_TXT = "txt";
+	private static final String EXTENSION_TSV = "tsv";
+	private static final String EXTENSION_ZIP = "zip";
+
+	public static final Set<String> EXTENSIONS = ImmutableSet.of(EXTENSION_CSV, EXTENSION_TXT, EXTENSION_TSV,
+			EXTENSION_ZIP);
+
 	private static final Charset CHARSET = Charset.forName("UTF-8");
+	private static final String MAC_ZIP = "__MACOSX";
 	private final File file;
+	private ZipFile zipFile = null;
 
 	public CsvRepositorySource(File file) throws InvalidFormatException, IOException
 	{
@@ -54,9 +63,8 @@ public class CsvRepositorySource extends FileRepositorySource
 		String extension = StringUtils.getFilenameExtension(file.getName());
 		List<Repository> repositories = Lists.newArrayList();
 
-		if (extension.equalsIgnoreCase(".zip"))
+		if (extension.equalsIgnoreCase(EXTENSION_ZIP))
 		{
-			ZipFile zipFile = null;
 			try
 			{
 				zipFile = new ZipFile(file);
@@ -64,18 +72,17 @@ public class CsvRepositorySource extends FileRepositorySource
 				{
 					ZipEntry entry = e.nextElement();
 					InputStream in = zipFile.getInputStream(entry);
-					repositories.add(getRepository(file.getName() + "/" + entry.getName(), in, cellProcessors));
+
+					if (!entry.getName().contains(MAC_ZIP))
+					{
+						repositories.add(getRepository(file.getName() + "/" + entry.getName(), in, cellProcessors));
+					}
 				}
 			}
 			catch (Exception e)
 			{
 				throw new MolgenisDataException(e);
 			}
-			finally
-			{
-				IOUtils.closeQuietly(zipFile);
-			}
-
 		}
 		else
 		{
@@ -97,16 +104,26 @@ public class CsvRepositorySource extends FileRepositorySource
 		String name = StringUtils.stripFilenameExtension(StringUtils.getFilename(fileName));
 		Reader reader = new InputStreamReader(in, CHARSET);
 
-		if (fileName.toLowerCase().endsWith(".csv") || fileName.toLowerCase().endsWith(".txt"))
+		if (fileName.toLowerCase().endsWith("." + EXTENSION_CSV)
+				|| fileName.toLowerCase().endsWith("." + EXTENSION_TXT))
 		{
 			return new CsvRepository(fileName, reader, name, cellProcessors);
 		}
 
-		if (fileName.toUpperCase().endsWith(".tsv"))
+		if (fileName.toLowerCase().endsWith("." + EXTENSION_TSV))
 		{
 			return new CsvRepository(fileName, reader, '\t', StringUtils.getFilename(fileName), cellProcessors);
 		}
 
 		throw new MolgenisDataException("Unknown file type: [" + fileName + "] for csv repository");
+	}
+
+	@Override
+	public void close() throws IOException
+	{
+		if (zipFile != null)
+		{
+			IOUtils.closeQuietly(zipFile);
+		}
 	}
 }

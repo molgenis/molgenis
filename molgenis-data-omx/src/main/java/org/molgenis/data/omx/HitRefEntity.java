@@ -90,13 +90,13 @@ public class HitRefEntity extends AbstractEntity
 		if (attributeName.equals(getIdAttributeName()))
 		{
 			Object val = columnValueMap.get(HIT_ID_PREFIX + caseInsensitiveAttributeName);
-			if (columnValueIndex == null) return val;
+			if (columnValueIndex == null || val == null) return val;
 			else return ((List<?>) val).get(columnValueIndex);
 		}
 		else if (attributeName.equals(getLabelAttributeName()))
 		{
 			Object val = columnValueMap.get(caseInsensitiveAttributeName);
-			if (columnValueIndex == null) return val;
+			if (columnValueIndex == null || val == null) return val;
 			else return val.toString().split(",")[columnValueIndex];
 		}
 		else

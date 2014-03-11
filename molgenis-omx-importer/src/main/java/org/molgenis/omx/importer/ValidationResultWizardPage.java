@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
@@ -65,22 +66,30 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 				if (entityDbAction == null) throw new IOException("unknown database action: " + entityImportOption);
 
 				RepositorySource repositorySource = dataService.createFileRepositorySource(importWizard.getFile());
-				EntityImportReport importReport = omxImporterService.doImport(repositorySource.getRepositories(),
-						entityDbAction);
-				importWizard.setImportResult(importReport);
 
-				// publish dataset imported event(s)
-				Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME, DataSet.class);
-				for (DataSet dataSet : dataSets)
-					ApplicationContextProvider.getApplicationContext().publishEvent(
-							new EntityImportedEvent(this, DataSet.ENTITY_NAME, dataSet.getId()));
+				try
+				{
+					EntityImportReport importReport = omxImporterService.doImport(repositorySource.getRepositories(),
+							entityDbAction);
+					importWizard.setImportResult(importReport);
 
-				// publish protocol imported event(s)
-				Iterable<Protocol> protocols = dataService.findAll(Protocol.ENTITY_NAME,
-						new QueryImpl().eq(Protocol.ROOT, true), Protocol.class);
-				for (Protocol protocol : protocols)
-					ApplicationContextProvider.getApplicationContext().publishEvent(
-							new EntityImportedEvent(this, Protocol.ENTITY_NAME, protocol.getId()));
+					// publish dataset imported event(s)
+					Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME, DataSet.class);
+					for (DataSet dataSet : dataSets)
+						ApplicationContextProvider.getApplicationContext().publishEvent(
+								new EntityImportedEvent(this, DataSet.ENTITY_NAME, dataSet.getId()));
+
+					// publish protocol imported event(s)
+					Iterable<Protocol> protocols = dataService.findAll(Protocol.ENTITY_NAME,
+							new QueryImpl().eq(Protocol.ROOT, true), Protocol.class);
+					for (Protocol protocol : protocols)
+						ApplicationContextProvider.getApplicationContext().publishEvent(
+								new EntityImportedEvent(this, Protocol.ENTITY_NAME, protocol.getId()));
+				}
+				finally
+				{
+					IOUtils.closeQuietly(repositorySource);
+				}
 
 				return "File successfully imported.";
 			}
