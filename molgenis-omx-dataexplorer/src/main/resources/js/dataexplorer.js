@@ -75,7 +75,7 @@
 	/**
 	 * @memberOf molgenis.dataexplorer
 	 */
-	function createAttributeFiltersList(attributeFilters) {
+	function createFiltersList(attributeFilters) {
 		var items = [];
 		$.each(attributeFilters, function(attributeUri, attributeFilter) {
 			var attribute = attributeFilter.attribute;
@@ -481,7 +481,7 @@
 			$.each(data.filters, function() {
 				attributeFilters[this.attribute.href] = this;
 			});
-			createAttributeFiltersList(attributeFilters);
+			createFiltersList(attributeFilters);
 			switch($("#tabs li.active").attr('id')) {
 				case 'tab-data':
 					createDataTable();
@@ -502,7 +502,7 @@
 		
 		$(document).on('removeAttributeFilter', function(e, data) {
 			delete attributeFilters[data.attributeUri];
-			createAttributeFiltersList(attributeFilters);
+			createFiltersList(attributeFilters);
 			
 			switch($("#tabs li.active").attr('id')) {
 				case 'tab-data':
