@@ -59,6 +59,9 @@ public class OmxImporterServiceImpl implements OmxImporterService
 		// First import entities, the data sheets are ignored in the entitiesimporter
 		EntityImportReport importReport = entitiesImporter.importEntities(repositories, databaseAction);
 
+		// RULE: Feature can only belong to one Protocol in a DataSet. Check it (see issue #1136)
+		checkFeatureCanOnlyBelongToOneProtocolForOneDataSet();
+
 		// Import data sheets
 		for (Repository repository : repositories)
 		{
@@ -154,5 +157,36 @@ public class OmxImporterServiceImpl implements OmxImporterService
 		}
 
 		return importReport;
+	}
+
+	// RULE: Feature can only belong to one Protocol in a DataSet.(see issue #1136)
+	private void checkFeatureCanOnlyBelongToOneProtocolForOneDataSet()
+	{
+		// RULE: Feature can only belong to one Protocol in a DataSet. Check it (see issue #1136)
+		Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME, DataSet.class);
+		for (DataSet dataSet : dataSets)
+		{
+			List<Protocol> dataSetProtocols = ProtocolUtils.getProtocolDescendants(dataSet.getProtocolUsed(), true);
+
+			for (Protocol protocol : dataSetProtocols)
+			{
+				for (ObservableFeature feature : protocol.getFeatures())
+				{
+					for (Protocol p : dataSetProtocols)
+					{
+						if (!p.equals(protocol) && p.getFeatures().contains(feature))
+						{
+							String message = String
+									.format("An ObservableFeature can only belong to one Protocol but feature '%s' belongs to both '%s' and '%s'",
+											feature.getIdentifier(), p.getIdentifier(), protocol.getIdentifier());
+
+							throw new MolgenisValidationException(Sets.newHashSet(new ConstraintViolation(message,
+									feature.getIdentifier(), feature, null, null, 0)));
+						}
+					}
+				}
+			}
+		}
+
 	}
 }
