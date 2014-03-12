@@ -219,6 +219,23 @@ public class OmxImporterServiceTest
 		}
 	}
 
+	@Test
+	public void testFeatureInMultipleProtocols() throws IOException, ValueConverterException
+	{
+		try
+		{
+			RepositorySource source = dataService
+					.createFileRepositorySource(loadTestFile("feature-in-multiple-protocols.xls"));
+			importer.doImport(source.getRepositories(), DatabaseAction.ADD_UPDATE_EXISTING);
+			fail("Should have thrown MolgenisValidationException");
+		}
+		catch (MolgenisValidationException e)
+		{
+			assertEquals(e.getViolations().size(), 1);
+			assertEquals(e.getViolations().iterator().next().getInvalidValue(), "Celiac_Individual");
+		}
+	}
+
 	@AfterMethod
 	public void afterMethod() throws IOException
 	{
