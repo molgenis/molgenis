@@ -220,7 +220,7 @@
 
 		var attributes = molgenis.getAtomicAttributes(getSelectedAttributes(), restApi);
 		var aggregableAttributes = $.grep(attributes, function(attribute) {
-			return attribute.fieldType === 'BOOL' || attribute.fieldType === 'CATEGORICAL';
+			return attribute.fieldType === 'BOOL' || attribute.fieldType === 'CATEGORICAL' || attribute.fieldType === 'XREF';
 		});
 
 		if (aggregableAttributes.length > 0) {
