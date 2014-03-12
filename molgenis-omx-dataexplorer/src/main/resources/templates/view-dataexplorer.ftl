@@ -5,11 +5,6 @@
 <#assign js=["dalliance-compiled.js", "jquery-ui-1.9.2.custom.min.js", "chosen.jquery.min.js", "dataexplorer.js", "jquery.bootstrap.pager.js", "jquery.bootstrap.wizard.min.js", "bootstrap-datetimepicker.min.js", "dataexplorer-filter.js", "dataexplorer-wizard.js", "dataexplorer-charts.js", "highstock-1.3.6/highstock.js", "highstock-1.3.6/highcharts-more.js","jquery.fancytree.min.js", "jquery.molgenis.tree.js", "jquery.molgenis.table.js", "select2.min.js", "jquery.molgenis.xrefsearch.js"]>
 
 <@header css js/>
-	<#-- 
-	<#if entityExplorerUrl??>
-		<script>top.molgenis.setEntityExplorerUrl('${entityExplorerUrl}');</script>
-    </#if>
-    -->
     <script>
     <#--instanciate the Dalliance browser with settings from the controller-->
     var genomeBrowserDataSets = {};
@@ -92,7 +87,7 @@
 		</div>
 		<div class="span9">			
 			<#--Charts-->
-			<#if app_dataexplorer_include_charts?has_content && app_dataexplorer_include_charts>
+			<#if mod_charts>
 				<#include "/charts-forms/view-scatterplot.ftl" parse=false>
 				<#include "/charts-forms/view-boxplot.ftl" parse=false>
 				<#include "/charts-forms/view-heatmap.ftl" parse=false>
@@ -100,14 +95,18 @@
 				
 			<div class="tabbable">
 				<ul id="tabs" class="nav nav-tabs">
-					<li class="active" id="tab-data"><a href="#dataset-data-container" data-toggle="tab"><img src="/img/grid-icon.png"> Data</a></li>  
+				<#if mod_data>
+					<li id="tab-data"><a href="#dataset-data-container" data-toggle="tab"><img src="/img/grid-icon.png"> Data</a></li>
+				</#if>
+				<#if mod_aggregates>
 					<li id="tab-aggregates"><a href="#dataset-aggregate-container" data-toggle="tab"><img src="/img/aggregate-icon.png"> Aggregates</a></li>
-					<#--Charts-->
-					<#if app_dataexplorer_include_charts?has_content && app_dataexplorer_include_charts>
-						<li id="tab-charts"><a href="#chart-container" data-toggle="tab"><img src="/img/chart-icon.png" alt="charts"> Charts</a></li>
-					</#if>
+				</#if>
+				<#if mod_charts>
+					<li id="tab-charts"><a href="#chart-container" data-toggle="tab"><img src="/img/chart-icon.png" alt="charts"> Charts</a></li>
+				</#if>
 				</ul>
 				<div class="tab-content">
+				<#if mod_data>
 					<div class="tab-pane active" id="dataset-data-container">
 						<div id="dataexplorer-grid-data">
                             <div class="accordion" id="genomebrowser">
@@ -129,6 +128,8 @@
 							</div>
 						</div>
 					</div>
+				</#if>
+				<#if mod_aggregates>
 					<div class="tab-pane" id="dataset-aggregate-container">
 						<div id="feature-select-container">
 							<label class="control-label" for="feature-select">Aggregate by:</label>
@@ -139,23 +140,20 @@
 							<div id="aggregate-table-container"></div>
 						</div>
 					</div>
-					<#--Charts-->
-					<#if app_dataexplorer_include_charts?has_content && app_dataexplorer_include_charts>
-						<div class="tab-pane" id="chart-container">
-							<div class="row-fluid">		
-								<div class="btn-group" class="span9">
-									<a href="#chart-designer-modal-scatterplot" id="chart-designer-modal-scatterplot-button" role="button" class="btn" data-toggle="modal">Create scatter plot <i class="icon-plus"></i></a>
-									<a href="#chart-designer-modal-boxplot" id="chart-designer-modal-boxplot-button" role="button" class="btn" data-toggle="modal">Create box plot <i class="icon-plus"></i></a>
-									<!-- TODO Heat map
-										<a href="#chart-designer-modal-heatmap" id="chart-designer-modal-heatmap-button" role="button" class="btn" data-toggle="modal">Heat map <i class="icon-plus"></i></a>
-									-->							
-								</div>
-							</div>
-							<div class="row-fluid">
-								<div id="chart-view" class="span9"></div>
+				</#if>
+				<#if mod_charts>
+					<div class="tab-pane" id="chart-container">
+						<div class="row-fluid">
+							<div class="btn-group" class="span9">
+								<a href="#chart-designer-modal-scatterplot" id="chart-designer-modal-scatterplot-button" role="button" class="btn" data-toggle="modal">Create scatter plot <i class="icon-plus"></i></a>
+								<a href="#chart-designer-modal-boxplot" id="chart-designer-modal-boxplot-button" role="button" class="btn" data-toggle="modal">Create box plot <i class="icon-plus"></i></a>
 							</div>
 						</div>
-					</#if>
+						<div class="row-fluid">
+							<div id="chart-view" class="span9"></div>
+						</div>
+					</div>
+				</#if>
 				</div>
 			</div>
 		</div>

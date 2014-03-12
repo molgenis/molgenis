@@ -583,6 +583,9 @@
 			setDallianceFilter();
 		});
 		
+
+		// select first tab
+		$('#tabs a[data-toggle="tab"]').first().click();
 		
 		// fire event handler
 		$('#dataset-select').change();
