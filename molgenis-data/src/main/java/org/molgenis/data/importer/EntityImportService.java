@@ -89,14 +89,32 @@ public class EntityImportService
 		String updateKey = entityMetaData.getLabelAttribute().getName();
 		List<Entity> batch = Lists.newArrayListWithCapacity(BATCH_SIZE);
 		List<Entity> unresolved = Lists.newArrayList();
+		Set<Object> labelAttributeValues = Sets.newHashSetWithExpectedSize(BATCH_SIZE);
 
 		long rownr = 0;
 		for (Entity entityToImport : entitiesToImport)
 		{
+			rownr++;
+
 			// Skip empty rows
 			if (EntityUtils.isEmpty(entityToImport)) break;
 
-			rownr++;
+			Object key = entityToImport.get(updateKey);
+			if (key == null)
+			{
+				ConstraintViolation violation = new ConstraintViolation("Missing key", null, entityToImport,
+						entityMetaData.getLabelAttribute(), entityMetaData, rownr);
+				throw new MolgenisValidationException(Sets.newHashSet(violation));
+			}
+			else if (labelAttributeValues.contains(key))
+			{
+				ConstraintViolation violation = new ConstraintViolation("Duplicate key '" + key + "'", key,
+						entityToImport, entityMetaData.getLabelAttribute(), entityMetaData, rownr);
+				throw new MolgenisValidationException(Sets.newHashSet(violation));
+			}
+
+			labelAttributeValues.add(key);
+
 			boolean resolved = true;
 			for (AttributeMetaData attr : entityMetaData.getAttributes())
 			{
@@ -139,7 +157,6 @@ public class EntityImportService
 
 		if (!unresolved.isEmpty())
 		{
-
 			// We got unresolved refs to the same entity, try the unresolved again max 100 times
 			int iterations = 0;
 			while (!unresolved.isEmpty() && (++iterations < 100))
