@@ -69,10 +69,15 @@ public class DataExplorerController extends MolgenisPluginController
 
 	private static final String KEY_APP_HREF_CSS = "app.href.css";
 
-	// Including excluding the charts module
-	public static final boolean INCLUDE_CHARTS_MODULE = true;
-	public static final String KEY_APP_INCLUDE_CHARTS = "app.dataexplorer.include.charts";
-	private static final String MODEL_APP_INCLUDE_CHARTS = "app_dataexplorer_include_charts";
+	public static final String KEY_MOD_AGGREGATES = "plugin.dataexplorer.mod.aggregates";
+	public static final String KEY_MOD_CHARTS = "plugin.dataexplorer.mod.charts";
+	public static final String KEY_MOD_DATA = "plugin.dataexplorer.mod.data";
+	private static final String MODEL_KEY_MOD_AGGREGATES = "mod_aggregates";
+	private static final String MODEL_KEY_MOD_CHARTS = "mod_charts";
+	private static final String MODEL_KEY_MOD_DATA = "mod_data";
+	private static final boolean DEFAULT_VAL_MOD_AGGREGATES = true;
+	private static final boolean DEFAULT_VAL_MOD_CHARTS = true;
+	private static final boolean DEFAULT_VAL_MOD_DATA = true;
 
 	public static final String INITLOCATION = "initLocation";
 	public static final String COORDSYSTEM = "coordSystem";
@@ -143,12 +148,13 @@ public class DataExplorerController extends MolgenisPluginController
 		// Init genome browser
 		model.addAttribute("genomeBrowserSets", getGenomeBrowserSetsToModel());
 
-		String appHrefCss = molgenisSettings.getProperty(KEY_APP_HREF_CSS);
-		if (appHrefCss != null) model.addAttribute(KEY_APP_HREF_CSS.replaceAll("\\.", "_"), appHrefCss);
-
-		// including/excluding charts
-		Boolean appIncludeCharts = molgenisSettings.getBooleanProperty(KEY_APP_INCLUDE_CHARTS, INCLUDE_CHARTS_MODULE);
-		model.addAttribute(MODEL_APP_INCLUDE_CHARTS, appIncludeCharts);
+		// define which modules to display
+		Boolean modCharts = molgenisSettings.getBooleanProperty(KEY_MOD_CHARTS, DEFAULT_VAL_MOD_CHARTS);
+		model.addAttribute(MODEL_KEY_MOD_CHARTS, modCharts);
+		Boolean modData = molgenisSettings.getBooleanProperty(KEY_MOD_DATA, DEFAULT_VAL_MOD_DATA);
+		model.addAttribute(MODEL_KEY_MOD_DATA, modData);
+		Boolean modAggregates = molgenisSettings.getBooleanProperty(KEY_MOD_AGGREGATES, DEFAULT_VAL_MOD_AGGREGATES);
+		model.addAttribute(MODEL_KEY_MOD_AGGREGATES, modAggregates);
 
 		model.addAttribute(INITLOCATION, molgenisSettings.getProperty(INITLOCATION));
 		model.addAttribute(COORDSYSTEM, molgenisSettings.getProperty(COORDSYSTEM));
