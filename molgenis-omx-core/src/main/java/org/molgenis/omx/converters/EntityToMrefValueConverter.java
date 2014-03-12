@@ -62,6 +62,11 @@ public class EntityToMrefValueConverter implements EntityToValueConverter<MrefVa
 		{
 			for (String identifier : xrefIdentifiersPreTrim)
 			{
+				// Check on doubles
+				if (xrefIdentifiers.contains(identifier))
+				{
+					throw new ValueConverterException("Duplicate identifier '" + identifier + "'");
+				}
 
 				xrefIdentifiers.add(identifier.trim());
 			}
