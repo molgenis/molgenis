@@ -230,6 +230,7 @@
 			});
 			$('#feature-select').html(attributeSelect);
 			$('#feature-select-container').show();
+			$('#aggregate-table-container').empty();
 			if (attributeSelect.val()) {
 				updateAggregatesTable(attributeSelect.val());
 				attributeSelect.chosen();
