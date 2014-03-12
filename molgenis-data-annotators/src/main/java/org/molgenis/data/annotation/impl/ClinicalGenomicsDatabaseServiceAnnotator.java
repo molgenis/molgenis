@@ -27,11 +27,11 @@ import org.springframework.stereotype.Component;
 @Component("CgdService")
 public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 {
-	@Autowired
+	
 	private MolgenisSettings molgenisSettings;
-
-	@Autowired
-	AnnotationService annotatorService;
+	private AnnotationService annotatorService;
+	
+	public static final String CGD_FILE_LOCATION_PROPERTY = "cgd_location";
 
 	public static final String REFERENCES = "REFERENCES";
 	public static final String INTERVENTION_RATIONALE = "INTERVENTION / RATIONALE";
@@ -46,7 +46,12 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 	public static final String GENE = "GENE";
 	private static final String NAME = "Clinical Genomic Database";
 
-	public static final String CGD_FILE_LOCATION_PROPERTY = "cgd_location";
+	public ClinicalGenomicsDatabaseServiceAnnotator(MolgenisSettings molgenisSettings,
+			AnnotationService annotatorService)
+	{
+		this.molgenisSettings = molgenisSettings;
+		this.annotatorService = annotatorService;
+	}
 
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
