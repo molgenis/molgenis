@@ -255,8 +255,8 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Cr
 							// are already validated by the EntityValidator (see above)
 
 							Object invalidValue = entity.get(observableFeature.getIdentifier());
-							String message = String.format("Invalid value '%s' for attribute '%s' of entity '%s'.",
-									invalidValue, observableFeature.getIdentifier(), getName());
+							String message = String.format("Invalid value '%s' for attribute '%s' of entity '%s'. %s.",
+									invalidValue, observableFeature.getIdentifier(), getName(), e.getMessage());
 
 							throw new MolgenisValidationException(Sets.newHashSet(new ConstraintViolation(message,
 									invalidValue, entity, attr, entityMetaData, rownr)));

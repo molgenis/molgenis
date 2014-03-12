@@ -327,9 +327,9 @@ public class EntityImportService
 		String key = attr.getName() + "_" + foreignAttr;
 		Object value = entity.get(key);
 
-		String message = String.format(
-				"Could not resolve attribute '%s' with value '%s' of entity '%s'. This is a reference to entity '%s'.",
-				attr.getName(), value, entityMetaData.getName(), attr.getRefEntity().getName());
+		String message = String
+				.format("Could not resolve attribute '%s' with value '%s' of entity '%s'. This is a reference to entity '%s'.This happens when the key is missing in the referencing entity or when there are duplicate keys.",
+						attr.getName(), value, entityMetaData.getName(), attr.getRefEntity().getName());
 
 		return new ConstraintViolation(message, value, entity, attr, entityMetaData, rownr);
 	}
