@@ -46,6 +46,7 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 	public static final String GENE = "GENE";
 	private static final String NAME = "Clinical Genomic Database";
 
+	@Autowired
 	public ClinicalGenomicsDatabaseServiceAnnotator(MolgenisSettings molgenisSettings,
 			AnnotationService annotatorService)
 	{
