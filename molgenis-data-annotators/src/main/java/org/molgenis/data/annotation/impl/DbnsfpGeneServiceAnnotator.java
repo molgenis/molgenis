@@ -50,47 +50,52 @@ import org.springframework.stereotype.Component;
 @Component("dbnsfpGeneService")
 public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 {
-	@Autowired
 	private MolgenisSettings molgenisSettings;
-
-	@Autowired
-	AnnotationService annotatorService;
+	private AnnotationService annotatorService;
 
 	private static final String NAME = "dbNSFP-Gene";
 	public static final String GENE_FILE_LOCATION_PROPERTY = "dbnsfp_gene_location";
 
-	private static final String GENE_NAME = "Gene_name";
-	private static final String ENSEMBL_GENE = "Ensembl_gene";
-	private static final String CHR = "chr";
-	private static final String GENE_OLD_NAMES = "Gene_old_names";
-	private static final String GENE_OTHER_NAMES = "Gene_other_names";
-	private static final String UNIPROT_ACC = "Uniprot_acc";
-	private static final String UNIPROT_ID = "Uniprot_id";
-	private static final String ENTREZ_GENE_ID = "Entrez_gene_id";
-	private static final String CCDS_ID = "CCDS_id";
-	private static final String REFSEQ_ID = "Refseq_id";
-	private static final String UCSC_ID = "ucsc_id";
-	private static final String MIM_ID = "MIM_id";
-	private static final String GENE_FULL_NAME = "Gene_full_name";
-	private static final String PATHWAY_UNIPROT = "Pathway(Uniprot)";
-	private static final String PATHWAY_CONSENSUSPATHDB = "Pathway(ConsensusPathDB)";
-	private static final String FUNCTION_DESCRIPTION = "Function_description";
-	private static final String DISEASE_DESCRIPTION = "Disease_description";
-	private static final String MIM_PHENOTYPE_ID = "MIM_phenotype_id";
-	private static final String MIM_DISEASE = "MIM_disease";
-	private static final String TRAIT_ASSOCIATION_GWAS = "Trait_association(GWAS)";
-	private static final String GO_SLIM_BIOLOGICAL_PROCESS = "GO_Slim_biological_process";
-	private static final String GO_SLIM_CELLULAR_COMPONENT = "GO_Slim_cellular_component";
-	private static final String GO_SLIM_MOLECULAR_FUNCTION = "GO_Slim_molecular_function";
-	private static final String EXPRESSION_EGENETICS = "Expression(egenetics)";
-	private static final String EXPRESSION_GNF_ATLAS = "Expression(GNF/Atlas)";
-	private static final String INTERACTIONS_INTACT = "Interactions(IntAct)";
-	private static final String INTERACTIONS_BIOGRID = "Interactions(BioGRID)";
-	private static final String INTERACTIONS_CONSENSUSPATHDB = "Interactions(ConsensusPathDB)";
-	private static final String P_HI = "P(HI)";
-	private static final String P_REC = "P(rec)";
-	private static final String KNOWN_REC_INFO = "Known_rec_info";
-	private static final String ESSENTIAL_GENE = "Essential_gene";
+	static final String GENE_NAME = "Gene_name";
+	static final String ENSEMBL_GENE = "Ensembl_gene";
+	static final String CHR = "chr";
+	static final String GENE_OLD_NAMES = "Gene_old_names";
+	static final String GENE_OTHER_NAMES = "Gene_other_names";
+	static final String UNIPROT_ACC = "Uniprot_acc";
+	static final String UNIPROT_ID = "Uniprot_id";
+	static final String ENTREZ_GENE_ID = "Entrez_gene_id";
+	static final String CCDS_ID = "CCDS_id";
+	static final String REFSEQ_ID = "Refseq_id";
+	static final String UCSC_ID = "ucsc_id";
+	static final String MIM_ID = "MIM_id";
+	static final String GENE_FULL_NAME = "Gene_full_name";
+	static final String PATHWAY_UNIPROT = "Pathway(Uniprot)";
+	static final String PATHWAY_CONSENSUSPATHDB = "Pathway(ConsensusPathDB)";
+	static final String FUNCTION_DESCRIPTION = "Function_description";
+	static final String DISEASE_DESCRIPTION = "Disease_description";
+	static final String MIM_PHENOTYPE_ID = "MIM_phenotype_id";
+	static final String MIM_DISEASE = "MIM_disease";
+	static final String TRAIT_ASSOCIATION_GWAS = "Trait_association(GWAS)";
+	static final String GO_SLIM_BIOLOGICAL_PROCESS = "GO_Slim_biological_process";
+	static final String GO_SLIM_CELLULAR_COMPONENT = "GO_Slim_cellular_component";
+	static final String GO_SLIM_MOLECULAR_FUNCTION = "GO_Slim_molecular_function";
+	static final String EXPRESSION_EGENETICS = "Expression(egenetics)";
+	static final String EXPRESSION_GNF_ATLAS = "Expression(GNF/Atlas)";
+	static final String INTERACTIONS_INTACT = "Interactions(IntAct)";
+	static final String INTERACTIONS_BIOGRID = "Interactions(BioGRID)";
+	static final String INTERACTIONS_CONSENSUSPATHDB = "Interactions(ConsensusPathDB)";
+	static final String P_HI = "P(HI)";
+	static final String P_REC = "P(rec)";
+	static final String KNOWN_REC_INFO = "Known_rec_info";
+	static final String ESSENTIAL_GENE = "Essential_gene";
+
+	
+	@Autowired
+	public DbnsfpGeneServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService)
+	{
+		this.molgenisSettings = molgenisSettings;
+		this.annotatorService = annotatorService;
+	}
 
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
