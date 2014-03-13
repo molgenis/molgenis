@@ -230,9 +230,6 @@
 							
 							$.each(protocols.items, function(i, protocol) {
 								var subTree = subTrees[parseInt(restApi.getPrimaryKeyFromHref(protocol.href))];
-								console.log(protocol);
-								console.log(protocol.Features);
-								console.log(protocol.Features.items);
 								$.each(protocol.Features.items, function(i, feature) {
 									if(!subTree['F' + restApi.getPrimaryKeyFromHref(feature.href)])
 										subTree['F' + restApi.getPrimaryKeyFromHref(feature.href)] = null;
