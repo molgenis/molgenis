@@ -39,15 +39,8 @@ import org.springframework.stereotype.Component;
 @Component("caddService")
 public class CaddServiceAnnotator extends VariantAnnotator
 {
-
-	@Autowired
 	private MolgenisSettings molgenisSettings;
-
-	@Autowired
-	DataService dataService;
-
-	@Autowired
-	AnnotationService annotatorService;
+	private AnnotationService annotatorService;
 
 	// the cadd service returns these two values
 	static final String CADD_SCALED = "CADD_SCALED";
@@ -57,6 +50,13 @@ public class CaddServiceAnnotator extends VariantAnnotator
 
 	public static final String TABIX_LOCATION_PROPERTY = "tabix_location";
 	public static final String CADD_FILE_LOCATION_PROPERTY = "cadd_location";
+
+	@Autowired
+	public CaddServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService)
+	{
+		this.molgenisSettings = molgenisSettings;
+		this.annotatorService = annotatorService;
+	}
 
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
@@ -78,13 +78,11 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	}
 
 	@Override
-	public List<Entity> annotateEntity(Entity entity)
+	public List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException
 	{
 		List<Entity> results = new ArrayList<Entity>();
 		String caddFile = molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY);
 		String tabix = molgenisSettings.getProperty(TABIX_LOCATION_PROPERTY);
-
-		BufferedReader bufferedReader = null;
 
 		String chromosome = entity.getString(CHROMOSOME);
 		Long position = entity.getLong(POSITION);
@@ -94,18 +92,18 @@ public class CaddServiceAnnotator extends VariantAnnotator
 		String caddAbs = "";
 		String caddScaled = "";
 
+		Runtime runTime = Runtime.getRuntime();
+		Process process = runTime.exec(tabix + " " + caddFile + " " + chromosome + ":" + position + "-" + position);
+
+		process.waitFor();
+
+		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+		String line = "";
+		String[] split = null;
+
 		try
 		{
-			Runtime runTime = Runtime.getRuntime();
-			Process process = runTime.exec(tabix + " " + caddFile + " " + chromosome + ":" + position + "-" + position);
-
-			process.waitFor();
-
-			bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-
-			String line = "";
-			String[] split = null;
-
 			while ((line = bufferedReader.readLine()) != null)
 			{
 				if (!line.equals(null))
@@ -136,20 +134,9 @@ public class CaddServiceAnnotator extends VariantAnnotator
 		{
 			throw new RuntimeException(e);
 		}
-		catch (InterruptedException e)
-		{
-			throw new RuntimeException(e);
-		}
 		finally
 		{
-			try
-			{
-				bufferedReader.close();
-			}
-			catch (IOException e)
-			{
-				throw new RuntimeException(e);
-			}
+			bufferedReader.close();
 		}
 
 		return results;
