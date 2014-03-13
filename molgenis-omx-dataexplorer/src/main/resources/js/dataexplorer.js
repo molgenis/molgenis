@@ -75,16 +75,16 @@
 	/**
 	 * @memberOf molgenis.dataexplorer
 	 */
-	function createAttributeFiltersList(attributeFilters) {
+	function createFiltersList(attributeFilters) {
 		var items = [];
 		$.each(attributeFilters, function(attributeUri, attributeFilter) {
 			var attribute = attributeFilter.attribute;
 			var joinChars = attributeFilter.operator ? ' ' + attributeFilter.operator + ' ' : ',';
-			
+			var attributeLabel = attribute.label || attribute.name;
 			items.push('<p><a class="feature-filter-edit" data-href="' + attributeUri + '" href="#">'
-					+ attribute.name + ' (' + attributeFilter.values.join(joinChars)
+					+ attributeLabel + ' (' + attributeFilter.values.join(joinChars)
 					+ ')</a><a class="feature-filter-remove" data-href="' + attributeUri + '" href="#" title="Remove '
-					+ attribute.name + ' filter" ><i class="ui-icon ui-icon-closethick"></i></a></p>');
+					+ attributeLabel + ' filter" ><i class="ui-icon ui-icon-closethick"></i></a></p>');
 		});
 		items.push('</div>');
 		$('#feature-filters').html(items.join(''));
@@ -189,55 +189,6 @@
 		});
 
 		return dataRequest;
-	}
-
-	/**
-	 * @memberOf molgenis.dataexplorer
-	 */
-	function createAggregatesTable() {
-		function updateAggregatesTable(attributeUri) {
-			$.ajax({
-				type : 'POST',
-				url : molgenis.getContextUrl() + '/aggregate',
-				data : JSON.stringify({'attributeUri': attributeUri, 'q': createEntityQuery().q}),
-				contentType : 'application/json',
-				success : function(aggregateResult) {
-					var table = $('<table />').addClass('table table-striped');
-					table.append('<tr><th>Category name</th><th>Count</th></tr>');
-					$.each(aggregateResult.hashCategories, function(categoryName, count) {
-						table.append('<tr><td>' + categoryName + '</td><td>' + count + '</td></tr>');
-					});
-					$('#aggregate-table-container').html(table);
-				},
-				error : function(xhr) {
-					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
-				}
-			});
-		}
-
-		var attributes = molgenis.getAtomicAttributes(getSelectedAttributes(), restApi);
-		var aggregableAttributes = $.grep(attributes, function(attribute) {
-			return attribute.fieldType === 'BOOL' || attribute.fieldType === 'CATEGORICAL';
-		});
-
-		if (aggregableAttributes.length > 0) {
-			var attributeSelect = $('<select id="selectFeature"/>');
-			$.each(aggregableAttributes, function() {
-				attributeSelect.append('<option value="' + this.href + '">' + this.label + '</option>');
-			});
-			$('#feature-select').html(attributeSelect);
-			$('#feature-select-container').show();
-			if (attributeSelect.val()) {
-				updateAggregatesTable(attributeSelect.val());
-				attributeSelect.chosen();
-				attributeSelect.change(function() {
-					updateAggregatesTable($(this).val());
-				});
-			}
-		} else {
-			$('#feature-select-container').hide();
-			$('#aggregate-table-container').html('<p>No aggregable items</p>');
-		}
 	}
 
 	/**
@@ -467,7 +418,7 @@
 					updateGenomeBrowser();
 					break;
 				case 'tab-aggregates':
-					createAggregatesTable();
+					molgenis.dataexplorer.aggregates.createAggregatesTable();
 					break;
 				case 'tab-charts':
 					break;
@@ -478,7 +429,7 @@
 			$.each(data.filters, function() {
 				attributeFilters[this.attribute.href] = this;
 			});
-			createAttributeFiltersList(attributeFilters);
+			createFiltersList(attributeFilters);
 			switch($("#tabs li.active").attr('id')) {
 				case 'tab-data':
 					createDataTable();
@@ -490,7 +441,7 @@
 					});
 					break;
 				case 'tab-aggregates':
-					createAggregatesTable();
+					molgenis.dataexplorer.aggregates.createAggregatesTable();
 					break;
 				case 'tab-charts':
 					break;
@@ -499,7 +450,7 @@
 		
 		$(document).on('removeAttributeFilter', function(e, data) {
 			delete attributeFilters[data.attributeUri];
-			createAttributeFiltersList(attributeFilters);
+			createFiltersList(attributeFilters);
 			
 			switch($("#tabs li.active").attr('id')) {
 				case 'tab-data':
@@ -507,7 +458,7 @@
 					// TODO what to do for genomebrowser?
 					break;
 				case 'tab-aggregates':
-					createAggregatesTable();
+					molgenis.dataexplorer.aggregates.createAggregatesTable();
 					break;
 				case 'tab-charts':
 					break;
@@ -525,7 +476,7 @@
 						createDataTable();
 					break;
 				case 'tab-aggregates':
-					createAggregatesTable();
+					molgenis.dataexplorer.aggregates.createAggregatesTable();
 					break;
 				case 'tab-charts':
 					break;
@@ -548,7 +499,7 @@
 			createDataTable();
 		});
 		$('a[data-toggle="tab"][href="#dataset-aggregate-container"]').on('show', function(e) {
-			createAggregatesTable();
+			molgenis.dataexplorer.aggregates.createAggregatesTable();
 		});
 
 		$("#observationset-search").focus();
@@ -580,6 +531,9 @@
 			setDallianceFilter();
 		});
 		
+
+		// select first tab
+		$('#tabs a[data-toggle="tab"]').first().click();
 		
 		// fire event handler
 		$('#dataset-select').change();
