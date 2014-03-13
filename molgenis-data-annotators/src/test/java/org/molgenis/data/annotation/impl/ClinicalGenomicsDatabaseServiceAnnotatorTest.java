@@ -39,14 +39,6 @@ public class ClinicalGenomicsDatabaseServiceAnnotatorTest
 	private Entity entity;
 	private ArrayList<Entity> input;
 
-	// input: 1 66067385
-	// output: LEPR 3953 Leptin receptor deficiency AR Pediatric Allergy/Immunology/Infectious; Endocrine
-	// Allergy/Immunology/Infectious; Endocrine Standard treatments for obesity, such as gastric surgery, have been
-	// described as beneficial In addition to endocrine manifestations, individuals may be susceptible to infections
-	// (eg, respiratory infections), which, coupled with other manifestations (eg, severe obesity) can have severe
-	// sequelae such that prophylaxis and rapid treatment may be beneficial 8666155; 9537324; 17229951; 21306929;
-	// 23275530; 23616257
-
 	@BeforeMethod
 	public void beforeMethod() throws IOException
 	{
