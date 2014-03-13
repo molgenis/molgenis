@@ -22,6 +22,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Query;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.entityexplorer.controller.EntityExplorerController;
@@ -66,12 +67,15 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String ID = "dataexplorer";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
-	private static final String KEY_APP_HREF_CSS = "app.href.css";
-
-	// Including excluding the charts module
-	public static final boolean INCLUDE_CHARTS_MODULE = true;
-	public static final String KEY_APP_INCLUDE_CHARTS = "app.dataexplorer.include.charts";
-	private static final String MODEL_APP_INCLUDE_CHARTS = "app_dataexplorer_include_charts";
+	public static final String KEY_MOD_AGGREGATES = "plugin.dataexplorer.mod.aggregates";
+	public static final String KEY_MOD_CHARTS = "plugin.dataexplorer.mod.charts";
+	public static final String KEY_MOD_DATA = "plugin.dataexplorer.mod.data";
+	private static final String MODEL_KEY_MOD_AGGREGATES = "mod_aggregates";
+	private static final String MODEL_KEY_MOD_CHARTS = "mod_charts";
+	private static final String MODEL_KEY_MOD_DATA = "mod_data";
+	private static final boolean DEFAULT_VAL_MOD_AGGREGATES = true;
+	private static final boolean DEFAULT_VAL_MOD_CHARTS = true;
+	private static final boolean DEFAULT_VAL_MOD_DATA = true;
 
 	public static final String INITLOCATION = "initLocation";
 	public static final String COORDSYSTEM = "coordSystem";
@@ -142,12 +146,13 @@ public class DataExplorerController extends MolgenisPluginController
 		// Init genome browser
 		model.addAttribute("genomeBrowserSets", getGenomeBrowserSetsToModel());
 
-		String appHrefCss = molgenisSettings.getProperty(KEY_APP_HREF_CSS);
-		if (appHrefCss != null) model.addAttribute(KEY_APP_HREF_CSS.replaceAll("\\.", "_"), appHrefCss);
-
-		// including/excluding charts
-		Boolean appIncludeCharts = molgenisSettings.getBooleanProperty(KEY_APP_INCLUDE_CHARTS, INCLUDE_CHARTS_MODULE);
-		model.addAttribute(MODEL_APP_INCLUDE_CHARTS, appIncludeCharts);
+		// define which modules to display
+		Boolean modCharts = molgenisSettings.getBooleanProperty(KEY_MOD_CHARTS, DEFAULT_VAL_MOD_CHARTS);
+		model.addAttribute(MODEL_KEY_MOD_CHARTS, modCharts);
+		Boolean modData = molgenisSettings.getBooleanProperty(KEY_MOD_DATA, DEFAULT_VAL_MOD_DATA);
+		model.addAttribute(MODEL_KEY_MOD_DATA, modData);
+		Boolean modAggregates = molgenisSettings.getBooleanProperty(KEY_MOD_AGGREGATES, DEFAULT_VAL_MOD_AGGREGATES);
+		model.addAttribute(MODEL_KEY_MOD_AGGREGATES, modAggregates);
 
 		model.addAttribute(INITLOCATION, molgenisSettings.getProperty(INITLOCATION));
 		model.addAttribute(COORDSYSTEM, molgenisSettings.getProperty(COORDSYSTEM));
@@ -227,10 +232,8 @@ public class DataExplorerController extends MolgenisPluginController
 	@ResponseBody
 	public AggregateResponse aggregate(@Valid @RequestBody AggregateRequest request)
 	{
-		// TODO create utility class to extract info from entity/attribute uris
-		String[] attributeUriTokens = request.getAttributeUri().split("/");
-		String entityName = attributeUriTokens[3];
-		String attributeName = attributeUriTokens[5];
+		String entityName = request.getEntityName();
+		String attributeName = request.getXAxisAttributeName();
 		QueryImpl q = request.getQ() != null ? new QueryImpl(request.getQ()) : new QueryImpl();
 
 		EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
@@ -241,34 +244,29 @@ public class DataExplorerController extends MolgenisPluginController
 			throw new RuntimeException("Unsupported data type " + dataType);
 		}
 
-		EntityMetaData refEntityMeta = null;
-		String refAttributeName = null;
-		if (dataType == FieldTypeEnum.CATEGORICAL)
+		Map<String, Long> aggregateMap = new HashMap<String, Long>();
+		if (dataType == FieldTypeEnum.BOOL)
 		{
-			refEntityMeta = attributeMeta.getRefEntity();
-			refAttributeName = refEntityMeta.getLabelAttribute().getName();
+			Query trueQ = new QueryImpl(q).and().eq(attributeName, true);
+			long trueCount = dataService.count(entityName, trueQ);
+			aggregateMap.put("true", trueCount);
+			Query falseQ = new QueryImpl(q).and().eq(attributeName, false);
+			long falseCount = dataService.count(entityName, falseQ);
+			aggregateMap.put("false", falseCount);
 		}
-		Map<String, Integer> aggregateMap = new HashMap<String, Integer>();
-		for (Entity entity : dataService.findAll(entityName, q))
+		else if (dataType == FieldTypeEnum.CATEGORICAL || dataType == FieldTypeEnum.XREF)
 		{
-			String val;
-			switch (dataType)
+
+			EntityMetaData refEntityMeta = attributeMeta.getRefEntity();
+			String refEntityName = refEntityMeta.getName();
+			String refEntityLblAttr = refEntityMeta.getLabelAttribute().getName();
+
+			for (Entity refEntity : dataService.findAll(refEntityName))
 			{
-				case BOOL:
-					val = entity.getString(attributeName);
-					break;
-				case CATEGORICAL:
-					Entity refEntity = (Entity) entity.get(attributeName);
-					val = refEntity.getString(refAttributeName);
-					break;
-				default:
-					throw new RuntimeException("Unsupported data type " + dataType);
-
+				Query refQ = new QueryImpl(q).and().eq(attributeName, refEntity);
+				long refEntityCount = dataService.count(entityName, refQ);
+				aggregateMap.put(refEntity.getString(refEntityLblAttr), refEntityCount);
 			}
-
-			Integer count = aggregateMap.get(val);
-			if (count == null) aggregateMap.put(val, 1);
-			else aggregateMap.put(val, count + 1);
 		}
 		return new AggregateResponse(aggregateMap);
 	}

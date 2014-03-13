@@ -9,18 +9,42 @@ import org.molgenis.data.QueryRule;
 public class AggregateRequest
 {
 	@NotNull
-	private String attributeUri;
+	private String entityName;
+
+	private String xAxisAttributeName;
+
+	private String yAxisAttributeName;
 
 	private List<QueryRule> q;
 
-	public String getAttributeUri()
+	public String getEntityName()
 	{
-		return attributeUri;
+		return entityName;
 	}
 
-	public void setAttributeUri(String attributeUri)
+	public void setEntityName(String entityName)
 	{
-		this.attributeUri = attributeUri;
+		this.entityName = entityName;
+	}
+
+	public String getXAxisAttributeName()
+	{
+		return xAxisAttributeName;
+	}
+
+	public void setXAxisAttributeName(String xAxisAttributeName)
+	{
+		this.xAxisAttributeName = xAxisAttributeName;
+	}
+
+	public String getYAxisAttributeName()
+	{
+		return yAxisAttributeName;
+	}
+
+	public void setYAxisAttributeName(String yAxisAttributeName)
+	{
+		this.yAxisAttributeName = yAxisAttributeName;
 	}
 
 	public List<QueryRule> getQ()
