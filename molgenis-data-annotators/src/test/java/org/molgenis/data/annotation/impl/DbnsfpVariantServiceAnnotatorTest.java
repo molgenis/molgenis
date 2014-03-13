@@ -4,6 +4,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -16,6 +20,9 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.framework.server.MolgenisSettings;
+import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StringUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -33,15 +40,15 @@ public class DbnsfpVariantServiceAnnotatorTest
 	private AttributeMetaData attributeMetaDataCantAnnotatePos;
 	private AttributeMetaData attributeMetaDataCantAnnotateRef;
 	private AttributeMetaData attributeMetaDataCantAnnotateAlt;
-	private String annotatorOutput;
 	private Entity entity;
 	private ArrayList<Entity> input;
 
 	@BeforeMethod
-	public void beforeMethod()
+	public void beforeMethod() throws IOException
 	{
-
-		annotator = new DbnsfpVariantServiceAnnotator();
+		MolgenisSettings settings = mock(MolgenisSettings.class);
+		when(settings.getProperty(DbnsfpVariantServiceAnnotator.CHROMOSOME_FILE_LOCATION_PROPERTY)).thenReturn(
+				loadTestFile("dbNSFP_variant_example_chrY.txt"));
 
 		metaDataCanAnnotate = mock(EntityMetaData.class);
 
@@ -118,7 +125,7 @@ public class DbnsfpVariantServiceAnnotatorTest
 		input = new ArrayList<Entity>();
 		input.add(entity);
 
-		annotatorOutput = "Q	H	2715049	SRY	.	.	.	.	-	CAG";
+		annotator = new DbnsfpVariantServiceAnnotator(settings, null);
 	}
 
 	@Test
@@ -126,17 +133,17 @@ public class DbnsfpVariantServiceAnnotatorTest
 	{
 		List<Entity> expectedList = new ArrayList<Entity>();
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
-		
-		resultMap.put(annotator.FEATURES[4], "Q");
-		resultMap.put(annotator.FEATURES[5], "H");
-		resultMap.put(annotator.FEATURES[6], "2715049");
-		resultMap.put(annotator.FEATURES[7], "SRY");
-		resultMap.put(annotator.FEATURES[8], ".");
-		resultMap.put(annotator.FEATURES[9], ".");
-		resultMap.put(annotator.FEATURES[10], ".");
-		resultMap.put(annotator.FEATURES[11], ".");
-		resultMap.put(annotator.FEATURES[12], "-");
-		resultMap.put(annotator.FEATURES[13], "CAG");
+
+		resultMap.put(DbnsfpVariantServiceAnnotator.AAREF, "Q");
+		resultMap.put(DbnsfpVariantServiceAnnotator.AAALT, "H");
+		resultMap.put(DbnsfpVariantServiceAnnotator.HG18_POS_1_COOR, "2715049");
+		resultMap.put(DbnsfpVariantServiceAnnotator.GENENAME, "SRY");
+		resultMap.put(DbnsfpVariantServiceAnnotator.UNIPROT_ACC, ".");
+		resultMap.put(DbnsfpVariantServiceAnnotator.UNIPROT_ID, ".");
+		resultMap.put(DbnsfpVariantServiceAnnotator.UNIPROT_AAPOS, ".");
+		resultMap.put(DbnsfpVariantServiceAnnotator.INTERPRO_DOMAIN, ".");
+		resultMap.put(DbnsfpVariantServiceAnnotator.CDS_STRAND, "-");
+		resultMap.put(DbnsfpVariantServiceAnnotator.REFCODON, "CAG");
 
 		Entity expectedEntity = new MapEntity(resultMap);
 
@@ -146,11 +153,26 @@ public class DbnsfpVariantServiceAnnotatorTest
 
 		Entity resultEntity = results.next();
 
-		for (int i = 4; i < 14; i++)
-		{
-			assertEquals(resultEntity.get(annotator.FEATURES[i]),
-					expectedEntity.get(annotator.FEATURES[i]));
-		}
+		assertEquals(resultEntity.get(DbnsfpVariantServiceAnnotator.AAREF),
+				expectedEntity.get(DbnsfpVariantServiceAnnotator.AAREF));
+		assertEquals(resultEntity.get(DbnsfpVariantServiceAnnotator.AAALT),
+				expectedEntity.get(DbnsfpVariantServiceAnnotator.AAALT));
+		assertEquals(resultEntity.get(DbnsfpVariantServiceAnnotator.HG18_POS_1_COOR),
+				expectedEntity.get(DbnsfpVariantServiceAnnotator.HG18_POS_1_COOR));
+		assertEquals(resultEntity.get(DbnsfpVariantServiceAnnotator.GENENAME),
+				expectedEntity.get(DbnsfpVariantServiceAnnotator.GENENAME));
+		assertEquals(resultEntity.get(DbnsfpVariantServiceAnnotator.UNIPROT_ACC),
+				expectedEntity.get(DbnsfpVariantServiceAnnotator.UNIPROT_ACC));
+		assertEquals(resultEntity.get(DbnsfpVariantServiceAnnotator.UNIPROT_ID),
+				expectedEntity.get(DbnsfpVariantServiceAnnotator.UNIPROT_ID));
+		assertEquals(resultEntity.get(DbnsfpVariantServiceAnnotator.UNIPROT_AAPOS),
+				expectedEntity.get(DbnsfpVariantServiceAnnotator.UNIPROT_AAPOS));
+		assertEquals(resultEntity.get(DbnsfpVariantServiceAnnotator.INTERPRO_DOMAIN),
+				expectedEntity.get(DbnsfpVariantServiceAnnotator.INTERPRO_DOMAIN));
+		assertEquals(resultEntity.get(DbnsfpVariantServiceAnnotator.CDS_STRAND),
+				expectedEntity.get(DbnsfpVariantServiceAnnotator.CDS_STRAND));
+		assertEquals(resultEntity.get(DbnsfpVariantServiceAnnotator.REFCODON),
+				expectedEntity.get(DbnsfpVariantServiceAnnotator.REFCODON));
 	}
 
 	@Test
@@ -163,5 +185,14 @@ public class DbnsfpVariantServiceAnnotatorTest
 	public void canAnnotateFalseTest()
 	{
 		assertEquals(annotator.canAnnotate(metaDataCantAnnotate), false);
+	}
+
+	private String loadTestFile(String name) throws IOException
+	{
+		InputStream in = getClass().getResourceAsStream("/" + name);
+		File f = File.createTempFile(name, "");
+		FileCopyUtils.copy(in, new FileOutputStream(f.getName()));
+
+		return f.getAbsolutePath();
 	}
 }
