@@ -15,8 +15,8 @@ import org.molgenis.omx.auth.MolgenisGroupMember;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.controller.HomeController;
 import org.molgenis.omx.core.RuntimeProperty;
-import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.account.AccountService;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -134,8 +134,9 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 				"new DASSource('http://www.derkholm.net:8080/das/hsa_59_37d/')");
 
 		// Charts include/exclude charts
-		runtimePropertyMap.put(DataExplorerController.KEY_APP_INCLUDE_CHARTS,
-				DataExplorerController.INCLUDE_CHARTS_MODULE + "");
+		runtimePropertyMap.put(DataExplorerController.KEY_MOD_AGGREGATES, String.valueOf(true));
+		runtimePropertyMap.put(DataExplorerController.KEY_MOD_CHARTS, String.valueOf(true));
+		runtimePropertyMap.put(DataExplorerController.KEY_MOD_DATA, String.valueOf(true));
 
 		for (Entry<String, String> entry : runtimePropertyMap.entrySet())
 		{
