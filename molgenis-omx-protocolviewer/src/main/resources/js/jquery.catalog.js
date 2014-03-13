@@ -28,8 +28,8 @@
 						node.children = [];
 						
 						var features = {};
-						if(protocol.features.items) {
-							$.each(protocol.features.items, function() {
+						if(protocol.Features.items) {
+							$.each(protocol.Features.items, function() {
 								features[parseInt(restApi.getPrimaryKeyFromHref(this.href))] = this;
 							});
 						}
@@ -230,7 +230,10 @@
 							
 							$.each(protocols.items, function(i, protocol) {
 								var subTree = subTrees[parseInt(restApi.getPrimaryKeyFromHref(protocol.href))];
-								$.each(protocol.features.items, function(i, feature) {
+								console.log(protocol);
+								console.log(protocol.Features);
+								console.log(protocol.Features.items);
+								$.each(protocol.Features.items, function(i, feature) {
 									if(!subTree['F' + restApi.getPrimaryKeyFromHref(feature.href)])
 										subTree['F' + restApi.getPrimaryKeyFromHref(feature.href)] = null;
 								});
