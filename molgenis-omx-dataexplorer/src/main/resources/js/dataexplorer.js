@@ -80,11 +80,11 @@
 		$.each(attributeFilters, function(attributeUri, attributeFilter) {
 			var attribute = attributeFilter.attribute;
 			var joinChars = attributeFilter.operator ? ' ' + attributeFilter.operator + ' ' : ',';
-			
+			var attributeLabel = attribute.label || attribute.name;
 			items.push('<p><a class="feature-filter-edit" data-href="' + attributeUri + '" href="#">'
-					+ attribute.name + ' (' + attributeFilter.values.join(joinChars)
+					+ attributeLabel + ' (' + attributeFilter.values.join(joinChars)
 					+ ')</a><a class="feature-filter-remove" data-href="' + attributeUri + '" href="#" title="Remove '
-					+ attribute.name + ' filter" ><i class="ui-icon ui-icon-closethick"></i></a></p>');
+					+ attributeLabel + ' filter" ><i class="ui-icon ui-icon-closethick"></i></a></p>');
 		});
 		items.push('</div>');
 		$('#feature-filters').html(items.join(''));
