@@ -239,7 +239,7 @@ public class DataExplorerController extends MolgenisPluginController
 		EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
 		AttributeMetaData attributeMeta = entityMeta.getAttribute(attributeName);
 		FieldTypeEnum dataType = attributeMeta.getDataType().getEnumType();
-		if (dataType != FieldTypeEnum.BOOL && dataType != FieldTypeEnum.CATEGORICAL)
+		if (dataType != FieldTypeEnum.BOOL && dataType != FieldTypeEnum.CATEGORICAL && dataType != FieldTypeEnum.XREF)
 		{
 			throw new RuntimeException("Unsupported data type " + dataType);
 		}
