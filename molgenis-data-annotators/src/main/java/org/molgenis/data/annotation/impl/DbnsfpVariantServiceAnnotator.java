@@ -145,11 +145,10 @@ public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 	}
 
 	@Override
-	public List<Entity> annotateEntity(Entity entity)
+	public List<Entity> annotateEntity(Entity entity) throws IOException
 	{
 		List<Entity> results = new ArrayList<Entity>();
 		Map<String, List<String[]>> chromosomeMap = new HashMap<String, List<String[]>>();
-		BufferedReader bufferedReader = null;
 
 		List<String[]> listOfTriplets = new ArrayList<String[]>();
 
@@ -175,93 +174,81 @@ public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 			chromosomeMap.put(chromosome, listOfTriplets);
 		}
 
-		try
+	
+
+		for (String chromosomeInMap : chromosomeMap.keySet())	
 		{
-			for (String chromosomeInMap : chromosomeMap.keySet())
+			FileReader reader = new FileReader(new File(molgenisSettings.getProperty(CHROMOSOME_FILE_LOCATION_PROPERTY) + chromosomeInMap));
+			BufferedReader bufferedReader = new BufferedReader(reader);
+			
+			try
 			{
-					File file = new File(molgenisSettings.getProperty(CHROMOSOME_FILE_LOCATION_PROPERTY) + chromosomeInMap);
-					FileReader reader = new FileReader(file);
-					bufferedReader = new BufferedReader(reader);
+				List<String[]> charArraysForThisChromosome = chromosomeMap.get(chromosomeInMap);
 
-					List<String[]> charArraysForThisChromosome = chromosomeMap.get(chromosomeInMap);
+				String line = "";
 
-					String line = "";
-					System.out.println(bufferedReader.readLine());
-					fileReader: while (bufferedReader.ready())
+				fileReader: while (bufferedReader.ready())
+				{
+					line = bufferedReader.readLine();
+					if (line.startsWith("#"))
 					{
-						line = bufferedReader.readLine();
-						if (line.startsWith("#"))
+						continue fileReader;
+					}
+
+					String[] lineSplit = line.split("\t");
+
+					charArrayReader: for (int i = 0; i < charArraysForThisChromosome.size(); i++)
+					{
+						Long position = Long.parseLong(charArraysForThisChromosome.get(i)[0]);
+
+						if (lineSplit[1].equals(position.toString()))
 						{
-							continue fileReader;
-						}
+							String reference = charArraysForThisChromosome.get(i)[1];
+							String alternative = charArraysForThisChromosome.get(i)[2];
 
-						String[] lineSplit = line.split("\t");
-
-						charArrayReader: for (int i = 0; i < charArraysForThisChromosome.size(); i++)
-						{
-							Long position = Long.parseLong(charArraysForThisChromosome.get(i)[0]);
-
-							if (lineSplit[1].equals(position.toString()))
+							if (lineSplit[2].toUpperCase().equals(reference.toUpperCase())
+									&& lineSplit[3].toUpperCase().equals(alternative.toUpperCase()))
 							{
-								String reference = charArraysForThisChromosome.get(i)[1];
-								String alternative = charArraysForThisChromosome.get(i)[2];
+								int lineSplitIndex = 0;
 
-								if (lineSplit[2].toUpperCase().equals(reference.toUpperCase())
-										&& lineSplit[3].toUpperCase().equals(alternative.toUpperCase()))
+								HashMap<String, Object> resultMap = new HashMap<String, Object>();
+								Iterable<AttributeMetaData> featureList = getOutputMetaData().getAtomicAttributes();
+
+								for (AttributeMetaData feature : featureList)
 								{
-									int lineSplitIndex = 0;
-
-									HashMap<String, Object> resultMap = new HashMap<String, Object>();
-									Iterable<AttributeMetaData> featureList = getOutputMetaData().getAtomicAttributes();
-
-									for (AttributeMetaData feature : featureList)
+									if (feature != null)
 									{
-										if (feature != null)
-										{
-											resultMap.put(feature.getName(), lineSplit[lineSplitIndex]);
-											lineSplitIndex = lineSplitIndex + 1;
-										}
+										resultMap.put(feature.getName(), lineSplit[lineSplitIndex]);
+										lineSplitIndex = lineSplitIndex + 1;
 									}
-
-									resultMap.put(CHROMOSOME, chromosomeInMap);
-									resultMap.put(POSITION, position);
-									resultMap.put(REFERENCE, reference);
-									resultMap.put(ALTERNATIVE, alternative);
-
-									results.add(new MapEntity(resultMap));
 								}
-								else
-								{
-									continue charArrayReader;
-								}
+
+								resultMap.put(CHROMOSOME, chromosomeInMap);
+								resultMap.put(POSITION, position);
+								resultMap.put(REFERENCE, reference);
+								resultMap.put(ALTERNATIVE, alternative);
+
+								results.add(new MapEntity(resultMap));
 							}
 							else
 							{
 								continue charArrayReader;
 							}
 						}
+						else
+						{
+							continue charArrayReader;
+						}
 					}
+				}
 			}
-		}
-
-		catch (FileNotFoundException e)
-		{
-			throw new RuntimeException(e);
-		}
-
-		catch (IOException e)
-		{
-			throw new RuntimeException(e);
-		}
-		finally
-		{
-			try
-			{
-				bufferedReader.close();
-			}
-			catch (IOException e)
+			catch (FileNotFoundException e)
 			{
 				throw new RuntimeException(e);
+			}
+			finally
+			{
+				bufferedReader.close();
 			}
 		}
 
