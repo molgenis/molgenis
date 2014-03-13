@@ -67,8 +67,6 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String ID = "dataexplorer";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
-	private static final String KEY_APP_HREF_CSS = "app.href.css";
-
 	public static final String KEY_MOD_AGGREGATES = "plugin.dataexplorer.mod.aggregates";
 	public static final String KEY_MOD_CHARTS = "plugin.dataexplorer.mod.charts";
 	public static final String KEY_MOD_DATA = "plugin.dataexplorer.mod.data";
@@ -234,10 +232,8 @@ public class DataExplorerController extends MolgenisPluginController
 	@ResponseBody
 	public AggregateResponse aggregate(@Valid @RequestBody AggregateRequest request)
 	{
-		// TODO create utility class to extract info from entity/attribute uris
-		String[] attributeUriTokens = request.getAttributeUri().split("/");
-		String entityName = attributeUriTokens[3];
-		String attributeName = attributeUriTokens[5];
+		String entityName = request.getEntityName();
+		String attributeName = request.getXAxisAttributeName();
 		QueryImpl q = request.getQ() != null ? new QueryImpl(request.getQ()) : new QueryImpl();
 
 		EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
