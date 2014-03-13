@@ -48,7 +48,7 @@ public class DbnsfpVariantServiceAnnotatorTest
 	{
 		MolgenisSettings settings = mock(MolgenisSettings.class);
 		when(settings.getProperty(DbnsfpVariantServiceAnnotator.CHROMOSOME_FILE_LOCATION_PROPERTY)).thenReturn(
-				loadTestFile("dbNSFP_variant_example_chrY.txt"));
+				getClass().getResource("/dbNSFP_variant_example_chr").getFile());
 
 		metaDataCanAnnotate = mock(EntityMetaData.class);
 
@@ -185,14 +185,5 @@ public class DbnsfpVariantServiceAnnotatorTest
 	public void canAnnotateFalseTest()
 	{
 		assertEquals(annotator.canAnnotate(metaDataCantAnnotate), false);
-	}
-
-	private String loadTestFile(String name) throws IOException
-	{
-		InputStream in = getClass().getResourceAsStream("/" + name);
-		File f = File.createTempFile(name, "");
-		FileCopyUtils.copy(in, new FileOutputStream(f.getName()));
-
-		return f.getAbsolutePath();
 	}
 }
