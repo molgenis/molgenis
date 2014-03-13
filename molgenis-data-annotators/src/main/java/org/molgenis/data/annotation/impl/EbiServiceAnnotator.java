@@ -10,11 +10,11 @@ import java.util.Collections;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AbstractRepositoryAnnotator;
@@ -22,7 +22,6 @@ import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -53,6 +52,7 @@ public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements 
 	// EBI service is dependant on this ID when the web service is called
 	// If Uniprot ID is not in a data set, the web service cannot be used
 	public static final String UNIPROT_ID = "uniprot_id";
+
 	public static final String NAME = "EBI-CHeMBL";
 	private final DefaultHttpClient httpClient;
     private List<Object> annotatedInput = new ArrayList<Object>();
@@ -75,7 +75,17 @@ public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements 
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(UNIPROT_ID, FieldTypeEnum.STRING));
 		return metadata;
 	}
-
+	
+	@Override
+	public boolean annotationDataExists()
+	{
+		boolean dataExists = true;
+		
+		// TODO Check if the webservice is up
+		
+		return dataExists;
+	}
+	
 	@Override
 	public List<Entity> annotateEntity(Entity entity)
 	{
@@ -157,4 +167,5 @@ public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements 
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData("preferredName", FieldTypeEnum.STRING));
 		return metadata;
 	}
+
 }

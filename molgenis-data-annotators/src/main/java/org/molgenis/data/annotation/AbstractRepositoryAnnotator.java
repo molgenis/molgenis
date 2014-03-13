@@ -3,6 +3,7 @@ package org.molgenis.data.annotation;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.annotation.impl.CaddServiceAnnotator;
 import org.molgenis.data.support.MapEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
@@ -31,26 +32,39 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 	@Override
 	public boolean canAnnotate(EntityMetaData repoMetaData)
 	{
-		boolean canAnnotate = true;
 		Iterable<AttributeMetaData> annotatorAttributes = getInputMetaData().getAttributes();
 		for (AttributeMetaData annotatorAttribute : annotatorAttributes)
 		{
 			// one of the needed attributes not present? we can not annotate
 			if (repoMetaData.getAttribute(annotatorAttribute.getName()) == null)
 			{
-				canAnnotate = false;
-				break;
+				return false;
 			}
+
 			// one of the needed attributes not of the correct type? we can not annotate
 			if (!repoMetaData.getAttribute(annotatorAttribute.getName()).getDataType()
 					.equals(annotatorAttribute.getDataType()))
 			{
-				canAnnotate = false;
-				break;
+				return false;
+			}
+
+			// Are the runtime property files not available, or is a webservice is down? we can not annotate
+			if (!annotationDataExists())
+			{
+				return false;
 			}
 		}
-		return canAnnotate;
+
+		return true;
 	}
+	
+	/**
+	 * Checks if folder and files that were set with a runtime property actually exist, or if a webservice can be
+	 * reached
+	 * 
+	 * @return boolean
+	 * */
+	protected abstract boolean annotationDataExists();
 
 	@Override
 	@Transactional
