@@ -4,6 +4,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -16,12 +20,16 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.util.ApplicationContextProvider;
+import org.springframework.context.ApplicationContext;
+import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StringUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class DbnsfpGeneServiceAnnotatorTest
 {
-	
 	private EntityMetaData metaDataCanAnnotate;
 	private EntityMetaData metaDataCantAnnotate;
 	private DbnsfpGeneServiceAnnotator annotator;
@@ -30,18 +38,17 @@ public class DbnsfpGeneServiceAnnotatorTest
 	private AttributeMetaData attributeMetaDataCantAnnotateFeature;
 	private AttributeMetaData attributeMetaDataCantAnnotateChrom;
 	private AttributeMetaData attributeMetaDataCantAnnotatePos;
-	private String annotatorOutput;
 	private Entity entity;
 	private ArrayList<Entity> input;
 
 	@BeforeMethod
-	public void beforeMethod()
+	public void beforeMethod() throws IOException
 	{
-
-		annotator = new DbnsfpGeneServiceAnnotator();
-
 		metaDataCanAnnotate = mock(EntityMetaData.class);
 
+		MolgenisSettings settings = mock(MolgenisSettings.class);
+		when(settings.getProperty(DbnsfpGeneServiceAnnotator.GENE_FILE_LOCATION_PROPERTY)).thenReturn(loadTestFile("dbNSFP_gene_example.txt"));
+		
 		attributeMetaDataChrom = mock(AttributeMetaData.class);
 		attributeMetaDataPos = mock(AttributeMetaData.class);
 
@@ -86,40 +93,61 @@ public class DbnsfpGeneServiceAnnotatorTest
 
 		input = new ArrayList<Entity>();
 		input.add(entity);
-
-		annotatorOutput = "USP5	ENSG00000111667	12	.	IsoT	P45974	UBP5_HUMAN	8078	CCDS31733.1;CCDS41743.1	NM_001098536	uc001qri.4";
+		
+		annotator = new DbnsfpGeneServiceAnnotator(settings, null);
 	}
 
 	@Test
 	public void annotateTest()
 	{
-		List<Entity> expectedList = new ArrayList<Entity>();
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
 
-		resultMap.put(annotator.FEATURES[0], "USP5");
-		resultMap.put(annotator.FEATURES[1], "ENSG00000111667");
-		resultMap.put(annotator.FEATURES[2], "12");
-		resultMap.put(annotator.FEATURES[3], ".");
-		resultMap.put(annotator.FEATURES[4], "IsoT");
-		resultMap.put(annotator.FEATURES[5], "P45974");
-		resultMap.put(annotator.FEATURES[6], "UBP5_HUMAN");
-		resultMap.put(annotator.FEATURES[7], "8078");
-		resultMap.put(annotator.FEATURES[8], "CCDS31733.1;CCDS41743.1");
-		resultMap.put(annotator.FEATURES[9], "NM_001098536");
-		resultMap.put(annotator.FEATURES[10], "uc001qri.4");
+		resultMap.put(DbnsfpGeneServiceAnnotator.GENE_NAME, "USP5");
+		resultMap.put(DbnsfpGeneServiceAnnotator.ENSEMBL_GENE, "ENSG00000111667");
+		resultMap.put(DbnsfpGeneServiceAnnotator.CHR, "12");
+		resultMap.put(DbnsfpGeneServiceAnnotator.GENE_OLD_NAMES, ".");
+		resultMap.put(DbnsfpGeneServiceAnnotator.GENE_OTHER_NAMES, "IsoT");
+		resultMap.put(DbnsfpGeneServiceAnnotator.UNIPROT_ACC, "P45974");
+		resultMap.put(DbnsfpGeneServiceAnnotator.UNIPROT_ID, "UBP5_HUMAN");
+		resultMap.put(DbnsfpGeneServiceAnnotator.ENTREZ_GENE_ID, "8078");
+		resultMap.put(DbnsfpGeneServiceAnnotator.CCDS_ID, "CCDS31733.1;CCDS41743.1");
+		resultMap.put(DbnsfpGeneServiceAnnotator.REFSEQ_ID, "NM_001098536");
+		resultMap.put(DbnsfpGeneServiceAnnotator.UCSC_ID, "uc001qri.4");
+		resultMap.put(DbnsfpGeneServiceAnnotator.MIM_ID, "601447");
+		resultMap.put(DbnsfpGeneServiceAnnotator.ESSENTIAL_GENE, "E");
 
 		Entity expectedEntity = new MapEntity(resultMap);
-
-		expectedList.add(expectedEntity);
 
 		Iterator<Entity> results = annotator.annotate(input.iterator());
 
 		Entity resultEntity = results.next();
-		for (int i = 0; i < 11; i++)
-		{
-			assertEquals(resultEntity.get(annotator.FEATURES[i]),
-					expectedEntity.get(annotator.FEATURES[i]));
-		}
+
+		assertEquals(resultEntity.get(DbnsfpGeneServiceAnnotator.GENE_NAME),
+				expectedEntity.get(DbnsfpGeneServiceAnnotator.GENE_NAME));
+		assertEquals(resultEntity.get(DbnsfpGeneServiceAnnotator.ENSEMBL_GENE),
+				expectedEntity.get(DbnsfpGeneServiceAnnotator.ENSEMBL_GENE));
+		assertEquals(resultEntity.get(DbnsfpGeneServiceAnnotator.CHR),
+				expectedEntity.get(DbnsfpGeneServiceAnnotator.CHR));
+		assertEquals(resultEntity.get(DbnsfpGeneServiceAnnotator.GENE_OLD_NAMES),
+				expectedEntity.get(DbnsfpGeneServiceAnnotator.GENE_OLD_NAMES));
+		assertEquals(resultEntity.get(DbnsfpGeneServiceAnnotator.GENE_OTHER_NAMES),
+				expectedEntity.get(DbnsfpGeneServiceAnnotator.GENE_OTHER_NAMES));
+		assertEquals(resultEntity.get(DbnsfpGeneServiceAnnotator.UNIPROT_ACC),
+				expectedEntity.get(DbnsfpGeneServiceAnnotator.UNIPROT_ACC));
+		assertEquals(resultEntity.get(DbnsfpGeneServiceAnnotator.UNIPROT_ID),
+				expectedEntity.get(DbnsfpGeneServiceAnnotator.UNIPROT_ID));
+		assertEquals(resultEntity.get(DbnsfpGeneServiceAnnotator.ENTREZ_GENE_ID),
+				expectedEntity.get(DbnsfpGeneServiceAnnotator.ENTREZ_GENE_ID));
+		assertEquals(resultEntity.get(DbnsfpGeneServiceAnnotator.CCDS_ID),
+				expectedEntity.get(DbnsfpGeneServiceAnnotator.CCDS_ID));
+		assertEquals(resultEntity.get(DbnsfpGeneServiceAnnotator.REFSEQ_ID),
+				expectedEntity.get(DbnsfpGeneServiceAnnotator.REFSEQ_ID));
+		assertEquals(resultEntity.get(DbnsfpGeneServiceAnnotator.UCSC_ID),
+				expectedEntity.get(DbnsfpGeneServiceAnnotator.UCSC_ID));
+		assertEquals(resultEntity.get(DbnsfpGeneServiceAnnotator.MIM_ID),
+				expectedEntity.get(DbnsfpGeneServiceAnnotator.MIM_ID));
+		assertEquals(resultEntity.get(DbnsfpGeneServiceAnnotator.ESSENTIAL_GENE),
+				expectedEntity.get(DbnsfpGeneServiceAnnotator.ESSENTIAL_GENE));
 	}
 
 	@Test
@@ -133,5 +161,13 @@ public class DbnsfpGeneServiceAnnotatorTest
 	{
 		assertEquals(annotator.canAnnotate(metaDataCantAnnotate), false);
 	}
+	
+	private String loadTestFile(String name) throws IOException
+	{
+		InputStream in = getClass().getResourceAsStream("/" + name);
+		File f = File.createTempFile(name, "." + StringUtils.getFilenameExtension(name));
+		FileCopyUtils.copy(in, new FileOutputStream(f));
 
+		return f.getAbsolutePath();
+	}
 }

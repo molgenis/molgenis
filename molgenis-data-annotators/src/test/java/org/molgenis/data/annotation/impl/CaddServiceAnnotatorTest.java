@@ -4,6 +4,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -16,6 +20,9 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.framework.server.MolgenisSettings;
+import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StringUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -33,17 +40,20 @@ public class CaddServiceAnnotatorTest
 	private AttributeMetaData attributeMetaDataCantAnnotatePos;
 	private AttributeMetaData attributeMetaDataCantAnnotateRef;
 	private AttributeMetaData attributeMetaDataCantAnnotateAlt;
-	private String annotatorOutput;
 	private Entity entity;
 	private ArrayList<Entity> input;
 
 	@BeforeMethod
-	public void beforeMethod()
+	public void beforeMethod() throws IOException
 	{
-
-		annotator = new CaddServiceAnnotator();
-
 		metaDataCanAnnotate = mock(EntityMetaData.class);
+
+		MolgenisSettings settings = mock(MolgenisSettings.class);
+
+		when(settings.getProperty(CaddServiceAnnotator.CADD_FILE_LOCATION_PROPERTY))
+				.thenReturn(getClass().getResource("/1000G.vcf.gz").getFile());
+
+		when(settings.getProperty(CaddServiceAnnotator.TABIX_LOCATION_PROPERTY)).thenReturn(getClass().getResource("/tabix").getFile());
 
 		attributeMetaDataChrom = mock(AttributeMetaData.class);
 		attributeMetaDataPos = mock(AttributeMetaData.class);
@@ -114,7 +124,7 @@ public class CaddServiceAnnotatorTest
 		input = new ArrayList<Entity>();
 		input.add(entity);
 
-		annotatorOutput = "0.180916	4.974";
+		annotator = new CaddServiceAnnotator(settings, null);
 	}
 
 	@Test
@@ -149,5 +159,14 @@ public class CaddServiceAnnotatorTest
 	public void canAnnotateFalseTest()
 	{
 		assertEquals(annotator.canAnnotate(metaDataCantAnnotate), false);
+	}
+
+	private String loadTestFile(String name) throws IOException
+	{
+		InputStream in = getClass().getResourceAsStream("/" + name);
+		File f = File.createTempFile(name, "." + StringUtils.getFilenameExtension(name));
+		FileCopyUtils.copy(in, new FileOutputStream(f));
+
+		return f.getAbsolutePath();
 	}
 }
