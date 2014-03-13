@@ -1,3 +1,11 @@
+/**
+ * Aggregates module
+ * 
+ * Dependencies: dataexplorer.js
+ *  
+ * @param $
+ * @param molgenis
+ */
 (function($, molgenis) {
 	"use strict";
 	
