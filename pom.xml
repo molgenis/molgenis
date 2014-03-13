@@ -575,7 +575,7 @@
 		<module>molgenis-data-rest</module>
 		<module>molgenis-r</module>
 		<module>molgenis-charts</module>
-		<module>molgenis-data-annotators-ui</module>
+		<module>molgenis-omx-annotators</module>
 		<module>molgenis-js</module>
 	</modules>
 </project>
