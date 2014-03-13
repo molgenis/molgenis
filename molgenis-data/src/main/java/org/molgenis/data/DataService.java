@@ -42,6 +42,7 @@ public interface DataService extends RepositoryCollection
 	/**
 	 * Returns the meta data for the given entity
 	 * 
+	 * @throws UnknownEntityException
 	 * @param entityName
 	 * @return
 	 */

@@ -143,6 +143,20 @@ public abstract class AbstractEntity implements Entity
 		return DataConverter.toIntList(get(attributeName));
 	}
 
+    @Override
+    public String toString()
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.append(this.getClass().getSimpleName() + "{");
+        for(String attrName : this.getAttributeNames())
+        {
+            sb.append(attrName + "='" +this.get(attrName) + "', ");
+        }
+        sb.delete(sb.length()-2, sb.length());
+        sb.append("}");
+        return sb.toString();
+    }
+
 	public static boolean isObjectRepresentation(String objStr)
 	{
 		int left = objStr.indexOf('(');

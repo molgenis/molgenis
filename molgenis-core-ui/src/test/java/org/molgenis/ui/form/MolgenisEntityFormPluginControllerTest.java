@@ -49,19 +49,8 @@ public class MolgenisEntityFormPluginControllerTest extends AbstractTestNGSpring
 	@Test
 	public void listUnknownEntity() throws Exception
 	{
-		when(dataService.getRepositoryByEntityName("Test")).thenThrow(new UnknownEntityException());
+		when(dataService.getEntityMetaData("Test")).thenThrow(new UnknownEntityException());
 		mockMvc.perform(get(MolgenisEntityFormPluginController.URI + "Test")).andExpect(status().is(404));
-	}
-
-	@Test
-	public void listUnknownUnauthorized() throws Exception
-	{
-		Model model = mock(Model.class);
-		Entity entity = mock(Entity.class);
-		when(model.getEntity("Test")).thenReturn(entity);
-		when(permissionService.hasPermissionOnEntity("Test", Permission.READ)).thenReturn(false);
-
-		mockMvc.perform(get(MolgenisEntityFormPluginController.URI + "Test")).andExpect(status().is(401));
 	}
 
 	@Test

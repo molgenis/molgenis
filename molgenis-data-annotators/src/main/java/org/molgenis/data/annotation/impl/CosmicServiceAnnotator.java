@@ -10,7 +10,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AbstractRepositoryAnnotator;
@@ -19,7 +18,6 @@ import org.molgenis.data.annotation.impl.datastructures.CosmicData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -40,22 +38,22 @@ import com.google.gson.reflect.TypeToken;
 public class CosmicServiceAnnotator extends AbstractRepositoryAnnotator implements RepositoryAnnotator,
 		ApplicationListener<ContextRefreshedEvent>
 {
-    // Web url to call the ensembl web service
+	// Web url to call the ensembl web service
 	private static final String SERVICE_URL = "http://beta.rest.ensembl.org/feature/id/";
 	private static final String SERVICE_POSTFIX = ".json?feature=somatic_variation";
 	// ensembl service is dependant on this ID when the web service is called
 	// If ensemblId is not in a data set, the web service cannot be used
 	public static final String ENSEMBLE_ID = "ensemblId";
-	public static final String NAME = "Ensemble2Cosmic";
-    public static final String ID = "ID";
-    public static final String FEATURE_TYPE = "feature_type";
-    public static final String ALT_ALLELES = "alt_alleles";
-    public static final String END = "end";
-    public static final String SEQ_REGION_NAME = "seq_region_name";
-    public static final String CONSEQUENCE_TYPE = "consequence_type";
-    public static final String STRAND = "strand";
-    public static final String START = "start";
-    private final DefaultHttpClient httpClient;
+	public static final String NAME = "Cosmic";
+	public static final String ID = "ID";
+	public static final String FEATURE_TYPE = "feature_type";
+	public static final String ALT_ALLELES = "alt_alleles";
+	public static final String END = "end";
+	public static final String SEQ_REGION_NAME = "seq_region_name";
+	public static final String CONSEQUENCE_TYPE = "consequence_type";
+	public static final String STRAND = "strand";
+	public static final String START = "start";
+	private final DefaultHttpClient httpClient;
 
 	public CosmicServiceAnnotator()
 	{
@@ -74,6 +72,16 @@ public class CosmicServiceAnnotator extends AbstractRepositoryAnnotator implemen
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ENSEMBLE_ID, FieldTypeEnum.STRING));
 		return metadata;
+	}
+
+	@Override
+	public boolean annotationDataExists()
+	{
+		boolean dataExists = true;
+
+		// TODO check if the webservice is up and running
+
+		return dataExists;
 	}
 
 	@Override

@@ -50,11 +50,6 @@ public class ExcelEntity extends AbstractMetaDataEntity
 	public Object get(String attributeName)
 	{
 		Integer col = colNamesMap.get(attributeName);
-		if (col == null)
-		{
-			col = colNamesMap.get(attributeName.toLowerCase());
-		}
-
 		if (col != null)
 		{
 			Cell cell = row.getCell(col);

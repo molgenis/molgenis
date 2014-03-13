@@ -34,11 +34,10 @@
 		return q;
 	}
 	
-	function getLookupAttributeNames(entityUri) {
+	function getLookupAttributeNames(entityMetaData) {
 		var attributeNames = [];
-		var refEntityMetaData = restApi.get(entityUri,  {attributes: ['attributes'], expand: ['attributes']});
 		
-		$.each(refEntityMetaData.attributes, function(attrName, attr) {
+		$.each(entityMetaData.attributes, function(attrName, attr) {
 			if (attr.lookupAttribute) {
 				attributeNames.push(attr.name);
 			}
@@ -47,7 +46,7 @@
 		return attributeNames;
 	}
 	
-	function formatResult(entity, lookupAttributeNames) {
+	function formatResult(entity, entityMetaData, lookupAttributeNames) {
 		var items = [];
 		items.push('<div class="row-fluid">');
 		
@@ -56,9 +55,10 @@
 			var abbr = Math.round(100 / lookupAttributeNames.length);// 100 is full width in characters (if you don't change the font size)
 		
 			$.each(lookupAttributeNames, function(index, attrName) {
+				var attrLabel = entityMetaData.attributes[attrName].label || attrName;
 				var attrValue = entity[attrName] == undefined ?  '' :  entity[attrName];
 				items.push('<div class="span' + width + '">');
-				items.push(abbreviate(attrName + ': <b>' + htmlEscape(attrValue) + '</b>', abbr));
+				items.push(abbreviate(attrLabel + ': <b>' + htmlEscape(attrValue) + '</b>', abbr));
 				items.push('</div>');
 			});
 		}
@@ -77,7 +77,8 @@
 	}
 	
 	function createSelect2(container, attributeMetaData) {
-		var lookupAttrNames = getLookupAttributeNames(attributeMetaData.refEntity.href);
+		var refEntityMetaData = restApi.get(attributeMetaData.refEntity.href, {expand: ['attributes']});
+		var lookupAttrNames = getLookupAttributeNames(refEntityMetaData);
 		var hiddenInput = container.find('input[type=hidden]');
 		
 		hiddenInput.select2({
@@ -86,25 +87,25 @@
 			minimumInputLength: 2,
 			query: function (options){
 				var query = createQuery(lookupAttrNames, options.term);
-				restApi.getAsync('/api/v1/' + attributeMetaData.refEntity.name, {q: {num: 10, q: query}}, function(data) {
-					 options.callback({results: data.items, more: false});
+				restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {num: 10, q: query}}, function(data) {
+					options.callback({results: data.items, more: false});
 				});           
             },
 			initSelection: function(element, callback) {
 				//Only called when the input has a value
 				var query = createQuery(lookupAttrNames, element.val());
-				restApi.getAsync('/api/v1/' + attributeMetaData.refEntity.name, {q: {num: 1, q: query}}, function(data) {
+				restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {num: 1, q: query}}, function(data) {
 					callback(data.items[0]);
 				});
 			},
 			formatResult: function(entity) {
-				return formatResult(entity, lookupAttrNames);
+				return formatResult(entity, refEntityMetaData, lookupAttrNames);
 			},
 			formatSelection: function(entity) {
-				return entity[attributeMetaData.refEntity.labelAttribute];
+				return entity[refEntityMetaData.labelAttribute];
 			},
 			id: function(entity) {
-				return entity[attributeMetaData.refEntity.labelAttribute];
+				return entity[refEntityMetaData.labelAttribute];
 			}
 		});
 		
@@ -122,7 +123,7 @@
 				'autofocus': 'autofocus',
 			};
 			
-		var element = createInput(attributeMetaData.fieldType, attrs, value)
+		var element = createInput(attributeMetaData.fieldType, attrs, value);
 		container.parent().append(element);
 		createSelect2(element, attributeMetaData, value);
 			
@@ -159,6 +160,6 @@
 		});
 		
 		return this;
-	}
+	};
 	
 }($, window.top.molgenis = window.top.molgenis || {}));

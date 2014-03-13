@@ -1,13 +1,15 @@
 package org.molgenis.data.omx;
 
-import java.util.Arrays;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
+
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
@@ -38,6 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 /**
@@ -89,14 +92,14 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Cr
 	public Iterable<Entity> findAll(final Query q)
 	{
 		EntityMetaData entityMetaData = getEntityMetaData();
-		// Set xref/mref search fields on ref identifier
+		// Set xref/mref/categorical search fields on ref identifier
 		for (QueryRule r : q.getRules())
 		{
 			if ((r.getField() != null) && (r.getValue() instanceof Entity))
 			{
 				AttributeMetaData attr = entityMetaData.getAttribute(r.getField());
-				if ((attr.getDataType().getEnumType() == MolgenisFieldTypes.FieldTypeEnum.XREF)
-						|| (attr.getDataType().getEnumType() == MolgenisFieldTypes.FieldTypeEnum.MREF))
+				if ((attr.getDataType().getEnumType() == XREF) || (attr.getDataType().getEnumType() == MREF)
+						|| attr.getDataType().getEnumType() == CATEGORICAL)
 				{
 					Object value = ((Entity) r.getValue()).get(attr.getRefEntity().getLabelAttribute().getName());
 					r.setValue(value);
@@ -197,7 +200,7 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Cr
 	@Override
 	public Integer add(Entity entity)
 	{
-		add(Arrays.asList(entity));
+		add(Lists.newArrayList(entity));
 		return entity.getIdValue();
 	}
 
@@ -255,8 +258,8 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Cr
 							// are already validated by the EntityValidator (see above)
 
 							Object invalidValue = entity.get(observableFeature.getIdentifier());
-							String message = String.format("Invalid value '%s' for attribute '%s' of entity '%s'.",
-									invalidValue, observableFeature.getIdentifier(), getName());
+							String message = String.format("Invalid value '%s' for attribute '%s' of entity '%s'. %s.",
+									invalidValue, observableFeature.getIdentifier(), getName(), e.getMessage());
 
 							throw new MolgenisValidationException(Sets.newHashSet(new ConstraintViolation(message,
 									invalidValue, entity, attr, entityMetaData, rownr)));

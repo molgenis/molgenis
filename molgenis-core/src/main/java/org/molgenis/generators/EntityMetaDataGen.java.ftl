@@ -33,6 +33,9 @@ public class ${JavaName(entity)}MetaData extends DefaultEntityMetaData
 		${name(f)}.setDefaultValue(${f.defaultValue});
 			</#if>
 		</#if>
+		<#if f.label??>
+		${name(f)}.setLabel("${f.label!}");
+		</#if>
 		<#if f.description??>
 		${name(f)}.setDescription("${f.description!}");
 		</#if>

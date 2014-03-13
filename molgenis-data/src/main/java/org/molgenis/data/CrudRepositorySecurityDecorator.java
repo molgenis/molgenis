@@ -17,7 +17,7 @@ public class CrudRepositorySecurityDecorator extends CrudRepositoryDecorator imp
 	{
 		super(decoratedRepository);
 		this.decoratedRepository = decoratedRepository;
-		this.entityName = decoratedRepository.getName().toUpperCase();
+		this.entityName = decoratedRepository.getName();
 	}
 
 	@Override
@@ -224,7 +224,7 @@ public class CrudRepositorySecurityDecorator extends CrudRepositoryDecorator imp
 		String role = String.format("ROLE_ENTITY_%s_%s", permission.toString(), entityName.toUpperCase());
 		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", role))
 		{
-			throw new MolgenisDataAccessException("No read permission on " + entityName);
+			throw new MolgenisDataAccessException("No " + permission.toString() + " permission on entity " + entityName);
 		}
 	}
 }

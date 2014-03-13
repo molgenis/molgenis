@@ -6,6 +6,7 @@ package org.molgenis.data.jpa;
 
 import java.util.List;
 import java.util.Map;
+import java.io.IOException;
 
 import org.molgenis.data.Repository;
 import org.molgenis.data.CrudRepository;
@@ -51,5 +52,10 @@ public class JpaRepositorySource implements RepositorySource
 	{
 		return repositories.get(name);
 	}
-
+	
+	@Override
+	public void close() throws IOException
+	{
+		// Nothing
+	}
 }

@@ -3,6 +3,8 @@ package org.molgenis.data.importer;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
@@ -87,14 +89,32 @@ public class EntityImportService
 		String updateKey = entityMetaData.getLabelAttribute().getName();
 		List<Entity> batch = Lists.newArrayListWithCapacity(BATCH_SIZE);
 		List<Entity> unresolved = Lists.newArrayList();
+		Set<Object> labelAttributeValues = Sets.newHashSetWithExpectedSize(BATCH_SIZE);
 
 		long rownr = 0;
 		for (Entity entityToImport : entitiesToImport)
 		{
+			rownr++;
+
 			// Skip empty rows
 			if (EntityUtils.isEmpty(entityToImport)) break;
 
-			rownr++;
+			Object key = entityToImport.get(updateKey);
+			if (key == null)
+			{
+				ConstraintViolation violation = new ConstraintViolation("Missing key", null, entityToImport,
+						entityMetaData.getLabelAttribute(), entityMetaData, rownr);
+				throw new MolgenisValidationException(Sets.newHashSet(violation));
+			}
+			else if (labelAttributeValues.contains(key))
+			{
+				ConstraintViolation violation = new ConstraintViolation("Duplicate key '" + key + "'", key,
+						entityToImport, entityMetaData.getLabelAttribute(), entityMetaData, rownr);
+				throw new MolgenisValidationException(Sets.newHashSet(violation));
+			}
+
+			labelAttributeValues.add(key);
+
 			boolean resolved = true;
 			for (AttributeMetaData attr : entityMetaData.getAttributes())
 			{
@@ -137,7 +157,6 @@ public class EntityImportService
 
 		if (!unresolved.isEmpty())
 		{
-
 			// We got unresolved refs to the same entity, try the unresolved again max 100 times
 			int iterations = 0;
 			while (!unresolved.isEmpty() && (++iterations < 100))
@@ -226,9 +245,8 @@ public class EntityImportService
 
 	private boolean resolveEntityRef(String entityName, Entity entityToBeImported, AttributeMetaData attr)
 	{
-		List<Object> keyValues = Lists.newArrayList();
-
-		String foreignAttr = attr.getRefEntity().getLabelAttribute().getName();
+		final List<Object> keyValues = Lists.newArrayList();
+		final String foreignAttr = attr.getRefEntity().getLabelAttribute().getName();
 		String key = attr.getName() + "_" + foreignAttr;
 
 		if (attr.getDataType().getEnumType() == MREF)
@@ -263,6 +281,22 @@ public class EntityImportService
 			{
 				refLoadingCache.invalidate(cacheKey);
 			}
+
+			// Sort entity list the same as the original key list
+			Collections.sort(foundRefEntityList, new Comparator<Entity>()
+			{
+				@Override
+				public int compare(Entity o1, Entity o2)
+				{
+					Object value1 = o1.get(foreignAttr);
+					Object value2 = o2.get(foreignAttr);
+					Integer index1 = keyValues.indexOf(value1);
+					Integer index2 = keyValues.indexOf(value2);
+
+					return index1.compareTo(index2);
+				}
+
+			});
 		}
 		catch (ExecutionException e)
 		{
@@ -310,9 +344,9 @@ public class EntityImportService
 		String key = attr.getName() + "_" + foreignAttr;
 		Object value = entity.get(key);
 
-		String message = String.format(
-				"Could not resolve attribute '%s' with value '%s' of entity '%s'. This is a reference to entity '%s'.",
-				attr.getName(), value, entityMetaData.getName(), attr.getRefEntity().getName());
+		String message = String
+				.format("Could not resolve attribute '%s' with value '%s' of entity '%s'. This is a reference to entity '%s'.This happens when the key is missing in the referencing entity or when there are duplicate keys.",
+						attr.getName(), value, entityMetaData.getName(), attr.getRefEntity().getName());
 
 		return new ConstraintViolation(message, value, entity, attr, entityMetaData, rownr);
 	}

@@ -65,11 +65,11 @@
 	 * 
 	 * @param attributes
 	 */
-	function createAttributeSelectOptions(attributes) {
+	function createAttributeSelectOptions(attributes, selectedVal) {
 		var items = [];
 		items.push('<option value='+ '-1' +'>select</option>');
 		$.each(attributes, function() {
-			items.push('<option value=' + this.href + '>' + this.name + '</option>');
+			items.push('<option value=' + this.href + (selectedVal === this.href? ' selected ' : '') + '>' + this.name + '</option>');
 		});
 		return items.join('');
 	}
@@ -178,7 +178,7 @@
 		var disabled = true;
 		var valueOne  = $('#scatterplot-select-yaxis-feature').val();
 		var valueTwo  = $('#scatterplot-select-xaxis-feature').val();
-
+		
 		if (valueOne && (valueOne !== "-1") && valueTwo && (valueTwo !== "-1")) {
 			disabled = false;
 		}
@@ -244,9 +244,9 @@
 				return $.inArray(attribute.fieldType, ['DECIMAL', 'LONG', 'INT', 'DATE', 'DATE_TIME']) !== -1;
 			});
 
-			$('#scatterplot-select-xaxis-feature').html(createAttributeSelectOptions(xaxisAttributes));
-			$('#scatterplot-select-yaxis-feature').html(createAttributeSelectOptions(yaxisAttributes));
-			$('#scatterplot-select-split-feature').html(createAttributeSelectOptions(attributes));
+			$('#scatterplot-select-xaxis-feature').html(createAttributeSelectOptions(xaxisAttributes, $('#scatterplot-select-xaxis-feature').val()));
+			$('#scatterplot-select-yaxis-feature').html(createAttributeSelectOptions(yaxisAttributes, $('#scatterplot-select-yaxis-feature').val()));
+			$('#scatterplot-select-split-feature').html(createAttributeSelectOptions(attributes, $('#scatterplot-select-split-feature').val()));
 			
 			$('#scatterplot-designer-modal-create-button').click(function() {
 				var attributeMap = toAttributeMap(attributes);
@@ -255,6 +255,8 @@
 				var splitAttribute = attributeMap[$('#scatterplot-select-split-feature').val()];
 				ns.createScatterPlot(getEntity(), getEntityQuery(), xaxisAttribute, yaxisAttribute, splitAttribute);
 			});
+			
+			activateDesignerSubmitButtonScatterPlot();
 		});
 		
 		$('#scatterplot-select-xaxis-feature').change(activateDesignerSubmitButtonScatterPlot);
@@ -269,8 +271,8 @@
 				return $.inArray(attribute.fieldType, ['DECIMAL', 'LONG', 'INT']) !== -1;
 			});
 			
-			$('#boxplot-select-feature').html(createAttributeSelectOptions(attributeAttributes));
-			$('#boxplot-select-split-feature').html(createAttributeSelectOptions(attributes));
+			$('#boxplot-select-feature').html(createAttributeSelectOptions(attributeAttributes, $('#boxplot-select-feature').val()));
+			$('#boxplot-select-split-feature').html(createAttributeSelectOptions(attributes, $('#boxplot-select-split-feature').val()));
 			
 			$('#boxplot-designer-modal-create-button').click(function(){
 				var attributeMap = toAttributeMap(attributes);
@@ -278,6 +280,8 @@
 				var splitAttribute = attributeMap[$('#boxplot-select-split-feature').val()];
 				ns.createBoxPlot(getEntity(), getEntityQuery(), attribute, splitAttribute);
 			});	
+			
+			activateDesignerSubmitButtonBoxPlot();
 		});
 		
 		$('#boxplot-select-feature').change(activateDesignerSubmitButtonBoxPlot);

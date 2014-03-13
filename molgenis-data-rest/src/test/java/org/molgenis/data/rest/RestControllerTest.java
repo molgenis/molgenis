@@ -1,5 +1,8 @@
 package org.molgenis.data.rest;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -25,6 +28,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Queryable;
 import org.molgenis.data.Repository;
@@ -95,10 +99,14 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		attrId.setIdAttribute(true);
 		attrId.setVisible(false);
 
-		when(repo.getEntityMetaData().getAttribute("name")).thenReturn(attrName);
-		when(repo.getEntityMetaData().getIdAttribute()).thenReturn(attrId);
-		when(repo.getEntityMetaData().getAttributes()).thenReturn(Arrays.<AttributeMetaData> asList(attrName, attrId));
-		when(repo.getEntityMetaData().getAtomicAttributes()).thenReturn(Arrays.<AttributeMetaData> asList(attrName, attrId));
+		EntityMetaData entityMetaData = mock(EntityMetaData.class);
+		when(entityMetaData.getAttribute("name")).thenReturn(attrName);
+		when(entityMetaData.getIdAttribute()).thenReturn(attrId);
+		when(entityMetaData.getAttributes()).thenReturn(Arrays.<AttributeMetaData> asList(attrName, attrId));
+		when(entityMetaData.getAtomicAttributes()).thenReturn(Arrays.<AttributeMetaData> asList(attrName, attrId));
+		when(entityMetaData.getName()).thenReturn(ENTITY_NAME);
+		when(repo.getEntityMetaData()).thenReturn(entityMetaData);
+		when(dataService.getEntityMetaData(ENTITY_NAME)).thenReturn(entityMetaData);
 		when(repo.getName()).thenReturn(ENTITY_NAME);
 
 		mockMvc = MockMvcBuilders.standaloneSetup(restController).setMessageConverters(new GsonHttpMessageConverter())
@@ -238,8 +246,12 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	public void retrieveEntityAttributeUnknownAttribute() throws Exception
 	{
 		Repository repo = mock(Repository.class, withSettings().extraInterfaces(Updateable.class, Queryable.class));
+
+		EntityMetaData entityMetaData = mock(EntityMetaData.class);
+		when(entityMetaData.getAttribute("name")).thenReturn(null);
+		when(repo.getEntityMetaData()).thenReturn(entityMetaData);
+		when(dataService.getEntityMetaData(ENTITY_NAME)).thenReturn(entityMetaData);
 		when(dataService.getRepositoryByEntityName(ENTITY_NAME)).thenReturn(repo);
-		when(repo.getEntityMetaData().getAttribute("name")).thenReturn(null);
 		mockMvc.perform(get(HREF_ENTITY_ID + "/name")).andExpect(status().isNotFound());
 	}
 
@@ -251,7 +263,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void retrieveEntityAttributeXREF() throws Exception
+	public void retrieveEntityAttributeXref() throws Exception
 	{
 		reset(dataService);
 
@@ -259,7 +271,6 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(dataService.getRepositoryByEntityName(ENTITY_NAME)).thenReturn(repo);
 		when(dataService.getEntityNames()).thenReturn(Arrays.asList(ENTITY_NAME));
 		when(dataService.add(Matchers.eq(ENTITY_NAME), Matchers.any(MapEntity.class))).thenReturn(1);
-
 		Entity entityXref = new MapEntity("id");
 		entityXref.set("id", 1);
 		entityXref.set("xrefValue", "PietXREF");
@@ -272,20 +283,24 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 
 		DefaultAttributeMetaData attrName = new DefaultAttributeMetaData("name", FieldTypeEnum.XREF);
 		EntityMetaData meta = mock(EntityMetaData.class);
+		when(dataService.getEntityMetaData(ENTITY_NAME)).thenReturn(meta);
+		when(repo.getEntityMetaData()).thenReturn(meta);
 
+		EntityMetaData refMeta = mock(EntityMetaData.class);
 		AttributeMetaData attrNameXREF = new DefaultAttributeMetaData("xrefValue", FieldTypeEnum.STRING);
-		when(meta.getAtomicAttributes()).thenReturn(Arrays.<AttributeMetaData> asList(attrNameXREF));
-		attrName.setRefEntity(meta);
+		when(refMeta.getAtomicAttributes()).thenReturn(Arrays.<AttributeMetaData> asList(attrNameXREF));
+		attrName.setRefEntity(refMeta);
 
 		DefaultAttributeMetaData attrId = new DefaultAttributeMetaData("id", FieldTypeEnum.INT);
 		attrId.setIdAttribute(true);
 		attrId.setVisible(false);
 
-		when(repo.getEntityMetaData().getAttribute("name")).thenReturn(attrName);
-		when(repo.getEntityMetaData().getIdAttribute()).thenReturn(attrId);
-		when(repo.getEntityMetaData().getAttributes()).thenReturn(Arrays.<AttributeMetaData> asList(attrName, attrId));
-		when(repo.getEntityMetaData().getAtomicAttributes()).thenReturn(Arrays.<AttributeMetaData> asList(attrName, attrId));
+		when(meta.getAttribute("name")).thenReturn(attrName);
+		when(meta.getIdAttribute()).thenReturn(attrId);
+		when(meta.getAttributes()).thenReturn(Arrays.<AttributeMetaData> asList(attrName, attrId));
+		when(meta.getAtomicAttributes()).thenReturn(Arrays.<AttributeMetaData> asList(attrName, attrId));
 		when(repo.getName()).thenReturn(ENTITY_NAME);
+		when(meta.getName()).thenReturn(ENTITY_NAME);
 
 		mockMvc = MockMvcBuilders.standaloneSetup(restController).setMessageConverters(new GsonHttpMessageConverter())
 				.build();
@@ -309,9 +324,9 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	{
 		Repository repo = mock(Repository.class);
 		when(dataService.getRepositoryByEntityName(ENTITY_NAME)).thenReturn(repo);
-
+		doThrow(new MolgenisDataException()).when(dataService).update(anyString(), any(Entity.class));
 		mockMvc.perform(put(HREF_ENTITY_ID).content("{name:Klaas}").contentType(APPLICATION_JSON)).andExpect(
-				status().isInternalServerError());
+				status().isBadRequest());
 	}
 
 	@Test
@@ -319,8 +334,10 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	{
 		Repository repo = mock(Repository.class, withSettings().extraInterfaces(Updateable.class, Queryable.class));
 		when(dataService.getRepositoryByEntityName(ENTITY_NAME)).thenReturn(repo);
-		when(repo.getEntityMetaData().getIdAttribute()).thenReturn(null);
-
+		EntityMetaData entityMetaData = mock(EntityMetaData.class);
+		when(entityMetaData.getIdAttribute()).thenReturn(null);
+		when(repo.getEntityMetaData()).thenReturn(entityMetaData);
+		when(dataService.getEntityMetaData(ENTITY_NAME)).thenReturn(entityMetaData);
 		mockMvc.perform(put(HREF_ENTITY_ID).content("{name:Klaas}").contentType(APPLICATION_JSON)).andExpect(
 				status().isInternalServerError());
 	}
