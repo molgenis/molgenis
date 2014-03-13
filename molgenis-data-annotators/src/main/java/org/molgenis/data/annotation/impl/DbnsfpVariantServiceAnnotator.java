@@ -45,82 +45,86 @@ import org.springframework.stereotype.Component;
 @Component("dbnsfpVariantService")
 public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 {
-	@Autowired
 	private MolgenisSettings molgenisSettings;
-
-	@Autowired
-	AnnotationService annotatorService;
+	private AnnotationService annotatorService;
 
 	private static final String NAME = "dbNSFP-Variant";
 	public static final String CHROMOSOME_FILE_LOCATION_PROPERTY = "dbsnfp_variant_location";
 
-	private static final String CHR = "chr";
-	private static final String POS_1_COOR = "pos(1-coor)";
-	private static final String REF = "ref";
-	private static final String ALT = "alt";
-	private static final String AAREF = "aaref";
-	private static final String AAALT = "aaalt";
-	private static final String HG18_POS_1_COOR = "hg18_pos(1-coor)";
-	private static final String GENENAME = "genename";
-	private static final String UNIPROT_ACC = "Uniprot_acc";
-	private static final String UNIPROT_ID = "Uniprot_id";
-	private static final String UNIPROT_AAPOS = "Uniprot_aapos";
-	private static final String INTERPRO_DOMAIN = "Interpro_domain";
-	private static final String CDS_STRAND = "cds_strand";
-	private static final String REFCODON = "refcodon";
-	private static final String SLR_TEST_STATISTIC = "SLR_test_statistic ";
-	private static final String CODONPOS = "codonpos";
-	private static final String FOLD_DEGENERATE = "fold-degenerate";
-	private static final String ANCESTRAL_ALLELE = "Ancestral_allele";
-	private static final String ENSEMBL_GENEID = "Ensembl_geneid";
-	private static final String ENSEMBL_TRANSCRIPTID = "Ensembl_transcriptid";
-	private static final String AAPOS = "aapos";
-	private static final String AAPOS_SIFT = "aapos_SIFT";
-	private static final String AAPOS_FATHMM = "aapos_FATHMM";
-	private static final String SIFT_SCORE = "SIFT_score";
-	private static final String SIFT_SCORE_CONVERTED = "SIFT_score_converted";
-	private static final String SIFT_PRED = "SIFT_pred";
-	private static final String POLYPHEN2_HDIV_SCORE = "Polyphen2_HDIV_score";
-	private static final String POLYPHEN2_HDIV_PRED = "Polyphen2_HDIV_pred";
-	private static final String POLYPHEN2_HVAR_SCORE = "Polyphen2_HVAR_score";
-	private static final String POLYPHEN2_HVAR_PRED = "Polyphen2_HVAR_pred";
-	private static final String LRT_SCORE = "LRT_score";
-	private static final String LRT_SCORE_CONVERTED = "LRT_score_converted";
-	private static final String LRT_PRED = "LRT_pred";
-	private static final String MUTATIONTASTER_SCORE = "MutationTaster_score";
-	private static final String MUTATIONTASTER_SCORE_CONVERTED = "MutationTaster_score_converted";
-	private static final String MUTATIONTASTER_PRED = "MutationTaster_pred";
-	private static final String MUTATIONASSESSOR_SCORE = "MutationAssessor_score";
-	private static final String MUTATIONASSESSOR_SCORE_CONVERTED = "MutationAssessor_score_converted";
-	private static final String MUTATIONASSESSOR_PRED = "MutationAssessor_pred";
-	private static final String FATHMM_SCORE = "FATHMM_score";
-	private static final String FATHMM_SCORE_CONVERTED = "FATHMM_score_converted";
-	private static final String FATHMM_PRED = "FATHMM_pred";
-	private static final String RADIALSVM_SCORE = "RadialSVM_score";
-	private static final String RADIALSVM_SCORE_CONVERTED = "RadialSVM_score_converted";
-	private static final String RADIALSVM_PRED = "RadialSVM_pred";
-	private static final String LR_SCORE = "LR_score";
-	private static final String LR_PRED = "LR_pred";
-	private static final String RELIABILITY_INDEX = "Reliability_index";
-	private static final String GERP_NR = "GERP++_NR";
-	private static final String GERP_RS = "GERP++_RS";
-	private static final String PHYLOP = "phyloP";
-	private static final String TWONINE_WAY_PI = "29way_pi";
-	private static final String TWONINE_WAY_LOGODDS = "29way_logOdds";
-	private static final String LRT_OMEGA = "LRT_Omega";
-	private static final String UNISNP_IDS = "UniSNP_ids";
-	private static final String THOUSAND_GP1_AC = "1000Gp1_AC";
-	private static final String THOUSAND_GP1_AF = "1000Gp1_AF";
-	private static final String THOUSAND_GP1_AFR_AC = "1000Gp1_AFR_AC";
-	private static final String THOUSAND_GP1_AFR_AF = "1000Gp1_AFR_AF";
-	private static final String THOUSAND_GP1_EUR_AC = "1000Gp1_EUR_AC";
-	private static final String THOUSAND_GP1_EUR_AF = "1000Gp1_EUR_AF";
-	private static final String THOUSAND_GP1_AMR_AC = "1000Gp1_AMR_AC";
-	private static final String THOUSAND_GP1_AMR_AF = "1000Gp1_AMR_AF";
-	private static final String THOUSAND_GP1_ASN_AC = "1000Gp1_ASN_AC";
-	private static final String THOUSAND_GP1_ASN_AF = "1000Gp1_ASN_AF";
-	private static final String ESP6500_AA_AF = "ESP6500_AA_AF";
-	private static final String ESP6500_EA_AF = "ESP6500_EA_AF";
+	static final String CHR = "chr";
+	static final String POS_1_COOR = "pos(1-coor)";
+	static final String REF = "ref";
+	static final String ALT = "alt";
+	static final String AAREF = "aaref";
+	static final String AAALT = "aaalt";
+	static final String HG18_POS_1_COOR = "hg18_pos(1-coor)";
+	static final String GENENAME = "genename";
+	static final String UNIPROT_ACC = "Uniprot_acc";
+	static final String UNIPROT_ID = "Uniprot_id";
+	static final String UNIPROT_AAPOS = "Uniprot_aapos";
+	static final String INTERPRO_DOMAIN = "Interpro_domain";
+	static final String CDS_STRAND = "cds_strand";
+	static final String REFCODON = "refcodon";
+	static final String SLR_TEST_STATISTIC = "SLR_test_statistic ";
+	static final String CODONPOS = "codonpos";
+	static final String FOLD_DEGENERATE = "fold-degenerate";
+	static final String ANCESTRAL_ALLELE = "Ancestral_allele";
+	static final String ENSEMBL_GENEID = "Ensembl_geneid";
+	static final String ENSEMBL_TRANSCRIPTID = "Ensembl_transcriptid";
+	static final String AAPOS = "aapos";
+	static final String AAPOS_SIFT = "aapos_SIFT";
+	static final String AAPOS_FATHMM = "aapos_FATHMM";
+	static final String SIFT_SCORE = "SIFT_score";
+	static final String SIFT_SCORE_CONVERTED = "SIFT_score_converted";
+	static final String SIFT_PRED = "SIFT_pred";
+	static final String POLYPHEN2_HDIV_SCORE = "Polyphen2_HDIV_score";
+	static final String POLYPHEN2_HDIV_PRED = "Polyphen2_HDIV_pred";
+	static final String POLYPHEN2_HVAR_SCORE = "Polyphen2_HVAR_score";
+	static final String POLYPHEN2_HVAR_PRED = "Polyphen2_HVAR_pred";
+	static final String LRT_SCORE = "LRT_score";
+	static final String LRT_SCORE_CONVERTED = "LRT_score_converted";
+	static final String LRT_PRED = "LRT_pred";
+	static final String MUTATIONTASTER_SCORE = "MutationTaster_score";
+	static final String MUTATIONTASTER_SCORE_CONVERTED = "MutationTaster_score_converted";
+	static final String MUTATIONTASTER_PRED = "MutationTaster_pred";
+	static final String MUTATIONASSESSOR_SCORE = "MutationAssessor_score";
+	static final String MUTATIONASSESSOR_SCORE_CONVERTED = "MutationAssessor_score_converted";
+	static final String MUTATIONASSESSOR_PRED = "MutationAssessor_pred";
+	static final String FATHMM_SCORE = "FATHMM_score";
+	static final String FATHMM_SCORE_CONVERTED = "FATHMM_score_converted";
+	static final String FATHMM_PRED = "FATHMM_pred";
+	static final String RADIALSVM_SCORE = "RadialSVM_score";
+	static final String RADIALSVM_SCORE_CONVERTED = "RadialSVM_score_converted";
+	static final String RADIALSVM_PRED = "RadialSVM_pred";
+	static final String LR_SCORE = "LR_score";
+	static final String LR_PRED = "LR_pred";
+	static final String RELIABILITY_INDEX = "Reliability_index";
+	static final String GERP_NR = "GERP++_NR";
+	static final String GERP_RS = "GERP++_RS";
+	static final String PHYLOP = "phyloP";
+	static final String TWONINE_WAY_PI = "29way_pi";
+	static final String TWONINE_WAY_LOGODDS = "29way_logOdds";
+	static final String LRT_OMEGA = "LRT_Omega";
+	static final String UNISNP_IDS = "UniSNP_ids";
+	static final String THOUSAND_GP1_AC = "1000Gp1_AC";
+	static final String THOUSAND_GP1_AF = "1000Gp1_AF";
+	static final String THOUSAND_GP1_AFR_AC = "1000Gp1_AFR_AC";
+	static final String THOUSAND_GP1_AFR_AF = "1000Gp1_AFR_AF";
+	static final String THOUSAND_GP1_EUR_AC = "1000Gp1_EUR_AC";
+	static final String THOUSAND_GP1_EUR_AF = "1000Gp1_EUR_AF";
+	static final String THOUSAND_GP1_AMR_AC = "1000Gp1_AMR_AC";
+	static final String THOUSAND_GP1_AMR_AF = "1000Gp1_AMR_AF";
+	static final String THOUSAND_GP1_ASN_AC = "1000Gp1_ASN_AC";
+	static final String THOUSAND_GP1_ASN_AF = "1000Gp1_ASN_AF";
+	static final String ESP6500_AA_AF = "ESP6500_AA_AF";
+	static final String ESP6500_EA_AF = "ESP6500_EA_AF";
+
+	@Autowired
+	public DbnsfpVariantServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService)
+	{
+		this.molgenisSettings = molgenisSettings;
+		this.annotatorService = annotatorService;
+	}
 
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
@@ -175,68 +179,68 @@ public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 		{
 			for (String chromosomeInMap : chromosomeMap.keySet())
 			{
-				FileReader reader = new FileReader(new File(
-						molgenisSettings.getProperty(CHROMOSOME_FILE_LOCATION_PROPERTY) + chromosomeInMap));
-				bufferedReader = new BufferedReader(reader);
+					File file = new File(molgenisSettings.getProperty(CHROMOSOME_FILE_LOCATION_PROPERTY) + chromosomeInMap);
+					FileReader reader = new FileReader(file);
+					bufferedReader = new BufferedReader(reader);
 
-				List<String[]> charArraysForThisChromosome = chromosomeMap.get(chromosomeInMap);
+					List<String[]> charArraysForThisChromosome = chromosomeMap.get(chromosomeInMap);
 
-				String line = "";
-
-				fileReader: while (bufferedReader.ready())
-				{
-					line = bufferedReader.readLine();
-					if (line.startsWith("#"))
+					String line = "";
+					System.out.println(bufferedReader.readLine());
+					fileReader: while (bufferedReader.ready())
 					{
-						continue fileReader;
-					}
-
-					String[] lineSplit = line.split("\t");
-
-					charArrayReader: for (int i = 0; i < charArraysForThisChromosome.size(); i++)
-					{
-						Long position = Long.parseLong(charArraysForThisChromosome.get(i)[0]);
-
-						if (lineSplit[1].equals(position.toString()))
+						line = bufferedReader.readLine();
+						if (line.startsWith("#"))
 						{
-							String reference = charArraysForThisChromosome.get(i)[1];
-							String alternative = charArraysForThisChromosome.get(i)[2];
+							continue fileReader;
+						}
 
-							if (lineSplit[2].toUpperCase().equals(reference.toUpperCase())
-									&& lineSplit[3].toUpperCase().equals(alternative.toUpperCase()))
+						String[] lineSplit = line.split("\t");
+
+						charArrayReader: for (int i = 0; i < charArraysForThisChromosome.size(); i++)
+						{
+							Long position = Long.parseLong(charArraysForThisChromosome.get(i)[0]);
+
+							if (lineSplit[1].equals(position.toString()))
 							{
-								int lineSplitIndex = 0;
+								String reference = charArraysForThisChromosome.get(i)[1];
+								String alternative = charArraysForThisChromosome.get(i)[2];
 
-								HashMap<String, Object> resultMap = new HashMap<String, Object>();
-								Iterable<AttributeMetaData> featureList = getOutputMetaData().getAtomicAttributes();
-
-								for (AttributeMetaData feature : featureList)
+								if (lineSplit[2].toUpperCase().equals(reference.toUpperCase())
+										&& lineSplit[3].toUpperCase().equals(alternative.toUpperCase()))
 								{
-									if (feature != null)
+									int lineSplitIndex = 0;
+
+									HashMap<String, Object> resultMap = new HashMap<String, Object>();
+									Iterable<AttributeMetaData> featureList = getOutputMetaData().getAtomicAttributes();
+
+									for (AttributeMetaData feature : featureList)
 									{
-										resultMap.put(feature.getName(), lineSplit[lineSplitIndex]);
-										lineSplitIndex = lineSplitIndex + 1;
+										if (feature != null)
+										{
+											resultMap.put(feature.getName(), lineSplit[lineSplitIndex]);
+											lineSplitIndex = lineSplitIndex + 1;
+										}
 									}
+
+									resultMap.put(CHROMOSOME, chromosomeInMap);
+									resultMap.put(POSITION, position);
+									resultMap.put(REFERENCE, reference);
+									resultMap.put(ALTERNATIVE, alternative);
+
+									results.add(new MapEntity(resultMap));
 								}
-
-								resultMap.put(CHROMOSOME, chromosomeInMap);
-								resultMap.put(POSITION, position);
-								resultMap.put(REFERENCE, reference);
-								resultMap.put(ALTERNATIVE, alternative);
-
-								results.add(new MapEntity(resultMap));
+								else
+								{
+									continue charArrayReader;
+								}
 							}
 							else
 							{
 								continue charArrayReader;
 							}
 						}
-						else
-						{
-							continue charArrayReader;
-						}
 					}
-				}
 			}
 		}
 

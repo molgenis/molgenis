@@ -10,6 +10,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -48,7 +49,7 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 				return false;
 			}
 
-			// Are the runtime property files not available, or is a webservice is down? we can not annotate
+			// Are the runtime property files not available, or is a webservice down? we can not annotate
 			if (!annotationDataExists())
 			{
 				return false;
@@ -90,7 +91,19 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 				{
 					if (source.hasNext())
 					{
-						results = annotateEntity(source.next());
+						try
+						{
+							results = annotateEntity(source.next());
+						}
+						catch (IOException e)
+						{
+							throw new RuntimeException(e);
+						}
+						catch (InterruptedException e)
+						{
+							throw new RuntimeException(e);
+						}
+						
 						size = results.size();
 					}
 					current = 0;
@@ -115,5 +128,5 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 		};
 	}
 
-	public abstract List<Entity> annotateEntity(Entity entity);
+	public abstract List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException;
 }
