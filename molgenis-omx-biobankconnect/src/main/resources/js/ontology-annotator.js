@@ -659,7 +659,7 @@
 		if(existingOntology.items.length === 0){
 			var ontologyData = {};
 			ontologyData.name = data.ontologyName;
-			ontologyData.identifier = data.ontologyIRI;
+			ontologyData.Identifier = data.ontologyIRI;
 			ontologyData.ontologyURI = data.ontologyIRI;
 			
 			$.ajax({

@@ -67,7 +67,7 @@
 				var table = $('<table />');
 
 				table.append('<tr><td>' + "Name:" + '</td><td>' + feature.name + '</td></tr>');
-				table.append('<tr><td>' + "Identifier:" + '</td><td>' + feature.identifier + '</td></tr>');
+				table.append('<tr><td>' + "Identifier:" + '</td><td>' + feature.Identifier + '</td></tr>');
 				$.each(molgenis.i18n.getAll(feature.description), function(key, val) {
 					table.append('<tr><td>' + "Description (" + key + "):" + '</td><td>' + val + '</td></tr>');
 				});
@@ -108,7 +108,7 @@
 				q : [ {
 					"field" : "observableFeature_Identifier",
 					"operator" : "EQUALS",
-					"value" : data.identifier
+					"value" : data.Identifier
 				} ],
 				num : maxItems
 			}),
@@ -219,7 +219,7 @@
 									
 									var protocolName = protocol.name;
 									var name = feature.name;
-									var identifier = feature.identifier;
+									var identifier = feature.Identifier;
 									var description = molgenis.i18n.get(feature.description);
 									var row = $('<tr />').data('key', this);
 									$('<td />').text(typeof protocolName !== 'undefined' ? protocolName : "").appendTo(row);

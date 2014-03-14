@@ -19,4 +19,5 @@ public interface AnnotationService
 	List<RepositoryAnnotator> getAllAnnotators();
 
 	List<RepositoryAnnotator> getAnnotatorsByMetaData(EntityMetaData metaData);
+	
 }

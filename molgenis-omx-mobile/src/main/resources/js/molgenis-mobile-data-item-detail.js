@@ -26,7 +26,7 @@ $(document).bind("mobileinit", function() {
 					var items = [];
 					items.push('<li>Categories</li>');
 				
-					var q = {q:[{field:'observablefeature_identifier',operator:'EQUALS',value:feature.identifier}]};
+					var q = {q:[{field:'observablefeature_identifier',operator:'EQUALS',value:feature.Identifier}]};
 					restApi.getAsync('/api/v1/category', {'q': q}, function(categories) {
 						$.each(categories.items, function() {
 							items.push('<li class="feature-detail-value">' + this.name + '</li>');

@@ -1,12 +1,12 @@
 package org.molgenis.data.support;
 
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.util.CaseInsensitiveLinkedHashMap;
 
 /**
  * Simple Entity implementation based on a Map
@@ -14,7 +14,7 @@ import org.molgenis.data.EntityMetaData;
 public class MapEntity extends AbstractEntity
 {
 	private static final long serialVersionUID = -8283375007931769373L;
-	private Map<String, Object> values = new LinkedHashMap<String, Object>();
+	private Map<String, Object> values = new CaseInsensitiveLinkedHashMap<Object>();
 	private String idAttributeName = null;
 
 	public MapEntity()
@@ -44,13 +44,7 @@ public class MapEntity extends AbstractEntity
 	@Override
 	public Object get(String attributeName)
 	{
-		Object value = values.get(attributeName);
-		if (value == null)
-		{
-			value = values.get(attributeName.toLowerCase());
-		}
-
-		return value;
+		return values.get(attributeName);
 	}
 
 	@Override
