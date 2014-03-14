@@ -4,6 +4,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -16,6 +20,9 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.framework.server.MolgenisSettings;
+import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StringUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -29,24 +36,15 @@ public class ClinicalGenomicsDatabaseServiceAnnotatorTest
 	private AttributeMetaData attributeMetaDataCantAnnotateFeature;
 	private AttributeMetaData attributeMetaDataCantAnnotateChrom;
 	private AttributeMetaData attributeMetaDataCantAnnotatePos;
-	private String annotatorOutput;
 	private Entity entity;
 	private ArrayList<Entity> input;
 
-	// input: 1 66067385
-	// output: LEPR 3953 Leptin receptor deficiency AR Pediatric Allergy/Immunology/Infectious; Endocrine
-	// Allergy/Immunology/Infectious; Endocrine Standard treatments for obesity, such as gastric surgery, have been
-	// described as beneficial In addition to endocrine manifestations, individuals may be susceptible to infections
-	// (eg, respiratory infections), which, coupled with other manifestations (eg, severe obesity) can have severe
-	// sequelae such that prophylaxis and rapid treatment may be beneficial 8666155; 9537324; 17229951; 21306929;
-	// 23275530; 23616257
-
 	@BeforeMethod
-	public void beforeMethod()
+	public void beforeMethod() throws IOException
 	{
-
-		annotator = new ClinicalGenomicsDatabaseServiceAnnotator();
-
+		MolgenisSettings settings = mock(MolgenisSettings.class);
+		when(settings.getProperty(ClinicalGenomicsDatabaseServiceAnnotator.CGD_FILE_LOCATION_PROPERTY)).thenReturn(loadTestFile("cgd_example.txt"));
+		
 		metaDataCanAnnotate = mock(EntityMetaData.class);
 		attributeMetaDataChrom = mock(AttributeMetaData.class);
 		attributeMetaDataPos = mock(AttributeMetaData.class);
@@ -93,7 +91,7 @@ public class ClinicalGenomicsDatabaseServiceAnnotatorTest
 		input = new ArrayList<Entity>();
 		input.add(entity);
 
-		annotatorOutput = "LEPR	3953	Leptin receptor deficiency	AR	Pediatric		Allergy/Immunology/Infectious; Endocrine	Allergy/Immunology/Infectious; Endocrine	Standard treatments for obesity, such as gastric surgery, have been described as beneficial	In addition to endocrine manifestations, individuals may be susceptible to infections (eg, respiratory infections), which, coupled with other manifestations (eg, severe obesity) can have severe sequelae such that prophylaxis and rapid treatment may be beneficial	8666155; 9537324; 17229951; 21306929; 23275530; 23616257";
+		annotator = new ClinicalGenomicsDatabaseServiceAnnotator(settings, null);
 	}
 
 	@Test
@@ -162,5 +160,14 @@ public class ClinicalGenomicsDatabaseServiceAnnotatorTest
 	public void canAnnotateFalseTest()
 	{
 		assertEquals(annotator.canAnnotate(metaDataCantAnnotate), false);
+	}
+	
+	private String loadTestFile(String name) throws IOException
+	{
+		InputStream in = getClass().getResourceAsStream("/" + name);
+		File f = File.createTempFile(name, "." + StringUtils.getFilenameExtension(name));
+		FileCopyUtils.copy(in, new FileOutputStream(f));
+
+		return f.getAbsolutePath();
 	}
 }
