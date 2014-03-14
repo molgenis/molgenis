@@ -84,7 +84,7 @@
 	ns.MappingManager.prototype.createMatrixForDataItems = function() {
 		var dataSetMapping = getDataSetsForMapping();
 		if(dataSetMapping.items.length > 0){
-			var documentType = 'protocolTree-' + dataSetMapping.items[0].identifier.split('-')[1];
+			var documentType = 'protocolTree-' + dataSetMapping.items[0].Identifier.split('-')[1];
 			
 			var q = {
 					rules : [[{
@@ -166,7 +166,7 @@
 			$.each(dataSets, function(index, dataSet){
 				var tuple = {};
 				var searchRequest = {
-					documentType : dataSet.identifier,
+					documentType : dataSet.Identifier,
 					query : {
 						pageSize: 10000,
 						rules: [queryRules]
@@ -192,7 +192,7 @@
 							if($.inArray(storeMappedFeatureId, allFeatureCollection) === -1) allFeatureCollection.push(storeMappedFeatureId);
 						});
 					}
-					var dataSetIdArray = dataSet.identifier.split('-');
+					var dataSetIdArray = dataSet.Identifier.split('-');
 					mappingPerStudy[dataSetIdArray[2]] = sortMappings(tuple);
 					count++;
 					
@@ -240,7 +240,7 @@
 			var involvedDataSetNames = [];
 			$.each(mappingDataSets, function(index, dataSet){
 				if(dataSet !== undefined && dataSet !== null){
-					var dataSetIdArray = dataSet.identifier.split('-');
+					var dataSetIdArray = dataSet.Identifier.split('-');
 					involvedDataSetIds.push(dataSetIdArray[2]);
 				}
 			});
@@ -351,7 +351,7 @@
 			});
 			
 			$.each(dataSets, function(index, dataSet){
-				var mappedDataSetId = dataSet.identifier.split('-')[2];
+				var mappedDataSetId = dataSet.Identifier.split('-')[2];
 				var mapping = mappingPerStudy[mappedDataSetId];
 				var mappedFeatures = mapping[featureId];
 				if(mappedFeatures){
@@ -391,7 +391,7 @@
 								});
 								removeAnnotation(mappedFeatures);
 								var deleteRequest = {
-									'documentType' : dataSet.identifier,
+									'documentType' : dataSet.Identifier,
 									'documentIds' : documentIds
 								};
 								$.ajax({
@@ -932,7 +932,7 @@
 		var deleteRequest = {
 			'dataSetId' : selectedDataSet,
 			'matchedDataSetIds' : mappedDataSetIds,
-			'documentType' : dataSet.identifier
+			'documentType' : dataSet.Identifier
 		};
 		$.download(molgenis.getContextURL().replace('/biobankconnect', '') + '/mappingmanager/download',{request : JSON.stringify(deleteRequest)});
 	};

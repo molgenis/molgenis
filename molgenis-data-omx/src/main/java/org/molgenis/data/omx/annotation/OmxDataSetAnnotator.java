@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.UUID;
 
 import org.apache.log4j.Logger;
 import org.molgenis.data.AttributeMetaData;
@@ -110,6 +111,7 @@ public class OmxDataSetAnnotator
 		{
 			dataSet = copyDataSet(dataSet);
 		}
+
 		Protocol resultProtocol = dataService.findOne(Protocol.ENTITY_NAME,
 				new QueryImpl().eq(Protocol.IDENTIFIER, annotator.getName() + PROTOCOL_SUFFIX), Protocol.class);
 		if (resultProtocol == null)
@@ -130,7 +132,9 @@ public class OmxDataSetAnnotator
 	}
 
 	private void addAnnotationResults(List<String> inputMetadataNames, List<String> outputMetadataNames,
-			DataSet dataSet, Iterator<Entity> annotationResultIterator, RepositoryAnnotator annotator)
+
+	DataSet dataSet, Iterator<Entity> annotationResultIterator, RepositoryAnnotator annotator)
+
 	{
 		List<String> processedObservationSets = new ArrayList<String>();
 		Iterable<ObservationSet> ObservationSets = dataService.findAll(ObservationSet.ENTITY_NAME,
@@ -148,6 +152,7 @@ public class OmxDataSetAnnotator
 				{
 					if (entityEqualsObservationSet(entity, inputValues, inputMetadataNames))
 					{
+
 						if (!processedObservationSets.contains(observationSet.getIdentifier()))
 						{
 							processedObservationSets.add(observationSet.getIdentifier());
@@ -168,6 +173,7 @@ public class OmxDataSetAnnotator
 								logger.error(e.getMessage());
 							}
 						}
+
 					}
 				}
 			}
@@ -236,6 +242,7 @@ public class OmxDataSetAnnotator
 
 	private void addValue(Entity entity, ObservationSet observationSet, String columnName, String prefix)
 			throws ValueConverterException
+
 	{
 		ObservableFeature thisFeature = dataService.findOne(ObservableFeature.ENTITY_NAME,
 				new QueryImpl().eq(ObservableFeature.IDENTIFIER, prefix + columnName), ObservableFeature.class);
@@ -262,6 +269,7 @@ public class OmxDataSetAnnotator
 			// retrieve a value from this observation set based on a specified feature
 			ObservedValue value = valueRepo.findOne(new QueryImpl().eq(ObservedValue.OBSERVATIONSET, observationSet)
 					.eq(ObservedValue.FEATURE, inputFeature), ObservedValue.class);
+
 			if (value != null)
 			{
 				Value omxValue = value.getValue();
@@ -271,6 +279,7 @@ public class OmxDataSetAnnotator
 					inputValueMap.put(inputFeature.getIdentifier(), inputValue);
 				}
 			}
+
 		}
 		return inputValueMap;
 	}
@@ -339,7 +348,7 @@ public class OmxDataSetAnnotator
 			{
 				observationSet.setPartOfDataSet(copy);
 			}
-			observationSet.setIdentifier(observationSet.getIdentifier() + new Date().getTime());
+			observationSet.setIdentifier(UUID.randomUUID().toString());
 			observationSet.setId(null);
 			newObservationSets.add(observationSet);
 			for (ObservedValue observedValue : observedValues)

@@ -15,7 +15,7 @@
 					// create protocol node
 					var node = {
 						key : protocolUri,
-						title : protocol.name,
+						title : protocol.Name,
 						folder : true,
 						lazy: subTree === null,
 						expanded: !settings.displaySiblings
@@ -28,8 +28,8 @@
 						node.children = [];
 						
 						var features = {};
-						if(protocol.features.items) {
-							$.each(protocol.features.items, function() {
+						if(protocol.Features.items) {
+							$.each(protocol.Features.items, function() {
 								features[parseInt(restApi.getPrimaryKeyFromHref(this.href))] = this;
 							});
 						}
@@ -39,7 +39,7 @@
 								var feature = features[key.substring(1)];
 								var featureNode = {
 									key : feature.href,
-									title : feature.name,
+									title : feature.Name,
 									folder : false,
 									selected: selectedNodes.hasOwnProperty(feature.href)
 								};
@@ -104,7 +104,7 @@
 						$.each(subprotocols.items, function() {
 							children.push({
 								key : this.href,
-								title : this.name,
+								title : this.Name,
 								tooltip : molgenis.i18n.get(this.description),
 								folder : true,
 								lazy : true,
@@ -123,7 +123,7 @@
 							$.each(features.items, function() {
 								children.push({
 									key : this.href,
-									title : this.name,
+									title : this.Name,
 									tooltip : molgenis.i18n.get(this.description),
 									selected: node.selected
 								});
@@ -230,7 +230,7 @@
 							
 							$.each(protocols.items, function(i, protocol) {
 								var subTree = subTrees[parseInt(restApi.getPrimaryKeyFromHref(protocol.href))];
-								$.each(protocol.features.items, function(i, feature) {
+								$.each(protocol.Features.items, function(i, feature) {
 									if(!subTree['F' + restApi.getPrimaryKeyFromHref(feature.href)])
 										subTree['F' + restApi.getPrimaryKeyFromHref(feature.href)] = null;
 								});

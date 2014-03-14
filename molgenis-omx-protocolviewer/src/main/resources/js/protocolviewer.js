@@ -66,14 +66,14 @@
 			getFeature(featureUri, function(feature) {
 				var table = $('<table />');
 
-				table.append('<tr><td>' + "Name:" + '</td><td>' + feature.name + '</td></tr>');
-				table.append('<tr><td>' + "Identifier:" + '</td><td>' + feature.identifier + '</td></tr>');
+				table.append('<tr><td>' + "Name:" + '</td><td>' + feature.Name + '</td></tr>');
+				table.append('<tr><td>' + "Identifier:" + '</td><td>' + feature.Identifier + '</td></tr>');
 				$.each(molgenis.i18n.getAll(feature.description), function(key, val) {
 					table.append('<tr><td>' + "Description (" + key + "):" + '</td><td>' + val + '</td></tr>');
 				});
 				table.append('<tr><td>' + "Data type:" + '</td><td>' + (feature.dataType ? feature.dataType : '') + '</td></tr>');
 				if (feature.unit)
-					table.append('<tr><td>' + "Unit:" + '</td><td>' + (feature.unit.name ? feature.unit.name : '') + '</td></tr>');
+					table.append('<tr><td>' + "Unit:" + '</td><td>' + (feature.unit.Name ? feature.unit.Name : '') + '</td></tr>');
 
 				table.addClass('listtable feature-table');
 				table.find('td:first-child').addClass('feature-table-col1');
@@ -88,7 +88,7 @@
 					$.each(feature.categories, function(i, category) {
 						var row = $('<tr />');
 						$('<td />').text(category.valueCode).appendTo(row);
-						$('<td />').text(category.name).appendTo(row);
+						$('<td />').text(category.Name).appendTo(row);
 						$('<td />').text(category.description).appendTo(row);
 						row.appendTo(categoryTable);
 					});
@@ -108,7 +108,7 @@
 				q : [ {
 					"field" : "observableFeature_Identifier",
 					"operator" : "EQUALS",
-					"value" : data.identifier
+					"value" : data.Identifier
 				} ],
 				num : maxItems
 			}),
@@ -205,21 +205,20 @@
 								}
 								var featureMap = {};
 								$.each(features.items, function() {
-									featureMap[this.href] = this;
+									featureMap[this.href.toLowerCase()] = this;
 								});
 								var protocolMap = {};
 								$.each(protocols.items, function() {
-									protocolMap[this.href] = this;
+									protocolMap[this.href.toLowerCase()] = this;
 								});
 								var table = $('<table id="feature-selection-table" class="table table-striped table-condensed table-hover" />');
 								$('<thead />').append('<th>Group</th><th>Variable Name</th><th>Variable Identifier</th><th>Description</th><th>Remove</th>').appendTo(table);
 								$.each(catalogItems, function() {
-									var feature = featureMap[this.feature];
+									var feature = featureMap[this.feature.toLowerCase()];
 									var protocol = protocolMap[this.path[this.path.length - 1]];
-									
-									var protocolName = protocol.name;
-									var name = feature.name;
-									var identifier = feature.identifier;
+									var protocolName = protocol.Name;
+									var name = feature.Name;
+									var identifier = feature.Identifier;
 									var description = molgenis.i18n.get(feature.description);
 									var row = $('<tr />').data('key', this);
 									$('<td />').text(typeof protocolName !== 'undefined' ? protocolName : "").appendTo(row);

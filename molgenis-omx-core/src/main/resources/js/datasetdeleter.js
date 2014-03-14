@@ -12,7 +12,7 @@
 			var items = [];
 			
 			$.each(datasets.items, function(key, val) {
-				items.push('<option value="' + val.identifier + '">' + val.name + '</option>');
+				items.push('<option value="' + val.Identifier + '">' + val.Name + '</option>');
 			});
 			$('#dataset-select').html(items.join(''));
 		});
