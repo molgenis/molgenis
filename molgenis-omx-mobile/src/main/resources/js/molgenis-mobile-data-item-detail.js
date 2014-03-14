@@ -14,7 +14,7 @@ $(document).bind("mobileinit", function() {
 	ns.onDataItemPageShow = function() {
 		if (selectedFeatureHref) {
 			restApi.getAsync(selectedFeatureHref, null, function(feature) {
-				$('.feature-name').html(feature.name);
+				$('.feature-name').html(feature.Name);
 				$('#feature-description').html(feature.description);
 				$('#feature-datatype').html(feature.dataType);
 			
@@ -29,7 +29,7 @@ $(document).bind("mobileinit", function() {
 					var q = {q:[{field:'observablefeature_identifier',operator:'EQUALS',value:feature.Identifier}]};
 					restApi.getAsync('/api/v1/category', {'q': q}, function(categories) {
 						$.each(categories.items, function() {
-							items.push('<li class="feature-detail-value">' + this.name + '</li>');
+							items.push('<li class="feature-detail-value">' + this.Name + '</li>');
 						});
 						$('#categories ul').html(items.join('')).listview('refresh');
 					});
