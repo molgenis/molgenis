@@ -122,18 +122,18 @@
 			<div class="tabbable">
 				<ul id="tabs" class="nav nav-tabs">
 				<#if mod_data>
-					<li id="tab-data"><a href="#dataset-data-container" data-toggle="tab"><img src="/img/grid-icon.png"> Data</a></li>
+					<li id="tab-data"><a href="#dataset-data-container" data-toggle="tab" <#if tab=="DATA">class="active"</#if>><img src="/img/grid-icon.png"> Data</a></li>
 				</#if>
 				<#if mod_aggregates>
-					<li id="tab-aggregates"><a href="#dataset-aggregate-container" data-toggle="tab"><img src="/img/aggregate-icon.png"> Aggregates</a></li>
+					<li id="tab-aggregates"><a href="#dataset-aggregate-container" data-toggle="tab" <#if tab=="AGGREGATE">class="active"</#if>><img src="/img/aggregate-icon.png"> Aggregates</a></li>
 				</#if>
 				<#if mod_charts>
-					<li id="tab-charts"><a href="#chart-container" data-toggle="tab"><img src="/img/chart-icon.png" alt="charts"> Charts</a></li>
+					<li id="tab-charts"><a href="#chart-container" data-toggle="tab" <#if tab=="CHART">class="active"</#if>><img src="/img/chart-icon.png" alt="charts"> Charts</a></li>
 				</#if>
 				</ul>
 				<div class="tab-content">
 				<#if mod_data>
-					<div class="tab-pane active" id="dataset-data-container">
+					<div class="tab-pane" id="dataset-data-container">
 						<div id="dataexplorer-grid-data">
                             <div class="accordion" id="genomebrowser">
                                 <div class="accordion-group">

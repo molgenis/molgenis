@@ -532,8 +532,8 @@
 		});
 		
 
-		// select first tab
-		$('#tabs a[data-toggle="tab"]').first().click();
+		// select active tab
+		$('#tabs a[data-toggle="tab"].active').click();
 		
 		// fire event handler
 		$('#dataset-select').change();
