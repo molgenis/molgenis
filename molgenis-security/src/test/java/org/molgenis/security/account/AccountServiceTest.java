@@ -114,7 +114,7 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests
 	{
 		when(
 				dataService.findOne(MolgenisUser.ENTITY_NAME,
-						new QueryImpl().eq(MolgenisUser.ACTIVE, false).eq(MolgenisUser.ACTIVATIONCODE, "123"),
+						new QueryImpl().eq(MolgenisUser.ACTIVE, false).and().eq(MolgenisUser.ACTIVATIONCODE, "123"),
 						MolgenisUser.class)).thenReturn(new MolgenisUser());
 
 		accountService.activateUser("123");
