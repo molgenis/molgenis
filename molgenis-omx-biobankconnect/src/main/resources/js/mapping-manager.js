@@ -120,7 +120,7 @@
 			$('#dataitem-table').empty();
 			$('#table-papger').empty();
 			var dataSetEntity = restApi.get('/api/v1/dataset/' + ns.MappingManager.prototype.getSelectedDataSet());
-			showMessage('alert alert-info', 'There are not mappings for <strong>' + dataSetEntity.name + '</strong> catalogue');
+			showMessage('alert alert-info', 'There are not mappings for <strong>' + dataSetEntity.Name + '</strong> catalogue');
 		}
 		
 		function getDataSetsForMapping(){
@@ -249,7 +249,7 @@
 			var removeDataSetIndex = [];
 			$.each(biobankDataSets, function(index, dataSet){
 				if($.inArray(ns.hrefToId(dataSet.href), involvedDataSetIds) !== -1){
-					involvedDataSetNames.push(dataSet.name);
+					involvedDataSetNames.push(dataSet.Name);
 				}else{
 					removeDataSetIndex.push(index);
 				}
@@ -330,7 +330,7 @@
 		function createRowForMappingTable(mappingPerStudy, dataSets, featureId, cachedFeatures){
 			var feature = cachedFeatures[featureId];
 			var row = $('<tr />');
-			var description = '<strong>' + feature.name + '</strong> : ' + i18nDescription(feature).en;
+			var description = '<strong>' + feature.Name + '</strong> : ' + i18nDescription(feature).en;
 			var isPopOver = description.length < 90;
 			var popover = $('<span />').html(isPopOver ? description : description.substring(0, 90) + ' ...');
 			if(!isPopOver){
@@ -364,11 +364,11 @@
 						if(eachValue.mappedFeatureId !== undefined){
 							var mappedFeatureEntity = cachedFeatures[eachValue.mappedFeatureId];
 							if(count === 0){
-								displayTerm = mappedFeatureEntity.name;
+								displayTerm = mappedFeatureEntity.Name;
 								description = mappedFeatureEntity.description;
 							}
 							if(eachValue.confirmed === true){
-								selectedMappings.push(mappedFeatureEntity.name);
+								selectedMappings.push(mappedFeatureEntity.Name);
 								confirmed = true;
 							}
 							count++;
@@ -447,7 +447,7 @@
 		function createAnnotationModal(feature){
 			var featureId = ns.hrefToId(feature.href);
 			var title = 'Rematch research variable : ';
-			standardModal.createModalCallback('Rematch research variable : ' + feature.name, function(modal){
+			standardModal.createModalCallback('Rematch research variable : ' + feature.Name, function(modal){
 				restApi.getAsync(feature.href, {'expand': ["unit", "definitions"]}, function(restApiFeature){
 					var body = modal.find('div.modal-body:eq(0)').addClass('overflow-y-visible');
 					ns.getOntologyAnnotator().createFeatureTable(body, title, restApiFeature, createAnnotationModal);
@@ -470,14 +470,14 @@
 		}
 		
 		function createRematchingModal(feature){
-			standardModal.createModalCallback('Rematch research variable : ' + feature.name, function(modal){
+			standardModal.createModalCallback('Rematch research variable : ' + feature.Name, function(modal){
 				var body = modal.find('div.modal-body:eq(0)');
 				var divControlPanel = $('<div />').addClass('row-fluid').appendTo(body);
 				var selectTag = $('<select />');
 				$.each(biobankDataSets, function(index, dataSet){
 					var dataSetId = ns.hrefToId(dataSet.href);
 					if(dataSetId !== ns.MappingManager.prototype.getSelectedDataSet()){
-						selectTag.append('<option value="' + dataSetId + '">' + dataSet.name + '</option>');
+						selectTag.append('<option value="' + dataSetId + '">' + dataSet.Name + '</option>');
 					}
 				});
 				var selectButton = $('<button type="btn" class="btn btn-info">Select</button>');
@@ -629,7 +629,7 @@
 				$.each(selectedOptions, function(index, dataSetId){
 					var dataSet = restApi.get('/api/v1/dataset/' + dataSetId);
 					var newRow = $('<div />').addClass('row-fluid');
-					$('<div />').addClass('offset2 span3').append(dataSet.name).appendTo(newRow);
+					$('<div />').addClass('offset2 span3').append(dataSet.Name).appendTo(newRow);
 					var removeButton = $('<button type="btn" class="btn btn-link">Remove</button>');
 					$('<div />').addClass('offset3 span2').append(removeButton).appendTo(newRow);
 					dataSetsContainer.append(newRow);
@@ -702,7 +702,7 @@
 		function createMappingTable(feature, mappedFeatures, mappedDataSet, modal, clickedCell){
 			var selectedFeatures = [];
 			var tableDiv = $('<div />').addClass('span7').css('margin-right', -100);
-			$('<div />').append('<h4>' + mappedDataSet.name + '</h4>').appendTo(tableDiv);
+			$('<div />').append('<h4>' + mappedDataSet.Name + '</h4>').appendTo(tableDiv);
 			var mappingTable = $('<table />').addClass('table table-bordered table-striped'); 
 			var header = $('<tr><th>Name</th><th>Description</th><th>Score</th><th>Select</th></tr>');
 			mappingTable.append(header);
@@ -737,11 +737,11 @@
 					var checkBox = $('<input type="checkbox">');
 					if(eachMapping.confirmed){
 						checkBox.attr('checked', true);
-						selectedFeatures.push(mappedFeature.name);
+						selectedFeatures.push(mappedFeature.Name);
 					}
 					eachMapping.mappedFeature = mappedFeature;
 					checkBox.data('eachMapping', eachMapping);
-					row.append('<td>' + mappedFeature.name + '</td><td>' + i18nDescription(mappedFeature).en + '</td><td>' + score + '</td>');
+					row.append('<td>' + mappedFeature.Name + '</td><td>' + i18nDescription(mappedFeature).en + '</td><td>' + score + '</td>');
 					row.append($('<td />').append($('<label class="checkbox"></label>').append(checkBox))).appendTo(mappingTable);
 				}
 				if($.inArray(index, highScoresIndex) !== -1){
@@ -764,8 +764,8 @@
 				'z-index' : 10000
 			});
 			var dataSet = restApi.get('/api/v1/dataset/' + ns.MappingManager.prototype.getSelectedDataSet());
-			$('<div />').append('<h4>' + dataSet.name + '</h4>').appendTo(infoDiv);
-			$('<div />').append('<span class="info"><strong>Data item : </strong></span>').append('<span>' + feature.name + '</span>').appendTo(infoDiv);
+			$('<div />').append('<h4>' + dataSet.Name + '</h4>').appendTo(infoDiv);
+			$('<div />').append('<span class="info"><strong>Data item : </strong></span>').append('<span>' + feature.Name + '</span>').appendTo(infoDiv);
 			$('<div />').append('<span class="info"><strong>Description : </strong></span>').append('<span>' + i18nDescription(feature).en + '</span>').appendTo(infoDiv);
 			var selectedMappings = $('<div />').append('<span class="info"><strong>Selected mappings : </strong></span>').append('<span>' + selectedFeatures.join(' , ') + '</span>').appendTo(infoDiv);
 			infoDiv.append('<br /><br />');
@@ -784,7 +784,7 @@
 			tableDiv.find('input[type="checkbox"]').click(function(){
 				var dataItems = [];
 				tableDiv.find('input:checked').each(function(index, checkbox){
-					dataItems.push($(checkbox).data('eachMapping').mappedFeature.name);
+					dataItems.push($(checkbox).data('eachMapping').mappedFeature.Name);
 				});
 				selectedMappings.find('span:eq(1)').html(dataItems.join(' , '));
 			});
@@ -824,7 +824,7 @@
 				var eachMapping = $(checkBox).data('eachMapping');
 				var changedValue = null;
 				if(checkBox.checked){
-					displayedFeatures.push(eachMapping.mappedFeature.name);
+					displayedFeatures.push(eachMapping.mappedFeature.Name);
 				}
 				if(checkBox.checked && !eachMapping.confirmed){
 					changedValue = true;
@@ -872,7 +872,7 @@
 						contentType : 'application/json'
 					});
 					
-					showMessage('alert alert-info', 'the mapping(s) has been updated for <strong>' + feature.name + '</strong> in <strong>' + mappedDataSet.name + '</strong> Biobank!');
+					showMessage('alert alert-info', 'the mapping(s) has been updated for <strong>' + feature.Name + '</strong> in <strong>' + mappedDataSet.Name + '</strong> Biobank!');
 				}
 				
 				if(displayedFeatures.length > 0){
@@ -880,7 +880,7 @@
 					clickedCell.removeClass('icon-pencil').addClass('icon-ok');
 				}else{
 					var firstMapping = mappingTable.find('input:eq(0)').data('eachMapping');
-					clickedCell.siblings('span:eq(0)').empty().append(firstMapping.mappedFeature.name);
+					clickedCell.siblings('span:eq(0)').empty().append(firstMapping.mappedFeature.Name);
 					clickedCell.removeClass('icon-ok').addClass('icon-pencil');
 				}
 			});
