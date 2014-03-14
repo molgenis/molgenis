@@ -5,6 +5,7 @@
 	// module api
 	self.getSelectedEntityMeta = getSelectedEntityMeta;
 	self.getSelectedAttributes = getSelectedAttributes;
+	self.setShowWizardOnInit = setShowWizardOnInit; 
 	self.getEntityQuery = getEntityQuery;
 	self.createFilterControls = createFilterControls;
 	self.createFilters = createFilters;
@@ -15,6 +16,7 @@
 	var attributeFilters = {};
 	var selectedAttributes = [];
 	var searchQuery = null;
+	var showWizardOnInit = false;
 	
 	/**
 	 * @memberOf molgenis.dataexplorer
@@ -28,6 +30,13 @@
 	 */
 	function getSelectedAttributes() {
 		return selectedAttributes;
+	}
+	
+	/**
+	 * @memberOf molgenis.dataexplorer
+	 */
+	function setShowWizardOnInit(show) {
+		showWizardOnInit = show;
 	}
 	
 	/**
@@ -399,9 +408,9 @@
 				createEntityMetaTree(entityMetaData, selectedAttributes);
 				
 				//Show wizard on show of dataexplorer if url param 'wizard=true' is added
-				if (showWizard) {
+				if (showWizardOnInit) {
 					molgenis.dataexplorer.wizard.openFilterWizardModal(selectedEntityMetaData, attributeFilters);
-					showWizard = false;
+					showWizardOnInit = false;
 				}
 			});
 		});

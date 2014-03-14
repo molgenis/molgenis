@@ -53,7 +53,7 @@
                     $(this).parent().find(".icon-chevron-down").removeClass("icon-chevron-down").addClass("icon-chevron-right");
                 });
     </#if>
-    	var showWizard = ${wizard?string('true', 'false')};
+    	molgenis.dataexplorer.setShowWizardOnInit(${wizard?string('true', 'false')});
     </script>
 	<div class="row-fluid">
 		<div class="row-fluid pull-right form-horizontal">
