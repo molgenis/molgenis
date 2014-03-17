@@ -26,6 +26,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.support.QueryResolver;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.search.SearchService;
@@ -102,6 +103,9 @@ public class DataExplorerController extends MolgenisPluginController
 
 	@Autowired
 	private SearchService searchService;
+
+	@Autowired
+	private QueryResolver queryResolver;
 
 	public DataExplorerController()
 	{
@@ -287,9 +291,13 @@ public class DataExplorerController extends MolgenisPluginController
 	{
 		String entityName = request.getEntityName();
 		String attributeName = request.getXAxisAttributeName();
-		QueryImpl q = request.getQ() != null ? new QueryImpl(request.getQ()) : new QueryImpl();
 
 		EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
+
+		QueryImpl q;
+		if (request.getQ() != null) q = new QueryImpl(queryResolver.resolveRefIdentifiers(request.getQ(), entityMeta));
+		else q = new QueryImpl();
+
 		AttributeMetaData attributeMeta = entityMeta.getAttribute(attributeName);
 		FieldTypeEnum dataType = attributeMeta.getDataType().getEnumType();
 		if (dataType != FieldTypeEnum.BOOL && dataType != FieldTypeEnum.CATEGORICAL && dataType != FieldTypeEnum.XREF)

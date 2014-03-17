@@ -33,7 +33,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
@@ -45,12 +44,12 @@ import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
-import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Queryable;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.support.QueryResolver;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.framework.db.EntityNotFoundException;
@@ -94,11 +93,15 @@ public class RestController
 	public static final String BASE_URI = "/api/v1";
 	private static final Pattern PATTERN_EXPANDS = Pattern.compile("([^\\[^\\]]+)(?:\\[(.+)\\])?");
 	private final DataService dataService;
+	private final QueryResolver queryResolver;
 
 	@Autowired
-	public RestController(DataService dataService)
+	public RestController(DataService dataService, QueryResolver queryResolver)
 	{
+		if (dataService == null) throw new IllegalArgumentException("dataService is null");
+		if (queryResolver == null) throw new IllegalArgumentException("queryResolver is null");
 		this.dataService = dataService;
+		this.queryResolver = queryResolver;
 	}
 
 	/**
@@ -648,7 +651,7 @@ public class RestController
 		// TODO non queryable
 		List<QueryRule> queryRules = request.getQ() == null ? Collections.<QueryRule> emptyList() : request.getQ();
 
-		Query q = new QueryImpl(resolveRefIdentifiers(queryRules, meta)).pageSize(request.getNum())
+		Query q = new QueryImpl(queryResolver.resolveRefIdentifiers(queryRules, meta)).pageSize(request.getNum())
 				.offset(request.getStart()).sort(request.getSort());
 
 		Iterable<Entity> it = dataService.findAll(entityName, q);
@@ -758,57 +761,6 @@ public class RestController
 		}
 
 		return entityMap;
-	}
-
-	// Handle a bit of lagacy, handle query like 'SELECT FROM Category WHERE observableFeature_Identifier=xxx'
-	// Resolve xref ids.
-	// TODO Do this in a cleaner way and support more operators, Move to util class or remove this completely?
-	private List<QueryRule> resolveRefIdentifiers(List<QueryRule> rules, EntityMetaData meta)
-	{
-		for (QueryRule r : rules)
-		{
-			if (r.getField() != null)
-			{
-				if (r.getField().endsWith("_Identifier"))
-				{
-					String entityName = StringUtils.capitalize(r.getField().substring(0,
-							r.getField().length() - "_Identifier".length()));
-					r.setField(entityName);
-
-					Object value = dataService.findOne(entityName, new QueryImpl().eq("Identifier", r.getValue()));
-					r.setValue(value);
-				}
-				else
-				{
-					// Resolve xref, mref fields
-					AttributeMetaData attr = meta.getAttribute(r.getField());
-
-					FieldTypeEnum dataType = attr.getDataType().getEnumType();
-					if (dataType == XREF || dataType == MREF || dataType == CATEGORICAL)
-					{
-						if (r.getOperator() == Operator.IN)
-						{
-							Iterable<?> values = dataService.findAll(attr.getRefEntity().getName(), new QueryImpl().in(
-									attr.getRefEntity().getLabelAttribute().getName(), (Iterable<?>) r.getValue()));
-							r.setValue(Lists.newArrayList(values));
-						}
-						else
-						{
-							Object value = dataService
-									.findOne(
-											attr.getRefEntity().getName(),
-											new QueryImpl().eq(attr.getRefEntity().getLabelAttribute().getName(),
-													r.getValue()));
-
-							r.setValue(value);
-						}
-					}
-				}
-			}
-
-		}
-
-		return rules;
 	}
 
 	/**
