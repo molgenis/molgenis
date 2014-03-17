@@ -345,29 +345,33 @@ public class DataExplorerController extends MolgenisPluginController
 		boolean hasXValues = !Iterables.isEmpty(xValues);
 		boolean hasYValues = !Iterables.isEmpty(yValues);
 
-		if (hasXValues && !hasYValues)
-		{
-			yLabels.add("Count");
-		}
-		else if (!hasXValues && hasYValues)
-		{
-			xLabels.add("Count");
-		}
-
 		if (hasXValues)
 		{
+			List<Long> totals = Lists.newArrayList();
+
 			for (Object xValue : xValues)
 			{
 				List<Long> row = Lists.newArrayList();
 
 				if (hasYValues)
 				{
+					int i = 0;
 					for (Object yValue : yValues)
 					{
-						// Both x and y choosen, create all possible combinations
+						// Both x and y choosen
 						Query query = q.getRules().isEmpty() ? new QueryImpl() : new QueryImpl(q).and();
 						query.eq(xAttributeName, xValue).and().eq(yAttributeName, yValue);
-						row.add(dataService.count(entityName, query));
+						long count = dataService.count(entityName, query);
+						row.add(count);
+						if (totals.size() == i)
+						{
+							totals.add(count);
+						}
+						else
+						{
+							totals.set(i, totals.get(i) + count);
+						}
+						i++;
 					}
 				}
 				else
@@ -375,23 +379,45 @@ public class DataExplorerController extends MolgenisPluginController
 					// No y attribute chosen
 					Query query = q.getRules().isEmpty() ? new QueryImpl() : new QueryImpl(q).and();
 					query.eq(xAttributeName, xValue);
-					row.add(dataService.count(entityName, query));
+					long count = dataService.count(entityName, query);
+					row.add(count);
+					if (totals.isEmpty())
+					{
+						totals.add(count);
+					}
+					else
+					{
+						totals.set(0, totals.get(0) + count);
+					}
+
 				}
 
 				matrix.add(row);
 			}
+
+			yLabels.add(hasYValues ? "Total" : "Count");
+			xLabels.add("Total");
+
+			matrix.add(totals);
 		}
 		else
 		{
 			// No xattribute chosen
+			long total = 0;
 			List<Long> row = Lists.newArrayList();
 			for (Object yValue : yValues)
 			{
 				Query query = q.getRules().isEmpty() ? new QueryImpl() : new QueryImpl(q).and();
 				query.eq(yAttributeName, yValue);
-				row.add(dataService.count(entityName, query));
+				long count = dataService.count(entityName, query);
+				row.add(count);
+				total += count;
 			}
+			row.add(total);
 			matrix.add(row);
+
+			xLabels.add("Count");
+			yLabels.add("Total");
 		}
 
 		return new AggregateResponse(matrix, xLabels, yLabels);
