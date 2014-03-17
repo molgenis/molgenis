@@ -129,8 +129,10 @@
 				});
 			}
 			var attribute = attributeFilter.attribute;
+			var rangeQuery = attribute.fieldType === 'DATE' || attribute.fieldType === 'DATE_TIME' || attribute.fieldType === 'DECIMAL' || attribute.fieldType === 'INT' || attribute.fieldType === 'LONG';
+			
 			$.each(attributeFilter.values, function(index, value) {
-				if (attributeFilter.range) {
+				if (rangeQuery) {
 
 					// Range filter
 					var rangeAnd = false;
@@ -261,31 +263,31 @@
 	 */
 	function createFilters(form) {
 		var filters = {};
-		$(":input", form).not('[type=radio]:not(:checked)').not('[type=checkbox]:not(:checked)').each(function(){
-			var value = $(this).val();
-			if(value) {
-				var attribute = $(this).closest('.controls').data('attribute');
-				var filter = filters[attribute.href];
-				if(!filter) {
-					filter = {};
-					filters[attribute.href] = filter;
-					filter.attribute = attribute;
+		$('.controls', form).each(function() {
+			var attribute = $(this).data('attribute');
+			var filter = filters[attribute.href];
+			$(":input", $(this)).not('[type=radio]:not(:checked)').not('[type=checkbox]:not(:checked)').each(function(){
+				var value = $(this).val();
+				if(value) {
+					if(!filter) {
+						filter = {};
+						filters[attribute.href] = filter;
+						filter.attribute = attribute;
+					}
+					var values = filter.values;
+					if(!values) {
+						values = [];
+						filter.values = values;
+					}
+					
+					if ($(this).hasClass('operator')) {
+						filter.operator = value;
+					} else {
+						values.push(value);
+					}
 				}
-				var values = filter.values;
-				if(!values) {
-					values = [];
-					filter.values = values;
-				}
-				
-				if ($(this).hasClass('operator')) {
-					filter.operator = value;
-				} else {
-					values.push(value);
-				}
-			}
+			});	
 		});
-		
-
 		return Object.keys(filters).map(function (key) { return filters[key]; }).filter(function(filter){return filter.values.length > 0;});
 	}
 	
