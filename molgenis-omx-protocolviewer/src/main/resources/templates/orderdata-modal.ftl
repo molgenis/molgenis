@@ -90,7 +90,7 @@
 	                        $.each(selection.items, function (i, item) {
 	                        	var feature = molgenis.Catalog.getFeature(item.feature);
 	                            var row = $('<tr>');
-	                            row.append('<td>' + feature.name + '</td>');
+	                            row.append('<td>' + feature.Name + '</td>');
 	                            row.append('<td>' + (feature.description ? molgenis.i18n.get(feature.description) : '') + '</td>');
 	
 	                            var deleteCol = $('<td class="center">');

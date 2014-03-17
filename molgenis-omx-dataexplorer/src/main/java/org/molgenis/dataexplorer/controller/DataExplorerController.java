@@ -1,6 +1,7 @@
 package org.molgenis.dataexplorer.controller;
 
 import static org.molgenis.dataexplorer.controller.DataExplorerController.URI;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import java.io.IOException;
@@ -25,7 +26,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.entityexplorer.controller.EntityExplorerController;
+import org.molgenis.data.support.QueryResolver;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.search.SearchService;
@@ -37,6 +38,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -102,6 +104,9 @@ public class DataExplorerController extends MolgenisPluginController
 	@Autowired
 	private SearchService searchService;
 
+	@Autowired
+	private QueryResolver queryResolver;
+
 	public DataExplorerController()
 	{
 		super(URI);
@@ -117,14 +122,6 @@ public class DataExplorerController extends MolgenisPluginController
 	public String init(@RequestParam(value = "dataset", required = false) String selectedEntityName,
 			@RequestParam(value = "wizard", required = false) Boolean wizard, Model model) throws Exception
 	{
-		// set entityExplorer URL for link to EntityExplorer for x/mrefs, but only if the user has permission to see the
-		// plugin
-		if (molgenisPermissionService.hasPermissionOnPlugin(EntityExplorerController.ID, Permission.READ)
-				|| molgenisPermissionService.hasPermissionOnPlugin(EntityExplorerController.ID, Permission.WRITE))
-		{
-			model.addAttribute("entityExplorerUrl", EntityExplorerController.ID);
-		}
-
 		Iterable<EntityMetaData> entitiesMeta = Iterables.transform(dataService.getEntityNames(),
 				new Function<String, EntityMetaData>()
 				{
@@ -143,9 +140,6 @@ public class DataExplorerController extends MolgenisPluginController
 		model.addAttribute("selectedEntityName", selectedEntityName);
 		model.addAttribute("wizard", (wizard != null) && wizard.booleanValue());
 
-		// Init genome browser
-		model.addAttribute("genomeBrowserSets", getGenomeBrowserSetsToModel());
-
 		// define which modules to display
 		Boolean modCharts = molgenisSettings.getBooleanProperty(KEY_MOD_CHARTS, DEFAULT_VAL_MOD_CHARTS);
 		model.addAttribute(MODEL_KEY_MOD_CHARTS, modCharts);
@@ -154,33 +148,96 @@ public class DataExplorerController extends MolgenisPluginController
 		Boolean modAggregates = molgenisSettings.getBooleanProperty(KEY_MOD_AGGREGATES, DEFAULT_VAL_MOD_AGGREGATES);
 		model.addAttribute(MODEL_KEY_MOD_AGGREGATES, modAggregates);
 
-		model.addAttribute(INITLOCATION, molgenisSettings.getProperty(INITLOCATION));
-		model.addAttribute(COORDSYSTEM, molgenisSettings.getProperty(COORDSYSTEM));
-		model.addAttribute(CHAINS, molgenisSettings.getProperty(CHAINS));
-		model.addAttribute(SOURCES, molgenisSettings.getProperty(SOURCES));
-		model.addAttribute(BROWSERLINKS, molgenisSettings.getProperty(BROWSERLINKS));
-		model.addAttribute(SEARCHENDPOINT, molgenisSettings.getProperty(SEARCHENDPOINT));
-		model.addAttribute(KARYOTYPEENDPOINT, molgenisSettings.getProperty(KARYOTYPEENDPOINT));
-		model.addAttribute(GENOMEBROWSERTABLE, molgenisSettings.getProperty(GENOMEBROWSERTABLE));
-
 		return "view-dataexplorer";
 	}
 
-	private Map<String, String> getGenomeBrowserSetsToModel()
+	@RequestMapping(value = "/module/{moduleId}", method = GET)
+	public String getModule(@PathVariable("moduleId") String moduleId, Model model)
 	{
-		Map<String, String> genomeBrowserSets = new HashMap<String, String>();
+		if (moduleId.equals("data"))
+		{
+			// Init genome browser
+			model.addAttribute("genomeEntities", getGenomeBrowserEntities());
+
+			model.addAttribute(INITLOCATION, molgenisSettings.getProperty(INITLOCATION));
+			model.addAttribute(COORDSYSTEM, molgenisSettings.getProperty(COORDSYSTEM));
+			model.addAttribute(CHAINS, molgenisSettings.getProperty(CHAINS));
+			model.addAttribute(SOURCES, molgenisSettings.getProperty(SOURCES));
+			model.addAttribute(BROWSERLINKS, molgenisSettings.getProperty(BROWSERLINKS));
+			model.addAttribute(SEARCHENDPOINT, molgenisSettings.getProperty(SEARCHENDPOINT));
+			model.addAttribute(KARYOTYPEENDPOINT, molgenisSettings.getProperty(KARYOTYPEENDPOINT));
+			model.addAttribute(GENOMEBROWSERTABLE, molgenisSettings.getProperty(GENOMEBROWSERTABLE));
+		}
+		return "view-dataexplorer-mod-" + moduleId; // TODO bad request in case of invalid module id
+	}
+
+	/**
+	 * Returns modules configuration for this entity based on current user permissions.
+	 * 
+	 * @param entityName
+	 * @return
+	 */
+	@RequestMapping(value = "/modules", method = GET)
+	@ResponseBody
+	public ModulesConfigResponse getModules(@RequestParam("entity") String entityName)
+	{
+		// set data explorer permission
+		Permission pluginPermission = null;
+		if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITE)) pluginPermission = Permission.WRITE;
+		else if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.READ)) pluginPermission = Permission.READ;
+		else if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.COUNT)) pluginPermission = Permission.COUNT;
+
+		ModulesConfigResponse modulesConfig = new ModulesConfigResponse();
+		if (pluginPermission != null)
+		{
+			switch (pluginPermission)
+			{
+				case COUNT:
+					modulesConfig.add(new ModuleConfig("aggregates", "Aggregates", "grid-icon.png"));
+					break;
+				case READ:
+				case WRITE:
+					modulesConfig.add(new ModuleConfig("data", "Data", "grid-icon.png"));
+					modulesConfig.add(new ModuleConfig("aggregates", "Aggregates", "aggregate-icon.png"));
+					modulesConfig.add(new ModuleConfig("charts", "Charts", "chart-icon.png"));
+					break;
+				default:
+					throw new RuntimeException("unknown plugin permission: " + pluginPermission);
+			}
+		}
+		return modulesConfig;
+	}
+
+	/**
+	 * Get readable genome entities
+	 * 
+	 * @return
+	 */
+	private Map<String, String> getGenomeBrowserEntities()
+	{
+		Map<String, String> genomeEntities = new HashMap<String, String>();
 		for (String entityName : dataService.getEntityNames())
 		{
 			EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
-			AttributeMetaData attributeStartPosition = entityMetaData.getAttribute(MUTATION_START_POSITION);
-			AttributeMetaData attributeId = entityMetaData.getAttribute(MUTATION_ID);
-			AttributeMetaData attributeChromosome = entityMetaData.getAttribute(MUTATION_CHROMOSOME);
-			if (attributeStartPosition != null && attributeId != null && attributeChromosome != null)
+			if (isGenomeBrowserEntity(entityMetaData))
 			{
-				genomeBrowserSets.put(entityName, entityMetaData.getLabel());
+				boolean canRead = molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.READ);
+				boolean canWrite = molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITE);
+				if (canRead || canWrite)
+				{
+					genomeEntities.put(entityMetaData.getName(), entityMetaData.getLabel());
+				}
 			}
 		}
-		return genomeBrowserSets;
+		return genomeEntities;
+	}
+
+	private boolean isGenomeBrowserEntity(EntityMetaData entityMetaData)
+	{
+		AttributeMetaData attributeStartPosition = entityMetaData.getAttribute(MUTATION_START_POSITION);
+		AttributeMetaData attributeId = entityMetaData.getAttribute(MUTATION_ID);
+		AttributeMetaData attributeChromosome = entityMetaData.getAttribute(MUTATION_CHROMOSOME);
+		return attributeStartPosition != null && attributeId != null && attributeChromosome != null;
 	}
 
 	@RequestMapping(value = "/download", method = POST)
@@ -234,9 +291,13 @@ public class DataExplorerController extends MolgenisPluginController
 	{
 		String entityName = request.getEntityName();
 		String attributeName = request.getXAxisAttributeName();
-		QueryImpl q = request.getQ() != null ? new QueryImpl(request.getQ()) : new QueryImpl();
 
 		EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
+
+		QueryImpl q;
+		if (request.getQ() != null) q = new QueryImpl(queryResolver.resolveRefIdentifiers(request.getQ(), entityMeta));
+		else q = new QueryImpl();
+
 		AttributeMetaData attributeMeta = entityMeta.getAttribute(attributeName);
 		FieldTypeEnum dataType = attributeMeta.getDataType().getEnumType();
 		if (dataType != FieldTypeEnum.BOOL && dataType != FieldTypeEnum.CATEGORICAL && dataType != FieldTypeEnum.XREF)

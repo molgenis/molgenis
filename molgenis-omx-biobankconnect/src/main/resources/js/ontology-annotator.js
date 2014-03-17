@@ -29,7 +29,7 @@
 			};
 			searchApi.search(request, function(searchResponse){
 				var sortRule = null;
-				$('#catalogue-name').empty().append(dataSetEntity.name);
+				$('#catalogue-name').empty().append(dataSetEntity.Name);
 				$('#dataitem-number').empty().append(searchResponse.totalHitCount);
 				pagination.reset();
 				ns.OntologyAnnotator.prototype.updateselectedDataSetId(selectedDataSetId);
@@ -113,7 +113,7 @@
 			pagination.updateMatrixPagination($('.pagination ul'), ns.OntologyAnnotator.prototype.createMatrixForDataItems);
 		});
 		
-		function createTableRow(feature){
+		function createTableRow(feature){	
 			var row = $('<tr />').addClass('show-popover').data('feature', feature).click(function(){
 				var featureId = $(this).data('feature').id;
 				var restApiFeature = restApi.get('/api/v1/observablefeature/' + featureId, {'expand': ["unit", "definitions"]}, null);
@@ -510,7 +510,7 @@
 				toCreate = false;
 				ontologyTermId = ns.hrefToId(result.items[0].href);
 				ontologyTermRestApi = result.items[0];
-				toUpdate = (result.items[0].name !== ontologyTermFromIndex.ontologyTermSynonym);
+				toUpdate = (result.items[0].Name !== ontologyTermFromIndex.ontologyTermSynonym);
 			}
 			if(toCreate) ontologyTermId = createOntologyTerm(dataMap[ontologyTerm]);
 			if(toUpdate) updateOntologyTerm(ontologyTermRestApi, dataMap[ontologyTerm]);
