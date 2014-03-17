@@ -24,7 +24,7 @@
 		var attributes = getAttributes();
 		if (attributes.length > 0) {
 			$('#data-table-container').table({
-				'entityMetaData' : molgenis.dataexplorer.getSelectedEntityMeta(),
+				'entityMetaData' : getEntity(),
 				'attributes' : attributes,
 				'query' : molgenis.dataexplorer.getEntityQuery()
 			});
@@ -49,22 +49,22 @@
 	 * @memberOf molgenis.dataexplorer.data
 	 */
 	function createDownloadDataRequest() {
-		var entityQuery = createEntityQuery();
+		var entityQuery = molgenis.dataexplorer.getEntityQuery();
 		
 		var dataRequest = {
-			entityName : selectedEntityMetaData.name,
+			entityName : getEntity().name,
 			attributeNames: [],
 			query : {
 				rules : [entityQuery.q]
 			}
 		};
 
-		var query = dataTable.table('getQuery');
+		var query = $('#data-table-container').table('getQuery');
 		if (query && query.sort) {
 			searchRequest.query.sort = query.sort;
 		}
 		
-		$.each(selectedAttributes, function() {
+		$.each(getAttributes(), function() {
 			var feature = this;
 			dataRequest.attributeNames.push(feature.name);
 			if (feature.fieldType === 'XREF' || feature.fieldType === 'MREF')
