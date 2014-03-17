@@ -226,11 +226,28 @@
 		container.data('table', {
 			'setAttributes' : function(attributes) {
 				settings.attributes = attributes;
-				createTable(settings);
+				
+				if(settings.attributes && settings.attributes.length > 0) {
+					// add data to elements
+					getTableMetaData(settings, function(attributes, refEntitiesMeta) {
+						settings.colAttributes = attributes;
+						settings.refEntitiesMeta = refEntitiesMeta;
+			
+						getTableData(settings, function(data) {
+							createTableHeader(settings);
+							createTableBody(data, settings);
+						});
+					});
+				}
 			},
 			'setQuery' : function(query) {
 				settings.query = query;
-				createTable(settings);
+				
+				getTableData(settings, function(data) {
+					createTableBody(data, settings);
+					createTablePager(data, settings);
+					createTableFooter(data, settings);
+				});
 			},
 			'getQuery' : function() {
 				return settings.query;
@@ -251,8 +268,6 @@
 				var order = settings.sort.orders[0];
 				order.property = attributeName;
 				order.direction = order.direction === 'ASC' ? 'DESC' : 'ASC';
-
-
 			} else {
 				settings.sort = {
 					orders: [{
