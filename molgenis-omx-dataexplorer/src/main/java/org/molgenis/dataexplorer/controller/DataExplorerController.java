@@ -403,7 +403,6 @@ public class DataExplorerController extends MolgenisPluginController
 		else
 		{
 			// No xattribute chosen
-			long total = 0;
 			List<Long> row = Lists.newArrayList();
 			for (Object yValue : yValues)
 			{
@@ -411,13 +410,25 @@ public class DataExplorerController extends MolgenisPluginController
 				query.eq(yAttributeName, yValue);
 				long count = dataService.count(entityName, query);
 				row.add(count);
-				total += count;
 			}
-			row.add(total);
 			matrix.add(row);
 
 			xLabels.add("Count");
 			yLabels.add("Total");
+		}
+
+		// Count row totals
+		if (hasYValues)
+		{
+			for (List<Long> row : matrix)
+			{
+				long total = 0;
+				for (Long count : row)
+				{
+					total += count;
+				}
+				row.add(total);
+			}
 		}
 
 		return new AggregateResponse(matrix, xLabels, yLabels);
