@@ -96,7 +96,7 @@
 			items.push('<p><a class="feature-filter-edit" data-href="' + attributeUri + '" href="#">'
 					+ attributeLabel + ' (' + attributeFilter.values.join(joinChars)
 					+ ')</a><a class="feature-filter-remove" data-href="' + attributeUri + '" href="#" title="Remove '
-					+ attributeLabel + ' filter" ><i class="ui-icon ui-icon-closethick"></i></a></p>');
+					+ attributeLabel + ' filter" ><i class="icon-remove"></i></a></p>');
 		});
 		items.push('</div>');
 		$('#feature-filters').html(items.join(''));
