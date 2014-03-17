@@ -364,7 +364,7 @@
 		var container = $("#plugin-container");
 		
 		// use chosen plugin for data set select
-		$('#dataset-select').chosen();
+		$('#dataset-select').select2({ width: 'resolve' });
 		$('#dataset-select').change(function() {
 			$(document).trigger('changeEntity', $(this).val());
 		});
