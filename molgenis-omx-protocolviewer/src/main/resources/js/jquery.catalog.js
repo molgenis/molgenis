@@ -15,7 +15,7 @@
 					// create protocol node
 					var node = {
 						key : protocolUri,
-						title : protocol.name,
+						title : protocol.Name,
 						folder : true,
 						lazy: subTree === null,
 						expanded: !settings.displaySiblings
@@ -39,7 +39,7 @@
 								var feature = features[key.substring(1)];
 								var featureNode = {
 									key : feature.href,
-									title : feature.name,
+									title : feature.Name,
 									folder : false,
 									selected: selectedNodes.hasOwnProperty(feature.href)
 								};
@@ -104,7 +104,7 @@
 						$.each(subprotocols.items, function() {
 							children.push({
 								key : this.href,
-								title : this.name,
+								title : this.Name,
 								tooltip : molgenis.i18n.get(this.description),
 								folder : true,
 								lazy : true,
@@ -123,7 +123,7 @@
 							$.each(features.items, function() {
 								children.push({
 									key : this.href,
-									title : this.name,
+									title : this.Name,
 									tooltip : molgenis.i18n.get(this.description),
 									selected: node.selected
 								});
