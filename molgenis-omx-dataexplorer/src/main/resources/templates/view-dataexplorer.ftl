@@ -6,6 +6,7 @@
 	"jquery.bootstrap.wizard.css",
 	"bootstrap-datetimepicker.min.css",
 	"ui.fancytree.min.css",
+	"jquery-ui-1.9.2.custom.min.css",
 	"select2.css",
 	"dataexplorer.css"]>
 <#assign js=[
