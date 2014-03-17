@@ -348,11 +348,13 @@
 				attributeFilters[this.attribute.href] = this;
 			});
 			createFiltersList(attributeFilters);
+			$(document).trigger('changeQuery', createEntityQuery());
 		});
 		
 		$(document).on('removeAttributeFilter', function(e, data) {
 			delete attributeFilters[data.attributeUri];
 			createFiltersList(attributeFilters);
+			$(document).trigger('changeQuery', createEntityQuery());
 		});
 		
 		$(document).on('clickAttribute', function(e, data) {
@@ -370,7 +372,8 @@
 		$("#observationset-search").focus();
 		
 		$("#observationset-search").change(function(e) {
-			$(document).trigger('changeEntitySearchQuery', $(this).val());
+			searchQuery = $(this).val();
+			$(document).trigger('changeQuery', createEntityQuery());
 		});
 	
 		$('#filter-wizard-btn').click(function() {
