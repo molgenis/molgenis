@@ -107,19 +107,23 @@
 	};
 	
 	$(function() {
-		$(document).on('changeAttributeSelection', function(e, data) {
+		// unbind existing event handlers before binding new ones
+		$(document).off('.aggregates');
+		
+		// bind event handlers with namespace
+		$(document).on('changeAttributeSelection.aggregates', function(e, data) {
 			molgenis.dataexplorer.aggregates.createAggregatesTable();
 		});
 		
-		$(document).on('updateAttributeFilters', function(e, data) {
+		$(document).on('updateAttributeFilters.aggregates', function(e, data) {
 			molgenis.dataexplorer.aggregates.createAggregatesTable();
 		});
 		
-		$(document).on('removeAttributeFilter', function(e, data) {
+		$(document).on('removeAttributeFilter.aggregates', function(e, data) {
 			molgenis.dataexplorer.aggregates.createAggregatesTable();
 		});
 		
-		$(document).on('changeEntitySearchQuery', function(e, entitySearchQuery) {
+		$(document).on('changeQuery.aggregates', function(e, entitySearchQuery) {
 			molgenis.dataexplorer.aggregates.createAggregatesTable();
 		});
 	});
