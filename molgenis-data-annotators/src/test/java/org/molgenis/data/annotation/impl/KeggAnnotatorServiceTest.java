@@ -29,7 +29,6 @@ public class KeggAnnotatorServiceTest
 	private AttributeMetaData attributeMetaDataCantAnnotateFeature;
 	private AttributeMetaData attributeMetaDataCantAnnotateChrom;
 	private AttributeMetaData attributeMetaDataCantAnnotatePos;
-	private String annotatorOutput;
 	private Entity entity;
 	private ArrayList<Entity> input;
 
@@ -80,8 +79,6 @@ public class KeggAnnotatorServiceTest
 
 		input = new ArrayList<Entity>();
 		input.add(entity);
-
-		annotatorOutput = "hsa:55120	path:hsa03460, path:hsa04120	Fanconi anemia pathway - Homo sapiens (human), Ubiquitin mediated proteolysis - Homo sapiens (human)";
 	}
 
 	@Test
