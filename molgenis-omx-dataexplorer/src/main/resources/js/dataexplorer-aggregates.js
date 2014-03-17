@@ -12,12 +12,15 @@
 	molgenis.dataexplorer = molgenis.dataexplorer || {};
 	var self = molgenis.dataexplorer.aggregates = molgenis.dataexplorer.aggregates || {};
 	
+	// module api
+	self.createAggregatesTable = createAggregatesTable;
+	
 	var restApi = new molgenis.RestClient();
 
 	/**
 	 * @memberOf molgenis.dataexplorer.aggregates
 	 */
-	self.createAggregatesTable = function() {
+	function createAggregatesTable() {
 		var attributes = getAttributes();
 		var aggregableAttributes = $.grep(attributes, function(attribute) {
 			return attribute.fieldType === 'BOOL' || attribute.fieldType === 'CATEGORICAL' || attribute.fieldType === 'XREF';
@@ -42,7 +45,7 @@
 			$('#feature-select-container').hide();
 			$('#aggregate-table-container').html('<p>No aggregable items</p>');
 		}
-	};
+	}
 	
 	/**
 	 * @memberOf molgenis.dataexplorer.aggregates
@@ -102,4 +105,22 @@
 	function getEntityQuery() {
 		return molgenis.dataexplorer.getEntityQuery().q;
 	};
+	
+	$(function() {
+		$(document).on('changeAttributeSelection', function(e, data) {
+			molgenis.dataexplorer.aggregates.createAggregatesTable();
+		});
+		
+		$(document).on('updateAttributeFilters', function(e, data) {
+			molgenis.dataexplorer.aggregates.createAggregatesTable();
+		});
+		
+		$(document).on('removeAttributeFilter', function(e, data) {
+			molgenis.dataexplorer.aggregates.createAggregatesTable();
+		});
+		
+		$(document).on('changeEntitySearchQuery', function(e, entitySearchQuery) {
+			molgenis.dataexplorer.aggregates.createAggregatesTable();
+		});
+	});
 })($, window.top.molgenis = window.top.molgenis || {});
