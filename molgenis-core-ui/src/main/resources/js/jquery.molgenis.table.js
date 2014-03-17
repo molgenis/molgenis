@@ -84,7 +84,9 @@
 		// TODO do not construct uri from other uri
 		var entityCollectionUri = settings.entityMetaData.href.replace("/meta", "");
 		var q = $.extend({}, settings.query, {'start': settings.start, 'num': settings.maxRows, 'sort': settings.sort});
+		showSpinner();
 		restApi.getAsync(entityCollectionUri, {'attributes' : attributeNames, 'expand' : expandAttributeNames, 'q' : q}, function(data) {
+			hideSpinner();
 			callback(data);
 		});
 	}
