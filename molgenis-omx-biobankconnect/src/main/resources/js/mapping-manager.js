@@ -130,13 +130,14 @@
 				if(dataSetId !== ns.MappingManager.prototype.getSelectedDataSet())
 				identifiers.push(getUserName() + '-' + ns.MappingManager.prototype.getSelectedDataSet() + '-' + dataSetId); 
 			});
-			var dataSetMapping = restApi.get('/api/v1/dataset/', null, {
+			var request = {
 				q : [{
-					field : 'identifier',
+					field : 'Identifier',
 					operator : 'IN',
 					value : identifiers
-				}],
-			});
+				}]
+			};
+			var dataSetMapping = restApi.get('/api/v1/dataset/',{ q : request });
 			return dataSetMapping;
 		}
 		
@@ -209,14 +210,15 @@
 			for(var i = 1; i < iterations; i++){
 				var lower = (i - 1) * 500;
 				var upper = (i * 500) < allFeatureCollection.length ? (i * 500) : allFeatureCollection.length; 
-				var listOfFeatures = restApi.get('/api/v1/observablefeature', {
+				var query = {
 					q : [{
 						field : 'id',
 						operator : 'IN',
 						value : allFeatureCollection.slice(lower, upper)
 					}],
 					num : 500
-				});
+				};
+				var listOfFeatures = restApi.get('/api/v1/observablefeature', {q : query});
 				$.each(listOfFeatures.items, function(index, element){
 					cachedFeatures[(ns.hrefToId(element.href))] = element;
 				});
