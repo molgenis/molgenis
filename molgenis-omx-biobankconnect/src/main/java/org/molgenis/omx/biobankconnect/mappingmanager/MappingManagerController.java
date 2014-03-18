@@ -242,7 +242,7 @@ public class MappingManagerController extends MolgenisPluginController
 								{
 									if (featureMap.containsKey(id))
 									{
-										if (value.length() > 0) value.append(';');
+										if (value.length() > 0) value.append(';').append('\r');
 										value.append(featureMap.get(id).getName()).append(':')
 												.append(featureMap.get(id).getDescription());
 									}
