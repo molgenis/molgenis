@@ -48,8 +48,6 @@ public class CaddServiceAnnotatorTest
 		when(settings.getProperty(CaddServiceAnnotator.CADD_FILE_LOCATION_PROPERTY))
 				.thenReturn(getClass().getResource("/1000G.vcf.gz").getFile());
 
-		when(settings.getProperty(CaddServiceAnnotator.TABIX_LOCATION_PROPERTY)).thenReturn(getClass().getResource("/tabix").getFile());
-
 		attributeMetaDataChrom = mock(AttributeMetaData.class);
 		attributeMetaDataPos = mock(AttributeMetaData.class);
 		attributeMetaDataRef = mock(AttributeMetaData.class);
@@ -111,8 +109,8 @@ public class CaddServiceAnnotatorTest
 
 		entity = mock(Entity.class);
 
-		when(entity.getString(CaddServiceAnnotator.CHROMOSOME)).thenReturn("10");
-		when(entity.getLong(CaddServiceAnnotator.POSITION)).thenReturn(new Long(17463221));
+		when(entity.getString(CaddServiceAnnotator.CHROMOSOME)).thenReturn("11");
+		when(entity.getLong(CaddServiceAnnotator.POSITION)).thenReturn(new Long(19207841));
 		when(entity.getString(CaddServiceAnnotator.REFERENCE)).thenReturn("C");
 		when(entity.getString(CaddServiceAnnotator.ALTERNATIVE)).thenReturn("T");
 
