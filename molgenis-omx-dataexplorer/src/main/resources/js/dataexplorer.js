@@ -129,8 +129,10 @@
 				});
 			}
 			var attribute = attributeFilter.attribute;
+			var rangeQuery = attribute.fieldType === 'DATE' || attribute.fieldType === 'DATE_TIME' || attribute.fieldType === 'DECIMAL' || attribute.fieldType === 'INT' || attribute.fieldType === 'LONG';
+			
 			$.each(attributeFilter.values, function(index, value) {
-				if (attributeFilter.range) {
+				if (rangeQuery) {
 
 					// Range filter
 					var rangeAnd = false;
@@ -261,31 +263,31 @@
 	 */
 	function createFilters(form) {
 		var filters = {};
-		$(":input", form).not('[type=radio]:not(:checked)').not('[type=checkbox]:not(:checked)').each(function(){
-			var value = $(this).val();
-			if(value) {
-				var attribute = $(this).closest('.controls').data('attribute');
-				var filter = filters[attribute.href];
-				if(!filter) {
-					filter = {};
-					filters[attribute.href] = filter;
-					filter.attribute = attribute;
+		$('.controls', form).each(function() {
+			var attribute = $(this).data('attribute');
+			var filter = filters[attribute.href];
+			$(":input", $(this)).not('[type=radio]:not(:checked)').not('[type=checkbox]:not(:checked)').each(function(){
+				var value = $(this).val();
+				if(value) {
+					if(!filter) {
+						filter = {};
+						filters[attribute.href] = filter;
+						filter.attribute = attribute;
+					}
+					var values = filter.values;
+					if(!values) {
+						values = [];
+						filter.values = values;
+					}
+					
+					if ($(this).hasClass('operator')) {
+						filter.operator = value;
+					} else {
+						values.push(value);
+					}
 				}
-				var values = filter.values;
-				if(!values) {
-					values = [];
-					filter.values = values;
-				}
-				
-				if ($(this).hasClass('operator')) {
-					filter.operator = value;
-				} else {
-					values.push(value);
-				}
-			}
+			});	
 		});
-		
-
 		return Object.keys(filters).map(function (key) { return filters[key]; }).filter(function(filter){return filter.values.length > 0;});
 	}
 	
@@ -346,11 +348,13 @@
 				attributeFilters[this.attribute.href] = this;
 			});
 			createFiltersList(attributeFilters);
+			$(document).trigger('changeQuery', createEntityQuery());
 		});
 		
 		$(document).on('removeAttributeFilter', function(e, data) {
 			delete attributeFilters[data.attributeUri];
 			createFiltersList(attributeFilters);
+			$(document).trigger('changeQuery', createEntityQuery());
 		});
 		
 		$(document).on('clickAttribute', function(e, data) {
@@ -360,7 +364,7 @@
 		var container = $("#plugin-container");
 		
 		// use chosen plugin for data set select
-		$('#dataset-select').chosen();
+		$('#dataset-select').select2({ width: 'resolve' });
 		$('#dataset-select').change(function() {
 			$(document).trigger('changeEntity', $(this).val());
 		});
@@ -368,7 +372,8 @@
 		$("#observationset-search").focus();
 		
 		$("#observationset-search").change(function(e) {
-			$(document).trigger('changeEntitySearchQuery', $(this).val());
+			searchQuery = $(this).val();
+			$(document).trigger('changeQuery', createEntityQuery());
 		});
 	
 		$('#filter-wizard-btn').click(function() {
