@@ -4,14 +4,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.molgenis.MolgenisFieldTypes;
@@ -21,10 +17,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.util.ApplicationContextProvider;
-import org.springframework.context.ApplicationContext;
-import org.springframework.util.FileCopyUtils;
-import org.springframework.util.StringUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -47,8 +39,9 @@ public class DbnsfpGeneServiceAnnotatorTest
 		metaDataCanAnnotate = mock(EntityMetaData.class);
 
 		MolgenisSettings settings = mock(MolgenisSettings.class);
-		when(settings.getProperty(DbnsfpGeneServiceAnnotator.GENE_FILE_LOCATION_PROPERTY)).thenReturn(loadTestFile("dbNSFP_gene_example.txt"));
-		
+		when(settings.getProperty(DbnsfpGeneServiceAnnotator.GENE_FILE_LOCATION_PROPERTY)).thenReturn(
+				getClass().getResource("/dbNSFP_gene_example.txt").getFile());
+
 		attributeMetaDataChrom = mock(AttributeMetaData.class);
 		attributeMetaDataPos = mock(AttributeMetaData.class);
 
@@ -93,7 +86,7 @@ public class DbnsfpGeneServiceAnnotatorTest
 
 		input = new ArrayList<Entity>();
 		input.add(entity);
-		
+
 		annotator = new DbnsfpGeneServiceAnnotator(settings, null);
 	}
 
@@ -160,14 +153,5 @@ public class DbnsfpGeneServiceAnnotatorTest
 	public void canAnnotateFalseTest()
 	{
 		assertEquals(annotator.canAnnotate(metaDataCantAnnotate), false);
-	}
-	
-	private String loadTestFile(String name) throws IOException
-	{
-		InputStream in = getClass().getResourceAsStream("/" + name);
-		File f = File.createTempFile(name, "." + StringUtils.getFilenameExtension(name));
-		FileCopyUtils.copy(in, new FileOutputStream(f));
-
-		return f.getAbsolutePath();
 	}
 }

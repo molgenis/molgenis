@@ -37,6 +37,7 @@ import org.molgenis.data.rest.RestControllerTest.RestControllerConfig;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.support.QueryResolver;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -394,9 +395,15 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
+		public QueryResolver queryResolver()
+		{
+			return new QueryResolver(dataService());
+		}
+
+		@Bean
 		public RestController restController()
 		{
-			return new RestController(dataService());
+			return new RestController(dataService(), queryResolver());
 		}
 	}
 

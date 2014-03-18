@@ -4,10 +4,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -21,8 +18,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.springframework.util.FileCopyUtils;
-import org.springframework.util.StringUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -43,8 +38,9 @@ public class ClinicalGenomicsDatabaseServiceAnnotatorTest
 	public void beforeMethod() throws IOException
 	{
 		MolgenisSettings settings = mock(MolgenisSettings.class);
-		when(settings.getProperty(ClinicalGenomicsDatabaseServiceAnnotator.CGD_FILE_LOCATION_PROPERTY)).thenReturn(loadTestFile("cgd_example.txt"));
-		
+		when(settings.getProperty(ClinicalGenomicsDatabaseServiceAnnotator.CGD_FILE_LOCATION_PROPERTY)).thenReturn(
+				getClass().getResource("/cgd_example.txt").getFile());
+
 		metaDataCanAnnotate = mock(EntityMetaData.class);
 		attributeMetaDataChrom = mock(AttributeMetaData.class);
 		attributeMetaDataPos = mock(AttributeMetaData.class);
@@ -160,14 +156,5 @@ public class ClinicalGenomicsDatabaseServiceAnnotatorTest
 	public void canAnnotateFalseTest()
 	{
 		assertEquals(annotator.canAnnotate(metaDataCantAnnotate), false);
-	}
-	
-	private String loadTestFile(String name) throws IOException
-	{
-		InputStream in = getClass().getResourceAsStream("/" + name);
-		File f = File.createTempFile(name, "." + StringUtils.getFilenameExtension(name));
-		FileCopyUtils.copy(in, new FileOutputStream(f));
-
-		return f.getAbsolutePath();
 	}
 }
