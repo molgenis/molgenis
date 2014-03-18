@@ -339,26 +339,24 @@ public class DataExplorerController extends MolgenisPluginController
 		AttributeMetaData yAttributeMeta = null;
 		FieldTypeEnum yDataType = null;
 		if (StringUtils.isNotBlank(yAttributeName))
-
-		QueryImpl q;
-		if (request.getQ() != null) q = new QueryImpl(queryResolver.resolveRefIdentifiers(request.getQ(), entityMeta));
-		else q = new QueryImpl();
-
-		AttributeMetaData attributeMeta = entityMeta.getAttribute(attributeName);
-		FieldTypeEnum dataType = attributeMeta.getDataType().getEnumType();
-		if (dataType != FieldTypeEnum.BOOL && dataType != FieldTypeEnum.CATEGORICAL && dataType != FieldTypeEnum.XREF)
-
 		{
-			yAttributeMeta = entityMeta.getAttribute(yAttributeName);
-			if (yAttributeMeta == null)
-			{
-				throw new InputValidationException("Unknow attribute '" + yAttributeName + "'");
-			}
 
-			yDataType = yAttributeMeta.getDataType().getEnumType();
-			if ((yDataType != BOOL) && (yDataType != CATEGORICAL) && (yDataType != XREF))
+			AttributeMetaData attributeMeta = entityMeta.getAttribute(attributeName);
+			FieldTypeEnum dataType = attributeMeta.getDataType().getEnumType();
+			if (dataType != FieldTypeEnum.BOOL && dataType != FieldTypeEnum.CATEGORICAL
+					&& dataType != FieldTypeEnum.XREF)
 			{
-				throw new InputValidationException("Unsupported data type " + yDataType);
+				yAttributeMeta = entityMeta.getAttribute(yAttributeName);
+				if (yAttributeMeta == null)
+				{
+					throw new InputValidationException("Unknow attribute '" + yAttributeName + "'");
+				}
+
+				yDataType = yAttributeMeta.getDataType().getEnumType();
+				if ((yDataType != BOOL) && (yDataType != CATEGORICAL) && (yDataType != XREF))
+				{
+					throw new InputValidationException("Unsupported data type " + yDataType);
+				}
 			}
 		}
 
