@@ -255,6 +255,9 @@ public class DataExplorerController extends MolgenisPluginController
 		final Set<String> attributes = new HashSet<String>(dataRequest.getAttributeNames());
 		String fileName = entityName + '_' + new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + ".csv";
 
+		QueryImpl query = dataRequest.getQuery();
+		queryResolver.resolveRefIdentifiers(query.getRules(), entityMetaData);
+
 		response.setContentType("text/csv");
 		response.addHeader("Content-Disposition", "attachment; filename=" + fileName);
 
@@ -277,7 +280,7 @@ public class DataExplorerController extends MolgenisPluginController
 							return attributeMetaData.getName();
 						}
 					}));
-			csvWriter.add(dataService.findAll(entityName, dataRequest.getQuery()));
+			csvWriter.add(dataService.findAll(entityName, query));
 		}
 		finally
 		{
