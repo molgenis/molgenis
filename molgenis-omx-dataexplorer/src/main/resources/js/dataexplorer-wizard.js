@@ -88,7 +88,8 @@
 		
 		$.each(compoundAttributes, function(i, compoundAttribute) {
 			var tabId = compoundAttribute.name + '-tab';
-			listItems.push('<li' + (i == 0 ? ' class="active"' : '') + '><a href="#' + tabId + '" data-toggle="tab">' + compoundAttribute.label + '</a></li>');
+			var label = compoundAttribute.label || compoundAttribute.name;
+			listItems.push('<li' + (i == 0 ? ' class="active"' : '') + '><a href="#' + tabId + '" data-toggle="tab">' + label + '</a></li>');
 			
 			var pane = $('<div class="tab-pane' + (i == 0 ? ' active"' : '') + '" id="' + tabId + '">');
 			var paneContainer = $('<div class="well"></div>');

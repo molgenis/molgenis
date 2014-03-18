@@ -36,7 +36,7 @@
 			$('#aggregate-table-container').empty();
 			if (attributeSelect.val()) {
 				updateAggregatesTable(attributeSelect.val());
-				attributeSelect.chosen();
+				attributeSelect.select2({ width: 'resolve' });
 				attributeSelect.change(function() {
 					updateAggregatesTable($(this).val());
 				});
