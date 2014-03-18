@@ -36,7 +36,8 @@ public class CaddServiceAnnotatorTest
 	private AttributeMetaData attributeMetaDataCantAnnotateRef;
 	private AttributeMetaData attributeMetaDataCantAnnotateAlt;
 	private Entity entity;
-	private ArrayList<Entity> input;
+	private ArrayList<Entity> input1;
+	private ArrayList<Entity> input2;
 
 	@BeforeMethod
 	public void beforeMethod() throws IOException
@@ -114,18 +115,28 @@ public class CaddServiceAnnotatorTest
 		when(entity.getString(CaddServiceAnnotator.REFERENCE)).thenReturn("C");
 		when(entity.getString(CaddServiceAnnotator.ALTERNATIVE)).thenReturn("T");
 
-		input = new ArrayList<Entity>();
-		input.add(entity);
+		input1 = new ArrayList<Entity>();
+		input1.add(entity);
+		
+		entity = mock(Entity.class);
+				
+		when(entity.getString(CaddServiceAnnotator.CHROMOSOME)).thenReturn("2");
+		when(entity.getLong(CaddServiceAnnotator.POSITION)).thenReturn(new Long(19207841));
+		when(entity.getString(CaddServiceAnnotator.REFERENCE)).thenReturn("C");
+		when(entity.getString(CaddServiceAnnotator.ALTERNATIVE)).thenReturn("T");
+		
+		input2 = new ArrayList<Entity>();
+		input2.add(entity);
 
 		annotator = new CaddServiceAnnotator(settings, null);
 	}
 
 	@Test
-	public void annotateTest()
+	public void annotateTestLineOne()
 	{
 		List<Entity> expectedList = new ArrayList<Entity>();
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
-
+	
 		resultMap.put(CaddServiceAnnotator.CADD_ABS, "0.180916");
 		resultMap.put(CaddServiceAnnotator.CADD_SCALED, "4.974");
 
@@ -133,7 +144,29 @@ public class CaddServiceAnnotatorTest
 
 		expectedList.add(expectedEntity);
 
-		Iterator<Entity> results = annotator.annotate(input.iterator());
+		Iterator<Entity> results = annotator.annotate(input1.iterator());
+
+		Entity resultEntity = results.next();
+
+		assertEquals(resultEntity.get(CaddServiceAnnotator.CADD_ABS), expectedEntity.get(CaddServiceAnnotator.CADD_ABS));
+		assertEquals(resultEntity.get(CaddServiceAnnotator.CADD_SCALED),
+				expectedEntity.get(CaddServiceAnnotator.CADD_SCALED));
+	}
+	
+	@Test
+	public void annotateTestLineTwo()
+	{
+		List<Entity> expectedList = new ArrayList<Entity>();
+		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
+
+		resultMap.put(CaddServiceAnnotator.CADD_ABS, "0.18026");
+		resultMap.put(CaddServiceAnnotator.CADD_SCALED, "5.974");
+		
+		Entity expectedEntity = new MapEntity(resultMap);
+
+		expectedList.add(expectedEntity);
+
+		Iterator<Entity> results = annotator.annotate(input2.iterator());
 
 		Entity resultEntity = results.next();
 
