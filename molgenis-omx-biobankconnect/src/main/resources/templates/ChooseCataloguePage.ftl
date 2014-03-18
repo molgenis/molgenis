@@ -85,9 +85,10 @@
 		$(function(){
 			var molgenis = window.top.molgenis;
 			molgenis.ontologyMatcherRunning(function(){
-				molgenis.getCatalogueChooser().changeDataSet($('#selectedDataSetId').val());
+				var catalogueChooser = new molgenis.CatalogueChooser();
+				catalogueChooser.changeDataSet($('#selectedDataSetId').val());
 				$('#selectedDataSetId').change(function(){
-					molgenis.getCatalogueChooser().changeDataSet($('#selectedDataSetId').val());
+					catalogueChooser.changeDataSet($('#selectedDataSetId').val());
 				});
 				if($('#selectedDataSetId option').length === 0){
 					$('.pager li.next').addClass('disabled');
