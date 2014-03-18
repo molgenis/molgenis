@@ -32,6 +32,9 @@ import java.util.*;
 @Component("omimHpoService")
 public class OmimHpoAnnotator extends LocusAnnotator
 {
+	private static final String GENE_LOCATIONS_URL = "https://molgenis26.target.rug.nl/downloads/5gpm/GRCh37p13_HGNC_GeneLocations_noPatches.tsv";
+	private static final String OMIM_MORBIDMAP_URL = "ftp://ftp.omim.org/omim/morbidmap";
+	private static final String DISEASES_TO_GENES_TO_PHENOTYPES_URL = "http://compbio.charite.de/hudson/job/hpo.annotations.monthly/lastStableBuild/artifact/annotation/ALL_SOURCES_ALL_FREQUENCIES_diseases_to_genes_to_phenotypes.txt";
 	private AnnotationService annotatorService;
 	private List<HPOTerm> HPO_TERMS;
 	private List<OMIMTerm> OMIM_TERMS;
@@ -189,10 +192,8 @@ public class OmimHpoAnnotator extends LocusAnnotator
 	{
 		List<HPOTerm> hpoTermsList = new ArrayList<HPOTerm>();
 
-		String url = "http://compbio.charite.de/hudson/job/hpo.annotations.monthly/lastStableBuild/artifact/annotation/ALL_SOURCES_ALL_FREQUENCIES_diseases_to_genes_to_phenotypes.txt";
 		String cacheName = "diseases_to_genes_to_phenotypes.txt";
-
-		ArrayList<String> hpoLines = readLinesFromURL(url, cacheName);
+		ArrayList<String> hpoLines = readLinesFromURL(DISEASES_TO_GENES_TO_PHENOTYPES_URL, cacheName);
 
 		for (String line : hpoLines)
 		{
@@ -233,10 +234,8 @@ public class OmimHpoAnnotator extends LocusAnnotator
 	{
 		List<OMIMTerm> omimTermList = new ArrayList<OMIMTerm>();
 
-		String url = "ftp://ftp.omim.org/omim/morbidmap";
 		String cacheName = "morbid_map";
-
-		ArrayList<String> omimLines = readLinesFromURL(url, cacheName);
+		ArrayList<String> omimLines = readLinesFromURL(OMIM_MORBIDMAP_URL, cacheName);
 
 		try
 		{
@@ -278,10 +277,8 @@ public class OmimHpoAnnotator extends LocusAnnotator
 	 */
 	public HashMap<String, HGNCLocations> getHgncLocations() throws IOException
 	{
-		String url = "https://molgenis26.target.rug.nl/downloads/5gpm/GRCh37p13_HGNC_GeneLocations_noPatches.tsv";
 		String cacheName = "HGNC_gene_locations_GRCH37.tsv";
-
-		ArrayList<String> geneLocations = this.readLinesFromURL(url, cacheName);
+		ArrayList<String> geneLocations = this.readLinesFromURL(GENE_LOCATIONS_URL, cacheName);
 
 		HashMap<String, HGNCLocations> res = new HashMap<String, HGNCLocations>();
 		for (String line : geneLocations)
