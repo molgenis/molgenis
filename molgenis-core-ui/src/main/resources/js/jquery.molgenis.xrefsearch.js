@@ -106,7 +106,8 @@
 			},
 			id: function(entity) {
 				return entity[refEntityMetaData.labelAttribute];
-			}
+			},
+			dropdownCssClass: 'molgenis-xrefsearch'
 		});
 		
 		var addButton = $('<a href="#" class="add-ref-query-part" title="add new"><i class="icon-plus"></i></a>');

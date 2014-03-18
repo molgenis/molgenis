@@ -255,6 +255,11 @@
 				throw 'Unknown data type: ' + dataType;			
 		}
 		
+		// show description in tooltip
+		if (attribute.description) {
+			label.attr('data-toggle', 'tooltip');
+			label.attr('title', attribute.description);
+		}
 		return $('<div class="control-group">').append(label).append(controls);	
 	}
 
