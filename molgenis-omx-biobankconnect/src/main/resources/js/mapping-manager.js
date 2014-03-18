@@ -837,7 +837,6 @@
 		
 		function updateMappingInfo(feature, mappingTable, mappedDataSet, clickedCell){
 			var displayedFeatures = [];
-//			var confirmFeature = null;
 			mappingTable.find('input').each(function(index, checkBox){
 				var eachMapping = $(checkBox).data('eachMapping');
 				var changedValue = null;
@@ -852,17 +851,6 @@
 				}
 				if(changedValue !== null){
 					eachMapping.confirmed = changedValue;
-//					if(confirmFeature === null){
-//						confirmFeature = restApi.get('/api/v1/observablefeature', {
-//							'q' : {
-//								'q' : [{
-//									'field' : 'Identifier',
-//									'operator' : 'EQUALS',
-//									'value' : storeMappingConfirmMapping
-//								}]
-//							}
-//						});
-//					}
 					var observationSet = restApi.get('/api/v1/observationset/' + eachMapping.observationSet);
 					var observedValue = restApi.get('/api/v1/observedvalue', {
 						'expand': ['Value'],
