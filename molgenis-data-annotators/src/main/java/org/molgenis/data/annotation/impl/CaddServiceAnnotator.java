@@ -93,6 +93,9 @@ public class CaddServiceAnnotator extends VariantAnnotator
 		String caddScaled = "";
 
 		Runtime runTime = Runtime.getRuntime();
+		
+		// FIXME Does not work for windows!!!!!!
+		runTime.exec("chmod 777 " + tabix);
 		Process process = runTime.exec(tabix + " " + caddFile + " " + chromosome + ":" + position + "-" + position);
 
 		process.waitFor();

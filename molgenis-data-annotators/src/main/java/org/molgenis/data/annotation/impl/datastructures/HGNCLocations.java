@@ -3,14 +3,14 @@ package org.molgenis.data.annotation.impl.datastructures;
 /**
  * Created by jvelde on 1/30/14.
  */
-public class HGNCLoc {
+public class HGNCLocations {
 
     String hgnc;
     Long start;
     Long end;
     String chrom;
 
-    public HGNCLoc(String hgnc, Long start, Long end, String chrom) {
+    public HGNCLocations(String hgnc, Long start, Long end, String chrom) {
         this.hgnc = hgnc;
         this.start = start;
         this.end = end;
