@@ -4,6 +4,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -13,8 +14,10 @@ import java.util.Map;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.support.MapEntity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -33,14 +36,15 @@ public class KeggAnnotatorServiceTest
 	private ArrayList<Entity> input;
 
 	@BeforeMethod
-	public void beforeMethod()
+	public void beforeMethod() throws IOException
 	{
-		annotator = new KeggServiceAnnotator();
-
 		metaDataCanAnnotate = mock(EntityMetaData.class);
 		attributeMetaDataChrom = mock(AttributeMetaData.class);
 		attributeMetaDataPos = mock(AttributeMetaData.class);
 
+		AnnotationService annotationService = mock(AnnotationService.class);
+		DataService dataService = mock(DataService.class);
+		
 		when(attributeMetaDataChrom.getName()).thenReturn(KeggServiceAnnotator.CHROMOSOME);
 		when(attributeMetaDataPos.getName()).thenReturn(KeggServiceAnnotator.POSITION);
 		when(attributeMetaDataChrom.getDataType()).thenReturn(
@@ -79,6 +83,8 @@ public class KeggAnnotatorServiceTest
 
 		input = new ArrayList<Entity>();
 		input.add(entity);
+		
+		annotator = new KeggServiceAnnotator(annotationService, dataService);
 	}
 
 	@Test

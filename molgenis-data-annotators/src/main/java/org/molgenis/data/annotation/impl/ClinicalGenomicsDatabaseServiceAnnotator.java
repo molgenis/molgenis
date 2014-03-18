@@ -2,6 +2,7 @@ package org.molgenis.data.annotation.impl;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,7 +15,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.LocusAnnotator;
-import org.molgenis.data.annotation.impl.datastructures.HGNCLoc;
+import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
 import org.molgenis.data.annotation.impl.datastructures.Locus;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -30,6 +31,7 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 
 	private MolgenisSettings molgenisSettings;
 	private AnnotationService annotatorService;
+	private OmimHpoAnnotator omimHpo;
 
 	private static final String NAME = "Clinical Genomic Database";
 	public static final String CGD_FILE_LOCATION_PROPERTY = "cgd_location";
@@ -48,10 +50,11 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 
 	@Autowired
 	public ClinicalGenomicsDatabaseServiceAnnotator(MolgenisSettings molgenisSettings,
-			AnnotationService annotatorService)
+			AnnotationService annotatorService) throws IOException
 	{
 		this.molgenisSettings = molgenisSettings;
 		this.annotatorService = annotatorService;
+		this.omimHpo = new OmimHpoAnnotator(annotatorService);
 	}
 
 	@Override
@@ -73,25 +76,23 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 	}
 
 	@Override
-	public List<Entity> annotateEntity(Entity entity)
+	public List<Entity> annotateEntity(Entity entity) throws IOException
 	{
-		String cgdFile = molgenisSettings.getProperty(CGD_FILE_LOCATION_PROPERTY);
 		List<Entity> results = new ArrayList<Entity>();
-		BufferedReader bufferedReader = null;
+		
+
+		String cgdFile = molgenisSettings.getProperty(CGD_FILE_LOCATION_PROPERTY);
+
+		Long position = entity.getLong(POSITION);
+		String chromosome = entity.getString(CHROMOSOME);
+
+		List<String> geneSymbols = omimHpo.locationToHGNC(new Locus(chromosome, position));
+
+		FileReader fileReader = new FileReader(cgdFile);
+		BufferedReader bufferedReader = new BufferedReader(fileReader);
 
 		try
 		{
-			HashMap<String, HGNCLoc> hgncLocs = OmimHpoAnnotator.getHgncLocs();
-
-			Long position = entity.getLong(POSITION);
-			String chromosome = entity.getString(CHROMOSOME);
-
-			List<Locus> locus = new ArrayList<Locus>(Arrays.asList(new Locus(chromosome, position)));
-			List<String> geneSymbols = OmimHpoAnnotator.locationToHGNC(hgncLocs, locus);
-
-			FileReader fileReader = new FileReader(cgdFile);
-			bufferedReader = new BufferedReader(fileReader);
-
 			while (bufferedReader.ready())
 			{
 				String line = bufferedReader.readLine();
