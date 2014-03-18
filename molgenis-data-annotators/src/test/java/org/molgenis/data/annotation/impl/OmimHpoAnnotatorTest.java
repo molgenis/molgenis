@@ -22,7 +22,6 @@ import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.support.MapEntity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import org.testng.collections.Sets;
 
 public class OmimHpoAnnotatorTest
 {
