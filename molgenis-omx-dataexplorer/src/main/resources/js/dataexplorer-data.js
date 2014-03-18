@@ -22,15 +22,11 @@
 	 */
 	function createDataTable() {
 		var attributes = getAttributes();
-		if (attributes.length > 0) {
-			$('#data-table-container').table({
-				'entityMetaData' : getEntity(),
-				'attributes' : attributes,
-				'query' : molgenis.dataexplorer.getEntityQuery()
-			});
-		} else {
-			$('#data-table-container').html('No items selected');
-		}
+		$('#data-table-container').table({
+			'entityMetaData' : getEntity(),
+			'attributes' : attributes,
+			'query' : molgenis.dataexplorer.getEntityQuery()
+		});
 	};
 	
 	/**
