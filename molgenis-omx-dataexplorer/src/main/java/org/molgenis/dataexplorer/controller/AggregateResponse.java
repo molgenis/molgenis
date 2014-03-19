@@ -1,34 +1,30 @@
 package org.molgenis.dataexplorer.controller;
 
-import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 public class AggregateResponse
 {
-	private final List<List<Long>> matrix;
-	private final Set<String> xLabels;
-	private final Set<String> yLabels;
+	private final Map<String, Long> hashCategories;
 
-	public AggregateResponse(List<List<Long>> matrix, Set<String> xLabels, Set<String> yLabels)
+	public AggregateResponse(Map<String, Long> hashCategories)
 	{
-		this.matrix = matrix;
-		this.xLabels = xLabels;
-		this.yLabels = yLabels;
+		this.hashCategories = hashCategories;
 	}
 
-	public List<List<Long>> getMatrix()
+	public Map<String, Long> getHashCategories()
 	{
-		return matrix;
+		return hashCategories;
 	}
-
-	public Set<String> getxLabels()
-	{
-		return xLabels;
-	}
-
-	public Set<String> getyLabels()
-	{
-		return yLabels;
-	}
-
+	/*
+	 * private final List<List<Long>> matrix; private final Set<String> xLabels; private final Set<String> yLabels;
+	 * 
+	 * public AggregateResponse(List<List<Long>> matrix, Set<String> xLabels, Set<String> yLabels) { this.matrix =
+	 * matrix; this.xLabels = xLabels; this.yLabels = yLabels; }
+	 * 
+	 * public List<List<Long>> getMatrix() { return matrix; }
+	 * 
+	 * public Set<String> getxLabels() { return xLabels; }
+	 * 
+	 * public Set<String> getyLabels() { return yLabels; }
+	 */
 }
