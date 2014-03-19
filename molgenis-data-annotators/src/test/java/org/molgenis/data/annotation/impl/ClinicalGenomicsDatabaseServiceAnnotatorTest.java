@@ -6,6 +6,7 @@ import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -16,6 +17,8 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.impl.datastructures.Locus;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.testng.annotations.BeforeMethod;
@@ -37,6 +40,8 @@ public class ClinicalGenomicsDatabaseServiceAnnotatorTest
 	@BeforeMethod
 	public void beforeMethod() throws IOException
 	{
+		String file = getClass().getResource("/cgd_example.txt").getFile();
+
 		MolgenisSettings settings = mock(MolgenisSettings.class);
 		when(settings.getProperty(ClinicalGenomicsDatabaseServiceAnnotator.CGD_FILE_LOCATION_PROPERTY)).thenReturn(
 				getClass().getResource("/cgd_example.txt").getFile());
@@ -81,13 +86,18 @@ public class ClinicalGenomicsDatabaseServiceAnnotatorTest
 
 		entity = mock(Entity.class);
 
-		when(entity.getString(ClinicalGenomicsDatabaseServiceAnnotator.CHROMOSOME)).thenReturn("1");
-		when(entity.getLong(ClinicalGenomicsDatabaseServiceAnnotator.POSITION)).thenReturn(new Long(66067385));
+		String chrStr = "1";
+		Long chrPos = new Long(66067385);
+		when(entity.getString(ClinicalGenomicsDatabaseServiceAnnotator.CHROMOSOME)).thenReturn(chrStr);
+		when(entity.getLong(ClinicalGenomicsDatabaseServiceAnnotator.POSITION)).thenReturn(chrPos);
 
 		input = new ArrayList<Entity>();
 		input.add(entity);
 
-		annotator = new ClinicalGenomicsDatabaseServiceAnnotator(settings, null);
+		AnnotationService annotationService = mock(AnnotationService.class);
+		OmimHpoAnnotator omimHpoAnnotator = mock(OmimHpoAnnotator.class);
+		when(omimHpoAnnotator.locationToHGNC(new Locus(chrStr, chrPos))).thenReturn(Arrays.asList("LEPR"));
+		annotator = new ClinicalGenomicsDatabaseServiceAnnotator(settings, annotationService, omimHpoAnnotator);
 	}
 
 	@Test
