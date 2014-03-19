@@ -609,6 +609,7 @@ function showSpinner(callback) {
 		items.push('</div>');
 		$('body').append(items.join(''));
 		spinner = $('#spinner');
+		spinner.data('count', 0);
 	}
 	
 	if (callback) {
@@ -617,15 +618,24 @@ function showSpinner(callback) {
 		});
 	}
 	
-	
-	var timeout = setTimeout(function(){ spinner.modal('show'); }, 500);
-	$('#spinner').data('timeout', timeout);
+	var count = $('#spinner').data('count');
+	if(count === 0) {
+		var timeout = setTimeout(function(){ spinner.modal('show'); }, 500);
+		$('#spinner').data('timeout', timeout);
+		$('#spinner').data('count', 1);
+	} else {
+		$('#spinner').data('count', count + 1);
+	}
 }
 
 function hideSpinner() {
 	if ($('#spinner').length !== 0) {
-		clearTimeout($('#spinner').data('timeout'));
-		$('#spinner').modal('hide');
+		var count = $('#spinner').data('count');
+		if(count === 1) {
+			clearTimeout($('#spinner').data('timeout'));
+			$('#spinner').modal('hide');
+		}
+		$('#spinner').data('count', count - 1);
 	}
 }
 

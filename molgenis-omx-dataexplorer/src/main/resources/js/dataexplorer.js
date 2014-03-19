@@ -69,13 +69,13 @@
 	/**
 	 * @memberOf molgenis.dataexplorer
 	 */
-	function createEntityMetaTree(entityMetaData, selectedAttributes) {
+	function createEntityMetaTree(entityMetaData, attributes) {
 		var container = $('#feature-selection');
 		container.tree({
 			'entityMetaData' : entityMetaData,
-			'selectedAttributes' : selectedAttributes,
+			'selectedAttributes' : attributes,
 			'onAttributesSelect' : function(selects) {
-				var attributes = container.tree('getSelectedAttributes');
+				selectedAttributes = container.tree('getSelectedAttributes');
 				$(document).trigger('changeAttributeSelection', {'attributes': attributes});
 			},
 			'onAttributeClick' : function(attribute) {
