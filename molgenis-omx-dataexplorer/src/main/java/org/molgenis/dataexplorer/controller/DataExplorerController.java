@@ -1,5 +1,8 @@
 package org.molgenis.dataexplorer.controller;
 
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.BOOL;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
 import static org.molgenis.dataexplorer.controller.DataExplorerController.URI;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
@@ -7,16 +10,20 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
@@ -49,6 +56,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 /**
  * Controller class for the data explorer.
@@ -298,8 +307,13 @@ public class DataExplorerController extends MolgenisPluginController
 	AggregateRequest request)
 	{
 		String entityName = request.getEntityName();
-		String attributeName = request.getXAxisAttributeName();
+		String xAttributeName = request.getXAxisAttributeName();
+		String yAttributeName = request.getYAxisAttributeName();
 
+		if (StringUtils.isBlank(xAttributeName) && StringUtils.isBlank(yAttributeName))
+		{
+			throw new InputValidationException("Missing aggregate attribute");
+		}
 		EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
 
 		QueryImpl q;
@@ -311,38 +325,184 @@ public class DataExplorerController extends MolgenisPluginController
 			q.and();
 		}
 
-		AttributeMetaData attributeMeta = entityMeta.getAttribute(attributeName);
-		FieldTypeEnum dataType = attributeMeta.getDataType().getEnumType();
-		if (dataType != FieldTypeEnum.BOOL && dataType != FieldTypeEnum.CATEGORICAL && dataType != FieldTypeEnum.XREF)
+		AttributeMetaData xAttributeMeta = null;
+		FieldTypeEnum xDataType = null;
+		if (StringUtils.isNotBlank(xAttributeName))
 		{
-			throw new RuntimeException("Unsupported data type " + dataType);
-		}
-
-		Map<String, Long> aggregateMap = new HashMap<String, Long>();
-		if (dataType == FieldTypeEnum.BOOL)
-		{
-			Query trueQ = new QueryImpl(q).eq(attributeName, true);
-			long trueCount = dataService.count(entityName, trueQ);
-			aggregateMap.put("true", trueCount);
-			Query falseQ = new QueryImpl(q).eq(attributeName, false);
-			long falseCount = dataService.count(entityName, falseQ);
-			aggregateMap.put("false", falseCount);
-		}
-		else if (dataType == FieldTypeEnum.CATEGORICAL || dataType == FieldTypeEnum.XREF)
-		{
-
-			EntityMetaData refEntityMeta = attributeMeta.getRefEntity();
-			String refEntityName = refEntityMeta.getName();
-			String refEntityLblAttr = refEntityMeta.getLabelAttribute().getName();
-
-			for (Entity refEntity : dataService.findAll(refEntityName))
+			xAttributeMeta = entityMeta.getAttribute(xAttributeName);
+			if (xAttributeMeta == null)
 			{
-				Query refQ = new QueryImpl(q).eq(attributeName, refEntity);
-				long refEntityCount = dataService.count(entityName, refQ);
-				aggregateMap.put(refEntity.getString(refEntityLblAttr), refEntityCount);
+				throw new InputValidationException("Unknow attribute '" + xAttributeName + "'");
+			}
+
+			xDataType = xAttributeMeta.getDataType().getEnumType();
+			if ((xDataType != BOOL) && (xDataType != CATEGORICAL) && (xDataType != XREF))
+			{
+				throw new InputValidationException("Unsupported data type " + xDataType);
 			}
 		}
-		return new AggregateResponse(aggregateMap);
+
+		AttributeMetaData yAttributeMeta = null;
+		FieldTypeEnum yDataType = null;
+		if (StringUtils.isNotBlank(yAttributeName))
+		{
+
+			yAttributeMeta = entityMeta.getAttribute(yAttributeName);
+			if (yAttributeMeta == null)
+			{
+				throw new InputValidationException("Unknow attribute '" + yAttributeName + "'");
+			}
+
+			yDataType = yAttributeMeta.getDataType().getEnumType();
+			if ((yDataType != BOOL) && (yDataType != CATEGORICAL) && (yDataType != XREF))
+			{
+				throw new InputValidationException("Unsupported data type " + yDataType);
+			}
+
+		}
+
+		Iterable<?> xValues;
+		Iterable<?> yValues;
+		List<List<Long>> matrix = new ArrayList<List<Long>>();
+		Set<String> xLabels = Sets.newLinkedHashSet();
+		Set<String> yLabels = Sets.newLinkedHashSet();
+
+		if (xDataType == null)
+		{
+			xValues = Lists.newArrayList();
+		}
+		else if (xDataType == BOOL)
+		{
+			xValues = Arrays.asList(true, false);
+			xLabels.add(xAttributeName + ": true");
+			xLabels.add(xAttributeName + ": false");
+		}
+		else
+		{
+			EntityMetaData xRefEntityMeta = xAttributeMeta.getRefEntity();
+			String xRefEntityName = xRefEntityMeta.getName();
+			String xRefEntityLblAttr = xRefEntityMeta.getLabelAttribute().getName();
+
+			xValues = dataService.findAll(xRefEntityName);
+			for (Object xRefEntity : xValues)
+			{
+				xLabels.add(((Entity) xRefEntity).getString(xRefEntityLblAttr));
+			}
+		}
+
+		if (yDataType == null)
+		{
+			yValues = Lists.newArrayList();
+		}
+		else if (yDataType == BOOL)
+		{
+			yValues = Arrays.asList(true, false);
+			yLabels.add(yAttributeName + ": true");
+			yLabels.add(yAttributeName + ": false");
+		}
+		else
+		{
+			EntityMetaData yRefEntityMeta = yAttributeMeta.getRefEntity();
+			String yRefEntityName = yRefEntityMeta.getName();
+			String yRefEntityLblAttr = yRefEntityMeta.getLabelAttribute().getName();
+
+			yValues = dataService.findAll(yRefEntityName);
+			for (Object yRefEntity : yValues)
+			{
+				yLabels.add(((Entity) yRefEntity).getString(yRefEntityLblAttr));
+			}
+		}
+
+		boolean hasXValues = !Iterables.isEmpty(xValues);
+		boolean hasYValues = !Iterables.isEmpty(yValues);
+
+		if (hasXValues)
+		{
+			List<Long> totals = Lists.newArrayList();
+
+			for (Object xValue : xValues)
+			{
+				List<Long> row = Lists.newArrayList();
+
+				if (hasYValues)
+				{
+					int i = 0;
+					for (Object yValue : yValues)
+					{
+						// Both x and y choosen
+						Query query = q.getRules().isEmpty() ? new QueryImpl() : new QueryImpl(q).and();
+						query.eq(xAttributeName, xValue).and().eq(yAttributeName, yValue);
+						long count = dataService.count(entityName, query);
+						row.add(count);
+						if (totals.size() == i)
+						{
+							totals.add(count);
+						}
+						else
+						{
+							totals.set(i, totals.get(i) + count);
+						}
+						i++;
+					}
+				}
+				else
+				{
+					// No y attribute chosen
+					Query query = q.getRules().isEmpty() ? new QueryImpl() : new QueryImpl(q).and();
+					query.eq(xAttributeName, xValue);
+					long count = dataService.count(entityName, query);
+					row.add(count);
+					if (totals.isEmpty())
+					{
+						totals.add(count);
+					}
+					else
+					{
+						totals.set(0, totals.get(0) + count);
+					}
+
+				}
+
+				matrix.add(row);
+			}
+
+			yLabels.add(hasYValues ? "Total" : "Count");
+			xLabels.add("Total");
+
+			matrix.add(totals);
+		}
+		else
+		{
+			// No xattribute chosen
+			List<Long> row = Lists.newArrayList();
+			for (Object yValue : yValues)
+			{
+				Query query = q.getRules().isEmpty() ? new QueryImpl() : new QueryImpl(q).and();
+				query.eq(yAttributeName, yValue);
+				long count = dataService.count(entityName, query);
+				row.add(count);
+			}
+			matrix.add(row);
+
+			xLabels.add("Count");
+			yLabels.add("Total");
+		}
+
+		// Count row totals
+		if (hasYValues)
+		{
+			for (List<Long> row : matrix)
+			{
+				long total = 0;
+				for (Long count : row)
+				{
+					total += count;
+				}
+				row.add(total);
+			}
+		}
+
+		return new AggregateResponse(matrix, xLabels, yLabels);
 	}
 
 	@ExceptionHandler(RuntimeException.class)

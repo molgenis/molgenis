@@ -27,34 +27,51 @@
 		});
 
 		if (aggregableAttributes.length > 0) {
-			var attributeSelect = $('<select id="selectFeature"/>');
-			$.each(aggregableAttributes, function() {
-				attributeSelect.append('<option value="' + this.name + '">' + this.label + '</option>');
-			});
-			$('#feature-select').html(attributeSelect);
+			$('#feature-select').empty();
+			createAtributeDropdown($('#feature-select'), aggregableAttributes, 'x-aggr-attribute');
+			$('#feature-select').append(' x ');
+			createAtributeDropdown($('#feature-select'), aggregableAttributes, 'y-aggr-attribute');
+			
 			$('#feature-select-container').show();
 			$('#aggregate-table-container').empty();
-			if (attributeSelect.val()) {
-				updateAggregatesTable(attributeSelect.val());
-				attributeSelect.select2({ width: 'resolve' });
-				attributeSelect.change(function() {
-					updateAggregatesTable($(this).val());
-				});
-			}
+			
+			$('.attribute-dropdown').on('change', function() {
+				//updateAggregatesTable($('#x-aggr-attribute').val(), $('#y-aggr-attribute').val());
+				updateAggregatesTable($('#x-aggr-attribute').val(), $('#y-aggr-attribute').val());
+
+			});
 		} else {
 			$('#feature-select-container').hide();
 			$('#aggregate-table-container').html('<p>No aggregable items</p>');
 		}
 	}
 	
+	function createAtributeDropdown(parent, aggregableAttributes, id) {
+		var attributeSelect = $('<select id="' + id + '" class="attribute-dropdown" data-placeholder="Select a category..." />');
+		attributeSelect.append('<option value="">Select a category...</option>');
+		
+		$.each(aggregableAttributes, function() {
+			attributeSelect.append('<option value="' + this.name + '">' + this.label + '</option>');
+		});
+		
+		parent.append(attributeSelect);
+		attributeSelect.select2({ width: 'resolve' });
+	}
+	
 	/**
 	 * @memberOf molgenis.dataexplorer.aggregates
 	 */
-	function updateAggregatesTable(attributeName) {
+	function updateAggregatesTable(xAttributeName, yAttributeName) {
+		if (!xAttributeName && !yAttributeName) {
+			$('#aggregate-table-container').html('');
+			return;
+		}
+		
 		showSpinner();
 		var data = {
 			'entityName': getEntity().name,
-			'xAxisAttributeName': attributeName,
+			'xAxisAttributeName': xAttributeName,
+			'yAxisAttributeName': yAttributeName,
 			'q': getEntityQuery()
 		};
 		$.ajax({
@@ -64,12 +81,26 @@
 			contentType : 'application/json',
 			success : function(aggregateResult) {
 				hideSpinner();
-				var table = $('<table />').addClass('table table-striped');
-				table.append('<tr><th>Category name</th><th>Count</th></tr>');
-				$.each(aggregateResult.hashCategories, function(categoryName, count) {
-					table.append('<tr><td>' + categoryName + '</td><td>' + count + '</td></tr>');
+				var items = ['<table class="table table-striped" >'];
+				
+				items.push('<tr>');
+				items.push('<td style="width: 18%"></td>');
+				$.each(aggregateResult.yLabels, function(index, label){
+					items.push('<th><div class="text-center">' + label + '</div></th>');
 				});
-				$('#aggregate-table-container').html(table);
+				
+				$.each(aggregateResult.matrix, function(index, row) {
+					items.push('<tr>');
+					items.push('<th>' + aggregateResult.xLabels[index] + '</th>');
+					$.each(row, function(index, count) {
+						items.push('<td><div class="text-center">' + count + '</div></td>');
+					});
+					items.push('</tr>');
+				});
+				
+				items.push('</table>');
+				
+				$('#aggregate-table-container').html(items.join(''));
 			},
 			error : function(xhr) {
 				hideSpinner();
