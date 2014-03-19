@@ -59,5 +59,10 @@
 		    <artifactId>httpclient</artifactId>
 		    <version>4.2.1</version>
 		</dependency>
+		<dependency>
+			<groupId>org.utgenome.thirdparty</groupId>
+			<artifactId>picard</artifactId>
+			<version>1.102.0</version>
+		</dependency>
 	</dependencies>
 </project>
