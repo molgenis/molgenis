@@ -154,8 +154,6 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		if (!molgenisHomeDir.endsWith("/")) molgenisHomeDir = molgenisHomeDir + '/';
 		String molgenisHomeDirAnnotationResources = molgenisHomeDir + "data/annotation_resources";
 
-		runtimePropertyMap.put(CaddServiceAnnotator.TABIX_LOCATION_PROPERTY, molgenisHomeDirAnnotationResources
-				+ "/tabix-0.2.6/tabix");
 		runtimePropertyMap.put(CaddServiceAnnotator.CADD_FILE_LOCATION_PROPERTY, molgenisHomeDirAnnotationResources
 				+ "/CADD/1000G.vcf.gz");
 		runtimePropertyMap.put(ClinicalGenomicsDatabaseServiceAnnotator.CGD_FILE_LOCATION_PROPERTY,
