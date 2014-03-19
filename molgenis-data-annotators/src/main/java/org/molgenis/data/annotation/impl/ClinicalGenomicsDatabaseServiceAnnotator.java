@@ -12,8 +12,10 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.HgcnLocationsUtils;
 import org.molgenis.data.annotation.LocusAnnotator;
 import org.molgenis.data.annotation.impl.datastructures.Locus;
+import org.molgenis.data.annotation.provider.HgncLocationsProvider;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -26,9 +28,9 @@ import org.springframework.stereotype.Component;
 public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 {
 
-	private MolgenisSettings molgenisSettings;
-	private AnnotationService annotatorService;
-	private OmimHpoAnnotator omimHpo;
+	private final MolgenisSettings molgenisSettings;
+	private final AnnotationService annotatorService;
+	private final HgncLocationsProvider hgncLocationsProvider;
 
 	private static final String NAME = "Clinical Genomic Database";
 	public static final String CGD_FILE_LOCATION_PROPERTY = "cgd_location";
@@ -47,11 +49,14 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 
 	@Autowired
 	public ClinicalGenomicsDatabaseServiceAnnotator(MolgenisSettings molgenisSettings,
-			AnnotationService annotatorService) throws IOException
+			AnnotationService annotationService, HgncLocationsProvider hgncLocationsProvider) throws IOException
 	{
+		if (molgenisSettings == null) throw new IllegalArgumentException("molgenisSettings is null");
+		if (annotationService == null) throw new IllegalArgumentException("annotationService is null");
+		if (hgncLocationsProvider == null) throw new IllegalArgumentException("hgncLocationsProvider is null");
 		this.molgenisSettings = molgenisSettings;
-		this.annotatorService = annotatorService;
-		this.omimHpo = new OmimHpoAnnotator(annotatorService);
+		this.annotatorService = annotationService;
+		this.hgncLocationsProvider = hgncLocationsProvider;
 	}
 
 	@Override
@@ -76,14 +81,14 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 	public List<Entity> annotateEntity(Entity entity) throws IOException
 	{
 		List<Entity> results = new ArrayList<Entity>();
-		
 
 		String cgdFile = molgenisSettings.getProperty(CGD_FILE_LOCATION_PROPERTY);
 
 		Long position = entity.getLong(POSITION);
 		String chromosome = entity.getString(CHROMOSOME);
 
-		List<String> geneSymbols = omimHpo.locationToHGNC(new Locus(chromosome, position));
+		List<String> geneSymbols = HgcnLocationsUtils.locationToHgcn(hgncLocationsProvider.getHgncLocations(),
+				new Locus(chromosome, position));
 
 		FileReader fileReader = new FileReader(cgdFile);
 		BufferedReader bufferedReader = new BufferedReader(fileReader);

@@ -1,12 +1,6 @@
 package org.molgenis.data.annotation.impl;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -15,15 +9,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.io.IOUtils;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.HgcnLocationsUtils;
 import org.molgenis.data.annotation.LocusAnnotator;
-import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
 import org.molgenis.data.annotation.impl.datastructures.HPOTerm;
 import org.molgenis.data.annotation.impl.datastructures.Locus;
 import org.molgenis.data.annotation.impl.datastructures.OMIMTerm;
+import org.molgenis.data.annotation.provider.HgncLocationsProvider;
+import org.molgenis.data.annotation.provider.HpoMappingProvider;
+import org.molgenis.data.annotation.provider.OmimMorbidMapProvider;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -46,18 +44,6 @@ import org.springframework.stereotype.Component;
 @Component("omimHpoService")
 public class OmimHpoAnnotator extends LocusAnnotator
 {
-	private static final String GENE_LOCATIONS_URL = "https://molgenis26.target.rug.nl/downloads/5gpm/GRCh37p13_HGNC_GeneLocations_noPatches.tsv";
-	private static final String OMIM_MORBIDMAP_URL = "ftp://ftp.omim.org/omim/morbidmap";
-	private static final String DISEASES_TO_GENES_TO_PHENOTYPES_URL = "http://compbio.charite.de/hudson/job/hpo.annotations.monthly/lastStableBuild/artifact/annotation/ALL_SOURCES_ALL_FREQUENCIES_diseases_to_genes_to_phenotypes.txt";
-	private final AnnotationService annotatorService;
-	private List<HPOTerm> hpoTerms;
-	private List<OMIMTerm> omimTerms;
-	private Map<String, List<HPOTerm>> geneToHpoTerms;
-	private Map<String, List<OMIMTerm>> geneToOmimTerms;
-
-	// TODO: more fancy symptom information by using
-	// http://compbio.charite.de/hudson/job/hpo.annotations/lastStableBuild/artifact/misc/phenotype_annotation.tab
-
 	private static final String NAME = "OmimHpo";
 
 	public static final String OMIM_CAUSAL_IDENTIFIER = "OMIM_Causal_ID";
@@ -75,10 +61,27 @@ public class OmimHpoAnnotator extends LocusAnnotator
 	public static final String HPO_DISEASE_DATABASE_ENTRY = "HPO_Disease_Database_Entry";
 	public static final String HPO_ENTREZ_ID = "HPO_Entrez_ID";
 
+	private final AnnotationService annotatorService;
+	private List<HPOTerm> hpoTerms;
+	private List<OMIMTerm> omimTerms;
+	private Map<String, List<HPOTerm>> geneToHpoTerms;
+	private Map<String, List<OMIMTerm>> geneToOmimTerms;
+	private final OmimMorbidMapProvider omimMorbidMapProvider;
+	private final HgncLocationsProvider hgncLocationsProvider;
+	private final HpoMappingProvider hpoMappingProvider;
+
 	@Autowired
-	public OmimHpoAnnotator(AnnotationService annotatorService) throws IOException
+	public OmimHpoAnnotator(AnnotationService annotatorService, OmimMorbidMapProvider omimMorbidMapProvider,
+			HgncLocationsProvider hgncLocationsProvider, HpoMappingProvider hpoMappingProvider) throws IOException
 	{
+		if (annotatorService == null) throw new IllegalArgumentException("annotatorService is null");
+		if (omimMorbidMapProvider == null) throw new IllegalArgumentException("omimMorbidMapProvider is null");
+		if (hgncLocationsProvider == null) throw new IllegalArgumentException("hgncLocationsProvider is null");
+		if (hpoMappingProvider == null) throw new IllegalArgumentException("hpoMappingProvider is null");
 		this.annotatorService = annotatorService;
+		this.omimMorbidMapProvider = omimMorbidMapProvider;
+		this.hgncLocationsProvider = hgncLocationsProvider;
+		this.hpoMappingProvider = hpoMappingProvider;
 	}
 
 	@Override
@@ -113,7 +116,7 @@ public class OmimHpoAnnotator extends LocusAnnotator
 
 		Locus locus = new Locus(chromosome, position);
 
-		List<String> geneSymbols = locationToHGNC(locus);
+		List<String> geneSymbols = HgcnLocationsUtils.locationToHgcn(hgncLocationsProvider.getHgncLocations(), locus);
 
 		Map<String, List<HPOTerm>> geneToHpoTerms = getGeneToHpoTerms();
 		Map<String, List<OMIMTerm>> geneToOmimTerms = getGeneToOmimTerms();
@@ -203,12 +206,11 @@ public class OmimHpoAnnotator extends LocusAnnotator
 	 */
 	private List<HPOTerm> getHpoTerms() throws IOException
 	{
-		if (this.hpoTerms != null)
+		if (this.hpoTerms == null)
 		{
 			hpoTerms = new ArrayList<HPOTerm>();
 
-			String cacheName = "diseases_to_genes_to_phenotypes.txt";
-			ArrayList<String> hpoLines = readLinesFromURL(DISEASES_TO_GENES_TO_PHENOTYPES_URL, cacheName);
+			List<String> hpoLines = IOUtils.readLines(hpoMappingProvider.getHpoMapping());
 
 			for (String line : hpoLines)
 			{
@@ -251,11 +253,9 @@ public class OmimHpoAnnotator extends LocusAnnotator
 		{
 			omimTerms = new ArrayList<OMIMTerm>();
 
-			String cacheName = "morbid_map";
-			ArrayList<String> omimLines = readLinesFromURL(OMIM_MORBIDMAP_URL, cacheName);
-
 			try
 			{
+				List<String> omimLines = IOUtils.readLines(omimMorbidMapProvider.getOmimMorbidMap());
 				for (String line : omimLines)
 				{
 					String[] split = line.split("\\|");
@@ -286,31 +286,6 @@ public class OmimHpoAnnotator extends LocusAnnotator
 			}
 		}
 		return omimTerms;
-	}
-
-	/**
-	 * 
-	 * @return map of GeneSymbol to HGNCLoc(GeneSymbol, Start, End, Chrom)
-	 * @throws IOException
-	 */
-	public HashMap<String, HGNCLocations> getHgncLocations() throws IOException
-	{
-		String cacheName = "HGNC_gene_locations_GRCH37.tsv";
-		ArrayList<String> geneLocations = this.readLinesFromURL(GENE_LOCATIONS_URL, cacheName);
-
-		HashMap<String, HGNCLocations> res = new HashMap<String, HGNCLocations>();
-		for (String line : geneLocations)
-		{
-			String[] split = line.split("\t");
-			HGNCLocations hgncLoc = new HGNCLocations(split[0], Long.parseLong(split[1]), Long.parseLong(split[2]),
-					split[3]);
-			if (hgncLoc.getChrom().matches("[0-9]+|X"))
-			{
-				res.put(hgncLoc.getHgnc(), hgncLoc);
-			}
-		}
-
-		return res;
 	}
 
 	private Map<String, List<OMIMTerm>> getGeneToOmimTerms() throws IOException
@@ -359,68 +334,6 @@ public class OmimHpoAnnotator extends LocusAnnotator
 			}
 		}
 		return geneToHpoTerms;
-	}
-
-	public List<String> locationToHGNC(Locus locus) throws IOException
-	{
-		HashMap<String, HGNCLocations> hgncLocations = this.getHgncLocations();
-		List<String> hgncSymbols = new ArrayList<String>();
-
-		boolean variantMapped = false;
-		for (HGNCLocations hgncLocation : hgncLocations.values())
-		{
-			if (hgncLocation.getChrom().equals(locus.getChrom()) && locus.getPos() >= (hgncLocation.getStart() - 5)
-					&& locus.getPos() <= (hgncLocation.getEnd() + 5))
-			{
-				hgncSymbols.add(hgncLocation.getHgnc());
-				variantMapped = true;
-				break;
-			}
-		}
-
-		if (!variantMapped)
-		{
-			hgncSymbols.add(null);
-		}
-
-		return hgncSymbols;
-	}
-
-	public ArrayList<String> readLinesFromURL(String webLocation, String cacheName) throws IOException
-	{
-		ArrayList<String> outputLines = new ArrayList<String>();
-		File cacheLocation = new File(System.getProperty("java.io.tmpdir"), cacheName);
-
-		if (cacheLocation.exists())
-		{
-			FileReader fileReader = new FileReader(cacheLocation);
-			BufferedReader bufferedReader = new BufferedReader(fileReader);
-
-			while (bufferedReader.ready())
-			{
-				outputLines.add(bufferedReader.readLine());
-			}
-
-			bufferedReader.close();
-		}
-		else
-		{
-			URL url = new URL(webLocation);
-
-			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(url.openStream()));
-			FileWriter writer = new FileWriter(cacheLocation);
-
-			while (bufferedReader.ready())
-			{
-				outputLines.add(bufferedReader.readLine());
-				writer.write(bufferedReader.readLine() + "\n");
-			}
-
-			bufferedReader.close();
-			writer.close();
-		}
-
-		return outputLines;
 	}
 
 	@Override
