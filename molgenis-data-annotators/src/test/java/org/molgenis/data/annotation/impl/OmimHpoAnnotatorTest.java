@@ -5,11 +5,14 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +22,10 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
+import org.molgenis.data.annotation.provider.HgncLocationsProvider;
+import org.molgenis.data.annotation.provider.HpoMappingProvider;
+import org.molgenis.data.annotation.provider.OmimMorbidMapProvider;
 import org.molgenis.data.support.MapEntity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -85,7 +92,56 @@ public class OmimHpoAnnotatorTest
 		input = new ArrayList<Entity>();
 		input.add(entity);
 
-		annotator = new OmimHpoAnnotator(annotationService);
+		String morbidMapData = "3-M syndrome 1, 273750 (3)|CUL7|609577|6p21.1";
+		OmimMorbidMapProvider omimMorbidMapProvider = mock(OmimMorbidMapProvider.class);
+		when(omimMorbidMapProvider.getOmimMorbidMap()).thenReturn(new StringReader(morbidMapData));
+
+		String hpoMappingData = "#Format: diseaseId<tab>gene-symbol<tab>gene-id(entrez)<tab>HPO-ID<tab>HPO-term-name\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0000463	Anteverted nares\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0004209	Clinodactyly of the 5th finger\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0004322	Short stature\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0003298	Spina bifida occulta\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0000574	Thick eyebrow\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0004570	Increased vertebral height\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0001511	Intrauterine growth retardation\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0008734	Decreased testicular size\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0001518	Small for gestational age\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0000272	Malar flattening\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0000268	Dolichocephaly\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0000767	Pectus excavatum\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0010306	Short thorax\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0000007	Autosomal recessive inheritance\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0001763	Pes planus\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0002827	Hip dislocation\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0000470	Short neck\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0003691	Scapular winging\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0008897	Postnatal growth retardation\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0000047	Hypospadias\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0000307	Pointed chin\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0002007	Frontal bossing\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0008839	Hypoplastic pelvis\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0003307	Hyperlordosis\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0000303	Mandibular prognathia\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0002750	Delayed skeletal maturation\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0000325	Triangular face\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0002643	Neonatal respiratory distress\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0000773	Short ribs\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0000179	Thick lower lip vermilion\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0005280	Depressed nasal bridge\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0000343	Long philtrum\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0001382	Joint hypermobility\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0009237	Short 5th finger\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0003100	Slender long bone";
+		HpoMappingProvider hpoMappingProvider = mock(HpoMappingProvider.class);
+		when(hpoMappingProvider.getHpoMapping()).thenReturn(new StringReader(hpoMappingData));
+
+		HgncLocationsProvider hgncLocationsProvider = mock(HgncLocationsProvider.class);
+		Map<String, HGNCLocations> hgncLocations = Collections.singletonMap("CUL7", new HGNCLocations("CUL7",
+				19207841l - 10, 19207841l + 10, "11"));
+		when(hgncLocationsProvider.getHgncLocations()).thenReturn(hgncLocations);
+
+		annotator = new OmimHpoAnnotator(annotationService, omimMorbidMapProvider, hgncLocationsProvider,
+				hpoMappingProvider);
 	}
 
 	@Test
@@ -93,19 +149,37 @@ public class OmimHpoAnnotatorTest
 	{
 		List<Entity> expectedList = new ArrayList<Entity>();
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
-		
-		resultMap.put(OmimHpoAnnotator.OMIM_DISORDERS, new HashSet<String>(Arrays.asList("Cardiomyopathy, dilated, 1M", "Cardiomyopathy, familial hypertrophic, 12")));
-		resultMap.put(OmimHpoAnnotator.OMIM_CAUSAL_IDENTIFIER, new HashSet<Integer>(Arrays.asList(600824)));
+
+		resultMap.put(OmimHpoAnnotator.OMIM_DISORDERS, new HashSet<String>(Arrays.asList("3-M syndrome 1")));
+		resultMap.put(OmimHpoAnnotator.OMIM_CAUSAL_IDENTIFIER, new HashSet<Integer>(Arrays.asList(609577)));
 		resultMap.put(OmimHpoAnnotator.OMIM_TYPE, new HashSet<Integer>(Arrays.asList(3)));
-		resultMap.put(OmimHpoAnnotator.OMIM_HGNC_IDENTIFIERS, new HashSet<String>(Arrays.asList("CSRP3", "CRP3", "CLP", "CMD1M", "CMH12")));
-		resultMap.put(OmimHpoAnnotator.OMIM_CYTOGENIC_LOCATION, new HashSet<String>(Arrays.asList("11p15.1")));
-		resultMap.put(OmimHpoAnnotator.OMIM_ENTRY, new HashSet<Integer>(Arrays.asList(607482, 612124)));
-		resultMap.put(OmimHpoAnnotator.HPO_IDENTIFIERS, new HashSet<String>(Arrays.asList("HP:0000407", "HP:0001645", "HP:0001706", "HP:0000982", "HP:0001644", "HP:0003457", "HP:0006670", "HP:0100578", "HP:0001639", "HP:0001638", "HP:0001874", "HP:0004757", "HP:0004756", "HP:0003198", "HP:0000006")));
-		resultMap.put(OmimHpoAnnotator.HPO_GENE_NAME, new HashSet<String>(Arrays.asList("CSRP3")));
-		resultMap.put(OmimHpoAnnotator.HPO_DESCRIPTIONS, new HashSet<String>(Arrays.asList("Myopathy", "Hypertrophic cardiomyopathy", "Palmoplantar keratoderma", "EMG abnormality", "Lipoatrophy", "Sensorineural hearing impairment", "Abnormality of neutrophils", "Cardiomyopathy", "Sudden cardiac death", "Paroxysmal atrial fibrillation", "Autosomal dominant inheritance", "Ventricular tachycardia", "Endocardial fibroelastosis", "Dilated cardiomyopathy", "Impaired myocardial contractility", "Autosomal dominant inheritance")));
-		resultMap.put(OmimHpoAnnotator.HPO_DISEASE_DATABASE, new HashSet<String>(Arrays.asList("ORPHANET", "OMIM")));
-		resultMap.put(OmimHpoAnnotator.HPO_DISEASE_DATABASE_ENTRY, new HashSet<Integer>(Arrays.asList(607482, 154, 612124)));
-		resultMap.put(OmimHpoAnnotator.HPO_ENTREZ_ID, new HashSet<Integer>(Arrays.asList(8048)));
+		resultMap.put(OmimHpoAnnotator.OMIM_HGNC_IDENTIFIERS, new HashSet<String>(Arrays.asList("CUL7")));
+		resultMap.put(OmimHpoAnnotator.OMIM_CYTOGENIC_LOCATION, new HashSet<String>(Arrays.asList("6p21.1")));
+		resultMap.put(OmimHpoAnnotator.OMIM_ENTRY, new HashSet<Integer>(Arrays.asList(273750)));
+		resultMap.put(
+				OmimHpoAnnotator.HPO_IDENTIFIERS,
+				new HashSet<String>(Arrays.asList("HP:0002827", "HP:0009237", "HP:0003100", "HP:0000272", "HP:0000179",
+						"HP:0003691", "HP:0008734", "HP:0000463", "HP:0003307", "HP:0000268", "HP:0000767",
+						"HP:0005280", "HP:0000574", "HP:0004570", "HP:0000007", "HP:0001763", "HP:0008897",
+						"HP:0004209", "HP:0010306", "HP:0000470", "HP:0000343", "HP:0001518", "HP:0000047",
+						"HP:0000307", "HP:0004322", "HP:0002007", "HP:0008839", "HP:0000303", "HP:0001511",
+						"HP:0002643", "HP:0000325", "HP:0000773", "HP:0002750", "HP:0001382", "HP:0003298")));
+		resultMap.put(OmimHpoAnnotator.HPO_GENE_NAME, new HashSet<String>(Arrays.asList("CUL7")));
+		resultMap.put(
+				OmimHpoAnnotator.HPO_DESCRIPTIONS,
+				new LinkedHashSet<String>(Arrays.asList("Long philtrum", "Short thorax", "Hyperlordosis",
+						"Short stature", "Anteverted nares", "Hypoplastic pelvis", "Spina bifida occulta",
+						"Pes planus", "Clinodactyly of the 5th finger", "Postnatal growth retardation",
+						"Joint hypermobility", "Hypospadias", "Malar flattening", "Depressed nasal bridge",
+						"Short 5th finger", "Autosomal recessive inheritance", "Mandibular prognathia", "Short neck",
+						"Scapular winging", "Small for gestational age", "Triangular face", "Slender long bone",
+						"Hip dislocation", "Delayed skeletal maturation", "Frontal bossing", "Pointed chin",
+						"Neonatal respiratory distress", "Pectus excavatum", "Decreased testicular size",
+						"Thick lower lip vermilion", "Short ribs", "Thick eyebrow", "Increased vertebral height",
+						"Intrauterine growth retardation", "Dolichocephaly")));
+		resultMap.put(OmimHpoAnnotator.HPO_DISEASE_DATABASE, new HashSet<String>(Arrays.asList("OMIM")));
+		resultMap.put(OmimHpoAnnotator.HPO_DISEASE_DATABASE_ENTRY, new HashSet<Integer>(Arrays.asList(273750)));
+		resultMap.put(OmimHpoAnnotator.HPO_ENTREZ_ID, new HashSet<Integer>(Arrays.asList(9820)));
 
 		Entity expectedEntity = new MapEntity(resultMap);
 
@@ -115,22 +189,30 @@ public class OmimHpoAnnotatorTest
 
 		Entity resultEntity = results.next();
 
-		assertEquals(resultEntity.get(OmimHpoAnnotator.OMIM_DISORDERS), expectedEntity.get(OmimHpoAnnotator.OMIM_DISORDERS));
-		assertEquals(resultEntity.get(OmimHpoAnnotator.OMIM_CAUSAL_IDENTIFIER), expectedEntity.get(OmimHpoAnnotator.OMIM_CAUSAL_IDENTIFIER));
-		assertEquals(resultEntity.get(OmimHpoAnnotator.OMIM_IDENTIFIERS), expectedEntity.get(OmimHpoAnnotator.OMIM_IDENTIFIERS));
+		assertEquals(resultEntity.get(OmimHpoAnnotator.OMIM_DISORDERS),
+				expectedEntity.get(OmimHpoAnnotator.OMIM_DISORDERS));
+		assertEquals(resultEntity.get(OmimHpoAnnotator.OMIM_CAUSAL_IDENTIFIER),
+				expectedEntity.get(OmimHpoAnnotator.OMIM_CAUSAL_IDENTIFIER));
+		assertEquals(resultEntity.get(OmimHpoAnnotator.OMIM_IDENTIFIERS),
+				expectedEntity.get(OmimHpoAnnotator.OMIM_IDENTIFIERS));
 		assertEquals(resultEntity.get(OmimHpoAnnotator.OMIM_TYPE), expectedEntity.get(OmimHpoAnnotator.OMIM_TYPE));
-		assertEquals(resultEntity.get(OmimHpoAnnotator.OMIM_HGNC_IDENTIFIERS), expectedEntity.get(OmimHpoAnnotator.OMIM_HGNC_IDENTIFIERS));
-		assertEquals(resultEntity.get(OmimHpoAnnotator.OMIM_CYTOGENIC_LOCATION), expectedEntity.get(OmimHpoAnnotator.OMIM_CYTOGENIC_LOCATION));
+		assertEquals(resultEntity.get(OmimHpoAnnotator.OMIM_HGNC_IDENTIFIERS),
+				expectedEntity.get(OmimHpoAnnotator.OMIM_HGNC_IDENTIFIERS));
+		assertEquals(resultEntity.get(OmimHpoAnnotator.OMIM_CYTOGENIC_LOCATION),
+				expectedEntity.get(OmimHpoAnnotator.OMIM_CYTOGENIC_LOCATION));
 		assertEquals(resultEntity.get(OmimHpoAnnotator.OMIM_ENTRY), expectedEntity.get(OmimHpoAnnotator.OMIM_ENTRY));
-
-		assertEquals(resultEntity.get(OmimHpoAnnotator.HPO_IDENTIFIERS), expectedEntity.get(OmimHpoAnnotator.HPO_IDENTIFIERS));
-		assertEquals(resultEntity.get(OmimHpoAnnotator.HPO_GENE_NAME), expectedEntity.get(OmimHpoAnnotator.HPO_GENE_NAME));
-		assertEquals(resultEntity.get(OmimHpoAnnotator.HPO_DESCRIPTIONS), expectedEntity.get(OmimHpoAnnotator.HPO_DESCRIPTIONS));
-		assertEquals(resultEntity.get(OmimHpoAnnotator.HPO_DISEASE_DATABASE), expectedEntity.get(OmimHpoAnnotator.HPO_DISEASE_DATABASE));
-		assertEquals(resultEntity.get(OmimHpoAnnotator.HPO_DISEASE_DATABASE_ENTRY), expectedEntity.get(OmimHpoAnnotator.HPO_DISEASE_DATABASE_ENTRY));
-		assertEquals(resultEntity.get(OmimHpoAnnotator.HPO_ENTREZ_ID), expectedEntity.get(OmimHpoAnnotator.HPO_ENTREZ_ID));
-
-
+		assertEquals(resultEntity.get(OmimHpoAnnotator.HPO_IDENTIFIERS),
+				expectedEntity.get(OmimHpoAnnotator.HPO_IDENTIFIERS));
+		assertEquals(resultEntity.get(OmimHpoAnnotator.HPO_GENE_NAME),
+				expectedEntity.get(OmimHpoAnnotator.HPO_GENE_NAME));
+		assertEquals(resultEntity.get(OmimHpoAnnotator.HPO_DESCRIPTIONS),
+				expectedEntity.get(OmimHpoAnnotator.HPO_DESCRIPTIONS));
+		assertEquals(resultEntity.get(OmimHpoAnnotator.HPO_DISEASE_DATABASE),
+				expectedEntity.get(OmimHpoAnnotator.HPO_DISEASE_DATABASE));
+		assertEquals(resultEntity.get(OmimHpoAnnotator.HPO_DISEASE_DATABASE_ENTRY),
+				expectedEntity.get(OmimHpoAnnotator.HPO_DISEASE_DATABASE_ENTRY));
+		assertEquals(resultEntity.get(OmimHpoAnnotator.HPO_ENTREZ_ID),
+				expectedEntity.get(OmimHpoAnnotator.HPO_ENTREZ_ID));
 	}
 
 	@Test

@@ -6,7 +6,7 @@ import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -18,7 +18,8 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.impl.datastructures.Locus;
+import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
+import org.molgenis.data.annotation.provider.HgncLocationsProvider;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.testng.annotations.BeforeMethod;
@@ -40,8 +41,6 @@ public class ClinicalGenomicsDatabaseServiceAnnotatorTest
 	@BeforeMethod
 	public void beforeMethod() throws IOException
 	{
-		String file = getClass().getResource("/cgd_example.txt").getFile();
-
 		MolgenisSettings settings = mock(MolgenisSettings.class);
 		when(settings.getProperty(ClinicalGenomicsDatabaseServiceAnnotator.CGD_FILE_LOCATION_PROPERTY)).thenReturn(
 				getClass().getResource("/cgd_example.txt").getFile());
@@ -95,9 +94,11 @@ public class ClinicalGenomicsDatabaseServiceAnnotatorTest
 		input.add(entity);
 
 		AnnotationService annotationService = mock(AnnotationService.class);
-		OmimHpoAnnotator omimHpoAnnotator = mock(OmimHpoAnnotator.class);
-		when(omimHpoAnnotator.locationToHGNC(new Locus(chrStr, chrPos))).thenReturn(Arrays.asList("LEPR"));
-		annotator = new ClinicalGenomicsDatabaseServiceAnnotator(settings, annotationService, omimHpoAnnotator);
+		HgncLocationsProvider hgncLocationsProvider = mock(HgncLocationsProvider.class);
+		Map<String, HGNCLocations> locationsMap = Collections.singletonMap("LEPR", new HGNCLocations("LEPR", 65886248l,
+				66107242l, "1"));
+		when(hgncLocationsProvider.getHgncLocations()).thenReturn(locationsMap);
+		annotator = new ClinicalGenomicsDatabaseServiceAnnotator(settings, annotationService, hgncLocationsProvider);
 	}
 
 	@Test
