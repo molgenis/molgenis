@@ -2,11 +2,9 @@ package org.molgenis.data.annotation.impl;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -15,7 +13,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.LocusAnnotator;
-import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
 import org.molgenis.data.annotation.impl.datastructures.Locus;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
