@@ -6,6 +6,7 @@ import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -16,6 +17,9 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
+import org.molgenis.data.annotation.provider.HgncLocationsProvider;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.testng.annotations.BeforeMethod;
@@ -81,13 +85,20 @@ public class ClinicalGenomicsDatabaseServiceAnnotatorTest
 
 		entity = mock(Entity.class);
 
-		when(entity.getString(ClinicalGenomicsDatabaseServiceAnnotator.CHROMOSOME)).thenReturn("1");
-		when(entity.getLong(ClinicalGenomicsDatabaseServiceAnnotator.POSITION)).thenReturn(new Long(66067385));
+		String chrStr = "1";
+		Long chrPos = new Long(66067385);
+		when(entity.getString(ClinicalGenomicsDatabaseServiceAnnotator.CHROMOSOME)).thenReturn(chrStr);
+		when(entity.getLong(ClinicalGenomicsDatabaseServiceAnnotator.POSITION)).thenReturn(chrPos);
 
 		input = new ArrayList<Entity>();
 		input.add(entity);
 
-		annotator = new ClinicalGenomicsDatabaseServiceAnnotator(settings, null);
+		AnnotationService annotationService = mock(AnnotationService.class);
+		HgncLocationsProvider hgncLocationsProvider = mock(HgncLocationsProvider.class);
+		Map<String, HGNCLocations> locationsMap = Collections.singletonMap("LEPR", new HGNCLocations("LEPR", 65886248l,
+				66107242l, "1"));
+		when(hgncLocationsProvider.getHgncLocations()).thenReturn(locationsMap);
+		annotator = new ClinicalGenomicsDatabaseServiceAnnotator(settings, annotationService, hgncLocationsProvider);
 	}
 
 	@Test
