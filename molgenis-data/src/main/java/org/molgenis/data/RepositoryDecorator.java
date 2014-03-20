@@ -20,39 +20,9 @@ public class RepositoryDecorator implements Repository
 	}
 
 	@Override
-	public String getLabel()
+	public EntityMetaData getEntityMetaData()
 	{
-		return decoratedRepository.getLabel();
-	}
-
-	@Override
-	public String getDescription()
-	{
-		return decoratedRepository.getDescription();
-	}
-
-	@Override
-	public Iterable<AttributeMetaData> getAttributes()
-	{
-		return decoratedRepository.getAttributes();
-	}
-
-	@Override
-	public AttributeMetaData getIdAttribute()
-	{
-		return decoratedRepository.getIdAttribute();
-	}
-
-	@Override
-	public AttributeMetaData getLabelAttribute()
-	{
-		return decoratedRepository.getLabelAttribute();
-	}
-
-	@Override
-	public AttributeMetaData getAttribute(String attributeName)
-	{
-		return decoratedRepository.getAttribute(attributeName);
+		return decoratedRepository.getEntityMetaData();
 	}
 
 	@Override
@@ -84,5 +54,4 @@ public class RepositoryDecorator implements Repository
 	{
 		return decoratedRepository.getUrl();
 	}
-
 }

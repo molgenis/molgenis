@@ -2,7 +2,7 @@ package org.molgenis.omx.controller;
 
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.security.SecurityUtils;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;

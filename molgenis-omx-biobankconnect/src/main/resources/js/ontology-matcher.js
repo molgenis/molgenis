@@ -26,7 +26,7 @@
 			targetCatalogues.css('margin-top', '20px').empty().append(dataSetDiv);
 			$.each(selectedOptions, function(index, targetDataSetId){
 				var dataSet = restApi.get('/api/v1/dataset/' + targetDataSetId);
-				var nameDiv = $('<div />').addClass('span4').append(dataSet.name);
+				var nameDiv = $('<div />').addClass('span4').append(dataSet.Name);
 				var controlDiv = $('<div />').addClass('offset4 span4');
 				var viewCatalogue = $('<button type="btn" class="btn btn-link view-button">View</button>').click(function(){
 					if($(this).hasClass('view-button')){
@@ -105,7 +105,7 @@
 	function changeDataSet (selectedDataSetId){
 		if(selectedDataSetId !== ''){
 			var dataSetEntity = restApi.get('/api/v1/dataset/' + selectedDataSetId);
-			$('#selected-catalogue').empty().append(dataSetEntity.name);
+			$('#selected-catalogue').empty().append(dataSetEntity.Name);
 			var request = {
 				documentType : 'protocolTree-' + ns.hrefToId(dataSetEntity.href),
 				query : {

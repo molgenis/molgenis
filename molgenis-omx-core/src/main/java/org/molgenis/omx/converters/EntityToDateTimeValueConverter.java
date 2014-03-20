@@ -34,7 +34,7 @@ public class EntityToDateTimeValueConverter implements EntityToValueConverter<Da
 		DateTimeValue dateTimeValue = (DateTimeValue) value;
 		try
 		{
-			dateTimeValue.setValue(MolgenisDateFormat.getDateFormat().parse(dateTimeStr));
+			dateTimeValue.setValue(MolgenisDateFormat.getDateTimeFormat().parse(dateTimeStr));
 		}
 		catch (ParseException e)
 		{
@@ -51,6 +51,6 @@ public class EntityToDateTimeValueConverter implements EntityToValueConverter<Da
 			throw new ValueConverterException("value is not a " + DateTimeValue.class.getSimpleName());
 		}
 
-		return new ValueCell<String>(MolgenisDateFormat.getDateFormat().format(((DateTimeValue) value).getValue()));
+		return new ValueCell<String>(MolgenisDateFormat.getDateTimeFormat().format(((DateTimeValue) value).getValue()));
 	}
 }

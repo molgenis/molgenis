@@ -37,6 +37,9 @@ public class CsvRepositoryTest
 	public void addCellProcessor_header() throws IOException
 	{
 		CellProcessor processor = when(mock(CellProcessor.class).processHeader()).thenReturn(true).getMock();
+		when(processor.process("col1")).thenReturn("col1");
+		when(processor.process("col2")).thenReturn("col2");
+
 		CsvRepository csvRepository = new CsvRepository("test.csv", new StringReader("col1,col2\nval1,val2"), ',',
 				"test", null);
 		try
@@ -89,7 +92,7 @@ public class CsvRepositoryTest
 			FileCopyUtils.copy(in, new FileOutputStream(file));
 			csvRepository = new CsvRepository(file, null);
 			assertEquals(csvRepository.getName(), "testdata");
-			Iterator<AttributeMetaData> it = csvRepository.getAttributes().iterator();
+			Iterator<AttributeMetaData> it = csvRepository.getEntityMetaData().getAttributes().iterator();
 			assertTrue(it.hasNext());
 			assertEquals(it.next().getName(), "col1");
 			assertTrue(it.hasNext());

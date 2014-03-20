@@ -18,6 +18,7 @@ import org.molgenis.charts.XYDataChart;
 import org.molgenis.charts.calculations.BoxPlotCalcUtil;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.Queryable;
@@ -44,9 +45,12 @@ public class ChartDataServiceImpl implements ChartDataService
 			String split, List<QueryRule> queryRules)
 	{
 		Repository repo = dataService.getRepositoryByEntityName(entityName);
+		EntityMetaData entityMetaData = repo.getEntityMetaData();
 
-		final FieldTypeEnum attributeXFieldTypeEnum = repo.getAttribute(attributeNameXaxis).getDataType().getEnumType();
-		final FieldTypeEnum attributeYFieldTypeEnum = repo.getAttribute(attributeNameYaxis).getDataType().getEnumType();
+		final FieldTypeEnum attributeXFieldTypeEnum = entityMetaData.getAttribute(attributeNameXaxis).getDataType()
+				.getEnumType();
+		final FieldTypeEnum attributeYFieldTypeEnum = entityMetaData.getAttribute(attributeNameYaxis).getDataType()
+				.getEnumType();
 		final List<XYDataSerie> xYDataSeries;
 
 		// Sanity check
@@ -86,9 +90,11 @@ public class ChartDataServiceImpl implements ChartDataService
 			String attributeNameYaxis, FieldTypeEnum attributeXFieldTypeEnum, FieldTypeEnum attributeYFieldTypeEnum,
 			List<QueryRule> queryRules)
 	{
+		EntityMetaData entityMetaData = repo.getEntityMetaData();
+
 		XYDataSerie serie = new XYDataSerie();
-		serie.setName(repo.getAttribute(attributeNameXaxis).getLabel() + " vs "
-				+ repo.getAttribute(attributeNameYaxis).getLabel());
+		serie.setName(entityMetaData.getAttribute(attributeNameXaxis).getLabel() + " vs "
+				+ entityMetaData.getAttribute(attributeNameYaxis).getLabel());
 		serie.setAttributeXFieldTypeEnum(attributeXFieldTypeEnum);
 		serie.setAttributeYFieldTypeEnum(attributeYFieldTypeEnum);
 
@@ -116,7 +122,7 @@ public class ChartDataServiceImpl implements ChartDataService
 		Map<String, XYDataSerie> xYDataSeriesMap = new HashMap<String, XYDataSerie>();
 		for (Entity entity : iterable)
 		{
-			String splitValue = split + "__" + entity.get(split);
+			String splitValue = createSplitKey(entity, split);
 			if (!xYDataSeriesMap.containsKey(splitValue))
 			{
 				XYDataSerie serie = new XYDataSerie();
@@ -138,6 +144,47 @@ public class ChartDataServiceImpl implements ChartDataService
 		}
 
 		return series;
+	}
+
+	private String getValueAsString(Entity entity, String split)
+	{
+		Object o = entity.get(split);
+		if (o instanceof Entity)
+		{
+			return ((Entity) o).getLabelValue();
+		}
+		else if (o instanceof List)
+		{
+			@SuppressWarnings("unchecked")
+			Iterable<Object> refObjects = (Iterable<Object>) o;
+			StringBuilder strBuilder = new StringBuilder();
+			for (Object ob : refObjects)
+			{
+				if (strBuilder.length() > 0)
+				{
+					strBuilder.append(',');
+				}
+
+				if (ob instanceof Entity)
+				{
+					strBuilder.append(((Entity) ob).getLabelValue());
+				}
+				else
+				{
+					strBuilder.append(ob.toString());
+				}
+			}
+			return strBuilder.toString();
+		}
+		else
+		{
+			return "" + o;
+		}
+	}
+
+	public String createSplitKey(Entity entity, String split)
+	{
+		return split + '(' + getValueAsString(entity, split) + ')';
 	}
 
 	@Override
@@ -162,12 +209,15 @@ public class ChartDataServiceImpl implements ChartDataService
 			String split, double scaleToCalcOutliers)
 	{
 		Repository repo = dataService.getRepositoryByEntityName(entityName);
+		EntityMetaData entityMetaData = repo.getEntityMetaData();
+
 		BoxPlotChart boxPlotChart = new BoxPlotChart();
-		boxPlotChart.setyLabel(repo.getAttribute(attributeName).getLabel());
+		boxPlotChart.setyLabel(entityMetaData.getAttribute(attributeName).getLabel());
 
 		Sort sort = new Sort(Sort.DEFAULT_DIRECTION, attributeName);
 		Iterable<Entity> iterable = getIterable(entityName, repo, queryRules, sort);
-		Map<String, List<Double>> boxPlotDataListMap = getBoxPlotDataListMap(repo, iterable, attributeName, split);
+		Map<String, List<Double>> boxPlotDataListMap = getBoxPlotDataListMap(entityMetaData, iterable, attributeName,
+				split);
 
 		BoxPlotSerie boxPlotSerie = new BoxPlotSerie();
 		boxPlotSerie.setType(MolgenisSerieType.BOXPLOT);
@@ -220,14 +270,14 @@ public class ChartDataServiceImpl implements ChartDataService
 	/**
 	 * Get a map containing keys to different data lists
 	 * 
-	 * @param repo
+	 * @param entityMeta
 	 * @param iterable
 	 * @param attributeName
 	 * @param split
 	 *            (String) if null or empty String will not split
 	 * @return map (Map<String, List<Double>>)
 	 */
-	private Map<String, List<Double>> getBoxPlotDataListMap(Repository repo, Iterable<Entity> iterable,
+	private Map<String, List<Double>> getBoxPlotDataListMap(EntityMetaData entityMeta, Iterable<Entity> iterable,
 			String attributeName, String split)
 	{
 		Map<String, List<Double>> boxPlotDataListMap = new HashMap<String, List<Double>>();
@@ -237,7 +287,7 @@ public class ChartDataServiceImpl implements ChartDataService
 		{
 			for (Entity entity : iterable)
 			{
-				String key = split + "__" + entity.get(split);
+				String key = createSplitKey(entity, split);
 				if (!boxPlotDataListMap.containsKey(key))
 				{
 					boxPlotDataListMap.put(key, new ArrayList<Double>());
@@ -247,7 +297,7 @@ public class ChartDataServiceImpl implements ChartDataService
 		}
 		else
 		{
-			String key = repo.getAttribute(attributeName).getLabel();
+			String key = entityMeta.getAttribute(attributeName).getLabel();
 			List<Double> list = new ArrayList<Double>();
 			for (Entity entity : iterable)
 			{

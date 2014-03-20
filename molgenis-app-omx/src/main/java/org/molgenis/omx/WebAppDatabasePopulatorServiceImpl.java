@@ -1,10 +1,15 @@
 package org.molgenis.omx;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.annotation.impl.CaddServiceAnnotator;
+import org.molgenis.data.annotation.impl.ClinicalGenomicsDatabaseServiceAnnotator;
+import org.molgenis.data.annotation.impl.DbnsfpGeneServiceAnnotator;
+import org.molgenis.data.annotation.impl.DbnsfpVariantServiceAnnotator;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.framework.db.WebAppDatabasePopulatorService;
@@ -15,8 +20,8 @@ import org.molgenis.omx.auth.MolgenisGroupMember;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.controller.HomeController;
 import org.molgenis.omx.core.RuntimeProperty;
-import org.molgenis.security.SecurityUtils;
 import org.molgenis.security.account.AccountService;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -134,8 +139,29 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 				"new DASSource('http://www.derkholm.net:8080/das/hsa_59_37d/')");
 
 		// Charts include/exclude charts
-		runtimePropertyMap.put(DataExplorerController.KEY_APP_INCLUDE_CHARTS,
-				DataExplorerController.INCLUDE_CHARTS_MODULE + "");
+		runtimePropertyMap.put(DataExplorerController.KEY_MOD_AGGREGATES, String.valueOf(true));
+		runtimePropertyMap.put(DataExplorerController.KEY_MOD_CHARTS, String.valueOf(true));
+		runtimePropertyMap.put(DataExplorerController.KEY_MOD_DATA, String.valueOf(true));
+
+		// Annotators include files/tools
+		String molgenisHomeDir = System.getProperty("molgenis.home");
+		
+		if (molgenisHomeDir == null)
+		{
+			throw new IllegalArgumentException("missing required java system property 'molgenis.home'");
+		}
+
+		if (!molgenisHomeDir.endsWith("/")) molgenisHomeDir = molgenisHomeDir + '/';
+		String molgenisHomeDirAnnotationResources = molgenisHomeDir + "data/annotation_resources";
+
+		runtimePropertyMap.put(CaddServiceAnnotator.CADD_FILE_LOCATION_PROPERTY, molgenisHomeDirAnnotationResources
+				+ "/CADD/1000G.vcf.gz");
+		runtimePropertyMap.put(ClinicalGenomicsDatabaseServiceAnnotator.CGD_FILE_LOCATION_PROPERTY,
+				molgenisHomeDirAnnotationResources + "/CGD/CGD.txt");
+		runtimePropertyMap.put(DbnsfpGeneServiceAnnotator.GENE_FILE_LOCATION_PROPERTY,
+				molgenisHomeDirAnnotationResources + "/dbnsfp/dbNSFP2.3_gene");
+		runtimePropertyMap.put(DbnsfpVariantServiceAnnotator.CHROMOSOME_FILE_LOCATION_PROPERTY,
+				molgenisHomeDirAnnotationResources + "/dbnsfp/dbNSFP2.3_variant.chr");
 
 		for (Entry<String, String> entry : runtimePropertyMap.entrySet())
 		{

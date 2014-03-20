@@ -14,7 +14,7 @@ public class DateToStringConverterTest
 	public void convert()
 	{
 		Date d = new Date();
-		String s = MolgenisDateFormat.getDateFormat().format(d);
+		String s = MolgenisDateFormat.getDateTimeFormat().format(d);
 		assertEquals(new DateToStringConverter().convert(d), s);
 	}
 }

@@ -1,5 +1,6 @@
 package org.molgenis.data;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -90,15 +91,15 @@ public class CrudRepositoryDecorator extends RepositoryDecorator implements Crud
 	}
 
 	@Override
-	public String getDescription()
-	{
-		return decoratedRepository.getDescription();
-	}
-
-	@Override
 	public Entity findOne(Integer id)
 	{
 		return decoratedRepository.findOne(id);
+	}
+
+	@Override
+	public void close() throws IOException
+	{
+		decoratedRepository.close();
 	}
 
 	@Override

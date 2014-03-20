@@ -13,7 +13,7 @@ public class StringToDateConverter implements Converter<String, Date>
 	{
 		try
 		{
-			return MolgenisDateFormat.getDateFormat().parse(source);
+			return MolgenisDateFormat.getDateTimeFormat().parse(source);
 		}
 		catch (ParseException pe)
 		{

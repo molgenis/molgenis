@@ -21,6 +21,7 @@
 							  					<th>Plugin</th>
 							  					<th>Edit</th>
 							  					<th>View</th>
+							  					<th>Count</th>
 							  					<th>None</th>
 							  				</tr>
 							  			</thead>
@@ -48,6 +49,7 @@
 							  					<th>Plugin</th>
 							  					<th>Edit</th>
 							  					<th>View</th>
+							  					<th>Count</th>
 							  					<th>None</th>
 							  				</tr>
 							  			</thead>

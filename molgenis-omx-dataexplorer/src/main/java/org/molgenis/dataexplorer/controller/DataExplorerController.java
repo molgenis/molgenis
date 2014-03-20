@@ -1,60 +1,54 @@
 package org.molgenis.dataexplorer.controller;
 
 import static org.molgenis.dataexplorer.controller.DataExplorerController.URI;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Query;
 import org.molgenis.data.csv.CsvWriter;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.entityexplorer.controller.EntityExplorerController;
-import org.molgenis.framework.server.MolgenisPermissionService;
-import org.molgenis.framework.server.MolgenisPermissionService.Permission;
+import org.molgenis.data.support.QueryResolver;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.omx.observ.Category;
-import org.molgenis.omx.observ.DataSet;
-import org.molgenis.omx.observ.ObservableFeature;
-import org.molgenis.omx.observ.Protocol;
-import org.molgenis.omx.utils.ProtocolUtils;
-import org.molgenis.search.Hit;
-import org.molgenis.search.SearchRequest;
-import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
+import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.Permission;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.google.common.collect.Lists;
-
-//import org.molgenis.data.csv
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 
 /**
  * Controller class for the data explorer.
@@ -75,16 +69,15 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String ID = "dataexplorer";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
-	private static final int DOWNLOAD_SEARCH_LIMIT = 1000;
-
-	private static final String DEFAULT_KEY_TABLE_TYPE = "MultiObservationSetTable.js";
-	private static final String KEY_TABLE_TYPE = "dataexplorer.resultstable.js";
-	private static final String KEY_APP_HREF_CSS = "app.href.css";
-
-	// Including excluding the charts module
-	public static final boolean INCLUDE_CHARTS_MODULE = true;
-	public static final String KEY_APP_INCLUDE_CHARTS = "app.dataexplorer.include.charts";
-	private static final String MODEL_APP_INCLUDE_CHARTS = "app_dataexplorer_include_charts";
+	public static final String KEY_MOD_AGGREGATES = "plugin.dataexplorer.mod.aggregates";
+	public static final String KEY_MOD_CHARTS = "plugin.dataexplorer.mod.charts";
+	public static final String KEY_MOD_DATA = "plugin.dataexplorer.mod.data";
+	private static final String MODEL_KEY_MOD_AGGREGATES = "mod_aggregates";
+	private static final String MODEL_KEY_MOD_CHARTS = "mod_charts";
+	private static final String MODEL_KEY_MOD_DATA = "mod_data";
+	private static final boolean DEFAULT_VAL_MOD_AGGREGATES = true;
+	private static final boolean DEFAULT_VAL_MOD_CHARTS = true;
+	private static final boolean DEFAULT_VAL_MOD_DATA = true;
 
 	public static final String INITLOCATION = "initLocation";
 	public static final String COORDSYSTEM = "coordSystem";
@@ -111,6 +104,9 @@ public class DataExplorerController extends MolgenisPluginController
 	@Autowired
 	private SearchService searchService;
 
+	@Autowired
+	private QueryResolver queryResolver;
+
 	public DataExplorerController()
 	{
 		super(URI);
@@ -123,274 +119,229 @@ public class DataExplorerController extends MolgenisPluginController
 	 * @return the view name
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(@RequestParam(value = "dataset", required = false)
-	String selectedDataSetIdentifier, Model model) throws Exception
+	public String init(@RequestParam(value = "dataset", required = false) String selectedEntityName,
+			@RequestParam(value = "wizard", required = false) Boolean wizard, Model model) throws Exception
 	{
-		Map<String, String> genomeBrowserSets = new HashMap<String, String>();
-
-		// set entityExplorer URL for link to EntityExplorer for x/mrefs, but only if the user has permission to see the
-		// plugin
-		if (molgenisPermissionService.hasPermissionOnPlugin(EntityExplorerController.ID, Permission.READ)
-				|| molgenisPermissionService.hasPermissionOnPlugin(EntityExplorerController.ID, Permission.WRITE))
-		{
-			model.addAttribute("entityExplorerUrl", EntityExplorerController.ID);
-		}
-
-		List<DataSet> dataSets = Lists.newArrayList(dataService.findAll(DataSet.ENTITY_NAME,
-				new QueryImpl().sort(new Sort(Direction.DESC, DataSet.STARTTIME)), DataSet.class));
-
-		model.addAttribute("dataSets", dataSets);
-
-		if (dataSets != null && !dataSets.isEmpty())
-		{
-			// determine selected data set and add to model
-			DataSet selectedDataSet = null;
-			if (selectedDataSetIdentifier != null)
-			{
-				for (DataSet dataSet : dataSets)
+		Iterable<EntityMetaData> entitiesMeta = Iterables.transform(dataService.getEntityNames(),
+				new Function<String, EntityMetaData>()
 				{
-					if (dataSet.getIdentifier().equals(selectedDataSetIdentifier))
+					@Override
+					public EntityMetaData apply(String entityName)
 					{
-						selectedDataSet = dataSet;
-						break;
+						return dataService.getEntityMetaData(entityName);
 					}
-				}
+				});
+		model.addAttribute("entitiesMeta", entitiesMeta);
 
-				if (selectedDataSet == null) throw new IllegalArgumentException(selectedDataSetIdentifier
-						+ " is not a valid data set identifier");
-			}
-			else
-			{
-				// select first data set by default
-				selectedDataSet = dataSets.iterator().next();
-			}
-			model.addAttribute("selectedDataSet", selectedDataSet);
-			for (DataSet dataSet : dataSets)
-			{
-				if (isGenomeBrowserDataSet(dataSet))
-				{
-					genomeBrowserSets.put(dataSet.getIdentifier(), dataSet.getName());
-				}
-			}
-			model.addAttribute("genomeBrowserSets", genomeBrowserSets);
+		if (selectedEntityName == null)
+		{
+			selectedEntityName = entitiesMeta.iterator().next().getName();
 		}
+		model.addAttribute("selectedEntityName", selectedEntityName);
+		model.addAttribute("wizard", (wizard != null) && wizard.booleanValue());
 
-		String resultsTableJavascriptFile = molgenisSettings.getProperty(KEY_TABLE_TYPE, DEFAULT_KEY_TABLE_TYPE);
-		model.addAttribute("resultsTableJavascriptFile", resultsTableJavascriptFile);
-
-		String appHrefCss = molgenisSettings.getProperty(KEY_APP_HREF_CSS);
-		if (appHrefCss != null) model.addAttribute(KEY_APP_HREF_CSS.replaceAll("\\.", "_"), appHrefCss);
-
-		// including/excluding charts
-		Boolean appIncludeCharts = molgenisSettings.getBooleanProperty(KEY_APP_INCLUDE_CHARTS, INCLUDE_CHARTS_MODULE);
-		model.addAttribute(MODEL_APP_INCLUDE_CHARTS, appIncludeCharts);
-
-		model.addAttribute(INITLOCATION, molgenisSettings.getProperty(INITLOCATION));
-		model.addAttribute(COORDSYSTEM, molgenisSettings.getProperty(COORDSYSTEM));
-		model.addAttribute(CHAINS, molgenisSettings.getProperty(CHAINS));
-		model.addAttribute(SOURCES, molgenisSettings.getProperty(SOURCES));
-		model.addAttribute(BROWSERLINKS, molgenisSettings.getProperty(BROWSERLINKS));
-		model.addAttribute(SEARCHENDPOINT, molgenisSettings.getProperty(SEARCHENDPOINT));
-		model.addAttribute(KARYOTYPEENDPOINT, molgenisSettings.getProperty(KARYOTYPEENDPOINT));
-		model.addAttribute(GENOMEBROWSERTABLE, molgenisSettings.getProperty(GENOMEBROWSERTABLE));
+		// define which modules to display
+		Boolean modCharts = molgenisSettings.getBooleanProperty(KEY_MOD_CHARTS, DEFAULT_VAL_MOD_CHARTS);
+		model.addAttribute(MODEL_KEY_MOD_CHARTS, modCharts);
+		Boolean modData = molgenisSettings.getBooleanProperty(KEY_MOD_DATA, DEFAULT_VAL_MOD_DATA);
+		model.addAttribute(MODEL_KEY_MOD_DATA, modData);
+		Boolean modAggregates = molgenisSettings.getBooleanProperty(KEY_MOD_AGGREGATES, DEFAULT_VAL_MOD_AGGREGATES);
+		model.addAttribute(MODEL_KEY_MOD_AGGREGATES, modAggregates);
 
 		return "view-dataexplorer";
 	}
 
-	private boolean isGenomeBrowserDataSet(DataSet selectedDataSet)
+	@RequestMapping(value = "/module/{moduleId}", method = GET)
+	public String getModule(@PathVariable("moduleId") String moduleId, Model model)
 	{
-		Collection<Protocol> protocols = new ArrayList<Protocol>();
-		protocols.add(selectedDataSet.getProtocolUsed());
-		return containsGenomeBrowserProtocol(protocols);
+		if (moduleId.equals("data"))
+		{
+			// Init genome browser
+			model.addAttribute("genomeEntities", getGenomeBrowserEntities());
+
+			model.addAttribute(INITLOCATION, molgenisSettings.getProperty(INITLOCATION));
+			model.addAttribute(COORDSYSTEM, molgenisSettings.getProperty(COORDSYSTEM));
+			model.addAttribute(CHAINS, molgenisSettings.getProperty(CHAINS));
+			model.addAttribute(SOURCES, molgenisSettings.getProperty(SOURCES));
+			model.addAttribute(BROWSERLINKS, molgenisSettings.getProperty(BROWSERLINKS));
+			model.addAttribute(SEARCHENDPOINT, molgenisSettings.getProperty(SEARCHENDPOINT));
+			model.addAttribute(KARYOTYPEENDPOINT, molgenisSettings.getProperty(KARYOTYPEENDPOINT));
+			model.addAttribute(GENOMEBROWSERTABLE, molgenisSettings.getProperty(GENOMEBROWSERTABLE));
+		}
+		return "view-dataexplorer-mod-" + moduleId; // TODO bad request in case of invalid module id
 	}
 
-	private boolean containsGenomeBrowserProtocol(Collection<Protocol> protocols)
+	/**
+	 * Returns modules configuration for this entity based on current user permissions.
+	 * 
+	 * @param entityName
+	 * @return
+	 */
+	@RequestMapping(value = "/modules", method = GET)
+	@ResponseBody
+	public ModulesConfigResponse getModules(@RequestParam("entity") String entityName)
 	{
-		boolean hasStartPosition = false;
-		boolean hasChromosome = false;
-		boolean hasId = false;
-		boolean hasGenomeBrowserprotocol = false;
-		boolean hasGenomeBrowserSubprotocol = false;
+		// set data explorer permission
+		Permission pluginPermission = null;
+		if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITE)) pluginPermission = Permission.WRITE;
+		else if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.READ)) pluginPermission = Permission.READ;
+		else if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.COUNT)) pluginPermission = Permission.COUNT;
 
-		for (Protocol protocol : protocols)
+		ModulesConfigResponse modulesConfig = new ModulesConfigResponse();
+		if (pluginPermission != null)
 		{
-			List<ObservableFeature> features = protocol.getFeatures();
-			for (ObservableFeature feature : features)
+			switch (pluginPermission)
 			{
-				if (feature.getIdentifier().equals(MUTATION_START_POSITION)) hasStartPosition = true;
-				else if (feature.getIdentifier().equals(MUTATION_ID)) hasId = true;
-				else if (feature.getIdentifier().equals(MUTATION_CHROMOSOME)) hasChromosome = true;
-			}
-			if (hasStartPosition && hasChromosome && hasId)
-			{
-				hasGenomeBrowserprotocol = true;
-			}
-			else
-			{
-				hasGenomeBrowserSubprotocol = containsGenomeBrowserProtocol(protocol.getSubprotocols());
+				case COUNT:
+					modulesConfig.add(new ModuleConfig("aggregates", "Aggregates", "grid-icon.png"));
+					break;
+				case READ:
+				case WRITE:
+					modulesConfig.add(new ModuleConfig("data", "Data", "grid-icon.png"));
+					modulesConfig.add(new ModuleConfig("aggregates", "Aggregates", "aggregate-icon.png"));
+					modulesConfig.add(new ModuleConfig("charts", "Charts", "chart-icon.png"));
+					break;
+				default:
+					throw new RuntimeException("unknown plugin permission: " + pluginPermission);
 			}
 		}
-		return hasGenomeBrowserprotocol || hasGenomeBrowserSubprotocol;
+		return modulesConfig;
+	}
+
+	/**
+	 * Get readable genome entities
+	 * 
+	 * @return
+	 */
+	private Map<String, String> getGenomeBrowserEntities()
+	{
+		Map<String, String> genomeEntities = new HashMap<String, String>();
+		for (String entityName : dataService.getEntityNames())
+		{
+			EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
+			if (isGenomeBrowserEntity(entityMetaData))
+			{
+				boolean canRead = molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.READ);
+				boolean canWrite = molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITE);
+				if (canRead || canWrite)
+				{
+					genomeEntities.put(entityMetaData.getName(), entityMetaData.getLabel());
+				}
+			}
+		}
+		return genomeEntities;
+	}
+
+	private boolean isGenomeBrowserEntity(EntityMetaData entityMetaData)
+	{
+		AttributeMetaData attributeStartPosition = entityMetaData.getAttribute(MUTATION_START_POSITION);
+		AttributeMetaData attributeId = entityMetaData.getAttribute(MUTATION_ID);
+		AttributeMetaData attributeChromosome = entityMetaData.getAttribute(MUTATION_CHROMOSOME);
+		return attributeStartPosition != null && attributeId != null && attributeChromosome != null;
 	}
 
 	@RequestMapping(value = "/download", method = POST)
-	public void download(@RequestParam("searchRequest")
-	String searchRequest, HttpServletResponse response) throws IOException
+	public void download(@RequestParam("dataRequest") String dataRequestStr, HttpServletResponse response)
+			throws IOException
 	{
-		searchRequest = URLDecoder.decode(searchRequest, "UTF-8");
-		logger.info("Download request: [" + searchRequest + "]");
+		// Workaround because binding with @RequestBody is not possible:
+		// http://stackoverflow.com/a/9970672
+		dataRequestStr = URLDecoder.decode(dataRequestStr, "UTF-8");
+		logger.info("Download request: [" + dataRequestStr + "]");
+		DataRequest dataRequest = new GsonHttpMessageConverter().getGson().fromJson(dataRequestStr, DataRequest.class);
 
-		SearchRequest request = new GsonHttpMessageConverter().getGson().fromJson(searchRequest, SearchRequest.class);
-		request.getQuery().pageSize(DOWNLOAD_SEARCH_LIMIT).offset(0);
+		String entityName = dataRequest.getEntityName();
+		EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
+		final Set<String> attributes = new HashSet<String>(dataRequest.getAttributeNames());
+		String fileName = entityName + '_' + new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + ".csv";
+
+		QueryImpl query = dataRequest.getQuery();
+		queryResolver.resolveRefIdentifiers(query.getRules(), entityMetaData);
 
 		response.setContentType("text/csv");
-		response.addHeader("Content-Disposition", "attachment; filename=" + getCsvFileName(request.getDocumentType()));
+		response.addHeader("Content-Disposition", "attachment; filename=" + fileName);
 
-		CsvWriter writer = null;
+		CsvWriter csvWriter = new CsvWriter(response.getOutputStream());
 		try
 		{
-			writer = new CsvWriter(response.getWriter());
-
-			// The fieldsToReturn contain identifiers, we need the names
-			Map<String, String> nameByIdentifier = getFeatureNames(request.getFieldsToReturn());
-
-			// Keep order
-			List<String> names = new ArrayList<String>();
-			for (String identifier : request.getFieldsToReturn())
-			{
-				String name = nameByIdentifier.get(identifier);
-				if (name != null)
-				{
-					names.add(name);
-				}
-			}
-
-			writer.writeAttributeNames(names);
-			int count = 0;
-			SearchResult searchResult;
-
-			do
-			{
-				request.getQuery().offset(count);
-				searchResult = searchService.search(request);
-
-				for (Hit hit : searchResult.getSearchHits())
-				{
-					Entity entity = new MapEntity();
-					for (String field : request.getFieldsToReturn())
+			csvWriter.writeAttributeNames(Iterables.transform(
+					Iterables.filter(entityMetaData.getAtomicAttributes(), new Predicate<AttributeMetaData>()
 					{
-						entity.set(nameByIdentifier.get(field), hit.getColumnValueMap().get(field));
-					}
-					writer.add(entity);
-				}
-
-				count += searchResult.getSearchHits().size();
-			}
-			while (count < searchResult.getTotalHitCount());
+						@Override
+						public boolean apply(AttributeMetaData attributeMetaData)
+						{
+							return attributes.contains(attributeMetaData.getName());
+						}
+					}), new Function<AttributeMetaData, String>()
+					{
+						@Override
+						public String apply(AttributeMetaData attributeMetaData)
+						{
+							return attributeMetaData.getName();
+						}
+					}));
+			csvWriter.add(dataService.findAll(entityName, query));
 		}
 		finally
 		{
-			IOUtils.closeQuietly(writer);
+			csvWriter.close();
 		}
 	}
 
 	@RequestMapping(value = "/aggregate", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
 	@ResponseBody
-	public AggregateResponse aggregate(@RequestBody
-	AggregateRequest request)
+	public AggregateResponse aggregate(@Valid @RequestBody AggregateRequest request)
 	{
+		String entityName = request.getEntityName();
+		String attributeName = request.getXAxisAttributeName();
 
-		Map<String, Integer> hashCounts = new HashMap<String, Integer>();
+		EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
 
-		try
+		QueryImpl q;
+		if (request.getQ() != null) q = new QueryImpl(queryResolver.resolveRefIdentifiers(request.getQ(), entityMeta));
+		else q = new QueryImpl();
+
+		AttributeMetaData attributeMeta = entityMeta.getAttribute(attributeName);
+		FieldTypeEnum dataType = attributeMeta.getDataType().getEnumType();
+		if (dataType != FieldTypeEnum.BOOL && dataType != FieldTypeEnum.CATEGORICAL && dataType != FieldTypeEnum.XREF)
 		{
-			if (request.getDataType().equals("categorical"))
-			{
-				ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME, request.getFeatureId(),
-						ObservableFeature.class);
-				if (feature != null)
-				{
-					Iterable<Category> categories = dataService.findAll(Category.ENTITY_NAME,
-							new QueryImpl().eq(Category.OBSERVABLEFEATURE, feature), Category.class);
-
-					for (Category category : categories)
-					{
-						hashCounts.put(category.getName(), 0);
-					}
-				}
-			}
-			else if (request.getDataType().equals("bool"))
-			{
-				hashCounts.put("true", 0);
-				hashCounts.put("false", 0);
-			}
-			else
-			{
-				throw new RuntimeException("Illegal datatype");
-			}
-
-			ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME, request.getFeatureId(),
-					ObservableFeature.class);
-			SearchResult searchResult = searchService.search(request.getSearchRequest());
-
-			for (Hit hit : searchResult.getSearchHits())
-			{
-				Map<String, Object> columnValueMap = hit.getColumnValueMap();
-				if (columnValueMap.containsKey(feature.getIdentifier()))
-				{
-					String categoryValue = columnValueMap.get(feature.getIdentifier()).toString();
-					if (hashCounts.containsKey(categoryValue))
-					{
-						Integer countPerCategoricalValue = hashCounts.get(categoryValue);
-						hashCounts.put(categoryValue, ++countPerCategoricalValue);
-					}
-				}
-			}
-
-		}
-		catch (MolgenisDataException e)
-		{
-			logger.info(e);
-
-		}
-		return new AggregateResponse(hashCounts);
-
-	}
-
-	@RequestMapping(value = "/filterdialog", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
-	public String filterwizard(@RequestBody
-	@Valid
-	@NotNull
-	FilterWizardRequest request, Model model)
-	{
-		String dataSetIdentifier = request.getDataSetIdentifier();
-		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME,
-				new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier), DataSet.class);
-		List<Protocol> listOfallProtocols = ProtocolUtils.getProtocolDescendants(dataSet.getProtocolUsed(), true);
-
-		model.addAttribute("listOfallProtocols", listOfallProtocols);
-		model.addAttribute("identifier", dataSetIdentifier);
-		return "view-filter-dialog";
-	}
-
-	// Get feature names by feature identifiers
-	private Map<String, String> getFeatureNames(List<String> identifiers)
-	{
-		Iterable<ObservableFeature> features = dataService.findAll(ObservableFeature.ENTITY_NAME,
-				new QueryImpl().in(ObservableFeature.IDENTIFIER, identifiers), ObservableFeature.class);
-
-		Map<String, String> nameByIdentifier = new LinkedHashMap<String, String>();
-		for (ObservableFeature feature : features)
-		{
-			nameByIdentifier.put(feature.getIdentifier(), feature.getName());
+			throw new RuntimeException("Unsupported data type " + dataType);
 		}
 
-		return nameByIdentifier;
+		Map<String, Long> aggregateMap = new HashMap<String, Long>();
+		if (dataType == FieldTypeEnum.BOOL)
+		{
+			Query trueQ = new QueryImpl(q).and().eq(attributeName, true);
+			long trueCount = dataService.count(entityName, trueQ);
+			aggregateMap.put("true", trueCount);
+			Query falseQ = new QueryImpl(q).and().eq(attributeName, false);
+			long falseCount = dataService.count(entityName, falseQ);
+			aggregateMap.put("false", falseCount);
+		}
+		else if (dataType == FieldTypeEnum.CATEGORICAL || dataType == FieldTypeEnum.XREF)
+		{
+
+			EntityMetaData refEntityMeta = attributeMeta.getRefEntity();
+			String refEntityName = refEntityMeta.getName();
+			String refEntityLblAttr = refEntityMeta.getLabelAttribute().getName();
+
+			for (Entity refEntity : dataService.findAll(refEntityName))
+			{
+				Query refQ = new QueryImpl(q).and().eq(attributeName, refEntity);
+				long refEntityCount = dataService.count(entityName, refQ);
+				aggregateMap.put(refEntity.getString(refEntityLblAttr), refEntityCount);
+			}
+		}
+		return new AggregateResponse(aggregateMap);
 	}
 
-	private String getCsvFileName(String dataSetName)
+	@ExceptionHandler(RuntimeException.class)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+	public Map<String, String> handleRuntimeException(RuntimeException e)
 	{
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-		return dataSetName + "_" + dateFormat.format(new Date()) + ".csv";
+		logger.error(null, e);
+		return Collections.singletonMap("errorMessage",
+				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage());
 	}
 }

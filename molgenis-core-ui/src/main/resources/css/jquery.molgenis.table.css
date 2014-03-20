@@ -1,0 +1,53 @@
+.molgenis-table-container {
+	margin-bottom: 10px;
+	overflow: auto;
+	white-space: nowrap;
+	font-style: italice;	
+}
+
+.molgenis-table {
+	width: 100%;	
+}
+
+.molgenis-table thead th {
+	background-color: #5B82A4;
+	color: white;
+}
+
+.molgenis-table thead th .ui-icon {
+	display: inline-block;
+	cursor: pointer;
+}
+
+.molgenis-table thead th .updown {
+	vertical-align: middle;
+	background-image: url("images/ui-icons_454545_256x240.png");
+}
+
+.molgenis-table thead th .up {
+	vertical-align: top;
+	background-image: url("images/ui-icons_ffffff_256x240.png");
+}
+
+.molgenis-table thead th .down {
+	vertical-align: bottom;
+	background-image: url("images/ui-icons_ffffff_256x240.png");
+}
+
+.molgenis-table-info {
+	font-style: italic;	
+}
+
+.molgenis-table .show-popover {
+	cursor: pointer;
+}
+
+.molgenis-table .popover-content {
+	word-wrap: break-word;	
+}
+
+.molgenis-table .multi-os-datacell input[type=checkbox] {
+	margin-left: auto;
+	margin-right: auto;
+	width: 100%;
+}

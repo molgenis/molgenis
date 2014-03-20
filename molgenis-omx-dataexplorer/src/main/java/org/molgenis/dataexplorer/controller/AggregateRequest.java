@@ -1,40 +1,59 @@
 package org.molgenis.dataexplorer.controller;
 
-import org.molgenis.search.SearchRequest;
+import java.util.List;
+
+import javax.validation.constraints.NotNull;
+
+import org.molgenis.data.QueryRule;
 
 public class AggregateRequest
 {
+	@NotNull
+	private String entityName;
 
-	private final String documentType;
-	private final Integer featureId;
-	private final SearchRequest searchRequest;
-	private final String dataType;
+	private String xAxisAttributeName;
 
-	public AggregateRequest(String documentType, Integer featureId, SearchRequest searchRequest, String dataType)
+	private String yAxisAttributeName;
+
+	private List<QueryRule> q;
+
+	public String getEntityName()
 	{
-		this.documentType = documentType;
-		this.featureId = featureId;
-		this.searchRequest = searchRequest;
-		this.dataType = dataType;
+		return entityName;
 	}
 
-	public String getDocumentType()
+	public void setEntityName(String entityName)
 	{
-		return documentType;
+		this.entityName = entityName;
 	}
 
-	public Integer getFeatureId()
+	public String getXAxisAttributeName()
 	{
-		return featureId;
+		return xAxisAttributeName;
 	}
 
-	public SearchRequest getSearchRequest()
+	public void setXAxisAttributeName(String xAxisAttributeName)
 	{
-		return searchRequest;
+		this.xAxisAttributeName = xAxisAttributeName;
 	}
 
-	public String getDataType()
+	public String getYAxisAttributeName()
 	{
-		return dataType;
+		return yAxisAttributeName;
+	}
+
+	public void setYAxisAttributeName(String yAxisAttributeName)
+	{
+		this.yAxisAttributeName = yAxisAttributeName;
+	}
+
+	public List<QueryRule> getQ()
+	{
+		return q;
+	}
+
+	public void setQ(List<QueryRule> q)
+	{
+		this.q = q;
 	}
 }

@@ -84,7 +84,7 @@
 	ns.MappingManager.prototype.createMatrixForDataItems = function() {
 		var dataSetMapping = getDataSetsForMapping();
 		if(dataSetMapping.items.length > 0){
-			var documentType = 'protocolTree-' + dataSetMapping.items[0].identifier.split('-')[1];
+			var documentType = 'protocolTree-' + dataSetMapping.items[0].Identifier.split('-')[1];
 			
 			var q = {
 					rules : [[{
@@ -120,7 +120,7 @@
 			$('#dataitem-table').empty();
 			$('#table-papger').empty();
 			var dataSetEntity = restApi.get('/api/v1/dataset/' + ns.MappingManager.prototype.getSelectedDataSet());
-			showMessage('alert alert-info', 'There are not mappings for <strong>' + dataSetEntity.name + '</strong> catalogue');
+			showMessage('alert alert-info', 'There are not mappings for <strong>' + dataSetEntity.Name + '</strong> catalogue');
 		}
 		
 		function getDataSetsForMapping(){
@@ -130,13 +130,14 @@
 				if(dataSetId !== ns.MappingManager.prototype.getSelectedDataSet())
 				identifiers.push(getUserName() + '-' + ns.MappingManager.prototype.getSelectedDataSet() + '-' + dataSetId); 
 			});
-			var dataSetMapping = restApi.get('/api/v1/dataset/', null, {
+			var request = {
 				q : [{
-					field : 'identifier',
+					field : 'Identifier',
 					operator : 'IN',
 					value : identifiers
-				}],
-			});
+				}]
+			};
+			var dataSetMapping = restApi.get('/api/v1/dataset/',{ q : request });
 			return dataSetMapping;
 		}
 		
@@ -166,7 +167,7 @@
 			$.each(dataSets, function(index, dataSet){
 				var tuple = {};
 				var searchRequest = {
-					documentType : dataSet.identifier,
+					documentType : dataSet.Identifier,
 					query : {
 						pageSize: 10000,
 						rules: [queryRules]
@@ -192,7 +193,7 @@
 							if($.inArray(storeMappedFeatureId, allFeatureCollection) === -1) allFeatureCollection.push(storeMappedFeatureId);
 						});
 					}
-					var dataSetIdArray = dataSet.identifier.split('-');
+					var dataSetIdArray = dataSet.Identifier.split('-');
 					mappingPerStudy[dataSetIdArray[2]] = sortMappings(tuple);
 					count++;
 					
@@ -209,14 +210,15 @@
 			for(var i = 1; i < iterations; i++){
 				var lower = (i - 1) * 500;
 				var upper = (i * 500) < allFeatureCollection.length ? (i * 500) : allFeatureCollection.length; 
-				var listOfFeatures = restApi.get('/api/v1/observablefeature', null, {
+				var query = {
 					q : [{
 						field : 'id',
 						operator : 'IN',
 						value : allFeatureCollection.slice(lower, upper)
 					}],
 					num : 500
-				});
+				};
+				var listOfFeatures = restApi.get('/api/v1/observablefeature', {q : query});
 				$.each(listOfFeatures.items, function(index, element){
 					cachedFeatures[(ns.hrefToId(element.href))] = element;
 				});
@@ -240,7 +242,7 @@
 			var involvedDataSetNames = [];
 			$.each(mappingDataSets, function(index, dataSet){
 				if(dataSet !== undefined && dataSet !== null){
-					var dataSetIdArray = dataSet.identifier.split('-');
+					var dataSetIdArray = dataSet.Identifier.split('-');
 					involvedDataSetIds.push(dataSetIdArray[2]);
 				}
 			});
@@ -249,7 +251,7 @@
 			var removeDataSetIndex = [];
 			$.each(biobankDataSets, function(index, dataSet){
 				if($.inArray(ns.hrefToId(dataSet.href), involvedDataSetIds) !== -1){
-					involvedDataSetNames.push(dataSet.name);
+					involvedDataSetNames.push(dataSet.Name);
 				}else{
 					removeDataSetIndex.push(index);
 				}
@@ -330,7 +332,7 @@
 		function createRowForMappingTable(mappingPerStudy, dataSets, featureId, cachedFeatures){
 			var feature = cachedFeatures[featureId];
 			var row = $('<tr />');
-			var description = '<strong>' + feature.name + '</strong> : ' + i18nDescription(feature).en;
+			var description = '<strong>' + feature.Name + '</strong> : ' + i18nDescription(feature).en;
 			var isPopOver = description.length < 90;
 			var popover = $('<span />').html(isPopOver ? description : description.substring(0, 90) + ' ...');
 			if(!isPopOver){
@@ -351,7 +353,7 @@
 			});
 			
 			$.each(dataSets, function(index, dataSet){
-				var mappedDataSetId = dataSet.identifier.split('-')[2];
+				var mappedDataSetId = dataSet.Identifier.split('-')[2];
 				var mapping = mappingPerStudy[mappedDataSetId];
 				var mappedFeatures = mapping[featureId];
 				if(mappedFeatures){
@@ -364,11 +366,11 @@
 						if(eachValue.mappedFeatureId !== undefined){
 							var mappedFeatureEntity = cachedFeatures[eachValue.mappedFeatureId];
 							if(count === 0){
-								displayTerm = mappedFeatureEntity.name;
+								displayTerm = mappedFeatureEntity.Name;
 								description = mappedFeatureEntity.description;
 							}
 							if(eachValue.confirmed === true){
-								selectedMappings.push(mappedFeatureEntity.name);
+								selectedMappings.push(mappedFeatureEntity.Name);
 								confirmed = true;
 							}
 							count++;
@@ -391,7 +393,7 @@
 								});
 								removeAnnotation(mappedFeatures);
 								var deleteRequest = {
-									'documentType' : dataSet.identifier,
+									'documentType' : dataSet.Identifier,
 									'documentIds' : documentIds
 								};
 								$.ajax({
@@ -447,8 +449,8 @@
 		function createAnnotationModal(feature){
 			var featureId = ns.hrefToId(feature.href);
 			var title = 'Rematch research variable : ';
-			standardModal.createModalCallback('Rematch research variable : ' + feature.name, function(modal){
-				restApi.getAsync(feature.href, ["unit", "definitions"], null, function(restApiFeature){
+			standardModal.createModalCallback('Rematch research variable : ' + feature.Name, function(modal){
+				restApi.getAsync(feature.href, {'expand': ["unit", "definitions"]}, function(restApiFeature){
 					var body = modal.find('div.modal-body:eq(0)').addClass('overflow-y-visible');
 					ns.getOntologyAnnotator().createFeatureTable(body, title, restApiFeature, createAnnotationModal);
 					body.append(ns.getOntologyAnnotator().createSearchDiv(title, restApiFeature, createAnnotationModal));
@@ -470,14 +472,14 @@
 		}
 		
 		function createRematchingModal(feature){
-			standardModal.createModalCallback('Rematch research variable : ' + feature.name, function(modal){
+			standardModal.createModalCallback('Rematch research variable : ' + feature.Name, function(modal){
 				var body = modal.find('div.modal-body:eq(0)');
 				var divControlPanel = $('<div />').addClass('row-fluid').appendTo(body);
 				var selectTag = $('<select />');
 				$.each(biobankDataSets, function(index, dataSet){
 					var dataSetId = ns.hrefToId(dataSet.href);
 					if(dataSetId !== ns.MappingManager.prototype.getSelectedDataSet()){
-						selectTag.append('<option value="' + dataSetId + '">' + dataSet.name + '</option>');
+						selectTag.append('<option value="' + dataSetId + '">' + dataSet.Name + '</option>');
 					}
 				});
 				var selectButton = $('<button type="btn" class="btn btn-info">Select</button>');
@@ -629,7 +631,7 @@
 				$.each(selectedOptions, function(index, dataSetId){
 					var dataSet = restApi.get('/api/v1/dataset/' + dataSetId);
 					var newRow = $('<div />').addClass('row-fluid');
-					$('<div />').addClass('offset2 span3').append(dataSet.name).appendTo(newRow);
+					$('<div />').addClass('offset2 span3').append(dataSet.Name).appendTo(newRow);
 					var removeButton = $('<button type="btn" class="btn btn-link">Remove</button>');
 					$('<div />').addClass('offset3 span2').append(removeButton).appendTo(newRow);
 					dataSetsContainer.append(newRow);
@@ -658,14 +660,30 @@
 			$.each(mappings, function(index, eachMapping){
 				observationSetIds.push(eachMapping.observationSet);
 			});
+			var observationSets = restApi.get('/api/v1/observationset', {
+				'q' : {
+					'q' : [{
+						'field' : 'id',
+						'operator' : 'IN',
+						'value' : observationSetIds
+					}]
+				}
+			});
+			var observationSetIdentifiers = [];
+			$.each(observationSets.items, function(index, observationSet){
+				observationSetIdentifiers.push(observationSet.Identifier);
+			});
+			
 			showMessage('alert alert-info', observationSetIds.length + ' candidate mappings are being deleted!');
-			var observedValues = restApi.get('/api/v1/observedvalue', null, {
-				q : [{
-					field : 'observationSet',
-					operator : 'IN',
-					value : observationSetIds
-				}],
-				num : 500
+			var observedValues = restApi.get('/api/v1/observedvalue', {
+				'q' : {
+					'q' : [{
+						'field' : 'observationSet',
+						'operator' : 'IN',
+						'value' : observationSetIdentifiers
+					}],
+					'num' : 500
+				}
 			});
 			
 			var observedValueIds = [];
@@ -737,11 +755,11 @@
 					var checkBox = $('<input type="checkbox">');
 					if(eachMapping.confirmed){
 						checkBox.attr('checked', true);
-						selectedFeatures.push(mappedFeature.name);
+						selectedFeatures.push(mappedFeature.Name);
 					}
 					eachMapping.mappedFeature = mappedFeature;
 					checkBox.data('eachMapping', eachMapping);
-					row.append('<td>' + mappedFeature.name + '</td><td>' + i18nDescription(mappedFeature).en + '</td><td>' + score + '</td>');
+					row.append('<td>' + mappedFeature.Name + '</td><td>' + i18nDescription(mappedFeature).en + '</td><td>' + score + '</td>');
 					row.append($('<td />').append($('<label class="checkbox"></label>').append(checkBox))).appendTo(mappingTable);
 				}
 				if($.inArray(index, highScoresIndex) !== -1){
@@ -764,8 +782,8 @@
 				'z-index' : 10000
 			});
 			var dataSet = restApi.get('/api/v1/dataset/' + ns.MappingManager.prototype.getSelectedDataSet());
-			$('<div />').append('<h4>' + dataSet.name + '</h4>').appendTo(infoDiv);
-			$('<div />').append('<span class="info"><strong>Data item : </strong></span>').append('<span>' + feature.name + '</span>').appendTo(infoDiv);
+			$('<div />').append('<h4>' + dataSet.Name + '</h4>').appendTo(infoDiv);
+			$('<div />').append('<span class="info"><strong>Data item : </strong></span>').append('<span>' + feature.Name + '</span>').appendTo(infoDiv);
 			$('<div />').append('<span class="info"><strong>Description : </strong></span>').append('<span>' + i18nDescription(feature).en + '</span>').appendTo(infoDiv);
 			var selectedMappings = $('<div />').append('<span class="info"><strong>Selected mappings : </strong></span>').append('<span>' + selectedFeatures.join(' , ') + '</span>').appendTo(infoDiv);
 			infoDiv.append('<br /><br />');
@@ -784,7 +802,7 @@
 			tableDiv.find('input[type="checkbox"]').click(function(){
 				var dataItems = [];
 				tableDiv.find('input:checked').each(function(index, checkbox){
-					dataItems.push($(checkbox).data('eachMapping').mappedFeature.name);
+					dataItems.push($(checkbox).data('eachMapping').mappedFeature.Name);
 				});
 				selectedMappings.find('span:eq(1)').html(dataItems.join(' , '));
 			});
@@ -819,12 +837,11 @@
 		
 		function updateMappingInfo(feature, mappingTable, mappedDataSet, clickedCell){
 			var displayedFeatures = [];
-			var confirmFeature = null;
 			mappingTable.find('input').each(function(index, checkBox){
 				var eachMapping = $(checkBox).data('eachMapping');
 				var changedValue = null;
 				if(checkBox.checked){
-					displayedFeatures.push(eachMapping.mappedFeature.name);
+					displayedFeatures.push(eachMapping.mappedFeature.Name);
 				}
 				if(checkBox.checked && !eachMapping.confirmed){
 					changedValue = true;
@@ -834,28 +851,22 @@
 				}
 				if(changedValue !== null){
 					eachMapping.confirmed = changedValue;
-					if(confirmFeature === null){
-						confirmFeature = restApi.get('/api/v1/observablefeature', null, {
-							q : [{
-								field : 'identifier',
-								operator : 'EQUALS',
-								value : storeMappingConfirmMapping
+					var observationSet = restApi.get('/api/v1/observationset/' + eachMapping.observationSet);
+					var observedValue = restApi.get('/api/v1/observedvalue', {
+						'expand': ['Value'],
+						'q' : {
+							'q' : [{
+								'field' : 'observationSet',
+								'operator' : 'EQUALS',
+								'value' : observationSet.Identifier
+							},{
+								'field' : 'feature',
+								'operator' : 'EQUALS',
+								'value' : storeMappingConfirmMapping
 							}]
-						});
-					}
-					
-					var observedValue = restApi.get('/api/v1/observedvalue', ['value'], {
-						q : [{
-							field : 'observationSet',
-							operator : 'EQUALS',
-							value : eachMapping.observationSet
-						},{
-							field : 'feature',
-							operator : 'EQUALS',
-							value : ns.hrefToId(confirmFeature.items[0].href)
-						}]
+						}
 					});
-					var xrefValue = restApi.get('/api/v1/boolvalue/' + ns.hrefToId(observedValue.items[0].value.href));
+					var xrefValue = restApi.get('/api/v1/boolvalue/' + ns.hrefToId(observedValue.items[0].Value.href));
 					xrefValue.value = changedValue;
 					updateEntity(xrefValue.href, xrefValue);
 					var updateRequest = {
@@ -871,7 +882,7 @@
 						contentType : 'application/json'
 					});
 					
-					showMessage('alert alert-info', 'the mapping(s) has been updated for <strong>' + feature.name + '</strong> in <strong>' + mappedDataSet.name + '</strong> Biobank!');
+					showMessage('alert alert-info', 'the mapping(s) has been updated for <strong>' + feature.Name + '</strong> in <strong>' + mappedDataSet.Name + '</strong> Biobank!');
 				}
 				
 				if(displayedFeatures.length > 0){
@@ -879,7 +890,7 @@
 					clickedCell.removeClass('icon-pencil').addClass('icon-ok');
 				}else{
 					var firstMapping = mappingTable.find('input:eq(0)').data('eachMapping');
-					clickedCell.siblings('span:eq(0)').empty().append(firstMapping.mappedFeature.name);
+					clickedCell.siblings('span:eq(0)').empty().append(firstMapping.mappedFeature.Name);
 					clickedCell.removeClass('icon-ok').addClass('icon-pencil');
 				}
 			});
@@ -931,7 +942,7 @@
 		var deleteRequest = {
 			'dataSetId' : selectedDataSet,
 			'matchedDataSetIds' : mappedDataSetIds,
-			'documentType' : dataSet.identifier
+			'documentType' : dataSet.Identifier
 		};
 		$.download(molgenis.getContextURL().replace('/biobankconnect', '') + '/mappingmanager/download',{request : JSON.stringify(deleteRequest)});
 	};

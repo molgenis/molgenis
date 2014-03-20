@@ -74,4 +74,8 @@ public interface SearchService
 	 */
 	void deleteDocumentsByType(String documentType);
 
+	/**
+	 * Refresh indices
+	 */
+	void refresh();
 }

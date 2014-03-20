@@ -2,7 +2,6 @@ package org.molgenis.omx.protocolviewer;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.List;
 
 import javax.mail.MessagingException;
 import javax.servlet.http.Part;
@@ -68,12 +67,20 @@ public interface ProtocolViewerService
 			throws MessagingException, IOException, UnknownCatalogException, UnknownStudyDefinitionException;
 
 	/**
-	 * Update the study definition draft with the given catalog items
+	 * Add a catalog item or catalog group (implies all items in a group) to the study definition draft
 	 * 
-	 * @param catalogItemIds
-	 * @throws UnknownCatalogException
+	 * @param resourceUri
+	 * @param catalogId
 	 */
-	void updateStudyDefinitionDraftForCurrentUser(List<Integer> catalogItemIds, String catalogId)
+	void addToStudyDefinitionDraftForCurrentUser(String resourceUri, String catalogId) throws UnknownCatalogException;
+
+	/**
+	 * Remove a catalog item or catalog group (implies all items in a group) from the study definition draft
+	 * 
+	 * @param resourceUri
+	 * @param catalogId
+	 */
+	void removeFromStudyDefinitionDraftForCurrentUser(String resourceUri, String catalogId)
 			throws UnknownCatalogException;
 
 	/**

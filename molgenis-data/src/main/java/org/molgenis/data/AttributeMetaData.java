@@ -63,8 +63,22 @@ public interface AttributeMetaData
 	boolean isLabelAttribute();
 
 	/**
+	 * Wether this attribute must be searched in case of xref/mref search
+	 */
+	boolean isLookupAttribute();
+
+	/**
+	 * When true the attribute is automatically assigned a value when persisted (for example the current date)
+	 */
+	boolean isAuto();
+
+	/**
 	 * When getDataType=xref/mref, get other end of xref
 	 */
 	EntityMetaData getRefEntity();
 
+	/**
+	 * Get compound attribute parts
+	 */
+	Iterable<AttributeMetaData> getAttributeParts();
 }

@@ -8,10 +8,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.molgenis.data.DataService;
-import org.molgenis.framework.server.MolgenisPermissionService;
-import org.molgenis.framework.server.MolgenisPermissionService.Permission;
 import org.molgenis.model.elements.Entity;
 import org.molgenis.model.elements.Model;
+import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.Permission;
 import org.molgenis.util.HandleRequestDelegationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -49,19 +49,8 @@ public class MolgenisEntityFormPluginControllerTest extends AbstractTestNGSpring
 	@Test
 	public void listUnknownEntity() throws Exception
 	{
-		when(dataService.getRepositoryByEntityName("Test")).thenThrow(new UnknownEntityException());
+		when(dataService.getEntityMetaData("Test")).thenThrow(new UnknownEntityException());
 		mockMvc.perform(get(MolgenisEntityFormPluginController.URI + "Test")).andExpect(status().is(404));
-	}
-
-	@Test
-	public void listUnknownUnauthorized() throws Exception
-	{
-		Model model = mock(Model.class);
-		Entity entity = mock(Entity.class);
-		when(model.getEntity("Test")).thenReturn(entity);
-		when(permissionService.hasPermissionOnEntity("Test", Permission.READ)).thenReturn(false);
-
-		mockMvc.perform(get(MolgenisEntityFormPluginController.URI + "Test")).andExpect(status().is(401));
 	}
 
 	@Test

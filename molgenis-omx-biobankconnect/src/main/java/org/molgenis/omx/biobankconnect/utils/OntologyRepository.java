@@ -71,5 +71,4 @@ public class OntologyRepository extends AbstractRepository implements Countable
 
 		return metaData;
 	}
-
 }

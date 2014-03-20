@@ -73,7 +73,6 @@
 					$('ul.pager a').on('click', function(e) {
 						e.preventDefault();
 						if (!$(this).parent().hasClass('disabled')) {
-							showSpinner();
 							$('#wizardForm').attr('action', $(this).attr('href')).submit();
 						}
 						
@@ -83,9 +82,6 @@
 						callback();
 					}
 				}
-			},
-			error : function(error){
-				console.log('error');
 			}
 		});
 	};

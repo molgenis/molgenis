@@ -2,8 +2,8 @@ package org.molgenis.ui;
 
 import java.io.IOException;
 
-import org.molgenis.framework.server.MolgenisPermissionService;
 import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.security.core.MolgenisPermissionService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class XmlMolgenisUi implements MolgenisUi
@@ -59,9 +59,7 @@ public class XmlMolgenisUi implements MolgenisUi
 	@Override
 	public MolgenisUiMenu getMenu(String menuId)
 	{
-		MolgenisUiMenu menu = getMenuRecursive(getMenu(), menuId);
-		if (menu == null) throw new RuntimeException("unknown menu or menu with no (accessible) items: " + menuId);
-		return menu;
+		return getMenuRecursive(getMenu(), menuId);
 	}
 
 	private MolgenisUiMenu getMenuRecursive(MolgenisUiMenu menu, String menuId)

@@ -13,10 +13,10 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.server.MolgenisPermissionService;
-import org.molgenis.framework.server.MolgenisPermissionService.Permission;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.model.MolgenisModelException;
+import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.Permission;
 import org.molgenis.ui.MolgenisUiUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapperImpl;
@@ -62,7 +62,7 @@ public class MolgenisEntityFormPluginController extends MolgenisPluginController
 	{
 		model.addAttribute("current_uri", MolgenisUiUtils.getCurrentUri());
 
-		EntityMetaData entityMetaData = createAndValidateEntity(entityName, Permission.READ);
+		EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
 		boolean hasWritePermission = molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITE);
 
 		EntityForm form = new EntityForm(entityMetaData, hasWritePermission);
@@ -81,7 +81,7 @@ public class MolgenisEntityFormPluginController extends MolgenisPluginController
 				String subEntityName = subFormParts[0];
 				String xrefFieldName = subFormParts[1];
 
-				EntityMetaData subEntityMetaData = createAndValidateEntity(subEntityName, Permission.READ);
+				EntityMetaData subEntityMetaData = dataService.getEntityMetaData(subEntityName);
 				boolean found = false;
 				for (AttributeMetaData attr : subEntityMetaData.getAttributes())
 				{
@@ -121,7 +121,7 @@ public class MolgenisEntityFormPluginController extends MolgenisPluginController
 			model.addAttribute("back", back);
 		}
 
-		EntityMetaData entityMetaData = createAndValidateEntity(entityName, Permission.READ);
+		EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
 		Entity entity = findEntityById(entityMetaData, id);
 		boolean hasWritePermission = molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITE);
 		model.addAttribute(ENTITY_FORM_MODEL_ATTRIBUTE, new EntityForm(entityMetaData, entity, id, hasWritePermission));
@@ -139,8 +139,9 @@ public class MolgenisEntityFormPluginController extends MolgenisPluginController
 			model.addAttribute("back", back);
 		}
 
-		Repository repo = createAndValidateEntity(entityName, Permission.WRITE);
+		Repository repo = dataService.getRepositoryByEntityName(entityName);
 		Entity entity = BeanUtils.instantiateClass(repo.getEntityClass());
+		EntityMetaData entityMeta = repo.getEntityMetaData();
 
 		Map<String, String[]> parameterMap = request.getParameterMap();
 		if (!parameterMap.isEmpty())
@@ -156,7 +157,7 @@ public class MolgenisEntityFormPluginController extends MolgenisPluginController
 
 				if (StringUtils.isNotBlank(value))
 				{
-					AttributeMetaData attr = repo.getAttribute(fieldName);
+					AttributeMetaData attr = entityMeta.getAttribute(fieldName);
 					if ((attr != null) && (attr.getDataType().getEnumType() == MolgenisFieldTypes.FieldTypeEnum.XREF))
 					{
 						EntityMetaData xrefEntityMetadata = attr.getRefEntity();
@@ -184,7 +185,7 @@ public class MolgenisEntityFormPluginController extends MolgenisPluginController
 			}
 		}
 
-		model.addAttribute(ENTITY_FORM_MODEL_ATTRIBUTE, new EntityForm(repo, true, entity));
+		model.addAttribute(ENTITY_FORM_MODEL_ATTRIBUTE, new EntityForm(entityMeta, true, entity));
 
 		return VIEW_NAME_EDIT;
 	}
@@ -201,17 +202,4 @@ public class MolgenisEntityFormPluginController extends MolgenisPluginController
 
 		return entity;
 	}
-
-	private Repository createAndValidateEntity(String entityName, Permission permission)
-	{
-		Repository repo = dataService.getRepositoryByEntityName(entityName);
-
-		if (!molgenisPermissionService.hasPermissionOnEntity(entityName, permission))
-		{
-			throw new MolgenisEntityFormSecurityException();
-		}
-
-		return repo;
-	}
-
 }

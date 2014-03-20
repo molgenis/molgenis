@@ -50,8 +50,8 @@
 	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring.version>3.2.6.RELEASE</spring.version>
-		<spring.security.version>3.2.0.RELEASE</spring.security.version>
+		<spring.version>4.0.2.RELEASE</spring.version>
+		<spring.security.version>3.2.1.RELEASE</spring.security.version>
 		<mysql.connector.java.version>5.1.28</mysql.connector.java.version>
 	</properties>
 
@@ -493,6 +493,19 @@
 		</plugins>
 	</reporting>
 
+	<dependencyManagement>
+		<dependencies>
+			<!-- see http://docs.spring.io/spring-security/site/docs/3.2.x/reference/htmlsingle/#maven-bom -->
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-framework-bom</artifactId>
+				<version>${spring.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+			
 	<dependencies>
 		<!-- scope: compile -->
 		<dependency>
@@ -551,6 +564,8 @@
 		<module>molgenis-search</module>
 		<module>molgenis-search-elasticsearch</module>
 		<module>molgenis-security</module>
+		<module>molgenis-security-core</module>
+		<module>molgenis-data-annotators</module>
 		<module>molgenis-data-excel</module>
 		<module>molgenis-data-csv</module>
 		<module>molgenis-data-googlespreadsheet</module>
@@ -560,6 +575,7 @@
 		<module>molgenis-data-rest</module>
 		<module>molgenis-r</module>
 		<module>molgenis-charts</module>
+		<module>molgenis-omx-annotators</module>
 		<module>molgenis-js</module>
 	</modules>
 </project>

@@ -1,0 +1,11 @@
+#dataset-select-container {
+	height:100px;
+}
+
+.dataset-select-position-container {
+	position:absolute;
+}
+
+#dataset-change-succes-message {
+	margin-bottom:-100px;
+}

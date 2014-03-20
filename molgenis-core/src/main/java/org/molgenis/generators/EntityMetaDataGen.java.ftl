@@ -33,6 +33,9 @@ public class ${JavaName(entity)}MetaData extends DefaultEntityMetaData
 		${name(f)}.setDefaultValue(${f.defaultValue});
 			</#if>
 		</#if>
+		<#if f.label??>
+		${name(f)}.setLabel("${f.label!}");
+		</#if>
 		<#if f.description??>
 		${name(f)}.setDescription("${f.description!}");
 		</#if>
@@ -40,6 +43,7 @@ public class ${JavaName(entity)}MetaData extends DefaultEntityMetaData
 		${name(f)}.setNillable(${f.nillable?string('true', 'false')});
 		${name(f)}.setReadOnly(${f.readOnly?string('true', 'false')});
 		${name(f)}.setUnique(${f.unique?string('true', 'false')});
+		${name(f)}.setAuto(${f.auto?string('true', 'false')});
 		<#if f.isXRef()>
 			<#if f.xrefEntity.name == entity.name>
 		${name(f)}.setRefEntity(this);	
@@ -51,12 +55,17 @@ public class ${JavaName(entity)}MetaData extends DefaultEntityMetaData
 			<#if xrefLabel == f.name>
 		${name(f)}.setLabelAttribute(true);
 			</#if>
+		</#list>
+		<#list entity.getXrefLookupFields() as xrefLookup>
+			<#if xrefLookup == f.name>
+		${name(f)}.setLookupAttribute(true);
+			</#if>
 		</#list>	
 		<#if f.hidden || f.system>
 		${name(f)}.setVisible(false);
 		</#if>
-		
 		addAttributeMetaData(${name(f)});	
+		
 </#list>
 		
 	}

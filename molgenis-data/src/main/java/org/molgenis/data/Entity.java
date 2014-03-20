@@ -11,25 +11,12 @@ import java.util.List;
  */
 public interface Entity extends Serializable
 {
+	EntityMetaData getEntityMetaData();
+
 	/**
 	 * Get all attribute names
 	 */
 	Iterable<String> getAttributeNames();
-
-	/**
-	 * Get attribute value
-	 */
-	Object get(String attributeName);
-
-	/**
-	 * Change attribute value
-	 */
-	void set(String attributeName, Object value);
-
-	/**
-	 * Copy attribute values from another entity
-	 */
-	void set(Entity values);
 
 	/**
 	 * Optional unique id to identify this Entity. Otherwise return null
@@ -41,56 +28,84 @@ public interface Entity extends Serializable
 	 */
 	String getLabelValue();
 
-	public String getString(String attributeName);
+	// TODO discuss: move to meta data
+	List<String> getLabelAttributeNames();
+
+	/**
+	 * Get attribute value
+	 */
+	Object get(String attributeName);
+
+	/**
+	 * Retrieves the value of the designated column as String.
+	 */
+	String getString(String attributeName);
 
 	/**
 	 * Retrieves the value of the designated column as Integer.
 	 */
-	public Integer getInt(String attributeName);
+	Integer getInt(String attributeName);
 
 	/**
 	 * Retrieves the value of the designated column as Long.
 	 */
-	public Long getLong(String attributeName);
+	Long getLong(String attributeName);
 
 	/**
 	 * Retrieves the value of the designated column as Boolean.
 	 */
-	public Boolean getBoolean(String attributeName);
+	Boolean getBoolean(String attributeName);
 
 	/**
 	 * Retrieves the value of the designated column as Double.
 	 */
-	public Double getDouble(String attributeName);
+	Double getDouble(String attributeName);
 
 	/**
 	 * Retrieves the value of the designated column as {@link java.sql.Date}.
 	 */
-	public java.sql.Date getDate(String attributeName);
+	java.sql.Date getDate(String attributeName);
 
 	/**
 	 * Retrieves the value of the designated column as {@link java.util.Date}.
 	 */
-	public java.util.Date getUtilDate(String attributeName);
+	java.util.Date getUtilDate(String attributeName);
 
 	/**
 	 * Retrieves the value of the designated column as {@link java.sql.Timestamp}.
 	 */
-	public Timestamp getTimestamp(String attributeName);
+	Timestamp getTimestamp(String attributeName);
 
 	/**
-	 * Retrieves the value of the designated column as List<?>.
+	 * Retrieves the value of the designated column as entity
 	 */
-	public List<String> getList(String attributeName);
+	Entity getEntity(String attributeName);
+
+	/**
+	 * Retrieves the value of the designated column as a entity iterable
+	 */
+	Iterable<Entity> getEntities(String attributeName);
+
+	/**
+	 * Retrieves the value of the designated column as List<String>.
+	 */
+	List<String> getList(String attributeName);
 
 	/**
 	 * Retrieves the value of the designated column as List<Integer>
 	 */
-	public List<Integer> getIntList(String attributeName);
+	List<Integer> getIntList(String attributeName);
 
-	List<String> getLabelAttributeNames();
+	/**
+	 * Change attribute value
+	 */
+	void set(String attributeName, Object value);
 
+	/**
+	 * Copy attribute values from another entity
+	 */
+	void set(Entity values);
+
+	// TODO document strict behavior
 	void set(Entity entity, boolean strict);
-
-	EntityMetaData getEntityMetaData();
 }
