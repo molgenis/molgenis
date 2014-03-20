@@ -33,12 +33,10 @@
 	 * @memberOf molgenis.dataexplorer.data
 	 */
 	function download() {
-		parent.showSpinner();
 		$.download(molgenis.getContextUrl() + '/download', {
 			// Workaround, see http://stackoverflow.com/a/9970672
 			'dataRequest' : JSON.stringify(createDownloadDataRequest())
 		});
-		parent.hideSpinner();
 	}
 	
 	/**
@@ -170,10 +168,7 @@
 	/**
 	 * @memberOf molgenis.dataexplorer.data
 	 */
-	$(function() {
-		// unbind existing event handlers before binding new ones
-		$(document).off('.data');
-		
+	$(function() {		
 		// bind event handlers with namespace 
 		$(document).on('show.data', '#genomebrowser .collapse', function() {
             $(this).parent().find(".icon-chevron-right").removeClass("icon-chevron-right").addClass("icon-chevron-down");

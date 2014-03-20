@@ -32,8 +32,6 @@
 		}
 		
 		$('#catalogForm input[type="radio"]').change(function() {
-			showSpinner();
-			
 			if($(this).data('loaded')) {
 				$('#loadButton').attr('name', 'unload');
 				$('#loadButton').val('Unload');
@@ -56,7 +54,6 @@
 				type : 'GET',
 				url : molgenis.getContextUrl() + '/view/' + catalogId,
 				success : function(catalog) {
-					hideSpinner();
 					var items= [];
 					items.push('<table class="table table-condensed table-borderless">');
 					items.push('<tr><td>Version</td><td>' + catalog.version + '</td></tr>');
@@ -70,9 +67,7 @@
 					treeContainer.dynatree({'minExpandLevel': 2, 'children': createDynatreeConfig(catalog), 'debugLevel': 0});
 				},
 				error: function (xhr) {
-					hideSpinner();
 					treeContainer.empty();
-					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 				}
 			});
 		});

@@ -19,7 +19,6 @@
 	};
 
 	ns.deleteDataSet = function(e){	
-		parent.showSpinner();
 		e.preventDefault();
 		e.stopPropagation();
 		var form = $('#deletedataset-form');
@@ -30,12 +29,7 @@
 		    success: function (msg) {
 		    	$('#plugin-container').before($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Dataset ' + msg + ' was successfully removed</div>'));
 		    	ns.fillDataSetSelect();
-		    	parent.hideSpinner();
-		    },
-		    error: function (xhr) {
-		    	parent.hideSpinner();
-		    	molgenis.createAlert(JSON.parse(xhr.responseText).errors);
-			}  
+		    } 
 		 }); 
 	};
 }($, window.top.molgenis = window.top.molgenis || {}));
