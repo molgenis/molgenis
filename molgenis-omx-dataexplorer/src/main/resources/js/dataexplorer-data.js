@@ -168,10 +168,7 @@
 	/**
 	 * @memberOf molgenis.dataexplorer.data
 	 */
-	$(function() {
-		// unbind existing event handlers before binding new ones
-		$(document).off('.data');
-		
+	$(function() {		
 		// bind event handlers with namespace 
 		$(document).on('show.data', '#genomebrowser .collapse', function() {
             $(this).parent().find(".icon-chevron-right").removeClass("icon-chevron-right").addClass("icon-chevron-down");

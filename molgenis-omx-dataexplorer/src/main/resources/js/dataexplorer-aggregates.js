@@ -100,10 +100,7 @@
 		return molgenis.dataexplorer.getEntityQuery().q;
 	};
 	
-	$(function() {
-		// unbind existing event handlers before binding new ones
-		$(document).off('.aggregates');
-		
+	$(function() {		
 		// bind event handlers with namespace
 		$(document).on('changeAttributeSelection.aggregates', function(e, data) {
 			molgenis.dataexplorer.aggregates.createAggregatesTable();
