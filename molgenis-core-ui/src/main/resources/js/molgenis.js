@@ -631,9 +631,8 @@ $(function() {
 		}
 	});
 	
-	window.onerror = function(msg, url, line) {
+	window.onerror = function(msg) {
 		molgenis.createAlert([{'message': 'An error occurred. Please contact the administrator.'}, {'message': msg}], 'error');
-		hideSpinner();
 	};
 	
 	// async load bootstrap modal and display
