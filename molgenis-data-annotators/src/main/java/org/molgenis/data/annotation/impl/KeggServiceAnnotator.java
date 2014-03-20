@@ -12,7 +12,7 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.HgcnLocationsUtils;
+import org.molgenis.data.annotation.HgncLocationsUtils;
 import org.molgenis.data.annotation.LocusAnnotator;
 import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
 import org.molgenis.data.annotation.impl.datastructures.KeggGene;
@@ -84,7 +84,7 @@ public class KeggServiceAnnotator extends LocusAnnotator
 		Map<String, ArrayList<String>> keggPathwayGenes = getKeggPathwayGenes();
 		Map<String, String> pathwayInfo = getKeggPathwayInfo();
 
-		List<String> geneSymbols = HgcnLocationsUtils.locationToHgcn(hgncLocationsProvider.getHgncLocations(), locus);
+		List<String> geneSymbols = HgncLocationsUtils.locationToHgcn(hgncLocationsProvider.getHgncLocations(), locus);
 
 		Map<String, String> hgncToKeggGeneId = hgncToKeggGeneId();
 		Map<String, ArrayList<String>> keggGenePathways = getKeggGenePathways(keggPathwayGenes);
