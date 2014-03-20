@@ -67,7 +67,6 @@
 			return;
 		}
 		
-		showSpinner();
 		var data = {
 			'entityName': getEntity().name,
 			'xAxisAttributeName': xAttributeName,
@@ -80,7 +79,6 @@
 			data : JSON.stringify(data),
 			contentType : 'application/json',
 			success : function(aggregateResult) {
-				hideSpinner();
 				var items = ['<table class="table table-striped" >'];
 				
 				items.push('<tr>');
@@ -103,7 +101,6 @@
 				$('#aggregate-table-container').html(items.join(''));
 			},
 			error : function(xhr) {
-				hideSpinner();
 				molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 			}
 		});
