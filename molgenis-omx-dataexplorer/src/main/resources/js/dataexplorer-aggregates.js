@@ -99,9 +99,6 @@
 				items.push('</table>');
 				
 				$('#aggregate-table-container').html(items.join(''));
-			},
-			error : function(xhr) {
-				molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 			}
 		});
 	}
