@@ -59,7 +59,7 @@ public class DataSetElasticSearchRangeHandlingDataSourceTest
 		when(ctx.getBean(DataService.class)).thenReturn(dataService);
 		new ApplicationContextProvider().setApplicationContext(ctx);
 
-		DasType type = new DasType("type", null, "?", "type");
+		DasType type = new DasType("0", "", "", "type");
 		DasMethod method = new DasMethod("not_recorded", "not_recorded", "ECO:0000037");
 		source = new RepositoryRangeHandlingDataSource();
 		DataSourceConfiguration dataSourceConfig = mock(DataSourceConfiguration.class);
@@ -72,9 +72,13 @@ public class DataSetElasticSearchRangeHandlingDataSourceTest
 
 		List<DasTarget> dasTarget = new ArrayList<DasTarget>();
 		dasTarget.add(new MolgenisDasTarget("mutation id", 10, 1000, "mutation name,description"));
-		dasFeature = new DasFeature("mutation id", "mutation name,description", type, method, 10, 1000, new Double(0),
+        List<String> notes = new ArrayList<String>();
+        notes.add("track:dataset");
+        notes.add("source:MOLGENIS");
+
+        dasFeature = new DasFeature("mutation id", "mutation name,description", type, method, 10, 1000, new Double(0),
 				DasFeatureOrientation.ORIENTATION_NOT_APPLICABLE, DasPhase.PHASE_NOT_APPLICABLE,
-				new ArrayList<String>(), linkout, dasTarget, new ArrayList<String>(), null);
+                notes, linkout, dasTarget, new ArrayList<String>(), null);
 
 		Query q = new QueryImpl().eq(RangeHandlingDataSource.MUTATION_CHROMOSOME, "1");
 		q.pageSize(100);
@@ -121,6 +125,6 @@ public class DataSetElasticSearchRangeHandlingDataSourceTest
 	public void getTypes() throws UnimplementedFeatureException, DataSourceException, BadReferenceObjectException,
 			CoordinateErrorException
 	{
-		assertEquals(Collections.singleton(new DasType("type", null, "?", "type")), source.getTypes());
+		assertEquals(Collections.emptyList(), source.getTypes());
 	}
 }

@@ -32,13 +32,46 @@
 		.done(function() {
 			<#-- create genome browser -->
 		    molgenis.dataexplorer.data.createGenomeBrowser({
-				${initLocation},
-	            coordSystem: ${coordSystem},
-	            chains: ${chains},
-	            sources: ${sources},
-	            browserLinks: ${browserLinks},
-	            searchEndpoint: ${searchEndpoint},
-	            karyotypeEndpoint: ${karyotypeEndpoint}
+                        chr:          '1',
+                        viewStart:    10000000,
+                        viewEnd:      10100000,
+                        cookieKey:    'human',
+                        nopersist:    true,
+                coordSystem: {
+                    speciesName: 'Human',
+                    taxon: 9606,
+                    auth: 'GRCh',
+                    version: '37',
+                    ucscName: 'hg19'
+                },
+
+                chains: {
+                    hg18ToHg19: new Chainset('http://www.derkholm.net:8080/das/hg18ToHg19/', 'NCBI36', 'GRCh37',
+                            {
+                                speciesName: 'Human',
+                                taxon: 9606,
+                                auth: 'NCBI',
+                                version: 36,
+                                ucscName: 'hg18'
+                            })
+                },
+                sources:     [{name:                 'Genome',
+                    twoBitURI:            'http://www.biodalliance.org/datasets/hg19.2bit',
+                    tier_type: 'sequence'},
+                    {name: 'Genes',
+                        desc: 'Gene structures from GENCODE 19',
+                        bwgURI: 'http://www.biodalliance.org/datasets/gencode.bb',
+                        stylesheet_uri: 'http://www.biodalliance.org/stylesheets/gencode.xml',
+                        collapseSuperGroups: true,
+                        trixURI: 'http://www.biodalliance.org/datasets/geneIndex.ix'},
+                    {name: 'Repeats',
+                        desc: 'Repeat annotation from Ensembl 59',
+                        bwgURI: 'http://www.biodalliance.org/datasets/repeats.bb',
+                        stylesheet_uri: 'http://www.biodalliance.org/stylesheets/bb-repeats.xml'}
+                    ,{name: 'Conservation',
+                        desc: 'Conservation',
+                        bwgURI: 'http://www.biodalliance.org/datasets/phastCons46way.bw',
+                        noDownsample: true}]
 			}, [<#list genomeEntities?keys as entityName>{'name': '${entityName}', 'label': '${genomeEntities[entityName]}'}<#if entityName_has_next>,</#if></#list>]);
 			<#-- create data table -->
 		    molgenis.dataexplorer.data.createDataTable();    	

@@ -68,7 +68,7 @@
 	/**
 	 * @memberOf molgenis.table
 	 */
-	function getTableData(settings, callback) {
+	function x(settings, callback) {
 		var attributeNames = $.map(settings.colAttributes, function(attribute) {
 			return attribute.name;
 		});
