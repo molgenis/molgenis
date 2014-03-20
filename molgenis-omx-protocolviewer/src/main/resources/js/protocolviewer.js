@@ -22,9 +22,6 @@
 			url : molgenis.getContextUrl() + '/selection/' + catalogId,
 			success : function(selection) {
 				updateCatalog(catalogId, selection);
-			},
-			error : function(xhr) {
-				molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 			}
 		});
 	};
@@ -39,17 +36,13 @@
 				updateFeatureDetails(featureUri);
 			},
 			'onItemSelect' : function(featureUri, select) {
-				showSpinner();
 				updateShoppingCart(featureUri, select, catalogId, function() {
 					updateFeatureSelection(catalogId);
-					hideSpinner();
 				});
 			},
 			'onFolderSelect' : function(protocolUri, select) {
-				showSpinner();
 				updateShoppingCart(protocolUri, select, catalogId, function() {
 					updateFeatureSelection(catalogId);
-					hideSpinner();
 				});
 			},
 			'onInit' : function() {
@@ -125,9 +118,6 @@
 					categories.push($(this)[0]);
 				});
 				data["categories"] = categories;
-			},
-			error : function(xhr) {
-				molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 			}
 		});
 		callback(data);
@@ -244,9 +234,6 @@
 							});
 						});
 					}
-				},
-				error : function(xhr) {
-					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 				}
 			});
 		};

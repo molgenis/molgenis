@@ -51,7 +51,6 @@
 	 * @memberOf molgenis.dataexplorer.aggregates
 	 */
 	function updateAggregatesTable(attributeName) {
-		showSpinner();
 		var data = {
 			'entityName': getEntity().name,
 			'xAxisAttributeName': attributeName,
@@ -63,17 +62,12 @@
 			data : JSON.stringify(data),
 			contentType : 'application/json',
 			success : function(aggregateResult) {
-				hideSpinner();
 				var table = $('<table />').addClass('table table-striped');
 				table.append('<tr><th>Category name</th><th>Count</th></tr>');
 				$.each(aggregateResult.hashCategories, function(categoryName, count) {
 					table.append('<tr><td>' + categoryName + '</td><td>' + count + '</td></tr>');
 				});
 				$('#aggregate-table-container').html(table);
-			},
-			error : function(xhr) {
-				hideSpinner();
-				molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 			}
 		});
 	}
@@ -106,10 +100,7 @@
 		return molgenis.dataexplorer.getEntityQuery().q;
 	};
 	
-	$(function() {
-		// unbind existing event handlers before binding new ones
-		$(document).off('.aggregates');
-		
+	$(function() {		
 		// bind event handlers with namespace
 		$(document).on('changeAttributeSelection.aggregates', function(e, data) {
 			molgenis.dataexplorer.aggregates.createAggregatesTable();
