@@ -150,14 +150,6 @@ public class DataExplorerController extends MolgenisPluginController
 		model.addAttribute("selectedEntityName", selectedEntityName);
 		model.addAttribute("wizard", (wizard != null) && wizard.booleanValue());
 
-		// define which modules to display
-		Boolean modCharts = molgenisSettings.getBooleanProperty(KEY_MOD_CHARTS, DEFAULT_VAL_MOD_CHARTS);
-		model.addAttribute(MODEL_KEY_MOD_CHARTS, modCharts);
-		Boolean modData = molgenisSettings.getBooleanProperty(KEY_MOD_DATA, DEFAULT_VAL_MOD_DATA);
-		model.addAttribute(MODEL_KEY_MOD_DATA, modData);
-		Boolean modAggregates = molgenisSettings.getBooleanProperty(KEY_MOD_AGGREGATES, DEFAULT_VAL_MOD_AGGREGATES);
-		model.addAttribute(MODEL_KEY_MOD_AGGREGATES, modAggregates);
-
 		return "view-dataexplorer";
 	}
 
@@ -193,6 +185,11 @@ public class DataExplorerController extends MolgenisPluginController
 	public ModulesConfigResponse getModules(@RequestParam("entity")
 	String entityName)
 	{
+		// get data explorer settings
+		boolean modCharts = molgenisSettings.getBooleanProperty(KEY_MOD_CHARTS, DEFAULT_VAL_MOD_CHARTS);
+		boolean modData = molgenisSettings.getBooleanProperty(KEY_MOD_DATA, DEFAULT_VAL_MOD_DATA);
+		boolean modAggregates = molgenisSettings.getBooleanProperty(KEY_MOD_AGGREGATES, DEFAULT_VAL_MOD_AGGREGATES);
+
 		// set data explorer permission
 		Permission pluginPermission = null;
 		if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITE)) pluginPermission = Permission.WRITE;
@@ -205,13 +202,25 @@ public class DataExplorerController extends MolgenisPluginController
 			switch (pluginPermission)
 			{
 				case COUNT:
-					modulesConfig.add(new ModuleConfig("aggregates", "Aggregates", "grid-icon.png"));
+					if (modAggregates)
+					{
+						modulesConfig.add(new ModuleConfig("aggregates", "Aggregates", "grid-icon.png"));
+					}
 					break;
 				case READ:
 				case WRITE:
-					modulesConfig.add(new ModuleConfig("data", "Data", "grid-icon.png"));
-					modulesConfig.add(new ModuleConfig("aggregates", "Aggregates", "aggregate-icon.png"));
-					modulesConfig.add(new ModuleConfig("charts", "Charts", "chart-icon.png"));
+					if (modData)
+					{
+						modulesConfig.add(new ModuleConfig("data", "Data", "grid-icon.png"));
+					}
+					if (modAggregates)
+					{
+						modulesConfig.add(new ModuleConfig("aggregates", "Aggregates", "aggregate-icon.png"));
+					}
+					if (modCharts)
+					{
+						modulesConfig.add(new ModuleConfig("charts", "Charts", "chart-icon.png"));
+					}
 					break;
 				default:
 					throw new RuntimeException("unknown plugin permission: " + pluginPermission);
