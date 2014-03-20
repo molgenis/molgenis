@@ -82,7 +82,15 @@ public class GoogleSpreadsheetRepositoryTest
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void GoogleSpreadsheetRepository() throws IOException, ServiceException
 	{
-		new GoogleSpreadsheetRepository(null, null, null);
+		GoogleSpreadsheetRepository repo = null;
+		try
+		{
+			repo = new GoogleSpreadsheetRepository(null, null, null);
+		}
+		finally
+		{
+			if (repo != null) repo.close();
+		}
 	}
 
 	@Test

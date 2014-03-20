@@ -35,34 +35,54 @@ public class CategoryParser
 	public void check(String file, String datasetMatrix) throws IOException, InvalidFormatException
 	{
 		RepositorySource repositorySource = new ExcelRepositorySource(new File(file), new TrimProcessor());
-		Repository repo = repositorySource.getRepository("observablefeature");
-
-		List<String> listOfCategoricalFeatures = new ArrayList<String>();
-		Map<String, List<String>> hashCategories = new HashMap<String, List<String>>();
-
-		for (Entity entity : repo)
+		try
 		{
-			if ("categorical".equals(entity.getString("datatype")))
-			{
-				listOfCategoricalFeatures.add(entity.getString("identifier"));
-				hashCategories.put(entity.getString("identifier"), new ArrayList<String>());
-			}
-		}
+			List<String> listOfCategoricalFeatures = new ArrayList<String>();
+			Map<String, List<String>> hashCategories = new HashMap<String, List<String>>();
 
-		Repository readObservableDataMatrixRepo = repositorySource.getRepository(datasetMatrix);
-
-		for (Entity entity : readObservableDataMatrixRepo)
-		{
-			for (String category : listOfCategoricalFeatures)
+			Repository repo = repositorySource.getRepository("observablefeature");
+			try
 			{
-				List<String> getList = hashCategories.get(category);
-				if (!hashCategories.get(category).contains(entity.getString(category)))
+				for (Entity entity : repo)
 				{
-					getList.add(entity.getString(category));
+					if ("categorical".equals(entity.getString("datatype")))
+					{
+						listOfCategoricalFeatures.add(entity.getString("identifier"));
+						hashCategories.put(entity.getString("identifier"), new ArrayList<String>());
+					}
 				}
 			}
+			finally
+			{
+				repo.close();
+			}
+
+			Repository readObservableDataMatrixRepo = repositorySource.getRepository(datasetMatrix);
+			try
+			{
+				for (Entity entity : readObservableDataMatrixRepo)
+				{
+					for (String category : listOfCategoricalFeatures)
+					{
+						List<String> getList = hashCategories.get(category);
+						if (!hashCategories.get(category).contains(entity.getString(category)))
+						{
+							getList.add(entity.getString(category));
+						}
+					}
+				}
+				printForCategoryTab(hashCategories);
+			}
+			finally
+			{
+				readObservableDataMatrixRepo.close();
+			}
 		}
-		printForCategoryTab(hashCategories);
+		finally
+		{
+			repositorySource.close();
+		}
+
 	}
 
 	public void printAsList(Map<String, List<String>> hashCategories)
