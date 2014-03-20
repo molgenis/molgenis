@@ -35,31 +35,38 @@ public class SampleTabOmxConverter
 		this.unitOntologyTermsForFeatures = new HashMap<String, String>();
 
 		RepositorySource repositorySource = new ExcelRepositorySource(new File(inputFilePath), new TrimProcessor());
-		WritableFactory writableFactory = new ExcelWriter(new File(inputFilePath + ".Omx.xls"));
-
 		try
 		{
-			Repository repo = repositorySource.getRepository(sheetName);
+			WritableFactory writableFactory = new ExcelWriter(new File(inputFilePath + ".Omx.xls"));
+
 			try
 			{
-				// Collect headers as features to be imported in Omx-format
-				List<String> listOfColumns = collectColumns(repo);
-				// Collect observableFeatures
-				List<String> listOfObservableFeatures = collectObservableFeatures(listOfColumns);
-				addObserableFeatureTab(writableFactory, listOfObservableFeatures);
-				addProtocolTab(writableFactory, listOfObservableFeatures);
-				addDataSet(writableFactory);
-				addSDataSetMatrix(writableFactory, repo, listOfObservableFeatures);
-				addOntologyTermTab(writableFactory);
+				Repository repo = repositorySource.getRepository(sheetName);
+				try
+				{
+					// Collect headers as features to be imported in Omx-format
+					List<String> listOfColumns = collectColumns(repo);
+					// Collect observableFeatures
+					List<String> listOfObservableFeatures = collectObservableFeatures(listOfColumns);
+					addObserableFeatureTab(writableFactory, listOfObservableFeatures);
+					addProtocolTab(writableFactory, listOfObservableFeatures);
+					addDataSet(writableFactory);
+					addSDataSetMatrix(writableFactory, repo, listOfObservableFeatures);
+					addOntologyTermTab(writableFactory);
+				}
+				finally
+				{
+					repo.close();
+				}
 			}
 			finally
 			{
-				repo.close();
+				writableFactory.close();
 			}
 		}
 		finally
 		{
-			writableFactory.close();
+			repositorySource.close();
 		}
 	}
 

@@ -43,20 +43,34 @@ public class ParsingToolKit
 	public void convertTo256Characters(String file) throws IOException, InvalidFormatException
 	{
 		RepositorySource repositorySource = new ExcelRepositorySource(new File(file), new TrimProcessor());
-		Repository repo = repositorySource.getRepository("ontologyterm");
-
-		for (Entity entity : repo)
+		try
 		{
-			String name = entity.getString("name");
-			if (name.length() >= 256)
+			Repository repo = repositorySource.getRepository("ontologyterm");
+			try
 			{
 
-				System.out.println(name.substring(0, 252) + "...");
+				for (Entity entity : repo)
+				{
+					String name = entity.getString("name");
+					if (name.length() >= 256)
+					{
+
+						System.out.println(name.substring(0, 252) + "...");
+					}
+					else
+					{
+						System.out.println(name);
+					}
+				}
 			}
-			else
+			finally
 			{
-				System.out.println(name);
+				repo.close();
 			}
+		}
+		finally
+		{
+			repositorySource.close();
 		}
 	}
 
@@ -107,26 +121,40 @@ public class ParsingToolKit
 	public void check(String file) throws IOException, InvalidFormatException
 	{
 		RepositorySource repositorySource = new ExcelRepositorySource(new File(file), new TrimProcessor());
-		Repository repo = repositorySource.getRepository("dataset_palga");
-		List<String> list = null;
-		List<List<String>> listOfLists = new ArrayList<List<String>>();
-		for (Entity entity : repo)
+		try
 		{
-			list = new ArrayList<String>();
-			String[] code = entity.getString("PALGA-code").split(",");
-			for (int i = 0; i < code.length; ++i)
+			Repository repo = repositorySource.getRepository("dataset_palga");
+			try
 			{
-				if (!list.contains(code[i]))
+				List<String> list = null;
+				List<List<String>> listOfLists = new ArrayList<List<String>>();
+				for (Entity entity : repo)
 				{
-					list.add(code[i]);
+					list = new ArrayList<String>();
+					String[] code = entity.getString("PALGA-code").split(",");
+					for (int i = 0; i < code.length; ++i)
+					{
+						if (!list.contains(code[i]))
+						{
+							list.add(code[i]);
+						}
+					}
+					listOfLists.add(list);
+				}
+				for (List<String> all : listOfLists)
+				{
+					System.out.println(all);
+
 				}
 			}
-			listOfLists.add(list);
+			finally
+			{
+				repo.close();
+			}
 		}
-		for (List<String> all : listOfLists)
+		finally
 		{
-			System.out.println(all);
-
+			repositorySource.close();
 		}
 	}
 }
