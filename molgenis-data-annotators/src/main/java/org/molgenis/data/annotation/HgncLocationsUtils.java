@@ -8,7 +8,7 @@ import java.util.Map;
 import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
 import org.molgenis.data.annotation.impl.datastructures.Locus;
 
-public class HgcnLocationsUtils
+public class HgncLocationsUtils
 {
 	public static List<String> locationToHgcn(Map<String, HGNCLocations> hgncLocations, Locus locus) throws IOException
 	{
