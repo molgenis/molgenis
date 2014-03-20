@@ -76,7 +76,7 @@
 			'selectedAttributes' : attributes,
 			'onAttributesSelect' : function(selects) {
 				selectedAttributes = container.tree('getSelectedAttributes');
-				$(document).trigger('changeAttributeSelection', {'attributes': attributes});
+				$(document).trigger('changeAttributeSelection', {'attributes': selectedAttributes});
 			},
 			'onAttributeClick' : function(attribute) {
 				$(document).trigger('clickAttribute', {'attribute': attribute});
