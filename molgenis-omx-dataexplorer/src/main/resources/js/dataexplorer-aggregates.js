@@ -36,9 +36,7 @@
 			$('#aggregate-table-container').empty();
 			
 			$('.attribute-dropdown').on('change', function() {
-				//updateAggregatesTable($('#x-aggr-attribute').val(), $('#y-aggr-attribute').val());
 				updateAggregatesTable($('#x-aggr-attribute').val(), $('#y-aggr-attribute').val());
-
 			});
 		} else {
 			$('#feature-select-container').hide();
