@@ -400,7 +400,7 @@
 			e.preventDefault();
 			$(document).trigger('removeAttributeFilter', {'attributeUri': $(this).data('href')});
 		});
-				
+		
 		// fire event handler
 		$('#dataset-select').change();
 	});
