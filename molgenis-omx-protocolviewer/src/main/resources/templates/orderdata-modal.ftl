@@ -184,7 +184,6 @@
         });
 
         function order() {
-            showSpinner();
             submitBtn.addClass('disabled');
             $.ajax({
                 type: 'POST',
@@ -194,13 +193,10 @@
                 contentType: false,
                 processData: false,
                 success: function () {
-                    hideSpinner();
                     $(document).trigger('molgenis-order-placed', 'Your submission has been received');
                     modal.modal('hide');
                 },
                 error: function (xhr) {
-                    hideSpinner();
-                    molgenis.createAlert(JSON.parse(xhr.responseText).errors);
                     modal.modal('hide');
                 }
             });

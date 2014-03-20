@@ -16,6 +16,7 @@
 	var selectedAttributes = [];
 	var searchQuery = null;
 	var showWizardOnInit = false;
+	var modules = [];
 	
 	/**
 	 * @memberOf molgenis.dataexplorer
@@ -321,11 +322,17 @@
 			$("#observationset-search").val("");
 			$('#data-table-pager').empty();
 			
+			// reset: unbind existing event handlers
+			$.each(modules, function() {
+				$(document).off('.' + this.id);	
+			})
+			
 			restApi.getAsync(entityUri + '/meta', {'expand': ['attributes']}, function(entityMetaData) {
 				selectedEntityMetaData = entityMetaData;
 
 				// get modules config for this entity
 				$.get(molgenis.getContextUrl() + '/modules?entity=' + entityMetaData.name).done(function(data) {
+					modules = data.modules;
 					createModuleNav(data.modules, $('#module-nav'));
 				
 					selectedAttributes = $.map(entityMetaData.attributes, function(attribute) {
@@ -342,8 +349,6 @@
 						molgenis.dataexplorer.wizard.openFilterWizardModal(selectedEntityMetaData, attributeFilters);
 						showWizardOnInit = false;
 					}
-				}).fail(function(xhr) {
-					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 				});
 			});
 		});

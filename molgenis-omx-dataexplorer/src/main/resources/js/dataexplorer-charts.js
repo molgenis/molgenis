@@ -231,10 +231,7 @@
 		return attributeMap;
 	}
 	
-	$(function() {
-		// unbind existing event handlers before binding new ones
-		$(document).off('.charts');
-		
+	$(function() {		
 		// bind event handlers with namespace
 		
 		// scatter plot modal
