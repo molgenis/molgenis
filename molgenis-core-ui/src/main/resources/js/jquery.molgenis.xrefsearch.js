@@ -85,6 +85,7 @@
 			width: 650,
 			placeholder: 'filter text',
 			minimumInputLength: 2,
+            multiple: (attributeMetaData.fieldType == 'MREF'),
 			query: function (options){
 				var query = createQuery(lookupAttrNames, options.term);
 				restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {num: 10, q: query}}, function(data) {
@@ -94,8 +95,8 @@
 			initSelection: function(element, callback) {
 				//Only called when the input has a value
 				var query = createQuery(lookupAttrNames, element.val());
-				restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {num: 1, q: query}}, function(data) {
-					callback(data.items[0]);
+				restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {q: query}}, function(data) {
+					callback(data.items);
 				});
 			},
 			formatResult: function(entity) {
@@ -107,21 +108,15 @@
 			id: function(entity) {
 				return entity[refEntityMetaData.labelAttribute];
 			},
+            separator: ',',
 			dropdownCssClass: 'molgenis-xrefsearch'
-		});
-		
-		var addButton = $('<a href="#" class="add-ref-query-part" title="add new"><i class="icon-plus"></i></a>');
-		container.append(addButton);
-		
-		addButton.on('click', function() {
-			addQueryPartSelect(container, attributeMetaData);
 		});
 	}
 	
 	function addQueryPartSelect(container, attributeMetaData, value) {
 		var attrs = {
 				'placeholder': 'filter text',
-				'autofocus': 'autofocus',
+				'autofocus': 'autofocus'
 			};
 			
 		var element = createInput(attributeMetaData.fieldType, attrs, value);
