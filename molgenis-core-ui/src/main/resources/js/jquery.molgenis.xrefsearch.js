@@ -73,16 +73,8 @@
 		
 		return items.join('');
 	}
-	
-	function createQueryTypeDropdown(container, attributeMetaData, operator) {
-		if (attributeMetaData.fieldType == 'MREF') {
-			var element = $('<select id="mref-query-type" class="operator"><option value="OR">ANY match (OR)</option><option value="AND">ALL match (AND)</option></select>');
-			container.prepend(element);
-			element.val(operator);
-		}
-	}
-	
-	function createSelect2(container, attributeMetaData) {
+
+	function createSelect2(container, attributeMetaData, options) {
 		var refEntityMetaData = restApi.get(attributeMetaData.refEntity.href, {expand: ['attributes']});
 		var lookupAttrNames = getLookupAttributeNames(refEntityMetaData);
 		var hiddenInput = container.find('input[type=hidden]');
@@ -117,21 +109,23 @@
             separator: ',',
 			dropdownCssClass: 'molgenis-xrefsearch'
 		});
+        if (attributeMetaData.fieldType == 'MREF') {
+            var dropdown = $('<select id="mref-query-type" class="operator"><option value="OR">OR</option><option value="AND">AND</option></select>');
+            dropdown.val(options.operator);
+            dropdown.width(70);
+            container.append(dropdown);
+        }
 	}
 
-	function addQueryPartSelect(container, attributeMetaData, values) {
+	function addQueryPartSelect(container, attributeMetaData, options) {
 		var attrs = {
 				'placeholder': 'filter text',
 				'autofocus': 'autofocus'
 			};
 
-		var element = createInput(attributeMetaData.fieldType, attrs, values);
+		var element = createInput(attributeMetaData.fieldType, attrs, options.values);
 		container.parent().append(element);
-		createSelect2(element, attributeMetaData, values);
-	}
-	
-	function removeQueryPartSelect(element) {
-		element.remove();
+		createSelect2(element, attributeMetaData, options);
 	}
 	
 	$.fn.xrefsearch = function(options) {
@@ -139,13 +133,7 @@
 		var attributeUri = options.attributeUri ? options.attributeUri : options.attribute.href;
 		
 		restApi.getAsync(attributeUri, {attributes:['refEntity', 'fieldType'], expand:['refEntity']}, function(attributeMetaData) {
-			createQueryTypeDropdown(container, attributeMetaData, options.operator);
-
-			if (options.values && options.values.length > 0) {
-			    addQueryPartSelect(container, attributeMetaData, options.values);
-			} else {
-				addQueryPartSelect(container, attributeMetaData);
-			}
+			    addQueryPartSelect(container, attributeMetaData, options);
 		});
 		
 		return this;
