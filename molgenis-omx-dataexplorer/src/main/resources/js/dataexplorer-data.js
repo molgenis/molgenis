@@ -33,12 +33,10 @@
 	 * @memberOf molgenis.dataexplorer.data
 	 */
 	function download() {
-		parent.showSpinner();
 		$.download(molgenis.getContextUrl() + '/download', {
 			// Workaround, see http://stackoverflow.com/a/9970672
 			'dataRequest' : JSON.stringify(createDownloadDataRequest())
 		});
-		parent.hideSpinner();
 	}
 	
 	/**

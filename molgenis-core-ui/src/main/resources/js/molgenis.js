@@ -338,28 +338,6 @@ function createInput(dataType, attrs, val, lbl) {
 	}
 }
 
-$(function() {
-	// disable all ajax request caching
-	$.ajaxSetup({
-		cache : false
-	});
-	// async load bootstrap modal and display
-	$(document).on('click', 'a.modal-href', function(e) {
-		e.preventDefault();
-		e.stopPropagation();
-		if (!$(this).hasClass('disabled')) {
-			var container = $('#' + $(this).data('target'));
-			if (container.is(':empty')) {
-				container.load($(this).attr('href'), function() {
-					$('.modal:first', container).modal('show');
-				});
-			} else {
-				$('.modal:first', container).modal('show');
-			}
-		}
-	});
-});
-
 // molgenis entity REST API client
 (function($, molgenis) {
 	"use strict";
@@ -389,9 +367,6 @@ $(function() {
 					callback(data);
 				else
 					resource = data;
-			},
-			'error' : function(xhr) {
-				molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 			}
 		};
 		
@@ -454,9 +429,6 @@ $(function() {
 			async : false,
 			success : function(exists) {
 				result = exists;
-			},
-			error : function(xhr) {
-				molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 			}
 		});
 		
@@ -635,11 +607,46 @@ function hideSpinner() {
 			clearTimeout($('#spinner').data('timeout'));
 			$('#spinner').modal('hide');
 		}
-		$('#spinner').data('count', count - 1);
+		if (count > 0) {
+			$('#spinner').data('count', count - 1);
+		}
 	}
 }
 
 $(function() {
+	// disable all ajax request caching
+	$.ajaxSetup({
+		cache : false
+	});
+
+	$(document).ajaxStart(function() {
+		showSpinner();
+	}).ajaxStop(function() {
+		hideSpinner();
+	}).ajaxError(function() {
+		try {
+			molgenis.createAlert(JSON.parse(xhr.responseText).errors);
+		} catch(e) {
+			molgenis.createAlert([{'message': 'An error occurred. Please contact the administrator.'}], 'error');
+		}
+	});
+	
+	// async load bootstrap modal and display
+	$(document).on('click', 'a.modal-href', function(e) {
+		e.preventDefault();
+		e.stopPropagation();
+		if (!$(this).hasClass('disabled')) {
+			var container = $('#' + $(this).data('target'));
+			if (container.is(':empty')) {
+				container.load($(this).attr('href'), function() {
+					$('.modal:first', container).modal('show');
+				});
+			} else {
+				$('.modal:first', container).modal('show');
+			}
+		}
+	});
+	
 	/**
 	 * Add download functionality to JQuery.
 	 * data can be string of parameters or array/object

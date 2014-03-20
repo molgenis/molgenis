@@ -342,8 +342,6 @@
 						molgenis.dataexplorer.wizard.openFilterWizardModal(selectedEntityMetaData, attributeFilters);
 						showWizardOnInit = false;
 					}
-				}).fail(function(xhr) {
-					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 				});
 			});
 		});
