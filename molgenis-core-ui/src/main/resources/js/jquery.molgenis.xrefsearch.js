@@ -16,19 +16,25 @@
 	
 	var restApi = new molgenis.RestClient();
 	
-	function createQuery(lookupAttributeNames, term) {
+	function createQuery(lookupAttributeNames, terms) {
 		var q = [];
 		
 		$.each(lookupAttributeNames, function(index, attrName) {
 			if (q.length > 0) {
 				q.push({operator: 'OR'});
 			}
-				
-			q.push({
-				field: attrName,
-				operator: 'LIKE',
-				value: term
-			});
+            if (terms.length > 0) {
+                $.each(terms, function(index) {
+                    if(index > 0){
+                        q.push({operator: 'OR'});
+                    }
+                    q.push({
+                        field: attrName,
+                        operator: 'LIKE',
+                        value: terms[index]
+                    });
+                });
+            }
 		});
 			
 		return q;
@@ -87,14 +93,14 @@
 			minimumInputLength: 2,
             multiple: (attributeMetaData.fieldType == 'MREF'),
 			query: function (options){
-				var query = createQuery(lookupAttrNames, options.term);
+				var query = createQuery(lookupAttrNames, [options.term]);
 				restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {num: 10, q: query}}, function(data) {
 					options.callback({results: data.items, more: false});
 				});           
             },
 			initSelection: function(element, callback) {
 				//Only called when the input has a value
-				var query = createQuery(lookupAttrNames, element.val());
+				var query = createQuery(lookupAttrNames, element.val().split(','));
 				restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {q: query}}, function(data) {
 					callback(data.items);
 				});
@@ -112,23 +118,16 @@
 			dropdownCssClass: 'molgenis-xrefsearch'
 		});
 	}
-	
-	function addQueryPartSelect(container, attributeMetaData, value) {
+
+	function addQueryPartSelect(container, attributeMetaData, values) {
 		var attrs = {
 				'placeholder': 'filter text',
 				'autofocus': 'autofocus'
 			};
-			
-		var element = createInput(attributeMetaData.fieldType, attrs, value);
+
+		var element = createInput(attributeMetaData.fieldType, attrs, values);
 		container.parent().append(element);
-		createSelect2(element, attributeMetaData, value);
-			
-		var removeButton = $('<a href="#" class="remove-ref-query-part" title="remove"><i class="icon-remove"></i></a>');
-		container.parent().find('.add-ref-query-part:not(:last)').replaceWith(removeButton);
-		
-		removeButton.on('click', function() {
-			removeQueryPartSelect($(this).parent());
-		});
+		createSelect2(element, attributeMetaData, values);
 	}
 	
 	function removeQueryPartSelect(element) {
@@ -141,17 +140,11 @@
 		
 		restApi.getAsync(attributeUri, {attributes:['refEntity', 'fieldType'], expand:['refEntity']}, function(attributeMetaData) {
 			createQueryTypeDropdown(container, attributeMetaData, options.operator);
-			
+
 			if (options.values && options.values.length > 0) {
-				
-				//Preselect values
-				for (var i = 0; i < options.values.length; i++) {
-					addQueryPartSelect(container, attributeMetaData, options.values[i]);
-				}
-				
+			    addQueryPartSelect(container, attributeMetaData, options.values);
 			} else {
 				addQueryPartSelect(container, attributeMetaData);
-				
 			}
 		});
 		
