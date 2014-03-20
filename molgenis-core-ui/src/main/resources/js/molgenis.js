@@ -619,11 +619,14 @@ $(function() {
 		cache : false
 	});
 
-	$(document).ajaxStart(function() {
-		showSpinner();
-	}).ajaxStop(function() {
-		hideSpinner();
-	}).ajaxError(function() {
+	// use ajaxPrefilter instead of ajaxStart and ajaxStop
+	// to work around issue http://bugs.jquery.com/ticket/13680
+	$.ajaxPrefilter(function( options, _, jqXHR ) {
+	    showSpinner();
+	    jqXHR.always( hideSpinner );
+	});
+
+	$(document).ajaxError(function() {
 		try {
 			molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 		} catch(e) {
@@ -631,7 +634,7 @@ $(function() {
 		}
 	});
 	
-	window.onerror = function(msg) {
+	window.onerror = function(msg, url, line) {
 		molgenis.createAlert([{'message': 'An error occurred. Please contact the administrator.'}, {'message': msg}], 'error');
 	};
 	
