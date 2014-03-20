@@ -108,7 +108,7 @@ public class OmxImporterServiceImpl implements OmxImporterService
 				// Check if all column names in the excel sheet exist as attributes of the entity
 				Set<ConstraintViolation> violations = Sets.newLinkedHashSet();
 				EntityMetaData meta = dataService.getEntityMetaData(identifier);
-				for (AttributeMetaData attr : meta.getAttributes())
+				for (AttributeMetaData attr : repository.getEntityMetaData().getAttributes())
 				{
 					if (meta.getAttribute(attr.getName()) == null)
 					{

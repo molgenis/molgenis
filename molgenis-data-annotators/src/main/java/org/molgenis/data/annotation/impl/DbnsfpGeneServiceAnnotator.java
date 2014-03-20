@@ -13,7 +13,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.HgcnLocationsUtils;
+import org.molgenis.data.annotation.HgncLocationsUtils;
 import org.molgenis.data.annotation.LocusAnnotator;
 import org.molgenis.data.annotation.impl.datastructures.Locus;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
@@ -128,7 +128,7 @@ public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 		Long position = entity.getLong(POSITION);
 		String chromosome = entity.getString(CHROMOSOME);
 
-		List<String> geneSymbols = HgcnLocationsUtils.locationToHgcn(hgncLocationsProvider.getHgncLocations(),
+		List<String> geneSymbols = HgncLocationsUtils.locationToHgcn(hgncLocationsProvider.getHgncLocations(),
 				new Locus(chromosome, position));
 
 		try
