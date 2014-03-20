@@ -23,9 +23,9 @@
 		items.push(type.charAt(0).toUpperCase() + type.slice(1));
 		items.push('!</strong> ');
 		$.each(alerts, function(i, alert) {
-			items.push(alert.message);
 			if (i > 0)
-				items.push('\n');
+				items.push('<br/>');
+			items.push('<span>' + alert.message + '</span>');
 		});
 		items.push('</div>');
 
@@ -630,6 +630,11 @@ $(function() {
 			molgenis.createAlert([{'message': 'An error occurred. Please contact the administrator.'}], 'error');
 		}
 	});
+	
+	window.onerror = function(msg, url, line) {
+		molgenis.createAlert([{'message': 'An error occurred. Please contact the administrator.'}, {'message': msg}], 'error');
+		hideSpinner();
+	};
 	
 	// async load bootstrap modal and display
 	$(document).on('click', 'a.modal-href', function(e) {
