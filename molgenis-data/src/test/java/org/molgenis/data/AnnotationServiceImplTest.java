@@ -47,8 +47,6 @@ public class AnnotationServiceImplTest
 	public void getAllAnnotators()
 	{
 		assertNotNull(annotationService.getAllAnnotators());
-		List<RepositoryAnnotator> it = annotationService.getAllAnnotators();
-
 	}
 
 	@Test

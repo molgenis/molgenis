@@ -1,6 +1,5 @@
 package org.molgenis.omx;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -145,7 +144,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 
 		// Annotators include files/tools
 		String molgenisHomeDir = System.getProperty("molgenis.home");
-		
+
 		if (molgenisHomeDir == null)
 		{
 			throw new IllegalArgumentException("missing required java system property 'molgenis.home'");

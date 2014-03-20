@@ -54,101 +54,109 @@ public class SampleConverter
 		PROJECT = projectName;
 
 		RepositorySource repositorySource = new ExcelRepositorySource(projectName, in, new TrimProcessor(false, true));
-		CsvWriter csvWriter = null;
-
-		ArrayList<String> listOfEntity = new ArrayList<String>();
-		listOfEntity.add("dataset");
-		listOfEntity.add("protocol");
-		listOfEntity.add("observableFeature");
-		listOfEntity.add("dataset_" + PROJECT.toLowerCase().trim());
-
 		try
 		{
-			for (Repository repo : repositorySource.getRepositories())
+			CsvWriter csvWriter = null;
+
+			ArrayList<String> listOfEntity = new ArrayList<String>();
+			listOfEntity.add("dataset");
+			listOfEntity.add("protocol");
+			listOfEntity.add("observableFeature");
+			listOfEntity.add("dataset_" + PROJECT.toLowerCase().trim());
+
+			try
 			{
-				this.featureColNames = new ArrayList<String>();
-
-				for (AttributeMetaData attr : repo.getEntityMetaData().getAttributes())
+				for (Repository repo : repositorySource.getRepositories())
 				{
-					String colName = attr.getName();
-					if (colName.equals(IDENTIFIER))
-					{
-						this.featureColNames.add(0, colName);
-					}
-					else
-					{
-						this.featureColNames.add(colName);
-					}
-				}
+					this.featureColNames = new ArrayList<String>();
 
-				csvWriter = new CsvWriter(new OutputStreamWriter(out, Charset.forName("UTF-8")), this.featureColNames);
-
-				for (Entity entity : repo)
-				{
-					// If the sample name exists
-					if (entity.getString(IDENTIFIER) != null && !entity.getString(IDENTIFIER).isEmpty())
+					for (AttributeMetaData attr : repo.getEntityMetaData().getAttributes())
 					{
-						String sampleId = entity.getString(IDENTIFIER);
-						if (!checkIfDouble(sampleId))
+						String colName = attr.getName();
+						if (colName.equals(IDENTIFIER))
 						{
-							createCategoryList(entity, sampleId);
-							csvWriter.add(entity);
+							this.featureColNames.add(0, colName);
 						}
-
-					}
-					else
-					{
-						Entity entOut = new MapEntity();
-						for (String featureColName : featureColNames)
+						else
 						{
-							if (featureColName.equals(IDENTIFIER))
+							this.featureColNames.add(colName);
+						}
+					}
+
+					csvWriter = new CsvWriter(new OutputStreamWriter(out, Charset.forName("UTF-8")),
+							this.featureColNames);
+
+					for (Entity entity : repo)
+					{
+						// If the sample name exists
+						if (entity.getString(IDENTIFIER) != null && !entity.getString(IDENTIFIER).isEmpty())
+						{
+							String sampleId = entity.getString(IDENTIFIER);
+							if (!checkIfDouble(sampleId))
 							{
-								// Make a identifier for this sample
-								entOut.set(featureColName, emptySample());
-							}
-							else
-							{
-								entOut.set(featureColName, entity.getString(featureColName));
+								createCategoryList(entity, sampleId);
+								csvWriter.add(entity);
 							}
 
 						}
-						csvWriter.add(entOut);
+						else
+						{
+							Entity entOut = new MapEntity();
+							for (String featureColName : featureColNames)
+							{
+								if (featureColName.equals(IDENTIFIER))
+								{
+									// Make a identifier for this sample
+									entOut.set(featureColName, emptySample());
+								}
+								else
+								{
+									entOut.set(featureColName, entity.getString(featureColName));
+								}
+
+							}
+							csvWriter.add(entOut);
+						}
 					}
 				}
-			}
-			makeProtocolList(this.featureColNames);
-			if (this.featureColNames != null)
-			{
-				makeFeaturesList();
-			}
-			mkmetadataExcelFile(listOfEntity);
-			// Write categories to file
-			PrintWriter printCategories = new PrintWriter(new File(OUTPUTDIR + "/categories.txt"));
-			for (Entry<String, HashSet<String>> entry : hashMapCategories.entrySet())
-			{
-				if (entry.getValue().size() > 1 && entry.getValue().size() < 100)
+				makeProtocolList(this.featureColNames);
+				if (this.featureColNames != null)
 				{
-					printCategories.append(entry.getKey() + "^");
-					for (String e : entry.getValue())
-					{
-						printCategories.append(e + "^");
-					}
-					printCategories.append("\n");
+					makeFeaturesList();
 				}
+				mkmetadataExcelFile(listOfEntity);
+				// Write categories to file
+				PrintWriter printCategories = new PrintWriter(new File(OUTPUTDIR + "/categories.txt"));
+				for (Entry<String, HashSet<String>> entry : hashMapCategories.entrySet())
+				{
+					if (entry.getValue().size() > 1 && entry.getValue().size() < 100)
+					{
+						printCategories.append(entry.getKey() + "^");
+						for (String e : entry.getValue())
+						{
+							printCategories.append(e + "^");
+						}
+						printCategories.append("\n");
+					}
+
+				}
+				printCategories.close();
 
 			}
-			printCategories.close();
-
+			finally
+			{
+				try
+				{
+					csvWriter.close();
+				}
+				catch (IOException e)
+				{
+				}
+			}
 		}
 		finally
 		{
-			try
-			{
-				csvWriter.close();
-			}
-			catch (IOException e)
-			{
-			}
+			repositorySource.close();
 		}
 	}
 

@@ -33,9 +33,22 @@ public class Validator
 	{
 		ValidationFile excelfile = new ValidationFile();
 		RepositorySource excelReaderReferenceFile = new ExcelRepositorySource(new File(excelFile1), new TrimProcessor());
-		Repository excelSheetReaderReferenceFile = excelReaderReferenceFile.getRepository("dataset_celiac_sprue");
-		excelfile.readFile(excelSheetReaderReferenceFile, IDENTIFIER, IDENTIFIER2);
-
+		try
+		{
+			Repository excelSheetReaderReferenceFile = excelReaderReferenceFile.getRepository("dataset_celiac_sprue");
+			try
+			{
+				excelfile.readFile(excelSheetReaderReferenceFile, IDENTIFIER, IDENTIFIER2);
+			}
+			finally
+			{
+				excelSheetReaderReferenceFile.close();
+			}
+		}
+		finally
+		{
+			excelReaderReferenceFile.close();
+		}
 		ValidationFile csvFile = new ValidationFile();
 		Repository csvReaderFileToCompare = new CsvRepository(new File(file2), null);
 
