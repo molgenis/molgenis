@@ -1,130 +1,93 @@
 package org.molgenis.data.annotation.impl;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.io.IOUtils;
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.*;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.HgcnLocationsUtils;
 import org.molgenis.data.annotation.LocusAnnotator;
-import org.molgenis.data.annotation.impl.datastructures.*;
+import org.molgenis.data.annotation.impl.datastructures.HPOTerm;
+import org.molgenis.data.annotation.impl.datastructures.Locus;
+import org.molgenis.data.annotation.impl.datastructures.OMIMTerm;
+import org.molgenis.data.annotation.provider.HgncLocationsProvider;
+import org.molgenis.data.annotation.provider.HpoMappingProvider;
+import org.molgenis.data.annotation.provider.OmimMorbidMapProvider;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
-
-import java.io.*;
-import java.net.URL;
-import java.util.*;
 
 /**
  * Created by jvelde on 2/12/14.
  * 
  * uses:
- * 
- * http://compbio.charite.de/hudson/job/hpo.annotations.monthly/lastStableBuild/artifact/annotation/
- * ALL_SOURCES_ALL_FREQUENCIES_diseases_to_genes_to_phenotypes.txt
- * https://molgenis26.target.rug.nl/downloads/5gpm/GRCh37p13_HGNC_GeneLocations_noPatches.tsv
+ * <p>
+ * - http://compbio.charite.de/hudson/job/hpo.annotations.monthly/lastStableBuild/artifact/annotation/
+ * ALL_SOURCES_ALL_FREQUENCIES_diseases_to_genes_to_phenotypes.txt -
+ * https://molgenis26.target.rug.nl/downloads/5gpm/GRCh37p13_HGNC_GeneLocations_noPatches.tsv -
  * ftp://ftp.omim.org/omim/morbidmap
- * 
- * Todo: more fancy symptom information by using
- * http://compbio.charite.de/hudson/job/hpo.annotations/lastStableBuild/artifact/misc/phenotype_annotation.tab
- * 
- * Gene 1..N DiseaseID 1..N HPO-term
- * 
- * example lines
- * 
- * ALL_SOURCES_ALL_FREQUENCIES_diseases_to_genes_to_phenotypes.txt: OMIM:614887 PEX14 5195 HP:0002240 Hepatomegaly
- * 
- * morbidmap: Occipital horn syndrome, 304150 (3)|ATP7A, MNK, MK, OHS, SMAX3|300011|Xq21.1
- * 
- * phenotype_annotation.tab: OMIM 102370 ACROMICRIC DYSPLASIA HP:0001156 ORPHANET:969 TAS hallmark O
- * http://www.orpha.net/consor/cgi-bin/OC_Exp.php?lng=en&Expert=969 2014.02.06 orphanet
- * 
+ * </p>
  * 
  */
 @Component("omimHpoService")
 public class OmimHpoAnnotator extends LocusAnnotator
 {
-	private static final String GRCH37P13_HGNC_GENE_LOCATIONS_OUTPUT_FILE = "GRCh37p13_HGNC_GeneLocations_noPatches.tsv";
-	private static final String GRCH37P13_HGNC_GENE_LOCATIONS = "https://molgenis26.target.rug.nl/downloads/5gpm/GRCh37p13_HGNC_GeneLocations_noPatches.tsv";
-	private static final String MORBIDMAP = "morbidmap";
-	private static final String FTP_FTP_OMIM_ORG_OMIM_MORBIDMAP = "ftp://ftp.omim.org/omim/morbidmap";
-	private static final String HPO_ANNOTATIONS_STABLE_BUILD_DISEASES_TO_GENES_TO_PHENOTYPES = "http://compbio.charite.de/hudson/job/hpo.annotations.monthly/lastStableBuild/artifact/annotation/ALL_SOURCES_ALL_FREQUENCIES_diseases_to_genes_to_phenotypes.txt";
-	private static final String DISEASES_TO_GENES_TO_PHENOTYPES_OUTPUT_FILE = "ALL_SOURCES_ALL_FREQUENCIES_diseases_to_genes_to_phenotypes.txt";
-
-	public static final String OMIM_DISO = "Disease_OMIM";
-	public static final String OMIM_LINK = "Hyperlink_OMIM";
-	public static final String OMIM_ALL = "Full_info_OMIM";
-	public static final String HPO_DESC = "Symptoms_HPO";
-	public static final String HPO_LINK = "Hyperlinks_HPO";
-	public static final String HPO_ALL = "Full_info_HPO";
-
 	private static final String NAME = "OmimHpo";
 
-	/**
-	 * full info fields can be big due to many symptoms or diseases..
-	 * 
-	 * KCNJ13 [HPOTerm{id='HP:0000486', description='Strabismus', diseaseDb='OMIM', diseaseDbEntry=614186,
-	 * geneName='KCNJ13', geneEntrezID=3769}, HPOTerm{id='HP:0000007', description='Autosomal recessive inheritance',
-	 * diseaseDb='OMIM', diseaseDbEntry=614186, geneName='KCNJ13', geneEntrezID=3769}, HPOTerm{id='HP:0000639',
-	 * description='Nystagmus', diseaseDb='OMIM', diseaseDbEntry=614186, geneName='KCNJ13', geneEntrezID=3769},
-	 * HPOTerm{id='HP:0000518', description='Cataract', diseaseDb='OMIM', diseaseDbEntry=614186, geneName='KCNJ13',
-	 * geneEntrezID=3769}, HPOTerm{id='HP:0000505', description='Visual impairment', diseaseDb='OMIM',
-	 * diseaseDbEntry=614186, geneName='KCNJ13', geneEntrezID=3769}, HPOTerm{id='HP:0100543', description='Cognitive
-	 * impairment', diseaseDb='ORPHANET', diseaseDbEntry=65, geneName='KCNJ13', geneEntrezID=3769},
-	 * HPOTerm{id='HP:0000365', description='Hearing impairment', diseaseDb='ORPHANET', diseaseDbEntry=65,
-	 * geneName='KCNJ13', geneEntrezID=3769}, HPOTerm{id='HP:0004374', description='Hemiplegia/hemiparesis',
-	 * diseaseDb='ORPHANET', diseaseDbEntry=65, geneName='KCNJ13', geneEntrezID=3769}, HPOTerm{id='HP:0000512',
-	 * description='Abnormal electroretinogram', diseaseDb='ORPHANET', diseaseDbEntry=65, geneName='KCNJ13',
-	 * geneEntrezID=3769}, HPOTerm{id='HP:0000639', description='Nystagmus', diseaseDb='ORPHANET', diseaseDbEntry=65,
-	 * geneName='KCNJ13', geneEntrezID=3769}, HPOTerm{id='HP:0002084', description='Encephalocele',
-	 * diseaseDb='ORPHANET', diseaseDbEntry=65, geneName='KCNJ13', geneEntrezID=3769}, HPOTerm{id='HP:0007360',
-	 * description='Aplasia/Hypoplasia of the cerebellum', diseaseDb='ORPHANET', diseaseDbEntry=65, geneName='KCNJ13',
-	 * geneEntrezID=3769}, HPOTerm{id='HP:0000518', description='Cataract', diseaseDb='ORPHANET', diseaseDbEntry=65,
-	 * geneName='KCNJ13', geneEntrezID=3769}, HPOTerm{id='HP:0000505', description='Visual impairment',
-	 * diseaseDb='ORPHANET', diseaseDbEntry=65, geneName='KCNJ13', geneEntrezID=3769}, HPOTerm{id='HP:0007703',
-	 * description='Abnormal retinal pigmentation', diseaseDb='ORPHANET', diseaseDbEntry=65, geneName='KCNJ13',
-	 * geneEntrezID=3769}, HPOTerm{id='HP:0000648', description='Optic atrophy', diseaseDb='ORPHANET',
-	 * diseaseDbEntry=65, geneName='KCNJ13', geneEntrezID=3769}, HPOTerm{id='HP:0100689', description='Decreased corneal
-	 * thickness', diseaseDb='ORPHANET', diseaseDbEntry=65, geneName='KCNJ13', geneEntrezID=3769},
-	 * HPOTerm{id='HP:0001252', description='Muscular hypotonia', diseaseDb='ORPHANET', diseaseDbEntry=65,
-	 * geneName='KCNJ13', geneEntrezID=3769}, HPOTerm{id='HP:0002269', description='Abnormality of neuronal migration',
-	 * diseaseDb='ORPHANET', diseaseDbEntry=65, geneName='KCNJ13', geneEntrezID=3769}, HPOTerm{id='HP:0001250',
-	 * description='Seizures', diseaseDb='ORPHANET', diseaseDbEntry=65, geneName='KCNJ13', geneEntrezID=3769},
-	 * HPOTerm{id='HP:0000518', description='Cataract', diseaseDb='OMIM', diseaseDbEntry=193230, geneName='KCNJ13',
-	 * geneEntrezID=3769}, HPOTerm{id='HP:0000006', description='Autosomal dominant inheritance', diseaseDb='OMIM',
-	 * diseaseDbEntry=193230, geneName='KCNJ13', geneEntrezID=3769}] [OMIMTerm{entry=614186, name='Leber congenital
-	 * amaurosis 16', type=3, causedBy=603208, cytoLoc='2q37.1', hgncIds=[KCNJ13, SVD, LCA16]}, OMIMTerm{entry=193230,
-	 * name='Snowflake vitreoretinal degeneration', type=3, causedBy=603208, cytoLoc='2q37.1', hgncIds=[KCNJ13, SVD,
-	 * LCA16]}]
-	 */
+	public static final String OMIM_CAUSAL_IDENTIFIER = "OMIM_Causal_ID";
+	public static final String OMIM_DISORDERS = "OMIM_Disorders";
+	public static final String OMIM_IDENTIFIERS = "OMIM_IDs";
+	public static final String OMIM_TYPE = "OMIM_Type";
+	public static final String OMIM_HGNC_IDENTIFIERS = "OMIM_HGNC_IDs";
+	public static final String OMIM_CYTOGENIC_LOCATION = "OMIM_Cytogenic_Location";
+	public static final String OMIM_ENTRY = "OMIM_Entry";
+
+	public static final String HPO_IDENTIFIERS = "HPO_IDs";
+	public static final String HPO_GENE_NAME = "HPO_Gene_Name";
+	public static final String HPO_DESCRIPTIONS = "HPO_Descriptions";
+	public static final String HPO_DISEASE_DATABASE = "HPO_Disease_Database";
+	public static final String HPO_DISEASE_DATABASE_ENTRY = "HPO_Disease_Database_Entry";
+	public static final String HPO_ENTREZ_ID = "HPO_Entrez_ID";
+
+	private final AnnotationService annotatorService;
+	private List<HPOTerm> hpoTerms;
+	private List<OMIMTerm> omimTerms;
+	private Map<String, List<HPOTerm>> geneToHpoTerms;
+	private Map<String, List<OMIMTerm>> geneToOmimTerms;
+	private final OmimMorbidMapProvider omimMorbidMapProvider;
+	private final HgncLocationsProvider hgncLocationsProvider;
+	private final HpoMappingProvider hpoMappingProvider;
 
 	@Autowired
-	DataService dataService;
-
-	@Autowired
-	private MolgenisSettings molgenisSettings;
-
-	@Autowired
-	AnnotationService annotatorService;
+	public OmimHpoAnnotator(AnnotationService annotatorService, OmimMorbidMapProvider omimMorbidMapProvider,
+			HgncLocationsProvider hgncLocationsProvider, HpoMappingProvider hpoMappingProvider) throws IOException
+	{
+		if (annotatorService == null) throw new IllegalArgumentException("annotatorService is null");
+		if (omimMorbidMapProvider == null) throw new IllegalArgumentException("omimMorbidMapProvider is null");
+		if (hgncLocationsProvider == null) throw new IllegalArgumentException("hgncLocationsProvider is null");
+		if (hpoMappingProvider == null) throw new IllegalArgumentException("hpoMappingProvider is null");
+		this.annotatorService = annotatorService;
+		this.omimMorbidMapProvider = omimMorbidMapProvider;
+		this.hgncLocationsProvider = hgncLocationsProvider;
+		this.hpoMappingProvider = hpoMappingProvider;
+	}
 
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
 		annotatorService.addAnnotator(this);
-	}
-
-	@Override
-	public EntityMetaData getInputMetaData()
-	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
-
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CHROMOSOME, MolgenisFieldTypes.FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(POSITION, MolgenisFieldTypes.FieldTypeEnum.LONG));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData("disabled", MolgenisFieldTypes.FieldTypeEnum.STRING));
-
-		return metadata;
 	}
 
 	@Override
@@ -138,9 +101,98 @@ public class OmimHpoAnnotator extends LocusAnnotator
 	{
 		boolean dataExists = true;
 
-		// TODO Check if the webservices are up
+		// TODO Check if online resources are available
 
 		return dataExists;
+	}
+
+	@Override
+	public List<Entity> annotateEntity(Entity entity) throws IOException
+	{
+		List<Entity> results = new ArrayList<Entity>();
+
+		String chromosome = entity.getString(CHROMOSOME);
+		Long position = entity.getLong(POSITION);
+
+		Locus locus = new Locus(chromosome, position);
+
+		List<String> geneSymbols = HgcnLocationsUtils.locationToHgcn(hgncLocationsProvider.getHgncLocations(), locus);
+
+		Map<String, List<HPOTerm>> geneToHpoTerms = getGeneToHpoTerms();
+		Map<String, List<OMIMTerm>> geneToOmimTerms = getGeneToOmimTerms();
+		try
+		{
+			for (String geneSymbol : geneSymbols)
+			{
+				if (geneSymbol != null && geneToOmimTerms.containsKey(geneSymbol)
+						&& geneToHpoTerms.containsKey(geneSymbol))
+				{
+					HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+					Set<String> OMIMDisorders = new HashSet<String>();
+					Set<String> OMIMCytoLocations = new HashSet<String>();
+					Set<String> OMIMHgncIdentifiers = new HashSet<String>();
+					Set<Integer> OMIMEntries = new HashSet<Integer>();
+					Set<Integer> OMIMTypes = new HashSet<Integer>();
+					Set<Integer> OMIMCausedBy = new HashSet<Integer>();
+
+					Set<String> HPOPDescriptions = new HashSet<String>();
+					Set<String> HPOIdentifiers = new HashSet<String>();
+					Set<Integer> HPODiseaseDatabaseEntries = new HashSet<Integer>();
+					Set<String> HPODiseaseDatabases = new HashSet<String>();
+					Set<String> HPOGeneNames = new HashSet<String>();
+					Set<Integer> HPOEntrezIdentifiers = new HashSet<Integer>();
+
+					for (OMIMTerm omimTerm : geneToOmimTerms.get(geneSymbol))
+					{
+						OMIMDisorders.add(omimTerm.getName());
+						OMIMEntries.add(omimTerm.getEntry());
+						OMIMTypes.add(omimTerm.getType());
+						OMIMCausedBy.add(omimTerm.getCausedBy());
+						OMIMCytoLocations.add(omimTerm.getCytoLoc());
+
+						for (String hgncSymbol : omimTerm.getHgncIds())
+						{
+							OMIMHgncIdentifiers.add(hgncSymbol);
+						}
+
+					}
+
+					for (HPOTerm hpoTerm : geneToHpoTerms.get(geneSymbol))
+					{
+						HPOPDescriptions.add(hpoTerm.getDescription());
+						HPOIdentifiers.add(hpoTerm.getId());
+						HPOGeneNames.add(hpoTerm.getGeneName());
+						HPOEntrezIdentifiers.add(hpoTerm.getGeneEntrezID());
+						HPODiseaseDatabaseEntries.add(hpoTerm.getDiseaseDbEntry());
+						HPODiseaseDatabases.add(hpoTerm.getDiseaseDb());
+					}
+
+					resultMap.put(CHROMOSOME, locus.getChrom());
+					resultMap.put(POSITION, locus.getPos());
+					resultMap.put(OMIM_DISORDERS, OMIMDisorders);
+					resultMap.put(HPO_DESCRIPTIONS, HPOPDescriptions);
+					resultMap.put(OMIM_CAUSAL_IDENTIFIER, OMIMCausedBy);
+					resultMap.put(OMIM_TYPE, OMIMTypes);
+					resultMap.put(OMIM_HGNC_IDENTIFIERS, OMIMHgncIdentifiers);
+					resultMap.put(OMIM_CYTOGENIC_LOCATION, OMIMCytoLocations);
+					resultMap.put(OMIM_ENTRY, OMIMEntries);
+					resultMap.put(HPO_IDENTIFIERS, HPOIdentifiers);
+					resultMap.put(HPO_GENE_NAME, HPOGeneNames);
+					resultMap.put(HPO_DISEASE_DATABASE, HPODiseaseDatabases);
+					resultMap.put(HPO_DISEASE_DATABASE_ENTRY, HPODiseaseDatabaseEntries);
+					resultMap.put(HPO_ENTREZ_ID, HPOEntrezIdentifiers);
+
+					results.add(new MapEntity(resultMap));
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			throw new RuntimeException(e);
+		}
+
+		return results;
 	}
 
 	/**
@@ -152,31 +204,33 @@ public class OmimHpoAnnotator extends LocusAnnotator
 	 * @return
 	 * @throws IOException
 	 */
-	public static List<HPOTerm> hpoTerms() throws IOException
+	private List<HPOTerm> getHpoTerms() throws IOException
 	{
-		List<HPOTerm> hpoTermsList = new ArrayList<HPOTerm>();
-		ArrayList<String> hpoRaw = readLinesFromURL(HPO_ANNOTATIONS_STABLE_BUILD_DISEASES_TO_GENES_TO_PHENOTYPES,
-				DISEASES_TO_GENES_TO_PHENOTYPES_OUTPUT_FILE);
-
-		for (String line : hpoRaw)
+		if (this.hpoTerms == null)
 		{
-			if (!line.startsWith("#"))
+			hpoTerms = new ArrayList<HPOTerm>();
+
+			List<String> hpoLines = IOUtils.readLines(hpoMappingProvider.getHpoMapping());
+
+			for (String line : hpoLines)
 			{
-				String[] split = line.split("\t");
-				String diseaseDb = split[0].split(":")[0];
-				String geneSymbol = split[1];
-				String hpoId = split[3];
-				String description = split[4];
+				if (!line.startsWith("#"))
+				{
+					String[] split = line.split("\t");
+					String diseaseDb = split[0].split(":")[0];
+					String geneSymbol = split[1];
+					String hpoId = split[3];
+					String description = split[4];
 
-				Integer diseaseDbID = Integer.parseInt(split[0].split(":")[1]);
-				Integer geneEntrezId = Integer.parseInt(split[2]);
+					Integer diseaseDbID = Integer.parseInt(split[0].split(":")[1]);
+					Integer geneEntrezId = Integer.parseInt(split[2]);
 
-				HPOTerm hpoTerm = new HPOTerm(hpoId, description, diseaseDb, diseaseDbID, geneSymbol, geneEntrezId);
-				hpoTermsList.add(hpoTerm);
+					HPOTerm hpoTerm = new HPOTerm(hpoId, description, diseaseDb, diseaseDbID, geneSymbol, geneEntrezId);
+					hpoTerms.add(hpoTerm);
+				}
 			}
 		}
-
-		return hpoTermsList;
+		return hpoTerms;
 	}
 
 	/**
@@ -193,308 +247,121 @@ public class OmimHpoAnnotator extends LocusAnnotator
 	 * @return
 	 * @throws IOException
 	 */
-	public static List<OMIMTerm> omimTerms() throws IOException
+	private List<OMIMTerm> getOmimTerms() throws IOException
 	{
-		List<OMIMTerm> omimTermList = new ArrayList<OMIMTerm>();
-		ArrayList<String> omimRaw = readLinesFromURL(FTP_FTP_OMIM_ORG_OMIM_MORBIDMAP, MORBIDMAP);
-
-		for (String line : omimRaw)
+		if (omimTerms == null)
 		{
-			String[] split = line.split("\\|");
-			Integer omimEntry = null;
+			omimTerms = new ArrayList<OMIMTerm>();
 
 			try
 			{
-				String entry = split[0].substring(split[0].length() - 10, split[0].length() - 4);
-				if (entry.matches("[0-9]+"))
+				List<String> omimLines = IOUtils.readLines(omimMorbidMapProvider.getOmimMorbidMap());
+				for (String line : omimLines)
 				{
-					List<String> genes = Arrays.asList(split[1].split(", "));
+					String[] split = line.split("\\|");
 
-					String name = split[0].substring(0, split[0].length() - 12);
-					String cytoLoc = split[3];
+					String entry = split[0].substring(split[0].length() - 10, split[0].length() - 4);
+					if (entry.matches("[0-9]+"))
+					{
+						List<String> genes = Arrays.asList(split[1].split(", "));
 
-					Integer mutationId = Integer.parseInt(split[2]);
-					Integer type = Integer.parseInt(split[0].substring(split[0].length() - 2, split[0].length() - 1));
+						String name = split[0].substring(0, split[0].length() - 12);
+						String cytoLoc = split[3];
 
-					omimEntry = Integer.parseInt(entry);
+						Integer mutationId = Integer.parseInt(split[2]);
+						Integer type = Integer
+								.parseInt(split[0].substring(split[0].length() - 2, split[0].length() - 1));
 
-					OMIMTerm omimTerm = new OMIMTerm(omimEntry, name, type, mutationId, cytoLoc, genes);
+						Integer omimEntry = Integer.parseInt(entry);
 
-					omimTermList.add(omimTerm);
+						OMIMTerm omimTerm = new OMIMTerm(omimEntry, name, type, mutationId, cytoLoc, genes);
+
+						omimTerms.add(omimTerm);
+					}
 				}
-
 			}
 			catch (Exception e)
 			{
 				throw new RuntimeException(e);
 			}
 		}
-
-		return omimTermList;
+		return omimTerms;
 	}
 
-	/**
-	 * output: map of GeneSymbol to HGNCLoc(GeneSymbol, Start, End, Chrom)
-	 * 
-	 * @return
-	 * @throws IOException
-	 */
-	public static HashMap<String, HGNCLoc> getHgncLocs() throws IOException
+	private Map<String, List<OMIMTerm>> getGeneToOmimTerms() throws IOException
 	{
-		ArrayList<String> geneLocs = readLinesFromURL(GRCH37P13_HGNC_GENE_LOCATIONS,
-				GRCH37P13_HGNC_GENE_LOCATIONS_OUTPUT_FILE);
-
-		HashMap<String, HGNCLoc> res = new HashMap<String, HGNCLoc>();
-		for (String line : geneLocs)
+		if (geneToOmimTerms == null)
 		{
-			String[] split = line.split("\t");
-			HGNCLoc hgncLoc = new HGNCLoc(split[0], Long.parseLong(split[1]), Long.parseLong(split[2]), split[3]);
-			if (hgncLoc.getChrom().matches("[0-9]+|X"))
+			geneToOmimTerms = new HashMap<String, List<OMIMTerm>>();
+
+			for (OMIMTerm omimTerm : getOmimTerms())
 			{
-				res.put(hgncLoc.getHgnc(), hgncLoc);
-			}
-		}
-		return res;
-	}
-
-	public static ArrayList<String> readLinesFromFile(String location) throws FileNotFoundException
-	{
-		ArrayList<String> out = new ArrayList<String>();
-		Scanner scanner = new Scanner(new File(location));
-
-		while (scanner.hasNextLine())
-		{
-			out.add(scanner.nextLine());
-		}
-
-		return out;
-	}
-
-	public static ArrayList<String> readLinesFromURL(String webLocation, String cacheName) throws IOException
-	{
-		ArrayList<String> outputLines = new ArrayList<String>();
-		File cacheLocation = new File(System.getProperty("java.io.tmpdir"), cacheName);
-
-		if (cacheLocation.exists())
-		{
-			Scanner scanner = new Scanner(cacheLocation);
-
-			while (scanner.hasNextLine())
-			{
-				outputLines.add(scanner.nextLine());
-			}
-
-			scanner.close();
-		}
-		else
-		{
-			URL url = new URL(webLocation);
-
-			BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-			FileWriter writer = new FileWriter(cacheLocation);
-
-			String inputLine;
-
-			while ((inputLine = in.readLine()) != null)
-			{
-				outputLines.add(inputLine);
-			}
-
-			in.close();
-
-			for (String line : outputLines)
-			{
-				writer.write(line + "\n");
-			}
-
-			writer.close();
-		}
-
-		return outputLines;
-	}
-
-	private static Map<String, List<OMIMTerm>> geneToOmimTerms(List<OMIMTerm> omimTermsList)
-	{
-		Map<String, List<OMIMTerm>> omimTermListMap = new HashMap<String, List<OMIMTerm>>();
-
-		for (OMIMTerm omimTerm : omimTermsList)
-		{
-			for (String geneSymbol : omimTerm.getHgncIds())
-			{
-				if (omimTermListMap.containsKey(geneSymbol))
+				for (String geneSymbol : omimTerm.getHgncIds())
 				{
-					omimTermListMap.get(geneSymbol).add(omimTerm);
+					if (geneToOmimTerms.containsKey(geneSymbol))
+					{
+						geneToOmimTerms.get(geneSymbol).add(omimTerm);
+					}
+					else
+					{
+						ArrayList<OMIMTerm> omimTermList = new ArrayList<OMIMTerm>();
+						omimTermList.add(omimTerm);
+						geneToOmimTerms.put(geneSymbol, omimTermList);
+					}
+				}
+			}
+		}
+		return geneToOmimTerms;
+	}
+
+	private Map<String, List<HPOTerm>> getGeneToHpoTerms() throws IOException
+	{
+		if (geneToHpoTerms == null)
+		{
+			geneToHpoTerms = new HashMap<String, List<HPOTerm>>();
+			for (HPOTerm hpoTerm : getHpoTerms())
+			{
+				if (geneToHpoTerms.containsKey(hpoTerm.getGeneName()))
+				{
+					geneToHpoTerms.get(hpoTerm.getGeneName()).add(hpoTerm);
 				}
 				else
 				{
-					ArrayList<OMIMTerm> omimTermList = new ArrayList<OMIMTerm>();
-					omimTermList.add(omimTerm);
-					omimTermListMap.put(geneSymbol, omimTermList);
+					ArrayList<HPOTerm> hpoTermList = new ArrayList<HPOTerm>();
+					hpoTermList.add(hpoTerm);
+					geneToHpoTerms.put(hpoTerm.getGeneName(), hpoTermList);
 				}
 			}
 		}
-
-		return omimTermListMap;
-	}
-
-	private static Map<String, List<HPOTerm>> geneToHpoTerms(List<HPOTerm> hpoTermsList)
-	{
-		Map<String, List<HPOTerm>> hpoTermListMap = new HashMap<String, List<HPOTerm>>();
-		for (HPOTerm hpoTerm : hpoTermsList)
-		{
-			if (hpoTermListMap.containsKey(hpoTerm.getGeneName()))
-			{
-				hpoTermListMap.get(hpoTerm.getGeneName()).add(hpoTerm);
-			}
-			else
-			{
-				ArrayList<HPOTerm> hpoTermList = new ArrayList<HPOTerm>();
-				hpoTermList.add(hpoTerm);
-				hpoTermListMap.put(hpoTerm.getGeneName(), hpoTermList);
-			}
-		}
-
-		return hpoTermListMap;
-	}
-
-	public static List<String> locationToHGNC(HashMap<String, HGNCLoc> hgncLocations, List<Locus> locusList)
-			throws Exception
-	{
-		List<String> hgncSymbols = new ArrayList<String>();
-
-		for (Locus locus : locusList)
-		{
-			boolean variantMapped = false;
-			for (HGNCLoc hgncLocation : hgncLocations.values())
-			{
-				if (hgncLocation.getChrom().equals(locus.getChrom()) && locus.getPos() >= (hgncLocation.getStart() - 5)
-						&& locus.getPos() <= (hgncLocation.getEnd() + 5))
-				{
-					hgncSymbols.add(hgncLocation.getHgnc());
-					variantMapped = true;
-					break;
-				}
-			}
-
-			if (!variantMapped)
-			{
-				hgncSymbols.add(null);
-			}
-		}
-		return hgncSymbols;
+		return geneToHpoTerms;
 	}
 
 	@Override
 	public EntityMetaData getOutputMetaData()
 	{
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_DISO, MolgenisFieldTypes.FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_LINK, MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_ALL, MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_DESC, MolgenisFieldTypes.FieldTypeEnum.STRING));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_LINK, MolgenisFieldTypes.FieldTypeEnum.TEXT));
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_ALL, MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_CAUSAL_IDENTIFIER,
+				MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_DISORDERS,
+				MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_IDENTIFIERS,
+				MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_TYPE, MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_HGNC_IDENTIFIERS,
+				MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_CYTOGENIC_LOCATION,
+				MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_ENTRY, MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_IDENTIFIERS,
+				MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_GENE_NAME, MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_DESCRIPTIONS,
+				MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_DISEASE_DATABASE,
+				MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_DISEASE_DATABASE_ENTRY,
+				MolgenisFieldTypes.FieldTypeEnum.TEXT));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HPO_ENTREZ_ID, MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		return metadata;
-	}
-
-	public static void main(String[] args) throws Exception
-	{
-		// includes a gene without HGNC symbol, and a gene not related to OMIM/HPO terms
-		List<Locus> loci = new ArrayList<Locus>(Arrays.asList(new Locus("2", 58453844l), new Locus("2", 71892329l),
-				new Locus("2", 73679116l), new Locus("10", 112360316l), new Locus("11", 2017661l), new Locus("1",
-						18151726l), new Locus("1", -1l), new Locus("11", 6637740l)));
-
-		List<Entity> inputs = new ArrayList<Entity>();
-		for (Locus l : loci)
-		{
-			HashMap<String, Object> inputMap = new HashMap<String, Object>();
-			inputMap.put(CHROMOSOME, l.getChrom());
-			inputMap.put(POSITION, l.getPos());
-			inputs.add(new MapEntity(inputMap));
-		}
-
-		Iterator<Entity> res = new OmimHpoAnnotator().annotate(inputs.iterator());
-		while (res.hasNext())
-		{
-			System.out.println(res.next().toString());
-		}
-
-	}
-
-	@Override
-	public List<Entity> annotateEntity(Entity entity)
-	{
-		List<Entity> results = new ArrayList<Entity>();
-
-		try
-		{
-			List<Locus> loci = new ArrayList<Locus>();
-
-			String chromosome = entity.getString(CHROMOSOME);
-			Long position = entity.getLong(POSITION);
-			Locus locus = new Locus(chromosome, position);
-			loci.add(locus);
-
-			HashMap<String, HGNCLoc> hgncLocs = getHgncLocs();
-			List<String> geneSymbols = locationToHGNC(hgncLocs, loci);
-
-			List<HPOTerm> hpoTerms = hpoTerms();
-			Map<String, List<HPOTerm>> geneToHpoTerm = geneToHpoTerms(hpoTerms);
-
-			List<OMIMTerm> omimTerms = omimTerms();
-			Map<String, List<OMIMTerm>> geneToOmimTerm = geneToOmimTerms(omimTerms);
-
-			for (int i = 0; i < loci.size(); i++)
-			{
-				locus = loci.get(i);
-				String geneSymbol = geneSymbols.get(i);
-
-				if (geneSymbol != null && geneToOmimTerm.containsKey(geneSymbol)
-						&& geneToHpoTerm.containsKey(geneSymbol))
-				{
-					StringBuffer omimDisorders = new StringBuffer();
-					StringBuffer omimLinks = new StringBuffer();
-					StringBuffer hpoDescriptions = new StringBuffer();
-					StringBuffer hpoLinks = new StringBuffer();
-
-					for (OMIMTerm omimTerm : geneToOmimTerm.get(geneSymbol))
-					{
-						omimDisorders.append(omimTerm.getName() + " / ");
-						omimLinks.append("http://www.omim.org/entry/" + omimTerm.getEntry());
-					}
-
-					omimDisorders.delete(omimDisorders.length() - 3, omimDisorders.length());
-					omimLinks.delete(omimLinks.length() - 3, omimLinks.length());
-
-					for (HPOTerm hpoTerm : geneToHpoTerm.get(geneSymbol))
-					{
-						hpoDescriptions.append(hpoTerm.getDescription() + " / ");
-						hpoLinks.append("http://www.human-phenotype-ontology.org/hpoweb/showterm?id=" + hpoTerm.getId());
-					}
-
-					hpoDescriptions.delete(hpoDescriptions.length() - 3, hpoDescriptions.length());
-					hpoLinks.delete(hpoLinks.length() - 3, hpoLinks.length());
-
-					HashMap<String, Object> resultMap = new HashMap<String, Object>();
-
-					resultMap.put(OMIM_DISO, omimDisorders.toString());
-					resultMap.put(OMIM_LINK, omimLinks.toString());
-					resultMap.put(OMIM_ALL, geneToOmimTerm.get(geneSymbol));
-					resultMap.put(HPO_DESC, hpoDescriptions.toString());
-					resultMap.put(HPO_LINK, hpoLinks.toString());
-					resultMap.put(HPO_ALL, geneToHpoTerm.get(geneSymbol));
-					resultMap.put(CHROMOSOME, locus.getChrom());
-					resultMap.put(POSITION, locus.getPos());
-
-					results.add(new MapEntity(resultMap));
-				}
-			}
-		}
-		catch (Exception e)
-		{
-			throw new RuntimeException(e);
-		}
-
-		return results;
 	}
 }

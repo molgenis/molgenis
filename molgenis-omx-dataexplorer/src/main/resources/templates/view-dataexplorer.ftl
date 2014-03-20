@@ -2,15 +2,14 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=[
-	"chosen.css",
 	"jquery.bootstrap.wizard.css",
 	"bootstrap-datetimepicker.min.css",
 	"ui.fancytree.min.css",
+	"jquery-ui-1.9.2.custom.min.css",
 	"select2.css",
 	"dataexplorer.css"]>
 <#assign js=[
 	"jquery-ui-1.9.2.custom.min.js",
-	"chosen.jquery.min.js",
 	"jquery.bootstrap.wizard.min.js",
 	"bootstrap-datetimepicker.min.js",
 	"dataexplorer-filter.js",

@@ -325,7 +325,7 @@ function createInput(dataType, attrs, val, lbl) {
 			return createBasicInput('text', attrs, val);
 		case 'MREF':
 		case 'XREF':
-			var container = $('<div class="xrefsearch" />')
+			var container = $('<div class="xrefsearch" />');
 			container.append(createBasicInput('hidden', attrs, val));
 			return container;
 		case 'COMPOUND' :
@@ -364,133 +364,53 @@ $(function() {
 (function($, molgenis) {
 	"use strict";
 
-	molgenis.RestClient = function RestClient(cache) {
-		this.cache = cache === false ? null : [];
-	};
+	molgenis.RestClient = function RestClient() {};
 
 	molgenis.RestClient.prototype.get = function(resourceUri, options) {
-		var apiUri = this._toApiUri(resourceUri, options);
-		var cachedResource = this.cache && this.cache[apiUri];
-		if (!cachedResource) {
-			var _this = this;
-			if (options && options.q) {
-				$
-						.ajax({
-							type : 'POST',
-							dataType : 'json',
-							url : apiUri,
-							cache : true,
-							data : JSON.stringify(options.q),
-							contentType : 'application/json',
-							async : false,
-							success : function(resource) {
-								if (_this.cache)
-									_this._cachePut(resourceUri, resource, options);
-								cachedResource = resource;
-							},
-							error : function(xhr) {
-								molgenis.createAlert(JSON
-										.parse(xhr.responseText).errors);
-							}
-						});
-			} else {
-				$
-						.ajax({
-							dataType : 'json',
-							url : apiUri,
-							cache : true,
-							async : false,
-							success : function(resource) {
-								if (_this.cache)
-									_this._cachePut(resourceUri, resource, options);
-								cachedResource = resource;
-							},
-							error : function(xhr) {
-								molgenis.createAlert(JSON
-										.parse(xhr.responseText).errors);
-							}
-						});
-			}
-		}
-		return cachedResource;
+		return this._get(resourceUri, options);
 	};
 	
 	molgenis.RestClient.prototype.getAsync = function(resourceUri, options, callback) {
-		var apiUri = this._toApiUri(resourceUri, options);
-		var cachedResource = this._cacheGet[apiUri];
-		if (cachedResource) {
-			callback(cachedResource);
-		} else {
-			var _this = this;
-			if (options && options.q) {
-				$
-						.ajax({
-							type : 'POST',
-							dataType : 'json',
-							url : apiUri,
-							cache : true,
-							data : JSON.stringify(options.q),
-							contentType : 'application/json',
-							async : true,
-							success : function(resource) {
-								_this._cachePut(resourceUri, resource, options);
-								callback(resource);
-							},
-							error : function(xhr) {
-								molgenis.createAlert(JSON
-										.parse(xhr.responseText).errors);
-							}
-						});
-			} else {
-				$
-						.ajax({
-							dataType : 'json',
-							url : apiUri,
-							cache : true,
-							async : true,
-							success : function(resource) {
-								_this._cachePut(resourceUri, resource, options);
-								callback(resource);
-							},
-							error : function(xhr) {
-								molgenis.createAlert(JSON
-										.parse(xhr.responseText).errors);
-							}
-						});
-			}
-		}
+		this._get(resourceUri, options, callback);
 	};
 
-	molgenis.RestClient.prototype._cacheGet = function(resourceUri) {
-		return this.cache !== null ? this.cache[resourceUri] : null;
-	};
+	molgenis.RestClient.prototype._get = function(resourceUri, options, callback) {
+		var resource = null;
 
-	molgenis.RestClient.prototype._cachePut = function(resourceUri, resource, options) {
-		var apiUri = this._toApiUri(resourceUri, options);
-		this.cache[apiUri] = resource;
-		if (resource.items) {
-			for ( var i = 0; i < resource.items.length; i++) {
-				var nestedResource = resource.items[i];
-				this.cache[nestedResource.href] = nestedResource;
+		var async = callback !== undefined;
+		
+		var config = {
+			'dataType' : 'json',
+			'url' : this._toApiUri(resourceUri, options),
+			'cache' : true,
+			'async' : async,
+			'success' : function(data) {
+				if (async)
+					callback(data);
+				else
+					resource = data;
+			},
+			'error' : function(xhr) {
+				molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 			}
+		};
+		
+		// tunnel get requests with query through a post,
+		// because it might not fit in the URL
+		if (options && options.q) {
+			$.extend(config, {
+				'type' : 'POST',
+				'data' : JSON.stringify(options.q),
+				'contentType' : 'application/json'
+			});
 		}
-		if (options && options.expand) {
-			this.cache[resourceUri] = resource;
-			for ( var i = 0; i < options.expand.length; i++) {
-				var expand = resource[options.expand[i]];
-				if (expand) {
-					this.cache[expand.href] = expand;
-					if (expand.items) {
-						for ( var j = 0; j < expand.items.length; j++) {
-							var expandedResource = expand.items[j];
-							this.cache[expandedResource.href] = expandedResource;
-						}
-					}
-				}
-			}
-		}
+		
+		$.ajax(config);
+		
+		if (!async)
+			return resource;
 	};
-
+	
 	molgenis.RestClient.prototype._toApiUri = function(resourceUri, options) {
 		var qs = "";
 		if (resourceUri.indexOf('?') != -1) {
@@ -541,8 +461,7 @@ $(function() {
 		});
 		
 		return result;
-	}
-
+	};
 }($, window.top.molgenis = window.top.molgenis || {}));
 
 // molgenis search API client
@@ -690,6 +609,7 @@ function showSpinner(callback) {
 		items.push('</div>');
 		$('body').append(items.join(''));
 		spinner = $('#spinner');
+		spinner.data('count', 0);
 	}
 	
 	if (callback) {
@@ -698,15 +618,24 @@ function showSpinner(callback) {
 		});
 	}
 	
-	
-	var timeout = setTimeout(function(){ spinner.modal('show'); }, 500);
-	$('#spinner').data('timeout', timeout);
+	var count = $('#spinner').data('count');
+	if(count === 0) {
+		var timeout = setTimeout(function(){ spinner.modal('show'); }, 500);
+		$('#spinner').data('timeout', timeout);
+		$('#spinner').data('count', 1);
+	} else {
+		$('#spinner').data('count', count + 1);
+	}
 }
 
 function hideSpinner() {
 	if ($('#spinner').length !== 0) {
-		clearTimeout($('#spinner').data('timeout'));
-		$('#spinner').modal('hide');
+		var count = $('#spinner').data('count');
+		if(count === 1) {
+			clearTimeout($('#spinner').data('timeout'));
+			$('#spinner').modal('hide');
+		}
+		$('#spinner').data('count', count - 1);
 	}
 }
 
