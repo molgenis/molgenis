@@ -4,6 +4,7 @@ import static org.molgenis.omx.biobankconnect.analysis.BiobankAnalysisController
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -123,12 +124,19 @@ public class BiobankAnalysisController extends MolgenisPluginController
 
 	@RequestMapping(method = RequestMethod.POST, value = "/runanalysis")
 	@ResponseBody
-	public Map<Integer, Object> runAnalysis(@RequestBody
+	public Map<String, Object> runAnalysis(@RequestBody
 	AnalysisComponent request)
 	{
-		Map<Integer, Object> results = applyAlgorithms.createValueFromAlgorithm("decimal",
-				Integer.parseInt(request.getSourceDataSetId()), request.getScript());
-		return results;
+		Map<String, Object> jsonResults = new HashMap<String, Object>();
+
+		Integer dataSetId = Integer.parseInt(request.getSourceDataSetId());
+		String algorithm = request.getScript();
+		String message = applyAlgorithms.validateAlgorithmInputs(dataSetId, algorithm);
+		Collection<Object> results = message.isEmpty() ? applyAlgorithms.createValueFromAlgorithm("decimal", dataSetId,
+				algorithm).values() : Collections.emptyList();
+		jsonResults.put("message", message);
+		jsonResults.put("results", results);
+		return jsonResults;
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/newsourcedata")

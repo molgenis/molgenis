@@ -17,20 +17,22 @@
 		if(selectedDataSet !== '' && dataSetIds.length > 0){
 			setUserName(userName); 
 			var dataSetEntity = restApi.get('/api/v1/dataset/' + selectedDataSet);
-			biobankDataSets = restApi.get('/api/v1/dataset/', null, {
-				q : [{
-					field : 'id',
-					operator : 'IN',
-					value : dataSetIds
-				}],
+			biobankDataSets = restApi.get('/api/v1/dataset/', {
+				'q' : {
+					'q' : [{
+						'field' : 'id',
+						'operator' : 'IN',
+						'value' : dataSetIds
+					}]
+				}
 			}).items;
 			var request = {
-				documentType : 'protocolTree-' + molgenis.hrefToId(dataSetEntity.href),
-				query:{
-					rules :[[{
-						field : 'type',
-						operator : 'EQUALS',
-						value : 'observablefeature'
+				'documentType' : 'protocolTree-' + molgenis.hrefToId(dataSetEntity.href),
+				'query' : {
+					'rules' :[[{
+						'field' : 'type',
+						'operator' : 'EQUALS',
+						'value' : 'observablefeature'
 					}]]
 				}
 			};
@@ -48,12 +50,12 @@
 	molgenis.AlgorithmEditor.prototype.createMatrixForDataItems = function() {
 		var documentType = 'protocolTree-' + molgenis.hrefToId(selectedDataSet.href);
 		var query = {
-				rules : [[{
-					operator : 'SEARCH',
-					value : 'observablefeature'
-				}]]
+			'rules' :[[{
+				'field' : 'type',
+				'operator' : 'EQUALS',
+				'value' : 'observablefeature'
+			}]]
 		};
-		
 		if(sortRule !== null) query.sort = sortRule;
 		searchApi.search(pagination.createSearchRequest(documentType, query),function(searchResponse) {
 			createAlgorithmMappingTable(searchResponse, function(tableBody, involedDataSets){
@@ -127,13 +129,16 @@
 			for(var i = 1; i < iterations; i++){
 				var lower = (i - 1) * 500;
 				var upper = (i * 500) < allFeatureCollection.length ? (i * 500) : allFeatureCollection.length; 
-				var listOfFeatures = restApi.get('/api/v1/observablefeature', ['unit'], {
-					q : [{
-						field : 'id',
-						operator : 'IN',
-						value : allFeatureCollection.slice(lower, upper)
-					}],
-					num : 500
+				var listOfFeatures = restApi.get('/api/v1/observablefeature', {
+					'expand' : ['unit'],
+					'q' : {
+						'q' : [{
+							'field' : 'id',
+							'operator' : 'IN',
+							'value' : allFeatureCollection.slice(lower, upper)
+						}],
+						'num' : 500
+					}
 				});
 				$.each(listOfFeatures.items, function(index, element){
 					cachedFeatures[(molgenis.hrefToId(element.href))] = element;
@@ -143,9 +148,9 @@
 		
 		function renderAlgorithmMappingTable(mappingPerStudy, displayFeatures, cachedFeatures, callback){
 			var involvedDataSetNames = [];
-			involvedDataSetNames.push(selectedDataSet.name);
+			involvedDataSetNames.push(selectedDataSet.Name);
 			$.each(biobankDataSets, function(index, dataSet){
-				involvedDataSetNames.push(dataSet.name);
+				involvedDataSetNames.push(dataSet.Name);
 			});
 			var tableBody = $('<tbody />');
 			$.each(displayFeatures, function(index, featureFromIndex){
@@ -203,7 +208,7 @@
 		function createRowForAlgorithmMappingTable(mappingPerStudy, featureId, cachedFeatures){
 			var feature = cachedFeatures[featureId];
 			var row = $('<tr />');
-			var description = '<strong>' + feature.name + '</strong> : ' + i18nDescription(feature).en;
+			var description = '<strong>' + feature.Name + '</strong> : ' + i18nDescription(feature).en;
 			var isPopOver = description.length < 90;
 			var popover = $('<span />').html(isPopOver ? description : description.substring(0, 90) + ' ...');
 			if(!isPopOver){
@@ -282,13 +287,13 @@
 				contentType : 'application/json',
 				success : function(data, textStatus, request) {	
 					createFeatureInfoPanel(feature, featureInfoDiv);
-					$('<div />').addClass('row-fuild').css('margin-bottom', '10px').append('<strong>' + mappedDataSet.name + '</strong>').appendTo(tableDiv);
+					$('<div />').addClass('row-fuild').css('margin-bottom', '10px').append('<strong>' + mappedDataSet.Name + '</strong>').appendTo(tableDiv);
 					var style= {
 						'overflow-y' : 'scroll',
 						'height' : $(document).height()/4
 					};
 					molgenis.AlgorithmEditor.prototype.createTableForRetrievedMappings(data.searchHits, tableDiv, style);
-					$('<div />').addClass('row-fuild').css('margin-bottom', '10px').append('<strong>' + selectedDataSet.name + '</strong>').appendTo(metaInfoDiv);
+					$('<div />').addClass('row-fuild').css('margin-bottom', '10px').append('<strong>' + selectedDataSet.Name + '</strong>').appendTo(metaInfoDiv);
 					var editor = createEditorInModel(metaInfoDiv, mappedDataSet);
 					$('<div />').addClass('row-fuild').css('margin-bottom', '10px').before(controlDiv);
 					addButtonsToControl(controlDiv, editor);
@@ -300,18 +305,18 @@
 			
 			function createFeatureInfoPanel(feature, parentDiv){
 				var infoDiv = $('<div />').addClass('span3');
-				$('<div />').append('<span class="info"><strong>Data item : </strong></span>').append('<span>' + feature.name + '</span>').appendTo(infoDiv);
+				$('<div />').append('<span class="info"><strong>Data item : </strong></span>').append('<span>' + feature.Name + '</span>').appendTo(infoDiv);
 				if(feature.unit !== undefined && feature.unit !== null){
-					$('<div />').append('<span class="info"><strong>Unit : </strong></span>').append('<span>' + feature.unit.name + '</span>').appendTo(infoDiv);
+					$('<div />').append('<span class="info"><strong>Unit : </strong></span>').append('<span>' + feature.unit.Name + '</span>').appendTo(infoDiv);
 				}
 				$('<div />').append('<span class="info"><strong>Data type : </strong></span>').append('<span>' + feature.dataType + '</span>').appendTo(infoDiv);
 				$('<div />').append('<span class="info"><strong>Description : </strong></span>').append('<span>' + i18nDescription(feature).en + '</span>').appendTo(infoDiv);
 				var middleDiv = $('<div />').addClass('span9');
-				var categories = getCategoriesByFeatureId(molgenis.hrefToId(feature.href));
+				var categories = getCategoriesByFeatureIdentifier(molgenis.hrefToId(feature.href));
 				if(categories.length > 0){
 					var categoryDiv = $('<div />').addClass('span8').css('margin-left', '30px');
 					$.each(categories, function(index, category){
-						categoryDiv.append('<div>' + category.valueCode + ' = ' + category.name + '</div>');
+						categoryDiv.append('<div>' + category.valueCode + ' = ' + category.Name + '</div>');
 					});
 					$('<div />').addClass('row-fluid').append('<div class="span1"><strong>Categories: </strong></div>').append(categoryDiv).appendTo(middleDiv);
 				}
@@ -403,7 +408,7 @@
 							var backButton = $('<button />').addClass('btn btn-primary').append('Go back');
 							var featureObject = restApi.get('/api/v1/observablefeature/' + ontologyMatcherRequest['featureId']);
 							var dataSetObject = restApi.get('/api/v1/dataset/' + ontologyMatcherRequest['selectedDataSetIds'][0]);
-							var algorithmDiv = $('<div />').addClass('offset3 span6 well text-align-center').append('Test for variable <strong>' + featureObject.name + '</strong> in dataset <strong>' + dataSetObject.name + '</strong>');
+							var algorithmDiv = $('<div />').addClass('offset3 span6 well text-align-center').append('Test for variable <strong>' + featureObject.Name + '</strong> in dataset <strong>' + dataSetObject.Name + '</strong>');
 							var tableDiv = $('<div />').addClass('span6 well').css('min-height', statisticsDivHeight).append('<div class="legend-align-center">Summary statistics</div>').append(statisticsTable(data));
 							var graphDiv = $('<div />').attr('id', graphDivId).addClass('span6 well').css('min-height', statisticsDivHeight).append('<div class="legend-align-center">Distribution plot</div>').bcgraph(data.results);
 							$('<div />').addClass('row-fluid').append(algorithmDiv).appendTo(modalBody);
@@ -497,11 +502,11 @@
 		$.each(searchHits, function(index, hit){
 			var row = $('<tr />');
 			var featureId = hit.columnValueMap.id;
-			var featureEntity = restApi.get('/api/v1/observablefeature/' + featureId, ['unit']);
-			row.append('<td>' + featureEntity.name + '</td>');
+			var featureEntity = restApi.get('/api/v1/observablefeature/' + featureId, {'expand' : ['unit']});
+			row.append('<td>' + featureEntity.Name + '</td>');
 			row.append('<td>' + featureEntity.description + '</td>');
 			if(featureEntity.unit !== undefined && featureEntity.unit !== null){
-				row.append('<td>' + featureEntity.unit.name + '</td>');
+				row.append('<td>' + featureEntity.unit.Name + '</td>');
 			}else{
 				row.append('<td />');
 			}
@@ -520,17 +525,17 @@
 		function retrieveAllInfoForFeature(clickedRow, featureEntity){
 			var detailInfoTable = $('<table class="table table-bordered"></table>');
 			detailInfoTable.append('<tr><th>Id</th><td>' + molgenis.hrefToId(featureEntity.href) + '</td></tr>');
-			detailInfoTable.append('<tr><th>Name</th><td>' + featureEntity.name + '</td></tr>');
+			detailInfoTable.append('<tr><th>Name</th><td>' + featureEntity.Name + '</td></tr>');
 			if(featureEntity.unit !== undefined && featureEntity.unit !== null){
-				detailInfoTable.append('<tr><th>Unit</th><td>' + featureEntity.unit.name + '</td></tr>');
+				detailInfoTable.append('<tr><th>Unit</th><td>' + featureEntity.unit.Name + '</td></tr>');
 			}
 			detailInfoTable.append('<tr><th>Data type</th><td>' + featureEntity.dataType + '</td></tr>');
 			detailInfoTable.append('<tr><th>Description</th><td>' + featureEntity.description + '</td></tr>');
-			var categories = getCategoriesByFeatureId(molgenis.hrefToId(featureEntity.href));
+			var categories = getCategoriesByFeatureIdentifier(featureEntity.Identifier);
 			if(categories.length > 0){
 				var categoryDiv = $('<div />');
 				$.each(categories, function(index, category){
-					categoryDiv.append('<div>' + category.valueCode + ' = ' + category.name + '</div>');
+					categoryDiv.append('<div>' + category.valueCode + ' = ' + category.Name + '</div>');
 				});
 				detailInfoTable.append('<tr><th>Categories</th><td>' + categoryDiv.html() + '</td></tr>');
 			}
@@ -546,26 +551,17 @@
 				backButton.click();
 			});
 		}
-		
-		function getCategoriesByFeatureId(featureId){
-			var categories = restApi.get('/api/v1/category/', null, {
-				q : [{
-					field : 'observableFeature',
-					operator : 'EQUALS',
-					value : featureId
-				}],
-			});
-			return categories.items; 
-		}
 	};
-	
-	function getCategoriesByFeatureId(featureId){
-		var categories = restApi.get('/api/v1/category/', null, {
-			q : [{
-				field : 'observableFeature',
-				operator : 'EQUALS',
-				value : featureId
-			}],
+
+	function getCategoriesByFeatureIdentifier(featureIdentifier){
+		var categories = restApi.get('/api/v1/category/', {
+			'q' : { 
+				'q' : [{
+					'field' : 'observableFeature',
+					'operator' : 'EQUALS',
+					'value' : featureIdentifier
+				}]
+			}
 		});
 		return categories.items; 
 	}

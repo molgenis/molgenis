@@ -29,6 +29,7 @@ import org.molgenis.omx.observ.value.CategoricalValue;
 import org.molgenis.omx.observ.value.DecimalValue;
 import org.molgenis.omx.observ.value.IntValue;
 import org.molgenis.omx.observ.value.StringValue;
+import org.molgenis.omx.observ.value.Value;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
@@ -63,7 +64,7 @@ public class ApplyAlgorithms
 	private static final String STORE_MAPPING_FEATURE = "store_mapping_feature";
 	private static final String STORE_MAPPING_ALGORITHM_SCRIPT = "store_mapping_algorithm_script";
 
-	private static final Map<String, Class<?>> entityMap = new HashMap<String, Class<?>>();
+	private static final Map<String, Class<? extends Value>> entityMap = new HashMap<String, Class<? extends Value>>();
 	static
 	{
 		entityMap.put(StringValue.ENTITY_NAME, StringValue.class);
@@ -226,13 +227,22 @@ public class ApplyAlgorithms
 			Iterable<ObservedValue> observedValues = dataService.findAll(ObservedValue.ENTITY_NAME,
 					new QueryImpl().in(ObservedValue.OBSERVATIONSET, observationSets), ObservedValue.class);
 
+			Map<String, List<Integer>> valuesByType = new HashMap<String, List<Integer>>();
 			for (ObservedValue value : observedValues)
 			{
 				String valueType = value.getValue().get__Type();
 				Integer valueId = value.getId();
+				if (!valuesByType.containsKey(valueType)) valuesByType.put(valueType, new ArrayList<Integer>());
+				valuesByType.get(valueType).add(valueId);
 			}
-
-			// dataSetDeleterService.deleteData(dataSetIdentifier, false);
+			dataSetDeleterService.deleteData(dataSetIdentifier, false);
+			for (Entry<String, List<Integer>> entryValuesByType : valuesByType.entrySet())
+			{
+				String valueType = entryValuesByType.getKey();
+				List<Integer> ids = entryValuesByType.getValue();
+				dataService.delete(valueType, dataService.findAll(valueType, ids));
+			}
+			dataService.getCrudRepository(ObservedValue.ENTITY_NAME).flush();
 		}
 	}
 
@@ -256,16 +266,42 @@ public class ApplyAlgorithms
 		return searchService.search(new SearchRequest(CATALOGUE_PREFIX + targetDataSetId, query, null));
 	}
 
+	public String validateAlgorithmInputs(Integer dataSetId, String algorithm)
+	{
+		if (algorithm.isEmpty())
+		{
+			return ("Algorithm is not defined!");
+		}
+
+		Iterable<ObservableFeature> featureIterators = dataService.findAll(ObservableFeature.ENTITY_NAME,
+				new QueryImpl().in(ObservableFeature.NAME, extractFeatureName(algorithm)), ObservableFeature.class);
+		if (Iterables.size(featureIterators) == 0)
+		{
+			return ("Variables are not found! Please check the name of variables!");
+		}
+
+		DataSet sourceDataSet = dataService.findOne(DataSet.ENTITY_NAME, dataSetId, DataSet.class);
+		Iterable<ObservationSet> observationSets = dataService.findAll(ObservationSet.ENTITY_NAME,
+				new QueryImpl().eq(ObservationSet.PARTOFDATASET, sourceDataSet), ObservationSet.class);
+		if (Iterables.size(observationSets) == 0)
+		{
+			return ("There are not rows in this dataset!");
+		}
+
+		return StringUtils.EMPTY;
+	}
+
 	public Map<Integer, Object> createValueFromAlgorithm(String dataType, Integer sourceDataSetId,
 			String algorithmScript)
 	{
 		if (algorithmScript.isEmpty()) return Collections.emptyMap();
-		DataSet sourceDataSet = dataService.findOne(DataSet.ENTITY_NAME, sourceDataSetId, DataSet.class);
-		Iterable<ObservationSet> observationSets = dataService.findAll(ObservationSet.ENTITY_NAME,
-				new QueryImpl().eq(ObservationSet.PARTOFDATASET, sourceDataSet), ObservationSet.class);
 		List<String> featureNames = extractFeatureName(algorithmScript);
 		Iterable<ObservableFeature> featureIterators = dataService.findAll(ObservableFeature.ENTITY_NAME,
 				new QueryImpl().in(ObservableFeature.NAME, featureNames), ObservableFeature.class);
+
+		DataSet sourceDataSet = dataService.findOne(DataSet.ENTITY_NAME, sourceDataSetId, DataSet.class);
+		Iterable<ObservationSet> observationSets = dataService.findAll(ObservationSet.ENTITY_NAME,
+				new QueryImpl().eq(ObservationSet.PARTOFDATASET, sourceDataSet), ObservationSet.class);
 		Iterable<ObservedValue> observedValueIterators = dataService.findAll(
 				ObservedValue.ENTITY_NAME,
 				new QueryImpl().and().in(ObservedValue.FEATURE, featureIterators).and()
@@ -302,20 +338,20 @@ public class ApplyAlgorithms
 			}
 		}
 
-		Map<Integer, Object> results = new HashMap<Integer, Object>();
+		Map<Integer, Object> calculatedResults = new HashMap<Integer, Object>();
 		for (Entry<Integer, MapEntity> entry : eachIndividualValues.entrySet())
 		{
 			if (Iterables.size(entry.getValue().getAttributeNames()) != featureNames.size()) continue;
 			Object result = ScriptEvaluator.eval(algorithmScript, entry.getValue());
-			if (dataType.equalsIgnoreCase(MolgenisFieldTypes.FieldTypeEnum.INT.toString())) results.put(entry.getKey(),
-					Integer.parseInt(Context.toString(result)));
-			else if (dataType.equalsIgnoreCase(MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL.toString())) results.put(
+			if (dataType.equalsIgnoreCase(MolgenisFieldTypes.FieldTypeEnum.INT.toString())) calculatedResults.put(
 					entry.getKey(), Integer.parseInt(Context.toString(result)));
-			else if (dataType.equalsIgnoreCase(MolgenisFieldTypes.FieldTypeEnum.DECIMAL.toString())) results.put(
-					entry.getKey(), Context.toNumber(result));
-			else results.put(entry.getKey(), Context.toString(result));
+			else if (dataType.equalsIgnoreCase(MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL.toString())) calculatedResults
+					.put(entry.getKey(), Integer.parseInt(Context.toString(result)));
+			else if (dataType.equalsIgnoreCase(MolgenisFieldTypes.FieldTypeEnum.DECIMAL.toString())) calculatedResults
+					.put(entry.getKey(), Context.toNumber(result));
+			else calculatedResults.put(entry.getKey(), Context.toString(result));
 		}
-		return results;
+		return calculatedResults;
 	}
 
 	public List<String> extractFeatureName(String algorithmScript)

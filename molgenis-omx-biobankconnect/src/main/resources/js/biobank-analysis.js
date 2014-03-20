@@ -24,9 +24,9 @@
 				if(parentDiv.length == 0)
 					parentDiv = $('<div />').attr('id', 'table-container');
 				parentDiv.empty().appendTo(container);
-				
 				var analyses = data['analyses'];
-				if(Object.keys(analyses).length == 0){
+				
+				if(analyses === undefined || Object.keys(analyses).length == 0){
 					parentDiv.append('No datasets are selected for this analysis and please choose a dataset from pulldown!')
 					return;
 				}
@@ -49,9 +49,9 @@
 						'class' : 'btn'
 					}).css('float', 'right').append('<i class="icon-trash"></i>');
 					
-					var dataSet = restApi.get('/api/v1/dataset/' + eachAnalysis.sourceDataSetId, ['protocolUsed']);
+					var dataSet = restApi.get('/api/v1/dataset/' + eachAnalysis.sourceDataSetId, {'expand' : ['protocolUsed']});
 					$('<td />').append(editButton).append(' ').append(runningButton).append(removeButton).appendTo(row);
-					$('<td />').append(dataSet.name).appendTo(row);
+					$('<td />').append(dataSet.Name).appendTo(row);
 					$('<td />').append(eachAnalysis.script).appendTo(row);
 					$('<td />').append('').appendTo(row);
 					tableBody.append(row);
@@ -87,7 +87,7 @@
 				type : 'POST',
 				url : molgenis.getContextUrl() + '/runanalysis',
 				async : false,
-				data : JSON.stringify(analysisRequest),
+				data : JSON.stringify(eachAnalysis),
 				contentType : 'application/json',
 				success : function(data, textStatus, request){	
 					console.log(data);
@@ -101,7 +101,7 @@
 	
 	function retrieveAllFeatures(dataSet, editorContainer){
 		var request = {
-			documentType : 'protocolTree-' + molgenis.hrefToId(dataSet.protocolUsed.href),
+			documentType : 'protocolTree-' + molgenis.hrefToId(dataSet.ProtocolUsed.href),
 			query : {
 				pageSize: 1000000,
 				rules : [[{
@@ -133,7 +133,7 @@
 		featureResultDiv.append('<div />').append('<strong>Define the result</strong>');
 		
 		var generalInfoDiv = $('<div />').addClass('row-fluid').appendTo(layoutDiv);
-		$('<div />').addClass('span6').append('Define analysis script for : <strong>' + dataSet.name + '</strong>').appendTo(generalInfoDiv);
+		$('<div />').addClass('span6').append('Define analysis script for : <strong>' + dataSet.Name + '</strong>').appendTo(generalInfoDiv);
 		$('<div />').addClass('span6').append('<strong>Data items</strong>').appendTo(generalInfoDiv);
 	}
 	
@@ -156,7 +156,7 @@
 	
 	function initEditor (eachAnalysis, editorContainer){
 		var algorithmEditorDiv = $('<div id="algorithmEditorDiv"></div>').addClass('span6 well').css('height', editorHeight).appendTo(editorContainer);
-		var dataSet = restApi.get('/api/v1/dataset/' + eachAnalysis.sourceDataSetId, ['protocolUsed']);
+		var dataSet = restApi.get('/api/v1/dataset/' + eachAnalysis.sourceDataSetId, {'expand' : ['protocolUsed']});
 		
 		var langTools = ace.require("ace/ext/language_tools");
 		var editor = ace.edit('algorithmEditorDiv');
@@ -169,7 +169,7 @@
 		var algorithmEditorCompleter = {
 	        getCompletions: function(editor, session, pos, prefix, callback) {
 	            if (prefix.length === 0) { callback(null, []); return }
-	            searchApi.search(searchFeatureByName('protocolTree-' + molgenis.hrefToId(dataSet.protocolUsed.href), prefix), function(searchResponse){
+	            searchApi.search(searchFeatureByName('protocolTree-' + molgenis.hrefToId(dataSet.ProtocolUsed.href), prefix), function(searchResponse){
                     callback(null, searchResponse.searchHits.map(function(hit) {
                     	var map = hit.columnValueMap;
                         return {name: '$(\'' + map.name + '\')', value: '$(\'' + map.name + '\')', score: map.score, meta: dataSet.name};

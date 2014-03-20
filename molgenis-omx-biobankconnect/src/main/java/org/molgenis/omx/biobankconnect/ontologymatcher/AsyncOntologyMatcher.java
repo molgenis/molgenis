@@ -1099,7 +1099,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 					new QueryImpl().eq(ObservedValue.OBSERVATIONSET, observationSet).and()
 							.eq(ObservedValue.FEATURE, storeMappingAlgorithmScriptFeature), ObservedValue.class);
 
-			if (algorithmScriptObservedValue.getValue() instanceof StringValue)
+			if (algorithmScriptObservedValue != null && algorithmScriptObservedValue.getValue() instanceof StringValue)
 			{
 				StringValue algorithmScriptValue = (StringValue) algorithmScriptObservedValue.getValue();
 				algorithmScriptValue.setValue(request.getAlgorithmScript());

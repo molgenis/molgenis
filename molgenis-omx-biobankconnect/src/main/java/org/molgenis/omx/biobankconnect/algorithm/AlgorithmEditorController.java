@@ -188,24 +188,30 @@ public class AlgorithmEditorController extends AbstractWizardController
 	public Map<String, Object> testScrpit(@RequestBody
 	OntologyMatcherRequest request)
 	{
-		if (request.getSelectedDataSetIds().size() == 0 || request.getAlgorithmScript().isEmpty()) return Collections
-				.emptyMap();
 		Map<String, Object> jsonResults = new HashMap<String, Object>();
+		String algorithm = request.getAlgorithmScript();
+		List<Integer> selectedDataSetIds = request.getSelectedDataSetIds();
+		if (selectedDataSetIds.size() != 0 && !algorithm.isEmpty())
+		{
+			Integer sourceDataSetId = selectedDataSetIds.get(0);
+			ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME, request.getFeatureId(),
+					ObservableFeature.class);
+			String message = applyAlgorithms.validateAlgorithmInputs(sourceDataSetId, algorithm);
+			Collection<Object> results = message.isEmpty() ? applyAlgorithms.createValueFromAlgorithm(
+					feature.getDataType(), sourceDataSetId, algorithm).values() : Collections.emptyList();
+			jsonResults.put("results", results);
+			jsonResults.put("message", message);
+			jsonResults.put("totalCounts", countRowsByDataSet(sourceDataSetId));
+		}
+		return jsonResults;
+	}
 
-		DataSet sourceDataSet = dataService.findOne(DataSet.ENTITY_NAME, request.getSelectedDataSetIds().get(0),
-				DataSet.class);
+	private Integer countRowsByDataSet(Integer sourceDataSetId)
+	{
+		DataSet sourceDataSet = dataService.findOne(DataSet.ENTITY_NAME, sourceDataSetId, DataSet.class);
 		Iterable<ObservationSet> observationSets = dataService.findAll(ObservationSet.ENTITY_NAME,
 				new QueryImpl().eq(ObservationSet.PARTOFDATASET, sourceDataSet), ObservationSet.class);
-
-		ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME, request.getFeatureId(),
-				ObservableFeature.class);
-
-		Collection<Object> results = applyAlgorithms.createValueFromAlgorithm(feature.getDataType(),
-				request.getSelectedDataSetIds().get(0), request.getAlgorithmScript()).values();
-
-		jsonResults.put("results", results);
-		jsonResults.put("totalCounts", Iterables.size(observationSets));
-		return jsonResults;
+		return Iterables.size(observationSets);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/savescript", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
