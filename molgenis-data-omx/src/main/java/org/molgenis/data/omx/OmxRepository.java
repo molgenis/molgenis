@@ -85,27 +85,15 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Cr
 	@Override
 	public long count(Query q)
 	{
+		rewriteXrefRules(q);
+
 		return searchService.count(dataSetIdentifier, q);
 	}
 
 	@Override
 	public Iterable<Entity> findAll(final Query q)
 	{
-		EntityMetaData entityMetaData = getEntityMetaData();
-		// Set xref/mref/categorical search fields on ref identifier
-		for (QueryRule r : q.getRules())
-		{
-			if ((r.getField() != null) && (r.getValue() instanceof Entity))
-			{
-				AttributeMetaData attr = entityMetaData.getAttribute(r.getField());
-				if ((attr.getDataType().getEnumType() == XREF) || (attr.getDataType().getEnumType() == MREF)
-						|| attr.getDataType().getEnumType() == CATEGORICAL)
-				{
-					Object value = ((Entity) r.getValue()).get(attr.getRefEntity().getLabelAttribute().getName());
-					r.setValue(value);
-				}
-			}
-		}
+		rewriteXrefRules(q);
 
 		return new Iterable<Entity>()
 		{
@@ -373,5 +361,26 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Cr
 	public void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
 	{
 		throw new UnsupportedOperationException();
+	}
+
+	// Set xref/mref/categorical search fields on ref identifier
+	private void rewriteXrefRules(Query q)
+	{
+		EntityMetaData entityMetaData = getEntityMetaData();
+
+		for (QueryRule r : q.getRules())
+		{
+			if ((r.getField() != null) && (r.getValue() instanceof Entity))
+			{
+				AttributeMetaData attr = entityMetaData.getAttribute(r.getField());
+
+				if ((attr.getDataType().getEnumType() == XREF) || (attr.getDataType().getEnumType() == MREF)
+						|| attr.getDataType().getEnumType() == CATEGORICAL)
+				{
+					Object value = ((Entity) r.getValue()).get(attr.getRefEntity().getLabelAttribute().getName());
+					r.setValue(value);
+				}
+			}
+		}
 	}
 }
