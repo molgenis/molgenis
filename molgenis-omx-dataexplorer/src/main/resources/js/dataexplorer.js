@@ -395,19 +395,6 @@
 			e.preventDefault();
 			$(document).trigger('removeAttributeFilter', {'attributeUri': $(this).data('href')});
 		});
-
-		
-		$('#download-button').click(function() {
-			download();
-		});
-
-		$('#genomebrowser-filter-button').click(function() {
-			setDallianceFilter();
-		});
-		
-
-		// select active tab
-		$('#tabs a[data-toggle="tab"].active').click();
 		
 		// fire event handler
 		$('#dataset-select').change();
