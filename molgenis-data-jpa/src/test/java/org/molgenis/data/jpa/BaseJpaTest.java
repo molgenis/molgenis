@@ -6,6 +6,7 @@ import javax.persistence.Persistence;
 import org.molgenis.data.DataService;
 import org.molgenis.data.excel.ExcelRepositorySource;
 import org.molgenis.data.support.DataServiceImpl;
+import org.molgenis.data.support.QueryResolver;
 import org.molgenis.data.validation.DefaultEntityValidator;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.testng.annotations.AfterMethod;
@@ -24,7 +25,7 @@ public class BaseJpaTest
 		dataService = new DataServiceImpl();
 		dataService.addFileRepositorySourceClass(ExcelRepositorySource.class, ExcelRepositorySource.EXTENSIONS);
 		repo = new JpaRepository(entityManager, Person.class, new PersonMetaData(), new DefaultEntityValidator(
-				dataService, new EntityAttributesValidator()));
+				dataService, new EntityAttributesValidator()), new QueryResolver(dataService));
 		dataService.addRepository(repo);
 		entityManager.getTransaction().begin();
 	}
