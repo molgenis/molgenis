@@ -40,14 +40,15 @@
 				dataSetIds.push('${dataSetId?c}');
 			</#list>
 			var molgenis = window.top.molgenis;
+			var mappingManager = new molgenis.MappingManager();
 			molgenis.setContextURL('${context_url}');
-			molgenis.getMappingManager().changeDataSet('${wizard.userName}', '${wizard.selectedDataSet.id?c}', dataSetIds);
+			mappingManager.changeDataSet('${wizard.userName}', '${wizard.selectedDataSet.id?c}', dataSetIds);
 			$('#downloadButton').click(function(){
-				molgenis.getMappingManager().downloadMappings();
+				mappingManager.downloadMappings();
 				return false;
 			});
 			$('#help-button').click(function(){
-				molgenis.getMappingManager().createHelpModal();
+				mappingManager.createHelpModal();
 			}).click();
 		});
 	</script>

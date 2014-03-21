@@ -34,12 +34,11 @@
 					</div>
 					<div class="row-fluid">
 						<div class="span12">
-							<div class="data-table-container">
-								<table id="dataitem-table" class="table table-striped table-condensed">
-								</table>
-								<div class="pagination pagination-centered">
-									<ul></ul>
-								</div>
+							<div id="container" class="data-table-container">
+								<!-- <table id="dataitem-table" class="table table-striped table-condensed"></table>-->
+							</div>
+							<div class="pagination pagination-centered">
+								<ul></ul>
 							</div>
 						</div>
 					</div>
@@ -87,16 +86,20 @@
 			molgenis.ontologyMatcherRunning(function(){
 				var catalogueChooser = new molgenis.CatalogueChooser();
 				catalogueChooser.changeDataSet($('#selectedDataSetId').val());
+				
 				$('#selectedDataSetId').change(function(){
 					catalogueChooser.changeDataSet($('#selectedDataSetId').val());
 				});
+				
 				if($('#selectedDataSetId option').length === 0){
 					$('.pager li.next').addClass('disabled');
 				}
+				
 				$('#import-data-button').click(function(){
 					$('#import-features-modal').modal('show');
 					return false;
 				});
+				
 				$('#import-features').click(function(){
 					var alert = {};
 					var uploadedFile = $('#uploadedOntology').val();
@@ -115,6 +118,7 @@
 						}).submit();
 					}
 				});
+				
 				<#if message??>
 					var alert = {};
 					alert.message = '${message}';

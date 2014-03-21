@@ -8,6 +8,10 @@
 		this.totalPage = 0;
 	};
 	
+	molgenis.Pagination.prototype.getCurrentPage = function(){
+		return this.currentPage;
+	};
+	
 	molgenis.Pagination.prototype.reset = function(){
 		this.offSet = 1;
 		this.currentPage = 1;
@@ -21,7 +25,7 @@
 		return this.pager;
 	};
 	
-	molgenis.Pagination.prototype.updateMatrixPagination = function(pageElement, callback) {
+	molgenis.Pagination.prototype.updateMatrixPagination = function(pageElement, callback, args) {
 		pageElement.empty();
 		if(this.totalPage > 0){
 			pageElement.append('<li><a href="#">Prev</a></li>');
@@ -70,7 +74,7 @@
 						}
 						
 					}
-					callback();
+					callback(args);
 					return false;
 				},{'clickElement' : $(this), 'data' : pagination}));
 			});
@@ -146,9 +150,10 @@
 		});
 		
 		this.modal.modal({
-			'backdrop' : false,
 			'show' : true
 		}).draggable();
+		
+		return this.modal;
 	};
 	
 	molgenis.StandardModal.prototype.createModalCallback = function(title, callback){

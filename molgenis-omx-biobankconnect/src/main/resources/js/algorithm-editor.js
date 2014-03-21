@@ -40,14 +40,15 @@
 				$('#dataitem-number').empty().append(searchResponse.totalHitCount);
 				pagination.reset();
 				updateSelectedDataset(dataSetEntity);
-				molgenis.AlgorithmEditor.prototype.createMatrixForDataItems();
+				createMatrixForDataItems();
 			});
 		}else{
 			$('#dataitem-number').empty().append('Nothing selected');
 		}
 	};
 	
-	molgenis.AlgorithmEditor.prototype.createMatrixForDataItems = function() {
+	function createMatrixForDataItems () {
+		
 		var documentType = 'protocolTree-' + molgenis.hrefToId(selectedDataSet.href);
 		var query = {
 			'rules' :[[{
@@ -56,12 +57,13 @@
 				'value' : 'observablefeature'
 			}]]
 		};
+		
 		if(sortRule !== null) query.sort = sortRule;
 		searchApi.search(pagination.createSearchRequest(documentType, query),function(searchResponse) {
 			createAlgorithmMappingTable(searchResponse, function(tableBody, involedDataSets){
 				$('#algorithm-table').empty().append(createHeaderAlgorithmMappingTable(involedDataSets)).append(tableBody);
 				pagination.setTotalPage(Math.ceil(searchResponse.totalHitCount / pagination.getPager()));
-				pagination.updateMatrixPagination($('.pagination ul'), molgenis.AlgorithmEditor.prototype.createMatrixForDataItems);
+				pagination.updateMatrixPagination($('.pagination ul'), createMatrixForDataItems);
 			});
 		});
 		
@@ -198,7 +200,7 @@
 								}]
 						};
 					}
-					molgenis.AlgorithmEditor.prototype.createMatrixForDataItems();
+					createMatrixForDataItems();
 					return false;
 				});
 			}
@@ -208,13 +210,13 @@
 		function createRowForAlgorithmMappingTable(mappingPerStudy, featureId, cachedFeatures){
 			var feature = cachedFeatures[featureId];
 			var row = $('<tr />');
-			var description = '<strong>' + feature.Name + '</strong> : ' + i18nDescription(feature).en;
+			var description = '<strong>' + feature.Name + '</strong> : ' + molgenis.i18nDescription(feature).en;
 			var isPopOver = description.length < 90;
 			var popover = $('<span />').html(isPopOver ? description : description.substring(0, 90) + ' ...');
 			if(!isPopOver){
 				popover.addClass('show-popover');
 				popover.popover({
-					content : i18nDescription(feature).en,
+					content : molgenis.i18nDescription(feature).en,
 					trigger : 'hover',
 					placement : 'bottom'
 				});
@@ -281,7 +283,7 @@
 			
 			$.ajax({
 				type : 'POST',
-				url : molgenis.getContextURL() + '/createmapping',
+				url : molgenis.getContextUrl() + '/createmapping',
 				async : false,
 				data : JSON.stringify(searchRequest),
 				contentType : 'application/json',
@@ -310,7 +312,7 @@
 					$('<div />').append('<span class="info"><strong>Unit : </strong></span>').append('<span>' + feature.unit.Name + '</span>').appendTo(infoDiv);
 				}
 				$('<div />').append('<span class="info"><strong>Data type : </strong></span>').append('<span>' + feature.dataType + '</span>').appendTo(infoDiv);
-				$('<div />').append('<span class="info"><strong>Description : </strong></span>').append('<span>' + i18nDescription(feature).en + '</span>').appendTo(infoDiv);
+				$('<div />').append('<span class="info"><strong>Description : </strong></span>').append('<span>' + molgenis.i18nDescription(feature).en + '</span>').appendTo(infoDiv);
 				var middleDiv = $('<div />').addClass('span9');
 				var categories = getCategoriesByFeatureIdentifier(molgenis.hrefToId(feature.href));
 				if(categories.length > 0){
@@ -395,7 +397,7 @@
 					});
 					$.ajax({
 						type : 'POST',
-						url : molgenis.getContextURL() + '/testscript',
+						url : molgenis.getContextUrl() + '/testscript',
 						async : false,
 						data : JSON.stringify(ontologyMatcherRequest),
 						contentType : 'application/json',
@@ -428,7 +430,7 @@
 					console.log('The suggestScript button has been clicked!');
 					$.ajax({
 						type : 'POST',
-						url : molgenis.getContextURL() + '/suggestscript',
+						url : molgenis.getContextUrl() + '/suggestscript',
 						async : false,
 						data : JSON.stringify($(document).data('searchRequest')),
 						contentType : 'application/json',
@@ -450,7 +452,7 @@
 					});
 					$.ajax({
 						type : 'POST',
-						url : molgenis.getContextURL() + '/savescript',
+						url : molgenis.getContextUrl() + '/savescript',
 						async : false,
 						data : JSON.stringify(ontologyMatcherRequest),
 						contentType : 'application/json',
@@ -470,15 +472,7 @@
 				});
 			}
 		}
-		
-		function i18nDescription(feature){
-			if(feature.description === undefined) feature.description = '';
-			if(feature.description.indexOf('{') !== 0){
-				feature.description = '{"en":"' + (feature.description === null ? '' : feature.description.replace(new RegExp('"','gm'), '')) +'"}';
-			}
-			return eval('(' + feature.description + ')');
-		}
-		
+
 		function statisticsTable(data){
 			var array = data.results;
 			var table = $('<table />').addClass('table table-bordered');
@@ -489,7 +483,7 @@
 			table.append('<tr><th>Standard Deviation</th><td>' + jStat.stdev(array) + '</td></tr>');
 			return table;
 		}
-	};
+	}
 
 	molgenis.AlgorithmEditor.prototype.createTableForRetrievedMappings = function(searchHits, parentDiv, style){
 		if(searchHits.length === 0) {

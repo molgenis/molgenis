@@ -38,9 +38,8 @@
 					</div>
 					<div class="row-fluid">
 						<div class="span12">
-							<div class="data-table-container">
-								<table id="dataitem-table" class="table table-striped table-condensed">
-								</table>
+							<div id="container" class="data-table-container">
+								<!-- <table id="dataitem-table" class="table table-striped table-condensed"></table>-->
 							</div>
 							<div class="pagination pagination-centered">
 								<ul></ul>
@@ -54,11 +53,14 @@
 	<script type="text/javascript">
 		$(document).ready(function(){
 			var molgenis = window.top.molgenis;
-			molgenis.ontologyMatcherRunning(function(){
-				molgenis.getOntologyAnnotator().changeDataSet('${wizard.selectedDataSet.id?c}');
-				molgenis.getOntologyAnnotator().searchOntologies();
-				molgenis.setContextURL('${context_url}');
+			molgenis.ontologyMatcherRunning(function()
+			{
+				var ontologyAnnotator = new molgenis.OntologyAnnotator();
+				ontologyAnnotator.changeDataSet('${wizard.selectedDataSet.id?c}');
+				ontologyAnnotator.searchOntologies($('#ontology-list'), $('#selectedOntologies'));
+				
 				$('#toggle-select').click(function(){
+					
 					if($(this).hasClass('select-all')){
 						$('#ontology-list').find('input').empty().attr('checked', false);
 						$(this).removeClass('select-all').addClass('remove-all').empty().append('Select all');
@@ -66,17 +68,17 @@
 						$('#ontology-list').find('input').empty().attr('checked', true);
 						$(this).removeClass('remove-all').addClass('select-all').empty().append('Deselect all');
 					}
-					molgenis.getOntologyAnnotator().searchOntologies();
+					ontologyAnnotator.searchOntologies($('#ontology-list'), $('#selectedOntologies'));
 					return false;
 				});
 				
 				$('#annotate-all-dataitems').click(function(){
-					molgenis.getOntologyAnnotator().confirmation('Warning', 'Are you sure that you want to overwrite all pre-defined annotations?', '/annotate');
+					ontologyAnnotator.annotateConfirmation('Warning', true);
 					return false;
 				});
 				
 				$('#remove-annotations').click(function(){
-					molgenis.getOntologyAnnotator().confirmation('Warning', 'Are you sure that you want to remove all pre-defined annotations?', '/annotate/remove');
+					ontologyAnnotator.annotateConfirmation('Warning', false);
 					return false;
 				});
 			});

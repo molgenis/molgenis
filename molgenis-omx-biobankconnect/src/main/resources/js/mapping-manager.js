@@ -1,11 +1,11 @@
 (function($, molgenis, w) {
 	"use strict";
 	
-	var ns = molgenis;
-	var pagination = new ns.Pagination();
-	var standardModal = new ns.StandardModal();
-	var restApi = new ns.RestClient();
-	var searchApi = new ns.SearchClient();
+	var ontologyAnnotator = new molgenis.OntologyAnnotator();
+	var pagination = new molgenis.Pagination();
+	var standardModal = new molgenis.StandardModal();
+	var restApi = new molgenis.RestClient();
+	var searchApi = new molgenis.SearchClient();
 	var selectedDataSet = null;
 	var userName = null;
 	var biobankDataSets = null;
@@ -16,11 +16,11 @@
 	var storeMappingConfirmMapping = 'store_mapping_confirm_mapping';
 	var scoreMappingScore = "store_mapping_score";
 	
-	ns.MappingManager = function MappingManager(){
+	molgenis.MappingManager = function MappingManager(){
 		
 	};
 	
-	ns.MappingManager.prototype.changeDataSet = function(userName, selectedDataSet, dataSetIds){
+	molgenis.MappingManager.prototype.changeDataSet = function(userName, selectedDataSet, dataSetIds){
 		if(selectedDataSet !== '' && dataSetIds.length > 0){
 			setUserName(userName); 
 			var dataSetEntity = restApi.get('/api/v1/dataset/' + selectedDataSet);
@@ -32,7 +32,7 @@
 				}],
 			}).items;
 			var request = {
-				documentType : 'protocolTree-' + ns.hrefToId(dataSetEntity.href),
+				documentType : 'protocolTree-' + molgenis.hrefToId(dataSetEntity.href),
 				query:{
 					rules :[[{
 						field : 'type',
@@ -45,8 +45,8 @@
 				sortRule = null;
 				$('#dataitem-number').empty().append(searchResponse.totalHitCount);
 				pagination.reset();
-				ns.MappingManager.prototype.updateSelectedDataset(selectedDataSet);
-				ns.MappingManager.prototype.createMatrixForDataItems();
+				molgenis.MappingManager.prototype.updateSelectedDataset(selectedDataSet);
+				molgenis.MappingManager.prototype.createMatrixForDataItems();
 				initSearchDataItems(dataSetEntity);
 			});
 		}else{
@@ -56,13 +56,13 @@
 		function initSearchDataItems (dataSet) {
 			$('#search-dataitem').typeahead({
 				source: function(query, process) {
-					ns.dataItemsTypeahead('observablefeature', ns.hrefToId(dataSet.href), query, process);
+					molgenis.dataItemsTypeahead('observablefeature', molgenis.hrefToId(dataSet.href), query, process);
 				},
 				minLength : 3,
 				items : 20
 			});
 			$('#search-button').click(function(){
-				ns.MappingManager.prototype.createMatrixForDataItems();
+				molgenis.MappingManager.prototype.createMatrixForDataItems();
 				previousSearchText = $('#search-dataitem').val();
 			});
 			$('#search-dataitem').on('keydown', function(e){
@@ -75,24 +75,22 @@
 			$('#search-dataitem').on('keyup', function(e){
 				if($(this).val() === '' && previousSearchText !== null){
 					previousSearchText = null;
-					ns.MappingManager.prototype.createMatrixForDataItems();
+					molgenis.MappingManager.prototype.createMatrixForDataItems();
 			    }
 			});
 		}
 	};
 	
-	ns.MappingManager.prototype.createMatrixForDataItems = function() {
+	molgenis.MappingManager.prototype.createMatrixForDataItems = function() {
 		var dataSetMapping = getDataSetsForMapping();
 		if(dataSetMapping.items.length > 0){
 			var documentType = 'protocolTree-' + dataSetMapping.items[0].Identifier.split('-')[1];
-			
 			var q = {
 					rules : [[{
 						operator : 'SEARCH',
 						value : 'observablefeature'
 					}]]
 			}
-			
 			var queryText = $('#search-dataitem').val();
 			if(queryText !== ''){
 				q.rules[0].push({
@@ -113,31 +111,31 @@
 				createMappingFromIndex(dataSetMapping.items, searchResponse, function(tableBody, involedDataSets){
 					$('#dataitem-table').empty().append(createDynamicTableHeader(involedDataSets)).append(tableBody);
 					pagination.setTotalPage(Math.ceil(searchResponse.totalHitCount / pagination.getPager()));
-					pagination.updateMatrixPagination($('.pagination ul'), ns.MappingManager.prototype.createMatrixForDataItems);
+					pagination.updateMatrixPagination($('.pagination ul'), molgenis.MappingManager.prototype.createMatrixForDataItems);
 				});
 			});
 		}else{
 			$('#dataitem-table').empty();
 			$('#table-papger').empty();
-			var dataSetEntity = restApi.get('/api/v1/dataset/' + ns.MappingManager.prototype.getSelectedDataSet());
-			showMessage('alert alert-info', 'There are not mappings for <strong>' + dataSetEntity.Name + '</strong> catalogue');
+			var dataSetEntity = restApi.get('/api/v1/dataset/' + molgenis.MappingManager.prototype.getSelectedDataSet());
+			molgenis.showMessage('alert alert-info', 'There are not mappings for <strong>' + dataSetEntity.Name + '</strong> catalogue', $('form:eq(-1)'));
 		}
 		
 		function getDataSetsForMapping(){
 			var identifiers = [];
 			$.each(biobankDataSets, function(index, dataSet){
-				var dataSetId = ns.hrefToId(dataSet.href);
-				if(dataSetId !== ns.MappingManager.prototype.getSelectedDataSet())
-				identifiers.push(getUserName() + '-' + ns.MappingManager.prototype.getSelectedDataSet() + '-' + dataSetId); 
+				var dataSetId = molgenis.hrefToId(dataSet.href);
+				if(dataSetId !== molgenis.MappingManager.prototype.getSelectedDataSet())
+				identifiers.push(getUserName() + '-' + molgenis.MappingManager.prototype.getSelectedDataSet() + '-' + dataSetId); 
 			});
 			var request = {
-				q : [{
-					field : 'Identifier',
-					operator : 'IN',
-					value : identifiers
+				'q' : [{
+					'field' : 'Identifier',
+					'operator' : 'IN',
+					'value' : identifiers
 				}]
 			};
-			var dataSetMapping = restApi.get('/api/v1/dataset/',{ q : request });
+			var dataSetMapping = restApi.get('/api/v1/dataset/',{ 'q' : request });
 			return dataSetMapping;
 		}
 		
@@ -153,13 +151,13 @@
 				var hitInfo = hit.columnValueMap;
 				if(queryRules.length > 0){
 					queryRules.push({
-						operator : 'OR'
+						'operator' : 'OR'
 					});
 				}
 				queryRules.push({
-					field : storeMappingFeature,
-					operator : 'EQUALS',
-					value : hitInfo.id.toString()
+					'field' : storeMappingFeature,
+					'operator' : 'EQUALS',
+					'value' : hitInfo.id.toString()
 				});
 				allFeatureCollection.push(hitInfo.id);
 			});
@@ -167,10 +165,10 @@
 			$.each(dataSets, function(index, dataSet){
 				var tuple = {};
 				var searchRequest = {
-					documentType : dataSet.Identifier,
-					query : {
-						pageSize: 10000,
-						rules: [queryRules]
+					'documentType' : dataSet.Identifier,
+					'query' : {
+						'pageSize': 10000,
+						'rules' : [queryRules]
 					}
 				};	
 				searchApi.search(searchRequest, function(searchResponse) {
@@ -183,11 +181,11 @@
 							
 							if(!tuple[featureId]) tuple[featureId] = [];
 							tuple[featureId].push({
-								score : mapping[scoreMappingScore],
-								mappedFeatureId : storeMappedFeatureId,
-								confirmed : mapping[storeMappingConfirmMapping],
-								observationSet : mapping.observation_set,
-								documentId : hit.id
+								'score' : mapping[scoreMappingScore],
+								'mappedFeatureId' : storeMappedFeatureId,
+								'confirmed' : mapping[storeMappingConfirmMapping],
+								'observationSet' : mapping.observation_set,
+								'documentId' : hit.id
 							});
 							
 							if($.inArray(storeMappedFeatureId, allFeatureCollection) === -1) allFeatureCollection.push(storeMappedFeatureId);
@@ -211,16 +209,16 @@
 				var lower = (i - 1) * 500;
 				var upper = (i * 500) < allFeatureCollection.length ? (i * 500) : allFeatureCollection.length; 
 				var query = {
-					q : [{
-						field : 'id',
-						operator : 'IN',
-						value : allFeatureCollection.slice(lower, upper)
+					'q' : [{
+						'field' : 'id',
+						'operator' : 'IN',
+						'value' : allFeatureCollection.slice(lower, upper)
 					}],
-					num : 500
+					'num' : 500
 				};
 				var listOfFeatures = restApi.get('/api/v1/observablefeature', {q : query});
 				$.each(listOfFeatures.items, function(index, element){
-					cachedFeatures[(ns.hrefToId(element.href))] = element;
+					cachedFeatures[(molgenis.hrefToId(element.href))] = element;
 				});
 			}
 		}
@@ -246,11 +244,11 @@
 					involvedDataSetIds.push(dataSetIdArray[2]);
 				}
 			});
-			involvedDataSetIds.splice(0, 0, ns.MappingManager.prototype.getSelectedDataSet());
+			involvedDataSetIds.splice(0, 0, molgenis.MappingManager.prototype.getSelectedDataSet());
 			biobankDataSets = sortOrderOfDataSets(biobankDataSets, involvedDataSetIds);
 			var removeDataSetIndex = [];
 			$.each(biobankDataSets, function(index, dataSet){
-				if($.inArray(ns.hrefToId(dataSet.href), involvedDataSetIds) !== -1){
+				if($.inArray(molgenis.hrefToId(dataSet.href), involvedDataSetIds) !== -1){
 					involvedDataSetNames.push(dataSet.Name);
 				}else{
 					removeDataSetIndex.push(index);
@@ -271,7 +269,7 @@
 				$.each(involvedDataSetIds, function(index, dataSetId){
 					for(var i = 0; i < biobankDataSets.length; i++){
 						var currentDataSet = biobankDataSets[i];
-						if(ns.hrefToId(currentDataSet.href) === dataSetId){
+						if(molgenis.hrefToId(currentDataSet.href) === dataSetId){
 							sortedDataSets.splice(index, 0, currentDataSet);
 							break;
 						}
@@ -322,7 +320,7 @@
 								}]
 						};
 					}
-					ns.MappingManager.prototype.createMatrixForDataItems();
+					molgenis.MappingManager.prototype.createMatrixForDataItems();
 					return false;
 				});
 			}
@@ -332,13 +330,13 @@
 		function createRowForMappingTable(mappingPerStudy, dataSets, featureId, cachedFeatures){
 			var feature = cachedFeatures[featureId];
 			var row = $('<tr />');
-			var description = '<strong>' + feature.Name + '</strong> : ' + i18nDescription(feature).en;
+			var description = '<strong>' + feature.Name + '</strong> : ' + molgenis.i18nDescription(feature).en;
 			var isPopOver = description.length < 90;
 			var popover = $('<span />').html(isPopOver ? description : description.substring(0, 90) + ' ...');
 			if(!isPopOver){
 				popover.addClass('show-popover');
 				popover.popover({
-					content : i18nDescription(feature).en,
+					content : molgenis.i18nDescription(feature).en,
 					trigger : 'hover',
 					placement : 'bottom'
 				});
@@ -398,13 +396,13 @@
 								};
 								$.ajax({
 									type : 'POST',
-									url : molgenis.getContextURL().replace('/biobankconnect', '') + '/mappingmanager/delete',
+									url : molgenis.getContextUrl().replace('/biobankconnect', '') + '/mappingmanager/delete',
 									async : false,
 									data : JSON.stringify(deleteRequest),
 									contentType : 'application/json',
 								});
 								modal.remove();
-								ns.MappingManager.prototype.createMatrixForDataItems();
+								molgenis.MappingManager.prototype.createMatrixForDataItems();
 							});
 							var table = row.parents('table:eq(0)');
 							modal.find('div.modal-body:eq(0)').append('<p style="font-size:16px"><strong>Are you sure that you want to remove candidate mappings?</strong></p>');
@@ -447,27 +445,23 @@
 		}
 		
 		function createAnnotationModal(feature){
-			var featureId = ns.hrefToId(feature.href);
 			var title = 'Rematch research variable : ';
-			standardModal.createModalCallback('Rematch research variable : ' + feature.Name, function(modal){
-				restApi.getAsync(feature.href, {'expand': ["unit", "definitions"]}, function(restApiFeature){
-					var body = modal.find('div.modal-body:eq(0)').addClass('overflow-y-visible');
-					ns.getOntologyAnnotator().createFeatureTable(body, title, restApiFeature, createAnnotationModal);
-					body.append(ns.getOntologyAnnotator().createSearchDiv(title, restApiFeature, createAnnotationModal));
-					var footer = modal.find('div.modal-footer:eq(0)');
-					var nextButton = $('<button type="btn" class="btn btn-primary">Next</button>').click(function(){
-						createRematchingModal(restApiFeature);
-					});
-					footer.prepend(nextButton);
-					var table = $('body table:eq(0)');
-					modal.css({
-						'width' : 800,
-						'left' : table.width()/2 - 300,
-						'margin-left' : 0,
-						'margin-top' : 0,
-						'top' : 200
-					}).modal('show');
+			restApi.getAsync(feature.href, {'expand': ["unit", "definitions"]}, function(updatedFeature){
+				var modal = ontologyAnnotator.createFeatureTable(title, updatedFeature, createAnnotationModal);
+				var body = modal.find('div.modal-body:eq(0)').addClass('overflow-y-visible');
+				var footer = modal.find('div.modal-footer:eq(0)');
+				var nextButton = $('<button type="btn" class="btn btn-primary">Next</button>').click(function(){
+					createRematchingModal(updatedFeature);
 				});
+				footer.prepend(nextButton);
+				var table = $('body table:eq(0)');
+				modal.css({
+					'width' : 800,
+					'left' : table.width()/2 - 300,
+					'margin-left' : 0,
+					'margin-top' : 0,
+					'top' : 200
+				}).modal('show');
 			});
 		}
 		
@@ -477,8 +471,8 @@
 				var divControlPanel = $('<div />').addClass('row-fluid').appendTo(body);
 				var selectTag = $('<select />');
 				$.each(biobankDataSets, function(index, dataSet){
-					var dataSetId = ns.hrefToId(dataSet.href);
-					if(dataSetId !== ns.MappingManager.prototype.getSelectedDataSet()){
+					var dataSetId = molgenis.hrefToId(dataSet.href);
+					if(dataSetId !== molgenis.MappingManager.prototype.getSelectedDataSet()){
 						selectTag.append('<option value="' + dataSetId + '">' + dataSet.Name + '</option>');
 					}
 				});
@@ -531,23 +525,23 @@
 				
 				matchButton.click(function(){
 					var request = {
-						'sourceDataSetId' : ns.MappingManager.prototype.getSelectedDataSet(),
-						'featureId' : ns.hrefToId(feature.href),
+						'sourceDataSetId' : molgenis.MappingManager.prototype.getSelectedDataSet(),
+						'featureId' : molgenis.hrefToId(feature.href),
 						'selectedDataSetIds' : selectedOptions
 					};
 					$.ajax({
 						type : 'POST',
-						url : ns.getContextURL() + '/rematch',
+						url : molgenis.getContextUrl() + '/rematch',
 						async : false,
 						data : JSON.stringify(request),
 						contentType : 'application/json',
 						success : function(data, textStatus, request) {
-							modal.remove();
+							modal.modal('hide');
 							var storedRowInfo = $('body').data('clickedRow');
-							var existingRow = storedRowInfo[ns.hrefToId(feature.href)];
+							var existingRow = storedRowInfo[molgenis.hrefToId(feature.href)];
 							var biobankDataSetIds = [];
 							$.each(biobankDataSets, function(index, dataSet){
-								biobankDataSetIds.push(ns.hrefToId(dataSet.href));
+								biobankDataSetIds.push(molgenis.hrefToId(dataSet.href));
 							});
 							$.each(selectedOptions, function(index, dataSetId){
 								var index = $.inArray(parseInt(dataSetId), biobankDataSetIds);
@@ -569,7 +563,7 @@
 			function checkProgressForRematch(feature){
 				$.ajax({
 					type : 'GET',
-					url : ns.getContextURL() + '/match/status',
+					url : molgenis.getContextUrl() + '/match/status',
 					async : false,
 					contentType : 'application/json',
 					success : function(data, textStatus, request) {
@@ -591,18 +585,18 @@
 			
 			function replaceMappingInTable(feature){
 				var searchRequest = {
-					'documentType' : 'protocolTree-' + ns.MappingManager.prototype.getSelectedDataSet(),
+					'documentType' : 'protocolTree-' + molgenis.MappingManager.prototype.getSelectedDataSet(),
 					'query' : {
 						'rules':[[{
 							'field' : 'id',
 							'operator' : 'EQUALS',
-							'value' : ns.hrefToId(feature.href).toString()
+							'value' : molgenis.hrefToId(feature.href).toString()
 						}]]
 					}
 				}
 				searchApi.search(searchRequest, function(searchResponse){
 					var storedRowInfo = $('body').data('clickedRow');
-					var existingRow = storedRowInfo[ns.hrefToId(feature.href)];
+					var existingRow = storedRowInfo[molgenis.hrefToId(feature.href)];
 					var table = $('body').data('table');
 					var index = $.inArray(existingRow[0], table.find('tr'));
 					var dataSetMapping = getDataSetsForMapping();
@@ -622,7 +616,7 @@
 							}
 						});
 					}
-					delete storedRowInfo[ns.hrefToId(feature.href)];
+					delete storedRowInfo[molgenis.hrefToId(feature.href)];
 				});
 			}
 			
@@ -645,12 +639,12 @@
 			function switchOptions(targetDataSetId, selectedOptions){
 				var index = 0;
 				var options = $(selectedOptions).find('option');
-				options.attr('selected', false).each(function(){
+				optiomolgenis.attr('selected', false).each(function(){
 					if(targetDataSetId !== $(this).val()){
 						index++;
 					}else return false;
 				});
-				index = index === options.length - 1 ? 0 : index + 1;
+				index = index === optiomolgenis.length - 1 ? 0 : index + 1;
 				$(options[index]).attr('selected', true);
 			}
 		}
@@ -673,8 +667,7 @@
 			$.each(observationSets.items, function(index, observationSet){
 				observationSetIdentifiers.push(observationSet.Identifier);
 			});
-			
-			showMessage('alert alert-info', observationSetIds.length + ' candidate mappings are being deleted!');
+			molgenis.showMessage('alert alert-info', observationSetIds.length + ' candidate mappings are being deleted!', $('form:eq(-1)'));
 			var observedValues = restApi.get('/api/v1/observedvalue', {
 				'q' : {
 					'q' : [{
@@ -688,7 +681,7 @@
 			
 			var observedValueIds = [];
 			$.each(observedValues.items, function(index, ov){
-				observedValueIds.push(ns.hrefToId(ov.href));
+				observedValueIds.push(molgenis.hrefToId(ov.href));
 			});
 			deleteEntity('/api/v1/observedvalue/', observedValueIds, function(){deleteEntity('/api/v1/observationset/', observationSetIds, null);});
 		}
@@ -759,7 +752,7 @@
 					}
 					eachMapping.mappedFeature = mappedFeature;
 					checkBox.data('eachMapping', eachMapping);
-					row.append('<td>' + mappedFeature.Name + '</td><td>' + i18nDescription(mappedFeature).en + '</td><td>' + score + '</td>');
+					row.append('<td>' + mappedFeature.Name + '</td><td>' + molgenis.i18nDescription(mappedFeature).en + '</td><td>' + score + '</td>');
 					row.append($('<td />').append($('<label class="checkbox"></label>').append(checkBox))).appendTo(mappingTable);
 				}
 				if($.inArray(index, highScoresIndex) !== -1){
@@ -781,10 +774,10 @@
 				'margin-top' : 25,
 				'z-index' : 10000
 			});
-			var dataSet = restApi.get('/api/v1/dataset/' + ns.MappingManager.prototype.getSelectedDataSet());
+			var dataSet = restApi.get('/api/v1/dataset/' + molgenis.MappingManager.prototype.getSelectedDataSet());
 			$('<div />').append('<h4>' + dataSet.Name + '</h4>').appendTo(infoDiv);
 			$('<div />').append('<span class="info"><strong>Data item : </strong></span>').append('<span>' + feature.Name + '</span>').appendTo(infoDiv);
-			$('<div />').append('<span class="info"><strong>Description : </strong></span>').append('<span>' + i18nDescription(feature).en + '</span>').appendTo(infoDiv);
+			$('<div />').append('<span class="info"><strong>Description : </strong></span>').append('<span>' + molgenis.i18nDescription(feature).en + '</span>').appendTo(infoDiv);
 			var selectedMappings = $('<div />').append('<span class="info"><strong>Selected mappings : </strong></span>').append('<span>' + selectedFeatures.join(' , ') + '</span>').appendTo(infoDiv);
 			infoDiv.append('<br /><br />');
 			var header = modal.find('.modal-header:eq(0)');
@@ -866,23 +859,23 @@
 							}]
 						}
 					});
-					var xrefValue = restApi.get('/api/v1/boolvalue/' + ns.hrefToId(observedValue.items[0].Value.href));
+					var xrefValue = restApi.get('/api/v1/boolvalue/' + molgenis.hrefToId(observedValue.items[0].Value.href));
 					xrefValue.value = changedValue;
 					updateEntity(xrefValue.href, xrefValue);
 					var updateRequest = {
-						'documentType' : getUserName() + '-' + selectedDataSet + '-' + ns.hrefToId(mappedDataSet.href),
+						'documentType' : getUserName() + '-' + selectedDataSet + '-' + molgenis.hrefToId(mappedDataSet.href),
 						'documentIds' : [eachMapping.documentId],
 						'updateScript' : storeMappingConfirmMapping + '=' + changedValue,
 					};
 					$.ajax({
 						type : 'POST',
-						url : molgenis.getContextURL().replace('/biobankconnect', '') + '/mappingmanager/update',
+						url : molgenis.getContextUrl().replace('/biobankconnect', '') + '/mappingmanager/update',
 						async : false,
 						data : JSON.stringify(updateRequest),
 						contentType : 'application/json'
 					});
 					
-					showMessage('alert alert-info', 'the mapping(s) has been updated for <strong>' + feature.Name + '</strong> in <strong>' + mappedDataSet.Name + '</strong> Biobank!');
+					molgenis.showMessage('alert alert-info', 'the mapping(s) has been updated for <strong>' + feature.Name + '</strong> in <strong>' + mappedDataSet.Name + '</strong> Biobank!', $('form:eq(-1)'));
 				}
 				
 				if(displayedFeatures.length > 0){
@@ -894,24 +887,6 @@
 					clickedCell.removeClass('icon-ok').addClass('icon-pencil');
 				}
 			});
-		}
-		
-		function showMessage(alertClass, message){
-			var messageDiv = $('#alert-message');
-			if(messageDiv.length === 0) messageDiv = $('<div id="alert-message"></div>');
-			var messageAlert = $('<div />').addClass(alertClass).append('<button type="button" class="close" data-dismiss="alert">&times;</button>');
-			$('<span><strong>Message : </strong>' + message + '</span>').appendTo(messageAlert);
-			messageDiv.empty().append(messageAlert);
-			$('form:eq(-1)').prepend(messageDiv);
-			w.setTimeout(function(){messageDiv.fadeOut(1000).remove();}, 10000);
-		}
-		
-		function i18nDescription(feature){
-			if(feature.description === undefined) feature.description = '';
-			if(feature.description.indexOf('{') !== 0){
-				feature.description = '{"en":"' + (feature.description === null ? '' : feature.description.replace(new RegExp('"','gm'), '')) +'"}';
-			}
-			return eval('(' + feature.description + ')');
 		}
 		
 		function updateEntity(href, data){
@@ -933,21 +908,21 @@
 		}
 	};
 	
-	ns.MappingManager.prototype.downloadMappings = function(){
+	molgenis.MappingManager.prototype.downloadMappings = function(){
 		var dataSet = restApi.get('/api/v1/dataset/' + selectedDataSet);
 		var mappedDataSetIds = [];
 		$.each(biobankDataSets, function(index, dataSet){
-			if(ns.hrefToId(dataSet.href) !== selectedDataSet) mappedDataSetIds.push(ns.hrefToId(dataSet.href));
+			if(molgenis.hrefToId(dataSet.href) !== selectedDataSet) mappedDataSetIds.push(molgenis.hrefToId(dataSet.href));
 		});
 		var deleteRequest = {
 			'dataSetId' : selectedDataSet,
 			'matchedDataSetIds' : mappedDataSetIds,
 			'documentType' : dataSet.Identifier
 		};
-		$.download(molgenis.getContextURL().replace('/biobankconnect', '') + '/mappingmanager/download',{request : JSON.stringify(deleteRequest)});
+		$.download(molgenis.getContextUrl().replace('/biobankconnect', '') + '/mappingmanager/download',{request : JSON.stringify(deleteRequest)});
 	};
 	
-	ns.MappingManager.prototype.createHelpModal = function(){
+	molgenis.MappingManager.prototype.createHelpModal = function(){
 		var container = $('<div />');
 		$('<div />').append('<i class="icon-ok"></i><span class="float-right text-success">Mappings have been selected</span>').appendTo(container);
 		$('<div />').append('<i class="icon-pencil"></i><span class="float-right text-info">Select the mappings</span>').appendTo(container);
@@ -963,11 +938,11 @@
 		});
 	};
 	
-	ns.MappingManager.prototype.updateSelectedDataset = function(dataSet) {
+	molgenis.MappingManager.prototype.updateSelectedDataset = function(dataSet) {
 		selectedDataSet = dataSet;
 	};
 	
-	ns.MappingManager.prototype.getSelectedDataSet = function (){
+	molgenis.MappingManager.prototype.getSelectedDataSet = function (){
 		return selectedDataSet;
 	};
 	

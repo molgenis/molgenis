@@ -224,7 +224,7 @@ public class BiobankConnectController extends AbstractWizardController
 	{
 		return Arrays.asList("bootstrap-fileupload.min.js", "jquery-ui-1.9.2.custom.min.js", "common-component.js",
 				"catalogue-chooser.js", "ontology-annotator.js", "ontology-matcher.js", "mapping-manager.js",
-				"simple_statistics.js", "algorithm-editor.js", "biobank-connect.js");
+				"simple_statistics.js", "algorithm-editor.js", "biobank-connect.js", "biobankconnect.matrix.js");
 	}
 
 	@Override

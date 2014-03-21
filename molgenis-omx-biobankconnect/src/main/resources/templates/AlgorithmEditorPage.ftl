@@ -42,10 +42,10 @@
 				dataSetIds.push('${dataSetId?c}');
 			</#list>
 			var molgenis = window.top.molgenis;
-			molgenis.setContextURL('${context_url}');
-			molgenis.getAlgorithmEditor().changeDataSet('${wizard.userName}', '${wizard.selectedDataSet.id?c}', dataSetIds);
+			var algorithmEditor = new molgenis.AlgorithmEditor();
+			algorithmEditor.changeDataSet('${wizard.userName}', '${wizard.selectedDataSet.id?c}', dataSetIds);
 			$('#selectedDataSetId').change(function(){
-				molgenis.getAlgorithmEditor().changeDataSet('${wizard.userName}', '${wizard.selectedDataSet.id?c}', dataSetIds);
+				algorithmEditor.changeDataSet('${wizard.userName}', '${wizard.selectedDataSet.id?c}', dataSetIds);
 			});
 		});
 	</script>

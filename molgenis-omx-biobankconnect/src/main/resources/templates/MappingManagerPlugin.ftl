@@ -1,7 +1,18 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
-<#assign css=["jquery-ui-1.9.2.custom.min.css", "bootstrap-fileupload.min.css", "biobank-connect.css", "mapping-manager.css"]>
-<#assign js=["jquery-ui-1.9.2.custom.min.js", "bootstrap-fileupload.min.js", "common-component.js", "catalogue-chooser.js", "ontology-annotator.js", "mapping-manager.js","algorithm-editor.js", "biobank-connect.js"]>
+<#assign css=[
+	"jquery-ui-1.9.2.custom.min.css", 
+	"bootstrap-fileupload.min.css", 
+	"biobank-connect.css", 
+	"mapping-manager.css"]>
+<#assign js=[
+	"jquery-ui-1.9.2.custom.min.js", 
+	"bootstrap-fileupload.min.js", 
+	"common-component.js", 
+	"ontology-annotator.js", 
+	"mapping-manager.js",
+	"biobank-connect.js", 
+	"simple_statistics.js"]>
 <@header css js/>
 <form id="wizardForm" class="form-horizontal" enctype="multipart/form-data">
 	<div class="row-fluid">
@@ -58,22 +69,23 @@
 			var molgenis = window.top.molgenis;
 			var contextUrl = '${context_url}';
 			contextUrl = contextUrl.replace('/mappingmanager', '/biobankconnect')
-			molgenis.setContextURL(contextUrl);
+			molgenis.setContextUrl(contextUrl);
 			molgenis.ontologyMatcherRunning(function(){
+				var mappingManager = new molgenis.MappingManager();
 				var dataSetIds = [];
 				<#list dataSets as dataset>
 					dataSetIds.push('${dataset.id?c}');
 				</#list>
-				molgenis.getMappingManager().changeDataSet('${userName}', $('#selectedDataSet').val(), dataSetIds);
+				mappingManager.changeDataSet('${userName}', $('#selectedDataSet').val(), dataSetIds);
 				$('#selectedDataSet').change(function(){
-					molgenis.getMappingManager().changeDataSet('${userName}', $(this).val(), dataSetIds);
+					mappingManager.changeDataSet('${userName}', $(this).val(), dataSetIds);
 				});
 				$('#downloadButton').click(function(){
-					molgenis.getMappingManager().downloadMappings();
+					mappingManager.downloadMappings();
 					return false;
 				});
 				$('#help-button').click(function(){
-					molgenis.getMappingManager().createHelpModal();
+					mappingManager.createHelpModal();
 				});
 				
 				$('#verify-button').click(function(){

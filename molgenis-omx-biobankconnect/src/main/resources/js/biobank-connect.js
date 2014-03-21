@@ -1,55 +1,36 @@
-(function($, molgenis) {
+(function($, molgenis, w) {
 	"use strict";
 	
-	var ns = molgenis;
-	var restApi = new ns.RestClient();
-	var searchApi = new ns.SearchClient();
-	var CONTEXT_URL = null;
-	var isRunning = null;
-	var standardModal = new ns.StandardModal();
-	var catalogueChooser = new ns.CatalogueChooser();
-	var ontologyAnnotator = new ns.OntologyAnnotator();
-	var mappingManager = new ns.MappingManager();
-	var algorithmEditor = new ns.AlgorithmEditor();
-
-	ns.setContextURL = function(CONTEXT_URL){
-		this.CONTEXT_URL = CONTEXT_URL;
-	};
+	var searchApi = new molgenis.SearchClient();
+	var standardModal = new molgenis.StandardModal();
 	
-	ns.getContextURL = function(){
-		return this.CONTEXT_URL;
-	};
-	
-	ns.setIsRunning = function(isRunning){
-		this.isRunning = isRunning;
-	};
-	
-	ns.getIsRunning = function(){
-		return this.isRunning;
-	};
-	
-	ns.hrefToId = function(href){
+	molgenis.hrefToId = function(href){
 		return href.substring(href.lastIndexOf('/') + 1); 
 	};
 	
-	ns.getCatalogueChooser = function() {
-		return catalogueChooser;
+	molgenis.showMessage = function(alertClass, message, parentDiv){
+		var messageDiv = $('#alert-message');
+		if(messageDiv.length === 0) messageDiv = $('<div id="alert-message"></div>').addClass('span12');
+		var button = $('<button type="button" class="close" data-dismiss="alert">&times;</button>');
+		messageDiv.empty().addClass(alertClass).css('margin-left', '-1px').append(button);
+		$('<span><strong>Message : </strong>' + message + '</span>').appendTo(messageDiv);
+		w.setTimeout(function(){messageDiv.fadeOut(1000).remove()}, 10000);
+		button.click(function(){
+			messageDiv.remove();
+		});
+		parentDiv.prepend(messageDiv);
+	}
+	
+	molgenis.i18nDescription = function(feature){
+		if(feature.description === undefined) feature.description = '';
+		if(feature.description.indexOf('{') !== 0){
+			feature.description = '{"en":"' + (feature.description === null ? '' : feature.description.replace(new RegExp('"','gm'), '')) +'"}';
+		}
+		return eval('(' + feature.description + ')');
 	};
 	
-	ns.getOntologyAnnotator = function() {
-		return ontologyAnnotator;
-	};
-	
-	ns.getMappingManager = function() {
-		return mappingManager;
-	};
-	
-	ns.getAlgorithmEditor = function() {
-		return algorithmEditor;
-	};
-	
-	ns.ontologyMatcherRunning = function(callback, contextUrl) {
-		if(contextUrl === undefined || contextUrl === null) contextUrl = ns.getContextUrl();
+	molgenis.ontologyMatcherRunning = function (callback, contextUrl) {
+		if(contextUrl === undefined || contextUrl === null) contextUrl = molgenis.getContextUrl();
 		$.ajax({
 			type : 'GET',
 			url : contextUrl + '/running',
@@ -64,7 +45,7 @@
 					items.push('<div class="offset1"><p>other user is currently running BiobankConnect using the same account, please be patient or login as another user!</p></div></div>');
 					$('#wizardForm').html(items.join(''));
 					setTimeout(function(){
-						ns.ontologyMatcherRunning(callback, contextUrl);
+						molgenis.ontologyMatcherRunning(callback, contextUrl);
 					}, 5000);
 				}else{
 					var childElements = $('#wizardForm').data('childElements');
@@ -86,7 +67,7 @@
 		});
 	};
 	
-	ns.checkMatchingStatus = function(contextUrl, parentElement, currentStatus, prevStage) {
+	molgenis.checkMatchingStatus = function(contextUrl, parentElement, currentStatus, prevStage) {
 		$.ajax({
 			type : 'GET',
 			url : contextUrl + '/match/status',
@@ -119,9 +100,8 @@
 					}else{
 						$('#other-user-alert').remove();
 					}
-					
 					setTimeout(function(){
-						ns.checkMatchingStatus(contextUrl, parentElement, currentStatus)
+						molgenis.checkMatchingStatus(contextUrl, parentElement, currentStatus)
 					}, 3000);
 				}else {
 					$.each(currentStatus, function(stageName, progressBar){
@@ -139,7 +119,7 @@
 		});
 	};
 	
-	ns.dataItemsTypeahead = function (type, dataSetId, query, response){
+	molgenis.dataItemsTypeahead = function (type, dataSetId, query, response){
 		var queryRules = [{
 			field : 'type',
 			operator : 'EQUALS',
@@ -158,7 +138,6 @@
 				rules:[queryRules]
 			}
 		};
-		
 		searchApi.search(searchRequest, function(searchReponse){
 			var result = [];
 			var dataMap = {};
@@ -168,6 +147,42 @@
 					var name = hit.columnValueMap.name;
 					result.push(name);
 					dataMap[name] = hit.columnValueMap;
+				}
+			});
+			$(document).data('dataMap', dataMap);
+			response(result);
+		});
+	};
+	
+	molgenis.ontologyTermTypeahead = function (field, query, response){
+		var queryRules = [{
+			field : field,
+			operator : 'LIKE',
+			value : query,
+		},{
+			operator : 'OR'
+		},{
+			field : field,
+			operator : 'EQUALS',
+			value : query,
+		}];
+		var searchRequest = {
+			documentType : null,
+			query : {
+				pageSize: 40,
+				rules: [queryRules]
+			}
+		};
+		searchApi.search(searchRequest, function(searchReponse){
+			var result = [];
+			var dataMap = {};
+			$.each(searchReponse.searchHits, function(index, hit){
+				var ontologyName = hit.columnValueMap.ontologyLabel;
+				var termName = hit.columnValueMap.ontologyTermSynonym;
+				termName = ontologyName === '' ? termName : ontologyName + ':' + termName;
+				if($.inArray(termName, result) === -1){					
+					result.push(termName);
+					dataMap[termName] = hit.columnValueMap;
 				}
 			});
 			$(document).data('dataMap', dataMap);
@@ -189,4 +204,4 @@
 		    }
 		};
 	});
-}($, window.top.molgenis = window.top.molgenis || {}));
+}($, window.top.molgenis = window.top.molgenis || {}, window.top));
