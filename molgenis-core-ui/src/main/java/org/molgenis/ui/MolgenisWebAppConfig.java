@@ -102,7 +102,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		PropertySourcesPlaceholderConfigurer pspc = new PropertySourcesPlaceholderConfigurer();
 		Resource[] resources = new Resource[]
 		{ new FileSystemResource(System.getProperty("molgenis.home") + "/molgenis-server.properties"),
-				new ClassPathResource("/molgenis.properties"), new ClassPathResource("/version.properties") };
+				new ClassPathResource("/molgenis.properties") };
 		pspc.setLocations(resources);
 		pspc.setFileEncoding("UTF-8");
 		pspc.setIgnoreUnresolvablePlaceholders(true);
