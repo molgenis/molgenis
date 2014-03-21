@@ -16,7 +16,7 @@
 	
 	var restApi = new molgenis.RestClient();
 	
-	function createQuery(lookupAttributeNames, terms) {
+	function createQuery(lookupAttributeNames, terms, operator) {
 		var q = [];
 		
 		$.each(lookupAttributeNames, function(index, attrName) {
@@ -30,7 +30,7 @@
                     }
                     q.push({
                         field: attrName,
-                        operator: 'LIKE',
+                        operator: operator,
                         value: terms[index]
                     });
                 });
@@ -85,14 +85,14 @@
 			minimumInputLength: 2,
             multiple: (attributeMetaData.fieldType === 'MREF'),
 			query: function (options){
-				var query = createQuery(lookupAttrNames, [options.term]);
+				var query = createQuery(lookupAttrNames, [options.term],'LIKE');
 				restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {num: 10, q: query}}, function(data) {
 					options.callback({results: data.items, more: false});
 				});           
             },
 			initSelection: function(element, callback) {
 				//Only called when the input has a value
-				var query = createQuery(lookupAttrNames, element.val().split(','));
+				var query = createQuery(lookupAttrNames, element.val().split(','), 'EQUALS');
 				restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {q: query}}, function(data) {
 					callback(data.items);
 				});
