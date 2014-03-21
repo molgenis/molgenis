@@ -120,8 +120,9 @@ public class DataExplorerController extends MolgenisPluginController
 	 * @return the view name
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(@RequestParam(value = "dataset", required = false) String selectedEntityName,
-			@RequestParam(value = "wizard", required = false) Boolean wizard, Model model) throws Exception
+	public String init(@RequestParam(value = "dataset", required = false)
+	String selectedEntityName, @RequestParam(value = "wizard", required = false)
+	Boolean wizard, Model model) throws Exception
 	{
 		Iterable<EntityMetaData> entitiesMeta = Iterables.transform(dataService.getEntityNames(),
 				new Function<String, EntityMetaData>()
@@ -145,7 +146,8 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/module/{moduleId}", method = GET)
-	public String getModule(@PathVariable("moduleId") String moduleId, Model model)
+	public String getModule(@PathVariable("moduleId")
+	String moduleId, Model model)
 	{
 		if (moduleId.equals("data"))
 		{
@@ -172,7 +174,8 @@ public class DataExplorerController extends MolgenisPluginController
 	 */
 	@RequestMapping(value = "/modules", method = GET)
 	@ResponseBody
-	public ModulesConfigResponse getModules(@RequestParam("entity") String entityName)
+	public ModulesConfigResponse getModules(@RequestParam("entity")
+	String entityName)
 	{
 		// get data explorer settings
 		boolean modCharts = molgenisSettings.getBooleanProperty(KEY_MOD_CHARTS, DEFAULT_VAL_MOD_CHARTS);
@@ -251,8 +254,8 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/download", method = POST)
-	public void download(@RequestParam("dataRequest") String dataRequestStr, HttpServletResponse response)
-			throws IOException
+	public void download(@RequestParam("dataRequest")
+	String dataRequestStr, HttpServletResponse response) throws IOException
 	{
 		// Workaround because binding with @RequestBody is not possible:
 		// http://stackoverflow.com/a/9970672
@@ -298,7 +301,9 @@ public class DataExplorerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/aggregate", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
 	@ResponseBody
-	public AggregateResponse aggregate(@Valid @RequestBody AggregateRequest request)
+	public AggregateResponse aggregate(@Valid
+	@RequestBody
+	AggregateRequest request)
 	{
 		String entityName = request.getEntityName();
 		String xAttributeName = request.getXAxisAttributeName();
@@ -443,9 +448,7 @@ public class DataExplorerController extends MolgenisPluginController
 					// No y attribute chosen
 					Query query = q.getRules().isEmpty() ? new QueryImpl() : new QueryImpl(q).and();
 					query.eq(xAttributeName, xValue);
-					System.out.println(query);
 					long count = dataService.count(entityName, query);
-					System.out.println(count);
 					row.add(count);
 					if (totals.isEmpty())
 					{
