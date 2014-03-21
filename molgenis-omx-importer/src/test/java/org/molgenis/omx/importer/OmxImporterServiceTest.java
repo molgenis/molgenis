@@ -18,9 +18,9 @@ import javax.persistence.Persistence;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
-import org.molgenis.data.FileRepositorySourceFactory;
-import org.molgenis.data.RepositorySource;
-import org.molgenis.data.excel.ExcelRepositorySource;
+import org.molgenis.data.FileRepositoryCollectionFactory;
+import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.importer.EntityImportService;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.QueryImpl;
@@ -96,17 +96,17 @@ public class OmxImporterServiceTest
 	private OmxImporterService importer;
 	private EmbeddedElasticSearchServiceFactory factory;
 	private SearchService searchService;
-	private FileRepositorySourceFactory fileRepositorySourceFactory;
+	private FileRepositoryCollectionFactory fileRepositorySourceFactory;
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
 		entityManager = Persistence.createEntityManagerFactory("molgenis-import-test").createEntityManager();
 		dataService = new DataServiceImpl();
-		fileRepositorySourceFactory = new FileRepositorySourceFactory();
+		fileRepositorySourceFactory = new FileRepositoryCollectionFactory();
 
-		fileRepositorySourceFactory.addFileRepositorySourceClass(ExcelRepositorySource.class,
-				ExcelRepositorySource.EXTENSIONS);
+		fileRepositorySourceFactory.addFileRepositoryCollectionClass(ExcelRepositoryCollection.class,
+				ExcelRepositoryCollection.EXTENSIONS);
 		EntityValidator validator = new DefaultEntityValidator(dataService, new EntityAttributesValidator());
 		QueryResolver queryResolver = new QueryResolver(dataService);
 
@@ -156,9 +156,9 @@ public class OmxImporterServiceTest
 	@Test
 	public void testImportSampleOmx() throws IOException, ValueConverterException
 	{
-		RepositorySource source = fileRepositorySourceFactory
-				.createFileRepositorySource(loadTestFile("example-omx.xls"));
-		importer.doImport(source.getRepositories(), DatabaseAction.ADD_UPDATE_EXISTING);
+		RepositoryCollection source = fileRepositorySourceFactory
+				.createFileRepositoryCollection(loadTestFile("example-omx.xls"));
+		importer.doImport(source, DatabaseAction.ADD_UPDATE_EXISTING);
 
 		assertEquals(dataService.count(DataSet.ENTITY_NAME, new QueryImpl()), 1);
 		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME, new QueryImpl(), DataSet.class);
@@ -178,9 +178,9 @@ public class OmxImporterServiceTest
 	{
 		try
 		{
-			RepositorySource source = fileRepositorySourceFactory
-					.createFileRepositorySource(loadTestFile("missing-xref.xlsx"));
-			importer.doImport(source.getRepositories(), DatabaseAction.ADD_UPDATE_EXISTING);
+			RepositoryCollection source = fileRepositorySourceFactory
+					.createFileRepositoryCollection(loadTestFile("missing-xref.xlsx"));
+			importer.doImport(source, DatabaseAction.ADD_UPDATE_EXISTING);
 			fail("Should have thrown MolgenisValidationException");
 		}
 		catch (MolgenisValidationException e)
@@ -197,9 +197,9 @@ public class OmxImporterServiceTest
 	{
 		try
 		{
-			RepositorySource source = fileRepositorySourceFactory
-					.createFileRepositorySource(loadTestFile("missing-mref.xlsx"));
-			importer.doImport(source.getRepositories(), DatabaseAction.ADD_UPDATE_EXISTING);
+			RepositoryCollection source = fileRepositorySourceFactory
+					.createFileRepositoryCollection(loadTestFile("missing-mref.xlsx"));
+			importer.doImport(source, DatabaseAction.ADD_UPDATE_EXISTING);
 			fail("Should have thrown MolgenisValidationException");
 		}
 		catch (MolgenisValidationException e)
@@ -216,9 +216,9 @@ public class OmxImporterServiceTest
 	{
 		try
 		{
-			RepositorySource source = fileRepositorySourceFactory
-					.createFileRepositorySource(loadTestFile("wrong-email-value.xlsx"));
-			importer.doImport(source.getRepositories(), DatabaseAction.ADD_UPDATE_EXISTING);
+			RepositoryCollection source = fileRepositorySourceFactory
+					.createFileRepositoryCollection(loadTestFile("wrong-email-value.xlsx"));
+			importer.doImport(source, DatabaseAction.ADD_UPDATE_EXISTING);
 			fail("Should have thrown MolgenisValidationException");
 		}
 		catch (MolgenisValidationException e)
@@ -235,9 +235,9 @@ public class OmxImporterServiceTest
 	{
 		try
 		{
-			RepositorySource source = fileRepositorySourceFactory
-					.createFileRepositorySource(loadTestFile("feature-in-multiple-protocols.xls"));
-			importer.doImport(source.getRepositories(), DatabaseAction.ADD_UPDATE_EXISTING);
+			RepositoryCollection source = fileRepositorySourceFactory
+					.createFileRepositoryCollection(loadTestFile("feature-in-multiple-protocols.xls"));
+			importer.doImport(source, DatabaseAction.ADD_UPDATE_EXISTING);
 			fail("Should have thrown MolgenisValidationException");
 		}
 		catch (MolgenisValidationException e)

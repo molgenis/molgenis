@@ -28,8 +28,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.FileRepositorySourceFactory;
-import org.molgenis.data.RepositorySource;
+import org.molgenis.data.FileRepositoryCollectionFactory;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.Repository;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntitiesValidator;
@@ -63,13 +63,13 @@ public class EntitiesValidatorImpl implements EntitiesValidator
 	</#list>
 	}
 	
-	private final FileRepositorySourceFactory fileRepositorySourceFactory;
+	private final FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
 
 	@Autowired
-	public EntitiesValidatorImpl(FileRepositorySourceFactory fileRepositorySourceFactory)
+	public EntitiesValidatorImpl(FileRepositoryCollectionFactory fileRepositoryCollectionFactory)
 	{
-		if (fileRepositorySourceFactory == null) throw new IllegalArgumentException("fileRepositorySourceFactory is null");
-		this.fileRepositorySourceFactory = fileRepositorySourceFactory;
+		if (fileRepositoryCollectionFactory == null) throw new IllegalArgumentException("fileRepositoryCollectionFactory is null");
+		this.fileRepositoryCollectionFactory = fileRepositoryCollectionFactory;
 	}
 	
 	@Override
@@ -77,11 +77,13 @@ public class EntitiesValidatorImpl implements EntitiesValidator
 	{
 		EntitiesValidationReport validationReport = new EntitiesValidationReportImpl();
 
-		RepositorySource repositorySource = fileRepositorySourceFactory.createFileRepositorySource(file);
+		RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 		try
 		{
-			for (Repository repository : repositorySource.getRepositories())
+			for (String name : repositoryCollection.getEntityNames())
 			{
+				Repository repository = repositoryCollection.getRepositoryByEntityName(name);
+			
 				try
 				{
 					boolean isImportableEntity = ENTITIES_IMPORTABLE.containsKey(repository.getName().toLowerCase());

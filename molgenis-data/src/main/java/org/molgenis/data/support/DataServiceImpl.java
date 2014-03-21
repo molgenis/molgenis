@@ -90,21 +90,6 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public Repository getRepositoryByUrl(String url)
-	{
-		for (Map.Entry<String, Repository> entry : repositories.entrySet())
-		{
-			Repository repository = entry.getValue();
-			if (repository.getUrl().equalsIgnoreCase(url))
-			{
-				return repository;
-			}
-		}
-
-		return null;
-	}
-
-	@Override
 	public long count(String entityName, Query q)
 	{
 		return getQueryable(entityName).count(q);

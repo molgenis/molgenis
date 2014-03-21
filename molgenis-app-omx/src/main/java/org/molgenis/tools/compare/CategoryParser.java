@@ -12,8 +12,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.RepositorySource;
-import org.molgenis.data.excel.ExcelRepositorySource;
+import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.processor.TrimProcessor;
 
 public class CategoryParser
@@ -34,53 +34,47 @@ public class CategoryParser
 
 	public void check(String file, String datasetMatrix) throws IOException, InvalidFormatException
 	{
-		RepositorySource repositorySource = new ExcelRepositorySource(new File(file), new TrimProcessor());
+		RepositoryCollection repositorySource = new ExcelRepositoryCollection(new File(file), new TrimProcessor());
+
+		List<String> listOfCategoricalFeatures = new ArrayList<String>();
+		Map<String, List<String>> hashCategories = new HashMap<String, List<String>>();
+
+		Repository repo = repositorySource.getRepositoryByEntityName("observablefeature");
 		try
 		{
-			List<String> listOfCategoricalFeatures = new ArrayList<String>();
-			Map<String, List<String>> hashCategories = new HashMap<String, List<String>>();
-
-			Repository repo = repositorySource.getRepository("observablefeature");
-			try
+			for (Entity entity : repo)
 			{
-				for (Entity entity : repo)
+				if ("categorical".equals(entity.getString("datatype")))
 				{
-					if ("categorical".equals(entity.getString("datatype")))
-					{
-						listOfCategoricalFeatures.add(entity.getString("identifier"));
-						hashCategories.put(entity.getString("identifier"), new ArrayList<String>());
-					}
+					listOfCategoricalFeatures.add(entity.getString("identifier"));
+					hashCategories.put(entity.getString("identifier"), new ArrayList<String>());
 				}
-			}
-			finally
-			{
-				repo.close();
-			}
-
-			Repository readObservableDataMatrixRepo = repositorySource.getRepository(datasetMatrix);
-			try
-			{
-				for (Entity entity : readObservableDataMatrixRepo)
-				{
-					for (String category : listOfCategoricalFeatures)
-					{
-						List<String> getList = hashCategories.get(category);
-						if (!hashCategories.get(category).contains(entity.getString(category)))
-						{
-							getList.add(entity.getString(category));
-						}
-					}
-				}
-				printForCategoryTab(hashCategories);
-			}
-			finally
-			{
-				readObservableDataMatrixRepo.close();
 			}
 		}
 		finally
 		{
-			repositorySource.close();
+			repo.close();
+		}
+
+		Repository readObservableDataMatrixRepo = repositorySource.getRepositoryByEntityName(datasetMatrix);
+		try
+		{
+			for (Entity entity : readObservableDataMatrixRepo)
+			{
+				for (String category : listOfCategoricalFeatures)
+				{
+					List<String> getList = hashCategories.get(category);
+					if (!hashCategories.get(category).contains(entity.getString(category)))
+					{
+						getList.add(entity.getString(category));
+					}
+				}
+			}
+			printForCategoryTab(hashCategories);
+		}
+		finally
+		{
+			readObservableDataMatrixRepo.close();
 		}
 
 	}

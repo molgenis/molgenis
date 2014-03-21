@@ -20,7 +20,7 @@ import java.util.Set;
 import org.molgenis.framework.db.AbstractEntitiesImporter;
 
 import org.molgenis.data.importer.EntityImportService;
-import org.molgenis.data.FileRepositorySourceFactory;
+import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -43,9 +43,9 @@ public class EntitiesImporterImpl extends AbstractEntitiesImporter
 	}
 	
 	@Autowired
-	public EntitiesImporterImpl(FileRepositorySourceFactory fileRepositorySourceFactory, EntityImportService entityImportService)
+	public EntitiesImporterImpl(FileRepositoryCollectionFactory fileRepositoryCollectionFactory, EntityImportService entityImportService)
 	{
-		super(fileRepositorySourceFactory, entityImportService);
+		super(fileRepositoryCollectionFactory, entityImportService);
 	}
 
 	protected Set<String> getEntitiesImportable()
