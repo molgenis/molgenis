@@ -2,7 +2,7 @@ package org.molgenis.data.csv;
 
 import javax.annotation.PostConstruct;
 
-import org.molgenis.data.DataService;
+import org.molgenis.data.FileRepositorySourceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
@@ -11,7 +11,7 @@ public class CsvDataConfig
 {
 
 	@Autowired
-	private DataService dataService;
+	private FileRepositorySourceFactory fileRepositorySourceFactory;
 
 	/**
 	 * Registers the CsvRepositorySource factory so it can be used by DataService.createFileRepositorySource(File file);
@@ -19,7 +19,8 @@ public class CsvDataConfig
 	@PostConstruct
 	public void registerCsvRepositorySource()
 	{
-		dataService.addFileRepositorySourceClass(CsvRepositorySource.class, CsvRepositorySource.EXTENSIONS);
+		fileRepositorySourceFactory.addFileRepositorySourceClass(CsvRepositorySource.class,
+				CsvRepositorySource.EXTENSIONS);
 	}
 
 }

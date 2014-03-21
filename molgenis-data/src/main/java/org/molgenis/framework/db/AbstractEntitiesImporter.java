@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
+import org.molgenis.data.FileRepositorySourceFactory;
 import org.molgenis.data.Repository;
 import org.molgenis.data.importer.EntityImportService;
 import org.molgenis.data.validation.ConstraintViolation;
@@ -17,14 +17,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 public abstract class AbstractEntitiesImporter implements EntitiesImporter
 {
-	private final DataService dataService;
+	private final FileRepositorySourceFactory fileRepositorySourceFactory;
 	private final EntityImportService entityImportService;
 
-	public AbstractEntitiesImporter(DataService dataService, EntityImportService entityImportService)
+	public AbstractEntitiesImporter(FileRepositorySourceFactory fileRepositorySourceFactory,
+			EntityImportService entityImportService)
 	{
-		if (dataService == null) throw new IllegalArgumentException("dataService is null");
+		if (fileRepositorySourceFactory == null) throw new IllegalArgumentException(
+				"fileRepositorySourceFactory is null");
 		if (entityImportService == null) throw new IllegalArgumentException("entityImportService is null");
-		this.dataService = dataService;
+		this.fileRepositorySourceFactory = fileRepositorySourceFactory;
 		this.entityImportService = entityImportService;
 	}
 
@@ -33,7 +35,7 @@ public abstract class AbstractEntitiesImporter implements EntitiesImporter
 	{ IOException.class })
 	public EntityImportReport importEntities(File file, DatabaseAction dbAction) throws IOException
 	{
-		return importEntities(dataService.createFileRepositorySource(file).getRepositories(), dbAction);
+		return importEntities(fileRepositorySourceFactory.createFileRepositorySource(file).getRepositories(), dbAction);
 	}
 
 	@Override

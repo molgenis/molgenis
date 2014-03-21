@@ -1,6 +1,7 @@
 package org.molgenis.data.jpa;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.Repository;
 import org.molgenis.data.RepositorySource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -31,7 +32,10 @@ public class JpaRepositoryRegistrator implements ApplicationListener<ContextRefr
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
-		dataService.addRepositories(repositorySource);
+		for (Repository repository : repositorySource.getRepositories())
+		{
+			dataService.addRepository(repository);
+		}
 	}
 
 	@Override

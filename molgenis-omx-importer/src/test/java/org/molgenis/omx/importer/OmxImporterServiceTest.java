@@ -18,6 +18,7 @@ import javax.persistence.Persistence;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
+import org.molgenis.data.FileRepositorySourceFactory;
 import org.molgenis.data.RepositorySource;
 import org.molgenis.data.excel.ExcelRepositorySource;
 import org.molgenis.data.importer.EntityImportService;
@@ -95,13 +96,17 @@ public class OmxImporterServiceTest
 	private OmxImporterService importer;
 	private EmbeddedElasticSearchServiceFactory factory;
 	private SearchService searchService;
+	private FileRepositorySourceFactory fileRepositorySourceFactory;
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
 		entityManager = Persistence.createEntityManagerFactory("molgenis-import-test").createEntityManager();
 		dataService = new DataServiceImpl();
-		dataService.addFileRepositorySourceClass(ExcelRepositorySource.class, ExcelRepositorySource.EXTENSIONS);
+		fileRepositorySourceFactory = new FileRepositorySourceFactory();
+
+		fileRepositorySourceFactory.addFileRepositorySourceClass(ExcelRepositorySource.class,
+				ExcelRepositorySource.EXTENSIONS);
 		EntityValidator validator = new DefaultEntityValidator(dataService, new EntityAttributesValidator());
 		QueryResolver queryResolver = new QueryResolver(dataService);
 
@@ -136,8 +141,8 @@ public class OmxImporterServiceTest
 
 		EntityImportService eis = new EntityImportService();
 		eis.setDataService(dataService);
-		importer = new OmxImporterServiceImpl(dataService, searchService, new EntitiesImporterImpl(dataService, eis),
-				validator, new QueryResolver(dataService));
+		importer = new OmxImporterServiceImpl(dataService, searchService, new EntitiesImporterImpl(
+				fileRepositorySourceFactory, eis), validator, new QueryResolver(dataService));
 
 		entityManager.getTransaction().begin();
 
@@ -151,7 +156,8 @@ public class OmxImporterServiceTest
 	@Test
 	public void testImportSampleOmx() throws IOException, ValueConverterException
 	{
-		RepositorySource source = dataService.createFileRepositorySource(loadTestFile("example-omx.xls"));
+		RepositorySource source = fileRepositorySourceFactory
+				.createFileRepositorySource(loadTestFile("example-omx.xls"));
 		importer.doImport(source.getRepositories(), DatabaseAction.ADD_UPDATE_EXISTING);
 
 		assertEquals(dataService.count(DataSet.ENTITY_NAME, new QueryImpl()), 1);
@@ -172,7 +178,8 @@ public class OmxImporterServiceTest
 	{
 		try
 		{
-			RepositorySource source = dataService.createFileRepositorySource(loadTestFile("missing-xref.xlsx"));
+			RepositorySource source = fileRepositorySourceFactory
+					.createFileRepositorySource(loadTestFile("missing-xref.xlsx"));
 			importer.doImport(source.getRepositories(), DatabaseAction.ADD_UPDATE_EXISTING);
 			fail("Should have thrown MolgenisValidationException");
 		}
@@ -190,7 +197,8 @@ public class OmxImporterServiceTest
 	{
 		try
 		{
-			RepositorySource source = dataService.createFileRepositorySource(loadTestFile("missing-mref.xlsx"));
+			RepositorySource source = fileRepositorySourceFactory
+					.createFileRepositorySource(loadTestFile("missing-mref.xlsx"));
 			importer.doImport(source.getRepositories(), DatabaseAction.ADD_UPDATE_EXISTING);
 			fail("Should have thrown MolgenisValidationException");
 		}
@@ -208,7 +216,8 @@ public class OmxImporterServiceTest
 	{
 		try
 		{
-			RepositorySource source = dataService.createFileRepositorySource(loadTestFile("wrong-email-value.xlsx"));
+			RepositorySource source = fileRepositorySourceFactory
+					.createFileRepositorySource(loadTestFile("wrong-email-value.xlsx"));
 			importer.doImport(source.getRepositories(), DatabaseAction.ADD_UPDATE_EXISTING);
 			fail("Should have thrown MolgenisValidationException");
 		}
@@ -226,7 +235,7 @@ public class OmxImporterServiceTest
 	{
 		try
 		{
-			RepositorySource source = dataService
+			RepositorySource source = fileRepositorySourceFactory
 					.createFileRepositorySource(loadTestFile("feature-in-multiple-protocols.xls"));
 			importer.doImport(source.getRepositories(), DatabaseAction.ADD_UPDATE_EXISTING);
 			fail("Should have thrown MolgenisValidationException");

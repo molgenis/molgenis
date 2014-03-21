@@ -9,6 +9,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
+import org.molgenis.data.FileRepositorySourceFactory;
 import org.molgenis.data.RepositorySource;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
@@ -39,6 +40,9 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 	@Autowired
 	private DataService dataService;
 
+	@Autowired
+	private FileRepositorySourceFactory fileRepositorySourceFactory;
+
 	@Override
 	public String getTitle()
 	{
@@ -65,7 +69,8 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 				DatabaseAction entityDbAction = toDatabaseAction(entityImportOption);
 				if (entityDbAction == null) throw new IOException("unknown database action: " + entityImportOption);
 
-				RepositorySource repositorySource = dataService.createFileRepositorySource(importWizard.getFile());
+				RepositorySource repositorySource = fileRepositorySourceFactory.createFileRepositorySource(importWizard
+						.getFile());
 
 				try
 				{

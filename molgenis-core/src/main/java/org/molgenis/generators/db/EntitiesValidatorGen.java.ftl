@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataService;
+import org.molgenis.data.FileRepositorySourceFactory;
 import org.molgenis.data.RepositorySource;
 import org.molgenis.data.Repository;
 import org.molgenis.framework.db.EntitiesValidationReport;
@@ -63,13 +63,13 @@ public class EntitiesValidatorImpl implements EntitiesValidator
 	</#list>
 	}
 	
-	private final DataService dataService;
+	private final FileRepositorySourceFactory fileRepositorySourceFactory;
 
 	@Autowired
-	public EntitiesValidatorImpl(DataService dataService)
+	public EntitiesValidatorImpl(FileRepositorySourceFactory fileRepositorySourceFactory)
 	{
-		if (dataService == null) throw new IllegalArgumentException("dataService is null");
-		this.dataService = dataService;
+		if (fileRepositorySourceFactory == null) throw new IllegalArgumentException("fileRepositorySourceFactory is null");
+		this.fileRepositorySourceFactory = fileRepositorySourceFactory;
 	}
 	
 	@Override
@@ -77,7 +77,7 @@ public class EntitiesValidatorImpl implements EntitiesValidator
 	{
 		EntitiesValidationReport validationReport = new EntitiesValidationReportImpl();
 
-		RepositorySource repositorySource = dataService.createFileRepositorySource(file);
+		RepositorySource repositorySource = fileRepositorySourceFactory.createFileRepositorySource(file);
 		try
 		{
 			for (Repository repository : repositorySource.getRepositories())

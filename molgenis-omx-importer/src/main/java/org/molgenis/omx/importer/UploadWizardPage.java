@@ -2,14 +2,24 @@ package org.molgenis.omx.importer;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 
 import org.apache.log4j.Logger;
-import org.molgenis.data.*;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.FileRepositorySourceFactory;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositorySource;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntitiesValidator;
@@ -30,14 +40,19 @@ public class UploadWizardPage extends AbstractWizardPage
 	private static final String DATASET_PREFIX = DataSet.class.getSimpleName().toLowerCase();
 	private final transient DataService dataService;
 	private final transient EntitiesValidator entitiesValidator;
+	private final transient FileRepositorySourceFactory fileRepositorySourceFactory;
 
 	@Autowired
-	public UploadWizardPage(DataService dataService, EntitiesValidator entitiesValidator)
+	public UploadWizardPage(DataService dataService, EntitiesValidator entitiesValidator,
+			FileRepositorySourceFactory fileRepositorySourceFactory)
 	{
 		this.dataService = dataService;
 		this.entitiesValidator = entitiesValidator;
+		this.fileRepositorySourceFactory = fileRepositorySourceFactory;
 		if (dataService == null) throw new IllegalArgumentException("DataService is null");
 		if (entitiesValidator == null) throw new IllegalArgumentException("EntitiesValidator is null");
+		if (fileRepositorySourceFactory == null) throw new IllegalArgumentException(
+				"FileRepositorySopurceFactory is null");
 	}
 
 	@Override
@@ -105,7 +120,7 @@ public class UploadWizardPage extends AbstractWizardPage
 			}
 		}
 
-		Map<String, Boolean> dataSetsImportable = validateDataSetInstances(dataService, file);
+		Map<String, Boolean> dataSetsImportable = validateDataSetInstances(fileRepositorySourceFactory, file);
 
 		// determine if validation succeeded
 		boolean ok = true;
@@ -152,9 +167,10 @@ public class UploadWizardPage extends AbstractWizardPage
 		return msg;
 	}
 
-	private Map<String, Boolean> validateDataSetInstances(DataService dataService, File file) throws IOException
+	private Map<String, Boolean> validateDataSetInstances(FileRepositorySourceFactory fileRepositorySourceFactory,
+			File file) throws IOException
 	{
-		RepositorySource repositorySource = dataService.createFileRepositorySource(file);
+		RepositorySource repositorySource = fileRepositorySourceFactory.createFileRepositorySource(file);
 
 		// get dataset identifiers (case insensitive)
 		Set<String> datasetIdentifiers = new HashSet<String>();
