@@ -79,9 +79,6 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String KEY_MOD_AGGREGATES = "plugin.dataexplorer.mod.aggregates";
 	public static final String KEY_MOD_CHARTS = "plugin.dataexplorer.mod.charts";
 	public static final String KEY_MOD_DATA = "plugin.dataexplorer.mod.data";
-	private static final String MODEL_KEY_MOD_AGGREGATES = "mod_aggregates";
-	private static final String MODEL_KEY_MOD_CHARTS = "mod_charts";
-	private static final String MODEL_KEY_MOD_DATA = "mod_data";
 	private static final boolean DEFAULT_VAL_MOD_AGGREGATES = true;
 	private static final boolean DEFAULT_VAL_MOD_CHARTS = true;
 	private static final boolean DEFAULT_VAL_MOD_DATA = true;
@@ -123,9 +120,8 @@ public class DataExplorerController extends MolgenisPluginController
 	 * @return the view name
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(@RequestParam(value = "dataset", required = false)
-	String selectedEntityName, @RequestParam(value = "wizard", required = false)
-	Boolean wizard, Model model) throws Exception
+	public String init(@RequestParam(value = "dataset", required = false) String selectedEntityName,
+			@RequestParam(value = "wizard", required = false) Boolean wizard, Model model) throws Exception
 	{
 		Iterable<EntityMetaData> entitiesMeta = Iterables.transform(dataService.getEntityNames(),
 				new Function<String, EntityMetaData>()
@@ -145,20 +141,11 @@ public class DataExplorerController extends MolgenisPluginController
 		model.addAttribute("selectedEntityName", selectedEntityName);
 		model.addAttribute("wizard", (wizard != null) && wizard.booleanValue());
 
-		// define which modules to display
-		Boolean modCharts = molgenisSettings.getBooleanProperty(KEY_MOD_CHARTS, DEFAULT_VAL_MOD_CHARTS);
-		model.addAttribute(MODEL_KEY_MOD_CHARTS, modCharts);
-		Boolean modData = molgenisSettings.getBooleanProperty(KEY_MOD_DATA, DEFAULT_VAL_MOD_DATA);
-		model.addAttribute(MODEL_KEY_MOD_DATA, modData);
-		Boolean modAggregates = molgenisSettings.getBooleanProperty(KEY_MOD_AGGREGATES, DEFAULT_VAL_MOD_AGGREGATES);
-		model.addAttribute(MODEL_KEY_MOD_AGGREGATES, modAggregates);
-
 		return "view-dataexplorer";
 	}
 
 	@RequestMapping(value = "/module/{moduleId}", method = GET)
-	public String getModule(@PathVariable("moduleId")
-	String moduleId, Model model)
+	public String getModule(@PathVariable("moduleId") String moduleId, Model model)
 	{
 		if (moduleId.equals("data"))
 		{
@@ -185,9 +172,13 @@ public class DataExplorerController extends MolgenisPluginController
 	 */
 	@RequestMapping(value = "/modules", method = GET)
 	@ResponseBody
-	public ModulesConfigResponse getModules(@RequestParam("entity")
-	String entityName)
+	public ModulesConfigResponse getModules(@RequestParam("entity") String entityName)
 	{
+		// get data explorer settings
+		boolean modCharts = molgenisSettings.getBooleanProperty(KEY_MOD_CHARTS, DEFAULT_VAL_MOD_CHARTS);
+		boolean modData = molgenisSettings.getBooleanProperty(KEY_MOD_DATA, DEFAULT_VAL_MOD_DATA);
+		boolean modAggregates = molgenisSettings.getBooleanProperty(KEY_MOD_AGGREGATES, DEFAULT_VAL_MOD_AGGREGATES);
+
 		// set data explorer permission
 		Permission pluginPermission = null;
 		if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITE)) pluginPermission = Permission.WRITE;
@@ -200,13 +191,25 @@ public class DataExplorerController extends MolgenisPluginController
 			switch (pluginPermission)
 			{
 				case COUNT:
-					modulesConfig.add(new ModuleConfig("aggregates", "Aggregates", "grid-icon.png"));
+					if (modAggregates)
+					{
+						modulesConfig.add(new ModuleConfig("aggregates", "Aggregates", "grid-icon.png"));
+					}
 					break;
 				case READ:
 				case WRITE:
-					modulesConfig.add(new ModuleConfig("data", "Data", "grid-icon.png"));
-					modulesConfig.add(new ModuleConfig("aggregates", "Aggregates", "aggregate-icon.png"));
-					modulesConfig.add(new ModuleConfig("charts", "Charts", "chart-icon.png"));
+					if (modData)
+					{
+						modulesConfig.add(new ModuleConfig("data", "Data", "grid-icon.png"));
+					}
+					if (modAggregates)
+					{
+						modulesConfig.add(new ModuleConfig("aggregates", "Aggregates", "aggregate-icon.png"));
+					}
+					if (modCharts)
+					{
+						modulesConfig.add(new ModuleConfig("charts", "Charts", "chart-icon.png"));
+					}
 					break;
 				default:
 					throw new RuntimeException("unknown plugin permission: " + pluginPermission);
@@ -248,8 +251,8 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/download", method = POST)
-	public void download(@RequestParam("dataRequest")
-	String dataRequestStr, HttpServletResponse response) throws IOException
+	public void download(@RequestParam("dataRequest") String dataRequestStr, HttpServletResponse response)
+			throws IOException
 	{
 		// Workaround because binding with @RequestBody is not possible:
 		// http://stackoverflow.com/a/9970672
@@ -295,9 +298,7 @@ public class DataExplorerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/aggregate", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
 	@ResponseBody
-	public AggregateResponse aggregate(@Valid
-	@RequestBody
-	AggregateRequest request)
+	public AggregateResponse aggregate(@Valid @RequestBody AggregateRequest request)
 	{
 		String entityName = request.getEntityName();
 		String xAttributeName = request.getXAxisAttributeName();

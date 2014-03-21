@@ -3,13 +3,10 @@ package org.molgenis.data.annotation.impl;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Map;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
-
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -25,6 +22,9 @@ import org.molgenis.data.support.MapEntity;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 /**
  * <p>
@@ -55,7 +55,7 @@ public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements 
 
 	public static final String NAME = "EBI-CHeMBL";
 	private final DefaultHttpClient httpClient;
-    private List<Object> annotatedInput = new ArrayList<Object>();
+	private final List<Object> annotatedInput = new ArrayList<Object>();
 
 	public EbiServiceAnnotator()
 	{
@@ -75,21 +75,21 @@ public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements 
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(UNIPROT_ID, FieldTypeEnum.STRING));
 		return metadata;
 	}
-	
+
 	@Override
 	public boolean annotationDataExists()
 	{
 		boolean dataExists = true;
-		
+
 		// TODO Check if the webservice is up
-		
+
 		return dataExists;
 	}
-	
+
 	@Override
 	public List<Entity> annotateEntity(Entity entity)
 	{
-        HttpGet httpGet = new HttpGet(getServiceUri(entity));
+		HttpGet httpGet = new HttpGet(getServiceUri(entity));
 		Entity resultEntity = new MapEntity();
 
 		if (!annotatedInput.contains(entity.get(UNIPROT_ID)))
@@ -135,7 +135,7 @@ public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements 
 		if (!"".equals(json))
 		{
 			Map<String, Object> rootMap = jsonStringToMap(json);
-			Map<String, Object> resultMap = (Map) rootMap.get("target");
+			Map<String, Object> resultMap = (Map<String, Object>) rootMap.get("target");
 			resultMap.put(UNIPROT_ID, entity.get(UNIPROT_ID));
 			result = new MapEntity(resultMap);
 		}

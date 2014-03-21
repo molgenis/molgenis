@@ -14,7 +14,7 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.HgcnLocationsUtils;
+import org.molgenis.data.annotation.HgncLocationsUtils;
 import org.molgenis.data.annotation.LocusAnnotator;
 import org.molgenis.data.annotation.impl.datastructures.HPOTerm;
 import org.molgenis.data.annotation.impl.datastructures.Locus;
@@ -116,7 +116,7 @@ public class OmimHpoAnnotator extends LocusAnnotator
 
 		Locus locus = new Locus(chromosome, position);
 
-		List<String> geneSymbols = HgcnLocationsUtils.locationToHgcn(hgncLocationsProvider.getHgncLocations(), locus);
+		List<String> geneSymbols = HgncLocationsUtils.locationToHgcn(hgncLocationsProvider.getHgncLocations(), locus);
 
 		Map<String, List<HPOTerm>> geneToHpoTerms = getGeneToHpoTerms();
 		Map<String, List<OMIMTerm>> geneToOmimTerms = getGeneToOmimTerms();
