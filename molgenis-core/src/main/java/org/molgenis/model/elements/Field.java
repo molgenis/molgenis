@@ -527,8 +527,8 @@ public class Field implements Serializable
 		Entity e = this.getEntity().getModel().getEntity(this.getXrefEntityName());
 		if (e == null)
 		{
-			throw new MolgenisModelException("Xref entity '" + this.getXrefEntityName() + "' for entity '"
-					+ this.getEntity().getName() + "' not part of model.");
+			throw new MolgenisModelException("Xref entity '" + this.getXrefEntityName() + "' for attribute '"
+					+ this.getName() + "' of entity '" + this.getEntity().getName() + "' not part of model.");
 		}
 		return e;
 	}
