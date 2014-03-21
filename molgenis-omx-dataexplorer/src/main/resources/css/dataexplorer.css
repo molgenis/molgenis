@@ -155,10 +155,6 @@ a.accordion-toggle:hover,a.accordion-toggle:focus,a.accordion-toggle:active
 	margin-left: 10px;
 }
 
-#mref-query-type, .xrefsearch {
-	margin-bottom: 10px;
-}
-
 #filter-wizard-modal .modal-body {
 	min-height: 550px;
 	max-height: 550px;
