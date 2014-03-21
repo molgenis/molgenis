@@ -137,7 +137,7 @@ public class OmxImporterServiceTest
 		EntityImportService eis = new EntityImportService();
 		eis.setDataService(dataService);
 		importer = new OmxImporterServiceImpl(dataService, searchService, new EntitiesImporterImpl(dataService, eis),
-				validator);
+				validator, new QueryResolver(dataService));
 
 		entityManager.getTransaction().begin();
 

@@ -16,6 +16,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.omx.OmxLookupTableRepository;
 import org.molgenis.data.omx.OmxRepository;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.support.QueryResolver;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.data.validation.MolgenisValidationException;
@@ -41,15 +42,17 @@ public class OmxImporterServiceImpl implements OmxImporterService
 	private final SearchService searchService;
 	private final EntitiesImporter entitiesImporter;
 	private final EntityValidator entityValidator;
+	private final QueryResolver queryResolver;
 
 	@Autowired
 	public OmxImporterServiceImpl(DataService dataService, SearchService searchService,
-			EntitiesImporter entitiesImporter, EntityValidator entityValidator)
+			EntitiesImporter entitiesImporter, EntityValidator entityValidator, QueryResolver queryResolver)
 	{
 		this.dataService = dataService;
 		this.searchService = searchService;
 		this.entitiesImporter = entitiesImporter;
 		this.entityValidator = entityValidator;
+		this.queryResolver = queryResolver;
 	}
 
 	@Override
@@ -100,7 +103,7 @@ public class OmxImporterServiceImpl implements OmxImporterService
 						if (!dataService.hasRepository(categoricalFeature.getIdentifier() + "-LUT"))
 						{
 							dataService.addRepository(new OmxLookupTableRepository(dataService, categoricalFeature
-									.getIdentifier()));
+									.getIdentifier(), queryResolver));
 						}
 					}
 				}
