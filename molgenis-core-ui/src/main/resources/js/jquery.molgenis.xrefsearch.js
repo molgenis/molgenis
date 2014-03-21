@@ -83,7 +83,7 @@
 			width: 650,
 			placeholder: 'filter text',
 			minimumInputLength: 2,
-            multiple: (attributeMetaData.fieldType == 'MREF'),
+            multiple: (attributeMetaData.fieldType === 'MREF'),
 			query: function (options){
 				var query = createQuery(lookupAttrNames, [options.term]);
 				restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {num: 10, q: query}}, function(data) {
@@ -109,7 +109,7 @@
             separator: ',',
 			dropdownCssClass: 'molgenis-xrefsearch'
 		});
-        if (attributeMetaData.fieldType == 'MREF') {
+        if (attributeMetaData.fieldType === 'MREF') {
             var dropdown = $('<select id="mref-query-type" class="operator"><option value="OR">OR</option><option value="AND">AND</option></select>');
             dropdown.val(options.operator);
             dropdown.width(70);
