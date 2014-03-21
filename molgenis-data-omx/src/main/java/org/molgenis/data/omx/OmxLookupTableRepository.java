@@ -13,6 +13,7 @@ import org.molgenis.data.Writable;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.support.QueryResolver;
 import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.protocol.OmxLookupTableEntityMetaData;
@@ -23,12 +24,15 @@ public class OmxLookupTableRepository extends AbstractRepository implements Quer
 
 	private final DataService dataService;
 	private final String categoricalFeatureIdentifier;
+	private final QueryResolver queryResolver;
 
-	public OmxLookupTableRepository(DataService dataService, String categoricalFeatureIdentifier)
+	public OmxLookupTableRepository(DataService dataService, String categoricalFeatureIdentifier,
+			QueryResolver queryResolver)
 	{
 		super(BASE_URL);
 		this.dataService = dataService;
 		this.categoricalFeatureIdentifier = categoricalFeatureIdentifier;
+		this.queryResolver = queryResolver;
 	}
 
 	@Override
@@ -84,6 +88,8 @@ public class OmxLookupTableRepository extends AbstractRepository implements Quer
 	@Override
 	public long count(Query q)
 	{
+		queryResolver.resolveRefIdentifiers(q.getRules(), getEntityMetaData());
+
 		return dataService.count(Category.ENTITY_NAME,
 				new QueryImpl().eq(Category.OBSERVABLEFEATURE, getObservableFeature()));
 	}
@@ -91,6 +97,8 @@ public class OmxLookupTableRepository extends AbstractRepository implements Quer
 	@Override
 	public Iterable<Entity> findAll(Query q)
 	{
+		queryResolver.resolveRefIdentifiers(q.getRules(), getEntityMetaData());
+
 		q = new QueryImpl(q).eq(Category.OBSERVABLEFEATURE, getObservableFeature());
 		return dataService.findAll(Category.ENTITY_NAME, q);
 	}
@@ -98,6 +106,8 @@ public class OmxLookupTableRepository extends AbstractRepository implements Quer
 	@Override
 	public <E extends Entity> Iterable<E> findAll(Query q, Class<E> clazz)
 	{
+		queryResolver.resolveRefIdentifiers(q.getRules(), getEntityMetaData());
+
 		q = new QueryImpl(q).eq(Category.OBSERVABLEFEATURE, getObservableFeature());
 		return dataService.findAll(Category.ENTITY_NAME, q, clazz);
 	}
@@ -105,6 +115,8 @@ public class OmxLookupTableRepository extends AbstractRepository implements Quer
 	@Override
 	public Entity findOne(Query q)
 	{
+		queryResolver.resolveRefIdentifiers(q.getRules(), getEntityMetaData());
+
 		q = new QueryImpl(q).eq(Category.OBSERVABLEFEATURE, getObservableFeature());
 		return dataService.findOne(Category.ENTITY_NAME, q);
 	}
@@ -136,6 +148,8 @@ public class OmxLookupTableRepository extends AbstractRepository implements Quer
 	@Override
 	public <E extends Entity> E findOne(Query q, Class<E> clazz)
 	{
+		queryResolver.resolveRefIdentifiers(q.getRules(), getEntityMetaData());
+
 		q = new QueryImpl(q).eq(Category.OBSERVABLEFEATURE, getObservableFeature());
 		return dataService.findOne(Category.ENTITY_NAME, q, clazz);
 	}

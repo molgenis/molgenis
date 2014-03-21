@@ -58,11 +58,19 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 	 */
 	public GsonHttpMessageConverter()
 	{
+		this(false);
+	}
+
+	/**
+	 * Construct a new {@code GsonHttpMessageConverter} with a default {@link Gson#Gson() Gson}.
+	 */
+	public GsonHttpMessageConverter(boolean prettyPrinting)
+	{
 		super(new MediaType("application", "json", DEFAULT_CHARSET));
 
 		GsonBuilder builder = new GsonBuilder().setDateFormat(MolgenisDateFormat.DATEFORMAT_DATETIME)
 				.disableHtmlEscaping();
-		if (LOG.isTraceEnabled())
+		if (prettyPrinting)
 		{
 			builder = builder.setPrettyPrinting();
 		}
