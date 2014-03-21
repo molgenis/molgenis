@@ -35,6 +35,7 @@ import org.molgenis.data.support.AbstractCrudRepository;
 import org.molgenis.data.support.ConvertingIterable;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.support.QueryResolver;
 import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.generators.GeneratorHelper;
 import org.springframework.beans.BeanUtils;
@@ -54,20 +55,22 @@ public class JpaRepository extends AbstractCrudRepository
 	private EntityManager entityManager;
 	private final Class<? extends Entity> entityClass;
 	private final EntityMetaData entityMetaData;
+	private final QueryResolver queryResolver;
 	private final Logger logger = Logger.getLogger(getClass());
 
 	public JpaRepository(Class<? extends Entity> entityClass, EntityMetaData entityMetaData,
-			EntityValidator entityValidator)
+			EntityValidator entityValidator, QueryResolver queryResolver)
 	{
 		super(BASE_URL + entityClass.getName(), entityValidator);
 		this.entityClass = entityClass;
 		this.entityMetaData = entityMetaData;
+		this.queryResolver = queryResolver;
 	}
 
 	public JpaRepository(EntityManager entityManager, Class<? extends Entity> entityClass,
-			EntityMetaData entityMetaData, EntityValidator entityValidator)
+			EntityMetaData entityMetaData, EntityValidator entityValidator, QueryResolver queryResolver)
 	{
-		this(entityClass, entityMetaData, entityValidator);
+		this(entityClass, entityMetaData, entityValidator, queryResolver);
 		this.entityManager = entityManager;
 	}
 
@@ -126,6 +129,8 @@ public class JpaRepository extends AbstractCrudRepository
 	@Transactional(readOnly = true)
 	public long count(Query q)
 	{
+		queryResolver.resolveRefIdentifiers(q.getRules(), getEntityMetaData());
+
 		EntityManager em = getEntityManager();
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 
@@ -185,6 +190,8 @@ public class JpaRepository extends AbstractCrudRepository
 	@Transactional(readOnly = true)
 	public Iterable<Entity> findAll(Query q)
 	{
+		queryResolver.resolveRefIdentifiers(q.getRules(), getEntityMetaData());
+
 		EntityManager em = getEntityManager();
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 
