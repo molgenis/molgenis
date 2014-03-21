@@ -34,6 +34,7 @@
 			<id>dev</id>
 			<properties>
 				<minify.skipMinify>true</minify.skipMinify>
+				<molgenis.build.profile>dev</molgenis.build.profile>
 			</properties>
 		</profile>
 		<!-- release profile (default) -->
@@ -41,6 +42,7 @@
 			<id>release</id>
 			<properties>
 				<minify.skipMinify>false</minify.skipMinify>
+				<molgenis.build.profile>release</molgenis.build.profile>
 			</properties>
 			<activation>
 	            <activeByDefault>true</activeByDefault>
