@@ -138,6 +138,7 @@ public class DataExplorerController extends MolgenisPluginController
 		if (selectedEntityName == null)
 		{
 			selectedEntityName = entitiesMeta.iterator().next().getName();
+            model.addAttribute("showDatasetSelect", true);
 		}
 		model.addAttribute("selectedEntityName", selectedEntityName);
 		model.addAttribute("wizard", (wizard != null) && wizard.booleanValue());

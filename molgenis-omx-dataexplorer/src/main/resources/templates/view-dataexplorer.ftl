@@ -23,20 +23,22 @@
     <script>
     	molgenis.dataexplorer.setShowWizardOnInit(${wizard?string('true', 'false')});
     </script>
-	<div class="row-fluid">
-		<div class="row-fluid pull-right form-horizontal">
-			<div id="dataset-select-container" class="pull-right form-horizontal">
-				<label class="control-label" for="dataset-select">Choose a dataset:</label>
-				<div class="controls">
-					<select data-placeholder="Choose a Entity (example: dataset, protocol..." id="dataset-select">
-						<#list entitiesMeta.iterator() as entityMeta>
-							<option value="/api/v1/${entityMeta.name}" <#if entityMeta.name == selectedEntityName> selected</#if>><#if entityMeta.label?has_content>${entityMeta.label}<#else>${entityMeta.name}</#if></option>
-						</#list>
-					</select>
-				</div>
-			</div>
-		</div>	
-	</div>
+    <#if showDatasetSelect??>
+        <div class="row-fluid">
+            <div class="row-fluid pull-right form-horizontal">
+                <div id="dataset-select-container" class="pull-right form-horizontal">
+                    <label class="control-label" for="dataset-select">Choose a dataset:</label>
+                    <div class="controls">
+                        <select data-placeholder="Choose a Entity (example: dataset, protocol..." id="dataset-select">
+                            <#list entitiesMeta.iterator() as entityMeta>
+                                <option value="/api/v1/${entityMeta.name}" <#if entityMeta.name == selectedEntityName> selected</#if>><#if entityMeta.label?has_content>${entityMeta.label}<#else>${entityMeta.name}</#if></option>
+                            </#list>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+	</#if>
 	<div class="row-fluid">
 		<div class="span3">
 			<div class="well">
