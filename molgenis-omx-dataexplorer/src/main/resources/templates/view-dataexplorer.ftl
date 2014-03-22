@@ -59,8 +59,8 @@
 								    <div class="row-fluid" id="feature-filters"></div>
 								</div>
 								<div class="row-fluid" id="data-options">
-                                    <a href="#" id="filter-wizard-btn" class="btn btn-small pull-right"><img src="/img/filter-bw.png"> Wizard</a>
-                                 </div>
+								    <a href="#" id="filter-wizard-btn" class="btn btn-small pull-right"><img src="/img/filter-bw.png"> Wizard</a>
+								</div>
 							</div>
 						</div>
 					</div>
