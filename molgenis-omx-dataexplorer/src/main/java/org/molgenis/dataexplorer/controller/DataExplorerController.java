@@ -138,12 +138,21 @@ public class DataExplorerController extends MolgenisPluginController
 		if (selectedEntityName == null)
 		{
 			selectedEntityName = entitiesMeta.iterator().next().getName();
-            model.addAttribute("showDatasetSelect", true);
 		}
+        else
+        {
+            model.addAttribute("hideDatasetSelect", true);
+        }
 		model.addAttribute("selectedEntityName", selectedEntityName);
 		model.addAttribute("wizard", (wizard != null) && wizard.booleanValue());
 
-		return "view-dataexplorer";
+        //check for count-permission only (to showDataItemSelection)
+        if (!molgenisPermissionService.hasPermissionOnEntity(selectedEntityName, Permission.READ))
+        {
+            model.addAttribute("hideDataItemSelect", true);
+        }
+
+        return "view-dataexplorer";
 	}
 
 	@RequestMapping(value = "/module/{moduleId}", method = GET)

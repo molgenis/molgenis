@@ -23,8 +23,7 @@
     <script>
     	molgenis.dataexplorer.setShowWizardOnInit(${wizard?string('true', 'false')});
     </script>
-    <#if showDatasetSelect??>
-        <div class="row-fluid">
+        <div class="row-fluid"<#if hideDatasetSelect??> style="display:none"</#if>>
             <div class="row-fluid pull-right form-horizontal">
                 <div id="dataset-select-container" class="pull-right form-horizontal">
                     <label class="control-label" for="dataset-select">Choose a dataset:</label>
@@ -38,7 +37,6 @@
                 </div>
             </div>
         </div>
-	</#if>
 	<div class="row-fluid">
 		<div class="span3">
 			<div class="well">
@@ -67,20 +65,20 @@
 						</div>
 					</div>
 				</div>
-				<div class="row-fluid">
-					<div class="accordion" id="feature-selection-container">
-						<div class="accordion-group">
-						    <div class="accordion-heading">
-								<a class="accordion-toggle" data-toggle="false" data-parent="#feature-selection-container" href="#feature-selection">Data item selection</a>
-							</div>
-							<div class="accordion-body collapse in">
-								<div class="accordion-inner">
-									<div class="row-fluid" id="feature-selection"></div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>			
+                <div class="row-fluid"<#if hideDataItemSelect??> style="display:none"</#if>>
+                    <div class="accordion" id="feature-selection-container">
+                        <div class="accordion-group">
+                            <div class="accordion-heading">
+                                <a class="accordion-toggle" data-toggle="false" data-parent="#feature-selection-container" href="#feature-selection">Data item selection</a>
+                            </div>
+                            <div class="accordion-body collapse in">
+                                <div class="accordion-inner">
+                                    <div class="row-fluid" id="feature-selection"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 			</div>		
 		</div>
 		<div class="span9" id="module-nav"></div>
