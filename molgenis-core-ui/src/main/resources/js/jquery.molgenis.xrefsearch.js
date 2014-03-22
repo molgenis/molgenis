@@ -81,7 +81,6 @@
 		
 		hiddenInput.select2({
 			width: 650,
-			placeholder: 'filter text',
 			minimumInputLength: 2,
             multiple: (attributeMetaData.fieldType === 'MREF'),
 			query: function (options){
@@ -119,7 +118,6 @@
 
 	function addQueryPartSelect(container, attributeMetaData, options) {
 		var attrs = {
-				'placeholder': 'filter text',
 				'autofocus': 'autofocus'
 			};
 
