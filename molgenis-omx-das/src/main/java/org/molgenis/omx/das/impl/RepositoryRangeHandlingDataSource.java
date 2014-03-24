@@ -79,11 +79,11 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource i
 		Iterable<Entity> entityIterable = queryDataSet(segmentId, dataSet, maxbins);
 		List<DasFeature> features = new ArrayList<DasFeature>();
 
-        Integer score = 0;
-        Map<String, DasType> patients = new HashMap<String, DasType>();
+		Integer score = 0;
+		Map<String, DasType> patients = new HashMap<String, DasType>();
 		for (Entity entity : entityIterable)
 		{
-            DasFeature feature;
+			DasFeature feature;
 
 			Integer valueStart = null;
 			Integer valueStop = null;
@@ -91,7 +91,7 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource i
 			String valueIdentifier = null;
 			String valueName = null;
 			String valueLink = null;
-            String valuePatient = null;
+			String valuePatient = null;
 			try
 			{
 				valueStart = entity.getInt(MUTATION_START_POSITION);
@@ -109,24 +109,27 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource i
 					.getString(MUTATION_DESCRIPTION);
 			valueName = entity.getString(MUTATION_NAME) == null ? "" : entity.getString(MUTATION_NAME);
 			valueLink = entity.getString(MUTATION_LINK) == null ? "" : entity.getString(MUTATION_LINK);
-            valuePatient = entity.getString(PATIENT_ID) == null ? "" : entity.getString(PATIENT_ID);
+			valuePatient = entity.getString(PATIENT_ID) == null ? "" : entity.getString(PATIENT_ID);
 
 			if ((valueStart >= start && valueStart <= stop) || (valueStop >= start && valueStop <= stop))
 			{
-                DasType type;//used for label colours in Dalliance
-                if(patients.containsKey(valuePatient)){
-                    type = patients.get(valuePatient);
-                }else{
-                    type = new DasType(score.toString(), "", "", "");
-                    patients.put(valuePatient, type);
-                    ++score;
-                }
+				DasType type;// used for label colours in Dalliance
+				if (patients.containsKey(valuePatient))
+				{
+					type = patients.get(valuePatient);
+				}
+				else
+				{
+					type = new DasType(score.toString(), "", "", "");
+					patients.put(valuePatient, type);
+					++score;
+				}
 
-                feature = createDasFeature(valueStart, valueStop, valueIdentifier, valueName, valueDescription,
+				feature = createDasFeature(valueStart, valueStop, valueIdentifier, valueName, valueDescription,
 						valueLink, type, method, dataSet, valuePatient);
 				features.add(feature);
-            }
-        }
+			}
+		}
 		DasAnnotatedSegment segment = new DasAnnotatedSegment(segmentId, start, stop, "1.00", segmentId, features);
 		return segment;
 	}
@@ -167,9 +170,9 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource i
 		dasTarget.add(new MolgenisDasTarget(identifier, start, stop, featureDescription));
 
 		List<String> parents = new ArrayList<String>();
-		DasFeature feature = new DasFeature(identifier, featureDescription, type, method, start, stop,
-				score, DasFeatureOrientation.ORIENTATION_NOT_APPLICABLE, DasPhase.PHASE_NOT_APPLICABLE, notes,
-				linkout, dasTarget, parents, null);
+		DasFeature feature = new DasFeature(identifier, featureDescription, type, method, start, stop, score,
+				DasFeatureOrientation.ORIENTATION_NOT_APPLICABLE, DasPhase.PHASE_NOT_APPLICABLE, notes, linkout,
+				dasTarget, parents, null);
 		return feature;
 	}
 

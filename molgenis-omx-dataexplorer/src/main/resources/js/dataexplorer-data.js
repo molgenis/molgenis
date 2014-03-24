@@ -15,7 +15,7 @@
 	self.createGenomeBrowser = createGenomeBrowser;
 
 	var genomeEntities;
-    self.genomeBrowser;
+    var genomeBrowser;
 	/**
 	 * @memberOf molgenis.dataexplorer.data
 	 */
@@ -110,10 +110,10 @@
                     settings.sources.push(dallianceTrack);
                 }
             });
-            self.genomeBrowser = new Browser(settings);
-            self.genomeBrowser.realInit();
+            genomeBrowser = new Browser(settings);
+            genomeBrowser.realInit();
             var featureInfoMap = new Object();
-            self.genomeBrowser.addFeatureInfoPlugin(function(f, info) {
+            genomeBrowser.addFeatureInfoPlugin(function(f, info) {
                 //check if there is cached information for this clicked item
                 if(f.id in featureInfoMap){
                     $.each(featureInfoMap[f.id+f.label].sections, function(section) {
@@ -202,13 +202,13 @@
                 var attributeFilter = {
 					attribute : attribute,
 					range : true,
-					values : [ Math.floor(self.genomeBrowser.viewStart).toString(), Math.floor(self.genomeBrowser.viewEnd).toString() ]
+					values : [ Math.floor(genomeBrowser.viewStart).toString(), Math.floor(genomeBrowser.viewEnd).toString() ]
 				};
 				$(document).trigger('updateAttributeFilters', {'filters': [attributeFilter]});
 			} else if(attribute.name === 'chromosome') {
 				var attributeFilter = {
 					attribute : attribute,
-					values : [ self.genomeBrowser.chr ]
+					values : [ genomeBrowser.chr ]
 				};
 				$(document).trigger('updateAttributeFilters', {'filters': [attributeFilter]});
 			}
@@ -247,8 +247,8 @@
 		$(document).on('updateAttributeFilters.data', function(e, data) {
 			// TODO implement elegant solution for genome browser specific code
 			$.each(data.filters, function() {
-				if(this.attribute.name === 'start_nucleotide') self.genomeBrowser.setLocation(self.genomeBrowser.chr, this.values[0], this.values[1]);
-				if(this.attribute.name === 'chromosome') self.genomeBrowser.setLocation(this.values[0], self.genomeBrowser.viewStart, self.genomeBrowser.viewEnd);
+				if(this.attribute.name === 'start_nucleotide') genomeBrowser.setLocation(genomeBrowser.chr, this.values[0], this.values[1]);
+				if(this.attribute.name === 'chromosome') genomeBrowser.setLocation(this.values[0], genomeBrowser.viewStart, genomeBrowser.viewEnd);
 			});
 		});
 		
