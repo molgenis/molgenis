@@ -36,12 +36,16 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource i
 		RangeHandlingAnnotationDataSource
 {
 	private final DataService dataService;
+	private DasType mutationType;
 	private DasMethod method;
+	private String type;
 
 	@Override
 	public void init(ServletContext servletContext, Map<String, PropertyType> globalParameters,
 			DataSourceConfiguration dataSourceConfig) throws DataSourceException
 	{
+		this.type = dataSourceConfig.getDataSourceProperties().get("type").getValue();
+		this.mutationType = new DasType(type, null, "?", type);
 		this.method = new DasMethod("not_recorded", "not_recorded", "ECO:0000037");
 	}
 
@@ -178,6 +182,6 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource i
 	@Override
 	public Collection<DasType> getTypes() throws DataSourceException
 	{
-		return Collections.emptyList();
+		return Collections.singleton(mutationType);
 	}
 }

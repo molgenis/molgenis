@@ -114,6 +114,7 @@
             self.genomeBrowser.realInit();
             var featureInfoMap = new Object();
             self.genomeBrowser.addFeatureInfoPlugin(function(f, info) {
+                //check if there is cached information for this clicked item
                 if(f.id in featureInfoMap){
                     $.each(featureInfoMap[f.id+f.label].sections, function(section) {
                         info.sections.push(featureInfoMap[f.id+f.label].sections[section]);
@@ -121,44 +122,47 @@
                 }
                 else{
                     var selectedTrack = false;
-                    $.each(f.notes, function(note) {
-                        var trackIndex = f.notes[note].indexOf("track:")
-                        if(trackIndex!=-1){
-                            var trackName = f.notes[note].substr(trackIndex+6);
-                            if(entity.name == trackName){
-                                selectedTrack = true;
-                            }
-                            info.feature.notes.splice(trackIndex,1);
-                            return false;
-                        }
-                    });
-                    $.each(f.notes, function(note) {
-                        var patientIndex = f.notes[note].indexOf("patient:")
-                        if(patientIndex!=-1){
-                            var patientID = f.notes[note].substr(patientIndex+8);
-                            info.feature.notes.splice(note,1);
-                            if(selectedTrack){
-                                var a = document.createElement('a');
-                                a.href =  'javascript:void(0)';
-                                a.innerHTML = patientID
-                                a.onclick = function () {
-                                    $.each(getAttributes(), function(key, attribute) {
-                                        if(attribute.name === 'patient_id') {
-                                            var attributeFilter = {
-                                                attribute : attribute,
-                                                values : [patientID]
-                                            };
-                                            $(document).trigger('updateAttributeFilters', {'filters': [attributeFilter]});
-                                        }
-                                    });
-                                };
-                                info.add('Filter on patient:', a);
-                            }
-                            return false;
-                        }
-                    });
                     var molgenisIndex = f.notes.indexOf("source:MOLGENIS");
                     if(molgenisIndex!=-1){
+                        //get the value of the "track" field to see if this is the selected Entity in the dataexplorer
+                        $.each(f.notes, function(note) {
+                            var trackIndex = f.notes[note].indexOf("track:")
+                            if(trackIndex!=-1){
+                                var trackName = f.notes[note].substr(trackIndex+6);
+                                if(entity.name == trackName){
+                                    selectedTrack = true;
+                                }
+                                info.feature.notes.splice(trackIndex,1);
+                                return false;
+                            }
+                        });
+                        //get the patient note to create a filter on patient link
+                        $.each(f.notes, function(note) {
+                            var patientIndex = f.notes[note].indexOf("patient:")
+                            if(patientIndex!=-1){
+                                var patientID = f.notes[note].substr(patientIndex+8);
+                                info.feature.notes.splice(note,1);
+                                if(selectedTrack){
+                                    var a = document.createElement('a');
+                                    a.href =  'javascript:void(0)';
+                                    a.innerHTML = patientID
+                                    a.onclick = function () {
+                                        $.each(getAttributes(), function(key, attribute) {
+                                            if(attribute.name === 'patient_id') {
+                                                var attributeFilter = {
+                                                    attribute : attribute,
+                                                    values : [patientID]
+                                                };
+                                                $(document).trigger('updateAttributeFilters', {'filters': [attributeFilter]});
+                                            }
+                                        });
+                                    };
+                                    info.add('Filter on patient:', a);
+                                }
+                                return false;
+                            }
+                        });
+                        //get the mutation note to create a mutations filter link
                         info.feature.notes.splice(molgenisIndex,1);
                         if(selectedTrack){
                             var a = document.createElement('a');
@@ -176,18 +180,13 @@
                                 });
                             };
                             info.add('Filter on mutation:', a);
+                            //cache the information
                             featureInfoMap[f.id+f.label] = info;
                             return false;
                         }
                     }
                 }
             });
-
-
-            //self.genomeBrowser.addViewListener(function(chromosome,start,end,oldZoom,newZoom) {});
-            //self.genomeBrowser.addFeatureListener(function(mouseEvent,feature,hit,tier) {});
-            //self.genomeBrowser.highlightRegion(1,10017408,10018357);
-
 		}else {
             $('#genomebrowser').css('display', 'none');
         }

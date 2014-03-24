@@ -125,6 +125,6 @@ public class DataSetElasticSearchRangeHandlingDataSourceTest
 	public void getTypes() throws UnimplementedFeatureException, DataSourceException, BadReferenceObjectException,
 			CoordinateErrorException
 	{
-		assertEquals(Collections.emptyList(), source.getTypes());
+		assertEquals(Collections.singleton(new DasType("type", null, "?", "type")), source.getTypes());
 	}
 }
