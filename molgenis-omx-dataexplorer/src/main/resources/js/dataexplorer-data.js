@@ -13,7 +13,8 @@
 	var self = molgenis.dataexplorer.data = molgenis.dataexplorer.data || {};
 	self.createDataTable = createDataTable;
 	self.createGenomeBrowser = createGenomeBrowser;
-	
+	var restApi = new molgenis.RestClient();
+
 	var genomeBrowser;
 	var genomeEntities;
 	
@@ -58,7 +59,9 @@
 			searchRequest.query.sort = query.sort;
 		}
 		
-		$.each(getAttributes(), function() {
+		var colAttributes = molgenis.getAtomicAttributes(getAttributes(), restApi);
+		
+		$.each(colAttributes, function() {
 			var feature = this;
 			dataRequest.attributeNames.push(feature.name);
 			if (feature.fieldType === 'XREF' || feature.fieldType === 'MREF')
