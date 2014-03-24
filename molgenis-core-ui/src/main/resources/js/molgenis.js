@@ -625,7 +625,8 @@ $(function() {
 	    jqXHR.always( hideSpinner );
 	});
 
-	$(document).ajaxError(function() {
+	$(document).ajaxError(function(event, xhr, settings, e) {
+		console.log(e);
 		try {
 			molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 		} catch(e) {
@@ -634,6 +635,7 @@ $(function() {
 	});
 	
 	window.onerror = function(msg, url, line) {
+		console.log(msg);
 		molgenis.createAlert([{'message': 'An error occurred. Please contact the administrator.'}, {'message': msg}], 'error');
 	};
 	
