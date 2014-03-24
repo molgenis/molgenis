@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collections;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -27,14 +28,17 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import freemarker.template.TemplateException;
 
@@ -72,7 +76,9 @@ public class ChartController
 
 	@RequestMapping(value = "/xydatachart", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Options renderXYDataChart(@Valid @RequestBody XYDataChartRequest request, Model model)
+	public Options renderXYDataChart(@Valid
+	@RequestBody
+	XYDataChartRequest request, Model model)
 	{
 		Query query = request.getQuery();
 		XYDataChart xYDataChart = chartDataService.getXYDataChart(request.getEntity(), request.getX(), request.getY(),
@@ -93,7 +99,9 @@ public class ChartController
 
 	@RequestMapping(value = "/boxplot", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Options renderPlotBoxChart(@Valid @RequestBody BoxPlotChartRequest request, Model model)
+	public Options renderPlotBoxChart(@Valid
+	@RequestBody
+	BoxPlotChartRequest request, Model model)
 	{
 		Query query = request.getQuery();
 		BoxPlotChart chart = chartDataService.getBoxPlotChart(request.getEntity(), request.getObservableFeature(),
@@ -123,8 +131,9 @@ public class ChartController
 	 * @throws IOException
 	 */
 	@RequestMapping("/get/{name}.{extension}")
-	public void getFile(OutputStream out, @PathVariable("name") String name,
-			@PathVariable("extension") String extension, HttpServletResponse response) throws IOException
+	public void getFile(OutputStream out, @PathVariable("name")
+	String name, @PathVariable("extension")
+	String extension, HttpServletResponse response) throws IOException
 	{
 		File f = fileStore.getFile(name + "." + extension);
 		if (!f.exists())
@@ -156,8 +165,10 @@ public class ChartController
 	 */
 	@RequestMapping(value = "/heatmap", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public String renderHeatMap(@Valid @RequestBody HeatMapRequest request, Model model) throws IOException,
-			TemplateException, XMLStreamException, FactoryConfigurationError
+	public String renderHeatMap(@Valid
+	@RequestBody
+	HeatMapRequest request, Model model) throws IOException, TemplateException, XMLStreamException,
+			FactoryConfigurationError
 	{
 		DataMatrix matrix = chartDataService.getDataMatrix(request.getEntity(), request.getX(), request.getY(),
 				request.getQueryRules());
@@ -174,5 +185,15 @@ public class ChartController
 				.getVisualizationService(MolgenisChartType.HEAT_MAP);
 
 		return (String) service.renderChart(chart, model);
+	}
+
+	@ExceptionHandler(RuntimeException.class)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+	public Map<String, String> handleRuntimeException(RuntimeException e)
+	{
+		logger.error(null, e);
+		return Collections.singletonMap("errorMessage",
+				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage());
 	}
 }
