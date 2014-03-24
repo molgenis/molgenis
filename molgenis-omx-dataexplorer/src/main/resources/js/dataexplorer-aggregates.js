@@ -14,6 +14,7 @@
 	
 	// module api
 	self.createAggregatesTable = createAggregatesTable;
+	self.updateAggregatesTable = updateAggregatesTable;
 	
 	var restApi = new molgenis.RestClient();
 
@@ -28,28 +29,33 @@
 
 		if (aggregableAttributes.length > 0) {
 			$('#feature-select').empty();
-			createAtributeDropdown($('#feature-select'), aggregableAttributes, 'x-aggr-attribute');
+			createAtributeDropdown($('#feature-select'), aggregableAttributes, 'x-aggr-attribute', aggregableAttributes[0]);
 			$('#feature-select').append(' x ');
-			createAtributeDropdown($('#feature-select'), aggregableAttributes, 'y-aggr-attribute');
-			
+			if(aggregableAttributes.length > 1) createAtributeDropdown($('#feature-select'), aggregableAttributes, 'y-aggr-attribute', aggregableAttributes[1]);
+			else createAtributeDropdown($('#feature-select'), aggregableAttributes, 'y-aggr-attribute');
+
 			$('#feature-select-container').show();
 			$('#aggregate-table-container').empty();
 			
 			$('.attribute-dropdown').on('change', function() {
 				updateAggregatesTable($('#x-aggr-attribute').val(), $('#y-aggr-attribute').val());
 			});
+
+			//render first results
+			updateAggregatesTable($('#x-aggr-attribute').val(), $('#y-aggr-attribute').val());
 		} else {
 			$('#feature-select-container').hide();
 			$('#aggregate-table-container').html('<p>No aggregable items</p>');
 		}
 	}
 	
-	function createAtributeDropdown(parent, aggregableAttributes, id) {
-		var attributeSelect = $('<select id="' + id + '" class="attribute-dropdown" data-placeholder="Select a category..." />');
-		attributeSelect.append('<option value="">Select a category...</option>');
+	function createAtributeDropdown(parent, aggregableAttributes, id, defaultValue) {
+		var attributeSelect = $('<select id="' + id + '" class="attribute-dropdown" data-placeholder="Select ..." />');
+		attributeSelect.append('<option value="">Select ...</option>');
 		
 		$.each(aggregableAttributes, function() {
-			attributeSelect.append('<option value="' + this.name + '">' + this.label + '</option>');
+		    if(this == defaultValue) attributeSelect.append('<option selected value="' + this.name + '">' + this.label + '</option>');
+	        else attributeSelect.append('<option value="' + this.name + '">' + this.label + '</option>');
 		});
 		
 		parent.append(attributeSelect);
@@ -136,15 +142,15 @@
 		});
 		
 		$(document).on('updateAttributeFilters.aggregates', function(e, data) {
-			molgenis.dataexplorer.aggregates.createAggregatesTable();
+			molgenis.dataexplorer.aggregates.updateAggregatesTable($('#x-aggr-attribute').val(), $('#y-aggr-attribute').val());
 		});
 		
 		$(document).on('removeAttributeFilter.aggregates', function(e, data) {
-			molgenis.dataexplorer.aggregates.createAggregatesTable();
+			molgenis.dataexplorer.aggregates.updateAggregatesTable($('#x-aggr-attribute').val(), $('#y-aggr-attribute').val());
 		});
 		
 		$(document).on('changeQuery.aggregates', function(e, entitySearchQuery) {
-			molgenis.dataexplorer.aggregates.createAggregatesTable();
+			molgenis.dataexplorer.aggregates.updateAggregatesTable($('#x-aggr-attribute').val(), $('#y-aggr-attribute').val());
 		});
 	});
 })($, window.top.molgenis = window.top.molgenis || {});
