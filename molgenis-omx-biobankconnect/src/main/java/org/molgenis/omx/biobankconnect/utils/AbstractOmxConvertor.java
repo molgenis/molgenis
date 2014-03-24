@@ -12,10 +12,10 @@ import java.util.Map.Entry;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.data.Entity;
-import org.molgenis.data.RepositorySource;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.Writable;
 import org.molgenis.data.WritableFactory;
-import org.molgenis.data.excel.ExcelRepositorySource;
+import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.support.MapEntity;
@@ -41,14 +41,14 @@ abstract class AbstractOmxConvertor
 		if (file.exists())
 		{
 
-			RepositorySource repositorySource = new ExcelRepositorySource(file, new TrimProcessor());
+			RepositoryCollection repositoryCollection = new ExcelRepositoryCollection(file, new TrimProcessor());
 
 			// Handle category sheet first
-			collectCategoryInfo(repositorySource);
+			collectCategoryInfo(repositoryCollection);
 			// Handle variable sheet second
-			collectVariableInfo(repositorySource);
+			collectVariableInfo(repositoryCollection);
 			// Handle protocol sheet second
-			collectProtocolInfo(repositorySource);
+			collectProtocolInfo(repositoryCollection);
 
 			ExcelWriter writer = null;
 
@@ -193,11 +193,11 @@ abstract class AbstractOmxConvertor
 		}
 	}
 
-	public abstract void collectProtocolInfo(RepositorySource repositorySource) throws IOException;
+	public abstract void collectProtocolInfo(RepositoryCollection repositoryCollection) throws IOException;
 
-	public abstract void collectVariableInfo(RepositorySource repositorySource) throws IOException;
+	public abstract void collectVariableInfo(RepositoryCollection repositoryCollection) throws IOException;
 
-	public abstract void collectCategoryInfo(RepositorySource repositorySource) throws IOException;
+	public abstract void collectCategoryInfo(RepositoryCollection repositoryCollection) throws IOException;
 
 	public String createFeatureIdentifier(String featureName)
 	{

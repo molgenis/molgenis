@@ -4,23 +4,20 @@
  */
 package org.molgenis.data.jpa;
 
-import java.util.List;
 import java.util.Map;
-import java.io.IOException;
 
 import org.molgenis.data.Repository;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.CrudRepositorySecurityDecorator;
-import org.molgenis.data.RepositorySource;
+import org.molgenis.data.RepositoryCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-@Component("JpaRepositorySource")
-public class JpaRepositorySource implements RepositorySource
+@Component("JpaRepositoryCollection")
+public class JpaRepositoryCollection implements RepositoryCollection
 {
 	private final Map<String, Repository> repositories = Maps.newLinkedHashMap();
 
@@ -42,20 +39,14 @@ public class JpaRepositorySource implements RepositorySource
 	</#list>
 	
 	@Override
-	public List<Repository> getRepositories()
+	public Iterable<String> getEntityNames()
 	{
-		return Lists.newArrayList(repositories.values());
+		return repositories.keySet();
 	}
 
 	@Override
-	public Repository getRepository(String name)
+	public Repository getRepositoryByEntityName(String name)
 	{
 		return repositories.get(name);
-	}
-	
-	@Override
-	public void close() throws IOException
-	{
-		// Nothing
 	}
 }

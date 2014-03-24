@@ -8,8 +8,8 @@ import java.util.List;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.RepositorySource;
-import org.molgenis.data.excel.ExcelRepositorySource;
+import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.processor.TrimProcessor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -42,36 +42,30 @@ public class ParsingToolKit
 	// Convert a value to max 256 characters
 	public void convertTo256Characters(String file) throws IOException, InvalidFormatException
 	{
-		RepositorySource repositorySource = new ExcelRepositorySource(new File(file), new TrimProcessor());
+		RepositoryCollection repositorySource = new ExcelRepositoryCollection(new File(file), new TrimProcessor());
+		Repository repo = repositorySource.getRepositoryByEntityName("ontologyterm");
 		try
 		{
-			Repository repo = repositorySource.getRepository("ontologyterm");
-			try
-			{
 
-				for (Entity entity : repo)
+			for (Entity entity : repo)
+			{
+				String name = entity.getString("name");
+				if (name.length() >= 256)
 				{
-					String name = entity.getString("name");
-					if (name.length() >= 256)
-					{
 
-						System.out.println(name.substring(0, 252) + "...");
-					}
-					else
-					{
-						System.out.println(name);
-					}
+					System.out.println(name.substring(0, 252) + "...");
 				}
-			}
-			finally
-			{
-				repo.close();
+				else
+				{
+					System.out.println(name);
+				}
 			}
 		}
 		finally
 		{
-			repositorySource.close();
+			repo.close();
 		}
+
 	}
 
 	// Parse your password
@@ -120,41 +114,36 @@ public class ParsingToolKit
 	// column a list of all the referring terms
 	public void check(String file) throws IOException, InvalidFormatException
 	{
-		RepositorySource repositorySource = new ExcelRepositorySource(new File(file), new TrimProcessor());
+		RepositoryCollection repositorySource = new ExcelRepositoryCollection(new File(file), new TrimProcessor());
+
+		Repository repo = repositorySource.getRepositoryByEntityName("dataset_palga");
 		try
 		{
-			Repository repo = repositorySource.getRepository("dataset_palga");
-			try
+			List<String> list = null;
+			List<List<String>> listOfLists = new ArrayList<List<String>>();
+			for (Entity entity : repo)
 			{
-				List<String> list = null;
-				List<List<String>> listOfLists = new ArrayList<List<String>>();
-				for (Entity entity : repo)
+				list = new ArrayList<String>();
+				String[] code = entity.getString("PALGA-code").split(",");
+				for (int i = 0; i < code.length; ++i)
 				{
-					list = new ArrayList<String>();
-					String[] code = entity.getString("PALGA-code").split(",");
-					for (int i = 0; i < code.length; ++i)
+					if (!list.contains(code[i]))
 					{
-						if (!list.contains(code[i]))
-						{
-							list.add(code[i]);
-						}
+						list.add(code[i]);
 					}
-					listOfLists.add(list);
 				}
-				for (List<String> all : listOfLists)
-				{
-					System.out.println(all);
-
-				}
+				listOfLists.add(list);
 			}
-			finally
+			for (List<String> all : listOfLists)
 			{
-				repo.close();
+				System.out.println(all);
+
 			}
 		}
 		finally
 		{
-			repositorySource.close();
+			repo.close();
 		}
+
 	}
 }

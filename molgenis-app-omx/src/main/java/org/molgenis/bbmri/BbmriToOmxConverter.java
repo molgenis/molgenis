@@ -13,10 +13,10 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.RepositorySource;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.Writable;
 import org.molgenis.data.WritableFactory;
-import org.molgenis.data.excel.ExcelRepositorySource;
+import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.support.MapEntity;
@@ -152,48 +152,43 @@ public class BbmriToOmxConverter
 				Institute.IDENTIFIER, Institute.NAME, Institute.ADDRESS, Institute.PHONE, Institute.EMAIL,
 				Institute.FAX, Institute.TOLLFREEPHONE, Institute.CITY, Institute.COUNTRY));
 
-		RepositorySource repositorySource = new ExcelRepositorySource(entityFileMap.get("institutes.xls"),
+		RepositoryCollection repositorySource = new ExcelRepositoryCollection(entityFileMap.get("institutes.xls"),
 				new TrimProcessor());
+
 		try
 		{
+			Repository repo = repositorySource.getRepositoryByEntityName("BiobankInstitute");
 			try
 			{
-				Repository repo = repositorySource.getRepository("BiobankInstitute");
-				try
+				for (Entity inputEntity : repo)
 				{
-					for (Entity inputEntity : repo)
-					{
-						String name = inputEntity.getString("name");
-						String identifier = UUID.randomUUID().toString();
-						instituteMap.put(name, identifier);
+					String name = inputEntity.getString("name");
+					String identifier = UUID.randomUUID().toString();
+					instituteMap.put(name, identifier);
 
-						Entity outputEntity = new MapEntity();
-						outputEntity.set(Institute.IDENTIFIER, identifier);
-						outputEntity.set(Institute.NAME, name);
-						outputEntity.set(Institute.ADDRESS, inputEntity.getString("Address"));
-						outputEntity.set(Institute.PHONE, inputEntity.getString("Phone"));
-						outputEntity.set(Institute.EMAIL, inputEntity.getString("Email"));
-						outputEntity.set(Institute.FAX, inputEntity.getString("Fax"));
-						outputEntity.set(Institute.TOLLFREEPHONE, inputEntity.getString("tollFreePhone"));
-						outputEntity.set(Institute.CITY, inputEntity.getString("City"));
-						outputEntity.set(Institute.COUNTRY, inputEntity.getString("Country"));
-						writable.add(outputEntity);
-					}
-				}
-				finally
-				{
-					repo.close();
+					Entity outputEntity = new MapEntity();
+					outputEntity.set(Institute.IDENTIFIER, identifier);
+					outputEntity.set(Institute.NAME, name);
+					outputEntity.set(Institute.ADDRESS, inputEntity.getString("Address"));
+					outputEntity.set(Institute.PHONE, inputEntity.getString("Phone"));
+					outputEntity.set(Institute.EMAIL, inputEntity.getString("Email"));
+					outputEntity.set(Institute.FAX, inputEntity.getString("Fax"));
+					outputEntity.set(Institute.TOLLFREEPHONE, inputEntity.getString("tollFreePhone"));
+					outputEntity.set(Institute.CITY, inputEntity.getString("City"));
+					outputEntity.set(Institute.COUNTRY, inputEntity.getString("Country"));
+					writable.add(outputEntity);
 				}
 			}
 			finally
 			{
-				IOUtils.closeQuietly(writable);
+				repo.close();
 			}
 		}
 		finally
 		{
-			repositorySource.close();
+			IOUtils.closeQuietly(writable);
 		}
+
 		return instituteMap;
 	}
 
@@ -207,58 +202,52 @@ public class BbmriToOmxConverter
 				Person.COUNTRY, Person.FIRSTNAME, Person.MIDINITIALS, Person.LASTNAME, Person.TITLE, Person.AFFILIATION
 						+ "_" + Institute.NAME, Person.DEPARTMENT, Person.ROLES + "_" + PersonRole.IDENTIFIER));
 
-		RepositorySource repositorySource = new ExcelRepositorySource(entityFileMap.get("biobankcoordinator.xls"),
-				new TrimProcessor());
+		RepositoryCollection repositorySource = new ExcelRepositoryCollection(
+				entityFileMap.get("biobankcoordinator.xls"), new TrimProcessor());
+
 		try
 		{
+
+			Repository repo = repositorySource.getRepositoryByEntityName("BiobankCoordinator");
 			try
 			{
-
-				Repository repo = repositorySource.getRepository("BiobankCoordinator");
-				try
+				for (Entity entity : repo)
 				{
-					for (Entity entity : repo)
-					{
-						String name = entity.getString("name");
-						String identifier = UUID.randomUUID().toString();
-						personMap.put(name, identifier);
+					String name = entity.getString("name");
+					String identifier = UUID.randomUUID().toString();
+					personMap.put(name, identifier);
 
-						Entity outputEntity = new MapEntity();
-						outputEntity.set(Person.IDENTIFIER, identifier);
-						outputEntity.set(Person.NAME, name);
-						outputEntity.set(Person.ADDRESS, entity.getString("Address"));
-						outputEntity.set(Person.PHONE, entity.getString("Phone"));
-						outputEntity.set(Person.EMAIL, entity.getString("Email"));
-						outputEntity.set(Person.FAX, entity.getString("Fax"));
-						outputEntity.set(Person.TOLLFREEPHONE, entity.getString("tollFreePhone"));
-						outputEntity.set(Person.CITY, entity.getString("City"));
-						outputEntity.set(Person.COUNTRY, entity.getString("Country"));
-						outputEntity.set(Person.FIRSTNAME, entity.getString("FirstName"));
-						outputEntity.set(Person.MIDINITIALS, entity.getString("MidInitials"));
-						outputEntity.set(Person.LASTNAME, entity.getString("LastName"));
-						outputEntity.set(Person.TITLE, entity.getString("Title"));
-						outputEntity.set(Person.AFFILIATION + "_" + Institute.NAME,
-								entity.getString("Affiliation_name"));
-						outputEntity.set(Person.DEPARTMENT, entity.getString("Department"));
-						outputEntity.set(Person.ROLES + "_" + PersonRole.IDENTIFIER,
-								ontologyMap.get(entity.getString("Roles_name")));
-						writable.add(outputEntity);
-					}
-				}
-				finally
-				{
-					repo.close();
+					Entity outputEntity = new MapEntity();
+					outputEntity.set(Person.IDENTIFIER, identifier);
+					outputEntity.set(Person.NAME, name);
+					outputEntity.set(Person.ADDRESS, entity.getString("Address"));
+					outputEntity.set(Person.PHONE, entity.getString("Phone"));
+					outputEntity.set(Person.EMAIL, entity.getString("Email"));
+					outputEntity.set(Person.FAX, entity.getString("Fax"));
+					outputEntity.set(Person.TOLLFREEPHONE, entity.getString("tollFreePhone"));
+					outputEntity.set(Person.CITY, entity.getString("City"));
+					outputEntity.set(Person.COUNTRY, entity.getString("Country"));
+					outputEntity.set(Person.FIRSTNAME, entity.getString("FirstName"));
+					outputEntity.set(Person.MIDINITIALS, entity.getString("MidInitials"));
+					outputEntity.set(Person.LASTNAME, entity.getString("LastName"));
+					outputEntity.set(Person.TITLE, entity.getString("Title"));
+					outputEntity.set(Person.AFFILIATION + "_" + Institute.NAME, entity.getString("Affiliation_name"));
+					outputEntity.set(Person.DEPARTMENT, entity.getString("Department"));
+					outputEntity.set(Person.ROLES + "_" + PersonRole.IDENTIFIER,
+							ontologyMap.get(entity.getString("Roles_name")));
+					writable.add(outputEntity);
 				}
 			}
 			finally
 			{
-				IOUtils.closeQuietly(writable);
+				repo.close();
 			}
 		}
 		finally
 		{
-			repositorySource.close();
+			IOUtils.closeQuietly(writable);
 		}
+
 		return personMap;
 	}
 
@@ -271,34 +260,28 @@ public class BbmriToOmxConverter
 				Arrays.asList(PersonRole.IDENTIFIER, PersonRole.NAME));
 		try
 		{
-			RepositorySource repositorySource = new ExcelRepositorySource(entityFileMap.get("personrole.xls"),
+			RepositoryCollection repositorySource = new ExcelRepositoryCollection(entityFileMap.get("personrole.xls"),
 					new TrimProcessor());
 
-			Repository repo = repositorySource.getRepository("BiobankPersonRole");
+			Repository repo = repositorySource.getRepositoryByEntityName("BiobankPersonRole");
 			try
 			{
-				try
-				{
-					for (Entity inputEntity : repo)
-					{
-						String name = inputEntity.getString("name");
-						String identifier = UUID.randomUUID().toString();
-						personRoleMap.put(name, identifier);
 
-						Entity outputEntity = new MapEntity();
-						outputEntity.set(OntologyTerm.IDENTIFIER, identifier);
-						outputEntity.set(OntologyTerm.NAME, name);
-						writable.add(outputEntity);
-					}
-				}
-				finally
+				for (Entity inputEntity : repo)
 				{
-					repo.close();
+					String name = inputEntity.getString("name");
+					String identifier = UUID.randomUUID().toString();
+					personRoleMap.put(name, identifier);
+
+					Entity outputEntity = new MapEntity();
+					outputEntity.set(OntologyTerm.IDENTIFIER, identifier);
+					outputEntity.set(OntologyTerm.NAME, name);
+					writable.add(outputEntity);
 				}
 			}
 			finally
 			{
-				repositorySource.close();
+				repo.close();
 			}
 
 		}
@@ -320,132 +303,106 @@ public class BbmriToOmxConverter
 		{
 			// biodata
 			{
-				RepositorySource repositorySource = new ExcelRepositorySource(entityFileMap.get("biobankdatatype.xls"),
-						new TrimProcessor());
+				RepositoryCollection repositorySource = new ExcelRepositoryCollection(
+						entityFileMap.get("biobankdatatype.xls"), new TrimProcessor());
+
+				Repository repo = repositorySource.getRepositoryByEntityName("BiobankDataType");
 				try
 				{
-					Repository repo = repositorySource.getRepository("BiobankDataType");
-					try
+					for (Entity entity : repo)
 					{
-						for (Entity entity : repo)
-						{
-							String name = entity.getString("name");
-							String identifier = UUID.randomUUID().toString();
-							ontologyMap.put(name, identifier);
+						String name = entity.getString("name");
+						String identifier = UUID.randomUUID().toString();
+						ontologyMap.put(name, identifier);
 
-							Entity outputEntity = new MapEntity();
-							outputEntity.set(OntologyTerm.IDENTIFIER, identifier);
-							outputEntity.set(OntologyTerm.NAME, name);
-							writable.add(outputEntity);
-						}
-					}
-					finally
-					{
-						repo.close();
+						Entity outputEntity = new MapEntity();
+						outputEntity.set(OntologyTerm.IDENTIFIER, identifier);
+						outputEntity.set(OntologyTerm.NAME, name);
+						writable.add(outputEntity);
 					}
 				}
 				finally
 				{
-					repositorySource.close();
+					repo.close();
 				}
 
 			}
 
 			// category
 			{
-				RepositorySource repositorySource = new ExcelRepositorySource(entityFileMap.get("categories.xls"),
-						new TrimProcessor());
+				RepositoryCollection repositorySource = new ExcelRepositoryCollection(
+						entityFileMap.get("categories.xls"), new TrimProcessor());
+				Repository repo = repositorySource.getRepositoryByEntityName("BiobankCategory");
 				try
 				{
-					Repository repo = repositorySource.getRepository("BiobankCategory");
-					try
+					for (Entity entity : repo)
 					{
-						for (Entity entity : repo)
-						{
-							String name = entity.getString("name");
-							String identifier = UUID.randomUUID().toString();
-							ontologyMap.put(name, identifier);
+						String name = entity.getString("name");
+						String identifier = UUID.randomUUID().toString();
+						ontologyMap.put(name, identifier);
 
-							Entity output = new MapEntity();
-							output.set(OntologyTerm.IDENTIFIER, identifier);
-							output.set(OntologyTerm.NAME, name);
-							writable.add(output);
-						}
-					}
-					finally
-					{
-						repo.close();
+						Entity output = new MapEntity();
+						output.set(OntologyTerm.IDENTIFIER, identifier);
+						output.set(OntologyTerm.NAME, name);
+						writable.add(output);
 					}
 				}
 				finally
 				{
-					repositorySource.close();
+					repo.close();
 				}
 
 			}
 
 			// subcategory
 			{
-				RepositorySource repositorySource = new ExcelRepositorySource(entityFileMap.get("subcategories.xls"),
-						new TrimProcessor());
+				RepositoryCollection repositorySource = new ExcelRepositoryCollection(
+						entityFileMap.get("subcategories.xls"), new TrimProcessor());
+				Repository repo = repositorySource.getRepositoryByEntityName("BiobankSubCategory");
 				try
 				{
-					Repository repo = repositorySource.getRepository("BiobankSubCategory");
-					try
+					for (Entity entity : repo)
 					{
-						for (Entity entity : repo)
-						{
-							String name = entity.getString("name");
-							String identifier = UUID.randomUUID().toString();
-							ontologyMap.put(name, identifier);
+						String name = entity.getString("name");
+						String identifier = UUID.randomUUID().toString();
+						ontologyMap.put(name, identifier);
 
-							Entity output = new MapEntity();
-							output.set(OntologyTerm.IDENTIFIER, identifier);
-							output.set(OntologyTerm.NAME, name);
-							writable.add(output);
-						}
-					}
-					finally
-					{
-						repo.close();
+						Entity output = new MapEntity();
+						output.set(OntologyTerm.IDENTIFIER, identifier);
+						output.set(OntologyTerm.NAME, name);
+						writable.add(output);
 					}
 				}
 				finally
 				{
-					repositorySource.close();
+					repo.close();
 				}
 
 			}
 
 			// topics
 			{
-				RepositorySource repositorySource = new ExcelRepositorySource(entityFileMap.get("topics.xls"),
+				RepositoryCollection repositorySource = new ExcelRepositoryCollection(entityFileMap.get("topics.xls"),
 						new TrimProcessor());
+
+				Repository repo = repositorySource.getRepositoryByEntityName("BiobankTopic");
 				try
 				{
-					Repository repo = repositorySource.getRepository("BiobankTopic");
-					try
+					for (Entity entity : repo)
 					{
-						for (Entity entity : repo)
-						{
-							String name = entity.getString("name");
-							String identifier = UUID.randomUUID().toString();
-							ontologyMap.put(name, identifier);
+						String name = entity.getString("name");
+						String identifier = UUID.randomUUID().toString();
+						ontologyMap.put(name, identifier);
 
-							Entity output = new MapEntity();
-							output.set(OntologyTerm.IDENTIFIER, identifier);
-							output.set(OntologyTerm.NAME, name);
-							writable.add(output);
-						}
-					}
-					finally
-					{
-						repo.close();
+						Entity output = new MapEntity();
+						output.set(OntologyTerm.IDENTIFIER, identifier);
+						output.set(OntologyTerm.NAME, name);
+						writable.add(output);
 					}
 				}
 				finally
 				{
-					repositorySource.close();
+					repo.close();
 				}
 
 			}
@@ -473,99 +430,92 @@ public class BbmriToOmxConverter
 					}
 				}));
 
-		RepositorySource repositorySource = new ExcelRepositorySource(entityFileMap.get("cohorts.xls"),
+		RepositoryCollection repositorySource = new ExcelRepositoryCollection(entityFileMap.get("cohorts.xls"),
 				new TrimProcessor());
 		try
 		{
+
+			Repository repo = repositorySource.getRepositoryByEntityName("Biobank");
 			try
 			{
-				Repository repo = repositorySource.getRepository("Biobank");
-				try
+				for (Entity inputEntity : repo)
 				{
-					for (Entity inputEntity : repo)
+					Entity outputEntity = new MapEntity();
+					for (FeatureDescription featureDescription : FeatureDescription.values())
 					{
-						Entity outputEntity = new MapEntity();
-						for (FeatureDescription featureDescription : FeatureDescription.values())
+						String featureIdentifier = featureDescription.getIdentifier();
+						switch (featureDescription)
 						{
-							String featureIdentifier = featureDescription.getIdentifier();
-							switch (featureDescription)
-							{
-								case COHORT:
-									outputEntity.set(featureIdentifier, inputEntity.get("Cohort"));
-									break;
-								case BIODATA:
-									outputEntity.set(featureIdentifier,
-											ontologyMap.get(inputEntity.get("Biodata_name")));
-									break;
-								case CATEGORY:
-									outputEntity.set(featureIdentifier,
-											ontologyMap.get(inputEntity.get("Category_name")));
-									break;
-								case COORDINATOR:
-									List<String> coordinatorIdentifiers = Lists.transform(
-											inputEntity.getList("Coordinator_name"), new Function<String, String>()
+							case COHORT:
+								outputEntity.set(featureIdentifier, inputEntity.get("Cohort"));
+								break;
+							case BIODATA:
+								outputEntity.set(featureIdentifier, ontologyMap.get(inputEntity.get("Biodata_name")));
+								break;
+							case CATEGORY:
+								outputEntity.set(featureIdentifier, ontologyMap.get(inputEntity.get("Category_name")));
+								break;
+							case COORDINATOR:
+								List<String> coordinatorIdentifiers = Lists.transform(
+										inputEntity.getList("Coordinator_name"), new Function<String, String>()
+										{
+											@Override
+											public String apply(String coordinatorName)
 											{
-												@Override
-												public String apply(String coordinatorName)
-												{
-													return personMap.get(coordinatorName);
-												}
-											});
-									outputEntity.set(featureIdentifier, coordinatorIdentifiers);
-									break;
-								case CURRENT_N:
-									outputEntity.set(featureIdentifier, inputEntity.get("PanelSize"));
-									break;
-								case GENERAL_COMMENTS:
-									outputEntity.set(featureIdentifier, inputEntity.get("GeneralComments"));
-									break;
-								case GWA_COMMENTS:
-									outputEntity.set(featureIdentifier, inputEntity.get("GwaComments"));
-									break;
-								case GWA_DATA_N:
-									outputEntity.set(featureIdentifier, inputEntity.get("GwaDataNum"));
-									break;
-								case GWA_PLATFORM:
-									outputEntity.set(featureIdentifier, inputEntity.get("GwaPlatform"));
-									break;
-								case INSTITUTION:
-									List<String> institutionIdentifiers = Lists.transform(
-											inputEntity.getList("Institutes_name"), new Function<String, String>()
+												return personMap.get(coordinatorName);
+											}
+										});
+								outputEntity.set(featureIdentifier, coordinatorIdentifiers);
+								break;
+							case CURRENT_N:
+								outputEntity.set(featureIdentifier, inputEntity.get("PanelSize"));
+								break;
+							case GENERAL_COMMENTS:
+								outputEntity.set(featureIdentifier, inputEntity.get("GeneralComments"));
+								break;
+							case GWA_COMMENTS:
+								outputEntity.set(featureIdentifier, inputEntity.get("GwaComments"));
+								break;
+							case GWA_DATA_N:
+								outputEntity.set(featureIdentifier, inputEntity.get("GwaDataNum"));
+								break;
+							case GWA_PLATFORM:
+								outputEntity.set(featureIdentifier, inputEntity.get("GwaPlatform"));
+								break;
+							case INSTITUTION:
+								List<String> institutionIdentifiers = Lists.transform(
+										inputEntity.getList("Institutes_name"), new Function<String, String>()
+										{
+											@Override
+											public String apply(String coordinatorName)
 											{
-												@Override
-												public String apply(String coordinatorName)
-												{
-													return institutionMap.get(coordinatorName);
-												}
-											});
-									outputEntity.set(featureIdentifier, institutionIdentifiers);
-									break;
-								case PUBLICATIONS:
-									outputEntity.set(featureIdentifier, inputEntity.get("Publications"));
-									break;
-								case SUBCATEGORY:
-									outputEntity.set(featureIdentifier,
-											ontologyMap.get(inputEntity.get("SubCategory_name")));
-									break;
-								case TOPIC:
-									outputEntity.set(featureIdentifier, ontologyMap.get(inputEntity.get("Topic_name")));
-									break;
-								default:
-									break;
-							}
+												return institutionMap.get(coordinatorName);
+											}
+										});
+								outputEntity.set(featureIdentifier, institutionIdentifiers);
+								break;
+							case PUBLICATIONS:
+								outputEntity.set(featureIdentifier, inputEntity.get("Publications"));
+								break;
+							case SUBCATEGORY:
+								outputEntity.set(featureIdentifier,
+										ontologyMap.get(inputEntity.get("SubCategory_name")));
+								break;
+							case TOPIC:
+								outputEntity.set(featureIdentifier, ontologyMap.get(inputEntity.get("Topic_name")));
+								break;
+							default:
+								break;
 						}
-						writable.add(outputEntity);
 					}
-				}
-				finally
-				{
-					repo.close();
+					writable.add(outputEntity);
 				}
 			}
 			finally
 			{
-				repositorySource.close();
+				repo.close();
 			}
+
 		}
 		finally
 		{
