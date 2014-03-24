@@ -28,9 +28,9 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
-import org.molgenis.data.RepositorySource;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.Writable;
-import org.molgenis.data.excel.ExcelRepositorySource;
+import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.data.processor.LowerCaseProcessor;
 import org.molgenis.data.processor.TrimProcessor;
@@ -80,7 +80,8 @@ public class EvaluationController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(@RequestParam(value = "selectedDataSet", required = false) String selectedDataSetId, Model model)
+	public String init(@RequestParam(value = "selectedDataSet", required = false)
+	String selectedDataSetId, Model model)
 	{
 		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl(), DataSet.class);
 
@@ -112,9 +113,9 @@ public class EvaluationController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/verify", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
-	public void verify(@RequestParam(value = "selectedDataSet", required = false) String selectedDataSetId,
-			@RequestParam Part file, HttpServletResponse response, Model model) throws IOException,
-			InvalidFormatException
+	public void verify(@RequestParam(value = "selectedDataSet", required = false)
+	String selectedDataSetId, @RequestParam
+	Part file, HttpServletResponse response, Model model) throws IOException, InvalidFormatException
 	{
 		ExcelWriter excelWriterRanks = null;
 
@@ -135,227 +136,238 @@ public class EvaluationController extends MolgenisPluginController
 				Writable sheetWriteBiobankRanks = null;
 				Writable sheetWriteSpssInput = null;
 
-				RepositorySource repositorySource = new ExcelRepositorySource(uploadFile, new TrimProcessor());
-				Repository inputSheet = repositorySource.getRepository("Sheet1");
+				RepositoryCollection repositoryCollection = new ExcelRepositoryCollection(uploadFile,
+						new TrimProcessor());
 
-				List<String> biobankNames = new ArrayList<String>();
-				for (AttributeMetaData attr : inputSheet.getEntityMetaData().getAttributes())
+				Repository inputSheet = repositoryCollection.getRepositoryByEntityName("Sheet1");
+				try
 				{
-					biobankNames.add(attr.getName());
-				}
-				String firstColumn = biobankNames.get(0);
-				biobankNames.remove(0);
-
-				// First column has to correspond to the selected dataset
-				DataSet ds = dataService.findOne(DataSet.ENTITY_NAME, Integer.parseInt(selectedDataSetId),
-						DataSet.class);
-
-				if (ds.getName().equalsIgnoreCase(firstColumn))
-				{
-					Map<String, Map<String, List<String>>> maunalMappings = new HashMap<String, Map<String, List<String>>>();
-					for (Entity row : inputSheet)
+					List<String> biobankNames = new ArrayList<String>();
+					for (AttributeMetaData attr : inputSheet.getEntityMetaData().getAttributes())
 					{
-						String variableName = row.getString(firstColumn);
-						if (!maunalMappings.containsKey(variableName)) maunalMappings.put(variableName,
-								new HashMap<String, List<String>>());
-						for (String biobank : biobankNames)
+						biobankNames.add(attr.getName());
+					}
+					String firstColumn = biobankNames.get(0);
+					biobankNames.remove(0);
+
+					// First column has to correspond to the selected dataset
+					DataSet ds = dataService.findOne(DataSet.ENTITY_NAME, Integer.parseInt(selectedDataSetId),
+							DataSet.class);
+
+					if (ds.getName().equalsIgnoreCase(firstColumn))
+					{
+						Map<String, Map<String, List<String>>> maunalMappings = new HashMap<String, Map<String, List<String>>>();
+						for (Entity row : inputSheet)
 						{
-							if (row.get(biobank) != null)
+							String variableName = row.getString(firstColumn);
+							if (!maunalMappings.containsKey(variableName)) maunalMappings.put(variableName,
+									new HashMap<String, List<String>>());
+							for (String biobank : biobankNames)
 							{
-								String mappingString = row.get(biobank).toString();
-								if (!maunalMappings.containsKey(variableName))
+								if (row.get(biobank) != null)
 								{
-									maunalMappings.put(variableName, new HashMap<String, List<String>>());
+									String mappingString = row.get(biobank).toString();
+									if (!maunalMappings.containsKey(variableName))
+									{
+										maunalMappings.put(variableName, new HashMap<String, List<String>>());
+									}
+									if (!maunalMappings.get(variableName).containsKey(biobank.toLowerCase()))
+									{
+										maunalMappings.get(variableName).put(biobank.toLowerCase(),
+												new ArrayList<String>());
+									}
+									maunalMappings.get(variableName).get(biobank.toLowerCase())
+											.addAll(Arrays.asList(mappingString.split(",")));
 								}
-								if (!maunalMappings.get(variableName).containsKey(biobank.toLowerCase()))
-								{
-									maunalMappings.get(variableName)
-											.put(biobank.toLowerCase(), new ArrayList<String>());
-								}
-								maunalMappings.get(variableName).get(biobank.toLowerCase())
-										.addAll(Arrays.asList(mappingString.split(",")));
 							}
 						}
-					}
 
-					List<String> lowerCaseBiobankNames = new ArrayList<String>();
-					for (String element : biobankNames)
-					{
-						lowerCaseBiobankNames.add(element.toLowerCase());
-					}
-
-					Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME,
-							new QueryImpl().in(DataSet.NAME, lowerCaseBiobankNames), DataSet.class);
-
-					lowerCaseBiobankNames.add(0, firstColumn.toLowerCase());
-					sheetWriterRank = excelWriterRanks.createWritable("result", lowerCaseBiobankNames);
-
-					Map<String, Map<String, List<Integer>>> rankCollection = new HashMap<String, Map<String, List<Integer>>>();
-					List<Object> allRanks = new ArrayList<Object>();
-
-					for (Entry<String, Map<String, List<String>>> entry : maunalMappings.entrySet())
-					{
-						String variableName = entry.getKey();
-						List<String> ranks = new ArrayList<String>();
-						ranks.add(variableName);
-						Map<String, List<String>> mappingDetail = entry.getValue();
-						ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME,
-								new QueryImpl().eq(ObservableFeature.NAME, variableName), ObservableFeature.class);
-						String description = feature == null ? StringUtils.EMPTY : feature.getDescription();
-						if (!rankCollection.containsKey(description)) rankCollection.put(description,
-								new HashMap<String, List<Integer>>());
-
-						if (feature != null)
+						List<String> lowerCaseBiobankNames = new ArrayList<String>();
+						for (String element : biobankNames)
 						{
-							Entity row = new MapEntity();
-							row.set(firstColumn.toLowerCase(), description);
+							lowerCaseBiobankNames.add(element.toLowerCase());
+						}
 
-							for (DataSet dataSet : dataSets)
+						Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME,
+								new QueryImpl().in(DataSet.NAME, lowerCaseBiobankNames), DataSet.class);
+
+						lowerCaseBiobankNames.add(0, firstColumn.toLowerCase());
+						sheetWriterRank = excelWriterRanks.createWritable("result", lowerCaseBiobankNames);
+
+						Map<String, Map<String, List<Integer>>> rankCollection = new HashMap<String, Map<String, List<Integer>>>();
+						List<Object> allRanks = new ArrayList<Object>();
+
+						for (Entry<String, Map<String, List<String>>> entry : maunalMappings.entrySet())
+						{
+							String variableName = entry.getKey();
+							List<String> ranks = new ArrayList<String>();
+							ranks.add(variableName);
+							Map<String, List<String>> mappingDetail = entry.getValue();
+							ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME,
+									new QueryImpl().eq(ObservableFeature.NAME, variableName), ObservableFeature.class);
+							String description = feature == null ? StringUtils.EMPTY : feature.getDescription();
+							if (!rankCollection.containsKey(description)) rankCollection.put(description,
+									new HashMap<String, List<Integer>>());
+
+							if (feature != null)
 							{
-								List<Integer> ranksBiobank = new ArrayList<Integer>();
-								if (mappingDetail.containsKey(dataSet.getName().toLowerCase()))
+								Entity row = new MapEntity();
+								row.set(firstColumn.toLowerCase(), description);
+
+								for (DataSet dataSet : dataSets)
 								{
-									Map<String, Hit> mappedFeatureIds = findFeaturesFromIndex("name",
-											mappingDetail.get(dataSet.getName().toLowerCase()), dataSet.getId());
-
-									String mappingDataSetIdentifier = SecurityUtils.getCurrentUsername() + "-"
-											+ selectedDataSetId + "-" + dataSet.getId();
-
-									Query q = new QueryImpl().eq("store_mapping_feature", feature.getId()).pageSize(50)
-											.sort(new Sort(Direction.DESC, "store_mapping_score"));
-
-									SearchRequest searchRequest = new SearchRequest(mappingDataSetIdentifier, q, null);
-
-									SearchResult result = searchService.search(searchRequest);
-
-									if (mappedFeatureIds.size() == 0)
+									List<Integer> ranksBiobank = new ArrayList<Integer>();
+									if (mappingDetail.containsKey(dataSet.getName().toLowerCase()))
 									{
-										row.set(dataSet.getName().toLowerCase(), "N/A2");
-										continue;
-									}
+										Map<String, Hit> mappedFeatureIds = findFeaturesFromIndex("name",
+												mappingDetail.get(dataSet.getName().toLowerCase()), dataSet.getId());
 
-									List<String> ids = new ArrayList<String>();
-									for (Hit hit : result.getSearchHits())
-									{
-										Map<String, Object> columnValueMap = hit.getColumnValueMap();
-										ids.add(columnValueMap.get("store_mapping_mapped_feature").toString());
-									}
-									Map<String, Hit> featureInfos = findFeaturesFromIndex("id", ids, dataSet.getId());
+										String mappingDataSetIdentifier = SecurityUtils.getCurrentUsername() + "-"
+												+ selectedDataSetId + "-" + dataSet.getId();
 
-									String previousDescription = null;
-									int rank = 0;
-									for (Hit hit : result.getSearchHits())
-									{
-										Map<String, Object> columnValueMap = hit.getColumnValueMap();
-										String mappedFeatureId = columnValueMap.get("store_mapping_mapped_feature")
-												.toString();
-										String mappedFeatureDescription = featureInfos.get(mappedFeatureId)
-												.getColumnValueMap().get("description").toString()
-												.replaceAll("[^0-9a-zA-Z ]", " ");
+										Query q = new QueryImpl().eq("store_mapping_feature", feature.getId())
+												.pageSize(50).sort(new Sort(Direction.DESC, "store_mapping_score"));
 
-										rank++;
-										if (previousDescription != null
-												&& previousDescription.equalsIgnoreCase(mappedFeatureDescription)) rank--;
+										SearchRequest searchRequest = new SearchRequest(mappingDataSetIdentifier, q,
+												null);
 
-										if (mappedFeatureIds.containsKey(mappedFeatureId))
+										SearchResult result = searchService.search(searchRequest);
+
+										if (mappedFeatureIds.size() == 0)
 										{
-											ranksBiobank.add(rank);
-											allRanks.add(rank);
-											mappedFeatureIds.remove(mappedFeatureId);
+											row.set(dataSet.getName().toLowerCase(), "N/A2");
+											continue;
 										}
-										previousDescription = mappedFeatureDescription;
-									}
-									if (mappedFeatureIds.size() == 0)
-									{
-										String output = StringUtils.join(ranksBiobank, ',');
-										if (ranksBiobank.size() > 1)
+
+										List<String> ids = new ArrayList<String>();
+										for (Hit hit : result.getSearchHits())
 										{
-											output += " (" + averageRank(ranksBiobank) + ")";
+											Map<String, Object> columnValueMap = hit.getColumnValueMap();
+											ids.add(columnValueMap.get("store_mapping_mapped_feature").toString());
 										}
-										row.set(dataSet.getName().toLowerCase(), output);
+										Map<String, Hit> featureInfos = findFeaturesFromIndex("id", ids,
+												dataSet.getId());
+
+										String previousDescription = null;
+										int rank = 0;
+										for (Hit hit : result.getSearchHits())
+										{
+											Map<String, Object> columnValueMap = hit.getColumnValueMap();
+											String mappedFeatureId = columnValueMap.get("store_mapping_mapped_feature")
+													.toString();
+											String mappedFeatureDescription = featureInfos.get(mappedFeatureId)
+													.getColumnValueMap().get("description").toString()
+													.replaceAll("[^0-9a-zA-Z ]", " ");
+
+											rank++;
+											if (previousDescription != null
+													&& previousDescription.equalsIgnoreCase(mappedFeatureDescription)) rank--;
+
+											if (mappedFeatureIds.containsKey(mappedFeatureId))
+											{
+												ranksBiobank.add(rank);
+												allRanks.add(rank);
+												mappedFeatureIds.remove(mappedFeatureId);
+											}
+											previousDescription = mappedFeatureDescription;
+										}
+										if (mappedFeatureIds.size() == 0)
+										{
+											String output = StringUtils.join(ranksBiobank, ',');
+											if (ranksBiobank.size() > 1)
+											{
+												output += " (" + averageRank(ranksBiobank) + ")";
+											}
+											row.set(dataSet.getName().toLowerCase(), output);
+										}
+										else
+										{
+											for (int i = 0; i < mappedFeatureIds.size(); i++)
+												allRanks.add("Not mapped");
+											row.set(dataSet.getName().toLowerCase(), "Not mapped");
+											ranksBiobank.clear();
+										}
+									}
+									else row.set(dataSet.getName().toLowerCase(), "N/A1");
+
+									rankCollection.get(description).put(dataSet.getName().toLowerCase(), ranksBiobank);
+								}
+								sheetWriterRank.add(row);
+							}
+						}
+
+						Map<String, List<Integer>> rankCollectionPerBiobank = new HashMap<String, List<Integer>>();
+						{
+							sheetWriterRankStatistics = excelWriterRanks.createWritable("rank statistics", Arrays
+									.asList(firstColumn.toLowerCase(), "average rank", "round-up rank", "median rank",
+											"minium", "maximum"));
+
+							for (Entry<String, Map<String, List<Integer>>> entry : rankCollection.entrySet())
+							{
+								String variableName = entry.getKey();
+								Entity row = new MapEntity();
+								row.set(firstColumn.toLowerCase(), variableName);
+								List<Integer> rankAllBiobanks = new ArrayList<Integer>();
+								for (Entry<String, List<Integer>> rankBiobanks : entry.getValue().entrySet())
+								{
+									if (!rankCollectionPerBiobank.containsKey(rankBiobanks.getKey())) rankCollectionPerBiobank
+											.put(rankBiobanks.getKey(), new ArrayList<Integer>());
+									rankCollectionPerBiobank.get(rankBiobanks.getKey()).addAll(rankBiobanks.getValue());
+									rankAllBiobanks.addAll(rankBiobanks.getValue());
+								}
+
+								row.set("average rank", averageRank(rankAllBiobanks));
+								row.set("round-up rank", Math.ceil(averageRank(rankAllBiobanks)));
+								Collections.sort(rankAllBiobanks);
+								if (!rankAllBiobanks.isEmpty())
+								{
+									row.set("minium", rankAllBiobanks.get(0));
+									row.set("maximum", rankAllBiobanks.get(rankAllBiobanks.size() - 1));
+
+									double medianRank = 0;
+									if (rankAllBiobanks.size() % 2 == 0)
+									{
+										medianRank = (double) (rankAllBiobanks.get(rankAllBiobanks.size() / 2 - 1) + rankAllBiobanks
+												.get(rankAllBiobanks.size() / 2)) / 2;
 									}
 									else
 									{
-										for (int i = 0; i < mappedFeatureIds.size(); i++)
-											allRanks.add("Not mapped");
-										row.set(dataSet.getName().toLowerCase(), "Not mapped");
-										ranksBiobank.clear();
+										medianRank = rankAllBiobanks.get(rankAllBiobanks.size() / 2);
 									}
+									row.set("median rank", medianRank);
 								}
-								else row.set(dataSet.getName().toLowerCase(), "N/A1");
 
-								rankCollection.get(description).put(dataSet.getName().toLowerCase(), ranksBiobank);
+								sheetWriterRankStatistics.add(row);
 							}
-							sheetWriterRank.add(row);
 						}
-					}
 
-					Map<String, List<Integer>> rankCollectionPerBiobank = new HashMap<String, List<Integer>>();
-					{
-						sheetWriterRankStatistics = excelWriterRanks.createWritable("rank statistics", Arrays.asList(
-								firstColumn.toLowerCase(), "average rank", "round-up rank", "median rank", "minium",
-								"maximum"));
-
-						for (Entry<String, Map<String, List<Integer>>> entry : rankCollection.entrySet())
 						{
-							String variableName = entry.getKey();
-							Entity row = new MapEntity();
-							row.set(firstColumn.toLowerCase(), variableName);
-							List<Integer> rankAllBiobanks = new ArrayList<Integer>();
-							for (Entry<String, List<Integer>> rankBiobanks : entry.getValue().entrySet())
+							lowerCaseBiobankNames.remove(0);
+							sheetWriteBiobankRanks = excelWriterRanks.createWritable("biobank average ranks",
+									lowerCaseBiobankNames);
+							Entity entity = new MapEntity();
+							for (Entry<String, List<Integer>> entry : rankCollectionPerBiobank.entrySet())
 							{
-								if (!rankCollectionPerBiobank.containsKey(rankBiobanks.getKey())) rankCollectionPerBiobank
-										.put(rankBiobanks.getKey(), new ArrayList<Integer>());
-								rankCollectionPerBiobank.get(rankBiobanks.getKey()).addAll(rankBiobanks.getValue());
-								rankAllBiobanks.addAll(rankBiobanks.getValue());
+								entity.set(entry.getKey(), averageRank(entry.getValue()));
 							}
+							sheetWriteBiobankRanks.add(entity);
+						}
 
-							row.set("average rank", averageRank(rankAllBiobanks));
-							row.set("round-up rank", Math.ceil(averageRank(rankAllBiobanks)));
-							Collections.sort(rankAllBiobanks);
-							if (!rankAllBiobanks.isEmpty())
+						{
+							sheetWriteSpssInput = excelWriterRanks.createWritable("spss ranks", Arrays.asList("rank"));
+							for (Object rank : allRanks)
 							{
-								row.set("minium", rankAllBiobanks.get(0));
-								row.set("maximum", rankAllBiobanks.get(rankAllBiobanks.size() - 1));
-
-								double medianRank = 0;
-								if (rankAllBiobanks.size() % 2 == 0)
-								{
-									medianRank = (double) (rankAllBiobanks.get(rankAllBiobanks.size() / 2 - 1) + rankAllBiobanks
-											.get(rankAllBiobanks.size() / 2)) / 2;
-								}
-								else
-								{
-									medianRank = rankAllBiobanks.get(rankAllBiobanks.size() / 2);
-								}
-								row.set("median rank", medianRank);
+								Entity entity = new MapEntity("rank", rank);
+								sheetWriteSpssInput.add(entity);
 							}
-
-							sheetWriterRankStatistics.add(row);
-						}
-					}
-
-					{
-						lowerCaseBiobankNames.remove(0);
-						sheetWriteBiobankRanks = excelWriterRanks.createWritable("biobank average ranks",
-								lowerCaseBiobankNames);
-						Entity entity = new MapEntity();
-						for (Entry<String, List<Integer>> entry : rankCollectionPerBiobank.entrySet())
-						{
-							entity.set(entry.getKey(), averageRank(entry.getValue()));
-						}
-						sheetWriteBiobankRanks.add(entity);
-					}
-
-					{
-						sheetWriteSpssInput = excelWriterRanks.createWritable("spss ranks", Arrays.asList("rank"));
-						for (Object rank : allRanks)
-						{
-							Entity entity = new MapEntity("rank", rank);
-							sheetWriteSpssInput.add(entity);
 						}
 					}
 				}
+				finally
+				{
+					inputSheet.close();
+				}
+
 			}
 		}
 		finally

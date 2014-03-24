@@ -231,9 +231,11 @@
 		return attributeMap;
 	}
 	
-	$(function() {
+	$(function() {		
+		// bind event handlers with namespace
+		
 		// scatter plot modal
-		$('#chart-designer-modal-scatterplot').on('show', function() {
+		$(document).on('show.charts', '#chart-designer-modal-scatterplot', function() {
 			$("#scatterplot-designer-modal-create-button").prop('disabled', true); // reset
 			
 			var attributes = getAttributes();
@@ -263,7 +265,7 @@
 		$('#scatterplot-select-yaxis-feature').change(activateDesignerSubmitButtonScatterPlot);
 		
 		// box plot modal
-		$('#chart-designer-modal-boxplot').on('show', function() {
+		$(document).on('show.charts', '#chart-designer-modal-boxplot', function() {
 			$("#boxplot-designer-modal-create-button").prop('disabled', true); // reset
 			
 			var attributes = getAttributes();

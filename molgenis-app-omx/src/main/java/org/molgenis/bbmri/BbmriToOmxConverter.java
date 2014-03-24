@@ -13,10 +13,10 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.RepositorySource;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.Writable;
 import org.molgenis.data.WritableFactory;
-import org.molgenis.data.excel.ExcelRepositorySource;
+import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.support.MapEntity;
@@ -152,11 +152,12 @@ public class BbmriToOmxConverter
 				Institute.IDENTIFIER, Institute.NAME, Institute.ADDRESS, Institute.PHONE, Institute.EMAIL,
 				Institute.FAX, Institute.TOLLFREEPHONE, Institute.CITY, Institute.COUNTRY));
 
-		RepositorySource repositorySource = new ExcelRepositorySource(entityFileMap.get("institutes.xls"),
+		RepositoryCollection repositorySource = new ExcelRepositoryCollection(entityFileMap.get("institutes.xls"),
 				new TrimProcessor());
+
 		try
 		{
-			Repository repo = repositorySource.getRepository("BiobankInstitute");
+			Repository repo = repositorySource.getRepositoryByEntityName("BiobankInstitute");
 			try
 			{
 				for (Entity inputEntity : repo)
@@ -201,12 +202,13 @@ public class BbmriToOmxConverter
 				Person.COUNTRY, Person.FIRSTNAME, Person.MIDINITIALS, Person.LASTNAME, Person.TITLE, Person.AFFILIATION
 						+ "_" + Institute.NAME, Person.DEPARTMENT, Person.ROLES + "_" + PersonRole.IDENTIFIER));
 
-		RepositorySource repositorySource = new ExcelRepositorySource(entityFileMap.get("biobankcoordinator.xls"),
-				new TrimProcessor());
+		RepositoryCollection repositorySource = new ExcelRepositoryCollection(
+				entityFileMap.get("biobankcoordinator.xls"), new TrimProcessor());
+
 		try
 		{
 
-			Repository repo = repositorySource.getRepository("BiobankCoordinator");
+			Repository repo = repositorySource.getRepositoryByEntityName("BiobankCoordinator");
 			try
 			{
 				for (Entity entity : repo)
@@ -258,12 +260,13 @@ public class BbmriToOmxConverter
 				Arrays.asList(PersonRole.IDENTIFIER, PersonRole.NAME));
 		try
 		{
-			RepositorySource repositorySource = new ExcelRepositorySource(entityFileMap.get("personrole.xls"),
+			RepositoryCollection repositorySource = new ExcelRepositoryCollection(entityFileMap.get("personrole.xls"),
 					new TrimProcessor());
 
-			Repository repo = repositorySource.getRepository("BiobankPersonRole");
+			Repository repo = repositorySource.getRepositoryByEntityName("BiobankPersonRole");
 			try
 			{
+
 				for (Entity inputEntity : repo)
 				{
 					String name = inputEntity.getString("name");
@@ -300,10 +303,10 @@ public class BbmriToOmxConverter
 		{
 			// biodata
 			{
-				RepositorySource repositorySource = new ExcelRepositorySource(entityFileMap.get("biobankdatatype.xls"),
-						new TrimProcessor());
+				RepositoryCollection repositorySource = new ExcelRepositoryCollection(
+						entityFileMap.get("biobankdatatype.xls"), new TrimProcessor());
 
-				Repository repo = repositorySource.getRepository("BiobankDataType");
+				Repository repo = repositorySource.getRepositoryByEntityName("BiobankDataType");
 				try
 				{
 					for (Entity entity : repo)
@@ -327,9 +330,9 @@ public class BbmriToOmxConverter
 
 			// category
 			{
-				RepositorySource repositorySource = new ExcelRepositorySource(entityFileMap.get("categories.xls"),
-						new TrimProcessor());
-				Repository repo = repositorySource.getRepository("BiobankCategory");
+				RepositoryCollection repositorySource = new ExcelRepositoryCollection(
+						entityFileMap.get("categories.xls"), new TrimProcessor());
+				Repository repo = repositorySource.getRepositoryByEntityName("BiobankCategory");
 				try
 				{
 					for (Entity entity : repo)
@@ -353,9 +356,9 @@ public class BbmriToOmxConverter
 
 			// subcategory
 			{
-				RepositorySource repositorySource = new ExcelRepositorySource(entityFileMap.get("subcategories.xls"),
-						new TrimProcessor());
-				Repository repo = repositorySource.getRepository("BiobankSubCategory");
+				RepositoryCollection repositorySource = new ExcelRepositoryCollection(
+						entityFileMap.get("subcategories.xls"), new TrimProcessor());
+				Repository repo = repositorySource.getRepositoryByEntityName("BiobankSubCategory");
 				try
 				{
 					for (Entity entity : repo)
@@ -379,9 +382,10 @@ public class BbmriToOmxConverter
 
 			// topics
 			{
-				RepositorySource repositorySource = new ExcelRepositorySource(entityFileMap.get("topics.xls"),
+				RepositoryCollection repositorySource = new ExcelRepositoryCollection(entityFileMap.get("topics.xls"),
 						new TrimProcessor());
-				Repository repo = repositorySource.getRepository("BiobankTopic");
+
+				Repository repo = repositorySource.getRepositoryByEntityName("BiobankTopic");
 				try
 				{
 					for (Entity entity : repo)
@@ -426,11 +430,12 @@ public class BbmriToOmxConverter
 					}
 				}));
 
-		RepositorySource repositorySource = new ExcelRepositorySource(entityFileMap.get("cohorts.xls"),
+		RepositoryCollection repositorySource = new ExcelRepositoryCollection(entityFileMap.get("cohorts.xls"),
 				new TrimProcessor());
 		try
 		{
-			Repository repo = repositorySource.getRepository("Biobank");
+
+			Repository repo = repositorySource.getRepositoryByEntityName("Biobank");
 			try
 			{
 				for (Entity inputEntity : repo)
@@ -510,6 +515,7 @@ public class BbmriToOmxConverter
 			{
 				repo.close();
 			}
+
 		}
 		finally
 		{

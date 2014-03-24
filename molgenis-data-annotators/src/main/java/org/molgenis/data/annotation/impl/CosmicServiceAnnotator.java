@@ -4,7 +4,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -96,7 +99,8 @@ public class CosmicServiceAnnotator extends AbstractRepositoryAnnotator implemen
 			try
 			{
 				HttpResponse response = httpClient.execute(httpGet);
-				BufferedReader br = new BufferedReader(new InputStreamReader((response.getEntity().getContent())));
+				BufferedReader br = new BufferedReader(new InputStreamReader((response.getEntity().getContent()),
+						Charset.forName("UTF-8")));
 
 				String output;
 				StringBuilder result = new StringBuilder();

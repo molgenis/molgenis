@@ -82,7 +82,15 @@ public class GafListRepositoryTest
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void GafListRepository() throws IOException, ServiceException
 	{
-		new GafListRepository(null, null, null, null, null);
+		GafListRepository repo = null;
+		try
+		{
+			repo = new GafListRepository(null, null, null, null, null);
+		}
+		finally
+		{
+			if (repo != null) repo.close();
+		}
 	}
 
 	@SuppressWarnings("unchecked")

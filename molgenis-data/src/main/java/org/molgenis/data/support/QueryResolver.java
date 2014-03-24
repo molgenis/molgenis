@@ -4,12 +4,14 @@ import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
 
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
@@ -40,6 +42,9 @@ public class QueryResolver
 		{
 			if (r.getField() != null)
 			{
+				AttributeMetaData attr = meta.getAttribute(r.getField());
+				FieldTypeEnum dataType = attr.getDataType().getEnumType();
+
 				if (r.getField().endsWith("_Identifier"))
 				{
 					String entityName = StringUtils.capitalize(r.getField().substring(0,
@@ -49,32 +54,31 @@ public class QueryResolver
 					Object value = dataService.findOne(entityName, new QueryImpl().eq("Identifier", r.getValue()));
 					r.setValue(value);
 				}
-				else
-				{
-					// Resolve xref, mref fields
-					AttributeMetaData attr = meta.getAttribute(r.getField());
+				else if ((dataType == XREF || dataType == MREF || dataType == CATEGORICAL))
 
-					FieldTypeEnum dataType = attr.getDataType().getEnumType();
-					if (dataType == XREF || dataType == MREF || dataType == CATEGORICAL)
+				{
+					// Find referencing entity if a ref attribute is given and not the ref entity itself
+					if (r.getOperator() == Operator.IN)
 					{
-						if (r.getOperator() == Operator.IN)
+						Iterable<?> iterable = (Iterable<?>) r.getValue();
+						Iterator<?> it = iterable.iterator();
+						if (it.hasNext() && !(it.next() instanceof Entity))
 						{
-							Iterable<?> values = dataService.findAll(attr.getRefEntity().getName(), new QueryImpl().in(
-									attr.getRefEntity().getLabelAttribute().getName(), (Iterable<?>) r.getValue()));
+							Iterable<?> values = dataService.findAll(attr.getRefEntity().getName(),
+									new QueryImpl().in(attr.getRefEntity().getLabelAttribute().getName(), iterable));
+
 							r.setValue(Lists.newArrayList(values));
 						}
-						else
-						{
-							Object value = dataService
-									.findOne(
-											attr.getRefEntity().getName(),
-											new QueryImpl().eq(attr.getRefEntity().getLabelAttribute().getName(),
-													r.getValue()));
+					}
+					else if (!(r.getValue() instanceof Entity))
+					{
+						Object value = dataService.findOne(attr.getRefEntity().getName(),
+								new QueryImpl().eq(attr.getRefEntity().getLabelAttribute().getName(), r.getValue()));
 
-							r.setValue(value);
-						}
+						r.setValue(value);
 					}
 				}
+
 			}
 
 		}

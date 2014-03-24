@@ -14,9 +14,9 @@ import org.apache.commons.io.IOUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.RepositorySource;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.csv.CsvRepository;
-import org.molgenis.data.excel.ExcelRepositorySource;
+import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.processor.TrimProcessor;
 
 /**
@@ -32,12 +32,22 @@ public class Validator
 			InvalidFormatException
 	{
 		ValidationFile excelfile = new ValidationFile();
-		RepositorySource excelReaderReferenceFile = new ExcelRepositorySource(new File(excelFile1), new TrimProcessor());
-		Repository excelSheetReaderReferenceFile = excelReaderReferenceFile.getRepository("dataset_celiac_sprue");
-		excelfile.readFile(excelSheetReaderReferenceFile, IDENTIFIER, IDENTIFIER2);
+		RepositoryCollection excelReaderReferenceFile = new ExcelRepositoryCollection(new File(excelFile1),
+				new TrimProcessor());
+
+		Repository excelSheetReaderReferenceFile = excelReaderReferenceFile
+				.getRepositoryByEntityName("dataset_celiac_sprue");
+		try
+		{
+			excelfile.readFile(excelSheetReaderReferenceFile, IDENTIFIER, IDENTIFIER2);
+		}
+		finally
+		{
+			excelSheetReaderReferenceFile.close();
+		}
 
 		ValidationFile csvFile = new ValidationFile();
-		Repository csvReaderFileToCompare = new CsvRepository(new File(file2), null);
+		Repository csvReaderFileToCompare = new CsvRepository(new File(file2), "", null);
 
 		csvFile.readFile(csvReaderFileToCompare, IDENTIFIER, IDENTIFIER2);
 		boolean noUniqueColums = false;

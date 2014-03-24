@@ -21,11 +21,11 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.RepositorySource;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.Writable;
 import org.molgenis.data.WritableFactory;
 import org.molgenis.data.csv.CsvWriter;
-import org.molgenis.data.excel.ExcelRepositorySource;
+import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.data.excel.ExcelWriter.FileFormat;
 import org.molgenis.data.processor.LowerCaseProcessor;
@@ -53,7 +53,9 @@ public class SampleConverter
 		OUTPUTDIR = outputdir;
 		PROJECT = projectName;
 
-		RepositorySource repositorySource = new ExcelRepositorySource(projectName, in, new TrimProcessor(false, true));
+		RepositoryCollection repositorySource = new ExcelRepositoryCollection(projectName, in, new TrimProcessor(false,
+				true));
+
 		CsvWriter csvWriter = null;
 
 		ArrayList<String> listOfEntity = new ArrayList<String>();
@@ -64,8 +66,9 @@ public class SampleConverter
 
 		try
 		{
-			for (Repository repo : repositorySource.getRepositories())
+			for (String name : repositorySource.getEntityNames())
 			{
+				Repository repo = repositorySource.getRepositoryByEntityName(name);
 				this.featureColNames = new ArrayList<String>();
 
 				for (AttributeMetaData attr : repo.getEntityMetaData().getAttributes())
@@ -150,6 +153,7 @@ public class SampleConverter
 			{
 			}
 		}
+
 	}
 
 	private void createCategoryList(Entity entity, String sampleId)

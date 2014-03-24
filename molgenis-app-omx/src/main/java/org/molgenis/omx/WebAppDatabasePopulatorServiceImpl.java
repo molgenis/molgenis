@@ -1,6 +1,5 @@
 package org.molgenis.omx;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -145,7 +144,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 
 		// Annotators include files/tools
 		String molgenisHomeDir = System.getProperty("molgenis.home");
-		
+
 		if (molgenisHomeDir == null)
 		{
 			throw new IllegalArgumentException("missing required java system property 'molgenis.home'");
@@ -154,8 +153,6 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		if (!molgenisHomeDir.endsWith("/")) molgenisHomeDir = molgenisHomeDir + '/';
 		String molgenisHomeDirAnnotationResources = molgenisHomeDir + "data/annotation_resources";
 
-		runtimePropertyMap.put(CaddServiceAnnotator.TABIX_LOCATION_PROPERTY, molgenisHomeDirAnnotationResources
-				+ "/tabix-0.2.6/tabix");
 		runtimePropertyMap.put(CaddServiceAnnotator.CADD_FILE_LOCATION_PROPERTY, molgenisHomeDirAnnotationResources
 				+ "/CADD/1000G.vcf.gz");
 		runtimePropertyMap.put(ClinicalGenomicsDatabaseServiceAnnotator.CGD_FILE_LOCATION_PROPERTY,

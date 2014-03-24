@@ -116,6 +116,7 @@ public class QueryImpl implements Query
 	@Override
 	public Query and()
 	{
+		rules.get(this.rules.size() - 1).add(new QueryRule(Operator.AND));
 		return this;
 	}
 

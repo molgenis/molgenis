@@ -7,7 +7,7 @@ import java.util.List;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.RepositorySource;
+import org.molgenis.data.RepositoryCollection;
 
 public class OpalToOmxConvertor extends AbstractOmxConvertor
 {
@@ -17,15 +17,15 @@ public class OpalToOmxConvertor extends AbstractOmxConvertor
 	}
 
 	@Override
-	public void collectProtocolInfo(RepositorySource repositorySource) throws IOException
+	public void collectProtocolInfo(RepositoryCollection repositoryCollection) throws IOException
 	{
 		System.out.println("No protocol involved in OPAL format!");
 	}
 
 	@Override
-	public void collectVariableInfo(RepositorySource repositorySource) throws IOException
+	public void collectVariableInfo(RepositoryCollection repositoryCollection) throws IOException
 	{
-		Repository repo = repositorySource.getRepository("Variables");
+		Repository repo = repositoryCollection.getRepositoryByEntityName("Variables");
 		for (Entity entity : repo)
 		{
 			String variableName = entity.getString("name");
@@ -45,9 +45,9 @@ public class OpalToOmxConvertor extends AbstractOmxConvertor
 	}
 
 	@Override
-	public void collectCategoryInfo(RepositorySource repositorySource) throws IOException
+	public void collectCategoryInfo(RepositoryCollection repositoryCollection) throws IOException
 	{
-		Repository repo = repositorySource.getRepository("Categories");
+		Repository repo = repositoryCollection.getRepositoryByEntityName("Categories");
 		for (Entity entity : repo)
 		{
 			String featureID = entity.getString("variable");

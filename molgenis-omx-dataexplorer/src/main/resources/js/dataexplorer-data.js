@@ -21,49 +21,43 @@
 	 */
 	function createDataTable() {
 		var attributes = getAttributes();
-		if (attributes.length > 0) {
-			$('#data-table-container').table({
-				'entityMetaData' : molgenis.dataexplorer.getSelectedEntityMeta(),
-				'attributes' : attributes,
-				'query' : molgenis.dataexplorer.getEntityQuery()
-			});
-		} else {
-			$('#data-table-container').html('No items selected');
-		}
+		$('#data-table-container').table({
+			'entityMetaData' : getEntity(),
+			'attributes' : attributes,
+			'query' : molgenis.dataexplorer.getEntityQuery()
+		});
 	};
 	
 	/**
 	 * @memberOf molgenis.dataexplorer.data
 	 */
 	function download() {
-		parent.showSpinner();
 		$.download(molgenis.getContextUrl() + '/download', {
 			// Workaround, see http://stackoverflow.com/a/9970672
 			'dataRequest' : JSON.stringify(createDownloadDataRequest())
 		});
-		parent.hideSpinner();
 	}
 	
 	/**
 	 * @memberOf molgenis.dataexplorer.data
 	 */
 	function createDownloadDataRequest() {
-		var entityQuery = createEntityQuery();
+		var entityQuery = molgenis.dataexplorer.getEntityQuery();
 		
 		var dataRequest = {
-			entityName : selectedEntityMetaData.name,
+			entityName : getEntity().name,
 			attributeNames: [],
 			query : {
 				rules : [entityQuery.q]
 			}
 		};
 
-		var query = dataTable.table('getQuery');
+		var query = $('#data-table-container').table('getQuery');
 		if (query && query.sort) {
 			searchRequest.query.sort = query.sort;
 		}
 		
-		$.each(selectedAttributes, function() {
+		$.each(getAttributes(), function() {
 			var feature = this;
 			dataRequest.attributeNames.push(feature.name);
 			if (feature.fieldType === 'XREF' || feature.fieldType === 'MREF')
@@ -231,24 +225,27 @@
 		return molgenis.dataexplorer.getSelectedAttributes();
 	}
 	
+	function getQuery() {
+		return molgenis.dataexplorer.getEntityQuery();
+	}
+	
 	/**
 	 * @memberOf molgenis.dataexplorer.data
 	 */
-	$(function() {	
-		$(document).on('show', '#genomebrowser .collapse', function() {
+	$(function() {		
+		// bind event handlers with namespace 
+		$(document).on('show.data', '#genomebrowser .collapse', function() {
             $(this).parent().find(".icon-chevron-right").removeClass("icon-chevron-right").addClass("icon-chevron-down");
-        }).on('hide', '#genomebrowser .collapse', function() {
+        }).on('hide.data', '#genomebrowser .collapse', function() {
             $(this).parent().find(".icon-chevron-down").removeClass("icon-chevron-down").addClass("icon-chevron-right");
         });
 		
-		$(document).on('changeAttributeSelection', function(e, data) {
+		$(document).on('changeAttributeSelection.data', function(e, data) {
 			if($('#data-table-container'))
 				$('#data-table-container').table('setAttributes', data.attributes);
 		});
 		
-		$(document).on('updateAttributeFilters', function(e, data) {
-			molgenis.dataexplorer.data.createDataTable();
-			
+		$(document).on('updateAttributeFilters.data', function(e, data) {
 			// TODO implement elegant solution for genome browser specific code
 			$.each(data.filters, function() {
 				if(this.attribute.name === 'start_nucleotide') self.genomeBrowser.setLocation(self.genomeBrowser.chr, this.values[0], this.values[1]);
@@ -256,14 +253,9 @@
 			});
 		});
 		
-		$(document).on('changeEntitySearchQuery', function(e, entitySearchQuery) {
-			molgenis.dataexplorer.data.createDataTable();
-			// TODO what to do for genomebrowser?
-		});
-		
-		$(document).on('removeAttributeFilter', function(e, data) {
-			molgenis.dataexplorer.data.createDataTable();
-			// TODO what to do for genomebrowser?
+		$(document).on('changeQuery.data', function(e, query) {
+			$('#data-table-container').table('setQuery', query);
+			// TODO what to do for genome browser
 		});
 		
 		$('#download-button').click(function() {

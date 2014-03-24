@@ -34,7 +34,7 @@ public class JpaRepositorySourceGen extends Generator
 		Template template = createTemplate("/" + getClass().getSimpleName() + ".java.ftl");
 		Map<String, Object> templateArgs = createTemplateArguments(options);
 
-		File target = new File(getSourcePath(options) + "/org/molgenis/data/jpa/JpaRepositorySource.java");
+		File target = new File(getSourcePath(options) + "/org/molgenis/data/jpa/JpaRepositoryCollection.java");
 
 		boolean created = target.getParentFile().mkdirs();
 		if (!created && !target.getParentFile().exists())

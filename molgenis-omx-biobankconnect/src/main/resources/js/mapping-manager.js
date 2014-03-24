@@ -130,13 +130,14 @@
 				if(dataSetId !== ns.MappingManager.prototype.getSelectedDataSet())
 				identifiers.push(getUserName() + '-' + ns.MappingManager.prototype.getSelectedDataSet() + '-' + dataSetId); 
 			});
-			var dataSetMapping = restApi.get('/api/v1/dataset/', null, {
+			var request = {
 				q : [{
-					field : 'identifier',
+					field : 'Identifier',
 					operator : 'IN',
 					value : identifiers
-				}],
-			});
+				}]
+			};
+			var dataSetMapping = restApi.get('/api/v1/dataset/',{ q : request });
 			return dataSetMapping;
 		}
 		
@@ -209,14 +210,15 @@
 			for(var i = 1; i < iterations; i++){
 				var lower = (i - 1) * 500;
 				var upper = (i * 500) < allFeatureCollection.length ? (i * 500) : allFeatureCollection.length; 
-				var listOfFeatures = restApi.get('/api/v1/observablefeature', {
+				var query = {
 					q : [{
 						field : 'id',
 						operator : 'IN',
 						value : allFeatureCollection.slice(lower, upper)
 					}],
 					num : 500
-				});
+				};
+				var listOfFeatures = restApi.get('/api/v1/observablefeature', {q : query});
 				$.each(listOfFeatures.items, function(index, element){
 					cachedFeatures[(ns.hrefToId(element.href))] = element;
 				});
@@ -658,14 +660,30 @@
 			$.each(mappings, function(index, eachMapping){
 				observationSetIds.push(eachMapping.observationSet);
 			});
+			var observationSets = restApi.get('/api/v1/observationset', {
+				'q' : {
+					'q' : [{
+						'field' : 'id',
+						'operator' : 'IN',
+						'value' : observationSetIds
+					}]
+				}
+			});
+			var observationSetIdentifiers = [];
+			$.each(observationSets.items, function(index, observationSet){
+				observationSetIdentifiers.push(observationSet.Identifier);
+			});
+			
 			showMessage('alert alert-info', observationSetIds.length + ' candidate mappings are being deleted!');
 			var observedValues = restApi.get('/api/v1/observedvalue', {
-				q : [{
-					field : 'observationSet',
-					operator : 'IN',
-					value : observationSetIds
-				}],
-				num : 500
+				'q' : {
+					'q' : [{
+						'field' : 'observationSet',
+						'operator' : 'IN',
+						'value' : observationSetIdentifiers
+					}],
+					'num' : 500
+				}
 			});
 			
 			var observedValueIds = [];
@@ -819,7 +837,6 @@
 		
 		function updateMappingInfo(feature, mappingTable, mappedDataSet, clickedCell){
 			var displayedFeatures = [];
-			var confirmFeature = null;
 			mappingTable.find('input').each(function(index, checkBox){
 				var eachMapping = $(checkBox).data('eachMapping');
 				var changedValue = null;
@@ -834,29 +851,22 @@
 				}
 				if(changedValue !== null){
 					eachMapping.confirmed = changedValue;
-					if(confirmFeature === null){
-						confirmFeature = restApi.get('/api/v1/observablefeature', {
-							q : [{
-								field : 'identifier',
-								operator : 'EQUALS',
-								value : storeMappingConfirmMapping
-							}]
-						});
-					}
-					
+					var observationSet = restApi.get('/api/v1/observationset/' + eachMapping.observationSet);
 					var observedValue = restApi.get('/api/v1/observedvalue', {
-						'expand': ['value'],
-						'q' : [{
-							field : 'observationSet',
-							operator : 'EQUALS',
-							value : eachMapping.observationSet
-						},{
-							field : 'feature',
-							operator : 'EQUALS',
-							value : ns.hrefToId(confirmFeature.items[0].href)
-						}]
+						'expand': ['Value'],
+						'q' : {
+							'q' : [{
+								'field' : 'observationSet',
+								'operator' : 'EQUALS',
+								'value' : observationSet.Identifier
+							},{
+								'field' : 'feature',
+								'operator' : 'EQUALS',
+								'value' : storeMappingConfirmMapping
+							}]
+						}
 					});
-					var xrefValue = restApi.get('/api/v1/boolvalue/' + ns.hrefToId(observedValue.items[0].value.href));
+					var xrefValue = restApi.get('/api/v1/boolvalue/' + ns.hrefToId(observedValue.items[0].Value.href));
 					xrefValue.value = changedValue;
 					updateEntity(xrefValue.href, xrefValue);
 					var updateRequest = {

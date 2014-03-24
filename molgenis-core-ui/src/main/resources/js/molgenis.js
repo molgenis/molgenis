@@ -23,9 +23,9 @@
 		items.push(type.charAt(0).toUpperCase() + type.slice(1));
 		items.push('!</strong> ');
 		$.each(alerts, function(i, alert) {
-			items.push(alert.message);
 			if (i > 0)
-				items.push('\n');
+				items.push('<br/>');
+			items.push('<span>' + alert.message + '</span>');
 		});
 		items.push('</div>');
 
@@ -275,7 +275,6 @@ function abbreviate(s, maxLength) {
  * @param attrs input attributes
  * @param val input value
  * @param lbl input label (for checkbox and radio inputs)
- * @returns
  */
 function createInput(dataType, attrs, val, lbl) {
 	function createBasicInput(type, attrs, val) {
@@ -325,7 +324,7 @@ function createInput(dataType, attrs, val, lbl) {
 			return createBasicInput('text', attrs, val);
 		case 'MREF':
 		case 'XREF':
-			var container = $('<div class="xrefsearch" />')
+			var container = $('<div class="xrefsearch" />');
 			container.append(createBasicInput('hidden', attrs, val));
 			return container;
 		case 'COMPOUND' :
@@ -338,159 +337,54 @@ function createInput(dataType, attrs, val, lbl) {
 	}
 }
 
-$(function() {
-	// disable all ajax request caching
-	$.ajaxSetup({
-		cache : false
-	});
-	// async load bootstrap modal and display
-	$(document).on('click', 'a.modal-href', function(e) {
-		e.preventDefault();
-		e.stopPropagation();
-		if (!$(this).hasClass('disabled')) {
-			var container = $('#' + $(this).data('target'));
-			if (container.is(':empty')) {
-				container.load($(this).attr('href'), function() {
-					$('.modal:first', container).modal('show');
-				});
-			} else {
-				$('.modal:first', container).modal('show');
-			}
-		}
-	});
-});
-
 // molgenis entity REST API client
 (function($, molgenis) {
 	"use strict";
 
-	molgenis.RestClient = function RestClient(cache) {
-		this.cache = cache === false ? null : [];
-	};
+	molgenis.RestClient = function RestClient() {};
 
 	molgenis.RestClient.prototype.get = function(resourceUri, options) {
-		var apiUri = this._toApiUri(resourceUri, options);
-		var cachedResource = this.cache && this.cache[apiUri];
-		if (!cachedResource) {
-			var _this = this;
-			if (options && options.q) {
-				$
-						.ajax({
-							type : 'POST',
-							dataType : 'json',
-							url : apiUri,
-							cache : true,
-							data : JSON.stringify(options.q),
-							contentType : 'application/json',
-							async : false,
-							success : function(resource) {
-								if (_this.cache)
-									_this._cachePut(resourceUri, resource, options);
-								cachedResource = resource;
-							},
-							error : function(xhr) {
-								molgenis.createAlert(JSON
-										.parse(xhr.responseText).errors);
-							}
-						});
-			} else {
-				$
-						.ajax({
-							dataType : 'json',
-							url : apiUri,
-							cache : true,
-							async : false,
-							success : function(resource) {
-								if (_this.cache)
-									_this._cachePut(resourceUri, resource, options);
-								cachedResource = resource;
-							},
-							error : function(xhr) {
-								molgenis.createAlert(JSON
-										.parse(xhr.responseText).errors);
-							}
-						});
-			}
-		}
-		return cachedResource;
+		return this._get(resourceUri, options);
 	};
 	
 	molgenis.RestClient.prototype.getAsync = function(resourceUri, options, callback) {
-		var apiUri = this._toApiUri(resourceUri, options);
-		var cachedResource = this._cacheGet[apiUri];
-		if (cachedResource) {
-			callback(cachedResource);
-		} else {
-			var _this = this;
-			if (options && options.q) {
-				$
-						.ajax({
-							type : 'POST',
-							dataType : 'json',
-							url : apiUri,
-							cache : true,
-							data : JSON.stringify(options.q),
-							contentType : 'application/json',
-							async : true,
-							success : function(resource) {
-								_this._cachePut(resourceUri, resource, options);
-								callback(resource);
-							},
-							error : function(xhr) {
-								molgenis.createAlert(JSON
-										.parse(xhr.responseText).errors);
-							}
-						});
-			} else {
-				$
-						.ajax({
-							dataType : 'json',
-							url : apiUri,
-							cache : true,
-							async : true,
-							success : function(resource) {
-								_this._cachePut(resourceUri, resource, options);
-								callback(resource);
-							},
-							error : function(xhr) {
-								molgenis.createAlert(JSON
-										.parse(xhr.responseText).errors);
-							}
-						});
-			}
-		}
+		this._get(resourceUri, options, callback);
 	};
 
-	molgenis.RestClient.prototype._cacheGet = function(resourceUri) {
-		return this.cache !== null ? this.cache[resourceUri] : null;
-	};
+	molgenis.RestClient.prototype._get = function(resourceUri, options, callback) {
+		var resource = null;
 
-	molgenis.RestClient.prototype._cachePut = function(resourceUri, resource, options) {
-		var apiUri = this._toApiUri(resourceUri, options);
-		this.cache[apiUri] = resource;
-		if (resource.items) {
-			for ( var i = 0; i < resource.items.length; i++) {
-				var nestedResource = resource.items[i];
-				this.cache[nestedResource.href] = nestedResource;
+		var async = callback !== undefined;
+		
+		var config = {
+			'dataType' : 'json',
+			'url' : this._toApiUri(resourceUri, options),
+			'cache' : true,
+			'async' : async,
+			'success' : function(data) {
+				if (async)
+					callback(data);
+				else
+					resource = data;
 			}
+		};
+		
+		// tunnel get requests with query through a post,
+		// because it might not fit in the URL
+		if (options && options.q) {
+			$.extend(config, {
+				'type' : 'POST',
+				'data' : JSON.stringify(options.q),
+				'contentType' : 'application/json'
+			});
 		}
-		if (options && options.expand) {
-			this.cache[resourceUri] = resource;
-			for ( var i = 0; i < options.expand.length; i++) {
-				var expand = resource[options.expand[i]];
-				if (expand) {
-					this.cache[expand.href] = expand;
-					if (expand.items) {
-						for ( var j = 0; j < expand.items.length; j++) {
-							var expandedResource = expand.items[j];
-							this.cache[expandedResource.href] = expandedResource;
-						}
-					}
-				}
-			}
-		}
+		
+		$.ajax(config);
+		
+		if (!async)
+			return resource;
 	};
-
+	
 	molgenis.RestClient.prototype._toApiUri = function(resourceUri, options) {
 		var qs = "";
 		if (resourceUri.indexOf('?') != -1) {
@@ -534,15 +428,11 @@ $(function() {
 			async : false,
 			success : function(exists) {
 				result = exists;
-			},
-			error : function(xhr) {
-				molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 			}
 		});
 		
 		return result;
-	}
-
+	};
 }($, window.top.molgenis = window.top.molgenis || {}));
 
 // molgenis search API client
@@ -690,6 +580,7 @@ function showSpinner(callback) {
 		items.push('</div>');
 		$('body').append(items.join(''));
 		spinner = $('#spinner');
+		spinner.data('count', 0);
 	}
 	
 	if (callback) {
@@ -698,19 +589,70 @@ function showSpinner(callback) {
 		});
 	}
 	
-	
-	var timeout = setTimeout(function(){ spinner.modal('show'); }, 500);
-	$('#spinner').data('timeout', timeout);
+	var count = $('#spinner').data('count');
+	if(count === 0) {
+		var timeout = setTimeout(function(){ spinner.modal('show'); }, 500);
+		$('#spinner').data('timeout', timeout);
+		$('#spinner').data('count', 1);
+	} else {
+		$('#spinner').data('count', count + 1);
+	}
 }
 
 function hideSpinner() {
 	if ($('#spinner').length !== 0) {
-		clearTimeout($('#spinner').data('timeout'));
-		$('#spinner').modal('hide');
+		var count = $('#spinner').data('count');
+		if(count === 1) {
+			clearTimeout($('#spinner').data('timeout'));
+			$('#spinner').modal('hide');
+		}
+		if (count > 0) {
+			$('#spinner').data('count', count - 1);
+		}
 	}
 }
 
 $(function() {
+	// disable all ajax request caching
+	$.ajaxSetup({
+		cache : false
+	});
+
+	// use ajaxPrefilter instead of ajaxStart and ajaxStop
+	// to work around issue http://bugs.jquery.com/ticket/13680
+	$.ajaxPrefilter(function( options, _, jqXHR ) {
+	    showSpinner();
+	    jqXHR.always( hideSpinner );
+	});
+
+	$(document).ajaxError(function() {
+		try {
+			molgenis.createAlert(JSON.parse(xhr.responseText).errors);
+		} catch(e) {
+			molgenis.createAlert([{'message': 'An error occurred. Please contact the administrator.'}], 'error');
+		}
+	});
+	
+	window.onerror = function(msg, url, line) {
+		molgenis.createAlert([{'message': 'An error occurred. Please contact the administrator.'}, {'message': msg}], 'error');
+	};
+	
+	// async load bootstrap modal and display
+	$(document).on('click', 'a.modal-href', function(e) {
+		e.preventDefault();
+		e.stopPropagation();
+		if (!$(this).hasClass('disabled')) {
+			var container = $('#' + $(this).data('target'));
+			if (container.is(':empty')) {
+				container.load($(this).attr('href'), function() {
+					$('.modal:first', container).modal('show');
+				});
+			} else {
+				$('.modal:first', container).modal('show');
+			}
+		}
+	});
+	
 	/**
 	 * Add download functionality to JQuery.
 	 * data can be string of parameters or array/object

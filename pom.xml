@@ -34,6 +34,7 @@
 			<id>dev</id>
 			<properties>
 				<minify.skipMinify>true</minify.skipMinify>
+				<molgenis.build.profile>dev</molgenis.build.profile>
 			</properties>
 		</profile>
 		<!-- release profile (default) -->
@@ -41,6 +42,7 @@
 			<id>release</id>
 			<properties>
 				<minify.skipMinify>false</minify.skipMinify>
+				<molgenis.build.profile>release</molgenis.build.profile>
 			</properties>
 			<activation>
 	            <activeByDefault>true</activeByDefault>
@@ -53,6 +55,9 @@
 		<spring.version>4.0.2.RELEASE</spring.version>
 		<spring.security.version>3.2.1.RELEASE</spring.security.version>
 		<mysql.connector.java.version>5.1.28</mysql.connector.java.version>
+		
+		<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
+		<molgenis.build.timestamp>${maven.build.timestamp}</molgenis.build.timestamp>
 	</properties>
 
 	<build>
@@ -530,7 +535,6 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
-			<version>${spring.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<!-- scope: provided -->

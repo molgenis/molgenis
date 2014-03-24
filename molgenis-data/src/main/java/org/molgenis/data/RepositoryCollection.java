@@ -17,13 +17,4 @@ public interface RepositoryCollection
 	 * @throws UnknownEntityException
 	 */
 	Repository getRepositoryByEntityName(String name);
-
-	// TODO remove
-	/**
-	 * Get a repository by url
-	 * 
-	 * @param name
-	 * @return Repository or null if not found
-	 */
-	Repository getRepositoryByUrl(String url);
 }

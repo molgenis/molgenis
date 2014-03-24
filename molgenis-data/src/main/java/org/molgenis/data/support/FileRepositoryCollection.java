@@ -5,18 +5,18 @@ import java.util.List;
 import java.util.Set;
 
 import org.molgenis.data.Repository;
-import org.molgenis.data.RepositorySource;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.processor.CellProcessor;
 
 import com.google.common.collect.Lists;
 
-public abstract class FileRepositorySource implements RepositorySource
+public abstract class FileRepositoryCollection implements RepositoryCollection
 {
 	/** process cells after reading */
 	protected List<CellProcessor> cellProcessors;
 	private final Set<String> fileNameExtensions;
 
-	public FileRepositorySource(Set<String> fileNameExtensions, CellProcessor... cellProcessors)
+	public FileRepositoryCollection(Set<String> fileNameExtensions, CellProcessor... cellProcessors)
 	{
 		if (fileNameExtensions == null) throw new IllegalArgumentException("FileNameExtensions is null");
 		this.fileNameExtensions = fileNameExtensions;
@@ -32,23 +32,6 @@ public abstract class FileRepositorySource implements RepositorySource
 		return fileNameExtensions;
 	}
 
-	@Override
-	public abstract List<Repository> getRepositories();
-
-	@Override
-	public Repository getRepository(String name)
-	{
-		for (Repository repository : getRepositories())
-		{
-			if (repository.getName().equalsIgnoreCase(name))
-			{
-				return repository;
-			}
-		}
-
-		return null;
-	}
-
 	public void addCellProcessor(CellProcessor cellProcessor)
 	{
 		if (cellProcessors == null)
@@ -58,4 +41,10 @@ public abstract class FileRepositorySource implements RepositorySource
 
 		cellProcessors.add(cellProcessor);
 	}
+
+	@Override
+	public abstract Iterable<String> getEntityNames();
+
+	@Override
+	public abstract Repository getRepositoryByEntityName(String name);
 }

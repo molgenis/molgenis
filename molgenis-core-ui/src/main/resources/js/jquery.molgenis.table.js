@@ -19,50 +19,50 @@
 		items.push('</div>');
 		settings.container.html(items.join(''));
 
-		if(settings.attributes && settings.attributes.length > 0) {
-			// add data to elements
-			getTableMetaData(settings, function(attributes, refEntitiesMeta) {
-				settings.colAttributes = attributes;
-				settings.refEntitiesMeta = refEntitiesMeta;
-	
-				getTableData(settings, function(data) {
-					createTableHeader(settings);
-					createTableBody(data, settings);
-					createTablePager(data, settings);
-					createTableFooter(data, settings);
-				});
+		// add data to elements
+		getTableMetaData(settings, function(attributes, refEntitiesMeta) {
+			settings.colAttributes = attributes;
+			settings.refEntitiesMeta = refEntitiesMeta;
+
+			getTableData(settings, function(data) {
+				createTableHeader(settings);
+				createTableBody(data, settings);
+				createTablePager(data, settings);
+				createTableFooter(data, settings);
 			});
-		}
+		});
 	}
 	
 	/**
 	 * @memberOf molgenis.table
 	 */
 	function getTableMetaData(settings, callback) {
-		var colAttributes = molgenis.getAtomicAttributes(settings.attributes, restApi);
-		
-		// get meta data for referenced entities
-		var refEntitiesMeta = {};
-		$.each(colAttributes, function(i, attribute) {
-			if(attribute.fieldType === 'XREF' || attribute.fieldType === 'MREF' || attribute.fieldType === 'CATEGORICAL') {
-				refEntitiesMeta[attribute.refEntity.href] = null;
-			}
-		});
-
-		var dfds = [];
-		$.each(refEntitiesMeta, function(entityHref) {
-			dfds.push($.Deferred(function(dfd) {
-				restApi.getAsync(entityHref, {'expand' : [ 'attributes' ]}, function(entityMeta) {
-					refEntitiesMeta[entityHref] = entityMeta;
-					dfd.resolve();
-				});
-			}).promise());
-		});
-
-		// build table after all meta data for referenced entities was loaded
-		$.when.apply($, dfds).done(function() {
-			callback(colAttributes, refEntitiesMeta);
-		});
+		if(settings.attributes && settings.attributes.length > 0) {
+			var colAttributes = molgenis.getAtomicAttributes(settings.attributes, restApi);
+			
+			// get meta data for referenced entities
+			var refEntitiesMeta = {};
+			$.each(colAttributes, function(i, attribute) {
+				if(attribute.fieldType === 'XREF' || attribute.fieldType === 'MREF' || attribute.fieldType === 'CATEGORICAL') {
+					refEntitiesMeta[attribute.refEntity.href] = null;
+				}
+			});
+	
+			var dfds = [];
+			$.each(refEntitiesMeta, function(entityHref) {
+				dfds.push($.Deferred(function(dfd) {
+					restApi.getAsync(entityHref, {'expand' : [ 'attributes' ]}, function(entityMeta) {
+						refEntitiesMeta[entityHref] = entityMeta;
+						dfd.resolve();
+					});
+				}).promise());
+			});
+	
+			// build table after all meta data for referenced entities was loaded
+			$.when.apply($, dfds).done(function() {
+				callback(colAttributes, refEntitiesMeta);
+			});
+		} else callback([], {});
 	}
 
 	/**
@@ -226,11 +226,26 @@
 		container.data('table', {
 			'setAttributes' : function(attributes) {
 				settings.attributes = attributes;
-				createTable(settings);
+				
+				// add data to elements
+				getTableMetaData(settings, function(attributes, refEntitiesMeta) {
+					settings.colAttributes = attributes;
+					settings.refEntitiesMeta = refEntitiesMeta;
+		
+					getTableData(settings, function(data) {
+						createTableHeader(settings);
+						createTableBody(data, settings);
+					});
+				});
 			},
 			'setQuery' : function(query) {
 				settings.query = query;
-				createTable(settings);
+				
+				getTableData(settings, function(data) {
+					createTableBody(data, settings);
+					createTablePager(data, settings);
+					createTableFooter(data, settings);
+				});
 			},
 			'getQuery' : function() {
 				return settings.query;
@@ -251,8 +266,6 @@
 				var order = settings.sort.orders[0];
 				order.property = attributeName;
 				order.direction = order.direction === 'ASC' ? 'DESC' : 'ASC';
-
-
 			} else {
 				settings.sort = {
 					orders: [{

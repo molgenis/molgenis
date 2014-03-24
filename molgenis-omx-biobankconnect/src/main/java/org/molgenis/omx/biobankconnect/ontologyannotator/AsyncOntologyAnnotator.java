@@ -150,11 +150,6 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			searchService.indexRepository(new CategoryRepository(dataSet.getProtocolUsed(), dataSet.getId(),
 					dataService));
 		}
-		catch (IOException e)
-		{
-			logger.error("Failed to read CSV file!");
-			return "Failed to import the features, please check your file again.";
-		}
 		finally
 		{
 			if (csvRepository != null) csvRepository.close();

@@ -4,9 +4,15 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +21,11 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
+import org.molgenis.data.annotation.provider.HgncLocationsProvider;
+import org.molgenis.data.annotation.provider.HpoMappingProvider;
+import org.molgenis.data.annotation.provider.OmimMorbidMapProvider;
 import org.molgenis.data.support.MapEntity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -29,13 +40,13 @@ public class OmimHpoAnnotatorTest
 	private AttributeMetaData attributeMetaDataCantAnnotateFeature;
 	private AttributeMetaData attributeMetaDataCantAnnotateChrom;
 	private AttributeMetaData attributeMetaDataCantAnnotatePos;
-	private String annotatorOutput;
 	private Entity entity;
 	private ArrayList<Entity> input;
-	
+
 	@BeforeMethod
-	public void beforeMethod(){
-		annotator = new OmimHpoAnnotator();
+	public void beforeMethod() throws IOException
+	{
+		AnnotationService annotationService = mock(AnnotationService.class);
 
 		metaDataCanAnnotate = mock(EntityMetaData.class);
 
@@ -50,8 +61,7 @@ public class OmimHpoAnnotatorTest
 		when(attributeMetaDataPos.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.LONG.toString().toLowerCase()));
 
-		when(metaDataCanAnnotate.getAttribute(OmimHpoAnnotator.CHROMOSOME))
-				.thenReturn(attributeMetaDataChrom);
+		when(metaDataCanAnnotate.getAttribute(OmimHpoAnnotator.CHROMOSOME)).thenReturn(attributeMetaDataChrom);
 		when(metaDataCanAnnotate.getAttribute(OmimHpoAnnotator.POSITION)).thenReturn(attributeMetaDataPos);
 
 		metaDataCantAnnotate = mock(EntityMetaData.class);
@@ -71,36 +81,105 @@ public class OmimHpoAnnotatorTest
 		when(attributeMetaDataCantAnnotatePos.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
 
-		when(metaDataCantAnnotate.getAttribute(OmimHpoAnnotator.CHROMOSOME)).thenReturn(
-				attributeMetaDataChrom);
-		when(metaDataCantAnnotate.getAttribute(OmimHpoAnnotator.POSITION)).thenReturn(
-				attributeMetaDataCantAnnotatePos);
+		when(metaDataCantAnnotate.getAttribute(OmimHpoAnnotator.CHROMOSOME)).thenReturn(attributeMetaDataChrom);
+		when(metaDataCantAnnotate.getAttribute(OmimHpoAnnotator.POSITION)).thenReturn(attributeMetaDataCantAnnotatePos);
 
 		entity = mock(Entity.class);
 
-		when(entity.getString(OmimHpoAnnotator.CHROMOSOME)).thenReturn("2");
-		when(entity.getLong(OmimHpoAnnotator.POSITION)).thenReturn(new Long(58453844l));
+		when(entity.getString(OmimHpoAnnotator.CHROMOSOME)).thenReturn("11");
+		when(entity.getLong(OmimHpoAnnotator.POSITION)).thenReturn(new Long(19207841));
 
 		input = new ArrayList<Entity>();
 		input.add(entity);
 
-		annotatorOutput = "";
+		String morbidMapData = "3-M syndrome 1, 273750 (3)|CUL7|609577|6p21.1";
+		OmimMorbidMapProvider omimMorbidMapProvider = mock(OmimMorbidMapProvider.class);
+		when(omimMorbidMapProvider.getOmimMorbidMap()).thenReturn(new StringReader(morbidMapData));
+
+		String hpoMappingData = "#Format: diseaseId<tab>gene-symbol<tab>gene-id(entrez)<tab>HPO-ID<tab>HPO-term-name\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0000463	Anteverted nares\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0004209	Clinodactyly of the 5th finger\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0004322	Short stature\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0003298	Spina bifida occulta\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0000574	Thick eyebrow\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0004570	Increased vertebral height\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0001511	Intrauterine growth retardation\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0008734	Decreased testicular size\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0001518	Small for gestational age\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0000272	Malar flattening\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0000268	Dolichocephaly\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0000767	Pectus excavatum\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0010306	Short thorax\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0000007	Autosomal recessive inheritance\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0001763	Pes planus\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0002827	Hip dislocation\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0000470	Short neck\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0003691	Scapular winging\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0008897	Postnatal growth retardation\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0000047	Hypospadias\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0000307	Pointed chin\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0002007	Frontal bossing\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0008839	Hypoplastic pelvis\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0003307	Hyperlordosis\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0000303	Mandibular prognathia\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0002750	Delayed skeletal maturation\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0000325	Triangular face\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0002643	Neonatal respiratory distress\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0000773	Short ribs\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0000179	Thick lower lip vermilion\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0005280	Depressed nasal bridge\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0000343	Long philtrum\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0001382	Joint hypermobility\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0009237	Short 5th finger\r\n"
+				+ "OMIM:273750	CUL7	9820	HP:0003100	Slender long bone";
+		HpoMappingProvider hpoMappingProvider = mock(HpoMappingProvider.class);
+		when(hpoMappingProvider.getHpoMapping()).thenReturn(new StringReader(hpoMappingData));
+
+		HgncLocationsProvider hgncLocationsProvider = mock(HgncLocationsProvider.class);
+		Map<String, HGNCLocations> hgncLocations = Collections.singletonMap("CUL7", new HGNCLocations("CUL7",
+				19207841l - 10, 19207841l + 10, "11"));
+		when(hgncLocationsProvider.getHgncLocations()).thenReturn(hgncLocations);
+
+		annotator = new OmimHpoAnnotator(annotationService, omimMorbidMapProvider, hgncLocationsProvider,
+				hpoMappingProvider);
 	}
-	
+
 	@Test
 	public void annotateTest()
 	{
 		List<Entity> expectedList = new ArrayList<Entity>();
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
 
-		
-		//Full_info_HPO='[HPOTerm{id='HP:0001639', description='Hypertrophic cardiomyopathy', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000532', description='Chorioretinal abnormality', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000505', description='Visual impairment', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000388', description='Otitis media', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000613', description='Photophobia', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0001956', description='Truncal obesity', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000858', description='Menstrual irregularities', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0001970', description='Tubulointerstitial nephritis', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0002149', description='Hyperuricemia', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0001596', description='Alopecia', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000873', description='Diabetes insipidus', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0200120', description='Chronic active hepatitis', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0001155', description='Abnormality of the hand', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0002910', description='Elevated hepatic transaminases', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000842', description='Hyperinsulinemia', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0002650', description='Scoliosis', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000824', description='Growth hormone deficiency', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000639', description='Nystagmus', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0003233', description='Hypoalphalipoproteinemia', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0002099', description='Asthma', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000083', description='Renal insufficiency', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0001394', description='Cirrhosis', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000548', description='Cone-rod dystrophy', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000121', description='Nephrocalcinosis', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0100820', description='Glomerulopathy', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000822', description='Hypertension', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0007360', description='Aplasia/Hypoplasia of the cerebellum', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0005616', description='Accelerated skeletal maturation', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0002205', description='Recurrent respiratory infections', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000580', description='Pigmentary retinopathy', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000717', description='Autism', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000144', description='Decreased fertility', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000164', description='Abnormality of the teeth', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0001397', description='Hepatic steatosis', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000408', description='Progressive sensorineural hearing impairment', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000956', description='Acanthosis nigricans', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000091', description='Abnormality of the renal tubule', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000123', description='Nephritis', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0001635', description='Congestive heart failure', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0002808', description='Kyphosis', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000518', description='Cataract', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0100543', description='Cognitive impairment', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000618', description='Blindness', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0004438', description='Hyperostosis frontalis interna', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0001644', description='Dilated cardiomyopathy', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000407', description='Sensorineural hearing impairment', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000795', description='Abnormality of the urethra', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000821', description='Hypothyroidism', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0004322', description='Short stature', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0009124', description='Abnormality of adipose tissue', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000771', description='Gynecomastia', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0001409', description='Portal hypertension', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0002240', description='Hepatomegaly', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000076', description='Vesicoureteral reflux', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0100817', description='Renovascular hypertension', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0006532', description='Recurrent pneumonia', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0003119', description='Abnormality of lipid metabolism', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0001250', description='Seizures', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000998', description='Hypertrichosis', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000523', description='Subcapsular cataract', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000815', description='Hypergonadotropic hypogonadism', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000490', description='Deeply set eye', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0001763', description='Pes planus', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000831', description='Insulin-resistant diabetes mellitus', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000855', description='Insulin resistance', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0005978', description='Type II diabetes mellitus', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000055', description='Abnormality of female external genitalia', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000035', description='Abnormality of the testis', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0002092', description='Pulmonary hypertension', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000230', description='Gingivitis', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000311', description='Round face', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000007', description='Autosomal recessive inheritance', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000722', description='Obsessive-compulsive disorder', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0002621', description='Atherosclerosis', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0002093', description='Respiratory insufficiency', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0100626', description='Chronic hepatic failure', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0002155', description='Hypertriglyceridemia', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000826', description='Precocious puberty', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0005987', description='Multinodular goiter', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0002206', description='Pulmonary fibrosis', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0001263', description='Global developmental delay', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0001744', description='Splenomegaly', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}, HPOTerm{id='HP:0000147', description='Polycystic ovaries', diseaseDb='OMIM', diseaseDbEntry=203800, geneName='ALMS1', geneEntrezID=7840}]', Hyperlink_OMIM='<a href="http://www.omim.org/entry/203800">203800</a>', Hyperlinks_HPO='<a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0001639">HP:0001639</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000532">HP:0000532</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000505">HP:0000505</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000388">HP:0000388</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000613">HP:0000613</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0001956">HP:0001956</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000858">HP:0000858</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0001970">HP:0001970</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0002149">HP:0002149</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0001596">HP:0001596</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000873">HP:0000873</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0200120">HP:0200120</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0001155">HP:0001155</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0002910">HP:0002910</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000842">HP:0000842</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0002650">HP:0002650</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000824">HP:0000824</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000639">HP:0000639</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0003233">HP:0003233</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0002099">HP:0002099</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000083">HP:0000083</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0001394">HP:0001394</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000548">HP:0000548</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000121">HP:0000121</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0100820">HP:0100820</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000822">HP:0000822</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0007360">HP:0007360</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0005616">HP:0005616</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0002205">HP:0002205</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000580">HP:0000580</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000717">HP:0000717</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000144">HP:0000144</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000164">HP:0000164</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0001397">HP:0001397</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000408">HP:0000408</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000956">HP:0000956</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000091">HP:0000091</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000123">HP:0000123</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0001635">HP:0001635</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0002808">HP:0002808</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000518">HP:0000518</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0100543">HP:0100543</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000618">HP:0000618</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0004438">HP:0004438</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0001644">HP:0001644</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000407">HP:0000407</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000795">HP:0000795</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000821">HP:0000821</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0004322">HP:0004322</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0009124">HP:0009124</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000771">HP:0000771</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0001409">HP:0001409</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0002240">HP:0002240</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000076">HP:0000076</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0100817">HP:0100817</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0006532">HP:0006532</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0003119">HP:0003119</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0001250">HP:0001250</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000998">HP:0000998</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000523">HP:0000523</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000815">HP:0000815</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000490">HP:0000490</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0001763">HP:0001763</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000831">HP:0000831</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000855">HP:0000855</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0005978">HP:0005978</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000055">HP:0000055</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000035">HP:0000035</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0002092">HP:0002092</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000230">HP:0000230</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000311">HP:0000311</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000007">HP:0000007</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000722">HP:0000722</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0002621">HP:0002621</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0002093">HP:0002093</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0100626">HP:0100626</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0002155">HP:0002155</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000826">HP:0000826</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0005987">HP:0005987</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0002206">HP:0002206</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0001263">HP:0001263</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0001744">HP:0001744</a> / <a href="http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0000147">HP:0000147</a>', Disease_OMIM='Alstrom syndrome', Symptoms_HPO='Hypertrophic cardiomyopathy / Chorioretinal abnormality / Visual impairment / Otitis media / Photophobia / Truncal obesity / Menstrual irregularities / Tubulointerstitial nephritis / Hyperuricemia / Alopecia / Diabetes insipidus / Chronic active hepatitis / Abnormality of the hand / Elevated hepatic transaminases / Hyperinsulinemia / Scoliosis / Growth hormone deficiency / Nystagmus / Hypoalphalipoproteinemia / Asthma / Renal insufficiency / Cirrhosis / Cone-rod dystrophy / Nephrocalcinosis / Glomerulopathy / Hypertension / Aplasia/Hypoplasia of the cerebellum / Accelerated skeletal maturation / Recurrent respiratory infections / Pigmentary retinopathy / Autism / Decreased fertility / Abnormality of the teeth / Hepatic steatosis / Progressive sensorineural hearing impairment / Acanthosis nigricans / Abnormality of the renal tubule / Nephritis / Congestive heart failure / Kyphosis / Cataract / Cognitive impairment / Blindness / Hyperostosis frontalis interna / Dilated cardiomyopathy / Sensorineural hearing impairment / Abnormality of the urethra / Hypothyroidism / Short stature / Abnormality of adipose tissue / Gynecomastia / Portal hypertension / Hepatomegaly / Vesicoureteral reflux / Renovascular hypertension / Recurrent pneumonia / Abnormality of lipid metabolism / Seizures / Hypertrichosis / Subcapsular cataract / Hypergonadotropic hypogonadism / Deeply set eye / Pes planus / Insulin-resistant diabetes mellitus / Insulin resistance / Type II diabetes mellitus / Abnormality of female external genitalia / Abnormality of the testis / Pulmonary hypertension / Gingivitis / Round face / Autosomal recessive inheritance / Obsessive-compulsive disorder / Atherosclerosis / Respiratory insufficiency / Chronic hepatic failure / Hypertriglyceridemia / Precocious puberty / Multinodular goiter / Pulmonary fibrosis / Global developmental delay / Splenomegaly / Polycystic ovaries', Full_info_OMIM='[OMIMTerm{entry=203800, name='Alstrom syndrome', type=3, causedBy=606844, cytoLoc='2p13.1', hgncIds=[ALMS1, ALSS, KIAA0328]}]', pos='73679116', chrom='2'}
-		resultMap.put(OmimHpoAnnotator.OMIM_ALL, "");
-		resultMap.put(OmimHpoAnnotator.OMIM_LINK, "http://www.omim.org/entry/203800");
-		resultMap.put(OmimHpoAnnotator.OMIM_DISO, "");
-		resultMap.put(OmimHpoAnnotator.HPO_ALL, "");
-		resultMap.put(OmimHpoAnnotator.HPO_LINK, "http://www.human-phenotype-ontology.org/hpoweb/showterm?id=HP:0001639");
-		resultMap.put(OmimHpoAnnotator.HPO_DESC, "");
+		resultMap.put(OmimHpoAnnotator.OMIM_DISORDERS, new HashSet<String>(Arrays.asList("3-M syndrome 1")));
+		resultMap.put(OmimHpoAnnotator.OMIM_CAUSAL_IDENTIFIER, new HashSet<Integer>(Arrays.asList(609577)));
+		resultMap.put(OmimHpoAnnotator.OMIM_TYPE, new HashSet<Integer>(Arrays.asList(3)));
+		resultMap.put(OmimHpoAnnotator.OMIM_HGNC_IDENTIFIERS, new HashSet<String>(Arrays.asList("CUL7")));
+		resultMap.put(OmimHpoAnnotator.OMIM_CYTOGENIC_LOCATION, new HashSet<String>(Arrays.asList("6p21.1")));
+		resultMap.put(OmimHpoAnnotator.OMIM_ENTRY, new HashSet<Integer>(Arrays.asList(273750)));
+		resultMap.put(
+				OmimHpoAnnotator.HPO_IDENTIFIERS,
+				new HashSet<String>(Arrays.asList("HP:0002827", "HP:0009237", "HP:0003100", "HP:0000272", "HP:0000179",
+						"HP:0003691", "HP:0008734", "HP:0000463", "HP:0003307", "HP:0000268", "HP:0000767",
+						"HP:0005280", "HP:0000574", "HP:0004570", "HP:0000007", "HP:0001763", "HP:0008897",
+						"HP:0004209", "HP:0010306", "HP:0000470", "HP:0000343", "HP:0001518", "HP:0000047",
+						"HP:0000307", "HP:0004322", "HP:0002007", "HP:0008839", "HP:0000303", "HP:0001511",
+						"HP:0002643", "HP:0000325", "HP:0000773", "HP:0002750", "HP:0001382", "HP:0003298")));
+		resultMap.put(OmimHpoAnnotator.HPO_GENE_NAME, new HashSet<String>(Arrays.asList("CUL7")));
+		resultMap.put(
+				OmimHpoAnnotator.HPO_DESCRIPTIONS,
+				new LinkedHashSet<String>(Arrays.asList("Long philtrum", "Short thorax", "Hyperlordosis",
+						"Short stature", "Anteverted nares", "Hypoplastic pelvis", "Spina bifida occulta",
+						"Pes planus", "Clinodactyly of the 5th finger", "Postnatal growth retardation",
+						"Joint hypermobility", "Hypospadias", "Malar flattening", "Depressed nasal bridge",
+						"Short 5th finger", "Autosomal recessive inheritance", "Mandibular prognathia", "Short neck",
+						"Scapular winging", "Small for gestational age", "Triangular face", "Slender long bone",
+						"Hip dislocation", "Delayed skeletal maturation", "Frontal bossing", "Pointed chin",
+						"Neonatal respiratory distress", "Pectus excavatum", "Decreased testicular size",
+						"Thick lower lip vermilion", "Short ribs", "Thick eyebrow", "Increased vertebral height",
+						"Intrauterine growth retardation", "Dolichocephaly")));
+		resultMap.put(OmimHpoAnnotator.HPO_DISEASE_DATABASE, new HashSet<String>(Arrays.asList("OMIM")));
+		resultMap.put(OmimHpoAnnotator.HPO_DISEASE_DATABASE_ENTRY, new HashSet<Integer>(Arrays.asList(273750)));
+		resultMap.put(OmimHpoAnnotator.HPO_ENTREZ_ID, new HashSet<Integer>(Arrays.asList(9820)));
 
 		Entity expectedEntity = new MapEntity(resultMap);
 
@@ -110,20 +189,32 @@ public class OmimHpoAnnotatorTest
 
 		Entity resultEntity = results.next();
 
-		assertEquals(resultEntity.get(OmimHpoAnnotator.OMIM_ALL), expectedEntity.get(OmimHpoAnnotator.OMIM_ALL));
-		assertEquals(resultEntity.get(OmimHpoAnnotator.OMIM_LINK),
-				expectedEntity.get(OmimHpoAnnotator.OMIM_LINK));
-		assertEquals(resultEntity.get(OmimHpoAnnotator.OMIM_DISO),
-				expectedEntity.get(OmimHpoAnnotator.OMIM_DISO));
-		assertEquals(resultEntity.get(OmimHpoAnnotator.HPO_ALL),
-				expectedEntity.get(OmimHpoAnnotator.HPO_ALL));
-		assertEquals(resultEntity.get(OmimHpoAnnotator.HPO_LINK),
-				expectedEntity.get(OmimHpoAnnotator.HPO_LINK));
-		assertEquals(resultEntity.get(OmimHpoAnnotator.HPO_DESC),
-				expectedEntity.get(OmimHpoAnnotator.HPO_DESC));
-		
+		assertEquals(resultEntity.get(OmimHpoAnnotator.OMIM_DISORDERS),
+				expectedEntity.get(OmimHpoAnnotator.OMIM_DISORDERS));
+		assertEquals(resultEntity.get(OmimHpoAnnotator.OMIM_CAUSAL_IDENTIFIER),
+				expectedEntity.get(OmimHpoAnnotator.OMIM_CAUSAL_IDENTIFIER));
+		assertEquals(resultEntity.get(OmimHpoAnnotator.OMIM_IDENTIFIERS),
+				expectedEntity.get(OmimHpoAnnotator.OMIM_IDENTIFIERS));
+		assertEquals(resultEntity.get(OmimHpoAnnotator.OMIM_TYPE), expectedEntity.get(OmimHpoAnnotator.OMIM_TYPE));
+		assertEquals(resultEntity.get(OmimHpoAnnotator.OMIM_HGNC_IDENTIFIERS),
+				expectedEntity.get(OmimHpoAnnotator.OMIM_HGNC_IDENTIFIERS));
+		assertEquals(resultEntity.get(OmimHpoAnnotator.OMIM_CYTOGENIC_LOCATION),
+				expectedEntity.get(OmimHpoAnnotator.OMIM_CYTOGENIC_LOCATION));
+		assertEquals(resultEntity.get(OmimHpoAnnotator.OMIM_ENTRY), expectedEntity.get(OmimHpoAnnotator.OMIM_ENTRY));
+		assertEquals(resultEntity.get(OmimHpoAnnotator.HPO_IDENTIFIERS),
+				expectedEntity.get(OmimHpoAnnotator.HPO_IDENTIFIERS));
+		assertEquals(resultEntity.get(OmimHpoAnnotator.HPO_GENE_NAME),
+				expectedEntity.get(OmimHpoAnnotator.HPO_GENE_NAME));
+		assertEquals(resultEntity.get(OmimHpoAnnotator.HPO_DESCRIPTIONS),
+				expectedEntity.get(OmimHpoAnnotator.HPO_DESCRIPTIONS));
+		assertEquals(resultEntity.get(OmimHpoAnnotator.HPO_DISEASE_DATABASE),
+				expectedEntity.get(OmimHpoAnnotator.HPO_DISEASE_DATABASE));
+		assertEquals(resultEntity.get(OmimHpoAnnotator.HPO_DISEASE_DATABASE_ENTRY),
+				expectedEntity.get(OmimHpoAnnotator.HPO_DISEASE_DATABASE_ENTRY));
+		assertEquals(resultEntity.get(OmimHpoAnnotator.HPO_ENTREZ_ID),
+				expectedEntity.get(OmimHpoAnnotator.HPO_ENTREZ_ID));
 	}
-	
+
 	@Test
 	public void canAnnotateTrueTest()
 	{
@@ -134,5 +225,5 @@ public class OmimHpoAnnotatorTest
 	public void canAnnotateFalseTest()
 	{
 		assertEquals(annotator.canAnnotate(metaDataCantAnnotate), false);
-	}	
+	}
 }
