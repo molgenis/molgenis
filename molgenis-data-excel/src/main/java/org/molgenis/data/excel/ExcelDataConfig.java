@@ -2,7 +2,7 @@ package org.molgenis.data.excel;
 
 import javax.annotation.PostConstruct;
 
-import org.molgenis.data.DataService;
+import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 public class ExcelDataConfig
 {
 	@Autowired
-	private DataService dataService;
+	private FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
 
 	/**
 	 * Registers the ExcelRepositorySource factory so it can be used by DataService.createFileRepositorySource(File
@@ -19,7 +19,8 @@ public class ExcelDataConfig
 	@PostConstruct
 	public void registerExcelRepositorySource()
 	{
-		dataService.addFileRepositorySourceClass(ExcelRepositorySource.class, ExcelRepositorySource.EXTENSIONS);
+		fileRepositoryCollectionFactory.addFileRepositoryCollectionClass(ExcelRepositoryCollection.class,
+				ExcelRepositoryCollection.EXTENSIONS);
 	}
 
 }

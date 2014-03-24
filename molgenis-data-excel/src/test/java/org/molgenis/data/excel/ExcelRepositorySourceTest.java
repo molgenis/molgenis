@@ -14,16 +14,18 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.Lists;
+
 public class ExcelRepositorySourceTest
 {
 	private InputStream is;
-	private ExcelRepositorySource excelRepositorySource;
+	private ExcelRepositoryCollection excelRepositoryCollection;
 
 	@BeforeMethod
 	public void beforeMethod() throws InvalidFormatException, IOException
 	{
 		is = getClass().getResourceAsStream("/test.xls");
-		excelRepositorySource = new ExcelRepositorySource("test.xls", is);
+		excelRepositoryCollection = new ExcelRepositoryCollection("test.xls", is);
 	}
 
 	@AfterMethod
@@ -35,13 +37,13 @@ public class ExcelRepositorySourceTest
 	@Test
 	public void getNumberOfSheets()
 	{
-		assertEquals(excelRepositorySource.getNumberOfSheets(), 2);
+		assertEquals(excelRepositoryCollection.getNumberOfSheets(), 2);
 	}
 
 	@Test
 	public void getRepositories()
 	{
-		List<Repository> repositories = excelRepositorySource.getRepositories();
+		List<String> repositories = Lists.newArrayList(excelRepositoryCollection.getEntityNames());
 		assertNotNull(repositories);
 		assertEquals(repositories.size(), 2);
 	}
@@ -49,11 +51,11 @@ public class ExcelRepositorySourceTest
 	@Test
 	public void getRepository()
 	{
-		Repository test = excelRepositorySource.getRepository("test");
+		Repository test = excelRepositoryCollection.getRepositoryByEntityName("test");
 		assertNotNull(test);
 		assertEquals(test.getName(), "test");
 
-		Repository blad2 = excelRepositorySource.getRepository("Blad2");
+		Repository blad2 = excelRepositoryCollection.getRepositoryByEntityName("Blad2");
 		assertNotNull(blad2);
 		assertEquals(blad2.getName(), "Blad2");
 	}

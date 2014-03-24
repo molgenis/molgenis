@@ -13,6 +13,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.omx.OmxLookupTableRepository;
 import org.molgenis.data.omx.OmxRepository;
 import org.molgenis.data.support.QueryImpl;
@@ -57,7 +58,8 @@ public class OmxImporterServiceImpl implements OmxImporterService
 
 	@Override
 	@Transactional(rollbackFor = IOException.class)
-	public EntityImportReport doImport(List<Repository> repositories, DatabaseAction databaseAction) throws IOException
+	public EntityImportReport doImport(RepositoryCollection repositories, DatabaseAction databaseAction)
+			throws IOException
 	{
 		// First import entities, the data sheets are ignored in the entitiesimporter
 		EntityImportReport importReport = entitiesImporter.importEntities(repositories, databaseAction);
@@ -66,8 +68,10 @@ public class OmxImporterServiceImpl implements OmxImporterService
 		checkFeatureCanOnlyBelongToOneProtocolForOneDataSet();
 
 		// Import data sheets
-		for (Repository repository : repositories)
+		for (String name : repositories.getEntityNames())
 		{
+			Repository repository = repositories.getRepositoryByEntityName(name);
+
 			if (repository.getName().startsWith(DATASET_SHEET_PREFIX))
 			{
 				// Import DataSet sheet, create new OmxRepository
