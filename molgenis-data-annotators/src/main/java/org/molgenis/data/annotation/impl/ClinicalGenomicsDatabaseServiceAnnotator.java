@@ -1,19 +1,13 @@
 package org.molgenis.data.annotation.impl;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.input.ReaderInputStream;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -33,16 +27,16 @@ import org.springframework.stereotype.Component;
 @Component("CgdService")
 public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 {
-
 	private final MolgenisSettings molgenisSettings;
 	private final AnnotationService annotatorService;
 	private final HgncLocationsProvider hgncLocationsProvider;
 
 	private static final String NAME = "Clinical Genomic Database";
 	public static final String CGD_FILE_LOCATION_PROPERTY = "cgd_location";
+	private static HashMap<Integer, String> columnNameMap;
 
 	public static final String REFERENCES = "REFERENCES";
-	public static final String INTERVENTION_RATIONALE = "INTERVENTION / RATIONALE";
+	public static final String INTERVENTION_RATIONALE = "INTERVENTION/RATIONALE";
 	public static final String COMMENTS = "COMMENTS";
 	public static final String INTERVENTION_CATEGORIES = "INTERVENTION CATEGORIES";
 	public static final String MANIFESTATION_CATEGORIES = "MANIFESTATION CATEGORIES";
@@ -101,31 +95,51 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 				List<String> fileLines = IOUtils.readLines(new InputStreamReader(new FileInputStream(new File(
 						molgenisSettings.getProperty(CGD_FILE_LOCATION_PROPERTY))), "UTF-8"));
 
-				for (String line : fileLines)
+				if (columnNameMap == null)
 				{
-					if (!line.startsWith("#"))
-					{
-						String[] split = line.split("\t");
-						for (String gene : geneSymbols)
-						{
-							if (gene.equals(split[0]))
-							{
-								HashMap<String, Object> resultMap = new HashMap<String, Object>();
-								resultMap.put(GENE, split[0]);
-								resultMap.put(ENTREZ_GENE_ID, split[1]);
-								resultMap.put(CONDITION, split[2]);
-								resultMap.put(INHERITANCE, split[3]);
-								resultMap.put(AGE_GROUP, split[4]);
-								resultMap.put(ALLELIC_CONDITIONS, split[5]);
-								resultMap.put(MANIFESTATION_CATEGORIES, split[6]);
-								resultMap.put(INTERVENTION_CATEGORIES, split[7]);
-								resultMap.put(COMMENTS, split[8]);
-								resultMap.put(INTERVENTION_RATIONALE, split[9]);
-								resultMap.put(REFERENCES, split[10]);
-								resultMap.put(CHROMOSOME, chromosome);
-								resultMap.put(POSITION, position);
+					columnNameMap = new HashMap<Integer, String>();
+					int count = 0;
 
-								results.add(new MapEntity(resultMap));
+					for (String line : fileLines)
+					{
+						if (line.startsWith("#"))
+						{
+							line = line.substring(1);
+						}
+						String[] split = line.split("\t");
+						for (int index = 0; index < split.length; index++)
+						{
+							String columnName = split[index];
+							columnNameMap.put(index, columnName);
+						}
+
+						count++;
+						if (count != 0) break;
+					}
+				}
+				else
+				{
+					for (String line : fileLines)
+					{
+						if (!line.startsWith("#"))
+						{
+							String[] split = line.split("\t");
+							for (String gene : geneSymbols)
+							{
+								if (gene.equals(split[0]))
+								{
+									HashMap<String, Object> resultMap = new HashMap<String, Object>();
+									for (int index = 0; index < split.length; index++)
+									{
+
+										resultMap.put(columnNameMap.get(index), split[index]);
+									}
+
+									resultMap.put(CHROMOSOME, chromosome);
+									resultMap.put(POSITION, position);
+
+									results.add(new MapEntity(resultMap));
+								}
 							}
 						}
 					}
