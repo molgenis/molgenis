@@ -275,7 +275,6 @@ function abbreviate(s, maxLength) {
  * @param attrs input attributes
  * @param val input value
  * @param lbl input label (for checkbox and radio inputs)
- * @returns
  */
 function createInput(dataType, attrs, val, lbl) {
 	function createBasicInput(type, attrs, val) {

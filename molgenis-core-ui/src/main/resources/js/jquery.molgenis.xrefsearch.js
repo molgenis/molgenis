@@ -16,19 +16,25 @@
 	
 	var restApi = new molgenis.RestClient();
 	
-	function createQuery(lookupAttributeNames, term) {
+	function createQuery(lookupAttributeNames, terms, operator) {
 		var q = [];
 		
 		$.each(lookupAttributeNames, function(index, attrName) {
 			if (q.length > 0) {
 				q.push({operator: 'OR'});
 			}
-				
-			q.push({
-				field: attrName,
-				operator: 'LIKE',
-				value: term
-			});
+            if (terms.length > 0) {
+                $.each(terms, function(index) {
+                    if(index > 0){
+                        q.push({operator: 'OR'});
+                    }
+                    q.push({
+                        field: attrName,
+                        operator: operator,
+                        value: terms[index]
+                    });
+                });
+            }
 		});
 			
 		return q;
@@ -67,35 +73,27 @@
 		
 		return items.join('');
 	}
-	
-	function createQueryTypeDropdown(container, attributeMetaData, operator) {
-		if (attributeMetaData.fieldType == 'MREF') {
-			var element = $('<select id="mref-query-type" class="operator"><option value="OR">ANY match (OR)</option><option value="AND">ALL match (AND)</option></select>');
-			container.prepend(element);
-			element.val(operator);
-		}
-	}
-	
-	function createSelect2(container, attributeMetaData) {
+
+	function createSelect2(container, attributeMetaData, options) {
 		var refEntityMetaData = restApi.get(attributeMetaData.refEntity.href, {expand: ['attributes']});
 		var lookupAttrNames = getLookupAttributeNames(refEntityMetaData);
 		var hiddenInput = container.find('input[type=hidden]');
 		
 		hiddenInput.select2({
 			width: 650,
-			placeholder: 'filter text',
 			minimumInputLength: 2,
+            multiple: (attributeMetaData.fieldType === 'MREF'),
 			query: function (options){
-				var query = createQuery(lookupAttrNames, options.term);
+				var query = createQuery(lookupAttrNames, [options.term],'LIKE');
 				restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {num: 10, q: query}}, function(data) {
 					options.callback({results: data.items, more: false});
 				});           
             },
 			initSelection: function(element, callback) {
 				//Only called when the input has a value
-				var query = createQuery(lookupAttrNames, element.val());
-				restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {num: 1, q: query}}, function(data) {
-					callback(data.items[0]);
+				var query = createQuery(lookupAttrNames, element.val().split(','), 'EQUALS');
+				restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {q: query}}, function(data) {
+					callback(data.items);
 				});
 			},
 			formatResult: function(entity) {
@@ -107,37 +105,25 @@
 			id: function(entity) {
 				return entity[refEntityMetaData.labelAttribute];
 			},
+            separator: ',',
 			dropdownCssClass: 'molgenis-xrefsearch'
 		});
-		
-		var addButton = $('<a href="#" class="add-ref-query-part" title="add new"><i class="icon-plus"></i></a>');
-		container.append(addButton);
-		
-		addButton.on('click', function() {
-			addQueryPartSelect(container, attributeMetaData);
-		});
+        if (attributeMetaData.fieldType === 'MREF') {
+            var dropdown = $('<select id="mref-query-type" class="operator"><option value="OR">OR</option><option value="AND">AND</option></select>');
+            dropdown.val(options.operator);
+            dropdown.width(70);
+            container.append(dropdown);
+        }
 	}
-	
-	function addQueryPartSelect(container, attributeMetaData, value) {
+
+	function addQueryPartSelect(container, attributeMetaData, options) {
 		var attrs = {
-				'placeholder': 'filter text',
-				'autofocus': 'autofocus',
+				'autofocus': 'autofocus'
 			};
-			
-		var element = createInput(attributeMetaData.fieldType, attrs, value);
+
+		var element = createInput(attributeMetaData.fieldType, attrs, options.values);
 		container.parent().append(element);
-		createSelect2(element, attributeMetaData, value);
-			
-		var removeButton = $('<a href="#" class="remove-ref-query-part" title="remove"><i class="icon-remove"></i></a>');
-		container.parent().find('.add-ref-query-part:not(:last)').replaceWith(removeButton);
-		
-		removeButton.on('click', function() {
-			removeQueryPartSelect($(this).parent());
-		});
-	}
-	
-	function removeQueryPartSelect(element) {
-		element.remove();
+		createSelect2(element, attributeMetaData, options);
 	}
 	
 	$.fn.xrefsearch = function(options) {
@@ -145,19 +131,7 @@
 		var attributeUri = options.attributeUri ? options.attributeUri : options.attribute.href;
 		
 		restApi.getAsync(attributeUri, {attributes:['refEntity', 'fieldType'], expand:['refEntity']}, function(attributeMetaData) {
-			createQueryTypeDropdown(container, attributeMetaData, options.operator);
-			
-			if (options.values && options.values.length > 0) {
-				
-				//Preselect values
-				for (var i = 0; i < options.values.length; i++) {
-					addQueryPartSelect(container, attributeMetaData, options.values[i]);
-				}
-				
-			} else {
-				addQueryPartSelect(container, attributeMetaData);
-				
-			}
+			    addQueryPartSelect(container, attributeMetaData, options);
 		});
 		
 		return this;

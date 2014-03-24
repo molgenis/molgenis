@@ -131,7 +131,7 @@
 			}
 			var attribute = attributeFilter.attribute;
 			var rangeQuery = attribute.fieldType === 'DATE' || attribute.fieldType === 'DATE_TIME' || attribute.fieldType === 'DECIMAL' || attribute.fieldType === 'INT' || attribute.fieldType === 'LONG';
-			
+
 			$.each(attributeFilter.values, function(index, value) {
 				if (rangeQuery) {
 
@@ -158,18 +158,18 @@
 						});
 					}
 				} else {
-					if (index > 0) {
-						var operator = attributeFilter.operator ? attributeFilter.operator : 'OR';
-						entityCollectionRequest.q.push({
-							operator : operator
-						});
-					}
-					entityCollectionRequest.q.push({
-						field : attribute.name,
-						operator : 'EQUALS',
-						value : value
-					});
-				}
+                        if (index > 0) {
+                            var operator = attributeFilter.operator ? attributeFilter.operator : 'OR';
+                            entityCollectionRequest.q.push({
+                                operator : operator
+                            });
+                        }
+                        entityCollectionRequest.q.push({
+                            field : attribute.name,
+                            operator : 'EQUALS',
+                            value : value
+                        });
+                    }
 			});
 			count++;
 		});
@@ -268,10 +268,11 @@
 	 * @memberOf molgenis.dataexplorer
 	 */
 	function createFilters(form) {
-		var filters = {};
+        var filters = {};
 		$('.controls', form).each(function() {
 			var attribute = $(this).data('attribute');
 			var filter = filters[attribute.href];
+
 			$(":input", $(this)).not('[type=radio]:not(:checked)').not('[type=checkbox]:not(:checked)').each(function(){
 				var value = $(this).val();
 				if(value) {
@@ -289,7 +290,14 @@
 					if ($(this).hasClass('operator')) {
 						filter.operator = value;
 					} else {
-						values.push(value);
+                        if(attribute.fieldType === 'MREF'){
+                            var mrefValues = value.split(',');
+                            $(mrefValues).each(function(i){
+                                values.push(mrefValues[i]);
+                            });
+                        } else{
+						    values.push(value);
+                        }
 					}
 				}
 			});	
