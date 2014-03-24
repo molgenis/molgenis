@@ -7,7 +7,7 @@ import java.util.List;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.RepositorySource;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.UnknownEntityException;
 
 public class PhenoToOmxConvertor extends AbstractOmxConvertor
@@ -18,11 +18,11 @@ public class PhenoToOmxConvertor extends AbstractOmxConvertor
 	}
 
 	@Override
-	public void collectProtocolInfo(RepositorySource repositorySource) throws IOException
+	public void collectProtocolInfo(RepositoryCollection repositoryCollection) throws IOException
 	{
 		try
 		{
-			Repository repo = repositorySource.getRepository("Protocol");
+			Repository repo = repositoryCollection.getRepositoryByEntityName("Protocol");
 			for (Entity entity : repo)
 			{
 				String name = entity.getString("name");
@@ -47,9 +47,9 @@ public class PhenoToOmxConvertor extends AbstractOmxConvertor
 	}
 
 	@Override
-	public void collectVariableInfo(RepositorySource repositorySource) throws IOException
+	public void collectVariableInfo(RepositoryCollection repositoryCollection) throws IOException
 	{
-		Repository repo = repositorySource.getRepository("Measurement");
+		Repository repo = repositoryCollection.getRepositoryByEntityName("Measurement");
 		for (Entity entity : repo)
 		{
 			String featureName = entity.getString("name");
@@ -79,9 +79,9 @@ public class PhenoToOmxConvertor extends AbstractOmxConvertor
 	}
 
 	@Override
-	public void collectCategoryInfo(RepositorySource repositorySource) throws IOException
+	public void collectCategoryInfo(RepositoryCollection repositoryCollection) throws IOException
 	{
-		Repository repo = repositorySource.getRepository("Category");
+		Repository repo = repositoryCollection.getRepositoryByEntityName("Category");
 		for (Entity entity : repo)
 		{
 			String name = entity.getString("name");

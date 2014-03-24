@@ -2,10 +2,9 @@ package org.molgenis.framework.db;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 import org.molgenis.data.DatabaseAction;
-import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCollection;
 
 /**
  * Import entities into the database
@@ -31,7 +30,7 @@ public interface EntitiesImporter
 	 * @return
 	 * @throws IOException
 	 */
-	public EntityImportReport importEntities(List<Repository> sourceRepositories, DatabaseAction dbAction)
+	public EntityImportReport importEntities(RepositoryCollection sourceRepositories, DatabaseAction dbAction)
 			throws IOException;
 
 }

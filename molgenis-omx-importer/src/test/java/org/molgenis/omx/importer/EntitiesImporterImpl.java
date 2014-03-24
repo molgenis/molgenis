@@ -9,7 +9,7 @@ package org.molgenis.omx.importer;
 
 import java.util.Set;
 
-import org.molgenis.data.DataService;
+import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.importer.EntityImportService;
 import org.molgenis.framework.db.AbstractEntitiesImporter;
 import org.springframework.stereotype.Component;
@@ -54,9 +54,10 @@ public class EntitiesImporterImpl extends AbstractEntitiesImporter
 		ENTITIES_IMPORTABLE.add("sample");
 	}
 
-	public EntitiesImporterImpl(DataService dataService, EntityImportService entityImportService)
+	public EntitiesImporterImpl(FileRepositoryCollectionFactory fileRepositorySourceFactory,
+			EntityImportService entityImportService)
 	{
-		super(dataService, entityImportService);
+		super(fileRepositorySourceFactory, entityImportService);
 	}
 
 	@Override

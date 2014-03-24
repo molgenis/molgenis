@@ -59,10 +59,14 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		registry.addResourceHandler("/html/**").addResourceLocations("/html/", "classpath:/html/").setCachePeriod(3600);
 	}
 
+	@Value("${molgenis.build.profile}")
+	private String molgenisBuildProfile;
+
 	@Override
 	public void configureMessageConverters(List<HttpMessageConverter<?>> converters)
 	{
-		converters.add(new GsonHttpMessageConverter());
+		boolean prettyPrinting = molgenisBuildProfile != null && molgenisBuildProfile.equals("dev");
+		converters.add(new GsonHttpMessageConverter(prettyPrinting));
 		converters.add(new BufferedImageHttpMessageConverter());
 	}
 
@@ -98,7 +102,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		PropertySourcesPlaceholderConfigurer pspc = new PropertySourcesPlaceholderConfigurer();
 		Resource[] resources = new Resource[]
 		{ new FileSystemResource(System.getProperty("molgenis.home") + "/molgenis-server.properties"),
-				new ClassPathResource("/molgenis.properties") };
+				new ClassPathResource("/molgenis.properties"), new ClassPathResource("/version.properties") };
 		pspc.setLocations(resources);
 		pspc.setFileEncoding("UTF-8");
 		pspc.setIgnoreUnresolvablePlaceholders(true);

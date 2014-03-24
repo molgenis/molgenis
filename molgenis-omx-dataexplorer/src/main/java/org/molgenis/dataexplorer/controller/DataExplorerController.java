@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -33,7 +32,6 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.support.QueryResolver;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.search.SearchService;
@@ -110,9 +108,6 @@ public class DataExplorerController extends MolgenisPluginController
 	@Autowired
 	private SearchService searchService;
 
-	@Autowired
-	private QueryResolver queryResolver;
-
 	public DataExplorerController()
 	{
 		super(URI);
@@ -125,8 +120,9 @@ public class DataExplorerController extends MolgenisPluginController
 	 * @return the view name
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(@RequestParam(value = "dataset", required = false) String selectedEntityName,
-			@RequestParam(value = "wizard", required = false) Boolean wizard, Model model) throws Exception
+	public String init(@RequestParam(value = "dataset", required = false)
+	String selectedEntityName, @RequestParam(value = "wizard", required = false)
+	Boolean wizard, Model model) throws Exception
 	{
 		Iterable<EntityMetaData> entitiesMeta = Iterables.transform(dataService.getEntityNames(),
 				new Function<String, EntityMetaData>()
@@ -143,14 +139,25 @@ public class DataExplorerController extends MolgenisPluginController
 		{
 			selectedEntityName = entitiesMeta.iterator().next().getName();
 		}
+        else
+        {
+            model.addAttribute("hideDatasetSelect", true);
+        }
 		model.addAttribute("selectedEntityName", selectedEntityName);
 		model.addAttribute("wizard", (wizard != null) && wizard.booleanValue());
 
-		return "view-dataexplorer";
+        //check for count-permission only (to showDataItemSelection)
+        if (!molgenisPermissionService.hasPermissionOnEntity(selectedEntityName, Permission.READ))
+        {
+            model.addAttribute("hideDataItemSelect", true);
+        }
+
+        return "view-dataexplorer";
 	}
 
 	@RequestMapping(value = "/module/{moduleId}", method = GET)
-	public String getModule(@PathVariable("moduleId") String moduleId, Model model)
+	public String getModule(@PathVariable("moduleId")
+	String moduleId, Model model)
 	{
 		if (moduleId.equals("data"))
 		{
@@ -177,7 +184,8 @@ public class DataExplorerController extends MolgenisPluginController
 	 */
 	@RequestMapping(value = "/modules", method = GET)
 	@ResponseBody
-	public ModulesConfigResponse getModules(@RequestParam("entity") String entityName)
+	public ModulesConfigResponse getModules(@RequestParam("entity")
+	String entityName)
 	{
 		// get data explorer settings
 		boolean modCharts = molgenisSettings.getBooleanProperty(KEY_MOD_CHARTS, DEFAULT_VAL_MOD_CHARTS);
@@ -256,8 +264,8 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/download", method = POST)
-	public void download(@RequestParam("dataRequest") String dataRequestStr, HttpServletResponse response)
-			throws IOException
+	public void download(@RequestParam("dataRequest")
+	String dataRequestStr, HttpServletResponse response) throws IOException
 	{
 		// Workaround because binding with @RequestBody is not possible:
 		// http://stackoverflow.com/a/9970672
@@ -271,8 +279,6 @@ public class DataExplorerController extends MolgenisPluginController
 		String fileName = entityName + '_' + new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + ".csv";
 
 		QueryImpl query = dataRequest.getQuery();
-		queryResolver.resolveRefIdentifiers(query.getRules(), entityMetaData);
-
 		response.setContentType("text/csv");
 		response.addHeader("Content-Disposition", "attachment; filename=" + fileName);
 
@@ -305,7 +311,9 @@ public class DataExplorerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/aggregate", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
 	@ResponseBody
-	public AggregateResponse aggregate(@Valid @RequestBody AggregateRequest request)
+	public AggregateResponse aggregate(@Valid
+	@RequestBody
+	AggregateRequest request)
 	{
 		String entityName = request.getEntityName();
 		String xAttributeName = request.getXAxisAttributeName();
@@ -317,10 +325,7 @@ public class DataExplorerController extends MolgenisPluginController
 		}
 		EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
 
-		QueryImpl q;
-		if (request.getQ() != null) q = new QueryImpl(queryResolver.resolveRefIdentifiers(request.getQ(), entityMeta));
-		else q = new QueryImpl();
-
+		QueryImpl q = request.getQ() == null ? new QueryImpl() : new QueryImpl(request.getQ());
 		if (q.getRules().size() > 0)
 		{
 			q.and();
@@ -362,60 +367,62 @@ public class DataExplorerController extends MolgenisPluginController
 
 		}
 
-		Iterable<?> xValues;
-		Iterable<?> yValues;
+		List<Object> xValues = Lists.newArrayList();
+		List<Object> yValues = Lists.newArrayList();
 		List<List<Long>> matrix = new ArrayList<List<Long>>();
 		Set<String> xLabels = Sets.newLinkedHashSet();
 		Set<String> yLabels = Sets.newLinkedHashSet();
 
-		if (xDataType == null)
+		if (xDataType != null)
 		{
-			xValues = Lists.newArrayList();
-		}
-		else if (xDataType == BOOL)
-		{
-			xValues = Arrays.asList(true, false);
-			xLabels.add(xAttributeName + ": true");
-			xLabels.add(xAttributeName + ": false");
-		}
-		else
-		{
-			EntityMetaData xRefEntityMeta = xAttributeMeta.getRefEntity();
-			String xRefEntityName = xRefEntityMeta.getName();
-			String xRefEntityLblAttr = xRefEntityMeta.getLabelAttribute().getName();
-
-			xValues = dataService.findAll(xRefEntityName);
-			for (Object xRefEntity : xValues)
+			if (xDataType == BOOL)
 			{
-				xLabels.add(((Entity) xRefEntity).getString(xRefEntityLblAttr));
+				xValues.add(Boolean.TRUE);
+				xValues.add(Boolean.FALSE);
+				xLabels.add(xAttributeName + ": true");
+				xLabels.add(xAttributeName + ": false");
+			}
+			else
+			{
+				EntityMetaData xRefEntityMeta = xAttributeMeta.getRefEntity();
+				String xRefEntityName = xRefEntityMeta.getName();
+				String xRefEntityLblAttr = xRefEntityMeta.getLabelAttribute().getName();
+
+				Iterable<Entity> xEntities = dataService.findAll(xRefEntityName);
+				for (Entity xRefEntity : xEntities)
+				{
+					xLabels.add(xRefEntity.getString(xRefEntityLblAttr));
+					xValues.add(xRefEntity.get(xRefEntityLblAttr));
+				}
 			}
 		}
 
-		if (yDataType == null)
+		if (yDataType != null)
 		{
-			yValues = Lists.newArrayList();
-		}
-		else if (yDataType == BOOL)
-		{
-			yValues = Arrays.asList(true, false);
-			yLabels.add(yAttributeName + ": true");
-			yLabels.add(yAttributeName + ": false");
-		}
-		else
-		{
-			EntityMetaData yRefEntityMeta = yAttributeMeta.getRefEntity();
-			String yRefEntityName = yRefEntityMeta.getName();
-			String yRefEntityLblAttr = yRefEntityMeta.getLabelAttribute().getName();
-
-			yValues = dataService.findAll(yRefEntityName);
-			for (Object yRefEntity : yValues)
+			if (yDataType == BOOL)
 			{
-				yLabels.add(((Entity) yRefEntity).getString(yRefEntityLblAttr));
+				yValues.add(Boolean.TRUE);
+				yValues.add(Boolean.FALSE);
+				yLabels.add(yAttributeName + ": true");
+				yLabels.add(yAttributeName + ": false");
+			}
+			else
+			{
+				EntityMetaData yRefEntityMeta = yAttributeMeta.getRefEntity();
+				String yRefEntityName = yRefEntityMeta.getName();
+				String yRefEntityLblAttr = yRefEntityMeta.getLabelAttribute().getName();
+
+				Iterable<Entity> yEntities = dataService.findAll(yRefEntityName);
+				for (Entity yRefEntity : yEntities)
+				{
+					xLabels.add(yRefEntity.getString(yRefEntityLblAttr));
+					xValues.add(yRefEntity.get(yRefEntityLblAttr));
+				}
 			}
 		}
 
-		boolean hasXValues = !Iterables.isEmpty(xValues);
-		boolean hasYValues = !Iterables.isEmpty(yValues);
+		boolean hasXValues = !xValues.isEmpty();
+		boolean hasYValues = !yValues.isEmpty();
 
 		if (hasXValues)
 		{

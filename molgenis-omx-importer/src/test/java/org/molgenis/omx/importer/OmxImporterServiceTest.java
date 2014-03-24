@@ -18,11 +18,13 @@ import javax.persistence.Persistence;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
-import org.molgenis.data.RepositorySource;
-import org.molgenis.data.excel.ExcelRepositorySource;
+import org.molgenis.data.FileRepositoryCollectionFactory;
+import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.importer.EntityImportService;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.support.QueryResolver;
 import org.molgenis.data.validation.DefaultEntityValidator;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.EntityValidator;
@@ -94,48 +96,53 @@ public class OmxImporterServiceTest
 	private OmxImporterService importer;
 	private EmbeddedElasticSearchServiceFactory factory;
 	private SearchService searchService;
+	private FileRepositoryCollectionFactory fileRepositorySourceFactory;
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
 		entityManager = Persistence.createEntityManagerFactory("molgenis-import-test").createEntityManager();
 		dataService = new DataServiceImpl();
-		dataService.addFileRepositorySourceClass(ExcelRepositorySource.class, ExcelRepositorySource.EXTENSIONS);
-		EntityValidator validator = new DefaultEntityValidator(dataService, new EntityAttributesValidator());
+		fileRepositorySourceFactory = new FileRepositoryCollectionFactory();
 
-		dataService.addRepository(new CharacteristicRepository(entityManager, validator));
-		dataService.addRepository(new ObservableFeatureRepository(entityManager, validator));
-		dataService.addRepository(new ProtocolRepository(entityManager, validator));
-		dataService.addRepository(new DataSetRepository(entityManager, validator));
-		dataService.addRepository(new ObservationSetRepository(entityManager, validator));
-		dataService.addRepository(new ObservedValueRepository(entityManager, validator));
-		dataService.addRepository(new CategoryRepository(entityManager, validator));
-		dataService.addRepository(new ObservationTargetRepository(entityManager, validator));
-		dataService.addRepository(new IndividualRepository(entityManager, validator));
-		dataService.addRepository(new PanelRepository(entityManager, validator));
-		dataService.addRepository(new ValueRepository(entityManager, validator));
-		dataService.addRepository(new StringValueRepository(entityManager, validator));
-		dataService.addRepository(new XrefValueRepository(entityManager, validator));
-		dataService.addRepository(new MrefValueRepository(entityManager, validator));
-		dataService.addRepository(new EmailValueRepository(entityManager, validator));
-		dataService.addRepository(new DecimalValueRepository(entityManager, validator));
-		dataService.addRepository(new IntValueRepository(entityManager, validator));
-		dataService.addRepository(new CategoricalValueRepository(entityManager, validator));
-		dataService.addRepository(new DateValueRepository(entityManager, validator));
-		dataService.addRepository(new DateTimeValueRepository(entityManager, validator));
-		dataService.addRepository(new BoolValueRepository(entityManager, validator));
-		dataService.addRepository(new HtmlValueRepository(entityManager, validator));
-		dataService.addRepository(new HyperlinkValueRepository(entityManager, validator));
-		dataService.addRepository(new LongValueRepository(entityManager, validator));
-		dataService.addRepository(new TextValueRepository(entityManager, validator));
+		fileRepositorySourceFactory.addFileRepositoryCollectionClass(ExcelRepositoryCollection.class,
+				ExcelRepositoryCollection.EXTENSIONS);
+		EntityValidator validator = new DefaultEntityValidator(dataService, new EntityAttributesValidator());
+		QueryResolver queryResolver = new QueryResolver(dataService);
+
+		dataService.addRepository(new CharacteristicRepository(entityManager, validator, queryResolver));
+		dataService.addRepository(new ObservableFeatureRepository(entityManager, validator, queryResolver));
+		dataService.addRepository(new ProtocolRepository(entityManager, validator, queryResolver));
+		dataService.addRepository(new DataSetRepository(entityManager, validator, queryResolver));
+		dataService.addRepository(new ObservationSetRepository(entityManager, validator, queryResolver));
+		dataService.addRepository(new ObservedValueRepository(entityManager, validator, queryResolver));
+		dataService.addRepository(new CategoryRepository(entityManager, validator, queryResolver));
+		dataService.addRepository(new ObservationTargetRepository(entityManager, validator, queryResolver));
+		dataService.addRepository(new IndividualRepository(entityManager, validator, queryResolver));
+		dataService.addRepository(new PanelRepository(entityManager, validator, queryResolver));
+		dataService.addRepository(new ValueRepository(entityManager, validator, queryResolver));
+		dataService.addRepository(new StringValueRepository(entityManager, validator, queryResolver));
+		dataService.addRepository(new XrefValueRepository(entityManager, validator, queryResolver));
+		dataService.addRepository(new MrefValueRepository(entityManager, validator, queryResolver));
+		dataService.addRepository(new EmailValueRepository(entityManager, validator, queryResolver));
+		dataService.addRepository(new DecimalValueRepository(entityManager, validator, queryResolver));
+		dataService.addRepository(new IntValueRepository(entityManager, validator, queryResolver));
+		dataService.addRepository(new CategoricalValueRepository(entityManager, validator, queryResolver));
+		dataService.addRepository(new DateValueRepository(entityManager, validator, queryResolver));
+		dataService.addRepository(new DateTimeValueRepository(entityManager, validator, queryResolver));
+		dataService.addRepository(new BoolValueRepository(entityManager, validator, queryResolver));
+		dataService.addRepository(new HtmlValueRepository(entityManager, validator, queryResolver));
+		dataService.addRepository(new HyperlinkValueRepository(entityManager, validator, queryResolver));
+		dataService.addRepository(new LongValueRepository(entityManager, validator, queryResolver));
+		dataService.addRepository(new TextValueRepository(entityManager, validator, queryResolver));
 
 		factory = new EmbeddedElasticSearchServiceFactory(Collections.singletonMap("path.data", "target/data"));
 		searchService = factory.create();
 
 		EntityImportService eis = new EntityImportService();
 		eis.setDataService(dataService);
-		importer = new OmxImporterServiceImpl(dataService, searchService, new EntitiesImporterImpl(dataService, eis),
-				validator);
+		importer = new OmxImporterServiceImpl(dataService, searchService, new EntitiesImporterImpl(
+				fileRepositorySourceFactory, eis), validator, new QueryResolver(dataService));
 
 		entityManager.getTransaction().begin();
 
@@ -149,8 +156,9 @@ public class OmxImporterServiceTest
 	@Test
 	public void testImportSampleOmx() throws IOException, ValueConverterException
 	{
-		RepositorySource source = dataService.createFileRepositorySource(loadTestFile("example-omx.xls"));
-		importer.doImport(source.getRepositories(), DatabaseAction.ADD_UPDATE_EXISTING);
+		RepositoryCollection source = fileRepositorySourceFactory
+				.createFileRepositoryCollection(loadTestFile("example-omx.xls"));
+		importer.doImport(source, DatabaseAction.ADD_UPDATE_EXISTING);
 
 		assertEquals(dataService.count(DataSet.ENTITY_NAME, new QueryImpl()), 1);
 		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME, new QueryImpl(), DataSet.class);
@@ -170,8 +178,9 @@ public class OmxImporterServiceTest
 	{
 		try
 		{
-			RepositorySource source = dataService.createFileRepositorySource(loadTestFile("missing-xref.xlsx"));
-			importer.doImport(source.getRepositories(), DatabaseAction.ADD_UPDATE_EXISTING);
+			RepositoryCollection source = fileRepositorySourceFactory
+					.createFileRepositoryCollection(loadTestFile("missing-xref.xlsx"));
+			importer.doImport(source, DatabaseAction.ADD_UPDATE_EXISTING);
 			fail("Should have thrown MolgenisValidationException");
 		}
 		catch (MolgenisValidationException e)
@@ -188,8 +197,9 @@ public class OmxImporterServiceTest
 	{
 		try
 		{
-			RepositorySource source = dataService.createFileRepositorySource(loadTestFile("missing-mref.xlsx"));
-			importer.doImport(source.getRepositories(), DatabaseAction.ADD_UPDATE_EXISTING);
+			RepositoryCollection source = fileRepositorySourceFactory
+					.createFileRepositoryCollection(loadTestFile("missing-mref.xlsx"));
+			importer.doImport(source, DatabaseAction.ADD_UPDATE_EXISTING);
 			fail("Should have thrown MolgenisValidationException");
 		}
 		catch (MolgenisValidationException e)
@@ -206,8 +216,9 @@ public class OmxImporterServiceTest
 	{
 		try
 		{
-			RepositorySource source = dataService.createFileRepositorySource(loadTestFile("wrong-email-value.xlsx"));
-			importer.doImport(source.getRepositories(), DatabaseAction.ADD_UPDATE_EXISTING);
+			RepositoryCollection source = fileRepositorySourceFactory
+					.createFileRepositoryCollection(loadTestFile("wrong-email-value.xlsx"));
+			importer.doImport(source, DatabaseAction.ADD_UPDATE_EXISTING);
 			fail("Should have thrown MolgenisValidationException");
 		}
 		catch (MolgenisValidationException e)
@@ -224,9 +235,9 @@ public class OmxImporterServiceTest
 	{
 		try
 		{
-			RepositorySource source = dataService
-					.createFileRepositorySource(loadTestFile("feature-in-multiple-protocols.xls"));
-			importer.doImport(source.getRepositories(), DatabaseAction.ADD_UPDATE_EXISTING);
+			RepositoryCollection source = fileRepositorySourceFactory
+					.createFileRepositoryCollection(loadTestFile("feature-in-multiple-protocols.xls"));
+			importer.doImport(source, DatabaseAction.ADD_UPDATE_EXISTING);
 			fail("Should have thrown MolgenisValidationException");
 		}
 		catch (MolgenisValidationException e)
