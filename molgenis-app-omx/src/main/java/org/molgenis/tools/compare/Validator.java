@@ -47,7 +47,7 @@ public class Validator
 		}
 
 		ValidationFile csvFile = new ValidationFile();
-		Repository csvReaderFileToCompare = new CsvRepository(new File(file2), null);
+		Repository csvReaderFileToCompare = new CsvRepository(new File(file2), "", null);
 
 		csvFile.readFile(csvReaderFileToCompare, IDENTIFIER, IDENTIFIER2);
 		boolean noUniqueColums = false;

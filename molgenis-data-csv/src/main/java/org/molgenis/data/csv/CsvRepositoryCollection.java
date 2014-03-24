@@ -1,19 +1,14 @@
 package org.molgenis.data.csv;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.Charset;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
@@ -32,57 +27,57 @@ import com.google.common.collect.Lists;
  */
 public class CsvRepositoryCollection extends FileRepositoryCollection
 {
-	private static final String EXTENSION_CSV = "csv";
-	private static final String EXTENSION_TXT = "txt";
-	private static final String EXTENSION_TSV = "tsv";
-	private static final String EXTENSION_ZIP = "zip";
-
+	public static final String EXTENSION_CSV = "csv";
+	public static final String EXTENSION_TXT = "txt";
+	public static final String EXTENSION_TSV = "tsv";
+	public static final String EXTENSION_ZIP = "zip";
 	public static final Set<String> EXTENSIONS = ImmutableSet.of(EXTENSION_CSV, EXTENSION_TXT, EXTENSION_TSV,
 			EXTENSION_ZIP);
-
-	private static final Charset CHARSET = Charset.forName("UTF-8");
 	private static final String MAC_ZIP = "__MACOSX";
 	private final File file;
-	private ZipFile zipFile = null;
+	private List<String> entityNames;
+	private List<String> entityNamesLowerCase;
 
 	public CsvRepositoryCollection(File file) throws InvalidFormatException, IOException
 	{
 		this(file, (CellProcessor[]) null);
 	}
 
-	public CsvRepositoryCollection(File file, CellProcessor... cellProcessors) throws InvalidFormatException, IOException
+	public CsvRepositoryCollection(File file, CellProcessor... cellProcessors) throws InvalidFormatException,
+			IOException
 	{
 		super(EXTENSIONS, cellProcessors);
 		this.file = file;
-	}
 
-	private Repository getRepository(String fileName, InputStream in, List<CellProcessor> cellProcessors)
-	{
-		String name = StringUtils.stripFilenameExtension(StringUtils.getFilename(fileName));
-		Reader reader = new InputStreamReader(in, CHARSET);
-
-		if (fileName.toLowerCase().endsWith("." + EXTENSION_CSV)
-				|| fileName.toLowerCase().endsWith("." + EXTENSION_TXT))
-		{
-			return new CsvRepository(fileName, reader, name, cellProcessors);
-		}
-
-		if (fileName.toLowerCase().endsWith("." + EXTENSION_TSV))
-		{
-			return new CsvRepository(fileName, reader, '\t', StringUtils.getFilename(fileName), cellProcessors);
-		}
-
-		throw new MolgenisDataException("Unknown file type: [" + fileName + "] for csv repository");
+		loadEntityNames();
 	}
 
 	@Override
 	public Iterable<String> getEntityNames()
 	{
+		return entityNames;
+	}
+
+	@Override
+	public Repository getRepositoryByEntityName(String name)
+	{
+		if (!entityNamesLowerCase.contains(name.toLowerCase()))
+		{
+			return null;
+		}
+
+		return new CsvRepository(file, name, cellProcessors);
+	}
+
+	private void loadEntityNames()
+	{
 		String extension = StringUtils.getFilenameExtension(file.getName());
-		List<String> repositories = Lists.newArrayList();
+		entityNames = Lists.newArrayList();
+		entityNamesLowerCase = Lists.newArrayList();
 
 		if (extension.equalsIgnoreCase(EXTENSION_ZIP))
 		{
+			ZipFile zipFile = null;
 			try
 			{
 				zipFile = new ZipFile(file);
@@ -91,63 +86,32 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 					ZipEntry entry = e.nextElement();
 					if (!entry.getName().contains(MAC_ZIP))
 					{
-						repositories.add(StringUtils.stripFilenameExtension(StringUtils.getFilename(file.getName())));
+						String name = getRepositoryName(entry.getName());
+						entityNames.add(name);
+						entityNamesLowerCase.add(name.toLowerCase());
 					}
 				}
 			}
 			catch (Exception e)
 			{
 				throw new MolgenisDataException(e);
+			}
+			finally
+			{
+				IOUtils.closeQuietly(zipFile);
 			}
 		}
 		else
 		{
-			repositories.add(StringUtils.stripFilenameExtension(StringUtils.getFilename(file.getName())));
+			String name = getRepositoryName(file.getName());
+			entityNames.add(name);
+			entityNamesLowerCase.add(name.toLowerCase());
 		}
-
-		return repositories;
 	}
 
-	@Override
-	public Repository getRepositoryByEntityName(String name)
+	private String getRepositoryName(String fileName)
 	{
-		String extension = StringUtils.getFilenameExtension(file.getName());
-
-		if (extension.equalsIgnoreCase(EXTENSION_ZIP))
-		{
-			try
-			{
-				zipFile = new ZipFile(file);
-				for (Enumeration<? extends ZipEntry> e = zipFile.entries(); e.hasMoreElements();)
-				{
-					ZipEntry entry = e.nextElement();
-					if (StringUtils.stripFilenameExtension(StringUtils.getFilename(entry.getName())).equalsIgnoreCase(
-							name))
-					{
-						return getRepository(file.getName() + "/" + entry.getName(), zipFile.getInputStream(entry),
-								cellProcessors);
-					}
-				}
-			}
-			catch (Exception e)
-			{
-				throw new MolgenisDataException(e);
-			}
-		}
-		else if (file.getName().equalsIgnoreCase(name))
-		{
-			try
-			{
-				return getRepository(StringUtils.stripFilenameExtension(StringUtils.getFilename(file.getName())),
-						new FileInputStream(file), cellProcessors);
-			}
-			catch (FileNotFoundException e)
-			{
-				throw new MolgenisDataException(e);
-			}
-		}
-
-		return null;
+		return StringUtils.stripFilenameExtension(StringUtils.getFilename(fileName));
 	}
 
 }
