@@ -11,7 +11,7 @@
 	<div id="chart-view" class="span9"></div>
 </div>
 <script>
-	if (typeof Highcharts == 'undefined') {
+	if (typeof Highcharts === 'undefined') {
 		$.when(
 			$.ajax("/js/highstock-1.3.6/highstock.js", {'cache': true})
 		).then(function() {
