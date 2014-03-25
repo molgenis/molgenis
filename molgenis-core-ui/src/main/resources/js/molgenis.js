@@ -625,7 +625,7 @@ $(function() {
 	    jqXHR.always( hideSpinner );
 	});
 
-	$(document).ajaxError(function() {
+	$(document).ajaxError(function(event, xhr, settings, e) {
 		try {
 			molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 		} catch(e) {

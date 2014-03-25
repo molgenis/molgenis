@@ -65,7 +65,7 @@ public class IndexRequestGenerator
 	private Iterator<BulkRequestBuilder> indexRequestIterator(final Repository repository)
 	{
 		final Set<String> xrefAndMrefColumns = new HashSet<String>();
-		for (AttributeMetaData attr : repository.getEntityMetaData().getAttributes())
+		for (AttributeMetaData attr : repository.getEntityMetaData().getAtomicAttributes())
 		{
 			FieldTypeEnum fieldType = attr.getDataType().getEnumType();
 			boolean isXrefOrMref = fieldType.equals(FieldTypeEnum.XREF) || fieldType.equals(FieldTypeEnum.MREF);
