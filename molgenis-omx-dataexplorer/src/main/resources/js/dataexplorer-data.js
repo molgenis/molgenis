@@ -93,7 +93,7 @@
             var dallianceTrack = {
                 name : entity.label || entity.name,
                 uri : '/das/molgenis/dataset_' + entity.name + '/',
-                desc : "",
+                desc : entity.description,
                 stylesheet_uri : '/css/selected_dataset-track.xml'
             };
 
@@ -104,7 +104,7 @@
                     var dallianceTrack = {
                         name : refEntity.label || refEntity.name,
                         uri : '/das/molgenis/dataset_' + refEntity.name + '/',
-                        desc : "unselected dataset",
+                        desc : refEntity.description,
                         stylesheet_uri : '/css/not_selected_dataset-track.xml'
                     };
                     settings.sources.push(dallianceTrack);
@@ -112,10 +112,10 @@
             });
             genomeBrowser = new Browser(settings);
             genomeBrowser.realInit();
-            var featureInfoMap = new Object();
+            var featureInfoMap = {};
             genomeBrowser.addFeatureInfoPlugin(function(f, info) {
                 //check if there is cached information for this clicked item
-                if(f.id in featureInfoMap){
+                if(featureInfoMap.hasOwnProperty(f.id+f.label)){
                     $.each(featureInfoMap[f.id+f.label].sections, function(section) {
                         info.sections.push(featureInfoMap[f.id+f.label].sections[section]);
                     });
@@ -123,11 +123,11 @@
                 else{
                     var selectedTrack = false;
                     var molgenisIndex = f.notes.indexOf("source:MOLGENIS");
-                    if(molgenisIndex!=-1){
+                    if(molgenisIndex!==-1){
                         //get the value of the "track" field to see if this is the selected Entity in the dataexplorer
                         $.each(f.notes, function(note) {
                             var trackIndex = f.notes[note].indexOf("track:")
-                            if(trackIndex!=-1){
+                            if(trackIndex!==-1){
                                 var trackName = f.notes[note].substr(trackIndex+6);
                                 if(entity.name == trackName){
                                     selectedTrack = true;
@@ -139,14 +139,12 @@
                         //get the patient note to create a filter on patient link
                         $.each(f.notes, function(note) {
                             var patientIndex = f.notes[note].indexOf("patient:")
-                            if(patientIndex!=-1){
+                            if(patientIndex!==-1){
                                 var patientID = f.notes[note].substr(patientIndex+8);
                                 info.feature.notes.splice(note,1);
                                 if(selectedTrack){
-                                    var a = document.createElement('a');
-                                    a.href =  'javascript:void(0)';
-                                    a.innerHTML = patientID
-                                    a.onclick = function () {
+                                    var a = $('<a href="javascript:void(0)">' + patientID + '</a>');
+                                    a.click(function() {
                                         $.each(getAttributes(), function(key, attribute) {
                                             if(attribute.name === 'patient_id') {
                                                 var attributeFilter = {
@@ -156,8 +154,9 @@
                                                 $(document).trigger('updateAttributeFilters', {'filters': [attributeFilter]});
                                             }
                                         });
-                                    };
-                                    info.add('Filter on patient:', a);
+                                    });
+                                    self.test = a;
+                                    info.add('Filter on patient:', a[0]);
                                 }
                                 return false;
                             }
@@ -165,10 +164,8 @@
                         //get the mutation note to create a mutations filter link
                         info.feature.notes.splice(molgenisIndex,1);
                         if(selectedTrack){
-                            var a = document.createElement('a');
-                            a.href =  'javascript:void(0)';
-                            a.innerHTML = f.id
-                            a.onclick = function () {
+                            var a = $('<a href="javascript:void(0)">' + f.id + '</a>');
+                            a.click(function() {
                                 $.each(getAttributes(), function(key, attribute) {
                                     if(attribute.name === 'mutation_id') {
                                         var attributeFilter = {
@@ -178,8 +175,9 @@
                                         $(document).trigger('updateAttributeFilters', {'filters': [attributeFilter]});
                                     }
                                 });
-                            };
-                            info.add('Filter on mutation:', a);
+                            });
+                            self.test = a;
+                            info.add('Filter on mutation:', a[0]);
                             //cache the information
                             featureInfoMap[f.id+f.label] = info;
                             return false;
