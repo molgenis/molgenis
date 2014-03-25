@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.annotation.impl.CaddServiceAnnotator;
+import org.molgenis.data.annotation.impl.ClinVarServiceAnnotator;
 import org.molgenis.data.annotation.impl.ClinicalGenomicsDatabaseServiceAnnotator;
 import org.molgenis.data.annotation.impl.DbnsfpGeneServiceAnnotator;
 import org.molgenis.data.annotation.impl.DbnsfpVariantServiceAnnotator;
@@ -161,6 +162,8 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 				molgenisHomeDirAnnotationResources + "/dbnsfp/dbNSFP2.3_gene");
 		runtimePropertyMap.put(DbnsfpVariantServiceAnnotator.CHROMOSOME_FILE_LOCATION_PROPERTY,
 				molgenisHomeDirAnnotationResources + "/dbnsfp/dbNSFP2.3_variant.chr");
+		runtimePropertyMap.put(ClinVarServiceAnnotator.CLINVAR_FILE_LOCATION_PROPERTY,
+				molgenisHomeDirAnnotationResources + "/Clinvar/variant_summary.txt");
 
 		for (Entry<String, String> entry : runtimePropertyMap.entrySet())
 		{
