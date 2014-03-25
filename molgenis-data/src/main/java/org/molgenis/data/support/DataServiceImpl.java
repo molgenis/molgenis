@@ -4,10 +4,10 @@ import static org.molgenis.security.core.utils.SecurityUtils.currentUserHasRole;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
@@ -38,7 +38,7 @@ public class DataServiceImpl implements DataService
 	public DataServiceImpl()
 	{
 		this.repositories = new LinkedHashMap<String, Repository>();
-		this.repositoryNames = new LinkedHashSet<String>();
+		this.repositoryNames = new TreeSet<String>();
 	}
 
 	@Override
