@@ -1,3 +1,6 @@
+//Create log function for browsers that don't support console.log 
+if(!window.console){ window.console = {log: function(){} }; } 
+
 (function($, molgenis) {
 	molgenis.setContextUrl = function(contextUrl) {
 		molgenis.contextUrl = contextUrl;
