@@ -114,7 +114,7 @@ public class ElasticSearchServiceTest
 		});
 
 		when(repoMock.getName()).thenReturn("person");
-		when(entityMetaData.getAttributes()).thenReturn(
+		when(entityMetaData.getAtomicAttributes()).thenReturn(
 				Arrays.<AttributeMetaData> asList(new DefaultAttributeMetaData("id", FieldTypeEnum.INT),
 						new DefaultAttributeMetaData("name", FieldTypeEnum.STRING)));
 
@@ -169,7 +169,7 @@ public class ElasticSearchServiceTest
 			}
 		});
 		when(repoMock.getName()).thenReturn("fruit");
-		when(repoMock.getEntityMetaData().getAttributes()).thenReturn(
+		when(repoMock.getEntityMetaData().getAtomicAttributes()).thenReturn(
 				Arrays.<AttributeMetaData> asList(new DefaultAttributeMetaData("id", FieldTypeEnum.INT),
 						new DefaultAttributeMetaData("name", FieldTypeEnum.STRING), new DefaultAttributeMetaData(
 								"color", FieldTypeEnum.STRING)));

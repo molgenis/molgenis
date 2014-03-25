@@ -36,9 +36,7 @@
 	            coordSystem: ${coordSystem},
 	            chains: ${chains},
 	            sources: ${sources},
-	            browserLinks: ${browserLinks},
-	            searchEndpoint: ${searchEndpoint},
-	            karyotypeEndpoint: ${karyotypeEndpoint}
+	            browserLinks: ${browserLinks}
 			}, [<#list genomeEntities?keys as entityName>{'name': '${entityName}', 'label': '${genomeEntities[entityName]}'}<#if entityName_has_next>,</#if></#list>]);
 			<#-- create data table -->
 		    molgenis.dataexplorer.data.createDataTable();    	
