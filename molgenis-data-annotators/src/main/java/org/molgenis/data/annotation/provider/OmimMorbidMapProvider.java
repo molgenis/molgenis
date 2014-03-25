@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 public class OmimMorbidMapProvider
 {
 	private static final String KEY_OMIM_MORBIDMAP = "plugin.annotators.omim.morbidmap.url";
-	private static final String DEFAULT_OMIM_MORBIDMAP_VALUE = "ftp://ftp.omim.org/omim/morbidmap";
+	private static final String DEFAULT_OMIM_MORBIDMAP_VALUE = "https://molgenis26.target.rug.nl/downloads/5gpm/morbidmap";
 
 	private final MolgenisSettings molgenisSettings;
 

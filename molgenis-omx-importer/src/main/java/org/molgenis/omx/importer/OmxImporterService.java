@@ -1,10 +1,9 @@
 package org.molgenis.omx.importer;
 
 import java.io.IOException;
-import java.util.List;
 
 import org.molgenis.data.DatabaseAction;
-import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.omx.converters.ValueConverterException;
 
@@ -26,6 +25,6 @@ public interface OmxImporterService
 	 * @throws IOException
 	 * @throws ValueConverterException
 	 */
-	EntityImportReport doImport(List<Repository> repositories, DatabaseAction databaseAction) throws IOException,
+	EntityImportReport doImport(RepositoryCollection repositories, DatabaseAction databaseAction) throws IOException,
 			ValueConverterException;
 }

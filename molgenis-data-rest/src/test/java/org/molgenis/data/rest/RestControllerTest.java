@@ -403,7 +403,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		@Bean
 		public RestController restController()
 		{
-			return new RestController(dataService(), queryResolver());
+			return new RestController(dataService());
 		}
 	}
 

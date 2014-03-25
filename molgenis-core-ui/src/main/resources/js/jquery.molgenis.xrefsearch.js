@@ -16,7 +16,7 @@
 	
 	var restApi = new molgenis.RestClient();
 	
-	function createQuery(lookupAttributeNames, terms) {
+	function createQuery(lookupAttributeNames, terms, operator) {
 		var q = [];
 		
 		$.each(lookupAttributeNames, function(index, attrName) {
@@ -30,7 +30,7 @@
                     }
                     q.push({
                         field: attrName,
-                        operator: 'LIKE',
+                        operator: operator,
                         value: terms[index]
                     });
                 });
@@ -81,18 +81,17 @@
 		
 		hiddenInput.select2({
 			width: 650,
-			placeholder: 'filter text',
 			minimumInputLength: 2,
-            multiple: (attributeMetaData.fieldType == 'MREF'),
+            multiple: (attributeMetaData.fieldType === 'MREF'),
 			query: function (options){
-				var query = createQuery(lookupAttrNames, [options.term]);
+				var query = createQuery(lookupAttrNames, [options.term],'LIKE');
 				restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {num: 10, q: query}}, function(data) {
 					options.callback({results: data.items, more: false});
 				});           
             },
 			initSelection: function(element, callback) {
 				//Only called when the input has a value
-				var query = createQuery(lookupAttrNames, element.val().split(','));
+				var query = createQuery(lookupAttrNames, element.val().split(','), 'EQUALS');
 				restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {q: query}}, function(data) {
 					callback(data.items);
 				});
@@ -109,7 +108,7 @@
             separator: ',',
 			dropdownCssClass: 'molgenis-xrefsearch'
 		});
-        if (attributeMetaData.fieldType == 'MREF') {
+        if (attributeMetaData.fieldType === 'MREF') {
             var dropdown = $('<select id="mref-query-type" class="operator"><option value="OR">OR</option><option value="AND">AND</option></select>');
             dropdown.val(options.operator);
             dropdown.width(70);
@@ -119,7 +118,6 @@
 
 	function addQueryPartSelect(container, attributeMetaData, options) {
 		var attrs = {
-				'placeholder': 'filter text',
 				'autofocus': 'autofocus'
 			};
 

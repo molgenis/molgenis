@@ -13,9 +13,11 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.omx.OmxLookupTableRepository;
 import org.molgenis.data.omx.OmxRepository;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.support.QueryResolver;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.data.validation.MolgenisValidationException;
@@ -41,20 +43,23 @@ public class OmxImporterServiceImpl implements OmxImporterService
 	private final SearchService searchService;
 	private final EntitiesImporter entitiesImporter;
 	private final EntityValidator entityValidator;
+	private final QueryResolver queryResolver;
 
 	@Autowired
 	public OmxImporterServiceImpl(DataService dataService, SearchService searchService,
-			EntitiesImporter entitiesImporter, EntityValidator entityValidator)
+			EntitiesImporter entitiesImporter, EntityValidator entityValidator, QueryResolver queryResolver)
 	{
 		this.dataService = dataService;
 		this.searchService = searchService;
 		this.entitiesImporter = entitiesImporter;
 		this.entityValidator = entityValidator;
+		this.queryResolver = queryResolver;
 	}
 
 	@Override
 	@Transactional(rollbackFor = IOException.class)
-	public EntityImportReport doImport(List<Repository> repositories, DatabaseAction databaseAction) throws IOException
+	public EntityImportReport doImport(RepositoryCollection repositories, DatabaseAction databaseAction)
+			throws IOException
 	{
 		// First import entities, the data sheets are ignored in the entitiesimporter
 		EntityImportReport importReport = entitiesImporter.importEntities(repositories, databaseAction);
@@ -63,8 +68,10 @@ public class OmxImporterServiceImpl implements OmxImporterService
 		checkFeatureCanOnlyBelongToOneProtocolForOneDataSet();
 
 		// Import data sheets
-		for (Repository repository : repositories)
+		for (String name : repositories.getEntityNames())
 		{
+			Repository repository = repositories.getRepositoryByEntityName(name);
+
 			if (repository.getName().startsWith(DATASET_SHEET_PREFIX))
 			{
 				// Import DataSet sheet, create new OmxRepository
@@ -100,7 +107,7 @@ public class OmxImporterServiceImpl implements OmxImporterService
 						if (!dataService.hasRepository(categoricalFeature.getIdentifier() + "-LUT"))
 						{
 							dataService.addRepository(new OmxLookupTableRepository(dataService, categoricalFeature
-									.getIdentifier()));
+									.getIdentifier(), queryResolver));
 						}
 					}
 				}

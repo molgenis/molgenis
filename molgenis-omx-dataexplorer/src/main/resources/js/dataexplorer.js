@@ -268,26 +268,7 @@
 	 * @memberOf molgenis.dataexplorer
 	 */
 	function createFilters(form) {
-        /**if(mrefQuery){
-            var values = value.split(',')
-            $.each(values, function(i) {
-                if (index > 0) {
-                    var operator = attributeFilter.operator ? attributeFilter.operator : 'OR';
-                    entityCollectionRequest.q.push({
-                        operator : operator
-                    });
-                }
-                entityCollectionRequest.q.push({
-                    field : attribute.name,
-                    operator : 'EQUALS',
-                    value : values[i]
-                });
-            });
-        } else **/
-
-
-
-		var filters = {};
+        var filters = {};
 		$('.controls', form).each(function() {
 			var attribute = $(this).data('attribute');
 			var filter = filters[attribute.href];

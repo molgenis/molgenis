@@ -38,16 +38,16 @@ public class TupleToCategoricalValueConverterTest
 	public void fromTuple() throws ValueConverterException
 	{
 		Category category = new Category();
-		String valueCode = "code1";
+		String identifier = "code1";
 		ObservableFeature feature = mock(ObservableFeature.class);
 		DataService dataService = mock(DataService.class);
 
-		Query q = new QueryImpl().eq(Category.OBSERVABLEFEATURE, feature).and().eq(Category.VALUECODE, valueCode);
+		Query q = new QueryImpl().eq(Category.IDENTIFIER, identifier);
 
 		when(dataService.findOne(Category.ENTITY_NAME, q, Category.class)).thenReturn(category);
 
 		String colName = "col";
-		Entity entity = new MapEntity(colName, valueCode);
+		Entity entity = new MapEntity(colName, identifier);
 		CategoricalValue value = new EntityToCategoricalValueConverter(dataService)
 				.fromEntity(entity, colName, feature);
 		assertEquals(value.getValue(), category);
@@ -58,15 +58,15 @@ public class TupleToCategoricalValueConverterTest
 	{
 		CategoricalValue value = new CategoricalValue();
 		Category category = new Category();
-		String valueCode = "code1";
+		String identifier = "code1";
 		ObservableFeature feature = mock(ObservableFeature.class);
 		DataService dataService = mock(DataService.class);
 
-		Query q = new QueryImpl().eq(Category.OBSERVABLEFEATURE, feature).and().eq(Category.VALUECODE, valueCode);
+		Query q = new QueryImpl().eq(Category.IDENTIFIER, identifier);
 
 		when(dataService.findOne(Category.ENTITY_NAME, q, Category.class)).thenReturn(category);
 		String colName = "col";
-		Entity entity = new MapEntity(colName, valueCode);
+		Entity entity = new MapEntity(colName, identifier);
 		new EntityToCategoricalValueConverter(dataService).updateFromEntity(entity, colName, feature, value);
 		assertEquals(value.getValue(), category);
 	}

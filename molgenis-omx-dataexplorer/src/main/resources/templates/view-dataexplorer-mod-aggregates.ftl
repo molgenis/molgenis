@@ -1,5 +1,5 @@
 <div id="feature-select-container">
-	<label class="control-label" for="feature-select">Aggregate by:</label>
+	<label class="control-label" for="feature-select">Group by:</label>
 	<div id="feature-select" class="controls">
 	</div>
 </div>

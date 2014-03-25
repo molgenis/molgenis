@@ -15,10 +15,10 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.RepositorySource;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.Writable;
 import org.molgenis.data.WritableFactory;
-import org.molgenis.data.excel.ExcelRepositorySource;
+import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.support.MapEntity;
@@ -34,40 +34,36 @@ public class SampleTabOmxConverter
 		this.submissionID = submissionID;
 		this.unitOntologyTermsForFeatures = new HashMap<String, String>();
 
-		RepositorySource repositorySource = new ExcelRepositorySource(new File(inputFilePath), new TrimProcessor());
+		RepositoryCollection repositorySource = new ExcelRepositoryCollection(new File(inputFilePath),
+				new TrimProcessor());
+
+		WritableFactory writableFactory = new ExcelWriter(new File(inputFilePath + ".Omx.xls"));
+
 		try
 		{
-			WritableFactory writableFactory = new ExcelWriter(new File(inputFilePath + ".Omx.xls"));
-
+			Repository repo = repositorySource.getRepositoryByEntityName(sheetName);
 			try
 			{
-				Repository repo = repositorySource.getRepository(sheetName);
-				try
-				{
-					// Collect headers as features to be imported in Omx-format
-					List<String> listOfColumns = collectColumns(repo);
-					// Collect observableFeatures
-					List<String> listOfObservableFeatures = collectObservableFeatures(listOfColumns);
-					addObserableFeatureTab(writableFactory, listOfObservableFeatures);
-					addProtocolTab(writableFactory, listOfObservableFeatures);
-					addDataSet(writableFactory);
-					addSDataSetMatrix(writableFactory, repo, listOfObservableFeatures);
-					addOntologyTermTab(writableFactory);
-				}
-				finally
-				{
-					repo.close();
-				}
+				// Collect headers as features to be imported in Omx-format
+				List<String> listOfColumns = collectColumns(repo);
+				// Collect observableFeatures
+				List<String> listOfObservableFeatures = collectObservableFeatures(listOfColumns);
+				addObserableFeatureTab(writableFactory, listOfObservableFeatures);
+				addProtocolTab(writableFactory, listOfObservableFeatures);
+				addDataSet(writableFactory);
+				addSDataSetMatrix(writableFactory, repo, listOfObservableFeatures);
+				addOntologyTermTab(writableFactory);
 			}
 			finally
 			{
-				writableFactory.close();
+				repo.close();
 			}
 		}
 		finally
 		{
-			repositorySource.close();
+			writableFactory.close();
 		}
+
 	}
 
 	private void addOntologyTermTab(WritableFactory writableFactory) throws IOException
