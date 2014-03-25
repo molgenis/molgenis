@@ -88,8 +88,6 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String CHAINS = "chains";
 	public static final String SOURCES = "sources";
 	public static final String BROWSERLINKS = "browserLinks";
-	public static final String SEARCHENDPOINT = "searchEndpoint";
-	public static final String KARYOTYPEENDPOINT = "karyotypeEndpoint";
 	public static final String GENOMEBROWSERTABLE = "genomeBrowserTable";
 
 	public static final String MUTATION_START_POSITION = "start_nucleotide";
@@ -169,8 +167,6 @@ public class DataExplorerController extends MolgenisPluginController
 			model.addAttribute(CHAINS, molgenisSettings.getProperty(CHAINS));
 			model.addAttribute(SOURCES, molgenisSettings.getProperty(SOURCES));
 			model.addAttribute(BROWSERLINKS, molgenisSettings.getProperty(BROWSERLINKS));
-			model.addAttribute(SEARCHENDPOINT, molgenisSettings.getProperty(SEARCHENDPOINT));
-			model.addAttribute(KARYOTYPEENDPOINT, molgenisSettings.getProperty(KARYOTYPEENDPOINT));
 			model.addAttribute(GENOMEBROWSERTABLE, molgenisSettings.getProperty(GENOMEBROWSERTABLE));
 		}
 		return "view-dataexplorer-mod-" + moduleId; // TODO bad request in case of invalid module id
