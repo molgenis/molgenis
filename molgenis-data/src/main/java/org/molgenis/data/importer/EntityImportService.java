@@ -30,7 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -204,7 +203,7 @@ public class EntityImportService
 							&& attr.getRefEntity().getName().equalsIgnoreCase(entityName)
 							&& !resolveEntityRef(entityName, entity, attr))
 					{
-						long rowNr = getRowNr(entity, source, entityMetaData.getLabelAttribute().getName());
+						long rowNr = getRowNr(entity, entitiesToImport, entityMetaData.getLabelAttribute().getName());
 						violations.add(createViolation(attr, entityMetaData, entity, rowNr));
 					}
 				}
@@ -219,7 +218,7 @@ public class EntityImportService
 			updateable.update(batch, dbAction, updateKey);
 		}
 
-		return Iterables.size(source);
+		return entitiesToImport.size();
 	}
 
 	private long getRowNr(Entity entityToFind, Iterable<Entity> entities, String keyAttr)

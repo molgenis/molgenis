@@ -38,7 +38,7 @@ public class JpaImportTest extends BaseJpaTest
 		EntityImportService eis = new EntityImportService();
 		eis.setDataService(dataService);
 
-		importer = new AbstractEntitiesImporter(dataService, eis)
+		importer = new AbstractEntitiesImporter(fileRepositorySourceFactory, eis)
 		{
 			@Override
 			protected Set<String> getEntitiesImportable()
