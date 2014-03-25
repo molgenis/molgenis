@@ -1,5 +1,9 @@
-//Create log function for browsers that don't support console.log 
-if(!window.console){ window.console = {log: function(){} }; } 
+//Create log function for browsers that don't support console.log 	
+if (!window.console) { 
+	window.console = {log: function(){} }; 
+} else if (!window.console.log) {
+	window.console.log = function(){};
+} 
 
 (function($, molgenis) {
 	molgenis.setContextUrl = function(contextUrl) {
