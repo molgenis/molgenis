@@ -2,6 +2,7 @@
 						</div>
 					</div>
 				</div><#-- close plugin container-fluid -->
+				<div id="push"></div>
 			</div><#-- close wrap -->
 			<div id="footer"> 
 				<p>This database was generated using the open source <a href="http://www.molgenis.org">MOLGENIS database generator</a> version ${molgenis_version} build on ${molgenis_build_date}.<br>
