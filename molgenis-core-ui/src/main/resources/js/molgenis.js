@@ -1,4 +1,7 @@
+
 (function($, molgenis) {
+	"use strict";
+	
 	molgenis.setContextUrl = function(contextUrl) {
 		molgenis.contextUrl = contextUrl;
 	};
@@ -79,7 +82,7 @@
 					'message' : response.message
 				} ], response.type, $('.datasetsindexerAlerts'));
 			});
-		};
+		}
 	};
 
 	/**
@@ -197,7 +200,7 @@ function padNumber(number, length) {
 	}
 
 	return str;
-};
+}
 
 function getCurrentTimezoneOffset() {
 	var offset = new Date().getTimezoneOffset();
@@ -206,7 +209,7 @@ function getCurrentTimezoneOffset() {
 			.abs(offset % 60), 2));
 
 	return offset;
-};
+}
 
 function htmlEscape(text) {
 	return $('<div/>').text(text).html();
@@ -229,7 +232,7 @@ function formatTableCellValue(value, dataType) {
 		value = '<a href="mailto:' + value + '">' + htmlEscape(value) + '</a>';
 
 	} else if (dataType.toLowerCase() == 'bool') {
-		var checked = (value == true);
+		var checked = (value === true);
 		value = '<input type="checkbox" disabled="disabled" ';
 		if (checked) {
 			value = value + 'checked ';
@@ -253,7 +256,7 @@ function formatTableCellValue(value, dataType) {
 	}
 
 	return value;
-};
+}
 
 /**
  * Is s is longer then maxLength cut it and add ...
@@ -393,11 +396,11 @@ function createInput(dataType, attrs, val, lbl) {
 			qs = '?' + uriParts[1];
 		}
 		if (options && options.attributes)
-			qs += (qs.length == 0 ? '?' : '&') + 'attributes=' + options.attributes.join(',');
+			qs += (qs.length === 0 ? '?' : '&') + 'attributes=' + options.attributes.join(',');
 		if (options && options.expand)
-			qs += (qs.length == 0 ? '?' : '&') + 'expand=' + options.expand.join(',');
+			qs += (qs.length === 0 ? '?' : '&') + 'expand=' + options.expand.join(',');
 		if (options && options.q)
-			qs += (qs.length == 0 ? '?' : '&') + '_method=GET';
+			qs += (qs.length === 0 ? '?' : '&') + '_method=GET';
 		return resourceUri + qs;
 	};
 
@@ -496,11 +499,11 @@ function validateForm(form, fields) {
 	alertstring = "";
 
 	for ( var i = 0; i < fields.length; i++) {
-		if (fields[i].value == "") {
+		if (fields[i].value === "") {
 			alertstring += fields[i].name + "\n";
 		}
 	}
-	if (alertstring == "") {
+	if (alertstring === "") {
 		return true;
 	} else {
 		alert("Fields marked with * are required. Please provide: \n"
@@ -529,7 +532,7 @@ function checkAll(formname, inputname) {
 }
 
 function toggleCssClass(cssClass) {
-	var cssRules = new Array();
+	var cssRules = [];
 	var ff = true;
 	if (document.styleSheets[0].cssRules) {
 		cssRules = document.styleSheets[0].cssRules;
