@@ -83,7 +83,8 @@ public class AccountController
 	@RequestMapping(value = "/register", method = RequestMethod.POST, headers = "Content-Type=application/x-www-form-urlencoded")
 	@ResponseBody
 	public Map<String, String> registerUser(@Valid @ModelAttribute RegisterRequest registerRequest,
-			@Valid @ModelAttribute CaptchaRequest captchaRequest, HttpServletRequest request) throws CaptchaException, BindException
+			@Valid @ModelAttribute CaptchaRequest captchaRequest, HttpServletRequest request) throws CaptchaException,
+			BindException
 	{
 		if (!captchaService.validateCaptcha(captchaRequest.getCaptcha()))
 		{
@@ -97,7 +98,7 @@ public class AccountController
 		String activationUri = null;
 		if (StringUtils.isEmpty(request.getHeader("X-Forwarded-Host")))
 		{
-			activationUri = ServletUriComponentsBuilder.fromCurrentRequest().path(URI + "/activate").build()
+			activationUri = ServletUriComponentsBuilder.fromCurrentRequest().replacePath(URI + "/activate").build()
 					.toUriString();
 		}
 		else
