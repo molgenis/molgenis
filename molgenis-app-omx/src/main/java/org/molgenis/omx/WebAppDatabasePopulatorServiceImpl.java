@@ -72,8 +72,6 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		userAdmin.setEmail(adminEmail);
 		userAdmin.setActive(true);
 		userAdmin.setSuperuser(true);
-		userAdmin.setFirstName(USERNAME_ADMIN);
-		userAdmin.setLastName(USERNAME_ADMIN);
 		dataService.add(MolgenisUser.ENTITY_NAME, userAdmin);
 
 		MolgenisUser anonymousUser = new MolgenisUser();
@@ -82,8 +80,6 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		anonymousUser.setEmail(anonymousEmail);
 		anonymousUser.setActive(true);
 		anonymousUser.setSuperuser(false);
-		anonymousUser.setFirstName(SecurityUtils.ANONYMOUS_USERNAME);
-		anonymousUser.setLastName(SecurityUtils.ANONYMOUS_USERNAME);
 		dataService.add(MolgenisUser.ENTITY_NAME, anonymousUser);
 
 		UserAuthority anonymousAuthority = new UserAuthority();
