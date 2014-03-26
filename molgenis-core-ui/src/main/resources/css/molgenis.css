@@ -79,7 +79,8 @@ body{
 
 .modal.large {
     width: 80%; /* responsive width */
-    margin-left:-40%; /* width/2) */ 
+    margin-left:-40%; /* width/2) */
+    top: 5%;
 }
 
 label.horizontal-inline {
