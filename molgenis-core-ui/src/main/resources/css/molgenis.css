@@ -1,3 +1,20 @@
+html, body {
+	height:100%;
+}
+
+/* Wrapper for page content to push down footer */
+#wrap {
+	min-height: 100%;
+	height: auto !important;
+	height: 100%;
+	margin: 0 auto -40px; /* Negative indent footer by it's height */
+}
+
+/* Set the fixed height of the footer here */
+#push, #footer {
+	height: 40px;
+}
+
 .container-fluid {
 	padding-right: 10px;
 	padding-left: 10px;
@@ -45,10 +62,11 @@
 #plugin-container {
 	background: #F8FAFB;
 	padding: 10px;
-	margin-bottom: 10px;	
+	margin-bottom: 10px;
+	height: 100%;
 }
 
-#molgenis-footer p {
+#footer p {
 	text-align: center;
 	font: menu;
 	font-style: italic;
