@@ -118,11 +118,6 @@ a.accordion-toggle:hover,a.accordion-toggle:focus,a.accordion-toggle:active
 	position:absolute;
 }
 
-#filter-wizard-btn { 
-	color:white;
-	background:#5B82A4
-}
-
 #feature-selection .fancytree-ico-e span.fancytree-icon
 {
 	background-position: 0 0;
