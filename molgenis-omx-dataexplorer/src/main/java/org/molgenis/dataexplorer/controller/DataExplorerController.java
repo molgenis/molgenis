@@ -104,9 +104,6 @@ public class DataExplorerController extends MolgenisPluginController
 	@Autowired
 	private MolgenisSettings molgenisSettings;
 
-	@Autowired
-	private SearchService searchService;
-
 	public DataExplorerController()
 	{
 		super(URI);
