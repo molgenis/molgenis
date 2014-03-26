@@ -26,7 +26,7 @@
 		$('#data-table-container').table({
 			'entityMetaData' : getEntity(),
 			'attributes' : attributes,
-			'query' : molgenis.dataexplorer.getEntityQuery()
+			'query' : getQuery()
 		});
 	}
 	
@@ -44,7 +44,7 @@
 	 * @memberOf molgenis.dataexplorer.data
 	 */
 	function createDownloadDataRequest() {
-		var entityQuery = molgenis.dataexplorer.getEntityQuery();
+		var entityQuery = getQuery();
 		
 		var dataRequest = {
 			entityName : getEntity().name,
