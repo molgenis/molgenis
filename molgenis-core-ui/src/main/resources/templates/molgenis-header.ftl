@@ -75,9 +75,8 @@
 	</#macro>
 	<#--topmenu -->
 	<#macro topmenu menu plugin_id>
-		<#--TODO: put navbar-fixed-top back-->
 		<div class="navbar"> 
-			<div class="navbar navbar-inner"> 	
+			<div class="navbar-inner"> 	
 				<ul class="nav">
 					<#list menu.items as item>
 						<#if item.type != "MENU">
