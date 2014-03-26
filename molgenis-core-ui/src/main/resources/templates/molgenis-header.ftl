@@ -35,49 +35,49 @@
 	</#if>
 	</head>
 	<body>
-		<div class="container-fluid">
-			<div class="row-fluid">
-				<#if menu_id??>
-					<#if !(plugin_id??)>
-						<#assign plugin_id="NULL">
+		<div id="wrap">
+			<div class="container-fluid">
+				<div class="row-fluid">
+					<#if menu_id??>
+						<#if !(plugin_id??)>
+							<#assign plugin_id="NULL">
+						</#if>
+							<@topmenu molgenis_ui.getMenu() plugin_id/>
+						<#if plugin_id?starts_with("form")>
+							<@submenu molgenis_ui.getMenu(menu_id) plugin_id/>
+						</#if>	
+					</#if>			
+				</div>
+				<div id="login-modal-container-header"></div>
+				<div class="row-fluid">
+					<div class="datasetsindexerAlerts"></div>
+				</div>
+				<div class="row-fluid">
+					<div class="alerts"><#if errorMessage??>
+						<#assign message = errorMessage>
+						<#assign messageType = "error"> 
+					<#elseif warningMessage??>
+						<#assign message = warningMessage>
+						<#assign messageType = "warning">
+					<#elseif successMessage??>
+						<#assign message = successMessage>
+						<#assign messageType = "success">
+					<#elseif infoMessage??>
+						<#assign message = infoMessage>
+						<#assign messageType = "info">
 					</#if>
-						<@topmenu molgenis_ui.getMenu() plugin_id/>
-					<#if plugin_id?starts_with("form")>
-						<@submenu molgenis_ui.getMenu(menu_id) plugin_id/>
-					</#if>	
-				</#if>			
-			</div>
-			<div id="login-modal-container-header"></div>
-			<div class="row-fluid">
-				<div class="datasetsindexerAlerts"></div>
+					<#if messageType??>
+						<div class="alert alert-${messageType}"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>${messageType?capitalize}!</strong> ${message}</div>
+					</#if>
+				</div>
 			</div>
 			<div class="row-fluid">
-				<div class="alerts"><#if errorMessage??>
-					<#assign message = errorMessage>
-					<#assign messageType = "error"> 
-				<#elseif warningMessage??>
-					<#assign message = warningMessage>
-					<#assign messageType = "warning">
-				<#elseif successMessage??>
-					<#assign message = successMessage>
-					<#assign messageType = "success">
-				<#elseif infoMessage??>
-					<#assign message = infoMessage>
-					<#assign messageType = "info">
-				</#if>
-				<#if messageType??>
-					<div class="alert alert-${messageType}"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>${messageType?capitalize}!</strong> ${message}</div>
-				</#if>
-			</div>
-		</div>
-		<div class="row-fluid">
-			<div id="plugin-container" class="container-fluid">
+				<div id="plugin-container" class="container-fluid">
 	</#macro>
 	<#--topmenu -->
 	<#macro topmenu menu plugin_id>
-		<#--TODO: put navbar-fixed-top back-->
 		<div class="navbar"> 
-			<div class="navbar navbar-inner"> 	
+			<div class="navbar-inner"> 	
 				<ul class="nav">
 					<#list menu.items as item>
 						<#if item.type != "MENU">
@@ -161,5 +161,3 @@
 		</#if>
 	</div>
 </#macro>
-
-

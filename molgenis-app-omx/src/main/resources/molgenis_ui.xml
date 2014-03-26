@@ -40,7 +40,7 @@
 	        <plugin id="evaluation" name="Evaluation" url="evaluation"/>
 	        <plugin id="ontologyindexer" name="Add Ontologies" url="ontologyindexer"/>
         </menu>
-        <plugin id="workflowdataentry" name="Workflow Data Entry" url="workflowdataentry"/>
+        <plugin id="workflowdataentry" name="Workflow Editor" url="workflowdataentry"/>
         <menu label="Background" name="background">    
 	        <plugin id="news" name="News" url="news"/>
 	        <plugin id="background" name="Background" url="background"/>
