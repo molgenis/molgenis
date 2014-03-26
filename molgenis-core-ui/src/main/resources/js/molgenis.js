@@ -1,4 +1,3 @@
-
 (function($, molgenis) {
 	"use strict";
 	
