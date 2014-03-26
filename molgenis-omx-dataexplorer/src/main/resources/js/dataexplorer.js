@@ -137,7 +137,7 @@
 
 					// Range filter
 					var rangeAnd = false;
-					if ((index == 0) && (value != '')) {
+					if ((index === 0) && (value !== '')) {
 						entityCollectionRequest.q.push({
 							field : attribute.name,
 							operator : 'GREATER_EQUAL',
@@ -150,7 +150,7 @@
 							operator : 'AND'
 						});
 					}
-					if ((index == 1) && (value != '')) {
+					if ((index === 1) && (value !== '')) {
 						entityCollectionRequest.q.push({
 							field : attribute.name,
 							operator : 'LESS_EQUAL',
@@ -251,9 +251,9 @@
 			case 'ENUM':
 			case 'FILE':
 			case 'IMAGE':
-				throw 'Unsupported data type: ' + dataType;
+				throw 'Unsupported data type: ' + attribute.fieldType;
 			default:
-				throw 'Unknown data type: ' + dataType;			
+				throw 'Unknown data type: ' + attribute.fieldType;			
 		}
 		
 		// show description in tooltip
@@ -333,7 +333,7 @@
 			// reset: unbind existing event handlers
 			$.each(modules, function() {
 				$(document).off('.' + this.id);	
-			})
+			});
 			
 			restApi.getAsync(entityUri + '/meta', {'expand': ['attributes']}, function(entityMetaData) {
 				selectedEntityMetaData = entityMetaData;
