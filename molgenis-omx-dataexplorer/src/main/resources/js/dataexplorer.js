@@ -376,7 +376,8 @@
 		});
 		
 		$(document).on('clickAttribute', function(e, data) {
-			molgenis.dataexplorer.filter.openFilterModal(data.attribute, attributeFilters[data.attribute.href]);
+			if(data.attribute.fieldType !== 'COMPOUND')
+				molgenis.dataexplorer.filter.openFilterModal(data.attribute, attributeFilters[data.attribute.href]);
 		});
 		
 		var container = $("#plugin-container");
