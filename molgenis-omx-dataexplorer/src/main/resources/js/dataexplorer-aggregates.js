@@ -133,7 +133,7 @@
 	 */
 	function getEntityQuery() {
 		return molgenis.dataexplorer.getEntityQuery().q;
-	};
+	}
 	
 	$(function() {		
 		// bind event handlers with namespace
