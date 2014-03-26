@@ -14,7 +14,6 @@ import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.framework.db.WebAppDatabasePopulatorService;
 import org.molgenis.omx.auth.GroupAuthority;
 import org.molgenis.omx.auth.MolgenisGroup;
-import org.molgenis.omx.auth.MolgenisGroupMember;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.UserAuthority;
 import org.molgenis.omx.controller.HomeController;
@@ -35,7 +34,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulatorService
 {
 	private static final String USERNAME_ADMIN = "admin";
-	private static final String USERNAME_USER = "user";
 
 	public static final String INITLOCATION = "initLocation";
 	public static final String COORDSYSTEM = "coordSystem";
@@ -54,10 +52,6 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 	private String adminEmail;
 	@Value("${anonymous.email:molgenis+anonymous@gmail.com}")
 	private String anonymousEmail;
-	@Value("${user.password:@null}")
-	private String userPassword;
-	@Value("${user.email:molgenis+user@gmail.com}")
-	private String userEmail;
 
 	@Autowired
 	public WebAppDatabasePopulatorServiceImpl(DataService dataService)
@@ -73,8 +67,6 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 	{
 		if (adminPassword == null) throw new RuntimeException(
 				"please configure the admin.password property in your molgenis-server.properties");
-		if (userPassword == null) throw new RuntimeException(
-				"please configure the user.password property in your molgenis-server.properties");
 
 		MolgenisUser userAdmin = new MolgenisUser();
 		userAdmin.setUsername(USERNAME_ADMIN);
@@ -96,16 +88,6 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		anonymousUser.setLastName(SecurityUtils.ANONYMOUS_USERNAME);
 		dataService.add(MolgenisUser.ENTITY_NAME, anonymousUser);
 
-		MolgenisUser userUser = new MolgenisUser();
-		userUser.setUsername(USERNAME_USER);
-		userUser.setPassword(new BCryptPasswordEncoder().encode(userPassword));
-		userUser.setEmail(userEmail);
-		userUser.setActive(true);
-		userUser.setSuperuser(false);
-		userUser.setFirstName(USERNAME_USER);
-		userUser.setLastName(USERNAME_USER);
-		dataService.add(MolgenisUser.ENTITY_NAME, userUser);
-
 		UserAuthority anonymousAuthority = new UserAuthority();
 		anonymousAuthority.setMolgenisUser(anonymousUser);
 		anonymousAuthority.setRole(SecurityUtils.AUTHORITY_ANONYMOUS);
@@ -126,11 +108,6 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		usersGroupUserAccountAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX
 				+ UserAccountController.ID.toUpperCase());
 		dataService.add(GroupAuthority.ENTITY_NAME, usersGroupUserAccountAuthority);
-
-		MolgenisGroupMember molgenisGroupMember1 = new MolgenisGroupMember();
-		molgenisGroupMember1.setMolgenisGroup(usersGroup);
-		molgenisGroupMember1.setMolgenisUser(userUser);
-		dataService.add(MolgenisGroupMember.ENTITY_NAME, molgenisGroupMember1);
 
 		for (String entityName : dataService.getEntityNames())
 		{
