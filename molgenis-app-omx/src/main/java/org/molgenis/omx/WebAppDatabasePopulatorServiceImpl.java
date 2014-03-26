@@ -117,7 +117,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		UserAuthority anonymousAuthority = new UserAuthority();
 		anonymousAuthority.setMolgenisUser(anonymousUser);
 		anonymousAuthority.setRole(SecurityUtils.AUTHORITY_ANONYMOUS);
-		dataService.add(UserAuthority.ENTITY_NAME, anonymousUser);
+		dataService.add(UserAuthority.ENTITY_NAME, anonymousAuthority);
 
 		MolgenisGroup usersGroup = new MolgenisGroup();
 		usersGroup.setName(AccountService.ALL_USER_GROUP);
