@@ -12,7 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 public class SecurityUtils
 {
-	public static final String ANONYMOUS_USERNAME = "anonymousUser";
+	public static final String ANONYMOUS_USERNAME = "anonymous";
 
 	public static final String AUTHORITY_SU = "ROLE_SU";
 
