@@ -23,10 +23,25 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class MolgenisAnonymousAuthenticationFilterTest
 {
+	private static Authentication AUTHENTICATION;
+
+	@BeforeClass
+	public static void setUpBeforeClass()
+	{
+		AUTHENTICATION = SecurityContextHolder.getContext().getAuthentication();
+	}
+
+	@AfterClass
+	public static void tearDownAfterClass()
+	{
+		SecurityContextHolder.getContext().setAuthentication(AUTHENTICATION);
+	}
 
 	@SuppressWarnings("unchecked")
 	@Test
