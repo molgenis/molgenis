@@ -58,15 +58,15 @@
 	    </div>
 	  </div>
 	  <div class="control-group">
-	    <label class="control-label" for="reg-last-name">Last name *</label>
+	    <label class="control-label" for="reg-last-name">Last name</label>
 	    <div class="controls">
-	      <input type="text" id="reg-last-name" name="lastname" required>
+	      <input type="text" id="reg-last-name" name="lastname">
 	    </div>
 	  </div>
 	  <div class="control-group">
-	    <label class="control-label" for="reg-first-name">First name *</label>
+	    <label class="control-label" for="reg-first-name">First name</label>
 	    <div class="controls">
-	      <input type="text" id="reg-first-name" name="firstname" required>
+	      <input type="text" id="reg-first-name" name="firstname">
 	    </div>
 	  </div>
 	  <div class="control-group">
