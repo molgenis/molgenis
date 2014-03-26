@@ -22,6 +22,7 @@ import org.molgenis.omx.core.RuntimeProperty;
 import org.molgenis.security.account.AccountService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.runas.RunAsSystem;
+import org.molgenis.security.user.UserAccountController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -75,15 +76,10 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		if (userPassword == null) throw new RuntimeException(
 				"please configure the user.password property in your molgenis-server.properties");
 
-		String firstName = "John";
-		String lastName = "Doe";
-
 		MolgenisUser userAdmin = new MolgenisUser();
 		userAdmin.setUsername(USERNAME_ADMIN);
 		userAdmin.setPassword(new BCryptPasswordEncoder().encode(adminPassword));
 		userAdmin.setEmail(adminEmail);
-		userAdmin.setFirstName(firstName);
-		userAdmin.setLastName(lastName);
 		userAdmin.setActive(true);
 		userAdmin.setSuperuser(true);
 		userAdmin.setFirstName(USERNAME_ADMIN);
@@ -94,8 +90,6 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		anonymousUser.setUsername(SecurityUtils.ANONYMOUS_USERNAME);
 		anonymousUser.setPassword(new BCryptPasswordEncoder().encode(SecurityUtils.ANONYMOUS_USERNAME));
 		anonymousUser.setEmail(anonymousEmail);
-		anonymousUser.setFirstName(firstName);
-		anonymousUser.setLastName(lastName);
 		anonymousUser.setActive(true);
 		anonymousUser.setSuperuser(false);
 		anonymousUser.setFirstName(SecurityUtils.ANONYMOUS_USERNAME);
@@ -106,8 +100,6 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		userUser.setUsername(USERNAME_USER);
 		userUser.setPassword(new BCryptPasswordEncoder().encode(userPassword));
 		userUser.setEmail(userEmail);
-		userUser.setFirstName(firstName);
-		userUser.setLastName(lastName);
 		userUser.setActive(true);
 		userUser.setSuperuser(false);
 		userUser.setFirstName(USERNAME_USER);
@@ -128,6 +120,12 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		usersGroupHomeAuthority.setMolgenisGroup(usersGroup);
 		usersGroupHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + HomeController.ID.toUpperCase());
 		dataService.add(GroupAuthority.ENTITY_NAME, usersGroupHomeAuthority);
+
+		GroupAuthority usersGroupUserAccountAuthority = new GroupAuthority();
+		usersGroupUserAccountAuthority.setMolgenisGroup(usersGroup);
+		usersGroupUserAccountAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX
+				+ UserAccountController.ID.toUpperCase());
+		dataService.add(GroupAuthority.ENTITY_NAME, usersGroupUserAccountAuthority);
 
 		MolgenisGroupMember molgenisGroupMember1 = new MolgenisGroupMember();
 		molgenisGroupMember1.setMolgenisGroup(usersGroup);
