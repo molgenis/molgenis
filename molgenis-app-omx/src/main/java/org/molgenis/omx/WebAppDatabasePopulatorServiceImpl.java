@@ -16,6 +16,7 @@ import org.molgenis.omx.auth.GroupAuthority;
 import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisGroupMember;
 import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.omx.auth.UserAuthority;
 import org.molgenis.omx.controller.HomeController;
 import org.molgenis.omx.core.RuntimeProperty;
 import org.molgenis.security.account.AccountService;
@@ -35,14 +36,14 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 	private static final String USERNAME_ADMIN = "admin";
 	private static final String USERNAME_USER = "user";
 
-    public static final String INITLOCATION = "initLocation";
-    public static final String COORDSYSTEM = "coordSystem";
-    public static final String CHAINS = "chains";
-    public static final String SOURCES = "sources";
-    public static final String BROWSERLINKS = "browserLinks";
-    public static final String SEARCHENDPOINT = "searchEndpoint";
-    public static final String KARYOTYPEENDPOINT = "karyotypeEndpoint";
-    public static final String GENOMEBROWSERTABLE = "genomeBrowserTable";
+	public static final String INITLOCATION = "initLocation";
+	public static final String COORDSYSTEM = "coordSystem";
+	public static final String CHAINS = "chains";
+	public static final String SOURCES = "sources";
+	public static final String BROWSERLINKS = "browserLinks";
+	public static final String SEARCHENDPOINT = "searchEndpoint";
+	public static final String KARYOTYPEENDPOINT = "karyotypeEndpoint";
+	public static final String GENOMEBROWSERTABLE = "genomeBrowserTable";
 
 	private final DataService dataService;
 
@@ -50,6 +51,8 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 	private String adminPassword;
 	@Value("${admin.email:molgenis+admin@gmail.com}")
 	private String adminEmail;
+	@Value("${anonymous.email:molgenis+anonymous@gmail.com}")
+	private String anonymousEmail;
 	@Value("${user.password:@null}")
 	private String userPassword;
 	@Value("${user.email:molgenis+user@gmail.com}")
@@ -87,6 +90,18 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		userAdmin.setLastName(USERNAME_ADMIN);
 		dataService.add(MolgenisUser.ENTITY_NAME, userAdmin);
 
+		MolgenisUser anonymousUser = new MolgenisUser();
+		anonymousUser.setUsername(SecurityUtils.ANONYMOUS_USERNAME);
+		anonymousUser.setPassword(new BCryptPasswordEncoder().encode(SecurityUtils.ANONYMOUS_USERNAME));
+		anonymousUser.setEmail(anonymousEmail);
+		anonymousUser.setFirstName(firstName);
+		anonymousUser.setLastName(lastName);
+		anonymousUser.setActive(true);
+		anonymousUser.setSuperuser(false);
+		anonymousUser.setFirstName(SecurityUtils.ANONYMOUS_USERNAME);
+		anonymousUser.setLastName(SecurityUtils.ANONYMOUS_USERNAME);
+		dataService.add(MolgenisUser.ENTITY_NAME, anonymousUser);
+
 		MolgenisUser userUser = new MolgenisUser();
 		userUser.setUsername(USERNAME_USER);
 		userUser.setPassword(new BCryptPasswordEncoder().encode(userPassword));
@@ -98,6 +113,11 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		userUser.setFirstName(USERNAME_USER);
 		userUser.setLastName(USERNAME_USER);
 		dataService.add(MolgenisUser.ENTITY_NAME, userUser);
+
+		UserAuthority anonymousAuthority = new UserAuthority();
+		anonymousAuthority.setMolgenisUser(anonymousUser);
+		anonymousAuthority.setRole(SecurityUtils.AUTHORITY_ANONYMOUS);
+		dataService.add(UserAuthority.ENTITY_NAME, anonymousUser);
 
 		MolgenisGroup usersGroup = new MolgenisGroup();
 		usersGroup.setName(AccountService.ALL_USER_GROUP);
