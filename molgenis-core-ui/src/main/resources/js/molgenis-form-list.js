@@ -125,7 +125,8 @@
 	ns.deleteEntity = function(uri, formIndex) {
 		ns.hideAlerts();
 		
-		if (confirm('Delete this ' + forms[formIndex].title + '?')) {
+		//TODO confirm doesn't work anymore, why?
+		//if (confirm('Delete this ' + forms[formIndex].title + '?')) {
 			restApi.remove(uri, {
 				success: function() {
 					//Refresh table
@@ -143,7 +144,7 @@
 					$('#error-message').show();
 				}
 			});
-		}
+		//}
 	};
 	
 	ns.updateSubForms = function() {
