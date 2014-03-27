@@ -95,7 +95,7 @@
 			var joinChars = attributeFilter.operator ? ' ' + attributeFilter.operator + ' ' : ',';
 			var attributeLabel = attribute.label || attribute.name;
 			items.push('<p><a class="feature-filter-edit" data-href="' + attributeUri + '" href="#">'
-					+ attributeLabel + ' (' + attributeFilter.values.join(joinChars)
+					+ attributeLabel + ' (' + htmlEscape(attributeFilter.values.join(joinChars))
 					+ ')</a><a class="feature-filter-remove" data-href="' + attributeUri + '" href="#" title="Remove '
 					+ attributeLabel + ' filter" ><i class="icon-remove"></i></a></p>');
 		});
