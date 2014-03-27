@@ -54,6 +54,24 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
+	public void removeRepository(Repository repository)
+	{
+		String repositoryName = repository.getName();
+		removeRepository(repositoryName);
+	}
+
+	@Override
+	public void removeRepository(String repositoryName)
+	{
+		if (!repositories.containsKey(repositoryName.toLowerCase()))
+		{
+			throw new MolgenisDataException("Repository [" + repositoryName + "] doesn't exists");
+		}
+		repositoryNames.remove(repositoryName);
+		repositories.remove(repositoryName.toLowerCase());
+	}
+
+	@Override
 	public EntityMetaData getEntityMetaData(String entityName)
 	{
 		Repository repository = repositories.get(entityName.toLowerCase());
