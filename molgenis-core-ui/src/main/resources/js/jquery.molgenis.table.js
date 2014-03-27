@@ -197,6 +197,7 @@
 					});
 				}
 			});
+			container.show();
 		} else container.hide();
 	}
 

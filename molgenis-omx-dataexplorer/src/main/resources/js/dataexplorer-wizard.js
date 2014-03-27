@@ -30,6 +30,7 @@
 			items.push('<li class="previous"><a href="#">Previous</a></li>');
 			items.push('<li class="next"><a href="#">Next</a></li>');
 			items.push('</ul>');
+			items.push('</form>');
 			items.push('</div>');
 			items.push('</div>');
 			items.push('<div class="modal-footer">');
@@ -39,14 +40,6 @@
 			items.push('</div>');
 			
 			modal = $(items.join(''));
-			
-			// workaround for "Uncaught RangeError: Maximum call stack size exceeded"
-			// http://stackoverflow.com/a/19190216
-			var enforceModalFocusFn = $.fn.modal.Constructor.prototype.enforceFocus;
-			$.fn.modal.Constructor.prototype.enforceFocus = function() {};
-			modal.on('hidden', function() {
-			    $.fn.modal.Constructor.prototype.enforceFocus = enforceModalFocusFn;
-			});
 			
 			modal.modal({'show': false});
 			
