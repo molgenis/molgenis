@@ -49,11 +49,11 @@ public class DataSetDeleterServiceImpl implements DataSetDeleterService
 			entitiesList.addAll(dataService.findAllAsList(Protocol.ENTITY_NAME, new QueryImpl()));
 			entitiesList.addAll(dataService.findAllAsList(DataSet.ENTITY_NAME, new QueryImpl()));
 			entitiesList.remove(dataSet);
-
 			Protocol protocolUsed = dataSet.getProtocolUsed();
 			deleteProtocol(protocolUsed, entitiesList);
 		}
 
+		dataService.removeRepository(dataSetIdentifier);
 		dataService.delete(DataSet.ENTITY_NAME, dataSet);
 		return dataSet.getName();
 	}

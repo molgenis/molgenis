@@ -25,9 +25,10 @@ import org.testng.annotations.Test;
 
 public class DataServiceImplTest
 {
-	private final List<String> entityNames = Arrays.asList("Entity1", "Entity2");
+	private final List<String> entityNames = Arrays.asList("Entity1", "Entity2", "Entity3");
 	private Repository repo1;
 	private Repository repo2;
+	private Repository repoToRemove;
 	private DataServiceImpl dataService;
 
 	@BeforeMethod
@@ -57,6 +58,10 @@ public class DataServiceImplTest
 		when(repo2.getName()).thenReturn("Entity2");
 		dataService.addRepository(repo2);
 
+		repoToRemove = mock(Repository.class);
+		when(repoToRemove.getName()).thenReturn("Entity3");
+		dataService.addRepository(repoToRemove);
+
 	}
 
 	@Test
@@ -68,6 +73,8 @@ public class DataServiceImplTest
 		assertTrue(it.next().equalsIgnoreCase(entityNames.get(0)));
 		assertTrue(it.hasNext());
 		assertTrue(it.next().equalsIgnoreCase(entityNames.get(1)));
+		assertTrue(it.hasNext());
+		assertTrue(it.next().equalsIgnoreCase(entityNames.get(2)));
 		assertFalse(it.hasNext());
 	}
 
@@ -78,4 +85,25 @@ public class DataServiceImplTest
 		assertEquals(dataService.getRepositoryByEntityName("Entity2"), repo2);
 	}
 
+	@Test
+	public void removeRepositoryByEntityName()
+	{
+		assertEquals(dataService.getRepositoryByEntityName("Entity3"), repoToRemove);
+		dataService.removeRepository("Entity3");
+	}
+
+	@Test(expectedExceptions = UnknownEntityException.class)
+	public void removeRepositoryByEntityNameUnknownEntityException()
+	{
+		assertEquals(dataService.getRepositoryByEntityName("Entity3"), repoToRemove);
+		dataService.removeRepository("Entity3");
+		dataService.getRepositoryByEntityName("Entity3");
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class)
+	public void removeRepositoryByEntityNameMolgenisDataException()
+	{
+		assertEquals(dataService.getRepositoryByEntityName("Entity3"), repoToRemove);
+		dataService.removeRepository("Entity4");
+	}
 }
