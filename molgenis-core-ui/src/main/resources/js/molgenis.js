@@ -1,6 +1,10 @@
 (function($, molgenis) {
 	"use strict";
-	
+
+    // workaround for "Uncaught RangeError: Maximum call stack size exceeded"
+    // http://stackoverflow.com/a/19190216
+    $.fn.modal.Constructor.prototype.enforceFocus = function() {};
+
 	molgenis.setContextUrl = function(contextUrl) {
 		molgenis.contextUrl = contextUrl;
 	};
