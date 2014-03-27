@@ -30,6 +30,7 @@
 			items.push('<li class="previous"><a href="#">Previous</a></li>');
 			items.push('<li class="next"><a href="#">Next</a></li>');
 			items.push('</ul>');
+			items.push('</form>');
 			items.push('</div>');
 			items.push('</div>');
 			items.push('<div class="modal-footer">');
