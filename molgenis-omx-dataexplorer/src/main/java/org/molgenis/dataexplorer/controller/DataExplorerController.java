@@ -104,9 +104,6 @@ public class DataExplorerController extends MolgenisPluginController
 	@Autowired
 	private MolgenisSettings molgenisSettings;
 
-	@Autowired
-	private SearchService searchService;
-
 	public DataExplorerController()
 	{
 		super(URI);
@@ -421,8 +418,8 @@ public class DataExplorerController extends MolgenisPluginController
 				Iterable<Entity> yEntities = dataService.findAll(yRefEntityName);
 				for (Entity yRefEntity : yEntities)
 				{
-					xLabels.add(yRefEntity.getString(yRefEntityLblAttr));
-					xValues.add(yRefEntity.get(yRefEntityLblAttr));
+					yLabels.add(yRefEntity.getString(yRefEntityLblAttr));
+					yValues.add(yRefEntity.get(yRefEntityLblAttr));
 				}
 			}
 		}

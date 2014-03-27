@@ -19,6 +19,24 @@ public interface DataService extends RepositoryCollection
 	void addRepository(Repository repository);
 
 	/**
+	 * Remove a repository from the DataService
+	 * 
+	 * @throws MolgenisDataException
+	 *             if repository/entity name doesn't exists
+	 * @param repository
+	 */
+	void removeRepository(Repository repository);
+
+	/**
+	 * Remove a repository from the DataService
+	 * 
+	 * @throws MolgenisDataException
+	 *             if repository/entity name doesn't exists
+	 * @param repository
+	 */
+	void removeRepository(String repositoryName);
+
+	/**
 	 * check ia a repository for this entity already exists
 	 * 
 	 * @param entityName

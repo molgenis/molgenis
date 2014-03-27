@@ -19,17 +19,13 @@
 						</li>
 					</#if>
 				</#list>
-			</ol> 
-				
-			<#if successMessage! != "" >
-				<div class="alert alert-block alert-success">${successMessage!}</div>
-			</#if>
+			</ol>
 				
 			<@spring.bind "wizard" />	
 			<#if spring.status.error>
-  				<#list spring.status.errorMessages as error>
-                	<div class="alert alert-block alert-error">${error}</div>
-            	</#list>
+				<script>
+  					molgenis.createAlert([{'message': "<#list spring.status.errorMessages as error>${error}</#list>"}], 'error');
+            	</script>
 			</#if>
 				
 			<#list wizard.pages as wizardPage>
