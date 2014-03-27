@@ -29,10 +29,10 @@
 
 		if (aggregableAttributes.length > 0) {
 			$('#feature-select').empty();
-			createAtributeDropdown($('#feature-select'), aggregableAttributes, 'x-aggr-attribute', aggregableAttributes[0]);
+			createAtributeDropdown($('#feature-select'), aggregableAttributes, 'x-aggr-attribute', aggregableAttributes[0], true);
 			$('#feature-select').append(' x ');
 			if(aggregableAttributes.length > 1) createAtributeDropdown($('#feature-select'), aggregableAttributes, 'y-aggr-attribute', aggregableAttributes[1]);
-			else createAtributeDropdown($('#feature-select'), aggregableAttributes, 'y-aggr-attribute');
+			else createAtributeDropdown($('#feature-select'), aggregableAttributes, 'y-aggr-attribute', false);
 
 			$('#feature-select-container').show();
 			$('#aggregate-table-container').empty();
@@ -49,10 +49,14 @@
 		}
 	}
 	
-	function createAtributeDropdown(parent, aggregableAttributes, id, defaultValue) {
-		var attributeSelect = $('<select id="' + id + '" class="attribute-dropdown" data-placeholder="Select ..." />');
-		attributeSelect.append('<option value="">Select ...</option>');
-		
+	function createAtributeDropdown(parent, aggregableAttributes, id, defaultValue, hasDefault) {
+        if(defaultValue && hasDefault){
+            var attributeSelect = $('<select id="' + id + '" class="attribute-dropdown"/>');
+        }
+        else{
+            var attributeSelect = $('<select id="' + id + '" class="attribute-dropdown" data-placeholder="Select ..." />');
+            attributeSelect.append('<option value="">Select ...</option>');
+        }
 		$.each(aggregableAttributes, function() {
 		    if(this == defaultValue) attributeSelect.append('<option selected value="' + this.name + '">' + this.label + '</option>');
 	        else attributeSelect.append('<option value="' + this.name + '">' + this.label + '</option>');
