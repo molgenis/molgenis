@@ -111,7 +111,7 @@
         if (attributeMetaData.fieldType === 'MREF') {
             var dropdown = $('<select id="mref-query-type" class="operator"><option value="OR">OR</option><option value="AND">AND</option></select>');
             dropdown.val(options.operator);
-            dropdown.width('20%');
+            dropdown.width(70);
             container.append(dropdown);
         }
 	}
