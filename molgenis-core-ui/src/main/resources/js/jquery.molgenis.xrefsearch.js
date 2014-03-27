@@ -80,7 +80,7 @@
 		var hiddenInput = container.find('input[type=hidden]');
 		
 		hiddenInput.select2({
-			width: 650,
+			width: '80%',
 			minimumInputLength: 2,
             multiple: (attributeMetaData.fieldType === 'MREF'),
 			query: function (options){
@@ -111,7 +111,7 @@
         if (attributeMetaData.fieldType === 'MREF') {
             var dropdown = $('<select id="mref-query-type" class="operator"><option value="OR">OR</option><option value="AND">AND</option></select>');
             dropdown.val(options.operator);
-            dropdown.width(70);
+            dropdown.width('20%');
             container.append(dropdown);
         }
 	}
