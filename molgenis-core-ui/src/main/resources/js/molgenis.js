@@ -1,6 +1,8 @@
 (function($, molgenis) {
 	"use strict";
-	
+
+    $.fn.modal.Constructor.prototype.enforceFocus = function() {};
+
 	molgenis.setContextUrl = function(contextUrl) {
 		molgenis.contextUrl = contextUrl;
 	};

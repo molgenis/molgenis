@@ -40,14 +40,6 @@
 			
 			modal = $(items.join(''));
 			
-			// workaround for "Uncaught RangeError: Maximum call stack size exceeded"
-			// http://stackoverflow.com/a/19190216
-			var enforceModalFocusFn = $.fn.modal.Constructor.prototype.enforceFocus;
-			$.fn.modal.Constructor.prototype.enforceFocus = function() {};
-			modal.on('hidden', function() {
-			    $.fn.modal.Constructor.prototype.enforceFocus = enforceModalFocusFn;
-			});
-			
 			modal.modal({'show': false});
 			
 			createFilterModalControls(modal);
