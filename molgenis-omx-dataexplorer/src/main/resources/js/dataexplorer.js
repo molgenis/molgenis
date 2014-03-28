@@ -16,6 +16,7 @@
 	var selectedAttributes = [];
 	var searchQuery = null;
 	var showWizardOnInit = false;
+	var modules = [];
 	
 	/**
 	 * @memberOf molgenis.dataexplorer
@@ -69,14 +70,14 @@
 	/**
 	 * @memberOf molgenis.dataexplorer
 	 */
-	function createEntityMetaTree(entityMetaData, selectedAttributes) {
+	function createEntityMetaTree(entityMetaData, attributes) {
 		var container = $('#feature-selection');
 		container.tree({
 			'entityMetaData' : entityMetaData,
-			'selectedAttributes' : selectedAttributes,
+			'selectedAttributes' : attributes,
 			'onAttributesSelect' : function(selects) {
-				var attributes = container.tree('getSelectedAttributes');
-				$(document).trigger('changeAttributeSelection', {'attributes': attributes});
+				selectedAttributes = container.tree('getSelectedAttributes');
+				$(document).trigger('changeAttributeSelection', {'attributes': selectedAttributes});
 			},
 			'onAttributeClick' : function(attribute) {
 				$(document).trigger('clickAttribute', {'attribute': attribute});
@@ -94,7 +95,7 @@
 			var joinChars = attributeFilter.operator ? ' ' + attributeFilter.operator + ' ' : ',';
 			var attributeLabel = attribute.label || attribute.name;
 			items.push('<p><a class="feature-filter-edit" data-href="' + attributeUri + '" href="#">'
-					+ attributeLabel + ' (' + attributeFilter.values.join(joinChars)
+					+ attributeLabel + ' (' + htmlEscape(attributeFilter.values.join(joinChars))
 					+ ')</a><a class="feature-filter-remove" data-href="' + attributeUri + '" href="#" title="Remove '
 					+ attributeLabel + ' filter" ><i class="icon-remove"></i></a></p>');
 		});
@@ -130,13 +131,13 @@
 			}
 			var attribute = attributeFilter.attribute;
 			var rangeQuery = attribute.fieldType === 'DATE' || attribute.fieldType === 'DATE_TIME' || attribute.fieldType === 'DECIMAL' || attribute.fieldType === 'INT' || attribute.fieldType === 'LONG';
-			
+
 			$.each(attributeFilter.values, function(index, value) {
 				if (rangeQuery) {
 
 					// Range filter
 					var rangeAnd = false;
-					if ((index == 0) && (value != '')) {
+					if (index === 0 && value) {
 						entityCollectionRequest.q.push({
 							field : attribute.name,
 							operator : 'GREATER_EQUAL',
@@ -149,7 +150,7 @@
 							operator : 'AND'
 						});
 					}
-					if ((index == 1) && (value != '')) {
+					if (index === 1 && value) {
 						entityCollectionRequest.q.push({
 							field : attribute.name,
 							operator : 'LESS_EQUAL',
@@ -157,18 +158,18 @@
 						});
 					}
 				} else {
-					if (index > 0) {
-						var operator = attributeFilter.operator ? attributeFilter.operator : 'OR';
-						entityCollectionRequest.q.push({
-							operator : operator
-						});
-					}
-					entityCollectionRequest.q.push({
-						field : attribute.name,
-						operator : 'EQUALS',
-						value : value
-					});
-				}
+                        if (index > 0) {
+                            var operator = attributeFilter.operator ? attributeFilter.operator : 'OR';
+                            entityCollectionRequest.q.push({
+                                operator : operator
+                            });
+                        }
+                        entityCollectionRequest.q.push({
+                            field : attribute.name,
+                            operator : 'EQUALS',
+                            value : value
+                        });
+                    }
 			});
 			count++;
 		});
@@ -250,9 +251,9 @@
 			case 'ENUM':
 			case 'FILE':
 			case 'IMAGE':
-				throw 'Unsupported data type: ' + dataType;
+				throw 'Unsupported data type: ' + attribute.fieldType;
 			default:
-				throw 'Unknown data type: ' + dataType;			
+				throw 'Unknown data type: ' + attribute.fieldType;			
 		}
 		
 		// show description in tooltip
@@ -267,11 +268,12 @@
 	 * @memberOf molgenis.dataexplorer
 	 */
 	function createFilters(form) {
-		var filters = {};
+        var filters = {};
 		$('.controls', form).each(function() {
 			var attribute = $(this).data('attribute');
 			var filter = filters[attribute.href];
-			$(":input", $(this)).not('[type=radio]:not(:checked)').not('[type=checkbox]:not(:checked)').each(function(){
+
+			$(":input", $(this)).not('[type=radio]:not(:checked)').not('[type=checkbox]:not(:checked)').each(function(i){
 				var value = $(this).val();
 				if(value) {
 					if(!filter) {
@@ -288,7 +290,14 @@
 					if ($(this).hasClass('operator')) {
 						filter.operator = value;
 					} else {
-						values.push(value);
+                        if(attribute.fieldType === 'MREF'){
+                            var mrefValues = value.split(',');
+                            $(mrefValues).each(function(i){
+                                values.push(mrefValues[i]);
+                            });
+                        } else{
+						    values[i] = value;
+                        }
 					}
 				}
 			});	
@@ -321,11 +330,17 @@
 			$("#observationset-search").val("");
 			$('#data-table-pager').empty();
 			
+			// reset: unbind existing event handlers
+			$.each(modules, function() {
+				$(document).off('.' + this.id);	
+			});
+			
 			restApi.getAsync(entityUri + '/meta', {'expand': ['attributes']}, function(entityMetaData) {
 				selectedEntityMetaData = entityMetaData;
 
 				// get modules config for this entity
 				$.get(molgenis.getContextUrl() + '/modules?entity=' + entityMetaData.name).done(function(data) {
+					modules = data.modules;
 					createModuleNav(data.modules, $('#module-nav'));
 				
 					selectedAttributes = $.map(entityMetaData.attributes, function(attribute) {
@@ -342,8 +357,6 @@
 						molgenis.dataexplorer.wizard.openFilterWizardModal(selectedEntityMetaData, attributeFilters);
 						showWizardOnInit = false;
 					}
-				}).fail(function(xhr) {
-					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 				});
 			});
 		});
@@ -363,7 +376,8 @@
 		});
 		
 		$(document).on('clickAttribute', function(e, data) {
-			molgenis.dataexplorer.filter.openFilterModal(data.attribute, attributeFilters[data.attribute.href]);
+			if(data.attribute.fieldType !== 'COMPOUND')
+				molgenis.dataexplorer.filter.openFilterModal(data.attribute, attributeFilters[data.attribute.href]);
 		});
 		
 		var container = $("#plugin-container");
@@ -395,7 +409,7 @@
 			e.preventDefault();
 			$(document).trigger('removeAttributeFilter', {'attributeUri': $(this).data('href')});
 		});
-				
+		
 		// fire event handler
 		$('#dataset-select').change();
 	});

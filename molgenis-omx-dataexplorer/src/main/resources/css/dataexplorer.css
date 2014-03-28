@@ -118,11 +118,6 @@ a.accordion-toggle:hover,a.accordion-toggle:focus,a.accordion-toggle:active
 	position:absolute;
 }
 
-#filter-wizard-btn { 
-	color:white;
-	background:#5B82A4
-}
-
 #feature-selection .fancytree-ico-e span.fancytree-icon
 {
 	background-position: 0 0;
@@ -155,13 +150,9 @@ a.accordion-toggle:hover,a.accordion-toggle:focus,a.accordion-toggle:active
 	margin-left: 10px;
 }
 
-#mref-query-type, .xrefsearch {
-	margin-bottom: 10px;
-}
-
 #filter-wizard-modal .modal-body {
-	min-height: 550px;
-	max-height: 550px;
+	min-height: 525px;
+	max-height: 525px;
 }
 
 #filter-wizard-modal .well {

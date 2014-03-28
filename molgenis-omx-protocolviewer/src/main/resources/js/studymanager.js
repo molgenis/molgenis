@@ -70,16 +70,11 @@
 					var studyDefinitionRadio = $('#studyDefinitionList input[type="radio"]:first');
 					studyDefinitionRadio.attr('checked', 'checked');
 					studyDefinitionRadio.change();
-				},
-				error: function (xhr) {
-					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 				}
 			});
 		}
 		
 		function updateStudyDefinitionViewer() {
-			showSpinner();
-			
 			// clear previous tree
 			if (viewTreeContainer.children('ul').length > 0)
 				viewTreeContainer.dynatree('destroy');
@@ -93,22 +88,17 @@
 				type : 'GET',
 				url : molgenis.getContextUrl() + '/view/' + studyDefinitionId,
 				success : function(catalog) {
-					hideSpinner();
 					viewInfoContainer.html(createCatalogInfo(catalog));
 					viewTreeContainer.empty();
 					viewTreeContainer.dynatree({'minExpandLevel': 2, 'children': createDynatreeConfig(catalog), 'selectMode': 3, 'debugLevel': 0});
 				},
 				error: function (xhr) {
-					hideSpinner();
 					viewTreeContainer.empty();
-					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 				}
 			});
 		}
 		
 		function updateStudyDefinitionEditor() {
-			showSpinner();
-			
 			// clear previous tree
 			if (editTreeContainer.children('ul').length > 0)
 				editTreeContainer.dynatree('destroy');
@@ -122,15 +112,12 @@
 				type : 'GET',
 				url : molgenis.getContextUrl() + '/edit/' + studyDefinitionId,
 				success : function(catalog) {
-					hideSpinner();
 					editInfoContainer.html(createCatalogInfo(catalog));
 					editTreeContainer.empty();
 					editTreeContainer.dynatree({'minExpandLevel': 2, 'children': createDynatreeConfig(catalog), 'selectMode': 3, 'debugLevel': 0, 'checkbox': true});
 				},
 				error: function (xhr) {
-					hideSpinner();
 					editTreeContainer.empty();
-					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 				}
 			});
 		}
@@ -155,7 +142,6 @@
 		
 		updateStudyDefinitionBtn.click(function() {
 			updateStudyDefinitionBtn.prop('disabled', true);
-			showSpinner();
 			
 			var studyDefinitionId = $('#studyDefinitionForm input[type="radio"]:checked').val();
 			
@@ -181,13 +167,8 @@
 				}),
 				contentType : 'application/json',
 				success : function(entities) {
-					hideSpinner();
 					updateStudyDefinitionBtn.prop('disabled', false);
 					molgenis.createAlert([{'message': 'Updated study definition [' + studyDefinitionId + ']'}], 'success');
-				},
-				error: function (xhr) {
-					hideSpinner();
-					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 				}
 			});
 		});

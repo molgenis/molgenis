@@ -1,10 +1,6 @@
 package org.molgenis.data;
 
-import java.io.File;
 import java.util.List;
-import java.util.Set;
-
-import org.molgenis.data.support.FileRepositorySource;
 
 /**
  * DataService is a façade that manages data sources Entity names should be unique over all data sources.
@@ -23,14 +19,22 @@ public interface DataService extends RepositoryCollection
 	void addRepository(Repository repository);
 
 	/**
-	 * Add all repositories of a RepositorySource
+	 * Remove a repository from the DataService
 	 * 
 	 * @throws MolgenisDataException
-	 *             if entity name of a repository is already registered
-	 * 
-	 * @param repositorySource
+	 *             if repository/entity name doesn't exists
+	 * @param repository
 	 */
-	void addRepositories(RepositorySource repositorySource);
+	void removeRepository(Repository repository);
+
+	/**
+	 * Remove a repository from the DataService
+	 * 
+	 * @throws MolgenisDataException
+	 *             if repository/entity name doesn't exists
+	 * @param repository
+	 */
+	void removeRepository(String repositoryName);
 
 	/**
 	 * check ia a repository for this entity already exists
@@ -288,20 +292,4 @@ public interface DataService extends RepositoryCollection
 	 */
 	<E extends Entity> E findOne(String entityName, Query q, Class<E> clazz);
 
-	/**
-	 * Add a FileRepositorySource so it can be used by the 'createFileRepositySource' factory method
-	 * 
-	 * @param fileRepositorySource
-	 */
-	void addFileRepositorySourceClass(Class<? extends FileRepositorySource> clazz, Set<String> fileExtensions);
-
-	/**
-	 * Factory method for creating a new FileRepositorySource
-	 * 
-	 * For example an excel file
-	 * 
-	 * @param file
-	 * @return
-	 */
-	FileRepositorySource createFileRepositorySource(File file);
 }

@@ -84,9 +84,7 @@
 		// TODO do not construct uri from other uri
 		var entityCollectionUri = settings.entityMetaData.href.replace("/meta", "");
 		var q = $.extend({}, settings.query, {'start': settings.start, 'num': settings.maxRows, 'sort': settings.sort});
-		showSpinner();
 		restApi.getAsync(entityCollectionUri, {'attributes' : attributeNames, 'expand' : expandAttributeNames, 'q' : q}, function(data) {
-			hideSpinner();
 			callback(data);
 		});
 	}
@@ -128,7 +126,7 @@
 			var entity = data.items[i];
 
 			$.each(settings.colAttributes, function(i, attribute) {
-				var rawValue = entity[attribute.name];
+				var rawValue = entity[attribute.name];				
 				if (rawValue) {
 					var cellValue;
 					switch(attribute.fieldType) {
@@ -137,26 +135,32 @@
                         case 'CATEGORICAL':
                         	var refEntity = settings.refEntitiesMeta[attribute.refEntity.href];
 							var refAttribute = refEntity.labelAttribute;
-							var refAttributeType = refEntity.attributes[refAttribute].fieldType;
-							if (refAttributeType === 'XREF' || refAttributeType === 'MREF' || refAttributeType === 'COMPOUND') {
-								throw 'unsupported field type ' + refAttributeType;
-							}
-
-							switch(attribute.fieldType) {
-                                case 'CATEGORICAL':
-                                case 'XREF':
-									cellValue = formatTableCellValue(rawValue[refAttribute], refAttributeType);
-									break;
-								case 'MREF':
-									var cellValueParts = [];
-									$.each(rawValue.items, function(i, rawValue) {
-										var cellValuePart = formatTableCellValue(rawValue[refAttribute], refAttributeType);
-										cellValueParts.push(cellValuePart);
-									});
-									cellValue = cellValueParts.join(',');
-									break;
-								default:
-									throw 'unexpected field type ' + attribute.fieldType;
+							var refValue = refEntity.attributes[refAttribute];
+							
+							if (refValue) {
+								var refAttributeType = refValue.fieldType;
+								if (refAttributeType === 'XREF' || refAttributeType === 'MREF' || refAttributeType === 'COMPOUND') {
+									throw 'unsupported field type ' + refAttributeType;
+								}
+								
+								switch(attribute.fieldType) {
+									case 'CATEGORICAL':
+									case 'XREF':
+										cellValue = formatTableCellValue(rawValue[refAttribute], refAttributeType);
+										break;
+									case 'MREF':
+										var cellValueParts = [];
+										$.each(rawValue.items, function(i, rawValue) {
+											var cellValuePart = formatTableCellValue(rawValue[refAttribute], refAttributeType);
+											cellValueParts.push(cellValuePart);
+										});
+										cellValue = cellValueParts.join(',');
+										break;
+									default:
+										throw 'unexpected field type ' + attribute.fieldType;
+								}
+							} else {
+								cellValue = '';
 							}
 							break;
 						default :
@@ -193,6 +197,7 @@
 					});
 				}
 			});
+			container.show();
 		} else container.hide();
 	}
 
@@ -251,6 +256,9 @@
 			},
 			'getQuery' : function() {
 				return settings.query;
+			},
+			'getSort' : function() {
+				return settings.sort;
 			}
 		});
 

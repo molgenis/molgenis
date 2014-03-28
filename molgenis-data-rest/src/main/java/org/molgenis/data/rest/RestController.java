@@ -49,7 +49,6 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.support.QueryResolver;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.framework.db.EntityNotFoundException;
@@ -93,15 +92,12 @@ public class RestController
 	public static final String BASE_URI = "/api/v1";
 	private static final Pattern PATTERN_EXPANDS = Pattern.compile("([^\\[^\\]]+)(?:\\[(.+)\\])?");
 	private final DataService dataService;
-	private final QueryResolver queryResolver;
 
 	@Autowired
-	public RestController(DataService dataService, QueryResolver queryResolver)
+	public RestController(DataService dataService)
 	{
 		if (dataService == null) throw new IllegalArgumentException("dataService is null");
-		if (queryResolver == null) throw new IllegalArgumentException("queryResolver is null");
 		this.dataService = dataService;
-		this.queryResolver = queryResolver;
 	}
 
 	/**
@@ -109,7 +105,8 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/exist", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public boolean entityExists(@PathVariable("entityName") String entityName)
+	public boolean entityExists(@PathVariable("entityName")
+	String entityName)
 	{
 		try
 		{
@@ -132,9 +129,10 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/meta", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public EntityMetaDataResponse getEntityMetaData(@PathVariable("entityName") String entityName,
-			@RequestParam(value = "attributes", required = false) String[] attributes,
-			@RequestParam(value = "expand", required = false) String[] attributeExpands)
+	public EntityMetaDataResponse getEntityMetaData(@PathVariable("entityName")
+	String entityName, @RequestParam(value = "attributes", required = false)
+	String[] attributes, @RequestParam(value = "expand", required = false)
+	String[] attributeExpands)
 	{
 		Set<String> attributeSet = toAttributeSet(attributes);
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
@@ -151,10 +149,11 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/meta/{attributeName}", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public AttributeMetaDataResponse getAttributeMetaData(@PathVariable("entityName") String entityName,
-			@PathVariable("attributeName") String attributeName,
-			@RequestParam(value = "attributes", required = false) String[] attributes,
-			@RequestParam(value = "expand", required = false) String[] attributeExpands)
+	public AttributeMetaDataResponse getAttributeMetaData(@PathVariable("entityName")
+	String entityName, @PathVariable("attributeName")
+	String attributeName, @RequestParam(value = "attributes", required = false)
+	String[] attributes, @RequestParam(value = "expand", required = false)
+	String[] attributeExpands)
 	{
 		Set<String> attributeSet = toAttributeSet(attributes);
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
@@ -186,9 +185,11 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Map<String, Object> retrieveEntity(@PathVariable("entityName") String entityName,
-			@PathVariable("id") Integer id, @RequestParam(value = "attributes", required = false) String[] attributes,
-			@RequestParam(value = "expand", required = false) String[] attributeExpands)
+	public Map<String, Object> retrieveEntity(@PathVariable("entityName")
+	String entityName, @PathVariable("id")
+	Integer id, @RequestParam(value = "attributes", required = false)
+	String[] attributes, @RequestParam(value = "expand", required = false)
+	String[] attributeExpands)
 	{
 		Set<String> attributesSet = toAttributeSet(attributes);
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
@@ -221,11 +222,13 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/{id}/{refAttributeName}", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Object retrieveEntityAttribute(@PathVariable("entityName") String entityName,
-			@PathVariable("id") Integer id, @PathVariable("refAttributeName") String refAttributeName,
-			@Valid EntityCollectionRequest request,
-			@RequestParam(value = "attributes", required = false) String[] attributes,
-			@RequestParam(value = "expand", required = false) String[] attributeExpands)
+	public Object retrieveEntityAttribute(@PathVariable("entityName")
+	String entityName, @PathVariable("id")
+	Integer id, @PathVariable("refAttributeName")
+	String refAttributeName, @Valid
+	EntityCollectionRequest request, @RequestParam(value = "attributes", required = false)
+	String[] attributes, @RequestParam(value = "expand", required = false)
+	String[] attributeExpands)
 	{
 		Set<String> attributesSet = toAttributeSet(attributes);
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
@@ -303,10 +306,11 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public EntityCollectionResponse retrieveEntityCollection(@PathVariable("entityName") String entityName,
-			@Valid EntityCollectionRequest request,
-			@RequestParam(value = "attributes", required = false) String[] attributes,
-			@RequestParam(value = "expand", required = false) String[] attributeExpands)
+	public EntityCollectionResponse retrieveEntityCollection(@PathVariable("entityName")
+	String entityName, @Valid
+	EntityCollectionRequest request, @RequestParam(value = "attributes", required = false)
+	String[] attributes, @RequestParam(value = "expand", required = false)
+	String[] attributeExpands)
 	{
 		Set<String> attributesSet = toAttributeSet(attributes);
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
@@ -328,10 +332,12 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public EntityCollectionResponse retrieveEntityCollectionPost(@PathVariable("entityName") String entityName,
-			@Valid @RequestBody EntityCollectionRequest request,
-			@RequestParam(value = "attributes", required = false) String[] attributes,
-			@RequestParam(value = "expand", required = false) String[] attributeExpands)
+	public EntityCollectionResponse retrieveEntityCollectionPost(@PathVariable("entityName")
+	String entityName, @Valid
+	@RequestBody
+	EntityCollectionRequest request, @RequestParam(value = "attributes", required = false)
+	String[] attributes, @RequestParam(value = "expand", required = false)
+	String[] attributeExpands)
 	{
 		Set<String> attributesSet = toAttributeSet(attributes);
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
@@ -350,8 +356,8 @@ public class RestController
 	 * @throws UnknownEntityException
 	 */
 	@RequestMapping(value = "/{entityName}", method = POST, headers = "Content-Type=application/x-www-form-urlencoded")
-	public void createFromFormPost(@PathVariable("entityName") String entityName, HttpServletRequest request,
-			HttpServletResponse response)
+	public void createFromFormPost(@PathVariable("entityName")
+	String entityName, HttpServletRequest request, HttpServletResponse response)
 	{
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		for (String param : request.getParameterMap().keySet())
@@ -363,8 +369,9 @@ public class RestController
 	}
 
 	@RequestMapping(value = "/{entityName}", method = POST)
-	public void create(@PathVariable("entityName") String entityName, @RequestBody Map<String, Object> entityMap,
-			HttpServletResponse response) throws EntityNotFoundException
+	public void create(@PathVariable("entityName")
+	String entityName, @RequestBody
+	Map<String, Object> entityMap, HttpServletResponse response) throws EntityNotFoundException
 	{
 		if (entityMap == null)
 		{
@@ -385,8 +392,10 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = PUT)
 	@ResponseStatus(OK)
-	public void update(@PathVariable("entityName") String entityName, @PathVariable("id") Integer id,
-			@RequestBody Map<String, Object> entityMap)
+	public void update(@PathVariable("entityName")
+	String entityName, @PathVariable("id")
+	Integer id, @RequestBody
+	Map<String, Object> entityMap)
 	{
 		updateInternal(entityName, id, entityMap);
 	}
@@ -402,8 +411,10 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = POST, params = "_method=PUT")
 	@ResponseStatus(OK)
-	public void updatePost(@PathVariable("entityName") String entityName, @PathVariable("id") Integer id,
-			@RequestBody Map<String, Object> entityMap)
+	public void updatePost(@PathVariable("entityName")
+	String entityName, @PathVariable("id")
+	Integer id, @RequestBody
+	Map<String, Object> entityMap)
 	{
 		updateInternal(entityName, id, entityMap);
 	}
@@ -422,8 +433,9 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = POST, params = "_method=PUT", headers = "Content-Type=application/x-www-form-urlencoded")
 	@ResponseStatus(NO_CONTENT)
-	public void updateFromFormPost(@PathVariable("entityName") String entityName, @PathVariable("id") Integer id,
-			HttpServletRequest request)
+	public void updateFromFormPost(@PathVariable("entityName")
+	String entityName, @PathVariable("id")
+	Integer id, HttpServletRequest request)
 	{
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		for (String param : request.getParameterMap().keySet())
@@ -443,7 +455,9 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = DELETE)
 	@ResponseStatus(NO_CONTENT)
-	public void delete(@PathVariable("entityName") String entityName, @PathVariable Integer id)
+	public void delete(@PathVariable("entityName")
+	String entityName, @PathVariable
+	Integer id)
 	{
 		dataService.delete(entityName, id);
 	}
@@ -459,7 +473,9 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = POST, params = "_method=DELETE")
 	@ResponseStatus(NO_CONTENT)
-	public void deletePost(@PathVariable("entityName") String entityName, @PathVariable Integer id)
+	public void deletePost(@PathVariable("entityName")
+	String entityName, @PathVariable
+	Integer id)
 	{
 		delete(entityName, id);
 	}
@@ -650,9 +666,8 @@ public class RestController
 
 		// TODO non queryable
 		List<QueryRule> queryRules = request.getQ() == null ? Collections.<QueryRule> emptyList() : request.getQ();
-
-		Query q = new QueryImpl(queryResolver.resolveRefIdentifiers(queryRules, meta)).pageSize(request.getNum())
-				.offset(request.getStart()).sort(request.getSort());
+		Query q = new QueryImpl(queryRules).pageSize(request.getNum()).offset(request.getStart())
+				.sort(request.getSort());
 
 		Iterable<Entity> it = dataService.findAll(entityName, q);
 		Long count = ((Queryable) repository).count(q);

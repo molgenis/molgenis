@@ -1,12 +1,24 @@
 package org.molgenis.data.annotation.impl;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.io.IOUtils;
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.HgncLocationsUtils;
 import org.molgenis.data.annotation.LocusAnnotator;
-import org.molgenis.data.annotation.impl.datastructures.*;
+import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
+import org.molgenis.data.annotation.impl.datastructures.KeggGene;
+import org.molgenis.data.annotation.impl.datastructures.Locus;
+import org.molgenis.data.annotation.provider.HgncLocationsProvider;
+import org.molgenis.data.annotation.provider.KeggDataProvider;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -14,36 +26,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
-import java.io.*;
-import java.util.*;
-
 /**
  * @author jvelde
  */
 @Component("KeggService")
 public class KeggServiceAnnotator extends LocusAnnotator
 {
-	AnnotationService annotatorService;
-	DataService dataService;
-	OmimHpoAnnotator omimHpo;
-
-	private static final String KEGG_PATHWAY_INFO = "keggPathwayInfo";
-	private static final String HTTP_REST_KEGG_JP_LIST_PATHWAY_HSA = "http://rest.kegg.jp/list/pathway/hsa";
-	private static final String KEGG_GENES_HSA = "keggGenesHsa";
-	private static final String HTTP_REST_KEGG_JP_LIST_HSA = "http://rest.kegg.jp/list/hsa";
-	private static final String KEGG_PATHWAYS_HSA = "keggPathwaysHsa";
-	private static final String HTTP_REST_KEGG_JP_LINK_HSA_PATHWAY = "http://rest.kegg.jp/link/hsa/pathway";
+	private final AnnotationService annotatorService;
+	private final HgncLocationsProvider hgncLocationsProvider;
+	private final KeggDataProvider keggDataProvider;
 
 	public static final String KEGG_GENE_ID = "KEGG_gene_id";
 	public static final String KEGG_PATHWAYS_IDS = "KEGG_pathway_ids";
 	public static final String KEGG_PATHWAYS_NAMES = "KEGG_pathway_names";
 
 	@Autowired
-	public KeggServiceAnnotator(AnnotationService annotatorService, DataService dataService) throws IOException
+	public KeggServiceAnnotator(AnnotationService annotatorService, HgncLocationsProvider hgncLocationsProvider,
+			KeggDataProvider keggDataProvider) throws IOException
 	{
-		this.dataService = dataService;
 		this.annotatorService = annotatorService;
-		this.omimHpo = new OmimHpoAnnotator(annotatorService);
+		this.hgncLocationsProvider = hgncLocationsProvider;
+		this.keggDataProvider = keggDataProvider;
 	}
 
 	@Override
@@ -81,7 +84,7 @@ public class KeggServiceAnnotator extends LocusAnnotator
 		Map<String, ArrayList<String>> keggPathwayGenes = getKeggPathwayGenes();
 		Map<String, String> pathwayInfo = getKeggPathwayInfo();
 
-		List<String> geneSymbols = omimHpo.locationToHGNC(locus);
+		List<String> geneSymbols = HgncLocationsUtils.locationToHgcn(hgncLocationsProvider.getHgncLocations(), locus);
 
 		Map<String, String> hgncToKeggGeneId = hgncToKeggGeneId();
 		Map<String, ArrayList<String>> keggGenePathways = getKeggGenePathways(keggPathwayGenes);
@@ -147,7 +150,7 @@ public class KeggServiceAnnotator extends LocusAnnotator
 	private Map<String, KeggGene> getKeggGenes() throws IOException
 	{
 		Map<String, KeggGene> res = new HashMap<String, KeggGene>();
-		ArrayList<String> keggGenes = omimHpo.readLinesFromURL(HTTP_REST_KEGG_JP_LIST_HSA, KEGG_GENES_HSA);
+		List<String> keggGenes = IOUtils.readLines(keggDataProvider.getKeggHsaReader());
 		for (String s : keggGenes)
 		{
 			String[] line = s.split("\t");
@@ -200,8 +203,7 @@ public class KeggServiceAnnotator extends LocusAnnotator
 	 **/
 	private Map<String, ArrayList<String>> getKeggPathwayGenes() throws IOException
 	{
-		ArrayList<String> keggGenesToPathway = omimHpo.readLinesFromURL(HTTP_REST_KEGG_JP_LINK_HSA_PATHWAY,
-				KEGG_PATHWAYS_HSA);
+		List<String> keggGenesToPathway = IOUtils.readLines(keggDataProvider.getKeggPathwayHsaReader());
 		Map<String, ArrayList<String>> res = new HashMap<String, ArrayList<String>>();
 		for (String s : keggGenesToPathway)
 		{
@@ -225,8 +227,7 @@ public class KeggServiceAnnotator extends LocusAnnotator
 	 **/
 	private Map<String, String> getKeggPathwayInfo() throws IOException
 	{
-		ArrayList<String> keggPathwayInfo = omimHpo.readLinesFromURL(HTTP_REST_KEGG_JP_LIST_PATHWAY_HSA,
-				KEGG_PATHWAY_INFO);
+		List<String> keggPathwayInfo = IOUtils.readLines(keggDataProvider.getKeggPathwayReader());
 
 		Map<String, String> res = new HashMap<String, String>();
 
@@ -248,7 +249,7 @@ public class KeggServiceAnnotator extends LocusAnnotator
 		Map<String, KeggGene> keggGenes = getKeggGenes();
 		Map<String, String> res = new HashMap<String, String>();
 
-		HashMap<String, HGNCLocations> hgncLocs = omimHpo.getHgncLocations();
+		Map<String, HGNCLocations> hgncLocs = hgncLocationsProvider.getHgncLocations();
 
 		for (String keggId : keggGenes.keySet())
 		{

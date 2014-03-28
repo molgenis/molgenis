@@ -23,9 +23,10 @@ public abstract class RangeHandlingDataSource implements RangeHandlingAnnotation
     public static final String MUTATION_START_POSITION = "start_nucleotide";
     public static final String MUTATION_ID = "mutation_id";
     public static final String MUTATION_CHROMOSOME = "chromosome";
+    public static final String PATIENT_ID = "patient_id";
 
     protected DasFeature createDasFeature(Integer start, Integer stop, String identifier, String name,
-                                          String description, String link, DasType mutationType, DasMethod method) throws DataSourceException
+                                          String description, String link, DasType type, DasMethod method, String dataSet, String patient) throws DataSourceException
     {
         if (stop == null) stop = start;// no stop? assume length of 1;
 
@@ -41,6 +42,11 @@ public abstract class RangeHandlingDataSource implements RangeHandlingAnnotation
         }
 
         List<String> notes = new ArrayList<String>();
+        notes.add("track:"+dataSet);
+        notes.add("source:MOLGENIS");
+        if(StringUtils.isNotEmpty(patient)){
+            notes.add("patient:"+patient);
+        }
 
         Map<URL, String> linkout = new HashMap<URL, String>();
         try
@@ -53,9 +59,8 @@ public abstract class RangeHandlingDataSource implements RangeHandlingAnnotation
 
         List<DasTarget> dasTarget = new ArrayList<DasTarget>();
         dasTarget.add(new MolgenisDasTarget(identifier, start, stop, featureDescription));
-
         List<String> parents = new ArrayList<String>();
-        DasFeature feature = new DasFeature(identifier, featureDescription, mutationType, method, start, stop,
+        DasFeature feature = new DasFeature(identifier, featureDescription, type, method, start, stop,
                 new Double(0), DasFeatureOrientation.ORIENTATION_NOT_APPLICABLE, DasPhase.PHASE_NOT_APPLICABLE, notes,
                 linkout, dasTarget, parents, null);
         return feature;

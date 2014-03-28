@@ -1,7 +1,7 @@
 package org.molgenis.data.jpa;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.RepositorySource;
+import org.molgenis.data.RepositoryCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationListener;
@@ -16,22 +16,25 @@ import org.springframework.stereotype.Component;
 public class JpaRepositoryRegistrator implements ApplicationListener<ContextRefreshedEvent>, Ordered
 {
 	private final DataService dataService;
-	private final RepositorySource repositorySource;
+	private final RepositoryCollection repositoryCollection;
 
 	@Autowired
-	public JpaRepositoryRegistrator(DataService dataService, @Qualifier("JpaRepositorySource")
-	RepositorySource repositorySource)
+	public JpaRepositoryRegistrator(DataService dataService, @Qualifier("JpaRepositoryCollection")
+	RepositoryCollection repositoryCollection)
 	{
 		if (dataService == null) throw new IllegalArgumentException("DataService is null");
-		if (repositorySource == null) throw new IllegalArgumentException("JpaRepositorySource is missing");
+		if (repositoryCollection == null) throw new IllegalArgumentException("JpaRepositoryCollection is missing");
 		this.dataService = dataService;
-		this.repositorySource = repositorySource;
+		this.repositoryCollection = repositoryCollection;
 	}
 
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
-		dataService.addRepositories(repositorySource);
+		for (String name : repositoryCollection.getEntityNames())
+		{
+			dataService.addRepository(repositoryCollection.getRepositoryByEntityName(name));
+		}
 	}
 
 	@Override

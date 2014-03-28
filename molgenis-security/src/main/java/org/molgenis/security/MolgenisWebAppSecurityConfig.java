@@ -1,7 +1,5 @@
 package org.molgenis.security;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -47,7 +45,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	@Override
 	protected void configure(HttpSecurity http) throws Exception
 	{
-		http.addFilter(anonymousAuthFilter());
+		http.addFilterBefore(anonymousAuthFilter(), AnonymousAuthenticationFilter.class);
 		http.authenticationProvider(anonymousAuthenticationProvider());
 
 		ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry expressionInterceptUrlRegistry = http
@@ -93,18 +91,10 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	protected abstract RoleHierarchy roleHierarchy();
 
 	@Bean
-	public AnonymousAuthenticationFilter anonymousAuthFilter()
+	public MolgenisAnonymousAuthenticationFilter anonymousAuthFilter()
 	{
-		List<GrantedAuthority> anonymousUserAuthorities = createAnonymousUserAuthorities();
-
-		Collection<? extends GrantedAuthority> anonymousUserMappedAuthorities = roleHierarchyAuthoritiesMapper()
-				.mapAuthorities(anonymousUserAuthorities);
-		List<GrantedAuthority> allAnonymousUserAuthorityList = new ArrayList<GrantedAuthority>();
-		for (GrantedAuthority anonymousUserMappedAuthority : anonymousUserMappedAuthorities)
-			allAnonymousUserAuthorityList.add(anonymousUserMappedAuthority);
-
-		return new AnonymousAuthenticationFilter(ANONYMOUS_AUTHENTICATION_KEY, SecurityUtils.ANONYMOUS_USERNAME,
-				allAnonymousUserAuthorityList);
+		return new MolgenisAnonymousAuthenticationFilter(ANONYMOUS_AUTHENTICATION_KEY,
+				SecurityUtils.ANONYMOUS_USERNAME, userDetailsService());
 	}
 
 	protected abstract List<GrantedAuthority> createAnonymousUserAuthorities();

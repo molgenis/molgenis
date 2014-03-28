@@ -2,14 +2,12 @@ package org.molgenis.data.support;
 
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserHasRole;
 
-import java.io.File;
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
@@ -19,18 +17,14 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Queryable;
 import org.molgenis.data.Repository;
-import org.molgenis.data.RepositorySource;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.Updateable;
 import org.molgenis.data.Writable;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 /**
  * Implementation of the DataService interface
@@ -40,13 +34,11 @@ public class DataServiceImpl implements DataService
 {
 	private final Map<String, Repository> repositories;
 	private final Set<String> repositoryNames;
-	private final Map<String, Class<? extends FileRepositorySource>> fileRepositorySources;
 
 	public DataServiceImpl()
 	{
 		this.repositories = new LinkedHashMap<String, Repository>();
-		this.repositoryNames = new LinkedHashSet<String>();
-		this.fileRepositorySources = Maps.newHashMap();
+		this.repositoryNames = new TreeSet<String>();
 	}
 
 	@Override
@@ -59,6 +51,24 @@ public class DataServiceImpl implements DataService
 		}
 		repositoryNames.add(repositoryName);
 		repositories.put(repositoryName.toLowerCase(), newRepository);
+	}
+
+	@Override
+	public void removeRepository(Repository repository)
+	{
+		String repositoryName = repository.getName();
+		removeRepository(repositoryName);
+	}
+
+	@Override
+	public void removeRepository(String repositoryName)
+	{
+		if (!repositories.containsKey(repositoryName.toLowerCase()))
+		{
+			throw new MolgenisDataException("Repository [" + repositoryName + "] doesn't exists");
+		}
+		repositoryNames.remove(repositoryName);
+		repositories.remove(repositoryName.toLowerCase());
 	}
 
 	@Override
@@ -95,21 +105,6 @@ public class DataServiceImpl implements DataService
 	{
 		return repositories.containsKey(entityName.toLowerCase());
 
-	}
-
-	@Override
-	public Repository getRepositoryByUrl(String url)
-	{
-		for (Map.Entry<String, Repository> entry : repositories.entrySet())
-		{
-			Repository repository = entry.getValue();
-			if (repository.getUrl().equalsIgnoreCase(url))
-			{
-				return repository;
-			}
-		}
-
-		return null;
 	}
 
 	@Override
@@ -287,45 +282,4 @@ public class DataServiceImpl implements DataService
 		return findAll(entityName, new QueryImpl(), clazz);
 	}
 
-	@Override
-	public void addFileRepositorySourceClass(Class<? extends FileRepositorySource> clazz, Set<String> fileExtensions)
-	{
-		for (String extension : fileExtensions)
-		{
-			fileRepositorySources.put(extension.toLowerCase(), clazz);
-		}
-	}
-
-	@Override
-	public FileRepositorySource createFileRepositorySource(File file)
-	{
-		String extension = StringUtils.getFilenameExtension(file.getName());
-		Class<? extends FileRepositorySource> clazz = fileRepositorySources.get(extension.toLowerCase());
-		if (clazz == null)
-		{
-			throw new MolgenisDataException("Unknown extension '" + extension + "'");
-		}
-
-		Constructor<? extends FileRepositorySource> ctor;
-		try
-		{
-			ctor = clazz.getConstructor(File.class);
-		}
-		catch (Exception e)
-		{
-			throw new MolgenisDataException("Exception creating [" + clazz
-					+ "]  missing constructor FileRepositorySource(File file)");
-		}
-
-		return BeanUtils.instantiateClass(ctor, file);
-	}
-
-	@Override
-	public void addRepositories(RepositorySource repositorySource)
-	{
-		for (Repository repository : repositorySource.getRepositories())
-		{
-			addRepository(repository);
-		}
-	}
 }

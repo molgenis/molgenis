@@ -38,18 +38,18 @@ public class EntityToCategoricalValueConverter implements EntityToValueConverter
 			throw new ValueConverterException("value is not a " + CategoricalValue.class.getSimpleName());
 		}
 
-		String categoryValueCode = entity.getString(attributeName);
-		if (categoryValueCode == null) return null;
+		String categoryIdentifier = entity.getString(attributeName);
+		if (categoryIdentifier == null) return null;
 
 		Category category;
 		try
 		{
-			Query q = new QueryImpl().eq(Category.OBSERVABLEFEATURE, feature).and()
-					.eq(Category.VALUECODE, categoryValueCode);
+
+			Query q = new QueryImpl().eq(Category.IDENTIFIER, categoryIdentifier);
 			category = dataService.findOne(Category.ENTITY_NAME, q, Category.class);
 			if (category == null)
 			{
-				throw new ValueConverterException("unknown category value code [" + categoryValueCode + ']');
+				throw new ValueConverterException("unknown category value identifier [" + categoryIdentifier + ']');
 			}
 		}
 		catch (MolgenisDataException e)

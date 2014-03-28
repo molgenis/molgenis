@@ -1,22 +1,44 @@
+html, body {
+	height:100%;
+}
+
+/* Wrapper for page content to push down footer */
+#wrap {
+	min-height: 100%;
+	height: auto !important;
+	height: 100%;
+	margin: 0 auto -40px; /* Negative indent footer by it's height */
+}
+
+/* Set the fixed height of the footer here */
+#push, #footer {
+	height: 40px;
+}
+
+.container-fluid {
+	padding-right: 10px;
+	padding-left: 10px;
+}
+
 .nav, .navbar {
 	margin-bottom: 10px;
 }
 
-/*TODO: put this back when topmenu issue is solved
-body{
-	padding-top:60px;
-}*/
+.navbar-inner {
+	padding-left: 0px;
+	padding-right:0px;	
+}
 
 .btn-link 	{
 	text-shadow:none;
 }
 
-.navbar .nav li{
-	margin-bottom:-5px;
-}
-
 .navbar .nav li img {
 	margin-top:-5px;
+}
+
+.navbar .nav>li>a {
+	padding: 10px 10px 10px;
 }
 
 .nav-tabs>li>a {
@@ -41,10 +63,10 @@ body{
 	background: #F8FAFB;
 	padding: 10px;
 	margin-bottom: 10px;
-	
+	height: 100%;
 }
 
-#molgenis-footer p {
+#footer p {
 	text-align: center;
 	font: menu;
 	font-style: italic;
@@ -73,13 +95,14 @@ body{
 }
 
 .modal.medium {
-    width: 50%; /* responsive width */
-    margin-left:-25%; /* width/2) */ 
+    width: 50%;
+    margin-left:-25%; 
 }
 
 .modal.large {
-    width: 80%; /* responsive width */
-    margin-left:-40%; /* width/2) */ 
+    width: 80%;
+    margin-left:-40%;
+    top: 5%;
 }
 
 label.horizontal-inline {

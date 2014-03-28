@@ -5,7 +5,9 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -14,10 +16,12 @@ import java.util.Map;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
+import org.molgenis.data.annotation.provider.HgncLocationsProvider;
+import org.molgenis.data.annotation.provider.KeggDataProvider;
 import org.molgenis.data.support.MapEntity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -43,8 +47,7 @@ public class KeggAnnotatorServiceTest
 		attributeMetaDataPos = mock(AttributeMetaData.class);
 
 		AnnotationService annotationService = mock(AnnotationService.class);
-		DataService dataService = mock(DataService.class);
-		
+
 		when(attributeMetaDataChrom.getName()).thenReturn(KeggServiceAnnotator.CHROMOSOME);
 		when(attributeMetaDataPos.getName()).thenReturn(KeggServiceAnnotator.POSITION);
 		when(attributeMetaDataChrom.getDataType()).thenReturn(
@@ -56,7 +59,7 @@ public class KeggAnnotatorServiceTest
 		when(metaDataCanAnnotate.getAttribute(KeggServiceAnnotator.POSITION)).thenReturn(attributeMetaDataPos);
 
 		metaDataCantAnnotate = mock(EntityMetaData.class);
-		
+
 		attributeMetaDataCantAnnotateFeature = mock(AttributeMetaData.class);
 		when(attributeMetaDataCantAnnotateFeature.getName()).thenReturn("otherID");
 		when(attributeMetaDataCantAnnotateFeature.getDataType()).thenReturn(
@@ -83,8 +86,20 @@ public class KeggAnnotatorServiceTest
 
 		input = new ArrayList<Entity>();
 		input.add(entity);
-		
-		annotator = new KeggServiceAnnotator(annotationService, dataService);
+
+		String keggHsaData = "hsa:55120	FANCL, FAAP43, PHF9, POG; Fanconi anemia, complementation group L; K10606 E3 ubiquitin-protein ligase FANCL [EC:6.3.2.19]";
+		String keggPathwayData = "path:hsa03460	Fanconi anemia pathway - Homo sapiens (human)\npath:hsa04120	Ubiquitin mediated proteolysis - Homo sapiens (human)";
+		String keggPathwayHsaData = "path:hsa03460	hsa:55120\npath:hsa04120	hsa:55120";
+		KeggDataProvider keggDataProvider = mock(KeggDataProvider.class);
+		when(keggDataProvider.getKeggHsaReader()).thenReturn(new StringReader(keggHsaData));
+		when(keggDataProvider.getKeggPathwayReader()).thenReturn(new StringReader(keggPathwayData));
+		when(keggDataProvider.getKeggPathwayHsaReader()).thenReturn(new StringReader(keggPathwayHsaData));
+
+		HgncLocationsProvider hgncLocationsProvider = mock(HgncLocationsProvider.class);
+		Map<String, HGNCLocations> locationsMap = Collections.singletonMap("FANCL", new HGNCLocations("FANCL",
+				58453844l - 10, 58453844l + 10, "2"));
+		when(hgncLocationsProvider.getHgncLocations()).thenReturn(locationsMap);
+		annotator = new KeggServiceAnnotator(annotationService, hgncLocationsProvider, keggDataProvider);
 	}
 
 	@Test

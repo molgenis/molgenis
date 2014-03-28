@@ -2,11 +2,9 @@ package org.molgenis.data.annotation.impl;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -14,10 +12,11 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.annotation.LocusAnnotator;
 import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
+import org.molgenis.data.annotation.HgncLocationsUtils;
+import org.molgenis.data.annotation.LocusAnnotator;
 import org.molgenis.data.annotation.impl.datastructures.Locus;
+import org.molgenis.data.annotation.provider.HgncLocationsProvider;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -51,9 +50,9 @@ import org.springframework.stereotype.Component;
 @Component("dbnsfpGeneService")
 public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 {
-	private MolgenisSettings molgenisSettings;
-	private AnnotationService annotatorService;
-	private OmimHpoAnnotator omimHpo;
+	private final MolgenisSettings molgenisSettings;
+	private final AnnotationService annotatorService;
+	private final HgncLocationsProvider hgncLocationsProvider;
 
 	private static final String NAME = "dbNSFP-Gene";
 	public static final String GENE_FILE_LOCATION_PROPERTY = "dbnsfp_gene_location";
@@ -92,11 +91,12 @@ public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 	static final String ESSENTIAL_GENE = "Essential_gene";
 
 	@Autowired
-	public DbnsfpGeneServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService) throws IOException
+	public DbnsfpGeneServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService,
+			HgncLocationsProvider hgncLocationsProvider) throws IOException
 	{
 		this.molgenisSettings = molgenisSettings;
 		this.annotatorService = annotatorService;
-		this.omimHpo = new OmimHpoAnnotator(annotatorService);
+		this.hgncLocationsProvider = hgncLocationsProvider;
 	}
 
 	@Override
@@ -121,14 +121,15 @@ public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 	public List<Entity> annotateEntity(Entity entity) throws IOException
 	{
 		List<Entity> results = new ArrayList<Entity>();
-		
+
 		FileReader reader = new FileReader(new File(molgenisSettings.getProperty(GENE_FILE_LOCATION_PROPERTY)));
 		BufferedReader bufferedReader = new BufferedReader(reader);
 
 		Long position = entity.getLong(POSITION);
 		String chromosome = entity.getString(CHROMOSOME);
 
-		List<String> geneSymbols = omimHpo.locationToHGNC(new Locus(chromosome, position));
+		List<String> geneSymbols = HgncLocationsUtils.locationToHgcn(hgncLocationsProvider.getHgncLocations(),
+				new Locus(chromosome, position));
 
 		try
 		{

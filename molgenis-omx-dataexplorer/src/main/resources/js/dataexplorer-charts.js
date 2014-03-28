@@ -184,7 +184,7 @@
 		}
 		
 		$("#scatterplot-designer-modal-create-button").prop('disabled', disabled);
-	};
+	}
 	
 	function activateDesignerSubmitButtonBoxPlot() {
 		var disabled = true;
@@ -195,7 +195,7 @@
 		}
 		
 		$('#boxplot-designer-modal-create-button').prop('disabled', disabled);
-	};
+	}
 	
 	/**
 	 * Returns the selected attributes from the data explorer 
@@ -203,14 +203,14 @@
 	function getAttributes() {
 		var attributes = molgenis.dataexplorer.getSelectedAttributes();
 		return molgenis.getAtomicAttributes(attributes, restApi);
-	};
+	}
 	
 	/**
 	 * Returns the selected entity from the data explorer 
 	 */
 	function getEntity() {
 		return molgenis.dataexplorer.getSelectedEntityMeta();
-	};
+	}
 	
 	/**
 	 * Returns the selected entity query from the data explorer 
@@ -218,7 +218,7 @@
 	function getEntityQuery() {
 		var query = molgenis.dataexplorer.getEntityQuery();
 		return {'rules': [query.q]};
-	};
+	}
 	
 	/**
 	 * Returns attributes map with attribute.href as key
@@ -231,10 +231,7 @@
 		return attributeMap;
 	}
 	
-	$(function() {
-		// unbind existing event handlers before binding new ones
-		$(document).off('.charts');
-		
+	$(function() {		
 		// bind event handlers with namespace
 		
 		// scatter plot modal

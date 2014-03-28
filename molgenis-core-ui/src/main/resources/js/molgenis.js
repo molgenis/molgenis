@@ -1,4 +1,10 @@
 (function($, molgenis) {
+	"use strict";
+
+    // workaround for "Uncaught RangeError: Maximum call stack size exceeded"
+    // http://stackoverflow.com/a/19190216
+    $.fn.modal.Constructor.prototype.enforceFocus = function() {};
+
 	molgenis.setContextUrl = function(contextUrl) {
 		molgenis.contextUrl = contextUrl;
 	};
@@ -23,9 +29,9 @@
 		items.push(type.charAt(0).toUpperCase() + type.slice(1));
 		items.push('!</strong> ');
 		$.each(alerts, function(i, alert) {
-			items.push(alert.message);
 			if (i > 0)
-				items.push('\n');
+				items.push('<br/>');
+			items.push('<span>' + alert.message + '</span>');
 		});
 		items.push('</div>');
 
@@ -79,7 +85,7 @@
 					'message' : response.message
 				} ], response.type, $('.datasetsindexerAlerts'));
 			});
-		};
+		}
 	};
 
 	/**
@@ -197,7 +203,7 @@ function padNumber(number, length) {
 	}
 
 	return str;
-};
+}
 
 function getCurrentTimezoneOffset() {
 	var offset = new Date().getTimezoneOffset();
@@ -206,7 +212,7 @@ function getCurrentTimezoneOffset() {
 			.abs(offset % 60), 2));
 
 	return offset;
-};
+}
 
 function htmlEscape(text) {
 	return $('<div/>').text(text).html();
@@ -229,7 +235,7 @@ function formatTableCellValue(value, dataType) {
 		value = '<a href="mailto:' + value + '">' + htmlEscape(value) + '</a>';
 
 	} else if (dataType.toLowerCase() == 'bool') {
-		var checked = (value == true);
+		var checked = (value === true);
 		value = '<input type="checkbox" disabled="disabled" ';
 		if (checked) {
 			value = value + 'checked ';
@@ -253,7 +259,7 @@ function formatTableCellValue(value, dataType) {
 	}
 
 	return value;
-};
+}
 
 /**
  * Is s is longer then maxLength cut it and add ...
@@ -275,7 +281,6 @@ function abbreviate(s, maxLength) {
  * @param attrs input attributes
  * @param val input value
  * @param lbl input label (for checkbox and radio inputs)
- * @returns
  */
 function createInput(dataType, attrs, val, lbl) {
 	function createBasicInput(type, attrs, val) {
@@ -338,28 +343,6 @@ function createInput(dataType, attrs, val, lbl) {
 	}
 }
 
-$(function() {
-	// disable all ajax request caching
-	$.ajaxSetup({
-		cache : false
-	});
-	// async load bootstrap modal and display
-	$(document).on('click', 'a.modal-href', function(e) {
-		e.preventDefault();
-		e.stopPropagation();
-		if (!$(this).hasClass('disabled')) {
-			var container = $('#' + $(this).data('target'));
-			if (container.is(':empty')) {
-				container.load($(this).attr('href'), function() {
-					$('.modal:first', container).modal('show');
-				});
-			} else {
-				$('.modal:first', container).modal('show');
-			}
-		}
-	});
-});
-
 // molgenis entity REST API client
 (function($, molgenis) {
 	"use strict";
@@ -389,9 +372,6 @@ $(function() {
 					callback(data);
 				else
 					resource = data;
-			},
-			'error' : function(xhr) {
-				molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 			}
 		};
 		
@@ -419,11 +399,11 @@ $(function() {
 			qs = '?' + uriParts[1];
 		}
 		if (options && options.attributes)
-			qs += (qs.length == 0 ? '?' : '&') + 'attributes=' + options.attributes.join(',');
+			qs += (qs.length === 0 ? '?' : '&') + 'attributes=' + options.attributes.join(',');
 		if (options && options.expand)
-			qs += (qs.length == 0 ? '?' : '&') + 'expand=' + options.expand.join(',');
+			qs += (qs.length === 0 ? '?' : '&') + 'expand=' + options.expand.join(',');
 		if (options && options.q)
-			qs += (qs.length == 0 ? '?' : '&') + '_method=GET';
+			qs += (qs.length === 0 ? '?' : '&') + '_method=GET';
 		return resourceUri + qs;
 	};
 
@@ -454,9 +434,6 @@ $(function() {
 			async : false,
 			success : function(exists) {
 				result = exists;
-			},
-			error : function(xhr) {
-				molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 			}
 		});
 		
@@ -525,11 +502,11 @@ function validateForm(form, fields) {
 	alertstring = "";
 
 	for ( var i = 0; i < fields.length; i++) {
-		if (fields[i].value == "") {
+		if (fields[i].value === "") {
 			alertstring += fields[i].name + "\n";
 		}
 	}
-	if (alertstring == "") {
+	if (alertstring === "") {
 		return true;
 	} else {
 		alert("Fields marked with * are required. Please provide: \n"
@@ -558,7 +535,7 @@ function checkAll(formname, inputname) {
 }
 
 function toggleCssClass(cssClass) {
-	var cssRules = new Array();
+	var cssRules = [];
 	var ff = true;
 	if (document.styleSheets[0].cssRules) {
 		cssRules = document.styleSheets[0].cssRules;
@@ -609,6 +586,7 @@ function showSpinner(callback) {
 		items.push('</div>');
 		$('body').append(items.join(''));
 		spinner = $('#spinner');
+		spinner.data('count', 0);
 	}
 	
 	if (callback) {
@@ -617,19 +595,70 @@ function showSpinner(callback) {
 		});
 	}
 	
-	
-	var timeout = setTimeout(function(){ spinner.modal('show'); }, 500);
-	$('#spinner').data('timeout', timeout);
+	var count = $('#spinner').data('count');
+	if(count === 0) {
+		var timeout = setTimeout(function(){ spinner.modal('show'); }, 500);
+		$('#spinner').data('timeout', timeout);
+		$('#spinner').data('count', 1);
+	} else {
+		$('#spinner').data('count', count + 1);
+	}
 }
 
 function hideSpinner() {
 	if ($('#spinner').length !== 0) {
-		clearTimeout($('#spinner').data('timeout'));
-		$('#spinner').modal('hide');
+		var count = $('#spinner').data('count');
+		if(count === 1) {
+			clearTimeout($('#spinner').data('timeout'));
+			$('#spinner').modal('hide');
+		}
+		if (count > 0) {
+			$('#spinner').data('count', count - 1);
+		}
 	}
 }
 
 $(function() {
+	// disable all ajax request caching
+	$.ajaxSetup({
+		cache : false
+	});
+
+	// use ajaxPrefilter instead of ajaxStart and ajaxStop
+	// to work around issue http://bugs.jquery.com/ticket/13680
+	$.ajaxPrefilter(function( options, _, jqXHR ) {
+	    showSpinner();
+	    jqXHR.always( hideSpinner );
+	});
+
+	$(document).ajaxError(function(event, xhr, settings, e) {
+		try {
+			molgenis.createAlert(JSON.parse(xhr.responseText).errors);
+		} catch(e) {
+			molgenis.createAlert([{'message': 'An error occurred. Please contact the administrator.'}], 'error');
+		}
+	});
+	
+	window.onerror = function(msg, url, line) {
+		molgenis.createAlert([{'message': 'An error occurred. Please contact the administrator.'}, {'message': msg}], 'error');
+	};
+	
+	// async load bootstrap modal and display
+	$(document).on('click', 'a.modal-href', function(e) {
+		e.preventDefault();
+		e.stopPropagation();
+		if (!$(this).hasClass('disabled')) {
+			var container = $('#' + $(this).data('target'));
+			if (container.is(':empty')) {
+				container.load($(this).attr('href'), function() {
+					$('.modal:first', container).modal('show');
+				});
+			} else {
+				$('.modal:first', container).modal('show');
+			}
+		}
+	});
+	
 	/**
 	 * Add download functionality to JQuery.
 	 * data can be string of parameters or array/object

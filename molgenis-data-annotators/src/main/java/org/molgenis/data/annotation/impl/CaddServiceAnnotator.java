@@ -1,18 +1,16 @@
 package org.molgenis.data.annotation.impl;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.TabixReader;
 import org.molgenis.data.annotation.VariantAnnotator;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -48,7 +46,6 @@ public class CaddServiceAnnotator extends VariantAnnotator
 
 	private static final String NAME = "CADD";
 
-	public static final String TABIX_LOCATION_PROPERTY = "tabix_location";
 	public static final String CADD_FILE_LOCATION_PROPERTY = "cadd_location";
 
 	@Autowired
@@ -67,8 +64,7 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	@Override
 	public boolean annotationDataExists()
 	{
-		return new File(molgenisSettings.getProperty(TABIX_LOCATION_PROPERTY)).exists()
-				&& new File(molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY)).exists();
+		return new File(molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY)).exists();
 	}
 
 	@Override
@@ -82,7 +78,6 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	{
 		List<Entity> results = new ArrayList<Entity>();
 		String caddFile = molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY);
-		String tabix = molgenisSettings.getProperty(TABIX_LOCATION_PROPERTY);
 
 		String chromosome = entity.getString(CHROMOSOME);
 		Long position = entity.getLong(POSITION);
@@ -92,55 +87,32 @@ public class CaddServiceAnnotator extends VariantAnnotator
 		String caddAbs = "";
 		String caddScaled = "";
 
-		Runtime runTime = Runtime.getRuntime();
-		
-		// FIXME Does not work for windows!!!!!!
-		runTime.exec("chmod 777 " + tabix);
-		Process process = runTime.exec(tabix + " " + caddFile + " " + chromosome + ":" + position + "-" + position);
+		TabixReader txr = new TabixReader(caddFile);
+		String line = txr.query(chromosome + ":" + position).next();
 
-		process.waitFor();
-
-		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-
-		String line = "";
 		String[] split = null;
 
-		try
+		if (line != null)
 		{
-			while ((line = bufferedReader.readLine()) != null)
+			split = line.split("\t");
+
+			if (split[2].equals(reference) && split[3].equals(alternative))
 			{
-				if (!line.equals(null))
-				{
-					split = line.split("\t");
-
-					if (split[2].equals(reference) && split[3].equals(alternative))
-					{
-						caddAbs = split[4];
-						caddScaled = split[5];
-					}
-				}
+				caddAbs = split[4];
+				caddScaled = split[5];
 			}
-
-			HashMap<String, Object> resultMap = new HashMap<String, Object>();
-
-			resultMap.put(CADD_ABS, caddAbs);
-			resultMap.put(CADD_SCALED, caddScaled);
-			resultMap.put(CHROMOSOME, chromosome);
-			resultMap.put(POSITION, position);
-			resultMap.put(ALTERNATIVE, alternative);
-			resultMap.put(REFERENCE, reference);
-
-			results.add(new MapEntity(resultMap));
-
 		}
-		catch (IOException e)
-		{
-			throw new RuntimeException(e);
-		}
-		finally
-		{
-			bufferedReader.close();
-		}
+
+		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+
+		resultMap.put(CADD_ABS, caddAbs);
+		resultMap.put(CADD_SCALED, caddScaled);
+		resultMap.put(CHROMOSOME, chromosome);
+		resultMap.put(POSITION, position);
+		resultMap.put(ALTERNATIVE, alternative);
+		resultMap.put(REFERENCE, reference);
+
+		results.add(new MapEntity(resultMap));
 
 		return results;
 	}

@@ -1,9 +1,5 @@
 package org.molgenis.data.omx;
 
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
-
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -18,7 +14,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule;
 import org.molgenis.data.support.ConvertingIterable;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
@@ -91,22 +86,6 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Cr
 	@Override
 	public Iterable<Entity> findAll(final Query q)
 	{
-		EntityMetaData entityMetaData = getEntityMetaData();
-		// Set xref/mref/categorical search fields on ref identifier
-		for (QueryRule r : q.getRules())
-		{
-			if ((r.getField() != null) && (r.getValue() instanceof Entity))
-			{
-				AttributeMetaData attr = entityMetaData.getAttribute(r.getField());
-				if ((attr.getDataType().getEnumType() == XREF) || (attr.getDataType().getEnumType() == MREF)
-						|| attr.getDataType().getEnumType() == CATEGORICAL)
-				{
-					Object value = ((Entity) r.getValue()).get(attr.getRefEntity().getLabelAttribute().getName());
-					r.setValue(value);
-				}
-			}
-		}
-
 		return new Iterable<Entity>()
 		{
 			@Override
@@ -374,4 +353,5 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Cr
 	{
 		throw new UnsupportedOperationException();
 	}
+
 }

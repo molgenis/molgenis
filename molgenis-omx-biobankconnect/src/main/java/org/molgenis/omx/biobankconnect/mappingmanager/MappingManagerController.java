@@ -21,6 +21,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.QueryRule;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Writable;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.support.MapEntity;
@@ -210,8 +212,10 @@ public class MappingManagerController extends MolgenisPluginController
 
 				writer = new CsvWriter(response.getWriter(), dataSetNames);
 
-				SearchRequest searchFeatures = new SearchRequest("protocolTree-" + selectedDataSetId,
-						new QueryImpl().pageSize(1000000), null);
+				QueryImpl q = new QueryImpl();
+				q.pageSize(1000000);
+				q.addRule(new QueryRule("type", Operator.SEARCH, ObservableFeature.class.getSimpleName().toLowerCase()));
+				SearchRequest searchFeatures = new SearchRequest("protocolTree-" + selectedDataSetId, q, null);
 				SearchResult featureSearchResult = searchService.search(searchFeatures);
 				for (Hit hit : featureSearchResult.getSearchHits())
 				{
@@ -238,7 +242,7 @@ public class MappingManagerController extends MolgenisPluginController
 								{
 									if (featureMap.containsKey(id))
 									{
-										if (value.length() > 0) value.append(',').append('\r');
+										if (value.length() > 0) value.append(';').append('\r');
 										value.append(featureMap.get(id).getName()).append(':')
 												.append(featureMap.get(id).getDescription());
 									}

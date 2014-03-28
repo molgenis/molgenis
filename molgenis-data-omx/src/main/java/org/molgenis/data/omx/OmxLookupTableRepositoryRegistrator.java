@@ -4,6 +4,7 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.support.QueryResolver;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.security.runas.SystemSecurityToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,12 +22,15 @@ import org.springframework.stereotype.Component;
 public class OmxLookupTableRepositoryRegistrator implements ApplicationListener<ContextRefreshedEvent>, Ordered
 {
 	private final DataService dataService;
+	private final QueryResolver queryResolver;
 
 	@Autowired
-	public OmxLookupTableRepositoryRegistrator(DataService dataService)
+	public OmxLookupTableRepositoryRegistrator(DataService dataService, QueryResolver queryResolver)
 	{
 		if (dataService == null) throw new IllegalArgumentException("dataService is null");
+		if (queryResolver == null) throw new IllegalArgumentException("queryResolver is null");
 		this.dataService = dataService;
+		this.queryResolver = queryResolver;
 	}
 
 	@Override
@@ -47,7 +51,7 @@ public class OmxLookupTableRepositoryRegistrator implements ApplicationListener<
 					ObservableFeature.class))
 			{
 				OmxLookupTableRepository repo = new OmxLookupTableRepository(dataService,
-						categoricalFeature.getIdentifier());
+						categoricalFeature.getIdentifier(), queryResolver);
 				dataService.addRepository(repo);
 			}
 		}
