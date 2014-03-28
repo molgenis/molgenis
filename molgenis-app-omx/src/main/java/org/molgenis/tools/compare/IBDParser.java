@@ -81,6 +81,8 @@ public class IBDParser
 		// There are also categories for date (when it is missing, in the data there are fake date formats as
 		// 1808/08/08, we cannot handle that either
 		vc.filterCategories(categoryFilePath, featureFilePath, logfile);
+		System.out.println("logfile can be found at: " + path + "logfile.txt");
+		logfile.close();
 
 	}
 
