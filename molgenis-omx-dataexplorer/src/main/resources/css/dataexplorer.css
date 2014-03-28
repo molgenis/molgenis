@@ -146,6 +146,11 @@ a.accordion-toggle:hover,a.accordion-toggle:focus,a.accordion-toggle:active
 	background-color: #FFF;
 }
 
+.molgenis-xrefsearch .select2-results .select2-highlighted {
+    background: #04c;
+    color: #fff;
+}
+
 .molgenis-xrefsearch .add-ref-query-part, .remove-ref-query-part {
 	margin-left: 10px;
 }
