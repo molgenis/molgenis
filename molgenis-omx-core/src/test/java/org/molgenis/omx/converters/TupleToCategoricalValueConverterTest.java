@@ -23,15 +23,15 @@ public class TupleToCategoricalValueConverterTest
 	{
 		DataService dataService = mock(DataService.class);
 		String catIdentifier = "category1";
-		String catName = "category1";
+		String valueCode = "category #1";
 		Category category = new Category();
 		category.setIdentifier(catIdentifier);
-		category.setName(catName);
+		category.setValueCode(valueCode);
 		CategoricalValue value = new CategoricalValue();
 		value.setValue(category);
 		Cell<String> cell = new EntityToCategoricalValueConverter(dataService).toCell(value);
 		assertEquals(cell.getKey(), catIdentifier);
-		assertEquals(cell.getValue(), catName);
+		assertEquals(cell.getValue(), valueCode);
 	}
 
 	@Test
