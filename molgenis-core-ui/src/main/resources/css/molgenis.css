@@ -94,15 +94,24 @@ html, body {
 	margin-bottom: 10px;
 }
 
-.modal.medium {
-    width: 50%;
-    margin-left:-25%; 
-}
-
 .modal.large {
     width: 80%;
     margin-left:-40%;
     top: 5%;
+}
+	
+@media (min-width: 1281px) {
+	.modal.medium {
+	    width: 50%;
+	    margin-left:-25%; 
+	}
+}
+
+@media (max-width: 1280px) {
+	.modal.medium {
+		width: 80%;
+    	margin-left:-40%;
+	}
 }
 
 label.horizontal-inline {

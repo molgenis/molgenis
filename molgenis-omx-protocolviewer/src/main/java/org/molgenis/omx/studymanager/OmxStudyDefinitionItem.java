@@ -15,11 +15,14 @@ import com.google.common.collect.Lists;
 public class OmxStudyDefinitionItem implements CatalogItem
 {
 	private final ObservableFeature observableFeature;
+	private final Integer catalogId;
 
-	public OmxStudyDefinitionItem(ObservableFeature observableFeature)
+	public OmxStudyDefinitionItem(ObservableFeature observableFeature, Integer catalogId)
 	{
 		if (observableFeature == null) throw new IllegalArgumentException("observableFeature is null");
+		if (catalogId == null) throw new IllegalArgumentException("catalogId is null");
 		this.observableFeature = observableFeature;
+		this.catalogId = catalogId;
 	}
 
 	@Override
@@ -67,7 +70,8 @@ public class OmxStudyDefinitionItem implements CatalogItem
 	{
 		List<String> protocolPath = new ArrayList<String>();
 		Collection<Protocol> protocols = observableFeature.getFeaturesProtocolCollection();
-		while (protocols != null && !protocols.isEmpty())
+		boolean rootReached = false;
+		while (protocols != null && !protocols.isEmpty() && !rootReached)
 		{
 			if (protocols.size() != 1)
 			{
@@ -75,9 +79,12 @@ public class OmxStudyDefinitionItem implements CatalogItem
 						+ protocols.size() + ')');
 			}
 			Protocol protocol = protocols.iterator().next();
+			// Stop when catalog protocol is found (this is the root)
+			if (protocol.getId().equals(catalogId)) rootReached = true;
 			protocolPath.add(protocol.getId().toString());
 			protocols = protocol.getSubprotocolsProtocolCollection();
 		}
+
 		return Lists.reverse(protocolPath);
 	}
 }

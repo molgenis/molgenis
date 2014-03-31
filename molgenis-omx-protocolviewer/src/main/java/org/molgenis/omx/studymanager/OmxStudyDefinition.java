@@ -85,7 +85,7 @@ public class OmxStudyDefinition implements StudyDefinition
 			@Override
 			public CatalogItem apply(ObservableFeature observableFeature)
 			{
-				return new OmxStudyDefinitionItem(observableFeature);
+				return new OmxStudyDefinitionItem(observableFeature, studyDataRequest.getProtocol().getId());
 			}
 		});
 	}
