@@ -8,7 +8,7 @@
 	</parent>
 	<groupId>org.molgenis</groupId>
 	<artifactId>molgenis</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.1.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<!-- More Project Information -->
@@ -559,7 +559,6 @@
 		<module>molgenis-omx-core</module>
 		<module>molgenis-omx-das</module>
 		<module>molgenis-omx-dataexplorer</module>
-		<module>molgenis-omx-genomebrowser</module>
 		<module>molgenis-omx-protocolmanager</module>
 		<module>molgenis-omx-importer</module>
 		<module>molgenis-omx-protocolviewer</module>

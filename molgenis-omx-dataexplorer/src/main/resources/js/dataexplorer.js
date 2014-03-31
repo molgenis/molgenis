@@ -95,7 +95,7 @@
 			var joinChars = attributeFilter.operator ? ' ' + attributeFilter.operator + ' ' : ',';
 			var attributeLabel = attribute.label || attribute.name;
 			items.push('<p><a class="feature-filter-edit" data-href="' + attributeUri + '" href="#">'
-					+ attributeLabel + ' (' + attributeFilter.values.join(joinChars)
+					+ attributeLabel + ' (' + htmlEscape(attributeFilter.values.join(joinChars))
 					+ ')</a><a class="feature-filter-remove" data-href="' + attributeUri + '" href="#" title="Remove '
 					+ attributeLabel + ' filter" ><i class="icon-remove"></i></a></p>');
 		});
@@ -137,7 +137,7 @@
 
 					// Range filter
 					var rangeAnd = false;
-					if ((index == 0) && (value != '')) {
+					if (index === 0 && value) {
 						entityCollectionRequest.q.push({
 							field : attribute.name,
 							operator : 'GREATER_EQUAL',
@@ -150,7 +150,7 @@
 							operator : 'AND'
 						});
 					}
-					if ((index == 1) && (value != '')) {
+					if (index === 1 && value) {
 						entityCollectionRequest.q.push({
 							field : attribute.name,
 							operator : 'LESS_EQUAL',
@@ -251,9 +251,9 @@
 			case 'ENUM':
 			case 'FILE':
 			case 'IMAGE':
-				throw 'Unsupported data type: ' + dataType;
+				throw 'Unsupported data type: ' + attribute.fieldType;
 			default:
-				throw 'Unknown data type: ' + dataType;			
+				throw 'Unknown data type: ' + attribute.fieldType;			
 		}
 		
 		// show description in tooltip
@@ -273,7 +273,7 @@
 			var attribute = $(this).data('attribute');
 			var filter = filters[attribute.href];
 
-			$(":input", $(this)).not('[type=radio]:not(:checked)').not('[type=checkbox]:not(:checked)').each(function(){
+			$(":input", $(this)).not('[type=radio]:not(:checked)').not('[type=checkbox]:not(:checked)').each(function(i){
 				var value = $(this).val();
 				if(value) {
 					if(!filter) {
@@ -296,7 +296,7 @@
                                 values.push(mrefValues[i]);
                             });
                         } else{
-						    values.push(value);
+						    values[i] = value;
                         }
 					}
 				}
@@ -333,7 +333,7 @@
 			// reset: unbind existing event handlers
 			$.each(modules, function() {
 				$(document).off('.' + this.id);	
-			})
+			});
 			
 			restApi.getAsync(entityUri + '/meta', {'expand': ['attributes']}, function(entityMetaData) {
 				selectedEntityMetaData = entityMetaData;
@@ -376,7 +376,8 @@
 		});
 		
 		$(document).on('clickAttribute', function(e, data) {
-			molgenis.dataexplorer.filter.openFilterModal(data.attribute, attributeFilters[data.attribute.href]);
+			if(data.attribute.fieldType !== 'COMPOUND')
+				molgenis.dataexplorer.filter.openFilterModal(data.attribute, attributeFilters[data.attribute.href]);
 		});
 		
 		var container = $("#plugin-container");

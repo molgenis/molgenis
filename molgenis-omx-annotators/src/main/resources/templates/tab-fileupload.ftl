@@ -24,7 +24,7 @@
 </#macro>
 
 <#macro modal_popup_dataset_upload>
-<div class="modal fade" id="dataset-upload-modal">
+<div class="modal hide fade" id="dataset-upload-modal">
   	<div class="modal-header">
   		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
   		<h4>Create a new data set</h4>

@@ -30,6 +30,7 @@
 			items.push('<li class="previous"><a href="#">Previous</a></li>');
 			items.push('<li class="next"><a href="#">Next</a></li>');
 			items.push('</ul>');
+			items.push('</form>');
 			items.push('</div>');
 			items.push('</div>');
 			items.push('<div class="modal-footer">');
@@ -39,14 +40,6 @@
 			items.push('</div>');
 			
 			modal = $(items.join(''));
-			
-			// workaround for "Uncaught RangeError: Maximum call stack size exceeded"
-			// http://stackoverflow.com/a/19190216
-			var enforceModalFocusFn = $.fn.modal.Constructor.prototype.enforceFocus;
-			$.fn.modal.Constructor.prototype.enforceFocus = function() {};
-			modal.on('hidden', function() {
-			    $.fn.modal.Constructor.prototype.enforceFocus = enforceModalFocusFn;
-			});
 			
 			modal.modal({'show': false});
 			
@@ -89,9 +82,9 @@
 		$.each(compoundAttributes, function(i, compoundAttribute) {
 			var tabId = compoundAttribute.name + '-tab';
 			var label = compoundAttribute.label || compoundAttribute.name;
-			listItems.push('<li' + (i == 0 ? ' class="active"' : '') + '><a href="#' + tabId + '" data-toggle="tab">' + label + '</a></li>');
+			listItems.push('<li' + (i === 0 ? ' class="active"' : '') + '><a href="#' + tabId + '" data-toggle="tab">' + label + '</a></li>');
 			
-			var pane = $('<div class="tab-pane' + (i == 0 ? ' active"' : '') + '" id="' + tabId + '">');
+			var pane = $('<div class="tab-pane' + (i === 0 ? ' active"' : '') + '" id="' + tabId + '">');
 			var paneContainer = $('<div class="well"></div>');
 			pane.append(paneContainer);
 			$.each(compoundAttribute.attributes, function(i, attribute) {

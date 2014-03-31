@@ -14,7 +14,7 @@
 						</form>
 					</li>
 					<li><a id="editBtn" href="${context_url}/edit" class="btn">Edit page</a></li>
-				<ul>
+				</ul>
 			</div>
 		</div>
 	</div>	

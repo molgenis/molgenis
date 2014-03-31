@@ -27,10 +27,11 @@
 	};
 
 	var updateCatalog = function(catalogId, selection) {
+		
 		catalogContainer.catalog({
 			'selection' : Catalog.getEnableSelection(),
 			'protocolId' : catalogId,
-			'selectedItems' : selection.items ? $.map(selection.items, function(selectedItem) { return selectedItem.feature; }) : null, // FIXME catalog requires group info
+			'selectedItems' : selection.items ? $.map(selection.items, function(selectedItem) { return selectedItem.feature.toLowerCase(); }) : null, // FIXME catalog requires group info
 			'sort' : molgenis.naturalSort,
 			'onItemClick' : function(featureUri) {
 				updateFeatureDetails(featureUri);
@@ -216,11 +217,14 @@
 									$('<td />').text(typeof identifier !== 'undefined' ? identifier : "").appendTo(row);
 									$('<td />').text(typeof description !== 'undefined' ? description : "").appendTo(row);
 									var deleteButton = $('<i class="icon-remove"></i>');
+									
+									
+									
 									deleteButton.click(function() {
 										var item = $(this).closest('tr').data('key');
 										catalogContainer.catalog('selectItem', {
 											'feature' : item.feature,
-											'path' : item.path,
+											'path' : $.map(item.path, function(pathPart){return pathPart.toLowerCase()}),
 											'select' : false
 										});
 										return false; // TODO do we need this?

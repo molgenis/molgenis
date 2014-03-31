@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Iterator;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -88,8 +89,6 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String CHAINS = "chains";
 	public static final String SOURCES = "sources";
 	public static final String BROWSERLINKS = "browserLinks";
-	public static final String SEARCHENDPOINT = "searchEndpoint";
-	public static final String KARYOTYPEENDPOINT = "karyotypeEndpoint";
 	public static final String GENOMEBROWSERTABLE = "genomeBrowserTable";
 
 	public static final String MUTATION_START_POSITION = "start_nucleotide";
@@ -104,9 +103,6 @@ public class DataExplorerController extends MolgenisPluginController
 
 	@Autowired
 	private MolgenisSettings molgenisSettings;
-
-	@Autowired
-	private SearchService searchService;
 
 	public DataExplorerController()
 	{
@@ -124,6 +120,7 @@ public class DataExplorerController extends MolgenisPluginController
 	String selectedEntityName, @RequestParam(value = "wizard", required = false)
 	Boolean wizard, Model model) throws Exception
 	{
+		boolean entityExists = false;
 		Iterable<EntityMetaData> entitiesMeta = Iterables.transform(dataService.getEntityNames(),
 				new Function<String, EntityMetaData>()
 				{
@@ -134,14 +131,22 @@ public class DataExplorerController extends MolgenisPluginController
 					}
 				});
 		model.addAttribute("entitiesMeta", entitiesMeta);
-
-		if (selectedEntityName == null)
+		if (selectedEntityName != null)
 		{
-			selectedEntityName = entitiesMeta.iterator().next().getName();
+			entityExists = dataService.hasRepository(selectedEntityName);
+		}
+
+		if (entityExists)
+		{
+			model.addAttribute("hideDatasetSelect", true);
 		}
         else
         {
-            model.addAttribute("hideDatasetSelect", true);
+			Iterator<EntityMetaData> entitiesIterator = entitiesMeta.iterator();
+			if (entitiesIterator.hasNext())
+			{
+				selectedEntityName = entitiesIterator.next().getName();
+			}
         }
 		model.addAttribute("selectedEntityName", selectedEntityName);
 		model.addAttribute("wizard", (wizard != null) && wizard.booleanValue());
@@ -169,8 +174,6 @@ public class DataExplorerController extends MolgenisPluginController
 			model.addAttribute(CHAINS, molgenisSettings.getProperty(CHAINS));
 			model.addAttribute(SOURCES, molgenisSettings.getProperty(SOURCES));
 			model.addAttribute(BROWSERLINKS, molgenisSettings.getProperty(BROWSERLINKS));
-			model.addAttribute(SEARCHENDPOINT, molgenisSettings.getProperty(SEARCHENDPOINT));
-			model.addAttribute(KARYOTYPEENDPOINT, molgenisSettings.getProperty(KARYOTYPEENDPOINT));
 			model.addAttribute(GENOMEBROWSERTABLE, molgenisSettings.getProperty(GENOMEBROWSERTABLE));
 		}
 		return "view-dataexplorer-mod-" + moduleId; // TODO bad request in case of invalid module id
@@ -415,8 +418,8 @@ public class DataExplorerController extends MolgenisPluginController
 				Iterable<Entity> yEntities = dataService.findAll(yRefEntityName);
 				for (Entity yRefEntity : yEntities)
 				{
-					xLabels.add(yRefEntity.getString(yRefEntityLblAttr));
-					xValues.add(yRefEntity.get(yRefEntityLblAttr));
+					yLabels.add(yRefEntity.getString(yRefEntityLblAttr));
+					yValues.add(yRefEntity.get(yRefEntityLblAttr));
 				}
 			}
 		}

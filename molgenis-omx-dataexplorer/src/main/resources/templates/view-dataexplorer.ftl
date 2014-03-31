@@ -57,9 +57,9 @@
 							<div class="accordion-body collapse in">
 								<div class="accordion-inner">
 								    <div class="row-fluid" id="feature-filters"></div>
-								</div>
-								<div class="row-fluid" id="data-options">
-								    <a href="#" id="filter-wizard-btn" class="btn btn-small pull-right"><img src="/img/filter-bw.png"> Wizard</a>
+								    <div class="row-fluid">
+								    	<a href="#" id="filter-wizard-btn" class="btn btn-small pull-right"><img src="/img/filter-bw.png"> Wizard</a>
+									</div>
 								</div>
 							</div>
 						</div>

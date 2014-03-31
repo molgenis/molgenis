@@ -11,9 +11,15 @@
 	<div id="chart-view" class="span9"></div>
 </div>
 <script>
-	$.when(
-		$.ajax("/js/highstock-1.3.6/highstock.js", {'cache': true}),
-		$.ajax("/js/highstock-1.3.6/highcharts-more.js", {'cache': true}),
-		$.ajax("/js/dataexplorer-charts.js"), {'cache': true})
-		.then(function() {});
+	if (typeof Highcharts === 'undefined') {
+		$.when(
+			$.ajax("/js/highstock-1.3.6/highstock.js", {'cache': true})
+		).then(function() {
+			$.when(
+				$.ajax("/js/highstock-1.3.6/highcharts-more.js", {'cache': true})
+			);
+		});
+	}
+	
+	$.ajax("/js/dataexplorer-charts.js", {'cache': true});
 </script>

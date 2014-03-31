@@ -44,10 +44,11 @@ public class RangeHandlingDataSourceTest
 		List<DasTarget> dasTarget = new ArrayList<DasTarget>();
 
 		dasTarget.add(new MolgenisDasTarget("vatiant_identifier", 0, 1000, "name,variant_description"));
-		dasFeature = new DasFeature("vatiant_identifier", "name,variant_description", new DasType("type", null, "?",
+		List<String> notes = new ArrayList<String>();notes.add("track:"); notes.add("source:MOLGENIS");
+        dasFeature = new DasFeature("vatiant_identifier", "name,variant_description", new DasType("0", "", "",
 				"type"), new DasMethod("not_recorded", "not_recorded", "ECO:0000037"), 0, 1000, new Double(0),
 				DasFeatureOrientation.ORIENTATION_NOT_APPLICABLE, DasPhase.PHASE_NOT_APPLICABLE,
-				new ArrayList<String>(), linkout, dasTarget, new ArrayList<String>(), null);
+				notes, linkout, dasTarget, new ArrayList<String>(), null);
 		source = new TestDataSource();
 	}
 
@@ -61,8 +62,8 @@ public class RangeHandlingDataSourceTest
 	public void createDasFeature() throws UnimplementedFeatureException, DataSourceException, MalformedURLException
 	{
 		DasFeature dasFeatureUnderTest = source.createDasFeature(0, 1000, "vatiant_identifier", "name",
-				"variant_description", "http://www.molgenis.org/", new DasType("type", null, "?", "type"),
-				new DasMethod("not_recorded", "not_recorded", "ECO:0000037"));
+				"variant_description", "http://www.molgenis.org/", new DasType("0", "", "", "type"),
+				new DasMethod("not_recorded", "not_recorded", "ECO:0000037"),"","");
 		assertEquals(dasFeature, dasFeatureUnderTest);
 	}
 

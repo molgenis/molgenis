@@ -54,7 +54,11 @@ public class MolgenisMenuController
 		model.addAttribute(KEY_MENU_ID, menuId);
 
 		MolgenisUiMenuItem activeItem = menu.getActiveItem();
-		if (activeItem == null) logger.warn("main menu does not contain any (accessible) items");
+		if (activeItem == null)
+		{
+			logger.warn("main menu does not contain any (accessible) items");
+			return "forward:/login";
+		}
 		String pluginId = activeItem != null ? activeItem.getId() : VoidPluginController.ID;
 
 		String contextUri = new StringBuilder(URI).append('/').append(menuId).append('/').append(pluginId).toString();
