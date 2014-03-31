@@ -69,6 +69,6 @@ public class EntityToCategoricalValueConverter implements EntityToValueConverter
 			throw new ValueConverterException("value is not a " + CategoricalValue.class.getSimpleName());
 		}
 		Category category = ((CategoricalValue) value).getValue();
-		return new ValueCell<String>(category.getId(), category.getIdentifier(), category.getIdentifier());
+		return new ValueCell<String>(category.getId(), category.getIdentifier(), category.getValueCode());
 	}
 }
