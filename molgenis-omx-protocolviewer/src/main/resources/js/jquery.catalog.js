@@ -38,10 +38,10 @@
 							if(key.charAt(0) === 'F') {
 								var feature = features[key.substring(1)];
 								var featureNode = {
-									key : feature.href,
+									key : feature.href.toLowerCase(),
 									title : feature.Name,
 									folder : false,
-									selected: selectedNodes.hasOwnProperty(feature.href)
+									selected: selectedNodes.hasOwnProperty(feature.href.toLowerCase())
 								};
 								if (feature.description)
 									featureNode.tooltip = molgenis.i18n.get(feature.description);
@@ -103,7 +103,7 @@
 							subprotocols.items.sort(settings.sort);
 						$.each(subprotocols.items, function() {
 							children.push({
-								key : this.href,
+								key : this.href.toLowerCase(),
 								title : this.Name,
 								tooltip : molgenis.i18n.get(this.description),
 								folder : true,
@@ -122,7 +122,7 @@
 								features.items.sort(settings.sort);
 							$.each(features.items, function() {
 								children.push({
-									key : this.href,
+									key : this.href.toLowerCase(),
 									title : this.Name,
 									tooltip : molgenis.i18n.get(this.description),
 									selected: node.selected
