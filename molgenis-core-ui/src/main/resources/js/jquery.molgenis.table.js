@@ -197,6 +197,7 @@
 					});
 				}
 			});
+			container.show();
 		} else container.hide();
 	}
 
@@ -255,6 +256,9 @@
 			},
 			'getQuery' : function() {
 				return settings.query;
+			},
+			'getSort' : function() {
+				return settings.sort;
 			}
 		});
 

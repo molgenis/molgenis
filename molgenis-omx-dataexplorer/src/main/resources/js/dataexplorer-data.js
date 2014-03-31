@@ -26,9 +26,9 @@
 		$('#data-table-container').table({
 			'entityMetaData' : getEntity(),
 			'attributes' : attributes,
-			'query' : molgenis.dataexplorer.getEntityQuery()
+			'query' : getQuery()
 		});
-	};
+	}
 	
 	/**
 	 * @memberOf molgenis.dataexplorer.data
@@ -44,7 +44,7 @@
 	 * @memberOf molgenis.dataexplorer.data
 	 */
 	function createDownloadDataRequest() {
-		var entityQuery = molgenis.dataexplorer.getEntityQuery();
+		var entityQuery = getQuery();
 		
 		var dataRequest = {
 			entityName : getEntity().name,
@@ -54,10 +54,7 @@
 			}
 		};
 
-		var query = $('#data-table-container').table('getQuery');
-		if (query && query.sort) {
-			searchRequest.query.sort = query.sort;
-		}
+		dataRequest.query.sort = $('#data-table-container').table('getSort');
 		
 		var colAttributes = molgenis.getAtomicAttributes(getAttributes(), restApi);
 		
@@ -130,7 +127,7 @@
                     if(molgenisIndex!==-1){
                         //get the value of the "track" field to see if this is the selected Entity in the dataexplorer
                         $.each(f.notes, function(note) {
-                            var trackIndex = f.notes[note].indexOf("track:")
+                            var trackIndex = f.notes[note].indexOf("track:");
                             if(trackIndex!==-1){
                                 var trackName = f.notes[note].substr(trackIndex+6);
                                 if(entity.name == trackName){
@@ -142,7 +139,7 @@
                         });
                         //get the patient note to create a filter on patient link
                         $.each(f.notes, function(note) {
-                            var patientIndex = f.notes[note].indexOf("patient:")
+                            var patientIndex = f.notes[note].indexOf("patient:");
                             if(patientIndex!==-1){
                                 var patientID = f.notes[note].substr(patientIndex+8);
                                 info.feature.notes.splice(note,1);

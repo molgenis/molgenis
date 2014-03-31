@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Iterator;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -103,9 +104,6 @@ public class DataExplorerController extends MolgenisPluginController
 	@Autowired
 	private MolgenisSettings molgenisSettings;
 
-	@Autowired
-	private SearchService searchService;
-
 	public DataExplorerController()
 	{
 		super(URI);
@@ -122,6 +120,7 @@ public class DataExplorerController extends MolgenisPluginController
 	String selectedEntityName, @RequestParam(value = "wizard", required = false)
 	Boolean wizard, Model model) throws Exception
 	{
+		boolean entityExists = false;
 		Iterable<EntityMetaData> entitiesMeta = Iterables.transform(dataService.getEntityNames(),
 				new Function<String, EntityMetaData>()
 				{
@@ -132,14 +131,22 @@ public class DataExplorerController extends MolgenisPluginController
 					}
 				});
 		model.addAttribute("entitiesMeta", entitiesMeta);
-
-		if (selectedEntityName == null)
+		if (selectedEntityName != null)
 		{
-			selectedEntityName = entitiesMeta.iterator().next().getName();
+			entityExists = dataService.hasRepository(selectedEntityName);
+		}
+
+		if (entityExists)
+		{
+			model.addAttribute("hideDatasetSelect", true);
 		}
         else
         {
-            model.addAttribute("hideDatasetSelect", true);
+			Iterator<EntityMetaData> entitiesIterator = entitiesMeta.iterator();
+			if (entitiesIterator.hasNext())
+			{
+				selectedEntityName = entitiesIterator.next().getName();
+			}
         }
 		model.addAttribute("selectedEntityName", selectedEntityName);
 		model.addAttribute("wizard", (wizard != null) && wizard.booleanValue());
@@ -411,8 +418,8 @@ public class DataExplorerController extends MolgenisPluginController
 				Iterable<Entity> yEntities = dataService.findAll(yRefEntityName);
 				for (Entity yRefEntity : yEntities)
 				{
-					xLabels.add(yRefEntity.getString(yRefEntityLblAttr));
-					xValues.add(yRefEntity.get(yRefEntityLblAttr));
+					yLabels.add(yRefEntity.getString(yRefEntityLblAttr));
+					yValues.add(yRefEntity.get(yRefEntityLblAttr));
 				}
 			}
 		}
