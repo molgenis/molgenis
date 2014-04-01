@@ -1,0 +1,2 @@
+#AlleleID	Type	Name	GeneID	GeneSymbol	ClinicalSignificance	RS# (dbSNP)	nsv (dbVar)	RCVaccession	TestedInGTR	PhenotypeIDs	Origin	Assembly	Chromosome	Start	Stop	Cytogenetic	ReviewStatus	HGVS(c.)	HGVS(p.)	NumberSubmitters	LastEvaluated	Guidelines	OtherIDs
+53860	deletion	NM_003476.4:c.282-5_285delAACAGGTCC	8048	CSRP3	Uncertain significance	397516855	-	RCV000037779	N	MedGen:CN169374	germline	GRCh37	11	19207892	19207900	11p15.1	classified by single submitter	LRG_440:g.29221_29229delAACAGGTCC		1	08 Mar 2012	-	-
