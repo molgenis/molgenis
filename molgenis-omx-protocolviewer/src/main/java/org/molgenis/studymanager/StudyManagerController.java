@@ -7,6 +7,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -140,13 +142,16 @@ public class StudyManagerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/edit/{id}", method = RequestMethod.GET)
 	@ResponseBody
-	public CatalogModel getCatalogWithStudyDefinition(@PathVariable String id) throws UnknownCatalogException,
+	public Map<String, Object> getCatalogWithStudyDefinition(@PathVariable String id) throws UnknownCatalogException,
 			UnknownStudyDefinitionException
 	{
+        Map map = new HashMap<String, Object>();
 		// get study definition and catalog used to create study definition
 		StudyDefinition studyDefinition = studyDefinitionManagerService.getStudyDefinition(id);
 		Catalog catalog = catalogManagerService.getCatalogOfStudyDefinition(studyDefinition.getId());
-		return CatalogModelBuilder.create(catalog, studyDefinition, false);
+		map.put("catalog", CatalogModelBuilder.create(catalog, studyDefinition, false));
+        map.put("status", studyDefinition.getStatus());
+        return map;
 	}
 
 	@RequestMapping(value = "/update/{id}", method = RequestMethod.POST)

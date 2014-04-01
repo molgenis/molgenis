@@ -112,11 +112,11 @@
 			$.ajax({
 				type : 'GET',
 				url : molgenis.getContextUrl() + '/edit/' + studyDefinitionId,
-				success : function(catalog) {
-					editInfoContainer.html(createCatalogInfo(catalog));
+				success : function(result) {
+					editInfoContainer.html(createCatalogInfo(result.catalog));
 					editTreeContainer.empty();
-					editTreeContainer.dynatree({'minExpandLevel': 2, 'children': createDynatreeConfig(catalog), 'selectMode': 3, 'debugLevel': 0, 'checkbox': true});
-                    editStateSelect.val(catalog.status);
+					editTreeContainer.dynatree({'minExpandLevel': 2, 'children': createDynatreeConfig(result.catalog), 'selectMode': 3, 'debugLevel': 0, 'checkbox': true});
+                    editStateSelect.val(result.status);
 				},
 				error: function (xhr) {
 					editTreeContainer.empty();
