@@ -15,9 +15,9 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.RepositorySource;
-import org.molgenis.data.csv.CsvRepositorySource;
+import org.molgenis.data.csv.CsvRepository;
 import org.molgenis.data.csv.CsvWriter;
+import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.support.MapEntity;
 
@@ -42,126 +42,137 @@ public class IBDParser
 		String featureFilePath = path + "observablefeature.csv";
 
 		PrintWriter logfile = new PrintWriter(new File(path + "logfile.txt"));
-
-		File dir = new File(inputFolder);
-		String datasetName = null;
-
-		// Create map with key = tableName and value = the column name of the consultdate
-		Map<String, String> consultMap = new HashMap<String, String>();
-		consultMap.put("BB", "IDAABB");
-		consultMap.put("BC", "IDAABC");
-		consultMap.put("BE", "IDAABE");
-		consultMap.put("BF", "IDAABF");
-		consultMap.put("BG", "IDAABG");
-		consultMap.put("BH", "IDAABH");
-		consultMap.put("BI", "IDAABI");
-		consultMap.put("BJ", "IDAABJ");
-		consultMap.put("CA", "IDAABC");
-		consultMap.put("CB", "IDAABC");
-		consultMap.put("CD", "IDAABJ");
-		consultMap.put("CE", "IDAABI");
-
-		// Go through the files and check if there are multiple consultdates for a patient and filter then on first
-		// consult date
-		for (File child : dir.listFiles())
+		try
 		{
-			if (!child.isHidden())
+			File dir = new File(inputFolder);
+			String datasetName = null;
+
+			// Create map with key = tableName and value = the column name of the consultdate
+			Map<String, String> consultMap = new HashMap<String, String>();
+			consultMap.put("BB", "IDAABB");
+			consultMap.put("BC", "IDAABC");
+			consultMap.put("BE", "IDAABE");
+			consultMap.put("BF", "IDAABF");
+			consultMap.put("BG", "IDAABG");
+			consultMap.put("BH", "IDAABH");
+			consultMap.put("BI", "IDAABI");
+			consultMap.put("BJ", "IDAABJ");
+			consultMap.put("CA", "IDAABC");
+			consultMap.put("CB", "IDAABC");
+			consultMap.put("CD", "IDAABJ");
+			consultMap.put("CE", "IDAABI");
+
+			// Go through the files and check if there are multiple consultdates for a patient and filter then on first
+			// consult date
+			for (File child : dir.listFiles())
 			{
-				String fileName = FilenameUtils.removeExtension(child.toString());
-				String[] splitFileName = fileName.split("_");
-				datasetName = splitFileName[2];
-				if (!datasetName.equals("CD"))
+				if (!child.isHidden())
 				{
-					vc.checkForMultipleConsults(datasetName, consultMap.get(datasetName), logfile);
+					String fileName = FilenameUtils.removeExtension(child.toString());
+					String[] splitFileName = fileName.split("_");
+					datasetName = splitFileName[2];
+					if (!datasetName.equals("CD"))
+					{
+						vc.checkForMultipleConsults(datasetName, consultMap.get(datasetName), logfile);
+					}
 				}
 			}
+			// Filter categories: look for 'real' categories, this is because the data contains categories that are also
+			// free text and our model cannot handle that.
+			// There are also categories for date (when it is missing, in the data there are fake date formats as
+			// 1808/08/08, we cannot handle that either
+			vc.filterCategories(categoryFilePath, featureFilePath, logfile);
+			System.out.println("logfile can be found at: " + path + "logfile.txt");
 		}
-		// Filter categories: look for 'real' categories, this is because the data contains categories that are also
-		// free text and our model cannot handle that.
-		// There are also categories for date (when it is missing, in the data there are fake date formats as
-		// 1808/08/08, we cannot handle that either
-		vc.filterCategories(categoryFilePath, featureFilePath, logfile);
-		System.out.println("logfile can be found at: " + path + "logfile.txt");
-		logfile.close();
+		finally
+		{
+			logfile.close();
+		}
 
 	}
 
 	public void checkForMultipleConsults(String datasetName, String consultDateName, PrintWriter logfile)
 			throws IOException, InvalidFormatException
 	{
-
+		List<CellProcessor> processors = new ArrayList<CellProcessor>();
+		processors.add(new TrimProcessor());
 		String file2 = "/Users/Roan/Work/IBDParelsnoer/convert/dataset/dataset_VW_" + datasetName + "_.csv";
-		RepositorySource repositorySource = new CsvRepositorySource(new File(file2), new TrimProcessor());
-		RepositorySource repositorySource2 = new CsvRepositorySource(new File(file2), new TrimProcessor());
-		Repository repo = repositorySource.getRepositories().get(0);
-		Repository repo2 = repositorySource2.getRepositories().get(0);
 
-		/*
-		 * IDAA = identifier of patient {datasetname}_ID = row identifier IDAA{datasetName} = consultDate
-		 */
-
-		String lastIDAA = null;
-
-		Map<String, String> mapID = new HashMap<String, String>();
-
-		List<String> storedIDs = new ArrayList<String>();
-		Iterable<String> listOfAttributeNames = null;
-		String oldRowID = null;
-
-		// Read the different dataset files
-
-		for (Entity entity : repo)
-		{
-			String id = entity.getString("IDAA");
-			String consultDate = entity.getString(consultDateName);
-			listOfAttributeNames = entity.getAttributeNames();
-
-			if (!id.equals(lastIDAA))
-			{
-				mapID.put(id, consultDate);
-				lastIDAA = id;
-				oldRowID = entity.getString(datasetName + "_ID");
-				storedIDs.add(oldRowID);
-			}
-			// Means that the IDAA is already there, the dates will now be compared in CompareDate()
-			else
-			{
-				String storedID = compareDate(oldRowID, entity.getString(datasetName + "_ID"), mapID.get(id),
-						consultDate, logfile);
-				if (!storedIDs.contains(storedID)) storedIDs.add(storedID);
-			}
-
-		}
-
-		// Now for the 2nd time the dataset files will be read
-		// The rowIds that are stored in storedIDs are now used
+		CsvRepository csvRepository = new CsvRepository(new File(file2), processors);
+		CsvRepository csvRepository2 = new CsvRepository(new File(file2), processors);
 		CsvWriter csvWriter = new CsvWriter(new File("/Users/Roan/Work/IBDParelsnoer/convert/output/dataset_VW_"
 				+ datasetName + "_.csv"));
-		csvWriter.writeAttributeNames(listOfAttributeNames);
-		Entity writeEntity = null;
-
-		int counter = 0;
-		for (Entity entity2 : repo2)
+		try
 		{
-			counter++;
-			writeEntity = new MapEntity();
-			if (storedIDs.contains(entity2.getString(datasetName + "_ID")))
+			/*
+			 * IDAA = identifier of patient {datasetname}_ID = row identifier IDAA{datasetName} = consultDate
+			 */
+
+			String lastIDAA = null;
+
+			Map<String, String> mapID = new HashMap<String, String>();
+
+			List<String> storedIDs = new ArrayList<String>();
+			Iterable<String> listOfAttributeNames = null;
+			String oldRowID = null;
+
+			// Read the different dataset files
+
+			for (Entity entity : csvRepository)
 			{
-				Iterator<String> it = entity2.getAttributeNames().iterator();
-				while (it.hasNext())
+				String id = entity.getString("IDAA");
+				String consultDate = entity.getString(consultDateName);
+				listOfAttributeNames = entity.getAttributeNames();
+
+				if (!id.equals(lastIDAA))
 				{
-					String value = it.next();
-					writeEntity.set(value, entity2.getString(value));
+					mapID.put(id, consultDate);
+					lastIDAA = id;
+					oldRowID = entity.getString(datasetName + "_ID");
+					storedIDs.add(oldRowID);
 				}
-				csvWriter.add(writeEntity);
+				// Means that the IDAA is already there, the dates will now be compared in CompareDate()
+				else
+				{
+					String storedID = compareDate(oldRowID, entity.getString(datasetName + "_ID"), mapID.get(id),
+							consultDate, logfile);
+					if (!storedIDs.contains(storedID)) storedIDs.add(storedID);
+				}
+
 			}
 
+			// Now for the 2nd time the dataset files will be read
+			// The rowIds that are stored in storedIDs are now used
+
+			csvWriter.writeAttributeNames(listOfAttributeNames);
+			Entity writeEntity = null;
+
+			int counter = 0;
+			for (Entity entity2 : csvRepository2)
+			{
+				counter++;
+				writeEntity = new MapEntity();
+				if (storedIDs.contains(entity2.getString(datasetName + "_ID")))
+				{
+					Iterator<String> it = entity2.getAttributeNames().iterator();
+					while (it.hasNext())
+					{
+						String value = it.next();
+						writeEntity.set(value, entity2.getString(value));
+					}
+					csvWriter.add(writeEntity);
+				}
+
+			}
+			logfile.println("----------------------------------------------------------------");
+			logfile.println(datasetName + " finished, total number of entities: " + counter);
 		}
-		logfile.println("----------------------------------------------------------------");
-		logfile.println(datasetName + " finished, total number of entities: " + counter);
-		csvWriter.close();
-		repositorySource.close();
-		repositorySource2.close();
+		finally
+		{
+			csvWriter.close();
+			csvRepository.close();
+			csvRepository2.close();
+		}
 	}
 
 	private void filterCategories(String categoryFile, String featureFile, PrintWriter logfile)
@@ -169,95 +180,100 @@ public class IBDParser
 	{
 		logfile.println("########");
 		logfile.println("Categories will be filtered");
-		RepositorySource repositoryCategoryCsvSourceInput = new CsvRepositorySource(new File(categoryFile),
-				new TrimProcessor());
-		RepositorySource repositoryCategoryCsvSourceOutput = new CsvRepositorySource(new File(categoryFile),
-				new TrimProcessor());
-		RepositorySource repositoryFeatureCsvSourceOutput = new CsvRepositorySource(new File(featureFile),
-				new TrimProcessor());
-		Repository categoryCsvInput = repositoryCategoryCsvSourceInput.getRepositories().get(0);
-		Repository categoryCsvOutput = repositoryCategoryCsvSourceOutput.getRepositories().get(0);
-		Repository featureCsvInput = repositoryFeatureCsvSourceOutput.getRepositories().get(0);
-
-		Iterable<String> listOfAttributeNames = null;
-		Map<String, List<String>> mapOfStrings = new HashMap<String, List<String>>();
-		List<String> listOfStrings = new ArrayList<String>();
-
-		for (Entity entity : categoryCsvInput)
+		List<CellProcessor> processors = new ArrayList<CellProcessor>();
+		processors.add(new TrimProcessor());
+		CsvRepository repositoryCategoryCsvSourceInput = new CsvRepository(new File(categoryFile), processors);
+		CsvRepository repositoryCategoryCsvSourceOutput = new CsvRepository(new File(categoryFile), processors);
+		CsvRepository repositoryFeatureCsvSourceOutput = new CsvRepository(new File(featureFile), processors);
+		try
 		{
-			listOfAttributeNames = entity.getAttributeNames();
-			String feature = entity.getString("observablefeature_identifier");
-			String valueCode = entity.getString("valuecode");
+			Iterable<String> listOfAttributeNames = null;
+			Map<String, List<String>> mapOfStrings = new HashMap<String, List<String>>();
+			List<String> listOfStrings = new ArrayList<String>();
 
-			if (!mapOfStrings.containsKey(feature))
+			for (Entity entity : repositoryCategoryCsvSourceInput)
 			{
-				listOfStrings = new ArrayList<String>();
-				listOfStrings.add(valueCode);
-				mapOfStrings.put(feature, listOfStrings);
-			}
-			else
-			{
-				mapOfStrings.get(feature).add(valueCode);
-			}
+				listOfAttributeNames = entity.getAttributeNames();
+				String feature = entity.getString("observablefeature_identifier");
+				String valueCode = entity.getString("valuecode");
 
-		}
-		List<String> listOfFeatures = new ArrayList<String>();
-		for (Entry<String, List<String>> entry : mapOfStrings.entrySet())
-		{
-			boolean cat = false;
-			for (String valueCode : entry.getValue())
-			{
-				// When it not starts with '-' and not contains '1808', '1809' or '1810' then it is a real category
-				if (!valueCode.startsWith("-") && !valueCode.contains("1808") && !valueCode.contains("1809")
-						&& !valueCode.contains("1810"))
+				if (!mapOfStrings.containsKey(feature))
 				{
-					cat = true;
+					listOfStrings = new ArrayList<String>();
+					listOfStrings.add(valueCode);
+					mapOfStrings.put(feature, listOfStrings);
 				}
-				if (cat)
+				else
 				{
-					listOfFeatures.add(entry.getKey());
-					break;
+					mapOfStrings.get(feature).add(valueCode);
+				}
+
+			}
+			List<String> listOfFeatures = new ArrayList<String>();
+			for (Entry<String, List<String>> entry : mapOfStrings.entrySet())
+			{
+				boolean cat = false;
+				for (String valueCode : entry.getValue())
+				{
+					// When it not starts with '-' and not contains '1808', '1809' or '1810' then it is a real category
+					if (!valueCode.startsWith("-") && !valueCode.contains("1808") && !valueCode.contains("1809")
+							&& !valueCode.contains("1810"))
+					{
+						cat = true;
+					}
+					if (cat)
+					{
+						listOfFeatures.add(entry.getKey());
+						break;
+					}
 				}
 			}
+
+			// Update the category.csv
+			writeCategoryOutput(listOfAttributeNames, repositoryCategoryCsvSourceOutput, listOfFeatures);
+			logfile.println("category output done");
+
+			// Update the observablefeature.csv
+			writeFeatureOutput(listOfAttributeNames, repositoryFeatureCsvSourceOutput, listOfFeatures);
+			logfile.println("feature output done");
 		}
-
-		// Update the category.csv
-		writeCategoryOutput(listOfAttributeNames, categoryCsvOutput, listOfFeatures);
-		logfile.println("category output done");
-
-		// Update the observablefeature.csv
-		writeFeatureOutput(listOfAttributeNames, featureCsvInput, listOfFeatures);
-		logfile.println("feature output done");
-
-		repositoryCategoryCsvSourceOutput.close();
-		repositoryCategoryCsvSourceInput.close();
-		repositoryFeatureCsvSourceOutput.close();
-
+		finally
+		{
+			repositoryCategoryCsvSourceOutput.close();
+			repositoryCategoryCsvSourceInput.close();
+			repositoryFeatureCsvSourceOutput.close();
+		}
 	}
 
 	private void writeCategoryOutput(Iterable<String> listOfAttributeNames, Repository categoryCsvOutput,
 			List<String> listOfFeatures) throws IOException
 	{
 		CsvWriter csvWriter = new CsvWriter(new File("/Users/Roan/Work/IBDParelsnoer/convert/output/category.csv"));
-		csvWriter.writeAttributeNames(listOfAttributeNames);
-		Entity writeEntity = null;
-
-		for (Entity entity2 : categoryCsvOutput)
+		try
 		{
-			writeEntity = new MapEntity();
-			if (listOfFeatures.contains(entity2.getString("observablefeature_identifier")))
-			{
-				Iterator<String> it = entity2.getAttributeNames().iterator();
-				while (it.hasNext())
-				{
-					String value = it.next();
-					writeEntity.set(value, entity2.getString(value));
-				}
-				csvWriter.add(writeEntity);
-			}
+			csvWriter.writeAttributeNames(listOfAttributeNames);
+			Entity writeEntity = null;
 
+			for (Entity entity2 : categoryCsvOutput)
+			{
+				writeEntity = new MapEntity();
+				if (listOfFeatures.contains(entity2.getString("observablefeature_identifier")))
+				{
+					Iterator<String> it = entity2.getAttributeNames().iterator();
+					while (it.hasNext())
+					{
+						String value = it.next();
+						writeEntity.set(value, entity2.getString(value));
+					}
+					csvWriter.add(writeEntity);
+				}
+
+			}
 		}
-		csvWriter.close();
+		finally
+		{
+			csvWriter.close();
+		}
 	}
 
 	private void writeFeatureOutput(Iterable<String> listOfAttributeNames, Repository featureCsvInput,
@@ -266,52 +282,58 @@ public class IBDParser
 		List<String> headers = Arrays.asList("identifier", "name", "dataType", "description");
 		CsvWriter csvWriterFeature = new CsvWriter(new File(
 				"/Users/Roan/Work/IBDParelsnoer/convert/output/observablefeature.csv"));
-		csvWriterFeature.writeAttributeNames(headers);
-		Entity writeEntityFeature = null;
-		for (Entity entity : featureCsvInput)
+		try
 		{
-			writeEntityFeature = new MapEntity();
-			if (listOfFeatures.contains(entity.getString("identifier")))
+			csvWriterFeature.writeAttributeNames(headers);
+			Entity writeEntityFeature = null;
+			for (Entity entity : featureCsvInput)
 			{
-				Iterator<String> it = entity.getAttributeNames().iterator();
-				while (it.hasNext())
+				writeEntityFeature = new MapEntity();
+				if (listOfFeatures.contains(entity.getString("identifier")))
 				{
-					String value = it.next();
-					writeEntityFeature.set(value, entity.getString(value));
+					Iterator<String> it = entity.getAttributeNames().iterator();
+					while (it.hasNext())
+					{
+						String value = it.next();
+						writeEntityFeature.set(value, entity.getString(value));
+					}
+					csvWriterFeature.add(writeEntityFeature);
 				}
-				csvWriterFeature.add(writeEntityFeature);
-			}
-			else if (entity.getString("dataType") == null)
-			{
-				writeEntityFeature.set("identifier", entity.getString("identifier"));
-				writeEntityFeature.set("name", entity.getString("name"));
-				writeEntityFeature.set("dataType", "string");
-				writeEntityFeature.set("description", entity.getString("description"));
-				csvWriterFeature.add(writeEntityFeature);
-
-			}
-			else if (entity.getString("dataType").equals("categorical"))
-			{
-				writeEntityFeature.set("identifier", entity.getString("identifier"));
-				writeEntityFeature.set("name", entity.getString("name"));
-				writeEntityFeature.set("dataType", "string");
-				writeEntityFeature.set("description", entity.getString("description"));
-				csvWriterFeature.add(writeEntityFeature);
-
-			}
-			else
-			{
-				Iterator<String> it = entity.getAttributeNames().iterator();
-				while (it.hasNext())
+				else if (entity.getString("dataType") == null || entity.getString("dataType").equals("categorical"))
 				{
-					String value = it.next();
-					writeEntityFeature.set(value, entity.getString(value));
-				}
-				csvWriterFeature.add(writeEntityFeature);
-			}
+					writeEntityFeature.set("identifier", entity.getString("identifier"));
+					writeEntityFeature.set("name", entity.getString("name"));
+					writeEntityFeature.set("dataType", "string");
+					writeEntityFeature.set("description", entity.getString("description"));
+					csvWriterFeature.add(writeEntityFeature);
 
+				}
+				// else if (entity.getString("dataType").equals("categorical"))
+				// {
+				// writeEntityFeature.set("identifier", entity.getString("identifier"));
+				// writeEntityFeature.set("name", entity.getString("name"));
+				// writeEntityFeature.set("dataType", "string");
+				// writeEntityFeature.set("description", entity.getString("description"));
+				// csvWriterFeature.add(writeEntityFeature);
+				//
+				// }
+				else
+				{
+					Iterator<String> it = entity.getAttributeNames().iterator();
+					while (it.hasNext())
+					{
+						String value = it.next();
+						writeEntityFeature.set(value, entity.getString(value));
+					}
+					csvWriterFeature.add(writeEntityFeature);
+				}
+
+			}
 		}
-		csvWriterFeature.close();
+		finally
+		{
+			csvWriterFeature.close();
+		}
 	}
 
 	public String compareDate(String oldId, String newId, String date1, String date2, PrintWriter logfile)
