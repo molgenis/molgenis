@@ -26,11 +26,7 @@
 			}
 			
 			var dynaNodes = [];
-			if(catalog.children) {
-				$.each(catalog.children, function(idx, child) {
-					createDynatreeConfigRec(child, dynaNodes);
-				});
-			}
+			createDynatreeConfigRec(catalog, dynaNodes);
 			return dynaNodes;
 		}
 		
