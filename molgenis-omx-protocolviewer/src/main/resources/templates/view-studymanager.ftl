@@ -62,6 +62,13 @@
 							    	<div id="study-definition-editor-container">
 								    	<div id="study-definition-editor-info">
 										</div>
+                                        <div id="study-definition-state-select">
+                                            <select id="edit-state-select" name="edit-state-select">
+                                                <#list studyDefinitionStates as studyDefinitionState>
+                                                    <option value="${studyDefinitionState}">${studyDefinitionState}</option>
+                                                </#list>
+                                            </select>
+                                        </div>
 										<div id="study-definition-editor-tree">
 										</div>
 									</div>
