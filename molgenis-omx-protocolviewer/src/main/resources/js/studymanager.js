@@ -7,6 +7,7 @@
 		var viewTreeContainer = $('#study-definition-viewer-tree');
 		var editInfoContainer = $('#study-definition-editor-info');
 		var editTreeContainer = $('#study-definition-editor-tree');
+        var editStateSelect = $('#edit-state-select');
 		var updateStudyDefinitionBtn = $('#update-study-definition-btn');
 		
 		function createDynatreeConfig(catalog) {
@@ -115,6 +116,7 @@
 					editInfoContainer.html(createCatalogInfo(catalog));
 					editTreeContainer.empty();
 					editTreeContainer.dynatree({'minExpandLevel': 2, 'children': createDynatreeConfig(catalog), 'selectMode': 3, 'debugLevel': 0, 'checkbox': true});
+                    editStateSelect.val(catalog.status);
 				},
 				error: function (xhr) {
 					editTreeContainer.empty();
@@ -163,6 +165,7 @@
 				type : 'POST',
 				url : molgenis.getContextUrl() + '/update/' + studyDefinitionId,
 				data : JSON.stringify({
+                    'status': editStateSelect.val(),
 					'catalogItemIds': uniquecatalogItemIds
 				}),
 				contentType : 'application/json',

@@ -172,6 +172,7 @@ public class StudyManagerController extends MolgenisPluginController
 						return catalogItem;
 					}
 				}));
+        updatedStudyDefinition.setStatus(updateRequest.getStatus());
 
 		// update study definition
 		studyDefinitionManagerService.updateStudyDefinition(updatedStudyDefinition);
@@ -269,7 +270,9 @@ public class StudyManagerController extends MolgenisPluginController
 
 	public static class StudyDefinitionUpdateRequest
 	{
-		@NotNull
+        @NotNull
+        private StudyDefinition.Status status;
+        @NotNull
 		private List<String> catalogItemIds;
 
 		public List<String> getCatalogItemIds()
@@ -280,6 +283,16 @@ public class StudyManagerController extends MolgenisPluginController
 		public void setCatalogItemIds(List<String> catalogItemIds)
 		{
 			this.catalogItemIds = catalogItemIds;
+        }
+
+        public StudyDefinition.Status getStatus()
+        {
+            return status;
+        }
+
+        public void setStatus(StudyDefinition.Status status)
+        {
+            this.status = status;
 		}
 	}
 

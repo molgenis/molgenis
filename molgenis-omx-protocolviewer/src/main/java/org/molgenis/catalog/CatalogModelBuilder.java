@@ -29,6 +29,7 @@ public class CatalogModelBuilder
 		catalogModel.setDescription(catalog.getDescription());
 		catalogModel.setVersion(catalog.getVersion());
 		catalogModel.setAuthors(catalog.getAuthors());
+        catalogModel.setStatus(studyDefinition.getStatus());
 
 		createCatalogModelRec(catalogModel, catalog, studyDefinition, selectedOnly);
 		if (hasDescendantItems(catalogModel))
