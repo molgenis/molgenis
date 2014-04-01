@@ -218,6 +218,8 @@ public class EntityImportService
 			updateable.update(batch, dbAction, updateKey);
 		}
 
+		updateable.flush();
+
 		return entitiesToImport.size();
 	}
 
