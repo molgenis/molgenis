@@ -41,6 +41,7 @@ import org.molgenis.study.StudyDefinition;
 import org.molgenis.study.UnknownStudyDefinitionException;
 import org.molgenis.studymanager.StudyManagerService;
 import org.molgenis.util.FileStore;
+import org.molgenis.util.FileUploadUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.FileSystemResource;
@@ -49,6 +50,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -195,7 +197,11 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 		// create excel attachment for study data request
 		String appName = molgenisSettings.getProperty("app.name", "MOLGENIS");
 		long timestamp = System.currentTimeMillis();
-		String fileName = appName + "-request_" + timestamp + ".doc";
+
+		String originalFileName = FileUploadUtils.getOriginalFileName(requestForm);
+		String extension = StringUtils.getFilenameExtension(originalFileName);
+		String fileName = appName + "-request_" + timestamp + "." + extension;
+
 		File orderFile = fileStore.store(requestForm.getInputStream(), fileName);
 		String variablesFileName = appName + "-request_" + timestamp + "-variables.xls";
 		InputStream variablesIs = createStudyDefinitionXlsStream(studyDefinition);
