@@ -145,13 +145,13 @@ public class StudyManagerController extends MolgenisPluginController
 	public Map<String, Object> getCatalogWithStudyDefinition(@PathVariable String id) throws UnknownCatalogException,
 			UnknownStudyDefinitionException
 	{
-        Map map = new HashMap<String, Object>();
+		Map map = new HashMap<String, Object>();
 		// get study definition and catalog used to create study definition
 		StudyDefinition studyDefinition = studyDefinitionManagerService.getStudyDefinition(id);
 		Catalog catalog = catalogManagerService.getCatalogOfStudyDefinition(studyDefinition.getId());
 		map.put("catalog", CatalogModelBuilder.create(catalog, studyDefinition, false));
-        map.put("status", studyDefinition.getStatus());
-        return map;
+		map.put("status", studyDefinition.getStatus());
+		return map;
 	}
 
 	@RequestMapping(value = "/update/{id}", method = RequestMethod.POST)
@@ -177,7 +177,7 @@ public class StudyManagerController extends MolgenisPluginController
 						return catalogItem;
 					}
 				}));
-        updatedStudyDefinition.setStatus(updateRequest.getStatus());
+		updatedStudyDefinition.setStatus(updateRequest.getStatus());
 
 		// update study definition
 		studyDefinitionManagerService.updateStudyDefinition(updatedStudyDefinition);
@@ -275,9 +275,9 @@ public class StudyManagerController extends MolgenisPluginController
 
 	public static class StudyDefinitionUpdateRequest
 	{
-        @NotNull
-        private StudyDefinition.Status status;
-        @NotNull
+		@NotNull
+		private StudyDefinition.Status status;
+		@NotNull
 		private List<String> catalogItemIds;
 
 		public List<String> getCatalogItemIds()
@@ -288,16 +288,16 @@ public class StudyManagerController extends MolgenisPluginController
 		public void setCatalogItemIds(List<String> catalogItemIds)
 		{
 			this.catalogItemIds = catalogItemIds;
-        }
+		}
 
-        public StudyDefinition.Status getStatus()
-        {
-            return status;
-        }
+		public StudyDefinition.Status getStatus()
+		{
+			return status;
+		}
 
-        public void setStatus(StudyDefinition.Status status)
-        {
-            this.status = status;
+		public void setStatus(StudyDefinition.Status status)
+		{
+			this.status = status;
 		}
 	}
 
