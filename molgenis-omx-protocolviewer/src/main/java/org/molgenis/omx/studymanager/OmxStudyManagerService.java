@@ -191,6 +191,7 @@ public class OmxStudyManagerService implements StudyManagerService
 						return feature;
 					}
 				})));
+        studyDataRequest.setRequestStatus(studyDefinition.getStatus().toString());
 
 		dataService.update(StudyDataRequest.ENTITY_NAME, studyDataRequest);
 	}
