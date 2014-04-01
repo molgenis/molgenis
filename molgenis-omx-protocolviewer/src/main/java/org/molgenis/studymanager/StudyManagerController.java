@@ -83,6 +83,8 @@ public class StudyManagerController extends MolgenisPluginController
 	public String getStudyDefinitions(Model model)
 	{
 		model.addAttribute("dataLoadingEnabled", studyDefinitionManagerService.canLoadStudyData());
+		model.addAttribute("studyDefinitionStates", StudyDefinition.Status.values());
+		model.addAttribute("defaultStudyDefinitionState", StudyDefinition.Status.SUBMITTED);
 		return VIEW_NAME;
 	}
 
@@ -93,9 +95,9 @@ public class StudyManagerController extends MolgenisPluginController
 	 */
 	@RequestMapping(value = "/list", method = RequestMethod.GET)
 	@ResponseBody
-	public StudyDefinitionsMetaResponse getStudyDefinitionsMeta()
+	public StudyDefinitionsMetaResponse getStudyDefinitionsMeta(@RequestParam("state") StudyDefinition.Status status)
 	{
-		List<StudyDefinition> studyDefinitions = studyDefinitionManagerService.getStudyDefinitions();
+		List<StudyDefinition> studyDefinitions = studyDefinitionManagerService.getStudyDefinitions(status);
 		logger.debug("Got [" + studyDefinitions.size() + "] study definitions from service");
 
 		List<StudyDefinitionMetaModel> models = Lists.transform(studyDefinitions,
