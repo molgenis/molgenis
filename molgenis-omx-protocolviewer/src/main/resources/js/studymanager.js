@@ -47,7 +47,7 @@
 		function updateStudyDefinitionTable() {
 			$.ajax({
 				type : 'GET',
-				url : molgenis.getContextUrl() + '/list',
+				url : molgenis.getContextUrl() + '/list?state=' + $('#state-select').val(),
 				success : function(data) {
 					var table = $('#studyDefinitionList tbody');
 					var items = [];
@@ -173,6 +173,10 @@
 			});
 		});
 		
-		updateStudyDefinitionTable();
+		$('#state-select').change(function(){
+			updateStudyDefinitionTable();
+		});
+		
+		$('#state-select').change();
 	});
 }($, window.top.molgenis = window.top.molgenis || {}));
