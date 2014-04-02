@@ -21,10 +21,6 @@
 				<li><a href="#tab2" class="tab2" data-toggle="tab">Filter by: Genome</a></li>
 				<li><a href="#tab3" class="tab3" data-toggle="tab">Filter by: Phenotype</a></li>
 				<li><a href="#tab4" class="tab4" data-toggle="tab">Select your annotation</a></li>
-		
-				<li>
-					<button type="submit" form="execute-annotation-app" class="btn">Go</button>
-				</li>
 			</ul>
 		
 			<div class="tab-content" style="height:auto;">

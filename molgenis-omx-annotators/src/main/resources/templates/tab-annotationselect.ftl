@@ -1,7 +1,7 @@
 <#macro annotationselect_panel>
 	<#--Panel 4: Annotation tool / database selection-->
 	<div class="tab-pane" id="tab4">
-		<form id="execute-annotation-app" role="form" action="${context_url}/execute-annotation-app" method="post">
+		<form id="execute-annotation-app" role="form">
 			  
 			<h4>Your selected dataset: <div class=lead id="selected-dataset-name"></div></h4> 
 			
@@ -19,7 +19,7 @@
 						</div>
 						<div class="span5">
 							<h5>Annotations not available
-								<a id="disabled-tooltip" data-toggle="tooltip" data-placement="top-right" 
+								<a id="disabled-tooltip" data-toggle="tooltip"
 									title= "These annotations are not available for the selected data set because the data set does not contain the correct data"> 
 										
 									<span class="icon icon-question-sign"></span>
@@ -34,8 +34,8 @@
 				</div>	
 			</div>
 			
-			<input type="hidden" value="" id="dataset-identifier" name="dataset-identifier"></input>
-				
-		</form>	
+			<input type="hidden" value="" id="dataset-identifier" name="dataset-identifier">
+            <button id="execute-button" class="btn">Run annotation</button>
+		</form>
 	</div>
 </#macro>
