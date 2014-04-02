@@ -191,7 +191,7 @@ public class StudyManagerController extends MolgenisPluginController
 		}
 		else
 		{
-			throw new IllegalStateException("Cannot update APPROVED StudyDefinition");
+			throw new IllegalStateException("Cannot update APPROVED study definition");
 		}
 	}
 
