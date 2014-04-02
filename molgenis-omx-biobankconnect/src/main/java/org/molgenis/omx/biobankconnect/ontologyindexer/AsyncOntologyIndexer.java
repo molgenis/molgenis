@@ -1,6 +1,5 @@
 package org.molgenis.omx.biobankconnect.ontologyindexer;
 
-import java.io.File;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.StringUtils;
@@ -15,7 +14,6 @@ import org.molgenis.omx.observ.target.Ontology;
 import org.molgenis.omx.observ.target.OntologyTerm;
 import org.molgenis.search.SearchService;
 import org.molgenis.security.runas.RunAsSystem;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -43,7 +41,6 @@ public class AsyncOntologyIndexer implements OntologyIndexer, InitializingBean
 		if (searchService == null) throw new IllegalArgumentException("Missing bean of type SearchService");
 	}
 
-	@Override
 	public boolean isIndexingRunning()
 	{
 		return (runningIndexProcesses.get() > 0);
@@ -52,19 +49,18 @@ public class AsyncOntologyIndexer implements OntologyIndexer, InitializingBean
 	@Override
 	@Async
 	@RunAsSystem
-	public void index(String ontologyName, File ontologyFile)
+	public void index(OntologyLoader model)
 	{
 		isCorrectOntology = true;
 		runningIndexProcesses.incrementAndGet();
 
 		try
 		{
-			OntologyLoader model = new OntologyLoader(ontologyName, ontologyFile);
 			ontologyUri = model.getOntologyIRI() == null ? StringUtils.EMPTY : model.getOntologyIRI();
 			searchService.indexRepository(new OntologyRepository(model, "ontology-" + ontologyUri));
 			searchService.indexRepository(new OntologyTermRepository(model, "ontologyTerm-" + ontologyUri));
 		}
-		catch (OWLOntologyCreationException e)
+		catch (Exception e)
 		{
 			isCorrectOntology = false;
 			logger.error("Exception imported file is not a valid ontology", e);
@@ -99,13 +95,11 @@ public class AsyncOntologyIndexer implements OntologyIndexer, InitializingBean
 		searchService.deleteDocumentsByType("ontologyTerm-" + ontologyURI);
 	}
 
-	@Override
 	public String getOntologyUri()
 	{
 		return ontologyUri;
 	}
 
-	@Override
 	public boolean isCorrectOntology()
 	{
 		return this.isCorrectOntology;

@@ -79,7 +79,6 @@
 	<script type="text/javascript">
 		$(document).ready(function(){
 			var molgenis = window.top.molgenis;
-			molgenis.setContextURL('${context_url}');
 			$('#selectedDataSet').change(function(){
 				$('#evaluationForm').attr({
 					'action' : molgenis.getContextUrl(),

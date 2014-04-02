@@ -41,6 +41,7 @@
 		   	<plugin id="biobankanalysis" name="Biobank Analysis" url="biobankanalysis"/>
 	        <plugin id="evaluation" name="Evaluation" url="evaluation"/>
 	        <plugin id="ontologyindexer" name="Add Ontologies" url="ontologyindexer"/>
+	        <plugin id="ontologyservice" name="Ontology Service" url="ontologyservice"/>
         </menu>
         <plugin id="workflowdataentry" name="Workflow Editor" url="workflowdataentry"/>
         <menu label="Background" name="background">    

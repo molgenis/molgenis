@@ -27,6 +27,7 @@ import org.molgenis.data.processor.LowerCaseProcessor;
 import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.biobankconnect.utils.NGramMatchingModel;
+import org.molgenis.omx.biobankconnect.utils.TermComparison;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
@@ -558,48 +559,6 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		QueryRule[] nestedQuery = new QueryRule[rules.size()];
 		rules.toArray(nestedQuery);
 		return nestedQuery;
-	}
-
-	class TermComparison implements Comparable<TermComparison>
-	{
-		private final Hit hit;
-		private final Integer synonymLength;
-		private final Integer termLength;
-
-		public TermComparison(Hit hit)
-		{
-			Map<String, Object> data = hit.getColumnValueMap();
-			String ontologyTermSynonym = data.get("ontologyTermSynonym").toString().toLowerCase();
-			String ontologyTerm = data.get("ontologyTerm").toString().toLowerCase();
-			this.hit = hit;
-			this.synonymLength = ontologyTermSynonym.split(" +").length;
-			this.termLength = ontologyTerm.split(" +").length;
-		}
-
-		private Integer getSynonymLength()
-		{
-			return synonymLength;
-		}
-
-		private Integer getTermLength()
-		{
-			return termLength;
-		}
-
-		public Hit getHit()
-		{
-			return hit;
-		}
-
-		@Override
-		public int compareTo(TermComparison other)
-		{
-			if (synonymLength.compareTo(other.getSynonymLength()) == 0)
-			{
-				return this.termLength.compareTo(other.getTermLength());
-			}
-			else return this.synonymLength.compareTo(other.getSynonymLength()) * (-1);
-		}
 	}
 
 	@Override

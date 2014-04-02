@@ -23,6 +23,7 @@ public class OntologyTermRepository extends AbstractRepository implements Counta
 	private final String ontologyIRI;
 	private final String ontologyName;
 	private final String name;
+	private final static String ID = "id";
 	private final static String NODE_PATH = "nodePath";
 	private final static String BOOST = "boost";
 	private final static String ONTOLOGY_IRI = "ontologyIRI";
@@ -77,6 +78,7 @@ public class OntologyTermRepository extends AbstractRepository implements Counta
 	public EntityMetaData getEntityMetaData()
 	{
 		DefaultEntityMetaData metaData = new DefaultEntityMetaData(name);
+		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ID, FieldTypeEnum.STRING));
 		metaData.addAttributeMetaData(new DefaultAttributeMetaData(NODE_PATH, FieldTypeEnum.STRING));
 		metaData.addAttributeMetaData(new DefaultAttributeMetaData(BOOST, FieldTypeEnum.STRING));
 		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_IRI, FieldTypeEnum.STRING));
@@ -123,6 +125,7 @@ public class OntologyTermRepository extends AbstractRepository implements Counta
 		for (String synonym : synonyms)
 		{
 			Entity entity = new MapEntity();
+			entity.set(ID, loader.getId(cls));
 			entity.set(NODE_PATH, termPath + "[" + (termPath.split("\\.").length - 1) + "]");
 			entity.set(BOOST, false);
 			entity.set(ONTOLOGY_IRI, ontologyIRI);
