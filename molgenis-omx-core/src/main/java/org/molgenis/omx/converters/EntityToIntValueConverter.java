@@ -41,7 +41,7 @@ public class EntityToIntValueConverter implements EntityToValueConverter<IntValu
 	}
 
 	@Override
-	public Cell<Integer> toCell(Value value) throws ValueConverterException
+	public Cell<Integer> toCell(Value value, ObservableFeature feature) throws ValueConverterException
 	{
 		if (!(value instanceof IntValue))
 		{

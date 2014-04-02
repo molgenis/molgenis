@@ -14,7 +14,7 @@ public class TupleToIntValueConverterTest
 	{
 		IntValue value = new IntValue();
 		value.setValue(123);
-		assertEquals(new EntityToIntValueConverter().toCell(value).getValue(), Integer.valueOf(123));
+		assertEquals(new EntityToIntValueConverter().toCell(value, null).getValue(), Integer.valueOf(123));
 	}
 
 	@Test
