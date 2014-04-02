@@ -308,15 +308,6 @@ public class IBDParser
 					csvWriterFeature.add(writeEntityFeature);
 
 				}
-				// else if (entity.getString("dataType").equals("categorical"))
-				// {
-				// writeEntityFeature.set("identifier", entity.getString("identifier"));
-				// writeEntityFeature.set("name", entity.getString("name"));
-				// writeEntityFeature.set("dataType", "string");
-				// writeEntityFeature.set("description", entity.getString("description"));
-				// csvWriterFeature.add(writeEntityFeature);
-				//
-				// }
 				else
 				{
 					Iterator<String> it = entity.getAttributeNames().iterator();
