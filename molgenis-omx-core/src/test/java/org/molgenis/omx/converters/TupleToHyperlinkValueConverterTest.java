@@ -14,7 +14,7 @@ public class TupleToHyperlinkValueConverterTest
 	{
 		HyperlinkValue value = new HyperlinkValue();
 		value.setValue("http://www.a.org/");
-		assertEquals(new EntityToHyperlinkValueConverter().toCell(value).getValue(), "http://www.a.org/");
+		assertEquals(new EntityToHyperlinkValueConverter().toCell(value, null).getValue(), "http://www.a.org/");
 	}
 
 	@Test

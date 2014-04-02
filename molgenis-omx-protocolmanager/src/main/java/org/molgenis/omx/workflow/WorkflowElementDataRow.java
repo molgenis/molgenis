@@ -100,7 +100,7 @@ public class WorkflowElementDataRow
 			ValueConverter valueConverter = new ValueConverter(dataService);
 			for (ObservedValue observedValue : observedValues)
 			{
-				Object value = valueConverter.toCell(observedValue.getValue()).getValue();
+				Object value = valueConverter.toCell(observedValue.getValue(), observedValue.getFeature()).getValue();
 				valueMap.put(observedValue.getFeature().getId(), value);
 			}
 		}

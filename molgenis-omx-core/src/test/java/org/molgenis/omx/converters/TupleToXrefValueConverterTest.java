@@ -22,7 +22,7 @@ public class TupleToXrefValueConverterTest
 		XrefValue value = new XrefValue();
 		value.setValue(ch1);
 		CharacteristicLoadingCache characteristicLoadingCache = mock(CharacteristicLoadingCache.class);
-		Cell<String> cell = new EntityToXrefValueConverter(characteristicLoadingCache).toCell(value);
+		Cell<String> cell = new EntityToXrefValueConverter(characteristicLoadingCache).toCell(value, null);
 		assertEquals(cell.getKey(), "ch1");
 		assertEquals(cell.getValue(), "ch1");
 	}

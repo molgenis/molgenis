@@ -14,7 +14,7 @@ public class TupleToBoolValueConverterTest
 	{
 		BoolValue value = new BoolValue();
 		value.setValue(Boolean.TRUE);
-		assertEquals(new EntityToBoolValueConverter().toCell(value).getValue(), Boolean.TRUE);
+		assertEquals(new EntityToBoolValueConverter().toCell(value, null).getValue(), Boolean.TRUE);
 	}
 
 	@Test

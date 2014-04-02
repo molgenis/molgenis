@@ -34,7 +34,7 @@ public class EntityToBoolValueConverter implements EntityToValueConverter<BoolVa
 	}
 
 	@Override
-	public Cell<Boolean> toCell(Value value) throws ValueConverterException
+	public Cell<Boolean> toCell(Value value, ObservableFeature feature) throws ValueConverterException
 	{
 		if (!(value instanceof BoolValue))
 		{
