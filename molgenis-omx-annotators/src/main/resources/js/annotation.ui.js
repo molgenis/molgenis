@@ -20,7 +20,7 @@
 					var disabledAnnotators = [];
 					
 					for(var key in resultMap){
-						if(resultMap[key]['canAnnotate'] == true){
+						if(resultMap[key]['canAnnotate'] === true){
 							enabledAnnotators.push('<label class="checkbox">\n');
 							enabledAnnotators.push('<input type="checkbox" class="checkbox" name="annotatorNames" value="' + key + '">' + key+ ' <a id="disabled-tooltip" class="darktooltip" data-toggle="tooltip" title="Input:\t'+resultMap[key]["inputMetadata"].toString()+'\nOutput:\t'+resultMap[key]["outputMetadata"].toString()+'"><span class="icon icon-info-sign"></span></a>');
 							enabledAnnotators.push('</label>');
@@ -80,19 +80,13 @@
             e.preventDefault();
             e.stopPropagation();
             if (form.valid()) {
-                showSpinner();
                 $.ajax({
                     type: 'POST',
                     url: molgenis.getContextUrl() + '/execute-annotation-app/',
                     data: form.serialize(),
                     contentType: 'application/x-www-form-urlencoded',
                     success: function (name) {
-                        hideSpinner();
                         molgenis.createAlert([{'message': 'Annotation completed. <a href="http://localhost:8080/menu/main/dataexplorer?dataset='+name+'">Show result</a>'}], 'success');
-                    },
-                    error : function (xhr, textStatus, errorThrown) {
-                        hideSpinner();
-                        molgenis.createAlert("Annotation failed");
                     }
                 });
             }
