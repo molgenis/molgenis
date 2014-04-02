@@ -39,15 +39,17 @@
 				$('<div />').addClass('row-fluid').append(ontologyTermName).append(ontologyTermUrl).append(matchScore).appendTo(ontologyTermMatchDiv);
 				scoreGroup.push(parseFloat(hit.columnValueMap.combinedScore.toFixed(2)));
 			});
-			var classifications = ss.jenks(scoreGroup, 2);	
-			var index = scoreGroup.indexOf(classifications[1]);
-			if(index !== scoreGroup.length - 1){
-				var separatLine = $('<legend />').css({
-					'padding-top':'15px',
-					'padding-bottom':'5px',
-					'border-bottom-color':'#CC0025'
-				});
-				ontologyTermMatchDiv.children('div.row-fluid:eq(' + index + ')').append(separatLine);
+			if(scoreGroup.length > 2){
+				var classifications = ss.jenks(scoreGroup, 2);	
+				var index = scoreGroup.indexOf(classifications[1]);
+				if(index !== scoreGroup.length - 1){
+					var separatLine = $('<legend />').css({
+						'padding-top':'15px',
+						'padding-bottom':'5px',
+						'border-bottom-color':'#CC0025'
+					});
+					ontologyTermMatchDiv.children('div.row-fluid:eq(' + (index - 1) + ')').append(separatLine);
+				}
 			}
 			var divWithColor = $('<div />').addClass('span12 well').append(layoutDiv);
 			$('<div />').addClass('row-fluid').append(divWithColor).appendTo(container);
