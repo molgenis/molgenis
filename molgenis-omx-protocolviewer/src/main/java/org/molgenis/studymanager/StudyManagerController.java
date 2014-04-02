@@ -132,12 +132,16 @@ public class StudyManagerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/view/{id}", method = RequestMethod.GET)
 	@ResponseBody
-	public CatalogModel getStudyDefinitionAsCatalog(@PathVariable String id) throws UnknownCatalogException,
+	public Map<String, Object> getStudyDefinitionAsCatalog(@PathVariable String id) throws UnknownCatalogException,
 			UnknownStudyDefinitionException
 	{
+		Map map = new HashMap<String, Object>();
+		// get study definition and catalog used to create study definition
 		StudyDefinition studyDefinition = studyDefinitionManagerService.getStudyDefinition(id);
 		Catalog catalog = catalogManagerService.getCatalogOfStudyDefinition(studyDefinition.getId());
-		return CatalogModelBuilder.create(catalog, studyDefinition, true);
+		map.put("catalog", CatalogModelBuilder.create(catalog, studyDefinition, true));
+		map.put("status", studyDefinition.getStatus());
+		return map;
 	}
 
 	@RequestMapping(value = "/edit/{id}", method = RequestMethod.GET)
