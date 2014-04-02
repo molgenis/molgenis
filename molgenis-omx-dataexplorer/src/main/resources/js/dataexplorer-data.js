@@ -111,6 +111,7 @@
                     settings.sources.push(dallianceTrack);
                 }
             });
+            settings.registry = 'https://www.dasregistry.org/das/sources';
             genomeBrowser = new Browser(settings);
             genomeBrowser.realInit();
             var featureInfoMap = {};
