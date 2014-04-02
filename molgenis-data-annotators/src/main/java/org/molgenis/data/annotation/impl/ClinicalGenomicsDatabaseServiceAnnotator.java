@@ -47,6 +47,8 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 	public static final String CONDITION = "CONDITION";
 	public static final String ENTREZ_GENE_ID = "ENTREZ GENE ID";
 	public static final String GENE = "GENE";
+	public static final String HGNC_ID = "HGNC ID";
+	
 
 	@Autowired
 	public ClinicalGenomicsDatabaseServiceAnnotator(MolgenisSettings molgenisSettings,
@@ -107,16 +109,17 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 							{
 								HashMap<String, Object> resultMap = new HashMap<String, Object>();
 								resultMap.put(GENE, split[0]);
-								resultMap.put(ENTREZ_GENE_ID, split[1]);
-								resultMap.put(CONDITION, split[2]);
-								resultMap.put(INHERITANCE, split[3]);
-								resultMap.put(AGE_GROUP, split[4]);
-								resultMap.put(ALLELIC_CONDITIONS, split[5]);
-								resultMap.put(MANIFESTATION_CATEGORIES, split[6]);
-								resultMap.put(INTERVENTION_CATEGORIES, split[7]);
-								resultMap.put(COMMENTS, split[8]);
-								resultMap.put(INTERVENTION_RATIONALE, split[9]);
-								resultMap.put(REFERENCES, split[10]);
+								resultMap.put(HGNC_ID, split[1]);
+								resultMap.put(ENTREZ_GENE_ID, split[2]);
+								resultMap.put(CONDITION, split[3]);
+								resultMap.put(INHERITANCE, split[4]);
+								resultMap.put(AGE_GROUP, split[5]);
+								resultMap.put(ALLELIC_CONDITIONS, split[6]);
+								resultMap.put(MANIFESTATION_CATEGORIES, split[7]);
+								resultMap.put(INTERVENTION_CATEGORIES, split[8]);
+								resultMap.put(COMMENTS, split[9]);
+								resultMap.put(INTERVENTION_RATIONALE, split[10]);
+								resultMap.put(REFERENCES, split[11]);
 								resultMap.put(CHROMOSOME, chromosome);
 								resultMap.put(POSITION, position);
 
@@ -155,6 +158,7 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
 
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(GENE, MolgenisFieldTypes.FieldTypeEnum.STRING));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HGNC_ID, MolgenisFieldTypes.FieldTypeEnum.LONG));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ENTREZ_GENE_ID, MolgenisFieldTypes.FieldTypeEnum.INT));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CONDITION, MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(INHERITANCE, MolgenisFieldTypes.FieldTypeEnum.STRING));

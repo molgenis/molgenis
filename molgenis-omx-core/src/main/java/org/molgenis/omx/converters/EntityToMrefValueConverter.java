@@ -99,7 +99,7 @@ public class EntityToMrefValueConverter implements EntityToValueConverter<MrefVa
 	}
 
 	@Override
-	public Cell<List<Cell<String>>> toCell(Value value) throws ValueConverterException
+	public Cell<List<Cell<String>>> toCell(Value value, ObservableFeature feature) throws ValueConverterException
 	{
 		if (!(value instanceof MrefValue))
 		{

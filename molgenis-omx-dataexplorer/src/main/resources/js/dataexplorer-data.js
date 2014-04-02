@@ -216,14 +216,23 @@
 	}
 	//--END genome browser--
 	
+	/**
+	 * @memberOf molgenis.dataexplorer.data
+	 */
 	function getEntity() {
 		return molgenis.dataexplorer.getSelectedEntityMeta();
 	}
 	
+	/**
+	 * @memberOf molgenis.dataexplorer.data
+	 */
 	function getAttributes() {
 		return molgenis.dataexplorer.getSelectedAttributes();
 	}
 	
+	/**
+	 * @memberOf molgenis.dataexplorer.data
+	 */
 	function getQuery() {
 		return molgenis.dataexplorer.getEntityQuery();
 	}

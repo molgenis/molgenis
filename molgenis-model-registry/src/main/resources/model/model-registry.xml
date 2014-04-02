@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<molgenis name="org.molgenis.data.model">
+	<module name="registry">
+		<entity name="EntityClass" xref_lookup="identifier,fullName">
+			<field name="id" type="autoid" hidden="true" description="automatically generated internal id, only for internal use." />
+			<field name="identifier" type="string" description="Unique identifier for an entityclass" />
+			<field name="fullName" type="string" />
+			<field name="type" type="enum" default="undefined" enum_options="[dataset, model, format, guideline, undefined]" />
+			<field name="description" type="text" nillable="true" />
+			<field name="tags" type="mref" xref_entity="OntologyTerm" nillable="true" />
+			<field name="homepage" type="hyperlink" nillable="true" />
+			<unique fields="identifier" />	
+			<unique fields="fullName" />	
+		</entity>
+		<entity name="AttributeClass">
+			<field name="id" type="autoid" hidden="true" description="automatically generated internal id, only for internal use." />
+			<field name="identifier" type="string" description="Unique identifier for an entityclass" />
+			<field name="entityClass" type="xref" xref_entity="EntityClass" />
+			<field name="fullName" type="string" />
+			<field name="description" type="text" nillable="true" />
+			<field name="nillable" type="bool" default="false" />
+			<field name="dataType" type="enum" default="string" enum_options="[bool,categorical,compound,date,datetime,decimal,email,enum,file,html,hyperlink,image,int,long,mref,string,text,xref]" />
+			<unique fields="entityClass,identifier" />
+		</entity>
+	</module>	
+</molgenis>
