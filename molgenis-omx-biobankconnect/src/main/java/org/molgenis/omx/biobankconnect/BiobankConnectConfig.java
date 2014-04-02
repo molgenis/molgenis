@@ -3,9 +3,9 @@ package org.molgenis.omx.biobankconnect;
 import org.molgenis.omx.biobankconnect.ontologyannotator.AsyncOntologyAnnotator;
 import org.molgenis.omx.biobankconnect.ontologyannotator.OntologyAnnotator;
 import org.molgenis.omx.biobankconnect.ontologyindexer.AsyncOntologyIndexer;
-import org.molgenis.omx.biobankconnect.ontologyindexer.OntologyIndexer;
 import org.molgenis.omx.biobankconnect.ontologymatcher.AsyncOntologyMatcher;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcher;
+import org.molgenis.omx.biobankconnect.ontologyservice.OntologyService;
 import org.molgenis.omx.biobankconnect.wizard.CurrentUserStatus;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,7 +22,7 @@ public class BiobankConnectConfig
 	 * @return HarmonizationIndexer
 	 */
 	@Bean
-	public OntologyIndexer harmonizationIndexer()
+	public AsyncOntologyIndexer harmonizationIndexer()
 	{
 		return new AsyncOntologyIndexer();
 	}
@@ -38,6 +38,12 @@ public class BiobankConnectConfig
 	public OntologyMatcher ontologyMatcher()
 	{
 		return new AsyncOntologyMatcher();
+	}
+
+	@Bean
+	public OntologyService ontologyService()
+	{
+		return new OntologyService();
 	}
 
 	@Bean
