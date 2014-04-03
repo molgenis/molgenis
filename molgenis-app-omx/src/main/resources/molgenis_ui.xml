@@ -5,7 +5,7 @@
 		<plugin id="protocolviewer" name="Catalog" url="protocolviewer"/>
 		<plugin id="dataexplorer" name="Data Explorer" url="dataexplorer"/>	
 		<plugin id="importwizard" name="Upload" url="importwizard"/>
-		<plugin id="annotationwizard" name="Annotate" url="annotateUI"/>
+		<plugin id="annotationwizard" name="Annotate" url="annotationwizard"/>
 		<plugin id="models" name="Model registry" url="models" />
 		<menu label="Entities" name ="entities">
         		<plugin id="form.DataSet" name="DataSet" url="form.DataSet"/>
