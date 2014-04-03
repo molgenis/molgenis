@@ -21,7 +21,7 @@ public class LimitMethod implements TemplateMethodModelEx
 	{
 		if (s.length() > nrOfCharacters)
 		{
-			return s.substring(0, nrOfCharacters - 3) + "...";
+			return s.substring(0, nrOfCharacters - 6) + " [...]";
 		}
 
 		return s;
