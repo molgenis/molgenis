@@ -54,7 +54,7 @@ public class AnnotatorsUIController extends MolgenisPluginController
 
 	private static final Logger logger = Logger.getLogger(AnnotatorsUIController.class);
 
-	private static final String ID = "annotateUI";
+	private static final String ID = "annotationwizard";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
 	private final AnnotatorsUIService pluginAnnotatorsUIService;
