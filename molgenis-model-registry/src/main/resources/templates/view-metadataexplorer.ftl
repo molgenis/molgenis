@@ -31,13 +31,8 @@
 					
 <#list entityClasses as entityClass>
 	<div class="well">
-		<div class="row-fluid">
-			<div class="span2">Identifier:</div>
-			<div class="span10 value">${entityClass.entityClassIdentifier}</div>
-		</div>
-		<div class="row-fluid">
-			<div class="span2">Full name:</div>
-			<div class="span10">${entityClass.fullName}</div>
+		<div class="row-fluid entity-class-header">
+			<h3>${entityClass.fullName}</h3> <i>(${entityClass.entityClassIdentifier})</i>
 		</div>
 		<div class="row-fluid">
 			<div class="span2">Type:</div>
@@ -46,7 +41,7 @@
 		<#if entityClass.description?? && entityClass.description != ''>
 			<div class="row-fluid">
 				<div class="span2">Description:</div>
-				<div class="span10">${limit(entityClass.description, 50)}</div>
+				<div class="span10">${limit(entityClass.description, 150)}</div>
 			</div>
 		</#if>
 		<#if entityClass.tags?size &gt; 0>
