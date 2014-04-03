@@ -46,7 +46,7 @@
 				type : 'GET',
 				url : molgenis.getContextUrl() + '/list?state=' + $('#state-select').val(),
 				success : function(data) {
-                    if(data.studyDefinitions.length == 0){
+                    if(data.studyDefinitions.length === 0){
                         $('#study-definition-info').hide();
                     }else{
                         $('#study-definition-info').show();
