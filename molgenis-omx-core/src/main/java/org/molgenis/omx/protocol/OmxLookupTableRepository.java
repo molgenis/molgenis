@@ -1,4 +1,4 @@
-package org.molgenis.data.omx;
+package org.molgenis.omx.protocol;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -11,12 +11,10 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Queryable;
 import org.molgenis.data.Writable;
 import org.molgenis.data.support.AbstractRepository;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.QueryResolver;
 import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.ObservableFeature;
-import org.molgenis.omx.protocol.OmxLookupTableEntityMetaData;
 
 public class OmxLookupTableRepository extends AbstractRepository implements Queryable, Writable
 {
@@ -50,7 +48,7 @@ public class OmxLookupTableRepository extends AbstractRepository implements Quer
 	@Override
 	public Class<? extends Entity> getEntityClass()
 	{
-		return MapEntity.class;
+		return Category.class;
 	}
 
 	@Override

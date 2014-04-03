@@ -14,7 +14,7 @@ public class TupleToLongValueConverterTest
 	{
 		LongValue value = new LongValue();
 		value.setValue(1234l);
-		assertEquals(new EntityToLongValueConverter().toCell(value).getValue(), Long.valueOf(1234l));
+		assertEquals(new EntityToLongValueConverter().toCell(value, null).getValue(), Long.valueOf(1234l));
 	}
 
 	@Test

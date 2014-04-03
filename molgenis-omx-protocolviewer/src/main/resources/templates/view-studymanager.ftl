@@ -45,8 +45,8 @@
 						</div>
 						<div class="span6" id="study-definition-info">
 							<ul class="nav nav-tabs">
-								<li class="active"><a href="#study-definition-viewer" data-toggle="tab">Details</a></li>
-								<li><a href="#study-definition-editor" data-toggle="tab">Manage</a></li>
+								<li id='details-tab' class="active"><a href="#study-definition-viewer" data-toggle="tab">Details</a></li>
+								<li id='manage-tab' ><a href="#study-definition-editor" data-toggle="tab">Manage</a></li>
 							</ul>
 							<div class="tab-content">
 							    <div class="tab-pane active" id="study-definition-viewer">

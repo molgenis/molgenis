@@ -398,9 +398,9 @@ function createInput(dataType, attrs, val, lbl) {
 			resourceUri = uriParts[0];
 			qs = '?' + uriParts[1];
 		}
-		if (options && options.attributes)
+		if (options && options.attributes && options.attributes.length > 0)
 			qs += (qs.length === 0 ? '?' : '&') + 'attributes=' + options.attributes.join(',');
-		if (options && options.expand)
+		if (options && options.expand && options.expand.length > 0)
 			qs += (qs.length === 0 ? '?' : '&') + 'expand=' + options.expand.join(',');
 		if (options && options.q)
 			qs += (qs.length === 0 ? '?' : '&') + '_method=GET';

@@ -67,7 +67,7 @@ public class DataSetMatrixRepository extends AbstractDataSetMatrixRepository imp
 					{
 						ObservableFeature feature = v.getFeature();
 						Value value = v.getValue();
-						entity.set(feature.getIdentifier(), valueConverter.toCell(value));
+						entity.set(feature.getIdentifier(), valueConverter.toCell(value, feature));
 					}
 					entity.set("partOfDataset", currentRowToGet.getPartOfDataSet().getIdentifier());
 				}

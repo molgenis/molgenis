@@ -42,7 +42,7 @@ public class EntityToLongValueConverter implements EntityToValueConverter<LongVa
 	}
 
 	@Override
-	public Cell<Long> toCell(Value value) throws ValueConverterException
+	public Cell<Long> toCell(Value value, ObservableFeature feature) throws ValueConverterException
 	{
 		if (!(value instanceof LongValue))
 		{

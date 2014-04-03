@@ -18,7 +18,7 @@ public class TupleToDateValueConverterTest
 		Date date = new Date(1371420000000l);
 		DateValue value = new DateValue();
 		value.setValue(date);
-		assertEquals(new EntityToDateValueConverter().toCell(value).getValue(), "2013-06-17");
+		assertEquals(new EntityToDateValueConverter().toCell(value, null).getValue(), "2013-06-17");
 	}
 
 	@Test
