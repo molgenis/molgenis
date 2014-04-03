@@ -23,9 +23,9 @@ public class OntologyTermRepository extends AbstractRepository implements Counta
 	private final String ontologyIRI;
 	private final String ontologyName;
 	private final String name;
-	private final static String ID = "termId";
+	private final static String ID = "id";
 	private final static String NODE_PATH = "nodePath";
-	private final static String ROOT = "root";
+	private final static String BOOST = "boost";
 	private final static String ONTOLOGY_IRI = "ontologyIRI";
 	private final static String ONTOLOGY_NAME = "ontologyName";
 	private final static String ONTOLOGY_TERM = "ontologyTerm";
@@ -79,8 +79,8 @@ public class OntologyTermRepository extends AbstractRepository implements Counta
 	{
 		DefaultEntityMetaData metaData = new DefaultEntityMetaData(name);
 		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ID, FieldTypeEnum.STRING));
-		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ROOT, FieldTypeEnum.BOOL));
 		metaData.addAttributeMetaData(new DefaultAttributeMetaData(NODE_PATH, FieldTypeEnum.STRING));
+		metaData.addAttributeMetaData(new DefaultAttributeMetaData(BOOST, FieldTypeEnum.STRING));
 		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_IRI, FieldTypeEnum.STRING));
 		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_TERM, FieldTypeEnum.STRING));
 		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_TERM_IRI, FieldTypeEnum.STRING));
@@ -97,13 +97,12 @@ public class OntologyTermRepository extends AbstractRepository implements Counta
 		int count = 0;
 		for (OWLClass subClass : model.getTopClasses())
 		{
-			recursiveAddEntity("0." + count, subClass, model, entities, true);
+			recursiveAddEntity("0[0]." + count, subClass, model, entities);
 			count++;
 		}
 	}
 
-	private void recursiveAddEntity(String termPath, OWLClass cls, OntologyLoader ontologyLoader,
-			List<Entity> entities, boolean root)
+	private void recursiveAddEntity(String termPath, OWLClass cls, OntologyLoader ontologyLoader, List<Entity> entities)
 	{
 		String label = ontologyLoader.getLabel(cls).replaceAll("[^a-zA-Z0-9 ]", " ");
 		Set<String> synonyms = new HashSet<String>();
@@ -122,12 +121,13 @@ public class OntologyTermRepository extends AbstractRepository implements Counta
 					.append("&&&");
 			alternativeDefinitions.append(newDefinition);
 		}
+
 		for (String synonym : synonyms)
 		{
 			Entity entity = new MapEntity();
 			entity.set(ID, loader.getId(cls));
-			entity.set(ROOT, root);
 			entity.set(NODE_PATH, termPath + "[" + (termPath.split("\\.").length - 1) + "]");
+			entity.set(BOOST, false);
 			entity.set(ONTOLOGY_IRI, ontologyIRI);
 			entity.set(ONTOLOGY_NAME, ontologyName);
 			entity.set(ONTOLOGY_TERM, label);
@@ -145,8 +145,9 @@ public class OntologyTermRepository extends AbstractRepository implements Counta
 			int i = 0;
 			for (OWLClass childClass : listOfChildren)
 			{
-				String childTermPath = termPath + "." + i;
-				recursiveAddEntity(childTermPath, childClass, ontologyLoader, entities, false);
+				int level = termPath.split("\\.").length - 1;
+				String childTermPath = termPath + "[" + level + "]." + i;
+				recursiveAddEntity(childTermPath, childClass, ontologyLoader, entities);
 				i++;
 			}
 		}
