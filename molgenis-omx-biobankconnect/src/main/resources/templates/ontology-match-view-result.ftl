@@ -11,9 +11,13 @@
 					<legend><center><h3>Ontology Annotator</h3></center></legend>
 				</div>
 			</div>
-			<div class="row-fluid btn-group">
-				<a id="download-button" href="${context_url}/match/download" type="button" class="btn btn-primary">Download</a>
-				<a id="back-button" href="${context_url}" type="button" class="btn btn">Back</a>
+			<div class="row-fluid">
+				<div class="span1">
+					<a id="back-button" href="${context_url}" type="button" class="btn btn-info">Back</a>
+				</div>
+				<div>
+					<a id="download-button" href="${context_url}/match/download" type="button" class="btn btn-primary">Download</a>
+				</div>
 			</div>
 			<br><br>
 			<#if (total > 0)>
