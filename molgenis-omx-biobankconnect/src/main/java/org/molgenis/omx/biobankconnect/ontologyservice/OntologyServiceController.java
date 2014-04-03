@@ -32,6 +32,7 @@ import org.molgenis.data.csv.CsvRepository;
 import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.data.processor.LowerCaseProcessor;
 import org.molgenis.data.rest.EntityCollectionResponse;
+import org.molgenis.data.rest.EntityMetaDataResponse;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.ui.MolgenisPluginController;
@@ -72,6 +73,15 @@ public class OntologyServiceController extends MolgenisPluginController
 	{
 		model.addAttribute("ontologies", ontologyService.getAllOntologies());
 		return "ontology-match-view";
+	}
+
+	@RequestMapping(value = "/ontologytree", method = POST, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public EntityMetaDataResponse getEntityMetaData(@RequestBody
+	OntologyServiceRequest request)
+	{
+		Hit ontology = ontologyService.getOntologyByUrl(request.getOntologyUrl());
+		return new EntityMetaDataResponse(new OntologyEntityMetaData(ontology), null, null);
 	}
 
 	@RequestMapping(method = POST, value = "/match")
@@ -149,27 +159,6 @@ public class OntologyServiceController extends MolgenisPluginController
 						}
 					}
 				}
-				// for (String term : inputTerms)
-				// {
-				// for (Hit hit : ontologyService.search(ontologyUrl,
-				// term).getSearchHits())
-				// {
-				// Entity row = new MapEntity();
-				// row.set("InputTerm", term);
-				// row.set("OntologyTerm",
-				// hit.getColumnValueMap().get("ontologyTerm"));
-				// row.set("Synonym used for matching",
-				// hit.getColumnValueMap().get("ontologyTermSynonym"));
-				// row.set("OntologyTermUrl",
-				// hit.getColumnValueMap().get("ontologyTermIRI"));
-				// row.set("OntologyUrl",
-				// hit.getColumnValueMap().get("ontologyIRI"));
-				// row.set("CombinedScore",
-				// hit.getColumnValueMap().get("combinedScore"));
-				// row.set("LuceneScore", hit.getColumnValueMap().get("score"));
-				// csvWriter.add(row);
-				// }
-				// }
 			}
 			finally
 			{
@@ -216,7 +205,7 @@ public class OntologyServiceController extends MolgenisPluginController
 	public SearchResult retrieveEntity(@PathVariable("id")
 	String id)
 	{
-		return ontologyService.searchById("id", id);
+		return ontologyService.searchById("termId", id);
 	}
 
 	@RequestMapping(method = POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)

@@ -36,6 +36,29 @@ public class OntologyService
 	private static final String COMBINED_SCORE = "combinedScore";
 	private static final String SCORE = "score";
 
+	public Hit getOntologyByUrl(String ontologyUrl)
+	{
+		QueryImpl q = new QueryImpl();
+		q.pageSize(1000);
+		q.addRule(new QueryRule(ENTITY_TYPE, Operator.EQUALS, "indexedOntology"));
+		q.addRule(new QueryRule(Operator.AND));
+		q.addRule(new QueryRule(ONTOLOGY_IRI, Operator.EQUALS, ontologyUrl));
+		SearchRequest searchRequest = new SearchRequest(createOntologyDocumentType(ontologyUrl), q, null);
+		List<Hit> searchHits = searchService.search(searchRequest).getSearchHits();
+		if (searchHits.size() > 0) return searchHits.get(0);
+		return new Hit(null, createOntologyDocumentType(ontologyUrl), Collections.<String, Object> emptyMap());
+	}
+
+	public List<Hit> getRootOntologyTerms(String ontologyUrl)
+	{
+		QueryImpl q = new QueryImpl();
+		q.pageSize(10000);
+		q.addRule(new QueryRule("root", Operator.EQUALS, true));
+		SearchRequest searchRequest = new SearchRequest(OntologyService.createOntologyTermDocumentType(ontologyUrl), q,
+				null);
+		return searchService.search(searchRequest).getSearchHits();
+	}
+
 	public List<Ontology> getAllOntologies()
 	{
 		List<Ontology> ontologies = new ArrayList<Ontology>();
@@ -86,7 +109,7 @@ public class OntologyService
 		}
 
 		queryString = StringUtils.join(uniqueTerms, " +");
-		SearchRequest request = new SearchRequest(createDocumentType(ontologyUrl), q, null);
+		SearchRequest request = new SearchRequest(createOntologyTermDocumentType(ontologyUrl), q, null);
 		Iterator<Hit> iterator = searchService.search(request).getSearchHits().iterator();
 
 		List<ComparableHit> comparableHits = new ArrayList<ComparableHit>();
@@ -121,7 +144,12 @@ public class OntologyService
 		return new SearchResult(hits.size(), hits);
 	}
 
-	private String createDocumentType(String ontologyUrl)
+	public static String createOntologyDocumentType(String ontologyUrl)
+	{
+		return "ontology-" + ontologyUrl;
+	}
+
+	public static String createOntologyTermDocumentType(String ontologyUrl)
 	{
 		return "ontologyTerm-" + ontologyUrl;
 	}
