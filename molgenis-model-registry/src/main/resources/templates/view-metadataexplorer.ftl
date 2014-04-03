@@ -12,7 +12,7 @@
 	<form id="model-search-form" action="" method="POST">
 		<div class="input-append span4">
 			<span class="search-label">Search:</span>
-			<input class="span8" id="search-input" name="searchTerm" type="text" placeholder="Type here your search" value="${form.searchTerm!}">
+			<input class="span8" id="search-input" name="searchTerm" type="text" placeholder="Type here your search" autofocus="autofocus" value="${form.searchTerm!}">
 			<button class="btn" type="button" id="clear-button"><i class="icon-large icon-remove"></i></button>
 			<button class="btn" type="submit" id="search-button"><i class="icon-large icon-search"></i></button>
 		</div>	
@@ -46,7 +46,7 @@
 		<#if entityClass.description?? && entityClass.description != ''>
 			<div class="row-fluid">
 				<div class="span2">Description:</div>
-				<div class="span10">${entityClass.description}</div>
+				<div class="span10">${limit(entityClass.description, 50)}</div>
 			</div>
 		</#if>
 		<#if entityClass.tags?size &gt; 0>
