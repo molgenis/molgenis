@@ -56,7 +56,7 @@ public class DataServiceImpl implements DataService
 	@Override
 	public void removeRepository(String repositoryName)
 	{
-		if (null != repositoryName)
+		if (null == repositoryName)
 		{
 			throw new MolgenisDataException("repositoryName may not be [" + repositoryName + "]");
 		}
