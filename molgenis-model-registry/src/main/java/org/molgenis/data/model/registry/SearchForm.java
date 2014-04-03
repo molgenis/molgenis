@@ -5,7 +5,8 @@ import java.util.List;
 public class SearchForm
 {
 	private String searchTerm;
-	private List<String> entityClassTypes = ModelRegistryController.ENTITY_CLASS_TYPES;
+	private List<String> entityClassTypes = MetaDataExplorerController.ENTITY_CLASS_TYPES;
+	private int page = 1;
 
 	public String getSearchTerm()
 	{
@@ -26,4 +27,15 @@ public class SearchForm
 	{
 		this.entityClassTypes = entityClassTypes;
 	}
+
+	public void setPage(int page)
+	{
+		this.page = page;
+	}
+
+	public int getPage()
+	{
+		return page;
+	}
+
 }

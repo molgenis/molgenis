@@ -3,13 +3,13 @@
 	<module name="registry">
 		<entity name="EntityClass" xref_lookup="identifier,fullName">
 			<field name="id" type="autoid" hidden="true" description="automatically generated internal id, only for internal use." />
-			<field name="identifier" type="string" description="Unique identifier for an entityclass" />
+			<field name="entityClassIdentifier" type="string" description="Unique identifier for an entityclass" />
 			<field name="fullName" type="string" />
 			<field name="type" type="enum" default="undefined" enum_options="[dataset, model, format, guideline, undefined]" />
 			<field name="description" type="text" nillable="true" />
 			<field name="tags" type="mref" xref_entity="OntologyTerm" nillable="true" />
 			<field name="homepage" type="hyperlink" nillable="true" />
-			<unique fields="identifier" />	
+			<unique fields="entityClassIdentifier" />	
 			<unique fields="fullName" />	
 		</entity>
 		<entity name="AttributeClass">
