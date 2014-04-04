@@ -79,11 +79,13 @@
 					settings.onInit();
 			},
 			'lazyload' : function(e, data) {
+				var node = data.node;
 				if (settings.lazyload !== undefined
 						&& typeof settings.lazyload === "function") {
-					settings.lazyload(data);
+					settings.lazyload(data, createChildren, function() {
+						return node.selected;
+					});
 				} else {
-					var node = data.node;
 					data.result = $.Deferred(function(dfd) {
 						restApi.getAsync(node.key, {
 							'expand' : [ 'attributes' ]

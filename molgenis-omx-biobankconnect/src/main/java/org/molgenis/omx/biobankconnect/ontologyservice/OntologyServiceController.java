@@ -32,7 +32,6 @@ import org.molgenis.data.csv.CsvRepository;
 import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.data.processor.LowerCaseProcessor;
 import org.molgenis.data.rest.EntityCollectionResponse;
-import org.molgenis.data.rest.EntityMetaDataResponse;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.ui.MolgenisPluginController;
@@ -73,15 +72,6 @@ public class OntologyServiceController extends MolgenisPluginController
 	{
 		model.addAttribute("ontologies", ontologyService.getAllOntologies());
 		return "ontology-match-view";
-	}
-
-	@RequestMapping(value = "/ontologytree", method = POST, produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public EntityMetaDataResponse getEntityMetaData(@RequestBody
-	OntologyServiceRequest request)
-	{
-		Hit ontology = ontologyService.getOntologyByUrl(request.getOntologyUrl());
-		return new EntityMetaDataResponse(new OntologyEntityMetaData(ontology), null, null);
 	}
 
 	@RequestMapping(method = POST, value = "/match")
@@ -130,10 +120,6 @@ public class OntologyServiceController extends MolgenisPluginController
 				response.addHeader("Content-Disposition", "attachment; filename=" + getCsvFileName("match-result"));
 				excelWriter = new ExcelWriter(response.getOutputStream());
 				excelWriter.addCellProcessor(new LowerCaseProcessor(true, false));
-				// Writable sheetWriterRank = null;(Arrays.asList("InputTerm",
-				// "OntologyTerm", "Synonym used for matching",
-				// "OntologyTermUrl", "OntologyUrl", "CombinedScore",
-				// "LuceneScore"));
 				int iteration = inputTerms.size() / 1000 + 1;
 				List<String> columnHeaders = Arrays.asList("InputTerm", "OntologyTerm", "Synonym used for matching",
 						"OntologyTermUrl", "OntologyUrl", "CombinedScore", "LuceneScore");

@@ -47,6 +47,13 @@ public class OntologyLoader
 		owlObjectProperties = new HashSet<String>(
 				Arrays.asList("http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#is_associated_with"));
 	}
+
+	private Set<String> ontologyTermDefinitions;
+	{
+		ontologyTermDefinitions = new HashSet<String>(Arrays.asList("http://purl.obolibrary.org/obo/",
+				"http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#DEFINITION"));
+	}
+
 	private Map<String, OWLClass> hashToRetrieveClass = new HashMap<String, OWLClass>();
 
 	public OntologyLoader(OWLOntologyManager manager, OWLDataFactory factory)
@@ -181,6 +188,18 @@ public class OntologyLoader
 			listOfSynonyms.addAll(getAnnotation(cls, eachSynonymProperty));
 		}
 		return listOfSynonyms;
+	}
+
+	public String getDefinition(OWLClass cls)
+	{
+		for (String definitionProperty : ontologyTermDefinitions)
+		{
+			for (String definition : getAnnotation(cls, definitionProperty))
+			{
+				return definition;
+			}
+		}
+		return StringUtils.EMPTY;
 	}
 
 	public String getLabel(OWLClass cls)

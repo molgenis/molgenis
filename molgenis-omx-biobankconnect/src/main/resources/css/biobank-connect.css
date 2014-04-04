@@ -1,3 +1,16 @@
+tbody tr:hover {
+	background: #CEECF5; 
+}
+
+th {	
+    background-color: #5B82A4; 
+    color: white;
+}
+
+th.text-align-center,.text-align-center{
+	text-align:center;
+}
+
 div.div-pager {
 	margin-top : -20px;
 }

@@ -17,10 +17,10 @@ import org.molgenis.data.support.MapEntity;
 public class OntologyRepository extends AbstractRepository implements Countable
 {
 	private final OntologyLoader loader;
-	private final static String ONTOLOGY_URL = "url";
-	private final static String ENTITY_TYPE = "entity_type";
-	private final static String ONTOLOGY_LABEL = "ontologyLabel";
 	private final String name;
+	public final static String ONTOLOGY_URL = "url";
+	public final static String ENTITY_TYPE = "entity_type";
+	public final static String ONTOLOGY_LABEL = "ontologyLabel";
 
 	public OntologyRepository(OntologyLoader loader, String name)
 	{
