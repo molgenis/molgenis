@@ -28,6 +28,7 @@ import org.molgenis.omx.observ.value.Value;
 public class DataSetMatrixRepository extends AbstractDataSetMatrixRepository implements Countable
 {
 	public static final String BASE_URL = "dataset://";
+	public static final String ENTITY_ID_COLUMN_NAME = "observationsetid";
 
 	public DataSetMatrixRepository(DataService dataService, String dataSetIdentifier)
 	{
@@ -55,7 +56,7 @@ public class DataSetMatrixRepository extends AbstractDataSetMatrixRepository imp
 			{
 				ObservationSet currentRowToGet = it.next();
 
-				Entity entity = new MapEntity("id", currentRowToGet.getId());
+				Entity entity = new MapEntity(ENTITY_ID_COLUMN_NAME, currentRowToGet.getId());
 
 				try
 				{

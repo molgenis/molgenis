@@ -18,3 +18,12 @@ label {
 	font-weight: bold;	
 	margin: 20px;
 }
+
+.entity-class-header {
+	margin-bottom: 10px;
+}
+
+.entity-class-header h3 {
+	display: inline;
+	margin-right: 10px;
+}

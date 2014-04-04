@@ -1,6 +1,6 @@
 package org.molgenis.data.model.registry;
 
-import static org.molgenis.data.model.registry.ModelRegistryController.URI;
+import static org.molgenis.data.model.registry.MetaDataExplorerController.URI;
 
 import java.util.List;
 
@@ -24,15 +24,16 @@ import com.google.common.collect.Lists;
  */
 @Controller
 @RequestMapping(URI)
-public class ModelRegistryController extends MolgenisPluginController
+public class MetaDataExplorerController extends MolgenisPluginController
 {
 	public static final String ID = "models";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	public static List<String> ENTITY_CLASS_TYPES;
+	private static final int NR_ITEMS_PER_PAGE = 4;
 	private final DataService dataService;
 
 	@Autowired
-	public ModelRegistryController(DataService dataService) throws MolgenisModelException
+	public MetaDataExplorerController(DataService dataService) throws MolgenisModelException
 	{
 		super(URI);
 		this.dataService = dataService;
@@ -52,9 +53,10 @@ public class ModelRegistryController extends MolgenisPluginController
 	 * @return the viewname
 	 */
 	@RequestMapping
-	public String showModelExplorer(SearchForm searchForm, Model model)
+	public String showMetaDataExplorer(SearchForm searchForm, Model model)
 	{
 		List<EntityClass> entityClasses = Lists.newArrayList();
+		long totalCount = 0;
 
 		if ((searchForm.getEntityClassTypes() != null) && !searchForm.getEntityClassTypes().isEmpty())
 		{
@@ -62,27 +64,25 @@ public class ModelRegistryController extends MolgenisPluginController
 
 			if (StringUtils.isNotBlank(searchForm.getSearchTerm()))
 			{
-				q.nest().search(searchForm.getSearchTerm()).unnest();
-				q.and();
+				q.search(searchForm.getSearchTerm());
 			}
 
-			for (int i = 0; i < searchForm.getEntityClassTypes().size(); i++)
-			{
-				if (i > 0)
-				{
-					q.or();
-				}
+			q.in(EntityClass.TYPE, searchForm.getEntityClassTypes());
 
-				q.eq(EntityClass.TYPE, searchForm.getEntityClassTypes().get(i));
-			}
+			totalCount = dataService.count(EntityClass.ENTITY_NAME, q);
+
+			q.pageSize(NR_ITEMS_PER_PAGE);
+			q.offset((searchForm.getPage() - 1) * NR_ITEMS_PER_PAGE);
 
 			entityClasses
 					.addAll(Lists.newArrayList(dataService.findAll(EntityClass.ENTITY_NAME, q, EntityClass.class)));
 		}
 
+		model.addAttribute("nrItems", totalCount);
+		model.addAttribute("nrItemsPerPage", NR_ITEMS_PER_PAGE);
 		model.addAttribute("entityClasses", entityClasses);
 		model.addAttribute("form", searchForm);
 
-		return "view-modelexplorer";
+		return "view-metadataexplorer";
 	}
 }

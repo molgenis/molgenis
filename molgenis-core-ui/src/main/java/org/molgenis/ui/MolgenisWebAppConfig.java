@@ -2,6 +2,7 @@ package org.molgenis.ui;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
@@ -13,6 +14,7 @@ import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.ui.freemarker.LimitMethod;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.AsyncJavaMailSender;
 import org.molgenis.util.FileStore;
@@ -37,6 +39,8 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
+
+import freemarker.template.TemplateException;
 
 public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 {
@@ -196,14 +200,19 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 	/**
 	 * Configure freemarker. All freemarker templates should be on the classpath in a package called 'freemarker'
+	 * 
+	 * @throws TemplateException
+	 * @throws IOException
 	 */
 	@Bean
-	public FreeMarkerConfigurer freeMarkerConfigurer()
+	public FreeMarkerConfigurer freeMarkerConfigurer() throws IOException, TemplateException
 	{
 		FreeMarkerConfigurer result = new FreeMarkerConfigurer();
 		result.setPreferFileSystemAccess(false);
 		result.setTemplateLoaderPath("classpath:/templates/");
 		result.setDefaultEncoding("UTF-8");
+		result.setFreemarkerVariables(Collections.singletonMap("limit", (Object) new LimitMethod()));
+
 		return result;
 
 	}
