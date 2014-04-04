@@ -61,6 +61,9 @@ public class OmxImporterServiceImpl implements OmxImporterService
 	public EntityImportReport doImport(RepositoryCollection repositories, DatabaseAction databaseAction)
 			throws IOException
 	{
+		// All new repository identifiers
+		List<String> newRepoIdentifiers = new ArrayList<String>();
+
 		// First import entities, the data sheets are ignored in the entitiesimporter
 		EntityImportReport importReport = entitiesImporter.importEntities(repositories, databaseAction);
 
@@ -71,15 +74,18 @@ public class OmxImporterServiceImpl implements OmxImporterService
 		for (String name : repositories.getEntityNames())
 		{
 			Repository repository = repositories.getRepositoryByEntityName(name);
-
+			
 			if (repository.getName().startsWith(DATASET_SHEET_PREFIX))
 			{
 				// Import DataSet sheet, create new OmxRepository
 				String identifier = repository.getName().substring(DATASET_SHEET_PREFIX.length());
+				
 				if (!dataService.hasRepository(identifier))
 				{
+
 					dataService.addRepository(new CrudRepositorySecurityDecorator(new OmxRepository(dataService,
 							searchService, identifier, entityValidator)));
+					newRepoIdentifiers.add(identifier);
 
 					DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME,
 							new QueryImpl().eq(DataSet.IDENTIFIER, identifier), DataSet.class);
@@ -108,6 +114,7 @@ public class OmxImporterServiceImpl implements OmxImporterService
 						{
 							dataService.addRepository(new OmxLookupTableRepository(dataService, categoricalFeature
 									.getIdentifier(), queryResolver));
+							newRepoIdentifiers.add(categoricalFeature.getIdentifier() + "-LUT");
 						}
 					}
 				}
@@ -154,6 +161,11 @@ public class OmxImporterServiceImpl implements OmxImporterService
 
 					}
 
+					for (String newRepoIdentifier : newRepoIdentifiers)
+					{
+						dataService.removeRepository(newRepoIdentifier);
+					}
+					
 					throw e;
 				}
 
