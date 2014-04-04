@@ -580,5 +580,6 @@
 		<module>molgenis-charts</module>
 		<module>molgenis-omx-annotators</module>
 		<module>molgenis-js</module>
+		<module>molgenis-model-registry</module>
 	</modules>
 </project>

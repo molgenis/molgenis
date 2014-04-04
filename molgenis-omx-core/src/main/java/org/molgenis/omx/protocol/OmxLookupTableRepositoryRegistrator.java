@@ -1,4 +1,4 @@
-package org.molgenis.data.omx;
+package org.molgenis.omx.protocol;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.DataService;

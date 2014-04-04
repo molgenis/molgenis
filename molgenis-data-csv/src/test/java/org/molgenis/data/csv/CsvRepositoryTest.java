@@ -32,6 +32,8 @@ public class CsvRepositoryTest
 	private static File novalues;
 	private static File emptyvalues;
 	private static File testtsv;
+	private static File emptylines;
+	private static File emptylinessinglecol;
 
 	@BeforeClass
 	public static void beforeClass() throws FileNotFoundException, IOException
@@ -55,6 +57,14 @@ public class CsvRepositoryTest
 		in = CsvRepositoryTest.class.getResourceAsStream("/test.tsv");
 		testtsv = new File(FileUtils.getTempDirectory(), "test.tsv");
 		FileCopyUtils.copy(in, new FileOutputStream(testtsv));
+
+		in = CsvRepositoryTest.class.getResourceAsStream("/emptylines.csv");
+		emptylines = new File(FileUtils.getTempDirectory(), "emptylines.csv");
+		FileCopyUtils.copy(in, new FileOutputStream(emptylines));
+
+		in = CsvRepositoryTest.class.getResourceAsStream("/emptylinessinglecol.csv");
+		emptylinessinglecol = new File(FileUtils.getTempDirectory(), "emptylinessinglecol.csv");
+		FileCopyUtils.copy(in, new FileOutputStream(emptylinessinglecol));
 	}
 
 	@Test
@@ -220,4 +230,43 @@ public class CsvRepositoryTest
 		}
 	}
 
+	@Test
+	public void iterator_emptylines() throws IOException
+	{
+		CsvRepository csvRepository = new CsvRepository(emptylines, null);
+		try
+		{
+			Iterator<Entity> it = csvRepository.iterator();
+			Entity entity = it.next();
+			assertEquals(entity.get("col1"), "val1");
+			assertEquals(entity.get("col2"), "val2");
+			assertFalse(it.hasNext());
+		}
+		finally
+		{
+			csvRepository.close();
+		}
+	}
+
+	@Test
+	public void iterator_emptylines_singlecol() throws IOException
+	{
+		CsvRepository csvRepository = new CsvRepository(emptylinessinglecol, null);
+		try
+		{
+			Iterator<Entity> it = csvRepository.iterator();
+			Entity entity = it.next();
+			assertEquals(entity.get("col1"), "val1");
+
+			assertTrue(it.hasNext());
+			entity = it.next();
+			assertNull(entity.get("col1"));
+
+			assertFalse(it.hasNext());
+		}
+		finally
+		{
+			csvRepository.close();
+		}
+	}
 }

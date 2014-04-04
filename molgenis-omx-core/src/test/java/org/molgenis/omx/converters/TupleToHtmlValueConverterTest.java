@@ -14,7 +14,7 @@ public class TupleToHtmlValueConverterTest
 	{
 		HtmlValue value = new HtmlValue();
 		value.setValue("value");
-		assertEquals(new EntityToHtmlValueConverter().toCell(value).getValue(), "value");
+		assertEquals(new EntityToHtmlValueConverter().toCell(value, null).getValue(), "value");
 	}
 
 	@Test

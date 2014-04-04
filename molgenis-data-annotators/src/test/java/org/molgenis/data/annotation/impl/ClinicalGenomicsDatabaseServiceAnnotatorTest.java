@@ -108,6 +108,7 @@ public class ClinicalGenomicsDatabaseServiceAnnotatorTest
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
 
 		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.GENE, "LEPR");
+		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.HGNC_ID, "6554");
 		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.ENTREZ_GENE_ID, "3953");
 		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.CONDITION, "Leptin receptor deficiency");
 		resultMap.put(ClinicalGenomicsDatabaseServiceAnnotator.INHERITANCE, "AR");

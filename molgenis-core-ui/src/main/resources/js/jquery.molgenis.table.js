@@ -39,7 +39,6 @@
 	function getTableMetaData(settings, callback) {
 		if(settings.attributes && settings.attributes.length > 0) {
 			var colAttributes = molgenis.getAtomicAttributes(settings.attributes, restApi);
-			
 			// get meta data for referenced entities
 			var refEntitiesMeta = {};
 			$.each(colAttributes, function(i, attribute) {
@@ -118,17 +117,61 @@
 	 * @memberOf molgenis.table
 	 */
 	function createTableBody(data, settings) {
+		function openRefAttributeModal(attribute, refEntity, refAttribute, refValue) {
+			// create modal structure
+			var modal = $('#table-ref-modal');
+			if(!modal.length) {
+				var items = [];
+				items.push('<div class="modal hide medium" id="table-ref-modal" tabindex="-1">');
+				items.push('<div class="modal-header">');
+				items.push('<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>');
+				items.push('<h3 class="ref-title"></h3>');
+				items.push('</div>');
+				items.push('<div class="modal-body">');
+				items.push('<legend class="ref-description-header"></legend>');
+				items.push('<p class="ref-description"></p>');
+				items.push('<legend>Data</legend>');
+				items.push('<div class="ref-table"></div>');
+				items.push('</div>');
+				items.push('<div class="modal-footer">');
+				items.push('<a href="#" class="btn btn-primary filter-apply-btn" data-dismiss="modal">Ok</a>');
+				items.push('</div>');
+				items.push('</div>');
+				modal = $(items.join(''));
+			}
+			
+			// inject modal data
+			var refAttributes = molgenis.getAtomicAttributes(refEntity.attributes, restApi);
+			var refQuery = {
+				'q' : [ {
+					// TODO use idAttribute once github #1400 is fixed
+					'field' : refEntity.labelAttribute, 
+					'operator' : 'EQUALS',
+					// TODO use idAttribute once github #1400 is fixed
+					// TODO remove trim() once github #1401 is fixed
+					'value' : refValue[refEntity.labelAttribute].trim()
+				} ]
+			}; 
+			$('.ref-title', modal).html(attribute.label || attribute.name);
+			$('.ref-description-header', modal).html((refEntity.label || refEntity.name) + ' description');
+			$('.ref-description', modal).html(refEntity.description || 'No description available');
+			$('.ref-table', modal).table({'entityMetaData' : refEntity, 'attributes': refAttributes, 'query' : refQuery});
+			
+			// show modal
+			modal.modal({'show': true});
+		}
+		
 		var container = $('.molgenis-table tbody', settings.container);
 
 		var items = [];
 		for ( var i = 0; i < data.items.length; ++i) {
-			items.push('<tr>');
+			var row = $('<tr>');
 			var entity = data.items[i];
 
 			$.each(settings.colAttributes, function(i, attribute) {
+				var cell = $('<td>');
 				var rawValue = entity[attribute.name];				
 				if (rawValue) {
-					var cellValue;
 					switch(attribute.fieldType) {
 						case 'XREF':
 						case 'MREF':
@@ -146,36 +189,38 @@
 								switch(attribute.fieldType) {
 									case 'CATEGORICAL':
 									case 'XREF':
-										cellValue = formatTableCellValue(rawValue[refAttribute], refAttributeType);
+										var cellValue = $('<a href="#">' + formatTableCellValue(rawValue[refAttribute], refAttributeType) + '</a>'); 
+										cellValue.click(function() {
+											openRefAttributeModal(attribute, refEntity, refAttribute, rawValue); 
+										});
+										cell.append(cellValue);
 										break;
 									case 'MREF':
-										var cellValueParts = [];
 										$.each(rawValue.items, function(i, rawValue) {
-											var cellValuePart = formatTableCellValue(rawValue[refAttribute], refAttributeType);
-											cellValueParts.push(cellValuePart);
+											var cellValuePart = $('<a href="#">' + formatTableCellValue(rawValue[refAttribute], refAttributeType) + '</a>');
+											cellValuePart.click(function() {
+												openRefAttributeModal(attribute, refEntity, refAttribute, rawValue); 
+											});
+											if (i > 0)
+												cell.append(',');
+											cell.append(cellValuePart);
 										});
-										cellValue = cellValueParts.join(',');
 										break;
 									default:
 										throw 'unexpected field type ' + attribute.fieldType;
 								}
-							} else {
-								cellValue = '';
 							}
 							break;
 						default :
-							cellValue = formatTableCellValue(rawValue, attribute.fieldType);
+							cell.append(formatTableCellValue(rawValue, attribute.fieldType));
 							break;
 					}
-					items.push('<td class="multi-os-datacell">' + cellValue + '</td>');
-				} else {
-					items.push('<td></td>');
 				}
+				row.append(cell);
 			});
-
-			items.push('</tr>');
+			items.push(row);
 		}
-		container.html(items.join(''));
+		container.html(items);
 
 		$('.show-popover').popover({trigger:'hover', placement: 'bottom'});
 	}

@@ -58,7 +58,7 @@ public class EntityToXrefValueConverter implements EntityToValueConverter<XrefVa
 	}
 
 	@Override
-	public Cell<String> toCell(Value value) throws ValueConverterException
+	public Cell<String> toCell(Value value, ObservableFeature feature) throws ValueConverterException
 	{
 		if (!(value instanceof XrefValue))
 		{
