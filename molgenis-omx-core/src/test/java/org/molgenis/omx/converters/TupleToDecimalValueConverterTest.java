@@ -14,7 +14,7 @@ public class TupleToDecimalValueConverterTest
 	{
 		DecimalValue value = new DecimalValue();
 		value.setValue(1.23);
-		assertEquals(new EntityToDecimalValueConverter().toCell(value).getValue(), Double.valueOf(1.23));
+		assertEquals(new EntityToDecimalValueConverter().toCell(value, null).getValue(), Double.valueOf(1.23));
 	}
 
 	@Test

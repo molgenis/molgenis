@@ -22,32 +22,45 @@ public class TupleToCategoricalValueConverterTest
 	public void toCell() throws ValueConverterException
 	{
 		DataService dataService = mock(DataService.class);
-		String catIdentifier = "category1";
-		String valueCode = "category #1";
+
+		String name = "category #1";
 		Category category = new Category();
-		category.setIdentifier(catIdentifier);
-		category.setValueCode(valueCode);
+		category.setName(name);
+
 		CategoricalValue value = new CategoricalValue();
 		value.setValue(category);
-		Cell<String> cell = new EntityToCategoricalValueConverter(dataService).toCell(value);
-		assertEquals(cell.getKey(), catIdentifier);
-		assertEquals(cell.getValue(), valueCode);
+
+		ObservableFeature f = new ObservableFeature();
+
+		when(
+				dataService.findOne(ObservableFeature.ENTITY_NAME,
+						new QueryImpl().eq(ObservableFeature.IDENTIFIER, f.getIdentifier()), ObservableFeature.class))
+				.thenReturn(f);
+
+		when(
+				dataService.findOne(
+						Category.ENTITY_NAME,
+						new QueryImpl().eq(Category.VALUECODE, category.getValueCode()).eq(Category.OBSERVABLEFEATURE,
+								f))).thenReturn(category);
+
+		Cell<String> cell = new EntityToCategoricalValueConverter(dataService).toCell(value, f);
+		assertEquals(cell.getKey(), name);
+		assertEquals(cell.getValue(), name);
 	}
 
 	@Test
 	public void fromTuple() throws ValueConverterException
 	{
 		Category category = new Category();
-		String identifier = "code1";
+		String valueCode = "code1";
 		ObservableFeature feature = mock(ObservableFeature.class);
 		DataService dataService = mock(DataService.class);
 
-		Query q = new QueryImpl().eq(Category.IDENTIFIER, identifier);
-
+		Query q = new QueryImpl().eq(Category.VALUECODE, valueCode).and().eq(Category.OBSERVABLEFEATURE, feature);
 		when(dataService.findOne(Category.ENTITY_NAME, q, Category.class)).thenReturn(category);
 
 		String colName = "col";
-		Entity entity = new MapEntity(colName, identifier);
+		Entity entity = new MapEntity(colName, valueCode);
 		CategoricalValue value = new EntityToCategoricalValueConverter(dataService)
 				.fromEntity(entity, colName, feature);
 		assertEquals(value.getValue(), category);
@@ -58,15 +71,15 @@ public class TupleToCategoricalValueConverterTest
 	{
 		CategoricalValue value = new CategoricalValue();
 		Category category = new Category();
-		String identifier = "code1";
+		String valueCode = "code1";
 		ObservableFeature feature = mock(ObservableFeature.class);
 		DataService dataService = mock(DataService.class);
 
-		Query q = new QueryImpl().eq(Category.IDENTIFIER, identifier);
-
+		Query q = new QueryImpl().eq(Category.VALUECODE, valueCode).and().eq(Category.OBSERVABLEFEATURE, feature);
 		when(dataService.findOne(Category.ENTITY_NAME, q, Category.class)).thenReturn(category);
+
 		String colName = "col";
-		Entity entity = new MapEntity(colName, identifier);
+		Entity entity = new MapEntity(colName, valueCode);
 		new EntityToCategoricalValueConverter(dataService).updateFromEntity(entity, colName, feature, value);
 		assertEquals(value.getValue(), category);
 	}

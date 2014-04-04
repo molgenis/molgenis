@@ -44,7 +44,7 @@ public class EntityToDateTimeValueConverter implements EntityToValueConverter<Da
 	}
 
 	@Override
-	public Cell<String> toCell(Value value) throws ValueConverterException
+	public Cell<String> toCell(Value value, ObservableFeature feature) throws ValueConverterException
 	{
 		if (!(value instanceof DateTimeValue))
 		{

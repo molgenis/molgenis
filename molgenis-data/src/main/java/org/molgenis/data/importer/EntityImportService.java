@@ -144,6 +144,7 @@ public class EntityImportService
 			if (batch.size() == BATCH_SIZE)
 			{
 				updateable.update(batch, dbAction, updateKey);
+				updateable.flush();
 				batch.clear();
 			}
 		}
@@ -151,6 +152,7 @@ public class EntityImportService
 		if (!batch.isEmpty())
 		{
 			updateable.update(batch, dbAction, updateKey);
+			updateable.flush();
 			batch.clear();
 		}
 
@@ -181,6 +183,7 @@ public class EntityImportService
 						it.remove();
 						batch.add(entityToImport);
 						updateable.update(batch, dbAction, updateKey);
+						updateable.flush();
 						batch.clear();
 					}
 				}
@@ -216,9 +219,8 @@ public class EntityImportService
 		if (!batch.isEmpty())
 		{
 			updateable.update(batch, dbAction, updateKey);
+			updateable.flush();
 		}
-
-		updateable.flush();
 
 		return entitiesToImport.size();
 	}

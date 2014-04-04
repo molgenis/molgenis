@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
@@ -613,20 +614,21 @@ public class JpaRepository extends AbstractCrudRepository
 	/** Converts MOLGENIS query rules into JPA predicates */
 	@SuppressWarnings(
 	{ "rawtypes", "unchecked" })
-	private List<Predicate> createPredicates(Root<?> from, CriteriaBuilder cb, List<QueryRule> rules)
+	private List<Predicate> createPredicates(Root<?> from, CriteriaBuilder cb, List<QueryRule> originalRules)
 	{
-		if (!rules.isEmpty() && (rules.get(0).getOperator() == Operator.SEARCH))
-		{
-			return createPredicates(from, cb, createSearchQueryRules(rules.get(0).getValue()));
-		}
+		List<QueryRule> rules = Lists.newArrayList(originalRules);
 
 		// default Query links criteria based on 'and'
 		List<Predicate> andPredicates = new ArrayList<Predicate>();
+
 		// optionally, subqueries can be formulated seperated by 'or'
 		List<Predicate> orPredicates = new ArrayList<Predicate>();
 
-		for (QueryRule r : rules)
+		ListIterator<QueryRule> it = rules.listIterator();
+		while (it.hasNext())
 		{
+			QueryRule r = it.next();
+
 			switch (r.getOperator())
 			{
 				case AND:
@@ -658,6 +660,11 @@ public class JpaRepository extends AbstractCrudRepository
 					String like = "%" + r.getValue() + "%";
 					String f = r.getJpaAttribute();
 					andPredicates.add(cb.like(from.<String> get(f), like));
+					break;
+				case SEARCH:
+					// Create like predicated for all attributes and remove original 'search' QueryRule
+					andPredicates.addAll(createPredicates(from, cb, createSearchQueryRules(r.getValue())));
+					it.remove();
 					break;
 				default:
 					// go into comparator based criteria, that need
@@ -701,7 +708,9 @@ public class JpaRepository extends AbstractCrudRepository
 							throw new RuntimeException("canno solve query rule:  " + r);
 					}
 			}
+
 		}
+
 		if (orPredicates.size() > 0)
 		{
 			if (andPredicates.size() > 0)
@@ -710,12 +719,14 @@ public class JpaRepository extends AbstractCrudRepository
 			}
 			List<Predicate> result = new ArrayList<Predicate>();
 			result.add(cb.or(orPredicates.toArray(new Predicate[andPredicates.size()])));
+
 			return result;
 		}
 		else
 		{
 			if (andPredicates.size() > 0)
 			{
+
 				return andPredicates;
 			}
 			return new ArrayList<Predicate>();

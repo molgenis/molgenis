@@ -29,13 +29,13 @@ public class ValueConverterTest
 	{
 		BoolValue value = new BoolValue();
 		value.setValue(Boolean.TRUE);
-		assertEquals(new ValueConverter(dataService).toCell(value).getValue(), Boolean.TRUE);
+		assertEquals(new ValueConverter(dataService).toCell(value, null).getValue(), Boolean.TRUE);
 	}
 
 	@Test(expectedExceptions = ValueConverterException.class)
 	public void extractValue_UnsupportValue() throws ValueConverterException
 	{
-		new ValueConverter(dataService).toCell(new Value());
+		new ValueConverter(dataService).toCell(new Value(), null);
 	}
 
 	@Test
