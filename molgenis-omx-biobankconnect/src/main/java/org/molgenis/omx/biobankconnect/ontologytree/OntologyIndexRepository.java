@@ -3,15 +3,10 @@ package org.molgenis.omx.biobankconnect.ontologytree;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.biobankconnect.utils.OntologyRepository;
-import org.molgenis.omx.biobankconnect.utils.OntologyTermRepository;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
@@ -22,23 +17,29 @@ import com.google.common.collect.Iterables;
 
 public class OntologyIndexRepository extends AbstractOntologyIndexRepository
 {
+	public final static String DEFAULT_ONTOLOGY_REPO = "ontologyindex";
 	private final static String BASE_URL = "ontologyindex://";
-	private final static String DEFAULT_ONTOLOGY_REPO = "ontologyindex";
 	private final OntologyRepository ontologyRepository;
+	{
+		attributeMap.put("name", OntologyRepository.ONTOLOGY_URL);
+		attributeMap.put("label", OntologyRepository.ONTOLOGY_LABEL);
+		attributeMap.put("ontologyUrl", OntologyRepository.ONTOLOGY_URL);
+	}
 
 	@Autowired
-	public OntologyIndexRepository(SearchService searchService)
+	public OntologyIndexRepository(String entityName, SearchService searchService)
 	{
-		super(searchService);
-		this.ontologyRepository = new OntologyRepository(null, DEFAULT_ONTOLOGY_REPO);
+		super(entityName, searchService);
+		this.ontologyRepository = new OntologyRepository(null, entityName);
 	}
 
 	@Override
 	public Iterable<Entity> findAll(Query q)
 	{
 		List<Entity> entities = new ArrayList<Entity>();
+		if (q.getRules().size() > 0) q.and();
 		q.eq(OntologyRepository.ENTITY_TYPE, OntologyRepository.TYPE_ONTOLOGY);
-		for (Hit hit : searchService.search(new SearchRequest(null, q, null)).getSearchHits())
+		for (Hit hit : searchService.search(new SearchRequest(null, mapAttribute(q), null)).getSearchHits())
 		{
 			String id = hit.getId();
 			int hashCode = id.hashCode();
@@ -52,6 +53,22 @@ public class OntologyIndexRepository extends AbstractOntologyIndexRepository
 	}
 
 	@Override
+	public Entity findOne(Query q)
+	{
+		Hit hit = findOneInternal(q);
+		if (hit != null) return new OntologyIndexEntity(hit, getEntityMetaData(), identifierMap, searchService);
+		return null;
+	}
+
+	@Override
+	public Entity findOne(Integer id)
+	{
+		Hit hit = findOneInternal(id);
+		if (hit != null) return new OntologyIndexEntity(hit, getEntityMetaData(), identifierMap, searchService);
+		return null;
+	}
+
+	@Override
 	public long count(Query q)
 	{
 		if (q.getRules().size() == 0)
@@ -61,27 +78,7 @@ public class OntologyIndexRepository extends AbstractOntologyIndexRepository
 
 			return result.getTotalHitCount();
 		}
-		return Iterables.size(findAll(new QueryImpl()));
-	}
-
-	@Override
-	public EntityMetaData getEntityMetaData()
-	{
-		if (entityMetaData == null)
-		{
-			entityMetaData = new DefaultEntityMetaData(ontologyRepository.getName());
-			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyRepository.ONTOLOGY_LABEL,
-					FieldTypeEnum.STRING));
-			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyRepository.ONTOLOGY_URL,
-					FieldTypeEnum.STRING));
-			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyRepository.ENTITY_TYPE,
-					FieldTypeEnum.STRING));
-			DefaultAttributeMetaData childrenAttributeMetatData = new DefaultAttributeMetaData(
-					OntologyTermRepository.CHIDLREN, FieldTypeEnum.MREF);
-			childrenAttributeMetatData.setRefEntity(entityMetaData);
-			entityMetaData.addAttributeMetaData(childrenAttributeMetatData);
-		}
-		return entityMetaData;
+		return Iterables.size(findAll(q));
 	}
 
 	@Override

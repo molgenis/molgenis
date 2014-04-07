@@ -1,5 +1,6 @@
 package org.molgenis.omx.biobankconnect.ontologyindexer;
 
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.StringUtils;
@@ -78,7 +79,13 @@ public class AsyncOntologyIndexer implements OntologyIndexer, InitializingBean
 						.search(new SearchRequest("ontology-" + ontologyUri, new QueryImpl().eq(
 								OntologyRepository.ENTITY_TYPE, OntologyRepository.TYPE_ONTOLOGY), null))
 						.getSearchHits().get(0);
-				dataService.addRepository(new OntologyTermIndexRepository(hit, searchService));
+				Map<String, Object> columnValueMap = hit.getColumnValueMap();
+				String ontologyTermEntityName = columnValueMap.containsKey(OntologyTermRepository.ONTOLOGY_LABEL) ? columnValueMap
+						.get(OntologyRepository.ONTOLOGY_LABEL).toString() : OntologyTermIndexRepository.DEFAULT_ONTOLOGY_TERM_REPO;
+				String ontologyUrl = columnValueMap.containsKey(OntologyTermRepository.ONTOLOGY_LABEL) ? columnValueMap
+						.get(OntologyRepository.ONTOLOGY_URL).toString() : OntologyTermIndexRepository.DEFAULT_ONTOLOGY_TERM_REPO;
+				dataService.addRepository(new OntologyTermIndexRepository(ontologyTermEntityName, ontologyUrl,
+						searchService));
 			}
 			runningIndexProcesses.decrementAndGet();
 			ontologyUri = null;

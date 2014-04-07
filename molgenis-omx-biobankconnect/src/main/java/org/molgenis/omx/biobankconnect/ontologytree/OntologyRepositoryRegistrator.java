@@ -1,8 +1,11 @@
 package org.molgenis.omx.biobankconnect.ontologytree;
 
+import java.util.Map;
+
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.biobankconnect.utils.OntologyRepository;
+import org.molgenis.omx.biobankconnect.utils.OntologyTermRepository;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchService;
@@ -35,14 +38,21 @@ public class OntologyRepositoryRegistrator implements ApplicationListener<Contex
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
 		// Register ontology info
-		dataService.addRepository(new OntologyIndexRepository(searchService));
+		dataService.addRepository(new OntologyIndexRepository(OntologyIndexRepository.DEFAULT_ONTOLOGY_REPO,
+				searchService));
 
 		for (Hit hit : searchService.search(
 				new SearchRequest(null, new QueryImpl().eq(OntologyRepository.ENTITY_TYPE,
 						OntologyRepository.TYPE_ONTOLOGY), null)).getSearchHits())
 		{
 			// Register ontology content (terms) using separate repos
-			dataService.addRepository(new OntologyTermIndexRepository(hit, searchService));
+			Map<String, Object> columnValueMap = hit.getColumnValueMap();
+			String ontologyTermEntityName = columnValueMap.containsKey(OntologyTermRepository.ONTOLOGY_LABEL) ? columnValueMap
+					.get(OntologyRepository.ONTOLOGY_LABEL).toString() : OntologyTermIndexRepository.DEFAULT_ONTOLOGY_TERM_REPO;
+			String ontologyUrl = columnValueMap.containsKey(OntologyTermRepository.ONTOLOGY_LABEL) ? columnValueMap
+					.get(OntologyRepository.ONTOLOGY_URL).toString() : OntologyTermIndexRepository.DEFAULT_ONTOLOGY_TERM_REPO;
+			dataService.addRepository(new OntologyTermIndexRepository(ontologyTermEntityName, ontologyUrl,
+					searchService));
 		}
 	}
 }
