@@ -38,13 +38,23 @@ public class OntologyTermRepository extends AbstractRepository implements Counta
 	public final static String ALTERNATIVE_DEFINITION = "alternativeDefinition";
 	public final static String ONTOLOGY_LABEL = "ontologyLabel";
 	public final static String ENTITY_TYPE = "entity_type";
+	public final static String TYPE_ONTOLOGYTERM = "ontologyTerm";
+	public final static String CHIDLREN = "children";
 
 	public OntologyTermRepository(OntologyLoader loader, String name)
 	{
 		super("ontologyterm://" + name);
 		this.ontologyLoader = loader;
-		this.ontologyName = this.ontologyLoader.getOntologyName();
-		this.ontologyIRI = this.ontologyLoader.getOntologyIRI();
+		if (this.ontologyLoader != null)
+		{
+			this.ontologyName = this.ontologyLoader.getOntologyName();
+			this.ontologyIRI = this.ontologyLoader.getOntologyIRI();
+		}
+		else
+		{
+			this.ontologyName = name;
+			this.ontologyIRI = name;
+		}
 		this.name = name;
 	}
 
@@ -87,6 +97,7 @@ public class OntologyTermRepository extends AbstractRepository implements Counta
 		metaData.addAttributeMetaData(new DefaultAttributeMetaData(PARENT_NODE_PATH, FieldTypeEnum.STRING));
 		metaData.addAttributeMetaData(new DefaultAttributeMetaData(PARENT_ONTOLOGY_TERM_URL, FieldTypeEnum.STRING));
 		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ROOT, FieldTypeEnum.STRING));
+		metaData.addAttributeMetaData(new DefaultAttributeMetaData(LAST, FieldTypeEnum.STRING));
 		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_IRI, FieldTypeEnum.STRING));
 		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_TERM, FieldTypeEnum.STRING));
 		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_TERM_DEFINITION, FieldTypeEnum.STRING));
@@ -147,7 +158,7 @@ public class OntologyTermRepository extends AbstractRepository implements Counta
 			entity.set(ONTOLOGY_TERM_DEFINITION, definition);
 			entity.set(ONTOLOGY_TERM_IRI, cls.getIRI().toString());
 			entity.set(ONTOLOGY_LABEL, ontologyLoader.getOntologyName());
-			entity.set(ENTITY_TYPE, "ontologyTerm");
+			entity.set(ENTITY_TYPE, TYPE_ONTOLOGYTERM);
 			entity.set(SYNONYMS, synonym.replaceAll("[^a-zA-Z0-9 ]", " "));
 			entity.set(ALTERNATIVE_DEFINITION, alternativeDefinitions.toString());
 			entities.add(entity);

@@ -7,11 +7,15 @@ import org.apache.log4j.Logger;
 import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.omx.biobankconnect.ontologytree.OntologyTermIndexRepository;
 import org.molgenis.omx.biobankconnect.utils.OntologyLoader;
 import org.molgenis.omx.biobankconnect.utils.OntologyRepository;
 import org.molgenis.omx.biobankconnect.utils.OntologyTermRepository;
 import org.molgenis.omx.observ.target.Ontology;
 import org.molgenis.omx.observ.target.OntologyTerm;
+import org.molgenis.search.Hit;
+import org.molgenis.search.SearchRequest;
+import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
 import org.molgenis.security.runas.RunAsSystem;
 import org.springframework.beans.factory.InitializingBean;
@@ -67,6 +71,15 @@ public class AsyncOntologyIndexer implements OntologyIndexer, InitializingBean
 		}
 		finally
 		{
+			String ontologyName = model.getOntologyName();
+			if (!dataService.hasRepository(ontologyName))
+			{
+				Hit hit = searchService
+						.search(new SearchRequest("ontology-" + ontologyUri, new QueryImpl().eq(
+								OntologyRepository.ENTITY_TYPE, OntologyRepository.TYPE_ONTOLOGY), null))
+						.getSearchHits().get(0);
+				dataService.addRepository(new OntologyTermIndexRepository(hit, searchService));
+			}
 			runningIndexProcesses.decrementAndGet();
 			ontologyUri = null;
 		}
@@ -89,6 +102,19 @@ public class AsyncOntologyIndexer implements OntologyIndexer, InitializingBean
 				if (Iterables.size(ontologyTerms) > 0) dataService.delete(OntologyTerm.ENTITY_NAME, ontologyTerms);
 			}
 			dataService.delete(Ontology.ENTITY_NAME, ontologies);
+		}
+
+		SearchRequest request = new SearchRequest("ontology-" + ontologyURI, new QueryImpl().eq(
+				OntologyRepository.ONTOLOGY_URL, ontologyURI), null);
+		SearchResult result = searchService.search(request);
+		if (result.getTotalHitCount() > 0)
+		{
+			Hit hit = result.getSearchHits().get(0);
+			String ontologyEntityName = hit.getColumnValueMap().get(OntologyRepository.ONTOLOGY_LABEL).toString();
+			if (dataService.hasRepository(ontologyEntityName))
+			{
+				dataService.removeRepository(ontologyEntityName);
+			}
 		}
 
 		searchService.deleteDocumentsByType("ontology-" + ontologyURI);

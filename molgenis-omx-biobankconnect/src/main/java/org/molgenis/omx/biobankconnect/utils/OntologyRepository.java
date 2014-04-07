@@ -21,6 +21,7 @@ public class OntologyRepository extends AbstractRepository implements Countable
 	public final static String ONTOLOGY_URL = "url";
 	public final static String ENTITY_TYPE = "entity_type";
 	public final static String ONTOLOGY_LABEL = "ontologyLabel";
+	public final static String TYPE_ONTOLOGY = "indexedOntology";
 
 	public OntologyRepository(OntologyLoader loader, String name)
 	{
@@ -49,7 +50,7 @@ public class OntologyRepository extends AbstractRepository implements Countable
 		Entity entity = new MapEntity();
 		entity.set(ONTOLOGY_URL, loader.getOntologyIRI());
 		entity.set(ONTOLOGY_LABEL, loader.getOntologyName());
-		entity.set(ENTITY_TYPE, "indexedOntology");
+		entity.set(ENTITY_TYPE, TYPE_ONTOLOGY);
 		entities.add(entity);
 
 		return entities.iterator();
