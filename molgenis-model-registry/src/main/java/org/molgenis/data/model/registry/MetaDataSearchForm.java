@@ -2,7 +2,7 @@ package org.molgenis.data.model.registry;
 
 import java.util.List;
 
-public class SearchForm
+public class MetaDataSearchForm
 {
 	private String searchTerm;
 	private List<String> entityClassTypes = MetaDataExplorerController.ENTITY_CLASS_TYPES;
