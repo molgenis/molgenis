@@ -39,17 +39,11 @@ public class OntologyTermIndexRepository extends AbstractOntologyIndexRepository
 	@Override
 	public Iterable<Entity> findAll(Query q)
 	{
-		// Set<String> duplicatedTerms = new HashSet<String>();
 		List<Entity> entities = new ArrayList<Entity>();
 		if (q.getRules().size() > 0) q.and();
 		q.eq(OntologyTermRepository.ENTITY_TYPE, OntologyTermRepository.TYPE_ONTOLOGYTERM);
 		for (Hit hit : searchService.search(new SearchRequest(null, q, null)).getSearchHits())
 		{
-			// String ontologyTermUrl =
-			// hit.getColumnValueMap().get(OntologyTermRepository.ONTOLOGY_TERM_IRI).toString();
-			// if (!duplicatedTerms.contains(ontologyTermUrl))
-			// {
-			// duplicatedTerms.add(ontologyTermUrl);
 			String id = hit.getId();
 			int hashCode = id.hashCode();
 			if (!identifierMap.containsKey(hashCode))
@@ -57,7 +51,6 @@ public class OntologyTermIndexRepository extends AbstractOntologyIndexRepository
 				identifierMap.put(hashCode, id);
 			}
 			entities.add(new OntologyIndexEntity(hit, getEntityMetaData(), identifierMap, searchService));
-			// }
 		}
 		return entities;
 	}
