@@ -54,19 +54,18 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public void removeRepository(Repository repository)
-	{
-		String repositoryName = repository.getName();
-		removeRepository(repositoryName);
-	}
-
-	@Override
 	public void removeRepository(String repositoryName)
 	{
+		if (null == repositoryName)
+		{
+			throw new MolgenisDataException("repositoryName may not be [" + repositoryName + "]");
+		}
+
 		if (!repositories.containsKey(repositoryName.toLowerCase()))
 		{
 			throw new MolgenisDataException("Repository [" + repositoryName + "] doesn't exists");
 		}
+
 		repositoryNames.remove(repositoryName);
 		repositories.remove(repositoryName.toLowerCase());
 	}
