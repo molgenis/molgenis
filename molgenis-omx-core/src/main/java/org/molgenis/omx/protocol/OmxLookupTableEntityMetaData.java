@@ -9,8 +9,10 @@ import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
 import java.util.List;
 
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
 import org.molgenis.data.support.AbstractEntityMetaData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.ObservableFeature;
 
 import com.google.common.collect.Lists;
@@ -107,5 +109,11 @@ public class OmxLookupTableEntityMetaData extends AbstractEntityMetaData
 		attributes.add(isMissing);
 
 		return attributes;
+	}
+
+	@Override
+	public Class<? extends Entity> getEntityClass()
+	{
+		return Category.class;
 	}
 }

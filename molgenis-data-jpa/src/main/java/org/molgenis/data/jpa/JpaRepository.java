@@ -16,6 +16,7 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaBuilder.In;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
@@ -23,6 +24,7 @@ import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DatabaseAction;
@@ -54,24 +56,21 @@ public class JpaRepository extends AbstractCrudRepository
 
 	@PersistenceContext
 	private EntityManager entityManager;
-	private final Class<? extends Entity> entityClass;
 	private final EntityMetaData entityMetaData;
 	private final QueryResolver queryResolver;
 	private final Logger logger = Logger.getLogger(getClass());
 
-	public JpaRepository(Class<? extends Entity> entityClass, EntityMetaData entityMetaData,
-			EntityValidator entityValidator, QueryResolver queryResolver)
+	public JpaRepository(EntityMetaData entityMetaData, EntityValidator entityValidator, QueryResolver queryResolver)
 	{
-		super(BASE_URL + entityClass.getName(), entityValidator);
-		this.entityClass = entityClass;
+		super(BASE_URL + entityMetaData.getEntityClass().getName(), entityValidator);
 		this.entityMetaData = entityMetaData;
 		this.queryResolver = queryResolver;
 	}
 
-	public JpaRepository(EntityManager entityManager, Class<? extends Entity> entityClass,
-			EntityMetaData entityMetaData, EntityValidator entityValidator, QueryResolver queryResolver)
+	public JpaRepository(EntityManager entityManager, EntityMetaData entityMetaData, EntityValidator entityValidator,
+			QueryResolver queryResolver)
 	{
-		this(entityClass, entityMetaData, entityValidator, queryResolver);
+		this(entityMetaData, entityValidator, queryResolver);
 		this.entityManager = entityManager;
 	}
 
@@ -81,10 +80,9 @@ public class JpaRepository extends AbstractCrudRepository
 		return entityMetaData;
 	}
 
-	@Override
-	public Class<? extends Entity> getEntityClass()
+	protected Class<? extends Entity> getEntityClass()
 	{
-		return entityClass;
+		return entityMetaData.getEntityClass();
 	}
 
 	protected EntityManager getEntityManager()
@@ -282,7 +280,7 @@ public class JpaRepository extends AbstractCrudRepository
 		if (entities.size() == 0) return;
 
 		// retrieve entity class and name
-		String entityName = entityClass.getSimpleName();
+		String entityName = getEntityClass().getSimpleName();
 
 		// create maps to store key values and entities
 		// key is a concat of all key values for an entity
@@ -340,7 +338,7 @@ public class JpaRepository extends AbstractCrudRepository
 				}
 				else
 				{
-					throw new MolgenisDataException("keys are missing: " + entityClass.getSimpleName() + "."
+					throw new MolgenisDataException("keys are missing: " + getEntityClass().getSimpleName() + "."
 							+ Arrays.asList(keyNames));
 				}
 			}
@@ -649,12 +647,25 @@ public class JpaRepository extends AbstractCrudRepository
 					andPredicates.add(cb.equal(from.get(r.getJpaAttribute()), r.getValue()));
 					break;
 				case IN:
-					In<Object> in = cb.in(from.get(r.getJpaAttribute()));
+					AttributeMetaData meta = getEntityMetaData().getAttribute(r.getField());
+
+					In<Object> in;
+					if (meta.getDataType().getEnumType() == FieldTypeEnum.MREF
+							|| meta.getDataType().getEnumType() == FieldTypeEnum.CATEGORICAL)
+					{
+						in = cb.in(from.join(r.getJpaAttribute(), JoinType.LEFT));
+					}
+					else
+					{
+						in = cb.in(from.get(r.getJpaAttribute()));
+					}
+
 					for (Object o : (Iterable) r.getValue())
 					{
 						in.value(o);
 					}
 					andPredicates.add(in);
+
 					break;
 				case LIKE:
 					String like = "%" + r.getValue() + "%";
@@ -789,12 +800,12 @@ public class JpaRepository extends AbstractCrudRepository
 	// If the entity is of the correct type return it, else convert it to the correct type
 	private Entity getTypedEntity(Entity entity)
 	{
-		if (entityClass.isAssignableFrom(entity.getClass()))
+		if (getEntityClass().isAssignableFrom(entity.getClass()))
 		{
 			return entity;
 		}
 
-		Entity jpaEntity = BeanUtils.instantiateClass(entityClass);
+		Entity jpaEntity = BeanUtils.instantiateClass(getEntityClass());
 		jpaEntity.set(entity);
 
 		return jpaEntity;
@@ -872,6 +883,7 @@ public class JpaRepository extends AbstractCrudRepository
 			QueryRule rule = null;
 			switch (attr.getDataType().getEnumType())
 			{
+				case ENUM:
 				case STRING:
 				case TEXT:
 				case HTML:
@@ -916,10 +928,36 @@ public class JpaRepository extends AbstractCrudRepository
 					}
 					break;
 
-				// TODO how??
 				case CATEGORICAL:
 				case MREF:
 				case XREF:
+					// Find the ref entities and create an 'in' queryrule
+					// TODO other datatypes
+					if (attr.getRefEntity().getLabelAttribute().getDataType().getEnumType() == FieldTypeEnum.STRING)
+					{
+						Query q = new QueryImpl().like(attr.getRefEntity().getLabelAttribute().getName(), searchValue);
+						EntityManager em = getEntityManager();
+						CriteriaBuilder cb = em.getCriteriaBuilder();
+
+						@SuppressWarnings("unchecked")
+						CriteriaQuery<Entity> cq = (CriteriaQuery<Entity>) cb.createQuery(attr.getRefEntity()
+								.getEntityClass());
+
+						@SuppressWarnings("unchecked")
+						Root<Entity> from = (Root<Entity>) cq.from(attr.getRefEntity().getEntityClass());
+						cq.select(from);
+
+						// add filters
+						createWhere(q, from, cq, cb);
+
+						TypedQuery<Entity> tq = em.createQuery(cq);
+						List<Entity> refEntities = tq.getResultList();
+						if (!refEntities.isEmpty())
+						{
+							rule = new QueryRule(attr.getName(), Operator.IN, refEntities);
+						}
+					}
+
 					break;
 				default:
 					break;

@@ -27,3 +27,12 @@ label {
 	display: inline;
 	margin-right: 10px;
 }
+
+.entity-btn {
+	float: right;
+	color: #08c;
+}
+
+.entity-btn:hover {
+	color: #005580;
+}

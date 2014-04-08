@@ -245,7 +245,7 @@ public class DataServiceImpl implements DataService
 		for (String entityName : getEntityNames())
 		{
 			Repository repo = getRepositoryByEntityName(entityName);
-			entityClasses.add(repo.getEntityClass());
+			entityClasses.add(repo.getEntityMetaData().getEntityClass());
 		}
 
 		return entityClasses;

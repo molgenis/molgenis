@@ -48,7 +48,6 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 	public static final String ENTREZ_GENE_ID = "ENTREZ GENE ID";
 	public static final String GENE = "GENE";
 	public static final String HGNC_ID = "HGNC ID";
-	
 
 	@Autowired
 	public ClinicalGenomicsDatabaseServiceAnnotator(MolgenisSettings molgenisSettings,
@@ -155,7 +154,7 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 	@Override
 	public EntityMetaData getOutputMetaData()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
+		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
 
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(GENE, MolgenisFieldTypes.FieldTypeEnum.STRING));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(HGNC_ID, MolgenisFieldTypes.FieldTypeEnum.LONG));

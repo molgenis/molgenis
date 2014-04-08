@@ -46,12 +46,6 @@ public class OmxLookupTableRepository extends AbstractRepository implements Quer
 	}
 
 	@Override
-	public Class<? extends Entity> getEntityClass()
-	{
-		return Category.class;
-	}
-
-	@Override
 	public Iterator<Entity> iterator()
 	{
 		return dataService.findAll(Category.ENTITY_NAME,

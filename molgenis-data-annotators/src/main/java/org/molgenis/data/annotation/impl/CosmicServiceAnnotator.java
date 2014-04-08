@@ -72,7 +72,7 @@ public class CosmicServiceAnnotator extends AbstractRepositoryAnnotator implemen
 	@Override
 	public EntityMetaData getInputMetaData()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
+		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ENSEMBLE_ID, FieldTypeEnum.STRING));
 		return metadata;
 	}
@@ -169,7 +169,7 @@ public class CosmicServiceAnnotator extends AbstractRepositoryAnnotator implemen
 	@Override
 	public EntityMetaData getOutputMetaData()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
+		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ID, FieldTypeEnum.STRING));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(FEATURE_TYPE, FieldTypeEnum.STRING));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ALT_ALLELES, FieldTypeEnum.STRING));

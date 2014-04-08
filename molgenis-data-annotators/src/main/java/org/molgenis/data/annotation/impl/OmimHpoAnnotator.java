@@ -339,7 +339,7 @@ public class OmimHpoAnnotator extends LocusAnnotator
 	@Override
 	public EntityMetaData getOutputMetaData()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
+		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_CAUSAL_IDENTIFIER,
 				MolgenisFieldTypes.FieldTypeEnum.TEXT));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(OMIM_DISORDERS,

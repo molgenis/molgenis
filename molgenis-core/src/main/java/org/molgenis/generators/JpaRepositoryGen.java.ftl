@@ -25,7 +25,7 @@ public class ${JavaName(entity)}Repository extends JpaRepository
 	@Autowired
 	public ${JavaName(entity)}Repository(EntityValidator entityValidator, QueryResolver queryResolver)
 	{
-		super(${JavaName(entity)}.class, new ${JavaName(entity)}MetaData(), entityValidator, queryResolver);
+		super(new ${JavaName(entity)}MetaData(), entityValidator, queryResolver);
 	}
 	
     /**
@@ -33,6 +33,6 @@ public class ${JavaName(entity)}Repository extends JpaRepository
 	 */
 	public ${JavaName(entity)}Repository(EntityManager entityManager, EntityValidator entityValidator, QueryResolver queryResolver)
 	{
-		super(entityManager, ${JavaName(entity)}.class, new ${JavaName(entity)}MetaData(), entityValidator, queryResolver);
+		super(entityManager, new ${JavaName(entity)}MetaData(), entityValidator, queryResolver);
 	}
 }
