@@ -66,6 +66,8 @@
 	</div>
 </#list>
 
+<i>${nrItems} items found</i>
+
 <script>
 	var nrItems = ${nrItems};
 	var nrItemsPerPage = ${nrItemsPerPage};
