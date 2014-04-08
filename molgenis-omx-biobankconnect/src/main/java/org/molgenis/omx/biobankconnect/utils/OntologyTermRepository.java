@@ -53,12 +53,6 @@ public class OntologyTermRepository extends AbstractRepository implements Counta
 	}
 
 	@Override
-	public Class<? extends Entity> getEntityClass()
-	{
-		return MapEntity.class;
-	}
-
-	@Override
 	public Iterator<Entity> iterator()
 	{
 		List<Entity> entities = new ArrayList<Entity>();
@@ -76,7 +70,7 @@ public class OntologyTermRepository extends AbstractRepository implements Counta
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		DefaultEntityMetaData metaData = new DefaultEntityMetaData(name);
+		DefaultEntityMetaData metaData = new DefaultEntityMetaData(name, MapEntity.class);
 		metaData.addAttributeMetaData(new DefaultAttributeMetaData(NODE_PATH, FieldTypeEnum.STRING));
 		metaData.addAttributeMetaData(new DefaultAttributeMetaData(BOOST, FieldTypeEnum.STRING));
 		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_IRI, FieldTypeEnum.STRING));
