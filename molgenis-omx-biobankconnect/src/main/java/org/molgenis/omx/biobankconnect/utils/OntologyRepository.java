@@ -36,12 +36,6 @@ public class OntologyRepository extends AbstractRepository implements Countable
 	}
 
 	@Override
-	public Class<? extends Entity> getEntityClass()
-	{
-		return MapEntity.class;
-	}
-
-	@Override
 	public Iterator<Entity> iterator()
 	{
 		List<Entity> entities = new ArrayList<Entity>();
@@ -64,7 +58,7 @@ public class OntologyRepository extends AbstractRepository implements Countable
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		DefaultEntityMetaData metaData = new DefaultEntityMetaData(name);
+		DefaultEntityMetaData metaData = new DefaultEntityMetaData(name, MapEntity.class);
 		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_URL, FieldTypeEnum.STRING));
 		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_LABEL, FieldTypeEnum.STRING));
 		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ENTITY_TYPE, FieldTypeEnum.STRING));

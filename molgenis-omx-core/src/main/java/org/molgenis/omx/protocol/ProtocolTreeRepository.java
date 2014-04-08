@@ -84,12 +84,6 @@ public class ProtocolTreeRepository extends AbstractRepository implements Counta
 	}
 
 	@Override
-	public Class<? extends Entity> getEntityClass()
-	{
-		return MapEntity.class;
-	}
-
-	@Override
 	public Iterator<Entity> iterator()
 	{
 		List<Entity> entities = new ArrayList<Entity>();
@@ -121,7 +115,7 @@ public class ProtocolTreeRepository extends AbstractRepository implements Counta
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData(name);
+		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData(name, MapEntity.class);
 
 		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(FIELD_TYPE, FieldTypeEnum.STRING));
 		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(FIELD_ID, FieldTypeEnum.STRING));

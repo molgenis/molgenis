@@ -19,7 +19,7 @@ public class ${JavaName(entity)}MetaData extends DefaultEntityMetaData
 {
 	public ${JavaName(entity)}MetaData()
 	{
-		super("${JavaName(entity)}");
+		super("${JavaName(entity)}", ${JavaName(entity)}.class);
 		setLabel("${entity.label}");
 		
 <#list entity.allFields as f>

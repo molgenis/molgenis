@@ -67,12 +67,6 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 	}
 
 	@Override
-	public Class<? extends Entity> getEntityClass()
-	{
-		return MapEntity.class;
-	}
-
-	@Override
 	public Iterator<Entity> iterator()
 	{
 		if (entityMetaData == null) entityMetaData = getEntityMetaData();
@@ -163,7 +157,7 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 				throw new RuntimeException(e);
 			}
 
-			entityMetaData = new DefaultEntityMetaData(feed.getTitle().getPlainText());
+			entityMetaData = new DefaultEntityMetaData(feed.getTitle().getPlainText(), MapEntity.class);
 
 			for (CellEntry cellEntry : feed.getEntries())
 			{
