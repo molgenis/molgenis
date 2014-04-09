@@ -27,14 +27,26 @@ public abstract class PermissionDirective implements TemplateDirectiveModel
 	public void execute(Environment env, @SuppressWarnings("rawtypes") Map params, TemplateModel[] loopVars,
 			TemplateDirectiveBody body) throws TemplateException, IOException
 	{
-		if (!params.containsKey("entityName")) throw new TemplateModelException("Missing 'entityName' parameter");
-		if (!params.containsKey("permission")) throw new TemplateModelException("Missing 'permission' parameter");
-
 		String entityName = DataConverter.toString(params.get("entityName"));
-		String permissionStr = DataConverter.toString(params.get("permission"));
-		Permission permission = Permission.valueOf(permissionStr);
+		String plugin = DataConverter.toString(params.get("plugin"));
+		String permission = DataConverter.toString(params.get("permission"));
 
-		execute(molgenisPermissionService.hasPermissionOnEntity(entityName, permission), env, body);
+		if (permission == null) throw new TemplateModelException("Missing 'permission' parameter");
+		if ((entityName == null) && (plugin == null)) throw new TemplateModelException(
+				"Missing 'entityName' and/or 'plugin' parameter");
+
+		boolean hasPermission = false;
+		if (entityName != null)
+		{
+			hasPermission = molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.valueOf(permission));
+		}
+
+		if ((plugin != null) && hasPermission)
+		{
+			hasPermission = molgenisPermissionService.hasPermissionOnPlugin(plugin, Permission.valueOf(permission));
+		}
+
+		execute(hasPermission, env, body);
 	}
 
 	protected abstract void execute(boolean hasPermission, Environment env, TemplateDirectiveBody body)

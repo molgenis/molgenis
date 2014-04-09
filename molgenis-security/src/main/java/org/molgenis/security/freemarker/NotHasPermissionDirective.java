@@ -13,10 +13,10 @@ import freemarker.template.TemplateException;
  * 
  * usage: <@notHasPermission entity='celiacsprue' permission="WRITE">no write permission</@notHasPermission>
  */
-public class HasNotPermissionDirective extends PermissionDirective
+public class NotHasPermissionDirective extends PermissionDirective
 {
 
-	public HasNotPermissionDirective(MolgenisPermissionService molgenisPermissionService)
+	public NotHasPermissionDirective(MolgenisPermissionService molgenisPermissionService)
 	{
 		super(molgenisPermissionService);
 	}

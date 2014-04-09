@@ -149,12 +149,6 @@ public class DataExplorerController extends MolgenisPluginController
 		model.addAttribute("selectedEntityName", selectedEntityName);
 		model.addAttribute("wizard", (wizard != null) && wizard.booleanValue());
 
-		// check for count-permission only (to showDataItemSelection)
-		if (!molgenisPermissionService.hasPermissionOnEntity(selectedEntityName, Permission.READ))
-		{
-			model.addAttribute("hideDataItemSelect", true);
-		}
-
 		return "view-dataexplorer";
 	}
 

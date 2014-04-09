@@ -35,11 +35,11 @@
 			<h3>${entityClass.fullName?html}</h3> 
 			<i>(${entityClass.entityClassIdentifier})</i>
 			
-			<@hasPermission entityName=entityClass.entityClassIdentifier permission='READ'>
+			<@hasPermission plugin='dataexplorer' entityName=entityClass.entityClassIdentifier permission='COUNT'>
 				<@dataExplorerLink entityName=entityClass.entityClassIdentifier class='btn entity-btn'>Explore data</@dataExplorerLink>
 			</@hasPermission>
 			
-			<@hasPermission entityName=entityClass.entityClassIdentifier permission='WRITE'>
+			<@hasPermission entityName='EntityClass' permission='WRITE'>
 				<@formLink entity=entityClass class='btn entity-btn'>Edit</@formLink>	
 			</@hasPermission>
 		</div>
@@ -75,10 +75,10 @@
 				<div class="span10">
 					<#list entityClass.subEntityClasses as subEntityClass>
 						<div>
-							<@hasPermission entityName=subEntityClass.entityClassIdentifier permission='READ'>
+							<@hasPermission plugin='dataexplorer' entityName=subEntityClass.entityClassIdentifier permission='COUNT'>
 								<@dataExplorerLink entityName=subEntityClass.entityClassIdentifier alternativeText=subEntityClass.fullName >${subEntityClass.fullName}</@dataExplorerLink>
 							</@hasPermission>
-							<@notHasPermission entityName=subEntityClass.entityClassIdentifier permission='READ'>
+							<@notHasPermission plugin='dataexplorer' entityName=subEntityClass.entityClassIdentifier permission='COUNT'>
 								${subEntityClass.fullName} 
 							</@notHasPermission>
 							 (${subEntityClass.type})

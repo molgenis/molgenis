@@ -14,8 +14,8 @@ import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.security.core.MolgenisPermissionService;
-import org.molgenis.security.freemarker.HasNotPermissionDirective;
 import org.molgenis.security.freemarker.HasPermissionDirective;
+import org.molgenis.security.freemarker.NotHasPermissionDirective;
 import org.molgenis.ui.freemarker.FormLinkDirective;
 import org.molgenis.ui.freemarker.LimitMethod;
 import org.molgenis.util.ApplicationContextProvider;
@@ -220,7 +220,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		Map<String, Object> freemarkerVariables = Maps.newHashMap();
 		freemarkerVariables.put("limit", new LimitMethod());
 		freemarkerVariables.put("hasPermission", new HasPermissionDirective(molgenisPermissionService));
-		freemarkerVariables.put("notHasPermission", new HasNotPermissionDirective(molgenisPermissionService));
+		freemarkerVariables.put("notHasPermission", new NotHasPermissionDirective(molgenisPermissionService));
 		freemarkerVariables.put("formLink", new FormLinkDirective());
 		addFreemarkerVariables(freemarkerVariables);
 

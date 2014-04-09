@@ -41,11 +41,11 @@ public class HasPermissionDirectiveTest
 	@Test
 	public void executeWithPermission() throws TemplateException, IOException
 	{
-		when(molgenisPermissionService.hasPermissionOnEntity("entity", Permission.READ)).thenReturn(true);
+		when(molgenisPermissionService.hasPermissionOnEntity("entity", Permission.COUNT)).thenReturn(true);
 
-		Map<String, String> params = Maps.newHashMap();
+		Map<String, Object> params = Maps.newHashMap();
 		params.put("entityName", "entity");
-		params.put("permission", "READ");
+		params.put("permission", "COUNT");
 
 		directive.execute(new Environment(fakeTemplate, null, envWriter), params, new TemplateModel[0],
 				new TemplateDirectiveBody()
@@ -66,7 +66,7 @@ public class HasPermissionDirectiveTest
 	{
 		when(molgenisPermissionService.hasPermissionOnEntity("entity", Permission.WRITE)).thenReturn(false);
 
-		Map<String, String> params = Maps.newHashMap();
+		Map<String, Object> params = Maps.newHashMap();
 		params.put("entityName", "entity");
 		params.put("permission", "WRITE");
 
