@@ -280,7 +280,7 @@ public class KeggServiceAnnotator extends LocusAnnotator
 	@Override
 	public EntityMetaData getOutputMetaData()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
+		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(KEGG_GENE_ID,
 				MolgenisFieldTypes.FieldTypeEnum.STRING));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(KEGG_PATHWAYS_IDS,

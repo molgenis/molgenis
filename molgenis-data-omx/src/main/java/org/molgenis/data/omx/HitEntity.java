@@ -13,6 +13,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.AbstractEntity;
+import org.molgenis.omx.dataset.DataSetMatrixRepository;
 import org.molgenis.search.Hit;
 import org.molgenis.util.MolgenisDateFormat;
 
@@ -26,7 +27,6 @@ public class HitEntity extends AbstractEntity
 	private static final long serialVersionUID = 1L;
 
 	private static final String HIT_KEY_PREFIX = "key-";
-	private static final String HIT_ID_COLUMN = "id";
 
 	private final Map<String, Object> columnValueMap;
 	private final Set<String> attributeNames;
@@ -229,7 +229,7 @@ public class HitEntity extends AbstractEntity
 	@Override
 	public Integer getIdValue()
 	{
-		return Integer.valueOf(columnValueMap.get(HIT_ID_COLUMN).toString());
+		return Integer.valueOf(columnValueMap.get(DataSetMatrixRepository.ENTITY_ID_COLUMN_NAME).toString());
 	}
 
 	@Override

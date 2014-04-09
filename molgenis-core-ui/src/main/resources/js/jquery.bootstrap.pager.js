@@ -10,7 +10,7 @@
 
 		// pager html
 		this.addClass("pagination pagination-centered");
-		updatePager(this, 1, settings, false);
+		updatePager(this, settings.page, settings, false);
 		
 		// pager events
 		this.off('click', '**');
@@ -38,6 +38,7 @@
 	$.fn.pager.defaults = {
 		'nrItems' : 0,
 		'nrItemsPerPage' : 20,
+		'page' : 1,
 		'onPageChange' : null
 	};
 	

@@ -80,12 +80,6 @@ public class CategoryRepository extends AbstractRepository implements Countable
 	}
 
 	@Override
-	public Class<? extends Entity> getEntityClass()
-	{
-		return MapEntity.class;
-	}
-
-	@Override
 	public Iterator<Entity> iterator()
 	{
 		List<Entity> entities = new ArrayList<Entity>();
@@ -103,7 +97,7 @@ public class CategoryRepository extends AbstractRepository implements Countable
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("featureCategory-" + id);
+		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("featureCategory-" + id, MapEntity.class);
 
 		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(FIELD_TYPE, FieldTypeEnum.STRING));
 		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(FIELD_ID, FieldTypeEnum.STRING));

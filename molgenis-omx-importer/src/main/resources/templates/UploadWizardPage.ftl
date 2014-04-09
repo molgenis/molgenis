@@ -16,7 +16,7 @@
 	<tr>
 		<td>
 			<label>
-				<input type="radio" style="margin:8px" name="entity_option" value="add_update" checked>
+				<input type="radio" style="margin:8px" name="entity_option" value="add_update" >
 				Add entities / update existing
 			</label>
 		</td>
@@ -25,7 +25,7 @@
 	<tr>
 		<td style="width: 30%;">
 			<label>
-				<input type="radio" style="margin:8px" name="entity_option" value="add">
+				<input type="radio" style="margin:8px" name="entity_option" value="add" checked>
 				Add entities
 			</label>
 		</td>

@@ -14,7 +14,7 @@ public class TupleToEmailValueConverterTest
 	{
 		EmailValue value = new EmailValue();
 		value.setValue("a@b.org");
-		assertEquals(new EntityToEmailValueConverter().toCell(value).getValue(), "a@b.org");
+		assertEquals(new EntityToEmailValueConverter().toCell(value, null).getValue(), "a@b.org");
 	}
 
 	@Test

@@ -37,5 +37,5 @@ public interface EntityToValueConverter<S extends Value, T>
 	 * @param value
 	 * @return
 	 */
-	public Cell<T> toCell(Value value) throws ValueConverterException;
+	public Cell<T> toCell(Value value, ObservableFeature feature) throws ValueConverterException;
 }

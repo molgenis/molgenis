@@ -9,24 +9,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
-import org.apache.poi.hssf.extractor.ExcelExtractor;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.RepositoryAnnotator;
 import org.molgenis.data.omx.OmxRepository;
-import org.molgenis.data.support.AbstractEntity;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.EntityValidator;
-import org.molgenis.generators.EntityMetaDataGen;
 import org.molgenis.omx.converters.ValueConverter;
 import org.molgenis.omx.converters.ValueConverterException;
 import org.molgenis.omx.observ.DataSet;
@@ -40,7 +35,6 @@ import org.molgenis.search.SearchService;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.Model;
 
 /**
  * Service implementation for the Annotation UI service
@@ -80,7 +74,7 @@ public class AnnotatorsUIServiceImpl implements AnnotatorsUIService
 		}
 
 		// DefaultAttributeMetaData object for all observable features
-		DefaultEntityMetaData metaData = new DefaultEntityMetaData(submittedDataSetName + "_METADATA");
+		DefaultEntityMetaData metaData = new DefaultEntityMetaData(submittedDataSetName + "_METADATA", MapEntity.class);
 
 		try
 		{
