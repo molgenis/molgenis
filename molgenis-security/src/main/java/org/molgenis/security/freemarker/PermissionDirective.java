@@ -35,7 +35,7 @@ public abstract class PermissionDirective implements TemplateDirectiveModel
 		if ((entityName == null) && (plugin == null)) throw new TemplateModelException(
 				"Missing 'entityName' and/or 'plugin' parameter");
 
-		boolean hasPermission = false;
+		boolean hasPermission = true;
 		if (entityName != null)
 		{
 			hasPermission = molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.valueOf(permission));

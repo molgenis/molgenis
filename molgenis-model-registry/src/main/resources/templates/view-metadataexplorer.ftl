@@ -39,8 +39,10 @@
 				<@dataExplorerLink entityName=entityClass.entityClassIdentifier class='btn entity-btn'>Explore data</@dataExplorerLink>
 			</@hasPermission>
 			
-			<@hasPermission entityName='EntityClass' permission='WRITE'>
-				<@formLink entity=entityClass class='btn entity-btn'>Edit</@formLink>	
+			<@hasPermission plugin='form.EntityClass' permission='READ'>
+				<@hasPermission entityName='EntityClass' permission='WRITE'>
+					<@formLink entity=entityClass class='btn entity-btn'>Edit</@formLink>	
+				</@hasPermission>
 			</@hasPermission>
 		</div>
 		<div class="row-fluid">
