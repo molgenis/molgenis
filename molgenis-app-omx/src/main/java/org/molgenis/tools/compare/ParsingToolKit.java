@@ -5,10 +5,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntitySource;
 import org.molgenis.data.Repository;
-import org.molgenis.data.excel.ExcelEntitySourceFactory;
+import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.excel.ExcelRepositoryCollection;
+import org.molgenis.data.processor.TrimProcessor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 /**
@@ -38,25 +40,32 @@ public class ParsingToolKit
 	}
 
 	// Convert a value to max 256 characters
-	public void convertTo256Characters(String file) throws IOException
+	public void convertTo256Characters(String file) throws IOException, InvalidFormatException
 	{
-		EntitySource entitySource = new ExcelEntitySourceFactory().create(new File(file));
-		Repository repo = entitySource.getRepositoryByEntityName("ontologyterm");
-
-		for (Entity entity : repo)
+		RepositoryCollection repositorySource = new ExcelRepositoryCollection(new File(file), new TrimProcessor());
+		Repository repo = repositorySource.getRepositoryByEntityName("ontologyterm");
+		try
 		{
-			String name = entity.getString("name");
-			if (name.length() >= 256)
-			{
 
-				System.out.println(name.substring(0, 252) + "...");
-			}
-			else
+			for (Entity entity : repo)
 			{
-				System.out.println(name);
+				String name = entity.getString("name");
+				if (name.length() >= 256)
+				{
+
+					System.out.println(name.substring(0, 252) + "...");
+				}
+				else
+				{
+					System.out.println(name);
+				}
 			}
 		}
-		entitySource.close();
+		finally
+		{
+			repo.close();
+		}
+
 	}
 
 	// Parse your password
@@ -103,31 +112,38 @@ public class ParsingToolKit
 	// Palga project specific
 	// This code reads an excelfile and produces a list with in the first column the Palga-code and the second
 	// column a list of all the referring terms
-	public void check(String file) throws IOException
+	public void check(String file) throws IOException, InvalidFormatException
 	{
-		EntitySource entitySource = new ExcelEntitySourceFactory().create(new File(file));
-		Repository repo = entitySource.getRepositoryByEntityName("dataset_palga");
-		List<String> list = null;
-		List<List<String>> listOfLists = new ArrayList<List<String>>();
-		for (Entity entity : repo)
+		RepositoryCollection repositorySource = new ExcelRepositoryCollection(new File(file), new TrimProcessor());
+
+		Repository repo = repositorySource.getRepositoryByEntityName("dataset_palga");
+		try
 		{
-			list = new ArrayList<String>();
-			String[] code = entity.getString("PALGA-code").split(",");
-			for (int i = 0; i < code.length; ++i)
+			List<String> list = null;
+			List<List<String>> listOfLists = new ArrayList<List<String>>();
+			for (Entity entity : repo)
 			{
-				if (!list.contains(code[i]))
+				list = new ArrayList<String>();
+				String[] code = entity.getString("PALGA-code").split(",");
+				for (int i = 0; i < code.length; ++i)
 				{
-					list.add(code[i]);
+					if (!list.contains(code[i]))
+					{
+						list.add(code[i]);
+					}
 				}
+				listOfLists.add(list);
 			}
-			listOfLists.add(list);
+			for (List<String> all : listOfLists)
+			{
+				System.out.println(all);
+
+			}
 		}
-		for (List<String> all : listOfLists)
+		finally
 		{
-			System.out.println(all);
-
+			repo.close();
 		}
 
-		entitySource.close();
 	}
 }

@@ -12,7 +12,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.security.SecurityUtils;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.userdetails.UserDetails;

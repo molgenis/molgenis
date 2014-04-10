@@ -22,9 +22,16 @@ public interface EntityMetaData
 	String getDescription();
 
 	/**
-	 * Meta data describing all attributes returns all attributes, including those of super classes
+	 * Returns all attributes. In case of compound attributes (attributes consisting of multiple atomic attributes) only
+	 * the compound attribute is returned. This attribute can be used to retrieve parts of the compound attribute.
 	 */
 	Iterable<AttributeMetaData> getAttributes();
+
+	/**
+	 * Returns all atomic attributes. In case of compound attributes (attributes consisting of multiple atomic
+	 * attributes) only the descendant atomic attributes are returned. The compound attribute itself is not returned.
+	 */
+	Iterable<AttributeMetaData> getAtomicAttributes();
 
 	/**
 	 * Attribute that is used as unique Id. If no label exist, returns null.
@@ -40,4 +47,6 @@ public interface EntityMetaData
 	 * Get attribute by name (case insensitive), returns null if not found
 	 */
 	AttributeMetaData getAttribute(String attributeName);
+
+	Class<? extends Entity> getEntityClass();
 }

@@ -26,6 +26,8 @@ import com.google.gdata.util.ServiceException;
 
 public class GoogleSpreadsheetRepository extends AbstractRepository
 {
+	public static final String BASE_URL = "googless://";
+
 	public enum Visibility
 	{
 		PUBLIC, PRIVATE;
@@ -53,6 +55,7 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 	public GoogleSpreadsheetRepository(SpreadsheetService spreadsheetService, String spreadsheetKey,
 			String worksheetId, Visibility visibility) throws IOException, ServiceException
 	{
+		super(BASE_URL + spreadsheetKey + "/" + worksheetId);
 		if (spreadsheetService == null) throw new IllegalArgumentException("spreadsheetService is null");
 		if (spreadsheetKey == null) throw new IllegalArgumentException("spreadsheetKey is null");
 		if (worksheetId == null) throw new IllegalArgumentException("worksheetId is null");
@@ -61,12 +64,6 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 		this.spreadsheetKey = spreadsheetKey;
 		this.worksheetId = worksheetId;
 		this.visibility = visibility;
-	}
-
-	@Override
-	public Class<? extends Entity> getEntityClass()
-	{
-		return MapEntity.class;
 	}
 
 	@Override
@@ -160,7 +157,7 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 				throw new RuntimeException(e);
 			}
 
-			entityMetaData = new DefaultEntityMetaData(feed.getTitle().getPlainText());
+			entityMetaData = new DefaultEntityMetaData(feed.getTitle().getPlainText(), MapEntity.class);
 
 			for (CellEntry cellEntry : feed.getEntries())
 			{
@@ -175,5 +172,4 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 
 		return entityMetaData;
 	}
-
 }

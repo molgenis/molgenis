@@ -28,8 +28,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataService;
-import org.molgenis.data.EntitySource;
+import org.molgenis.data.FileRepositoryCollectionFactory;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.Repository;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntitiesValidator;
@@ -63,13 +63,13 @@ public class EntitiesValidatorImpl implements EntitiesValidator
 	</#list>
 	}
 	
-	private final DataService dataService;
+	private final FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
 
 	@Autowired
-	public EntitiesValidatorImpl(DataService dataService)
+	public EntitiesValidatorImpl(FileRepositoryCollectionFactory fileRepositoryCollectionFactory)
 	{
-		if (dataService == null) throw new IllegalArgumentException("dataService is null");
-		this.dataService = dataService;
+		if (fileRepositoryCollectionFactory == null) throw new IllegalArgumentException("fileRepositoryCollectionFactory is null");
+		this.fileRepositoryCollectionFactory = fileRepositoryCollectionFactory;
 	}
 	
 	@Override
@@ -77,21 +77,23 @@ public class EntitiesValidatorImpl implements EntitiesValidator
 	{
 		EntitiesValidationReport validationReport = new EntitiesValidationReportImpl();
 
-		EntitySource entitySource = dataService.createEntitySource(file);
+		RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 		try
 		{
-			for (String entityName : entitySource.getEntityNames())
+			for (String name : repositoryCollection.getEntityNames())
 			{
-				Repository repository = entitySource.getRepositoryByEntityName(entityName);
+				Repository repository = repositoryCollection.getRepositoryByEntityName(name);
+			
 				try
 				{
-					boolean isImportableEntity = ENTITIES_IMPORTABLE.containsKey(entityName.toLowerCase());
+					boolean isImportableEntity = ENTITIES_IMPORTABLE.containsKey(repository.getName().toLowerCase());
 					if (isImportableEntity)
 					{
-						Class<? extends Entity> entityClazz = ENTITIES_IMPORTABLE.get(entityName.toLowerCase());
-						validateTable(entityName, repository, entityClazz, validationReport);
+						Class<? extends Entity> entityClazz = ENTITIES_IMPORTABLE.get(repository.getName()
+								.toLowerCase());
+						validateTable(repository.getName(), repository, entityClazz, validationReport);
 					}
-					validationReport.getSheetsImportable().put(entityName, isImportableEntity);
+					validationReport.getSheetsImportable().put(repository.getName(), isImportableEntity);
 				}
 				finally
 				{
@@ -103,14 +105,10 @@ public class EntitiesValidatorImpl implements EntitiesValidator
 		{
 			throw new IOException(e);
 		}
-		finally
-		{
-			entitySource.close();
-		}
 
 		return validationReport;
 	}
-
+	
 	private void validateTable(String entityName, Repository repository,
 			Class<? extends Entity> entityClazz, EntitiesValidationReport validationReport)
 			throws MolgenisModelException, IOException
@@ -151,7 +149,7 @@ public class EntitiesValidatorImpl implements EntitiesValidator
 		// collect
 		List<String> detectedFieldNames = new ArrayList<String>();
 		List<String> unknownFieldNames = new ArrayList<String>();
-		for (AttributeMetaData attr : repository.getAttributes())
+		for (AttributeMetaData attr : repository.getEntityMetaData().getAttributes())
 		{
 			String attrName = attr.getName();
 			if (attrName == null || attrName.isEmpty()) continue;

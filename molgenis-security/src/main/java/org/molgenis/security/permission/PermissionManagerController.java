@@ -8,13 +8,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.molgenis.framework.server.MolgenisPermissionService;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.auth.GroupAuthority;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.UserAuthority;
-import org.molgenis.security.SecurityUtils;
+import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -110,8 +110,10 @@ public class PermissionManagerController extends MolgenisPluginController
 		{
 			String param = "radio-" + plugin.getId();
 			String value = webRequest.getParameter(param);
-			if (value.equalsIgnoreCase(MolgenisPermissionService.Permission.READ.toString())
-					|| value.equalsIgnoreCase(MolgenisPermissionService.Permission.WRITE.toString()))
+
+			if (value.equalsIgnoreCase(Permission.READ.toString())
+					|| value.equalsIgnoreCase(Permission.COUNT.toString())
+					|| value.equalsIgnoreCase(Permission.WRITE.toString()))
 			{
 				GroupAuthority authority = new GroupAuthority();
 				authority.setRole(SecurityUtils.AUTHORITY_PLUGIN_PREFIX + value.toUpperCase() + "_"
@@ -132,8 +134,9 @@ public class PermissionManagerController extends MolgenisPluginController
 		{
 			String param = "radio-" + entityClassId;
 			String value = webRequest.getParameter(param);
-			if (value.equalsIgnoreCase(MolgenisPermissionService.Permission.READ.toString())
-					|| value.equalsIgnoreCase(MolgenisPermissionService.Permission.WRITE.toString()))
+			if (value.equalsIgnoreCase(Permission.READ.toString())
+					|| value.equalsIgnoreCase(Permission.COUNT.toString())
+					|| value.equalsIgnoreCase(Permission.WRITE.toString()))
 			{
 				GroupAuthority authority = new GroupAuthority();
 				authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_"
@@ -154,8 +157,9 @@ public class PermissionManagerController extends MolgenisPluginController
 		{
 			String param = "radio-" + plugin.getId();
 			String value = webRequest.getParameter(param);
-			if (value.equalsIgnoreCase(MolgenisPermissionService.Permission.READ.toString())
-					|| value.equalsIgnoreCase(MolgenisPermissionService.Permission.WRITE.toString()))
+			if (value.equalsIgnoreCase(Permission.READ.toString())
+					|| value.equalsIgnoreCase(Permission.COUNT.toString())
+					|| value.equalsIgnoreCase(Permission.WRITE.toString()))
 			{
 				UserAuthority authority = new UserAuthority();
 				authority.setRole(SecurityUtils.AUTHORITY_PLUGIN_PREFIX + value.toUpperCase() + "_"
@@ -176,8 +180,9 @@ public class PermissionManagerController extends MolgenisPluginController
 		{
 			String param = "radio-" + entityClassId;
 			String value = webRequest.getParameter(param);
-			if (value.equalsIgnoreCase(MolgenisPermissionService.Permission.READ.toString())
-					|| value.equalsIgnoreCase(MolgenisPermissionService.Permission.WRITE.toString()))
+			if (value.equalsIgnoreCase(Permission.READ.toString())
+					|| value.equalsIgnoreCase(Permission.COUNT.toString())
+					|| value.equalsIgnoreCase(Permission.WRITE.toString()))
 			{
 				UserAuthority authority = new UserAuthority();
 				authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_"

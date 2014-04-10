@@ -11,14 +11,16 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntitySource;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.Writable;
 import org.molgenis.data.WritableFactory;
-import org.molgenis.data.excel.ExcelEntitySourceFactory;
+import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.excel.ExcelWriter;
+import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.support.MapEntity;
 
 public class SampleTabOmxConverter
@@ -26,17 +28,20 @@ public class SampleTabOmxConverter
 	private final String submissionID;
 	private final Map<String, String> unitOntologyTermsForFeatures;
 
-	public SampleTabOmxConverter(String inputFilePath, String submissionID, String sheetName) throws IOException
+	public SampleTabOmxConverter(String inputFilePath, String submissionID, String sheetName) throws IOException,
+			InvalidFormatException
 	{
 		this.submissionID = submissionID;
 		this.unitOntologyTermsForFeatures = new HashMap<String, String>();
 
-		EntitySource entitySource = new ExcelEntitySourceFactory().create(new File(inputFilePath));
+		RepositoryCollection repositorySource = new ExcelRepositoryCollection(new File(inputFilePath),
+				new TrimProcessor());
+
 		WritableFactory writableFactory = new ExcelWriter(new File(inputFilePath + ".Omx.xls"));
 
 		try
 		{
-			Repository repo = entitySource.getRepositoryByEntityName(sheetName);
+			Repository repo = repositorySource.getRepositoryByEntityName(sheetName);
 			try
 			{
 				// Collect headers as features to be imported in Omx-format
@@ -57,8 +62,8 @@ public class SampleTabOmxConverter
 		finally
 		{
 			writableFactory.close();
-			entitySource.close();
 		}
+
 	}
 
 	private void addOntologyTermTab(WritableFactory writableFactory) throws IOException
@@ -206,7 +211,7 @@ public class SampleTabOmxConverter
 	private List<String> collectColumns(Repository repo) throws IOException
 	{
 		List<String> listOfFeatures = new ArrayList<String>();
-		for (AttributeMetaData attr : repo.getAttributes())
+		for (AttributeMetaData attr : repo.getEntityMetaData().getAttributes())
 		{
 			listOfFeatures.add(attr.getName());
 		}
@@ -231,7 +236,7 @@ public class SampleTabOmxConverter
 		return identifiier.toString();
 	}
 
-	public static void main(String args[]) throws IOException
+	public static void main(String args[]) throws IOException, InvalidFormatException
 	{
 		new SampleTabOmxConverter(args[0], "GCR-ada", args[1]);
 		if (args.length != 2)

@@ -1,4 +1,10 @@
 (function($, molgenis) {
+	"use strict";
+
+    // workaround for "Uncaught RangeError: Maximum call stack size exceeded"
+    // http://stackoverflow.com/a/19190216
+    $.fn.modal.Constructor.prototype.enforceFocus = function() {};
+
 	molgenis.setContextUrl = function(contextUrl) {
 		molgenis.contextUrl = contextUrl;
 	};
@@ -23,9 +29,9 @@
 		items.push(type.charAt(0).toUpperCase() + type.slice(1));
 		items.push('!</strong> ');
 		$.each(alerts, function(i, alert) {
-			items.push(alert.message);
 			if (i > 0)
-				items.push('\n');
+				items.push('<br/>');
+			items.push('<span>' + alert.message + '</span>');
 		});
 		items.push('</div>');
 
@@ -79,9 +85,56 @@
 					'message' : response.message
 				} ], response.type, $('.datasetsindexerAlerts'));
 			});
-		};
+		}
 	};
 
+	/**
+	 * Returns all atomic attributes. In case of compound attributes (attributes consisting of multiple atomic
+	 * attributes) only the descendant atomic attributes are returned. The compound attribute itself is not returned.
+	 * 
+	 * @param attributes
+	 * @param restClient
+	 */
+	molgenis.getAtomicAttributes = function(attributes, restClient) {
+		var atomicAttributes = [];
+		function createAtomicAttributesRec(attributes) {
+			$.each(attributes, function(i, attribute) {
+				if(attribute.fieldType === 'COMPOUND'){
+					// FIXME improve performance by retrieving async 
+					attribute = restClient.get(attribute.href, {'expand': ['attributes']});
+					createAtomicAttributesRec(attribute.attributes);
+				}
+					else
+						atomicAttributes.push(attribute);
+			});	
+		}
+		createAtomicAttributesRec(attributes);
+		return atomicAttributes;
+	};
+
+	/**
+	 * Returns all compound attributes. In case of compound attributes (attributes consisting of multiple atomic
+	 * attributes) only the descendant atomic attributes are returned. The compound attribute itself is not returned.
+	 * 
+	 * @param attributes
+	 * @param restClient
+	 */
+	molgenis.getCompoundAttributes = function(attributes, restClient) {
+		var compoundAttributes = [];
+		function createAtomicAttributesRec(attributes) {
+			$.each(attributes, function(i, attribute) {
+				if(attribute.fieldType === 'COMPOUND'){
+					// FIXME improve performance by retrieving async 
+					attribute = restClient.get(attribute.href, {'expand': ['attributes']});
+					compoundAttributes.push(attribute);
+					createAtomicAttributesRec(attribute.attributes);
+				}
+			});	
+		}
+		createAtomicAttributesRec(attributes);
+		return compoundAttributes;
+	};
+	
 	/*
 	 * Natural Sort algorithm for Javascript - Version 0.7 - Released under MIT license
 	 * Author: Jim Palmer (based on chunking idea from Dave Koelle)
@@ -133,7 +186,7 @@
 				return 1;
 		}
 		return 0;
-	}
+	};
 }($, window.top.molgenis = window.top.molgenis || {}));
 
 // Add endsWith function to the string class
@@ -150,7 +203,7 @@ function padNumber(number, length) {
 	}
 
 	return str;
-};
+}
 
 function getCurrentTimezoneOffset() {
 	var offset = new Date().getTimezoneOffset();
@@ -159,7 +212,7 @@ function getCurrentTimezoneOffset() {
 			.abs(offset % 60), 2));
 
 	return offset;
-};
+}
 
 function htmlEscape(text) {
 	return $('<div/>').text(text).html();
@@ -170,6 +223,10 @@ function htmlEscape(text) {
  * Is used by the dataexplorer and the forms plugin
  */
 function formatTableCellValue(value, dataType) {
+	if (!value) {
+		return '';
+	}
+	
 	if (dataType.toLowerCase() == "hyperlink") {
 		value = '<a target="_blank" href="' + value + '">' + htmlEscape(value)
 				+ '</a>';
@@ -178,7 +235,7 @@ function formatTableCellValue(value, dataType) {
 		value = '<a href="mailto:' + value + '">' + htmlEscape(value) + '</a>';
 
 	} else if (dataType.toLowerCase() == 'bool') {
-		var checked = (value == true);
+		var checked = (value === true);
 		value = '<input type="checkbox" disabled="disabled" ';
 		if (checked) {
 			value = value + 'checked ';
@@ -189,7 +246,7 @@ function formatTableCellValue(value, dataType) {
 	} else if (dataType.toLowerCase() != 'html') {
 
 		if (value.length > 50) {
-			var abbr = htmlEscape(value.substr(0, 47)) + '...';
+			var abbr = htmlEscape(abbreviate(value, 50));
 			value = '<span class="show-popover"  data-content="'
 					+ htmlEscape(value) + '" data-toggle="popover">' + abbr
 					+ "</span>";
@@ -202,176 +259,151 @@ function formatTableCellValue(value, dataType) {
 	}
 
 	return value;
-};
+}
 
-$(function() {
-	// disable all ajax request caching
-	$.ajaxSetup({
-		cache : false
-	});
-	// async load bootstrap modal and display
-	$(document).on('click', 'a.modal-href', function(e) {
-		e.preventDefault();
-		e.stopPropagation();
-		if (!$(this).hasClass('disabled')) {
-			var container = $('#' + $(this).data('target'));
-			if (container.is(':empty')) {
-				container.load($(this).attr('href'), function() {
-					$('.modal:first', container).modal('show');
-				});
-			} else {
-				$('.modal:first', container).modal('show');
-			}
-		}
-	});
-});
+/**
+ * Is s is longer then maxLength cut it and add ...
+ * @param s
+ * @param maxLength
+ */
+function abbreviate(s, maxLength) {
+	if (s.length <= maxLength) {
+		return s;
+	}
+	
+	return s.substr(0, maxLength-3) + '...';
+}
+
+/**
+ * Create input element for a molgenis data type
+ * 
+ * @param dataType molgenis data type
+ * @param attrs input attributes
+ * @param val input value
+ * @param lbl input label (for checkbox and radio inputs)
+ */
+function createInput(dataType, attrs, val, lbl) {
+	function createBasicInput(type, attrs, val) {
+		var input = $('<input type="' + type + '">');
+		if(attrs)
+			input.attr(attrs);
+		if(val !== undefined)
+			input.val(val);
+		return input;
+	}
+	
+	switch(dataType) {
+		case 'BOOL':
+			var label = $('<label class="radio">');
+			var input = createBasicInput('radio', attrs, val); 
+			return label.append(input).append(val ? 'True' : 'False');
+		case 'CATEGORICAL':
+			var label = $('<label class="checkbox">');
+			var input = createBasicInput('checkbox', attrs, val); 
+			return label.append(input).append(lbl);
+		case 'DATE':
+		case 'DATE_TIME':
+			var format = dataType === 'DATE' ? 'yyyy-MM-dd' : 'yyyy-MM-dd\'T\'hh:mm:ss' + getCurrentTimezoneOffset();
+			var items = [];
+			items.push('<div class="input-append date">');
+			items.push('<input data-format="' + format + '" data-language="en" type="text">');
+			items.push('<span class="add-on">');
+			items.push('<i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>');
+			items.push('</span>');
+			items.push('</div>');
+			var datepicker = $(items.join(''));
+			if(attrs)
+				$('input', datepicker).attr(attrs);
+			if(val !== undefined)
+				$('input', datepicker).val(val);
+			return datepicker.datetimepicker();
+		case 'DECIMAL':
+		case 'INT':
+		case 'LONG':
+			return createBasicInput('number', attrs, val);
+		case 'EMAIL':
+			return createBasicInput('email', attrs, val);
+		case 'HTML':
+		case 'HYPERLINK':
+		case 'STRING':
+		case 'TEXT':
+			return createBasicInput('text', attrs, val);
+		case 'MREF':
+		case 'XREF':
+			var container = $('<div class="xrefsearch" />');
+			container.append(createBasicInput('hidden', attrs, val));
+			return container;
+		case 'COMPOUND' :
+		case 'ENUM':
+		case 'FILE':
+		case 'IMAGE':
+			throw 'Unsupported data type: ' + dataType;
+		default:
+			throw 'Unknown data type: ' + dataType;
+	}
+}
 
 // molgenis entity REST API client
 (function($, molgenis) {
 	"use strict";
 
-	molgenis.RestClient = function RestClient(cache) {
-		this.cache = cache === false ? null : [];
+	molgenis.RestClient = function RestClient() {};
+
+	molgenis.RestClient.prototype.get = function(resourceUri, options) {
+		return this._get(resourceUri, options);
+	};
+	
+	molgenis.RestClient.prototype.getAsync = function(resourceUri, options, callback) {
+		this._get(resourceUri, options, callback);
 	};
 
-	molgenis.RestClient.prototype.get = function(resourceUri, expands, q) {
-		var apiUri = this._toApiUri(resourceUri, expands, q);
-		var cachedResource = this.cache && this.cache[apiUri];
-		if (!cachedResource) {
-			var _this = this;
-			if (q) {
-				$
-						.ajax({
-							type : 'POST',
-							dataType : 'json',
-							url : apiUri,
-							cache : true,
-							data : JSON.stringify(q),
-							contentType : 'application/json',
-							async : false,
-							success : function(resource) {
-								if (_this.cache)
-									_this._cachePut(resourceUri, resource,
-											expands);
-								cachedResource = resource;
-							},
-							error : function(xhr) {
-								molgenis.createAlert(JSON
-										.parse(xhr.responseText).errors);
-							}
-						});
-			} else {
-				$
-						.ajax({
-							dataType : 'json',
-							url : apiUri,
-							cache : true,
-							async : false,
-							success : function(resource) {
-								if (_this.cache)
-									_this._cachePut(resourceUri, resource,
-											expands);
-								cachedResource = resource;
-							},
-							error : function(xhr) {
-								molgenis.createAlert(JSON
-										.parse(xhr.responseText).errors);
-							}
-						});
+	molgenis.RestClient.prototype._get = function(resourceUri, options, callback) {
+		var resource = null;
+
+		var async = callback !== undefined;
+		
+		var config = {
+			'dataType' : 'json',
+			'url' : this._toApiUri(resourceUri, options),
+			'cache' : true,
+			'async' : async,
+			'success' : function(data) {
+				if (async)
+					callback(data);
+				else
+					resource = data;
 			}
+		};
+		
+		// tunnel get requests with query through a post,
+		// because it might not fit in the URL
+		if (options && options.q) {
+			$.extend(config, {
+				'type' : 'POST',
+				'data' : JSON.stringify(options.q),
+				'contentType' : 'application/json'
+			});
 		}
-		return cachedResource;
+		
+		$.ajax(config);
+		
+		if (!async)
+			return resource;
 	};
-
-	molgenis.RestClient.prototype.getAsync = function(resourceUri, expands, q,
-			callback) {
-		var apiUri = this._toApiUri(resourceUri, expands, q);
-		var cachedResource = this._cacheGet[apiUri];
-		if (cachedResource) {
-			callback(cachedResource);
-		} else {
-			var _this = this;
-			if (q) {
-				$
-						.ajax({
-							type : 'POST',
-							dataType : 'json',
-							url : apiUri,
-							cache : true,
-							data : JSON.stringify(q),
-							contentType : 'application/json',
-							async : true,
-							success : function(resource) {
-								_this._cachePut(resourceUri, resource, expands);
-								callback(resource);
-							},
-							error : function(xhr) {
-								molgenis.createAlert(JSON
-										.parse(xhr.responseText).errors);
-							}
-						});
-			} else {
-				$
-						.ajax({
-							dataType : 'json',
-							url : apiUri,
-							cache : true,
-							async : true,
-							success : function(resource) {
-								_this._cachePut(resourceUri, resource, expands);
-								callback(resource);
-							},
-							error : function(xhr) {
-								molgenis.createAlert(JSON
-										.parse(xhr.responseText).errors);
-							}
-						});
-			}
-		}
-	};
-
-	molgenis.RestClient.prototype._cacheGet = function(resourceUri) {
-		return this.cache !== null ? this.cache[resourceUri] : null;
-	};
-
-	molgenis.RestClient.prototype._cachePut = function(resourceUri, resource,
-			expands) {
-		var apiUri = this._toApiUri(resourceUri, expands);
-		this.cache[apiUri] = resource;
-		if (resource.items) {
-			for ( var i = 0; i < resource.items.length; i++) {
-				var nestedResource = resource.items[i];
-				this.cache[nestedResource.href] = nestedResource;
-			}
-		}
-		if (expands) {
-			this.cache[resourceUri] = resource;
-			for ( var i = 0; i < expands.length; i++) {
-				var expand = resource[expands[i]];
-				if (expand) {
-					this.cache[expand.href] = expand;
-					if (expand.items) {
-						for ( var j = 0; j < expand.items.length; j++) {
-							var expandedResource = expand.items[j];
-							this.cache[expandedResource.href] = expandedResource;
-						}
-					}
-				}
-			}
-		}
-	};
-
-	molgenis.RestClient.prototype._toApiUri = function(resourceUri, expands, q) {
+	
+	molgenis.RestClient.prototype._toApiUri = function(resourceUri, options) {
 		var qs = "";
 		if (resourceUri.indexOf('?') != -1) {
 			var uriParts = resourceUri.split('?');
 			resourceUri = uriParts[0];
 			qs = '?' + uriParts[1];
 		}
-		if (expands)
-			qs += (qs.length == 0 ? '?' : '&') + 'expand=' + expands.join(',');
-		if (q)
-			qs += (qs.length == 0 ? '?' : '&') + '_method=GET';
+		if (options && options.attributes && options.attributes.length > 0)
+			qs += (qs.length === 0 ? '?' : '&') + 'attributes=' + options.attributes.join(',');
+		if (options && options.expand && options.expand.length > 0)
+			qs += (qs.length === 0 ? '?' : '&') + 'expand=' + options.expand.join(',');
+		if (options && options.q)
+			qs += (qs.length === 0 ? '?' : '&') + '_method=GET';
 		return resourceUri + qs;
 	};
 
@@ -379,6 +411,10 @@ $(function() {
 		return href.substring(href.lastIndexOf('/') + 1);
 	};
 
+	molgenis.RestClient.prototype.getHref = function(entityName, primaryKey) {
+		return '/api/v1/' + entityName + (primaryKey ? '/' + primaryKey : '');
+	};
+	
 	molgenis.RestClient.prototype.remove = function(href, callback) {
 		$.ajax({
 			type : 'POST',
@@ -389,7 +425,20 @@ $(function() {
 			error : callback.error
 		});
 	};
-
+	
+	molgenis.RestClient.prototype.entityExists = function(resourceUri) {
+		var result = false;
+		$.ajax({
+			dataType : 'json',
+			url : resourceUri + '/exist',
+			async : false,
+			success : function(exists) {
+				result = exists;
+			}
+		});
+		
+		return result;
+	};
 }($, window.top.molgenis = window.top.molgenis || {}));
 
 // molgenis search API client
@@ -453,11 +502,11 @@ function validateForm(form, fields) {
 	alertstring = "";
 
 	for ( var i = 0; i < fields.length; i++) {
-		if (fields[i].value == "") {
+		if (fields[i].value === "") {
 			alertstring += fields[i].name + "\n";
 		}
 	}
-	if (alertstring == "") {
+	if (alertstring === "") {
 		return true;
 	} else {
 		alert("Fields marked with * are required. Please provide: \n"
@@ -486,7 +535,7 @@ function checkAll(formname, inputname) {
 }
 
 function toggleCssClass(cssClass) {
-	var cssRules = new Array();
+	var cssRules = [];
 	var ff = true;
 	if (document.styleSheets[0].cssRules) {
 		cssRules = document.styleSheets[0].cssRules;
@@ -519,34 +568,97 @@ function toggleCssClass(cssClass) {
 	}
 }
 
+function uncapitalize(s) {
+	if (s && s.length > 0) {
+		return s.charAt(0).toLowerCase() + s.slice(1);
+	}
+	
+	return s;
+}
+
 function showSpinner(callback) {
 	var spinner = $('#spinner');
 	if (spinner.length === 0) {
 		var items = [];
-		items.push('<div id="spinner" class="modal hide fade" data-backdrop="">');
+		items.push('<div id="spinner" class="modal hide fade" data-backdrop="static">');
 		items.push('<div class="modal-header"><h3>Loading ...</h3></div>');
 		items.push('<div class="modal-body"><div class="modal-body-inner"><img src="/img/waiting-spinner.gif"></div></div>');
 		items.push('</div>');
 		$('body').append(items.join(''));
 		spinner = $('#spinner');
+		spinner.data('count', 0);
 	}
 	
 	if (callback) {
-		$('#spinner').on('shown', function() {
+		spinner.on('shown', function() {
 			callback();
 		});
 	}
 	
-	spinner.modal('show');
+	var count = $('#spinner').data('count');
+	if(count === 0) {
+		var timeout = setTimeout(function(){ spinner.modal('show'); }, 500);
+		$('#spinner').data('timeout', timeout);
+		$('#spinner').data('count', 1);
+	} else {
+		$('#spinner').data('count', count + 1);
+	}
 }
 
 function hideSpinner() {
 	if ($('#spinner').length !== 0) {
-		$('#spinner').modal('hide');
+		var count = $('#spinner').data('count');
+		if(count === 1) {
+			clearTimeout($('#spinner').data('timeout'));
+			$('#spinner').modal('hide');
+		}
+		if (count > 0) {
+			$('#spinner').data('count', count - 1);
+		}
 	}
 }
 
 $(function() {
+	// disable all ajax request caching
+	$.ajaxSetup({
+		cache : false
+	});
+
+	// use ajaxPrefilter instead of ajaxStart and ajaxStop
+	// to work around issue http://bugs.jquery.com/ticket/13680
+	$.ajaxPrefilter(function( options, _, jqXHR ) {
+	    showSpinner();
+	    jqXHR.always( hideSpinner );
+	});
+
+	$(document).ajaxError(function(event, xhr, settings, e) {
+		try {
+			molgenis.createAlert(JSON.parse(xhr.responseText).errors);
+		} catch(e) {
+			molgenis.createAlert([{'message': 'An error occurred. Please contact the administrator.'}], 'error');
+		}
+	});
+	
+	window.onerror = function(msg, url, line) {
+		molgenis.createAlert([{'message': 'An error occurred. Please contact the administrator.'}, {'message': msg}], 'error');
+	};
+	
+	// async load bootstrap modal and display
+	$(document).on('click', 'a.modal-href', function(e) {
+		e.preventDefault();
+		e.stopPropagation();
+		if (!$(this).hasClass('disabled')) {
+			var container = $('#' + $(this).data('target'));
+			if (container.is(':empty')) {
+				container.load($(this).attr('href'), function() {
+					$('.modal:first', container).modal('show');
+				});
+			} else {
+				$('.modal:first', container).modal('show');
+			}
+		}
+	});
+	
 	/**
 	 * Add download functionality to JQuery.
 	 * data can be string of parameters or array/object

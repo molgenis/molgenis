@@ -166,7 +166,7 @@ public class GafListValidator
 			Map<String, Set<String>> lookupLists, GafListValidationReport report)
 	{
 		int row = 2;
-		Iterable<AttributeMetaData> attributes = repository.getAttributes();
+		Iterable<AttributeMetaData> attributes = repository.getEntityMetaData().getAttributes();
 		for (Iterator<Entity> it = repository.iterator(); it.hasNext(); ++row)
 		{
 			Entity entity = it.next();

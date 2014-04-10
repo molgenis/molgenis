@@ -110,7 +110,7 @@ public class StoreMappingRepositoryTest
 	@Test
 	public void getAttributes()
 	{
-		for (AttributeMetaData attr : repository.getAttributes())
+		for (AttributeMetaData attr : repository.getEntityMetaData().getAttributes())
 		{
 			assertTrue(columns.contains(attr.getName()));
 		}

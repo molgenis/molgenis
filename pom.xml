@@ -8,7 +8,7 @@
 	</parent>
 	<groupId>org.molgenis</groupId>
 	<artifactId>molgenis</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.1.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<!-- More Project Information -->
@@ -34,6 +34,7 @@
 			<id>dev</id>
 			<properties>
 				<minify.skipMinify>true</minify.skipMinify>
+				<molgenis.build.profile>dev</molgenis.build.profile>
 			</properties>
 		</profile>
 		<!-- release profile (default) -->
@@ -41,6 +42,7 @@
 			<id>release</id>
 			<properties>
 				<minify.skipMinify>false</minify.skipMinify>
+				<molgenis.build.profile>release</molgenis.build.profile>
 			</properties>
 			<activation>
 	            <activeByDefault>true</activeByDefault>
@@ -50,9 +52,12 @@
 	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring.version>3.2.6.RELEASE</spring.version>
-		<spring.security.version>3.2.0.RELEASE</spring.security.version>
+		<spring.version>4.0.2.RELEASE</spring.version>
+		<spring.security.version>3.2.1.RELEASE</spring.security.version>
 		<mysql.connector.java.version>5.1.28</mysql.connector.java.version>
+		
+		<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
+		<molgenis.build.timestamp>${maven.build.timestamp}</molgenis.build.timestamp>
 	</properties>
 
 	<build>
@@ -493,6 +498,19 @@
 		</plugins>
 	</reporting>
 
+	<dependencyManagement>
+		<dependencies>
+			<!-- see http://docs.spring.io/spring-security/site/docs/3.2.x/reference/htmlsingle/#maven-bom -->
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-framework-bom</artifactId>
+				<version>${spring.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+			
 	<dependencies>
 		<!-- scope: compile -->
 		<dependency>
@@ -517,7 +535,6 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
-			<version>${spring.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<!-- scope: provided -->
@@ -542,7 +559,6 @@
 		<module>molgenis-omx-core</module>
 		<module>molgenis-omx-das</module>
 		<module>molgenis-omx-dataexplorer</module>
-		<module>molgenis-omx-genomebrowser</module>
 		<module>molgenis-omx-protocolmanager</module>
 		<module>molgenis-omx-importer</module>
 		<module>molgenis-omx-protocolviewer</module>
@@ -551,6 +567,8 @@
 		<module>molgenis-search</module>
 		<module>molgenis-search-elasticsearch</module>
 		<module>molgenis-security</module>
+		<module>molgenis-security-core</module>
+		<module>molgenis-data-annotators</module>
 		<module>molgenis-data-excel</module>
 		<module>molgenis-data-csv</module>
 		<module>molgenis-data-googlespreadsheet</module>
@@ -560,5 +578,8 @@
 		<module>molgenis-data-rest</module>
 		<module>molgenis-r</module>
 		<module>molgenis-charts</module>
+		<module>molgenis-omx-annotators</module>
+		<module>molgenis-js</module>
+		<module>molgenis-model-registry</module>
 	</modules>
 </project>

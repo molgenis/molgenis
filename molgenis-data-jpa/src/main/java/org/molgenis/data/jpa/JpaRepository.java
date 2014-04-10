@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
@@ -15,6 +16,7 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaBuilder.In;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
@@ -22,7 +24,8 @@ import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.molgenis.data.CrudRepository;
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
@@ -30,10 +33,14 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
-import org.molgenis.data.support.AbstractRepository;
+import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.support.AbstractCrudRepository;
 import org.molgenis.data.support.ConvertingIterable;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.support.QueryResolver;
+import org.molgenis.data.validation.EntityValidator;
+import org.molgenis.generators.GeneratorHelper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,30 +50,39 @@ import com.google.common.collect.Lists;
 /**
  * Repository implementation for (generated) jpa entities
  */
-public class JpaRepository extends AbstractRepository implements CrudRepository
+public class JpaRepository extends AbstractCrudRepository
 {
+	public static final String BASE_URL = "jpa://";
+
 	@PersistenceContext
 	private EntityManager entityManager;
-	private final Class<? extends Entity> entityClass;
 	private final EntityMetaData entityMetaData;
+	private final QueryResolver queryResolver;
 	private final Logger logger = Logger.getLogger(getClass());
 
-	public JpaRepository(Class<? extends Entity> entityClass, EntityMetaData entityMetaData)
+	public JpaRepository(EntityMetaData entityMetaData, EntityValidator entityValidator, QueryResolver queryResolver)
 	{
-		this.entityClass = entityClass;
+		super(BASE_URL + entityMetaData.getEntityClass().getName(), entityValidator);
 		this.entityMetaData = entityMetaData;
+		this.queryResolver = queryResolver;
 	}
 
-	public JpaRepository(EntityManager entityManager, Class<? extends Entity> entityClass, EntityMetaData entityMetaData)
+	public JpaRepository(EntityManager entityManager, EntityMetaData entityMetaData, EntityValidator entityValidator,
+			QueryResolver queryResolver)
 	{
-		this(entityClass, entityMetaData);
+		this(entityMetaData, entityValidator, queryResolver);
 		this.entityManager = entityManager;
 	}
 
 	@Override
-	public Class<? extends Entity> getEntityClass()
+	public EntityMetaData getEntityMetaData()
 	{
-		return entityClass;
+		return entityMetaData;
+	}
+
+	protected Class<? extends Entity> getEntityClass()
+	{
+		return entityMetaData.getEntityClass();
 	}
 
 	protected EntityManager getEntityManager()
@@ -75,8 +91,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 	}
 
 	@Override
-	@Transactional
-	public Integer add(Entity entity)
+	protected Integer addInternal(Entity entity)
 	{
 		Entity jpaEntity = getTypedEntity(entity);
 
@@ -89,11 +104,10 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 	}
 
 	@Override
-	@Transactional
-	public void add(Iterable<? extends Entity> entities)
+	protected void addInternal(Iterable<? extends Entity> entities)
 	{
 		for (Entity e : entities)
-			add(e);
+			addInternal(e);
 	}
 
 	@Override
@@ -114,6 +128,8 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 	@Transactional(readOnly = true)
 	public long count(Query q)
 	{
+		queryResolver.resolveRefIdentifiers(q.getRules(), getEntityMetaData());
+
 		EntityManager em = getEntityManager();
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 
@@ -137,6 +153,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 	{
 		if (logger.isDebugEnabled()) logger
 				.debug("finding by key" + getEntityClass().getSimpleName() + " [" + id + "]");
+
 		return getEntityManager().find(getEntityClass(), id);
 	}
 
@@ -144,7 +161,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 	@Transactional(readOnly = true)
 	public Iterable<Entity> findAll(Iterable<Integer> ids)
 	{
-		String idAttrName = getIdAttribute().getName();
+		String idAttrName = getEntityMetaData().getIdAttribute().getName();
 
 		// TODO why doesn't this work? Should work now (test it)
 		// Query q = new QueryImpl().in(idAttrName, ids);
@@ -172,6 +189,8 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 	@Transactional(readOnly = true)
 	public Iterable<Entity> findAll(Query q)
 	{
+		queryResolver.resolveRefIdentifiers(q.getRules(), getEntityMetaData());
+
 		EntityManager em = getEntityManager();
 		CriteriaBuilder cb = em.getCriteriaBuilder();
 
@@ -211,8 +230,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 	}
 
 	@Override
-	@Transactional
-	public void update(Entity entity)
+	protected void updateInternal(Entity entity)
 	{
 		EntityManager em = getEntityManager();
 
@@ -225,8 +243,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 	}
 
 	@Override
-	@Transactional
-	public void update(Iterable<? extends Entity> entities)
+	protected void updateInternal(Iterable<? extends Entity> entities)
 	{
 		EntityManager em = getEntityManager();
 		int batchSize = 500;
@@ -255,8 +272,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 	}
 
 	@Override
-	@Transactional
-	public void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyNames)
+	protected void updateInternal(List<? extends Entity> entities, DatabaseAction dbAction, String... keyNames)
 	{
 		if (keyNames.length == 0) throw new MolgenisDataException("At least one key must be provided, e.g. 'name'");
 
@@ -264,7 +280,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 		if (entities.size() == 0) return;
 
 		// retrieve entity class and name
-		String entityName = entityClass.getSimpleName();
+		String entityName = getEntityClass().getSimpleName();
 
 		// create maps to store key values and entities
 		// key is a concat of all key values for an entity
@@ -316,13 +332,13 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 				if ((dbAction.equals(DatabaseAction.ADD) || dbAction.equals(DatabaseAction.ADD_IGNORE_EXISTING) || dbAction
 						.equals(DatabaseAction.ADD_UPDATE_EXISTING))
 						&& keyNames.length == 1
-						&& keyNames[0].equals(getIdAttribute().getName()))
+						&& keyNames[0].equals(getEntityMetaData().getIdAttribute().getName()))
 				{
 					// don't complain is 'id' field is emptyr
 				}
 				else
 				{
-					throw new MolgenisDataException("keys are missing: " + entityClass.getSimpleName() + "."
+					throw new MolgenisDataException("keys are missing: " + getEntityClass().getSimpleName() + "."
 							+ Arrays.asList(keyNames));
 				}
 			}
@@ -402,7 +418,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 			case ADD:
 				if (existingEntities.size() == 0)
 				{
-					add(newEntities);
+					addInternal(newEntities);
 				}
 				else
 				{
@@ -422,7 +438,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 			case ADD_IGNORE_EXISTING:
 				if (logger.isDebugEnabled()) logger.debug("updateByName(List<" + entityName + "," + dbAction
 						+ ">) will skip " + existingEntities.size() + " existing entities");
-				add(newEntities);
+				addInternal(newEntities);
 				break;
 
 			// will try to update(existingEntities) entities and
@@ -432,7 +448,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 				if (logger.isDebugEnabled()) logger.debug("updateByName(List<" + entityName + "," + dbAction
 						+ ">)  will try to update " + existingEntities.size() + " existing entities and add "
 						+ newEntities.size() + " new entities");
-				add(newEntities);
+				addInternal(newEntities);
 				update(existingEntities);
 				break;
 
@@ -440,7 +456,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 			case UPDATE:
 				if (newEntities.size() == 0)
 				{
-					update(existingEntities);
+					updateInternal(existingEntities);
 				}
 				else
 				{
@@ -456,7 +472,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 				if (logger.isDebugEnabled()) logger.debug("updateByName(List<" + entityName + "," + dbAction
 						+ ">) will try to update " + existingEntities.size() + " existing entities and skip "
 						+ newEntities.size() + " new entities");
-				update(existingEntities);
+				updateInternal(existingEntities);
 				break;
 
 			// remove all elements in list, test if no elements are missing
@@ -596,17 +612,25 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 	/** Converts MOLGENIS query rules into JPA predicates */
 	@SuppressWarnings(
 	{ "rawtypes", "unchecked" })
-	private List<Predicate> createPredicates(Root<?> from, CriteriaBuilder cb, List<QueryRule> rules)
+	private List<Predicate> createPredicates(Root<?> from, CriteriaBuilder cb, List<QueryRule> originalRules)
 	{
+		List<QueryRule> rules = Lists.newArrayList(originalRules);
+
 		// default Query links criteria based on 'and'
 		List<Predicate> andPredicates = new ArrayList<Predicate>();
+
 		// optionally, subqueries can be formulated seperated by 'or'
 		List<Predicate> orPredicates = new ArrayList<Predicate>();
 
-		for (QueryRule r : rules)
+		ListIterator<QueryRule> it = rules.listIterator();
+		while (it.hasNext())
 		{
+			QueryRule r = it.next();
+
 			switch (r.getOperator())
 			{
+				case AND:
+					break;
 				case NESTED:
 					Predicate nested = cb.conjunction();
 					for (Predicate p : createPredicates(from, cb, r.getNestedRules()))
@@ -623,21 +647,40 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 					andPredicates.add(cb.equal(from.get(r.getJpaAttribute()), r.getValue()));
 					break;
 				case IN:
-					In<Object> in = cb.in(from.get(r.getJpaAttribute()));
+					AttributeMetaData meta = getEntityMetaData().getAttribute(r.getField());
+
+					In<Object> in;
+					if (meta.getDataType().getEnumType() == FieldTypeEnum.MREF
+							|| meta.getDataType().getEnumType() == FieldTypeEnum.CATEGORICAL)
+					{
+						in = cb.in(from.join(r.getJpaAttribute(), JoinType.LEFT));
+					}
+					else
+					{
+						in = cb.in(from.get(r.getJpaAttribute()));
+					}
+
 					for (Object o : (Iterable) r.getValue())
 					{
 						in.value(o);
 					}
 					andPredicates.add(in);
+
 					break;
 				case LIKE:
 					String like = "%" + r.getValue() + "%";
 					String f = r.getJpaAttribute();
 					andPredicates.add(cb.like(from.<String> get(f), like));
 					break;
+				case SEARCH:
+					// Create like predicated for all attributes and remove original 'search' QueryRule
+					andPredicates.addAll(createPredicates(from, cb, createSearchQueryRules(r.getValue())));
+					it.remove();
+					break;
 				default:
 					// go into comparator based criteria, that need
 					// conversion...
+
 					Path<Comparable> field = from.get(r.getJpaAttribute());
 					Object value = r.getValue();
 					Comparable cValue = null;
@@ -676,7 +719,9 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 							throw new RuntimeException("canno solve query rule:  " + r);
 					}
 			}
+
 		}
+
 		if (orPredicates.size() > 0)
 		{
 			if (andPredicates.size() > 0)
@@ -685,12 +730,14 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 			}
 			List<Predicate> result = new ArrayList<Predicate>();
 			result.add(cb.or(orPredicates.toArray(new Predicate[andPredicates.size()])));
+
 			return result;
 		}
 		else
 		{
 			if (andPredicates.size() > 0)
 			{
+
 				return andPredicates;
 			}
 			return new ArrayList<Predicate>();
@@ -707,11 +754,11 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 			{
 				if (sortOrder.isAscending())
 				{
-					orders.add(cb.asc(from.get(sortOrder.getProperty())));
+					orders.add(cb.asc(from.get(GeneratorHelper.firstToLower(sortOrder.getProperty()))));
 				}
 				else
 				{
-					orders.add(cb.desc(from.get(sortOrder.getProperty())));
+					orders.add(cb.desc(from.get(GeneratorHelper.firstToLower(sortOrder.getProperty()))));
 				}
 			}
 		}
@@ -753,30 +800,26 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 	// If the entity is of the correct type return it, else convert it to the correct type
 	private Entity getTypedEntity(Entity entity)
 	{
-		if (entityClass.isAssignableFrom(entity.getClass()))
+		if (getEntityClass().isAssignableFrom(entity.getClass()))
 		{
 			return entity;
 		}
 
-		Entity jpaEntity = BeanUtils.instantiateClass(entityClass);
+		Entity jpaEntity = BeanUtils.instantiateClass(getEntityClass());
 		jpaEntity.set(entity);
 
 		return jpaEntity;
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public <E extends Entity> Iterable<E> findAll(Iterable<Integer> ids, Class<E> clazz)
 	{
 		return new ConvertingIterable<E>(clazz, findAll(ids));
 	}
 
 	@Override
-	protected EntityMetaData getEntityMetaData()
-	{
-		return entityMetaData;
-	}
-
-	@Override
+	@Transactional(readOnly = true)
 	public <E extends Entity> Iterable<E> findAll(Query q, Class<E> clazz)
 	{
 		return new ConvertingIterable<E>(clazz, findAll(q));
@@ -784,6 +827,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 
 	@SuppressWarnings("unchecked")
 	@Override
+	@Transactional(readOnly = true)
 	public <E extends Entity> E findOne(Integer id, Class<E> clazz)
 	{
 		Entity entity = findOne(id);
@@ -804,6 +848,7 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 
 	@SuppressWarnings("unchecked")
 	@Override
+	@Transactional(readOnly = true)
 	public <E extends Entity> E findOne(Query q, Class<E> clazz)
 	{
 		Entity entity = findOne(q);
@@ -822,4 +867,115 @@ public class JpaRepository extends AbstractRepository implements CrudRepository
 		return e;
 	}
 
+	/*
+	 * Convert a search query to a list of QueryRule, creates for every attribute a QueryRule and 'OR's them
+	 * 
+	 * No search on XREF/MREF possible at the moment
+	 * 
+	 * Replace this by ES indexing??
+	 */
+	private List<QueryRule> createSearchQueryRules(Object searchValue)
+	{
+		List<QueryRule> searchRules = Lists.newArrayList();
+
+		for (AttributeMetaData attr : getEntityMetaData().getAttributes())
+		{
+			QueryRule rule = null;
+			switch (attr.getDataType().getEnumType())
+			{
+				case ENUM:
+				case STRING:
+				case TEXT:
+				case HTML:
+				case HYPERLINK:
+				case EMAIL:
+					rule = new QueryRule(attr.getName(), Operator.LIKE, searchValue);
+					break;
+				case BOOL:
+					if (DataConverter.canConvert(searchValue, Boolean.class))
+					{
+						rule = new QueryRule(attr.getName(), Operator.EQUALS, DataConverter.toBoolean(searchValue));
+					}
+					break;
+				case DATE:
+					if (DataConverter.canConvert(searchValue, java.sql.Date.class))
+					{
+						rule = new QueryRule(attr.getName(), Operator.EQUALS, DataConverter.toDate(searchValue));
+					}
+					break;
+				case DATE_TIME:
+					if (DataConverter.canConvert(searchValue, java.util.Date.class))
+					{
+						rule = new QueryRule(attr.getName(), Operator.EQUALS, DataConverter.toUtilDate(searchValue));
+					}
+					break;
+				case DECIMAL:
+					if (DataConverter.canConvert(searchValue, Double.class))
+					{
+						rule = new QueryRule(attr.getName(), Operator.EQUALS, DataConverter.toDouble(searchValue));
+					}
+					break;
+				case INT:
+					if (DataConverter.canConvert(searchValue, Integer.class))
+					{
+						rule = new QueryRule(attr.getName(), Operator.EQUALS, DataConverter.toInt(searchValue));
+					}
+					break;
+				case LONG:
+					if (DataConverter.canConvert(searchValue, Long.class))
+					{
+						rule = new QueryRule(attr.getName(), Operator.EQUALS, DataConverter.toLong(searchValue));
+					}
+					break;
+
+				case CATEGORICAL:
+				case MREF:
+				case XREF:
+					// Find the ref entities and create an 'in' queryrule
+					// TODO other datatypes
+					if (attr.getRefEntity().getLabelAttribute().getDataType().getEnumType() == FieldTypeEnum.STRING)
+					{
+						Query q = new QueryImpl().like(attr.getRefEntity().getLabelAttribute().getName(), searchValue);
+						EntityManager em = getEntityManager();
+						CriteriaBuilder cb = em.getCriteriaBuilder();
+
+						@SuppressWarnings("unchecked")
+						CriteriaQuery<Entity> cq = (CriteriaQuery<Entity>) cb.createQuery(attr.getRefEntity()
+								.getEntityClass());
+
+						@SuppressWarnings("unchecked")
+						Root<Entity> from = (Root<Entity>) cq.from(attr.getRefEntity().getEntityClass());
+						cq.select(from);
+
+						// add filters
+						createWhere(q, from, cq, cb);
+
+						TypedQuery<Entity> tq = em.createQuery(cq);
+						List<Entity> refEntities = tq.getResultList();
+						if (!refEntities.isEmpty())
+						{
+							rule = new QueryRule(attr.getName(), Operator.IN, refEntities);
+						}
+					}
+
+					break;
+				default:
+					break;
+
+			}
+
+			if (rule != null)
+			{
+				if (!searchRules.isEmpty())
+				{
+					searchRules.add(new QueryRule(Operator.OR));
+				}
+
+				searchRules.add(rule);
+			}
+
+		}
+
+		return searchRules;
+	}
 }

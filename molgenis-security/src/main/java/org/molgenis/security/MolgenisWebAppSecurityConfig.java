@@ -1,13 +1,13 @@
 package org.molgenis.security;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import javax.sql.DataSource;
 
 import org.molgenis.data.DataService;
-import org.molgenis.framework.server.MolgenisPermissionService;
+import org.molgenis.security.core.MolgenisPasswordEncoder;
+import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.MolgenisPermissionServiceImpl;
 import org.molgenis.security.user.MolgenisUserDetailsChecker;
 import org.molgenis.security.user.MolgenisUserDetailsService;
@@ -45,7 +45,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	@Override
 	protected void configure(HttpSecurity http) throws Exception
 	{
-		http.addFilter(anonymousAuthFilter());
+		http.addFilterBefore(anonymousAuthFilter(), AnonymousAuthenticationFilter.class);
 		http.authenticationProvider(anonymousAuthenticationProvider());
 
 		ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry expressionInterceptUrlRegistry = http
@@ -91,18 +91,10 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	protected abstract RoleHierarchy roleHierarchy();
 
 	@Bean
-	public AnonymousAuthenticationFilter anonymousAuthFilter()
+	public MolgenisAnonymousAuthenticationFilter anonymousAuthFilter()
 	{
-		List<GrantedAuthority> anonymousUserAuthorities = createAnonymousUserAuthorities();
-
-		Collection<? extends GrantedAuthority> anonymousUserMappedAuthorities = roleHierarchyAuthoritiesMapper()
-				.mapAuthorities(anonymousUserAuthorities);
-		List<GrantedAuthority> allAnonymousUserAuthorityList = new ArrayList<GrantedAuthority>();
-		for (GrantedAuthority anonymousUserMappedAuthority : anonymousUserMappedAuthorities)
-			allAnonymousUserAuthorityList.add(anonymousUserMappedAuthority);
-
-		return new AnonymousAuthenticationFilter(ANONYMOUS_AUTHENTICATION_KEY, SecurityUtils.ANONYMOUS_USERNAME,
-				allAnonymousUserAuthorityList);
+		return new MolgenisAnonymousAuthenticationFilter(ANONYMOUS_AUTHENTICATION_KEY,
+				SecurityUtils.ANONYMOUS_USERNAME, userDetailsService());
 	}
 
 	protected abstract List<GrantedAuthority> createAnonymousUserAuthorities();

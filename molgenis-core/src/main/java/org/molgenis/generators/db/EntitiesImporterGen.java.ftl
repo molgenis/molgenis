@@ -15,141 +15,41 @@
  */
 package ${package};
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.Set;
 
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntitySource;
-import org.molgenis.data.Repository;
-import org.molgenis.data.DatabaseAction;
-import org.molgenis.framework.db.EntitiesImporter;
-import org.molgenis.framework.db.EntityImportReport;
-import org.molgenis.framework.db.EntityImporter;
+import org.molgenis.framework.db.AbstractEntitiesImporter;
 
-<#list entities as entity>
-<#if !entity.abstract && !entity.system>
-import ${entity.namespace}.db.${JavaName(entity)}EntityImporter;
-</#if>
-</#list>
-
+import org.molgenis.data.importer.EntityImportService;
+import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.collect.Sets;
 
 @Component
-public class EntitiesImporterImpl implements EntitiesImporter
+public class EntitiesImporterImpl extends AbstractEntitiesImporter
 {
 	/** importable entity names (lowercase) */
-	private static final Map<String, EntityImporter> ENTITIES_IMPORTABLE;
+	private static final Set<String> ENTITIES_IMPORTABLE;
 	
 	static {
 		// entities added in import order
-		ENTITIES_IMPORTABLE = new LinkedHashMap<String, EntityImporter>();
+		ENTITIES_IMPORTABLE = Sets.newLinkedHashSet();
 	<#list entities as entity>
 		<#if !entity.abstract && !entity.system>
-		ENTITIES_IMPORTABLE.put("${entity.name?lower_case}", new ${JavaName(entity)}EntityImporter());
+		ENTITIES_IMPORTABLE.add("${entity.name?lower_case}");
 		</#if>
 	</#list>
 	}
 	
-	private final DataService dataService;
-
 	@Autowired
-	public EntitiesImporterImpl(DataService dataService)
+	public EntitiesImporterImpl(FileRepositoryCollectionFactory fileRepositoryCollectionFactory, EntityImportService entityImportService)
 	{
-		if (dataService == null) throw new IllegalArgumentException("dataService is null");
-		this.dataService = dataService;
+		super(fileRepositoryCollectionFactory, entityImportService);
 	}
 
-	@Override
-	@Transactional(rollbackFor =
-	{ IOException.class})
-	public EntityImportReport importEntities(File file, DatabaseAction dbAction) throws IOException
+	protected Set<String> getEntitiesImportable()
 	{
-		return importEntities(dataService.createEntitySource(file), dbAction);
-	}
-	
-	@Override
-	@Transactional(rollbackFor =
-	{ IOException.class})
-	public EntityImportReport importEntities(final Repository repository, final String entityName,
-			DatabaseAction dbAction) throws IOException
-	{
-
-		return importEntities(new EntitySource()
-		{
-
-			@Override
-			public Iterable<String> getEntityNames()
-			{
-				return Collections.singleton(entityName);
-			}
-
-			@Override
-			public Repository getRepositoryByEntityName(String name)
-			{
-				return repository;
-			}
-
-			@Override
-			public void close() throws IOException
-			{
-				repository.close();
-			}
-
-			@Override
-			public String getUrl()
-			{
-				return null;
-			}
-
-		}, dbAction);
-	}
-
-	@Override
-	@Transactional(rollbackFor =
-	{ IOException.class})
-	public EntityImportReport importEntities(EntitySource entitySource, DatabaseAction dbAction) throws IOException
-	{
-		EntityImportReport importReport = new EntityImportReport();
-
-		try
-		{
-			// map entity names on repositories
-			Map<String, Repository> repositoryMap = new HashMap<String, Repository>();
-			for (String entityName : entitySource.getEntityNames())
-			{
-				repositoryMap.put(entityName.toLowerCase(), entitySource.getRepositoryByEntityName(entityName));
-			}
-
-			// import entities in order defined by entities map
-			for (Map.Entry<String, EntityImporter> entry : ENTITIES_IMPORTABLE.entrySet())
-			{
-				String entityName = entry.getKey();
-				Repository repository = repositoryMap.get(entityName);
-				if (repository != null)
-				{
-					EntityImporter entityImporter = entry.getValue();
-					int nr = entityImporter.importEntity(repository, dataService, dbAction);
-					if (nr > 0)
-					{
-						importReport.addEntityCount(entry.getKey(), nr);
-						importReport.addNrImported(nr);
-					}
-				}
-
-			}
-		}
-		finally
-		{
-			entitySource.close();
-		}
-
-		return importReport;
+		return ENTITIES_IMPORTABLE;
 	}
 }

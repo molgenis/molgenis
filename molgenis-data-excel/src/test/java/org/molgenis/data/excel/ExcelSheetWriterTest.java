@@ -3,20 +3,12 @@ package org.molgenis.data.excel;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Iterator;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntitySource;
-import org.molgenis.data.Repository;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.MapEntity;
 import org.testng.annotations.AfterMethod;
@@ -74,34 +66,6 @@ public class ExcelSheetWriterTest
 
 		excelWriter.close();
 
-		EntitySource entitySource = null;
-		try
-		{
-			entitySource = new ExcelEntitySource(new ByteArrayInputStream(bos.toByteArray()), null);
-			Repository repo = entitySource.getRepositoryByEntityName("sheet");
-
-			assertNotNull(repo.getAttribute("col1"));
-			assertNotNull(repo.getAttribute("col2"));
-
-			Iterator<? extends Entity> it = repo.iterator();
-			assertNotNull(it);
-
-			assertTrue(it.hasNext());
-			Entity entity = it.next();
-			assertEquals(entity.get("col1"), "val1");
-			assertEquals(entity.get("col2"), "val2");
-
-			assertTrue(it.hasNext());
-			entity = it.next();
-			assertEquals(entity.get("col1"), "val3");
-			assertEquals(entity.get("col2"), "val4");
-
-			assertFalse(it.hasNext());
-		}
-		finally
-		{
-			entitySource.close();
-		}
 	}
 
 }

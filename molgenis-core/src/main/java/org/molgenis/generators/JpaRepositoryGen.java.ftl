@@ -11,15 +11,28 @@
  */
 package ${package};
 
-import org.molgenis.data.jpa.JpaRepository;
-import org.springframework.stereotype.Component;
+import javax.persistence.EntityManager;
 
-@Component("${JavaName(entity)}Repository")
+import org.molgenis.data.jpa.JpaRepository;
+import org.molgenis.data.validation.EntityValidator;
+import org.molgenis.data.support.QueryResolver;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+@Repository("${JavaName(entity)}Repository")
 public class ${JavaName(entity)}Repository extends JpaRepository
 {	
-	public ${JavaName(entity)}Repository()
+	@Autowired
+	public ${JavaName(entity)}Repository(EntityValidator entityValidator, QueryResolver queryResolver)
 	{
-		super(${JavaName(entity)}.class, new ${JavaName(entity)}MetaData());
+		super(new ${JavaName(entity)}MetaData(), entityValidator, queryResolver);
 	}
 	
+    /**
+	 * For testing purposes
+	 */
+	public ${JavaName(entity)}Repository(EntityManager entityManager, EntityValidator entityValidator, QueryResolver queryResolver)
+	{
+		super(entityManager, new ${JavaName(entity)}MetaData(), entityValidator, queryResolver);
+	}
 }

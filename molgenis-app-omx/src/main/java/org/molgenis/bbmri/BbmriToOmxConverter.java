@@ -9,14 +9,16 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntitySource;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.Writable;
 import org.molgenis.data.WritableFactory;
-import org.molgenis.data.excel.ExcelEntitySourceFactory;
+import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.excel.ExcelWriter;
+import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.model.elements.Dataset;
 import org.molgenis.omx.auth.Institute;
@@ -35,12 +37,13 @@ public class BbmriToOmxConverter
 {
 
 	/**
+	 * @throws InvalidFormatException
 	 * @throws IOException
 	 * @throws FileNotFoundException
 	 * @param args
 	 * @throws
 	 */
-	public static void main(String[] args) throws IOException
+	public static void main(String[] args) throws IOException, InvalidFormatException
 	{
 		if (args.length != 2)
 		{
@@ -115,7 +118,7 @@ public class BbmriToOmxConverter
 		}
 	}
 
-	public void convert() throws IOException
+	public void convert() throws IOException, InvalidFormatException
 	{
 		Map<String, File> entityFileMap = getEntityFileMap(inputFolder);
 
@@ -141,7 +144,7 @@ public class BbmriToOmxConverter
 	}
 
 	private Map<String, String> writeInstitutes(WritableFactory writableFactory, Map<String, File> entityFileMap)
-			throws IOException
+			throws IOException, InvalidFormatException
 	{
 		Map<String, String> instituteMap = new HashMap<String, String>();
 
@@ -149,10 +152,12 @@ public class BbmriToOmxConverter
 				Institute.IDENTIFIER, Institute.NAME, Institute.ADDRESS, Institute.PHONE, Institute.EMAIL,
 				Institute.FAX, Institute.TOLLFREEPHONE, Institute.CITY, Institute.COUNTRY));
 
-		EntitySource entitySource = new ExcelEntitySourceFactory().create(entityFileMap.get("institutes.xls"));
+		RepositoryCollection repositorySource = new ExcelRepositoryCollection(entityFileMap.get("institutes.xls"),
+				new TrimProcessor());
+
 		try
 		{
-			Repository repo = entitySource.getRepositoryByEntityName("BiobankInstitute");
+			Repository repo = repositorySource.getRepositoryByEntityName("BiobankInstitute");
 			try
 			{
 				for (Entity inputEntity : repo)
@@ -181,7 +186,6 @@ public class BbmriToOmxConverter
 		}
 		finally
 		{
-			IOUtils.closeQuietly(entitySource);
 			IOUtils.closeQuietly(writable);
 		}
 
@@ -189,7 +193,7 @@ public class BbmriToOmxConverter
 	}
 
 	private Map<String, String> writePersons(WritableFactory outputWriter, Map<String, File> entityFileMap,
-			Map<String, String> ontologyMap) throws IOException
+			Map<String, String> ontologyMap) throws IOException, InvalidFormatException
 	{
 		Map<String, String> personMap = new HashMap<String, String>();
 
@@ -198,11 +202,13 @@ public class BbmriToOmxConverter
 				Person.COUNTRY, Person.FIRSTNAME, Person.MIDINITIALS, Person.LASTNAME, Person.TITLE, Person.AFFILIATION
 						+ "_" + Institute.NAME, Person.DEPARTMENT, Person.ROLES + "_" + PersonRole.IDENTIFIER));
 
-		EntitySource entitySource = new ExcelEntitySourceFactory().create(entityFileMap.get("biobankcoordinator.xls"));
+		RepositoryCollection repositorySource = new ExcelRepositoryCollection(
+				entityFileMap.get("biobankcoordinator.xls"), new TrimProcessor());
+
 		try
 		{
 
-			Repository repo = entitySource.getRepositoryByEntityName("BiobankCoordinator");
+			Repository repo = repositorySource.getRepositoryByEntityName("BiobankCoordinator");
 			try
 			{
 				for (Entity entity : repo)
@@ -239,7 +245,6 @@ public class BbmriToOmxConverter
 		}
 		finally
 		{
-			IOUtils.closeQuietly(entitySource);
 			IOUtils.closeQuietly(writable);
 		}
 
@@ -247,7 +252,7 @@ public class BbmriToOmxConverter
 	}
 
 	private Map<String, String> writePersonRoles(WritableFactory writableFactory, Map<String, File> entityFileMap)
-			throws IOException
+			throws IOException, InvalidFormatException
 	{
 		Map<String, String> personRoleMap = new HashMap<String, String>();
 
@@ -255,17 +260,60 @@ public class BbmriToOmxConverter
 				Arrays.asList(PersonRole.IDENTIFIER, PersonRole.NAME));
 		try
 		{
-			EntitySource entitySource = new ExcelEntitySourceFactory().create(entityFileMap.get("personrole.xls"));
+			RepositoryCollection repositorySource = new ExcelRepositoryCollection(entityFileMap.get("personrole.xls"),
+					new TrimProcessor());
+
+			Repository repo = repositorySource.getRepositoryByEntityName("BiobankPersonRole");
 			try
 			{
-				Repository repo = entitySource.getRepositoryByEntityName("BiobankPersonRole");
+
+				for (Entity inputEntity : repo)
+				{
+					String name = inputEntity.getString("name");
+					String identifier = UUID.randomUUID().toString();
+					personRoleMap.put(name, identifier);
+
+					Entity outputEntity = new MapEntity();
+					outputEntity.set(OntologyTerm.IDENTIFIER, identifier);
+					outputEntity.set(OntologyTerm.NAME, name);
+					writable.add(outputEntity);
+				}
+			}
+			finally
+			{
+				repo.close();
+			}
+
+		}
+		finally
+		{
+			IOUtils.closeQuietly(writable);
+		}
+		return personRoleMap;
+	}
+
+	private Map<String, String> writeOntologyTerms(WritableFactory writableFactory, Map<String, File> entityFileMap)
+			throws IOException, InvalidFormatException
+	{
+		Map<String, String> ontologyMap = new HashMap<String, String>();
+
+		Writable writable = writableFactory.createWritable(OntologyTerm.class.getSimpleName(),
+				Arrays.asList(OntologyTerm.IDENTIFIER, OntologyTerm.NAME));
+		try
+		{
+			// biodata
+			{
+				RepositoryCollection repositorySource = new ExcelRepositoryCollection(
+						entityFileMap.get("biobankdatatype.xls"), new TrimProcessor());
+
+				Repository repo = repositorySource.getRepositoryByEntityName("BiobankDataType");
 				try
 				{
-					for (Entity inputEntity : repo)
+					for (Entity entity : repo)
 					{
-						String name = inputEntity.getString("name");
+						String name = entity.getString("name");
 						String identifier = UUID.randomUUID().toString();
-						personRoleMap.put(name, identifier);
+						ontologyMap.put(name, identifier);
 
 						Entity outputEntity = new MapEntity();
 						outputEntity.set(OntologyTerm.IDENTIFIER, identifier);
@@ -277,153 +325,86 @@ public class BbmriToOmxConverter
 				{
 					repo.close();
 				}
-			}
-			finally
-			{
-				IOUtils.closeQuietly(entitySource);
-			}
-		}
-		finally
-		{
-			IOUtils.closeQuietly(writable);
-		}
-		return personRoleMap;
-	}
 
-	private Map<String, String> writeOntologyTerms(WritableFactory writableFactory, Map<String, File> entityFileMap)
-			throws IOException
-	{
-		Map<String, String> ontologyMap = new HashMap<String, String>();
-
-		Writable writable = writableFactory.createWritable(OntologyTerm.class.getSimpleName(),
-				Arrays.asList(OntologyTerm.IDENTIFIER, OntologyTerm.NAME));
-		try
-		{
-			// biodata
-			{
-				EntitySource entitySource = new ExcelEntitySourceFactory().create(entityFileMap
-						.get("biobankdatatype.xls"));
-
-				try
-				{
-					Repository repo = entitySource.getRepositoryByEntityName("BiobankDataType");
-					try
-					{
-						for (Entity entity : repo)
-						{
-							String name = entity.getString("name");
-							String identifier = UUID.randomUUID().toString();
-							ontologyMap.put(name, identifier);
-
-							Entity outputEntity = new MapEntity();
-							outputEntity.set(OntologyTerm.IDENTIFIER, identifier);
-							outputEntity.set(OntologyTerm.NAME, name);
-							writable.add(outputEntity);
-						}
-					}
-					finally
-					{
-						repo.close();
-					}
-				}
-				finally
-				{
-					IOUtils.closeQuietly(entitySource);
-				}
 			}
 
 			// category
 			{
-				EntitySource entitySource = new ExcelEntitySourceFactory().create(entityFileMap.get("categories.xls"));
+				RepositoryCollection repositorySource = new ExcelRepositoryCollection(
+						entityFileMap.get("categories.xls"), new TrimProcessor());
+				Repository repo = repositorySource.getRepositoryByEntityName("BiobankCategory");
 				try
 				{
-					Repository repo = entitySource.getRepositoryByEntityName("BiobankCategory");
-					try
+					for (Entity entity : repo)
 					{
-						for (Entity entity : repo)
-						{
-							String name = entity.getString("name");
-							String identifier = UUID.randomUUID().toString();
-							ontologyMap.put(name, identifier);
+						String name = entity.getString("name");
+						String identifier = UUID.randomUUID().toString();
+						ontologyMap.put(name, identifier);
 
-							Entity output = new MapEntity();
-							output.set(OntologyTerm.IDENTIFIER, identifier);
-							output.set(OntologyTerm.NAME, name);
-							writable.add(output);
-						}
-					}
-					finally
-					{
-						repo.close();
+						Entity output = new MapEntity();
+						output.set(OntologyTerm.IDENTIFIER, identifier);
+						output.set(OntologyTerm.NAME, name);
+						writable.add(output);
 					}
 				}
 				finally
 				{
-					IOUtils.closeQuietly(entitySource);
+					repo.close();
 				}
+
 			}
 
 			// subcategory
 			{
-				EntitySource entitySource = new ExcelEntitySourceFactory().create(entityFileMap
-						.get("subcategories.xls"));
+				RepositoryCollection repositorySource = new ExcelRepositoryCollection(
+						entityFileMap.get("subcategories.xls"), new TrimProcessor());
+				Repository repo = repositorySource.getRepositoryByEntityName("BiobankSubCategory");
 				try
 				{
-					Repository repo = entitySource.getRepositoryByEntityName("BiobankSubCategory");
-					try
+					for (Entity entity : repo)
 					{
-						for (Entity entity : repo)
-						{
-							String name = entity.getString("name");
-							String identifier = UUID.randomUUID().toString();
-							ontologyMap.put(name, identifier);
+						String name = entity.getString("name");
+						String identifier = UUID.randomUUID().toString();
+						ontologyMap.put(name, identifier);
 
-							Entity output = new MapEntity();
-							output.set(OntologyTerm.IDENTIFIER, identifier);
-							output.set(OntologyTerm.NAME, name);
-							writable.add(output);
-						}
-					}
-					finally
-					{
-						repo.close();
+						Entity output = new MapEntity();
+						output.set(OntologyTerm.IDENTIFIER, identifier);
+						output.set(OntologyTerm.NAME, name);
+						writable.add(output);
 					}
 				}
 				finally
 				{
-					IOUtils.closeQuietly(entitySource);
+					repo.close();
 				}
+
 			}
 
 			// topics
 			{
-				EntitySource entitySource = new ExcelEntitySourceFactory().create(entityFileMap.get("topics.xls"));
+				RepositoryCollection repositorySource = new ExcelRepositoryCollection(entityFileMap.get("topics.xls"),
+						new TrimProcessor());
+
+				Repository repo = repositorySource.getRepositoryByEntityName("BiobankTopic");
 				try
 				{
-					Repository repo = entitySource.getRepositoryByEntityName("BiobankTopic");
-					try
+					for (Entity entity : repo)
 					{
-						for (Entity entity : repo)
-						{
-							String name = entity.getString("name");
-							String identifier = UUID.randomUUID().toString();
-							ontologyMap.put(name, identifier);
+						String name = entity.getString("name");
+						String identifier = UUID.randomUUID().toString();
+						ontologyMap.put(name, identifier);
 
-							Entity output = new MapEntity();
-							output.set(OntologyTerm.IDENTIFIER, identifier);
-							output.set(OntologyTerm.NAME, name);
-							writable.add(output);
-						}
-					}
-					finally
-					{
-						repo.close();
+						Entity output = new MapEntity();
+						output.set(OntologyTerm.IDENTIFIER, identifier);
+						output.set(OntologyTerm.NAME, name);
+						writable.add(output);
 					}
 				}
 				finally
 				{
-					IOUtils.closeQuietly(entitySource);
+					repo.close();
 				}
+
 			}
 		}
 		finally
@@ -435,7 +416,7 @@ public class BbmriToOmxConverter
 
 	private void writeDataSetMatrix(WritableFactory writableFactory, String dataSetIdentifier,
 			Map<String, File> entityFileMap, Map<String, String> ontologyMap, final Map<String, String> personMap,
-			final Map<String, String> institutionMap) throws IOException
+			final Map<String, String> institutionMap) throws IOException, InvalidFormatException
 	{
 
 		Writable writable = writableFactory.createWritable(DataSet.class.getSimpleName().toLowerCase() + '_'
@@ -449,10 +430,12 @@ public class BbmriToOmxConverter
 					}
 				}));
 
-		EntitySource entitySource = new ExcelEntitySourceFactory().create(entityFileMap.get("cohorts.xls"));
+		RepositoryCollection repositorySource = new ExcelRepositoryCollection(entityFileMap.get("cohorts.xls"),
+				new TrimProcessor());
 		try
 		{
-			Repository repo = entitySource.getRepositoryByEntityName("Biobank");
+
+			Repository repo = repositorySource.getRepositoryByEntityName("Biobank");
 			try
 			{
 				for (Entity inputEntity : repo)
@@ -532,10 +515,10 @@ public class BbmriToOmxConverter
 			{
 				repo.close();
 			}
+
 		}
 		finally
 		{
-			IOUtils.closeQuietly(entitySource);
 			IOUtils.closeQuietly(writable);
 		}
 	}

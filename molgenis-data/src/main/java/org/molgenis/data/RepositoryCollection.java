@@ -10,6 +10,7 @@ public interface RepositoryCollection
 	 */
 	Iterable<String> getEntityNames();
 
+	// TODO remove
 	/**
 	 * Get a repository by entity name
 	 * 

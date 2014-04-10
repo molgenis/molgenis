@@ -16,8 +16,9 @@ import javax.servlet.http.Part;
 import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntitySource;
+import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.EntitiesValidationReport;
@@ -39,14 +40,19 @@ public class UploadWizardPage extends AbstractWizardPage
 	private static final String DATASET_PREFIX = DataSet.class.getSimpleName().toLowerCase();
 	private final transient DataService dataService;
 	private final transient EntitiesValidator entitiesValidator;
+	private final transient FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
 
 	@Autowired
-	public UploadWizardPage(DataService dataService, EntitiesValidator entitiesValidator)
+	public UploadWizardPage(DataService dataService, EntitiesValidator entitiesValidator,
+			FileRepositoryCollectionFactory fileRepositoryCollectionFactory)
 	{
 		this.dataService = dataService;
 		this.entitiesValidator = entitiesValidator;
+		this.fileRepositoryCollectionFactory = fileRepositoryCollectionFactory;
 		if (dataService == null) throw new IllegalArgumentException("DataService is null");
 		if (entitiesValidator == null) throw new IllegalArgumentException("EntitiesValidator is null");
+		if (fileRepositoryCollectionFactory == null) throw new IllegalArgumentException(
+				"FileRepositoryCollectionFactory is null");
 	}
 
 	@Override
@@ -114,7 +120,7 @@ public class UploadWizardPage extends AbstractWizardPage
 			}
 		}
 
-		Map<String, Boolean> dataSetsImportable = validateDataSetInstances(dataService, file);
+		Map<String, Boolean> dataSetsImportable = validateDataSetInstances(fileRepositoryCollectionFactory, file);
 
 		// determine if validation succeeded
 		boolean ok = true;
@@ -161,61 +167,63 @@ public class UploadWizardPage extends AbstractWizardPage
 		return msg;
 	}
 
-	private Map<String, Boolean> validateDataSetInstances(DataService dataService, File file) throws IOException
+	private Map<String, Boolean> validateDataSetInstances(
+			FileRepositoryCollectionFactory fileRepositoryCollectionFactory, File file) throws IOException
 	{
-		EntitySource entitySource = dataService.createEntitySource(file);
+		RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory
+				.createFileRepositoryCollection(file);
+
+		// get dataset identifiers (case insensitive)
+		Set<String> datasetIdentifiers = new HashSet<String>();
+
+		Repository repo = null;
 		try
 		{
-			// get dataset identifiers (case insensitive)
-			Set<String> datasetIdentifiers = new HashSet<String>();
-
-			Repository repo = null;
-			try
+			repo = repositoryCollection.getRepositoryByEntityName(DATASET_PREFIX);
+			if (repo != null)
 			{
-				repo = entitySource.getRepositoryByEntityName(DATASET_PREFIX);
 				for (Entity entity : repo)
 				{
 					String identifier = entity.getString(DataSet.IDENTIFIER.toLowerCase());
 					if (identifier != null) datasetIdentifiers.add(identifier);
 				}
 			}
-			catch (UnknownEntityException e)
-			{
-				// Ok, no dataset sheet
-			}
-			finally
-			{
-				if (repo != null)
-				{
-					repo.close();
-				}
-			}
-
-			// validate dataset matrices
-			Map<String, Boolean> dataSetValidationMap = new LinkedHashMap<String, Boolean>();
-
-			// determine if dataset matrices can be imported
-			for (String tableName : entitySource.getEntityNames())
-			{
-				if (tableName.toLowerCase().startsWith(DATASET_PREFIX + "_"))
-				{
-					String identifier = tableName.substring((DATASET_PREFIX + "_").length());
-
-					// Check if dataset is present in the excel or in the database
-					boolean canImport = datasetIdentifiers.contains(identifier)
-							|| (dataService.findOne(DataSet.ENTITY_NAME,
-									new QueryImpl().eq(DataSet.IDENTIFIER, identifier)) != null);
-
-					dataSetValidationMap.put(identifier, canImport);
-				}
-			}
-
-			return dataSetValidationMap;
+		}
+		catch (UnknownEntityException e)
+		{
+			// Ok, no dataset sheet
 		}
 		finally
 		{
-			entitySource.close();
+			if (repo != null)
+			{
+				repo.close();
+			}
 		}
+
+		// validate dataset matrices
+		Map<String, Boolean> dataSetValidationMap = new LinkedHashMap<String, Boolean>();
+
+		// determine if dataset matrices can be imported
+		for (String name : repositoryCollection.getEntityNames())
+		{
+			Repository repository = repositoryCollection.getRepositoryByEntityName(name);
+
+			if (repository.getName().toLowerCase().startsWith(DATASET_PREFIX + "_"))
+			{
+				String identifier = repository.getName().substring((DATASET_PREFIX + "_").length());
+
+				// Check if dataset is present in the excel or in the database
+				boolean canImport = datasetIdentifiers.contains(identifier)
+						|| (dataService
+								.findOne(DataSet.ENTITY_NAME, new QueryImpl().eq(DataSet.IDENTIFIER, identifier)) != null);
+
+				dataSetValidationMap.put(identifier, canImport);
+			}
+		}
+
+		return dataSetValidationMap;
+
 	}
 
 }

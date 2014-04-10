@@ -28,6 +28,7 @@ import com.google.common.collect.Iterables;
 
 public class CategoryRepository extends AbstractRepository implements Countable
 {
+	public static final String BASE_URL = "featureCategory://";
 	private static final String FIELD_TYPE = "type";
 	private static final String FIELD_ID = "id";
 	private static final String FIELD_NAME = "name";
@@ -60,6 +61,7 @@ public class CategoryRepository extends AbstractRepository implements Countable
 
 	public CategoryRepository(Protocol protocol, Integer id, DataService dataService)
 	{
+		super(BASE_URL + id);
 		if (protocol == null) throw new IllegalArgumentException("protocol cannot be null");
 		this.protocol = protocol;
 		if (dataService == null) throw new IllegalArgumentException("dataService cannot be null");
@@ -75,12 +77,6 @@ public class CategoryRepository extends AbstractRepository implements Countable
 		countEntities(protocol, count);
 
 		return count.get();
-	}
-
-	@Override
-	public Class<? extends Entity> getEntityClass()
-	{
-		return MapEntity.class;
 	}
 
 	@Override
@@ -101,7 +97,7 @@ public class CategoryRepository extends AbstractRepository implements Countable
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("featureCategory-" + id);
+		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("featureCategory-" + id, MapEntity.class);
 
 		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(FIELD_TYPE, FieldTypeEnum.STRING));
 		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(FIELD_ID, FieldTypeEnum.STRING));

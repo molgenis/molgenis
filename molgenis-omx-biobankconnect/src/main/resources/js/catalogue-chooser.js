@@ -15,7 +15,7 @@
 	ns.CatalogueChooser.prototype.changeDataSet = function(selectedDataSet){
 		if(selectedDataSet !== null && selectedDataSet !== '' && selectedDataSet !== undefined){
 			var dataSetEntity = restApi.get('/api/v1/dataset/' + selectedDataSet);
-			$('#selected-catalogue').empty().append(dataSetEntity.name);
+			$('#selected-catalogue').empty().append(dataSetEntity.Name);
 			var request = {
 				documentType : 'protocolTree-' + ns.hrefToId(dataSetEntity.href),
 				query:{
@@ -28,7 +28,7 @@
 			};
 			searchApi.search(request, function(searchResponse){
 				sortRule = null;
-				$('#catalogue-name').empty().append(dataSetEntity.name);
+				$('#catalogue-name').empty().append(dataSetEntity.Name);
 				$('#dataitem-number').empty().append(searchResponse.totalHitCount);
 				pagination.reset();
 				ns.CatalogueChooser.prototype.updateSelectedDataset(selectedDataSet);
@@ -117,6 +117,7 @@
 					placement : 'bottom'
 				});
 			}
+			
 			var featureNameSpan = $('<span>' + feature.name + '</span>');
 			$('<td />').append(featureNameSpan).appendTo(row);
 			$('<td />').append(descriptionSpan).appendTo(row);

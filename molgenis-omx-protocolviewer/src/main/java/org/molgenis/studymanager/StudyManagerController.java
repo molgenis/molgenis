@@ -7,6 +7,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -83,6 +85,8 @@ public class StudyManagerController extends MolgenisPluginController
 	public String getStudyDefinitions(Model model)
 	{
 		model.addAttribute("dataLoadingEnabled", studyDefinitionManagerService.canLoadStudyData());
+		model.addAttribute("studyDefinitionStates", StudyDefinition.Status.values());
+		model.addAttribute("defaultStudyDefinitionState", StudyDefinition.Status.SUBMITTED);
 		return VIEW_NAME;
 	}
 
@@ -93,9 +97,9 @@ public class StudyManagerController extends MolgenisPluginController
 	 */
 	@RequestMapping(value = "/list", method = RequestMethod.GET)
 	@ResponseBody
-	public StudyDefinitionsMetaResponse getStudyDefinitionsMeta()
+	public StudyDefinitionsMetaResponse getStudyDefinitionsMeta(@RequestParam("state") StudyDefinition.Status status)
 	{
-		List<StudyDefinition> studyDefinitions = studyDefinitionManagerService.getStudyDefinitions();
+		List<StudyDefinition> studyDefinitions = studyDefinitionManagerService.getStudyDefinitions(status);
 		logger.debug("Got [" + studyDefinitions.size() + "] study definitions from service");
 
 		List<StudyDefinitionMetaModel> models = Lists.transform(studyDefinitions,
@@ -128,52 +132,67 @@ public class StudyManagerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/view/{id}", method = RequestMethod.GET)
 	@ResponseBody
-	public CatalogModel getStudyDefinitionAsCatalog(@PathVariable
-	String id) throws UnknownCatalogException, UnknownStudyDefinitionException
+	public Map<String, Object> getStudyDefinitionAsCatalog(@PathVariable String id) throws UnknownCatalogException,
+			UnknownStudyDefinitionException
 	{
+		Map map = new HashMap<String, Object>();
+		// get study definition and catalog used to create study definition
 		StudyDefinition studyDefinition = studyDefinitionManagerService.getStudyDefinition(id);
 		Catalog catalog = catalogManagerService.getCatalogOfStudyDefinition(studyDefinition.getId());
-		return CatalogModelBuilder.create(catalog, studyDefinition, true);
+		map.put("catalog", CatalogModelBuilder.create(catalog, studyDefinition, true));
+		map.put("status", studyDefinition.getStatus());
+		return map;
 	}
 
 	@RequestMapping(value = "/edit/{id}", method = RequestMethod.GET)
 	@ResponseBody
-	public CatalogModel getCatalogWithStudyDefinition(@PathVariable
-	String id) throws UnknownCatalogException, UnknownStudyDefinitionException
+	public Map<String, Object> getCatalogWithStudyDefinition(@PathVariable String id) throws UnknownCatalogException,
+			UnknownStudyDefinitionException
 	{
+		Map map = new HashMap<String, Object>();
 		// get study definition and catalog used to create study definition
 		StudyDefinition studyDefinition = studyDefinitionManagerService.getStudyDefinition(id);
 		Catalog catalog = catalogManagerService.getCatalogOfStudyDefinition(studyDefinition.getId());
-		return CatalogModelBuilder.create(catalog, studyDefinition, false);
+		map.put("catalog", CatalogModelBuilder.create(catalog, studyDefinition, false));
+		map.put("status", studyDefinition.getStatus());
+		return map;
 	}
 
 	@RequestMapping(value = "/update/{id}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void updateStudyDefinition(@PathVariable
-	String id, @Valid
-	@RequestBody
-	StudyDefinitionUpdateRequest updateRequest) throws UnknownStudyDefinitionException, UnknownCatalogException
+	public void updateStudyDefinition(@PathVariable String id,
+			@Valid @RequestBody StudyDefinitionUpdateRequest updateRequest) throws UnknownStudyDefinitionException,
+			UnknownCatalogException
 	{
 		// get study definition and catalog used to create study definition
 		StudyDefinition studyDefinition = studyDefinitionManagerService.getStudyDefinition(id);
-		final Catalog catalog = catalogManagerService.getCatalogOfStudyDefinition(studyDefinition.getId());
+		if (!studyDefinition.getStatus().equals(StudyDefinition.Status.APPROVED))
+		{
+			final Catalog catalog = catalogManagerService.getCatalogOfStudyDefinition(studyDefinition.getId());
 
-		// create updated study definition
-		StudyDefinitionImpl updatedStudyDefinition = new StudyDefinitionImpl(studyDefinition);
-		updatedStudyDefinition.setItems(Lists.transform(updateRequest.getCatalogItemIds(),
-				new Function<String, CatalogItem>()
-				{
-					@Override
-					public CatalogItem apply(String catalogItemId)
+			// create updated study definition
+			StudyDefinitionImpl updatedStudyDefinition = new StudyDefinitionImpl(studyDefinition);
+			updatedStudyDefinition.setItems(Lists.transform(updateRequest.getCatalogItemIds(),
+					new Function<String, CatalogItem>()
 					{
-						CatalogItem catalogItem = catalog.findItem(catalogItemId);
-						if (catalogItem == null) throw new RuntimeException("unknown catalog item id: " + catalogItemId);
-						return catalogItem;
-					}
-				}));
+						@Override
+						public CatalogItem apply(String catalogItemId)
+						{
+							CatalogItem catalogItem = catalog.findItem(catalogItemId);
+							if (catalogItem == null) throw new RuntimeException("unknown catalog item id: "
+									+ catalogItemId);
+							return catalogItem;
+						}
+					}));
+			updatedStudyDefinition.setStatus(updateRequest.getStatus());
 
-		// update study definition
-		studyDefinitionManagerService.updateStudyDefinition(updatedStudyDefinition);
+			// update study definition
+			studyDefinitionManagerService.updateStudyDefinition(updatedStudyDefinition);
+		}
+		else
+		{
+			throw new IllegalStateException("Cannot update APPROVED study definition");
+		}
 	}
 
 	/**
@@ -188,8 +207,7 @@ public class StudyManagerController extends MolgenisPluginController
 	 * @return
 	 */
 	@RequestMapping(value = "/load", method = RequestMethod.POST)
-	public String loadStudyDefinition(@RequestParam(value = "id", required = false)
-	String id, Model model)
+	public String loadStudyDefinition(@RequestParam(value = "id", required = false) String id, Model model)
 	{
 		try
 		{
@@ -213,8 +231,8 @@ public class StudyManagerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/download/{id}", method = RequestMethod.GET)
-	public void downloadStudyDefinition(@PathVariable
-	String id, HttpServletResponse response) throws UnknownStudyDefinitionException, IOException
+	public void downloadStudyDefinition(@PathVariable String id, HttpServletResponse response)
+			throws UnknownStudyDefinitionException, IOException
 	{
 		StudyDefinition studyDefinition = studyDefinitionManagerService.getStudyDefinition(id);
 
@@ -226,7 +244,7 @@ public class StudyManagerController extends MolgenisPluginController
 		// TODO remove code duplication (see ProtocolViewerController)
 		// write excel file
 		List<String> header = Arrays.asList("Id", "Variable", "Description");
-		List<CatalogItem> catalogItems = studyDefinition.getItems();
+		List<CatalogItem> catalogItems = Lists.newArrayList(studyDefinition.getItems());
 		if (catalogItems != null)
 		{
 			Collections.sort(catalogItems, new Comparator<CatalogItem>()
@@ -270,6 +288,8 @@ public class StudyManagerController extends MolgenisPluginController
 	public static class StudyDefinitionUpdateRequest
 	{
 		@NotNull
+		private StudyDefinition.Status status;
+		@NotNull
 		private List<String> catalogItemIds;
 
 		public List<String> getCatalogItemIds()
@@ -280,6 +300,16 @@ public class StudyManagerController extends MolgenisPluginController
 		public void setCatalogItemIds(List<String> catalogItemIds)
 		{
 			this.catalogItemIds = catalogItemIds;
+		}
+
+		public StudyDefinition.Status getStatus()
+		{
+			return status;
+		}
+
+		public void setStatus(StudyDefinition.Status status)
+		{
+			this.status = status;
 		}
 	}
 

@@ -1,6 +1,6 @@
 <#macro render field hasWritePermission entity=''>
 
-	<#assign fieldName=field.name?uncap_first/>
+	<#assign fieldName=field.name/>
 	
 	<div class="control-group">
     	<label class="control-label" for="${fieldName}">${field.name} <#if field.nillable?string('true', 'false') == 'false'>*</#if></label>
@@ -29,12 +29,12 @@
 								
 								//When user first clicks in dropdown term is empty, then when user types we get called with the term, create query for it
 								if (query.term.length > 0) {
-									q = {q:[{field:'${field.refEntity.labelAttribute.name!?uncap_first}',operator:'LIKE',value:query.term}]};
+									q = {q:[{field:'${field.refEntity.labelAttribute.name!}',operator:'LIKE',value:query.term}]};
 								}
 								
-								restApi.getAsync(url, null, q, function(entities) {
+								restApi.getAsync(url, {q: q}, function(entities) {
 									$.each(entities.items, function(index, entity) {
-										queryResult.results.push({id:restApi.getPrimaryKeyFromHref(entity.href), text:entity['${field.refEntity.labelAttribute.name!?uncap_first}']});
+										queryResult.results.push({id:restApi.getPrimaryKeyFromHref(entity.href), text:entity['${field.refEntity.labelAttribute.name!}']});
 									});
 									query.callback(queryResult);
 								});
@@ -81,12 +81,12 @@
 								
 								//When user first clicks in dropdown term is empty, then when user types we get called with the term, create query for it
 								if (query.term.length > 0) {
-									q = {q:[{field:'${field.refEntity.labelAttribute.name!?uncap_first}',operator:'LIKE',value:query.term}]};
+									q = {q:[{field:'${field.refEntity.labelAttribute.name!}',operator:'LIKE',value:query.term}]};
 								}
 								
-								restApi.getAsync(url, null, q, function(entities) {
+								restApi.getAsync(url, {q: q}, function(entities) {
 									$.each(entities.items, function(index, entity) {
-										queryResult.results.push({id:restApi.getPrimaryKeyFromHref(entity.href), text:entity['${field.refEntity.labelAttribute.name!?uncap_first}']});
+										queryResult.results.push({id:restApi.getPrimaryKeyFromHref(entity.href), text:entity['${field.refEntity.labelAttribute.name!}']});
 									});
 									query.callback(queryResult);
 								});
@@ -99,7 +99,7 @@
 						$('#${fieldName}').select2('val', xrefs);
 							
 						<#if field.readonly || hasWritePermission?string("true", "false") == "false">
-							$('#${name}').select2('readonly', true);
+							$('#${fieldName}').select2('readonly', true);
 						</#if>
 					});
 					

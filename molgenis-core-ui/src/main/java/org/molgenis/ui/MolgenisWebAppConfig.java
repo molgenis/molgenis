@@ -3,16 +3,21 @@ package org.molgenis.ui;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.framework.db.WebAppDatabasePopulator;
 import org.molgenis.framework.db.WebAppDatabasePopulatorService;
-import org.molgenis.framework.server.MolgenisPermissionService;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
+import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.freemarker.HasPermissionDirective;
+import org.molgenis.security.freemarker.NotHasPermissionDirective;
+import org.molgenis.ui.freemarker.FormLinkDirective;
+import org.molgenis.ui.freemarker.LimitMethod;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.AsyncJavaMailSender;
 import org.molgenis.util.FileStore;
@@ -38,6 +43,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 
+import com.google.common.collect.Maps;
+
+import freemarker.template.TemplateException;
+
 public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 {
 	@Autowired
@@ -59,10 +68,14 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		registry.addResourceHandler("/html/**").addResourceLocations("/html/", "classpath:/html/").setCachePeriod(3600);
 	}
 
+	@Value("${molgenis.build.profile}")
+	private String molgenisBuildProfile;
+
 	@Override
 	public void configureMessageConverters(List<HttpMessageConverter<?>> converters)
 	{
-		converters.add(new GsonHttpMessageConverter());
+		boolean prettyPrinting = molgenisBuildProfile != null && molgenisBuildProfile.equals("dev");
+		converters.add(new GsonHttpMessageConverter(prettyPrinting));
 		converters.add(new BufferedImageHttpMessageConverter());
 	}
 
@@ -192,15 +205,33 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 	/**
 	 * Configure freemarker. All freemarker templates should be on the classpath in a package called 'freemarker'
+	 * 
+	 * @throws TemplateException
+	 * @throws IOException
 	 */
 	@Bean
-	public FreeMarkerConfigurer freeMarkerConfigurer()
+	public FreeMarkerConfigurer freeMarkerConfigurer() throws IOException, TemplateException
 	{
 		FreeMarkerConfigurer result = new FreeMarkerConfigurer();
 		result.setPreferFileSystemAccess(false);
 		result.setTemplateLoaderPath("classpath:/templates/");
 		result.setDefaultEncoding("UTF-8");
+
+		Map<String, Object> freemarkerVariables = Maps.newHashMap();
+		freemarkerVariables.put("limit", new LimitMethod());
+		freemarkerVariables.put("hasPermission", new HasPermissionDirective(molgenisPermissionService));
+		freemarkerVariables.put("notHasPermission", new NotHasPermissionDirective(molgenisPermissionService));
+		freemarkerVariables.put("formLink", new FormLinkDirective());
+		addFreemarkerVariables(freemarkerVariables);
+
+		result.setFreemarkerVariables(freemarkerVariables);
+
 		return result;
+	}
+
+	// Override in subclass if you need more freemarker variables
+	protected void addFreemarkerVariables(Map<String, Object> freemarkerVariables)
+	{
 
 	}
 

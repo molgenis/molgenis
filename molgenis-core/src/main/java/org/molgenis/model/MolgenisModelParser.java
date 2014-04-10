@@ -63,7 +63,7 @@ public class MolgenisModelParser
 		// check for illegal words
 		String[] keywords = new String[]
 		{ "name", "label", "extends", "implements", "abstract", "description", "system", "decorator", "xref_label",
-				"allocationSize" };
+				"allocationSize", "xref_lookup" };
 		List<String> key_words = new ArrayList<String>(Arrays.asList(keywords));
 		for (int i = 0; i < element.getAttributes().getLength(); i++)
 		{
@@ -127,6 +127,15 @@ public class MolgenisModelParser
 		else
 		{
 			entity.setXrefLabels(null);
+		}
+
+		// XREF_LOOKUP
+		String xref_lookup = element.getAttribute("xref_lookup");
+		if ((xref_lookup != null) && !xref_lookup.isEmpty())
+		{
+			List<String> xref_lookup_fields = new ArrayList<String>();
+			xref_lookup_fields.addAll(Arrays.asList(xref_lookup.split(",")));
+			entity.setXrefLookupFields(xref_lookup_fields);
 		}
 
 		// TRIGGER
@@ -432,10 +441,6 @@ public class MolgenisModelParser
 		{
 			label = name;
 		}
-		if (description.isEmpty())
-		{
-			description = label;
-		}
 		if (xref_label == null || xref_label.isEmpty())
 		{
 			xref_label = null;
@@ -475,7 +480,7 @@ public class MolgenisModelParser
 		}
 
 		String jpaCascade = null;
-		if (type.equals("mref") || type.equals("xref"))
+		if (type.equals("mref") || type.equals("xref") || type.equals("categorical"))
 		{
 			if (element.hasAttribute("jpaCascade"))
 			{
@@ -550,7 +555,7 @@ public class MolgenisModelParser
 
 			field.setEnumOptions(options);
 		}
-		else if (type.equals("xref") || type.equals("mref"))
+		else if (type.equals("xref") || type.equals("mref") || type.equals("categorical"))
 		{
 			// xref must be defined unless mref_name is set
 			// caveat, can be both ends!!!

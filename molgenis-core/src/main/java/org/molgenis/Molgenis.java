@@ -34,13 +34,11 @@ import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.generators.DataTypeGen;
 import org.molgenis.generators.EntityMetaDataGen;
 import org.molgenis.generators.Generator;
-import org.molgenis.generators.JpaEntitySourceGen;
 import org.molgenis.generators.JpaRepositoryGen;
-import org.molgenis.generators.db.CrudRepositorySecurityDecoratorGen;
+import org.molgenis.generators.JpaRepositorySourceGen;
 import org.molgenis.generators.db.DatabaseConfigGen;
 import org.molgenis.generators.db.EntitiesImporterGen;
 import org.molgenis.generators.db.EntitiesValidatorGen;
-import org.molgenis.generators.db.EntityImporterGen;
 import org.molgenis.generators.db.JDBCMetaDatabaseGen;
 import org.molgenis.generators.db.PersistenceGen;
 import org.molgenis.generators.doc.DotDocGen;
@@ -225,25 +223,16 @@ public class Molgenis
 			generators.add(new DataTypeGen());
 			generators.add(new EntityMetaDataGen());
 			generators.add(new JpaRepositoryGen());
-			generators.add(new EntityImporterGen());
 			generators.add(new JDBCMetaDatabaseGen());
-
-			if (options.generate_jpa_entity_source)
-			{
-				generators.add(new JpaEntitySourceGen());
-			}
 
 			if (options.generate_persistence)
 			{
 				generators.add(new PersistenceGen());
 			}
 
-			// decorators
-			if (options.generate_decorators)
+			if (options.generate_jpa_repository_source)
 			{
-				// authorization
-				generators.add(new CrudRepositorySecurityDecoratorGen());
-
+				generators.add(new JpaRepositorySourceGen());
 			}
 		}
 		else
@@ -325,8 +314,7 @@ public class Molgenis
 			{
 				@Override
 				@Nullable
-				public Callable<Boolean> apply(@Nullable
-				final Generator generator)
+				public Callable<Boolean> apply(@Nullable final Generator generator)
 				{
 					return generator != null ? new Callable<Boolean>()
 					{

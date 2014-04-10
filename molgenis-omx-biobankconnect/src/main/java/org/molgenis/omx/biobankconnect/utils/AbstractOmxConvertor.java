@@ -10,12 +10,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntitySource;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.Writable;
 import org.molgenis.data.WritableFactory;
-import org.molgenis.data.excel.ExcelEntitySourceFactory;
+import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.excel.ExcelWriter;
+import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.support.MapEntity;
 
 abstract class AbstractOmxConvertor
@@ -27,34 +29,28 @@ abstract class AbstractOmxConvertor
 
 	public String studyName = null;
 
-	public AbstractOmxConvertor(String studyName, String filePath) throws IOException
+	public AbstractOmxConvertor(String studyName, String filePath) throws IOException, InvalidFormatException
 	{
 		this.studyName = studyName;
 		start(filePath);
 	}
 
-	public void start(String fileString) throws IOException
+	public void start(String fileString) throws IOException, InvalidFormatException
 	{
 		File file = new File(fileString);
 		if (file.exists())
 		{
-			EntitySource entitySource = null;
-			ExcelWriter writer = null;
-			try
-			{
-				entitySource = new ExcelEntitySourceFactory().create(file);
 
-				// Handle category sheet first
-				collectCategoryInfo(entitySource);
-				// Handle variable sheet second
-				collectVariableInfo(entitySource);
-				// Handle protocol sheet second
-				collectProtocolInfo(entitySource);
-			}
-			finally
-			{
-				if (entitySource != null) entitySource.close();
-			}
+			RepositoryCollection repositoryCollection = new ExcelRepositoryCollection(file, new TrimProcessor());
+
+			// Handle category sheet first
+			collectCategoryInfo(repositoryCollection);
+			// Handle variable sheet second
+			collectVariableInfo(repositoryCollection);
+			// Handle protocol sheet second
+			collectProtocolInfo(repositoryCollection);
+
+			ExcelWriter writer = null;
 
 			try
 			{
@@ -197,11 +193,11 @@ abstract class AbstractOmxConvertor
 		}
 	}
 
-	public abstract void collectProtocolInfo(EntitySource entitySource) throws IOException;
+	public abstract void collectProtocolInfo(RepositoryCollection repositoryCollection) throws IOException;
 
-	public abstract void collectVariableInfo(EntitySource entitySource) throws IOException;
+	public abstract void collectVariableInfo(RepositoryCollection repositoryCollection) throws IOException;
 
-	public abstract void collectCategoryInfo(EntitySource entitySource) throws IOException;
+	public abstract void collectCategoryInfo(RepositoryCollection repositoryCollection) throws IOException;
 
 	public String createFeatureIdentifier(String featureName)
 	{

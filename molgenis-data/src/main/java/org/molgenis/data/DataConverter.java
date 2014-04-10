@@ -7,14 +7,31 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.molgenis.data.convert.DateToStringConverter;
+import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.ListEscapeUtils;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.support.DefaultConversionService;
 
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "NP_BOOLEAN_RETURN_NULL", justification = "We want to return Boolean.TRUE, Boolean.FALSE or null")
 public class DataConverter
 {
 	private static ConversionService conversionService;
+
+	public static boolean canConvert(Object source, Class<?> targetType)
+	{
+		try
+		{
+			convert(source, targetType);
+			return true;
+		}
+		catch (Exception e)
+		{
+			return false;
+		}
+
+	}
 
 	@SuppressWarnings("unchecked")
 	public static <T> T convert(Object source, Class<T> targetType)
@@ -29,12 +46,7 @@ public class DataConverter
 			return (T) source;
 		}
 
-		if (conversionService == null)
-		{
-			conversionService = ApplicationContextProvider.getApplicationContext().getBean(ConversionService.class);
-		}
-
-		return conversionService.convert(source, targetType);
+		return getConversionService().convert(source, targetType);
 	}
 
 	public static String toString(Object source)
@@ -78,6 +90,7 @@ public class DataConverter
 	{
 		if (source == null) return null;
 		if (source instanceof java.sql.Date) return (java.sql.Date) source;
+		if (source instanceof java.util.Date) return new java.sql.Date(((java.util.Date) source).getTime());
 		return convert(source, java.sql.Date.class);
 	}
 
@@ -94,6 +107,21 @@ public class DataConverter
 		else if (source instanceof Timestamp) return (Timestamp) source;
 		else if (source instanceof Date) return new Timestamp(((Date) source).getTime());
 		return new Timestamp(convert(source, java.util.Date.class).getTime());
+	}
+
+	public static Entity toEntity(Object source)
+	{
+		if (source == null) return null;
+		if (source instanceof Entity) return (Entity) source;
+		return convert(source, Entity.class);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static Iterable<Entity> toEntities(Object source)
+	{
+		if (source == null) return null;
+		if (source instanceof Iterable) return (Iterable<Entity>) source;
+		return null;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -137,4 +165,24 @@ public class DataConverter
 		else return null;
 	}
 
+	private static ConversionService getConversionService()
+	{
+		if (conversionService == null)
+		{
+			if (ApplicationContextProvider.getApplicationContext() == null)
+			{
+				// We are not in a Spring managed environment
+				conversionService = new DefaultConversionService();
+				((DefaultConversionService) conversionService).addConverter(new DateToStringConverter());
+				((DefaultConversionService) conversionService).addConverter(new StringToDateConverter());
+			}
+			else
+			{
+				conversionService = ApplicationContextProvider.getApplicationContext().getBean(ConversionService.class);
+			}
+
+		}
+
+		return conversionService;
+	}
 }

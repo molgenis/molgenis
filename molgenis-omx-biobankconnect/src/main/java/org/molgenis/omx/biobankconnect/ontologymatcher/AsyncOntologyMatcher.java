@@ -319,6 +319,9 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 
 			currentUserStatus.setUserCurrentStage(userName, STAGE.StoreMapping);
 			currentUserStatus.setUserTotalNumberOfQueries(userName, (long) dataSetsToMatch.size());
+
+			dataService.getCrudRepository(DataSet.ENTITY_NAME).flush();
+
 			if (featureId != null)
 			{
 				for (Entry<String, List<ObservedValue>> entry : observationValuesPerDataSet.entrySet())
@@ -882,6 +885,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			protocol.setName(PROTOCOL_IDENTIFIER);
 			protocol.setFeatures(features);
 			dataService.add(Protocol.ENTITY_NAME, protocol);
+
+			dataService.getCrudRepository(Protocol.ENTITY_NAME).flush();
 		}
 
 		for (Integer dataSetId : dataSetsToMatch)
@@ -904,6 +909,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 				dataService.add(DataSet.ENTITY_NAME, dataSet);
 			}
 		}
+		dataService.getCrudRepository(Protocol.ENTITY_NAME).flush();
 	}
 
 	@Override

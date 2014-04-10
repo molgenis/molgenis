@@ -11,7 +11,7 @@
 	};
 	
 	ns.onEntityChange = function(name) {
-		restApi.getAsync('/api/v1/' + name, null, null, function(entities) {
+		restApi.getAsync('/api/v1/' + name, null, function(entities) {
 			var items = [];
 			// TODO deal with multiple entity pages
 			$.each(entities.items, function(key, val) {
@@ -26,7 +26,7 @@
 	};
 
 	ns.onEntitySelectionChange = function(entityUrl) {
-		restApi.getAsync(entityUrl, null, null, function(entity) {
+		restApi.getAsync(entityUrl, null, function(entity) {
 			ns.updateEntityTable(entity);
 			ns.updateEntitySearchResults(entity);
 		});
@@ -34,7 +34,7 @@
 
 	ns.updateEntityTable = function(entity) {
 		var name = typeof entity.name !== 'undefined' ? entity.name : 'N/A';
-		var identifier = typeof entity.identifier !== 'undefined' ? entity.identifier : 'N/A';
+		var identifier = typeof entity.Identifier !== 'undefined' ? entity.Identifier : 'N/A';
 		var description = typeof entity.description !== 'undefined' ? entity.description : 'N/A';
 
 		var items = [];
@@ -64,12 +64,12 @@
 						var featureIdentifier = key.substring(4);
 						if($.isArray(val)) {
 							$.each(val, function(key, val) {
-								if(val === entity.identifier) {
+								if(val === entity.Identifier) {
 									match = true;
 									return false;
 								}
 							});
-						} else if(val === entity.identifier) {
+						} else if(val === entity.Identifier) {
 							match = true;
 						}
 						
@@ -88,20 +88,20 @@
             var protocolsMap = {};
             var datasets = restApi.get('/api/v1/dataset');
             $.each(datasets.items, function(key, dataset) {
-                var protocolUsed = dataset.protocolUsed.href;
-                protocolsMap = getSubProtocols(dataset.identifier, protocolUsed, protocolsMap);
+                var protocolUsed = dataset.ProtocolUsed.href;
+                protocolsMap = getSubProtocols(dataset.Identifier, protocolUsed, protocolsMap);
             });
 
             function getSubProtocols (datasetIdentifier, rootProtocolUri, protocolsMap){
-                var rootProtocol = restApi.get(rootProtocolUri, ["subprotocols"]);
+                var rootProtocol = restApi.get(rootProtocolUri, {'expand' : ['subprotocols']});
                 //check if the protocol was already found in another dataset
                 //add dataset to list of datasets in which the protocol occurs
-                var datasetIdentifiers = protocolsMap[rootProtocol.identifier];
+                var datasetIdentifiers = protocolsMap[rootProtocol.Identifier];
                 if(!datasetIdentifiers) {
                     datasetIdentifiers = [];
                 }
                 datasetIdentifiers.push(datasetIdentifier);
-                protocolsMap[rootProtocol.identifier] = datasetIdentifiers;
+                protocolsMap[rootProtocol.Identifier] = datasetIdentifiers;
                 if(rootProtocol.subprotocols.items.length>0){
                     $.each(rootProtocol.subprotocols.items, function(key, protocol) {
                          protocolsMap = getSubProtocols(datasetIdentifier, protocol.href, protocolsMap);
@@ -111,19 +111,19 @@
             }
 
 			// get all protocol features
-            restApi.getAsync('/api/v1/protocol', ['features'], null, function(protocols) {
+            restApi.getAsync('/api/v1/protocol', {'expand': ['features']}, function(protocols) {
                 var items = [];
                 items.push('<div class="accordion" id="accordion">');
 
                 var nrProtocols = 0;
                 var firstProtocol = true;
                 $.each(protocols.items, function(key, protocol) {
-                    var datasets = protocolsMap[protocol.identifier];
+                    var datasets = protocolsMap[protocol.Identifier];
                    	// determine features that reference the given entity
 					var matchedFeatures = [];
 					var remainingFeatures = [];
-					$.each(protocol.features.items, function(key, feature) {
-						if(featuresMap[feature.identifier])
+					$.each(protocol.Features.items, function(key, feature) {
+						if(featuresMap[feature.Identifier])
 							matchedFeatures.push(feature);
 						else
 							remainingFeatures.push(feature);
@@ -134,8 +134,8 @@
 						// order searchHits 
 						var searchHits = [];
 						$.each(matchedFeatures, function(key, feature) {
-							if(featuresMap[feature.identifier]) {
-								$.each(featuresMap[feature.identifier], function(key, searchHit) {
+							if(featuresMap[feature.Identifier]) {
+								$.each(featuresMap[feature.Identifier], function(key, searchHit) {
 									searchHits.push(searchHit);
 								});
 							}
@@ -143,7 +143,7 @@
 						
 						items.push('<div class="accordion-group">');
 						items.push('<div class="accordion-heading">');
-						items.push('<a class="accordion-toggle" data-toggle="collapse" href="#collapse-' + protocol.identifier + '"><i class="icon-chevron-');
+						items.push('<a class="accordion-toggle" data-toggle="collapse" href="#collapse-' + protocol.Identifier + '"><i class="icon-chevron-');
 						if(firstProtocol) {
 							items.push('down');
 						} else {
@@ -153,7 +153,7 @@
 					    items.push(protocol.name);
 					    items.push('</a>');
 					    items.push('</div>');
-					    items.push('<div id="collapse-' + protocol.identifier + '" class="accordion-body collapse');
+					    items.push('<div id="collapse-' + protocol.Identifier + '" class="accordion-body collapse');
 					    if(firstProtocol) {
 					    	items.push(' in');
 					    	firstProtocol = false;
@@ -178,8 +178,8 @@
 							$.each(searchHits, function(key, searchHit) {
                                 //only include data that was found in a dataset where the current protocol is part of
 								if(datasets.indexOf(searchHit.columnValueMap['partOfDataset'])!=-1){
-                                    if(searchHit.columnValueMap[feature.identifier]){
-                                        items.push('<td>' + formatTableCellValue(searchHit.columnValueMap[feature.identifier],feature.dataType) + '</td>');
+                                    if(searchHit.columnValueMap[feature.Identifier]){
+                                        items.push('<td>' + formatTableCellValue(searchHit.columnValueMap[feature.Identifier],feature.dataType) + '</td>');
                                     }
                                     else{
                                         items.push('<td/>');
@@ -224,7 +224,7 @@
         queryRules.push({
             field : '_xrefvalue',
             operator : 'EQUALS',
-            value : entity.identifier
+            value : entity.Identifier
         });
 
         var searchRequest = {

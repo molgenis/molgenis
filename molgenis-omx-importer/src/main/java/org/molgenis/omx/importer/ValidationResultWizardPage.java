@@ -8,8 +8,12 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
-import org.molgenis.data.EntitySource;
+import org.molgenis.data.FileRepositoryCollectionFactory;
+import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.Repository;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.validation.ConstraintViolation;
+import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.omx.converters.ValueConverterException;
 import org.molgenis.omx.observ.DataSet;
@@ -35,6 +39,9 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 
 	@Autowired
 	private DataService dataService;
+
+	@Autowired
+	private FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
 
 	@Override
 	public String getTitle()
@@ -62,25 +69,65 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 				DatabaseAction entityDbAction = toDatabaseAction(entityImportOption);
 				if (entityDbAction == null) throw new IOException("unknown database action: " + entityImportOption);
 
-				EntitySource repository = dataService.createEntitySource(importWizard.getFile());
-				EntityImportReport importReport = omxImporterService.doImport(repository,
-						importWizard.getDataImportable(), entityDbAction);
+				RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory
+						.createFileRepositoryCollection(importWizard.getFile());
+
+				EntityImportReport importReport = omxImporterService.doImport(repositoryCollection, entityDbAction);
 				importWizard.setImportResult(importReport);
 
 				// publish dataset imported event(s)
-				Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME, DataSet.class);
-				for (DataSet dataSet : dataSets)
-					ApplicationContextProvider.getApplicationContext().publishEvent(
-							new EntityImportedEvent(this, DataSet.ENTITY_NAME, dataSet.getId()));
+				Iterable<String> entities = repositoryCollection.getEntityNames();
+				for (String entityName : entities)
+				{
+					if (entityName.startsWith(OmxImporterService.DATASET_SHEET_PREFIX))
+					{
+						// Import DataSet sheet, create new OmxRepository
+						String dataSetIdentifier = entityName.substring(OmxImporterService.DATASET_SHEET_PREFIX
+								.length());
+						DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME,
+								new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier), DataSet.class);
+						ApplicationContextProvider.getApplicationContext().publishEvent(
+								new EntityImportedEvent(this, DataSet.ENTITY_NAME, dataSet.getId()));
+					}
+					if (Protocol.ENTITY_NAME.equalsIgnoreCase(entityName))
+					{
+						Repository repo = repositoryCollection.getRepositoryByEntityName("protocol");
 
-				// publish protocol imported event(s)
-				Iterable<Protocol> protocols = dataService.findAll(Protocol.ENTITY_NAME,
-						new QueryImpl().eq(Protocol.ROOT, true), Protocol.class);
-				for (Protocol protocol : protocols)
-					ApplicationContextProvider.getApplicationContext().publishEvent(
-							new EntityImportedEvent(this, Protocol.ENTITY_NAME, protocol.getId()));
+						for (Protocol protocol : repo.iterator(Protocol.class))
+						{
+							if (protocol.getRoot())
+							{
+                                Protocol rootProtocol = dataService.findOne(Protocol.ENTITY_NAME,
+                                        new QueryImpl().eq(Protocol.IDENTIFIER, protocol.getIdentifier()), Protocol.class);
+								ApplicationContextProvider.getApplicationContext().publishEvent(
+										new EntityImportedEvent(this, Protocol.ENTITY_NAME, rootProtocol.getId()));
+							}
+						}
+					}
+				}
 
 				return "File successfully imported.";
+			}
+			catch (MolgenisValidationException e)
+			{
+				File file = importWizard.getFile();
+				logger.warn("Import of file [" + file.getName() + "] failed for action [" + entityImportOption + "]", e);
+
+				StringBuilder sb = new StringBuilder("<b>Your import failed:</b><br /><br />");
+				for (ConstraintViolation violation : e.getViolations())
+				{
+					sb.append(violation.getMessage());
+
+					if (violation.getImportInfo() != null)
+					{
+						sb.append(" ").append(violation.getImportInfo());
+					}
+
+					sb.append("<br />");
+
+				}
+
+				result.addError(new ObjectError("wizard", sb.toString()));
 			}
 			catch (RuntimeException e)
 			{

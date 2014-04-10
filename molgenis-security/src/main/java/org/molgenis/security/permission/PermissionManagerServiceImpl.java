@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.EntitySource;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
@@ -21,7 +20,7 @@ import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisGroupMember;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.UserAuthority;
-import org.molgenis.security.SecurityUtils;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.GrantedAuthority;
@@ -81,8 +80,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	public List<String> getEntityClassIds()
 	{
-		EntitySource entitySource = dataService.getEntitySource("jpa://");
-		return Lists.newArrayList(entitySource.getEntityNames());
+		return Lists.newArrayList(dataService.getEntityNames());
 	}
 
 	@Override

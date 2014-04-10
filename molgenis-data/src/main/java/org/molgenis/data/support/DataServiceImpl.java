@@ -1,22 +1,18 @@
 package org.molgenis.data.support;
 
-import java.io.File;
-import java.io.IOException;
+import static org.molgenis.security.core.utils.SecurityUtils.currentUserHasRole;
+
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntitySource;
-import org.molgenis.data.EntitySourceFactory;
-import org.molgenis.data.FileBasedEntitySourceFactory;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Queryable;
@@ -25,8 +21,9 @@ import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.Updateable;
 import org.molgenis.data.Writable;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 /**
@@ -35,86 +32,78 @@ import com.google.common.collect.Lists;
 @Component
 public class DataServiceImpl implements DataService
 {
-	// Key: entity name, value:EntitySourceFactory
-	private final Map<String, EntitySourceFactory> entitySourceFactoryByEntityName = new LinkedHashMap<String, EntitySourceFactory>();
+	private final Map<String, Repository> repositories;
+	private final Set<String> repositoryNames;
 
-	// Key: entity name, value:EntitySource url of the entity
-	private final Map<String, String> entitySourceUrlByEntityName = new HashMap<String, String>();
+	public DataServiceImpl()
+	{
+		this.repositories = new LinkedHashMap<String, Repository>();
+		this.repositoryNames = new TreeSet<String>();
+	}
 
-	// Key: EntitySourceFactory.urlPrefix, value:EntitySource
-	private final Map<String, EntitySourceFactory> entitySourceFactoryByUrlPrefix = new HashMap<String, EntitySourceFactory>();
+	@Override
+	public void addRepository(Repository newRepository)
+	{
+		String repositoryName = newRepository.getName();
+		if (repositories.containsKey(repositoryName.toLowerCase()))
+		{
+			throw new MolgenisDataException("Entity [" + repositoryName + "] already registered.");
+		}
+		repositoryNames.add(repositoryName);
+		repositories.put(repositoryName.toLowerCase(), newRepository);
+	}
 
-	private final Map<String, FileBasedEntitySourceFactory> fileBasedEntitySourceFactoryByFileExtension = new HashMap<String, FileBasedEntitySourceFactory>();
+	@Override
+	public void removeRepository(String repositoryName)
+	{
+		if (null == repositoryName)
+		{
+			throw new MolgenisDataException("repositoryName may not be [" + repositoryName + "]");
+		}
+
+		if (!repositories.containsKey(repositoryName.toLowerCase()))
+		{
+			throw new MolgenisDataException("Repository [" + repositoryName + "] doesn't exists");
+		}
+
+		repositoryNames.remove(repositoryName);
+		repositories.remove(repositoryName.toLowerCase());
+	}
+
+	@Override
+	public EntityMetaData getEntityMetaData(String entityName)
+	{
+		Repository repository = repositories.get(entityName.toLowerCase());
+		if (repository == null) throw new UnknownEntityException("Unknown entity [" + entityName + "]");
+		return repository.getEntityMetaData();
+	}
 
 	@Override
 	public Iterable<String> getEntityNames()
 	{
-		return entitySourceFactoryByEntityName.keySet();
+		return Iterables.filter(repositoryNames, new Predicate<String>()
+		{
+			@Override
+			public boolean apply(String entityName)
+			{
+				return currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", "ROLE_ENTITY_COUNT_" + entityName.toUpperCase());
+			}
+		});
 	}
 
 	@Override
 	public Repository getRepositoryByEntityName(String entityName)
 	{
-		EntitySourceFactory factory = entitySourceFactoryByEntityName.get(entityName);
-		if (factory == null)
-		{
-			throw new UnknownEntityException("Unknown entity [" + entityName + "]");
-		}
-
-		String url = entitySourceUrlByEntityName.get(entityName);
-		EntitySource entitySource = factory.create(url);
-
-		return entitySource.getRepositoryByEntityName(entityName);
+		Repository repository = repositories.get(entityName.toLowerCase());
+		if (repository == null) throw new UnknownEntityException("Unknown entity [" + entityName + "]");
+		else return repository;
 	}
 
 	@Override
-	public Iterator<EntitySource> iterator()
+	public boolean hasRepository(String entityName)
 	{
-		Set<EntitySource> entitySources = new LinkedHashSet<EntitySource>();
-		for (String entityName : entitySourceUrlByEntityName.keySet())
-		{
-			String url = entitySourceUrlByEntityName.get(entityName);
-			EntitySourceFactory factory = entitySourceFactoryByEntityName.get(entityName);
-			entitySources.add(factory.create(url));
-		}
+		return repositories.containsKey(entityName.toLowerCase());
 
-		return entitySources.iterator();
-	}
-
-	/**
-	 * Register a new EntitySourceFactory of an EntitySource implementation
-	 */
-	@Override
-	public void registerFactory(EntitySourceFactory entitySourceFactory)
-	{
-		if (entitySourceFactoryByUrlPrefix.get(entitySourceFactory.getUrlPrefix()) != null)
-		{
-			throw new MolgenisDataException(entitySourceFactory.getUrlPrefix() + " already registered");
-		}
-
-		entitySourceFactoryByUrlPrefix.put(entitySourceFactory.getUrlPrefix(), entitySourceFactory);
-
-		if (entitySourceFactory instanceof FileBasedEntitySourceFactory)
-		{
-			FileBasedEntitySourceFactory factory = (FileBasedEntitySourceFactory) entitySourceFactory;
-			for (String fileExtension : factory.getFileExtensions())
-			{
-				fileBasedEntitySourceFactoryByFileExtension.put(fileExtension, factory);
-			}
-		}
-	}
-
-	@Override
-	public void registerEntitySource(String url)
-	{
-		EntitySourceFactory entitySourceFactory = getEntitySourcefactory(url);
-		EntitySource entitySource = entitySourceFactory.create(url);
-
-		for (String entityName : entitySource.getEntityNames())
-		{
-			entitySourceFactoryByEntityName.put(entityName, entitySourceFactory);
-			entitySourceUrlByEntityName.put(entityName, url);
-		}
 	}
 
 	@Override
@@ -238,24 +227,6 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public EntitySource createEntitySource(File file) throws IOException
-	{
-		if (!file.isFile())
-		{
-			throw new MolgenisDataException("File [" + file.getAbsolutePath() + "] is not a file");
-		}
-
-		String extension = StringUtils.getFilenameExtension(file.getName());
-		FileBasedEntitySourceFactory factory = fileBasedEntitySourceFactoryByFileExtension.get(extension);
-		if (factory == null)
-		{
-			throw new MolgenisDataException("Unknown file extension [" + extension + "]");
-		}
-
-		return factory.create(file);
-	}
-
-	@Override
 	public CrudRepository getCrudRepository(String entityName)
 	{
 		Repository repository = getRepositoryByEntityName(entityName);
@@ -268,37 +239,13 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public EntitySource getEntitySource(String url)
-	{
-		return getEntitySourcefactory(url).create(url);
-	}
-
-	private EntitySourceFactory getEntitySourcefactory(String url)
-	{
-		int index = url.indexOf("://");
-		if (index == -1)
-		{
-			throw new MolgenisDataException("Incorrect url format should be of format prefix://");
-		}
-
-		String prefix = url.substring(0, index + "://".length());
-		EntitySourceFactory entitySourceFactory = entitySourceFactoryByUrlPrefix.get(prefix);
-		if (entitySourceFactory == null)
-		{
-			throw new MolgenisDataException("Unknown EntitySource url prefix [" + prefix + "]");
-		}
-
-		return entitySourceFactory;
-	}
-
-	@Override
 	public Iterable<Class<? extends Entity>> getEntityClasses()
 	{
 		List<Class<? extends Entity>> entityClasses = new ArrayList<Class<? extends Entity>>();
 		for (String entityName : getEntityNames())
 		{
 			Repository repo = getRepositoryByEntityName(entityName);
-			entityClasses.add(repo.getEntityClass());
+			entityClasses.add(repo.getEntityMetaData().getEntityClass());
 		}
 
 		return entityClasses;
@@ -333,4 +280,5 @@ public class DataServiceImpl implements DataService
 	{
 		return findAll(entityName, new QueryImpl(), clazz);
 	}
+
 }

@@ -32,17 +32,18 @@ public class TupleToMrefValueConverterTest
 		MrefValue value = new MrefValue();
 		value.setValue(Arrays.asList(ch1, ch2));
 		CharacteristicLoadingCache characteristicLoadingCache = mock(CharacteristicLoadingCache.class);
-		List<Cell<String>> cells = new EntityToMrefValueConverter(characteristicLoadingCache).toCell(value).getValue();
+		List<Cell<String>> cells = new EntityToMrefValueConverter(characteristicLoadingCache).toCell(value, null)
+				.getValue();
 
 		Iterator<Cell<String>> it = cells.iterator();
 		assertTrue(it.hasNext());
 		Cell<String> cell1 = it.next();
 		assertEquals(cell1.getKey(), "ch1");
-		assertEquals(cell1.getValue(), "ch #1");
+		assertEquals(cell1.getValue(), "ch1");
 		assertTrue(it.hasNext());
 		Cell<String> cell2 = it.next();
 		assertEquals(cell2.getKey(), "ch2");
-		assertEquals(cell2.getValue(), "ch #2");
+		assertEquals(cell2.getValue(), "ch2");
 		assertFalse(it.hasNext());
 	}
 

@@ -42,7 +42,7 @@ public class EntityToDecimalValueConverter implements EntityToValueConverter<Dec
 	}
 
 	@Override
-	public Cell<Double> toCell(Value value) throws ValueConverterException
+	public Cell<Double> toCell(Value value, ObservableFeature feature) throws ValueConverterException
 	{
 		if (!(value instanceof DecimalValue))
 		{

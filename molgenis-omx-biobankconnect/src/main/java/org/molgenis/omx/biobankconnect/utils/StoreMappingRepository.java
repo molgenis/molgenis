@@ -38,6 +38,8 @@ public class StoreMappingRepository extends AbstractRepository
 
 	public StoreMappingRepository(DataSet dataSet, DataService dataService)
 	{
+		super("mapping://" + dataSet.getIdentifier());
+
 		this.dataSet = dataSet;
 		Iterable<ObservationSet> observationSets = dataService.findAll(ObservationSet.ENTITY_NAME,
 				new QueryImpl().eq(ObservationSet.PARTOFDATASET, dataSet), ObservationSet.class);
@@ -50,15 +52,11 @@ public class StoreMappingRepository extends AbstractRepository
 
 	public StoreMappingRepository(DataSet dataSet, List<ObservedValue> observedValues, DataService dataService)
 	{
+		super("mapping://" + dataSet.getIdentifier());
+
 		this.dataSet = dataSet;
 		this.observedValues = observedValues;
 		this.valueConverter = new ValueConverter(dataService);
-	}
-
-	@Override
-	public Class<? extends Entity> getEntityClass()
-	{
-		return MapEntity.class;
 	}
 
 	@Override
@@ -76,7 +74,7 @@ public class StoreMappingRepository extends AbstractRepository
 				Integer observationId = ov.getObservationSet().getId();
 				if (storeMapping.containsKey(observationId)) entity = storeMapping.get(observationId);
 				else entity = new MapEntity();
-				entity.set(ov.getFeature().getIdentifier(), valueConverter.toCell(ov.getValue()));
+				entity.set(ov.getFeature().getIdentifier(), valueConverter.toCell(ov.getValue(), ov.getFeature()));
 				storeMapping.put(observationId, entity);
 			}
 
@@ -103,7 +101,7 @@ public class StoreMappingRepository extends AbstractRepository
 	{
 		if (metaData == null)
 		{
-			metaData = new DefaultEntityMetaData(dataSet.getIdentifier());
+			metaData = new DefaultEntityMetaData(dataSet.getIdentifier(), MapEntity.class);
 			metaData.setLabel(dataSet.getLabelValue());
 
 			Protocol protocol = dataSet.getProtocolUsed();

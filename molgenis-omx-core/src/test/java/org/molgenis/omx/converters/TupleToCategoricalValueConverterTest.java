@@ -22,16 +22,30 @@ public class TupleToCategoricalValueConverterTest
 	public void toCell() throws ValueConverterException
 	{
 		DataService dataService = mock(DataService.class);
-		String catIdentifier = "category1";
-		String catName = "category #1";
+
+		String name = "category #1";
 		Category category = new Category();
-		category.setIdentifier(catIdentifier);
-		category.setName(catName);
+		category.setName(name);
+
 		CategoricalValue value = new CategoricalValue();
 		value.setValue(category);
-		Cell<String> cell = new EntityToCategoricalValueConverter(dataService).toCell(value);
-		assertEquals(cell.getKey(), catIdentifier);
-		assertEquals(cell.getValue(), catName);
+
+		ObservableFeature f = new ObservableFeature();
+
+		when(
+				dataService.findOne(ObservableFeature.ENTITY_NAME,
+						new QueryImpl().eq(ObservableFeature.IDENTIFIER, f.getIdentifier()), ObservableFeature.class))
+				.thenReturn(f);
+
+		when(
+				dataService.findOne(
+						Category.ENTITY_NAME,
+						new QueryImpl().eq(Category.VALUECODE, category.getValueCode()).eq(Category.OBSERVABLEFEATURE,
+								f))).thenReturn(category);
+
+		Cell<String> cell = new EntityToCategoricalValueConverter(dataService).toCell(value, f);
+		assertEquals(cell.getKey(), name);
+		assertEquals(cell.getValue(), name);
 	}
 
 	@Test
@@ -42,8 +56,7 @@ public class TupleToCategoricalValueConverterTest
 		ObservableFeature feature = mock(ObservableFeature.class);
 		DataService dataService = mock(DataService.class);
 
-		Query q = new QueryImpl().eq(Category.OBSERVABLEFEATURE, feature).and().eq(Category.VALUECODE, valueCode);
-
+		Query q = new QueryImpl().eq(Category.VALUECODE, valueCode).and().eq(Category.OBSERVABLEFEATURE, feature);
 		when(dataService.findOne(Category.ENTITY_NAME, q, Category.class)).thenReturn(category);
 
 		String colName = "col";
@@ -62,9 +75,9 @@ public class TupleToCategoricalValueConverterTest
 		ObservableFeature feature = mock(ObservableFeature.class);
 		DataService dataService = mock(DataService.class);
 
-		Query q = new QueryImpl().eq(Category.OBSERVABLEFEATURE, feature).and().eq(Category.VALUECODE, valueCode);
-
+		Query q = new QueryImpl().eq(Category.VALUECODE, valueCode).and().eq(Category.OBSERVABLEFEATURE, feature);
 		when(dataService.findOne(Category.ENTITY_NAME, q, Category.class)).thenReturn(category);
+
 		String colName = "col";
 		Entity entity = new MapEntity(colName, valueCode);
 		new EntityToCategoricalValueConverter(dataService).updateFromEntity(entity, colName, feature, value);

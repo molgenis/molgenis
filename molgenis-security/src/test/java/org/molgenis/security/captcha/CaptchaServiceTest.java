@@ -15,8 +15,6 @@ import javax.servlet.http.HttpSession;
 
 import nl.captcha.Captcha;
 
-import org.molgenis.security.captcha.CaptchaException;
-import org.molgenis.security.captcha.CaptchaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

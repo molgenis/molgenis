@@ -29,7 +29,7 @@
 			};
 			searchApi.search(request, function(searchResponse){
 				var sortRule = null;
-				$('#catalogue-name').empty().append(dataSetEntity.name);
+				$('#catalogue-name').empty().append(dataSetEntity.Name);
 				$('#dataitem-number').empty().append(searchResponse.totalHitCount);
 				pagination.reset();
 				ns.OntologyAnnotator.prototype.updateselectedDataSetId(selectedDataSetId);
@@ -113,10 +113,10 @@
 			pagination.updateMatrixPagination($('.pagination ul'), ns.OntologyAnnotator.prototype.createMatrixForDataItems);
 		});
 		
-		function createTableRow(feature){
+		function createTableRow(feature){	
 			var row = $('<tr />').addClass('show-popover').data('feature', feature).click(function(){
 				var featureId = $(this).data('feature').id;
-				var restApiFeature = restApi.get('/api/v1/observablefeature/' + featureId, ["unit", "definitions"], null);
+				var restApiFeature = restApi.get('/api/v1/observablefeature/' + featureId, {'expand': ["unit", "definitions"]}, null);
 				createFeatureModal('Annotate data item', restApiFeature);
 			});
 			
@@ -135,16 +135,16 @@
 			var featureNameDiv = $('<div />').append(feature.name);
 			var annotationDiv = $('<div />').addClass('text-info');
 			var annotationText = '';
-			var featureEntity = restApi.get('/api/v1/observablefeature/' + feature.id, ["unit", "definitions"]);
+			var featureEntity = restApi.get('/api/v1/observablefeature/' + feature.id, {'expand': ["unit", "definitions"]});
 			if(featureEntity.definitions.items !== 0){
 				var moreToShow = featureEntity.definitions.items.length;
 				$.each(featureEntity.definitions.items, function(index, ontologyTerm){
-					var newAnnotationText = annotationText + ontologyTerm.name + ' , ';
+					var newAnnotationText = annotationText + ontologyTerm.Name + ' , ';
 					if(newAnnotationText.length > 130) {
 						annotationText = annotationText.substring(0, annotationText.length - 3) + ' , ';
 					}else{
 						moreToShow--;
-						annotationText += ontologyTerm.name + ' , ';
+						annotationText += ontologyTerm.Name + ' , ';
 					}
 				});
 				annotationDiv.append($('<span>' + annotationText.substring(0, annotationText.length - 3) + '</span>'));
@@ -210,7 +210,7 @@
 		}).append(table).appendTo(bodyContainer);
 		featureTableContainer.scrollTop(featureTableContainer.height());
 		$('<tr><th class="feature-detail-th">ID : </th><td class="feature-detail-td">' + ns.hrefToId(restApiFeature.href) + '</td></tr>').appendTo(table);
-		$('<tr><th>Name : </th><td>' + restApiFeature.name + '</td></tr>').appendTo(table);
+		$('<tr><th>Name : </th><td>' + restApiFeature.Name + '</td></tr>').appendTo(table);
 		$('<tr><th>Description : </th><td>' + i18nDescription(restApiFeature).en + '</td></tr>').appendTo(table);
 		
 		if(restApiFeature.definitions.items.length !== 0){
@@ -239,7 +239,7 @@
 							$(this).removeClass('icon-star').addClass('icon-star-empty');
 						}
 					});
-					var ontologyTermLink = $('<a href="' + ontologyTerm.termAccession + '" target="_blank">' + ontologyTerm.name + '</a>');
+					var ontologyTermLink = $('<a href="' + ontologyTerm.termAccession + '" target="_blank">' + ontologyTerm.Name + '</a>');
 					$('<li />').append(ontologyTermLink).append(removeIcon).append(selectBoostIcon).appendTo(ontologyTermAnnotations);
 				});
 				$('<tr />').append('<th>Annotation : </th>').append($('<td />').append(ontologyTermAnnotations)).appendTo(table);
@@ -398,7 +398,7 @@
 			$.each(searchReponse.searchHits, function(index, hit){
 				var value = hit.columnValueMap.ontologyTerm;
 				if($.inArray(value, result) === -1){
-					var name = hit.columnValueMap.name;
+					var name = hit.columnValueMap.Name;
 					result.push(name);
 					dataMap[name] = hit.columnValueMap;
 				}
@@ -494,25 +494,21 @@
 			var ontology = createOntology(ontologyTermFromIndex);
 			var queryRules = [];
 			queryRules.push({
-				field : 'termAccession',
+				field : 'Identifier',
 				operator : 'EQUALS',
-				value : ontologyTermFromIndex.ontologyTermIRI
+				value : ontology.Name + ':' + ontologyTermFromIndex.ontologyTermIRI
 			});
-			queryRules.push({
-				field : 'ontology',
-				operator : 'EQUALS',
-				value : ns.hrefToId(ontology.href)
-			});
-			var result = restApi.get('/api/v1/ontologyterm/', ['ontology'], {
-					q : queryRules,
-			});
+			var request = {
+					'q' : queryRules
+			};
+			var result = restApi.get('/api/v1/ontologyterm/', {'expand': ['ontology'], 'q' : request});
 			var ontologyTermId = null;
 			var ontologyTermRestApi = null;
 			if(result.items.length !== 0) {
 				toCreate = false;
 				ontologyTermId = ns.hrefToId(result.items[0].href);
 				ontologyTermRestApi = result.items[0];
-				toUpdate = (result.items[0].name !== ontologyTermFromIndex.ontologyTermSynonym);
+				toUpdate = (result.items[0].Name !== ontologyTermFromIndex.ontologyTermSynonym);
 			}
 			if(toCreate) ontologyTermId = createOntologyTerm(dataMap[ontologyTerm]);
 			if(toUpdate) updateOntologyTerm(ontologyTermRestApi, dataMap[ontologyTerm]);
@@ -521,7 +517,7 @@
 	}
 	
 	function createFeatureModal(title, feature){
-		restApi.getAsync(feature.href, ["unit", "definitions"], null, function(updatedFeature){
+		restApi.getAsync(feature.href, {'expand': ["unit", "definitions"]}, function(updatedFeature){
 			standardModal.createModalCallback(title, function(modal){
 				var body = modal.find('div.modal-body').addClass('overflow-y-visible');
 				ns.OntologyAnnotator.prototype.createFeatureTable(body, title, updatedFeature);
@@ -536,7 +532,7 @@
 	}
 	
 	function updateModalAfterAnnotation(title, feature, callback){
-		restApi.getAsync(feature.href, ["unit", "definitions"], null, function(updatedFeature){
+		restApi.getAsync(feature.href, {'expand': ["unit", "definitions"]}, function(updatedFeature){
 			standardModal.createModalCallback(title, function(modal){
 				var body = modal.find('div.modal-body').addClass('overflow-y-visible');
 				ns.OntologyAnnotator.prototype.createFeatureTable(body, title, updatedFeature, callback);
@@ -600,7 +596,7 @@
 			if(key === 'ontology') value = ns.hrefToId(value.href);
 			query[key] = value;
 		});
-		query.name = data.ontologyLabel + ':' + data.ontologyTermSynonym;
+		query.Name = data.ontologyLabel + ':' + data.ontologyTermSynonym;
 		query.definition = data.ontologyTermSynonym;
 		$.ajax({
 			type : 'PUT',
@@ -623,8 +619,8 @@
 		var ontology = createOntology(data);
 		var ontologyTermId = null;
 		var query = {};
-		query.name =  data.ontologyLabel + ':' + data.ontologyTerm;
-		query.identifier = data.ontologyLabel + ':' + data.ontologyTermIRI;
+		query.Name =  data.ontologyLabel + ':' + data.ontologyTerm;
+		query.Identifier = data.ontologyLabel + ':' + data.ontologyTermIRI;
 		query.termAccession = data.ontologyTermIRI;
 		query.description = data.ontologyTermLabel;
 		query.ontology = ns.hrefToId(ontology.href);
@@ -657,11 +653,11 @@
 					value : data.ontologyIRI
 				} ],
 		};
-		var existingOntology = restApi.get('/api/v1/ontology/', null, query);
+		var existingOntology = restApi.get('/api/v1/ontology/', {'q': query});
 		if(existingOntology.items.length === 0){
 			var ontologyData = {};
-			ontologyData.name = data.ontologyName;
-			ontologyData.identifier = data.ontologyIRI;
+			ontologyData.Name = data.ontologyName;
+			ontologyData.Identifier = data.ontologyIRI;
 			ontologyData.ontologyURI = data.ontologyIRI;
 			
 			$.ajax({
@@ -679,7 +675,7 @@
 					console.log(error);
 				} 
 			});
-			existingOntology = restApi.get('/api/v1/ontology/', null, query);
+			existingOntology = restApi.get('/api/v1/ontology/', {'q': query});
 		}
 		return existingOntology.items[0];
 	}

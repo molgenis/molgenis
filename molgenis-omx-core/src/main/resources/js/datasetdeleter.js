@@ -8,18 +8,17 @@
 	ns.fillDataSetSelect = function(callback) {
 		var maxNrOfDataSets = 500;
 		
-		restApi.getAsync('/api/v1/dataset', null, {num: maxNrOfDataSets}, function(datasets) {
+		restApi.getAsync('/api/v1/dataset', {'q': {'num': maxNrOfDataSets}}, function(datasets) {
 			var items = [];
 			
 			$.each(datasets.items, function(key, val) {
-				items.push('<option value="' + val.identifier + '">' + val.name + '</option>');
+				items.push('<option value="' + val.Identifier + '">' + val.Name + '</option>');
 			});
 			$('#dataset-select').html(items.join(''));
 		});
 	};
 
 	ns.deleteDataSet = function(e){	
-		parent.showSpinner();
 		e.preventDefault();
 		e.stopPropagation();
 		var form = $('#deletedataset-form');
@@ -30,12 +29,7 @@
 		    success: function (msg) {
 		    	$('#plugin-container').before($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Dataset ' + msg + ' was successfully removed</div>'));
 		    	ns.fillDataSetSelect();
-		    	parent.hideSpinner();
-		    },
-		    error: function (xhr) {
-		    	parent.hideSpinner();
-		    	molgenis.createAlert(JSON.parse(xhr.responseText).errors);
-			}  
+		    } 
 		 }); 
 	};
 }($, window.top.molgenis = window.top.molgenis || {}));

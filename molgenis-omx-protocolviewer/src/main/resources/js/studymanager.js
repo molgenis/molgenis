@@ -7,6 +7,7 @@
 		var viewTreeContainer = $('#study-definition-viewer-tree');
 		var editInfoContainer = $('#study-definition-editor-info');
 		var editTreeContainer = $('#study-definition-editor-tree');
+        var editStateSelect = $('#edit-state-select');
 		var updateStudyDefinitionBtn = $('#update-study-definition-btn');
 		
 		function createDynatreeConfig(catalog) {
@@ -26,11 +27,7 @@
 			}
 			
 			var dynaNodes = [];
-			if(catalog.children) {
-				$.each(catalog.children, function(idx, child) {
-					createDynatreeConfigRec(child, dynaNodes);
-				});
-			}
+			createDynatreeConfigRec(catalog, dynaNodes);
 			return dynaNodes;
 		}
 		
@@ -47,8 +44,13 @@
 		function updateStudyDefinitionTable() {
 			$.ajax({
 				type : 'GET',
-				url : molgenis.getContextUrl() + '/list',
+				url : molgenis.getContextUrl() + '/list?state=' + $('#state-select').val(),
 				success : function(data) {
+                    if(data.studyDefinitions.length === 0){
+                        $('#study-definition-info').hide();
+                    }else{
+                        $('#study-definition-info').show();
+                    }
 					var table = $('#studyDefinitionList tbody');
 					var items = [];
 					$.each(data.studyDefinitions, function(idx, studyDefinition) {
@@ -66,73 +68,67 @@
 					    items.push('</tr>');
 					});
 					table.html(items.join(''));
-					
+
 					var studyDefinitionRadio = $('#studyDefinitionList input[type="radio"]:first');
 					studyDefinitionRadio.attr('checked', 'checked');
 					studyDefinitionRadio.change();
-				},
-				error: function (xhr) {
-					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 				}
 			});
 		}
-		
+
 		function updateStudyDefinitionViewer() {
-			showSpinner();
-			
 			// clear previous tree
 			if (viewTreeContainer.children('ul').length > 0)
 				viewTreeContainer.dynatree('destroy');
 			viewInfoContainer.empty();
 			viewTreeContainer.empty();
 			viewTreeContainer.html('Loading viewer ...');
-			
+
 			// create new tree
 			var studyDefinitionId = $('#studyDefinitionForm input[type="radio"]:checked').val();
 			$.ajax({
 				type : 'GET',
 				url : molgenis.getContextUrl() + '/view/' + studyDefinitionId,
-				success : function(catalog) {
-					hideSpinner();
-					viewInfoContainer.html(createCatalogInfo(catalog));
+				success : function(result) {
+					viewInfoContainer.html(createCatalogInfo(result.catalog));
 					viewTreeContainer.empty();
-					viewTreeContainer.dynatree({'minExpandLevel': 2, 'children': createDynatreeConfig(catalog), 'selectMode': 3, 'debugLevel': 0});
+					viewTreeContainer.dynatree({'minExpandLevel': 2, 'children': createDynatreeConfig(result.catalog), 'selectMode': 3, 'debugLevel': 0});
 				},
 				error: function (xhr) {
-					hideSpinner();
 					viewTreeContainer.empty();
-					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 				}
 			});
 		}
 		
 		function updateStudyDefinitionEditor() {
-			showSpinner();
-			
-			// clear previous tree
-			if (editTreeContainer.children('ul').length > 0)
-				editTreeContainer.dynatree('destroy');
-			editInfoContainer.empty();
-			editTreeContainer.empty();
-			editTreeContainer.html('Loading editor ...');
-			
-			// create new tree
-			var studyDefinitionId = $('#studyDefinitionForm input[type="radio"]:checked').val();
-			$.ajax({
-				type : 'GET',
-				url : molgenis.getContextUrl() + '/edit/' + studyDefinitionId,
-				success : function(catalog) {
-					hideSpinner();
-					editInfoContainer.html(createCatalogInfo(catalog));
-					editTreeContainer.empty();
-					editTreeContainer.dynatree({'minExpandLevel': 2, 'children': createDynatreeConfig(catalog), 'selectMode': 3, 'debugLevel': 0, 'checkbox': true});
-				},
-				error: function (xhr) {
-					hideSpinner();
-					editTreeContainer.empty();
-					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
-				}
-			});
+            if($('#state-select').val() === 'APPROVED'){
+                $('a[data-toggle="tab"][href="#study-definition-viewer"]').click();
+            }
+            else
+            {
+                // clear previous tree
+                if (editTreeContainer.children('ul').length > 0)
+                    editTreeContainer.dynatree('destroy');
+                editInfoContainer.empty();
+                editTreeContainer.empty();
+                editTreeContainer.html('Loading editor ...');
+
+                // create new tree
+                var studyDefinitionId = $('#studyDefinitionForm input[type="radio"]:checked').val();
+                $.ajax({
+                    type : 'GET',
+                    url : molgenis.getContextUrl() + '/edit/' + studyDefinitionId,
+                    success : function(result) {
+                        editInfoContainer.html(createCatalogInfo(result.catalog));
+                        editTreeContainer.empty();
+                        editTreeContainer.dynatree({'minExpandLevel': 2, 'children': createDynatreeConfig(result.catalog), 'selectMode': 3, 'debugLevel': 0, 'checkbox': true});
+                        editStateSelect.val(result.status);
+                    },
+                    error: function (xhr) {
+                        editTreeContainer.empty();
+                    }
+                });
+            }
 		}
 		
 		$('#studyDefinitionForm').on('change', 'input[type="radio"]', function() {
@@ -155,7 +151,6 @@
 		
 		updateStudyDefinitionBtn.click(function() {
 			updateStudyDefinitionBtn.prop('disabled', true);
-			showSpinner();
 			
 			var studyDefinitionId = $('#studyDefinitionForm input[type="radio"]:checked').val();
 			
@@ -177,21 +172,26 @@
 				type : 'POST',
 				url : molgenis.getContextUrl() + '/update/' + studyDefinitionId,
 				data : JSON.stringify({
+                    'status': editStateSelect.val(),
 					'catalogItemIds': uniquecatalogItemIds
 				}),
 				contentType : 'application/json',
 				success : function(entities) {
-					hideSpinner();
 					updateStudyDefinitionBtn.prop('disabled', false);
 					molgenis.createAlert([{'message': 'Updated study definition [' + studyDefinitionId + ']'}], 'success');
-				},
-				error: function (xhr) {
-					hideSpinner();
-					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 				}
 			});
 		});
 		
-		updateStudyDefinitionTable();
+		$('#state-select').change(function(){
+            if($('#state-select').val() === 'APPROVED'){
+                $('#manage-tab').hide();
+            }else{
+                $('#manage-tab').show();
+            }
+			updateStudyDefinitionTable();
+		});
+
+		$('#state-select').change();
 	});
 }($, window.top.molgenis = window.top.molgenis || {}));

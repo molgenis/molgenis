@@ -7,19 +7,22 @@ import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Entity;
 
-public class DefaultEntityMetaData implements EntityMetaData
+public class DefaultEntityMetaData extends AbstractEntityMetaData
 {
 	private final String name;
 	private String label;
 	private String description;
+	private final Class<? extends Entity> entityClass;
 	private final Map<String, AttributeMetaData> attributes = new LinkedHashMap<String, AttributeMetaData>();
 
-	public DefaultEntityMetaData(String name)
+	public DefaultEntityMetaData(String name, Class<? extends Entity> entityClass)
 	{
 		if (name == null) throw new IllegalArgumentException("Name cannot be null");
+		if (entityClass == null) throw new IllegalArgumentException("EntityClass cannot be null");
 		this.name = name;
+		this.entityClass = entityClass;
 	}
 
 	@Override
@@ -35,6 +38,18 @@ public class DefaultEntityMetaData implements EntityMetaData
 				"Name of the AttributeMetaData cannot be null");
 
 		attributes.put(attributeMetaData.getName().toLowerCase(), attributeMetaData);
+	}
+
+	public void addAllAttributeMetaData(List<AttributeMetaData> attributeMetaDataList)
+	{
+		for (AttributeMetaData attributeMetaData : attributeMetaDataList)
+		{
+			if (attributeMetaData == null) throw new IllegalArgumentException("AttributeMetaData cannot be null");
+			if (attributeMetaData.getName() == null) throw new IllegalArgumentException(
+					"Name of the AttributeMetaData cannot be null");
+
+			attributes.put(attributeMetaData.getName().toLowerCase(), attributeMetaData);
+		}
 	}
 
 	@Override
@@ -98,6 +113,12 @@ public class DefaultEntityMetaData implements EntityMetaData
 	public void setDescription(String description)
 	{
 		this.description = description;
+	}
+
+	@Override
+	public Class<? extends Entity> getEntityClass()
+	{
+		return entityClass;
 	}
 
 	@Override

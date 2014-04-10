@@ -12,6 +12,7 @@ import org.molgenis.omx.study.StudyDataRequest;
 import org.molgenis.study.StudyDefinition;
 
 import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 public class OmxStudyDefinition implements StudyDefinition
@@ -77,26 +78,26 @@ public class OmxStudyDefinition implements StudyDefinition
 	}
 
 	@Override
-	public List<CatalogItem> getItems()
+	public Iterable<CatalogItem> getItems()
 	{
 		return Lists.transform(studyDataRequest.getFeatures(), new Function<ObservableFeature, CatalogItem>()
 		{
 			@Override
 			public CatalogItem apply(ObservableFeature observableFeature)
 			{
-				return new OmxStudyDefinitionItem(observableFeature);
+				return new OmxStudyDefinitionItem(observableFeature, studyDataRequest.getProtocol().getId());
 			}
 		});
 	}
 
 	@Override
-	public void setItems(List<CatalogItem> items)
+	public void setItems(Iterable<CatalogItem> items)
 	{
 		List<ObservableFeature> features;
-		if (!items.isEmpty())
+		if (items.iterator().hasNext())
 		{
 			Iterable<ObservableFeature> featuresIterable = dataService.findAll(ObservableFeature.ENTITY_NAME,
-					Lists.transform(items, new Function<CatalogItem, Integer>()
+					Iterables.transform(items, new Function<CatalogItem, Integer>()
 					{
 						@Override
 						public Integer apply(CatalogItem catalogItem)

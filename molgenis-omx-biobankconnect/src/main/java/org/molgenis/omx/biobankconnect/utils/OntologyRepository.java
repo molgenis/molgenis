@@ -24,6 +24,7 @@ public class OntologyRepository extends AbstractRepository implements Countable
 
 	public OntologyRepository(OntologyLoader loader, String name)
 	{
+		super("ontology://" + name);
 		this.loader = loader;
 		this.name = name;
 	}
@@ -32,12 +33,6 @@ public class OntologyRepository extends AbstractRepository implements Countable
 	public long count()
 	{
 		return 1;
-	}
-
-	@Override
-	public Class<? extends Entity> getEntityClass()
-	{
-		return MapEntity.class;
 	}
 
 	@Override
@@ -63,12 +58,11 @@ public class OntologyRepository extends AbstractRepository implements Countable
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		DefaultEntityMetaData metaData = new DefaultEntityMetaData(name);
+		DefaultEntityMetaData metaData = new DefaultEntityMetaData(name, MapEntity.class);
 		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_URL, FieldTypeEnum.STRING));
 		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_LABEL, FieldTypeEnum.STRING));
 		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ENTITY_TYPE, FieldTypeEnum.STRING));
 
 		return metaData;
 	}
-
 }

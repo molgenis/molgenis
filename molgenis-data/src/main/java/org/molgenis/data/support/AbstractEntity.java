@@ -1,10 +1,14 @@
 package org.molgenis.data.support;
 
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
+import org.molgenis.data.convert.DateToStringConverter;
 import org.springframework.beans.BeanUtils;
 
 public abstract class AbstractEntity implements Entity
@@ -12,10 +16,59 @@ public abstract class AbstractEntity implements Entity
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public void set(Entity entity, boolean strict)
+	public String getLabelValue()
 	{
-		this.set(entity);
+		AttributeMetaData labelAttribute = getEntityMetaData().getLabelAttribute();
+		String labelAttributeName = labelAttribute.getName();
+		FieldTypeEnum dataType = labelAttribute.getDataType().getEnumType();
+		switch (dataType)
+		{
+			case BOOL:
+			case DECIMAL:
+			case EMAIL:
+			case ENUM:
+			case HTML:
+			case HYPERLINK:
+			case INT:
+			case LONG:
+			case STRING:
+			case TEXT:
+				Object obj = get(labelAttributeName);
+				return obj != null ? obj.toString() : null;
+			case DATE:
+			case DATE_TIME:
+				Date date = getUtilDate(labelAttributeName);
+				return new DateToStringConverter().convert(date);
+			case CATEGORICAL:
+			case XREF:
+				Entity refEntity = getEntity(labelAttributeName);
+				return refEntity != null ? refEntity.getLabelValue() : null;
+			case MREF:
+				Iterable<Entity> refEntities = getEntities(labelAttributeName);
+				if (refEntities != null)
+				{
+					StringBuilder strBuilder = new StringBuilder();
+					for (Entity mrefEntity : refEntities)
+					{
+						if (strBuilder.length() > 0) strBuilder.append(',');
+						strBuilder.append(mrefEntity.getLabelValue());
+					}
+					return strBuilder.toString();
+				}
+				return null;
+			case COMPOUND:
+			case FILE:
+			case IMAGE:
+				throw new RuntimeException("invalid label data type " + dataType);
+			default:
+				throw new RuntimeException("unsupported label data type " + dataType);
+		}
+	}
 
+	@Override
+	public void set(Entity entity)
+	{
+		set(entity, false);
 	}
 
 	@Override
@@ -67,6 +120,18 @@ public abstract class AbstractEntity implements Entity
 	}
 
 	@Override
+	public Entity getEntity(String attributeName)
+	{
+		return DataConverter.toEntity(get(attributeName));
+	}
+
+	@Override
+	public Iterable<Entity> getEntities(String attributeName)
+	{
+		return DataConverter.toEntities(get(attributeName));
+	}
+
+	@Override
 	public List<String> getList(String attributeName)
 	{
 		return DataConverter.toList(get(attributeName));
@@ -77,6 +142,20 @@ public abstract class AbstractEntity implements Entity
 	{
 		return DataConverter.toIntList(get(attributeName));
 	}
+
+    @Override
+    public String toString()
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.append(this.getClass().getSimpleName() + "{");
+        for(String attrName : this.getAttributeNames())
+        {
+            sb.append(attrName + "='" +this.get(attrName) + "', ");
+        }
+        sb.delete(sb.length()-2, sb.length());
+        sb.append("}");
+        return sb.toString();
+    }
 
 	public static boolean isObjectRepresentation(String objStr)
 	{

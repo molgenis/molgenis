@@ -44,8 +44,18 @@ public class MolgenisUiPluginRegistry implements MolgenisPluginRegistry
 					getPluginsRec(subMenuItem, pluginMap);
 				break;
 			case PLUGIN:
+				String fullUri = "/" + menuItem.getUrl();
+
+				MolgenisUiMenu menu = menuItem.getParentMenu();
+				while (menu != null)
+				{
+					fullUri = "/" + menu.getId() + fullUri;
+					menu = menu.getParentMenu();
+				}
+				fullUri = "/menu" + fullUri;
+
 				pluginMap.put(menuItem.getId(),
-						new MolgenisPlugin(menuItem.getId(), menuItem.getName(), menuItem.getUrl()));
+						new MolgenisPlugin(menuItem.getId(), menuItem.getName(), menuItem.getUrl(), fullUri));
 				break;
 			default:
 				throw new RuntimeException("Unknown menu item type [" + menuItem.getType() + "]");

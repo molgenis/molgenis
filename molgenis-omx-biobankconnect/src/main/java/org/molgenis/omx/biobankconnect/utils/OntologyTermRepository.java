@@ -36,6 +36,7 @@ public class OntologyTermRepository extends AbstractRepository implements Counta
 
 	public OntologyTermRepository(OntologyLoader loader, String name)
 	{
+		super("ontologyterm://" + name);
 		this.loader = loader;
 		this.ontologyName = this.loader.getOntologyName();
 		this.ontologyIRI = this.loader.getOntologyIRI();
@@ -49,12 +50,6 @@ public class OntologyTermRepository extends AbstractRepository implements Counta
 		createOntologyTable(entities, loader);
 
 		return entities.size();
-	}
-
-	@Override
-	public Class<? extends Entity> getEntityClass()
-	{
-		return MapEntity.class;
 	}
 
 	@Override
@@ -75,7 +70,7 @@ public class OntologyTermRepository extends AbstractRepository implements Counta
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		DefaultEntityMetaData metaData = new DefaultEntityMetaData(name);
+		DefaultEntityMetaData metaData = new DefaultEntityMetaData(name, MapEntity.class);
 		metaData.addAttributeMetaData(new DefaultAttributeMetaData(NODE_PATH, FieldTypeEnum.STRING));
 		metaData.addAttributeMetaData(new DefaultAttributeMetaData(BOOST, FieldTypeEnum.STRING));
 		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_IRI, FieldTypeEnum.STRING));
