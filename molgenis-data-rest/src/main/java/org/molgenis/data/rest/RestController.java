@@ -599,10 +599,10 @@ public class RestController
 			Object paramValue = request.get(paramName);
 			Object value = null;
 
+			// Treat empty strings as null
 			if ((paramValue != null) && (paramValue instanceof String) && StringUtils.isEmpty((String) paramValue))
 			{
 				paramValue = null;
-
 			}
 
 			if (paramValue != null)
