@@ -55,11 +55,14 @@ public class MysqlQueryTest
 
 		MysqlRepository countries = new MysqlRepository(ds, countryMD);
 		MysqlRepository persons = new MysqlRepository(ds, personMD);
+
+		// drop and create the tables via the repository
 		persons.drop();
 		countries.drop();
 		countries.create();
 		persons.create();
 
+		// add country entities to repo
 		Entity c = new MapEntity();
 		c.set("code", "US");
 		countries.add(c);
@@ -73,17 +76,18 @@ public class MysqlQueryTest
 		e.set("birthday", "1976-06-07");
 		e.set("height", 180);
 		e.set("active", true);
-        e.set("country","US");
+		e.set("country", "US");
 		persons.add(e);
 
+		// add person entities to repo
 		e.set("email", "bar@localhost");
 		e.set("firstName", "jane");
 		e.set("lastName", "doe");
 		e.set("birthday", "1980-06-07");
 		e.set("height", 165);
 		e.set("active", false);
-        e.set("country","US");
-        persons.add(e);
+		e.set("country", "US");
+		persons.add(e);
 
 		e.set("email", "donald@localhost");
 		e.set("firstName", "donald");
@@ -91,8 +95,10 @@ public class MysqlQueryTest
 		e.set("birthday", "1950-01-31");
 		e.set("height", 55);
 		e.set("active", true);
-        e.set("country","NL");
-        persons.add(e);
+		e.set("country", "NL");
+		persons.add(e);
+
+		// query test
 
 		Assert.assertEquals(persons.count(), 3);
 		// string
@@ -119,10 +125,9 @@ public class MysqlQueryTest
 		Assert.assertEquals(
 				persons.count(new QueryImpl().gt("birthday", "1976-06-07").or().lt("birthday", "1976-06-07")), 2);
 
-        // xref
-        Assert.assertEquals(persons.count(new QueryImpl().eq("country", "US")), 2);
-        Assert.assertEquals(persons.count(new QueryImpl().eq("country", "NL")), 1);
-        Assert.assertEquals(persons.count(new QueryImpl().eq("country", "US").gt("height",165)), 1);
-
-    }
+		// xref
+		Assert.assertEquals(persons.count(new QueryImpl().eq("country", "US")), 2);
+		Assert.assertEquals(persons.count(new QueryImpl().eq("country", "NL")), 1);
+		Assert.assertEquals(persons.count(new QueryImpl().eq("country", "US").gt("height", 165)), 1);
+	}
 }
