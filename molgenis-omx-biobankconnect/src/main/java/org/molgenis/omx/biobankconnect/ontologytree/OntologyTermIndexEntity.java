@@ -30,29 +30,9 @@ public class OntologyTermIndexEntity extends IndexEntity
 	{
 		Map<String, Object> columnValueMap = hit.getColumnValueMap();
 
-		if (attributeName.equalsIgnoreCase("name"))
-		{
-			return columnValueMap.get(OntologyTermRepository.ONTOLOGY_TERM_IRI);
-		}
-
 		if (attributeName.equalsIgnoreCase("fieldType"))
 		{
 			return Boolean.parseBoolean(columnValueMap.get(OntologyTermRepository.LAST).toString()) ? FieldTypeEnum.STRING : FieldTypeEnum.COMPOUND;
-		}
-
-		if (attributeName.equalsIgnoreCase("label"))
-		{
-			return columnValueMap.get(OntologyTermRepository.ONTOLOGY_TERM);
-		}
-
-		if (attributeName.equalsIgnoreCase("description"))
-		{
-			return columnValueMap.get(OntologyTermRepository.ONTOLOGY_TERM_DEFINITION);
-		}
-
-		if (attributeName.equalsIgnoreCase("ontologyUrl"))
-		{
-			return columnValueMap.get(OntologyTermRepository.ONTOLOGY_IRI);
 		}
 
 		if (attributeName.equalsIgnoreCase("attributes"))

@@ -18,12 +18,6 @@ public class OntologyTermIndexRepository extends AbstractOntologyIndexRepository
 	private final static String BASE_URL = "ontologytermindex://";
 	private final OntologyTermRepository ontologyTermRepository;
 	private final String ontologyUrl;
-	{
-		attributeMap.put("name", OntologyTermRepository.ONTOLOGY_TERM_IRI);
-		attributeMap.put("label", OntologyTermRepository.ONTOLOGY_TERM);
-		attributeMap.put("description", OntologyTermRepository.ONTOLOGY_TERM_DEFINITION);
-		attributeMap.put("ontologyUrl", OntologyTermRepository.ONTOLOGY_IRI);
-	}
 
 	@Autowired
 	public OntologyTermIndexRepository(String entityName, String ontologyUrl, SearchService searchService)
@@ -39,7 +33,7 @@ public class OntologyTermIndexRepository extends AbstractOntologyIndexRepository
 		List<Entity> entities = new ArrayList<Entity>();
 		if (q.getRules().size() > 0) q.and();
 		q.eq(OntologyTermRepository.ENTITY_TYPE, OntologyTermRepository.TYPE_ONTOLOGYTERM);
-		for (Hit hit : searchService.search(new SearchRequest(null, mapAttribute(q), null)).getSearchHits())
+		for (Hit hit : searchService.search(new SearchRequest(null, q, null)).getSearchHits())
 		{
 			String id = hit.getId();
 			int hashCode = id.hashCode();

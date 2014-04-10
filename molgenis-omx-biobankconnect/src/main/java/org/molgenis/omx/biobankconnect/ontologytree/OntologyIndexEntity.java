@@ -1,6 +1,5 @@
 package org.molgenis.omx.biobankconnect.ontologytree;
 
-import java.util.ArrayList;
 import java.util.Map;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -29,32 +28,12 @@ public class OntologyIndexEntity extends IndexEntity
 	{
 		Map<String, Object> columnValueMap = hit.getColumnValueMap();
 
-		if (attributeName.equalsIgnoreCase("name"))
-		{
-			return columnValueMap.get(OntologyRepository.ONTOLOGY_URL);
-		}
-
 		if (attributeName.equalsIgnoreCase("fieldType"))
 		{
 			String documentType = OntologyService.createOntologyDocumentType(columnValueMap.get(
 					OntologyRepository.ONTOLOGY_URL).toString());
 			SearchResult result = searchService.search(new SearchRequest(documentType, new QueryImpl(), null));
 			return result.getTotalHitCount() == 0 ? FieldTypeEnum.STRING : FieldTypeEnum.COMPOUND;
-		}
-
-		if (attributeName.equalsIgnoreCase("label"))
-		{
-			return columnValueMap.get(OntologyRepository.ONTOLOGY_LABEL);
-		}
-
-		if (attributeName.equalsIgnoreCase("description"))
-		{
-			return null;
-		}
-
-		if (attributeName.equalsIgnoreCase("ontologyUrl"))
-		{
-			return columnValueMap.get(OntologyRepository.ONTOLOGY_URL);
 		}
 
 		if (attributeName.equalsIgnoreCase(OntologyTermRepository.LAST))
@@ -68,11 +47,6 @@ public class OntologyIndexEntity extends IndexEntity
 		if (attributeName.equalsIgnoreCase(OntologyTermRepository.ROOT))
 		{
 			return true;
-		}
-
-		if (attributeName.equalsIgnoreCase("attributes"))
-		{
-			return new ArrayList<OntologyTermIndexEntity>();
 		}
 
 		return columnValueMap.containsKey(attributeName) ? columnValueMap.get(attributeName) : null;

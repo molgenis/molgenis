@@ -20,11 +20,6 @@ public class OntologyIndexRepository extends AbstractOntologyIndexRepository
 	public final static String DEFAULT_ONTOLOGY_REPO = "ontologyindex";
 	private final static String BASE_URL = "ontologyindex://";
 	private final OntologyRepository ontologyRepository;
-	{
-		attributeMap.put("name", OntologyRepository.ONTOLOGY_URL);
-		attributeMap.put("label", OntologyRepository.ONTOLOGY_LABEL);
-		attributeMap.put("ontologyUrl", OntologyRepository.ONTOLOGY_URL);
-	}
 
 	@Autowired
 	public OntologyIndexRepository(String entityName, SearchService searchService)
@@ -39,7 +34,7 @@ public class OntologyIndexRepository extends AbstractOntologyIndexRepository
 		List<Entity> entities = new ArrayList<Entity>();
 		if (q.getRules().size() > 0) q.and();
 		q.eq(OntologyRepository.ENTITY_TYPE, OntologyRepository.TYPE_ONTOLOGY);
-		for (Hit hit : searchService.search(new SearchRequest(null, mapAttribute(q), null)).getSearchHits())
+		for (Hit hit : searchService.search(new SearchRequest(null, q, null)).getSearchHits())
 		{
 			String id = hit.getId();
 			int hashCode = id.hashCode();

@@ -18,7 +18,7 @@ public class OntologyRepository extends AbstractRepository implements Countable
 {
 	private final OntologyLoader loader;
 	private final String name;
-	public final static String ONTOLOGY_URL = "url";
+	public final static String ONTOLOGY_URL = "ontologyIRI";
 	public final static String ENTITY_TYPE = "entity_type";
 	public final static String ONTOLOGY_LABEL = "ontologyLabel";
 	public final static String TYPE_ONTOLOGY = "indexedOntology";
