@@ -16,17 +16,23 @@
 		var ontologyIndex = restApi.get("/api/v1/ontologyindex/", {'expand' : ['attributes'], 'q' : request}, null);
 		if(ontologyIndex.items.length > 0){
 			var topNode = ontologyIndex.items[0];
-			topNode.attributes = removeDuplicate(getRootOntologyTerms(topNode.label));
+			topNode.attributes = removeDuplicate(getRootOntologyTerms(topNode));
 			createEntityMetaTree(topNode, null);
 		}
 	};
 	
-	function getRootOntologyTerms(ontologyName){
-		var rootOntologyTerms = restApi.get('/api/v1/' + ontologyName, {'expand' : ['attributes'], 'q' : {
+	function getRootOntologyTerms(ontology){
+		var rootOntologyTerms = restApi.get('/api/v1/' + ontology.label, {'expand' : ['attributes'], 'q' : {
 			'q' : [{
 				'field' : 'root',
 				'operator' : 'EQUALS',
 				'value' : true
+			},{
+				'operator' : 'AND'
+			},{
+				'field' : 'ontologyUrl',
+				'operator' : 'EQUALS',
+				'value' : ontology.ontologyUrl
 			}]
 		}}, null);
 		return rootOntologyTerms.items;
