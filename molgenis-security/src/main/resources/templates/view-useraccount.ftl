@@ -10,13 +10,13 @@
 				        <div class="control-group">
 							<label class="control-label" for="username">Username</label>
 							<div class="controls">
-								<input type="text" name="username" value="${user.username}" disabled>
+								<input type="text" name="username" value="${user.username!}" disabled>
 							</div>
 						</div>
 						<div class="control-group">
 							<label class="control-label" for="emailaddress">Email address</label>
 							<div class="controls">
-								<input type="email" name="emailaddress" value="${user.email}" disabled>
+								<input type="email" name="emailaddress" value="${user.email!}" disabled>
 							</div>
 						</div>
 					</div>
