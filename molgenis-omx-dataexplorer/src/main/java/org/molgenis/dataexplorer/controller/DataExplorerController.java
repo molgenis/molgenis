@@ -15,10 +15,10 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Iterator;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -35,7 +35,6 @@ import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.search.SearchService;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.util.GsonHttpMessageConverter;
@@ -116,9 +115,8 @@ public class DataExplorerController extends MolgenisPluginController
 	 * @return the view name
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(@RequestParam(value = "dataset", required = false)
-	String selectedEntityName, @RequestParam(value = "wizard", required = false)
-	Boolean wizard, Model model) throws Exception
+	public String init(@RequestParam(value = "dataset", required = false) String selectedEntityName,
+			@RequestParam(value = "wizard", required = false) Boolean wizard, Model model) throws Exception
 	{
 		boolean entityExists = false;
 		Iterable<EntityMetaData> entitiesMeta = Iterables.transform(dataService.getEntityNames(),
@@ -140,29 +138,22 @@ public class DataExplorerController extends MolgenisPluginController
 		{
 			model.addAttribute("hideDatasetSelect", true);
 		}
-        else
-        {
+		else
+		{
 			Iterator<EntityMetaData> entitiesIterator = entitiesMeta.iterator();
 			if (entitiesIterator.hasNext())
 			{
 				selectedEntityName = entitiesIterator.next().getName();
 			}
-        }
+		}
 		model.addAttribute("selectedEntityName", selectedEntityName);
 		model.addAttribute("wizard", (wizard != null) && wizard.booleanValue());
 
-        //check for count-permission only (to showDataItemSelection)
-        if (!molgenisPermissionService.hasPermissionOnEntity(selectedEntityName, Permission.READ))
-        {
-            model.addAttribute("hideDataItemSelect", true);
-        }
-
-        return "view-dataexplorer";
+		return "view-dataexplorer";
 	}
 
 	@RequestMapping(value = "/module/{moduleId}", method = GET)
-	public String getModule(@PathVariable("moduleId")
-	String moduleId, Model model)
+	public String getModule(@PathVariable("moduleId") String moduleId, Model model)
 	{
 		if (moduleId.equals("data"))
 		{
@@ -187,8 +178,7 @@ public class DataExplorerController extends MolgenisPluginController
 	 */
 	@RequestMapping(value = "/modules", method = GET)
 	@ResponseBody
-	public ModulesConfigResponse getModules(@RequestParam("entity")
-	String entityName)
+	public ModulesConfigResponse getModules(@RequestParam("entity") String entityName)
 	{
 		// get data explorer settings
 		boolean modCharts = molgenisSettings.getBooleanProperty(KEY_MOD_CHARTS, DEFAULT_VAL_MOD_CHARTS);
@@ -267,8 +257,8 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/download", method = POST)
-	public void download(@RequestParam("dataRequest")
-	String dataRequestStr, HttpServletResponse response) throws IOException
+	public void download(@RequestParam("dataRequest") String dataRequestStr, HttpServletResponse response)
+			throws IOException
 	{
 		// Workaround because binding with @RequestBody is not possible:
 		// http://stackoverflow.com/a/9970672
@@ -314,9 +304,7 @@ public class DataExplorerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/aggregate", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
 	@ResponseBody
-	public AggregateResponse aggregate(@Valid
-	@RequestBody
-	AggregateRequest request)
+	public AggregateResponse aggregate(@Valid @RequestBody AggregateRequest request)
 	{
 		String entityName = request.getEntityName();
 		String xAttributeName = request.getXAxisAttributeName();

@@ -1,8 +1,11 @@
 package org.molgenis.omx;
 
+import java.util.Map;
+
 import org.molgenis.DatabaseConfig;
 import org.molgenis.catalogmanager.CatalogManagerService;
 import org.molgenis.data.DataService;
+import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
 import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.omx.catalogmanager.OmxCatalogManagerService;
 import org.molgenis.omx.config.DataExplorerConfig;
@@ -47,6 +50,13 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	public StudyManagerService studyDefinitionManagerService()
 	{
 		return new OmxStudyManagerService(dataService, molgenisUserService);
+	}
+
+	@Override
+	protected void addFreemarkerVariables(Map<String, Object> freemarkerVariables)
+	{
+		freemarkerVariables.put("dataExplorerLink", new DataExplorerHyperlinkDirective(molgenisPluginRegistry(),
+				dataService));
 	}
 
 }

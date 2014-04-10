@@ -9,7 +9,7 @@
 <div class="subtitle">This is a listing of all datasets available in ${molgenis_ui.title?html}</div>
 
 <div class="row-fluid">
-	<form id="model-search-form" action="" method="POST">
+	<form id="model-search-form" action="">
 		<div class="input-append span4">
 			<span class="search-label">Search:</span>
 			<input class="span8" id="search-input" name="searchTerm" type="text" placeholder="Type here your search" autofocus="autofocus" value="${metaDataSearchForm.searchTerm!}">
@@ -18,7 +18,7 @@
 		</div>	
 		<div class="span8">
 			<span class="search-label">Entity types:</span>
-			<input type="hidden" value="on" name="_entityClassTypes"/><#-- This is a marker for spring that all checkboxes are deselected -->
+			<input type="hidden" value="on" name="_entityClassTypes"/><#-- This is a marker for spring if all checkboxes are deselected -->
 			<#list entityClassTypes as type>
 				<label><input type="checkbox" name="entityClassTypes" value="${type}" <#if metaDataSearchForm.entityClassTypes?? && metaDataSearchForm.entityClassTypes?seq_contains(type)>CHECKED</#if> /> ${type}</label>
 			</#list>
@@ -29,38 +29,64 @@
 					
 <div id="pager"></div>
 					
-<#list entityClassModels as model>
+<#list entityClasses as entityClass>
 	<div class="well">
 		<div class="row-fluid entity-class-header">
-			<h3>${model.entityClass.fullName?html}</h3> 
-			<i>(${model.entityClass.entityClassIdentifier})</i>
-			<#if model.explorerUri??><a href="${model.explorerUri}" class="btn entity-btn">Explore data</a></#if>
-			<#if model.formUri??><a href="${model.formUri}" class="btn entity-btn">Edit</a></#if>
+			<h3>${entityClass.fullName?html}</h3> 
+			<i>(${entityClass.entityClassIdentifier})</i>
+			
+			<@hasPermission plugin='dataexplorer' entityName=entityClass.entityClassIdentifier permission='COUNT'>
+				<@dataExplorerLink entityName=entityClass.entityClassIdentifier class='btn entity-btn'>Explore data</@dataExplorerLink>
+			</@hasPermission>
+			
+			<@hasPermission plugin='form.EntityClass' permission='READ'>
+				<@hasPermission entityName='EntityClass' permission='WRITE'>
+					<@formLink entity=entityClass class='btn entity-btn'>Edit</@formLink>	
+				</@hasPermission>
+			</@hasPermission>
 		</div>
 		<div class="row-fluid">
 			<div class="span2">Type:</div>
-			<div class="span10">${model.entityClass.type}</div>
+			<div class="span10">${entityClass.type}</div>
 		</div>
-		<#if model.entityClass.description?? && model.entityClass.description != ''>
+		<#if entityClass.description?? && entityClass.description != ''>
 			<div class="row-fluid">
 				<div class="span2">Description:</div>
-				<div id="entityClass-${model.entityClass.id?c}" class="span10">${limit(model.entityClass.description?html, 150, 'entityClass-${model.entityClass.id?c}')}</div>
+				<div id="entityClass-${entityClass.id?c}" class="span10">${limit(entityClass.description?html, 150, 'entityClass-${entityClass.id?c}')}</div>
 			</div>
 		</#if>
-		<#if model.entityClass.tags?size &gt; 0>
+		<#if entityClass.tags?size &gt; 0>
 			<div class="row-fluid">
 				<div class="span2">Tags:</div>
 				<div class="span10">
-					<#list model.entityClass.tags as tag>
-						${tag.name}<#if tag != model.entityClass.tags?last>,</#if>
+					<#list entityClass.tags as tag>
+						${tag.name}<#if tag != entityClass.tags?last>,</#if>
 					</#list>
 				</div>
 			</div>
 		</#if>
-		<#if model.entityClass.homepage?? && model.entityClass.homepage != ''>
+		<#if entityClass.homepage?? && entityClass.homepage != ''>
 			<div class="row-fluid">
 				<div class="span2">Homepage:</div>
-				<div class="span10"><a href="${model.entityClass.homepage}" target="_blank">${model.entityClass.homepage}</a></div>
+				<div class="span10"><a href="${entityClass.homepage}" target="_blank">${entityClass.homepage}</a></div>
+			</div>
+		</#if>
+		<#if entityClass.subEntityClasses?? && entityClass.subEntityClasses?size &gt; 0>
+			<div class="row-fluid">
+				<div class="span2">See also:</div>
+				<div class="span10">
+					<#list entityClass.subEntityClasses as subEntityClass>
+						<div>
+							<@hasPermission plugin='dataexplorer' entityName=subEntityClass.entityClassIdentifier permission='COUNT'>
+								<@dataExplorerLink entityName=subEntityClass.entityClassIdentifier alternativeText=subEntityClass.fullName >${subEntityClass.fullName}</@dataExplorerLink>
+							</@hasPermission>
+							<@notHasPermission plugin='dataexplorer' entityName=subEntityClass.entityClassIdentifier permission='COUNT'>
+								${subEntityClass.fullName} 
+							</@notHasPermission>
+							 (${subEntityClass.type})
+						</div>
+					</#list>
+				</div>
 			</div>
 		</#if>
 	</div>
