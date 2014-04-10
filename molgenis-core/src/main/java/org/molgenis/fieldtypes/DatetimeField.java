@@ -1,5 +1,6 @@
 package org.molgenis.fieldtypes;
 
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -8,6 +9,7 @@ import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.model.MolgenisModelException;
+import org.molgenis.util.MolgenisDateFormat;
 
 public class DatetimeField extends FieldType
 {
@@ -103,5 +105,25 @@ public class DatetimeField extends FieldType
 	public List<String> getAllowedOperators()
 	{
 		return Arrays.asList("EQUALS", "NOT EQUALS", "LESS", "GREATER", "LIKE");
+	}
+
+	@Override
+	public Object convert(Object value)
+	{
+		if (value == null) return null;
+        if (value instanceof java.sql.Timestamp) return new java.util.Date(((Timestamp) value).getTime());
+        if (value instanceof java.util.Date) return value;
+		if (value instanceof String)
+		{
+			try
+			{
+				return MolgenisDateFormat.getDateTimeFormat().parse(value.toString());
+			}
+			catch (Exception e)
+			{
+				throw new RuntimeException("DateField.convert(" + value + ") failed: " + e.getMessage());
+			}
+		}
+		throw new RuntimeException("DateField.convert(" + value + ") failed");
 	}
 }
