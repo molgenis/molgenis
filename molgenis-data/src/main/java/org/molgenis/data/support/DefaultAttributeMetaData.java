@@ -5,6 +5,8 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.fieldtypes.FieldType;
+import org.molgenis.fieldtypes.MrefField;
+import org.molgenis.fieldtypes.XrefField;
 
 /**
  * Default implementation of the AttributeMetaData interface
@@ -13,27 +15,39 @@ import org.molgenis.fieldtypes.FieldType;
 public class DefaultAttributeMetaData implements AttributeMetaData
 {
 	private final String name;
-	private final FieldTypeEnum fieldType;
+	private FieldType fieldType;
 	private String description;
 	private boolean nillable = true;
 	private boolean readOnly = false;
-	private Object defaultValue;
+	private Object defaultValue = null;
 	private boolean idAttribute = false;
-	private boolean labelAttribute = false;
-	private boolean lookupAttribute = false;
+	private boolean labelAttribute = false; //remove?
+	private boolean lookupAttribute = false; //remove?
 	private EntityMetaData refEntity;
 	private String label;
-	private boolean visible = true;
+	private boolean visible = true; //remove?
 	private boolean unique = false;
 	private boolean auto = false;
 	private Iterable<AttributeMetaData> attributesMetaData;
 
+	@Deprecated
+	/*
+	 * Don't want to useFieldTypeEnum because that limits FieldType to predefined set while we want to have this
+	 * extensible
+	 */
 	public DefaultAttributeMetaData(String name, FieldTypeEnum fieldType)
 	{
 		if (name == null) throw new IllegalArgumentException("Name cannot be null");
 		if (fieldType == null) throw new IllegalArgumentException("FieldType cannot be null");
 		this.name = name;
-		this.fieldType = fieldType;
+		this.fieldType = MolgenisFieldTypes.getType(fieldType.toString().toLowerCase());
+	}
+
+	public DefaultAttributeMetaData(String name)
+	{
+		if (name == null) throw new IllegalArgumentException("Name cannot be null");
+		this.name = name;
+		this.fieldType = MolgenisFieldTypes.STRING;
 	}
 
 	@Override
@@ -56,7 +70,13 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	@Override
 	public FieldType getDataType()
 	{
-		return MolgenisFieldTypes.getType(fieldType.toString().toLowerCase());
+		return fieldType;
+	}
+
+	public DefaultAttributeMetaData setDataType(FieldType type)
+	{
+		this.fieldType = type;
+		return this;
 	}
 
 	@Override
@@ -65,9 +85,10 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		return nillable;
 	}
 
-	public void setNillable(boolean nillable)
+	public DefaultAttributeMetaData setNillable(boolean nillable)
 	{
 		this.nillable = nillable;
+		return this;
 	}
 
 	@Override
@@ -84,7 +105,12 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	@Override
 	public Object getDefaultValue()
 	{
-		return defaultValue;
+		if (getDataType() instanceof XrefField || getDataType() instanceof MrefField)
+		{
+			if (getRefEntity() == null) throw new RuntimeException("refEntity is missing for "+this.getName());
+			return getRefEntity().getIdAttribute().getDataType().convert(defaultValue);
+		}
+		return getDataType().convert(defaultValue);
 	}
 
 	public void setDefaultValue(Object defaultValue)
@@ -98,9 +124,10 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		return idAttribute;
 	}
 
-	public void setIdAttribute(boolean idAttribute)
+	public DefaultAttributeMetaData setIdAttribute(boolean idAttribute)
 	{
 		this.idAttribute = idAttribute;
+		return this;
 	}
 
 	@Override
@@ -109,9 +136,10 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		return labelAttribute;
 	}
 
-	public void setLabelAttribute(boolean labelAttribute)
+	public DefaultAttributeMetaData setLabelAttribute(boolean labelAttribute)
 	{
 		this.labelAttribute = labelAttribute;
+		return this;
 	}
 
 	@Override
@@ -120,14 +148,16 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		return refEntity;
 	}
 
-	public void setRefEntity(EntityMetaData refEntity)
+	public DefaultAttributeMetaData setRefEntity(EntityMetaData refEntity)
 	{
 		this.refEntity = refEntity;
+		return this;
 	}
 
 	@Override
 	public Iterable<AttributeMetaData> getAttributeParts()
 	{
+		if (this.attributesMetaData == null) return this.refEntity.getAttributes();
 		return attributesMetaData;
 	}
 
@@ -142,9 +172,10 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		return label == null ? name : label;
 	}
 
-	public void setLabel(String label)
+	public DefaultAttributeMetaData setLabel(String label)
 	{
 		this.label = label;
+		return this;
 	}
 
 	@Override
@@ -153,9 +184,10 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		return visible;
 	}
 
-	public void setVisible(boolean visible)
+	public DefaultAttributeMetaData setVisible(boolean visible)
 	{
 		this.visible = visible;
+		return this;
 	}
 
 	@Override
@@ -164,9 +196,10 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		return unique;
 	}
 
-	public void setUnique(boolean unique)
+	public DefaultAttributeMetaData setUnique(boolean unique)
 	{
 		this.unique = unique;
+		return this;
 	}
 
 	@Override
@@ -175,9 +208,10 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		return auto;
 	}
 
-	public void setAuto(boolean auto)
+	public DefaultAttributeMetaData setAuto(boolean auto)
 	{
 		this.auto = auto;
+		return this;
 	}
 
 	@Override
@@ -186,9 +220,10 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		return lookupAttribute;
 	}
 
-	public void setLookupAttribute(boolean lookupAttribute)
+	public DefaultAttributeMetaData setLookupAttribute(boolean lookupAttribute)
 	{
 		this.lookupAttribute = lookupAttribute;
+		return this;
 	}
 
 }

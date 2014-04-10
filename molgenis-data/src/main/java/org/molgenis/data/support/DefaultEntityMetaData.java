@@ -1,19 +1,20 @@
 package org.molgenis.data.support;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.EntityMetaData;
 
 public class DefaultEntityMetaData extends AbstractEntityMetaData
 {
 	private final String name;
-	private String label;
-	private String description;
 	private final Map<String, AttributeMetaData> attributes = new LinkedHashMap<String, AttributeMetaData>();
+	private String label;
+    private boolean abstract_ = false;
+	private String description;
+	private String idAttribute;
+	private String labelAttribute; //remove?
+    private EntityMetaData extends_;
 
 	public DefaultEntityMetaData(String name)
 	{
@@ -57,29 +58,40 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 	@Override
 	public AttributeMetaData getIdAttribute()
 	{
-		for (AttributeMetaData attribute : attributes.values())
+		// primary key is first attribute unless otherwise indicate
+		if (idAttribute != null)
 		{
-			if (attribute.isIdAtrribute())
-			{
-				return attribute;
-			}
+			AttributeMetaData att = getAttribute(idAttribute);
+			if (att == null) throw new RuntimeException("getIdAttribute() failed: '" + idAttribute + "' unknown");
+			return att;
 		}
-
+		else for (AttributeMetaData att : getAttributes())
+			return att;
 		return null;
+	}
+
+	public DefaultEntityMetaData setIdAttribute(String name)
+	{
+		this.idAttribute = name;
+		return this;
 	}
 
 	@Override
 	public AttributeMetaData getLabelAttribute()
 	{
-		for (AttributeMetaData attribute : attributes.values())
+		if (labelAttribute != null)
 		{
-			if (attribute.isLabelAttribute())
-			{
-				return attribute;
-			}
+			AttributeMetaData att = getAttribute(labelAttribute);
+			if (att == null) throw new RuntimeException("getLabelAttribute() failed: '" + labelAttribute + "' unknown");
+			return att;
 		}
+		else return getIdAttribute();
+	}
 
-		return null;
+	public DefaultEntityMetaData setLabelAttribute(String name)
+	{
+		this.labelAttribute = name;
+        return this;
 	}
 
 	@Override
@@ -95,9 +107,10 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 		return label != null ? label : name;
 	}
 
-	public void setLabel(String label)
+	public DefaultEntityMetaData setLabel(String label)
 	{
 		this.label = label;
+		return this;
 	}
 
 	@Override
@@ -106,9 +119,10 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 		return description;
 	}
 
-	public void setDescription(String description)
+	public DefaultEntityMetaData setDescription(String description)
 	{
 		this.description = description;
+		return this;
 	}
 
 	@Override
@@ -134,4 +148,29 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 		else if (!name.equals(other.name)) return false;
 		return true;
 	}
+
+	public DefaultAttributeMetaData addAttribute(String name)
+	{
+		DefaultAttributeMetaData result = new DefaultAttributeMetaData(name);
+		this.addAttributeMetaData(result);
+		return result;
+	}
+
+    @Override
+    public boolean isAbstract() {
+        return abstract_;
+    }
+
+    public void setAbstract(boolean abstract_) {
+        this.abstract_ = abstract_;
+    }
+
+    @Override
+    public EntityMetaData getExtends() {
+        return extends_;
+    }
+
+    public void setExtends(EntityMetaData extends_) {
+        this.extends_ = extends_;
+    }
 }

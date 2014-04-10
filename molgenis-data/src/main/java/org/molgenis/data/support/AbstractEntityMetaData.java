@@ -30,7 +30,8 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 				if (dataType == FieldTypeEnum.COMPOUND) return attributeMetaData.getAttributeParts();
 				else return Collections.<AttributeMetaData> emptyList();
 			}
-		}.breadthFirstTraversal(new AttributeMetaData()
+            //traverse in same order as attributes are inserted
+		}.preOrderTraversal(new AttributeMetaData()
 		{
 
 			@Override
