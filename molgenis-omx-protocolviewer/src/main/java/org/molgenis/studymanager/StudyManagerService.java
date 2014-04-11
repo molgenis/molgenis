@@ -75,6 +75,17 @@ public interface StudyManagerService
 	boolean isStudyDataLoaded(String id) throws UnknownStudyDefinitionException;
 
 	/**
+	 * Returns whether study definition data is loaded
+	 * 
+	 * @param id
+	 *            study definition id
+	 * @return
+	 * @throws UnknownStudyDefinitionException
+	 * @throws UnknownCatalogException
+	 */
+	boolean isStudyDataActivated(String id) throws UnknownStudyDefinitionException, UnknownCatalogException;
+
+	/**
 	 * Creates a new study definition for the given user based on a catalog
 	 * 
 	 * @param username
