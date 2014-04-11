@@ -36,4 +36,10 @@ public class EntityFormMetaData implements FormMetaData
 		return entityMetaData.getName();
 	}
 
+	@Override
+	public AttributeMetaData getLabelAttribute()
+	{
+		return entityMetaData.getLabelAttribute();
+	}
+
 }
