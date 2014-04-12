@@ -226,4 +226,13 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		return this;
 	}
 
+    public String toString()
+    {
+        String result = "AttributeMetaData(name='"+this.getName()+"'";
+        result+=" dataType='"+getDataType()+"'";
+        if(getRefEntity() != null) result+=" refEntity='"+getRefEntity().getName()+"'";
+        if(getDescription() != null) result+=" description='"+getDescription()+"'";
+        result += ")";
+        return result;
+    }
 }

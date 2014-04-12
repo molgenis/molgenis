@@ -10,11 +10,11 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 	private final String name;
 	private final Map<String, AttributeMetaData> attributes = new LinkedHashMap<String, AttributeMetaData>();
 	private String label;
-    private boolean abstract_ = false;
+	private boolean abstract_ = false;
 	private String description;
 	private String idAttribute;
-	private String labelAttribute; //remove?
-    private EntityMetaData extends_;
+	private String labelAttribute; // remove?
+	private EntityMetaData extends_;
 
 	public DefaultEntityMetaData(String name)
 	{
@@ -52,7 +52,16 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 	@Override
 	public List<AttributeMetaData> getAttributes()
 	{
-		return Collections.unmodifiableList(new ArrayList<AttributeMetaData>(attributes.values()));
+		List<AttributeMetaData> result = new ArrayList<AttributeMetaData>();
+		if (this.getExtends() != null)
+		{
+			for (AttributeMetaData att : getExtends().getAttributes())
+			{
+				result.add(att);
+			}
+		}
+		result.addAll(attributes.values());
+		return Collections.unmodifiableList(result);
 	}
 
 	@Override
@@ -91,14 +100,16 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 	public DefaultEntityMetaData setLabelAttribute(String name)
 	{
 		this.labelAttribute = name;
-        return this;
+		return this;
 	}
 
 	@Override
 	public AttributeMetaData getAttribute(String attributeName)
 	{
 		if (attributeName == null) throw new IllegalArgumentException("AttributeName is null");
-		return attributes.get(attributeName.toLowerCase());
+		AttributeMetaData result = attributes.get(attributeName.toLowerCase());
+		if (result == null && getExtends() != null) return getExtends().getAttribute(attributeName);
+		else return result;
 	}
 
 	@Override
@@ -156,21 +167,36 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 		return result;
 	}
 
-    @Override
-    public boolean isAbstract() {
-        return abstract_;
-    }
+	@Override
+	public boolean isAbstract()
+	{
+		return abstract_;
+	}
 
-    public void setAbstract(boolean abstract_) {
-        this.abstract_ = abstract_;
-    }
+	public DefaultEntityMetaData setAbstract(boolean abstract_)
+	{
+		this.abstract_ = abstract_;
+		return this;
+	}
 
-    @Override
-    public EntityMetaData getExtends() {
-        return extends_;
-    }
+	@Override
+	public EntityMetaData getExtends()
+	{
+		return extends_;
+	}
 
-    public void setExtends(EntityMetaData extends_) {
-        this.extends_ = extends_;
+	public DefaultEntityMetaData setExtends(EntityMetaData extends_)
+	{
+		this.extends_ = extends_;
+        return this;
+	}
+
+    public String toString()
+    {
+        String result = "EntityMetaData(name='"+this.getName()+"'";
+        if(isAbstract()) result+=" abstract='true'";
+        if(getExtends() != null) result +=" extends='"+getExtends().getName()+"'";
+        result += ")";
+        return result;
     }
 }

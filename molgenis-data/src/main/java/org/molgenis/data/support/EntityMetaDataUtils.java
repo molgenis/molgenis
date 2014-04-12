@@ -1,9 +1,6 @@
 package org.molgenis.data.support;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
@@ -30,7 +27,30 @@ public class EntityMetaDataUtils
 		omxEntities.put(category.getName(), category);
 	}
 
-	public Collection<EntityMetaData> load(RepositoryCollection omx)
+	public Collection<EntityMetaData> loadEMD(RepositoryCollection emdFormattedRepos)
+	{
+        // extract entity metadata
+        Map<String,DefaultEntityMetaData> entities = new LinkedHashMap<String,DefaultEntityMetaData>();
+        for(Entity e: emdFormattedRepos.getRepositoryByEntityName("entities")) {
+            DefaultEntityMetaData emd = new DefaultEntityMetaData(e.getString("name"));
+            if (e.getBoolean("abstract")) emd.setAbstract(true);
+        }
+
+        //extract extends relations
+        for(Entity e: emdFormattedRepos.getRepositoryByEntityName("entities")) {
+            if (e.get("extends") != null)
+            {
+                DefaultEntityMetaData emd = entities.get(e.get("name"));
+                emd.setExtends(entities.get(e.get("extends")));
+            }
+        }
+
+        Collection<EntityMetaData> result = new ArrayList<EntityMetaData>();
+        result.addAll(entities.values());
+        return result;
+	}
+
+	public Collection<EntityMetaData> loadOMX(RepositoryCollection omx)
 	{
 		// extract attribute metadata
 		Map<String, AttributeMetaData> attributes = new LinkedHashMap<String, AttributeMetaData>();
@@ -81,21 +101,21 @@ public class EntityMetaDataUtils
 			}
 		}
 
-        for(Entity e: omx.getRepositoryByEntityName("protocol"))
-        {
-            // add subprotocols as compound
-            if (e.get("subprotocols_identifier") != null)
-            {
-                for (String subProtocol : e.getList("subprotocols_identifier"))
-                {
-                    DefaultAttributeMetaData att = new DefaultAttributeMetaData(subProtocol);
-                    att.setDataType(MolgenisFieldTypes.COMPOUND);
-                    att.setRefEntity(entities.get(subProtocol));
-                    ((DefaultEntityMetaData)entities.get(e.get("identifier"))).addAttributeMetaData(att);
-                }
+		for (Entity e : omx.getRepositoryByEntityName("protocol"))
+		{
+			// add subprotocols as compound
+			if (e.get("subprotocols_identifier") != null)
+			{
+				for (String subProtocol : e.getList("subprotocols_identifier"))
+				{
+					DefaultAttributeMetaData att = new DefaultAttributeMetaData(subProtocol);
+					att.setDataType(MolgenisFieldTypes.COMPOUND);
+					att.setRefEntity(entities.get(subProtocol));
+					((DefaultEntityMetaData) entities.get(e.get("identifier"))).addAttributeMetaData(att);
+				}
 
-            }
-        }
+			}
+		}
 
 		// create dataset as entities
 		for (Entity e : omx.getRepositoryByEntityName("dataset"))
