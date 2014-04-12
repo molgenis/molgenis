@@ -20,7 +20,8 @@ import org.testng.annotations.Test;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
-public class MysqlBasicTest
+/** Simple test of all apsects of the repository */
+public class MysqlRepositoryTest
 {
 	DataSource ds;
 	Logger logger;
@@ -33,7 +34,7 @@ public class MysqlBasicTest
 
 		ComboPooledDataSource dataSource = new ComboPooledDataSource();
 		dataSource.setDriverClass("com.mysql.jdbc.Driver");
-		dataSource.setJdbcUrl(MysqlTestConstants.URL);
+		dataSource.setJdbcUrl(MysqlRepositoryTestConstants.URL);
 		dataSource.setUser("molgenis");
 		dataSource.setPassword("molgenis");
 
@@ -52,23 +53,23 @@ public class MysqlBasicTest
 
 		metaData.addAttribute("firstName").setNillable(false);
 
-        //check default id
-        Assert.assertEquals(metaData.getIdAttribute().getName(),"firstName");
+		// check default id (first attribute is used if not entity.setIdAttribute)
 
-        Assert.assertEquals(repo.iteratorSql(), "SELECT firstName FROM PERSON");
+		Assert.assertEquals(metaData.getIdAttribute().getName(), "firstName");
+
+		Assert.assertEquals(repo.iteratorSql(), "SELECT firstName FROM PERSON");
 		Assert.assertEquals(repo.getInsertSql(), "INSERT INTO PERSON (firstName) VALUES (?)");
-		Assert.assertEquals(
-				repo.getCreateSql(),
+		Assert.assertEquals(repo.getCreateSql(),
 				"CREATE TABLE IF NOT EXISTS PERSON(firstName VARCHAR(255) NOT NULL, PRIMARY KEY (firstName)) ENGINE=InnoDB;");
 
 		metaData.addAttribute("lastName").setNillable(false);
 
+		// check manually set id (using setIdAttribute)
 
-		//check manually set id
 		metaData.setIdAttribute("lastName");
-        Assert.assertEquals(metaData.getIdAttribute().getName(),"lastName");
+		Assert.assertEquals(metaData.getIdAttribute().getName(), "lastName");
 
-        Assert.assertEquals(repo.iteratorSql(), "SELECT firstName, lastName FROM PERSON");
+		Assert.assertEquals(repo.iteratorSql(), "SELECT firstName, lastName FROM PERSON");
 		Assert.assertEquals(repo.getInsertSql(), "INSERT INTO PERSON (firstName, lastName) VALUES (?, ?)");
 		Assert.assertEquals(
 				repo.getCreateSql(),
@@ -82,15 +83,15 @@ public class MysqlBasicTest
 				"CREATE TABLE IF NOT EXISTS PERSON(firstName VARCHAR(255) NOT NULL, lastName VARCHAR(255) NOT NULL, age INTEGER, PRIMARY KEY (lastName)) ENGINE=InnoDB;");
 		Assert.assertEquals(repo.getCountSql(new QueryImpl()), "SELECT count(this.lastName) FROM PERSON AS this");
 
-		// where
+		// test where clauses
 		Assert.assertEquals(repo.getWhereSql(new QueryImpl().eq("firstName", "John")), "this.firstName = 'John'");
 		Assert.assertEquals(repo.getWhereSql(new QueryImpl().eq("firstName", "John").eq("age", "5")),
 				"this.firstName = 'John' AND this.age = 5");
 
 		repo.create();
 
-		// Entity generator to monitor performance
-		final int SIZE = 100;
+		// Entity generator to monitor performance (set batch to 100000 to show up to >10,000 records/second)
+		final int SIZE = 100000;
 		Iterable<Entity> iterable = new Iterable<Entity>()
 		{
 			@Override
@@ -142,7 +143,7 @@ public class MysqlBasicTest
 
 		// select
 		Assert.assertEquals(4, count(repo, new QueryImpl().lt("age", 5)));
-        Assert.assertEquals(SIZE, count(repo, new QueryImpl()));
+		Assert.assertEquals(SIZE, count(repo, new QueryImpl()));
 	}
 
 	public int count(MysqlRepository repo, Query query)

@@ -13,7 +13,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class MysqlMrefTest extends AbstractMysqlDatatypeTest
+/** Test for MolgenisFieldTypes.MREF */
+public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 {
 	@Override
 	public EntityMetaData createMetaData()

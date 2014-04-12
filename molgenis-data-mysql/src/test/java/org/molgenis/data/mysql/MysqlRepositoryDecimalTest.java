@@ -6,7 +6,8 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 
-public class MysqlDecimalTest extends AbstractMysqlDatatypeTest
+/** Test for MolgenisFieldTypes.DECIMAL */
+public class MysqlRepositoryDecimalTest extends MysqlRepositoryAbstractDatatypeTest
 {
 	@Override
 	public EntityMetaData createMetaData()

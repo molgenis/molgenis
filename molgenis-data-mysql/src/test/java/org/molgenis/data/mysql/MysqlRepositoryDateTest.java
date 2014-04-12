@@ -6,9 +6,8 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 
-import java.util.Date;
-
-public class MysqlDateTest extends AbstractMysqlDatatypeTest {
+/** Test for MolgenisFieldTypes.DATE */
+public class MysqlRepositoryDateTest extends MysqlRepositoryAbstractDatatypeTest {
 
     @Override
     public EntityMetaData createMetaData()

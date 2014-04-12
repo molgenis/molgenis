@@ -6,7 +6,8 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 
-public class MysqlCompoundTest extends AbstractMysqlDatatypeTest
+/** Test for MolgenisFieldTypes.COMPOUND */
+public class MysqlRepositoryCompoundTest extends MysqlRepositoryAbstractDatatypeTest
 {
 	@Override
 	public EntityMetaData createMetaData()

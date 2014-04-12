@@ -17,7 +17,8 @@ import org.testng.annotations.Test;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
-public class MysqlQueryTest
+/** Test for Query */
+public class MysqlRepositoryCountTest
 {
 	DataSource ds;
 	Logger logger;
@@ -30,7 +31,7 @@ public class MysqlQueryTest
 
 		ComboPooledDataSource dataSource = new ComboPooledDataSource();
 		dataSource.setDriverClass("com.mysql.jdbc.Driver");
-		dataSource.setJdbcUrl(MysqlTestConstants.URL);
+		dataSource.setJdbcUrl(MysqlRepositoryTestConstants.URL);
 		dataSource.setUser("molgenis");
 		dataSource.setPassword("molgenis");
 

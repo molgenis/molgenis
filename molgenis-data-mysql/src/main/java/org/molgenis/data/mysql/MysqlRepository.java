@@ -13,9 +13,6 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.*;
 import org.molgenis.model.MolgenisModelException;
 
-/**
- * Created by mswertz on 27/03/14.
- */
 public class MysqlRepository implements Repository, Writable, Queryable, Manageable
 {
 	public static final int BATCH_SIZE = 100000;

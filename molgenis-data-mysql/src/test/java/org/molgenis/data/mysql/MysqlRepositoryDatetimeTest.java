@@ -1,8 +1,5 @@
 package org.molgenis.data.mysql;
 
-import java.sql.Timestamp;
-import java.util.Date;
-
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -10,7 +7,8 @@ import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 
-public class MysqlDatetimeTest extends AbstractMysqlDatatypeTest {
+/** Test for MolgenisFieldTypes.DATETIME */
+public class MysqlRepositoryDatetimeTest extends MysqlRepositoryAbstractDatatypeTest {
 
     @Override
     public EntityMetaData createMetaData()

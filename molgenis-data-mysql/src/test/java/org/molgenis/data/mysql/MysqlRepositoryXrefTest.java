@@ -9,10 +9,8 @@ import org.molgenis.data.support.QueryImpl;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class MysqlXrefTest extends AbstractMysqlDatatypeTest
+/** Test for MolgenisFieldTypes.XREF */
+public class MysqlRepositoryXrefTest extends MysqlRepositoryAbstractDatatypeTest
 {
 	@Override
 	public EntityMetaData createMetaData()
