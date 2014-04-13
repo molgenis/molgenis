@@ -1,6 +1,11 @@
 package org.molgenis.omx.protocol;
 
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.*;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.BOOL;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.INT;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.TEXT;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
 
 import java.util.List;
 
