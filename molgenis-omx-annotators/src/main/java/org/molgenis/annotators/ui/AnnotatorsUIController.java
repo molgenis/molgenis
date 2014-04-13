@@ -6,11 +6,13 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 
 import javax.servlet.http.Part;
 
 import org.apache.log4j.Logger;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
@@ -52,7 +54,7 @@ public class AnnotatorsUIController extends MolgenisPluginController
 
 	private static final Logger logger = Logger.getLogger(AnnotatorsUIController.class);
 
-	private static final String ID = "annotateUI";
+	private static final String ID = "annotationwizard";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
 	private final AnnotatorsUIService pluginAnnotatorsUIService;
@@ -125,18 +127,17 @@ public class AnnotatorsUIController extends MolgenisPluginController
 
 	@RequestMapping(value = "/change-selected-dataset")
 	@ResponseBody
-	public Map<String, Boolean> changeSelectedDataSet(@RequestBody
-	String selectedDataSetIdentifier, Model model)
+	public Map<String, Map<String, Object>> changeSelectedDataSet(@RequestBody String selectedDataSetIdentifier,
+			Model model)
 	{
-		Map<String, Boolean> annotatorMap = setMapOfAnnotators(selectedDataSetIdentifier);
+		Map<String, Map<String, Object>> annotatorMap = setMapOfAnnotators(selectedDataSetIdentifier);
 		return annotatorMap;
 	}
 
 	@RequestMapping(value = "/file-upload", headers = "content-type=multipart/*", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void handleAnnotatorFileUpload(@RequestParam("file-input-field")
-	Part part, @RequestParam("dataset-name")
-	String submittedDataSetName) throws IOException
+	public void handleAnnotatorFileUpload(@RequestParam("file-input-field") Part part,
+			@RequestParam("dataset-name") String submittedDataSetName) throws IOException
 	{
 		if (part != null)
 		{
@@ -152,16 +153,19 @@ public class AnnotatorsUIController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/execute-annotation-app", method = RequestMethod.POST)
-	public String filterMyVariants(@RequestParam(value = "annotatorNames", required = false)
-	String[] annotatorNames, Model model, @RequestParam("dataset-identifier")
-	String dataSetIdentifier)
+	@ResponseBody
+	public String filterMyVariants(@RequestParam(value = "annotatorNames", required = false) String[] annotatorNames,
+			Model model, @RequestParam("dataset-identifier") String dataSetIdentifier,
+			@RequestParam(value = "createCopy", required = false) boolean createCopy)
 	{
 		OmxDataSetAnnotator omxDataSetAnnotator = new OmxDataSetAnnotator(dataService, searchService, indexer,
 				entityValidator);
 		Repository repository = dataService.getRepositoryByEntityName(dataSetIdentifier);
+		String name = dataSetIdentifier;
 
 		if (annotatorNames != null && repository != null)
 		{
+
 			for (String annotatorName : annotatorNames)
 			{
 				RepositoryAnnotator annotator = annotationService.getAnnotatorByName(annotatorName);
@@ -171,18 +175,20 @@ public class AnnotatorsUIController extends MolgenisPluginController
 					while (indexer.isIndexingRunning())
 					{
 					}
+					Repository repo = dataService.getRepositoryByEntityName(name);
 
-					omxDataSetAnnotator.annotate(annotator, repository, false);
+					repository = omxDataSetAnnotator.annotate(annotator, repo, createCopy);
+					name = repository.getName();
+					createCopy = false;
 				}
 			}
 		}
-
-		return "view-result-page";
+		return name;
 	}
 
-	private Map<String, Boolean> setMapOfAnnotators(String dataSetIdentifier)
+	private Map<String, Map<String, Object>> setMapOfAnnotators(String dataSetIdentifier)
 	{
-		Map<String, Boolean> mapOfAnnotators = new HashMap<String, Boolean>();
+		Map<String, Map<String, Object>> mapOfAnnotators = new HashMap<String, Map<String, Object>>();
 
 		if (dataSetIdentifier != null)
 		{
@@ -190,12 +196,26 @@ public class AnnotatorsUIController extends MolgenisPluginController
 
 			for (RepositoryAnnotator annotator : annotationService.getAllAnnotators())
 			{
-				mapOfAnnotators.put(annotator.getName(), annotator.canAnnotate(entityMetaData));
+				Map<String, Object> map = new HashMap<String, Object>();
+				map.put("canAnnotate", annotator.canAnnotate(entityMetaData));
+				map.put("inputMetadata", metaDataToStringList(annotator.getInputMetaData()));
+				map.put("outputMetadata", metaDataToStringList(annotator.getOutputMetaData()));
+				mapOfAnnotators.put(annotator.getName(), map);
 			}
 
 		}
 
 		return mapOfAnnotators;
+	}
+
+	private List<String> metaDataToStringList(EntityMetaData metaData)
+	{
+		List<String> result = new ArrayList<String>();
+		for (AttributeMetaData attribute : metaData.getAttributes())
+		{
+			result.add(attribute.getLabel() + "(" + attribute.getDataType().toString() + ")\n");
+		}
+		return result;
 	}
 
 	@ExceptionHandler(RuntimeException.class)

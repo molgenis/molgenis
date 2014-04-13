@@ -1,0 +1,38 @@
+.well {
+	font-size: 18px;	
+}
+
+.subtitle {
+	font-size: 18px;
+	padding-bottom: 20px;
+}
+
+label {
+	display: inline;
+	font-size: 16px;
+	margin-right: 10px;
+}
+
+.search-label {
+	font-size: 16px;
+	font-weight: bold;	
+	margin: 20px;
+}
+
+.entity-class-header {
+	margin-bottom: 10px;
+}
+
+.entity-class-header h3 {
+	display: inline;
+	margin-right: 10px;
+}
+
+.entity-btn {
+	float: right;
+	color: #08c;
+}
+
+.entity-btn:hover {
+	color: #005580;
+}

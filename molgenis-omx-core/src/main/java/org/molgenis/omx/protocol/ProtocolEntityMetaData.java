@@ -3,7 +3,10 @@ package org.molgenis.omx.protocol;
 import java.util.Collections;
 
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.AbstractEntityMetaData;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
 
@@ -25,6 +28,12 @@ public class ProtocolEntityMetaData extends AbstractEntityMetaData
 	public String getName()
 	{
 		return protocol.getIdentifier(); // yes, getIdentifier and not getName
+	}
+
+	@Override
+	public boolean isAbstract()
+	{
+		return false;
 	}
 
 	@Override
@@ -83,5 +92,17 @@ public class ProtocolEntityMetaData extends AbstractEntityMetaData
 					observableFeaturesAttributeMetaData);
 		}
 		return cachedAttributesMetaData;
+	}
+
+	@Override
+	public EntityMetaData getExtends()
+	{
+		return null;
+	}
+
+	@Override
+	public Class<? extends Entity> getEntityClass()
+	{
+		return MapEntity.class;
 	}
 }

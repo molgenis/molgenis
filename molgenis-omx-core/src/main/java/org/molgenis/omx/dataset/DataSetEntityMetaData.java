@@ -1,7 +1,10 @@
 package org.molgenis.omx.dataset;
 
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.AbstractEntityMetaData;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.protocol.ProtocolEntityMetaData;
 
@@ -21,6 +24,12 @@ public class DataSetEntityMetaData extends AbstractEntityMetaData
 	public String getName()
 	{
 		return dataSet.getIdentifier(); // yes, getIdentifier and not getName
+	}
+
+	@Override
+	public boolean isAbstract()
+	{
+		return false;
 	}
 
 	@Override
@@ -53,5 +62,17 @@ public class DataSetEntityMetaData extends AbstractEntityMetaData
 			cachedAtomicAttributes = new ProtocolEntityMetaData(dataSet.getProtocolUsed()).getAtomicAttributes();
 		}
 		return cachedAtomicAttributes;
+	}
+
+	@Override
+	public EntityMetaData getExtends()
+	{
+		return null;
+	}
+
+	@Override
+	public Class<? extends Entity> getEntityClass()
+	{
+		return MapEntity.class;
 	}
 }

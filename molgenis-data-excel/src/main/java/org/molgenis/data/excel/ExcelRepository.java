@@ -106,7 +106,7 @@ public class ExcelRepository extends AbstractRepository
 	{
 		if (entityMetaData == null)
 		{
-			entityMetaData = new DefaultEntityMetaData(sheet.getSheetName());
+			entityMetaData = new DefaultEntityMetaData(sheet.getSheetName(), ExcelEntity.class);
 
 			if (colNamesMap == null)
 			{
@@ -159,11 +159,5 @@ public class ExcelRepository extends AbstractRepository
 	public void close() throws IOException
 	{
 		// Nothing
-	}
-
-	@Override
-	public Class<? extends Entity> getEntityClass()
-	{
-		return ExcelEntity.class;
 	}
 }

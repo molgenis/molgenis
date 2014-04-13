@@ -72,6 +72,8 @@
 	
 	function createFilterWizardContent(entityMetaData, attributeFilters, modal) {
 		var wizard = $('.filter-wizard', modal);
+		if (wizard.data('bootstrapWizard'))
+			$.removeData(wizard.get(0));
 		
 		var listItems = [];
 		var paneItems = [];

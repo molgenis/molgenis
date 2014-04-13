@@ -58,4 +58,6 @@ public interface EntityMetaData
 	 * Entity can extend another entity, adding its properties to their own
 	 */
 	public EntityMetaData getExtends();
+
+	Class<? extends Entity> getEntityClass();
 }

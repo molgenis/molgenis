@@ -11,6 +11,7 @@ import java.util.Iterator;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Query;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.data.domain.Sort;
@@ -19,9 +20,31 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
 
 public class JpaRepositoryTest extends BaseJpaTest
 {
+	@Test
+	public void testMrefQuery()
+	{
+		Person p = new Person("Piet", "Paulusma");
+		repo.add(p);
+
+		Person child1 = new Person("Child1", "Child1");
+		repo.add(child1);
+
+		Person child2 = new Person("Child2", "Child2");
+		repo.add(child2);
+
+		p.getChildren().add(child1);
+		p.getChildren().add(child2);
+		repo.update(p);
+
+		Query q = new QueryImpl().in("children", Lists.newArrayList(child1));
+		Person found = repo.findOne(q, Person.class);
+		assertEquals(p, found);
+	}
+
 	@Test
 	public void testAddAndretrieve()
 	{

@@ -22,13 +22,7 @@ public interface DataService extends RepositoryCollection
 	 * Remove a repository from the DataService
 	 * 
 	 * @throws MolgenisDataException
-	 *             if repository/entity name doesn't exists
-	 * @param repository
-	 */
-	void removeRepository(Repository repository);
-
-	/**
-	 * Remove a repository from the DataService
+	 *             if repository/entity name is null
 	 * 
 	 * @throws MolgenisDataException
 	 *             if repository/entity name doesn't exists

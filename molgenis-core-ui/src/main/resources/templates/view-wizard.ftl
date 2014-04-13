@@ -24,7 +24,7 @@
 			<@spring.bind "wizard" />	
 			<#if spring.status.error>
 				<script>
-  					molgenis.createAlert([{'message': "<#list spring.status.errorMessages as error>${error}</#list>"}], 'error');
+  					molgenis.createAlert([{'message': '<#list spring.status.errorMessages as error>${error?js_string}</#list>'}], 'error');
             	</script>
 			</#if>
 				

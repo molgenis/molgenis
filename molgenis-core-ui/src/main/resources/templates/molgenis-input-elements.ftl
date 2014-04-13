@@ -99,7 +99,7 @@
 						$('#${fieldName}').select2('val', xrefs);
 							
 						<#if field.readonly || hasWritePermission?string("true", "false") == "false">
-							$('#${name}').select2('readonly', true);
+							$('#${fieldName}').select2('readonly', true);
 						</#if>
 					});
 					

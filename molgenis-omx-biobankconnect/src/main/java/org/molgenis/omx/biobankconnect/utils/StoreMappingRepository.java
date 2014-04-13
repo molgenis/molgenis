@@ -60,12 +60,6 @@ public class StoreMappingRepository extends AbstractRepository
 	}
 
 	@Override
-	public Class<? extends Entity> getEntityClass()
-	{
-		return MapEntity.class;
-	}
-
-	@Override
 	public Iterator<Entity> iterator()
 	{
 		List<Entity> entities = new ArrayList<Entity>();
@@ -80,7 +74,7 @@ public class StoreMappingRepository extends AbstractRepository
 				Integer observationId = ov.getObservationSet().getId();
 				if (storeMapping.containsKey(observationId)) entity = storeMapping.get(observationId);
 				else entity = new MapEntity();
-				entity.set(ov.getFeature().getIdentifier(), valueConverter.toCell(ov.getValue()));
+				entity.set(ov.getFeature().getIdentifier(), valueConverter.toCell(ov.getValue(), ov.getFeature()));
 				storeMapping.put(observationId, entity);
 			}
 
@@ -107,7 +101,7 @@ public class StoreMappingRepository extends AbstractRepository
 	{
 		if (metaData == null)
 		{
-			metaData = new DefaultEntityMetaData(dataSet.getIdentifier());
+			metaData = new DefaultEntityMetaData(dataSet.getIdentifier(), MapEntity.class);
 			metaData.setLabel(dataSet.getLabelValue());
 
 			Protocol protocol = dataSet.getProtocolUsed();

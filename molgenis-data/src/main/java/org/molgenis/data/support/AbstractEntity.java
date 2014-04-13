@@ -150,7 +150,7 @@ public abstract class AbstractEntity implements Entity
         sb.append(this.getClass().getSimpleName() + "{");
         for(String attrName : this.getAttributeNames())
         {
-            sb.append(attrName + "='" +this.getString(attrName) + "', ");
+            sb.append(attrName + "='" +this.get(attrName) + "', ");
         }
         sb.delete(sb.length()-2, sb.length());
         sb.append("}");

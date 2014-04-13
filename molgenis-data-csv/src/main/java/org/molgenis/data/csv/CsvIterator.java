@@ -116,8 +116,9 @@ public class CsvIterator implements CloseableIterator<Entity>
 			{
 				String[] values = csvReader.readNext();
 
-				if (values != null)
+				if ((values != null) && (values.length >= colNamesMap.size()))
 				{
+					List<String> valueList = Arrays.asList(values);
 					for (int i = 0; i < values.length; ++i)
 					{
 						// subsequent separators indicate
@@ -129,7 +130,6 @@ public class CsvIterator implements CloseableIterator<Entity>
 
 					next = new MapEntity();
 
-					List<String> valueList = Arrays.asList(values);
 					for (String name : colNamesMap.keySet())
 					{
 						next.set(name, valueList.get(colNamesMap.get(name)));

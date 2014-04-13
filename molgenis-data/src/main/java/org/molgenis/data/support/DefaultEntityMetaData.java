@@ -4,6 +4,7 @@ import java.util.*;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Entity;
 
 public class DefaultEntityMetaData extends AbstractEntityMetaData
 {
@@ -15,11 +16,19 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 	private String idAttribute;
 	private String labelAttribute; // remove?
 	private EntityMetaData extends_;
+	private final Class<? extends Entity> entityClass;
 
-	public DefaultEntityMetaData(String name)
+    public DefaultEntityMetaData(String name)
+    {
+        this(name,Entity.class);
+    }
+
+	public DefaultEntityMetaData(String name, Class<? extends Entity> entityClass)
 	{
 		if (name == null) throw new IllegalArgumentException("Name cannot be null");
+		if (entityClass == null) throw new IllegalArgumentException("EntityClass cannot be null");
 		this.name = name;
+		this.entityClass = entityClass;
 	}
 
 	@Override
@@ -33,6 +42,8 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 		if (attributeMetaData == null) throw new IllegalArgumentException("AttributeMetaData cannot be null");
 		if (attributeMetaData.getName() == null) throw new IllegalArgumentException(
 				"Name of the AttributeMetaData cannot be null");
+        if(attributeMetaData.isLabelAttribute()) this.labelAttribute = attributeMetaData.getName();
+        if(attributeMetaData.isIdAtrribute()) this.idAttribute = attributeMetaData.getName();
 
 		attributes.put(attributeMetaData.getName().toLowerCase(), attributeMetaData);
 	}
@@ -94,7 +105,7 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 			if (att == null) throw new RuntimeException("getLabelAttribute() failed: '" + labelAttribute + "' unknown");
 			return att;
 		}
-		else return getIdAttribute();
+		return null;
 	}
 
 	public DefaultEntityMetaData setLabelAttribute(String name)
@@ -134,6 +145,12 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 	{
 		this.description = description;
 		return this;
+	}
+
+	@Override
+	public Class<? extends Entity> getEntityClass()
+	{
+		return entityClass;
 	}
 
 	@Override

@@ -22,6 +22,14 @@ public interface StudyManagerService
 	List<StudyDefinition> getStudyDefinitions();
 
 	/**
+	 * Find all study definition with the given status
+	 * 
+	 * @param status
+	 * @return
+	 */
+	List<StudyDefinition> getStudyDefinitions(StudyDefinition.Status status);
+
+	/**
 	 * Find all study definition with the given status for a user
 	 * 
 	 * @param username

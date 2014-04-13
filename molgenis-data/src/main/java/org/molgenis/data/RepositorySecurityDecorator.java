@@ -47,12 +47,6 @@ public class RepositorySecurityDecorator extends RepositoryDecorator implements 
 	}
 
 	@Override
-	public Class<? extends Entity> getEntityClass()
-	{
-		return decoratedRepository.getEntityClass();
-	}
-
-	@Override
 	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
 	{
 		validatePermission(Permission.READ);
