@@ -111,13 +111,13 @@ public class DatetimeField extends FieldType
 	public Object convert(Object value)
 	{
 		if (value == null) return null;
-        if (value instanceof java.sql.Timestamp) return new java.util.Date(((Timestamp) value).getTime());
-        if (value instanceof java.util.Date) return value;
+		if (value instanceof java.sql.Timestamp) return new java.util.Date(((Timestamp) value).getTime());
+		if (value instanceof java.util.Date) return value;
 		if (value instanceof String)
 		{
 			try
 			{
-				return MolgenisDateFormat.getDateTimeFormat().parse(value.toString());
+				return MolgenisDateFormat.getDateTimeFormatSimple().parse(value.toString());
 			}
 			catch (Exception e)
 			{
