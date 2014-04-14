@@ -12,15 +12,15 @@ public class MysqlRepositoryCompoundTest extends MysqlRepositoryAbstractDatatype
 	@Override
 	public EntityMetaData createMetaData()
 	{
-        DefaultEntityMetaData compoundMD = new DefaultEntityMetaData("compound");
-        compoundMD.addAttribute("col2").setDataType(MolgenisFieldTypes.BOOL);
+		DefaultEntityMetaData compoundMD = new DefaultEntityMetaData("compound");
+		compoundMD.addAttribute("col2").setDataType(MolgenisFieldTypes.BOOL);
 
 		DefaultEntityMetaData rootMD = new DefaultEntityMetaData("BoolTest").setLabel("Bool Test");
 		rootMD.addAttribute("col1").setDataType(MolgenisFieldTypes.BOOL).setNillable(false);
-        rootMD.addAttribute("compound").setDataType(MolgenisFieldTypes.COMPOUND).setRefEntity(compoundMD);
-        rootMD.addAttribute("col3").setDataType(MolgenisFieldTypes.BOOL).setDefaultValue(true);
+		rootMD.addAttribute("compound").setDataType(MolgenisFieldTypes.COMPOUND).setRefEntity(compoundMD);
+		rootMD.addAttribute("col3").setDataType(MolgenisFieldTypes.BOOL).setDefaultValue(true);
 
-        return rootMD;
+		return rootMD;
 	}
 
 	@Override

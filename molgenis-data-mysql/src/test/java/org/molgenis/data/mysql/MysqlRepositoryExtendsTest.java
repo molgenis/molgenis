@@ -12,16 +12,17 @@ public class MysqlRepositoryExtendsTest extends MysqlRepositoryAbstractDatatypeT
 	@Override
 	public EntityMetaData createMetaData()
 	{
-        DefaultEntityMetaData superclass2 = new DefaultEntityMetaData("super").setAbstract(true);
-        superclass2.addAttribute("col1").setDataType(MolgenisFieldTypes.BOOL).setNillable(false);
+		DefaultEntityMetaData superclass2 = new DefaultEntityMetaData("super").setAbstract(true);
+		superclass2.addAttribute("col1").setDataType(MolgenisFieldTypes.BOOL).setNillable(false);
 
 		DefaultEntityMetaData superclass = new DefaultEntityMetaData("ExtendsTest").setExtends(superclass2);
-        superclass.addAttribute("col2").setDataType(MolgenisFieldTypes.BOOL);
+		superclass.addAttribute("col2").setDataType(MolgenisFieldTypes.BOOL);
 
-        DefaultEntityMetaData subclass = new DefaultEntityMetaData("ExtendsTest").setLabel("Extends Test").setExtends(superclass);
-        subclass.addAttribute("col3").setDataType(MolgenisFieldTypes.BOOL).setDefaultValue(true);
+		DefaultEntityMetaData subclass = new DefaultEntityMetaData("ExtendsTest").setLabel("Extends Test").setExtends(
+				superclass);
+		subclass.addAttribute("col3").setDataType(MolgenisFieldTypes.BOOL).setDefaultValue(true);
 
-        return subclass;
+		return subclass;
 	}
 
 	@Override

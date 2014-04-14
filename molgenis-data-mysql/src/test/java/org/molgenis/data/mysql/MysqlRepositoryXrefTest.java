@@ -22,7 +22,7 @@ public class MysqlRepositoryXrefTest extends MysqlRepositoryAbstractDatatypeTest
 		refEntity2.addAttribute("identifier").setDataType(MolgenisFieldTypes.INT).setNillable(false);
 
 		DefaultEntityMetaData xrefEntity = new DefaultEntityMetaData("XrefTest").setLabel("Xref Test");
-        xrefEntity.addAttribute("identifier").setNillable(false);
+		xrefEntity.addAttribute("identifier").setNillable(false);
 		xrefEntity.addAttribute("stringRef").setDataType(MolgenisFieldTypes.XREF).setRefEntity(refEntity)
 				.setNillable(false);
 		xrefEntity.addAttribute("intRef").setDataType(MolgenisFieldTypes.XREF).setRefEntity(refEntity2);
@@ -77,17 +77,17 @@ public class MysqlRepositoryXrefTest extends MysqlRepositoryAbstractDatatypeTest
 		entity.set("identifier", 2);
 		intRepo.add(entity);
 
-        entity.set("identifier","one");
+		entity.set("identifier", "one");
 		entity.set("stringRef", "ref1");
 		entity.set("intRef", 1);
 		xrefRepo.add(entity);
 
-        entity.set("identifier","two");
+		entity.set("identifier", "two");
 		entity.set("stringRef", "ref2");
 		entity.set("intRef", null);
 		xrefRepo.add(entity);
 
-        entity.set("identifier","three");
+		entity.set("identifier", "three");
 		entity.set("stringRef", "ref3");
 		entity.set("intRef", 2);
 		xrefRepo.add(entity);
@@ -100,9 +100,9 @@ public class MysqlRepositoryXrefTest extends MysqlRepositoryAbstractDatatypeTest
 		for (Entity e : xrefRepo)
 		{
 			logger.debug(e);
-			//Assert.assertEquals(e.get("stringRef"), "ref1");
-			//Assert.assertEquals(e.get("intRef"), 1);
-			//break;
+			// Assert.assertEquals(e.get("stringRef"), "ref1");
+			// Assert.assertEquals(e.get("intRef"), 1);
+			// break;
 		}
 
 		// verify not null error

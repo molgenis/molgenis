@@ -13,7 +13,7 @@ public class MysqlRepositoryTextTest extends MysqlRepositoryAbstractDatatypeTest
 	public EntityMetaData createMetaData()
 	{
 		DefaultEntityMetaData varcharMD = new DefaultEntityMetaData("TextTest").setLabel("Text Test");
-        varcharMD.addAttribute("identifier").setDataType(MolgenisFieldTypes.INT).setAuto(true).setNillable(false);
+		varcharMD.addAttribute("identifier").setDataType(MolgenisFieldTypes.INT).setAuto(true).setNillable(false);
 		varcharMD.addAttribute("col1").setDataType(MolgenisFieldTypes.TEXT).setNillable(false);
 		varcharMD.addAttribute("col2").setDataType(MolgenisFieldTypes.TEXT);
 		varcharMD.addAttribute("col3").setDataType(MolgenisFieldTypes.TEXT).setDefaultValue("lorem ipsum");

@@ -30,9 +30,9 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 				if (dataType.equals(MolgenisFieldTypes.COMPOUND)) return attributeMetaData.getAttributeParts();
 				else return Collections.<AttributeMetaData> emptyList();
 			}
-            //traverse in same order as attributes are inserted
 		}.preOrderTraversal(new AttributeMetaData()
 		{
+			// traverse in same order as attributes are inserted
 
 			@Override
 			public boolean isVisible()
