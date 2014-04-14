@@ -183,12 +183,6 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 	}
 
 	@Override
-	public Class<? extends Entity> getEntityClass()
-	{
-		return Entity.class;
-	}
-
-	@Override
 	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
 	{
 		throw new UnsupportedOperationException();
