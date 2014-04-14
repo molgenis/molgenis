@@ -84,6 +84,10 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 			if (att == null) throw new RuntimeException("getIdAttribute() failed: '" + idAttribute + "' unknown");
 			return att;
 		}
+        else if(getExtends() != null)
+        {
+            return getExtends().getIdAttribute();
+        }
 		return null;
 	}
 

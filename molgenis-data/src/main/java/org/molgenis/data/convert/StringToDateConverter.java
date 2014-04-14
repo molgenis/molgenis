@@ -23,8 +23,15 @@ public class StringToDateConverter implements Converter<String, Date>
 			}
 			catch (ParseException pe2)
 			{
-				throw new IllegalArgumentException("Invalid dateformat [" + source + "] should be of format "
-						+ MolgenisDateFormat.DATEFORMAT_DATETIME + " OR " + MolgenisDateFormat.DATEFORMAT_DATE);
+				try
+				{
+					return MolgenisDateFormat.getDateTimeFormatSimple().parse(source);
+				}
+				catch (ParseException pe3)
+				{
+					throw new IllegalArgumentException("Invalid dateformat [" + source + "] should be of format "
+							+ MolgenisDateFormat.DATEFORMAT_DATETIME + " OR " + MolgenisDateFormat.DATEFORMAT_DATE+ " OR " + MolgenisDateFormat.DATEFORMAT_DATETIME_SIMPLE);
+				}
 			}
 		}
 	}
