@@ -93,7 +93,10 @@
 					}
 					<#if field_has_next>,</#if>
 				</#list>];
-			
+				
+	//Get the label attribute
+	forms[${index}].meta.labelFieldName = '${form.metaData.labelAttribute.name}';
+	
 	//Get a field by name				
 	forms[${index}].meta.getField = function(name) {
 		for (var i = 0; i < form${index}.meta.fields.length; i++) {
