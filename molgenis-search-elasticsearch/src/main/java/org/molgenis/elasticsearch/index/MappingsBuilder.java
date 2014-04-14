@@ -41,9 +41,7 @@ public class MappingsBuilder
 			{
 				String dateFormat;
 				if (attr.getDataType().getEnumType() == FieldTypeEnum.DATE) dateFormat = "date"; // yyyy-MM-dd
-				else if (attr.getDataType().getEnumType() == FieldTypeEnum.DATE_TIME) dateFormat = "yyyy-MM-dd HH:mm:ss";// "date_hour_minute_second";
-																															// //
-																															// yyyy-MM-dd’T’HH:mm:ss
+				else if (attr.getDataType().getEnumType() == FieldTypeEnum.DATE_TIME) dateFormat = "date_time_no_millis"; // yyyy-MM-dd’T’HH:mm:ssZZ
 				else
 				{
 					throw new MolgenisDataException("invalid molgenis field type for elasticsearch date format ["
@@ -51,9 +49,8 @@ public class MappingsBuilder
 				}
 
 				jsonBuilder.startObject(attr.getName()).field("type", "multi_field").startObject("fields")
-						.startObject(attr.getName()).field("type", "date").field("format", dateFormat).endObject()
-						.startObject("sort").field("type", "date").field("format", dateFormat).endObject().endObject()
-						.endObject();
+						.startObject(attr.getName()).field("type", "date").endObject().startObject("sort")
+						.field("type", "date").field("format", dateFormat).endObject().endObject().endObject();
 			}
 			else
 			{
