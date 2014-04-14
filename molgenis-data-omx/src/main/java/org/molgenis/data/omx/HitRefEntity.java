@@ -101,7 +101,8 @@ public class HitRefEntity extends AbstractEntity
 		}
 		else
 		{
-			return getEntityFromDataService().get(attributeName);
+			Entity entity = getEntityFromDataService();
+			return entity != null ? entity.get(attributeName) : null;
 		}
 	}
 

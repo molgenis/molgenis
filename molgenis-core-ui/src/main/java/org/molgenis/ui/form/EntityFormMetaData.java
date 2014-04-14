@@ -19,7 +19,7 @@ public class EntityFormMetaData implements FormMetaData
 	public List<AttributeMetaData> getFields()
 	{
 		List<AttributeMetaData> attributes = new ArrayList<AttributeMetaData>();
-		for (AttributeMetaData attr : entityMetaData.getAttributes())
+		for (AttributeMetaData attr : entityMetaData.getAtomicAttributes())
 		{
 			if (!attr.isIdAtrribute() && !attr.getName().equals("__Type"))// TODO system fields in AttributeMetaData
 			{
