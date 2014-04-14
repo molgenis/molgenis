@@ -78,15 +78,12 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 	@Override
 	public AttributeMetaData getIdAttribute()
 	{
-		// primary key is first attribute unless otherwise indicate
 		if (idAttribute != null)
 		{
 			AttributeMetaData att = getAttribute(idAttribute);
 			if (att == null) throw new RuntimeException("getIdAttribute() failed: '" + idAttribute + "' unknown");
 			return att;
 		}
-		else for (AttributeMetaData att : getAttributes())
-			return att;
 		return null;
 	}
 

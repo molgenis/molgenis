@@ -103,7 +103,7 @@ public class ExcelSheetReaderTest
 	@Test
 	public void getIdAttribute()
 	{
-		//TODO disuss! assertNull(excelSheetReader.getEntityMetaData().getIdAttribute());
+		assertNull(excelSheetReader.getEntityMetaData().getIdAttribute());
 	}
 
 	@Test
@@ -115,7 +115,7 @@ public class ExcelSheetReaderTest
 	@Test
 	public void getLabelAttribute()
 	{
-		//TODO discuss! assertNull(excelSheetReader.getEntityMetaData().getLabelAttribute());
+		assertNull(excelSheetReader.getEntityMetaData().getLabelAttribute());
 	}
 
 	@Test
