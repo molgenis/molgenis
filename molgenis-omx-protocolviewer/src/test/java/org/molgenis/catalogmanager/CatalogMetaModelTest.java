@@ -11,9 +11,12 @@ public class CatalogMetaModelTest
 	@Test
 	public void equals()
 	{
-		assertEquals(new CatalogMetaModel("1", "name", true), new CatalogMetaModel("1", "name", true));
-		assertNotEquals(new CatalogMetaModel("1", "name", true), new CatalogMetaModel("1", "name", false));
-		assertNotEquals(new CatalogMetaModel("1", "name", true), new CatalogMetaModel("1", "other name", true));
-		assertNotEquals(new CatalogMetaModel("1", "name", true), new CatalogMetaModel("other id", "name", true));
+		assertEquals(new CatalogMetaModel("1", "name", true, true), new CatalogMetaModel("1", "name", true, true));
+		assertNotEquals(new CatalogMetaModel("1", "name", false, true), new CatalogMetaModel("1", "name", true, false));
+		assertNotEquals(new CatalogMetaModel("1", "name", true, true), new CatalogMetaModel("1", "name", false, false));
+		assertNotEquals(new CatalogMetaModel("1", "name", true, true), new CatalogMetaModel("1", "other name", true,
+				true));
+		assertNotEquals(new CatalogMetaModel("1", "name", true, true), new CatalogMetaModel("other id", "name", true,
+				true));
 	}
 }

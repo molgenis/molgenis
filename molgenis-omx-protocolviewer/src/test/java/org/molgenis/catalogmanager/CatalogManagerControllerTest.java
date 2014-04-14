@@ -76,11 +76,15 @@ public class CatalogManagerControllerTest extends AbstractTestNGSpringContextTes
 		String catalogName2 = "name2";
 		boolean isLoaded1 = true;
 		boolean isLoaded2 = false;
+		boolean isActivated1 = true;
+		boolean isActivated2 = false;
 		CatalogMeta catalogMeta1 = new CatalogMeta(catalogId1, catalogName1);
 		CatalogMeta catalogMeta2 = new CatalogMeta(catalogId2, catalogName2);
 		when(catalogManagerService.getCatalogs()).thenReturn(Arrays.asList(catalogMeta1, catalogMeta2));
 		when(catalogManagerService.isCatalogLoaded(catalogId1)).thenReturn(isLoaded1);
 		when(catalogManagerService.isCatalogLoaded(catalogId2)).thenReturn(isLoaded2);
+		when(catalogManagerService.isCatalogActivated(catalogId1)).thenReturn(isActivated1);
+		when(catalogManagerService.isCatalogActivated(catalogId2)).thenReturn(isActivated2);
 		this.mockMvc
 				.perform(get(CatalogManagerController.URI))
 				.andExpect(status().isOk())
@@ -88,8 +92,8 @@ public class CatalogManagerControllerTest extends AbstractTestNGSpringContextTes
 				.andExpect(
 						model().attribute(
 								"catalogs",
-								Arrays.asList(new CatalogMetaModel(catalogId1, catalogName1, isLoaded1),
-										new CatalogMetaModel(catalogId2, catalogName2, isLoaded2))));
+								Arrays.asList(new CatalogMetaModel(catalogId1, catalogName1, isLoaded1, isActivated1),
+										new CatalogMetaModel(catalogId2, catalogName2, isLoaded2, isActivated2))));
 	}
 
 	@Test
@@ -98,42 +102,48 @@ public class CatalogManagerControllerTest extends AbstractTestNGSpringContextTes
 		String catalogId = "1";
 		String catalogName = "name";
 		boolean isLoaded = false;
+		boolean isActivated = false;
 		CatalogMeta catalogInfo1 = new CatalogMeta(catalogId, catalogName);
 		when(catalogManagerService.getCatalogs()).thenReturn(Arrays.asList(catalogInfo1));
 		when(catalogManagerService.isCatalogLoaded(catalogId)).thenReturn(isLoaded, !isLoaded);
+		when(catalogManagerService.isCatalogActivated(catalogId)).thenReturn(isActivated, !isActivated);
 
 		this.mockMvc
 				.perform(
-						post(CatalogManagerController.URI + "/load").param("id", "1").param("load", "load")
+						post(CatalogManagerController.URI + "/activation").param("id", "1")
+								.param("activate", "activate")
 								.contentType(MediaType.APPLICATION_FORM_URLENCODED))
 				.andExpect(status().isOk())
 				.andExpect(view().name("view-catalogmanager"))
-				.andExpect(model().attributeExists("successMessage"))
+				.andExpect(model().attributeExists("succesMessage"))
 				.andExpect(
 						model().attribute("catalogs",
-								Arrays.asList(new CatalogMetaModel(catalogId, catalogName, !isLoaded))));
+								Arrays.asList(new CatalogMetaModel(catalogId, catalogName, !isLoaded, isActivated))));
 	}
 
 	@Test
-	public void loadLoadedCatalog() throws Exception
+	public void activateLoadedAndActivatedCatalog() throws Exception
 	{
 		String catalogId = "1";
 		String catalogName = "name";
 		boolean isLoaded = true;
+		boolean isActivated = true;
 		CatalogMeta catalogInfo1 = new CatalogMeta(catalogId, catalogName);
 		when(catalogManagerService.getCatalogs()).thenReturn(Arrays.asList(catalogInfo1));
 		when(catalogManagerService.isCatalogLoaded(catalogId)).thenReturn(isLoaded);
+		when(catalogManagerService.isCatalogActivated(catalogId)).thenReturn(isActivated);
 
 		this.mockMvc
 				.perform(
-						post(CatalogManagerController.URI + "/load").param("id", "1").param("load", "load")
+						post(CatalogManagerController.URI + "/activation").param("id", "1")
+								.param("activate", "activate")
 								.contentType(MediaType.APPLICATION_FORM_URLENCODED))
 				.andExpect(status().isOk())
 				.andExpect(view().name("view-catalogmanager"))
-				.andExpect(model().attributeExists("errorMessage"))
+				.andExpect(model().attributeExists("succesMessage"))
 				.andExpect(
 						model().attribute("catalogs",
-								Arrays.asList(new CatalogMetaModel(catalogId, catalogName, isLoaded))));
+								Arrays.asList(new CatalogMetaModel(catalogId, catalogName, isLoaded, isActivated))));
 	}
 
 	@Test
@@ -143,63 +153,71 @@ public class CatalogManagerControllerTest extends AbstractTestNGSpringContextTes
 
 		this.mockMvc
 				.perform(
-						post(CatalogManagerController.URI + "/load").param("id", "bogus").param("load", "load")
+						post(CatalogManagerController.URI + "/activation").param("id", "bogus")
+								.param("activate", "activate")
 								.contentType(MediaType.APPLICATION_FORM_URLENCODED)).andExpect(status().isOk())
 				.andExpect(view().name("view-catalogmanager")).andExpect(model().attributeExists("errorMessage"));
 	}
 
 	@Test
-	public void unloadLoadedCatalog() throws Exception
+	public void deactivateLoadedAndActivatedCatalog() throws Exception
 	{
 		String catalogId = "id1";
 		String catalogName = "name1";
 		boolean isLoaded = true;
+		boolean isActivated = true;
 		CatalogMeta catalogInfo1 = new CatalogMeta(catalogId, catalogName);
 		when(catalogManagerService.getCatalogs()).thenReturn(Arrays.asList(catalogInfo1));
 		when(catalogManagerService.isCatalogLoaded(catalogId)).thenReturn(isLoaded);
+		when(catalogManagerService.isCatalogActivated(catalogId)).thenReturn(isActivated);
 
 		this.mockMvc
 				.perform(
-						post(CatalogManagerController.URI + "/load").param("id", catalogId).param("unload", "unload")
+						post(CatalogManagerController.URI + "/activation").param("id", catalogId)
+								.param("deactivate", "deactivate")
 								.contentType(MediaType.APPLICATION_FORM_URLENCODED))
 				.andExpect(status().isOk())
 				.andExpect(view().name("view-catalogmanager"))
 				.andExpect(model().attributeExists("successMessage"))
 				.andExpect(
 						model().attribute("catalogs",
-								Arrays.asList(new CatalogMetaModel(catalogId, catalogName, isLoaded))));
+								Arrays.asList(new CatalogMetaModel(catalogId, catalogName, isLoaded, isActivated))));
 	}
 
 	@Test
-	public void unloadUnloadedCatalog() throws Exception
+	public void deactivateUnloadedCatalog() throws Exception
 	{
 		String catalogId = "1";
 		String catalogName = "name1";
 		boolean isLoaded = false;
+		boolean isActivated = false;
 		CatalogMeta catalogInfo1 = new CatalogMeta(catalogId, catalogName);
 		when(catalogManagerService.getCatalogs()).thenReturn(Arrays.asList(catalogInfo1));
 		when(catalogManagerService.isCatalogLoaded(catalogId)).thenReturn(isLoaded);
+		when(catalogManagerService.isCatalogActivated(catalogId)).thenReturn(isActivated);
 		this.mockMvc
 				.perform(
-						post(CatalogManagerController.URI + "/load").param("id", "1").param("unload", "unload")
+						post(CatalogManagerController.URI + "/activation").param("id", "1")
+								.param("deactivate", "deactivate")
 								.contentType(MediaType.APPLICATION_FORM_URLENCODED))
 				.andExpect(status().isOk())
 				.andExpect(view().name("view-catalogmanager"))
 				.andExpect(model().attributeExists("errorMessage"))
 				.andExpect(
 						model().attribute("catalogs",
-								Arrays.asList(new CatalogMetaModel(catalogId, catalogName, isLoaded))));
+								Arrays.asList(new CatalogMetaModel(catalogId, catalogName, isLoaded, isActivated))));
 	}
 
 	@Test
-	public void unloadNonExistingCatalog() throws Exception
+	public void deactivateNonExistingCatalog() throws Exception
 	{
 		doThrow(new UnknownCatalogException("catalog does not exist")).when(catalogManagerService).unloadCatalog(
 				"bogus");
 
 		this.mockMvc
 				.perform(
-						post(CatalogManagerController.URI + "/load").param("id", "bogus").param("unload", "unload")
+						post(CatalogManagerController.URI + "/activation").param("id", "bogus")
+								.param("deactivate", "deactivate")
 								.contentType(MediaType.APPLICATION_FORM_URLENCODED)).andExpect(status().isOk())
 				.andExpect(view().name("view-catalogmanager")).andExpect(model().attributeExists("errorMessage"));
 	}
