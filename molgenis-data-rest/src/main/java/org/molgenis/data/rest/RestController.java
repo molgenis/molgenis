@@ -717,8 +717,7 @@ public class RestController
 				else if ((attrType == XREF || attrType == CATEGORICAL) && attributeExpandsSet != null
 						&& attributeExpandsSet.containsKey(attrName.toLowerCase()))
 				{
-					Entity refEntity = (Entity) entity.get(attr.getName());
-
+					Entity refEntity = entity.getEntity(attr.getName());
 					if (refEntity != null)
 					{
 						Set<String> subAttributesSet = attributeExpandsSet.get(attrName.toLowerCase());
@@ -732,9 +731,7 @@ public class RestController
 						&& attributeExpandsSet.containsKey(attrName.toLowerCase()))
 				{
 					EntityMetaData refEntityMetaData = dataService.getEntityMetaData(attr.getRefEntity().getName());
-
-					@SuppressWarnings("unchecked")
-					Iterable<Entity> mrefEntities = (Iterable<Entity>) entity.get(attr.getName());
+					Iterable<Entity> mrefEntities = entity.getEntities(attr.getName());
 
 					Set<String> subAttributesSet = attributeExpandsSet.get(attrName.toLowerCase());
 					List<Map<String, Object>> refEntityMaps = new ArrayList<Map<String, Object>>();
