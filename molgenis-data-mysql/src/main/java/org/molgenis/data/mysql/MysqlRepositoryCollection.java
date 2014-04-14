@@ -28,11 +28,11 @@ public class MysqlRepositoryCollection implements RepositoryCollection
 	{
 		this.ds = ds;
 
-		DefaultEntityMetaData entityMD = new DefaultEntityMetaData("entities");
+		DefaultEntityMetaData entityMD = new DefaultEntityMetaData("entities").setIdAttribute("name");
 		entityMD.addAttribute("name").setNillable(false);
 		entityMD.addAttribute("idAttribute");
 
-		DefaultEntityMetaData attributeMD = new DefaultEntityMetaData("attributes");
+		DefaultEntityMetaData attributeMD = new DefaultEntityMetaData("attributes").setIdAttribute("identifier");
 		attributeMD.addAttribute("identifier").setNillable(false).setDataType(INT).setAuto(true);
 		attributeMD.addAttribute("entity").setNillable(false);
 		attributeMD.addAttribute("name").setNillable(false);
@@ -49,13 +49,14 @@ public class MysqlRepositoryCollection implements RepositoryCollection
 		for (Entity e : entities)
 		{
 			DefaultEntityMetaData md = new DefaultEntityMetaData(e.getString("name"));
+            md.setIdAttribute(e.getString("idAttribute"));
 			for (Entity a : attributes.findAll(new QueryImpl().eq("entity", e.getString("name"))))
 			{
 				md.addAttribute(a.getString("name")).setDataType(MolgenisFieldTypes.getType(a.getString("dataType")))
 						.setNillable(a.getBoolean("nillable")).setAuto(a.getBoolean("auto"));
 			}
 
-			this.repositories.put(md.getName(), new MysqlRepository(ds,md));
+			this.repositories.put(md.getName(), new MysqlRepository(ds, md));
 		}
 	}
 
@@ -68,8 +69,9 @@ public class MysqlRepositoryCollection implements RepositoryCollection
 
 	public void add(MysqlRepository repository)
 	{
-		if (entities.count(new QueryImpl().eq("name", repository.getName())) > 0) throw new RuntimeException("repository '"+repository.getName()+"' already exists");
-        //TODO: check if this repository is equal to existing one!
+		if (entities.count(new QueryImpl().eq("name", repository.getName())) > 0) throw new RuntimeException(
+				"repository '" + repository.getName() + "' already exists");
+		// TODO: check if this repository is equal to existing one!
 
 		// add entity metadata
 		EntityMetaData emd = repository.getEntityMetaData();

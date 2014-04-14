@@ -42,10 +42,10 @@ public class MysqlRepositoryCountTest
 	public void test()
 	{
 		// define model
-		DefaultEntityMetaData countryMD = new DefaultEntityMetaData("query_country");
+		DefaultEntityMetaData countryMD = new DefaultEntityMetaData("query_country").setIdAttribute("code");
 		countryMD.addAttribute("code").setNillable(false); // TODO: make this an enum!
 
-		DefaultEntityMetaData personMD = new DefaultEntityMetaData("query_person");
+		DefaultEntityMetaData personMD = new DefaultEntityMetaData("query_person").setIdAttribute("email");
 		personMD.addAttribute("email").setNillable(false);
 		personMD.addAttribute("firstName");
 		personMD.addAttribute("lastName");

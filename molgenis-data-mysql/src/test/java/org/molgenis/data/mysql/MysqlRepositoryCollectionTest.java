@@ -30,7 +30,7 @@ public class MysqlRepositoryCollectionTest
 		new MysqlRepository(ds, new DefaultEntityMetaData("coll_person")).drop();
 
 		// create collection, add repo, destroy and reload
-		DefaultEntityMetaData personMD = new DefaultEntityMetaData("coll_person");
+		DefaultEntityMetaData personMD = new DefaultEntityMetaData("coll_person").setIdAttribute("email");
 		personMD.addAttribute("email").setNillable(false);
 		personMD.addAttribute("firstName");
 		personMD.addAttribute("lastName");
