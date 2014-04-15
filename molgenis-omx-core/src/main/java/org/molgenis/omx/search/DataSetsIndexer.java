@@ -1,5 +1,7 @@
 package org.molgenis.omx.search;
 
+import org.molgenis.security.runas.RunAsSystem;
+
 import java.util.List;
 
 /**
@@ -22,4 +24,7 @@ public interface DataSetsIndexer
 	 * @return
 	 */
 	public boolean isIndexingRunning();
+
+	@RunAsSystem
+	void indexProtocolsSynced(List<Integer> protocolIds);
 }
