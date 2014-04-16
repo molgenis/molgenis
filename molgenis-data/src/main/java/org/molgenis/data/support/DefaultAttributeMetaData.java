@@ -21,11 +21,11 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	private boolean readOnly = false;
 	private Object defaultValue = null;
 	private boolean idAttribute = false;
-	private boolean labelAttribute = false; //remove?
-	private boolean lookupAttribute = false; //remove?
+	private boolean labelAttribute = false; // remove?
+	private boolean lookupAttribute = false; // remove?
 	private EntityMetaData refEntity;
 	private String label;
-	private boolean visible = true; //remove?
+	private boolean visible = true; // remove?
 	private boolean unique = false;
 	private boolean auto = false;
 	private Iterable<AttributeMetaData> attributesMetaData;
@@ -107,7 +107,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	{
 		if (getDataType() instanceof XrefField || getDataType() instanceof MrefField)
 		{
-			if (getRefEntity() == null) throw new RuntimeException("refEntity is missing for "+this.getName());
+			if (getRefEntity() == null) throw new RuntimeException("refEntity is missing for " + this.getName());
 			return getRefEntity().getIdAttribute().getDataType().convert(defaultValue);
 		}
 		return getDataType().convert(defaultValue);
@@ -157,7 +157,10 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	@Override
 	public Iterable<AttributeMetaData> getAttributeParts()
 	{
-		if (this.attributesMetaData == null) return this.refEntity.getAttributes();
+		if (this.attributesMetaData == null && this.getRefEntity() != null)
+		{
+			return this.refEntity.getAttributes();
+		}
 		return attributesMetaData;
 	}
 
@@ -226,13 +229,13 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		return this;
 	}
 
-    public String toString()
-    {
-        String result = "AttributeMetaData(name='"+this.getName()+"'";
-        result+=" dataType='"+getDataType()+"'";
-        if(getRefEntity() != null) result+=" refEntity='"+getRefEntity().getName()+"'";
-        if(getDescription() != null) result+=" description='"+getDescription()+"'";
-        result += ")";
-        return result;
-    }
+	public String toString()
+	{
+		String result = "AttributeMetaData(name='" + this.getName() + "'";
+		result += " dataType='" + getDataType() + "'";
+		if (getRefEntity() != null) result += " refEntity='" + getRefEntity().getName() + "'";
+		if (getDescription() != null) result += " description='" + getDescription() + "'";
+		result += ")";
+		return result;
+	}
 }

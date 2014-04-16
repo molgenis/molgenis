@@ -3,25 +3,25 @@ package org.molgenis.data.support;
 import java.util.*;
 
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 
 public class DefaultEntityMetaData extends AbstractEntityMetaData
 {
 	private final String name;
 	private final Map<String, AttributeMetaData> attributes = new LinkedHashMap<String, AttributeMetaData>();
+	private final Class<? extends Entity> entityClass;
 	private String label;
 	private boolean abstract_ = false;
 	private String description;
 	private String idAttribute;
 	private String labelAttribute; // remove?
 	private EntityMetaData extends_;
-	private final Class<? extends Entity> entityClass;
 
-    public DefaultEntityMetaData(String name)
-    {
-        this(name,Entity.class);
-    }
+	public DefaultEntityMetaData(String name)
+	{
+		this(name, Entity.class);
+	}
 
 	public DefaultEntityMetaData(String name, Class<? extends Entity> entityClass)
 	{
@@ -42,11 +42,16 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 		if (attributeMetaData == null) throw new IllegalArgumentException("AttributeMetaData cannot be null");
 		if (attributeMetaData.getName() == null) throw new IllegalArgumentException(
 				"Name of the AttributeMetaData cannot be null");
-        if(attributeMetaData.isLabelAttribute()) this.labelAttribute = attributeMetaData.getName();
-        if(attributeMetaData.isIdAtrribute()) this.idAttribute = attributeMetaData.getName();
+		if (attributeMetaData.isLabelAttribute()) this.labelAttribute = attributeMetaData.getName();
+		if (attributeMetaData.isIdAtrribute()) this.idAttribute = attributeMetaData.getName();
 
 		attributes.put(attributeMetaData.getName().toLowerCase(), attributeMetaData);
 	}
+
+    public void removeAttributeMetaData(AttributeMetaData attributeMetaData)
+    {
+        this.attributes.remove(attributeMetaData.getName());
+    }
 
 	public void addAllAttributeMetaData(List<AttributeMetaData> attributeMetaDataList)
 	{
@@ -84,10 +89,10 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 			if (att == null) throw new RuntimeException("getIdAttribute() failed: '" + idAttribute + "' unknown");
 			return att;
 		}
-        else if(getExtends() != null)
-        {
-            return getExtends().getIdAttribute();
-        }
+		else if (getExtends() != null)
+		{
+			return getExtends().getIdAttribute();
+		}
 		return null;
 	}
 
@@ -206,15 +211,19 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 	public DefaultEntityMetaData setExtends(EntityMetaData extends_)
 	{
 		this.extends_ = extends_;
-        return this;
+		return this;
 	}
 
-    public String toString()
-    {
-        String result = "EntityMetaData(name='"+this.getName()+"'";
-        if(isAbstract()) result+=" abstract='true'";
-        if(getExtends() != null) result +=" extends='"+getExtends().getName()+"'";
-        result += ")";
-        return result;
-    }
+	public String toString()
+	{
+		String result = "\nEntityMetaData(name='" + this.getName() + "'";
+		if (isAbstract()) result += " abstract='true'";
+		if (getExtends() != null) result += " extends='" + getExtends().getName() + "'";
+		result += ")";
+		for (AttributeMetaData att : this.getAttributes())
+		{
+			result += "\n\t" + att.toString();
+		}
+		return result;
+	}
 }

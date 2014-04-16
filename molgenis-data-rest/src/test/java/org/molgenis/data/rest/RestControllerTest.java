@@ -170,7 +170,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void getEntityMetaDataExpandAttributes() throws Exception
 	{
-		mockMvc.perform(get(HREF_ENTITY_META).param("expand", "attributes"))
+        mockMvc.perform(get(HREF_ENTITY_META).param("expand", "attributes"))
 				.andExpect(status().isOk())
 				.andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(
