@@ -2,11 +2,15 @@ package org.molgenis.data.model.registry;
 
 import static org.molgenis.data.model.registry.MetaDataExplorerController.URI;
 
+import java.io.IOException;
 import java.util.List;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.JDBCMetaDatabase;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
@@ -15,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
@@ -89,5 +94,23 @@ public class MetaDataExplorerController extends MolgenisPluginController
 		model.addAttribute("metaDataSearchForm", metaDataSearchForm);
 
 		return "view-metadataexplorer";
+	}
+
+	@RequestMapping("{entityClassIdentifier}")
+	public String showDetails(@PathVariable("entityClassIdentifier") String entityClassIdentifier, Model model,
+			HttpServletResponse response) throws IOException
+	{
+		Entity entityClass = dataService.findOne(EntityClass.ENTITY_NAME,
+				new QueryImpl().eq(EntityClass.ENTITYCLASSIDENTIFIER, entityClassIdentifier));
+
+		if (entityClass == null)
+		{
+			response.sendError(404);
+			return null;
+		}
+
+		model.addAttribute("entityClass", entityClass);
+
+		return "view-metadatadetails";
 	}
 }
