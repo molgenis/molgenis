@@ -6,10 +6,11 @@ package org.molgenis.data.mysql;
 /**
  * Work in progress. Open issues:
  * <ul>
+ * <li>SQL injection in queries (updates are prepared statements)
  * <li>DONE DataType.COMPOUND
- * <li>Convertor OMX to OMX4 (or what we want to call this???)
- * <li>unique constraints</li>
- * <li>Inheritance / Abstract
+ * <li>PARTLY Convertor OMX to OMX4 (or what we want to call this???)
+ * <li>PARTLY unique constraints</li>
+ * <li>DONE Inheritance / Abstract
  * <li>Observablefeature.Unit -> create dedicated lookup table?
  * <li>Parsing of Characteristic subclasses/figuring out what subclass meant (by looking at the data?)
  * <li>Protocol.active

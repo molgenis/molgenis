@@ -35,8 +35,7 @@ public class EntityMetaDataUtilsTest
 
 		ComboPooledDataSource dataSource = new ComboPooledDataSource();
 		dataSource.setDriverClass("com.mysql.jdbc.Driver");
-		//dataSource.setJdbcUrl(MysqlRepositoryTestConstants.URL);
-        dataSource.setJdbcUrl("jdbc:mysql://localhost:3306/bbmri");
+		dataSource.setJdbcUrl(MysqlRepositoryTestConstants.URL);
 		dataSource.setUser("molgenis");
 		dataSource.setPassword("molgenis");
 
