@@ -105,7 +105,7 @@ public class MetaDataExplorerController extends MolgenisPluginController
 
 		if (entityClass == null)
 		{
-			response.sendError(404);
+			response.sendError(HttpServletResponse.SC_NOT_FOUND);
 			return null;
 		}
 

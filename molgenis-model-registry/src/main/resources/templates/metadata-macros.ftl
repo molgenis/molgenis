@@ -15,7 +15,7 @@
 			<div class="span2">Type:</div>
 			<div class="span10">${entityClass.type}</div>
 		</div>
-		<#if entityClass.description?? && entityClass.description != ''>
+		<#if entityClass.description?has_content>
 			<div class="row-fluid">
 				<div class="span2">Description:</div>
 				<div id="entityClass-${entityClass.id?c}" class="span10">${limit(entityClass.description?html, 150, 'entityClass-${entityClass.id?c}')}</div>
@@ -31,7 +31,7 @@
 				</div>
 			</div>
 		</#if>
-		<#if entityClass.homepage?? && entityClass.homepage != ''>
+		<#if entityClass.homepage?has_content>
 			<div class="row-fluid">
 				<div class="span2">Homepage:</div>
 				<div class="span10"><a href="${entityClass.homepage}" target="_blank">${entityClass.homepage}</a></div>
