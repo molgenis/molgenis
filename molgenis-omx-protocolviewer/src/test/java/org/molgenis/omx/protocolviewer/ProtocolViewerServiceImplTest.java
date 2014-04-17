@@ -249,8 +249,7 @@ public class ProtocolViewerServiceImplTest extends AbstractTestNGSpringContextTe
 	{
 		List<StudyDefinition> studyDefinitions = Lists.newArrayList(protocolViewerService
 				.getStudyDefinitionsForCurrentUser());
-		assertEquals(studyDefinitions,
-				Arrays.asList(studyDefinitionCatalog0UserDraft, studyDefinitionCatalog1UserApproved));
+		assertEquals(studyDefinitions, Arrays.asList(studyDefinitionCatalog1UserApproved));
 	}
 
 	@Test
