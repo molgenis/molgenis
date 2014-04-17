@@ -36,3 +36,12 @@ label {
 .entity-btn:hover {
 	color: #005580;
 }
+
+.breadcrumb {
+	background-color: #fff;
+	margin: 0;
+}
+
+#data-table-container table {
+	background: #DDDDDD;
+}

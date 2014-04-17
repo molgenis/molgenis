@@ -5,7 +5,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -38,7 +37,6 @@ public class MolgenisEntityFormPluginController extends MolgenisPluginController
 	public static final String ENTITY_FORM_MODEL_ATTRIBUTE = "form";
 	private static final String VIEW_NAME_LIST = "view-form-list";
 	private static final String VIEW_NAME_EDIT = "view-form-edit";
-	private static final Logger logger = Logger.getLogger(MolgenisEntityFormPluginController.class);
 
 	private final DataService dataService;
 	private final MolgenisPermissionService molgenisPermissionService;

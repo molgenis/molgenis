@@ -32,7 +32,7 @@
 			'selection' : Catalog.getEnableSelection(),
 			'protocolId' : catalogId,
 			'selectedItems' : selection.items ? $.map(selection.items, function(selectedItem) { return selectedItem.feature.toLowerCase(); }) : null, // FIXME catalog requires group info
-			'sort' : molgenis.naturalSort,
+			'sort' : function(a,b) {return molgenis.naturalSort(a.Name, b.Name);},
 			'onItemClick' : function(featureUri) {
 				updateFeatureDetails(featureUri);
 			},
