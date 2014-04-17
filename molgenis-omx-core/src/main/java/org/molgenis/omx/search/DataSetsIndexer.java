@@ -22,4 +22,6 @@ public interface DataSetsIndexer
 	 * @return
 	 */
 	public boolean isIndexingRunning();
+
+	void indexProtocolsSynced(List<Integer> protocolIds);
 }
