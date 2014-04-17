@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.controller.ContentControllersTest.Config;
+import org.molgenis.ui.controller.StaticContentService;
 import org.molgenis.util.FileStore;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
