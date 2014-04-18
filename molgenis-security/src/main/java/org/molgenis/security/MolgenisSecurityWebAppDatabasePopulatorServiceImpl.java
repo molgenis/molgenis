@@ -15,7 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl
+public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl implements
+		MolgenisSecurityWebAppDatabasePopulatorService
 {
     private static final String USERNAME_ADMIN = "admin";
 
