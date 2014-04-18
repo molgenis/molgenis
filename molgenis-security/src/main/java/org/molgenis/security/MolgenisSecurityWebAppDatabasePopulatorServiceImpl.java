@@ -9,19 +9,15 @@ import org.molgenis.security.account.AccountService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.runas.RunAsSystem;
 import org.molgenis.security.user.UserAccountController;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class MolgenisSecurityWebAppDatabasePopulator
+public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl
 {
     private static final String USERNAME_ADMIN = "admin";
-
-	@Autowired
-	private DataService dataService;
 
     @Value("${admin.password:@null}")
     private String adminPassword;
@@ -30,9 +26,9 @@ public class MolgenisSecurityWebAppDatabasePopulator
     @Value("${anonymous.email:molgenis+anonymous@gmail.com}")
     private String anonymousEmail;
 
-    @Transactional
-    @RunAsSystem
-	public void populateDatabase(String homeControllerId)
+	@Transactional
+	@RunAsSystem
+	public void populateDatabase(DataService dataService, String homeControllerId)
     {
         if (adminPassword == null) throw new RuntimeException(
                 "please configure the admin.password property in your molgenis-server.properties");

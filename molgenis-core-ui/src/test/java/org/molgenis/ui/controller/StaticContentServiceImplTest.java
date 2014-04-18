@@ -1,4 +1,4 @@
-package org.molgenis.omx.controller;
+package org.molgenis.ui.controller;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;

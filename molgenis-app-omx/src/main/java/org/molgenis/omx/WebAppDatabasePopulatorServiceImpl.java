@@ -16,7 +16,7 @@ import org.molgenis.framework.db.WebAppDatabasePopulatorService;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.controller.HomeController;
 import org.molgenis.omx.core.RuntimeProperty;
-import org.molgenis.security.MolgenisSecurityWebAppDatabasePopulator;
+import org.molgenis.security.MolgenisSecurityWebAppDatabasePopulatorService;
 import org.molgenis.security.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,18 +35,18 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 	public static final String GENOMEBROWSERTABLE = "genomeBrowserTable";
 
 	private final DataService dataService;
-	private final MolgenisSecurityWebAppDatabasePopulator molgenisSecurityWebAppDatabasePopulator;
+	private final MolgenisSecurityWebAppDatabasePopulatorService molgenisSecurityWebAppDatabasePopulatorService;
 
 	@Autowired
 	public WebAppDatabasePopulatorServiceImpl(DataService dataService,
-			MolgenisSecurityWebAppDatabasePopulator molgenisSecurityWebAppDatabasePopulator)
+			MolgenisSecurityWebAppDatabasePopulatorService molgenisSecurityWebAppDatabasePopulatorService)
 	{
 		if (dataService == null) throw new IllegalArgumentException("DataService is null");
 		this.dataService = dataService;
 
-		if (molgenisSecurityWebAppDatabasePopulator == null) throw new IllegalArgumentException(
+		if (molgenisSecurityWebAppDatabasePopulatorService == null) throw new IllegalArgumentException(
 				"MolgenisSecurityWebAppDatabasePopulator is null");
-		this.molgenisSecurityWebAppDatabasePopulator = molgenisSecurityWebAppDatabasePopulator;
+		this.molgenisSecurityWebAppDatabasePopulatorService = molgenisSecurityWebAppDatabasePopulatorService;
 
 	}
 
@@ -55,7 +55,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 	@RunAsSystem
 	public void populateDatabase()
 	{
-		molgenisSecurityWebAppDatabasePopulator.populateDatabase(HomeController.ID);
+		molgenisSecurityWebAppDatabasePopulatorService.populateDatabase(this.dataService, HomeController.ID);
 
 		// Genomebrowser stuff
 		Map<String, String> runtimePropertyMap = new HashMap<String, String>();
