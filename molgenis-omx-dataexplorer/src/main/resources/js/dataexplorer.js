@@ -383,10 +383,12 @@
 		var container = $("#plugin-container");
 		
 		// use chosen plugin for data set select
-		$('#dataset-select').select2({ width: 'resolve' });
-		$('#dataset-select').change(function() {
-			$(document).trigger('changeEntity', $(this).val());
-		});
+		if ($('#dataset-select').length > 0) {
+			$('#dataset-select').select2({ width: 'resolve' });
+			$('#dataset-select').change(function() {
+				$(document).trigger('changeEntity', $(this).val());
+			});
+		}
 
 		$("#observationset-search").focus();
 		

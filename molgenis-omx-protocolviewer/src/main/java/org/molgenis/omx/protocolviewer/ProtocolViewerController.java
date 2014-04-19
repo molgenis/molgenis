@@ -277,7 +277,8 @@ public class ProtocolViewerController extends MolgenisPluginController
 	@ResponseBody
 	public ErrorMessageResponse handleException(Exception e)
 	{
-		logger.error("", e);
+		e.printStackTrace();
+		logger.error("Error", e);
 		return new ErrorMessageResponse(
 				Collections.singletonList(new ErrorMessageResponse.ErrorMessage(e.getMessage())));
 	}
@@ -312,14 +313,17 @@ public class ProtocolViewerController extends MolgenisPluginController
 	{
 		private final Integer id;
 		private final String name;
-		private final String orderDate;
+		private String orderDate;
 		private final String orderStatus;
 
 		public StudyDefinitionResponse(StudyDefinition studyDefinition)
 		{
 			this.id = Integer.valueOf(studyDefinition.getId());
 			this.name = studyDefinition.getName();
-			this.orderDate = new SimpleDateFormat("yyyy-MM-dd").format(studyDefinition.getDateCreated());
+			if (studyDefinition.getDateCreated() != null)
+			{
+				this.orderDate = new SimpleDateFormat("yyyy-MM-dd").format(studyDefinition.getDateCreated());
+			}
 			this.orderStatus = studyDefinition.getStatus().toString().toLowerCase();
 		}
 
