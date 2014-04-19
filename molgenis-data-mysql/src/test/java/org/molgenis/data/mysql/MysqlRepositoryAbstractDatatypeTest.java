@@ -2,22 +2,26 @@ package org.molgenis.data.mysql;
 
 import java.beans.PropertyVetoException;
 
-import javax.sql.DataSource;
-
+import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
+import org.molgenis.AppConfig;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.mchange.v2.c3p0.ComboPooledDataSource;
+import javax.sql.DataSource;
 
 /** Superclass for all datatype specific tests, e.g. MysqlRepositoryStringTest */
-public abstract class MysqlRepositoryAbstractDatatypeTest
+@ContextConfiguration(classes = AppConfig.class)
+public abstract class MysqlRepositoryAbstractDatatypeTest extends AbstractTestNGSpringContextTests
 {
-	DataSource ds;
+    DataSource ds;
+    
 	Logger logger;
 	private EntityMetaData metaData;
 

@@ -49,11 +49,11 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 	public void test() throws Exception
 	{
 		// create
-		MysqlRepository mrefRepo = new MysqlRepository(ds, getMetaData());
+		MysqlRepository mrefRepo = new MysqlRepository(ds,getMetaData());
 		Assert.assertEquals(mrefRepo.getCreateSql(), createSql());
 
-		MysqlRepository stringRepo = new MysqlRepository(ds, getMetaData().getAttribute("stringRef").getRefEntity());
-		MysqlRepository intRepo = new MysqlRepository(ds, getMetaData().getAttribute("intRef").getRefEntity());
+		MysqlRepository stringRepo = new MysqlRepository(ds,getMetaData().getAttribute("stringRef").getRefEntity());
+		MysqlRepository intRepo = new MysqlRepository(ds,getMetaData().getAttribute("intRef").getRefEntity());
 
 		mrefRepo.drop();
 		stringRepo.drop();
@@ -149,7 +149,7 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 			eList.add(entity);
 		}
 
-		MysqlRepository mrefRepo = new MysqlRepository(ds, getMetaData());
+		MysqlRepository mrefRepo = new MysqlRepository(ds,getMetaData());
 		long startTime = System.currentTimeMillis();
 		mrefRepo.add(eList);
 		long stopTime = System.currentTimeMillis();

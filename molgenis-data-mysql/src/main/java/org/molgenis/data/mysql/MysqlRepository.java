@@ -12,18 +12,28 @@ import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.*;
 import org.molgenis.model.MolgenisModelException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 public class MysqlRepository implements Repository, Writable, Queryable, Manageable
 {
 	public static final int BATCH_SIZE = 100000;
-	EntityMetaData metaData;
-	DataSource ds;
+	private EntityMetaData metaData;
+	private DataSource ds;
 
 	public MysqlRepository(DataSource ds, EntityMetaData metaData)
 	{
-		assert metaData != null && ds != null;
+        if (metaData == null) throw new IllegalArgumentException("DataSource is null");
+        if (metaData == null) throw new IllegalArgumentException("metaData is null");
 		this.metaData = metaData;
-		this.ds = ds;
+        this.ds = ds;
+	}
+
+	@Autowired
+	public void setDataSource(DataSource dataSource)
+	{
+		this.ds = dataSource;
+		System.out.println("BLAAAT:" + dataSource);
 	}
 
 	@Override
