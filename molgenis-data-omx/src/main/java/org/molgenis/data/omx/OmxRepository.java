@@ -22,6 +22,7 @@ import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.omx.converters.ValueConverter;
 import org.molgenis.omx.converters.ValueConverterException;
 import org.molgenis.omx.dataset.AbstractDataSetMatrixRepository;
+import org.molgenis.omx.dataset.DataSetMatrixRepository;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
@@ -112,7 +113,7 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Cr
 	@Override
 	public Entity findOne(Integer id)
 	{
-		Query q = new QueryImpl().eq(ObservationSet.ID, id);
+		Query q = new QueryImpl().eq(DataSetMatrixRepository.ENTITY_ID_COLUMN_NAME, id);
 		return findOne(q);
 	}
 
