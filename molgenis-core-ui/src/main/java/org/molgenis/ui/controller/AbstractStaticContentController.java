@@ -1,4 +1,4 @@
-package org.molgenis.omx.controller;
+package org.molgenis.ui.controller;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,7 +47,6 @@ public abstract class AbstractStaticContentController extends MolgenisPluginCont
 	{
 		try
 		{
-
 			model.addAttribute("content", this.staticContentService.getContent(uniqueReference));
 			model.addAttribute("isCurrentUserCanEdit", this.staticContentService.isCurrentUserCanEdit());
 		}

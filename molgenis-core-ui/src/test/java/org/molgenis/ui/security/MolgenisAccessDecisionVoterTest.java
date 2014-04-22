@@ -1,4 +1,4 @@
-package org.molgenis.omx;
+package org.molgenis.ui.security;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -10,6 +10,7 @@ import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.ui.MolgenisUi;
 import org.molgenis.ui.MolgenisUiMenu;
+import org.molgenis.ui.security.MolgenisAccessDecisionVoter;
 import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.web.FilterInvocation;
