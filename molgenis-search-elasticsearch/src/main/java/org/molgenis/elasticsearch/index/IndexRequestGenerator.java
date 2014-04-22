@@ -138,8 +138,7 @@ public class IndexRequestGenerator
 								if (mrefIds != null) id = mrefIds;
 								if (mrefKeys != null) key = mrefKeys;
 							}
-							// FIXME https://github.com/molgenis/molgenis/issues/1401
-							value = Joiner.on(" , ").join((Collection<?>) value);
+							value = Joiner.on(",").join((Collection<?>) value);
 						}
 						if (id != null) doc.put("id-" + attrName, id);
 						if (key != null) doc.put("key-" + attrName, key);
