@@ -19,6 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.collect.Lists;
+
 @Service
 public class DataSetDeleterServiceImpl implements DataSetDeleterService
 {
@@ -45,9 +47,10 @@ public class DataSetDeleterServiceImpl implements DataSetDeleterService
 
 		if (deleteMetadata)
 		{
-			List<Entity> entitiesList = dataService.findAllAsList(ObservedValue.ENTITY_NAME, new QueryImpl());
-			entitiesList.addAll(dataService.findAllAsList(Protocol.ENTITY_NAME, new QueryImpl()));
-			entitiesList.addAll(dataService.findAllAsList(DataSet.ENTITY_NAME, new QueryImpl()));
+			List<Entity> entitiesList = Lists.newArrayList(dataService.findAll(ObservedValue.ENTITY_NAME,
+					new QueryImpl()));
+			entitiesList.addAll(Lists.newArrayList(dataService.findAll(Protocol.ENTITY_NAME, new QueryImpl())));
+			entitiesList.addAll(Lists.newArrayList(dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl())));
 			entitiesList.remove(dataSet);
 			Protocol protocolUsed = dataSet.getProtocolUsed();
 			deleteProtocol(protocolUsed, entitiesList);
@@ -69,21 +72,21 @@ public class DataSetDeleterServiceImpl implements DataSetDeleterService
 	void deleteData(DataSet dataset)
 	{
 		int count = 0;
-		List<ObservationSet> observationSets = dataService.findAllAsList(ObservationSet.ENTITY_NAME,
-				new QueryImpl().eq(ObservationSet.PARTOFDATASET, dataset));
+		List<Entity> observationSets = Lists.newArrayList(dataService.findAll(ObservationSet.ENTITY_NAME,
+				new QueryImpl().eq(ObservationSet.PARTOFDATASET, dataset)));
 
-		List<ObservedValue> observedValues = new ArrayList<ObservedValue>();
-		for (ObservationSet observationSet : observationSets)
+		List<Entity> observedValues = new ArrayList<Entity>();
+		for (Entity observationSet : observationSets)
 		{
-			List<ObservedValue> list = dataService.findAllAsList(ObservedValue.ENTITY_NAME,
-					new QueryImpl().eq(ObservedValue.OBSERVATIONSET, observationSet));
+			List<Entity> list = Lists.newArrayList(dataService.findAll(ObservedValue.ENTITY_NAME,
+					new QueryImpl().eq(ObservedValue.OBSERVATIONSET, observationSet)));
 
 			observedValues.addAll(list);
 
 			if (count % 20 == 0)
 			{
 				dataService.delete(ObservedValue.ENTITY_NAME, observedValues);
-				observedValues = new ArrayList<ObservedValue>();
+				observedValues = new ArrayList<Entity>();
 			}
 			count++;
 		}

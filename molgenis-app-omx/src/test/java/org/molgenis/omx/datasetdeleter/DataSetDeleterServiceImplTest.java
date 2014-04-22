@@ -47,11 +47,11 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 	private static Protocol protocol2;
 	private static Protocol protocol3;
 	private static List<Entity> allEntities;
-	private static List<Protocol> subProtocols;
+	private static ArrayList<Protocol> subProtocols;
 	private static ObservationSet observationSet0;
 	private static ObservationSet observationSet1;
-	private static List<ObservedValue> observedValues0;
-	private static List<ObservedValue> observedValues1;
+	private static Iterable<Entity> observedValues0;
+	private static List<Entity> observedValues1;
 	private static List<ObservableFeature> features0;
 	private static List<ObservableFeature> features1;
 	private static ObservableFeature feature1;
@@ -192,8 +192,8 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 		observedValue0.setValue(new Value());
 		observedValue0.setFeature(feature0);
 		observedValue0.setObservationSet(observationSet0);
-		observedValues0 = new ArrayList<ObservedValue>();
-		observedValues0.add(observedValue0);
+		observedValues0 = new ArrayList<Entity>();
+		((List<Entity>) observedValues0).add((Entity) observedValue0);
 
 		ObservedValue observedValue1 = new ObservedValue();
 		observedValue1.setId(1);
@@ -203,8 +203,7 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 		observedValue1.setValue(v1);
 		observedValue1.setFeature(feature1);
 		observedValue1.setObservationSet(observationSet1);
-		observedValues1 = new ArrayList<ObservedValue>();
-		observedValues1.add(observedValue1);
+		observedValues1 = Arrays.asList((Entity) observedValue1);
 
 		observationSets0 = new ArrayList<Entity>();
 		observationSets0.add(observationSet0);
@@ -214,19 +213,19 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 		category0.setIdentifier("category" + 0);
 		categories.add(category0);
 
-		List<DataSet> datasets = new ArrayList<DataSet>();
-		datasets.add(dataset);
+		Iterable<Entity> datasets = Arrays.asList((Entity) dataset);
+		Iterable<Entity> protocols = Arrays.asList();
 
-		when(dataService.findAllAsList(DataSet.ENTITY_NAME, new QueryImpl().eq(DataSet.IDENTIFIER, "dataset1")))
-				.thenReturn(Arrays.<Entity> asList(dataset));
+		when(dataService.findOne(DataSet.ENTITY_NAME, new QueryImpl().eq(DataSet.IDENTIFIER, "dataset1"))).thenReturn(
+				dataset);
+
+		when(dataService.findAll(Protocol.ENTITY_NAME, new QueryImpl())).thenReturn(protocols);
+		when(dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl())).thenReturn(datasets);
+		when(dataService.findAll(ObservationSet.ENTITY_NAME, new QueryImpl().eq(ObservationSet.PARTOFDATASET, dataset)))
+				.thenReturn(observationSets0);
 		when(
-				dataService.findAllAsList(ObservedValue.ENTITY_NAME,
-						new QueryImpl().eq(ObservedValue.OBSERVATIONSET, observationSet0))).thenReturn(
-				Arrays.<Entity> asList(observedValue0));
-
-		when(dataService.findAllAsList(ObservationSet.ENTITY_NAME, new QueryImpl().eq(ObservationSet.PARTOFDATASET, 0)))
-				.thenReturn(Arrays.<Entity> asList(observationSet0));
-
+				dataService.findAll(ObservedValue.ENTITY_NAME,
+						new QueryImpl().eq(ObservedValue.OBSERVATIONSET, observationSet0))).thenReturn(observedValues0);
 	}
 
 	@BeforeMethod
@@ -257,6 +256,8 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 				dataService.findOne(DataSet.ENTITY_NAME, new QueryImpl().eq(DataSet.IDENTIFIER, "dataset1"),
 						DataSet.class)).thenReturn(dataset);
 
+		when(dataService.findAll(ObservedValue.ENTITY_NAME, new QueryImpl())).thenReturn(observationSets0);
+
 		dataSetDeleterServiceImpl.deleteData("dataset1", true);
 		verify(dataService).delete(DataSet.ENTITY_NAME, dataset);
 	}
@@ -282,10 +283,14 @@ public class DataSetDeleterServiceImplTest extends AbstractTestNGSpringContextTe
 	@Test
 	public void deleteData()
 	{
-		when(
-				dataService.findAllAsList(ObservationSet.ENTITY_NAME,
-						new QueryImpl().eq(ObservationSet.PARTOFDATASET, dataset))).thenReturn(observationSets0);
+		when(dataService.findAll(ObservationSet.ENTITY_NAME, new QueryImpl().eq(ObservationSet.PARTOFDATASET, dataset)))
+				.thenReturn(observationSets0);
+		
+		when(dataService.findAll(ObservedValue.ENTITY_NAME,
+						new QueryImpl().eq(ObservedValue.OBSERVATIONSET, observationSet0))).thenReturn(observedValues0);
+
 		dataSetDeleterServiceImpl.deleteData(dataset);
+
 		// verify that only observationsets and abservedvalues belonging to the dataset are removed
 		verify(dataService, Mockito.atLeastOnce()).delete(eq(ObservationSet.ENTITY_NAME),
 				captorObservationSetsArrayList.capture());
