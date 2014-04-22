@@ -149,7 +149,10 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 		String username = SecurityUtils.getCurrentUsername();
 		for (StudyDefinition.Status status : StudyDefinition.Status.values())
 		{
-			studyDefinitions.addAll(studyManagerService.getStudyDefinitions(username, status));
+			if (status != StudyDefinition.Status.DRAFT)
+			{
+				studyDefinitions.addAll(studyManagerService.getStudyDefinitions(username, status));
+			}
 		}
 		return studyDefinitions;
 	}
@@ -161,7 +164,8 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 	{
 		MolgenisUser user = molgenisUserService.getUser(SecurityUtils.getCurrentUsername());
 		StudyDefinition studyDefinition = studyManagerService.getStudyDefinition(id.toString());
-		if (!studyDefinition.getAuthorEmail().equals(user.getEmail()))
+
+		if (!studyDefinition.getAuthorEmail().endsWith(user.getEmail()))
 		{
 			throw new MolgenisDataAccessException("Access denied to study definition [" + id + "]");
 		}
@@ -291,7 +295,14 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 
 		try
 		{
-			studyManagerService.updateStudyDefinition(studyDefinition);
+			if (Iterables.isEmpty(newCatalogItems))
+			{
+				// TOD remove StudyDefinition, empty item list is invalid according to the xsd
+			}
+			else
+			{
+				studyManagerService.updateStudyDefinition(studyDefinition);
+			}
 		}
 		catch (UnknownStudyDefinitionException e)
 		{

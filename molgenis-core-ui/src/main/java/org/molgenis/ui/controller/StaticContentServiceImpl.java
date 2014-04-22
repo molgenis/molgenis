@@ -1,4 +1,4 @@
-package org.molgenis.omx.controller;
+package org.molgenis.ui.controller;
 
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.framework.server.MolgenisSettings;

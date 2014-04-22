@@ -80,20 +80,27 @@
 	forms[${index}].meta.fields = [<#list form.metaData.fields as field>
 					{
 						name:'${field.name}', 
-						xref:${(field.dataType.enumType == 'XREF')?string('true', 'false')},
+						xref:${(field.dataType.enumType == 'XREF' || field.dataType.enumType == 'CATEGORICAL')?string('true', 'false')},
 						mref:${(field.dataType.enumType == 'MREF')?string('true', 'false')},
 						type:'${field.dataType.enumType}',
 						readOnly:${field.isReadonly()?string('true', 'false')},
 						unique:false,
 						<#if field.refEntity??>
-						xrefLabelName: '${field.refEntity.labelAttribute.name}',
+							<#if field.refEntity.labelAttribute??>
+								xrefLabelName: '${field.refEntity.labelAttribute.name}',
+							</#if>
 						xrefLabel: '${field.refEntity.name}',
 						xrefEntityName: '${field.refEntity.name?lower_case}'
 						</#if>
 					}
 					<#if field_has_next>,</#if>
 				</#list>];
-			
+				
+	//Get the label attribute
+	<#if form.metaData.labelAttribute??>
+		forms[${index}].meta.labelFieldName = '${form.metaData.labelAttribute.name}';
+	</#if>
+	
 	//Get a field by name				
 	forms[${index}].meta.getField = function(name) {
 		for (var i = 0; i < form${index}.meta.fields.length; i++) {

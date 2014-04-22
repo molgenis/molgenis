@@ -122,10 +122,14 @@ public class CategoryRepository extends AbstractRepository implements Countable
 		}
 		else
 		{
-			Iterable<Category> categories = dataService.findAll(Category.ENTITY_NAME,
-					new QueryImpl().in(Category.OBSERVABLEFEATURE, protocol.getFeatures()), Category.class);
+			List<ObservableFeature> features = protocol.getFeatures();
+			if (features != null && !features.isEmpty())
+			{
+				Iterable<Category> categories = dataService.findAll(Category.ENTITY_NAME,
+						new QueryImpl().in(Category.OBSERVABLEFEATURE, features), Category.class);
 
-			count.addAndGet(Iterables.size(categories));
+				count.addAndGet(Iterables.size(categories));
+			}
 		}
 	}
 

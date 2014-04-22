@@ -132,6 +132,13 @@ public class OmxStudyManagerService implements StudyManagerService
 	}
 
 	@Override
+	public boolean isStudyDataActivated(String id) throws UnknownStudyDefinitionException
+	{
+		// FIXME mee after isStudyDataLoaded(String id) is implemented
+		return isStudyDataLoaded(id);
+	}
+
+	@Override
 	public StudyDefinition createStudyDefinition(String username, String catalogId)
 	{
 		return createStudyDefinition(username, catalogId, UUID.randomUUID().toString());

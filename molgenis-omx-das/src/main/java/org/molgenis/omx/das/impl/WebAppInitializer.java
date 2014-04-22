@@ -9,7 +9,6 @@ import javax.servlet.ServletRegistration.Dynamic;
 
 import org.apache.log4j.Logger;
 import org.springframework.web.WebApplicationInitializer;
-import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 
 import uk.ac.ebi.mydas.controller.MydasServlet;
 
@@ -38,7 +37,7 @@ public class WebAppInitializer implements WebApplicationInitializer
 		}
 		else
 		{
-			dasServlet.setLoadOnStartup(2);
+			dasServlet.setLoadOnStartup(1);
 			dasServlet.addMapping("/das/*");
 		}
 	}

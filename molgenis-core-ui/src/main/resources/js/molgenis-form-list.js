@@ -5,7 +5,7 @@
 	var restApi = new molgenis.RestClient(false);
 	var NR_ROWS_PER_PAGE = 10;
 	var currentPages = [];
-	var selectedEntityId = null;//Id of the selected entity in the master list
+	var selectedEntityLabelValue = null;//Value of the labelAttribute of the selected entity
 	var search = null;
 	
 	ns.buildTableBody = function(formIndex, isPageChange) {
@@ -26,12 +26,12 @@
 			uri += '&q[0].field=' + search.field + '&q[0].operator=' + search.operator + '&q[0].value=' + encodeURIComponent(search.value);
 		}
 		
-		if ((formIndex > 0) && (selectedEntityId != null)) {
-			uri += '&q[0].field=' + forms[formIndex].xrefFieldName + '&q[0].operator=EQUALS&q[0].value=' + selectedEntityId;
+		if ((formIndex > 0) && (selectedEntityLabelValue != null)) {
+			uri += '&q[0].field=' + forms[formIndex].xrefFieldName + '&q[0].operator=EQUALS&q[0].value=' + selectedEntityLabelValue;
 		} 
 		
 		var entities = {};
-		if ((formIndex > 0) && (selectedEntityId == null)) {
+		if ((formIndex > 0) && (selectedEntityLabelValue == null)) {
 			//No selected master item, don't bother calling the api
 			entities.items = [];
 			entities.total = 0;
@@ -42,18 +42,19 @@
 		var items = [];
 		$.each(entities.items, function(index, entity) {
 			var id = restApi.getPrimaryKeyFromHref(entity.href);
+			var labelValue = entity[forms[formIndex].meta.labelFieldName];
 			var editPageUrl = forms[formIndex].baseUri + '/' + id + '?back=' + encodeURIComponent(CURRENT_URI);
 			var deleteApiUrl = '/api/v1/' + forms[formIndex].meta.name + '/' +  id;
 				
 			//Select first row when table is shown and we have master/detail
-			if ((forms.length > 1) && (formIndex == 0) && (selectedEntityId == null)) {
-				selectedEntityId = id;
+			if ((forms.length > 1) && (formIndex == 0) && (selectedEntityLabelValue == null)) {
+				selectedEntityLabelValue = labelValue;
 			}
 				
-			if (selectedEntityId == id) {
-				items.push('<tr data-id="' + id + '" class="info">');
+			if (labelValue && (selectedEntityLabelValue == labelValue)) {
+				items.push('<tr data-id="' + id + '" data-label="' + labelValue + '" class="info">');
 			} else {
-				items.push('<tr data-id="' + id + '">');
+				items.push('<tr data-id="' + id + '"  data-label="' + labelValue + '">');
 			}
 				
 			items.push('<td class="edit-entity"><a href="' + editPageUrl + '"><img src="/img/editview.gif"></a></td>');
@@ -104,7 +105,7 @@
 				tr.addClass('info');
 					
 				//Update subforms
-				selectedEntityId = tr.attr('data-id');
+				selectedEntityLabelValue = tr.attr('data-label');
 				ns.updateSubForms();
 				return false;
 			});
@@ -152,7 +153,7 @@
 			ns.buildTableBody(i);
 			
 			//Update url of create buttons of subforms so xref dropdown is preselected
-			var href = forms[i].baseUri + '/create?' + forms[i].xrefFieldName + '=' + selectedEntityId + '&back=' + encodeURIComponent(CURRENT_URI);
+			var href = forms[i].baseUri + '/create?' + forms[i].xrefFieldName + '=' + selectedEntityLabelValue + '&back=' + encodeURIComponent(CURRENT_URI);
 			$('#create-' + i).attr('href', href);
 		}
 	};
@@ -205,7 +206,7 @@
 			};
 			
 			//Build master tables
-			selectedEntityId = null;
+			selectedEntityLabelValue = null;
 			ns.refresh();
 			
 			return false;
