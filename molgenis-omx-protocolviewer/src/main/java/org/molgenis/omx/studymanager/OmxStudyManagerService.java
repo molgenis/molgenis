@@ -72,13 +72,11 @@ public class OmxStudyManagerService implements StudyManagerService
 	}
 
 	@Override
-	public List<StudyDefinition> getStudyDefinitions(String username, Status status)
+	public List<StudyDefinition> getStudyDefinitions(String username)
 	{
 		MolgenisUser user = molgenisUserService.getUser(username);
-		Iterable<StudyDataRequest> studyDataRequest = dataService.findAll(
-				StudyDataRequest.ENTITY_NAME,
-				new QueryImpl().eq(StudyDataRequest.MOLGENISUSER, user).and()
-						.eq(StudyDataRequest.REQUESTSTATUS, status.toString().toLowerCase()), StudyDataRequest.class);
+		Iterable<StudyDataRequest> studyDataRequest = dataService.findAll(StudyDataRequest.ENTITY_NAME,
+				new QueryImpl().eq(StudyDataRequest.MOLGENISUSER, user), StudyDataRequest.class);
 
 		return Lists.newArrayList(Iterables.transform(studyDataRequest,
 				new Function<StudyDataRequest, StudyDefinition>()
@@ -198,7 +196,7 @@ public class OmxStudyManagerService implements StudyManagerService
 						return feature;
 					}
 				})));
-        studyDataRequest.setRequestStatus(studyDefinition.getStatus().toString());
+		studyDataRequest.setRequestStatus(studyDefinition.getStatus().toString());
 
 		dataService.update(StudyDataRequest.ENTITY_NAME, studyDataRequest);
 	}
