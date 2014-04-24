@@ -13,9 +13,8 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.*;
 import org.molgenis.model.MolgenisModelException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-public class MysqlRepository implements Repository, Writable, Queryable, Manageable
+public class MysqlRepository implements Repository, Writable, Queryable, Manageable, CrudRepository
 {
 	public static final int BATCH_SIZE = 100000;
 	private EntityMetaData metaData;
@@ -23,10 +22,10 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 
 	public MysqlRepository(DataSource ds, EntityMetaData metaData)
 	{
-        if (metaData == null) throw new IllegalArgumentException("DataSource is null");
-        if (metaData == null) throw new IllegalArgumentException("metaData is null");
+		if (metaData == null) throw new IllegalArgumentException("DataSource is null");
+		if (metaData == null) throw new IllegalArgumentException("metaData is null");
 		this.metaData = metaData;
-        this.ds = ds;
+		this.ds = ds;
 	}
 
 	@Autowired
@@ -471,7 +470,13 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 		{
 			connection = ds.getConnection();
 			Statement stmt = connection.createStatement();
-			ResultSet rs = stmt.executeQuery(getSelectSql(q));
+			String sql = getSelectSql(q);
+
+			// tmp:
+			System.out.println("query: " + q);
+			System.out.println("sql: " + sql);
+
+			ResultSet rs = stmt.executeQuery(sql);
 			while (rs.next())
 			{
 				Entity e = new MapEntity();
@@ -548,13 +553,14 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 	@Override
 	public <E extends Entity> E findOne(Integer id, Class<E> clazz)
 	{
-		return null;
+		return findAll(Arrays.asList(new Integer[]
+		{ id }), clazz).iterator().next();
 	}
 
 	@Override
 	public <E extends Entity> E findOne(Query q, Class<E> clazz)
 	{
-		return null;
+		return findAll(q, clazz).iterator().next();
 	}
 
 	@Override
@@ -598,6 +604,18 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 			String predicate = "";
 			switch (r.getOperator())
 			{
+                case SEARCH:
+                    String search = "";
+                    for(AttributeMetaData att: getEntityMetaData().getAttributes())
+                    {
+                        //TODO: other data types???
+                        if(att.getDataType() instanceof StringField ||  att.getDataType() instanceof TextField)
+                        {
+                            search += " OR "+att.getName()+" LIKE '%"+r.getValue()+"%'";
+                        }
+                    }
+                    if(search.length()>0) predicate = search.substring(4);
+                    break;
 				case AND:
 					break;
 				case NESTED:
@@ -662,5 +680,117 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 	public MysqlRepositoryQuery query()
 	{
 		return new MysqlRepositoryQuery(this);
+	}
+
+	@Override
+	public void update(Entity entity)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void update(Iterable<? extends Entity> records)
+	{
+		throw new UnsupportedOperationException();
+
+	}
+
+	@Override
+	public void delete(Entity entity)
+	{
+		this.delete(Arrays.asList(new Entity[]
+		{ entity }));
+
+	}
+
+	@Override
+	public void delete(Iterable<? extends Entity> entities)
+	{
+		Connection connection = null;
+		try
+		{
+			connection = ds.getConnection();
+			PreparedStatement ps = connection.prepareStatement(this.getDeleteSql());
+			int count = 0;
+			AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
+			for (Entity e : entities)
+			{
+
+				if (e.get(idAttribute.getName()) == null)
+				{
+					throw new IllegalArgumentException("idAttribute cannot be null");
+				}
+				else
+				{
+					ps.setObject(1, e.get(idAttribute.getName()));
+				}
+
+			}
+			ps.addBatch();
+			count++;
+			if (count > BATCH_SIZE)
+			{
+				ps.executeBatch();
+				ps.clearBatch();
+				count = 0;
+			}
+
+			if (count > 0)
+			{
+				ps.executeBatch();
+			}
+			ps.close();
+		}
+		catch (Exception e)
+		{
+			throw new RuntimeException(e);
+		}
+		finally
+		{
+			if (connection != null)
+			{
+				try
+				{
+					connection.close();
+				}
+				catch (SQLException e)
+				{
+					e.printStackTrace();
+					throw new RuntimeException(e);
+				}
+			}
+		}
+	}
+
+	public String getDeleteSql()
+	{
+		return "DELETE FROM " + getName() + " WHERE " + getEntityMetaData().getIdAttribute().getName() + " = ?";
+	}
+
+	@Override
+	public void deleteById(Integer id)
+	{
+		throw new UnsupportedOperationException();
+
+	}
+
+	@Override
+	public void deleteById(Iterable<Integer> ids)
+	{
+		throw new UnsupportedOperationException();
+
+	}
+
+	@Override
+	public void deleteAll()
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
+	{
+		throw new UnsupportedOperationException();
+
 	}
 }

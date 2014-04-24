@@ -3,9 +3,6 @@ package org.molgenis.data.mysql;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
 
-/**
- * Created by mswertz on 01/04/14.
- */
 public class MysqlRepositoryQuery extends QueryImpl
 {
 	MysqlRepository repo;

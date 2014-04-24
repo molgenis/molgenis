@@ -81,6 +81,7 @@ public class MysqlRepositoryCollection implements RepositoryCollection
 						.setNillable(a.getBoolean("nillable")).setAuto(a.getBoolean("auto"));
 			}
 
+			System.out.println(e.getString("name"));
 			this.repositories.put(md.getName(), new MysqlRepository(ds, md));
 		}
 	}
@@ -172,4 +173,17 @@ public class MysqlRepositoryCollection implements RepositoryCollection
 	{
 		return repositories.get(name);
 	}
+
+	public void drop(String name)
+	{
+        //remove the repo
+		MysqlRepository r = this.repositories.get(name);
+		if (r == null) throw new IllegalArgumentException("drop('" + name + "'): could not find");
+		r.drop();
+		this.repositories.remove(name);
+
+        //delete metadata
+        attributes.delete(attributes.findAll(new QueryImpl().eq("entity",name)));
+        entities.delete(entities.findAll(new QueryImpl().eq("name",name)));
+    }
 }

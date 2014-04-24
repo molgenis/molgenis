@@ -23,15 +23,13 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class AppConfig
 {
 	private String dbDriverClass = "com.mysql.jdbc.Driver";
-	private String dbJdbcUri = MysqlRepositoryTestConstants.URL;
+	private String dbJdbcUri = "jdbc:mysql://localhost:3306/omx?rewriteBatchedStatements=true";
 	private String dbUser = "molgenis";
 	private String dbPassword = "molgenis";
 
 	@Bean
 	public DataSource dataSource()
 	{
-		System.out.println("BLAAAT");
-
 		if (dbDriverClass == null) throw new IllegalArgumentException("db_driver is null");
 		if (dbJdbcUri == null) throw new IllegalArgumentException("db_uri is null");
 		if (dbUser == null) throw new IllegalArgumentException(

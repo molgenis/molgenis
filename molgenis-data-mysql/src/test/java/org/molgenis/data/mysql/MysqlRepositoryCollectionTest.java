@@ -33,9 +33,7 @@ public class MysqlRepositoryCollectionTest extends AbstractTestNGSpringContextTe
 	public void test()
 	{
 		// delete old stuff
-		new MysqlRepository(ds,new DefaultEntityMetaData("attributes")).drop();
-		new MysqlRepository(ds,new DefaultEntityMetaData("entities")).drop();
-		new MysqlRepository(ds,new DefaultEntityMetaData("coll_person")).drop();
+        coll.drop("coll_person");
 
 		// create collection, add repo, destroy and reload
 		DefaultEntityMetaData personMD = new DefaultEntityMetaData("coll_person").setIdAttribute("email");
@@ -47,7 +45,6 @@ public class MysqlRepositoryCollectionTest extends AbstractTestNGSpringContextTe
 		personMD.addAttribute("active").setDataType(MolgenisFieldTypes.BOOL);
 
         //autowired ds
-        //coll = new MysqlRepositoryCollection(ds);
 		coll.add(personMD);
 
 		// destroy and rebuild
