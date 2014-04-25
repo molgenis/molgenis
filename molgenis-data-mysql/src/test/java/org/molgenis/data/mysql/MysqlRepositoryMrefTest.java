@@ -100,7 +100,7 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 				"SELECT this.identifier, GROUP_CONCAT(DISTINCT(stringRef.stringRef)) AS stringRef, GROUP_CONCAT(DISTINCT(intRef.intRef)) AS intRef FROM MrefTest AS this LEFT JOIN MrefTest_stringRef AS stringRef_filter ON (this.identifier = stringRef_filter.identifier) LEFT JOIN MrefTest_stringRef AS stringRef ON (this.identifier = stringRef.identifier) LEFT JOIN MrefTest_intRef AS intRef_filter ON (this.identifier = intRef_filter.identifier) LEFT JOIN MrefTest_intRef AS intRef ON (this.identifier = intRef.identifier) GROUP BY this.identifier");
 		for (Entity e : mrefRepo.findAll(new QueryImpl().eq("identifier", "one")))
 		{
-			logger.debug("found: " + e);
+			logger.info("found: " + e);
 			Assert.assertEquals(e.get("stringRef"), "ref1,ref2");
 			Assert.assertEquals(e.getList("stringRef"), Arrays.asList(new String[]
 			{ "ref1", "ref2" }));
