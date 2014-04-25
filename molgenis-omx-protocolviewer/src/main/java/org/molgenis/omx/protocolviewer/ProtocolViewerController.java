@@ -30,6 +30,7 @@ import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.utils.I18nTools;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.study.StudyDefinition;
+import org.molgenis.study.StudyDefinition.Status;
 import org.molgenis.study.UnknownStudyDefinitionException;
 import org.molgenis.util.ErrorMessageResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -235,6 +236,7 @@ public class ProtocolViewerController extends MolgenisPluginController
 	public StudyDefinitionsResponse getOrders()
 	{
 		if (!getEnableOrderAction()) throw new MolgenisDataAccessException("Action not allowed");
+
 		Iterable<StudyDefinitionResponse> ordersIterable = Iterables.transform(
 				protocolViewerService.getStudyDefinitionsForCurrentUser(),
 				new Function<StudyDefinition, StudyDefinitionResponse>()
@@ -243,9 +245,11 @@ public class ProtocolViewerController extends MolgenisPluginController
 					@Nullable
 					public StudyDefinitionResponse apply(@Nullable StudyDefinition studyDefinition)
 					{
-						return studyDefinition != null ? new StudyDefinitionResponse(studyDefinition) : null;
+						return studyDefinition != null ? (studyDefinition.getStatus() != Status.DRAFT ? new StudyDefinitionResponse(
+								studyDefinition) : null) : null;
 					}
 				});
+
 		return new StudyDefinitionsResponse(Lists.newArrayList(ordersIterable));
 	}
 
