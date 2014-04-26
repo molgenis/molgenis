@@ -14,6 +14,7 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.springframework.data.domain.Sort;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -84,9 +85,21 @@ public class MysqlRepositoryTest
 		Assert.assertEquals(repo.getCountSql(new QueryImpl()), "SELECT count(this.lastName) FROM MysqlPerson AS this");
 
 		// test where clauses
-		Assert.assertEquals(repo.getWhereSql(new QueryImpl().eq("firstName", "John")), "this.firstName = 'John'");
+		Assert.assertEquals(repo.getWhereSql(new QueryImpl().eq("firstName", "John")), "WHERE this.firstName = 'John'");
 		Assert.assertEquals(repo.getWhereSql(new QueryImpl().eq("firstName", "John").eq("age", "5")),
-				"this.firstName = 'John' AND this.age = 5");
+            "WHERE this.firstName = 'John' AND this.age = 5");
+
+        //search
+        Assert.assertEquals(repo.getWhereSql(new QueryImpl().search("John")),
+                "WHERE (this.firstName LIKE '%John%' OR this.lastName LIKE '%John%' OR CAST(this.age as CHAR) LIKE '%John%')");
+
+        //sort
+        Assert.assertEquals(repo.getWhereSql(new QueryImpl().sort(Sort.Direction.ASC,"firstName"))
+                ,"ORDER BY firstName ASC");
+        Assert.assertEquals(repo.getWhereSql(new QueryImpl().sort(Sort.Direction.DESC,"firstName"))
+                ,"ORDER BY firstName DESC");
+        Assert.assertEquals(repo.getWhereSql(new QueryImpl().eq("firstName", "John").sort(Sort.Direction.DESC,"firstName"))
+                ,"WHERE this.firstName = 'John' ORDER BY firstName DESC");
 
         //test delete clauses
         Assert.assertEquals(repo.getDeleteSql(), "DELETE FROM MysqlPerson WHERE lastName = ?");

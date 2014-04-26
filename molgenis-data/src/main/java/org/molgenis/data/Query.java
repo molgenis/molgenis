@@ -88,5 +88,7 @@ public interface Query
 
 	Query offset(int offset);
 
+    Query sort(Sort.Direction direction, String ... fields);
+
 	Query sort(Sort sort);
 }

@@ -102,7 +102,12 @@ public class MysqlRepositoryCountTest
 		// query test
 
 		Assert.assertEquals(persons.count(), 3);
-		// string
+
+        //search all text/string fields
+        Assert.assertEquals(persons.count(new QueryImpl().search("doe")), 2);
+
+
+        // string
 		Assert.assertEquals(persons.count(new QueryImpl().eq("lastName", "doe")), 2);
 		Assert.assertEquals(persons.count(new QueryImpl().eq("lastName", "duck")), 1);
 		Assert.assertEquals(persons.count(new QueryImpl().eq("lastName", "duck").or().eq("lastName", "doe")), 3);

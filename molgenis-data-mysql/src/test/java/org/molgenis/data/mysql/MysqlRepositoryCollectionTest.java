@@ -1,6 +1,7 @@
 package org.molgenis.data.mysql;
 
 import java.beans.PropertyVetoException;
+import java.util.Locale;
 
 import javax.sql.DataSource;
 
@@ -52,10 +53,15 @@ public class MysqlRepositoryCollectionTest extends AbstractTestNGSpringContextTe
 		Assert.assertNotNull(coll.getRepositoryByEntityName("coll_person"));
 
 		MysqlRepository repo = (MysqlRepository) coll.getRepositoryByEntityName("coll_person");
+        String[] locale = Locale.getISOCountries();
 		for (int i = 0; i < 10; i++)
 		{
 			Entity e = new MapEntity();
 			e.set("email", i + "@localhost");
+            e.set("firstName", locale[i]);
+            e.set("height", 170+i);
+            e.set("birthday","1992-03-1"+i);
+            e.set("active", i % 2);
 			repo.add(e);
 		}
 
@@ -74,7 +80,8 @@ public class MysqlRepositoryCollectionTest extends AbstractTestNGSpringContextTe
 
 		ComboPooledDataSource dataSource = new ComboPooledDataSource();
 		dataSource.setDriverClass("com.mysql.jdbc.Driver");
-		dataSource.setJdbcUrl(MysqlRepositoryTestConstants.URL);
+        dataSource.setJdbcUrl("jdbc:mysql://localhost:3306/omx?rewriteBatchedStatements=true)");
+		//dataSource.setJdbcUrl(MysqlRepositoryTestConstants.URL);
 		dataSource.setUser("molgenis");
 		dataSource.setPassword("molgenis");
 

@@ -1,7 +1,6 @@
 package org.molgenis.data.mysql;
 
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -16,6 +15,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.*;
 import org.molgenis.model.MolgenisModelException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -287,13 +287,14 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 			}
 		});
 
-        //add mrefs as well
-        for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes()) {
-            if (att.getDataType() == MolgenisFieldTypes.MREF) {
-                addMref(mrefs.get(att.getName()), att);
-            }
-        }
-
+		// add mrefs as well
+		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
+		{
+			if (att.getDataType() == MolgenisFieldTypes.MREF)
+			{
+				addMref(mrefs.get(att.getName()), att);
+			}
+		}
 
 	}
 
@@ -375,7 +376,7 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 		}
 		String where = getWhereSql(q);
 		String result = select + getFromSql();
-		if (where.length() > 0) result += " WHERE " + where;
+		if (where.length() > 0) result += " " + where;
 		if (select.contains("GROUP_CONCAT") && group.length() > 0) result += " GROUP BY " + group;
 		return result;
 	}
@@ -464,7 +465,7 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 		String where = getWhereSql(q);
 		String from = getFromSql();
 		String idAttribute = getEntityMetaData().getIdAttribute().getName();
-		if (where.length() > 0) return "SELECT count(this." + idAttribute + ")" + from + " WHERE " + where;
+		if (where.length() > 0) return "SELECT count(this." + idAttribute + ")" + from + " " + where;
 		return "SELECT count(this." + idAttribute + ")" + from;
 	}
 
@@ -483,10 +484,14 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 						// TODO: other data types???
 						if (att.getDataType() instanceof StringField || att.getDataType() instanceof TextField)
 						{
-							search += " OR " + att.getName() + " LIKE '%" + r.getValue() + "%'";
+							search += " OR this." + att.getName() + " LIKE '%" + r.getValue() + "%'";
 						}
+                        else
+                        {
+                            search += " OR CAST(this." + att.getName() + " as CHAR) LIKE '%" + r.getValue() + "%'";
+                        }
 					}
-					if (search.length() > 0) predicate = search.substring(4);
+					if (search.length() > 0) result += "(" + search.substring(4) + ")";
 					break;
 				case AND:
 					break;
@@ -534,7 +539,27 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 					result += predicate;
 			}
 		}
-		return result;
+		String sortSql = "";
+		if (q.getSort() != null)
+		{
+			for (Sort.Order o : q.getSort())
+			{
+				sortSql += ", " + o.getProperty();
+				if (o.getDirection().equals(Sort.Direction.DESC))
+				{
+					sortSql += " DESC";
+				}
+				else
+				{
+					sortSql += " ASC";
+				}
+			}
+
+			if (sortSql.length() > 0) sortSql = " ORDER BY " + sortSql.substring(2);
+
+		}
+		if (result.length() > 0) return "WHERE " + result + sortSql;
+		else return sortSql.trim();
 	}
 
 	private String formatValue(AttributeMetaData att, Object value)
