@@ -48,10 +48,10 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 		attributes.put(attributeMetaData.getName().toLowerCase(), attributeMetaData);
 	}
 
-    public void removeAttributeMetaData(AttributeMetaData attributeMetaData)
-    {
-        this.attributes.remove(attributeMetaData.getName());
-    }
+	public void removeAttributeMetaData(AttributeMetaData attributeMetaData)
+	{
+		this.attributes.remove(attributeMetaData.getName());
+	}
 
 	public void addAllAttributeMetaData(List<AttributeMetaData> attributeMetaDataList)
 	{
@@ -219,6 +219,9 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 		String result = "\nEntityMetaData(name='" + this.getName() + "'";
 		if (isAbstract()) result += " abstract='true'";
 		if (getExtends() != null) result += " extends='" + getExtends().getName() + "'";
+		if (getIdAttribute() != null) result += " idAttribute='" + getIdAttribute().getName() + "'";
+		if (getDescription() != null) result += " description='"
+				+ getDescription().substring(0, Math.min(25, getDescription().length())) + (getDescription().length() > 25 ? "...'" : "'");
 		result += ")";
 		for (AttributeMetaData att : this.getAttributes())
 		{

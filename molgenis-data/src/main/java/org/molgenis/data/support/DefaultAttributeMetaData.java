@@ -15,7 +15,7 @@ import org.molgenis.fieldtypes.XrefField;
 public class DefaultAttributeMetaData implements AttributeMetaData
 {
 	private final String name;
-	private FieldType fieldType;
+	private FieldType fieldType = MolgenisFieldTypes.STRING;
 	private String description;
 	private boolean nillable = true;
 	private boolean readOnly = false;

@@ -27,7 +27,10 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 			public Iterable<AttributeMetaData> children(AttributeMetaData attributeMetaData)
 			{
 				FieldType dataType = attributeMetaData.getDataType();
-				if (dataType.equals(MolgenisFieldTypes.COMPOUND)) return attributeMetaData.getAttributeParts();
+				if (dataType.equals(MolgenisFieldTypes.COMPOUND))
+				{
+					return attributeMetaData.getAttributeParts();
+				}
 				else return Collections.<AttributeMetaData> emptyList();
 			}
 		}.preOrderTraversal(new AttributeMetaData()
