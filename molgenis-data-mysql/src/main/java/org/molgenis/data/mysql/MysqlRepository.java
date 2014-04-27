@@ -80,6 +80,7 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 		}
 		catch (Exception e)
 		{
+            e.printStackTrace();
 			throw new RuntimeException(e);
 		}
 	}
@@ -100,7 +101,7 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 		String sql = "CREATE TABLE IF NOT EXISTS " + getEntityMetaData().getName() + "(";
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 		{
-			if (att.getDataType() != MolgenisFieldTypes.MREF)
+			if (!(att.getDataType() instanceof MrefField))
 			{
 				sql += att.getName() + " ";
 				// xref adopt type of the identifier of referenced entity

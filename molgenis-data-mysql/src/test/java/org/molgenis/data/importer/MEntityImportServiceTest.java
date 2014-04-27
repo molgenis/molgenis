@@ -1,8 +1,16 @@
 package org.molgenis.data.importer;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.AppConfig;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.excel.ExcelRepositoryCollection;
+import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -12,16 +20,38 @@ import org.testng.annotations.Test;
 @ContextConfiguration(classes = AppConfig.class)
 public class MEntityImportServiceTest extends AbstractTestNGSpringContextTests
 {
-	@Autowired
-	MEntityImportService importer;
+    @Autowired
+    MysqlRepositoryCollection store;
 
 	@Test
-	public void test1() throws IOException
-	{
-		Assert.assertNotNull(importer);
+	public void test1() throws IOException, InvalidFormatException, InterruptedException {
 
-        //create test excel
+		// create test excel
+		File f = new File("/Users/mswertz/example.xlsx");
+		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
 
-        importer.doImport(null, null);
+		Assert.assertEquals(source.getNumberOfSheets(), 3);
+		Assert.assertNotNull(source.getRepositoryByEntityName("attributes"));
+
+		List<Entity> entities = new ArrayList<Entity>();
+		for (Entity e : source.getRepositoryByEntityName("attributes"))
+		{
+			System.out.println(e);
+		}
+
+		MEntityImportServiceImpl importer = new MEntityImportServiceImpl();
+        importer.setRepositoryCollection(store);
+
+		for (EntityMetaData em : importer.getEntityMetaData(source).values())
+		{
+			System.out.println(em);
+		}
+
+        //test import
+        importer.doImport(source,null);
+
+        //wait to make sure logger has outputted
+        Thread.sleep(1000);
+
 	}
 }
