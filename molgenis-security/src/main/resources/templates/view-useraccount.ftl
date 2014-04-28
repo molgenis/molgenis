@@ -131,13 +131,28 @@
 					<div class="span6 offset6">
 						<div class="control-group">
 							<div class="controls">
-								<button type="submit" id="submit-button" class="btn pull-right">Apply changes</button>
+								<button type="submit" id="submit-button" class="btn btn-primary pull-right">Apply changes</button>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-	   </form>
+		</form>
+	</div>	
+	<div class="row-fluid">
+		<div class="span8 offset2">
+			<legend>Group information</legend>
+			<div class="span4">
+				A member of the following groups:
+			</div>
+			<div class="span4">
+				<ul id="groups" class="inline">
+					<#list groups as group>
+						<li>${group.name}</li>
+					</#list>
+				</ul>
+			</div>
+		</div>
 	</div>
 	<script type="text/javascript">
   	$(function() {
