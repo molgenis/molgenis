@@ -117,15 +117,14 @@ public class DataSetDeleterServiceImpl implements DataSetDeleterService
 		while (!observedValues.isEmpty())
 		{
 			List<ObservedValue> observedValuesToDelete = new ArrayList<ObservedValue>();
-			for (int i = 0; i < observedValues.size(); i++)
+			for (int i = 0; (i < observedValues.size()) && (i < maxDeleteBatch); i++)
 			{
 				ObservedValue observedValue = observedValues.get(i);
 				observedValuesToDelete.add(observedValue);
 				values.add(observedValue.getValue());
-				if (i == maxDeleteBatch) break;
 			}
-			observedValues.removeAll(observedValuesToDelete);
 			dataService.delete(ObservedValue.ENTITY_NAME, observedValuesToDelete);
+			observedValues.removeAll(observedValuesToDelete);
 			observedValuesToDelete.clear();
 		}
 
@@ -148,13 +147,13 @@ public class DataSetDeleterServiceImpl implements DataSetDeleterService
 		while (!values.isEmpty())
 		{
 			List<Value> valuesToDelete = new ArrayList<Value>();
-			for (int i = 0; (i < values.size()) && (i == maxDeleteBatch); i++)
+			for (int i = 0; (i < values.size()) && (i < maxDeleteBatch); i++)
 			{
 				Value value = values.get(i);
 				valuesToDelete.add(value);
 			}
-			values.removeAll(valuesToDelete);
 			dataService.delete(Value.ENTITY_NAME, valuesToDelete);
+			values.removeAll(valuesToDelete);
 			valuesToDelete.clear();
 		}
 	}
@@ -167,19 +166,19 @@ public class DataSetDeleterServiceImpl implements DataSetDeleterService
 	 * @param the
 	 *            protocols that should be deleted
 	 */
-	void deleteProtocol(Protocol protocol, List<Entity> entitiesList)
+	void deleteProtocol(Protocol protocol, List<Entity> allEntitiesList)
 	{
 		List<Protocol> subprotocolsToDelete = protocol.getSubprotocols();
 		for (Protocol subprotocol : subprotocolsToDelete)
 		{
-			int superprotocolcount = countReferringEntities(subprotocol, entitiesList);
-			if (superprotocolcount == 1)
+			int superprotocolcount = countReferringEntities(subprotocol, allEntitiesList);
+			if (superprotocolcount <= 1)
 			{
-				deleteProtocol(subprotocol, entitiesList);
+				deleteProtocol(subprotocol, allEntitiesList);
 			}
 		}
 		List<ObservableFeature> subFeatures = protocol.getFeatures();
-		deleteFeatures(subFeatures, entitiesList);
+		deleteFeatures(subFeatures, allEntitiesList);
 		dataService.delete(Protocol.ENTITY_NAME, protocol);
 	}
 	
@@ -193,11 +192,11 @@ public class DataSetDeleterServiceImpl implements DataSetDeleterService
 	void deleteProtocol(Protocol protocol)
 	{
 		
-		List<Entity> entitiesList = Lists.newArrayList(dataService.findAll(ObservedValue.ENTITY_NAME,
+		List<Entity> allEntitiesList = Lists.newArrayList(dataService.findAll(ObservedValue.ENTITY_NAME,
 				new QueryImpl()));
-		entitiesList.addAll(Lists.newArrayList(dataService.findAll(Protocol.ENTITY_NAME, new QueryImpl())));
-		entitiesList.addAll(Lists.newArrayList(dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl())));
-		deleteProtocol(protocol, entitiesList);
+		allEntitiesList.addAll(Lists.newArrayList(dataService.findAll(Protocol.ENTITY_NAME, new QueryImpl())));
+		allEntitiesList.addAll(Lists.newArrayList(dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl())));
+		deleteProtocol(protocol, allEntitiesList);
 	}
 
 	/**
@@ -208,14 +207,14 @@ public class DataSetDeleterServiceImpl implements DataSetDeleterService
 	 * @param the
 	 *            features that should be deleted
 	 */
-	void deleteFeatures(List<ObservableFeature> features, List<Entity> entitiesList)
+	void deleteFeatures(List<ObservableFeature> features, List<Entity> allEntitiesList)
 	{
 		List<ObservableFeature> removableFeatures = new ArrayList<ObservableFeature>();
 		List<OntologyTerm> ontologyTermsToRemove = new ArrayList<OntologyTerm>();
 
 		for (ObservableFeature feature : features)
 		{
-			int entityCount = countReferringEntities(feature, entitiesList);
+			int entityCount = countReferringEntities(feature, allEntitiesList);
 			if (entityCount <= 1)
 			{
 				removableFeatures.add(feature);
@@ -232,14 +231,8 @@ public class DataSetDeleterServiceImpl implements DataSetDeleterService
 				deleteCategories(categories);
 			}
 
-			// Remove repository
-			final String entityName = feature.getIdentifier();
-			if (dataService.hasRepository(entityName))
-			{
-				dataService.removeRepository(entityName);
-			}
-
 			// Remove repository lookup table if exists
+			final String entityName = feature.getIdentifier();
 			final String entityNameOmxLookupTable = OmxLookupTableEntityMetaData
 					.createOmxLookupTableEntityMetaDataName(entityName);
 			if (dataService.hasRepository(entityNameOmxLookupTable))
@@ -288,10 +281,10 @@ public class DataSetDeleterServiceImpl implements DataSetDeleterService
 	{
 		for (Entity category : categories)
 		{
-			Iterable<Entity> categoricalValues = dataService.findAll(CategoricalValue.ENTITY_NAME,
-					new QueryImpl().eq(CategoricalValue.VALUE, category));
+			Iterable<CategoricalValue> categoricalValues = dataService.findAll(CategoricalValue.ENTITY_NAME,
+					new QueryImpl().eq(CategoricalValue.VALUE, category), CategoricalValue.class);
 
-			for (Entity categoricalValue : categoricalValues)
+			for (CategoricalValue categoricalValue : categoricalValues)
 			{
 				dataService.delete(CategoricalValue.ENTITY_NAME, categoricalValue);
 			}
@@ -316,6 +309,11 @@ public class DataSetDeleterServiceImpl implements DataSetDeleterService
 
 		for (Entity entity : entitiesList)
 		{
+			if (entity.equals(characteristic))
+			{
+				continue;
+			}
+
 			if (entity.getClass().equals(Protocol.class))
 			{
 				Protocol protocol = (Protocol) entity;
