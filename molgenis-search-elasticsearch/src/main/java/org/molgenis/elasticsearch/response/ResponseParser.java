@@ -96,35 +96,43 @@ public class ResponseParser
 						yLabels.add(labels[1]);
 					}
 
-					List<Long> yTotals = Lists.newArrayList();
 					for (String xLabel : xLabels)
 					{
 						List<Long> row = Lists.newArrayList();
 						matrix.add(row);
 
-						int i = 0;
-						long xTotal = 0;
+						long rowTotal = 0;
 						for (String yLabel : yLabels)
 						{
 							TermsFacet.Entry term = findTerm(xLabel + "~" + yLabel, facet);
 							Long count = term != null ? Long.valueOf(term.getCount()) : 0;
 							row.add(count);
-							xTotal += count;
+							rowTotal += count;
+						}
+						row.add(rowTotal);
+					}
 
-							if (yTotals.size() - 1 < i)
+					yLabels.add("Total");
+
+					// Column totals
+					List<Long> columnTotals = Lists.newArrayList();
+					for (List<Long> row : matrix)
+					{
+						int i = 0;
+						for (Long cellCount : row)
+						{
+							if (columnTotals.size() - 1 < i)
 							{
-								yTotals.add(count);
+								columnTotals.add(cellCount);
 							}
 							else
 							{
-								yTotals.set(i, yTotals.get(i) + count);
+								columnTotals.set(i, columnTotals.get(i) + cellCount);
 							}
+							i++;
 						}
-						row.add(xTotal);
 					}
-
-					matrix.add(yTotals);
-					yLabels.add("Total");
+					matrix.add(columnTotals);
 					xLabels.add("Total");
 				}
 				else
