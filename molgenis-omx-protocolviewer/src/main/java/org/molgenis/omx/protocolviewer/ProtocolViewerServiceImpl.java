@@ -105,30 +105,36 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 	@Transactional(readOnly = true)
 	public StudyDefinition getStudyDefinitionDraftForCurrentUser(String catalogId) throws UnknownCatalogException
 	{
-		List<StudyDefinition> studyDefinitions = studyManagerService.getStudyDefinitions(
-				SecurityUtils.getCurrentUsername(), StudyDefinition.Status.DRAFT);
+		List<StudyDefinition> studyDefinitions = studyManagerService.getStudyDefinitions(SecurityUtils
+				.getCurrentUsername());
+
 		for (StudyDefinition studyDefinition : studyDefinitions)
 		{
-			Catalog catalogOfStudyDefinition;
-			try
+			if (studyDefinition.getStatus() == StudyDefinition.Status.DRAFT)
 			{
-				catalogOfStudyDefinition = catalogService.getCatalogOfStudyDefinition(studyDefinition.getId());
-			}
-			catch (UnknownCatalogException e)
-			{
-				logger.error("", e);
-				throw new RuntimeException(e);
-			}
-			catch (UnknownStudyDefinitionException e)
-			{
-				logger.error("", e);
-				throw new RuntimeException(e);
-			}
-			if (catalogOfStudyDefinition.getId().equals(catalogId))
-			{
-				return studyDefinition;
+				Catalog catalogOfStudyDefinition;
+				try
+				{
+					catalogOfStudyDefinition = catalogService.getCatalogOfStudyDefinition(studyDefinition.getId());
+				}
+				catch (UnknownCatalogException e)
+				{
+					logger.error("", e);
+					throw new RuntimeException(e);
+				}
+				catch (UnknownStudyDefinitionException e)
+				{
+					logger.error("", e);
+					throw new RuntimeException(e);
+				}
+
+				if (catalogOfStudyDefinition.getId().equals(catalogId))
+				{
+					return studyDefinition;
+				}
 			}
 		}
+
 		return null;
 	}
 
@@ -145,16 +151,8 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 	@Transactional(readOnly = true)
 	public List<StudyDefinition> getStudyDefinitionsForCurrentUser()
 	{
-		List<StudyDefinition> studyDefinitions = new ArrayList<StudyDefinition>();
 		String username = SecurityUtils.getCurrentUsername();
-		for (StudyDefinition.Status status : StudyDefinition.Status.values())
-		{
-			if (status != StudyDefinition.Status.DRAFT)
-			{
-				studyDefinitions.addAll(studyManagerService.getStudyDefinitions(username, status));
-			}
-		}
-		return studyDefinitions;
+		return studyManagerService.getStudyDefinitions(username);
 	}
 
 	@Override
