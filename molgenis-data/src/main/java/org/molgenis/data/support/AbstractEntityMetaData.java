@@ -6,6 +6,7 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Range;
 import org.molgenis.fieldtypes.FieldType;
 
 import com.google.common.base.Predicate;
@@ -125,6 +126,12 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 
 			@Override
 			public boolean isAggregateable()
+			{
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public Range getRange()
 			{
 				throw new UnsupportedOperationException();
 			}
