@@ -210,7 +210,6 @@ public class DataSetDeleterServiceImpl implements DataSetDeleterService
 	void deleteFeatures(List<ObservableFeature> features, List<Entity> allEntitiesList)
 	{
 		List<ObservableFeature> removableFeatures = new ArrayList<ObservableFeature>();
-		List<OntologyTerm> ontologyTermsToRemove = new ArrayList<OntologyTerm>();
 
 		for (ObservableFeature feature : features)
 		{
@@ -245,16 +244,9 @@ public class DataSetDeleterServiceImpl implements DataSetDeleterService
 					new QueryImpl().eq(Characteristic.IDENTIFIER, entityName), Characteristic.class);
 			dataService.delete(Characteristic.ENTITY_NAME, c);
 
-
-			final OntologyTerm ontologyTerm = feature.getUnit();
-			if (null != ontologyTerm) ontologyTermsToRemove.add(ontologyTerm);
-
 			// Remove feature
 			dataService.delete(ObservableFeature.ENTITY_NAME, feature);
 		}
-
-		// Remove ontologyTerms
-		deleteOntologyTerms(ontologyTermsToRemove);
 	}
 
 	/**
