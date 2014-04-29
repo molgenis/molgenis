@@ -7,6 +7,7 @@
 	"ui.fancytree.min.css",
 	"jquery-ui-1.9.2.custom.min.css",
 	"select2.css",
+	"iThing-min.css",
 	"dataexplorer.css"]>
 <#assign js=[
 	"jquery-ui-1.9.2.custom.min.js",
@@ -17,6 +18,7 @@
 	"jquery.fancytree.min.js",
 	"jquery.molgenis.tree.js",
 	"select2.min.js",
+	"jQEditRangeSlider-min.js",
 	"jquery.molgenis.xrefsearch.js",
 	"dataexplorer.js"]>
 <@header css js/>

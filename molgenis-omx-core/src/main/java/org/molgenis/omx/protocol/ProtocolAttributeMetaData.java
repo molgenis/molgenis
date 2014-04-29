@@ -7,6 +7,7 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Range;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
@@ -153,5 +154,11 @@ public class ProtocolAttributeMetaData implements AttributeMetaData
 	public boolean isAggregateable()
 	{
 		return false;
+	}
+
+	@Override
+	public Range getRange()
+	{
+		return null;
 	}
 }

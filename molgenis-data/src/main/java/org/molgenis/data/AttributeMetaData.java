@@ -87,4 +87,9 @@ public interface AttributeMetaData
 	 * 'CATEGORICAL' are aggregateable.
 	 */
 	boolean isAggregateable();
+
+	/**
+	 * For int and long fields, the value must be between min and max (included) of the range
+	 **/
+	Range getRange();
 }
