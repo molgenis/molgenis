@@ -24,7 +24,7 @@
 	function createAggregatesTable() {
 		var attributes = getAttributes();
 		var aggregableAttributes = $.grep(attributes, function(attribute) {
-			return attribute.fieldType === 'BOOL' || attribute.fieldType === 'CATEGORICAL' || attribute.fieldType === 'XREF';
+			return attribute.aggregateable;
 		});
 
 		if (aggregableAttributes.length > 0) {

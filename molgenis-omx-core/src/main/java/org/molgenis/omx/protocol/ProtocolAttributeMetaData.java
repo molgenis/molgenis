@@ -148,4 +148,10 @@ public class ProtocolAttributeMetaData implements AttributeMetaData
 	{
 		return false;
 	}
+
+	@Override
+	public boolean isAggregateable()
+	{
+		return false;
+	}
 }

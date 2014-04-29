@@ -308,7 +308,7 @@
 			var attribute = $(this).data('attribute');
 			var filter = filters[attribute.href];
 
-			$(":input", $(this)).not('[type=radio]:not(:checked)').not('[type=checkbox]:not(:checked)').each(function(i){
+			$(":input", $(this)).not('[type=radio]:not(:checked)').not('[type=checkbox]:not(:checked)').each(function(){
 				var value = $(this).val();
 				if(value) {
 					if(!filter) {
@@ -331,7 +331,7 @@
                                 values.push(mrefValues[i]);
                             });
                         } else{
-						    values[i] = value;
+                        	values[values.length] = value;
                         }
 					}
 				}

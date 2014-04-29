@@ -3,8 +3,11 @@ package org.molgenis.elasticsearch.request;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchType;
+import org.elasticsearch.search.facet.FacetBuilders;
+import org.elasticsearch.search.facet.terms.TermsFacet.ComparatorType;
 import org.molgenis.data.Query;
 
 /**
@@ -33,7 +36,8 @@ public class SearchRequestGenerator
 	 * @return SearchRequestBuilder
 	 */
 	public void buildSearchRequest(SearchRequestBuilder searchRequestBuilder, List<String> entityNames,
-			SearchType searchType, Query query, List<String> fieldsToReturn)
+			SearchType searchType, Query query, List<String> fieldsToReturn, String aggregateField1,
+			String aggregateField2)
 	{
 		searchRequestBuilder.setSearchType(searchType);
 
@@ -54,12 +58,34 @@ public class SearchRequestGenerator
 		{
 			generator.generate(searchRequestBuilder, query);
 		}
+
+		// Aggregates
+		if (StringUtils.isNotBlank(aggregateField1) || StringUtils.isNotBlank(aggregateField2))
+		{
+			StringBuilder sb = new StringBuilder();
+			if (StringUtils.isNotBlank(aggregateField1))
+			{
+				sb.append(aggregateField1);
+				if (StringUtils.isNotBlank(aggregateField2))
+				{
+					sb.append("~");
+				}
+			}
+
+			if (StringUtils.isNotBlank(aggregateField2))
+			{
+				sb.append(aggregateField2);
+			}
+
+			searchRequestBuilder.addFacet(FacetBuilders.termsFacet(sb.toString()).fields(sb.toString()).allTerms(true)
+					.size(Integer.MAX_VALUE).order(ComparatorType.TERM));
+		}
 	}
 
 	public void buildSearchRequest(SearchRequestBuilder searchRequestBuilder, String entityName, SearchType searchType,
-			Query query, List<String> fieldsToReturn)
+			Query query, List<String> fieldsToReturn, String aggregateField1, String aggregateField2)
 	{
 		buildSearchRequest(searchRequestBuilder, entityName == null ? null : Arrays.asList(entityName), searchType,
-				query, fieldsToReturn);
+				query, fieldsToReturn, aggregateField1, aggregateField2);
 	}
 }
