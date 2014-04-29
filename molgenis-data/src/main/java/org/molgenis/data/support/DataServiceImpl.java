@@ -68,9 +68,12 @@ public class DataServiceImpl implements DataService
 		{
 			throw new MolgenisDataException("Repository [" + repositoryName + "] doesn't exists");
 		}
+		else
+		{
+			repositoryNames.remove(repositoryName);
+			repositories.remove(repositoryName.toLowerCase());
+		}
 
-		repositoryNames.remove(repositoryName);
-		repositories.remove(repositoryName.toLowerCase());
 	}
 
 	@Override
@@ -180,8 +183,7 @@ public class DataServiceImpl implements DataService
 	@Override
 	public void delete(String entityName, Entity entity)
 	{
-		Updateable updateable = getUpdateable(entityName);
-		updateable.delete(entity);
+		getUpdateable(entityName).delete(entity);
 	}
 
 	@Override
