@@ -200,6 +200,13 @@ public class CrudRepositorySecurityDecorator extends CrudRepositoryDecorator imp
 	}
 
 	@Override
+	public AggregateResult aggregate(AttributeMetaData xAttr, AttributeMetaData yAttr, Query q)
+	{
+		validatePermission(Permission.COUNT);
+		return decoratedRepository.aggregate(xAttr, yAttr, q);
+	}
+
+	@Override
 	public void flush()
 	{
 		validatePermission(Permission.WRITE);

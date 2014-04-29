@@ -2,9 +2,11 @@ package org.molgenis.omx.dataset;
 
 import java.util.Iterator;
 
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Countable;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.MapEntity;
@@ -44,6 +46,7 @@ public class DataSetMatrixRepository extends AbstractDataSetMatrixRepository imp
 			private final Iterable<ObservationSet> observationSets = dataService.findAll(ObservationSet.ENTITY_NAME,
 					new QueryImpl().eq(ObservationSet.PARTOFDATASET, getDataSet()), ObservationSet.class);
 			private final Iterator<ObservationSet> it = observationSets.iterator();
+			private final EntityMetaData meta = getEntityMetaData();
 
 			@Override
 			public boolean hasNext()
@@ -71,6 +74,23 @@ public class DataSetMatrixRepository extends AbstractDataSetMatrixRepository imp
 						entity.set(feature.getIdentifier(), valueConverter.toCell(value, feature));
 					}
 					entity.set("partOfDataset", currentRowToGet.getPartOfDataSet().getIdentifier());
+
+					// Create aggregateable field combinations
+					for (AttributeMetaData attr1 : meta.getAtomicAttributes())
+					{
+						if (attr1.isAggregateable())
+						{
+							for (AttributeMetaData attr2 : meta.getAtomicAttributes())
+							{
+								if (attr2.isAggregateable() && !attr1.getName().equalsIgnoreCase(attr2.getName()))
+								{
+									String name = attr1.getName() + "~" + attr2.getName();
+									String value = entity.get(attr1.getName()) + "~" + entity.get(attr2.getName());
+									entity.set(name, value);
+								}
+							}
+						}
+					}
 				}
 				catch (ValueConverterException e)
 				{
@@ -95,5 +115,4 @@ public class DataSetMatrixRepository extends AbstractDataSetMatrixRepository imp
 		return dataService.count(ObservationSet.ENTITY_NAME,
 				new QueryImpl().eq(ObservationSet.PARTOFDATASET, getDataSet()));
 	}
-
 }

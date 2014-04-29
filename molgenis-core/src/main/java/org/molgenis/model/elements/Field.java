@@ -277,6 +277,16 @@ public class Field implements Serializable
 		return this.nillable;
 	}
 
+	public boolean isAggregateable()
+	{
+		return aggregateable;
+	}
+
+	public void setAggregateable(boolean aggregateable)
+	{
+		this.aggregateable = aggregateable;
+	}
+
 	public void setReadonly(boolean readonly)
 	{
 		this.readonly = readonly;
@@ -971,6 +981,7 @@ public class Field implements Serializable
 	private boolean hidden;
 	/** Whether this field is hidden. */
 	private boolean readonly;
+	private boolean aggregateable;
 	/**
 	 * The string that should be set as the default value (is passed to the database ...)
 	 */

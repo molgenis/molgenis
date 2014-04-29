@@ -40,6 +40,14 @@ public class Person extends AbstractMetaDataEntity
 		this.lastName = lastName;
 	}
 
+	public Person(String firstName, String lastName, Integer age)
+	{
+		this();
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.age = age;
+	}
+
 	public String getFirstName()
 	{
 		return firstName;

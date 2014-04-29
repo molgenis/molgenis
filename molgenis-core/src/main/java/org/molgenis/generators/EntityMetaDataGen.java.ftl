@@ -64,8 +64,8 @@ public class ${JavaName(entity)}MetaData extends DefaultEntityMetaData
 		<#if f.hidden || f.system>
 		${name(f)}.setVisible(false);
 		</#if>
+		${name(f)}.setAggregateable(${f.aggregateable?string('true', 'false')});
 		addAttributeMetaData(${name(f)});	
-		
 </#list>
 		
 	}

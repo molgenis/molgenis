@@ -81,4 +81,10 @@ public interface AttributeMetaData
 	 * Get compound attribute parts
 	 */
 	Iterable<AttributeMetaData> getAttributeParts();
+
+	/**
+	 * Wether this attribute can be used to aggregate on. Default only attributes of type 'BOOL', 'XREF' and
+	 * 'CATEGORICAL' are aggregateable.
+	 */
+	boolean isAggregateable();
 }
