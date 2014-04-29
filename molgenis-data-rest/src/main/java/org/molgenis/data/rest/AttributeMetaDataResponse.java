@@ -28,6 +28,7 @@ public class AttributeMetaDataResponse
 	private final Boolean labelAttribute;
 	private final Boolean unique;
 	private Boolean lookupAttribute;
+	private Boolean aggregateable;
 
 	public AttributeMetaDataResponse(String entityParentName, AttributeMetaData attr)
 	{
@@ -152,6 +153,12 @@ public class AttributeMetaDataResponse
 			this.lookupAttribute = attr.isLookupAttribute();
 		}
 		else this.lookupAttribute = null;
+
+		if (attributesSet == null || attributesSet.contains("aggregateable".toLowerCase()))
+		{
+			this.aggregateable = attr.isAggregateable();
+		}
+		else this.aggregateable = null;
 	}
 
 	public String getHref()
@@ -217,6 +224,11 @@ public class AttributeMetaDataResponse
 	public Boolean getLookupAttribute()
 	{
 		return lookupAttribute;
+	}
+
+	public Boolean isAggregateable()
+	{
+		return aggregateable;
 	}
 
 }

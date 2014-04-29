@@ -5,10 +5,10 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.molgenis.data.AggregateResult;
 
 /**
- * Result of a search. Check the errorMessage, if not null an error was returned
- * by the SearchService
+ * Result of a search. Check the errorMessage, if not null an error was returned by the SearchService
  * 
  * @author erwin
  * 
@@ -18,6 +18,7 @@ public class SearchResult implements Iterable<Hit>
 	private long totalHitCount = 0;
 	private List<Hit> searchHits = Collections.emptyList();
 	private String errorMessage = null;
+	private AggregateResult aggregate;
 
 	public SearchResult(String errorMessage)
 	{
@@ -30,6 +31,12 @@ public class SearchResult implements Iterable<Hit>
 
 		this.totalHitCount = totalHitCount;
 		this.searchHits = searchHits;
+	}
+
+	public SearchResult(long totalHitCount, List<Hit> searchHits, AggregateResult aggregate)
+	{
+		this(totalHitCount, searchHits);
+		this.aggregate = aggregate;
 	}
 
 	public long getTotalHitCount()
@@ -45,6 +52,11 @@ public class SearchResult implements Iterable<Hit>
 	public String getErrorMessage()
 	{
 		return errorMessage;
+	}
+
+	public AggregateResult getAggregate()
+	{
+		return aggregate;
 	}
 
 	@Override
