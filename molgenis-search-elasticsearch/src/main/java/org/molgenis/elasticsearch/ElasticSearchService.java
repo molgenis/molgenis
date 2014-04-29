@@ -45,11 +45,10 @@ import org.molgenis.search.SearchService;
  */
 public class ElasticSearchService implements SearchService
 {
-	public static final String REST_API_BASE_URL = "/api/v1";
 	private static final Logger LOG = Logger.getLogger(ElasticSearchService.class);
 	private final String indexName;
 	private final Client client;
-	private final ResponseParser responseParser = new ResponseParser(REST_API_BASE_URL);
+	private final ResponseParser responseParser = new ResponseParser();
 	private final SearchRequestGenerator generator = new SearchRequestGenerator();
 
 	public ElasticSearchService(Client client, String indexName)
@@ -108,7 +107,7 @@ public class ElasticSearchService implements SearchService
 		SearchRequestBuilder builder = client.prepareSearch(indexName);
 
 		generator.buildSearchRequest(builder, documentTypes, searchType, request.getQuery(),
-				request.getFieldsToReturn());
+				request.getFieldsToReturn(), null, null);
 
 		if (LOG.isDebugEnabled())
 		{
@@ -129,8 +128,8 @@ public class ElasticSearchService implements SearchService
 		SearchRequestBuilder builder = client.prepareSearch(indexName);
 		String documentType = request.getDocumentType() == null ? null : sanitizeMapperType(request.getDocumentType());
 
-		generator
-				.buildSearchRequest(builder, documentType, searchType, request.getQuery(), request.getFieldsToReturn());
+		generator.buildSearchRequest(builder, documentType, searchType, request.getQuery(),
+				request.getFieldsToReturn(), request.getAggregateField1(), request.getAggregateField2());
 
 		if (LOG.isDebugEnabled())
 		{

@@ -7,7 +7,9 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
+import org.molgenis.data.AggregateResult;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
@@ -21,6 +23,7 @@ import org.testng.annotations.Test;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 public class JpaRepositoryTest extends BaseJpaTest
 {
@@ -440,9 +443,29 @@ public class JpaRepositoryTest extends BaseJpaTest
 
 		Iterable<Entity> it = repo.findAll(new QueryImpl().pageSize(1).offset(1)
 				.sort(new Sort(Direction.ASC, "lastName")));
-		System.out.println(it);
+
 		assertEquals(Iterables.size(it), 1);
 		assertTrue(Iterables.contains(it, p3));
 	}
 
+	@Test
+	public void testAggregate()
+	{
+		Person p1 = new Person("Piet", "Paulusma", 30);
+		Person p2 = new Person("Piet", "de Boskabouter", 35);
+		Person p3 = new Person("Klaas", "Vaak", 35);
+		repo.add(Arrays.asList(p1, p2, p3));
+
+		AggregateResult result = repo.aggregate(repo.getEntityMetaData().getAttribute("firstName"), repo
+				.getEntityMetaData().getAttribute("age"), new QueryImpl());
+		assertNotNull(result);
+		List<List<Long>> matrix = Lists.newArrayList();
+		matrix.add(Lists.newArrayList(1l, 1l, 2l));
+		matrix.add(Lists.newArrayList(1l, 0l, 1l));
+		matrix.add(Lists.newArrayList(2l, 1l, 3l));
+		assertEquals(
+				result,
+				new AggregateResult(matrix, Sets.newLinkedHashSet(Arrays.asList("Piet", "Klaas", "Total")), Sets
+						.newLinkedHashSet(Arrays.asList("35", "30", "Total"))));
+	}
 }

@@ -116,4 +116,12 @@ public class ObservableFeatureAttributeMetaData implements AttributeMetaData
 	{
 		return false;
 	}
+
+	@Override
+	public boolean isAggregateable()
+	{
+		return observableFeature.getDataType().equalsIgnoreCase("BOOL")
+				|| observableFeature.getDataType().equalsIgnoreCase("XREF")
+				|| observableFeature.getDataType().equalsIgnoreCase("CATEGORICAL");
+	}
 }

@@ -26,6 +26,7 @@ import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
+import org.molgenis.omx.protocol.OmxLookupTableEntityMetaData;
 import org.molgenis.omx.protocol.OmxLookupTableRepository;
 import org.molgenis.omx.utils.ProtocolUtils;
 import org.molgenis.search.SearchService;
@@ -110,11 +111,13 @@ public class OmxImporterServiceImpl implements OmxImporterService
 					}
 					for (ObservableFeature categoricalFeature : categoricalFeatures)
 					{
-						if (!dataService.hasRepository(categoricalFeature.getIdentifier() + "-LUT"))
+						if (!dataService.hasRepository(OmxLookupTableEntityMetaData
+								.createOmxLookupTableEntityMetaDataName(categoricalFeature.getIdentifier())))
 						{
 							dataService.addRepository(new OmxLookupTableRepository(dataService, categoricalFeature
 									.getIdentifier(), queryResolver));
-							newRepoIdentifiers.add(categoricalFeature.getIdentifier() + "-LUT");
+							newRepoIdentifiers.add(OmxLookupTableEntityMetaData
+									.createOmxLookupTableEntityMetaDataName(categoricalFeature.getIdentifier()));
 						}
 					}
 				}

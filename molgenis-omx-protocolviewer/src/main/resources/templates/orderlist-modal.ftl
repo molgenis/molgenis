@@ -32,18 +32,20 @@
                         items.push('<table class="table">');
                         items.push('<thead><th>#<th>Study</th><th>Status</th><th></th></thead><tbody>');
                         $.each(data.orders, function (i, order) {
-                            var clazz;
-                            if (order.orderStatus === 'approved') clazz = 'success';
-                            else if (order.orderStatus === 'draft') clazz = 'warning';
-                            else if (order.orderStatus === 'submitted') clazz = 'warning';
-                            else if (order.orderStatus === 'rejected') clazz = 'error';
-                            else clazz = 'error';
-                            var containerId = 'orderdetails' + order.id + 'modal-container';
-                            items.push('<tr class=' + clazz + '>');
-                            items.push('<div id="' + containerId + '"></div>')
-                            items.push('<td>' + order.id + '</td><td>' + order.name + '</td><td>' + order.orderStatus + '</td>');
-                            items.push('<td><a class="modal-href" href="' + pluginUri + '/orders/' + order.id + '/view" data-target="' + containerId + '">view</a></td>');
-                            items.push('</tr>');
+                        	if(order){
+	                            var clazz;
+	                            if (order.orderStatus === 'approved') clazz = 'success';
+	                            else if (order.orderStatus === 'draft') clazz = 'warning';
+	                            else if (order.orderStatus === 'submitted') clazz = 'warning';
+	                            else if (order.orderStatus === 'rejected') clazz = 'error';
+	                            else clazz = 'error';
+	                            var containerId = 'orderdetails' + order.id + 'modal-container';
+	                            items.push('<tr class=' + clazz + '>');
+	                            items.push('<div id="' + containerId + '"></div>')
+	                            items.push('<td>' + order.id + '</td><td>' + order.name + '</td><td>' + order.orderStatus + '</td>');
+	                            items.push('<td><a class="modal-href" href="' + pluginUri + '/orders/' + order.id + '/view" data-target="' + containerId + '">view</a></td>');
+	                            items.push('</tr>');
+                            }
                         });
                         items.push('</tbody></table>');
                     } else {
@@ -57,10 +59,11 @@
                 }
             });
         });
+        
         modal.on('hide', function () {
             $('#order-list-container').empty();
-
         });
+        
         $('.close', modal).click(function (e) {<#-- workaround: Bootstrap closes the whole stack of modals when closing one modal -->
             e.preventDefault();
             modal.modal('hide');
