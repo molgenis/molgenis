@@ -91,16 +91,51 @@
 	function createFiltersList(attributeFilters) {
 		var items = [];
 		$.each(attributeFilters, function(attributeUri, attributeFilter) {
-			var attribute = attributeFilter.attribute;
-			var joinChars = attributeFilter.operator ? ' ' + attributeFilter.operator + ' ' : ',';
-			var attributeLabel = attribute.label || attribute.name;
+			var attributeLabel = attributeFilter.attribute.label || attributeFilter.attribute.name;
 			items.push('<p><a class="feature-filter-edit" data-href="' + attributeUri + '" href="#">'
-					+ attributeLabel + ' (' + htmlEscape(attributeFilter.values.join(joinChars))
-					+ ')</a><a class="feature-filter-remove" data-href="' + attributeUri + '" href="#" title="Remove '
+					+ attributeLabel + ': ' + createFilterValuesRepresentation(attributeFilter)
+					+ '</a><a class="feature-filter-remove" data-href="' + attributeUri + '" href="#" title="Remove '
 					+ attributeLabel + ' filter" ><i class="icon-remove"></i></a></p>');
 		});
 		items.push('</div>');
 		$('#feature-filters').html(items.join(''));
+	}
+	
+	/**
+	 * @memberOf molgenis.dataexplorer
+	 */
+	function createFilterValuesRepresentation(attributeFilter) {
+		switch(attributeFilter.attribute.fieldType) {
+			case 'DATE':
+			case 'DATE_TIME':
+			case 'DECIMAL':
+			case 'INT':
+			case 'LONG':
+				return htmlEscape('from ' + attributeFilter.values[0] + ' to ' +attributeFilter.values[1]);
+			case 'EMAIL':
+			case 'HTML':
+			case 'HYPERLINK':
+			case 'STRING':
+			case 'TEXT':
+			case 'BOOL':
+			case 'XREF':
+				return htmlEscape(attributeFilter.values[0]);
+			case 'CATEGORICAL':
+			case 'MREF':
+				var operator = (attributeFilter.operator ? attributeFilter.operator.toLocaleLowerCase() : 'or');
+				var array = [];
+				$.each(attributeFilter.values, function(key, value) {
+					array.push('\'' + value + '\'');
+				});
+				return htmlEscape(array.join(' ' + operator + ' '));
+			case 'COMPOUND' :
+			case 'ENUM':
+			case 'FILE':
+			case 'IMAGE':
+				throw 'Unsupported data type: ' + attributeFilter.attribute.fieldType;
+			default:
+				throw 'Unknown data type: ' + attributeFilter.attribute.fieldType;
+		}
 	}
 
 	/**
