@@ -166,7 +166,14 @@
 								
 							return 'false';
 						}
-					}
+					},
+					<#if field.range??>
+						range: [${field.range.min?c},${field.range.max?c}]
+					</#if>
+				},
+			<#elseif field.range??>
+				${field.name}: {
+					range: [${field.range.min?c},${field.range.max?c}]
 				},
 			</#if>
 		</#list>

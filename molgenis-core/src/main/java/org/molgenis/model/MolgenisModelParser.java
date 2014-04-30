@@ -348,8 +348,8 @@ public class MolgenisModelParser
 		{ "type", "name", "label", "auto", "nillable", "optional", "readonly", "default", "description", "desc",
 				"unique", "hidden", "length", "enum_options", "default_code", "xref", "xref_entity", "xref_field",
 				"xref_label", "xref_name", "mref_name", "mref_localid", "mref_remoteid", "filter", "filtertype",
-				"filterfield", "filtervalue", "xref_cascade" + "", "allocationSize", "jpaCascade", "aggregateable",
-				"min", "max" };
+				"filterfield", "filtervalue", "xref_cascade", "allocationSize", "jpaCascade", "aggregateable", "min",
+				"max" };
 		List<String> key_words = new ArrayList<String>(Arrays.asList(keywords));
 		for (int i = 0; i < element.getAttributes().getLength(); i++)
 		{
@@ -587,7 +587,7 @@ public class MolgenisModelParser
 				{
 					throw new IllegalArgumentException("Illegal min value [" + min + "]");
 				}
-			
+
 				try
 				{
 					field.setMax(Long.valueOf(max));
