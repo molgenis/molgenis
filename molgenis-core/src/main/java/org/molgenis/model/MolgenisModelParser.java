@@ -27,6 +27,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -347,7 +348,8 @@ public class MolgenisModelParser
 		{ "type", "name", "label", "auto", "nillable", "optional", "readonly", "default", "description", "desc",
 				"unique", "hidden", "length", "enum_options", "default_code", "xref", "xref_entity", "xref_field",
 				"xref_label", "xref_name", "mref_name", "mref_localid", "mref_remoteid", "filter", "filtertype",
-				"filterfield", "filtervalue", "xref_cascade" + "", "allocationSize", "jpaCascade", "aggregateable" };
+				"filterfield", "filtervalue", "xref_cascade", "allocationSize", "jpaCascade", "aggregateable", "min",
+				"max" };
 		List<String> key_words = new ArrayList<String>(Arrays.asList(keywords));
 		for (int i = 0; i < element.getAttributes().getLength(); i++)
 		{
@@ -383,6 +385,9 @@ public class MolgenisModelParser
 		String length = element.getAttribute("length");
 		String enum_options = element.getAttribute("enum_options").replace('[', ' ').replace(']', ' ').trim();
 		String default_code = element.getAttribute("default_code");
+		String min = element.getAttribute("min");
+		String max = element.getAttribute("max");
+
 		// xref and mref
 		String xref_entity = element.getAttribute("xref_entity");
 		String xref_field = element.getAttribute("xref_field");
@@ -569,6 +574,29 @@ public class MolgenisModelParser
 			}
 
 			field.setEnumOptions(options);
+		}
+		else if (type.equals("int") || type.equals("long"))
+		{
+			if (StringUtils.isNotBlank(min) && StringUtils.isNotBlank(max))
+			{
+				try
+				{
+					field.setMin(Long.valueOf(min));
+				}
+				catch (Exception e)
+				{
+					throw new IllegalArgumentException("Illegal min value [" + min + "]");
+				}
+
+				try
+				{
+					field.setMax(Long.valueOf(max));
+				}
+				catch (Exception e)
+				{
+					throw new IllegalArgumentException("Illegal max value [" + max + "]");
+				}
+			}
 		}
 		else if (type.equals("xref") || type.equals("mref") || type.equals("categorical"))
 		{

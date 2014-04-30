@@ -112,11 +112,9 @@
 				</div>
 				
 			<#elseif field.dataType.enumType =='INT' || field.dataType.enumType = 'LONG'>
-				<input type="number" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" <#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)}"</#if> <@validationOptions field /> >
-	
+				<input type="number" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" <#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)?c}"</#if> <@validationOptions field /> >
 			<#else>
 				<input type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" <#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string?html}"</#if> <@validationOptions field /> >
-	
 			</#if>
 		</div>
 	</div>

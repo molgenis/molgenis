@@ -95,6 +95,7 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String MUTATION_START_POSITION = "start_nucleotide";
 	public static final String MUTATION_ID = "mutation_id";
 	public static final String MUTATION_CHROMOSOME = "chromosome";
+    public static final String WIZARD_TITLE = "wizardTitle";
 
 	@Autowired
 	private DataService dataService;
@@ -149,6 +150,7 @@ public class DataExplorerController extends MolgenisPluginController
 			}
 		}
 		model.addAttribute("selectedEntityName", selectedEntityName);
+        model.addAttribute(WIZARD_TITLE, molgenisSettings.getProperty(WIZARD_TITLE)==null?"Filter Wizard":molgenisSettings.getProperty(WIZARD_TITLE));
 		model.addAttribute("wizard", (wizard != null) && wizard.booleanValue());
 
 		return "view-dataexplorer";

@@ -13,29 +13,16 @@ import javax.servlet.http.HttpServletRequestWrapper;
 
 public class DasPatientFilter implements Filter
 {
-	public void doFilter(ServletRequest servletRequest, ServletResponse response, FilterChain chain) throws IOException,
+    public static final String DATASET_PREFIX = "dataset_";
+
+    public void doFilter(ServletRequest servletRequest, ServletResponse response, FilterChain chain) throws IOException,
 			ServletException
 	{
 
 		HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
 		String requestURI = httpServletRequest.getRequestURI();
-        int patientIndex = requestURI.indexOf("patient_");
-        int datasetIndex = requestURI.indexOf("dataset_");
-		if (patientIndex != -1)
-		{
-			String patientPart = requestURI.substring(patientIndex);
-			int slashIndex = patientPart.indexOf("/");
-            String patientId = patientPart.substring(0, slashIndex);
-            String newDasURI = requestURI.replace(patientId+"/", "");
-            String newQueryString = createNewQueryString(httpServletRequest, patientId);
-			
-			FilteredRequest requestWrapper = new FilteredRequest(servletRequest);
-			if(newQueryString != null){
-                requestWrapper.setQuery(newQueryString);
-            }
-			servletRequest.getRequestDispatcher(newDasURI).forward(requestWrapper, response);
-		}
-        if (datasetIndex != -1)
+        int datasetIndex = requestURI.indexOf(DATASET_PREFIX);
+		if (datasetIndex != -1)
         {
             String dataSetURLPart = requestURI.substring(datasetIndex);
             int slashIndex = dataSetURLPart.indexOf("/");
