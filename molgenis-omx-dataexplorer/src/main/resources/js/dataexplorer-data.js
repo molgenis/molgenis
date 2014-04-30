@@ -17,7 +17,6 @@
 	var restApi = new molgenis.RestClient();
 	var genomeBrowser;
 	var genomeEntities;
-    var genomeBrowser;
 	/**
 	 * @memberOf molgenis.dataexplorer.data
 	 */
