@@ -30,9 +30,6 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 	public static final String CHAINS = "chains";
 	public static final String SOURCES = "sources";
 	public static final String BROWSERLINKS = "browserLinks";
-	public static final String SEARCHENDPOINT = "searchEndpoint";
-	public static final String KARYOTYPEENDPOINT = "karyotypeEndpoint";
-	public static final String GENOMEBROWSERTABLE = "genomeBrowserTable";
 
 	private final DataService dataService;
 	private final MolgenisSecurityWebAppDatabasePopulatorService molgenisSecurityWebAppDatabasePopulatorService;
@@ -102,6 +99,10 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 				molgenisHomeDirAnnotationResources + "/dbnsfp/dbNSFP2.3_variant.chr");
 		runtimePropertyMap.put(ClinVarServiceAnnotator.CLINVAR_FILE_LOCATION_PROPERTY,
 				molgenisHomeDirAnnotationResources + "/Clinvar/variant_summary.txt");
+
+        runtimePropertyMap.put(DataExplorerController.WIZARD_TITLE,
+                "Filter Wizard");
+
 
 		for (Entry<String, String> entry : runtimePropertyMap.entrySet())
 		{
