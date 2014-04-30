@@ -6,6 +6,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
@@ -28,6 +29,8 @@ import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.value.Value;
+import org.molgenis.search.SearchRequest;
+import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
 import org.molgenis.util.EntityUtils;
 import org.springframework.beans.BeanUtils;
@@ -355,4 +358,18 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Cr
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public AggregateResult aggregate(AttributeMetaData xAttr, AttributeMetaData yAttr, Query q)
+	{
+		if ((xAttr == null) && (yAttr == null))
+		{
+			throw new MolgenisDataException("Missing aggregate attribute");
+		}
+
+		SearchRequest request = new SearchRequest(dataSetIdentifier, q, null, xAttr != null ? xAttr.getName() : null,
+				yAttr != null ? yAttr.getName() : null);
+		SearchResult result = searchService.search(request);
+
+		return result.getAggregate();
+	}
 }

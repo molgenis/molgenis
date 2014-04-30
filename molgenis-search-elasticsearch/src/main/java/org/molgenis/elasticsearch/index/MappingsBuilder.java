@@ -7,6 +7,7 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.elasticsearch.util.MapperTypeSanitizer;
@@ -26,12 +27,30 @@ public class MappingsBuilder
 		XContentBuilder jsonBuilder = XContentFactory.jsonBuilder().startObject().startObject(documentType)
 				.startObject("properties");
 
-		for (AttributeMetaData attr : repository.getEntityMetaData().getAtomicAttributes())
+		EntityMetaData meta = repository.getEntityMetaData();
+
+		// Aggregateable field combinations
+		for (AttributeMetaData attr1 : meta.getAtomicAttributes())
+		{
+			if (attr1.isAggregateable())
+			{
+				for (AttributeMetaData attr2 : repository.getEntityMetaData().getAtomicAttributes())
+				{
+					if (attr2.isAggregateable() && !attr1.getName().equalsIgnoreCase(attr2.getName()))
+					{
+						String name = attr1.getName() + "~" + attr2.getName();
+						jsonBuilder.startObject(name).field("type", "string").field("index", "not_analyzed")
+								.endObject();
+					}
+				}
+			}
+		}
+
+		for (AttributeMetaData attr : meta.getAtomicAttributes())
 		{
 			String esType = getType(attr);
 			if (esType.equals("string"))
 			{
-
 				jsonBuilder.startObject(attr.getName()).field("type", "multi_field").startObject("fields")
 						.startObject(attr.getName()).field("type", "string").endObject().startObject("sort")
 						.field("type", "string").field("index", "not_analyzed").endObject().endObject().endObject();
