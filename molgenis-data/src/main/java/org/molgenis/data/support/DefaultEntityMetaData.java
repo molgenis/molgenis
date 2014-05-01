@@ -86,7 +86,8 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 		if (idAttribute != null)
 		{
 			AttributeMetaData att = getAttribute(idAttribute);
-			if (att == null) throw new RuntimeException("getIdAttribute() failed: '" + idAttribute + "' unknown");
+			if (att == null) throw new RuntimeException(getName() + ".getIdAttribute() failed: '" + idAttribute
+					+ "' unknown");
 			return att;
 		}
 		else if (getExtends() != null)
@@ -221,7 +222,8 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 		if (getExtends() != null) result += " extends='" + getExtends().getName() + "'";
 		if (getIdAttribute() != null) result += " idAttribute='" + getIdAttribute().getName() + "'";
 		if (getDescription() != null) result += " description='"
-				+ getDescription().substring(0, Math.min(25, getDescription().length())) + (getDescription().length() > 25 ? "...'" : "'");
+				+ getDescription().substring(0, Math.min(25, getDescription().length()))
+				+ (getDescription().length() > 25 ? "...'" : "'");
 		result += ")";
 		for (AttributeMetaData att : this.getAttributes())
 		{

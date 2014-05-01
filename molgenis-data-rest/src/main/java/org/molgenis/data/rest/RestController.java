@@ -243,7 +243,7 @@ public class RestController
 			throw new UnknownEntityException(entityName + " " + id + " not found");
 		}
 
-		String attrHref = String.format(BASE_URI + "/%s/%s/%s", meta.getName(), entity.getIdValue(), refAttributeName);
+		String attrHref = String.format(BASE_URI + "/%s/%s/%s", meta.getName(), entity.get(meta.getIdAttribute().getName()), refAttributeName);
 		switch (attr.getDataType().getEnumType())
 		{
 			case COMPOUND:
@@ -568,7 +568,7 @@ public class RestController
 		}
 
 		Entity entity = toEntity(meta, entityMap);
-		entity.set(meta.getIdAttribute().getName(), existing.getIdValue());
+		entity.set(meta.getIdAttribute().getName(), existing.get(meta.getIdAttribute().getName()));
 
 		dataService.update(entityName, entity);
 	}
@@ -579,7 +579,7 @@ public class RestController
 
 		Entity entity = toEntity(meta, entityMap);
 
-		Integer id = dataService.add(entityName, entity);
+		Object id = dataService.add(entityName, entity);
 		if (id != null)
 		{
 			response.addHeader("Location", String.format(BASE_URI + "/%s/%d", entityName, id));
@@ -622,7 +622,7 @@ public class RestController
 				}
 				else if (attr.getDataType().getEnumType() == MREF)
 				{
-					List<Integer> ids = DataConverter.toIntList(paramValue);
+					List<Object> ids = DataConverter.toObjectList(paramValue);
 					if ((ids != null) && !ids.isEmpty())
 					{
 						Iterable<Entity> mrefs = dataService.findAll(attr.getRefEntity().getName(), ids);
@@ -682,7 +682,7 @@ public class RestController
 		if (null == meta) throw new IllegalArgumentException("meta is null");
 
 		Map<String, Object> entityMap = new LinkedHashMap<String, Object>();
-		entityMap.put("href", String.format(BASE_URI + "/%s/%s", meta.getName(), entity.getIdValue()));
+		entityMap.put("href", String.format(BASE_URI + "/%s/%s", meta.getName(), entity.get(meta.getIdAttribute().getName())));
 
 		// TODO system fields
 		for (AttributeMetaData attr : meta.getAtomicAttributes())
@@ -731,7 +731,7 @@ public class RestController
 						&& attributeExpandsSet.containsKey(attrName.toLowerCase()))
 				{
 					EntityMetaData refEntityMetaData = dataService.getEntityMetaData(attr.getRefEntity().getName());
-					Iterable<Entity> mrefEntities = entity.getEntities(attr.getName());
+                    Iterable<Entity> mrefEntities = entity.getEntities(attr.getName());
 
 					Set<String> subAttributesSet = attributeExpandsSet.get(attrName.toLowerCase());
 					List<Map<String, Object>> refEntityMaps = new ArrayList<Map<String, Object>>();
@@ -745,7 +745,7 @@ public class RestController
 					EntityPager pager = new EntityPager(0, new EntityCollectionRequest().getNum(),
 							(long) refEntityMaps.size(), mrefEntities);
 
-					String uri = String.format(BASE_URI + "/%s/%s/%s", meta.getName(), entity.getIdValue(), attrName);
+					String uri = String.format(BASE_URI + "/%s/%s/%s", meta.getName(), entity.get(meta.getIdAttribute().getName()), attrName);
 					EntityCollectionResponse ecr = new EntityCollectionResponse(pager, refEntityMaps, uri);
 					entityMap.put(attrName, ecr);
 				}
@@ -755,7 +755,7 @@ public class RestController
 					// Add href to ref field
 					Map<String, String> ref = new LinkedHashMap<String, String>();
 					ref.put("href",
-							String.format(BASE_URI + "/%s/%s/%s", meta.getName(), entity.getIdValue(), attrName));
+							String.format(BASE_URI + "/%s/%s/%s", meta.getName(), entity.get(meta.getIdAttribute().getName()), attrName));
 					entityMap.put(attrName, ref);
 				}
 

@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 import org.molgenis.AppConfig;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
@@ -20,9 +21,10 @@ import javax.sql.DataSource;
 @ContextConfiguration(classes = AppConfig.class)
 public abstract class MysqlRepositoryAbstractDatatypeTest extends AbstractTestNGSpringContextTests
 {
-    DataSource ds;
-    
-	Logger logger;
+    @Autowired
+    MysqlRepositoryCollection coll;
+
+	Logger logger = Logger.getLogger(getClass());
 	private EntityMetaData metaData;
 
 	/** Define a data model to test */
@@ -46,16 +48,18 @@ public abstract class MysqlRepositoryAbstractDatatypeTest extends AbstractTestNG
 	@Test
 	public void test() throws Exception
 	{
+        //drop if needed
+        coll.drop(getMetaData());
+
 		// test create table
-		MysqlRepository repo = new MysqlRepository(ds, getMetaData());
+        MysqlRepository repo = coll.add(getMetaData());
 		Assert.assertEquals(repo.getCreateSql(), createSql());
-		repo.drop();
-		repo.create();
 
 		// verify default value
 		Entity defaultEntity = defaultEntity();
 		logger.debug("inserting: " + defaultEntity);
 		repo.add(defaultEntity());
+
 		for (Entity e : repo)
 		{
 			logger.debug("found back " + e);
@@ -79,22 +83,5 @@ public abstract class MysqlRepositoryAbstractDatatypeTest extends AbstractTestNG
 
 		// allow time for logger to finish... (premature end of program results in loss of output)
 		Thread.sleep(100);
-	}
-
-	/** Setup a datasource to use for testing */
-	// TODO use spring injection
-	@BeforeClass
-	public void setup() throws PropertyVetoException
-	{
-		BasicConfigurator.configure();
-		logger = Logger.getRootLogger();
-
-		ComboPooledDataSource dataSource = new ComboPooledDataSource();
-		dataSource.setDriverClass("com.mysql.jdbc.Driver");
-		dataSource.setJdbcUrl(MysqlRepositoryTestConstants.URL);
-		dataSource.setUser("molgenis");
-		dataSource.setPassword("molgenis");
-
-		ds = dataSource;
 	}
 }

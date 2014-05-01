@@ -1,21 +1,22 @@
 package org.molgenis.data.mysql;
 
-import static org.molgenis.MolgenisFieldTypes.BOOL;
-import static org.molgenis.MolgenisFieldTypes.INT;
+import static org.molgenis.MolgenisFieldTypes.*;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.sql.DataSource;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.*;
+import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.fieldtypes.CompoundField;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,6 +37,11 @@ public class MysqlRepositoryCollection implements RepositoryCollection
 		this.setDataSource(ds);
 	}
 
+	public DataSource getDataSource()
+	{
+		return ds;
+	}
+
 	@Autowired
 	public void setDataSource(DataSource ds)
 	{
@@ -46,12 +52,12 @@ public class MysqlRepositoryCollection implements RepositoryCollection
 
 	private void refreshRepositories()
 	{
-		repositories = new HashMap<String, MysqlRepository>();
+		repositories = new LinkedHashMap<String, MysqlRepository>();
 
 		DefaultEntityMetaData entityMD = new DefaultEntityMetaData("entities").setIdAttribute("name");
 		entityMD.addAttribute("name").setNillable(false);
 		entityMD.addAttribute("idAttribute");
-		entities = new MysqlRepository(ds, entityMD);
+		entities = new MysqlRepository(this, entityMD);
 		if (!this.tableExists("entities"))
 		{
 			entities.create();
@@ -62,27 +68,64 @@ public class MysqlRepositoryCollection implements RepositoryCollection
 		attributeMD.addAttribute("entity").setNillable(false);
 		attributeMD.addAttribute("name").setNillable(false);
 		attributeMD.addAttribute("dataType");
+		attributeMD.addAttribute("refEntity").setDataType(XREF).setRefEntity(entityMD);
 		attributeMD.addAttribute("nillable").setDataType(BOOL);
 		attributeMD.addAttribute("auto").setDataType(BOOL);
 
-		attributes = new MysqlRepository(ds, attributeMD);
+		attributes = new MysqlRepository(this, attributeMD);
 		if (!this.tableExists("attributes"))
 		{
 			attributes.create();
 		}
 
+		Map<String, DefaultEntityMetaData> metadata = new LinkedHashMap<String, DefaultEntityMetaData>();
+
+		// read the attributes
+		for (Entity a : attributes)
+		{
+			if (metadata.get(a.getString("entity")) == null)
+			{
+				metadata.put(a.getString("entity"), new DefaultEntityMetaData(a.getString("entity")));
+			}
+			DefaultEntityMetaData md = metadata.get(a.getString("entity"));
+
+			DefaultAttributeMetaData am = new DefaultAttributeMetaData(a.getString("name"));
+			am.setDataType(MolgenisFieldTypes.getType(a.getString("dataType")));
+			am.setNillable(a.getBoolean("nillable"));
+			am.setAuto(a.getBoolean("auto"));
+			md.addAttributeMetaData(am);
+		}
+
+		// read the entities
 		for (Entity e : entities)
 		{
-			DefaultEntityMetaData md = new DefaultEntityMetaData(e.getString("name"));
-			md.setIdAttribute(e.getString("idAttribute"));
-			for (Entity a : attributes.findAll(new QueryImpl().eq("entity", e.getString("name"))))
+			if (metadata.get(e.getString("name")) == null)
 			{
-				md.addAttribute(a.getString("name")).setDataType(MolgenisFieldTypes.getType(a.getString("dataType")))
-						.setNillable(a.getBoolean("nillable")).setAuto(a.getBoolean("auto"));
+				metadata.put(e.getString("name"), new DefaultEntityMetaData(e.getString("name")));
 			}
+			DefaultEntityMetaData md = metadata.get(e.getString("name"));
+			md.setIdAttribute(e.getString("idAttribute"));
+		}
 
-			System.out.println(e.getString("name"));
-			this.repositories.put(md.getName(), new MysqlRepository(ds, md));
+		// read the refEntity
+		for (Entity a : attributes)
+		{
+			if (a.getString("refEntity") != null)
+			{
+				EntityMetaData emd = metadata.get(a.getString("entity"));
+				DefaultAttributeMetaData amd = (DefaultAttributeMetaData) emd.getAttribute(a.getString("name"));
+				EntityMetaData ref = metadata.get(a.getString("refEntity"));
+				if (ref == null) throw new RuntimeException("refEntity '" + a.getString("refEntity") + "' missing for "
+						+ emd.getName() + "." + amd.getName());
+				amd.setRefEntity(ref);
+			}
+		}
+
+		// instantiate the repos
+		for (EntityMetaData emd : metadata.values())
+		{
+			System.out.println(emd);
+			this.repositories.put(emd.getName(), new MysqlRepository(this, emd));
 		}
 	}
 
@@ -121,28 +164,20 @@ public class MysqlRepositoryCollection implements RepositoryCollection
 		}
 	}
 
-	public void add(EntityMetaData md)
+	public MysqlRepository add(EntityMetaData emd)
 	{
 		this.refreshRepositories();
-		if (this.getRepositoryByEntityName(md.getName()) != null) throw new RuntimeException(
-				"MysqlRepositorCollection.add() failed: table '" + md.getName() + "' exists");
-		MysqlRepository repository = new MysqlRepository(ds, md);
-		repository.create();
-		this.add(repository);
-	}
+		if (this.getRepositoryByEntityName(emd.getName()) != null) throw new RuntimeException(
+				"MysqlRepositorCollection.add() failed: table '" + emd.getName() + "' exists");
 
-	public void add(MysqlRepository repository)
-	{
 		this.refreshRepositories();
-		if (this.getRepositoryByEntityName(repository.getName()) != null) throw new RuntimeException(
-				"MysqlRepositorCollection.add() failed: table '" + repository.getName() + "' exists");
+		if (this.getRepositoryByEntityName(emd.getName()) != null) throw new RuntimeException(
+				"MysqlRepositorCollection.add() failed: table '" + emd.getName() + "' exists");
 		// TODO: check if this repository is equal to existing one!
 
-		// add entity metadata
-		EntityMetaData emd = repository.getEntityMetaData();
 		Entity e = new MapEntity();
 		e.set("name", emd.getName());
-		e.set("idAttribute", emd.getIdAttribute().getName());
+		if (emd.getIdAttribute() != null) e.set("idAttribute", emd.getIdAttribute().getName());
 		entities.add(e);
 
 		// add attribute metadata
@@ -153,13 +188,27 @@ public class MysqlRepositoryCollection implements RepositoryCollection
 			a.set("name", att.getName());
 			a.set("defaultValue", att.getDefaultValue());
 			a.set("dataType", att.getDataType());
+			if (att.getRefEntity() != null) a.set("refEntity", att.getRefEntity().getName());
+			// add compound entities unless already there
+			if (att.getDataType() instanceof CompoundField
+					&& entities.count(new QueryImpl().eq("name", att.getRefEntity().getName())) == 0)
+			{
+				this.add(att.getRefEntity());
+			}
 			a.set("nillable", att.isNillable());
 			a.set("auto", att.isAuto());
 			attributes.add(a);
 		}
 
-		// add tot repository
-		repositories.put(repository.getName(), repository);
+		// if not abstract add to repositories
+		if (!emd.isAbstract())
+		{
+			MysqlRepository repository = new MysqlRepository(this, emd);
+			repository.create();
+			repositories.put(emd.getName(), repository);
+			return repository;
+		}
+		return null;
 	}
 
 	@Override
@@ -174,16 +223,21 @@ public class MysqlRepositoryCollection implements RepositoryCollection
 		return repositories.get(name);
 	}
 
+	public void drop(EntityMetaData md)
+	{
+		assert md != null;
+		this.drop(md.getName());
+	}
+
 	public void drop(String name)
 	{
-        //remove the repo
+		// remove the repo
 		MysqlRepository r = this.repositories.get(name);
-		if (r == null) throw new IllegalArgumentException("drop('" + name + "'): could not find");
-		r.drop();
+		if (r != null) r.drop();
 		this.repositories.remove(name);
 
-        //delete metadata
-        attributes.delete(attributes.findAll(new QueryImpl().eq("entity",name)));
-        entities.delete(entities.findAll(new QueryImpl().eq("name",name)));
-    }
+		// delete metadata
+		attributes.delete(attributes.findAll(new QueryImpl().eq("entity", name)));
+		entities.delete(entities.findAll(new QueryImpl().eq("name", name)));
+	}
 }

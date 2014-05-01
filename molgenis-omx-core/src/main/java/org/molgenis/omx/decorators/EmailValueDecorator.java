@@ -34,7 +34,7 @@ public class EmailValueDecorator extends CrudRepositoryDecorator
 	}
 
 	@Override
-	public Integer add(Entity entity)
+	public Object add(Entity entity)
 	{
 		String email = entity.getString(EmailValue.VALUE);
 		if (!emailValidator.isValid(email, null))

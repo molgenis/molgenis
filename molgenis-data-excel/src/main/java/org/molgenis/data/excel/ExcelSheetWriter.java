@@ -44,7 +44,7 @@ public class ExcelSheetWriter extends AbstractWritable
 	 * Add a new row to the sheet
 	 */
 	@Override
-	public Integer add(Entity entity)
+	public Object add(Entity entity)
 	{
 		if (entity == null) throw new IllegalArgumentException("Entity cannot be null");
 		if (cachedAttributeNames == null) throw new MolgenisDataException(

@@ -73,7 +73,7 @@ public class FormLinkDirectiveTest
 		private static final long serialVersionUID = 1L;
 
 		@Override
-		public Integer getIdValue()
+		public Object getIdValue()
 		{
 			return 99;
 		}

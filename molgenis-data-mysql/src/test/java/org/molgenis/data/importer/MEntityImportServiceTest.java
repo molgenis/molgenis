@@ -20,17 +20,22 @@ import org.testng.annotations.Test;
 @ContextConfiguration(classes = AppConfig.class)
 public class MEntityImportServiceTest extends AbstractTestNGSpringContextTests
 {
-    @Autowired
-    MysqlRepositoryCollection store;
+	@Autowired
+	MysqlRepositoryCollection store;
 
 	@Test
-	public void test1() throws IOException, InvalidFormatException, InterruptedException {
+	public void test1() throws IOException, InvalidFormatException, InterruptedException
+	{
+        //cleanup
+        store.drop("import_person");
+        store.drop("import_city");
+        store.drop("import_country");
 
-		// create test excel
+        // create test excel
 		File f = new File("/Users/mswertz/example.xlsx");
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
 
-		Assert.assertEquals(source.getNumberOfSheets(), 3);
+		Assert.assertEquals(source.getNumberOfSheets(), 4);
 		Assert.assertNotNull(source.getRepositoryByEntityName("attributes"));
 
 		List<Entity> entities = new ArrayList<Entity>();
@@ -40,18 +45,29 @@ public class MEntityImportServiceTest extends AbstractTestNGSpringContextTests
 		}
 
 		MEntityImportServiceImpl importer = new MEntityImportServiceImpl();
-        importer.setRepositoryCollection(store);
+		importer.setRepositoryCollection(store);
 
 		for (EntityMetaData em : importer.getEntityMetaData(source).values())
 		{
 			System.out.println(em);
 		}
 
-        //test import
-        importer.doImport(source,null);
+		// test import
+		importer.doImport(source, null);
 
-        //wait to make sure logger has outputted
-        Thread.sleep(1000);
+        //query
+        for(Entity e: store.getRepositoryByEntityName("import_city"))
+        {
+            System.out.println(e);
+        }
+
+        for(Entity e: store.getRepositoryByEntityName("import_person"))
+        {
+            System.out.println(e);
+        }
+
+		// wait to make sure logger has outputted
+		Thread.sleep(1000);
 
 	}
 }

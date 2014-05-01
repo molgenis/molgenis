@@ -6,11 +6,15 @@ import javax.sql.DataSource;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
+import org.molgenis.AppConfig;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -18,25 +22,12 @@ import org.testng.annotations.Test;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 /** Test for Query */
-public class MysqlRepositoryCountTest
+@ContextConfiguration(classes = AppConfig.class)
+public class MysqlRepositoryCountTest extends AbstractTestNGSpringContextTests
 {
-	DataSource ds;
-	Logger logger;
-
-	@BeforeClass
-	public void setup() throws PropertyVetoException
-	{
-		BasicConfigurator.configure();
-		logger = Logger.getRootLogger();
-
-		ComboPooledDataSource dataSource = new ComboPooledDataSource();
-		dataSource.setDriverClass("com.mysql.jdbc.Driver");
-		dataSource.setJdbcUrl(MysqlRepositoryTestConstants.URL);
-		dataSource.setUser("molgenis");
-		dataSource.setPassword("molgenis");
-
-		ds = dataSource;
-	}
+    @Autowired
+    MysqlRepositoryCollection coll;
+	Logger logger = Logger.getLogger(getClass());
 
 	@Test
 	public void test()
@@ -54,14 +45,10 @@ public class MysqlRepositoryCountTest
 		personMD.addAttribute("active").setDataType(MolgenisFieldTypes.BOOL);
 		personMD.addAttribute("country").setDataType(MolgenisFieldTypes.XREF).setRefEntity(countryMD);
 
-		MysqlRepository countries = new MysqlRepository(ds, countryMD);
-		MysqlRepository persons = new MysqlRepository(ds, personMD);
-
-		// drop and create the tables via the repository
-		persons.drop();
-		countries.drop();
-		countries.create();
-		persons.create();
+        coll.drop(personMD.getName());
+        coll.drop(countryMD.getName());
+		MysqlRepository countries = coll.add(countryMD);
+		MysqlRepository persons = coll.add(personMD);
 
 		// add country entities to repo
 		Entity c = new MapEntity();

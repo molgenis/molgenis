@@ -21,7 +21,7 @@ public abstract class AbstractCrudRepository extends AbstractRepository implemen
 
 	@Override
 	@Transactional
-	public final Integer add(Entity entity)
+	public final Object add(Entity entity)
 	{
 		validator.validate(Arrays.asList(entity), getEntityMetaData(), null);
 		return addInternal(entity);
@@ -61,7 +61,7 @@ public abstract class AbstractCrudRepository extends AbstractRepository implemen
 
 	protected abstract void addInternal(Iterable<? extends Entity> entities);
 
-	protected abstract Integer addInternal(Entity entity);
+	protected abstract Object addInternal(Entity entity);
 
 	protected abstract void updateInternal(Entity entity);
 

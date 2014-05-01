@@ -91,7 +91,7 @@ public class JpaRepository extends AbstractCrudRepository
 	}
 
 	@Override
-	protected Integer addInternal(Entity entity)
+	protected Object addInternal(Entity entity)
 	{
 		Entity jpaEntity = getTypedEntity(entity);
 
@@ -149,7 +149,7 @@ public class JpaRepository extends AbstractCrudRepository
 
 	@Override
 	@Transactional(readOnly = true)
-	public Entity findOne(Integer id)
+	public Entity findOne(Object id)
 	{
 		if (logger.isDebugEnabled()) logger
 				.debug("finding by key" + getEntityClass().getSimpleName() + " [" + id + "]");
@@ -159,7 +159,7 @@ public class JpaRepository extends AbstractCrudRepository
 
 	@Override
 	@Transactional(readOnly = true)
-	public Iterable<Entity> findAll(Iterable<Integer> ids)
+	public Iterable<Entity> findAll(Iterable<Object> ids)
 	{
 		String idAttrName = getEntityMetaData().getIdAttribute().getName();
 
@@ -555,7 +555,7 @@ public class JpaRepository extends AbstractCrudRepository
 
 	@Override
 	@Transactional
-	public void deleteById(Integer id)
+	public void deleteById(Object id)
 	{
 		if (logger.isDebugEnabled()) logger.debug("removing " + getEntityClass().getSimpleName() + " [" + id + "]");
 		delete(findOne(id));
@@ -774,9 +774,9 @@ public class JpaRepository extends AbstractCrudRepository
 
 	@Override
 	@Transactional
-	public void deleteById(Iterable<Integer> ids)
+	public void deleteById(Iterable<Object> ids)
 	{
-		for (Integer id : ids)
+		for (Object id : ids)
 		{
 			deleteById(id);
 		}
@@ -813,7 +813,7 @@ public class JpaRepository extends AbstractCrudRepository
 
 	@Override
 	@Transactional(readOnly = true)
-	public <E extends Entity> Iterable<E> findAll(Iterable<Integer> ids, Class<E> clazz)
+	public <E extends Entity> Iterable<E> findAll(Iterable<Object> ids, Class<E> clazz)
 	{
 		return new ConvertingIterable<E>(clazz, findAll(ids));
 	}
@@ -828,7 +828,7 @@ public class JpaRepository extends AbstractCrudRepository
 	@SuppressWarnings("unchecked")
 	@Override
 	@Transactional(readOnly = true)
-	public <E extends Entity> E findOne(Integer id, Class<E> clazz)
+	public <E extends Entity> E findOne(Object id, Class<E> clazz)
 	{
 		Entity entity = findOne(id);
 		if (entity == null)

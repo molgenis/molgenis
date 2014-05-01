@@ -42,7 +42,7 @@ public class MEntityImportServiceImpl implements MEntityImportService
 
 		Map<String, DefaultEntityMetaData> metadata = getEntityMetaData(source);
 
-		for (String name : source.getEntityNames())
+		for (String name : metadata.keySet())
 		{
 			if (!"entities".equals(name) && !"attributes".equals(name))
 			{
@@ -55,14 +55,15 @@ public class MEntityImportServiceImpl implements MEntityImportService
 
 				if (to == null)
 				{
-					EntityMetaData em = metadata.get(name);
+                    System.out.println("tyring to create: " + name);
+
+                    EntityMetaData em = metadata.get(name);
 					if (em == null) throw new IllegalArgumentException("Unknown entity: " + name);
 					store.add(em);
 
-					to = (MysqlRepository) store.getRepositoryByEntityName(name);
+                    to = (MysqlRepository) store.getRepositoryByEntityName(name);
 				}
 
-				System.out.println("imported: " + to);
 
 				// import
 				to.add(from);

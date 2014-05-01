@@ -20,10 +20,10 @@ public interface Updateable extends Writable
 	void delete(Iterable<? extends Entity> entities);
 
 	/* Delete one entity based on id */
-	void deleteById(Integer id);
+	void deleteById(Object id);
 
 	/* Streaming delete based on multiple ids */
-	void deleteById(Iterable<Integer> ids);
+	void deleteById(Iterable<Object> ids);
 
 	/* Delete all entities */
 	void deleteAll();

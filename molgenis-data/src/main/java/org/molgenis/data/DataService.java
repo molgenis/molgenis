@@ -26,7 +26,7 @@ public interface DataService extends RepositoryCollection
 	 * 
 	 * @throws MolgenisDataException
 	 *             if repository/entity name doesn't exists
-	 * @param repository
+	 * @param repositoryName
 	 */
 	void removeRepository(String repositoryName);
 
@@ -92,7 +92,7 @@ public interface DataService extends RepositoryCollection
 	 * @param ids
 	 * @return
 	 */
-	Iterable<Entity> findAll(String entityName, Iterable<Integer> ids);
+	Iterable<Entity> findAll(String entityName, Iterable<Object> ids);
 
 	@Deprecated
 	/**
@@ -115,7 +115,7 @@ public interface DataService extends RepositoryCollection
 	 * @param entityName
 	 *            entity name (case insensitive)
 	 */
-	Entity findOne(String entityName, Integer id);
+	Entity findOne(String entityName, Object id);
 
 	/**
 	 * Find one entity based on id. Returns null if not exists
@@ -140,7 +140,7 @@ public interface DataService extends RepositoryCollection
 	 *            entity name (case insensitive)
 	 * @return the id of the entity
 	 */
-	Integer add(String entityName, Entity entity);
+	Object add(String entityName, Entity entity);
 
 	/**
 	 * @throws MolgenisDataAccessException
@@ -206,7 +206,7 @@ public interface DataService extends RepositoryCollection
 	 *            entity name (case insensitive)
 	 * @param id
 	 */
-	void delete(String entityName, int id);
+	void delete(String entityName, Object id);
 
 	// TODO can we remove this?
 	/**
@@ -262,7 +262,7 @@ public interface DataService extends RepositoryCollection
 	 * @param entityName
 	 *            entity name (case insensitive)
 	 */
-	<E extends Entity> Iterable<E> findAll(String entityName, Iterable<Integer> ids, Class<E> clazz);
+	<E extends Entity> Iterable<E> findAll(String entityName, Iterable<Object> ids, Class<E> clazz);
 
 	/**
 	 * 
@@ -274,7 +274,7 @@ public interface DataService extends RepositoryCollection
 	 * @param clazz
 	 * @return
 	 */
-	<E extends Entity> E findOne(String entityName, Integer id, Class<E> clazz);
+	<E extends Entity> E findOne(String entityName, Object id, Class<E> clazz);
 
 	/**
 	 * type-save find an entity by it's id

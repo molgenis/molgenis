@@ -75,7 +75,7 @@ public class CsvWriter extends AbstractWritable
 	}
 
 	@Override
-	public Integer add(Entity entity)
+	public Object add(Entity entity)
 	{
 		if (cachedAttributeNames == null) throw new MolgenisDataException(
 				"No attribute names defined call writeAttributeNames first");

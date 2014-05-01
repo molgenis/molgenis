@@ -49,7 +49,7 @@ public class JpaRepositoryTest extends BaseJpaTest
 	public void testAddAndretrieve()
 	{
 		Person p = new Person("Piet", "Paulusma");
-		Integer id = repo.add(p);
+		Object id = repo.add(p);
 
 		assertNotNull(id);
 
@@ -78,7 +78,7 @@ public class JpaRepositoryTest extends BaseJpaTest
 	public void testDelete()
 	{
 		Person p = new Person("Piet", "Paulusma");
-		Integer id = repo.add(p);
+		Object id = repo.add(p);
 		repo.delete(p);
 		assertNull(repo.findOne(id));
 	}
@@ -87,7 +87,7 @@ public class JpaRepositoryTest extends BaseJpaTest
 	public void testDeleteIterable()
 	{
 		Person p = new Person("Piet", "Paulusma");
-		Integer id = repo.add(p);
+		Object id = repo.add(p);
 		repo.delete(Arrays.asList(p));
 		assertNull(repo.findOne(id));
 	}
@@ -96,7 +96,7 @@ public class JpaRepositoryTest extends BaseJpaTest
 	public void testDeleteAll()
 	{
 		Person p = new Person("Piet", "Paulusma");
-		Integer id = repo.add(p);
+		Object id = repo.add(p);
 		repo.deleteAll();
 		assertNull(repo.findOne(id));
 	}
@@ -105,7 +105,7 @@ public class JpaRepositoryTest extends BaseJpaTest
 	public void testDeleteById()
 	{
 		Person p = new Person("Piet", "Paulusma");
-		Integer id = repo.add(p);
+		Object id = repo.add(p);
 		repo.deleteById(id);
 		assertNull(repo.findOne(id));
 	}
@@ -114,7 +114,7 @@ public class JpaRepositoryTest extends BaseJpaTest
 	public void testDeleteByIdIterable()
 	{
 		Person p = new Person("Piet", "Paulusma");
-		Integer id = repo.add(p);
+		Object id = repo.add(p);
 		repo.deleteById(Arrays.asList(id));
 		assertNull(repo.findOne(id));
 	}
@@ -123,10 +123,10 @@ public class JpaRepositoryTest extends BaseJpaTest
 	public void testFindAll()
 	{
 		Person p1 = new Person("Piet", "Paulusma");
-		Integer id1 = repo.add(p1);
+		Object id1 = repo.add(p1);
 
 		Person p2 = new Person("Paulus", "de Boskabouter");
-		Integer id2 = repo.add(p2);
+		Object id2 = repo.add(p2);
 
 		Iterable<Entity> it = repo.findAll(Arrays.asList(id1, id2));
 		assertEquals(Iterables.size(it), 2);
@@ -138,10 +138,10 @@ public class JpaRepositoryTest extends BaseJpaTest
 	public void testFindAllTyped()
 	{
 		Person p1 = new Person("Piet", "Paulusma");
-		Integer id1 = repo.add(p1);
+		Object id1 = repo.add(p1);
 
 		Person p2 = new Person("Paulus", "de Boskabouter");
-		Integer id2 = repo.add(p2);
+		Object id2 = repo.add(p2);
 
 		repo.add(Arrays.asList(p1, p2));
 
@@ -155,7 +155,7 @@ public class JpaRepositoryTest extends BaseJpaTest
 	public void testFindOne()
 	{
 		Person p = new Person("Piet", "Paulusma");
-		Integer id = repo.add(p);
+		Object id = repo.add(p);
 		Entity e = repo.findOne(id);
 		assertNotNull(e);
 		assertEquals(p, e);
@@ -165,7 +165,7 @@ public class JpaRepositoryTest extends BaseJpaTest
 	public void testFindOneTyped()
 	{
 		Person p = new Person("Piet", "Paulusma");
-		Integer id = repo.add(p);
+		Object id = repo.add(p);
 		Person e = repo.findOne(id, Person.class);
 		assertNotNull(e);
 		assertEquals(p, e);
@@ -188,7 +188,7 @@ public class JpaRepositoryTest extends BaseJpaTest
 	public void testUpdate()
 	{
 		Person p = new Person("Piet", "Paulusma");
-		Integer id = repo.add(p);
+		Object id = repo.add(p);
 
 		Person e = repo.findOne(id, Person.class);
 		e.setLastName("XXX");

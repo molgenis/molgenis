@@ -1,6 +1,7 @@
 package org.molgenis.data.support;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -9,6 +10,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
 import org.molgenis.data.convert.DateToStringConverter;
+import org.molgenis.fieldtypes.MrefField;
 import org.springframework.beans.BeanUtils;
 
 public abstract class AbstractEntity implements Entity

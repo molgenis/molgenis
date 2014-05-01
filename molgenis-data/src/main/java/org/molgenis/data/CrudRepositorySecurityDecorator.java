@@ -88,28 +88,28 @@ public class CrudRepositorySecurityDecorator extends CrudRepositoryDecorator imp
 	}
 
 	@Override
-	public Entity findOne(Integer id)
+	public Entity findOne(Object id)
 	{
 		validatePermission(Permission.READ);
 		return decoratedRepository.findOne(id);
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Integer> ids)
+	public Iterable<Entity> findAll(Iterable<Object> ids)
 	{
 		validatePermission(Permission.READ);
 		return decoratedRepository.findAll(ids);
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> findAll(Iterable<Integer> ids, Class<E> clazz)
+	public <E extends Entity> Iterable<E> findAll(Iterable<Object> ids, Class<E> clazz)
 	{
 		validatePermission(Permission.READ);
 		return decoratedRepository.findAll(ids, clazz);
 	}
 
 	@Override
-	public <E extends Entity> E findOne(Integer id, Class<E> clazz)
+	public <E extends Entity> E findOne(Object id, Class<E> clazz)
 	{
 		validatePermission(Permission.READ);
 		return decoratedRepository.findOne(id, clazz);
@@ -158,14 +158,14 @@ public class CrudRepositorySecurityDecorator extends CrudRepositoryDecorator imp
 	}
 
 	@Override
-	public void deleteById(Integer id)
+	public void deleteById(Object id)
 	{
 		validatePermission(Permission.WRITE);
 		decoratedRepository.deleteById(id);
 	}
 
 	@Override
-	public void deleteById(Iterable<Integer> ids)
+	public void deleteById(Iterable<Object> ids)
 	{
 		validatePermission(Permission.WRITE);
 		decoratedRepository.deleteById(ids);
@@ -186,7 +186,7 @@ public class CrudRepositorySecurityDecorator extends CrudRepositoryDecorator imp
 	}
 
 	@Override
-	public Integer add(Entity entity)
+	public Object add(Entity entity)
 	{
 		validatePermission(Permission.WRITE);
 		return decoratedRepository.add(entity);

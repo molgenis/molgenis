@@ -7,6 +7,7 @@ import javax.sql.DataSource;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
+import org.molgenis.AppConfig;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -14,7 +15,10 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -22,26 +26,12 @@ import org.testng.annotations.Test;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 /** Simple test of all apsects of the repository */
-public class MysqlRepositoryTest
+@ContextConfiguration(classes = AppConfig.class)
+public class MysqlRepositoryTest  extends AbstractTestNGSpringContextTests
 {
-	DataSource ds;
-	Logger logger;
-
-	@BeforeClass
-	public void setup() throws PropertyVetoException
-	{
-		BasicConfigurator.configure();
-		logger = Logger.getRootLogger();
-
-		ComboPooledDataSource dataSource = new ComboPooledDataSource();
-		dataSource.setDriverClass("com.mysql.jdbc.Driver");
-		dataSource.setJdbcUrl("jdbc:mysql://localhost:3306/omx?rewriteBatchedStatements=true");
-		dataSource.setUser("molgenis");
-		dataSource.setPassword("molgenis");
-
-		ds = dataSource;
-
-	}
+    @Autowired
+    MysqlRepositoryCollection coll;
+	Logger logger = Logger.getLogger(getClass());
 
 	@Test
 	public void testSql() throws Exception
@@ -49,8 +39,6 @@ public class MysqlRepositoryTest
 		// create table person(id int auto_increment primary key, firstName varchar(255), lastName varchar(255));
 
 		DefaultEntityMetaData metaData = new DefaultEntityMetaData("MysqlPerson");
-		MysqlRepository repo = new MysqlRepository(ds, metaData);
-		repo.drop();
 
 		metaData.addAttribute("firstName").setNillable(false);
 
@@ -69,6 +57,9 @@ public class MysqlRepositoryTest
 
 		metaData.setIdAttribute("lastName");
 		Assert.assertEquals(metaData.getIdAttribute().getName(), "lastName");
+
+        coll.drop(metaData.getName());
+        MysqlRepository repo = coll.add(metaData);
 
 		Assert.assertEquals(repo.iteratorSql(), "SELECT firstName, lastName FROM MysqlPerson");
 		Assert.assertEquals(repo.getInsertSql(), "INSERT INTO MysqlPerson (firstName, lastName) VALUES (?, ?)");
@@ -104,7 +95,8 @@ public class MysqlRepositoryTest
         //test delete clauses
         Assert.assertEquals(repo.getDeleteSql(), "DELETE FROM MysqlPerson WHERE lastName = ?");
 
-		repo.create();
+        coll.drop(metaData.getName());
+        repo = coll.add(metaData);
 
 		// Entity generator to monitor performance (set batch to 100000 to show up to >10,000 records/second)
 		final int SIZE = 100000;

@@ -110,14 +110,14 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Cr
 	}
 
 	@Override
-	public Entity findOne(Integer id)
+	public Entity findOne(Object id)
 	{
 		Query q = new QueryImpl().eq(ObservationSet.ID, id);
 		return findOne(q);
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Integer> ids)
+	public Iterable<Entity> findAll(Iterable<Object> ids)
 	{
 		Query q = new QueryImpl().in(ObservationSet.ID, ids);
 		return findAll(q);
@@ -130,14 +130,14 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Cr
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> findAll(Iterable<Integer> ids, Class<E> clazz)
+	public <E extends Entity> Iterable<E> findAll(Iterable<Object> ids, Class<E> clazz)
 	{
 		return new ConvertingIterable<E>(clazz, findAll(ids));
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <E extends Entity> E findOne(Integer id, Class<E> clazz)
+	public <E extends Entity> E findOne(Object id, Class<E> clazz)
 	{
 		Entity entity = findOne(id);
 		if (entity == null)
@@ -177,7 +177,7 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Cr
 
 	@Transactional
 	@Override
-	public Integer add(Entity entity)
+	public Object add(Entity entity)
 	{
 		add(Lists.newArrayList(entity));
 		return entity.getIdValue();
@@ -331,13 +331,13 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Cr
 	}
 
 	@Override
-	public void deleteById(Integer id)
+	public void deleteById(Object id)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void deleteById(Iterable<Integer> ids)
+	public void deleteById(Iterable<Object> ids)
 	{
 		throw new UnsupportedOperationException();
 	}

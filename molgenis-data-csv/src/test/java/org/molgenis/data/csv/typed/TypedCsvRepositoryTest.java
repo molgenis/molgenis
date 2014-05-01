@@ -103,7 +103,7 @@ public class TypedCsvRepositoryTest
 		}
 
 		@Override
-		public Integer getIdValue()
+		public Object getIdValue()
 		{
 			return index;
 		}
