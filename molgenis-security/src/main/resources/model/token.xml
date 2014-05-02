@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<molgenis name="org.molgenis.security">
+	<module name="token">
+		<entity name="MolgenisToken" label="Token">
+			<field name="id" type="autoid" hidden="true" />
+			<field name="molgenisUser" type="xref" xref_entity="MolgenisUser" />
+			<field name="token" label="Token" type="string" />
+			<field name="expirationDate" label="Expiration date" type="datetime" optional="true" description="When expiration date is null it will never expire"/>
+			<unique fields="token"/>
+		</entity>
+	</module>
+</molgenis>

@@ -53,12 +53,22 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.framework.db.EntityNotFoundException;
+import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.security.token.TokenExtractor;
+import org.molgenis.security.token.TokenService;
+import org.molgenis.security.token.UnknownTokenException;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -93,12 +103,19 @@ public class RestController
 	public static final String BASE_URI = "/api/v1";
 	private static final Pattern PATTERN_EXPANDS = Pattern.compile("([^\\[^\\]]+)(?:\\[(.+)\\])?");
 	private final DataService dataService;
+	private final TokenService tokenService;
+	private final AuthenticationManager authenticationManager;
 
 	@Autowired
-	public RestController(DataService dataService)
+	public RestController(DataService dataService, TokenService tokenService,
+			AuthenticationManager authenticationManager)
 	{
 		if (dataService == null) throw new IllegalArgumentException("dataService is null");
+		if (tokenService == null) throw new IllegalArgumentException("tokenService is null");
+		if (authenticationManager == null) throw new IllegalArgumentException("authenticationManager is null");
 		this.dataService = dataService;
+		this.tokenService = tokenService;
+		this.authenticationManager = authenticationManager;
 	}
 
 	/**
@@ -465,12 +482,84 @@ public class RestController
 		delete(entityName, id);
 	}
 
+	/**
+	 * Login to the api.
+	 * 
+	 * Returns a json object with a token on correct login else throws an AuthenticationException. Clients can use this
+	 * token when calling the api.
+	 * 
+	 * Example:
+	 * 
+	 * Request: {username:admin,password:xxx}
+	 * 
+	 * Response: {token: b4fd94dc-eae6-4d9a-a1b7-dd4525f2f75d}
+	 * 
+	 * @param login
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "/login", method = POST, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public LoginResponse login(@Valid @RequestBody LoginRequest login, HttpServletRequest request)
+	{
+		if (login == null)
+		{
+			throw new HttpMessageNotReadableException("Missing login");
+		}
+
+		UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(login.getUsername(),
+				login.getPassword());
+		authToken.setDetails(new WebAuthenticationDetails(request));
+
+		// Authenticate the login
+		Authentication authentication = authenticationManager.authenticate(authToken);
+		if (!authentication.isAuthenticated())
+		{
+			throw new BadCredentialsException("Unknown username or password");
+		}
+
+		// User authenticated, log the user in
+		SecurityContextHolder.getContext().setAuthentication(authentication);
+
+		// Generate a new token for the user
+		String token = tokenService.generateAndStoreToken(authentication.getName());
+
+		MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisUser.USERNAME, authentication.getName()), MolgenisUser.class);
+
+		return new LoginResponse(token, user.getUsername(), user.getFirstName(), user.getLastName());
+	}
+
+	@RequestMapping("/logout")
+	@ResponseStatus(OK)
+	public void logout(HttpServletRequest request)
+	{
+		String token = TokenExtractor.getToken(request);
+		if (token == null)
+		{
+			throw new HttpMessageNotReadableException("Missing token in header");
+		}
+
+		tokenService.removeToken(token);
+		SecurityContextHolder.getContext().setAuthentication(null);
+		request.getSession().invalidate();
+	}
+
 	@ExceptionHandler(HttpMessageNotReadableException.class)
 	@ResponseStatus(BAD_REQUEST)
 	@ResponseBody
 	public ErrorMessageResponse handleHttpMessageNotReadableException(HttpMessageNotReadableException e)
 	{
 		logger.error("", e);
+		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
+	}
+
+	@ExceptionHandler(UnknownTokenException.class)
+	@ResponseStatus(NOT_FOUND)
+	@ResponseBody
+	public ErrorMessageResponse handleUnknownTokenException(UnknownTokenException e)
+	{
+		logger.debug("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
