@@ -85,8 +85,8 @@
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>3.0</version>
 					<configuration>
-						<source>1.6</source>
-						<target>1.6</target>
+						<source>1.7</source>
+						<target>1.7</target>
 						<compilerArguments>
 							<Xlint/>
 						</compilerArguments>
@@ -581,5 +581,6 @@
 		<module>molgenis-annotators</module>
 		<module>molgenis-js</module>
 		<module>molgenis-model-registry</module>
+		<module>molgenis-disease-matcher</module>
 	</modules>
 </project>
