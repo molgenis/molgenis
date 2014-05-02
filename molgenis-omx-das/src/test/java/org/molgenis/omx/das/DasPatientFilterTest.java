@@ -57,7 +57,7 @@ public class DasPatientFilterTest
 		when(requestNoPatient.getRequestDispatcher("/das/col7a1/features")).thenReturn(requestDispatcher);
 	}
 
-	// @Test()
+	@Test()
 	public void doFilterPatientTest() throws UnimplementedFeatureException, DataSourceException, IOException,
 			ServletException
 	{

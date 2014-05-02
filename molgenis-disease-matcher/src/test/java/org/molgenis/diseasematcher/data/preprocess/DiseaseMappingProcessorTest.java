@@ -37,8 +37,6 @@ public class DiseaseMappingProcessorTest
 		Reader in = new FileReader(outFile);
 		String out = FileCopyUtils.copyToString(in);
 
-		System.out.println(out);
-
 		String check = "\"identifier\"	\"diseaseId\"	\"geneSymbol\"	\"geneId\"	\"HPOId\"	\"HPODescription\"	\"isTypical\"\n\"OMIM:303100CHMHP:0000505\"	\"OMIM:303100\"	\"CHM\"	\"1121\"	\"HP:0000505\"	\"Visual impairment\"	\"true\"\n\"ORPHANET:2318ZNF423HP:0002311\"	\"ORPHANET:2318\"	\"ZNF423\"	\"23090\"	\"HP:0002311\"	\"Incoordination\"	\"true\"\n\"ORPHANET:2318TMEM138HP:0002104\"	\"ORPHANET:2318\"	\"TMEM138\"	\"51524\"	\"HP:0002104\"	\"Apnea\"	\"false\"\n";
 
 		assertEquals(out, check);

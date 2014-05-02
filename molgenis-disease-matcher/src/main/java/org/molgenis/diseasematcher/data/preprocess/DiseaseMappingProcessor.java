@@ -93,8 +93,6 @@ public class DiseaseMappingProcessor
 	 */
 	public void processFiles(File typicalFile, File allFile, File outFile)
 	{
-		BufferedReader typicalReader = null;
-		BufferedReader allReader = null;
 		CsvWriter csvWriter = null;
 		CSVReader csvReaderTypical = null;
 		CSVReader csvReaderAll = null;
@@ -102,11 +100,8 @@ public class DiseaseMappingProcessor
 		try
 		{
 			// instantiate readers and writers
-			typicalReader = new BufferedReader(new FileReader(typicalFile));
-			allReader = new BufferedReader(new FileReader(allFile));
-
-			csvReaderTypical = new CSVReader(typicalReader, '\t');
-			csvReaderAll = new CSVReader(allReader, '\t');
+			csvReaderTypical = new CSVReader(new BufferedReader(new FileReader(typicalFile)), '\t');
+			csvReaderAll = new CSVReader(new BufferedReader(new FileReader(allFile)), '\t');
 
 			csvWriter = new CsvWriter(new BufferedWriter(new FileWriter(outFile)), '\t');
 
@@ -161,7 +156,6 @@ public class DiseaseMappingProcessor
 		}
 		finally
 		{
-			IOUtils.closeQuietly(typicalReader);
 			IOUtils.closeQuietly(csvReaderTypical);
 			IOUtils.closeQuietly(csvReaderAll);
 			IOUtils.closeQuietly(csvWriter);
