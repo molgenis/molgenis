@@ -108,8 +108,6 @@ public class MysqlRepositoryXrefTest extends MysqlRepositoryAbstractDatatypeTest
 		Assert.assertEquals(xrefRepo.getSelectSql(new QueryImpl()),
 				"SELECT this.identifier, this.stringRef, this.intRef FROM XrefTest AS this");
 
-		// "SElECT stringRef.identifier AS stringRef, XrefTest.intRef FROM XrefTest LEFT JOIN StringTarget AS stringRef ON (XrefTest.stringRef = stringRef.identifier) LEFT JOIN IntTarget AS intRef ON (XrefTest.intRef = intRef.identifier");
-
 		for (Entity e : xrefRepo)
 		{
 			logger.debug(e);

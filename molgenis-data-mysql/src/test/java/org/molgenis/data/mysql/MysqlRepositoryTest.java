@@ -85,12 +85,12 @@ public class MysqlRepositoryTest  extends AbstractTestNGSpringContextTests
                 "WHERE (this.firstName LIKE '%John%' OR this.lastName LIKE '%John%' OR CAST(this.age as CHAR) LIKE '%John%')");
 
         //sort
-        Assert.assertEquals(repo.getWhereSql(new QueryImpl().sort(Sort.Direction.ASC,"firstName"))
+        Assert.assertEquals(repo.getSortSql(new QueryImpl().sort(Sort.Direction.ASC,"firstName"))
                 ,"ORDER BY firstName ASC");
-        Assert.assertEquals(repo.getWhereSql(new QueryImpl().sort(Sort.Direction.DESC,"firstName"))
+        Assert.assertEquals(repo.getSortSql(new QueryImpl().sort(Sort.Direction.DESC,"firstName"))
                 ,"ORDER BY firstName DESC");
         Assert.assertEquals(repo.getWhereSql(new QueryImpl().eq("firstName", "John").sort(Sort.Direction.DESC,"firstName"))
-                ,"WHERE this.firstName = 'John' ORDER BY firstName DESC");
+                ,"WHERE this.firstName = 'John'");
 
         //test delete clauses
         Assert.assertEquals(repo.getDeleteSql(), "DELETE FROM MysqlPerson WHERE lastName = ?");

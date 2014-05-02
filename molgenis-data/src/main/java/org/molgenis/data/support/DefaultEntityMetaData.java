@@ -112,7 +112,7 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 			if (att == null) throw new RuntimeException("getLabelAttribute() failed: '" + labelAttribute + "' unknown");
 			return att;
 		}
-		return null;
+        return getIdAttribute();
 	}
 
 	public DefaultEntityMetaData setLabelAttribute(String name)

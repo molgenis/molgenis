@@ -362,15 +362,6 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 			if (count > 0) select += ", ";
 
 			// TODO needed when autoids are used to join
-			// if(att.getDataType() == MolgenisFieldTypes.XREF)
-			// {
-			// String refEntity = att.getRefEntity().getName();
-			// String refId = att.getRefEntity().getIdAttribute().getName();
-			// select += att.getName()+"."+refId+" AS "+att.getName();
-			// from += " LEFT JOIN "+refEntity+" AS "+att.getName()+" ON ("+refEntity+"."+refId+"=this."+att.getName();
-			// }
-			// else
-			// {
 			if (att.getDataType() instanceof MrefField)
 			{
 				select += "GROUP_CONCAT(DISTINCT(" + att.getName() + "." + att.getName() + ")) AS " + att.getName();
@@ -386,11 +377,20 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 			count++;
 
 		}
-		String where = getWhereSql(q);
+
+		// from
 		String result = select + getFromSql();
+		// where
+		String where = getWhereSql(q);
 		if (where.length() > 0) result += " " + where;
+		// group by
 		if (select.contains("GROUP_CONCAT") && group.length() > 0) result += " GROUP BY " + group;
-		return result;
+		// order by
+		result += " " + getSortSql(q);
+		// limit
+		if (q.getPageSize() > 0) result += " LIMIT " + q.getPageSize();
+		if (q.getOffset() > 0) result += " OFFSET " + q.getOffset();
+		return result.trim();
 	}
 
 	@Override
@@ -420,7 +420,8 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 	@Override
 	public Entity findOne(Object id)
 	{
-		throw new UnsupportedOperationException();
+		if (id == null) return null;
+		return findOne(new QueryImpl().eq(getEntityMetaData().getIdAttribute().getName(), id));
 	}
 
 	@Override
@@ -513,18 +514,19 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 				case OR:
 					result += " OR ";
 					break;
-                case IN:
+				case IN:
 					AttributeMetaData att = getEntityMetaData().getAttribute(r.getField());
 					String in = "'UNKNOWN VALUE'";
-                    List<Object> values = new ArrayList<Object>();
+					List<Object> values = new ArrayList<Object>();
 					if (!(r.getValue() instanceof List))
-                    {
-                        for(String str: r.getValue().toString().split(",")) values.add(str);
-                    }
-                    else
-                    {
-                        values.addAll((Collection<?>) r.getValue());
-                    }
+					{
+						for (String str : r.getValue().toString().split(","))
+							values.add(str);
+					}
+					else
+					{
+						values.addAll((Collection<?>) r.getValue());
+					}
 					boolean quotes = att.getDataType() instanceof StringField || att.getDataType() instanceof TextField;
 					for (Object o : values)
 					{
@@ -532,8 +534,9 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 						else in += "," + o;
 					}
 
-                    if (att.getDataType() instanceof MrefField)result += att.getName() + "_filter." + r.getField()+ " IN(" + in+ ")" ;
-                    else result += "this." + r.getField()+ " IN(" + in+ ")";
+					if (att.getDataType() instanceof MrefField) result += att.getName() + "_filter." + r.getField()
+							+ " IN(" + in + ")";
+					else result += "this." + r.getField() + " IN(" + in + ")";
 					break;
 				default:
 					// comparable values...
@@ -570,12 +573,20 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 					result += predicate;
 			}
 		}
+		if (result.length() > 0) return "WHERE " + result.trim();
+		else return "";
+	}
+
+	protected String getSortSql(Query q)
+	{
 		String sortSql = "";
 		if (q.getSort() != null)
 		{
 			for (Sort.Order o : q.getSort())
 			{
-				sortSql += ", " + o.getProperty();
+				AttributeMetaData att = getEntityMetaData().getAttribute(o.getProperty());
+				if (att.getDataType() instanceof MrefField) sortSql += ", " + att.getName();
+				else sortSql += ", " + att.getName();
 				if (o.getDirection().equals(Sort.Direction.DESC))
 				{
 					sortSql += " DESC";
@@ -586,11 +597,9 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 				}
 			}
 
-			if (sortSql.length() > 0) sortSql = " ORDER BY " + sortSql.substring(2);
-
+			if (sortSql.length() > 0) sortSql = "ORDER BY " + sortSql.substring(2);
 		}
-		if (result.length() > 0) return "WHERE " + result + sortSql;
-		else return sortSql.trim();
+		return sortSql;
 	}
 
 	private String formatValue(AttributeMetaData att, Object value)

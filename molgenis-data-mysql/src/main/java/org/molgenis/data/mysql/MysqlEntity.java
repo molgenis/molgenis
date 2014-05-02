@@ -1,5 +1,8 @@
 package org.molgenis.data.mysql;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -7,8 +10,6 @@ import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
-
-import java.util.ArrayList;
 
 public class MysqlEntity extends MapEntity
 {
@@ -24,6 +25,13 @@ public class MysqlEntity extends MapEntity
 		this.repositoryCollection = repositoryCollection;
 	}
 
+	@Override
+	public String getIdAttributeName()
+	{
+		return metaData.getIdAttribute().getName();
+	}
+
+	@Override
 	public Entity getEntity(String attributeName)
 	{
 		if (repositoryCollection == null) throw new RuntimeException(
@@ -45,7 +53,7 @@ public class MysqlEntity extends MapEntity
 	@Override
 	public Iterable<Entity> getEntities(String attributeName)
 	{
-        System.out.println("trying getEntities("+attributeName+")");
+		System.out.println("trying getEntities(" + attributeName + ")");
 		if (repositoryCollection == null) throw new RuntimeException(
 				"getEntities() failed: repositoryCollection not set");
 
@@ -57,7 +65,9 @@ public class MysqlEntity extends MapEntity
 			MysqlRepository r = (MysqlRepository) repositoryCollection.getRepositoryByEntityName(ref.getName());
 			return r.findAll(new QueryImpl().in(ref.getIdAttribute().getName(), getList(attributeName)));
 		}
-		return new ArrayList<Entity>();
+		List<Entity> result = new ArrayList<Entity>();
+        System.out.println("getEntities(" + attributeName + "): found "+result.size());
+        return result;
 	}
 
 	@Override
