@@ -97,6 +97,8 @@
 			
 			var pane = $('<div class="tab-pane' + (i === 0 ? ' active"' : '') + '" id="' + tabId + '">');
 			var paneContainer = $('<div class="well"></div>');
+			var form = $('<form class="form-horizontal"></form>');
+			paneContainer.append(form);
 			pane.append(paneContainer);
 			$.each(compoundAttribute.attributes, function(i, attribute) {
 				if(attribute.fieldType !== 'COMPOUND') {
