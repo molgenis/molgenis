@@ -108,10 +108,13 @@
 		switch(attributeFilter.attribute.fieldType) {
 			case 'DATE':
 			case 'DATE_TIME':
+				//TODO FIX
+				return htmlEscape((attributeFilter.values[0] ? 'from ' + attributeFilter.values[0] : '') + (attributeFilter.values[1] ? ' to ' + attributeFilter.values[1] : ''));
 			case 'DECIMAL':
 			case 'INT':
 			case 'LONG':
-				return htmlEscape((attributeFilter.values[0]?'from '+attributeFilter.values[0]:'') + (attributeFilter.values[1]?' to '+attributeFilter.values[1]:''));
+				//TODO FIX
+				return htmlEscape((attributeFilter.fromValue ? 'from ' + attributeFilter.fromValue : '') + (attributeFilter.toValue ? ' to ' + attributeFilter.toValue : ''));
 			case 'EMAIL':
 			case 'HTML':
 			case 'HYPERLINK':
@@ -247,9 +250,11 @@
 				var nameFrom = name + '-from', nameTo = name + '-to';
 				var valFrom = values ? values[0] : undefined;
 				var valTo = values ? values[1] : undefined;
-				var inputFrom = $('<div class="control-group">').append(createInput(attribute.fieldType, {'name': nameFrom, 'placeholder': 'Start date'}, valFrom ? valFrom.replace("T", "'T'") : valFrom));
-				var inputTo = $('<div class="control-group">').append(createInput(attribute.fieldType, {'name': nameTo, 'placeholder': 'End date'}, valTo ? valTo.replace("T", "'T'") : valTo));
-				controls.append(inputFrom).append(inputTo);
+				var inputFrom = createInput(attribute.fieldType, {'name': nameFrom, 'placeholder': 'Start date'}, valFrom ? valFrom.replace("T", "'T'") : valFrom);
+				inputFrom.data("label", "from");
+				var inputTo = createInput(attribute.fieldType, {'name': nameTo, 'placeholder': 'End date'}, valTo ? valTo.replace("T", "'T'") : valTo);
+				inputTo.data("label", "to");
+				controls.append($('<div class="control-group">').append(inputFrom)).append($('<div class="control-group">').append(inputTo));
 				break;
 			case 'DECIMAL':
 			case 'INT':
@@ -259,17 +264,20 @@
 					var min = values ? values[0] : attribute.range.min;
 					var max = values ? values[1] : attribute.range.max;
 					slider.editRangeSlider({
-						 bounds: {min: attribute.range.min, max: attribute.range.max},
-						 defaultValues: {min: min, max: max},
-						 type: "number"
+						symmetricPositionning: true,
+						range: {min: attribute.range.min, max: attribute.range.max},
+						defaultValues: {min: min, max: max},
+						type: "number"
 					});
-					controls.append(slider);
+					controls.append($(slider).css("width", "700px"));
 				} else {
 					var nameFrom = name + '-from', nameTo = name + '-to';
 					var labelFrom = $('<label class="horizontal-inline" for="' + nameFrom + '">From</label>');
 					var labelTo = $('<label class="horizontal-inline inbetween" for="' + nameTo + '">To</label>');
 					var inputFrom = createInput(attribute.fieldType, {'name': nameFrom, 'id': nameFrom}, values ? values[0] : undefined).addClass('input-small');
+					inputFrom.data("label", "from");
 					var inputTo = createInput(attribute.fieldType, {'name': nameTo, 'id': nameTo}, values ? values[1] : undefined).addClass('input-small');
+					inputTo.data("label", "to");
 					controls.addClass('form-inline').append(labelFrom).append(inputFrom).append(labelTo).append(inputTo);
 				}
 				break;
@@ -319,18 +327,24 @@
 			
 			$(":input", $(this)).not('[type=radio]:not(:checked)').not('[type=checkbox]:not(:checked)').each(function(){
 				var value = $(this).val();
-				if(value) {
+				var label = $(this).data("label");
+				var name = $(this).attr("name");
+				
+				if(value) {		
 					if(!filter) {
 						filter = {};
 						filters[attribute.href] = filter;
 						filter.attribute = attribute;
 					}
+					
+					// Add values
 					var values = filter.values;
 					if(!values) {
 						values = [];
 						filter.values = values;
 					}
 					
+					// Add operator
 					if ($(this).hasClass('operator')) {
 						filter.operator = value;
 					} else {
@@ -342,6 +356,15 @@
                         } else{
                         	values[values.length] = value;
                         }
+					}
+					
+					// Add toValue and fromValue
+					if(label === "to" || name === "sliderright"){
+						filter.toValue = value;
+					}
+					
+					if(label === "from" || name === "sliderleft"){
+						filter.fromValue = value;
 					}
 				}
 			});	
