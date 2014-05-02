@@ -215,7 +215,7 @@
 	/**
 	 * @memberOf molgenis.dataexplorer
 	 */
-	function createFilterControls(attribute, attributeFilter) {
+	function createFilterControls(attribute, attributeFilter, addLabel) {
 		var label;
 		var controls = $('<div class="controls">');
 		controls.data('attribute', attribute);
@@ -223,7 +223,6 @@
 		var values = attributeFilter ? attributeFilter.values : null;
 		switch(attribute.fieldType) {
 			case 'BOOL':
-				label = $('<label class="control-label" for="' + name + '">' + attribute.label + '</label>');
 				var attrs = {'name': name};
 				var attrsTrue = values && values[0] === 'true' ? $.extend({}, attrs, {'checked': 'checked'}) : attrs;
 				var attrsFalse = values && values[0] === 'false' ? $.extend({}, attrs, {'checked': 'checked'}) : attrs;
@@ -232,7 +231,6 @@
 				controls.append(inputTrue.addClass('inline')).append(inputFalse.addClass('inline'));
 				break;
 			case 'CATEGORICAL':
-				label = $('<label class="control-label" for="' + name + '">' +attribute.label + '</label>');
 				var entityMeta = restApi.get(attribute.refEntity.href);
 				var entitiesUri = entityMeta.href.replace(new RegExp('/meta[^/]*$'), ""); // TODO do not manipulate uri
 
@@ -246,7 +244,6 @@
 				break;
 			case 'DATE':
 			case 'DATE_TIME':
-				label = $('<label class="control-label" for="' + name + '">' + attribute.label + '</label>');
 				var nameFrom = name + '-from', nameTo = name + '-to';
 				var valFrom = values ? values[0] : undefined;
 				var valTo = values ? values[1] : undefined;
@@ -257,7 +254,6 @@
 			case 'DECIMAL':
 			case 'INT':
 			case 'LONG':
-                label = $('<label class="control-label" for="' + name + '">' + attribute.label + '</label>');
 				if (attribute.range) {
 					var slider = $('<div id="slider"></div>');
 					var min = values ? values[0] : attribute.range.min;
@@ -282,12 +278,10 @@
 			case 'HYPERLINK':
 			case 'STRING':
 			case 'TEXT':
-				label = $('<label class="control-label" for="' + name + '">' + attribute.label + '</label>');
 				controls.append(createInput(attribute.fieldType, {'name': name, 'id': name}, values ? values[0] : undefined));
 				break;
 			case 'MREF':
 			case 'XREF':
-				label = $('<label class="control-label" for="' + name + '">' + attribute.label + '</label>');
 				var element = $('<div />').css( "width", 700);
 				var operator = attributeFilter ? attributeFilter.operator : 'OR';
 				element.xrefsearch({attribute: attribute, values: values, operator: operator});
@@ -302,7 +296,16 @@
 				throw 'Unknown data type: ' + attribute.fieldType;			
 		}
 		
-		return $('<div class="control-group">').append(label).append(controls);
+		if(addLabel === true) 
+		{
+			label = $('<label class="control-label" for="' + name + '">' + attribute.label + '</label>');
+			return $('<div class="control-group">').append(label).append(controls);
+		}
+		else 
+		{
+			return $('<div class="control-group">').append(controls);
+		}
+
 	}
 
 	/**
