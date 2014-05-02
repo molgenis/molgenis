@@ -184,7 +184,7 @@ public class RestController
 	@RequestMapping(value = "/{entityName}/{id}", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public Map<String, Object> retrieveEntity(@PathVariable("entityName") String entityName,
-			@PathVariable("id") Integer id, @RequestParam(value = "attributes", required = false) String[] attributes,
+			@PathVariable("id") Object id, @RequestParam(value = "attributes", required = false) String[] attributes,
 			@RequestParam(value = "expand", required = false) String[] attributeExpands)
 	{
 		Set<String> attributesSet = toAttributeSet(attributes);
@@ -219,7 +219,7 @@ public class RestController
 	@RequestMapping(value = "/{entityName}/{id}/{refAttributeName}", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public Object retrieveEntityAttribute(@PathVariable("entityName") String entityName,
-			@PathVariable("id") Integer id, @PathVariable("refAttributeName") String refAttributeName,
+			@PathVariable("id") Object id, @PathVariable("refAttributeName") String refAttributeName,
 			@Valid EntityCollectionRequest request,
 			@RequestParam(value = "attributes", required = false) String[] attributes,
 			@RequestParam(value = "expand", required = false) String[] attributeExpands)
@@ -243,7 +243,7 @@ public class RestController
 			throw new UnknownEntityException(entityName + " " + id + " not found");
 		}
 
-		String attrHref = String.format(BASE_URI + "/%s/%s/%s", meta.getName(), entity.get(meta.getIdAttribute().getName()), refAttributeName);
+		String attrHref = String.format(BASE_URI + "/%s/%s/%s", meta.getName(), entity.getIdValue(), refAttributeName);
 		switch (attr.getDataType().getEnumType())
 		{
 			case COMPOUND:
@@ -386,7 +386,7 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = PUT)
 	@ResponseStatus(OK)
-	public void update(@PathVariable("entityName") String entityName, @PathVariable("id") Integer id,
+	public void update(@PathVariable("entityName") String entityName, @PathVariable("id") Object id,
 			@RequestBody Map<String, Object> entityMap)
 	{
 		updateInternal(entityName, id, entityMap);
@@ -403,7 +403,7 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = POST, params = "_method=PUT")
 	@ResponseStatus(OK)
-	public void updatePost(@PathVariable("entityName") String entityName, @PathVariable("id") Integer id,
+	public void updatePost(@PathVariable("entityName") String entityName, @PathVariable("id") Object id,
 			@RequestBody Map<String, Object> entityMap)
 	{
 		updateInternal(entityName, id, entityMap);
@@ -423,7 +423,7 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = POST, params = "_method=PUT", headers = "Content-Type=application/x-www-form-urlencoded")
 	@ResponseStatus(NO_CONTENT)
-	public void updateFromFormPost(@PathVariable("entityName") String entityName, @PathVariable("id") Integer id,
+	public void updateFromFormPost(@PathVariable("entityName") String entityName, @PathVariable("id") Object id,
 			HttpServletRequest request)
 	{
 		Map<String, Object> paramMap = new HashMap<String, Object>();
@@ -444,7 +444,7 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = DELETE)
 	@ResponseStatus(NO_CONTENT)
-	public void delete(@PathVariable("entityName") String entityName, @PathVariable Integer id)
+	public void delete(@PathVariable("entityName") String entityName, @PathVariable Object id)
 	{
 		dataService.delete(entityName, id);
 	}
@@ -460,7 +460,7 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = POST, params = "_method=DELETE")
 	@ResponseStatus(NO_CONTENT)
-	public void deletePost(@PathVariable("entityName") String entityName, @PathVariable Integer id)
+	public void deletePost(@PathVariable("entityName") String entityName, @PathVariable Object id)
 	{
 		delete(entityName, id);
 	}
@@ -553,7 +553,7 @@ public class RestController
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
-	private void updateInternal(String entityName, Integer id, Map<String, Object> entityMap)
+	private void updateInternal(String entityName, Object id, Map<String, Object> entityMap)
 	{
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
 		if (meta.getIdAttribute() == null)
@@ -568,7 +568,7 @@ public class RestController
 		}
 
 		Entity entity = toEntity(meta, entityMap);
-		entity.set(meta.getIdAttribute().getName(), existing.get(meta.getIdAttribute().getName()));
+		entity.set(meta.getIdAttribute().getName(), existing.getIdValue());
 
 		dataService.update(entityName, entity);
 	}
@@ -609,7 +609,7 @@ public class RestController
 			{
 				if (attr.getDataType().getEnumType() == XREF)
 				{
-					Integer id = DataConverter.toInt(paramValue);
+					Object id = DataConverter.toInt(paramValue);
 					if (id != null)
 					{
 						value = dataService.findOne(attr.getRefEntity().getName(), id);
@@ -682,7 +682,7 @@ public class RestController
 		if (null == meta) throw new IllegalArgumentException("meta is null");
 
 		Map<String, Object> entityMap = new LinkedHashMap<String, Object>();
-		entityMap.put("href", String.format(BASE_URI + "/%s/%s", meta.getName(), entity.get(meta.getIdAttribute().getName())));
+		entityMap.put("href", String.format(BASE_URI + "/%s/%s", meta.getName(), entity.getIdValue()));
 
 		// TODO system fields
 		for (AttributeMetaData attr : meta.getAtomicAttributes())
@@ -745,7 +745,7 @@ public class RestController
 					EntityPager pager = new EntityPager(0, new EntityCollectionRequest().getNum(),
 							(long) refEntityMaps.size(), mrefEntities);
 
-					String uri = String.format(BASE_URI + "/%s/%s/%s", meta.getName(), entity.get(meta.getIdAttribute().getName()), attrName);
+					String uri = String.format(BASE_URI + "/%s/%s/%s", meta.getName(), entity.getIdValue(), attrName);
 					EntityCollectionResponse ecr = new EntityCollectionResponse(pager, refEntityMaps, uri);
 					entityMap.put(attrName, ecr);
 				}
@@ -755,7 +755,7 @@ public class RestController
 					// Add href to ref field
 					Map<String, String> ref = new LinkedHashMap<String, String>();
 					ref.put("href",
-							String.format(BASE_URI + "/%s/%s/%s", meta.getName(), entity.get(meta.getIdAttribute().getName()), attrName));
+							String.format(BASE_URI + "/%s/%s/%s", meta.getName(), entity.getIdValue(), attrName));
 					entityMap.put(attrName, ref);
 				}
 
