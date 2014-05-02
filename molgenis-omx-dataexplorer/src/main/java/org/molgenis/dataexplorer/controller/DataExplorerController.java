@@ -68,12 +68,14 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
 	public static final String KEY_MOD_AGGREGATES = "plugin.dataexplorer.mod.aggregates";
+	public static final String KEY_MOD_ANNOTATORS = "plugin.dataexplorer.mod.annotators";
 	public static final String KEY_MOD_CHARTS = "plugin.dataexplorer.mod.charts";
 	public static final String KEY_MOD_DATA = "plugin.dataexplorer.mod.data";
 	private static final boolean DEFAULT_VAL_MOD_AGGREGATES = true;
+	private static final boolean DEFAULT_VAL_MOD_ANNOTATORS = true;
 	private static final boolean DEFAULT_VAL_MOD_CHARTS = true;
 	private static final boolean DEFAULT_VAL_MOD_DATA = true;
-
+	
 	public static final String INITLOCATION = "initLocation";
 	public static final String COORDSYSTEM = "coordSystem";
 	public static final String CHAINS = "chains";
@@ -177,6 +179,7 @@ public class DataExplorerController extends MolgenisPluginController
 		boolean modCharts = molgenisSettings.getBooleanProperty(KEY_MOD_CHARTS, DEFAULT_VAL_MOD_CHARTS);
 		boolean modData = molgenisSettings.getBooleanProperty(KEY_MOD_DATA, DEFAULT_VAL_MOD_DATA);
 		boolean modAggregates = molgenisSettings.getBooleanProperty(KEY_MOD_AGGREGATES, DEFAULT_VAL_MOD_AGGREGATES);
+		boolean modAnnotators = molgenisSettings.getBooleanProperty(KEY_MOD_ANNOTATORS, DEFAULT_VAL_MOD_ANNOTATORS);
 
 		// set data explorer permission
 		Permission pluginPermission = null;
@@ -208,6 +211,10 @@ public class DataExplorerController extends MolgenisPluginController
 					if (modCharts)
 					{
 						modulesConfig.add(new ModuleConfig("charts", "Charts", "chart-icon.png"));
+					}
+					if (modAnnotators)
+					{
+						modulesConfig.add(new ModuleConfig("annotators", "Annotators", "annotator-icon.png"));
 					}
 					break;
 				default:

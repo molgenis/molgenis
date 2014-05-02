@@ -1,19 +1,38 @@
+/**
+ * Annotators module
+ * 
+ * Dependencies: dataexplorer.js
+ *  
+ * @param $
+ * @param molgenis
+ */
 (function($, molgenis) {
 	"use strict";
 	
-	var selectedDataSet = null;
+	molgenis.dataexplorer = molgenis.dataexplorer || {};
+	
+	var self = molgenis.dataexplorer.annotators = molgenis.dataexplorer.annotators || {};
+
+	// module api
+	self.setAnnotatorSelectBoxes = setAnnotatorSelectBoxes;
 	
 	var restApi = new molgenis.RestClient();
 	
-	molgenis.onDataSetSelectionChange = function(dataSetUri) {
+	/**
+	 * @memberOf molgenis.dataexplorer.annotators
+	 */
+	function setAnnotatorSelectBoxes(){
+		var entity = getEntity();
+		molgenis.getAnnotatorSelectBoxes(entity.href);
+	}
+	
+	molgenis.getAnnotatorSelectBoxes = function(dataSetUri) {
 		// reset
-		restApi.getAsync(dataSetUri, null, function(dataSet) {
-			selectedDataSet = dataSet;
-			
+		restApi.getAsync(dataSetUri, null, function(dataset) {		
 			$.ajax({
 				type : 'POST',
-				url : molgenis.getContextUrl() + '/change-selected-dataset',
-				data : JSON.stringify(selectedDataSet.Identifier),
+				url : '/annotators/get-available-annotators',
+				data : JSON.stringify(dataset.name),
 				contentType : 'application/json',
 				success : function(resultMap) {
 					var enabledAnnotators = [];
@@ -34,55 +53,63 @@
 					
 					$('#annotator-checkboxes-enabled').html(enabledAnnotators.join(""));
 					$('#annotator-checkboxes-disabled').html(disabledAnnotators.join(""));
-					$('#selected-dataset-name').html(selectedDataSet.Name);
-					$('#dataset-identifier').val(selectedDataSet.Identifier);
+					$('#selected-dataset-name').html(dataset.name);
+					$('#dataset-identifier').val(dataset.name);
                     $('.darktooltip').tooltip({placement: 'right'});
 				}
 			});
 		});
 	};
-
+	
+	/**
+	 * Returns the selected attributes from the data explorer
+	 * 
+	 * @memberOf molgenis.dataexplorer.annotators
+	 */
+	function getAttributes() {
+		var attributes = molgenis.dataexplorer.getSelectedAttributes();
+		return molgenis.getAtomicAttributes(attributes, restApi);
+	}
+	
+	/**
+	 * Returns the selected entity from the data explorer
+	 * 
+	 * @memberOf molgenis.dataexplorer.annotators
+	 */
+	function getEntity() {
+		return molgenis.dataexplorer.getSelectedEntityMeta();
+	}
+	
+	/**
+	 * Returns the selected entity query from the data explorer
+	 * 
+	 * @memberOf molgenis.dataexplorer.annotators
+	 */
+	function getEntityQuery() {
+		return molgenis.dataexplorer.getEntityQuery().q;
+	}
+	
 	// on document ready
 	$(function() {
-		$('#dataset-select').chosen();
-		$('#dataset-select').change(function() {
-			if($("#dataset-select").val() != null){
-				
-				restApi.getAsync($('#dataset-select').val(), null, function(dataSet) {
-					selectedDataSet = dataSet;
-				});
-			
-				molgenis.onDataSetSelectionChange($(this).val());
-			}	
-		});
-		
-		// fire event handler
-		$('#dataset-select').change();
 			
 		$("#disabled-tooltip").tooltip();
-		$("#remove-button-selected-phenotype").tooltip();
-		
-		$("#rootwizard").bootstrapWizard({'tabClass': 'nav nav-tabs'});
-		$("#phenotypeSelect").chosen();	
-		
-		// disable the filtering tabs
-		$("#rootwizard").bootstrapWizard('disable', 1);
-		$(".tab2").click(function(){return false;});
-		
-		$("#rootwizard").bootstrapWizard('disable', 2);
-		$(".tab3").click(function(){return false;});
 
-         var submitBtn = $('#execute-button');
-
-        var form = $('#execute-annotation-app');
-
+        var submitBtn = $('#annotate-dataset-button');
+        var form = $('#annotate-dataset-form');
+ 
+        submitBtn.click(function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            form.submit();
+        });    
+        
         form.submit(function (e) {
             e.preventDefault();
             e.stopPropagation();
             if (form.valid()) {
                 $.ajax({
                     type: 'POST',
-                    url: molgenis.getContextUrl() + '/execute-annotation-app/',
+                    url: '/annotators/annotate-data/',
                     data: form.serialize(),
                     contentType: 'application/x-www-form-urlencoded',
                     success: function (name) {
@@ -90,13 +117,6 @@
                     }
                 });
             }
-        });
-        submitBtn.click(function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            form.submit();
-        });
-
+        }); 
 	});
-	
 }($, window.top.molgenis = window.top.molgenis || {}));	
