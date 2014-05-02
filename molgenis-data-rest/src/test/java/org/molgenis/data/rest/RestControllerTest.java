@@ -38,10 +38,12 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.QueryResolver;
+import org.molgenis.security.token.TokenService;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -395,6 +397,18 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
+		public TokenService tokenService()
+		{
+			return mock(TokenService.class);
+		}
+
+		@Bean
+		public AuthenticationManager authenticationManager()
+		{
+			return mock(AuthenticationManager.class);
+		}
+
+		@Bean
 		public QueryResolver queryResolver()
 		{
 			return new QueryResolver(dataService());
@@ -403,7 +417,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		@Bean
 		public RestController restController()
 		{
-			return new RestController(dataService());
+			return new RestController(dataService(), tokenService(), authenticationManager());
 		}
 	}
 

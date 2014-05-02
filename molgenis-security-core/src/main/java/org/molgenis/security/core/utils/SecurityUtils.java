@@ -98,6 +98,8 @@ public class SecurityUtils
 	{
 		String username;
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		if (authentication == null) return false;
+
 		Object principal = authentication.getPrincipal();
 		if (principal instanceof UserDetails) username = ((UserDetails) principal).getUsername();
 		else username = principal.toString();
