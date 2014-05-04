@@ -7,6 +7,7 @@
 	"ui.fancytree.min.css",
 	"jquery-ui-1.9.2.custom.min.css",
 	"select2.css",
+	"iThing-min.css",
 	"dataexplorer.css"]>
 <#assign js=[
 	"jquery-ui-1.9.2.custom.min.js",
@@ -17,11 +18,13 @@
 	"jquery.fancytree.min.js",
 	"jquery.molgenis.tree.js",
 	"select2.min.js",
+	"jQEditRangeSlider-min.js",
 	"jquery.molgenis.xrefsearch.js",
 	"dataexplorer.js"]>
 <@header css js/>
     <script>
     	molgenis.dataexplorer.setShowWizardOnInit(${wizard?string('true', 'false')});
+        molgenis.dataexplorer.wizard.setWizardTitle('${wizardTitle}');
     </script>
         <div class="row-fluid"<#if hideDatasetSelect??> style="display:none"</#if>>
             <div class="row-fluid pull-right form-horizontal">

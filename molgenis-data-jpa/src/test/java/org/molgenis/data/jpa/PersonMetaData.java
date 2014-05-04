@@ -28,6 +28,7 @@ public class PersonMetaData extends DefaultEntityMetaData
 		firstName.setReadOnly(false);
 		firstName.setLabelAttribute(true);
 		firstName.setUnique(true);
+		firstName.setAggregateable(true);
 		addAttributeMetaData(firstName);
 
 		DefaultAttributeMetaData lastName = new DefaultAttributeMetaData("lastName", STRING);
@@ -42,6 +43,7 @@ public class PersonMetaData extends DefaultEntityMetaData
 		age.setIdAttribute(false);
 		age.setNillable(true);
 		age.setReadOnly(false);
+		age.setAggregateable(true);
 		addAttributeMetaData(age);
 
 		DefaultAttributeMetaData father = new DefaultAttributeMetaData("father", XREF);

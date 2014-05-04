@@ -50,9 +50,12 @@ public class DataServiceImpl implements DataService
 		{
 			throw new MolgenisDataException("Repository [" + repositoryName + "] doesn't exists");
 		}
+		else
+		{
+			repositoryNames.remove(repositoryName);
+			repositories.remove(repositoryName.toLowerCase());
+		}
 
-		repositoryNames.remove(repositoryName);
-		repositories.remove(repositoryName.toLowerCase());
 	}
 
 	@Override
@@ -162,8 +165,7 @@ public class DataServiceImpl implements DataService
 	@Override
 	public void delete(String entityName, Entity entity)
 	{
-		Updateable updateable = getUpdateable(entityName);
-		updateable.delete(entity);
+		getUpdateable(entityName).delete(entity);
 	}
 
 	@Override
@@ -266,4 +268,15 @@ public class DataServiceImpl implements DataService
 		return findAll(entityName, new QueryImpl(), clazz);
 	}
 
+	@Override
+	public AggregateResult aggregate(String entityName, AttributeMetaData xAttr, AttributeMetaData yAttr, Query q)
+	{
+		Repository repo = getRepositoryByEntityName(entityName);
+		if (!(repo instanceof Aggregateable))
+		{
+			throw new MolgenisDataException("Repository of [" + entityName + "] isn't aggregateable");
+		}
+
+		return ((Aggregateable) repo).aggregate(xAttr, yAttr, q);
+	}
 }

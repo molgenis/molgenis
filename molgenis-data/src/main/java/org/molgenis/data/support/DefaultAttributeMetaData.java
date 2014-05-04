@@ -4,6 +4,7 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Range;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
@@ -29,6 +30,8 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	private boolean unique = false;
 	private boolean auto = false;
 	private Iterable<AttributeMetaData> attributesMetaData;
+	private boolean aggregateable = false;
+	private Range range;
 
 	@Deprecated
 	/*
@@ -237,5 +240,27 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		if (getDescription() != null) result += " description='" + getDescription() + "'";
 		result += ")";
 		return result;
+	}
+
+	@Override
+	public boolean isAggregateable()
+	{
+		return this.aggregateable;
+	}
+
+	public void setAggregateable(boolean aggregateable)
+	{
+		this.aggregateable = aggregateable;
+	}
+
+	@Override
+	public Range getRange()
+	{
+		return range;
+	}
+
+	public void setRange(Range range)
+	{
+		this.range = range;
 	}
 }

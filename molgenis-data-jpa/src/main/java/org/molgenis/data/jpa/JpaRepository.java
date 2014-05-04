@@ -1,10 +1,13 @@
 package org.molgenis.data.jpa;
 
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.BOOL;
+
 import java.io.IOException;
 import java.util.*;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import javax.persistence.criteria.CriteriaBuilder.In;
@@ -22,6 +25,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 /**
  * Repository implementation for (generated) jpa entities
@@ -706,10 +710,11 @@ public class JpaRepository extends AbstractCrudRepository
 		{
 			if (andPredicates.size() > 0)
 			{
-				orPredicates.add(cb.and(andPredicates.toArray(new Predicate[andPredicates.size()])));
+				orPredicates.add(cb.and(andPredicates.toArray(new Predicate[0])));
 			}
 			List<Predicate> result = new ArrayList<Predicate>();
-			result.add(cb.or(orPredicates.toArray(new Predicate[andPredicates.size()])));
+
+			result.add(cb.or(orPredicates.toArray(new Predicate[0])));
 
 			return result;
 		}
@@ -845,6 +850,239 @@ public class JpaRepository extends AbstractCrudRepository
 		E e = BeanUtils.instantiate(clazz);
 		e.set(entity);
 		return e;
+	}
+
+	@Override
+	public AggregateResult aggregate(AttributeMetaData xAttributeMeta, AttributeMetaData yAttributeMeta, Query query)
+	{
+		if ((xAttributeMeta == null) && (yAttributeMeta == null))
+		{
+			throw new MolgenisDataException("Missing aggregate attribute");
+		}
+
+		FieldTypeEnum xDataType = null;
+		String xAttributeName = null;
+		if (xAttributeMeta != null)
+		{
+			xAttributeName = xAttributeMeta.getName();
+
+			if (!xAttributeMeta.isAggregateable())
+			{
+				throw new MolgenisDataException("Attribute '" + xAttributeName + "' is not aggregateable");
+			}
+
+			xDataType = xAttributeMeta.getDataType().getEnumType();
+		}
+
+		FieldTypeEnum yDataType = null;
+		String yAttributeName = null;
+		if (yAttributeMeta != null)
+		{
+			yAttributeName = yAttributeMeta.getName();
+			if (!yAttributeMeta.isAggregateable())
+			{
+				throw new MolgenisDataException("Attribute '" + yAttributeName + "' is not aggregateable");
+			}
+
+			yDataType = yAttributeMeta.getDataType().getEnumType();
+		}
+
+		List<Object> xValues = Lists.newArrayList();
+		List<Object> yValues = Lists.newArrayList();
+		List<List<Long>> matrix = new ArrayList<List<Long>>();
+		Set<String> xLabels = Sets.newLinkedHashSet();
+		Set<String> yLabels = Sets.newLinkedHashSet();
+
+		if (xDataType != null)
+		{
+			if (xDataType == BOOL)
+			{
+				xValues.add(Boolean.TRUE);
+				xValues.add(Boolean.FALSE);
+				xLabels.add(xAttributeName + ": true");
+				xLabels.add(xAttributeName + ": false");
+			}
+			else if (xAttributeMeta.getRefEntity() != null)
+			{
+				EntityMetaData xRefEntityMeta = xAttributeMeta.getRefEntity();
+				String xRefEntityLblAttr = xRefEntityMeta.getLabelAttribute().getName();
+
+				for (Entity xRefEntity : findAll(xRefEntityMeta.getEntityClass()))
+				{
+					xLabels.add(xRefEntity.getString(xRefEntityLblAttr));
+					xValues.add(xRefEntity.get(xRefEntityLblAttr));
+				}
+			}
+			else
+			{
+				for (Object value : getDistinctValues(xAttributeMeta))
+				{
+					String valueStr = DataConverter.toString(value);
+					xLabels.add(valueStr);
+					xValues.add(valueStr);
+				}
+			}
+		}
+
+		if (yDataType != null)
+		{
+			if (yDataType == BOOL)
+			{
+				yValues.add(Boolean.TRUE);
+				yValues.add(Boolean.FALSE);
+				yLabels.add(yAttributeName + ": true");
+				yLabels.add(yAttributeName + ": false");
+			}
+			else if (yAttributeMeta.getRefEntity() != null)
+			{
+				EntityMetaData yRefEntityMeta = yAttributeMeta.getRefEntity();
+				String yRefEntityLblAttr = yRefEntityMeta.getLabelAttribute().getName();
+
+				for (Entity yRefEntity : findAll(yRefEntityMeta.getEntityClass()))
+				{
+					yLabels.add(yRefEntity.getString(yRefEntityLblAttr));
+					yValues.add(yRefEntity.get(yRefEntityLblAttr));
+				}
+			}
+			else
+			{
+				for (Object value : getDistinctValues(yAttributeMeta))
+				{
+					String valueStr = DataConverter.toString(value);
+					yLabels.add(valueStr);
+					yValues.add(valueStr);
+				}
+			}
+		}
+
+		boolean hasXValues = !xValues.isEmpty();
+		boolean hasYValues = !yValues.isEmpty();
+
+		if (hasXValues)
+		{
+			List<Long> totals = Lists.newArrayList();
+
+			for (Object xValue : xValues)
+			{
+				List<Long> row = Lists.newArrayList();
+
+				if (hasYValues)
+				{
+					int i = 0;
+
+					for (Object yValue : yValues)
+					{
+
+						// Both x and y choosen
+						Query finalQ = query.getRules().isEmpty() ? new QueryImpl() : new QueryImpl(query).and();
+						finalQ.eq(xAttributeName, xValue).and().eq(yAttributeName, yValue);
+						long count = count(finalQ);
+						row.add(count);
+						if (totals.size() == i)
+						{
+							totals.add(count);
+						}
+						else
+						{
+							totals.set(i, totals.get(i) + count);
+						}
+						i++;
+					}
+				}
+				else
+				{
+					// No y attribute chosen
+					Query finalQ = query.getRules().isEmpty() ? new QueryImpl() : new QueryImpl(query).and();
+					finalQ.eq(xAttributeName, xValue);
+					long count = count(finalQ);
+					row.add(count);
+					if (totals.isEmpty())
+					{
+						totals.add(count);
+					}
+					else
+					{
+						totals.set(0, totals.get(0) + count);
+					}
+
+				}
+
+				matrix.add(row);
+			}
+
+			yLabels.add(hasYValues ? "Total" : "Count");
+			xLabels.add("Total");
+
+			matrix.add(totals);
+		}
+		else
+		{
+			// No xattribute chosen
+			List<Long> row = Lists.newArrayList();
+			for (Object yValue : yValues)
+			{
+				Query finalQ = query.getRules().isEmpty() ? new QueryImpl() : new QueryImpl(query).and();
+				finalQ.eq(yAttributeName, yValue);
+				long count = count(finalQ);
+				row.add(count);
+			}
+			matrix.add(row);
+
+			xLabels.add("Count");
+			yLabels.add("Total");
+		}
+
+		// Count row totals
+		if (hasYValues)
+		{
+			for (List<Long> row : matrix)
+			{
+				long total = 0;
+				for (Long count : row)
+				{
+					total += count;
+				}
+				row.add(total);
+			}
+		}
+
+		return new AggregateResult(matrix, xLabels, yLabels);
+	}
+
+	// Get all distinct values of an attribute
+	private List<?> getDistinctValues(AttributeMetaData attr)
+	{
+		EntityManager em = getEntityManager();
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<Tuple> cq = cb.createTupleQuery();
+
+		String attrName = attr.getName().substring(0, 1).toLowerCase() + attr.getName().substring(1);
+		Root<? extends Entity> root = cq.from(getEntityClass());
+		cq.distinct(true).multiselect(root.get(attrName));
+
+		TypedQuery<Tuple> tq = em.createQuery(cq);
+		List<Tuple> tuples = tq.getResultList();
+
+		List<Object> result = Lists.newArrayList();
+		for (Tuple tuple : tuples)
+		{
+			result.add(tuple.get(0));
+		}
+
+		return result;
+	}
+
+	// Find all instances of an jpa entity
+	private List<? extends Entity> findAll(Class<? extends Entity> entityClass)
+	{
+		EntityManager em = getEntityManager();
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+
+		@SuppressWarnings("unchecked")
+		CriteriaQuery<Entity> cq = (CriteriaQuery<Entity>) cb.createQuery(entityClass);
+		TypedQuery<Entity> tq = em.createQuery(cq.select(cq.from(entityClass)));
+
+		return tq.getResultList();
 	}
 
 	/*

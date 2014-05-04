@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<molgenis name="org.molgenis.omx">
+	<module name="diseasemapping">
+		<entity name="DiseaseMapping"  xref_lookup="diseaseId, geneSymbol, geneId, HPOId">
+			<description>Mapping of OMIM/ORPHANET diseases to HGNC genes to HPO terms.</description>
+			<field name="id" type="autoid" hidden="true" description="automatically generated internal id, only for internal use"/>
+			<field name="identifier" type="string" description="Combination of diseaseId, geneSymbol and HPOId to get unique identifer"/>
+			<field name="diseaseId" type="string" description="OMIM or ORPHANET identifier"/>
+			<field name="geneSymbol" type="string" description="Gene symbol"/>
+			<field name="geneId" type="string" description="Entrez gene identifier"/>
+			<field name="HPOId" type="string" description="HPO term identifier"/>
+			<field name="HPODescription" type="string" description="Description of the HPO term"/>
+			<field name="isTypical" type="bool" description="Boolean to indicate if this term is only found in the TYPICAL disease-gene-phenotype set"/>
+			<unique fields="identifier" />
+		</entity>
+	</module>
+</molgenis>

@@ -91,16 +91,51 @@
 	function createFiltersList(attributeFilters) {
 		var items = [];
 		$.each(attributeFilters, function(attributeUri, attributeFilter) {
-			var attribute = attributeFilter.attribute;
-			var joinChars = attributeFilter.operator ? ' ' + attributeFilter.operator + ' ' : ',';
-			var attributeLabel = attribute.label || attribute.name;
+			var attributeLabel = attributeFilter.attribute.label || attributeFilter.attribute.name;
 			items.push('<p><a class="feature-filter-edit" data-href="' + attributeUri + '" href="#">'
-					+ attributeLabel + ' (' + htmlEscape(attributeFilter.values.join(joinChars))
-					+ ')</a><a class="feature-filter-remove" data-href="' + attributeUri + '" href="#" title="Remove '
+					+ attributeLabel + ': ' + createFilterValuesRepresentation(attributeFilter)
+					+ '</a><a class="feature-filter-remove" data-href="' + attributeUri + '" href="#" title="Remove '
 					+ attributeLabel + ' filter" ><i class="icon-remove"></i></a></p>');
 		});
 		items.push('</div>');
 		$('#feature-filters').html(items.join(''));
+	}
+	
+	/**
+	 * @memberOf molgenis.dataexplorer
+	 */
+	function createFilterValuesRepresentation(attributeFilter) {
+		switch(attributeFilter.attribute.fieldType) {
+			case 'DATE':
+			case 'DATE_TIME':
+			case 'DECIMAL':
+			case 'INT':
+			case 'LONG':
+				return htmlEscape((attributeFilter.values[0]?'from '+attributeFilter.values[0]:'') + (attributeFilter.values[1]?' to '+attributeFilter.values[1]:''));
+			case 'EMAIL':
+			case 'HTML':
+			case 'HYPERLINK':
+			case 'STRING':
+			case 'TEXT':
+			case 'BOOL':
+			case 'XREF':
+				return htmlEscape(attributeFilter.values[0]?attributeFilter.values[0]:'');
+			case 'CATEGORICAL':
+			case 'MREF':
+				var operator = (attributeFilter.operator?attributeFilter.operator.toLocaleLowerCase():'or');
+				var array = [];
+				$.each(attributeFilter.values, function(key, value) {
+					array.push('\'' + value + '\'');
+				});
+				return htmlEscape(array.join(' ' + operator + ' '));
+			case 'COMPOUND' :
+			case 'ENUM':
+			case 'FILE':
+			case 'IMAGE':
+				throw 'Unsupported data type: ' + attributeFilter.attribute.fieldType;
+			default:
+				throw 'Unknown data type: ' + attributeFilter.attribute.fieldType;
+		}
 	}
 
 	/**
@@ -184,12 +219,11 @@
 		var label;
 		var controls = $('<div class="controls">');
 		controls.data('attribute', attribute);
-		
 		var name = 'input-' + attribute.name + '-' + new Date().getTime();
 		var values = attributeFilter ? attributeFilter.values : null;
 		switch(attribute.fieldType) {
 			case 'BOOL':
-				label = $('<span class="control-label">' + attribute.label + '</label>');
+				label = $('<label class="control-label" for="' + name + '">' + attribute.label + '</label>');
 				var attrs = {'name': name};
 				var attrsTrue = values && values[0] === 'true' ? $.extend({}, attrs, {'checked': 'checked'}) : attrs;
 				var attrsFalse = values && values[0] === 'false' ? $.extend({}, attrs, {'checked': 'checked'}) : attrs;
@@ -198,7 +232,7 @@
 				controls.append(inputTrue.addClass('inline')).append(inputFalse.addClass('inline'));
 				break;
 			case 'CATEGORICAL':
-				label = $('<label class="control-label" for="' + name + '">' + attribute.label + '</label>');
+				label = $('<label class="control-label" for="' + name + '">' +attribute.label + '</label>');
 				var entityMeta = restApi.get(attribute.refEntity.href);
 				var entitiesUri = entityMeta.href.replace(new RegExp('/meta[^/]*$'), ""); // TODO do not manipulate uri
 
@@ -212,24 +246,36 @@
 				break;
 			case 'DATE':
 			case 'DATE_TIME':
-				label = $('<span class="control-label">' + attribute.label + '</label>');
+				label = $('<label class="control-label" for="' + name + '">' + attribute.label + '</label>');
 				var nameFrom = name + '-from', nameTo = name + '-to';
 				var valFrom = values ? values[0] : undefined;
 				var valTo = values ? values[1] : undefined;
 				var inputFrom = $('<div class="control-group">').append(createInput(attribute.fieldType, {'name': nameFrom, 'placeholder': 'Start date'}, valFrom ? valFrom.replace("T", "'T'") : valFrom));
-				var inputTo = createInput(attribute.fieldType, {'name': nameTo, 'placeholder': 'End date'}, valTo ? valTo.replace("T", "'T'") : valTo);
+				var inputTo = $('<div class="control-group">').append(createInput(attribute.fieldType, {'name': nameTo, 'placeholder': 'End date'}, valTo ? valTo.replace("T", "'T'") : valTo));
 				controls.append(inputFrom).append(inputTo);
 				break;
 			case 'DECIMAL':
 			case 'INT':
 			case 'LONG':
-				label = $('<span class="control-label">' + attribute.label + '</label>');
-				var nameFrom = name + '-from', nameTo = name + '-to';
-				var labelFrom = $('<label class="horizontal-inline" for="' + nameFrom + '">From</label>');
-				var labelTo = $('<label class="horizontal-inline inbetween" for="' + nameTo + '">To</label>');
-				var inputFrom = createInput(attribute.fieldType, {'name': nameFrom, 'id': nameFrom}, values ? values[0] : undefined).addClass('input-small');
-				var inputTo = createInput(attribute.fieldType, {'name': nameTo, 'id': nameTo}, values ? values[1] : undefined).addClass('input-small');
-				controls.addClass('form-inline').append(labelFrom).append(inputFrom).append(labelTo).append(inputTo);
+                label = $('<label class="control-label" for="' + name + '">' + attribute.label + '</label>');
+				if (attribute.range) {
+					var slider = $('<div id="slider"></div>');
+					var min = values ? values[0] : attribute.range.min;
+					var max = values ? values[1] : attribute.range.max;
+					slider.editRangeSlider({
+						 bounds: {min: attribute.range.min, max: attribute.range.max},
+						 defaultValues: {min: min, max: max},
+						 type: "number"
+					});
+					controls.append(slider);
+				} else {
+					var nameFrom = name + '-from', nameTo = name + '-to';
+					var labelFrom = $('<label class="horizontal-inline" for="' + nameFrom + '">From</label>');
+					var labelTo = $('<label class="horizontal-inline inbetween" for="' + nameTo + '">To</label>');
+					var inputFrom = createInput(attribute.fieldType, {'name': nameFrom, 'id': nameFrom}, values ? values[0] : undefined).addClass('input-small');
+					var inputTo = createInput(attribute.fieldType, {'name': nameTo, 'id': nameTo}, values ? values[1] : undefined).addClass('input-small');
+					controls.addClass('form-inline').append(labelFrom).append(inputFrom).append(labelTo).append(inputTo);
+				}
 				break;
 			case 'EMAIL':
 			case 'HTML':
@@ -237,12 +283,12 @@
 			case 'STRING':
 			case 'TEXT':
 				label = $('<label class="control-label" for="' + name + '">' + attribute.label + '</label>');
-				controls.append(createInput(attribute.fieldType, {'name': name, 'id': name}, values ? values[0] : undefined)); 
+				controls.append(createInput(attribute.fieldType, {'name': name, 'id': name}, values ? values[0] : undefined));
 				break;
 			case 'MREF':
 			case 'XREF':
 				label = $('<label class="control-label" for="' + name + '">' + attribute.label + '</label>');
-				var element = $('<div />');
+				var element = $('<div />').css( "width", 700);
 				var operator = attributeFilter ? attributeFilter.operator : 'OR';
 				element.xrefsearch({attribute: attribute, values: values, operator: operator});
 				controls.append(element);
@@ -256,12 +302,7 @@
 				throw 'Unknown data type: ' + attribute.fieldType;			
 		}
 		
-		// show description in tooltip
-		if (attribute.description) {
-			label.attr('data-toggle', 'tooltip');
-			label.attr('title', attribute.description);
-		}
-		return $('<div class="control-group">').append(label).append(controls);	
+		return $('<div class="control-group">').append(label).append(controls);
 	}
 
 	/**
@@ -269,11 +310,11 @@
 	 */
 	function createFilters(form) {
         var filters = {};
-		$('.controls', form).each(function() {
+        $('.controls', form).each(function() {
 			var attribute = $(this).data('attribute');
 			var filter = filters[attribute.href];
-
-			$(":input", $(this)).not('[type=radio]:not(:checked)').not('[type=checkbox]:not(:checked)').each(function(i){
+			
+			$(":input", $(this)).not('[type=radio]:not(:checked)').not('[type=checkbox]:not(:checked)').each(function(){
 				var value = $(this).val();
 				if(value) {
 					if(!filter) {
@@ -296,7 +337,7 @@
                                 values.push(mrefValues[i]);
                             });
                         } else{
-						    values[i] = value;
+                        	values[values.length] = value;
                         }
 					}
 				}
