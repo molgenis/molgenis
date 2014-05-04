@@ -30,7 +30,7 @@ public class HyperlinkValueDecorator extends CrudRepositoryDecorator
 	}
 
 	@Override
-	public void add(Iterable<? extends Entity> entities)
+	public Integer add(Iterable<? extends Entity> entities)
 	{
 		for (Entity entity : entities)
 		{
@@ -41,7 +41,7 @@ public class HyperlinkValueDecorator extends CrudRepositoryDecorator
 			}
 		}
 
-		super.add(entities);
+		return super.add(entities);
 	}
 
 	@Override

@@ -1,8 +1,11 @@
 package org.molgenis.data.importer;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.*;
@@ -11,16 +14,18 @@ import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.fieldtypes.FieldType;
+import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
-public class MEntityImportServiceImpl implements MEntityImportService
+public class EmxImportServiceImpl implements EmxImporterService
 {
 	MysqlRepositoryCollection store;
 
-	public MEntityImportServiceImpl()
+	public EmxImportServiceImpl()
 	{
 		System.out.println("MEntityImportServiceImpl created");
 	}
@@ -32,6 +37,7 @@ public class MEntityImportServiceImpl implements MEntityImportService
 		System.out.println("MEntityImportServiceImpl created with coll=" + coll);
 	}
 
+    @Transactional(rollbackFor = IOException.class)
 	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction) throws IOException
 	{
 		if (store == null) throw new RuntimeException("store was not set");
@@ -55,21 +61,69 @@ public class MEntityImportServiceImpl implements MEntityImportService
 
 				if (to == null)
 				{
-                    System.out.println("tyring to create: " + name);
+					System.out.println("tyring to create: " + name);
 
-                    EntityMetaData em = metadata.get(name);
+					EntityMetaData em = metadata.get(name);
 					if (em == null) throw new IllegalArgumentException("Unknown entity: " + name);
 					store.add(em);
 
-                    to = (MysqlRepository) store.getRepositoryByEntityName(name);
+					to = (MysqlRepository) store.getRepositoryByEntityName(name);
 				}
 
-
 				// import
-				to.add(from);
+
+				report.getNrImportedEntitiesMap().put(name, to.add(from));
 			}
 		}
 
+		return report;
+	}
+
+	public EntitiesValidationReport validateImport(RepositoryCollection source)
+	{
+		EntitiesValidationReportImpl report = new EntitiesValidationReportImpl();
+
+		// compare the data sheets against metadata in store or imported file
+		Map<String, DefaultEntityMetaData> metaDataMap = getEntityMetaData(source);
+
+		for (String sheet : source.getEntityNames())
+			if (!"entities".equals(sheet) && !"attributes".equals(sheet))
+			{
+				// check if sheet is known?
+				if (metaDataMap.containsKey(sheet)) report.getSheetsImportable().put(sheet, true);
+				else report.getSheetsImportable().put(sheet, false);
+
+				// check the fields
+				Repository s = source.getRepositoryByEntityName(sheet);
+				EntityMetaData target = metaDataMap.get(sheet);
+
+				if (target != null)
+				{
+					List<String> fieldsAvailable = new ArrayList<String>();
+					List<String> fieldsImportable = new ArrayList<String>();
+					List<String> fieldsRequired = new ArrayList<String>();
+					List<String> fieldsUnknown = new ArrayList<String>();
+
+					for (AttributeMetaData att : s.getEntityMetaData().getAttributes())
+					{
+						if (target.getAttribute(att.getName()) == null) fieldsUnknown.add(att.getName());
+						else fieldsImportable.add(att.getName());
+					}
+					for (AttributeMetaData att : target.getAttributes())
+					{
+						if (!fieldsImportable.contains(att.getName()))
+						{
+							if (!att.isNillable()) fieldsRequired.add(att.getName());
+							else fieldsAvailable.add(att.getName());
+						}
+					}
+
+					report.getFieldsAvailable().put(sheet, fieldsAvailable);
+					report.getFieldsRequired().put(sheet, fieldsRequired);
+					report.getFieldsUnknown().put(sheet, fieldsUnknown);
+					report.getFieldsImportable().put(sheet, fieldsImportable);
+				}
+			}
 		return report;
 	}
 
@@ -84,7 +138,7 @@ public class MEntityImportServiceImpl implements MEntityImportService
 		// load attributes first (because entities are optional).
 		for (Entity a : source.getRepositoryByEntityName("attributes"))
 		{
-            int i = 1;
+			int i = 1;
 			String entityName = a.getString("entity");
 
 			// required

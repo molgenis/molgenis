@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.sql.DataSource;
 
@@ -236,14 +237,17 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 	}
 
 	@Override
-	public void add(Iterable<? extends Entity> entities)
+	public Integer add(Iterable<? extends Entity> entities)
 	{
-		// todo, split in subbatches
+        AtomicInteger count = new AtomicInteger(0);
+
+		// TODO, split in subbatches
 		final List<Entity> batch = new ArrayList<Entity>();
 		if (entities != null) for (Entity e : entities)
 		{
 			batch.add(e);
-		}
+            count.addAndGet(1);
+        }
 		final AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
 		final Map<String, List<Entity>> mrefs = new HashMap<String, List<Entity>>();
 
@@ -308,6 +312,7 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 			}
 		}
 
+        return count.get();
 	}
 
 	private void addMref(final List<Entity> mrefs, final AttributeMetaData att)

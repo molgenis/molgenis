@@ -185,7 +185,7 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Cr
 
 	@Transactional
 	@Override
-	public void add(Iterable<? extends Entity> entities)
+	public Integer add(Iterable<? extends Entity> entities)
 	{
 		EntityMetaData entityMetaData = this.getEntityMetaData();
 		entityValidator.validate(entities, entityMetaData, DatabaseAction.ADD);
@@ -270,7 +270,7 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Cr
 				repo.clearCache();
 			}
 		}
-
+        return rownr;
 	}
 
 	private LoadingCache<String, ObservableFeature> getObservableFeatureCache()

@@ -43,9 +43,9 @@ public class CrudRepositoryDecorator extends RepositoryDecorator implements Crud
 	}
 
 	@Override
-	public void add(Iterable<? extends Entity> entities)
+	public Integer add(Iterable<? extends Entity> entities)
 	{
-		decoratedRepository.add(entities);
+		return decoratedRepository.add(entities);
 	}
 
 	@Override

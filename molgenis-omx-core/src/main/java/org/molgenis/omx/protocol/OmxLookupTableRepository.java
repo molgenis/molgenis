@@ -60,7 +60,7 @@ public class OmxLookupTableRepository extends AbstractRepository implements Quer
 	}
 
 	@Override
-	public void add(Iterable<? extends Entity> entities)
+	public Integer add(Iterable<? extends Entity> entities)
 	{
 		throw new UnsupportedOperationException(); // FIXME implement method
 	}

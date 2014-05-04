@@ -6,11 +6,8 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
-import org.molgenis.data.DataService;
-import org.molgenis.data.DatabaseAction;
-import org.molgenis.data.FileRepositoryCollectionFactory;
-import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.Repository;
+import org.molgenis.data.*;
+import org.molgenis.data.importer.EmxImporterService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
@@ -36,6 +33,9 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 
 	@Autowired
 	private OmxImporterService omxImporterService;
+
+    @Autowired
+    private EmxImporterService emxImporterService;
 
 	@Autowired
 	private DataService dataService;
@@ -72,35 +72,47 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 				RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory
 						.createFileRepositoryCollection(importWizard.getFile());
 
-				EntityImportReport importReport = omxImporterService.doImport(repositoryCollection, entityDbAction);
-				importWizard.setImportResult(importReport);
-
-				// publish dataset imported event(s)
-				Iterable<String> entities = repositoryCollection.getEntityNames();
-				for (String entityName : entities)
+                //emd based import
+				if (true)
 				{
-					if (entityName.startsWith(OmxImporterService.DATASET_SHEET_PREFIX))
-					{
-						// Import DataSet sheet, create new OmxRepository
-						String dataSetIdentifier = entityName.substring(OmxImporterService.DATASET_SHEET_PREFIX
-								.length());
-						DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME,
-								new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier), DataSet.class);
-						ApplicationContextProvider.getApplicationContext().publishEvent(
-								new EntityImportedEvent(this, DataSet.ENTITY_NAME, dataSet.getId()));
-					}
-					if (Protocol.ENTITY_NAME.equalsIgnoreCase(entityName))
-					{
-						Repository repo = repositoryCollection.getRepositoryByEntityName("protocol");
+                    EntityImportReport importReport = emxImporterService.doImport(repositoryCollection, entityDbAction);
+                    importWizard.setImportResult(importReport);
+                }
+                //omx based import
+				else
+				{
 
-						for (Protocol protocol : repo.iterator(Protocol.class))
+					EntityImportReport importReport = omxImporterService.doImport(repositoryCollection, entityDbAction);
+					importWizard.setImportResult(importReport);
+
+					// publish dataset imported event(s)
+					Iterable<String> entities = repositoryCollection.getEntityNames();
+					for (String entityName : entities)
+					{
+						if (entityName.startsWith(OmxImporterService.DATASET_SHEET_PREFIX))
 						{
-							if (protocol.getRoot())
+							// Import DataSet sheet, create new OmxRepository
+							String dataSetIdentifier = entityName.substring(OmxImporterService.DATASET_SHEET_PREFIX
+									.length());
+							DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME,
+									new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier), DataSet.class);
+							ApplicationContextProvider.getApplicationContext().publishEvent(
+									new EntityImportedEvent(this, DataSet.ENTITY_NAME, dataSet.getId()));
+						}
+						if (Protocol.ENTITY_NAME.equalsIgnoreCase(entityName))
+						{
+							Repository repo = repositoryCollection.getRepositoryByEntityName("protocol");
+
+							for (Protocol protocol : repo.iterator(Protocol.class))
 							{
-                                Protocol rootProtocol = dataService.findOne(Protocol.ENTITY_NAME,
-                                        new QueryImpl().eq(Protocol.IDENTIFIER, protocol.getIdentifier()), Protocol.class);
-								ApplicationContextProvider.getApplicationContext().publishEvent(
-										new EntityImportedEvent(this, Protocol.ENTITY_NAME, rootProtocol.getId()));
+								if (protocol.getRoot())
+								{
+									Protocol rootProtocol = dataService.findOne(Protocol.ENTITY_NAME,
+											new QueryImpl().eq(Protocol.IDENTIFIER, protocol.getIdentifier()),
+											Protocol.class);
+									ApplicationContextProvider.getApplicationContext().publishEvent(
+											new EntityImportedEvent(this, Protocol.ENTITY_NAME, rootProtocol.getId()));
+								}
 							}
 						}
 					}

@@ -193,10 +193,10 @@ public class CrudRepositorySecurityDecorator extends CrudRepositoryDecorator imp
 	}
 
 	@Override
-	public void add(Iterable<? extends Entity> entities)
+	public Integer add(Iterable<? extends Entity> entities)
 	{
 		validatePermission(Permission.WRITE);
-		decoratedRepository.add(entities);
+		return decoratedRepository.add(entities);
 	}
 
 	@Override

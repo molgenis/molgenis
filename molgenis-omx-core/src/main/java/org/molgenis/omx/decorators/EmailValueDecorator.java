@@ -19,7 +19,7 @@ public class EmailValueDecorator extends CrudRepositoryDecorator
 	}
 
 	@Override
-	public void add(Iterable<? extends Entity> entities)
+	public Integer add(Iterable<? extends Entity> entities)
 	{
 		for (Entity entity : entities)
 		{
@@ -30,7 +30,7 @@ public class EmailValueDecorator extends CrudRepositoryDecorator
 			}
 		}
 
-		super.add(entities);
+		return super.add(entities);
 	}
 
 	@Override

@@ -49,13 +49,13 @@ public class StudyDataRequestDecorator extends CrudRepositoryDecorator
 	}
 
 	@Override
-	public void add(Iterable<? extends Entity> entities)
+	public Integer add(Iterable<? extends Entity> entities)
 	{
 		for (Entity entity : entities)
 		{
 			checkEntitiesPermission(entity);
 		}
-		super.add(entities);
+		return super.add(entities);
 	}
 
 	@Override

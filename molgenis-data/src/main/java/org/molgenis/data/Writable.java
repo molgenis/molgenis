@@ -15,7 +15,7 @@ public interface Writable extends Closeable
 	Object add(Entity entity);
 
 	/** Stream add multiple entities */
-	void add(Iterable<? extends Entity> entities);
+	Integer add(Iterable<? extends Entity> entities);
 
 	void flush();
 
