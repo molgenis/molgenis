@@ -138,9 +138,9 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public Object add(String entityName, Entity entity)
+	public void add(String entityName, Entity entity)
 	{
-		return getWritable(entityName).add(entity);
+		getWritable(entityName).add(entity);
 	}
 
 	@Override

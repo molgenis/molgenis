@@ -42,10 +42,10 @@ public class StudyDataRequestDecorator extends CrudRepositoryDecorator
 	}
 
 	@Override
-	public Object add(Entity entity)
+	public void add(Entity entity)
 	{
 		checkEntitiesPermission(entity);
-		return super.add(entity);
+		super.add(entity);
 	}
 
 	@Override

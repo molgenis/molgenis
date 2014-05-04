@@ -91,7 +91,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(dataService.getEntityNames()).thenReturn(Arrays.asList(ENTITY_NAME));
 		when(dataService.getRepositoryByEntityName(ENTITY_NAME)).thenReturn(repo);
 
-		when(dataService.add(Matchers.eq(ENTITY_NAME), Matchers.any(MapEntity.class))).thenReturn("p1");
+		//when(dataService.add(Matchers.eq(ENTITY_NAME), Matchers.any(MapEntity.class))).thenReturn("p1");
 		when(dataService.findOne(ENTITY_NAME, ENTITY_ID)).thenReturn(entity);
 
 		Query q = new QueryImpl().eq("name", "Piet").pageSize(10).offset(5);
@@ -122,7 +122,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	public void create() throws Exception
 	{
         //restController.create(ENTITY_NAME, ImmutableMap.<String,Object>builder().put("name","Piet").build(), null);
-		mockMvc.perform(post(HREF_ENTITY).content("{name:Piet}").contentType(APPLICATION_JSON))
+		mockMvc.perform(post(HREF_ENTITY).content("{id:'p1', name:'Piet'}").contentType(APPLICATION_JSON))
 				.andExpect(status().isCreated()).andExpect(header().string("Location", HREF_ENTITY_ID));
 
 		verify(dataService).add(Matchers.eq(ENTITY_NAME), Matchers.any(MapEntity.class));
@@ -131,7 +131,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void createFromFormPost() throws Exception
 	{
-		mockMvc.perform(post(HREF_ENTITY).contentType(APPLICATION_FORM_URLENCODED).param("name", "Piet"))
+		mockMvc.perform(post(HREF_ENTITY).contentType(APPLICATION_FORM_URLENCODED).param("id", "p1").param("name", "Piet"))
 				.andExpect(status().isCreated()).andExpect(header().string("Location", HREF_ENTITY_ID));
 
 		verify(dataService).add(Matchers.eq(ENTITY_NAME), Matchers.any(MapEntity.class));
@@ -278,7 +278,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		Repository repo = mock(Repository.class, withSettings().extraInterfaces(Updateable.class, Queryable.class));
 		when(dataService.getRepositoryByEntityName(ENTITY_NAME)).thenReturn(repo);
 		when(dataService.getEntityNames()).thenReturn(Arrays.asList(ENTITY_NAME));
-		when(dataService.add(Matchers.eq(ENTITY_NAME), Matchers.any(MapEntity.class))).thenReturn(1);
+		//when(dataService.add(Matchers.eq(ENTITY_NAME), Matchers.any(MapEntity.class))).thenReturn(1);
 		Entity entityXref = new MapEntity("id");
 		entityXref.set("id", ENTITY_ID);
 		entityXref.set("xrefValue", "PietXREF");

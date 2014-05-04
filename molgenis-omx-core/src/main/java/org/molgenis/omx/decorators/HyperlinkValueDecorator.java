@@ -18,7 +18,7 @@ public class HyperlinkValueDecorator extends CrudRepositoryDecorator
 	}
 
 	@Override
-	public Object add(Entity entity)
+	public void add(Entity entity)
 	{
 		String uri = entity.getString(HyperlinkValue.VALUE);
 		if (!isValidURI(uri))
@@ -26,7 +26,7 @@ public class HyperlinkValueDecorator extends CrudRepositoryDecorator
 			throw new ValidationException("not a hyperlink [" + uri + "]");
 		}
 
-		return super.add(entity);
+		super.add(entity);
 	}
 
 	@Override

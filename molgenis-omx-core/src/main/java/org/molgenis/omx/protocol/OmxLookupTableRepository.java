@@ -53,10 +53,9 @@ public class OmxLookupTableRepository extends AbstractRepository implements Quer
 	}
 
 	@Override
-	public Object add(Entity entity)
+	public void add(Entity entity)
 	{
 		add(Collections.singleton(entity));
-		return entity.getIdValue();
 	}
 
 	@Override

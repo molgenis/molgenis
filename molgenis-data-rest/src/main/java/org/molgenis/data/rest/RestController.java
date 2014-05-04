@@ -632,7 +632,8 @@ public class RestController
 
 		Entity entity = toEntity(meta, entityMap);
 
-		Object id = dataService.add(entityName, entity);
+		dataService.add(entityName, entity);
+        Object id = entity.getIdValue();
 		if (id != null)
 		{
 			response.addHeader("Location", String.format(BASE_URI + "/%s/%s", entityName, id));
@@ -645,6 +646,7 @@ public class RestController
 	private Entity toEntity(EntityMetaData meta, Map<String, Object> request)
 	{
 		Entity entity = new MapEntity();
+        if(meta.getIdAttribute() != null) entity = new MapEntity(meta.getIdAttribute().getName());
 
 		for (AttributeMetaData attr : meta.getAtomicAttributes())
 		{

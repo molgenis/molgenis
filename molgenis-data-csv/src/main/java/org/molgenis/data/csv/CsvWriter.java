@@ -75,7 +75,7 @@ public class CsvWriter extends AbstractWritable
 	}
 
 	@Override
-	public Object add(Entity entity)
+	public void add(Entity entity)
 	{
 		if (cachedAttributeNames == null) throw new MolgenisDataException(
 				"No attribute names defined call writeAttributeNames first");
@@ -89,8 +89,6 @@ public class CsvWriter extends AbstractWritable
 
 		csvWriter.writeNext(values);
 		if (csvWriter.checkError()) throw new MolgenisDataException("An exception occured writing the csv file");
-
-		return entity.getIdValue();
 	}
 
 	public void writeAttributeNames(Iterable<String> attributeNames) throws IOException

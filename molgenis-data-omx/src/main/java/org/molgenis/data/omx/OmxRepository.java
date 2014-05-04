@@ -181,10 +181,9 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Cr
 
 	@Transactional
 	@Override
-	public Object add(Entity entity)
+	public void add(Entity entity)
 	{
 		add(Lists.newArrayList(entity));
-		return entity.getIdValue();
 	}
 
 	@Transactional

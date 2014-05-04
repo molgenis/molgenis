@@ -140,7 +140,7 @@ public interface DataService extends RepositoryCollection
 	 *            entity name (case insensitive)
 	 * @return the id of the entity
 	 */
-	Object add(String entityName, Entity entity);
+	void add(String entityName, Entity entity);
 
 	/**
 	 * @throws MolgenisDataAccessException

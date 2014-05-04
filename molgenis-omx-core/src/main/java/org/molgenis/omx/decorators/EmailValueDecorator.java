@@ -34,7 +34,7 @@ public class EmailValueDecorator extends CrudRepositoryDecorator
 	}
 
 	@Override
-	public Object add(Entity entity)
+	public void add(Entity entity)
 	{
 		String email = entity.getString(EmailValue.VALUE);
 		if (!emailValidator.isValid(email, null))
@@ -42,7 +42,7 @@ public class EmailValueDecorator extends CrudRepositoryDecorator
 			throw new ValidationException("not an email address [" + email + "]");
 		}
 
-		return super.add(entity);
+		super.add(entity);
 	}
 
 	@Override

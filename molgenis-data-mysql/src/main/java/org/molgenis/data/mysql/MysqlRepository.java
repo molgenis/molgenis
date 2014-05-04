@@ -209,12 +209,11 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 	}
 
 	@Override
-	public Integer add(Entity entity)
+	public void add(Entity entity)
 	{
 		if (entity == null) throw new RuntimeException("MysqlRepository.add() failed: entity was null");
 		this.add(Arrays.asList(new Entity[]
 		{ entity }));
-		return 1;
 	}
 
 	protected String getInsertSql()
@@ -239,15 +238,15 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 	@Override
 	public Integer add(Iterable<? extends Entity> entities)
 	{
-        AtomicInteger count = new AtomicInteger(0);
+		AtomicInteger count = new AtomicInteger(0);
 
 		// TODO, split in subbatches
 		final List<Entity> batch = new ArrayList<Entity>();
 		if (entities != null) for (Entity e : entities)
 		{
 			batch.add(e);
-            count.addAndGet(1);
-        }
+			count.addAndGet(1);
+		}
 		final AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
 		final Map<String, List<Entity>> mrefs = new HashMap<String, List<Entity>>();
 
@@ -312,7 +311,7 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 			}
 		}
 
-        return count.get();
+		return count.get();
 	}
 
 	private void addMref(final List<Entity> mrefs, final AttributeMetaData att)
@@ -712,6 +711,12 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 	public MysqlRepositoryCollection getRepositoryCollection()
 	{
 		return repositoryCollection;
+	}
+
+	@Override
+	public AggregateResult aggregate(AttributeMetaData xAttr, AttributeMetaData yAttr, Query q)
+	{
+		throw new UnsupportedOperationException("not yet implemented");
 	}
 
 	private class EntityMapper implements RowMapper

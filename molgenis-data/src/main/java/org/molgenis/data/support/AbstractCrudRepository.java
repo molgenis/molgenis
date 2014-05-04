@@ -21,10 +21,10 @@ public abstract class AbstractCrudRepository extends AbstractRepository implemen
 
 	@Override
 	@Transactional
-	public final Object add(Entity entity)
+	public final void add(Entity entity)
 	{
 		validator.validate(Arrays.asList(entity), getEntityMetaData(), null);
-		return addInternal(entity);
+		addInternal(entity);
 	}
 
 	@Override

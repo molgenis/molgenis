@@ -52,11 +52,11 @@ public class JpaRepositoryTest extends BaseJpaTest
 	public void testAddAndretrieve()
 	{
 		Person p = new Person("Piet", "Paulusma");
-		Object id = repo.add(p);
+		repo.add(p);
 
-		assertNotNull(id);
+		assertNotNull(p.getId());
 
-		Entity retrieved = repo.findOne(id);
+		Entity retrieved = repo.findOne(p.getId());
 		assertNotNull(retrieved);
 		assertTrue(retrieved instanceof Person);
 		assertEquals(retrieved.get("firstName"), p.getFirstName());
@@ -81,57 +81,57 @@ public class JpaRepositoryTest extends BaseJpaTest
 	public void testDelete()
 	{
 		Person p = new Person("Piet", "Paulusma");
-		Object id = repo.add(p);
+		repo.add(p);
 		repo.delete(p);
-		assertNull(repo.findOne(id));
+		assertNull(repo.findOne(p.getId()));
 	}
 
 	@Test
 	public void testDeleteIterable()
 	{
 		Person p = new Person("Piet", "Paulusma");
-		Object id = repo.add(p);
+		repo.add(p);
 		repo.delete(Arrays.asList(p));
-		assertNull(repo.findOne(id));
+		assertNull(repo.findOne(p.getId()));
 	}
 
 	@Test
 	public void testDeleteAll()
 	{
 		Person p = new Person("Piet", "Paulusma");
-		Object id = repo.add(p);
+		repo.add(p);
 		repo.deleteAll();
-		assertNull(repo.findOne(id));
+		assertNull(repo.findOne(p.getId()));
 	}
 
 	@Test
 	public void testDeleteById()
 	{
 		Person p = new Person("Piet", "Paulusma");
-		Object id = repo.add(p);
-		repo.deleteById(id);
-		assertNull(repo.findOne(id));
+		repo.add(p);
+		repo.deleteById(p.getId());
+		assertNull(repo.findOne(p.getId()));
 	}
 
 	@Test
 	public void testDeleteByIdIterable()
 	{
 		Person p = new Person("Piet", "Paulusma");
-		Object id = repo.add(p);
-		repo.deleteById(Arrays.asList(id));
-		assertNull(repo.findOne(id));
+		repo.add(p);
+		repo.deleteById(Arrays.asList(p.getId()));
+		assertNull(repo.findOne(p.getId()));
 	}
 
 	@Test
 	public void testFindAll()
 	{
 		Person p1 = new Person("Piet", "Paulusma");
-		Object id1 = repo.add(p1);
+		repo.add(p1);
 
 		Person p2 = new Person("Paulus", "de Boskabouter");
-		Object id2 = repo.add(p2);
+		repo.add(p2);
 
-		Iterable<Entity> it = repo.findAll(Arrays.asList(id1, id2));
+		Iterable<Entity> it = repo.findAll(Arrays.asList((Object)p1.getId(), p2.getId()));
 		assertEquals(Iterables.size(it), 2);
 		assertTrue(Iterables.contains(it, p1));
 		assertTrue(Iterables.contains(it, p2));
@@ -141,14 +141,14 @@ public class JpaRepositoryTest extends BaseJpaTest
 	public void testFindAllTyped()
 	{
 		Person p1 = new Person("Piet", "Paulusma");
-		Object id1 = repo.add(p1);
+		repo.add(p1);
 
 		Person p2 = new Person("Paulus", "de Boskabouter");
-		Object id2 = repo.add(p2);
+		repo.add(p2);
 
 		repo.add(Arrays.asList(p1, p2));
 
-		Iterable<Person> it = repo.findAll(Arrays.asList(id1, id2), Person.class);
+		Iterable<Person> it = repo.findAll(Arrays.asList((Object)p1.getId(), p2.getId()), Person.class);
 		assertEquals(Iterables.size(it), 2);
 		assertTrue(Iterables.contains(it, p1));
 		assertTrue(Iterables.contains(it, p2));
@@ -158,8 +158,8 @@ public class JpaRepositoryTest extends BaseJpaTest
 	public void testFindOne()
 	{
 		Person p = new Person("Piet", "Paulusma");
-		Object id = repo.add(p);
-		Entity e = repo.findOne(id);
+		repo.add(p);
+		Entity e = repo.findOne(p.getId());
 		assertNotNull(e);
 		assertEquals(p, e);
 	}
@@ -168,8 +168,8 @@ public class JpaRepositoryTest extends BaseJpaTest
 	public void testFindOneTyped()
 	{
 		Person p = new Person("Piet", "Paulusma");
-		Object id = repo.add(p);
-		Person e = repo.findOne(id, Person.class);
+		repo.add(p);
+		Person e = repo.findOne(p.getId(), Person.class);
 		assertNotNull(e);
 		assertEquals(p, e);
 	}
@@ -191,13 +191,13 @@ public class JpaRepositoryTest extends BaseJpaTest
 	public void testUpdate()
 	{
 		Person p = new Person("Piet", "Paulusma");
-		Object id = repo.add(p);
+		repo.add(p);
 
-		Person e = repo.findOne(id, Person.class);
+		Person e = repo.findOne(p.getId(), Person.class);
 		e.setLastName("XXX");
 		repo.update(e);
 
-		Person e1 = repo.findOne(id, Person.class);
+		Person e1 = repo.findOne(p.getId(), Person.class);
 		assertNotNull(e1);
 		assertEquals(e.getLastName(), "XXX");
 	}

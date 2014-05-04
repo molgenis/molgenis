@@ -12,7 +12,7 @@ public interface Writable extends Closeable
 	 * 
 	 * @return the id of the added entity
 	 */
-	Object add(Entity entity);
+	void add(Entity entity);
 
 	/** Stream add multiple entities */
 	Integer add(Iterable<? extends Entity> entities);
