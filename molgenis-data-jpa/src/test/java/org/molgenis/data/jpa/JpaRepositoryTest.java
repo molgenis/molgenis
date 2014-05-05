@@ -82,8 +82,9 @@ public class JpaRepositoryTest extends BaseJpaTest
 	{
 		Person p = new Person("Piet", "Paulusma");
 		repo.add(p);
+        Object id = p.getIdValue();
 		repo.delete(p);
-		assertNull(repo.findOne(p.getId()));
+		assertNull(repo.findOne(id));
 	}
 
 	@Test
@@ -91,8 +92,9 @@ public class JpaRepositoryTest extends BaseJpaTest
 	{
 		Person p = new Person("Piet", "Paulusma");
 		repo.add(p);
+        Object id = p.getIdValue();
 		repo.delete(Arrays.asList(p));
-		assertNull(repo.findOne(p.getId()));
+		assertNull(repo.findOne(id));
 	}
 
 	@Test
@@ -100,8 +102,9 @@ public class JpaRepositoryTest extends BaseJpaTest
 	{
 		Person p = new Person("Piet", "Paulusma");
 		repo.add(p);
+        Object id = p.getIdValue();
 		repo.deleteAll();
-		assertNull(repo.findOne(p.getId()));
+		assertNull(repo.findOne(id));
 	}
 
 	@Test
@@ -109,8 +112,9 @@ public class JpaRepositoryTest extends BaseJpaTest
 	{
 		Person p = new Person("Piet", "Paulusma");
 		repo.add(p);
+        Object id = p.getIdValue();
 		repo.deleteById(p.getId());
-		assertNull(repo.findOne(p.getId()));
+		assertNull(repo.findOne(id));
 	}
 
 	@Test
@@ -118,7 +122,8 @@ public class JpaRepositoryTest extends BaseJpaTest
 	{
 		Person p = new Person("Piet", "Paulusma");
 		repo.add(p);
-		repo.deleteById(Arrays.asList(p.getId()));
+        Object id = p.getIdValue();
+		repo.deleteById(Arrays.asList(id));
 		assertNull(repo.findOne(p.getId()));
 	}
 

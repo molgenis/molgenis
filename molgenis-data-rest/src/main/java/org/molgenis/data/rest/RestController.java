@@ -407,13 +407,15 @@ public class RestController
 	public void updateFromFormPost(@PathVariable("entityName") String entityName, @PathVariable("id") Object id,
 			HttpServletRequest request)
 	{
-		Map<String, Object> paramMap = new HashMap<String, Object>();
+        Object typedId = dataService.getRepositoryByEntityName(entityName).getEntityMetaData().getIdAttribute().getDataType().convert(id);
+
+        Map<String, Object> paramMap = new HashMap<String, Object>();
 		for (String param : request.getParameterMap().keySet())
 		{
 			paramMap.put(param, request.getParameter(param));
 		}
 
-		updateInternal(entityName, id, paramMap);
+		updateInternal(entityName, typedId, paramMap);
 	}
 
 	/**
@@ -427,7 +429,8 @@ public class RestController
 	@ResponseStatus(NO_CONTENT)
 	public void delete(@PathVariable("entityName") String entityName, @PathVariable Object id)
 	{
-		dataService.delete(entityName, id);
+        Object typedId = dataService.getRepositoryByEntityName(entityName).getEntityMetaData().getIdAttribute().getDataType().convert(id);
+		dataService.delete(entityName, typedId);
 	}
 
 	/**

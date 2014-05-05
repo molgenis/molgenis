@@ -100,7 +100,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		DefaultAttributeMetaData attrName = new DefaultAttributeMetaData("name", FieldTypeEnum.STRING);
 		attrName.setLookupAttribute(true);
 
-		DefaultAttributeMetaData attrId = new DefaultAttributeMetaData("id", FieldTypeEnum.INT);
+		DefaultAttributeMetaData attrId = new DefaultAttributeMetaData("id", FieldTypeEnum.STRING);
 		attrId.setIdAttribute(true);
 		attrId.setVisible(false);
 
@@ -140,6 +140,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void deleteDelete() throws Exception
 	{
+        //restController.delete(ENTITY_NAME, ENTITY_ID);
+
 		mockMvc.perform(delete(HREF_ENTITY_ID)).andExpect(status().isNoContent());
 		verify(dataService).delete(ENTITY_NAME, ENTITY_ID);
 	}

@@ -138,7 +138,7 @@ public class JpaRepository extends AbstractCrudRepository
 		if (logger.isDebugEnabled()) logger
 				.debug("finding by key" + getEntityClass().getSimpleName() + " [" + id + "]");
 
-		return getEntityManager().find(getEntityClass(), id);
+		return getEntityManager().find(getEntityClass(), getEntityMetaData().getIdAttribute().getDataType().convert(id));
 	}
 
 	@Override
@@ -542,7 +542,7 @@ public class JpaRepository extends AbstractCrudRepository
 	public void deleteById(Object id)
 	{
 		if (logger.isDebugEnabled()) logger.debug("removing " + getEntityClass().getSimpleName() + " [" + id + "]");
-		delete(findOne(id));
+		delete(findOne(getEntityMetaData().getIdAttribute().getDataType().convert(id)));
 	}
 
 	@Override
