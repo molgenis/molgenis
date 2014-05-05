@@ -108,12 +108,10 @@
 		switch(attributeFilter.attribute.fieldType) {
 			case 'DATE':
 			case 'DATE_TIME':
-				//TODO FIX
-				return htmlEscape((attributeFilter.values[0] ? 'from ' + attributeFilter.values[0] : '') + (attributeFilter.values[1] ? ' to ' + attributeFilter.values[1] : ''));
+				return htmlEscape((attributeFilter.fromValue ? 'from ' + attributeFilter.fromValue : '') + (attributeFilter.toValue ? ' to ' + attributeFilter.toValue : ''));
 			case 'DECIMAL':
 			case 'INT':
 			case 'LONG':
-				//TODO FIX
 				return htmlEscape((attributeFilter.fromValue ? 'from ' + attributeFilter.fromValue : '') + (attributeFilter.toValue ? ' to ' + attributeFilter.toValue : ''));
 			case 'EMAIL':
 			case 'HTML':
@@ -122,7 +120,7 @@
 			case 'TEXT':
 			case 'BOOL':
 			case 'XREF':
-				return htmlEscape(attributeFilter.values[0]?attributeFilter.values[0]:'');
+				return htmlEscape(attributeFilter.values[0] ? attributeFilter.values[0] : '');
 			case 'CATEGORICAL':
 			case 'MREF':
 				var operator = (attributeFilter.operator?attributeFilter.operator.toLocaleLowerCase():'or');
@@ -170,45 +168,49 @@
 			var attribute = attributeFilter.attribute;
 			var rangeQuery = attribute.fieldType === 'DATE' || attribute.fieldType === 'DATE_TIME' || attribute.fieldType === 'DECIMAL' || attribute.fieldType === 'INT' || attribute.fieldType === 'LONG';
 
-			$.each(attributeFilter.values, function(index, value) {
-				if (rangeQuery) {
-
-					// Range filter
-					var rangeAnd = false;
-					if (index === 0 && value) {
-						entityCollectionRequest.q.push({
-							field : attribute.name,
-							operator : 'GREATER_EQUAL',
-							value : value
-						});
-						rangeAnd = true;
-					}
-					if (rangeAnd) {
+			if (rangeQuery) {
+				// Range filter
+				var rangeAnd = false;
+				
+				// add range fromValue
+				if (attributeFilter.fromValue) {
+					entityCollectionRequest.q.push({
+						field : attribute.name,
+						operator : 'GREATER_EQUAL',
+						value : attributeFilter.fromValue
+					});
+				}
+				
+				// add range toValue
+				if (attributeFilter.toValue) {
+					if(attributeFilter.fromValue !== undefined){
 						entityCollectionRequest.q.push({
 							operator : 'AND'
 						});
 					}
-					if (index === 1 && value) {
+					entityCollectionRequest.q.push({
+						field : attribute.name,
+						operator : 'LESS_EQUAL',
+						value : attributeFilter.toValue
+					});
+				}
+			}else{
+				$.each(attributeFilter.values, function(index, value) {
+					if (index > 0) {
+						var operator = attributeFilter.operator ? attributeFilter.operator : 'OR';
 						entityCollectionRequest.q.push({
-							field : attribute.name,
-							operator : 'LESS_EQUAL',
-							value : value
+							operator : operator
 						});
 					}
-				} else {
-                        if (index > 0) {
-                            var operator = attributeFilter.operator ? attributeFilter.operator : 'OR';
-                            entityCollectionRequest.q.push({
-                                operator : operator
-                            });
-                        }
-                        entityCollectionRequest.q.push({
-                            field : attribute.name,
-                            operator : 'EQUALS',
-                            value : value
-                        });
-                    }
-			});
+
+					entityCollectionRequest.q.push({
+						field : attribute.name,
+						operator : 'EQUALS',
+						value : value
+					});
+				});
+			}
+			
 			count++;
 		});
 
@@ -224,6 +226,8 @@
 		controls.data('attribute', attribute);
 		var name = 'input-' + attribute.name + '-' + new Date().getTime();
 		var values = attributeFilter ? attributeFilter.values : null;
+		var fromValue = attributeFilter ? attributeFilter.fromValue : null;
+		var toValue = attributeFilter ? attributeFilter.toValue : null;
 		switch(attribute.fieldType) {
 			case 'BOOL':
 				var attrs = {'name': name};
@@ -236,7 +240,6 @@
 			case 'CATEGORICAL':
 				var entityMeta = restApi.get(attribute.refEntity.href);
 				var entitiesUri = entityMeta.href.replace(new RegExp('/meta[^/]*$'), ""); // TODO do not manipulate uri
-
 				var entities = restApi.get(entitiesUri);
 				$.each(entities.items, function() {
 					var attrs = {'name': name, 'id': name};
@@ -248,36 +251,32 @@
 			case 'DATE':
 			case 'DATE_TIME':
 				var nameFrom = name + '-from', nameTo = name + '-to';
-				var valFrom = values ? values[0] : undefined;
-				var valTo = values ? values[1] : undefined;
+				var valFrom = fromValue ? fromValue : undefined;
+				var valTo = toValue ? toValue : undefined;
 				var inputFrom = createInput(attribute.fieldType, {'name': nameFrom, 'placeholder': 'Start date'}, valFrom ? valFrom.replace("T", "'T'") : valFrom);
-				inputFrom.data("label", "from");
 				var inputTo = createInput(attribute.fieldType, {'name': nameTo, 'placeholder': 'End date'}, valTo ? valTo.replace("T", "'T'") : valTo);
-				inputTo.data("label", "to");
 				controls.append($('<div class="control-group">').append(inputFrom)).append($('<div class="control-group">').append(inputTo));
 				break;
 			case 'DECIMAL':
 			case 'INT':
 			case 'LONG':
 				if (attribute.range) {
-					var slider = $('<div id="slider"></div>');
-					var min = values ? values[0] : attribute.range.min;
-					var max = values ? values[1] : attribute.range.max;
+					var slider = $('<div id="slider" class="control-group"></div>');
+					var min = fromValue ? fromValue : attribute.range.min;
+					var max = toValue ? toValue : attribute.range.max;
 					slider.editRangeSlider({
 						symmetricPositionning: true,
 						range: {min: attribute.range.min, max: attribute.range.max},
 						defaultValues: {min: min, max: max},
 						type: "number"
 					});
-					controls.append($(slider).css("width", "700px"));
+					controls.append(slider);
 				} else {
 					var nameFrom = name + '-from', nameTo = name + '-to';
 					var labelFrom = $('<label class="horizontal-inline" for="' + nameFrom + '">From</label>');
 					var labelTo = $('<label class="horizontal-inline inbetween" for="' + nameTo + '">To</label>');
-					var inputFrom = createInput(attribute.fieldType, {'name': nameFrom, 'id': nameFrom}, values ? values[0] : undefined).addClass('input-small');
-					inputFrom.data("label", "from");
-					var inputTo = createInput(attribute.fieldType, {'name': nameTo, 'id': nameTo}, values ? values[1] : undefined).addClass('input-small');
-					inputTo.data("label", "to");
+					var inputFrom = createInput(attribute.fieldType, {'name': nameFrom, 'id': nameFrom}, values ? fromValue : undefined).addClass('input-small');
+					var inputTo = createInput(attribute.fieldType, {'name': nameTo, 'id': nameTo}, values ? toValue : undefined).addClass('input-small');
 					controls.addClass('form-inline').append(labelFrom).append(inputFrom).append(labelTo).append(inputTo);
 				}
 				break;
@@ -327,10 +326,9 @@
 			
 			$(":input", $(this)).not('[type=radio]:not(:checked)').not('[type=checkbox]:not(:checked)').each(function(){
 				var value = $(this).val();
-				var label = $(this).data("label");
 				var name = $(this).attr("name");
 				
-				if(value) {		
+				if(value) {
 					if(!filter) {
 						filter = {};
 						filters[attribute.href] = filter;
@@ -344,32 +342,55 @@
 						filter.values = values;
 					}
 					
+
 					// Add operator
 					if ($(this).hasClass('operator')) {
 						filter.operator = value;
-					} else {
+					} 
+					
+					// Add values
+					else 
+					{
                         if(attribute.fieldType === 'MREF'){
                             var mrefValues = value.split(',');
                             $(mrefValues).each(function(i){
                                 values.push(mrefValues[i]);
                             });
-                        } else{
+                        } 
+                        else if(attribute.fieldType === 'INT'
+    						|| attribute.fieldType === 'LONG'
+    							|| attribute.fieldType === 'DECIMAL'
+    								|| attribute.fieldType === 'DATE'
+    									|| attribute.fieldType === 'DATE_TIME'
+    							){
+    						
+    						// Add toValue
+    						if(name && (name.match(/-to$/g) || name === 'sliderright')){
+    							filter.toValue = value;
+    							if(!filter.hasOwnProperty('fromValue')){
+    								filter.fromValue = undefined;
+    							}
+    						}
+    						
+    						// Add fromValue
+    						if(name && (name.match(/-from$/g) || name === 'sliderleft')){
+    							filter.fromValue = value;
+    						}
+    					}
+                        else
+                        {
                         	values[values.length] = value;
                         }
-					}
-					
-					// Add toValue and fromValue
-					if(label === "to" || name === "sliderright"){
-						filter.toValue = value;
-					}
-					
-					if(label === "from" || name === "sliderleft"){
-						filter.fromValue = value;
 					}
 				}
 			});	
 		});
-		return Object.keys(filters).map(function (key) { return filters[key]; }).filter(function(filter){return filter.values.length > 0;});
+        
+		return Object.keys(filters).map(function (key) { return filters[key]; }).filter(
+				function(filter)
+				{
+					return filter.fromValue || filter.toValue || filter.values.length > 0;
+				});
 	}
 	
 	/**
