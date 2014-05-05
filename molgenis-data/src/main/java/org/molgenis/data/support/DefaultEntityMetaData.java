@@ -7,18 +7,22 @@ import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
 
 public class DefaultEntityMetaData extends AbstractEntityMetaData
 {
 	private final String name;
 	private String label;
 	private String description;
+	private final Class<? extends Entity> entityClass;
 	private final Map<String, AttributeMetaData> attributes = new LinkedHashMap<String, AttributeMetaData>();
 
-	public DefaultEntityMetaData(String name)
+	public DefaultEntityMetaData(String name, Class<? extends Entity> entityClass)
 	{
 		if (name == null) throw new IllegalArgumentException("Name cannot be null");
+		if (entityClass == null) throw new IllegalArgumentException("EntityClass cannot be null");
 		this.name = name;
+		this.entityClass = entityClass;
 	}
 
 	@Override
@@ -112,6 +116,12 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 	}
 
 	@Override
+	public Class<? extends Entity> getEntityClass()
+	{
+		return entityClass;
+	}
+
+	@Override
 	public int hashCode()
 	{
 		final int prime = 31;
@@ -134,4 +144,5 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 		else if (!name.equals(other.name)) return false;
 		return true;
 	}
+
 }

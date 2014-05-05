@@ -17,9 +17,9 @@ public class StudyDefinitionMetaModel extends CatalogMetaModel
 	 *            email of the user related to this study definition
 	 * @param loaded
 	 */
-	public StudyDefinitionMetaModel(String id, String name, String email, Date date, boolean loaded)
+	public StudyDefinitionMetaModel(String id, String name, String email, Date date, boolean loaded, boolean activated)
 	{
-		super(id, name, loaded);
+		super(id, name, loaded, activated);
 		this.email = email;
 		this.date = date != null ? new Date(date.getTime()) : null; // do not store externally mutable object
 	}

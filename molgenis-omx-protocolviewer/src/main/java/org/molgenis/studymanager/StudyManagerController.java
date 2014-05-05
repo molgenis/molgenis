@@ -6,9 +6,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -17,7 +17,6 @@ import javax.validation.constraints.NotNull;
 import org.apache.log4j.Logger;
 import org.molgenis.catalog.Catalog;
 import org.molgenis.catalog.CatalogItem;
-import org.molgenis.catalog.CatalogModel;
 import org.molgenis.catalog.CatalogModelBuilder;
 import org.molgenis.catalog.UnknownCatalogException;
 import org.molgenis.catalogmanager.CatalogManagerService;
@@ -113,15 +112,21 @@ public class StudyManagerController extends MolgenisPluginController
 						String email = studyDefinition.getAuthorEmail();
 						Date date = studyDefinition.getDateCreated();
 						boolean loaded;
+						boolean activated;
 						try
 						{
 							loaded = studyDefinitionManagerService.isStudyDataLoaded(id);
+							activated = studyDefinitionManagerService.isStudyDataActivated(id);
 						}
 						catch (UnknownStudyDefinitionException e)
 						{
 							throw new RuntimeException(e);
 						}
-						return new StudyDefinitionMetaModel(id, name, email, date, loaded);
+						catch (UnknownCatalogException e)
+						{
+							throw new RuntimeException(e);
+						}
+						return new StudyDefinitionMetaModel(id, name, email, date, loaded, activated);
 					}
 				});
 

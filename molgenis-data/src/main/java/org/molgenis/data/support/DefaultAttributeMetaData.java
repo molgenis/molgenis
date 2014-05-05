@@ -4,6 +4,7 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Range;
 import org.molgenis.fieldtypes.FieldType;
 
 /**
@@ -27,6 +28,8 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	private boolean unique = false;
 	private boolean auto = false;
 	private Iterable<AttributeMetaData> attributesMetaData;
+	private boolean aggregateable = false;
+	private Range range;
 
 	public DefaultAttributeMetaData(String name, FieldTypeEnum fieldType)
 	{
@@ -189,6 +192,28 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public void setLookupAttribute(boolean lookupAttribute)
 	{
 		this.lookupAttribute = lookupAttribute;
+	}
+
+	@Override
+	public boolean isAggregateable()
+	{
+		return this.aggregateable;
+	}
+
+	public void setAggregateable(boolean aggregateable)
+	{
+		this.aggregateable = aggregateable;
+	}
+
+	@Override
+	public Range getRange()
+	{
+		return range;
+	}
+
+	public void setRange(Range range)
+	{
+		this.range = range;
 	}
 
 }

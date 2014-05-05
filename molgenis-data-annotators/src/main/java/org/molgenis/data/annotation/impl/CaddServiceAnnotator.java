@@ -37,8 +37,8 @@ import org.springframework.stereotype.Component;
 @Component("caddService")
 public class CaddServiceAnnotator extends VariantAnnotator
 {
-	private MolgenisSettings molgenisSettings;
-	private AnnotationService annotatorService;
+	private final MolgenisSettings molgenisSettings;
+	private final AnnotationService annotatorService;
 
 	// the cadd service returns these two values
 	static final String CADD_SCALED = "CADD_SCALED";
@@ -120,7 +120,7 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	@Override
 	public EntityMetaData getOutputMetaData()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
+		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
 
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CADD_ABS, FieldTypeEnum.DECIMAL));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CADD_SCALED, FieldTypeEnum.DECIMAL));

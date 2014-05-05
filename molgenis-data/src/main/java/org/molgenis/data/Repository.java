@@ -11,8 +11,6 @@ public interface Repository extends Iterable<Entity>, Closeable
 
 	EntityMetaData getEntityMetaData();
 
-	Class<? extends Entity> getEntityClass();
-
 	<E extends Entity> Iterable<E> iterator(Class<E> clazz);
 
 	String getUrl();

@@ -1,5 +1,7 @@
 package org.molgenis.data.jpa;
 
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.BOOL;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,13 +11,16 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaBuilder.In;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
@@ -23,6 +28,8 @@ import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DatabaseAction;
@@ -44,6 +51,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 /**
  * Repository implementation for (generated) jpa entities
@@ -54,24 +62,21 @@ public class JpaRepository extends AbstractCrudRepository
 
 	@PersistenceContext
 	private EntityManager entityManager;
-	private final Class<? extends Entity> entityClass;
 	private final EntityMetaData entityMetaData;
 	private final QueryResolver queryResolver;
 	private final Logger logger = Logger.getLogger(getClass());
 
-	public JpaRepository(Class<? extends Entity> entityClass, EntityMetaData entityMetaData,
-			EntityValidator entityValidator, QueryResolver queryResolver)
+	public JpaRepository(EntityMetaData entityMetaData, EntityValidator entityValidator, QueryResolver queryResolver)
 	{
-		super(BASE_URL + entityClass.getName(), entityValidator);
-		this.entityClass = entityClass;
+		super(BASE_URL + entityMetaData.getEntityClass().getName(), entityValidator);
 		this.entityMetaData = entityMetaData;
 		this.queryResolver = queryResolver;
 	}
 
-	public JpaRepository(EntityManager entityManager, Class<? extends Entity> entityClass,
-			EntityMetaData entityMetaData, EntityValidator entityValidator, QueryResolver queryResolver)
+	public JpaRepository(EntityManager entityManager, EntityMetaData entityMetaData, EntityValidator entityValidator,
+			QueryResolver queryResolver)
 	{
-		this(entityClass, entityMetaData, entityValidator, queryResolver);
+		this(entityMetaData, entityValidator, queryResolver);
 		this.entityManager = entityManager;
 	}
 
@@ -81,10 +86,9 @@ public class JpaRepository extends AbstractCrudRepository
 		return entityMetaData;
 	}
 
-	@Override
-	public Class<? extends Entity> getEntityClass()
+	protected Class<? extends Entity> getEntityClass()
 	{
-		return entityClass;
+		return entityMetaData.getEntityClass();
 	}
 
 	protected EntityManager getEntityManager()
@@ -282,7 +286,7 @@ public class JpaRepository extends AbstractCrudRepository
 		if (entities.size() == 0) return;
 
 		// retrieve entity class and name
-		String entityName = entityClass.getSimpleName();
+		String entityName = getEntityClass().getSimpleName();
 
 		// create maps to store key values and entities
 		// key is a concat of all key values for an entity
@@ -340,7 +344,7 @@ public class JpaRepository extends AbstractCrudRepository
 				}
 				else
 				{
-					throw new MolgenisDataException("keys are missing: " + entityClass.getSimpleName() + "."
+					throw new MolgenisDataException("keys are missing: " + getEntityClass().getSimpleName() + "."
 							+ Arrays.asList(keyNames));
 				}
 			}
@@ -649,12 +653,25 @@ public class JpaRepository extends AbstractCrudRepository
 					andPredicates.add(cb.equal(from.get(r.getJpaAttribute()), r.getValue()));
 					break;
 				case IN:
-					In<Object> in = cb.in(from.get(r.getJpaAttribute()));
+					AttributeMetaData meta = getEntityMetaData().getAttribute(r.getField());
+
+					In<Object> in;
+					if (meta.getDataType().getEnumType() == FieldTypeEnum.MREF
+							|| meta.getDataType().getEnumType() == FieldTypeEnum.CATEGORICAL)
+					{
+						in = cb.in(from.join(r.getJpaAttribute(), JoinType.LEFT));
+					}
+					else
+					{
+						in = cb.in(from.get(r.getJpaAttribute()));
+					}
+
 					for (Object o : (Iterable) r.getValue())
 					{
 						in.value(o);
 					}
 					andPredicates.add(in);
+
 					break;
 				case LIKE:
 					String like = "%" + r.getValue() + "%";
@@ -715,10 +732,11 @@ public class JpaRepository extends AbstractCrudRepository
 		{
 			if (andPredicates.size() > 0)
 			{
-				orPredicates.add(cb.and(andPredicates.toArray(new Predicate[andPredicates.size()])));
+				orPredicates.add(cb.and(andPredicates.toArray(new Predicate[0])));
 			}
 			List<Predicate> result = new ArrayList<Predicate>();
-			result.add(cb.or(orPredicates.toArray(new Predicate[andPredicates.size()])));
+
+			result.add(cb.or(orPredicates.toArray(new Predicate[0])));
 
 			return result;
 		}
@@ -789,12 +807,12 @@ public class JpaRepository extends AbstractCrudRepository
 	// If the entity is of the correct type return it, else convert it to the correct type
 	private Entity getTypedEntity(Entity entity)
 	{
-		if (entityClass.isAssignableFrom(entity.getClass()))
+		if (getEntityClass().isAssignableFrom(entity.getClass()))
 		{
 			return entity;
 		}
 
-		Entity jpaEntity = BeanUtils.instantiateClass(entityClass);
+		Entity jpaEntity = BeanUtils.instantiateClass(getEntityClass());
 		jpaEntity.set(entity);
 
 		return jpaEntity;
@@ -856,6 +874,239 @@ public class JpaRepository extends AbstractCrudRepository
 		return e;
 	}
 
+	@Override
+	public AggregateResult aggregate(AttributeMetaData xAttributeMeta, AttributeMetaData yAttributeMeta, Query query)
+	{
+		if ((xAttributeMeta == null) && (yAttributeMeta == null))
+		{
+			throw new MolgenisDataException("Missing aggregate attribute");
+		}
+
+		FieldTypeEnum xDataType = null;
+		String xAttributeName = null;
+		if (xAttributeMeta != null)
+		{
+			xAttributeName = xAttributeMeta.getName();
+
+			if (!xAttributeMeta.isAggregateable())
+			{
+				throw new MolgenisDataException("Attribute '" + xAttributeName + "' is not aggregateable");
+			}
+
+			xDataType = xAttributeMeta.getDataType().getEnumType();
+		}
+
+		FieldTypeEnum yDataType = null;
+		String yAttributeName = null;
+		if (yAttributeMeta != null)
+		{
+			yAttributeName = yAttributeMeta.getName();
+			if (!yAttributeMeta.isAggregateable())
+			{
+				throw new MolgenisDataException("Attribute '" + yAttributeName + "' is not aggregateable");
+			}
+
+			yDataType = yAttributeMeta.getDataType().getEnumType();
+		}
+
+		List<Object> xValues = Lists.newArrayList();
+		List<Object> yValues = Lists.newArrayList();
+		List<List<Long>> matrix = new ArrayList<List<Long>>();
+		Set<String> xLabels = Sets.newLinkedHashSet();
+		Set<String> yLabels = Sets.newLinkedHashSet();
+
+		if (xDataType != null)
+		{
+			if (xDataType == BOOL)
+			{
+				xValues.add(Boolean.TRUE);
+				xValues.add(Boolean.FALSE);
+				xLabels.add(xAttributeName + ": true");
+				xLabels.add(xAttributeName + ": false");
+			}
+			else if (xAttributeMeta.getRefEntity() != null)
+			{
+				EntityMetaData xRefEntityMeta = xAttributeMeta.getRefEntity();
+				String xRefEntityLblAttr = xRefEntityMeta.getLabelAttribute().getName();
+
+				for (Entity xRefEntity : findAll(xRefEntityMeta.getEntityClass()))
+				{
+					xLabels.add(xRefEntity.getString(xRefEntityLblAttr));
+					xValues.add(xRefEntity.get(xRefEntityLblAttr));
+				}
+			}
+			else
+			{
+				for (Object value : getDistinctValues(xAttributeMeta))
+				{
+					String valueStr = DataConverter.toString(value);
+					xLabels.add(valueStr);
+					xValues.add(valueStr);
+				}
+			}
+		}
+
+		if (yDataType != null)
+		{
+			if (yDataType == BOOL)
+			{
+				yValues.add(Boolean.TRUE);
+				yValues.add(Boolean.FALSE);
+				yLabels.add(yAttributeName + ": true");
+				yLabels.add(yAttributeName + ": false");
+			}
+			else if (yAttributeMeta.getRefEntity() != null)
+			{
+				EntityMetaData yRefEntityMeta = yAttributeMeta.getRefEntity();
+				String yRefEntityLblAttr = yRefEntityMeta.getLabelAttribute().getName();
+
+				for (Entity yRefEntity : findAll(yRefEntityMeta.getEntityClass()))
+				{
+					yLabels.add(yRefEntity.getString(yRefEntityLblAttr));
+					yValues.add(yRefEntity.get(yRefEntityLblAttr));
+				}
+			}
+			else
+			{
+				for (Object value : getDistinctValues(yAttributeMeta))
+				{
+					String valueStr = DataConverter.toString(value);
+					yLabels.add(valueStr);
+					yValues.add(valueStr);
+				}
+			}
+		}
+
+		boolean hasXValues = !xValues.isEmpty();
+		boolean hasYValues = !yValues.isEmpty();
+
+		if (hasXValues)
+		{
+			List<Long> totals = Lists.newArrayList();
+
+			for (Object xValue : xValues)
+			{
+				List<Long> row = Lists.newArrayList();
+
+				if (hasYValues)
+				{
+					int i = 0;
+
+					for (Object yValue : yValues)
+					{
+
+						// Both x and y choosen
+						Query finalQ = query.getRules().isEmpty() ? new QueryImpl() : new QueryImpl(query).and();
+						finalQ.eq(xAttributeName, xValue).and().eq(yAttributeName, yValue);
+						long count = count(finalQ);
+						row.add(count);
+						if (totals.size() == i)
+						{
+							totals.add(count);
+						}
+						else
+						{
+							totals.set(i, totals.get(i) + count);
+						}
+						i++;
+					}
+				}
+				else
+				{
+					// No y attribute chosen
+					Query finalQ = query.getRules().isEmpty() ? new QueryImpl() : new QueryImpl(query).and();
+					finalQ.eq(xAttributeName, xValue);
+					long count = count(finalQ);
+					row.add(count);
+					if (totals.isEmpty())
+					{
+						totals.add(count);
+					}
+					else
+					{
+						totals.set(0, totals.get(0) + count);
+					}
+
+				}
+
+				matrix.add(row);
+			}
+
+			yLabels.add(hasYValues ? "Total" : "Count");
+			xLabels.add("Total");
+
+			matrix.add(totals);
+		}
+		else
+		{
+			// No xattribute chosen
+			List<Long> row = Lists.newArrayList();
+			for (Object yValue : yValues)
+			{
+				Query finalQ = query.getRules().isEmpty() ? new QueryImpl() : new QueryImpl(query).and();
+				finalQ.eq(yAttributeName, yValue);
+				long count = count(finalQ);
+				row.add(count);
+			}
+			matrix.add(row);
+
+			xLabels.add("Count");
+			yLabels.add("Total");
+		}
+
+		// Count row totals
+		if (hasYValues)
+		{
+			for (List<Long> row : matrix)
+			{
+				long total = 0;
+				for (Long count : row)
+				{
+					total += count;
+				}
+				row.add(total);
+			}
+		}
+
+		return new AggregateResult(matrix, xLabels, yLabels);
+	}
+
+	// Get all distinct values of an attribute
+	private List<?> getDistinctValues(AttributeMetaData attr)
+	{
+		EntityManager em = getEntityManager();
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+		CriteriaQuery<Tuple> cq = cb.createTupleQuery();
+
+		String attrName = attr.getName().substring(0, 1).toLowerCase() + attr.getName().substring(1);
+		Root<? extends Entity> root = cq.from(getEntityClass());
+		cq.distinct(true).multiselect(root.get(attrName));
+
+		TypedQuery<Tuple> tq = em.createQuery(cq);
+		List<Tuple> tuples = tq.getResultList();
+
+		List<Object> result = Lists.newArrayList();
+		for (Tuple tuple : tuples)
+		{
+			result.add(tuple.get(0));
+		}
+
+		return result;
+	}
+
+	// Find all instances of an jpa entity
+	private List<? extends Entity> findAll(Class<? extends Entity> entityClass)
+	{
+		EntityManager em = getEntityManager();
+		CriteriaBuilder cb = em.getCriteriaBuilder();
+
+		@SuppressWarnings("unchecked")
+		CriteriaQuery<Entity> cq = (CriteriaQuery<Entity>) cb.createQuery(entityClass);
+		TypedQuery<Entity> tq = em.createQuery(cq.select(cq.from(entityClass)));
+
+		return tq.getResultList();
+	}
+
 	/*
 	 * Convert a search query to a list of QueryRule, creates for every attribute a QueryRule and 'OR's them
 	 * 
@@ -872,6 +1123,7 @@ public class JpaRepository extends AbstractCrudRepository
 			QueryRule rule = null;
 			switch (attr.getDataType().getEnumType())
 			{
+				case ENUM:
 				case STRING:
 				case TEXT:
 				case HTML:
@@ -916,10 +1168,36 @@ public class JpaRepository extends AbstractCrudRepository
 					}
 					break;
 
-				// TODO how??
 				case CATEGORICAL:
 				case MREF:
 				case XREF:
+					// Find the ref entities and create an 'in' queryrule
+					// TODO other datatypes
+					if (attr.getRefEntity().getLabelAttribute().getDataType().getEnumType() == FieldTypeEnum.STRING)
+					{
+						Query q = new QueryImpl().like(attr.getRefEntity().getLabelAttribute().getName(), searchValue);
+						EntityManager em = getEntityManager();
+						CriteriaBuilder cb = em.getCriteriaBuilder();
+
+						@SuppressWarnings("unchecked")
+						CriteriaQuery<Entity> cq = (CriteriaQuery<Entity>) cb.createQuery(attr.getRefEntity()
+								.getEntityClass());
+
+						@SuppressWarnings("unchecked")
+						Root<Entity> from = (Root<Entity>) cq.from(attr.getRefEntity().getEntityClass());
+						cq.select(from);
+
+						// add filters
+						createWhere(q, from, cq, cb);
+
+						TypedQuery<Entity> tq = em.createQuery(cq);
+						List<Entity> refEntities = tq.getResultList();
+						if (!refEntities.isEmpty())
+						{
+							rule = new QueryRule(attr.getName(), Operator.IN, refEntities);
+						}
+					}
+
 					break;
 				default:
 					break;
@@ -940,4 +1218,5 @@ public class JpaRepository extends AbstractCrudRepository
 
 		return searchRules;
 	}
+
 }

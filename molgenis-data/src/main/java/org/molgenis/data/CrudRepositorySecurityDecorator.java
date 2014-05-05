@@ -47,12 +47,6 @@ public class CrudRepositorySecurityDecorator extends CrudRepositoryDecorator imp
 	}
 
 	@Override
-	public Class<? extends Entity> getEntityClass()
-	{
-		return decoratedRepository.getEntityClass();
-	}
-
-	@Override
 	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
 	{
 		validatePermission(Permission.READ);
@@ -203,6 +197,13 @@ public class CrudRepositorySecurityDecorator extends CrudRepositoryDecorator imp
 	{
 		validatePermission(Permission.WRITE);
 		decoratedRepository.add(entities);
+	}
+
+	@Override
+	public AggregateResult aggregate(AttributeMetaData xAttr, AttributeMetaData yAttr, Query q)
+	{
+		validatePermission(Permission.COUNT);
+		return decoratedRepository.aggregate(xAttr, yAttr, q);
 	}
 
 	@Override

@@ -2,8 +2,8 @@ package org.molgenis.ui;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.molgenis.data.convert.DateToStringConverter;
@@ -14,6 +14,9 @@ import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.freemarker.HasPermissionDirective;
+import org.molgenis.security.freemarker.NotHasPermissionDirective;
+import org.molgenis.ui.freemarker.FormLinkDirective;
 import org.molgenis.ui.freemarker.LimitMethod;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.AsyncJavaMailSender;
@@ -39,6 +42,8 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
+
+import com.google.common.collect.Maps;
 
 import freemarker.template.TemplateException;
 
@@ -211,9 +216,22 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		result.setPreferFileSystemAccess(false);
 		result.setTemplateLoaderPath("classpath:/templates/");
 		result.setDefaultEncoding("UTF-8");
-		result.setFreemarkerVariables(Collections.singletonMap("limit", (Object) new LimitMethod()));
+
+		Map<String, Object> freemarkerVariables = Maps.newHashMap();
+		freemarkerVariables.put("limit", new LimitMethod());
+		freemarkerVariables.put("hasPermission", new HasPermissionDirective(molgenisPermissionService));
+		freemarkerVariables.put("notHasPermission", new NotHasPermissionDirective(molgenisPermissionService));
+		freemarkerVariables.put("formLink", new FormLinkDirective());
+		addFreemarkerVariables(freemarkerVariables);
+
+		result.setFreemarkerVariables(freemarkerVariables);
 
 		return result;
+	}
+
+	// Override in subclass if you need more freemarker variables
+	protected void addFreemarkerVariables(Map<String, Object> freemarkerVariables)
+	{
 
 	}
 

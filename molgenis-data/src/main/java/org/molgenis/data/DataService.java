@@ -22,13 +22,7 @@ public interface DataService extends RepositoryCollection
 	 * Remove a repository from the DataService
 	 * 
 	 * @throws MolgenisDataException
-	 *             if repository/entity name doesn't exists
-	 * @param repository
-	 */
-	void removeRepository(Repository repository);
-
-	/**
-	 * Remove a repository from the DataService
+	 *             if repository/entity name is null
 	 * 
 	 * @throws MolgenisDataException
 	 *             if repository/entity name doesn't exists
@@ -292,4 +286,12 @@ public interface DataService extends RepositoryCollection
 	 */
 	<E extends Entity> E findOne(String entityName, Query q, Class<E> clazz);
 
+	/**
+	 * Creates counts off all possible combinations of xAttr and yAttr attributes of an entity
+	 * 
+	 * @param xAttr
+	 * @param yAttr
+	 * @return
+	 */
+	AggregateResult aggregate(String entityName, AttributeMetaData xAttr, AttributeMetaData yAttr, Query q);
 }

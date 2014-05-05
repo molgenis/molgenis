@@ -26,6 +26,7 @@ import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
+import org.molgenis.omx.protocol.OmxLookupTableEntityMetaData;
 import org.molgenis.omx.protocol.OmxLookupTableRepository;
 import org.molgenis.omx.utils.ProtocolUtils;
 import org.molgenis.search.SearchService;
@@ -61,6 +62,9 @@ public class OmxImporterServiceImpl implements OmxImporterService
 	public EntityImportReport doImport(RepositoryCollection repositories, DatabaseAction databaseAction)
 			throws IOException
 	{
+		// All new repository identifiers
+		List<String> newRepoIdentifiers = new ArrayList<String>();
+
 		// First import entities, the data sheets are ignored in the entitiesimporter
 		EntityImportReport importReport = entitiesImporter.importEntities(repositories, databaseAction);
 
@@ -71,15 +75,18 @@ public class OmxImporterServiceImpl implements OmxImporterService
 		for (String name : repositories.getEntityNames())
 		{
 			Repository repository = repositories.getRepositoryByEntityName(name);
-
+			
 			if (repository.getName().startsWith(DATASET_SHEET_PREFIX))
 			{
 				// Import DataSet sheet, create new OmxRepository
 				String identifier = repository.getName().substring(DATASET_SHEET_PREFIX.length());
+				
 				if (!dataService.hasRepository(identifier))
 				{
+
 					dataService.addRepository(new CrudRepositorySecurityDecorator(new OmxRepository(dataService,
 							searchService, identifier, entityValidator)));
+					newRepoIdentifiers.add(identifier);
 
 					DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME,
 							new QueryImpl().eq(DataSet.IDENTIFIER, identifier), DataSet.class);
@@ -104,10 +111,13 @@ public class OmxImporterServiceImpl implements OmxImporterService
 					}
 					for (ObservableFeature categoricalFeature : categoricalFeatures)
 					{
-						if (!dataService.hasRepository(categoricalFeature.getIdentifier() + "-LUT"))
+						if (!dataService.hasRepository(OmxLookupTableEntityMetaData
+								.createOmxLookupTableEntityMetaDataName(categoricalFeature.getIdentifier())))
 						{
 							dataService.addRepository(new OmxLookupTableRepository(dataService, categoricalFeature
 									.getIdentifier(), queryResolver));
+							newRepoIdentifiers.add(OmxLookupTableEntityMetaData
+									.createOmxLookupTableEntityMetaDataName(categoricalFeature.getIdentifier()));
 						}
 					}
 				}
@@ -154,6 +164,11 @@ public class OmxImporterServiceImpl implements OmxImporterService
 
 					}
 
+					for (String newRepoIdentifier : newRepoIdentifiers)
+					{
+						dataService.removeRepository(newRepoIdentifier);
+					}
+					
 					throw e;
 				}
 

@@ -156,4 +156,9 @@ public class CrudRepositoryDecorator extends RepositoryDecorator implements Crud
 		decoratedRepository.deleteById(id);
 	}
 
+	@Override
+	public AggregateResult aggregate(AttributeMetaData xAttr, AttributeMetaData yAttr, Query q)
+	{
+		return decoratedRepository.aggregate(xAttr, yAttr, q);
+	}
 }

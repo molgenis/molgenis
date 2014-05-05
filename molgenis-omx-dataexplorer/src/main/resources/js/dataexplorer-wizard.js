@@ -5,7 +5,14 @@
 	var self = molgenis.dataexplorer.wizard = molgenis.dataexplorer.wizard || {};
 
 	var restApi = new molgenis.RestClient();
-	
+	var wizardTitle = "";
+
+    self.setWizardTitle = function setWizardTitle(title) {
+        if(title !== undefined) {
+            wizardTitle = title;
+        }
+    }
+
 	self.openFilterWizardModal = function(entityMetaData, attributeFilters) {
 		var modal = createFilterWizardModal();
 		createFilterWizardContent(entityMetaData, attributeFilters, modal);
@@ -19,7 +26,9 @@
 			items.push('<div class="modal large hide" id="filter-wizard-modal" tabindex="-1">');
 			items.push('<div class="modal-header">');
 			items.push('<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>');
-			items.push('<h3>Filter Wizard</h3>');
+            items.push('<h3>');
+            items.push(wizardTitle);
+            items.push('</h3>');
 			items.push('</div>');
 			items.push('<div class="modal-body">');
 			items.push('<div class="filter-wizard">');
@@ -38,11 +47,11 @@
 			items.push('<a href="#" class="btn btn-primary filter-wizard-apply-btn" data-dismiss="modal">Apply</a>');
 			items.push('</div>');
 			items.push('</div>');
-			
+
 			modal = $(items.join(''));
-			
+
 			modal.modal({'show': false});
-			
+
 			createFilterModalControls(modal);
 		}
 		return modal;
@@ -88,6 +97,8 @@
 			
 			var pane = $('<div class="tab-pane' + (i === 0 ? ' active"' : '') + '" id="' + tabId + '">');
 			var paneContainer = $('<div class="well"></div>');
+			var form = $('<form class="form-horizontal"></form>');
+			paneContainer.append(form);
 			pane.append(paneContainer);
 			$.each(compoundAttribute.attributes, function(i, attribute) {
 				if(attribute.fieldType !== 'COMPOUND') {
@@ -97,8 +108,13 @@
 			paneItems.push(pane);
 		});
 		
-		$('.wizard-steps', wizard).html(listItems.join(''));
-		$('.tab-content', wizard).html(paneItems);
+		if(compoundAttributes.length > 1){
+            $('.wizard-steps').show();
+            $('.wizard-steps', wizard).html(listItems.join(''));
+        }else{
+            $('.wizard-steps').hide();
+        }
+        $('.tab-content', wizard).html(paneItems);
 		
 		wizard.bootstrapWizard({
 	   		tabClass: 'bwizard-steps',

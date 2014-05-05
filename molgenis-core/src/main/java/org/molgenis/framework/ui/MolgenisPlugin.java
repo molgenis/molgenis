@@ -5,15 +5,18 @@ public class MolgenisPlugin
 	private final String id;
 	private final String name;
 	private final String uri;
+	private final String fullUri;
 
-	public MolgenisPlugin(String id, String name, String uri)
+	public MolgenisPlugin(String id, String name, String uri, String fullUri)
 	{
 		if (id == null) throw new IllegalArgumentException("id is null");
 		if (name == null) throw new IllegalArgumentException("name is null");
 		if (uri == null) throw new IllegalArgumentException("uri is null");
+		if (fullUri == null) throw new IllegalArgumentException("fullUri is null");
 		this.id = id;
 		this.name = name;
 		this.uri = uri;
+		this.fullUri = fullUri;
 	}
 
 	public String getId()
@@ -29,6 +32,11 @@ public class MolgenisPlugin
 	public String getUrl()
 	{
 		return uri;
+	}
+
+	public String getFullUri()
+	{
+		return fullUri;
 	}
 
 	@Override

@@ -5,27 +5,34 @@ public class CatalogMetaModel
 	private final String id;
 	private final String name;
 	private final boolean loaded;
+	private final boolean activated;
 
-	public CatalogMetaModel(String id, String name, boolean loaded)
+	public CatalogMetaModel(String id, String name, boolean loaded, boolean activated)
 	{
 		this.id = id;
 		this.name = name;
 		this.loaded = loaded;
+		this.activated = activated;
 	}
 
 	public String getId()
 	{
-		return id;
+		return this.id;
 	}
 
 	public String getName()
 	{
-		return name;
+		return this.name;
 	}
 
 	public boolean isLoaded()
 	{
-		return loaded;
+		return this.loaded;
+	}
+
+	public boolean isActivated()
+	{
+		return this.activated;
 	}
 
 	@Override
@@ -33,9 +40,10 @@ public class CatalogMetaModel
 	{
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		result = prime * result + (loaded ? 1231 : 1237);
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((this.id == null) ? 0 : this.id.hashCode());
+		result = prime * result + (this.loaded ? 1231 : 1237);
+		result = prime * result + (this.activated ? 1231 : 1237);
+		result = prime * result + ((this.name == null) ? 0 : this.name.hashCode());
 		return result;
 	}
 
@@ -46,17 +54,18 @@ public class CatalogMetaModel
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
 		CatalogMetaModel other = (CatalogMetaModel) obj;
-		if (id == null)
+		if (this.id == null)
 		{
 			if (other.id != null) return false;
 		}
-		else if (!id.equals(other.id)) return false;
-		if (loaded != other.loaded) return false;
-		if (name == null)
+		else if (!this.id.equals(other.id)) return false;
+		if (this.loaded != other.loaded) return false;
+		if (this.activated != other.activated) return false;
+		if (this.name == null)
 		{
 			if (other.name != null) return false;
 		}
-		else if (!name.equals(other.name)) return false;
+		else if (!this.name.equals(other.name)) return false;
 		return true;
 	}
 }

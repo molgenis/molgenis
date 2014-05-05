@@ -9,6 +9,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.molgenis.data.AggregateResult;
+import org.molgenis.data.Aggregateable;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -54,21 +57,23 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public void removeRepository(Repository repository)
-	{
-		String repositoryName = repository.getName();
-		removeRepository(repositoryName);
-	}
-
-	@Override
 	public void removeRepository(String repositoryName)
 	{
+		if (null == repositoryName)
+		{
+			throw new MolgenisDataException("repositoryName may not be [" + repositoryName + "]");
+		}
+
 		if (!repositories.containsKey(repositoryName.toLowerCase()))
 		{
 			throw new MolgenisDataException("Repository [" + repositoryName + "] doesn't exists");
 		}
-		repositoryNames.remove(repositoryName);
-		repositories.remove(repositoryName.toLowerCase());
+		else
+		{
+			repositoryNames.remove(repositoryName);
+			repositories.remove(repositoryName.toLowerCase());
+		}
+
 	}
 
 	@Override
@@ -178,8 +183,7 @@ public class DataServiceImpl implements DataService
 	@Override
 	public void delete(String entityName, Entity entity)
 	{
-		Updateable updateable = getUpdateable(entityName);
-		updateable.delete(entity);
+		getUpdateable(entityName).delete(entity);
 	}
 
 	@Override
@@ -246,7 +250,7 @@ public class DataServiceImpl implements DataService
 		for (String entityName : getEntityNames())
 		{
 			Repository repo = getRepositoryByEntityName(entityName);
-			entityClasses.add(repo.getEntityClass());
+			entityClasses.add(repo.getEntityMetaData().getEntityClass());
 		}
 
 		return entityClasses;
@@ -280,6 +284,18 @@ public class DataServiceImpl implements DataService
 	public <E extends Entity> Iterable<E> findAll(String entityName, Class<E> clazz)
 	{
 		return findAll(entityName, new QueryImpl(), clazz);
+	}
+
+	@Override
+	public AggregateResult aggregate(String entityName, AttributeMetaData xAttr, AttributeMetaData yAttr, Query q)
+	{
+		Repository repo = getRepositoryByEntityName(entityName);
+		if (!(repo instanceof Aggregateable))
+		{
+			throw new MolgenisDataException("Repository of [" + entityName + "] isn't aggregateable");
+		}
+
+		return ((Aggregateable) repo).aggregate(xAttr, yAttr, q);
 	}
 
 }

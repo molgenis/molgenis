@@ -34,14 +34,12 @@ public class CsvRepository extends AbstractRepository
 	private final String sheetName;
 	private final File file;
 
-	public CsvRepository(File file, @Nullable
-	List<CellProcessor> cellProcessors)
+	public CsvRepository(File file, @Nullable List<CellProcessor> cellProcessors)
 	{
 		this(file, StringUtils.stripFilenameExtension(file.getName()), null);
 	}
 
-	public CsvRepository(File file, String sheetName, @Nullable
-	List<CellProcessor> cellProcessors)
+	public CsvRepository(File file, String sheetName, @Nullable List<CellProcessor> cellProcessors)
 	{
 		super(file.getName().toLowerCase().endsWith(EXTENSION_ZIP) ? BASE_URL + file.getName() + '/' + sheetName : file
 				.getName());
@@ -62,7 +60,7 @@ public class CsvRepository extends AbstractRepository
 	{
 		if (entityMetaData == null)
 		{
-			entityMetaData = new DefaultEntityMetaData(sheetName);
+			entityMetaData = new DefaultEntityMetaData(sheetName, MapEntity.class);
 
 			for (String attrName : new CsvIterator(file, sheetName, null).getColNamesMap().keySet())
 			{
@@ -83,11 +81,5 @@ public class CsvRepository extends AbstractRepository
 	@Override
 	public void close() throws IOException
 	{
-	}
-
-	@Override
-	public Class<? extends Entity> getEntityClass()
-	{
-		return MapEntity.class;
 	}
 }

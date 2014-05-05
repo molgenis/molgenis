@@ -8,6 +8,7 @@ import org.hibernate.validator.constraints.impl.EmailValidator;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Range;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
@@ -51,9 +52,17 @@ public class EntityAttributesValidator
 					break;
 				case INT:
 					violation = checkInt(entity, attr, meta);
+					if ((violation == null) && (attr.getRange() != null))
+					{
+						violation = checkRange(entity, attr, meta);
+					}
 					break;
 				case LONG:
 					violation = checkLong(entity, attr, meta);
+					if ((violation == null) && (attr.getRange() != null))
+					{
+						violation = checkRange(entity, attr, meta);
+					}
 					break;
 				default:
 					break;
@@ -183,6 +192,18 @@ public class EntityAttributesValidator
 		}
 	}
 
+	private ConstraintViolation checkRange(Entity entity, AttributeMetaData attribute, EntityMetaData meta)
+	{
+		Range range = attribute.getRange();
+		Long value = entity.getLong(attribute.getName());
+		if ((value != null) && ((value < range.getMin()) || (value > range.getMax())))
+		{
+			return createConstraintViolation(entity, attribute, meta);
+		}
+
+		return null;
+	}
+
 	private ConstraintViolation createConstraintViolation(Entity entity, AttributeMetaData attribute,
 			EntityMetaData meta)
 	{
@@ -200,6 +221,12 @@ public class EntityAttributesValidator
 			message = String.format("Invalid %s value '%s' for attribute '%s' of entity '%s' with key '%s'.", attribute
 					.getDataType().getEnumType().toString().toLowerCase(), entity.getString(attribute.getName()),
 					attribute.getName(), meta.getName(), key);
+		}
+
+		Range range = attribute.getRange();
+		if (range != null)
+		{
+			message += String.format("Value must be between %d and %d", range.getMin(), range.getMax());
 		}
 
 		return new ConstraintViolation(message, entity.getString(attribute.getName()), entity, attribute, meta, 0);

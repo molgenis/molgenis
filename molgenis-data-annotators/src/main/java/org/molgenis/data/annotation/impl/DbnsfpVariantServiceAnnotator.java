@@ -1,7 +1,14 @@
 package org.molgenis.data.annotation.impl;
 
-import java.util.*;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
@@ -45,8 +52,8 @@ import org.springframework.stereotype.Component;
 @Component("dbnsfpVariantService")
 public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 {
-	private MolgenisSettings molgenisSettings;
-	private AnnotationService annotatorService;
+	private final MolgenisSettings molgenisSettings;
+	private final AnnotationService annotatorService;
 
 	private static final String NAME = "dbNSFP-Variant";
 	public static final String CHROMOSOME_FILE_LOCATION_PROPERTY = "dbsnfp_variant_location";
@@ -174,13 +181,12 @@ public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 			chromosomeMap.put(chromosome, listOfTriplets);
 		}
 
-	
-
-		for (String chromosomeInMap : chromosomeMap.keySet())	
+		for (String chromosomeInMap : chromosomeMap.keySet())
 		{
-			FileReader reader = new FileReader(new File(molgenisSettings.getProperty(CHROMOSOME_FILE_LOCATION_PROPERTY) + chromosomeInMap));
+			FileReader reader = new FileReader(new File(molgenisSettings.getProperty(CHROMOSOME_FILE_LOCATION_PROPERTY)
+					+ chromosomeInMap));
 			BufferedReader bufferedReader = new BufferedReader(reader);
-			
+
 			try
 			{
 				List<String[]> charArraysForThisChromosome = chromosomeMap.get(chromosomeInMap);
@@ -258,7 +264,7 @@ public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 	@Override
 	public EntityMetaData getOutputMetaData()
 	{
-		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName());
+		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
 
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CHR, FieldTypeEnum.STRING));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(POS_1_COOR, FieldTypeEnum.LONG));

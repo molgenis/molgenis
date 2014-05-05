@@ -38,12 +38,6 @@ public class RepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Class<? extends Entity> getEntityClass()
-	{
-		return decoratedRepository.getEntityClass();
-	}
-
-	@Override
 	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
 	{
 		return decoratedRepository.iterator(clazz);

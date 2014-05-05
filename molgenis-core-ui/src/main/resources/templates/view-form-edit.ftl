@@ -34,16 +34,6 @@
 			</div>
 		</div>
 		
-		<div id="error-message" class="control-group" style="display: none">
-    		<div class="controls">
-				<div class="alert alert-error">
-  					<button type="button" class="close">&times;</button>
-  					<strong>Error saving ${form.title}</strong>: <span id="error-message-content"></span>
-  					<p id="error-message-details"></p>
-				</div>
-			</div>
-		</div>
-		
 		<#if form.primaryKey??>
 			<input type="hidden" name="_method" value="PUT" >
 		<#else>
