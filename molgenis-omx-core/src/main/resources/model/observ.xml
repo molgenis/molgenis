@@ -98,10 +98,10 @@
 					temporal=false) " />
 			<field name="aggregateable" type="bool" nillable="true"
 				description="indicate if this feature can be used for group by aggregation in the user interface" />
-			<field name="min" type="long" nillable="true"
+			<field name="minRange" type="long" nillable="true"
 				description="for numeric values this is used to set the 'min' value of the slider user interface" />
-			<field name="max" type="long" nillable="true"
-				description="for numeric values this is used to set the 'min' value of the slider user interface" />
+			<field name="maxRange" type="long" nillable="true"
+				description="for numeric values this is used to set the 'max' value of the slider user interface" />
 		</entity>
 		<entity name="Category" extends="Characteristic">
 			<description>Category is partOf ObservableFeature to define
