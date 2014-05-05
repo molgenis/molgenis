@@ -6,7 +6,7 @@ public interface Form
 {
 	String getTitle();
 
-	Integer getPrimaryKey();
+	Object getPrimaryKey();
 
 	boolean getHasWritePermission();
 

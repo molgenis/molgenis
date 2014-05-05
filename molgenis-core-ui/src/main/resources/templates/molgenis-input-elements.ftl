@@ -41,13 +41,13 @@
 							},
 							<#if entity!='' && entity.get(fieldName)??>
 							initSelection: function (element, callback) {
-								callback({id:'<@formatValue field.refEntity.idAttribute.dataType.enumType entity.get(fieldName).idValue />', text: '${entity.get(fieldName).get(field.refEntity.labelAttribute.name)!?html}'});
+								callback({id:'<@formatValue field.refEntity.idAttribute.dataType.enumType entity.getEntity(fieldName).idValue />', text: '${entity.getEntity(fieldName).get(field.refEntity.labelAttribute.name)!?html}'});
 							}
 							</#if>
 						});
 						
 						<#if entity!='' && entity.get(fieldName)??>
-							$('#${fieldName}').select2('val', '<@formatValue field.refEntity.idAttribute.dataType.enumType entity.get(fieldName).idValue />');
+							$('#${fieldName}').select2('val', '<@formatValue field.refEntity.idAttribute.dataType.enumType entity.getEntity(fieldName).idValue />');
 						</#if>
 						
 						<#if field.readonly || hasWritePermission?string("true", "false") == "false">

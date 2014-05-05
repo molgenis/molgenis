@@ -418,7 +418,9 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 	@Override
 	public Entity findOne(Query q)
 	{
-		return findAll(q).iterator().next();
+        Iterator<Entity> iterator = findAll(q).iterator();
+        if(iterator.hasNext()) return iterator.next();
+		return null;
 	}
 
 	@Override
@@ -648,32 +650,10 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 	public void delete(Iterable<? extends Entity> entities)
 	{
 		// todo, split in subbatchs
-		final List<Entity> batch = new ArrayList<Entity>();
+		final List<Object> batch = new ArrayList<Object>();
 		for (Entity e : entities)
-			batch.add(e);
-		final AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
-
-		jdbcTemplate.batchUpdate(getDeleteSql(), new BatchPreparedStatementSetter()
-		{
-			@Override
-			public void setValues(PreparedStatement preparedStatement, int i) throws SQLException
-			{
-				if (batch.get(i).get(idAttribute.getName()) == null)
-				{
-					throw new IllegalArgumentException("idAttribute cannot be null");
-				}
-				else
-				{
-					preparedStatement.setObject(1, batch.get(i).get(idAttribute.getName()));
-				}
-			}
-
-			@Override
-			public int getBatchSize()
-			{
-				return batch.size();
-			}
-		});
+			batch.add(e.getIdValue());
+        this.deleteById(batch);
 	}
 
 	public String getDeleteSql()
@@ -684,28 +664,41 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 	@Override
 	public void deleteById(Object id)
 	{
-		throw new UnsupportedOperationException();
-
+		this.deleteById(Arrays.asList(new Object[]{id}));
 	}
 
 	@Override
 	public void deleteById(Iterable<Object> ids)
 	{
-		throw new UnsupportedOperationException();
+        final List<Object> idList = new ArrayList<Object>();
+        for(Object id: ids) idList.add(id);
 
+        jdbcTemplate.batchUpdate(getDeleteSql(), new BatchPreparedStatementSetter()
+        {
+            @Override
+            public void setValues(PreparedStatement preparedStatement, int i) throws SQLException
+            {
+                preparedStatement.setObject(1, idList.get(i));
+            }
+
+            @Override
+            public int getBatchSize()
+            {
+                return idList.size();
+            }
+        });
 	}
 
 	@Override
 	public void deleteAll()
 	{
-		throw new UnsupportedOperationException();
+		delete(this);
 	}
 
 	@Override
 	public void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
 	{
 		throw new UnsupportedOperationException();
-
 	}
 
 	public MysqlRepositoryCollection getRepositoryCollection()
