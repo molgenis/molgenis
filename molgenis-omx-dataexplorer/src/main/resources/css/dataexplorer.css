@@ -185,3 +185,21 @@ ul.fancytree-container {
 	border: none;
 	outline: none;
 }
+
+#slider {
+	margin: 0 30px;	
+}
+
+.form-horizontal .controls {
+	margin-left: 4px;
+	display: inline-block;
+	padding-left: 20px;
+}
+
+.ui-rangeSlider-bar {
+	background-color: #5b82a4;	
+}
+
+.ui-editRangeSlider-inputValue {
+	width: 4em;
+}

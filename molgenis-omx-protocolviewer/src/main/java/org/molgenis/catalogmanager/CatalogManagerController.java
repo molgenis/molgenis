@@ -66,15 +66,18 @@ public class CatalogManagerController extends MolgenisPluginController
 		for (CatalogMeta catalog : catalogs)
 		{
 			boolean catalogLoaded;
+			boolean catalogActivated;
 			try
 			{
 				catalogLoaded = catalogManagerService.isCatalogLoaded(catalog.getId());
+				catalogActivated = catalogManagerService.isCatalogActivated(catalog.getId());
 			}
 			catch (UnknownCatalogException e)
 			{
 				throw new RuntimeException(e);
 			}
-			models.add(new CatalogMetaModel(catalog.getId(), catalog.getName(), catalogLoaded));
+
+			models.add(new CatalogMetaModel(catalog.getId(), catalog.getName(), catalogLoaded, catalogActivated));
 		}
 
 		model.addAttribute("catalogs", models);
@@ -93,7 +96,7 @@ public class CatalogManagerController extends MolgenisPluginController
 	 * @param model
 	 * @return
 	 */
-	@RequestMapping(value = "/load", params = "load", method = RequestMethod.POST)
+	@RequestMapping(value = "/activation", params = "activate", method = RequestMethod.POST)
 	public String loadCatalog(@RequestParam(value = "id", required = false) String id, Model model)
 	{
 		try
@@ -103,13 +106,18 @@ public class CatalogManagerController extends MolgenisPluginController
 				if (!catalogManagerService.isCatalogLoaded(id))
 				{
 					catalogManagerService.loadCatalog(id);
-					model.addAttribute("successMessage", "Catalog loaded");
 					LOG.info("Loaded catalog with id [" + id + "]");
 				}
 				else
 				{
-					model.addAttribute("errorMessage", "Catalog already loaded");
+					if (!catalogManagerService.isCatalogActivated(id))
+					{
+						catalogManagerService.activateCatalog(id);
+						LOG.info("Reactivated catalog with id [" + id + "]");
+					}
 				}
+
+				model.addAttribute("succesMessage", "Catalog is activated");
 			}
 			else
 			{
@@ -124,8 +132,8 @@ public class CatalogManagerController extends MolgenisPluginController
 		return listCatalogs(model);
 	}
 
-	@RequestMapping(value = "/load", params = "unload", method = RequestMethod.POST)
-	public String unloadCatalog(@RequestParam(value = "id", required = false) String id, Model model)
+	@RequestMapping(value = "/activation", params = "deactivate", method = RequestMethod.POST)
+	public String deactivateCatalog(@RequestParam(value = "id", required = false) String id, Model model)
 	{
 		try
 		{
@@ -133,9 +141,16 @@ public class CatalogManagerController extends MolgenisPluginController
 			{
 				if (catalogManagerService.isCatalogLoaded(id))
 				{
-					catalogManagerService.unloadCatalog(id);
-					model.addAttribute("successMessage", "Catalog unloaded");
-					LOG.info("Unloaded catalog with id [" + id + "]");
+					if (catalogManagerService.isCatalogActivated(id))
+					{
+						catalogManagerService.deactivateCatalog(id);
+						model.addAttribute("successMessage", "Catalog is deactivated");
+						LOG.info("Deactivate catalog with id [" + id + "]");
+					}
+					else
+					{
+						model.addAttribute("errorMessage", "Catalog is allready activated");
+					}
 				}
 				else
 				{

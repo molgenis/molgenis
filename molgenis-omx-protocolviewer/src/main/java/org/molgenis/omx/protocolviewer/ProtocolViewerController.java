@@ -30,6 +30,7 @@ import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.utils.I18nTools;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.study.StudyDefinition;
+import org.molgenis.study.StudyDefinition.Status;
 import org.molgenis.study.UnknownStudyDefinitionException;
 import org.molgenis.util.ErrorMessageResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -235,6 +236,7 @@ public class ProtocolViewerController extends MolgenisPluginController
 	public StudyDefinitionsResponse getOrders()
 	{
 		if (!getEnableOrderAction()) throw new MolgenisDataAccessException("Action not allowed");
+
 		Iterable<StudyDefinitionResponse> ordersIterable = Iterables.transform(
 				protocolViewerService.getStudyDefinitionsForCurrentUser(),
 				new Function<StudyDefinition, StudyDefinitionResponse>()
@@ -243,9 +245,11 @@ public class ProtocolViewerController extends MolgenisPluginController
 					@Nullable
 					public StudyDefinitionResponse apply(@Nullable StudyDefinition studyDefinition)
 					{
-						return studyDefinition != null ? new StudyDefinitionResponse(studyDefinition) : null;
+						return studyDefinition != null ? (studyDefinition.getStatus() != Status.DRAFT ? new StudyDefinitionResponse(
+								studyDefinition) : null) : null;
 					}
 				});
+
 		return new StudyDefinitionsResponse(Lists.newArrayList(ordersIterable));
 	}
 
@@ -277,7 +281,8 @@ public class ProtocolViewerController extends MolgenisPluginController
 	@ResponseBody
 	public ErrorMessageResponse handleException(Exception e)
 	{
-		logger.error("", e);
+		e.printStackTrace();
+		logger.error("Error", e);
 		return new ErrorMessageResponse(
 				Collections.singletonList(new ErrorMessageResponse.ErrorMessage(e.getMessage())));
 	}
@@ -312,14 +317,17 @@ public class ProtocolViewerController extends MolgenisPluginController
 	{
 		private final Integer id;
 		private final String name;
-		private final String orderDate;
+		private String orderDate;
 		private final String orderStatus;
 
 		public StudyDefinitionResponse(StudyDefinition studyDefinition)
 		{
 			this.id = Integer.valueOf(studyDefinition.getId());
 			this.name = studyDefinition.getName();
-			this.orderDate = new SimpleDateFormat("yyyy-MM-dd").format(studyDefinition.getDateCreated());
+			if (studyDefinition.getDateCreated() != null)
+			{
+				this.orderDate = new SimpleDateFormat("yyyy-MM-dd").format(studyDefinition.getDateCreated());
+			}
 			this.orderStatus = studyDefinition.getStatus().toString().toLowerCase();
 		}
 

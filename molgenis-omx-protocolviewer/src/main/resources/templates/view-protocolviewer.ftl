@@ -52,9 +52,9 @@
                         </div>
                     </div>
                     <div class="span3">
+                    <div id="orderdata-modal-container"></div>
+                    <div id="ordersview-modal-container"></div>
                     <#if enableOrderAction>
-                        <div id="orderdata-modal-container"></div>
-                        <div id="ordersview-modal-container"></div>
                         <div class="btn-group pull-right">
                             <a class="modal-href btn" href="/plugin/protocolviewer/orders/view" data-target="ordersview-modal-container" id="ordersview-href-btn">View Submissions</a>
                             <a class="modal-href btn btn-primary" href="/plugin/protocolviewer/order" data-target="orderdata-modal-container" id="orderdata-href-btn">Submit</a>

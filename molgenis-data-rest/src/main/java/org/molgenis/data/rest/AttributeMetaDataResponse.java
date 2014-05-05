@@ -8,6 +8,7 @@ import java.util.Set;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Range;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -28,6 +29,8 @@ public class AttributeMetaDataResponse
 	private final Boolean labelAttribute;
 	private final Boolean unique;
 	private Boolean lookupAttribute;
+	private Boolean aggregateable;
+	private Range range;
 
 	public AttributeMetaDataResponse(String entityParentName, AttributeMetaData attr)
 	{
@@ -152,6 +155,18 @@ public class AttributeMetaDataResponse
 			this.lookupAttribute = attr.isLookupAttribute();
 		}
 		else this.lookupAttribute = null;
+
+		if (attributesSet == null || attributesSet.contains("aggregateable".toLowerCase()))
+		{
+			this.aggregateable = attr.isAggregateable();
+		}
+		else this.aggregateable = null;
+
+		if (attributesSet == null || attributesSet.contains("range".toLowerCase()))
+		{
+			this.range = attr.getRange();
+		}
+		else this.range = null;
 	}
 
 	public String getHref()
@@ -217,6 +232,41 @@ public class AttributeMetaDataResponse
 	public Boolean getLookupAttribute()
 	{
 		return lookupAttribute;
+	}
+
+	public Boolean isAggregateable()
+	{
+		return aggregateable;
+	}
+
+	public Boolean getNillable()
+	{
+		return nillable;
+	}
+
+	public Boolean getReadOnly()
+	{
+		return readOnly;
+	}
+
+	public Boolean getLabelAttribute()
+	{
+		return labelAttribute;
+	}
+
+	public Boolean getUnique()
+	{
+		return unique;
+	}
+
+	public Boolean getAggregateable()
+	{
+		return aggregateable;
+	}
+
+	public Range getRange()
+	{
+		return range;
 	}
 
 }

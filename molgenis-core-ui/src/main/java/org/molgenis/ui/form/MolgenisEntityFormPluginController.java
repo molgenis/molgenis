@@ -5,7 +5,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -19,7 +18,6 @@ import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.ui.MolgenisUiUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -39,7 +37,6 @@ public class MolgenisEntityFormPluginController extends MolgenisPluginController
 	public static final String ENTITY_FORM_MODEL_ATTRIBUTE = "form";
 	private static final String VIEW_NAME_LIST = "view-form-list";
 	private static final String VIEW_NAME_EDIT = "view-form-edit";
-	private static final Logger logger = Logger.getLogger(MolgenisEntityFormPluginController.class);
 
 	private final DataService dataService;
 	private final MolgenisPermissionService molgenisPermissionService;
@@ -147,7 +144,7 @@ public class MolgenisEntityFormPluginController extends MolgenisPluginController
 			DataBinder binder = new DataBinder(entity);
 			binder.bind(pvs);
 
-			// Resolve xrefs TODO mref
+			// Set xref prop to preselect dropdown
 			for (String fieldName : parameterMap.keySet())
 			{
 				String value = request.getParameter(fieldName);
@@ -157,24 +154,12 @@ public class MolgenisEntityFormPluginController extends MolgenisPluginController
 					AttributeMetaData attr = entityMeta.getAttribute(fieldName);
 					if ((attr != null) && (attr.getDataType().getEnumType() == MolgenisFieldTypes.FieldTypeEnum.XREF))
 					{
-						EntityMetaData xrefEntityMetadata = attr.getRefEntity();
-						Entity xref = null;
-						try
-						{
-
-							xref = dataService.findOne(xrefEntityMetadata.getName(),
-									new QueryImpl().eq(xrefEntityMetadata.getIdAttribute().getName(), value));
-						}
-						catch (Exception e)
-						{
-							// Probably pk is of wrong type, could be that user entered an invalid value
-							logger.debug("Exception getting entity [" + xrefEntityMetadata.getName()
-									+ "] by primarykey with value [" + value + "]", e);
-						}
+						Entity xref = dataService.findOne(attr.getRefEntity().getName(),
+								new QueryImpl().eq(attr.getRefEntity().getLabelAttribute().getName(), value));
 
 						if (xref != null)
 						{
-							new BeanWrapperImpl(entity).setPropertyValue(fieldName, xref);
+							entity.set(fieldName, xref);
 						}
 					}
 

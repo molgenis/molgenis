@@ -91,6 +91,15 @@ public class OmxCatalogManagerService implements CatalogManagerService
 	}
 
 	@Override
+	public boolean isCatalogActivated(String id) throws UnknownCatalogException
+	{
+		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.ID, id),
+				Protocol.class);
+		if (protocol == null) throw new UnknownCatalogException("Catalog [" + id + "] does not exist");
+		return protocol.getActive();
+	}
+
+	@Override
 	public void loadCatalogOfStudyDefinition(String id) throws UnknownCatalogException, UnknownStudyDefinitionException
 	{
 		StudyDataRequest studyDataRequest = dataService.findOne(StudyDataRequest.ENTITY_NAME,
@@ -135,5 +144,23 @@ public class OmxCatalogManagerService implements CatalogManagerService
 	{
 		protocol.setActive(active);
 		dataService.update(Protocol.ENTITY_NAME, protocol);
+	}
+
+	@Override
+	public void deactivateCatalog(String id) throws UnknownCatalogException
+	{
+		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.ID, id),
+				Protocol.class);
+		if (protocol == null) throw new UnknownCatalogException("Catalog [" + id + "] does not exist");
+		setProtocolActive(protocol, false);
+	}
+
+	@Override
+	public void activateCatalog(String id) throws UnknownCatalogException
+	{
+		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.ID, id),
+				Protocol.class);
+		if (protocol == null) throw new UnknownCatalogException("Catalog [" + id + "] does not exist");
+		setProtocolActive(protocol, true);
 	}
 }
