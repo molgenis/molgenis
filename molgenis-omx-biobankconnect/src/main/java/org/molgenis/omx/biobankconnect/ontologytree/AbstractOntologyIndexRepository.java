@@ -86,6 +86,10 @@ public abstract class AbstractOntologyIndexRepository implements Repository, Que
 					FieldTypeEnum.STRING));
 			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermRepository.ENTITY_TYPE,
 					FieldTypeEnum.STRING));
+			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermRepository.NODE_PATH,
+					FieldTypeEnum.STRING));
+			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermRepository.PARENT_NODE_PATH,
+					FieldTypeEnum.STRING));
 			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData("fieldType", FieldTypeEnum.ENUM));
 			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermRepository.LAST,
 					FieldTypeEnum.BOOL));

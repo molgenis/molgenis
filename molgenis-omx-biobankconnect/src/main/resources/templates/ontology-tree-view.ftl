@@ -12,6 +12,12 @@
 	<#if ontologies?? && (ontologies?size > 0)>
 		<div class="row-fluid">
 			<div class="span6">
+				<div class="btn-group">
+				<input id="searchField" type="text">
+				<button id="searchButton" type="text" class="btn btn-primary">Search</button>
+				</div>
+			</div>
+			<div class="offset3 float-right">
 				<select id="selectOntologies">
 					<#list ontologies as ontology>
 						<option value="${ontology.identifier}">${ontology.name}</option>
@@ -19,6 +25,7 @@
 				</select>
 			</div>
 		</div>
+		<br>
 		<div class="row-fluid">
 			<div class="span6">
 				<div id="tree-container"></div>
@@ -41,6 +48,10 @@
 		ontologyTree.updateOntologyTree($('#selectOntologies').val());
 		$('#selectOntologies').change(function(){
 			ontologyTree.updateOntologyTree($(this).val());
+		});
+		$('#searchButton').click(function(event){
+			event.preventDefault();
+			ontologyTree.queryTree($('#selectOntologies').val(), $('#searchField').val());
 		});
 	});
 </script>

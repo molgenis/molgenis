@@ -12,10 +12,49 @@
 	var ONTOLOGY_TERM_IRI = "ontologyTermIRI";
 	var SYNONYMS = "ontologyTermSynonym";
 	var ONTOLOGY_TERM_DEFINITION = "definition";
+	var NODE_PATH = "nodePath";
+	var PARENT_NODE_PATH = "parentNodePath";
 	
 	molgenis.OntologyTree = function OntologyTree(){};
 	
 	molgenis.OntologyTree.prototype.updateOntologyTree = function(ontologyIRI){
+		var ontologyIndex = getOntologyTermByIri(ontologyIRI);
+		if(ontologyIndex.items.length > 0){
+			var topNode = ontologyIndex.items[0];
+			topNode.attributes = removeDuplicate(getRootOntologyTerms(topNode));
+			createEntityMetaTree(topNode, null);
+		}
+	};
+	
+	molgenis.OntologyTree.prototype.queryTree = function(ontologyIRI, query){
+		if(query !== undefined && query !== ''){
+			var ontologyIndex = getOntologyTermByIri(ontologyIRI);
+			if(ontologyIndex.items.length > 0){
+				var ontology = ontologyIndex.items[0];
+				var ontologyTerms = searchByQuery(ontology, query);
+				console.log(ontologyTerms);
+				$.each(ontologyTerms, function(index, term){
+					
+				})
+			}
+		}
+		function getParentNodes(ontologyTerms){
+			
+		}
+		
+		function searchByQuery(ontology, query){
+			var ontologyTermResult = restApi.get('/api/v1/' + ontology[ONTOLOGY_LABEL], {'expand' : ['attributes'], 'q' : {
+				'q' : [{
+					'field' : SYNONYMS,
+					'operator' : 'EQUALS',
+					'value' : query
+				}]
+			}}, null);
+			return ontologyTermResult.items;
+		}
+	};
+	
+	function getOntologyTermByIri(ontologyIRI){
 		var request = {
 			'q' : [{
 				'field' : ONTOLOGY_IRI,
@@ -23,13 +62,8 @@
 				'value' : ontologyIRI
 			}]
 		};
-		var ontologyIndex = restApi.get("/api/v1/ontologyindex/", {'q' : request}, null);
-		if(ontologyIndex.items.length > 0){
-			var topNode = ontologyIndex.items[0];
-			topNode.attributes = removeDuplicate(getRootOntologyTerms(topNode));
-			createEntityMetaTree(topNode, null);
-		}
-	};
+		return restApi.get("/api/v1/ontologyindex/", {'q' : request}, null);
+	}
 	
 	function getRootOntologyTerms(ontology){
 		var rootOntologyTerms = restApi.get('/api/v1/' + ontology[ONTOLOGY_LABEL], {'expand' : ['attributes'], 'q' : {
@@ -76,7 +110,7 @@
 		return mapMetaData(uniqueNodes);
 	}
 	
-	function mapMetaData(listOfEntities){
+	function mapMetaData(listOfEntities, isExpanded){
 		var convertedData = {};
 		$.each(listOfEntities, function(index, metaData){
 			if(metaData[ONTOLOGY_TERM]){
@@ -84,6 +118,9 @@
 			}
 			else if(metaData[ONTOLOGY_LABEL]){
 				metaData[TREE_LABEL] = metaData[ONTOLOGY_LABEL];
+			}
+			if(isExpanded !== undefined && isExpanded !== null && isExpanded){
+				metaData['expanded'] = true;
 			}
 		});
 		return listOfEntities;
