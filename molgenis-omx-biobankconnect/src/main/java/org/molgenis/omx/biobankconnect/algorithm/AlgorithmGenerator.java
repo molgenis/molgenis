@@ -2,16 +2,22 @@ package org.molgenis.omx.biobankconnect.algorithm;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcher;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcherRequest;
+import org.molgenis.omx.biobankconnect.utils.NGramMatchingModel;
+import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.target.OntologyTerm;
 import org.molgenis.search.Hit;
@@ -61,54 +67,123 @@ public class AlgorithmGenerator
 			{
 				if (scriptTemplate.isEmpty())
 				{
-					Hit hit = searchResult.getSearchHits().get(0);
-					ObservableFeature customFeature = dataService.findOne(ObservableFeature.ENTITY_NAME,
-							Integer.parseInt(hit.getColumnValueMap().get("id").toString()), ObservableFeature.class);
-					String conversionScript = algorithmUnitConverter.convert(standardFeature.getUnit(),
-							customFeature.getUnit());
-					suggestedScript.append(createJavascriptName(customFeature.getName(), conversionScript, false));
+					suggestedScript.append(convertToJavascript(standardFeature, searchResult));
 				}
 				else
 				{
-					for (String standardFeatureName : applyAlgorithms.extractFeatureName(scriptTemplate))
-					{
-						SearchResult result = algorithmScriptLibrary.findOntologyTerm(Arrays
-								.asList(standardFeatureName));
-						if (result.getTotalHitCount() > 0)
-						{
-							Hit bestMatchedFeature = null;
-							int miniDistance = 1000000;
-							for (Hit candidateFeature : searchResult.getSearchHits())
-							{
-								int distance = compareOntologyTermDistance(result.getSearchHits().get(0),
-										findOntologyTerms(candidateFeature));
-								if (distance >= 0 && distance < miniDistance)
-								{
-									miniDistance = distance;
-									bestMatchedFeature = candidateFeature;
-								}
-							}
-							if (bestMatchedFeature != null)
-							{
-								ObservableFeature mappedFeature = dataService.findOne(ObservableFeature.ENTITY_NAME,
-										Integer.parseInt(bestMatchedFeature.getColumnValueMap().get("id").toString()),
-										ObservableFeature.class);
-								String conversionScript = algorithmUnitConverter.convert(standardFeature.getUnit(),
-										mappedFeature.getUnit());
-								String mappedFeatureJavaScriptName = createJavascriptName(bestMatchedFeature
-										.getColumnValueMap().get("name").toString(), conversionScript, true);
-								String standardJavaScriptName = createJavascriptName(standardFeatureName, null, true);
-								scriptTemplate = scriptTemplate.replaceAll(standardJavaScriptName,
-										mappedFeatureJavaScriptName);
-							}
-						}
-					}
-					suggestedScript.append(scriptTemplate);
+					suggestedScript.append(convertToJavascriptByFormula(scriptTemplate, standardFeature, searchResult));
 				}
 			}
 		}
 
 		return suggestedScript.toString();
+	}
+
+	/**
+	 * Convert to Javascript based on the variable matching only
+	 * 
+	 * @param standardFeature
+	 * @param searchResult
+	 * @return
+	 */
+	private String convertToJavascript(ObservableFeature standardFeature, SearchResult searchResult)
+	{
+		Hit hit = searchResult.getSearchHits().get(0);
+		ObservableFeature customFeature = dataService.findOne(ObservableFeature.ENTITY_NAME,
+				Integer.parseInt(hit.getColumnValueMap().get(ObservableFeature.ID.toLowerCase()).toString()),
+				ObservableFeature.class);
+		String conversionScript = algorithmUnitConverter.convert(standardFeature.getUnit(), customFeature.getUnit());
+		StringBuilder javaScript = new StringBuilder();
+		javaScript.append(createJavascriptName(customFeature.getName(), conversionScript, false));
+
+		// If two variables are categorical, map the value codes onto each other
+		if (standardFeature.getDataType().equalsIgnoreCase(MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL.toString())
+				&& customFeature.getDataType()
+						.equalsIgnoreCase(MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL.toString()))
+		{
+			Iterable<Category> categoriesForStandardFeature = dataService.findAll(Category.ENTITY_NAME,
+					new QueryImpl().eq(Category.OBSERVABLEFEATURE, standardFeature), Category.class);
+
+			Iterable<Category> categoriesForCustomFeature = dataService.findAll(Category.ENTITY_NAME,
+					new QueryImpl().eq(Category.OBSERVABLEFEATURE, customFeature), Category.class);
+
+			Map<String, String> valueCodeMapping = new HashMap<String, String>();
+			for (Category customCategory : categoriesForCustomFeature)
+			{
+				double similarityScore = 0;
+				String mappedValueCode = null;
+				for (Category standardCategory : categoriesForStandardFeature)
+				{
+					double score = NGramMatchingModel.stringMatching(customCategory.getName(),
+							standardCategory.getName(), false);
+					if (score > similarityScore)
+					{
+						similarityScore = score;
+						mappedValueCode = standardCategory.getValueCode();
+					}
+				}
+				if (mappedValueCode != null) valueCodeMapping.put(customCategory.getValueCode(), mappedValueCode);
+			}
+			if (valueCodeMapping.size() > 0)
+			{
+				javaScript.append(".map({");
+				for (Entry<String, String> entry : valueCodeMapping.entrySet())
+				{
+					javaScript.append("'").append(entry.getKey()).append("'").append(" : ").append("'")
+							.append(entry.getValue()).append("',");
+				}
+				javaScript.delete(javaScript.length() - 1, javaScript.length());
+				javaScript.append("})");
+			}
+		}
+		return javaScript.toString();
+	}
+
+	/**
+	 * Convert to Javascript based on the formula pre-defined. E.g. BMI,
+	 * Hypertension
+	 * 
+	 * @param scriptTemplate
+	 * @param standardFeature
+	 * @param searchResult
+	 * @return
+	 */
+	private String convertToJavascriptByFormula(String scriptTemplate, ObservableFeature standardFeature,
+			SearchResult searchResult)
+	{
+		for (String standardFeatureName : applyAlgorithms.extractFeatureName(scriptTemplate))
+		{
+			SearchResult result = algorithmScriptLibrary.findOntologyTerm(Arrays.asList(standardFeatureName));
+			if (result.getTotalHitCount() > 0)
+			{
+				Hit bestMatchedFeature = null;
+				int miniDistance = 1000000;
+				for (Hit candidateFeature : searchResult.getSearchHits())
+				{
+					int distance = compareOntologyTermDistance(result.getSearchHits().get(0),
+							findOntologyTerms(candidateFeature));
+					if (distance >= 0 && distance < miniDistance)
+					{
+						miniDistance = distance;
+						bestMatchedFeature = candidateFeature;
+					}
+				}
+				if (bestMatchedFeature != null)
+				{
+					ObservableFeature mappedFeature = dataService.findOne(
+							ObservableFeature.ENTITY_NAME,
+							Integer.parseInt(bestMatchedFeature.getColumnValueMap()
+									.get(ObservableFeature.ID.toLowerCase()).toString()), ObservableFeature.class);
+					String conversionScript = algorithmUnitConverter.convert(standardFeature.getUnit(),
+							mappedFeature.getUnit());
+					String mappedFeatureJavaScriptName = createJavascriptName(bestMatchedFeature.getColumnValueMap()
+							.get(ObservableFeature.NAME.toLowerCase()).toString(), conversionScript, true);
+					String standardJavaScriptName = createJavascriptName(standardFeatureName, null, true);
+					scriptTemplate = scriptTemplate.replaceAll(standardJavaScriptName, mappedFeatureJavaScriptName);
+				}
+			}
+		}
+		return scriptTemplate;
 	}
 
 	private String createJavascriptName(String mappedFeatureName, String suffix, boolean escaped)
@@ -121,7 +196,8 @@ public class AlgorithmGenerator
 
 	private List<Hit> findOntologyTerms(Hit candidateFeature)
 	{
-		Integer featureId = Integer.parseInt(candidateFeature.getColumnValueMap().get("id").toString());
+		Integer featureId = Integer.parseInt(candidateFeature.getColumnValueMap()
+				.get(ObservableFeature.ID.toLowerCase()).toString());
 		ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME, featureId,
 				ObservableFeature.class);
 

@@ -14,8 +14,11 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.omx.OmxRepository;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.validation.DefaultEntityValidator;
+import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.js.ScriptEvaluator;
 import org.molgenis.omx.biobankconnect.wizard.CurrentUserStatus;
 import org.molgenis.omx.dataset.DataSetMatrixRepository;
@@ -96,6 +99,7 @@ public class ApplyAlgorithms
 		currentUserStatus.setUserIsRunning(userName, false);
 		searchService.indexRepository(new DataSetMatrixRepository(dataService, createDerivedDataSetIdentifier(userName,
 				targetDataSetId.toString(), StringUtils.join(sourceDataSetIds, '-'))));
+
 	}
 
 	private void findAllAlgorithms(String userName, QueryImpl query, Integer targetDataSetId,
@@ -257,6 +261,12 @@ public class ApplyAlgorithms
 		derivedDataSet.setProtocolUsed(targetDataSet.getProtocolUsed());
 		dataService.add(DataSet.ENTITY_NAME, derivedDataSet);
 		dataService.getCrudRepository(DataSet.ENTITY_NAME).flush();
+
+		if (!dataService.hasRepository(derivedDataSet.getIdentifier()))
+		{
+			dataService.addRepository(new OmxRepository(dataService, searchService, derivedDataSet.getIdentifier(),
+					new DefaultEntityValidator(dataService, new EntityAttributesValidator())));
+		}
 	}
 
 	private SearchResult findAllFeatures(Integer targetDataSetId)
