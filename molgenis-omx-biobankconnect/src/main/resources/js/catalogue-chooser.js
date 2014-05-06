@@ -9,7 +9,7 @@
 	
 	molgenis.CatalogueChooser.prototype.changeDataSet = function(selectedDataSetId){
 		if(selectedDataSetId !== null && selectedDataSetId !== '' && selectedDataSetId !== undefined){
-			var dataSetEntity = restApi.get('/api/v1/dataset/' + selectedDataSetId);
+			var dataSetEntity = restApi.get('/api/v1/dataset/' + selectedDataSetId, {'expand' : ['protocolUsed']});
 			$('#selected-catalogue').empty().append(dataSetEntity.Name);
 			var request = {
 				documentType : 'protocolTree-' + molgenis.hrefToId(dataSetEntity.href),

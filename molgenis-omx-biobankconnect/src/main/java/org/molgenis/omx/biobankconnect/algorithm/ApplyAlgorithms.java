@@ -236,6 +236,7 @@ public class ApplyAlgorithms
 				valuesByType.get(valueType).add(valueId);
 			}
 			dataSetDeleterService.deleteData(dataSetIdentifier, false);
+			dataService.delete(DataSet.ENTITY_NAME, derivedDataSet);
 			for (Entry<String, List<Integer>> entryValuesByType : valuesByType.entrySet())
 			{
 				String valueType = entryValuesByType.getKey();

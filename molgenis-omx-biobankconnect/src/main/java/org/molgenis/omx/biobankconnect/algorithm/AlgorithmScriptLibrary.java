@@ -84,5 +84,8 @@ public class AlgorithmScriptLibrary
 	private void populateLibrary()
 	{
 		scriptLibrary.put("body mass index", "$('weight').div($('height').pow(2))");
+		scriptLibrary
+				.put("hypertension",
+						"function hypertension(SBP, DBP){\n\tif(SBP >= 140 || DBP >= 90) return 1;\n\telse return 0;\n}\nhypertension($('Systolic Blood Pressure'), $('Diastolic Blood Pressure'));");
 	}
 }
