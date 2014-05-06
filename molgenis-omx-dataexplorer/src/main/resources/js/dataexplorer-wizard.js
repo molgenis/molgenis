@@ -22,33 +22,35 @@
 	function createFilterWizardModal() {		
 		var modal = $('#filter-wizard-modal');
 
-		var items = [];
-		items.push('<div class="modal large hide" id="filter-wizard-modal" tabindex="-1">');
-		items.push('<div class="modal-header">');
-		items.push('<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>');
-        items.push('<h3>');
-        items.push(wizardTitle);
-        items.push('</h3>');
-		items.push('</div>');
-		items.push('<div class="modal-body">');
-		items.push('<div class="filter-wizard">');
-		items.push('<form class="form-horizontal">');
-		items.push('<ul class="wizard-steps"></ul>');
-		items.push('<div class="tab-content wizard-page"></div>');
-		items.push('<ul class="pager wizard">');
-		items.push('<li class="previous"><a href="#">Previous</a></li><li class="next"><a href="#">Next</a></li>');
-		items.push('</ul>');
-		items.push('</form>');
-		items.push('</div>');
-		items.push('</div>');
-		items.push('<div class="modal-footer">');
-		items.push('<a href="#" class="btn" data-dismiss="modal">Cancel</a>');
-		items.push('<a href="#" class="btn btn-primary filter-wizard-apply-btn" data-dismiss="modal">Apply</a>');
-		items.push('</div>');
-		items.push('</div>');
-
-		modal = $(items.join(''));
-		createFilterModalControls(modal);
+		if(modal.length === 0){
+			var items = [];
+			items.push('<div class="modal large hide" id="filter-wizard-modal" tabindex="-1">');
+			items.push('<div class="modal-header">');
+			items.push('<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>');
+	        items.push('<h3>');
+	        items.push(wizardTitle);
+	        items.push('</h3>');
+			items.push('</div>');
+			items.push('<div class="modal-body">');
+			items.push('<div class="filter-wizard">');
+			items.push('<form class="form-horizontal">');
+			items.push('<ul class="wizard-steps"></ul>');
+			items.push('<div class="tab-content wizard-page"></div>');
+			items.push('<ul class="pager wizard">');
+			items.push('<li class="previous"><a href="#">Previous</a></li><li class="next"><a href="#">Next</a></li>');
+			items.push('</ul>');
+			items.push('</form>');
+			items.push('</div>');
+			items.push('</div>');
+			items.push('<div class="modal-footer">');
+			items.push('<a href="#" class="btn" data-dismiss="modal">Cancel</a>');
+			items.push('<a href="#" class="btn btn-primary filter-wizard-apply-btn" data-dismiss="modal">Apply</a>');
+			items.push('</div>');
+			items.push('</div>');
+	
+			modal = $(items.join(''));
+			createFilterModalControls(modal);
+		}
 		
 		return modal;
 	}
@@ -110,7 +112,9 @@
             $('.wizard-steps').hide();
         }
         $('.tab-content', wizard).html(paneItems);
-		
+        
+        $('#filter-wizard-modal ul.pager.wizard').html('<li class="previous"><a href="#">Previous</a></li><li class="next"><a href="#">Next</a></li>');
+        
 		wizard.bootstrapWizard({
 	   		tabClass: 'bwizard-steps',
 	   		onTabShow: function(tab, navigation, index) {
