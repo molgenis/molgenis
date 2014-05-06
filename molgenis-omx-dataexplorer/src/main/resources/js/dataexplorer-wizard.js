@@ -93,18 +93,16 @@
 		$.each(compoundAttributes, function(i, compoundAttribute) {
 			var tabId = compoundAttribute.name + '-tab';
 			var label = compoundAttribute.label || compoundAttribute.name;
-			listItems.push('<li' + (i === 0 ? ' class="active"' : '') + '><a href="#' + tabId + '" data-toggle="tab">' + label + '</a></li>');
+			listItems.push('<li><a href="#' + tabId + '" data-toggle="tab">' + label + '</a></li>');
 			
 			var pane = $('<div class="tab-pane' + (i === 0 ? ' active"' : '') + '" id="' + tabId + '">');
 			var paneContainer = $('<div class="well"></div>');
-			var form = $('<form class="form-horizontal"></form>');
-			paneContainer.append(form);
-			pane.append(paneContainer);
 			$.each(compoundAttribute.attributes, function(i, attribute) {
 				if(attribute.fieldType !== 'COMPOUND') {
 					paneContainer.append(molgenis.dataexplorer.createFilterControls(attribute, attributeFilters[attribute.href], true));
 				}
 			});
+			pane.append(paneContainer);
 			paneItems.push(pane);
 		});
 		
@@ -123,19 +121,24 @@
 	   			var $current = index+1;
 	   			
 	   			// If it's the last tab then hide the last button and show the finish instead
-	   			if($total == 1) {
+	   			if($total === 1) {
 	   				wizard.find('.pager').hide();
 	   			} else if($current === 1) {
 	   				wizard.find('.pager .previous').hide();
 	   				wizard.find('.pager .next').show();
 	   			} else if($current > 1 && $current < $total) {
-	   				wizard.find('.pager .previous').show();
-	   				wizard.find('.pager .next').show();
-	   			} else {
+	   				wizard.find('.pager').show();
+	   			} else if($current === $total && $current>1) {
 	   				wizard.find('.pager .previous').show();
 	   				wizard.find('.pager .next').hide();
+	   			} else {
+	   				wizard.find('.pager .previous').hide();
+	   				wizard.find('.pager .next').hide();
 	   			}
-	   		}
+	   		},
+	   		onNext: function(tab, navigation, index) {
+	   			// BugFix: Don't remove this empty function
+			}
 		});
 	}
 })($, window.top.molgenis = window.top.molgenis || {});	
