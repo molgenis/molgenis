@@ -108,7 +108,6 @@
 		switch(attributeFilter.attribute.fieldType) {
 			case 'DATE':
 			case 'DATE_TIME':
-				return htmlEscape((attributeFilter.fromValue ? 'from ' + attributeFilter.fromValue : '') + (attributeFilter.toValue ? ' to ' + attributeFilter.toValue : ''));
 			case 'DECIMAL':
 			case 'INT':
 			case 'LONG':
@@ -167,23 +166,34 @@
 			}
 			var attribute = attributeFilter.attribute;
 			var rangeQuery = attribute.fieldType === 'DATE' || attribute.fieldType === 'DATE_TIME' || attribute.fieldType === 'DECIMAL' || attribute.fieldType === 'INT' || attribute.fieldType === 'LONG';
-
+			
 			if (rangeQuery) {
 				// Range filter
 				var rangeAnd = false;
+				var fromValue = attributeFilter.fromValue;
+				var toValue = attributeFilter.toValue;
+				
+				if(attribute.fieldType === 'DATE_TIME'){
+					if(fromValue){
+						fromValue = fromValue.replace("'T'", "T");
+					}
+					if(toValue){
+						toValue = toValue.replace("'T'", "T");
+					}
+				}
 				
 				// add range fromValue
-				if (attributeFilter.fromValue) {
+				if (fromValue) {
 					entityCollectionRequest.q.push({
 						field : attribute.name,
 						operator : 'GREATER_EQUAL',
-						value : attributeFilter.fromValue
+						value : fromValue
 					});
 				}
 				
 				// add range toValue
-				if (attributeFilter.toValue) {
-					if(attributeFilter.fromValue !== undefined){
+				if (toValue) {
+					if(fromValue !== undefined){
 						entityCollectionRequest.q.push({
 							operator : 'AND'
 						});
@@ -191,7 +201,7 @@
 					entityCollectionRequest.q.push({
 						field : attribute.name,
 						operator : 'LESS_EQUAL',
-						value : attributeFilter.toValue
+						value : toValue
 					});
 				}
 			}else{
@@ -253,8 +263,8 @@
 				var nameFrom = name + '-from', nameTo = name + '-to';
 				var valFrom = fromValue ? fromValue : undefined;
 				var valTo = toValue ? toValue : undefined;
-				var inputFrom = createInput(attribute.fieldType, {'name': nameFrom, 'placeholder': 'Start date'}, valFrom ? valFrom.replace("T", "'T'") : valFrom);
-				var inputTo = createInput(attribute.fieldType, {'name': nameTo, 'placeholder': 'End date'}, valTo ? valTo.replace("T", "'T'") : valTo);
+				var inputFrom = createInput(attribute.fieldType, {'name': nameFrom, 'placeholder': 'Start date'}, valFrom);
+				var inputTo = createInput(attribute.fieldType, {'name': nameTo, 'placeholder': 'End date'}, valTo);
 				controls.append($('<div class="control-group">').append(inputFrom)).append($('<div class="control-group">').append(inputTo));
 				break;
 			case 'DECIMAL':
