@@ -276,7 +276,7 @@
 					var max = toValue ? toValue : attribute.range.max;
 					slider.editRangeSlider({
 						symmetricPositionning: true,
-						range: {min: attribute.range.min, max: attribute.range.max},
+						bounds: {min: attribute.range.min, max: attribute.range.max},
 						defaultValues: {min: min, max: max},
 						type: "number"
 					});
