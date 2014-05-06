@@ -160,6 +160,15 @@ public class MysqlRepositoryTest  extends AbstractTestNGSpringContextTests
             break;
         }
         Assert.assertEquals(3, count(repo, new QueryImpl().lt("age", 5)));
+
+        //update one
+        Entity e = repo.findOne("Doe2");
+        e.set("firstName","Updated");
+        repo.update(e);
+
+        //find change
+        e = repo.findOne("Doe2");
+        Assert.assertEquals(e.getString("firstName"),"Updated");
     }
 
 	public int count(MysqlRepository repo, Query query)

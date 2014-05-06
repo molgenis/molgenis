@@ -62,7 +62,7 @@
 					$(document).ready(function() {
 						var xrefs = [];
 						<#if entity!='' && entity.get(fieldName)??>
-							<#list entity.get(fieldName) as xrefEntity>
+							<#list entity.getEntities(fieldName) as xrefEntity>
 								xrefs.push({id:'<@formatValue field.refEntity.idAttribute.dataType.enumType xrefEntity.idValue />', text:'${xrefEntity.get(field.refEntity.labelAttribute.name)!?html}'});
 							</#list>
 						</#if>

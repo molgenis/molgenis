@@ -262,13 +262,15 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 					if (att.getDataType() instanceof MrefField)
 					{
 						if (mrefs.get(att.getName()) == null) mrefs.put(att.getName(), new ArrayList<Entity>());
-						if (batch.get(rowIndex).get(att.getName()) != null) for (Object val : batch.get(rowIndex)
-								.getList(att.getName()))
+						if (batch.get(rowIndex).get(att.getName()) != null)
 						{
-							Entity mref = new MapEntity();
-							mref.set(idAttribute.getName(), batch.get(rowIndex).get(idAttribute.getName()));
-							mref.set(att.getName(), val);
-							mrefs.get(att.getName()).add(mref);
+							for (Object val : batch.get(rowIndex).getList(att.getName()))
+							{
+								Entity mref = new MapEntity();
+								mref.set(idAttribute.getName(), batch.get(rowIndex).get(idAttribute.getName()));
+								mref.set(att.getName(), val);
+								mrefs.get(att.getName()).add(mref);
+							}
 						}
 					}
 					else
@@ -307,17 +309,39 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 		{
 			if (att.getDataType() instanceof MrefField)
 			{
-				addMref(mrefs.get(att.getName()), att);
+				addMrefs(mrefs.get(att.getName()), att);
 			}
 		}
 
 		return count.get();
 	}
 
-	private void addMref(final List<Entity> mrefs, final AttributeMetaData att)
+	private void removeMrefs(final List<Object> ids, final AttributeMetaData att)
+	{
+		final AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
+		String mrefSql = "DELETE FROM " + getEntityMetaData().getName() + "_" + att.getName() + " WHERE "
+				+ idAttribute.getName() + "= ?";
+		jdbcTemplate.batchUpdate(mrefSql, new BatchPreparedStatementSetter()
+		{
+			@Override
+			public void setValues(PreparedStatement preparedStatement, int i) throws SQLException
+			{
+				preparedStatement.setObject(1, ids.get(i));
+			}
+
+			@Override
+			public int getBatchSize()
+			{
+				return ids.size();
+			}
+		});
+	}
+
+	private void addMrefs(final List<Entity> mrefs, final AttributeMetaData att)
 	{
 
 		final AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
+		final AttributeMetaData refAttribute = att.getRefEntity().getIdAttribute();
 		String mrefSql = "INSERT INTO " + getEntityMetaData().getName() + "_" + att.getName() + " ("
 				+ idAttribute.getName() + "," + att.getName() + ") VALUES (?,?)";
 		jdbcTemplate.batchUpdate(mrefSql, new BatchPreparedStatementSetter()
@@ -325,8 +349,20 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 			@Override
 			public void setValues(PreparedStatement preparedStatement, int i) throws SQLException
 			{
+				System.out.println("mref: " + mrefs.get(i).get(idAttribute.getName()) + ", "
+						+ mrefs.get(i).get(att.getName()));
+
 				preparedStatement.setObject(1, mrefs.get(i).get(idAttribute.getName()));
-				preparedStatement.setObject(2, mrefs.get(i).get(att.getName()));
+				Object value = mrefs.get(i).get(att.getName());
+				if (value instanceof Entity)
+				{
+					preparedStatement.setObject(2,
+							refAttribute.getDataType().convert(((Entity) value).get(idAttribute.getName())));
+				}
+				else
+				{
+					preparedStatement.setObject(2, refAttribute.getDataType().convert(value));
+				}
 			}
 
 			@Override
@@ -352,8 +388,8 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 	@Override
 	public long count(Query q)
 	{
-        String sql = getCountSql(q);
-        System.out.println(sql);
+		String sql = getCountSql(q);
+		System.out.println(sql);
 		return jdbcTemplate.queryForObject(sql, Long.class);
 	}
 
@@ -420,8 +456,8 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 	@Override
 	public Entity findOne(Query q)
 	{
-        Iterator<Entity> iterator = findAll(q).iterator();
-        if(iterator.hasNext()) return iterator.next();
+		Iterator<Entity> iterator = findAll(q).iterator();
+		if (iterator.hasNext()) return iterator.next();
 		return null;
 	}
 
@@ -435,7 +471,8 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 	@Override
 	public Iterable<Entity> findAll(Iterable<Object> ids)
 	{
-		throw new UnsupportedOperationException();
+		if (ids == null) return new ArrayList();
+		return findAll(new QueryImpl().in(getEntityMetaData().getIdAttribute().getName(), ids));
 	}
 
 	@Override
@@ -630,14 +667,129 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 	@Override
 	public void update(Entity entity)
 	{
-		throw new UnsupportedOperationException();
+		update(Arrays.asList(new Entity[]
+		{ entity }));
 	}
 
 	@Override
-	public void update(Iterable<? extends Entity> records)
+	public void update(Iterable<? extends Entity> entities)
 	{
-		throw new UnsupportedOperationException();
+		AtomicInteger count = new AtomicInteger(0);
 
+		// TODO, split in subbatches
+		final List<Entity> batch = new ArrayList<Entity>();
+		if (entities != null) for (Entity e : entities)
+		{
+			batch.add(e);
+			count.addAndGet(1);
+		}
+		final AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
+		final List<Object> ids = new ArrayList<Object>();
+		final Map<String, List<Entity>> mrefs = new HashMap<String, List<Entity>>();
+
+		jdbcTemplate.batchUpdate(this.getUpdateSql(), new BatchPreparedStatementSetter()
+		{
+			@Override
+			public void setValues(PreparedStatement preparedStatement, int rowIndex) throws SQLException
+			{
+				Entity e = batch.get(rowIndex);
+				System.out.println("updating: " + e);
+				Object idValue = idAttribute.getDataType().convert(e.get(idAttribute.getName()));
+				ids.add(idValue);
+				int fieldIndex = 1;
+				for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
+				{
+					// create the mref records
+					if (att.getDataType() instanceof MrefField)
+					{
+						if (mrefs.get(att.getName()) == null) mrefs.put(att.getName(), new ArrayList<Entity>());
+						if (e.get(att.getName()) != null) for (Object val : e.getList(att.getName()))
+						{
+							Entity mref = new MapEntity();
+							mref.set(idAttribute.getName(), idValue);
+							mref.set(att.getName(), val);
+							mrefs.get(att.getName()).add(mref);
+						}
+					}
+					else
+					{
+						// default value, if any
+						if (e.get(att.getName()) == null)
+						{
+							preparedStatement.setObject(fieldIndex++, att.getDefaultValue());
+						}
+						else
+						{
+							if (att.getDataType() instanceof XrefField)
+							{
+								Object value = e.get(att.getName());
+								if (value instanceof Entity)
+								{
+									preparedStatement.setObject(
+											fieldIndex++,
+											att.getRefEntity()
+													.getIdAttribute()
+													.getDataType()
+													.convert(
+															((Entity) value).get(att.getRefEntity().getIdAttribute()
+																	.getName())));
+								}
+								else
+								{
+									preparedStatement.setObject(fieldIndex++, att.getRefEntity().getIdAttribute()
+											.getDataType().convert(value));
+								}
+							}
+							else
+							{
+								preparedStatement.setObject(fieldIndex++,
+										att.getDataType().convert(e.get(att.getName())));
+							}
+						}
+					}
+				}
+				preparedStatement.setObject(fieldIndex++, idValue);
+			}
+
+			@Override
+			public int getBatchSize()
+			{
+				return batch.size();
+			}
+		});
+
+		// update mrefs
+		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
+		{
+			if (att.getDataType() instanceof MrefField)
+			{
+				removeMrefs(ids, att);
+				addMrefs(mrefs.get(att.getName()), att);
+			}
+		}
+
+		// return count.get();
+	}
+
+	protected String getUpdateSql()
+	{
+		// use (readonly) identifier
+		AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
+
+		// create sql
+		String sql = "UPDATE " + this.getName() + " SET ";
+		String params = "";
+		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
+			if (!(att.getDataType() instanceof MrefField))
+			{
+				sql += att.getName() + " = ?, ";
+			}
+		if (sql.endsWith(", "))
+		{
+			sql = sql.substring(0, sql.length() - 2);
+		}
+		sql += " WHERE " + idAttribute.getName() + "= ?";
+		return sql;
 	}
 
 	@Override
@@ -655,7 +807,7 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 		final List<Object> batch = new ArrayList<Object>();
 		for (Entity e : entities)
 			batch.add(e.getIdValue());
-        this.deleteById(batch);
+		this.deleteById(batch);
 	}
 
 	public String getDeleteSql()
@@ -666,29 +818,31 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 	@Override
 	public void deleteById(Object id)
 	{
-		this.deleteById(Arrays.asList(new Object[]{id}));
+		this.deleteById(Arrays.asList(new Object[]
+		{ id }));
 	}
 
 	@Override
 	public void deleteById(Iterable<Object> ids)
 	{
-        final List<Object> idList = new ArrayList<Object>();
-        for(Object id: ids) idList.add(id);
+		final List<Object> idList = new ArrayList<Object>();
+		for (Object id : ids)
+			idList.add(id);
 
-        jdbcTemplate.batchUpdate(getDeleteSql(), new BatchPreparedStatementSetter()
-        {
-            @Override
-            public void setValues(PreparedStatement preparedStatement, int i) throws SQLException
-            {
-                preparedStatement.setObject(1, idList.get(i));
-            }
+		jdbcTemplate.batchUpdate(getDeleteSql(), new BatchPreparedStatementSetter()
+		{
+			@Override
+			public void setValues(PreparedStatement preparedStatement, int i) throws SQLException
+			{
+				preparedStatement.setObject(1, idList.get(i));
+			}
 
-            @Override
-            public int getBatchSize()
-            {
-                return idList.size();
-            }
-        });
+			@Override
+			public int getBatchSize()
+			{
+				return idList.size();
+			}
+		});
 	}
 
 	@Override

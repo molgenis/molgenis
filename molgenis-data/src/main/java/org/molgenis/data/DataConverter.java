@@ -129,17 +129,24 @@ public class DataConverter
 	{
 		if (source == null) return null;
 		else if (source instanceof List<?>) return (List<String>) source;
-		else if (source instanceof String) return ListEscapeUtils.toList((String)source);
+		else if (source instanceof String) return ListEscapeUtils.toList((String) source);
 		else return ListEscapeUtils.toList(source.toString());
 	}
 
-    public static List<Object> toObjectList(Object source)
-    {
-        if (source == null) return null;
-        else if (source instanceof List<?>) return (List<Object>) source;
-        else return Arrays.asList(new Object[]{source});
-    }
-
+	public static List<Object> toObjectList(Object source)
+	{
+		if (source == null) return null;
+		else if (source instanceof List<?>) return (List<Object>) source;
+		else if (source instanceof String)
+		{
+			List<Object> result = new ArrayList<Object>();
+			for (String str : ((String) source).split(","))
+				result.add(str);
+			return result;
+		}
+		else return Arrays.asList(new Object[]
+		{ source });
+	}
 
 	public static List<Integer> toIntList(Object source)
 	{
