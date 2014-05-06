@@ -60,17 +60,11 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 		MysqlRepository intRepo = coll.add(getMetaData().getAttribute("intRef").getRefEntity());
         MysqlRepository mrefRepo = coll.add(getMetaData());
 
+        Assert.assertEquals(stringRepo.count(),0);
+        Assert.assertEquals(intRepo.count(),0);
+        Assert.assertEquals(mrefRepo.count(),0);
 
         Assert.assertEquals(mrefRepo.getCreateSql(), createSql());
-
-		mrefRepo.drop();
-		stringRepo.drop();
-		intRepo.drop();
-
-		Assert.assertEquals(mrefRepo.getCreateSql(), createSql());
-		stringRepo.create();
-		intRepo.create();
-		mrefRepo.create();
 
 		// add records
 		Entity entity = new MapEntity();
@@ -103,7 +97,9 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 		logger.debug("mref: " + entity);
 		mrefRepo.add(entity);
 
-		Assert.assertEquals(
+        Assert.assertEquals(mrefRepo.count(),2);
+
+        Assert.assertEquals(
 				mrefRepo.getSelectSql(new QueryImpl()),
 				"SELECT this.identifier, GROUP_CONCAT(DISTINCT(stringRef.stringRef)) AS stringRef, GROUP_CONCAT(DISTINCT(intRef.intRef)) AS intRef FROM MrefTest AS this LEFT JOIN MrefTest_stringRef AS stringRef_filter ON (this.identifier = stringRef_filter.identifier) LEFT JOIN MrefTest_stringRef AS stringRef ON (this.identifier = stringRef.identifier) LEFT JOIN MrefTest_intRef AS intRef_filter ON (this.identifier = intRef_filter.identifier) LEFT JOIN MrefTest_intRef AS intRef ON (this.identifier = intRef.identifier) GROUP BY this.identifier");
 		for (Entity e : mrefRepo.findAll(new QueryImpl().eq("identifier", "one")))

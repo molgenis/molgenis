@@ -73,7 +73,7 @@ public class MysqlRepositoryTest  extends AbstractTestNGSpringContextTests
 		Assert.assertEquals(
 				repo.getCreateSql(),
 				"CREATE TABLE IF NOT EXISTS MysqlPerson(firstName VARCHAR(255) NOT NULL, lastName VARCHAR(255) NOT NULL, age INTEGER, PRIMARY KEY (lastName)) ENGINE=InnoDB;");
-		Assert.assertEquals(repo.getCountSql(new QueryImpl()), "SELECT count(this.lastName) FROM MysqlPerson AS this");
+		Assert.assertEquals(repo.getCountSql(new QueryImpl()), "SELECT COUNT(DISTINCT this.lastName) FROM MysqlPerson AS this");
 
 		// test where clauses
 		Assert.assertEquals(repo.getWhereSql(new QueryImpl().eq("firstName", "John")), "WHERE this.firstName = 'John'");

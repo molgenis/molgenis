@@ -352,7 +352,9 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 	@Override
 	public long count(Query q)
 	{
-		return jdbcTemplate.queryForObject(getCountSql(q), Long.class);
+        String sql = getCountSql(q);
+        System.out.println(sql);
+		return jdbcTemplate.queryForObject(sql, Long.class);
 	}
 
 	protected String getSelectSql(Query q)
@@ -484,8 +486,8 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 		String where = getWhereSql(q);
 		String from = getFromSql();
 		String idAttribute = getEntityMetaData().getIdAttribute().getName();
-		if (where.length() > 0) return "SELECT count(this." + idAttribute + ")" + from + " " + where;
-		return "SELECT count(this." + idAttribute + ")" + from;
+		if (where.length() > 0) return "SELECT COUNT(DISTINCT this." + idAttribute + ")" + from + " " + where;
+		return "SELECT COUNT(DISTINCT this." + idAttribute + ")" + from;
 	}
 
 	protected String getWhereSql(Query q)
