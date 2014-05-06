@@ -127,7 +127,8 @@
 	   				wizard.find('.pager .previous').hide();
 	   				wizard.find('.pager .next').show();
 	   			} else if($current > 1 && $current < $total) {
-	   				wizard.find('.pager').show();
+	   				wizard.find('.pager .previous').show();
+	   				wizard.find('.pager .next').show();
 	   			} else if($current === $total && $current>1) {
 	   				wizard.find('.pager .previous').show();
 	   				wizard.find('.pager .next').hide();
