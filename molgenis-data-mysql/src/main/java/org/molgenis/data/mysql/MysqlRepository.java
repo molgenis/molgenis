@@ -881,12 +881,16 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 				if (att.getDataType() instanceof MrefField)
 				{
 					// TODO: convert to typed lists (or arrays?)
-                    if(att.getRefEntity().getIdAttribute().getDataType() instanceof IntField)
-					    e.set(att.getName(), DataConverter.toIntList(resultSet.getObject(att.getName())));
-                    else
-                        e.set(att.getName(), DataConverter.toObjectList(resultSet.getObject(att.getName())));
+					if (att.getRefEntity().getIdAttribute().getDataType() instanceof IntField)
+					{
+						e.set(att.getName(), DataConverter.toIntList(resultSet.getString(att.getName())));
+					}
+					else
+					{
+						e.set(att.getName(), DataConverter.toObjectList(resultSet.getString(att.getName())));
+					}
 
-                }
+				}
 				else if (att.getDataType() instanceof XrefField)
 				{
 					e.set(att.getName(),
