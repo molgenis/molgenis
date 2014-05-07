@@ -136,7 +136,7 @@ public class DataConverter
 	public static List<Object> toObjectList(Object source)
 	{
 		if (source == null) return null;
-		else if (source instanceof List<?>) return (List<Object>) source;
+		else if (source instanceof List) return (List<Object>) source;
 		else if (source instanceof String)
 		{
 			List<Object> result = new ArrayList<Object>();
