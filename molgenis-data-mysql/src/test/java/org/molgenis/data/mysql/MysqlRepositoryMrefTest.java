@@ -143,10 +143,14 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
         mrefRepo.update(e);
 
         e = mrefRepo.findOne("one");
-        Assert.assertEquals(e.getList("stringRef"),Arrays.asList(new String[]{"ref2","ref3"}));
+        Assert.assertEquals(e.getList("stringRef").size(),2);
+        Assert.assertTrue(e.getList("stringRef").contains("ref2"));
+        Assert.assertTrue(e.getList("stringRef").contains("ref3"));
 
 
-		// verify not null error
+
+
+        // verify not null error
 
 		// verify default
 	}
