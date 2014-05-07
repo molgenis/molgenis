@@ -32,19 +32,19 @@ public interface Queryable extends Countable
 	/**
 	 * type-safe find one entity based on id. Returns null if not exists
 	 */
-	Entity findOne(Integer id);
+	Entity findOne(Object id);
 
 	/**
 	 * find entities based on a stream of ids
 	 */
-	Iterable<Entity> findAll(Iterable<Integer> ids);
+	Iterable<Entity> findAll(Iterable<Object> ids);
 
 	/**
 	 * type-safe find entities that match a stream of ids
 	 */
-	<E extends Entity> Iterable<E> findAll(Iterable<Integer> ids, Class<E> clazz);
+	<E extends Entity> Iterable<E> findAll(Iterable<Object> ids, Class<E> clazz);
 
-	<E extends Entity> E findOne(Integer id, Class<E> clazz);
+	<E extends Entity> E findOne(Object id, Class<E> clazz);
 
 	/**
 	 * type-save find an entity by it's id

@@ -42,20 +42,20 @@ public class StudyDataRequestDecorator extends CrudRepositoryDecorator
 	}
 
 	@Override
-	public Integer add(Entity entity)
+	public void add(Entity entity)
 	{
 		checkEntitiesPermission(entity);
-		return super.add(entity);
+		super.add(entity);
 	}
 
 	@Override
-	public void add(Iterable<? extends Entity> entities)
+	public Integer add(Iterable<? extends Entity> entities)
 	{
 		for (Entity entity : entities)
 		{
 			checkEntitiesPermission(entity);
 		}
-		super.add(entities);
+		return super.add(entities);
 	}
 
 	@Override
@@ -118,7 +118,7 @@ public class StudyDataRequestDecorator extends CrudRepositoryDecorator
 	}
 
 	@Override
-	public void deleteById(Integer id)
+	public void deleteById(Object id)
 	{
 		Entity entity = super.findOne(id);
 		checkEntitiesPermission(entity);
@@ -133,7 +133,7 @@ public class StudyDataRequestDecorator extends CrudRepositoryDecorator
 	}
 
 	@Override
-	public Entity findOne(Integer id)
+	public Entity findOne(Object id)
 	{
 		Entity entity = super.findOne(id);
 		checkEntitiesPermission(entity);
@@ -142,7 +142,7 @@ public class StudyDataRequestDecorator extends CrudRepositoryDecorator
 	}
 
 	@Override
-	public void deleteById(Iterable<Integer> ids)
+	public void deleteById(Iterable<Object> ids)
 	{
 		for (Entity entity : super.findAll(ids))
 		{
@@ -153,7 +153,7 @@ public class StudyDataRequestDecorator extends CrudRepositoryDecorator
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Integer> ids)
+	public Iterable<Entity> findAll(Iterable<Object> ids)
 	{
 		Iterable<Entity> entities = super.findAll(ids);
 		for (Entity entity : entities)
@@ -183,7 +183,7 @@ public class StudyDataRequestDecorator extends CrudRepositoryDecorator
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> findAll(Iterable<Integer> ids, Class<E> clazz)
+	public <E extends Entity> Iterable<E> findAll(Iterable<Object> ids, Class<E> clazz)
 	{
 		return new ConvertingIterable<E>(clazz, findAll(ids));
 	}

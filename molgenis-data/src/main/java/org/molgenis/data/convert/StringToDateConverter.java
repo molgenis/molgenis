@@ -13,12 +13,26 @@ public class StringToDateConverter implements Converter<String, Date>
 	{
 		try
 		{
-			return MolgenisDateFormat.getDateTimeFormat().parse(source);
+			return MolgenisDateFormat.getDateFormat().parse(source);
 		}
 		catch (ParseException pe)
 		{
-			throw new IllegalArgumentException("Invalid dateformat [" + source + "] should be of format "
-					+ MolgenisDateFormat.DATEFORMAT_DATETIME);
+			try
+			{
+				return MolgenisDateFormat.getDateTimeFormat().parse(source);
+			}
+			catch (ParseException pe2)
+			{
+				try
+				{
+					return MolgenisDateFormat.getDateTimeFormatSimple().parse(source);
+				}
+				catch (ParseException pe3)
+				{
+					throw new IllegalArgumentException("Invalid dateformat [" + source + "] should be of format "
+							+ MolgenisDateFormat.DATEFORMAT_DATETIME + " OR " + MolgenisDateFormat.DATEFORMAT_DATE+ " OR " + MolgenisDateFormat.DATEFORMAT_DATETIME_SIMPLE);
+				}
+			}
 		}
 	}
 }

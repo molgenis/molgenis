@@ -27,12 +27,16 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 			@Override
 			public Iterable<AttributeMetaData> children(AttributeMetaData attributeMetaData)
 			{
-				FieldTypeEnum dataType = attributeMetaData.getDataType().getEnumType();
-				if (dataType == FieldTypeEnum.COMPOUND) return attributeMetaData.getAttributeParts();
+				FieldType dataType = attributeMetaData.getDataType();
+				if (dataType.equals(MolgenisFieldTypes.COMPOUND))
+				{
+					return attributeMetaData.getAttributeParts();
+				}
 				else return Collections.<AttributeMetaData> emptyList();
 			}
-		}.breadthFirstTraversal(new AttributeMetaData()
+		}.preOrderTraversal(new AttributeMetaData()
 		{
+			// traverse in same order as attributes are inserted
 
 			@Override
 			public boolean isVisible()

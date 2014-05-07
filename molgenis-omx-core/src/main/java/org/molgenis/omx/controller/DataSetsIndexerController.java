@@ -88,7 +88,7 @@ public class DataSetsIndexerController extends MolgenisPluginController
 		}
 
 		// Convert the strings to integer
-		List<Integer> ids = new ArrayList<Integer>();
+		List<Object> ids = new ArrayList<Object>();
 		for (String dataSetId : dataSetIds)
 		{
 			if (StringUtils.isNumeric(dataSetId))

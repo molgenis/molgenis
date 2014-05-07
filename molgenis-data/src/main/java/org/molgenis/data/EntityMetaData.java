@@ -12,6 +12,12 @@ public interface EntityMetaData
 	String getName();
 
 	/**
+	 * Entities can be abstract (analogous an 'interface' or 'protocol'). Use is to define reusable Entity model
+	 * components that cannot be instantiated themselves (i.e. there cannot be data attached to this entity meta data).
+	 */
+	public boolean isAbstract();
+
+	/**
 	 * Optional human readable longer label
 	 */
 	String getLabel();
@@ -47,6 +53,11 @@ public interface EntityMetaData
 	 * Get attribute by name (case insensitive), returns null if not found
 	 */
 	AttributeMetaData getAttribute(String attributeName);
+
+	/**
+	 * Entity can extend another entity, adding its properties to their own
+	 */
+	public EntityMetaData getExtends();
 
 	Class<? extends Entity> getEntityClass();
 }

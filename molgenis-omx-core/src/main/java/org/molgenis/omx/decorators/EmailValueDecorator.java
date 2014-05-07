@@ -19,7 +19,7 @@ public class EmailValueDecorator extends CrudRepositoryDecorator
 	}
 
 	@Override
-	public void add(Iterable<? extends Entity> entities)
+	public Integer add(Iterable<? extends Entity> entities)
 	{
 		for (Entity entity : entities)
 		{
@@ -30,11 +30,11 @@ public class EmailValueDecorator extends CrudRepositoryDecorator
 			}
 		}
 
-		super.add(entities);
+		return super.add(entities);
 	}
 
 	@Override
-	public Integer add(Entity entity)
+	public void add(Entity entity)
 	{
 		String email = entity.getString(EmailValue.VALUE);
 		if (!emailValidator.isValid(email, null))
@@ -42,7 +42,7 @@ public class EmailValueDecorator extends CrudRepositoryDecorator
 			throw new ValidationException("not an email address [" + email + "]");
 		}
 
-		return super.add(entity);
+		super.add(entity);
 	}
 
 	@Override

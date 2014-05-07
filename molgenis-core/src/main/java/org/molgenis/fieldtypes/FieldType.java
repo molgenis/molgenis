@@ -187,4 +187,6 @@ public abstract class FieldType implements Serializable
 	{
 		return f != null ? f.hashCode() : 0;
 	}
+
+    public abstract Object convert(Object value);
 }

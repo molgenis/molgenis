@@ -72,7 +72,7 @@ public class HitRefEntity extends AbstractEntity
 	}
 
 	@Override
-	public Integer getIdValue()
+	public Object getIdValue()
 	{
 		return getInt(getEntityMetaData().getIdAttribute().getName());
 	}

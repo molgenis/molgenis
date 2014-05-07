@@ -88,4 +88,11 @@ public class EmailField extends FieldType
 		return FieldTypeEnum.EMAIL;
 	}
 
+    @Override
+    public Object convert(Object value)
+    {
+        if (value == null) return null;
+        return value.toString();
+    }
+
 }
