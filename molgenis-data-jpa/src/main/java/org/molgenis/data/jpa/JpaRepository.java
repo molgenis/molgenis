@@ -3,47 +3,21 @@ package org.molgenis.data.jpa;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.BOOL;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.*;
 import javax.persistence.criteria.CriteriaBuilder.In;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Order;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AggregateResult;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataConverter;
-import org.molgenis.data.DatabaseAction;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule;
+import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.support.AbstractCrudRepository;
-import org.molgenis.data.support.ConvertingIterable;
-import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.support.QueryResolver;
+import org.molgenis.data.support.*;
 import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.generators.GeneratorHelper;
 import org.springframework.beans.BeanUtils;
@@ -59,12 +33,11 @@ import com.google.common.collect.Sets;
 public class JpaRepository extends AbstractCrudRepository
 {
 	public static final String BASE_URL = "jpa://";
-
-	@PersistenceContext
-	private EntityManager entityManager;
 	private final EntityMetaData entityMetaData;
 	private final QueryResolver queryResolver;
 	private final Logger logger = Logger.getLogger(getClass());
+	@PersistenceContext
+	private EntityManager entityManager;
 
 	public JpaRepository(EntityMetaData entityMetaData, EntityValidator entityValidator, QueryResolver queryResolver)
 	{
@@ -97,7 +70,7 @@ public class JpaRepository extends AbstractCrudRepository
 	}
 
 	@Override
-	protected Integer addInternal(Entity entity)
+	protected Object addInternal(Entity entity)
 	{
 		Entity jpaEntity = getTypedEntity(entity);
 
@@ -110,10 +83,15 @@ public class JpaRepository extends AbstractCrudRepository
 	}
 
 	@Override
-	protected void addInternal(Iterable<? extends Entity> entities)
+	protected Integer addInternal(Iterable<? extends Entity> entities)
 	{
+		Integer count = 0;
 		for (Entity e : entities)
+		{
 			addInternal(e);
+			count++;
+		}
+		return count;
 	}
 
 	@Override
@@ -155,17 +133,17 @@ public class JpaRepository extends AbstractCrudRepository
 
 	@Override
 	@Transactional(readOnly = true)
-	public Entity findOne(Integer id)
+	public Entity findOne(Object id)
 	{
 		if (logger.isDebugEnabled()) logger
 				.debug("finding by key" + getEntityClass().getSimpleName() + " [" + id + "]");
 
-		return getEntityManager().find(getEntityClass(), id);
+		return getEntityManager().find(getEntityClass(), getEntityMetaData().getIdAttribute().getDataType().convert(id));
 	}
 
 	@Override
 	@Transactional(readOnly = true)
-	public Iterable<Entity> findAll(Iterable<Integer> ids)
+	public Iterable<Entity> findAll(Iterable<Object> ids)
 	{
 		String idAttrName = getEntityMetaData().getIdAttribute().getName();
 
@@ -561,10 +539,10 @@ public class JpaRepository extends AbstractCrudRepository
 
 	@Override
 	@Transactional
-	public void deleteById(Integer id)
+	public void deleteById(Object id)
 	{
 		if (logger.isDebugEnabled()) logger.debug("removing " + getEntityClass().getSimpleName() + " [" + id + "]");
-		delete(findOne(id));
+		delete(findOne(getEntityMetaData().getIdAttribute().getDataType().convert(id)));
 	}
 
 	@Override
@@ -638,12 +616,34 @@ public class JpaRepository extends AbstractCrudRepository
 				case AND:
 					break;
 				case NESTED:
-					Predicate nested = cb.conjunction();
-					for (Predicate p : createPredicates(from, cb, r.getNestedRules()))
+					List<QueryRule> nestedRules = r.getNestedRules();
+					if (nestedRules != null && !nestedRules.isEmpty())
 					{
-						nested.getExpressions().add(p);
+						List<Predicate> subPredicates = createPredicates(from, cb, nestedRules);
+						Predicate predicate;
+						if (subPredicates.size() == 1)
+						{
+							predicate = subPredicates.get(0);
+						}
+						else
+						{
+							Predicate[] subPredicatesArr = subPredicates.toArray(new Predicate[0]);
+							Operator andOrOperator = nestedRules.get(1).getOperator();
+							switch (andOrOperator)
+							{
+								case AND:
+									predicate = cb.and(subPredicatesArr);
+									break;
+								case OR:
+									predicate = cb.or(subPredicatesArr);
+									break;
+								default:
+									throw new MolgenisDataException("Expected AND or OR operator in query rule [" + r
+											+ "] instead of " + andOrOperator);
+							}
+						}
+						andPredicates.add(predicate); // added to orPredicates list near end of method if required
 					}
-					andPredicates.add(nested);
 					break;
 				case OR:
 					orPredicates.add(cb.and(andPredicates.toArray(new Predicate[andPredicates.size()])));
@@ -781,9 +781,9 @@ public class JpaRepository extends AbstractCrudRepository
 
 	@Override
 	@Transactional
-	public void deleteById(Iterable<Integer> ids)
+	public void deleteById(Iterable<Object> ids)
 	{
-		for (Integer id : ids)
+		for (Object id : ids)
 		{
 			deleteById(id);
 		}
@@ -820,7 +820,7 @@ public class JpaRepository extends AbstractCrudRepository
 
 	@Override
 	@Transactional(readOnly = true)
-	public <E extends Entity> Iterable<E> findAll(Iterable<Integer> ids, Class<E> clazz)
+	public <E extends Entity> Iterable<E> findAll(Iterable<Object> ids, Class<E> clazz)
 	{
 		return new ConvertingIterable<E>(clazz, findAll(ids));
 	}
@@ -835,7 +835,7 @@ public class JpaRepository extends AbstractCrudRepository
 	@SuppressWarnings("unchecked")
 	@Override
 	@Transactional(readOnly = true)
-	public <E extends Entity> E findOne(Integer id, Class<E> clazz)
+	public <E extends Entity> E findOne(Object id, Class<E> clazz)
 	{
 		Entity entity = findOne(id);
 		if (entity == null)
@@ -1218,5 +1218,4 @@ public class JpaRepository extends AbstractCrudRepository
 
 		return searchRules;
 	}
-
 }

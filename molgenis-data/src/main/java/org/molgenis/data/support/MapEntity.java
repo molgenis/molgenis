@@ -63,14 +63,14 @@ public class MapEntity extends AbstractEntity
 	}
 
 	@Override
-	public Integer getIdValue()
+	public Object getIdValue()
 	{
-		if (idAttributeName == null)
+		if (getIdAttributeName() == null)
 		{
 			return null;
 		}
 
-		return (Integer) get(idAttributeName);
+		return get(getIdAttributeName());
 	}
 
 	@Override

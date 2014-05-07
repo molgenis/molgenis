@@ -119,6 +119,7 @@
 			case 'TEXT':
 			case 'BOOL':
 			case 'XREF':
+			case 'ENUM':
 				return htmlEscape(attributeFilter.values[0] ? attributeFilter.values[0] : '');
 			case 'CATEGORICAL':
 			case 'MREF':
@@ -129,7 +130,6 @@
 				});
 				return htmlEscape(array.join(' ' + operator + ' '));
 			case 'COMPOUND' :
-			case 'ENUM':
 			case 'FILE':
 			case 'IMAGE':
 				throw 'Unsupported data type: ' + attributeFilter.attribute.fieldType;
@@ -276,7 +276,7 @@
 					var max = toValue ? toValue : attribute.range.max;
 					slider.editRangeSlider({
 						symmetricPositionning: true,
-						range: {min: attribute.range.min, max: attribute.range.max},
+						bounds: {min: attribute.range.min, max: attribute.range.max},
 						defaultValues: {min: min, max: max},
 						type: "number"
 					});
@@ -295,6 +295,7 @@
 			case 'HYPERLINK':
 			case 'STRING':
 			case 'TEXT':
+			case 'ENUM':
 				controls.append(createInput(attribute.fieldType, {'name': name, 'id': name}, values ? values[0] : undefined));
 				break;
 			case 'MREF':
@@ -305,7 +306,6 @@
 				controls.append(element);
 				break;
 			case 'COMPOUND' :
-			case 'ENUM':
 			case 'FILE':
 			case 'IMAGE':
 				throw 'Unsupported data type: ' + attribute.fieldType;

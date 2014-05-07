@@ -138,7 +138,7 @@ public class GafListImporterService
 		mailSender.send(message);
 		logger.debug("finished emailing gaf list validation report");
 
-		Integer dataSetId;
+		Object dataSetId;
 		GafListRepository gafListRepository = new GafListRepository(service, GAF_SHEET_ID, GAF_WORKBOOK_ID,
 				Visibility.PRIVATE, report);
 
