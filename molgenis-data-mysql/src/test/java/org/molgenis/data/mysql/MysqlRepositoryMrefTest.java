@@ -106,7 +106,7 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 			logger.info("found: " + e);
 			Assert.assertEquals(e.getList("stringRef"), Arrays.asList(new String[]
 			{ "ref1", "ref2" }));
-			Assert.assertEquals(e.getIntList("intRef"), Arrays.asList(new Integer[]
+			Assert.assertEquals(e.getList("intRef"), Arrays.asList(new Integer[]
 			{ 1, 2 }));
 
 			List<Entity> result = new ArrayList<Entity>();
