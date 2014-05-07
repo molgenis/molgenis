@@ -2,24 +2,16 @@ package org.molgenis.omx.importer;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 
 import org.apache.log4j.Logger;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.FileRepositoryCollectionFactory;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.*;
+import org.molgenis.data.importer.EmxImportServiceImpl;
+import org.molgenis.data.importer.EmxImporterService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntitiesValidator;
@@ -104,67 +96,101 @@ public class UploadWizardPage extends AbstractWizardPage
 
 	private String validateInput(File file, ImportWizard wizard, BindingResult result) throws Exception
 	{
-		// validate entity sheets
-		EntitiesValidationReport validationReport = entitiesValidator.validate(file);
-
-		// remove data sheets
-		Map<String, Boolean> entitiesImportable = validationReport.getSheetsImportable();
-		if (entitiesImportable != null)
+		// decide what importer to use...
+		RepositoryCollection source = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
+		if (source.getRepositoryByEntityName("attributes") != null)
 		{
-			for (Iterator<Entry<String, Boolean>> it = entitiesImportable.entrySet().iterator(); it.hasNext();)
+			System.out.println("Using the new EMX importer");
+
+			EmxImporterService importer = new EmxImportServiceImpl();
+			EntitiesValidationReport validationReport = importer.validateImport(source);
+
+			wizard.setEntitiesImportable(validationReport.getSheetsImportable());
+			//wizard.setDataImportable(validationReport.getSheetsImportable());
+			wizard.setFieldsDetected(validationReport.getFieldsImportable());
+			wizard.setFieldsRequired(validationReport.getFieldsRequired());
+			wizard.setFieldsAvailable(validationReport.getFieldsAvailable());
+			wizard.setFieldsUnknown(validationReport.getFieldsUnknown());
+
+			String msg = null;
+			if (validationReport.valid())
 			{
-				if (it.next().getKey().toLowerCase().startsWith("dataset_"))
-				{
-					it.remove();
-				}
+				wizard.setFile(file);
+				msg = "File is validated and can be imported.";
 			}
-		}
-
-		Map<String, Boolean> dataSetsImportable = validateDataSetInstances(fileRepositoryCollectionFactory, file);
-
-		// determine if validation succeeded
-		boolean ok = true;
-		if (entitiesImportable != null)
-		{
-			for (Boolean b : entitiesImportable.values())
+			else
 			{
-				ok = ok & b;
+				wizard.setValidationMessage("File did not pass validation see results below. Please resolve the errors and try again.");
 			}
 
-			for (Collection<String> fields : validationReport.getFieldsRequired().values())
-			{
-				ok = ok & (fields == null || fields.isEmpty());
-			}
-		}
-
-		if (dataSetsImportable != null)
-		{
-			for (Boolean b : dataSetsImportable.values())
-			{
-				ok = ok & b;
-			}
-		}
-
-		String msg = null;
-		if (ok)
-		{
-			wizard.setFile(file);
-			msg = "File is validated and can be imported.";
+			return msg;
 		}
 		else
 		{
-			wizard.setValidationMessage("File did not pass validation see results below. Please resolve the errors and try again.");
+            System.out.println("Using the existing OMX importer");
+
+            // validate entity sheets
+			EntitiesValidationReport validationReport = entitiesValidator.validate(file);
+
+			// remove data sheets
+			Map<String, Boolean> entitiesImportable = validationReport.getSheetsImportable();
+			if (entitiesImportable != null)
+			{
+				for (Iterator<Entry<String, Boolean>> it = entitiesImportable.entrySet().iterator(); it.hasNext();)
+				{
+					if (it.next().getKey().toLowerCase().startsWith("dataset_"))
+					{
+						it.remove();
+					}
+				}
+			}
+
+			Map<String, Boolean> dataSetsImportable = validateDataSetInstances(fileRepositoryCollectionFactory, file);
+
+			// determine if validation succeeded
+			boolean ok = true;
+			if (entitiesImportable != null)
+			{
+				for (Boolean b : entitiesImportable.values())
+				{
+					ok = ok & b;
+				}
+
+				for (Collection<String> fields : validationReport.getFieldsRequired().values())
+				{
+					ok = ok & (fields == null || fields.isEmpty());
+				}
+			}
+
+			if (dataSetsImportable != null)
+			{
+				for (Boolean b : dataSetsImportable.values())
+				{
+					ok = ok & b;
+				}
+			}
+
+			String msg = null;
+			if (ok)
+			{
+				wizard.setFile(file);
+				msg = "File is validated and can be imported.";
+			}
+			else
+			{
+				wizard.setValidationMessage("File did not pass validation see results below. Please resolve the errors and try again.");
+			}
+
+			// if no error, set prognosis, set file, and continue
+			wizard.setEntitiesImportable(entitiesImportable);
+			wizard.setDataImportable(dataSetsImportable);
+			wizard.setFieldsDetected(validationReport.getFieldsImportable());
+			wizard.setFieldsRequired(validationReport.getFieldsRequired());
+			wizard.setFieldsAvailable(validationReport.getFieldsAvailable());
+			wizard.setFieldsUnknown(validationReport.getFieldsUnknown());
+
+			return msg;
 		}
-
-		// if no error, set prognosis, set file, and continue
-		wizard.setEntitiesImportable(entitiesImportable);
-		wizard.setDataImportable(dataSetsImportable);
-		wizard.setFieldsDetected(validationReport.getFieldsImportable());
-		wizard.setFieldsRequired(validationReport.getFieldsRequired());
-		wizard.setFieldsAvailable(validationReport.getFieldsAvailable());
-		wizard.setFieldsUnknown(validationReport.getFieldsUnknown());
-
-		return msg;
 	}
 
 	private Map<String, Boolean> validateDataSetInstances(

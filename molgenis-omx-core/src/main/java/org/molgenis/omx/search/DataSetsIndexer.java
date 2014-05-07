@@ -12,9 +12,9 @@ public interface DataSetsIndexer
 {
 	void index();
 
-	void indexDataSets(List<Integer> datasetIds);
+	void indexDataSets(List<Object> datasetIds);
 
-	void indexProtocols(List<Integer> protocolIds);
+	void indexProtocols(List<Object> protocolIds);
 
 	/**
 	 * Check if there is an indexing job running
@@ -22,4 +22,6 @@ public interface DataSetsIndexer
 	 * @return
 	 */
 	public boolean isIndexingRunning();
+
+	void indexProtocolsSynced(List<Object> protocolIds);
 }

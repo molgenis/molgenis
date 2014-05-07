@@ -5,7 +5,14 @@
 	var self = molgenis.dataexplorer.wizard = molgenis.dataexplorer.wizard || {};
 
 	var restApi = new molgenis.RestClient();
-	
+	var wizardTitle = "";
+
+    self.setWizardTitle = function setWizardTitle(title) {
+        if(title !== undefined) {
+            wizardTitle = title;
+        }
+    }
+
 	self.openFilterWizardModal = function(entityMetaData, attributeFilters) {
 		var modal = createFilterWizardModal();
 		createFilterWizardContent(entityMetaData, attributeFilters, modal);
@@ -19,7 +26,9 @@
 			items.push('<div class="modal large hide" id="filter-wizard-modal" tabindex="-1">');
 			items.push('<div class="modal-header">');
 			items.push('<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>');
-			items.push('<h3>Filter Wizard</h3>');
+            items.push('<h3>');
+            items.push(wizardTitle);
+            items.push('</h3>');
 			items.push('</div>');
 			items.push('<div class="modal-body">');
 			items.push('<div class="filter-wizard">');
@@ -38,11 +47,11 @@
 			items.push('<a href="#" class="btn btn-primary filter-wizard-apply-btn" data-dismiss="modal">Apply</a>');
 			items.push('</div>');
 			items.push('</div>');
-			
+
 			modal = $(items.join(''));
-			
+
 			modal.modal({'show': false});
-			
+
 			createFilterModalControls(modal);
 		}
 		return modal;
@@ -84,21 +93,26 @@
 		$.each(compoundAttributes, function(i, compoundAttribute) {
 			var tabId = compoundAttribute.name + '-tab';
 			var label = compoundAttribute.label || compoundAttribute.name;
-			listItems.push('<li' + (i === 0 ? ' class="active"' : '') + '><a href="#' + tabId + '" data-toggle="tab">' + label + '</a></li>');
+			listItems.push('<li><a href="#' + tabId + '" data-toggle="tab">' + label + '</a></li>');
 			
 			var pane = $('<div class="tab-pane' + (i === 0 ? ' active"' : '') + '" id="' + tabId + '">');
 			var paneContainer = $('<div class="well"></div>');
-			pane.append(paneContainer);
 			$.each(compoundAttribute.attributes, function(i, attribute) {
 				if(attribute.fieldType !== 'COMPOUND') {
-					paneContainer.append(molgenis.dataexplorer.createFilterControls(attribute, attributeFilters[attribute.href]));
+					paneContainer.append(molgenis.dataexplorer.createFilterControls(attribute, attributeFilters[attribute.href], true));
 				}
 			});
+			pane.append(paneContainer);
 			paneItems.push(pane);
 		});
 		
-		$('.wizard-steps', wizard).html(listItems.join(''));
-		$('.tab-content', wizard).html(paneItems);
+		if(compoundAttributes.length > 1){
+            $('.wizard-steps').show();
+            $('.wizard-steps', wizard).html(listItems.join(''));
+        }else{
+            $('.wizard-steps').hide();
+        }
+        $('.tab-content', wizard).html(paneItems);
 		
 		wizard.bootstrapWizard({
 	   		tabClass: 'bwizard-steps',
@@ -107,7 +121,7 @@
 	   			var $current = index+1;
 	   			
 	   			// If it's the last tab then hide the last button and show the finish instead
-	   			if($total == 1) {
+	   			if($total === 1) {
 	   				wizard.find('.pager').hide();
 	   			} else if($current === 1) {
 	   				wizard.find('.pager .previous').hide();
@@ -115,11 +129,17 @@
 	   			} else if($current > 1 && $current < $total) {
 	   				wizard.find('.pager .previous').show();
 	   				wizard.find('.pager .next').show();
-	   			} else {
+	   			} else if($current === $total && $current>1) {
 	   				wizard.find('.pager .previous').show();
 	   				wizard.find('.pager .next').hide();
+	   			} else {
+	   				wizard.find('.pager .previous').hide();
+	   				wizard.find('.pager .next').hide();
 	   			}
-	   		}
+	   		},
+	   		onNext: function(tab, navigation, index) {
+	   			// BugFix: Don't remove this empty function
+			}
 		});
 	}
 })($, window.top.molgenis = window.top.molgenis || {});	

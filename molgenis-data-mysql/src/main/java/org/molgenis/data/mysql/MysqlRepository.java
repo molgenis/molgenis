@@ -1,8 +1,11 @@
 package org.molgenis.data.mysql;
 
 import java.io.IOException;
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.sql.DataSource;
 
@@ -12,56 +15,49 @@ import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.*;
 import org.molgenis.model.MolgenisModelException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 
-public class MysqlRepository implements Repository, Writable, Queryable, Manageable
+public class MysqlRepository implements Repository, Writable, Queryable, Manageable, CrudRepository
 {
 	public static final int BATCH_SIZE = 100000;
-	EntityMetaData metaData;
-	DataSource ds;
+	private EntityMetaData metaData;
+	private MysqlRepositoryCollection repositoryCollection;
+	private DataSource ds;
+	private JdbcTemplate jdbcTemplate;
 
-	public MysqlRepository(DataSource ds, EntityMetaData metaData)
+	protected MysqlRepository(MysqlRepositoryCollection collection, EntityMetaData metaData)
 	{
-		assert metaData != null && ds != null;
+		if (metaData == null) throw new IllegalArgumentException("DataSource is null");
+		if (metaData == null) throw new IllegalArgumentException("metaData is null");
 		this.metaData = metaData;
-		this.ds = ds;
+		this.repositoryCollection = collection;
+		this.ds = collection.getDataSource();
+		this.jdbcTemplate = new JdbcTemplate(ds);
+	}
+
+	@Autowired
+	public void setDataSource(DataSource dataSource)
+	{
+		this.ds = dataSource;
+		this.jdbcTemplate = new JdbcTemplate(ds);
+		System.out.println("set:" + dataSource);
 	}
 
 	@Override
 	public void drop()
 	{
-		Connection connection = null;
-		try
+		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 		{
-			connection = ds.getConnection();
-			Statement stmt = connection.createStatement();
-			// drop mref tables
-			for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
-				if (att.getDataType() == MolgenisFieldTypes.MREF)
-				{
-					stmt.execute("DROP TABLE IF EXISTS " + getEntityMetaData().getName() + "_" + att.getName());
-				}
-			// drop table
-			stmt.execute(this.getDropSql());
-			stmt.close();
-		}
-		catch (Exception e)
-		{
-			throw new RuntimeException(e);
-		}
-		finally
-		{
-			if (connection != null)
+			if (att.getDataType() instanceof MrefField)
 			{
-				try
-				{
-					connection.close();
-				}
-				catch (SQLException e)
-				{
-					e.printStackTrace();
-				}
+				jdbcTemplate.execute("DROP TABLE IF EXISTS " + getEntityMetaData().getName() + "_" + att.getName());
 			}
 		}
+		jdbcTemplate.execute(this.getDropSql());
 	}
 
 	protected String getDropSql()
@@ -72,38 +68,25 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 	@Override
 	public void create()
 	{
-		Connection connection = null;
 		try
 		{
-			connection = ds.getConnection();
-			Statement stmt = connection.createStatement();
-			stmt.execute(this.getCreateSql());
+			jdbcTemplate.execute(this.getCreateSql());
+			for (String fkeySql : this.getCreateFKeySql())
+				jdbcTemplate.execute(fkeySql);
 			// add mref tables
 			for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
-				if (att.getDataType() == MolgenisFieldTypes.MREF)
+			{
+				if (att.getDataType() instanceof MrefField)
 				{
-					stmt.execute(this.getMrefCreateSql(att));
+					jdbcTemplate.execute(this.getMrefCreateSql(att));
 				}
-			stmt.close();
+			}
+
 		}
 		catch (Exception e)
 		{
+			e.printStackTrace();
 			throw new RuntimeException(e);
-		}
-		finally
-		{
-			if (connection != null)
-			{
-				try
-				{
-					connection.close();
-				}
-				catch (SQLException e)
-				{
-					e.printStackTrace();
-					throw new RuntimeException(e);
-				}
-			}
 		}
 	}
 
@@ -114,7 +97,8 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 				+ " " + idAttribute.getDataType().getMysqlType() + " NOT NULL, " + att.getName() + " "
 				+ att.getRefEntity().getIdAttribute().getDataType().getMysqlType() + " NOT NULL, FOREIGN KEY ("
 				+ idAttribute.getName() + ") REFERENCES " + getEntityMetaData().getName() + "(" + idAttribute.getName()
-				+ "));";
+				+ ") ON DELETE CASCADE, FOREIGN KEY (" + att.getName() + ") REFERENCES " + att.getRefEntity().getName()
+				+ "(" + att.getRefEntity().getIdAttribute().getName() + ") ON DELETE CASCADE);";
 	}
 
 	protected String getCreateSql() throws MolgenisModelException
@@ -122,11 +106,11 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 		String sql = "CREATE TABLE IF NOT EXISTS " + getEntityMetaData().getName() + "(";
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 		{
-			if (att.getDataType() != MolgenisFieldTypes.MREF)
+			if (!(att.getDataType() instanceof MrefField))
 			{
 				sql += att.getName() + " ";
 				// xref adopt type of the identifier of referenced entity
-				if (att.getDataType().equals(MolgenisFieldTypes.XREF))
+				if (att.getDataType() instanceof XrefField)
 				{
 					sql += att.getRefEntity().getIdAttribute().getDataType().getMysqlType();
 				}
@@ -149,24 +133,30 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 		}
 		// primary key is first attribute unless otherwise indicate
 		AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
-		if (idAttribute.getDataType() == MolgenisFieldTypes.XREF
-				|| idAttribute.getDataType() == MolgenisFieldTypes.MREF) throw new RuntimeException("primary key("
-				+ getEntityMetaData().getName() + "." + idAttribute.getName() + ") cannot be XREF or MREF");
+		if (idAttribute.getDataType() instanceof XrefField || idAttribute.getDataType() instanceof MrefField) throw new RuntimeException(
+				"primary key(" + getEntityMetaData().getName() + "." + idAttribute.getName()
+						+ ") cannot be XREF or MREF");
 		if (idAttribute.isNillable() == true) throw new RuntimeException("primary key(" + getEntityMetaData().getName()
 				+ "." + idAttribute.getName() + ") must be NOT NULL");
 		sql += "PRIMARY KEY (" + getEntityMetaData().getIdAttribute().getName() + ")";
 
+		// close
+		sql += ") ENGINE=InnoDB;";
+
+		return sql;
+	}
+
+	protected List<String> getCreateFKeySql()
+	{
+		List<String> sql = new ArrayList<String>();
 		// foreign keys
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 			if (att.getDataType().equals(MolgenisFieldTypes.XREF))
 			{
-				sql += ", FOREIGN KEY (" + att.getName() + ") REFERENCES " + att.getRefEntity().getName() + "("
-						+ att.getRefEntity().getIdAttribute().getName() + ")";
+				sql.add("ALTER TABLE " + getEntityMetaData().getName() + " ADD FOREIGN KEY (" + att.getName()
+						+ ") REFERENCES " + att.getRefEntity().getName() + "("
+						+ att.getRefEntity().getIdAttribute().getName() + ")");
 			}
-
-		// close
-		sql += ") ENGINE=InnoDB;";
-
 		return sql;
 	}
 
@@ -219,12 +209,11 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 	}
 
 	@Override
-	public Integer add(Entity entity)
+	public void add(Entity entity)
 	{
 		if (entity == null) throw new RuntimeException("MysqlRepository.add() failed: entity was null");
 		this.add(Arrays.asList(new Entity[]
 		{ entity }));
-		return 1;
 	}
 
 	protected String getInsertSql()
@@ -232,7 +221,7 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 		String sql = "INSERT INTO " + this.getName() + " (";
 		String params = "";
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
-			if (att.getDataType() != MolgenisFieldTypes.MREF)
+			if (!(att.getDataType() instanceof MrefField))
 			{
 				sql += att.getName() + ", ";
 				params += "?, ";
@@ -247,121 +236,141 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 	}
 
 	@Override
-	public void add(Iterable<? extends Entity> entities)
+	public Integer add(Iterable<? extends Entity> entities)
 	{
-		Connection connection = null;
-		try
-		{
-			connection = ds.getConnection();
-			PreparedStatement ps = connection.prepareStatement(this.getInsertSql());
-			int count = 0;
+		AtomicInteger count = new AtomicInteger(0);
 
-			Map<String, List<Entity>> mrefs = new HashMap<String, List<Entity>>();
-			AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
-			for (Entity e : entities)
+		// TODO, split in subbatches
+		final List<Entity> batch = new ArrayList<Entity>();
+		if (entities != null) for (Entity e : entities)
+		{
+			batch.add(e);
+			count.addAndGet(1);
+		}
+		final AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
+		final Map<String, List<Entity>> mrefs = new HashMap<String, List<Entity>>();
+
+		jdbcTemplate.batchUpdate(this.getInsertSql(), new BatchPreparedStatementSetter()
+		{
+			@Override
+			public void setValues(PreparedStatement preparedStatement, int rowIndex) throws SQLException
 			{
-				int i = 1;
+				int fieldIndex = 1;
 				for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 				{
 					// create the mref records
-					if (att.getDataType() == MolgenisFieldTypes.MREF)
+					if (att.getDataType() instanceof MrefField)
 					{
 						if (mrefs.get(att.getName()) == null) mrefs.put(att.getName(), new ArrayList<Entity>());
-						if (e.get(att.getName()) != null) for (Object val : e.getList(att.getName()))
+						if (batch.get(rowIndex).get(att.getName()) != null)
 						{
-							Entity mref = new MapEntity();
-							mref.set(idAttribute.getName(), e.get(idAttribute.getName()));
-							mref.set(att.getName(), val);
-							mrefs.get(att.getName()).add(mref);
+							for (Object val : batch.get(rowIndex).getList(att.getName()))
+							{
+								Entity mref = new MapEntity();
+								mref.set(idAttribute.getName(), batch.get(rowIndex).get(idAttribute.getName()));
+								mref.set(att.getName(), val);
+								mrefs.get(att.getName()).add(mref);
+							}
 						}
 					}
 					else
 					{
-						if (e.get(att.getName()) == null)
+						// default value, if any
+						if (batch.get(rowIndex).get(att.getName()) == null)
 						{
-							ps.setObject(i++, att.getDefaultValue());
+							preparedStatement.setObject(fieldIndex++, att.getDefaultValue());
 						}
 						else
 						{
-							if (att.getDataType() == MolgenisFieldTypes.XREF)
+							if (att.getDataType() instanceof XrefField)
 							{
-								ps.setObject(i++,
-										att.getRefEntity().getIdAttribute().getDataType().convert(e.get(att.getName())));
+								preparedStatement.setObject(fieldIndex++, att.getRefEntity().getIdAttribute()
+										.getDataType().convert(batch.get(rowIndex).get(att.getName())));
 							}
 							else
 							{
-								ps.setObject(i++, att.getDataType().convert(e.get(att.getName())));
+								preparedStatement.setObject(fieldIndex++,
+										att.getDataType().convert(batch.get(rowIndex).get(att.getName())));
 							}
 						}
 					}
 				}
-				ps.addBatch();
-				count++;
-				if (count > BATCH_SIZE)
-				{
-					ps.executeBatch();
-					ps.clearBatch();
-					count = 0;
-
-					// add mrefs too
-					for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
-						if (att.getDataType() == MolgenisFieldTypes.MREF)
-						{
-							this.addMref(mrefs.get(att.getName()), connection, att);
-						}
-				}
 			}
 
-			if (count > 0)
+			@Override
+			public int getBatchSize()
 			{
-				ps.executeBatch();
+				return batch.size();
+			}
+		});
 
-				// add mrefs too
-				for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
-					if (att.getDataType() == MolgenisFieldTypes.MREF)
-					{
-						addMref(mrefs.get(att.getName()), connection, att);
-					}
-			}
-			ps.close();
-		}
-		catch (Exception e)
+		// add mrefs as well
+		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 		{
-			throw new RuntimeException(e);
-		}
-		finally
-		{
-			if (connection != null)
+			if (att.getDataType() instanceof MrefField)
 			{
-				try
-				{
-					connection.close();
-				}
-				catch (SQLException e)
-				{
-					e.printStackTrace();
-					throw new RuntimeException(e);
-				}
+				addMrefs(mrefs.get(att.getName()), att);
 			}
 		}
+
+		return count.get();
 	}
 
-	private void addMref(List<Entity> mrefs, Connection connection, AttributeMetaData att) throws SQLException
+	private void removeMrefs(final List<Object> ids, final AttributeMetaData att)
 	{
-		AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
+		final AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
+		String mrefSql = "DELETE FROM " + getEntityMetaData().getName() + "_" + att.getName() + " WHERE "
+				+ idAttribute.getName() + "= ?";
+		jdbcTemplate.batchUpdate(mrefSql, new BatchPreparedStatementSetter()
+		{
+			@Override
+			public void setValues(PreparedStatement preparedStatement, int i) throws SQLException
+			{
+				preparedStatement.setObject(1, ids.get(i));
+			}
 
+			@Override
+			public int getBatchSize()
+			{
+				return ids.size();
+			}
+		});
+	}
+
+	private void addMrefs(final List<Entity> mrefs, final AttributeMetaData att)
+	{
+
+		final AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
+		final AttributeMetaData refAttribute = att.getRefEntity().getIdAttribute();
 		String mrefSql = "INSERT INTO " + getEntityMetaData().getName() + "_" + att.getName() + " ("
 				+ idAttribute.getName() + "," + att.getName() + ") VALUES (?,?)";
-		PreparedStatement ps2 = connection.prepareStatement(mrefSql);
-		for (Entity mref : mrefs)
+		jdbcTemplate.batchUpdate(mrefSql, new BatchPreparedStatementSetter()
 		{
-			ps2.setObject(1, mref.get(idAttribute.getName()));
-			ps2.setObject(2, mref.get(att.getName()));
-			ps2.addBatch();
-		}
-		ps2.executeBatch();
-		ps2.close();
-		mrefs.clear();
+			@Override
+			public void setValues(PreparedStatement preparedStatement, int i) throws SQLException
+			{
+				System.out.println("mref: " + mrefs.get(i).get(idAttribute.getName()) + ", "
+						+ mrefs.get(i).get(att.getName()));
+
+				preparedStatement.setObject(1, mrefs.get(i).get(idAttribute.getName()));
+				Object value = mrefs.get(i).get(att.getName());
+				if (value instanceof Entity)
+				{
+					preparedStatement.setObject(2,
+							refAttribute.getDataType().convert(((Entity) value).get(idAttribute.getName())));
+				}
+				else
+				{
+					preparedStatement.setObject(2, refAttribute.getDataType().convert(value));
+				}
+			}
+
+			@Override
+			public int getBatchSize()
+			{
+				return mrefs.size();
+			}
+		});
 	}
 
 	@Override
@@ -379,34 +388,9 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 	@Override
 	public long count(Query q)
 	{
-		Connection connection = null;
-		try
-		{
-			connection = ds.getConnection();
-			Statement stmt = connection.createStatement();
-			ResultSet rs = stmt.executeQuery(getCountSql(q));
-			rs.next();
-			int rowCount = rs.getInt(1);
-			rs.close();
-			stmt.close();
-			return rowCount;
-		}
-		catch (Exception e)
-		{
-			throw new RuntimeException(e);
-		}
-		finally
-		{
-			try
-			{
-				connection.close();
-			}
-			catch (SQLException e)
-			{
-				e.printStackTrace();
-				throw new RuntimeException(e);
-			}
-		}
+		String sql = getCountSql(q);
+		System.out.println(sql);
+		return jdbcTemplate.queryForObject(sql, Long.class);
 	}
 
 	protected String getSelectSql(Query q)
@@ -420,16 +404,7 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 			if (count > 0) select += ", ";
 
 			// TODO needed when autoids are used to join
-			// if(att.getDataType() == MolgenisFieldTypes.XREF)
-			// {
-			// String refEntity = att.getRefEntity().getName();
-			// String refId = att.getRefEntity().getIdAttribute().getName();
-			// select += att.getName()+"."+refId+" AS "+att.getName();
-			// from += " LEFT JOIN "+refEntity+" AS "+att.getName()+" ON ("+refEntity+"."+refId+"=this."+att.getName();
-			// }
-			// else
-			// {
-			if (att.getDataType() == MolgenisFieldTypes.MREF)
+			if (att.getDataType() instanceof MrefField)
 			{
 				select += "GROUP_CONCAT(DISTINCT(" + att.getName() + "." + att.getName() + ")) AS " + att.getName();
 
@@ -444,65 +419,32 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 			count++;
 
 		}
-		String where = getWhereSql(q);
+
+		// from
 		String result = select + getFromSql();
-		if (where.length() > 0) result += " WHERE " + where;
+		// where
+		String where = getWhereSql(q);
+		if (where.length() > 0) result += " " + where;
+		// group by
 		if (select.contains("GROUP_CONCAT") && group.length() > 0) result += " GROUP BY " + group;
-		return result;
+		// order by
+		result += " " + getSortSql(q);
+		// limit
+		if (q.getPageSize() > 0) result += " LIMIT " + q.getPageSize();
+		if (q.getOffset() > 0) result += " OFFSET " + q.getOffset();
+		return result.trim();
 	}
 
 	@Override
 	public Iterable<Entity> findAll(Query q)
 	{
-		// TODO: add streaming/scalability not dependent on memory
-		List<Entity> result = new ArrayList<Entity>();
-		Connection connection = null;
-		try
-		{
-			connection = ds.getConnection();
-			Statement stmt = connection.createStatement();
-			ResultSet rs = stmt.executeQuery(getSelectSql(q));
-			while (rs.next())
-			{
-				Entity e = new MapEntity();
-				for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
-				{
-					if (att.getDataType() == MolgenisFieldTypes.MREF)
-					{
-						// TODO: convert to typed lists (or arrays?)
-						e.set(att.getName(), rs.getObject(att.getName()));
-					}
-					else if (att.getDataType() == MolgenisFieldTypes.XREF)
-					{
-						e.set(att.getName(),
-								att.getRefEntity().getIdAttribute().getDataType().convert(rs.getObject(att.getName())));
-					}
-					else
-					{
-						e.set(att.getName(), att.getDataType().convert(rs.getObject(att.getName())));
-					}
-				}
-				result.add(e);
-			}
+		String sql = getSelectSql(q);
 
-		}
-		catch (Exception e)
-		{
-			throw new RuntimeException(e);
-		}
-		finally
-		{
-			try
-			{
-				connection.close();
-			}
-			catch (SQLException e)
-			{
-				e.printStackTrace();
-				throw new RuntimeException(e);
-			}
-		}
-		return result;
+		// tmp:
+		System.out.println("query: " + q);
+		System.out.println("sql: " + sql);
+
+		return jdbcTemplate.query(sql, new EntityMapper());
 	}
 
 	@Override
@@ -514,37 +456,42 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 	@Override
 	public Entity findOne(Query q)
 	{
+		Iterator<Entity> iterator = findAll(q).iterator();
+		if (iterator.hasNext()) return iterator.next();
 		return null;
 	}
 
 	@Override
-	public Entity findOne(Integer id)
+	public Entity findOne(Object id)
+	{
+		if (id == null) return null;
+		return findOne(new QueryImpl().eq(getEntityMetaData().getIdAttribute().getName(), id));
+	}
+
+	@Override
+	public Iterable<Entity> findAll(Iterable<Object> ids)
+	{
+		if (ids == null) return new ArrayList();
+		return findAll(new QueryImpl().in(getEntityMetaData().getIdAttribute().getName(), ids));
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> findAll(Iterable<Object> ids, Class<E> clazz)
 	{
 		return null;
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Integer> ids)
+	public <E extends Entity> E findOne(Object id, Class<E> clazz)
 	{
-		return null;
-	}
-
-	@Override
-	public <E extends Entity> Iterable<E> findAll(Iterable<Integer> ids, Class<E> clazz)
-	{
-		return null;
-	}
-
-	@Override
-	public <E extends Entity> E findOne(Integer id, Class<E> clazz)
-	{
-		return null;
+		return findAll(Arrays.asList(new Object[]
+		{ id }), clazz).iterator().next();
 	}
 
 	@Override
 	public <E extends Entity> E findOne(Query q, Class<E> clazz)
 	{
-		return null;
+		return findAll(q, clazz).iterator().next();
 	}
 
 	@Override
@@ -558,7 +505,7 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 		String from = " FROM " + getEntityMetaData().getName() + " AS this";
 		AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
-			if (att.getDataType() == MolgenisFieldTypes.MREF)
+			if (att.getDataType() instanceof MrefField)
 			{
 				// extra join so we can filter on the mrefs
 				from += " LEFT JOIN " + getEntityMetaData().getName() + "_" + att.getName() + " AS " + att.getName()
@@ -576,8 +523,8 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 		String where = getWhereSql(q);
 		String from = getFromSql();
 		String idAttribute = getEntityMetaData().getIdAttribute().getName();
-		if (where.length() > 0) return "SELECT count(this." + idAttribute + ")" + from + " WHERE " + where;
-		return "SELECT count(this." + idAttribute + ")" + from;
+		if (where.length() > 0) return "SELECT COUNT(DISTINCT this." + idAttribute + ")" + from + " " + where;
+		return "SELECT COUNT(DISTINCT this." + idAttribute + ")" + from;
 	}
 
 	protected String getWhereSql(Query q)
@@ -588,6 +535,22 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 			String predicate = "";
 			switch (r.getOperator())
 			{
+				case SEARCH:
+					String search = "";
+					for (AttributeMetaData att : getEntityMetaData().getAttributes())
+					{
+						// TODO: other data types???
+						if (att.getDataType() instanceof StringField || att.getDataType() instanceof TextField)
+						{
+							search += " OR this." + att.getName() + " LIKE '%" + r.getValue() + "%'";
+						}
+						else
+						{
+							search += " OR CAST(this." + att.getName() + " as CHAR) LIKE '%" + r.getValue() + "%'";
+						}
+					}
+					if (search.length() > 0) result += "(" + search.substring(4) + ")";
+					break;
 				case AND:
 					break;
 				case NESTED:
@@ -597,15 +560,36 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 					result += " OR ";
 					break;
 				case IN:
-					throw new UnsupportedOperationException();
-					// break;
+					AttributeMetaData att = getEntityMetaData().getAttribute(r.getField());
+					String in = "'UNKNOWN VALUE'";
+					List<Object> values = new ArrayList<Object>();
+					if (!(r.getValue() instanceof List))
+					{
+						for (String str : r.getValue().toString().split(","))
+							values.add(str);
+					}
+					else
+					{
+						values.addAll((Collection<?>) r.getValue());
+					}
+					boolean quotes = att.getDataType() instanceof StringField || att.getDataType() instanceof TextField;
+					for (Object o : values)
+					{
+						if (quotes) in += ",'" + o + "'";
+						else in += "," + o;
+					}
+
+					if (att.getDataType() instanceof MrefField) result += att.getName() + "_filter." + r.getField()
+							+ " IN(" + in + ")";
+					else result += "this." + r.getField() + " IN(" + in + ")";
+					break;
 				default:
 					// comparable values...
-					AttributeMetaData att = getEntityMetaData().getAttribute(r.getField());
+					att = getEntityMetaData().getAttribute(r.getField());
 					if (att == null) throw new RuntimeException("Query failed: attribute '" + r.getField()
 							+ "' unknown");
 					FieldType type = att.getDataType();
-					if (type == MolgenisFieldTypes.MREF) predicate += att.getName() + "_filter." + r.getField();
+					if (type instanceof MrefField) predicate += att.getName() + "_filter." + r.getField();
 					else predicate += "this." + r.getField();
 					switch (r.getOperator())
 					{
@@ -634,7 +618,33 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 					result += predicate;
 			}
 		}
-		return result;
+		if (result.length() > 0) return "WHERE " + result.trim();
+		else return "";
+	}
+
+	protected String getSortSql(Query q)
+	{
+		String sortSql = "";
+		if (q.getSort() != null)
+		{
+			for (Sort.Order o : q.getSort())
+			{
+				AttributeMetaData att = getEntityMetaData().getAttribute(o.getProperty());
+				if (att.getDataType() instanceof MrefField) sortSql += ", " + att.getName();
+				else sortSql += ", " + att.getName();
+				if (o.getDirection().equals(Sort.Direction.DESC))
+				{
+					sortSql += " DESC";
+				}
+				else
+				{
+					sortSql += " ASC";
+				}
+			}
+
+			if (sortSql.length() > 0) sortSql = "ORDER BY " + sortSql.substring(2);
+		}
+		return sortSql;
 	}
 
 	private String formatValue(AttributeMetaData att, Object value)
@@ -652,5 +662,239 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 	public MysqlRepositoryQuery query()
 	{
 		return new MysqlRepositoryQuery(this);
+	}
+
+	@Override
+	public void update(Entity entity)
+	{
+		update(Arrays.asList(new Entity[]
+		{ entity }));
+	}
+
+	@Override
+	public void update(Iterable<? extends Entity> entities)
+	{
+		AtomicInteger count = new AtomicInteger(0);
+
+		// TODO, split in subbatches
+		final List<Entity> batch = new ArrayList<Entity>();
+		if (entities != null) for (Entity e : entities)
+		{
+			batch.add(e);
+			count.addAndGet(1);
+		}
+		final AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
+		final List<Object> ids = new ArrayList<Object>();
+		final Map<String, List<Entity>> mrefs = new HashMap<String, List<Entity>>();
+
+		jdbcTemplate.batchUpdate(this.getUpdateSql(), new BatchPreparedStatementSetter()
+		{
+			@Override
+			public void setValues(PreparedStatement preparedStatement, int rowIndex) throws SQLException
+			{
+				Entity e = batch.get(rowIndex);
+				System.out.println("updating: " + e);
+				Object idValue = idAttribute.getDataType().convert(e.get(idAttribute.getName()));
+				ids.add(idValue);
+				int fieldIndex = 1;
+				for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
+				{
+					// create the mref records
+					if (att.getDataType() instanceof MrefField)
+					{
+						if (mrefs.get(att.getName()) == null) mrefs.put(att.getName(), new ArrayList<Entity>());
+						if (e.get(att.getName()) != null) for (Object val : e.getList(att.getName()))
+						{
+							Entity mref = new MapEntity();
+							mref.set(idAttribute.getName(), idValue);
+							mref.set(att.getName(), val);
+							mrefs.get(att.getName()).add(mref);
+						}
+					}
+					else
+					{
+						// default value, if any
+						if (e.get(att.getName()) == null)
+						{
+							preparedStatement.setObject(fieldIndex++, att.getDefaultValue());
+						}
+						else
+						{
+							if (att.getDataType() instanceof XrefField)
+							{
+								Object value = e.get(att.getName());
+								if (value instanceof Entity)
+								{
+									preparedStatement.setObject(
+											fieldIndex++,
+											att.getRefEntity()
+													.getIdAttribute()
+													.getDataType()
+													.convert(
+															((Entity) value).get(att.getRefEntity().getIdAttribute()
+																	.getName())));
+								}
+								else
+								{
+									preparedStatement.setObject(fieldIndex++, att.getRefEntity().getIdAttribute()
+											.getDataType().convert(value));
+								}
+							}
+							else
+							{
+								preparedStatement.setObject(fieldIndex++,
+										att.getDataType().convert(e.get(att.getName())));
+							}
+						}
+					}
+				}
+				preparedStatement.setObject(fieldIndex++, idValue);
+			}
+
+			@Override
+			public int getBatchSize()
+			{
+				return batch.size();
+			}
+		});
+
+		// update mrefs
+		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
+		{
+			if (att.getDataType() instanceof MrefField)
+			{
+				removeMrefs(ids, att);
+				addMrefs(mrefs.get(att.getName()), att);
+			}
+		}
+
+		// return count.get();
+	}
+
+	protected String getUpdateSql()
+	{
+		// use (readonly) identifier
+		AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
+
+		// create sql
+		String sql = "UPDATE " + this.getName() + " SET ";
+		String params = "";
+		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
+			if (!(att.getDataType() instanceof MrefField))
+			{
+				sql += att.getName() + " = ?, ";
+			}
+		if (sql.endsWith(", "))
+		{
+			sql = sql.substring(0, sql.length() - 2);
+		}
+		sql += " WHERE " + idAttribute.getName() + "= ?";
+		return sql;
+	}
+
+	@Override
+	public void delete(Entity entity)
+	{
+		this.delete(Arrays.asList(new Entity[]
+		{ entity }));
+
+	}
+
+	@Override
+	public void delete(Iterable<? extends Entity> entities)
+	{
+		// todo, split in subbatchs
+		final List<Object> batch = new ArrayList<Object>();
+		for (Entity e : entities)
+			batch.add(e.getIdValue());
+		this.deleteById(batch);
+	}
+
+	public String getDeleteSql()
+	{
+		return "DELETE FROM " + getName() + " WHERE " + getEntityMetaData().getIdAttribute().getName() + " = ?";
+	}
+
+	@Override
+	public void deleteById(Object id)
+	{
+		this.deleteById(Arrays.asList(new Object[]
+		{ id }));
+	}
+
+	@Override
+	public void deleteById(Iterable<Object> ids)
+	{
+		final List<Object> idList = new ArrayList<Object>();
+		for (Object id : ids)
+			idList.add(id);
+
+		jdbcTemplate.batchUpdate(getDeleteSql(), new BatchPreparedStatementSetter()
+		{
+			@Override
+			public void setValues(PreparedStatement preparedStatement, int i) throws SQLException
+			{
+				preparedStatement.setObject(1, idList.get(i));
+			}
+
+			@Override
+			public int getBatchSize()
+			{
+				return idList.size();
+			}
+		});
+	}
+
+	@Override
+	public void deleteAll()
+	{
+		delete(this);
+	}
+
+	@Override
+	public void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	public MysqlRepositoryCollection getRepositoryCollection()
+	{
+		return repositoryCollection;
+	}
+
+	@Override
+	public AggregateResult aggregate(AttributeMetaData xAttr, AttributeMetaData yAttr, Query q)
+	{
+		throw new UnsupportedOperationException("not yet implemented");
+	}
+
+	private class EntityMapper implements RowMapper
+	{
+
+		@Override
+		public Entity mapRow(ResultSet resultSet, int i) throws SQLException
+		{
+			Entity e = new MysqlEntity(getEntityMetaData(), getRepositoryCollection());
+
+			for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
+			{
+				if (att.getDataType() instanceof MrefField)
+				{
+					// TODO: convert to typed lists (or arrays?)
+					e.set(att.getName(), resultSet.getObject(att.getName()));
+				}
+				else if (att.getDataType() instanceof XrefField)
+				{
+					e.set(att.getName(),
+							att.getRefEntity().getIdAttribute().getDataType()
+									.convert(resultSet.getObject(att.getName())));
+				}
+				else
+				{
+					e.set(att.getName(), att.getDataType().convert(resultSet.getObject(att.getName())));
+				}
+			}
+			return e;
+		}
 	}
 }

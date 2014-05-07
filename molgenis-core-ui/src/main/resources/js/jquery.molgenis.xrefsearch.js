@@ -56,6 +56,10 @@
 		var items = [];
 		items.push('<div class="row-fluid">');
 		
+		if(lookupAttributeNames.length === 0){
+			lookupAttributeNames.push(entityMetaData.labelAttribute);
+		}
+		
 		if (lookupAttributeNames.length > 0) {
 			var width = Math.round(12 / lookupAttributeNames.length);// 12 is full width in px
 			var abbr = Math.round(100 / lookupAttributeNames.length);// 100 is full width in characters (if you don't change the font size)
@@ -134,7 +138,7 @@
 			    addQueryPartSelect(container, attributeMetaData, options);
 		});
 		
-		return this;
+		return container;
 	};
 	
 }($, window.top.molgenis = window.top.molgenis || {}));

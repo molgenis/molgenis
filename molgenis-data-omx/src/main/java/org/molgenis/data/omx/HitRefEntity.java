@@ -72,7 +72,7 @@ public class HitRefEntity extends AbstractEntity
 	}
 
 	@Override
-	public Integer getIdValue()
+	public Object getIdValue()
 	{
 		return getInt(getEntityMetaData().getIdAttribute().getName());
 	}
@@ -101,7 +101,8 @@ public class HitRefEntity extends AbstractEntity
 		}
 		else
 		{
-			return getEntityFromDataService().get(attributeName);
+			Entity entity = getEntityFromDataService();
+			return entity != null ? entity.get(attributeName) : null;
 		}
 	}
 

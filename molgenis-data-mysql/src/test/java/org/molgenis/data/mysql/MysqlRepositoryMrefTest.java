@@ -19,13 +19,15 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		DefaultEntityMetaData refEntity = new DefaultEntityMetaData("StringTarget2").setLabelAttribute("label").setIdAttribute("identifier");
+		DefaultEntityMetaData refEntity = new DefaultEntityMetaData("StringTarget2").setLabelAttribute("label")
+				.setIdAttribute("identifier");
 		refEntity.addAttribute("identifier").setNillable(false);
 
 		DefaultEntityMetaData refEntity2 = new DefaultEntityMetaData("IntTarget2").setIdAttribute("identifier");
 		refEntity2.addAttribute("identifier").setDataType(MolgenisFieldTypes.INT).setNillable(false);
 
-		DefaultEntityMetaData varcharMD = new DefaultEntityMetaData("MrefTest").setLabel("ref Test").setIdAttribute("identifier");
+		DefaultEntityMetaData varcharMD = new DefaultEntityMetaData("MrefTest").setLabel("ref Test").setIdAttribute(
+				"identifier");
 		varcharMD.addAttribute("identifier").setNillable(false);
 		varcharMD.addAttribute("stringRef").setDataType(MolgenisFieldTypes.MREF).setRefEntity(refEntity)
 				.setNillable(false);
@@ -48,21 +50,20 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 	@Test
 	public void test() throws Exception
 	{
+		coll.drop(getMetaData().getName());
+		coll.drop(getMetaData().getAttribute("stringRef").getRefEntity().getName());
+		coll.drop(getMetaData().getAttribute("intRef").getRefEntity().getName());
+
 		// create
-		MysqlRepository mrefRepo = new MysqlRepository(ds, getMetaData());
-		Assert.assertEquals(mrefRepo.getCreateSql(), createSql());
+		MysqlRepository stringRepo = coll.add(getMetaData().getAttribute("stringRef").getRefEntity());
+		MysqlRepository intRepo = coll.add(getMetaData().getAttribute("intRef").getRefEntity());
+		MysqlRepository mrefRepo = coll.add(getMetaData());
 
-		MysqlRepository stringRepo = new MysqlRepository(ds, getMetaData().getAttribute("stringRef").getRefEntity());
-		MysqlRepository intRepo = new MysqlRepository(ds, getMetaData().getAttribute("intRef").getRefEntity());
-
-		mrefRepo.drop();
-		stringRepo.drop();
-		intRepo.drop();
+		Assert.assertEquals(stringRepo.count(), 0);
+		Assert.assertEquals(intRepo.count(), 0);
+		Assert.assertEquals(mrefRepo.count(), 0);
 
 		Assert.assertEquals(mrefRepo.getCreateSql(), createSql());
-		stringRepo.create();
-		intRepo.create();
-		mrefRepo.create();
 
 		// add records
 		Entity entity = new MapEntity();
@@ -95,18 +96,28 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 		logger.debug("mref: " + entity);
 		mrefRepo.add(entity);
 
+		Assert.assertEquals(mrefRepo.count(), 2);
+
 		Assert.assertEquals(
 				mrefRepo.getSelectSql(new QueryImpl()),
 				"SELECT this.identifier, GROUP_CONCAT(DISTINCT(stringRef.stringRef)) AS stringRef, GROUP_CONCAT(DISTINCT(intRef.intRef)) AS intRef FROM MrefTest AS this LEFT JOIN MrefTest_stringRef AS stringRef_filter ON (this.identifier = stringRef_filter.identifier) LEFT JOIN MrefTest_stringRef AS stringRef ON (this.identifier = stringRef.identifier) LEFT JOIN MrefTest_intRef AS intRef_filter ON (this.identifier = intRef_filter.identifier) LEFT JOIN MrefTest_intRef AS intRef ON (this.identifier = intRef.identifier) GROUP BY this.identifier");
 		for (Entity e : mrefRepo.findAll(new QueryImpl().eq("identifier", "one")))
 		{
-			logger.debug("found: " + e);
-			Assert.assertEquals(e.get("stringRef"), "ref1,ref2");
+			logger.info("found: " + e);
+			Assert.assertEquals(e.getString("stringRef"), "ref1,ref2");
 			Assert.assertEquals(e.getList("stringRef"), Arrays.asList(new String[]
 			{ "ref1", "ref2" }));
-			Assert.assertEquals(e.get("intRef"), "1,2");
+			Assert.assertEquals(e.getString("intRef"), "1,2");
 			Assert.assertEquals(e.getIntList("intRef"), Arrays.asList(new Integer[]
 			{ 1, 2 }));
+
+			List<Entity> result = new ArrayList<Entity>();
+			for (Entity e2 : e.getEntities("stringRef"))
+			{
+				result.add(e2);
+			}
+			Assert.assertEquals(result.get(0).getString("identifier"), "ref1");
+			Assert.assertEquals(result.get(1).getString("identifier"), "ref2");
 		}
 
 		for (Entity e : mrefRepo.findAll(new QueryImpl().eq("stringRef", "ref3")))
@@ -126,6 +137,16 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 			logger.debug("found: " + e);
 			Assert.assertEquals(e.get("intRef"), "1,2");
 		}
+
+		// update
+
+        Entity e = mrefRepo.findOne("one");
+        e.set("stringRef","ref2,ref3");
+        mrefRepo.update(e);
+
+        e = mrefRepo.findOne("one");
+        Assert.assertEquals(e.getString("stringRef"),"ref2,ref3");
+
 
 		// verify not null error
 
@@ -149,7 +170,7 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 			eList.add(entity);
 		}
 
-		MysqlRepository mrefRepo = new MysqlRepository(ds, getMetaData());
+		MysqlRepository mrefRepo = (MysqlRepository) coll.getRepositoryByEntityName(this.getMetaData().getName());
 		long startTime = System.currentTimeMillis();
 		mrefRepo.add(eList);
 		long stopTime = System.currentTimeMillis();

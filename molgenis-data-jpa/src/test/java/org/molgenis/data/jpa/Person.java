@@ -3,21 +3,25 @@ package org.molgenis.data.jpa;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.persistence.annotations.UuidGenerator;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.AbstractMetaDataEntity;
 
 import com.google.common.collect.Lists;
 
+import javax.persistence.GeneratedValue;
+
 @javax.persistence.Entity
 @javax.xml.bind.annotation.XmlAccessorType(javax.xml.bind.annotation.XmlAccessType.FIELD)
+@UuidGenerator(name="PERSON_ID_GEN")
 public class Person extends AbstractMetaDataEntity
 {
 	private static final long serialVersionUID = 1L;
 
 	@javax.persistence.Id
-	@javax.persistence.GeneratedValue(strategy = javax.persistence.GenerationType.AUTO)
-	private Integer id;
+    @GeneratedValue(generator="PERSON_ID_GEN")
+	private String id;
 	private String firstName;
 	private String lastName;
 	private Integer age;
@@ -38,6 +42,14 @@ public class Person extends AbstractMetaDataEntity
 		this();
 		this.firstName = firstName;
 		this.lastName = lastName;
+	}
+
+	public Person(String firstName, String lastName, Integer age)
+	{
+		this();
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.age = age;
 	}
 
 	public String getFirstName()
@@ -70,12 +82,12 @@ public class Person extends AbstractMetaDataEntity
 		this.age = age;
 	}
 
-	public Integer getId()
+	public String getId()
 	{
 		return id;
 	}
 
-	public void setId(Integer id)
+	public void setId(String id)
 	{
 		this.id = id;
 	}
@@ -141,7 +153,7 @@ public class Person extends AbstractMetaDataEntity
 	}
 
 	@Override
-	public Integer getIdValue()
+	public Object getIdValue()
 	{
 		return getId();
 	}

@@ -274,5 +274,24 @@ public class EntitiesValidatorImpl implements EntitiesValidator
 		{
 			return importOrder;
 		}
+
+        @Override
+        public boolean valid()
+        {// determine if validation succeeded
+            boolean ok = true;
+            if (sheetsImportable != null)
+            {
+                for (Boolean b : sheetsImportable.values())
+                {
+                    ok = ok & b;
+                }
+
+                for (Collection<String> fields : getFieldsRequired().values())
+                {
+                    ok = ok & (fields == null || fields.isEmpty());
+                }
+            }
+            return ok;
+        }
 	}
 }

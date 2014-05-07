@@ -105,30 +105,36 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 	@Transactional(readOnly = true)
 	public StudyDefinition getStudyDefinitionDraftForCurrentUser(String catalogId) throws UnknownCatalogException
 	{
-		List<StudyDefinition> studyDefinitions = studyManagerService.getStudyDefinitions(
-				SecurityUtils.getCurrentUsername(), StudyDefinition.Status.DRAFT);
+		List<StudyDefinition> studyDefinitions = studyManagerService.getStudyDefinitions(SecurityUtils
+				.getCurrentUsername());
+
 		for (StudyDefinition studyDefinition : studyDefinitions)
 		{
-			Catalog catalogOfStudyDefinition;
-			try
+			if (studyDefinition.getStatus() == StudyDefinition.Status.DRAFT)
 			{
-				catalogOfStudyDefinition = catalogService.getCatalogOfStudyDefinition(studyDefinition.getId());
-			}
-			catch (UnknownCatalogException e)
-			{
-				logger.error("", e);
-				throw new RuntimeException(e);
-			}
-			catch (UnknownStudyDefinitionException e)
-			{
-				logger.error("", e);
-				throw new RuntimeException(e);
-			}
-			if (catalogOfStudyDefinition.getId().equals(catalogId))
-			{
-				return studyDefinition;
+				Catalog catalogOfStudyDefinition;
+				try
+				{
+					catalogOfStudyDefinition = catalogService.getCatalogOfStudyDefinition(studyDefinition.getId());
+				}
+				catch (UnknownCatalogException e)
+				{
+					logger.error("", e);
+					throw new RuntimeException(e);
+				}
+				catch (UnknownStudyDefinitionException e)
+				{
+					logger.error("", e);
+					throw new RuntimeException(e);
+				}
+
+				if (catalogOfStudyDefinition.getId().equals(catalogId))
+				{
+					return studyDefinition;
+				}
 			}
 		}
+
 		return null;
 	}
 
@@ -145,13 +151,8 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 	@Transactional(readOnly = true)
 	public List<StudyDefinition> getStudyDefinitionsForCurrentUser()
 	{
-		List<StudyDefinition> studyDefinitions = new ArrayList<StudyDefinition>();
 		String username = SecurityUtils.getCurrentUsername();
-		for (StudyDefinition.Status status : StudyDefinition.Status.values())
-		{
-			studyDefinitions.addAll(studyManagerService.getStudyDefinitions(username, status));
-		}
-		return studyDefinitions;
+		return studyManagerService.getStudyDefinitions(username);
 	}
 
 	@Override
@@ -161,7 +162,8 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 	{
 		MolgenisUser user = molgenisUserService.getUser(SecurityUtils.getCurrentUsername());
 		StudyDefinition studyDefinition = studyManagerService.getStudyDefinition(id.toString());
-		if (!studyDefinition.getAuthorEmail().equals(user.getEmail()))
+
+		if (!studyDefinition.getAuthorEmail().endsWith(user.getEmail()))
 		{
 			throw new MolgenisDataAccessException("Access denied to study definition [" + id + "]");
 		}
@@ -291,7 +293,14 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 
 		try
 		{
-			studyManagerService.updateStudyDefinition(studyDefinition);
+			if (Iterables.isEmpty(newCatalogItems))
+			{
+				// TOD remove StudyDefinition, empty item list is invalid according to the xsd
+			}
+			else
+			{
+				studyManagerService.updateStudyDefinition(studyDefinition);
+			}
 		}
 		catch (UnknownStudyDefinitionException e)
 		{

@@ -2,6 +2,7 @@ package org.molgenis.security;
 
 import java.util.List;
 
+import javax.servlet.Filter;
 import javax.sql.DataSource;
 
 import org.molgenis.data.DataService;
@@ -9,6 +10,11 @@ import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.MolgenisPermissionServiceImpl;
+import org.molgenis.security.token.DataServiceTokenService;
+import org.molgenis.security.token.TokenAuthenticationFilter;
+import org.molgenis.security.token.TokenAuthenticationProvider;
+import org.molgenis.security.token.TokenGenerator;
+import org.molgenis.security.token.TokenService;
 import org.molgenis.security.user.MolgenisUserDetailsChecker;
 import org.molgenis.security.user.MolgenisUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +25,7 @@ import org.springframework.security.access.vote.RoleHierarchyVoter;
 import org.springframework.security.access.vote.RoleVoter;
 import org.springframework.security.authentication.AnonymousAuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -47,6 +54,9 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	{
 		http.addFilterBefore(anonymousAuthFilter(), AnonymousAuthenticationFilter.class);
 		http.authenticationProvider(anonymousAuthenticationProvider());
+
+		http.addFilterBefore(tokenAuthenticationFilter(), MolgenisAnonymousAuthenticationFilter.class);
+		http.authenticationProvider(tokenAuthenticationProvider());
 
 		ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry expressionInterceptUrlRegistry = http
 				.authorizeRequests();
@@ -103,6 +113,24 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	public AnonymousAuthenticationProvider anonymousAuthenticationProvider()
 	{
 		return new AnonymousAuthenticationProvider(ANONYMOUS_AUTHENTICATION_KEY);
+	}
+
+	@Bean
+	public TokenService tokenService()
+	{
+		return new DataServiceTokenService(new TokenGenerator(), dataService, userDetailsService());
+	}
+
+	@Bean
+	public AuthenticationProvider tokenAuthenticationProvider()
+	{
+		return new TokenAuthenticationProvider(tokenService());
+	}
+
+	@Bean
+	public Filter tokenAuthenticationFilter()
+	{
+		return new TokenAuthenticationFilter(tokenAuthenticationProvider());
 	}
 
 	@Bean

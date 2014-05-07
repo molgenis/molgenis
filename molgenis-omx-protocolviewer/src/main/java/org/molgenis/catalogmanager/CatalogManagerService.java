@@ -28,6 +28,22 @@ public interface CatalogManagerService extends CatalogService
 	void unloadCatalog(String id) throws UnknownCatalogException;
 
 	/**
+	 * Activate a catalog
+	 * 
+	 * @param id
+	 * @throws UnknownCatalogException
+	 */
+	void activateCatalog(String id) throws UnknownCatalogException;
+
+	/**
+	 * Deactivate a catalog
+	 * 
+	 * @param id
+	 * @throws UnknownCatalogException
+	 */
+	void deactivateCatalog(String id) throws UnknownCatalogException;
+
+	/**
 	 * Retrieves a catalog of a study definition and store it in the database
 	 * 
 	 * @param id

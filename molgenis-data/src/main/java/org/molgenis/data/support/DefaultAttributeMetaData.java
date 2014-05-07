@@ -4,6 +4,7 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Range;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
@@ -15,7 +16,7 @@ import org.molgenis.fieldtypes.XrefField;
 public class DefaultAttributeMetaData implements AttributeMetaData
 {
 	private final String name;
-	private FieldType fieldType;
+	private FieldType fieldType = MolgenisFieldTypes.STRING;
 	private String description;
 	private boolean nillable = true;
 	private boolean readOnly = false;
@@ -29,6 +30,8 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	private boolean unique = false;
 	private boolean auto = false;
 	private Iterable<AttributeMetaData> attributesMetaData;
+	private boolean aggregateable = false;
+	private Range range;
 
 	@Deprecated
 	/*
@@ -237,5 +240,46 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		if (getDescription() != null) result += " description='" + getDescription() + "'";
 		result += ")";
 		return result;
+	}
+
+	@Override
+	public boolean isAggregateable()
+	{
+		return this.aggregateable;
+	}
+
+	public void setAggregateable(boolean aggregateable)
+	{
+		this.aggregateable = aggregateable;
+	}
+
+	@Override
+	public Range getRange()
+	{
+		return range;
+	}
+
+	public void setRange(Range range)
+	{
+		this.range = range;
+	}
+
+	@Override
+	public boolean equals(Object o)
+	{
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		DefaultAttributeMetaData that = (DefaultAttributeMetaData) o;
+
+		if (name != null ? !name.equals(that.name) : that.name != null) return false;
+
+		return true;
+	}
+
+	@Override
+	public int hashCode()
+	{
+		return name != null ? name.hashCode() : 0;
 	}
 }

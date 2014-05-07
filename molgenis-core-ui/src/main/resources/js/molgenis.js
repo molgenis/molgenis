@@ -346,7 +346,8 @@ function createInput(dataType, attrs, val, lbl) {
 // molgenis entity REST API client
 (function($, molgenis) {
 	"use strict";
-
+	var self = molgenis.RestClient = molgenis.RestClient || {};
+	
 	molgenis.RestClient = function RestClient() {};
 
 	molgenis.RestClient.prototype.get = function(resourceUri, options) {
@@ -382,6 +383,12 @@ function createInput(dataType, attrs, val, lbl) {
 				'type' : 'POST',
 				'data' : JSON.stringify(options.q),
 				'contentType' : 'application/json'
+			});
+		}
+		
+		if (self.token) {
+			$.extend(config, {
+				headers: {'x-molgenis-token': self.token}
 			});
 		}
 		
@@ -439,6 +446,39 @@ function createInput(dataType, attrs, val, lbl) {
 		
 		return result;
 	};
+	
+	molgenis.RestClient.prototype.login = function(username, password, callback) {
+		$.ajax({
+			type: 'POST',
+			dataType : 'json',
+			url : '/api/v1/login',
+			contentType : 'application/json',
+			async : true,
+			data: JSON.stringify({username: username, password: password}),
+			success : function(loginResult) {
+				self.token = loginResult.token;
+				callback.success({
+					username: loginResult.username,
+					firstname: loginResult.firstname,
+					lastname: loginResult.lastname
+				});
+			},
+			error : callback.error
+		});
+	};
+	
+	molgenis.RestClient.prototype.logout = function(callback) {
+		$.ajax({
+			url : '/api/v1/logout',
+			async : true,
+			headers: {'x-molgenis-token': self.token},
+			success : function() {
+				self.token = null;
+				callback();
+			}
+		});
+	};
+	
 }($, window.top.molgenis = window.top.molgenis || {}));
 
 // molgenis search API client

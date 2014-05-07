@@ -12,10 +12,11 @@ public class MysqlRepositoryCompoundTest extends MysqlRepositoryAbstractDatatype
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		DefaultEntityMetaData compoundMD = new DefaultEntityMetaData("compound");
+		DefaultEntityMetaData compoundMD = new DefaultEntityMetaData("compound").setAbstract(true);
 		compoundMD.addAttribute("col2").setDataType(MolgenisFieldTypes.BOOL);
 
-		DefaultEntityMetaData rootMD = new DefaultEntityMetaData("BoolTest").setLabel("Bool Test").setIdAttribute("col1");
+		DefaultEntityMetaData rootMD = new DefaultEntityMetaData("CompoundTest").setLabel("CompoundTest")
+				.setIdAttribute("col1");
 		rootMD.addAttribute("col1").setDataType(MolgenisFieldTypes.BOOL).setNillable(false);
 		rootMD.addAttribute("compound").setDataType(MolgenisFieldTypes.COMPOUND).setRefEntity(compoundMD);
 		rootMD.addAttribute("col3").setDataType(MolgenisFieldTypes.BOOL).setDefaultValue(true);
@@ -26,7 +27,7 @@ public class MysqlRepositoryCompoundTest extends MysqlRepositoryAbstractDatatype
 	@Override
 	public String createSql()
 	{
-		return "CREATE TABLE IF NOT EXISTS BoolTest(col1 BOOL NOT NULL, col2 BOOL, col3 BOOL, PRIMARY KEY (col1)) ENGINE=InnoDB;";
+		return "CREATE TABLE IF NOT EXISTS CompoundTest(col1 BOOL NOT NULL, col2 BOOL, col3 BOOL, PRIMARY KEY (col1)) ENGINE=InnoDB;";
 	}
 
 	@Override
@@ -37,4 +38,12 @@ public class MysqlRepositoryCompoundTest extends MysqlRepositoryAbstractDatatype
 		e.set("col2", false);
 		return e;
 	}
+
+	@Override
+	public void test() throws Exception
+	{
+		coll.drop("CompoundTest");
+		super.test();
+	}
+
 }

@@ -27,8 +27,10 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.model.elements.Entity;
 import org.molgenis.model.elements.Field;
 import org.molgenis.model.elements.Index;
@@ -346,7 +348,8 @@ public class MolgenisModelParser
 		{ "type", "name", "label", "auto", "nillable", "optional", "readonly", "default", "description", "desc",
 				"unique", "hidden", "length", "enum_options", "default_code", "xref", "xref_entity", "xref_field",
 				"xref_label", "xref_name", "mref_name", "mref_localid", "mref_remoteid", "filter", "filtertype",
-				"filterfield", "filtervalue", "xref_cascade" + "", "allocationSize", "jpaCascade" };
+				"filterfield", "filtervalue", "xref_cascade", "allocationSize", "jpaCascade", "aggregateable",
+				"minRange", "maxRange" };
 		List<String> key_words = new ArrayList<String>(Arrays.asList(keywords));
 		for (int i = 0; i < element.getAttributes().getLength(); i++)
 		{
@@ -363,6 +366,7 @@ public class MolgenisModelParser
 		String label = element.getAttribute("label");
 		String auto = element.getAttribute("auto");
 		String nillable = element.getAttribute("nillable");
+		String aggregateable = element.getAttribute("aggregateable");
 		if (element.hasAttribute("optional"))
 		{
 			nillable = element.getAttribute("optional");
@@ -381,6 +385,9 @@ public class MolgenisModelParser
 		String length = element.getAttribute("length");
 		String enum_options = element.getAttribute("enum_options").replace('[', ' ').replace(']', ' ').trim();
 		String default_code = element.getAttribute("default_code");
+		String minRange = element.getAttribute("minRange");
+		String maxRange = element.getAttribute("maxRange");
+
 		// xref and mref
 		String xref_entity = element.getAttribute("xref_entity");
 		String xref_field = element.getAttribute("xref_field");
@@ -452,6 +459,7 @@ public class MolgenisModelParser
 			auto = "true";
 			readonly = "true";
 			unique = "true";
+			aggregateable = "false";
 			default_value = "";
 		}
 
@@ -492,6 +500,18 @@ public class MolgenisModelParser
 		Field field = new Field(entity, MolgenisFieldTypes.getType(type), name, label, Boolean.parseBoolean(auto),
 				Boolean.parseBoolean(nillable), Boolean.parseBoolean(readonly), default_value, jpaCascade);
 		logger.debug("read: " + field.toString());
+
+		if (aggregateable.isEmpty())
+		{
+			// Default xref,categorical and bool are aggregateable
+			FieldTypeEnum fieldType = field.getType().getEnumType();
+			field.setAggregateable(fieldType == FieldTypeEnum.BOOL || fieldType == FieldTypeEnum.XREF
+					|| fieldType == FieldTypeEnum.CATEGORICAL);
+		}
+		else if (aggregateable.equalsIgnoreCase("true"))
+		{
+			field.setAggregateable(true);
+		}
 
 		// add optional properties
 		if (!description.isEmpty())
@@ -554,6 +574,29 @@ public class MolgenisModelParser
 			}
 
 			field.setEnumOptions(options);
+		}
+		else if (type.equals("int") || type.equals("long"))
+		{
+			if (StringUtils.isNotBlank(minRange) && StringUtils.isNotBlank(maxRange))
+			{
+				try
+				{
+					field.setMinRange(Long.valueOf(minRange));
+				}
+				catch (Exception e)
+				{
+					throw new IllegalArgumentException("Illegal minRange value [" + minRange + "]");
+				}
+
+				try
+				{
+					field.setMaxRange(Long.valueOf(maxRange));
+				}
+				catch (Exception e)
+				{
+					throw new IllegalArgumentException("Illegal maxRange value [" + maxRange + "]");
+				}
+			}
 		}
 		else if (type.equals("xref") || type.equals("mref") || type.equals("categorical"))
 		{
