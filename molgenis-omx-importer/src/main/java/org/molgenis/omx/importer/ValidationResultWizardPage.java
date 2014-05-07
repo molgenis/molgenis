@@ -34,8 +34,8 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 	@Autowired
 	private OmxImporterService omxImporterService;
 
-    @Autowired
-    private EmxImporterService emxImporterService;
+	@Autowired
+	private EmxImporterService emxImporterService;
 
 	@Autowired
 	private DataService dataService;
@@ -72,13 +72,13 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 				RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory
 						.createFileRepositoryCollection(importWizard.getFile());
 
-                //emd based import
-				if (true)
+				// emd based import
+				if (repositoryCollection.getRepositoryByEntityName("attributes") != null)
 				{
-                    EntityImportReport importReport = emxImporterService.doImport(repositoryCollection, entityDbAction);
-                    importWizard.setImportResult(importReport);
-                }
-                //omx based import
+					EntityImportReport importReport = emxImporterService.doImport(repositoryCollection, entityDbAction);
+					importWizard.setImportResult(importReport);
+				}
+				// omx based import
 				else
 				{
 
