@@ -314,7 +314,7 @@
 				$('<div />').append('<span class="info"><strong>Data type : </strong></span>').append('<span>' + feature.dataType + '</span>').appendTo(infoDiv);
 				$('<div />').append('<span class="info"><strong>Description : </strong></span>').append('<span>' + molgenis.i18nDescription(feature).en + '</span>').appendTo(infoDiv);
 				var middleDiv = $('<div />').addClass('span9');
-				var categories = getCategoriesByFeatureIdentifier(molgenis.hrefToId(feature.href));
+				var categories = getCategoriesByFeatureIdentifier(feature.Identifier);
 				if(categories.length > 0){
 					var categoryDiv = $('<div />').addClass('span8').css('margin-left', '30px');
 					$.each(categories, function(index, category){
