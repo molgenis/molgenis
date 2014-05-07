@@ -1,31 +1,12 @@
 package org.molgenis.data.rest;
 
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.*;
 import static org.molgenis.data.rest.RestController.BASE_URI;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.http.HttpStatus.NO_CONTENT;
-import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-import static org.springframework.web.bind.annotation.RequestMethod.PUT;
+import static org.springframework.web.bind.annotation.RequestMethod.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,18 +17,7 @@ import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataConverter;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule;
-import org.molgenis.data.Queryable;
-import org.molgenis.data.Repository;
-import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.*;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
@@ -70,13 +40,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.*;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -98,9 +62,8 @@ import com.google.common.collect.Sets;
 @RequestMapping(BASE_URI)
 public class RestController
 {
-	private static final Logger logger = Logger.getLogger(RestController.class);
-
 	public static final String BASE_URI = "/api/v1";
+	private static final Logger logger = Logger.getLogger(RestController.class);
 	private static final Pattern PATTERN_EXPANDS = Pattern.compile("([^\\[^\\]]+)(?:\\[(.+)\\])?");
 	private final DataService dataService;
 	private final TokenService tokenService;
@@ -201,7 +164,7 @@ public class RestController
 	@RequestMapping(value = "/{entityName}/{id}", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public Map<String, Object> retrieveEntity(@PathVariable("entityName") String entityName,
-			@PathVariable("id") Integer id, @RequestParam(value = "attributes", required = false) String[] attributes,
+			@PathVariable("id") Object id, @RequestParam(value = "attributes", required = false) String[] attributes,
 			@RequestParam(value = "expand", required = false) String[] attributeExpands)
 	{
 		Set<String> attributesSet = toAttributeSet(attributes);
@@ -235,9 +198,8 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/{id}/{refAttributeName}", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Object retrieveEntityAttribute(@PathVariable("entityName") String entityName,
-			@PathVariable("id") Integer id, @PathVariable("refAttributeName") String refAttributeName,
-			@Valid EntityCollectionRequest request,
+	public Object retrieveEntityAttribute(@PathVariable("entityName") String entityName, @PathVariable("id") Object id,
+			@PathVariable("refAttributeName") String refAttributeName, @Valid EntityCollectionRequest request,
 			@RequestParam(value = "attributes", required = false) String[] attributes,
 			@RequestParam(value = "expand", required = false) String[] attributeExpands)
 	{
@@ -276,7 +238,9 @@ public class RestController
 				return entityHasAttributeMap;
 			case MREF:
 				@SuppressWarnings("unchecked")
-				List<Entity> mrefEntities = (List<Entity>) entity.get(attr.getName());
+				List<Entity> mrefEntities = new ArrayList<Entity>();
+				for (Entity e : entity.getEntities((attr.getName())))
+					mrefEntities.add(e);
 				int count = mrefEntities.size();
 				int toIndex = request.getStart() + request.getNum();
 				mrefEntities = mrefEntities.subList(request.getStart(), toIndex > count ? count : toIndex);
@@ -403,7 +367,7 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = PUT)
 	@ResponseStatus(OK)
-	public void update(@PathVariable("entityName") String entityName, @PathVariable("id") Integer id,
+	public void update(@PathVariable("entityName") String entityName, @PathVariable("id") Object id,
 			@RequestBody Map<String, Object> entityMap)
 	{
 		updateInternal(entityName, id, entityMap);
@@ -420,7 +384,7 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = POST, params = "_method=PUT")
 	@ResponseStatus(OK)
-	public void updatePost(@PathVariable("entityName") String entityName, @PathVariable("id") Integer id,
+	public void updatePost(@PathVariable("entityName") String entityName, @PathVariable("id") Object id,
 			@RequestBody Map<String, Object> entityMap)
 	{
 		updateInternal(entityName, id, entityMap);
@@ -440,16 +404,18 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = POST, params = "_method=PUT", headers = "Content-Type=application/x-www-form-urlencoded")
 	@ResponseStatus(NO_CONTENT)
-	public void updateFromFormPost(@PathVariable("entityName") String entityName, @PathVariable("id") Integer id,
+	public void updateFromFormPost(@PathVariable("entityName") String entityName, @PathVariable("id") Object id,
 			HttpServletRequest request)
 	{
-		Map<String, Object> paramMap = new HashMap<String, Object>();
+        Object typedId = dataService.getRepositoryByEntityName(entityName).getEntityMetaData().getIdAttribute().getDataType().convert(id);
+
+        Map<String, Object> paramMap = new HashMap<String, Object>();
 		for (String param : request.getParameterMap().keySet())
 		{
 			paramMap.put(param, request.getParameter(param));
 		}
 
-		updateInternal(entityName, id, paramMap);
+		updateInternal(entityName, typedId, paramMap);
 	}
 
 	/**
@@ -461,9 +427,10 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = DELETE)
 	@ResponseStatus(NO_CONTENT)
-	public void delete(@PathVariable("entityName") String entityName, @PathVariable Integer id)
+	public void delete(@PathVariable("entityName") String entityName, @PathVariable Object id)
 	{
-		dataService.delete(entityName, id);
+        Object typedId = dataService.getRepositoryByEntityName(entityName).getEntityMetaData().getIdAttribute().getDataType().convert(id);
+		dataService.delete(entityName, typedId);
 	}
 
 	/**
@@ -477,7 +444,7 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/{id}", method = POST, params = "_method=DELETE")
 	@ResponseStatus(NO_CONTENT)
-	public void deletePost(@PathVariable("entityName") String entityName, @PathVariable Integer id)
+	public void deletePost(@PathVariable("entityName") String entityName, @PathVariable Object id)
 	{
 		delete(entityName, id);
 	}
@@ -642,7 +609,7 @@ public class RestController
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
-	private void updateInternal(String entityName, Integer id, Map<String, Object> entityMap)
+	private void updateInternal(String entityName, Object id, Map<String, Object> entityMap)
 	{
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
 		if (meta.getIdAttribute() == null)
@@ -668,10 +635,11 @@ public class RestController
 
 		Entity entity = toEntity(meta, entityMap);
 
-		Integer id = dataService.add(entityName, entity);
+		dataService.add(entityName, entity);
+        Object id = entity.getIdValue();
 		if (id != null)
 		{
-			response.addHeader("Location", String.format(BASE_URI + "/%s/%d", entityName, id));
+			response.addHeader("Location", String.format(BASE_URI + "/%s/%s", entityName, id));
 		}
 
 		response.setStatus(HttpServletResponse.SC_CREATED);
@@ -681,6 +649,7 @@ public class RestController
 	private Entity toEntity(EntityMetaData meta, Map<String, Object> request)
 	{
 		Entity entity = new MapEntity();
+        if(meta.getIdAttribute() != null) entity = new MapEntity(meta.getIdAttribute().getName());
 
 		for (AttributeMetaData attr : meta.getAtomicAttributes())
 		{
@@ -698,7 +667,7 @@ public class RestController
 			{
 				if (attr.getDataType().getEnumType() == XREF)
 				{
-					Integer id = DataConverter.toInt(paramValue);
+					Object id = paramValue;
 					if (id != null)
 					{
 						value = dataService.findOne(attr.getRefEntity().getName(), id);
@@ -711,7 +680,7 @@ public class RestController
 				}
 				else if (attr.getDataType().getEnumType() == MREF)
 				{
-					List<Integer> ids = DataConverter.toIntList(paramValue);
+					List<Object> ids = DataConverter.toObjectList(paramValue);
 					if ((ids != null) && !ids.isEmpty())
 					{
 						Iterable<Entity> mrefs = dataService.findAll(attr.getRefEntity().getName(), ids);

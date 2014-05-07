@@ -7,6 +7,8 @@ import java.util.List;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.model.MolgenisModelException;
 
+@Deprecated
+//TODO discuss for removal
 public class LongField extends FieldType
 {
 	private static final long serialVersionUID = 1L;
@@ -94,6 +96,15 @@ public class LongField extends FieldType
 	public List<String> getAllowedOperators()
 	{
 		return Arrays.asList("EQUALS", "NOT EQUALS", "LESS", "GREATER");
+	}
+
+	@Override
+	public Object convert(Object value)
+	{
+		if (value == null) return null;
+		if (value instanceof Long) return value;
+		if (value instanceof String) return Long.parseLong(value.toString());
+		throw new RuntimeException("LongField.convert(" + value + ") failed");
 	}
 
 }

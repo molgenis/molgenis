@@ -56,14 +56,15 @@ public class JpaStandaloneDataService extends DataServiceImpl
 	}
 
 	@Override
-	public Integer add(final String entityName, final Entity entity)
+	public void add(final String entityName, final Entity entity)
 	{
-		return doInTransaction(new TransactionCallback<Integer>()
+		doInTransaction(new TransactionCallback<Object>()
 		{
 			@Override
-			public Integer execute()
+			public Object execute()
 			{
-				return JpaStandaloneDataService.super.add(entityName, entity);
+				JpaStandaloneDataService.super.add(entityName, entity);
+                return null;
 			}
 
 		});
@@ -140,7 +141,7 @@ public class JpaStandaloneDataService extends DataServiceImpl
 	}
 
 	@Override
-	public void delete(final String entityName, final int id)
+	public void delete(final String entityName, final Object id)
 	{
 		doInTransaction(new TransactionCallback<Object>()
 		{

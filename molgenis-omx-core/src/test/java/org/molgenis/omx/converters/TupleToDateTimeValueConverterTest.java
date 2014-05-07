@@ -18,7 +18,10 @@ public class TupleToDateTimeValueConverterTest
 		Date date = new Date(1371447949000l);
 		DateTimeValue value = new DateTimeValue();
 		value.setValue(date);
+
 		assertEquals(new EntityToDateTimeValueConverter().toCell(value, null).getValue(), "2013-06-17T07:45:49+0200");
+		// TODO assertEquals(new EntityToDateTimeValueConverter().toCell(value, null).getValue(),
+		// "2013-06-17 07:45:49");
 	}
 
 	@Test
@@ -26,6 +29,7 @@ public class TupleToDateTimeValueConverterTest
 	{
 		String colName = "col";
 		Entity entity = new MapEntity(colName, "2013-06-17T07:45:49+0200");
+		// TODO Entity entity = new MapEntity(colName, "2013-06-17 07:45:49");
 		DateTimeValue value = new EntityToDateTimeValueConverter().fromEntity(entity, colName, null);
 		assertEquals(value.getValue(), new Date(1371447949000l));
 	}
@@ -36,6 +40,7 @@ public class TupleToDateTimeValueConverterTest
 		DateTimeValue value = new DateTimeValue();
 		String colName = "col";
 		Entity entity = new MapEntity(colName, "2013-06-17T07:45:49+0200");
+		// TODO Entity entity = new MapEntity(colName, "2013-06-17 07:45:49");
 		new EntityToDateTimeValueConverter().updateFromEntity(entity, colName, null, value);
 		assertEquals(value.getValue(), new Date(1371447949000l));
 	}

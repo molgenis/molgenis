@@ -227,7 +227,7 @@ public class HitEntity extends AbstractEntity
 	}
 
 	@Override
-	public Integer getIdValue()
+	public Object getIdValue()
 	{
 		return Integer.valueOf(columnValueMap.get(DataSetMatrixRepository.ENTITY_ID_COLUMN_NAME).toString());
 	}

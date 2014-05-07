@@ -53,14 +53,13 @@ public class OmxLookupTableRepository extends AbstractRepository implements Quer
 	}
 
 	@Override
-	public Integer add(Entity entity)
+	public void add(Entity entity)
 	{
 		add(Collections.singleton(entity));
-		return entity.getIdValue();
 	}
 
 	@Override
-	public void add(Iterable<? extends Entity> entities)
+	public Integer add(Iterable<? extends Entity> entities)
 	{
 		throw new UnsupportedOperationException(); // FIXME implement method
 	}
@@ -114,25 +113,25 @@ public class OmxLookupTableRepository extends AbstractRepository implements Quer
 	}
 
 	@Override
-	public Entity findOne(Integer id)
+	public Entity findOne(Object id)
 	{
 		return dataService.findOne(Category.ENTITY_NAME, id);
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Integer> ids)
+	public Iterable<Entity> findAll(Iterable<Object> ids)
 	{
 		return dataService.findAll(Category.ENTITY_NAME, ids);
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> findAll(Iterable<Integer> ids, Class<E> clazz)
+	public <E extends Entity> Iterable<E> findAll(Iterable<Object> ids, Class<E> clazz)
 	{
 		return dataService.findAll(Category.ENTITY_NAME, ids, clazz);
 	}
 
 	@Override
-	public <E extends Entity> E findOne(Integer id, Class<E> clazz)
+	public <E extends Entity> E findOne(Object id, Class<E> clazz)
 	{
 		return dataService.findOne(Category.ENTITY_NAME, id, clazz);
 	}

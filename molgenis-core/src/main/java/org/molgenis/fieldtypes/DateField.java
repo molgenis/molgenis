@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.model.MolgenisModelException;
+import org.molgenis.util.MolgenisDateFormat;
 
 public class DateField extends FieldType
 {
@@ -103,5 +104,24 @@ public class DateField extends FieldType
 	public List<String> getAllowedOperators()
 	{
 		return Arrays.asList("EQUALS", "NOT EQUALS", "LESS", "GREATER", "LIKE");
+	}
+
+	@Override
+	public Object convert(Object value)
+	{
+		if (value == null) return null;
+		if (value instanceof java.util.Date) return value;
+		try
+		{
+			if (value instanceof String)
+			{
+				return MolgenisDateFormat.getDateFormat().parse(value.toString());
+			}
+		}
+		catch (Exception e)
+		{
+			throw new RuntimeException("DateField.convert(" + value + ") failed: " + e.getMessage());
+		}
+		throw new RuntimeException("DateField.convert(" + value + ") failed");
 	}
 }
