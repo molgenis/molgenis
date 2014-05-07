@@ -32,13 +32,13 @@
 		}
 		
 		$('#catalogForm input[type="radio"]').change(function() {
-			if($(this).data('loaded')) {
-				$('#loadButton').attr('name', 'unload');
-				$('#loadButton').val('Unload');
+			if($(this).data('activated')) {
+				$('#activationButton').attr('name', 'deactivate');
+				$('#activationButton').val('Deactivate');
 			}
 			else {
-				$('#loadButton').attr('name', 'load');
-				$('#loadButton').val('Load');
+				$('#activationButton').attr('name', 'activate');
+				$('#activationButton').val('Activate');
 			}
 			
 			// clear previous tree

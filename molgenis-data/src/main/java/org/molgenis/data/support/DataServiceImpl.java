@@ -2,24 +2,9 @@ package org.molgenis.data.support;
 
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserHasRole;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
-import org.molgenis.data.CrudRepository;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Query;
-import org.molgenis.data.Queryable;
-import org.molgenis.data.Repository;
-import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.Updateable;
-import org.molgenis.data.Writable;
+import org.molgenis.data.*;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Predicate;
@@ -65,9 +50,12 @@ public class DataServiceImpl implements DataService
 		{
 			throw new MolgenisDataException("Repository [" + repositoryName + "] doesn't exists");
 		}
+		else
+		{
+			repositoryNames.remove(repositoryName);
+			repositories.remove(repositoryName.toLowerCase());
+		}
 
-		repositoryNames.remove(repositoryName);
-		repositories.remove(repositoryName.toLowerCase());
 	}
 
 	@Override
@@ -125,7 +113,7 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public Iterable<Entity> findAll(String entityName, Iterable<Integer> ids)
+	public Iterable<Entity> findAll(String entityName, Iterable<Object> ids)
 	{
 		return getQueryable(entityName).findAll(ids);
 	}
@@ -138,7 +126,7 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public Entity findOne(String entityName, Integer id)
+	public Entity findOne(String entityName, Object id)
 	{
 		return getQueryable(entityName).findOne(id);
 	}
@@ -150,9 +138,9 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public Integer add(String entityName, Entity entity)
+	public void add(String entityName, Entity entity)
 	{
-		return getWritable(entityName).add(entity);
+		getWritable(entityName).add(entity);
 	}
 
 	@Override
@@ -177,8 +165,7 @@ public class DataServiceImpl implements DataService
 	@Override
 	public void delete(String entityName, Entity entity)
 	{
-		Updateable updateable = getUpdateable(entityName);
-		updateable.delete(entity);
+		getUpdateable(entityName).delete(entity);
 	}
 
 	@Override
@@ -188,7 +175,7 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public void delete(String entityName, int id)
+	public void delete(String entityName, Object id)
 	{
 		getUpdateable(entityName).deleteById(id);
 	}
@@ -258,13 +245,13 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> findAll(String entityName, Iterable<Integer> ids, Class<E> clazz)
+	public <E extends Entity> Iterable<E> findAll(String entityName, Iterable<Object> ids, Class<E> clazz)
 	{
 		return getQueryable(entityName).findAll(ids, clazz);
 	}
 
 	@Override
-	public <E extends Entity> E findOne(String entityName, Integer id, Class<E> clazz)
+	public <E extends Entity> E findOne(String entityName, Object id, Class<E> clazz)
 	{
 		return getQueryable(entityName).findOne(id, clazz);
 	}
@@ -281,4 +268,15 @@ public class DataServiceImpl implements DataService
 		return findAll(entityName, new QueryImpl(), clazz);
 	}
 
+	@Override
+	public AggregateResult aggregate(String entityName, AttributeMetaData xAttr, AttributeMetaData yAttr, Query q)
+	{
+		Repository repo = getRepositoryByEntityName(entityName);
+		if (!(repo instanceof Aggregateable))
+		{
+			throw new MolgenisDataException("Repository of [" + entityName + "] isn't aggregateable");
+		}
+
+		return ((Aggregateable) repo).aggregate(xAttr, yAttr, q);
+	}
 }

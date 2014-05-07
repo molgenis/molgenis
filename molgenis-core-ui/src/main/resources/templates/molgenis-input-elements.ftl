@@ -41,13 +41,13 @@
 							},
 							<#if entity!='' && entity.get(fieldName)??>
 							initSelection: function (element, callback) {
-								callback({id:'<@formatValue field.refEntity.idAttribute.dataType.enumType entity.get(fieldName).idValue />', text: '${entity.get(fieldName).get(field.refEntity.labelAttribute.name)!?html}'});
+								callback({id:'<@formatValue field.refEntity.idAttribute.dataType.enumType entity.getEntity(fieldName).idValue />', text: '${entity.getEntity(fieldName).get(field.refEntity.labelAttribute.name)!?html}'});
 							}
 							</#if>
 						});
 						
 						<#if entity!='' && entity.get(fieldName)??>
-							$('#${fieldName}').select2('val', '<@formatValue field.refEntity.idAttribute.dataType.enumType entity.get(fieldName).idValue />');
+							$('#${fieldName}').select2('val', '<@formatValue field.refEntity.idAttribute.dataType.enumType entity.getEntity(fieldName).idValue />');
 						</#if>
 						
 						<#if field.readonly || hasWritePermission?string("true", "false") == "false">
@@ -62,7 +62,7 @@
 					$(document).ready(function() {
 						var xrefs = [];
 						<#if entity!='' && entity.get(fieldName)??>
-							<#list entity.get(fieldName) as xrefEntity>
+							<#list entity.getEntities(fieldName) as xrefEntity>
 								xrefs.push({id:'<@formatValue field.refEntity.idAttribute.dataType.enumType xrefEntity.idValue />', text:'${xrefEntity.get(field.refEntity.labelAttribute.name)!?html}'});
 							</#list>
 						</#if>
@@ -112,11 +112,9 @@
 				</div>
 				
 			<#elseif field.dataType.enumType =='INT' || field.dataType.enumType = 'LONG'>
-				<input type="number" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" <#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)}"</#if> <@validationOptions field /> >
-	
+				<input type="number" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" <#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)?c}"</#if> <@validationOptions field /> >
 			<#else>
 				<input type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" <#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string?html}"</#if> <@validationOptions field /> >
-	
 			</#if>
 		</div>
 	</div>

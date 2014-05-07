@@ -277,6 +277,16 @@ public class Field implements Serializable
 		return this.nillable;
 	}
 
+	public boolean isAggregateable()
+	{
+		return aggregateable;
+	}
+
+	public void setAggregateable(boolean aggregateable)
+	{
+		this.aggregateable = aggregateable;
+	}
+
 	public void setReadonly(boolean readonly)
 	{
 		this.readonly = readonly;
@@ -971,6 +981,7 @@ public class Field implements Serializable
 	private boolean hidden;
 	/** Whether this field is hidden. */
 	private boolean readonly;
+	private boolean aggregateable;
 	/**
 	 * The string that should be set as the default value (is passed to the database ...)
 	 */
@@ -1025,6 +1036,8 @@ public class Field implements Serializable
 	/** Used for serialization purposes. */
 	private static final long serialVersionUID = -1879739243713730190L;
 	private String tableName;
+	private Long minRange;
+	private Long maxRange;
 
 	public String getAnnotations()
 	{
@@ -1097,6 +1110,26 @@ public class Field implements Serializable
 	{
 		this.xref_labels = labelNames;
 
+	}
+
+	public Long getMinRange()
+	{
+		return minRange;
+	}
+
+	public void setMinRange(Long minRange)
+	{
+		this.minRange = minRange;
+	}
+
+	public Long getMaxRange()
+	{
+		return maxRange;
+	}
+
+	public void setMaxRange(Long maxRange)
+	{
+		this.maxRange = maxRange;
 	}
 
 	public Map<String, List<Field>> allPossibleXrefLabels() throws MolgenisModelException

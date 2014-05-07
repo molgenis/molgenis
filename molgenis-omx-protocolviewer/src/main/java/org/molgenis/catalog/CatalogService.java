@@ -28,6 +28,15 @@ public interface CatalogService {
      */
     boolean isCatalogLoaded(String id) throws UnknownCatalogException;
 
+	/**
+	 * Returns whether the catalog with the given id is activated
+	 * 
+	 * @param id
+	 * @return
+	 * @throws UnknownCatalogException
+	 */
+	boolean isCatalogActivated(String id) throws UnknownCatalogException;
+
     /**
      * Get the catalog of the study definition with the given id
      *

@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.elasticsearch.client.Client;
+import org.elasticsearch.common.collect.Lists;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.mockito.invocation.InvocationOnMock;
@@ -236,6 +237,54 @@ public class ElasticSearchServiceTest
 		objectValueMapExpected = new LinkedHashMap<String, Object>();
 		objectValueMapExpected.put("id", 5);
 		assertEquals(hits.get(1).getColumnValueMap(), objectValueMapExpected);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testAggregate() throws Exception
+	{
+		final List<Entity> entities = new ArrayList<Entity>();
+		Entity e1 = new MapEntity("id");
+		e1.set("id", 1);
+		e1.set("name", "Piet");
+		entities.add(e1);
+
+		Entity e2 = new MapEntity("id");
+		e2.set("id", 2);
+		e2.set("name", "Piet");
+		entities.add(e2);
+
+		Entity e3 = new MapEntity("id");
+		e3.set("id", 3);
+		e3.set("name", "Klaas");
+		entities.add(e3);
+
+		when(repoMock.iterator()).thenAnswer(new Answer<Iterator<Entity>>()
+		{
+			@Override
+			public Iterator<Entity> answer(InvocationOnMock invocation) throws Throwable
+			{
+				return entities.iterator();
+			}
+		});
+
+		when(repoMock.getName()).thenReturn("person");
+		when(entityMetaData.getAtomicAttributes()).thenReturn(
+				Arrays.<AttributeMetaData> asList(new DefaultAttributeMetaData("id", FieldTypeEnum.INT),
+						new DefaultAttributeMetaData("name", FieldTypeEnum.STRING)));
+
+		searchService.indexRepository(repoMock);
+		waitForIndexUpdate();
+
+		SearchResult result = searchService.search(new SearchRequest("person", new QueryImpl(), null, "name", null));
+		assertNotNull(result);
+		assertNotNull(result.getAggregate());
+
+        //TODO fix test below?!
+//		assertEquals(
+//				result.getAggregate().getMatrix(),
+//				Lists.newArrayList(Lists.<Long> newArrayList(1l), Lists.<Long> newArrayList(2l),
+//						Lists.<Long> newArrayList(3l)));
 	}
 
 	private void waitForIndexUpdate()

@@ -30,13 +30,12 @@ public interface StudyManagerService
 	List<StudyDefinition> getStudyDefinitions(StudyDefinition.Status status);
 
 	/**
-	 * Find all study definition with the given status for a user
+	 * Find all studydefinitions of a user
 	 * 
 	 * @param username
-	 * @param status
 	 * @return
 	 */
-	List<StudyDefinition> getStudyDefinitions(String username, StudyDefinition.Status status);
+	List<StudyDefinition> getStudyDefinitions(String username);
 
 	/**
 	 * Find the study definition with the given id
@@ -73,6 +72,17 @@ public interface StudyManagerService
 	 * @throws UnknownStudyDefinitionException
 	 */
 	boolean isStudyDataLoaded(String id) throws UnknownStudyDefinitionException;
+
+	/**
+	 * Returns whether study definition data is loaded
+	 * 
+	 * @param id
+	 *            study definition id
+	 * @return
+	 * @throws UnknownStudyDefinitionException
+	 * @throws UnknownCatalogException
+	 */
+	boolean isStudyDataActivated(String id) throws UnknownStudyDefinitionException, UnknownCatalogException;
 
 	/**
 	 * Creates a new study definition for the given user based on a catalog

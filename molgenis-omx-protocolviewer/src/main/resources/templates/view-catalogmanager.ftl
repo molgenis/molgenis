@@ -8,11 +8,11 @@
 		<#if catalogs??>	
 			<div class="well">
 				<div class="row-fluid">
-					<p id="loader-title" class="box-title">Choose a catalog to load</p>
+					<p id="loader-title" class="box-title">Choose a catalog</p>
 				<#if catalogs?size == 0>
 					<p>No catalogs found</p>
 				<#else>
-					<form id="catalogForm" name="catalogForm" method="post" action="${context_url}/load">
+					<form id="catalogForm" name="catalogForm" method="post" action="${context_url}/activation">
 						<div class="row-fluid">
 							<div class="span6">	
 								<div id="resultsTable">
@@ -29,13 +29,13 @@
 									<#list catalogs as catalog>
 										<tr>
 											<td class="listEntryRadio">
-												<input id="catalog_${catalog.id}" type="radio" name="id" value="${catalog.id}" data-loaded="<#if catalog.loaded>true<#else>false</#if>" <#if !foundCatalog>checked<#assign foundCatalog = true></#if> >
+												<input id="catalog_${catalog.id}" type="radio" name="id" value="${catalog.id}" data-activated="<#if catalog.activated>true<#else>false</#if>" data-activated="<#if catalog.activated>true<#else>false</#if>" <#if !foundCatalog>checked<#assign foundCatalog = true></#if> >
 											</td>
 											<td class="listEntryId">
 												<label for="catalog_${catalog.id}">${catalog.id}</label>
 											</td>
 											<td>
-												<label for="catalog_${catalog.id}">${catalog.name}<#if catalog.loaded><p class="text-success pull-right">Loaded</p></#if></label>
+												<label for="catalog_${catalog.id}">${catalog.name}<#if catalog.activated><p class="text-success pull-right">Activated</p><#else><p class="text-error pull-right">Deactivated</p></#if></label>
 											</td>
 										</tr>
 									</#list>
@@ -53,7 +53,7 @@
 							</div>
 						</div>
 					<#if foundCatalog>
-						<input id="loadButton" type="submit" name="load" class="btn pull-right" value="Load" />
+						<input id="activationButton" type="submit" name="activate" class="btn pull-right" value="Activate" />
 					</#if>
 					</form>
 				</#if>

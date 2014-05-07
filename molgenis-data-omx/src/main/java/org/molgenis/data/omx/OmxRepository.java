@@ -6,6 +6,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
@@ -22,11 +23,14 @@ import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.omx.converters.ValueConverter;
 import org.molgenis.omx.converters.ValueConverterException;
 import org.molgenis.omx.dataset.AbstractDataSetMatrixRepository;
+import org.molgenis.omx.dataset.DataSetMatrixRepository;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.value.Value;
+import org.molgenis.search.SearchRequest;
+import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
 import org.molgenis.util.EntityUtils;
 import org.springframework.beans.BeanUtils;
@@ -110,14 +114,14 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Cr
 	}
 
 	@Override
-	public Entity findOne(Integer id)
+	public Entity findOne(Object id)
 	{
-		Query q = new QueryImpl().eq(ObservationSet.ID, id);
+		Query q = new QueryImpl().eq(DataSetMatrixRepository.ENTITY_ID_COLUMN_NAME, id);
 		return findOne(q);
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Integer> ids)
+	public Iterable<Entity> findAll(Iterable<Object> ids)
 	{
 		Query q = new QueryImpl().in(ObservationSet.ID, ids);
 		return findAll(q);
@@ -130,14 +134,14 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Cr
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> findAll(Iterable<Integer> ids, Class<E> clazz)
+	public <E extends Entity> Iterable<E> findAll(Iterable<Object> ids, Class<E> clazz)
 	{
 		return new ConvertingIterable<E>(clazz, findAll(ids));
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <E extends Entity> E findOne(Integer id, Class<E> clazz)
+	public <E extends Entity> E findOne(Object id, Class<E> clazz)
 	{
 		Entity entity = findOne(id);
 		if (entity == null)
@@ -177,15 +181,14 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Cr
 
 	@Transactional
 	@Override
-	public Integer add(Entity entity)
+	public void add(Entity entity)
 	{
 		add(Lists.newArrayList(entity));
-		return entity.getIdValue();
 	}
 
 	@Transactional
 	@Override
-	public void add(Iterable<? extends Entity> entities)
+	public Integer add(Iterable<? extends Entity> entities)
 	{
 		EntityMetaData entityMetaData = this.getEntityMetaData();
 		entityValidator.validate(entities, entityMetaData, DatabaseAction.ADD);
@@ -270,7 +273,7 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Cr
 				repo.clearCache();
 			}
 		}
-
+        return rownr;
 	}
 
 	private LoadingCache<String, ObservableFeature> getObservableFeatureCache()
@@ -331,13 +334,13 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Cr
 	}
 
 	@Override
-	public void deleteById(Integer id)
+	public void deleteById(Object id)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void deleteById(Iterable<Integer> ids)
+	public void deleteById(Iterable<Object> ids)
 	{
 		throw new UnsupportedOperationException();
 	}
@@ -354,4 +357,18 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Cr
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public AggregateResult aggregate(AttributeMetaData xAttr, AttributeMetaData yAttr, Query q)
+	{
+		if ((xAttr == null) && (yAttr == null))
+		{
+			throw new MolgenisDataException("Missing aggregate attribute");
+		}
+
+		SearchRequest request = new SearchRequest(dataSetIdentifier, q, null, xAttr != null ? xAttr.getName() : null,
+				yAttr != null ? yAttr.getName() : null);
+		SearchResult result = searchService.search(request);
+
+		return result.getAggregate();
+	}
 }

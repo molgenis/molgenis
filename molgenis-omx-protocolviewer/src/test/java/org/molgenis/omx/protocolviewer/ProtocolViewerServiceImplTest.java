@@ -169,21 +169,24 @@ public class ProtocolViewerServiceImplTest extends AbstractTestNGSpringContextTe
 
 		String catalog0Id = "0", catalog1Id = "1", catalog2Id = "2";
 		String studyDefinition0Id = "0", studyDefinition1Id = "1";
+
 		studyDefinitionCatalog0UserDraft = when(mock(StudyDefinition.class).getId()).thenReturn(studyDefinition0Id)
 				.getMock();
+		when(studyDefinitionCatalog0UserDraft.getStatus()).thenReturn(Status.DRAFT);
+
 		studyDefinitionCatalog1UserApproved = when(mock(StudyDefinition.class).getId()).thenReturn(studyDefinition1Id)
 				.getMock();
+		when(studyDefinitionCatalog1UserApproved.getStatus()).thenReturn(Status.APPROVED);
+
 		when(studyDefinitionCatalog0UserDraft.getAuthorEmail()).thenReturn(molgenisUserEmail);
 		when(studyDefinitionCatalog1UserApproved.getAuthorEmail()).thenReturn(molgenisUserEmail);
 
-		when(studyManagerService.getStudyDefinitions(username, Status.DRAFT)).thenReturn(
-				Arrays.asList(studyDefinitionCatalog0UserDraft));
+		when(studyManagerService.getStudyDefinitions(username)).thenReturn(
+				Arrays.asList(studyDefinitionCatalog0UserDraft, studyDefinitionCatalog1UserApproved));
+
 		when(studyManagerService.createStudyDefinition(username, catalog0Id)).thenReturn(
 				studyDefinitionCatalog0UserDraft);
-		when(studyManagerService.getStudyDefinitions(username, Status.DRAFT)).thenReturn(
-				Arrays.asList(studyDefinitionCatalog0UserDraft));
-		when(studyManagerService.getStudyDefinitions(username, Status.APPROVED)).thenReturn(
-				Arrays.asList(studyDefinitionCatalog1UserApproved));
+
 		when(studyManagerService.getStudyDefinition(studyDefinition0Id)).thenReturn(studyDefinitionCatalog0UserDraft);
 		when(studyManagerService.getStudyDefinition(studyDefinition1Id))
 				.thenReturn(studyDefinitionCatalog1UserApproved);

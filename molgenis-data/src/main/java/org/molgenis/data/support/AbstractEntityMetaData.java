@@ -6,6 +6,7 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Range;
 import org.molgenis.fieldtypes.FieldType;
 
 import com.google.common.base.Predicate;
@@ -27,7 +28,10 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 			public Iterable<AttributeMetaData> children(AttributeMetaData attributeMetaData)
 			{
 				FieldType dataType = attributeMetaData.getDataType();
-				if (dataType.equals(MolgenisFieldTypes.COMPOUND)) return attributeMetaData.getAttributeParts();
+				if (dataType.equals(MolgenisFieldTypes.COMPOUND))
+				{
+					return attributeMetaData.getAttributeParts();
+				}
 				else return Collections.<AttributeMetaData> emptyList();
 			}
 		}.preOrderTraversal(new AttributeMetaData()
@@ -120,6 +124,18 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 
 			@Override
 			public boolean isLookupAttribute()
+			{
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public boolean isAggregateable()
+			{
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public Range getRange()
 			{
 				throw new UnsupportedOperationException();
 			}

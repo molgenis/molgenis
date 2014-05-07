@@ -21,7 +21,7 @@ public interface Entity extends Serializable
 	/**
 	 * Optional unique id to identify this Entity. Otherwise return null
 	 */
-	Integer getIdValue();
+	Object getIdValue();
 
 	/**
 	 * Optional human readable label to recognize this Entity. Otherwise return null

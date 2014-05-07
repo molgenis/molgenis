@@ -3,6 +3,7 @@ package org.molgenis.omx.controller;
 import static org.molgenis.omx.controller.ReferencesController.URI;
 
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.ui.controller.AbstractStaticContentController;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 

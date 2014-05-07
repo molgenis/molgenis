@@ -4,6 +4,7 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Range;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.omx.observ.CharacteristicMetaData;
 import org.molgenis.omx.observ.ObservableFeature;
@@ -115,5 +116,23 @@ public class ObservableFeatureAttributeMetaData implements AttributeMetaData
 	public boolean isLookupAttribute()
 	{
 		return false;
+	}
+
+	@Override
+	public boolean isAggregateable()
+	{
+		return observableFeature.getDataType().equalsIgnoreCase("BOOL")
+				|| observableFeature.getDataType().equalsIgnoreCase("XREF")
+				|| observableFeature.getDataType().equalsIgnoreCase("CATEGORICAL");
+	}
+
+	@Override
+	public Range getRange()
+	{
+		if (this.observableFeature.getMinRange() != null && this.observableFeature.getMaxRange() != null)
+		{
+			return new Range(this.observableFeature.getMinRange(), this.observableFeature.getMaxRange());
+		}
+		return null;
 	}
 }

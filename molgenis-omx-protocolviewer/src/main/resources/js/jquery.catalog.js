@@ -284,7 +284,7 @@
 					displayedItems : $.map(Object.keys(visibleItems), function(visibleItem) {
 						return restApi.getHref('protocol', visibleItem);
 					}),
-					displaySiblings : false,
+					displaySiblings : false
 				});
 				createTreeConfig(treeSettings, callback);
 			});

@@ -48,10 +48,10 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 		attributes.put(attributeMetaData.getName().toLowerCase(), attributeMetaData);
 	}
 
-    public void removeAttributeMetaData(AttributeMetaData attributeMetaData)
-    {
-        this.attributes.remove(attributeMetaData.getName());
-    }
+	public void removeAttributeMetaData(AttributeMetaData attributeMetaData)
+	{
+		this.attributes.remove(attributeMetaData.getName());
+	}
 
 	public void addAllAttributeMetaData(List<AttributeMetaData> attributeMetaDataList)
 	{
@@ -86,7 +86,8 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 		if (idAttribute != null)
 		{
 			AttributeMetaData att = getAttribute(idAttribute);
-			if (att == null) throw new RuntimeException("getIdAttribute() failed: '" + idAttribute + "' unknown");
+			if (att == null) throw new RuntimeException(getName() + ".getIdAttribute() failed: '" + idAttribute
+					+ "' unknown");
 			return att;
 		}
 		else if (getExtends() != null)
@@ -111,7 +112,7 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 			if (att == null) throw new RuntimeException("getLabelAttribute() failed: '" + labelAttribute + "' unknown");
 			return att;
 		}
-		return null;
+        return getIdAttribute();
 	}
 
 	public DefaultEntityMetaData setLabelAttribute(String name)
@@ -219,6 +220,10 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 		String result = "\nEntityMetaData(name='" + this.getName() + "'";
 		if (isAbstract()) result += " abstract='true'";
 		if (getExtends() != null) result += " extends='" + getExtends().getName() + "'";
+		if (getIdAttribute() != null) result += " idAttribute='" + getIdAttribute().getName() + "'";
+		if (getDescription() != null) result += " description='"
+				+ getDescription().substring(0, Math.min(25, getDescription().length()))
+				+ (getDescription().length() > 25 ? "...'" : "'");
 		result += ")";
 		for (AttributeMetaData att : this.getAttributes())
 		{

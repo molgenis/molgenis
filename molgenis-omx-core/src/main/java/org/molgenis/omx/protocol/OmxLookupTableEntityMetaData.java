@@ -21,6 +21,7 @@ import com.google.common.collect.Lists;
 
 public class OmxLookupTableEntityMetaData extends AbstractEntityMetaData
 {
+	public static final String POSTFIX_OMXLOOKUPTABLE_NAME = "-LUT";
 	private final ObservableFeature categoricalFeature;
 
 	public OmxLookupTableEntityMetaData(ObservableFeature categoricalFeature)
@@ -28,11 +29,16 @@ public class OmxLookupTableEntityMetaData extends AbstractEntityMetaData
 		if (categoricalFeature == null) throw new IllegalArgumentException("categoricalFeature is null");
 		this.categoricalFeature = categoricalFeature;
 	}
+	
+	public static final String createOmxLookupTableEntityMetaDataName(String categoricalFeatureIdentifier)
+	{
+		return categoricalFeatureIdentifier + POSTFIX_OMXLOOKUPTABLE_NAME; // yes, Identifier
+	}
 
 	@Override
 	public String getName()
 	{
-		return categoricalFeature.getIdentifier() + "-LUT"; // yes, Identifier
+		return createOmxLookupTableEntityMetaDataName(categoricalFeature.getIdentifier()); // yes, Identifier
 	}
 
 	@Override

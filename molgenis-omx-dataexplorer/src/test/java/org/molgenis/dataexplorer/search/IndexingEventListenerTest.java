@@ -37,7 +37,7 @@ public class IndexingEventListenerTest
 	@Test
 	public void onApplicationEventEntityImportedEventDataSet()
 	{
-		Integer id = 2;
+		Object id = 2;
 		EntityImportedEvent event = new EntityImportedEvent(this, DataSet.ENTITY_NAME, id);
 		context.publishEvent(event);
 
@@ -49,7 +49,7 @@ public class IndexingEventListenerTest
 	@Test
 	public void onApplicationEventEntityImportedEventProtocol()
 	{
-		Integer id = 2;
+		Object id = 2;
 		EntityImportedEvent event = new EntityImportedEvent(this, Protocol.ENTITY_NAME, id);
 		context.publishEvent(event);
 

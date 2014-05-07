@@ -253,7 +253,7 @@ public class UserManagerServiceImpl implements UserManagerService
 		@Override
 		public boolean apply(MolgenisGroup item)
 		{
-			Integer id = item.getId();
+			Object id = item.getId();
 			for (MolgenisGroup toFilterItem : toFilterItemList)
 			{
 				if (toFilterItem.getId().equals(id)) return false;

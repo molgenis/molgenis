@@ -221,7 +221,15 @@ public class QueryImpl implements Query
 		return this;
 	}
 
-	@Override
+    @Override
+    public Query sort(Sort.Direction direction, String ... fields)
+    {
+        this.sort(new Sort(direction, fields));
+        return this;
+    }
+
+
+    @Override
 	public Query sort(Sort sort)
 	{
 		setSort(sort);
