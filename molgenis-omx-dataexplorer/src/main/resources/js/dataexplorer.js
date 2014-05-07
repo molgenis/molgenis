@@ -300,7 +300,7 @@
 				break;
 			case 'MREF':
 			case 'XREF':
-				var element = $('<div />').css( "width", 850);
+				var element = $('<div />').css( "width", 700);
 				var operator = attributeFilter ? attributeFilter.operator : 'OR';
 				element.xrefsearch({attribute: attribute, values: values, operator: operator});
 				controls.append(element);
