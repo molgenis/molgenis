@@ -12,7 +12,6 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-
 /**
  * Database configuration
  */
@@ -21,10 +20,10 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @ComponentScan("org.molgenis.data")
 public class AppConfig
 {
-	private String dbDriverClass = "com.mysql.jdbc.Driver";
-	private String dbJdbcUri = "jdbc:mysql://localhost:3306/omx?rewriteBatchedStatements=true";
-	private String dbUser = "molgenis";
-	private String dbPassword = "molgenis";
+	private final String dbDriverClass = "com.mysql.jdbc.Driver";
+	private final String dbJdbcUri = "jdbc:mysql://localhost:3306/omx?rewriteBatchedStatements=true";
+	private final String dbUser = "molgenis";
+	private final String dbPassword = "molgenis";
 
 	@Bean
 	public DataSource dataSource()
@@ -36,7 +35,7 @@ public class AppConfig
 		if (dbPassword == null) throw new IllegalArgumentException(
 				"please configure the db_password property in your molgenis-server.properties");
 
-        ComboPooledDataSource dataSource = new ComboPooledDataSource();
+		ComboPooledDataSource dataSource = new ComboPooledDataSource();
 		try
 		{
 			dataSource.setDriverClass(dbDriverClass);

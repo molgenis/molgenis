@@ -361,6 +361,7 @@ public class JpaRepositoryTest extends BaseJpaTest
 	@Test
 	public void testAndQuery()
 	{
+		// A and B
 		Person p1 = new Person("Piet", "Paulusma");
 		Person p2 = new Person("Piet", "de Boskabouter");
 		repo.add(Arrays.asList(p1, p2));
@@ -371,14 +372,236 @@ public class JpaRepositoryTest extends BaseJpaTest
 	}
 
 	@Test
+	public void testAndQueryFalseClause()
+	{
+		// A and B
+		Person p1 = new Person("Piet", "Paulusma");
+		Person p2 = new Person("Piet", "de Boskabouter");
+		repo.add(Arrays.asList(p1, p2));
+
+		Iterable<Entity> it = repo.findAll(new QueryImpl().eq("firstName", "Piet").and().eq("lastName", "Unknown"));
+		assertEquals(Iterables.size(it), 0);
+	}
+
+	@Test
 	public void testOrQuery()
 	{
+		// A or B
 		Person p1 = new Person("Piet", "Paulusma");
 		Person p2 = new Person("Piet", "de Boskabouter");
 		repo.add(Arrays.asList(p1, p2));
 
 		Iterable<Entity> it = repo.findAll(new QueryImpl().eq("lastName", "Paulusma").or()
 				.eq("lastName", "de Boskabouter"));
+		assertEquals(Iterables.size(it), 2);
+		assertTrue(Iterables.contains(it, p1));
+		assertTrue(Iterables.contains(it, p2));
+	}
+
+	@Test
+	public void testOrQueryFalseClause()
+	{
+		// A or B
+		Person p1 = new Person("Piet", "Paulusma");
+		Person p2 = new Person("Piet", "de Boskabouter");
+		repo.add(Arrays.asList(p1, p2));
+
+		Iterable<Entity> it = repo.findAll(new QueryImpl().eq("lastName", "Paulusma").or().eq("lastName", "Unknown"));
+		assertEquals(Iterables.size(it), 1);
+		assertTrue(Iterables.contains(it, p1));
+	}
+
+	@Test
+	public void testOrNestedAndQuery_TrueTrueTrue()
+	{
+		// A or (B and C) --> A = true, B = true, C = true
+		Person p1 = new Person("Piet", "Paulusma");
+		Person p2 = new Person("Piet", "de Boskabouter");
+		Person p3 = new Person("Klaas", "Vaak");
+		repo.add(Arrays.asList(p1, p2, p3));
+
+		Iterable<Entity> it = repo.findAll(new QueryImpl().eq("lastName", "Vaak").or().nest().eq("firstName", "Piet")
+				.and().eq("lastName", "de Boskabouter").unnest());
+		assertEquals(Iterables.size(it), 2);
+		assertTrue(Iterables.contains(it, p2));
+		assertTrue(Iterables.contains(it, p3));
+	}
+
+	@Test
+	public void testOrNestedAndQuery_TrueFalseTrue()
+	{
+		// A or (B and C) --> A = true, B = false, C = true
+		Person p1 = new Person("Piet", "Paulusma");
+		Person p2 = new Person("Piet", "de Boskabouter");
+		Person p3 = new Person("Klaas", "Vaak");
+		repo.add(Arrays.asList(p1, p2, p3));
+
+		Iterable<Entity> it = repo.findAll(new QueryImpl().eq("lastName", "Vaak").or().nest()
+				.eq("firstName", "Unknown").and().eq("lastName", "de Boskabouter").unnest());
+		assertEquals(Iterables.size(it), 1);
+		assertTrue(Iterables.contains(it, p3));
+	}
+
+	@Test
+	public void testOrNestedAndQuery_TrueTrueFalse()
+	{
+		// A or (B and C) --> A = true, B = true, C = false
+		Person p1 = new Person("Piet", "Paulusma");
+		Person p2 = new Person("Piet", "de Boskabouter");
+		Person p3 = new Person("Klaas", "Vaak");
+		repo.add(Arrays.asList(p1, p2, p3));
+
+		Iterable<Entity> it = repo.findAll(new QueryImpl().eq("lastName", "Vaak").or().nest().eq("firstName", "Piet")
+				.and().eq("lastName", "Unknown").unnest());
+		assertEquals(Iterables.size(it), 1);
+		assertTrue(Iterables.contains(it, p3));
+	}
+
+	@Test
+	public void testOrNestedAndQuery_TrueFalseFalse()
+	{
+		// A or (B and C) --> A = true, B = false, C = false
+		Person p1 = new Person("Piet", "Paulusma");
+		Person p2 = new Person("Piet", "de Boskabouter");
+		Person p3 = new Person("Klaas", "Vaak");
+		repo.add(Arrays.asList(p1, p2, p3));
+
+		Iterable<Entity> it = repo.findAll(new QueryImpl().eq("lastName", "Vaak").or().nest()
+				.eq("firstName", "Unknown").and().eq("lastName", "Unknown").unnest());
+		assertEquals(Iterables.size(it), 1);
+		assertTrue(Iterables.contains(it, p3));
+	}
+
+	@Test
+	public void testOrNestedAndQuery_FalseTrueTrue()
+	{
+		// A or (B and C) --> A = false, B = true, C = true
+		Person p1 = new Person("Piet", "Paulusma");
+		Person p2 = new Person("Piet", "de Boskabouter");
+		Person p3 = new Person("Klaas", "Vaak");
+		repo.add(Arrays.asList(p1, p2, p3));
+
+		Iterable<Entity> it = repo.findAll(new QueryImpl().eq("lastName", "Unknown").or().nest()
+				.eq("firstName", "Piet").and().eq("lastName", "de Boskabouter").unnest());
+		assertEquals(Iterables.size(it), 1);
+		assertTrue(Iterables.contains(it, p2));
+	}
+
+	@Test
+	public void testOrNestedAndQuery_FalseFalseTrue()
+	{
+		// A or (B and C) --> A = false, B = false, C = true
+		Person p1 = new Person("Piet", "Paulusma");
+		Person p2 = new Person("Piet", "de Boskabouter");
+		Person p3 = new Person("Klaas", "Vaak");
+		repo.add(Arrays.asList(p1, p2, p3));
+
+		Iterable<Entity> it = repo.findAll(new QueryImpl().eq("lastName", "Unknown").or().nest()
+				.eq("firstName", "Unknown").and().eq("lastName", "de Boskabouter").unnest());
+		assertEquals(Iterables.size(it), 0);
+	}
+
+	@Test
+	public void testOrNestedAndQuery_FalseFalseFalse()
+	{
+		// A or (B and C) --> A = false, B = false, C = false
+		Person p1 = new Person("Piet", "Paulusma");
+		Person p2 = new Person("Piet", "de Boskabouter");
+		Person p3 = new Person("Klaas", "Vaak");
+		repo.add(Arrays.asList(p1, p2, p3));
+
+		Iterable<Entity> it = repo.findAll(new QueryImpl().eq("lastName", "Unknown").or().nest()
+				.eq("firstName", "Unknown").and().eq("lastName", "Unknown").unnest());
+		assertEquals(Iterables.size(it), 0);
+	}
+
+	@Test
+	public void testOrNestedAndQuery_FalseTrueFalse()
+	{
+		// A or (B and C) --> A = false, B = true, C = false
+		Person p1 = new Person("Piet", "Paulusma");
+		Person p2 = new Person("Piet", "de Boskabouter");
+		Person p3 = new Person("Klaas", "Vaak");
+		repo.add(Arrays.asList(p1, p2, p3));
+
+		Iterable<Entity> it = repo.findAll(new QueryImpl().eq("lastName", "Unknown").or().nest()
+				.eq("firstName", "Piet").and().eq("lastName", "Unknown").unnest());
+		assertEquals(Iterables.size(it), 0);
+	}
+
+	@Test
+	public void testOrNestedAndQueryReversed()
+	{
+		// (B and C) or A
+		Person p1 = new Person("Piet", "Paulusma");
+		Person p2 = new Person("Piet", "de Boskabouter");
+		Person p3 = new Person("Klaas", "Vaak");
+		repo.add(Arrays.asList(p1, p2, p3));
+
+		Iterable<Entity> it = repo.findAll(new QueryImpl().nest().eq("firstName", "Piet").and()
+				.eq("lastName", "de Boskabouter").unnest().or().eq("lastName", "Vaak"));
+		assertEquals(Iterables.size(it), 2);
+		assertTrue(Iterables.contains(it, p2));
+		assertTrue(Iterables.contains(it, p3));
+	}
+
+	@Test
+	public void testOrNestedMultipleAndQuery()
+	{
+		// (A and B) or (C and D)
+		Person p1 = new Person("Piet", "Paulusma");
+		Person p2 = new Person("Piet", "de Boskabouter");
+		Person p3 = new Person("Klaas", "Vaak");
+		repo.add(Arrays.asList(p1, p2, p3));
+
+		Iterable<Entity> it = repo.findAll(new QueryImpl().nest().eq("firstName", "Klaas").and().eq("lastName", "Vaak")
+				.unnest().or().nest().eq("firstName", "Piet").and().eq("lastName", "de Boskabouter").unnest());
+		assertEquals(Iterables.size(it), 2);
+		assertTrue(Iterables.contains(it, p2));
+		assertTrue(Iterables.contains(it, p3));
+	}
+
+	@Test
+	public void testAndNestedOrQuery()
+	{
+		// (B or C) and A
+		Person p1 = new Person("Piet", "Paulusma");
+		Person p2 = new Person("Piet", "de Boskabouter");
+		Person p3 = new Person("Klaas", "Vaak");
+		repo.add(Arrays.asList(p1, p2, p3));
+
+		Iterable<Entity> it = repo.findAll(new QueryImpl().nest().eq("lastName", "Paulusma").or()
+				.eq("lastName", "de Boskabouter").unnest().and().eq("firstName", "Piet"));
+		assertEquals(Iterables.size(it), 2);
+		assertTrue(Iterables.contains(it, p1));
+		assertTrue(Iterables.contains(it, p2));
+	}
+
+	@Test
+	public void testAndNestedOrQueryFalse()
+	{
+		// (B or C) and A
+		Person p1 = new Person("Piet", "Paulusma");
+		Person p2 = new Person("Piet", "de Boskabouter");
+		Person p3 = new Person("Klaas", "Vaak");
+		repo.add(Arrays.asList(p1, p2, p3));
+
+		Iterable<Entity> it = repo.findAll(new QueryImpl().nest().eq("lastName", "Unknown").or()
+				.eq("lastName", "Unknown").unnest().and().eq("firstName", "Piet"));
+		assertEquals(Iterables.size(it), 0);
+	}
+
+	@Test
+	public void testAndNestedOrQueryReversed()
+	{
+		// A and (B or C)
+		Person p1 = new Person("Piet", "Paulusma");
+		Person p2 = new Person("Piet", "de Boskabouter");
+		Person p3 = new Person("Klaas", "Vaak");
+		repo.add(Arrays.asList(p1, p2, p3));
+
+		Iterable<Entity> it = repo.findAll(new QueryImpl().eq("firstName", "Piet").and().nest()
+				.eq("lastName", "Paulusma").or().eq("lastName", "de Boskabouter").unnest());
 		assertEquals(Iterables.size(it), 2);
 		assertTrue(Iterables.contains(it, p1));
 		assertTrue(Iterables.contains(it, p2));

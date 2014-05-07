@@ -616,12 +616,34 @@ public class JpaRepository extends AbstractCrudRepository
 				case AND:
 					break;
 				case NESTED:
-					Predicate nested = cb.conjunction();
-					for (Predicate p : createPredicates(from, cb, r.getNestedRules()))
+					List<QueryRule> nestedRules = r.getNestedRules();
+					if (nestedRules != null && !nestedRules.isEmpty())
 					{
-						nested.getExpressions().add(p);
+						List<Predicate> subPredicates = createPredicates(from, cb, nestedRules);
+						Predicate predicate;
+						if (subPredicates.size() == 1)
+						{
+							predicate = subPredicates.get(0);
+						}
+						else
+						{
+							Predicate[] subPredicatesArr = subPredicates.toArray(new Predicate[0]);
+							Operator andOrOperator = nestedRules.get(1).getOperator();
+							switch (andOrOperator)
+							{
+								case AND:
+									predicate = cb.and(subPredicatesArr);
+									break;
+								case OR:
+									predicate = cb.or(subPredicatesArr);
+									break;
+								default:
+									throw new MolgenisDataException("Expected AND or OR operator in query rule [" + r
+											+ "] instead of " + andOrOperator);
+							}
+						}
+						andPredicates.add(predicate); // added to orPredicates list near end of method if required
 					}
-					andPredicates.add(nested);
 					break;
 				case OR:
 					orPredicates.add(cb.and(andPredicates.toArray(new Predicate[andPredicates.size()])));
