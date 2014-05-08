@@ -7,6 +7,7 @@ import static org.molgenis.data.QueryRule.Operator.GREATER_EQUAL;
 import static org.molgenis.data.QueryRule.Operator.LESS;
 import static org.molgenis.data.QueryRule.Operator.LESS_EQUAL;
 import static org.molgenis.data.QueryRule.Operator.LIKE;
+import static org.molgenis.data.QueryRule.Operator.NESTED;
 import static org.molgenis.data.QueryRule.Operator.NOT;
 import static org.molgenis.data.QueryRule.Operator.OR;
 import static org.molgenis.data.QueryRule.Operator.SEARCH;
@@ -58,6 +59,13 @@ public class LuceneQueryStringBuilder
 
 		for (QueryRule queryRule : queryRules)
 		{
+			if (queryRule.getOperator() == NESTED)
+			{
+				sb.append(" ( ");
+				sb.append(buildQueryString(queryRule.getNestedRules()));
+				sb.append(" )");
+			}
+
 			if (queryRule.getOperator() == OR || queryRule.getOperator() == AND)
 			{
 				previousRule = queryRule;

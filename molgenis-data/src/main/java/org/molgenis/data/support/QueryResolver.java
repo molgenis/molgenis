@@ -40,6 +40,11 @@ public class QueryResolver
 	{
 		for (QueryRule r : rules)
 		{
+			if (r.getOperator() == Operator.NESTED)
+			{
+				resolveRefIdentifiers(r.getNestedRules(), meta);
+			}
+
 			if (r.getField() != null)
 			{
 				AttributeMetaData attr = meta.getAttribute(r.getField());
