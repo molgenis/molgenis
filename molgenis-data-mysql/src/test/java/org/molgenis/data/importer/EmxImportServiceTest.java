@@ -27,9 +27,6 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	MysqlRepositoryCollection store;
 
-    @Autowired
-    DataService dataService;
-
 	@Test
 	public void testValidationReport() throws IOException, InvalidFormatException
 	{
@@ -39,7 +36,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 
 		// create importer
 		EmxImportServiceImpl importer = new EmxImportServiceImpl();
-		importer.setRepositoryCollection(store, dataService);
+		importer.setRepositoryCollection(store);
 
 		// generate report
 		EntitiesValidationReport report = importer.validateImport(source);
@@ -100,7 +97,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		}
 
 		EmxImportServiceImpl importer = new EmxImportServiceImpl();
-		importer.setRepositoryCollection(store,dataService);
+		importer.setRepositoryCollection(store);
 
 		for (EntityMetaData em : importer.getEntityMetaData(source).values())
 		{
