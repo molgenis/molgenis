@@ -96,8 +96,6 @@
 				description="Whether this feature is time dependent and can have different values when measured 
 					on different times (e.g. weight, temporal=true) or generally only measured once (e.g. birth date, 
 					temporal=false) " />
-			<field name="aggregateable" type="bool" nillable="true"
-				description="indicate if this feature can be used for group by aggregation in the user interface" />
 			<field name="minRange" type="long" nillable="true"
 				description="for numeric values this is used to set the 'min' value of the slider user interface" />
 			<field name="maxRange" type="long" nillable="true"
