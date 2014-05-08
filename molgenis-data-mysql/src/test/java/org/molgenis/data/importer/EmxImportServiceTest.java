@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.AppConfig;
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
@@ -26,6 +27,9 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	MysqlRepositoryCollection store;
 
+    @Autowired
+    DataService dataService;
+
 	@Test
 	public void testValidationReport() throws IOException, InvalidFormatException
 	{
@@ -35,7 +39,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 
 		// create importer
 		EmxImportServiceImpl importer = new EmxImportServiceImpl();
-		importer.setRepositoryCollection(store);
+		importer.setRepositoryCollection(store, dataService);
 
 		// generate report
 		EntitiesValidationReport report = importer.validateImport(source);
@@ -96,7 +100,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		}
 
 		EmxImportServiceImpl importer = new EmxImportServiceImpl();
-		importer.setRepositoryCollection(store);
+		importer.setRepositoryCollection(store,dataService);
 
 		for (EntityMetaData em : importer.getEntityMetaData(source).values())
 		{

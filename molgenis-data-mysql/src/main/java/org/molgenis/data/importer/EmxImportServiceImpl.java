@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class EmxImportServiceImpl implements EmxImporterService
 {
 	MysqlRepositoryCollection store;
+    DataService dataService;
 
 	public EmxImportServiceImpl()
 	{
@@ -31,9 +32,10 @@ public class EmxImportServiceImpl implements EmxImporterService
 	}
 
 	@Autowired
-	public void setRepositoryCollection(MysqlRepositoryCollection coll)
+	public void setRepositoryCollection(MysqlRepositoryCollection coll, DataService service)
 	{
 		this.store = coll;
+        this.dataService = service;
 		System.out.println("MEntityImportServiceImpl created with coll=" + coll);
 	}
 
@@ -68,7 +70,8 @@ public class EmxImportServiceImpl implements EmxImporterService
 					store.add(em);
 
 					to = (MysqlRepository) store.getRepositoryByEntityName(name);
-				}
+                    dataService.addRepository(to);
+                }
 
 				// import
 
