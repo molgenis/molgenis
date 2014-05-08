@@ -24,6 +24,10 @@ import org.springframework.stereotype.Component;
 public class MysqlRepositoryCollection implements RepositoryCollection
 {
 	DataSource ds;
+
+    @Autowired
+    DataService dataService;
+
 	Map<String, MysqlRepository> repositories;
 	MysqlRepository entities;
 	MysqlRepository attributes;
@@ -206,6 +210,7 @@ public class MysqlRepositoryCollection implements RepositoryCollection
 			MysqlRepository repository = new MysqlRepository(this, emd);
 			repository.create();
 			repositories.put(emd.getName(), repository);
+            dataService.addRepository(repository);
 			return repository;
 		}
 		return null;
@@ -233,8 +238,11 @@ public class MysqlRepositoryCollection implements RepositoryCollection
 	{
 		// remove the repo
 		MysqlRepository r = this.repositories.get(name);
-		if (r != null) r.drop();
-		this.repositories.remove(name);
+		if (r != null) {
+            r.drop();
+            this.repositories.remove(name);
+            dataService.removeRepository(r.getName());
+        }
 
 		// delete metadata
 		attributes.delete(attributes.findAll(new QueryImpl().eq("entity", name)));
