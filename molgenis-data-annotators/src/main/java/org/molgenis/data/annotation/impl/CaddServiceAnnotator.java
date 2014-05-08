@@ -101,6 +101,20 @@ public class CaddServiceAnnotator extends VariantAnnotator
 				caddAbs = split[4];
 				caddScaled = split[5];
 			}
+			// In some cases, the ref and alt are swapped. If this is the case, the initial if statement above will
+			// fail, we can just check whether such a swapping has occured
+			else if (split[3].equals(reference) && split[2].equals(alternative))
+			{
+				caddAbs = split[4];
+				caddScaled = split[5];
+			}
+			// If both matchings are incorrect, there is something really wrong with the source files,
+			// which we cant do anything about.
+			else
+			{
+				caddAbs = "0";
+				caddScaled = "0";
+			}
 		}
 
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
