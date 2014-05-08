@@ -80,6 +80,12 @@
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
             <version>3.9</version>
+			<exclusions>
+				<exclusion>
+					<groupId>stax</groupId>
+					<artifactId>stax-api</artifactId>
+				</exclusion>
+			</exclusions>
         </dependency>
         <!-- override version xml-apis 1.0b2 (poi-ooxml dependency) to prevent conflicts -->
         <dependency>

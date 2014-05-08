@@ -40,7 +40,7 @@ public abstract class AbstractMetaDataEntity extends AbstractEntity
 	}
 
 	@Override
-	public Integer getIdValue()
+	public Object getIdValue()
 	{
 		AttributeMetaData idAttribute = metaData.getIdAttribute();
 		if (idAttribute == null)
@@ -55,7 +55,7 @@ public abstract class AbstractMetaDataEntity extends AbstractEntity
 					+ "]");
 		}
 
-		return (Integer) id;
+		return (String) id;
 	}
 
 	@Override

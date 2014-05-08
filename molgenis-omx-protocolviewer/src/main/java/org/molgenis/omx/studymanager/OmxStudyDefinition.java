@@ -97,10 +97,10 @@ public class OmxStudyDefinition implements StudyDefinition
 		if (items.iterator().hasNext())
 		{
 			Iterable<ObservableFeature> featuresIterable = dataService.findAll(ObservableFeature.ENTITY_NAME,
-					Iterables.transform(items, new Function<CatalogItem, Integer>()
+					Iterables.transform(items, new Function<CatalogItem, Object>()
 					{
 						@Override
-						public Integer apply(CatalogItem catalogItem)
+						public Object apply(CatalogItem catalogItem)
 						{
 							return Integer.valueOf(catalogItem.getId());
 						}

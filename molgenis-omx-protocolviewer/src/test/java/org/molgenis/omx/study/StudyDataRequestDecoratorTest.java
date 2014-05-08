@@ -46,8 +46,8 @@ public class StudyDataRequestDecoratorTest
 	private MolgenisUser userUser, adminUser;
 	private StudyDataRequest userStudyDataRequest, adminStudyDataRequest;
 	private QueryRule exampleRule;
-	private Integer exampleUserId, exampleAdminId;
-	private List<Integer> exampleUserIds, exampleAdminIds, exampleUserAdminIds;
+	private Object exampleUserId, exampleAdminId;
+	private List<Object> exampleUserIds, exampleAdminIds, exampleUserAdminIds;
 
 	@BeforeClass
 	public void setUpBeforeClass()

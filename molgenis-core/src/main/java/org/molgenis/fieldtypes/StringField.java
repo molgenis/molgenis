@@ -31,6 +31,7 @@ public class StringField extends FieldType
 	@Override
 	public String getMysqlType() throws MolgenisModelException
 	{
+        if(f == null) return "VARCHAR(255)";
 		return "VARCHAR(" + f.getVarCharLength() + ")";
 	}
 
@@ -86,6 +87,13 @@ public class StringField extends FieldType
 	public FieldTypeEnum getEnumType()
 	{
 		return FieldTypeEnum.STRING;
+	}
+
+	@Override
+	public Object convert(Object value)
+	{
+		if (value == null) return null;
+		return value.toString();
 	}
 
 }

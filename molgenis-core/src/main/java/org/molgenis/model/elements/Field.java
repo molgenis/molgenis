@@ -1036,8 +1036,8 @@ public class Field implements Serializable
 	/** Used for serialization purposes. */
 	private static final long serialVersionUID = -1879739243713730190L;
 	private String tableName;
-	private Long min;
-	private Long max;
+	private Long minRange;
+	private Long maxRange;
 
 	public String getAnnotations()
 	{
@@ -1112,24 +1112,24 @@ public class Field implements Serializable
 
 	}
 
-	public Long getMin()
+	public Long getMinRange()
 	{
-		return min;
+		return minRange;
 	}
 
-	public void setMin(Long min)
+	public void setMinRange(Long minRange)
 	{
-		this.min = min;
+		this.minRange = minRange;
 	}
 
-	public Long getMax()
+	public Long getMaxRange()
 	{
-		return max;
+		return maxRange;
 	}
 
-	public void setMax(Long max)
+	public void setMaxRange(Long maxRange)
 	{
-		this.max = max;
+		this.maxRange = maxRange;
 	}
 
 	public Map<String, List<Field>> allPossibleXrefLabels() throws MolgenisModelException

@@ -2,6 +2,7 @@ package org.molgenis.elasticsearch.request;
 
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.QueryStringQueryBuilder.Operator;
 import org.molgenis.data.Query;
 
 /**
@@ -16,7 +17,7 @@ public class QueryGenerator implements QueryPartGenerator
 	public void generate(SearchRequestBuilder searchRequestBuilder, Query query)
 	{
 		String queryString = LuceneQueryStringBuilder.buildQueryString(query.getRules());
-		searchRequestBuilder.setQuery(QueryBuilders.queryString(queryString));
+		searchRequestBuilder.setQuery(QueryBuilders.queryString(queryString).defaultOperator(Operator.AND));
 	}
 
 }

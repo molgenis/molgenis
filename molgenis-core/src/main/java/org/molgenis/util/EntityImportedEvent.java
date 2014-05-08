@@ -10,10 +10,10 @@ import org.springframework.context.ApplicationEvent;
 public class EntityImportedEvent extends ApplicationEvent
 {
 	private static final long serialVersionUID = 1L;
-	private final Integer entityId;
+	private final Object entityId;
 	private final String entityName;
 
-	public EntityImportedEvent(Object source, String entityName, Integer entityId)
+	public EntityImportedEvent(Object source, String entityName, Object entityId)
 	{
 		super(source);
 		if (entityName == null) throw new IllegalArgumentException("entityName is null");
@@ -27,7 +27,7 @@ public class EntityImportedEvent extends ApplicationEvent
 		return entityName;
 	}
 
-	public Integer getEntityId()
+	public Object getEntityId()
 	{
 		return entityId;
 	}
