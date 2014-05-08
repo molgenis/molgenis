@@ -365,7 +365,7 @@
 			<field name="Country" type="string" nillable="true"
 				description="Added from the old definition of MolgenisUser. Country of this contact." />
 			<field name="FirstName" label="First Name" nillable="true" />
-			<field name="MidInitials" label="Mid Initials" nillable="true" />
+			<field name="MiddleNames" label="MiddleNames" nillable="true" />
 			<field name="LastName" label="Last Name" nillable="true" />
 			<field name="Title" label="Title" nillable="true"
 				description="An academic title, e.g. Prof.dr, PhD" />

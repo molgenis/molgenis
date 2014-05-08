@@ -10,7 +10,7 @@
 			<field name="active" type="bool" default="false" description="Boolean to indicate if this account can be used to login"/>
 			<field name="superuser" type="bool" default="false"/>
 			<field name="FirstName" label="First Name" nillable="true"/>
-			<field name="MidInitials" label="Mid Initials" nillable="true"/>
+			<field name="MiddleNames" label="MiddleNames" nillable="true"/>
 			<field name="LastName" label="Last Name" nillable="true"/>
 			<field name="Title" label="Title" nillable="true" description="An academic title, e.g. Prof.dr, PhD"/>
 			<field name="Affiliation" type="string" nillable="true"/>
