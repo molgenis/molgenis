@@ -163,14 +163,14 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		{
 			throw new IllegalArgumentException("missing required java system property 'molgenis.home'");
 		}
-		if (!molgenisHomeDir.endsWith("/")) molgenisHomeDir = molgenisHomeDir + '/';
+		if (!molgenisHomeDir.endsWith(File.separator)) molgenisHomeDir = molgenisHomeDir + File.separator;
 
 		// create molgenis store directory in molgenis data directory if not exists
-		String molgenisFileStoreDirStr = molgenisHomeDir + "data/filestore";
+		String molgenisFileStoreDirStr = molgenisHomeDir + "data" + File.separator + "filestore";
 		File molgenisDataDir = new File(molgenisFileStoreDirStr);
 		if (!molgenisDataDir.exists())
 		{
-			if (!molgenisDataDir.mkdir())
+			if (!molgenisDataDir.mkdirs())
 			{
 				throw new RuntimeException("failed to create directory: " + molgenisFileStoreDirStr);
 			}
