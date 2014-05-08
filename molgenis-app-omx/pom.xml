@@ -102,7 +102,7 @@
 					<systemProperties>
 				      <systemProperty>
 				         <name>molgenis.home</name>
-				         <value>${user.home}/.molgenis/omx</value>
+				         <value>${user.home}${file.separator}.molgenis${file.separator}omx</value>
 				      </systemProperty>
 				      <systemProperty>
 				         <name>log4j.configuration</name>
