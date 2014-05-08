@@ -478,7 +478,7 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 	@Override
 	public <E extends Entity> Iterable<E> findAll(Iterable<Object> ids, Class<E> clazz)
 	{
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -881,7 +881,15 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 				if (att.getDataType() instanceof MrefField)
 				{
 					// TODO: convert to typed lists (or arrays?)
-					e.set(att.getName(), resultSet.getObject(att.getName()));
+					if (att.getRefEntity().getIdAttribute().getDataType() instanceof IntField)
+					{
+						e.set(att.getName(), DataConverter.toIntList(resultSet.getString(att.getName())));
+					}
+					else
+					{
+						e.set(att.getName(), DataConverter.toObjectList(resultSet.getString(att.getName())));
+					}
+
 				}
 				else if (att.getDataType() instanceof XrefField)
 				{

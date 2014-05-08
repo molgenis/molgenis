@@ -104,11 +104,9 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 		for (Entity e : mrefRepo.findAll(new QueryImpl().eq("identifier", "one")))
 		{
 			logger.info("found: " + e);
-			Assert.assertEquals(e.getString("stringRef"), "ref1,ref2");
 			Assert.assertEquals(e.getList("stringRef"), Arrays.asList(new String[]
 			{ "ref1", "ref2" }));
-			Assert.assertEquals(e.getString("intRef"), "1,2");
-			Assert.assertEquals(e.getIntList("intRef"), Arrays.asList(new Integer[]
+			Assert.assertEquals(e.getList("intRef"), Arrays.asList(new Integer[]
 			{ 1, 2 }));
 
 			List<Entity> result = new ArrayList<Entity>();
@@ -123,19 +121,19 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 		for (Entity e : mrefRepo.findAll(new QueryImpl().eq("stringRef", "ref3")))
 		{
 			logger.debug("found: " + e);
-			Assert.assertEquals(e.get("stringRef"), "ref3");
+			Assert.assertEquals(e.get("stringRef"), Arrays.asList(new String[]{"ref3"}));
 		}
 
 		for (Entity e : mrefRepo.findAll(new QueryImpl().eq("stringRef", "ref1")))
 		{
 			logger.debug("found: " + e);
-			Assert.assertEquals(e.get("stringRef"), "ref1,ref2");
+			Assert.assertEquals(e.get("stringRef"),  Arrays.asList(new String[]{"ref1","ref2"}));
 		}
 
 		for (Entity e : mrefRepo.findAll(new QueryImpl().gt("intRef", 1)))
 		{
 			logger.debug("found: " + e);
-			Assert.assertEquals(e.get("intRef"), "1,2");
+			Assert.assertEquals(e.get("intRef"), Arrays.asList(new Integer[]{1,2}));
 		}
 
 		// update
@@ -145,10 +143,14 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
         mrefRepo.update(e);
 
         e = mrefRepo.findOne("one");
-        Assert.assertEquals(e.getString("stringRef"),"ref2,ref3");
+        Assert.assertEquals(e.getList("stringRef").size(),2);
+        Assert.assertTrue(e.getList("stringRef").contains("ref2"));
+        Assert.assertTrue(e.getList("stringRef").contains("ref3"));
 
 
-		// verify not null error
+
+
+        // verify not null error
 
 		// verify default
 	}
