@@ -90,10 +90,12 @@
 	 */
 	function createFiltersList(attributeFilters) {
 		var items = [];
-		$.each(attributeFilters, function(attributeUri, attributeFilter) {
-			var attributeLabel = attributeFilter.attribute.label || attributeFilter.attribute.name;
+		
+		//TODO JJ change filter handling
+		$.each(attributeFilters, function(attributeUri, filter) {
+			var attributeLabel = filter.attribute.label || filter.attribute.name;
 			items.push('<p><a class="feature-filter-edit" data-href="' + attributeUri + '" href="#">'
-					+ attributeLabel + ': ' + createFilterValuesRepresentation(attributeFilter)
+					+ attributeLabel + ': ' + createFilterValuesRepresentation(filter)
 					+ '</a><a class="feature-filter-remove" data-href="' + attributeUri + '" href="#" title="Remove '
 					+ attributeLabel + ' filter" ><i class="icon-remove"></i></a></p>');
 		});
@@ -104,14 +106,48 @@
 	/**
 	 * @memberOf molgenis.dataexplorer
 	 */
-	function createFilterValuesRepresentation(attributeFilter) {
-		switch(attributeFilter.attribute.fieldType) {
+	////TODO JJ change filter handling
+	function createFilterValuesRepresentation(filter) {
+		var s = "TEST";
+		console.log("filter: ", filter);
+		if(filter.isType('complex')) {
+			var filters =filter.getFilters();
+			if(filters){
+				if(filters.length > 1){
+					s += '(';
+				}
+				for (var i = 0; i < filters.length; i++)
+				{
+					if(i > 0){
+						s += ' ' + filter.operator + ' ';
+					}
+					s += createSimpleFilterValuesRepresentation(filters[i]);
+				}
+				if(filters.length > 1){
+					s += ')';
+				}
+			}
+		}
+		else if(filter.isType('simple'))
+		{
+			s += createSimpleFilterValuesRepresentation(filter);
+		}
+		
+		return s;
+	}
+	
+	/**
+	 * @memberOf molgenis.dataexplorer
+	 */
+	////TODO JJ change filter handling
+	function createSimpleFilterValuesRepresentation(filter) {
+		switch(filter.attribute.fieldType) {
 			case 'DATE':
 			case 'DATE_TIME':
 			case 'DECIMAL':
 			case 'INT':
 			case 'LONG':
-				return htmlEscape((attributeFilter.fromValue ? 'from ' + attributeFilter.fromValue : '') + (attributeFilter.toValue ? ' to ' + attributeFilter.toValue : ''));
+				return htmlEscape((filter.fromValue ? 'from ' + filter.fromValue : '') + (filter.toValue ? ' to ' + filter.toValue : ''));
 			case 'EMAIL':
 			case 'HTML':
 			case 'HYPERLINK':
@@ -120,21 +156,21 @@
 			case 'BOOL':
 			case 'XREF':
 			case 'ENUM':
-				return htmlEscape(attributeFilter.values[0] ? attributeFilter.values[0] : '');
+				return htmlEscape(filter.values[0] ? filter.values[0] : '');
 			case 'CATEGORICAL':
 			case 'MREF':
-				var operator = (attributeFilter.operator?attributeFilter.operator.toLocaleLowerCase():'or');
+				var operator = (filter.operator?filter.operator.toLocaleLowerCase():'or');
 				var array = [];
-				$.each(attributeFilter.values, function(key, value) {
+				$.each(filter.values, function(key, value) {
 					array.push('\'' + value + '\'');
 				});
 				return htmlEscape(array.join(' ' + operator + ' '));
 			case 'COMPOUND' :
 			case 'FILE':
 			case 'IMAGE':
-				throw 'Unsupported data type: ' + attributeFilter.attribute.fieldType;
+				throw 'Unsupported data type: ' + filter.attribute.fieldType;
 			default:
-				throw 'Unknown data type: ' + attributeFilter.attribute.fieldType;
+				throw 'Unknown data type: ' + filter.attribute.fieldType;
 		}
 	}
 
@@ -330,10 +366,23 @@
 				break;
 			case 'MREF':
 			case 'XREF':
-				var element = $('<div />').css( "width", 700);
-				var operator = attributeFilter ? attributeFilter.operator : 'OR';
-				element.xrefsearch({attribute: attribute, values: values, operator: operator});
-				controls.append(element);
+				controls.addClass('complexFilter');
+				controls.append($('<select class="complexFilter operator"><option value="OR">OR</option><option value="AND">AND</option></select>'));
+				
+				var filter1 = $('<div class="simpleFilter">');
+				var element1 = $('<div />').css( "width", 525);
+				var operator1 = attributeFilter ? attributeFilter.operator : 'OR';
+				element1.xrefsearch({attribute: attribute, values: values, operator: operator1});
+				filter1.append(element1)
+				controls.append(filter1);
+				
+				var filter2 = $('<div class="simpleFilter">');
+				var element2 = $('<div />').css( "width", 525);
+				var operator2 = attributeFilter ? attributeFilter.operator : 'OR';
+				element2.xrefsearch({attribute: attribute, values: values, operator: operator2});
+				filter2.append(element2);
+				controls.append(filter2);
+				
 				break;
 			case 'COMPOUND' :
 			case 'FILE':
@@ -354,35 +403,60 @@
 		}
 
 	}
-
-	/**
-	 * @memberOf molgenis.dataexplorer
-	 */
-	function createFilters(form) {
-        var filters = {};
-        $('.controls', form).each(function() {
-			var attribute = $(this).data('attribute');
-			var filter = filters[attribute.href];
+	
+	
+	function Filter(){
+		this.operators = {'OR' : 'OR', 'AND' : 'AND'};
+		this.types = {'simple' : 'simple', 'complex': 'complex'};
+		this.type = undefined;
+		this.operator = this.operators['OR'];
+		this.attribute = undefined;
+		
+		/**
+		 * TODO	JJ write comment 
+		 */
+		//	this.update = function ($domElement) {
+		// 	Implement this method in Different filters
+		//	}
+		
+		/**
+		 * TODO	JJ write comment 
+		 */
+		//	this.isEmpty = function () {
+		//	Implement this method in Different filters
+		//	}
+		
+		this.isType = function(type)
+		{
+			return type && this.types[type] && this.type === type;
+		}
+		
+		return this;
+	}
+	
+	function SimpleFilter(attribute){
+		this.fromValue = undefined;
+		this.toValue = undefined;
+		this.values;
+		this.type = 'simple';
+		this.attribute = attribute;
+		
+		this.isEmpty = function() 
+		{
+			return !(this.values.length > 0 || this.fromValue || this.toValue);
+		}
+		
+		this.update = function ($domElement) {
+			var values = [];
 			
-			$(":input", $(this)).not('[type=radio]:not(:checked)').not('[type=checkbox]:not(:checked)').each(function(){
+			$(":input",$domElement).not('[type=radio]:not(:checked)').not('[type=checkbox]:not(:checked)').each(function(){
 				var value = $(this).val();
-				var name = $(this).attr("name");
+				var name =  $(this).attr("name");
+				
+				
+				// TODO JJ 2014-05-09 17:00
 				
 				if(value) {
-					if(!filter) {
-						filter = {};
-						filters[attribute.href] = filter;
-						filter.attribute = attribute;
-					}
-					
-					// Add values
-					var values = filter.values;
-					if(!values) {
-						values = [];
-						filter.values = values;
-					}
-					
-
 					// Add operator
 					if ($(this).hasClass('operator')) {
 						filter.operator = value;
@@ -391,48 +465,109 @@
 					// Add values
 					else 
 					{
-                        if(attribute.fieldType === 'MREF'){
-                            var mrefValues = value.split(',');
-                            $(mrefValues).each(function(i){
-                                values.push(mrefValues[i]);
-                            });
-                        } 
-                        else if(attribute.fieldType === 'INT'
-    						|| attribute.fieldType === 'LONG'
-    							|| attribute.fieldType === 'DECIMAL'
-    								|| attribute.fieldType === 'DATE'
-    									|| attribute.fieldType === 'DATE_TIME'
-    							){
-    						
-    						// Add toValue
-    						if(name && (name.match(/-to$/g) || name === 'sliderright')){
-    							filter.toValue = value;
-    							if(!filter.hasOwnProperty('fromValue')){
-    								filter.fromValue = undefined;
-    							}
-    						}
-    						
-    						// Add fromValue
-    						if(name && (name.match(/-from$/g) || name === 'sliderleft')){
-    							filter.fromValue = value;
-    						}
-    					}
-                        else
-                        {
-                        	values[values.length] = value;
-                        }
+		                if(attribute.fieldType === 'MREF'){
+		                    var mrefValues = value.split(',');
+		                    $(mrefValues).each(function(i){
+		                    	values.push(mrefValues[i]);
+		                    });
+		                } 
+		                else if(attribute.fieldType === 'INT'
+							|| attribute.fieldType === 'LONG'
+								|| attribute.fieldType === 'DECIMAL'
+									|| attribute.fieldType === 'DATE'
+										|| attribute.fieldType === 'DATE_TIME'
+								){
+							
+							// Add toValue
+							if(name && (name.match(/-to$/g) || name === 'sliderright')){
+								filter.toValue = value;
+								if(!filter.hasOwnProperty('fromValue')){
+									filter.fromValue = undefined;
+								}
+							}
+							
+							// Add fromValue
+							if(name && (name.match(/-from$/g) || name === 'sliderleft')){
+								filter.fromValue = value;
+							}
+						}
+		                else
+		                {
+		                	values[values.length] = value;
+		                }
 					}
 				}
 			});	
-		});
+
+			this.values = values;
+			
+			return this;
+		}
+
+		return this;
+	}
+	SimpleFilter.prototype = new Filter();
+	
+	function ComplexFilter(attribute){
+		var filters = [];
+		this.type = 'complex';
+		this.attribute = attribute;
+		
+		this.update = function ($domElement) {
+			this.operator = $(":input.complexFilter.operator", $domElement);
+			$(".simpleFilter", $domElement).each(function(){
+				filters.push((new SimpleFilter(attribute)).update($(this)));
+			});
+		};
+		
+		this.isEmpty = function () {
+			for(var i = 0; i < filters.length; i++)
+			{
+				if(!filters[i].isEmpty()){
+					return false;
+				}
+			}
+			return true;
+		};
+		
+		this.getFilters = function () {
+			return filters;
+		};
+		
+		return this;
+	}
+	ComplexFilter.prototype = new Filter();
+
+	/**
+	 * @memberOf molgenis.dataexplorer
+	 */
+	function createFilters(form) {
+        var filters = {};
+        var filter;
         
+		$('.controls.complexFilter', form).each(function() {
+			filter = new ComplexFilter($(this).data('attribute'));
+			filter.update($(this));
+			filters[filter.attribute.url] = filter;
+		});
+
+		$('.controls.simpleFilter', form).each(function() {
+			alert("simpleFilter");
+			filter = new SimpleFilter($(this).data('attribute'));
+			console.log('filter', filter);
+			filter.update($(this));
+			filters[filter.attribute.url] = filter;
+			
+			console.log("TEST: " + filter);
+		});
+		
 		return Object.keys(filters).map(function (key) { return filters[key]; }).filter(
 				function(filter)
 				{
-					return filter.fromValue || filter.toValue || filter.values.length > 0;
+					return !filter.isEmpty();
 				});
 	}
-	
+
 	/**
 	 * @memberOf molgenis.dataexplorer
 	 */
@@ -494,13 +629,13 @@
 				attributeFilters[this.attribute.href] = this;
 			});
 			createFiltersList(attributeFilters);
-			$(document).trigger('changeQuery', createEntityQuery());
+			//$(document).trigger('changeQuery', createEntityQuery());
 		});
 		
 		$(document).on('removeAttributeFilter', function(e, data) {
 			delete attributeFilters[data.attributeUri];
 			createFiltersList(attributeFilters);
-			$(document).trigger('changeQuery', createEntityQuery());
+			//$(document).trigger('changeQuery', createEntityQuery());
 		});
 		
 		$(document).on('clickAttribute', function(e, data) {
@@ -532,6 +667,8 @@
 		$(container).on('click', '.feature-filter-edit', function(e) {
 			e.preventDefault();
 			var attributeFilter = attributeFilters[$(this).data('href')];
+			console.log(attributeFilters);
+			console.log(attributeFilters[$(this).data('href')]);
 			molgenis.dataexplorer.filter.openFilterModal(attributeFilter.attribute, attributeFilter);
 		});
 		

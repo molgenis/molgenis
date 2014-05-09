@@ -83,11 +83,14 @@
 		var lookupAttrNames = getLookupAttributeNames(refEntityMetaData);
 		var hiddenInput = container.find('input[type=hidden]');
 		
+		// TODO JJ console.log('createSelect2: options: ', options);
+		
 		hiddenInput.select2({
 			width: '80%',
 			minimumInputLength: 2,
             multiple: (attributeMetaData.fieldType === 'MREF'),
 			query: function (options){
+				// TODO JJ console.log('query: options: ', options);
 				var query = createQuery(lookupAttrNames, [options.term],'LIKE');
 				restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {num: 10, q: query}}, function(data) {
 					options.callback({results: data.items, more: false});
@@ -95,29 +98,27 @@
             },
 			initSelection: function(element, callback) {
 				//Only called when the input has a value
+				// TODO JJ console.log('initSelection: element: ', element);
 				var query = createQuery(lookupAttrNames, element.val().split(','), 'EQUALS');
 				restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {q: query}}, function(data) {
 					callback(data.items);
 				});
 			},
 			formatResult: function(entity) {
+				// TODO JJ console.log('formatResult: entity: ', entity);
 				return formatResult(entity, refEntityMetaData, lookupAttrNames);
 			},
 			formatSelection: function(entity) {
+				// TODO JJ console.log('formatSelection: entity: ', entity);
 				return entity[refEntityMetaData.labelAttribute];
 			},
 			id: function(entity) {
+				// TODO JJ console.log('id: entity: ', entity);
 				return entity[refEntityMetaData.labelAttribute];
 			},
             separator: ',',
 			dropdownCssClass: 'molgenis-xrefsearch'
 		});
-        if (attributeMetaData.fieldType === 'MREF') {
-            var dropdown = $('<select id="mref-query-type" class="operator"><option value="OR">OR</option><option value="AND">AND</option></select>');
-            dropdown.val(options.operator);
-            dropdown.width(70);
-            container.append(dropdown);
-        }
 	}
 
 	function addQueryPartSelect(container, attributeMetaData, options) {
@@ -126,10 +127,31 @@
 			};
 
 		var element = createInput(attributeMetaData.fieldType, attrs, options.values);
+		
 		container.parent().append(element);
 		createSelect2(element, attributeMetaData, options);
+		
+        if (attributeMetaData.fieldType === 'MREF') {
+            var dropdown = $('<select id="mref-query-type" class="operator"><option value="OR">OR</option><option value="AND">AND</option></select>');
+            dropdown.val(options.operator);
+            dropdown.width(70);
+            container.append(dropdown);
+        }
 	}
 	
+	/**
+	 * Creates a mref or xref select2 component
+	 * 
+	 * options = 	The options to create the filter 
+	 * 				{
+	 * 					attribute 	 ==> the meta data of the attribute
+	 * 					operator ==> AND or OR or undefined
+	 * 					values 	 ==> the values that are concatenate with a operator
+	 *						1. example one: a AND b AND c
+	 *						2. example two: a OR b OR c
+	 * 					
+	 * 				}
+	 */
 	$.fn.xrefsearch = function(options) {
 		var container = this;
 		var attributeUri = options.attributeUri ? options.attributeUri : options.attribute.href;
