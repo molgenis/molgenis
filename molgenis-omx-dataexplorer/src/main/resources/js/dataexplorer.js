@@ -169,7 +169,6 @@
 			
 			if (rangeQuery) {
 				// Range filter
-				var rangeAnd = false;
 				var fromValue = attributeFilter.fromValue;
 				var toValue = attributeFilter.toValue;
 				
@@ -182,43 +181,74 @@
 					}
 				}
 				
-				// add range fromValue
-				if (fromValue) {
+				// add range fromValue / toValue
+				if (fromValue && toValue) {
+					entityCollectionRequest.q.push({
+						operator: 'NESTED',
+						nestedRules:[
+						{
+							field : attribute.name,
+							operator : 'GREATER_EQUAL',
+							value : fromValue
+						},
+						{
+							operator : 'AND'
+						},
+						{
+							field : attribute.name,
+							operator : 'LESS_EQUAL',
+							value : toValue
+						}]
+					});
+					
+				} else if (fromValue) {
 					entityCollectionRequest.q.push({
 						field : attribute.name,
 						operator : 'GREATER_EQUAL',
 						value : fromValue
 					});
-				}
-				
-				// add range toValue
-				if (toValue) {
-					if(fromValue !== undefined){
-						entityCollectionRequest.q.push({
-							operator : 'AND'
-						});
-					}
+					
+				} else if (toValue) {
 					entityCollectionRequest.q.push({
 						field : attribute.name,
 						operator : 'LESS_EQUAL',
 						value : toValue
 					});
+					
 				}
-			}else{
-				$.each(attributeFilter.values, function(index, value) {
-					if (index > 0) {
-						var operator = attributeFilter.operator ? attributeFilter.operator : 'OR';
-						entityCollectionRequest.q.push({
-							operator : operator
-						});
-					}
+			} else {
+				
+				if (attributeFilter.values.length > 1) {
+					var nestedRule = {
+						operator: 'NESTED',
+						nestedRules:[]
+					};
+				
+					$.each(attributeFilter.values, function(index, value) {
+						if (index > 0) {
+							var operator = attributeFilter.operator ? attributeFilter.operator : 'OR';
+							nestedRule.nestedRules.push({
+								operator : operator
+							});
+						}
 
+						nestedRule.nestedRules.push({
+							field : attribute.name,
+							operator : 'EQUALS',
+							value : value
+						});
+					});
+				
+					entityCollectionRequest.q.push(nestedRule);
+				
+				} else {
 					entityCollectionRequest.q.push({
 						field : attribute.name,
 						operator : 'EQUALS',
-						value : value
+						value : attributeFilter.values[0]
 					});
-				});
+					
+				}
 			}
 			
 			count++;

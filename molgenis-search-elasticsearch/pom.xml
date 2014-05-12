@@ -22,7 +22,7 @@
         <dependency>
     		<groupId>org.elasticsearch</groupId>
     		<artifactId>elasticsearch</artifactId>
-    		<version>0.90.7</version>
+    		<version>0.90.13</version>
 		</dependency> 
 		<dependency>
 			<groupId>org.springframework</groupId>
