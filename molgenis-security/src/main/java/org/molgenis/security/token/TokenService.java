@@ -14,7 +14,7 @@ public interface TokenService
 	 * @param user
 	 * @return
 	 */
-	String generateAndStoreToken(String username);
+	String generateAndStoreToken(String username, String description);
 
 	/**
 	 * Find a user by a security token
