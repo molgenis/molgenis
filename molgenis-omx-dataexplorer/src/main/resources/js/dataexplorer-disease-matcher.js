@@ -75,7 +75,6 @@
 	 */
 	function getDiseases(){
 		entityName = getEntity().name;
-		console.log(entityName);
 		var entityData = restApi.get('/api/v1/' + entityName, {'attributes': ['geneSymbol'], 'q': currentQuery});	
 		
 		var uniqueGeneSymbols = [];
