@@ -99,7 +99,6 @@ public class AccountController
 	public void changePassword(@Valid ChangePasswordForm form, HttpServletRequest request, HttpServletResponse response)
 			throws IOException
 	{
-		System.out.println("XXXXXX");
 		try
 		{
 			// Change password of current user
@@ -239,6 +238,7 @@ public class AccountController
 		user.setDepartment(request.getDepartment());
 		user.setCity(request.getCity());
 		user.setCountry(CountryCodes.get(request.getCountry()));
+		user.setChangePassword(false);
 		return user;
 	}
 }
