@@ -20,7 +20,14 @@
 	"select2.min.js",
 	"jQEditRangeSlider-min.js",
 	"jquery.molgenis.xrefsearch.js",
-	"dataexplorer.js"]>
+	"dataexplorer.js",
+	"jquery.molgenis.table.js"]>
+
+<#if modDiseaseMatcher == true>
+	<#assign js = js + ["dataexplorer-disease-matcher.js"]/>
+	<#assign css = css + ["diseasematcher.css"]/>
+</#if>
+
 <@header css js/>
     <script>
     	molgenis.dataexplorer.setShowWizardOnInit(${wizard?string('true', 'false')});
@@ -84,6 +91,10 @@
                 </div>
 			</div>		
 		</div>
+		
 		<div class="span9" id="module-nav"></div>
+		
+		<#if modDiseaseMatcher == true> <#include "view-dataexplorer-mod-diseasematcher.ftl"> </#if>
+	
 	</div>
 <@footer/>
