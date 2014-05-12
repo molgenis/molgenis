@@ -91,7 +91,6 @@
 	function createFiltersList(attributeFilters) {
 		var items = [];
 		
-		//TODO JJ change filter handling
 		$.each(attributeFilters, function(attributeUri, filter) {
 			var attributeLabel = filter.attribute.label || filter.attribute.name;
 			items.push('<p><a class="feature-filter-edit" data-href="' + attributeUri + '" href="#">'
@@ -108,9 +107,9 @@
 	 */
 	////TODO JJ change filter handling
 	function createFilterValuesRepresentation(filter) {
-		var s = "TEST";
-		console.log("filter: ", filter);
+		var s = '';
 		if(filter.isType('complex')) {
+			s += "'Complex Filter' ==> ";
 			var filters =filter.getFilters();
 			if(filters){
 				if(filters.length > 1){
@@ -139,7 +138,6 @@
 	/**
 	 * @memberOf molgenis.dataexplorer
 	 */
-	////TODO JJ change filter handling
 	function createSimpleFilterValuesRepresentation(filter) {
 		switch(filter.attribute.fieldType) {
 			case 'DATE':
@@ -194,116 +192,192 @@
 			}
 		}
 
-		$.each(attributeFilters, function(attributeUri, attributeFilter) {
+		$.each(attributeFilters, function(attributeUri, filter) {
+			var rule;
 			if (count > 0) {
 				entityCollectionRequest.q.push({
 					operator : 'AND'
 				});
 			}
-			var attribute = attributeFilter.attribute;
-			var rangeQuery = attribute.fieldType === 'DATE' || attribute.fieldType === 'DATE_TIME' || attribute.fieldType === 'DECIMAL' || attribute.fieldType === 'INT' || attribute.fieldType === 'LONG';
+
+			if(filter.isType('complex'))
+			{
+				rule = createEntityQueryFromComplexFilter(filter);
+			} 
+			else if (filter.isType('simple')) 
+			{
+				rule = createEntityQueryFromSimpleFilter(filter);
+			}
 			
-			if (rangeQuery) {
-				// Range filter
-				var fromValue = attributeFilter.fromValue;
-				var toValue = attributeFilter.toValue;
-				
-				if(attribute.fieldType === 'DATE_TIME'){
-					if(fromValue){
-						fromValue = fromValue.replace("'T'", "T");
-					}
-					if(toValue){
-						toValue = toValue.replace("'T'", "T");
-					}
+			if(rule){
+				entityCollectionRequest.q.push(rule);
+				count++;
+			}
+		});
+
+		return entityCollectionRequest;
+	}
+	
+	function createEntityQueryFromComplexFilter(filter){
+		var nestedRules = [];
+		var attribute = filter.attribute;
+		var rule; 
+		var filters = filter.getFilters();
+		
+		$.each(filters, function(index, subFilter) {
+			nestedRules .push(createEntityQueryFromSimpleFilter(filter));
+			if(index > 0 && index < (filters.length-1)){
+				nestedRules .push({
+					operator : filter.operator
+				});
+			}
+		});
+		
+		rule = {
+			operator: 'NESTED',
+			nestedRules: nestedRules
+		};
+		
+		return;
+	}
+	
+	function createEntityQueryFromSimpleFilter(filter){
+		var attribute = filter.attribute;
+		var rule;
+		var rangeQuery = attribute.fieldType === 'DATE' || attribute.fieldType === 'DATE_TIME' || attribute.fieldType === 'DECIMAL' || attribute.fieldType === 'INT' || attribute.fieldType === 'LONG';
+		
+		if (rangeQuery) {
+			// Range filter
+			var fromValue = filter.fromValue;
+			var toValue = filter.toValue;
+			
+			if(attribute.fieldType === 'DATE_TIME'){
+				if(fromValue){
+					fromValue = fromValue.replace("'T'", "T");
 				}
-				
-				// add range fromValue / toValue
-				if (fromValue && toValue) {
-					entityCollectionRequest.q.push({
-						operator: 'NESTED',
-						nestedRules:[
-						{
-							field : attribute.name,
-							operator : 'GREATER_EQUAL',
-							value : fromValue
-						},
-						{
-							operator : 'AND'
-						},
-						{
-							field : attribute.name,
-							operator : 'LESS_EQUAL',
-							value : toValue
-						}]
-					});
-					
-				} else if (fromValue) {
-					entityCollectionRequest.q.push({
+				if(toValue){
+					toValue = toValue.replace("'T'", "T");
+				}
+			}
+			
+			// add range fromValue / toValue
+			if (fromValue && toValue) {
+				rule = {
+					operator: 'NESTED',
+					nestedRules:[
+					{
 						field : attribute.name,
 						operator : 'GREATER_EQUAL',
 						value : fromValue
-					});
-					
-				} else if (toValue) {
-					entityCollectionRequest.q.push({
+					},
+					{
+						operator : 'AND'
+					},
+					{
 						field : attribute.name,
 						operator : 'LESS_EQUAL',
 						value : toValue
-					});
-					
-				}
-			} else {
-				
-				if (attributeFilter.values.length > 1) {
+					}]
+				};
+			} else if (fromValue) {
+				rule = {
+					field : attribute.name,
+					operator : 'GREATER_EQUAL',
+					value : fromValue
+				};
+			} else if (toValue) {
+				rule = {
+					field : attribute.name,
+					operator : 'LESS_EQUAL',
+					value : toValue
+				};
+			}
+		} else {
+			if(filter.values){
+				if (filter.values.length > 1) {
 					var nestedRule = {
 						operator: 'NESTED',
 						nestedRules:[]
 					};
 				
-					$.each(attributeFilter.values, function(index, value) {
+					$.each(filter.values, function(index, value) {
 						if (index > 0) {
-							var operator = attributeFilter.operator ? attributeFilter.operator : 'OR';
+							var operator = filter.operator ? filter.operator : 'OR';
 							nestedRule.nestedRules.push({
 								operator : operator
 							});
 						}
-
+	
 						nestedRule.nestedRules.push({
 							field : attribute.name,
 							operator : 'EQUALS',
 							value : value
 						});
 					});
-				
-					entityCollectionRequest.q.push(nestedRule);
-				
+					rule = nestedRule;
 				} else {
-					entityCollectionRequest.q.push({
+					rule = {
 						field : attribute.name,
 						operator : 'EQUALS',
-						value : attributeFilter.values[0]
-					});
-					
+						value : filter.values[0]
+					};
 				}
 			}
-			
-			count++;
-		});
+		}
+		
+		return rule;
+	}
 
-		return entityCollectionRequest;
+	/**
+	 * @memberOf molgenis.dataexplorer
+	 */
+	function createComplexFilterControls(attribute, filter, addLabel) {
+		var container = $('<div class="complexFilterContainer"></div>');
+		container.data('attribute', attribute);
+		var controlGroup = $('<div class="control-group">');
+		controlGroup.append($('<select class="complexFilter operator"><option value="OR">OR</option><option value="AND">AND</option></select>'));
+		controlGroup.append($('<button type="button">+</button>').click(function(){
+			// TODO JJ
+		}));
+		controlGroup.append($('<button type="button">-</button>').click(function(){
+			// TODO JJ
+		}));
+		container.append(controlGroup);
+		var filters;
+		
+		if(filter && filter.isType('complex')){
+			filters = filter.getFilters();
+			$.each(filters, function(key, value){
+				container.append(createSimpleFilterControlsElements(attribute, value, addLabel));
+			});
+		}else{
+			container.append(createSimpleFilterControlsElements(attribute, filter, addLabel));
+		}
+		
+		return container;
+	}
+	
+	
+	/**
+	 * @memberOf molgenis.dataexplorer
+	 */
+	function createSimpleFilterControls(attribute, filter, addLabel) {
+		var container = $('<div class="simpleFilterContainer"></div>');
+		container.append(createSimpleFilterControlsElements(attribute, filter, addLabel));
+		container.data('attribute', attribute);
+		return container;
 	}
 	
 	/**
 	 * @memberOf molgenis.dataexplorer
 	 */
-	function createFilterControls(attribute, attributeFilter, addLabel) {
+	function createSimpleFilterControlsElements(attribute, filter, addLabel) {
 		var label;
 		var controls = $('<div class="controls">');
-		controls.data('attribute', attribute);
 		var name = 'input-' + attribute.name + '-' + new Date().getTime();
-		var values = attributeFilter ? attributeFilter.values : null;
-		var fromValue = attributeFilter ? attributeFilter.fromValue : null;
-		var toValue = attributeFilter ? attributeFilter.toValue : null;
+		var values = filter ? filter.values : null;
+		var fromValue = filter ? filter.fromValue : null;
+		var toValue = filter ? filter.toValue : null;
 		switch(attribute.fieldType) {
 			case 'BOOL':
 				var attrs = {'name': name};
@@ -366,23 +440,10 @@
 				break;
 			case 'MREF':
 			case 'XREF':
-				controls.addClass('complexFilter');
-				controls.append($('<select class="complexFilter operator"><option value="OR">OR</option><option value="AND">AND</option></select>'));
-				
-				var filter1 = $('<div class="simpleFilter">');
-				var element1 = $('<div />').css( "width", 525);
-				var operator1 = attributeFilter ? attributeFilter.operator : 'OR';
-				element1.xrefsearch({attribute: attribute, values: values, operator: operator1});
-				filter1.append(element1)
-				controls.append(filter1);
-				
-				var filter2 = $('<div class="simpleFilter">');
-				var element2 = $('<div />').css( "width", 525);
-				var operator2 = attributeFilter ? attributeFilter.operator : 'OR';
-				element2.xrefsearch({attribute: attribute, values: values, operator: operator2});
-				filter2.append(element2);
-				controls.append(filter2);
-				
+				var element = $('<div />').css( "width", 525);
+				var operator = filter ? filter.operator : 'OR';
+				element.xrefsearch({attribute: attribute, values: values, operator: operator});
+				controls.append(element);
 				break;
 			case 'COMPOUND' :
 			case 'FILE':
@@ -401,9 +462,40 @@
 		{
 			return $('<div class="control-group">').append(controls);
 		}
-
 	}
 	
+	/**
+	 * @memberOf molgenis.dataexplorer
+	 */
+	function createFilterControls(attribute, filter, addLabel) {
+		switch(attribute.fieldType) {
+			case 'BOOL':
+			case 'CATEGORICAL':
+			case 'DATE':
+			case 'DATE_TIME':
+			case 'DECIMAL':
+			case 'INT':
+			case 'LONG':
+			case 'EMAIL':
+			case 'HTML':
+			case 'HYPERLINK':
+			case 'STRING':
+			case 'TEXT':
+			case 'ENUM':
+				return createSimpleFilterControls(attribute, filter, addLabel);
+				break;
+			case 'MREF':
+			case 'XREF':
+				return createComplexFilterControls(attribute, filter, addLabel);
+				break;
+			case 'COMPOUND' :
+			case 'FILE':
+			case 'IMAGE':
+				throw 'Unsupported data type: ' + attribute.fieldType;
+			default:
+				throw 'Unknown data type: ' + attribute.fieldType;
+		}
+	}
 	
 	function Filter(){
 		this.operators = {'OR' : 'OR', 'AND' : 'AND'};
@@ -441,6 +533,10 @@
 		this.type = 'simple';
 		this.attribute = attribute;
 		
+		if(!attribute){
+			
+		}
+		
 		this.isEmpty = function() 
 		{
 			return !(this.values.length > 0 || this.fromValue || this.toValue);
@@ -448,18 +544,18 @@
 		
 		this.update = function ($domElement) {
 			var values = [];
+			var fromValue = this.fromValue;
+			var toValue = this.toValue;
+			var operator = this.operator;
 			
 			$(":input",$domElement).not('[type=radio]:not(:checked)').not('[type=checkbox]:not(:checked)').each(function(){
 				var value = $(this).val();
 				var name =  $(this).attr("name");
 				
-				
-				// TODO JJ 2014-05-09 17:00
-				
 				if(value) {
 					// Add operator
 					if ($(this).hasClass('operator')) {
-						filter.operator = value;
+						operator = value;
 					} 
 					
 					// Add values
@@ -480,15 +576,12 @@
 							
 							// Add toValue
 							if(name && (name.match(/-to$/g) || name === 'sliderright')){
-								filter.toValue = value;
-								if(!filter.hasOwnProperty('fromValue')){
-									filter.fromValue = undefined;
-								}
+								toValue = value;
 							}
 							
 							// Add fromValue
 							if(name && (name.match(/-from$/g) || name === 'sliderleft')){
-								filter.fromValue = value;
+								fromValue = value;
 							}
 						}
 		                else
@@ -500,6 +593,9 @@
 			});	
 
 			this.values = values;
+			this.fromValue = fromValue;
+			this.toValue = toValue;
+			this.operator = operator;
 			
 			return this;
 		}
@@ -514,8 +610,8 @@
 		this.attribute = attribute;
 		
 		this.update = function ($domElement) {
-			this.operator = $(":input.complexFilter.operator", $domElement);
-			$(".simpleFilter", $domElement).each(function(){
+			this.operator = $(":input.complexFilter.operator", $domElement).val();
+			$(".controls", $domElement).each(function(){
 				filters.push((new SimpleFilter(attribute)).update($(this)));
 			});
 		};
@@ -545,20 +641,16 @@
         var filters = {};
         var filter;
         
-		$('.controls.complexFilter', form).each(function() {
+		$('.complexFilterContainer', form).each(function() {
 			filter = new ComplexFilter($(this).data('attribute'));
 			filter.update($(this));
 			filters[filter.attribute.url] = filter;
 		});
 
-		$('.controls.simpleFilter', form).each(function() {
-			alert("simpleFilter");
+		$('.simpleFilterContainer', form).each(function() {
 			filter = new SimpleFilter($(this).data('attribute'));
-			console.log('filter', filter);
 			filter.update($(this));
 			filters[filter.attribute.url] = filter;
-			
-			console.log("TEST: " + filter);
 		});
 		
 		return Object.keys(filters).map(function (key) { return filters[key]; }).filter(
@@ -629,13 +721,13 @@
 				attributeFilters[this.attribute.href] = this;
 			});
 			createFiltersList(attributeFilters);
-			//$(document).trigger('changeQuery', createEntityQuery());
+			$(document).trigger('changeQuery', createEntityQuery());
 		});
 		
 		$(document).on('removeAttributeFilter', function(e, data) {
 			delete attributeFilters[data.attributeUri];
 			createFiltersList(attributeFilters);
-			//$(document).trigger('changeQuery', createEntityQuery());
+			$(document).trigger('changeQuery', createEntityQuery());
 		});
 		
 		$(document).on('clickAttribute', function(e, data) {
@@ -666,10 +758,8 @@
 
 		$(container).on('click', '.feature-filter-edit', function(e) {
 			e.preventDefault();
-			var attributeFilter = attributeFilters[$(this).data('href')];
-			console.log(attributeFilters);
-			console.log(attributeFilters[$(this).data('href')]);
-			molgenis.dataexplorer.filter.openFilterModal(attributeFilter.attribute, attributeFilter);
+			var filter = attributeFilters[$(this).data('href')];
+			molgenis.dataexplorer.filter.openFilterModal(filter.attribute, filter);
 		});
 		
 		$(container).on('click', '.feature-filter-remove', function(e) {
