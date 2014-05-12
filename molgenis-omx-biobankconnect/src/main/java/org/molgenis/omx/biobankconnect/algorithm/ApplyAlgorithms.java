@@ -244,7 +244,7 @@ public class ApplyAlgorithms
 			for (Entry<String, List<Integer>> entryValuesByType : valuesByType.entrySet())
 			{
 				String valueType = entryValuesByType.getKey();
-				List<Integer> ids = entryValuesByType.getValue();
+				List<Object> ids = new ArrayList<Object>(entryValuesByType.getValue());
 				dataService.delete(valueType, dataService.findAll(valueType, ids));
 			}
 			dataService.getCrudRepository(ObservedValue.ENTITY_NAME).flush();
