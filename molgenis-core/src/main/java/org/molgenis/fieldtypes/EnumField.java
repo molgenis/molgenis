@@ -87,4 +87,11 @@ public class EnumField extends FieldType
 	{
 		return FieldTypeEnum.ENUM;
 	}
+
+	@Override
+	public Object convert(Object value)
+	{
+		if (value == null) return null;
+		return value.toString();
+	}
 }

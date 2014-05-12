@@ -156,8 +156,8 @@ public class DefaultEntityValidator implements EntityValidator
 	{
 		if (meta.getIdAttribute() != null)
 		{
-			Integer id1 = e1.getInt(meta.getIdAttribute().getName());
-			Integer id2 = e2.getInt(meta.getIdAttribute().getName());
+			String id1 = e1.getString(meta.getIdAttribute().getName());
+			String id2 = e2.getString(meta.getIdAttribute().getName());
 
 			if ((id1 != null) && (id2 != null) && id1.equals(id2))
 			{

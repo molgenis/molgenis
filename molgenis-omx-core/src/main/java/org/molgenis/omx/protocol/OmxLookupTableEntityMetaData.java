@@ -1,5 +1,6 @@
 package org.molgenis.omx.protocol;
 
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.*;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.BOOL;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.INT;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
@@ -10,6 +11,7 @@ import java.util.List;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.AbstractEntityMetaData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.omx.observ.Category;
@@ -37,6 +39,12 @@ public class OmxLookupTableEntityMetaData extends AbstractEntityMetaData
 	public String getName()
 	{
 		return createOmxLookupTableEntityMetaDataName(categoricalFeature.getIdentifier()); // yes, Identifier
+	}
+
+	@Override
+	public boolean isAbstract()
+	{
+		return false;
 	}
 
 	@Override
@@ -115,6 +123,12 @@ public class OmxLookupTableEntityMetaData extends AbstractEntityMetaData
 		attributes.add(isMissing);
 
 		return attributes;
+	}
+
+	@Override
+	public EntityMetaData getExtends()
+	{
+		return null;
 	}
 
 	@Override

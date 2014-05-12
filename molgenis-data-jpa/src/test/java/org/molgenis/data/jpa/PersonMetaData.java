@@ -14,7 +14,7 @@ public class PersonMetaData extends DefaultEntityMetaData
 	{
 		super("Person", Person.class);
 
-		DefaultAttributeMetaData id = new DefaultAttributeMetaData("id", INT);
+		DefaultAttributeMetaData id = new DefaultAttributeMetaData("id", STRING);
 		id.setDescription("automatically generated internal id, only for internal use.");
 		id.setIdAttribute(true);
 		id.setNillable(false);

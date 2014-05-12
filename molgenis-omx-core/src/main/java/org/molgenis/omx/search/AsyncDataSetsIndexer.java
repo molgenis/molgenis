@@ -82,7 +82,7 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 	@Override
 	@Async
 	@RunAsSystem
-	public void indexDataSets(List<Integer> dataSetIds)
+	public void indexDataSets(List<Object> dataSetIds)
 	{
 		while (isIndexingRunning())
 		{
@@ -123,14 +123,14 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 	@Override
 	@Async
 	@RunAsSystem
-	public void indexProtocols(List<Integer> protocolIds)
+	public void indexProtocols(List<Object> protocolIds)
 	{
 		indexProtocolsSynced(protocolIds);
 	}
 
 	@Override
 	@RunAsSystem
-	public void indexProtocolsSynced(List<Integer> protocolIds)
+	public void indexProtocolsSynced(List<Object> protocolIds)
 	{
 		while (isIndexingRunning())
 		{

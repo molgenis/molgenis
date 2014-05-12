@@ -182,7 +182,7 @@ public class OmxDataSetAnnotator
 
 	private void indexResultDataSet(DataSet dataSet)
 	{
-		ArrayList<Integer> datasetIds = new ArrayList<Integer>();
+		ArrayList<Object> datasetIds = new ArrayList<Object>();
 		datasetIds.add(dataSet.getId());
 		indexer.indexDataSets(datasetIds);
 	}

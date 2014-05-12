@@ -327,14 +327,14 @@ function createInput(dataType, attrs, val, lbl) {
 		case 'HYPERLINK':
 		case 'STRING':
 		case 'TEXT':
+		case 'ENUM':
 			return createBasicInput('text', attrs, val);
 		case 'MREF':
 		case 'XREF':
 			var container = $('<div class="xrefsearch" />');
 			container.append(createBasicInput('hidden', attrs, val));
 			return container;
-		case 'COMPOUND' :
-		case 'ENUM':
+		case 'COMPOUND':
 		case 'FILE':
 		case 'IMAGE':
 			throw 'Unsupported data type: ' + dataType;

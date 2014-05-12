@@ -11,6 +11,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.model.MolgenisModelException;
@@ -108,7 +109,7 @@ public class MolgenisEntityFormPluginController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = URI + "{entityName}/{id}")
-	public String edit(@PathVariable("entityName") String entityName, @PathVariable("id") Integer id,
+	public String edit(@PathVariable("entityName") String entityName, @PathVariable("id") Object id,
 			@RequestParam(value = "back", required = false) String back, Model model)
 	{
 		if (StringUtils.isNotBlank(back))
@@ -134,7 +135,11 @@ public class MolgenisEntityFormPluginController extends MolgenisPluginController
 		}
 
 		Repository repo = dataService.getRepositoryByEntityName(entityName);
-		Entity entity = BeanUtils.instantiateClass(repo.getEntityMetaData().getEntityClass());
+        Entity entity = null;
+        if(repo.getEntityMetaData().getEntityClass() != Entity.class)
+		    entity = BeanUtils.instantiateClass(repo.getEntityMetaData().getEntityClass());
+        else
+            entity = new MapEntity();
 		EntityMetaData entityMeta = repo.getEntityMetaData();
 
 		Map<String, String[]> parameterMap = request.getParameterMap();
@@ -172,10 +177,11 @@ public class MolgenisEntityFormPluginController extends MolgenisPluginController
 		return VIEW_NAME_EDIT;
 	}
 
-	private Entity findEntityById(EntityMetaData entityMetaData, Integer id)
+	private Entity findEntityById(EntityMetaData entityMetaData, Object id)
 	{
 		String entityName = entityMetaData.getName();
-		Entity entity = dataService.findOne(entityName, id);
+        Object typedId = entityMetaData.getIdAttribute().getDataType().convert(id);
+        Entity entity = dataService.findOne(entityName, typedId);
 
 		if (entity == null)
 		{

@@ -129,6 +129,10 @@ public class ObservableFeatureAttributeMetaData implements AttributeMetaData
 	@Override
 	public Range getRange()
 	{
+		if (this.observableFeature.getMinRange() != null && this.observableFeature.getMaxRange() != null)
+		{
+			return new Range(this.observableFeature.getMinRange(), this.observableFeature.getMaxRange());
+		}
 		return null;
 	}
 }

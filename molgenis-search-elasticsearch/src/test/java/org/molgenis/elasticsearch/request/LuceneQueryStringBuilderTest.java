@@ -18,7 +18,9 @@ import static org.testng.Assert.assertEquals;
 import java.util.Arrays;
 import java.util.Collections;
 
+import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
+import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.Test;
 
 public class LuceneQueryStringBuilderTest
@@ -42,6 +44,13 @@ public class LuceneQueryStringBuilderTest
 				new QueryRule("aaa", EQUALS, "yyy"))), "test:\"xxx\" AND aaa:\"yyy\"");
 		assertEquals(buildQueryString(Arrays.asList(new QueryRule("test", EQUALS, "xxx"), new QueryRule(OR),
 				new QueryRule("aaa", EQUALS, "yyy"))), "test:\"xxx\" OR aaa:\"yyy\"");
+	}
+
+	@Test
+	public void testBuildQueryStringNested()
+	{
+		Query q = new QueryImpl().eq("a", "qwerty").nest().ge("b", 1).lt("c", 5).unnest();
+		assertEquals(buildQueryString(q.getRules()), "a:\"qwerty\" ( b:[\"1\" TO *]c:{* TO \"5\"} )");
 	}
 
 	@Test

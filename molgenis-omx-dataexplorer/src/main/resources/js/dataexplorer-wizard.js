@@ -19,16 +19,17 @@
 		modal.modal('show');
 	};
 	
-	function createFilterWizardModal() {
+	function createFilterWizardModal() {		
 		var modal = $('#filter-wizard-modal');
-		if(!modal.length) {
+
+		if(modal.length === 0){
 			var items = [];
 			items.push('<div class="modal large hide" id="filter-wizard-modal" tabindex="-1">');
 			items.push('<div class="modal-header">');
 			items.push('<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>');
-            items.push('<h3>');
-            items.push(wizardTitle);
-            items.push('</h3>');
+	        items.push('<h3>');
+	        items.push(wizardTitle);
+	        items.push('</h3>');
 			items.push('</div>');
 			items.push('<div class="modal-body">');
 			items.push('<div class="filter-wizard">');
@@ -36,8 +37,7 @@
 			items.push('<ul class="wizard-steps"></ul>');
 			items.push('<div class="tab-content wizard-page"></div>');
 			items.push('<ul class="pager wizard">');
-			items.push('<li class="previous"><a href="#">Previous</a></li>');
-			items.push('<li class="next"><a href="#">Next</a></li>');
+			items.push('<li class="previous"><a href="#">Previous</a></li><li class="next"><a href="#">Next</a></li>');
 			items.push('</ul>');
 			items.push('</form>');
 			items.push('</div>');
@@ -47,13 +47,11 @@
 			items.push('<a href="#" class="btn btn-primary filter-wizard-apply-btn" data-dismiss="modal">Apply</a>');
 			items.push('</div>');
 			items.push('</div>');
-
+	
 			modal = $(items.join(''));
-
-			modal.modal({'show': false});
-
 			createFilterModalControls(modal);
 		}
+		
 		return modal;
 	}
 	
@@ -81,8 +79,9 @@
 	
 	function createFilterWizardContent(entityMetaData, attributeFilters, modal) {
 		var wizard = $('.filter-wizard', modal);
-		if (wizard.data('bootstrapWizard'))
+		if (wizard.data('bootstrapWizard')){
 			$.removeData(wizard.get(0));
+		}
 		
 		var listItems = [];
 		var paneItems = [];
@@ -93,18 +92,16 @@
 		$.each(compoundAttributes, function(i, compoundAttribute) {
 			var tabId = compoundAttribute.name + '-tab';
 			var label = compoundAttribute.label || compoundAttribute.name;
-			listItems.push('<li' + (i === 0 ? ' class="active"' : '') + '><a href="#' + tabId + '" data-toggle="tab">' + label + '</a></li>');
+			listItems.push('<li><a href="#' + tabId + '" data-toggle="tab">' + label + '</a></li>');
 			
-			var pane = $('<div class="tab-pane' + (i === 0 ? ' active"' : '') + '" id="' + tabId + '">');
+			var pane = $('<div class="tab-pane' + (i === 0 ? ' active"' : '"') + ' id="' + tabId + '">');
 			var paneContainer = $('<div class="well"></div>');
-			var form = $('<form class="form-horizontal"></form>');
-			paneContainer.append(form);
-			pane.append(paneContainer);
 			$.each(compoundAttribute.attributes, function(i, attribute) {
 				if(attribute.fieldType !== 'COMPOUND') {
-					paneContainer.append(molgenis.dataexplorer.createFilterControls(attribute, attributeFilters[attribute.href]));
+					paneContainer.append(molgenis.dataexplorer.createFilterControls(attribute, attributeFilters[attribute.href], true));
 				}
 			});
+			pane.append(paneContainer);
 			paneItems.push(pane);
 		});
 		
@@ -115,7 +112,9 @@
             $('.wizard-steps').hide();
         }
         $('.tab-content', wizard).html(paneItems);
-		
+        
+        $('#filter-wizard-modal ul.pager.wizard').html('<li class="previous"><a href="#">Previous</a></li><li class="next"><a href="#">Next</a></li>');
+        
 		wizard.bootstrapWizard({
 	   		tabClass: 'bwizard-steps',
 	   		onTabShow: function(tab, navigation, index) {
@@ -123,16 +122,20 @@
 	   			var $current = index+1;
 	   			
 	   			// If it's the last tab then hide the last button and show the finish instead
-	   			if($total == 1) {
-	   				wizard.find('.pager').hide();
+	   			if($total === 1) {
+	   				wizard.find('.pager .previous').hide();
+	   				wizard.find('.pager .next').hide();
 	   			} else if($current === 1) {
 	   				wizard.find('.pager .previous').hide();
 	   				wizard.find('.pager .next').show();
 	   			} else if($current > 1 && $current < $total) {
 	   				wizard.find('.pager .previous').show();
 	   				wizard.find('.pager .next').show();
-	   			} else {
+	   			} else if($current === $total && $current>1) {
 	   				wizard.find('.pager .previous').show();
+	   				wizard.find('.pager .next').hide();
+	   			} else {
+	   				wizard.find('.pager .previous').hide();
 	   				wizard.find('.pager .next').hide();
 	   			}
 	   		}

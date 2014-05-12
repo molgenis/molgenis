@@ -187,7 +187,8 @@ ul.fancytree-container {
 }
 
 #slider {
-	margin: 0 30px;	
+	margin: 0 30px;
+	width: 525px;
 }
 
 .form-horizontal .controls {

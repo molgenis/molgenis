@@ -348,8 +348,8 @@ public class MolgenisModelParser
 		{ "type", "name", "label", "auto", "nillable", "optional", "readonly", "default", "description", "desc",
 				"unique", "hidden", "length", "enum_options", "default_code", "xref", "xref_entity", "xref_field",
 				"xref_label", "xref_name", "mref_name", "mref_localid", "mref_remoteid", "filter", "filtertype",
-				"filterfield", "filtervalue", "xref_cascade", "allocationSize", "jpaCascade", "aggregateable", "min",
-				"max" };
+				"filterfield", "filtervalue", "xref_cascade", "allocationSize", "jpaCascade", "aggregateable",
+				"minRange", "maxRange" };
 		List<String> key_words = new ArrayList<String>(Arrays.asList(keywords));
 		for (int i = 0; i < element.getAttributes().getLength(); i++)
 		{
@@ -385,8 +385,8 @@ public class MolgenisModelParser
 		String length = element.getAttribute("length");
 		String enum_options = element.getAttribute("enum_options").replace('[', ' ').replace(']', ' ').trim();
 		String default_code = element.getAttribute("default_code");
-		String min = element.getAttribute("min");
-		String max = element.getAttribute("max");
+		String minRange = element.getAttribute("minRange");
+		String maxRange = element.getAttribute("maxRange");
 
 		// xref and mref
 		String xref_entity = element.getAttribute("xref_entity");
@@ -577,24 +577,24 @@ public class MolgenisModelParser
 		}
 		else if (type.equals("int") || type.equals("long"))
 		{
-			if (StringUtils.isNotBlank(min) && StringUtils.isNotBlank(max))
+			if (StringUtils.isNotBlank(minRange) && StringUtils.isNotBlank(maxRange))
 			{
 				try
 				{
-					field.setMin(Long.valueOf(min));
+					field.setMinRange(Long.valueOf(minRange));
 				}
 				catch (Exception e)
 				{
-					throw new IllegalArgumentException("Illegal min value [" + min + "]");
+					throw new IllegalArgumentException("Illegal minRange value [" + minRange + "]");
 				}
 
 				try
 				{
-					field.setMax(Long.valueOf(max));
+					field.setMaxRange(Long.valueOf(maxRange));
 				}
 				catch (Exception e)
 				{
-					throw new IllegalArgumentException("Illegal max value [" + max + "]");
+					throw new IllegalArgumentException("Illegal maxRange value [" + maxRange + "]");
 				}
 			}
 		}
