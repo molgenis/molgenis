@@ -105,11 +105,9 @@
 	/**
 	 * @memberOf molgenis.dataexplorer
 	 */
-	////TODO JJ change filter handling
 	function createFilterValuesRepresentation(filter) {
 		var s = '';
 		if(filter.isType('complex')) {
-			s += "'Complex Filter' ==> ";
 			var filters = filter.getFilters();
 			if(filters){
 				$.each(filters, function(index, value){
@@ -134,6 +132,7 @@
 	 * @memberOf molgenis.dataexplorer
 	 */
 	function createSimpleFilterValuesRepresentation(filter) {
+		var values = filter.getValues();
 		switch(filter.attribute.fieldType) {
 			case 'DATE':
 			case 'DATE_TIME':
@@ -149,12 +148,12 @@
 			case 'BOOL':
 			case 'XREF':
 			case 'ENUM':
-				return htmlEscape(filter.values[0] ? filter.values[0] : '');
+				return htmlEscape(values[0] ? values[0] : '');
 			case 'CATEGORICAL':
 			case 'MREF':
 				var operator = (filter.operator ? filter.operator.toLocaleLowerCase() : 'or');
 				var array = [];
-				$.each(filter.values, function(key, value) {
+				$.each(values, function(key, value) {
 					array.push('\'' + value + '\'');
 				});
 				return htmlEscape(array.join(' ' + operator + ' '));
@@ -209,7 +208,10 @@
 				count++;
 			}
 		});
-
+		
+		$("#debugFilterQuery").remove();
+		$("#tab-data").append($('<div id="debugFilterQuery"><p>QUERY : </p><p>' + JSON.stringify(entityCollectionRequest) + '</p></div>'));
+		
 		return entityCollectionRequest;
 	}
 	
@@ -220,12 +222,12 @@
 		var filters = filter.getFilters();
 		
 		$.each(filters, function(index, subFilter) {
-			nestedRules .push(createEntityQueryFromSimpleFilter(filter));
-			if(index > 0 && index < (filters.length-1)){
-				nestedRules .push({
+			if(index > 0){
+				nestedRules.push({
 					operator : filter.operator
 				});
 			}
+			nestedRules.push(createEntityQueryFromSimpleFilter(subFilter));
 		});
 		
 		rule = {
@@ -233,10 +235,11 @@
 			nestedRules: nestedRules
 		};
 		
-		return;
+		return rule;
 	}
 	
 	function createEntityQueryFromSimpleFilter(filter){
+		var values = filter.getValues();
 		var attribute = filter.attribute;
 		var rule;
 		var rangeQuery = attribute.fieldType === 'DATE' || attribute.fieldType === 'DATE_TIME' || attribute.fieldType === 'DECIMAL' || attribute.fieldType === 'INT' || attribute.fieldType === 'LONG';
@@ -288,14 +291,14 @@
 				};
 			}
 		} else {
-			if(filter.values){
-				if (filter.values.length > 1) {
+			if(values){
+				if (values.length > 1) {
 					var nestedRule = {
 						operator: 'NESTED',
 						nestedRules:[]
 					};
 				
-					$.each(filter.values, function(index, value) {
+					$.each(values, function(index, value) {
 						if (index > 0) {
 							var operator = filter.operator ? filter.operator : 'OR';
 							nestedRule.nestedRules.push({
@@ -314,7 +317,7 @@
 					rule = {
 						field : attribute.name,
 						operator : 'EQUALS',
-						value : filter.values[0]
+						value : values[0]
 					};
 				}
 			}
@@ -343,7 +346,7 @@
 		var operator = (filter?filter.operator:null);
 		controlGroup.append(createComplexFilterSelectOperator(operator));
 		controlGroup.append($('<button class="btn" type="button">+</button>').click(function(){
-			container.append(addRemoveButton(createSimpleFilterControlsElements(attribute, filter, addLabel)));
+			container.append(addRemoveButton(createSimpleFilterControlsElements(attribute, undefined, addLabel)));
 		}));
 		container.append(controlGroup);
 		var filters;
@@ -390,7 +393,7 @@
 		var label;
 		var controls = $('<div class="controls controls-row">').width(550);
 		var name = 'input-' + attribute.name + '-' + new Date().getTime();
-		var values = filter ? filter.values : null;
+		var values = filter ? filter.getValues() : null;
 		var fromValue = filter ? filter.fromValue : null;
 		var toValue = filter ? filter.toValue : null;
 		switch(attribute.fieldType) {
@@ -493,8 +496,8 @@
 			case 'HYPERLINK':
 			case 'STRING':
 			case 'ENUM':
-				return createSimpleFilterControls(attribute, filter, addLabel);
-				break;
+//				return createSimpleFilterControls(attribute, filter, addLabel);
+//				break;
 			case 'INT':
 			case 'TEXT':
 			case 'MREF':
@@ -542,21 +545,21 @@
 	function SimpleFilter(attribute){
 		this.fromValue = undefined;
 		this.toValue = undefined;
-		this.values;
+		var values = [];
 		this.type = 'simple';
 		this.attribute = attribute;
 		
-		if(!attribute){
-			
-		}
-		
 		this.isEmpty = function() 
 		{
-			return !(this.values.length > 0 || this.fromValue || this.toValue);
-		}
+			return !(values.length || this.fromValue || this.toValue);
+		};
+		
+		this.getValues = function ()
+		{
+			return values;
+		};
 		
 		this.update = function ($domElement) {
-			var values = [];
 			var fromValue = this.fromValue;
 			var toValue = this.toValue;
 			var operator = this.operator;
@@ -603,13 +606,10 @@
 		                }
 					}
 				}
-			});	
-
-			this.values = values;
+			});
 			this.fromValue = fromValue;
 			this.toValue = toValue;
 			this.operator = operator;
-			
 			return this;
 		}
 
