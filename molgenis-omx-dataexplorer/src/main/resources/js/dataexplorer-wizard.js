@@ -58,11 +58,7 @@
 	function createFilterModalControls(modal) {
 		$('.filter-wizard-apply-btn', modal).click(function() {
 			var filters = molgenis.dataexplorer.createFilters($('form', modal));
-			
-			alert("filters: " + filters);
-			console.log("filters: ", filters);
-			
-			// TODO JJ change raction on filters
+
 			if (filters.length > 0) {
 				$(document).trigger('updateAttributeFilters', {
 					'filters' : filters

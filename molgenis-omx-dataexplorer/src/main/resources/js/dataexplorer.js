@@ -110,21 +110,16 @@
 		var s = '';
 		if(filter.isType('complex')) {
 			s += "'Complex Filter' ==> ";
-			var filters =filter.getFilters();
+			var filters = filter.getFilters();
 			if(filters){
-				if(filters.length > 1){
-					s += '(';
-				}
-				for (var i = 0; i < filters.length; i++)
-				{
-					if(i > 0){
-						s += ' ' + filter.operator + ' ';
+				$.each(filters, function(index, value){
+					s += '(' + createSimpleFilterValuesRepresentation(filters[index]) + ')';
+					if((filters.length - 1)  > index)
+					{
+						s += ' ' + filter.operator.toLowerCase() + ' ';
 					}
-					s += createSimpleFilterValuesRepresentation(filters[i]);
-				}
-				if(filters.length > 1){
-					s += ')';
-				}
+				})
+
 			}
 		}
 		else if(filter.isType('simple'))
@@ -157,7 +152,7 @@
 				return htmlEscape(filter.values[0] ? filter.values[0] : '');
 			case 'CATEGORICAL':
 			case 'MREF':
-				var operator = (filter.operator?filter.operator.toLocaleLowerCase():'or');
+				var operator = (filter.operator ? filter.operator.toLocaleLowerCase() : 'or');
 				var array = [];
 				$.each(filter.values, function(key, value) {
 					array.push('\'' + value + '\'');
@@ -327,6 +322,16 @@
 		
 		return rule;
 	}
+	
+	function createComplexFilterSelectOperator(operator){
+		var $orOption = $('<option value="OR">OR</option>');
+		var $andOption = $('<option value="AND">AND</option>');
+		var $select = $('<select class="complexFilter operator"></select>').width(70);
+		var operatorLowerCase = (operator? operator.toLowerCase(): undefined);
+		if(operatorLowerCase === 'and') $andOption.attr('selected', 'selected');
+		else $orOption.attr('selected', 'selected');
+		return $select.append($orOption).append($andOption);
+	}
 
 	/**
 	 * @memberOf molgenis.dataexplorer
@@ -335,26 +340,36 @@
 		var container = $('<div class="complexFilterContainer"></div>');
 		container.data('attribute', attribute);
 		var controlGroup = $('<div class="control-group">');
-		controlGroup.append($('<select class="complexFilter operator"><option value="OR">OR</option><option value="AND">AND</option></select>'));
-		controlGroup.append($('<button type="button">+</button>').click(function(){
-			// TODO JJ
-		}));
-		controlGroup.append($('<button type="button">-</button>').click(function(){
-			// TODO JJ
+		var operator = (filter?filter.operator:null);
+		controlGroup.append(createComplexFilterSelectOperator(operator));
+		controlGroup.append($('<button class="btn" type="button">+</button>').click(function(){
+			container.append(addRemoveButton(createSimpleFilterControlsElements(attribute, filter, addLabel)));
 		}));
 		container.append(controlGroup);
 		var filters;
 		
 		if(filter && filter.isType('complex')){
 			filters = filter.getFilters();
-			$.each(filters, function(key, value){
-				container.append(createSimpleFilterControlsElements(attribute, value, addLabel));
+			$.each(filters, function(index, value){
+				if(index === 0){
+					container.append(createSimpleFilterControlsElements(attribute, value, addLabel));
+				}else{
+					container.append(addRemoveButton(createSimpleFilterControlsElements(attribute, value, addLabel)));
+				}
+				
 			});
 		}else{
 			container.append(createSimpleFilterControlsElements(attribute, filter, addLabel));
 		}
 		
 		return container;
+	}
+	
+	function addRemoveButton(element){
+		element.append($('<button class="btn" type="button">-</button>').click(function(){
+			$(this).parent().remove();
+		}));
+		return element;
 	}
 	
 	
@@ -373,7 +388,7 @@
 	 */
 	function createSimpleFilterControlsElements(attribute, filter, addLabel) {
 		var label;
-		var controls = $('<div class="controls">');
+		var controls = $('<div class="controls controls-row">').width(550);
 		var name = 'input-' + attribute.name + '-' + new Date().getTime();
 		var values = filter ? filter.values : null;
 		var fromValue = filter ? filter.fromValue : null;
@@ -440,10 +455,8 @@
 				break;
 			case 'MREF':
 			case 'XREF':
-				var element = $('<div />').css( "width", 525);
 				var operator = filter ? filter.operator : 'OR';
-				element.xrefsearch({attribute: attribute, values: values, operator: operator});
-				controls.append(element);
+				controls.xrefsearch({attribute: attribute, values: values, operator: operator});
 				break;
 			case 'COMPOUND' :
 			case 'FILE':
@@ -474,16 +487,16 @@
 			case 'DATE':
 			case 'DATE_TIME':
 			case 'DECIMAL':
-			case 'INT':
 			case 'LONG':
 			case 'EMAIL':
 			case 'HTML':
 			case 'HYPERLINK':
 			case 'STRING':
-			case 'TEXT':
 			case 'ENUM':
 				return createSimpleFilterControls(attribute, filter, addLabel);
 				break;
+			case 'INT':
+			case 'TEXT':
 			case 'MREF':
 			case 'XREF':
 				return createComplexFilterControls(attribute, filter, addLabel);
@@ -610,10 +623,16 @@
 		this.attribute = attribute;
 		
 		this.update = function ($domElement) {
+			var simpleFilter;
 			this.operator = $(":input.complexFilter.operator", $domElement).val();
 			$(".controls", $domElement).each(function(){
-				filters.push((new SimpleFilter(attribute)).update($(this)));
+				simpleFilter = (new SimpleFilter(attribute)).update($(this));
+				if(!simpleFilter.isEmpty())
+				{
+					filters.push(simpleFilter);
+				}
 			});
+			return this;
 		};
 		
 		this.isEmpty = function () {
@@ -644,13 +663,15 @@
 		$('.complexFilterContainer', form).each(function() {
 			filter = new ComplexFilter($(this).data('attribute'));
 			filter.update($(this));
-			filters[filter.attribute.url] = filter;
+			if(!filter.isEmpty()){
+				filters[filter.attribute.href] = filter;
+			}
 		});
 
 		$('.simpleFilterContainer', form).each(function() {
 			filter = new SimpleFilter($(this).data('attribute'));
 			filter.update($(this));
-			filters[filter.attribute.url] = filter;
+			filters[filter.attribute.href] = filter;
 		});
 		
 		return Object.keys(filters).map(function (key) { return filters[key]; }).filter(

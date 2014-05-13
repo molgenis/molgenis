@@ -331,10 +331,8 @@ function createInput(dataType, attrs, val, lbl) {
 			return createBasicInput('text', attrs, val);
 		case 'MREF':
 		case 'XREF':
-			var container = $('<div class="xrefsearch" />');
-			container.append(createBasicInput('hidden', attrs, val));
+			return $('<div class="xrefsearch" />').append(createBasicInput('hidden', attrs, val));
 			return container;
-		case 'COMPOUND':
 		case 'FILE':
 		case 'IMAGE':
 			throw 'Unsupported data type: ' + dataType;
@@ -665,7 +663,7 @@ $(function() {
 	});
 
 	// use ajaxPrefilter instead of ajaxStart and ajaxStop
-	// to work around issue http://bugs.jquery.com/ticket/13680
+	// to work around issue http://bugs.jquery.com/ticket/136
 	$.ajaxPrefilter(function( options, _, jqXHR ) {
 	    showSpinner();
 	    jqXHR.always( hideSpinner );

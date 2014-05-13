@@ -42,23 +42,17 @@
 	
 	function getLookupAttributeNames(entityMetaData) {
 		var attributeNames = [];
-		
 		$.each(entityMetaData.attributes, function(attrName, attr) {
-			if (attr.lookupAttribute) {
+			if (attr.lookupAttribute === true) {
 				attributeNames.push(attr.name);
 			}
 		});
-			
 		return attributeNames;
 	}
 	
 	function formatResult(entity, entityMetaData, lookupAttributeNames) {
 		var items = [];
 		items.push('<div class="row-fluid">');
-		
-		if(lookupAttributeNames.length === 0){
-			lookupAttributeNames.push(entityMetaData.labelAttribute);
-		}
 		
 		if (lookupAttributeNames.length > 0) {
 			var width = Math.round(12 / lookupAttributeNames.length);// 12 is full width in px
@@ -82,15 +76,12 @@
 		var refEntityMetaData = restApi.get(attributeMetaData.refEntity.href, {expand: ['attributes']});
 		var lookupAttrNames = getLookupAttributeNames(refEntityMetaData);
 		var hiddenInput = container.find('input[type=hidden]');
-		
-		// TODO JJ console.log('createSelect2: options: ', options);
-		
+	
 		hiddenInput.select2({
 			width: '80%',
 			minimumInputLength: 2,
             multiple: (attributeMetaData.fieldType === 'MREF'),
 			query: function (options){
-				// TODO JJ console.log('query: options: ', options);
 				var query = createQuery(lookupAttrNames, [options.term],'LIKE');
 				restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {num: 10, q: query}}, function(data) {
 					options.callback({results: data.items, more: false});
@@ -98,27 +89,27 @@
             },
 			initSelection: function(element, callback) {
 				//Only called when the input has a value
-				// TODO JJ console.log('initSelection: element: ', element);
 				var query = createQuery(lookupAttrNames, element.val().split(','), 'EQUALS');
 				restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {q: query}}, function(data) {
 					callback(data.items);
 				});
 			},
 			formatResult: function(entity) {
-				// TODO JJ console.log('formatResult: entity: ', entity);
 				return formatResult(entity, refEntityMetaData, lookupAttrNames);
 			},
 			formatSelection: function(entity) {
-				// TODO JJ console.log('formatSelection: entity: ', entity);
 				return entity[refEntityMetaData.labelAttribute];
 			},
 			id: function(entity) {
-				// TODO JJ console.log('id: entity: ', entity);
 				return entity[refEntityMetaData.labelAttribute];
 			},
             separator: ',',
 			dropdownCssClass: 'molgenis-xrefsearch'
 		});
+		
+		if(!lookupAttrNames.length){
+			container.append($("<label>lookup attribute is not defined.</label>"));
+		}
 	}
 
 	function addQueryPartSelect(container, attributeMetaData, options) {
@@ -127,16 +118,16 @@
 			};
 
 		var element = createInput(attributeMetaData.fieldType, attrs, options.values);
-		
-		container.parent().append(element);
 		createSelect2(element, attributeMetaData, options);
 		
         if (attributeMetaData.fieldType === 'MREF') {
-            var dropdown = $('<select id="mref-query-type" class="operator"><option value="OR">OR</option><option value="AND">AND</option></select>');
+            var dropdown = $('<select class="operator"><option value="OR">OR</option><option value="AND">AND</option></select>');
             dropdown.val(options.operator);
             dropdown.width(70);
-            container.append(dropdown);
+            element.append(dropdown);
         }
+        
+		container.append(element);
 	}
 	
 	/**
