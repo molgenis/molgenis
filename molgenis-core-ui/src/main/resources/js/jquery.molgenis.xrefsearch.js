@@ -89,7 +89,7 @@
             multiple: (attributeMetaData.fieldType === 'MREF'),
 			query: function (options){
 				var query = createQuery(lookupAttrNames, [options.term],'LIKE');
-				restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {num: 10, q: query}}, function(data) {
+				restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {num: 1000, q: query}}, function(data) {
 					options.callback({results: data.items, more: false});
 				});           
             },
