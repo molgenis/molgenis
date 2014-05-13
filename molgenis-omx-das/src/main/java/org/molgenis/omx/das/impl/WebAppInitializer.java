@@ -20,7 +20,7 @@ public class WebAppInitializer implements WebApplicationInitializer
 	public void onStartup(ServletContext servletContext) throws ServletException
 	{
 		//Filter is needed to alter the urls used to serve patient specific URLs
-		javax.servlet.FilterRegistration.Dynamic filter = servletContext.addFilter("dasFilter", new DasPatientFilter());
+		javax.servlet.FilterRegistration.Dynamic filter = servletContext.addFilter("dasFilter", new DasURLFilter());
 		if (filter == null)
 		{
 			logger.warn("ServletContext already contains a complete FilterRegistration for servlet 'dasFilter'");
