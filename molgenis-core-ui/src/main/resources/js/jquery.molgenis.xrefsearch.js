@@ -56,13 +56,12 @@
 		
 		if (lookupAttributeNames.length > 0) {
 			var width = Math.round(12 / lookupAttributeNames.length);// 12 is full width in px
-			var abbr = Math.round(100 / lookupAttributeNames.length);// 100 is full width in characters (if you don't change the font size)
 		
 			$.each(lookupAttributeNames, function(index, attrName) {
 				var attrLabel = entityMetaData.attributes[attrName].label || attrName;
 				var attrValue = entity[attrName] == undefined ?  '' :  entity[attrName];
 				items.push('<div class="span' + width + '">');
-				items.push(abbreviate(attrLabel + ': <b>' + htmlEscape(attrValue) + '</b>', abbr));
+				items.push(attrLabel + ': <b>' + htmlEscape(attrValue) + '</b>');
 				items.push('</div>');
 			});
 		}

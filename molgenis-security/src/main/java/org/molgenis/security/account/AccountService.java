@@ -133,6 +133,24 @@ public class AccountService
 	}
 
 	@RunAsSystem
+	public void changePassword(String username, String newPassword)
+	{
+		MolgenisUser molgenisUser = dataService.findOne(MolgenisUser.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisUser.USERNAME, username), MolgenisUser.class);
+
+		if (molgenisUser == null)
+		{
+			throw new MolgenisUserException("Unknown user [" + username + "]");
+		}
+
+		molgenisUser.setPassword(passwordEncoder.encode(newPassword));
+		molgenisUser.setChangePassword(false);
+		dataService.update(MolgenisUser.ENTITY_NAME, molgenisUser);
+
+		logger.info("Changed password of user [" + username + "]");
+	}
+
+	@RunAsSystem
 	public void resetPassword(String userEmail)
 	{
 		MolgenisUser molgenisUser = dataService.findOne(MolgenisUser.ENTITY_NAME,
