@@ -73,10 +73,11 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 				.put(BROWSERLINKS,
 						"{Ensembl: 'http://www.ensembl.org/Homo_sapiens/Location/View?r=${chr}:${start}-${end}',UCSC: 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr${chr}:${start}-${end}',Sequence: 'http://www.derkholm.net:8080/das/hg19comp/sequence?segment=${chr}:${start},${end}'}");
 
-		// Charts include/exclude charts
+		// include/exclude dataexplorer mods
 		runtimePropertyMap.put(DataExplorerController.KEY_MOD_AGGREGATES, String.valueOf(true));
 		runtimePropertyMap.put(DataExplorerController.KEY_MOD_CHARTS, String.valueOf(true));
 		runtimePropertyMap.put(DataExplorerController.KEY_MOD_DATA, String.valueOf(true));
+		runtimePropertyMap.put(DataExplorerController.KEY_MOD_DISEASEMATCHER, String.valueOf(false));
 
 		// Annotators include files/tools
 		String molgenisHomeDir = System.getProperty("molgenis.home");
@@ -100,9 +101,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		runtimePropertyMap.put(ClinVarServiceAnnotator.CLINVAR_FILE_LOCATION_PROPERTY,
 				molgenisHomeDirAnnotationResources + "/Clinvar/variant_summary.txt");
 
-        runtimePropertyMap.put(DataExplorerController.WIZARD_TITLE,
-                "Filter Wizard");
-
+		runtimePropertyMap.put(DataExplorerController.WIZARD_TITLE, "Filter Wizard");
 
 		for (Entry<String, String> entry : runtimePropertyMap.entrySet())
 		{

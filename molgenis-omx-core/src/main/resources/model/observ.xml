@@ -465,5 +465,22 @@
 			<description></description>
 			<field name="Value" type="xref" xref_entity="Characteristic" />
 		</entity>
+        <entity name="Diagnosis" label="Diagnose" xref_label="identifier" xref_lookup="identifier,description">
+            <field name="id" type="autoid" hidden="true" />
+            <field name="identifier" label="Code" type="string" />
+            <field name="description" label="Omschrijving" type="string" />
+            <unique fields="identifier" />
+        </entity>
+        <entity name="Gender" label="Geslacht" xref_label="gender" xref_lookup="gender">
+            <field name="id" type="autoid" hidden="true" />
+            <field name="gender" type="string" />
+            <unique fields="gender" />
+        </entity>
+
+        <entity name="PalgaSample3" label="PALGA 20K">
+            <field name="id" type="autoid" hidden="true" />
+            <field name="diagnose" label="Diagnose" type="mref" xref_entity="Diagnosis" />
+            <field name="jaar" label="Jaar" description="Jaar van verslaglegging" type="int" />
+        </entity>
 	</module>
 </molgenis>
