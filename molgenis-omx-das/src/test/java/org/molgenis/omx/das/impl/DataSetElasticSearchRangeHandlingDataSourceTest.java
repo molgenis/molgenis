@@ -16,9 +16,9 @@ import org.mockito.Mockito;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.support.GenomeConfig;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.omx.das.RangeHandlingDataSource;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchResult;
 import org.molgenis.util.ApplicationContextProvider;
@@ -80,17 +80,17 @@ public class DataSetElasticSearchRangeHandlingDataSourceTest
 				DasFeatureOrientation.ORIENTATION_NOT_APPLICABLE, DasPhase.PHASE_NOT_APPLICABLE,
                 notes, linkout, dasTarget, new ArrayList<String>(), null);
 
-		Query q = new QueryImpl().eq(RangeHandlingDataSource.MUTATION_CHROMOSOME, "1");
+		Query q = new QueryImpl().eq(GenomeConfig.GENOMEBROWSER_CHROMOSOME, "1");
 		q.pageSize(100);
 		SearchResult result = mock(SearchResult.class);
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put(RangeHandlingDataSource.MUTATION_STOP_POSITION, 1000);
-		map.put(RangeHandlingDataSource.MUTATION_LINK, "http://www.molgenis.org/");
-		map.put(RangeHandlingDataSource.MUTATION_NAME, "mutation name");
-		map.put(RangeHandlingDataSource.MUTATION_DESCRIPTION, "description");
-		map.put(RangeHandlingDataSource.MUTATION_START_POSITION, 10);
-		map.put(RangeHandlingDataSource.MUTATION_ID, "mutation id");
-		map.put(RangeHandlingDataSource.MUTATION_CHROMOSOME, "1");
+		map.put(GenomeConfig.GENOMEBROWSER_STOP_POSITION, 1000);
+		map.put(GenomeConfig.GENOMEBROWSER_LINK, "http://www.molgenis.org/");
+		map.put(GenomeConfig.GENOMEBROWSER_NAME, "mutation name");
+		map.put(GenomeConfig.GENOMEBROWSER_DESCRIPTION, "description");
+		map.put(GenomeConfig.GENOMEBROWSER_START_POSITION, 10);
+		map.put(GenomeConfig.GENOMEBROWSER_ID, "mutation id");
+		map.put(GenomeConfig.GENOMEBROWSER_CHROMOSOME, "1");
 
 		MapEntity entity = new MapEntity(map);
 		resultList = new ArrayList<Hit>();
@@ -112,13 +112,13 @@ public class DataSetElasticSearchRangeHandlingDataSourceTest
 			BadReferenceObjectException, CoordinateErrorException
 	{
 		assertEquals(new DasAnnotatedSegment("1", 1, 100000, "1.00", "1", featureList).getFeatures(), source
-				.getFeatures("1,dataset_dataset", 1, 100000, 100).getFeatures());
+				.getFeatures("1,dasdataset_dataset", 1, 100000, 100).getFeatures());
 		assertEquals(new DasAnnotatedSegment("1", 1, 100000, "1.00", "1", featureList).getSegmentId(), source
-				.getFeatures("1,dataset_dataset", 1, 100000, 100).getSegmentId());
+				.getFeatures("1,dasdataset_dataset", 1, 100000, 100).getSegmentId());
 		assertEquals(new DasAnnotatedSegment("1", 1, 100000, "1.00", "1", featureList).getStartCoordinate(), source
-				.getFeatures("1,dataset_dataset", 1, 100000, 100).getStartCoordinate());
+				.getFeatures("1,dasdataset_dataset", 1, 100000, 100).getStartCoordinate());
 		assertEquals(new DasAnnotatedSegment("1", 1, 100000, "1.00", "1", featureList).getStopCoordinate(), source
-				.getFeatures("1,dataset_dataset", 1, 100000, 100).getStopCoordinate());
+				.getFeatures("1,dasdataset_dataset", 1, 100000, 100).getStopCoordinate());
 	}
 
 	@Test()

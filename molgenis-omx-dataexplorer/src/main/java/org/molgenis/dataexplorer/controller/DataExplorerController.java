@@ -25,6 +25,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.csv.CsvWriter;
+import org.molgenis.data.support.GenomeConfig;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
@@ -82,10 +83,6 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String SOURCES = "sources";
 	public static final String BROWSERLINKS = "browserLinks";
 	public static final String GENOMEBROWSERTABLE = "genomeBrowserTable";
-
-	public static final String MUTATION_START_POSITION = "start_nucleotide";
-	public static final String MUTATION_ID = "mutation_id";
-	public static final String MUTATION_CHROMOSOME = "chromosome";
     public static final String WIZARD_TITLE = "wizardTitle";
 
 	@Autowired
@@ -250,9 +247,9 @@ public class DataExplorerController extends MolgenisPluginController
 
 	private boolean isGenomeBrowserEntity(EntityMetaData entityMetaData)
 	{
-		AttributeMetaData attributeStartPosition = entityMetaData.getAttribute(MUTATION_START_POSITION);
-		AttributeMetaData attributeId = entityMetaData.getAttribute(MUTATION_ID);
-		AttributeMetaData attributeChromosome = entityMetaData.getAttribute(MUTATION_CHROMOSOME);
+		AttributeMetaData attributeStartPosition = entityMetaData.getAttribute(GenomeConfig.GENOMEBROWSER_START_POSITION);
+		AttributeMetaData attributeId = entityMetaData.getAttribute(GenomeConfig.GENOMEBROWSER_ID);
+		AttributeMetaData attributeChromosome = entityMetaData.getAttribute(GenomeConfig.GENOMEBROWSER_CHROMOSOME);
 		return attributeStartPosition != null && attributeId != null && attributeChromosome != null;
 	}
 
