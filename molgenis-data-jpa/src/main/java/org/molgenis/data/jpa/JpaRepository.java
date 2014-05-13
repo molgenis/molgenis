@@ -598,7 +598,7 @@ public class JpaRepository extends AbstractCrudRepository
 	{ "rawtypes", "unchecked" })
 	private List<Predicate> createPredicates(Root<?> from, CriteriaBuilder cb, List<QueryRule> originalRules)
 	{
-        List<QueryRule> rules = Lists.newArrayList(originalRules);
+		List<QueryRule> rules = Lists.newArrayList(originalRules);
 
 		// default Query links criteria based on 'and'
 		List<Predicate> andPredicates = new ArrayList<Predicate>();
@@ -727,10 +727,8 @@ public class JpaRepository extends AbstractCrudRepository
 			}
 
 		}
-        System.out.println("TEST or" + orPredicates);
-        System.out.println("TEST and" + andPredicates);
 
-        if (orPredicates.size() > 0)
+		if (orPredicates.size() > 0)
 		{
 			if (andPredicates.size() > 0)
 			{
@@ -739,14 +737,14 @@ public class JpaRepository extends AbstractCrudRepository
 			List<Predicate> result = new ArrayList<Predicate>();
 
 			result.add(cb.or(orPredicates.toArray(new Predicate[0])));
-            System.out.println("TEST" + result);
+
 			return result;
 		}
 		else
 		{
 			if (andPredicates.size() > 0)
 			{
-                System.out.println("TEST and result " + andPredicates);
+
 				return andPredicates;
 			}
 			return new ArrayList<Predicate>();
