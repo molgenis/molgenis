@@ -280,11 +280,10 @@ public class ElasticSearchServiceTest
 		assertNotNull(result);
 		assertNotNull(result.getAggregate());
 
-        //TODO fix test below?!
-//		assertEquals(
-//				result.getAggregate().getMatrix(),
-//				Lists.newArrayList(Lists.<Long> newArrayList(1l), Lists.<Long> newArrayList(2l),
-//						Lists.<Long> newArrayList(3l)));
+		assertEquals(
+				result.getAggregate().getMatrix(),
+				Lists.newArrayList(Lists.<Long> newArrayList(1l), Lists.<Long> newArrayList(2l),
+						Lists.<Long> newArrayList(3l)));
 	}
 
 	private void waitForIndexUpdate()
