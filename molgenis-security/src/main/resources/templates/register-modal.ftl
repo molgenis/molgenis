@@ -183,7 +183,9 @@
 		form.submit(function(e) {	
 			e.preventDefault();
 		    e.stopPropagation();
-			if(form.valid()) {
+			if(form.valid() && !submitBtn.attr('disabled')) {
+				submitBtn.attr('disabled','disabled');
+				
 	    	 	$.ajax({
 		            type: 'POST',
 		            url:  '/account/register',
@@ -191,9 +193,11 @@
 		            success: function (data) {
 		            	$(document).trigger('molgenis-registered', data.message);
 		        		modal.modal('hide');
+		        		submitBtn.removeAttr('disabled');
 		            },
 		            error: function(xhr) {
 		            	molgenis.createAlert(JSON.parse(xhr.responseText).errors, 'error', $('.modal-body', modal));
+		            	submitBtn.removeAttr('disabled');
 		            }
 		        });
 	        }

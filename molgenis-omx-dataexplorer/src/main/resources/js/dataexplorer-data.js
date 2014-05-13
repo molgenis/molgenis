@@ -74,11 +74,11 @@
 	function isGenomeBrowserEntity() {
 		// FIXME check attributes on all levels
 		var attrs = getEntity().attributes;
-		return attrs.hasOwnProperty("start_nucleotide") && 
-			attrs.hasOwnProperty("mutation_id") &&
-			attrs.hasOwnProperty("chromosome");	
+		return attrs.hasOwnProperty("POS") &&
+			attrs.hasOwnProperty("ID") &&
+			attrs.hasOwnProperty("CHROM");
 	}
-	
+
 	/**
 	 * @memberOf molgenis.dataexplorer.data
 	 */
@@ -92,7 +92,7 @@
             // add track for current genomic entity
             var dallianceTrack = {
                 name : entity.label || entity.name,
-                uri : '/das/molgenis/dataset_' + entity.name + '/',
+                uri : '/das/molgenis/dasdataset_' + entity.name + '/',
                 desc : entity.description,
                 stylesheet_uri : '/css/selected_dataset-track.xml'
             };
@@ -103,7 +103,7 @@
                 if(refEntity.name !== entity.name) {
                     var dallianceTrack = {
                         name : refEntity.label || refEntity.name,
-                        uri : '/das/molgenis/dataset_' + refEntity.name + '/',
+                        uri : '/das/molgenis/dasdataset_' + refEntity.name + '/',
                         desc : refEntity.description,
                         stylesheet_uri : '/css/not_selected_dataset-track.xml'
                     };
@@ -156,7 +156,6 @@
                                             }
                                         });
                                     });
-                                    self.test = a;
                                     info.add('Filter on patient:', a[0]);
                                 }
                                 return false;
@@ -168,7 +167,7 @@
                             var a = $('<a href="javascript:void(0)">' + f.id + '</a>');
                             a.click(function() {
                                 $.each(getAttributes(), function(key, attribute) {
-                                    if(attribute.name === 'mutation_id') {
+                                    if(attribute.name === 'ID') {
                                         var attributeFilter = {
                                             attribute : attribute,
                                             values : [f.id]
@@ -197,14 +196,14 @@
 	 */
 	function setDallianceFilter() {
 		$.each(getAttributes(), function(key, attribute) {
-			if(attribute.name === 'start_nucleotide') {
+			if(attribute.name === 'POS') {
                 var attributeFilter = {
 					attribute : attribute,
 					range : true,
 					values : [ Math.floor(genomeBrowser.viewStart).toString(), Math.floor(genomeBrowser.viewEnd).toString() ]
 				};
 				$(document).trigger('updateAttributeFilters', {'filters': [attributeFilter]});
-			} else if(attribute.name === 'chromosome') {
+			} else if(attribute.name === 'CHROM') {
 				var attributeFilter = {
 					attribute : attribute,
 					values : [ genomeBrowser.chr ]
@@ -255,8 +254,8 @@
 		$(document).on('updateAttributeFilters.data', function(e, data) {
 			// TODO implement elegant solution for genome browser specific code
 			$.each(data.filters, function() {
-				if(this.attribute.name === 'start_nucleotide') genomeBrowser.setLocation(genomeBrowser.chr, this.values[0], this.values[1]);
-				if(this.attribute.name === 'chromosome') genomeBrowser.setLocation(this.values[0], genomeBrowser.viewStart, genomeBrowser.viewEnd);
+				if(this.attribute.name === 'POS') genomeBrowser.setLocation(genomeBrowser.chr, this.values[0], this.values[1]);
+				if(this.attribute.name === 'CHROM') genomeBrowser.setLocation(this.values[0], genomeBrowser.viewStart, genomeBrowser.viewEnd);
 			});
 		});
 		

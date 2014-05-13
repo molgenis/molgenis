@@ -78,7 +78,7 @@ public class DataServiceTokenServiceTest
 						MolgenisUser.class)).thenReturn(user);
 
 		when(tokenGenerator.generateToken()).thenReturn("token");
-		assertEquals(tokenService.generateAndStoreToken("admin"), "token");
+		assertEquals(tokenService.generateAndStoreToken("admin", "description"), "token");
 
 		MolgenisToken molgenisToken = new MolgenisToken();
 		molgenisToken.setToken("token");
