@@ -71,11 +71,13 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String KEY_MOD_ANNOTATORS = "plugin.dataexplorer.mod.annotators";
 	public static final String KEY_MOD_CHARTS = "plugin.dataexplorer.mod.charts";
 	public static final String KEY_MOD_DATA = "plugin.dataexplorer.mod.data";
+	public static final String KEY_MOD_DISEASEMATCHER = "plugin.dataexplorer.mod.diseasematcher";
 	private static final boolean DEFAULT_VAL_MOD_AGGREGATES = true;
 	private static final boolean DEFAULT_VAL_MOD_ANNOTATORS = true;
 	private static final boolean DEFAULT_VAL_MOD_CHARTS = true;
 	private static final boolean DEFAULT_VAL_MOD_DATA = true;
-	
+	private static final boolean DEFAULT_VAL_MOD_DISEASEMATCHER = false;
+
 	public static final String INITLOCATION = "initLocation";
 	public static final String COORDSYSTEM = "coordSystem";
 	public static final String CHAINS = "chains";
@@ -86,7 +88,7 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String MUTATION_START_POSITION = "start_nucleotide";
 	public static final String MUTATION_ID = "mutation_id";
 	public static final String MUTATION_CHROMOSOME = "chromosome";
-    public static final String WIZARD_TITLE = "wizardTitle";
+	public static final String WIZARD_TITLE = "wizardTitle";
 
 	@Autowired
 	private DataService dataService;
@@ -141,8 +143,15 @@ public class DataExplorerController extends MolgenisPluginController
 			}
 		}
 		model.addAttribute("selectedEntityName", selectedEntityName);
-        model.addAttribute(WIZARD_TITLE, molgenisSettings.getProperty(WIZARD_TITLE)==null?"Filter Wizard":molgenisSettings.getProperty(WIZARD_TITLE));
+		model.addAttribute(
+				WIZARD_TITLE,
+				molgenisSettings.getProperty(WIZARD_TITLE) == null ? "Filter Wizard" : molgenisSettings
+						.getProperty(WIZARD_TITLE));
 		model.addAttribute("wizard", (wizard != null) && wizard.booleanValue());
+
+		boolean modDiseaseMatcher = molgenisSettings.getBooleanProperty(KEY_MOD_DISEASEMATCHER,
+				DEFAULT_VAL_MOD_DISEASEMATCHER);
+		model.addAttribute("modDiseaseMatcher", modDiseaseMatcher);
 
 		return "view-dataexplorer";
 	}
@@ -216,6 +225,7 @@ public class DataExplorerController extends MolgenisPluginController
 					{
 						modulesConfig.add(new ModuleConfig("annotators", "Annotators", "annotator-icon.png"));
 					}
+
 					break;
 				default:
 					throw new RuntimeException("unknown plugin permission: " + pluginPermission);
