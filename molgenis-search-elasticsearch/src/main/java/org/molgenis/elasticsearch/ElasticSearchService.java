@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.elasticsearch.ElasticSearchException;
+import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
 import org.elasticsearch.action.admin.indices.exists.types.TypesExistsRequest;
@@ -162,7 +162,7 @@ public class ElasticSearchService implements SearchService
 		{
 			String msg = "Exception creating mapping for repository [" + repository.getName() + "]";
 			LOG.error(msg, e);
-			throw new ElasticSearchException(msg, e);
+			throw new ElasticsearchException(msg, e);
 		}
 
 		LOG.info("Going to update index [" + indexName + "] for repository type [" + repository.getName() + "]");
@@ -188,7 +188,7 @@ public class ElasticSearchService implements SearchService
 
 			if (response.hasFailures())
 			{
-				throw new ElasticSearchException(response.buildFailureMessage());
+				throw new ElasticsearchException(response.buildFailureMessage());
 			}
 		}
 	}
@@ -217,7 +217,7 @@ public class ElasticSearchService implements SearchService
 			IndexDeleteByQueryResponse idbqr = deleteResponse.getIndex(indexName);
 			if ((idbqr != null) && (idbqr.getFailedShards() > 0))
 			{
-				throw new ElasticSearchException("Delete failed. Returned headers:" + idbqr.getHeaders());
+				throw new ElasticsearchException("Delete failed. Returned headers:" + idbqr.getHeaders());
 			}
 		}
 
@@ -237,9 +237,9 @@ public class ElasticSearchService implements SearchService
 					.setRefresh(true).execute().actionGet();
 			if (deleteResponse != null)
 			{
-				if (deleteResponse.isNotFound())
+				if (!deleteResponse.isFound())
 				{
-					throw new ElasticSearchException("Delete failed. Returned headers:" + deleteResponse.getHeaders());
+					throw new ElasticsearchException("Delete failed. Returned headers:" + deleteResponse.getHeaders());
 				}
 			}
 		}
@@ -263,7 +263,7 @@ public class ElasticSearchService implements SearchService
 		{
 			String msg = "Exception creating mapping for repository [" + repository.getName() + "]";
 			LOG.error(msg, e);
-			throw new ElasticSearchException(msg, e);
+			throw new ElasticsearchException(msg, e);
 		}
 
 		LOG.info("Going to insert documents of type [" + repository.getName() + "]");
@@ -286,7 +286,7 @@ public class ElasticSearchService implements SearchService
 
 			if (response.hasFailures())
 			{
-				throw new ElasticSearchException(response.buildFailureMessage());
+				throw new ElasticsearchException(response.buildFailureMessage());
 			}
 		}
 	}
@@ -302,7 +302,7 @@ public class ElasticSearchService implements SearchService
 
 		if (updateResponse == null)
 		{
-			throw new ElasticSearchException("update failed.");
+			throw new ElasticsearchException("update failed.");
 		}
 
 		LOG.info("Update done.");
@@ -318,7 +318,7 @@ public class ElasticSearchService implements SearchService
 			CreateIndexResponse response = client.admin().indices().prepareCreate(indexName).execute().actionGet();
 			if (!response.isAcknowledged())
 			{
-				throw new ElasticSearchException("Creation of index [" + indexName + "] failed. Response=" + response);
+				throw new ElasticsearchException("Creation of index [" + indexName + "] failed. Response=" + response);
 			}
 			LOG.info("Index [" + indexName + "] created");
 		}
@@ -334,7 +334,7 @@ public class ElasticSearchService implements SearchService
 
 		if (!response.isAcknowledged())
 		{
-			throw new ElasticSearchException("Creation of mapping for documentType [" + repository.getName()
+			throw new ElasticsearchException("Creation of mapping for documentType [" + repository.getName()
 					+ "] failed. Response=" + response);
 		}
 
@@ -346,5 +346,4 @@ public class ElasticSearchService implements SearchService
 	{
 		client.admin().indices().refresh(refreshRequest()).actionGet();
 	}
-
 }
