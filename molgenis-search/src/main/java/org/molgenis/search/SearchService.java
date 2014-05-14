@@ -55,6 +55,8 @@ public interface SearchService
 	 */
 	SearchResult search(SearchRequest request);
 
+	Hit searchById(String documentType, String id);
+
 	SearchResult multiSearch(MultiSearchRequest request);
 
 	/**

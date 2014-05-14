@@ -1,67 +1,47 @@
 package org.molgenis.omx.biobankconnect.utils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.Map;
 
-class TermComparison implements Comparable<TermComparison>
+import org.molgenis.search.Hit;
+
+public class TermComparison implements Comparable<TermComparison>
 {
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args)
-	{
-		List<TermComparison> lists = new ArrayList<TermComparison>();
-		lists.add(new TermComparison("Total cholesterol", "Total Serum Cholesterol Measurement"));
-		lists.add(new TermComparison("Total cholesterol", "Total cholesterol"));
-		Collections.sort(lists);
+	private final Hit hit;
+	private final Integer synonymLength;
+	private final Integer termLength;
 
-		for (TermComparison term : lists)
-		{
-			System.out.println(term.getOntologyTermSynonym() + " : " + term.getOntologyTerm());
-		}
+	public TermComparison(Hit hit)
+	{
+		Map<String, Object> data = hit.getColumnValueMap();
+		String ontologyTermSynonym = data.get("ontologyTermSynonym").toString().toLowerCase();
+		String ontologyTerm = data.get("ontologyTerm").toString().toLowerCase();
+		this.hit = hit;
+		this.synonymLength = ontologyTermSynonym.split(" +").length;
+		this.termLength = ontologyTerm.split(" +").length;
 	}
 
-	private String ontologyTermSynonym;
-	private String ontologyTerm;
-	private Integer synonymLength;
-	private Integer termLength;
-
-	public TermComparison(String ontologyTermSynonym, String ontologyTerm)
-	{
-		this.ontologyTermSynonym = ontologyTermSynonym;
-		this.ontologyTerm = ontologyTerm;
-		this.synonymLength = this.ontologyTermSynonym.split(" +").length;
-		this.termLength = this.ontologyTerm.split(" +").length;
-	}
-
-	public String getOntologyTermSynonym()
-	{
-		return ontologyTermSynonym;
-	}
-
-	public String getOntologyTerm()
-	{
-		return ontologyTerm;
-	}
-
-	public Integer getLength()
+	private Integer getSynonymLength()
 	{
 		return synonymLength;
 	}
 
-	public Integer getTermLength()
+	private Integer getTermLength()
 	{
 		return termLength;
+	}
+
+	public Hit getHit()
+	{
+		return hit;
 	}
 
 	@Override
 	public int compareTo(TermComparison other)
 	{
-		if (this.synonymLength.compareTo(other.getLength()) == 0)
+		if (synonymLength.compareTo(other.getSynonymLength()) == 0)
 		{
-			return this.termLength.compareTo(other.getTermLength()) * (-1);
+			return this.termLength.compareTo(other.getTermLength());
 		}
-		return this.synonymLength.compareTo(other.getLength()) * (-1);
+		else return this.synonymLength.compareTo(other.getSynonymLength()) * (-1);
 	}
 }

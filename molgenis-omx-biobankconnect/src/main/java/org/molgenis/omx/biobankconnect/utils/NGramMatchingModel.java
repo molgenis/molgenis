@@ -59,10 +59,10 @@ public class NGramMatchingModel
 				"your", "yours", "yourself", "yourselves", "many", ")", "("));
 	}
 
-	public static double stringMatching(String queryOne, String queryTwo, boolean whetherRemoveStopWords)
+	public static double stringMatching(String queryOne, String queryTwo)
 	{
-		double similarityScore = calculateScore(createNGrams(queryOne.toLowerCase().trim(), whetherRemoveStopWords),
-				createNGrams(queryTwo.toLowerCase().trim(), whetherRemoveStopWords));
+		double similarityScore = calculateScore(createNGrams(queryOne.toLowerCase().trim()), createNGrams(queryTwo
+				.toLowerCase().trim()));
 		return similarityScore;
 	}
 
@@ -73,7 +73,7 @@ public class NGramMatchingModel
 	 * @param nGrams
 	 * @return
 	 */
-	private static Set<String> createNGrams(String inputQuery, boolean removeStopWords)
+	private static Set<String> createNGrams(String inputQuery)
 	{
 		Set<String> wordsInString = new HashSet<String>(Arrays.asList(inputQuery.trim().split(" ")));
 		Set<String> tokens = new HashSet<String>();

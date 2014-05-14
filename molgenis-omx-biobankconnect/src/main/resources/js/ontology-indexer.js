@@ -12,7 +12,7 @@
 				var table = $('#ontology-table');
 				$.each(searchHits, function(){
 					var ontologyInfo = $(this)[0]["columnValueMap"];
-					var ontologyUri = ontologyInfo.url;
+					var ontologyUri = ontologyInfo.ontologyIRI;
 					var ontologyName = ontologyInfo.ontologyLabel;
 					var status = "Indexed";
 					if(runningIndexUri !== null && ontologyUri === runningIndexUri){

@@ -287,7 +287,7 @@
 			if(ontologyDiv.find('input').length === 0){
 				$.each(searchResponse.searchHits, function(index, hit){
 					var ontologyInfo =hit.columnValueMap;
-					var ontologyUri = ontologyInfo.url;
+					var ontologyUri = ontologyInfo.ontologyIRI;
 					var ontologyName = ontologyInfo.ontologyLabel;
 				    $('<label />').addClass('checkbox').append('<input type="checkbox" value="' + ontologyUri + '" checked>' + ontologyName).click(function(){
 				    	$('#selectedOntologies').val(getAllOntologyUris(ontologyDiv));

@@ -8,6 +8,7 @@ import java.util.List;
 import javax.servlet.http.Part;
 
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.omx.biobankconnect.utils.OntologyLoader;
 import org.molgenis.omx.biobankconnect.utils.ZipFileUtil;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +55,7 @@ public class OntologyIndexerController extends MolgenisPluginController
 		{
 			File uploadFile = fileStore.store(file.getInputStream(), ontologyName);
 			List<File> uploadedFiles = ZipFileUtil.unzip(uploadFile);
-			if (uploadedFiles.size() > 0) ontologyIndexer.index(ontologyName, uploadedFiles.get(0));
+			if (uploadedFiles.size() > 0) ontologyIndexer.index(new OntologyLoader(ontologyName, uploadedFiles.get(0)));
 			model.addAttribute("isIndexRunning", true);
 		}
 		catch (Exception e)
