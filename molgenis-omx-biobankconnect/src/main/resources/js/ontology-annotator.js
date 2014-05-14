@@ -6,16 +6,16 @@
 	var restApi = new molgenis.RestClient();
 	var searchApi = new molgenis.SearchClient();
 	var ontologyTermIRI = "ontologyTermIRI";
-	var selectedDataSetId = null;
+	var selectedDataSet = null;
 	var sortRule = null;
 	
 	molgenis.OntologyAnnotator = function OntologyAnnotator(){};
 	
 	molgenis.OntologyAnnotator.prototype.changeDataSet = function(selectedDataSetId){
 		if(selectedDataSetId !== ''){
-			var dataSetEntity = restApi.get('/api/v1/dataset/' + selectedDataSetId);
+			var dataSetEntity = restApi.get('/api/v1/dataset/' + selectedDataSetId, {'expand' : ['ProtocolUsed']});
 			var request = {
-				documentType : 'protocolTree-' + molgenis.hrefToId(dataSetEntity.href),
+				documentType : 'protocolTree-' + molgenis.hrefToId(dataSetEntity.ProtocolUsed.href),
 				query : {
 					rules : [[{
 						field : 'type',
@@ -28,7 +28,7 @@
 				var sortRule = null;
 				$('#catalogue-name').empty().append(dataSetEntity.Name);
 				$('#dataitem-number').empty().append(searchResponse.totalHitCount);
-				setSelectedDataSetId(selectedDataSetId);
+				setSelectedDataSet(dataSetEntity);
 				updateMatrix();
 				initSearchDataItems(dataSetEntity);
 			});
@@ -66,7 +66,7 @@
 	
 	function updateMatrix(){
 		molgenis.createMatrixForDataItems({
-			'dataSetId' : getselectedDataSetId(),
+			'dataSetId' : molgenis.hrefToId(getSelectedDataSet().ProtocolUsed.href),
 			'tableHeaders' : ['Name', 'Description', 'Annotation'],
 			'queryText' : $('#search-dataitem').val(),
 			'sortRule' : null,
@@ -531,12 +531,12 @@
 		});
 	}
 	
-	function setSelectedDataSetId (dataSetId) {
-		selectedDataSetId = dataSetId;
+	function setSelectedDataSet (dataSet) {
+		selectedDataSet = dataSet;
 	}
 	
-	function getselectedDataSetId(){
-		return selectedDataSetId;
+	function getSelectedDataSet(){
+		return selectedDataSet;
 	}
 	
 }($, window.top.molgenis = window.top.molgenis || {}));

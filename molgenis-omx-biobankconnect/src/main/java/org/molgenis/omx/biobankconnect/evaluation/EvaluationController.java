@@ -397,8 +397,9 @@ public class EvaluationController extends MolgenisPluginController
 			if (q.getRules().size() > 0) q.addRule(new QueryRule(Operator.OR));
 			q.addRule(new QueryRule(field, Operator.EQUALS, featureName));
 		}
-
-		SearchResult result = searchService.search(new SearchRequest("protocolTree-" + dataSetId, q, null));
+		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME, dataSetId, DataSet.class);
+		SearchResult result = searchService.search(new SearchRequest("protocolTree-"
+				+ dataSet.getProtocolUsed().getId(), q, null));
 
 		Map<String, Hit> featureIds = new HashMap<String, Hit>();
 		for (Hit hit : result.getSearchHits())

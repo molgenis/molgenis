@@ -104,10 +104,10 @@
 	
 	function changeDataSet (selectedDataSetId){
 		if(selectedDataSetId !== ''){
-			var dataSetEntity = restApi.get('/api/v1/dataset/' + selectedDataSetId);
+			var dataSetEntity = restApi.get('/api/v1/dataset/' + selectedDataSetId, {'expand' : ['ProtocolUsed']});
 			$('#selected-catalogue').empty().append(dataSetEntity.Name);
 			var request = {
-				documentType : 'protocolTree-' + ns.hrefToId(dataSetEntity.href),
+				documentType : 'protocolTree-' + ns.hrefToId(dataSetEntity.ProtocolUsed.href),
 				query : {
 					rules : [[{
 						field : 'type',
@@ -118,7 +118,7 @@
 			};
 			searchApi.search(request, function(searchResponse){
 				pagination.reset();
-				updateSelectedDataset(selectedDataSetId);
+				updateSelectedDataset(dataSetEntity);
 				createMatrixForDataItems();
 				initSearchDataItems(dataSetEntity);
 			});
@@ -143,7 +143,7 @@
 	};
 	
 	function createMatrixForDataItems () {
-		var documentType = 'protocolTree-' + getSelectedDataSet();
+		var documentType = 'protocolTree-' + molgenis.hrefToId(getSelectedDataSet().ProtocolUsed.href);
 		
 		var q = {
 				rules : [[{

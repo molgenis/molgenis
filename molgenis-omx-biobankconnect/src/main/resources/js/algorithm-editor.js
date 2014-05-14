@@ -16,7 +16,7 @@
 	molgenis.AlgorithmEditor.prototype.changeDataSet = function(userName, selectedDataSet, dataSetIds){
 		if(selectedDataSet !== '' && dataSetIds.length > 0){
 			setUserName(userName); 
-			var dataSetEntity = restApi.get('/api/v1/dataset/' + selectedDataSet);
+			var dataSetEntity = restApi.get('/api/v1/dataset/' + selectedDataSet, {'expand' : ['protocolUsed']});
 			biobankDataSets = restApi.get('/api/v1/dataset/', {
 				'q' : {
 					'q' : [{
@@ -24,10 +24,11 @@
 						'operator' : 'IN',
 						'value' : dataSetIds
 					}]
-				}
+				},
+				'expand' : ['protocolUsed']
 			}).items;
 			var request = {
-				'documentType' : 'protocolTree-' + molgenis.hrefToId(dataSetEntity.href),
+				'documentType' : 'protocolTree-' + molgenis.hrefToId(dataSetEntity.ProtocolUsed.href),
 				'query' : {
 					'rules' :[[{
 						'field' : 'type',
@@ -49,7 +50,7 @@
 	
 	function createMatrixForDataItems () {
 		
-		var documentType = 'protocolTree-' + molgenis.hrefToId(selectedDataSet.href);
+		var documentType = 'protocolTree-' + molgenis.hrefToId(selectedDataSet.ProtocolUsed.href);
 		var query = {
 			'rules' :[[{
 				'field' : 'type',
@@ -237,7 +238,7 @@
 			var newCell = $('<td />').css('cursor','pointer').click(function(){
 				standardModal.createModalCallback('Algorithm editor', function(modal){
 					$(document).data('clickedCell', newCell).data('mapping', mapping);
-					var mappedDataSet = restApi.get('/api/v1/dataset/' + mappedDataSetId);
+					var mappedDataSet = restApi.get('/api/v1/dataset/' + mappedDataSetId, {'expand' : ['ProtocolUsed']});
 					createAlgorithmEditorContent(feature, mappedDataSet, modal);
 					modal.attr('data-backdrop', true).css({
 						'width' : '90%',
@@ -347,7 +348,7 @@
 				var algorithmEditorCompleter = {
 			        getCompletions: function(editor, session, pos, prefix, callback) {
 			            if (prefix.length === 0) { callback(null, []); return }
-			            searchApi.search(searchFeatureByName('protocolTree-' + molgenis.hrefToId(mappedDataSet.href), prefix), function(searchResponse){
+			            searchApi.search(searchFeatureByName('protocolTree-' + molgenis.hrefToId(mappedDataSet.ProtocolUsed.href), prefix), function(searchResponse){
 		                    callback(null, searchResponse.searchHits.map(function(hit) {
 		                    	var map = hit.columnValueMap;
 		                        return {name: '$(\'' + map.name + '\')', value: '$(\'' + map.name + '\')', score: map.score, meta: mappedDataSet.name};

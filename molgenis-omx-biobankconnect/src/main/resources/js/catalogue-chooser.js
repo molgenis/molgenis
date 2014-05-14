@@ -3,16 +3,15 @@
 	
 	var restApi = new molgenis.RestClient();
 	var searchApi = new molgenis.SearchClient();
-	var selectedDataSetId = null;
 	
 	molgenis.CatalogueChooser = function OntologyAnnotator(){};
 	
 	molgenis.CatalogueChooser.prototype.changeDataSet = function(selectedDataSetId){
 		if(selectedDataSetId !== null && selectedDataSetId !== '' && selectedDataSetId !== undefined){
-			var dataSetEntity = restApi.get('/api/v1/dataset/' + selectedDataSetId, {'expand' : ['protocolUsed']});
+			var dataSetEntity = restApi.get('/api/v1/dataset/' + selectedDataSetId, {'expand' : ['ProtocolUsed']});
 			$('#selected-catalogue').empty().append(dataSetEntity.Name);
 			var request = {
-				documentType : 'protocolTree-' + molgenis.hrefToId(dataSetEntity.href),
+				documentType : 'protocolTree-' + molgenis.hrefToId(dataSetEntity.ProtocolUsed.href),
 				query:{
 					rules:[[{
 						field : 'type',
@@ -24,8 +23,7 @@
 			searchApi.search(request, function(searchResponse){
 				$('#catalogue-name').empty().append(dataSetEntity.Name);
 				$('#dataitem-number').empty().append(searchResponse.totalHitCount);
-				updateSelectedDataset(selectedDataSetId);
-				updateMatrix(selectedDataSetId);
+				updateMatrix(molgenis.hrefToId(dataSetEntity.ProtocolUsed.href));
 				initSearchDataItems(dataSetEntity);
 			});
 		}else{
@@ -33,7 +31,7 @@
 			$('#dataitem-number').empty().append('Nothing selected');
 		}
 		
-		function initSearchDataItems (dataSet) {
+		function initSearchDataItems(dataSet) {
 			$('#search-dataitem').typeahead({
 				source: function(query, process) {
 					molgenis.dataItemsTypeahead('observablefeature', molgenis.hrefToId(dataSet.href), query, process);
@@ -47,18 +45,18 @@
 			    }
 			}).on('keyup', function(e){
 				if($(this).val() === ''){
-					updateMatrix(molgenis.hrefToId(dataSet.href));
+					updateMatrix(molgenis.hrefToId(dataSet.ProtocolUsed.href));
 			    }
 			});
 			$('#search-button').click(function(){
-				updateMatrix(molgenis.hrefToId(dataSet.href));
+				updateMatrix(molgenis.hrefToId(dataSet.ProtocolUsed.href));
 			});
 		}
 	};
 	
-	function updateMatrix(dataSetId){
+	function updateMatrix(protocolId){
 		molgenis.createMatrixForDataItems({
-			'dataSetId' : dataSetId,
+			'dataSetId' : protocolId,
 			'tableHeaders' : ['Name', 'Description'],
 			'queryText' : $('#search-dataitem').val(),
 			'sortRule' : null,
@@ -85,10 +83,6 @@
 		$('<td />').append(featureNameSpan).appendTo(row);
 		$('<td />').append(descriptionSpan).appendTo(row);
 		return row;
-	}
-	
-	function updateSelectedDataset(dataSet) {
-		selectedDataSetId = dataSet;
 	}
 	
 }($, window.top.molgenis = window.top.molgenis || {}));

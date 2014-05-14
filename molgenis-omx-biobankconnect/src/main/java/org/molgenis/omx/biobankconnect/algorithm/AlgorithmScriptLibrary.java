@@ -24,6 +24,7 @@ public class AlgorithmScriptLibrary
 	private SearchService searchService;
 	private static final String ONTOLOGY_TERM_IRI = "ontologyTermIRI";
 	private static final String ONTOLOGYTERM_SYNONYM = "ontologyTermSynonym";
+	private final static String ENTITY_TYPE = "entity_type";
 
 	private final Map<String, String> scriptLibrary = new HashMap<String, String>();
 
@@ -52,15 +53,19 @@ public class AlgorithmScriptLibrary
 	public SearchResult findOntologyTerm(List<String> queryStrings)
 	{
 		QueryImpl query = new QueryImpl();
-		for (String queryString : queryStrings)
+		if (queryStrings.size() > 0)
 		{
-			if (query.getRules().size() > 0) query.addRule(new QueryRule(Operator.OR));
-			query.addRule(new QueryRule(ONTOLOGYTERM_SYNONYM, Operator.EQUALS, queryString));
-		}
-		query.pageSize(100);
+			for (String queryString : queryStrings)
+			{
+				if (query.getRules().size() > 0) query.addRule(new QueryRule(Operator.OR));
+				query.addRule(new QueryRule(ONTOLOGYTERM_SYNONYM, Operator.EQUALS, queryString));
+			}
+			query.addRule(new QueryRule(Operator.AND));
+			query.addRule(new QueryRule(ENTITY_TYPE, Operator.EQUALS, "ontologyTerm"));
+			query.pageSize(100);
 
-		SearchRequest searchRequest = new SearchRequest(null, query, null);
-		return searchService.search(searchRequest);
+		}
+		return searchService.search(new SearchRequest(null, query, null));
 	}
 
 	public Set<String> findOntologyTermSynonyms(Hit ontologyTermHit)

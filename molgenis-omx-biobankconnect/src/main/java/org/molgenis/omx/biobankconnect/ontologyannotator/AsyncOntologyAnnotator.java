@@ -148,7 +148,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			dataService.getCrudRepository(ObservableFeature.ENTITY_NAME).flush();
 
 			searchService.indexRepository(new ProtocolTreeRepository(dataSet.getProtocolUsed(), dataService,
-					"protocolTree-" + dataSet.getId()));
+					"protocolTree-" + dataSet.getProtocolUsed().getId()));
 			searchService.indexRepository(new CategoryRepository(dataSet.getProtocolUsed(), dataSet.getId(),
 					dataService));
 		}
@@ -187,7 +187,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		q.pageSize(100000);
 		q.addRule(new QueryRule("type", Operator.SEARCH, "observablefeature"));
 
-		SearchRequest request = new SearchRequest("protocolTree-" + dataSet.getId(), q, null);
+		SearchRequest request = new SearchRequest("protocolTree-" + dataSet.getProtocolUsed().getId(), q, null);
 		SearchResult result = searchService.search(request);
 
 		List<Integer> listOfFeatureIds = new ArrayList<Integer>();
@@ -242,12 +242,14 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		{
 			if (documentTypes == null) documentTypes = searchAllOntologies();
 
+			DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME, dataSetId, DataSet.class);
+
 			PorterStemmer stemmer = new PorterStemmer();
 
 			QueryImpl q = new QueryImpl();
 			q.pageSize(100000);
 			q.addRule(new QueryRule("type", Operator.SEARCH, "observablefeature"));
-			SearchRequest request = new SearchRequest("protocolTree-" + dataSetId, q, null);
+			SearchRequest request = new SearchRequest("protocolTree-" + dataSet.getProtocolUsed().getId(), q, null);
 			SearchResult result = searchService.search(request);
 
 			List<ObservableFeature> featuresToUpdate = new ArrayList<ObservableFeature>();

@@ -218,7 +218,10 @@ public class AlgorithmGenerator
 		Set<String> uniquePaths = new HashSet<String>();
 		for (Hit sourceOntologyTerm : sourceOntologyTerms)
 		{
-			uniquePaths.add(sourceOntologyTerm.getColumnValueMap().get(NODE_PATH).toString());
+			if (sourceOntologyTerm.getColumnValueMap().containsKey(NODE_PATH))
+			{
+				uniquePaths.add(sourceOntologyTerm.getColumnValueMap().get(NODE_PATH).toString());
+			}
 		}
 		for (String uniquePath : uniquePaths)
 		{

@@ -23,16 +23,17 @@
 	molgenis.MappingManager.prototype.changeDataSet = function(userName, selectedDataSet, dataSetIds){
 		if(selectedDataSet !== '' && dataSetIds.length > 0){
 			setUserName(userName); 
-			var dataSetEntity = restApi.get('/api/v1/dataset/' + selectedDataSet);
+			var dataSetEntity = restApi.get('/api/v1/dataset/' + selectedDataSet, {'expand' : ['ProtocolUsed']});
 			biobankDataSets = restApi.get('/api/v1/dataset/', null, {
-				q : [{
+				'q' : [{
 					field : 'id',
 					operator : 'IN',
 					value : dataSetIds
 				}],
+				'expand' : ['ProtocolUsed']
 			}).items;
 			var request = {
-				documentType : 'protocolTree-' + molgenis.hrefToId(dataSetEntity.href),
+				documentType : 'protocolTree-' + molgenis.hrefToId(dataSetEntity.ProtocolUsed.href),
 				query:{
 					rules :[[{
 						field : 'type',
@@ -84,7 +85,8 @@
 	molgenis.MappingManager.prototype.createMatrixForDataItems = function() {
 		var dataSetMapping = getDataSetsForMapping();
 		if(dataSetMapping.items.length > 0){
-			var documentType = 'protocolTree-' + dataSetMapping.items[0].Identifier.split('-')[1];
+			var mappedDataSet = restApi.get('/api/v1/dataset/' + dataSetMapping.items[0].Identifier.split('-')[1], {'expand':['ProtocolUsed']});
+			var documentType = 'protocolTree-' + molgenis.hrefToId(mappedDataSet.ProtocolUsed.href);
 			var q = {
 					rules : [[{
 						operator : 'SEARCH',
@@ -584,8 +586,9 @@
 			}
 			
 			function replaceMappingInTable(feature){
+				var dataSet = restApi.get('/api/v1/dataset/' + molgenis.MappingManager.prototype.getSelectedDataSet(), {'expand' : ['ProtocolUsed']});
 				var searchRequest = {
-					'documentType' : 'protocolTree-' + molgenis.MappingManager.prototype.getSelectedDataSet(),
+					'documentType' : 'protocolTree-' + molgenis.hrefToId(dataSet.ProtocolUse.href),
 					'query' : {
 						'rules':[[{
 							'field' : 'id',

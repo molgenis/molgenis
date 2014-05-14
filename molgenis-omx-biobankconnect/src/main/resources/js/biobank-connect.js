@@ -211,7 +211,7 @@ var pagination = new molgenis.Pagination();
 		});
 	};
 	
-	molgenis.dataItemsTypeahead = function (type, dataSetId, query, response){
+	molgenis.dataItemsTypeahead = function (type, protocolId, query, response){
 		var queryRules = [{
 			field : 'type',
 			operator : 'EQUALS',
@@ -224,7 +224,7 @@ var pagination = new molgenis.Pagination();
 		}];
 		
 		var searchRequest = {
-			documentType : 'protocolTree-' + dataSetId,
+			documentType : 'protocolTree-' + protocolId,
 			query:{
 				pageSize: 20,
 				rules:[queryRules]

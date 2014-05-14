@@ -274,7 +274,9 @@ public class ApplyAlgorithms
 		QueryImpl query = new QueryImpl();
 		query.addRule(new QueryRule(ENTITY_TYPE, Operator.EQUALS, ObservableFeature.class.getSimpleName().toLowerCase()));
 		query.pageSize(1000000);
-		return searchService.search(new SearchRequest(CATALOGUE_PREFIX + targetDataSetId, query, null));
+		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME, targetDataSetId, DataSet.class);
+		return searchService
+				.search(new SearchRequest(CATALOGUE_PREFIX + dataSet.getProtocolUsed().getId(), query, null));
 	}
 
 	public String validateAlgorithmInputs(Integer dataSetId, String algorithm)

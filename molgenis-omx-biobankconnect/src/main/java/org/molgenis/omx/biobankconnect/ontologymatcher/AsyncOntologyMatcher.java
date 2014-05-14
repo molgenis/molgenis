@@ -123,11 +123,11 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	@RunAsSystem
 	@Async
 	@Transactional
-	public void match(String userName, Integer selectedDataSet, List<Integer> dataSetsToMatch, Integer featureId)
+	public void match(String userName, Integer selectedDataSetId, List<Integer> dataSetIdsToMatch, Integer featureId)
 	{
 		runningProcesses.incrementAndGet();
 		currentUserStatus.setUserIsRunning(userName, true);
-		dataSetsToMatch.remove(selectedDataSet);
+		dataSetIdsToMatch.remove(selectedDataSetId);
 		List<ObservationSet> listOfNewObservationSets = new ArrayList<ObservationSet>();
 		List<ObservedValue> listOfNewObservedValues = new ArrayList<ObservedValue>();
 		Map<String, List<ObservedValue>> observationValuesPerDataSet = new HashMap<String, List<ObservedValue>>();
@@ -145,11 +145,12 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			{
 				q.addRule(new QueryRule(ENTITY_ID, Operator.EQUALS, featureId));
 			}
-
-			SearchResult result = searchService.search(new SearchRequest(CATALOGUE_PREFIX + selectedDataSet, q, null));
+			DataSet selectedDataSet = dataService.findOne(DataSet.ENTITY_NAME, selectedDataSetId, DataSet.class);
+			SearchResult result = searchService.search(new SearchRequest(CATALOGUE_PREFIX
+					+ selectedDataSet.getProtocolUsed().getId(), q, null));
 
 			currentUserStatus.setUserCurrentStage(userName, STAGE.DeleteMapping);
-			preprocessing(userName, featureId, selectedDataSet, dataSetsToMatch);
+			preprocessing(userName, featureId, selectedDataSetId, dataSetIdsToMatch);
 
 			currentUserStatus.setUserCurrentStage(userName, STAGE.CreateMapping);
 			currentUserStatus.setUserTotalNumberOfQueries(userName, result.getTotalHitCount());
@@ -196,9 +197,10 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 					finalQuery.addRule(finalQueryRule);
 					Set<Integer> mappedFeatureIds = new HashSet<Integer>();
 
-					for (Integer dataSetId : dataSetsToMatch)
+					for (Integer dataSetId : dataSetIdsToMatch)
 					{
-						String dataSetIdentifier = createMappingDataSetIdentifier(userName, selectedDataSet, dataSetId);
+						String dataSetIdentifier = createMappingDataSetIdentifier(userName, selectedDataSetId,
+								dataSetId);
 						if (featureId != null) observationValuesPerDataSet.put(dataSetIdentifier,
 								new ArrayList<ObservedValue>());
 						Iterator<Hit> mappedFeatureHits = searchDisMaxQuery(dataSetId.toString(), finalQuery)
@@ -319,7 +321,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			dataService.getCrudRepository(ObservedValue.ENTITY_NAME).flush();
 
 			currentUserStatus.setUserCurrentStage(userName, STAGE.StoreMapping);
-			currentUserStatus.setUserTotalNumberOfQueries(userName, (long) dataSetsToMatch.size());
+			currentUserStatus.setUserTotalNumberOfQueries(userName, (long) dataSetIdsToMatch.size());
 
 			dataService.getCrudRepository(DataSet.ENTITY_NAME).flush();
 
@@ -336,10 +338,10 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			}
 			else
 			{
-				for (Integer catalogueId : dataSetsToMatch)
+				for (Integer catalogueId : dataSetIdsToMatch)
 				{
 					StringBuilder dataSetIdentifier = new StringBuilder();
-					dataSetIdentifier.append(userName).append('-').append(selectedDataSet).append('-')
+					dataSetIdentifier.append(userName).append('-').append(selectedDataSetId).append('-')
 							.append(catalogueId);
 					DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME,
 							new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier), DataSet.class);
@@ -361,12 +363,17 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 
 	@Override
 	@Transactional
-	public SearchResult generateMapping(String userName, Integer featureId, Integer targetDataSet, Integer sourceDataSet)
+	public SearchResult generateMapping(String userName, Integer featureId, Integer targetDataSetId,
+			Integer sourceDataSetId)
 	{
+		DataSet sourceDataSet = dataService.findOne(DataSet.ENTITY_NAME, sourceDataSetId, DataSet.class);
+		DataSet targetDataSet = dataService.findOne(DataSet.ENTITY_NAME, targetDataSetId, DataSet.class);
+
 		SearchResult mappedFeatures = findMappingsByAnnotation(featureId, sourceDataSet);
 		if (mappedFeatures.getTotalHitCount() > 0) return mappedFeatures;
 
-		SearchResult result = retrieveFeatureFromIndex(targetDataSet, Arrays.<Integer> asList(featureId));
+		SearchResult result = retrieveFeatureFromIndex(targetDataSet.getProtocolUsed().getId(),
+				Arrays.<Integer> asList(featureId));
 		List<Hit> searchHits = result.getSearchHits();
 		if (searchHits.size() > 0)
 		{
@@ -410,7 +417,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 
 				QueryImpl finalQuery = new QueryImpl();
 				finalQuery.addRule(finalQueryRule);
-				return searchDisMaxQuery(sourceDataSet.toString(), finalQuery);
+				return searchDisMaxQuery(sourceDataSet.getProtocolUsed().getId().toString(), finalQuery);
 			}
 		}
 		return new SearchResult(0, Collections.<Hit> emptyList());
@@ -421,16 +428,16 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	 * candidate feature are the same
 	 * 
 	 * @param featureId
-	 * @param sourceDataSet
+	 * @param sourceDataSetId
 	 * @return
 	 */
-	private SearchResult findMappingsByAnnotation(Integer featureId, Integer sourceDataSet)
+	private SearchResult findMappingsByAnnotation(Integer featureId, DataSet sourceDataSet)
 	{
 		ObservableFeature featureOfInterest = dataService.findOne(ObservableFeature.ENTITY_NAME, featureId,
 				ObservableFeature.class);
 
 		List<Object> candidateFeatureIds = new ArrayList<>();
-		for (Hit hit : retrieveFeatureFromIndex(sourceDataSet, null))
+		for (Hit hit : retrieveFeatureFromIndex(sourceDataSet.getProtocolUsed().getId(), null))
 		{
 			candidateFeatureIds.add(hit.getColumnValueMap().get(ENTITY_ID));
 		}
@@ -454,7 +461,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			}
 		}
 		return (featureOfInterestIds.size() == 0) ? new SearchResult(0, Collections.<Hit> emptyList()) : retrieveFeatureFromIndex(
-				sourceDataSet, featureOfInterestIds);
+				sourceDataSet.getProtocolUsed().getId(), featureOfInterestIds);
 	}
 
 	/**
@@ -462,11 +469,11 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	 * If featureIds is empty, all of features are retrieved for particular
 	 * dataset
 	 * 
-	 * @param dataSetId
+	 * @param protocolId
 	 * @param featureIds
 	 * @return
 	 */
-	private SearchResult retrieveFeatureFromIndex(Integer dataSetId, Iterable<Integer> featureIds)
+	private SearchResult retrieveFeatureFromIndex(Integer protocolId, Iterable<Integer> featureIds)
 	{
 		QueryImpl query = new QueryImpl();
 		query.pageSize(100000);
@@ -483,7 +490,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			query.addRule(new QueryRule(ENTITY_TYPE, Operator.EQUALS, ObservableFeature.class.getSimpleName()
 					.toLowerCase()));
 		}
-		return searchService.search(new SearchRequest(CATALOGUE_PREFIX + dataSetId, query, null));
+		return searchService.search(new SearchRequest(CATALOGUE_PREFIX + protocolId, query, null));
 	}
 
 	private void preprocessing(String userName, Integer featureId, Integer targetDataSet, List<Integer> sourceDataSets)
@@ -689,14 +696,14 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		return allQueries;
 	}
 
-	private SearchResult searchDisMaxQuery(String dataSetId, Query q)
+	private SearchResult searchDisMaxQuery(String protocolId, Query q)
 	{
 		SearchResult result = null;
 		try
 		{
 			q.pageSize(50);
-			MultiSearchRequest request = new MultiSearchRequest(Arrays.asList(CATALOGUE_PREFIX + dataSetId,
-					FEATURE_CATEGORY + dataSetId), q, null);
+			MultiSearchRequest request = new MultiSearchRequest(Arrays.asList(CATALOGUE_PREFIX + protocolId,
+					FEATURE_CATEGORY + protocolId), q, null);
 			result = searchService.multiSearch(request);
 		}
 		catch (Exception e)
