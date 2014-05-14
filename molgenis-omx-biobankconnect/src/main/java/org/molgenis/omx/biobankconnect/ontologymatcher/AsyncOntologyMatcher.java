@@ -445,13 +445,12 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		// candidate feature by checking on the size of annotations
 		for (ObservableFeature observableFeature : iterableObserableFeatures)
 		{
-			if (observableFeature.getDefinitions().size() == featureOfInterest.getDefinitions().size())
+			List<OntologyTerm> definitions = observableFeature.getDefinitions();
+			List<OntologyTerm> definitions1 = featureOfInterest.getDefinitions();
+			if (definitions.size() == definitions1.size())
 			{
-				for (OntologyTerm definition1 : observableFeature.getDefinitions())
-				{
-
-				}
-				featureOfInterestIds.add(observableFeature.getId());
+				definitions.removeAll(definitions1);
+				if (definitions.size() == 0) featureOfInterestIds.add(observableFeature.getId());
 			}
 		}
 		return (featureOfInterestIds.size() == 0) ? new SearchResult(0, Collections.<Hit> emptyList()) : retrieveFeatureFromIndex(
