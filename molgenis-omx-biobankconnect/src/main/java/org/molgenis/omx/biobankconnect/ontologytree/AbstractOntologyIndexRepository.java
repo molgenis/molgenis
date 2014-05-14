@@ -53,7 +53,7 @@ public abstract class AbstractOntologyIndexRepository implements Repository, Que
 		if (entityMetaData == null)
 		{
 			entityMetaData = new DefaultEntityMetaData(entityName);
-			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData("ID", FieldTypeEnum.HYPERLINK));
+			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData("ID"));
 			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermRepository.ONTOLOGY_TERM_IRI,
 					FieldTypeEnum.HYPERLINK));
 			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermRepository.ONTOLOGY_TERM));
