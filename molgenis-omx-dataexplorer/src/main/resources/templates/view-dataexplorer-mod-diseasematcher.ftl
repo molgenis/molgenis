@@ -1,5 +1,5 @@
 <!--DISEASE MATCHER / PHENOVIEWER -->
-<div class="row-fluid" <#if modDiseaseMatcher == false>style="display:none"</#if>>	
+<div class="row-fluid">	
 	<div class="span12" id="disease-matcher">
 		
 		<!-- PHENOTYPE ZONE -->

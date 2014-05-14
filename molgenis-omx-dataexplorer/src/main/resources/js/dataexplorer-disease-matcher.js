@@ -10,14 +10,12 @@
 	 * Listen for data explorer query changes.
 	 */
 	$(document).on('changeQuery', function(e, query){
-		currentQuery = query;
-		
-		//update disease list
+		currentQuery = query;		
 		updateDiseaseList();
 	});
 	
 	/**
-	 * Listen for entity change events.
+	 * Listen for entity change events. Also gets called when page is loaded.
 	 */
 	$(document).on('changeEntity', function(e, entityUri) {
 		checkToolAvailable(entityUri);
@@ -28,38 +26,32 @@
 	 * Checks if the current state of Molgenis meets the requirements of this tool. Shows warnings and instructions when it does not.
 	 */
 	function checkToolAvailable(entityUri){
+		var warnings = "";
+		
 		//check if a DiseaseMapping dataset is loaded, show a warning when it is not
 		var check = restApi.get('/api/v1/DiseaseMapping', {'num': 1});
 		if (check.total == 0){
-			//TODO disable functionality of buttons etc.
-			if ($('#diseasemapping-warning').length == false){
-				
-				$('#vardump').append('<div class="alert alert-warning" id="diseasemapping-warning"><strong>DiseaseMapping not loaded!' +
-						'</strong> For this tool to work, a valid DiseaseMapping dataset should be uploaded. ' +
-						'More information soon...</div>');
-				
-			}
-		}else{
-			$('#diseasemapping-warning').remove();
+			warnings += '<div class="alert alert-warning" id="diseasemapping-warning"><strong>DiseaseMapping not loaded!' +
+					'</strong> For this tool to work, a valid DiseaseMapping dataset should be uploaded.</div>';
 		}
 		
-		// if an entity is selected, check if it has a 'geneSymbol' column, show a warning if it does not 
+		// if an entity is selected, check if it has a 'geneSymbol' column and show a warning if it does not 
 		// TODO determine which columns to check for, and which annotators to propose
-		var check = restApi.get(entityUri, {'attributes': ['geneSymbol'], 'num': 1});
-		console.log(check);
-		if (check.total == 0){
-			if ($('#gene-symbol-warning').length == false){
-				
-				$('#vardump').append('<div class="alert alert-warning" id="gene-symbol-warning">' +
+		var check = restApi.get(entityUri + '/meta');		
+		if (check == null || !check.attributes.hasOwnProperty('geneSymbol')){			
+				warnings += '<div class="alert alert-warning" id="gene-symbol-warning">' +
 						'<strong>No gene symbols found!</strong> For this tool to work, make sure ' + 
-						'your dataset has a \'geneSymbol\' column.</div>');				
-			}
-		}else{
-			$('#gene-symbol-warning').remove();
+						'your dataset has a \'geneSymbol\' column.</div>';						
+				$('#grab-disease-button').attr('class', 'disabled');
 		}
-
+		
+		//TODO disable buttons etc. when there are warnings
+		$('#vardump').html(warnings);
 	}
-	
+
+	/**
+	 * Called when page has loaded.
+	 */
 	$(function() {
 		//TODO get diseases when page loads (so 'grab diseases' button can be removed)	
 		// register 'grab disease' button
@@ -106,11 +98,11 @@
 		});
 		
 		$('#disease-list a').click(function(e){
-			e.preventDefault(); 
+			e.preventDefault(); // stop jumping to top of page
 			onSelectDisease($(this));
 		});
 		
-		// pre-select top most disease
+		// pre-select top-most disease
 		onSelectDisease($('#disease-list li a').first());
 	}
 	
@@ -150,7 +142,6 @@
 		});
 		
 		// get genes for this disease
-		//TODO 'attributes' param does not work
 		var diseaseInfo =  restApi.get('/api/v1/DiseaseMapping', {
 			'q' : {
 				'q' : [{
@@ -158,9 +149,9 @@
 					operator : 'EQUALS',
 					value : diseaseId
 				}],	
-				'attributes': ['geneSymbol'],
 				'num': 10000
-			}
+			},
+			'attributes': ['geneSymbol']
 		});
 		
 		// get unique genes for this disease
@@ -171,7 +162,7 @@
 			}
 		});	
 
-		//retreive variants from the dataset associated with this disease
+		//build query to retrieve variants associated with this disease from current dataset
 		var queryRules = [];
 		$.each(uniqueGenes, function(index, uniqueGene){
 			if(queryRules.length > 0){
@@ -187,7 +178,6 @@
 		});
 		
 		// show associated variants in info panel
-		// TODO: only show interesting columns? -> geneSymbol, CADD, mutation type, etc.
 		$('#vardump').table({
 			'entityMetaData' : getEntity(),
 			'attributes' : getAttributes(),
