@@ -327,13 +327,13 @@
 	}
 	
 	function createComplexFilterSelectOperator(operator){
-		var $orOption = $('<option value="OR">OR</option>');
-		var $andOption = $('<option value="AND">AND</option>');
-		var $select = $('<select class="complexFilter operator"></select>').width(70);
+		var orOption = $('<option value="OR">OR</option>');
+		var andOption = $('<option value="AND">AND</option>');
+		var select = $('<select class="complexFilter operator"></select>').width(70);
 		var operatorLowerCase = (operator? operator.toLowerCase(): undefined);
-		if(operatorLowerCase === 'and') $andOption.attr('selected', 'selected');
-		else $orOption.attr('selected', 'selected');
-		return $select.append($orOption).append($andOption);
+		if(operatorLowerCase === 'and') andOption.attr('selected', 'selected');
+		else orOption.attr('selected', 'selected');
+		return select.append(orOption).append(andOption);
 	}
 
 	/**
@@ -366,9 +366,10 @@
 		var operator = (filter?filter.operator:null);
 		
 		btnGroup.append(createComplexFilterSelectOperator(operator));
-		btnGroup.append($('<button class="btn" type="button"><i class="icon-trash icon-plus"></i></button></button>').click(function(){
-			addComplexFilterControlsElementsToContainer(container, attribute, undefined, addLabel, true);
-		}));
+		btnGroup
+			.append($('<button class="btn" type="button"><i class="icon-trash icon-plus"></i></button></button>').click(function(){
+				addComplexFilterControlsElementsToContainer(container, attribute, undefined, addLabel, true);
+			}));
 		
 		if(addLabel) controlGroup.append($('<label class="control-label">' + attribute.name + '</label>'));
 		controlGroup.append(btnGroup);
@@ -392,7 +393,9 @@
 	 * @memberOf molgenis.dataexplorer
 	 */
 	function addRemoveButton(container){
-		$('.controls.controls-row', container).append($('<button class="btn" type="button"><i class="icon-trash"></i></button>').click(function(){
+		$('.controls.controls-row', container)
+			.append($('<span class="add-on">&nbsp;&nbsp;&nbsp;</span>'))
+			.append($('<button class="btn" type="button"><i class="icon-trash"></i></button>').click(function(){
 			$(this).parent().parent().remove();
 		}));
 		
@@ -416,7 +419,7 @@
 	function createSimpleFilterControlsElements(attribute, filter, addLabel) {
 		var label;
 		var container = $('<div class="control-group">');
-		var controls = $('<div class="controls controls-row">').width(555);
+		var controls = $('<div class="controls controls-row">').width(565);
 		var name = 'input-' + attribute.name + '-' + new Date().getTime();
 		var values = filter ? filter.getValues() : null;
 		var fromValue = filter ? filter.fromValue : null;
@@ -448,7 +451,7 @@
 				var valTo = toValue ? toValue : undefined;
 				var inputFrom = createInput(attribute.fieldType, {'name': nameFrom, 'placeholder': 'Start date'}, valFrom);
 				var inputTo = createInput(attribute.fieldType, {'name': nameTo, 'placeholder': 'End date'}, valTo);
-				controls.append($('<div class="control-group">').append(inputFrom)).append($('<div class="control-group">').append(inputTo));
+				controls.append(inputFrom).append($('<span class="add-on">&nbsp;&nbsp;&nbsp;</span>')).append(inputTo);
 				break;
 			case 'DECIMAL':
 			case 'INT':

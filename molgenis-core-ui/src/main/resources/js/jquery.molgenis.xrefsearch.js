@@ -77,7 +77,7 @@
 		var hiddenInput = container.find('input[type=hidden]');
 	
 		hiddenInput.select2({
-			width: '80%',
+			width: '75%',
 			minimumInputLength: 2,
             multiple: (attributeMetaData.fieldType === 'MREF'),
 			query: function (options){
