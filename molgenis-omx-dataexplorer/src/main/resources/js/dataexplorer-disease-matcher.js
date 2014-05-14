@@ -4,23 +4,63 @@
 	var currentQuery = null;
 	var currentDiseases = null;
 	
-	var diseaseListMaxLength = 10;
+	var diseaseListMaxLength = 15;
 	
 	/**
 	 * Listen for data explorer query changes.
 	 */
 	$(document).on('changeQuery', function(e, query){
 		currentQuery = query;
-
+		
 		//update disease list
 		updateDiseaseList();
 	});
 	
+	/**
+	 * Listen for entity change events.
+	 */
+	$(document).on('changeEntity', function(e, entityUri) {
+		checkToolAvailable(entityUri);
+	});
+	
+	
+	/**
+	 * Checks if the current state of Molgenis meets the requirements of this tool. Shows warnings and instructions when it does not.
+	 */
+	function checkToolAvailable(entityUri){
+		//check if a DiseaseMapping dataset is loaded, show a warning when it is not
+		var check = restApi.get('/api/v1/DiseaseMapping', {'num': 1});
+		if (check.total == 0){
+			//TODO disable functionality of buttons etc.
+			if ($('#diseasemapping-warning').length == false){
+				
+				$('#vardump').append('<div class="alert alert-warning" id="diseasemapping-warning"><strong>DiseaseMapping not loaded!' +
+						'</strong> For this tool to work, a valid DiseaseMapping dataset should be uploaded. ' +
+						'More information soon...</div>');
+				
+			}
+		}else{
+			$('#diseasemapping-warning').remove();
+		}
+		
+		// if an entity is selected, check if it has a 'geneSymbol' column, show a warning if it does not 
+		// TODO determine which columns to check for, and which annotators to propose
+		var check = restApi.get(entityUri, {'attributes': ['geneSymbol'], 'num': 1});
+		console.log(check);
+		if (check.total == 0){
+			if ($('#gene-symbol-warning').length == false){
+				
+				$('#vardump').append('<div class="alert alert-warning" id="gene-symbol-warning">' +
+						'<strong>No gene symbols found!</strong> For this tool to work, make sure ' + 
+						'your dataset has a \'geneSymbol\' column.</div>');				
+			}
+		}else{
+			$('#gene-symbol-warning').remove();
+		}
+
+	}
 	
 	$(function() {
-		//TODO check if DiseaseMapping is loaded and give warning + instructions if not
-		//TODO check if suitable annotation has been added (gene symbol column), and give warning + instructions if not
-		
 		//TODO get diseases when page loads (so 'grab diseases' button can be removed)	
 		// register 'grab disease' button
 		$('#grab-diseases-button').click(function(){
@@ -41,11 +81,11 @@
 	 * Initializes a pager for the currently selected diseases.
 	 */
 	function initPager(){
-		container = $('#disease-pager');
+		var container = $('#disease-pager');
 		if(currentDiseases != null && currentDiseases.length > diseaseListMaxLength) {
 			container.pager({
 				'nrItems' : currentDiseases.length,
-				'nrItemsPerPage' : 10,
+				'nrItemsPerPage' : diseaseListMaxLength,
 				'onPageChange' : function(page) {
 					populateDiseaseList(currentDiseases.slice(page.start, page.end));
 				}
@@ -62,11 +102,99 @@
 		$('#disease-list').empty();
 		
 		$.each(diseases, function(index, disease){
-			$('#disease-list').append('<li><a href="">' + disease + '</a></li>');
+			$('#disease-list').append('<li><a href="#" id="' + disease + '">' + disease + '</a></li>');
 		});
 		
-		//set first disease as the active one
-		$('#disease-list li').first().attr("class", "active");
+		$('#disease-list a').click(function(e){
+			e.preventDefault(); 
+			onSelectDisease($(this));
+		});
+		
+		// pre-select top most disease
+		onSelectDisease($('#disease-list li a').first());
+	}
+	
+	/**
+	 * Called when a disease is selected. Updates the selection in the disease list and shows the associated
+	 * phenotypes (from DiseaseMapping) and variants (from current dataset) for this disease.
+	 * @param diseaseLink the disease link that was clicked
+	 */
+	function onSelectDisease(diseaseLink){
+		// visually select the right disease in the list
+		$('#disease-list li').attr('class', '');
+		diseaseLink.parent().attr('class', 'active');
+		
+		//get TYPICAL phenotypes for this disease
+		var diseaseId = diseaseLink.attr('id');		
+		var phenotypes =  restApi.get('/api/v1/DiseaseMapping', {
+			'q' : {
+				'q' : [{
+					field : 'diseaseId',
+					operator : 'EQUALS',
+					value : diseaseId
+				}, {operator: 'AND'}, {
+					field : 'isTypical',
+					operator: 'EQUALS',
+					value : true
+				}],
+				'num': 10000,
+			},
+			'attributes': ['HPODescription']
+		});
+
+		// show the phenotypes for this disease in the info panel
+		var container = $('#diseasematcher-analysis-right');
+		container.empty();
+		$.each(phenotypes.items, function(index, pheno){
+			container.append(pheno.HPODescription + '<br/>');
+		});
+		
+		// get genes for this disease
+		//TODO 'attributes' param does not work
+		var diseaseInfo =  restApi.get('/api/v1/DiseaseMapping', {
+			'q' : {
+				'q' : [{
+					field : 'diseaseId',
+					operator : 'EQUALS',
+					value : diseaseId
+				}],	
+				'attributes': ['geneSymbol'],
+				'num': 10000
+			}
+		});
+		
+		// get unique genes for this disease
+		var uniqueGenes = [];
+		$.each(diseaseInfo.items, function(index, disease){
+			if($.inArray(disease.geneSymbol, uniqueGenes) === -1){
+				uniqueGenes.push(disease.geneSymbol);
+			}
+		});	
+
+		//retreive variants from the dataset associated with this disease
+		var queryRules = [];
+		$.each(uniqueGenes, function(index, uniqueGene){
+			if(queryRules.length > 0){
+				queryRules.push({
+					'operator' : 'OR'
+				});
+			}
+			queryRules.push({
+				'field' : 'geneSymbol',
+				'operator' : 'EQUALS',
+				'value' : uniqueGene
+			});
+		});
+		
+		// show associated variants in info panel
+		// TODO: only show interesting columns? -> geneSymbol, CADD, mutation type, etc.
+		$('#vardump').table({
+			'entityMetaData' : getEntity(),
+			'attributes' : getAttributes(),
+			'query' : {
+				'q' : queryRules
+			}
+		});
 	}
 	
 	/**
@@ -74,7 +202,7 @@
 	 * @returns array of diseaseIds, empty array when none found 
 	 */
 	function getDiseases(){
-		entityName = getEntity().name;
+		var entityName = getEntity().name;
 		var entityData = restApi.get('/api/v1/' + entityName, {'attributes': ['geneSymbol'], 'q': currentQuery});	
 		
 		var uniqueGeneSymbols = [];
@@ -97,10 +225,12 @@
 					operator : 'IN',
 					value : uniqueGeneSymbols
 				}],	
-				'attributes': ['diseaseId'],
 				'num': 10000
-			}
+			},
+			'attributes': ['diseaseId']
 		});
+		
+		console.log(diseaseInfo);
 		
 		var uniqueDiseases = [];
 		if (diseaseInfo.total > null){
@@ -121,6 +251,13 @@
 	 */
 	function getEntity() {
 		return molgenis.dataexplorer.getSelectedEntityMeta();
+	}
+	
+	/**
+	 * @memberOf molgenis.dataexplorer.data
+	 */
+	function getAttributes() {
+		return molgenis.dataexplorer.getSelectedAttributes();
 	}
 	
 })($, window.top.molgenis = window.top.molgenis || {});
