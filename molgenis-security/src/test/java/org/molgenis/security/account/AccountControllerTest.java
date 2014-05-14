@@ -30,6 +30,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.web.RedirectStrategy;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -233,6 +234,12 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 		public MolgenisPasswordEncoder molgenisPasswordEncoder()
 		{
 			return mock(MolgenisPasswordEncoder.class);
+		}
+
+		@Bean
+		public RedirectStrategy redirectStrategy()
+		{
+			return mock(RedirectStrategy.class);
 		}
 	}
 }

@@ -66,7 +66,7 @@ public class DiseaseMappingProcessor
 				throw new FileNotFoundException(allFile.getAbsolutePath());
 			}
 
-			File outFile = new File("disease-gene-phenotype.tsv");
+			File outFile = new File("DiseaseMapping.tsv");
 			System.out.println("Writing combined file to: " + outFile.getAbsolutePath());
 
 			dmp.processFiles(typicalFile, allFile, outFile);
@@ -77,7 +77,6 @@ public class DiseaseMappingProcessor
 			System.err.println("Could not find file: " + e.getMessage());
 			dmp.printHelp();
 		}
-
 	}
 
 	/**

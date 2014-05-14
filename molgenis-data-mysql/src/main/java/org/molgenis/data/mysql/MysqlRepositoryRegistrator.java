@@ -32,8 +32,11 @@ public class MysqlRepositoryRegistrator implements ApplicationListener<ContextRe
 	{
 		for (String name : repositoryCollection.getEntityNames())
 		{
-            System.out.println("MysqlRepositoryRegistrator: loading mysqlrepo " + name);
-			dataService.addRepository(repositoryCollection.getRepositoryByEntityName(name));
+			System.out.println("MysqlRepositoryRegistrator: loading mysqlrepo " + name);
+			if (!dataService.hasRepository(name))
+			{
+				dataService.addRepository(repositoryCollection.getRepositoryByEntityName(name));
+			}
 		}
 	}
 
