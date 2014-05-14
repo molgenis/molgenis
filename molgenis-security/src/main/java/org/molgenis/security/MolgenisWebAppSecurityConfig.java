@@ -6,6 +6,7 @@ import javax.servlet.Filter;
 import javax.sql.DataSource;
 
 import org.molgenis.data.DataService;
+import org.molgenis.security.account.AccountController;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -37,7 +38,10 @@ import org.springframework.security.core.userdetails.UserDetailsChecker;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.DefaultRedirectStrategy;
+import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
+import org.springframework.security.web.authentication.switchuser.SwitchUserFilter;
 
 public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurerAdapter
 {
@@ -58,6 +62,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 		http.addFilterBefore(tokenAuthenticationFilter(), MolgenisAnonymousAuthenticationFilter.class);
 		http.authenticationProvider(tokenAuthenticationProvider());
 
+		http.addFilterAfter(changePasswordFilter(), SwitchUserFilter.class);
+
 		ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry expressionInterceptUrlRegistry = http
 				.authorizeRequests();
 		configureUrlAuthorization(expressionInterceptUrlRegistry);
@@ -65,6 +71,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 		expressionInterceptUrlRegistry.antMatchers("/login").permitAll()
 
 		.antMatchers("/logo/**").permitAll()
+
+		.antMatchers(AccountController.CHANGE_PASSWORD_URI).authenticated()
 
 		.antMatchers("/account/**").permitAll()
 
@@ -131,6 +139,18 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	public Filter tokenAuthenticationFilter()
 	{
 		return new TokenAuthenticationFilter(tokenAuthenticationProvider());
+	}
+
+	@Bean
+	public Filter changePasswordFilter()
+	{
+		return new MolgenisChangePasswordFilter(dataService, redirectStrategy());
+	}
+
+	@Bean
+	public RedirectStrategy redirectStrategy()
+	{
+		return new DefaultRedirectStrategy();
 	}
 
 	@Bean

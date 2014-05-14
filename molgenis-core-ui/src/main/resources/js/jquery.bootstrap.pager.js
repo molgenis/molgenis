@@ -14,13 +14,19 @@
 		
 		// pager events
 		this.off('click', '**');
-		this.on('click', 'li.page-prev', $.proxy(function(){
+		this.on('click', 'li.page-prev', $.proxy(function(e){
+			e.preventDefault();
+			e.stopPropagation();
 			updatePager(this, this.data('page') - 1, settings, true);
 		}, this));
 		this.on('click', 'li.page', $.proxy(function(e){
+			e.preventDefault();
+			e.stopPropagation();
 			updatePager(this, parseInt($(e.target).html(), 10), settings, true);
 		}, this));
-		this.on('click', 'li.page-next', $.proxy(function(){
+		this.on('click', 'li.page-next', $.proxy(function(e){
+			e.preventDefault();
+			e.stopPropagation();
 			updatePager(this, this.data('page') + 1, settings, true);
 		}, this));
 		

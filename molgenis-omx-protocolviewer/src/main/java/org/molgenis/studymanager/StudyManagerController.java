@@ -25,6 +25,9 @@ import org.molgenis.data.Writable;
 import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.omx.study.StudyDataRequest;
+import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.Permission;
 import org.molgenis.study.StudyDefinition;
 import org.molgenis.study.StudyDefinitionImpl;
 import org.molgenis.study.UnknownStudyDefinitionException;
@@ -58,10 +61,11 @@ public class StudyManagerController extends MolgenisPluginController
 
 	private final StudyManagerService studyDefinitionManagerService;
 	private final CatalogManagerService catalogManagerService;
+	private final MolgenisPermissionService molgenisPermissionService;
 
 	@Autowired
 	public StudyManagerController(StudyManagerService studyDefinitionManagerService,
-			CatalogManagerService catalogManagerService)
+			CatalogManagerService catalogManagerService, MolgenisPermissionService molgenisPermissionService)
 	{
 		super(URI);
 		if (studyDefinitionManagerService == null) throw new IllegalArgumentException(
@@ -69,6 +73,7 @@ public class StudyManagerController extends MolgenisPluginController
 		if (catalogManagerService == null) throw new IllegalArgumentException("Catalog manager service is null");
 		this.studyDefinitionManagerService = studyDefinitionManagerService;
 		this.catalogManagerService = catalogManagerService;
+		this.molgenisPermissionService = molgenisPermissionService;
 	}
 
 	/**
@@ -86,6 +91,8 @@ public class StudyManagerController extends MolgenisPluginController
 		model.addAttribute("dataLoadingEnabled", studyDefinitionManagerService.canLoadStudyData());
 		model.addAttribute("studyDefinitionStates", StudyDefinition.Status.values());
 		model.addAttribute("defaultStudyDefinitionState", StudyDefinition.Status.SUBMITTED);
+		model.addAttribute("writePermission",
+				molgenisPermissionService.hasPermissionOnEntity(StudyDataRequest.ENTITY_NAME, Permission.WRITE));
 		return VIEW_NAME;
 	}
 

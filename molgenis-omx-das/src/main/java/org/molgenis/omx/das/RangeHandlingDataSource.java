@@ -16,15 +16,6 @@ import uk.ac.ebi.mydas.model.*;
 
 public abstract class RangeHandlingDataSource implements RangeHandlingAnnotationDataSource
 {
-    public static final String MUTATION_STOP_POSITION = "stop_nucleotide";
-    public static final String MUTATION_LINK = "linkout";
-    public static final String MUTATION_NAME = "mutation_name";
-    public static final String MUTATION_DESCRIPTION = "description";
-    public static final String MUTATION_START_POSITION = "start_nucleotide";
-    public static final String MUTATION_ID = "mutation_id";
-    public static final String MUTATION_CHROMOSOME = "chromosome";
-    public static final String PATIENT_ID = "patient_id";
-
     protected DasFeature createDasFeature(Integer start, Integer stop, String identifier, String name,
                                           String description, String link, DasType type, DasMethod method, String dataSet, String patient) throws DataSourceException
     {
