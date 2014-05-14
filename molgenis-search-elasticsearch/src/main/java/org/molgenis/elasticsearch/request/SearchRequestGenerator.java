@@ -64,7 +64,7 @@ public class SearchRequestGenerator
 			searchRequestBuilder.setSize(0);
 
 			TermsBuilder termsBuilder;
-			if (StringUtils.isNotBlank(aggregateField1) && StringUtils.isNotBlank(aggregateField1))
+			if (StringUtils.isNotBlank(aggregateField1) && StringUtils.isNotBlank(aggregateField2))
 			{
 				termsBuilder = new TermsBuilder(aggregateField1).size(Integer.MAX_VALUE).field(aggregateField1);
 				TermsBuilder subTermsBuilder = new TermsBuilder(aggregateField2).size(Integer.MAX_VALUE).field(
