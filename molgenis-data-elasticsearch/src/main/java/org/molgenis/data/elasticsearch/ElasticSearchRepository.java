@@ -6,8 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.molgenis.data.AggregateResult;
-import org.molgenis.data.Aggregateable;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -21,7 +21,7 @@ import org.molgenis.elasticsearch.ElasticSearchService;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 
-public class ElasticSearchRepository implements Repository, Queryable, Aggregateable, Updateable
+public class ElasticSearchRepository implements CrudRepository
 {
 	public static final String BASE_URL = "elasticsearch://";
 
