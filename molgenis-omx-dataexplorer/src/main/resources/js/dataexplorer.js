@@ -187,20 +187,12 @@
 		}
 
 		$.each(attributeFilters, function(attributeUri, filter) {
-			var rule;
+			var rule = filter.createQueryRule();
+			
 			if (count > 0) {
 				entityCollectionRequest.q.push({
 					operator : 'AND'
 				});
-			}
-
-			if(filter.isType('complex'))
-			{
-				rule = createEntityQueryFromComplexFilter(filter);
-			} 
-			else if (filter.isType('simple')) 
-			{
-				rule = createEntityQueryFromSimpleFilter(filter);
 			}
 			
 			if(rule){
@@ -214,118 +206,7 @@
 		
 		return entityCollectionRequest;
 	}
-	
-	function createEntityQueryFromComplexFilter(filter){
-		var nestedRules = [];
-		var attribute = filter.attribute;
-		var rule; 
-		var filters = filter.getFilters();
-		
-		$.each(filters, function(index, subFilter) {
-			if(index > 0){
-				nestedRules.push({
-					operator : filter.operator
-				});
-			}
-			nestedRules.push(createEntityQueryFromSimpleFilter(subFilter));
-		});
-		
-		rule = {
-			operator: 'NESTED',
-			nestedRules: nestedRules
-		};
-		
-		return rule;
-	}
-	
-	function createEntityQueryFromSimpleFilter(filter){
-		var values = filter.getValues();
-		var attribute = filter.attribute;
-		var rule;
-		var rangeQuery = attribute.fieldType === 'DATE' || attribute.fieldType === 'DATE_TIME' || attribute.fieldType === 'DECIMAL' || attribute.fieldType === 'INT' || attribute.fieldType === 'LONG';
-		
-		if (rangeQuery) {
-			// Range filter
-			var fromValue = filter.fromValue;
-			var toValue = filter.toValue;
 			
-			if(attribute.fieldType === 'DATE_TIME'){
-				if(fromValue){
-					fromValue = fromValue.replace("'T'", "T");
-				}
-				if(toValue){
-					toValue = toValue.replace("'T'", "T");
-				}
-			}
-			
-			// add range fromValue / toValue
-			if (fromValue && toValue) {
-				rule = {
-					operator: 'NESTED',
-					nestedRules:[
-					{
-						field : attribute.name,
-						operator : 'GREATER_EQUAL',
-						value : fromValue
-					},
-					{
-						operator : 'AND'
-					},
-					{
-						field : attribute.name,
-						operator : 'LESS_EQUAL',
-						value : toValue
-					}]
-				};
-			} else if (fromValue) {
-				rule = {
-					field : attribute.name,
-					operator : 'GREATER_EQUAL',
-					value : fromValue
-				};
-			} else if (toValue) {
-				rule = {
-					field : attribute.name,
-					operator : 'LESS_EQUAL',
-					value : toValue
-				};
-			}
-		} else {
-			if(values){
-				if (values.length > 1) {
-					var nestedRule = {
-						operator: 'NESTED',
-						nestedRules:[]
-					};
-				
-					$.each(values, function(index, value) {
-						if (index > 0) {
-							var operator = filter.operator ? filter.operator : 'OR';
-							nestedRule.nestedRules.push({
-								operator : operator
-							});
-						}
-	
-						nestedRule.nestedRules.push({
-							field : attribute.name,
-							operator : 'EQUALS',
-							value : value
-						});
-					});
-					rule = nestedRule;
-				} else {
-					rule = {
-						field : attribute.name,
-						operator : 'EQUALS',
-						value : values[0]
-					};
-				}
-			}
-		}
-		
-		return rule;
-	}
-	
 	function createComplexFilterSelectOperator(operator){
 		var orOption = $('<option value="OR">OR</option>');
 		var andOption = $('<option value="AND">AND</option>');
@@ -535,145 +416,7 @@
 		}
 	}
 	
-	function Filter(){
-		this.operators = {'OR' : 'OR', 'AND' : 'AND'};
-		this.types = {'simple' : 'simple', 'complex': 'complex'};
-		this.type = undefined;
-		this.operator = this.operators['OR'];
-		this.attribute = undefined;
-		
-		/**
-		 * this.update = function ($domElement) 
-		 * {
-		 * 		Implement this method in subclass filters
-		 * }
-		 */
-		
-		/**
-		 * this.isEmpty = function () 
-		 * {
-		 * 		Implement this method in subclass filters
-		 * }
-		 */
-		
-		this.isType = function(type)
-		{
-			return type && this.types[type] && this.type === type;
-		}
-		
-		return this;
-	}
 	
-	function SimpleFilter(attribute){
-		this.fromValue = undefined;
-		this.toValue = undefined;
-		var values = [];
-		this.type = 'simple';
-		this.attribute = attribute;
-		
-		this.isEmpty = function() 
-		{
-			return !(values.length || this.fromValue || this.toValue);
-		};
-		
-		this.getValues = function ()
-		{
-			return values;
-		};
-		
-		this.update = function ($domElement) {
-			var fromValue = this.fromValue;
-			var toValue = this.toValue;
-			var operator = this.operator;
-			
-			$(":input",$domElement).not('[type=radio]:not(:checked)').not('[type=checkbox]:not(:checked)').each(function(){
-				var value = $(this).val();
-				var name =  $(this).attr("name");
-				
-				if(value) {
-					// Add operator
-					if ($(this).hasClass('operator')) {
-						operator = value;
-					} 
-					
-					// Add values
-					else 
-					{
-		                if(attribute.fieldType === 'MREF'){
-		                    var mrefValues = value.split(',');
-		                    $(mrefValues).each(function(i){
-		                    	values.push(mrefValues[i]);
-		                    });
-		                } 
-		                else if(attribute.fieldType === 'INT'
-							|| attribute.fieldType === 'LONG'
-								|| attribute.fieldType === 'DECIMAL'
-									|| attribute.fieldType === 'DATE'
-										|| attribute.fieldType === 'DATE_TIME'
-								){
-							
-							// Add toValue
-							if(name && (name.match(/-to$/g) || name === 'sliderright')){
-								toValue = value;
-							}
-							
-							// Add fromValue
-							if(name && (name.match(/-from$/g) || name === 'sliderleft')){
-								fromValue = value;
-							}
-						}
-		                else
-		                {
-		                	values[values.length] = value;
-		                }
-					}
-				}
-			});
-			this.fromValue = fromValue;
-			this.toValue = toValue;
-			this.operator = operator;
-			return this;
-		}
-
-		return this;
-	}
-	SimpleFilter.prototype = new Filter();
-	
-	function ComplexFilter(attribute){
-		var filters = [];
-		this.type = 'complex';
-		this.attribute = attribute;
-		
-		this.update = function ($domElement) {
-			var simpleFilter;
-			this.operator = $(":input.complexFilter.operator", $domElement).val();
-			$(".controls", $domElement).each(function(){
-				simpleFilter = (new SimpleFilter(attribute)).update($(this));
-				if(!simpleFilter.isEmpty())
-				{
-					filters.push(simpleFilter);
-				}
-			});
-			return this;
-		};
-		
-		this.isEmpty = function () {
-			for(var i = 0; i < filters.length; i++)
-			{
-				if(!filters[i].isEmpty()){
-					return false;
-				}
-			}
-			return true;
-		};
-		
-		this.getFilters = function () {
-			return filters;
-		};
-		
-		return this;
-	}
-	ComplexFilter.prototype = new Filter();
 
 	/**
 	 * @memberOf molgenis.dataexplorer
@@ -683,7 +426,7 @@
         var filter;
         
 		$('.complexFilterContainer', form).each(function() {
-			filter = new ComplexFilter($(this).data('attribute'));
+			filter = new self.filter.ComplexFilter($(this).data('attribute'));
 			filter.update($(this));
 			if(!filter.isEmpty()){
 				filters[filter.attribute.href] = filter;
@@ -691,7 +434,7 @@
 		});
 
 		$('.simpleFilterContainer', form).each(function() {
-			filter = new SimpleFilter($(this).data('attribute'));
+			filter = new self.filter.SimpleFilter($(this).data('attribute'));
 			filter.update($(this));
 			filters[filter.attribute.href] = filter;
 		});
