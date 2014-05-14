@@ -1,6 +1,8 @@
 package org.molgenis.elasticsearch.response;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +17,6 @@ import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.terms.StringTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
-import org.elasticsearch.search.facet.terms.TermsFacet;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchResult;
@@ -100,56 +101,125 @@ public class ResponseParser
 			}
 			StringTerms stringTerms = (StringTerms) aggregation;
 
-			for (Bucket bucket : stringTerms.getBuckets())
+			Collection<Bucket> buckets = stringTerms.getBuckets();
+			if (buckets.size() > 0)
 			{
-				Aggregations subAggregations = bucket.getAggregations();
-				final int nrSubAggregations = Iterables.size(subAggregations);
-				if (nrSubAggregations > 1)
+				// distinguish between 1D and 2D aggregation
+				boolean hasSubAggregations = false;
+				for (Bucket bucket : buckets)
 				{
-					throw new RuntimeException("Multiple aggregations [" + nrAggregations + "] not supported");
+					Aggregations subAggregations = bucket.getAggregations();
+					if (subAggregations != null && Iterables.size(subAggregations) > 0)
+					{
+						hasSubAggregations = true;
+						break;
+					}
 				}
 
-				StringTerms subStringTerms;
-				if (nrSubAggregations == 1)
+				if (hasSubAggregations)
 				{
-
-					Aggregation subAggregation = subAggregations.iterator().next();
-					if (!(subAggregation instanceof StringTerms))
+					// create labels
+					for (Bucket bucket : buckets)
 					{
-						throw new RuntimeException("Aggregation of type [" + subAggregation.getClass().getName()
-								+ "] not supported");
+						xLabels.add(bucket.getKey());
+
+						Aggregations subAggregations = bucket.getAggregations();
+						if (subAggregations != null)
+						{
+							if (Iterables.size(subAggregations) > 1)
+							{
+								throw new RuntimeException("Multiple aggregations [" + nrAggregations
+										+ "] not supported");
+							}
+							Aggregation subAggregation = subAggregations.iterator().next();
+
+							if (!(subAggregation instanceof StringTerms))
+							{
+								throw new RuntimeException("Aggregation of type ["
+										+ subAggregation.getClass().getName() + "] not supported");
+							}
+							StringTerms subStringTerms = (StringTerms) subAggregation;
+
+							for (Bucket subBucket : subStringTerms.getBuckets())
+							{
+								yLabels.add(subBucket.getKey());
+							}
+
+						}
 					}
-					subStringTerms = (StringTerms) subAggregation;
+					xLabels.add("Total");
+					yLabels.add("Total");
+
+					// create label map
+					int idx = 0;
+					Map<String, Integer> yLabelMap = new HashMap<String, Integer>();
+					for (String yLabel : yLabels)
+					{
+						yLabelMap.put(yLabel, idx++);
+					}
+
+					for (Bucket bucket : buckets)
+					{
+						// create values
+						List<Long> yValues = new ArrayList<Long>();
+						for (int i = 0; i < idx; ++i)
+						{
+							yValues.add(0l);
+						}
+
+						Aggregations subAggregations = bucket.getAggregations();
+						if (subAggregations != null)
+						{
+							long count = 0;
+							StringTerms subStringTerms = (StringTerms) subAggregations.iterator().next();
+							for (Bucket subBucket : subStringTerms.getBuckets())
+							{
+								long bucketCount = subBucket.getDocCount();
+								yValues.set(yLabelMap.get(subBucket.getKey()), bucketCount);
+								count += bucketCount;
+							}
+							yValues.set(yLabelMap.get("Total"), count);
+						}
+
+						matrix.add(yValues);
+					}
+
+					// create value totals
+					List<Long> xTotals = new ArrayList<Long>();
+					for (int i = 0; i < idx; ++i)
+					{
+						xTotals.add(0l);
+					}
+
+					for (List<Long> values : matrix)
+					{
+						int nrValues = values.size();
+						for (int i = 0; i < nrValues; ++i)
+						{
+							xTotals.set(i, xTotals.get(i) + values.get(i));
+						}
+					}
+					matrix.add(xTotals);
 				}
 				else
 				{
-					subStringTerms = null;
+					long total = 0;
+					for (Bucket bucket : buckets)
+					{
+						xLabels.add(bucket.getKey());
+						long docCount = bucket.getDocCount();
+						matrix.add(Lists.newArrayList(Long.valueOf(docCount)));
+						total += docCount;
+					}
+					matrix.add(Lists.newArrayList(Long.valueOf(total)));
+					xLabels.add("Total");
+					yLabels.add("Count");
 				}
-
-				xLabels.add(bucket.getKey());
-				long docCount = bucket.getDocCount();
-				total += docCount;
-				matrix.add(Lists.newArrayList(docCount));
 			}
-
-			// TODO finish
 
 			aggregate = new AggregateResult(matrix, xLabels, yLabels);
 		}
 
 		return new SearchResult(totalCount, searchHits, aggregate);
-	}
-
-	private TermsFacet.Entry findTerm(String text, TermsFacet facet)
-	{
-		for (TermsFacet.Entry term : facet.getEntries())
-		{
-			if (term.getTerm().string().equalsIgnoreCase(text))
-			{
-				return term;
-			}
-		}
-
-		return null;
 	}
 }
