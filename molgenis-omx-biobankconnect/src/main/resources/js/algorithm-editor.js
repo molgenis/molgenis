@@ -372,7 +372,7 @@
 	            queryRules.push({
 	            	field : 'type',
 					operator : 'EQUALS',
-					value : '"observablefeature"'
+					value : 'observablefeature'
 	            });
 	            var autoCompletionSearchRequest = {
             		documentType : documentType,
