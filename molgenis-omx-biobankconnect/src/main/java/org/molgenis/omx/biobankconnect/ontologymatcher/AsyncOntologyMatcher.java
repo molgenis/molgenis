@@ -363,10 +363,10 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	@Transactional
 	public SearchResult generateMapping(String userName, Integer featureId, Integer targetDataSet, Integer sourceDataSet)
 	{
-		QueryImpl query = new QueryImpl();
-		query.pageSize(100000);
-		query.addRule(new QueryRule(ENTITY_ID, Operator.EQUALS, featureId));
-		SearchResult result = searchService.search(new SearchRequest(CATALOGUE_PREFIX + targetDataSet, query, null));
+		SearchResult mappedFeatures = findMappingsByAnnotation(featureId, sourceDataSet);
+		if (mappedFeatures.getTotalHitCount() > 0) return mappedFeatures;
+
+		SearchResult result = retrieveFeatureFromIndex(targetDataSet, Arrays.<Integer> asList(featureId));
 		List<Hit> searchHits = result.getSearchHits();
 		if (searchHits.size() > 0)
 		{
@@ -414,6 +414,77 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			}
 		}
 		return new SearchResult(0, Collections.<Hit> emptyList());
+	}
+
+	/**
+	 * Compare whether or not the ontology annotation of feature of interest and
+	 * candidate feature are the same
+	 * 
+	 * @param featureId
+	 * @param sourceDataSet
+	 * @return
+	 */
+	private SearchResult findMappingsByAnnotation(Integer featureId, Integer sourceDataSet)
+	{
+		ObservableFeature featureOfInterest = dataService.findOne(ObservableFeature.ENTITY_NAME, featureId,
+				ObservableFeature.class);
+
+		List<Object> candidateFeatureIds = new ArrayList<>();
+		for (Hit hit : retrieveFeatureFromIndex(sourceDataSet, null))
+		{
+			candidateFeatureIds.add(hit.getColumnValueMap().get(ENTITY_ID));
+		}
+
+		Iterable<ObservableFeature> iterableObserableFeatures = dataService.findAll(
+				ObservableFeature.ENTITY_NAME,
+				new QueryImpl().in(ObservableFeature.DEFINITIONS, featureOfInterest.getDefinitions()).and()
+						.in(ObservableFeature.ID, candidateFeatureIds), ObservableFeature.class);
+
+		List<Integer> featureOfInterestIds = new ArrayList<Integer>();
+		// Compare ontology annotations between feature of interest and
+		// candidate feature by checking on the size of annotations
+		for (ObservableFeature observableFeature : iterableObserableFeatures)
+		{
+			if (observableFeature.getDefinitions().size() == featureOfInterest.getDefinitions().size())
+			{
+				for (OntologyTerm definition1 : observableFeature.getDefinitions())
+				{
+
+				}
+				featureOfInterestIds.add(observableFeature.getId());
+			}
+		}
+		return (featureOfInterestIds.size() == 0) ? new SearchResult(0, Collections.<Hit> emptyList()) : retrieveFeatureFromIndex(
+				sourceDataSet, featureOfInterestIds);
+	}
+
+	/**
+	 * Retrieve feature information from Index based on given featureIds list.
+	 * If featureIds is empty, all of features are retrieved for particular
+	 * dataset
+	 * 
+	 * @param dataSetId
+	 * @param featureIds
+	 * @return
+	 */
+	private SearchResult retrieveFeatureFromIndex(Integer dataSetId, Iterable<Integer> featureIds)
+	{
+		QueryImpl query = new QueryImpl();
+		query.pageSize(100000);
+		if (featureIds != null && Iterables.size(featureIds) > 0)
+		{
+			for (Integer featureId : featureIds)
+			{
+				if (query.getRules().size() > 0) query.addRule(new QueryRule(Operator.OR));
+				query.addRule(new QueryRule(ENTITY_ID, Operator.EQUALS, featureId));
+			}
+		}
+		else
+		{
+			query.addRule(new QueryRule(ENTITY_TYPE, Operator.EQUALS, ObservableFeature.class.getSimpleName()
+					.toLowerCase()));
+		}
+		return searchService.search(new SearchRequest(CATALOGUE_PREFIX + dataSetId, query, null));
 	}
 
 	private void preprocessing(String userName, Integer featureId, Integer targetDataSet, List<Integer> sourceDataSets)
