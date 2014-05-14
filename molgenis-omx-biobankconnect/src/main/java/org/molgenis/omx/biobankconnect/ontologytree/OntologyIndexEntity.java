@@ -1,5 +1,7 @@
 package org.molgenis.omx.biobankconnect.ontologytree;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -16,17 +18,24 @@ import org.molgenis.search.SearchService;
 public class OntologyIndexEntity extends IndexEntity
 {
 	private static final long serialVersionUID = 1L;
+	private final OntologyService ontologyService;
 
-	public OntologyIndexEntity(Hit hit, EntityMetaData entityMetaData, Map<Integer, String> identifierMap,
+	public OntologyIndexEntity(Hit hit, EntityMetaData entityMetaData, OntologyService ontologyService,
 			SearchService searchService)
 	{
-		super(hit, entityMetaData, identifierMap, searchService);
+		super(hit, entityMetaData, searchService);
+		this.ontologyService = ontologyService;
 	}
 
 	@Override
 	public Object get(String attributeName)
 	{
 		Map<String, Object> columnValueMap = hit.getColumnValueMap();
+
+		if (attributeName.equalsIgnoreCase("id"))
+		{
+			return hit.getId();
+		}
 
 		if (attributeName.equalsIgnoreCase("fieldType"))
 		{
@@ -47,6 +56,19 @@ public class OntologyIndexEntity extends IndexEntity
 		if (attributeName.equalsIgnoreCase(OntologyTermRepository.ROOT))
 		{
 			return true;
+		}
+
+		if (attributeName.equalsIgnoreCase("attributes"))
+		{
+			List<OntologyTermIndexEntity> refEntities = new ArrayList<OntologyTermIndexEntity>();
+
+			for (Hit hit : ontologyService.getRootOntologyTerms(this.hit.getColumnValueMap()
+					.get(OntologyTermRepository.ONTOLOGY_IRI).toString()))
+			{
+				refEntities.add(new OntologyTermIndexEntity(hit, getEntityMetaData(), searchService));
+			}
+
+			return refEntities;
 		}
 
 		return columnValueMap.containsKey(attributeName) ? columnValueMap.get(attributeName) : null;

@@ -19,16 +19,20 @@ public class OntologyTermIndexEntity extends IndexEntity
 {
 	private static final long serialVersionUID = 1L;
 
-	public OntologyTermIndexEntity(Hit hit, EntityMetaData entityMetaData, Map<Integer, String> identifierMap,
-			SearchService searchService)
+	public OntologyTermIndexEntity(Hit hit, EntityMetaData entityMetaData, SearchService searchService)
 	{
-		super(hit, entityMetaData, identifierMap, searchService);
+		super(hit, entityMetaData, searchService);
 	}
 
 	@Override
 	public Object get(String attributeName)
 	{
 		Map<String, Object> columnValueMap = hit.getColumnValueMap();
+
+		if (attributeName.equalsIgnoreCase("id"))
+		{
+			return hit.getId();
+		}
 
 		if (attributeName.equalsIgnoreCase("fieldType"))
 		{
@@ -38,7 +42,6 @@ public class OntologyTermIndexEntity extends IndexEntity
 		if (attributeName.equalsIgnoreCase("attributes"))
 		{
 			List<OntologyTermIndexEntity> refEntities = new ArrayList<OntologyTermIndexEntity>();
-
 			if (!Boolean.parseBoolean(columnValueMap.get(OntologyTermRepository.LAST).toString()))
 			{
 				String currentNodePath = columnValueMap.get(OntologyTermRepository.NODE_PATH).toString();
@@ -51,14 +54,7 @@ public class OntologyTermIndexEntity extends IndexEntity
 				SearchResult result = searchService.search(searchRequest);
 				for (Hit hit : result.getSearchHits())
 				{
-					String id = hit.getId();
-					int hashCode = id.hashCode();
-					if (!identifierMap.containsKey(hashCode))
-					{
-						identifierMap.put(hashCode, id);
-					}
-					refEntities
-							.add(new OntologyTermIndexEntity(hit, getEntityMetaData(), identifierMap, searchService));
+					refEntities.add(new OntologyTermIndexEntity(hit, getEntityMetaData(), searchService));
 				}
 			}
 

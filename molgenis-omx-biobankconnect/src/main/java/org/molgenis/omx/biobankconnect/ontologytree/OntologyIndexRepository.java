@@ -6,6 +6,7 @@ import java.util.List;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.omx.biobankconnect.ontologyservice.OntologyService;
 import org.molgenis.omx.biobankconnect.utils.OntologyRepository;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
@@ -20,12 +21,14 @@ public class OntologyIndexRepository extends AbstractOntologyIndexRepository
 	public final static String DEFAULT_ONTOLOGY_REPO = "ontologyindex";
 	private final static String BASE_URL = "ontologyindex://";
 	private final OntologyRepository ontologyRepository;
+	private final OntologyService ontologySerivce;
 
 	@Autowired
-	public OntologyIndexRepository(String entityName, SearchService searchService)
+	public OntologyIndexRepository(String entityName, OntologyService ontologyService, SearchService searchService)
 	{
 		super(entityName, searchService);
 		this.ontologyRepository = new OntologyRepository(null, entityName);
+		this.ontologySerivce = ontologyService;
 	}
 
 	@Override
@@ -36,13 +39,7 @@ public class OntologyIndexRepository extends AbstractOntologyIndexRepository
 		q.eq(OntologyRepository.ENTITY_TYPE, OntologyRepository.TYPE_ONTOLOGY);
 		for (Hit hit : searchService.search(new SearchRequest(null, q, null)).getSearchHits())
 		{
-			String id = hit.getId();
-			int hashCode = id.hashCode();
-			if (!identifierMap.containsKey(hashCode))
-			{
-				identifierMap.put(hashCode, id);
-			}
-			entities.add(new OntologyIndexEntity(hit, getEntityMetaData(), identifierMap, searchService));
+			entities.add(new OntologyIndexEntity(hit, getEntityMetaData(), ontologySerivce, searchService));
 		}
 		return entities;
 	}
@@ -51,15 +48,15 @@ public class OntologyIndexRepository extends AbstractOntologyIndexRepository
 	public Entity findOne(Query q)
 	{
 		Hit hit = findOneInternal(q);
-		if (hit != null) return new OntologyIndexEntity(hit, getEntityMetaData(), identifierMap, searchService);
+		if (hit != null) return new OntologyIndexEntity(hit, getEntityMetaData(), ontologySerivce, searchService);
 		return null;
 	}
 
 	@Override
-	public Entity findOne(Integer id)
+	public Entity findOne(Object id)
 	{
-		Hit hit = findOneInternal(id);
-		if (hit != null) return new OntologyIndexEntity(hit, getEntityMetaData(), identifierMap, searchService);
+		Hit hit = searchService.searchById(null, id.toString());
+		if (hit != null) return new OntologyIndexEntity(hit, getEntityMetaData(), ontologySerivce, searchService);
 		return null;
 	}
 

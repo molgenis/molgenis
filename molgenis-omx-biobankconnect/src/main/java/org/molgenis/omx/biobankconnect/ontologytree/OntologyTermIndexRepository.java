@@ -35,13 +35,7 @@ public class OntologyTermIndexRepository extends AbstractOntologyIndexRepository
 		q.eq(OntologyTermRepository.ENTITY_TYPE, OntologyTermRepository.TYPE_ONTOLOGYTERM);
 		for (Hit hit : searchService.search(new SearchRequest(null, q, null)).getSearchHits())
 		{
-			String id = hit.getId();
-			int hashCode = id.hashCode();
-			if (!identifierMap.containsKey(hashCode))
-			{
-				identifierMap.put(hashCode, id);
-			}
-			entities.add(new OntologyTermIndexEntity(hit, getEntityMetaData(), identifierMap, searchService));
+			entities.add(new OntologyTermIndexEntity(hit, getEntityMetaData(), searchService));
 		}
 		return entities;
 	}
@@ -50,15 +44,15 @@ public class OntologyTermIndexRepository extends AbstractOntologyIndexRepository
 	public Entity findOne(Query q)
 	{
 		Hit hit = findOneInternal(q);
-		if (hit != null) return new OntologyTermIndexEntity(hit, getEntityMetaData(), identifierMap, searchService);
+		if (hit != null) return new OntologyTermIndexEntity(hit, getEntityMetaData(), searchService);
 		return null;
 	}
 
 	@Override
-	public Entity findOne(Integer id)
+	public Entity findOne(Object id)
 	{
-		Hit hit = findOneInternal(id);
-		if (hit != null) return new OntologyTermIndexEntity(hit, getEntityMetaData(), identifierMap, searchService);
+		Hit hit = searchService.searchById(null, id.toString());
+		if (hit != null) return new OntologyTermIndexEntity(hit, getEntityMetaData(), searchService);
 		return null;
 	}
 

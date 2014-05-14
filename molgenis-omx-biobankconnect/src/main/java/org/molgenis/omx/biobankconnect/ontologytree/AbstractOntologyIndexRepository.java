@@ -1,9 +1,7 @@
 package org.molgenis.omx.biobankconnect.ontologytree;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
@@ -25,7 +23,6 @@ public abstract class AbstractOntologyIndexRepository implements Repository, Que
 {
 	protected DefaultEntityMetaData entityMetaData = null;
 	protected final SearchService searchService;
-	protected final Map<Integer, String> identifierMap = new HashMap<Integer, String>();
 	protected final String entityName;
 
 	@Autowired
@@ -41,32 +38,10 @@ public abstract class AbstractOntologyIndexRepository implements Repository, Que
 		return findAll(new QueryImpl()).iterator();
 	}
 
-	@Override
-	public void close() throws IOException
-	{
-		identifierMap.clear();
-	}
-
 	public Hit findOneInternal(Query q)
 	{
 		for (Hit hit : searchService.search(new SearchRequest(null, q, null)).getSearchHits())
 		{
-			String id = hit.getId();
-			int hashCode = id.hashCode();
-			if (!identifierMap.containsKey(hashCode))
-			{
-				identifierMap.put(hashCode, id);
-			}
-			return hit;
-		}
-		return null;
-	}
-
-	public Hit findOneInternal(Integer id)
-	{
-		if (identifierMap.containsKey(id))
-		{
-			Hit hit = searchService.searchById(null, identifierMap.get(id));
 			return hit;
 		}
 		return null;
@@ -78,39 +53,35 @@ public abstract class AbstractOntologyIndexRepository implements Repository, Que
 		if (entityMetaData == null)
 		{
 			entityMetaData = new DefaultEntityMetaData(entityName);
+			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData("ID", FieldTypeEnum.HYPERLINK));
 			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermRepository.ONTOLOGY_TERM_IRI,
 					FieldTypeEnum.HYPERLINK));
-			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermRepository.ONTOLOGY_TERM,
-					FieldTypeEnum.STRING));
-			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermRepository.SYNONYMS,
-					FieldTypeEnum.STRING));
-			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermRepository.ENTITY_TYPE,
-					FieldTypeEnum.STRING));
-			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermRepository.NODE_PATH,
-					FieldTypeEnum.STRING));
-			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermRepository.PARENT_NODE_PATH,
-					FieldTypeEnum.STRING));
+			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermRepository.ONTOLOGY_TERM));
+			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermRepository.SYNONYMS));
+			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermRepository.ENTITY_TYPE));
+			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermRepository.NODE_PATH));
+			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermRepository.PARENT_NODE_PATH));
 			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData("fieldType", FieldTypeEnum.ENUM));
 			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermRepository.LAST,
 					FieldTypeEnum.BOOL));
 			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermRepository.ROOT,
 					FieldTypeEnum.BOOL));
 			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(
-					OntologyTermRepository.ONTOLOGY_TERM_DEFINITION, FieldTypeEnum.STRING));
+					OntologyTermRepository.ONTOLOGY_TERM_DEFINITION));
 			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermRepository.ONTOLOGY_IRI,
 					FieldTypeEnum.HYPERLINK));
-			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyRepository.ONTOLOGY_LABEL,
-					FieldTypeEnum.STRING));
+			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyRepository.ONTOLOGY_LABEL));
 			DefaultAttributeMetaData childrenAttributeMetatData = new DefaultAttributeMetaData("attributes",
 					FieldTypeEnum.MREF);
 			childrenAttributeMetatData.setRefEntity(entityMetaData);
 			entityMetaData.addAttributeMetaData(childrenAttributeMetatData);
+			entityMetaData.setIdAttribute("ID");
 		}
 		return entityMetaData;
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Integer> ids)
+	public Iterable<Entity> findAll(Iterable<Object> ids)
 	{
 		throw new UnsupportedOperationException();
 	}
@@ -128,25 +99,19 @@ public abstract class AbstractOntologyIndexRepository implements Repository, Que
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> findAll(Iterable<Integer> ids, Class<E> clazz)
+	public <E extends Entity> Iterable<E> findAll(Iterable<Object> ids, Class<E> clazz)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public <E extends Entity> E findOne(Integer id, Class<E> clazz)
+	public <E extends Entity> E findOne(Object id, Class<E> clazz)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public <E extends Entity> E findOne(Query q, Class<E> clazz)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public Class<? extends Entity> getEntityClass()
 	{
 		throw new UnsupportedOperationException();
 	}
@@ -161,5 +126,10 @@ public abstract class AbstractOntologyIndexRepository implements Repository, Que
 	public String getName()
 	{
 		return getEntityMetaData().getName();
+	}
+
+	@Override
+	public void close() throws IOException
+	{
 	}
 }

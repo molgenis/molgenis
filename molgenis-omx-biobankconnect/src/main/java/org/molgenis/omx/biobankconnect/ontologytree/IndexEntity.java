@@ -3,7 +3,6 @@ package org.molgenis.omx.biobankconnect.ontologytree;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
@@ -17,15 +16,14 @@ public abstract class IndexEntity extends AbstractEntity
 {
 	private static final long serialVersionUID = 1L;
 	protected final EntityMetaData entityMetaData;
-	protected final Map<Integer, String> identifierMap;
+	// protected final Map<Integer, String> identifierMap;
 	protected final SearchService searchService;
 	protected final Hit hit;
 
-	public IndexEntity(Hit hit, EntityMetaData entityMetaData, Map<Integer, String> identifierMap,
-			SearchService searchService)
+	public IndexEntity(Hit hit, EntityMetaData entityMetaData, SearchService searchService)
 	{
 		this.entityMetaData = entityMetaData;
-		this.identifierMap = identifierMap;
+		// this.identifierMap = identifierMap;
 		this.searchService = searchService;
 		this.hit = hit;
 
@@ -50,9 +48,9 @@ public abstract class IndexEntity extends AbstractEntity
 	}
 
 	@Override
-	public Integer getIdValue()
+	public Object getIdValue()
 	{
-		return hit.getId().hashCode();
+		return hit.getId();
 	}
 
 	@Override

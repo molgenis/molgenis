@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.omx.biobankconnect.ontologyservice.OntologyService;
 import org.molgenis.omx.biobankconnect.utils.OntologyRepository;
 import org.molgenis.omx.biobankconnect.utils.OntologyTermRepository;
 import org.molgenis.search.Hit;
@@ -20,12 +21,15 @@ public class OntologyRepositoryRegistrator implements ApplicationListener<Contex
 {
 	private final DataService dataService;
 	private final SearchService searchService;
+	private final OntologyService ontologyService;
 
 	@Autowired
-	public OntologyRepositoryRegistrator(SearchService searchService, DataService dataService)
+	public OntologyRepositoryRegistrator(SearchService searchService, DataService dataService,
+			OntologyService ontologyService)
 	{
 		this.searchService = searchService;
 		this.dataService = dataService;
+		this.ontologyService = ontologyService;
 	}
 
 	@Override
@@ -39,7 +43,7 @@ public class OntologyRepositoryRegistrator implements ApplicationListener<Contex
 	{
 		// Register ontology info
 		dataService.addRepository(new OntologyIndexRepository(OntologyIndexRepository.DEFAULT_ONTOLOGY_REPO,
-				searchService));
+				ontologyService, searchService));
 
 		for (Hit hit : searchService.search(
 				new SearchRequest(null, new QueryImpl().eq(OntologyRepository.ENTITY_TYPE,
