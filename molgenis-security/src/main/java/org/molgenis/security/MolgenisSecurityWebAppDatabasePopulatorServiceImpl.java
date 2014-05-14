@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl implements
 		MolgenisSecurityWebAppDatabasePopulatorService
 {
+
     private static final String USERNAME_ADMIN = "admin";
 
     @Value("${admin.password:@null}")
@@ -27,14 +28,17 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl implements
     @Value("${anonymous.email:molgenis+anonymous@gmail.com}")
     private String anonymousEmail;
 
-	@Transactional
+    private MolgenisUser userAdmin;
+    private MolgenisUser anonymousUser;
+
+    @Transactional
 	@RunAsSystem
 	public void populateDatabase(DataService dataService, String homeControllerId)
     {
         if (adminPassword == null) throw new RuntimeException(
                 "please configure the admin.password property in your molgenis-server.properties");
 
-        MolgenisUser userAdmin = new MolgenisUser();
+        userAdmin = new MolgenisUser();
         userAdmin.setUsername(USERNAME_ADMIN);
         userAdmin.setPassword(new BCryptPasswordEncoder().encode(adminPassword));
         userAdmin.setEmail(adminEmail);
@@ -42,7 +46,7 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl implements
         userAdmin.setSuperuser(true);
         dataService.add(MolgenisUser.ENTITY_NAME, userAdmin);
 
-        MolgenisUser anonymousUser = new MolgenisUser();
+        anonymousUser = new MolgenisUser();
         anonymousUser.setUsername(SecurityUtils.ANONYMOUS_USERNAME);
         anonymousUser.setPassword(new BCryptPasswordEncoder().encode(SecurityUtils.ANONYMOUS_USERNAME));
         anonymousUser.setEmail(anonymousEmail);
@@ -78,5 +82,14 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl implements
             entityAuthority.setRole(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + entityName.toUpperCase());
             dataService.add(GroupAuthority.ENTITY_NAME, entityAuthority);
         }
+    }
+    @Override
+    public MolgenisUser getAnonymousUser() {
+        return anonymousUser;
+    }
+
+    @Override
+    public MolgenisUser getUserAdmin() {
+        return userAdmin;
     }
 }
