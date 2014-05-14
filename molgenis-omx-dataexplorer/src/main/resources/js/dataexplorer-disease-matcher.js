@@ -220,8 +220,6 @@
 			'attributes': ['diseaseId']
 		});
 		
-		console.log(diseaseInfo);
-		
 		var uniqueDiseases = [];
 		if (diseaseInfo.total > null){
 			$.each(diseaseInfo.items, function(index, disease){
