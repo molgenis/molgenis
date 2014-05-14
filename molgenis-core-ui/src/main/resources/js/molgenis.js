@@ -331,8 +331,7 @@ function createInput(dataType, attrs, val, lbl) {
 			return createBasicInput('text', attrs, val);
 		case 'MREF':
 		case 'XREF':
-			return $('<div class="xrefsearch" />').append(createBasicInput('hidden', attrs, val));
-			return container;
+			return createBasicInput('hidden', attrs, val);
 		case 'FILE':
 		case 'IMAGE':
 			throw 'Unsupported data type: ' + dataType;

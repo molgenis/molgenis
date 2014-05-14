@@ -116,17 +116,16 @@
 				'autofocus': 'autofocus'
 			};
 
-		var element = createInput(attributeMetaData.fieldType, attrs, options.values);
-		createSelect2(element, attributeMetaData, options);
-		
         if (attributeMetaData.fieldType === 'MREF') {
             var dropdown = $('<select class="operator"><option value="OR">OR</option><option value="AND">AND</option></select>');
             dropdown.val(options.operator);
             dropdown.width(70);
-            element.append(dropdown);
+            container.prepend(dropdown);
         }
-        
-		container.append(element);
+		
+		var element = createInput(attributeMetaData.fieldType, attrs, options.values);
+		container.prepend(element);
+		createSelect2(container, attributeMetaData, options);
 	}
 	
 	/**

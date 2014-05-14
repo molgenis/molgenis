@@ -35,7 +35,7 @@
 			items.push('<div class="filter-wizard">');
 			items.push('<form class="form-horizontal">');
 			items.push('<ul class="wizard-steps"></ul>');
-			items.push('<div class="tab-content wizard-page"></div>');
+			items.push('<div class="tab-content wizard-page "></div>');
 			items.push('<ul class="pager wizard">');
 			items.push('<li class="previous"><a href="#">Previous</a></li><li class="next"><a href="#">Next</a></li>');
 			items.push('</ul>');
