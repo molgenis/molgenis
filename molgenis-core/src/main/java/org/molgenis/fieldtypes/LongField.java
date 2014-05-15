@@ -7,8 +7,6 @@ import java.util.List;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.model.MolgenisModelException;
 
-@Deprecated
-//TODO discuss for removal
 public class LongField extends FieldType
 {
 	private static final long serialVersionUID = 1L;
