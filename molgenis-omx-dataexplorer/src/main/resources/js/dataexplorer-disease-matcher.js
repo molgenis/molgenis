@@ -137,51 +137,51 @@
 			$.each(phenotypes.items, function(index, pheno){
 				container.append(pheno.HPODescription + '<br/>');
 			});
+		});
+				
+		// get genes for this disease
+		restApi.getAsync('/api/v1/DiseaseMapping', {
+			'q' : {
+				'q' : [{
+					field : 'diseaseId',
+					operator : 'EQUALS',
+					value : diseaseId
+				}],	
+				'num': 10000
+			},
+			'attributes': ['geneSymbol']
+		}, function(diseaseGenes){
 			
-			// get genes for this disease
-			restApi.getAsync('/api/v1/DiseaseMapping', {
-				'q' : {
-					'q' : [{
-						field : 'diseaseId',
-						operator : 'EQUALS',
-						value : diseaseId
-					}],	
-					'num': 10000
-				},
-				'attributes': ['geneSymbol']
-			}, function(diseaseGenes){
-				
-				// get unique genes for this disease
-				var uniqueGenes = [];
-				$.each(diseaseGenes.items, function(index, disease){
-					if($.inArray(diseaseGenes.geneSymbol, uniqueGenes) === -1){
-						uniqueGenes.push(disease.geneSymbol);
-					}
-				});	
+			// get unique genes for this disease
+			var uniqueGenes = [];
+			$.each(diseaseGenes.items, function(index, disease){
+				if($.inArray(diseaseGenes.geneSymbol, uniqueGenes) === -1){
+					uniqueGenes.push(disease.geneSymbol);
+				}
+			});	
 
-				//build query to retrieve variants associated with this disease from current dataset
-				var queryRules = [];
-				$.each(uniqueGenes, function(index, uniqueGene){
-					if(queryRules.length > 0){
-						queryRules.push({
-							'operator' : 'OR'
-						});
-					}
+			//build query to retrieve variants associated with this disease from current dataset
+			var queryRules = [];
+			$.each(uniqueGenes, function(index, uniqueGene){
+				if(queryRules.length > 0){
 					queryRules.push({
-						'field' : 'geneSymbol',
-						'operator' : 'EQUALS',
-						'value' : uniqueGene
+						'operator' : 'OR'
 					});
+				}
+				queryRules.push({
+					'field' : 'geneSymbol',
+					'operator' : 'EQUALS',
+					'value' : uniqueGene
 				});
-				
-				// show associated variants in info panel
-				$('#vardump').table({
-					'entityMetaData' : getEntity(),
-					'attributes' : getAttributes(),
-					'query' : {
-						'q' : queryRules
-					}
-				});
+			});
+			
+			// show associated variants in info panel
+			$('#vardump').table({
+				'entityMetaData' : getEntity(),
+				'attributes' : getAttributes(),
+				'query' : {
+					'q' : queryRules
+				}
 			});
 		});
 	}
