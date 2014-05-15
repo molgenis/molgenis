@@ -2,7 +2,7 @@ package org.molgenis.elasticsearch.index;
 
 import java.io.IOException;
 
-import org.elasticsearch.ElasticSearchException;
+import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -117,7 +117,7 @@ public class MappingsBuilder
 			}
 			case FILE:
 			case IMAGE:
-				throw new ElasticSearchException("indexing of molgenis field type [" + enumType + "] not supported");
+				throw new ElasticsearchException("indexing of molgenis field type [" + enumType + "] not supported");
 			default:
 				return "string";
 		}
