@@ -26,27 +26,33 @@
 	 * Checks if the current state of Molgenis meets the requirements of this tool. Shows warnings and instructions when it does not.
 	 */
 	function checkToolAvailable(entityUri){
-		var warnings = "";
-		
 		//check if a DiseaseMapping dataset is loaded, show a warning when it is not
-		var check = restApi.get('/api/v1/DiseaseMapping', {'num': 1});
-		if (check.total == 0){
-			warnings += '<div class="alert alert-warning" id="diseasemapping-warning"><strong>DiseaseMapping not loaded!' +
-					'</strong> For this tool to work, a valid DiseaseMapping dataset should be uploaded.</div>';
-		}
-		
+		restApi.getAsync('/api/v1/DiseaseMapping', {'num': 1}, function(data){
+			if (data.total === 0){
+				var warning = '<div class="alert alert-warning" id="diseasemapping-warning"><strong>DiseaseMapping not loaded!' +
+						'</strong> For this tool to work, a valid DiseaseMapping dataset should be uploaded.</div>';
+				if(!$('#vardump #diseasemapping-warning').length){
+					$('#vardump').append(warning);
+				}
+			}else{
+				$(('#vardump #diseasemapping-warning')).remove();
+			}
+		});
+
 		// if an entity is selected, check if it has a 'geneSymbol' column and show a warning if it does not 
 		// TODO determine which columns to check for, and which annotators to propose
-		var check = restApi.get(entityUri + '/meta');		
-		if (check == null || !check.attributes.hasOwnProperty('geneSymbol')){			
-				warnings += '<div class="alert alert-warning" id="gene-symbol-warning">' +
+		restApi.getAsync(entityUri + '/meta', {}, function(data){
+			if (data === null || !data.attributes.hasOwnProperty('geneSymbol')){			
+				var warning = '<div class="alert alert-warning" id="gene-symbol-warning">' +
 						'<strong>No gene symbols found!</strong> For this tool to work, make sure ' + 
-						'your dataset has a \'geneSymbol\' column.</div>';						
-				$('#grab-disease-button').attr('class', 'disabled');
-		}
-		
-		//TODO disable buttons etc. when there are warnings
-		$('#vardump').html(warnings);
+						'your dataset has a \'geneSymbol\' column.</div>';		
+				if(!$('#vardump #gene-symbol-warning').length){
+					$('#vardump').append(warning);
+				}
+			}else{
+				$(('#vardump #gene-symbol-warning')).remove();
+			}
+		});	
 	}
 
 	/**
@@ -59,15 +65,6 @@
 			updateDiseaseList();
 		});
 	});
-	
-	/**
-	 * Gets the diseases based on the current query, populates the disease list and sets the pager.
-	 */
-	function updateDiseaseList(){
-		currentDiseases = getDiseases();
-		populateDiseaseList(currentDiseases.slice(0, diseaseListMaxLength));
-		initPager();
-	}
 	
 	/**
 	 * Initializes a pager for the currently selected diseases.
@@ -118,7 +115,7 @@
 		
 		//get TYPICAL phenotypes for this disease
 		var diseaseId = diseaseLink.attr('id');		
-		var phenotypes =  restApi.get('/api/v1/DiseaseMapping', {
+		restApi.getAsync('/api/v1/DiseaseMapping', {
 			'q' : {
 				'q' : [{
 					field : 'diseaseId',
@@ -132,106 +129,112 @@
 				'num': 10000,
 			},
 			'attributes': ['HPODescription']
-		});
-
-		// show the phenotypes for this disease in the info panel
-		var container = $('#diseasematcher-analysis-right');
-		container.empty();
-		$.each(phenotypes.items, function(index, pheno){
-			container.append(pheno.HPODescription + '<br/>');
-		});
-		
-		// get genes for this disease
-		var diseaseInfo =  restApi.get('/api/v1/DiseaseMapping', {
-			'q' : {
-				'q' : [{
-					field : 'diseaseId',
-					operator : 'EQUALS',
-					value : diseaseId
-				}],	
-				'num': 10000
-			},
-			'attributes': ['geneSymbol']
-		});
-		
-		// get unique genes for this disease
-		var uniqueGenes = [];
-		$.each(diseaseInfo.items, function(index, disease){
-			if($.inArray(disease.geneSymbol, uniqueGenes) === -1){
-				uniqueGenes.push(disease.geneSymbol);
-			}
-		});	
-
-		//build query to retrieve variants associated with this disease from current dataset
-		var queryRules = [];
-		$.each(uniqueGenes, function(index, uniqueGene){
-			if(queryRules.length > 0){
-				queryRules.push({
-					'operator' : 'OR'
-				});
-			}
-			queryRules.push({
-				'field' : 'geneSymbol',
-				'operator' : 'EQUALS',
-				'value' : uniqueGene
+		}, function(phenotypes){
+			
+			// show the phenotypes for this disease in the info panel
+			var container = $('#diseasematcher-analysis-right');
+			container.empty();
+			$.each(phenotypes.items, function(index, pheno){
+				container.append(pheno.HPODescription + '<br/>');
 			});
-		});
-		
-		// show associated variants in info panel
-		$('#vardump').table({
-			'entityMetaData' : getEntity(),
-			'attributes' : getAttributes(),
-			'query' : {
-				'q' : queryRules
-			}
+			
+			// get genes for this disease
+			restApi.getAsync('/api/v1/DiseaseMapping', {
+				'q' : {
+					'q' : [{
+						field : 'diseaseId',
+						operator : 'EQUALS',
+						value : diseaseId
+					}],	
+					'num': 10000
+				},
+				'attributes': ['geneSymbol']
+			}, function(diseaseGenes){
+				
+				// get unique genes for this disease
+				var uniqueGenes = [];
+				$.each(diseaseGenes.items, function(index, disease){
+					if($.inArray(diseaseGenes.geneSymbol, uniqueGenes) === -1){
+						uniqueGenes.push(disease.geneSymbol);
+					}
+				});	
+
+				//build query to retrieve variants associated with this disease from current dataset
+				var queryRules = [];
+				$.each(uniqueGenes, function(index, uniqueGene){
+					if(queryRules.length > 0){
+						queryRules.push({
+							'operator' : 'OR'
+						});
+					}
+					queryRules.push({
+						'field' : 'geneSymbol',
+						'operator' : 'EQUALS',
+						'value' : uniqueGene
+					});
+				});
+				
+				// show associated variants in info panel
+				$('#vardump').table({
+					'entityMetaData' : getEntity(),
+					'attributes' : getAttributes(),
+					'query' : {
+						'q' : queryRules
+					}
+				});
+			});
 		});
 	}
 	
 	/**
-	 * Uses the genes in the currently selected entity to look for diseases. 
-	 * @returns array of diseaseIds, empty array when none found 
+	 * Uses the genes in the currently selected entity to look for diseases and updates the list by
+	 * calling populateDiseaseList() and initPager(). 
 	 */
-	function getDiseases(){
+	function updateDiseaseList(){
 		var entityName = getEntity().name;
-		var entityData = restApi.get('/api/v1/' + entityName, {'attributes': ['geneSymbol'], 'q': currentQuery});	
-		
-		var uniqueGeneSymbols = [];
-		if (entityData.total > 0){
-			$.each(entityData.items, function(index, entity){
-				if($.inArray(entity.geneSymbol, uniqueGeneSymbols) === -1){
-					uniqueGeneSymbols.push(entity.geneSymbol);
-				}
-			});
-		}else{
-			return [];
-		}
-		
-		//TODO change num: 10000 to a sensible solution (get unique)
-		// fetch diseases based on list of genes
-		var diseaseInfo =  restApi.get('/api/v1/DiseaseMapping', {
-			'q' : {
-				'q' : [{
-					field : 'geneSymbol',
-					operator : 'IN',
-					value : uniqueGeneSymbols
-				}],	
-				'num': 10000
-			},
-			'attributes': ['diseaseId']
-		});
-		
-		var uniqueDiseases = [];
-		if (diseaseInfo.total > null){
-			$.each(diseaseInfo.items, function(index, disease){
-				if($.inArray(disease.diseaseId, uniqueDiseases) === -1){
-					uniqueDiseases.push(disease.diseaseId);
-				}
-			});	
+		restApi.getAsync('/api/v1/' + entityName, {'attributes': ['geneSymbol'], 'q': currentQuery}, function(entityData){
+			var uniqueGeneSymbols = [];
+			if (entityData.total > 0){
+				$.each(entityData.items, function(index, entity){
+					if($.inArray(entity.geneSymbol, uniqueGeneSymbols) === -1){
+						uniqueGeneSymbols.push(entity.geneSymbol);
+					}
+				});
+			}else{
+				currentDiseases = [];
+			}
 			
-			return uniqueDiseases;
-		}else{
-			return [];
-		}
+			//TODO change num: 10000 to a sensible solution (get unique)
+			// fetch diseases based on list of genes
+			restApi.getAsync('/api/v1/DiseaseMapping', {
+				'q' : {
+					'q' : [{
+						field : 'geneSymbol',
+						operator : 'IN',
+						value : uniqueGeneSymbols
+					}],	
+					'num': 10000
+				},
+				'attributes': ['diseaseId']
+			}, function(diseaseInfo){	
+				var uniqueDiseases = [];
+				if (diseaseInfo.total > null){
+					$.each(diseaseInfo.items, function(index, disease){
+						if($.inArray(disease.diseaseId, uniqueDiseases) === -1){
+							uniqueDiseases.push(disease.diseaseId);
+						}
+					});	
+					
+					currentDiseases = uniqueDiseases;
+				}else{
+					currentDiseases = [];
+				}	
+
+				// add the diseases (if any) to the disease list and init the pager
+				populateDiseaseList(currentDiseases.slice(0, diseaseListMaxLength));
+				initPager();
+			});
+		});	
 	}
 	
 	/**
