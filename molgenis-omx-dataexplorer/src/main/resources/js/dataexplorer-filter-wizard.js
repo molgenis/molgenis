@@ -2,7 +2,8 @@
 	"use strict";
 	
 	molgenis.dataexplorer = molgenis.dataexplorer || {};
-	var self = molgenis.dataexplorer.wizard = molgenis.dataexplorer.wizard || {};
+	molgenis.dataexplorer.filter = molgenis.dataexplorer.filter || {};
+	var self = molgenis.dataexplorer.filter.wizard = molgenis.dataexplorer.filter.wizard || {};
 
 	var restApi = new molgenis.RestClient();
 	var wizardTitle = "";
@@ -57,7 +58,7 @@
 	
 	function createFilterModalControls(modal) {
 		$('.filter-wizard-apply-btn', modal).click(function() {
-			var filters = molgenis.dataexplorer.createFilters($('form', modal));
+			var filters = molgenis.dataexplorer.filter.createFilters($('form', modal));
 
 			if (filters.length > 0) {
 				$(document).trigger('updateAttributeFilters', {
@@ -99,7 +100,7 @@
 			var paneContainer = $('<div class="well"></div>');
 			$.each(compoundAttribute.attributes, function(i, attribute) {
 				if(attribute.fieldType !== 'COMPOUND') {
-					paneContainer.append(molgenis.dataexplorer.createFilterControls(attribute, attributeFilters[attribute.href], true));
+					paneContainer.append(molgenis.dataexplorer.filter.createFilterControls(attribute, attributeFilters[attribute.href], true));
 				}
 			});
 			pane.append(paneContainer);

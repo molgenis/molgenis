@@ -14,7 +14,8 @@
 	"jquery.bootstrap.wizard.min.js",
 	"bootstrap-datetimepicker.min.js",
 	"dataexplorer-filter.js",
-	"dataexplorer-wizard.js",
+	"dataexplorer-filter-form.js",
+	"dataexplorer-filter-wizard.js",
 	"jquery.fancytree.min.js",
 	"jquery.molgenis.tree.js",
 	"select2.min.js",
@@ -31,7 +32,7 @@
 <@header css js/>
     <script>
     	molgenis.dataexplorer.setShowWizardOnInit(${wizard?string('true', 'false')});
-        molgenis.dataexplorer.wizard.setWizardTitle('${wizardTitle}');
+        molgenis.dataexplorer.filter.wizard.setWizardTitle('${wizardTitle}');
     </script>
         <div class="row-fluid"<#if hideDatasetSelect??> style="display:none"</#if>>
             <div class="row-fluid pull-right form-horizontal">

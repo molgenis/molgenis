@@ -19,25 +19,28 @@
 	function createQuery(lookupAttributeNames, terms, operator) {
 		var q = [];
 		
-		$.each(lookupAttributeNames, function(index, attrName) {
-			if (q.length > 0) {
-				q.push({operator: 'OR'});
-			}
-            if (terms.length > 0) {
-                $.each(terms, function(index) {
-                    if(index > 0){
-                        q.push({operator: 'OR'});
-                    }
-                    q.push({
-                        field: attrName,
-                        operator: operator,
-                        value: terms[index]
-                    });
-                });
-            }
-		});
-			
-		return q;
+		if(lookupAttributeNames.length) {
+			$.each(lookupAttributeNames, function(index, attrName) {
+				if (q.length > 0) {
+					q.push({operator: 'OR'});
+				}
+	            if (terms.length > 0) {
+	                $.each(terms, function(index) {
+	                    if(index > 0){
+	                        q.push({operator: 'OR'});
+	                    }
+	                    q.push({
+	                        field: attrName,
+	                        operator: operator,
+	                        value: terms[index]
+	                    });
+	                });
+	            }
+			});
+			return q;
+		} else{
+			return undefined;
+		}
 	}
 	
 	function getLookupAttributeNames(entityMetaData) {
@@ -70,34 +73,55 @@
 		
 		return items.join('');
 	}
+	
+	function formatSelection(entity, refEntityMetaData) {
+		var result;
+		if(entity instanceof Array && entity.length)
+		{
+			$.each(entity, function( index, value ) {
+				result = value[refEntityMetaData.labelAttribute];
+			});
+		} 
+		else 
+		{
+			result = entity[refEntityMetaData.labelAttribute];	
+		}
+		return result;
+	}
 
 	function createSelect2(container, attributeMetaData, options) {
 		var refEntityMetaData = restApi.get(attributeMetaData.refEntity.href, {expand: ['attributes']});
 		var lookupAttrNames = getLookupAttributeNames(refEntityMetaData);
 		var hiddenInput = container.find('input[type=hidden]');
-	
+		
 		hiddenInput.select2({
 			width: '75%',
 			minimumInputLength: 2,
             multiple: (attributeMetaData.fieldType === 'MREF'),
 			query: function (options){
 				var query = createQuery(lookupAttrNames, [options.term],'LIKE');
-				restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {num: 10, q: query}}, function(data) {
-					options.callback({results: data.items, more: false});
-				});           
+				if(query)
+				{
+					restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {num: 1000, q: query}}, function(data) {
+						options.callback({results: data.items, more: false});
+					});
+				}
             },
 			initSelection: function(element, callback) {
 				//Only called when the input has a value
 				var query = createQuery(lookupAttrNames, element.val().split(','), 'EQUALS');
-				restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {q: query}}, function(data) {
-					callback(data.items);
-				});
+				if(query)
+				{
+					restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {q: query}}, function(data) {
+						callback(data.items);
+					});
+				}
 			},
 			formatResult: function(entity) {
 				return formatResult(entity, refEntityMetaData, lookupAttrNames);
 			},
 			formatSelection: function(entity) {
-				return entity[refEntityMetaData.labelAttribute];
+				return formatSelection(entity, refEntityMetaData);
 			},
 			id: function(entity) {
 				return entity[refEntityMetaData.labelAttribute];
@@ -144,7 +168,6 @@
 	$.fn.xrefsearch = function(options) {
 		var container = this;
 		var attributeUri = options.attributeUri ? options.attributeUri : options.attribute.href;
-		
 		restApi.getAsync(attributeUri, {attributes:['refEntity', 'fieldType'], expand:['refEntity']}, function(attributeMetaData) {
 			    addQueryPartSelect(container, attributeMetaData, options);
 		});
