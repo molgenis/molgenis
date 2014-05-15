@@ -662,7 +662,7 @@ $(function() {
 	});
 
 	// use ajaxPrefilter instead of ajaxStart and ajaxStop
-	// to work around issue http://bugs.jquery.com/ticket/136
+	// to work around issue http://bugs.jquery.com/ticket/13680
 	$.ajaxPrefilter(function( options, _, jqXHR ) {
 	    showSpinner();
 	    jqXHR.always( hideSpinner );
