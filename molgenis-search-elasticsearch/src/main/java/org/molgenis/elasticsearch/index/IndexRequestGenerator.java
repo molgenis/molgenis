@@ -211,7 +211,7 @@ public class IndexRequestGenerator
 					}
 					doc.put("_xrefvalue", xrefAndMrefValues);
 					IndexRequestBuilder request = client.prepareIndex(indexName,
-							MapperTypeSanitizer.sanitizeMapperType(entity.getEntityMetaData().getName()));
+							MapperTypeSanitizer.sanitizeMapperType(repository.getName()));
 
 					request.setSource(doc);
 					bulkRequest.add(request);
