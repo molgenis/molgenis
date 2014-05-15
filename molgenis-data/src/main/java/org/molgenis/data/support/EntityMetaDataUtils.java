@@ -3,7 +3,12 @@ package org.molgenis.data.support;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -183,7 +188,7 @@ public class EntityMetaDataUtils
 
 	public String toXml(Collection<EntityMetaData> entities)
 	{
-		String xml = "<molgenis>\n";
+		StringBuilder strBuilder = new StringBuilder("<molgenis>\n");
 
 		// TODO prevent duplicates
 		Map<String, EntityMetaData> allEntities = new LinkedHashMap<String, EntityMetaData>();
@@ -191,22 +196,25 @@ public class EntityMetaDataUtils
 
 		for (EntityMetaData emd : allEntities.values())
 		{
-			xml += "\t<entity name=\"" + emd.getName() + "\"";
-			if (emd.isAbstract()) xml += " abstract=\"true\"";
-			if (emd.getExtends() != null) xml += " extends=\"" + emd.getExtends().getName() + "\"";
-			xml += ">\n";
+			strBuilder.append("\t<entity name=\"").append(emd.getName()).append("\"");
+			if (emd.isAbstract()) strBuilder.append(" abstract=\"true\"");
+			if (emd.getExtends() != null) strBuilder.append(" extends=\"").append(emd.getExtends().getName())
+					.append("\"");
+			strBuilder.append(">\n");
 			for (AttributeMetaData amd : emd.getAttributes())
 			{
-				xml += "\t\t<field name=\"" + amd.getName() + "\"";
-				if (amd.getDataType() != MolgenisFieldTypes.STRING) xml += " dataType=\"" + amd.getDataType() + "\"";
-				if (amd.getRefEntity() != null) xml += " refEntity=\"" + amd.getRefEntity().getName() + "\"";
-				xml += "/>\n";
+				strBuilder.append("\t\t<field name=\"").append(amd.getName()).append("\"");
+				if (amd.getDataType() != MolgenisFieldTypes.STRING) strBuilder.append(" dataType=\"")
+						.append(amd.getDataType()).append("\"");
+				if (amd.getRefEntity() != null) strBuilder.append(" refEntity=\"").append(amd.getRefEntity().getName())
+						.append("\"");
+				strBuilder.append("/>\n");
 			}
-			xml += "\t</entity\n";
+			strBuilder.append("\t</entity\n");
 		}
 
-		xml += "</molgenis>\n";
-		return xml;
+		strBuilder.append("</molgenis>\n");
+		return strBuilder.toString();
 	}
 
 	private void getEntitiesRecursive(Map<String, EntityMetaData> allEntities, Collection<EntityMetaData> rootEntities)
@@ -495,10 +503,10 @@ public class EntityMetaDataUtils
 							toBeRemoved.add(f);
 						}
 					}
-//					for (DefaultEntityMetaData f : toBeRemoved)
-//					{
-//						//e.removeAttributeMetaData(f);
-//					}
+					// for (DefaultEntityMetaData f : toBeRemoved)
+					// {
+					// //e.removeAttributeMetaData(f);
+					// }
 				}
 				//
 				// // TODO GUESS the type="mref"
