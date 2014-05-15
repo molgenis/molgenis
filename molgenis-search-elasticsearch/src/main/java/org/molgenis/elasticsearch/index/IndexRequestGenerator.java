@@ -17,6 +17,7 @@ import org.elasticsearch.common.base.Joiner;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.elasticsearch.util.MapperTypeSanitizer;
 import org.molgenis.util.Cell;
@@ -105,6 +106,13 @@ public class IndexRequestGenerator
 						Object id = null;
 						Object key = null;
 						Object value = entity.get(attrName);
+						if (value instanceof Entity)
+						{
+							Entity refEntity = (Entity) value;
+							EntityMetaData refEntityMetaData = refEntity.getEntityMetaData();
+							key = refEntity.get(refEntityMetaData.getIdAttribute().getName());
+							value = refEntity.get(refEntityMetaData.getLabelAttribute().getName());
+						}
 						if (value instanceof Cell)
 						{
 							Cell<?> cell = (Cell<?>) value;
@@ -117,26 +125,59 @@ public class IndexRequestGenerator
 							Collection<?> values = (Collection<?>) value;
 							if (!values.isEmpty() && values.iterator().next() instanceof Cell)
 							{
-								List<Integer> mrefIds = null;
-								List<String> mrefKeys = null;
-								for (Iterator<Cell<?>> it = ((Collection<Cell<?>>) values).iterator(); it.hasNext();)
+								Object exampleValue = values.iterator().next();
+								if (exampleValue instanceof Cell)
 								{
-									Cell<?> cell = it.next();
-									Integer cellId = cell.getId();
-									if (cellId != null)
+									List<Integer> mrefIds = null;
+									List<String> mrefKeys = null;
+									for (Iterator<Cell<?>> it = ((Collection<Cell<?>>) values).iterator(); it.hasNext();)
 									{
-										if (mrefIds == null) mrefIds = new ArrayList<Integer>();
-										mrefIds.add(cellId);
+										Cell<?> cell = it.next();
+										Integer cellId = cell.getId();
+										if (cellId != null)
+										{
+											if (mrefIds == null) mrefIds = new ArrayList<Integer>();
+											mrefIds.add(cellId);
+										}
+										String cellKey = cell.getKey();
+										if (cellKey != null)
+										{
+											if (mrefKeys == null) mrefKeys = new ArrayList<String>();
+											mrefKeys.add(cellKey);
+										}
 									}
-									String cellKey = cell.getKey();
-									if (cellKey != null)
-									{
-										if (mrefKeys == null) mrefKeys = new ArrayList<String>();
-										mrefKeys.add(cellKey);
-									}
+									if (mrefIds != null) id = mrefIds;
+									if (mrefKeys != null) key = mrefKeys;
 								}
-								if (mrefIds != null) id = mrefIds;
-								if (mrefKeys != null) key = mrefKeys;
+								else if (exampleValue instanceof Entity)
+								{
+									List<Object> mrefIds = null;
+									List<String> mrefKeys = null;
+									for (Iterator<Entity> it = ((Collection<Entity>) values).iterator(); it.hasNext();)
+									{
+										Entity cell = it.next();
+										Object cellId = cell.getIdValue();
+										if (cellId != null)
+										{
+											if (mrefIds == null) mrefIds = new ArrayList<Object>();
+											mrefIds.add(cellId);
+										}
+										EntityMetaData refEntityMetaData = cell.getEntityMetaData();
+										String cellKey = cell.getString(refEntityMetaData.getIdAttribute().getName());
+										if (cellKey != null)
+										{
+											if (mrefKeys == null) mrefKeys = new ArrayList<String>();
+											mrefKeys.add(cellKey);
+										}
+									}
+									if (mrefIds != null) id = mrefIds;
+									if (mrefKeys != null) key = mrefKeys;
+								}
+								else
+								{
+									throw new RuntimeException("Unsupported value type ["
+											+ exampleValue.getClass().getName() + "]");
+								}
 							}
 							value = Joiner.on(",").join((Collection<?>) value);
 						}

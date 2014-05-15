@@ -577,6 +577,7 @@
 		<module>molgenis-data-jpa</module>
         <module>molgenis-data-mysql</module>
         <module>molgenis-data-rest</module>
+        <module>molgenis-data-elasticsearch</module>
 		<module>molgenis-r</module>
 		<module>molgenis-charts</module>
 		<module>molgenis-annotators</module>

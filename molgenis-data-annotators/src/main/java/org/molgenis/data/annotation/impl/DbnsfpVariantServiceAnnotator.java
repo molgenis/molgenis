@@ -2,9 +2,11 @@ package org.molgenis.data.annotation.impl;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -183,9 +185,8 @@ public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 
 		for (String chromosomeInMap : chromosomeMap.keySet())
 		{
-			FileReader reader = new FileReader(new File(molgenisSettings.getProperty(CHROMOSOME_FILE_LOCATION_PROPERTY)
-					+ chromosomeInMap));
-			BufferedReader bufferedReader = new BufferedReader(reader);
+			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(
+					molgenisSettings.getProperty(CHROMOSOME_FILE_LOCATION_PROPERTY)), Charset.forName("UTF-8")));
 
 			try
 			{

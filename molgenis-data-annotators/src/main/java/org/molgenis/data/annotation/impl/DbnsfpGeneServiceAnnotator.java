@@ -2,8 +2,10 @@ package org.molgenis.data.annotation.impl;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -122,8 +124,8 @@ public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 	{
 		List<Entity> results = new ArrayList<Entity>();
 
-		FileReader reader = new FileReader(new File(molgenisSettings.getProperty(GENE_FILE_LOCATION_PROPERTY)));
-		BufferedReader bufferedReader = new BufferedReader(reader);
+		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(
+				molgenisSettings.getProperty(GENE_FILE_LOCATION_PROPERTY)), Charset.forName("UTF-8")));
 
 		Long position = entity.getLong(POSITION);
 		String chromosome = entity.getString(CHROMOSOME);
