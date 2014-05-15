@@ -3,10 +3,12 @@ package org.molgenis.diseasematcher.data.preprocess;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -66,7 +68,7 @@ public class DiseaseMappingProcessor
 				throw new FileNotFoundException(allFile.getAbsolutePath());
 			}
 
-			File outFile = new File("disease-gene-phenotype.tsv");
+			File outFile = new File("DiseaseMapping.tsv");
 			System.out.println("Writing combined file to: " + outFile.getAbsolutePath());
 
 			dmp.processFiles(typicalFile, allFile, outFile);
@@ -77,7 +79,6 @@ public class DiseaseMappingProcessor
 			System.err.println("Could not find file: " + e.getMessage());
 			dmp.printHelp();
 		}
-
 	}
 
 	/**
@@ -100,8 +101,10 @@ public class DiseaseMappingProcessor
 		try
 		{
 			// instantiate readers and writers
-			csvReaderTypical = new CSVReader(new BufferedReader(new FileReader(typicalFile)), '\t');
-			csvReaderAll = new CSVReader(new BufferedReader(new FileReader(allFile)), '\t');
+			csvReaderTypical = new CSVReader(new BufferedReader(new InputStreamReader(new FileInputStream(typicalFile),
+					Charset.forName("UTF-8"))), '\t');
+			csvReaderAll = new CSVReader(new BufferedReader(new InputStreamReader(new FileInputStream(allFile),
+					Charset.forName("UTF-8"))), '\t');
 
 			csvWriter = new CsvWriter(new BufferedWriter(new FileWriter(outFile)), '\t');
 
