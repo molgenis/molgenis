@@ -41,7 +41,6 @@ import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -176,22 +175,6 @@ public class OntologyServiceController extends MolgenisPluginController
 		}
 		EntityPager pager = new EntityPager(start, num, (long) count, null);
 		return new EntityCollectionResponse(pager, entities, "/match/retrieve");
-	}
-
-	@RequestMapping(value = "/umls/{id}", method = GET, produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public SearchResult retrieveEntityByUMLS(@PathVariable("id")
-	String id)
-	{
-		return ontologyService.searchById("umls", id);
-	}
-
-	@RequestMapping(value = "/{id}", method = GET, produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public SearchResult retrieveEntity(@PathVariable("id")
-	String id)
-	{
-		return ontologyService.searchById("termId", id);
 	}
 
 	@RequestMapping(method = POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)

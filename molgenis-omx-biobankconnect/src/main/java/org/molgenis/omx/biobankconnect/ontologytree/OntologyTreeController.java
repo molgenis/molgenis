@@ -1,9 +1,10 @@
-package org.molgenis.omx.biobankconnect.ontologyservice;
+package org.molgenis.omx.biobankconnect.ontologytree;
 
-import static org.molgenis.omx.biobankconnect.ontologyservice.OntologyTreeController.URI;
+import static org.molgenis.omx.biobankconnect.ontologytree.OntologyTreeController.URI;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.omx.biobankconnect.ontologyservice.OntologyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

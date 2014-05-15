@@ -47,7 +47,9 @@ public class OntologyIndexRepository extends AbstractOntologyIndexRepository
 	@Override
 	public Entity findOne(Query q)
 	{
-		Hit hit = findOneInternal(q);
+		if (q.getRules().size() > 0) q.and();
+		q.eq(OntologyRepository.ENTITY_TYPE, OntologyRepository.TYPE_ONTOLOGY);
+		Hit hit = findOneInternal(null, q);
 		if (hit != null) return new OntologyIndexEntity(hit, getEntityMetaData(), ontologySerivce, searchService);
 		return null;
 	}

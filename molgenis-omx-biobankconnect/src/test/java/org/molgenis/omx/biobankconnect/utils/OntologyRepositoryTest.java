@@ -43,8 +43,8 @@ public class OntologyRepositoryTest
 
 		assertTrue(it.hasNext());
 		Entity entity = it.next();
-		assertEquals(entity.get("url"), "http://harmonization/test/owl/1.0.0");
-		assertEquals(entity.get("entity_type"), "indexedOntology");
-		assertEquals(entity.get("ontologyLabel"), "ontology-test");
+		assertEquals(entity.get(OntologyRepository.ONTOLOGY_URL), "http://harmonization/test/owl/1.0.0");
+		assertEquals(entity.get(OntologyRepository.ENTITY_TYPE), "indexedOntology");
+		assertEquals(entity.get(OntologyRepository.ONTOLOGY_LABEL), "ontology-test");
 	}
 }

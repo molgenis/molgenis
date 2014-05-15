@@ -28,16 +28,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class OntologyService
 {
-	@Autowired
-	private SearchService searchService;
+	private final SearchService searchService;
 	private static final String COMBINED_SCORE = "combinedScore";
 	private static final String SCORE = "score";
+
+	@Autowired
+	public OntologyService(SearchService searchService)
+	{
+		if (searchService == null) throw new IllegalArgumentException("SearchService is null");
+		this.searchService = searchService;
+	}
 
 	public Hit getOntologyByUrl(String ontologyUrl)
 	{
 		QueryImpl q = new QueryImpl();
 		q.pageSize(1000);
-		q.addRule(new QueryRule(OntologyRepository.ENTITY_TYPE, Operator.EQUALS, "indexedOntology"));
+		q.addRule(new QueryRule(OntologyRepository.ENTITY_TYPE, Operator.EQUALS, OntologyRepository.TYPE_ONTOLOGY));
 		q.addRule(new QueryRule(Operator.AND));
 		q.addRule(new QueryRule(OntologyRepository.ONTOLOGY_URL, Operator.EQUALS, ontologyUrl));
 		SearchRequest searchRequest = new SearchRequest(createOntologyDocumentType(ontologyUrl), q, null);
@@ -57,13 +63,6 @@ public class OntologyService
 			if (hit.getColumnValueMap().get(OntologyTermRepository.NODE_PATH).toString().equals(nodePath)) return hit;
 		}
 		return new Hit(null, documentType, Collections.<String, Object> emptyMap());
-	}
-
-	public List<Hit> getOntologyTermInfo(String ontologyUrl, String ontologyTermUrl)
-	{
-		Query q = new QueryImpl().eq(OntologyTermRepository.ONTOLOGY_TERM_IRI, ontologyTermUrl).pageSize(5000);
-		return searchService.search(new SearchRequest(createOntologyTermDocumentType(ontologyUrl), q, null))
-				.getSearchHits();
 	}
 
 	public List<Hit> getChildren(String ontologyUrl, String parentOntologyTermUrl, String parentNodePath)
@@ -87,11 +86,8 @@ public class OntologyService
 
 	public List<Hit> getRootOntologyTerms(String ontologyUrl)
 	{
-		QueryImpl q = new QueryImpl();
-		q.pageSize(10000);
-		q.addRule(new QueryRule(OntologyTermRepository.ROOT, Operator.EQUALS, true));
-		SearchRequest searchRequest = new SearchRequest(OntologyService.createOntologyTermDocumentType(ontologyUrl), q,
-				null);
+		SearchRequest searchRequest = new SearchRequest(OntologyService.createOntologyTermDocumentType(ontologyUrl),
+				new QueryImpl().pageSize(10000).eq(OntologyTermRepository.ROOT, true), null);
 		List<Hit> listOfHits = new ArrayList<Hit>();
 		Set<String> processedOntologyTerms = new HashSet<String>();
 		for (Hit hit : searchService.search(searchRequest))
@@ -111,27 +107,17 @@ public class OntologyService
 		List<Ontology> ontologies = new ArrayList<Ontology>();
 		QueryImpl q = new QueryImpl();
 		q.pageSize(1000);
-		q.addRule(new QueryRule(OntologyRepository.ENTITY_TYPE, Operator.EQUALS, "indexedOntology"));
+		q.addRule(new QueryRule(OntologyRepository.ENTITY_TYPE, Operator.EQUALS, OntologyRepository.TYPE_ONTOLOGY));
 		SearchRequest searchRequest = new SearchRequest(null, q, null);
 		for (Hit hit : searchService.search(searchRequest).getSearchHits())
 		{
 			Ontology ontology = new Ontology();
 			ontology.setIdentifier(hit.getColumnValueMap().get(OntologyRepository.ONTOLOGY_URL).toString());
+			ontology.setOntologyURI(hit.getColumnValueMap().get(OntologyRepository.ONTOLOGY_URL).toString());
 			ontology.setName(hit.getColumnValueMap().get(OntologyRepository.ONTOLOGY_LABEL).toString());
 			ontologies.add(ontology);
 		}
 		return ontologies;
-	}
-
-	public SearchResult searchById(String fieldId, String valueId)
-	{
-		QueryImpl q = new QueryImpl();
-		q.pageSize(100);
-		q.addRule(new QueryRule(OntologyTermRepository.ENTITY_TYPE, Operator.EQUALS, "ontologyTerm"));
-		q.addRule(new QueryRule(Operator.AND));
-		q.addRule(new QueryRule(fieldId, Operator.EQUALS, valueId));
-		SearchRequest searchRequest = new SearchRequest(null, q, null);
-		return searchService.search(searchRequest);
 	}
 
 	public SearchResult search(String ontologyUrl, String queryString)

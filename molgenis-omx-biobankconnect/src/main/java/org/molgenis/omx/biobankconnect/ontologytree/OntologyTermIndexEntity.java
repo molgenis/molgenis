@@ -4,12 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.biobankconnect.ontologyservice.OntologyService;
 import org.molgenis.omx.biobankconnect.utils.OntologyTermRepository;
+import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
@@ -29,14 +30,15 @@ public class OntologyTermIndexEntity extends IndexEntity
 	{
 		Map<String, Object> columnValueMap = hit.getColumnValueMap();
 
-		if (attributeName.equalsIgnoreCase("id"))
+		if (attributeName.equalsIgnoreCase(Characteristic.ID))
 		{
 			return hit.getId();
 		}
 
-		if (attributeName.equalsIgnoreCase("fieldType"))
+		if (attributeName.equalsIgnoreCase(OntologyTermIndexRepository.FIELDTYPE))
 		{
-			return Boolean.parseBoolean(columnValueMap.get(OntologyTermRepository.LAST).toString()) ? FieldTypeEnum.STRING : FieldTypeEnum.COMPOUND;
+			return Boolean.parseBoolean(columnValueMap.get(OntologyTermRepository.LAST).toString()) ? MolgenisFieldTypes.STRING
+					.toString().toUpperCase() : MolgenisFieldTypes.COMPOUND.toString().toUpperCase();
 		}
 
 		if (attributeName.equalsIgnoreCase("attributes"))

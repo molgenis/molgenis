@@ -7,7 +7,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Countable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -86,20 +85,20 @@ public class OntologyTermRepository extends AbstractRepository implements Counta
 	public EntityMetaData getEntityMetaData()
 	{
 		DefaultEntityMetaData metaData = new DefaultEntityMetaData(name, MapEntity.class);
-		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ID, FieldTypeEnum.STRING));
-		metaData.addAttributeMetaData(new DefaultAttributeMetaData(NODE_PATH, FieldTypeEnum.STRING));
-		metaData.addAttributeMetaData(new DefaultAttributeMetaData(PARENT_NODE_PATH, FieldTypeEnum.STRING));
-		metaData.addAttributeMetaData(new DefaultAttributeMetaData(PARENT_ONTOLOGY_TERM_URL, FieldTypeEnum.STRING));
-		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ROOT, FieldTypeEnum.STRING));
-		metaData.addAttributeMetaData(new DefaultAttributeMetaData(LAST, FieldTypeEnum.STRING));
-		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_IRI, FieldTypeEnum.STRING));
-		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_TERM, FieldTypeEnum.STRING));
-		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_TERM_DEFINITION, FieldTypeEnum.STRING));
-		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_TERM_IRI, FieldTypeEnum.STRING));
-		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_LABEL, FieldTypeEnum.STRING));
-		metaData.addAttributeMetaData(new DefaultAttributeMetaData(SYNONYMS, FieldTypeEnum.STRING));
-		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ENTITY_TYPE, FieldTypeEnum.STRING));
-		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ALTERNATIVE_DEFINITION, FieldTypeEnum.STRING));
+		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ID));
+		metaData.addAttributeMetaData(new DefaultAttributeMetaData(NODE_PATH));
+		metaData.addAttributeMetaData(new DefaultAttributeMetaData(PARENT_NODE_PATH));
+		metaData.addAttributeMetaData(new DefaultAttributeMetaData(PARENT_ONTOLOGY_TERM_URL));
+		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ROOT));
+		metaData.addAttributeMetaData(new DefaultAttributeMetaData(LAST));
+		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_IRI));
+		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_TERM));
+		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_TERM_DEFINITION));
+		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_TERM_IRI));
+		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_LABEL));
+		metaData.addAttributeMetaData(new DefaultAttributeMetaData(SYNONYMS));
+		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ENTITY_TYPE));
+		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ALTERNATIVE_DEFINITION));
 
 		return metaData;
 	}

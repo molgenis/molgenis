@@ -7,6 +7,8 @@ import org.molgenis.omx.biobankconnect.ontologymatcher.AsyncOntologyMatcher;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcher;
 import org.molgenis.omx.biobankconnect.ontologyservice.OntologyService;
 import org.molgenis.omx.biobankconnect.wizard.CurrentUserStatus;
+import org.molgenis.search.SearchService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
@@ -16,6 +18,9 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableAsync
 public class BiobankConnectConfig
 {
+	@Autowired
+	private SearchService searchService;
+
 	/**
 	 * Get a reference to a HarmonizationIndexer.
 	 * 
@@ -43,7 +48,7 @@ public class BiobankConnectConfig
 	@Bean
 	public OntologyService ontologyService()
 	{
-		return new OntologyService();
+		return new OntologyService(searchService);
 	}
 
 	@Bean

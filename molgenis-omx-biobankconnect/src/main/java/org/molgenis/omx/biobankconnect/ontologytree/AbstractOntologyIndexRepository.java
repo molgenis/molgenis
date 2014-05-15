@@ -14,6 +14,7 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.biobankconnect.utils.OntologyRepository;
 import org.molgenis.omx.biobankconnect.utils.OntologyTermRepository;
+import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchService;
@@ -22,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public abstract class AbstractOntologyIndexRepository implements Repository, Queryable
 {
 	protected DefaultEntityMetaData entityMetaData = null;
+	public final static String FIELDTYPE = "fieldType";
 	protected final SearchService searchService;
 	protected final String entityName;
 
@@ -38,9 +40,9 @@ public abstract class AbstractOntologyIndexRepository implements Repository, Que
 		return findAll(new QueryImpl()).iterator();
 	}
 
-	public Hit findOneInternal(Query q)
+	public Hit findOneInternal(String documentType, Query q)
 	{
-		for (Hit hit : searchService.search(new SearchRequest(null, q, null)).getSearchHits())
+		for (Hit hit : searchService.search(new SearchRequest(documentType, q, null)).getSearchHits())
 		{
 			return hit;
 		}
@@ -53,7 +55,7 @@ public abstract class AbstractOntologyIndexRepository implements Repository, Que
 		if (entityMetaData == null)
 		{
 			entityMetaData = new DefaultEntityMetaData(entityName);
-			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData("ID"));
+			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(Characteristic.ID));
 			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermRepository.ONTOLOGY_TERM_IRI,
 					FieldTypeEnum.HYPERLINK));
 			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermRepository.ONTOLOGY_TERM));
@@ -61,7 +63,7 @@ public abstract class AbstractOntologyIndexRepository implements Repository, Que
 			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermRepository.ENTITY_TYPE));
 			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermRepository.NODE_PATH));
 			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermRepository.PARENT_NODE_PATH));
-			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData("fieldType", FieldTypeEnum.ENUM));
+			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(FIELDTYPE));
 			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermRepository.LAST,
 					FieldTypeEnum.BOOL));
 			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermRepository.ROOT,

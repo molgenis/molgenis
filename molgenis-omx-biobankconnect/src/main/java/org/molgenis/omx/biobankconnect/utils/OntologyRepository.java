@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Countable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -60,9 +59,9 @@ public class OntologyRepository extends AbstractRepository implements Countable
 	public EntityMetaData getEntityMetaData()
 	{
 		DefaultEntityMetaData metaData = new DefaultEntityMetaData(name, MapEntity.class);
-		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_URL, FieldTypeEnum.STRING));
-		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_LABEL, FieldTypeEnum.STRING));
-		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ENTITY_TYPE, FieldTypeEnum.STRING));
+		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_URL));
+		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_LABEL));
+		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ENTITY_TYPE));
 
 		return metaData;
 	}

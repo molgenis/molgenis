@@ -3,12 +3,13 @@ package org.molgenis.omx.biobankconnect.ontologytree;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.omx.biobankconnect.ontologyservice.OntologyService;
 import org.molgenis.omx.biobankconnect.utils.OntologyTermRepository;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
-import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -33,7 +34,9 @@ public class OntologyTermIndexRepository extends AbstractOntologyIndexRepository
 		List<Entity> entities = new ArrayList<Entity>();
 		if (q.getRules().size() > 0) q.and();
 		q.eq(OntologyTermRepository.ENTITY_TYPE, OntologyTermRepository.TYPE_ONTOLOGYTERM);
-		for (Hit hit : searchService.search(new SearchRequest(null, q, null)).getSearchHits())
+		for (Hit hit : searchService.search(
+				new SearchRequest(OntologyService.createOntologyTermDocumentType(ontologyUrl), q, null))
+				.getSearchHits())
 		{
 			entities.add(new OntologyTermIndexEntity(hit, getEntityMetaData(), searchService));
 		}
@@ -43,7 +46,9 @@ public class OntologyTermIndexRepository extends AbstractOntologyIndexRepository
 	@Override
 	public Entity findOne(Query q)
 	{
-		Hit hit = findOneInternal(q);
+		if (q.getRules().size() > 0) q.and();
+		q.eq(OntologyTermRepository.ENTITY_TYPE, OntologyTermRepository.TYPE_ONTOLOGYTERM);
+		Hit hit = findOneInternal(OntologyService.createOntologyTermDocumentType(ontologyUrl), q);
 		if (hit != null) return new OntologyTermIndexEntity(hit, getEntityMetaData(), searchService);
 		return null;
 	}
@@ -51,7 +56,7 @@ public class OntologyTermIndexRepository extends AbstractOntologyIndexRepository
 	@Override
 	public Entity findOne(Object id)
 	{
-		Hit hit = searchService.searchById(null, id.toString());
+		Hit hit = searchService.searchById(OntologyService.createOntologyTermDocumentType(ontologyUrl), id.toString());
 		if (hit != null) return new OntologyTermIndexEntity(hit, getEntityMetaData(), searchService);
 		return null;
 	}
@@ -59,10 +64,7 @@ public class OntologyTermIndexRepository extends AbstractOntologyIndexRepository
 	@Override
 	public long count(Query q)
 	{
-		String documentType = "ontologyTerm-" + ontologyUrl;
-		SearchResult result = searchService.search(new SearchRequest(documentType, q, null));
-
-		return result.getTotalHitCount();
+		return Iterables.size(findAll(q));
 	}
 
 	@Override
