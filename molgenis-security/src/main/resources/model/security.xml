@@ -29,6 +29,7 @@
 		<entity name="MolgenisGroup" system="true" xref_lookup="name">
 			<field name="id" type="autoid" hidden="true"/>
 			<field name="name" type="string"/>
+			<field name="active" type="bool" default="true" description="Boolean to indicate whether this group is in use."/>
 		</entity>
 		<entity name="MolgenisGroupMember" system="true">
 			<field name="id" type="autoid" hidden="true"/>	
