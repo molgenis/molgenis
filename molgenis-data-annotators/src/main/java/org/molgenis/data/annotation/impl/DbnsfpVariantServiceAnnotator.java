@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
@@ -183,14 +184,14 @@ public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 			chromosomeMap.put(chromosome, listOfTriplets);
 		}
 
-		for (String chromosomeInMap : chromosomeMap.keySet())
+		for (Entry<String, List<String[]>> entry : chromosomeMap.entrySet())
 		{
 			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(
 					molgenisSettings.getProperty(CHROMOSOME_FILE_LOCATION_PROPERTY)), Charset.forName("UTF-8")));
 
 			try
 			{
-				List<String[]> charArraysForThisChromosome = chromosomeMap.get(chromosomeInMap);
+				List<String[]> charArraysForThisChromosome = entry.getValue();
 
 				String line = "";
 
@@ -230,7 +231,7 @@ public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 									}
 								}
 
-								resultMap.put(CHROMOSOME, chromosomeInMap);
+								resultMap.put(CHROMOSOME, entry.getKey());
 								resultMap.put(POSITION, position);
 								resultMap.put(REFERENCE, reference);
 								resultMap.put(ALTERNATIVE, alternative);
