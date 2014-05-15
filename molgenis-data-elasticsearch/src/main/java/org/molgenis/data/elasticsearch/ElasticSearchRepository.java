@@ -21,6 +21,9 @@ import org.molgenis.elasticsearch.ElasticSearchService;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 
+/**
+ * Repository that wraps an existing repository and retrieves count/aggregate information from a Elasticsearch index
+ */
 public class ElasticSearchRepository implements CrudRepository
 {
 	public static final String BASE_URL = "elasticsearch://";
