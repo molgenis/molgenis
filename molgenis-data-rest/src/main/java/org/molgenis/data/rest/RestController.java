@@ -35,7 +35,6 @@ import javax.validation.Valid;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
@@ -55,16 +54,11 @@ import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.framework.db.EntityNotFoundException;
 import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.security.core.MolgenisPermissionService;
-import org.molgenis.security.core.Permission;
 import org.molgenis.security.token.TokenExtractor;
 import org.molgenis.security.token.TokenService;
 import org.molgenis.security.token.UnknownTokenException;
-import org.molgenis.ui.form.EntityForm;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -76,9 +70,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.validation.DataBinder;
-import org.springframework.web.bind.ServletRequestParameterPropertyValues;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -113,12 +104,10 @@ public class RestController
 	private final DataService dataService;
 	private final TokenService tokenService;
 	private final AuthenticationManager authenticationManager;
-	private final String ENTITY_FORM_MODEL_ATTRIBUTE = "form";
-	private final MolgenisPermissionService molgenisPermissionService;
 
 	@Autowired
 	public RestController(DataService dataService, TokenService tokenService,
-			AuthenticationManager authenticationManager, MolgenisPermissionService molgenisPermissionService)
+			AuthenticationManager authenticationManager)
 	{
 		if (dataService == null) throw new IllegalArgumentException("dataService is null");
 		if (tokenService == null) throw new IllegalArgumentException("tokenService is null");
@@ -126,7 +115,6 @@ public class RestController
 		this.dataService = dataService;
 		this.tokenService = tokenService;
 		this.authenticationManager = authenticationManager;
-		this.molgenisPermissionService = molgenisPermissionService;
 	}
 
 	/**
@@ -285,7 +273,6 @@ public class RestController
 				}
 				return entityHasAttributeMap;
 			case MREF:
-				@SuppressWarnings("unchecked")
 				List<Entity> mrefEntities = new ArrayList<Entity>();
 				for (Entity e : entity.getEntities((attr.getName())))
 					mrefEntities.add(e);
@@ -499,39 +486,6 @@ public class RestController
 		delete(entityName, id);
 	}
 
-	@RequestMapping(value = "/{entityName}/create", method = GET)
-	public String createForm(@PathVariable("entityName") String entityName, Model model)
-	{
-
-		Repository repo = dataService.getRepositoryByEntityName(entityName);
-		Entity entity = null;
-		if (repo.getEntityMetaData().getEntityClass() != Entity.class) entity = BeanUtils.instantiateClass(repo
-				.getEntityMetaData().getEntityClass());
-		else entity = new MapEntity();
-		EntityMetaData entityMeta = repo.getEntityMetaData();
-		model.addAttribute(ENTITY_FORM_MODEL_ATTRIBUTE, new EntityForm(entityMeta, true, entity));
-
-		model.addAttribute("entity", entity);
-
-		return "view-entity-create";
-	}
-
-	@RequestMapping(value = "/{entityName}/{id}/edit", method = GET)
-	public String editForm(@PathVariable("entityName") String entityName, @PathVariable Object id, Model model)
-	{
-		Entity entity = dataService.findOne(entityName, id);
-
-		// dataService.getRepositoryByEntityName(entityName);
-		EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
-
-		boolean hasWritePermission = molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITE);
-		model.addAttribute(ENTITY_FORM_MODEL_ATTRIBUTE, new EntityForm(entityMetaData, entity, id, hasWritePermission));
-
-		model.addAttribute("entity", entity);
-
-		return "view-entity-edit";
-	}
-
 	/**
 	 * Login to the api.
 	 * 
@@ -572,7 +526,7 @@ public class RestController
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
 		// Generate a new token for the user
-		String token = tokenService.generateAndStoreToken(authentication.getName());
+		String token = tokenService.generateAndStoreToken(authentication.getName(), "Rest api login");
 
 		MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME,
 				new QueryImpl().eq(MolgenisUser.USERNAME, authentication.getName()), MolgenisUser.class);
@@ -831,8 +785,7 @@ public class RestController
 			// filter fields
 			if (attributesSet != null && !attributesSet.contains(attr.getName().toLowerCase())) continue;
 
-			// TODO remove __Type from jpa entities
-			if (attr.isVisible() && !attr.getName().equals("__Type"))
+			if (attr.isVisible() && !attr.getName().equals("__Type"))// TODO remove __Type from jpa entities
 			{
 				String attrName = attr.getName();
 				FieldTypeEnum attrType = attr.getDataType().getEnumType();
