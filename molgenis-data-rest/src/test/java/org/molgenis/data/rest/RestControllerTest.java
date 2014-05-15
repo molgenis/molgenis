@@ -423,11 +423,12 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 			return new QueryResolver(dataService());
 		}
 
-		@Bean
-		public RestController restController()
-		{
-			return new RestController(dataService(), tokenService(), authenticationManager());
-		}
+//		TODO: add molgenisPermissionService to test
+//		@Bean
+//		public RestController restController()
+//		{
+//			return new RestController(dataService(), tokenService(), authenticationManager());
+//		}
 	}
 
 }
