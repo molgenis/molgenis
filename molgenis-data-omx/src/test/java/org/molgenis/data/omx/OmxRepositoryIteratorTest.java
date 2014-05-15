@@ -39,6 +39,8 @@ public class OmxRepositoryIteratorTest
 		SearchService searchServiceMock = mock(SearchService.class);
 		String dataSetIdentifier = "identifier";
 		DataService dataService = mock(DataService.class);
+		EntityMetaData entityMetaData = mock(EntityMetaData.class);
+		when(dataService.getEntityMetaData(dataSetIdentifier)).thenReturn(entityMetaData);
 		Query q = new QueryImpl().pageSize(1);
 		Set<String> attributeNames = new HashSet<String>(Arrays.asList("attr1", "bogus"));
 
@@ -66,6 +68,8 @@ public class OmxRepositoryIteratorTest
 		SearchService searchServiceMock = mock(SearchService.class);
 		String dataSetIdentifier = "identifier";
 		DataService dataService = mock(DataService.class);
+		EntityMetaData entityMetaData = mock(EntityMetaData.class);
+		when(dataService.getEntityMetaData(dataSetIdentifier)).thenReturn(entityMetaData);
 		Query q = new QueryImpl().pageSize(0);
 		Query qBatch = new QueryImpl(q).pageSize(OmxRepositoryIterator.BATCH_SIZE);
 		Set<String> attributeNames = new HashSet<String>(Arrays.asList("attr1"));

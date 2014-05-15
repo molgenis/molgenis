@@ -2,9 +2,11 @@ package org.molgenis.data.csv.typed;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.Iterator;
 
 import org.apache.commons.io.IOUtils;
@@ -90,8 +92,9 @@ public class TypedCsvRepository<T extends Entity> extends AbstractRepository
 		{
 			return new CloseableIterator<T>()
 			{
-				private final CSVReader csvReader = new CSVReader(new BufferedReader(new FileReader(file)),
-						separatorChar, CSVParser.DEFAULT_QUOTE_CHARACTER, skipLines);
+				private final CSVReader csvReader = new CSVReader(new BufferedReader(new InputStreamReader(
+						new FileInputStream(file), Charset.forName("UTF-8"))), separatorChar,
+						CSVParser.DEFAULT_QUOTE_CHARACTER, skipLines);
 				private T next;
 				private boolean getNext = true;
 				private int lineNumber = 0;
