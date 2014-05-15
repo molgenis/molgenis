@@ -1,6 +1,5 @@
 package org.molgenis.elasticsearch.request;
 
-import static org.molgenis.data.QueryRule.Operator.AND;
 import static org.molgenis.data.QueryRule.Operator.EQUALS;
 import static org.molgenis.data.QueryRule.Operator.GREATER;
 import static org.molgenis.data.QueryRule.Operator.GREATER_EQUAL;
@@ -65,10 +64,9 @@ public class LuceneQueryStringBuilder
 				sb.append(buildQueryString(queryRule.getNestedRules()));
 				sb.append(" )");
 			}
-
-			if (queryRule.getOperator() == OR || queryRule.getOperator() == AND)
+			else if (queryRule.getOperator() == OR)
 			{
-				previousRule = queryRule;
+				sb.append(" " + queryRule.getOperator() + " ");
 			}
 			else if (queryRule.getOperator() == EQUALS || queryRule.getOperator() == NOT
 					|| queryRule.getOperator() == LIKE || queryRule.getOperator() == LESS
