@@ -178,9 +178,10 @@ public class KeggServiceAnnotator extends LocusAnnotator
 	{
 		Map<String, ArrayList<String>> res = new HashMap<String, ArrayList<String>>();
 
-		for (String pathwayId : pathwayGenes.keySet())
+		for (Map.Entry<String, ArrayList<String>> entry : pathwayGenes.entrySet())
 		{
-			for (String geneId : pathwayGenes.get(pathwayId))
+			String pathwayId = entry.getKey();
+			for (String geneId : entry.getValue())
 			{
 				if (res.containsKey(geneId))
 				{
@@ -251,8 +252,9 @@ public class KeggServiceAnnotator extends LocusAnnotator
 
 		Map<String, HGNCLocations> hgncLocs = hgncLocationsProvider.getHgncLocations();
 
-		for (String keggId : keggGenes.keySet())
+		for (Map.Entry<String, KeggGene> entry : keggGenes.entrySet())
 		{
+			String keggId = entry.getKey();
 			KeggGene k = keggGenes.get(keggId);
 
 			for (String symbol : k.getSymbols())

@@ -126,7 +126,8 @@ public class SampleConverter
 			}
 			mkmetadataExcelFile(listOfEntity);
 			// Write categories to file
-			PrintWriter printCategories = new PrintWriter(new File(OUTPUTDIR + "/categories.txt"));
+			PrintWriter printCategories = new PrintWriter(new OutputStreamWriter(new FileOutputStream(new File(
+					OUTPUTDIR + "/categories.txt")), Charset.forName("UTF-8")));
 			for (Entry<String, HashSet<String>> entry : hashMapCategories.entrySet())
 			{
 				if (entry.getValue().size() > 1 && entry.getValue().size() < 100)

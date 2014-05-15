@@ -5,10 +5,15 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Map.Entry;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.*;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.DatabaseAction;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DefaultAttributeMetaData;
@@ -37,7 +42,8 @@ public class EmxImportServiceImpl implements EmxImporterService
 		System.out.println("MEntityImportServiceImpl created with coll=" + coll);
 	}
 
-    @Transactional(rollbackFor = IOException.class)
+	@Override
+	@Transactional(rollbackFor = IOException.class)
 	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction) throws IOException
 	{
 		if (store == null) throw new RuntimeException("store was not set");
@@ -48,8 +54,9 @@ public class EmxImportServiceImpl implements EmxImporterService
 
 		Map<String, DefaultEntityMetaData> metadata = getEntityMetaData(source);
 
-		for (String name : metadata.keySet())
+		for (Entry<String, DefaultEntityMetaData> entry : metadata.entrySet())
 		{
+			String name = entry.getKey();
 			if (!"entities".equals(name) && !"attributes".equals(name))
 			{
 				Repository from = source.getRepositoryByEntityName(name);
@@ -68,7 +75,7 @@ public class EmxImportServiceImpl implements EmxImporterService
 					store.add(em);
 
 					to = (MysqlRepository) store.getRepositoryByEntityName(name);
-                }
+				}
 
 				// import
 
@@ -79,6 +86,7 @@ public class EmxImportServiceImpl implements EmxImporterService
 		return report;
 	}
 
+	@Override
 	public EntitiesValidationReport validateImport(RepositoryCollection source)
 	{
 		EntitiesValidationReportImpl report = new EntitiesValidationReportImpl();
@@ -192,7 +200,7 @@ public class EmxImportServiceImpl implements EmxImporterService
 			i++;
 			if (a.get("refEntity") != null)
 			{
-				DefaultEntityMetaData em = (DefaultEntityMetaData) entities.get(a.getString("entity"));
+				DefaultEntityMetaData em = entities.get(a.getString("entity"));
 				DefaultAttributeMetaData am = (DefaultAttributeMetaData) em.getAttribute(a.getString("name"));
 
 				if (entities.get(a.getString("refEntity")) == null)
