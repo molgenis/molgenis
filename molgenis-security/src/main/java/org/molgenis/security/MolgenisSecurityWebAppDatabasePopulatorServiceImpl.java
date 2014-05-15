@@ -44,26 +44,10 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl implements
 		userAdmin.setEmail(adminEmail);
 		userAdmin.setActive(true);
 		userAdmin.setSuperuser(true);
-		dataService.add(MolgenisUser.ENTITY_NAME, userAdmin);
-
-		anonymousUser = new MolgenisUser();
-		anonymousUser.setUsername(SecurityUtils.ANONYMOUS_USERNAME);
-		anonymousUser.setPassword(new BCryptPasswordEncoder().encode(SecurityUtils.ANONYMOUS_USERNAME));
-		anonymousUser.setEmail(anonymousEmail);
-		anonymousUser.setActive(true);
-		anonymousUser.setSuperuser(false);
-		dataService.add(MolgenisUser.ENTITY_NAME, anonymousUser);
-
-		MolgenisUser userAdmin = new MolgenisUser();
-		userAdmin.setUsername(USERNAME_ADMIN);
-		userAdmin.setPassword(new BCryptPasswordEncoder().encode(adminPassword));
-		userAdmin.setEmail(adminEmail);
-		userAdmin.setActive(true);
-		userAdmin.setSuperuser(true);
 		userAdmin.setChangePassword(false);
 		dataService.add(MolgenisUser.ENTITY_NAME, userAdmin);
 
-		MolgenisUser anonymousUser = new MolgenisUser();
+		anonymousUser = new MolgenisUser();
 		anonymousUser.setUsername(SecurityUtils.ANONYMOUS_USERNAME);
 		anonymousUser.setPassword(new BCryptPasswordEncoder().encode(SecurityUtils.ANONYMOUS_USERNAME));
 		anonymousUser.setEmail(anonymousEmail);

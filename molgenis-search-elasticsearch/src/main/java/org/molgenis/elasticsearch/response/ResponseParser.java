@@ -15,7 +15,7 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.Aggregations;
-import org.elasticsearch.search.aggregations.bucket.terms.StringTerms;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.search.Hit;
@@ -94,14 +94,14 @@ public class ResponseParser
 			}
 
 			Aggregation aggregation = aggregations.iterator().next();
-			if (!(aggregation instanceof StringTerms))
+			if (!(aggregation instanceof Terms))
 			{
 				throw new RuntimeException("Aggregation of type [" + aggregation.getClass().getName()
 						+ "] not supported");
 			}
-			StringTerms stringTerms = (StringTerms) aggregation;
+			Terms terms = (Terms) aggregation;
 
-			Collection<Bucket> buckets = stringTerms.getBuckets();
+			Collection<Bucket> buckets = terms.getBuckets();
 			if (buckets.size() > 0)
 			{
 				// distinguish between 1D and 2D aggregation
@@ -133,14 +133,14 @@ public class ResponseParser
 							}
 							Aggregation subAggregation = subAggregations.iterator().next();
 
-							if (!(subAggregation instanceof StringTerms))
+							if (!(subAggregation instanceof Terms))
 							{
 								throw new RuntimeException("Aggregation of type ["
 										+ subAggregation.getClass().getName() + "] not supported");
 							}
-							StringTerms subStringTerms = (StringTerms) subAggregation;
+							Terms subTerms = (Terms) subAggregation;
 
-							for (Bucket subBucket : subStringTerms.getBuckets())
+							for (Bucket subBucket : subTerms.getBuckets())
 							{
 								yLabels.add(subBucket.getKey());
 							}
@@ -171,8 +171,8 @@ public class ResponseParser
 						if (subAggregations != null)
 						{
 							long count = 0;
-							StringTerms subStringTerms = (StringTerms) subAggregations.iterator().next();
-							for (Bucket subBucket : subStringTerms.getBuckets())
+							Terms subTerms = (Terms) subAggregations.iterator().next();
+							for (Bucket subBucket : subTerms.getBuckets())
 							{
 								long bucketCount = subBucket.getDocCount();
 								yValues.set(yLabelMap.get(subBucket.getKey()), bucketCount);
