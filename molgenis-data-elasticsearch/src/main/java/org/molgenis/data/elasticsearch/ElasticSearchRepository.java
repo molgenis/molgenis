@@ -28,7 +28,7 @@ public class ElasticSearchRepository implements CrudRepository
 	private final ElasticSearchService elasticSearchService;
 	private final Repository repository;
 
-	public ElasticSearchRepository(ElasticSearchService elasticSearchService, Repository repository) throws IOException
+	public ElasticSearchRepository(ElasticSearchService elasticSearchService, Repository repository)
 	{
 		if (elasticSearchService == null) throw new IllegalArgumentException("elasticSearchService is null");
 		if (repository == null) throw new IllegalArgumentException("repository is null");
