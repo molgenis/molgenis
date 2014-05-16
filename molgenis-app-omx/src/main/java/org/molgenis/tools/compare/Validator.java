@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -197,7 +198,8 @@ public class Validator
 			return;
 		}
 		Validator vc = new Validator();
-		BufferedWriter logger = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(args[2])));
+		BufferedWriter logger = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(args[2]),
+				Charset.forName("UTF-8")));
 		try
 		{
 			logger.write("file1: " + args[0] + "\nfile2: " + args[1]);

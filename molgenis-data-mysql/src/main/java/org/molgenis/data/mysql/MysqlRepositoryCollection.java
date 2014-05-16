@@ -1,6 +1,8 @@
 package org.molgenis.data.mysql;
 
-import static org.molgenis.MolgenisFieldTypes.*;
+import static org.molgenis.MolgenisFieldTypes.BOOL;
+import static org.molgenis.MolgenisFieldTypes.INT;
+import static org.molgenis.MolgenisFieldTypes.XREF;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -10,8 +12,14 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.*;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -23,10 +31,12 @@ import org.springframework.stereotype.Component;
 @Component("MysqlRepositoryCollection")
 public class MysqlRepositoryCollection implements RepositoryCollection
 {
+	private static final Logger logger = Logger.getLogger(MysqlRepositoryCollection.class);
+
 	DataSource ds;
 
-    @Autowired
-    DataService dataService;
+	@Autowired
+	DataService dataService;
 
 	Map<String, MysqlRepository> repositories;
 	MysqlRepository entities;
@@ -50,7 +60,7 @@ public class MysqlRepositoryCollection implements RepositoryCollection
 	public void setDataSource(DataSource ds)
 	{
 		this.ds = ds;
-		System.out.println("MysqlRepositoryCollection initatied with ds=" + ds);
+		logger.debug("MysqlRepositoryCollection initatied with ds=" + ds);
 		refreshRepositories();
 	}
 
@@ -128,7 +138,7 @@ public class MysqlRepositoryCollection implements RepositoryCollection
 		// instantiate the repos
 		for (EntityMetaData emd : metadata.values())
 		{
-			System.out.println(emd);
+			logger.debug(emd);
 			this.repositories.put(emd.getName(), new MysqlRepository(this, emd));
 		}
 	}
@@ -210,7 +220,7 @@ public class MysqlRepositoryCollection implements RepositoryCollection
 			MysqlRepository repository = new MysqlRepository(this, emd);
 			repository.create();
 			repositories.put(emd.getName(), repository);
-            dataService.addRepository(repository);
+			dataService.addRepository(repository);
 			return repository;
 		}
 		return null;
@@ -238,11 +248,12 @@ public class MysqlRepositoryCollection implements RepositoryCollection
 	{
 		// remove the repo
 		MysqlRepository r = this.repositories.get(name);
-		if (r != null) {
-            r.drop();
-            this.repositories.remove(name);
-            dataService.removeRepository(r.getName());
-        }
+		if (r != null)
+		{
+			r.drop();
+			this.repositories.remove(name);
+			dataService.removeRepository(r.getName());
+		}
 
 		// delete metadata
 		attributes.delete(attributes.findAll(new QueryImpl().eq("entity", name)));

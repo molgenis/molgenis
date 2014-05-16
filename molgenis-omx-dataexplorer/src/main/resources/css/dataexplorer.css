@@ -191,9 +191,10 @@ ul.fancytree-container {
 }
 
 .form-horizontal .controls {
-	margin-left: 4px;
+	margin: 4px;
 	display: inline-block;
 	padding-left: 20px;
+	vertical-align: top;
 }
 
 .ui-rangeSlider-bar {

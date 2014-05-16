@@ -284,23 +284,23 @@ function abbreviate(s, maxLength) {
  */
 function createInput(dataType, attrs, val, lbl) {
 	function createBasicInput(type, attrs, val) {
-		var input = $('<input type="' + type + '">');
+		var $input = $('<input type="' + type + '">');
 		if(attrs)
-			input.attr(attrs);
+			$input.attr(attrs);
 		if(val !== undefined)
-			input.val(val);
-		return input;
+			$input.val(val);
+		return $input;
 	}
 	
 	switch(dataType) {
 		case 'BOOL':
 			var label = $('<label class="radio">');
-			var input = createBasicInput('radio', attrs, val); 
-			return label.append(input).append(val ? 'True' : 'False');
+			var $input = createBasicInput('radio', attrs, val); 
+			return label.append($input).append(val ? 'True' : 'False');
 		case 'CATEGORICAL':
 			var label = $('<label class="checkbox">');
-			var input = createBasicInput('checkbox', attrs, val); 
-			return label.append(input).append(lbl);
+			var $input = createBasicInput('checkbox', attrs, val); 
+			return label.append($input).append(lbl);
 		case 'DATE':
 		case 'DATE_TIME':
 			var format = dataType === 'DATE' ? 'yyyy-MM-dd' : 'yyyy-MM-dd\'T\'hh:mm:ss' + getCurrentTimezoneOffset();
@@ -331,10 +331,7 @@ function createInput(dataType, attrs, val, lbl) {
 			return createBasicInput('text', attrs, val);
 		case 'MREF':
 		case 'XREF':
-			var container = $('<div class="xrefsearch" />');
-			container.append(createBasicInput('hidden', attrs, val));
-			return container;
-		case 'COMPOUND':
+			return createBasicInput('hidden', attrs, val);
 		case 'FILE':
 		case 'IMAGE':
 			throw 'Unsupported data type: ' + dataType;

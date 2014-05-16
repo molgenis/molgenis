@@ -43,11 +43,13 @@ public class CsvIterator implements CloseableIterator<Entity>
 	private final Map<String, Integer> colNamesMap; // column names index
 	private MapEntity next;
 	private boolean getNext = true;
+	private Character separator = null;
 
-	public CsvIterator(File file, String repositoryName, List<CellProcessor> cellProcessors)
+	public CsvIterator(File file, String repositoryName, List<CellProcessor> cellProcessors, Character separator)
 	{
 		this.repositoryName = repositoryName;
 		this.cellProcessors = cellProcessors;
+		this.separator = separator;
 
 		try
 		{
@@ -82,6 +84,7 @@ public class CsvIterator implements CloseableIterator<Entity>
 			throw new MolgenisDataException("Exception reading [" + file.getAbsolutePath() + "]", e);
 		}
 	}
+
 
 	public Map<String, Integer> getColNamesMap()
 	{
@@ -172,18 +175,23 @@ public class CsvIterator implements CloseableIterator<Entity>
 	{
 		Reader reader = new InputStreamReader(in, CHARSET);
 
-		if (fileName.toLowerCase().endsWith("." + EXTENSION_CSV)
-				|| fileName.toLowerCase().endsWith("." + EXTENSION_TXT))
+		if (null == separator)
 		{
-			return new CSVReader(reader);
+			if (fileName.toLowerCase().endsWith("." + EXTENSION_CSV)
+					|| fileName.toLowerCase().endsWith("." + EXTENSION_TXT))
+			{
+				return new CSVReader(reader);
+			}
+
+			if (fileName.toLowerCase().endsWith("." + EXTENSION_TSV))
+			{
+				return new CSVReader(reader, '\t');
+			}
+
+			throw new MolgenisDataException("Unknown file type: [" + fileName + "] for csv repository");
 		}
 
-		if (fileName.toLowerCase().endsWith("." + EXTENSION_TSV))
-		{
-			return new CSVReader(reader, '\t');
-		}
-
-		throw new MolgenisDataException("Unknown file type: [" + fileName + "] for csv repository");
+		return new CSVReader(reader, this.separator);
 	}
 
 	private Map<String, Integer> toColNamesMap(String[] headers)
