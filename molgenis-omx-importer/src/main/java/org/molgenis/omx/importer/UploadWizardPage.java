@@ -2,14 +2,24 @@ package org.molgenis.omx.importer;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 
 import org.apache.log4j.Logger;
-import org.molgenis.data.*;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.FileRepositoryCollectionFactory;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.importer.EmxImportServiceImpl;
 import org.molgenis.data.importer.EmxImporterService;
 import org.molgenis.data.support.QueryImpl;
@@ -100,13 +110,11 @@ public class UploadWizardPage extends AbstractWizardPage
 		RepositoryCollection source = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 		if (source.getRepositoryByEntityName("attributes") != null)
 		{
-			System.out.println("Using the new EMX importer");
-
 			EmxImporterService importer = new EmxImportServiceImpl();
 			EntitiesValidationReport validationReport = importer.validateImport(source);
 
 			wizard.setEntitiesImportable(validationReport.getSheetsImportable());
-			//wizard.setDataImportable(validationReport.getSheetsImportable());
+			// wizard.setDataImportable(validationReport.getSheetsImportable());
 			wizard.setFieldsDetected(validationReport.getFieldsImportable());
 			wizard.setFieldsRequired(validationReport.getFieldsRequired());
 			wizard.setFieldsAvailable(validationReport.getFieldsAvailable());
@@ -127,9 +135,7 @@ public class UploadWizardPage extends AbstractWizardPage
 		}
 		else
 		{
-            System.out.println("Using the existing OMX importer");
-
-            // validate entity sheets
+			// validate entity sheets
 			EntitiesValidationReport validationReport = entitiesValidator.validate(file);
 
 			// remove data sheets
