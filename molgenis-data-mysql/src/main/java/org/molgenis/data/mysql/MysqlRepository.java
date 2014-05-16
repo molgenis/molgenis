@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.sql.DataSource;
 
+import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
@@ -47,6 +48,8 @@ import org.springframework.jdbc.core.RowMapper;
 
 public class MysqlRepository implements Repository, Writable, Queryable, Manageable, CrudRepository
 {
+	private static final Logger logger = Logger.getLogger(MysqlRepository.class);
+
 	public static final int BATCH_SIZE = 100000;
 	private final EntityMetaData metaData;
 	private final MysqlRepositoryCollection repositoryCollection;
@@ -68,7 +71,7 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 	{
 		this.ds = dataSource;
 		this.jdbcTemplate = new JdbcTemplate(ds);
-		System.out.println("set:" + dataSource);
+		logger.debug("set:" + dataSource);
 	}
 
 	@Override
@@ -376,7 +379,7 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 			@Override
 			public void setValues(PreparedStatement preparedStatement, int i) throws SQLException
 			{
-				System.out.println("mref: " + mrefs.get(i).get(idAttribute.getName()) + ", "
+				logger.debug("mref: " + mrefs.get(i).get(idAttribute.getName()) + ", "
 						+ mrefs.get(i).get(att.getName()));
 
 				preparedStatement.setObject(1, mrefs.get(i).get(idAttribute.getName()));
@@ -416,7 +419,7 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 	public long count(Query q)
 	{
 		String sql = getCountSql(q);
-		System.out.println(sql);
+		logger.debug(sql);
 		return jdbcTemplate.queryForObject(sql, Long.class);
 	}
 
@@ -469,8 +472,8 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 		String sql = getSelectSql(q);
 
 		// tmp:
-		System.out.println("query: " + q);
-		System.out.println("sql: " + sql);
+		logger.debug("query: " + q);
+		logger.debug("sql: " + sql);
 
 		return jdbcTemplate.query(sql, new EntityMapper());
 	}
@@ -728,7 +731,7 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 			public void setValues(PreparedStatement preparedStatement, int rowIndex) throws SQLException
 			{
 				Entity e = batch.get(rowIndex);
-				System.out.println("updating: " + e);
+				logger.debug("updating: " + e);
 				Object idValue = idAttribute.getDataType().convert(e.get(idAttribute.getName()));
 				ids.add(idValue);
 				int fieldIndex = 1;
