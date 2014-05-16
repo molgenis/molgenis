@@ -175,7 +175,6 @@ public class CsvIterator implements CloseableIterator<Entity>
 	{
 		Reader reader = new InputStreamReader(in, CHARSET);
 
-		System.err.println(">> separ" + separator);
 		if (null == separator)
 		{
 			if (fileName.toLowerCase().endsWith("." + EXTENSION_CSV)
@@ -192,7 +191,6 @@ public class CsvIterator implements CloseableIterator<Entity>
 			throw new MolgenisDataException("Unknown file type: [" + fileName + "] for csv repository");
 		}
 
-		System.err.println(">> done");
 		return new CSVReader(reader, this.separator);
 	}
 
