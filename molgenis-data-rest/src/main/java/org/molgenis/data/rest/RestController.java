@@ -745,15 +745,11 @@ public class RestController
 			{
 				if (attr.getDataType().getEnumType() == XREF)
 				{
-					Object id = paramValue;
-					if (id != null)
+					value = dataService.findOne(attr.getRefEntity().getName(), paramValue);
+					if (value == null)
 					{
-						value = dataService.findOne(attr.getRefEntity().getName(), id);
-						if (value == null)
-						{
-							throw new IllegalArgumentException("No " + attr.getRefEntity().getName() + " with id "
-									+ paramValue + " found");
-						}
+						throw new IllegalArgumentException("No " + attr.getRefEntity().getName() + " with id "
+								+ paramValue + " found");
 					}
 				}
 				else if (attr.getDataType().getEnumType() == MREF)
