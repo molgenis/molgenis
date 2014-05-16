@@ -12,14 +12,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.SessionAttributes;
 
 @Controller
 @RequestMapping(URI)
+@SessionAttributes("viewState")
+// either users or groups
 public class UserManagerController extends MolgenisPluginController
 {
 	public final static String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + "usermanager";
 	private final UserManagerService pluginUserManagerService;
-	private String viewState = "users"; // either users or groups
 
 	@Autowired
 	public UserManagerController(UserManagerService pluginUserManagerService)
@@ -38,21 +40,16 @@ public class UserManagerController extends MolgenisPluginController
 		model.addAttribute("users", this.pluginUserManagerService.getAllMolgenisUsers());
 		model.addAttribute("groups", this.pluginUserManagerService.getAllMolgenisGroups());
 
-		return "view-usermanager";
-	}
+		if (!model.containsAttribute("viewState")) model.addAttribute("viewState", "users");
 
-	@RequestMapping(value = "/isViewState/{viewState}", method = RequestMethod.GET)
-	@ResponseBody
-	public Boolean isViewState(@PathVariable String viewState)
-	{
-		return this.viewState.equalsIgnoreCase(viewState);
+		return "view-usermanager";
 	}
 
 	@RequestMapping(value = "/setViewState/{viewState}", method = RequestMethod.PUT)
 	@ResponseStatus(HttpStatus.OK)
-	public void setViewState(@PathVariable String viewState)
+	public void setViewState(@PathVariable String viewState, Model model)
 	{
-		this.viewState = viewState;
+		model.addAttribute("viewState", viewState);
 	}
 
 	@RequestMapping(value = "/setActivation/{type}/{id}/{active}", method = RequestMethod.PUT)
