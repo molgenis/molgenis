@@ -66,7 +66,11 @@ public class ElasticSearchRepository implements CrudRepository
 	@Override
 	public long count(Query q)
 	{
-		return elasticSearchService.count(getName(), q);
+		if (!(repository instanceof Queryable))
+		{
+			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Queryable");
+		}
+		return ((Queryable) repository).count(q);
 	}
 
 	@Override
