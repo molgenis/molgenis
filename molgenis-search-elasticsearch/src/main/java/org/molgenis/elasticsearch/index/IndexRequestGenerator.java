@@ -23,6 +23,8 @@ import org.molgenis.elasticsearch.util.MapperTypeSanitizer;
 import org.molgenis.util.Cell;
 import org.molgenis.util.RepositoryUtils;
 
+import com.google.common.collect.Lists;
+
 /**
  * Creates an IndexRequest for indexing entities with ElasticSearch
  * 
@@ -106,6 +108,7 @@ public class IndexRequestGenerator
 						Object id = null;
 						Object key = null;
 						Object value = entity.get(attrName);
+
 						if (value instanceof Entity)
 						{
 							Entity refEntity = (Entity) value;
@@ -122,8 +125,9 @@ public class IndexRequestGenerator
 						}
 						if (value instanceof Collection)
 						{
+
 							Collection<?> values = (Collection<?>) value;
-							if (!values.isEmpty() && values.iterator().next() instanceof Cell)
+							if (!values.isEmpty())
 							{
 								Object exampleValue = values.iterator().next();
 								if (exampleValue instanceof Cell)
@@ -153,16 +157,26 @@ public class IndexRequestGenerator
 								{
 									List<Object> mrefIds = null;
 									List<String> mrefKeys = null;
+									List<Object> labelValues = Lists.newArrayListWithCapacity(values.size());
 									for (Iterator<Entity> it = ((Collection<Entity>) values).iterator(); it.hasNext();)
 									{
+
 										Entity cell = it.next();
+										EntityMetaData refEntityMetaData = cell.getEntityMetaData();
+										Object labelValue = cell.get(refEntityMetaData.getLabelAttribute().getName());
+
+										if (labelValue != null)
+										{
+											labelValues.add(labelValue);
+										}
+
 										Object cellId = cell.getIdValue();
 										if (cellId != null)
 										{
 											if (mrefIds == null) mrefIds = new ArrayList<Object>();
 											mrefIds.add(cellId);
 										}
-										EntityMetaData refEntityMetaData = cell.getEntityMetaData();
+
 										String cellKey = cell.getString(refEntityMetaData.getIdAttribute().getName());
 										if (cellKey != null)
 										{
@@ -172,6 +186,7 @@ public class IndexRequestGenerator
 									}
 									if (mrefIds != null) id = mrefIds;
 									if (mrefKeys != null) key = mrefKeys;
+									value = labelValues;
 								}
 								else
 								{
