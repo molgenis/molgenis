@@ -3,11 +3,16 @@ package org.molgenis.security.usermanager;
 import java.util.List;
 
 import org.molgenis.omx.auth.MolgenisGroup;
+import org.molgenis.omx.auth.MolgenisUser;
 
 public interface UserManagerService
 {
 	List<MolgenisUserViewData> getAllMolgenisUsers();
+	
+	void setActivationUser(Integer userId, Boolean active);
 
+	void setActivationGroup(Integer groupId, Boolean active);
+	
 	List<MolgenisGroup> getAllMolgenisGroups();
 
 	List<MolgenisGroup> getGroupsWhereUserIsMember(Integer userId);

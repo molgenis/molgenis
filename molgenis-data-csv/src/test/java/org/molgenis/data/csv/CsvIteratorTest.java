@@ -26,11 +26,11 @@ public class CsvIteratorTest
 		File csvFile = new File(FileUtils.getTempDirectory(), "testdata.csv");
 		FileCopyUtils.copy(in, new FileOutputStream(csvFile));
 
-		CsvIterator it = new CsvIterator(csvFile, "testdata", null);
+		CsvIterator it = new CsvIterator(csvFile, "testdata", null, null);
 		assertEquals(it.getColNamesMap().keySet(), Sets.newLinkedHashSet(Arrays.asList("col1", "col2")));
 		assertEquals(Iterators.size(it), 5);
 
-		it = new CsvIterator(csvFile, "testdata", null);
+		it = new CsvIterator(csvFile, "testdata", null, null);
 		Entity entity = it.next();
 		assertEquals(entity.get("col1"), "val1");
 		assertEquals(entity.get("col2"), "val2");
