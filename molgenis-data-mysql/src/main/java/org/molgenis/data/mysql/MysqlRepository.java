@@ -55,7 +55,7 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 
 	protected MysqlRepository(MysqlRepositoryCollection collection, EntityMetaData metaData)
 	{
-		if (metaData == null) throw new IllegalArgumentException("DataSource is null");
+		if (collection == null) throw new IllegalArgumentException("DataSource is null");
 		if (metaData == null) throw new IllegalArgumentException("metaData is null");
 		this.metaData = metaData;
 		this.repositoryCollection = collection;
