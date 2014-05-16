@@ -167,11 +167,11 @@
 		if(filter){
 			if(filter.isType('complex')){
 				$.each(filter.getFilters(), function(index, value){
-					addComplexFilterControlsElementsToContainer(container, attribute, value, addLabel, (index > 0 ? true : false));
+					addComplexFilterControlsElementsToContainer(container, attribute, filter.operator, value, addLabel, (index > 0 ? true : false));
 				});
 			}
 		}else{
-			addComplexFilterControlsElementsToContainer(container, attribute, undefined, addLabel, false);
+			addComplexFilterControlsElementsToContainer(container, attribute, undefined, undefined, addLabel, false);
 		}
 		
 		return container;
@@ -183,20 +183,7 @@
 	function createComplexFilterControlsContainer(attribute, filter, addLabel)
 	{
 		var container = $('<div class="complexFilterContainer"></div>');
-		var controlGroup = $('<div class="control-group">');
-		var btnGroup = $('<div class="controls btn-group">');
 		var operator = (filter?filter.operator:null);
-		
-		btnGroup.append(createComplexFilterSelectOperator(operator));
-		btnGroup
-			.append($('<button class="btn" type="button"><i class="icon-trash icon-plus"></i></button></button>').click(function(){
-				addComplexFilterControlsElementsToContainer(container, attribute, undefined, addLabel, true);
-			}));
-		
-		if(addLabel) controlGroup.append($('<label class="control-label">' + attribute.name + '</label>'));
-		controlGroup.append(btnGroup);
-		
-		container.append(controlGroup);
 		container.data('attribute', attribute);
 		return container;
 	}
@@ -204,10 +191,18 @@
 	/**
 	 * @memberOf molgenis.dataexplorer
 	 */
-	function addComplexFilterControlsElementsToContainer(container, attribute, simpleFilter, addLabel, addRemoveCapability) {
+	function addComplexFilterControlsElementsToContainer(container, attribute, operator, simpleFilter, addLabel, addRemoveCapability) {
 		var elements = createSimpleFilterControlsElements(attribute, simpleFilter, false);
-		if(addLabel) elements.append($('<label class="control-label"></label>'));
-		if(addRemoveCapability) addRemoveButton(elements);
+		if(addRemoveCapability) {
+			addRemoveButton(elements);
+			elements.append($('<label class="control-label"></label>'));
+		} else {
+			elements.append($('<label class="control-label" data-placement="right" data-title="' + attribute.description + '">' + attribute.name + '</label>').tooltip());
+			$('.controls.controls-row', elements)
+				.parent().append($('<div class="controls controls-row">').append($('<button class="btn" type="button"><i class="icon-trash icon-plus"></i></button>').click(function(){
+					addComplexFilterControlsElementsToContainer(container, attribute, operator, undefined, addLabel, true);
+				})).append(createComplexFilterSelectOperator(operator)));
+		}
 		return container.append(elements);
 	}
 	
@@ -216,10 +211,9 @@
 	 */
 	function addRemoveButton(container){
 		$('.controls.controls-row', container)
-			.append($('<span class="add-on">&nbsp;&nbsp;&nbsp;</span>'))
-			.append($('<button class="btn" type="button"><i class="icon-trash"></i></button>').click(function(){
-			$(this).parent().parent().remove();
-		}));
+			.parent().append($('<div class="controls controls-row">').append($('<button class="btn" type="button"><i class="icon-trash"></i></button>').click(function(){
+			$(this).parent().remove();
+		})));
 		
 		return container;
 	}
@@ -241,7 +235,7 @@
 	function createSimpleFilterControlsElements(attribute, filter, addLabel) {
 		var label;
 		var container = $('<div class="control-group">');
-		var controls = $('<div class="controls controls-row">').width(565);
+		var controls = $('<div class="controls controls-row">').width('40%');
 		var name = 'input-' + attribute.name + '-' + new Date().getTime();
 		var values = filter ? filter.getValues() : null;
 		var fromValue = filter ? filter.fromValue : null;
@@ -274,7 +268,7 @@
 				var valTo = toValue ? toValue : undefined;
 				var inputFrom = createInput(attribute.fieldType, {'name': nameFrom, 'placeholder': 'Start date'}, valFrom);
 				var inputTo = createInput(attribute.fieldType, {'name': nameTo, 'placeholder': 'End date'}, valTo);
-				controls.append(inputFrom).append($('<span class="add-on">&nbsp;&nbsp;&nbsp;</span>')).append(inputTo);
+				controls.append($('<div class="control-group">').append(inputFrom)).append($('<div class="control-group">').append(inputTo));
 				break;
 			case 'DECIMAL':
 			case 'INT':

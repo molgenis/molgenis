@@ -14,7 +14,7 @@
 	"jquery.bootstrap.wizard.min.js",
 	"bootstrap-datetimepicker.min.js",
 	"dataexplorer-filter.js",
-	"dataexplorer-filter-form.js",
+	"dataexplorer-filter-dialog.js",
 	"dataexplorer-filter-wizard.js",
 	"jquery.fancytree.min.js",
 	"jquery.molgenis.tree.js",
