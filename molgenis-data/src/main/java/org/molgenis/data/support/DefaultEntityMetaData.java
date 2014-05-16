@@ -1,6 +1,10 @@
 package org.molgenis.data.support;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
@@ -112,7 +116,7 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 			if (att == null) throw new RuntimeException("getLabelAttribute() failed: '" + labelAttribute + "' unknown");
 			return att;
 		}
-        return getIdAttribute();
+		return getIdAttribute();
 	}
 
 	public DefaultEntityMetaData setLabelAttribute(String name)
@@ -215,20 +219,23 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 		return this;
 	}
 
+	@Override
 	public String toString()
 	{
-		String result = "\nEntityMetaData(name='" + this.getName() + "'";
-		if (isAbstract()) result += " abstract='true'";
-		if (getExtends() != null) result += " extends='" + getExtends().getName() + "'";
-		if (getIdAttribute() != null) result += " idAttribute='" + getIdAttribute().getName() + "'";
-		if (getDescription() != null) result += " description='"
-				+ getDescription().substring(0, Math.min(25, getDescription().length()))
-				+ (getDescription().length() > 25 ? "...'" : "'");
-		result += ")";
+		StringBuilder strBuilder = new StringBuilder("\nEntityMetaData(name='");
+		strBuilder.append(this.getName()).append('\'');
+		if (isAbstract()) strBuilder.append(" abstract='true'");
+		if (getExtends() != null) strBuilder.append(" extends='" + getExtends().getName()).append('\'');
+		if (getIdAttribute() != null) strBuilder.append(" idAttribute='").append(getIdAttribute().getName())
+				.append('\'');
+		if (getDescription() != null) strBuilder.append(" description='")
+				.append(getDescription().substring(0, Math.min(25, getDescription().length())))
+				.append(getDescription().length() > 25 ? "...'" : "'");
+		strBuilder.append(')');
 		for (AttributeMetaData att : this.getAttributes())
 		{
-			result += "\n\t" + att.toString();
+			strBuilder.append("\n\t").append(att.toString());
 		}
-		return result;
+		return strBuilder.toString();
 	}
 }
