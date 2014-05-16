@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DatabaseAction;
@@ -28,18 +29,20 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class EmxImportServiceImpl implements EmxImporterService
 {
+	private static final Logger logger = Logger.getLogger(EmxImportServiceImpl.class);
+
 	MysqlRepositoryCollection store;
 
 	public EmxImportServiceImpl()
 	{
-		System.out.println("MEntityImportServiceImpl created");
+		logger.debug("MEntityImportServiceImpl created");
 	}
 
 	@Autowired
 	public void setRepositoryCollection(MysqlRepositoryCollection coll)
 	{
 		this.store = coll;
-		System.out.println("MEntityImportServiceImpl created with coll=" + coll);
+		logger.debug("MEntityImportServiceImpl created with coll=" + coll);
 	}
 
 	@Override
@@ -68,7 +71,7 @@ public class EmxImportServiceImpl implements EmxImporterService
 
 				if (to == null)
 				{
-					System.out.println("tyring to create: " + name);
+					logger.debug("tyring to create: " + name);
 
 					EntityMetaData em = metadata.get(name);
 					if (em == null) throw new IllegalArgumentException("Unknown entity: " + name);

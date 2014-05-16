@@ -2,15 +2,9 @@ package org.molgenis.data.importer;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.AppConfig;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.framework.db.EntitiesValidationReport;
@@ -31,7 +25,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 	public void testValidationReport() throws IOException, InvalidFormatException
 	{
 		// open test source
-        File f =  new File(getClass().getResource("/example_invalid.xlsx").getFile());
+		File f = new File(getClass().getResource("/example_invalid.xlsx").getFile());
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
 
 		// create importer
@@ -67,13 +61,13 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		Assert.assertEquals(report.getFieldsUnknown().get("import_city").size(), 0);
 
 		// FieldsRequired missing
-        Assert.assertEquals(report.getFieldsRequired().size(), 2);
-        Assert.assertEquals(report.getFieldsRequired().get("import_person").size(), 1);
-        Assert.assertTrue(report.getFieldsRequired().get("import_person").contains("birthday"));
-        Assert.assertEquals(report.getFieldsRequired().get("import_city").size(), 0);
-    }
+		Assert.assertEquals(report.getFieldsRequired().size(), 2);
+		Assert.assertEquals(report.getFieldsRequired().get("import_person").size(), 1);
+		Assert.assertTrue(report.getFieldsRequired().get("import_person").contains("birthday"));
+		Assert.assertEquals(report.getFieldsRequired().get("import_city").size(), 0);
+	}
 
-    @Test
+	@Test
 	public void testImportReport() throws IOException, InvalidFormatException, InterruptedException
 	{
 		// cleanup
@@ -82,7 +76,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		store.drop("import_country");
 
 		// create test excel
-        File f =  new File(getClass().getResource("/example.xlsx").getFile());
+		File f = new File(getClass().getResource("/example.xlsx").getFile());
 		// TODO add good example to repo
 
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
@@ -90,41 +84,17 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		Assert.assertEquals(source.getNumberOfSheets(), 4);
 		Assert.assertNotNull(source.getRepositoryByEntityName("attributes"));
 
-		List<Entity> entities = new ArrayList<Entity>();
-		for (Entity e : source.getRepositoryByEntityName("attributes"))
-		{
-			System.out.println(e);
-		}
-
 		EmxImportServiceImpl importer = new EmxImportServiceImpl();
 		importer.setRepositoryCollection(store);
-
-		for (EntityMetaData em : importer.getEntityMetaData(source).values())
-		{
-			System.out.println(em);
-		}
 
 		// test import
 		EntityImportReport report = importer.doImport(source, null);
 
-        // test report
-        Assert.assertEquals(report.getNrImportedEntitiesMap().get("import_city"), new Integer(2));
-        Assert.assertEquals(report.getNrImportedEntitiesMap().get("import_person"),new Integer(3));
-
-
-        // test state via queries
-		for (Entity e : store.getRepositoryByEntityName("import_city"))
-		{
-			System.out.println(e);
-		}
-
-		for (Entity e : store.getRepositoryByEntityName("import_person"))
-		{
-			System.out.println(e);
-		}
+		// test report
+		Assert.assertEquals(report.getNrImportedEntitiesMap().get("import_city"), new Integer(2));
+		Assert.assertEquals(report.getNrImportedEntitiesMap().get("import_person"), new Integer(3));
 
 		// wait to make sure logger has outputted
 		Thread.sleep(1000);
-
 	}
 }
