@@ -212,7 +212,7 @@
 	function addRemoveButton(container){
 		$('.controls.controls-row', container)
 			.parent().append($('<div class="controls controls-row">').append($('<button class="btn" type="button"><i class="icon-trash"></i></button>').click(function(){
-			$(this).parent().remove();
+			$(this).parent().parent().remove();
 		})));
 		
 		return container;
