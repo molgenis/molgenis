@@ -193,7 +193,7 @@
 				addComplexFilterControlsElementsToContainer(container, attribute, undefined, addLabel, true);
 			}));
 		
-		if(addLabel) controlGroup.append($('<label class="control-label">' + attribute.name + '</label>'));
+		if(addLabel) controlGroup.append($('<label class="control-label" data-placement="right" data-title="' + attribute.description + '">' + attribute.name + '</label>').tooltip());
 		controlGroup.append(btnGroup);
 		
 		container.append(controlGroup);
