@@ -5,9 +5,10 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -106,7 +107,8 @@ public class DiseaseMappingProcessor
 			csvReaderAll = new CSVReader(new BufferedReader(new InputStreamReader(new FileInputStream(allFile),
 					Charset.forName("UTF-8"))), '\t');
 
-			csvWriter = new CsvWriter(new BufferedWriter(new FileWriter(outFile)), '\t');
+			csvWriter = new CsvWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFile),
+					Charset.forName("UTF-8"))), '\t');
 
 			// write header
 			csvWriter.writeAttributeNames(Arrays.asList("identifier", "diseaseId", "geneSymbol", "geneId", "HPOId",

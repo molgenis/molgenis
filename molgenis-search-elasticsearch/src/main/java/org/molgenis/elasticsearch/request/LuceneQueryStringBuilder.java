@@ -47,6 +47,7 @@ public class LuceneQueryStringBuilder
 	 * @param queryRules
 	 * @return the lucene query
 	 */
+	@edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "RCN_REDUNDANT_NULLCHECK_OF_NULL_VALUE", justification = "False positive for Redundant nullcheck of previousRule")
 	public static String buildQueryString(List<QueryRule> queryRules)
 	{
 		if (queryRules.isEmpty())
