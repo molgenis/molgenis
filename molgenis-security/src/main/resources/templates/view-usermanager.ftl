@@ -1,10 +1,8 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 
-<#-- Some of the css/js may be omitted, here...   -->
-  
-<#assign css=['select2.css', 'bootstrap-datetimepicker.min.css', 'molgenis-form.css', "chosen.css"]>
-<#assign js=['jquery.validate.min.js', 'select2.min.js', 'bootstrap-datetimepicker.min.js', "chosen.jquery.min.js", "usermanager.js"]>
+<#assign css=['select2.css', 'bootstrap-datetimepicker.min.css', 'molgenis-form.css']>
+<#assign js=['jquery.validate.min.js', 'select2.min.js', 'bootstrap-datetimepicker.min.js', "usermanager.js"]>
 
 <@header css js/>
 <div class="container-fluid">
@@ -32,7 +30,7 @@
 				<#list users as user>
 				<tr id="userRow${user.id?c}">
 					<td><a href="#" class="edit-user-btn" data-toggle="modal" data-target="#managerModal" data-id="${user.id?c}"><img src="/img/editview.gif"></a></td>
-					<td><#if 1 < user.id><input type="checkbox" class="activate-user-checkbox" data-id="${user.id?c}" <#if user.isActive()>checked</#if>></#if></td>
+					<td><#if !user.isSuperuser()><input type="checkbox" class="activate-user-checkbox" data-id="${user.id?c}" <#if user.isActive()>checked</#if>></#if></td>
 					<td>${user.getUsername()?if_exists}</td>
 					<td>${user.getFullName()?if_exists}</td>
 					<#list groups as g><#if g.active><td><input type="checkbox" class="change-group-membership-checkbox" data-uid="${user.id?c}" data-gid="${g.id?c}"  <#if user.isGroupMember(g.id)>checked</#if>></td></#if></#list>
@@ -86,7 +84,7 @@
 	        	<h4 class="modal-title" id="managerModalTitle"></h4>
 	     	</div>
 	      	<div class="modal-body">
-				<DIV id="controlGroups"></DIV>
+				<div id="controlGroups"></div>
 	      	</div>
 	      	<div class="modal-footer">
 	        	<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>

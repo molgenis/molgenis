@@ -16,6 +16,7 @@ public class MolgenisUserViewData
 	private String lastName;
 	private String fullName; // first, middle, last name
 	private Boolean active;
+	private Boolean superuser;
 	private List<Integer> groupList = new ArrayList<Integer>();
 
 
@@ -29,6 +30,7 @@ public class MolgenisUserViewData
 		fullName = firstName + ' ' + middleName + ' ' + lastName; 
 		
 		this.active = mu.getActive();
+		this.superuser = mu.getSuperuser();
 		
 		for (MolgenisGroup mg : molgenisGroups) {
 			this.groupList.add(mg.getId());
@@ -67,6 +69,10 @@ public class MolgenisUserViewData
 		return this.active;
 	}
 
+	public Boolean isSuperuser() {
+		return this.superuser;
+	}
+	
 	public Boolean isGroupMember(Integer id) {
 		return groupList.contains(id);
 	}
