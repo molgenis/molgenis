@@ -41,7 +41,7 @@ public class LuceneQueryStringBuilderTest
 		assertEquals(buildQueryString(Arrays.asList(new QueryRule("test", GREATER, 9))), "test:{\"9\" TO *}");
 		assertEquals(buildQueryString(Arrays.asList(new QueryRule("test", GREATER_EQUAL, 9))), "test:[\"9\" TO *]");
 		assertEquals(buildQueryString(Arrays.asList(new QueryRule("test", EQUALS, "xxx"), new QueryRule(AND),
-				new QueryRule("aaa", EQUALS, "yyy"))), "test:\"xxx\" AND aaa:\"yyy\"");
+				new QueryRule("aaa", EQUALS, "yyy"))), "test:\"xxx\"aaa:\"yyy\"");// AND is default
 		assertEquals(buildQueryString(Arrays.asList(new QueryRule("test", EQUALS, "xxx"), new QueryRule(OR),
 				new QueryRule("aaa", EQUALS, "yyy"))), "test:\"xxx\" OR aaa:\"yyy\"");
 	}
