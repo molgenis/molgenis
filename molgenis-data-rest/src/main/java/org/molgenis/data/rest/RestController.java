@@ -119,6 +119,8 @@ public class RestController
 		if (dataService == null) throw new IllegalArgumentException("dataService is null");
 		if (tokenService == null) throw new IllegalArgumentException("tokenService is null");
 		if (authenticationManager == null) throw new IllegalArgumentException("authenticationManager is null");
+		if (molgenisPermissionService == null) throw new IllegalArgumentException("molgenisPermissionService is null");
+		
 		this.dataService = dataService;
 		this.tokenService = tokenService;
 		this.authenticationManager = authenticationManager;

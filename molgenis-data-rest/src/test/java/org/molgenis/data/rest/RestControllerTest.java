@@ -39,6 +39,7 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.QueryResolver;
+import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.token.TokenService;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -423,12 +424,17 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 			return new QueryResolver(dataService());
 		}
 
-//		TODO: add molgenisPermissionService to test
-//		@Bean
-//		public RestController restController()
-//		{
-//			return new RestController(dataService(), tokenService(), authenticationManager());
-//		}
+		@Bean
+		public MolgenisPermissionService molgenisPermissionService()
+		{
+			return mock(MolgenisPermissionService.class);
+		}
+		
+		@Bean
+		public RestController restController()
+		{
+			return new RestController(dataService(), tokenService(), authenticationManager(), molgenisPermissionService());
+		}
 	}
 
 }
