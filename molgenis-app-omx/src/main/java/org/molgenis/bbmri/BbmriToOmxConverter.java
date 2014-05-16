@@ -199,7 +199,7 @@ public class BbmriToOmxConverter
 
 		Writable writable = outputWriter.createWritable(Person.class.getSimpleName(), Arrays.asList(Person.IDENTIFIER,
 				Person.NAME, Person.ADDRESS, Person.PHONE, Person.EMAIL, Person.FAX, Person.TOLLFREEPHONE, Person.CITY,
-				Person.COUNTRY, Person.FIRSTNAME, Person.MIDDLENAMES, Person.LASTNAME, Person.TITLE, Person.AFFILIATION
+				Person.COUNTRY, Person.FIRSTNAME, Person.MIDINITIALS, Person.LASTNAME, Person.TITLE, Person.AFFILIATION
 						+ "_" + Institute.NAME, Person.DEPARTMENT, Person.ROLES + "_" + PersonRole.IDENTIFIER));
 
 		RepositoryCollection repositorySource = new ExcelRepositoryCollection(
@@ -228,7 +228,7 @@ public class BbmriToOmxConverter
 					outputEntity.set(Person.CITY, entity.getString("City"));
 					outputEntity.set(Person.COUNTRY, entity.getString("Country"));
 					outputEntity.set(Person.FIRSTNAME, entity.getString("FirstName"));
-					outputEntity.set(Person.MIDDLENAMES, entity.getString("MiddleNames"));
+					outputEntity.set(Person.MIDINITIALS, entity.getString("MidInitials"));
 					outputEntity.set(Person.LASTNAME, entity.getString("LastName"));
 					outputEntity.set(Person.TITLE, entity.getString("Title"));
 					outputEntity.set(Person.AFFILIATION + "_" + Institute.NAME, entity.getString("Affiliation_name"));
