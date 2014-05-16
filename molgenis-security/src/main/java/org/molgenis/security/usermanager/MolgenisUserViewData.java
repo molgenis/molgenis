@@ -10,12 +10,12 @@ import org.molgenis.omx.auth.MolgenisUser;
 public class MolgenisUserViewData
 {
 	private final Integer id;
-	private String username = null;
-	private String firstName = null;
-	private String middleName = null;
-	private String lastName = null;
-	private String fullName = null; // first, middle, last name
-	private Boolean active = null;
+	private String username;
+	private String firstName;
+	private String middleName;
+	private String lastName;
+	private String fullName; // first, middle, last name
+	private Boolean active;
 	private List<Integer> groupList = new ArrayList<Integer>();
 
 
