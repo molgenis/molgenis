@@ -95,18 +95,16 @@ public class ElasticSearchRepositoryTest
 	@Test
 	public void count()
 	{
-		when(elasticSearchRepository.getName()).thenReturn("entity");
 		elasticSearchRepository.count();
-		verify(elasticSearchService).count("entity", new QueryImpl());
+		verify(repository).count(new QueryImpl());
 	}
 
 	@Test
 	public void countQuery()
 	{
-		when(elasticSearchRepository.getName()).thenReturn("entity");
 		Query q = mock(Query.class);
 		elasticSearchRepository.count(q);
-		verify(elasticSearchService).count("entity", q);
+		verify(repository).count(q);
 	}
 
 	@Test
