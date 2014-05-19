@@ -108,10 +108,10 @@
 		});
 		
 		if(compoundAttributes.length > 1){
-            $('.wizard-steps').show();
+            $('.wizard-steps', wizard).show();
             $('.wizard-steps', wizard).html(listItems.join(''));
         }else{
-            $('.wizard-steps').hide();
+            $('.wizard-steps', wizard).hide();
         }
         $('.tab-content', wizard).html(paneItems);
         
