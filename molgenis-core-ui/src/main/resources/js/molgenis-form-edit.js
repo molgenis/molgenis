@@ -9,7 +9,7 @@
 			var d = $(this).val();
 			$(this).val(d.replace(/T/,"'T'"));//Put quotes around T
 		});
-	}
+	};
 	
 	ns.onFormSubmit = function() {
 		ns.hideAlerts();
@@ -51,12 +51,12 @@
 			}
 		});
 		
-	}
+	};
 	
 	ns.hideAlerts = function() {
 		$('#success-message').hide();
 		$('#error-message').hide();
-	}
+	};
 	
 	$(function() {
 		//Enable datepickers
