@@ -63,9 +63,6 @@ public class AccountController
 	private CaptchaService captchaService;
 
 	@Autowired
-	private PasswordEncoder passwordEncoder;
-
-	@Autowired
 	private RedirectStrategy redirectStrategy;
 
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
@@ -226,7 +223,7 @@ public class AccountController
 	{
 		MolgenisUser user = new MolgenisUser();
 		user.setUsername(request.getUsername());
-		user.setPassword(passwordEncoder.encode(request.getPassword()));
+		user.setPassword(request.getPassword());
 		user.setEmail(request.getEmail());
 		user.setPhone(request.getPhone());
 		user.setFax(request.getFax());
