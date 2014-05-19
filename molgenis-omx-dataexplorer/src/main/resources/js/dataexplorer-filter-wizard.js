@@ -12,7 +12,7 @@
         if(title !== undefined) {
             wizardTitle = title;
         }
-    }
+    };
 
 	self.openFilterWizardModal = function(entityMetaData, attributeFilters) {
 		var modal = createFilterWizardModal();
