@@ -82,7 +82,7 @@
 		});
 		items.push('</div>');
 		$('#feature-filters').html(items.join(''));
-	}
+	};
 	
 	/**
 	 * @memberOf molgenis.dataexplorer
@@ -98,8 +98,7 @@
 					{
 						s += ' ' + filter.operator.toLowerCase() + ' ';
 					}
-				})
-
+				});
 			}
 		}
 		else if(filter.isType('simple'))
@@ -183,7 +182,6 @@
 	function createComplexFilterControlsContainer(attribute, filter, addLabel)
 	{
 		var container = $('<div class="complexFilterContainer"></div>');
-		var operator = (filter?filter.operator:null);
 		container.data('attribute', attribute);
 		return container;
 	}
@@ -197,7 +195,8 @@
 			addRemoveButton(elements);
 			elements.append($('<label class="control-label"></label>'));
 		} else {
-			elements.append($('<label class="control-label" data-placement="right" data-title="' + attribute.description + '">' + attribute.name + '</label>').tooltip());
+			var label = attribute.label || attribute.name;
+			elements.append($('<label class="control-label" data-placement="right" data-title="' + attribute.description + '">' + label + '</label>').tooltip());
 			$('.controls.controls-row', elements)
 				.parent().append($('<div class="controls controls-row">').append($('<button class="btn" type="button"><i class="icon-trash icon-plus"></i></button>').click(function(){
 					addComplexFilterControlsElementsToContainer(container, attribute, operator, undefined, addLabel, true);
@@ -233,7 +232,6 @@
 	 * @memberOf molgenis.dataexplorer
 	 */
 	function createSimpleFilterControlsElements(attribute, filter, addLabel) {
-		var label;
 		var container = $('<div class="control-group">');
 		var controls = $('<div class="controls controls-row">').width('40%');
 		var name = 'input-' + attribute.name + '-' + new Date().getTime();
@@ -350,7 +348,7 @@
 		this.isType = function(type)
 		{
 			return type && this.types[type] && this.type === type;
-		}
+		};
 		
 		return this;
 	}
@@ -424,7 +422,7 @@
 			this.toValue = toValue;
 			this.operator = operator;
 			return this;
-		}
+		};
 		
 		this.createQueryRule = function (){
 			var attribute = this.attribute;
@@ -511,10 +509,10 @@
 			}
 			
 			return rule;
-		}
+		};
 
 		return this;
-	}
+	};
 	self.SimpleFilter.prototype = new Filter();
 	
 	self.ComplexFilter = function(attribute){
@@ -551,7 +549,6 @@
 		
 		this.createQueryRule = function() {
 			var nestedRules = [];
-			var attribute = this.attribute;
 			var operator = this.operator;
 			var rule;
 			
@@ -570,9 +567,9 @@
 			};
 			
 			return rule;
-		}
+		};
 		
 		return this;
-	}
+	};
 	self.ComplexFilter.prototype = new Filter();
 }($, window.top.molgenis = window.top.molgenis || {}));
