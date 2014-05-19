@@ -20,7 +20,7 @@
 	function getCreateForm(type) {
 		$.ajax({
 			type : 'GET',
-			url : molgenis.getContextUrl() + '/api/v1/molgenis' + type + '/create',
+			url : '/api/v1/molgenis' + type + '/create',
 			success : function(text) {
 				$('#managerModalTitle').html('Add ' + type);
 				$('#controlGroups').html(text);
@@ -34,7 +34,7 @@
 	function getEditForm(id, type) {
 		$.ajax({
 			type : 'GET',
-			url : molgenis.getContextUrl() + '/api/v1/molgenis' + type + '/' + id + '/edit',
+			url : '/api/v1/molgenis' + type + '/' + id + '/edit',
 			success : function(text) {
 				$('#managerModalTitle').html('Edit ' + type);
 				$('#controlGroups').html(text);
