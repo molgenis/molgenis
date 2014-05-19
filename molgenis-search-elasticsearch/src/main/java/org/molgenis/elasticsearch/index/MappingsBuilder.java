@@ -2,7 +2,7 @@ package org.molgenis.elasticsearch.index;
 
 import java.io.IOException;
 
-import org.elasticsearch.ElasticSearchException;
+import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -28,23 +28,6 @@ public class MappingsBuilder
 				.startObject("properties");
 
 		EntityMetaData meta = repository.getEntityMetaData();
-
-		// Aggregateable field combinations
-		for (AttributeMetaData attr1 : meta.getAtomicAttributes())
-		{
-			if (attr1.isAggregateable())
-			{
-				for (AttributeMetaData attr2 : repository.getEntityMetaData().getAtomicAttributes())
-				{
-					if (attr2.isAggregateable() && !attr1.getName().equalsIgnoreCase(attr2.getName()))
-					{
-						String name = attr1.getName() + "~" + attr2.getName();
-						jsonBuilder.startObject(name).field("type", "string").field("index", "not_analyzed")
-								.endObject();
-					}
-				}
-			}
-		}
 
 		for (AttributeMetaData attr : meta.getAtomicAttributes())
 		{
@@ -117,7 +100,7 @@ public class MappingsBuilder
 			}
 			case FILE:
 			case IMAGE:
-				throw new ElasticSearchException("indexing of molgenis field type [" + enumType + "] not supported");
+				throw new ElasticsearchException("indexing of molgenis field type [" + enumType + "] not supported");
 			default:
 				return "string";
 		}

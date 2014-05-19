@@ -6,8 +6,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchType;
-import org.elasticsearch.search.facet.FacetBuilders;
-import org.elasticsearch.search.facet.terms.TermsFacet.ComparatorType;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
 import org.molgenis.data.Query;
 
 /**
@@ -62,23 +61,25 @@ public class SearchRequestGenerator
 		// Aggregates
 		if (StringUtils.isNotBlank(aggregateField1) || StringUtils.isNotBlank(aggregateField2))
 		{
-			StringBuilder sb = new StringBuilder();
-			if (StringUtils.isNotBlank(aggregateField1))
-			{
-				sb.append(aggregateField1);
-				if (StringUtils.isNotBlank(aggregateField2))
-				{
-					sb.append("~");
-				}
-			}
+			searchRequestBuilder.setSize(0);
 
-			if (StringUtils.isNotBlank(aggregateField2))
+			TermsBuilder termsBuilder;
+			if (StringUtils.isNotBlank(aggregateField1) && StringUtils.isNotBlank(aggregateField2))
 			{
-				sb.append(aggregateField2);
+				termsBuilder = new TermsBuilder(aggregateField1).size(Integer.MAX_VALUE).field(aggregateField1);
+				TermsBuilder subTermsBuilder = new TermsBuilder(aggregateField2).size(Integer.MAX_VALUE).field(
+						aggregateField2);
+				termsBuilder.subAggregation(subTermsBuilder);
 			}
-
-			searchRequestBuilder.addFacet(FacetBuilders.termsFacet(sb.toString()).fields(sb.toString()).allTerms(true)
-					.size(Integer.MAX_VALUE).order(ComparatorType.TERM));
+			else if (StringUtils.isNotBlank(aggregateField1))
+			{
+				termsBuilder = new TermsBuilder(aggregateField1).size(Integer.MAX_VALUE).field(aggregateField1);
+			}
+			else
+			{
+				termsBuilder = new TermsBuilder(aggregateField2).size(Integer.MAX_VALUE).field(aggregateField2);
+			}
+			searchRequestBuilder.addAggregation(termsBuilder);
 		}
 	}
 

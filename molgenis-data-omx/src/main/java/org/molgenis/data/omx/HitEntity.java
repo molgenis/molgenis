@@ -38,10 +38,10 @@ public class HitEntity extends AbstractEntity
 
 	public HitEntity(Hit hit, Set<String> attributeNames, EntityMetaData entityMetaData, DataService dataService)
 	{
-		if (hit == null) new IllegalArgumentException("Hit is null");
-		if (attributeNames == null) new IllegalArgumentException("attributeNames is null");
-		if (entityMetaData == null) new IllegalArgumentException("entityMetaData is null");
-		if (dataService == null) new IllegalArgumentException("dataService is null");
+		if (hit == null) throw new IllegalArgumentException("Hit is null");
+		if (attributeNames == null) throw new IllegalArgumentException("attributeNames is null");
+		if (entityMetaData == null) throw new IllegalArgumentException("entityMetaData is null");
+		if (dataService == null) throw new IllegalArgumentException("dataService is null");
 		this.columnValueMap = hit.getColumnValueMap();
 		this.attributeNames = attributeNames;
 		this.entityMetaData = entityMetaData;
