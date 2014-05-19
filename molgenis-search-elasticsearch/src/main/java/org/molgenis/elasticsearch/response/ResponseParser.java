@@ -2,6 +2,7 @@ package org.molgenis.elasticsearch.response;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.Set;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.ShardSearchFailure;
 import org.elasticsearch.common.collect.Iterables;
+import org.elasticsearch.common.collect.Sets;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
 import org.elasticsearch.search.aggregations.Aggregation;
@@ -22,7 +24,6 @@ import org.molgenis.search.Hit;
 import org.molgenis.search.SearchResult;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 /**
  * Generates a SearchResult from the ElasticSearch SearchResponse object
@@ -84,9 +85,10 @@ public class ResponseParser
 		if (aggregations != null)
 		{
 			List<List<Long>> matrix = Lists.newArrayList();
-			Set<String> xLabels = Sets.newLinkedHashSet();
-			Set<String> yLabels = Sets.newLinkedHashSet();
-
+			Set<String> xLabelsSet = Sets.newHashSet();
+			Set<String> yLabelsSet = Sets.newHashSet();
+			List<String> xLabels = new ArrayList<String>();
+			List<String> yLabels = new ArrayList<String>();
 			final int nrAggregations = Iterables.size(aggregations);
 			if (nrAggregations != 1)
 			{
@@ -121,7 +123,7 @@ public class ResponseParser
 					// create labels
 					for (Bucket bucket : buckets)
 					{
-						xLabels.add(bucket.getKey());
+						if (!xLabelsSet.contains(bucket.getKey())) xLabelsSet.add(bucket.getKey());
 
 						Aggregations subAggregations = bucket.getAggregations();
 						if (subAggregations != null)
@@ -142,12 +144,17 @@ public class ResponseParser
 
 							for (Bucket subBucket : subTerms.getBuckets())
 							{
-								yLabels.add(subBucket.getKey());
+								yLabelsSet.add(subBucket.getKey());
 							}
 
 						}
 					}
+
+					xLabels = new ArrayList<String>(xLabelsSet);
+					Collections.sort(xLabels);
 					xLabels.add("Total");
+					yLabels = new ArrayList<String>(yLabelsSet);
+					Collections.sort(yLabels);
 					yLabels.add("Total");
 
 					// create label map

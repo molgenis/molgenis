@@ -1,15 +1,14 @@
 package org.molgenis.data;
 
 import java.util.List;
-import java.util.Set;
 
 public class AggregateResult
 {
 	private final List<List<Long>> matrix;
-	private final Set<String> xLabels;
-	private final Set<String> yLabels;
+	private final List<String> xLabels;
+	private final List<String> yLabels;
 
-	public AggregateResult(List<List<Long>> matrix, Set<String> xLabels, Set<String> yLabels)
+	public AggregateResult(List<List<Long>> matrix, List<String> xLabels, List<String> yLabels)
 	{
 		this.matrix = matrix;
 		this.xLabels = xLabels;
@@ -21,12 +20,12 @@ public class AggregateResult
 		return matrix;
 	}
 
-	public Set<String> getxLabels()
+	public List<String> getxLabels()
 	{
 		return xLabels;
 	}
 
-	public Set<String> getyLabels()
+	public List<String> getyLabels()
 	{
 		return yLabels;
 	}
