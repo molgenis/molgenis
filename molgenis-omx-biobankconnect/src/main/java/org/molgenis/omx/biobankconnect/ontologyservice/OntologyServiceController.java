@@ -41,7 +41,6 @@ import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -120,10 +119,6 @@ public class OntologyServiceController extends MolgenisPluginController
 				response.addHeader("Content-Disposition", "attachment; filename=" + getCsvFileName("match-result"));
 				excelWriter = new ExcelWriter(response.getOutputStream());
 				excelWriter.addCellProcessor(new LowerCaseProcessor(true, false));
-				// Writable sheetWriterRank = null;(Arrays.asList("InputTerm",
-				// "OntologyTerm", "Synonym used for matching",
-				// "OntologyTermUrl", "OntologyUrl", "CombinedScore",
-				// "LuceneScore"));
 				int iteration = inputTerms.size() / 1000 + 1;
 				List<String> columnHeaders = Arrays.asList("InputTerm", "OntologyTerm", "Synonym used for matching",
 						"OntologyTermUrl", "OntologyUrl", "CombinedScore", "LuceneScore");
@@ -149,27 +144,6 @@ public class OntologyServiceController extends MolgenisPluginController
 						}
 					}
 				}
-				// for (String term : inputTerms)
-				// {
-				// for (Hit hit : ontologyService.search(ontologyUrl,
-				// term).getSearchHits())
-				// {
-				// Entity row = new MapEntity();
-				// row.set("InputTerm", term);
-				// row.set("OntologyTerm",
-				// hit.getColumnValueMap().get("ontologyTerm"));
-				// row.set("Synonym used for matching",
-				// hit.getColumnValueMap().get("ontologyTermSynonym"));
-				// row.set("OntologyTermUrl",
-				// hit.getColumnValueMap().get("ontologyTermIRI"));
-				// row.set("OntologyUrl",
-				// hit.getColumnValueMap().get("ontologyIRI"));
-				// row.set("CombinedScore",
-				// hit.getColumnValueMap().get("combinedScore"));
-				// row.set("LuceneScore", hit.getColumnValueMap().get("score"));
-				// csvWriter.add(row);
-				// }
-				// }
 			}
 			finally
 			{
@@ -201,22 +175,6 @@ public class OntologyServiceController extends MolgenisPluginController
 		}
 		EntityPager pager = new EntityPager(start, num, (long) count, null);
 		return new EntityCollectionResponse(pager, entities, "/match/retrieve");
-	}
-
-	@RequestMapping(value = "/umls/{id}", method = GET, produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public SearchResult retrieveEntityByUMLS(@PathVariable("id")
-	String id)
-	{
-		return ontologyService.searchById("umls", id);
-	}
-
-	@RequestMapping(value = "/{id}", method = GET, produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public SearchResult retrieveEntity(@PathVariable("id")
-	String id)
-	{
-		return ontologyService.searchById("id", id);
 	}
 
 	@RequestMapping(method = POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)

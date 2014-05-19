@@ -1,7 +1,7 @@
 (function($, molgenis) {
 	"use strict";
 	
-	molgenis.OntologySerivce = function molgenis(){}
+	molgenis.OntologySerivce = function OntologySerivce(){};
 	
 	molgenis.OntologySerivce.prototype.updatePageFunction = function(page){
 		var request = {

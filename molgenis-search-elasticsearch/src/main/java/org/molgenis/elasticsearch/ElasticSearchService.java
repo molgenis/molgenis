@@ -19,6 +19,7 @@ import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.deletebyquery.DeleteByQueryResponse;
 import org.elasticsearch.action.deletebyquery.IndexDeleteByQueryResponse;
+import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -32,6 +33,7 @@ import org.molgenis.elasticsearch.index.IndexRequestGenerator;
 import org.molgenis.elasticsearch.index.MappingsBuilder;
 import org.molgenis.elasticsearch.request.SearchRequestGenerator;
 import org.molgenis.elasticsearch.response.ResponseParser;
+import org.molgenis.search.Hit;
 import org.molgenis.search.MultiSearchRequest;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
@@ -89,6 +91,18 @@ public class ElasticSearchService implements SearchService
 		SearchResult result = search(SearchType.COUNT, request);
 
 		return result.getTotalHitCount();
+	}
+
+	@Override
+	public Hit searchById(String documentType, String id)
+	{
+		GetResponse response = client.prepareGet(indexName, sanitizeMapperType(documentType), id).execute().actionGet();
+		Hit hit = null;
+		if (response.isExists())
+		{
+			hit = new Hit(response.getId(), response.getType(), response.getSourceAsMap());
+		}
+		return hit;
 	}
 
 	public SearchResult multiSearch(SearchType searchType, MultiSearchRequest request)
