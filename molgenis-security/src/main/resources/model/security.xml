@@ -4,11 +4,11 @@
 		<entity name="MolgenisUser" system="true" xref_lookup="username,Email,LastName" decorator="org.molgenis.security.user.MolgenisUserDecorator">
 			<description>Anyone who can login</description>
 			<field name="id" type="autoid" hidden="true" description="automatically generated internal id, only for internal use."/>
-			<field name="username" type="string"/>
-			<field name="password_" type="string" description="big fixme: password type"/>
-			<field name="activationCode" type="string" nillable="true" description="Used as alternative authentication mechanism to verify user email and/or if user has lost password."/>
-			<field name="active" type="bool" default="false" description="Boolean to indicate if this account can be used to login"/>
-			<field name="superuser" type="bool" default="false"/>
+			<field name="username" label="Username" type="string"/>
+			<field name="password_" label="Password" type="string" description="big fixme: password type"/>
+			<field name="activationCode" label="Activation code" type="string" nillable="true" description="Used as alternative authentication mechanism to verify user email and/or if user has lost password."/>
+			<field name="active" label="Active" type="bool" default="false" description="Boolean to indicate if this account can be used to login"/>
+			<field name="superuser" label="Superuser" type="bool" default="false"/>
 			<field name="FirstName" label="First name" nillable="true"/>
 			<field name="MiddleNames" label="Middle names" nillable="true"/>
 			<field name="LastName" label="Last name" nillable="true"/>
@@ -29,8 +29,8 @@
 		</entity>
 		<entity name="MolgenisGroup" system="true" xref_lookup="name">
 			<field name="id" type="autoid" hidden="true"/>
-			<field name="name" type="string"/>
-			<field name="active" type="bool" default="true" description="Boolean to indicate whether this group is in use."/>
+			<field name="name" label="Name" type="string"/>
+			<field name="active" label="Active" type="bool" default="true" description="Boolean to indicate whether this group is in use."/>
 		</entity>
 		<entity name="MolgenisGroupMember" system="true">
 			<field name="id" type="autoid" hidden="true"/>	
