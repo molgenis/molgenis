@@ -29,6 +29,7 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl implements
 
 	private MolgenisUser userAdmin;
 	private MolgenisUser anonymousUser;
+	private MolgenisGroup allUsersGroup;
 
 	@Override
 	@Transactional
@@ -40,7 +41,7 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl implements
 
 		userAdmin = new MolgenisUser();
 		userAdmin.setUsername(USERNAME_ADMIN);
-		userAdmin.setPassword(new BCryptPasswordEncoder().encode(adminPassword));
+		userAdmin.setPassword(adminPassword);
 		userAdmin.setEmail(adminEmail);
 		userAdmin.setActive(true);
 		userAdmin.setSuperuser(true);
@@ -49,7 +50,7 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl implements
 
 		anonymousUser = new MolgenisUser();
 		anonymousUser.setUsername(SecurityUtils.ANONYMOUS_USERNAME);
-		anonymousUser.setPassword(new BCryptPasswordEncoder().encode(SecurityUtils.ANONYMOUS_USERNAME));
+		anonymousUser.setPassword(SecurityUtils.ANONYMOUS_USERNAME);
 		anonymousUser.setEmail(anonymousEmail);
 		anonymousUser.setActive(true);
 		anonymousUser.setSuperuser(false);
@@ -61,18 +62,17 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl implements
 		anonymousAuthority.setRole(SecurityUtils.AUTHORITY_ANONYMOUS);
 		dataService.add(UserAuthority.ENTITY_NAME, anonymousAuthority);
 
-		MolgenisGroup usersGroup = new MolgenisGroup();
-		usersGroup.setName(AccountService.ALL_USER_GROUP);
-		dataService.add(MolgenisGroup.ENTITY_NAME, usersGroup);
-		usersGroup.setName(AccountService.ALL_USER_GROUP);
+		allUsersGroup = new MolgenisGroup();
+		allUsersGroup.setName(AccountService.ALL_USER_GROUP);
+		dataService.add(MolgenisGroup.ENTITY_NAME, allUsersGroup);
 
 		GroupAuthority usersGroupHomeAuthority = new GroupAuthority();
-		usersGroupHomeAuthority.setMolgenisGroup(usersGroup);
+		usersGroupHomeAuthority.setMolgenisGroup(allUsersGroup);
 		usersGroupHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + homeControllerId.toUpperCase());
 		dataService.add(GroupAuthority.ENTITY_NAME, usersGroupHomeAuthority);
 
 		GroupAuthority usersGroupUserAccountAuthority = new GroupAuthority();
-		usersGroupUserAccountAuthority.setMolgenisGroup(usersGroup);
+		usersGroupUserAccountAuthority.setMolgenisGroup(allUsersGroup);
 		usersGroupUserAccountAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX
 				+ UserAccountController.ID.toUpperCase());
 		dataService.add(GroupAuthority.ENTITY_NAME, usersGroupUserAccountAuthority);
@@ -80,7 +80,7 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl implements
 		for (String entityName : dataService.getEntityNames())
 		{
 			GroupAuthority entityAuthority = new GroupAuthority();
-			entityAuthority.setMolgenisGroup(usersGroup);
+			entityAuthority.setMolgenisGroup(allUsersGroup);
 			entityAuthority.setRole(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + entityName.toUpperCase());
 			dataService.add(GroupAuthority.ENTITY_NAME, entityAuthority);
 		}
@@ -96,5 +96,11 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl implements
 	public MolgenisUser getUserAdmin()
 	{
 		return userAdmin;
+	}
+
+	@Override
+	public MolgenisGroup getAllUsersGroup()
+	{
+		return allUsersGroup;
 	}
 }

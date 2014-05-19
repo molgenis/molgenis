@@ -3,7 +3,7 @@
 	<#assign fieldName=field.name/>
 	
 	<div class="control-group">
-    	<label class="control-label" for="${fieldName}">${field.name} <#if field.nillable?string('true', 'false') == 'false'>*</#if></label>
+    	<label class="control-label" for="${fieldName}">${field.label} <#if field.nillable?string('true', 'false') == 'false'>*</#if></label>
     	<div class="controls">
     		
     		<#if field.dataType.enumType == 'BOOL'>
