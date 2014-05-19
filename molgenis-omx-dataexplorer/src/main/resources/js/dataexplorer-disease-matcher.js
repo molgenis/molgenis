@@ -21,7 +21,6 @@
 		checkToolAvailable(entityUri);
 	});
 	
-	
 	/**
 	 * Checks if the current state of Molgenis meets the requirements of this tool. Shows warnings and instructions when it does not.
 	 */
@@ -128,13 +127,19 @@
 				}],
 				'num': 10000,
 			},
-			'attributes': ['HPODescription']
+			'attributes': ['geneSymbol', 'HPODescription']
 		}, function(phenotypes){
 			
-			// show the phenotypes for this disease in the info panel
+			// show the phenotypes for this disease in the info panel (for 1 gene)
 			var container = $('#diseasematcher-analysis-right');
 			container.empty();
+			
+			// phenotypes are doubled for each gene, so only use first gene
+			var key = phenotypes.items[0].geneSymbol;
 			$.each(phenotypes.items, function(index, pheno){
+				if (pheno.geneSymbol !== key){
+					return false; // break from .each loop
+				}
 				container.append(pheno.HPODescription + '<br/>');
 			});
 		});

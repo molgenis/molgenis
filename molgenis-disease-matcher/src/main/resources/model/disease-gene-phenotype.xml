@@ -13,5 +13,13 @@
 			<field name="isTypical" type="bool" description="Boolean to indicate if this term is only found in the TYPICAL disease-gene-phenotype set"/>
 			<unique fields="identifier" />
 		</entity>
+		<entity name="DiseaseNames" xref_lookup="diseaseId, diseaseName, mappingMethod">
+			<description>Mapping of OMIM/ORPHANET disease id's to disease names.</description>
+			<field name="id" type="autoid" hidden="true" description="automatically generated internal id, only for internal use"/>
+			<field name="identifier" type="string" description="Combination of diseaseName, diseaseId and mappingMethod"/>
+			<field name="diseaseId" type="string" description="OMIM or ORPHANET identifier"/>
+			<field name="diseaseName" type="string" description="OMIM or ORPHANET disease name"/>
+			<field name="mappingMethod" type="string" description="The phenotype mapping method"/>
+		</entity>
 	</module>
 </molgenis>
