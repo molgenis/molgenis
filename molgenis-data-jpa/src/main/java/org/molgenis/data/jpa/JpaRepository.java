@@ -1097,7 +1097,7 @@ public class JpaRepository extends AbstractCrudRepository
 			}
 		}
 
-		return new AggregateResult(matrix, xLabels, yLabels);
+		return new AggregateResult(matrix, new ArrayList<String>(xLabels), new ArrayList<String>(yLabels));
 	}
 
 	// Get all distinct values of an attribute
