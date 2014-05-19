@@ -29,23 +29,6 @@ public class MappingsBuilder
 
 		EntityMetaData meta = repository.getEntityMetaData();
 
-		// Aggregateable field combinations
-		for (AttributeMetaData attr1 : meta.getAtomicAttributes())
-		{
-			if (attr1.isAggregateable())
-			{
-				for (AttributeMetaData attr2 : repository.getEntityMetaData().getAtomicAttributes())
-				{
-					if (attr2.isAggregateable() && !attr1.getName().equalsIgnoreCase(attr2.getName()))
-					{
-						String name = attr1.getName() + "~" + attr2.getName();
-						jsonBuilder.startObject(name).field("type", "string").field("index", "not_analyzed")
-								.endObject();
-					}
-				}
-			}
-		}
-
 		for (AttributeMetaData attr : meta.getAtomicAttributes())
 		{
 			String esType = getType(attr);
