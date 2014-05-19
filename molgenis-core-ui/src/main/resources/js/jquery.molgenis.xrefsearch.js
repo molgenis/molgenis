@@ -141,10 +141,22 @@
 			};
 
         if (attributeMetaData.fieldType === 'MREF') {
-            var dropdown = $('<select class="operator top"><option value="OR">OR</option><option value="AND">AND</option></select>');
-            dropdown.val(options.operator);
-            dropdown.width(70);
-            container.prepend(dropdown);
+            var checkbox = $('<input type="checkbox" class="exclude">');//Checkbox is only for jquery-switch, it should not be included in the query
+    		checkbox.attr('checked', options.operator == 'OR');
+    		container.prepend(checkbox);
+    		
+    		var andOrSwitch = checkbox.bootstrapSwitch({
+    			onText: 'OR',
+    			offText: 'AND',
+    			onSwitchChange: function(event, state) {
+    				var operator = state ? 'OR' : 'AND';
+    				operatorInput.val(operator);
+    			}
+    		});
+    		
+    		var operatorInput = $('<input type="hidden" class="operator top" >');
+    		operatorInput.val(options.operator);
+    		andOrSwitch.append(operatorInput);
         }
 		
 		var element = createInput(attributeMetaData.fieldType, attrs, options.values);

@@ -98,6 +98,13 @@
 			
 			var pane = $('<div class="tab-pane' + (i === 0 ? ' active"' : '"') + ' id="' + tabId + '">');
 			var paneContainer = $('<div class="well"></div>');
+			
+			if (compoundAttributes.length > 1){
+				paneContainer.addClass('filter-wizard-fixed-height');
+			} else {
+				paneContainer.removeClass('filter-wizard-fixed-height');
+			}
+			
 			$.each(compoundAttribute.attributes, function(i, attribute) {
 				if(attribute.fieldType !== 'COMPOUND') {
 					paneContainer.append(molgenis.dataexplorer.filter.createFilterControls(attribute, attributeFilters[attribute.href], true));
@@ -107,11 +114,14 @@
 			paneItems.push(pane);
 		});
 		
+		
 		if(compoundAttributes.length > 1){
             $('.wizard-steps', wizard).show();
             $('.wizard-steps', wizard).html(listItems.join(''));
+            $('.pager', wizard).show();
         }else{
             $('.wizard-steps', wizard).hide();
+            $('.pager', wizard).hide();
         }
         $('.tab-content', wizard).html(paneItems);
         
