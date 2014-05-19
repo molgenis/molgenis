@@ -11,8 +11,8 @@
 	
 			<#elseif field.dataType.enumType == 'TEXT' || field.dataType.enumType =='HTML'>
 				<textarea name="${fieldName}" id="${fieldName}" <#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <@validationOptions field /> ><#if entity!='' && entity.get(fieldName)??>${entity.get(fieldName)!?html}</#if></textarea>
-	
-			<#elseif field.dataType.enumType == 'XREF'>
+			
+			<#elseif field.dataType.enumType == 'XREF' || field.dataType.enumType == 'CATEGORICAL'>
 				<input type="hidden" name="${fieldName}" id="${fieldName}" <@validationOptions field />>
 				<script>
 					$(document).ready(function() {
