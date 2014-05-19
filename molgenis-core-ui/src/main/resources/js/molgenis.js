@@ -4,7 +4,7 @@
     // workaround for "Uncaught RangeError: Maximum call stack size exceeded"
     // http://stackoverflow.com/a/19190216
     $.fn.modal.Constructor.prototype.enforceFocus = function() {};
-
+    
 	molgenis.setContextUrl = function(contextUrl) {
 		molgenis.contextUrl = contextUrl;
 	};
@@ -76,7 +76,6 @@
 
 		function showDatasetsindexerStatusMessage() {
 			$.get("/dataindexerstatus", function(response) {
-				//console.log("showDatasetsindexerStatusMessage" + new Date()); //activate voor bugfixing
 				$('.datasetsindexerAlerts').empty();
 				if (response.isRunning === true) {
 					setTimeout(showDatasetsindexerStatusMessage, 3000);
@@ -616,8 +615,9 @@ function uncapitalize(s) {
 function showSpinner(callback) {
 	var spinner = $('#spinner');
 	if (spinner.length === 0) {
+		// do not add fade effect on modal: http://stackoverflow.com/a/22101894
 		var items = [];
-		items.push('<div id="spinner" class="modal hide fade" data-backdrop="static">');
+		items.push('<div id="spinner" class="modal hide" data-backdrop="static">');
 		items.push('<div class="modal-header"><h3>Loading ...</h3></div>');
 		items.push('<div class="modal-body"><div class="modal-body-inner"><img src="/img/waiting-spinner.gif"></div></div>');
 		items.push('</div>');
