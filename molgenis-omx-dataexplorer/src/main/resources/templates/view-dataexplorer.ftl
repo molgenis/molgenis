@@ -8,6 +8,7 @@
 	"jquery-ui-1.9.2.custom.min.css",
 	"select2.css",
 	"iThing-min.css",
+	"bootstrap-switch.min.css",
 	"dataexplorer.css"]>
 <#assign js=[
 	"jquery-ui-1.9.2.custom.min.js",
@@ -20,6 +21,7 @@
 	"jquery.molgenis.tree.js",
 	"select2.min.js",
 	"jQEditRangeSlider-min.js",
+	"bootstrap-switch.min.js"
 	"jquery.molgenis.xrefsearch.js",
 	"dataexplorer.js",
 	"jquery.molgenis.table.js"]>

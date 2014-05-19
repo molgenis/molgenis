@@ -155,14 +155,18 @@ a.accordion-toggle:hover,a.accordion-toggle:focus,a.accordion-toggle:active
 }
 
 #filter-wizard-modal .modal-body {
-	min-height: 525px;
-	max-height: 525px;
+	min-height: 548px;
+	max-height: 548px;
+	padding-bottom: 0;
 }
 
 #filter-wizard-modal .well {
-	height: 400px;
 	overflow: auto;
 	margin-bottom: 10px;
+}
+
+.filter-wizard-fixed-height {
+	height: 400px;
 }
 
 #filter-wizard-modal .pager {
@@ -185,9 +189,14 @@ ul.fancytree-container {
 	outline: none;
 }
 
+.bootstrap-switch {
+	width: 70px;
+	min-width: 70px;
+}
+
 #slider {
 	margin: 0 30px;
-	width: 525px;
+	width: 450px;
 }
 
 .form-horizontal .controls {
