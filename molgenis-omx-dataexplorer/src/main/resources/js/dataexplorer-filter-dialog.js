@@ -11,7 +11,7 @@
 	
 	molgenis.dataexplorer = molgenis.dataexplorer || {};
 	molgenis.dataexplorer.filter = molgenis.dataexplorer.filter || {};
-	var self = molgenis.dataexplorer.filter.form = molgenis.dataexplorer.filter.form || {};
+	var self = molgenis.dataexplorer.filter.dialog = molgenis.dataexplorer.filter.dialog || {};
 	
 	self.openFilterModal = function(attribute, attributeFilter) {
 		var modal = createFilterModal();
