@@ -55,6 +55,7 @@ public interface ${JavaName(entity)} extends <#if entity.hasImplements()><#list 
 		</#if>
 	</#if>
 @javax.xml.bind.annotation.XmlAccessorType(javax.xml.bind.annotation.XmlAccessType.FIELD)
+@edu.umd.cs.findbugs.annotations.SuppressWarnings(value={"EI_EXPOSE_REP", "EI_EXPOSE_REP2"}, justification="Exposing internal representation is accepted")
 public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getAncestor().namespace}.${JavaName(entity.getAncestor())}<#else>org.molgenis.data.support.AbstractEntity</#if> implements org.molgenis.data.Entity<#if entity.hasImplements()>,<#list entity.getImplements() as i> ${i.namespace}.${JavaName(i)}<#if i_has_next>,</#if></#list></#if>
 </#if>
 {

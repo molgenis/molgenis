@@ -1,8 +1,11 @@
 package org.molgenis.tools.compare;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -41,7 +44,8 @@ public class IBDParser
 		String categoryFilePath = path + "category.csv";
 		String featureFilePath = path + "observablefeature.csv";
 
-		PrintWriter logfile = new PrintWriter(new File(path + "logfile.txt"));
+		PrintWriter logfile = new PrintWriter(new OutputStreamWriter(new FileOutputStream(
+				new File(path + "logfile.txt")), Charset.forName("UTF-8")));
 		try
 		{
 			File dir = new File(inputFolder);

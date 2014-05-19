@@ -4,16 +4,41 @@ import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.sql.DataSource;
 
+import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.*;
+import org.molgenis.data.AggregateResult;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.CrudRepository;
+import org.molgenis.data.DataConverter;
+import org.molgenis.data.DatabaseAction;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Manageable;
+import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule;
+import org.molgenis.data.Queryable;
+import org.molgenis.data.Repository;
+import org.molgenis.data.Writable;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.fieldtypes.*;
+import org.molgenis.fieldtypes.BoolField;
+import org.molgenis.fieldtypes.FieldType;
+import org.molgenis.fieldtypes.IntField;
+import org.molgenis.fieldtypes.MrefField;
+import org.molgenis.fieldtypes.StringField;
+import org.molgenis.fieldtypes.TextField;
+import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.model.MolgenisModelException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -23,15 +48,17 @@ import org.springframework.jdbc.core.RowMapper;
 
 public class MysqlRepository implements Repository, Writable, Queryable, Manageable, CrudRepository
 {
+	private static final Logger logger = Logger.getLogger(MysqlRepository.class);
+
 	public static final int BATCH_SIZE = 100000;
-	private EntityMetaData metaData;
-	private MysqlRepositoryCollection repositoryCollection;
+	private final EntityMetaData metaData;
+	private final MysqlRepositoryCollection repositoryCollection;
 	private DataSource ds;
 	private JdbcTemplate jdbcTemplate;
 
 	protected MysqlRepository(MysqlRepositoryCollection collection, EntityMetaData metaData)
 	{
-		if (metaData == null) throw new IllegalArgumentException("DataSource is null");
+		if (collection == null) throw new IllegalArgumentException("DataSource is null");
 		if (metaData == null) throw new IllegalArgumentException("metaData is null");
 		this.metaData = metaData;
 		this.repositoryCollection = collection;
@@ -44,7 +71,7 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 	{
 		this.ds = dataSource;
 		this.jdbcTemplate = new JdbcTemplate(ds);
-		System.out.println("set:" + dataSource);
+		logger.debug("set:" + dataSource);
 	}
 
 	@Override
@@ -103,32 +130,33 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 
 	protected String getCreateSql() throws MolgenisModelException
 	{
-		String sql = "CREATE TABLE IF NOT EXISTS " + getEntityMetaData().getName() + "(";
+		StringBuilder sql = new StringBuilder();
+		sql.append("CREATE TABLE IF NOT EXISTS ").append(getEntityMetaData().getName()).append('(');
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 		{
 			if (!(att.getDataType() instanceof MrefField))
 			{
-				sql += att.getName() + " ";
+				sql.append(att.getName()).append(' ');
 				// xref adopt type of the identifier of referenced entity
 				if (att.getDataType() instanceof XrefField)
 				{
-					sql += att.getRefEntity().getIdAttribute().getDataType().getMysqlType();
+					sql.append(att.getRefEntity().getIdAttribute().getDataType().getMysqlType());
 				}
 				else
 				{
-					sql += att.getDataType().getMysqlType();
+					sql.append(att.getDataType().getMysqlType());
 				}
 				// not null
 				if (!att.isNillable())
 				{
-					sql += " NOT NULL";
+					sql.append(" NOT NULL");
 				}
 				// int + auto = auto_increment
 				if (att.getDataType().equals(MolgenisFieldTypes.INT) && att.isAuto())
 				{
-					sql += " AUTO_INCREMENT";
+					sql.append(" AUTO_INCREMENT");
 				}
-				sql += ", ";
+				sql.append(", ");
 			}
 		}
 		// primary key is first attribute unless otherwise indicate
@@ -138,12 +166,12 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 						+ ") cannot be XREF or MREF");
 		if (idAttribute.isNillable() == true) throw new RuntimeException("primary key(" + getEntityMetaData().getName()
 				+ "." + idAttribute.getName() + ") must be NOT NULL");
-		sql += "PRIMARY KEY (" + getEntityMetaData().getIdAttribute().getName() + ")";
+		sql.append("PRIMARY KEY (").append(getEntityMetaData().getIdAttribute().getName()).append(')');
 
 		// close
-		sql += ") ENGINE=InnoDB;";
+		sql.append(") ENGINE=InnoDB;");
 
-		return sql;
+		return sql.toString();
 	}
 
 	protected List<String> getCreateFKeySql()
@@ -153,9 +181,10 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 			if (att.getDataType().equals(MolgenisFieldTypes.XREF))
 			{
-				sql.add("ALTER TABLE " + getEntityMetaData().getName() + " ADD FOREIGN KEY (" + att.getName()
-						+ ") REFERENCES " + att.getRefEntity().getName() + "("
-						+ att.getRefEntity().getIdAttribute().getName() + ")");
+				sql.add(new StringBuilder().append("ALTER TABLE ").append(getEntityMetaData().getName())
+						.append(" ADD FOREIGN KEY (").append(att.getName()).append(") REFERENCES ")
+						.append(att.getRefEntity().getName()).append('(')
+						.append(att.getRefEntity().getIdAttribute().getName()).append(')').toString());
 			}
 		return sql;
 	}
@@ -180,15 +209,15 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 
 	protected String iteratorSql()
 	{
-		String sql = "SELECT ";
+		StringBuilder sql = new StringBuilder("SELECT ");
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 		{
-			sql += att.getName() + ", ";
+			sql.append(att.getName()).append(", ");
 		}
-		if (sql.endsWith(", ")) sql = sql.substring(0, sql.length() - 2);
-		else sql += "*";
-		sql += " FROM " + getEntityMetaData().getName();
-		return sql;
+		if (sql.charAt(sql.length() - 1) == ' ' && sql.charAt(sql.length() - 2) == ',') sql.setLength(sql.length() - 2);
+		else sql.append('*');
+		sql.append(" FROM ").append(getEntityMetaData().getName());
+		return sql.toString();
 	}
 
 	@Override
@@ -218,21 +247,22 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 
 	protected String getInsertSql()
 	{
-		String sql = "INSERT INTO " + this.getName() + " (";
-		String params = "";
+		StringBuilder sql = new StringBuilder();
+		sql.append("INSERT INTO ").append(this.getName()).append(" (");
+		StringBuilder params = new StringBuilder();
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 			if (!(att.getDataType() instanceof MrefField))
 			{
-				sql += att.getName() + ", ";
-				params += "?, ";
+				sql.append(att.getName()).append(", ");
+				params.append("?, ");
 			}
-		if (sql.endsWith(", "))
+		if (sql.charAt(sql.length() - 1) == ' ' && sql.charAt(sql.length() - 2) == ',')
 		{
-			sql = sql.substring(0, sql.length() - 2);
-			params = params.substring(0, params.length() - 2);
+			sql.setLength(sql.length() - 2);
+			params.setLength(params.length() - 2);
 		}
-		sql += ") VALUES (" + params + ")";
-		return sql;
+		sql.append(") VALUES (").append(params).append(")");
+		return sql.toString();
 	}
 
 	@Override
@@ -349,7 +379,7 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 			@Override
 			public void setValues(PreparedStatement preparedStatement, int i) throws SQLException
 			{
-				System.out.println("mref: " + mrefs.get(i).get(idAttribute.getName()) + ", "
+				logger.debug("mref: " + mrefs.get(i).get(idAttribute.getName()) + ", "
 						+ mrefs.get(i).get(att.getName()));
 
 				preparedStatement.setObject(1, mrefs.get(i).get(idAttribute.getName()));
@@ -389,31 +419,32 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 	public long count(Query q)
 	{
 		String sql = getCountSql(q);
-		System.out.println(sql);
+		logger.debug(sql);
 		return jdbcTemplate.queryForObject(sql, Long.class);
 	}
 
 	protected String getSelectSql(Query q)
 	{
-		String select = "SELECT ";
-		String group = "";
+		StringBuilder select = new StringBuilder("SELECT ");
+		StringBuilder group = new StringBuilder();
 		int count = 0;
 		AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 		{
-			if (count > 0) select += ", ";
+			if (count > 0) select.append(", ");
 
 			// TODO needed when autoids are used to join
 			if (att.getDataType() instanceof MrefField)
 			{
-				select += "GROUP_CONCAT(DISTINCT(" + att.getName() + "." + att.getName() + ")) AS " + att.getName();
+				select.append("GROUP_CONCAT(DISTINCT(").append(att.getName()).append('.').append(att.getName())
+						.append(")) AS ").append(att.getName());
 
 			}
 			else
 			{
-				select += "this." + att.getName();
-				if (group.length() > 0) group += ", this." + att.getName();
-				else group += "this." + att.getName();
+				select.append("this.").append(att.getName());
+				if (group.length() > 0) group.append(", this.").append(att.getName());
+				else group.append("this.").append(att.getName());
 			}
 			// }
 			count++;
@@ -421,18 +452,18 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 		}
 
 		// from
-		String result = select + getFromSql();
+		StringBuilder result = new StringBuilder().append(select).append(getFromSql());
 		// where
 		String where = getWhereSql(q);
-		if (where.length() > 0) result += " " + where;
+		if (where.length() > 0) result.append(' ').append(where);
 		// group by
-		if (select.contains("GROUP_CONCAT") && group.length() > 0) result += " GROUP BY " + group;
+		if (select.indexOf("GROUP_CONCAT") != -1 && group.length() > 0) result.append(" GROUP BY ").append(group);
 		// order by
-		result += " " + getSortSql(q);
+		result.append(' ').append(getSortSql(q));
 		// limit
-		if (q.getPageSize() > 0) result += " LIMIT " + q.getPageSize();
-		if (q.getOffset() > 0) result += " OFFSET " + q.getOffset();
-		return result.trim();
+		if (q.getPageSize() > 0) result.append(" LIMIT ").append(q.getPageSize());
+		if (q.getOffset() > 0) result.append(" OFFSET ").append(q.getOffset());
+		return result.toString().trim();
 	}
 
 	@Override
@@ -441,8 +472,8 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 		String sql = getSelectSql(q);
 
 		// tmp:
-		System.out.println("query: " + q);
-		System.out.println("sql: " + sql);
+		logger.debug("query: " + q);
+		logger.debug("sql: " + sql);
 
 		return jdbcTemplate.query(sql, new EntityMapper());
 	}
@@ -502,20 +533,22 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 
 	protected String getFromSql()
 	{
-		String from = " FROM " + getEntityMetaData().getName() + " AS this";
+		StringBuilder from = new StringBuilder();
+		from.append(" FROM ").append(getEntityMetaData().getName()).append(" AS this");
 		AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 			if (att.getDataType() instanceof MrefField)
 			{
 				// extra join so we can filter on the mrefs
-				from += " LEFT JOIN " + getEntityMetaData().getName() + "_" + att.getName() + " AS " + att.getName()
-						+ "_filter ON (this." + idAttribute.getName() + " = " + att.getName() + "_filter."
-						+ idAttribute.getName() + ") LEFT JOIN " + getEntityMetaData().getName() + "_" + att.getName()
-						+ " AS " + att.getName() + " ON (this." + idAttribute.getName() + " = " + att.getName() + "."
-						+ idAttribute.getName() + ")";
+				from.append(" LEFT JOIN ").append(getEntityMetaData().getName()).append('_').append(att.getName())
+						.append(" AS ").append(att.getName()).append("_filter ON (this.").append(idAttribute.getName())
+						.append(" = ").append(att.getName()).append("_filter.").append(idAttribute.getName())
+						.append(") LEFT JOIN ").append(getEntityMetaData().getName()).append('_').append(att.getName())
+						.append(" AS ").append(att.getName()).append(" ON (this.").append(idAttribute.getName())
+						.append(" = ").append(att.getName()).append('.').append(idAttribute.getName()).append(')');
 			}
 
-		return from;
+		return from.toString();
 	}
 
 	protected String getCountSql(Query q)
@@ -523,33 +556,36 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 		String where = getWhereSql(q);
 		String from = getFromSql();
 		String idAttribute = getEntityMetaData().getIdAttribute().getName();
-		if (where.length() > 0) return "SELECT COUNT(DISTINCT this." + idAttribute + ")" + from + " " + where;
-		return "SELECT COUNT(DISTINCT this." + idAttribute + ")" + from;
+		if (where.length() > 0) return new StringBuilder("SELECT COUNT(DISTINCT this.").append(idAttribute).append(')')
+				.append(from).append(' ').append(where).toString();
+		return new StringBuilder("SELECT COUNT(DISTINCT this.").append(idAttribute).append(')').append(from).toString();
 	}
 
 	protected String getWhereSql(Query q)
 	{
-		String result = "";
+		StringBuilder result = new StringBuilder();
 		for (QueryRule r : q.getRules())
 		{
-			String predicate = "";
+			StringBuilder predicate = new StringBuilder();
 			switch (r.getOperator())
 			{
 				case SEARCH:
-					String search = "";
+					StringBuilder search = new StringBuilder();
 					for (AttributeMetaData att : getEntityMetaData().getAttributes())
 					{
 						// TODO: other data types???
 						if (att.getDataType() instanceof StringField || att.getDataType() instanceof TextField)
 						{
-							search += " OR this." + att.getName() + " LIKE '%" + r.getValue() + "%'";
+							search.append(" OR this.").append(att.getName()).append(" LIKE '%").append(r.getValue())
+									.append("%'");
 						}
 						else
 						{
-							search += " OR CAST(this." + att.getName() + " as CHAR) LIKE '%" + r.getValue() + "%'";
+							search.append(" OR CAST(this.").append(att.getName()).append(" as CHAR) LIKE '%")
+									.append(r.getValue()).append("%'");
 						}
 					}
-					if (search.length() > 0) result += "(" + search.substring(4) + ")";
+					if (search.length() > 0) result.append('(').append(search.substring(4)).append(')');
 					break;
 				case AND:
 					break;
@@ -557,11 +593,11 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 					throw new UnsupportedOperationException();
 					// break;
 				case OR:
-					result += " OR ";
+					result.append(" OR ");
 					break;
 				case IN:
 					AttributeMetaData att = getEntityMetaData().getAttribute(r.getField());
-					String in = "'UNKNOWN VALUE'";
+					StringBuilder in = new StringBuilder("'UNKNOWN VALUE'");
 					List<Object> values = new ArrayList<Object>();
 					if (!(r.getValue() instanceof List))
 					{
@@ -575,13 +611,13 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 					boolean quotes = att.getDataType() instanceof StringField || att.getDataType() instanceof TextField;
 					for (Object o : values)
 					{
-						if (quotes) in += ",'" + o + "'";
-						else in += "," + o;
+						if (quotes) in.append(",'").append(o).append('\'');
+						else in.append(',').append(o);
 					}
 
-					if (att.getDataType() instanceof MrefField) result += att.getName() + "_filter." + r.getField()
-							+ " IN(" + in + ")";
-					else result += "this." + r.getField() + " IN(" + in + ")";
+					if (att.getDataType() instanceof MrefField) result.append(att.getName()).append("_filter.")
+							.append(r.getField()).append(" IN(").append(in).append(')');
+					else result.append("this.").append(r.getField()).append(" IN(").append(in).append(')');
 					break;
 				default:
 					// comparable values...
@@ -589,62 +625,64 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 					if (att == null) throw new RuntimeException("Query failed: attribute '" + r.getField()
 							+ "' unknown");
 					FieldType type = att.getDataType();
-					if (type instanceof MrefField) predicate += att.getName() + "_filter." + r.getField();
-					else predicate += "this." + r.getField();
+					if (type instanceof MrefField) predicate.append(att.getName()).append("_filter.")
+							.append(r.getField());
+					else predicate.append("this.").append(r.getField());
 					switch (r.getOperator())
 					{
 						case EQUALS:
-							predicate += " =";
+							predicate.append(" =");
 							break;
 						case GREATER:
-							predicate += " >";
+							predicate.append(" >");
 							break;
 						case LESS:
-							predicate += " <";
+							predicate.append(" <");
 							break;
 						case GREATER_EQUAL:
-							predicate += " >=";
+							predicate.append(" >=");
 							break;
 						case LESS_EQUAL:
-							predicate += " <=";
+							predicate.append(" <=");
 							break;
 						default:
 							throw new RuntimeException("cannot solve query rule:  " + r);
 					}
-					if (type instanceof IntField || type instanceof BoolField) predicate += " " + r.getValue() + "";
-					else predicate += " '" + r.getValue() + "'";
+					if (type instanceof IntField || type instanceof BoolField) predicate.append(' ')
+							.append(r.getValue()).append("");
+					else predicate.append(" '").append(r.getValue()).append('\'');
 
-					if (result.length() > 0 && !result.endsWith(" OR ")) result += " AND ";
-					result += predicate;
+					if (result.length() > 0 && !result.toString().endsWith(" OR ")) result.append(" AND ");
+					result.append(predicate);
 			}
 		}
-		if (result.length() > 0) return "WHERE " + result.trim();
+		if (result.length() > 0) return "WHERE " + result.toString().trim();
 		else return "";
 	}
 
 	protected String getSortSql(Query q)
 	{
-		String sortSql = "";
+		StringBuilder sortSql = new StringBuilder();
 		if (q.getSort() != null)
 		{
 			for (Sort.Order o : q.getSort())
 			{
 				AttributeMetaData att = getEntityMetaData().getAttribute(o.getProperty());
-				if (att.getDataType() instanceof MrefField) sortSql += ", " + att.getName();
-				else sortSql += ", " + att.getName();
+				if (att.getDataType() instanceof MrefField) sortSql.append(", ").append(att.getName());
+				else sortSql.append(", ").append(att.getName());
 				if (o.getDirection().equals(Sort.Direction.DESC))
 				{
-					sortSql += " DESC";
+					sortSql.append(" DESC");
 				}
 				else
 				{
-					sortSql += " ASC";
+					sortSql.append(" ASC");
 				}
 			}
 
-			if (sortSql.length() > 0) sortSql = "ORDER BY " + sortSql.substring(2);
+			if (sortSql.length() > 0) sortSql = new StringBuilder("ORDER BY ").append(sortSql.substring(2));
 		}
-		return sortSql;
+		return sortSql.toString();
 	}
 
 	private String formatValue(AttributeMetaData att, Object value)
@@ -693,7 +731,7 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 			public void setValues(PreparedStatement preparedStatement, int rowIndex) throws SQLException
 			{
 				Entity e = batch.get(rowIndex);
-				System.out.println("updating: " + e);
+				logger.debug("updating: " + e);
 				Object idValue = idAttribute.getDataType().convert(e.get(idAttribute.getName()));
 				ids.add(idValue);
 				int fieldIndex = 1;
@@ -777,19 +815,19 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 		AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
 
 		// create sql
-		String sql = "UPDATE " + this.getName() + " SET ";
+		StringBuilder sql = new StringBuilder("UPDATE ").append(this.getName()).append(" SET ");
 		String params = "";
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 			if (!(att.getDataType() instanceof MrefField))
 			{
-				sql += att.getName() + " = ?, ";
+				sql.append(att.getName()).append(" = ?, ");
 			}
-		if (sql.endsWith(", "))
+		if (sql.charAt(sql.length() - 1) == ' ' && sql.charAt(sql.length() - 2) == ',')
 		{
-			sql = sql.substring(0, sql.length() - 2);
+			sql.setLength(sql.length() - 2);
 		}
-		sql += " WHERE " + idAttribute.getName() + "= ?";
-		return sql;
+		sql.append(" WHERE ").append(idAttribute.getName()).append("= ?");
+		return sql.toString();
 	}
 
 	@Override
