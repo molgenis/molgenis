@@ -77,6 +77,12 @@
 				'field' : ONTOLOGY_IRI,
 				'operator' : 'EQUALS',
 				'value' : ontology[ONTOLOGY_IRI]
+			},{
+				'operator' : 'AND'
+			},{
+				'field' : LAST,
+				'operator' : 'EQUALS',
+				'value' : false
 			}]
 		}}, null);
 		return rootOntologyTerms.items;
