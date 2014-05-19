@@ -149,14 +149,8 @@
 	
 	function createComplexFilterSelectOperator(operator, container){
 		var operatorLowerCase = (operator ? operator.toLowerCase() : 'or');
-		
-		//var controls = $('<div class="controls controls-row" />');
-		//container.append(controls);
-		
 		var andOrSwitch = $('<input type="checkbox" class="complexFilter operator">');
 		andOrSwitch.attr('checked', operatorLowerCase == 'or');
-		
-		//controls.append(andOrSwitch);
 		container.append(andOrSwitch);
 		
 		andOrSwitch.bootstrapSwitch({
