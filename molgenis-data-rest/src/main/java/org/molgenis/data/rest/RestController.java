@@ -120,7 +120,7 @@ public class RestController
 		if (tokenService == null) throw new IllegalArgumentException("tokenService is null");
 		if (authenticationManager == null) throw new IllegalArgumentException("authenticationManager is null");
 		if (molgenisPermissionService == null) throw new IllegalArgumentException("molgenisPermissionService is null");
-		
+
 		this.dataService = dataService;
 		this.tokenService = tokenService;
 		this.authenticationManager = authenticationManager;
@@ -745,7 +745,7 @@ public class RestController
 
 			if (paramValue != null)
 			{
-				if (attr.getDataType().getEnumType() == XREF)
+				if (attr.getDataType().getEnumType() == XREF || attr.getDataType().getEnumType() == CATEGORICAL)
 				{
 					value = dataService.findOne(attr.getRefEntity().getName(), paramValue);
 					if (value == null)
