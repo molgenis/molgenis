@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.google.common.collect.Lists;
+
 @Controller
 @RequestMapping(URI)
 public class UserAccountController extends MolgenisPluginController
@@ -50,7 +52,7 @@ public class UserAccountController extends MolgenisPluginController
 	{
 		model.addAttribute("user", userAccountService.getCurrentUser());
 		model.addAttribute("countries", CountryCodes.get());
-		model.addAttribute("groups", userAccountService.getCurrentUserGroups());
+		model.addAttribute("groups", Lists.newArrayList(userAccountService.getCurrentUserGroups()));
 		model.addAttribute("min_password_length", MIN_PASSWORD_LENGTH);
 		return "view-useraccount";
 	}
