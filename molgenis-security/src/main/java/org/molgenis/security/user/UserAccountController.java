@@ -11,7 +11,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.security.usermanager.UserManagerService;
 import org.molgenis.util.CountryCodes;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
@@ -25,6 +24,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import com.google.common.collect.Lists;
+
 @Controller
 @RequestMapping(URI)
 public class UserAccountController extends MolgenisPluginController
@@ -37,17 +38,13 @@ public class UserAccountController extends MolgenisPluginController
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
 	private final UserAccountService userAccountService;
-	private final UserManagerService userManagerService;
 
 	@Autowired
-	public UserAccountController(UserAccountService userAccountService, UserManagerService userManagerService)
+	public UserAccountController(UserAccountService userAccountService)
 	{
 		super(URI);
 		if (userAccountService == null) throw new IllegalArgumentException("UserAccountService is null");
 		this.userAccountService = userAccountService;
-
-		if (userManagerService == null) throw new IllegalArgumentException("UserManagerService is null");
-		this.userManagerService = userManagerService;
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
@@ -55,8 +52,7 @@ public class UserAccountController extends MolgenisPluginController
 	{
 		model.addAttribute("user", userAccountService.getCurrentUser());
 		model.addAttribute("countries", CountryCodes.get());
-		model.addAttribute("groups",
-				userManagerService.getGroupsWhereUserIsMember(userAccountService.getCurrentUser().getId()));
+		model.addAttribute("groups", Lists.newArrayList(userAccountService.getCurrentUserGroups()));
 		model.addAttribute("min_password_length", MIN_PASSWORD_LENGTH);
 		return "view-useraccount";
 	}
