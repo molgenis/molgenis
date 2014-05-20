@@ -1,11 +1,11 @@
 (function($, molgenis) {
 	"use strict";
 	
-	var ns = molgenis;
-	var restApi = new ns.RestClient();
+	var self = molgenis.datasetdeleter = molgenis.datasetdeleter || {};
+	var restApi = new molgenis.RestClient();
 	
 	// fill dataset select
-	ns.fillDataSetSelect = function(callback) {
+	self.fillDataSetSelect = function() {
 		var maxNrOfDataSets = 500;
 		
 		restApi.getAsync('/api/v1/dataset', {'q': {'num': maxNrOfDataSets}}, function(datasets) {
@@ -15,10 +15,11 @@
 				items.push('<option value="' + val.Identifier + '">' + val.Name + '</option>');
 			});
 			$('#dataset-select').html(items.join(''));
+			$('#dataset-select').select2({ width: 'resolve' });
 		});
 	};
 
-	ns.deleteDataSet = function(e){	
+	self.deleteDataSet = function(e){	
 		e.preventDefault();
 		e.stopPropagation();
 		var form = $('#deletedataset-form');
@@ -27,9 +28,25 @@
 		    url: molgenis.getContextUrl() + '/delete',
 		    data: form.serialize(),
 		    success: function (msg) {
-		    	$('#plugin-container').before($('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>Dataset ' + msg + ' was successfully removed</div>'));
-		    	ns.fillDataSetSelect();
+		    	molgenis.createAlert([{'message': 'Dataset ' + msg + ' was successfully removed'}], 'success');
+		    	self.fillDataSetSelect();
 		    } 
 		 }); 
 	};
+	
+	$(function() {
+		self.fillDataSetSelect();
+		
+		var submitBtn = $('#delete-button');
+		var form = $('#deletedataset-form');
+		form.submit(function(e){
+			self.deleteDataSet(e);
+		});
+		
+		submitBtn.click(function(e) {
+			e.preventDefault();
+			e.stopPropagation();
+			form.submit();
+		});
+	});
 }($, window.top.molgenis = window.top.molgenis || {}));

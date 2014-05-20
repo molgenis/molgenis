@@ -4,7 +4,7 @@
 	var currentQuery = null;
 	var currentDiseases = null;
 	
-	var diseaseListMaxLength = 15;
+	var diseaseListMaxLength = 10;
 	
 	/**
 	 * Listen for data explorer query changes.
@@ -18,6 +18,13 @@
 	 * Listen for entity change events. Also gets called when page is loaded.
 	 */
 	$(document).on('changeEntity', function(e, entityUri) {
+		$('#vardump').empty();
+		$('#diseasematcher-analysis-right').empty();
+		currentDiseases = null;
+		
+		/// HIERO::::
+		$('#disease-list').empty();
+		
 		checkToolAvailable(entityUri);
 	});
 	
@@ -25,19 +32,9 @@
 	 * Checks if the current state of Molgenis meets the requirements of this tool. Shows warnings and instructions when it does not.
 	 */
 	function checkToolAvailable(entityUri){
-		//check if a DiseaseMapping dataset is loaded, show a warning when it is not
-		restApi.getAsync('/api/v1/DiseaseMapping', {'num': 1}, function(data){
-			if (data.total === 0){
-				var warning = '<div class="alert alert-warning" id="diseasemapping-warning"><strong>DiseaseMapping not loaded!' +
-						'</strong> For this tool to work, a valid DiseaseMapping dataset should be uploaded.</div>';
-				if(!$('#vardump #diseasemapping-warning').length){
-					$('#vardump').append(warning);
-				}
-			}else{
-				$(('#vardump #diseasemapping-warning')).remove();
-			}
-		});
-
+		checkDatasetAvailable('DiseaseNames');
+		checkDatasetAvailable('DiseaseMapping');
+		
 		// if an entity is selected, check if it has a 'geneSymbol' column and show a warning if it does not 
 		// TODO determine which columns to check for, and which annotators to propose
 		restApi.getAsync(entityUri + '/meta', {}, function(data){
@@ -52,6 +49,25 @@
 				$(('#vardump #gene-symbol-warning')).remove();
 			}
 		});	
+	}
+	
+	/**
+	 * Checks if a dataset is loaded. Shows a warning when it is not.
+	 * @param dataset the dataset to check for
+	 */
+	function checkDatasetAvailable(dataset){
+		//check if a DiseaseMapping dataset is loaded, show a warning when it is not
+		restApi.getAsync('/api/v1/' + dataset, {'num': 1}, function(data){
+			if (data.total === 0){
+				var warning = '<div class="alert alert-warning" id="' + dataset + '-warning"><strong>' + dataset + ' not loaded!' +
+						'</strong> For this tool to work, a valid ' + dataset + ' dataset should be uploaded.</div>';
+				if(!$('#vardump #' + dataset + '-warning').length){
+					$('#vardump').append(warning);
+				}
+			}else{
+				$(('#vardump #' + dataset + '-warning')).remove();
+			}
+		});
 	}
 
 	/**
@@ -85,21 +101,63 @@
 	/**
 	 * Populates disease list with new set of diseases.
 	 */
-	function populateDiseaseList(diseases){
+	function populateDiseaseList(diseaseIds){
 		
 		$('#disease-list').empty();
 		
-		$.each(diseases, function(index, disease){
-			$('#disease-list').append('<li><a href="#" id="' + disease + '">' + disease + '</a></li>');
+		getDiseaseNames(diseaseIds, function(diseaseInfo){
+			
+			$.each(diseaseIds, function(index, thisDiseaseId){
+				//for each diseaseId, check if a name was found, else use identifier	
+				var thisDiseaseName = thisDiseaseId;				
+				
+				$.each(diseaseInfo.items, function(index, disease){
+					if (thisDiseaseId === disease.diseaseId){
+						thisDiseaseName = disease.diseaseName;
+						return false;
+					}
+				});		
+				
+				$('#disease-list').append('<li><a href="#" id="' + thisDiseaseId + '">' + thisDiseaseName + '</a></li>');
+			});
+			
+			$('#disease-list a').click(function(e){
+				e.preventDefault(); // stop jumping to top of page
+				onSelectDisease($(this));
+			});
+			
+			// pre-select top-most disease
+			onSelectDisease($('#disease-list li a').first());
+		});
+	}
+	
+	/**
+	 * 
+	 */
+	function getDiseaseNames(diseaseIds, callback){
+		// build query
+		var queryRules = [];
+		$.each(diseaseIds, function(index, diseaseId){
+			if(queryRules.length > 0){
+				queryRules.push({
+					'operator' : 'OR'
+				});
+			}
+			queryRules.push({
+				'field' : 'diseaseId',
+				'operator' : 'EQUALS',
+				'value' : diseaseId
+			});
 		});
 		
-		$('#disease-list a').click(function(e){
-			e.preventDefault(); // stop jumping to top of page
-			onSelectDisease($(this));
+		restApi.getAsync('/api/v1/DiseaseNames', {
+			'q' : {
+				'q' : queryRules
+			},
+			'attributes': ['diseaseId', 'diseaseName']
+		}, function(diseaseInfo){
+			callback(diseaseInfo);
 		});
-		
-		// pre-select top-most disease
-		onSelectDisease($('#disease-list li a').first());
 	}
 	
 	/**

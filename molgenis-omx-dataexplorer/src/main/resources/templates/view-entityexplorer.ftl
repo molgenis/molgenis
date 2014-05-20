@@ -1,7 +1,7 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
-<#assign css=["chosen.css", "entityexplorer.css"]>
-<#assign js=["chosen.jquery.min.js", "entityexplorer.js"]>
+<#assign css=["entityexplorer.css"]>
+<#assign js=["entityexplorer.js"]>
 <@header css js/>
 	<#if dataExplorerUrl??>
 		<script>top.molgenis.setDataExplorerUrl('${dataExplorerUrl}');</script>

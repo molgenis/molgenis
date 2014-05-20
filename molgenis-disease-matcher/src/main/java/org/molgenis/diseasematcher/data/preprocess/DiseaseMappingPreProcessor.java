@@ -11,6 +11,7 @@ import java.nio.file.NotDirectoryException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import org.apache.commons.cli.BasicParser;
@@ -105,12 +106,12 @@ public class DiseaseMappingPreProcessor
 				dmpp.makeDiseaseNamesFile(morbidmapFile, diseaseNamesOutFile);
 
 				// zip output files
-				System.out.println("Zipping files to DiseaseMapping.zip ...");
+				System.out.println("Zipping files to DiseaseMapping.zip in " + outDir.getAbsolutePath());
 				List<File> files = new ArrayList<File>();
 				files.add(diseaseNamesOutFile);
 				files.add(diseaseMappingOutFile);
 
-				File outputZipFile = new File(outDir.getAbsolutePath() + "/DiseaseMapping.zip");
+				File outputZipFile = new File(outDir.getAbsolutePath(), "DiseaseMapping.zip");
 				ZipUtils.compress(files, outputZipFile, DirectoryStructure.EXCLUDE_DIR);
 
 				// remove temp files
@@ -164,12 +165,22 @@ public class DiseaseMappingPreProcessor
 			// write header
 			csvWriter.writeAttributeNames(Arrays.asList("identifier", "diseaseId", "diseaseName", "mappingMethod"));
 
+			HashSet<String> ids = new HashSet<String>();
 			String line[] = csvReader.readNext();
 			while (line != null)
 			{
 				// last three chars is always the mapping method
 				String entry = line[0];
 				String identifier = entry;
+
+				// ignore double entries
+				if (ids.contains(identifier))
+				{
+					line = csvReader.readNext();
+					continue;
+				}
+				ids.add(identifier);
+
 				String mappingMethod = entry.substring(entry.length() - 3);
 
 				entry = entry.substring(0, entry.length() - 3);

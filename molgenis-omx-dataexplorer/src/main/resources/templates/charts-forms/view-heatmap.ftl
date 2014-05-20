@@ -13,22 +13,12 @@
 							<input type="text" id="heatmap-title" placeholder="title">
 						</div>
 					</div>
-					
 					<div class="control-group">
 						<label class="control-label" for="heatmap-select-xaxis-feature">X axis</label>
 						<div class="controls">
-							<select id="heatmap-select-xaxis-feature" data-placeholder="ObservableValue" name="heatmap-select-xaxis-feature" class="chosen-select"></select>
+							<select id="heatmap-select-xaxis-feature" data-placeholder="ObservableValue" name="heatmap-select-xaxis-feature"></select>
 						</div>
 					</div>
-					
-					<!--
-					<div class="control-group">
-						<label class="control-label" for="scatterplot-select-yaxis-feature">Y axis</label>
-						<div class="controls">
-							<select id="scatterplot-select-yaxis-feature" data-placeholder="ObservableValue" name="scatterplot-select-yaxis-feature" class="chosen-select"></select>
-						</div>
-					</div>
-					-->
 				</form>
 			</div>
 		</div>
