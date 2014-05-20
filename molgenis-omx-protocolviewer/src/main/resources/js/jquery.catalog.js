@@ -6,11 +6,8 @@
 	var maxItems = 10000;
 	
 	function createTreeConfig(settings, callback) {
-		console.log('createTreeConfig', settings);
 		function createTreeNodes(tree, subTrees, treeConfig, callback) {
-			console.log('createTreeNodes', tree, subTrees, treeConfig);
 			function createTreeNodesRec(tree, selectedNodes, parentNode) {
-				console.log('createTreeNodesRec', tree, selectedNodes, parentNode);
 				$.each(tree, function(protocolId, subTree) {
 					var protocolUri = restApi.getHref('protocol', protocolId);
 					var protocol = restApi.get(protocolUri, {'expand': subTree ? ['features'] : []});
