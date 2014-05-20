@@ -353,13 +353,15 @@
 		return this;
 	}
 	
-	self.SimpleFilter = function(attribute){
-		this.fromValue = undefined;
-		this.toValue = undefined;
+	self.SimpleFilter = function(attribute, fromValue, toValue, value){
+		this.fromValue = fromValue;
+		this.toValue = toValue;
 		var values = [];
 		this.type = 'simple';
 		this.attribute = attribute;
-		
+
+        if(value !== undefined) values.push(value);
+
 		this.isEmpty = function() 
 		{
 			return !(values.length || this.fromValue || this.toValue);
@@ -530,6 +532,16 @@
 					filters.push(simpleFilter);
 				}
 			});
+			return this;
+		};
+
+        this.addFilter = function (simpleFilter, operator) {
+            this.operator = operator;
+
+            if(!simpleFilter.isEmpty())
+            {
+                filters.push(simpleFilter);
+            }
 			return this;
 		};
 		
