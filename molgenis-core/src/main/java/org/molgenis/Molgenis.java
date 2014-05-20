@@ -169,8 +169,8 @@ public class Molgenis
 		this.options = options;
 
 		Logger.getLogger("freemarker.cache").setLevel(Level.INFO);
-		logger.info("\nMOLGENIS version " + org.molgenis.Version.convertToString());
-		logger.info("working dir: " + System.getProperty("user.dir"));
+		logger.debug("\nMOLGENIS version " + org.molgenis.Version.convertToString());
+		logger.debug("working dir: " + System.getProperty("user.dir"));
 
 		// clean options
 		if (outputPath != null)
@@ -210,7 +210,7 @@ public class Molgenis
 		}
 		else
 		{
-			logger.info("Skipping documentation ....");
+			logger.debug("Skipping documentation ....");
 		}
 
 		if (options.generate_jpa)
@@ -237,7 +237,7 @@ public class Molgenis
 		}
 		else
 		{
-			logger.info("SEVERE: Skipping ALL SQL ....");
+			logger.warn("SEVERE: Skipping ALL SQL ....");
 		}
 
 		if (options.generate_entityio)
@@ -294,13 +294,13 @@ public class Molgenis
 	 */
 	public void generate() throws Exception
 	{
-		logger.info("generating ....");
-		logger.info("\nUsing options:\n" + options.toString());
+		logger.info("Generating ...");
+		logger.debug("\nUsing options:\n" + options.toString());
 
 		File generatedFolder = new File(options.output_dir);
 		if (generatedFolder.exists() && options.delete_generated_folder)
 		{
-			logger.info("removing previous generated folder " + generatedFolder);
+			logger.debug("removing previous generated folder " + generatedFolder);
 			deleteContentOfDirectory(generatedFolder);
 			deleteContentOfDirectory(new File(options.output_src));
 			deleteContentOfDirectory(new File(options.output_sql));

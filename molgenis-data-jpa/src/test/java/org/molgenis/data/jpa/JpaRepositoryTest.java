@@ -23,7 +23,6 @@ import org.testng.annotations.Test;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 public class JpaRepositoryTest extends BaseJpaTest
 {
@@ -82,7 +81,7 @@ public class JpaRepositoryTest extends BaseJpaTest
 	{
 		Person p = new Person("Piet", "Paulusma");
 		repo.add(p);
-        Object id = p.getIdValue();
+		Object id = p.getIdValue();
 		repo.delete(p);
 		assertNull(repo.findOne(id));
 	}
@@ -92,7 +91,7 @@ public class JpaRepositoryTest extends BaseJpaTest
 	{
 		Person p = new Person("Piet", "Paulusma");
 		repo.add(p);
-        Object id = p.getIdValue();
+		Object id = p.getIdValue();
 		repo.delete(Arrays.asList(p));
 		assertNull(repo.findOne(id));
 	}
@@ -102,7 +101,7 @@ public class JpaRepositoryTest extends BaseJpaTest
 	{
 		Person p = new Person("Piet", "Paulusma");
 		repo.add(p);
-        Object id = p.getIdValue();
+		Object id = p.getIdValue();
 		repo.deleteAll();
 		assertNull(repo.findOne(id));
 	}
@@ -112,7 +111,7 @@ public class JpaRepositoryTest extends BaseJpaTest
 	{
 		Person p = new Person("Piet", "Paulusma");
 		repo.add(p);
-        Object id = p.getIdValue();
+		Object id = p.getIdValue();
 		repo.deleteById(p.getId());
 		assertNull(repo.findOne(id));
 	}
@@ -122,7 +121,7 @@ public class JpaRepositoryTest extends BaseJpaTest
 	{
 		Person p = new Person("Piet", "Paulusma");
 		repo.add(p);
-        Object id = p.getIdValue();
+		Object id = p.getIdValue();
 		repo.deleteById(Arrays.asList(id));
 		assertNull(repo.findOne(p.getId()));
 	}
@@ -136,7 +135,7 @@ public class JpaRepositoryTest extends BaseJpaTest
 		Person p2 = new Person("Paulus", "de Boskabouter");
 		repo.add(p2);
 
-		Iterable<Entity> it = repo.findAll(Arrays.asList((Object)p1.getId(), p2.getId()));
+		Iterable<Entity> it = repo.findAll(Arrays.asList((Object) p1.getId(), p2.getId()));
 		assertEquals(Iterables.size(it), 2);
 		assertTrue(Iterables.contains(it, p1));
 		assertTrue(Iterables.contains(it, p2));
@@ -153,7 +152,7 @@ public class JpaRepositoryTest extends BaseJpaTest
 
 		repo.add(Arrays.asList(p1, p2));
 
-		Iterable<Person> it = repo.findAll(Arrays.asList((Object)p1.getId(), p2.getId()), Person.class);
+		Iterable<Person> it = repo.findAll(Arrays.asList((Object) p1.getId(), p2.getId()), Person.class);
 		assertEquals(Iterables.size(it), 2);
 		assertTrue(Iterables.contains(it, p1));
 		assertTrue(Iterables.contains(it, p2));
@@ -693,7 +692,6 @@ public class JpaRepositoryTest extends BaseJpaTest
 		matrix.add(Lists.newArrayList(2l, 1l, 3l));
 		assertEquals(
 				result,
-				new AggregateResult(matrix, Sets.newLinkedHashSet(Arrays.asList("Piet", "Klaas", "Total")), Sets
-						.newLinkedHashSet(Arrays.asList("35", "30", "Total"))));
+				new AggregateResult(matrix, Arrays.asList("Piet", "Klaas", "Total"), Arrays.asList("35", "30", "Total")));
 	}
 }
