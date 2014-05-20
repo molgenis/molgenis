@@ -1,7 +1,7 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
-<#assign css=["chosen.css", "jquery.bootstrap.wizard.css", "workflowdataentry.css"]>
-<#assign js=["chosen.jquery.min.js", "jquery.bootstrap.wizard.min.js", "workflowdataentry.js"]>
+<#assign css=["jquery.bootstrap.wizard.css", "workflowdataentry.css"]>
+<#assign js=["jquery.bootstrap.wizard.min.js", "workflowdataentry.js"]>
 <@header css js/>
 	<#if workflows?size == 0>
 		<span>No workflows</span>
