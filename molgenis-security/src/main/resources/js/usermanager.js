@@ -24,6 +24,7 @@
 			success : function(text) {
 				$('#managerModalTitle').html('Add ' + type);
 				$('#controlGroups').html(text);
+				
 			}
 		});
 	}
@@ -82,6 +83,7 @@
 	}
 
 	$(function() {
+		
 		$('#usersTab a').click(function(e) {
 			setViewState('users');
 		});
@@ -127,10 +129,13 @@
 			e.preventDefault();
 			e.stopPropagation();
 			$('#entity-form').submit();
+		});
+
+		$(document).on('onFormSubmitSuccess', function() {
 			$('#usermanagerModal').modal('toggle');
 			location.reload();
 		});
-
+		
 		$('#managerModal').keydown(function(e) {
 			// prevent modal being submitted if one presses enter
 			if (event.keyCode === 13) {
