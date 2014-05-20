@@ -155,8 +155,8 @@ a.accordion-toggle:hover,a.accordion-toggle:focus,a.accordion-toggle:active
 }
 
 #filter-wizard-modal .modal-body {
-	min-height: 548px;
-	max-height: 548px;
+	min-height: 500px;
+	max-height: 500px;
 	padding-bottom: 0;
 }
 
@@ -196,7 +196,7 @@ ul.fancytree-container {
 
 #slider {
 	margin: 0 30px;
-	width: 450px;
+	width: 350px;
 }
 
 .form-horizontal .controls {
