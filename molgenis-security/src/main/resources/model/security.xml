@@ -20,7 +20,7 @@
 			<field name="Phone" nillable="true" description="The telephone number of the Contact including the suitable area codes."/>
 			<field name="Email" description="The email address of the Contact."/>
 			<field name="Fax" nillable="true" type="varchar" description="The fax number of the Contact."/>
-			<field name="tollFreePhone" label="Toll free phone" nillable="true" type="string" description="A toll free phone number for the Contact, including suitable area codes."/>
+			<field name="tollFreePhone" label="Toll-free phone" nillable="true" type="string" description="A toll free phone number for the Contact, including suitable area codes."/>
 			<field name="City" type="string" nillable="true" description="Added from the old definition of MolgenisUser. City of this contact."/>
 			<field name="Country" type="string" nillable="true" description="Added from the old definition of MolgenisUser. Country of this contact."/>
 			<field name="changePassword" label="Change password" type="boolean" default="false" description="If true the user must first change his password before he can proceed" />
