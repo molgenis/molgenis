@@ -18,6 +18,7 @@ import org.molgenis.security.token.TokenGenerator;
 import org.molgenis.security.token.TokenService;
 import org.molgenis.security.user.MolgenisUserDetailsChecker;
 import org.molgenis.security.user.MolgenisUserDetailsService;
+import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
@@ -52,6 +53,9 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
 	@Autowired
 	private DataSource dataSource;
+
+	@Autowired
+	private MolgenisUserService molgenisUserService;
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception
@@ -144,7 +148,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	@Bean
 	public Filter changePasswordFilter()
 	{
-		return new MolgenisChangePasswordFilter(dataService, redirectStrategy());
+		return new MolgenisChangePasswordFilter(molgenisUserService, redirectStrategy());
 	}
 
 	@Bean

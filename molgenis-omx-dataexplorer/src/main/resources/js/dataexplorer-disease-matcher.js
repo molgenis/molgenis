@@ -22,7 +22,6 @@
 		$('#diseasematcher-analysis-right').empty();
 		currentDiseases = null;
 		
-		/// HIERO::::
 		$('#disease-list').empty();
 		
 		checkToolAvailable(entityUri);
@@ -32,7 +31,7 @@
 	 * Checks if the current state of Molgenis meets the requirements of this tool. Shows warnings and instructions when it does not.
 	 */
 	function checkToolAvailable(entityUri){
-		checkDatasetAvailable('DiseaseNames');
+		checkDatasetAvailable('Disease');
 		checkDatasetAvailable('DiseaseMapping');
 		
 		// if an entity is selected, check if it has a 'geneSymbol' column and show a warning if it does not 
@@ -79,6 +78,21 @@
 		$('#grab-diseases-button').click(function(){
 			updateDiseaseList();
 		});
+		
+		$('#magic-button').click(function(){
+			$.ajax({
+				type : 'POST',
+				contentType : 'application/json',
+				url : '/diseasematcher/diseases',
+				data : JSON.stringify({
+					geneSymbols:currentDiseases
+				}),
+				success : function(data) {
+					console.log(data);
+					molgenis.createAlert([{'message': 'Melding zonder nut.'}], 'success');
+				}
+			});
+		});
 	});
 	
 	/**
@@ -108,8 +122,8 @@
 		getDiseaseNames(diseaseIds, function(diseaseInfo){
 			
 			$.each(diseaseIds, function(index, thisDiseaseId){
-				//for each diseaseId, check if a name was found, else use identifier	
-				var thisDiseaseName = thisDiseaseId;				
+				//for each diseaseId, check if a name was found, else use identifier
+				var thisDiseaseName = thisDiseaseId;
 				
 				$.each(diseaseInfo.items, function(index, disease){
 					if (thisDiseaseId === disease.diseaseId){
@@ -150,7 +164,7 @@
 			});
 		});
 		
-		restApi.getAsync('/api/v1/DiseaseNames', {
+		restApi.getAsync('/api/v1/Disease', {
 			'q' : {
 				'q' : queryRules
 			},
@@ -191,7 +205,7 @@
 			// show the phenotypes for this disease in the info panel (for 1 gene)
 			var container = $('#diseasematcher-analysis-right');
 			container.empty();
-			
+
 			// phenotypes are doubled for each gene, so only use first gene
 			var key = phenotypes.items[0].geneSymbol;
 			$.each(phenotypes.items, function(index, pheno){

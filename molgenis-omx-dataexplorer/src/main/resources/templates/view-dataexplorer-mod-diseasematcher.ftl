@@ -48,6 +48,9 @@
 					<button type="button" class="btn btn-default btn-lg" id="grab-diseases-button">
 						<span class="icon-large icon-arrow-down"></span> Grab diseases
 					</button>
+					<button type="button" class="btn btn-default btn-lg" id="magic-button">
+						<span class="icon-large icon-magnet"></span> Magic
+					</button>			
 				</div>
 				
 				<div class="row-fluid">

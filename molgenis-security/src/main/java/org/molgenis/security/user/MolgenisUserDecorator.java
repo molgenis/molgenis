@@ -84,7 +84,8 @@ public class MolgenisUserDecorator extends CrudRepositoryDecorator
 		MolgenisUser currentUser = findOne(entity.getIdValue(), MolgenisUser.class);
 		String currentPassword = currentUser.getPassword();
 		String password = entity.getString(MolgenisUser.PASSWORD_);
-		if (!getPasswordEncoder().matches(password, currentPassword))
+
+		if (!password.equals(currentPassword))
 		{
 			encodePassword(entity);
 		}

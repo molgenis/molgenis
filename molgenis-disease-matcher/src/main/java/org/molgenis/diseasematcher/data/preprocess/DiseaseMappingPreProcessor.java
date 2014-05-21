@@ -43,6 +43,9 @@ import au.com.bytecode.opencsv.CSVReader;
  */
 public class DiseaseMappingPreProcessor
 {
+	private static final String DISEASEMAPPING_FILENAME = "DiseaseMapping.tsv";
+	private static final String DISEASE_FILENAME = "Disease.tsv";
+	private static final String ZIP_FILENAME = "DiseaseMapping.zip";
 
 	/**
 	 * Main method of tool.
@@ -97,21 +100,22 @@ public class DiseaseMappingPreProcessor
 				}
 
 				// process files
-				System.out.println("Combining TYPICAL_FEATURES and ALL_FREQUENCIES files to DiseaseMapping.tsv ...");
-				File diseaseMappingOutFile = new File(outDir.getAbsolutePath() + "/DiseaseMapping.tsv");
+				System.out.println("Combining TYPICAL_FEATURES and ALL_FREQUENCIES files to " + DISEASEMAPPING_FILENAME
+						+ " ...");
+				File diseaseMappingOutFile = new File(outDir.getAbsolutePath() + "/" + DISEASEMAPPING_FILENAME);
 				dmpp.makeDiseaseMappingFile(typicalFile, allFile, diseaseMappingOutFile);
 
-				System.out.println("Parsing morbidmap to DiseaseNames.tsv ...");
-				File diseaseNamesOutFile = new File(outDir.getAbsolutePath() + "/DiseaseNames.tsv");
+				System.out.println("Parsing morbidmap to " + DISEASE_FILENAME + " ...");
+				File diseaseNamesOutFile = new File(outDir.getAbsolutePath() + "/" + DISEASE_FILENAME);
 				dmpp.makeDiseaseNamesFile(morbidmapFile, diseaseNamesOutFile);
 
 				// zip output files
-				System.out.println("Zipping files to DiseaseMapping.zip in " + outDir.getAbsolutePath());
+				System.out.println("Zipping files to " + ZIP_FILENAME + " in " + outDir.getAbsolutePath());
 				List<File> files = new ArrayList<File>();
 				files.add(diseaseNamesOutFile);
 				files.add(diseaseMappingOutFile);
 
-				File outputZipFile = new File(outDir.getAbsolutePath(), "DiseaseMapping.zip");
+				File outputZipFile = new File(outDir.getAbsolutePath(), ZIP_FILENAME);
 				ZipUtils.compress(files, outputZipFile, DirectoryStructure.EXCLUDE_DIR);
 
 				// remove temp files

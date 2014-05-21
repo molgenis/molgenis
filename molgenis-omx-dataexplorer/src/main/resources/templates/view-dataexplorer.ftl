@@ -21,7 +21,7 @@
 	"jquery.molgenis.tree.js",
 	"select2.min.js",
 	"jQEditRangeSlider-min.js",
-	"bootstrap-switch.min.js"
+	"bootstrap-switch.min.js",
 	"jquery.molgenis.xrefsearch.js",
 	"dataexplorer.js",
 	"jquery.molgenis.table.js"]>
@@ -34,7 +34,7 @@
 <@header css js/>
     <script>
     	molgenis.dataexplorer.setShowWizardOnInit(${wizard?string('true', 'false')});
-        molgenis.dataexplorer.filter.wizard.setWizardTitle('${wizardTitle}');
+        molgenis.dataexplorer.filter.wizard.setWizardTitle('${'plugin.dataexplorer.wizard.title'}');
     </script>
         <div class="row-fluid"<#if hideDatasetSelect??> style="display:none"</#if>>
             <div class="row-fluid pull-right form-horizontal">

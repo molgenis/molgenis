@@ -30,7 +30,7 @@
 				<#list users as user>
 				<tr id="userRow${user.id?c}">
 					<td><a href="#" class="edit-user-btn" data-toggle="modal" data-target="#managerModal" data-id="${user.id?c}"><img src="/img/editview.gif"></a></td>
-					<td><#if !user.isSuperuser()><input type="checkbox" class="activate-user-checkbox" data-id="${user.id?c}" <#if user.isActive()>checked</#if>></#if></td>
+					<td><input type="checkbox" class="activate-user-checkbox" data-id="${user.id?c}" <#if user.isActive()>checked</#if> <#if user.isSuperuser()>disabled</#if>></td>
 					<td>${user.getUsername()?if_exists}</td>
 					<td>${user.getFullName()?if_exists}</td>
 					<#list groups as g><#if g.active><td><input type="checkbox" class="change-group-membership-checkbox" data-uid="${user.id?c}" data-gid="${g.id?c}"  <#if user.isGroupMember(g.id)>checked</#if>></td></#if></#list>
@@ -88,7 +88,7 @@
 	      	</div>
 	      	<div class="modal-footer">
 	        	<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-	        	<button id="submitFormButton" type="submit" class="btn btn-primary">Save</button>
+	        	<button id="submitFormButton" class="btn btn-primary">Save</button>
 	      	</div>
 	    </div>
 	</div>

@@ -27,13 +27,26 @@
 					if(subTree) {
 						node.children = [];
 						
+						// recurse for subprotocols
+						$.each(subTree, function(key, val) {
+							if(key.charAt(0) !== 'F') {
+								var subTree = {};
+								subTree[key] = subTrees.hasOwnProperty(key) ? subTrees[key] : null;
+								createTreeNodesRec(subTree, selectedNodes, node.children);
+							}
+						});
+						if (settings.sort)
+							node.children.sort(settings.sort);
+						
+						// create feature nodes
 						var features = {};
 						if(protocol.Features.items) {
 							$.each(protocol.Features.items, function() {
 								features[parseInt(restApi.getPrimaryKeyFromHref(this.href))] = this;
 							});
 						}
-						// create feature nodes
+						
+						var featureNodes = [];
 						$.each(subTree, function(key, val) {
 							if(key.charAt(0) === 'F') {
 								var feature = features[key.substring(1)];
@@ -45,17 +58,13 @@
 								};
 								if (feature.description)
 									featureNode.tooltip = molgenis.i18n.get(feature.description);
-								node.children.push(featureNode);
+								featureNodes.push(featureNode);
 							}
 						});
-						// recurse for subprotocols
-						$.each(subTree, function(key, val) {
-							if(key.charAt(0) !== 'F') {
-								var subTree = {};
-								subTree[key] = subTrees.hasOwnProperty(key) ? subTrees[key] : null;
-								createTreeNodesRec(subTree, selectedNodes, node.children);
-							}
-						});
+						if (settings.sort)
+							featureNodes.sort(settings.sort);
+						node.children = node.children.concat(featureNodes);
+						
 					}
 					
 					// append protocol node
@@ -68,7 +77,6 @@
 			$.each(settings.selectedItems, function() {
 				selectedNodes[this] = null;
 			});
-			
 			createTreeNodesRec(tree, selectedNodes, nodes);
 			// disable checkboxes of root nodes
 			$.each(nodes, function(i, node) {
@@ -99,10 +107,10 @@
 								'message' : 'Protocol contains more than ' + subprotocols.num + ' subprotocols'
 							} ], 'error');
 						}
-						if (settings.sort)
-							subprotocols.items.sort(settings.sort);
+						
+						var protocolNodes = [];
 						$.each(subprotocols.items, function() {
-							children.push({
+							protocolNodes.push({
 								key : this.href.toLowerCase(),
 								title : this.Name,
 								tooltip : molgenis.i18n.get(this.description),
@@ -111,6 +119,9 @@
 								selected: node.selected
 							});
 						});
+						if (settings.sort)
+							protocolNodes.sort(settings.sort);
+						children = children.concat(protocolNodes);
 						
 						restApi.getAsync(node.key + '/features?num=' + maxItems, null, function(features) {
 							if(features.total > features.num) {
@@ -118,17 +129,18 @@
 									'message' : 'Protocol contains more than ' + features.num + ' features'
 								} ], 'error');
 							}
-							if (settings.sort)
-								features.items.sort(settings.sort);
+							var featureNodes = [];
 							$.each(features.items, function() {
-								children.push({
+								featureNodes.push({
 									key : this.href.toLowerCase(),
 									title : this.Name,
 									tooltip : molgenis.i18n.get(this.description),
 									selected: node.selected
 								});
 							});
-							
+							if (settings.sort)
+								featureNodes.sort(settings.sort);
+							children = children.concat(featureNodes);
 							dfd.resolve(children);
 						});
 					});
