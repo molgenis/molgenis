@@ -79,13 +79,12 @@ public class DataExplorerController extends MolgenisPluginController
 	private static final boolean DEFAULT_VAL_MOD_DATA = true;
 	private static final boolean DEFAULT_VAL_MOD_DISEASEMATCHER = false;
 
-	public static final String INITLOCATION = "initLocation";
-	public static final String COORDSYSTEM = "coordSystem";
-	public static final String CHAINS = "chains";
-	public static final String SOURCES = "sources";
-	public static final String BROWSERLINKS = "browserLinks";
-	public static final String GENOMEBROWSERTABLE = "genomeBrowserTable";
-	public static final String WIZARD_TITLE = "wizardTitle";
+	public static final String INITLOCATION = "genomebrowser.init.initLocation";
+	public static final String COORDSYSTEM = "genomebrowser.init.coordSystem";
+	public static final String CHAINS = "genomebrowser.init.chains";
+	public static final String SOURCES = "genomebrowser.init.sources";
+	public static final String BROWSERLINKS = "genomebrowser.init.browserLinks";
+	public static final String WIZARD_TITLE = "plugin.dataexplorer.wizard.title";
 
 	@Autowired
 	private DataService dataService;
@@ -161,12 +160,11 @@ public class DataExplorerController extends MolgenisPluginController
 			// Init genome browser
 			model.addAttribute("genomeEntities", getGenomeBrowserEntities());
 
-			model.addAttribute(INITLOCATION, molgenisSettings.getProperty(INITLOCATION));
-			model.addAttribute(COORDSYSTEM, molgenisSettings.getProperty(COORDSYSTEM));
-			model.addAttribute(CHAINS, molgenisSettings.getProperty(CHAINS));
-			model.addAttribute(SOURCES, molgenisSettings.getProperty(SOURCES));
-			model.addAttribute(BROWSERLINKS, molgenisSettings.getProperty(BROWSERLINKS));
-			model.addAttribute(GENOMEBROWSERTABLE, molgenisSettings.getProperty(GENOMEBROWSERTABLE));
+			model.addAttribute("initLocation", molgenisSettings.getProperty(INITLOCATION));
+			model.addAttribute("coordSystem", molgenisSettings.getProperty(COORDSYSTEM));
+			model.addAttribute("chains", molgenisSettings.getProperty(CHAINS));
+			model.addAttribute("sources", molgenisSettings.getProperty(SOURCES));
+			model.addAttribute("browserLinks", molgenisSettings.getProperty(BROWSERLINKS));
 		}
 		return "view-dataexplorer-mod-" + moduleId; // TODO bad request in case of invalid module id
 	}
