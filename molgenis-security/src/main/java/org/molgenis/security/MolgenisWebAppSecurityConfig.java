@@ -152,6 +152,12 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	}
 
 	@Bean
+	public Filter restCorsFilter()
+	{
+		return new RestCorsFilter();
+	}
+
+	@Bean
 	public RedirectStrategy redirectStrategy()
 	{
 		return new DefaultRedirectStrategy();
