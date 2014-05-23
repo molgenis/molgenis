@@ -27,7 +27,7 @@ import org.testng.annotations.Test;
 
 public class ElasticSearchRepositoryTest
 {
-	private ElasticSearchRepository elasticSearchRepository;
+	private ElasticSearchDecoratedRepository elasticSearchRepository;
 	private ElasticSearchService elasticSearchService;
 	private CrudRepository repository;
 
@@ -36,14 +36,14 @@ public class ElasticSearchRepositoryTest
 	{
 		elasticSearchService = mock(ElasticSearchService.class);
 		repository = mock(CrudRepository.class);
-		elasticSearchRepository = new ElasticSearchRepository(elasticSearchService, repository);
+		elasticSearchRepository = new ElasticSearchDecoratedRepository(elasticSearchService, repository);
 	}
 
 	@SuppressWarnings("resource")
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void ElasticSearchRepository()
 	{
-		new ElasticSearchRepository(null, null);
+		new ElasticSearchDecoratedRepository(null, null);
 	}
 
 	@Test

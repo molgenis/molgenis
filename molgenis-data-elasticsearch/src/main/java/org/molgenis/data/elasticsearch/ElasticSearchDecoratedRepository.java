@@ -24,31 +24,30 @@ import org.molgenis.search.SearchResult;
 /**
  * Repository that wraps an existing repository and retrieves count/aggregate information from a Elasticsearch index
  */
-public class ElasticSearchRepository implements CrudRepository
+public class ElasticSearchDecoratedRepository implements CrudRepository
 {
-	public static final String BASE_URL = "elasticsearch://";
+	public static final String BASE_URL = "elasticsearchdecorator://";
 
 	private final ElasticSearchService elasticSearchService;
+	private final Repository repository;
 
-	public ElasticSearchRepository(ElasticSearchService elasticSearchService)
+	public ElasticSearchDecoratedRepository(ElasticSearchService elasticSearchService, Repository repository)
 	{
 		if (elasticSearchService == null) throw new IllegalArgumentException("elasticSearchService is null");
+		if (repository == null) throw new IllegalArgumentException("repository is null");
 		this.elasticSearchService = elasticSearchService;
+		this.repository = repository;
 	}
 
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		// FIXME
-		return null;
+		return repository.getEntityMetaData();
 	}
 
 	@Override
 	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
 	{
-		SearchRequest searchRequest = new SearchRequest(getName(), new QueryImpl(), Collections.<String> emptyList());
-		SearchResult searchResult = elasticSearchService.search(searchRequest);
-		searchResult.
 		return repository.iterator(clazz);
 	}
 
