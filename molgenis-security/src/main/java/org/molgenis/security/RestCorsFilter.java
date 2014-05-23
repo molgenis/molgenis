@@ -34,8 +34,7 @@ public class RestCorsFilter extends GenericFilterBean
 			{
 				// actual CORS request
 				httpResponse.setHeader("Access-Control-Allow-Origin", "*");
-				httpResponse.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
-				httpResponse.setHeader("Access-Control-Max-Age", "3600");
+				httpResponse.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE");
 				httpResponse.setHeader("Access-Control-Allow-Headers", "x-requested-with,x-molgenis-token");
 			}
 		}
