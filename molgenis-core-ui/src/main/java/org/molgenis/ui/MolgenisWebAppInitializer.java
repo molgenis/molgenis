@@ -3,12 +3,14 @@ package org.molgenis.ui;
 import java.util.EnumSet;
 
 import javax.servlet.DispatcherType;
+import javax.servlet.FilterRegistration.Dynamic;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 
 import org.apache.log4j.Logger;
+import org.molgenis.security.CorsFilter;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.request.RequestContextListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
@@ -34,7 +36,7 @@ public class MolgenisWebAppInitializer
 		// Create the 'root' Spring application context
 		AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();
 		rootContext.register(appConfig);
-		
+
 		// Manage the lifecycle of the root application context
 		servletContext.addListener(new ContextLoaderListener(rootContext));
 
@@ -56,9 +58,10 @@ public class MolgenisWebAppInitializer
 		}
 
 		// add filters
-		javax.servlet.FilterRegistration.Dynamic etagFilter = servletContext.addFilter("etagFilter",
-				new ShallowEtagHeaderFilter());
+		Dynamic etagFilter = servletContext.addFilter("etagFilter", ShallowEtagHeaderFilter.class);
 		etagFilter.addMappingForServletNames(EnumSet.of(DispatcherType.REQUEST), true, "dispatcher");
+		Dynamic corsFilter = servletContext.addFilter("corsFilter", CorsFilter.class);
+		corsFilter.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), true, "/api/*");
 
 		// enable use of request scoped beans in FrontController
 		servletContext.addListener(new RequestContextListener());
