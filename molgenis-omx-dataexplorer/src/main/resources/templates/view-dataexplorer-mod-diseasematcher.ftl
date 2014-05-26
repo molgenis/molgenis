@@ -1,5 +1,5 @@
 <!--DISEASE MATCHER / PHENOVIEWER -->
-<div class="row-fluid" <#if modDiseaseMatcher == false>style="display:none"</#if>>	
+<div class="row-fluid">	
 	<div class="span12" id="disease-matcher">
 		
 		<!-- PHENOTYPE ZONE -->
@@ -33,7 +33,11 @@
 		<!-- ANALYSIS ZONE -->
 		<div class="span6">
 			<div class="well">
-				<div class="span6" id="vardump"></div>
+				<div class="span12" id="vardump"></div>
+				<div class="row-fluid">
+					<div class="span6" id="diseasematcher-analysis-left"></div>
+					<div class="span6" id="diseasematcher-analysis-right"></div>
+				</div>
 			</div>
 		</div>
 		
@@ -54,6 +58,7 @@
 						<button class="btn" type="button" id="disease-search-button"><i class="icon-large icon-search"></i></button>
 					</div>					
 				</div>
+				
 				<div class="row-fluid">
 					<div class="accordion" id="disease-selection-container">
                         <div class="accordion-group">
