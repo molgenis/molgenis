@@ -50,7 +50,7 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 			return null;
 		}
 
-		return new VcfRepository(file);
+        return new VcfRepository(file);
 	}
 
 	private void loadEntityName()
