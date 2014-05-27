@@ -1,6 +1,5 @@
-package org.molgenis.data.rest;
+package org.molgenis.data;
 
-import org.molgenis.data.MolgenisDataException;
 
 public class UnknownAttributeException extends MolgenisDataException
 {
