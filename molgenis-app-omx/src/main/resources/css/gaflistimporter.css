@@ -1,0 +1,7 @@
+.table th, .table td { 
+     border-top: none; 
+ }
+ 
+ .table th {
+ 	color: #08c;
+ }
