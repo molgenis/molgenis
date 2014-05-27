@@ -14,11 +14,14 @@ import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.google.gdata.util.ServiceException;
 
@@ -32,13 +35,18 @@ public class GafListImporterController extends MolgenisPluginController
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
 	private final GafListImporterService gafListImporterService;
+	private final GafListFileImporterService gafListFileImporterService;
 
 	@Autowired
-	public GafListImporterController(GafListImporterService gafListImporterService)
+	public GafListImporterController(GafListImporterService gafListImporterService,
+			GafListFileImporterService gafListFileImporter)
 	{
 		super(URI);
 		if (gafListImporterService == null) throw new IllegalArgumentException("gafListImporterService is null");
 		this.gafListImporterService = gafListImporterService;
+
+		if (gafListFileImporter == null) throw new IllegalArgumentException("gafListFileImporter is null");
+		this.gafListFileImporterService = gafListFileImporter;
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
@@ -52,6 +60,38 @@ public class GafListImporterController extends MolgenisPluginController
 	public void importGafList() throws IOException, ServiceException, ValueConverterException, MessagingException
 	{
 		gafListImporterService.importGafListAsSuperuser();
+	}
+
+	@RequestMapping(value = "/import-file", method = RequestMethod.POST)
+	public String importGafListFromFile(@RequestParam("csvFile") MultipartFile csvFile,
+			@RequestParam("separator") Character separator, Model model)
+	{
+		if (!csvFile.isEmpty())
+		{
+			gafListFileImporterService.createCsvRepo(csvFile, separator);
+			gafListFileImporterService.createValidationReport();
+			model.addAttribute("hasValidationError", gafListFileImporterService.hasValidationError());
+			model.addAttribute("validationReport", gafListFileImporterService.getValidationReportHtml());
+
+			if (!gafListFileImporterService.hasValidationError())
+			{
+				try
+				{
+					gafListFileImporterService.importValidatedGafList();
+					model.addAttribute("importMessage", "Successfully imported into database.");
+				}
+				catch (Exception e)
+				{
+					logger.error(e);
+					model.addAttribute("importMessage", "Failed to import data into database.");
+				}
+			}
+		}
+		else
+		{
+			logger.error("The file you try to upload is empty! Filename: " + csvFile);
+		}
+		return "view-gaflistimporter";
 	}
 
 	@ExceptionHandler(value = Throwable.class)
