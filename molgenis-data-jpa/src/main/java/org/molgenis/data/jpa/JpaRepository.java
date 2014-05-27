@@ -39,6 +39,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.support.AbstractCrudRepository;
 import org.molgenis.data.support.ConvertingIterable;
 import org.molgenis.data.support.MapEntity;
@@ -96,7 +97,7 @@ public class JpaRepository extends AbstractCrudRepository
 	}
 
 	@Override
-	protected Object addInternal(Entity entity)
+	protected void addInternal(Entity entity)
 	{
 		Entity jpaEntity = getTypedEntity(entity);
 
@@ -105,7 +106,7 @@ public class JpaRepository extends AbstractCrudRepository
 		if (logger.isDebugEnabled()) logger.debug("persisted " + entity.getClass().getSimpleName() + " ["
 				+ jpaEntity.getIdValue() + "]");
 
-		return jpaEntity.getIdValue();
+		entity.set(getEntityMetaData().getIdAttribute().getName(), jpaEntity.getIdValue());
 	}
 
 	@Override
@@ -571,7 +572,15 @@ public class JpaRepository extends AbstractCrudRepository
 	public void deleteById(Object id)
 	{
 		if (logger.isDebugEnabled()) logger.debug("removing " + getEntityClass().getSimpleName() + " [" + id + "]");
-		delete(findOne(getEntityMetaData().getIdAttribute().getDataType().convert(id)));
+
+		Entity entity = findOne(getEntityMetaData().getIdAttribute().getDataType().convert(id));
+		if (entity == null)
+		{
+			throw new UnknownEntityException("Unknown entity [" + getEntityMetaData().getName() + "] with id [" + id
+					+ "]");
+		}
+
+		delete(entity);
 	}
 
 	@Override
@@ -583,6 +592,7 @@ public class JpaRepository extends AbstractCrudRepository
 		{
 			logger.debug("removing " + getEntityClass().getSimpleName() + " [" + entity.getIdValue() + "]");
 		}
+
 		em.remove(getTypedEntity(entity));
 		if (logger.isDebugEnabled()) logger.debug("flushing entity manager");
 		em.flush();
