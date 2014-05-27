@@ -1,299 +1,193 @@
 package org.molgenis.data.elasticsearch;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import org.molgenis.data.AggregateResult;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.CrudRepository;
-import org.molgenis.data.DatabaseAction;
-import org.molgenis.data.Entity;
-import org.molgenis.data.Query;
-import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.support.QueryImpl;
-import org.molgenis.elasticsearch.ElasticSearchService;
-import org.molgenis.search.SearchRequest;
-import org.molgenis.search.SearchResult;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class ElasticSearchRepositoryTest
+public class ElasticsearchRepositoryTest
 {
-	private ElasticSearchDecoratedRepository elasticSearchRepository;
-	private ElasticSearchService elasticSearchService;
-	private CrudRepository repository;
 
-	@BeforeMethod
-	public void setUp() throws IOException
+	@Test
+	public void ElasticsearchRepository()
 	{
-		elasticSearchService = mock(ElasticSearchService.class);
-		repository = mock(CrudRepository.class);
-		elasticSearchRepository = new ElasticSearchDecoratedRepository(elasticSearchService, repository);
-	}
-
-	@SuppressWarnings("resource")
-	@Test(expectedExceptions = IllegalArgumentException.class)
-	public void ElasticSearchRepository()
-	{
-		new ElasticSearchDecoratedRepository(null, null);
+		throw new RuntimeException("Test not implemented");
 	}
 
 	@Test
 	public void addEntity()
 	{
-		Entity entity = mock(Entity.class);
-		elasticSearchRepository.add(entity);
-		verify(repository).add(entity);
-		// TODO verify index update
+		throw new RuntimeException("Test not implemented");
 	}
 
 	@Test
 	public void addIterableextendsEntity()
 	{
-		List<Entity> entities = Arrays.asList(mock(Entity.class), mock(Entity.class));
-		elasticSearchRepository.add(entities);
-		verify(repository).add(entities);
-		// TODO verify index update
+		throw new RuntimeException("Test not implemented");
 	}
 
 	@Test
 	public void aggregate()
 	{
-		when(elasticSearchRepository.getName()).thenReturn("entity");
-		AttributeMetaData xAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("xAttr").getMock();
-		AttributeMetaData yAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("yAttr").getMock();
-		Query q = mock(Query.class);
-		SearchRequest searchRequest = new SearchRequest("entity", q, Collections.<String> emptyList(), "xAttr", "yAttr");
-		AggregateResult aggregate = mock(AggregateResult.class);
-		SearchResult searchResult = when(mock(SearchResult.class).getAggregate()).thenReturn(aggregate).getMock();
-		when(elasticSearchService.search(searchRequest)).thenReturn(searchResult);
-		assertEquals(elasticSearchRepository.aggregate(xAttr, yAttr, q), aggregate);
+		throw new RuntimeException("Test not implemented");
 	}
 
 	@Test
 	public void clearCache()
 	{
-		elasticSearchRepository.clearCache();
-		verify(repository).clearCache();
+		throw new RuntimeException("Test not implemented");
 	}
 
 	@Test
-	public void close() throws IOException
+	public void close()
 	{
-		elasticSearchRepository.close();
-		verify(repository, times(0)).close(); // do not close repository
+		throw new RuntimeException("Test not implemented");
 	}
 
 	@Test
 	public void count()
 	{
-		elasticSearchRepository.count();
-		verify(repository).count(new QueryImpl());
+		throw new RuntimeException("Test not implemented");
 	}
 
 	@Test
 	public void countQuery()
 	{
-		Query q = mock(Query.class);
-		elasticSearchRepository.count(q);
-		verify(repository).count(q);
+		throw new RuntimeException("Test not implemented");
+	}
+
+	@Test
+	public void create()
+	{
+		throw new RuntimeException("Test not implemented");
 	}
 
 	@Test
 	public void deleteEntity()
 	{
-		Entity entity = mock(Entity.class);
-		elasticSearchRepository.delete(entity);
-		verify(repository).delete(entity);
-		// TODO verify index update
+		throw new RuntimeException("Test not implemented");
 	}
 
 	@Test
 	public void deleteIterableextendsEntity()
 	{
-		List<Entity> entities = Arrays.asList(mock(Entity.class), mock(Entity.class));
-		elasticSearchRepository.delete(entities);
-		verify(repository).delete(entities);
-		// TODO verify index update
+		throw new RuntimeException("Test not implemented");
 	}
 
 	@Test
 	public void deleteAll()
 	{
-		elasticSearchRepository.deleteAll();
-		verify(repository).deleteAll();
-		// TODO verify index update
+		throw new RuntimeException("Test not implemented");
 	}
 
 	@Test
 	public void deleteByIdObject()
 	{
-		Object id = mock(Object.class);
-		elasticSearchRepository.deleteById(id);
-		verify(repository).deleteById(id);
-		// TODO verify index update
+		throw new RuntimeException("Test not implemented");
 	}
 
 	@Test
 	public void deleteByIdIterableObject()
 	{
-		List<Object> ids = Arrays.asList(mock(Object.class), mock(Object.class));
-		elasticSearchRepository.deleteById(ids);
-		verify(repository).deleteById(ids);
-		// TODO verify index update
+		throw new RuntimeException("Test not implemented");
 	}
 
 	@Test
 	public void findAllQuery()
 	{
-		Query q = mock(Query.class);
-		elasticSearchRepository.findAll(q);
-		verify(repository).findAll(q);
-	}
-
-	@Test
-	public void findAllQueryClassE()
-	{
-		Query q = mock(Query.class);
-		Class<? extends Entity> clazz = new MapEntity().getClass();
-		elasticSearchRepository.findAll(q, clazz);
-		verify(repository).findAll(q, clazz);
+		throw new RuntimeException("Test not implemented");
 	}
 
 	@Test
 	public void findAllIterableObject()
 	{
-		List<Object> ids = Arrays.asList(mock(Object.class), mock(Object.class));
-		elasticSearchRepository.findAll(ids);
-		verify(repository).findAll(ids);
+		throw new RuntimeException("Test not implemented");
+	}
+
+	@Test
+	public void findAllQueryClassE()
+	{
+		throw new RuntimeException("Test not implemented");
 	}
 
 	@Test
 	public void findAllIterableObjectClassE()
 	{
-		List<Object> ids = Arrays.asList(mock(Object.class), mock(Object.class));
-		Class<? extends Entity> clazz = new MapEntity().getClass();
-		elasticSearchRepository.findAll(ids, clazz);
-		verify(repository).findAll(ids, clazz);
+		throw new RuntimeException("Test not implemented");
 	}
 
 	@Test
 	public void findOneQuery()
 	{
-		Query q = mock(Query.class);
-		elasticSearchRepository.findOne(q);
-		verify(repository).findOne(q);
+		throw new RuntimeException("Test not implemented");
 	}
 
 	@Test
 	public void findOneObject()
 	{
-		Object id = mock(Object.class);
-		elasticSearchRepository.findOne(id);
-		verify(repository).findOne(id);
+		throw new RuntimeException("Test not implemented");
 	}
 
 	@Test
 	public void findOneObjectClassE()
 	{
-		Object id = mock(Object.class);
-		Class<? extends Entity> clazz = new MapEntity().getClass();
-		elasticSearchRepository.findOne(id, clazz);
-		verify(repository).findOne(id, clazz);
+		throw new RuntimeException("Test not implemented");
 	}
 
 	@Test
 	public void findOneQueryClassE()
 	{
-		Query q = mock(Query.class);
-		Class<? extends Entity> clazz = new MapEntity().getClass();
-		elasticSearchRepository.findOne(q, clazz);
-		verify(repository).findOne(q, clazz);
+		throw new RuntimeException("Test not implemented");
 	}
 
 	@Test
 	public void flush()
 	{
-		elasticSearchRepository.flush();
-		verify(repository).flush();
+		throw new RuntimeException("Test not implemented");
 	}
 
 	@Test
 	public void getEntityMetaData()
 	{
-		elasticSearchRepository.getEntityMetaData();
-		verify(repository).getEntityMetaData();
+		throw new RuntimeException("Test not implemented");
 	}
 
 	@Test
 	public void getName()
 	{
-		elasticSearchRepository.getName();
-		verify(repository).getName();
-	}
-
-	@Test
-	public void getRepository()
-	{
-		assertEquals(elasticSearchRepository.getRepository(), repository);
+		throw new RuntimeException("Test not implemented");
 	}
 
 	@Test
 	public void getUrl()
 	{
-		when(repository.getName()).thenReturn("entity");
-		assertEquals(elasticSearchRepository.getUrl(), "elasticsearch://entity/");
-	}
-
-	@Test
-	public void iteratorClassE()
-	{
-		Class<? extends Entity> clazz = new MapEntity().getClass();
-		elasticSearchRepository.iterator(clazz);
-		verify(repository).iterator(clazz);
+		throw new RuntimeException("Test not implemented");
 	}
 
 	@Test
 	public void iterator()
 	{
-		elasticSearchRepository.iterator();
-		verify(repository).iterator();
+		throw new RuntimeException("Test not implemented");
+	}
+
+	@Test
+	public void iteratorClassE()
+	{
+		throw new RuntimeException("Test not implemented");
 	}
 
 	@Test
 	public void updateEntity()
 	{
-		Entity entity = mock(Entity.class);
-		elasticSearchRepository.update(entity);
-		verify(repository).update(entity);
-		// TODO verify index update
+		throw new RuntimeException("Test not implemented");
 	}
 
 	@Test
 	public void updateIterableextendsEntity()
 	{
-		List<Entity> entities = Arrays.asList(mock(Entity.class), mock(Entity.class));
-		elasticSearchRepository.update(entities);
-		verify(repository).update(entities);
-		// TODO verify index update
+		throw new RuntimeException("Test not implemented");
 	}
 
 	@Test
 	public void updateListextendsEntityDatabaseActionString()
 	{
-		String keyName = "key";
-		DatabaseAction dbAction = DatabaseAction.UPDATE_IGNORE_MISSING;
-		List<? extends Entity> entities = Arrays.asList(mock(Entity.class), mock(Entity.class));
-		elasticSearchRepository.update(entities, dbAction, keyName);
-		verify(repository).update(entities, dbAction, keyName);
-		// TODO verify index update
+		throw new RuntimeException("Test not implemented");
 	}
 }

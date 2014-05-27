@@ -24,14 +24,14 @@ import org.molgenis.search.SearchResult;
 /**
  * Repository that wraps an existing repository and retrieves count/aggregate information from a Elasticsearch index
  */
-public class ElasticSearchDecoratedRepository implements CrudRepository
+public class ElasticsearchRepositoryDecorator implements CrudRepository
 {
 	public static final String BASE_URL = "elasticsearchdecorator://";
 
 	private final ElasticSearchService elasticSearchService;
 	private final Repository repository;
 
-	public ElasticSearchDecoratedRepository(ElasticSearchService elasticSearchService, Repository repository)
+	public ElasticsearchRepositoryDecorator(ElasticSearchService elasticSearchService, Repository repository)
 	{
 		if (elasticSearchService == null) throw new IllegalArgumentException("elasticSearchService is null");
 		if (repository == null) throw new IllegalArgumentException("repository is null");
