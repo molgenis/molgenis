@@ -1,5 +1,6 @@
 package org.molgenis.omx;
 
+import java.util.List;
 import java.util.Map;
 
 import org.molgenis.DatabaseConfig;
@@ -7,6 +8,7 @@ import org.molgenis.catalogmanager.CatalogManagerService;
 import org.molgenis.data.DataService;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
 import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
+import org.molgenis.messageconverter.CsvHttpMessageConverter;
 import org.molgenis.omx.catalogmanager.OmxCatalogManagerService;
 import org.molgenis.omx.config.DataExplorerConfig;
 import org.molgenis.omx.studymanager.OmxStudyManagerService;
@@ -20,6 +22,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -59,4 +62,10 @@ public class WebAppConfig extends MolgenisWebAppConfig
 				dataService));
 	}
 
+	@Override
+	public void configureMessageConverters(List<HttpMessageConverter<?>> converters)
+	{
+		super.configureMessageConverters(converters);
+		converters.add(new CsvHttpMessageConverter());
+	}
 }
