@@ -231,5 +231,4 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	{
 		return new MolgenisPermissionServiceImpl();
 	}
-
 }
