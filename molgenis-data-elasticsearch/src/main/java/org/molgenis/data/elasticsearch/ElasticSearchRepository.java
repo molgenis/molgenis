@@ -65,7 +65,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 
-public class ElasticSearchRepository implements CrudRepository
+public class ElasticsearchRepository implements CrudRepository
 {
 	public static final String BASE_URL = "elasticsearch://";
 
@@ -76,7 +76,7 @@ public class ElasticSearchRepository implements CrudRepository
 	private final String docType;
 	private final EntityMetaData entityMetaData;
 
-	public ElasticSearchRepository(Client client, String indexName, String entityName)
+	public ElasticsearchRepository(Client client, String indexName, String entityName)
 	{
 		if (client == null) throw new IllegalArgumentException("client is null");
 		if (indexName == null) throw new IllegalArgumentException("indexName is null");
@@ -640,7 +640,7 @@ public class ElasticSearchRepository implements CrudRepository
 		throw new UnsupportedOperationException();
 	}
 
-	public ElasticSearchRepository create(Client client, EntityMetaData entityMetaData)
+	public ElasticsearchRepository create(Client client, EntityMetaData entityMetaData)
 	{
 		String docType = sanitizeMapperType(entityMetaData.getName());
 
@@ -663,7 +663,7 @@ public class ElasticSearchRepository implements CrudRepository
 					+ response);
 		}
 
-		return new ElasticSearchRepository(client, "molgenis", docType);
+		return new ElasticsearchRepository(client, "molgenis", docType);
 	}
 
 	private QueryBuilder createQuery(Query q)
