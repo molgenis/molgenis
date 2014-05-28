@@ -1,31 +1,46 @@
 (function($, molgenis) {
 	var restApi = new molgenis.RestClient();
 	
-	var currentQuery = null;
-	var currentDiseases = null;
+	var lineBreaks = /(?:\r\n|\r|\n)/g;
 	
-	var diseaseListMaxLength = 10;
+	var SelectionMode = {
+			DISEASE: 'diseases',
+			GENE: 'genes'
+		};
+	var currentQuery = null;
+	var currentSelectionMode = SelectionMode.DISEASE;
+	var listMaxLength = 10;
+	
 	
 	/**
 	 * Listen for data explorer query changes.
 	 */
 	$(document).on('changeQuery', function(e, query){
 		currentQuery = query;		
-		updateDiseaseList();
+		updateSelectionList(currentSelectionMode);
 	});
+	
+	/**
+	 * Listen for attribute selection changes.
+	 */
+	$(document).on('changeAttributeSelection', function(e, data) {	
+		var panel = $('#diseasematcher-variant-panel');
+		if(!panel.is(':empty')){
+			panel.table('setAttributes', data.attributes);
+		}
+	});
+	
 	
 	/**
 	 * Listen for entity change events. Also gets called when page is loaded.
 	 */
 	$(document).on('changeEntity', function(e, entityUri) {
-		$('#vardump').empty();
-		$('#diseasematcher-analysis-right').empty();
-		currentDiseases = null;
-		
-		$('#disease-list').empty();
+		$('#diseasematcher-variant-panel').empty();
+		$('#diseasematcher-selection-list').empty();
 		
 		checkToolAvailable(entityUri);
 	});
+	
 	
 	/**
 	 * Checks if the current state of Molgenis meets the requirements of this tool. Shows warnings and instructions when it does not.
@@ -41,14 +56,15 @@
 				var warning = '<div class="alert alert-warning" id="gene-symbol-warning">' +
 						'<strong>No gene symbols found!</strong> For this tool to work, make sure ' + 
 						'your dataset has a \'geneSymbol\' column.</div>';		
-				if(!$('#vardump #gene-symbol-warning').length){
-					$('#vardump').append(warning);
+				if(!$('#diseasematcher-variant-panel #gene-symbol-warning').length){
+					$('#diseasematcher-variant-panel').append(warning);
 				}
 			}else{
-				$(('#vardump #gene-symbol-warning')).remove();
+				$(('#diseasematcher-variant-panel #gene-symbol-warning')).remove();
 			}
 		});	
 	}
+	
 	
 	/**
 	 * Checks if a dataset is loaded. Shows a warning when it is not.
@@ -60,258 +76,366 @@
 			if (data.total === 0){
 				var warning = '<div class="alert alert-warning" id="' + dataset + '-warning"><strong>' + dataset + ' not loaded!' +
 						'</strong> For this tool to work, a valid ' + dataset + ' dataset should be uploaded.</div>';
-				if(!$('#vardump #' + dataset + '-warning').length){
-					$('#vardump').append(warning);
+				if(!$('#diseasematcher-variant-panel #' + dataset + '-warning').length){
+					$('#diseasematcher-variant-panel').append(warning);
 				}
 			}else{
-				$(('#vardump #' + dataset + '-warning')).remove();
+				$(('#diseasematcher-variant-panel #' + dataset + '-warning')).remove();
 			}
 		});
 	}
 
+	
 	/**
 	 * Called when page has loaded.
 	 */
 	$(function() {
-		//TODO get diseases when page loads (so 'grab diseases' button can be removed)	
-		// register 'grab disease' button
-		$('#grab-diseases-button').click(function(){
-			updateDiseaseList();
+
+		
+		// selection nav bar diseases:
+		$('#diseasematcher-diseases-select-button').click(function(e){
+			e.preventDefault();
+			$('#diseasematcher-selection-navbar li').attr('class', '');
+			$(this).parent().attr("class", "active");
+			
+			$('#diseasematcher-selection-search').attr('placeholder', 'Search diseases');
+			$('#diseasematcher-selection-title').html('Diseases');
+			
+			currentSelectionMode = SelectionMode.DISEASE;
+			updateSelectionList(SelectionMode.DISEASE);
+		});
+		// selection nav bar genes:
+		$('#diseasematcher-genes-select-button').click(function(e){
+			e.preventDefault();
+			$('#diseasematcher-selection-navbar li').attr('class', '');
+			$(this).parent().attr("class", "active");
+			
+			$('#diseasematcher-selection-search').attr('placeholder', 'Search genes');
+			$('#diseasematcher-selection-title').html('Genes');
+			
+			currentSelectionMode = SelectionMode.GENE;
+			updateSelectionList(SelectionMode.GENE);
 		});
 		
-		$('#magic-button').click(function(){
-			$.ajax({
-				type : 'POST',
-				contentType : 'application/json',
-				url : '/diseasematcher/diseases',
-				data : JSON.stringify({
-					geneSymbols:currentDiseases
-				}),
-				success : function(data) {
-					console.log(data);
-					molgenis.createAlert([{'message': 'Melding zonder nut.'}], 'success');
-				}
-			});
-		});
+		$('#diseasematcher-disease-panel-tabs').tab();
+		
 	});
+	
+	
+	/**
+	 * 
+	 */
+	function updateSelectionList(selectionType){
+		var entityName = getEntity().name;
+		var request = {
+			'datasetName' : entityName,
+			'num' : listMaxLength,
+			'start' : 0
+		};
+		$.extend(request, currentQuery);
+		$.ajax({
+			type : 'POST',
+			contentType : 'application/json',
+			url : '/diseasematcher/' + selectionType,
+			data : JSON.stringify(request),
+			success : function(data) {
+				
+				if (selectionType === SelectionMode.DISEASE)
+				{
+					// add the diseases (if any) to the disease list and init the pager	
+					populateSelectionList(data.diseases, selectionType);
+					initPager(data.total, selectionType);
+				}
+				else if (selectionType === SelectionMode.GENE)
+				{
+					populateSelectionList(data.genes, selectionType);
+					initPager(data.total, selectionType);
+				}
+			}
+		});
+	}
+	
+	
+	/**
+	 * 
+	 */
+	function populateSelectionList(list, selectionType){
+		$('#diseasematcher-selection-list').empty();
+		
+		if (selectionType === SelectionMode.DISEASE){
+			$.each(list, function(index, item){
+				var name;
+				if (item.diseaseName === null){
+					name = item.diseaseId;
+				}else{
+					name = item.diseaseName;
+				}
+				$('#diseasematcher-selection-list').append('<li><a href="#" class="diseasematcher-disease-listitem" id="' + item.diseaseId + '">' + name + '</a></li>');
+			});
+		}else if (selectionType === SelectionMode.GENE){
+			$.each(list, function(index, item){
+				$('#diseasematcher-selection-list').append('<li><a href="#" class="diseasematcher-gene-listitem" id="' + item + '">' + item + '</a></li>');
+			});
+		}
+		
+		$('#diseasematcher-selection-list a').click(function(e){
+			e.preventDefault(); // stop jumping to top of page
+			onSelectListItem($(this), currentSelectionMode);
+		});
+		
+		// pre-select top-most disease
+		onSelectListItem($('#diseasematcher-selection-list li a').first(), currentSelectionMode);
+	}
+	
 	
 	/**
 	 * Initializes a pager for the currently selected diseases.
 	 */
-	function initPager(){
-		var container = $('#disease-pager');
-		if(currentDiseases != null && currentDiseases.length > diseaseListMaxLength) {
+	function initPager(total, selectionType){
+		var container = $('#diseasematcher-selection-pager');
+		if(total > listMaxLength) {
 			container.pager({
-				'nrItems' : currentDiseases.length,
-				'nrItemsPerPage' : diseaseListMaxLength,
+				'nrItems' : total,
+				'nrItemsPerPage' : listMaxLength,
 				'onPageChange' : function(page) {
-					populateDiseaseList(currentDiseases.slice(page.start, page.end));
+					onPageChange(page.start, page.end, selectionType);
 				}
 			});
 			container.show();
 		} else container.hide();
 	}
 	
+	
 	/**
-	 * Populates disease list with new set of diseases.
+	 * 
 	 */
-	function populateDiseaseList(diseaseIds){
+	function onPageChange(pageStart, pageEnd, selectionType){
+		var entityName = getEntity().name;
+		$.ajax({
+			type : 'POST',
+			contentType : 'application/json',
+			url : '/diseasematcher/' + selectionType,
+			data : JSON.stringify({
+				datasetName : entityName,
+				num : pageEnd - pageStart,
+				start : pageStart
+			}),
+			success : function(data) {
+				console.log(data);
+				if (selectionType === SelectionMode.DISEASE)
+				{
+					populateSelectionList(data.diseases, selectionType);
+				}
+				else if (selectionType === SelectionMode.GENE)
+				{
+					populateSelectionList(data.genes, selectionType);
+				}
+			}
+		});
+	}
+	
+	
+	/*
+	 * 
+	 */
+	function onSelectDiseaseTab(diseaseId){
+		var diseasePanel = $('#diseasematcher-disease-tab-content');
+		diseasePanel.empty();
+		// remove 'OMIM:'
+		diseaseIdDigits = diseaseId.substring(5); 
 		
-		$('#disease-list').empty();
-		
-		getDiseaseNames(diseaseIds, function(diseaseInfo){
-			
-			$.each(diseaseIds, function(index, thisDiseaseId){
-				//for each diseaseId, check if a name was found, else use identifier
-				var thisDiseaseName = thisDiseaseId;
+		$.ajax({
+			type : 'GET',
+			contentType : 'application/json',
+			url : '/omim/' + diseaseIdDigits,
+			success : function(data) {
+				console.log(data);
+				var entry = data.omim.entryList[0].entry;
+				/// PHENOTYPES
+//				var synopsis = entry.clinicalSynopsis;
+//				for (var propt in synopsis){
+//					if (synopsis[propt] === true){
+//						var key = propt.replace('Exists','');
+//						if (synopsis.hasOwnProperty(key)){
+//							var symptoms = synopsis[key].replace('\n', '<br/>');
+//							diseasePanel.append(symptoms);
+//						}
+//					}
+//				}
 				
-				$.each(diseaseInfo.items, function(index, disease){
-					if (thisDiseaseId === disease.diseaseId){
-						thisDiseaseName = disease.diseaseName;
-						return false;
-					}
-				});		
-				
-				$('#disease-list').append('<li><a href="#" id="' + thisDiseaseId + '">' + thisDiseaseName + '</a></li>');
-			});
-			
-			$('#disease-list a').click(function(e){
-				e.preventDefault(); // stop jumping to top of page
-				onSelectDisease($(this));
-			});
-			
-			// pre-select top-most disease
-			onSelectDisease($('#disease-list li a').first());
+				///TEXT
+				var textSectionList = entry.textSectionList;
+				$.each(textSectionList, function(index, textSection){
+					var text = textSection.textSection.textSectionContent;
+					var title = textSection.textSection.textSectionTitle;
+					
+					var textParts = text.split(lineBreaks);
+					$.each(textParts, function(index, part){
+						
+						if (part.substring(0, 9) === '<Subhead>'){
+							// OMIM <Subhead> tag to <strong> title </strong>
+							
+							var part = part.substring(9);
+							textParts[index] = '<strong>' + part + '</strong>';	
+							
+						}else{
+							// split text on { and } to find references to other OMIM ids
+							
+							var subParts = part.split(/[{}]/);
+							var linkedText = "";
+							if (subParts.length > 1){
+								$.each(subParts, function(index, subPart){
+									if (!isNaN(subPart)){
+										// OMIM id, add a link
+										linkedText += '<a href="http://www.omim.org/entry/' + subPart + '" target="_blank">' + subPart + '</a>';
+										
+									}else{
+										linkedText += subPart;
+									}
+								})	
+								textParts[index] = linkedText;
+							}
+						}
+					});
+					finalText = textParts.join('<br />');
+					
+					if (index > 0) diseasePanel.append('<h4>' + title + '</h4>');
+					diseasePanel.append('<p>' + finalText + '</p>');
+					
+				});
+			}
 		});
 	}
 	
 	/**
 	 * 
+	 * @param 
 	 */
-	function getDiseaseNames(diseaseIds, callback){
-		// build query
+	function onSelectListItem(link, selectionType){
+		//visually select the right item in the list
+		$('#diseasematcher-selection-list li').attr('class', '');
+		link.parent().attr('class', 'active');
+		
+		entityName = getEntity().name;
+		
+		if (selectionType == SelectionMode.DISEASE)
+		{
+			diseaseId = link.attr('id');
+			restApi.getAsync('/api/v1/DiseaseMapping', {
+				'q' : {
+					'q' : [{
+						field : 'diseaseId',
+						operator : 'EQUALS',
+						value : diseaseId
+					}],	
+					'num': 10000
+				},
+				'attributes': ['geneSymbol']
+			}, function(diseaseGenes){
+				// get unique genes for this disease
+				var uniqueGenes = [];
+				$.each(diseaseGenes.items, function(index, disease){
+					if($.inArray(diseaseGenes.geneSymbol, uniqueGenes) === -1){
+						uniqueGenes.push(disease.geneSymbol);
+					}
+				});	
+				
+				showVariants(uniqueGenes)
+				showDiseases(diseaseId, selectionType);
+			});
+		}
+		else if (selectionType == SelectionMode.GENE)
+		{
+			//make it an array for showVariants()
+			var geneId = [link.attr('id')];
+			showVariants(geneId);
+			showDiseases(geneId, selectionType);
+			
+			
+		}
+	}
+	
+	function showDiseases(id, selectionType){
+		//empty disease tabs
+		$('#diseasematcher-disease-tab-content').empty();
+		$('#diseasematcher-disease-panel-tabs').empty();
+		
+		if (selectionType === SelectionMode.DISEASE){
+			// add 1 tab for current disease
+			$('#diseasematcher-disease-panel-tabs').append('<li class="active"><a href="#' + id + '" data-toggle="tab">' + id + '</a></li>');
+			$('#diseasematcher-disease-tab-content').append('<div class="tab-pane active" id="' + id + '">' + id + '</div>');
+			
+			onSelectDiseaseTab(diseaseId);
+			
+		}else if(selectionType === SelectionMode.GENE){
+			// add tabs for each disease this gene is known for
+			restApi.getAsync('/api/v1/DiseaseMapping', {
+				'q' : {
+					'q' : [{
+						field : 'geneSymbol',
+						operator : 'EQUALS',
+						value : id
+					}],	
+					'num': 10000
+				},
+				'attributes': ['diseaseId']
+			}, function(diseases){
+				// get unique diseases
+				var uniqueDiseases = [];
+				$.each(diseases.items, function(index, disease){
+					if($.inArray(disease.diseaseId, uniqueDiseases) === -1){
+						uniqueDiseases.push(disease.diseaseId);
+						$('#diseasematcher-disease-panel-tabs').append('<li><a href="#' + disease.diseaseId + '" id="' + disease.diseaseId + '" data-toggle="tab">' + disease.diseaseId + '</a></li>');
+					}
+				});	
+
+				$('#diseasematcher-disease-panel-tabs li a').click(function(e){
+					e.preventDefault();
+					$('#diseasematcher-disease-panel-tabs li').removeClass('active');
+					$(this).parent().addClass('active');
+					onSelectDiseaseTab($(this).attr('id'));
+				});
+				
+				var first = $('#diseasematcher-disease-panel-tabs li').first();
+				first.addClass('active');
+				
+				onSelectDiseaseTab(first.children().attr('id'));
+				
+			});
+		}
+	}
+	
+	/**
+	 * 
+	 */
+	function showVariants(genes){	
 		var queryRules = [];
-		$.each(diseaseIds, function(index, diseaseId){
+		$.each(genes, function(index, gene){
 			if(queryRules.length > 0){
 				queryRules.push({
 					'operator' : 'OR'
 				});
 			}
 			queryRules.push({
-				'field' : 'diseaseId',
+				'field' : 'geneSymbol',
 				'operator' : 'EQUALS',
-				'value' : diseaseId
+				'value' : gene
 			});
 		});
-		
-		restApi.getAsync('/api/v1/Disease', {
-			'q' : {
+
+		// show associated variants in info panel
+		$('#diseasematcher-variant-panel').table({
+			'entityMetaData' : getEntity(),
+			'attributes' : getAttributes(),
+			'query' : {
 				'q' : queryRules
-			},
-			'attributes': ['diseaseId', 'diseaseName']
-		}, function(diseaseInfo){
-			callback(diseaseInfo);
-		});
-	}
-	
-	/**
-	 * Called when a disease is selected. Updates the selection in the disease list and shows the associated
-	 * phenotypes (from DiseaseMapping) and variants (from current dataset) for this disease.
-	 * @param diseaseLink the disease link that was clicked
-	 */
-	function onSelectDisease(diseaseLink){
-		// visually select the right disease in the list
-		$('#disease-list li').attr('class', '');
-		diseaseLink.parent().attr('class', 'active');
-		
-		//get TYPICAL phenotypes for this disease
-		var diseaseId = diseaseLink.attr('id');		
-		restApi.getAsync('/api/v1/DiseaseMapping', {
-			'q' : {
-				'q' : [{
-					field : 'diseaseId',
-					operator : 'EQUALS',
-					value : diseaseId
-				}, {operator: 'AND'}, {
-					field : 'isTypical',
-					operator: 'EQUALS',
-					value : true
-				}],
-				'num': 10000,
-			},
-			'attributes': ['geneSymbol', 'HPODescription']
-		}, function(phenotypes){
-			
-			// show the phenotypes for this disease in the info panel (for 1 gene)
-			var container = $('#diseasematcher-analysis-right');
-			container.empty();
-
-			// phenotypes are doubled for each gene, so only use first gene
-			var key = phenotypes.items[0].geneSymbol;
-			$.each(phenotypes.items, function(index, pheno){
-				if (pheno.geneSymbol !== key){
-					return false; // break from .each loop
-				}
-				container.append(pheno.HPODescription + '<br/>');
-			});
-		});
-				
-		// get genes for this disease
-		restApi.getAsync('/api/v1/DiseaseMapping', {
-			'q' : {
-				'q' : [{
-					field : 'diseaseId',
-					operator : 'EQUALS',
-					value : diseaseId
-				}],	
-				'num': 10000
-			},
-			'attributes': ['geneSymbol']
-		}, function(diseaseGenes){
-			
-			// get unique genes for this disease
-			var uniqueGenes = [];
-			$.each(diseaseGenes.items, function(index, disease){
-				if($.inArray(diseaseGenes.geneSymbol, uniqueGenes) === -1){
-					uniqueGenes.push(disease.geneSymbol);
-				}
-			});	
-
-			//build query to retrieve variants associated with this disease from current dataset
-			var queryRules = [];
-			$.each(uniqueGenes, function(index, uniqueGene){
-				if(queryRules.length > 0){
-					queryRules.push({
-						'operator' : 'OR'
-					});
-				}
-				queryRules.push({
-					'field' : 'geneSymbol',
-					'operator' : 'EQUALS',
-					'value' : uniqueGene
-				});
-			});
-			
-			// show associated variants in info panel
-			$('#vardump').table({
-				'entityMetaData' : getEntity(),
-				'attributes' : getAttributes(),
-				'query' : {
-					'q' : queryRules
-				}
-			});
-		});
-	}
-	
-	/**
-	 * Uses the genes in the currently selected entity to look for diseases and updates the list by
-	 * calling populateDiseaseList() and initPager(). 
-	 */
-	function updateDiseaseList(){
-		var entityName = getEntity().name;
-		restApi.getAsync('/api/v1/' + entityName, {'attributes': ['geneSymbol'], 'q': currentQuery}, function(entityData){
-			var uniqueGeneSymbols = [];
-			if (entityData.total > 0){
-				$.each(entityData.items, function(index, entity){
-					if($.inArray(entity.geneSymbol, uniqueGeneSymbols) === -1){
-						uniqueGeneSymbols.push(entity.geneSymbol);
-					}
-				});
-			}else{
-				currentDiseases = [];
 			}
-			
-			//TODO change num: 10000 to a sensible solution (get unique)
-			// fetch diseases based on list of genes
-			restApi.getAsync('/api/v1/DiseaseMapping', {
-				'q' : {
-					'q' : [{
-						field : 'geneSymbol',
-						operator : 'IN',
-						value : uniqueGeneSymbols
-					}],	
-					'num': 10000
-				},
-				'attributes': ['diseaseId']
-			}, function(diseaseInfo){	
-				var uniqueDiseases = [];
-				if (diseaseInfo.total > null){
-					$.each(diseaseInfo.items, function(index, disease){
-						if($.inArray(disease.diseaseId, uniqueDiseases) === -1){
-							uniqueDiseases.push(disease.diseaseId);
-						}
-					});	
-					
-					currentDiseases = uniqueDiseases;
-				}else{
-					currentDiseases = [];
-				}	
-
-				// add the diseases (if any) to the disease list and init the pager
-				populateDiseaseList(currentDiseases.slice(0, diseaseListMaxLength));
-				initPager();
-			});
-		});	
+		});
+	}
+	
+	
+	function lineBreaksToBrTags(str){
+		return str.replace(/(?:\r\n|\r|\n)/g, '<br />');
 	}
 	
 	/**
