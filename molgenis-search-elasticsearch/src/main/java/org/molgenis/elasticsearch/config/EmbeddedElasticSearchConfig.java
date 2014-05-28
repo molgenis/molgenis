@@ -3,6 +3,7 @@ package org.molgenis.elasticsearch.config;
 import java.io.File;
 import java.util.Collections;
 
+import org.elasticsearch.client.Client;
 import org.molgenis.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.search.SearchService;
 import org.springframework.context.annotation.Bean;
@@ -41,6 +42,13 @@ public class EmbeddedElasticSearchConfig
 		}
 
 		return new EmbeddedElasticSearchServiceFactory(Collections.singletonMap("path.data", molgenisDataDirStr));
+	}
+
+	@Bean
+	public Client client()
+	{
+		// TODO refactor to make elegant
+		return embeddedElasticSearchServiceFactory().getClient();
 	}
 
 	@Bean

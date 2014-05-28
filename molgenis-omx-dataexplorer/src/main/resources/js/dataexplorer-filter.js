@@ -200,11 +200,12 @@
 			var label = attribute.label || attribute.name;
 			elements.append($('<label class="control-label" data-placement="right" data-title="' + attribute.description + '">' + label + '</label>').tooltip());
 			var row = $('<div class="controls controls-row">');
-			$('.controls.controls-row', elements).parent().append(row.append($('<button class="btn"  type="button"><i class="icon-trash icon-plus"></i></button>').click(function(){
+			$('.controls.controls-row', elements).parent().append(row.append($('<button class="btn"  type="button"><i class="icon-plus"></i></button>').click(function(){
 				addComplexFilterControlsElementsToContainer(container, attribute, operator, undefined, addLabel, true);
+				if(!$('.complexFilter.operator', container).length){
+					createComplexFilterSelectOperator(operator, row);
+				}
 			})));
-			
-			createComplexFilterSelectOperator(operator, row);
 		}
 		
 		return container.append(elements);
@@ -213,13 +214,16 @@
 	/**
 	 * @memberOf molgenis.dataexplorer
 	 */
-	function addRemoveButton(container){
-		$('.controls.controls-row', container)
+	function addRemoveButton(elements){
+		$('.controls.controls-row', elements)
 			.parent().append($('<div class="controls controls-row">').append($('<button class="btn" type="button"><i class="icon-trash"></i></button>').click(function(){
-			$(this).parent().parent().remove();
+				if($('.icon-trash', elements.parent()).length === 1){
+					$('.bootstrap-switch', elements.parent()).remove();
+				}
+				$(this).parent().parent().remove();
 		})));
-		
-		return container;
+
+		return elements;
 	}
 	
 	
