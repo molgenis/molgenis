@@ -1,6 +1,7 @@
 package org.molgenis.data.vcf;
 
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
@@ -8,6 +9,7 @@ import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.genotype.GenotypeDataException;
 import org.molgenis.vcf.VcfInfo;
 import org.molgenis.vcf.VcfReader;
@@ -20,7 +22,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Repository implementation for vcf files.
@@ -37,10 +41,16 @@ public class VcfRepository extends AbstractRepository
 	public static final String FILTER = "FILTER";
 	public static final String QUAL = "QUAL";
 	public static final String ID = "ID";
+    public static final String INFO = "INFO";
 
 	private DefaultEntityMetaData entityMetaData;
 	private final File file;
-	private VcfReader vcfReader;
+
+    public VcfReader getVcfReader() {
+        return vcfReader;
+    }
+
+    private VcfReader vcfReader;
 
 	public VcfRepository(File file)
 	{
@@ -125,8 +135,7 @@ public class VcfRepository extends AbstractRepository
 			try
 			{
 				VcfMeta metadata = vcfReader.getVcfMeta();
-				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(CHROM,
-						MolgenisFieldTypes.FieldTypeEnum.STRING));
+				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(CHROM, MolgenisFieldTypes.FieldTypeEnum.STRING));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ALT,
 						MolgenisFieldTypes.FieldTypeEnum.STRING));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(POS,
@@ -140,13 +149,20 @@ public class VcfRepository extends AbstractRepository
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ID,
 						MolgenisFieldTypes.FieldTypeEnum.STRING));
 				Iterator<VcfMetaInfo> metaInfoIterator = metadata.getInfoMeta().iterator();
+                DefaultAttributeMetaData infoMetaData = new DefaultAttributeMetaData(INFO,
+                        MolgenisFieldTypes.FieldTypeEnum.COMPOUND);
+                List<AttributeMetaData> metadataInfoField = new ArrayList<AttributeMetaData>();
 				while (metaInfoIterator.hasNext())
 				{
-					VcfMetaInfo info = metaInfoIterator.next();
-					entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(info.getId(),
-							vcfReaderFormatToMolgenisType(info)));
-				}
-				// TODO: deal with samples
+                    VcfMetaInfo info = metaInfoIterator.next();
+                    DefaultAttributeMetaData attributeMetaData = new DefaultAttributeMetaData(info.getId(),
+                            vcfReaderFormatToMolgenisType(info));
+                    attributeMetaData.setDescription(info.getDescription());
+                    metadataInfoField.add(attributeMetaData);
+                }
+                infoMetaData.setAttributesMetaData(metadataInfoField);
+                entityMetaData.addAttributeMetaData(infoMetaData);
+                // TODO: deal with samples
 				/**
 				 * Iterator<VcfMetaSample> sampleInfoIterator = metadata.getSampleMeta().iterator(); while
 				 * (sampleInfoIterator.hasNext()) { VcfMetaSample info = sampleInfoIterator.next();
@@ -164,7 +180,7 @@ public class VcfRepository extends AbstractRepository
 		return entityMetaData;
 	}
 
-	private MolgenisFieldTypes.FieldTypeEnum vcfReaderFormatToMolgenisType(VcfMetaInfo vcfMetaInfo)
+    private MolgenisFieldTypes.FieldTypeEnum vcfReaderFormatToMolgenisType(VcfMetaInfo vcfMetaInfo)
 	{
 		String number = vcfMetaInfo.getNumber();
 		boolean isListValue;
