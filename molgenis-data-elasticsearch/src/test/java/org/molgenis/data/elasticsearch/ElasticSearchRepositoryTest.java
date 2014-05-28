@@ -2,7 +2,7 @@ package org.molgenis.data.elasticsearch;
 
 import org.testng.annotations.Test;
 
-public class ElasticsearchRepositoryTest
+public class ElasticSearchRepositoryTest
 {
 
 	@Test
