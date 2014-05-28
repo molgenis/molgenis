@@ -7,7 +7,6 @@ import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.INT;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.LONG;
 
 import java.util.Iterator;
-import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
@@ -18,8 +17,6 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.support.QueryImpl;
-
-import com.google.common.collect.Lists;
 
 import cz.jirutka.rsql.parser.ast.AndNode;
 import cz.jirutka.rsql.parser.ast.ComparisonNode;
@@ -104,19 +101,6 @@ public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query>
 	}
 
 	@Override
-	public Query visit(InNode node)
-	{
-		AttributeMetaData attr = getAttribute(node);
-		List<Object> args = Lists.newArrayListWithCapacity(node.getArguments().size());
-		for (String arg : node.getArguments())
-		{
-			DataConverter.convert(arg, attr);
-		}
-
-		return q.in(attr.getName(), args);
-	}
-
-	@Override
 	public Query visit(GreaterThanOrEqualNode node)
 	{
 		return numericalQueryRule(node, Operator.GREATER_EQUAL);
@@ -150,6 +134,13 @@ public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query>
 	public Query visit(NotInNode node)
 	{
 		throw new UnsupportedOperationException("=out= not supported");
+	}
+
+	@Override
+	public Query visit(InNode node)
+	{
+		// IN is not implemented ES
+		throw new UnsupportedOperationException("=in= not supported");
 	}
 
 	private AttributeMetaData getAttribute(ComparisonNode node)
