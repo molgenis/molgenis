@@ -3,7 +3,7 @@
 <#assign css=["ui.dynatree.css", "studymanager.css"]>
 <#assign js=["jquery-ui-1.9.2.custom.min.js", "jquery.dynatree.min.js", "studymanager.js"]>
 <@header css js/>
-	<div class="span8 offset2">
+	<div class="span10 offset1">
 		<div class="row-fluid">	
 			<div class="well">
 				<p id="loader-title" class="box-title">Choose a study definition to manage</p>

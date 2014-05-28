@@ -20,7 +20,6 @@ import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.account.AccountService.ActivationMode;
 import org.molgenis.security.captcha.CaptchaService;
-import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.HandleRequestDelegationException;
@@ -228,12 +227,6 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 		public MolgenisUserService molgenisUserService()
 		{
 			return mock(MolgenisUserService.class);
-		}
-
-		@Bean
-		public MolgenisPasswordEncoder molgenisPasswordEncoder()
-		{
-			return mock(MolgenisPasswordEncoder.class);
 		}
 
 		@Bean

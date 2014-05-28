@@ -1,5 +1,6 @@
 package org.molgenis.security.user;
 
+import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisUser;
 
 /**
@@ -13,6 +14,13 @@ public interface UserAccountService
 	 * @return
 	 */
 	MolgenisUser getCurrentUser();
+
+	/**
+	 * Returns the groups to which the currently logged in user belongs
+	 * 
+	 * @return
+	 */
+	Iterable<MolgenisGroup> getCurrentUserGroups();
 
 	/**
 	 * Update the currently logged in user

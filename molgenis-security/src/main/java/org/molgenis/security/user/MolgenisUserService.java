@@ -2,6 +2,7 @@ package org.molgenis.security.user;
 
 import java.util.List;
 
+import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisUser;
 
 public interface MolgenisUserService
@@ -14,9 +15,17 @@ public interface MolgenisUserService
 	List<String> getSuEmailAddresses();
 
 	/**
-	 * Returns the currently logged in user
+	 * Returns the given user
 	 */
 	MolgenisUser getUser(String username);
+
+	/**
+	 * Returns the groups that the given user belongs to
+	 * 
+	 * @param username
+	 * @return
+	 */
+	Iterable<MolgenisGroup> getUserGroups(String username);
 
 	/**
 	 * Update user

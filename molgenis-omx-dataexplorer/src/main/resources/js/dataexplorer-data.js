@@ -148,11 +148,7 @@
                                     a.click(function() {
                                         $.each(getAttributes(), function(key, attribute) {
                                             if(attribute.name === 'patient_id') {
-                                                var attributeFilter = {
-                                                    attribute : attribute,
-                                                    values : [patientID]
-                                                };
-                                                $(document).trigger('updateAttributeFilters', {'filters': [attributeFilter]});
+                                                createFilter(attribute, undefined, undefined, patientID);
                                             }
                                         });
                                     });
@@ -168,11 +164,7 @@
                             a.click(function() {
                                 $.each(getAttributes(), function(key, attribute) {
                                     if(attribute.name === 'ID') {
-                                        var attributeFilter = {
-                                            attribute : attribute,
-                                            values : [f.id]
-                                        };
-                                        $(document).trigger('updateAttributeFilters', {'filters': [attributeFilter]});
+                                        createFilter(attribute, undefined, undefined, f.id);
                                     }
                                 });
                             });
@@ -197,77 +189,79 @@
 	function setDallianceFilter() {
 		$.each(getAttributes(), function(key, attribute) {
 			if(attribute.name === 'POS') {
-                var attributeFilter = {
-					attribute : attribute,
-					range : true,
-					values : [ Math.floor(genomeBrowser.viewStart).toString(), Math.floor(genomeBrowser.viewEnd).toString() ]
-				};
-				$(document).trigger('updateAttributeFilters', {'filters': [attributeFilter]});
+                createFilter(attribute, Math.floor(genomeBrowser.viewStart).toString(), Math.floor(genomeBrowser.viewEnd).toString());
 			} else if(attribute.name === 'CHROM') {
-				var attributeFilter = {
-					attribute : attribute,
-					values : [ genomeBrowser.chr ]
-				};
-				$(document).trigger('updateAttributeFilters', {'filters': [attributeFilter]});
+                createFilter(attribute, undefined, undefined, genomeBrowser.chr);
 			}
 		});
 	}
 	//--END genome browser--
-	
+
 	/**
 	 * @memberOf molgenis.dataexplorer.data
 	 */
 	function getEntity() {
 		return molgenis.dataexplorer.getSelectedEntityMeta();
 	}
-	
+
 	/**
 	 * @memberOf molgenis.dataexplorer.data
 	 */
 	function getAttributes() {
 		return molgenis.dataexplorer.getSelectedAttributes();
 	}
-	
+
 	/**
 	 * @memberOf molgenis.dataexplorer.data
 	 */
 	function getQuery() {
 		return molgenis.dataexplorer.getEntityQuery();
 	}
-	
+
+    function createFilter(attribute, fromValue, toValue, values){
+        var attributeFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, fromValue, toValue, values);
+        var complexFilter = new molgenis.dataexplorer.filter.ComplexFilter(attribute);
+        complexFilter.addFilter(attributeFilter,'OR');
+        $(document).trigger('updateAttributeFilters', {'filters': [complexFilter]});
+    }
+
 	/**
 	 * @memberOf molgenis.dataexplorer.data
 	 */
-	$(function() {		
-		// bind event handlers with namespace 
+	$(function() {
+		// bind event handlers with namespace
 		$(document).on('show.data', '#genomebrowser .collapse', function() {
             $(this).parent().find(".icon-chevron-right").removeClass("icon-chevron-right").addClass("icon-chevron-down");
         }).on('hide.data', '#genomebrowser .collapse', function() {
             $(this).parent().find(".icon-chevron-down").removeClass("icon-chevron-down").addClass("icon-chevron-right");
         });
-		
+
 		$(document).on('changeAttributeSelection.data', function(e, data) {
 			if($('#data-table-container'))
 				$('#data-table-container').table('setAttributes', data.attributes);
 		});
-		
+
 		$(document).on('updateAttributeFilters.data', function(e, data) {
 			// TODO implement elegant solution for genome browser specific code
 			$.each(data.filters, function() {
-				if(this.attribute.name === 'POS') genomeBrowser.setLocation(genomeBrowser.chr, this.values[0], this.values[1]);
-				if(this.attribute.name === 'CHROM') genomeBrowser.setLocation(this.values[0], genomeBrowser.viewStart, genomeBrowser.viewEnd);
+				if(this.attribute.name === 'POS'){
+                    genomeBrowser.setLocation(genomeBrowser.chr, this.getFilters()[0].fromValue, this.getFilters()[0].toValue)
+                };
+				if(this.attribute.name === 'CHROM'){
+                    genomeBrowser.setLocation(this.getFilters()[0].getValues()[0], genomeBrowser.viewStart, genomeBrowser.viewEnd)
+                };
 			});
 		});
-		
+
 		$(document).on('changeQuery.data', function(e, query) {
 			$('#data-table-container').table('setQuery', query);
 			// TODO what to do for genome browser
 		});
-		
+
 		$('#download-button').click(function() {
 			download();
 		});
-		
+
 		$('#genomebrowser-filter-button').click(function() {
 			setDallianceFilter();
 		});

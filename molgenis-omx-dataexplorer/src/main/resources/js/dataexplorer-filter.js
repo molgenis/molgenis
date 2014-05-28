@@ -147,14 +147,16 @@
 		}
 	}
 	
-	function createComplexFilterSelectOperator(operator){
-		var orOption = $('<option value="OR">OR</option>');
-		var andOption = $('<option value="AND">AND</option>');
-		var select = $('<select class="complexFilter operator"></select>').width(70);
-		var operatorLowerCase = (operator? operator.toLowerCase(): undefined);
-		if(operatorLowerCase === 'and') andOption.attr('selected', 'selected');
-		else orOption.attr('selected', 'selected');
-		return select.append(orOption).append(andOption);
+	function createComplexFilterSelectOperator(operator, container){
+		var operatorLowerCase = (operator ? operator.toLowerCase() : 'or');
+		var andOrSwitch = $('<input type="checkbox" class="complexFilter operator">');
+		andOrSwitch.attr('checked', operatorLowerCase == 'or');
+		container.append(andOrSwitch);
+		
+		andOrSwitch.bootstrapSwitch({
+			onText: 'OR',
+			offText: 'AND',
+		});
 	}
 
 	/**
@@ -197,24 +199,31 @@
 		} else {
 			var label = attribute.label || attribute.name;
 			elements.append($('<label class="control-label" data-placement="right" data-title="' + attribute.description + '">' + label + '</label>').tooltip());
-			$('.controls.controls-row', elements)
-				.parent().append($('<div class="controls controls-row">').append($('<button class="btn" type="button"><i class="icon-trash icon-plus"></i></button>').click(function(){
-					addComplexFilterControlsElementsToContainer(container, attribute, operator, undefined, addLabel, true);
-				})).append(createComplexFilterSelectOperator(operator)));
+			var row = $('<div class="controls controls-row">');
+			$('.controls.controls-row', elements).parent().append(row.append($('<button class="btn"  type="button"><i class="icon-plus"></i></button>').click(function(){
+				addComplexFilterControlsElementsToContainer(container, attribute, operator, undefined, addLabel, true);
+				if(!$('.complexFilter.operator', container).length){
+					createComplexFilterSelectOperator(operator, row);
+				}
+			})));
 		}
+		
 		return container.append(elements);
 	}
 	
 	/**
 	 * @memberOf molgenis.dataexplorer
 	 */
-	function addRemoveButton(container){
-		$('.controls.controls-row', container)
+	function addRemoveButton(elements){
+		$('.controls.controls-row', elements)
 			.parent().append($('<div class="controls controls-row">').append($('<button class="btn" type="button"><i class="icon-trash"></i></button>').click(function(){
-			$(this).parent().parent().remove();
+				if($('.icon-trash', elements.parent()).length === 1){
+					$('.bootstrap-switch', elements.parent()).remove();
+				}
+				$(this).parent().parent().remove();
 		})));
-		
-		return container;
+
+		return elements;
 	}
 	
 	
@@ -353,13 +362,15 @@
 		return this;
 	}
 	
-	self.SimpleFilter = function(attribute){
-		this.fromValue = undefined;
-		this.toValue = undefined;
+	self.SimpleFilter = function(attribute, fromValue, toValue, value){
+		this.fromValue = fromValue;
+		this.toValue = toValue;
 		var values = [];
 		this.type = 'simple';
 		this.attribute = attribute;
-		
+
+        if(value !== undefined) values.push(value);
+
 		this.isEmpty = function() 
 		{
 			return !(values.length || this.fromValue || this.toValue);
@@ -375,7 +386,7 @@
 			var toValue = this.toValue;
 			var operator = this.operator;
 			
-			$(":input",$domElement).not('[type=radio]:not(:checked)').not('[type=checkbox]:not(:checked)').each(function(){
+			$(":input",$domElement).not('[type=radio]:not(:checked)').not('[type=checkbox]:not(:checked)').not('.exclude').each(function(){
 				var value = $(this).val();
 				var name =  $(this).attr("name");
 				
@@ -522,7 +533,8 @@
 		
 		this.update = function ($domElement) {
 			var simpleFilter;
-			this.operator = $(":input.complexFilter.operator", $domElement).val();
+			this.operator = $(":input.complexFilter.operator", $domElement).attr('checked') === 'checked' ? 'OR' : 'AND' ;
+			
 			$(".controls", $domElement).each(function(){
 				simpleFilter = (new self.SimpleFilter(attribute)).update($(this));
 				if(!simpleFilter.isEmpty())
@@ -530,6 +542,16 @@
 					filters.push(simpleFilter);
 				}
 			});
+			return this;
+		};
+
+        this.addFilter = function (simpleFilter, operator) {
+            this.operator = operator;
+
+            if(!simpleFilter.isEmpty())
+            {
+                filters.push(simpleFilter);
+            }
 			return this;
 		};
 		
