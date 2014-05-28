@@ -47,6 +47,6 @@ public class ElasticsearchRepositoryCollection implements RepositoryCollection
 	@Override
 	public Repository getRepositoryByEntityName(String name)
 	{
-		return new ElasticSearchRepository(client, INDEX_NAME, name);
+		return new ElasticsearchRepository(client, INDEX_NAME, name);
 	}
 }
