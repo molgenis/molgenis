@@ -93,7 +93,6 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(dataService.getEntityNames()).thenReturn(Arrays.asList(ENTITY_NAME));
 		when(dataService.getRepositoryByEntityName(ENTITY_NAME)).thenReturn(repo);
 
-		// when(dataService.add(Matchers.eq(ENTITY_NAME), Matchers.any(MapEntity.class))).thenReturn("p1");
 		when(dataService.findOne(ENTITY_NAME, ENTITY_ID)).thenReturn(entity);
 
 		Query q = new QueryImpl().eq("name", "Piet").pageSize(10).offset(5);
@@ -123,7 +122,6 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void create() throws Exception
 	{
-		// restController.create(ENTITY_NAME, ImmutableMap.<String,Object>builder().put("name","Piet").build(), null);
 		mockMvc.perform(post(HREF_ENTITY).content("{id:'p1', name:'Piet'}").contentType(APPLICATION_JSON))
 				.andExpect(status().isCreated()).andExpect(header().string("Location", HREF_ENTITY_ID));
 
@@ -143,8 +141,6 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void deleteDelete() throws Exception
 	{
-		// restController.delete(ENTITY_NAME, ENTITY_ID);
-
 		mockMvc.perform(delete(HREF_ENTITY_ID)).andExpect(status().isNoContent());
 		verify(dataService).delete(ENTITY_NAME, ENTITY_ID);
 	}
@@ -285,7 +281,6 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		Repository repo = mock(Repository.class, withSettings().extraInterfaces(Updateable.class, Queryable.class));
 		when(dataService.getRepositoryByEntityName(ENTITY_NAME)).thenReturn(repo);
 		when(dataService.getEntityNames()).thenReturn(Arrays.asList(ENTITY_NAME));
-		// when(dataService.add(Matchers.eq(ENTITY_NAME), Matchers.any(MapEntity.class))).thenReturn(1);
 		Entity entityXref = new MapEntity("id");
 		entityXref.set("id", ENTITY_ID);
 		entityXref.set("xrefValue", "PietXREF");
@@ -379,9 +374,6 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void updatePost() throws Exception
 	{
-		// restController.updatePost(ENTITY_NAME, HREF_ENTITY_ID,
-		// ImmutableMap.<String,Object>builder().put("name","Klaas").build());
-
 		mockMvc.perform(
 				post(HREF_ENTITY_ID).param("_method", "PUT").content("{name:Klaas}").contentType(APPLICATION_JSON))
 				.andExpect(status().isOk());
