@@ -85,6 +85,24 @@ entity| The entity name of the entity to create|yes
 id <- molgenis.add(entity = "Person", firstName = "Piet", lastName = "Paulusma")
 ```
 
+### ```molgenis.addAll(entity, rows)```
+Creates an new entity and returns the id.
+
+Parameter|Description|Required
+---------|-----------|--------
+entity| The entity name of the entity to create|yes
+rows| data frame where each row represents an entity|yes
+
+**Example**
+
+```
+firstName <- c("Piet", "Paulusma")
+lastName <- c("Klaas", "de Vries")
+df <- data.frame(firstName, lastName)
+
+molgenis.updateAll("Person", df)
+```
+
 <br />
 ### ```molgenis.update(entity, id, ...)```
 Updates un existing entity

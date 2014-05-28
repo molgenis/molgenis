@@ -98,11 +98,48 @@ molgenis.get <- local(function(entity, q = NULL, start = 0, num = 1000, attribut
 #
 ####################################################################
 molgenis.add <- local(function(entity, ...) {
+	molgenis.addList(entity, list(...))
+}, env = molgenis.env)
+
+######################################################################
+#
+# Creates new entities
+#
+# Parameters:
+# 	entity: the entityname
+#   rows: dataFrame where each row is an entity
+#
+# example: 
+#	firstName <- c("Piet", "Klaas")
+#   lastName  <- c("Paulusma", "de Vries")
+#   df <- data.frame(firstName, lastName)
+#   molgenis.addAll("Person", df)
+#
+####################################################################
+molgenis.addAll <- function(entity, rows) {
+  apply(rows, 1, function(row){
+    molgenis.addList(entity, row)
+  })
+}
+
+######################################################################
+#
+# Creates a new entity
+#
+# Parameters:
+# 	entity: the entityname
+#   attributeList: list of attribute name/value pairs
+#
+# Return: 
+#	the id of the created entity
+#
+#####################################################################
+molgenis.addList <- local(function(entity, attributeList) {
   url <- paste0(molgenis.api.url, entity)
   h <- basicHeaderGatherer()
  
   postForm(url,
-           .params = list(...),
+           .params = attributeList,
             style = "POST",
            .opts = list(headerfunction = h$update, 
                         httpheader = list("x-molgenis-token" = molgenis.token, 
