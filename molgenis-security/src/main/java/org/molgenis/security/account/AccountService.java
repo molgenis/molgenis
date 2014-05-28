@@ -20,7 +20,6 @@ import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -45,9 +44,6 @@ public class AccountService
 
 	@Autowired
 	private MolgenisUserService molgenisUserService;
-
-	@Autowired
-	private PasswordEncoder passwordEncoder;
 
 	@RunAsSystem
 	public void createUser(MolgenisUser molgenisUser, String baseActivationUri)
@@ -143,7 +139,7 @@ public class AccountService
 			throw new MolgenisUserException("Unknown user [" + username + "]");
 		}
 
-		molgenisUser.setPassword(passwordEncoder.encode(newPassword));
+		molgenisUser.setPassword(newPassword);
 		molgenisUser.setChangePassword(false);
 		dataService.update(MolgenisUser.ENTITY_NAME, molgenisUser);
 
@@ -160,7 +156,6 @@ public class AccountService
 		{
 			String newPassword = UUID.randomUUID().toString().substring(0, 8);
 			molgenisUser.setPassword(newPassword);
-			molgenisUser.setPassword(passwordEncoder.encode(newPassword));
 			dataService.update(MolgenisUser.ENTITY_NAME, molgenisUser);
 
 			// send password reseted email to user

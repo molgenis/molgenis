@@ -5,12 +5,15 @@ import java.util.List;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.omx.auth.MolgenisGroup;
+import org.molgenis.omx.auth.MolgenisGroupMember;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 /**
@@ -52,6 +55,23 @@ public class MolgenisUserServiceImpl implements MolgenisUserService
 	{
 		return dataService.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl().eq(MolgenisUser.USERNAME, username),
 				MolgenisUser.class);
+	}
+
+	@Override
+	@RunAsSystem
+	public Iterable<MolgenisGroup> getUserGroups(String username)
+	{
+		Iterable<MolgenisGroupMember> molgenisGroupMembers = dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, getUser(username)), MolgenisGroupMember.class);
+		return Iterables.transform(molgenisGroupMembers, new Function<MolgenisGroupMember, MolgenisGroup>()
+		{
+
+			@Override
+			public MolgenisGroup apply(MolgenisGroupMember molgenisGroupMember)
+			{
+				return molgenisGroupMember.getMolgenisGroup();
+			}
+		});
 	}
 
 	@Override

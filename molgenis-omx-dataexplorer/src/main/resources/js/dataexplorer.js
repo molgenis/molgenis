@@ -206,7 +206,6 @@
 		
 		var container = $("#plugin-container");
 		
-		// use chosen plugin for data set select
 		if ($('#dataset-select').length > 0) {
 			$('#dataset-select').select2({ width: 'resolve' });
 			$('#dataset-select').change(function() {

@@ -204,3 +204,7 @@ label.horizontal-inline.inbetween {
     width:0;
     height:0
 }
+
+.form-horizontal .control-group {
+	margin-bottom: 10px;
+}

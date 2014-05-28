@@ -12,9 +12,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.molgenis.data.DataService;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.RedirectStrategy;
@@ -22,12 +21,12 @@ import org.springframework.web.filter.GenericFilterBean;
 
 public class MolgenisChangePasswordFilter extends GenericFilterBean
 {
-	private final DataService dataService;
+	private final MolgenisUserService molgenisUserService;
 	private final RedirectStrategy redirectStrategy;
 
-	public MolgenisChangePasswordFilter(DataService dataService, RedirectStrategy redirectStrategy)
+	public MolgenisChangePasswordFilter(MolgenisUserService molgenisUserService, RedirectStrategy redirectStrategy)
 	{
-		this.dataService = dataService;
+		this.molgenisUserService = molgenisUserService;
 		this.redirectStrategy = redirectStrategy;
 	}
 
@@ -47,8 +46,7 @@ public class MolgenisChangePasswordFilter extends GenericFilterBean
 				&& !httpRequest.getRequestURI().toLowerCase().startsWith("/css/")
 				&& !httpRequest.getRequestURI().toLowerCase().startsWith("/js/"))
 		{
-			MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME,
-					new QueryImpl().eq(MolgenisUser.USERNAME, authentication.getName()), MolgenisUser.class);
+			MolgenisUser user = molgenisUserService.getUser(authentication.getName());
 			if (user == null)
 			{
 				throw new RuntimeException("Unknown username [" + authentication.getName() + "]");

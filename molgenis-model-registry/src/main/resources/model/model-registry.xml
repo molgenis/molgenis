@@ -21,7 +21,7 @@
 			<field name="description" type="text" nillable="true" />
 			<field name="nillable" type="bool" default="false" />
 			<field name="dataType" type="enum" default="string" enum_options="[bool,categorical,compound,date,datetime,decimal,email,enum,file,html,hyperlink,image,int,long,mref,string,text,xref]" />
-			<unique fields="entityClass,attributeClassIdentifier" />
+			<unique fields="attributeClassIdentifier" />
 		</entity>
 	</module>	
 </molgenis>
