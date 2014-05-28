@@ -23,7 +23,7 @@ local({
 # 
 # Parameters:
 #	username: your username
-#	password: youd password
+#	password: your password
 #
 ###################################################################
 molgenis.login <- local(function(username, password) {
