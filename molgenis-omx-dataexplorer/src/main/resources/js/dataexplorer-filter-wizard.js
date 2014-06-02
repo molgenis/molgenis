@@ -2,7 +2,8 @@
 	"use strict";
 	
 	molgenis.dataexplorer = molgenis.dataexplorer || {};
-	var self = molgenis.dataexplorer.wizard = molgenis.dataexplorer.wizard || {};
+	molgenis.dataexplorer.filter = molgenis.dataexplorer.filter || {};
+	var self = molgenis.dataexplorer.filter.wizard = molgenis.dataexplorer.filter.wizard || {};
 
 	var restApi = new molgenis.RestClient();
 	var wizardTitle = "";
@@ -11,7 +12,7 @@
         if(title !== undefined) {
             wizardTitle = title;
         }
-    }
+    };
 
 	self.openFilterWizardModal = function(entityMetaData, attributeFilters) {
 		var modal = createFilterWizardModal();
@@ -35,7 +36,7 @@
 			items.push('<div class="filter-wizard">');
 			items.push('<form class="form-horizontal">');
 			items.push('<ul class="wizard-steps"></ul>');
-			items.push('<div class="tab-content wizard-page"></div>');
+			items.push('<div class="tab-content wizard-page "></div>');
 			items.push('<ul class="pager wizard">');
 			items.push('<li class="previous"><a href="#">Previous</a></li><li class="next"><a href="#">Next</a></li>');
 			items.push('</ul>');
@@ -57,7 +58,8 @@
 	
 	function createFilterModalControls(modal) {
 		$('.filter-wizard-apply-btn', modal).click(function() {
-			var filters = molgenis.dataexplorer.createFilters($('form', modal));
+			var filters = molgenis.dataexplorer.filter.createFilters($('form', modal));
+
 			if (filters.length > 0) {
 				$(document).trigger('updateAttributeFilters', {
 					'filters' : filters
@@ -96,20 +98,30 @@
 			
 			var pane = $('<div class="tab-pane' + (i === 0 ? ' active"' : '"') + ' id="' + tabId + '">');
 			var paneContainer = $('<div class="well"></div>');
+			
+			if (compoundAttributes.length > 1){
+				paneContainer.addClass('filter-wizard-fixed-height');
+			} else {
+				paneContainer.removeClass('filter-wizard-fixed-height');
+			}
+			
 			$.each(compoundAttribute.attributes, function(i, attribute) {
 				if(attribute.fieldType !== 'COMPOUND') {
-					paneContainer.append(molgenis.dataexplorer.createFilterControls(attribute, attributeFilters[attribute.href], true));
+					paneContainer.append(molgenis.dataexplorer.filter.createFilterControls(attribute, attributeFilters[attribute.href], true));
 				}
 			});
 			pane.append(paneContainer);
 			paneItems.push(pane);
 		});
 		
+		
 		if(compoundAttributes.length > 1){
-            $('.wizard-steps').show();
+            $('.wizard-steps', wizard).show();
             $('.wizard-steps', wizard).html(listItems.join(''));
+            $('.pager', wizard).show();
         }else{
-            $('.wizard-steps').hide();
+            $('.wizard-steps', wizard).hide();
+            $('.pager', wizard).hide();
         }
         $('.tab-content', wizard).html(paneItems);
         

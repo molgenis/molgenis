@@ -2,7 +2,6 @@ package org.molgenis.security.user;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -140,7 +139,6 @@ public class UserAccountServiceImplTest extends AbstractTestNGSpringContextTests
 		when(updatedMolgenisUser.getUsername()).thenReturn("username");
 
 		userAccountServiceImpl.updateCurrentUser(updatedMolgenisUser);
-		verify(passwordEncoder, times(1)).encode("new-password");
 	}
 
 	@Test

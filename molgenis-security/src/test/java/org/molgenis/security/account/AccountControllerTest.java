@@ -20,7 +20,6 @@ import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.account.AccountService.ActivationMode;
 import org.molgenis.security.captcha.CaptchaService;
-import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.HandleRequestDelegationException;
@@ -30,6 +29,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.web.RedirectStrategy;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -230,9 +230,9 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		public MolgenisPasswordEncoder molgenisPasswordEncoder()
+		public RedirectStrategy redirectStrategy()
 		{
-			return mock(MolgenisPasswordEncoder.class);
+			return mock(RedirectStrategy.class);
 		}
 	}
 }

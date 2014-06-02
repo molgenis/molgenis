@@ -11,10 +11,12 @@ import java.util.Map;
 
 import javax.servlet.ServletContext;
 
+import com.google.common.collect.Iterables;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.support.GenomeConfig;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.das.RangeHandlingDataSource;
 import org.molgenis.util.ApplicationContextProvider;
@@ -67,9 +69,9 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource i
 		{
 			segmentId = segmentParts[0];
 			customParam = segmentParts[1];
-			if (customParam.indexOf("dataset_") != -1)
+			if (customParam.indexOf(DasURLFilter.DATASET_PREFIX) != -1)
 			{
-				dataSet = customParam.substring(8);
+				dataSet = customParam.substring(11);
 			}
 		}
 		if (maxbins == null || maxbins < 0)
@@ -94,8 +96,8 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource i
 			String valuePatient = null;
 			try
 			{
-				valueStart = entity.getInt(MUTATION_START_POSITION);
-				valueIdentifier = entity.getString(MUTATION_ID);
+				valueStart = entity.getInt(GenomeConfig.GENOMEBROWSER_START_POSITION);
+				valueIdentifier = entity.getString(GenomeConfig.GENOMEBROWSER_ID);
 			}
 			catch (ClassCastException e)
 			{
@@ -103,13 +105,16 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource i
 				break;
 			}
 			// no end position? assume mutation of 1 position, so stop == start
-			valueStop = entity.getInt(MUTATION_STOP_POSITION) == null ? valueStart : entity
-					.getInt(MUTATION_STOP_POSITION);
-			valueDescription = entity.getString(MUTATION_DESCRIPTION) == null ? "" : entity
-					.getString(MUTATION_DESCRIPTION);
-			valueName = entity.getString(MUTATION_NAME) == null ? "" : entity.getString(MUTATION_NAME);
-			valueLink = entity.getString(MUTATION_LINK) == null ? "" : entity.getString(MUTATION_LINK);
-			valuePatient = entity.getString(PATIENT_ID) == null ? "" : entity.getString(PATIENT_ID);
+			Iterable<String> attributes = entity.getAttributeNames();
+
+			valueStop = Iterables.contains(attributes, GenomeConfig.GENOMEBROWSER_STOP_POSITION) ? entity.getInt(GenomeConfig.GENOMEBROWSER_STOP_POSITION) : valueStart;
+
+			valueDescription = Iterables.contains(attributes, GenomeConfig.GENOMEBROWSER_DESCRIPTION) ? entity
+					.getString(GenomeConfig.GENOMEBROWSER_DESCRIPTION) : "";
+
+			valueName = Iterables.contains(attributes, GenomeConfig.GENOMEBROWSER_NAME) ? entity.getString(GenomeConfig.GENOMEBROWSER_NAME) : "";
+			valueLink = Iterables.contains(attributes, GenomeConfig.GENOMEBROWSER_LINK) ? entity.getString(GenomeConfig.GENOMEBROWSER_LINK) : "";
+			valuePatient = Iterables.contains(attributes, GenomeConfig.GENOMEBROWSER_PATIENT_ID) ? entity.getString(GenomeConfig.GENOMEBROWSER_PATIENT_ID) : "";
 
 			if ((valueStart >= start && valueStart <= stop) || (valueStop >= start && valueStop <= stop))
 			{
@@ -136,7 +141,7 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource i
 
 	protected Iterable<Entity> queryDataSet(String segmentId, String dataSet, int maxbins)
 	{
-		Query q = new QueryImpl().eq(MUTATION_CHROMOSOME, segmentId);
+		Query q = new QueryImpl().eq(GenomeConfig.GENOMEBROWSER_CHROMOSOME, segmentId);
 		q.pageSize(maxbins);
 		return dataService.findAll(dataSet, q);
 	}

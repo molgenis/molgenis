@@ -3,6 +3,7 @@ package org.molgenis.data.annotation.impl;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -98,7 +99,8 @@ public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements 
 			try
 			{
 				HttpResponse response = httpClient.execute(httpGet);
-				BufferedReader br = new BufferedReader(new InputStreamReader((response.getEntity().getContent())));
+				BufferedReader br = new BufferedReader(new InputStreamReader((response.getEntity().getContent()),
+						Charset.forName("UTF-8")));
 
 				String output;
 				StringBuilder result = new StringBuilder();

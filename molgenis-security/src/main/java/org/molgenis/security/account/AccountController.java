@@ -3,10 +3,12 @@ package org.molgenis.security.account;
 import static org.molgenis.security.account.AccountController.URI;
 import static org.molgenis.security.user.UserAccountController.MIN_PASSWORD_LENGTH;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
@@ -23,7 +25,9 @@ import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.RedirectStrategy;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
@@ -43,6 +47,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 public class AccountController
 {
 	public static final String URI = "/account";
+	private static final String CHANGE_PASSWORD_RELATIVE_URI = "/password/change";
+	public static final String CHANGE_PASSWORD_URI = URI + CHANGE_PASSWORD_RELATIVE_URI;
 
 	private static final Logger logger = Logger.getLogger(AccountController.class);
 
@@ -56,7 +62,7 @@ public class AccountController
 	private CaptchaService captchaService;
 
 	@Autowired
-	private PasswordEncoder passwordEncoder;
+	private RedirectStrategy redirectStrategy;
 
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
 	public String getLoginForm()
@@ -77,6 +83,34 @@ public class AccountController
 	public String getPasswordResetForm()
 	{
 		return "resetpassword-modal";
+	}
+
+	@RequestMapping(value = CHANGE_PASSWORD_RELATIVE_URI, method = RequestMethod.GET)
+	public String getChangePasswordForm()
+	{
+		return "view-change-password";
+	}
+
+	@RequestMapping(value = CHANGE_PASSWORD_RELATIVE_URI, method = RequestMethod.POST)
+	public void changePassword(@Valid ChangePasswordForm form, HttpServletRequest request, HttpServletResponse response)
+			throws IOException
+	{
+		try
+		{
+			// Change password of current user
+			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+			if (authentication != null)
+			{
+				accountService.changePassword(authentication.getName(), form.getPassword1());
+			}
+
+			// Redirect to homepage
+			redirectStrategy.sendRedirect(request, response, "/");
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 	}
 
 	// Spring's FormHttpMessageConverter cannot bind target classes (as ModelAttribute can)
@@ -188,7 +222,7 @@ public class AccountController
 	{
 		MolgenisUser user = new MolgenisUser();
 		user.setUsername(request.getUsername());
-		user.setPassword(passwordEncoder.encode(request.getPassword()));
+		user.setPassword(request.getPassword());
 		user.setEmail(request.getEmail());
 		user.setPhone(request.getPhone());
 		user.setFax(request.getFax());
@@ -200,6 +234,7 @@ public class AccountController
 		user.setDepartment(request.getDepartment());
 		user.setCity(request.getCity());
 		user.setCountry(CountryCodes.get(request.getCountry()));
+		user.setChangePassword(false);
 		return user;
 	}
 }

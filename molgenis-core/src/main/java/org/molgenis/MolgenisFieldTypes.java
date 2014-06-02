@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
-import org.eclipse.persistence.internal.databaseaccess.FieldTypeDefinition;
 import org.molgenis.fieldtypes.BoolField;
 import org.molgenis.fieldtypes.CategoricalField;
 import org.molgenis.fieldtypes.CompoundField;
@@ -40,23 +39,21 @@ public class MolgenisFieldTypes
 	private static Map<String, FieldType> types = new TreeMap<String, FieldType>();
 	private static boolean init = false;
 
-    @Deprecated
-    //we will remove this, it is not extensible like this.
 	public enum FieldTypeEnum
 	{
 		BOOL, CATEGORICAL, COMPOUND, DATE, DATE_TIME, DECIMAL, EMAIL, ENUM, FILE, HTML, HYPERLINK, IMAGE, INT, LONG, MREF, STRING, TEXT, XREF
 	}
 
-    public static final FieldType STRING = new StringField();
-    public static final FieldType INT = new IntField();
-    public static final FieldType DECIMAL = new DecimalField();
-    public static final FieldType BOOL = new BoolField();
-    public static final FieldType TEXT = new TextField();
-    public static final FieldType XREF = new XrefField();
-    public static final FieldType MREF = new MrefField();
-    public static final FieldType DATE = new DateField();
-    public static final FieldType DATETIME = new DatetimeField();
-    public static final FieldType COMPOUND = new CompoundField();
+	public static final FieldType STRING = new StringField();
+	public static final FieldType INT = new IntField();
+	public static final FieldType DECIMAL = new DecimalField();
+	public static final FieldType BOOL = new BoolField();
+	public static final FieldType TEXT = new TextField();
+	public static final FieldType XREF = new XrefField();
+	public static final FieldType MREF = new MrefField();
+	public static final FieldType DATE = new DateField();
+	public static final FieldType DATETIME = new DatetimeField();
+	public static final FieldType COMPOUND = new CompoundField();
 
 	/** Initialize default field types */
 	private static void init()

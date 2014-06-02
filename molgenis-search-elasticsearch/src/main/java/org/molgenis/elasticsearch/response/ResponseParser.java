@@ -1,7 +1,9 @@
 package org.molgenis.elasticsearch.response;
 
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,16 +11,19 @@ import java.util.Set;
 
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.ShardSearchFailure;
+import org.elasticsearch.common.collect.Iterables;
+import org.elasticsearch.common.collect.Sets;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
-import org.elasticsearch.search.facet.Facet;
-import org.elasticsearch.search.facet.terms.TermsFacet;
+import org.elasticsearch.search.aggregations.Aggregation;
+import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchResult;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 /**
  * Generates a SearchResult from the ElasticSearch SearchResponse object
@@ -76,96 +81,152 @@ public class ResponseParser
 		}
 
 		AggregateResult aggregate = null;
-		if (response.getFacets() != null)
+		Aggregations aggregations = response.getAggregations();
+		if (aggregations != null)
 		{
-			// We always have exactly one facet, can be a compount of two aggregateable fields (separated by ~)
-			Iterator<Facet> it = response.getFacets().iterator();
-			if (it.hasNext())
+			List<List<Long>> matrix = Lists.newArrayList();
+			Set<String> xLabelsSet = Sets.newHashSet();
+			Set<String> yLabelsSet = Sets.newHashSet();
+			List<String> xLabels = new ArrayList<String>();
+			List<String> yLabels = new ArrayList<String>();
+			final int nrAggregations = Iterables.size(aggregations);
+			if (nrAggregations != 1)
 			{
-				List<List<Long>> matrix = Lists.newArrayList();
-				Set<String> xLabels = Sets.newLinkedHashSet();
-				Set<String> yLabels = Sets.newLinkedHashSet();
+				throw new RuntimeException("Multiple aggregations [" + nrAggregations + "] not supported");
+			}
 
-				TermsFacet facet = (TermsFacet) it.next();
-				if (facet.getName().contains("~"))
+			Aggregation aggregation = aggregations.iterator().next();
+			if (!(aggregation instanceof Terms))
+			{
+				throw new RuntimeException("Aggregation of type [" + aggregation.getClass().getName()
+						+ "] not supported");
+			}
+			Terms terms = (Terms) aggregation;
+
+			Collection<Bucket> buckets = terms.getBuckets();
+			if (buckets.size() > 0)
+			{
+				// distinguish between 1D and 2D aggregation
+				boolean hasSubAggregations = false;
+				for (Bucket bucket : buckets)
 				{
-					for (TermsFacet.Entry term : facet.getEntries())
+					Aggregations subAggregations = bucket.getAggregations();
+					if (subAggregations != null && Iterables.size(subAggregations) > 0)
 					{
-						String[] labels = term.getTerm().string().split("~");
-						xLabels.add(labels[0]);
-						yLabels.add(labels[1]);
+						hasSubAggregations = true;
+						break;
 					}
+				}
 
-					for (String xLabel : xLabels)
+				if (hasSubAggregations)
+				{
+					// create labels
+					for (Bucket bucket : buckets)
 					{
-						List<Long> row = Lists.newArrayList();
-						matrix.add(row);
+						if (!xLabelsSet.contains(bucket.getKey())) xLabelsSet.add(bucket.getKey());
 
-						long rowTotal = 0;
-						for (String yLabel : yLabels)
+						Aggregations subAggregations = bucket.getAggregations();
+						if (subAggregations != null)
 						{
-							TermsFacet.Entry term = findTerm(xLabel + "~" + yLabel, facet);
-							Long count = term != null ? Long.valueOf(term.getCount()) : 0;
-							row.add(count);
-							rowTotal += count;
+							if (Iterables.size(subAggregations) > 1)
+							{
+								throw new RuntimeException("Multiple aggregations [" + nrAggregations
+										+ "] not supported");
+							}
+							Aggregation subAggregation = subAggregations.iterator().next();
+
+							if (!(subAggregation instanceof Terms))
+							{
+								throw new RuntimeException("Aggregation of type ["
+										+ subAggregation.getClass().getName() + "] not supported");
+							}
+							Terms subTerms = (Terms) subAggregation;
+
+							for (Bucket subBucket : subTerms.getBuckets())
+							{
+								yLabelsSet.add(subBucket.getKey());
+							}
+
 						}
-						row.add(rowTotal);
 					}
 
+					xLabels = new ArrayList<String>(xLabelsSet);
+					Collections.sort(xLabels);
+					xLabels.add("Total");
+					yLabels = new ArrayList<String>(yLabelsSet);
+					Collections.sort(yLabels);
 					yLabels.add("Total");
 
-					// Column totals
-					List<Long> columnTotals = Lists.newArrayList();
-					for (List<Long> row : matrix)
+					// create label map
+					int idx = 0;
+					Map<String, Integer> yLabelMap = new HashMap<String, Integer>();
+					for (String yLabel : yLabels)
 					{
-						int i = 0;
-						for (Long cellCount : row)
+						yLabelMap.put(yLabel, idx++);
+					}
+
+					for (Bucket bucket : buckets)
+					{
+						// create values
+						List<Long> yValues = new ArrayList<Long>();
+						for (int i = 0; i < idx; ++i)
 						{
-							if (columnTotals.size() - 1 < i)
+							yValues.add(0l);
+						}
+
+						Aggregations subAggregations = bucket.getAggregations();
+						if (subAggregations != null)
+						{
+							long count = 0;
+							Terms subTerms = (Terms) subAggregations.iterator().next();
+							for (Bucket subBucket : subTerms.getBuckets())
 							{
-								columnTotals.add(cellCount);
+								long bucketCount = subBucket.getDocCount();
+								yValues.set(yLabelMap.get(subBucket.getKey()), bucketCount);
+								count += bucketCount;
 							}
-							else
-							{
-								columnTotals.set(i, columnTotals.get(i) + cellCount);
-							}
-							i++;
+							yValues.set(yLabelMap.get("Total"), count);
+						}
+
+						matrix.add(yValues);
+					}
+
+					// create value totals
+					List<Long> xTotals = new ArrayList<Long>();
+					for (int i = 0; i < idx; ++i)
+					{
+						xTotals.add(0l);
+					}
+
+					for (List<Long> values : matrix)
+					{
+						int nrValues = values.size();
+						for (int i = 0; i < nrValues; ++i)
+						{
+							xTotals.set(i, xTotals.get(i) + values.get(i));
 						}
 					}
-					matrix.add(columnTotals);
-					xLabels.add("Total");
+					matrix.add(xTotals);
 				}
 				else
 				{
-					yLabels.add("Count");
 					long total = 0;
-					for (TermsFacet.Entry term : facet.getEntries())
+					for (Bucket bucket : buckets)
 					{
-						matrix.add(Lists.newArrayList(Long.valueOf(term.getCount())));
-						xLabels.add(term.getTerm().string());
-						total += term.getCount();
+						xLabels.add(bucket.getKey());
+						long docCount = bucket.getDocCount();
+						matrix.add(Lists.newArrayList(Long.valueOf(docCount)));
+						total += docCount;
 					}
+					matrix.add(Lists.newArrayList(Long.valueOf(total)));
 					xLabels.add("Total");
-					matrix.add(Lists.newArrayList(total));
+					yLabels.add("Count");
 				}
-
-				aggregate = new AggregateResult(matrix, xLabels, yLabels);
 			}
+
+			aggregate = new AggregateResult(matrix, xLabels, yLabels);
 		}
 
 		return new SearchResult(totalCount, searchHits, aggregate);
-	}
-
-	private TermsFacet.Entry findTerm(String text, TermsFacet facet)
-	{
-		for (TermsFacet.Entry term : facet.getEntries())
-		{
-			if (term.getTerm().string().equalsIgnoreCase(text))
-			{
-				return term;
-			}
-		}
-
-		return null;
 	}
 }

@@ -2,9 +2,27 @@ package org.molgenis.data.support;
 
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserHasRole;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
-import org.molgenis.data.*;
+import org.molgenis.data.AggregateResult;
+import org.molgenis.data.Aggregateable;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.CrudRepository;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Query;
+import org.molgenis.data.Queryable;
+import org.molgenis.data.Repository;
+import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.Updateable;
+import org.molgenis.data.Writable;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Predicate;
@@ -43,7 +61,7 @@ public class DataServiceImpl implements DataService
 	{
 		if (null == repositoryName)
 		{
-			throw new MolgenisDataException("repositoryName may not be [" + repositoryName + "]");
+			throw new MolgenisDataException("repositoryName may not be null");
 		}
 
 		if (!repositories.containsKey(repositoryName.toLowerCase()))

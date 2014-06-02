@@ -16,7 +16,7 @@
 					<div class="control-group">
 						<label class="control-label" for="boxplot-select-feature">Select feature</label>
 						<div class="controls">
-							<select id="boxplot-select-feature" data-placeholder="ObservableValue" name="chart-select-feature" class="chosen-select"></select>
+							<select id="boxplot-select-feature" data-placeholder="ObservableValue" name="chart-select-feature"></select>
 						</div>
 					</div>
 					<div class="control-group">
@@ -28,7 +28,7 @@
 					<div class="control-group">
 						<label class="control-label" for="boxplot-select-split-feature">Split to series</label>
 						<div class="controls">
-							<select id="boxplot-select-split-feature" data-placeholder="ObservableValue" name="boxplot-select-split-feature" class="chosen-select"></select>
+							<select id="boxplot-select-split-feature" data-placeholder="ObservableValue" name="boxplot-select-split-feature"></select>
 						</div>
 					</div>
 				</form>

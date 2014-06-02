@@ -51,7 +51,7 @@ public class DataServiceTokenService implements TokenService
 	@Override
 	@Transactional
 	@RunAsSystem
-	public String generateAndStoreToken(String username)
+	public String generateAndStoreToken(String username, String description)
 	{
 		MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME,
 				new QueryImpl().eq(MolgenisUser.USERNAME, username), MolgenisUser.class);
@@ -63,6 +63,7 @@ public class DataServiceTokenService implements TokenService
 		MolgenisToken molgenisToken = new MolgenisToken();
 		molgenisToken.setMolgenisUser(user);
 		molgenisToken.setToken(token);
+		molgenisToken.setDescription(description);
 		molgenisToken.setExpirationDate(null);// No expiration date
 		dataService.add(MolgenisToken.ENTITY_NAME, molgenisToken);
 

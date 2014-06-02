@@ -7,6 +7,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
@@ -30,7 +31,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeMethod;
@@ -64,12 +64,6 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		public PasswordEncoder passwordEncoder()
-		{
-			return mock(PasswordEncoder.class);
-		}
-
-		@Bean
 		public JavaMailSender mailSender()
 		{
 			return mock(JavaMailSender.class);
@@ -90,9 +84,6 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests
 
 	@Autowired
 	private JavaMailSender javaMailSender;
-
-	@Autowired
-	private PasswordEncoder passwordEncoder;
 
 	@BeforeMethod
 	public void setUp()
@@ -168,7 +159,6 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests
 
 		accountService.resetPassword("user@molgenis.org");
 		ArgumentCaptor<MolgenisUser> argument = ArgumentCaptor.forClass(MolgenisUser.class);
-		verify(passwordEncoder).encode(any(String.class));
 		verify(dataService).update(eq(MolgenisUser.ENTITY_NAME), argument.capture());
 		assertNotNull(argument.getValue().getPassword());
 		verify(javaMailSender).send(any(SimpleMailMessage.class));
@@ -186,5 +176,22 @@ public class AccountServiceTest extends AbstractTestNGSpringContextTests
 				.thenReturn(null);
 
 		accountService.resetPassword("invalid-user@molgenis.org");
+	}
+
+	@Test
+	public void changePassword()
+	{
+		MolgenisUser user = new MolgenisUser();
+		user.setUsername("test");
+		user.setPassword("oldpass");
+
+		when(
+				dataService.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl().eq(MolgenisUser.USERNAME, "test"),
+						MolgenisUser.class)).thenReturn(user);
+
+		accountService.changePassword("test", "newpass");
+
+		verify(dataService).update(MolgenisUser.ENTITY_NAME, user);
+		assertNotEquals(user.getPassword(), "oldpass");
 	}
 }

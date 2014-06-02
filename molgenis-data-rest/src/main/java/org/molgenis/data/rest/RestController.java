@@ -1,12 +1,31 @@
 package org.molgenis.data.rest;
 
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.*;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
 import static org.molgenis.data.rest.RestController.BASE_URI;
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.web.bind.annotation.RequestMethod.*;
+import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
+import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,18 +36,33 @@ import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.*;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.DataConverter;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule;
+import org.molgenis.data.Queryable;
+import org.molgenis.data.Repository;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.framework.db.EntityNotFoundException;
 import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.Permission;
 import org.molgenis.security.token.TokenExtractor;
 import org.molgenis.security.token.TokenService;
 import org.molgenis.security.token.UnknownTokenException;
+import org.molgenis.ui.form.EntityForm;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -40,7 +74,14 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -68,17 +109,22 @@ public class RestController
 	private final DataService dataService;
 	private final TokenService tokenService;
 	private final AuthenticationManager authenticationManager;
+	private final String ENTITY_FORM_MODEL_ATTRIBUTE = "form";
+	private final MolgenisPermissionService molgenisPermissionService;
 
 	@Autowired
 	public RestController(DataService dataService, TokenService tokenService,
-			AuthenticationManager authenticationManager)
+			AuthenticationManager authenticationManager, MolgenisPermissionService molgenisPermissionService)
 	{
 		if (dataService == null) throw new IllegalArgumentException("dataService is null");
 		if (tokenService == null) throw new IllegalArgumentException("tokenService is null");
 		if (authenticationManager == null) throw new IllegalArgumentException("authenticationManager is null");
+		if (molgenisPermissionService == null) throw new IllegalArgumentException("molgenisPermissionService is null");
+
 		this.dataService = dataService;
 		this.tokenService = tokenService;
 		this.authenticationManager = authenticationManager;
+		this.molgenisPermissionService = molgenisPermissionService;
 	}
 
 	/**
@@ -237,7 +283,6 @@ public class RestController
 				}
 				return entityHasAttributeMap;
 			case MREF:
-				@SuppressWarnings("unchecked")
 				List<Entity> mrefEntities = new ArrayList<Entity>();
 				for (Entity e : entity.getEntities((attr.getName())))
 					mrefEntities.add(e);
@@ -407,9 +452,10 @@ public class RestController
 	public void updateFromFormPost(@PathVariable("entityName") String entityName, @PathVariable("id") Object id,
 			HttpServletRequest request)
 	{
-        Object typedId = dataService.getRepositoryByEntityName(entityName).getEntityMetaData().getIdAttribute().getDataType().convert(id);
+		Object typedId = dataService.getRepositoryByEntityName(entityName).getEntityMetaData().getIdAttribute()
+				.getDataType().convert(id);
 
-        Map<String, Object> paramMap = new HashMap<String, Object>();
+		Map<String, Object> paramMap = new HashMap<String, Object>();
 		for (String param : request.getParameterMap().keySet())
 		{
 			paramMap.put(param, request.getParameter(param));
@@ -429,7 +475,8 @@ public class RestController
 	@ResponseStatus(NO_CONTENT)
 	public void delete(@PathVariable("entityName") String entityName, @PathVariable Object id)
 	{
-        Object typedId = dataService.getRepositoryByEntityName(entityName).getEntityMetaData().getIdAttribute().getDataType().convert(id);
+		Object typedId = dataService.getRepositoryByEntityName(entityName).getEntityMetaData().getIdAttribute()
+				.getDataType().convert(id);
 		dataService.delete(entityName, typedId);
 	}
 
@@ -447,6 +494,39 @@ public class RestController
 	public void deletePost(@PathVariable("entityName") String entityName, @PathVariable Object id)
 	{
 		delete(entityName, id);
+	}
+
+	@RequestMapping(value = "/{entityName}/create", method = GET)
+	public String createForm(@PathVariable("entityName") String entityName, Model model)
+	{
+
+		Repository repo = dataService.getRepositoryByEntityName(entityName);
+		Entity entity = null;
+		if (repo.getEntityMetaData().getEntityClass() != Entity.class) entity = BeanUtils.instantiateClass(repo
+				.getEntityMetaData().getEntityClass());
+		else entity = new MapEntity();
+		EntityMetaData entityMeta = repo.getEntityMetaData();
+		model.addAttribute(ENTITY_FORM_MODEL_ATTRIBUTE, new EntityForm(entityMeta, true, entity));
+
+		model.addAttribute("entity", entity);
+
+		return "view-entity-create";
+	}
+
+	@RequestMapping(value = "/{entityName}/{id}/edit", method = GET)
+	public String editForm(@PathVariable("entityName") String entityName, @PathVariable Object id, Model model)
+	{
+		Entity entity = dataService.findOne(entityName, id);
+
+		// dataService.getRepositoryByEntityName(entityName);
+		EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
+
+		boolean hasWritePermission = molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITE);
+		model.addAttribute(ENTITY_FORM_MODEL_ATTRIBUTE, new EntityForm(entityMetaData, entity, id, hasWritePermission));
+
+		model.addAttribute("entity", entity);
+
+		return "view-entity-edit";
 	}
 
 	/**
@@ -489,7 +569,7 @@ public class RestController
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
 		// Generate a new token for the user
-		String token = tokenService.generateAndStoreToken(authentication.getName());
+		String token = tokenService.generateAndStoreToken(authentication.getName(), "Rest api login");
 
 		MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME,
 				new QueryImpl().eq(MolgenisUser.USERNAME, authentication.getName()), MolgenisUser.class);
@@ -636,7 +716,7 @@ public class RestController
 		Entity entity = toEntity(meta, entityMap);
 
 		dataService.add(entityName, entity);
-        Object id = entity.getIdValue();
+		Object id = entity.getIdValue();
 		if (id != null)
 		{
 			response.addHeader("Location", String.format(BASE_URI + "/%s/%s", entityName, id));
@@ -649,7 +729,7 @@ public class RestController
 	private Entity toEntity(EntityMetaData meta, Map<String, Object> request)
 	{
 		Entity entity = new MapEntity();
-        if(meta.getIdAttribute() != null) entity = new MapEntity(meta.getIdAttribute().getName());
+		if (meta.getIdAttribute() != null) entity = new MapEntity(meta.getIdAttribute().getName());
 
 		for (AttributeMetaData attr : meta.getAtomicAttributes())
 		{
@@ -665,17 +745,13 @@ public class RestController
 
 			if (paramValue != null)
 			{
-				if (attr.getDataType().getEnumType() == XREF)
+				if (attr.getDataType().getEnumType() == XREF || attr.getDataType().getEnumType() == CATEGORICAL)
 				{
-					Object id = paramValue;
-					if (id != null)
+					value = dataService.findOne(attr.getRefEntity().getName(), paramValue);
+					if (value == null)
 					{
-						value = dataService.findOne(attr.getRefEntity().getName(), id);
-						if (value == null)
-						{
-							throw new IllegalArgumentException("No " + attr.getRefEntity().getName() + " with id "
-									+ paramValue + " found");
-						}
+						throw new IllegalArgumentException("No " + attr.getRefEntity().getName() + " with id "
+								+ paramValue + " found");
 					}
 				}
 				else if (attr.getDataType().getEnumType() == MREF)
@@ -748,7 +824,8 @@ public class RestController
 			// filter fields
 			if (attributesSet != null && !attributesSet.contains(attr.getName().toLowerCase())) continue;
 
-			if (attr.isVisible() && !attr.getName().equals("__Type"))// TODO remove __Type from jpa entities
+			// TODO remove __Type from jpa entities
+			if (attr.isVisible() && !attr.getName().equals("__Type"))
 			{
 				String attrName = attr.getName();
 				FieldTypeEnum attrType = attr.getDataType().getEnumType();

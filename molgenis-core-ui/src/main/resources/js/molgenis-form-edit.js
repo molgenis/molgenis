@@ -3,13 +3,14 @@
 	
 	var ns = molgenis.form = molgenis.form || {};
 	var restApi = new molgenis.RestClient();
+	var successHandler;
 	
 	ns.quoteIsoDateT = function() {
 		$('.date input').each(function() {
 			var d = $(this).val();
 			$(this).val(d.replace(/T/,"'T'"));//Put quotes around T
 		});
-	}
+	};
 	
 	ns.onFormSubmit = function() {
 		ns.hideAlerts();
@@ -28,6 +29,7 @@
 			contentType: 'application/x-www-form-urlencoded',
 			async: false,
 			success: function(data, textStatus, response) {
+			
 				//Add quotes to dateformat again
 				ns.quoteIsoDateT();
 				
@@ -38,6 +40,8 @@
 					$('input[name=_method]').val('PUT');
 				}
 				$('#success-message').show();
+				
+				$(document).trigger('onFormSubmitSuccess');
 			},
 			error: function(xhr) {
 				ns.quoteIsoDateT();
@@ -51,12 +55,12 @@
 			}
 		});
 		
-	}
+	};
 	
 	ns.hideAlerts = function() {
 		$('#success-message').hide();
 		$('#error-message').hide();
-	}
+	};
 	
 	$(function() {
 		//Enable datepickers

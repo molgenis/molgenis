@@ -8,6 +8,10 @@ public interface UserManagerService
 {
 	List<MolgenisUserViewData> getAllMolgenisUsers();
 
+	void setActivationUser(Integer userId, Boolean active);
+
+	void setActivationGroup(Integer groupId, Boolean active);
+
 	List<MolgenisGroup> getAllMolgenisGroups();
 
 	List<MolgenisGroup> getGroupsWhereUserIsMember(Integer userId);

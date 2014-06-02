@@ -13,6 +13,7 @@ import org.molgenis.framework.db.WebAppDatabasePopulatorService;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
+import org.molgenis.security.CorsInterceptor;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.freemarker.HasPermissionDirective;
 import org.molgenis.security.freemarker.NotHasPermissionDirective;
@@ -83,7 +84,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	public void addInterceptors(InterceptorRegistry registry)
 	{
 		String pluginInterceptPattern = MolgenisPluginController.PLUGIN_URI_PREFIX + "**";
+		String corsInterceptPattern = "/api/**";
 		registry.addInterceptor(molgenisPluginInterceptor()).addPathPatterns(pluginInterceptPattern);
+		registry.addInterceptor(corsInterceptor()).addPathPatterns(corsInterceptPattern);
 	}
 
 	@Override
@@ -163,14 +166,14 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		{
 			throw new IllegalArgumentException("missing required java system property 'molgenis.home'");
 		}
-		if (!molgenisHomeDir.endsWith("/")) molgenisHomeDir = molgenisHomeDir + '/';
+		if (!molgenisHomeDir.endsWith(File.separator)) molgenisHomeDir = molgenisHomeDir + File.separator;
 
 		// create molgenis store directory in molgenis data directory if not exists
-		String molgenisFileStoreDirStr = molgenisHomeDir + "data/filestore";
+		String molgenisFileStoreDirStr = molgenisHomeDir + "data" + File.separator + "filestore";
 		File molgenisDataDir = new File(molgenisFileStoreDirStr);
 		if (!molgenisDataDir.exists())
 		{
-			if (!molgenisDataDir.mkdir())
+			if (!molgenisDataDir.mkdirs())
 			{
 				throw new RuntimeException("failed to create directory: " + molgenisFileStoreDirStr);
 			}
@@ -258,5 +261,11 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	public MolgenisPluginRegistry molgenisPluginRegistry()
 	{
 		return new MolgenisUiPluginRegistry(molgenisUi());
+	}
+
+	@Bean
+	public CorsInterceptor corsInterceptor()
+	{
+		return new CorsInterceptor();
 	}
 }

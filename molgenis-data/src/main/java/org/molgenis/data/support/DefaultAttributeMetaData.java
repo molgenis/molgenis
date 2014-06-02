@@ -33,11 +33,6 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	private boolean aggregateable = false;
 	private Range range;
 
-	@Deprecated
-	/*
-	 * Don't want to useFieldTypeEnum because that limits FieldType to predefined set while we want to have this
-	 * extensible
-	 */
 	public DefaultAttributeMetaData(String name, FieldTypeEnum fieldType)
 	{
 		if (name == null) throw new IllegalArgumentException("Name cannot be null");
@@ -232,6 +227,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		return this;
 	}
 
+	@Override
 	public String toString()
 	{
 		String result = "AttributeMetaData(name='" + this.getName() + "'";

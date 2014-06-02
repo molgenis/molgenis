@@ -6,7 +6,6 @@ import java.util.Collections;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
-import org.molgenis.framework.server.TokenFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -105,11 +104,5 @@ public class DatabaseConfig implements TransactionManagementConfigurer
 	public PlatformTransactionManager annotationDrivenTransactionManager()
 	{
 		return transactionManager();
-	}
-
-	@Bean
-	public TokenFactory tokenFactory()
-	{
-		return new TokenFactory();
 	}
 }

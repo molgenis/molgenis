@@ -1,12 +1,12 @@
 package org.molgenis.elasticsearch.request;
 
-import static org.molgenis.data.QueryRule.Operator.AND;
 import static org.molgenis.data.QueryRule.Operator.EQUALS;
 import static org.molgenis.data.QueryRule.Operator.GREATER;
 import static org.molgenis.data.QueryRule.Operator.GREATER_EQUAL;
 import static org.molgenis.data.QueryRule.Operator.LESS;
 import static org.molgenis.data.QueryRule.Operator.LESS_EQUAL;
 import static org.molgenis.data.QueryRule.Operator.LIKE;
+import static org.molgenis.data.QueryRule.Operator.NESTED;
 import static org.molgenis.data.QueryRule.Operator.NOT;
 import static org.molgenis.data.QueryRule.Operator.OR;
 import static org.molgenis.data.QueryRule.Operator.SEARCH;
@@ -46,6 +46,7 @@ public class LuceneQueryStringBuilder
 	 * @param queryRules
 	 * @return the lucene query
 	 */
+	@edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "RCN_REDUNDANT_NULLCHECK_OF_NULL_VALUE", justification = "False positive for Redundant nullcheck of previousRule")
 	public static String buildQueryString(List<QueryRule> queryRules)
 	{
 		if (queryRules.isEmpty())
@@ -58,9 +59,15 @@ public class LuceneQueryStringBuilder
 
 		for (QueryRule queryRule : queryRules)
 		{
-			if (queryRule.getOperator() == OR || queryRule.getOperator() == AND)
+			if (queryRule.getOperator() == NESTED)
 			{
-				previousRule = queryRule;
+				sb.append(" ( ");
+				sb.append(buildQueryString(queryRule.getNestedRules()));
+				sb.append(" )");
+			}
+			else if (queryRule.getOperator() == OR)
+			{
+				sb.append(" " + queryRule.getOperator() + " ");
 			}
 			else if (queryRule.getOperator() == EQUALS || queryRule.getOperator() == NOT
 					|| queryRule.getOperator() == LIKE || queryRule.getOperator() == LESS

@@ -3,21 +3,47 @@ package org.molgenis.data.jpa;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.BOOL;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.*;
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaBuilder.In;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Order;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.*;
+import org.molgenis.data.AggregateResult;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.DataConverter;
+import org.molgenis.data.DatabaseAction;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.support.*;
+import org.molgenis.data.support.AbstractCrudRepository;
+import org.molgenis.data.support.ConvertingIterable;
+import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.support.QueryResolver;
 import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.generators.GeneratorHelper;
 import org.springframework.beans.BeanUtils;
@@ -120,7 +146,8 @@ public class JpaRepository extends AbstractCrudRepository
 		// gonna produce a number
 		CriteriaQuery<Long> cq = cb.createQuery(Long.class);
 		Root<? extends Entity> from = cq.from(getEntityClass());
-		cq.select(cb.count(from));
+		cq.select(cb.countDistinct(from));// We need distinct, sometimes double rows are returned by EL when doing a
+											// mref search
 
 		// add filters
 		createWhere(q, from, cq, cb);
@@ -138,7 +165,8 @@ public class JpaRepository extends AbstractCrudRepository
 		if (logger.isDebugEnabled()) logger
 				.debug("finding by key" + getEntityClass().getSimpleName() + " [" + id + "]");
 
-		return getEntityManager().find(getEntityClass(), getEntityMetaData().getIdAttribute().getDataType().convert(id));
+		return getEntityManager()
+				.find(getEntityClass(), getEntityMetaData().getIdAttribute().getDataType().convert(id));
 	}
 
 	@Override
@@ -183,7 +211,8 @@ public class JpaRepository extends AbstractCrudRepository
 
 		@SuppressWarnings("unchecked")
 		Root<Entity> from = (Root<Entity>) cq.from(getEntityClass());
-		cq.select(from);
+		cq.select(from).distinct(true);// We need distinct, sometimes double rows are returned by EL when doing a mref
+										// search
 
 		// add filters
 		createWhere(q, from, cq, cb);
@@ -1068,7 +1097,7 @@ public class JpaRepository extends AbstractCrudRepository
 			}
 		}
 
-		return new AggregateResult(matrix, xLabels, yLabels);
+		return new AggregateResult(matrix, new ArrayList<String>(xLabels), new ArrayList<String>(yLabels));
 	}
 
 	// Get all distinct values of an attribute

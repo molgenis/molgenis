@@ -3,7 +3,7 @@
 	<#assign fieldName=field.name/>
 	
 	<div class="control-group">
-    	<label class="control-label" for="${fieldName}">${field.name} <#if field.nillable?string('true', 'false') == 'false'>*</#if></label>
+    	<label class="control-label" for="${fieldName}">${field.label} <#if field.nillable?string('true', 'false') == 'false'>*</#if></label>
     	<div class="controls">
     		
     		<#if field.dataType.enumType == 'BOOL'>
@@ -11,8 +11,8 @@
 	
 			<#elseif field.dataType.enumType == 'TEXT' || field.dataType.enumType =='HTML'>
 				<textarea name="${fieldName}" id="${fieldName}" <#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <@validationOptions field /> ><#if entity!='' && entity.get(fieldName)??>${entity.get(fieldName)!?html}</#if></textarea>
-	
-			<#elseif field.dataType.enumType == 'XREF'>
+			
+			<#elseif field.dataType.enumType == 'XREF' || field.dataType.enumType == 'CATEGORICAL'>
 				<input type="hidden" name="${fieldName}" id="${fieldName}" <@validationOptions field />>
 				<script>
 					$(document).ready(function() {

@@ -81,6 +81,12 @@
 							</div>
 						</div>
 						<div class="control-group">
+							<label class="control-label" for="firstname">Middle names</label>
+							<div class="controls">
+								<input type="text" name="middleNames"<#if user.middleNames??> value="${user.middleNames}"</#if>>
+							</div>
+						</div>
+						<div class="control-group">
 							<label class="control-label" for="lastname">Last name</label>
 							<div class="controls">
 								<input type="text" name="lastname"<#if user.lastname??> value="${user.lastname}"</#if>>
