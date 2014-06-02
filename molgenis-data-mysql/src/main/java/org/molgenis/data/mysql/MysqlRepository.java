@@ -11,6 +11,7 @@ import javax.sql.DataSource;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.*;
+import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.*;
@@ -21,7 +22,7 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
-public class MysqlRepository implements Repository, Writable, Queryable, Manageable, CrudRepository
+public class MysqlRepository extends AbstractRepository implements Repository, Writable, Queryable, Manageable, CrudRepository
 {
 	public static final int BATCH_SIZE = 100000;
 	private EntityMetaData metaData;
@@ -31,6 +32,7 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 
 	protected MysqlRepository(MysqlRepositoryCollection collection, EntityMetaData metaData)
 	{
+        super(metaData.getName());
 		if (metaData == null) throw new IllegalArgumentException("DataSource is null");
 		if (metaData == null) throw new IllegalArgumentException("metaData is null");
 		this.metaData = metaData;
@@ -161,21 +163,9 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 	}
 
 	@Override
-	public String getName()
-	{
-		return metaData.getName();
-	}
-
-	@Override
 	public EntityMetaData getEntityMetaData()
 	{
 		return metaData;
-	}
-
-	@Override
-	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
-	{
-		throw new UnsupportedOperationException();
 	}
 
 	protected String iteratorSql()
@@ -189,12 +179,6 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 		else sql += "*";
 		sql += " FROM " + getEntityMetaData().getName();
 		return sql;
-	}
-
-	@Override
-	public String getUrl()
-	{
-		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -383,6 +367,12 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 	public void clearCache()
 	{
 
+	}
+
+	@Override
+	public Query query()
+	{
+		return new QueryImpl(this);
 	}
 
 	@Override
@@ -657,11 +647,6 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 		{
 			return value.toString();
 		}
-	}
-
-	public MysqlRepositoryQuery query()
-	{
-		return new MysqlRepositoryQuery(this);
 	}
 
 	@Override

@@ -34,6 +34,11 @@ public class CsvRepository extends AbstractRepository
 	private final String sheetName;
 	private final File file;
 
+    public CsvRepository(String file)
+    {
+        this(new File(file), null);
+    }
+
 	public CsvRepository(File file, @Nullable List<CellProcessor> cellProcessors)
 	{
 		this(file, StringUtils.stripFilenameExtension(file.getName()), null);

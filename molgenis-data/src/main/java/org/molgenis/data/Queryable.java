@@ -5,6 +5,8 @@ package org.molgenis.data;
  */
 public interface Queryable extends Countable
 {
+    Query query();
+
 	/**
 	 * return number of entities matched by query
 	 **/
