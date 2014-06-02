@@ -1,4 +1,16 @@
-<form id="wizardForm" name="wizardForm" method="post" class="form-horizontal" enctype="multipart/form-data" action="">
+
+<script src="/js/jquery-ui-1.9.2.custom.min.js"></script>
+<script src="/js/jquery.bootstrap.pager.js"></script>
+<script src="/js/bootstrap-fileupload.min.js"></script>
+<script src="/js/common-component.js"></script>
+<script src="/js/biobank-connect.js"></script>
+<script src="/js/catalogue-chooser.js"></script>
+<link rel="stylesheet" type="text/css" href="/css/jquery-ui-1.9.2.custom.min.css">
+<link rel="stylesheet" type="text/css" href="/css/bootstrap-fileupload.min.css">
+<link rel="stylesheet" type="text/css" href="/css/biobank-connect.css">
+<link rel="stylesheet" type="text/css" href="/css/catalogue-chooser.css">
+
+<form id="wizardForm" name="wizardForm" method="post" class="form-horizontal" enctype="multipart/form-data">
 	<div class="row-fluid">
 		<div class="span12">
 			<div class="row-fluid">
@@ -37,9 +49,7 @@
 							<div id="container" class="data-table-container">
 								<!-- <table id="dataitem-table" class="table table-striped table-condensed"></table>-->
 							</div>
-							<div class="pagination pagination-centered">
-								<ul></ul>
-							</div>
+							<div class="pagination-centered"></div>
 						</div>
 					</div>
 				</div>
@@ -118,7 +128,6 @@
 						}).submit();
 					}
 				});
-				
 				<#if message??>
 					var alert = {};
 					alert.message = '${message}';

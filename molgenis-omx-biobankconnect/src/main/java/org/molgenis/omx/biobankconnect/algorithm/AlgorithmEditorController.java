@@ -4,7 +4,6 @@ import static org.molgenis.omx.biobankconnect.algorithm.AlgorithmEditorControlle
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -14,6 +13,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.biobankconnect.ontologyannotator.OntologyAnnotator;
@@ -27,6 +27,7 @@ import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.search.Hit;
+import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
 import org.molgenis.security.user.UserAccountService;
@@ -34,13 +35,13 @@ import org.molgenis.ui.wizard.AbstractWizardController;
 import org.molgenis.ui.wizard.Wizard;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.google.common.collect.Iterables;
+import com.google.gson.Gson;
 
 @Controller
 @RequestMapping(URI)
@@ -239,22 +240,33 @@ public class AlgorithmEditorController extends AbstractWizardController
 		return jsonResults;
 	}
 
-	@Override
-	@ModelAttribute("javascripts")
-	public List<String> getJavascripts()
+	@RequestMapping(method = RequestMethod.POST, value = "/allattributes")
+	@ResponseBody
+	public SearchResult getAllAttributes(@RequestBody
+	Map<String, Object> request)
 	{
-		return Arrays.asList("bootstrap-fileupload.min.js", "jquery-ui-1.9.2.custom.min.js", "common-component.js",
-				"catalogue-chooser.js", "ontology-annotator.js", "ontology-matcher.js", "mapping-manager.js",
-				"algorithm-editor.js", "biobank-connect.js", "jstat.min.js", "d3.min.js", "vega.min.js",
-				"biobankconnect-graph.js");
-	}
+		if (request.get("dataSetId") == null) return new SearchResult("dataSetId cannot be null!");
+		Object dataSetId = request.get("dataSetId");
+		Object queryString = request.get("queryString");
+		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME, dataSetId, DataSet.class);
 
-	@Override
-	@ModelAttribute("stylesheets")
-	public List<String> getStylesheets()
-	{
-		return Arrays.asList("bootstrap-fileupload.min.css", "jquery-ui-1.9.2.custom.min.css", "biobank-connect.css",
-				"catalogue-chooser.css", "ontology-matcher.css", "mapping-manager.css", "ontology-annotator.css",
-				"algorithm-editor.css");
+		Query query = null;
+		if (request.get("query") != null)
+		{
+			query = new Gson().fromJson(request.get("query").toString(), QueryImpl.class);
+		}
+		else
+		{
+			query = new QueryImpl();
+		}
+		query.eq("type", "observablefeature");
+
+		if (queryString != null && !queryString.toString().isEmpty())
+		{
+			query.and().search(queryString.toString());
+		}
+
+		return searchService
+				.search(new SearchRequest("protocolTree-" + dataSet.getProtocolUsed().getId(), query, null));
 	}
 }

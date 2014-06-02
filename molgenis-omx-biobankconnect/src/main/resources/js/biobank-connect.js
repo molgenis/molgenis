@@ -1,56 +1,53 @@
 (function($, molgenis, w) {
 	"use strict";
 	
+	var restApi = new molgenis.RestClient();
 	var searchApi = new molgenis.SearchClient();
-	var standardModal = new molgenis.StandardModal();
+	var nrItemsPerPage = 10;
 	
-var pagination = new molgenis.Pagination();
 	molgenis.createMatrixForDataItems = function(options){
-		var documentType = 'protocolTree-' + options.dataSetId;
-		var q = {
-			'rules' : [[{
-				'field' : 'type',
-				'operator' : 'SEARCH',
-				'value' : 'observablefeature'
-			}]]
+		var request = {
+			'dataSetId' : options.dataSetId, 
+			'queryString' : options.queryText, 
+			'query' : {
+				'offset' : options.page ? options.page.start : 0 ,
+				'pageSize' : nrItemsPerPage,
+				'sort' : options.sortRule
+			}
 		};
-		if(options.queryText !== ''){
-			q.rules[0].push({
-				'operator' : 'AND'
-			});
-			q.rules[0].push({
-				'operator' : 'SEARCH',
-				'value' : options.queryText
-			});
-			pagination.reset();
-		}
-		if(options.sortRule !== null)
-		{
-			q.sort = options.sortRule;
-		}
-		searchApi.search(createSearchRequest(documentType, q), function(searchResponse){
-			var searchHits = searchResponse.searchHits;
-			var table = $('<table />').addClass('table table-condensed');
-			var body = $('<tbody />');
-			$.each(searchHits, function(){
-				$(options.createTableRow($(this)[0]['columnValueMap'])).appendTo(body);
-			});
-			table.append(createTableHeader(options)).append(body);
-			pagination.setTotalPage(Math.ceil(searchResponse.totalHitCount / pagination.getPager()));
-			pagination.updateMatrixPagination($('.pagination ul'), molgenis.createMatrixForDataItems, options);
-			options.container.find('table').remove();
-			options.container.prepend(table);
+		$.ajax({
+			type : 'POST',
+			url : molgenis.getContextUrl() + '/allattributes',
+			async : false,
+			data : JSON.stringify(request),
+			contentType : 'application/json',
+			success : function(data, textStatus, request){
+				if(data.searchHits){
+					var searchHits = data.searchHits;
+					var table = $('<table />').addClass('table table-condensed');
+					var body = $('<tbody />');
+					$.each(searchHits, function(){
+						$(options.createTableRow($(this)[0]['columnValueMap'])).appendTo(body);
+					});
+					table.append(createTableHeader(options)).append(body);
+					var tablePager = $('<div>');
+					options.container.find('table').remove();
+					options.container.prepend(table);
+					options.container.find('div.pagination').remove();
+					options.container.append(tablePager);
+					tablePager.pager({
+						'nrItems' : data.totalHitCount,
+						'nrItemsPerPage' : nrItemsPerPage,
+						'onPageChange' : function(page) {
+							options.page = page;
+							molgenis.createMatrixForDataItems(options);
+						}
+					});
+				}else{
+					molgenis.createAlert([{'message' : 'There is no dataset available!'}], 'warning', $('#wizardForm'));
+				}
+			}		
 		});
-		
-		function createSearchRequest (documentType, q) {
-			q.pageSize = pagination.getPager();
-			q.offset = (pagination.getCurrentPage() - 1) * pagination.getPager();
-			var searchRequest = {
-				documentType : documentType,
-				query: q
-			};
-			return searchRequest;
-		}
 		
 		function createTableHeader(options){
 			var headerRow = $('<tr />');
@@ -211,38 +208,27 @@ var pagination = new molgenis.Pagination();
 		});
 	};
 	
-	molgenis.dataItemsTypeahead = function (type, protocolId, query, response){
-		var queryRules = [{
-			field : 'type',
-			operator : 'EQUALS',
-			value : type,
-		},{
-			operator : 'AND'
-		},{
-			operator : 'SEARCH',
-			value : query
-		}];
-		
-		var searchRequest = {
-			documentType : 'protocolTree-' + protocolId,
-			query:{
-				pageSize: 20,
-				rules:[queryRules]
-			}
-		};
-		searchApi.search(searchRequest, function(searchReponse){
-			var result = [];
-			var dataMap = {};
-			$.each(searchReponse.searchHits, function(index, hit){
-				var value = hit.columnValueMap.ontologyTerm;
-				if($.inArray(value, result) === -1){
-					var name = hit.columnValueMap.name;
-					result.push(name);
-					dataMap[name] = hit.columnValueMap;
-				}
-			});
-			$(document).data('dataMap', dataMap);
-			response(result);
+	molgenis.dataItemsTypeahead = function (dataSetId, query, response){
+		$.ajax({
+			type : 'POST',
+			url : molgenis.getContextUrl() + '/allattributes',
+			async : false,
+			data : JSON.stringify({'dataSetId' : dataSetId, 'queryString' : query}),
+			contentType : 'application/json',
+			success : function(data, textStatus, request){
+				var result = [];
+				var dataMap = {};
+				$.each(data.searchHits, function(index, hit){
+					var value = hit.columnValueMap.name;
+					if($.inArray(value, result) === -1){
+						var name = hit.columnValueMap.name;
+						result.push(name);
+						dataMap[name] = hit.columnValueMap;
+					}
+				});
+				$(document).data('dataMap', dataMap);
+				response(result);
+			}		
 		});
 	};
 	
@@ -288,12 +274,5 @@ var pagination = new molgenis.Pagination();
 		buttonGroup.before('<legend />');
 		$('.wizard-page').removeClass('well');
 		$('div.wizard-page').css('min-height', 300);
-		
-		document.onkeydown = function(evt) {
-		    evt = evt || window.event;
-		    if (evt.keyCode == 27) {
-		    	standardModal.closeModal();
-		    }
-		};
 	});
 }($, window.top.molgenis = window.top.molgenis || {}, window.top));
