@@ -13,6 +13,7 @@ import org.molgenis.framework.db.WebAppDatabasePopulatorService;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
+import org.molgenis.messageconverter.CsvHttpMessageConverter;
 import org.molgenis.security.CorsInterceptor;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.freemarker.HasPermissionDirective;
@@ -78,6 +79,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		boolean prettyPrinting = molgenisBuildProfile != null && molgenisBuildProfile.equals("dev");
 		converters.add(new GsonHttpMessageConverter(prettyPrinting));
 		converters.add(new BufferedImageHttpMessageConverter());
+		converters.add(new CsvHttpMessageConverter());
 	}
 
 	@Override
