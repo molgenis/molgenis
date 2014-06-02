@@ -442,22 +442,26 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			candidateFeatureIds.add(hit.getColumnValueMap().get(ENTITY_ID));
 		}
 
-		Iterable<ObservableFeature> iterableObserableFeatures = dataService.findAll(
-				ObservableFeature.ENTITY_NAME,
-				new QueryImpl().in(ObservableFeature.DEFINITIONS, featureOfInterest.getDefinitions()).and()
-						.in(ObservableFeature.ID, candidateFeatureIds), ObservableFeature.class);
-
 		List<Integer> featureOfInterestIds = new ArrayList<Integer>();
-		// Compare ontology annotations between feature of interest and
-		// candidate feature by checking on the size of annotations
-		for (ObservableFeature observableFeature : iterableObserableFeatures)
+		if (featureOfInterest.getDefinitions().size() != 0)
 		{
-			List<OntologyTerm> definitions = observableFeature.getDefinitions();
-			List<OntologyTerm> definitions1 = featureOfInterest.getDefinitions();
-			if (definitions.size() == definitions1.size())
+
+			Iterable<ObservableFeature> iterableObserableFeatures = dataService.findAll(
+					ObservableFeature.ENTITY_NAME,
+					new QueryImpl().in(ObservableFeature.DEFINITIONS, featureOfInterest.getDefinitions()).and()
+							.in(ObservableFeature.ID, candidateFeatureIds), ObservableFeature.class);
+
+			// Compare ontology annotations between feature of interest and
+			// candidate feature by checking on the size of annotations
+			for (ObservableFeature observableFeature : iterableObserableFeatures)
 			{
-				definitions.removeAll(definitions1);
-				if (definitions.size() == 0) featureOfInterestIds.add(observableFeature.getId());
+				List<OntologyTerm> definitions = observableFeature.getDefinitions();
+				List<OntologyTerm> definitions1 = featureOfInterest.getDefinitions();
+				if (definitions.size() == definitions1.size())
+				{
+					definitions.removeAll(definitions1);
+					if (definitions.size() == 0) featureOfInterestIds.add(observableFeature.getId());
+				}
 			}
 		}
 		return (featureOfInterestIds.size() == 0) ? new SearchResult(0, Collections.<Hit> emptyList()) : retrieveFeatureFromIndex(
