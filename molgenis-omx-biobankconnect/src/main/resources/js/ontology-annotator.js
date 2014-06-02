@@ -40,7 +40,7 @@
 		function initSearchDataItems (dataSet) {
 			$('#search-dataitem').typeahead({
 				source: function(query, process) {
-					molgenis.dataItemsTypeahead('observablefeature', molgenis.hrefToId(dataSet.href), query, process);
+					molgenis.dataItemsTypeahead(molgenis.hrefToId(dataSet.href), query, process);
 				},
 				minLength : 3,
 				items : 20
