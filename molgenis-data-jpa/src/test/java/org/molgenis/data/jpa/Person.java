@@ -3,6 +3,8 @@ package org.molgenis.data.jpa;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.persistence.GeneratedValue;
+
 import org.eclipse.persistence.annotations.UuidGenerator;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
@@ -10,17 +12,15 @@ import org.molgenis.data.support.AbstractMetaDataEntity;
 
 import com.google.common.collect.Lists;
 
-import javax.persistence.GeneratedValue;
-
 @javax.persistence.Entity
 @javax.xml.bind.annotation.XmlAccessorType(javax.xml.bind.annotation.XmlAccessType.FIELD)
-@UuidGenerator(name="PERSON_ID_GEN")
+@UuidGenerator(name = "PERSON_ID_GEN")
 public class Person extends AbstractMetaDataEntity
 {
 	private static final long serialVersionUID = 1L;
 
 	@javax.persistence.Id
-    @GeneratedValue(generator="PERSON_ID_GEN")
+	@GeneratedValue(generator = "PERSON_ID_GEN")
 	private String id;
 	private String firstName;
 	private String lastName;
@@ -135,7 +135,7 @@ public class Person extends AbstractMetaDataEntity
 	@Override
 	public void set(String attributeName, Object value)
 	{
-		if ("id".equalsIgnoreCase(attributeName)) setFirstName(DataConverter.toString(value));
+		if ("id".equalsIgnoreCase(attributeName)) setId(DataConverter.toString(value));
 		else if ("firstName".equalsIgnoreCase(attributeName)) setFirstName(DataConverter.toString(value));
 		else if ("lastName".equalsIgnoreCase(attributeName)) setLastName(DataConverter.toString(value));
 		else if ("age".equalsIgnoreCase(attributeName)) setAge(DataConverter.toInt(value));
