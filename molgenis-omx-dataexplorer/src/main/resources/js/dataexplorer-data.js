@@ -37,6 +37,8 @@
 			// Workaround, see http://stackoverflow.com/a/9970672
 			'dataRequest' : JSON.stringify(createDownloadDataRequest())
 		});
+		
+		$('#downloadModal').modal('hide');
 	}
 	
 	/**
@@ -50,7 +52,8 @@
 			attributeNames: [],
 			query : {
 				rules : [entityQuery.q]
-			}
+			},
+			colNames : $('input[name=ColNames]:checked').val()
 		};
 
 		dataRequest.query.sort = $('#data-table-container').table('getSort');

@@ -15,7 +15,7 @@
 	display: inline;
 }
 
-#download-button {
+#download-modal-button {
 	float: right;
 }
 
@@ -212,4 +212,9 @@ ul.fancytree-container {
 
 .ui-editRangeSlider-inputValue {
 	width: 4em;
+}
+
+input[name="ColNames"] {
+  margin-top: -1px;
+  vertical-align: middle;
 }
