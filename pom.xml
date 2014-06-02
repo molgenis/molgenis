@@ -583,5 +583,6 @@
 		<module>molgenis-js</module>
 		<module>molgenis-model-registry</module>
 		<module>molgenis-disease-matcher</module>
-	</modules>
+        <module>molgenis-data-examples</module>
+    </modules>
 </project>
