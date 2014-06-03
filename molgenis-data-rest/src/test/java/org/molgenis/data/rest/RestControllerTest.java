@@ -21,7 +21,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Arrays;
 
-import com.google.common.collect.ImmutableMap;
 import org.mockito.Matchers;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
@@ -35,10 +34,12 @@ import org.molgenis.data.Queryable;
 import org.molgenis.data.Repository;
 import org.molgenis.data.Updateable;
 import org.molgenis.data.rest.RestControllerTest.RestControllerConfig;
+import org.molgenis.data.rsql.MolgenisRSQL;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.QueryResolver;
+import org.molgenis.messageconverter.CsvHttpMessageConverter;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.token.TokenService;
 import org.molgenis.util.GsonHttpMessageConverter;
@@ -60,7 +61,7 @@ import org.testng.annotations.Test;
 public class RestControllerTest extends AbstractTestNGSpringContextTests
 {
 	private static String ENTITY_NAME = "Person";
-    private static Object ENTITY_ID = "p1";
+	private static Object ENTITY_ID = "p1";
 	private static String HREF_ENTITY = BASE_URI + "/" + ENTITY_NAME;
 	private static String HREF_ENTITY_META = HREF_ENTITY + "/meta";
 	private static String HREF_ENTITY_ID = HREF_ENTITY + "/p1";
@@ -92,7 +93,6 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(dataService.getEntityNames()).thenReturn(Arrays.asList(ENTITY_NAME));
 		when(dataService.getRepositoryByEntityName(ENTITY_NAME)).thenReturn(repo);
 
-		//when(dataService.add(Matchers.eq(ENTITY_NAME), Matchers.any(MapEntity.class))).thenReturn("p1");
 		when(dataService.findOne(ENTITY_NAME, ENTITY_ID)).thenReturn(entity);
 
 		Query q = new QueryImpl().eq("name", "Piet").pageSize(10).offset(5);
@@ -115,14 +115,13 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(dataService.getEntityMetaData(ENTITY_NAME)).thenReturn(entityMetaData);
 		when(repo.getName()).thenReturn(ENTITY_NAME);
 
-		mockMvc = MockMvcBuilders.standaloneSetup(restController).setMessageConverters(new GsonHttpMessageConverter())
-				.build();
+		mockMvc = MockMvcBuilders.standaloneSetup(restController)
+				.setMessageConverters(new GsonHttpMessageConverter(), new CsvHttpMessageConverter()).build();
 	}
 
 	@Test
 	public void create() throws Exception
 	{
-        //restController.create(ENTITY_NAME, ImmutableMap.<String,Object>builder().put("name","Piet").build(), null);
 		mockMvc.perform(post(HREF_ENTITY).content("{id:'p1', name:'Piet'}").contentType(APPLICATION_JSON))
 				.andExpect(status().isCreated()).andExpect(header().string("Location", HREF_ENTITY_ID));
 
@@ -132,7 +131,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void createFromFormPost() throws Exception
 	{
-		mockMvc.perform(post(HREF_ENTITY).contentType(APPLICATION_FORM_URLENCODED).param("id", "p1").param("name", "Piet"))
+		mockMvc.perform(
+				post(HREF_ENTITY).contentType(APPLICATION_FORM_URLENCODED).param("id", "p1").param("name", "Piet"))
 				.andExpect(status().isCreated()).andExpect(header().string("Location", HREF_ENTITY_ID));
 
 		verify(dataService).add(Matchers.eq(ENTITY_NAME), Matchers.any(MapEntity.class));
@@ -141,8 +141,6 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void deleteDelete() throws Exception
 	{
-        //restController.delete(ENTITY_NAME, ENTITY_ID);
-
 		mockMvc.perform(delete(HREF_ENTITY_ID)).andExpect(status().isNoContent());
 		verify(dataService).delete(ENTITY_NAME, ENTITY_ID);
 	}
@@ -196,7 +194,9 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void retrieve() throws Exception
 	{
-        restController.retrieveEntity(ENTITY_NAME, ENTITY_ID, new String[]{}, new String[]{});
+		restController.retrieveEntity(ENTITY_NAME, ENTITY_ID, new String[]
+		{}, new String[]
+		{});
 
 		mockMvc.perform(get(HREF_ENTITY_ID)).andExpect(status().isOk())
 				.andExpect(content().contentType(APPLICATION_JSON))
@@ -281,7 +281,6 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		Repository repo = mock(Repository.class, withSettings().extraInterfaces(Updateable.class, Queryable.class));
 		when(dataService.getRepositoryByEntityName(ENTITY_NAME)).thenReturn(repo);
 		when(dataService.getEntityNames()).thenReturn(Arrays.asList(ENTITY_NAME));
-		//when(dataService.add(Matchers.eq(ENTITY_NAME), Matchers.any(MapEntity.class))).thenReturn(1);
 		Entity entityXref = new MapEntity("id");
 		entityXref.set("id", ENTITY_ID);
 		entityXref.set("xrefValue", "PietXREF");
@@ -375,8 +374,6 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void updatePost() throws Exception
 	{
-        //restController.updatePost(ENTITY_NAME, HREF_ENTITY_ID, ImmutableMap.<String,Object>builder().put("name","Klaas").build());
-
 		mockMvc.perform(
 				post(HREF_ENTITY_ID).param("_method", "PUT").content("{name:Klaas}").contentType(APPLICATION_JSON))
 				.andExpect(status().isOk());
@@ -395,6 +392,14 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	{
 		when(dataService.findOne(ENTITY_NAME, ENTITY_ID)).thenThrow(new MolgenisDataAccessException());
 		mockMvc.perform(get(HREF_ENTITY_ID)).andExpect(status().isUnauthorized());
+	}
+
+	@Test
+	public void retrieveEntityCollectionCsv() throws Exception
+	{
+		mockMvc.perform(get(BASE_URI + "/csv/Person").param("start", "5").param("num", "10").param("q", "name==Piet"))
+				.andExpect(status().isOk()).andExpect(content().contentType("text/csv"))
+				.andExpect(content().string("\"name\",\"id\"\n\"Piet\",\"p1\"\n"));
 	}
 
 	@Configuration
@@ -429,11 +434,12 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		{
 			return mock(MolgenisPermissionService.class);
 		}
-		
+
 		@Bean
 		public RestController restController()
 		{
-			return new RestController(dataService(), tokenService(), authenticationManager(), molgenisPermissionService());
+			return new RestController(dataService(), tokenService(), authenticationManager(),
+					molgenisPermissionService(), new MolgenisRSQL());
 		}
 	}
 
