@@ -116,7 +116,7 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource i
 			valueLink = Iterables.contains(attributes, GenomeConfig.GENOMEBROWSER_LINK) ? entity.getString(GenomeConfig.GENOMEBROWSER_LINK) : "";
 			valuePatient = Iterables.contains(attributes, GenomeConfig.GENOMEBROWSER_PATIENT_ID) ? entity.getString(GenomeConfig.GENOMEBROWSER_PATIENT_ID) : "";
 
-			if ((valueStart >= start && valueStart <= stop) || (valueStop >= start && valueStop <= stop))
+			if (valueStart != null && ((valueStart >= start && valueStart <= stop) || (valueStop >= start && valueStop <= stop)))
 			{
 				DasType type;// used for label colours in Dalliance
 				if (patients.containsKey(valuePatient))
