@@ -34,7 +34,7 @@
 <@header css js/>
     <script>
     	molgenis.dataexplorer.setShowWizardOnInit(${wizard?string('true', 'false')});
-        molgenis.dataexplorer.filter.wizard.setWizardTitle('${'plugin.dataexplorer.wizard.title'}');
+        molgenis.dataexplorer.filter.wizard.setWizardTitle('${wizardtitle}');
     </script>
         <div class="row-fluid"<#if hideDatasetSelect??> style="display:none"</#if>>
             <div class="row-fluid pull-right form-horizontal">
