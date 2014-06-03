@@ -49,6 +49,34 @@ public class DataConverter
 		return getConversionService().convert(source, targetType);
 	}
 
+	public static Object convert(Object source, AttributeMetaData attr)
+	{
+		switch (attr.getDataType().getEnumType())
+		{
+			case BOOL:
+				return toBoolean(source);
+			case XREF:
+			case CATEGORICAL:
+			case MREF:
+				return source;
+			case COMPOUND:
+				throw new UnsupportedOperationException();
+			case DATE:
+				return toDate(source);
+			case DATE_TIME:
+				return toUtilDate(source);
+			case DECIMAL:
+				return toDouble(source);
+			case INT:
+				return toInt(source);
+			case LONG:
+				return toLong(source);
+			default:
+				return toString(source);
+
+		}
+	}
+
 	public static String toString(Object source)
 	{
 		if (source == null) return null;
@@ -133,6 +161,7 @@ public class DataConverter
 		else return ListEscapeUtils.toList(source.toString());
 	}
 
+	@SuppressWarnings("unchecked")
 	public static List<Object> toObjectList(Object source)
 	{
 		if (source == null) return null;

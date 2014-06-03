@@ -13,6 +13,8 @@ import org.molgenis.framework.db.WebAppDatabasePopulatorService;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
+import org.molgenis.messageconverter.CsvHttpMessageConverter;
+import org.molgenis.security.CorsInterceptor;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.freemarker.HasPermissionDirective;
 import org.molgenis.security.freemarker.NotHasPermissionDirective;
@@ -77,13 +79,16 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		boolean prettyPrinting = molgenisBuildProfile != null && molgenisBuildProfile.equals("dev");
 		converters.add(new GsonHttpMessageConverter(prettyPrinting));
 		converters.add(new BufferedImageHttpMessageConverter());
+		converters.add(new CsvHttpMessageConverter());
 	}
 
 	@Override
 	public void addInterceptors(InterceptorRegistry registry)
 	{
 		String pluginInterceptPattern = MolgenisPluginController.PLUGIN_URI_PREFIX + "**";
+		String corsInterceptPattern = "/api/**";
 		registry.addInterceptor(molgenisPluginInterceptor()).addPathPatterns(pluginInterceptPattern);
+		registry.addInterceptor(corsInterceptor()).addPathPatterns(corsInterceptPattern);
 	}
 
 	@Override
@@ -258,5 +263,11 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	public MolgenisPluginRegistry molgenisPluginRegistry()
 	{
 		return new MolgenisUiPluginRegistry(molgenisUi());
+	}
+
+	@Bean
+	public CorsInterceptor corsInterceptor()
+	{
+		return new CorsInterceptor();
 	}
 }

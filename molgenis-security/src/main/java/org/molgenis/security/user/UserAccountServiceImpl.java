@@ -1,6 +1,6 @@
 package org.molgenis.security.user;
 
-import org.apache.commons.lang3.StringUtils;
+import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +13,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserAccountServiceImpl implements UserAccountService
 {
 	@Autowired
-	private PasswordEncoder passwordEncoder;
+	private MolgenisUserService userService;
 
 	@Autowired
-	private MolgenisUserService userService;
+	private PasswordEncoder passwordEncoder;
 
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_USERACCOUNT')")
@@ -24,6 +24,14 @@ public class UserAccountServiceImpl implements UserAccountService
 	public MolgenisUser getCurrentUser()
 	{
 		return userService.getUser(SecurityUtils.getCurrentUsername());
+	}
+
+	@Override
+	@PreAuthorize("hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_READ_USERACCOUNT')")
+	@Transactional(readOnly = true)
+	public Iterable<MolgenisGroup> getCurrentUserGroups()
+	{
+		return userService.getUserGroups(SecurityUtils.getCurrentUsername());
 	}
 
 	@Override
@@ -42,15 +50,6 @@ public class UserAccountServiceImpl implements UserAccountService
 		{
 			throw new RuntimeException("User does not exist [" + currentUsername + "]");
 		}
-		String password = currentUser.getPassword();
-		String updatedPassword = updatedCurrentUser.getPassword();
-		if (StringUtils.isNotEmpty(updatedPassword) && !password.equals(updatedPassword))
-		{
-			// encode updated password
-			String encodedPassword = passwordEncoder.encode(updatedPassword);
-			updatedCurrentUser.setPassword(encodedPassword);
-		}
-
 		userService.update(updatedCurrentUser);
 	}
 
