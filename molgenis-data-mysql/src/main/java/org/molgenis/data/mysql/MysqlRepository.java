@@ -45,6 +45,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.transaction.annotation.Transactional;
 
 public class MysqlRepository implements Repository, Writable, Queryable, Manageable, CrudRepository
 {
@@ -109,6 +110,19 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 				}
 			}
 
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		}
+	}
+
+	public void populateWithQuery(String insertQuery)
+	{
+		try
+		{
+			jdbcTemplate.execute(insertQuery);
 		}
 		catch (Exception e)
 		{
@@ -266,6 +280,7 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 	}
 
 	@Override
+	@Transactional
 	public Integer add(Iterable<? extends Entity> entities)
 	{
 		AtomicInteger count = new AtomicInteger(0);
@@ -310,18 +325,15 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 						{
 							preparedStatement.setObject(fieldIndex++, att.getDefaultValue());
 						}
+						else if (att.getDataType() instanceof XrefField)
+						{
+							preparedStatement.setObject(fieldIndex++, att.getRefEntity().getIdAttribute()
+									.getDataType().convert(batch.get(rowIndex).get(att.getName())));
+						}
 						else
 						{
-							if (att.getDataType() instanceof XrefField)
-							{
-								preparedStatement.setObject(fieldIndex++, att.getRefEntity().getIdAttribute()
-										.getDataType().convert(batch.get(rowIndex).get(att.getName())));
-							}
-							else
-							{
-								preparedStatement.setObject(fieldIndex++,
-										att.getDataType().convert(batch.get(rowIndex).get(att.getName())));
-							}
+							preparedStatement.setObject(fieldIndex++,
+									att.getDataType().convert(batch.get(rowIndex).get(att.getName())));
 						}
 					}
 				}
