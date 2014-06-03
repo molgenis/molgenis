@@ -1,3 +1,13 @@
 .disease-button-toolbar {
 	margin-bottom: 10px;
 }
+
+.diseasematcher.badge {
+	font-size: 15px;
+	font-weight: normal;
+}
+
+.diseasematcher.label {
+	font-size: 15px;
+	font-weight: normal;
+}

@@ -4,11 +4,14 @@ import static org.molgenis.diseasematcher.controller.OmimClientController.BASE_U
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLEncoder;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,18 +26,35 @@ public class OmimClientController
 	 */
 	public static final String BASE_URI = "/omim";
 
-	// TODO hide api key
-	private static final String API_KEY = "CF5DAEF52E82034FEB69333BB4A1B1FCB27B8F96";
+	private static final Logger logger = Logger.getLogger(OmimClientController.class);
+
+	@Value("${omim_key:@null}")
+	private String apiKey;
 
 	@RequestMapping(value = "/{omimId}", method = GET, produces = APPLICATION_JSON_VALUE)
-	public void getOmimData(@PathVariable("omimId") String omimId, HttpServletResponse response) throws Exception
+	public void getOmimData(@PathVariable("omimId") String omimId, HttpServletResponse response)
 	{
-		String uri = "http://api.europe.omim.org/api/entry?mimNumber=" + omimId + "&include=all&format=json&apiKey="
-				+ URLEncoder.encode(API_KEY, "UTF-8");
+		if (apiKey == null)
+		{
+			return;
+		}
 
-		URL omimRequest = new URL(uri);
-		response.setContentType("application/json");
-		FileCopyUtils.copy(omimRequest.openStream(), response.getOutputStream());
+		try
+		{
+			String uri = "http://api.europe.omim.org/api/entry?mimNumber=" + omimId
+					+ "&include=text&include=clinicalSynopsis&format=json&apiKey=" + URLEncoder.encode(apiKey, "UTF-8");
+
+			// String uri = "http://api.europe.omim.org/api/entry?mimNumber=" + omimId
+			// + "&include=all&format=json&apiKey=" + URLEncoder.encode(apiKey, "UTF-8");
+
+			URL omimRequest = new URL(uri);
+			response.setContentType("application/json");
+			FileCopyUtils.copy(omimRequest.openStream(), response.getOutputStream());
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+
 	}
-
 }

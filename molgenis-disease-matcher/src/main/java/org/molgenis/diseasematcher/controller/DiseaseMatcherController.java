@@ -5,8 +5,10 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.validation.Valid;
@@ -25,6 +27,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 
 /**
  * Controller for handling communication between the Data Explorer Disease Matcher plugin and the DiseaseMapping and
@@ -92,6 +97,40 @@ public class DiseaseMatcherController
 		System.out.println(geneSymbols.toString());
 
 		return geneSymbols;
+	}
+
+	@RequestMapping(value = "/diseaseNames", method = POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public Map<String, Collection<String>> getDiseaseNamesforDiseaseIds(
+			@RequestParam("diseaseId") List<String> diseaseIds,
+			@RequestParam(value = "query", required = false) List<QueryRule> query)
+	{
+
+		Iterable<Disease> diseases;
+		if (query == null)
+		{
+			QueryRule queryRule = new QueryRule(Disease.DISEASEID, Operator.IN, diseaseIds);
+
+			diseases = dataService.findAll(Disease.ENTITY_NAME, new QueryImpl(queryRule), Disease.class);
+		}
+		else
+		{
+			QueryRule queryRule = new QueryRule(Disease.DISEASEID, Operator.EQUALS, diseaseIds);
+			query.add(queryRule);
+			diseases = dataService.findAll(Disease.DISEASEID, new QueryImpl(query), Disease.class);
+		}
+
+		// iterate over diseases and order them in a map
+		Multimap<String, String> result = HashMultimap.create();
+		for (Disease d : diseases)
+		{
+			result.put(d.getDiseaseId(), d.getDiseaseName());
+		}
+
+		Map<String, Collection<String>> jsonResult = result.asMap();
+
+		return jsonResult;
+
 	}
 
 	/**
