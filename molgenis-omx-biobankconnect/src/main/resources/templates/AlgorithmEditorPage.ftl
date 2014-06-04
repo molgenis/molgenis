@@ -15,8 +15,12 @@
 	<div class="row-fluid">
 		<div class="span12">
 			<div class="row-fluid">
-				<div id="div-info" class="span12 well">	
-					<legend>Curate mappings for : <strong>${wizard.selectedDataSet.name}</strong></legend>
+				<div id="div-info" class="span12 well custom-white-well">	
+					<div class="row-fluid">
+						<div class="offset3 span6 text-align-center">
+							<legend class="custom-purple-legend">Harmonize dataset &nbsp;<strong>${wizard.selectedDataSet.name}</strong></legend>
+						</div>
+					</div>
 					<div class="row-fluid">
 						<div  id="div-search" class="span3">
 							<div><strong>Search data items :</strong></div>

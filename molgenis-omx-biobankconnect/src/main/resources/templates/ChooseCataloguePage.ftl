@@ -11,7 +11,8 @@
 	<div class="row-fluid">
 		<div class="span12">
 			<div class="row-fluid">
-				<div id="div-info" class="span12 well">	
+				<div id="div-info" class="span12 well custom-white-well">	
+					<br>
 					<div class="row-fluid">
 						<div class="span9"><legend class="legend">
 							Browse catalogue : 

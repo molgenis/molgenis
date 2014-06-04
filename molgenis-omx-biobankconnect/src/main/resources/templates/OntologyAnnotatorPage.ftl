@@ -34,9 +34,10 @@
 				</div>
 			</div>
 			<div class="row-fluid">
-				<div id="div-info" class="span12 well">	
+				<div id="div-info" class="span12 well custom-white-well">	
+					<br>
 					<div class="row-fluid">
-						<div class="span9"><legend class="legend">Annotate catalogue : <strong><span>${wizard.selectedDataSet.name}</span></strong></legend></div>
+						<div class="span9"><legend class="legend">Annotate catalogue <strong><span>${wizard.selectedDataSet.name}</span></strong></legend></div>
 						<div  id="div-search" class="span3">
 							<div><strong>Search data items :</strong></div>
 							<div class="input-append">

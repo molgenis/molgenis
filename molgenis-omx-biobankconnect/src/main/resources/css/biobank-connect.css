@@ -73,3 +73,14 @@ legend.legend {
 	cursor: hand; 
 	cursor: pointer;
 }
+
+.custom-white-well {
+	background:white;
+	border-left:none;
+	border-right:none;
+	border-radius:10px;
+}
+
+.custom-purple-legend {
+	color:#0B09A0;
+}
