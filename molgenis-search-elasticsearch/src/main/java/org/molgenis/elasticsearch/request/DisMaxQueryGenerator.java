@@ -54,7 +54,7 @@ public class DisMaxQueryGenerator implements QueryPartGenerator
 		}
 		else
 		{
-			return QueryBuilders.termQuery(queryRule.getField(), queryRule.getValue());
+			return QueryBuilders.matchQuery(queryRule.getField(), queryRule.getValue());
 		}
 	}
 }
