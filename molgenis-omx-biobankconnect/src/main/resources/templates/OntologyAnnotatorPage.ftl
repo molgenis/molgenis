@@ -1,4 +1,13 @@
-<form id="wizardForm" name="wizardForm" method="post" class="form-horizontal" action="">
+<script src="/js/jquery-ui-1.9.2.custom.min.js"></script>
+<script src="/js/jquery.bootstrap.pager.js"></script>
+<script src="/js/bootstrap-fileupload.min.js"></script>
+<script src="/js/common-component.js"></script>
+<script src="/js/biobank-connect.js"></script>
+<script src="/js/ontology-annotator.js"></script>
+<link rel="stylesheet" type="text/css" href="/css/jquery-ui-1.9.2.custom.min.css">
+<link rel="stylesheet" type="text/css" href="/css/biobank-connect.css">
+<link rel="stylesheet" type="text/css" href="/css/ontology-annotator.css">
+<form id="wizardForm" name="wizardForm" method="post" class="form-horizontal">
 	<div class="row-fluid">
 		<div class="span12">
 			<div class="row-fluid">

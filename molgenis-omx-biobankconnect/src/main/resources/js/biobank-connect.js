@@ -1,6 +1,7 @@
 (function($, molgenis, w) {
 	"use strict";
 	
+	var standardModal = new molgenis.StandardModal();
 	var restApi = new molgenis.RestClient();
 	var searchApi = new molgenis.SearchClient();
 	var nrItemsPerPage = 10;
@@ -24,30 +25,41 @@
 			success : function(data, textStatus, request){
 				if(data.searchHits){
 					var searchHits = data.searchHits;
-					var table = $('<table />').addClass('table table-condensed');
+					var table = $('<table />').addClass('table table-bordered');
 					var body = $('<tbody />');
+					if(options.createTableRow === undefined || options.createTableRow === null){
+						options.createTableRow = createTableRow;
+					}
 					$.each(searchHits, function(){
 						$(options.createTableRow($(this)[0]['columnValueMap'])).appendTo(body);
 					});
 					table.append(createTableHeader(options)).append(body);
-					var tablePager = $('<div>');
 					options.container.find('table').remove();
 					options.container.prepend(table);
-					options.container.find('div.pagination').remove();
-					options.container.append(tablePager);
-					tablePager.pager({
-						'nrItems' : data.totalHitCount,
-						'nrItemsPerPage' : nrItemsPerPage,
-						'onPageChange' : function(page) {
-							options.page = page;
-							molgenis.createMatrixForDataItems(options);
-						}
-					});
+					initPager(options, data.totalHitCount);
+					
 				}else{
 					molgenis.createAlert([{'message' : 'There is no dataset available!'}], 'warning', $('#wizardForm'));
 				}
 			}		
 		});
+		
+		function initPager(options, totalHitCount){
+			if(options.updatePager || options.container.find('#pager-' + options.dataSetId).length === 0){
+				options.updatePager = false;
+				var tablePager = $('<div/>').attr('id', 'pager-' + options.dataSetId);
+				options.container.find('div.pagination').remove();
+				options.container.append(tablePager);
+				tablePager.pager({
+					'nrItems' : totalHitCount,
+					'nrItemsPerPage' : nrItemsPerPage,
+					'onPageChange' : function(page) {
+						options.page = page;
+						molgenis.createMatrixForDataItems(options);
+					}
+				});
+			}
+		}
 		
 		function createTableHeader(options){
 			var headerRow = $('<tr />');
@@ -90,6 +102,25 @@
 				});
 			}
 			return headerRow;
+		}
+		
+		function createTableRow(feature){
+			var row = $('<tr />');
+			var description = feature.description;
+			var isPopOver = description.length < 120;
+			var descriptionSpan = $('<span />').html(isPopOver ? description : description.substring(0, 120) + '...');
+			if(!isPopOver){
+				descriptionSpan.addClass('show-popover');
+				descriptionSpan.popover({
+					content : description,
+					trigger : 'hover',
+					placement : 'bottom'
+				});
+			}
+			var featureNameSpan = $('<span>' + feature.name + '</span>');
+			$('<td />').append(featureNameSpan).appendTo(row);
+			$('<td />').append(descriptionSpan).appendTo(row);
+			return row;
 		}
 	};
 	
@@ -274,5 +305,10 @@
 		buttonGroup.before('<legend />');
 		$('.wizard-page').removeClass('well');
 		$('div.wizard-page').css('min-height', 300);
+		$(document).keyup(function(e) {
+		    if(e.which == 27){
+		    	$('div.modal').modal('hide');
+		    }
+		});
 	});
 }($, window.top.molgenis = window.top.molgenis || {}, window.top));

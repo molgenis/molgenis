@@ -1,8 +1,11 @@
-.float-right {
-	float : right;
-	margin-right : 5px;
-	cursor: hand; 
-	cursor: pointer;
+table {
+	border : 1px solid #5B82A4;
+}
+
+table thead th {	
+    background-color: #5B82A4; 
+    border:2px solid #5B82A4;
+    color: white;
 }
 
 tbody tr:hover {
@@ -16,10 +19,6 @@ th {
 
 th.text-align-center,.text-align-center{
 	text-align:center;
-}
-
-div.div-pager {
-	margin-top : -20px;
 }
 
 h3 {
@@ -39,4 +38,38 @@ div#progress-bar-div {
 	font-size : 15px;
 	text-align : center;
 	display : block;'
+}
+
+ol.action-list, ol.action-list li{
+	padding : 4px;
+	padding-left : 5px;
+}
+
+dl{
+	font-size : 16px;
+}
+
+dt {
+	padding-bottom : 5px;
+}
+
+dd {
+	padding-bottom : 10px;
+}
+
+legend.legend {
+	margin-top : -10px;
+	padding-bottom : 10px;
+}
+
+.float-right {
+	float : right;
+	margin-right : 5px;
+	cursor: hand; 
+	cursor: pointer;
+}
+
+.show-popover {
+	cursor: hand; 
+	cursor: pointer;
 }

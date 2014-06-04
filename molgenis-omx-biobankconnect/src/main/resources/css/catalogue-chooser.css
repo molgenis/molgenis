@@ -8,58 +8,6 @@ div#div-search {
 	margin-bottom : 10px;
 }
 
-table {
-	border : 1px solid #5B82A4;
-}
-
-table thead th {	
-    background-color: #5B82A4; 
-    border:2px solid #5B82A4;
-    color: white;
-}
-
-
-.float-right {
-	float : right;
-	margin-right : 5px;
-}
-
-.float-right a{
-	cursor: hand; 
-	cursor: pointer;
-}
-
-.show-popover {
-	cursor: hand; 
-	cursor: pointer;
-}
-
-.float-right{
-	float : right;
-	right : 20px;
-	cursor: hand; 
-	cursor: pointer;
-}
-
-ol.action-list, ol.action-list li{
-	padding : 3px;
-	padding-left : 5px;
-}
-
-dl{
-	font-size : 16px;
-	margin-top : -5px;
-}
-
-dd {
-	margin-left : -2px;
-	padding-left : 2px;
-}
-
 h3.catalogue-chooser-header {
 	color : #3079C2;
-}
-
-legend.legend {
-	margin-top : -10px;
 }

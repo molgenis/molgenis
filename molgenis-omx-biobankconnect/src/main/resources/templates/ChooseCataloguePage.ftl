@@ -1,5 +1,3 @@
-
-<script src="/js/jquery-ui-1.9.2.custom.min.js"></script>
 <script src="/js/jquery.bootstrap.pager.js"></script>
 <script src="/js/bootstrap-fileupload.min.js"></script>
 <script src="/js/common-component.js"></script>
@@ -9,7 +7,6 @@
 <link rel="stylesheet" type="text/css" href="/css/bootstrap-fileupload.min.css">
 <link rel="stylesheet" type="text/css" href="/css/biobank-connect.css">
 <link rel="stylesheet" type="text/css" href="/css/catalogue-chooser.css">
-
 <form id="wizardForm" name="wizardForm" method="post" class="form-horizontal" enctype="multipart/form-data">
 	<div class="row-fluid">
 		<div class="span12">
@@ -47,7 +44,7 @@
 					<div class="row-fluid">
 						<div class="span12">
 							<div id="container" class="data-table-container">
-								<!-- <table id="dataitem-table" class="table table-striped table-condensed"></table>-->
+								
 							</div>
 							<div class="pagination-centered"></div>
 						</div>

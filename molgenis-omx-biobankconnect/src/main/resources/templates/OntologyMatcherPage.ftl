@@ -1,4 +1,4 @@
-<form id="wizardForm" name="wizardForm" method="post" class="form-horizontal" action="">
+<form id="wizardForm" name="wizardForm" method="post" class="form-horizontal">
 	<div class="row-fluid">
 		<div class="span12">
 			<div class="row-fluid">

@@ -1,52 +1,38 @@
 (function($, molgenis) {
 	"use strict";
 	
-	var pagination = new molgenis.Pagination();
 	var standardModal = new molgenis.StandardModal();
 	var restApi = new molgenis.RestClient();
-	var searchApi = new molgenis.SearchClient();
 	var ontologyTermIRI = "ontologyTermIRI";
 	var selectedDataSet = null;
-	var sortRule = null;
 	
 	molgenis.OntologyAnnotator = function OntologyAnnotator(){};
 	
 	molgenis.OntologyAnnotator.prototype.changeDataSet = function(selectedDataSetId){
-		if(selectedDataSetId !== ''){
-			var dataSetEntity = restApi.get('/api/v1/dataset/' + selectedDataSetId, {'expand' : ['ProtocolUsed']});
-			var request = {
-				documentType : 'protocolTree-' + molgenis.hrefToId(dataSetEntity.ProtocolUsed.href),
-				query : {
-					rules : [[{
-						field : 'type',
-						operator : 'EQUALS',
-						value : 'observablefeature'
-					}]]
-				}
-			};
-			searchApi.search(request, function(searchResponse){
-				var sortRule = null;
-				$('#catalogue-name').empty().append(dataSetEntity.Name);
-				$('#dataitem-number').empty().append(searchResponse.totalHitCount);
-				setSelectedDataSet(dataSetEntity);
-				updateMatrix();
-				initSearchDataItems(dataSetEntity);
-			});
+		if(selectedDataSetId !== undefined && selectedDataSetId !== null && selectedDataSetId !== ''){
+			selectedDataSet = restApi.get('/api/v1/dataset/' + selectedDataSetId);
+			var attributes = restApi.get('/api/v1/' + selectedDataSet.Identifier + '/meta', {'expand' : ['attributes']});
+			$('#catalogue-name').empty().append(selectedDataSet.Name);
+			$('#dataitem-number').empty().append(Object.keys(attributes.attributes).length);
+			updateMatrix();
+			initSearchDataItems();
+		
 		}else{
 			$('#catalogue-name').empty().append('Nothing selected');
 			$('#dataitem-number').empty().append('Nothing selected');
 		}
 		
-		function initSearchDataItems (dataSet) {
+		function initSearchDataItems () {
+			var options = {'updatePager' : true};
 			$('#search-dataitem').typeahead({
 				source: function(query, process) {
-					molgenis.dataItemsTypeahead(molgenis.hrefToId(dataSet.href), query, process);
+					molgenis.dataItemsTypeahead(molgenis.hrefToId(selectedDataSet.href), query, process);
 				},
 				minLength : 3,
 				items : 20
 			});
 			$('#search-button').click(function(){
-				updateMatrix();
+				updateMatrix(options);
 			});
 			
 			$('#search-dataitem').on('keydown', function(e){
@@ -58,21 +44,26 @@
 			$('#search-dataitem').on('keyup', function(e){
 				if($(this).val() === ''){
 					$('#search-dataitem').val('');
-					updateMatrix();
+					updateMatrix(options);
 			    }
 			});
 		};
 	};
 	
-	function updateMatrix(){
-		molgenis.createMatrixForDataItems({
-			'dataSetId' : molgenis.hrefToId(getSelectedDataSet().ProtocolUsed.href),
+	function updateMatrix(options){
+		var default_options = {
+			'dataSetId' : molgenis.hrefToId(selectedDataSet.href),
 			'tableHeaders' : ['Name', 'Description', 'Annotation'],
 			'queryText' : $('#search-dataitem').val(),
 			'sortRule' : null,
 			'createTableRow' : createTableRow,
+			'updatePager' : false,
 			'container' : $('#container')
-		});
+		}
+		if(options !== undefined && options !== null){
+			$.extend(default_options, options);
+		}
+		molgenis.createMatrixForDataItems(default_options);
 	}
 	
 	function createTableRow(feature){	
@@ -125,7 +116,6 @@
 	}
 	
 	molgenis.OntologyAnnotator.prototype.createFeatureTable = function(title, restApiFeature, callback){
-		
 		var modal = standardModal.createModal(title, [], {});
 		var body = modal.find('div.modal-body:eq(0)').addClass('overflow-y-visible');
 		body.append(createFeatureInfo(title, restApiFeature, callback));
@@ -136,6 +126,7 @@
 			'margin-top' : 100
 		}).modal('show');
 		return modal;
+		
 		function createFeatureInfo(title, restApiFeature, callback){
 			var table = $('<table />').addClass('table table-bordered'); 
 			var featureTableContainer = $('<div />');
@@ -189,7 +180,7 @@
 		}
 	};
 	
-	function createSearchDiv (title, feature, callback){
+	function createSearchDiv(title, feature, callback){
 		var searchDiv = $('<div class="row-fluid"></div>').css('z-index', 10000);
 		var searchGroup = $('<div class="input-append span4"></div>');
 		var searchField = $('<input type="text" data-provide="typeahead" />');
@@ -223,31 +214,17 @@
 	}
 	
 	molgenis.OntologyAnnotator.prototype.searchOntologies = function(ontologyDiv, hiddenInput){
-		
-		var searchRequest = {
-			documentType : null,
-			pageSize: 1000000,
-			query : {
-				rules:[[{
-					operator : 'SEARCH',
-					value : 'indexedOntology'
-				}]]
-			}
-		};
-		
-		searchApi.search(searchRequest, function(searchResponse){
-			if(ontologyDiv.find('input').length === 0){
-				$.each(searchResponse.searchHits, function(index, hit){
-					var ontologyInfo =hit.columnValueMap;
-					var ontologyUri = ontologyInfo.ontologyIRI;
-					var ontologyName = ontologyInfo.ontologyLabel;
-				    $('<label />').addClass('checkbox').append('<input type="checkbox" value="' + ontologyUri + '" checked>' + ontologyName).click(function(){
-				    	$('#selectedOntologies').val(getAllOntologyUris(ontologyDiv));
-				    }).appendTo(ontologyDiv);
-				});
-			}
-			$('#selectedOntologies').val(getAllOntologyUris(ontologyDiv));
-		});
+		var indexedOntologies = restApi.get('/api/v1/ontologyindex/');
+		if(ontologyDiv.find('input').length === 0){
+			$.each(indexedOntologies.items, function(index, ontology){
+				var ontologyUri = ontology.ontologyIRI;
+				var ontologyName = ontology.ontologyLabel;
+			    $('<label />').addClass('checkbox').append('<input type="checkbox" value="' + ontologyUri + '" checked>' + ontologyName).click(function(){
+			    	$('#selectedOntologies').val(getAllOntologyUris(ontologyDiv));
+			    }).appendTo(ontologyDiv);
+			});
+		}
+		$('#selectedOntologies').val(getAllOntologyUris(ontologyDiv));
 		
 		function getAllOntologyUris(ontologyDiv){
 			var selectedOntologies = [];
@@ -320,7 +297,7 @@
 				value : ontology.Name + ':' + ontologyTermFromIndex.ontologyTermIRI
 			});
 			var request = {
-					'q' : queryRules
+				'q' : queryRules
 			};
 			var result = restApi.get('/api/v1/ontologyterm/', {'expand': ['ontology'], 'q' : request});
 			var ontologyTermId = null;
@@ -336,39 +313,7 @@
 			if(ontologyTermId != null) updateAnnotation(feature, ontologyTermId, true);
 		}
 	}
-//	
-//	function createFeatureModal(title, feature){
-//		restApi.getAsync(feature.href, {'expand': ["unit", "definitions"]}, function(updatedFeature){
-//			standardModal.createModalCallback(title, function(modal){
-//				var body = modal.find('div.modal-body').addClass('overflow-y-visible');
-//				molgenis.OntologyAnnotator.prototype.createFeatureTable(body, title, updatedFeature);
-//				body.append(molgenis.OntologyAnnotator.prototype.createSearchDiv(title, updatedFeature));
-//				modal.css({
-//					'width' : 650, 
-//					'margin-left' : -350,
-//					'margin-top' : 100
-//				}).modal('show');
-//			});
-//		});
-//	}
-	
-//	function updateModalAfterAnnotation(title, feature, callback){
-//		restApi.getAsync(feature.href, {'expand': ["unit", "definitions"]}, function(updatedFeature){
-//			standardModal.createModalCallback(title, function(modal){
-//				var body = modal.find('div.modal-body').addClass('overflow-y-visible');
-//				molgenis.OntologyAnnotator.prototype.createFeatureTable(body, title, updatedFeature, callback);
-//				body.append(molgenis.OntologyAnnotator.prototype.createSearchDiv(title, updatedFeature, callback));
-//				modal.css({
-//					'width' : 650, 
-//					'margin-left' : -350,
-//					'margin-top' : 100
-//				}).modal('show');
-//				if(callback !== undefined && callback !== null) callback();
-//				else updateMatrix();
-//			});
-//		});
-//	}
-	
+
 	function updateAnnotation(feature, ontologyTermId, add){
 		var data = {};
 		feature.description = molgenis.i18nDescription(feature).en;
@@ -456,8 +401,16 @@
 			contentType : 'application/json',
 			async : false,
 			success : function(data, textStatus, request) {
-				var href = request.getResponseHeader('Location');
-				ontologyTermId = href.substring(href.lastIndexOf('/') + 1);
+				var ontologyTerm = restApi.get('/api/v1/ontologyterm/', {
+					'q':  {
+						'q' : [{
+							field : 'Identifier',
+							operator : 'EQUALS',
+							value : query.Identifier
+						}]
+					}
+				});
+				ontologyTermId = molgenis.hrefToId(ontologyTerm.items[0].href);
 			},
 			error : function(request, textStatus, error){
 				console.log(error);
@@ -501,42 +454,20 @@
 		return existingOntology.items[0];
 	}
 	
-	function getFeatureFromIndex(feature, callback){
-		var queryRules = [];
-		queryRules.push({
-			field : 'id',
-			operator : 'EQUALS',
-			value : molgenis.hrefToId(feature.href)
+	function getFeatureFromIndex(feature, callback){		
+		$.ajax({
+			type : 'POST',
+			url : molgenis.getContextUrl() + '/attribute',
+			async : false,
+			data : JSON.stringify(molgenis.hrefToId(feature.href)),
+			contentType : 'application/json',
+			success : function(data, textStatus, request){
+				$.each(data.searchHits, function(index, hit){
+					callback(hit);
+					return false;
+				});
+			}		
 		});
-		queryRules.push({
-			operator : 'AND',
-		});
-		queryRules.push({
-			field : 'type',
-			operator : 'EQUALS',
-			value : 'observablefeature'
-		});
-		var searchRequest = {
-			documentType : null,
-			query : {
-				pageSize: 100000,
-				rules: [queryRules]
-			}
-		};
-		searchApi.search(searchRequest, function(searchResponse){
-			$.each(searchResponse.searchHits, function(index, hit){
-				callback(hit);
-				return false;
-			});
-		});
-	}
-	
-	function setSelectedDataSet (dataSet) {
-		selectedDataSet = dataSet;
-	}
-	
-	function getSelectedDataSet(){
-		return selectedDataSet;
 	}
 	
 }($, window.top.molgenis = window.top.molgenis || {}));

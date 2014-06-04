@@ -40,52 +40,14 @@ td.feature-detail-td {
 	width : 70%;
 }
 
-.float-right {
-	float : right;
-	margin-right : 5px;
-}
-
-.float-right a{
-	cursor: hand; 
-	cursor: pointer;
-}
-
-.show-popover {
-	cursor: hand; 
-	cursor: pointer;
-}
-
 .popover-content{
 	max-height: 500px;
     overflow-y: auto;
 }
 
-.float-right{
-	float : right;
-	right : 20px;
-	cursor: hand; 
-	cursor: pointer;
-}
-
 .overflow-y-visible {
 	overflow-y : visible;
 }
-
-ol.action-list, ol.action-list li{
-	padding : 3px;
-	padding-left : 5px;
-}
-
-dl{
-	font-size : 16px;
-	margin-top : -5px;
-}
-
-dd {
-	margin-left : -2px;
-	padding-left : 2px;
-}
-
 
 h3 {
 	color : #3079C2;
