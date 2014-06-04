@@ -31,13 +31,21 @@
 		$.ajax("/js/dataexplorer-data.js", {'cache': true}))
 		.done(function() {
 			<#-- create genome browser -->
-		    molgenis.dataexplorer.data.createGenomeBrowser({
-				${initLocation},
-	            coordSystem: ${coordSystem},
-	            chains: ${chains},
-	            sources: ${sources},
-	            browserLinks: ${browserLinks}
-			}, [<#list genomeEntities?keys as entityName>{'name': '${entityName}', 'label': '${genomeEntities[entityName]}'}<#if entityName_has_next>,</#if></#list>]);
+            if(molgenis.dataexplorer.data.doShowGenomeBrowser() == true)
+            {
+                molgenis.dataexplorer.data.createGenomeBrowser(
+                {
+                    ${initLocation},
+                    coordSystem: ${coordSystem},
+                    chains: ${chains},
+                    sources: ${sources},
+                    browserLinks: ${browserLinks}
+                }, [<#list genomeEntities?keys as entityName>{'name': '${entityName}', 'label': '${genomeEntities[entityName]}'}<#if entityName_has_next>,</#if></#list>]);
+            }
+            else
+            {
+                $('#genomebrowser').css('display', 'none');
+            }
 			<#-- create data table -->
 		    molgenis.dataexplorer.data.createDataTable();    	
 		})

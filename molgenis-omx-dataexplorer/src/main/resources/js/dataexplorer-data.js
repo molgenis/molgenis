@@ -13,6 +13,7 @@
 	var self = molgenis.dataexplorer.data = molgenis.dataexplorer.data || {};
 	self.createDataTable = createDataTable;
 	self.createGenomeBrowser = createGenomeBrowser;
+    self.doShowGenomeBrowser = doShowGenomeBrowser;
 
 	var restApi = new molgenis.RestClient();
 	var genomeBrowser;
@@ -71,7 +72,7 @@
 	/**
 	 * @memberOf molgenis.dataexplorer.data
 	 */
-	function isGenomeBrowserEntity() {
+	function doShowGenomeBrowser() {
 		// FIXME check attributes on all levels
 		var attrs = getEntity().attributes;
 		return attrs.hasOwnProperty("POS") &&
@@ -84,7 +85,7 @@
 	 */
 	function createGenomeBrowser(settings, genomeEntityKeyVals) {
 		genomeEntities = genomeEntityKeyVals;
-        if (isGenomeBrowserEntity()) {
+
             $('#genomebrowser').css('display', 'block');
             $('#genomebrowser').css('visibility', 'visible');
 
@@ -177,9 +178,7 @@
                     }
                 }
             });
-		}else {
-            $('#genomebrowser').css('display', 'none');
-        }
+
 	}
 
 
