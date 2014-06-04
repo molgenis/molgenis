@@ -144,7 +144,7 @@ public class DataExplorerController extends MolgenisPluginController
 		}
 		model.addAttribute("selectedEntityName", selectedEntityName);
 		model.addAttribute(
-				WIZARD_TITLE,
+				"wizardtitle",
 				molgenisSettings.getProperty(WIZARD_TITLE) == null ? "Filter Wizard" : molgenisSettings
 						.getProperty(WIZARD_TITLE));
 		model.addAttribute("wizard", (wizard != null) && wizard.booleanValue());
