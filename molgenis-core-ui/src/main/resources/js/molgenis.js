@@ -221,7 +221,21 @@ function htmlEscape(text) {
  * Create a table cell to show data of a certain type
  * Is used by the dataexplorer and the forms plugin
  */
-function formatTableCellValue(value, dataType) {
+function formatTableCellValue(value, dataType, editable) {
+	
+	if (dataType.toLowerCase() == 'bool') {
+		var checked = (value === true);
+		value = '<input type="checkbox" ';
+		if (checked) {
+			value = value + 'checked ';
+		}
+		if (editable !== true) {
+			value = value + 'disabled="disabled"';
+		}
+
+		return value + '/>';
+	}
+	
 	if (!value) {
 		return '';
 	}
@@ -232,15 +246,6 @@ function formatTableCellValue(value, dataType) {
 
 	} else if (dataType.toLowerCase() == "email") {
 		value = '<a href="mailto:' + value + '">' + htmlEscape(value) + '</a>';
-
-	} else if (dataType.toLowerCase() == 'bool') {
-		var checked = (value === true);
-		value = '<input type="checkbox" disabled="disabled" ';
-		if (checked) {
-			value = value + 'checked ';
-		}
-
-		value = value + '/>';
 
 	} else if (dataType.toLowerCase() != 'html') {
 
@@ -423,6 +428,18 @@ function createInput(dataType, attrs, val, lbl) {
 			type : 'POST',
 			url : href,
 			data : '_method=DELETE',
+			async : false,
+			success : callback.success,
+			error : callback.error
+		});
+	};
+	
+	molgenis.RestClient.prototype.update = function(href, entity, callback) {
+		$.ajax({
+			type : 'POST',
+			url : href + '?_method=PUT',
+			contentType : 'application/json',
+			data : JSON.stringify(entity),
 			async : false,
 			success : callback.success,
 			error : callback.error

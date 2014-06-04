@@ -75,6 +75,9 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		runtimePropertyMap.put(DataExplorerController.KEY_MOD_DATA, String.valueOf(true));
 		runtimePropertyMap.put(DataExplorerController.KEY_MOD_DISEASEMATCHER, String.valueOf(false));
 
+		// DataExplorer table editable yes/no
+		runtimePropertyMap.put(DataExplorerController.KEY_DATAEXPLORER_EDITABLE, String.valueOf(false));
+
 		// Annotators include files/tools
 		String molgenisHomeDir = System.getProperty("molgenis.home");
 
@@ -109,11 +112,11 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 			dataService.add(RuntimeProperty.ENTITY_NAME, runtimeProperty);
 		}
 
-        MolgenisUser anonymousUser = molgenisSecurityWebAppDatabasePopulatorService.getAnonymousUser();
-        UserAuthority anonymousHomeAuthority = new UserAuthority();
-        anonymousHomeAuthority.setMolgenisUser(anonymousUser);
-        anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX + HomeController.ID.toUpperCase());
-        dataService.add(UserAuthority.ENTITY_NAME, anonymousHomeAuthority);
+		MolgenisUser anonymousUser = molgenisSecurityWebAppDatabasePopulatorService.getAnonymousUser();
+		UserAuthority anonymousHomeAuthority = new UserAuthority();
+		anonymousHomeAuthority.setMolgenisUser(anonymousUser);
+		anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX + HomeController.ID.toUpperCase());
+		dataService.add(UserAuthority.ENTITY_NAME, anonymousHomeAuthority);
 	}
 
 	@Override

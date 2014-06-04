@@ -87,6 +87,9 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String BROWSERLINKS = "genomebrowser.init.browserLinks";
 	public static final String WIZARD_TITLE = "plugin.dataexplorer.wizard.title";
 
+	public static final String KEY_DATAEXPLORER_EDITABLE = "plugin.dataexplorer.editable";
+	private static final boolean DEFAULT_VAL_DATAEXPLORER_EDITABLE = false;
+
 	@Autowired
 	private DataService dataService;
 
@@ -166,6 +169,9 @@ public class DataExplorerController extends MolgenisPluginController
 			model.addAttribute("chains", molgenisSettings.getProperty(CHAINS));
 			model.addAttribute("sources", molgenisSettings.getProperty(SOURCES));
 			model.addAttribute("browserLinks", molgenisSettings.getProperty(BROWSERLINKS));
+			model.addAttribute("tableEditable",
+					molgenisSettings.getBooleanProperty(KEY_DATAEXPLORER_EDITABLE, DEFAULT_VAL_DATAEXPLORER_EDITABLE));
+
 		}
 		return "view-dataexplorer-mod-" + moduleId; // TODO bad request in case of invalid module id
 	}
