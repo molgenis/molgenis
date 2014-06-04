@@ -26,7 +26,11 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.omx.OmxRepository;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.validation.DefaultEntityValidator;
+import org.molgenis.data.validation.EntityAttributesValidator;
+import org.molgenis.omx.biobankconnect.algorithm.ApplyAlgorithms;
 import org.molgenis.omx.biobankconnect.utils.NGramMatchingModel;
 import org.molgenis.omx.biobankconnect.utils.StoreMappingRepository;
 import org.molgenis.omx.biobankconnect.wizard.CurrentUserStatus;
@@ -68,7 +72,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	private static final String FIELD_BOOST_ONTOLOGYTERM = "boostOntologyTerms";
 	private static final String ONTOLOGY_IRI = "ontologyIRI";
 	private static final String ONTOLOGY_LABEL = "ontologyLabel";
-	private static final String OBSERVATION_SET = "observation_set";
+	private static final String OBSERVATION_SET = "observationsetid";
 	private static final String ONTOLOGYTERM_SYNONYM = "ontologyTermSynonym";
 	private static final String ONTOLOGY_TERM = "ontologyTerm";
 	private static final String ONTOLOGY_TERM_IRI = "ontologyTermIRI";
@@ -986,7 +990,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 
 			ObservableFeature mappedFeature = new ObservableFeature();
 			mappedFeature.setIdentifier(STORE_MAPPING_MAPPED_FEATURE);
-			mappedFeature.setDataType(MolgenisFieldTypes.FieldTypeEnum.INT.toString().toLowerCase());
+			mappedFeature.setDataType(MolgenisFieldTypes.FieldTypeEnum.STRING.toString().toLowerCase());
 			mappedFeature.setName("Mapped features");
 			features.add(mappedFeature);
 
@@ -1040,11 +1044,10 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 				Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME,
 						new QueryImpl().eq(Protocol.IDENTIFIER, PROTOCOL_IDENTIFIER), Protocol.class);
 				dataSet.setProtocolUsed(protocol);
-
-				dataSet.setDescription("");
 				dataService.add(DataSet.ENTITY_NAME, dataSet);
-
 				dataService.getCrudRepository(DataSet.ENTITY_NAME).flush();
+				dataService.addRepository(new OmxRepository(dataService, searchService, identifier,
+						new DefaultEntityValidator(dataService, new EntityAttributesValidator())));
 			}
 		}
 		dataService.getCrudRepository(Protocol.ENTITY_NAME).flush();
@@ -1142,9 +1145,29 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		valueForObservationSet.setValue(observationSetIntValue);
 		listOfNewObservedValues.add(valueForObservationSet);
 
+		// Extract feature names out of algorithm script and store ids of the
+		// mapped features
+		List<String> selectedFeatureNames = new ArrayList<String>();
+		for (String standardFeatureName : ApplyAlgorithms.extractFeatureName(request.getAlgorithmScript()))
+		{
+			selectedFeatureNames.add(standardFeatureName);
+		}
+		ObservedValue valueForMappedFeatures = new ObservedValue();
+		ObservableFeature SMMF = dataService
+				.findOne(ObservableFeature.ENTITY_NAME,
+						new QueryImpl().eq(ObservableFeature.IDENTIFIER, STORE_MAPPING_MAPPED_FEATURE),
+						ObservableFeature.class);
+		StringValue mappedFeatureValues = new StringValue();
+		mappedFeatureValues.setValue(selectedFeatureNames.toString());
+		dataService.add(StringValue.ENTITY_NAME, mappedFeatureValues);
+		valueForMappedFeatures.setFeature(SMMF);
+		valueForMappedFeatures.setValue(mappedFeatureValues);
+		valueForMappedFeatures.setObservationSet(observationSet);
+		listOfNewObservedValues.add(valueForMappedFeatures);
+
+		// Add observedValues to database and index those values
 		dataService.add(ObservedValue.ENTITY_NAME, listOfNewObservedValues);
 		dataService.getCrudRepository(ObservedValue.ENTITY_NAME).flush();
-
 		searchService.updateRepositoryIndex(new StoreMappingRepository(storingMappingDataSet, listOfNewObservedValues,
 				dataService));
 	}
@@ -1182,15 +1205,42 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 
 			if (algorithmScriptObservedValue != null && algorithmScriptObservedValue.getValue() instanceof StringValue)
 			{
+				// Update algorithm script in database
 				StringValue algorithmScriptValue = (StringValue) algorithmScriptObservedValue.getValue();
 				algorithmScriptValue.setValue(request.getAlgorithmScript());
 				dataService.update(StringValue.ENTITY_NAME, algorithmScriptValue);
 				dataService.getCrudRepository(StringValue.ENTITY_NAME).flush();
-				// Update index
+				// Update algorithm script in index
 				StringBuilder updateScriptBuilder = new StringBuilder();
 				updateScriptBuilder.append(STORE_MAPPING_ALGORITHM_SCRIPT).append('=').append("\"")
 						.append(request.getAlgorithmScript()).append("\"");
 				searchService.updateDocumentById(mappingDataSetIdentifier, hit.getId(), updateScriptBuilder.toString());
+
+			}
+			ObservableFeature SMMF = dataService.findOne(ObservableFeature.ENTITY_NAME,
+					new QueryImpl().eq(ObservableFeature.IDENTIFIER, STORE_MAPPING_MAPPED_FEATURE),
+					ObservableFeature.class);
+			ObservedValue mappedFeaturesObservedValue = dataService.findOne(ObservedValue.ENTITY_NAME, new QueryImpl()
+					.eq(ObservedValue.OBSERVATIONSET, observationSet).and().eq(ObservedValue.FEATURE, SMMF),
+					ObservedValue.class);
+			if (mappedFeaturesObservedValue != null && mappedFeaturesObservedValue.getValue() instanceof StringValue)
+			{
+				// Update mappedFeatures in database
+				List<String> selectedFeatureNames = new ArrayList<String>();
+				for (String standardFeatureName : ApplyAlgorithms.extractFeatureName(request.getAlgorithmScript()))
+				{
+					selectedFeatureNames.add(standardFeatureName);
+				}
+				StringValue mappedFeaturesValue = (StringValue) mappedFeaturesObservedValue.getValue();
+				mappedFeaturesValue.setValue(selectedFeatureNames.toString());
+				dataService.update(StringValue.ENTITY_NAME, mappedFeaturesValue);
+				dataService.getCrudRepository(StringValue.ENTITY_NAME).flush();
+				// Update mappedFeatures in index
+				StringBuilder updateMappedFeaturesBuilder = new StringBuilder();
+				updateMappedFeaturesBuilder.append(STORE_MAPPING_MAPPED_FEATURE).append('=').append("\"")
+						.append(selectedFeatureNames.toString()).append("\"");
+				searchService.updateDocumentById(mappingDataSetIdentifier, hit.getId(),
+						updateMappedFeaturesBuilder.toString());
 			}
 		}
 		return result.getTotalHitCount() > 0;

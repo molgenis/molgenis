@@ -370,7 +370,7 @@ public class ApplyAlgorithms
 		return calculatedResults;
 	}
 
-	public List<String> extractFeatureName(String algorithmScript)
+	public static List<String> extractFeatureName(String algorithmScript)
 	{
 		List<String> featureNames = new ArrayList<String>();
 		Pattern pattern = Pattern.compile("\\$\\('([^\\$\\(\\)]*)'\\)");

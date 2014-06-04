@@ -19,6 +19,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.biobankconnect.ontologyannotator.OntologyAnnotator;
 import org.molgenis.omx.biobankconnect.ontologyannotator.UpdateIndexRequest;
+import org.molgenis.omx.biobankconnect.ontologymatcher.AsyncOntologyMatcher;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcher;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcherRequest;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcherResponse;
@@ -54,9 +55,7 @@ public class BiobankConnectController extends AbstractWizardController
 	private final OntologyMatcherPage ontologyMatcherPager;
 	private final MappingManagerPage mappingManagerPager;
 	private final ProgressingBarPage progressingBarPager;
-
 	private BiobankConnectWizard wizard;
-	private static final String PROTOCOL_IDENTIFIER = "store_mapping";
 
 	@Autowired
 	private DataService dataService;
@@ -99,11 +98,11 @@ public class BiobankConnectController extends AbstractWizardController
 	public void onInit(HttpServletRequest request)
 	{
 		List<DataSet> dataSets = new ArrayList<DataSet>();
-
 		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME, DataSet.class);
 		for (DataSet dataSet : allDataSets)
 		{
-			if (!dataSet.getProtocolUsed().getIdentifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);
+			if (!dataSet.getProtocolUsed().getIdentifier().equals(AsyncOntologyMatcher.PROTOCOL_IDENTIFIER)) dataSets
+					.add(dataSet);
 		}
 		wizard.setDataSets(dataSets);
 		currentUserStatus.setUserLoggedIn(userAccountService.getCurrentUser().getUsername(),
@@ -118,7 +117,8 @@ public class BiobankConnectController extends AbstractWizardController
 		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME, DataSet.class);
 		for (DataSet dataSet : allDataSets)
 		{
-			if (!dataSet.getProtocolUsed().getIdentifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);
+			if (!dataSet.getProtocolUsed().getIdentifier().equals(AsyncOntologyMatcher.PROTOCOL_IDENTIFIER)) dataSets
+					.add(dataSet);
 		}
 		wizard.setDataSets(dataSets);
 		wizard.setUserName(userAccountService.getCurrentUser().getUsername());
@@ -143,7 +143,8 @@ public class BiobankConnectController extends AbstractWizardController
 		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME, DataSet.class);
 		for (DataSet dataSet : allDataSets)
 		{
-			if (!dataSet.getProtocolUsed().getIdentifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);
+			if (!dataSet.getProtocolUsed().getIdentifier().equals(AsyncOntologyMatcher.PROTOCOL_IDENTIFIER)) dataSets
+					.add(dataSet);
 		}
 		biobankConnectWizard.setDataSets(dataSets);
 		logger.error(message);

@@ -39,9 +39,6 @@ public class AlgorithmGenerator
 	private AlgorithmUnitConverter algorithmUnitConverter;
 
 	@Autowired
-	private ApplyAlgorithms applyAlgorithms;
-
-	@Autowired
 	private DataService dataService;
 
 	@Autowired
@@ -151,7 +148,7 @@ public class AlgorithmGenerator
 	private String convertToJavascriptByFormula(String scriptTemplate, ObservableFeature standardFeature,
 			SearchResult searchResult)
 	{
-		for (String standardFeatureName : applyAlgorithms.extractFeatureName(scriptTemplate))
+		for (String standardFeatureName : ApplyAlgorithms.extractFeatureName(scriptTemplate))
 		{
 			SearchResult result = algorithmScriptLibrary.findOntologyTerm(Arrays.asList(standardFeatureName));
 			if (result.getTotalHitCount() > 0)
