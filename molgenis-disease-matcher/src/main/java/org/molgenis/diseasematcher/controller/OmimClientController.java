@@ -44,16 +44,14 @@ public class OmimClientController
 			String uri = "http://api.europe.omim.org/api/entry?mimNumber=" + omimId
 					+ "&include=text&include=clinicalSynopsis&format=json&apiKey=" + URLEncoder.encode(apiKey, "UTF-8");
 
-			// String uri = "http://api.europe.omim.org/api/entry?mimNumber=" + omimId
-			// + "&include=all&format=json&apiKey=" + URLEncoder.encode(apiKey, "UTF-8");
-
 			URL omimRequest = new URL(uri);
 			response.setContentType("application/json");
 			FileCopyUtils.copy(omimRequest.openStream(), response.getOutputStream());
 		}
 		catch (IOException e)
 		{
-			e.printStackTrace();
+			response.setContentType("application/json");
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 		}
 
 	}

@@ -10,8 +10,9 @@
 	var currentQuery = null;
 	var currentSelectionMode = SelectionMode.DISEASE;
 	var listMaxLength = 10;
-	var toolAvailable = false;
+	var toolAvailable = true;
 	var omimObjectCache = {};
+	var localStorageSupported = false;
 	
 	
 	/**
@@ -41,7 +42,7 @@
 		$('#diseasematcher-variant-panel').empty();
 		$('#diseasematcher-selection-list').empty();
 
-		toolAvailable = false;
+		toolAvailable = true;
 		checkToolAvailable(entityUri);
 	});
 	
@@ -63,7 +64,7 @@
 						+ 'your dataset has a \'geneSymbol\' column.</div>';
 				if (!$('#diseasematcher-variant-panel #gene-symbol-warning').length) {
 					$('#diseasematcher-variant-panel').append(warning);
-					toolAvailable = true;
+					toolAvailable = false;
 				}
 			} else {
 				$(('#diseasematcher-variant-panel #gene-symbol-warning')).remove();
@@ -87,7 +88,7 @@
 						+ '</strong> For this tool to work, a valid ' + dataset	+ ' dataset should be uploaded.</div>';
 				if (!$('#diseasematcher-variant-panel #' + dataset + '-warning').length) {
 					$('#diseasematcher-variant-panel').append(warning);
-					toolAvailable = true;
+					toolAvailable = false;
 				}
 			} else {
 				$('#diseasematcher-variant-panel #'+ dataset + '-warning').remove();
@@ -125,8 +126,7 @@
 			$('#diseasematcher-selection-navbar li').attr('class', '');
 			$(this).parent().attr("class", "active");
 	
-			$('#diseasematcher-selection-search').attr('placeholder',
-					'Search genes');
+			$('#diseasematcher-selection-search').attr('placeholder', 'Search genes');
 			$('#diseasematcher-selection-title').html('Genes');
 	
 			currentSelectionMode = SelectionMode.GENE;
@@ -136,6 +136,8 @@
 		// init tabs
 		$('#diseasematcher-disease-panel-tabs').tab();
 
+		localStorageSupported = browserSupportsLocalStorage();
+		//if (localStorageSupported) localStorage.clear();
 	});
 
 	
@@ -156,7 +158,8 @@
 			url : '/diseasematcher/' + selectionType,
 			data : JSON.stringify(request),
 			success : function(data) {
-
+				if (data === null) return;
+				
 				if (selectionType === SelectionMode.DISEASE) {
 					// add the diseases (if any) to the disease list and init
 					// the pager
@@ -203,8 +206,7 @@
 		});
 
 		// pre-select top-most disease
-		onSelectListItem($('#diseasematcher-selection-list li a').first(),
-				currentSelectionMode);
+		onSelectListItem($('#diseasematcher-selection-list li a').first(), currentSelectionMode);
 	}
 
 	
@@ -252,13 +254,14 @@
 		});
 	}
 
+	
 	/**
 	 * 
 	 * @param omimObject
 	 * @returns
 	 */
 	function showOmimObject(omimObject){
-		console.log(omimObject);
+		
 		// clear disease panel to make room for this object
 		var diseasePanel = $('#diseasematcher-disease-tab-content');
 		diseasePanel.empty();
@@ -266,7 +269,7 @@
 		// show a warning when omim object is empty (500 from OMIM API or other problem) and return
 		if (omimObject === null){
 			var warning = '<div class="alert alert-warning" id="no-clinical-synopsis-warning">'
-				+ '<strong>OMIM service unavailable!</strong> Please visit <a href="http://www.omim.org/entry/' + diseaseIdDigits + '" target="_blank">the OMIM website.</a></div>';
+				+ '<strong>OMIM service unavailable!</strong> Please visit <a href="http://www.omim.org/entry/' + diseaseId + '" target="_blank">the OMIM website.</a></div>';
 			diseasePanel.append(warning);
 			return;
 		}
@@ -337,7 +340,7 @@
 									// OMIM id, add a link
 									subPart.replace('.', '#');
 									linkedText += '<a href="http://www.omim.org/entry/' + subPart + '" target="_blank">' + subPart + '</a>';
-
+									
 								} else {
 									linkedText += subPart;
 								};
@@ -363,29 +366,31 @@
 	 * @returns
 	 */
 	function onSelectDiseaseTab(diseaseId) {
-		var diseaseIdDigits = diseaseId.substring(5);
-		
-		if (diseaseIdDigits in omimObjectCache){
-			// already cached this one
-			console.log('INFO: showing ' + diseaseId + ' from cache...');
-			showOmimObject(omimObjectCache[diseaseIdDigits]);
-			
+		if (localStorageSupported && diseaseId in localStorage){
+			console.log('INFO: showing ' + diseaseId + ' from local storage');
+			showOmimObject(JSON.parse(localStorage.getItem(diseaseId)));
 		}else{
 			// don't have this one yet, get it from OMIM API
 			$.ajax({
 				type : 'GET',
 				contentType : 'application/json',
-				url : '/omim/' + diseaseIdDigits,
+				url : '/omim/' + diseaseId.substring(5), //remove OMIM: part from string
 				success : function(omimObject) {
-					omimObjectCache[diseaseIdDigits] = omimObject;
 					
 					console.log('INFO: showing ' + diseaseId + ' from OMIM API');
-					showOmimObject(omimObjectCache[diseaseIdDigits]);
+					
+					if (localStorageSupported && omimObject !== null){
+						localStorage.setItem(diseaseId, JSON.stringify(omimObject));
+					}
+					
+					showOmimObject(omimObject);
+
 				}
 			});
 		}
 	}
 
+	
 	/**
 	 * 
 	 * @param
@@ -427,10 +432,13 @@
 			var geneId = [ link.attr('id') ];
 			showVariants(geneId);
 			showDiseases(geneId, selectionType);
-
 		}
 	}
 	
+	
+	/**
+	 * 
+	 */
 	function setDiseaseTabNames(diseaseIds){
 		if (!(diseaseIds instanceof Array)){
 			diseaseIds = [diseaseIds];
@@ -450,13 +458,17 @@
 			url : '/diseasematcher/diseaseNames' + requestParams,
 			success : function(data) {
 				$.each(diseaseIds, function(index, diseaseId){
-
-					$('#' + diseaseId).empty();
+					console.log(diseaseId);
+					$("[href='#" + diseaseId + "']").html(data[diseaseId][0]);
 				});
 			}
 		});
 	}
 	
+	
+	/**
+	 * 
+	 */
 	function showDiseases(id, selectionType) {
 		// empty disease tabs
 		$('#diseasematcher-disease-tab-content').empty();
@@ -467,7 +479,6 @@
 			$('#diseasematcher-disease-panel-tabs').append('<li class="active"><a href="#' + id	+ '" data-toggle="tab">' + id + '</a></li>');
 			$('#diseasematcher-disease-tab-content').append('<div class="tab-pane active" id="' + id + '">' + '</div>');
 
-			
 			
 			setDiseaseTabNames(diseaseId);
 			onSelectDiseaseTab(diseaseId);
@@ -511,6 +522,7 @@
 				var first = $('#diseasematcher-disease-panel-tabs li').first();
 				first.addClass('active');
 
+				setDiseaseTabNames(uniqueDiseases);
 				onSelectDiseaseTab(first.children().attr('id'));
 
 			});
@@ -534,15 +546,21 @@
 				'value' : gene
 			});
 		});
+		
+		var query = {'q' : queryRules};
 
 		// show associated variants in info panel
-		$('#diseasematcher-variant-panel').table({
-			'entityMetaData' : getEntity(),
-			'attributes' : getAttributes(),
-			'query' : {
-				'q' : queryRules
-			}
-		});
+		if ($('#diseasematcher-variant-panel').has('table').length){
+			$('#diseasematcher-variant-panel').table('setQuery', query);
+		}else{
+			$('#diseasematcher-variant-panel').table({
+				'entityMetaData' : getEntity(),
+				'attributes' : getAttributes(),
+				'query' : query
+			});
+		}
+		
+		
 	}
 
 	
@@ -579,6 +597,17 @@
 	 */
 	function getAttributes() {
 		return molgenis.dataexplorer.getSelectedAttributes();
+	}
+	
+	/**
+	 * 
+	 */
+	function browserSupportsLocalStorage() {
+		try {
+			return 'localStorage' in window && window['localStorage'] !== null;
+		} catch (e) {
+			return false;
+		}
 	}
 
 })($, window.top.molgenis = window.top.molgenis || {});
