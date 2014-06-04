@@ -18,7 +18,9 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.impl.datastructures.CgdData;
 import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
+import org.molgenis.data.annotation.provider.CgdDataProvider;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.server.MolgenisSettings;
@@ -42,7 +44,8 @@ public class ClinicalGenomicsDatabaseServiceAnnotatorTest
 	public void beforeMethod() throws IOException
 	{
 		MolgenisSettings settings = mock(MolgenisSettings.class);
-		when(settings.getProperty(ClinicalGenomicsDatabaseServiceAnnotator.CGD_FILE_LOCATION_PROPERTY)).thenReturn(
+
+		when(settings.getProperty(CgdDataProvider.CGD_FILE_LOCATION_PROPERTY)).thenReturn(
 				getClass().getResource("/cgd_example.txt").getFile());
 
 		metaDataCanAnnotate = mock(EntityMetaData.class);
@@ -93,12 +96,33 @@ public class ClinicalGenomicsDatabaseServiceAnnotatorTest
 		input = new ArrayList<Entity>();
 		input.add(entity);
 
+		CgdDataProvider cgdDataProvider = mock(CgdDataProvider.class);
 		AnnotationService annotationService = mock(AnnotationService.class);
 		HgncLocationsProvider hgncLocationsProvider = mock(HgncLocationsProvider.class);
 		Map<String, HGNCLocations> locationsMap = Collections.singletonMap("LEPR", new HGNCLocations("LEPR", 65886248l,
 				66107242l, "1"));
+
+		Map<String, CgdData> cgdDataMap = Collections
+				.singletonMap(
+						"LEPR",
+						new CgdData(
+								"6554",
+								"3953",
+								"Leptin receptor deficiency",
+								"AR",
+								"Pediatric",
+								"",
+								"Allergy/Immunology/Infectious; Endocrine",
+								"Allergy/Immunology/Infectious; Endocrine",
+								"Standard treatments for obesity, such as gastric surgery, have been described as beneficial",
+								"In addition to endocrine manifestations, individuals may be susceptible to infections (eg, respiratory infections), which, coupled with other manifestations (eg, severe obesity) can have severe sequelae such that prophylaxis and rapid treatment may be beneficial",
+								"8666155; 9537324; 17229951; 21306929; 23275530; 23616257"));
+
 		when(hgncLocationsProvider.getHgncLocations()).thenReturn(locationsMap);
-		annotator = new ClinicalGenomicsDatabaseServiceAnnotator(settings, annotationService, hgncLocationsProvider);
+		when(cgdDataProvider.getCgdData()).thenReturn(cgdDataMap);
+
+		annotator = new ClinicalGenomicsDatabaseServiceAnnotator(settings, annotationService, hgncLocationsProvider,
+				cgdDataProvider);
 	}
 
 	@Test
