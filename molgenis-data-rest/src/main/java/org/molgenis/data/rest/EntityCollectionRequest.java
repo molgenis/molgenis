@@ -10,15 +10,16 @@ import org.springframework.data.domain.Sort;
 
 public class EntityCollectionRequest
 {
+	public static final int MAX_ROWS = 10000;
+	public static final int DEFAULT_ROW_COUNT = 100;
 	private List<QueryRule> q;
-
 	private Sort sort;
 
 	@Min(0)
 	private int start = 0;
 	@Min(0)
-	@Max(10000)
-	private int num = 100;
+	@Max(MAX_ROWS)
+	private int num = DEFAULT_ROW_COUNT;
 
 	public int getStart()
 	{
