@@ -186,6 +186,25 @@
 		}
 		return 0;
 	};
+	
+	/**
+	 * Checks if the user has write permission on a particular entity
+	 */
+	molgenis.hasWritePermission = function(entityName) {
+		var writable = false;
+		
+		$.ajax({
+			url : '/permission/' + entityName + "/write",
+			dataType : 'json',
+			async : false,
+			success : function(result) {
+				writable = result;
+			}
+		});
+		
+		return writable;
+	}
+	
 }($, window.top.molgenis = window.top.molgenis || {}));
 
 // Add endsWith function to the string class
@@ -387,6 +406,13 @@ function createInput(dataType, attrs, val, lbl) {
 			});
 		}
 		
+		this._ajax(config);
+		
+		if (!async)
+			return resource;
+	};
+	
+	molgenis.RestClient.prototype._ajax = function(config) {
 		if (self.token) {
 			$.extend(config, {
 				headers: {'x-molgenis-token': self.token}
@@ -394,10 +420,7 @@ function createInput(dataType, attrs, val, lbl) {
 		}
 		
 		$.ajax(config);
-		
-		if (!async)
-			return resource;
-	};
+	}
 	
 	molgenis.RestClient.prototype._toApiUri = function(resourceUri, options) {
 		var qs = "";
@@ -424,7 +447,7 @@ function createInput(dataType, attrs, val, lbl) {
 	};
 	
 	molgenis.RestClient.prototype.remove = function(href, callback) {
-		$.ajax({
+		this._ajax({
 			type : 'POST',
 			url : href,
 			data : '_method=DELETE',
@@ -435,7 +458,7 @@ function createInput(dataType, attrs, val, lbl) {
 	};
 	
 	molgenis.RestClient.prototype.update = function(href, entity, callback) {
-		$.ajax({
+		this._ajax({
 			type : 'POST',
 			url : href + '?_method=PUT',
 			contentType : 'application/json',
@@ -448,7 +471,7 @@ function createInput(dataType, attrs, val, lbl) {
 	
 	molgenis.RestClient.prototype.entityExists = function(resourceUri) {
 		var result = false;
-		$.ajax({
+		this._ajax({
 			dataType : 'json',
 			url : resourceUri + '/exist',
 			async : false,
@@ -481,10 +504,9 @@ function createInput(dataType, attrs, val, lbl) {
 	};
 	
 	molgenis.RestClient.prototype.logout = function(callback) {
-		$.ajax({
+		this._ajax({
 			url : '/api/v1/logout',
 			async : true,
-			headers: {'x-molgenis-token': self.token},
 			success : function() {
 				self.token = null;
 				callback();

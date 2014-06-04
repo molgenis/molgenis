@@ -63,8 +63,13 @@
 	            sources: ${sources},
 	            browserLinks: ${browserLinks}
 			}, [<#list genomeEntities?keys as entityName>{'name': '${entityName}', 'label': '${genomeEntities[entityName]}'}<#if entityName_has_next>,</#if></#list>]);
+			
 			<#-- create data table -->
-		    molgenis.dataexplorer.data.createDataTable(${tableEditable?string('true', 'false')});    	
+			var tableEditable = ${tableEditable?string('true', 'false')};
+			if (tableEditable) {
+				tableEditable = molgenis.hasWritePermission(molgenis.dataexplorer.getSelectedEntityMeta().name);
+			}
+			molgenis.dataexplorer.data.createDataTable(tableEditable);    	
 		})
 		.fail(function() {
 			molgenis.createAlert([{'message': 'An error occured. Please contact the administrator.'}], 'error');
