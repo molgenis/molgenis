@@ -817,7 +817,7 @@ public class RestController
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
 		if (meta.getIdAttribute() == null)
 		{
-			throw new IllegalArgumentException(entityName + " does not have a id attribute");
+			throw new IllegalArgumentException(entityName + " does not have an id attribute");
 		}
 
 		Entity existing = dataService.findOne(entityName, id);
