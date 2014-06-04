@@ -89,6 +89,26 @@ public class CsvWriterTest
 	}
 
 	@Test
+	public void testLabels() throws IOException
+	{
+		StringWriter strWriter = new StringWriter();
+		CsvWriter csvWriter = new CsvWriter(strWriter);
+		try
+		{
+			csvWriter.writeAttributes(Arrays.asList("col1", "col2"), Arrays.asList("label1", "label2"));
+			Entity entity = new MapEntity();
+			entity.set("col1", "val1");
+			entity.set("col2", "val2");
+			csvWriter.add(entity);
+			assertEquals(strWriter.toString(), "\"label1\",\"label2\"\n\"val1\",\"val2\"\n");
+		}
+		finally
+		{
+			csvWriter.close();
+		}
+	}
+
+	@Test
 	public void close() throws IOException
 	{
 		// FIXME enable when double closing bug in opencsv is fixed

@@ -27,6 +27,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.support.GenomeConfig;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.dataexplorer.controller.DataRequest.ColNames;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -255,7 +256,8 @@ public class DataExplorerController extends MolgenisPluginController
 
 	private boolean isGenomeBrowserEntity(EntityMetaData entityMetaData)
 	{
-		AttributeMetaData attributeStartPosition = entityMetaData.getAttribute(GenomeConfig.GENOMEBROWSER_START_POSITION);
+		AttributeMetaData attributeStartPosition = entityMetaData
+				.getAttribute(GenomeConfig.GENOMEBROWSER_START_POSITION);
 		AttributeMetaData attributeId = entityMetaData.getAttribute(GenomeConfig.GENOMEBROWSER_ID);
 		AttributeMetaData attributeChromosome = entityMetaData.getAttribute(GenomeConfig.GENOMEBROWSER_CHROMOSOME);
 		return attributeStartPosition != null && attributeId != null && attributeChromosome != null;
@@ -273,8 +275,17 @@ public class DataExplorerController extends MolgenisPluginController
 
 		String entityName = dataRequest.getEntityName();
 		EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
-		final Set<String> attributes = new HashSet<String>(dataRequest.getAttributeNames());
+		final Set<String> attributeNames = new HashSet<String>(dataRequest.getAttributeNames());
 		String fileName = entityName + '_' + new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + ".csv";
+		Iterable<AttributeMetaData> attributes = Iterables.filter(entityMetaData.getAtomicAttributes(),
+				new Predicate<AttributeMetaData>()
+				{
+					@Override
+					public boolean apply(AttributeMetaData attributeMetaData)
+					{
+						return attributeNames.contains(attributeMetaData.getName());
+					}
+				});
 
 		QueryImpl query = dataRequest.getQuery();
 		response.setContentType("text/csv");
@@ -283,22 +294,22 @@ public class DataExplorerController extends MolgenisPluginController
 		CsvWriter csvWriter = new CsvWriter(response.getOutputStream());
 		try
 		{
-			csvWriter.writeAttributeNames(Iterables.transform(
-					Iterables.filter(entityMetaData.getAtomicAttributes(), new Predicate<AttributeMetaData>()
+			if (dataRequest.getColNames() == ColNames.ATTRIBUTE_LABELS)
+			{
+				csvWriter.writeAttributes(attributes);
+			}
+			else if (dataRequest.getColNames() == ColNames.ATTRIBUTE_NAMES)
+			{
+				csvWriter.writeAttributeNames(Iterables.transform(attributes, new Function<AttributeMetaData, String>()
+				{
+					@Override
+					public String apply(AttributeMetaData attributeMetaData)
 					{
-						@Override
-						public boolean apply(AttributeMetaData attributeMetaData)
-						{
-							return attributes.contains(attributeMetaData.getName());
-						}
-					}), new Function<AttributeMetaData, String>()
-					{
-						@Override
-						public String apply(AttributeMetaData attributeMetaData)
-						{
-							return attributeMetaData.getName();
-						}
-					}));
+						return attributeMetaData.getName();
+					}
+				}));
+			}
+
 			csvWriter.add(dataService.findAll(entityName, query));
 		}
 		finally
