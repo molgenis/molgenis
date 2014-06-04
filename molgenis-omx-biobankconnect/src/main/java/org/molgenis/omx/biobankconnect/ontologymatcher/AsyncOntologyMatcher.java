@@ -56,12 +56,12 @@ import org.tartarus.snowball.ext.PorterStemmer;
 public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 {
 	private static final Logger logger = Logger.getLogger(AsyncOntologyMatcher.class);
-	private static final String PROTOCOL_IDENTIFIER = "store_mapping";
-	private static final String STORE_MAPPING_FEATURE = "store_mapping_feature";
-	private static final String STORE_MAPPING_MAPPED_FEATURE = "store_mapping_mapped_feature";
-	private static final String STORE_MAPPING_CONFIRM_MAPPING = "store_mapping_confirm_mapping";
-	private static final String STORE_MAPPING_SCORE = "store_mapping_score";
-	private static final String STORE_MAPPING_ALGORITHM_SCRIPT = "store_mapping_algorithm_script";
+	public static final String PROTOCOL_IDENTIFIER = "store_mapping";
+	public static final String STORE_MAPPING_FEATURE = "store_mapping_feature";
+	public static final String STORE_MAPPING_MAPPED_FEATURE = "store_mapping_mapped_feature";
+	public static final String STORE_MAPPING_CONFIRM_MAPPING = "store_mapping_confirm_mapping";
+	public static final String STORE_MAPPING_SCORE = "store_mapping_score";
+	public static final String STORE_MAPPING_ALGORITHM_SCRIPT = "store_mapping_algorithm_script";
 	private static final String CATALOGUE_PREFIX = "protocolTree-";
 	private static final String FEATURE_CATEGORY = "featureCategory-";
 	private static final String FIELD_DESCRIPTION_STOPWORDS = "descriptionStopwords";

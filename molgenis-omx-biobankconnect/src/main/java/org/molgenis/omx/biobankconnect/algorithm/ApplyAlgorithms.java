@@ -224,20 +224,23 @@ public class ApplyAlgorithms
 				StringUtils.join(sourceDataSetIds, '-'));
 		DataSet derivedDataSet = dataService.findOne(DataSet.ENTITY_NAME,
 				new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier), DataSet.class);
+		Map<String, List<Integer>> valuesByType = new HashMap<String, List<Integer>>();
 		if (derivedDataSet != null)
 		{
 			Iterable<ObservationSet> observationSets = dataService.findAll(ObservationSet.ENTITY_NAME,
 					new QueryImpl().eq(ObservationSet.PARTOFDATASET, derivedDataSet), ObservationSet.class);
-			Iterable<ObservedValue> observedValues = dataService.findAll(ObservedValue.ENTITY_NAME,
-					new QueryImpl().in(ObservedValue.OBSERVATIONSET, observationSets), ObservedValue.class);
-
-			Map<String, List<Integer>> valuesByType = new HashMap<String, List<Integer>>();
-			for (ObservedValue value : observedValues)
+			if (Iterables.size(observationSets) > 0)
 			{
-				String valueType = value.getValue().get__Type();
-				Integer valueId = value.getId();
-				if (!valuesByType.containsKey(valueType)) valuesByType.put(valueType, new ArrayList<Integer>());
-				valuesByType.get(valueType).add(valueId);
+				Iterable<ObservedValue> observedValues = dataService.findAll(ObservedValue.ENTITY_NAME,
+						new QueryImpl().in(ObservedValue.OBSERVATIONSET, observationSets), ObservedValue.class);
+
+				for (ObservedValue value : observedValues)
+				{
+					String valueType = value.getValue().get__Type();
+					Integer valueId = value.getId();
+					if (!valuesByType.containsKey(valueType)) valuesByType.put(valueType, new ArrayList<Integer>());
+					valuesByType.get(valueType).add(valueId);
+				}
 			}
 			dataSetDeleterService.deleteData(dataSetIdentifier, false);
 			dataService.delete(DataSet.ENTITY_NAME, derivedDataSet);

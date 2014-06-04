@@ -4,6 +4,10 @@
 <script src="/js/common-component.js"></script>
 <script src="/js/biobank-connect.js"></script>
 <script src="/js/algorithm-editor.js"></script>
+<script src="/js/jstat.min.js"></script>
+<script src="/js/d3.min.js"></script>
+<script src="/js/vega.min.js"></script>
+<script src="/js/biobankconnect-graph.js"></script>
 <link rel="stylesheet" type="text/css" href="/css/jquery-ui-1.9.2.custom.min.css">
 <link rel="stylesheet" type="text/css" href="/css/biobank-connect.css">
 <link rel="stylesheet" type="text/css" href="/css/algorithm-editor.css">
@@ -29,13 +33,7 @@
 					</div>
 					<div class="row-fluid">
 						<div class="span12">
-							<div class="data-table-container">
-								<table id="algorithm-table" class="table table-bordered">
-								</table>
-								<div class="pagination pagination-centered">
-									<ul></ul>
-								</div>
-							</div>
+							<div id="container"></div>
 						</div>
 					</div>
 				</div>

@@ -2,6 +2,7 @@ package org.molgenis.omx.biobankconnect.algorithm;
 
 import static org.molgenis.omx.biobankconnect.algorithm.AlgorithmEditorController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -17,8 +18,12 @@ import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.biobankconnect.ontologyannotator.OntologyAnnotator;
+import org.molgenis.omx.biobankconnect.ontologyannotator.UpdateIndexRequest;
+import org.molgenis.omx.biobankconnect.ontologymatcher.AsyncOntologyMatcher;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcher;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcherRequest;
+import org.molgenis.omx.biobankconnect.ontologyservice.OntologyService;
+import org.molgenis.omx.biobankconnect.ontologyservice.OntologyServiceRequest;
 import org.molgenis.omx.biobankconnect.wizard.BiobankConnectWizard;
 import org.molgenis.omx.biobankconnect.wizard.ChooseCataloguePage;
 import org.molgenis.omx.biobankconnect.wizard.CurrentUserStatus;
@@ -34,11 +39,13 @@ import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.wizard.AbstractWizardController;
 import org.molgenis.ui.wizard.Wizard;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.google.common.collect.Iterables;
 import com.google.gson.Gson;
@@ -52,6 +59,8 @@ public class AlgorithmEditorController extends AbstractWizardController
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	private static final String PROTOCOL_IDENTIFIER = "store_mapping";
 
+	@Autowired
+	private OntologyService ontologyService;
 	@Autowired
 	private OntologyMatcher ontologyMatcher;
 	@Autowired
@@ -157,6 +166,14 @@ public class AlgorithmEditorController extends AbstractWizardController
 		return init(request);
 	}
 
+	@RequestMapping(method = RequestMethod.POST, value = "/annotate/update", consumes = APPLICATION_JSON_VALUE)
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void updateDocument(@RequestBody
+	UpdateIndexRequest request)
+	{
+		ontologyAnnotator.updateIndex(request);
+	}
+
 	@RequestMapping(method = RequestMethod.POST, value = "/createmapping", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public SearchResult createMappings(@RequestBody
@@ -248,25 +265,66 @@ public class AlgorithmEditorController extends AbstractWizardController
 		if (request.get("dataSetId") == null) return new SearchResult("dataSetId cannot be null!");
 		Object dataSetId = request.get("dataSetId");
 		Object queryString = request.get("queryString");
+		Object approximate = (request.get("approximate") == null) ? false : request.get("approximate");
 		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME, dataSetId, DataSet.class);
 
-		Query query = null;
+		Query query = new QueryImpl();
 		if (request.get("query") != null)
 		{
 			query = new Gson().fromJson(request.get("query").toString(), QueryImpl.class);
-		}
-		else
-		{
-			query = new QueryImpl();
 		}
 		query.eq("type", "observablefeature");
 
 		if (queryString != null && !queryString.toString().isEmpty())
 		{
-			query.and().search(queryString.toString());
+			if ((boolean) approximate)
+			{
+				query.and().like(ObservableFeature.NAME.toLowerCase(), queryString.toString());
+			}
+			else query.and().search(queryString.toString());
 		}
-
 		return searchService
 				.search(new SearchRequest("protocolTree-" + dataSet.getProtocolUsed().getId(), query, null));
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/attribute")
+	@ResponseBody
+	public SearchResult getAllAttributes(@RequestBody
+	String featureId)
+	{
+		return searchService.search(new SearchRequest(null, new QueryImpl().eq(ObservableFeature.ID, featureId).and()
+				.eq("type", "observablefeature"), null));
+	}
+
+	@RequestMapping(method = POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE, value = "/ontologyterm")
+	@ResponseBody
+	public SearchResult query(@RequestBody
+	OntologyServiceRequest ontologyTermRequest)
+	{
+		String ontologyUrl = ontologyTermRequest.getOntologyUrl();
+		String queryString = ontologyTermRequest.getQueryString();
+		if (queryString == null) return new SearchResult(0, Collections.<Hit> emptyList());
+		return ontologyService.search(ontologyUrl, queryString);
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/getmapping")
+	@ResponseBody
+	public SearchResult getMappings(@RequestBody
+	Map<String, Object> request)
+	{
+		if (request.get("dataSetIdentifier") == null) return new SearchResult("dataSetId cannot be null!");
+		Object dataSetIdentifier = request.get("dataSetIdentifier");
+		Object featureIds = request.get("featureIds");
+
+		Query query = new QueryImpl();
+		if (featureIds != null && !featureIds.toString().isEmpty())
+		{
+			if (query.getRules().size() > 0) query.or();
+			for (Object featureId : (List<?>) featureIds)
+			{
+				query.eq(AsyncOntologyMatcher.STORE_MAPPING_FEATURE, featureId.toString());
+			}
+		}
+		return searchService.search(new SearchRequest(dataSetIdentifier.toString(), query, null));
 	}
 }

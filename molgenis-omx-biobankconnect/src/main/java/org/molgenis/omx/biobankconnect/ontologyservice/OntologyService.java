@@ -179,12 +179,12 @@ public class OntologyService
 
 	public static String createOntologyDocumentType(String ontologyUrl)
 	{
-		return "ontology-" + ontologyUrl;
+		return ontologyUrl == null ? null : "ontology-" + ontologyUrl;
 	}
 
 	public static String createOntologyTermDocumentType(String ontologyUrl)
 	{
-		return "ontologyTerm-" + ontologyUrl;
+		return ontologyUrl == null ? null : "ontologyTerm-" + ontologyUrl;
 	}
 
 	class ComparableHit implements Comparable<ComparableHit>

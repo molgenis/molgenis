@@ -3,7 +3,6 @@
 	
 	var standardModal = new molgenis.StandardModal();
 	var restApi = new molgenis.RestClient();
-	var searchApi = new molgenis.SearchClient();
 	var nrItemsPerPage = 10;
 	
 	molgenis.createMatrixForDataItems = function(options){
@@ -239,12 +238,12 @@
 		});
 	};
 	
-	molgenis.dataItemsTypeahead = function (dataSetId, query, response){
+	molgenis.dataItemsTypeahead = function (dataSetId, query, response, approximate){
 		$.ajax({
 			type : 'POST',
 			url : molgenis.getContextUrl() + '/allattributes',
 			async : false,
-			data : JSON.stringify({'dataSetId' : dataSetId, 'queryString' : query}),
+			data : JSON.stringify({'dataSetId' : dataSetId, 'queryString' : query, 'approximate' : (approximate !== undefined && approximate !== null)}),
 			contentType : 'application/json',
 			success : function(data, textStatus, request){
 				var result = [];
@@ -264,38 +263,27 @@
 	};
 	
 	molgenis.ontologyTermTypeahead = function (field, query, response){
-		var queryRules = [{
-			field : field,
-			operator : 'LIKE',
-			value : query,
-		},{
-			operator : 'OR'
-		},{
-			field : field,
-			operator : 'EQUALS',
-			value : query,
-		}];
-		var searchRequest = {
-			documentType : null,
-			query : {
-				pageSize: 40,
-				rules: [queryRules]
-			}
-		};
-		searchApi.search(searchRequest, function(searchReponse){
-			var result = [];
-			var dataMap = {};
-			$.each(searchReponse.searchHits, function(index, hit){
-				var ontologyName = hit.columnValueMap.ontologyLabel;
-				var termName = hit.columnValueMap.ontologyTermSynonym;
-				termName = ontologyName === '' ? termName : ontologyName + ':' + termName;
-				if($.inArray(termName, result) === -1){					
-					result.push(termName);
-					dataMap[termName] = hit.columnValueMap;
-				}
-			});
-			$(document).data('dataMap', dataMap);
-			response(result);
+		$.ajax({
+			type : 'POST',
+			url : molgenis.getContextUrl() + '/ontologyterm',
+			async : false,
+			data : JSON.stringify({'queryString' : query}),
+			contentType : 'application/json',
+			success : function(data, textStatus, request){
+				var result = [];
+				var dataMap = {};
+				$.each(data.searchHits, function(index, hit){
+					var ontologyName = hit.columnValueMap.ontologyLabel;
+					var termName = hit.columnValueMap.ontologyTermSynonym;
+					termName = ontologyName === '' ? termName : ontologyName + ':' + termName;
+					if($.inArray(termName, result) === -1){					
+						result.push(termName);
+						dataMap[termName] = hit.columnValueMap;
+					}
+				});
+				$(document).data('dataMap', dataMap);
+				response(result);
+			}		
 		});
 	};
 	
