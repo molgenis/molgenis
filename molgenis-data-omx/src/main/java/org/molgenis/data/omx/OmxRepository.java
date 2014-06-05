@@ -28,6 +28,7 @@ import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.ObservedValue;
+import org.molgenis.omx.observ.value.BoolValue;
 import org.molgenis.omx.observ.value.Value;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
@@ -273,7 +274,7 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Cr
 				repo.clearCache();
 			}
 		}
-        return rownr;
+		return rownr;
 	}
 
 	private LoadingCache<String, ObservableFeature> getObservableFeatureCache()
@@ -309,10 +310,45 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Cr
 		// no-op
 	}
 
+	/**
+	 * For now update only is implemented for boolean attributes
+	 */
 	@Override
 	public void update(Entity entity)
 	{
-		throw new UnsupportedOperationException();
+		Integer observationSetId = entity.getInt(getEntityMetaData().getIdAttribute().getName());
+		ObservationSet os = dataService.findOne(ObservationSet.ENTITY_NAME, observationSetId, ObservationSet.class);
+
+		// Get the ES document id for this ObservationSet
+		SearchResult sr = searchService.search(new SearchRequest(dataSetIdentifier, new QueryImpl().eq(
+				"observationsetid", observationSetId), Lists.newArrayList("observationsetid")));
+
+		if (sr.getTotalHitCount() != 1)
+		{
+			throw new MolgenisDataException("Should have one searchresult for observationSetId [" + observationSetId
+					+ "] but got [" + sr.getTotalHitCount() + "] results");
+		}
+
+		String documentId = sr.getSearchHits().get(0).getId();
+
+		Query q = new QueryImpl().eq(ObservedValue.OBSERVATIONSET, os);
+		Iterable<ObservedValue> observedValues = dataService.findAll(ObservedValue.ENTITY_NAME, q, ObservedValue.class);
+		for (ObservedValue observedValue : observedValues)
+		{
+			Value value = observedValue.getValue();
+			if (value instanceof BoolValue)
+			{
+				String attrName = observedValue.getFeature().getIdentifier();
+				BoolValue boolValue = (BoolValue) value;
+				boolValue.setValue(entity.getBoolean(attrName));
+
+				// Update database
+				dataService.update(BoolValue.ENTITY_NAME, boolValue);
+
+				// Update ES
+				searchService.updateDocumentById(dataSetIdentifier, documentId, attrName + "=" + boolValue.getValue());
+			}
+		}
 	}
 
 	@Override
