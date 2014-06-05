@@ -310,6 +310,7 @@
 			},
 			'setQuery' : function(query) {
 				settings.query = query;
+				settings.start = 0;
 				
 				getTableData(settings, function(data) {
 					createTableBody(data, settings);
