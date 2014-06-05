@@ -214,19 +214,18 @@
 						break;
                     case 'BOOL':
                     	var cellValuePart = $(formatTableCellValue(rawValue, attribute.fieldType, settings.editable));
-						cellValuePart.change((function(entity) {
+                    	
+						cellValuePart.change((function(entity, attribute) {
 							return function() {
-								restApi.getAsync(entity.href, {},function(ent) {
-									ent[attribute.name] = cellValuePart.is(':checked');
-									restApi.update(entity.href, ent, {
-										success: function() {
-										},
-										error: function() {
-										}
-									});
+								var value = cellValuePart.is(':checked');
+								restApi.update(entity.href + "/" + attribute.name, value, {
+									success: function() {
+									},
+									error: function() {
+									}
 								});
 							}
-						})(entity));
+						})(entity, attribute));
 						
 						cell.append(cellValuePart);
                     	break;
