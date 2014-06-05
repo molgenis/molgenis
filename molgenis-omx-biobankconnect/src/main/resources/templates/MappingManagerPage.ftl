@@ -1,3 +1,16 @@
+<script src="/js/jquery-ui-1.9.2.custom.min.js"></script>
+<script src="/js/jquery.bootstrap.pager.js"></script>
+<script src="/js/bootstrap-fileupload.min.js"></script>
+<script src="/js/common-component.js"></script>
+<script src="/js/biobank-connect.js"></script>
+<script src="/js/algorithm-editor.js"></script>
+<script src="/js/jstat.min.js"></script>
+<script src="/js/d3.min.js"></script>
+<script src="/js/vega.min.js"></script>
+<script src="/js/biobankconnect-graph.js"></script>
+<link rel="stylesheet" type="text/css" href="/css/jquery-ui-1.9.2.custom.min.css">
+<link rel="stylesheet" type="text/css" href="/css/biobank-connect.css">
+<link rel="stylesheet" type="text/css" href="/css/algorithm-editor.css">
 <form id="wizardForm" name="wizardForm" method="post" class="form-horizontal" action="">
 	<legend>Curate mappings for : <strong>${wizard.selectedDataSet.name}</strong></legend>
 	<div class="row-fluid">
@@ -21,12 +34,7 @@
 		<div class="span12">
 			<div class="row-fluid">
 				<div class="span12">
-					<div id="data-table-container" class="row-fluid data-table-container">
-						<table id="dataitem-table" class="table table-condensed show-border">
-						</table>
-					</div>
-					<div class="pagination pagination-centered">
-						<ul id="table-papger"></ul>
+					<div id="container" class="row-fluid data-table-container">
 					</div>
 				</div>
 			</div>
@@ -35,13 +43,11 @@
 	<script type="text/javascript">
 		$(document).ready(function(){
 			var dataSetIds = [];
-			dataSetIds.push('${wizard.selectedDataSet.id?c}');
 			<#list wizard.selectedBiobanks as dataSetId>
 				dataSetIds.push('${dataSetId?c}');
 			</#list>
 			var molgenis = window.top.molgenis;
 			var mappingManager = new molgenis.MappingManager();
-			molgenis.setContextURL('${context_url}');
 			mappingManager.changeDataSet('${wizard.userName}', '${wizard.selectedDataSet.id?c}', dataSetIds);
 			$('#downloadButton').click(function(){
 				mappingManager.downloadMappings();

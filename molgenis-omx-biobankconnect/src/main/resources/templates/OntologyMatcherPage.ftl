@@ -1,3 +1,12 @@
+<script src="/js/jquery-ui-1.9.2.custom.min.js"></script>
+<script src="/js/jquery.bootstrap.pager.js"></script>
+<script src="/js/bootstrap-fileupload.min.js"></script>
+<script src="/js/common-component.js"></script>
+<script src="/js/biobank-connect.js"></script>
+<script src="/js/ontology-matcher.js"></script>
+<link rel="stylesheet" type="text/css" href="/css/jquery-ui-1.9.2.custom.min.css">
+<link rel="stylesheet" type="text/css" href="/css/biobank-connect.css">
+<link rel="stylesheet" type="text/css" href="/css/ontology-matcher.css">
 <form id="wizardForm" name="wizardForm" method="post" class="form-horizontal">
 	<div class="row-fluid">
 		<div class="span12">
@@ -44,23 +53,17 @@
 					</div>
 					<div class="row-fluid">
 						<div class="span12">
-							<div class="data-table-container">
-								<table id="dataitem-table" class="table table-striped table-condensed">
-								</table>
-								<div class="pagination pagination-centered">
-									<ul></ul>
-								</div>
-							</div>
+							<div id="container" class="data-table-container"></div>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
-	<script type="text/javascript">
-		$(function(){
-			var molgenis = window.top.molgenis;
-			molgenis.ontologyMatcherRunning();
-		});
-	</script>
 </form>
+<script type="text/javascript">
+	$(function(){
+		var molgenis = window.top.molgenis;
+		molgenis.ontologyMatcherRunning();
+	});
+</script>

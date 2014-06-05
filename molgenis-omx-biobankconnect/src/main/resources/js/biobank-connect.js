@@ -288,6 +288,7 @@
 	};
 	
 	$(function(){
+		molgenis.setContextUrl(molgenis.getContextUrl().replace(/biobankconnect$/g, "algorithm"));
 		var buttonGroup = $('.bwizard-buttons');
 		$('#wizardForm').prepend(buttonGroup);
 		buttonGroup.before('<legend />');

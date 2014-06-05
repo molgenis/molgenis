@@ -7,7 +7,7 @@
 	var storeMappingFeature = 'store_mapping_feature';
 	var storeMappingMappedFeature = 'store_mapping_mapped_feature';
 	var mappingScript = 'store_mapping_algorithm_script';
-	var observationSet = 'observation_set';
+	var observationSet = 'observationsetid';
 	
 	molgenis.AlgorithmEditor = function AlgorithmEditor(){};
 	

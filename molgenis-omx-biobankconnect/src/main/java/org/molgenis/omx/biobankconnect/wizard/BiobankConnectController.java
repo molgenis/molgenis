@@ -54,7 +54,7 @@ public class BiobankConnectController extends AbstractWizardController
 	private final OntologyAnnotatorPage ontologyAnnotatorPager;
 	private final OntologyMatcherPage ontologyMatcherPager;
 	private final MappingManagerPage mappingManagerPager;
-	private final ProgressingBarPage progressingBarPager;
+	// private final ProgressingBarPage progressingBarPager;
 	private BiobankConnectWizard wizard;
 
 	@Autowired
@@ -90,7 +90,7 @@ public class BiobankConnectController extends AbstractWizardController
 		this.ontologyAnnotatorPager = ontologyAnnotatorPager;
 		this.ontologyMatcherPager = ontologyMatcherPager;
 		this.mappingManagerPager = mappingManagerPager;
-		this.progressingBarPager = progressingBarPager;
+		// this.progressingBarPager = progressingBarPager;
 		this.wizard = new BiobankConnectWizard();
 	}
 
@@ -125,7 +125,7 @@ public class BiobankConnectController extends AbstractWizardController
 		wizard.addPage(chooseCataloguePager);
 		wizard.addPage(ontologyAnnotatorPager);
 		wizard.addPage(ontologyMatcherPager);
-		wizard.addPage(progressingBarPager);
+		// wizard.addPage(progressingBarPager);
 		wizard.addPage(mappingManagerPager);
 		return wizard;
 	}
