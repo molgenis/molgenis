@@ -26,11 +26,10 @@
 	"jquery.molgenis.xrefsearch.js",
 	"dataexplorer.js",
 	"jquery.molgenis.table.js",
-	"col7a1-patients.js"]>	
+	"col7a1.js"]>	
 <@header css js/>
-	<form id="form-col7a1-patients" method="get" action="${context_url}/import">
+	<form id="form-col7a1" method="get" action="${context_url}/import">
 		<div class="row-fluid">
-			Patients!!
 			<div class="row-fluid data-table-container" id="data-table-container"></div>
 				<div id="dataexplorer-grid-data" class="row-fluid data-table-pager-container">
 					<table class="table-striped table-condensed molgenis-table">

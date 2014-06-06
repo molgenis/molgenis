@@ -33,14 +33,13 @@ public class PatientsViewController extends MolgenisPluginController
 	private static final Logger logger = Logger.getLogger(PatientsViewController.class);
 	private static final String ENTITYNAME_PATIENTS = "import_patients";
 	private static final String ENTITYNAME_PATIENTSVIEW = "import_patientsview";
-	private static final String PATIENT_ID = "patient_id";
+	private static final String PATIENT_ID = "Patient ID";
 	private final DataService dataService;
 	public static final String ID = "col7a1_patients";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	private BufferedReader bufferedReader;
-	private static List<String> HEADERS_NAMES = Arrays.asList(PATIENT_ID, "mutation", "identifier_mutation",
-			"mutation_position",
- "codonchange", "patient_reference");
+	private static List<String> HEADERS_NAMES = Arrays.asList("Patient ID", "Phenotype", "Mutation", "cDNA change",
+			"Protein change", "Exon", "Consequence", "Reference");
 
 	@Autowired
 	public PatientsViewController(DataService dataService)
@@ -58,9 +57,9 @@ public class PatientsViewController extends MolgenisPluginController
 
 		try
 		{
-			entityNamePatientsViewRepo.populateWithQuery("truncate TABLE import_patientsview;");
-			entityNamePatientsViewRepo
-					.populateWithQuery("ALTER TABLE import_patientsview MODIFY id INT(11) NOT NULL AUTO_INCREMENT;");
+			entityNamePatientsViewRepo.populateWithQuery("TRUNCATE TABLE " + ENTITYNAME_PATIENTSVIEW + ";");
+			entityNamePatientsViewRepo.populateWithQuery("ALTER TABLE " + ENTITYNAME_PATIENTSVIEW
+					+ " MODIFY id INT(11) NOT NULL AUTO_INCREMENT;");
 			entityNamePatientsViewRepo.populateWithQuery(getViewPopulateSql());
 		}
 		catch (IOException e)
@@ -85,7 +84,7 @@ public class PatientsViewController extends MolgenisPluginController
 
 		model.addAttribute("headers", HEADERS_NAMES);
 		model.addAttribute("rows", rows);
-		return "view-col7a1-patients";
+		return "view-col7a1";
 	}
 
 	protected Row createRow(MysqlRepository repo, String patientsview_patient_id)
