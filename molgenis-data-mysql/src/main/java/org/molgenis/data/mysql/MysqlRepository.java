@@ -134,23 +134,31 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 	protected String getMrefCreateSql(AttributeMetaData att) throws MolgenisModelException
 	{
 		AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
-		return " CREATE TABLE " + getEntityMetaData().getName() + "_" + att.getName() + "(" + idAttribute.getName()
-				+ " " + idAttribute.getDataType().getMysqlType() + " NOT NULL, " + att.getName() + " "
-				+ att.getRefEntity().getIdAttribute().getDataType().getMysqlType() + " NOT NULL, FOREIGN KEY ("
-				+ idAttribute.getName() + ") REFERENCES " + getEntityMetaData().getName() + "(" + idAttribute.getName()
-				+ ") ON DELETE CASCADE, FOREIGN KEY (" + att.getName() + ") REFERENCES " + att.getRefEntity().getName()
-				+ "(" + att.getRefEntity().getIdAttribute().getName() + ") ON DELETE CASCADE);";
+		StringBuilder sql = new StringBuilder();
+		sql.append(" CREATE TABLE ").append('`').append(getEntityMetaData().getName()).append('_')
+				.append(att.getName()).append('`').append('(').append('`').append(idAttribute.getName()).append('`')
+				.append(' ').append(idAttribute.getDataType().getMysqlType()).append(" NOT NULL, ").append('`')
+				.append(att.getName()).append('`').append(' ')
+				.append(att.getRefEntity().getIdAttribute().getDataType().getMysqlType())
+				.append(" NOT NULL, FOREIGN KEY (").append('`').append(idAttribute.getName()).append('`')
+				.append(") REFERENCES ").append('`').append(getEntityMetaData().getName()).append('`').append('(')
+				.append('`').append(idAttribute.getName()).append('`').append(") ON DELETE CASCADE, FOREIGN KEY (")
+				.append('`').append(att.getName()).append('`').append(") REFERENCES ").append('`')
+				.append(att.getRefEntity().getName()).append('`').append('(').append('`')
+				.append(att.getRefEntity().getIdAttribute().getName()).append('`').append(") ON DELETE CASCADE);");
+		return sql.toString();
 	}
 
 	protected String getCreateSql() throws MolgenisModelException
 	{
 		StringBuilder sql = new StringBuilder();
-		sql.append("CREATE TABLE IF NOT EXISTS ").append(getEntityMetaData().getName()).append('(');
+		sql.append("CREATE TABLE IF NOT EXISTS ").append('`').append(getEntityMetaData().getName()).append('`')
+				.append('(');
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 		{
 			if (!(att.getDataType() instanceof MrefField))
 			{
-				sql.append(att.getName()).append(' ');
+				sql.append('`').append(att.getName()).append('`').append(' ');
 				// xref adopt type of the identifier of referenced entity
 				if (att.getDataType() instanceof XrefField)
 				{
@@ -180,10 +188,14 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 						+ ") cannot be XREF or MREF");
 		if (idAttribute.isNillable() == true) throw new RuntimeException("primary key(" + getEntityMetaData().getName()
 				+ "." + idAttribute.getName() + ") must be NOT NULL");
-		sql.append("PRIMARY KEY (").append(getEntityMetaData().getIdAttribute().getName()).append(')');
+		sql.append("PRIMARY KEY (").append('`').append(getEntityMetaData().getIdAttribute().getName()).append('`')
+				.append(')');
 
 		// close
 		sql.append(") ENGINE=InnoDB;");
+
+		System.out.println("sql: " + sql);
+		logger.info("sql: " + sql);
 
 		return sql.toString();
 	}
@@ -196,9 +208,10 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 			if (att.getDataType().equals(MolgenisFieldTypes.XREF))
 			{
 				sql.add(new StringBuilder().append("ALTER TABLE ").append(getEntityMetaData().getName())
-						.append(" ADD FOREIGN KEY (").append(att.getName()).append(") REFERENCES ")
-						.append(att.getRefEntity().getName()).append('(')
-						.append(att.getRefEntity().getIdAttribute().getName()).append(')').toString());
+						.append(" ADD FOREIGN KEY (").append('`').append(att.getName()).append('`')
+						.append(") REFERENCES ").append('`').append(att.getRefEntity().getName()).append('`')
+						.append('(').append('`').append(att.getRefEntity().getIdAttribute().getName()).append('`')
+						.append(')').toString());
 			}
 		return sql;
 	}
@@ -262,12 +275,12 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 	protected String getInsertSql()
 	{
 		StringBuilder sql = new StringBuilder();
-		sql.append("INSERT INTO ").append(this.getName()).append(" (");
+		sql.append("INSERT INTO ").append('`').append(this.getName()).append('`').append(" (");
 		StringBuilder params = new StringBuilder();
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 			if (!(att.getDataType() instanceof MrefField))
 			{
-				sql.append(att.getName()).append(", ");
+				sql.append('`').append(att.getName()).append('`').append(", ");
 				params.append("?, ");
 			}
 		if (sql.charAt(sql.length() - 1) == ' ' && sql.charAt(sql.length() - 2) == ',')
@@ -361,9 +374,12 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 	private void removeMrefs(final List<Object> ids, final AttributeMetaData att)
 	{
 		final AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
-		String mrefSql = "DELETE FROM " + getEntityMetaData().getName() + "_" + att.getName() + " WHERE "
-				+ idAttribute.getName() + "= ?";
-		jdbcTemplate.batchUpdate(mrefSql, new BatchPreparedStatementSetter()
+		StringBuilder mrefSql = new StringBuilder();
+		mrefSql.append("DELETE FROM ").append('`').append(getEntityMetaData().getName()).append('`').append('_')
+				.append('`').append(att.getName()).append('`').append(" WHERE ").append('`')
+				.append(idAttribute.getName()).append('`').append("= ?");
+
+		jdbcTemplate.batchUpdate(mrefSql.toString(), new BatchPreparedStatementSetter()
 		{
 			@Override
 			public void setValues(PreparedStatement preparedStatement, int i) throws SQLException
@@ -381,12 +397,14 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 
 	private void addMrefs(final List<Entity> mrefs, final AttributeMetaData att)
 	{
-
 		final AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
 		final AttributeMetaData refAttribute = att.getRefEntity().getIdAttribute();
-		String mrefSql = "INSERT INTO " + getEntityMetaData().getName() + "_" + att.getName() + " ("
-				+ idAttribute.getName() + "," + att.getName() + ") VALUES (?,?)";
-		jdbcTemplate.batchUpdate(mrefSql, new BatchPreparedStatementSetter()
+		StringBuilder mrefSql = new StringBuilder();
+		mrefSql.append("INSERT INTO ").append("INSERT INTO ").append(getEntityMetaData().getName()).append('_')
+				.append(att.getName()).append(" (")
+				.append('`').append(idAttribute.getName()).append('`').append(',').append('`').append(att.getName())
+				.append('`').append(") VALUES (?,?)");
+		jdbcTemplate.batchUpdate(mrefSql.toString(), new BatchPreparedStatementSetter()
 		{
 			@Override
 			public void setValues(PreparedStatement preparedStatement, int i) throws SQLException
@@ -440,7 +458,6 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 		StringBuilder select = new StringBuilder("SELECT ");
 		StringBuilder group = new StringBuilder();
 		int count = 0;
-		AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 		{
 			if (count > 0) select.append(", ");
@@ -448,19 +465,17 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 			// TODO needed when autoids are used to join
 			if (att.getDataType() instanceof MrefField)
 			{
-				select.append("GROUP_CONCAT(DISTINCT(").append(att.getName()).append('.').append(att.getName())
-						.append(")) AS ").append(att.getName());
-
+				select.append("GROUP_CONCAT(DISTINCT(").append('`').append(att.getName()).append('.')
+						.append(att.getName()).append('`').append(")) AS ").append('`').append(att.getName())
+						.append('`');
 			}
 			else
 			{
-				select.append("this.").append(att.getName());
-				if (group.length() > 0) group.append(", this.").append(att.getName());
-				else group.append("this.").append(att.getName());
+				select.append("this.").append('`').append(att.getName()).append('`');
+				if (group.length() > 0) group.append(", this.").append('`').append(att.getName()).append('`');
+				else group.append("this.").append('`').append(att.getName()).append('`');
 			}
-			// }
 			count++;
-
 		}
 
 		// from
@@ -568,9 +583,10 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 		String where = getWhereSql(q);
 		String from = getFromSql();
 		String idAttribute = getEntityMetaData().getIdAttribute().getName();
-		if (where.length() > 0) return new StringBuilder("SELECT COUNT(DISTINCT this.").append(idAttribute).append(')')
-				.append(from).append(' ').append(where).toString();
-		return new StringBuilder("SELECT COUNT(DISTINCT this.").append(idAttribute).append(')').append(from).toString();
+		if (where.length() > 0) return new StringBuilder("SELECT COUNT(DISTINCT this.").append('`').append(idAttribute)
+				.append('`').append(')').append(from).append(' ').append(where).toString();
+		return new StringBuilder("SELECT COUNT(DISTINCT this.").append('`').append(idAttribute).append('`').append(')')
+				.append(from).toString();
 	}
 
 	protected String getWhereSql(Query q)
@@ -588,12 +604,14 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 						// TODO: other data types???
 						if (att.getDataType() instanceof StringField || att.getDataType() instanceof TextField)
 						{
-							search.append(" OR this.").append(att.getName()).append(" LIKE '%").append(r.getValue())
+							search.append(" OR this.").append('`').append(att.getName()).append('`').append(" LIKE '%")
+									.append(r.getValue())
 									.append("%'");
 						}
 						else
 						{
-							search.append(" OR CAST(this.").append(att.getName()).append(" as CHAR) LIKE '%")
+							search.append(" OR CAST(this.").append('`').append(att.getName()).append('`')
+									.append(" as CHAR) LIKE '%")
 									.append(r.getValue()).append("%'");
 						}
 					}
@@ -639,7 +657,7 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 					FieldType type = att.getDataType();
 					if (type instanceof MrefField) predicate.append(att.getName()).append("_filter.")
 							.append(r.getField());
-					else predicate.append("this.").append(r.getField());
+					else predicate.append("this.").append('`').append(r.getField()).append('`');
 					switch (r.getOperator())
 					{
 						case EQUALS:
@@ -681,7 +699,7 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 			{
 				AttributeMetaData att = getEntityMetaData().getAttribute(o.getProperty());
 				if (att.getDataType() instanceof MrefField) sortSql.append(", ").append(att.getName());
-				else sortSql.append(", ").append(att.getName());
+				else sortSql.append(", ").append('`').append(att.getName()).append('`');
 				if (o.getDirection().equals(Sort.Direction.DESC))
 				{
 					sortSql.append(" DESC");
@@ -828,17 +846,16 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 
 		// create sql
 		StringBuilder sql = new StringBuilder("UPDATE ").append(this.getName()).append(" SET ");
-		String params = "";
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 			if (!(att.getDataType() instanceof MrefField))
 			{
-				sql.append(att.getName()).append(" = ?, ");
+				sql.append('`').append(att.getName()).append('`').append(" = ?, ");
 			}
 		if (sql.charAt(sql.length() - 1) == ' ' && sql.charAt(sql.length() - 2) == ',')
 		{
 			sql.setLength(sql.length() - 2);
 		}
-		sql.append(" WHERE ").append(idAttribute.getName()).append("= ?");
+		sql.append(" WHERE ").append('`').append(idAttribute.getName()).append('`').append("= ?");
 		return sql.toString();
 	}
 
@@ -862,7 +879,10 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 
 	public String getDeleteSql()
 	{
-		return "DELETE FROM " + getName() + " WHERE " + getEntityMetaData().getIdAttribute().getName() + " = ?";
+		StringBuilder sql = new StringBuilder("DELETE FROM ");
+		sql.append("DELETE FROM ").append('`').append(getName()).append('`').append(" WHERE ").append('`')
+				.append(getEntityMetaData().getIdAttribute().getName()).append('`').append(" = ?");
+		return sql.toString();
 	}
 
 	@Override
