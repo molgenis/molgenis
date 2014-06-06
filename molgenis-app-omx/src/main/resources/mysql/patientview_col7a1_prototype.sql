@@ -6,10 +6,10 @@ FROM
 		import_patients.`Patient ID`, 
 		import_patients.Pheno AS `Phenotype`, 
 		"First mutation" AS `Mutation`, 
-		IFNULL(import_mutations.`cdna_notation`, 'null') AS `cDNA change`, 
-		IFNULL(import_mutations.`aa_notation`, 'null') AS `Protein change`, 
-		IFNULL(import_mutations.`exon`, 'null') AS `Exon`, 
-		IFNULL(import_mutations.`Consequence`, 'null') AS `Consequence`,
+		IFNULL(import_mutations.`cdna_notation`, 'unknown') AS `cDNA change`, 
+		IFNULL(import_mutations.`aa_notation`, 'unknown') AS `Protein change`, 
+		IFNULL(import_mutations.`exon`, 'unknown') AS `Exon`, 
+		IFNULL(import_mutations.`Consequence`, 'unknown') AS `Consequence`,
 		import_patients.`Reference` AS `Reference`
 	FROM import_patients
 	LEFT JOIN import_mutations 
@@ -21,10 +21,10 @@ FROM
 		import_patients.`Patient ID`, 
 		import_patients.Pheno AS `Phenotype`, 
 		"Second mutation" AS "Mutation", 
-		IFNULL(import_mutations.`cdna_notation`, 'null') AS `cDNA change`, 
-		IFNULL(import_mutations.`aa_notation`, 'null') AS `Protein change`, 
-		IFNULL(import_mutations.`exon`, 'null') AS `Exon`, 
-		IFNULL(import_mutations.`Consequence`, 'null') AS `Consequence`,
+		IFNULL(import_mutations.`cdna_notation`, 'unknown') AS `cDNA change`, 
+		IFNULL(import_mutations.`aa_notation`, 'unknown') AS `Protein change`, 
+		IFNULL(import_mutations.`exon`, 'unknown') AS `Exon`, 
+		IFNULL(import_mutations.`Consequence`, 'unknown') AS `Consequence`,
 		import_patients.`Reference` AS `Reference`
 	FROM import_patients
 	LEFT JOIN import_mutations 

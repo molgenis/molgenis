@@ -1,8 +1,8 @@
 INSERT 
 	import_mutationsview 
-		(`first_identifier_mutation`,
-		`second_identifier_mutation`,	
-		`Mutation ID`,
+		(`Subject Mutation ID`,
+		`Other Mutation ID`,
+    	`Mutation ID`,
 		`cDNA change`,
 		`Protein change`,
 		`Exon/Intron`,
@@ -11,37 +11,37 @@ INSERT
 		`Patient ID`,
 		`Phenotype`)
 SELECT 
-	first_identifier_mutation,
-	second_identifier_mutation,
-    `Mutation ID` AS `Mutation ID`,
-    cdna_notation AS `cDNA change`,
-    aa_notation AS `Protein change`,
-    exon AS `Exon/Intron`,
-    consequence AS `Consequence`,
-    inheritance AS `Inheritance`,
-    `Patient ID` AS `Patient ID`,
-    `Pheno` AS `Phenotype`
+	`Subject Mutation ID`,
+	`Other Mutation ID`,
+    `Mutation ID`,
+    `cdna_notation` AS `cDNA change`,
+    `aa_notation` AS`Protein change`,
+    `exon` AS`Exon/Intron`,
+    `consequence` AS`Consequence`,
+    `inheritance` AS`Inheritance`,
+    `Patient ID`,
+    `Pheno` AS 'Phenotype'
 FROM
     (
 		(SELECT 
-        import_mutations.`identifier_mutation` AS 'first_identifier_mutation',
-		'' AS 'second_identifier_mutation',
+        import_mutations.`identifier_mutation` AS 'Subject Mutation ID',
+		' ' AS 'Other Mutation ID',
 		import_mutations.`identifier_mutation` AS 'Mutation ID',
 		import_mutations.`cdna_notation`,
 		import_mutations.`aa_notation`,
 		import_mutations.`exon`,
 		import_mutations.`consequence`,
 		import_mutations.`inheritance`,
-		'' AS 'Patient ID',
-		'' AS 'Pheno'
+		' ' AS 'Patient ID',
+		' ' AS 'Pheno'
 		FROM import_mutations) 
 
 		UNION ALL 
 
 		(SELECT
-				IFNULL(import_mutations.`identifier_mutation`, "unknown") AS 'first_identifier_mutation',
-				IFNULL(sub_mutationview.`Mutation ID`, "unknown") AS 'second_identifier_mutation',
-				CONCAT('+ ', IFNULL(sub_mutationview.`Mutation ID`, "unknown")) AS 'Mutation ID',
+				IFNULL(sub_mutationview.`Mutation ID`, 'unknown') AS 'Subject Mutation ID',
+				IFNULL(import_mutations.`identifier_mutation`, 'unknown') AS 'Other Mutation ID',
+				CONCAT('+ ', IFNULL(import_mutations.`identifier_mutation`, 'unknown')) AS 'Mutation ID',
 				sub_mutationview.`cdna_notation`,
 				sub_mutationview.`aa_notation`,
 				sub_mutationview.`exon`,
@@ -70,9 +70,9 @@ FROM
 		UNION ALL 
 		
 			(SELECT
-				IFNULL(import_mutations.`identifier_mutation`, "unknown") AS 'first_identifier_mutation',
-				IFNULL(sub_mutationview.`Mutation ID`, "unknown") AS 'second_identifier_mutation',
-				CONCAT('+ ', IFNULL(sub_mutationview.`Mutation ID`, "unknown"))  AS 'Mutation ID',
+				IFNULL(sub_mutationview.`Mutation ID`, 'unknown') AS 'Subject Mutation ID',
+				IFNULL(import_mutations.`identifier_mutation`, 'unknown') AS 'Other Mutation ID',
+				CONCAT('+ ', IFNULL(import_mutations.`identifier_mutation`, 'unknown')) AS 'Mutation ID',
 				sub_mutationview.`cdna_notation`,
 				sub_mutationview.`aa_notation`,
 				sub_mutationview.`exon`,
@@ -99,8 +99,8 @@ FROM
 			ON sub_mutationview.`cDNA_change_2` = import_mutations.`cdna_notation`)
 		) AS uTable
 GROUP BY
-	uTable.first_identifier_mutation,
-	uTable.second_identifier_mutation,	
+	uTable.`Subject Mutation ID`,
+	uTable.`Other Mutation ID`,	
 	uTable.`Mutation ID`,
     uTable.`cdna_notation`,
     uTable.`aa_notation`,
@@ -109,4 +109,4 @@ GROUP BY
     uTable.`inheritance`,
     uTable.`Patient ID`,
     uTable.`Pheno`
-ORDER BY uTable.first_identifier_mutation, uTable.second_identifier_mutation;
+ORDER BY uTable.`Subject Mutation ID`, uTable.`Other Mutation ID`;
