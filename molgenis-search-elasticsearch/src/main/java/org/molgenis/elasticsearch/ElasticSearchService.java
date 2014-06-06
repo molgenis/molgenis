@@ -294,7 +294,7 @@ public class ElasticSearchService implements SearchService
 	@Override
 	public void updateDocumentById(String documentType, String documentId, String updateScript)
 	{
-		LOG.info("Going to delete document of type [" + documentType + "] with Id : " + documentId);
+		LOG.info("Going to update document of type [" + documentType + "] with Id : " + documentId);
 
 		String documentTypeSantized = sanitizeMapperType(documentType);
 		UpdateResponse updateResponse = client.prepareUpdate(indexName, documentTypeSantized, documentId)

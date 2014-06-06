@@ -217,7 +217,10 @@ public class HitEntity extends AbstractEntity
 	@Override
 	public void set(String attributeName, Object value)
 	{
-		throw new UnsupportedOperationException();
+		if (caseInsensitiveAttributeNames == null) initCaseInsensitiveAttributeNames();
+		if (caseInsensitiveColumnValueMap == null) initCaseInsensitiveColumnValueMap();
+
+		caseInsensitiveColumnValueMap.put(attributeName.toLowerCase(), value);
 	}
 
 	@Override
