@@ -155,10 +155,6 @@
 		molgenis.addTargetDataSet();
 		$('#catalogue-container').hide().find('table').empty();
 	}
-
-	function updateSelectedDataset (dataSet) {
-		selectedDataSet = dataSet;
-	}
 	
 	$(function(){
 		$('#add-target-dataset').click(function(){

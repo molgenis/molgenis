@@ -18,7 +18,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.elasticsearch.common.collect.Iterables;
-import org.elasticsearch.common.collect.Lists;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
@@ -74,7 +73,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	private static final String ALTERNATIVE_DEFINITION = "alternativeDefinition";
 	private static final String NODE_PATH = "nodePath";
 	private static final String ENTITY_ID = "id";
-	private static final String LUCENE_SCORE = "score";
+	// private static final String LUCENE_SCORE = "score";
 	private static final String ENTITY_TYPE = "type";
 	private static final AtomicInteger runningProcesses = new AtomicInteger();
 	private static final PorterStemmer stemmer = new PorterStemmer();
@@ -254,83 +253,101 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		return searchService.search(new SearchRequest(CATALOGUE_PREFIX + protocolId, query, null));
 	}
 
-	private void preprocessing(String userName, Integer featureId, Integer targetDataSet, List<Integer> sourceDataSets)
-	{
-		List<String> dataSetsForMapping = new ArrayList<String>();
-		for (Integer sourceDataSet : sourceDataSets)
-		{
-			dataSetsForMapping.add(createMappingDataSetIdentifier(userName, targetDataSet, sourceDataSet));
-		}
-		if (featureId == null)
-		{
-			createMappingStore(userName, targetDataSet, sourceDataSets);
-			deleteExistingRecords(userName, dataSetsForMapping);
-		}
-		else removeExistingMappings(featureId, dataSetsForMapping);
-	}
+	// private void preprocessing(String userName, Integer featureId, Integer
+	// targetDataSet, List<Integer> sourceDataSets)
+	// {
+	// List<String> dataSetsForMapping = new ArrayList<String>();
+	// for (Integer sourceDataSet : sourceDataSets)
+	// {
+	// dataSetsForMapping.add(createMappingDataSetIdentifier(userName,
+	// targetDataSet, sourceDataSet));
+	// }
+	// if (featureId == null)
+	// {
+	// createMappingStore(userName, targetDataSet, sourceDataSets);
+	// deleteExistingRecords(userName, dataSetsForMapping);
+	// }
+	// else removeExistingMappings(featureId, dataSetsForMapping);
+	// }
 
-	private void deleteExistingRecords(String userName, List<String> dataSetsForMapping)
-	{
-		currentUserStatus.setUserTotalNumberOfQueries(userName, (long) dataSetsForMapping.size());
-		Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME,
-				new QueryImpl().in(DataSet.IDENTIFIER, dataSetsForMapping), DataSet.class);
-		for (DataSet dataSet : dataSets)
-		{
-			Iterable<ObservationSet> listOfObservationSets = dataService.findAll(ObservationSet.ENTITY_NAME,
-					new QueryImpl().eq(ObservationSet.PARTOFDATASET, dataSet), ObservationSet.class);
+	// private void deleteExistingRecords(String userName, List<String>
+	// dataSetsForMapping)
+	// {
+	// currentUserStatus.setUserTotalNumberOfQueries(userName, (long)
+	// dataSetsForMapping.size());
+	// Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME,
+	// new QueryImpl().in(DataSet.IDENTIFIER, dataSetsForMapping),
+	// DataSet.class);
+	// for (DataSet dataSet : dataSets)
+	// {
+	// Iterable<ObservationSet> listOfObservationSets =
+	// dataService.findAll(ObservationSet.ENTITY_NAME,
+	// new QueryImpl().eq(ObservationSet.PARTOFDATASET, dataSet),
+	// ObservationSet.class);
+	//
+	// if (Iterables.size(listOfObservationSets) > 0)
+	// {
+	// Iterable<ObservedValue> listOfObservedValues =
+	// dataService.findAll(ObservedValue.ENTITY_NAME,
+	// new QueryImpl().in(ObservedValue.OBSERVATIONSET,
+	// Lists.newArrayList(listOfObservationSets)),
+	// ObservedValue.class);
+	//
+	// if (Iterables.size(listOfObservedValues) > 0)
+	// dataService.delete(ObservedValue.ENTITY_NAME,
+	// listOfObservedValues);
+	// dataService.delete(ObservationSet.ENTITY_NAME, listOfObservationSets);
+	// }
+	// currentUserStatus.incrementFinishedNumberOfQueries(userName);
+	// }
+	// }
 
-			if (Iterables.size(listOfObservationSets) > 0)
-			{
-				Iterable<ObservedValue> listOfObservedValues = dataService.findAll(ObservedValue.ENTITY_NAME,
-						new QueryImpl().in(ObservedValue.OBSERVATIONSET, Lists.newArrayList(listOfObservationSets)),
-						ObservedValue.class);
-
-				if (Iterables.size(listOfObservedValues) > 0) dataService.delete(ObservedValue.ENTITY_NAME,
-						listOfObservedValues);
-				dataService.delete(ObservationSet.ENTITY_NAME, listOfObservationSets);
-			}
-			currentUserStatus.incrementFinishedNumberOfQueries(userName);
-		}
-	}
-
-	private void removeExistingMappings(Integer featureId, List<String> dataSetsForMapping)
-	{
-		List<Integer> observationSets = new ArrayList<Integer>();
-		for (String dataSet : dataSetsForMapping)
-		{
-			QueryImpl q = new QueryImpl();
-			q.pageSize(100000);
-			q.addRule(new QueryRule(STORE_MAPPING_FEATURE, Operator.EQUALS, featureId));
-
-			SearchRequest request = new SearchRequest(dataSet, q, null);
-			SearchResult searchResult = searchService.search(request);
-
-			List<String> indexIds = new ArrayList<String>();
-			for (Hit hit : searchResult.getSearchHits())
-			{
-				Map<String, Object> columnValueMap = hit.getColumnValueMap();
-				indexIds.add(hit.getId());
-				observationSets.add(Integer.parseInt(columnValueMap.get(OBSERVATION_SET).toString()));
-			}
-			searchService.deleteDocumentByIds(dataSet, indexIds);
-		}
-
-		if (observationSets.size() > 0)
-		{
-			Iterable<ObservationSet> existingObservationSets = dataService.findAll(ObservationSet.ENTITY_NAME,
-					new QueryImpl().in(ObservationSet.ID, observationSets), ObservationSet.class);
-
-			Iterable<ObservedValue> existingObservedValues = dataService.findAll(ObservedValue.ENTITY_NAME,
-					new QueryImpl().in(ObservedValue.OBSERVATIONSET, Lists.newArrayList(existingObservationSets)),
-					ObservedValue.class);
-
-			if (Iterables.size(existingObservedValues) > 0) dataService.delete(ObservedValue.ENTITY_NAME,
-					existingObservedValues);
-
-			if (Iterables.size(existingObservationSets) > 0) dataService.delete(ObservationSet.ENTITY_NAME,
-					existingObservationSets);
-		}
-	}
+	// private void removeExistingMappings(Integer featureId, List<String>
+	// dataSetsForMapping)
+	// {
+	// List<Integer> observationSets = new ArrayList<Integer>();
+	// for (String dataSet : dataSetsForMapping)
+	// {
+	// QueryImpl q = new QueryImpl();
+	// q.pageSize(100000);
+	// q.addRule(new QueryRule(STORE_MAPPING_FEATURE, Operator.EQUALS,
+	// featureId));
+	//
+	// SearchRequest request = new SearchRequest(dataSet, q, null);
+	// SearchResult searchResult = searchService.search(request);
+	//
+	// List<String> indexIds = new ArrayList<String>();
+	// for (Hit hit : searchResult.getSearchHits())
+	// {
+	// Map<String, Object> columnValueMap = hit.getColumnValueMap();
+	// indexIds.add(hit.getId());
+	// observationSets.add(Integer.parseInt(columnValueMap.get(OBSERVATION_SET).toString()));
+	// }
+	// searchService.deleteDocumentByIds(dataSet, indexIds);
+	// }
+	//
+	// if (observationSets.size() > 0)
+	// {
+	// Iterable<ObservationSet> existingObservationSets =
+	// dataService.findAll(ObservationSet.ENTITY_NAME,
+	// new QueryImpl().in(ObservationSet.ID, observationSets),
+	// ObservationSet.class);
+	//
+	// Iterable<ObservedValue> existingObservedValues =
+	// dataService.findAll(ObservedValue.ENTITY_NAME,
+	// new QueryImpl().in(ObservedValue.OBSERVATIONSET,
+	// Lists.newArrayList(existingObservationSets)),
+	// ObservedValue.class);
+	//
+	// if (Iterables.size(existingObservedValues) > 0)
+	// dataService.delete(ObservedValue.ENTITY_NAME,
+	// existingObservedValues);
+	//
+	// if (Iterables.size(existingObservationSets) > 0)
+	// dataService.delete(ObservationSet.ENTITY_NAME,
+	// existingObservationSets);
+	// }
+	// }
 
 	private List<QueryRule> makeQueryForOntologyTerms(Map<Integer, List<BoostTermContainer>> position)
 	{
@@ -873,7 +890,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		listOfNewObservedValues.add(valueForFeature);
 
 		StringValue algorithmScriptValue = new StringValue();
-		algorithmScriptValue.setValue(request.getAlgorithmScript());
+		algorithmScriptValue.setValue(request.getAlgorithmScript() == null ? StringUtils.EMPTY : request
+				.getAlgorithmScript());
 		dataService.add(StringValue.ENTITY_NAME, algorithmScriptValue);
 
 		ObservedValue algorithmScriptObservedValue = new ObservedValue();
@@ -900,18 +918,13 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 
 		// Extract feature names out of algorithm script and store ids of the
 		// mapped features
-		List<String> selectedFeatureNames = new ArrayList<String>();
-		for (String standardFeatureName : ApplyAlgorithms.extractFeatureName(request.getAlgorithmScript()))
-		{
-			selectedFeatureNames.add(standardFeatureName);
-		}
 		ObservedValue valueForMappedFeatures = new ObservedValue();
 		ObservableFeature SMMF = dataService
 				.findOne(ObservableFeature.ENTITY_NAME,
 						new QueryImpl().eq(ObservableFeature.IDENTIFIER, STORE_MAPPING_MAPPED_FEATURE),
 						ObservableFeature.class);
 		StringValue mappedFeatureValues = new StringValue();
-		mappedFeatureValues.setValue(selectedFeatureNames.toString());
+		mappedFeatureValues.setValue(convertToFeatureIds(request));
 		dataService.add(StringValue.ENTITY_NAME, mappedFeatureValues);
 		valueForMappedFeatures.setFeature(SMMF);
 		valueForMappedFeatures.setValue(mappedFeatureValues);
@@ -936,67 +949,96 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		{
 			Hit hit = result.getSearchHits().get(0);
 			Map<String, Object> columnValueMap = hit.getColumnValueMap();
-
-			// Check if the new script is same as old script
-			if (columnValueMap.get(STORE_MAPPING_ALGORITHM_SCRIPT) != null
-					&& columnValueMap.get(STORE_MAPPING_ALGORITHM_SCRIPT).toString().trim()
-							.equalsIgnoreCase(request.getAlgorithmScript().trim())) return true;
-
-			// Update database
 			ObservationSet observationSet = dataService.findOne(ObservationSet.ENTITY_NAME,
 					Integer.parseInt(columnValueMap.get(OBSERVATION_SET).toString()), ObservationSet.class);
 			if (observationSet == null) return false;
 
-			ObservableFeature storeMappingAlgorithmScriptFeature = dataService.findOne(ObservableFeature.ENTITY_NAME,
-					new QueryImpl().eq(ObservableFeature.IDENTIFIER, STORE_MAPPING_ALGORITHM_SCRIPT),
-					ObservableFeature.class);
-
-			ObservedValue algorithmScriptObservedValue = dataService.findOne(
-					ObservedValue.ENTITY_NAME,
-					new QueryImpl().eq(ObservedValue.OBSERVATIONSET, observationSet).and()
-							.eq(ObservedValue.FEATURE, storeMappingAlgorithmScriptFeature), ObservedValue.class);
-
-			if (algorithmScriptObservedValue != null && algorithmScriptObservedValue.getValue() instanceof StringValue)
+			// Check if the new script is same as old script
+			Object existingScript = columnValueMap.get(STORE_MAPPING_ALGORITHM_SCRIPT);
+			String algorithmScript = request.getAlgorithmScript();
+			if (algorithmScript != null && !existingScript.toString().trim().equalsIgnoreCase(algorithmScript.trim()))
 			{
-				// Update algorithm script in database
-				StringValue algorithmScriptValue = (StringValue) algorithmScriptObservedValue.getValue();
-				algorithmScriptValue.setValue(request.getAlgorithmScript());
-				dataService.update(StringValue.ENTITY_NAME, algorithmScriptValue);
-				dataService.getCrudRepository(StringValue.ENTITY_NAME).flush();
-				// Update algorithm script in index
-				StringBuilder updateScriptBuilder = new StringBuilder();
-				updateScriptBuilder.append(STORE_MAPPING_ALGORITHM_SCRIPT).append('=').append("\"")
-						.append(request.getAlgorithmScript()).append("\"");
-				searchService.updateDocumentById(mappingDataSetIdentifier, hit.getId(), updateScriptBuilder.toString());
+				ObservableFeature storeMappingAlgorithmScriptFeature = dataService.findOne(
+						ObservableFeature.ENTITY_NAME,
+						new QueryImpl().eq(ObservableFeature.IDENTIFIER, STORE_MAPPING_ALGORITHM_SCRIPT),
+						ObservableFeature.class);
 
-			}
-			ObservableFeature SMMF = dataService.findOne(ObservableFeature.ENTITY_NAME,
-					new QueryImpl().eq(ObservableFeature.IDENTIFIER, STORE_MAPPING_MAPPED_FEATURE),
-					ObservableFeature.class);
-			ObservedValue mappedFeaturesObservedValue = dataService.findOne(ObservedValue.ENTITY_NAME, new QueryImpl()
-					.eq(ObservedValue.OBSERVATIONSET, observationSet).and().eq(ObservedValue.FEATURE, SMMF),
-					ObservedValue.class);
-			if (mappedFeaturesObservedValue != null && mappedFeaturesObservedValue.getValue() instanceof StringValue)
-			{
-				// Update mappedFeatures in database
-				List<String> selectedFeatureNames = new ArrayList<String>();
-				for (String standardFeatureName : ApplyAlgorithms.extractFeatureName(request.getAlgorithmScript()))
+				ObservedValue algorithmScriptObservedValue = dataService.findOne(
+						ObservedValue.ENTITY_NAME,
+						new QueryImpl().eq(ObservedValue.OBSERVATIONSET, observationSet).and()
+								.eq(ObservedValue.FEATURE, storeMappingAlgorithmScriptFeature), ObservedValue.class);
+
+				if (algorithmScriptObservedValue != null
+						&& algorithmScriptObservedValue.getValue() instanceof StringValue)
 				{
-					selectedFeatureNames.add(standardFeatureName);
+					// Update algorithm script in database
+					StringValue algorithmScriptValue = (StringValue) algorithmScriptObservedValue.getValue();
+					algorithmScriptValue.setValue(algorithmScript);
+					dataService.update(StringValue.ENTITY_NAME, algorithmScriptValue);
+					dataService.getCrudRepository(StringValue.ENTITY_NAME).flush();
+					// Update algorithm script in index
+					StringBuilder updateScriptBuilder = new StringBuilder();
+					updateScriptBuilder.append(STORE_MAPPING_ALGORITHM_SCRIPT).append('=').append("\"")
+							.append(algorithmScript).append("\"");
+					searchService.updateDocumentById(mappingDataSetIdentifier, hit.getId(),
+							updateScriptBuilder.toString());
 				}
-				StringValue mappedFeaturesValue = (StringValue) mappedFeaturesObservedValue.getValue();
-				mappedFeaturesValue.setValue(selectedFeatureNames.toString());
-				dataService.update(StringValue.ENTITY_NAME, mappedFeaturesValue);
-				dataService.getCrudRepository(StringValue.ENTITY_NAME).flush();
-				// Update mappedFeatures in index
-				StringBuilder updateMappedFeaturesBuilder = new StringBuilder();
-				updateMappedFeaturesBuilder.append(STORE_MAPPING_MAPPED_FEATURE).append('=').append("\"")
-						.append(selectedFeatureNames.toString()).append("\"");
-				searchService.updateDocumentById(mappingDataSetIdentifier, hit.getId(),
-						updateMappedFeaturesBuilder.toString());
+			}
+
+			Object existingMappedFeature = columnValueMap.get(STORE_MAPPING_MAPPED_FEATURE);
+			String convertToFeatureIds = convertToFeatureIds(request);
+			if (!existingMappedFeature.toString().equalsIgnoreCase(convertToFeatureIds))
+			{
+				ObservableFeature SMMF = dataService.findOne(ObservableFeature.ENTITY_NAME,
+						new QueryImpl().eq(ObservableFeature.IDENTIFIER, STORE_MAPPING_MAPPED_FEATURE),
+						ObservableFeature.class);
+				ObservedValue mappedFeaturesObservedValue = dataService.findOne(
+						ObservedValue.ENTITY_NAME,
+						new QueryImpl().eq(ObservedValue.OBSERVATIONSET, observationSet).and()
+								.eq(ObservedValue.FEATURE, SMMF), ObservedValue.class);
+				if (mappedFeaturesObservedValue != null
+						&& mappedFeaturesObservedValue.getValue() instanceof StringValue)
+				{
+					// Update mappedFeatures in database
+					StringValue mappedFeaturesValue = (StringValue) mappedFeaturesObservedValue.getValue();
+					mappedFeaturesValue.setValue(convertToFeatureIds);
+					dataService.update(StringValue.ENTITY_NAME, mappedFeaturesValue);
+					dataService.getCrudRepository(StringValue.ENTITY_NAME).flush();
+					// Update mappedFeatures in index
+					StringBuilder updateMappedFeaturesBuilder = new StringBuilder();
+					updateMappedFeaturesBuilder.append(STORE_MAPPING_MAPPED_FEATURE).append('=').append("\"")
+							.append(convertToFeatureIds.toString()).append("\"");
+					searchService.updateDocumentById(mappingDataSetIdentifier, hit.getId(),
+							updateMappedFeaturesBuilder.toString());
+				}
 			}
 		}
 		return result.getTotalHitCount() > 0;
+	}
+
+	private String convertToFeatureIds(OntologyMatcherRequest request)
+	{
+		List<Integer> featureIds = new ArrayList<Integer>();
+		if (request.getMappedFeatureIds() != null && request.getMappedFeatureIds().size() > 0)
+		{
+			return request.getMappedFeatureIds().toString();
+		}
+		if (request.getAlgorithmScript() != null && !request.getAlgorithmScript().isEmpty())
+		{
+			List<String> selectedFeatureNames = new ArrayList<String>();
+			for (String standardFeatureName : ApplyAlgorithms.extractFeatureName(request.getAlgorithmScript()))
+			{
+				selectedFeatureNames.add(standardFeatureName);
+			}
+
+			Iterable<ObservableFeature> iterators = dataService.findAll(ObservableFeature.ENTITY_NAME,
+					new QueryImpl().in(ObservableFeature.NAME, selectedFeatureNames), ObservableFeature.class);
+			for (ObservableFeature feature : iterators)
+			{
+				featureIds.add(feature.getId());
+			}
+		}
+		return featureIds.size() == 0 ? StringUtils.EMPTY : featureIds.toString();
 	}
 
 	private String createMappingDataSetIdentifier(String userName, Integer targetDataSetId, Integer sourceDataSetId)
@@ -1113,6 +1155,6 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	@Transactional
 	public void match(String userName, Integer selectedDataSetId, List<Integer> dataSetIdsToMatch, Integer featureId)
 	{
-		preprocessing(userName, featureId, selectedDataSetId, dataSetIdsToMatch);
+		createMappingStore(userName, selectedDataSetId, dataSetIdsToMatch);
 	}
 }

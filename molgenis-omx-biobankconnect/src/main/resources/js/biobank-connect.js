@@ -238,6 +238,22 @@
 		});
 	};
 	
+	molgenis.getFeatureFromIndex = function (feature, callback){		
+		$.ajax({
+			type : 'POST',
+			url : molgenis.getContextUrl() + '/attribute',
+			async : false,
+			data : JSON.stringify(molgenis.hrefToId(feature.href)),
+			contentType : 'application/json',
+			success : function(data, textStatus, request){
+				$.each(data.searchHits, function(index, hit){
+					callback(hit);
+					return false;
+				});
+			}		
+		});
+	};
+	
 	molgenis.dataItemsTypeahead = function (dataSetId, query, response, approximate){
 		$.ajax({
 			type : 'POST',

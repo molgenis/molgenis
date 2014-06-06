@@ -120,11 +120,11 @@
 		var body = modal.find('div.modal-body:eq(0)').addClass('overflow-y-visible');
 		body.append(createFeatureInfo(title, restApiFeature, callback));
 		body.append(createSearchDiv(title, restApiFeature, callback));
-		modal.css({
-			'width' : 650, 
-			'margin-left' : -350,
-			'margin-top' : 100
-		}).modal('show');
+		modal.modal('show').css({
+			'width' : "60%",
+			'margin-left' : "-30%",
+			'top' : '20%'
+		});
 		return modal;
 		
 		function createFeatureInfo(title, restApiFeature, callback){
@@ -141,7 +141,7 @@
 			$('<tr><th>Description : </th><td>' + molgenis.i18nDescription(restApiFeature).en + '</td></tr>').appendTo(table);
 			
 			if(restApiFeature.definitions.items.length !== 0){
-				getFeatureFromIndex(restApiFeature, function(hit){
+				molgenis.getFeatureFromIndex(restApiFeature, function(hit){
 					var ontologyTermAnnotations = $('<ul />');
 					var boostedOntologyTerms = hit.columnValueMap['boostOntologyTerms'] === '' ? [] : hit.columnValueMap['boostOntologyTerms'].split(',');
 					$.each(restApiFeature.definitions.items, function(index, ontologyTerm){
@@ -453,21 +453,4 @@
 		}
 		return existingOntology.items[0];
 	}
-	
-	function getFeatureFromIndex(feature, callback){		
-		$.ajax({
-			type : 'POST',
-			url : molgenis.getContextUrl() + '/attribute',
-			async : false,
-			data : JSON.stringify(molgenis.hrefToId(feature.href)),
-			contentType : 'application/json',
-			success : function(data, textStatus, request){
-				$.each(data.searchHits, function(index, hit){
-					callback(hit);
-					return false;
-				});
-			}		
-		});
-	}
-	
 }($, window.top.molgenis = window.top.molgenis || {}));

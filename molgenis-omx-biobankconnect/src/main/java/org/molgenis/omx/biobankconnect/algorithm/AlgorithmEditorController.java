@@ -237,12 +237,24 @@ public class AlgorithmEditorController extends AbstractWizardController
 	public Map<String, String> saveScript(@RequestBody
 	OntologyMatcherRequest request)
 	{
-		String userName = userAccountService.getCurrentUser().getUsername();
-		if (request.getSelectedDataSetIds().size() > 0)
+		Integer targetDataSetId = request.getTargetDataSetId();
+		List<Integer> selectedDataSetIds = request.getSelectedDataSetIds();
+		// target data set and selected datasets need to be not null
+		if (targetDataSetId == null || selectedDataSetIds == null || request.getFeatureId() == null)
 		{
-			return ontologyMatcher.updateScript(userName, request);
+			return Collections.<String, String> emptyMap();
 		}
-		return new HashMap<String, String>();
+		// at least one of following values need to be not null (algorithm
+		// script or featureIds)
+		if (request.getAlgorithmScript() == null && request.getMappedFeatureIds() == null)
+		{
+			return Collections.<String, String> emptyMap();
+		}
+		if (selectedDataSetIds.size() > 0)
+		{
+			return ontologyMatcher.updateScript(userAccountService.getCurrentUser().getUsername(), request);
+		}
+		return Collections.<String, String> emptyMap();
 	}
 
 	@RequestMapping(method = RequestMethod.GET, value = "/progress", produces = APPLICATION_JSON_VALUE)
