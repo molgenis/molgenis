@@ -11,7 +11,7 @@
 <link rel="stylesheet" type="text/css" href="/css/jquery-ui-1.9.2.custom.min.css">
 <link rel="stylesheet" type="text/css" href="/css/biobank-connect.css">
 <link rel="stylesheet" type="text/css" href="/css/algorithm-editor.css">
-<form id="wizardForm" name="wizardForm" method="post" class="form-horizontal" action="">
+<form id="wizardForm" name="wizardForm" class="form-horizontal">
 	<div class="row-fluid">
 		<div class="span12 well custom-white-well">	
 			<div class="row-fluid">

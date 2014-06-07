@@ -2,20 +2,15 @@
 	"use strict";
 	
 	var ontologyAnnotator = new molgenis.OntologyAnnotator();
-	var pagination = new molgenis.Pagination();
 	var standardModal = new molgenis.StandardModal();
 	var restApi = new molgenis.RestClient();
-	var searchApi = new molgenis.SearchClient();
 	var selectedDataSet = null;
 	var userName = null;
 	var biobankDataSets = null;
-	var sortRule = null;
-	var previousSearchText = null;
 	var storeMappingFeature = 'store_mapping_feature';
 	var storeMappingMappedFeature = 'store_mapping_mapped_feature';
 	var storeMappingConfirmMapping = 'store_mapping_confirm_mapping';
 	var scoreMappingScore = "store_mapping_score";
-	var mappingScript = 'store_mapping_algorithm_script';
 	var observationSet = 'observationsetid';
 	
 	molgenis.MappingManager = function MappingManager(){
@@ -113,7 +108,7 @@
 		$.each(biobankDataSets, function(index, mappedDataSet){
 			var removeIcon = $('<i />').addClass('icon-trash show-popover float-right');
 			var editIcon = $('<i />').addClass('show-popover icon-pencil float-right');
-			var spinner = $('<img src="/img/waiting-spinner.gif">').css('height', '15px');
+			var spinner = $('<img src="/img/waiting-spinner.gif">').css('height', '20px');
 			var cellDiv = $('<div />').addClass('row-fluid text-align-center').append(spinner).append(removeIcon).append(editIcon);
 			$('<td />').append(cellDiv).appendTo(row);
 			createMappings(selectedDataSet, mappedDataSet, feature, function(candidateMappedFeatures){
@@ -124,7 +119,7 @@
 				if(mappedFeatureNames.length > 0){
 					topFeatureDivContainer.append('<span style="float:left;color:#04B4AE;"><strong>Complete</strong></span>').append(mappedFeatureNames.join(' , '));
 				}else{
-					topFeatureDivContainer.append('<span style="float:left;">Choose matches</span>');
+					topFeatureDivContainer.append('<span style="float:left;" class="empty-matches">Choose matches</span>');
 				}
 				//Initialize the edit click events
 				editIcon.click(function(){
@@ -197,9 +192,12 @@
 						});
 						//Initialize the event for confirm button
 						confirmButton.click(function(){
-							removeSelectedMappings(molgenis.hrefToId(feature.href), [molgenis.hrefToId(mappedDataSet.href)]);
-							$(editIcon).siblings('div:eq(0)').empty().append('<span style="float:left;">Choose matches</span>');
-							modal.modal('hide');
+							removeSelectedMappings(molgenis.hrefToId(feature.href), [molgenis.hrefToId(mappedDataSet.href)], function(data){
+								molgenis.getFeatureFromIndex(feature, function(featureFromIndex){
+									updateExistingRow(featureFromIndex.columnValueMap, row, [molgenis.hrefToId(mappedDataSet.href)]);
+									modal.modal('hide');									
+								});
+							});
 						});
 					});
 				});
@@ -208,6 +206,40 @@
 			});
 		});
 		return row;
+	}
+	
+	function updateExistingRow(featureFromIndex, existingRow, rematchedSelectedDataSetIds){
+		var biobankDataSetIds = [];
+		$.each(biobankDataSets, function(index, dataSet){
+			biobankDataSetIds.push(molgenis.hrefToId(dataSet.href));
+		});
+		$.each(rematchedSelectedDataSetIds, function(index, dataSetId){
+			var index = $.inArray(dataSetId, biobankDataSetIds);
+			if(index !== -1){
+				var spinner = $('<img src="/img/waiting-spinner.gif">').css('height', '20px');
+				existingRow.find('td:eq(' + (index + 1) + ')').empty().append(spinner).css('text-align', 'center');
+			}
+		});
+		if(rematchedSelectedDataSetIds.length > 0){
+			var columnIndex = $.inArray(rematchedSelectedDataSetIds[0], biobankDataSetIds)
+			replaceExistingRow(featureFromIndex, columnIndex, existingRow);
+		}
+		function replaceExistingRow(featureFromIndex, columnIndex, existingRow){
+			setTimeout(function(){
+				var table = existingRow.parents('table:eq(0)');
+				var rowIndex = $.inArray(existingRow[0], table.find('tr'));
+				var updatedRow = createTableRow(featureFromIndex);
+				var columnToUpdate = updatedRow.find('td:eq(' + (columnIndex + 1) + ')');
+				if(columnIndex !== -1){
+					if(columnToUpdate.find('div>span').hasClass('empty-matches')){
+						table.find('tr:eq(' + --rowIndex + ')').after(updatedRow);
+						existingRow.remove();
+					}else{
+						replaceExistingRow(featureFromIndex, columnIndex, existingRow);
+					}
+				}
+			}, 500);
+		}
 	}
 	
 	function removeSelectedMappings(featureId, mappedDataSetIds, callback){
@@ -268,19 +300,6 @@
 		return results;
 	}
 	
-	function compareTwoArrays(selectedFeatureMap, mappedFeatureNames){
-		var selectedFeatureNames = Object.keys(selectedFeatureMap);
-		if(selectedFeatureNames.length !== mappedFeatureNames.length) {
-			return false;
-		}
-		for(var i = 0; i < selectedFeatureNames.length; i++){
-			if($.inArray(selectedFeatureNames[i], mappedFeatureNames) === -1){
-				return false;
-			}
-		}
-		return true;
-	}
-	
 	function getMapping(dataSetIdentifier, featureId){
 		var results = [];
 		$.ajax({
@@ -325,6 +344,7 @@
 			url : molgenis.getContextUrl() + '/createmapping',
 			data : JSON.stringify(searchRequest),
 			contentType : 'application/json',
+			async : false,
 			success : function(data, textStatus, request) {	
 				var mappedFeatues = [];
 				var existingIds = [];
@@ -456,8 +476,8 @@
 				if(selectedDataSetId !== null && selectedDataSetId !== undefined){
 					if($.inArray(selectedDataSetId, rematchedSelectedDataSetIds) === -1){
 						rematchedSelectedDataSetIds.push(selectedDataSetId);
-						switchOptions(selectedDataSetId, $(selectTag));
-						listOfOptions(dataSetsContainer, rematchedSelectedDataSetIds)
+						updateSelectedDataSets(selectedDataSetId, $(selectTag));
+						listAllDataSets(dataSetsContainer, rematchedSelectedDataSetIds)
 					}
 				}
 			})
@@ -468,51 +488,28 @@
 						rematchedSelectedDataSetIds.push($(this).val());
 					}
 				});
-				listOfOptions(dataSetsContainer, rematchedSelectedDataSetIds)
+				listAllDataSets(dataSetsContainer, rematchedSelectedDataSetIds)
 			});
 			
 			removeAllButton.click(function(){
 				rematchedSelectedDataSetIds = [];
-				listOfOptions(dataSetsContainer, rematchedSelectedDataSetIds)
+				listAllDataSets(dataSetsContainer, rematchedSelectedDataSetIds)
 			});
 			
 			matchButton.click(function(){
-				molgenis.getFeatureFromIndex(feature, function(featureFromIndex){
-					removeSelectedMappings(molgenis.hrefToId(feature.href), rematchedSelectedDataSetIds);
-					modal.modal('hide');
-					var storedRowInfo = $('body').data('clickedRow');
-					var existingRow = storedRowInfo[molgenis.hrefToId(feature.href)];
-					var biobankDataSetIds = [];
-					$.each(biobankDataSets, function(index, dataSet){
-						biobankDataSetIds.push(molgenis.hrefToId(dataSet.href));
+				removeSelectedMappings(molgenis.hrefToId(feature.href), rematchedSelectedDataSetIds, function(data){
+					molgenis.getFeatureFromIndex(feature, function(featureFromIndex){
+						modal.modal('hide');
+						var storedRowInfo = $('body').data('clickedRow');
+						var existingRow = storedRowInfo[molgenis.hrefToId(feature.href)];
+						updateExistingRow(featureFromIndex.columnValueMap, existingRow, rematchedSelectedDataSetIds);
 					});
-					$.each(rematchedSelectedDataSetIds, function(index, dataSetId){
-						var index = $.inArray(dataSetId, biobankDataSetIds);
-						if(index !== -1){
-							var spinner = $('<img src="/img/waiting-spinner.gif">').css('height', '15px');
-							existingRow.find('td:eq(' + (index + 1) + ')').empty().append(spinner).css('text-align', 'center');
-						}
-					});
-					var table = existingRow.parents('table:eq(0)');
-					var rowIndex = $.inArray(existingRow[0], table.find('tr'));
-					if(rowIndex > 0){
-						var updatedRow = createTableRow(featureFromIndex.columnValueMap);
-						table.find('tr:eq(' + --rowIndex + ')').after(updatedRow);
-						existingRow.remove();
-						$.each(rematchedSelectedDataSetIds, function(index, dataSetId){
-							var index = $.inArray(dataSetId, biobankDataSetIds);
-							if(index !== -1){
-//								var columnToUpdate = updatedRow.find('td:eq(' + (index + 1) + ')');
-//								columnToUpdate.find('div:eq(1)').empty();
-							}
-						});
-					}
 				});
 			});
 			selectAllButton.click();
 		});
 		
-		function listOfOptions(dataSetsContainer, rematchedSelectedDataSetIds){
+		function listAllDataSets(dataSetsContainer, rematchedSelectedDataSetIds){
 			dataSetsContainer.find('div:gt(0)').remove();
 			$.each(rematchedSelectedDataSetIds, function(index, dataSetId){
 				var dataSet = restApi.get('/api/v1/dataset/' + dataSetId);
@@ -528,7 +525,7 @@
 			});
 		}
 		
-		function switchOptions(targetDataSetId, rematchedSelectedDataSetIds){
+		function updateSelectedDataSets(targetDataSetId, rematchedSelectedDataSetIds){
 			var index = 0;
 			var options = $(rematchedSelectedDataSetIds).find('option');
 			options.attr('selected', false).each(function(){
@@ -541,18 +538,31 @@
 		}
 	}
 	
+	function compareTwoArrays(selectedFeatureMap, mappedFeatureNames){
+		var selectedFeatureNames = Object.keys(selectedFeatureMap);
+		if(selectedFeatureNames.length !== mappedFeatureNames.length) {
+			return false;
+		}
+		for(var i = 0; i < selectedFeatureNames.length; i++){
+			if($.inArray(selectedFeatureNames[i], mappedFeatureNames) === -1){
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	molgenis.MappingManager.prototype.downloadMappings = function(){
-		var dataSet = restApi.get('/api/v1/dataset/' + selectedDataSet);
 		var mappedDataSetIds = [];
 		$.each(biobankDataSets, function(index, dataSet){
-			if(molgenis.hrefToId(dataSet.href) !== selectedDataSet) mappedDataSetIds.push(molgenis.hrefToId(dataSet.href));
+			mappedDataSetIds.push(molgenis.hrefToId(dataSet.href));
 		});
 		var deleteRequest = {
-			'dataSetId' : selectedDataSet,
+			'dataSetId' : molgenis.hrefToId(selectedDataSet.href),
 			'matchedDataSetIds' : mappedDataSetIds,
-			'documentType' : dataSet.Identifier
+			'documentType' : selectedDataSet.Identifier
 		};
-		$.download(molgenis.getContextUrl().replace('/biobankconnect', '') + '/mappingmanager/download',{request : JSON.stringify(deleteRequest)});
+		console.log(deleteRequest);
+		$.download(molgenis.getContextUrl() + '/download',{request : JSON.stringify(deleteRequest)});
 	};
 	
 	molgenis.MappingManager.prototype.createHelpModal = function(){

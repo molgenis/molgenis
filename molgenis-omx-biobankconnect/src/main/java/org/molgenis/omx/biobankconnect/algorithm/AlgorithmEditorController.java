@@ -4,17 +4,28 @@ import static org.molgenis.omx.biobankconnect.algorithm.AlgorithmEditorControlle
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.IOUtils;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.Writable;
+import org.molgenis.data.csv.CsvWriter;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.biobankconnect.ontologyannotator.OntologyAnnotator;
@@ -38,12 +49,14 @@ import org.molgenis.search.SearchService;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.wizard.AbstractWizardController;
 import org.molgenis.ui.wizard.Wizard;
+import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -301,7 +314,7 @@ public class AlgorithmEditorController extends AbstractWizardController
 
 	@RequestMapping(method = RequestMethod.POST, value = "/attribute")
 	@ResponseBody
-	public SearchResult getAllAttributes(@RequestBody
+	public SearchResult getOneAttribute(@RequestBody
 	String featureId)
 	{
 		return searchService.search(new SearchRequest(null, new QueryImpl().eq(ObservableFeature.ID, featureId).and()
@@ -338,5 +351,118 @@ public class AlgorithmEditorController extends AbstractWizardController
 			}
 		}
 		return searchService.search(new SearchRequest(dataSetIdentifier.toString(), query, null));
+	}
+
+	@RequestMapping(value = "/download", method = RequestMethod.POST)
+	public void download(@RequestParam("request")
+	String requestString, HttpServletResponse response) throws IOException
+	{
+		requestString = URLDecoder.decode(requestString, "UTF-8");
+		UpdateIndexRequest request = new GsonHttpMessageConverter().getGson().fromJson(requestString,
+				UpdateIndexRequest.class);
+		response.setContentType("text/csv");
+		response.addHeader("Content-Disposition", "attachment; filename=" + getCsvFileName(request.getDocumentType()));
+
+		Writable writer = null;
+		try
+		{
+			Integer selectedDataSetId = request.getDataSetId();
+			DataSet selectedDataSet = dataService.findOne(DataSet.ENTITY_NAME, selectedDataSetId, DataSet.class);
+			@SuppressWarnings("deprecation")
+			List<DataSet> dataSetsStoringMappings = dataService.findAllAsList(DataSet.ENTITY_NAME,
+					new QueryImpl().like(DataSet.IDENTIFIER, selectedDataSetId.toString()));
+			List<String> dataSetNames = new ArrayList<String>();
+			dataSetNames.add(selectedDataSet.getName());
+
+			Map<Integer, Map<String, String>> dataSetMappings = new HashMap<Integer, Map<String, String>>();
+
+			if (dataSetsStoringMappings.size() > 0)
+			{
+				for (DataSet dataSet : dataSetsStoringMappings)
+				{
+					Integer mappedDataSetId = Integer.parseInt(dataSet.getIdentifier().split("-")[2]);
+					if (dataSet.getIdentifier().startsWith(
+							userAccountService.getCurrentUser().getUsername() + "-" + selectedDataSetId)
+							&& !mappedDataSetId.equals(selectedDataSetId))
+					{
+						DataSet mappedDataSet = dataService
+								.findOne(DataSet.ENTITY_NAME, mappedDataSetId, DataSet.class);
+						dataSetNames.add(mappedDataSet.getName());
+
+						SearchRequest searchRequest = new SearchRequest(dataSet.getIdentifier(),
+								new QueryImpl().pageSize(Integer.MAX_VALUE), null);
+
+						Map<String, String> storeMappings = new HashMap<String, String>();
+
+						for (Hit hit : searchService.search(searchRequest).getSearchHits())
+						{
+							Map<String, Object> columnValueMap = hit.getColumnValueMap();
+							String featureId = columnValueMap.get(AsyncOntologyMatcher.STORE_MAPPING_FEATURE)
+									.toString();
+							String mappedFeatureIdsString = columnValueMap.get(
+									AsyncOntologyMatcher.STORE_MAPPING_MAPPED_FEATURE).toString();
+							StringBuilder mappedFeatureNames = new StringBuilder();
+							if (mappedFeatureIdsString.length() > 2)
+							{
+								List<String> mappedFeatureIds = Arrays.asList(mappedFeatureIdsString.substring(1,
+										mappedFeatureIdsString.length() - 1).split("\\s*,\\s*"));
+								Iterable<ObservableFeature> mappedFeatures = dataService.findAll(
+										ObservableFeature.ENTITY_NAME,
+										new QueryImpl().in(ObservableFeature.ID, mappedFeatureIds),
+										ObservableFeature.class);
+								for (ObservableFeature feature : mappedFeatures)
+								{
+									if (mappedFeatureNames.length() > 0) mappedFeatureNames.append(";");
+									mappedFeatureNames.append(feature.getName()).append(':')
+											.append(feature.getDescription());
+								}
+							}
+							storeMappings.put(featureId, mappedFeatureNames.toString());
+						}
+						dataSetMappings.put(mappedDataSetId, storeMappings);
+					}
+				}
+
+				writer = new CsvWriter(response.getWriter(), dataSetNames);
+
+				SearchRequest searchRequest = new SearchRequest("protocolTree-" + selectedDataSetId, new QueryImpl()
+						.eq("type", ObservableFeature.class.getSimpleName().toLowerCase()).pageSize(Integer.MAX_VALUE),
+						null);
+				for (Hit hit : searchService.search(searchRequest).getSearchHits())
+				{
+					Entity entity = new MapEntity();
+					Map<String, Object> columnValueMap = hit.getColumnValueMap();
+					String featureName = columnValueMap.get(ObservableFeature.NAME.toLowerCase()).toString();
+					String featureId = columnValueMap.get(ObservableFeature.ID.toLowerCase()).toString();
+					entity.set(dataSetNames.get(0), featureName);
+					int i = 1;
+					for (DataSet dataSet : dataSetsStoringMappings)
+					{
+						Integer mappedDataSetId = Integer.parseInt(dataSet.getIdentifier().split("-")[2]);
+						if (!mappedDataSetId.equals(selectedDataSetId))
+						{
+							StringBuilder value = new StringBuilder();
+							Map<String, String> storeMappings = dataSetMappings.get(mappedDataSetId);
+							if (storeMappings.containsKey(featureId))
+							{
+								value.append(storeMappings.get(featureId));
+							}
+							entity.set(dataSetNames.get(i++), value.toString());
+						}
+					}
+					writer.add(entity);
+				}
+			}
+		}
+		finally
+		{
+			IOUtils.closeQuietly(writer);
+		}
+	}
+
+	private String getCsvFileName(String dataSetName)
+	{
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		return dataSetName + "_" + dateFormat.format(new Date()) + ".csv";
 	}
 }

@@ -73,7 +73,6 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	private static final String ALTERNATIVE_DEFINITION = "alternativeDefinition";
 	private static final String NODE_PATH = "nodePath";
 	private static final String ENTITY_ID = "id";
-	// private static final String LUCENE_SCORE = "score";
 	private static final String ENTITY_TYPE = "type";
 	private static final AtomicInteger runningProcesses = new AtomicInteger();
 	private static final PorterStemmer stemmer = new PorterStemmer();
