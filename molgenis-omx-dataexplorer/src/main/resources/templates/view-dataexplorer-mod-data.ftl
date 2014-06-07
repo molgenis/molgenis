@@ -21,7 +21,7 @@
 </div>
 
 <!-- Download Modal -->
-<div class="modal fade medium" id="downloadModal" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal hide fade medium" id="downloadModal" tabindex="-1" role="dialog" aria-hidden="true">
 	<div class="modal-dialog">
 		<div class="modal-content">				
 	      	<div class="modal-header">
@@ -63,8 +63,13 @@
 	            sources: ${sources},
 	            browserLinks: ${browserLinks}
 			}, [<#list genomeEntities?keys as entityName>{'name': '${entityName}', 'label': '${genomeEntities[entityName]}'}<#if entityName_has_next>,</#if></#list>]);
+			
 			<#-- create data table -->
-		    molgenis.dataexplorer.data.createDataTable();    	
+			var tableEditable = ${tableEditable?string('true', 'false')};
+			if (tableEditable) {
+				tableEditable = molgenis.hasWritePermission(molgenis.dataexplorer.getSelectedEntityMeta().name);
+			}
+			molgenis.dataexplorer.data.createDataTable(tableEditable);    	
 		})
 		.fail(function() {
 			molgenis.createAlert([{'message': 'An error occured. Please contact the administrator.'}], 'error');
