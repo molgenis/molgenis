@@ -1,21 +1,18 @@
 (function($, molgenis) {
 	"use strict";
-
-	var ns = molgenis;
-
-	var restApi = new ns.RestClient();
-	var searchApi = new ns.SearchClient();
 	
-	ns.setDataExplorerUrl = function(dataExplorerUrl) {
-		ns.dataExplorerUrl = dataExplorerUrl;
+	var restApi = new molgenis.RestClient();
+	
+	molgenis.setDataExplorerUrl = function(dataExplorerUrl) {
+		molgenis.dataExplorerUrl = dataExplorerUrl;
 	};
 	
-	ns.onEntityChange = function(name) {
+	molgenis.onEntityChange = function(name) {
 		restApi.getAsync('/api/v1/' + name, null, function(entities) {
 			var items = [];
 			// TODO deal with multiple entity pages
 			$.each(entities.items, function(key, val) {
-				items.push('<option value="' + val.href + '">' + val.name + '</option>');
+				items.push('<option value="' + val.href + '">' + val.Name + '</option>');
 			});
 			$('#entity-instance-select').html(items.join(''));
 
@@ -25,15 +22,15 @@
 		});
 	};
 
-	ns.onEntitySelectionChange = function(entityUrl) {
+	molgenis.onEntitySelectionChange = function(entityUrl) {
 		restApi.getAsync(entityUrl, null, function(entity) {
-			ns.updateEntityTable(entity);
-			ns.updateEntitySearchResults(entity);
+			molgenis.updateEntityTable(entity);
+			molgenis.updateEntitySearchResults(entity);
 		});
 	};
 
-	ns.updateEntityTable = function(entity) {
-		var name = typeof entity.name !== 'undefined' ? entity.name : 'N/A';
+	molgenis.updateEntityTable = function(entity) {
+		var name = typeof entity.Name !== 'undefined' ? entity.Name : 'N/A';
 		var identifier = typeof entity.Identifier !== 'undefined' ? entity.Identifier : 'N/A';
 		var description = typeof entity.description !== 'undefined' ? entity.description : 'N/A';
 
@@ -46,8 +43,9 @@
 		$('#entity-table').html(items.join(''));
 	};
 
-	ns.updateEntitySearchResults = function(entity) {
-		searchApi.search(ns.createSearchRequest(entity), function(searchResponse) {
+	molgenis.updateEntitySearchResults = function(entity) {
+		
+		molgenis.getAllRelatedEntities(entity, function(searchResponse) {
 			if (searchResponse.totalHitCount == 0) {
 				$('#entity-search-results-header').html('No search results');
 				$('#entity-search-results').empty();
@@ -150,7 +148,7 @@
 							items.push('right');
 						}
 						items.push('"></i> ');
-					    items.push(protocol.name);
+					    items.push(protocol.Name);
 					    items.push('</a>');
 					    items.push('</div>');
 					    items.push('<div id="collapse-' + protocol.Identifier + '" class="accordion-body collapse');
@@ -164,7 +162,7 @@
 					    items.push('<div class="row-fluid">');
 					    items.push('<div class="span3">');
 					    items.push('<h3>Protocol summary</h3>');
-					    items.push('<p>' + protocol.description + '</p>');
+					    items.push('<p>' + (protocol.description || 'N/A') + '</p>');
 					    items.push('</div>');
 					    items.push('<div id="table-protocol-container" class="span9">');
 					    
@@ -174,7 +172,7 @@
 						items.push('<tbody>');
 						$.each(features, function(key, feature) {
 							items.push('<tr>');
-							items.push('<td class="first">' + feature.name + '</td>');
+							items.push('<td class="first">' + feature.Name + '</td>');
 							$.each(searchHits, function(key, searchHit) {
                                 //only include data that was found in a dataset where the current protocol is part of
 								if(datasets.indexOf(searchHit.columnValueMap['partOfDataset'])!=-1){
@@ -192,8 +190,8 @@
 						$.each(searchHits, function(key, searchHit) {
                             //only include data that was found in a dataset where the current protocol is part of
                             if(datasets.indexOf(searchHit.columnValueMap['partOfDataset'])!=-1){
-                                if(typeof ns.dataExplorerUrl !== 'undefined'){
-                                    items.push('<td><a href="'+ns.dataExplorerUrl+'?dataset=' + searchHit.documentType + '">View data set</a></td>');
+                                if(typeof molgenis.dataExplorerUrl !== 'undefined'){
+                                    items.push('<td><a href="'+molgenis.dataExplorerUrl+'?dataset=' + searchHit.documentType + '">View data set</a></td>');
                                 }
                             }
 						});
@@ -218,31 +216,26 @@
 			});
 		});
 	};
-
-	ns.createSearchRequest = function(entity) {
-        var queryRules = [];
-        queryRules.push({
-            field : '_xrefvalue',
-            operator : 'EQUALS',
-            value : entity.Identifier
-        });
-
-        var searchRequest = {
-            query : {
-                'rules' : [queryRules],
-                'pageSize' : 1000000
-            }
-        };
-		return searchRequest;
-	};
+	
+	molgenis.getAllRelatedEntities = function(entity, callback){
+    	$.ajax({
+			type : 'POST',
+			url : molgenis.getContextUrl() + '/entities',
+			data : JSON.stringify(entity.Identifier),
+			contentType : 'application/json',
+			success : function(searchResponse) {
+				callback(searchResponse);
+			}
+		});
+    }
 
 	// on document ready
 	$(function() {
 		$('#entity-select').change(function() {
-			ns.onEntityChange($(this).val());
+			molgenis.onEntityChange($(this).val());
 		});
 		$('#entity-instance-select').change(function() {
-			ns.onEntitySelectionChange($(this).val());
+			molgenis.onEntitySelectionChange($(this).val());
 		});
 
 		$(document).on('show', '#accordion .collapse', function() {

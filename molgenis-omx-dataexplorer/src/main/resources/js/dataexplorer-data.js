@@ -20,12 +20,13 @@
 	/**
 	 * @memberOf molgenis.dataexplorer.data
 	 */
-	function createDataTable() {
+	function createDataTable(editable) {
 		var attributes = getAttributes();
 		$('#data-table-container').table({
 			'entityMetaData' : getEntity(),
 			'attributes' : attributes,
-			'query' : getQuery()
+			'query' : getQuery(),
+			'editable' : editable
 		});
 	}
 	
@@ -37,6 +38,8 @@
 			// Workaround, see http://stackoverflow.com/a/9970672
 			'dataRequest' : JSON.stringify(createDownloadDataRequest())
 		});
+		
+		$('#downloadModal').modal('hide');
 	}
 	
 	/**
@@ -50,7 +53,8 @@
 			attributeNames: [],
 			query : {
 				rules : [entityQuery.q]
-			}
+			},
+			colNames : $('input[name=ColNames]:checked').val()
 		};
 
 		dataRequest.query.sort = $('#data-table-container').table('getSort');
