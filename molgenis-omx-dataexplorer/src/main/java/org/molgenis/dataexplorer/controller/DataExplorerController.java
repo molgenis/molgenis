@@ -149,10 +149,6 @@ public class DataExplorerController extends MolgenisPluginController
 						.getProperty(WIZARD_TITLE));
 		model.addAttribute("wizard", (wizard != null) && wizard.booleanValue());
 
-		boolean modDiseaseMatcher = molgenisSettings.getBooleanProperty(KEY_MOD_DISEASEMATCHER,
-				DEFAULT_VAL_MOD_DISEASEMATCHER);
-		model.addAttribute("modDiseaseMatcher", modDiseaseMatcher);
-
 		return "view-dataexplorer";
 	}
 
@@ -191,6 +187,8 @@ public class DataExplorerController extends MolgenisPluginController
 		boolean modData = molgenisSettings.getBooleanProperty(KEY_MOD_DATA, DEFAULT_VAL_MOD_DATA);
 		boolean modAggregates = molgenisSettings.getBooleanProperty(KEY_MOD_AGGREGATES, DEFAULT_VAL_MOD_AGGREGATES);
 		boolean modAnnotators = molgenisSettings.getBooleanProperty(KEY_MOD_ANNOTATORS, DEFAULT_VAL_MOD_ANNOTATORS);
+		boolean modDiseasematcher = molgenisSettings.getBooleanProperty(KEY_MOD_DISEASEMATCHER,
+				DEFAULT_VAL_MOD_DISEASEMATCHER);
 
 		// set data explorer permission
 		Permission pluginPermission = null;
@@ -226,6 +224,11 @@ public class DataExplorerController extends MolgenisPluginController
 					if (modAnnotators)
 					{
 						modulesConfig.add(new ModuleConfig("annotators", "Annotators", "annotator-icon.png"));
+					}
+					if (modDiseasematcher)
+					{
+						modulesConfig.add(new ModuleConfig("diseasematcher", "Disease Matcher",
+								"diseasematcher-icon.png"));
 					}
 
 					break;

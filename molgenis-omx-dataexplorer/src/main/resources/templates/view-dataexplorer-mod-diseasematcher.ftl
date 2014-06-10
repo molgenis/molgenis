@@ -2,13 +2,12 @@
 <div class="row-fluid">	
 	<div class="span12" id="disease-matcher">
 		
-		<!-- PHENOTYPE ZONE -->
+		<#-- PHENOTYPE ZONE
+		
 		<div class="span3">
 			<div class="well">
 				<div class="row-fluid">
-					<#-- add span12 to ensure that input is styled correctly at low and high solutions -->
 					<div class="input-append span12" id="phenotype-search-container">
-						<#-- add span10 to ensure that input is styled correctly at low and high solutions -->
 						<input class="span10" id="phenotype-search" type="text" placeholder="Search phenotypes">
 						<button class="btn" type="button" id="phenotype-search-button"><i class="icon-large icon-search"></i></button>
 					</div>					
@@ -29,9 +28,10 @@
             	</div>
 			</div>
 		</div>
+		-->
 		
-		<!-- ANALYSIS ZONE -->
-		<div class="span6">
+		<#-- ANALYSIS ZONE -->
+		<div class="span9">
 			<div class="well">
 				<div class="span12" id="vardump"></div>
 				<div class="row-fluid">
@@ -41,7 +41,7 @@
 			</div>
 		</div>
 		
-		<!-- DISEASE ZONE-->
+		<#-- DISEASE ZONE-->
 		<div class="span3">
 			<div class="well">
 				<div class="disease-button-toolbar">
@@ -86,3 +86,9 @@
 		</div>
 	</div>		
 </div>
+<script>
+	$.when($.ajax("/js/dataexplorer-diseasematcher.js", {'cache': true}))
+			.then(function() {
+				//	
+			});
+</script>
