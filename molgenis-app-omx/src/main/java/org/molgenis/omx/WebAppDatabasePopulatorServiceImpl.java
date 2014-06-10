@@ -7,7 +7,6 @@ import java.util.Map.Entry;
 import org.molgenis.data.DataService;
 import org.molgenis.data.annotation.impl.CaddServiceAnnotator;
 import org.molgenis.data.annotation.impl.ClinVarServiceAnnotator;
-import org.molgenis.data.annotation.impl.ClinicalGenomicsDatabaseServiceAnnotator;
 import org.molgenis.data.annotation.impl.DbnsfpGeneServiceAnnotator;
 import org.molgenis.data.annotation.impl.DbnsfpVariantServiceAnnotator;
 import org.molgenis.data.annotation.provider.CgdDataProvider;
@@ -92,8 +91,8 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 
 		runtimePropertyMap.put(CaddServiceAnnotator.CADD_FILE_LOCATION_PROPERTY, molgenisHomeDirAnnotationResources
 				+ "/CADD/1000G.vcf.gz");
-		runtimePropertyMap.put(CgdDataProvider.CGD_FILE_LOCATION_PROPERTY,
-				molgenisHomeDirAnnotationResources + "/CGD/CGD.txt");
+		runtimePropertyMap.put(CgdDataProvider.CGD_FILE_LOCATION_PROPERTY, molgenisHomeDirAnnotationResources
+				+ "/CGD/CGD.txt");
 		runtimePropertyMap.put(DbnsfpGeneServiceAnnotator.GENE_FILE_LOCATION_PROPERTY,
 				molgenisHomeDirAnnotationResources + "/dbnsfp/dbNSFP2.3_gene");
 		runtimePropertyMap.put(DbnsfpVariantServiceAnnotator.CHROMOSOME_FILE_LOCATION_PROPERTY,
