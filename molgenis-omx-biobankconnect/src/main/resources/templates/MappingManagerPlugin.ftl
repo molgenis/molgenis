@@ -7,12 +7,14 @@
 	"mapping-manager.css"]>
 <#assign js=[
 	"jquery-ui-1.9.2.custom.min.js", 
+	"jquery.bootstrap.pager.js",
 	"bootstrap-fileupload.min.js", 
 	"common-component.js", 
 	"ontology-annotator.js", 
 	"mapping-manager.js",
 	"biobank-connect.js", 
-	"simple_statistics.js"]>
+	"simple_statistics.js"]>	
+
 <@header css js/>
 <form id="wizardForm" class="form-horizontal" enctype="multipart/form-data">
 	<div class="row-fluid">
@@ -52,12 +54,11 @@
 			</div>
 			<div class="row-fluid">
 				<div class="span12">
-					<div id="data-table-container" class="row-fluid data-table-container">
-						<table id="dataitem-table" class="table table-condensed show-border">
-						</table>
-					</div>
-					<div class="pagination pagination-centered">
-						<ul id="table-papger"></ul>
+					<div class="row-fluid">
+						<div class="span12">
+							<div id="container" class="row-fluid data-table-container">
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -68,17 +69,15 @@
 		$(document).ready(function(){
 			var molgenis = window.top.molgenis;
 			var contextUrl = '${context_url}';
-			contextUrl = contextUrl.replace('/mappingmanager', '/biobankconnect')
+			contextUrl = contextUrl.replace('/mappingmanager', '/algorithm')
 			molgenis.setContextUrl(contextUrl);
 			molgenis.ontologyMatcherRunning(function(){
 				var mappingManager = new molgenis.MappingManager();
-				var dataSetIds = [];
-				<#list dataSets as dataset>
-					dataSetIds.push('${dataset.id?c}');
-				</#list>
-				mappingManager.changeDataSet('${userName}', $('#selectedDataSet').val(), dataSetIds);
+				var mappedDataSetIds = mappingManager.getAllMappedDataSetIds('${userName}', $('#selectedDataSet').val());
+				mappingManager.changeDataSet('${userName}', $('#selectedDataSet').val(), mappedDataSetIds);
 				$('#selectedDataSet').change(function(){
-					mappingManager.changeDataSet('${userName}', $(this).val(), dataSetIds);
+					var mappedDataSetIds = mappingManager.getAllMappedDataSetIds('${userName}', $('#selectedDataSet').val());
+					mappingManager.changeDataSet('${userName}', $(this).val(), mappedDataSetIds);
 				});
 				$('#downloadButton').click(function(){
 					mappingManager.downloadMappings();
@@ -88,12 +87,6 @@
 					mappingManager.createHelpModal();
 				});
 				
-				$('#verify-button').click(function(){
-					$('#wizardForm').attr({
-						'action' : molgenis.getContextUrl() + '/mappingmanager/verify',
-						'method' : 'POST'
-					}).submit();
-				});
 			}, contextUrl);
 		});
 	</script>

@@ -368,22 +368,25 @@ public class AlgorithmEditorController extends AbstractWizardController
 		{
 			Integer selectedDataSetId = request.getDataSetId();
 			DataSet selectedDataSet = dataService.findOne(DataSet.ENTITY_NAME, selectedDataSetId, DataSet.class);
-			@SuppressWarnings("deprecation")
-			List<DataSet> dataSetsStoringMappings = dataService.findAllAsList(DataSet.ENTITY_NAME,
-					new QueryImpl().like(DataSet.IDENTIFIER, selectedDataSetId.toString()));
+			List<String> mappingIdentifiers = new ArrayList<String>();
+			for (Integer mappedDataSetId : request.getMatchedDataSetIds())
+			{
+				mappingIdentifiers.add(AsyncOntologyMatcher.createMappingDataSetIdentifier(userAccountService
+						.getCurrentUser().getUsername(), selectedDataSetId, mappedDataSetId));
+			}
+			Iterable<DataSet> dataSetsStoringMappings = dataService.findAll(DataSet.ENTITY_NAME,
+					new QueryImpl().in(DataSet.IDENTIFIER, mappingIdentifiers), DataSet.class);
 			List<String> dataSetNames = new ArrayList<String>();
 			dataSetNames.add(selectedDataSet.getName());
 
 			Map<Integer, Map<String, String>> dataSetMappings = new HashMap<Integer, Map<String, String>>();
 
-			if (dataSetsStoringMappings.size() > 0)
+			if (Iterables.size(dataSetsStoringMappings) > 0)
 			{
 				for (DataSet dataSet : dataSetsStoringMappings)
 				{
 					Integer mappedDataSetId = Integer.parseInt(dataSet.getIdentifier().split("-")[2]);
-					if (dataSet.getIdentifier().startsWith(
-							userAccountService.getCurrentUser().getUsername() + "-" + selectedDataSetId)
-							&& !mappedDataSetId.equals(selectedDataSetId))
+					if (!mappedDataSetId.equals(selectedDataSetId))
 					{
 						DataSet mappedDataSet = dataService
 								.findOne(DataSet.ENTITY_NAME, mappedDataSetId, DataSet.class);
@@ -425,9 +428,9 @@ public class AlgorithmEditorController extends AbstractWizardController
 
 				writer = new CsvWriter(response.getWriter(), dataSetNames);
 
-				SearchRequest searchRequest = new SearchRequest("protocolTree-" + selectedDataSetId, new QueryImpl()
-						.eq("type", ObservableFeature.class.getSimpleName().toLowerCase()).pageSize(Integer.MAX_VALUE),
-						null);
+				SearchRequest searchRequest = new SearchRequest("protocolTree-"
+						+ selectedDataSet.getProtocolUsed().getId(), new QueryImpl().eq("type",
+						ObservableFeature.class.getSimpleName().toLowerCase()).pageSize(Integer.MAX_VALUE), null);
 				for (Hit hit : searchService.search(searchRequest).getSearchHits())
 				{
 					Entity entity = new MapEntity();
@@ -443,7 +446,7 @@ public class AlgorithmEditorController extends AbstractWizardController
 						{
 							StringBuilder value = new StringBuilder();
 							Map<String, String> storeMappings = dataSetMappings.get(mappedDataSetId);
-							if (storeMappings.containsKey(featureId))
+							if (storeMappings != null && storeMappings.containsKey(featureId))
 							{
 								value.append(storeMappings.get(featureId));
 							}

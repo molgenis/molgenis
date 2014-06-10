@@ -2,15 +2,13 @@
 <script src="/js/jquery.bootstrap.pager.js"></script>
 <script src="/js/bootstrap-fileupload.min.js"></script>
 <script src="/js/common-component.js"></script>
+<script src="/js/ontology-annotator.js"></script>
+<script src="/js/mapping-manager.js"></script>
 <script src="/js/biobank-connect.js"></script>
-<script src="/js/algorithm-editor.js"></script>
-<script src="/js/jstat.min.js"></script>
-<script src="/js/d3.min.js"></script>
-<script src="/js/vega.min.js"></script>
-<script src="/js/biobankconnect-graph.js"></script>
+<script src="/js/simple_statistics.js"></script>
 <link rel="stylesheet" type="text/css" href="/css/jquery-ui-1.9.2.custom.min.css">
 <link rel="stylesheet" type="text/css" href="/css/biobank-connect.css">
-<link rel="stylesheet" type="text/css" href="/css/algorithm-editor.css">
+<link rel="stylesheet" type="text/css" href="/css/mapping-manager.css">
 <form id="wizardForm" name="wizardForm" class="form-horizontal">
 	<div class="row-fluid">
 		<div class="span12 well custom-white-well">	
@@ -63,7 +61,7 @@
 			});
 			$('#help-button').click(function(){
 				mappingManager.createHelpModal();
-			}).click();
+			});
 		});
 	</script>
 </form>

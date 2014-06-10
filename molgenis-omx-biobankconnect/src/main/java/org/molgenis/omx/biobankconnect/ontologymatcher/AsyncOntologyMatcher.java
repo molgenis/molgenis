@@ -1040,7 +1040,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		return featureIds.size() == 0 ? StringUtils.EMPTY : featureIds.toString();
 	}
 
-	private String createMappingDataSetIdentifier(String userName, Integer targetDataSetId, Integer sourceDataSetId)
+	public static String createMappingDataSetIdentifier(String userName, Integer targetDataSetId,
+			Integer sourceDataSetId)
 	{
 		StringBuilder dataSetIdentifier = new StringBuilder();
 		dataSetIdentifier.append(userName).append('-').append(targetDataSetId).append('-').append(sourceDataSetId);

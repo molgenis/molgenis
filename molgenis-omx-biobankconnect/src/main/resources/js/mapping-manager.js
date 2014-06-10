@@ -7,18 +7,15 @@
 	var selectedDataSet = null;
 	var userName = null;
 	var biobankDataSets = null;
-	var storeMappingFeature = 'store_mapping_feature';
 	var storeMappingMappedFeature = 'store_mapping_mapped_feature';
-	var storeMappingConfirmMapping = 'store_mapping_confirm_mapping';
-	var scoreMappingScore = "store_mapping_score";
 	var observationSet = 'observationsetid';
 	
-	molgenis.MappingManager = function MappingManager(){
-		
-	};
+	molgenis.MappingManager = function MappingManager(){};
 	
 	molgenis.MappingManager.prototype.changeDataSet = function(userName, selectedDataSetId, dataSetIds){
 		if(selectedDataSetId !== '' && dataSetIds.length > 0){
+			$('#div-search').show();
+			dataSetIds = remove(selectedDataSetId, dataSetIds);
 			setUserName(userName); 
 			selectedDataSet = restApi.get('/api/v1/dataset/' + selectedDataSetId, {'expand' : ['protocolUsed']});
 			biobankDataSets = restApi.get('/api/v1/dataset/', {
@@ -31,7 +28,6 @@
 				},
 				'expand' : ['protocolUsed']
 			}).items;
-			
 			var involvedDataSetNames = [];
 			involvedDataSetNames.push(selectedDataSet.Name);
 			$.each(biobankDataSets, function(index, dataSet){
@@ -42,6 +38,8 @@
 			updateMatrix({'tableHeaders' : involvedDataSetNames});
 			initSearchDataItems();
 		}else{
+			$('#container').empty().append('<p style="font-size:16px;">There are no matches produced for this catalog. Please click on BiobankConnectWizard to produce new match sets!</p>');
+			$('#div-search').hide();
 			$('#dataitem-number').empty().append('Nothing selected');
 		}
 		
@@ -580,6 +578,35 @@
 			});
 		});
 	};
+	
+	molgenis.MappingManager.prototype.getAllMappedDataSetIds = function (userName, selectedDataSetId){
+		var mappings = restApi.get('/api/v1/dataset/', {
+			'q' : {
+				'q' : [{
+					'field' : 'Identifier',
+					'operator' : 'LIKE',
+					'value' : userName + '-' + selectedDataSetId
+				}]
+			}
+		}).items;
+		var mappedDataSetIds = [];
+		$.each(mappings, function(index, dataSet){
+			var identifier = dataSet.Identifier;
+			var dataSetIdArray = identifier.split('-');
+			mappedDataSetIds.push(dataSetIdArray[dataSetIdArray.length - 1]);
+		});
+		return mappedDataSetIds;
+	};
+	
+	function remove(object, array){
+		var newArray = [];
+		$.each(array, function(index, element){
+			if(element !== object){
+				newArray.push(element);
+			}
+		});
+		return newArray;;
+	}
 	
 	function setUserName(name){
 		userName = name;

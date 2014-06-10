@@ -6,7 +6,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -217,23 +216,5 @@ public class BiobankConnectController extends AbstractWizardController
 				currentUserStatus.isUserMatching(userName), ontologyMatcher.matchPercentage(userName),
 				currentUserStatus.getTotalNumberOfUsers());
 		return response;
-	}
-
-	@Override
-	@ModelAttribute("javascripts")
-	public List<String> getJavascripts()
-	{
-		return Arrays.asList("bootstrap-fileupload.min.js", "jquery-ui-1.9.2.custom.min.js", "common-component.js",
-				"catalogue-chooser.js", "ontology-annotator.js", "ontology-matcher.js", "mapping-manager.js",
-				"simple_statistics.js", "algorithm-editor.js", "biobank-connect.js");
-	}
-
-	@Override
-	@ModelAttribute("stylesheets")
-	public List<String> getStylesheets()
-	{
-		return Arrays.asList("bootstrap-fileupload.min.css", "jquery-ui-1.9.2.custom.min.css", "biobank-connect.css",
-				"catalogue-chooser.css", "ontology-matcher.css", "mapping-manager.css", "ontology-annotator.css",
-				"algorithm-editor.css");
 	}
 }
