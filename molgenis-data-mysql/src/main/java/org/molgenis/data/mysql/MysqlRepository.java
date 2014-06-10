@@ -1,5 +1,9 @@
 package org.molgenis.data.mysql;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -57,6 +61,8 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 	private DataSource ds;
 	private JdbcTemplate jdbcTemplate;
 
+	private BufferedReader bufferedReader;
+
 	protected MysqlRepository(MysqlRepositoryCollection collection, EntityMetaData metaData)
 	{
 		if (collection == null) throw new IllegalArgumentException("DataSource is null");
@@ -91,6 +97,15 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 	protected String getDropSql()
 	{
 		return "DROP TABLE IF EXISTS " + getEntityMetaData().getName();
+	}
+
+	public void truncate()
+	{
+		jdbcTemplate.execute(this.getTruncateSql());
+	}
+
+	protected String getTruncateSql(){
+		return "TRUNCATE TABLE " + getEntityMetaData().getName() + ";";
 	}
 
 	@Override
@@ -974,5 +989,32 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 			}
 			return e;
 		}
+	}
+
+	public String getMySqlQueryFromFile(String path)
+	{
+		try
+		{
+			final File f = new File(this.getClass().getResource(path).getFile());
+			final StringBuilder stringBuilder = new StringBuilder();
+			String thisLine = null;
+			this.bufferedReader = new BufferedReader(new FileReader(f.toString()));
+			while ((thisLine = this.bufferedReader.readLine()) != null)
+			{
+				stringBuilder.append(" ");
+				stringBuilder.append(thisLine);
+			}
+
+			return stringBuilder.toString();
+		}
+		catch (FileNotFoundException e)
+		{
+			logger.error("No query in path: " + path + " is found!", e);
+		}
+		catch (IOException e)
+		{
+			logger.error("A problem reading the query from path: " + path, e);
+		}
+		return null;
 	}
 }

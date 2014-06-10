@@ -28,6 +28,9 @@
 	"jquery.molgenis.table.js",
 	"col7a1.js"]>	
 <@header css js/>
+	<div class="row-fluid">
+		<h3>${title}</h3>
+	</div>
 	<form id="form-col7a1" method="get" action="${context_url}/import">
 		<div class="row-fluid">
 			<div class="row-fluid data-table-container" id="data-table-container"></div>
@@ -43,9 +46,11 @@
 								<tr>
 									<#list row.cells as cell>
 										<td>
-											<#list cell.values as value>
-												<div>${value.value}</div>
-											</#list>
+											<ul style="list-style: none;">
+												<#list cell.values as value>
+													<div>${value.value}</br></div>
+												</#list>
+											</ul>
 										</td>
 									</#list>
 								</tr>
