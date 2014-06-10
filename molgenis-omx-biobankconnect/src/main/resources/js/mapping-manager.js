@@ -484,6 +484,7 @@
 			modal.find('div.modal-footer:eq(0)').prepend(matchButton);
 			modal.modal('show');
 			
+			//Initialize all the button events
 			selectButton.click(function(){
 				var selectedDataSetId = selectTag.val();
 				if(selectedDataSetId !== null && selectedDataSetId !== undefined){
