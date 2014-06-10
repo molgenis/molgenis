@@ -1,5 +1,7 @@
 package org.molgenis.framework.ui;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 /**
  * Abstract base class for all MOLGENIS plugin controllers
  */
@@ -9,6 +11,13 @@ public abstract class MolgenisPluginController
 
 	/** Base URI for a plugin */
 	private final String uri;
+	private MolgenisPluginRegistry molgenisPluginRegistry;;
+
+	@Autowired(required = false)
+	public void setMolgenisPluginRegistry(MolgenisPluginRegistry molgenisPluginRegistry)
+	{
+		this.molgenisPluginRegistry = molgenisPluginRegistry;
+	}
 
 	public MolgenisPluginController(String uri)
 	{
@@ -34,5 +43,10 @@ public abstract class MolgenisPluginController
 	public String getId()
 	{
 		return uri.substring(PLUGIN_URI_PREFIX.length());
+	}
+
+	public MolgenisPlugin getPlugin(String id)
+	{
+		return molgenisPluginRegistry.getPlugin(id);
 	}
 }

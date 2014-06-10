@@ -49,13 +49,13 @@
 	 */
 	function createModuleNav(modules, container) {
 		var items = [];
-		items.push('<ul class="nav nav-tabs">');
+		items.push('<ul class="nav nav-tabs pull-left">');
 		$.each(modules, function() {
 			var href = molgenis.getContextUrl() + '/module/' + this.id;
 			items.push('<li data-id="' + this.id + '"><a href="' + href + '" data-target="#tab-' + this.id + '" data-toggle="tab"><img src="/img/' + this.icon + '"> ' + this.label + '</a></li>');
 		});
 		items.push('</ul>');
-		items.push('<div class="tab-content">');
+		items.push('<div class="tab-content span9">');
 		$.each(modules, function() {
 			items.push('<div class="tab-pane" id="tab-' + this.id + '">Loading...</div>');
 		});
@@ -81,6 +81,36 @@
 				$(document).trigger('clickAttribute', {'attribute': attribute});
 			}
 		});
+	}
+	
+	function createHeader(entityName) {
+		if (restApi.entityExists('/api/v1/EntityClass')) {
+			var q = [{field: 'entityClassIdentifier', operator: 'EQUALS', value: entityName}];
+			restApi.getAsync('/api/v1/EntityClass', {q:{q: q}, attributes:['fullName', 'description', 'entityClassIdentifier']}, function(result) {
+				if (result.total > 0) {
+					var entityClass = result.items[0];
+				
+					if (modelPluginUri) {
+						var modelUrl = modelPluginUri + '/' + entityClass.entityClassIdentifier;
+						var link = $('<a></a>');
+						link.attr('href', modelUrl);
+						link.html(entityClass.fullName);
+						$('#entity-class-name').append(link);
+					} else {
+						$('#entity-class-name').html(entityClass.fullName);
+					}
+				
+					var description = $('<span data-placement="bottom"></span>');
+					description.html(abbreviate(entityClass.description, 180));
+					description.attr('data-title', entityClass.description);
+				
+					$('#entity-class-description').append(description.tooltip());
+					$('#entity-class').show();
+				} else {
+					$('#entity-class').hide();
+				}
+			});
+		}
 	}
 
 	/**
@@ -181,7 +211,10 @@
 						self.filter.wizard.openFilterWizardModal(selectedEntityMetaData, attributeFilters);
 						showWizardOnInit = false;
 					}
+					
 				});
+				
+				createHeader(entityMetaData.name);
 			});
 		});
 		
