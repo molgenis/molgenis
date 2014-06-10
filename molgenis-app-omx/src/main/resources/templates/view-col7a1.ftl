@@ -46,11 +46,9 @@
 								<tr>
 									<#list row.cells as cell>
 										<td>
-											<ul style="list-style: none;">
-												<#list cell.values as value>
-													<div>${value.value}</br></div>
-												</#list>
-											</ul>
+											<#list cell.values as value>
+												<div>${value.value}</br></div>
+											</#list>
 										</td>
 									</#list>
 								</tr>
