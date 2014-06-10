@@ -8,12 +8,19 @@ import org.molgenis.data.support.QueryImpl;
 
 public class DataRequest
 {
+	public static enum ColNames
+	{
+		ATTRIBUTE_NAMES, ATTRIBUTE_LABELS
+	}
+
 	@NotNull
 	private String entityName;
 	@NotNull
 	private QueryImpl query;
 	@NotNull
 	private List<String> attributeNames;
+	@NotNull
+	private ColNames colNames;
 
 	public String getEntityName()
 	{
@@ -44,4 +51,15 @@ public class DataRequest
 	{
 		this.attributeNames = attributeNames;
 	}
+
+	public ColNames getColNames()
+	{
+		return colNames;
+	}
+
+	public void setColNames(ColNames colNames)
+	{
+		this.colNames = colNames;
+	}
+
 }

@@ -186,6 +186,25 @@
 		}
 		return 0;
 	};
+	
+	/**
+	 * Checks if the user has write permission on a particular entity
+	 */
+	molgenis.hasWritePermission = function(entityName) {
+		var writable = false;
+		
+		$.ajax({
+			url : '/permission/' + entityName + "/write",
+			dataType : 'json',
+			async : false,
+			success : function(result) {
+				writable = result;
+			}
+		});
+		
+		return writable;
+	}
+	
 }($, window.top.molgenis = window.top.molgenis || {}));
 
 // Add endsWith function to the string class
@@ -221,7 +240,21 @@ function htmlEscape(text) {
  * Create a table cell to show data of a certain type
  * Is used by the dataexplorer and the forms plugin
  */
-function formatTableCellValue(value, dataType) {
+function formatTableCellValue(value, dataType, editable) {
+	
+	if (dataType.toLowerCase() == 'bool') {
+		var checked = (value === true);
+		value = '<input type="checkbox" ';
+		if (checked) {
+			value = value + 'checked ';
+		}
+		if (editable !== true) {
+			value = value + 'disabled="disabled"';
+		}
+
+		return value + '/>';
+	}
+	
 	if (!value) {
 		return '';
 	}
@@ -232,15 +265,6 @@ function formatTableCellValue(value, dataType) {
 
 	} else if (dataType.toLowerCase() == "email") {
 		value = '<a href="mailto:' + value + '">' + htmlEscape(value) + '</a>';
-
-	} else if (dataType.toLowerCase() == 'bool') {
-		var checked = (value === true);
-		value = '<input type="checkbox" disabled="disabled" ';
-		if (checked) {
-			value = value + 'checked ';
-		}
-
-		value = value + '/>';
 
 	} else if (dataType.toLowerCase() != 'html') {
 
@@ -382,6 +406,13 @@ function createInput(dataType, attrs, val, lbl) {
 			});
 		}
 		
+		this._ajax(config);
+		
+		if (!async)
+			return resource;
+	};
+	
+	molgenis.RestClient.prototype._ajax = function(config) {
 		if (self.token) {
 			$.extend(config, {
 				headers: {'x-molgenis-token': self.token}
@@ -389,10 +420,7 @@ function createInput(dataType, attrs, val, lbl) {
 		}
 		
 		$.ajax(config);
-		
-		if (!async)
-			return resource;
-	};
+	}
 	
 	molgenis.RestClient.prototype._toApiUri = function(resourceUri, options) {
 		var qs = "";
@@ -402,9 +430,9 @@ function createInput(dataType, attrs, val, lbl) {
 			qs = '?' + uriParts[1];
 		}
 		if (options && options.attributes && options.attributes.length > 0)
-			qs += (qs.length === 0 ? '?' : '&') + 'attributes=' + options.attributes.join(',');
+			qs += (qs.length === 0 ? '?' : '&') + 'attributes=' + encodeURIComponent(options.attributes.join(','));
 		if (options && options.expand && options.expand.length > 0)
-			qs += (qs.length === 0 ? '?' : '&') + 'expand=' + options.expand.join(',');
+			qs += (qs.length === 0 ? '?' : '&') + 'expand=' + encodeURIComponent(options.expand.join(','));
 		if (options && options.q)
 			qs += (qs.length === 0 ? '?' : '&') + '_method=GET';
 		return resourceUri + qs;
@@ -419,7 +447,7 @@ function createInput(dataType, attrs, val, lbl) {
 	};
 	
 	molgenis.RestClient.prototype.remove = function(href, callback) {
-		$.ajax({
+		this._ajax({
 			type : 'POST',
 			url : href,
 			data : '_method=DELETE',
@@ -429,9 +457,21 @@ function createInput(dataType, attrs, val, lbl) {
 		});
 	};
 	
+	molgenis.RestClient.prototype.update = function(href, entity, callback) {
+		this._ajax({
+			type : 'POST',
+			url : href + '?_method=PUT',
+			contentType : 'application/json',
+			data : JSON.stringify(entity),
+			async : false,
+			success : callback.success,
+			error : callback.error
+		});
+	};
+	
 	molgenis.RestClient.prototype.entityExists = function(resourceUri) {
 		var result = false;
-		$.ajax({
+		this._ajax({
 			dataType : 'json',
 			url : resourceUri + '/exist',
 			async : false,
@@ -464,10 +504,9 @@ function createInput(dataType, attrs, val, lbl) {
 	};
 	
 	molgenis.RestClient.prototype.logout = function(callback) {
-		$.ajax({
+		this._ajax({
 			url : '/api/v1/logout',
 			async : true,
-			headers: {'x-molgenis-token': self.token},
 			success : function() {
 				self.token = null;
 				callback();
