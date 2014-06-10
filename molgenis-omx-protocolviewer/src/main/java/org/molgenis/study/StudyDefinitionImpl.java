@@ -155,4 +155,10 @@ public class StudyDefinitionImpl implements StudyDefinition
 	{
 		throw new UnsupportedOperationException(); // FIXME
 	}
+
+	@Override
+	public void setRequestProposalForm(String fileName)
+	{
+		this.requestForm = fileName;
+	}
 }
