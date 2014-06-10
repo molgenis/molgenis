@@ -13,35 +13,44 @@
 	molgenis.MappingManager = function MappingManager(){};
 	
 	molgenis.MappingManager.prototype.changeDataSet = function(userName, selectedDataSetId, dataSetIds){
-		if(selectedDataSetId !== '' && dataSetIds.length > 0){
-			$('#div-search').show();
-			dataSetIds = remove(selectedDataSetId, dataSetIds);
-			setUserName(userName); 
-			selectedDataSet = restApi.get('/api/v1/dataset/' + selectedDataSetId, {'expand' : ['protocolUsed']});
-			biobankDataSets = restApi.get('/api/v1/dataset/', {
-				'q' : {
-					'q' : [{
-						'field' : 'id',
-						'operator' : 'IN',
-						'value' : dataSetIds
-					}]
-				},
-				'expand' : ['protocolUsed']
-			}).items;
-			var involvedDataSetNames = [];
-			involvedDataSetNames.push(selectedDataSet.Name);
-			$.each(biobankDataSets, function(index, dataSet){
-				involvedDataSetNames.push(dataSet.Name);
-			});
-			var attributes = restApi.get('/api/v1/' + selectedDataSet.Identifier + '/meta', {'expand' : ['attributes']});
-			$('#dataitem-number').empty().append(Object.keys(attributes.attributes).length);
-			updateMatrix({'tableHeaders' : involvedDataSetNames});
-			initSearchDataItems();
-		}else{
-			$('#container').empty().append('<p style="font-size:16px;">There are no matches produced for this catalog. Please click on BiobankConnectWizard to produce new match sets!</p>');
-			$('#div-search').hide();
+		
+		//Initialize selectedDataset with default value null
+		selectedDataSet = null;
+		//Clear the previous messages if there are any 
+		if($('#mapping-unavailable')) $('#mapping-unavailable').remove();
+		//Check the nullibity of target selecteDataSetId
+		if(!selectedDataSetId || selectedDataSetId === ''){
+			var mappingUnavailable = $('<p />').attr('id', 'mapping-unavailable').addClass('text-align-center').append('The target catalogue cannot be empty!').css('margin-top', '50px');
+			$('#container').empty().after(mappingUnavailable);
 			$('#dataitem-number').empty().append('Nothing selected');
-		}
+			$('#div-search').hide();
+		}else{
+			selectedDataSet = restApi.get('/api/v1/dataset/' + selectedDataSetId, {'expand' : ['protocolUsed']});
+			//Check the nullibity of selecte biobank dataSetIds
+			if(!dataSetIds || dataSetIds.length === 0){
+				var mappingUnavailable = $('<p />').attr('id', 'mapping-unavailable').addClass('text-align-center').append('There are no matches produced for catalog <strong>' + selectedDataSet.Name + '</strong> . Please click on BiobankConnectWizard to produce new match sets!').css('margin-top', '50px');
+				$('#container').empty().after(mappingUnavailable);
+				$('#dataitem-number').empty().append('Nothing selected');
+				$('#div-search').hide();
+			}else{
+				$('#div-search').show();
+				setUserName(userName); 
+				biobankDataSets = restApi.get('/api/v1/dataset/', {
+					'q' : {
+						'q' : [{
+							'field' : 'id',
+							'operator' : 'IN',
+							'value' : remove(selectedDataSetId, dataSetIds)
+						}]
+					},
+					'expand' : ['protocolUsed']
+				}).items;
+				var attributes = restApi.get('/api/v1/' + selectedDataSet.Identifier + '/meta', {'expand' : ['attributes']});
+				$('#dataitem-number').empty().append(Object.keys(attributes.attributes).length);
+				updateMatrix();
+				initSearchDataItems();
+			}
+		} 
 		
 		function initSearchDataItems() {
 			var options = {'updatePager' : true};
@@ -68,9 +77,14 @@
 	};
 	
 	function updateMatrix(options){
+		var involvedDataSetNames = [];
+		involvedDataSetNames.push(selectedDataSet.Name);
+		$.each(biobankDataSets, function(index, dataSet){
+			involvedDataSetNames.push(dataSet.Name);
+		});
 		var default_options = {
 			'dataSetId' : molgenis.hrefToId(selectedDataSet.href),
-			'tableHeaders' : ['Name', 'Description'],
+			'tableHeaders' : involvedDataSetNames,
 			'queryText' : $('#search-dataitem').val(),
 			'sortRule' : null,
 			'createTableRow' : createTableRow,
@@ -87,14 +101,7 @@
 		var row = $('<tr />');
 		var feature = restApi.get('/api/v1/observablefeature/' + featureFromIndex.id);
 		var description = '<strong>' + feature.Name + '</strong> : ' + molgenis.i18nDescription(feature).en;
-		var popover = $('<span />').html(description.length < 90 ? description : description.substring(0, 90) + ' ...');
-		if(!(description.length < 90)){
-			popover.addClass('show-popover').popover({
-				'content' : molgenis.i18nDescription(feature).en,
-				'trigger' : 'hover',
-				'placement' : 'bottom'
-			});
-		}
+		var popover = makePopoverComponenet(description, 90, molgenis.i18nDescription(feature).en);
 		$('<td />').addClass('add-border show-popover').append(popover).appendTo(row).click(function(){
 			var row = $(this).parents('tr:eq(0)');
 			if(!$('body').data('clickedRow')) $('body').data('clickedRow', {});
@@ -105,70 +112,70 @@
 		
 		$.each(biobankDataSets, function(index, mappedDataSet){
 			var removeIcon = $('<i />').addClass('icon-trash show-popover float-right');
-			var editIcon = $('<i />').addClass('show-popover icon-pencil float-right');
-			var spinner = $('<img src="/img/waiting-spinner.gif">').css('height', '20px');
-			var cellDiv = $('<div />').addClass('row-fluid text-align-center').append(spinner).append(removeIcon).append(editIcon);
+			var editIcon = $('<i />').addClass('icon-pencil show-popover float-right');
+			var cellDiv = $('<div />').addClass('row-fluid text-align-center').append(removeIcon).append(editIcon);
 			$('<td />').append(cellDiv).appendTo(row);
-			createMappings(selectedDataSet, mappedDataSet, feature, function(candidateMappedFeatures){
-				var mappedFeatureNames = getMapping(createDataSetIdentifier(selectedDataSet, mappedDataSet), molgenis.hrefToId(feature.href));
-				var topFeatureDivContainer = $('<div />').addClass('show-popover span10').appendTo(cellDiv).click(function(){
+			getMapping(createDataSetIdentifier(selectedDataSet, mappedDataSet), molgenis.hrefToId(feature.href), function(mappedFeatureNames){
+				var topFeatureDivContainer = $('<div />').addClass('show-popover').appendTo(cellDiv).click(function(){
 					editIcon.click();
 				});
 				if(mappedFeatureNames.length > 0){
-					topFeatureDivContainer.append('<span style="float:left;color:#04B4AE;"><strong>Complete</strong></span>').append(mappedFeatureNames.join(' , '));
-				}else{
-					topFeatureDivContainer.append('<span style="float:left;" class="empty-matches">Choose matches</span>');
+					switchBackgroundIcon(editIcon, mappedFeatureNames);
+					topFeatureDivContainer.append(makePopoverComponenet(mappedFeatureNames.join(','), 10, mappedFeatureNames.join(',')));
 				}
 				//Initialize the edit click events
 				editIcon.click(function(){
-					standardModal.createModalCallback('Candidate mappings', function(modal){
-						//Customize modal
-						modal.modal('show').css({
-							'width' : '90%',
-							'margin-left' : '-45%',
-							'top' : '15%'
-						});
-						
-						//Modal header information.
-						var infoDiv = $('<div />').addClass('span4').css({
-							'position' : 'absolute',
-							'margin-left' : 0,
-							'margin-top' : 25,
-							'z-index' : 10000
-						});
-						$('<div />').append('<h4>' + selectedDataSet.Name + '</h4>').appendTo(infoDiv);
-						$('<div />').append('<span class="info"><strong>Data item : </strong></span>').append('<span>' + feature.Name + '</span>').appendTo(infoDiv);
-						$('<div />').append('<span class="info"><strong>Description : </strong></span>').append('<span>' + molgenis.i18nDescription(feature).en + '</span>').appendTo(infoDiv);
-						var selectedMappings = $('<div />').append('<span class="info"><strong>Selected mappings : </strong></span>').append('<span>' + mappedFeatureNames.join(' , ') + '</span>').appendTo(infoDiv);
-						modal.find('.modal-header:eq(0)').append(infoDiv);
-						
-						//Modal body information.
-						var mappingTable = createMappingTable(feature, candidateMappedFeatures, mappedFeatureNames);
-						var tableDiv = $('<div />').addClass('span7').css('margin-left', '-10px').append('<div><h4>' + mappedDataSet.Name +  '</h4></div>').append(mappingTable);
-						var body = modal.find('.modal-body:eq(0)').addClass('overflow-y-auto').css({
-							'min-height' : 250,
-							'max-height' : 350
-						});
-						$('<div />').addClass('row-fluid').append('<div class="span5"></div>').append(tableDiv).appendTo(body);
-
-						//Modal footer information.
-						var confirmButton = $('<button class="btn btn-primary">Confirm</button>');
-						modal.find('.modal-footer:eq(0)').prepend(confirmButton);
-						
-						//Confirm button event handler
-						confirmButton.click(function(){
-							var mappedFeatureMap = updateMappingInfo(feature, mappingTable, mappedDataSet, mappedFeatureNames);
-							mappedFeatureNames = mappedFeatureMap.mappedFeatureNames;
-							$(editIcon).siblings('div:eq(0)').empty().append('<span style="float:left;color:#04B4AE;"><strong>Complete</strong></span>').append(mappedFeatureNames.join(' , '));
-							standardModal.closeModal();
-						});
-						//table check box handler
-						tableDiv.find('input[type="checkbox"]').click(function(){
-							var dataItems = [];
-							tableDiv.find('input:checked').each(function(index, checkbox){
-								dataItems.push($(checkbox).data('eachMapping').mappedFeature.Name);
+					createMappings(selectedDataSet, mappedDataSet, feature, function(candidateMappedFeatures){
+						standardModal.createModalCallback('Candidate mappings', function(modal){
+							//Customize modal
+							modal.modal('show').css({
+								'width' : '90%',
+								'margin-left' : '-45%',
+								'top' : '15%'
 							});
-							selectedMappings.find('span:eq(1)').html(dataItems.join(' , '));
+							
+							//Modal header information.
+							var infoDiv = $('<div />').addClass('span4').css({
+								'position' : 'absolute',
+								'margin-left' : 0,
+								'margin-top' : 25,
+								'z-index' : 10000
+							});
+							$('<div />').append('<h4>' + selectedDataSet.Name + '</h4>').appendTo(infoDiv);
+							$('<div />').append('<span class="info"><strong>Data item : </strong></span>').append('<span>' + feature.Name + '</span>').appendTo(infoDiv);
+							$('<div />').append('<span class="info"><strong>Description : </strong></span>').append('<span>' + molgenis.i18nDescription(feature).en + '</span>').appendTo(infoDiv);
+							var selectedMappings = $('<div />').append('<span class="info"><strong>Selected mappings : </strong></span>').append('<span>' + mappedFeatureNames.join(' , ') + '</span>').appendTo(infoDiv);
+							modal.find('.modal-header:eq(0)').append(infoDiv);
+							
+							//Modal body information.
+							var mappingTable = createMappingTable(feature, candidateMappedFeatures, mappedFeatureNames);
+							var tableDiv = $('<div />').addClass('span7').css('margin-left', '-10px').append('<div><h4>' + mappedDataSet.Name +  '</h4></div>').append(mappingTable);
+							var body = modal.find('.modal-body:eq(0)').addClass('overflow-y-auto').css({
+								'min-height' : 250,
+								'max-height' : 350
+							});
+							$('<div />').addClass('row-fluid').append('<div class="span5"></div>').append(tableDiv).appendTo(body);
+							
+							//Modal footer information.
+							var confirmButton = $('<button class="btn btn-primary">Confirm</button>');
+							modal.find('.modal-footer:eq(0)').prepend(confirmButton);
+							
+							//Confirm button event handler
+							confirmButton.click(function(){
+								var mappedFeatureMap = updateMappingInfo(feature, mappingTable, mappedDataSet, mappedFeatureNames);
+								mappedFeatureNames = mappedFeatureMap.mappedFeatureNames;
+								switchBackgroundIcon(editIcon, mappedFeatureNames);
+								$(editIcon).siblings('div:eq(0)').empty().append(makePopoverComponenet(mappedFeatureNames.join(','), 10, mappedFeatureNames.join(',')));
+								standardModal.closeModal();
+							});
+							//table check box handler
+							tableDiv.find('input[type="checkbox"]').click(function(){
+								var dataItems = [];
+								tableDiv.find('input:checked').each(function(index, checkbox){
+									dataItems.push($(checkbox).data('eachMapping').mappedFeature.Name);
+								});
+								selectedMappings.find('span:eq(1)').html(dataItems.join(' , '));
+							});
 						});
 					});
 				});
@@ -199,11 +206,30 @@
 						});
 					});
 				});
-				
-				spinner.remove();
 			});
 		});
 		return row;
+		
+		//Helper class for createTableRow function...
+		function makePopoverComponenet(text, length, content){
+			var popover = $('<span />').html(text.length < length ? text : text.substring(0, length) + ' ...');
+			if(!(text.length < length)){
+				popover.addClass('show-popover').popover({
+					'content' : content,
+					'trigger' : 'hover',
+					'placement' : 'bottom'
+				});
+			}
+			return popover;
+		}
+		
+		function switchBackgroundIcon(editIcon, mappedFeatureNames){
+			if(mappedFeatureNames.length === 0){
+				editIcon.removeClass('icon-ok').addClass('icon-pencil').parents('td:eq(0)').css('background', '');
+			}else{
+				editIcon.removeClass('icon-pencil').addClass('icon-ok').parents('td:eq(0)').css('background-color', 'rgb(223, 235, 245)');
+			}
+		}	
 	}
 	
 	function updateExistingRow(featureFromIndex, existingRow, rematchedSelectedDataSetIds){
@@ -220,23 +246,14 @@
 		});
 		if(rematchedSelectedDataSetIds.length > 0){
 			var columnIndex = $.inArray(rematchedSelectedDataSetIds[0], biobankDataSetIds)
-			replaceExistingRow(featureFromIndex, columnIndex, existingRow);
-		}
-		function replaceExistingRow(featureFromIndex, columnIndex, existingRow){
 			setTimeout(function(){
 				var table = existingRow.parents('table:eq(0)');
 				var rowIndex = $.inArray(existingRow[0], table.find('tr'));
 				var updatedRow = createTableRow(featureFromIndex);
 				var columnToUpdate = updatedRow.find('td:eq(' + (columnIndex + 1) + ')');
-				if(columnIndex !== -1){
-					if(columnToUpdate.find('div>span').hasClass('empty-matches')){
-						table.find('tr:eq(' + --rowIndex + ')').after(updatedRow);
-						existingRow.remove();
-					}else{
-						replaceExistingRow(featureFromIndex, columnIndex, existingRow);
-					}
-				}
-			}, 500);
+				table.find('tr:eq(' + --rowIndex + ')').after(updatedRow);
+				existingRow.remove();
+			}, 1500);
 		}
 	}
 	
@@ -251,7 +268,6 @@
 			type : 'POST',
 			url : molgenis.getContextUrl() + '/savescript',
 			data : JSON.stringify(request),
-			async : false,
 			contentType : 'application/json',
 			success : function(data){
 				if(callback !== undefined && callback !== null && typeof(callback) === 'function'){
@@ -298,8 +314,7 @@
 		return results;
 	}
 	
-	function getMapping(dataSetIdentifier, featureId){
-		var results = [];
+	function getMapping(dataSetIdentifier, featureId, callback){
 		$.ajax({
 			type : 'POST',
 			url : molgenis.getContextUrl() + '/getmapping',
@@ -307,6 +322,7 @@
 			async : false,
 			contentType : 'application/json',
 			success : function(data, textStatus, request){				
+				var results = [];
 				if(data.searchHits.length > 0){
 					var hit = data.searchHits[0].columnValueMap;
 					var mappedFeatureString = hit[storeMappingMappedFeature];
@@ -326,9 +342,9 @@
 						});
 					}
 				}
+				callback(results)
 			}
 		});
-		return results;
 	}
 	
 	function createMappings(selectedDataSet, mappedDataSet, feature, callback){
@@ -342,7 +358,6 @@
 			url : molgenis.getContextUrl() + '/createmapping',
 			data : JSON.stringify(searchRequest),
 			contentType : 'application/json',
-			async : false,
 			success : function(data, textStatus, request) {	
 				var mappedFeatues = [];
 				var existingIds = [];
@@ -504,6 +519,7 @@
 					});
 				});
 			});
+			
 			selectAllButton.click();
 		});
 		

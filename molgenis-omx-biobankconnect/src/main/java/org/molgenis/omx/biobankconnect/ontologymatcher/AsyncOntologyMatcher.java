@@ -75,7 +75,6 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	private static final String ENTITY_ID = "id";
 	private static final String ENTITY_TYPE = "type";
 	private static final AtomicInteger runningProcesses = new AtomicInteger();
-	private static final PorterStemmer stemmer = new PorterStemmer();
 
 	@Autowired
 	private DataService dataService;
@@ -121,9 +120,9 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	public SearchResult generateMapping(String userName, Integer featureId, Integer targetDataSetId,
 			Integer sourceDataSetId)
 	{
+		PorterStemmer stemmer = new PorterStemmer();
 		DataSet sourceDataSet = dataService.findOne(DataSet.ENTITY_NAME, sourceDataSetId, DataSet.class);
 		DataSet targetDataSet = dataService.findOne(DataSet.ENTITY_NAME, targetDataSetId, DataSet.class);
-
 		SearchResult mappedFeatures = findMappingsByAnnotation(featureId, sourceDataSet);
 		if (mappedFeatures.getTotalHitCount() > 0) return mappedFeatures;
 
@@ -153,8 +152,10 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 				{
 					Map<String, OntologyTermContainer> ontologyTermContainers = collectOntologyTermInfo(definitions,
 							boostedOntologyTermUris);
-					rules.addAll(makeQueryForOntologyTerms(createQueryRules(description, ontologyTermContainers)));
-					for (Map<Integer, List<BoostTermContainer>> alternativeDefinition : addAlternativeDefinition(ontologyTermContainers))
+					rules.addAll(makeQueryForOntologyTerms(createQueryRules(description, ontologyTermContainers,
+							stemmer)));
+					for (Map<Integer, List<BoostTermContainer>> alternativeDefinition : addAlternativeDefinition(
+							ontologyTermContainers, stemmer))
 					{
 						QueryRule queryRule = new QueryRule(makeQueryForOntologyTerms(alternativeDefinition));
 						queryRule.setOperator(Operator.DIS_MAX);
@@ -175,6 +176,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 				return searchDisMaxQuery(sourceDataSet.getProtocolUsed().getId().toString(), finalQuery);
 			}
 		}
+		stemmer = null;
 		return new SearchResult(0, Collections.<Hit> emptyList());
 	}
 
@@ -251,102 +253,6 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		}
 		return searchService.search(new SearchRequest(CATALOGUE_PREFIX + protocolId, query, null));
 	}
-
-	// private void preprocessing(String userName, Integer featureId, Integer
-	// targetDataSet, List<Integer> sourceDataSets)
-	// {
-	// List<String> dataSetsForMapping = new ArrayList<String>();
-	// for (Integer sourceDataSet : sourceDataSets)
-	// {
-	// dataSetsForMapping.add(createMappingDataSetIdentifier(userName,
-	// targetDataSet, sourceDataSet));
-	// }
-	// if (featureId == null)
-	// {
-	// createMappingStore(userName, targetDataSet, sourceDataSets);
-	// deleteExistingRecords(userName, dataSetsForMapping);
-	// }
-	// else removeExistingMappings(featureId, dataSetsForMapping);
-	// }
-
-	// private void deleteExistingRecords(String userName, List<String>
-	// dataSetsForMapping)
-	// {
-	// currentUserStatus.setUserTotalNumberOfQueries(userName, (long)
-	// dataSetsForMapping.size());
-	// Iterable<DataSet> dataSets = dataService.findAll(DataSet.ENTITY_NAME,
-	// new QueryImpl().in(DataSet.IDENTIFIER, dataSetsForMapping),
-	// DataSet.class);
-	// for (DataSet dataSet : dataSets)
-	// {
-	// Iterable<ObservationSet> listOfObservationSets =
-	// dataService.findAll(ObservationSet.ENTITY_NAME,
-	// new QueryImpl().eq(ObservationSet.PARTOFDATASET, dataSet),
-	// ObservationSet.class);
-	//
-	// if (Iterables.size(listOfObservationSets) > 0)
-	// {
-	// Iterable<ObservedValue> listOfObservedValues =
-	// dataService.findAll(ObservedValue.ENTITY_NAME,
-	// new QueryImpl().in(ObservedValue.OBSERVATIONSET,
-	// Lists.newArrayList(listOfObservationSets)),
-	// ObservedValue.class);
-	//
-	// if (Iterables.size(listOfObservedValues) > 0)
-	// dataService.delete(ObservedValue.ENTITY_NAME,
-	// listOfObservedValues);
-	// dataService.delete(ObservationSet.ENTITY_NAME, listOfObservationSets);
-	// }
-	// currentUserStatus.incrementFinishedNumberOfQueries(userName);
-	// }
-	// }
-
-	// private void removeExistingMappings(Integer featureId, List<String>
-	// dataSetsForMapping)
-	// {
-	// List<Integer> observationSets = new ArrayList<Integer>();
-	// for (String dataSet : dataSetsForMapping)
-	// {
-	// QueryImpl q = new QueryImpl();
-	// q.pageSize(100000);
-	// q.addRule(new QueryRule(STORE_MAPPING_FEATURE, Operator.EQUALS,
-	// featureId));
-	//
-	// SearchRequest request = new SearchRequest(dataSet, q, null);
-	// SearchResult searchResult = searchService.search(request);
-	//
-	// List<String> indexIds = new ArrayList<String>();
-	// for (Hit hit : searchResult.getSearchHits())
-	// {
-	// Map<String, Object> columnValueMap = hit.getColumnValueMap();
-	// indexIds.add(hit.getId());
-	// observationSets.add(Integer.parseInt(columnValueMap.get(OBSERVATION_SET).toString()));
-	// }
-	// searchService.deleteDocumentByIds(dataSet, indexIds);
-	// }
-	//
-	// if (observationSets.size() > 0)
-	// {
-	// Iterable<ObservationSet> existingObservationSets =
-	// dataService.findAll(ObservationSet.ENTITY_NAME,
-	// new QueryImpl().in(ObservationSet.ID, observationSets),
-	// ObservationSet.class);
-	//
-	// Iterable<ObservedValue> existingObservedValues =
-	// dataService.findAll(ObservedValue.ENTITY_NAME,
-	// new QueryImpl().in(ObservedValue.OBSERVATIONSET,
-	// Lists.newArrayList(existingObservationSets)),
-	// ObservedValue.class);
-	//
-	// if (Iterables.size(existingObservedValues) > 0)
-	// dataService.delete(ObservedValue.ENTITY_NAME,
-	// existingObservedValues);
-	//
-	// if (Iterables.size(existingObservationSets) > 0)
-	// dataService.delete(ObservationSet.ENTITY_NAME,
-	// existingObservationSets);
-	// }
-	// }
 
 	private List<QueryRule> makeQueryForOntologyTerms(Map<Integer, List<BoostTermContainer>> position)
 	{
@@ -543,7 +449,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	}
 
 	private List<Map<Integer, List<BoostTermContainer>>> addAlternativeDefinition(
-			Map<String, OntologyTermContainer> ontologyTermContainers)
+			Map<String, OntologyTermContainer> ontologyTermContainers, PorterStemmer stemmer)
 	{
 		List<Map<Integer, List<BoostTermContainer>>> positions = new ArrayList<Map<Integer, List<BoostTermContainer>>>();
 		for (Entry<String, OntologyTermContainer> entry : ontologyTermContainers.entrySet())
@@ -596,7 +502,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 									totalHits.get(ontologyIRI).getAllPaths().put(nodePath, boost);
 								}
 							}
-							positions.add(createQueryRules(StringUtils.join(ontologyTerms.toArray(), ' '), totalHits));
+							positions.add(createQueryRules(StringUtils.join(ontologyTerms.toArray(), ' '), totalHits,
+									stemmer));
 						}
 					}
 				}
@@ -606,10 +513,10 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	}
 
 	private Map<Integer, List<BoostTermContainer>> createQueryRules(String description,
-			Map<String, OntologyTermContainer> totalHits)
+			Map<String, OntologyTermContainer> totalHits, PorterStemmer stemmer)
 	{
 		Map<Integer, List<BoostTermContainer>> position = new HashMap<Integer, List<BoostTermContainer>>();
-		List<String> uniqueTokens = stemMembers(Arrays.asList(description.split(" +")));
+		List<String> uniqueTokens = stemMembers(Arrays.asList(description.split(" +")), stemmer);
 
 		for (OntologyTermContainer ontologyTermContainer : totalHits.values())
 		{
@@ -647,7 +554,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 						if (nodePath.equals(parentNodePath))
 						{
 							if (finalIndexPosition == -1) finalIndexPosition = locateTermInDescription(uniqueTokens,
-									ontologyTermSynonym);
+									ontologyTermSynonym, stemmer);
 							if (!ontologyTermSynonym.toString().equals("")) boostTermContainer.getTerms().add(
 									ontologyTermSynonym);
 						}
@@ -660,7 +567,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 								int levelDown = nodePath.split("\\.").length - parentNodeLevel;
 								double boostedNumber = Math.pow(0.5, levelDown);
 								if (finalIndexPosition == -1) finalIndexPosition = locateTermInDescription(
-										uniqueTokens, ontologyTermSynonym);
+										uniqueTokens, ontologyTermSynonym, stemmer);
 
 								StringBuilder boostedSynonym = new StringBuilder();
 								for (String eachToken : ontologyTermSynonym.split(" +"))
@@ -698,10 +605,10 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		return StringUtils.join(tokens.toArray(), ' ');
 	}
 
-	private Integer locateTermInDescription(List<String> uniqueSets, String ontologyTermSynonym)
+	private Integer locateTermInDescription(List<String> uniqueSets, String ontologyTermSynonym, PorterStemmer stemmer)
 	{
 		int finalIndex = -1;
-		List<String> termsFromDescription = stemMembers(Arrays.asList(ontologyTermSynonym.split(" +")));
+		List<String> termsFromDescription = stemMembers(Arrays.asList(ontologyTermSynonym.split(" +")), stemmer);
 		for (String eachTerm : termsFromDescription)
 		{
 			if (!uniqueSets.contains(eachTerm))
@@ -718,7 +625,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		return finalIndex;
 	}
 
-	private List<String> stemMembers(List<String> originalList)
+	private List<String> stemMembers(List<String> originalList, PorterStemmer stemmer)
 	{
 		List<String> newList = new ArrayList<String>();
 		for (String eachTerm : originalList)
@@ -846,22 +753,23 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	{
 		Map<String, String> updateResult = new HashMap<String, String>();
 		// check if the dataset for mappings has been created
-		createMappingStore(userName, request.getTargetDataSetId(), request.getSelectedDataSetIds());
+		List<Integer> selectedDataSetIds = request.getSelectedDataSetIds();
+		Integer targetDataSetId = request.getTargetDataSetId();
+		createMappingStore(userName, targetDataSetId, selectedDataSetIds);
 
-		// check if the mapping that needs to be updated has been created
-		String mappingDataSetIdentifier = createMappingDataSetIdentifier(userName, request.getTargetDataSetId(),
-				request.getSelectedDataSetIds().get(0));
-
-		// update the existing mappings
-		if (updateExistingMapping(mappingDataSetIdentifier, request))
+		boolean toUpdate = false;
+		for (Integer selectedDataSetId : selectedDataSetIds)
 		{
-			updateResult.put("message", "the script has been updated!");
-			return updateResult;
+			// check if the mapping that needs to be updated has been created
+			String mappingDataSetIdentifier = createMappingDataSetIdentifier(userName, targetDataSetId,
+					selectedDataSetId);
+			// update the existing mappings
+			toUpdate = updateExistingMapping(mappingDataSetIdentifier, request);
+			if (!toUpdate) addNewMappingToDatabase(mappingDataSetIdentifier, request);
 		}
 
-		// add the new mappings
-		addNewMappingToDatabase(mappingDataSetIdentifier, request);
-		updateResult.put("message", "the script has been added to the database!");
+		updateResult.put("message",
+				toUpdate ? "the script has been updated!" : "the script has been added to the database!");
 		return updateResult;
 	}
 

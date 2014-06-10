@@ -18,21 +18,23 @@
 <@header css js/>
 <form id="wizardForm" class="form-horizontal" enctype="multipart/form-data">
 	<div class="row-fluid">
-		<div class="span12 well">
+		<div class="span12 well custom-white-well">
+			<br>
 			<div class="row-fluid">
-				<div class="span12"><legend class="legend-mapping-manager">
-					Curate mappings for :
-					<select id="selectedDataSet" name="selectedDataSet">
-						<#if selectedDataSet??>
-							<#list dataSets as dataset>
-								<option value="${dataset.id?c}"<#if dataset.id?c == selectedDataSet> selected</#if>>${dataset.name}</option>
-							</#list>
-						<#else>
-							<#list dataSets as dataset>
-								<option value="${dataset.id?c}"<#if dataset_index == 0> selected</#if>>${dataset.name}</option>
-							</#list>
-						</#if>
-					</select>
+				<div class="offset3 span6 text-align-center">
+					<legend class="custom-purple-legend legend-mapping-manager">Curate matches &nbsp;
+						<select id="selectedDataSet" name="selectedDataSet">
+							<#if selectedDataSet??>
+								<#list dataSets as dataset>
+									<option value="${dataset.id?c}"<#if dataset.id?c == selectedDataSet> selected</#if>>${dataset.name}</option>
+								</#list>
+							<#else>
+								<#list dataSets as dataset>
+									<option value="${dataset.id?c}"<#if dataset_index == 0> selected</#if>>${dataset.name}</option>
+								</#list>
+							</#if>
+						</select>
+					</legend>
 				</div>
 			</div>
 			<div class="row-fluid">
