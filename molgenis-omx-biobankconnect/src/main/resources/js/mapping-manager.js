@@ -97,11 +97,11 @@
 		molgenis.createMatrixForDataItems(default_options);
 	}
 	
-	function createTableRow(featureFromIndex){
+	function createTableRow(featureFromIndex, table){
 		var row = $('<tr />');
 		var feature = restApi.get('/api/v1/observablefeature/' + featureFromIndex.id);
 		var description = '<strong>' + feature.Name + '</strong> : ' + molgenis.i18nDescription(feature).en;
-		var popover = makePopoverComponenet(description, 90, molgenis.i18nDescription(feature).en);
+		var popover = makePopoverComponenet(description, Math.ceil((table.width() * 0.3 - 100)/4), molgenis.i18nDescription(feature).en);
 		$('<td />').addClass('add-border show-popover').append(popover).appendTo(row).click(function(){
 			var row = $(this).parents('tr:eq(0)');
 			if(!$('body').data('clickedRow')) $('body').data('clickedRow', {});
@@ -110,6 +110,8 @@
 			createAnnotationModal(feature);
 		});
 		
+		//Calculate the number of digits to show in the cell and full content is displayed in popover
+		var numberOfDigit = Math.ceil(((table.width() * 0.7) / biobankDataSets.length - 80)/8);
 		$.each(biobankDataSets, function(index, mappedDataSet){
 			var removeIcon = $('<i />').addClass('icon-trash show-popover float-right');
 			var editIcon = $('<i />').addClass('icon-pencil show-popover float-right');
@@ -121,7 +123,7 @@
 				});
 				if(mappedFeatureNames.length > 0){
 					switchBackgroundIcon(editIcon, mappedFeatureNames);
-					topFeatureDivContainer.append(makePopoverComponenet(mappedFeatureNames.join(','), 10, mappedFeatureNames.join(',')));
+					topFeatureDivContainer.append(makePopoverComponenet(mappedFeatureNames.join(','), numberOfDigit, mappedFeatureNames.join('<br />')));
 				}
 				//Initialize the edit click events
 				editIcon.click(function(){
@@ -165,7 +167,7 @@
 								var mappedFeatureMap = updateMappingInfo(feature, mappingTable, mappedDataSet, mappedFeatureNames);
 								mappedFeatureNames = mappedFeatureMap.mappedFeatureNames;
 								switchBackgroundIcon(editIcon, mappedFeatureNames);
-								$(editIcon).siblings('div:eq(0)').empty().append(makePopoverComponenet(mappedFeatureNames.join(','), 10, mappedFeatureNames.join(',')));
+								editIcon.siblings('div:eq(0)').empty().append(makePopoverComponenet(mappedFeatureNames.join(','), numberOfDigit, mappedFeatureNames.join('<br />')));
 								standardModal.closeModal();
 							});
 							//table check box handler
@@ -212,12 +214,13 @@
 		
 		//Helper class for createTableRow function...
 		function makePopoverComponenet(text, length, content){
-			var popover = $('<span />').html(text.length < length ? text : text.substring(0, length) + ' ...');
+			var popover = $('<span />').html(text.length < length ? text : text.substring(0, length) + '..');
 			if(!(text.length < length)){
 				popover.addClass('show-popover').popover({
 					'content' : content,
 					'trigger' : 'hover',
-					'placement' : 'bottom'
+					'placement' : 'bottom',
+					'html' : true
 				});
 			}
 			return popover;

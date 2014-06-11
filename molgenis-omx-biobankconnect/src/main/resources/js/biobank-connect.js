@@ -33,7 +33,7 @@
 						options.createTableRow = createTableRow;
 					}
 					$.each(searchHits, function(){
-						$(options.createTableRow($(this)[0]['columnValueMap'])).appendTo(body);
+						$(options.createTableRow($(this)[0]['columnValueMap'], table)).appendTo(body);
 					});
 					initPager(options, data.totalHitCount);
 					
@@ -127,19 +127,6 @@
 	molgenis.hrefToId = function(href){
 		return href.substring(href.lastIndexOf('/') + 1); 
 	};
-	
-	molgenis.showMessage = function(alertClass, message, parentDiv){
-		var messageDiv = $('#alert-message');
-		if(messageDiv.length === 0) messageDiv = $('<div id="alert-message"></div>').addClass('span12');
-		var button = $('<button type="button" class="close" data-dismiss="alert">&times;</button>');
-		messageDiv.empty().addClass(alertClass).css('margin-left', '-1px').append(button);
-		$('<span><strong>Message : </strong>' + message + '</span>').appendTo(messageDiv);
-		w.setTimeout(function(){messageDiv.fadeOut(1000).remove()}, 10000);
-		button.click(function(){
-			messageDiv.remove();
-		});
-		parentDiv.prepend(messageDiv);
-	}
 	
 	molgenis.i18nDescription = function(feature){
 		if(feature.description === undefined) feature.description = '';

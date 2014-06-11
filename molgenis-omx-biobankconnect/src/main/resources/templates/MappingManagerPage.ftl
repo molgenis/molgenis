@@ -36,12 +36,7 @@
 			</div>
 			<div class="row-fluid">
 				<div class="span12">
-					<div class="row-fluid">
-						<div class="span12">
-							<div id="container" class="row-fluid data-table-container">
-							</div>
-						</div>
-					</div>
+					<div id="container" class="row-fluid data-table-container"></div>
 				</div>
 			</div>
 		</div>

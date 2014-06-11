@@ -206,8 +206,6 @@
 					molgenis.OntologyAnnotator.prototype.createFeatureTable(title, updatedFeature, callback);
 					if(callback !== undefined && callback !== null) callback(updatedFeature);
 				});
-			}else{
-				molgenis.showMessage('alert alert-info', 'No ontology terms were found for "<strong>' + searchField.val() + '<strong/>"', searchDiv);
 			}
 		});
 		return searchDiv.append(searchGroup);
