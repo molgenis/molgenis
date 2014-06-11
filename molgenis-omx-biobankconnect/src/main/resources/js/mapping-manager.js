@@ -268,7 +268,7 @@
 		};
 		$.ajax({
 			type : 'POST',
-			url : molgenis.getContextUrl() + '/savescript',
+			url : molgenis.adaptContextUrl() + '/savescript',
 			data : JSON.stringify(request),
 			contentType : 'application/json',
 			success : function(data){
@@ -304,7 +304,7 @@
 			};
 			$.ajax({
 				type : 'POST',
-				url : molgenis.getContextUrl() + '/savescript',
+				url : molgenis.adaptContextUrl() + '/savescript',
 				data : JSON.stringify(request),
 				async : false,
 				contentType : 'application/json',
@@ -319,7 +319,7 @@
 	function getMapping(dataSetIdentifier, featureId, callback){
 		$.ajax({
 			type : 'POST',
-			url : molgenis.getContextUrl() + '/getmapping',
+			url : molgenis.adaptContextUrl() + '/getmapping',
 			data : JSON.stringify({'dataSetIdentifier' : dataSetIdentifier , 'featureIds' : [featureId]}),
 			async : false,
 			contentType : 'application/json',
@@ -357,7 +357,7 @@
 		};
 		$.ajax({
 			type : 'POST',
-			url : molgenis.getContextUrl() + '/createmapping',
+			url : molgenis.adaptContextUrl() + '/createmapping',
 			data : JSON.stringify(searchRequest),
 			contentType : 'application/json',
 			success : function(data, textStatus, request) {	
@@ -606,13 +606,16 @@
 					'operator' : 'LIKE',
 					'value' : userName + '-' + selectedDataSetId
 				}]
-			}
+			},
+			'expand' : ['ProtocolUsed']
 		}).items;
 		var mappedDataSetIds = [];
 		$.each(mappings, function(index, dataSet){
-			var identifier = dataSet.Identifier;
-			var dataSetIdArray = identifier.split('-');
-			mappedDataSetIds.push(dataSetIdArray[dataSetIdArray.length - 1]);
+			if(dataSet.ProtocolUsed.Identifier === 'store_mapping'){
+				var identifier = dataSet.Identifier;
+				var dataSetIdArray = identifier.split('-');
+				mappedDataSetIds.push(dataSetIdArray[dataSetIdArray.length - 1]);
+			}
 		});
 		return mappedDataSetIds;
 	};

@@ -3,8 +3,7 @@
 <#assign css=[
 	"jquery-ui-1.9.2.custom.min.css", 
 	"bootstrap-fileupload.min.css", 
-	"biobank-connect.css", 
-	"mapping-manager.css"]>
+	"biobank-connect.css"]>
 <#assign js=[
 	"jquery-ui-1.9.2.custom.min.js", 
 	"jquery.bootstrap.pager.js",

@@ -84,3 +84,11 @@ legend.legend {
 .custom-purple-legend {
 	color:#0B09A0;
 }
+
+.overflow-y-visible {
+	overflow-y : visible;
+}
+
+.overflow-y-auto {
+	overflow-y : auto;
+}

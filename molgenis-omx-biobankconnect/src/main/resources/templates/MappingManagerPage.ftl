@@ -8,7 +8,6 @@
 <script src="/js/simple_statistics.js"></script>
 <link rel="stylesheet" type="text/css" href="/css/jquery-ui-1.9.2.custom.min.css">
 <link rel="stylesheet" type="text/css" href="/css/biobank-connect.css">
-<link rel="stylesheet" type="text/css" href="/css/mapping-manager.css">
 <form id="wizardForm" name="wizardForm" class="form-horizontal">
 	<div class="row-fluid">
 		<div class="span12 well custom-white-well">	

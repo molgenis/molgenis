@@ -15,7 +15,7 @@
 		};
 		$.ajax({
 			type : 'POST',
-			url : molgenis.getContextUrl() + '/allattributes',
+			url : molgenis.adaptContextUrl() + '/allattributes',
 			async : false,
 			data : JSON.stringify(request),
 			contentType : 'application/json',
@@ -38,7 +38,7 @@
 		};
 		$.ajax({
 			type : 'POST',
-			url : molgenis.getContextUrl() + '/allattributes',
+			url : molgenis.adaptContextUrl() + '/allattributes',
 			async : false,
 			data : JSON.stringify(request),
 			contentType : 'application/json',
@@ -250,7 +250,7 @@
 	molgenis.getFeatureFromIndex = function (feature, callback){		
 		$.ajax({
 			type : 'POST',
-			url : molgenis.getContextUrl() + '/attribute',
+			url : molgenis.adaptContextUrl() + '/attribute',
 			async : false,
 			data : JSON.stringify(molgenis.hrefToId(feature.href)),
 			contentType : 'application/json',
@@ -266,7 +266,7 @@
 	molgenis.dataItemsTypeahead = function (dataSetId, query, response, approximate){
 		$.ajax({
 			type : 'POST',
-			url : molgenis.getContextUrl() + '/allattributes',
+			url : molgenis.adaptContextUrl() + '/allattributes',
 			async : false,
 			data : JSON.stringify({'dataSetId' : dataSetId, 'queryString' : query, 'approximate' : (approximate !== undefined && approximate !== null)}),
 			contentType : 'application/json',
@@ -290,7 +290,7 @@
 	molgenis.ontologyTermTypeahead = function (field, query, response){
 		$.ajax({
 			type : 'POST',
-			url : molgenis.getContextUrl() + '/ontologyterm',
+			url : molgenis.adaptContextUrl() + '/ontologyterm',
 			async : false,
 			data : JSON.stringify({'queryString' : query}),
 			contentType : 'application/json',
@@ -312,8 +312,11 @@
 		});
 	};
 	
+	molgenis.adaptContextUrl = function (){
+		return molgenis.getContextUrl().replace(/biobankconnect$/g, "algorithm");
+	};
+	
 	$(function(){
-		molgenis.setContextUrl(molgenis.getContextUrl().replace(/biobankconnect$/g, "algorithm"));
 		var buttonGroup = $('.bwizard-buttons');
 		$('#wizardForm').prepend(buttonGroup);
 		buttonGroup.before('<legend />');
