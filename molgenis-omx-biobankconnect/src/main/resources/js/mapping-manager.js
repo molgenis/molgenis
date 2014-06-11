@@ -251,7 +251,7 @@
 			setTimeout(function(){
 				var table = existingRow.parents('table:eq(0)');
 				var rowIndex = $.inArray(existingRow[0], table.find('tr'));
-				var updatedRow = createTableRow(featureFromIndex);
+				var updatedRow = createTableRow(featureFromIndex, table);
 				var columnToUpdate = updatedRow.find('td:eq(' + (columnIndex + 1) + ')');
 				table.find('tr:eq(' + --rowIndex + ')').after(updatedRow);
 				existingRow.remove();
