@@ -1,10 +1,15 @@
 package org.molgenis.dataexplorer.controller;
 
+import static org.molgenis.dataexplorer.controller.DataExplorerController.ATTR_GALAXY_API_KEY;
+import static org.molgenis.dataexplorer.controller.DataExplorerController.ATTR_GALAXY_URL;
 import static org.molgenis.dataexplorer.controller.DataExplorerController.URI;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
@@ -24,13 +29,20 @@ import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.support.GenomeConfig;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.dataexplorer.controller.DataRequest.ColNames;
+import org.molgenis.dataexplorer.galaxy.GalaxyDataExportException;
+import org.molgenis.dataexplorer.galaxy.GalaxyDataExportRequest;
+import org.molgenis.dataexplorer.galaxy.GalaxyDataExporter;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.util.ErrorMessageResponse;
+import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -44,6 +56,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.SessionAttributes;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -51,16 +64,11 @@ import com.google.common.collect.Iterables;
 
 /**
  * Controller class for the data explorer.
- * 
- * The implementation javascript file for the resultstable is defined in a MolgenisSettings property named
- * 'dataexplorer.resultstable.js' possible values are '/js/SingleObservationSetTable.js' or
- * '/js/MultiObservationSetTable.js' with '/js/MultiObservationSetTable.js' as the default
- * 
- * @author erwin
- * 
  */
 @Controller
 @RequestMapping(URI)
+@SessionAttributes(
+{ ATTR_GALAXY_URL, ATTR_GALAXY_API_KEY })
 public class DataExplorerController extends MolgenisPluginController
 {
 	private static final Logger logger = Logger.getLogger(DataExplorerController.class);
@@ -73,11 +81,17 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String KEY_MOD_CHARTS = "plugin.dataexplorer.mod.charts";
 	public static final String KEY_MOD_DATA = "plugin.dataexplorer.mod.data";
 	public static final String KEY_MOD_DISEASEMATCHER = "plugin.dataexplorer.mod.diseasematcher";
+	public static final String KEY_GALAXY_ENABLED = "plugin.dataexplorer.galaxy.enabled";
+	public static final String KEY_GALAXY_URL = "plugin.dataexplorer.galaxy.url";
 	private static final boolean DEFAULT_VAL_MOD_AGGREGATES = true;
 	private static final boolean DEFAULT_VAL_MOD_ANNOTATORS = true;
 	private static final boolean DEFAULT_VAL_MOD_CHARTS = true;
 	private static final boolean DEFAULT_VAL_MOD_DATA = true;
 	private static final boolean DEFAULT_VAL_MOD_DISEASEMATCHER = false;
+	private static final boolean DEFAULT_VAL_GALAXY_ENABLED = false;
+
+	static final String ATTR_GALAXY_URL = "galaxyUrl";
+	static final String ATTR_GALAXY_API_KEY = "galaxyApiKey";
 
 	public static final String INITLOCATION = "genomebrowser.init.initLocation";
 	public static final String COORDSYSTEM = "genomebrowser.init.coordSystem";
@@ -85,6 +99,9 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String SOURCES = "genomebrowser.init.sources";
 	public static final String BROWSERLINKS = "genomebrowser.init.browserLinks";
 	public static final String WIZARD_TITLE = "plugin.dataexplorer.wizard.title";
+
+	public static final String KEY_DATAEXPLORER_EDITABLE = "plugin.dataexplorer.editable";
+	private static final boolean DEFAULT_VAL_DATAEXPLORER_EDITABLE = false;
 
 	@Autowired
 	private DataService dataService;
@@ -140,7 +157,7 @@ public class DataExplorerController extends MolgenisPluginController
 		}
 		model.addAttribute("selectedEntityName", selectedEntityName);
 		model.addAttribute(
-				WIZARD_TITLE,
+				"wizardtitle",
 				molgenisSettings.getProperty(WIZARD_TITLE) == null ? "Filter Wizard" : molgenisSettings
 						.getProperty(WIZARD_TITLE));
 		model.addAttribute("wizard", (wizard != null) && wizard.booleanValue());
@@ -165,6 +182,12 @@ public class DataExplorerController extends MolgenisPluginController
 			model.addAttribute("chains", molgenisSettings.getProperty(CHAINS));
 			model.addAttribute("sources", molgenisSettings.getProperty(SOURCES));
 			model.addAttribute("browserLinks", molgenisSettings.getProperty(BROWSERLINKS));
+			model.addAttribute("tableEditable",
+					molgenisSettings.getBooleanProperty(KEY_DATAEXPLORER_EDITABLE, DEFAULT_VAL_DATAEXPLORER_EDITABLE));
+			model.addAttribute("galaxyEnabled",
+					molgenisSettings.getBooleanProperty(KEY_GALAXY_ENABLED, DEFAULT_VAL_GALAXY_ENABLED));
+			String galaxyUrl = molgenisSettings.getProperty(KEY_GALAXY_URL);
+			if (galaxyUrl != null) model.addAttribute(ATTR_GALAXY_URL, galaxyUrl);
 		}
 		return "view-dataexplorer-mod-" + moduleId; // TODO bad request in case of invalid module id
 	}
@@ -255,7 +278,8 @@ public class DataExplorerController extends MolgenisPluginController
 
 	private boolean isGenomeBrowserEntity(EntityMetaData entityMetaData)
 	{
-		AttributeMetaData attributeStartPosition = entityMetaData.getAttribute(GenomeConfig.GENOMEBROWSER_START_POSITION);
+		AttributeMetaData attributeStartPosition = entityMetaData
+				.getAttribute(GenomeConfig.GENOMEBROWSER_START_POSITION);
 		AttributeMetaData attributeId = entityMetaData.getAttribute(GenomeConfig.GENOMEBROWSER_ID);
 		AttributeMetaData attributeChromosome = entityMetaData.getAttribute(GenomeConfig.GENOMEBROWSER_CHROMOSOME);
 		return attributeStartPosition != null && attributeId != null && attributeChromosome != null;
@@ -272,33 +296,79 @@ public class DataExplorerController extends MolgenisPluginController
 		DataRequest dataRequest = new GsonHttpMessageConverter().getGson().fromJson(dataRequestStr, DataRequest.class);
 
 		String entityName = dataRequest.getEntityName();
-		EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
-		final Set<String> attributes = new HashSet<String>(dataRequest.getAttributeNames());
 		String fileName = entityName + '_' + new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + ".csv";
 
-		QueryImpl query = dataRequest.getQuery();
 		response.setContentType("text/csv");
 		response.addHeader("Content-Disposition", "attachment; filename=" + fileName);
+		writeDataRequestCsv(dataRequest, response.getOutputStream(), ',');
+	}
 
-		CsvWriter csvWriter = new CsvWriter(response.getOutputStream());
+	@RequestMapping(value = "/galaxy/export", method = POST)
+	@ResponseStatus(HttpStatus.OK)
+	public void exportToGalaxy(@Valid @RequestBody GalaxyDataExportRequest galaxyDataExportRequest, Model model)
+			throws IOException
+	{
+		boolean galaxyEnabled = molgenisSettings.getBooleanProperty(KEY_GALAXY_ENABLED, DEFAULT_VAL_GALAXY_ENABLED);
+		if (!galaxyEnabled) throw new MolgenisDataAccessException("Galaxy export disabled");
+
+		String galaxyUrl = galaxyDataExportRequest.getGalaxyUrl();
+		String galaxyApiKey = galaxyDataExportRequest.getGalaxyApiKey();
+		GalaxyDataExporter galaxyDataSetExporter = new GalaxyDataExporter(galaxyUrl, galaxyApiKey);
+
+		DataRequest dataRequest = galaxyDataExportRequest.getDataRequest();
+
+		File csvFile = File.createTempFile("galaxydata_" + System.currentTimeMillis(), ".tsv");
 		try
 		{
-			csvWriter.writeAttributeNames(Iterables.transform(
-					Iterables.filter(entityMetaData.getAtomicAttributes(), new Predicate<AttributeMetaData>()
+			writeDataRequestCsv(dataRequest, new FileOutputStream(csvFile), '\t');
+			galaxyDataSetExporter.export(dataRequest.getEntityName(), csvFile);
+		}
+		finally
+		{
+			csvFile.delete();
+		}
+
+		// store url and api key in session for subsequent galaxy export requests
+		model.addAttribute(ATTR_GALAXY_URL, galaxyUrl);
+		model.addAttribute(ATTR_GALAXY_API_KEY, galaxyApiKey);
+	}
+
+	private void writeDataRequestCsv(DataRequest dataRequest, OutputStream outputStream, char separator)
+			throws IOException
+	{
+		CsvWriter csvWriter = new CsvWriter(outputStream, separator);
+		try
+		{
+			String entityName = dataRequest.getEntityName();
+			EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
+			final Set<String> attributeNames = new HashSet<String>(dataRequest.getAttributeNames());
+			Iterable<AttributeMetaData> attributes = Iterables.filter(entityMetaData.getAtomicAttributes(),
+					new Predicate<AttributeMetaData>()
 					{
 						@Override
 						public boolean apply(AttributeMetaData attributeMetaData)
 						{
-							return attributes.contains(attributeMetaData.getName());
+							return attributeNames.contains(attributeMetaData.getName());
 						}
-					}), new Function<AttributeMetaData, String>()
+					});
+
+			if (dataRequest.getColNames() == ColNames.ATTRIBUTE_LABELS)
+			{
+				csvWriter.writeAttributes(attributes);
+			}
+			else if (dataRequest.getColNames() == ColNames.ATTRIBUTE_NAMES)
+			{
+				csvWriter.writeAttributeNames(Iterables.transform(attributes, new Function<AttributeMetaData, String>()
+				{
+					@Override
+					public String apply(AttributeMetaData attributeMetaData)
 					{
-						@Override
-						public String apply(AttributeMetaData attributeMetaData)
-						{
-							return attributeMetaData.getName();
-						}
-					}));
+						return attributeMetaData.getName();
+					}
+				}));
+			}
+
+			QueryImpl query = dataRequest.getQuery();
 			csvWriter.add(dataService.findAll(entityName, query));
 		}
 		finally
@@ -354,6 +424,15 @@ public class DataExplorerController extends MolgenisPluginController
 		}
 
 		return dataService.aggregate(entityName, xAttributeMeta, yAttributeMeta, new QueryImpl(request.getQ()));
+	}
+
+	@ExceptionHandler(GalaxyDataExportException.class)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public ErrorMessageResponse handleGalaxyDataExportException(GalaxyDataExportException e)
+	{
+		logger.debug("", e);
+		return new ErrorMessageResponse(Collections.singletonList(new ErrorMessage(e.getMessage())));
 	}
 
 	@ExceptionHandler(RuntimeException.class)

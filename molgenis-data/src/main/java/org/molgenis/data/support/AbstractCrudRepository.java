@@ -61,7 +61,7 @@ public abstract class AbstractCrudRepository extends AbstractRepository implemen
 
 	protected abstract Integer addInternal(Iterable<? extends Entity> entities);
 
-	protected abstract Object addInternal(Entity entity);
+	protected abstract void addInternal(Entity entity);
 
 	protected abstract void updateInternal(Entity entity);
 

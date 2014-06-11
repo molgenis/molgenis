@@ -2,6 +2,7 @@ package org.molgenis.security.token;
 
 import java.util.Date;
 
+import org.apache.commons.lang3.time.DateUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.auth.MolgenisUser;
@@ -43,7 +44,9 @@ public class DataServiceTokenService implements TokenService
 	}
 
 	/**
-	 * Generates a token and associates it with a user. For now tokens will not expire.
+	 * Generates a token and associates it with a user.
+	 * 
+	 * Token expires in 2 hours
 	 * 
 	 * @param user
 	 * @return
@@ -64,7 +67,7 @@ public class DataServiceTokenService implements TokenService
 		molgenisToken.setMolgenisUser(user);
 		molgenisToken.setToken(token);
 		molgenisToken.setDescription(description);
-		molgenisToken.setExpirationDate(null);// No expiration date
+		molgenisToken.setExpirationDate(DateUtils.addHours(new Date(), 2));
 		dataService.add(MolgenisToken.ENTITY_NAME, molgenisToken);
 
 		return token;

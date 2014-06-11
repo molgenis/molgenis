@@ -15,10 +15,6 @@
 	display: inline;
 }
 
-#download-button {
-	float: right;
-}
-
 #genomebrowser {
     visibility: hidden
 }
@@ -212,4 +208,9 @@ ul.fancytree-container {
 
 .ui-editRangeSlider-inputValue {
 	width: 4em;
+}
+
+input[name="ColNames"] {
+  margin-top: -1px;
+  vertical-align: middle;
 }

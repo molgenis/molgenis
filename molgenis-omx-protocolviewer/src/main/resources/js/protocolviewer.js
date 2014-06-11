@@ -100,7 +100,7 @@
 			url : '/api/v1/category?_method=GET',
 			data : JSON.stringify({
 				q : [ {
-					"field" : "observableFeature_Identifier",
+					"field" : "observableFeature",
 					"operator" : "EQUALS",
 					"value" : data.Identifier
 				} ],
