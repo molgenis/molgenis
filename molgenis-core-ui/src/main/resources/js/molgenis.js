@@ -203,7 +203,7 @@
 		});
 		
 		return writable;
-	}
+	};
 	
 }($, window.top.molgenis = window.top.molgenis || {}));
 
@@ -420,7 +420,7 @@ function createInput(dataType, attrs, val, lbl) {
 		}
 		
 		$.ajax(config);
-	}
+	};
 	
 	molgenis.RestClient.prototype._toApiUri = function(resourceUri, options) {
 		var qs = "";
