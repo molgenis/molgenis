@@ -101,7 +101,7 @@
 		var row = $('<tr />');
 		var feature = restApi.get('/api/v1/observablefeature/' + featureFromIndex.id);
 		var description = '<strong>' + feature.Name + '</strong> : ' + molgenis.i18nDescription(feature).en;
-		var popover = makePopoverComponenet(description, Math.ceil((table.width() * 0.3 - 100)/4), molgenis.i18nDescription(feature).en);
+		var popover = makePopoverComponenet(description, Math.ceil((table.find('th:eq(0)').width() - 135)/4), molgenis.i18nDescription(feature).en);
 		$('<td />').addClass('add-border show-popover').append(popover).appendTo(row).click(function(){
 			var row = $(this).parents('tr:eq(0)');
 			if(!$('body').data('clickedRow')) $('body').data('clickedRow', {});
@@ -111,7 +111,7 @@
 		});
 		
 		//Calculate the number of digits to show in the cell and full content is displayed in popover
-		var numberOfDigit = Math.ceil(((table.width() * 0.7) / biobankDataSets.length - 80)/8);
+		var numberOfDigit = Math.ceil(((table.width() - table.find('th:eq(0)').width()) / biobankDataSets.length - 80)/8);
 		$.each(biobankDataSets, function(index, mappedDataSet){
 			var removeIcon = $('<i />').addClass('icon-trash show-popover float-right');
 			var editIcon = $('<i />').addClass('icon-pencil show-popover float-right');
