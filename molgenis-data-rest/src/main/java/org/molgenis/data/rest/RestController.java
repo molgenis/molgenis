@@ -17,6 +17,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -29,6 +30,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -40,6 +42,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityCollection;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
@@ -47,7 +50,10 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.Queryable;
 import org.molgenis.data.Repository;
+import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.rsql.MolgenisRSQL;
+import org.molgenis.data.support.DefaultEntityCollection;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
@@ -65,6 +71,7 @@ import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionException;
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -84,9 +91,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.common.collect.Sets.SetView;
+
+import cz.jirutka.rsql.parser.RSQLParserException;
 
 /**
  * Rest endpoint for the DataService
@@ -111,10 +122,12 @@ public class RestController
 	private final AuthenticationManager authenticationManager;
 	private final String ENTITY_FORM_MODEL_ATTRIBUTE = "form";
 	private final MolgenisPermissionService molgenisPermissionService;
+	private final MolgenisRSQL molgenisRSQL;
 
 	@Autowired
 	public RestController(DataService dataService, TokenService tokenService,
-			AuthenticationManager authenticationManager, MolgenisPermissionService molgenisPermissionService)
+			AuthenticationManager authenticationManager, MolgenisPermissionService molgenisPermissionService,
+			MolgenisRSQL molgenisRSQL)
 	{
 		if (dataService == null) throw new IllegalArgumentException("dataService is null");
 		if (tokenService == null) throw new IllegalArgumentException("tokenService is null");
@@ -125,6 +138,7 @@ public class RestController
 		this.tokenService = tokenService;
 		this.authenticationManager = authenticationManager;
 		this.molgenisPermissionService = molgenisPermissionService;
+		this.molgenisRSQL = molgenisRSQL;
 	}
 
 	/**
@@ -365,6 +379,115 @@ public class RestController
 	}
 
 	/**
+	 * Does a rsql/fiql query, returns the result as csv
+	 * 
+	 * Parameters:
+	 * 
+	 * q: the query
+	 * 
+	 * attributes: the attributes to return, if not specified returns all attributes
+	 * 
+	 * start: the index of the first row, default 0
+	 * 
+	 * num: the number of results to return, default 100, max 100000
+	 * 
+	 * 
+	 * Example: /api/v1/csv/person?q=firstName==Piet&attributes=firstName,lastName&start=10&num=100
+	 * 
+	 * @param entityName
+	 * @param attributes
+	 * @param req
+	 * @param resp
+	 * @return
+	 * @throws IOException
+	 */
+	@RequestMapping(value = "/csv/{entityName}", method = GET, produces = "text/csv")
+	@ResponseBody
+	public EntityCollection retrieveEntityCollection(@PathVariable("entityName") String entityName,
+			@RequestParam(value = "attributes", required = false) String[] attributes, HttpServletRequest req,
+			HttpServletResponse resp) throws IOException
+	{
+		final Set<String> attributesSet = toAttributeSet(attributes);
+
+		EntityMetaData meta;
+		Iterable<Entity> entities;
+		try
+		{
+			meta = dataService.getEntityMetaData(entityName);
+			Query q = new QueryStringParser(meta, molgenisRSQL).parseQueryString(req.getParameterMap());
+
+			if (q.getPageSize() == 0)
+			{
+				q.pageSize(EntityCollectionRequest.DEFAULT_ROW_COUNT);
+			}
+
+			if (q.getPageSize() > EntityCollectionRequest.MAX_ROWS)
+			{
+				resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Num exceeded the maximum of "
+						+ EntityCollectionRequest.MAX_ROWS + " rows");
+				return null;
+			}
+
+			entities = dataService.findAll(entityName, q);
+		}
+		catch (ConversionFailedException | RSQLParserException | UnknownAttributeException | IllegalArgumentException
+				| UnsupportedOperationException | UnknownEntityException e)
+		{
+			resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+			return null;
+		}
+		catch (MolgenisDataAccessException e)
+		{
+			resp.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+			return null;
+		}
+
+		// Check attribute names
+		Iterable<String> attributesIterable = Iterables.transform(meta.getAtomicAttributes(),
+				new Function<AttributeMetaData, String>()
+				{
+					@Override
+					public String apply(AttributeMetaData attributeMetaData)
+					{
+						return attributeMetaData.getName().toLowerCase();
+					}
+				});
+
+		if (attributesSet != null)
+		{
+			SetView<String> diff = Sets.difference(attributesSet, Sets.newHashSet(attributesIterable));
+			if (!diff.isEmpty())
+			{
+				resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown attributes " + diff);
+				return null;
+			}
+		}
+
+		attributesIterable = Iterables.transform(meta.getAtomicAttributes(), new Function<AttributeMetaData, String>()
+		{
+			@Override
+			public String apply(AttributeMetaData attributeMetaData)
+			{
+				return attributeMetaData.getName();
+			}
+		});
+
+		if (attributesSet != null)
+		{
+			attributesIterable = Iterables.filter(attributesIterable, new Predicate<String>()
+			{
+				@Override
+				public boolean apply(@Nullable String attribute)
+				{
+					return attributesSet.contains(attribute.toLowerCase());
+				}
+			});
+		}
+
+		return new DefaultEntityCollection(entities, attributesIterable);
+	}
+
+	/**
 	 * Creates a new entity from a html form post.
 	 * 
 	 * @param entityName
@@ -433,6 +556,22 @@ public class RestController
 			@RequestBody Map<String, Object> entityMap)
 	{
 		updateInternal(entityName, id, entityMap);
+	}
+
+	@RequestMapping(value = "/{entityName}/{id}/{attributeName}", method = POST, params = "_method=PUT")
+	@ResponseStatus(OK)
+	public void updateAttribute(@PathVariable("entityName") String entityName,
+			@PathVariable("attributeName") String attributeName, @PathVariable("id") Object id,
+			@RequestBody Object value)
+	{
+		Entity entity = dataService.findOne(entityName, id);
+		if (entity == null)
+		{
+			throw new UnknownEntityException("Entity of type " + entityName + " with id " + id + " not found");
+		}
+
+		entity.set(attributeName, value);
+		dataService.update(entityName, entity);
 	}
 
 	/**
@@ -694,7 +833,7 @@ public class RestController
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
 		if (meta.getIdAttribute() == null)
 		{
-			throw new IllegalArgumentException(entityName + " does not have a id attribute");
+			throw new IllegalArgumentException(entityName + " does not have an id attribute");
 		}
 
 		Entity existing = dataService.findOne(entityName, id);

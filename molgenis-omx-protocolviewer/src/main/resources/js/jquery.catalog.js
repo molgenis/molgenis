@@ -2,7 +2,6 @@
 	"use strict";
 
 	var restApi = new molgenis.RestClient();
-	var searchApi = new molgenis.SearchClient();
 	var maxItems = 10000;
 	
 	function createTreeConfig(settings, callback) {
@@ -186,29 +185,12 @@
                  // displaySiblings: no
 		if(settings.displayedItems.length > 0) {
 			// FIXME search API does not support IN query
-			var searchRequest = {
-				'documentType' : 'protocolTree-' + settings.protocolId,
-				'query' : {
-					'rules' :	(function() {
-							var queryRules = [];
-							$.each(settings.displayedItems, function(i, item) {
-								if (i > 0) {
-									queryRules.push({
-										operator : 'OR'
-									});
-								}
-								queryRules.push({
-									field : 'id',
-									operator : 'EQUALS',
-									value : parseInt(restApi.getPrimaryKeyFromHref(item))
-								});
-							});
-							return [queryRules];
-						}()),
-					'pageSize' : 1000000
-				}
-			};
-			searchApi.search(searchRequest, function(searchResponse) {				
+			var items = [];
+			$.each(settings.displayedItems, function(i, item) {
+				items.push(restApi.getPrimaryKeyFromHref(item));
+			});
+
+			getDataItemsByIds(settings.protocolId, items, function(searchResponse) {				
 				var tree = {};
 				var subTrees = {};
 				$.each(searchResponse.searchHits, function() {
@@ -263,30 +245,33 @@
 		}		
 	};
 	
+	function getDataItemsByIds(catalogId, items, callback){
+		$.ajax({
+			type : 'POST',
+			url : molgenis.getContextUrl() + '/items',
+			data : JSON.stringify({'catalogId' : catalogId, 'items' : items}),
+			contentType : 'application/json',
+			success : function(searchResponse) {
+				callback(searchResponse);
+			}
+		});
+	}
+	
+	function searchItems(catalogId, queryString, callback){
+		$.ajax({
+			type : 'POST',
+			url : molgenis.getContextUrl() + '/search',
+			data : JSON.stringify({'catalogId' : catalogId, 'queryString' : queryString}),
+			contentType : 'application/json',
+			success : function(searchResponse) {
+				callback(searchResponse);
+			}
+		});
+	}
+	
 	function createSearchTreeConfig(query, settings, treeContainer, callback) {		
 		if (query) {
-			var searchRequest;
-			
-			var queryRules = [];
-			//FIXME move tokenization to search API
-			$.each($.trim(query).split(' '), function(i, term) {
-				if(i > 0) queryRules.push({operator : 'AND'});
-				queryRules.push({
-					operator : 'SEARCH',
-					value : term
-				});
-			});
-
-			searchRequest = {
-				documentType : 'protocolTree-' + settings.protocolId,
-				query : {
-					'rules' : [queryRules],
-					//FIXME get unlimited number of search results
-					'pageSize' : 1000000
-				}
-			};
-			
-			searchApi.search(searchRequest, function(searchResponse){
+			searchItems(settings.protocolId, query, function(searchResponse){
 				var visibleItems = {};
 				$.each(searchResponse.searchHits, function() {
 					visibleItems[this.columnValueMap.id] = null;

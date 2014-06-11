@@ -58,5 +58,4 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		freemarkerVariables.put("dataExplorerLink", new DataExplorerHyperlinkDirective(molgenisPluginRegistry(),
 				dataService));
 	}
-
 }
