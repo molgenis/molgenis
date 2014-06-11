@@ -426,9 +426,8 @@
 		var subSetMappings = mappedFeatures.slice(0, total < 10 ? total : 10);
 		var map = {};
 		$.each(subSetMappings, function(index, mappedFeatureFromIndex){
-			var mappedFeature = restApi.get('/api/v1/observablefeature/' + mappedFeatureFromIndex.id);
 			var score = mappedFeatureFromIndex.score;
-			mappedFeatureFromIndex.comparedScore = score / mappedFeature.description.length;
+			mappedFeatureFromIndex.comparedScore = score / mappedFeatureFromIndex.description.length;
 			if(!map[score]){
 				map[score] = [];
 			}
