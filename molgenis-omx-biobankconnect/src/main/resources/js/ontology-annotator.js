@@ -11,9 +11,8 @@
 	molgenis.OntologyAnnotator.prototype.changeDataSet = function(selectedDataSetId){
 		if(selectedDataSetId !== undefined && selectedDataSetId !== null && selectedDataSetId !== ''){
 			selectedDataSet = restApi.get('/api/v1/dataset/' + selectedDataSetId);
-			var attributes = restApi.get('/api/v1/' + selectedDataSet.Identifier + '/meta', {'expand' : ['attributes']});
 			$('#catalogue-name').empty().append(selectedDataSet.Name);
-			$('#dataitem-number').empty().append(Object.keys(attributes.attributes).length);
+			$('#dataitem-number').empty().append(molgenis.getTotalNumberOfItems(selectedDataSetId));
 			updateMatrix();
 			initSearchDataItems();
 		

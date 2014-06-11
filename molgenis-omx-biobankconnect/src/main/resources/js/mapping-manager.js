@@ -45,8 +45,7 @@
 					},
 					'expand' : ['protocolUsed']
 				}).items;
-				var attributes = restApi.get('/api/v1/' + selectedDataSet.Identifier + '/meta', {'expand' : ['attributes']});
-				$('#dataitem-number').empty().append(Object.keys(attributes.attributes).length);
+				$('#dataitem-number').empty().append(molgenis.getTotalNumberOfItems(selectedDataSetId));
 				updateMatrix();
 				initSearchDataItems();
 			}

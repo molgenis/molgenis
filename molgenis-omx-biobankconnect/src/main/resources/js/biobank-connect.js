@@ -5,6 +5,27 @@
 	var restApi = new molgenis.RestClient();
 	var nrItemsPerPage = 10;
 	
+	molgenis.getTotalNumberOfItems = function(dataSetId){
+		var number = 0;
+		var request = {
+			'dataSetId' : dataSetId,  
+			'query' : {
+				'pageSize' : 100000,
+			}
+		};
+		$.ajax({
+			type : 'POST',
+			url : molgenis.getContextUrl() + '/allattributes',
+			async : false,
+			data : JSON.stringify(request),
+			contentType : 'application/json',
+			success : function(data){
+				number = data.searchHits.length;
+			}
+		});
+		return number;
+	};
+	
 	molgenis.createMatrixForDataItems = function(options){
 		var request = {
 			'dataSetId' : options.dataSetId, 

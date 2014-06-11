@@ -47,12 +47,13 @@
 						</div>
 					</div>
 					<div class="row-fluid">
+						<div class="span4">
+							Number of data items : <span id="dataitem-number"></span>
+						</div>
+					</div>
+					<div class="row-fluid">
 						<div class="span12">
 							<div id="container" class="data-table-container">
-								<!-- <table id="dataitem-table" class="table table-striped table-condensed"></table>-->
-							</div>
-							<div class="pagination pagination-centered">
-								<ul></ul>
 							</div>
 						</div>
 					</div>

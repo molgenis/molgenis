@@ -44,10 +44,7 @@
 					</div>
 					<div class="row-fluid">
 						<div class="span12">
-							<div id="container" class="data-table-container">
-								
-							</div>
-							<div class="pagination-centered"></div>
+							<div id="container" class="data-table-container"></div>
 						</div>
 					</div>
 				</div>

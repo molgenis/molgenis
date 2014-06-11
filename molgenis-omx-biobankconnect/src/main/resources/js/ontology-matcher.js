@@ -94,7 +94,6 @@
 	function changeDataSet (selectedDataSetId){
 		if(selectedDataSetId !== undefined && selectedDataSetId !== null && selectedDataSetId !== ''){
 			selectedDataSet = restApi.get('/api/v1/dataset/' + selectedDataSetId);
-			var attributes = restApi.get('/api/v1/' + selectedDataSet.Identifier + '/meta', {'expand' : ['attributes']});
 			$('#selected-catalogue').empty().append(selectedDataSet.Name);
 			updateMatrix({'updatePager' : true});
 			initSearchDataItems();

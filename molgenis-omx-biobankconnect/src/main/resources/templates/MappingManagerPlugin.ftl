@@ -55,6 +55,11 @@
 				</div>
 			</div>
 			<div class="row-fluid">
+				<div class="span4">
+					Number of data items : <span id="dataitem-number"></span>
+				</div>
+			</div>
+			<div class="row-fluid">
 				<div class="span12">
 					<div id="container" class="row-fluid data-table-container">
 					</div>

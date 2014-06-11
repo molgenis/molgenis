@@ -31,8 +31,7 @@
 			$.each(biobankDataSets, function(index, dataSet){
 				involvedDataSetNames.push(dataSet.Name);
 			});
-			var attributes = restApi.get('/api/v1/' + selectedDataSet.Identifier + '/meta', {'expand' : ['attributes']});
-			$('#dataitem-number').empty().append(Object.keys(attributes.attributes).length);
+			$('#dataitem-number').empty().append(molgenis.getTotalNumberOfItems(selectedDataSetId));
 			updateMatrix({'tableHeaders' : involvedDataSetNames});
 			initSearchDataItems();
 		}else{

@@ -8,11 +8,10 @@
 	
 	molgenis.CatalogueChooser.prototype.changeDataSet = function(selectedDataSetId){
 		if(selectedDataSetId !== null && selectedDataSetId !== undefined && selectedDataSetId !== ''){
-			selectedDataSet = restApi.get('/api/v1/dataset/' + selectedDataSetId, {'expand' : ['ProtocolUsed']});
-			var attributes = restApi.get('/api/v1/' + selectedDataSet.Identifier + '/meta', {'expand' : ['attributes']});	
+			selectedDataSet = restApi.get('/api/v1/dataset/' + selectedDataSetId, {'expand' : ['ProtocolUsed']});	
 			$('#selected-catalogue').empty().append(selectedDataSet.Name);
 			$('#catalogue-name').empty().append(selectedDataSet.Name);
-			$('#dataitem-number').empty().append(Object.keys(attributes.attributes).length);
+			$('#dataitem-number').empty().append(molgenis.getTotalNumberOfItems(selectedDataSetId));
 			$('#search-dataitem').val('');
 			updateMatrix();
 			initSearchDataItems();
