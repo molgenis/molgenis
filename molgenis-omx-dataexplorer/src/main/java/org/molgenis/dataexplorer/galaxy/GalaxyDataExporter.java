@@ -26,40 +26,49 @@ public class GalaxyDataExporter
 		this.galaxyInstance = GalaxyInstanceFactory.get(galaxyUrl, galaxyApiKey);
 	}
 
-	public void export(String dataSetName, File tsvFile)
+	public void export(String dataSetName, File tsvFile) throws GalaxyDataExportException
 	{
 		export(dataSetName, tsvFile, MOLGENIS_HISTORY_NAME);
 	}
 
-	public void export(String dataSetName, File tsvFile, String historyName)
+	public void export(String dataSetName, File tsvFile, String historyName) throws GalaxyDataExportException
 	{
-		// get/create history
-		HistoriesClient historiesClient = galaxyInstance.getHistoriesClient();
-		History molgenisHistory = null;
-		for (History history : historiesClient.getHistories())
+		try
 		{
-			if (history.getName().equals(historyName))
+			// get/create history
+			HistoriesClient historiesClient = galaxyInstance.getHistoriesClient();
+			History molgenisHistory = null;
+			for (History history : historiesClient.getHistories())
 			{
-				molgenisHistory = history;
-				break;
+				if (history.getName().equals(historyName))
+				{
+					molgenisHistory = history;
+					break;
+				}
+			}
+			if (molgenisHistory == null)
+			{
+				molgenisHistory = new History(historyName);
+				molgenisHistory = historiesClient.create(molgenisHistory);
+			}
+
+			// upload data set file
+			ToolsClient toolsClient = galaxyInstance.getToolsClient();
+			UploadFile uploadFile = new UploadFile(tsvFile, dataSetName);
+			FileUploadRequest fileUploadRequest = new FileUploadRequest(molgenisHistory.getId(), uploadFile);
+			fileUploadRequest.setFileType("tabular");
+			ToolExecution toolsExecution = toolsClient.upload(fileUploadRequest);
+			List<OutputDataset> outputDatasets = toolsExecution.getOutputs();
+			if (outputDatasets == null || outputDatasets.size() != 1)
+			{
+				throw new RuntimeException("Expected one output data set instead of " + outputDatasets.size());
 			}
 		}
-		if (molgenisHistory == null)
+		catch (RuntimeException e)
 		{
-			molgenisHistory = new History(historyName);
-			molgenisHistory = historiesClient.create(molgenisHistory);
-		}
-
-		// upload data set file
-		ToolsClient toolsClient = galaxyInstance.getToolsClient();
-		UploadFile uploadFile = new UploadFile(tsvFile, dataSetName);
-		FileUploadRequest fileUploadRequest = new FileUploadRequest(molgenisHistory.getId(), uploadFile);
-		fileUploadRequest.setFileType("tabular");
-		ToolExecution toolsExecution = toolsClient.upload(fileUploadRequest);
-		List<OutputDataset> outputDatasets = toolsExecution.getOutputs();
-		if (outputDatasets == null || outputDatasets.size() != 1)
-		{
-			throw new RuntimeException("Expected one output data set instead of " + outputDatasets.size());
+			throw new GalaxyDataExportException(
+					"An error occured while communicating with the Galaxy server. Please verify that the Galaxy server URL and API key are correct",
+					e);
 		}
 	}
 }
