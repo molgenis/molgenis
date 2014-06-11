@@ -21,7 +21,7 @@
 			<br>
 			<div class="row-fluid">
 				<div class="offset3 span6 text-align-center">
-					<legend class="custom-purple-legend legend-mapping-manager">Curate matches &nbsp;
+					<legend class="custom-purple-legend">Curate matches &nbsp;
 						<select id="selectedDataSet" name="selectedDataSet">
 							<#if selectedDataSet??>
 								<#list dataSets as dataset>
