@@ -29,34 +29,15 @@
 	"col7a1.js"]>	
 <@header css js/>
 	<div class="row-fluid">
-		<h3>${title}</h3>
-	</div>
-	<form id="form-col7a1" method="get" action="${context_url}/import">
-		<div class="row-fluid">
-			<div class="row-fluid data-table-container" id="data-table-container"></div>
-				<div id="dataexplorer-grid-data" class="row-fluid data-table-pager-container">
-					<table class="table-striped table-condensed molgenis-table">
-						<thead>
-							<#list headers as header>
-								<th>${header}</th>
-							</#list>
-						</thead>
-						<tbody>
-							<#list rows as row>
-								<tr>
-									<#list row.cells as cell>
-										<td>
-											<#list cell.values as value>
-												<div>${value.value}</br></div>
-											</#list>
-										</td>
-									</#list>
-								</tr>
-							</#list>
-						</tbody>
-					</table>
-				</div>
+		<p>
+			<div class="pull-left">
+				<h3>${title}</h3>
 			</div>
-		</div>
-	</form>
+			<div class="btn-group pull-right">
+				<button id="refresh_button" type="button" class="btn btn-primary btn-large">Generate view</button>
+			</div>
+		</p>
+	</div>
+	<div class="molgenis-table-container table-striped" id="table-container">
+	</div>
 <@footer/>

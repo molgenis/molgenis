@@ -71,23 +71,26 @@ public class MysqlViewService
 		for (String header : headers)
 		{
 			List<Value> values = valuesByHeader.get(header);
-			Cell cell = new Cell();
-			if (values.isEmpty())
+			if (null != values)
 			{
-				row.add(cell);
-				continue;
-			}
+				Cell cell = new Cell();
+				if (values.isEmpty())
+				{
+					row.add(cell);
+					continue;
+				}
 
-			boolean equals = areAllValuesEquals(values);
-			if (equals)
-			{
-				cell.add(values.get(0));
+				boolean equals = areAllValuesEquals(values);
+				if (equals)
+				{
+					cell.add(values.get(0));
+				}
+				else
+				{
+					cell.addAll(values);
+				}
+				row.add(cell);
 			}
-			else
-			{
-				cell.addAll(values);
-			}
-			row.add(cell);
 		}
 
 		return row;
@@ -109,9 +112,12 @@ public class MysqlViewService
 		for (String header : headers)
 		{
 			List<Value> values = valuesByHeader.get(header);
-			Cell cell = new Cell();
-			cell.addAll(values);
-			row.add(cell);
+			if (null != values)
+			{
+				Cell cell = new Cell();
+				cell.addAll(values);
+				row.add(cell);
+			}
 		}
 
 		return row;

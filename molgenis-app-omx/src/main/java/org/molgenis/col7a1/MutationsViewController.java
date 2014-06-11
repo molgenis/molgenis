@@ -1,6 +1,8 @@
 package org.molgenis.col7a1;
 
 import static org.molgenis.col7a1.MutationsViewController.URI;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -10,7 +12,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.mysql.MysqlRepository;
@@ -21,12 +22,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping(URI)
 public class MutationsViewController extends MolgenisPluginController
 {
-	private static final Logger logger = Logger.getLogger(MutationsViewController.class);
 	public static final String ID = "col7a1_mutations";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	private static final String ENTITYNAME_MUTATIONSVIEW = "import_mutationsview";
@@ -42,6 +43,8 @@ public class MutationsViewController extends MolgenisPluginController
 			"Inheritance", "Patient ID", "Phenotype");
 	private static final String PATH_TO_INSERT_QUERY = File.separator + "mysql" + File.separator
 			+ "mutationview_col7a1_prototype.sql";
+	private static final String PATH_TO_NA_QUERY = File.separator + "mysql" + File.separator
+			+ "mutationview_col7a1_prototype_update_na.sql";
 
 	@Autowired
 	public MutationsViewController(DataService dataService, MysqlViewService mysqlViewService)
@@ -58,24 +61,47 @@ public class MutationsViewController extends MolgenisPluginController
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(Model model)
 	{
-		MysqlRepository mutationsViewRepo = (MysqlRepository) dataService
-				.getRepositoryByEntityName(ENTITYNAME_MUTATIONSVIEW);
-
-		mutationsViewRepo.truncate();
-		mutationsViewRepo.populateWithQuery(mutationsViewRepo.getMySqlQueryFromFile(PATH_TO_INSERT_QUERY));
-		
-		MysqlRepository mutationsRepo = (MysqlRepository) dataService
-				.getRepositoryByEntityName(ENTITYNAME_MUTATIONS);
-
-		List<Row> rows = createRows(mutationsViewRepo, mutationsRepo);
-		model.addAttribute("headers", HEADERS_NAMES);
-		model.addAttribute("rows", rows);
 		model.addAttribute("title", TITLE);
-
 		return "view-col7a1";
 	}
 
-	protected List<Row> createRows(MysqlRepository mutationsViewRepo, MysqlRepository mutationsRepo)
+	@RequestMapping(value = "/create", method = GET, produces = APPLICATION_JSON_VALUE)
+	public String create(Model model)
+	{
+		List<Row> rows = null;
+		if (dataService.hasRepository(ENTITYNAME_MUTATIONSVIEW) && dataService.hasRepository(ENTITYNAME_MUTATIONS))
+		{
+			MysqlRepository mutationsViewRepo = (MysqlRepository) dataService
+					.getRepositoryByEntityName(ENTITYNAME_MUTATIONSVIEW);
+			MysqlRepository mutationsRepo = (MysqlRepository) dataService
+					.getRepositoryByEntityName(ENTITYNAME_MUTATIONS);
+			rows = createRows(mutationsViewRepo, mutationsRepo);
+		}
+		model.addAttribute("rows", rows);
+		model.addAttribute("headers", HEADERS_NAMES);
+		return "view-col7a1-table";
+	}
+
+	@RequestMapping(value = "/generate", method = GET, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public boolean refresh(Model model)
+	{
+		if (dataService.hasRepository(ENTITYNAME_MUTATIONSVIEW))
+		{
+			MysqlRepository mutationsViewRepo = (MysqlRepository) dataService
+					.getRepositoryByEntityName(ENTITYNAME_MUTATIONSVIEW);
+			mutationsViewRepo.truncate();
+			mutationsViewRepo.populateWithQuery(mutationsViewRepo.getMySqlQueryFromFile(PATH_TO_INSERT_QUERY));
+			mutationsViewRepo.populateWithQuery(mutationsViewRepo.getMySqlQueryFromFile(PATH_TO_NA_QUERY));
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	private List<Row> createRows(MysqlRepository mutationsViewRepo, MysqlRepository mutationsRepo)
 	{
 		Iterator<Entity> iterator = mutationsRepo.iterator();
 		List<Row> rows = new ArrayList<Row>();
@@ -89,8 +115,9 @@ public class MutationsViewController extends MolgenisPluginController
 						mutationId));
 				Map<String, List<Value>> valuesPerHeader = this.mysqlViewService.valuesPerHeader(HEADERS_NAMES,
 						iterable);
-				rows.add(this.mysqlViewService.createRow(HEADERS_NAMES,
-						valuesPerHeader));
+
+				Row row = this.mysqlViewService.createRow(HEADERS_NAMES, valuesPerHeader);
+				rows.add(row);
 			}
 		}
 

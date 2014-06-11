@@ -1,6 +1,8 @@
 package org.molgenis.col7a1;
 
 import static org.molgenis.col7a1.PatientsViewController.URI;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -9,7 +11,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.mysql.MysqlRepository;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping(URI)
@@ -27,8 +29,6 @@ public class PatientsViewController extends MolgenisPluginController
 {
 	public static final String ID = "col7a1_patients";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
-
-	private static final Logger logger = Logger.getLogger(PatientsViewController.class);
 	private final static List<String> HEADERS_NAMES = Arrays.asList("Patient ID", "Phenotype", "Mutation",
 			"cDNA change", "Protein change", "Exon", "Consequence", "Reference");
 	private final static String PATH_TO_INSERT_QUERY = File.separator + "mysql" + File.separator
@@ -55,23 +55,44 @@ public class PatientsViewController extends MolgenisPluginController
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(Model model)
 	{
-		MysqlRepository patientsViewRepo = (MysqlRepository) dataService
-				.getRepositoryByEntityName(ENTITYNAME_PATIENTSVIEW);
-
-		patientsViewRepo.truncate();
-		patientsViewRepo.populateWithQuery(patientsViewRepo.getMySqlQueryFromFile(PATH_TO_INSERT_QUERY));
-
-		MysqlRepository patientsRepo = (MysqlRepository) dataService
-				.getRepositoryByEntityName(ENTITYNAME_PATIENTS);
-
-		List<Row> rows = createRows(patientsRepo, patientsViewRepo);
-		model.addAttribute("headers", HEADERS_NAMES);
-		model.addAttribute("rows", rows);
 		model.addAttribute("title", TITLE);
 		return "view-col7a1";
 	}
 
-	protected List<Row> createRows(MysqlRepository patientsRepo, MysqlRepository patientsViewRepo)
+	@RequestMapping(value = "/generate", method = GET, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public boolean refresh()
+	{
+		if (dataService.hasRepository(ENTITYNAME_PATIENTSVIEW))
+		{
+			MysqlRepository patientsViewRepo = (MysqlRepository) dataService
+				.getRepositoryByEntityName(ENTITYNAME_PATIENTSVIEW);
+			patientsViewRepo.truncate();
+			patientsViewRepo.populateWithQuery(patientsViewRepo.getMySqlQueryFromFile(PATH_TO_INSERT_QUERY));
+			return true;
+		}else{
+			return false;
+		}
+	}
+
+	@RequestMapping(value = "/create", method = GET, produces = APPLICATION_JSON_VALUE)
+	public String create(Model model)
+	{
+		List<Row> rows = null;
+		if (dataService.hasRepository(ENTITYNAME_PATIENTS) && dataService.hasRepository(ENTITYNAME_PATIENTSVIEW))
+		{
+			MysqlRepository patientsViewRepo = (MysqlRepository) dataService
+					.getRepositoryByEntityName(ENTITYNAME_PATIENTSVIEW);
+			MysqlRepository patientsRepo = (MysqlRepository) dataService
+					.getRepositoryByEntityName(ENTITYNAME_PATIENTS);
+			rows = createRows(patientsRepo, patientsViewRepo);
+		}
+		model.addAttribute("rows", rows);
+		model.addAttribute("headers", HEADERS_NAMES);
+		return "view-col7a1-table";
+	}
+
+	private List<Row> createRows(MysqlRepository patientsRepo, MysqlRepository patientsViewRepo)
 	{
 		Iterator<Entity> iterator = patientsRepo.iterator();
 		List<Row> rows = new ArrayList<Row>();
