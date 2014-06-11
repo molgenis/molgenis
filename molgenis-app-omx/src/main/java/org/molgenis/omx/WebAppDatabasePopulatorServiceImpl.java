@@ -77,6 +77,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 
 		// DataExplorer table editable yes/no
 		runtimePropertyMap.put(DataExplorerController.KEY_DATAEXPLORER_EDITABLE, String.valueOf(false));
+		runtimePropertyMap.put(DataExplorerController.KEY_GALAXY_ENABLED, String.valueOf(false));
 
 		// Annotators include files/tools
 		String molgenisHomeDir = System.getProperty("molgenis.home");
