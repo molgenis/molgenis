@@ -35,14 +35,9 @@
     <script>
     	molgenis.dataexplorer.setShowWizardOnInit(${wizard?string('true', 'false')});
         molgenis.dataexplorer.filter.wizard.setWizardTitle('${wizardtitle}');
-        <#if modelPluginUri??>
-        	var modelPluginUri = '${modelPluginUri}';
-        <#else>
-        	var modelPluginUri = null;
-        </#if>
-    </script>
+   	</script>
     
-    <div id="entity-class" class="well hide">
+    <div id="entity-class" class="well">
 		<div class="row-fluid">
 			<h3 id="entity-class-name"></h3>
 			<span id="entity-class-description"></span>

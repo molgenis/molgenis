@@ -84,33 +84,18 @@
 	}
 	
 	function createHeader(entityName) {
-		if (restApi.entityExists('/api/v1/EntityClass')) {
-			var q = [{field: 'entityClassIdentifier', operator: 'EQUALS', value: entityName}];
-			restApi.getAsync('/api/v1/EntityClass', {q:{q: q}, attributes:['fullName', 'description', 'entityClassIdentifier']}, function(result) {
-				if (result.total > 0) {
-					var entityClass = result.items[0];
-				
-					if (modelPluginUri) {
-						var modelUrl = modelPluginUri + '/' + entityClass.entityClassIdentifier;
-						var link = $('<a></a>');
-						link.attr('href', modelUrl);
-						link.html(entityClass.fullName);
-						$('#entity-class-name').append(link);
-					} else {
-						$('#entity-class-name').html(entityClass.fullName);
-					}
-				
-					var description = $('<span data-placement="bottom"></span>');
-					description.html(abbreviate(entityClass.description, 180));
-					description.attr('data-title', entityClass.description);
-				
-					$('#entity-class-description').append(description.tooltip());
-					$('#entity-class').show();
-				} else {
-					$('#entity-class').hide();
-				}
-			});
-		}
+		restApi.getAsync('/api/v1/' + entityName + '/meta', {attributes:['label', 'description']}, function(meta) {
+			$('#entity-class-name').html(meta.label);
+			
+			if (meta.description) {
+				var description = $('<span data-placement="bottom"></span>');
+				description.html(abbreviate(meta.description, 180));
+				description.attr('data-title', meta.description);
+				$('#entity-class-description').append(description.tooltip());
+			} else {
+				$('#entity-class-description').html('');
+			}
+		});
 	}
 
 	/**

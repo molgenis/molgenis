@@ -29,7 +29,6 @@ import org.molgenis.data.support.GenomeConfig;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataRequest.ColNames;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
@@ -153,12 +152,6 @@ public class DataExplorerController extends MolgenisPluginController
 		boolean modDiseaseMatcher = molgenisSettings.getBooleanProperty(KEY_MOD_DISEASEMATCHER,
 				DEFAULT_VAL_MOD_DISEASEMATCHER);
 		model.addAttribute("modDiseaseMatcher", modDiseaseMatcher);
-
-		MolgenisPlugin modelsPlugin = getPlugin("models");
-		if (modelsPlugin != null)
-		{
-			model.addAttribute("modelPluginUri", modelsPlugin.getFullUri());
-		}
 
 		return "view-dataexplorer";
 	}
