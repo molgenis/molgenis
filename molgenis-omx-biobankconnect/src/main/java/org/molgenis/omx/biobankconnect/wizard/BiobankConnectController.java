@@ -53,7 +53,6 @@ public class BiobankConnectController extends AbstractWizardController
 	private final OntologyAnnotatorPage ontologyAnnotatorPager;
 	private final OntologyMatcherPage ontologyMatcherPager;
 	private final MappingManagerPage mappingManagerPager;
-	// private final ProgressingBarPage progressingBarPager;
 	private BiobankConnectWizard wizard;
 
 	@Autowired
@@ -77,19 +76,17 @@ public class BiobankConnectController extends AbstractWizardController
 	@Autowired
 	public BiobankConnectController(ChooseCataloguePage chooseCataloguePager,
 			OntologyAnnotatorPage ontologyAnnotatorPager, OntologyMatcherPage ontologyMatcherPager,
-			MappingManagerPage mappingManagerPager, ProgressingBarPage progressingBarPager)
+			MappingManagerPage mappingManagerPager)
 	{
 		super(URI, "biobankconnect");
 		if (chooseCataloguePager == null) throw new IllegalArgumentException("ChooseCataloguePager is null");
 		if (ontologyAnnotatorPager == null) throw new IllegalArgumentException("OntologyAnnotatorPager is null");
 		if (ontologyMatcherPager == null) throw new IllegalArgumentException("OntologyMatcherPager is null");
 		if (mappingManagerPager == null) throw new IllegalArgumentException("MappingManagerPager is null");
-		if (progressingBarPager == null) throw new IllegalArgumentException("ProgressingBarPager is null");
 		this.chooseCataloguePager = chooseCataloguePager;
 		this.ontologyAnnotatorPager = ontologyAnnotatorPager;
 		this.ontologyMatcherPager = ontologyMatcherPager;
 		this.mappingManagerPager = mappingManagerPager;
-		// this.progressingBarPager = progressingBarPager;
 		this.wizard = new BiobankConnectWizard();
 	}
 
