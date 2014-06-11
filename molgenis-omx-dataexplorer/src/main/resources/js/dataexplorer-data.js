@@ -286,11 +286,11 @@
 					type : $(this).attr('method'),
 					url : $(this).attr('action'),
 					data : JSON.stringify($.extend({}, $(this).serializeObject(), {dataRequest : createDownloadDataRequest()})),
-					contentType: 'application/json',
-					success : function() {
-						$('#galaxy-export-modal').modal('hide');
-						molgenis.createAlert([{'message': 'Exported data set to Galaxy'}], 'success');
-					}
+					contentType: 'application/json'
+				}).done(function() {
+					molgenis.createAlert([{'message' : 'Exported data set to Galaxy'}], 'success');
+				}).always(function() {
+					$('#galaxy-export-modal').modal('hide');
 				});
 			}
 		});
