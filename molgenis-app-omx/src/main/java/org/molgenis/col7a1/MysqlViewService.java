@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +14,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class MysqlViewService
 {
-	private static final Logger logger = Logger.getLogger(MysqlViewService.class);
-
 	@Autowired
 	private DataService dataService;
 

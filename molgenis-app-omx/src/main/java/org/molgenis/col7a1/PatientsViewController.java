@@ -16,6 +16,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.util.MySqlFileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -68,7 +69,8 @@ public class PatientsViewController extends MolgenisPluginController
 			MysqlRepository patientsViewRepo = (MysqlRepository) dataService
 				.getRepositoryByEntityName(ENTITYNAME_PATIENTSVIEW);
 			patientsViewRepo.truncate();
-			patientsViewRepo.populateWithQuery(patientsViewRepo.getMySqlQueryFromFile(PATH_TO_INSERT_QUERY));
+			patientsViewRepo.populateWithQuery(MySqlFileUtil.getMySqlQueryFromFile(this.getClass(),
+					PATH_TO_INSERT_QUERY));
 			return true;
 		}else{
 			return false;

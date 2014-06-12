@@ -4,7 +4,6 @@ import static org.molgenis.col7a1.MutationsViewController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,6 +16,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.util.MySqlFileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -37,7 +37,6 @@ public class MutationsViewController extends MolgenisPluginController
 	private static final String TITLE = "Mutations view";
 	private final DataService dataService;
 	private final MysqlViewService mysqlViewService;
-	private BufferedReader bufferedReader;
 	private static List<String> HEADERS_NAMES = Arrays.asList("Mutation ID", "cDNA change", "Protein change",
 			"Exon/Intron", "Consequence",
 			"Inheritance", "Patient ID", "Phenotype");
@@ -91,8 +90,9 @@ public class MutationsViewController extends MolgenisPluginController
 			MysqlRepository mutationsViewRepo = (MysqlRepository) dataService
 					.getRepositoryByEntityName(ENTITYNAME_MUTATIONSVIEW);
 			mutationsViewRepo.truncate();
-			mutationsViewRepo.populateWithQuery(mutationsViewRepo.getMySqlQueryFromFile(PATH_TO_INSERT_QUERY));
-			mutationsViewRepo.populateWithQuery(mutationsViewRepo.getMySqlQueryFromFile(PATH_TO_NA_QUERY));
+			mutationsViewRepo.populateWithQuery(MySqlFileUtil.getMySqlQueryFromFile(this.getClass(),
+					PATH_TO_INSERT_QUERY));
+			mutationsViewRepo.populateWithQuery(MySqlFileUtil.getMySqlQueryFromFile(this.getClass(), PATH_TO_NA_QUERY));
 			return true;
 		}
 		else

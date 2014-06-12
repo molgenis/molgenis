@@ -1,9 +1,6 @@
 package org.molgenis.data.mysql;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -29,6 +26,7 @@ import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Manageable;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.Queryable;
@@ -141,8 +139,7 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
-			throw new RuntimeException(e);
+			throw new MolgenisDataException(e);
 		}
 	}
 
@@ -993,32 +990,5 @@ public class MysqlRepository implements Repository, Writable, Queryable, Managea
 			}
 			return e;
 		}
-	}
-
-	public String getMySqlQueryFromFile(String path)
-	{
-		try
-		{
-			final File f = new File(this.getClass().getResource(path).getFile());
-			final StringBuilder stringBuilder = new StringBuilder();
-			String thisLine = null;
-			this.bufferedReader = new BufferedReader(new FileReader(f.toString()));
-			while ((thisLine = this.bufferedReader.readLine()) != null)
-			{
-				stringBuilder.append(" ");
-				stringBuilder.append(thisLine);
-			}
-
-			return stringBuilder.toString();
-		}
-		catch (FileNotFoundException e)
-		{
-			logger.error("No query in path: " + path + " is found!", e);
-		}
-		catch (IOException e)
-		{
-			logger.error("A problem reading the query from path: " + path, e);
-		}
-		return null;
 	}
 }
