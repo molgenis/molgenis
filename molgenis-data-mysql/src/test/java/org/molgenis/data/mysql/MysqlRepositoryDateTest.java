@@ -26,7 +26,7 @@ public class MysqlRepositoryDateTest extends MysqlRepositoryAbstractDatatypeTest
 	@Override
 	public String createSql()
 	{
-		return "CREATE TABLE IF NOT EXISTS DateTest(col1 DATE NOT NULL, col2 DATE, col3 DATE, PRIMARY KEY (col1)) ENGINE=InnoDB;";
+		return "CREATE TABLE IF NOT EXISTS `DateTest`(`col1` DATE NOT NULL, `col2` DATE, `col3` DATE, PRIMARY KEY (`col1`)) ENGINE=InnoDB;";
 	}
 
 	@Override
