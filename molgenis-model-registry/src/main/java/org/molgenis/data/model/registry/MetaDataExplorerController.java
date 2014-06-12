@@ -35,16 +35,27 @@ public class MetaDataExplorerController extends MolgenisPluginController
 {
 	public static final String ID = "models";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
-	public static List<String> ENTITY_CLASS_TYPES;
+	public static final List<String> ENTITY_CLASS_TYPES;
 	private static final int NR_ITEMS_PER_PAGE = 4;
 	private final DataService dataService;
+
+	static
+	{
+		try
+		{
+			ENTITY_CLASS_TYPES = new JDBCMetaDatabase().getEntity("EntityClass").getField("type").getEnumOptions();
+		}
+		catch (MolgenisModelException e)
+		{
+			throw new RuntimeException(e);
+		}
+	}
 
 	@Autowired
 	public MetaDataExplorerController(DataService dataService) throws MolgenisModelException
 	{
 		super(URI);
 		this.dataService = dataService;
-		ENTITY_CLASS_TYPES = new JDBCMetaDatabase().getEntity("EntityClass").getField("type").getEnumOptions();
 	}
 
 	@ModelAttribute("entityClassTypes")

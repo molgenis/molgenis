@@ -9,6 +9,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -17,14 +21,19 @@ import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.observ.Characteristic;
+import org.molgenis.search.SearchRequest;
+import org.molgenis.search.SearchResult;
+import org.molgenis.search.SearchService;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
@@ -44,6 +53,9 @@ public class EntityExplorerController extends MolgenisPluginController
 	private MolgenisPermissionService molgenisPermissionService;
 
 	@Autowired
+	private SearchService searchService;
+
+	@Autowired
 	private DataService dataService;
 
 	@Autowired
@@ -56,11 +68,13 @@ public class EntityExplorerController extends MolgenisPluginController
 
 	@SuppressWarnings("unchecked")
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(@RequestParam(required = false) String entity,
-			@RequestParam(required = false) String identifier, @RequestParam(required = false) String query, Model model)
-			throws Exception
+	public String init(@RequestParam(required = false)
+	String entity, @RequestParam(required = false)
+	String identifier, @RequestParam(required = false)
+	String query, Model model) throws Exception
 	{
-		// set dataExplorer URL for link to DataExplorer for x/mrefs, but only if the user has permission to see the
+		// set dataExplorer URL for link to DataExplorer for x/mrefs, but only
+		// if the user has permission to see the
 		// plugin
 		if (molgenisPermissionService.hasPermissionOnPlugin(DataExplorerController.ID, Permission.READ)
 				|| molgenisPermissionService.hasPermissionOnPlugin(DataExplorerController.ID, Permission.WRITE))
@@ -145,5 +159,17 @@ public class EntityExplorerController extends MolgenisPluginController
 		}
 
 		return "view-entityexplorer";
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "entities")
+	@ResponseBody
+	public SearchResult getRelatedEntities(@RequestBody
+	@Valid
+	@NotNull
+	@Size(min = 1)
+	String _xrefvalue)
+	{
+		return searchService.search(new SearchRequest(null, new QueryImpl().eq("_xrefvalue", _xrefvalue).pageSize(
+				1000000), null));
 	}
 }

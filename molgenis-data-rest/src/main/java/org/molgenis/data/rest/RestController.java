@@ -558,6 +558,22 @@ public class RestController
 		updateInternal(entityName, id, entityMap);
 	}
 
+	@RequestMapping(value = "/{entityName}/{id}/{attributeName}", method = POST, params = "_method=PUT")
+	@ResponseStatus(OK)
+	public void updateAttribute(@PathVariable("entityName") String entityName,
+			@PathVariable("attributeName") String attributeName, @PathVariable("id") Object id,
+			@RequestBody Object value)
+	{
+		Entity entity = dataService.findOne(entityName, id);
+		if (entity == null)
+		{
+			throw new UnknownEntityException("Entity of type " + entityName + " with id " + id + " not found");
+		}
+
+		entity.set(attributeName, value);
+		dataService.update(entityName, entity);
+	}
+
 	/**
 	 * Updates an entity from a html form post.
 	 * 
@@ -817,7 +833,7 @@ public class RestController
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
 		if (meta.getIdAttribute() == null)
 		{
-			throw new IllegalArgumentException(entityName + " does not have a id attribute");
+			throw new IllegalArgumentException(entityName + " does not have an id attribute");
 		}
 
 		Entity existing = dataService.findOne(entityName, id);
