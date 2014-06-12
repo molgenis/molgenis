@@ -91,7 +91,7 @@
 			</div>		
 		</div>
 		
-		<div class="span9" id="module-nav"></div>
+		<div id="module-nav"></div>
 	
 	</div>
 <@footer/>
