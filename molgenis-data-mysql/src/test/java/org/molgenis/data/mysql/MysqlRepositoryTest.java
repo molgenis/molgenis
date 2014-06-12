@@ -1,11 +1,7 @@
 package org.molgenis.data.mysql;
 
-import java.beans.PropertyVetoException;
 import java.util.Iterator;
 
-import javax.sql.DataSource;
-
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.molgenis.AppConfig;
 import org.molgenis.MolgenisFieldTypes;
@@ -20,10 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 /** Simple test of all apsects of the repository */
 @ContextConfiguration(classes = AppConfig.class)
@@ -62,38 +55,44 @@ public class MysqlRepositoryTest  extends AbstractTestNGSpringContextTests
         MysqlRepository repo = coll.add(metaData);
 
 		Assert.assertEquals(repo.iteratorSql(), "SELECT firstName, lastName FROM MysqlPerson");
-		Assert.assertEquals(repo.getInsertSql(), "INSERT INTO MysqlPerson (firstName, lastName) VALUES (?, ?)");
+		Assert.assertEquals(repo.getInsertSql(), "INSERT INTO `MysqlPerson` (`firstName`, `lastName`) VALUES (?, ?)");
 		Assert.assertEquals(
 				repo.getCreateSql(),
-				"CREATE TABLE IF NOT EXISTS MysqlPerson(firstName VARCHAR(255) NOT NULL, lastName VARCHAR(255) NOT NULL, PRIMARY KEY (lastName)) ENGINE=InnoDB;");
+				"CREATE TABLE IF NOT EXISTS `MysqlPerson`(`firstName` VARCHAR(255) NOT NULL, `lastName` VARCHAR(255) NOT NULL, PRIMARY KEY (`lastName`)) ENGINE=InnoDB;");
 
 		metaData.addAttributeMetaData(new DefaultAttributeMetaData("age", MolgenisFieldTypes.FieldTypeEnum.INT));
 		Assert.assertEquals(repo.iteratorSql(), "SELECT firstName, lastName, age FROM MysqlPerson");
-		Assert.assertEquals(repo.getInsertSql(), "INSERT INTO MysqlPerson (firstName, lastName, age) VALUES (?, ?, ?)");
+		Assert.assertEquals(repo.getInsertSql(),
+				"INSERT INTO `MysqlPerson` (`firstName`, `lastName`, `age`) VALUES (?, ?, ?)");
 		Assert.assertEquals(
 				repo.getCreateSql(),
-				"CREATE TABLE IF NOT EXISTS MysqlPerson(firstName VARCHAR(255) NOT NULL, lastName VARCHAR(255) NOT NULL, age INTEGER, PRIMARY KEY (lastName)) ENGINE=InnoDB;");
-		Assert.assertEquals(repo.getCountSql(new QueryImpl()), "SELECT COUNT(DISTINCT this.lastName) FROM MysqlPerson AS this");
+				"CREATE TABLE IF NOT EXISTS `MysqlPerson`(`firstName` VARCHAR(255) NOT NULL, `lastName` VARCHAR(255) NOT NULL, `age` INTEGER, PRIMARY KEY (`lastName`)) ENGINE=InnoDB;");
+		Assert.assertEquals(repo.getCountSql(new QueryImpl()),
+				"SELECT COUNT(DISTINCT this.`lastName`) FROM `MysqlPerson` AS this");
 
 		// test where clauses
-		Assert.assertEquals(repo.getWhereSql(new QueryImpl().eq("firstName", "John")), "WHERE this.firstName = 'John'");
+		Assert.assertEquals(repo.getWhereSql(new QueryImpl().eq("firstName", "John")),
+				"WHERE this.`firstName` = 'John'");
 		Assert.assertEquals(repo.getWhereSql(new QueryImpl().eq("firstName", "John").eq("age", "5")),
-            "WHERE this.firstName = 'John' AND this.age = 5");
+				"WHERE this.`firstName` = 'John' AND this.`age` = 5");
 
         //search
         Assert.assertEquals(repo.getWhereSql(new QueryImpl().search("John")),
-                "WHERE (this.firstName LIKE '%John%' OR this.lastName LIKE '%John%' OR CAST(this.age as CHAR) LIKE '%John%')");
+				"WHERE (this.`firstName` LIKE '%John%' OR this.`lastName` LIKE '%John%' OR CAST(this.`age` as CHAR) LIKE '%John%')");
 
         //sort
         Assert.assertEquals(repo.getSortSql(new QueryImpl().sort(Sort.Direction.ASC,"firstName"))
-                ,"ORDER BY firstName ASC");
+,
+				"ORDER BY `firstName` ASC");
         Assert.assertEquals(repo.getSortSql(new QueryImpl().sort(Sort.Direction.DESC,"firstName"))
-                ,"ORDER BY firstName DESC");
+,
+				"ORDER BY `firstName` DESC");
         Assert.assertEquals(repo.getWhereSql(new QueryImpl().eq("firstName", "John").sort(Sort.Direction.DESC,"firstName"))
-                ,"WHERE this.firstName = 'John'");
+,
+				"WHERE this.`firstName` = 'John'");
 
         //test delete clauses
-        Assert.assertEquals(repo.getDeleteSql(), "DELETE FROM MysqlPerson WHERE lastName = ?");
+		Assert.assertEquals(repo.getDeleteSql(), "DELETE FROM `MysqlPerson` WHERE `lastName` = ?");
 
         coll.drop(metaData.getName());
         repo = coll.add(metaData);
