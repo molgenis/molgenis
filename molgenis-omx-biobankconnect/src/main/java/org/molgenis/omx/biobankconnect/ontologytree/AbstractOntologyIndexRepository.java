@@ -55,10 +55,15 @@ public abstract class AbstractOntologyIndexRepository implements Repository, Que
 		if (entityMetaData == null)
 		{
 			entityMetaData = new DefaultEntityMetaData(entityName);
-			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(Characteristic.ID));
+			DefaultAttributeMetaData attributeId = new DefaultAttributeMetaData(Characteristic.ID);
+			attributeId.setIdAttribute(true);
+			entityMetaData.addAttributeMetaData(attributeId);
 			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermRepository.ONTOLOGY_TERM_IRI,
 					FieldTypeEnum.HYPERLINK));
-			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermRepository.ONTOLOGY_TERM));
+			DefaultAttributeMetaData attributeMetaData = new DefaultAttributeMetaData(
+					OntologyTermRepository.ONTOLOGY_TERM);
+			attributeMetaData.setLabelAttribute(true);
+			entityMetaData.addAttributeMetaData(attributeMetaData);
 			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermRepository.SYNONYMS));
 			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermRepository.ENTITY_TYPE));
 			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermRepository.NODE_PATH));
@@ -79,7 +84,8 @@ public abstract class AbstractOntologyIndexRepository implements Repository, Que
 					FieldTypeEnum.MREF);
 			childrenAttributeMetatData.setRefEntity(entityMetaData);
 			entityMetaData.addAttributeMetaData(childrenAttributeMetatData);
-			entityMetaData.setIdAttribute("ID");
+			entityMetaData.setIdAttribute(Characteristic.ID);
+			entityMetaData.setIdAttribute(OntologyTermRepository.ONTOLOGY_TERM);
 		}
 		return entityMetaData;
 	}

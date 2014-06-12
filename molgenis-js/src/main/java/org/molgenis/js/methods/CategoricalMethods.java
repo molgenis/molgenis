@@ -14,6 +14,8 @@ import org.mozilla.javascript.Scriptable;
  */
 public class CategoricalMethods
 {
+	private static final int MISSING_VALUE = 9999;
+
 	/**
 	 * $('test').map({ 1 : 0, 0 : 1 })
 	 * 
@@ -48,7 +50,7 @@ public class CategoricalMethods
 		StringBuilder result = new StringBuilder();
 		String lhs = Context.toString(thisObj);
 		if (mappings.containsKey(lhs)) result.append(mappings.get(lhs));
-		else result.append(9999);
+		else result.append(MISSING_VALUE);
 		return new ScriptableValue(thisObj, result.toString());
 	}
 }
