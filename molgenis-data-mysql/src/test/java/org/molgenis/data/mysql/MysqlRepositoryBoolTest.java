@@ -22,7 +22,7 @@ public class MysqlRepositoryBoolTest extends MysqlRepositoryAbstractDatatypeTest
 	@Override
 	public String createSql()
 	{
-		return "CREATE TABLE IF NOT EXISTS BoolTest(col1 BOOL NOT NULL, col2 BOOL, col3 BOOL, PRIMARY KEY (col1)) ENGINE=InnoDB;";
+		return "CREATE TABLE IF NOT EXISTS `BoolTest`(`col1` BOOL NOT NULL, `col2` BOOL, `col3` BOOL, PRIMARY KEY (`col1`)) ENGINE=InnoDB;";
 	}
 
 	@Override

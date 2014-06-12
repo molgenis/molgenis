@@ -23,7 +23,7 @@ public class MysqlRepositoryTextTest extends MysqlRepositoryAbstractDatatypeTest
 	@Override
 	public String createSql()
 	{
-		return "CREATE TABLE IF NOT EXISTS TextTest(identifier INTEGER NOT NULL AUTO_INCREMENT, col1 TEXT NOT NULL, col2 TEXT, col3 TEXT, PRIMARY KEY (identifier)) ENGINE=InnoDB;";
+		return "CREATE TABLE IF NOT EXISTS `TextTest`(`identifier` INTEGER NOT NULL AUTO_INCREMENT, `col1` TEXT NOT NULL, `col2` TEXT, `col3` TEXT, PRIMARY KEY (`identifier`)) ENGINE=InnoDB;";
 	}
 
 	@Override

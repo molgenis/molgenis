@@ -38,7 +38,7 @@ public class MysqlRepositoryXrefTest extends MysqlRepositoryAbstractDatatypeTest
 	@Override
 	public String createSql()
 	{
-		return "CREATE TABLE IF NOT EXISTS XrefTest(identifier VARCHAR(255) NOT NULL, stringRef VARCHAR(255) NOT NULL, intRef INTEGER, PRIMARY KEY (identifier)) ENGINE=InnoDB;";
+		return "CREATE TABLE IF NOT EXISTS `XrefTest`(`identifier` VARCHAR(255) NOT NULL, `stringRef` VARCHAR(255) NOT NULL, `intRef` INTEGER, PRIMARY KEY (`identifier`)) ENGINE=InnoDB;";
 	}
 
 	@Override
@@ -62,7 +62,7 @@ public class MysqlRepositoryXrefTest extends MysqlRepositoryAbstractDatatypeTest
 		Assert.assertEquals(xrefRepo.getCreateSql(), createSql());
 
 		Assert.assertEquals(xrefRepo.getCreateFKeySql().get(0),
-				"ALTER TABLE XrefTest ADD FOREIGN KEY (stringRef) REFERENCES StringTarget(identifier)");
+				"ALTER TABLE XrefTest ADD FOREIGN KEY (`stringRef`) REFERENCES `StringTarget`(`identifier`)");
 
 		xrefRepo.drop();
 		stringRepo.drop();
@@ -106,7 +106,7 @@ public class MysqlRepositoryXrefTest extends MysqlRepositoryAbstractDatatypeTest
 		xrefRepo.add(entity);
 
 		Assert.assertEquals(xrefRepo.getSelectSql(new QueryImpl()),
-				"SELECT this.identifier, this.stringRef, this.intRef FROM XrefTest AS this");
+				"SELECT this.`identifier`, this.`stringRef`, this.`intRef` FROM `XrefTest` AS this");
 
 		for (Entity e : xrefRepo)
 		{
