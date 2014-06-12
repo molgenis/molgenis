@@ -7,11 +7,9 @@
 		DISEASE : 'diseases',
 		GENE : 'genes'
 	};
-	var currentQuery = null;
-	var currentSelectionMode = SelectionMode.DISEASE;
+	var currentSelectionMode = SelectionMode.GENE;
 	var listMaxLength = 10;
 	var toolAvailable = true;
-	var omimObjectCache = {};
 	var localStorageSupported = false;
 	
 	
@@ -19,7 +17,7 @@
 	 * Listen for data explorer query changes.
 	 */
 	$(document).on('changeQuery', function(e, query) {
-		currentQuery = query;
+		
 		updateSelectionList(currentSelectionMode);
 	});
 
@@ -39,11 +37,8 @@
 	 * Listen for entity change events. Also gets called when page is loaded.
 	 */
 	$(document).on('changeEntity', function(e, entityUri) {
-		$('#diseasematcher-variant-panel').empty();
-		$('#diseasematcher-selection-list').empty();
 
-		toolAvailable = true;
-		checkToolAvailable(entityUri);
+		
 	});
 	
 	
@@ -96,9 +91,8 @@
 		});
 	}
 
-	
 	/**
-	 * Called when page has loaded.
+	 * On document ready.
 	 */
 	$(function() {
 
@@ -119,7 +113,7 @@
 		});
 		
 		// selection nav bar genes:
-		$('#diseasematcher-genes-select-button').click(function(e) {
+		var genesBtn = $('#diseasematcher-genes-select-button').click(function(e) {
 			e.preventDefault();
 			if (!toolAvailable) return;
 			
@@ -131,13 +125,24 @@
 	
 			currentSelectionMode = SelectionMode.GENE;
 			updateSelectionList(SelectionMode.GENE);
-		});
+		})
 
 		// init tabs
 		$('#diseasematcher-disease-panel-tabs').tab();
 
 		localStorageSupported = browserSupportsLocalStorage();
 		//if (localStorageSupported) localStorage.clear();
+		
+		toolAvailable = true;
+		checkToolAvailable('/api/v1/' + getEntity().name);
+
+		// TODO: make this process nicer (multiple async calls are confusing)
+		// wait till the checkToolAvailable calls are done. if tool is available pre-select the first button
+		$(document).ajaxStop(function() {
+		    $(this).unbind("ajaxStop"); //prevent running again when other calls finish
+		    if (toolAvailable) genesBtn.click();
+		});
+		
 	});
 
 	
@@ -151,14 +156,15 @@
 			'num' : listMaxLength,
 			'start' : 0
 		};
-		$.extend(request, currentQuery);
+		$.extend(request, getQuery());
+		console.log(request);
 		$.ajax({
 			type : 'POST',
 			contentType : 'application/json',
 			url : '/diseasematcher/' + selectionType,
 			data : JSON.stringify(request),
 			success : function(data) {
-				if (data === null) return;
+				console.log('success');
 				
 				if (selectionType === SelectionMode.DISEASE) {
 					// add the diseases (if any) to the disease list and init
@@ -179,6 +185,8 @@
 	 */
 	function populateSelectionList(list, selectionType) {
 		$('#diseasematcher-selection-list').empty();
+		
+		if (list === null || list.length === 0) return;
 
 		if (selectionType === SelectionMode.DISEASE) {
 			$.each(list, function(index, item) {
@@ -234,15 +242,18 @@
 	 */
 	function onPageChange(pageStart, pageEnd, selectionType) {
 		var entityName = getEntity().name;
+		var request = {
+				'datasetName' : entityName,
+				'num' : pageEnd - pageStart,
+				'start' : pageStart
+			};
+			$.extend(request, getQuery());
+		
 		$.ajax({
 			type : 'POST',
 			contentType : 'application/json',
 			url : '/diseasematcher/' + selectionType,
-			data : JSON.stringify({
-				datasetName : entityName,
-				num : pageEnd - pageStart,
-				start : pageStart
-			}),
+			data : JSON.stringify(request),
 			success : function(data) {
 				
 				if (selectionType === SelectionMode.DISEASE) {
@@ -367,7 +378,6 @@
 	 */
 	function onSelectDiseaseTab(diseaseId) {
 		if (localStorageSupported && diseaseId in localStorage){
-			console.log('INFO: showing ' + diseaseId + ' from local storage');
 			showOmimObject(JSON.parse(localStorage.getItem(diseaseId)));
 		}else{
 			// don't have this one yet, get it from OMIM API
@@ -376,8 +386,6 @@
 				contentType : 'application/json',
 				url : '/omim/' + diseaseId.substring(5), //remove OMIM: part from string
 				success : function(omimObject) {
-					
-					console.log('INFO: showing ' + diseaseId + ' from OMIM API');
 					
 					if (localStorageSupported && omimObject !== null){
 						localStorage.setItem(diseaseId, JSON.stringify(omimObject));
@@ -458,7 +466,6 @@
 			url : '/diseasematcher/diseaseNames' + requestParams,
 			success : function(data) {
 				$.each(diseaseIds, function(index, diseaseId){
-					console.log(diseaseId);
 					$("[href='#" + diseaseId + "']").html(data[diseaseId][0]);
 				});
 			}
@@ -590,6 +597,10 @@
 	 */
 	function getEntity() {
 		return molgenis.dataexplorer.getSelectedEntityMeta();
+	}
+	
+	function getQuery() {
+		return molgenis.dataexplorer.getEntityQuery();
 	}
 
 	/**

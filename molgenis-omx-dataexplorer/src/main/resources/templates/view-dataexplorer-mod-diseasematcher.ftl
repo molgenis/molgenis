@@ -51,8 +51,8 @@
 				<div class="navbar" id="diseasematcher-selection-navbar">
 					<div class="navbar-inner">
 						<ul class="nav">
-							<li><a href="#" id="diseasematcher-diseases-select-button">Diseases</a></li>
 							<li><a href="#" id="diseasematcher-genes-select-button">Genes</a></li>
+							<li><a href="#" id="diseasematcher-diseases-select-button">Diseases</a></li>
 						</ul>
 					</div>
 				</div>

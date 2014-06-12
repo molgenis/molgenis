@@ -149,6 +149,7 @@ public class DiseaseMatcherController
 		}
 		else
 		{
+			System.out.println(request.getQuery().toString());
 			entities = dataService.findAll(request.getDatasetName(), new QueryImpl(request.getQuery()));
 		}
 
@@ -211,6 +212,15 @@ public class DiseaseMatcherController
 		for (Entity e : entities)
 		{
 			genes.add(e.getString("geneSymbol"));
+		}
+
+		if (genes.size() == 0)
+		{
+			FindDiseasesResponse response = new FindDiseasesResponse();
+			response.setNum(request.getNum());
+			response.setStart(request.getStart());
+			response.setTotal(0);
+			response.setDiseases(new ArrayList<Disease>());
 		}
 
 		// get disease identifiers based on genes from the DiseaseMapping dataset

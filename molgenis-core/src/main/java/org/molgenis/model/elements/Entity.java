@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Vector;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.fieldtypes.FieldType;
@@ -169,7 +170,7 @@ public class Entity extends DBSchema implements Record
 	@Override
 	public String getLabel()
 	{
-		if (label == null) return getName();
+		if (StringUtils.isEmpty(label)) return getName();
 		return this.label;
 	}
 

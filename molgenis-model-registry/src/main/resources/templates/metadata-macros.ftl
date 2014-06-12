@@ -1,13 +1,13 @@
-<#macro renderEntityClassInfo entityClass showButtons=true>
+<#macro renderEntityClassInfo entityClass showViewButton=true>
 	<div class="well">
 		<div class="row-fluid entity-class-header">
 			<h3>${entityClass.fullName?html}</h3> 
 			<i>(${entityClass.entityClassIdentifier})</i>
 			
-			<#if showButtons>
-				<@hasPermission plugin='dataexplorer' entityName=entityClass.entityClassIdentifier permission='COUNT'>
-					<@dataExplorerLink entityName=entityClass.entityClassIdentifier class='btn entity-btn'>Explore data</@dataExplorerLink>
-				</@hasPermission>
+			<@hasPermission plugin='dataexplorer' entityName=entityClass.entityClassIdentifier permission='COUNT'>
+				<@dataExplorerLink entityName=entityClass.entityClassIdentifier class='btn entity-btn'>Explore data</@dataExplorerLink>
+			</@hasPermission>
+			<#if showViewButton>
 				<a href="${context_url}/${entityClass.entityClassIdentifier}" class="btn entity-btn">View</a>
 			</#if>
 		</div>
