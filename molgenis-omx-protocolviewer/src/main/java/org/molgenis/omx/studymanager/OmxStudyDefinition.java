@@ -134,6 +134,12 @@ public class OmxStudyDefinition implements StudyDefinition
 	}
 
 	@Override
+	public void setRequestProposalForm(String path)
+	{
+		studyDataRequest.setRequestForm(path);
+	}
+
+	@Override
 	public boolean containsItem(CatalogItem anItem)
 	{
 		boolean contains = false;
@@ -152,4 +158,5 @@ public class OmxStudyDefinition implements StudyDefinition
 	{
 		return studyDataRequest;
 	}
+
 }

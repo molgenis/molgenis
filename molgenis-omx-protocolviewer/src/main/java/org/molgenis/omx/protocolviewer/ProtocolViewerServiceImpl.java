@@ -189,22 +189,23 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 			throw new IllegalArgumentException("feature list is null or empty");
 		}
 
-		// update study definition
-		studyDefinition.setName(studyName);
-		studyManagerService.updateStudyDefinition(studyDefinition);
-
-		// submit study definition
-		studyManagerService.submitStudyDefinition(studyDefinition.getId(), catalogId);
-
-		// create excel attachment for study data request
 		String appName = molgenisSettings.getProperty("app.name", "MOLGENIS");
 		long timestamp = System.currentTimeMillis();
 
 		String originalFileName = FileUploadUtils.getOriginalFileName(requestForm);
 		String extension = StringUtils.getFilenameExtension(originalFileName);
 		String fileName = appName + "-request_" + timestamp + "." + extension;
-
 		File orderFile = fileStore.store(requestForm.getInputStream(), fileName);
+
+		// update study definition
+		studyDefinition.setName(studyName);
+		studyDefinition.setRequestProposalForm(fileName);
+		studyManagerService.updateStudyDefinition(studyDefinition);
+
+		// submit study definition
+		studyManagerService.submitStudyDefinition(studyDefinition.getId(), catalogId);
+
+		// create excel attachment for study data request
 		String variablesFileName = appName + "-request_" + timestamp + "-variables.xls";
 		InputStream variablesIs = createStudyDefinitionXlsStream(studyDefinition);
 		File variablesFile = fileStore.store(variablesIs, variablesFileName);
