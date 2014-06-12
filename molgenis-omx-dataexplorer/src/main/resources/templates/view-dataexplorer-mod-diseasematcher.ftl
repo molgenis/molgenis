@@ -1,36 +1,7 @@
 <!--DISEASE MATCHER / PHENOVIEWER -->
 <div class="row-fluid">	
 	<div class="span12" id="disease-matcher">
-		
-		<#-- PHENOTYPE ZONE
-		
-		<div class="span3">
-			<div class="well">
-				<div class="row-fluid">
-					<div class="input-append span12" id="phenotype-search-container">
-						<input class="span10" id="phenotype-search" type="text" placeholder="Search phenotypes">
-						<button class="btn" type="button" id="phenotype-search-button"><i class="icon-large icon-search"></i></button>
-					</div>					
-				</div>
-				<div class="row-fluid">
-					<div class="accordion" id="phenotype-selection-container">
-                        <div class="accordion-group">
-                            <div class="accordion-heading">
-                                <a class="accordion-toggle" data-toggle="false" data-parent="#phenotype-selection-container" href="#phenotype-selection">Phenotypes</a>
-                            </div>
-                            <div class="accordion-body collapse in">
-                                <div class="accordion-inner">
-                                    <div class="row-fluid" id="phenotype-selection"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-            	</div>
-			</div>
-		</div>
-		-->
-		
-
+	
 		<#-- ANALYSIS ZONE -->
 		<div class="span9">
 			<div class="well">
@@ -44,7 +15,6 @@
 			</div>
 		</div>
 		
-
 		<#-- DISEASE ZONE-->
 		<div class="span3">
 			<div class="well">
@@ -86,6 +56,7 @@
                         </div>
                     </div>
             	</div>
+            	
 			</div>
 		</div>
 	</div>		
