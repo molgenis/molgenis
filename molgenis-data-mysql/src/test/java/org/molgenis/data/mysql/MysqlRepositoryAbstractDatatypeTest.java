@@ -1,9 +1,5 @@
 package org.molgenis.data.mysql;
 
-import java.beans.PropertyVetoException;
-
-import com.mchange.v2.c3p0.ComboPooledDataSource;
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.molgenis.AppConfig;
 import org.molgenis.data.Entity;
@@ -12,17 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import javax.sql.DataSource;
 
 /** Superclass for all datatype specific tests, e.g. MysqlRepositoryStringTest */
 @ContextConfiguration(classes = AppConfig.class)
 public abstract class MysqlRepositoryAbstractDatatypeTest extends AbstractTestNGSpringContextTests
 {
-    @Autowired
-    MysqlRepositoryCollection coll;
+	@Autowired
+	MysqlRepositoryCollection coll;
 
 	Logger logger = Logger.getLogger(getClass());
 	private EntityMetaData metaData;
@@ -48,11 +41,11 @@ public abstract class MysqlRepositoryAbstractDatatypeTest extends AbstractTestNG
 	@Test
 	public void test() throws Exception
 	{
-        //drop if needed
-        coll.drop(getMetaData());
+		// drop if needed
+		coll.drop(getMetaData());
 
 		// test create table
-        MysqlRepository repo = coll.add(getMetaData());
+		MysqlRepository repo = coll.add(getMetaData());
 		Assert.assertEquals(repo.getCreateSql(), createSql());
 
 		// verify default value
@@ -63,11 +56,7 @@ public abstract class MysqlRepositoryAbstractDatatypeTest extends AbstractTestNG
 		for (Entity e : repo)
 		{
 			logger.debug("found back " + e);
-			// Assert.assertEquals(e.get("col3").getClass(),
-			// e.get("col3", getMetaData().getAttribute("col3").getDataType().getJavaType());
 			Object value = e.get("col3");
-			// if(value instanceof BigDecimal)
-			// value = Double.valueOf(e.getString("col3"));
 			Object defaultValue = repo.getEntityMetaData().getAttribute("col3").getDefaultValue();
 			logger.debug("defaultClass=" + defaultValue.getClass().getName() + " - valueClass="
 					+ value.getClass().getName());

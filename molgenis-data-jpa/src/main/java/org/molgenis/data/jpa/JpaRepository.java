@@ -864,13 +864,6 @@ public class JpaRepository extends AbstractCrudRepository
 		return new ConvertingIterable<E>(clazz, findAll(ids));
 	}
 
-	@Override
-	@Transactional(readOnly = true)
-	public <E extends Entity> Iterable<E> findAll(Query q, Class<E> clazz)
-	{
-		return new ConvertingIterable<E>(clazz, findAll(q));
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
 	@Transactional(readOnly = true)

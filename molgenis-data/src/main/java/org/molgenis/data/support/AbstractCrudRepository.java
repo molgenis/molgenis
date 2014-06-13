@@ -6,6 +6,7 @@ import java.util.List;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
+import org.molgenis.data.Query;
 import org.molgenis.data.validation.EntityValidator;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +18,13 @@ public abstract class AbstractCrudRepository extends AbstractRepository implemen
 	{
 		super(url);
 		this.validator = validator;
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public <E extends Entity> Iterable<E> findAll(Query q, Class<E> clazz)
+	{
+		return new ConvertingIterable<E>(clazz, findAll(q));
 	}
 
 	@Override
