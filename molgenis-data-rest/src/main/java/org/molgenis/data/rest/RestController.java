@@ -18,6 +18,8 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -221,7 +223,7 @@ public class RestController
 	 * @return
 	 * @throws UnknownEntityException
 	 */
-	@RequestMapping(value = "/{entityName}/{id}", method = GET, produces = APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/{entityName}/{id:.+}", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public Map<String, Object> retrieveEntity(@PathVariable("entityName") String entityName,
 			@PathVariable("id") Object id, @RequestParam(value = "attributes", required = false) String[] attributes,
@@ -955,7 +957,17 @@ public class RestController
 		if (null == meta) throw new IllegalArgumentException("meta is null");
 
 		Map<String, Object> entityMap = new LinkedHashMap<String, Object>();
-		entityMap.put("href", String.format(BASE_URI + "/%s/%s", meta.getName(), entity.getIdValue()));
+		try
+		{
+			entityMap.put(
+					"href",
+					(String.format(BASE_URI + "/%s/%s", meta.getName(),
+							URLEncoder.encode(DataConverter.toString(entity.getIdValue()), "UTF-8"))));
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			throw new RuntimeException(e);
+		}
 
 		// TODO system fields
 		for (AttributeMetaData attr : meta.getAtomicAttributes())
