@@ -120,7 +120,7 @@
 				'operator' : 'EQUALS',
 				'value' : false
 			}]
-		}}, null);
+		}});
 		return rootOntologyTerms.items;
 	}
 	
