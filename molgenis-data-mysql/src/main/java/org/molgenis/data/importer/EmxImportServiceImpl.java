@@ -31,6 +31,20 @@ public class EmxImportServiceImpl implements EmxImporterService
 {
 	private static final Logger logger = Logger.getLogger(EmxImportServiceImpl.class);
 
+	// Sheet names
+	private static final String ENTITIES = "entities";
+	private static final String ATTRIBUTES = "attributes";
+
+	// Column names
+	private static final String NAME = "name";
+	private static final String DESCRIPTION = "description";
+	private static final String REFENTITY = "refEntity";
+	private static final String ENTITY = "entity";
+	private static final String DATATYPE = "dataType";
+	private static final String AUTO = "auto";
+	private static final String IDATTRIBUTE = "idAttribute";
+	private static final String NILLABLE = "nillable";
+
 	MysqlRepositoryCollection store;
 
 	public EmxImportServiceImpl()
@@ -60,28 +74,22 @@ public class EmxImportServiceImpl implements EmxImporterService
 		for (Entry<String, DefaultEntityMetaData> entry : metadata.entrySet())
 		{
 			String name = entry.getKey();
-			if (!"entities".equals(name) && !"attributes".equals(name))
+			DefaultEntityMetaData defaultEntityMetaData = entry.getValue();
+
+			if (!ENTITIES.equals(name) && !ATTRIBUTES.equals(name))
 			{
 				Repository from = source.getRepositoryByEntityName(name);
 
 				// TODO check if compatible with metadata
-
-				// create repo if needed
 				MysqlRepository to = (MysqlRepository) store.getRepositoryByEntityName(name);
-
 				if (to == null)
 				{
 					logger.debug("tyring to create: " + name);
-
-					EntityMetaData em = metadata.get(name);
-					if (em == null) throw new IllegalArgumentException("Unknown entity: " + name);
-					store.add(em);
-
-					to = (MysqlRepository) store.getRepositoryByEntityName(name);
+					if (defaultEntityMetaData == null) throw new IllegalArgumentException("Unknown entity: " + name);
+					to = store.add(defaultEntityMetaData);
 				}
 
 				// import
-
 				report.getNrImportedEntitiesMap().put(name, to.add(from));
 			}
 		}
@@ -98,7 +106,7 @@ public class EmxImportServiceImpl implements EmxImporterService
 		Map<String, DefaultEntityMetaData> metaDataMap = getEntityMetaData(source);
 
 		for (String sheet : source.getEntityNames())
-			if (!"entities".equals(sheet) && !"attributes".equals(sheet))
+			if (!ENTITIES.equals(sheet) && !ATTRIBUTES.equals(sheet))
 			{
 				// check if sheet is known?
 				if (metaDataMap.containsKey(sheet)) report.getSheetsImportable().put(sheet, true);
@@ -147,43 +155,78 @@ public class EmxImportServiceImpl implements EmxImporterService
 		Map<String, DefaultEntityMetaData> entities = new LinkedHashMap<String, DefaultEntityMetaData>();
 
 		// load attributes first (because entities are optional).
-		for (Entity a : source.getRepositoryByEntityName("attributes"))
+		loadAllAttributesToMap(source, entities);
+		loadAllEntitiesToMap(source, entities);
+		reiterateToMapRefEntity(source, entities);
+
+		return entities;
+	}
+
+	/**
+	 * Load all attributes
+	 * 
+	 * @param source
+	 * @param entities
+	 *            the map to add entities meta data
+	 */
+	private void loadAllAttributesToMap(RepositoryCollection source, Map<String, DefaultEntityMetaData> entities)
+	{
+		for (Entity attribute : source.getRepositoryByEntityName(ATTRIBUTES))
 		{
 			int i = 1;
-			String entityName = a.getString("entity");
+			String entityName = attribute.getString(ENTITY);
+			String attributeName = attribute.getString(NAME);
+			String attributeDataType = attribute.getString(DATATYPE);
 
 			// required
 			if (entityName == null) throw new IllegalArgumentException("attributes.entity is missing");
-			if (a.get("name") == null) throw new IllegalArgumentException("attributes.name is missing");
+			if (attributeName == null) throw new IllegalArgumentException("attributes.name is missing");
 
 			// create entity if not yet defined
 			if (entities.get(entityName) == null) entities.put(entityName, new DefaultEntityMetaData(entityName));
-			DefaultEntityMetaData md = entities.get(entityName);
+			DefaultEntityMetaData defaultEntityMetaData = entities.get(entityName);
 
-			DefaultAttributeMetaData am = new DefaultAttributeMetaData(a.getString("name"));
+			// create attribute meta data
+			DefaultAttributeMetaData defaultAttributeMetaData = new DefaultAttributeMetaData(attributeName);
 
-			if (a.get("dataType") != null)
+			if (attributeDataType != null)
 			{
-				FieldType t = MolgenisFieldTypes.getType(a.getString("dataType"));
+				FieldType t = MolgenisFieldTypes.getType(attributeDataType);
 				if (t == null) throw new IllegalArgumentException("attributes.type error on line " + i + ": "
-						+ a.getString("dataType") + " unknown");
-				am.setDataType(t);
+						+ attributeDataType + " unknown");
+				defaultAttributeMetaData.setDataType(t);
 			}
-			if (a.get("nillable") != null) am.setNillable(a.getBoolean("nillable"));
-			if (a.get("auto") != null) am.setAuto(a.getBoolean("auto"));
-			if (a.get("idAttribute") != null) am.setIdAttribute(a.getBoolean("idAttribute"));
+			else
+			{
+				defaultAttributeMetaData.setDataType(MolgenisFieldTypes.STRING);
+			}
 
-			md.addAttributeMetaData(am);
+			Boolean attributeNillable = attribute.getBoolean(NILLABLE);
+			Boolean attributeAuto = attribute.getBoolean(AUTO);
+			Boolean attributeIdAttribute = attribute.getBoolean(IDATTRIBUTE);
+			if (attributeNillable != null) defaultAttributeMetaData.setNillable(attributeNillable);
+			if (attributeAuto != null) defaultAttributeMetaData.setAuto(attributeAuto);
+			if (attributeIdAttribute != null) defaultAttributeMetaData.setIdAttribute(attributeIdAttribute);
+
+			defaultEntityMetaData.addAttributeMetaData(defaultAttributeMetaData);
 		}
+	}
 
-		// load all entities (optional)
-		if (source.getRepositoryByEntityName("entities") != null)
+	/**
+	 * Load all entities (optional)
+	 * 
+	 * @param source
+	 *            the map to add entities meta data
+	 */
+	private void loadAllEntitiesToMap(RepositoryCollection source, Map<String, DefaultEntityMetaData> entities)
+	{
+		if (source.getRepositoryByEntityName(ENTITIES) != null)
 		{
 			int i = 1;
-			for (Entity e : source.getRepositoryByEntityName("entities"))
+			for (Entity entity : source.getRepositoryByEntityName(ENTITIES))
 			{
 				i++;
-				String entityName = e.getString("name");
+				String entityName = entity.getString(NAME);
 
 				// required
 				if (entityName == null) throw new IllegalArgumentException("entity.name is missing on line " + i);
@@ -191,31 +234,40 @@ public class EmxImportServiceImpl implements EmxImporterService
 				if (entities.get(entityName) == null) entities.put(entityName, new DefaultEntityMetaData(entityName));
 				DefaultEntityMetaData md = entities.get(entityName);
 
-				if (e.get("description") != null) md.setDescription(e.getString("description"));
+				if (entity.get(DESCRIPTION) != null) md.setDescription(entity.getString(DESCRIPTION));
 			}
 		}
+	}
 
-		// re-iterate to map the mrefs/xref refEntity (or give error if not found)
-		// TODO: consider also those in existing db
+	/**
+	 * re-iterate to map the mrefs/xref refEntity (or give error if not found) TODO consider also those in existing db
+	 * 
+	 * @param source
+	 *            the map to add entities meta data
+	 */
+	private void reiterateToMapRefEntity(RepositoryCollection source, Map<String, DefaultEntityMetaData> entities)
+	{
 		int i = 1;
-		for (Entity a : source.getRepositoryByEntityName("attributes"))
+		for (Entity attribute : source.getRepositoryByEntityName(ATTRIBUTES))
 		{
+			final String refEntityName = (String) attribute.get(REFENTITY);
+			final String entityName = (String) attribute.getString(ENTITY);
+			final String attributeName = (String) attribute.getString(NAME);
 			i++;
-			if (a.get("refEntity") != null)
+			if (refEntityName != null)
 			{
-				DefaultEntityMetaData em = entities.get(a.getString("entity"));
-				DefaultAttributeMetaData am = (DefaultAttributeMetaData) em.getAttribute(a.getString("name"));
+				DefaultEntityMetaData defaultEntityMetaData = entities.get(entityName);
+				DefaultAttributeMetaData defaultAttributeMetaData = (DefaultAttributeMetaData) defaultEntityMetaData
+						.getAttribute(attributeName);
 
-				if (entities.get(a.getString("refEntity")) == null)
+				if (entities.get(refEntityName) == null)
 				{
-					throw new IllegalArgumentException("attributes.refEntity error on line " + i + ": "
-							+ a.getString("refEntity") + " unknown");
+					throw new IllegalArgumentException("attributes.refEntity error on line " + i + ": " + refEntityName
+							+ " unknown");
 				}
 
-				am.setRefEntity(entities.get(a.getString("refEntity")));
+				defaultAttributeMetaData.setRefEntity(entities.get(refEntityName));
 			}
 		}
-
-		return entities;
 	}
 }

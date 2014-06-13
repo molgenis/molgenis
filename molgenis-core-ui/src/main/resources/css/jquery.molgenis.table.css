@@ -34,6 +34,10 @@
 	background-image: url("images/ui-icons_ffffff_256x240.png");
 }
 
+.molgenis-table-striped tbody>tr:nth-child(odd)>td,.molgenis-table-striped tbody>tr:nth-child(odd)>th {
+    background-color: #ddd;
+}
+
 .molgenis-table-info {
 	font-style: italic;	
 }
