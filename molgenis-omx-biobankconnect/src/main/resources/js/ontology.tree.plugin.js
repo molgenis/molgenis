@@ -3,7 +3,7 @@
 	"use strict";
 	
 	var restApi = new molgenis.RestClient();
-
+	
 	function createChildren(attributes, doSelect) {
 		var children = [];
 		$.each(attributes, function() {
@@ -15,13 +15,17 @@
 				'folder' : isFolder,
 				'lazy' : isFolder,
 				'expanded' : !isFolder,
-				'selected' : doSelect(this),
+				'selected' : doSelect === undefined ? defaultDoSelect(this) : doSelect(this),
 				'data' : {
 					'attribute' : this
 				}
 			});
 		});
 		return children;
+	}
+	
+	function defaultDoSelect(node){
+		return node.selected;
 	}
 
 	$.fn.tree = function(options) {
@@ -80,24 +84,10 @@
 					settings.onInit();
 			},
 			'lazyload' : function(e, data) {
-				var node = data.node;
-				if (settings.lazyload !== undefined
-						&& typeof settings.lazyload === "function") {
-					settings.lazyload(data, createChildren, function() {
-						return node.selected;
-					});
-				} else {
-					data.result = $.Deferred(function(dfd) {
-						restApi.getAsync(node.key, {
-							'expand' : [ 'attributes' ]
-						}, function(attributeMetaData) {
-							var children = createChildren(
-									attributeMetaData.attributes, function() {
-										return node.selected;
-									});
-							dfd.resolve(children);
-						});
-					});
+				if (settings.lazyload !== undefined && typeof settings.lazyload === "function") {
+					settings.lazyload(data, createChildren);
+				}else{
+					molgenis.createAlert([{'message' : 'lazyload function is undefined!'}], 'error');
 				}
 			},
 			'source' : createChildren(settings.entityMetaData.attributes,

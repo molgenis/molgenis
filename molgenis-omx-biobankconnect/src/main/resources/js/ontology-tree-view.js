@@ -54,6 +54,42 @@
 		}
 	};
 	
+	
+	function removeDuplicate (listOfNodes){
+		var uniqueNodes = [];
+		if(listOfNodes.length > 0){
+			var nodeMap = {};
+			$.each(listOfNodes, function(index, eachNode){
+				var name = eachNode[ONTOLOGY_TERM_IRI];
+				if(nodeMap[name]){
+					if(eachNode[SYNONYMS] !== eachNode[ONTOLOGY_TERM]){			
+						var existingNode = nodeMap[name];
+						existingNode.synonyms.push(eachNode[SYNONYMS]);
+						nodeMap[name] = existingNode;
+					}
+				}else{
+					eachNode.synonyms = [];
+					if(eachNode[SYNONYMS] !== eachNode[ONTOLOGY_TERM]){
+						eachNode.synonyms.push(eachNode[SYNONYMS]);
+					}
+					nodeMap[name] = eachNode;
+				}
+			});
+			
+			//Add tree label to the node data
+			$.map(nodeMap, function(value, key){
+				if(value[ONTOLOGY_TERM]){
+					value[TREE_LABEL] = value[ONTOLOGY_TERM];
+				}
+				else if(value[ONTOLOGY_LABEL]){
+					value[TREE_LABEL] = value[ONTOLOGY_LABEL];
+				}
+				uniqueNodes.push(value);
+			});
+		}
+		return uniqueNodes;
+	}
+	
 	function getOntologyTermByIri(ontologyIRI){
 		var request = {
 			'q' : [{
@@ -88,50 +124,6 @@
 		return rootOntologyTerms.items;
 	}
 	
-	function removeDuplicate(listOfNodes){
-		var uniqueNodes = [];
-		if(listOfNodes.length > 0){
-			var nodeMap = {};
-			$.each(listOfNodes, function(index, eachNode){
-				var name = eachNode[ONTOLOGY_TERM_IRI];
-				if(nodeMap[name]){
-					if(eachNode[SYNONYMS] !== eachNode[ONTOLOGY_TERM]){			
-						var existingNode = nodeMap[name];
-						existingNode.synonyms.push(eachNode[SYNONYMS]);
-						nodeMap[name] = existingNode;
-					}
-				}else{
-					eachNode.synonyms = [];
-					if(eachNode[SYNONYMS] !== eachNode[ONTOLOGY_TERM]){
-						eachNode.synonyms.push(eachNode[SYNONYMS]);
-					}
-					nodeMap[name] = eachNode;
-				}
-			});
-			
-			$.map(nodeMap, function(value, key){
-				uniqueNodes.push(value);
-			});
-		}
-		return mapMetaData(uniqueNodes);
-	}
-	
-	function mapMetaData(listOfEntities, isExpanded){
-		var convertedData = {};
-		$.each(listOfEntities, function(index, metaData){
-			if(metaData[ONTOLOGY_TERM]){
-				metaData[TREE_LABEL] = metaData[ONTOLOGY_TERM];
-			}
-			else if(metaData[ONTOLOGY_LABEL]){
-				metaData[TREE_LABEL] = metaData[ONTOLOGY_LABEL];
-			}
-			if(isExpanded !== undefined && isExpanded !== null && isExpanded){
-				metaData['expanded'] = true;
-			}
-		});
-		return listOfEntities;
-	}
-	
 	function createEntityMetaTree(entityMetaData, attributes) {
 		
 		var container = $('#tree-container').css({
@@ -159,11 +151,10 @@
 					ontologyTermInfo(relatedOntologyTerms.items[0]);
 				}
 			},
-			'lazyload' : function(data, createChildren, doSelect){
+			'lazyload' : function(data, createChildren){
 				var href = data.node.data.attribute.href;
-				var ontologyTerm = restApi.get(href, {'expand' : ['attributes']}, null);
-				var childOntologyTerms = removeDuplicate(ontologyTerm.attributes.items);
-				data.result = createChildren(childOntologyTerms, doSelect);
+				var ontologyTerm = restApi.get(href, {'expand' : ['attributes']});
+				data.result = createChildren(removeDuplicate(ontologyTerm.attributes.items));
 			}
 		});
 	}
