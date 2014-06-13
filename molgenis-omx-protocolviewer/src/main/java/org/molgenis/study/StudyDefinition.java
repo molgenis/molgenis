@@ -40,6 +40,8 @@ public interface StudyDefinition
 	 */
 	String getRequestProposalForm();
 
+	void setRequestProposalForm(String fileName);
+
 	public enum Status
 	{
 		DRAFT, SUBMITTED, APPROVED, REJECTED

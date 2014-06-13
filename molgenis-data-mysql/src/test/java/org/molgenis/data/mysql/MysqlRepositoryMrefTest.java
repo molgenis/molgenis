@@ -38,7 +38,7 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 	@Override
 	public String createSql()
 	{
-		return "CREATE TABLE IF NOT EXISTS MrefTest(identifier VARCHAR(255) NOT NULL, PRIMARY KEY (identifier)) ENGINE=InnoDB;";
+		return "CREATE TABLE IF NOT EXISTS `MrefTest`(`identifier` VARCHAR(255) NOT NULL, PRIMARY KEY (`identifier`)) ENGINE=InnoDB;";
 	}
 
 	@Override
@@ -100,7 +100,7 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 
 		Assert.assertEquals(
 				mrefRepo.getSelectSql(new QueryImpl()),
-				"SELECT this.identifier, GROUP_CONCAT(DISTINCT(stringRef.stringRef)) AS stringRef, GROUP_CONCAT(DISTINCT(intRef.intRef)) AS intRef FROM MrefTest AS this LEFT JOIN MrefTest_stringRef AS stringRef_filter ON (this.identifier = stringRef_filter.identifier) LEFT JOIN MrefTest_stringRef AS stringRef ON (this.identifier = stringRef.identifier) LEFT JOIN MrefTest_intRef AS intRef_filter ON (this.identifier = intRef_filter.identifier) LEFT JOIN MrefTest_intRef AS intRef ON (this.identifier = intRef.identifier) GROUP BY this.identifier");
+				"SELECT this.`identifier`, GROUP_CONCAT(DISTINCT(`stringRef`.`stringRef`)) AS `stringRef`, GROUP_CONCAT(DISTINCT(`intRef`.`intRef`)) AS `intRef` FROM `MrefTest` AS this LEFT JOIN `MrefTest_stringRef` AS `stringRef_filter` ON (this.`identifier` = `stringRef_filter`.`identifier`) LEFT JOIN `MrefTest_stringRef` AS `stringRef` ON (this.`identifier` = `stringRef`.`identifier`) LEFT JOIN `MrefTest_intRef` AS `intRef_filter` ON (this.`identifier` = `intRef_filter`.`identifier`) LEFT JOIN `MrefTest_intRef` AS `intRef` ON (this.`identifier` = `intRef`.`identifier`) GROUP BY this.`identifier`");
 		for (Entity e : mrefRepo.findAll(new QueryImpl().eq("identifier", "one")))
 		{
 			logger.info("found: " + e);
