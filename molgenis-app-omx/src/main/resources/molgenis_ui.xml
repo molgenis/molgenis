@@ -4,7 +4,10 @@
 		<plugin id="home" name="Home" url="home"/>
 		<plugin id="protocolviewer" name="Catalog" url="protocolviewer"/>
 		<plugin id="dataexplorer" name="Data Explorer" url="dataexplorer"/>	
-		<plugin id="importwizard" name="Upload" url="importwizard"/>
+		<menu label="Import" name ="import">
+			<plugin id="importwizard" name="Import" url="importwizard"/>
+			<plugin id="vcfimporter" name="VCF" url="vcfimporter"/>
+		</menu>
 		<plugin id="models" name="Model registry" url="models" />
 		<menu label="Entities" name ="entities">
         		<plugin id="form.DataSet" name="DataSet" url="form.DataSet"/>

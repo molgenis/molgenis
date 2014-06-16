@@ -1,5 +1,15 @@
 package org.molgenis.data.vcf;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
@@ -9,22 +19,12 @@ import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.genotype.GenotypeDataException;
 import org.molgenis.vcf.VcfInfo;
 import org.molgenis.vcf.VcfReader;
 import org.molgenis.vcf.VcfRecord;
 import org.molgenis.vcf.meta.VcfMeta;
 import org.molgenis.vcf.meta.VcfMetaInfo;
-import org.springframework.util.StringUtils;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * Repository implementation for vcf files.
@@ -41,16 +41,17 @@ public class VcfRepository extends AbstractRepository
 	public static final String FILTER = "FILTER";
 	public static final String QUAL = "QUAL";
 	public static final String ID = "ID";
-    public static final String INFO = "INFO";
+	public static final String INFO = "INFO";
 
 	private DefaultEntityMetaData entityMetaData;
 	private final File file;
 
-    public VcfReader getVcfReader() {
-        return vcfReader;
-    }
+	public VcfReader getVcfReader()
+	{
+		return vcfReader;
+	}
 
-    private VcfReader vcfReader;
+	private VcfReader vcfReader;
 
 	public VcfRepository(File file)
 	{
@@ -91,17 +92,23 @@ public class VcfRepository extends AbstractRepository
 				Entity entity = new MapEntity();
 				try
 				{
-					VcfRecord record = vcfRecordIterator.next();
-					entity.set(CHROM, record.getChromosome());
-					entity.set(ALT, StringUtils.arrayToCommaDelimitedString(record.getAlternateAlleles().toArray()));
-					entity.set(POS, record.getPosition());
-					entity.set(REF, record.getReferenceAllele());
-					entity.set(FILTER, record.getFilterStatus());
-					entity.set(QUAL, record.getQuality());
-					entity.set(ID, StringUtils.arrayToCommaDelimitedString(record.getIdentifiers().toArray()));
-					for (VcfInfo informationColumn : record.getInformation())
+					VcfRecord vcfRecord = vcfRecordIterator.next();
+					entity.set(CHROM, vcfRecord.getChromosome());
+					entity.set(ALT, StringUtils.join(vcfRecord.getAlternateAlleles(), ','));
+					entity.set(POS, vcfRecord.getPosition());
+					entity.set(REF, vcfRecord.getReferenceAllele());
+					entity.set(FILTER, vcfRecord.getFilterStatus());
+					entity.set(QUAL, vcfRecord.getQuality());
+					entity.set(ID, StringUtils.join(vcfRecord.getIdentifiers(), ','));
+					for (VcfInfo vcfInfo : vcfRecord.getInformation())
 					{
-						entity.set(informationColumn.getKey(), informationColumn.getVal());
+						Object val = vcfInfo.getVal();
+						if (val instanceof List<?>)
+						{
+							// TODO support list of primitives datatype
+							val = StringUtils.join((List<?>) val, ',');
+						}
+						entity.set(vcfInfo.getKey(), val);
 					}
 					// TODO: deal with samples
 					/**
@@ -131,11 +138,12 @@ public class VcfRepository extends AbstractRepository
 	{
 		if (entityMetaData == null)
 		{
-			entityMetaData = new DefaultEntityMetaData(StringUtils.stripFilenameExtension(file.getName()));
+			entityMetaData = new DefaultEntityMetaData(FilenameUtils.removeExtension(file.getName()));
 			try
 			{
 				VcfMeta metadata = vcfReader.getVcfMeta();
-				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(CHROM, MolgenisFieldTypes.FieldTypeEnum.STRING));
+				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(CHROM,
+						MolgenisFieldTypes.FieldTypeEnum.STRING));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ALT,
 						MolgenisFieldTypes.FieldTypeEnum.STRING));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(POS,
@@ -149,20 +157,20 @@ public class VcfRepository extends AbstractRepository
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ID,
 						MolgenisFieldTypes.FieldTypeEnum.STRING));
 				Iterator<VcfMetaInfo> metaInfoIterator = metadata.getInfoMeta().iterator();
-                DefaultAttributeMetaData infoMetaData = new DefaultAttributeMetaData(INFO,
-                        MolgenisFieldTypes.FieldTypeEnum.COMPOUND);
-                List<AttributeMetaData> metadataInfoField = new ArrayList<AttributeMetaData>();
+				DefaultAttributeMetaData infoMetaData = new DefaultAttributeMetaData(INFO,
+						MolgenisFieldTypes.FieldTypeEnum.COMPOUND);
+				List<AttributeMetaData> metadataInfoField = new ArrayList<AttributeMetaData>();
 				while (metaInfoIterator.hasNext())
 				{
-                    VcfMetaInfo info = metaInfoIterator.next();
-                    DefaultAttributeMetaData attributeMetaData = new DefaultAttributeMetaData(info.getId(),
-                            vcfReaderFormatToMolgenisType(info));
-                    attributeMetaData.setDescription(info.getDescription());
-                    metadataInfoField.add(attributeMetaData);
-                }
-                infoMetaData.setAttributesMetaData(metadataInfoField);
-                entityMetaData.addAttributeMetaData(infoMetaData);
-                // TODO: deal with samples
+					VcfMetaInfo info = metaInfoIterator.next();
+					DefaultAttributeMetaData attributeMetaData = new DefaultAttributeMetaData(info.getId(),
+							vcfReaderFormatToMolgenisType(info));
+					attributeMetaData.setDescription(info.getDescription());
+					metadataInfoField.add(attributeMetaData);
+				}
+				infoMetaData.setAttributesMetaData(metadataInfoField);
+				entityMetaData.addAttributeMetaData(infoMetaData);
+				// TODO: deal with samples
 				/**
 				 * Iterator<VcfMetaSample> sampleInfoIterator = metadata.getSampleMeta().iterator(); while
 				 * (sampleInfoIterator.hasNext()) { VcfMetaSample info = sampleInfoIterator.next();
@@ -180,7 +188,7 @@ public class VcfRepository extends AbstractRepository
 		return entityMetaData;
 	}
 
-    private MolgenisFieldTypes.FieldTypeEnum vcfReaderFormatToMolgenisType(VcfMetaInfo vcfMetaInfo)
+	private MolgenisFieldTypes.FieldTypeEnum vcfReaderFormatToMolgenisType(VcfMetaInfo vcfMetaInfo)
 	{
 		String number = vcfMetaInfo.getNumber();
 		boolean isListValue;
@@ -199,36 +207,33 @@ public class VcfRepository extends AbstractRepository
 			case CHARACTER:
 				if (isListValue)
 				{
-					// FIXME: how to deal with this/lists?
+					// TODO support list of primitives datatype
 					return MolgenisFieldTypes.FieldTypeEnum.STRING;
 				}
 				return MolgenisFieldTypes.FieldTypeEnum.STRING;
-
 			case FLAG:
 				return MolgenisFieldTypes.FieldTypeEnum.BOOL;
 			case FLOAT:
 				if (isListValue)
 				{
-					// FIXME: how to deal with this/lists?
-					return MolgenisFieldTypes.FieldTypeEnum.DECIMAL;
+					// TODO support list of primitives datatype
+					return MolgenisFieldTypes.FieldTypeEnum.STRING;
 				}
 				return MolgenisFieldTypes.FieldTypeEnum.DECIMAL;
 			case INTEGER:
 				if (isListValue)
 				{
-					// FIXME: how to deal with this/lists?
-					return MolgenisFieldTypes.FieldTypeEnum.INT;
+					// TODO support list of primitives datatype
+					return MolgenisFieldTypes.FieldTypeEnum.STRING;
 				}
 				return MolgenisFieldTypes.FieldTypeEnum.INT;
-
 			case STRING:
 				if (isListValue)
 				{
-					// FIXME: how to deal with this/lists?
+					// TODO support list of primitives datatype
 					return MolgenisFieldTypes.FieldTypeEnum.STRING;
 				}
 				return MolgenisFieldTypes.FieldTypeEnum.STRING;
-
 			default:
 				throw new MolgenisDataException("unknown vcf info type [" + vcfMetaInfo.getType() + "]");
 		}

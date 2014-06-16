@@ -3,11 +3,14 @@ package org.molgenis.elasticsearch.index;
 import static org.molgenis.elasticsearch.util.MapperTypeSanitizer.sanitizeMapperType;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
+import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
@@ -34,6 +37,8 @@ import org.molgenis.elasticsearch.util.MapperTypeSanitizer;
  */
 public class MappingsBuilder
 {
+	private static final Logger logger = Logger.getLogger(MappingsBuilder.class);
+
 	private static final String ENTITY_NAME = "name";
 	private static final String ENTITY_LABEL = "label";
 	private static final String ENTITY_DESCRIPTION = "description";
@@ -241,7 +246,8 @@ public class MappingsBuilder
 			List<Map<String, Object>> attributes = (List<Map<String, Object>>) entityMetaMap.get(ENTITY_ATTRIBUTES);
 			for (Map<String, Object> attribute : attributes)
 			{
-				deserializeAttribute(attribute, entityMetaData, client);
+				AttributeMetaData attributeMetaData = deserializeAttribute(attribute, entityMetaData, client);
+				entityMetaData.addAttributeMetaData(attributeMetaData);
 			}
 		}
 		if (entityMetaMap.containsKey(ENTITY_EXTENDS))
@@ -253,8 +259,8 @@ public class MappingsBuilder
 	}
 
 	@SuppressWarnings("unchecked")
-	private static void deserializeAttribute(Map<String, Object> attributeMap, DefaultEntityMetaData entityMetaData,
-			Client client) throws IOException
+	private static AttributeMetaData deserializeAttribute(Map<String, Object> attributeMap,
+			DefaultEntityMetaData entityMetaData, Client client) throws IOException
 	{
 		String name = (String) attributeMap.get(ATTRIBUTE_NAME);
 		DefaultAttributeMetaData attribute = new DefaultAttributeMetaData(name);
@@ -296,10 +302,14 @@ public class MappingsBuilder
 		{
 			List<Map<String, Object>> attributeParts = (List<Map<String, Object>>) attributeMap
 					.get(ATTRIBUTE_ATTRIBUTE_PARTS);
+
+			List<AttributeMetaData> attributeMetaDataParts = new ArrayList<AttributeMetaData>();
 			for (Map<String, Object> attributePart : attributeParts)
 			{
-				deserializeAttribute(attributePart, entityMetaData, client);
+				AttributeMetaData attributeMetaDataPart = deserializeAttribute(attributePart, entityMetaData, client);
+				attributeMetaDataParts.add(attributeMetaDataPart);
 			}
+			attribute.setAttributesMetaData(attributeMetaDataParts);
 		}
 		attribute.setAggregateable((boolean) attributeMap.get(ATTRIBUTE_AGGREGATEABLE));
 		if (attributeMap.containsKey(ATTRIBUTE_RANGE))
@@ -309,8 +319,8 @@ public class MappingsBuilder
 			Long max = range.containsKey(ATTRIBUTE_RANGE_MAX) ? (Long) range.get(ATTRIBUTE_RANGE_MAX) : null;
 			attribute.setRange(new Range(min, max));
 		}
+		return attribute;
 
-		entityMetaData.addAttributeMetaData(attribute);
 	}
 
 	private static String getType(AttributeMetaData attr)
@@ -349,5 +359,34 @@ public class MappingsBuilder
 			default:
 				return "string";
 		}
+	}
+
+	public static boolean hasMapping(Client client, EntityMetaData entityMetaData)
+	{
+		String docType = sanitizeMapperType(entityMetaData.getName());
+
+		GetMappingsResponse getMappingsResponse = client.admin().indices().prepareGetMappings("molgenis").execute()
+				.actionGet();
+		ImmutableOpenMap<String, ImmutableOpenMap<String, MappingMetaData>> allMappings = getMappingsResponse
+				.getMappings();
+		final ImmutableOpenMap<String, MappingMetaData> indexMappings = allMappings.get("molgenis");
+		return indexMappings.containsKey(docType);
+	}
+
+	public static void createMapping(Client client, EntityMetaData entityMetaData) throws IOException
+	{
+		XContentBuilder jsonBuilder = MappingsBuilder.buildMapping(entityMetaData);
+
+		String docType = sanitizeMapperType(entityMetaData.getName());
+		PutMappingResponse response = client.admin().indices().preparePutMapping("molgenis").setType(docType)
+				.setSource(jsonBuilder).execute().actionGet();
+
+		if (!response.isAcknowledged())
+		{
+			throw new ElasticsearchException("Creation of mapping for documentType [" + docType + "] failed. Response="
+					+ response);
+		}
+
+		logger.info("Mapping for documentType [" + docType + "] created");
 	}
 }

@@ -1,13 +1,16 @@
 package org.molgenis.data.elasticsearch;
 
+import java.io.IOException;
 import java.util.Iterator;
 
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.elasticsearch.index.MappingsBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -32,7 +35,6 @@ public class ElasticsearchRepositoryCollection implements RepositoryCollection
 				.actionGet();
 		ImmutableOpenMap<String, ImmutableOpenMap<String, MappingMetaData>> allMappings = getMappingsResponse
 				.getMappings();
-
 		final ImmutableOpenMap<String, MappingMetaData> indexMappings = allMappings.get(INDEX_NAME);
 		return new Iterable<String>()
 		{
@@ -47,6 +49,15 @@ public class ElasticsearchRepositoryCollection implements RepositoryCollection
 	@Override
 	public Repository getRepositoryByEntityName(String name)
 	{
-		return new ElasticsearchRepository(client, INDEX_NAME, name);
+		EntityMetaData entityMetaData;
+		try
+		{
+			entityMetaData = MappingsBuilder.deserializeEntityMeta(client, name);
+		}
+		catch (IOException e)
+		{
+			throw new RuntimeException(e);
+		}
+		return new ElasticsearchRepository(client, INDEX_NAME, entityMetaData);
 	}
 }

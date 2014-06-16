@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.springframework.util.StringUtils;
@@ -24,14 +23,15 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 	public static final String EXTENSION_VCF = "vcf";
 	public static final Set<String> EXTENSIONS = ImmutableSet.of(EXTENSION_VCF);
 	private final File file;
+	private final String entityName;
 	private List<String> entityNames;
 	private List<String> entityNamesLowerCase;
 
-	public VcfRepositoryCollection(File file) throws InvalidFormatException,
-			IOException
+	public VcfRepositoryCollection(File file, String entityName) throws IOException
 	{
 		super(EXTENSIONS);
 		this.file = file;
+		this.entityName = entityName;
 
 		loadEntityName();
 	}
@@ -50,7 +50,7 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 			return null;
 		}
 
-        return new VcfRepository(file);
+		return new VcfRepository(file);
 	}
 
 	private void loadEntityName()
@@ -58,7 +58,7 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 		entityNames = Lists.newArrayList();
 		entityNamesLowerCase = Lists.newArrayList();
 
-		String name = getRepositoryName(file.getName());
+		String name = getRepositoryName(entityName);
 		entityNames.add(name);
 		entityNamesLowerCase.add(name.toLowerCase());
 	}

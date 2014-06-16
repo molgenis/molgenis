@@ -35,8 +35,8 @@ public class VcfRepositoryTest
 		testdata = new File(FileUtils.getTempDirectory(), "testdata.vcf");
 		FileCopyUtils.copy(in_data, new FileOutputStream(testdata));
 
-        InputStream in_no_data = VcfRepositoryTest.class.getResourceAsStream("/testnodata.vcf");
-        testnodata = new File(FileUtils.getTempDirectory(), "testnodata.vcf");
+		InputStream in_no_data = VcfRepositoryTest.class.getResourceAsStream("/testnodata.vcf");
+		testnodata = new File(FileUtils.getTempDirectory(), "testnodata.vcf");
 		FileCopyUtils.copy(in_no_data, new FileOutputStream(testnodata));
 	}
 
@@ -46,101 +46,104 @@ public class VcfRepositoryTest
 		VcfRepository vcfRepository = null;
 		try
 		{
-            RepositoryCollection collection = new VcfRepositoryCollection(testdata);
-            vcfRepository = (VcfRepository) collection.getRepositoryByEntityName("testdata");
+			RepositoryCollection collection = new VcfRepositoryCollection(testdata);
+			vcfRepository = (VcfRepository) collection.getRepositoryByEntityName("testdata");
 
-            assertEquals(vcfRepository.getName(), "testdata");
+			assertEquals(vcfRepository.getName(), "testdata");
 			Iterator<AttributeMetaData> it = vcfRepository.getEntityMetaData().getAttributes().iterator();
 			assertTrue(it.hasNext());
-            testAttribute(it.next(), VcfRepository.CHROM, MolgenisFieldTypes.STRING);
-            assertTrue(it.hasNext());
-            testAttribute(it.next(), VcfRepository.ALT, MolgenisFieldTypes.STRING);
+			testAttribute(it.next(), VcfRepository.CHROM, MolgenisFieldTypes.STRING);
 			assertTrue(it.hasNext());
-            testAttribute(it.next(), VcfRepository.POS, MolgenisFieldTypes.LONG);
+			testAttribute(it.next(), VcfRepository.ALT, MolgenisFieldTypes.STRING);
 			assertTrue(it.hasNext());
-            testAttribute(it.next(), VcfRepository.REF, MolgenisFieldTypes.STRING);
+			testAttribute(it.next(), VcfRepository.POS, MolgenisFieldTypes.LONG);
 			assertTrue(it.hasNext());
-            testAttribute(it.next(), VcfRepository.FILTER, MolgenisFieldTypes.STRING);
+			testAttribute(it.next(), VcfRepository.REF, MolgenisFieldTypes.STRING);
 			assertTrue(it.hasNext());
-            testAttribute(it.next(), VcfRepository.QUAL, MolgenisFieldTypes.STRING);
+			testAttribute(it.next(), VcfRepository.FILTER, MolgenisFieldTypes.STRING);
 			assertTrue(it.hasNext());
-            testAttribute(it.next(), VcfRepository.ID, MolgenisFieldTypes.STRING);
+			testAttribute(it.next(), VcfRepository.QUAL, MolgenisFieldTypes.STRING);
+			assertTrue(it.hasNext());
+			testAttribute(it.next(), VcfRepository.ID, MolgenisFieldTypes.STRING);
 
 			assertTrue(it.hasNext());
-            testAttribute(it.next(), "NS", MolgenisFieldTypes.INT);
+			testAttribute(it.next(), "NS", MolgenisFieldTypes.INT);
 			assertTrue(it.hasNext());
-            testAttribute(it.next(), "DP", MolgenisFieldTypes.INT);
+			testAttribute(it.next(), "DP", MolgenisFieldTypes.INT);
 			assertTrue(it.hasNext());
-            testAttribute(it.next(), "AF", MolgenisFieldTypes.DECIMAL);
+			testAttribute(it.next(), "AF", MolgenisFieldTypes.DECIMAL);
 			assertTrue(it.hasNext());
-            testAttribute(it.next(), "ANNOT", MolgenisFieldTypes.STRING);
+			testAttribute(it.next(), "ANNOT", MolgenisFieldTypes.STRING);
 			assertTrue(it.hasNext());
-            testAttribute(it.next(), "REFAA", MolgenisFieldTypes.STRING);
+			testAttribute(it.next(), "REFAA", MolgenisFieldTypes.STRING);
 			assertTrue(it.hasNext());
-            testAttribute(it.next(), "AAC", MolgenisFieldTypes.STRING);
+			testAttribute(it.next(), "AAC", MolgenisFieldTypes.STRING);
 			assertTrue(it.hasNext());
-            testAttribute(it.next(), "TI", MolgenisFieldTypes.STRING);
+			testAttribute(it.next(), "TI", MolgenisFieldTypes.STRING);
 			assertTrue(it.hasNext());
-            testAttribute(it.next(), "PI", MolgenisFieldTypes.STRING);
+			testAttribute(it.next(), "PI", MolgenisFieldTypes.STRING);
 			assertTrue(it.hasNext());
-            testAttribute(it.next(), "GI", MolgenisFieldTypes.STRING);
+			testAttribute(it.next(), "GI", MolgenisFieldTypes.STRING);
 			assertTrue(it.hasNext());
-            testAttribute(it.next(), "PHYLOPC", MolgenisFieldTypes.STRING);
+			testAttribute(it.next(), "PHYLOPC", MolgenisFieldTypes.STRING);
 			assertTrue(it.hasNext());
-            testAttribute(it.next(), "PHYLOPS", MolgenisFieldTypes.DECIMAL);
+			testAttribute(it.next(), "PHYLOPS", MolgenisFieldTypes.DECIMAL);
 			assertTrue(it.hasNext());
-            testAttribute(it.next(), "SIFTC", MolgenisFieldTypes.STRING);
+			testAttribute(it.next(), "SIFTC", MolgenisFieldTypes.STRING);
 			assertTrue(it.hasNext());
-            testAttribute(it.next(), "SIFTS", MolgenisFieldTypes.DECIMAL);
+			testAttribute(it.next(), "SIFTS", MolgenisFieldTypes.DECIMAL);
 			assertTrue(it.hasNext());
-            testAttribute(it.next(), "POLYPHEN2C", MolgenisFieldTypes.STRING);
+			testAttribute(it.next(), "POLYPHEN2C", MolgenisFieldTypes.STRING);
 			assertTrue(it.hasNext());
-            testAttribute(it.next(), "Polyphen2S", MolgenisFieldTypes.DECIMAL);
+			testAttribute(it.next(), "Polyphen2S", MolgenisFieldTypes.DECIMAL);
 			assertTrue(it.hasNext());
-            testAttribute(it.next(), "LRTC", MolgenisFieldTypes.STRING);
+			testAttribute(it.next(), "LRTC", MolgenisFieldTypes.STRING);
 			assertTrue(it.hasNext());
-            testAttribute(it.next(), "LRTS", MolgenisFieldTypes.DECIMAL);
+			testAttribute(it.next(), "LRTS", MolgenisFieldTypes.DECIMAL);
 			assertTrue(it.hasNext());
-            testAttribute(it.next(), "MTASTERC", MolgenisFieldTypes.STRING);
+			testAttribute(it.next(), "MTASTERC", MolgenisFieldTypes.STRING);
 			assertTrue(it.hasNext());
-            testAttribute(it.next(), "MTASTERS", MolgenisFieldTypes.DECIMAL);
+			testAttribute(it.next(), "MTASTERS", MolgenisFieldTypes.DECIMAL);
 			assertTrue(it.hasNext());
-            testAttribute(it.next(), "HGENOMES", MolgenisFieldTypes.DECIMAL);
+			testAttribute(it.next(), "HGENOMES", MolgenisFieldTypes.DECIMAL);
 			assertFalse(it.hasNext());
-		} catch (InvalidFormatException e) {
-            e.printStackTrace();
-        } finally
+		}
+		catch (InvalidFormatException e)
+		{
+			e.printStackTrace();
+		}
+		finally
 		{
 			IOUtils.closeQuietly(vcfRepository);
 		}
 	}
 
-    void testAttribute(AttributeMetaData metadata, String name,FieldType type) {
-        assertEquals(metadata.getName(), name);
-        assertEquals(metadata.getDataType(), type);
-    }
+	void testAttribute(AttributeMetaData metadata, String name, FieldType type)
+	{
+		assertEquals(metadata.getName(), name);
+		assertEquals(metadata.getDataType(), type);
+	}
 
-
-    @Test
+	@Test
 	public void iterator() throws IOException
 	{
 		VcfRepository vcfRepository = null;
 		try
 		{
-            RepositoryCollection collection = new VcfRepositoryCollection(testdata);
-            vcfRepository = (VcfRepository) collection.getRepositoryByEntityName("testdata");
-            Iterator<Entity> it = vcfRepository.iterator();
+			RepositoryCollection collection = new VcfRepositoryCollection(testdata);
+			vcfRepository = (VcfRepository) collection.getRepositoryByEntityName("testdata");
+			Iterator<Entity> it = vcfRepository.iterator();
 
 			assertTrue(it.hasNext());
 			Entity entity = it.next();
 			assertEquals(entity.get(VcfRepository.CHROM), "1");
 			assertEquals(entity.get(VcfRepository.POS), 565286);
 
-            assertTrue(it.hasNext());
-            entity = it.next();
-            assertEquals(entity.get(VcfRepository.CHROM), "1");
-            assertEquals(entity.get(VcfRepository.POS), 2243618);
-            assertTrue(it.hasNext());
+			assertTrue(it.hasNext());
+			entity = it.next();
+			assertEquals(entity.get(VcfRepository.CHROM), "1");
+			assertEquals(entity.get(VcfRepository.POS), 2243618);
+			assertTrue(it.hasNext());
 
 			assertTrue(it.hasNext());
 			entity = it.next();
@@ -163,25 +166,29 @@ public class VcfRepositoryTest
 			assertEquals(entity.get(VcfRepository.CHROM), "1");
 			assertEquals(entity.get(VcfRepository.POS), 6097450);
 
-            assertTrue(it.hasNext());
-            entity = it.next();
-            assertEquals(entity.get(VcfRepository.CHROM), "1");
-            assertEquals(entity.get(VcfRepository.POS), 7569187);
+			assertTrue(it.hasNext());
+			entity = it.next();
+			assertEquals(entity.get(VcfRepository.CHROM), "1");
+			assertEquals(entity.get(VcfRepository.POS), 7569187);
 
 			assertFalse(it.hasNext());
-		} catch (InvalidFormatException e) {
-            e.printStackTrace();
-        } finally
+		}
+		catch (InvalidFormatException e)
+		{
+			e.printStackTrace();
+		}
+		finally
 		{
 			IOUtils.closeQuietly(vcfRepository);
 		}
 	}
 
 	@Test
-	public void iterator_noValues() throws IOException, InvalidFormatException {
-        RepositoryCollection collection = new VcfRepositoryCollection(testnodata);
-        VcfRepository vcfRepository = (VcfRepository) collection.getRepositoryByEntityName("testnodata");
-        try
+	public void iterator_noValues() throws IOException, InvalidFormatException
+	{
+		RepositoryCollection collection = new VcfRepositoryCollection(testnodata);
+		VcfRepository vcfRepository = (VcfRepository) collection.getRepositoryByEntityName("testnodata");
+		try
 		{
 			Iterator<Entity> it = vcfRepository.iterator();
 			assertFalse(it.hasNext());
