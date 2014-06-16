@@ -43,8 +43,9 @@
 		
 		function updateStudyDefinitionTable() {
 			$.ajax({
-				type : 'GET',
-				url : molgenis.getContextUrl() + '/list?state=' + $('#state-select').val(),
+				type : 'POST',
+				url : molgenis.getContextUrl() + '/list',
+				data: 'state=' + $('#state-select').val() + '&search=' + encodeURIComponent($('#studydefinition-search').val()),
 				success : function(data) {
                     if(data.studyDefinitions.length === 0){
                         $('#study-definition-info').hide();
@@ -193,5 +194,16 @@
 		});
 
 		$('#state-select').change();
+		
+		$('#search-button').on('click', function(){
+			updateStudyDefinitionTable();
+		});
+		
+		$('#studydefinition-search').keydown(function(e) {
+			if (e.keyCode == 13 || e.which === '13') { // enter
+				e.preventDefault();
+				updateStudyDefinitionTable();
+			}
+		});
 	});
 }($, window.top.molgenis = window.top.molgenis || {}));

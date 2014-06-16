@@ -101,11 +101,12 @@ public class StudyManagerController extends MolgenisPluginController
 	 * 
 	 * @return
 	 */
-	@RequestMapping(value = "/list", method = RequestMethod.GET)
+	@RequestMapping(value = "/list")
 	@ResponseBody
-	public StudyDefinitionsMetaResponse getStudyDefinitionsMeta(@RequestParam("state") StudyDefinition.Status status)
+	public StudyDefinitionsMetaResponse getStudyDefinitionsMeta(@RequestParam("state") StudyDefinition.Status status,
+			@RequestParam(value = "search", required = false) String search)
 	{
-		List<StudyDefinition> studyDefinitions = studyDefinitionManagerService.getStudyDefinitions(status);
+		List<StudyDefinition> studyDefinitions = studyDefinitionManagerService.findStudyDefinitions(status, search);
 		logger.debug("Got [" + studyDefinitions.size() + "] study definitions from service");
 
 		List<StudyDefinitionMetaModel> models = Lists.transform(studyDefinitions,

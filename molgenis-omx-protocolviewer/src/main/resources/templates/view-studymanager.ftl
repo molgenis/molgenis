@@ -11,16 +11,16 @@
 					<div class="row-fluid">
 						<div class="span6">
 							<div class="row-fluid">
-								<div class="control-group form-horizontal">
-									<label class="control-label" for="state-select">Study definition status:</label>
-									<div class="controls">
-										<select id="state-select" name="state-select">
-										<#list studyDefinitionStates as studyDefinitionState>
-											<option value="${studyDefinitionState}"<#if studyDefinitionState == defaultStudyDefinitionState> selected</#if>>${studyDefinitionState}</option>
-										</#list> 
-										</select>
-									</div>
-								</div>
+								Status:
+								<select id="state-select" name="state-select">
+								<#list studyDefinitionStates as studyDefinitionState>
+									<option value="${studyDefinitionState}"<#if studyDefinitionState == defaultStudyDefinitionState> selected</#if>>${studyDefinitionState}</option>
+								</#list> 
+								</select>
+								<div class="input-append">
+									<input id="studydefinition-search" type="text" placeholder="Search study definitions">
+									<button class="btn" type="button" id="search-button"><i class="icon-large icon-search"></i></button>
+								</div>	
 							</div>
 							<div class="row-fluid">
 								<div id="resultsTable">
