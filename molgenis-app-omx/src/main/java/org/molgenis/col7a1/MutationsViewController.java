@@ -30,14 +30,14 @@ public class MutationsViewController extends MolgenisPluginController
 {
 	public static final String ID = "col7a1_mutations";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
-	private static final String ENTITYNAME_MUTATIONSVIEW = "import_mutationsview";
-	private static final String ENTITYNAME_MUTATIONS = "import_mutations";
-	private static final String MUTATIONS__MUTATION_ID = "identifier_mutation";
-	private static final String MUTATIONSVIEW__MUTATION_ID = "Subject Mutation ID";
-	private static final String TITLE = "Mutations view";
+	public static final String ENTITYNAME_MUTATIONSVIEW = "import_mutationsview";
+	public static final String ENTITYNAME_MUTATIONS = "import_mutations";
+	public static final String MUTATIONS__MUTATION_ID = "identifier_mutation";
+	public static final String MUTATIONSVIEW__MUTATION_ID = "Subject Mutation ID";
+	public static final String TITLE = "Mutations view";
 	private final DataService dataService;
 	private final MysqlViewService mysqlViewService;
-	private static List<String> HEADERS_NAMES = Arrays.asList("Mutation ID", "cDNA change", "Protein change",
+	public static List<String> HEADERS_NAMES = Arrays.asList("Mutation ID", "cDNA change", "Protein change",
 			"Exon/Intron", "Consequence",
 			"Inheritance", "Patient ID", "Phenotype");
 	private static final String PATH_TO_INSERT_QUERY = File.separator + "mysql" + File.separator
