@@ -33,7 +33,8 @@ public class GafListValidator
 {
 	private static final Logger logger = Logger.getLogger(GafListValidator.class);
 
-	static final String GAF_LIST_SETTINGS_PREFIX = RuntimeProperty.class.getSimpleName() + "_gafList.validator.";
+	static final String GAF_LIST_SETTINGS_PREFIX = "gafList.validator.";// RuntimeProperty.class.getSimpleName() +
+																		// "_gafList.validator.";
 
 	private static final List<String> COLUMNS;
 
@@ -341,7 +342,7 @@ public class GafListValidator
 				{
 					Entity laneEntity = laneEntityRowPair.getEntity();
 					String barcode = laneEntity.getString(COL_BARCODE);
-					if (!barcode.equals(BARCODE_NONE))
+					if (!BARCODE_NONE.equals(barcode))
 					{
 						if (barcodes.contains(barcode)) report.addEntry(runId, new GafListValidationError(
 								laneEntityRowPair.getRow(), COL_BARCODE, barcode, "run lane has duplicate "
@@ -627,6 +628,25 @@ public class GafListValidator
 			}
 			return strBuilder.toString();
 		}
+
+		public String toStringHtml()
+		{
+			StringBuilder strBuilder = new StringBuilder();
+			for (Entry<String, List<GafListValidationError>> reportEntry : validationErrors.entrySet())
+			{
+				String runId = reportEntry.getKey();
+				if (runId == null) runId = "NO RUN ID!";
+				strBuilder.append("Run: ").append(runId).append('\n');
+				strBuilder.append("<table class=\"table\">").append('\n');
+				strBuilder.append("<tr><th>Row</th><th>Column</th><th>Value</th><th>Message</th></tr>").append('\n');
+				for (GafListValidationError validationError : reportEntry.getValue())
+				{
+					strBuilder.append(validationError.toStringHtml()).append('\n');
+				}
+				strBuilder.append("</table>").append('\n');
+			}
+			return strBuilder.toString();
+		}
 	}
 
 	public static class GafListValidationError
@@ -670,5 +690,10 @@ public class GafListValidator
 			return "row: " + row + "\tcol: " + colName + "\tval: " + value + (msg != null ? "\tmsg: " + msg : "");
 		}
 
+		public String toStringHtml()
+		{
+			return "<tr><td>" + row + "</td><td>" + colName + "</td><td>" + value + "</td><td>"
+					+ (msg != null ? msg : "") + "</td></tr>";
+		}
 	}
 }
