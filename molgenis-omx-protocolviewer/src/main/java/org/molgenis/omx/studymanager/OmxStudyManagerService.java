@@ -221,4 +221,9 @@ public class OmxStudyManagerService implements StudyManagerService
 		studyDataRequest.setRequestStatus(Status.SUBMITTED.toString().toLowerCase());
 		dataService.update(StudyDataRequest.ENTITY_NAME, studyDataRequest);
 	}
+
+    @Override
+    public void exportStudyDefinition(String id, String catalogId) throws UnknownStudyDefinitionException, UnknownCatalogException {
+        throw new UnsupportedOperationException("No export functionality available for OMX");
+    }
 }
