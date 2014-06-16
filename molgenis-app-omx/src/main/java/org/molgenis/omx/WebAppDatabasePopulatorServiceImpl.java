@@ -104,8 +104,8 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 
 		runtimePropertyMap.put(DataExplorerController.WIZARD_TITLE, "Filter Wizard");
 
-        runtimePropertyMap.put(StudyManagerController.EXPORT_BTN_TITLE, "Export");
-        runtimePropertyMap.put(StudyManagerController.EXPORT_ENABLED, String.valueOf(false));
+		runtimePropertyMap.put(StudyManagerController.EXPORT_BTN_TITLE, "Export");
+		runtimePropertyMap.put(StudyManagerController.EXPORT_ENABLED, String.valueOf(false));
 
 		for (Entry<String, String> entry : runtimePropertyMap.entrySet())
 		{

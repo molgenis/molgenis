@@ -66,13 +66,13 @@ public class StudyManagerController extends MolgenisPluginController
 	private final CatalogManagerService catalogManagerService;
 	private final MolgenisPermissionService molgenisPermissionService;
 
-    public static final String EXPORT_BTN_TITLE = "plugin.studymanager.export.title";
-    public static final String EXPORT_ENABLED = "plugin.studymanager.export.enabled";
+	public static final String EXPORT_BTN_TITLE = "plugin.studymanager.export.title";
+	public static final String EXPORT_ENABLED = "plugin.studymanager.export.enabled";
 
-    @Autowired
-    private MolgenisSettings molgenisSettings;
+	@Autowired
+	private MolgenisSettings molgenisSettings;
 
-    @Autowired
+	@Autowired
 	public StudyManagerController(StudyManagerService studyDefinitionManagerService,
 			CatalogManagerService catalogManagerService, MolgenisPermissionService molgenisPermissionService)
 	{
@@ -98,18 +98,29 @@ public class StudyManagerController extends MolgenisPluginController
 	public String getStudyDefinitions(Model model)
 	{
 		model.addAttribute("dataLoadingEnabled", studyDefinitionManagerService.canLoadStudyData());
-		if(molgenisSettings.getBooleanProperty(EXPORT_ENABLED)) {
-            model.addAttribute("studyDefinitionStates", StudyDefinition.Status.values());
-        }else{
-            model.addAttribute("studyDefinitionStates", ArrayUtils.removeElement(StudyDefinition.Status.values(), StudyDefinition.Status.EXPORTED));
-        }
-        model.addAttribute("studyDefinitionUpdateStates", ArrayUtils.removeElement(StudyDefinition.Status.values(), StudyDefinition.Status.EXPORTED));
-        model.addAttribute("defaultStudyDefinitionState", StudyDefinition.Status.SUBMITTED);
-        model.addAttribute("exportedStudyDefinitionState", StudyDefinition.Status.EXPORTED);
+		if (molgenisSettings.getBooleanProperty(EXPORT_ENABLED))
+		{
+			model.addAttribute("studyDefinitionStates", StudyDefinition.Status.values());
+		}
+		else
+		{
+			model.addAttribute("studyDefinitionStates",
+					ArrayUtils.removeElement(StudyDefinition.Status.values(), StudyDefinition.Status.EXPORTED));
+		}
+		model.addAttribute("studyDefinitionUpdateStates",
+				ArrayUtils.removeElement(StudyDefinition.Status.values(), StudyDefinition.Status.EXPORTED));
+		model.addAttribute("defaultStudyDefinitionState", StudyDefinition.Status.SUBMITTED);
+		model.addAttribute("exportedStudyDefinitionState", StudyDefinition.Status.EXPORTED);
 		model.addAttribute("writePermission",
 				molgenisPermissionService.hasPermissionOnEntity(StudyDataRequest.ENTITY_NAME, Permission.WRITE));
-        model.addAttribute("exportTitle",molgenisSettings.getProperty(EXPORT_BTN_TITLE)==null?"Export":molgenisSettings.getProperty(EXPORT_BTN_TITLE));
-        model.addAttribute("exportEnabled",molgenisSettings.getBooleanProperty(EXPORT_ENABLED)==null?false:molgenisSettings.getBooleanProperty(EXPORT_ENABLED));
+		model.addAttribute(
+				"exportTitle",
+				molgenisSettings.getProperty(EXPORT_BTN_TITLE) == null ? "Export" : molgenisSettings
+						.getProperty(EXPORT_BTN_TITLE));
+		model.addAttribute(
+				"exportEnabled",
+				molgenisSettings.getBooleanProperty(EXPORT_ENABLED) == null ? false : molgenisSettings
+						.getBooleanProperty(EXPORT_ENABLED));
 		return VIEW_NAME;
 	}
 
@@ -224,30 +235,30 @@ public class StudyManagerController extends MolgenisPluginController
 		}
 	}
 
-    @RequestMapping(value = "/export/{id}", method = RequestMethod.POST)
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void exportStudyDefinition(@PathVariable String id) throws UnknownStudyDefinitionException,
-            UnknownCatalogException
-    {
-        // get study definition and catalog used to create study definition
-        StudyDefinition studyDefinition = studyDefinitionManagerService.getStudyDefinition(id);
-        if (!studyDefinition.getStatus().equals(StudyDefinition.Status.EXPORTED))
-        {
-            final Catalog catalog = catalogManagerService.getCatalogOfStudyDefinition(studyDefinition.getId());
-            //export the studydefinition
-            studyDefinitionManagerService.exportStudyDefinition(studyDefinition.getId(),catalog.getId());
+	@RequestMapping(value = "/export/{id}", method = RequestMethod.POST)
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void exportStudyDefinition(@PathVariable String id) throws UnknownStudyDefinitionException,
+			UnknownCatalogException
+	{
+		// get study definition and catalog used to create study definition
+		StudyDefinition studyDefinition = studyDefinitionManagerService.getStudyDefinition(id);
+		if (!studyDefinition.getStatus().equals(StudyDefinition.Status.EXPORTED))
+		{
+			final Catalog catalog = catalogManagerService.getCatalogOfStudyDefinition(studyDefinition.getId());
+			// export the studydefinition
+			studyDefinitionManagerService.exportStudyDefinition(studyDefinition.getId(), catalog.getId());
 
-            // update status for the study definition
-            StudyDefinitionImpl updatedStudyDefinition = new StudyDefinitionImpl(studyDefinition);
-            updatedStudyDefinition.setStatus(StudyDefinition.Status.EXPORTED);
-            // update study definition
-            studyDefinitionManagerService.updateStudyDefinition(updatedStudyDefinition);
-        }
-        else
-        {
-            throw new IllegalStateException("Cannot export already EXPORTED study definition");
-        }
-    }
+			// update status for the study definition
+			StudyDefinitionImpl updatedStudyDefinition = new StudyDefinitionImpl(studyDefinition);
+			updatedStudyDefinition.setStatus(StudyDefinition.Status.EXPORTED);
+			// update study definition
+			studyDefinitionManagerService.updateStudyDefinition(updatedStudyDefinition);
+		}
+		else
+		{
+			throw new IllegalStateException("Cannot export already EXPORTED study definition");
+		}
+	}
 
 	/**
 	 * Loads a studydefinition by it's id.
