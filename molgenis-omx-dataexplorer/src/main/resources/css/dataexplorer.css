@@ -15,10 +15,6 @@
 	display: inline;
 }
 
-#download-modal-button {
-	float: right;
-}
-
 #genomebrowser {
     visibility: hidden
 }
@@ -217,4 +213,13 @@ ul.fancytree-container {
 input[name="ColNames"] {
   margin-top: -1px;
   vertical-align: middle;
+}
+
+#entity-class h3 {
+	display: inline;
+	margin-right: 10px;
+}
+
+#module-nav .nav {
+	margin-left: 2.1277%;
 }

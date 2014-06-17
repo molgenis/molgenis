@@ -22,7 +22,7 @@ public class MysqlRepositoryIntTest extends MysqlRepositoryAbstractDatatypeTest
 	@Override
 	public String createSql()
 	{
-		return "CREATE TABLE IF NOT EXISTS IntegerTest(col1 INTEGER NOT NULL, col2 INTEGER, col3 INTEGER, PRIMARY KEY (col1)) ENGINE=InnoDB;";
+		return "CREATE TABLE IF NOT EXISTS `IntegerTest`(`col1` INTEGER NOT NULL, `col2` INTEGER, `col3` INTEGER, PRIMARY KEY (`col1`)) ENGINE=InnoDB;";
 	}
 
 	@Override

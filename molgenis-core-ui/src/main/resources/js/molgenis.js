@@ -203,7 +203,7 @@
 		});
 		
 		return writable;
-	}
+	};
 	
 }($, window.top.molgenis = window.top.molgenis || {}));
 
@@ -420,7 +420,7 @@ function createInput(dataType, attrs, val, lbl) {
 		}
 		
 		$.ajax(config);
-	}
+	};
 	
 	molgenis.RestClient.prototype._toApiUri = function(resourceUri, options) {
 		var qs = "";
@@ -657,5 +657,22 @@ $(function() {
 		//send request and remove form from dom
 		$('<form action="' + url + '" method="' + method + '">').html(
 				inputs.join('')).appendTo('body').submit().remove();
+	};
+
+	// serialize form as json object
+	$.fn.serializeObject = function() {
+		var o = {};
+		var a = this.serializeArray();
+		$.each(a, function() {
+			if (o[this.name] !== undefined) {
+				if (!o[this.name].push) {
+					o[this.name] = [ o[this.name] ];
+				}
+				o[this.name].push(this.value || '');
+			} else {
+				o[this.name] = this.value || '';
+			}
+		});
+		return o;
 	};
 });
