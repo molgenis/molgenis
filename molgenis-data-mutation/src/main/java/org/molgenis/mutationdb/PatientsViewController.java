@@ -1,6 +1,6 @@
-package org.molgenis.col7a1;
+package org.molgenis.mutationdb;
 
-import static org.molgenis.col7a1.PatientsViewController.URI;
+import static org.molgenis.mutationdb.PatientsViewController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 

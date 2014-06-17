@@ -13,6 +13,6 @@ public class MySqlFileUtilTest
 	{
 		String pathname = "/test_mysql_repo_util_query.sql";
 		String query = MySqlFileUtil.getMySqlQueryFromFile(getClass(), pathname);
-		assertEquals(query, "SELECT * \r\nFROM `test`\r\nWHERE `test`='test';");
+		assertEquals(query, "SELECT * FROM `test` WHERE `test`='test';");
 	}
 }

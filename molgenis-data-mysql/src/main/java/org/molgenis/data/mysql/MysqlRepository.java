@@ -680,7 +680,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
 
 		// create sql
-		StringBuilder sql = new StringBuilder("UPDATE ").append(this.getName()).append(" SET ");
+		StringBuilder sql = new StringBuilder("UPDATE ").append('`').append(this.getName()).append('`').append(" SET ");
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 			if (!(att.getDataType() instanceof MrefField))
 			{

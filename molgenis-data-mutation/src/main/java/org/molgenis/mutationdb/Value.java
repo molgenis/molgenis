@@ -1,4 +1,4 @@
-package org.molgenis.col7a1;
+package org.molgenis.mutationdb;
 
 public class Value
 {

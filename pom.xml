@@ -382,7 +382,7 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore />
+										<ignore/>
 									</action>
 								</pluginExecution>
 							</pluginExecutions>
@@ -584,5 +584,6 @@
 		<module>molgenis-js</module>
 		<module>molgenis-model-registry</module>
 		<module>molgenis-disease-matcher</module>
-	</modules>
+		<module>molgenis-data-mutation</module>
+  </modules>
 </project>

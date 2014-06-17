@@ -1,4 +1,4 @@
-package org.molgenis.col7a1;
+package org.molgenis.mutationdb;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -13,9 +13,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.molgenis.col7a1.MysqlViewServiceTest.Config;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.mutationdb.Cell;
+import org.molgenis.mutationdb.MysqlViewService;
+import org.molgenis.mutationdb.Row;
+import org.molgenis.mutationdb.Value;
+import org.molgenis.mutationdb.MysqlViewServiceTest.Config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

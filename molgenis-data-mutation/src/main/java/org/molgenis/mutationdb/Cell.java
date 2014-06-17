@@ -1,4 +1,4 @@
-package org.molgenis.col7a1;
+package org.molgenis.mutationdb;
 
 import java.util.ArrayList;
 import java.util.List;
