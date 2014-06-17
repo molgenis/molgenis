@@ -44,6 +44,6 @@ public interface StudyDefinition
 
 	public enum Status
 	{
-		DRAFT, SUBMITTED, APPROVED, REJECTED
+		DRAFT, SUBMITTED, APPROVED, REJECTED, EXPORTED
 	}
 }

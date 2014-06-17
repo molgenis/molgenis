@@ -14,6 +14,8 @@ import org.molgenis.fieldtypes.XrefField;
 
 public class MysqlEntity extends MapEntity
 {
+	private static final long serialVersionUID = 1L;
+
 	private static final Logger logger = Logger.getLogger(MysqlEntity.class);
 
 	EntityMetaData metaData;
