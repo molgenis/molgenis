@@ -98,7 +98,7 @@ public class StudyManagerController extends MolgenisPluginController
 	public String getStudyDefinitions(Model model)
 	{
 		model.addAttribute("dataLoadingEnabled", studyDefinitionManagerService.canLoadStudyData());
-		if (molgenisSettings.getBooleanProperty(EXPORT_ENABLED))
+		if (molgenisSettings.getBooleanProperty(EXPORT_ENABLED, false))
 		{
 			model.addAttribute("studyDefinitionStates", StudyDefinition.Status.values());
 		}
@@ -113,14 +113,8 @@ public class StudyManagerController extends MolgenisPluginController
 		model.addAttribute("exportedStudyDefinitionState", StudyDefinition.Status.EXPORTED);
 		model.addAttribute("writePermission",
 				molgenisPermissionService.hasPermissionOnEntity(StudyDataRequest.ENTITY_NAME, Permission.WRITE));
-		model.addAttribute(
-				"exportTitle",
-				molgenisSettings.getProperty(EXPORT_BTN_TITLE) == null ? "Export" : molgenisSettings
-						.getProperty(EXPORT_BTN_TITLE));
-		model.addAttribute(
-				"exportEnabled",
-				molgenisSettings.getBooleanProperty(EXPORT_ENABLED) == null ? false : molgenisSettings
-						.getBooleanProperty(EXPORT_ENABLED));
+		model.addAttribute("exportTitle", molgenisSettings.getProperty(EXPORT_BTN_TITLE, "Export"));
+		model.addAttribute("exportEnabled", molgenisSettings.getBooleanProperty(EXPORT_ENABLED, false));
 		return VIEW_NAME;
 	}
 
