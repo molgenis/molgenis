@@ -1,6 +1,6 @@
-package org.molgenis.col7a1;
+package org.molgenis.mutationdb;
 
-import static org.molgenis.col7a1.PatientsViewController.URI;
+import static org.molgenis.mutationdb.PatientsViewController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
@@ -30,15 +30,15 @@ public class PatientsViewController extends MolgenisPluginController
 {
 	public static final String ID = "col7a1_patients";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
-	private final static List<String> HEADERS_NAMES = Arrays.asList("Patient ID", "Phenotype", "Mutation",
+	public final static List<String> HEADERS_NAMES = Arrays.asList("Patient ID", "Phenotype", "Mutation",
 			"cDNA change", "Protein change", "Exon", "Consequence", "Reference");
-	private final static String PATH_TO_INSERT_QUERY = File.separator + "mysql" + File.separator
+	public final static String PATH_TO_INSERT_QUERY = File.separator + "mysql" + File.separator
 			+ "patientview_col7a1_prototype.sql";
-	private static final String ENTITYNAME_PATIENTS = "import_patients";
-	private static final String ENTITYNAME_PATIENTSVIEW = "import_patientsview";
-	private static final String PATIENT_ID = "Patient ID";
-	private static final String TITLE = "Patients view";
-	private final DataService dataService;
+	public static final String ENTITYNAME_PATIENTS = "import_patients";
+	public static final String ENTITYNAME_PATIENTSVIEW = "import_patientsview";
+	public static final String PATIENT_ID = "Patient ID";
+	public static final String TITLE = "Patients view";
+	public final DataService dataService;
 	private final MysqlViewService mysqlViewService;
 
 

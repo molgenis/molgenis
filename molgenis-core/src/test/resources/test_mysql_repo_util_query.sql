@@ -1,3 +1,1 @@
-SELECT * 
-FROM `test`
-WHERE `test`='test';
+SELECT * FROM `test` WHERE `test`='test';

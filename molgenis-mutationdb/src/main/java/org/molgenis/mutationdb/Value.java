@@ -1,10 +1,10 @@
-package org.molgenis.col7a1;
+package org.molgenis.mutationdb;
 
 public class Value
 {
 	private final String value;
 
-	Value(String value)
+	public Value(String value)
 	{
 		this.value = value;
 	}
