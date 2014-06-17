@@ -1,10 +1,10 @@
 package org.molgenis.omx.biobankconnect.ontologyindexer;
 
-import java.io.File;
+import org.molgenis.omx.biobankconnect.utils.OntologyLoader;
 
 public interface OntologyIndexer
 {
-	void index(String ontologyName, File file);
+	void index(OntologyLoader model);
 
 	void removeOntology(String ontologyURI);
 
