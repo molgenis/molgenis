@@ -27,7 +27,7 @@ public class OntologyTermRepositoryTest
 	@Test
 	public void getAttributes()
 	{
-		assertEquals(Iterables.size(repository.getEntityMetaData().getAttributes()), 9);
+		assertEquals(Iterables.size(repository.getEntityMetaData().getAttributes()), 14);
 	}
 
 	@Test

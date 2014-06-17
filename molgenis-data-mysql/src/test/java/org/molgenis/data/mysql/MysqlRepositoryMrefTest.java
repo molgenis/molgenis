@@ -13,6 +13,8 @@ import org.molgenis.data.support.QueryImpl;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.Lists;
+
 /** Test for MolgenisFieldTypes.MREF */
 public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 {
@@ -47,6 +49,7 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 		return null;
 	}
 
+	@Override
 	@Test
 	public void test() throws Exception
 	{
@@ -99,7 +102,7 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 		Assert.assertEquals(mrefRepo.count(), 2);
 
 		Assert.assertEquals(
-				mrefRepo.getSelectSql(new QueryImpl()),
+				mrefRepo.getSelectSql(new QueryImpl(), Lists.newArrayList()),
 				"SELECT this.`identifier`, GROUP_CONCAT(DISTINCT(`stringRef`.`stringRef`)) AS `stringRef`, GROUP_CONCAT(DISTINCT(`intRef`.`intRef`)) AS `intRef` FROM `MrefTest` AS this LEFT JOIN `MrefTest_stringRef` AS `stringRef_filter` ON (this.`identifier` = `stringRef_filter`.`identifier`) LEFT JOIN `MrefTest_stringRef` AS `stringRef` ON (this.`identifier` = `stringRef`.`identifier`) LEFT JOIN `MrefTest_intRef` AS `intRef_filter` ON (this.`identifier` = `intRef_filter`.`identifier`) LEFT JOIN `MrefTest_intRef` AS `intRef` ON (this.`identifier` = `intRef`.`identifier`) GROUP BY this.`identifier`");
 		for (Entity e : mrefRepo.findAll(new QueryImpl().eq("identifier", "one")))
 		{
@@ -121,36 +124,36 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 		for (Entity e : mrefRepo.findAll(new QueryImpl().eq("stringRef", "ref3")))
 		{
 			logger.debug("found: " + e);
-			Assert.assertEquals(e.get("stringRef"), Arrays.asList(new String[]{"ref3"}));
+			Assert.assertEquals(e.get("stringRef"), Arrays.asList(new String[]
+			{ "ref3" }));
 		}
 
 		for (Entity e : mrefRepo.findAll(new QueryImpl().eq("stringRef", "ref1")))
 		{
 			logger.debug("found: " + e);
-			Assert.assertEquals(e.get("stringRef"),  Arrays.asList(new String[]{"ref1","ref2"}));
+			Assert.assertEquals(e.get("stringRef"), Arrays.asList(new String[]
+			{ "ref1", "ref2" }));
 		}
 
 		for (Entity e : mrefRepo.findAll(new QueryImpl().gt("intRef", 1)))
 		{
 			logger.debug("found: " + e);
-			Assert.assertEquals(e.get("intRef"), Arrays.asList(new Integer[]{1,2}));
+			Assert.assertEquals(e.get("intRef"), Arrays.asList(new Integer[]
+			{ 1, 2 }));
 		}
 
 		// update
 
-        Entity e = mrefRepo.findOne("one");
-        e.set("stringRef","ref2,ref3");
-        mrefRepo.update(e);
+		Entity e = mrefRepo.findOne("one");
+		e.set("stringRef", "ref2,ref3");
+		mrefRepo.update(e);
 
-        e = mrefRepo.findOne("one");
-        Assert.assertEquals(e.getList("stringRef").size(),2);
-        Assert.assertTrue(e.getList("stringRef").contains("ref2"));
-        Assert.assertTrue(e.getList("stringRef").contains("ref3"));
+		e = mrefRepo.findOne("one");
+		Assert.assertEquals(e.getList("stringRef").size(), 2);
+		Assert.assertTrue(e.getList("stringRef").contains("ref2"));
+		Assert.assertTrue(e.getList("stringRef").contains("ref3"));
 
-
-
-
-        // verify not null error
+		// verify not null error
 
 		// verify default
 	}

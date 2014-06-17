@@ -11,16 +11,16 @@
 					<div class="row-fluid">
 						<div class="span6">
 							<div class="row-fluid">
-								<div class="control-group form-horizontal">
-									<label class="control-label" for="state-select">Study definition status:</label>
-									<div class="controls">
-										<select id="state-select" name="state-select">
-										<#list studyDefinitionStates as studyDefinitionState>
-											<option value="${studyDefinitionState}"<#if studyDefinitionState == defaultStudyDefinitionState> selected</#if>>${studyDefinitionState}</option>
-										</#list> 
-										</select>
-									</div>
-								</div>
+								Status:
+								<select id="state-select" name="state-select">
+								<#list studyDefinitionStates as studyDefinitionState>
+									<option value="${studyDefinitionState}"<#if studyDefinitionState == defaultStudyDefinitionState> selected</#if>>${studyDefinitionState}</option>
+								</#list> 
+								</select>
+								<div class="input-append">
+									<input id="studydefinition-search" type="text" placeholder="Search study definitions">
+									<button class="btn" type="button" id="search-button"><i class="icon-large icon-search"></i></button>
+								</div>	
 							</div>
 							<div class="row-fluid">
 								<div id="resultsTable">
@@ -59,6 +59,9 @@
 										</div>
 									</div>
 									<button id="download-study-definition-btn" class="btn pull-right" type="button">Download</button>
+                                    <#if exportEnabled>
+                                        <input id="export-study-definition-btn" type="button" class="btn pull-right" value="${exportTitle}" />
+                                    </#if>
 							    </div>
 							    <div class="tab-pane" id="study-definition-editor">
 							    	<div id="study-definition-editor-container">
@@ -66,7 +69,7 @@
 										</div>
                                         <div id="study-definition-state-select">
                                             <select id="edit-state-select" name="edit-state-select">
-                                                <#list studyDefinitionStates as studyDefinitionState>
+                                                <#list studyDefinitionUpdateStates as studyDefinitionState>
                                                     <option value="${studyDefinitionState}">${studyDefinitionState}</option>
                                                 </#list>
                                             </select>
