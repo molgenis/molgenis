@@ -427,6 +427,7 @@
 								</jsSourceIncludes>
 								<jsSourceExcludes>
 									<jsSourceExclude>**/*.min.js</jsSourceExclude>
+									<jsSourceExclude>**/ace-min/**</jsSourceExclude>
 								</jsSourceExcludes>
 								<skipMerge>true</skipMerge>
 								<skipMinify>${minify.skipMinify}</skipMinify>
