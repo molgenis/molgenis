@@ -30,6 +30,15 @@ public interface StudyManagerService
 	List<StudyDefinition> getStudyDefinitions(StudyDefinition.Status status);
 
 	/**
+	 * Search study definitions
+	 * 
+	 * @param status
+	 * @param search
+	 * @return
+	 */
+	List<StudyDefinition> findStudyDefinitions(StudyDefinition.Status status, String search);
+
+	/**
 	 * Find all studydefinitions of a user
 	 * 
 	 * @param username
@@ -110,4 +119,14 @@ public interface StudyManagerService
 	 */
 	void submitStudyDefinition(String id, String catalogId) throws UnknownStudyDefinitionException,
 			UnknownCatalogException;
+
+    /**
+     * Submit the draft study definition for the given catalog
+     *
+     * @param id
+     *            study definition id
+     * @throws UnknownStudyDefinitionException
+     */
+    void exportStudyDefinition(String id, String catalogId) throws UnknownStudyDefinitionException,
+            UnknownCatalogException;
 }

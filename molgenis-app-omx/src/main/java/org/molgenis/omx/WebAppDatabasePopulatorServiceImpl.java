@@ -20,6 +20,7 @@ import org.molgenis.omx.core.RuntimeProperty;
 import org.molgenis.security.MolgenisSecurityWebAppDatabasePopulatorService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.runas.RunAsSystem;
+import org.molgenis.studymanager.StudyManagerController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -102,6 +103,9 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 				molgenisHomeDirAnnotationResources + "/Clinvar/variant_summary.txt");
 
 		runtimePropertyMap.put(DataExplorerController.WIZARD_TITLE, "Filter Wizard");
+
+		runtimePropertyMap.put(StudyManagerController.EXPORT_BTN_TITLE, "Export");
+		runtimePropertyMap.put(StudyManagerController.EXPORT_ENABLED, String.valueOf(false));
 
 		for (Entry<String, String> entry : runtimePropertyMap.entrySet())
 		{

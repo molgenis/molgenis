@@ -1,8 +1,10 @@
 package org.molgenis.omx.biobankconnect.ontologymatcher;
 
 import java.util.List;
+import java.util.Map;
 
 import org.molgenis.data.DataService;
+import org.molgenis.search.SearchResult;
 
 public interface OntologyMatcher
 {
@@ -15,4 +17,8 @@ public interface OntologyMatcher
 	boolean isRunning();
 
 	boolean checkExistingMappings(String dataSetIdentifier, DataService dataService);
+
+	SearchResult generateMapping(String userName, Integer selectedDataSet, Integer dataSetsToMatch, Integer featureId);
+
+	Map<String, String> updateScript(String userName, OntologyMatcherRequest request);
 }

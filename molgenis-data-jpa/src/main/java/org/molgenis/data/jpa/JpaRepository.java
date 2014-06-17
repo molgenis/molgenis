@@ -864,13 +864,6 @@ public class JpaRepository extends AbstractCrudRepository
 		return new ConvertingIterable<E>(clazz, findAll(ids));
 	}
 
-	@Override
-	@Transactional(readOnly = true)
-	public <E extends Entity> Iterable<E> findAll(Query q, Class<E> clazz)
-	{
-		return new ConvertingIterable<E>(clazz, findAll(q));
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
 	@Transactional(readOnly = true)
@@ -1157,7 +1150,7 @@ public class JpaRepository extends AbstractCrudRepository
 	{
 		List<QueryRule> searchRules = Lists.newArrayList();
 
-		for (AttributeMetaData attr : getEntityMetaData().getAttributes())
+		for (AttributeMetaData attr : getEntityMetaData().getAtomicAttributes())
 		{
 			QueryRule rule = null;
 			switch (attr.getDataType().getEnumType())
@@ -1212,31 +1205,51 @@ public class JpaRepository extends AbstractCrudRepository
 				case XREF:
 					// Find the ref entities and create an 'in' queryrule
 					// TODO other datatypes
-					if (attr.getRefEntity().getLabelAttribute().getDataType().getEnumType() == FieldTypeEnum.STRING)
+
+					List<QueryRule> nested = Lists.newArrayList();
+					for (AttributeMetaData refAttr : attr.getRefEntity().getAtomicAttributes())
 					{
-						Query q = new QueryImpl().like(attr.getRefEntity().getLabelAttribute().getName(), searchValue);
-						EntityManager em = getEntityManager();
-						CriteriaBuilder cb = em.getCriteriaBuilder();
-
-						@SuppressWarnings("unchecked")
-						CriteriaQuery<Entity> cq = (CriteriaQuery<Entity>) cb.createQuery(attr.getRefEntity()
-								.getEntityClass());
-
-						@SuppressWarnings("unchecked")
-						Root<Entity> from = (Root<Entity>) cq.from(attr.getRefEntity().getEntityClass());
-						cq.select(from);
-
-						// add filters
-						createWhere(q, from, cq, cb);
-
-						TypedQuery<Entity> tq = em.createQuery(cq);
-						List<Entity> refEntities = tq.getResultList();
-						if (!refEntities.isEmpty())
+						if (refAttr.isLabelAttribute() || refAttr.isLookupAttribute())
 						{
-							rule = new QueryRule(attr.getName(), Operator.IN, refEntities);
+							FieldTypeEnum fieldType = refAttr.getDataType().getEnumType();
+
+							if (fieldType == FieldTypeEnum.STRING || fieldType == FieldTypeEnum.ENUM
+									|| fieldType == FieldTypeEnum.TEXT || fieldType == FieldTypeEnum.HTML
+									|| fieldType == FieldTypeEnum.HYPERLINK || fieldType == FieldTypeEnum.EMAIL)
+							{
+								Query q = new QueryImpl().like(refAttr.getName(), searchValue);
+								EntityManager em = getEntityManager();
+								CriteriaBuilder cb = em.getCriteriaBuilder();
+
+								@SuppressWarnings("unchecked")
+								CriteriaQuery<Entity> cq = (CriteriaQuery<Entity>) cb.createQuery(attr.getRefEntity()
+										.getEntityClass());
+
+								@SuppressWarnings("unchecked")
+								Root<Entity> from = (Root<Entity>) cq.from(attr.getRefEntity().getEntityClass());
+								cq.select(from);
+
+								// add filters
+								createWhere(q, from, cq, cb);
+
+								TypedQuery<Entity> tq = em.createQuery(cq);
+								List<Entity> refEntities = tq.getResultList();
+								if (!refEntities.isEmpty())
+								{
+									if (!nested.isEmpty())
+									{
+										nested.add(QueryRule.OR);
+									}
+									nested.add(new QueryRule(attr.getName(), Operator.IN, refEntities));
+								}
+							}
 						}
 					}
 
+					if (!nested.isEmpty())
+					{
+						rule = new QueryRule(Operator.NESTED, nested);
+					}
 					break;
 				default:
 					break;
