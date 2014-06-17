@@ -119,4 +119,14 @@ public interface StudyManagerService
 	 */
 	void submitStudyDefinition(String id, String catalogId) throws UnknownStudyDefinitionException,
 			UnknownCatalogException;
+
+    /**
+     * Submit the draft study definition for the given catalog
+     *
+     * @param id
+     *            study definition id
+     * @throws UnknownStudyDefinitionException
+     */
+    void exportStudyDefinition(String id, String catalogId) throws UnknownStudyDefinitionException,
+            UnknownCatalogException;
 }

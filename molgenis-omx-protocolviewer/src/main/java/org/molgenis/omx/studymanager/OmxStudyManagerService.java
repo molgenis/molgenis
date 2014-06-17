@@ -212,6 +212,12 @@ public class OmxStudyManagerService implements StudyManagerService
 	}
 
 	@Override
+	public void exportStudyDefinition(String id, String catalogId) throws UnknownStudyDefinitionException,
+			UnknownCatalogException
+	{
+		throw new UnsupportedOperationException("No export functionality available for OMX");
+	}
+
 	public List<StudyDefinition> findStudyDefinitions(Status status, String search)
 	{
 		Query q = new QueryImpl().eq(StudyDataRequest.REQUESTSTATUS, status.toString().toLowerCase());

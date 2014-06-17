@@ -59,6 +59,9 @@
 										</div>
 									</div>
 									<button id="download-study-definition-btn" class="btn pull-right" type="button">Download</button>
+                                    <#if exportEnabled>
+                                        <input id="export-study-definition-btn" type="button" class="btn pull-right" value="${exportTitle}" />
+                                    </#if>
 							    </div>
 							    <div class="tab-pane" id="study-definition-editor">
 							    	<div id="study-definition-editor-container">
@@ -66,7 +69,7 @@
 										</div>
                                         <div id="study-definition-state-select">
                                             <select id="edit-state-select" name="edit-state-select">
-                                                <#list studyDefinitionStates as studyDefinitionState>
+                                                <#list studyDefinitionUpdateStates as studyDefinitionState>
                                                     <option value="${studyDefinitionState}">${studyDefinitionState}</option>
                                                 </#list>
                                             </select>
