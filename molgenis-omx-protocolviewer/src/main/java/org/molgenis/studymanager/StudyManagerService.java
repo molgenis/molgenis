@@ -30,6 +30,15 @@ public interface StudyManagerService
 	List<StudyDefinition> getStudyDefinitions(StudyDefinition.Status status);
 
 	/**
+	 * Search study definitions
+	 * 
+	 * @param status
+	 * @param search
+	 * @return
+	 */
+	List<StudyDefinition> findStudyDefinitions(StudyDefinition.Status status, String search);
+
+	/**
 	 * Find all studydefinitions of a user
 	 * 
 	 * @param username
