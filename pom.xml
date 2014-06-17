@@ -584,6 +584,6 @@
 		<module>molgenis-js</module>
 		<module>molgenis-model-registry</module>
 		<module>molgenis-disease-matcher</module>
-		<module>molgenis-data-mutation</module>
+		<module>molgenis-mutationdb</module>
   </modules>
 </project>
