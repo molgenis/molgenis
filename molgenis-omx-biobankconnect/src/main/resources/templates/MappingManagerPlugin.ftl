@@ -1,25 +1,39 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
-<#assign css=["jquery-ui-1.9.2.custom.min.css", "bootstrap-fileupload.min.css", "biobank-connect.css", "mapping-manager.css"]>
-<#assign js=["jquery-ui-1.9.2.custom.min.js", "bootstrap-fileupload.min.js", "common-component.js", "catalogue-chooser.js", "ontology-annotator.js", "mapping-manager.js", "biobank-connect.js", "simple_statistics.js"]>
+<#assign css=[
+	"jquery-ui-1.9.2.custom.min.css", 
+	"bootstrap-fileupload.min.css", 
+	"biobank-connect.css"]>
+<#assign js=[
+	"jquery-ui-1.9.2.custom.min.js", 
+	"jquery.bootstrap.pager.js",
+	"bootstrap-fileupload.min.js", 
+	"common-component.js", 
+	"ontology-annotator.js", 
+	"mapping-manager.js",
+	"biobank-connect.js", 
+	"simple_statistics.js"]>	
+
 <@header css js/>
 <form id="wizardForm" class="form-horizontal" enctype="multipart/form-data">
 	<div class="row-fluid">
-		<div class="span12 well">
+		<div class="span12 well custom-white-well">
+			<br>
 			<div class="row-fluid">
-				<div class="span12"><legend class="legend-mapping-manager">
-					Curate mappings for :
-					<select id="selectedDataSet" name="selectedDataSet">
-						<#if selectedDataSet??>
-							<#list dataSets as dataset>
-								<option value="${dataset.id?c}"<#if dataset.id?c == selectedDataSet> selected</#if>>${dataset.name}</option>
-							</#list>
-						<#else>
-							<#list dataSets as dataset>
-								<option value="${dataset.id?c}"<#if dataset_index == 0> selected</#if>>${dataset.name}</option>
-							</#list>
-						</#if>
-					</select>
+				<div class="offset3 span6 text-align-center">
+					<legend class="custom-purple-legend">Curate matches &nbsp;
+						<select id="selectedDataSet" name="selectedDataSet">
+							<#if selectedDataSet??>
+								<#list dataSets as dataset>
+									<option value="${dataset.id?c}"<#if dataset.id?c == selectedDataSet> selected</#if>>${dataset.name}</option>
+								</#list>
+							<#else>
+								<#list dataSets as dataset>
+									<option value="${dataset.id?c}"<#if dataset_index == 0> selected</#if>>${dataset.name}</option>
+								</#list>
+							</#if>
+						</select>
+					</legend>
 				</div>
 			</div>
 			<div class="row-fluid">
@@ -40,13 +54,13 @@
 				</div>
 			</div>
 			<div class="row-fluid">
+				<div class="span4">
+					Number of data items : <span id="dataitem-number"></span>
+				</div>
+			</div>
+			<div class="row-fluid">
 				<div class="span12">
-					<div id="data-table-container" class="row-fluid data-table-container">
-						<table id="dataitem-table" class="table table-striped table-condensed show-border">
-						</table>
-					</div>
-					<div class="pagination pagination-centered">
-						<ul id="table-papger"></ul>
+					<div id="container" class="row-fluid data-table-container">
 					</div>
 				</div>
 			</div>
@@ -57,31 +71,24 @@
 		$(document).ready(function(){
 			var molgenis = window.top.molgenis;
 			var contextUrl = '${context_url}';
-			contextUrl = contextUrl.replace('/mappingmanager', '/biobankconnect')
-			molgenis.setContextURL(contextUrl);
+			contextUrl = contextUrl.replace('/mappingmanager', '/algorithm')
+			molgenis.setContextUrl(contextUrl);
 			molgenis.ontologyMatcherRunning(function(){
-				var dataSetIds = [];
-				<#list dataSets as dataset>
-					dataSetIds.push('${dataset.id?c}');
-				</#list>
-				molgenis.getMappingManager().changeDataSet('${userName}', $('#selectedDataSet').val(), dataSetIds);
+				var mappingManager = new molgenis.MappingManager();
+				var mappedDataSetIds = mappingManager.getAllMappedDataSetIds('${userName}', $('#selectedDataSet').val());
+				mappingManager.changeDataSet('${userName}', $('#selectedDataSet').val(), mappedDataSetIds);
 				$('#selectedDataSet').change(function(){
-					molgenis.getMappingManager().changeDataSet('${userName}', $(this).val(), dataSetIds);
+					var mappedDataSetIds = mappingManager.getAllMappedDataSetIds('${userName}', $('#selectedDataSet').val());
+					mappingManager.changeDataSet('${userName}', $(this).val(), mappedDataSetIds);
 				});
 				$('#downloadButton').click(function(){
-					molgenis.getMappingManager().downloadMappings();
+					mappingManager.downloadMappings();
 					return false;
 				});
 				$('#help-button').click(function(){
-					molgenis.getMappingManager().createHelpModal();
+					mappingManager.createHelpModal();
 				});
 				
-				$('#verify-button').click(function(){
-					$('#wizardForm').attr({
-						'action' : molgenis.getContextUrl() + '/mappingmanager/verify',
-						'method' : 'POST'
-					}).submit();
-				});
 			}, contextUrl);
 		});
 	</script>

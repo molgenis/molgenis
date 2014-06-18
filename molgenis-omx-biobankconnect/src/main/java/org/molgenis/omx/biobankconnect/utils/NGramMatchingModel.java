@@ -59,10 +59,17 @@ public class NGramMatchingModel
 				"your", "yours", "yourself", "yourselves", "many", ")", "("));
 	}
 
-	public static double stringMatching(String queryOne, String queryTwo, boolean whetherRemoveStopWords)
+	public static double stringMatching(String queryOne, String queryTwo)
 	{
-		double similarityScore = calculateScore(createNGrams(queryOne.toLowerCase().trim(), whetherRemoveStopWords),
-				createNGrams(queryTwo.toLowerCase().trim(), whetherRemoveStopWords));
+		double similarityScore = calculateScore(createNGrams(queryOne.toLowerCase().trim(), true),
+				createNGrams(queryTwo.toLowerCase().trim(), true));
+		return similarityScore;
+	}
+
+	public static double stringMatching(String queryOne, String queryTwo, boolean removeStopWords)
+	{
+		double similarityScore = calculateScore(createNGrams(queryOne.toLowerCase().trim(), removeStopWords),
+				createNGrams(queryTwo.toLowerCase().trim(), removeStopWords));
 		return similarityScore;
 	}
 
@@ -77,7 +84,7 @@ public class NGramMatchingModel
 	{
 		Set<String> wordsInString = new HashSet<String>(Arrays.asList(inputQuery.trim().split(" ")));
 		Set<String> tokens = new HashSet<String>();
-		wordsInString.removeAll(STOPWORDSLIST);
+		if (removeStopWords) wordsInString.removeAll(STOPWORDSLIST);
 		// Padding the string
 		for (String singleWord : wordsInString)
 		{

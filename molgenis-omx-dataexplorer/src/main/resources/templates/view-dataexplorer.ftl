@@ -35,21 +35,30 @@
     <script>
     	molgenis.dataexplorer.setShowWizardOnInit(${wizard?string('true', 'false')});
         molgenis.dataexplorer.filter.wizard.setWizardTitle('${wizardtitle}');
-    </script>
-        <div class="row-fluid"<#if hideDatasetSelect??> style="display:none"</#if>>
-            <div class="row-fluid pull-right form-horizontal">
-                <div id="dataset-select-container" class="pull-right form-horizontal">
-                    <label class="control-label" for="dataset-select">Choose a dataset:</label>
-                    <div class="controls">
-                        <select data-placeholder="Choose a Entity (example: dataset, protocol..." id="dataset-select">
-                            <#list entitiesMeta.iterator() as entityMeta>
-                                <option value="/api/v1/${entityMeta.name}" <#if entityMeta.name == selectedEntityName> selected</#if>><#if entityMeta.label?has_content>${entityMeta.label}<#else>${entityMeta.name}</#if></option>
-                            </#list>
-                        </select>
-                    </div>
-                </div>
-            </div>
-        </div>
+   	</script>
+    
+    <div id="entity-class" class="well">
+		<div class="row-fluid">
+			<h3 id="entity-class-name"></h3>
+			<span id="entity-class-description"></span>
+		</div>
+	</div>
+     
+    <div class="pull-right"<#if hideDatasetSelect??> style="display:none"</#if>>
+   		<div class="row-fluid  form-horizontal">
+       		<div id="dataset-select-container" class="pull-right form-horizontal">
+            	<label class="control-label" for="dataset-select">Choose a dataset:</label>
+                <div class="controls">
+                	<select data-placeholder="Choose a Entity (example: dataset, protocol..." id="dataset-select">
+                    	<#list entitiesMeta.iterator() as entityMeta>
+                        	<option value="/api/v1/${entityMeta.name}" <#if entityMeta.name == selectedEntityName> selected</#if>><#if entityMeta.label?has_content>${entityMeta.label}<#else>${entityMeta.name}</#if></option>
+                       	</#list>
+                    </select>
+               	</div>
+         	</div>
+     	</div>
+   	</div>
+     
 	<div class="row-fluid">
 		<div class="span3">
 			<div class="well">
@@ -95,7 +104,7 @@
 			</div>		
 		</div>
 		
-		<div class="span9" id="module-nav"></div>
+		<div id="module-nav"></div>
 		
 		<#if modDiseaseMatcher == true> <#include "view-dataexplorer-mod-diseasematcher.ftl"> </#if>
 	

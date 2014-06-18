@@ -1,13 +1,18 @@
 package org.molgenis.omx.biobankconnect.ontologyindexer;
 
 import static org.molgenis.omx.biobankconnect.ontologyindexer.OntologyIndexerController.URI;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.Part;
 
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.omx.biobankconnect.ontologyservice.OntologyService;
+import org.molgenis.omx.biobankconnect.utils.OntologyLoader;
 import org.molgenis.omx.biobankconnect.utils.ZipFileUtil;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +21,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping(URI)
@@ -26,6 +32,9 @@ public class OntologyIndexerController extends MolgenisPluginController
 
 	@Autowired
 	private FileStore fileStore;
+
+	@Autowired
+	private OntologyService ontologyService;
 
 	@Autowired
 	private OntologyIndexer ontologyIndexer;
@@ -45,6 +54,15 @@ public class OntologyIndexerController extends MolgenisPluginController
 		return "OntologyIndexerPlugin";
 	}
 
+	@RequestMapping(value = "/ontology", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public Map<String, Object> getAllOntologies()
+	{
+		Map<String, Object> results = new HashMap<String, Object>();
+		results.put("results", ontologyService.getAllOntologies());
+		return results;
+	}
+
 	@RequestMapping(value = "/index", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
 	public String indexOntology(@RequestParam
 	String ontologyName, @RequestParam
@@ -54,7 +72,7 @@ public class OntologyIndexerController extends MolgenisPluginController
 		{
 			File uploadFile = fileStore.store(file.getInputStream(), ontologyName);
 			List<File> uploadedFiles = ZipFileUtil.unzip(uploadFile);
-			if (uploadedFiles.size() > 0) ontologyIndexer.index(ontologyName, uploadedFiles.get(0));
+			if (uploadedFiles.size() > 0) ontologyIndexer.index(new OntologyLoader(ontologyName, uploadedFiles.get(0)));
 			model.addAttribute("isIndexRunning", true);
 		}
 		catch (Exception e)
