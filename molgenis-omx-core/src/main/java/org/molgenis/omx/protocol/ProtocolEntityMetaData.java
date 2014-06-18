@@ -1,11 +1,14 @@
 package org.molgenis.omx.protocol;
 
+import java.util.Arrays;
 import java.util.Collections;
 
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.AbstractEntityMetaData;
+import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
@@ -88,8 +91,13 @@ public class ProtocolEntityMetaData extends AbstractEntityMetaData
 			}
 			else observableFeaturesAttributeMetaData = Collections.emptyList();
 
+			DefaultAttributeMetaData idAttr = new DefaultAttributeMetaData("observationsetid", FieldTypeEnum.LONG)
+					.setIdAttribute(true).setUnique(true).setVisible(false);
+			idAttr.setReadOnly(true);
+
 			cachedAttributesMetaData = Iterables.concat(subprotocolsAttributeMetaData,
-					observableFeaturesAttributeMetaData);
+					observableFeaturesAttributeMetaData, Arrays.asList(idAttr));
+
 		}
 		return cachedAttributesMetaData;
 	}

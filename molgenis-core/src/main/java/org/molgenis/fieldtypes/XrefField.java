@@ -104,7 +104,7 @@ public class XrefField extends FieldType
 	@Override
 	public Object convert(Object value)
 	{
-		throw new UnsupportedOperationException();
+		return value;
 	}
 
 }

@@ -1,10 +1,11 @@
 (function($, molgenis) {
 	"use strict";
 
-    // workaround for "Uncaught RangeError: Maximum call stack size exceeded"
-    // http://stackoverflow.com/a/19190216
-    $.fn.modal.Constructor.prototype.enforceFocus = function() {};
-    
+	// workaround for "Uncaught RangeError: Maximum call stack size exceeded"
+	// http://stackoverflow.com/a/19190216
+	$.fn.modal.Constructor.prototype.enforceFocus = function() {
+	};
+
 	molgenis.setContextUrl = function(contextUrl) {
 		molgenis.contextUrl = contextUrl;
 	};
@@ -88,8 +89,9 @@
 	};
 
 	/**
-	 * Returns all atomic attributes. In case of compound attributes (attributes consisting of multiple atomic
-	 * attributes) only the descendant atomic attributes are returned. The compound attribute itself is not returned.
+	 * Returns all atomic attributes. In case of compound attributes (attributes
+	 * consisting of multiple atomic attributes) only the descendant atomic
+	 * attributes are returned. The compound attribute itself is not returned.
 	 * 
 	 * @param attributes
 	 * @param restClient
@@ -98,22 +100,25 @@
 		var atomicAttributes = [];
 		function createAtomicAttributesRec(attributes) {
 			$.each(attributes, function(i, attribute) {
-				if(attribute.fieldType === 'COMPOUND'){
-					// FIXME improve performance by retrieving async 
-					attribute = restClient.get(attribute.href, {'expand': ['attributes']});
+				if (attribute.fieldType === 'COMPOUND') {
+					// FIXME improve performance by retrieving async
+					attribute = restClient.get(attribute.href, {
+						'expand' : [ 'attributes' ]
+					});
 					createAtomicAttributesRec(attribute.attributes);
-				}
-					else
-						atomicAttributes.push(attribute);
-			});	
+				} else
+					atomicAttributes.push(attribute);
+			});
 		}
 		createAtomicAttributesRec(attributes);
 		return atomicAttributes;
 	};
 
 	/**
-	 * Returns all compound attributes. In case of compound attributes (attributes consisting of multiple atomic
-	 * attributes) only the descendant atomic attributes are returned. The compound attribute itself is not returned.
+	 * Returns all compound attributes. In case of compound attributes
+	 * (attributes consisting of multiple atomic attributes) only the descendant
+	 * atomic attributes are returned. The compound attribute itself is not
+	 * returned.
 	 * 
 	 * @param attributes
 	 * @param restClient
@@ -122,22 +127,24 @@
 		var compoundAttributes = [];
 		function createAtomicAttributesRec(attributes) {
 			$.each(attributes, function(i, attribute) {
-				if(attribute.fieldType === 'COMPOUND'){
-					// FIXME improve performance by retrieving async 
-					attribute = restClient.get(attribute.href, {'expand': ['attributes']});
+				if (attribute.fieldType === 'COMPOUND') {
+					// FIXME improve performance by retrieving async
+					attribute = restClient.get(attribute.href, {
+						'expand' : [ 'attributes' ]
+					});
 					compoundAttributes.push(attribute);
 					createAtomicAttributesRec(attribute.attributes);
 				}
-			});	
+			});
 		}
 		createAtomicAttributesRec(attributes);
 		return compoundAttributes;
 	};
-	
+
 	/*
-	 * Natural Sort algorithm for Javascript - Version 0.7 - Released under MIT license
-	 * Author: Jim Palmer (based on chunking idea from Dave Koelle)
-	 *
+	 * Natural Sort algorithm for Javascript - Version 0.7 - Released under MIT
+	 * license Author: Jim Palmer (based on chunking idea from Dave Koelle)
+	 * 
 	 * https://github.com/overset/javascript-natural-sort
 	 */
 	molgenis.naturalSort = function(a, b) {
@@ -165,16 +172,19 @@
 				return 1;
 		// natural sorting through split numeric strings and default strings
 		for ( var cLoc = 0, numS = Math.max(xN.length, yN.length); cLoc < numS; cLoc++) {
-			// find floats not starting with '0', string or 0 if not defined (Clint Priest)
+			// find floats not starting with '0', string or 0 if not defined
+			// (Clint Priest)
 			oFxNcL = !(xN[cLoc] || '').match(ore) && parseFloat(xN[cLoc])
 					|| xN[cLoc] || 0;
 			oFyNcL = !(yN[cLoc] || '').match(ore) && parseFloat(yN[cLoc])
 					|| yN[cLoc] || 0;
-			// handle numeric vs string comparison - number < string - (Kyle Adams)
+			// handle numeric vs string comparison - number < string - (Kyle
+			// Adams)
 			if (isNaN(oFxNcL) !== isNaN(oFyNcL)) {
 				return (isNaN(oFxNcL)) ? 1 : -1;
 			}
-			// rely on string comparison if different types - i.e. '02' < 2 != '02' < '2'
+			// rely on string comparison if different types - i.e. '02' < 2 !=
+			// '02' < '2'
 			else if (typeof oFxNcL !== typeof oFyNcL) {
 				oFxNcL += '';
 				oFyNcL += '';
@@ -186,6 +196,25 @@
 		}
 		return 0;
 	};
+
+	/**
+	 * Checks if the user has write permission on a particular entity
+	 */
+	molgenis.hasWritePermission = function(entityName) {
+		var writable = false;
+
+		$.ajax({
+			url : '/permission/' + entityName + "/write",
+			dataType : 'json',
+			async : false,
+			success : function(result) {
+				writable = result;
+			}
+		});
+
+		return writable;
+	};
+
 }($, window.top.molgenis = window.top.molgenis || {}));
 
 // Add endsWith function to the string class
@@ -204,7 +233,7 @@ function getCurrentTimezoneOffset() {
 
 		return str;
 	}
-	
+
 	var offset = new Date().getTimezoneOffset();
 	offset = ((offset < 0 ? '+' : '-')
 			+ padNumber(parseInt(Math.abs(offset / 60)), 2) + padNumber(Math
@@ -218,29 +247,34 @@ function htmlEscape(text) {
 }
 
 /*
- * Create a table cell to show data of a certain type
- * Is used by the dataexplorer and the forms plugin
+ * Create a table cell to show data of a certain type Is used by the
+ * dataexplorer and the forms plugin
  */
-function formatTableCellValue(value, dataType) {
+function formatTableCellValue(value, dataType, editable) {
+
+	if (dataType.toLowerCase() == 'bool') {
+		var checked = (value === true);
+		value = '<input type="checkbox" ';
+		if (checked) {
+			value = value + 'checked ';
+		}
+		if (editable !== true) {
+			value = value + 'disabled="disabled"';
+		}
+
+		return value + '/>';
+	}
+
 	if (!value) {
 		return '';
 	}
-	
+
 	if (dataType.toLowerCase() == "hyperlink") {
 		value = '<a target="_blank" href="' + value + '">' + htmlEscape(value)
 				+ '</a>';
 
 	} else if (dataType.toLowerCase() == "email") {
 		value = '<a href="mailto:' + value + '">' + htmlEscape(value) + '</a>';
-
-	} else if (dataType.toLowerCase() == 'bool') {
-		var checked = (value === true);
-		value = '<input type="checkbox" disabled="disabled" ';
-		if (checked) {
-			value = value + 'checked ';
-		}
-
-		value = value + '/>';
 
 	} else if (dataType.toLowerCase() != 'html') {
 
@@ -262,6 +296,7 @@ function formatTableCellValue(value, dataType) {
 
 /**
  * Is s is longer then maxLength cut it and add ...
+ * 
  * @param s
  * @param maxLength
  */
@@ -269,73 +304,80 @@ function abbreviate(s, maxLength) {
 	if (s.length <= maxLength) {
 		return s;
 	}
-	
-	return s.substr(0, maxLength-3) + '...';
+
+	return s.substr(0, maxLength - 3) + '...';
 }
 
 /**
  * Create input element for a molgenis data type
  * 
- * @param dataType molgenis data type
- * @param attrs input attributes
- * @param val input value
- * @param lbl input label (for checkbox and radio inputs)
+ * @param dataType
+ *            molgenis data type
+ * @param attrs
+ *            input attributes
+ * @param val
+ *            input value
+ * @param lbl
+ *            input label (for checkbox and radio inputs)
  */
 function createInput(dataType, attrs, val, lbl) {
 	function createBasicInput(type, attrs, val) {
 		var $input = $('<input type="' + type + '">');
-		if(attrs)
+		if (attrs)
 			$input.attr(attrs);
-		if(val !== undefined)
+		if (val !== undefined)
 			$input.val(val);
 		return $input;
 	}
-	
-	switch(dataType) {
-		case 'BOOL':
-			var label = $('<label class="radio">');
-			var $input = createBasicInput('radio', attrs, val); 
-			return label.append($input).append(val ? 'True' : 'False');
-		case 'CATEGORICAL':
-			var label = $('<label class="checkbox">');
-			var $input = createBasicInput('checkbox', attrs, val); 
-			return label.append($input).append(lbl);
-		case 'DATE':
-		case 'DATE_TIME':
-			var format = dataType === 'DATE' ? 'yyyy-MM-dd' : 'yyyy-MM-dd\'T\'hh:mm:ss' + getCurrentTimezoneOffset();
-			var items = [];
-			items.push('<div class="input-append date">');
-			items.push('<input data-format="' + format + '" data-language="en" type="text">');
-			items.push('<span class="add-on">');
-			items.push('<i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>');
-			items.push('</span>');
-			items.push('</div>');
-			var datepicker = $(items.join(''));
-			if(attrs)
-				$('input', datepicker).attr(attrs);
-			if(val !== undefined)
-				$('input', datepicker).val(val);
-			return datepicker.datetimepicker();
-		case 'DECIMAL':
-		case 'INT':
-		case 'LONG':
-			return createBasicInput('number', attrs, val);
-		case 'EMAIL':
-			return createBasicInput('email', attrs, val);
-		case 'HTML':
-		case 'HYPERLINK':
-		case 'STRING':
-		case 'TEXT':
-		case 'ENUM':
-			return createBasicInput('text', attrs, val);
-		case 'MREF':
-		case 'XREF':
-			return createBasicInput('hidden', attrs, val);
-		case 'FILE':
-		case 'IMAGE':
-			throw 'Unsupported data type: ' + dataType;
-		default:
-			throw 'Unknown data type: ' + dataType;
+
+	switch (dataType) {
+	case 'BOOL':
+		var label = $('<label class="radio">');
+		var $input = createBasicInput('radio', attrs, val);
+		return label.append($input).append(val ? 'True' : 'False');
+	case 'CATEGORICAL':
+		var label = $('<label class="checkbox">');
+		var $input = createBasicInput('checkbox', attrs, val);
+		return label.append($input).append(lbl);
+	case 'DATE':
+	case 'DATE_TIME':
+		var format = dataType === 'DATE' ? 'yyyy-MM-dd'
+				: 'yyyy-MM-dd\'T\'hh:mm:ss' + getCurrentTimezoneOffset();
+		var items = [];
+		items.push('<div class="input-append date">');
+		items.push('<input data-format="' + format
+				+ '" data-language="en" type="text">');
+		items.push('<span class="add-on">');
+		items
+				.push('<i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>');
+		items.push('</span>');
+		items.push('</div>');
+		var datepicker = $(items.join(''));
+		if (attrs)
+			$('input', datepicker).attr(attrs);
+		if (val !== undefined)
+			$('input', datepicker).val(val);
+		return datepicker.datetimepicker();
+	case 'DECIMAL':
+	case 'INT':
+	case 'LONG':
+		return createBasicInput('number', attrs, val);
+	case 'EMAIL':
+		return createBasicInput('email', attrs, val);
+	case 'HTML':
+	case 'HYPERLINK':
+	case 'STRING':
+	case 'TEXT':
+	case 'ENUM':
+		return createBasicInput('text', attrs, val);
+	case 'MREF':
+	case 'XREF':
+		return createBasicInput('hidden', attrs, val);
+	case 'FILE':
+	case 'IMAGE':
+		throw 'Unsupported data type: ' + dataType;
+	default:
+		throw 'Unknown data type: ' + dataType;
 	}
 }
 
@@ -343,22 +385,25 @@ function createInput(dataType, attrs, val, lbl) {
 (function($, molgenis) {
 	"use strict";
 	var self = molgenis.RestClient = molgenis.RestClient || {};
-	
-	molgenis.RestClient = function RestClient() {};
+
+	molgenis.RestClient = function RestClient() {
+	};
 
 	molgenis.RestClient.prototype.get = function(resourceUri, options) {
 		return this._get(resourceUri, options);
 	};
-	
-	molgenis.RestClient.prototype.getAsync = function(resourceUri, options, callback) {
+
+	molgenis.RestClient.prototype.getAsync = function(resourceUri, options,
+			callback) {
 		this._get(resourceUri, options, callback);
 	};
 
-	molgenis.RestClient.prototype._get = function(resourceUri, options, callback) {
+	molgenis.RestClient.prototype._get = function(resourceUri, options,
+			callback) {
 		var resource = null;
 
 		var async = callback !== undefined;
-		
+
 		var config = {
 			'dataType' : 'json',
 			'url' : this._toApiUri(resourceUri, options),
@@ -371,7 +416,7 @@ function createInput(dataType, attrs, val, lbl) {
 					resource = data;
 			}
 		};
-		
+
 		// tunnel get requests with query through a post,
 		// because it might not fit in the URL
 		if (options && options.q) {
@@ -381,19 +426,25 @@ function createInput(dataType, attrs, val, lbl) {
 				'contentType' : 'application/json'
 			});
 		}
-		
-		if (self.token) {
-			$.extend(config, {
-				headers: {'x-molgenis-token': self.token}
-			});
-		}
-		
-		$.ajax(config);
-		
+
+		this._ajax(config);
+
 		if (!async)
 			return resource;
 	};
-	
+
+	molgenis.RestClient.prototype._ajax = function(config) {
+		if (self.token) {
+			$.extend(config, {
+				headers : {
+					'x-molgenis-token' : self.token
+				}
+			});
+		}
+
+		$.ajax(config);
+	};
+
 	molgenis.RestClient.prototype._toApiUri = function(resourceUri, options) {
 		var qs = "";
 		if (resourceUri.indexOf('?') != -1) {
@@ -402,9 +453,11 @@ function createInput(dataType, attrs, val, lbl) {
 			qs = '?' + uriParts[1];
 		}
 		if (options && options.attributes && options.attributes.length > 0)
-			qs += (qs.length === 0 ? '?' : '&') + 'attributes=' + encodeUriComponent(options.attributes.join(','));
+			qs += (qs.length === 0 ? '?' : '&') + 'attributes='
+					+ encodeURIComponent(options.attributes.join(','));
 		if (options && options.expand && options.expand.length > 0)
-			qs += (qs.length === 0 ? '?' : '&') + 'expand=' + encodeUriComponent(options.expand.join(','));
+			qs += (qs.length === 0 ? '?' : '&') + 'expand='
+					+ encodeURIComponent(options.expand.join(','));
 		if (options && options.q)
 			qs += (qs.length === 0 ? '?' : '&') + '_method=GET';
 		return resourceUri + qs;
@@ -417,9 +470,9 @@ function createInput(dataType, attrs, val, lbl) {
 	molgenis.RestClient.prototype.getHref = function(entityName, primaryKey) {
 		return '/api/v1/' + entityName + (primaryKey ? '/' + primaryKey : '');
 	};
-	
+
 	molgenis.RestClient.prototype.remove = function(href, callback) {
-		$.ajax({
+		this._ajax({
 			type : 'POST',
 			url : href,
 			data : '_method=DELETE',
@@ -428,10 +481,22 @@ function createInput(dataType, attrs, val, lbl) {
 			error : callback.error
 		});
 	};
-	
+
+	molgenis.RestClient.prototype.update = function(href, entity, callback) {
+		this._ajax({
+			type : 'POST',
+			url : href + '?_method=PUT',
+			contentType : 'application/json',
+			data : JSON.stringify(entity),
+			async : false,
+			success : callback.success,
+			error : callback.error
+		});
+	};
+
 	molgenis.RestClient.prototype.entityExists = function(resourceUri) {
 		var result = false;
-		$.ajax({
+		this._ajax({
 			dataType : 'json',
 			url : resourceUri + '/exist',
 			async : false,
@@ -439,70 +504,44 @@ function createInput(dataType, attrs, val, lbl) {
 				result = exists;
 			}
 		});
-		
+
 		return result;
 	};
-	
+
 	molgenis.RestClient.prototype.login = function(username, password, callback) {
 		$.ajax({
-			type: 'POST',
+			type : 'POST',
 			dataType : 'json',
 			url : '/api/v1/login',
 			contentType : 'application/json',
 			async : true,
-			data: JSON.stringify({username: username, password: password}),
+			data : JSON.stringify({
+				username : username,
+				password : password
+			}),
 			success : function(loginResult) {
 				self.token = loginResult.token;
 				callback.success({
-					username: loginResult.username,
-					firstname: loginResult.firstname,
-					lastname: loginResult.lastname
+					username : loginResult.username,
+					firstname : loginResult.firstname,
+					lastname : loginResult.lastname
 				});
 			},
 			error : callback.error
 		});
 	};
-	
+
 	molgenis.RestClient.prototype.logout = function(callback) {
-		$.ajax({
+		this._ajax({
 			url : '/api/v1/logout',
 			async : true,
-			headers: {'x-molgenis-token': self.token},
 			success : function() {
 				self.token = null;
 				callback();
 			}
 		});
 	};
-	
-}($, window.top.molgenis = window.top.molgenis || {}));
 
-// molgenis search API client
-(function($, molgenis) {
-	"use strict";
-
-	molgenis.SearchClient = function SearchClient() {
-	};
-
-	molgenis.SearchClient.prototype.search = function(searchRequest, callback) {
-		var jsonRequest = JSON.stringify(searchRequest);
-		
-		$.ajax({
-			type : "POST",
-			url : '/search',
-			data : jsonRequest,
-			contentType : 'application/json',
-			success : function(searchResponse) {
-				if (searchResponse.errorMessage) {
-					alert(searchResponse.errorMessage);
-				}
-				callback(searchResponse);
-			},
-			error : function(xhr) {
-				alert(xhr.responseText);
-			}
-		});
-	};
 }($, window.top.molgenis = window.top.molgenis || {}));
 
 function showSpinner(callback) {
@@ -510,24 +549,28 @@ function showSpinner(callback) {
 	if (spinner.length === 0) {
 		// do not add fade effect on modal: http://stackoverflow.com/a/22101894
 		var items = [];
-		items.push('<div id="spinner" class="modal hide" data-backdrop="static">');
+		items
+				.push('<div id="spinner" class="modal hide" data-backdrop="static">');
 		items.push('<div class="modal-header"><h3>Loading ...</h3></div>');
-		items.push('<div class="modal-body"><div class="modal-body-inner"><img src="/img/waiting-spinner.gif"></div></div>');
+		items
+				.push('<div class="modal-body"><div class="modal-body-inner"><img src="/img/waiting-spinner.gif"></div></div>');
 		items.push('</div>');
 		$('body').append(items.join(''));
 		spinner = $('#spinner');
 		spinner.data('count', 0);
 	}
-	
+
 	if (callback) {
 		spinner.on('shown', function() {
 			callback();
 		});
 	}
-	
+
 	var count = $('#spinner').data('count');
-	if(count === 0) {
-		var timeout = setTimeout(function(){ spinner.modal('show'); }, 500);
+	if (count === 0) {
+		var timeout = setTimeout(function() {
+			spinner.modal('show');
+		}, 500);
 		$('#spinner').data('timeout', timeout);
 		$('#spinner').data('count', 1);
 	} else {
@@ -538,7 +581,7 @@ function showSpinner(callback) {
 function hideSpinner() {
 	if ($('#spinner').length !== 0) {
 		var count = $('#spinner').data('count');
-		if(count === 1) {
+		if (count === 1) {
 			clearTimeout($('#spinner').data('timeout'));
 			$('#spinner').modal('hide');
 		}
@@ -556,23 +599,34 @@ $(function() {
 
 	// use ajaxPrefilter instead of ajaxStart and ajaxStop
 	// to work around issue http://bugs.jquery.com/ticket/13680
-	$.ajaxPrefilter(function( options, _, jqXHR ) {
-	    showSpinner();
-	    jqXHR.always( hideSpinner );
+	$.ajaxPrefilter(function(options, _, jqXHR) {
+		showSpinner();
+		jqXHR.always(hideSpinner);
 	});
 
-	$(document).ajaxError(function(event, xhr, settings, e) {
-		try {
-			molgenis.createAlert(JSON.parse(xhr.responseText).errors);
-		} catch(e) {
-			molgenis.createAlert([{'message': 'An error occurred. Please contact the administrator.'}], 'error');
-		}
-	});
-	
+	$(document)
+			.ajaxError(
+					function(event, xhr, settings, e) {
+						try {
+							molgenis
+									.createAlert(JSON.parse(xhr.responseText).errors);
+						} catch (e) {
+							molgenis
+									.createAlert(
+											[ {
+												'message' : 'An error occurred. Please contact the administrator.'
+											} ], 'error');
+						}
+					});
+
 	window.onerror = function(msg, url, line) {
-		molgenis.createAlert([{'message': 'An error occurred. Please contact the administrator.'}, {'message': msg}], 'error');
+		molgenis.createAlert([ {
+			'message' : 'An error occurred. Please contact the administrator.'
+		}, {
+			'message' : msg
+		} ], 'error');
 	};
-	
+
 	// async load bootstrap modal and display
 	$(document).on('click', 'a.modal-href', function(e) {
 		e.preventDefault();
@@ -588,17 +642,18 @@ $(function() {
 			}
 		}
 	});
-	
+
 	/**
-	 * Add download functionality to JQuery.
-	 * data can be string of parameters or array/object
-	 *
+	 * Add download functionality to JQuery. data can be string of parameters or
+	 * array/object
+	 * 
 	 * Default method is POST
-	 *
+	 * 
 	 * Usage:
-	 * <code>download('/localhost:8080', 'param1=value1&param2=value2')</code> Or:
+	 * <code>download('/localhost:8080', 'param1=value1&param2=value2')</code>
+	 * Or:
 	 * <code>download('/localhost:8080', {param1 : 'value1', param2 : 'value2'})</code>
-	 *
+	 * 
 	 */
 	$.download = function(url, data, method) {
 		if (!method) {
@@ -607,7 +662,7 @@ $(function() {
 
 		data = typeof data == 'string' ? data : $.param(data);
 
-		//split params into form inputs
+		// split params into form inputs
 		var inputs = [];
 		$.each(data.split('&'), function() {
 			var pair = this.split('=');
@@ -615,8 +670,25 @@ $(function() {
 					+ pair[1] + '" />');
 		});
 
-		//send request and remove form from dom
+		// send request and remove form from dom
 		$('<form action="' + url + '" method="' + method + '">').html(
 				inputs.join('')).appendTo('body').submit().remove();
+	};
+
+	// serialize form as json object
+	$.fn.serializeObject = function() {
+		var o = {};
+		var a = this.serializeArray();
+		$.each(a, function() {
+			if (o[this.name] !== undefined) {
+				if (!o[this.name].push) {
+					o[this.name] = [ o[this.name] ];
+				}
+				o[this.name].push(this.value || '');
+			} else {
+				o[this.name] = this.value || '';
+			}
+		});
+		return o;
 	};
 });

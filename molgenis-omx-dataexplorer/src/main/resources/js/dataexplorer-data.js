@@ -13,6 +13,7 @@
 	var self = molgenis.dataexplorer.data = molgenis.dataexplorer.data || {};
 	self.createDataTable = createDataTable;
 	self.createGenomeBrowser = createGenomeBrowser;
+    self.doShowGenomeBrowser = doShowGenomeBrowser;
 
 	var restApi = new molgenis.RestClient();
 	var genomeBrowser;
@@ -20,12 +21,13 @@
 	/**
 	 * @memberOf molgenis.dataexplorer.data
 	 */
-	function createDataTable() {
+	function createDataTable(editable) {
 		var attributes = getAttributes();
 		$('#data-table-container').table({
 			'entityMetaData' : getEntity(),
 			'attributes' : attributes,
-			'query' : getQuery()
+			'query' : getQuery(),
+			'editable' : editable
 		});
 	}
 	
@@ -37,6 +39,8 @@
 			// Workaround, see http://stackoverflow.com/a/9970672
 			'dataRequest' : JSON.stringify(createDownloadDataRequest())
 		});
+		
+		$('#downloadModal').modal('hide');
 	}
 	
 	/**
@@ -50,7 +54,8 @@
 			attributeNames: [],
 			query : {
 				rules : [entityQuery.q]
-			}
+			},
+			colNames : $('input[name=ColNames]:checked').val()
 		};
 
 		dataRequest.query.sort = $('#data-table-container').table('getSort');
@@ -71,7 +76,7 @@
 	/**
 	 * @memberOf molgenis.dataexplorer.data
 	 */
-	function isGenomeBrowserEntity() {
+	function doShowGenomeBrowser() {
 		// FIXME check attributes on all levels
 		var attrs = getEntity().attributes;
 		return attrs.hasOwnProperty("POS") &&
@@ -84,7 +89,7 @@
 	 */
 	function createGenomeBrowser(settings, genomeEntityKeyVals) {
 		genomeEntities = genomeEntityKeyVals;
-        if (isGenomeBrowserEntity()) {
+
             $('#genomebrowser').css('display', 'block');
             $('#genomebrowser').css('visibility', 'visible');
 
@@ -177,9 +182,7 @@
                     }
                 }
             });
-		}else {
-            $('#genomebrowser').css('display', 'none');
-        }
+
 	}
 
 
@@ -262,6 +265,35 @@
 			download();
 		});
 
+		$('form[name=galaxy-export-form]').validate({
+			rules : {
+				galaxyUrl : {
+					required : true,
+					url : true
+				},
+				galaxyApiKey : {
+					required : true,
+					minlength: 32,
+					maxlength: 32
+				}
+			}
+		});
+		$('form[name=galaxy-export-form]').submit(function(e) {
+			e.preventDefault();
+			if($(this).valid()) {
+				$.ajax({
+					type : $(this).attr('method'),
+					url : $(this).attr('action'),
+					data : JSON.stringify($.extend({}, $(this).serializeObject(), {dataRequest : createDownloadDataRequest()})),
+					contentType: 'application/json'
+				}).done(function() {
+					molgenis.createAlert([{'message' : 'Exported data set to Galaxy'}], 'success');
+				}).always(function() {
+					$('#galaxy-export-modal').modal('hide');
+				});
+			}
+		});
+		
 		$('#genomebrowser-filter-button').click(function() {
 			setDallianceFilter();
 		});

@@ -49,13 +49,13 @@
 	 */
 	function createModuleNav(modules, container) {
 		var items = [];
-		items.push('<ul class="nav nav-tabs">');
+		items.push('<ul class="nav nav-tabs pull-left">');
 		$.each(modules, function() {
 			var href = molgenis.getContextUrl() + '/module/' + this.id;
 			items.push('<li data-id="' + this.id + '"><a href="' + href + '" data-target="#tab-' + this.id + '" data-toggle="tab"><img src="/img/' + this.icon + '"> ' + this.label + '</a></li>');
 		});
 		items.push('</ul>');
-		items.push('<div class="tab-content">');
+		items.push('<div class="tab-content span9">');
 		$.each(modules, function() {
 			items.push('<div class="tab-pane" id="tab-' + this.id + '">Loading...</div>');
 		});
@@ -79,6 +79,21 @@
 			},
 			'onAttributeClick' : function(attribute) {
 				$(document).trigger('clickAttribute', {'attribute': attribute});
+			}
+		});
+	}
+	
+	function createHeader(entityName) {
+		restApi.getAsync('/api/v1/' + entityName + '/meta', {attributes:['label', 'description']}, function(meta) {
+			$('#entity-class-name').html(meta.label);
+			
+			if (meta.description) {
+				var description = $('<span data-placement="bottom"></span>');
+				description.html(abbreviate(meta.description, 180));
+				description.attr('data-title', meta.description);
+				$('#entity-class-description').append(description.tooltip());
+			} else {
+				$('#entity-class-description').html('');
 			}
 		});
 	}
@@ -181,7 +196,10 @@
 						self.filter.wizard.openFilterWizardModal(selectedEntityMetaData, attributeFilters);
 						showWizardOnInit = false;
 					}
+					
 				});
+				
+				createHeader(entityMetaData.name);
 			});
 		});
 		

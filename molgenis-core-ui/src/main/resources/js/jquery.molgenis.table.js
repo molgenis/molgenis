@@ -171,22 +171,22 @@
 			$.each(settings.colAttributes, function(i, attribute) {
 				var cell = $('<td>');
 				var rawValue = entity[attribute.name];				
-				if (rawValue) {
-					switch(attribute.fieldType) {
-						case 'XREF':
-						case 'MREF':
-                        case 'CATEGORICAL':
+				switch(attribute.fieldType) {
+					case 'XREF':
+					case 'MREF':
+                    case 'CATEGORICAL':
+                        if (rawValue) {
                         	var refEntity = settings.refEntitiesMeta[attribute.refEntity.href];
-							var refAttribute = refEntity.labelAttribute;
-							var refValue = refEntity.attributes[refAttribute];
+                        	var refAttribute = refEntity.labelAttribute;
+                        	var refValue = refEntity.attributes[refAttribute];
 							
-							if (refValue) {
-								var refAttributeType = refValue.fieldType;
-								if (refAttributeType === 'XREF' || refAttributeType === 'MREF' || refAttributeType === 'COMPOUND') {
-									throw 'unsupported field type ' + refAttributeType;
-								}
+                        	if (refValue) {
+                        		var refAttributeType = refValue.fieldType;
+                        		if (refAttributeType === 'XREF' || refAttributeType === 'MREF' || refAttributeType === 'COMPOUND') {
+                        			throw 'unsupported field type ' + refAttributeType;
+                        		}
 								
-								switch(attribute.fieldType) {
+                        		switch(attribute.fieldType) {
 									case 'CATEGORICAL':
 									case 'XREF':
 										var cellValue = $('<a href="#">' + formatTableCellValue(rawValue[refAttribute], refAttributeType) + '</a>'); 
@@ -208,14 +208,32 @@
 										break;
 									default:
 										throw 'unexpected field type ' + attribute.fieldType;
-								}
+                        		}
+                        	}
+                        }
+						break;
+                    case 'BOOL':
+                    	var cellValuePart = $(formatTableCellValue(rawValue, attribute.fieldType, settings.editable));
+                    	
+						cellValuePart.change((function(entity, attribute) {
+							return function() {
+								var value = cellValuePart.is(':checked');
+								restApi.update(entity.href + "/" + attribute.name, value, {
+									success: function() {
+									},
+									error: function() {
+									}
+								});
 							}
-							break;
-						default :
-							cell.append(formatTableCellValue(rawValue, attribute.fieldType));
-							break;
-					}
+						})(entity, attribute));
+						
+						cell.append(cellValuePart);
+                    	break;
+					default :
+						cell.append(formatTableCellValue(rawValue, attribute.fieldType));
+						break;
 				}
+				
 				row.append(cell);
 			});
 			items.push(row);
@@ -292,6 +310,7 @@
 			},
 			'setQuery' : function(query) {
 				settings.query = query;
+				settings.start = 0;
 				
 				getTableData(settings, function(data) {
 					createTableBody(data, settings);
@@ -351,6 +370,7 @@
 		'entityMetaData' : null,
 		'maxRows' : 20,
 		'attributes' : null,
-		'query' : null
+		'query' : null,
+		'editable' : false
 	};
 }($, window.top.molgenis = window.top.molgenis || {}));

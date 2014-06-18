@@ -20,17 +20,14 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.lang.reflect.Type;
-import java.nio.charset.Charset;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -49,9 +46,9 @@ import com.google.gson.JsonSyntaxException;
  * @author Roy Clarkson
  * @since 1.0
  */
-public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Object>
+public class GsonHttpMessageConverter extends BaseHttpMessageConverter<Object>
 {
-	private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+
 	private static final Logger LOG = Logger.getLogger(GsonHttpMessageConverter.class);
 	private final Gson gson;
 	private Type type = null;
@@ -264,15 +261,6 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 	}
 
 	// helpers
-
-	private Charset getCharset(HttpHeaders headers)
-	{
-		if (headers != null && headers.getContentType() != null && headers.getContentType().getCharSet() != null)
-		{
-			return headers.getContentType().getCharSet();
-		}
-		return DEFAULT_CHARSET;
-	}
 
 	private String getCallbackParam()
 	{

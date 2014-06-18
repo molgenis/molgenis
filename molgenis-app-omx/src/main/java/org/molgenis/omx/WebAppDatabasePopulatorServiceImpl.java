@@ -7,9 +7,9 @@ import java.util.Map.Entry;
 import org.molgenis.data.DataService;
 import org.molgenis.data.annotation.impl.CaddServiceAnnotator;
 import org.molgenis.data.annotation.impl.ClinVarServiceAnnotator;
-import org.molgenis.data.annotation.impl.ClinicalGenomicsDatabaseServiceAnnotator;
 import org.molgenis.data.annotation.impl.DbnsfpGeneServiceAnnotator;
 import org.molgenis.data.annotation.impl.DbnsfpVariantServiceAnnotator;
+import org.molgenis.data.annotation.provider.CgdDataProvider;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.framework.db.WebAppDatabasePopulatorService;
@@ -20,6 +20,7 @@ import org.molgenis.omx.core.RuntimeProperty;
 import org.molgenis.security.MolgenisSecurityWebAppDatabasePopulatorService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.runas.RunAsSystem;
+import org.molgenis.studymanager.StudyManagerController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -75,6 +76,10 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		runtimePropertyMap.put(DataExplorerController.KEY_MOD_DATA, String.valueOf(true));
 		runtimePropertyMap.put(DataExplorerController.KEY_MOD_DISEASEMATCHER, String.valueOf(false));
 
+		// DataExplorer table editable yes/no
+		runtimePropertyMap.put(DataExplorerController.KEY_DATAEXPLORER_EDITABLE, String.valueOf(false));
+		runtimePropertyMap.put(DataExplorerController.KEY_GALAXY_ENABLED, String.valueOf(false));
+
 		// Annotators include files/tools
 		String molgenisHomeDir = System.getProperty("molgenis.home");
 
@@ -88,8 +93,8 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 
 		runtimePropertyMap.put(CaddServiceAnnotator.CADD_FILE_LOCATION_PROPERTY, molgenisHomeDirAnnotationResources
 				+ "/CADD/1000G.vcf.gz");
-		runtimePropertyMap.put(ClinicalGenomicsDatabaseServiceAnnotator.CGD_FILE_LOCATION_PROPERTY,
-				molgenisHomeDirAnnotationResources + "/CGD/CGD.txt");
+		runtimePropertyMap.put(CgdDataProvider.CGD_FILE_LOCATION_PROPERTY, molgenisHomeDirAnnotationResources
+				+ "/CGD/CGD.txt");
 		runtimePropertyMap.put(DbnsfpGeneServiceAnnotator.GENE_FILE_LOCATION_PROPERTY,
 				molgenisHomeDirAnnotationResources + "/dbnsfp/dbNSFP2.3_gene");
 		runtimePropertyMap.put(DbnsfpVariantServiceAnnotator.CHROMOSOME_FILE_LOCATION_PROPERTY,
@@ -98,6 +103,9 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 				molgenisHomeDirAnnotationResources + "/Clinvar/variant_summary.txt");
 
 		runtimePropertyMap.put(DataExplorerController.WIZARD_TITLE, "Filter Wizard");
+
+		runtimePropertyMap.put(StudyManagerController.EXPORT_BTN_TITLE, "Export");
+		runtimePropertyMap.put(StudyManagerController.EXPORT_ENABLED, String.valueOf(false));
 
 		for (Entry<String, String> entry : runtimePropertyMap.entrySet())
 		{
@@ -109,11 +117,11 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 			dataService.add(RuntimeProperty.ENTITY_NAME, runtimeProperty);
 		}
 
-        MolgenisUser anonymousUser = molgenisSecurityWebAppDatabasePopulatorService.getAnonymousUser();
-        UserAuthority anonymousHomeAuthority = new UserAuthority();
-        anonymousHomeAuthority.setMolgenisUser(anonymousUser);
-        anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX + HomeController.ID.toUpperCase());
-        dataService.add(UserAuthority.ENTITY_NAME, anonymousHomeAuthority);
+		MolgenisUser anonymousUser = molgenisSecurityWebAppDatabasePopulatorService.getAnonymousUser();
+		UserAuthority anonymousHomeAuthority = new UserAuthority();
+		anonymousHomeAuthority.setMolgenisUser(anonymousUser);
+		anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX + HomeController.ID.toUpperCase());
+		dataService.add(UserAuthority.ENTITY_NAME, anonymousHomeAuthority);
 	}
 
 	@Override
