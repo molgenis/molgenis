@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.cache.clear.ClearIndicesCacheResponse;
 import org.elasticsearch.action.admin.indices.flush.FlushResponse;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
@@ -37,6 +38,7 @@ import org.elasticsearch.common.collect.Sets;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.QueryStringQueryBuilder.Operator;
+import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.Aggregation;
@@ -46,15 +48,7 @@ import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AggregateResult;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.CrudRepository;
-import org.molgenis.data.DatabaseAction;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule;
+import org.molgenis.data.*;
 import org.molgenis.elasticsearch.index.MappingsBuilder;
 import org.molgenis.elasticsearch.request.LuceneQueryStringBuilder;
 import org.molgenis.util.MolgenisDateFormat;
@@ -67,7 +61,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 
-public class ElasticsearchRepository implements CrudRepository
+public class ElasticsearchRepository implements CrudRepository, Manageable
 {
 	public static final String BASE_URL = "elasticsearch://";
 
@@ -87,19 +81,6 @@ public class ElasticsearchRepository implements CrudRepository
 		this.indexName = indexName;
 		this.entityMetaData = entityMetaData;
 		this.docType = sanitizeMapperType(entityMetaData.getName());
-
-		// persist entity meta data if entity meta data does not exist in elasticsearch index
-		if (!MappingsBuilder.hasMapping(client, entityMetaData))
-		{
-			try
-			{
-				MappingsBuilder.createMapping(client, entityMetaData);
-			}
-			catch (IOException e)
-			{
-				throw new MolgenisDataException(e);
-			}
-		}
 	}
 
 	@Override
@@ -833,5 +814,39 @@ public class ElasticsearchRepository implements CrudRepository
 	private DeleteRequestBuilder createDeleteRequest(Object id)
 	{
 		return client.prepareDelete(indexName, docType, id.toString());
+	}
+
+	@Override
+	public void create()
+	{
+		if (!MappingsBuilder.hasMapping(client, entityMetaData))
+		{
+			try
+			{
+				MappingsBuilder.createMapping(client, entityMetaData);
+			}
+			catch (IOException e)
+			{
+				throw new MolgenisDataException(e);
+			}
+		}
+	}
+
+	@Override
+	public void drop()
+	{
+		String documentTypeSantized = sanitizeMapperType(docType);
+
+		DeleteByQueryResponse deleteResponse = client.prepareDeleteByQuery(indexName)
+				.setQuery(new TermQueryBuilder("_type", documentTypeSantized)).execute().actionGet();
+
+		if (deleteResponse != null)
+		{
+			IndexDeleteByQueryResponse idbqr = deleteResponse.getIndex(indexName);
+			if ((idbqr != null) && (idbqr.getFailedShards() > 0))
+			{
+				throw new ElasticsearchException("Delete failed. Returned headers:" + idbqr.getHeaders());
+			}
+		}
 	}
 }

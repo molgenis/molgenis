@@ -52,7 +52,8 @@ public class VcfImporterService
 			Client client = elasticSearchClient.getClient();
 			String indexName = elasticSearchClient.getIndexName();
 			EntityMetaData entityMetaData = inRepository.getEntityMetaData();
-			CrudRepository outRepository = new ElasticsearchRepository(client, indexName, entityMetaData);
+			ElasticsearchRepository outRepository = new ElasticsearchRepository(client, indexName, entityMetaData);
+			outRepository.create();
 			try
 			{
 				outRepository.add(inRepository);

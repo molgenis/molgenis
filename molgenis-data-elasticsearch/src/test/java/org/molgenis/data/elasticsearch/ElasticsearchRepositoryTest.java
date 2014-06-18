@@ -190,4 +190,10 @@ public class ElasticsearchRepositoryTest
 	{
 		throw new RuntimeException("Test not implemented");
 	}
+
+	@Test
+	public void drop()
+	{
+		throw new RuntimeException("Test not implemented");
+	}
 }
