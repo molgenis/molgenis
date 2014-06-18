@@ -18,6 +18,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.GenomeConfig;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.das.RangeHandlingDataSource;
 import org.molgenis.util.ApplicationContextProvider;
 
@@ -34,10 +35,13 @@ import uk.ac.ebi.mydas.model.DasPhase;
 import uk.ac.ebi.mydas.model.DasTarget;
 import uk.ac.ebi.mydas.model.DasType;
 
+import static org.molgenis.util.ApplicationContextProvider.*;
+
 public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource implements
 		RangeHandlingAnnotationDataSource
 {
 	private final DataService dataService;
+	private final GenomeConfig config;
 	private DasType mutationType;
 	private DasMethod method;
 	private String type;
@@ -53,18 +57,25 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource i
 
 	public RepositoryRangeHandlingDataSource() throws DataSourceException
 	{
-		dataService = ApplicationContextProvider.getApplicationContext().getBean(DataService.class);
+		dataService = getApplicationContext().getBean(DataService.class);
+		config = getApplicationContext().getBean(GenomeConfig.class);
 	}
 
 	@Override
 	public DasAnnotatedSegment getFeatures(String segmentParamString, int start, int stop, Integer maxbins)
 			throws BadReferenceObjectException, DataSourceException
 	{
-
 		String[] segmentParts = segmentParamString.split(",");
 		String dataSet = null;
 		String customParam;
 		String segmentId = null;
+
+		String startAttribute = null;
+		String chromosomeAttribute = null;
+		String idAttribute = null;
+		String stopAttribute = null;
+		String descriptionAttribute = null;
+
 		if (segmentParts.length > 1)
 		{
 			segmentId = segmentParts[0];
@@ -85,6 +96,32 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource i
 		Map<String, DasType> patients = new HashMap<String, DasType>();
 		for (Entity entity : entityIterable)
 		{
+			if (startAttribute == null)
+			{
+				startAttribute = config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_START,
+						entity.getEntityMetaData());
+			}
+			if (chromosomeAttribute == null)
+			{
+				chromosomeAttribute = config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_CHROM,
+						entity.getEntityMetaData());
+			}
+			if (idAttribute == null)
+			{
+				idAttribute = config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_ID,
+						entity.getEntityMetaData());
+			}
+			if (stopAttribute == null)
+			{
+				stopAttribute = config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_STOP,
+						entity.getEntityMetaData());
+			}
+			if (descriptionAttribute == null)
+			{
+				descriptionAttribute = config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_DESCRIPTION,
+						entity.getEntityMetaData());
+			}
+
 			DasFeature feature;
 
 			Integer valueStart = null;
@@ -96,8 +133,8 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource i
 			String valuePatient = null;
 			try
 			{
-				valueStart = entity.getInt(GenomeConfig.GENOMEBROWSER_START_POSITION);
-				valueIdentifier = entity.getString(GenomeConfig.GENOMEBROWSER_ID);
+				valueStart = entity.getInt(startAttribute);
+				valueIdentifier = entity.getString(idAttribute);
 			}
 			catch (ClassCastException e)
 			{
@@ -107,16 +144,22 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource i
 			// no end position? assume mutation of 1 position, so stop == start
 			Iterable<String> attributes = entity.getAttributeNames();
 
-			valueStop = Iterables.contains(attributes, GenomeConfig.GENOMEBROWSER_STOP_POSITION) ? entity.getInt(GenomeConfig.GENOMEBROWSER_STOP_POSITION) : valueStart;
+			valueStop = Iterables.contains(attributes, stopAttribute) ? entity.getInt(stopAttribute) : valueStart;
 
-			valueDescription = Iterables.contains(attributes, GenomeConfig.GENOMEBROWSER_DESCRIPTION) ? entity
-					.getString(GenomeConfig.GENOMEBROWSER_DESCRIPTION) : "";
+			valueDescription = Iterables.contains(attributes, descriptionAttribute) ? entity
+					.getString(descriptionAttribute) : "";
+			String name = config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_NAME,
+					entity.getEntityMetaData());
+			String link = config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_LINK,
+					entity.getEntityMetaData());
+			String patient = config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_PATIENT_ID,
+					entity.getEntityMetaData());
+			valueName = Iterables.contains(attributes, name) ? entity.getString(name) : "";
+			valueLink = Iterables.contains(attributes, link) ? entity.getString(link) : "";
+			valuePatient = Iterables.contains(attributes, patient) ? entity.getString(patient) : "";
 
-			valueName = Iterables.contains(attributes, GenomeConfig.GENOMEBROWSER_NAME) ? entity.getString(GenomeConfig.GENOMEBROWSER_NAME) : "";
-			valueLink = Iterables.contains(attributes, GenomeConfig.GENOMEBROWSER_LINK) ? entity.getString(GenomeConfig.GENOMEBROWSER_LINK) : "";
-			valuePatient = Iterables.contains(attributes, GenomeConfig.GENOMEBROWSER_PATIENT_ID) ? entity.getString(GenomeConfig.GENOMEBROWSER_PATIENT_ID) : "";
-
-			if (valueStart != null && ((valueStart >= start && valueStart <= stop) || (valueStop >= start && valueStop <= stop)))
+			if (valueStart != null
+					&& ((valueStart >= start && valueStart <= stop) || (valueStop >= start && valueStop <= stop)))
 			{
 				DasType type;// used for label colours in Dalliance
 				if (patients.containsKey(valuePatient))
@@ -141,7 +184,9 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource i
 
 	protected Iterable<Entity> queryDataSet(String segmentId, String dataSet, int maxbins)
 	{
-		Query q = new QueryImpl().eq(GenomeConfig.GENOMEBROWSER_CHROMOSOME, segmentId);
+		String chromosomeAttribute = config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_CHROM,
+				dataService.getEntityMetaData(dataSet));
+		Query q = new QueryImpl().eq(chromosomeAttribute, segmentId);
 		q.pageSize(maxbins);
 		return dataService.findAll(dataSet, q);
 	}

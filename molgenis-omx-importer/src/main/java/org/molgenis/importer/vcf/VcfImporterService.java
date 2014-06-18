@@ -49,20 +49,27 @@ public class VcfImporterService
 				throw new MolgenisDataException("Can't overwrite existing " + inEntityName);
 			}
 
-			Client client = elasticSearchClient.getClient();
-			String indexName = elasticSearchClient.getIndexName();
-			EntityMetaData entityMetaData = inRepository.getEntityMetaData();
-			ElasticsearchRepository outRepository = new ElasticsearchRepository(client, indexName, entityMetaData);
-			outRepository.create();
 			try
 			{
-				outRepository.add(inRepository);
+				Client client = elasticSearchClient.getClient();
+				String indexName = elasticSearchClient.getIndexName();
+				EntityMetaData entityMetaData = inRepository.getEntityMetaData();
+				ElasticsearchRepository outRepository = new ElasticsearchRepository(client, indexName, entityMetaData);
+                outRepository.create();
+                try
+				{
+					outRepository.add(inRepository);
+				}
+				finally
+				{
+					outRepository.close();
+				}
+				dataService.addRepository(outRepository);
 			}
 			finally
 			{
-				outRepository.close();
+				inRepository.close();
 			}
-			dataService.addRepository(outRepository);
 		}
 	}
 }

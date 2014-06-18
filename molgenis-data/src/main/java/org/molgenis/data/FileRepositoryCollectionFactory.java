@@ -3,12 +3,12 @@ package org.molgenis.data;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Maps;
 
@@ -56,11 +56,20 @@ public class FileRepositoryCollectionFactory
 	 */
 	public FileRepositoryCollection createFileRepositoryCollection(File file)
 	{
-		String extension = StringUtils.getFilenameExtension(file.getName());
-		Class<? extends FileRepositoryCollection> clazz = fileRepositoryCollection.get(extension.toLowerCase());
+		String name = file.getName().toLowerCase();
+		Class<? extends FileRepositoryCollection> clazz = null;
+		for (Entry<String, Class<? extends FileRepositoryCollection>> entry : fileRepositoryCollection.entrySet())
+		{
+			if (name.endsWith('.' + entry.getKey()))
+			{
+				clazz = entry.getValue();
+				break;
+			}
+		}
+
 		if (clazz == null)
 		{
-			throw new MolgenisDataException("Unknown extension '" + extension + "'");
+			throw new MolgenisDataException("Unknown extension for file '" + file.getName() + "'");
 		}
 
 		Constructor<? extends FileRepositoryCollection> ctor;

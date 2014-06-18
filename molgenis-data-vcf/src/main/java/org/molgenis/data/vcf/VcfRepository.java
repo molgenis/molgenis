@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
@@ -33,6 +34,8 @@ import org.molgenis.vcf.meta.VcfMetaInfo;
  */
 public class VcfRepository extends AbstractRepository
 {
+	private static final Logger logger = Logger.getLogger(VcfRepository.class);
+
 	public static final String BASE_URL = "vcf://";
 	public static final String CHROM = "#CHROM";
 	public static final String ALT = "ALT";
@@ -47,6 +50,7 @@ public class VcfRepository extends AbstractRepository
 	private final String entityName;
 
 	private DefaultEntityMetaData entityMetaData;
+	private List<VcfReader> vcfReaderRegistry;
 
 	public VcfRepository(File file, String entityName) throws IOException
 	{
@@ -61,8 +65,11 @@ public class VcfRepository extends AbstractRepository
 		VcfReader vcfReader;
 		try
 		{
-			// will be closed by user
 			vcfReader = createVcfReader();
+
+			// register reader so close() can close all readers
+			if (vcfReaderRegistry == null) vcfReaderRegistry = new ArrayList<VcfReader>();
+			vcfReaderRegistry.add(vcfReader);
 		}
 		catch (IOException e)
 		{
@@ -249,5 +256,19 @@ public class VcfRepository extends AbstractRepository
 	@Override
 	public void close() throws IOException
 	{
+		if (vcfReaderRegistry != null)
+		{
+			for (VcfReader vcfReader : vcfReaderRegistry)
+			{
+				try
+				{
+					vcfReader.close();
+				}
+				catch (IOException e)
+				{
+					logger.warn(e);
+				}
+			}
+		}
 	}
 }
