@@ -10,6 +10,7 @@ import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.elasticsearch.config.ElasticSearchClient;
 import org.molgenis.elasticsearch.index.MappingsBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -19,18 +20,19 @@ public class ElasticsearchRepositoryCollection implements RepositoryCollection
 {
 	public static final String INDEX_NAME = "molgenis";
 
-	private final Client client;
+	private final ElasticSearchClient elasticSearchClient;
 
 	@Autowired
-	public ElasticsearchRepositoryCollection(Client client)
+	public ElasticsearchRepositoryCollection(ElasticSearchClient elasticSearchClient)
 	{
-		if (client == null) throw new IllegalArgumentException("client is null");
-		this.client = client;
+		if (elasticSearchClient == null) throw new IllegalArgumentException("elasticSearchClient is null");
+		this.elasticSearchClient = elasticSearchClient;
 	}
 
 	@Override
 	public Iterable<String> getEntityNames()
 	{
+		Client client = elasticSearchClient.getClient();
 		GetMappingsResponse getMappingsResponse = client.admin().indices().prepareGetMappings(INDEX_NAME).execute()
 				.actionGet();
 		ImmutableOpenMap<String, ImmutableOpenMap<String, MappingMetaData>> allMappings = getMappingsResponse
@@ -49,6 +51,7 @@ public class ElasticsearchRepositoryCollection implements RepositoryCollection
 	@Override
 	public Repository getRepositoryByEntityName(String name)
 	{
+		Client client = elasticSearchClient.getClient();
 		EntityMetaData entityMetaData;
 		try
 		{
@@ -58,6 +61,6 @@ public class ElasticsearchRepositoryCollection implements RepositoryCollection
 		{
 			throw new RuntimeException(e);
 		}
-		return new ElasticsearchRepository(client, INDEX_NAME, entityMetaData);
+		return new ElasticsearchRepository(client, elasticSearchClient.getIndexName(), entityMetaData);
 	}
 }

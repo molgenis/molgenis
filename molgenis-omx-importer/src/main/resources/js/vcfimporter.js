@@ -2,7 +2,14 @@
 	"use strict";
 
 	$(function() {
-		$('form[name=vcf-importer-form]').validate();
+		$('form[name=vcf-importer-form]').validate({
+			rules : {
+				file : {
+					required : true,
+					extension : "vcf|vcf\.gz"
+				}
+			}
+		});
 		$('form[name=vcf-importer-form]').submit(function(e) {
 			e.preventDefault();
 			e.stopPropagation();

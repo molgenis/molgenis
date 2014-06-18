@@ -3,7 +3,6 @@ package org.molgenis.elasticsearch.config;
 import java.io.File;
 import java.util.Collections;
 
-import org.elasticsearch.client.Client;
 import org.molgenis.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.search.SearchService;
 import org.springframework.context.annotation.Bean;
@@ -19,6 +18,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class EmbeddedElasticSearchConfig
 {
+	private static final String MOLGENIS_INDEX_NAME = "molgenis";
+
 	@Bean(destroyMethod = "close")
 	public EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory()
 	{
@@ -45,10 +46,9 @@ public class EmbeddedElasticSearchConfig
 	}
 
 	@Bean
-	public Client client()
+	public ElasticSearchClient client()
 	{
-		// TODO refactor to make elegant
-		return embeddedElasticSearchServiceFactory().getClient();
+		return new ElasticSearchClient(embeddedElasticSearchServiceFactory().getClient(), MOLGENIS_INDEX_NAME);
 	}
 
 	@Bean

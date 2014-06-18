@@ -1,14 +1,14 @@
 package org.molgenis.data.vcf;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
@@ -43,41 +43,36 @@ public class VcfRepository extends AbstractRepository
 	public static final String ID = "ID";
 	public static final String INFO = "INFO";
 
-	private DefaultEntityMetaData entityMetaData;
 	private final File file;
+	private final String entityName;
 
-	public VcfReader getVcfReader()
-	{
-		return vcfReader;
-	}
+	private DefaultEntityMetaData entityMetaData;
 
-	private VcfReader vcfReader;
-
-	public VcfRepository(File file)
+	public VcfRepository(File file, String entityName) throws IOException
 	{
 		super(BASE_URL + file.getName());
 		this.file = file;
-		try
-		{
-			FileReader reader = new FileReader(file);
-			this.vcfReader = new VcfReader(reader);
-		}
-		catch (FileNotFoundException e)
-		{
-			e.printStackTrace();
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
+		this.entityName = entityName;
 	}
 
 	@Override
 	public Iterator<Entity> iterator()
 	{
+		VcfReader vcfReader;
+		try
+		{
+			// will be closed by user
+			vcfReader = createVcfReader();
+		}
+		catch (IOException e)
+		{
+			throw new RuntimeException(e);
+		}
+		final VcfReader finalVcfReader = vcfReader;
+
 		return new Iterator<Entity>()
 		{
-			Iterator<VcfRecord> vcfRecordIterator = vcfReader.iterator();
+			Iterator<VcfRecord> vcfRecordIterator = finalVcfReader.iterator();
 
 			@Override
 			public boolean hasNext()
@@ -138,10 +133,19 @@ public class VcfRepository extends AbstractRepository
 	{
 		if (entityMetaData == null)
 		{
-			entityMetaData = new DefaultEntityMetaData(FilenameUtils.removeExtension(file.getName()));
+			entityMetaData = new DefaultEntityMetaData(entityName);
 			try
 			{
-				VcfMeta metadata = vcfReader.getVcfMeta();
+				VcfReader vcfReader = createVcfReader();
+				VcfMeta vcfMeta;
+				try
+				{
+					vcfMeta = vcfReader.getVcfMeta();
+				}
+				finally
+				{
+					if (vcfReader != null) vcfReader.close();
+				}
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(CHROM,
 						MolgenisFieldTypes.FieldTypeEnum.STRING));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ALT,
@@ -156,13 +160,11 @@ public class VcfRepository extends AbstractRepository
 						MolgenisFieldTypes.FieldTypeEnum.STRING));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ID,
 						MolgenisFieldTypes.FieldTypeEnum.STRING));
-				Iterator<VcfMetaInfo> metaInfoIterator = metadata.getInfoMeta().iterator();
 				DefaultAttributeMetaData infoMetaData = new DefaultAttributeMetaData(INFO,
 						MolgenisFieldTypes.FieldTypeEnum.COMPOUND);
 				List<AttributeMetaData> metadataInfoField = new ArrayList<AttributeMetaData>();
-				while (metaInfoIterator.hasNext())
+				for (VcfMetaInfo info : vcfMeta.getInfoMeta())
 				{
-					VcfMetaInfo info = metaInfoIterator.next();
 					DefaultAttributeMetaData attributeMetaData = new DefaultAttributeMetaData(info.getId(),
 							vcfReaderFormatToMolgenisType(info));
 					attributeMetaData.setDescription(info.getDescription());
@@ -237,6 +239,11 @@ public class VcfRepository extends AbstractRepository
 			default:
 				throw new MolgenisDataException("unknown vcf info type [" + vcfMetaInfo.getType() + "]");
 		}
+	}
+
+	private VcfReader createVcfReader() throws IOException
+	{
+		return new VcfReader(new InputStreamReader(new FileInputStream(file), Charset.forName("UTF-8")));
 	}
 
 	@Override

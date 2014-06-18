@@ -17,7 +17,6 @@ import java.util.Set;
 
 import org.elasticsearch.action.admin.indices.cache.clear.ClearIndicesCacheResponse;
 import org.elasticsearch.action.admin.indices.flush.FlushResponse;
-import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.count.CountRequestBuilder;
@@ -34,14 +33,10 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.update.UpdateRequestBuilder;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.cluster.metadata.MappingMetaData;
-import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.collect.Sets;
-import org.elasticsearch.common.hppc.cursors.ObjectObjectCursor;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.QueryStringQueryBuilder.Operator;
-import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.Aggregation;
@@ -62,7 +57,6 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.elasticsearch.index.MappingsBuilder;
 import org.molgenis.elasticsearch.request.LuceneQueryStringBuilder;
-import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -503,93 +497,6 @@ public class ElasticsearchRepository implements CrudRepository
 		if (!deleteResponse.isFound())
 		{
 			throw new MolgenisDataException("Failed to delete entity, entity does not exist [" + entity + "]");
-		}
-		deleteReferences(entity);
-	}
-
-	private void deleteReferences(Entity entity)
-	{
-		// 1. for each doctype in elasticsearch
-		// 2. get entitymetadata
-		// 3. for each atomic attribute
-		// 4. if attribute is xref or mref
-		// 5. if ref entity meta data name == this.entityname
-		// 6. find all entities doctype + attribute.id
-		// 7. for each ref entity
-		// 8. check if delete is allowed (nillable)
-		// 9. delete
-		try
-		{
-			GetMappingsResponse getMappingsResponse = client.admin().indices().prepareGetMappings("molgenis").execute()
-					.actionGet();
-			ImmutableOpenMap<String, ImmutableOpenMap<String, MappingMetaData>> allMappings = getMappingsResponse
-					.getMappings();
-			ImmutableOpenMap<String, MappingMetaData> indexMappings = allMappings.get("molgenis");
-
-			for (ObjectObjectCursor<String, MappingMetaData> entry : indexMappings)
-			{
-				String docType = entry.key;
-				EntityMetaData refEntityMeta = MappingsBuilder.deserializeEntityMeta(client, docType);
-				String entityId = entity.getIdValue().toString();
-				for (AttributeMetaData attributeMetaData : entityMetaData.getAtomicAttributes())
-				{
-					FieldType dataType = attributeMetaData.getDataType();
-					switch (dataType.getEnumType())
-					{
-						case CATEGORICAL:
-						case XREF:
-						case MREF:
-							EntityMetaData refEntityMetaData = attributeMetaData.getRefEntity();
-							String refEntityName = refEntityMetaData.getName();
-							if (refEntityName.equals(getName()))
-							{
-								String refDocType = sanitizeMapperType(refEntityName);
-								SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName).setTypes(
-										refDocType);
-								String attributeName = attributeMetaData.getName();
-								TermQueryBuilder query = QueryBuilders.termQuery(attributeName + ".id", entityId);
-								searchRequestBuilder.setQuery(query);
-
-								SearchResponse searchResponse = searchRequestBuilder.execute().actionGet();
-								SearchHits searchHits = searchResponse.getHits();
-								if (searchHits.totalHits() > 0)
-								{
-									for (SearchHit searchHit : searchHits)
-									{
-										String refId = searchHit.getId();
-										GetResponse getResponse = client.prepareGet(indexName, refDocType, refId)
-												.execute().actionGet();
-										Map<String, Object> refSource = getResponse.getSource();
-										System.out.println("updating " + refId);
-
-										// switch (dataType.getEnumType()) {
-										// case CATEGORICAL:
-										// case XREF:
-										// refSource.put(attributeName, null);
-										// break;
-										// case MREF:
-										// Object val = refSource.get(attributeName);
-										// List<Object> vals = (List<Object>) val;
-										// for(ListIterator<Object> it = vals.listIterator(); it.hasNext();) {
-										// Object listVal = it.next();
-										// if(listVal.equals(obj))
-										// }
-										// default:
-										// throw new RuntimeException("unsupported case " + dataType.getEnumType());
-										// }
-									}
-								}
-							}
-							break;
-						default:
-							break;
-					}
-				}
-			}
-		}
-		catch (IOException e)
-		{
-			throw new MolgenisDataException(e);
 		}
 	}
 

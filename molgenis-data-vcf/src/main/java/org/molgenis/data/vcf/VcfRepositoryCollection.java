@@ -2,70 +2,62 @@ package org.molgenis.data.vcf;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
+import java.util.Collections;
 import java.util.Set;
 
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.FileRepositoryCollection;
-import org.springframework.util.StringUtils;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 
-/**
- * Reads vcf files.
- * 
- * The exposes the files as {@link org.molgenis.data.Repository}. The names of the repositories are the names of the
- * files without the extension
- */
 public class VcfRepositoryCollection extends FileRepositoryCollection
 {
-	public static final String EXTENSION_VCF = "vcf";
-	public static final Set<String> EXTENSIONS = ImmutableSet.of(EXTENSION_VCF);
+	private static final String EXTENSION_VCF = "vcf";
+	private static final String EXTENSION_VCF_GZ = "vcf.gz";
+	static final Set<String> EXTENSIONS = ImmutableSet.of(EXTENSION_VCF, EXTENSION_VCF_GZ);
+
 	private final File file;
 	private final String entityName;
-	private List<String> entityNames;
-	private List<String> entityNamesLowerCase;
 
-	public VcfRepositoryCollection(File file, String entityName) throws IOException
+	public VcfRepositoryCollection(File file) throws IOException
 	{
 		super(EXTENSIONS);
+		if (file == null) throw new IllegalArgumentException("file is null");
 		this.file = file;
-		this.entityName = entityName;
 
-		loadEntityName();
+		String name = file.getName();
+		if (name.endsWith(EXTENSION_VCF))
+		{
+			this.entityName = name.substring(0, name.lastIndexOf(EXTENSION_VCF));
+		}
+		else if (name.endsWith(EXTENSION_VCF_GZ))
+		{
+			this.entityName = name.substring(0, name.lastIndexOf(EXTENSION_VCF_GZ));
+		}
+		else
+		{
+			throw new IllegalArgumentException("Not a VCF file [" + file.getName() + "]");
+		}
 	}
 
 	@Override
 	public Iterable<String> getEntityNames()
 	{
-		return entityNames;
+		return Collections.singleton(entityName);
 	}
 
 	@Override
 	public Repository getRepositoryByEntityName(String name)
 	{
-		if (!entityNamesLowerCase.contains(name.toLowerCase()))
+		if (!entityName.equals(name)) throw new MolgenisDataException("Unknown entity name [" + name + "]");
+		try
 		{
-			return null;
+			return new VcfRepository(file, name);
 		}
-
-		return new VcfRepository(file);
+		catch (IOException e)
+		{
+			throw new MolgenisDataException(e);
+		}
 	}
-
-	private void loadEntityName()
-	{
-		entityNames = Lists.newArrayList();
-		entityNamesLowerCase = Lists.newArrayList();
-
-		String name = getRepositoryName(entityName);
-		entityNames.add(name);
-		entityNamesLowerCase.add(name.toLowerCase());
-	}
-
-	private String getRepositoryName(String fileName)
-	{
-		return StringUtils.stripFilenameExtension(StringUtils.getFilename(fileName));
-	}
-
 }
