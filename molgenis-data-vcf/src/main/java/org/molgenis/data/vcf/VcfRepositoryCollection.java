@@ -29,11 +29,11 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 		String name = file.getName();
 		if (name.endsWith(EXTENSION_VCF))
 		{
-			this.entityName = name.substring(0, name.lastIndexOf(EXTENSION_VCF));
+			this.entityName = name.substring(0, name.lastIndexOf('.' + EXTENSION_VCF));
 		}
 		else if (name.endsWith(EXTENSION_VCF_GZ))
 		{
-			this.entityName = name.substring(0, name.lastIndexOf(EXTENSION_VCF_GZ));
+			this.entityName = name.substring(0, name.lastIndexOf('.' + EXTENSION_VCF_GZ));
 		}
 		else
 		{
