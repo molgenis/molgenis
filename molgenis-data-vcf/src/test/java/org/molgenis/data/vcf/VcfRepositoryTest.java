@@ -108,10 +108,6 @@ public class VcfRepositoryTest
 			testAttribute(it.next(), "HGENOMES", MolgenisFieldTypes.DECIMAL);
 			assertFalse(it.hasNext());
 		}
-		catch (InvalidFormatException e)
-		{
-			e.printStackTrace();
-		}
 		finally
 		{
 			IOUtils.closeQuietly(vcfRepository);
@@ -172,10 +168,6 @@ public class VcfRepositoryTest
 			assertEquals(entity.get(VcfRepository.POS), 7569187);
 
 			assertFalse(it.hasNext());
-		}
-		catch (InvalidFormatException e)
-		{
-			e.printStackTrace();
 		}
 		finally
 		{

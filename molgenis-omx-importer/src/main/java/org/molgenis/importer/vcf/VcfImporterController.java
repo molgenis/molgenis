@@ -6,11 +6,15 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Map;
+import java.io.InputStream;
+import java.util.UUID;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.util.ErrorMessageResponse;
+import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -48,42 +52,86 @@ public class VcfImporterController extends MolgenisPluginController
 
 	@RequestMapping(value = "/import", method = POST)
 	@ResponseStatus(HttpStatus.OK)
-	public void importVcf(@RequestParam("file") MultipartFile multipartFile) throws IOException
+	public void importVcf(@RequestParam("name") String entityName, @RequestParam("file") MultipartFile multipartFile)
+			throws IOException
 	{
-		File tempFile = File.createTempFile("vcf" + System.currentTimeMillis(), null);
+		String name = multipartFile.getOriginalFilename().toLowerCase();
+		String suffix;
+		if (name.endsWith(".vcf")) suffix = ".vcf";
+		else if (name.endsWith(".vcf.gz")) suffix = ".vcf.gz";
+		else throw new MolgenisDataException("Unsupported file type " + multipartFile.getOriginalFilename());
+
+		String tmpPath = System.getProperty("java.io.tmpdir");
+		if (!tmpPath.endsWith(File.separator)) tmpPath += File.separator;
+		tmpPath += UUID.randomUUID().toString();
+		File tmpDir = new File(tmpPath);
+		boolean mkdirOk = tmpDir.mkdir();
+		if (!mkdirOk) throw new IOException("Could not create " + tmpPath);
+
 		try
 		{
-			multipartFile.transferTo(tempFile);
-			vcfImporterService.importVcf(tempFile, multipartFile.getName());
+			File tempFile = new File(tmpPath + File.separator + entityName + suffix);
+			try
+			{
+				// use copyInputStreamToFile because multipartFile.transferTo(tempFile) results in a tempFile of 0 bytes
+				InputStream inputStream = multipartFile.getInputStream();
+				try
+				{
+					FileUtils.copyInputStreamToFile(inputStream, tempFile);
+				}
+				finally
+				{
+					inputStream.close();
+				}
+				vcfImporterService.importVcf(tempFile, entityName);
+			}
+			finally
+			{
+				boolean deleteOk = tempFile.delete();
+				if (!deleteOk)
+				{
+					logger.error("Failed to delete " + tempFile.getName());
+					tempFile.deleteOnExit();
+				}
+			}
 		}
 		finally
 		{
-			boolean deleteOk = tempFile.delete();
+			boolean deleteOk = tmpDir.delete();
 			if (!deleteOk)
 			{
-				logger.error("failed to delete " + tempFile.getName());
-				tempFile.deleteOnExit();
+				logger.error("Failed to delete " + tmpDir.getName());
+				tmpDir.deleteOnExit();
 			}
 		}
+	}
+
+	@ExceptionHandler(MolgenisDataException.class)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public ErrorMessageResponse handleMolgenisDataException(MolgenisDataException e)
+	{
+		logger.debug(null, e);
+		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
 	@ExceptionHandler(IOException.class)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-	public Map<String, String> handleIOException(IOException e)
+	public ErrorMessageResponse handleIOException(IOException e)
 	{
 		logger.error(null, e);
-		return Collections.singletonMap("errorMessage",
-				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage());
+		return new ErrorMessageResponse(new ErrorMessage(
+				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage()));
 	}
 
 	@ExceptionHandler(RuntimeException.class)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-	public Map<String, String> handleRuntimeException(RuntimeException e)
+	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
 	{
 		logger.error(null, e);
-		return Collections.singletonMap("errorMessage",
-				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage());
+		return new ErrorMessageResponse(new ErrorMessage(
+				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage()));
 	}
 }
