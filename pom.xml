@@ -382,7 +382,7 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore />
+										<ignore/>
 									</action>
 								</pluginExecution>
 							</pluginExecutions>
@@ -427,6 +427,7 @@
 								</jsSourceIncludes>
 								<jsSourceExcludes>
 									<jsSourceExclude>**/*.min.js</jsSourceExclude>
+									<jsSourceExclude>**/ace-min/**</jsSourceExclude>
 								</jsSourceExcludes>
 								<skipMerge>true</skipMerge>
 								<skipMinify>${minify.skipMinify}</skipMinify>
@@ -585,5 +586,6 @@
 		<module>molgenis-js</module>
 		<module>molgenis-model-registry</module>
 		<module>molgenis-disease-matcher</module>
-	</modules>
+		<module>molgenis-mutationdb</module>
+  </modules>
 </project>

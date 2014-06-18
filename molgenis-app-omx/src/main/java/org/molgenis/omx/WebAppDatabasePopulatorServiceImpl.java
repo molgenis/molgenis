@@ -10,6 +10,7 @@ import org.molgenis.data.annotation.impl.ClinVarServiceAnnotator;
 import org.molgenis.data.annotation.impl.DbnsfpGeneServiceAnnotator;
 import org.molgenis.data.annotation.impl.DbnsfpVariantServiceAnnotator;
 import org.molgenis.data.annotation.provider.CgdDataProvider;
+import org.molgenis.data.support.GenomeConfig;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.framework.db.WebAppDatabasePopulatorService;
@@ -20,6 +21,7 @@ import org.molgenis.omx.core.RuntimeProperty;
 import org.molgenis.security.MolgenisSecurityWebAppDatabasePopulatorService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.runas.RunAsSystem;
+import org.molgenis.studymanager.StudyManagerController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -102,6 +104,16 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 				molgenisHomeDirAnnotationResources + "/Clinvar/variant_summary.txt");
 
 		runtimePropertyMap.put(DataExplorerController.WIZARD_TITLE, "Filter Wizard");
+
+		runtimePropertyMap.put(StudyManagerController.EXPORT_BTN_TITLE, "Export");
+		runtimePropertyMap.put(StudyManagerController.EXPORT_ENABLED, String.valueOf(false));
+
+		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_START, "POS,start_nucleotide");
+		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_STOP, "stop_pos,stop_nucleotide,end_nucleotide");
+		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_CHROM, "CHROM,#CHROM,chromosome");
+		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_ID, "ID,Mutation_id");
+		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_DESCRIPTION, "INFO");
+		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_PATIENT_ID, "patient_id");
 
 		for (Entry<String, String> entry : runtimePropertyMap.entrySet())
 		{

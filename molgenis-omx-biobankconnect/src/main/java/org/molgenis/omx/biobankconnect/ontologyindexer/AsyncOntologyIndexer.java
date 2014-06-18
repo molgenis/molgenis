@@ -1,6 +1,6 @@
 package org.molgenis.omx.biobankconnect.ontologyindexer;
 
-import java.io.File;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.StringUtils;
@@ -8,14 +8,17 @@ import org.apache.log4j.Logger;
 import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.omx.biobankconnect.ontologytree.OntologyTermIndexRepository;
 import org.molgenis.omx.biobankconnect.utils.OntologyLoader;
 import org.molgenis.omx.biobankconnect.utils.OntologyRepository;
 import org.molgenis.omx.biobankconnect.utils.OntologyTermRepository;
 import org.molgenis.omx.observ.target.Ontology;
 import org.molgenis.omx.observ.target.OntologyTerm;
+import org.molgenis.search.Hit;
+import org.molgenis.search.SearchRequest;
+import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
 import org.molgenis.security.runas.RunAsSystem;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -43,7 +46,6 @@ public class AsyncOntologyIndexer implements OntologyIndexer, InitializingBean
 		if (searchService == null) throw new IllegalArgumentException("Missing bean of type SearchService");
 	}
 
-	@Override
 	public boolean isIndexingRunning()
 	{
 		return (runningIndexProcesses.get() > 0);
@@ -52,25 +54,39 @@ public class AsyncOntologyIndexer implements OntologyIndexer, InitializingBean
 	@Override
 	@Async
 	@RunAsSystem
-	public void index(String ontologyName, File ontologyFile)
+	public void index(OntologyLoader model)
 	{
 		isCorrectOntology = true;
 		runningIndexProcesses.incrementAndGet();
 
 		try
 		{
-			OntologyLoader model = new OntologyLoader(ontologyName, ontologyFile);
 			ontologyUri = model.getOntologyIRI() == null ? StringUtils.EMPTY : model.getOntologyIRI();
 			searchService.indexRepository(new OntologyRepository(model, "ontology-" + ontologyUri));
 			searchService.indexRepository(new OntologyTermRepository(model, "ontologyTerm-" + ontologyUri));
 		}
-		catch (OWLOntologyCreationException e)
+		catch (Exception e)
 		{
 			isCorrectOntology = false;
 			logger.error("Exception imported file is not a valid ontology", e);
 		}
 		finally
 		{
+			String ontologyName = model.getOntologyName();
+			if (!dataService.hasRepository(ontologyName))
+			{
+				Hit hit = searchService
+						.search(new SearchRequest("ontology-" + ontologyUri, new QueryImpl().eq(
+								OntologyRepository.ENTITY_TYPE, OntologyRepository.TYPE_ONTOLOGY), null))
+						.getSearchHits().get(0);
+				Map<String, Object> columnValueMap = hit.getColumnValueMap();
+				String ontologyTermEntityName = columnValueMap.containsKey(OntologyTermRepository.ONTOLOGY_LABEL) ? columnValueMap
+						.get(OntologyRepository.ONTOLOGY_LABEL).toString() : OntologyTermIndexRepository.DEFAULT_ONTOLOGY_TERM_REPO;
+				String ontologyUrl = columnValueMap.containsKey(OntologyTermRepository.ONTOLOGY_LABEL) ? columnValueMap
+						.get(OntologyRepository.ONTOLOGY_URL).toString() : OntologyTermIndexRepository.DEFAULT_ONTOLOGY_TERM_REPO;
+				dataService.addRepository(new OntologyTermIndexRepository(ontologyTermEntityName, ontologyUrl,
+						searchService));
+			}
 			runningIndexProcesses.decrementAndGet();
 			ontologyUri = null;
 		}
@@ -95,17 +111,28 @@ public class AsyncOntologyIndexer implements OntologyIndexer, InitializingBean
 			dataService.delete(Ontology.ENTITY_NAME, ontologies);
 		}
 
+		SearchRequest request = new SearchRequest("ontology-" + ontologyURI, new QueryImpl().eq(
+				OntologyRepository.ONTOLOGY_URL, ontologyURI), null);
+		SearchResult result = searchService.search(request);
+		if (result.getTotalHitCount() > 0)
+		{
+			Hit hit = result.getSearchHits().get(0);
+			String ontologyEntityName = hit.getColumnValueMap().get(OntologyRepository.ONTOLOGY_LABEL).toString();
+			if (dataService.hasRepository(ontologyEntityName))
+			{
+				dataService.removeRepository(ontologyEntityName);
+			}
+		}
+
 		searchService.deleteDocumentsByType("ontology-" + ontologyURI);
 		searchService.deleteDocumentsByType("ontologyTerm-" + ontologyURI);
 	}
 
-	@Override
 	public String getOntologyUri()
 	{
 		return ontologyUri;
 	}
 
-	@Override
 	public boolean isCorrectOntology()
 	{
 		return this.isCorrectOntology;

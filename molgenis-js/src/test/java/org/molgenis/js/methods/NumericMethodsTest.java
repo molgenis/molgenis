@@ -34,6 +34,15 @@ public class NumericMethodsTest extends MolgenisJsTest
 
 		Object bmi = ScriptEvaluator.eval("$('weight').div($('height').div(100).pow(2))", person);
 		assertEquals(Context.toNumber(bmi), 82.0 / (1.89 * 1.89));
-		System.out.println(Context.toNumber(bmi));
+	}
+
+	@Test
+	public void testGlucose()
+	{
+		Entity glucose = new MapEntity();
+		glucose.set("GLUC_1", 4.1);
+
+		Object bmi = ScriptEvaluator.eval("$('GLUC_1').div(100)", glucose);
+		assertEquals(Context.toNumber(bmi), 4.1 / 100);
 	}
 }
