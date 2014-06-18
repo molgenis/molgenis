@@ -112,6 +112,9 @@ public class DataExplorerController extends MolgenisPluginController
 	@Autowired
 	private MolgenisSettings molgenisSettings;
 
+    @Autowired
+    private GenomeConfig genomeConfig;
+
 	public DataExplorerController()
 	{
 		super(URI);
@@ -182,7 +185,14 @@ public class DataExplorerController extends MolgenisPluginController
 			model.addAttribute("chains", molgenisSettings.getProperty(CHAINS));
 			model.addAttribute("sources", molgenisSettings.getProperty(SOURCES));
 			model.addAttribute("browserLinks", molgenisSettings.getProperty(BROWSERLINKS));
-			model.addAttribute("tableEditable",
+
+            model.addAttribute("genomebrowser_start_list", molgenisSettings.getProperty(GenomeConfig.GENOMEBROWSER_START, "POS"));
+            model.addAttribute("genomebrowser_chrom_list", molgenisSettings.getProperty(GenomeConfig.GENOMEBROWSER_CHROM, "CHROM"));
+            model.addAttribute("genomebrowser_id_list", molgenisSettings.getProperty(GenomeConfig.GENOMEBROWSER_ID, "ID"));
+            model.addAttribute("genomebrowser_desc_list", molgenisSettings.getProperty(GenomeConfig.GENOMEBROWSER_DESCRIPTION, "INFO"));
+            model.addAttribute("genomebrowser_patient_list", molgenisSettings.getProperty(GenomeConfig.GENOMEBROWSER_PATIENT_ID, "patient_id"));
+
+            model.addAttribute("tableEditable",
 					molgenisSettings.getBooleanProperty(KEY_DATAEXPLORER_EDITABLE, DEFAULT_VAL_DATAEXPLORER_EDITABLE));
 			model.addAttribute("galaxyEnabled",
 					molgenisSettings.getBooleanProperty(KEY_GALAXY_ENABLED, DEFAULT_VAL_GALAXY_ENABLED));
@@ -278,10 +288,9 @@ public class DataExplorerController extends MolgenisPluginController
 
 	private boolean isGenomeBrowserEntity(EntityMetaData entityMetaData)
 	{
-		AttributeMetaData attributeStartPosition = entityMetaData
-				.getAttribute(GenomeConfig.GENOMEBROWSER_START_POSITION);
-		AttributeMetaData attributeId = entityMetaData.getAttribute(GenomeConfig.GENOMEBROWSER_ID);
-		AttributeMetaData attributeChromosome = entityMetaData.getAttribute(GenomeConfig.GENOMEBROWSER_CHROMOSOME);
+		AttributeMetaData attributeStartPosition = genomeConfig.getAttributeMetadataForAttributeNameArray(GenomeConfig.GENOMEBROWSER_START, entityMetaData);
+		AttributeMetaData attributeId = genomeConfig.getAttributeMetadataForAttributeNameArray(GenomeConfig.GENOMEBROWSER_ID, entityMetaData);
+		AttributeMetaData attributeChromosome = genomeConfig.getAttributeMetadataForAttributeNameArray(GenomeConfig.GENOMEBROWSER_CHROM, entityMetaData);
 		return attributeStartPosition != null && attributeId != null && attributeChromosome != null;
 	}
 
