@@ -1,15 +1,17 @@
 package org.molgenis.omx.importer;
 
-import org.molgenis.data.*;
-import org.molgenis.data.support.FileRepositoryCollection;
-import org.molgenis.framework.db.EntitiesValidationReport;
-import org.molgenis.framework.db.EntityImporter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Controller;
-
 import java.io.File;
 import java.io.IOException;
+
+import org.molgenis.data.CrudRepository;
+import org.molgenis.data.DataService;
+import org.molgenis.data.DatabaseAction;
+import org.molgenis.data.FileRepositoryCollectionFactory;
+import org.molgenis.data.Repository;
+import org.molgenis.data.support.FileRepositoryCollection;
+import org.molgenis.framework.db.EntitiesValidationReport;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Created by charbonb on 22/05/14.
@@ -17,34 +19,45 @@ import java.io.IOException;
 @Component
 public class EntityImporterController
 {
-    private FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
-    private EntityImporterFactory entityImporterFactory;
-    private EntityImporterValidator validator;
+	private final FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
+	private final EntityImporterFactory entityImporterFactory;
+	private final EntityImporterValidator validator;
+	private final DataService dataService;
 
-    @Autowired
-    public EntityImporterController(EntityImporterFactory entityImporterFactory, FileRepositoryCollectionFactory fileRepositoryCollectionFactory, EntityImporterValidator validator){
-        this.entityImporterFactory = entityImporterFactory;
-        this.fileRepositoryCollectionFactory = fileRepositoryCollectionFactory;
-        this.validator = validator;
-    }
+	@Autowired
+	public EntityImporterController(EntityImporterFactory entityImporterFactory,
+			FileRepositoryCollectionFactory fileRepositoryCollectionFactory, EntityImporterValidator validator,
+			DataService dataService)
+	{
+		this.entityImporterFactory = entityImporterFactory;
+		this.fileRepositoryCollectionFactory = fileRepositoryCollectionFactory;
+		this.validator = validator;
+		this.dataService = dataService;
+	}
 
-    public EntitiesValidationReport handleImportRequest(File file, DatabaseAction dba) throws IOException {
-        FileRepositoryCollection collection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
+	public EntitiesValidationReport handleImportRequest(File file, DatabaseAction dba) throws IOException
+	{
+		FileRepositoryCollection collection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 
-        EntityImporterDependencyResolver dependencyResolver = new EntityImporterDependencyResolver();
+		EntityImporterDependencyResolver dependencyResolver = new EntityImporterDependencyResolver();
 
-        EntitiesValidationReport report = validator.validate(file, dba);
+		EntitiesValidationReport report = validator.validate(file, dba);
 		if (!report.getSheetsImportable().containsValue(false))
 		{
 			dependencyResolver.sort(collection);
-			for (String inEntityName : collection.getEntityNames())
+			for (String entityName : collection.getEntityNames())
 			{
-				Repository inRepository = collection.getRepositoryByEntityName(inEntityName);
+				Repository inRepository = collection.getRepositoryByEntityName(entityName);
 
 				CrudRepository outRepository = (CrudRepository) entityImporterFactory.getOutRepository(inRepository);
 
 				if (dba == DatabaseAction.ADD) outRepository.add(inRepository);
 				if (dba == DatabaseAction.UPDATE) outRepository.update(inRepository);
+
+				if (!dataService.hasRepository(entityName))
+				{
+					dataService.addRepository(outRepository);
+				}
 			}
 		}
 		return report;
