@@ -249,5 +249,6 @@ public class VcfRepository extends AbstractRepository
 	@Override
 	public void close() throws IOException
 	{
+		System.out.println("close");
 	}
 }

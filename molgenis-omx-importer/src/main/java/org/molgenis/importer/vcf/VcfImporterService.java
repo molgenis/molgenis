@@ -42,26 +42,32 @@ public class VcfImporterService
 				.createFileRepositoryCollection(vcfFile);
 		for (String inEntityName : repositoryCollection.getEntityNames())
 		{
-			Repository inRepository = repositoryCollection.getRepositoryByEntityName(inEntityName);
-
 			if (dataService.hasRepository(inEntityName))
 			{
 				throw new MolgenisDataException("Can't overwrite existing " + inEntityName);
 			}
 
-			Client client = elasticSearchClient.getClient();
-			String indexName = elasticSearchClient.getIndexName();
-			EntityMetaData entityMetaData = inRepository.getEntityMetaData();
-			CrudRepository outRepository = new ElasticsearchRepository(client, indexName, entityMetaData);
+			Repository inRepository = repositoryCollection.getRepositoryByEntityName(inEntityName);
 			try
 			{
-				outRepository.add(inRepository);
+				Client client = elasticSearchClient.getClient();
+				String indexName = elasticSearchClient.getIndexName();
+				EntityMetaData entityMetaData = inRepository.getEntityMetaData();
+				CrudRepository outRepository = new ElasticsearchRepository(client, indexName, entityMetaData);
+				try
+				{
+					outRepository.add(inRepository);
+				}
+				finally
+				{
+					outRepository.close();
+				}
+				dataService.addRepository(outRepository);
 			}
 			finally
 			{
-				outRepository.close();
+				inRepository.close();
 			}
-			dataService.addRepository(outRepository);
 		}
 	}
 }
