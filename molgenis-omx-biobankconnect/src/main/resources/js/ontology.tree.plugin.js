@@ -38,6 +38,8 @@
 				return container.data('tree')[options]();
 			else if (args.length === 1)
 				return container.data('tree')[options](args[0]);
+			else if (args.length === 2)
+				return container.data('tree')[options](args[0], args[1]);
 		}
 
 		// cleanup existing tree
@@ -70,6 +72,13 @@
 				return $.map(selectedNodes, function(selectedNode) {
 					return selectedNode.data.attribute;
 				});
+			},
+			'appendChildNodes' : function(parentNode, attributes){
+				parentNode.expanded = true;
+				parentNode.addChildren(createChildren(attributes));
+			},
+			'getTree' : function(){
+				return $('.molgenis-tree').fancytree('getTree');
 			}
 		});
 
