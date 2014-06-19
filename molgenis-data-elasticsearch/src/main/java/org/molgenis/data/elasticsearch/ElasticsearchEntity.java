@@ -1,7 +1,5 @@
 package org.molgenis.data.elasticsearch;
 
-import java.sql.Date;
-import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -10,11 +8,12 @@ import org.elasticsearch.search.SearchHit;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.support.AbstractEntity;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 
-public class ElasticsearchEntity implements Entity
+public class ElasticsearchEntity extends AbstractEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -82,90 +81,6 @@ public class ElasticsearchEntity implements Entity
 	public Object get(String attributeName)
 	{
 		return source.get(attributeName);
-	}
-
-	@Override
-	public String getString(String attributeName)
-	{
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
-	}
-
-	@Override
-	public Integer getInt(String attributeName)
-	{
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
-	}
-
-	@Override
-	public Long getLong(String attributeName)
-	{
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
-	}
-
-	@Override
-	public Boolean getBoolean(String attributeName)
-	{
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
-	}
-
-	@Override
-	public Double getDouble(String attributeName)
-	{
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
-	}
-
-	@Override
-	public Date getDate(String attributeName)
-	{
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
-	}
-
-	@Override
-	public java.util.Date getUtilDate(String attributeName)
-	{
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
-	}
-
-	@Override
-	public Timestamp getTimestamp(String attributeName)
-	{
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
-	}
-
-	@Override
-	public Entity getEntity(String attributeName)
-	{
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
-	}
-
-	@Override
-	public Iterable<Entity> getEntities(String attributeName)
-	{
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
-	}
-
-	@Override
-	public List<String> getList(String attributeName)
-	{
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
-	}
-
-	@Override
-	public List<Integer> getIntList(String attributeName)
-	{
-		// TODO implement
-		throw new UnsupportedOperationException("TODO implement");
 	}
 
 	@Override
