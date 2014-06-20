@@ -4,6 +4,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.util.CaseInsensitiveLinkedHashMap;
@@ -14,7 +17,8 @@ import org.molgenis.util.CaseInsensitiveLinkedHashMap;
 public class MapEntity extends AbstractEntity
 {
 	private static final long serialVersionUID = -8283375007931769373L;
-	private Map<String, Object> values = new CaseInsensitiveLinkedHashMap<Object>();
+    private EntityMetaData entityMetaData;
+    private Map<String, Object> values = new CaseInsensitiveLinkedHashMap<Object>();
 	private String idAttributeName = null;
 
 	public MapEntity()
@@ -40,6 +44,12 @@ public class MapEntity extends AbstractEntity
 	{
 		values.put(attributeName, value);
 	}
+
+    public MapEntity(EntityMetaData metaData)
+    {
+        this.entityMetaData = metaData;
+        this.idAttributeName = entityMetaData.getIdAttribute().getName();
+    }
 
 	@Override
 	public Object get(String attributeName)
@@ -87,19 +97,27 @@ public class MapEntity extends AbstractEntity
 	@Override
 	public Iterable<String> getAttributeNames()
 	{
+        if(entityMetaData != null){
+            return Iterables.transform(entityMetaData.getAttributes(), new Function<AttributeMetaData, String>() {
+                @Override
+                public String apply(AttributeMetaData input) {
+                    return input.getName();
+                }
+            });
+        }
 		return values.keySet();
 	}
 
-	@Override
-	public List<String> getLabelAttributeNames()
-	{
-		return Collections.emptyList();
-	}
+    @Override
+    public List<String> getLabelAttributeNames()
+    {
+        return Collections.singletonList(entityMetaData.getLabelAttribute().getName());
+    }
 
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		return null;
+		return entityMetaData;
 	}
 
 }

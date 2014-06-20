@@ -730,18 +730,19 @@ public class ElasticsearchRepository implements CrudRepository, Manageable
 			case MREF:
 			{
 				List<String> ids = null, values = null;
-				for (Entity refEntity : entity.getEntities(attrName))
-				{
-					if (ids == null) ids = new ArrayList<String>();
-					ids.add(refEntity.getIdValue().toString());
-					if (values == null) values = new ArrayList<String>();
-					values.add(refEntity.getLabelValue());
-				}
-				if (ids != null && values != null)
-				{
-					doc.put(attrName, values);
-					doc.put(attrName + ".id", ids);
-				}
+                Iterable<Entity> entities = entity.getEntities(attrName);
+                if(entities != null) {
+                    for (Entity refEntity : entities) {
+                        if (ids == null) ids = new ArrayList<String>();
+                        ids.add(refEntity.getIdValue().toString());
+                        if (values == null) values = new ArrayList<String>();
+                        values.add(refEntity.getLabelValue());
+                    }
+                    if (ids != null && values != null) {
+                        doc.put(attrName, values);
+                        doc.put(attrName + ".id", ids);
+                    }
+                }
 				break;
 			}
 			default:

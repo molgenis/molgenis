@@ -24,7 +24,9 @@ import org.molgenis.genotype.GenotypeDataException;
 import org.molgenis.vcf.VcfInfo;
 import org.molgenis.vcf.VcfReader;
 import org.molgenis.vcf.VcfRecord;
+import org.molgenis.vcf.VcfSample;
 import org.molgenis.vcf.meta.VcfMeta;
+import org.molgenis.vcf.meta.VcfMetaFormat;
 import org.molgenis.vcf.meta.VcfMetaInfo;
 
 /**
@@ -45,12 +47,15 @@ public class VcfRepository extends AbstractRepository
 	public static final String QUAL = "QUAL";
 	public static final String ID = "ID";
 	public static final String INFO = "INFO";
+	public static final String SAMPLES = "SAMPLES";
 
 	private final File file;
 	private final String entityName;
 
 	private DefaultEntityMetaData entityMetaData;
 	private List<VcfReader> vcfReaderRegistry;
+	private DefaultEntityMetaData sampleEntityMetaData;
+	private boolean hasFormatMetaData;
 
 	public VcfRepository(File file, String entityName) throws IOException
 	{
@@ -66,10 +71,6 @@ public class VcfRepository extends AbstractRepository
 		try
 		{
 			vcfReader = createVcfReader();
-
-			// register reader so close() can close all readers
-			if (vcfReaderRegistry == null) vcfReaderRegistry = new ArrayList<VcfReader>();
-			vcfReaderRegistry.add(vcfReader);
 		}
 		catch (IOException e)
 		{
@@ -112,13 +113,25 @@ public class VcfRepository extends AbstractRepository
 						}
 						entity.set(vcfInfo.getKey(), val);
 					}
-					// TODO: deal with samples
-					/**
-					 * int i = 0; Iterator<VcfSample> sampleIterator = record.getSamples().iterator(); while
-					 * (sampleIterator.hasNext()) { VcfSample sample = sampleIterator.next(); //FIXME: how to deal with
-					 * this/lists? entity.set(vcfReader.getVcfMeta().getSampleName(i), sample.getAlleles().toString());
-					 * i++; }
-					 **/
+					if (hasFormatMetaData)
+					{
+						List<Entity> samples = new ArrayList<Entity>();
+						Iterator<VcfSample> sampleIterator = vcfRecord.getSamples().iterator();
+						Iterator<String> sampleNameIterator = finalVcfReader.getVcfMeta().getSampleNames().iterator();
+						while (sampleIterator.hasNext())
+						{
+							String[] format = vcfRecord.getFormat();
+							VcfSample sample = sampleIterator.next();
+							Entity sampleEntity = new MapEntity(sampleEntityMetaData);
+							for (int i = 0; i < format.length; i = i + 1)
+							{
+								entity.set(format[i], sample.getData(i));
+							}
+							sampleEntity.set(ID, sampleNameIterator.next());
+							samples.add(sampleEntity);
+						}
+						entity.set(SAMPLES, samples);
+					}
 				}
 				catch (Exception e)
 				{
@@ -148,6 +161,8 @@ public class VcfRepository extends AbstractRepository
 				try
 				{
 					vcfMeta = vcfReader.getVcfMeta();
+                    Iterable<VcfMetaFormat> formatMetaData = vcfReader.getVcfMeta().getFormatMeta();
+                    createSampleEntityMetaData(formatMetaData);
 				}
 				finally
 				{
@@ -179,13 +194,13 @@ public class VcfRepository extends AbstractRepository
 				}
 				infoMetaData.setAttributesMetaData(metadataInfoField);
 				entityMetaData.addAttributeMetaData(infoMetaData);
-				// TODO: deal with samples
-				/**
-				 * Iterator<VcfMetaSample> sampleInfoIterator = metadata.getSampleMeta().iterator(); while
-				 * (sampleInfoIterator.hasNext()) { VcfMetaSample info = sampleInfoIterator.next();
-				 * entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(info.getId(),
-				 * MolgenisFieldTypes.FieldTypeEnum.STRING)); }
-				 **/
+				if (hasFormatMetaData)
+				{
+					DefaultAttributeMetaData samplesAttributeMeta = new DefaultAttributeMetaData(SAMPLES,
+							MolgenisFieldTypes.FieldTypeEnum.MREF);
+					samplesAttributeMeta.setRefEntity(sampleEntityMetaData);
+					entityMetaData.addAttributeMetaData(samplesAttributeMeta);
+				}
 				entityMetaData.setIdAttribute(ID);
 				entityMetaData.setLabelAttribute(ID);
 			}
@@ -197,7 +212,25 @@ public class VcfRepository extends AbstractRepository
 		return entityMetaData;
 	}
 
-	private MolgenisFieldTypes.FieldTypeEnum vcfReaderFormatToMolgenisType(VcfMetaInfo vcfMetaInfo)
+    void createSampleEntityMetaData(Iterable<VcfMetaFormat> formatMetaData) {
+        hasFormatMetaData = formatMetaData.iterator().hasNext();
+        if (hasFormatMetaData)
+        {
+            sampleEntityMetaData = new DefaultEntityMetaData(entityName + "_Sample");
+            sampleEntityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ID,
+                    MolgenisFieldTypes.FieldTypeEnum.STRING));
+            for (VcfMetaFormat meta : formatMetaData)
+            {
+                AttributeMetaData attributeMetaData = new DefaultAttributeMetaData(meta.getId(),
+                        VcfFieldTypeToMolgenisFieldType(meta.getType()));
+                sampleEntityMetaData.addAttributeMetaData(attributeMetaData);
+            }
+            sampleEntityMetaData.setIdAttribute(ID);
+            sampleEntityMetaData.setLabelAttribute(ID);
+        }
+    }
+
+    private MolgenisFieldTypes.FieldTypeEnum vcfReaderFormatToMolgenisType(VcfMetaInfo vcfMetaInfo)
 	{
 		String number = vcfMetaInfo.getNumber();
 		boolean isListValue;
@@ -248,9 +281,31 @@ public class VcfRepository extends AbstractRepository
 		}
 	}
 
+	private MolgenisFieldTypes.FieldTypeEnum VcfFieldTypeToMolgenisFieldType(VcfMetaFormat.Type type)
+	{
+		switch (type)
+		{
+			case CHARACTER:
+				return MolgenisFieldTypes.FieldTypeEnum.STRING;
+			case FLOAT:
+				return MolgenisFieldTypes.FieldTypeEnum.DECIMAL;
+			case INTEGER:
+				return MolgenisFieldTypes.FieldTypeEnum.INT;
+			case STRING:
+				return MolgenisFieldTypes.FieldTypeEnum.STRING;
+			default:
+				throw new MolgenisDataException("unknown vcf field type [" + type + "]");
+		}
+	}
+
 	private VcfReader createVcfReader() throws IOException
 	{
-		return new VcfReader(new InputStreamReader(new FileInputStream(file), Charset.forName("UTF-8")));
+		VcfReader reader = new VcfReader(new InputStreamReader(new FileInputStream(file), Charset.forName("UTF-8")));
+		// register reader so close() can close all readers
+		if (vcfReaderRegistry == null) vcfReaderRegistry = new ArrayList<VcfReader>();
+		vcfReaderRegistry.add(reader);
+
+		return reader;
 	}
 
 	@Override
