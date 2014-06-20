@@ -75,10 +75,20 @@
 			},
 			'appendChildNodes' : function(parentNode, attributes){
 				parentNode.expanded = true;
-				parentNode.addChildren(createChildren(attributes));
+				var molgenisTree = $('.molgenis-tree').fancytree('getTree');
+				var childrenToAdd = [];
+				$.each(createChildren(attributes), function(index, childNode){
+					if(!molgenisTree.getNodeByKey(childNode.key)){
+						childrenToAdd.push(childNode)
+					}
+				});
+				parentNode.addChildren(childrenToAdd);
 			},
 			'getTree' : function(){
 				return $('.molgenis-tree').fancytree('getTree');
+			},
+			'locateTerm' : function(){
+				
 			}
 		});
 

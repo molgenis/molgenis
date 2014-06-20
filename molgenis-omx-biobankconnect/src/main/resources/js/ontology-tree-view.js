@@ -26,13 +26,36 @@
 			topNode.attributes = removeDuplicate(getRootOntologyTerms(topNode));
 			createEntityMetaTree(topNode, null);
 		}
+		
+		function getRootOntologyTerms(ontology){
+			var rootOntologyTerms = restApi.get('/api/v1/' + ontology[ONTOLOGY_LABEL], {'expand' : ['attributes'], 'q' : {
+				'q' : [{
+					'field' : ROOT,
+					'operator' : 'EQUALS',
+					'value' : true
+				},{
+					'operator' : 'AND'
+				},{
+					'field' : ONTOLOGY_IRI,
+					'operator' : 'EQUALS',
+					'value' : ontology[ONTOLOGY_IRI]
+				},{
+					'operator' : 'AND'
+				},{
+					'field' : LAST,
+					'operator' : 'EQUALS',
+					'value' : false
+				}]
+			}});
+			return rootOntologyTerms.items;
+		}
 	};
 	
 	molgenis.OntologyTree.prototype.queryTree = function(ontologyIRI, query){
 		if(query !== undefined && query !== ''){
 			var molgenisTree = $('#tree-container').tree('getTree');
 			treeDict = treeDict ? treeDict : molgenisTree.rootNode.toDict(true);
-			molgenisTree.rootNode.removeChildren();
+			molgenisTree.reload();
 			var ontologyIndex = getOntologyTermByIri(ontologyIRI);
 			if(ontologyIndex.items.length > 0){
 				var ontology = ontologyIndex.items[0];
@@ -43,31 +66,6 @@
 					getParentNode(molgenisTree, ontologyTerm);
 				});
 			}
-		}
-		function getParentNode(molgenisTree, ontologyTerm){
-			var currentNode = null;
-			if(ontologyTerm){
-				var nodeKey = ontologyTerm.href;
-				//Check if the node exists in the tree already
-				if(!molgenisTree.getNodeByKey(nodeKey)){
-					//Recursively add parent nodes to the tree first
-					var parentOntologyTerm = getParentOntologyTerm(ontologyTerm);
-					var parentNode = null;
-					if(parentOntologyTerm.root){
-						parentNode = molgenisTree.rootNode;
-					}else{						
-						parentNode = getParentNode(molgenisTree, parentOntologyTerm);
-					}
-					//Add current node the tree
-					if(parentNode){
-						 $('#tree-container').tree('appendChildNodes', parentNode, removeDuplicate([ontologyTerm]));
-					}else{
-						console.log('error parent node cannot but null!');
-					}	
-				}
-				currentNode = molgenisTree.getNodeByKey(nodeKey);
-			}
-			return currentNode;
 		}
 		
 		function searchByQuery(ontology, query){
@@ -89,6 +87,38 @@
 			treeDict = null;
 		}
 	};
+	
+	molgenis.OntologyTree.prototype.locateTerm = function(ontologyTerm){
+		var molgenisTree = $('#tree-container').tree('getTree');
+		molgenisTree.reload();
+		ontologyTerm = getOntologyTerm(ontologyTerm);
+		var currentNode = getParentNode(molgenisTree, ontologyTerm, true);
+		currentNode.setFocus();
+		var scroll = $(currentNode.li).position().top - $('#tree-container').position().top - $('#tree-container').height() / 3 * 2;
+		if(scroll > $('#tree-container').height() / 2) $('#tree-container').scrollTop(scroll);
+		ontologyTermInfo(ontologyTerm);
+	};
+	
+	function getParentNode(molgenisTree, ontologyTerm, showSibling){
+		var currentNode = null;
+		if(ontologyTerm){
+			var nodeKey = ontologyTerm.href;
+			//Check if the node exists in the tree already
+			if(!molgenisTree.getNodeByKey(nodeKey)){
+				//Recursively add parent nodes to the tree first
+				var parentOntologyTerm = getParentOntologyTerm(ontologyTerm);				
+				var parentNode = getParentNode(molgenisTree, getParentOntologyTerm(ontologyTerm), showSibling);
+				//Add current node the tree
+				if(parentNode){
+					 $('#tree-container').tree('appendChildNodes', parentNode, showSibling ? removeDuplicate (parentOntologyTerm.attributes.items) : removeDuplicate([ontologyTerm]));
+				}else{
+					console.log('error parent node cannot but null!');
+				}	
+			}
+			currentNode = molgenisTree.getNodeByKey(nodeKey);
+		}
+		return currentNode;
+	}
 	
 	function removeDuplicate (listOfNodes){
 		var uniqueNodes = [];
@@ -136,45 +166,38 @@
 		return restApi.get("/api/v1/ontologyindex/", {'q' : request}, null);
 	}
 	
-	function getParentOntologyTerm(ontologyTerm){
-		console.log(ontologyTerm);
-		var parentOntologyTerms = restApi.get('/api/v1/' + ontologyTerm[ONTOLOGY_LABEL], {'expand' : ['attributes'], 'q' : {
+	function getOntologyTerm(option){
+		var ontologyTerms = restApi.get('/api/v1/' + option[ONTOLOGY_LABEL], {'expand' : ['attributes'], 'q' : {
 			'q' : [{
 				'field' : ONTOLOGY_TERM_IRI,
 				'operator' : 'EQUALS',
-				'value' : ontologyTerm[PARENT_ONTOLOGY_TERM_IRI]
+				'value' : option[ONTOLOGY_TERM_IRI]
 			},{
 				'operator' : 'AND'
 			},{
 				'field' : NODE_PATH,
 				'operator' : 'EQUALS',
-				'value' : ontologyTerm[PARENT_NODE_PATH]
+				'value' : option[NODE_PATH]
+			}]
+		}});
+		return ontologyTerms.items.length > 0 ? ontologyTerms.items[0] : null;
+	}
+	
+	function getParentOntologyTerm(option){
+		var parentOntologyTerms = restApi.get('/api/v1/' + option[ONTOLOGY_LABEL], {'expand' : ['attributes'], 'q' : {
+			'q' : [{
+				'field' : ONTOLOGY_TERM_IRI,
+				'operator' : 'EQUALS',
+				'value' : option[PARENT_ONTOLOGY_TERM_IRI]
+			},{
+				'operator' : 'AND'
+			},{
+				'field' : NODE_PATH,
+				'operator' : 'EQUALS',
+				'value' : option[PARENT_NODE_PATH]
 			}]
 		}});
 		return parentOntologyTerms.items.length > 0 ? parentOntologyTerms.items[0] : null;
-	}
-	
-	function getRootOntologyTerms(ontology){
-		var rootOntologyTerms = restApi.get('/api/v1/' + ontology[ONTOLOGY_LABEL], {'expand' : ['attributes'], 'q' : {
-			'q' : [{
-				'field' : ROOT,
-				'operator' : 'EQUALS',
-				'value' : true
-			},{
-				'operator' : 'AND'
-			},{
-				'field' : ONTOLOGY_IRI,
-				'operator' : 'EQUALS',
-				'value' : ontology[ONTOLOGY_IRI]
-			},{
-				'operator' : 'AND'
-			},{
-				'field' : LAST,
-				'operator' : 'EQUALS',
-				'value' : false
-			}]
-		}});
-		return rootOntologyTerms.items;
 	}
 	
 	function createEntityMetaTree(entityMetaData, attributes) {
@@ -190,19 +213,7 @@
 				console.log(selects);
 			},
 			'onAttributeClick' : function(attribute) {
-				var ontologyTerm = restApi.get(attribute.href, {'expand' : ['attributes']}, null);
-				var baseUrl = ontologyTerm.href.substring(0, ontologyTerm.href.lastIndexOf('/') + 1)
-				var relatedOntologyTerms = restApi.get(baseUrl, {'expand' : ['attributes'], 'q' : {
-					'q' : [{
-						'field' : ONTOLOGY_TERM_IRI,
-						'operator' : 'EQUALS',
-						'value' : ontologyTerm[ONTOLOGY_TERM_IRI]
-					}]
-				}}, null);
-				if(relatedOntologyTerms.items.length > 0){
-					relatedOntologyTerms.items = removeDuplicate(relatedOntologyTerms.items);
-					ontologyTermInfo(relatedOntologyTerms.items[0]);
-				}
+				ontologyTermInfo(attribute);
 			},
 			'lazyload' : function(data, createChildren){
 				var href = data.node.data.attribute.href;
@@ -212,23 +223,35 @@
 		});
 	}
 	
-	function ontologyTermInfo(data){
-		var table = $('<table />').addClass('table');
-		table.append('<tr><th>Ontology</th><td><a href="' + data[ONTOLOGY_IRI] + '" target="_blank">' + data[ONTOLOGY_IRI] + '</a></td></tr>');
-		table.append('<tr><th>OntologyTerm</th><td><a href="' + data[ONTOLOGY_TERM_IRI] + '" target="_blank">' + data[ONTOLOGY_TERM_IRI] + '</a></td></tr>');
-		table.append('<tr><th>Name</th><td>' + data[ONTOLOGY_TERM] + '</td></tr>');
-		if(data.description){
-			table.append('<tr><th>Definition</th><td>' + data[ONTOLOGY_TERM_DEFINITION] + '</td></tr>');
+	function ontologyTermInfo(attribute){
+		var ontologyTerm = restApi.get(attribute.href, {'expand' : ['attributes']}, null);
+		var baseUrl = ontologyTerm.href.substring(0, ontologyTerm.href.lastIndexOf('/') + 1)
+		var relatedOntologyTerms = restApi.get(baseUrl, {'expand' : ['attributes'], 'q' : {
+			'q' : [{
+				'field' : ONTOLOGY_TERM_IRI,
+				'operator' : 'EQUALS',
+				'value' : ontologyTerm[ONTOLOGY_TERM_IRI]
+			}]
+		}}, null);
+		if(relatedOntologyTerms.items.length > 0){
+			var data = removeDuplicate(relatedOntologyTerms.items)[0];
+			var table = $('<table />').addClass('table');
+			table.append('<tr><th>Ontology</th><td><a href="' + data[ONTOLOGY_IRI] + '" target="_blank">' + data[ONTOLOGY_IRI] + '</a></td></tr>');
+			table.append('<tr><th>OntologyTerm</th><td><a href="' + data[ONTOLOGY_TERM_IRI] + '" target="_blank">' + data[ONTOLOGY_TERM_IRI] + '</a></td></tr>');
+			table.append('<tr><th>Name</th><td>' + data[ONTOLOGY_TERM] + '</td></tr>');
+			if(data.description){
+				table.append('<tr><th>Definition</th><td>' + data[ONTOLOGY_TERM_DEFINITION] + '</td></tr>');
+			}
+			if(data.synonyms && data.synonyms.length > 0){
+				var listOfSynonyms = $('<ul />');
+				$.each(data.synonyms, function(index, synonym){
+					listOfSynonyms.append('<li>' + synonym + '</li>');
+				});
+				var synonymContainer = $('<td />').append(listOfSynonyms);
+				$('<tr />').append('<th>Synonyms</th>').append(synonymContainer).appendTo(table);
+			}
+			table.find('th').width('30%');
+			$('#ontology-term-info').empty().append(table);
 		}
-		if(data.synonyms && data.synonyms.length > 0){
-			var listOfSynonyms = $('<ul />');
-			$.each(data.synonyms, function(index, synonym){
-				listOfSynonyms.append('<li>' + synonym + '</li>');
-			});
-			var synonymContainer = $('<td />').append(listOfSynonyms);
-			$('<tr />').append('<th>Synonyms</th>').append(synonymContainer).appendTo(table);
-		}
-		table.find('th').width('30%');
-		$('#ontology-term-info').empty().append(table);
 	}
 }($, window.top.molgenis = window.top.molgenis || {}));

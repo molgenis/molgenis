@@ -1,9 +1,9 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
-<#assign css=["jquery-ui-1.9.2.custom.min.css", "bootstrap-fileupload.min.css"]>
-<#assign js=["jquery-ui-1.9.2.custom.min.js", "bootstrap-fileupload.min.js", "ontology-service-result.js", "jquery.bootstrap.pager.js","simple_statistics.js"]>
+<#assign css=["jquery-ui-1.9.2.custom.min.css", "bootstrap-fileupload.min.css", "ui.fancytree.min.css", "biobank-connect.css"]>
+<#assign js=["jquery-ui-1.9.2.custom.min.js", "bootstrap-fileupload.min.js", "jquery.fancytree.min.js", "ontology-tree-view.js", "ontology.tree.plugin.js", "ontology-service-result.js", "jquery.bootstrap.pager.js", "simple_statistics.js"]>
 <@header css js/>
-<form id="evaluationForm" class="form-horizontal" enctype="multipart/form-data">
+<form class="form-horizontal">
 	<div class="row-fluid">
 		<div class="span12">
 			<div class="row-fluid">
@@ -48,8 +48,15 @@
 			<#else>
 			<div><center>There are not ontology annotations found for the list of terms provided!</center></div>
 			</#if>
+			<div class="row-fluid"><div id="pager"></div></div>
 			<div class="row-fluid">
-				<div id="pager" class="offset3 span6 offset3"></div>
+				<div class="span6">
+					<div id="tree-container"></div>
+				</div>
+				<div class="span6">
+					<div><strong>Ontology Term Information</strong></div></br>
+					<div id="ontology-term-info"></div>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -68,6 +75,8 @@
 			'start' : 0,
 			'end' : ${total?c} < itermsPerPage ? ${total?c} : itermsPerPage
 		});
+		ontologyService.loadTree('${ontologyUrl}');
+		
 		$('#score-explanation').popover({
 			'placement' : 'bottom',
 			'trigger' : 'hover',

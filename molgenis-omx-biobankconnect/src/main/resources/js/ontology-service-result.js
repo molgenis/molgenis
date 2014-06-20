@@ -1,6 +1,8 @@
 (function($, molgenis) {
 	"use strict";
 	
+	var ontologyTree = new molgenis.OntologyTree();
+	
 	molgenis.OntologySerivce = function OntologySerivce(){};
 	
 	molgenis.OntologySerivce.prototype.updatePageFunction = function(page){
@@ -22,6 +24,10 @@
 			} 
 		});
 	};
+	
+	molgenis.OntologySerivce.prototype.loadTree = function(ontologyUrl){
+		ontologyTree.updateOntologyTree(ontologyUrl);
+	};
 
 	function createResults(entities){
 		var container = $('#match-result');
@@ -33,11 +39,19 @@
 			var scoreGroup = [];
 			$.each(entity.results.searchHits, function(index, hit){
 				if(index >= 20) return false;
-				var ontologyTermName = $('<div />').addClass('span5').css('margin-bottom', '-6px').append(hit.columnValueMap.ontologyTerm);
+				var ontologyTermName = $('<div />').addClass('span5 show-popover').css('margin-bottom', '-6px').append(hit.columnValueMap.ontologyTerm);
 				var ontologyTermUrl = $('<div />').addClass('span5').css('margin-bottom', '-6px').append('<a href="' + hit.columnValueMap.ontologyTermIRI + '" target="_blank">' + hit.columnValueMap.ontologyTermIRI + '</a>');
 				var matchScore = $('<div />').addClass('span2').css('margin-bottom', '-6px').append('<center>' + hit.columnValueMap.combinedScore.toFixed(2) + '</center>');
 				$('<div />').addClass('row-fluid').append(ontologyTermName).append(ontologyTermUrl).append(matchScore).appendTo(ontologyTermMatchDiv);
 				scoreGroup.push(parseFloat(hit.columnValueMap.combinedScore.toFixed(2)));
+				ontologyTermName.popover({
+					'placement' : 'bottom',
+					'trigger' : 'hover',
+					'title' : 'Look up in ontology',
+					'content' : 'Click to inspect the ontology term in the tree' 
+				}).click(function(){
+					ontologyTree.locateTerm(hit.columnValueMap);
+				});
 			});
 			if(scoreGroup.length > 2){
 				var classifications = ss.jenks(scoreGroup, 2);	
