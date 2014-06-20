@@ -62,9 +62,13 @@
 				var ontologyTerms = removeDuplicate(searchByQuery(ontology, query)).sort(function(a, b){
 					return molgenis.naturalSort(b.nodePath.split('.').length, a.nodePath.split('.').length);
 				});
-				$.each(ontologyTerms, function(index, ontologyTerm){
-					getParentNode(molgenisTree, ontologyTerm);
-				});
+				if(ontologyTerms.length > 0){
+					$.each(ontologyTerms, function(index, ontologyTerm){
+						getParentNode(molgenisTree, ontologyTerm);
+					});
+				}else{
+					molgenis.createAlert([{'message' : 'No ontology terms are found for query "<strong>' + query + '</strong>".'}], 'error');
+				}
 			}
 		}
 		
@@ -92,11 +96,11 @@
 		var molgenisTree = $('#tree-container').tree('getTree');
 		molgenisTree.reload();
 		ontologyTerm = getOntologyTerm(ontologyTerm);
+		ontologyTermInfo(ontologyTerm);
 		var currentNode = getParentNode(molgenisTree, ontologyTerm, true);
 		currentNode.setFocus();
 		var scroll = $(currentNode.li).position().top - $('#tree-container').position().top - $('#tree-container').height() / 3 * 2;
 		if(scroll > $('#tree-container').height() / 2) $('#tree-container').scrollTop(scroll);
-		ontologyTermInfo(ontologyTerm);
 	};
 	
 	function getParentNode(molgenisTree, ontologyTerm, showSibling){
@@ -110,7 +114,7 @@
 				var parentNode = getParentNode(molgenisTree, getParentOntologyTerm(ontologyTerm), showSibling);
 				//Add current node the tree
 				if(parentNode){
-					 $('#tree-container').tree('appendChildNodes', parentNode, showSibling ? removeDuplicate (parentOntologyTerm.attributes.items) : removeDuplicate([ontologyTerm]));
+					 $('#tree-container').tree('appendChildNodes', parentNode, showSibling ? removeDuplicate(parentOntologyTerm.attributes.items) : removeDuplicate([ontologyTerm]));
 				}else{
 					console.log('error parent node cannot but null!');
 				}	
@@ -152,7 +156,10 @@
 				uniqueNodes.push(value);
 			});
 		}
-		return uniqueNodes;
+		
+		return uniqueNodes.sort(function(a, b){
+			return molgenis.naturalSort(a[TREE_LABEL], b[TREE_LABEL]); 
+		});
 	}
 	
 	function getOntologyTermByIri(ontologyIRI){

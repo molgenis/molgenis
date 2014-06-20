@@ -86,9 +86,6 @@
 			},
 			'getTree' : function(){
 				return $('.molgenis-tree').fancytree('getTree');
-			},
-			'locateTerm' : function(){
-				
 			}
 		});
 
