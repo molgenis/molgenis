@@ -1,6 +1,11 @@
 package org.molgenis.data.examples;
 
-import org.molgenis.data.*;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
+import org.molgenis.data.Updateable;
+import org.molgenis.data.Writable;
 import org.molgenis.data.csv.CsvRepository;
 import org.molgenis.data.support.MapEntity;
 import org.springframework.beans.factory.annotation.Autowired;

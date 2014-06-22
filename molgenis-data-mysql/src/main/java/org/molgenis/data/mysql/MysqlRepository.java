@@ -4,19 +4,44 @@ import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.*;
-import org.molgenis.data.support.AbstractRepository;
+import org.molgenis.data.AggregateResult;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.CrudRepository;
+import org.molgenis.data.DataConverter;
+import org.molgenis.data.DatabaseAction;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Manageable;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule;
+import org.molgenis.data.Queryable;
+import org.molgenis.data.Repository;
+import org.molgenis.data.Writable;
+import org.molgenis.data.support.AbstractCrudRepository;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.EntityValidator;
-import org.molgenis.fieldtypes.*;
+import org.molgenis.fieldtypes.FieldType;
+import org.molgenis.fieldtypes.IntField;
+import org.molgenis.fieldtypes.MrefField;
+import org.molgenis.fieldtypes.StringField;
+import org.molgenis.fieldtypes.TextField;
+import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.model.MolgenisModelException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -26,7 +51,7 @@ import org.springframework.jdbc.core.RowMapper;
 
 import com.google.common.collect.Lists;
 
-public class MysqlRepository extends AbstractRepository implements Repository, Writable, Queryable, Manageable,
+public class MysqlRepository extends AbstractCrudRepository implements Repository, Writable, Queryable, Manageable,
 		CrudRepository
 {
 	public static final String URL_PREFIX = "mysql://";
@@ -39,8 +64,7 @@ public class MysqlRepository extends AbstractRepository implements Repository, W
 	protected MysqlRepository(MysqlRepositoryCollection collection, EntityMetaData metaData,
 			EntityValidator entityValidator)
 	{
-		// TODO super(URL_PREFIX + metaData.getName(), entityValidator);
-		super(URL_PREFIX + metaData.getName());
+		super(URL_PREFIX + metaData.getName(), entityValidator);
 		if (metaData == null) throw new IllegalArgumentException("DataSource is null");
 		if (collection == null) throw new IllegalArgumentException("DataSource is null");
 		this.metaData = metaData;
@@ -746,7 +770,7 @@ public class MysqlRepository extends AbstractRepository implements Repository, W
 	}
 
 	@Override
-	public void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
+	public void updateInternal(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
 	{
 
 	}
@@ -763,7 +787,7 @@ public class MysqlRepository extends AbstractRepository implements Repository, W
 	}
 
 	@Override
-	public Integer add(Iterable<? extends Entity> entities)
+	public Integer addInternal(Iterable<? extends Entity> entities)
 	{
 		AtomicInteger count = new AtomicInteger(0);
 
@@ -841,7 +865,7 @@ public class MysqlRepository extends AbstractRepository implements Repository, W
 	}
 
 	@Override
-	public void add(Entity entity)
+	public void addInternal(Entity entity)
 	{
 		if (entity == null) throw new RuntimeException("MysqlRepository.add() failed: entity was null");
 		this.add(Arrays.asList(new Entity[]
@@ -849,14 +873,14 @@ public class MysqlRepository extends AbstractRepository implements Repository, W
 	}
 
 	@Override
-	public void update(Entity entity)
+	public void updateInternal(Entity entity)
 	{
 		update(Arrays.asList(new Entity[]
 		{ entity }));
 	}
 
 	@Override
-	public void update(Iterable<? extends Entity> entities)
+	public void updateInternal(Iterable<? extends Entity> entities)
 	{
 		// TODO, split in subbatches
 		final List<Entity> batch = new ArrayList<Entity>();
@@ -955,12 +979,6 @@ public class MysqlRepository extends AbstractRepository implements Repository, W
 		}
 
 	}
-
-	// @Override
-	// protected void updateInternal(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
-	// {
-	// throw new UnsupportedOperationException();
-	// }
 
 	private class EntityMapper implements RowMapper<Entity>
 	{

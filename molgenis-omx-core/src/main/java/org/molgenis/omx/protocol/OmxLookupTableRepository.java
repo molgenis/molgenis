@@ -4,7 +4,12 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
 
-import org.molgenis.data.*;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Query;
+import org.molgenis.data.Queryable;
+import org.molgenis.data.Writable;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.QueryResolver;
