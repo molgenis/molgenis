@@ -3,8 +3,9 @@ package org.molgenis.data.support;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 /**
  * Created by charbonb on 13/05/14.
@@ -21,11 +22,13 @@ public class GenomeConfig
 	public static final String GENOMEBROWSER_NAME = "genomebrowser.data.name";
 	public static final String GENOMEBROWSER_PATIENT_ID = "genomebrowser.data.patient";
 
-	@Autowired
 	private MolgenisSettings settings;
 
 	public AttributeMetaData getAttributeMetadataForAttributeNameArray(String propertyName, EntityMetaData metadata)
 	{
+        if(settings == null){
+            settings = getApplicationContext().getBean(MolgenisSettings.class);
+        }
 		AttributeMetaData attribute;
 		String[] attributeNames = settings.getProperty(propertyName, "").split(",");
 		for (String attributeName : attributeNames)
