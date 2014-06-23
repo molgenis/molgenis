@@ -1,0 +1,106 @@
+body.dragging, body.dragging *
+  cursor: move !important
+
+.dragged
+  position: absolute
+  top: 0
+  opacity: .5
+  z-index: 2000
+
+ol.vertical
+  margin: 0 0 9px 0
+  min-height: 10px
+  li
+    display: block
+    margin: 5px
+    padding: 5px
+    border: 1px solid #CCC
+    color: $linkColor
+    background: $grayLighter
+  li.placeholder
+    position: relative
+    margin: 0
+    padding: 0
+    border: none
+    &:before
+      position: absolute
+      content: ""
+      width: 0
+      height: 0
+      margin-top: -5px
+      left: -5px
+      top: -4px
+      border: 5px solid transparent
+      border-left-color: $error
+      border-right: none
+      
+      /* line 1, /Users/jonasvonandrian/jquery-sortable/source/css/jquery-sortable.css.sass */
+body.dragging, body.dragging * {
+  cursor: move !important; }
+
+/* line 4, /Users/jonasvonandrian/jquery-sortable/source/css/jquery-sortable.css.sass */
+.dragged {
+  position: absolute;
+  top: 0;
+  opacity: 0.5;
+  z-index: 2000; }
+
+/* line 10, /Users/jonasvonandrian/jquery-sortable/source/css/jquery-sortable.css.sass */
+ol.vertical {
+  margin: 0 0 9px 0;
+  min-height: 10px; }
+  /* line 13, /Users/jonasvonandrian/jquery-sortable/source/css/jquery-sortable.css.sass */
+  ol.vertical li {
+    display: block;
+    margin: 5px;
+    padding: 1px 5px;
+    border: 1px solid #cccccc;
+    color: #0088cc;
+    background: #eeeeee; }
+  /* line 20, /Users/jonasvonandrian/jquery-sortable/source/css/jquery-sortable.css.sass */
+  ol.vertical li.placeholder {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    border: none; }
+    /* line 25, /Users/jonasvonandrian/jquery-sortable/source/css/jquery-sortable.css.sass */
+    ol.vertical li.placeholder:before {
+      position: absolute;
+      content: "";
+      width: 0;
+      height: 0;
+      margin-top: -5px;
+      left: -5px;
+      top: -4px;
+      border: 5px solid transparent;
+      border-left-color: red;
+      border-right: none; }
+
+/* line 32, /Users/jonasvonandrian/jquery-sortable/source/css/application.css.sass */
+ol {
+  list-style-type: none; }
+  /* line 34, /Users/jonasvonandrian/jquery-sortable/source/css/application.css.sass */
+  ol i.icon-move {
+    cursor: pointer; }
+  /* line 36, /Users/jonasvonandrian/jquery-sortable/source/css/application.css.sass */
+  ol li.highlight {
+    background: #dadada;
+    color: #000000; }
+    /* line 39, /Users/jonasvonandrian/jquery-sortable/source/css/application.css.sass */
+    ol li.highlight i.icon-move {
+      background-image: url("../img/glyphicons-halflings.png"); }
+
+/* line 42, /Users/jonasvonandrian/jquery-sortable/source/css/application.css.sass */
+ol.nested_with_switch, ol.nested_with_switch ol {
+  border: 1px solid #eeeeee; }
+  /* line 44, /Users/jonasvonandrian/jquery-sortable/source/css/application.css.sass */
+  ol.nested_with_switch.active, ol.nested_with_switch ol.active {
+    border: 1px solid #333333; }
+
+/* line 48, /Users/jonasvonandrian/jquery-sortable/source/css/application.css.sass */
+ol.nested_with_switch li, ol.simple_with_animation li, ol.serialization li, ol.default li {
+  cursor: pointer; }
+
+/* line 51, /Users/jonasvonandrian/jquery-sortable/source/css/application.css.sass */
+ol.simple_with_animation {
+  border: 1px solid #999999; }

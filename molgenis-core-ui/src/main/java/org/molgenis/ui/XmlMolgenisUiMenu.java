@@ -78,6 +78,16 @@ public class XmlMolgenisUiMenu implements MolgenisUiMenu
 	}
 
 	@Override
+	public boolean containsItem(String itemId)
+	{
+		for (MolgenisUiMenuItem molgenisUiMenuItem : getItems())
+		{
+			if (molgenisUiMenuItem.getId().equals(itemId)) return true;
+		}
+		return false;
+	}
+
+	@Override
 	public MolgenisUiMenuItem getActiveItem()
 	{
 		MolgenisUiMenuItem activeMenuItem = null;
