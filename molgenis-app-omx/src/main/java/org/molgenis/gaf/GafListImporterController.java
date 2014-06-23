@@ -68,7 +68,7 @@ public class GafListImporterController extends MolgenisPluginController
 	{
 		if (!csvFile.isEmpty())
 		{
-			gafListFileImporterService.createCsvRepo(csvFile, separator);
+			gafListFileImporterService.createCsvRepository(csvFile, separator);
 			gafListFileImporterService.createValidationReport();
 			model.addAttribute("hasValidationError", gafListFileImporterService.hasValidationError());
 			model.addAttribute("validationReport", gafListFileImporterService.getValidationReportHtml());
@@ -77,8 +77,9 @@ public class GafListImporterController extends MolgenisPluginController
 			{
 				try
 				{
-					gafListFileImporterService.importValidatedGafList();
-					model.addAttribute("importMessage", "Successfully imported into database.");
+					String nameNewGafList = gafListFileImporterService.importValidatedGafList();
+					model.addAttribute("importMessage", "Successfully imported! the new list name is: "
+							+ nameNewGafList);
 				}
 				catch (Exception e)
 				{

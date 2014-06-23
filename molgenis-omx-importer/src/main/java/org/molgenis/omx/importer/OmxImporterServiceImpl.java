@@ -75,7 +75,7 @@ public class OmxImporterServiceImpl implements OmxImporterService
 		for (String name : repositories.getEntityNames())
 		{
 			Repository repository = repositories.getRepositoryByEntityName(name);
-			
+
 			if (repository.getName().startsWith(DATASET_SHEET_PREFIX))
 			{
 				// Import DataSet sheet, create new OmxRepository
@@ -168,7 +168,7 @@ public class OmxImporterServiceImpl implements OmxImporterService
 					{
 						dataService.removeRepository(newRepoIdentifier);
 					}
-					
+
 					throw e;
 				}
 
