@@ -24,29 +24,23 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.fieldtypes.CompoundField;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component("MysqlRepositoryCollection")
-public class MysqlRepositoryCollection implements RepositoryCollection
+public abstract class MysqlRepositoryCollection implements RepositoryCollection
 {
 	private static final Logger logger = Logger.getLogger(MysqlRepositoryCollection.class);
 
 	private final DataSource ds;
 	private final DataService dataService;
-	private Map<String, MysqlRepository> repositories;
-	private MysqlRepository entities;
-	private MysqlRepository attributes;
-	private final EntityValidator entityValidator;
+	private Map<String, ManageableCrudRepository> repositories;
+	private ManageableCrudRepository entities;
+	private ManageableCrudRepository attributes;
 
-	@Autowired
-	public MysqlRepositoryCollection(DataSource ds, DataService dataService, EntityValidator entityValidator)
+	public MysqlRepositoryCollection(DataSource ds, DataService dataService)
 	{
 		this.ds = ds;
 		this.dataService = dataService;
-		this.entityValidator = entityValidator;
+
 		refreshRepositories();
 	}
 
@@ -55,15 +49,23 @@ public class MysqlRepositoryCollection implements RepositoryCollection
 		return ds;
 	}
 
+	/**
+	 * Return a spring managed prototype bean
+	 */
+	protected abstract ManageableCrudRepository createMysqlRepsitory();
+
 	private void refreshRepositories()
 	{
-		repositories = new LinkedHashMap<String, MysqlRepository>();
+		repositories = new LinkedHashMap<String, ManageableCrudRepository>();
 
 		DefaultEntityMetaData entityMD = new DefaultEntityMetaData("entities").setIdAttribute("name");
 		entityMD.addAttribute("name").setNillable(false);
 		entityMD.addAttribute("idAttribute");
-		entities = new MysqlRepository(this, entityMD, entityValidator);
-		if (!this.tableExists("entities"))
+
+		entities = createMysqlRepsitory();
+		entities.setMetaData(entityMD);
+
+		if (!tableExists("entities"))
 		{
 			entities.create();
 		}
@@ -78,8 +80,10 @@ public class MysqlRepositoryCollection implements RepositoryCollection
 		attributeMD.addAttribute("auto").setDataType(BOOL);
 		attributeMD.addAttribute("lookupAttribute").setDataType(BOOL);
 
-		attributes = new MysqlRepository(this, attributeMD, entityValidator);
-		if (!this.tableExists("attributes"))
+		attributes = createMysqlRepsitory();
+		attributes.setMetaData(attributeMD);
+
+		if (!tableExists("attributes"))
 		{
 			attributes.create();
 		}
@@ -132,7 +136,9 @@ public class MysqlRepositoryCollection implements RepositoryCollection
 		for (EntityMetaData emd : metadata.values())
 		{
 			logger.debug(emd);
-			this.repositories.put(emd.getName(), new MysqlRepository(this, emd, entityValidator));
+			ManageableCrudRepository repo = createMysqlRepsitory();
+			repo.setMetaData(emd);
+			repositories.put(emd.getName(), repo);
 		}
 	}
 
@@ -171,19 +177,18 @@ public class MysqlRepositoryCollection implements RepositoryCollection
 		}
 	}
 
-	public MysqlRepository add(EntityMetaData emd)
+	public ManageableCrudRepository add(EntityMetaData emd)
 	{
-		this.refreshRepositories();
-		if (this.getRepositoryByEntityName(emd.getName()) != null) throw new RuntimeException(
+		refreshRepositories();
+
+		if (getRepositoryByEntityName(emd.getName()) != null) throw new RuntimeException(
 				"MysqlRepositorCollection.add() failed: table '" + emd.getName() + "' exists");
 
-		this.refreshRepositories();
-		if (this.getRepositoryByEntityName(emd.getName()) != null) throw new RuntimeException(
-				"MysqlRepositorCollection.add() failed: table '" + emd.getName() + "' exists");
 		// TODO: check if this repository is equal to existing one!
 
 		Entity e = new MapEntity();
 		e.set("name", emd.getName());
+		e.set("description", emd.getDescription());
 		if (emd.getIdAttribute() != null) e.set("idAttribute", emd.getIdAttribute().getName());
 		entities.add(e);
 
@@ -204,6 +209,7 @@ public class MysqlRepositoryCollection implements RepositoryCollection
 			a.set("lookupAttribute", lookupAttribute);
 
 			if (att.getRefEntity() != null) a.set("refEntity", att.getRefEntity().getName());
+
 			// add compound entities unless already there
 			if (att.getDataType() instanceof CompoundField
 					&& entities.count(new QueryImpl().eq("name", att.getRefEntity().getName())) == 0)
@@ -218,12 +224,16 @@ public class MysqlRepositoryCollection implements RepositoryCollection
 		// if not abstract add to repositories
 		if (!emd.isAbstract())
 		{
-			MysqlRepository repository = new MysqlRepository(this, emd, entityValidator);
+			ManageableCrudRepository repository = createMysqlRepsitory();
+			repository.setMetaData(emd);
 			repository.create();
+
 			repositories.put(emd.getName(), repository);
 			dataService.addRepository(repository);
+
 			return repository;
 		}
+
 		return null;
 	}
 
@@ -248,7 +258,7 @@ public class MysqlRepositoryCollection implements RepositoryCollection
 	public void drop(String name)
 	{
 		// remove the repo
-		MysqlRepository r = this.repositories.get(name);
+		ManageableCrudRepository r = this.repositories.get(name);
 		if (r != null)
 		{
 			r.drop();

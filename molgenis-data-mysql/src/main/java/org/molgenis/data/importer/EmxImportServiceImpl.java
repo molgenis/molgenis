@@ -15,7 +15,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.mysql.MysqlRepository;
+import org.molgenis.data.mysql.ManageableCrudRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -81,7 +81,7 @@ public class EmxImportServiceImpl implements EmxImporterService
 				Repository from = source.getRepositoryByEntityName(name);
 
 				// TODO check if compatible with metadata
-				MysqlRepository to = (MysqlRepository) store.getRepositoryByEntityName(name);
+				ManageableCrudRepository to = (ManageableCrudRepository) store.getRepositoryByEntityName(name);
 				if (to == null)
 				{
 					logger.debug("tyring to create: " + name);
@@ -130,7 +130,7 @@ public class EmxImportServiceImpl implements EmxImporterService
 					}
 					for (AttributeMetaData att : target.getAttributes())
 					{
-						if (!fieldsImportable.contains(att.getName()))
+						if (!att.isAuto() && !fieldsImportable.contains(att.getName()))
 						{
 							if (!att.isNillable()) fieldsRequired.add(att.getName());
 							else fieldsAvailable.add(att.getName());
@@ -204,6 +204,7 @@ public class EmxImportServiceImpl implements EmxImporterService
 			Boolean attributeNillable = attribute.getBoolean(NILLABLE);
 			Boolean attributeAuto = attribute.getBoolean(AUTO);
 			Boolean attributeIdAttribute = attribute.getBoolean(IDATTRIBUTE);
+
 			if (attributeNillable != null) defaultAttributeMetaData.setNillable(attributeNillable);
 			if (attributeAuto != null) defaultAttributeMetaData.setAuto(attributeAuto);
 			if (attributeIdAttribute != null) defaultAttributeMetaData.setIdAttribute(attributeIdAttribute);
@@ -251,8 +252,8 @@ public class EmxImportServiceImpl implements EmxImporterService
 		for (Entity attribute : source.getRepositoryByEntityName(ATTRIBUTES))
 		{
 			final String refEntityName = (String) attribute.get(REFENTITY);
-			final String entityName = (String) attribute.getString(ENTITY);
-			final String attributeName = (String) attribute.getString(NAME);
+			final String entityName = attribute.getString(ENTITY);
+			final String attributeName = attribute.getString(NAME);
 			i++;
 			if (refEntityName != null)
 			{

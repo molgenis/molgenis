@@ -12,11 +12,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 public abstract class AbstractCrudRepository extends AbstractRepository implements CrudRepository
 {
-	private final EntityValidator validator;
+	private EntityValidator validator;
 
 	public AbstractCrudRepository(String url, EntityValidator validator)
 	{
 		super(url);
+		this.validator = validator;
+	}
+
+	public void setValidator(EntityValidator validator)
+	{
 		this.validator = validator;
 	}
 

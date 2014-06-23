@@ -13,7 +13,7 @@ import java.util.Map;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.mysql.MysqlRepository;
+import org.molgenis.data.mysql.ManageableCrudRepository;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.util.MySqlFileUtil;
@@ -41,7 +41,6 @@ public class PatientsViewController extends MolgenisPluginController
 	public final DataService dataService;
 	private final MysqlViewService mysqlViewService;
 
-
 	@Autowired
 	public PatientsViewController(DataService dataService, MysqlViewService mysqlViewService)
 	{
@@ -66,13 +65,15 @@ public class PatientsViewController extends MolgenisPluginController
 	{
 		if (dataService.hasRepository(ENTITYNAME_PATIENTSVIEW))
 		{
-			MysqlRepository patientsViewRepo = (MysqlRepository) dataService
-				.getRepositoryByEntityName(ENTITYNAME_PATIENTSVIEW);
+			ManageableCrudRepository patientsViewRepo = (ManageableCrudRepository) dataService
+					.getRepositoryByEntityName(ENTITYNAME_PATIENTSVIEW);
 			patientsViewRepo.truncate();
 			patientsViewRepo.populateWithQuery(MySqlFileUtil.getMySqlQueryFromFile(this.getClass(),
 					PATH_TO_INSERT_QUERY));
 			return true;
-		}else{
+		}
+		else
+		{
 			return false;
 		}
 	}
@@ -83,9 +84,9 @@ public class PatientsViewController extends MolgenisPluginController
 		List<Row> rows = null;
 		if (dataService.hasRepository(ENTITYNAME_PATIENTS) && dataService.hasRepository(ENTITYNAME_PATIENTSVIEW))
 		{
-			MysqlRepository patientsViewRepo = (MysqlRepository) dataService
+			ManageableCrudRepository patientsViewRepo = (ManageableCrudRepository) dataService
 					.getRepositoryByEntityName(ENTITYNAME_PATIENTSVIEW);
-			MysqlRepository patientsRepo = (MysqlRepository) dataService
+			ManageableCrudRepository patientsRepo = (ManageableCrudRepository) dataService
 					.getRepositoryByEntityName(ENTITYNAME_PATIENTS);
 			rows = createRows(patientsRepo, patientsViewRepo);
 		}
@@ -94,7 +95,7 @@ public class PatientsViewController extends MolgenisPluginController
 		return "view-col7a1-table";
 	}
 
-	private List<Row> createRows(MysqlRepository patientsRepo, MysqlRepository patientsViewRepo)
+	private List<Row> createRows(ManageableCrudRepository patientsRepo, ManageableCrudRepository patientsViewRepo)
 	{
 		Iterator<Entity> iterator = patientsRepo.iterator();
 		List<Row> rows = new ArrayList<Row>();
@@ -107,8 +108,7 @@ public class PatientsViewController extends MolgenisPluginController
 				Iterable<Entity> iterable = patientsViewRepo.findAll(new QueryImpl().eq(PATIENT_ID, patientId));
 				Map<String, List<Value>> valuesPerHeader = this.mysqlViewService.valuesPerHeader(HEADERS_NAMES,
 						iterable);
-				rows.add(this.mysqlViewService.createRowByMergingValuesIfEquales(HEADERS_NAMES,
-						valuesPerHeader));
+				rows.add(this.mysqlViewService.createRowByMergingValuesIfEquales(HEADERS_NAMES, valuesPerHeader));
 			}
 		}
 		return rows;
