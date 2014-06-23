@@ -94,6 +94,7 @@
 		$.ajax("/js/dataexplorer-data.js", {'cache': true}))
 		.done(function() {
 			<#-- create genome browser -->
+            molgenis.dataexplorer.data.setGenomeBrowserAttributes('${genomebrowser_start_list}', '${genomebrowser_chrom_list}', '${genomebrowser_id_list}', '${genomebrowser_patient_list}');
             if(molgenis.dataexplorer.data.doShowGenomeBrowser() == true)
             {
                 molgenis.dataexplorer.data.createGenomeBrowser(

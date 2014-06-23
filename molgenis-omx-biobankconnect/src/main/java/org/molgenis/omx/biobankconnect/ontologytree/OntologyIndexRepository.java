@@ -63,6 +63,12 @@ public class OntologyIndexRepository extends AbstractOntologyIndexRepository
 	}
 
 	@Override
+	public Query query()
+	{
+		return new QueryImpl(this);
+	}
+
+	@Override
 	public long count(Query q)
 	{
 		if (q.getRules().size() == 0)
