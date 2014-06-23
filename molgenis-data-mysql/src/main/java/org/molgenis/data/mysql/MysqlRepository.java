@@ -47,10 +47,11 @@ import org.springframework.jdbc.core.RowMapper;
 import com.google.common.collect.Lists;
 
 public class MysqlRepository extends AbstractCrudRepository implements ManageableCrudRepository
+
 {
-	private static final Logger logger = Logger.getLogger(MysqlRepository.class);
 	public static final String URL_PREFIX = "mysql://";
 	public static final int BATCH_SIZE = 100000;
+	private static final Logger logger = Logger.getLogger(MysqlRepository.class);
 	private EntityMetaData metaData;
 	private JdbcTemplate jdbcTemplate;
 	private RepositoryCollection repositoryCollection;
@@ -378,6 +379,12 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 	}
 
 	@Override
+	public Query query()
+	{
+		return new QueryImpl(this);
+	}
+
+	@Override
 	public long count(Query q)
 	{
 		List<Object> parameters = Lists.newArrayList();
@@ -445,6 +452,12 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		}
 
 		return jdbcTemplate.query(sql, parameters.toArray(new Object[0]), new EntityMapper());
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> findAll(Query q, Class<E> clazz)
+	{
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -694,11 +707,6 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		return sortSql.toString();
 	}
 
-	public MysqlRepositoryQuery query()
-	{
-		return new MysqlRepositoryQuery(this);
-	}
-
 	protected String getUpdateSql()
 	{
 		// use (readonly) identifier
@@ -782,13 +790,24 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 	}
 
 	@Override
+	public void updateInternal(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
+	{
+
+	}
+
+	public RepositoryCollection getRepositoryCollection()
+	{
+		return repositoryCollection;
+	}
+
+	@Override
 	public AggregateResult aggregate(AttributeMetaData xAttr, AttributeMetaData yAttr, Query q)
 	{
 		throw new UnsupportedOperationException("not yet implemented");
 	}
 
 	@Override
-	protected Integer addInternal(Iterable<? extends Entity> entities)
+	public Integer addInternal(Iterable<? extends Entity> entities)
 	{
 		AtomicInteger count = new AtomicInteger(0);
 
@@ -867,7 +886,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 	}
 
 	@Override
-	protected void addInternal(Entity entity)
+	public void addInternal(Entity entity)
 	{
 		if (entity == null) throw new RuntimeException("MysqlRepository.add() failed: entity was null");
 		addInternal(Arrays.asList(new Entity[]
@@ -875,14 +894,14 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 	}
 
 	@Override
-	protected void updateInternal(Entity entity)
+	public void updateInternal(Entity entity)
 	{
 		updateInternal(Arrays.asList(new Entity[]
 		{ entity }));
 	}
 
 	@Override
-	protected void updateInternal(Iterable<? extends Entity> entities)
+	public void updateInternal(Iterable<? extends Entity> entities)
 	{
 		// TODO, split in subbatches
 		final List<Entity> batch = new ArrayList<Entity>();
@@ -980,12 +999,6 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 			}
 		}
 
-	}
-
-	@Override
-	protected void updateInternal(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
-	{
-		throw new UnsupportedOperationException();
 	}
 
 	private class EntityMapper implements RowMapper<Entity>

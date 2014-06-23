@@ -5,17 +5,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.molgenis.data.AggregateResult;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.CrudRepository;
-import org.molgenis.data.DatabaseAction;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.data.Query;
-import org.molgenis.data.Queryable;
-import org.molgenis.data.Repository;
-import org.molgenis.data.Updateable;
+import org.molgenis.data.*;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.elasticsearch.ElasticSearchService;
 import org.molgenis.search.SearchRequest;
@@ -61,6 +51,12 @@ public class ElasticSearchRepository implements CrudRepository
 	public long count()
 	{
 		return count(new QueryImpl());
+	}
+
+	@Override
+	public Query query()
+	{
+		return new QueryImpl(this);
 	}
 
 	@Override

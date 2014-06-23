@@ -26,6 +26,12 @@ public abstract class AbstractCrudRepository extends AbstractRepository implemen
 	}
 
 	@Override
+	public Query query()
+	{
+		return new QueryImpl(this);
+	}
+
+	@Override
 	@Transactional(readOnly = true)
 	public <E extends Entity> Iterable<E> findAll(Query q, Class<E> clazz)
 	{
