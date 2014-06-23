@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.Permission;
 
 public class CrudRepositorySecurityDecorator extends CrudRepositoryDecorator implements CrudRepository
@@ -57,6 +58,12 @@ public class CrudRepositorySecurityDecorator extends CrudRepositoryDecorator imp
 	public String getUrl()
 	{
 		return decoratedRepository.getUrl();
+	}
+
+	@Override
+	public Query query()
+	{
+		return new QueryImpl(this);
 	}
 
 	@Override

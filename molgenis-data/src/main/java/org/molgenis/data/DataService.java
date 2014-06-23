@@ -208,7 +208,6 @@ public interface DataService extends RepositoryCollection
 	 */
 	void delete(String entityName, Object id);
 
-	// TODO can we remove this?
 	/**
 	 * Get a CrudRepository by entity name
 	 * 
@@ -223,6 +222,13 @@ public interface DataService extends RepositoryCollection
 	 *            entity name (case insensitive)
 	 */
 	CrudRepository getCrudRepository(String entityName);
+
+
+    Writable getWritableRepository(String entityName);
+
+    Queryable getQueryableRepository(String entityName);
+
+    Query query(String entityName);
 
 	// TODO remove
 	/**

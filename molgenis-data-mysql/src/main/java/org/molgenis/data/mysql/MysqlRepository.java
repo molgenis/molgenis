@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
@@ -28,6 +29,9 @@ import org.molgenis.data.Manageable;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
+import org.molgenis.data.Queryable;
+import org.molgenis.data.Repository;
+import org.molgenis.data.Writable;
 import org.molgenis.data.support.AbstractCrudRepository;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -47,11 +51,12 @@ import org.springframework.jdbc.core.RowMapper;
 
 import com.google.common.collect.Lists;
 
-public class MysqlRepository extends AbstractCrudRepository implements Manageable
+public class MysqlRepository extends AbstractCrudRepository implements Repository, Writable, Queryable, Manageable,
+		CrudRepository
 {
-	private static final Logger logger = Logger.getLogger(MysqlRepository.class);
 	public static final String URL_PREFIX = "mysql://";
 	public static final int BATCH_SIZE = 100000;
+	private static final Logger logger = Logger.getLogger(MysqlRepository.class);
 	private final EntityMetaData metaData;
 	private final MysqlRepositoryCollection repositoryCollection;
 	private JdbcTemplate jdbcTemplate;
@@ -60,6 +65,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 			EntityValidator entityValidator)
 	{
 		super(URL_PREFIX + metaData.getName(), entityValidator);
+		if (metaData == null) throw new IllegalArgumentException("DataSource is null");
 		if (collection == null) throw new IllegalArgumentException("DataSource is null");
 		this.metaData = metaData;
 		this.repositoryCollection = collection;
@@ -354,6 +360,12 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 	}
 
 	@Override
+	public Query query()
+	{
+		return new QueryImpl(this);
+	}
+
+	@Override
 	public long count(Query q)
 	{
 		List<Object> parameters = Lists.newArrayList();
@@ -421,6 +433,12 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		}
 
 		return jdbcTemplate.query(sql, parameters.toArray(new Object[0]), new EntityMapper());
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> findAll(Query q, Class<E> clazz)
+	{
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -669,11 +687,6 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		return sortSql.toString();
 	}
 
-	public MysqlRepositoryQuery query()
-	{
-		return new MysqlRepositoryQuery(this);
-	}
-
 	protected String getUpdateSql()
 	{
 		// use (readonly) identifier
@@ -756,6 +769,12 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		delete(this);
 	}
 
+	@Override
+	public void updateInternal(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
+	{
+
+	}
+
 	public MysqlRepositoryCollection getRepositoryCollection()
 	{
 		return repositoryCollection;
@@ -768,7 +787,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 	}
 
 	@Override
-	protected Integer addInternal(Iterable<? extends Entity> entities)
+	public Integer addInternal(Iterable<? extends Entity> entities)
 	{
 		AtomicInteger count = new AtomicInteger(0);
 
@@ -846,7 +865,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 	}
 
 	@Override
-	protected void addInternal(Entity entity)
+	public void addInternal(Entity entity)
 	{
 		if (entity == null) throw new RuntimeException("MysqlRepository.add() failed: entity was null");
 		this.add(Arrays.asList(new Entity[]
@@ -854,14 +873,14 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 	}
 
 	@Override
-	protected void updateInternal(Entity entity)
+	public void updateInternal(Entity entity)
 	{
 		update(Arrays.asList(new Entity[]
 		{ entity }));
 	}
 
 	@Override
-	protected void updateInternal(Iterable<? extends Entity> entities)
+	public void updateInternal(Iterable<? extends Entity> entities)
 	{
 		// TODO, split in subbatches
 		final List<Entity> batch = new ArrayList<Entity>();
@@ -959,12 +978,6 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 			}
 		}
 
-	}
-
-	@Override
-	protected void updateInternal(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
-	{
-		throw new UnsupportedOperationException();
 	}
 
 	private class EntityMapper implements RowMapper<Entity>
