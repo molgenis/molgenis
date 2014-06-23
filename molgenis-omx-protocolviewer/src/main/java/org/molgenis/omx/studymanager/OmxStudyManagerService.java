@@ -185,7 +185,7 @@ public class OmxStudyManagerService implements StudyManagerService
 						return feature;
 					}
 				})));
-		studyDataRequest.setRequestStatus(studyDefinition.getStatus().toString());
+		studyDataRequest.setRequestStatus(studyDefinition.getStatus().toString().toLowerCase());
 
 		dataService.update(StudyDataRequest.ENTITY_NAME, studyDataRequest);
 	}
@@ -218,6 +218,7 @@ public class OmxStudyManagerService implements StudyManagerService
 		throw new UnsupportedOperationException("No export functionality available for OMX");
 	}
 
+	@Override
 	public List<StudyDefinition> findStudyDefinitions(Status status, String search)
 	{
 		Query q = new QueryImpl().eq(StudyDataRequest.REQUESTSTATUS, status.toString().toLowerCase());
