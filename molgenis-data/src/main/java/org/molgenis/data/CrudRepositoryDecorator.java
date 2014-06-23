@@ -1,5 +1,7 @@
 package org.molgenis.data;
 
+import org.molgenis.data.support.QueryImpl;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -28,6 +30,12 @@ public class CrudRepositoryDecorator extends RepositoryDecorator implements Crud
 	public void add(Entity entity)
 	{
 		decoratedRepository.add(entity);
+	}
+
+	@Override
+	public Query query()
+	{
+		return new QueryImpl(this);
 	}
 
 	@Override

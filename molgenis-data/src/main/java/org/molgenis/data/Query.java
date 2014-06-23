@@ -7,8 +7,17 @@ import org.springframework.data.domain.Sort;
 /**
  * Definition of a query
  */
-public interface Query
+public interface Query extends Iterable<Entity>
 {
+    /**
+     * Count entities matching query
+     *
+     * @return count or Exception of not bound to repository
+     */
+    Long count();
+
+    <E extends Entity> Iterable<E> findAll(Class<E> klazz);
+
 	/**
 	 * Filtering rules
 	 */
