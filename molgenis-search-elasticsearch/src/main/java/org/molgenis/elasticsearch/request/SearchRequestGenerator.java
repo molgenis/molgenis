@@ -8,6 +8,7 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
 import org.molgenis.data.Query;
+import org.molgenis.elasticsearch.index.MappingsBuilder;
 
 /**
  * Builds a ElasticSearch search request
@@ -66,18 +67,21 @@ public class SearchRequestGenerator
 			TermsBuilder termsBuilder;
 			if (StringUtils.isNotBlank(aggregateField1) && StringUtils.isNotBlank(aggregateField2))
 			{
-				termsBuilder = new TermsBuilder(aggregateField1).size(Integer.MAX_VALUE).field(aggregateField1);
+				termsBuilder = new TermsBuilder(aggregateField1).size(Integer.MAX_VALUE).field(
+						aggregateField1 + '.' + MappingsBuilder.FIELD_NOT_ANALYZED);
 				TermsBuilder subTermsBuilder = new TermsBuilder(aggregateField2).size(Integer.MAX_VALUE).field(
-						aggregateField2);
+						aggregateField2 + '.' + MappingsBuilder.FIELD_NOT_ANALYZED);
 				termsBuilder.subAggregation(subTermsBuilder);
 			}
 			else if (StringUtils.isNotBlank(aggregateField1))
 			{
-				termsBuilder = new TermsBuilder(aggregateField1).size(Integer.MAX_VALUE).field(aggregateField1);
+				termsBuilder = new TermsBuilder(aggregateField1).size(Integer.MAX_VALUE).field(
+						aggregateField1 + '.' + MappingsBuilder.FIELD_NOT_ANALYZED);
 			}
 			else
 			{
-				termsBuilder = new TermsBuilder(aggregateField2).size(Integer.MAX_VALUE).field(aggregateField2);
+				termsBuilder = new TermsBuilder(aggregateField2).size(Integer.MAX_VALUE).field(
+						aggregateField2 + '.' + MappingsBuilder.FIELD_NOT_ANALYZED);
 			}
 			searchRequestBuilder.addAggregation(termsBuilder);
 		}
