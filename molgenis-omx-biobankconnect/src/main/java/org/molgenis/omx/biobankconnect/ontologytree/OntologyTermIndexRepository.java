@@ -6,6 +6,7 @@ import java.util.List;
 import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.biobankconnect.ontologyservice.OntologyService;
 import org.molgenis.omx.biobankconnect.utils.OntologyTermRepository;
 import org.molgenis.search.Hit;
@@ -59,6 +60,12 @@ public class OntologyTermIndexRepository extends AbstractOntologyIndexRepository
 		Hit hit = searchService.searchById(OntologyService.createOntologyTermDocumentType(ontologyUrl), id.toString());
 		if (hit != null) return new OntologyTermIndexEntity(hit, getEntityMetaData(), searchService);
 		return null;
+	}
+
+	@Override
+	public Query query()
+	{
+		return new QueryImpl(this);
 	}
 
 	@Override

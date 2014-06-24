@@ -66,6 +66,7 @@ public class MappingsBuilder
 	private static final String ATTRIBUTE_READONLY = "readonly";
 	private static final String ATTRIBUTE_NILLABLE = "nillable";
 	private static final String ATTRIBUTE_DATA_TYPE = "dataType";
+	public static final String FIELD_NOT_ANALYZED = "sort";
 
 	public static XContentBuilder buildMapping(Repository repository) throws IOException
 	{
@@ -86,8 +87,9 @@ public class MappingsBuilder
 			if (esType.equals("string"))
 			{
 				jsonBuilder.startObject(attr.getName()).field("type", "multi_field").startObject("fields")
-						.startObject(attr.getName()).field("type", "string").endObject().startObject("sort")
-						.field("type", "string").field("index", "not_analyzed").endObject().endObject().endObject();
+						.startObject(attr.getName()).field("type", "string").endObject()
+						.startObject(FIELD_NOT_ANALYZED).field("type", "string").field("index", "not_analyzed")
+						.endObject().endObject().endObject();
 
 			}
 			else if (esType.equals("date"))
@@ -102,13 +104,13 @@ public class MappingsBuilder
 				}
 
 				jsonBuilder.startObject(attr.getName()).field("type", "multi_field").startObject("fields")
-						.startObject(attr.getName()).field("type", "date").endObject().startObject("sort")
+						.startObject(attr.getName()).field("type", "date").endObject().startObject(FIELD_NOT_ANALYZED)
 						.field("type", "date").field("format", dateFormat).endObject().endObject().endObject();
 			}
 			else
 			{
 				jsonBuilder.startObject(attr.getName()).field("type", "multi_field").startObject("fields")
-						.startObject(attr.getName()).field("type", esType).endObject().startObject("sort")
+						.startObject(attr.getName()).field("type", esType).endObject().startObject(FIELD_NOT_ANALYZED)
 						.field("type", esType).endObject().endObject().endObject();
 
 			}
