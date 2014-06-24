@@ -71,8 +71,10 @@ public class ElasticsearchRepository implements CrudRepository, Manageable
 	private final String indexName;
 	private final String docType;
 	private final EntityMetaData entityMetaData;
+	private final DataService dataService;
 
-	public ElasticsearchRepository(Client client, String indexName, EntityMetaData entityMetaData)
+	public ElasticsearchRepository(Client client, String indexName, EntityMetaData entityMetaData,
+			DataService dataService)
 	{
 		if (client == null) throw new IllegalArgumentException("client is null");
 		if (indexName == null) throw new IllegalArgumentException("indexName is null");
@@ -81,6 +83,7 @@ public class ElasticsearchRepository implements CrudRepository, Manageable
 		this.indexName = indexName;
 		this.entityMetaData = entityMetaData;
 		this.docType = sanitizeMapperType(entityMetaData.getName());
+		this.dataService = dataService;
 	}
 
 	@Override
@@ -133,7 +136,7 @@ public class ElasticsearchRepository implements CrudRepository, Manageable
 			@Override
 			public Entity apply(SearchHit searchHit)
 			{
-				return new ElasticsearchEntity(searchHit, getEntityMetaData());
+				return new ElasticsearchEntity(searchHit, getEntityMetaData(), dataService);
 			}
 		});
 	}
@@ -144,7 +147,7 @@ public class ElasticsearchRepository implements CrudRepository, Manageable
 		SearchResponse searchResponse = createSearchRequest(q).setSize(1).execute().actionGet();
 		SearchHits searchHits = searchResponse.getHits();
 		SearchHit searchHit = searchHits.getHits()[0];
-		return new ElasticsearchEntity(searchHit, getEntityMetaData());
+		return new ElasticsearchEntity(searchHit, getEntityMetaData(), dataService);
 	}
 
 	@Override
@@ -153,7 +156,8 @@ public class ElasticsearchRepository implements CrudRepository, Manageable
 		GetResponse getResponse = client.prepareGet(indexName, docType, id.toString()).execute().actionGet();
 		if (getResponse.isExists())
 		{
-			return new ElasticsearchEntity(getResponse.getId(), getResponse.getSource(), getEntityMetaData());
+			return new ElasticsearchEntity(getResponse.getId(), getResponse.getSource(), getEntityMetaData(),
+					dataService);
 		}
 		else
 		{
@@ -191,7 +195,8 @@ public class ElasticsearchRepository implements CrudRepository, Manageable
 							throw new MolgenisDataException("An error occured finding entities");
 						}
 						GetResponse response = multiGetItemResponse.getResponse();
-						return new ElasticsearchEntity(response.getId(), response.getSource(), getEntityMetaData());
+						return new ElasticsearchEntity(response.getId(), response.getSource(), getEntityMetaData(),
+								dataService);
 					}
 				});
 			}
@@ -208,7 +213,7 @@ public class ElasticsearchRepository implements CrudRepository, Manageable
 			@Override
 			public Entity apply(SearchHit searchHit)
 			{
-				return new ElasticsearchEntity(searchHit, getEntityMetaData());
+				return new ElasticsearchEntity(searchHit, getEntityMetaData(), dataService);
 			}
 		});
 	}
@@ -730,19 +735,22 @@ public class ElasticsearchRepository implements CrudRepository, Manageable
 			case MREF:
 			{
 				List<String> ids = null, values = null;
-                Iterable<Entity> entities = entity.getEntities(attrName);
-                if(entities != null) {
-                    for (Entity refEntity : entities) {
-                        if (ids == null) ids = new ArrayList<String>();
-                        ids.add(refEntity.getIdValue().toString());
-                        if (values == null) values = new ArrayList<String>();
-                        values.add(refEntity.getLabelValue());
-                    }
-                    if (ids != null && values != null) {
-                        doc.put(attrName, values);
-                        doc.put(attrName + ".id", ids);
-                    }
-                }
+				Iterable<Entity> entities = entity.getEntities(attrName);
+				if (entities != null)
+				{
+					for (Entity refEntity : entities)
+					{
+						if (ids == null) ids = new ArrayList<String>();
+						ids.add(refEntity.getIdValue().toString());
+						if (values == null) values = new ArrayList<String>();
+						values.add(refEntity.getLabelValue());
+					}
+					if (ids != null && values != null)
+					{
+						doc.put(attrName, values);
+						doc.put(attrName + ".id", ids);
+					}
+				}
 				break;
 			}
 			default:

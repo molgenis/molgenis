@@ -2,15 +2,17 @@ package org.molgenis.importer.vcf;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
 
 import org.elasticsearch.client.Client;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
 import org.molgenis.data.elasticsearch.ElasticsearchRepository;
 import org.molgenis.elasticsearch.config.ElasticSearchClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,17 +56,29 @@ public class VcfImporterService
 				Client client = elasticSearchClient.getClient();
 				String indexName = elasticSearchClient.getIndexName();
 				EntityMetaData entityMetaData = inRepository.getEntityMetaData();
-				ElasticsearchRepository outRepository = new ElasticsearchRepository(client, indexName, entityMetaData);
-                outRepository.create();
-                try
+				ElasticsearchRepository outRepository = new ElasticsearchRepository(client, indexName, entityMetaData,
+						dataService);
+				outRepository.create();
+				AttributeMetaData sampleAttribute = entityMetaData.getAttribute("SAMPLES");
+				ElasticsearchRepository sampleRepository = new ElasticsearchRepository(client, indexName,
+						sampleAttribute.getRefEntity(), dataService);
+				sampleRepository.create();
+				Iterator<Entity> inIterator = inRepository.iterator();
+				try
 				{
-					outRepository.add(inRepository);
+					while (inIterator.hasNext())
+					{
+						Entity entity = inIterator.next();
+						outRepository.add(entity);
+						sampleRepository.add(entity.getEntities("SAMPLES"));
+					}
 				}
 				finally
 				{
 					outRepository.close();
 				}
 				dataService.addRepository(outRepository);
+				dataService.addRepository(sampleRepository);
 			}
 			finally
 			{

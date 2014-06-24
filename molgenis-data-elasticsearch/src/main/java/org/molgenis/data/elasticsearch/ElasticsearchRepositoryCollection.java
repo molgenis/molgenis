@@ -7,6 +7,7 @@ import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
+import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
@@ -21,12 +22,14 @@ public class ElasticsearchRepositoryCollection implements RepositoryCollection
 	public static final String INDEX_NAME = "molgenis";
 
 	private final ElasticSearchClient elasticSearchClient;
+	private final DataService dataService;
 
 	@Autowired
-	public ElasticsearchRepositoryCollection(ElasticSearchClient elasticSearchClient)
+	public ElasticsearchRepositoryCollection(ElasticSearchClient elasticSearchClient, DataService dataService)
 	{
 		if (elasticSearchClient == null) throw new IllegalArgumentException("elasticSearchClient is null");
 		this.elasticSearchClient = elasticSearchClient;
+		this.dataService = dataService;
 	}
 
 	@Override
@@ -61,6 +64,6 @@ public class ElasticsearchRepositoryCollection implements RepositoryCollection
 		{
 			throw new RuntimeException(e);
 		}
-		return new ElasticsearchRepository(client, elasticSearchClient.getIndexName(), entityMetaData);
+		return new ElasticsearchRepository(client, elasticSearchClient.getIndexName(), entityMetaData, dataService);
 	}
 }
