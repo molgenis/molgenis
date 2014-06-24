@@ -104,8 +104,13 @@ public class ResponseParser
 			Terms terms = (Terms) aggregation;
 
 			Collection<Bucket> buckets = terms.getBuckets();
-			if (buckets.size() > 0)
+			int nrBuckets = buckets.size();
+			if (nrBuckets > 0)
 			{
+				// create initial valuesT
+				for (int i = 0; i < nrBuckets; ++i)
+					matrix.add(null);
+
 				// distinguish between 1D and 2D aggregation
 				boolean hasSubAggregations = false;
 				for (Bucket bucket : buckets)
@@ -118,13 +123,28 @@ public class ResponseParser
 					}
 				}
 
+				// create (sorted) labels for x-axis
+				for (Bucket bucket : buckets)
+				{
+					if (!xLabelsSet.contains(bucket.getKey())) xLabelsSet.add(bucket.getKey());
+				}
+
+				xLabels = new ArrayList<String>(xLabelsSet);
+				Collections.sort(xLabels);
+				xLabels.add("Total");
+
+				int xIdx = 0;
+				Map<String, Integer> xLabelMap = new HashMap<String, Integer>();
+				for (String xLabel : xLabels)
+				{
+					xLabelMap.put(xLabel, xIdx++);
+				}
+
 				if (hasSubAggregations)
 				{
 					// create labels
 					for (Bucket bucket : buckets)
 					{
-						if (!xLabelsSet.contains(bucket.getKey())) xLabelsSet.add(bucket.getKey());
-
 						Aggregations subAggregations = bucket.getAggregations();
 						if (subAggregations != null)
 						{
@@ -150,26 +170,22 @@ public class ResponseParser
 						}
 					}
 
-					xLabels = new ArrayList<String>(xLabelsSet);
-					Collections.sort(xLabels);
-					xLabels.add("Total");
 					yLabels = new ArrayList<String>(yLabelsSet);
 					Collections.sort(yLabels);
 					yLabels.add("Total");
 
-					// create label map
-					int idx = 0;
+					int yIdx = 0;
 					Map<String, Integer> yLabelMap = new HashMap<String, Integer>();
 					for (String yLabel : yLabels)
 					{
-						yLabelMap.put(yLabel, idx++);
+						yLabelMap.put(yLabel, yIdx++);
 					}
 
 					for (Bucket bucket : buckets)
 					{
 						// create values
 						List<Long> yValues = new ArrayList<Long>();
-						for (int i = 0; i < idx; ++i)
+						for (int i = 0; i < yIdx; ++i)
 						{
 							yValues.add(0l);
 						}
@@ -188,12 +204,12 @@ public class ResponseParser
 							yValues.set(yLabelMap.get("Total"), count);
 						}
 
-						matrix.add(yValues);
+						matrix.set(xLabelMap.get(bucket.getKey()), yValues);
 					}
 
 					// create value totals
 					List<Long> xTotals = new ArrayList<Long>();
-					for (int i = 0; i < idx; ++i)
+					for (int i = 0; i < yIdx; ++i)
 					{
 						xTotals.add(0l);
 					}
@@ -213,13 +229,11 @@ public class ResponseParser
 					long total = 0;
 					for (Bucket bucket : buckets)
 					{
-						xLabels.add(bucket.getKey());
 						long docCount = bucket.getDocCount();
-						matrix.add(Lists.newArrayList(Long.valueOf(docCount)));
+						matrix.set(xLabelMap.get(bucket.getKey()), Lists.newArrayList(Long.valueOf(docCount)));
 						total += docCount;
 					}
 					matrix.add(Lists.newArrayList(Long.valueOf(total)));
-					xLabels.add("Total");
 					yLabels.add("Count");
 				}
 			}

@@ -32,6 +32,8 @@
 		}
 		
 		$('#catalogForm input[type="radio"]').change(function() {
+			$('#activationButton').attr('disabled', 'disabled');
+			
 			if($(this).data('activated')) {
 				$('#activationButton').attr('name', 'deactivate');
 				$('#activationButton').val('Deactivate');
@@ -65,6 +67,11 @@
 					// create new tree
 					treeContainer.empty();
 					treeContainer.dynatree({'minExpandLevel': 2, 'children': createDynatreeConfig(catalog), 'debugLevel': 0});
+					treeContainer.dynatree('getRoot').sortChildren(function(a, b) {
+						return molgenis.naturalSort(a.data.title, b.data.title);
+					}, true);
+					
+					$('#activationButton').removeAttr('disabled');
 				},
 				error: function (xhr) {
 					treeContainer.empty();
