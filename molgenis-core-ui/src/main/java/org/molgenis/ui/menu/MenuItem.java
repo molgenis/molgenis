@@ -1,7 +1,5 @@
 package org.molgenis.ui.menu;
 
-import java.util.List;
-
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
@@ -24,9 +22,6 @@ public class MenuItem
 
 	@SerializedName("params")
 	private String params;
-
-	@SerializedName("items")
-	private List<MenuItem> items;
 
 	public MenuItemType getType()
 	{
@@ -56,15 +51,5 @@ public class MenuItem
 	public void setLabel(String label)
 	{
 		this.label = label;
-	}
-
-	public List<MenuItem> getItems()
-	{
-		return items;
-	}
-
-	public void setItems(List<MenuItem> items)
-	{
-		this.items = items;
 	}
 }

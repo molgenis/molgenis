@@ -2,99 +2,33 @@ package org.molgenis.ui.menu;
 
 import java.util.List;
 
-import org.molgenis.security.core.MolgenisPermissionService;
-import org.molgenis.security.core.Permission;
 import org.molgenis.ui.MolgenisUiMenu;
 import org.molgenis.ui.MolgenisUiMenuItem;
-import org.molgenis.ui.MolgenisUiMenuItemType;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
-public class MenuItemToMolgenisUiMenuAdapter implements MolgenisUiMenu
+public class MenuItemToMolgenisUiMenuAdapter extends MenuItemToMolgenisUiMenuItemAdapter implements MolgenisUiMenu
 {
-	private final MenuItem menuItem;
-	private final MolgenisPermissionService molgenisPermissionService;
+	private final Menu menu;
 
-	public MenuItemToMolgenisUiMenuAdapter(MenuItem menuItem, MolgenisPermissionService molgenisPermissionService)
+	public MenuItemToMolgenisUiMenuAdapter(Menu menu)
 	{
-		if (menuItem == null) throw new IllegalArgumentException("menuItem is null");
-		if (molgenisPermissionService == null) throw new IllegalArgumentException("molgenisPermissionService is null");
-		this.menuItem = menuItem;
-		this.molgenisPermissionService = molgenisPermissionService;
-	}
-
-	@Override
-	public String getId()
-	{
-		return menuItem.getId();
-	}
-
-	@Override
-	public String getName()
-	{
-		return menuItem.getLabel();
-	}
-
-	@Override
-	public String getUrl()
-	{
-		return menuItem.getId();
-	}
-
-	@Override
-	public MolgenisUiMenuItemType getType()
-	{
-		switch (menuItem.getType())
-		{
-			case MENU:
-				return MolgenisUiMenuItemType.MENU;
-			case PLUGIN:
-				return MolgenisUiMenuItemType.PLUGIN;
-			default:
-				throw new RuntimeException("Unknown MolgenisUiMenuItemType [" + menuItem.getType() + "]");
-		}
-	}
-
-	@Override
-	public MolgenisUiMenu getParentMenu()
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public boolean isAuthorized()
-	{
-		return isAuthorizedRec(menuItem);
-	}
-
-	private boolean isAuthorizedRec(MenuItem menuItem)
-	{
-		switch (menuItem.getType())
-		{
-			case MENU:
-				for (MenuItem submenuItem : menuItem.getItems())
-				{
-					if (isAuthorizedRec(submenuItem)) return true;
-				}
-				return false;
-			case PLUGIN:
-				return molgenisPermissionService.hasPermissionOnPlugin(menuItem.getId(), Permission.COUNT);
-			default:
-				throw new RuntimeException("Unknown MolgenisUiMenuItemType [" + menuItem.getType() + "]");
-		}
+		super(menu);
+		if (menu == null) throw new IllegalArgumentException("menu is null");
+		this.menu = menu;
 	}
 
 	@Override
 	public List<MolgenisUiMenuItem> getItems()
 	{
-		return Lists.newArrayList(Iterables.transform(menuItem.getItems(), new Function<MenuItem, MolgenisUiMenuItem>()
+		return Lists.newArrayList(Iterables.transform(menu.getItems(), new Function<MenuItem, MolgenisUiMenuItem>()
 		{
 			@Override
-			public MolgenisUiMenuItem apply(MenuItem input)
+			public MolgenisUiMenuItem apply(MenuItem menuItem)
 			{
-				return new MenuItemToMolgenisUiMenuAdapter(input, molgenisPermissionService);
+				return new MenuItemToMolgenisUiMenuItemAdapter(menuItem);
 			}
 		}));
 	}
@@ -102,7 +36,7 @@ public class MenuItemToMolgenisUiMenuAdapter implements MolgenisUiMenu
 	@Override
 	public boolean containsItem(String itemId)
 	{
-		List<MenuItem> items = menuItem.getItems();
+		List<MenuItem> items = menu.getItems();
 		if (items != null)
 		{
 			for (MenuItem submenuItem : items)
@@ -116,15 +50,12 @@ public class MenuItemToMolgenisUiMenuAdapter implements MolgenisUiMenu
 	@Override
 	public MolgenisUiMenuItem getActiveItem()
 	{
-		List<MenuItem> items = menuItem.getItems();
+		List<MenuItem> items = menu.getItems();
 		if (items != null)
 		{
 			for (MenuItem submenuItem : items)
 			{
-				if (isAuthorizedRec(submenuItem))
-				{
-					return new MenuItemToMolgenisUiMenuAdapter(submenuItem, molgenisPermissionService);
-				}
+				return new MenuItemToMolgenisUiMenuItemAdapter(submenuItem);
 			}
 		}
 		return null;
