@@ -13,7 +13,7 @@ import java.util.Map;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.mysql.ManageableCrudRepository;
+import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.util.MySqlFileUtil;
@@ -65,7 +65,7 @@ public class PatientsViewController extends MolgenisPluginController
 	{
 		if (dataService.hasRepository(ENTITYNAME_PATIENTSVIEW))
 		{
-			ManageableCrudRepository patientsViewRepo = (ManageableCrudRepository) dataService
+			MysqlRepository patientsViewRepo = (MysqlRepository) dataService
 					.getRepositoryByEntityName(ENTITYNAME_PATIENTSVIEW);
 			patientsViewRepo.truncate();
 			patientsViewRepo.populateWithQuery(MySqlFileUtil.getMySqlQueryFromFile(this.getClass(),
@@ -84,10 +84,9 @@ public class PatientsViewController extends MolgenisPluginController
 		List<Row> rows = null;
 		if (dataService.hasRepository(ENTITYNAME_PATIENTS) && dataService.hasRepository(ENTITYNAME_PATIENTSVIEW))
 		{
-			ManageableCrudRepository patientsViewRepo = (ManageableCrudRepository) dataService
+			MysqlRepository patientsViewRepo = (MysqlRepository) dataService
 					.getRepositoryByEntityName(ENTITYNAME_PATIENTSVIEW);
-			ManageableCrudRepository patientsRepo = (ManageableCrudRepository) dataService
-					.getRepositoryByEntityName(ENTITYNAME_PATIENTS);
+			MysqlRepository patientsRepo = (MysqlRepository) dataService.getRepositoryByEntityName(ENTITYNAME_PATIENTS);
 			rows = createRows(patientsRepo, patientsViewRepo);
 		}
 		model.addAttribute("rows", rows);
@@ -95,7 +94,7 @@ public class PatientsViewController extends MolgenisPluginController
 		return "view-col7a1-table";
 	}
 
-	private List<Row> createRows(ManageableCrudRepository patientsRepo, ManageableCrudRepository patientsViewRepo)
+	private List<Row> createRows(MysqlRepository patientsRepo, MysqlRepository patientsViewRepo)
 	{
 		Iterator<Entity> iterator = patientsRepo.iterator();
 		List<Row> rows = new ArrayList<Row>();

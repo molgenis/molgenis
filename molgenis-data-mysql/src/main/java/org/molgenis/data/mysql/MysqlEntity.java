@@ -20,8 +20,8 @@ public class MysqlEntity extends MapEntity
 
 	private static final Logger logger = Logger.getLogger(MysqlEntity.class);
 
-	EntityMetaData metaData;
-	RepositoryCollection repositoryCollection;
+	private final EntityMetaData metaData;
+	private final RepositoryCollection repositoryCollection;
 
 	public MysqlEntity(EntityMetaData metaData, RepositoryCollection repositoryCollection)
 	{

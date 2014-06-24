@@ -178,7 +178,7 @@ public class Omx2EmxConverter
 	private void writeAttributes(WritableFactory writableFactory)
 	{
 		Writable attributes = writableFactory.createWritable("attributes", Arrays.asList("name", "entity", "label",
-				"dataType", "description", "refEntity", "nillable", "idAttribute"));
+				"dataType", "description", "refEntity", "nillable", "idAttribute", "visible"));
 		try
 		{
 			// Rename Indivual and Panel to Individuals and Panels because it would collide with omx Panel and
@@ -258,16 +258,30 @@ public class Omx2EmxConverter
 					Entity categoryName = new MapEntity();
 					categoryName.set("name", "Name");
 					categoryName.set("entity", observableFeatureIdentifier);
-					categoryName.set("dataType", "string");
+					categoryName.set("dataType", "string");// ?
 					categoryName.set("nillable", false);
 					categoryName.set("idAttribute", true);
 					attributes.add(categoryName);
 				}
 			}
 
-			// Compound attributes (protocols)
-
-			Set<String> entities = Sets.newHashSet();
+			// DataSet identifiers
+			for (String entity : omxRepositoryCollection.getEntityNames())
+			{
+				if (entity.toLowerCase().startsWith("dataset_"))
+				{
+					String dataset = entity.substring("dataset_".length());
+					Entity idAttribute = new MapEntity();
+					idAttribute.set("name", "Identifier");
+					idAttribute.set("entity", dataset);
+					idAttribute.set("label", "Identifier");
+					idAttribute.set("dataType", "string");
+					idAttribute.set("nillable", false);
+					idAttribute.set("idAttribute", true);
+					idAttribute.set("visible", false);
+					attributes.add(idAttribute);
+				}
+			}
 
 			for (Entity feature : getObservableFeatures())
 			{
@@ -279,7 +293,6 @@ public class Omx2EmxConverter
 				}
 				else
 				{
-
 					String dataType = feature.getString(OBSERVABLE_FEATURE_COLUMNS.DATATYPE.toString());
 					String entity = protocol.getString(PROTOCOL_COLUMNS.IDENTIFIER.toString());
 
@@ -288,20 +301,6 @@ public class Omx2EmxConverter
 					{
 						entity = getDatasets().get(entity.toLowerCase()).getString(
 								DATASET_COLUMNS.IDENTIFIER.toString());
-					}
-
-					if (!entities.contains(entity.toLowerCase()))
-					{
-						entities.add(entity.toLowerCase());
-
-						Entity idAttribute = new MapEntity();
-						idAttribute.set("name", "Identifier");
-						idAttribute.set("entity", entity);
-						idAttribute.set("label", "Identifier");
-						idAttribute.set("dataType", "string");
-						idAttribute.set("nillable", false);
-						idAttribute.set("idAttribute", true);
-						attributes.add(idAttribute);
 					}
 
 					Entity attribute = new MapEntity();
@@ -323,30 +322,34 @@ public class Omx2EmxConverter
 							&& (dataType.equalsIgnoreCase("xref") || dataType.equalsIgnoreCase("mref")))
 					{
 						// We assume that all ObservedValues of an ObservableFeature in an xref column point to the same
-						// entity
-						String datasetName = "dataset_" + entity;
-						if (omxContainsEntity(datasetName))
+						// entity, find it
+
+						for (String entityName : omxRepositoryCollection.getEntityNames())
 						{
-							// See where the first row points to
-							Repository repo = omxRepositoryCollection.getRepositoryByEntityName(datasetName);
+							if (entityName.toLowerCase().startsWith("dataset_"))
 
-							List<String> refs = null;
-							Iterator<Entity> it = repo.iterator();
-							while ((refs == null) && it.hasNext())
 							{
-								Entity row = it.next();
-								refs = row.getList(identifier);
-							}
+								// See where the first not null row points to
+								Repository repo = omxRepositoryCollection.getRepositoryByEntityName(entityName);
 
-							if (refs != null)
-							{
-								for (String ref : refs)
+								List<String> refs = null;
+								Iterator<Entity> it = repo.iterator();
+								while ((refs == null) && it.hasNext())
 								{
-									String refEntity = getRefEntity(ref);
-									if (refEntity != null)
+									Entity row = it.next();
+									refs = row.getList(identifier);
+								}
+
+								if (refs != null)
+								{
+									for (String ref : refs)
 									{
-										attribute.set("refEntity", refEntity);
-										break;
+										String refEntity = getRefEntity(ref);
+										if (refEntity != null)
+										{
+											attribute.set("refEntity", refEntity);
+											break;
+										}
 									}
 								}
 							}
@@ -367,11 +370,28 @@ public class Omx2EmxConverter
 				{
 					for (String subprotocolIdentifier : subprotocolIdentifiers)
 					{
+						String entity = protocol.getString(PROTOCOL_COLUMNS.IDENTIFIER.toString());
+						if (datasetByProtocolUsed.get(entity.toLowerCase()) != null)
+						{
+							entity = datasetByProtocolUsed.get(entity.toLowerCase()).getString(
+									DATASET_COLUMNS.IDENTIFIER.toString());
+						}
+
+						String refEntity = subprotocolIdentifier;
+						if (datasetByProtocolUsed.get(refEntity.toLowerCase()) != null)
+						{
+							refEntity = datasetByProtocolUsed.get(refEntity.toLowerCase()).getString(
+									DATASET_COLUMNS.IDENTIFIER.toString());
+						}
+
+						Entity subprotocol = getProtocol(subprotocolIdentifier);
+
 						Entity attribute = new MapEntity();
 						attribute.set("name", subprotocolIdentifier);
-						attribute.set("entity", protocol.getString(PROTOCOL_COLUMNS.IDENTIFIER.toString()));
+						attribute.set("entity", entity);
 						attribute.set("dataType", "compound");
-						attribute.set("refEntity", subprotocolIdentifier);
+						attribute.set("label", subprotocol.get(PROTOCOL_COLUMNS.NAME.toString()));
+						attribute.set("refEntity", refEntity);
 						attributes.add(attribute);
 					}
 				}
@@ -419,49 +439,11 @@ public class Omx2EmxConverter
 		return null;
 	}
 
-	// private Entity getDataset(String observableFeatureIdentifier)
-	// {
-	// for (Entity dataset : getDatasets())
-	// {
-	// String protocolUsed = dataset.getString(DATASET_COLUMNS.PROTOCOLUSED_IDENTIFIER.toString());
-	// Entity protocol = getProtocol(protocolUsed);
-	//
-	// Set<String> observableFeatureIdentifiers = Sets.newHashSet();
-	// getObservableFeatures(protocol, observableFeatureIdentifiers);
-	//
-	// if (observableFeatureIdentifiers.contains(observableFeatureIdentifier))
-	// {
-	// return dataset;
-	// }
-	// }
-	//
-	// return null;
-	// }
-
-	// private void getObservableFeatures(Entity protocol, Set<String> observableFeatureIdentifiers)
-	// {
-	// List<String> features = protocol.getList(PROTOCOL_COLUMNS.FEATURES_IDENTIFIER.toString());
-	// if (features != null)
-	// {
-	// observableFeatureIdentifiers.addAll(features);
-	// }
-	//
-	// List<String> subProtocolIdentifiers = protocol.getList(PROTOCOL_COLUMNS.SUBPROTOCOLS_IDENTIFIER.toString());
-	// if ((subProtocolIdentifiers != null) && !subProtocolIdentifiers.isEmpty())
-	// {
-	// for (String identifier : subProtocolIdentifiers)
-	// {
-	// Entity subProtocol = getProtocol(identifier);
-	// getObservableFeatures(subProtocol, observableFeatureIdentifiers);
-	// }
-	// }
-	// }
-
 	// TODO other tables: ontology etc.
 	private void writeEntities(WritableFactory writableFactory)
 	{
-		Writable entities = writableFactory
-				.createWritable("entities", Arrays.asList("name", "description", "abstract"));
+		Writable entities = writableFactory.createWritable("entities",
+				Arrays.asList("name", "description", "abstract", "label"));
 		try
 		{
 			Set<String> protocolUsedIdentifiers = Sets.newHashSet();
@@ -479,6 +461,7 @@ public class Omx2EmxConverter
 
 				Entity datasetMeta = new MapEntity();
 				datasetMeta.set("name", dataset.getString(DATASET_COLUMNS.IDENTIFIER.toString()));
+				datasetMeta.set("label", dataset.getString(DATASET_COLUMNS.NAME.toString()));
 				datasetMeta.set("description", dataset.getString(DATASET_COLUMNS.DESCRIPTION.toString()));
 				entities.add(datasetMeta);
 			}
@@ -491,6 +474,7 @@ public class Omx2EmxConverter
 				{
 					Entity protocolMeta = new MapEntity();
 					protocolMeta.set("name", protocol.getString(PROTOCOL_COLUMNS.IDENTIFIER.toString()));
+					protocolMeta.set("label", protocol.getString(PROTOCOL_COLUMNS.NAME.toString()));
 					protocolMeta.set("description", protocol.getString(PROTOCOL_COLUMNS.DESCRIPTION.toString()));
 					protocolMeta.set("abstract", true);
 					entities.add(protocolMeta);
@@ -549,7 +533,7 @@ public class Omx2EmxConverter
 	{
 		if (datasetByProtocolUsed == null)
 		{
-			datasetByProtocolUsed = Maps.newHashMap();
+			datasetByProtocolUsed = Maps.newLinkedHashMap();
 			for (Entity dataset : omxRepositoryCollection.getRepositoryByEntityName(OMX_TABS.DATASET.toString()))
 			{
 				String protocolUsedIdentifier = dataset.getString(DATASET_COLUMNS.PROTOCOLUSED_IDENTIFIER.toString());
@@ -576,6 +560,20 @@ public class Omx2EmxConverter
 		}
 
 		return protocols;
+	}
+
+	private Entity getProtocol(String identifier)
+	{
+		for (Entity protocol : getProtocols())
+		{
+			String protocolIdentifier = protocol.getString(PROTOCOL_COLUMNS.IDENTIFIER.toString());
+			if ((protocolIdentifier != null) && protocolIdentifier.equalsIgnoreCase(identifier))
+			{
+				return protocol;
+			}
+		}
+
+		throw new IllegalArgumentException("Unknown protocol [" + identifier + "]");
 	}
 
 	private boolean omxContainsEntity(String name)

@@ -12,16 +12,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 public abstract class AbstractCrudRepository extends AbstractRepository implements CrudRepository
 {
-	private EntityValidator validator;
+	private final EntityValidator validator;
 
 	public AbstractCrudRepository(String url, EntityValidator validator)
 	{
 		super(url);
-		this.validator = validator;
-	}
-
-	public void setValidator(EntityValidator validator)
-	{
 		this.validator = validator;
 	}
 
@@ -40,7 +35,7 @@ public abstract class AbstractCrudRepository extends AbstractRepository implemen
 
 	@Override
 	@Transactional
-	public final void add(Entity entity)
+	public void add(Entity entity)
 	{
 		validator.validate(Arrays.asList(entity), getEntityMetaData(), null);
 		addInternal(entity);
@@ -48,7 +43,7 @@ public abstract class AbstractCrudRepository extends AbstractRepository implemen
 
 	@Override
 	@Transactional
-	public final Integer add(Iterable<? extends Entity> entities)
+	public Integer add(Iterable<? extends Entity> entities)
 	{
 		validator.validate(entities, getEntityMetaData(), null);
 		return addInternal(entities);
@@ -56,7 +51,7 @@ public abstract class AbstractCrudRepository extends AbstractRepository implemen
 
 	@Override
 	@Transactional
-	public final void update(Entity entity)
+	public void update(Entity entity)
 	{
 		validator.validate(Arrays.asList(entity), getEntityMetaData(), null);
 		updateInternal(entity);
@@ -64,7 +59,7 @@ public abstract class AbstractCrudRepository extends AbstractRepository implemen
 
 	@Override
 	@Transactional
-	public final void update(Iterable<? extends Entity> entities)
+	public void update(Iterable<? extends Entity> entities)
 	{
 		validator.validate(entities, getEntityMetaData(), null);
 		updateInternal(entities);
@@ -72,7 +67,7 @@ public abstract class AbstractCrudRepository extends AbstractRepository implemen
 
 	@Override
 	@Transactional
-	public final void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
+	public void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
 	{
 		validator.validate(entities, getEntityMetaData(), dbAction);
 		updateInternal(entities, dbAction, keyName);

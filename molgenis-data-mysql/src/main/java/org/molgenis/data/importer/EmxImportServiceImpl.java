@@ -15,7 +15,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.mysql.ManageableCrudRepository;
+import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -44,8 +44,11 @@ public class EmxImportServiceImpl implements EmxImporterService
 	private static final String AUTO = "auto";
 	private static final String IDATTRIBUTE = "idAttribute";
 	private static final String NILLABLE = "nillable";
+	private static final String ABSTRACT = "abstract";
+	private static final String VISIBLE = "visible";
+	private static final String LABEL = "label";
 
-	MysqlRepositoryCollection store;
+	private MysqlRepositoryCollection store;
 
 	public EmxImportServiceImpl()
 	{
@@ -75,22 +78,23 @@ public class EmxImportServiceImpl implements EmxImporterService
 		{
 			String name = entry.getKey();
 			DefaultEntityMetaData defaultEntityMetaData = entry.getValue();
+			if (defaultEntityMetaData == null) throw new IllegalArgumentException("Unknown entity: " + name);
 
-			if (!ENTITIES.equals(name) && !ATTRIBUTES.equals(name))
+			if (!ENTITIES.equals(name) && !ATTRIBUTES.equals(name) && !defaultEntityMetaData.isAbstract())
 			{
 				Repository from = source.getRepositoryByEntityName(name);
 
 				// TODO check if compatible with metadata
-				ManageableCrudRepository to = (ManageableCrudRepository) store.getRepositoryByEntityName(name);
+				MysqlRepository to = (MysqlRepository) store.getRepositoryByEntityName(name);
 				if (to == null)
 				{
 					logger.debug("tyring to create: " + name);
-					if (defaultEntityMetaData == null) throw new IllegalArgumentException("Unknown entity: " + name);
 					to = store.add(defaultEntityMetaData);
 				}
 
 				// import
-				report.getNrImportedEntitiesMap().put(name, to.add(from));
+				Integer count = to.add(from);
+				report.getNrImportedEntitiesMap().put(name, count);
 			}
 		}
 
@@ -177,6 +181,7 @@ public class EmxImportServiceImpl implements EmxImporterService
 			String entityName = attribute.getString(ENTITY);
 			String attributeName = attribute.getString(NAME);
 			String attributeDataType = attribute.getString(DATATYPE);
+			String refEntityName = attribute.getString(REFENTITY);
 
 			// required
 			if (entityName == null) throw new IllegalArgumentException("attributes.entity is missing");
@@ -204,10 +209,19 @@ public class EmxImportServiceImpl implements EmxImporterService
 			Boolean attributeNillable = attribute.getBoolean(NILLABLE);
 			Boolean attributeAuto = attribute.getBoolean(AUTO);
 			Boolean attributeIdAttribute = attribute.getBoolean(IDATTRIBUTE);
+			Boolean attributeVisible = attribute.getBoolean(VISIBLE);
 
 			if (attributeNillable != null) defaultAttributeMetaData.setNillable(attributeNillable);
 			if (attributeAuto != null) defaultAttributeMetaData.setAuto(attributeAuto);
 			if (attributeIdAttribute != null) defaultAttributeMetaData.setIdAttribute(attributeIdAttribute);
+			if (attributeVisible != null) defaultAttributeMetaData.setVisible(attributeVisible);
+
+			if (refEntityName != null)
+			{
+				defaultAttributeMetaData.setRefEntity(entities.get(refEntityName));
+			}
+
+			defaultAttributeMetaData.setLabel(attribute.getString(LABEL));
 
 			defaultEntityMetaData.addAttributeMetaData(defaultAttributeMetaData);
 		}
@@ -233,9 +247,11 @@ public class EmxImportServiceImpl implements EmxImporterService
 				if (entityName == null) throw new IllegalArgumentException("entity.name is missing on line " + i);
 
 				if (entities.get(entityName) == null) entities.put(entityName, new DefaultEntityMetaData(entityName));
-				DefaultEntityMetaData md = entities.get(entityName);
 
-				if (entity.get(DESCRIPTION) != null) md.setDescription(entity.getString(DESCRIPTION));
+				DefaultEntityMetaData md = entities.get(entityName);
+				md.setLabel(entity.getString(LABEL));
+				md.setDescription(entity.getString(DESCRIPTION));
+				if (entity.getBoolean(ABSTRACT) != null) md.setAbstract(entity.getBoolean(ABSTRACT));
 			}
 		}
 	}

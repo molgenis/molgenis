@@ -13,7 +13,7 @@ import java.util.Map;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.mysql.ManageableCrudRepository;
+import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.util.MySqlFileUtil;
@@ -68,9 +68,9 @@ public class MutationsViewController extends MolgenisPluginController
 		List<Row> rows = null;
 		if (dataService.hasRepository(ENTITYNAME_MUTATIONSVIEW) && dataService.hasRepository(ENTITYNAME_MUTATIONS))
 		{
-			ManageableCrudRepository mutationsViewRepo = (ManageableCrudRepository) dataService
+			MysqlRepository mutationsViewRepo = (MysqlRepository) dataService
 					.getRepositoryByEntityName(ENTITYNAME_MUTATIONSVIEW);
-			ManageableCrudRepository mutationsRepo = (ManageableCrudRepository) dataService
+			MysqlRepository mutationsRepo = (MysqlRepository) dataService
 					.getRepositoryByEntityName(ENTITYNAME_MUTATIONS);
 			rows = createRows(mutationsViewRepo, mutationsRepo);
 		}
@@ -85,7 +85,7 @@ public class MutationsViewController extends MolgenisPluginController
 	{
 		if (dataService.hasRepository(ENTITYNAME_MUTATIONSVIEW))
 		{
-			ManageableCrudRepository mutationsViewRepo = (ManageableCrudRepository) dataService
+			MysqlRepository mutationsViewRepo = (MysqlRepository) dataService
 					.getRepositoryByEntityName(ENTITYNAME_MUTATIONSVIEW);
 			mutationsViewRepo.truncate();
 			mutationsViewRepo.populateWithQuery(MySqlFileUtil.getMySqlQueryFromFile(this.getClass(),
@@ -99,7 +99,7 @@ public class MutationsViewController extends MolgenisPluginController
 		}
 	}
 
-	private List<Row> createRows(ManageableCrudRepository mutationsViewRepo, ManageableCrudRepository mutationsRepo)
+	private List<Row> createRows(MysqlRepository mutationsViewRepo, MysqlRepository mutationsRepo)
 	{
 		Iterator<Entity> iterator = mutationsRepo.iterator();
 		List<Row> rows = new ArrayList<Row>();

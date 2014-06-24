@@ -23,13 +23,9 @@ public class MySqlConfiguration
 
 	@Bean
 	@Scope("prototype")
-	public ManageableCrudRepository mysqlRepository()
+	public MysqlRepository mysqlRepository()
 	{
-		ManageableCrudRepository repo = new MysqlRepository();
-		repo.setDataSource(dataSource);
-		repo.setValidator(entityValidator);
-
-		return repo;
+		return new MysqlRepository(dataSource, entityValidator);
 	}
 
 	@Bean
@@ -38,9 +34,9 @@ public class MySqlConfiguration
 		return new MysqlRepositoryCollection(dataSource, dataService)
 		{
 			@Override
-			protected ManageableCrudRepository createMysqlRepsitory()
+			protected MysqlRepository createMysqlRepsitory()
 			{
-				ManageableCrudRepository repo = mysqlRepository();
+				MysqlRepository repo = mysqlRepository();
 				repo.setRepositoryCollection(this);
 
 				return repo;

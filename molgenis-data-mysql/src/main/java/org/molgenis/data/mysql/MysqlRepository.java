@@ -24,6 +24,7 @@ import org.molgenis.data.DataConverter;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Manageable;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
@@ -46,44 +47,27 @@ import org.springframework.jdbc.core.RowMapper;
 
 import com.google.common.collect.Lists;
 
-public class MysqlRepository extends AbstractCrudRepository implements ManageableCrudRepository
+public class MysqlRepository extends AbstractCrudRepository implements Manageable
 
 {
 	public static final String URL_PREFIX = "mysql://";
 	public static final int BATCH_SIZE = 100000;
 	private static final Logger logger = Logger.getLogger(MysqlRepository.class);
 	private EntityMetaData metaData;
-	private JdbcTemplate jdbcTemplate;
+	private final JdbcTemplate jdbcTemplate;
 	private RepositoryCollection repositoryCollection;
 
-	protected MysqlRepository()
+	public MysqlRepository(DataSource dataSource, EntityValidator entityValidator)
 	{
-		super(null, null);
+		super(null, entityValidator);
+		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
-	protected MysqlRepository(DataSource dataSource, RepositoryCollection collection, EntityMetaData metaData,
-			EntityValidator entityValidator)
-	{
-		super(URL_PREFIX + metaData.getName(), entityValidator);
-		if (collection == null) throw new IllegalArgumentException("DataSource is null");
-		setMetaData(metaData);
-		setDataSource(dataSource);
-		setRepositoryCollection(collection);
-	}
-
-	@Override
 	public void setMetaData(EntityMetaData metaData)
 	{
 		this.metaData = metaData;
 	}
 
-	@Override
-	public void setDataSource(DataSource dataSource)
-	{
-		this.jdbcTemplate = new JdbcTemplate(dataSource);
-	}
-
-	@Override
 	public void setRepositoryCollection(RepositoryCollection repositoryCollection)
 	{
 		this.repositoryCollection = repositoryCollection;
@@ -107,7 +91,6 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		return "DROP TABLE IF EXISTS " + getEntityMetaData().getName();
 	}
 
-	@Override
 	public void truncate()
 	{
 		jdbcTemplate.execute(getTruncateSql());
@@ -144,7 +127,6 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		}
 	}
 
-	@Override
 	public void populateWithQuery(String insertQuery)
 	{
 		try
@@ -212,6 +194,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		}
 		// primary key is first attribute unless otherwise indicate
 		AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
+
 		if (idAttribute.getDataType() instanceof XrefField || idAttribute.getDataType() instanceof MrefField) throw new RuntimeException(
 				"primary key(" + getEntityMetaData().getName() + "." + idAttribute.getName()
 						+ ") cannot be XREF or MREF");
