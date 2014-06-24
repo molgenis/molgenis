@@ -67,46 +67,8 @@ public class VcfRepositoryTest
 			testAttribute(it.next(), VcfRepository.ID, MolgenisFieldTypes.STRING);
 
 			assertTrue(it.hasNext());
-			testAttribute(it.next(), "NS", MolgenisFieldTypes.INT);
+			testAttribute(it.next(), VcfRepository.INFO, MolgenisFieldTypes.COMPOUND);
 			assertTrue(it.hasNext());
-			testAttribute(it.next(), "DP", MolgenisFieldTypes.INT);
-			assertTrue(it.hasNext());
-			testAttribute(it.next(), "AF", MolgenisFieldTypes.DECIMAL);
-			assertTrue(it.hasNext());
-			testAttribute(it.next(), "ANNOT", MolgenisFieldTypes.STRING);
-			assertTrue(it.hasNext());
-			testAttribute(it.next(), "REFAA", MolgenisFieldTypes.STRING);
-			assertTrue(it.hasNext());
-			testAttribute(it.next(), "AAC", MolgenisFieldTypes.STRING);
-			assertTrue(it.hasNext());
-			testAttribute(it.next(), "TI", MolgenisFieldTypes.STRING);
-			assertTrue(it.hasNext());
-			testAttribute(it.next(), "PI", MolgenisFieldTypes.STRING);
-			assertTrue(it.hasNext());
-			testAttribute(it.next(), "GI", MolgenisFieldTypes.STRING);
-			assertTrue(it.hasNext());
-			testAttribute(it.next(), "PHYLOPC", MolgenisFieldTypes.STRING);
-			assertTrue(it.hasNext());
-			testAttribute(it.next(), "PHYLOPS", MolgenisFieldTypes.DECIMAL);
-			assertTrue(it.hasNext());
-			testAttribute(it.next(), "SIFTC", MolgenisFieldTypes.STRING);
-			assertTrue(it.hasNext());
-			testAttribute(it.next(), "SIFTS", MolgenisFieldTypes.DECIMAL);
-			assertTrue(it.hasNext());
-			testAttribute(it.next(), "POLYPHEN2C", MolgenisFieldTypes.STRING);
-			assertTrue(it.hasNext());
-			testAttribute(it.next(), "Polyphen2S", MolgenisFieldTypes.DECIMAL);
-			assertTrue(it.hasNext());
-			testAttribute(it.next(), "LRTC", MolgenisFieldTypes.STRING);
-			assertTrue(it.hasNext());
-			testAttribute(it.next(), "LRTS", MolgenisFieldTypes.DECIMAL);
-			assertTrue(it.hasNext());
-			testAttribute(it.next(), "MTASTERC", MolgenisFieldTypes.STRING);
-			assertTrue(it.hasNext());
-			testAttribute(it.next(), "MTASTERS", MolgenisFieldTypes.DECIMAL);
-			assertTrue(it.hasNext());
-			testAttribute(it.next(), "HGENOMES", MolgenisFieldTypes.DECIMAL);
-			assertFalse(it.hasNext());
 		}
 		finally
 		{

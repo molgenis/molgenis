@@ -1,199 +1,79 @@
 package org.molgenis.data.elasticsearch;
 
+import org.elasticsearch.client.AdminClient;
+import org.elasticsearch.client.Client;
+import org.elasticsearch.client.IndicesAdminClient;
+import org.elasticsearch.common.collect.Lists;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.*;
+import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.QueryImpl;
+import org.molgenis.elasticsearch.config.ElasticSearchClient;
+import org.molgenis.search.SearchRequest;
+import org.molgenis.search.SearchResult;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.io.IOException;
+import java.util.*;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 public class ElasticsearchRepositoryTest
 {
+    private ElasticsearchRepository elasticsearchRepository;
+    private ElasticsearchRepositoryCollection elasticsearchRepositoryCollection;
+    private DataService dataService;
+    private ElasticSearchClient elasticSearchClient;
+    private AdminClient adminClient;
+    private IndicesAdminClient indicesAdminClient;
+    private Client client;
+    private EntityMetaData entityMetaData;
 
-	@Test
-	public void ElasticsearchRepository()
-	{
-		throw new RuntimeException("Test not implemented");
-	}
+    @BeforeMethod
+    public void setUp() throws IOException
+    {
+        dataService = mock(DataService.class);
+        elasticSearchClient = mock(ElasticSearchClient.class);
+        adminClient = mock(AdminClient.class);
+        indicesAdminClient = mock(IndicesAdminClient.class);
+        client = mock(Client.class);
+        entityMetaData = mock(EntityMetaData.class);
+        when(entityMetaData.getName()).thenReturn("testRepo");
 
-	@Test
-	public void addEntity()
-	{
-		throw new RuntimeException("Test not implemented");
-	}
+        elasticsearchRepository = new ElasticsearchRepository(client, ElasticsearchRepositoryCollection.INDEX_NAME, entityMetaData,
+                dataService);
+    }
 
-	@Test
-	public void addIterableextendsEntity()
-	{
-		throw new RuntimeException("Test not implemented");
-	}
+    @Test
+    public void getEntityMetaData()
+    {
+        assertEquals(elasticsearchRepository.getEntityMetaData(), entityMetaData);
+    }
 
-	@Test
-	public void aggregate()
-	{
-		throw new RuntimeException("Test not implemented");
-	}
+    @Test
+    public void getUrl()
+    {
+        assertEquals(elasticsearchRepository.getUrl(), ElasticsearchRepository.BASE_URL + "testRepo/");
+    }
 
-	@Test
-	public void clearCache()
-	{
-		throw new RuntimeException("Test not implemented");
-	}
+    @Test
+    public void getName()
+    {
+        assertEquals(elasticsearchRepository.getName(), "testRepo");
+    }
 
-	@Test
-	public void close()
-	{
-		throw new RuntimeException("Test not implemented");
-	}
-
-	@Test
-	public void count()
-	{
-		throw new RuntimeException("Test not implemented");
-	}
-
-	@Test
-	public void countQuery()
-	{
-		throw new RuntimeException("Test not implemented");
-	}
-
-	@Test
-	public void create()
-	{
-		throw new RuntimeException("Test not implemented");
-	}
-
-	@Test
-	public void deleteEntity()
-	{
-		throw new RuntimeException("Test not implemented");
-	}
-
-	@Test
-	public void deleteIterableextendsEntity()
-	{
-		throw new RuntimeException("Test not implemented");
-	}
-
-	@Test
-	public void deleteAll()
-	{
-		throw new RuntimeException("Test not implemented");
-	}
-
-	@Test
-	public void deleteByIdObject()
-	{
-		throw new RuntimeException("Test not implemented");
-	}
-
-	@Test
-	public void deleteByIdIterableObject()
-	{
-		throw new RuntimeException("Test not implemented");
-	}
-
-	@Test
-	public void findAllQuery()
-	{
-		throw new RuntimeException("Test not implemented");
-	}
-
-	@Test
-	public void findAllIterableObject()
-	{
-		throw new RuntimeException("Test not implemented");
-	}
-
-	@Test
-	public void findAllQueryClassE()
-	{
-		throw new RuntimeException("Test not implemented");
-	}
-
-	@Test
-	public void findAllIterableObjectClassE()
-	{
-		throw new RuntimeException("Test not implemented");
-	}
-
-	@Test
-	public void findOneQuery()
-	{
-		throw new RuntimeException("Test not implemented");
-	}
-
-	@Test
-	public void findOneObject()
-	{
-		throw new RuntimeException("Test not implemented");
-	}
-
-	@Test
-	public void findOneObjectClassE()
-	{
-		throw new RuntimeException("Test not implemented");
-	}
-
-	@Test
-	public void findOneQueryClassE()
-	{
-		throw new RuntimeException("Test not implemented");
-	}
-
-	@Test
-	public void flush()
-	{
-		throw new RuntimeException("Test not implemented");
-	}
-
-	@Test
-	public void getEntityMetaData()
-	{
-		throw new RuntimeException("Test not implemented");
-	}
-
-	@Test
-	public void getName()
-	{
-		throw new RuntimeException("Test not implemented");
-	}
-
-	@Test
-	public void getUrl()
-	{
-		throw new RuntimeException("Test not implemented");
-	}
-
-	@Test
-	public void iterator()
-	{
-		throw new RuntimeException("Test not implemented");
-	}
-
-	@Test
-	public void iteratorClassE()
-	{
-		throw new RuntimeException("Test not implemented");
-	}
-
-	@Test
-	public void updateEntity()
-	{
-		throw new RuntimeException("Test not implemented");
-	}
-
-	@Test
-	public void updateIterableextendsEntity()
-	{
-		throw new RuntimeException("Test not implemented");
-	}
-
-	@Test
-	public void updateListextendsEntityDatabaseActionString()
-	{
-		throw new RuntimeException("Test not implemented");
-	}
-
-	@Test
-	public void drop()
-	{
-		throw new RuntimeException("Test not implemented");
-	}
+    @Test
+    public void query()
+    {
+        assertEquals(elasticsearchRepository.query(), new QueryImpl(elasticsearchRepository));
+    }
 }

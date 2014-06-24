@@ -250,7 +250,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	public void getUrl()
 	{
 		when(repository.getName()).thenReturn("entity");
-		assertEquals(elasticSearchRepository.getUrl(), "elasticsearch://entity/");
+		assertEquals(elasticSearchRepository.getUrl(), "elasticsearchdecorator://entity/");
 	}
 
 	@Test

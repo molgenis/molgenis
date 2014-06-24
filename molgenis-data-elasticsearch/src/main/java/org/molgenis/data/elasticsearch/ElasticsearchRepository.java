@@ -49,6 +49,7 @@ import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.*;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.elasticsearch.index.MappingsBuilder;
 import org.molgenis.elasticsearch.request.LuceneQueryStringBuilder;
 import org.molgenis.util.MolgenisDateFormat;
@@ -115,7 +116,12 @@ public class ElasticsearchRepository implements CrudRepository, Manageable
 		return countResponse.getCount();
 	}
 
-	@Override
+    @Override
+    public Query query() {
+        return new QueryImpl(this);
+    }
+
+    @Override
 	public long count(Query q)
 	{
 		CountResponse countResponse = createCountRequest(q).execute().actionGet();
