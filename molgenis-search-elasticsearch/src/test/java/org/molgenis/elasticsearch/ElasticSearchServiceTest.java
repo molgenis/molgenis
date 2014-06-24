@@ -280,9 +280,10 @@ public class ElasticSearchServiceTest
 		assertNotNull(result);
 		assertNotNull(result.getAggregate());
 
+		assertEquals(result.getAggregate().getxLabels(), Arrays.asList("Klaas", "Piet", "Total"));
 		assertEquals(
 				result.getAggregate().getMatrix(),
-				Lists.newArrayList(Lists.<Long> newArrayList(2l), Lists.<Long> newArrayList(1l),
+				Lists.newArrayList(Lists.<Long> newArrayList(1l), Lists.<Long> newArrayList(2l),
 						Lists.<Long> newArrayList(3l)));
 	}
 
