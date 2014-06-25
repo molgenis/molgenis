@@ -29,13 +29,13 @@
 									<#list catalogs as catalog>
 										<tr>
 											<td class="listEntryRadio">
-												<input id="catalog_${catalog.id}" type="radio" name="id" value="${catalog.id}" data-activated="<#if catalog.activated>true<#else>false</#if>" data-activated="<#if catalog.activated>true<#else>false</#if>" <#if !foundCatalog>checked<#assign foundCatalog = true></#if> >
+												<input id="catalog_${catalog.id}" type="radio" name="id" value="${catalog.id}" data-activated="<#if catalog.activated>true<#else>false</#if>"<#if !foundCatalog> checked<#assign foundCatalog = true></#if>>
 											</td>
 											<td class="listEntryId">
 												<label for="catalog_${catalog.id}">${catalog.id}</label>
 											</td>
 											<td>
-												<label for="catalog_${catalog.id}">${catalog.name}<#if catalog.activated><p class="text-success pull-right">Activated</p><#else><p class="text-error pull-right">Deactivated</p></#if></label>
+												<label for="catalog_${catalog.id}">${catalog.name}<#if catalog.activated><span class="text-success pull-right">Activated</span><#else><p class="text-error pull-right">Deactivated</span></#if></label>
 											</td>
 										</tr>
 									</#list>
@@ -62,14 +62,4 @@
 		</#if>
 		</div>
 	</div>
-	<script>
-	$(function() {
-		parent.hideSpinner();
-		
-		$('#catalogForm').submit(function() {
-			parent.showSpinner(); 
-			return true;
-		});
-	});
-	</script>
 <@footer/>
