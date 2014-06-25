@@ -35,11 +35,8 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl implements
 	@RunAsSystem
 	public void populateDatabase(DataService dataService, String homeControllerId)
 	{
-		if (adminPassword == null)
-		{
-			throw new RuntimeException(
-					"please configure the admin.password property in your molgenis-server.properties");
-		}
+		if (adminPassword == null) throw new RuntimeException(
+				"please configure the admin.password property in your molgenis-server.properties");
 
 		// create admin user
 		userAdmin = new MolgenisUser();
