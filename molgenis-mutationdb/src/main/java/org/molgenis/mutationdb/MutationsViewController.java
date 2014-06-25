@@ -57,7 +57,6 @@ public class MutationsViewController extends MolgenisPluginController
 		this.mysqlViewService = mysqlViewService;
 	}
 
-
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(Model model)
 	{

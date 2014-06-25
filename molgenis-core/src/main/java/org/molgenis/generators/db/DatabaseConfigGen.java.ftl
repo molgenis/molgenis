@@ -26,7 +26,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
  * Database configuration
  */
 @Configuration
-@EnableTransactionManagement
+@EnableTransactionManagement(proxyTargetClass = true)
 public class DatabaseConfig implements TransactionManagementConfigurer
 {
 	private static final String DEFAULT_PERSISTENCE_UNIT_NAME = "molgenis";

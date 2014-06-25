@@ -73,7 +73,9 @@ public class PatientsViewController extends MolgenisPluginController
 					PatientsViewController.class,
 					PATH_TO_INSERT_QUERY));
 			return true;
-		}else{
+		}
+		else
+		{
 			return false;
 		}
 	}
@@ -107,8 +109,7 @@ public class PatientsViewController extends MolgenisPluginController
 				Iterable<Entity> iterable = patientsViewRepo.findAll(new QueryImpl().eq(PATIENT_ID, patientId));
 				Map<String, List<Value>> valuesPerHeader = this.mysqlViewService.valuesPerHeader(HEADERS_NAMES,
 						iterable);
-				rows.add(this.mysqlViewService.createRowByMergingValuesIfEquales(HEADERS_NAMES,
-						valuesPerHeader));
+				rows.add(this.mysqlViewService.createRowByMergingValuesIfEquales(HEADERS_NAMES, valuesPerHeader));
 			}
 		}
 		return rows;

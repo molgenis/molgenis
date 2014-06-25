@@ -12,7 +12,8 @@ public class MysqlRepositoryDecimalTest extends MysqlRepositoryAbstractDatatypeT
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		DefaultEntityMetaData varcharMD = new DefaultEntityMetaData("DecimalTest").setLabel("Decimal Test").setIdAttribute("col1");
+		DefaultEntityMetaData varcharMD = new DefaultEntityMetaData("DecimalTest").setLabel("Decimal Test");
+		varcharMD.setIdAttribute("col1");
 		varcharMD.addAttribute("col1").setDataType(MolgenisFieldTypes.DECIMAL).setNillable(false);
 		varcharMD.addAttribute("col2").setDataType(MolgenisFieldTypes.DECIMAL);
 		varcharMD.addAttribute("col3").setDataType(MolgenisFieldTypes.DECIMAL).setDefaultValue(1.3);
