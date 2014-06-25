@@ -447,12 +447,6 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> findAll(Query q, Class<E> clazz)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public Entity findOne(Query q)
 	{
 		Iterator<Entity> iterator = findAll(q).iterator();
