@@ -195,11 +195,15 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		// primary key is first attribute unless otherwise indicate
 		AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
 
+		if (idAttribute == null) throw new MolgenisDataException("Missing idAttribute for entity [" + getName() + "]");
+
 		if (idAttribute.getDataType() instanceof XrefField || idAttribute.getDataType() instanceof MrefField) throw new RuntimeException(
 				"primary key(" + getEntityMetaData().getName() + "." + idAttribute.getName()
 						+ ") cannot be XREF or MREF");
+
 		if (idAttribute.isNillable() == true) throw new RuntimeException("primary key(" + getEntityMetaData().getName()
 				+ "." + idAttribute.getName() + ") must be NOT NULL");
+
 		sql.append("PRIMARY KEY (").append('`').append(getEntityMetaData().getIdAttribute().getName()).append('`')
 				.append(')');
 

@@ -18,7 +18,8 @@ public class Omx2EmxExcelConverter
 	{
 		try
 		{
-			convert(new File(args[0]), new File(args[1]));
+			String namespace = args.length == 3 ? args[2] : null;
+			convert(new File(args[0]), new File(args[1]), namespace);
 		}
 		catch (FileNotFoundException e)
 		{
@@ -34,7 +35,8 @@ public class Omx2EmxExcelConverter
 		}
 	}
 
-	public static void convert(File omxInputFile, File emxOutputFile) throws InvalidFormatException, IOException
+	public static void convert(File omxInputFile, File emxOutputFile, String namespace) throws InvalidFormatException,
+			IOException
 	{
 
 		RepositoryCollection repositoryCollection = new ExcelRepositoryCollection(omxInputFile);
@@ -44,7 +46,7 @@ public class Omx2EmxExcelConverter
 
 		try
 		{
-			new Omx2EmxConverter(repositoryCollection).convert(writableFactory);
+			new Omx2EmxConverter(repositoryCollection, namespace).convert(writableFactory);
 		}
 		finally
 		{

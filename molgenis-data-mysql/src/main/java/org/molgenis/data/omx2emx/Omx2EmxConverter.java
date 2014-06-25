@@ -49,12 +49,15 @@ public class Omx2EmxConverter
 	}
 
 	private final RepositoryCollection omxRepositoryCollection;
+	private final String namespace;
+
 	private Map<String, Entity> datasetByProtocolUsed;
 	private Iterable<Entity> protocols;
 
-	public Omx2EmxConverter(RepositoryCollection omxRepositoryCollection)
+	public Omx2EmxConverter(RepositoryCollection omxRepositoryCollection, String namespace)
 	{
 		this.omxRepositoryCollection = omxRepositoryCollection;
+		this.namespace = namespace;
 	}
 
 	public void convert(WritableFactory writableFactory)
@@ -87,7 +90,8 @@ public class Omx2EmxConverter
 				if (!observableFeatureIdentifiers.contains(observableFeatureIdentifier))
 				{
 					observableFeatureIdentifiers.add(observableFeatureIdentifier);
-					Writable lut = writableFactory.createWritable(observableFeatureIdentifier, Arrays.asList("Name"));
+					Writable lut = writableFactory.createWritable(getFullEntityName(observableFeatureIdentifier),
+							Arrays.asList("Name"));
 
 					for (Entity cat : categoryRepo)
 					{
@@ -116,14 +120,11 @@ public class Omx2EmxConverter
 			}
 		}
 
-		// Rename Indivual and Panel to Individuals and Panels because it would collide with omx Panel and Individual
-		// tables
-
 		// Individuals
 		if (omxContainsEntity(OMX_TABS.INDIVIDUAL.toString()))
 		{
 
-			Writable writable = writableFactory.createWritable("Individuals",
+			Writable writable = writableFactory.createWritable(getFullEntityName("Individual"),
 					Arrays.asList("Identifier", "Name", "Description"));
 			Repository individualRepo = omxRepositoryCollection.getRepositoryByEntityName(OMX_TABS.INDIVIDUAL
 					.toString());
@@ -133,7 +134,7 @@ public class Omx2EmxConverter
 		// Panels
 		if (omxContainsEntity(OMX_TABS.PANEL.toString()))
 		{
-			Writable writable = writableFactory.createWritable("Panels",
+			Writable writable = writableFactory.createWritable(getFullEntityName("Panel"),
 					Arrays.asList("Identifier", "Name", "NumberOfIndividuals"));
 			Repository panelRepo = omxRepositoryCollection.getRepositoryByEntityName(OMX_TABS.PANEL.toString());
 			writable.add(panelRepo);
@@ -151,7 +152,7 @@ public class Omx2EmxConverter
 				}
 
 				String dataset = entityName.substring("dataset_".length());
-				Writable writable = writableFactory.createWritable(dataset, attributeNames);
+				Writable writable = writableFactory.createWritable(getFullEntityName(dataset), attributeNames);
 				for (Entity excelEntity : repo)
 				{
 					Entity entity = new MapEntity();
@@ -189,7 +190,7 @@ public class Omx2EmxConverter
 			{
 				Entity identifier = new MapEntity();
 				identifier.set("name", "Identifier");
-				identifier.set("entity", "Individuals");
+				identifier.set("entity", getFullEntityName("Individual"));
 				identifier.set("dataType", "string");
 				identifier.set("nillable", false);
 				identifier.set("idAttribute", true);
@@ -197,7 +198,7 @@ public class Omx2EmxConverter
 
 				Entity name = new MapEntity();
 				name.set("name", "Name");
-				name.set("entity", "Individuals");
+				name.set("entity", getFullEntityName("Individual"));
 				name.set("dataType", "string");
 				name.set("nillable", true);
 				name.set("idAttribute", false);
@@ -205,7 +206,7 @@ public class Omx2EmxConverter
 
 				Entity description = new MapEntity();
 				description.set("name", "Description");
-				description.set("entity", "Individuals");
+				description.set("entity", getFullEntityName("Individual"));
 				description.set("dataType", "string");
 				description.set("nillable", false);
 				description.set("idAttribute", false);
@@ -217,7 +218,7 @@ public class Omx2EmxConverter
 			{
 				Entity identifier = new MapEntity();
 				identifier.set("name", "Identifier");
-				identifier.set("entity", "Panels");
+				identifier.set("entity", getFullEntityName("Panel"));
 				identifier.set("dataType", "string");
 				identifier.set("nillable", false);
 				identifier.set("idAttribute", true);
@@ -225,7 +226,7 @@ public class Omx2EmxConverter
 
 				Entity name = new MapEntity();
 				name.set("name", "Name");
-				name.set("entity", "Panels");
+				name.set("entity", getFullEntityName("Panel"));
 				name.set("dataType", "string");
 				name.set("nillable", true);
 				name.set("idAttribute", false);
@@ -233,7 +234,7 @@ public class Omx2EmxConverter
 
 				Entity nrOfIndividuals = new MapEntity();
 				nrOfIndividuals.set("name", "NumberOfIndividuals");
-				nrOfIndividuals.set("entity", "Panels");
+				nrOfIndividuals.set("entity", getFullEntityName("Panel"));
 				nrOfIndividuals.set("dataType", "int");
 				nrOfIndividuals.set("nillable", true);
 				nrOfIndividuals.set("idAttribute", false);
@@ -257,7 +258,7 @@ public class Omx2EmxConverter
 				{
 					Entity categoryName = new MapEntity();
 					categoryName.set("name", "Name");
-					categoryName.set("entity", observableFeatureIdentifier);
+					categoryName.set("entity", getFullEntityName(observableFeatureIdentifier));
 					categoryName.set("dataType", "string");// ?
 					categoryName.set("nillable", false);
 					categoryName.set("idAttribute", true);
@@ -273,7 +274,7 @@ public class Omx2EmxConverter
 					String dataset = entity.substring("dataset_".length());
 					Entity idAttribute = new MapEntity();
 					idAttribute.set("name", "Identifier");
-					idAttribute.set("entity", dataset);
+					idAttribute.set("entity", getFullEntityName(dataset));
 					idAttribute.set("label", "Identifier");
 					idAttribute.set("dataType", "string");
 					idAttribute.set("nillable", false);
@@ -305,7 +306,7 @@ public class Omx2EmxConverter
 
 					Entity attribute = new MapEntity();
 					attribute.set("name", identifier);
-					attribute.set("entity", entity);
+					attribute.set("entity", getFullEntityName(entity));
 					attribute.set("label", feature.getString(OBSERVABLE_FEATURE_COLUMNS.NAME.toString()));
 					attribute.set("dataType", dataType);
 					attribute.set("description", feature.getString(OBSERVABLE_FEATURE_COLUMNS.DESCRIPTION.toString()));
@@ -315,7 +316,7 @@ public class Omx2EmxConverter
 					// Categorical
 					if ((dataType != null) && dataType.equalsIgnoreCase("categorical"))
 					{
-						attribute.set("refEntity", identifier);
+						attribute.set("refEntity", getFullEntityName(identifier));
 					}
 					// xref/mref
 					else if ((dataType != null)
@@ -388,10 +389,10 @@ public class Omx2EmxConverter
 
 						Entity attribute = new MapEntity();
 						attribute.set("name", subprotocolIdentifier);
-						attribute.set("entity", entity);
+						attribute.set("entity", getFullEntityName(entity));
 						attribute.set("dataType", "compound");
 						attribute.set("label", subprotocol.get(PROTOCOL_COLUMNS.NAME.toString()));
-						attribute.set("refEntity", refEntity);
+						attribute.set("refEntity", getFullEntityName(refEntity));
 						attributes.add(attribute);
 					}
 				}
@@ -408,12 +409,12 @@ public class Omx2EmxConverter
 	{
 		if (containsIdentifier(OMX_TABS.INDIVIDUAL.toString(), identifier))
 		{
-			return "Individuals";
+			return getFullEntityName("Individual");
 		}
 
 		if (containsIdentifier(OMX_TABS.PANEL.toString(), identifier))
 		{
-			return "Panels";
+			return getFullEntityName("Panel");
 		}
 
 		return null;
@@ -439,7 +440,11 @@ public class Omx2EmxConverter
 		return null;
 	}
 
-	// TODO other tables: ontology etc.
+	private String getFullEntityName(String name)
+	{
+		return namespace == null ? name : namespace + "_" + name;
+	}
+
 	private void writeEntities(WritableFactory writableFactory)
 	{
 		Writable entities = writableFactory.createWritable("entities",
@@ -460,7 +465,7 @@ public class Omx2EmxConverter
 				protocolUsedIdentifiers.add(protocolUsedIdentifier.toLowerCase());
 
 				Entity datasetMeta = new MapEntity();
-				datasetMeta.set("name", dataset.getString(DATASET_COLUMNS.IDENTIFIER.toString()));
+				datasetMeta.set("name", getFullEntityName(dataset.getString(DATASET_COLUMNS.IDENTIFIER.toString())));
 				datasetMeta.set("label", dataset.getString(DATASET_COLUMNS.NAME.toString()));
 				datasetMeta.set("description", dataset.getString(DATASET_COLUMNS.DESCRIPTION.toString()));
 				entities.add(datasetMeta);
@@ -473,7 +478,8 @@ public class Omx2EmxConverter
 				if (!StringUtils.isEmpty(identifier) && !protocolUsedIdentifiers.contains(identifier.toLowerCase()))
 				{
 					Entity protocolMeta = new MapEntity();
-					protocolMeta.set("name", protocol.getString(PROTOCOL_COLUMNS.IDENTIFIER.toString()));
+					protocolMeta.set("name",
+							getFullEntityName(protocol.getString(PROTOCOL_COLUMNS.IDENTIFIER.toString())));
 					protocolMeta.set("label", protocol.getString(PROTOCOL_COLUMNS.NAME.toString()));
 					protocolMeta.set("description", protocol.getString(PROTOCOL_COLUMNS.DESCRIPTION.toString()));
 					protocolMeta.set("abstract", true);
@@ -497,7 +503,7 @@ public class Omx2EmxConverter
 				for (String observableFeatureIdentifier : observableFeatureIdentifiers)
 				{
 					Entity catMeta = new MapEntity();
-					catMeta.set("name", observableFeatureIdentifier);
+					catMeta.set("name", getFullEntityName(observableFeatureIdentifier));
 					entities.add(catMeta);
 				}
 			}
@@ -510,7 +516,7 @@ public class Omx2EmxConverter
 			if (omxContainsEntity(OMX_TABS.INDIVIDUAL.toString()))
 			{
 				Entity individualMeta = new MapEntity();
-				individualMeta.set("name", "Individuals");
+				individualMeta.set("name", getFullEntityName("Individual"));
 				entities.add(individualMeta);
 			}
 
@@ -518,7 +524,7 @@ public class Omx2EmxConverter
 			if (omxContainsEntity(OMX_TABS.PANEL.toString()))
 			{
 				Entity panelMeta = new MapEntity();
-				panelMeta.set("name", "Panels");
+				panelMeta.set("name", getFullEntityName("Panel"));
 				entities.add(panelMeta);
 			}
 
