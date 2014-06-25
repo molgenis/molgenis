@@ -101,6 +101,11 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		return "TRUNCATE TABLE " + getEntityMetaData().getName() + ";";
 	}
 
+	public boolean containsData()
+	{
+		return jdbcTemplate.queryForObject("SELECT count(*) FROM " + getName(), Integer.class) > 0;
+	}
+
 	@Override
 	public void create()
 	{

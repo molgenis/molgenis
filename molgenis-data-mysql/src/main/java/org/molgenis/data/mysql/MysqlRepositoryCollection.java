@@ -65,11 +65,6 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		entities = createMysqlRepsitory();
 		entities.setMetaData(entityMD);
 
-		if (!tableExists("entities"))
-		{
-			entities.create();
-		}
-
 		DefaultEntityMetaData attributeMD = new DefaultEntityMetaData("attributes");
 		attributeMD.setIdAttribute("identifier");
 		attributeMD.addAttribute("identifier").setNillable(false).setDataType(INT).setAuto(true);
@@ -86,8 +81,21 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		attributes = createMysqlRepsitory();
 		attributes.setMetaData(attributeMD);
 
-		if (!tableExists("attributes"))
+		if (!tableExists("entities"))
 		{
+			entities.create();
+
+			if (!tableExists("attributes"))
+			{
+				attributes.create();
+			}
+		}
+		else if (!attributes.containsData())
+		{
+			// Update table structure to prevent errors is apps that don't use emx
+			attributes.drop();
+			entities.drop();
+			entities.create();
 			attributes.create();
 		}
 
