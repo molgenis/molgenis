@@ -80,167 +80,172 @@ public class ResponseParser
 			searchHits.add(new Hit(hit.id(), hit.type(), columnValueMap));
 		}
 
-		AggregateResult aggregate = null;
-		Aggregations aggregations = response.getAggregations();
-		if (aggregations != null)
-		{
-			List<List<Long>> matrix = Lists.newArrayList();
-			Set<String> xLabelsSet = Sets.newHashSet();
-			Set<String> yLabelsSet = Sets.newHashSet();
-			List<String> xLabels = new ArrayList<String>();
-			List<String> yLabels = new ArrayList<String>();
-			final int nrAggregations = Iterables.size(aggregations);
-			if (nrAggregations != 1)
-			{
-				throw new RuntimeException("Multiple aggregations [" + nrAggregations + "] not supported");
-			}
-
-			Aggregation aggregation = aggregations.iterator().next();
-			if (!(aggregation instanceof Terms))
-			{
-				throw new RuntimeException("Aggregation of type [" + aggregation.getClass().getName()
-						+ "] not supported");
-			}
-			Terms terms = (Terms) aggregation;
-
-			Collection<Bucket> buckets = terms.getBuckets();
-			int nrBuckets = buckets.size();
-			if (nrBuckets > 0)
-			{
-				// create initial valuesT
-				for (int i = 0; i < nrBuckets; ++i)
-					matrix.add(null);
-
-				// distinguish between 1D and 2D aggregation
-				boolean hasSubAggregations = false;
-				for (Bucket bucket : buckets)
-				{
-					Aggregations subAggregations = bucket.getAggregations();
-					if (subAggregations != null && Iterables.size(subAggregations) > 0)
-					{
-						hasSubAggregations = true;
-						break;
-					}
-				}
-
-				// create (sorted) labels for x-axis
-				for (Bucket bucket : buckets)
-				{
-					if (!xLabelsSet.contains(bucket.getKey())) xLabelsSet.add(bucket.getKey());
-				}
-
-				xLabels = new ArrayList<String>(xLabelsSet);
-				Collections.sort(xLabels);
-				xLabels.add("Total");
-
-				int xIdx = 0;
-				Map<String, Integer> xLabelMap = new HashMap<String, Integer>();
-				for (String xLabel : xLabels)
-				{
-					xLabelMap.put(xLabel, xIdx++);
-				}
-
-				if (hasSubAggregations)
-				{
-					// create labels
-					for (Bucket bucket : buckets)
-					{
-						Aggregations subAggregations = bucket.getAggregations();
-						if (subAggregations != null)
-						{
-							if (Iterables.size(subAggregations) > 1)
-							{
-								throw new RuntimeException("Multiple aggregations [" + nrAggregations
-										+ "] not supported");
-							}
-							Aggregation subAggregation = subAggregations.iterator().next();
-
-							if (!(subAggregation instanceof Terms))
-							{
-								throw new RuntimeException("Aggregation of type ["
-										+ subAggregation.getClass().getName() + "] not supported");
-							}
-							Terms subTerms = (Terms) subAggregation;
-
-							for (Bucket subBucket : subTerms.getBuckets())
-							{
-								yLabelsSet.add(subBucket.getKey());
-							}
-
-						}
-					}
-
-					yLabels = new ArrayList<String>(yLabelsSet);
-					Collections.sort(yLabels);
-					yLabels.add("Total");
-
-					int yIdx = 0;
-					Map<String, Integer> yLabelMap = new HashMap<String, Integer>();
-					for (String yLabel : yLabels)
-					{
-						yLabelMap.put(yLabel, yIdx++);
-					}
-
-					for (Bucket bucket : buckets)
-					{
-						// create values
-						List<Long> yValues = new ArrayList<Long>();
-						for (int i = 0; i < yIdx; ++i)
-						{
-							yValues.add(0l);
-						}
-
-						Aggregations subAggregations = bucket.getAggregations();
-						if (subAggregations != null)
-						{
-							long count = 0;
-							Terms subTerms = (Terms) subAggregations.iterator().next();
-							for (Bucket subBucket : subTerms.getBuckets())
-							{
-								long bucketCount = subBucket.getDocCount();
-								yValues.set(yLabelMap.get(subBucket.getKey()), bucketCount);
-								count += bucketCount;
-							}
-							yValues.set(yLabelMap.get("Total"), count);
-						}
-
-						matrix.set(xLabelMap.get(bucket.getKey()), yValues);
-					}
-
-					// create value totals
-					List<Long> xTotals = new ArrayList<Long>();
-					for (int i = 0; i < yIdx; ++i)
-					{
-						xTotals.add(0l);
-					}
-
-					for (List<Long> values : matrix)
-					{
-						int nrValues = values.size();
-						for (int i = 0; i < nrValues; ++i)
-						{
-							xTotals.set(i, xTotals.get(i) + values.get(i));
-						}
-					}
-					matrix.add(xTotals);
-				}
-				else
-				{
-					long total = 0;
-					for (Bucket bucket : buckets)
-					{
-						long docCount = bucket.getDocCount();
-						matrix.set(xLabelMap.get(bucket.getKey()), Lists.newArrayList(Long.valueOf(docCount)));
-						total += docCount;
-					}
-					matrix.add(Lists.newArrayList(Long.valueOf(total)));
-					yLabels.add("Count");
-				}
-			}
-
-			aggregate = new AggregateResult(matrix, xLabels, yLabels);
-		}
+        AggregateResult aggregate = createAggregateResult(response);
 
 		return new SearchResult(totalCount, searchHits, aggregate);
 	}
+
+    public static AggregateResult createAggregateResult(SearchResponse response) {
+        AggregateResult aggregate = null;
+        Aggregations aggregations = response.getAggregations();
+        if (aggregations != null)
+        {
+            List<List<Long>> matrix = Lists.newArrayList();
+            Set<String> xLabelsSet = Sets.newHashSet();
+            Set<String> yLabelsSet = Sets.newHashSet();
+            List<String> xLabels = new ArrayList<String>();
+            List<String> yLabels = new ArrayList<String>();
+            final int nrAggregations = Iterables.size(aggregations);
+            if (nrAggregations != 1)
+            {
+                throw new RuntimeException("Multiple aggregations [" + nrAggregations + "] not supported");
+            }
+
+            Aggregation aggregation = aggregations.iterator().next();
+            if (!(aggregation instanceof Terms))
+            {
+                throw new RuntimeException("Aggregation of type [" + aggregation.getClass().getName()
+                        + "] not supported");
+            }
+            Terms terms = (Terms) aggregation;
+
+            Collection<Bucket> buckets = terms.getBuckets();
+            int nrBuckets = buckets.size();
+            if (nrBuckets > 0)
+            {
+                // create initial valuesT
+                for (int i = 0; i < nrBuckets; ++i)
+                    matrix.add(null);
+
+                // distinguish between 1D and 2D aggregation
+                boolean hasSubAggregations = false;
+                for (Bucket bucket : buckets)
+                {
+                    Aggregations subAggregations = bucket.getAggregations();
+                    if (subAggregations != null && Iterables.size(subAggregations) > 0)
+                    {
+                        hasSubAggregations = true;
+                        break;
+                    }
+                }
+
+                // create (sorted) labels for x-axis
+                for (Bucket bucket : buckets)
+                {
+                    if (!xLabelsSet.contains(bucket.getKey())) xLabelsSet.add(bucket.getKey());
+                }
+
+                xLabels = new ArrayList<String>(xLabelsSet);
+                Collections.sort(xLabels);
+                xLabels.add("Total");
+
+                int xIdx = 0;
+                Map<String, Integer> xLabelMap = new HashMap<String, Integer>();
+                for (String xLabel : xLabels)
+                {
+                    xLabelMap.put(xLabel, xIdx++);
+                }
+
+                if (hasSubAggregations)
+                {
+                    // create labels
+                    for (Bucket bucket : buckets)
+                    {
+                        Aggregations subAggregations = bucket.getAggregations();
+                        if (subAggregations != null)
+                        {
+                            if (Iterables.size(subAggregations) > 1)
+                            {
+                                throw new RuntimeException("Multiple aggregations [" + nrAggregations
+                                        + "] not supported");
+                            }
+                            Aggregation subAggregation = subAggregations.iterator().next();
+
+                            if (!(subAggregation instanceof Terms))
+                            {
+                                throw new RuntimeException("Aggregation of type ["
+                                        + subAggregation.getClass().getName() + "] not supported");
+                            }
+                            Terms subTerms = (Terms) subAggregation;
+
+                            for (Bucket subBucket : subTerms.getBuckets())
+                            {
+                                yLabelsSet.add(subBucket.getKey());
+                            }
+
+                        }
+                    }
+
+                    yLabels = new ArrayList<String>(yLabelsSet);
+                    Collections.sort(yLabels);
+                    yLabels.add("Total");
+
+                    int yIdx = 0;
+                    Map<String, Integer> yLabelMap = new HashMap<String, Integer>();
+                    for (String yLabel : yLabels)
+                    {
+                        yLabelMap.put(yLabel, yIdx++);
+                    }
+
+                    for (Bucket bucket : buckets)
+                    {
+                        // create values
+                        List<Long> yValues = new ArrayList<Long>();
+                        for (int i = 0; i < yIdx; ++i)
+                        {
+                            yValues.add(0l);
+                        }
+
+                        Aggregations subAggregations = bucket.getAggregations();
+                        if (subAggregations != null)
+                        {
+                            long count = 0;
+                            Terms subTerms = (Terms) subAggregations.iterator().next();
+                            for (Bucket subBucket : subTerms.getBuckets())
+                            {
+                                long bucketCount = subBucket.getDocCount();
+                                yValues.set(yLabelMap.get(subBucket.getKey()), bucketCount);
+                                count += bucketCount;
+                            }
+                            yValues.set(yLabelMap.get("Total"), count);
+                        }
+
+                        matrix.set(xLabelMap.get(bucket.getKey()), yValues);
+                    }
+
+                    // create value totals
+                    List<Long> xTotals = new ArrayList<Long>();
+                    for (int i = 0; i < yIdx; ++i)
+                    {
+                        xTotals.add(0l);
+                    }
+
+                    for (List<Long> values : matrix)
+                    {
+                        int nrValues = values.size();
+                        for (int i = 0; i < nrValues; ++i)
+                        {
+                            xTotals.set(i, xTotals.get(i) + values.get(i));
+                        }
+                    }
+                    matrix.add(xTotals);
+                }
+                else
+                {
+                    long total = 0;
+                    for (Bucket bucket : buckets)
+                    {
+                        long docCount = bucket.getDocCount();
+                        matrix.set(xLabelMap.get(bucket.getKey()), Lists.newArrayList(Long.valueOf(docCount)));
+                        total += docCount;
+                    }
+                    matrix.add(Lists.newArrayList(Long.valueOf(total)));
+                    yLabels.add("Count");
+                }
+            }
+
+            aggregate = new AggregateResult(matrix, xLabels, yLabels);
+        }
+        return aggregate;
+    }
 }
