@@ -36,7 +36,8 @@ public class MysqlRepositoryCollectionTest extends AbstractTestNGSpringContextTe
 		coll.drop("coll_person");
 
 		// create collection, add repo, destroy and reload
-		DefaultEntityMetaData personMD = new DefaultEntityMetaData("coll_person").setIdAttribute("email");
+		DefaultEntityMetaData personMD = new DefaultEntityMetaData("coll_person");
+		personMD.setIdAttribute("email");
 		personMD.addAttribute("email").setNillable(false);
 		personMD.addAttribute("firstName");
 		personMD.addAttribute("lastName");

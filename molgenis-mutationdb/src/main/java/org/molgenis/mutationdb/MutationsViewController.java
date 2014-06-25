@@ -38,8 +38,7 @@ public class MutationsViewController extends MolgenisPluginController
 	private final DataService dataService;
 	private final MysqlViewService mysqlViewService;
 	public static List<String> HEADERS_NAMES = Arrays.asList("Mutation ID", "cDNA change", "Protein change",
-			"Exon/Intron", "Consequence",
-			"Inheritance", "Patient ID", "Phenotype");
+			"Exon/Intron", "Consequence", "Inheritance", "Patient ID", "Phenotype");
 	private static final String PATH_TO_INSERT_QUERY = File.separator + "mysql" + File.separator
 			+ "mutationview_col7a1_prototype.sql";
 	private static final String PATH_TO_NA_QUERY = File.separator + "mysql" + File.separator
@@ -55,7 +54,6 @@ public class MutationsViewController extends MolgenisPluginController
 		if (mysqlViewService == null) throw new IllegalArgumentException("mysqlViewService is null");
 		this.mysqlViewService = mysqlViewService;
 	}
-
 
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(Model model)
