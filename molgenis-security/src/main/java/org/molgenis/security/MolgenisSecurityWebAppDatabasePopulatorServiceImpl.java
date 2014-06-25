@@ -38,6 +38,7 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl implements
 		if (adminPassword == null) throw new RuntimeException(
 				"please configure the admin.password property in your molgenis-server.properties");
 
+		// create admin user
 		userAdmin = new MolgenisUser();
 		userAdmin.setUsername(USERNAME_ADMIN);
 		userAdmin.setPassword(adminPassword);
@@ -47,6 +48,7 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl implements
 		userAdmin.setChangePassword(false);
 		dataService.add(MolgenisUser.ENTITY_NAME, userAdmin);
 
+		// create anonymous user
 		anonymousUser = new MolgenisUser();
 		anonymousUser.setUsername(SecurityUtils.ANONYMOUS_USERNAME);
 		anonymousUser.setPassword(SecurityUtils.ANONYMOUS_USERNAME);
@@ -56,33 +58,29 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl implements
 		anonymousUser.setChangePassword(false);
 		dataService.add(MolgenisUser.ENTITY_NAME, anonymousUser);
 
+		// set anonymous role for anonymous user
 		UserAuthority anonymousAuthority = new UserAuthority();
 		anonymousAuthority.setMolgenisUser(anonymousUser);
 		anonymousAuthority.setRole(SecurityUtils.AUTHORITY_ANONYMOUS);
 		dataService.add(UserAuthority.ENTITY_NAME, anonymousAuthority);
 
+		// create all users group
 		allUsersGroup = new MolgenisGroup();
 		allUsersGroup.setName(AccountService.ALL_USER_GROUP);
 		dataService.add(MolgenisGroup.ENTITY_NAME, allUsersGroup);
 
+		// allow all users to see the home plugin
 		GroupAuthority usersGroupHomeAuthority = new GroupAuthority();
 		usersGroupHomeAuthority.setMolgenisGroup(allUsersGroup);
 		usersGroupHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + homeControllerId.toUpperCase());
 		dataService.add(GroupAuthority.ENTITY_NAME, usersGroupHomeAuthority);
 
+		// allow all users to update their profile
 		GroupAuthority usersGroupUserAccountAuthority = new GroupAuthority();
 		usersGroupUserAccountAuthority.setMolgenisGroup(allUsersGroup);
 		usersGroupUserAccountAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX
 				+ UserAccountController.ID.toUpperCase());
 		dataService.add(GroupAuthority.ENTITY_NAME, usersGroupUserAccountAuthority);
-
-		for (String entityName : dataService.getEntityNames())
-		{
-			GroupAuthority entityAuthority = new GroupAuthority();
-			entityAuthority.setMolgenisGroup(allUsersGroup);
-			entityAuthority.setRole(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + entityName.toUpperCase());
-			dataService.add(GroupAuthority.ENTITY_NAME, entityAuthority);
-		}
 	}
 
 	@Override
