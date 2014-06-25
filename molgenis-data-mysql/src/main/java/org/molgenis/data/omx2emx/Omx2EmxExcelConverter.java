@@ -16,6 +16,13 @@ public class Omx2EmxExcelConverter
 {
 	public static void main(String[] args)
 	{
+		if (args.length < 2 || args.length > 3)
+		{
+			System.err.println("usage: java " + Omx2EmxExcelConverter.class.getSimpleName()
+					+ " inputfile outputfile <namespace>");
+			return;
+		}
+
 		try
 		{
 			String namespace = args.length == 3 ? args[2] : null;
