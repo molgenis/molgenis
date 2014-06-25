@@ -20,9 +20,6 @@ import org.molgenis.security.freemarker.HasPermissionDirective;
 import org.molgenis.security.freemarker.NotHasPermissionDirective;
 import org.molgenis.ui.freemarker.FormLinkDirective;
 import org.molgenis.ui.freemarker.LimitMethod;
-import org.molgenis.ui.menu.MenuMolgenisUi;
-import org.molgenis.ui.menu.MenuReaderService;
-import org.molgenis.ui.security.MolgenisUiPermissionDecorator;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.AsyncJavaMailSender;
 import org.molgenis.util.FileStore;
@@ -57,8 +54,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Autowired
 	private MolgenisSettings molgenisSettings;
 
-	@Autowired
-	private MenuReaderService menuReaderService;
+	// FIXME
+	// @Autowired
+	// private MenuReaderService menuReaderService;
 
 	@Autowired
 	private MolgenisPermissionService molgenisPermissionService;
@@ -255,17 +253,17 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Bean
 	public MolgenisUi molgenisUi()
 	{
-		MolgenisUi molgenisUi = new MenuMolgenisUi(molgenisSettings, menuReaderService);
-		return new MolgenisUiPermissionDecorator(molgenisUi, molgenisPermissionService);
+		// MolgenisUi molgenisUi = new MenuMolgenisUi(molgenisSettings, menuReaderService);
+		// return new MolgenisUiPermissionDecorator(molgenisUi, molgenisPermissionService);
 
-		// try
-		// {
-		// return new XmlMolgenisUi(new XmlMolgenisUiLoader(), molgenisSettings, molgenisPermissionService);
-		// }
-		// catch (IOException e)
-		// {
-		// throw new RuntimeException(e);
-		// }
+		try
+		{
+			return new XmlMolgenisUi(new XmlMolgenisUiLoader(), molgenisSettings, molgenisPermissionService);
+		}
+		catch (IOException e)
+		{
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Bean
