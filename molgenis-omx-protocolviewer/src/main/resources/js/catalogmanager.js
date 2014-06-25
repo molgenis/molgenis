@@ -32,6 +32,8 @@
 		}
 		
 		$('#catalogForm input[type="radio"]').change(function() {
+			$('#activationButton').attr('disabled', 'disabled');
+			
 			if($(this).data('activated')) {
 				$('#activationButton').attr('name', 'deactivate');
 				$('#activationButton').val('Deactivate');
@@ -68,6 +70,8 @@
 					treeContainer.dynatree('getRoot').sortChildren(function(a, b) {
 						return molgenis.naturalSort(a.data.title, b.data.title);
 					}, true);
+					
+					$('#activationButton').removeAttr('disabled');
 				},
 				error: function (xhr) {
 					treeContainer.empty();
