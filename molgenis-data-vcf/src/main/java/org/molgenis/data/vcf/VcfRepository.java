@@ -21,6 +21,7 @@ import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.genotype.Allele;
 import org.molgenis.genotype.GenotypeDataException;
 import org.molgenis.vcf.VcfInfo;
 import org.molgenis.vcf.VcfReader;
@@ -29,6 +30,9 @@ import org.molgenis.vcf.VcfSample;
 import org.molgenis.vcf.meta.VcfMeta;
 import org.molgenis.vcf.meta.VcfMetaFormat;
 import org.molgenis.vcf.meta.VcfMetaInfo;
+
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 
 /**
  * Repository implementation for vcf files.
@@ -99,9 +103,20 @@ public class VcfRepository extends AbstractRepository
 				{
 					VcfRecord vcfRecord = vcfRecordIterator.next();
 					entity.set(CHROM, vcfRecord.getChromosome());
-					entity.set(ALT, StringUtils.join(vcfRecord.getAlternateAlleles(), ','));
+					entity.set(
+							ALT,
+							StringUtils.join(
+									Lists.transform(vcfRecord.getAlternateAlleles(), new Function<Allele, String>()
+									{
+										@Override
+										public String apply(Allele allele)
+										{
+											return allele.toString();
+										}
+									}), ','));
+					
 					entity.set(POS, vcfRecord.getPosition());
-					entity.set(REF, vcfRecord.getReferenceAllele());
+					entity.set(REF, vcfRecord.getReferenceAllele().toString());
 					entity.set(FILTER, vcfRecord.getFilterStatus());
 					entity.set(QUAL, vcfRecord.getQuality());
 					entity.set(ID, StringUtils.join(vcfRecord.getIdentifiers(), ','));
@@ -369,4 +384,5 @@ public class VcfRepository extends AbstractRepository
 			}
 		}
 	}
+
 }
