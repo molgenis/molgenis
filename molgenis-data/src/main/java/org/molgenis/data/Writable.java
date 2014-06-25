@@ -7,11 +7,7 @@ import java.io.Closeable;
  */
 public interface Writable extends Closeable
 {
-	/**
-	 * Add one entity
-	 * 
-	 * @return the id of the added entity
-	 */
+	/** Add one entity */
 	void add(Entity entity);
 
 	/** Stream add multiple entities */

@@ -21,6 +21,12 @@ public abstract class AbstractCrudRepository extends AbstractRepository implemen
 	}
 
 	@Override
+	public Query query()
+	{
+		return new QueryImpl(this);
+	}
+
+	@Override
 	@Transactional(readOnly = true)
 	public <E extends Entity> Iterable<E> findAll(Query q, Class<E> clazz)
 	{
@@ -29,7 +35,7 @@ public abstract class AbstractCrudRepository extends AbstractRepository implemen
 
 	@Override
 	@Transactional
-	public final void add(Entity entity)
+	public void add(Entity entity)
 	{
 		validator.validate(Arrays.asList(entity), getEntityMetaData(), null);
 		addInternal(entity);
@@ -37,7 +43,7 @@ public abstract class AbstractCrudRepository extends AbstractRepository implemen
 
 	@Override
 	@Transactional
-	public final Integer add(Iterable<? extends Entity> entities)
+	public Integer add(Iterable<? extends Entity> entities)
 	{
 		validator.validate(entities, getEntityMetaData(), null);
 		return addInternal(entities);
@@ -45,7 +51,7 @@ public abstract class AbstractCrudRepository extends AbstractRepository implemen
 
 	@Override
 	@Transactional
-	public final void update(Entity entity)
+	public void update(Entity entity)
 	{
 		validator.validate(Arrays.asList(entity), getEntityMetaData(), null);
 		updateInternal(entity);
@@ -53,7 +59,7 @@ public abstract class AbstractCrudRepository extends AbstractRepository implemen
 
 	@Override
 	@Transactional
-	public final void update(Iterable<? extends Entity> entities)
+	public void update(Iterable<? extends Entity> entities)
 	{
 		validator.validate(entities, getEntityMetaData(), null);
 		updateInternal(entities);
@@ -61,7 +67,7 @@ public abstract class AbstractCrudRepository extends AbstractRepository implemen
 
 	@Override
 	@Transactional
-	public final void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
+	public void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
 	{
 		validator.validate(entities, getEntityMetaData(), dbAction);
 		updateInternal(entities, dbAction, keyName);

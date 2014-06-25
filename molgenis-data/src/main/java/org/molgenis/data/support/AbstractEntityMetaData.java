@@ -6,6 +6,7 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Range;
 import org.molgenis.fieldtypes.FieldType;
 
@@ -15,6 +16,9 @@ import com.google.common.collect.TreeTraverser;
 
 public abstract class AbstractEntityMetaData implements EntityMetaData
 {
+	private String labelAttribute;
+	private String idAttribute;
+
 	/**
 	 * Returns an iterable over all attributes including the attribute parts of compound attributes
 	 * 
@@ -30,7 +34,8 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 				FieldType dataType = attributeMetaData.getDataType();
 				if (dataType.equals(MolgenisFieldTypes.COMPOUND))
 				{
-					return attributeMetaData.getAttributeParts();
+					Iterable<AttributeMetaData> parts = attributeMetaData.getAttributeParts();
+					return parts != null ? parts : Collections.<AttributeMetaData> emptyList();
 				}
 				else return Collections.<AttributeMetaData> emptyList();
 			}
@@ -158,6 +163,14 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 	@Override
 	public AttributeMetaData getIdAttribute()
 	{
+		if (idAttribute != null)
+		{
+			AttributeMetaData att = getAttribute(idAttribute);
+			if (att == null) throw new RuntimeException(getName() + ".getIdAttribute() failed: '" + idAttribute
+					+ "' unknown");
+			return att;
+		}
+
 		for (AttributeMetaData attribute : getAttributesTraverser())
 		{
 			if (attribute.isIdAtrribute())
@@ -166,34 +179,65 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 			}
 		}
 
+		if (getExtends() != null)
+		{
+			return getExtends().getIdAttribute();
+		}
+
 		return null;
+	}
+
+	public void setIdAttribute(String name)
+	{
+		this.idAttribute = name;
 	}
 
 	@Override
 	public AttributeMetaData getLabelAttribute()
 	{
-		for (AttributeMetaData attribute : getAttributesTraverser())
+		if (labelAttribute != null)
 		{
-			if (attribute.isLabelAttribute())
+			AttributeMetaData att = getAttribute(labelAttribute);
+			if (att == null) throw new MolgenisDataException("getLabelAttribute() failed: '" + labelAttribute
+					+ "' unknown");
+
+			return att;
+		}
+		else
+		{
+			for (AttributeMetaData attribute : getAttributesTraverser())
 			{
-				return attribute;
+				if (attribute.isLabelAttribute())
+				{
+					return attribute;
+				}
 			}
 		}
 
-		return null;
+		return getIdAttribute();
+	}
+
+	public void setLabelAttribute(String name)
+	{
+		this.labelAttribute = name;
 	}
 
 	@Override
 	public AttributeMetaData getAttribute(String attributeName)
 	{
+		AttributeMetaData attr = null;
+
 		for (AttributeMetaData attribute : getAttributesTraverser())
 		{
 			if (attribute.getName().equalsIgnoreCase(attributeName))
 			{
-				return attribute;
+				attr = attribute;
+				break;
 			}
 		}
 
-		return null;
+		if ((attr == null) && (getExtends() != null)) attr = getExtends().getAttribute(attributeName);
+
+		return attr;
 	}
 }
