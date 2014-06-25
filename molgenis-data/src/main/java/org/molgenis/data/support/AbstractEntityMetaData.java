@@ -16,7 +16,7 @@ import com.google.common.collect.TreeTraverser;
 
 public abstract class AbstractEntityMetaData implements EntityMetaData
 {
-	private String labelAttribute; // remove?
+	private String labelAttribute;
 	private String idAttribute;
 
 	/**

@@ -175,7 +175,6 @@ public class Omx2EmxConverter
 
 	}
 
-	// TODO compound attributes (protocol)
 	private void writeAttributes(WritableFactory writableFactory)
 	{
 		Writable attributes = writableFactory.createWritable("attributes", Arrays.asList("name", "entity", "label",

@@ -6,6 +6,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Range;
+import org.molgenis.fieldtypes.CategoricalField;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
@@ -104,7 +105,8 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	@Override
 	public Object getDefaultValue()
 	{
-		if (getDataType() instanceof XrefField || getDataType() instanceof MrefField)
+		if (getDataType() instanceof XrefField || getDataType() instanceof MrefField
+				|| getDataType() instanceof CategoricalField)
 		{
 			if (getRefEntity() == null) throw new MolgenisDataException("refEntity is missing for " + getName());
 			if (getRefEntity().getIdAttribute() == null) throw new MolgenisDataException(
