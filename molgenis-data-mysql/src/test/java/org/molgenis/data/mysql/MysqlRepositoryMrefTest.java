@@ -1,5 +1,7 @@
 package org.molgenis.data.mysql;
 
+import static org.testng.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -14,6 +16,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 /** Test for MolgenisFieldTypes.MREF */
 public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
@@ -133,7 +136,9 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 		for (Entity e : mrefRepo.findAll(new QueryImpl().eq("stringRef", "ref1")))
 		{
 			logger.debug("found: " + e);
-			Assert.assertEquals(e.get("stringRef"), Arrays.asList(new String[]
+			Object obj = e.get("stringRef");
+			assertTrue(obj instanceof List<?>);
+			Assert.assertEquals(Sets.newHashSet((List<?>) obj), Sets.newHashSet(new String[]
 			{ "ref1", "ref2" }));
 		}
 
