@@ -27,10 +27,12 @@ public class MysqlRepositoryCountTest extends AbstractTestNGSpringContextTests
 	public void test()
 	{
 		// define model
-		DefaultEntityMetaData countryMD = new DefaultEntityMetaData("query_country").setIdAttribute("code");
+		DefaultEntityMetaData countryMD = new DefaultEntityMetaData("query_country");
+		countryMD.setIdAttribute("code");
 		countryMD.addAttribute("code").setNillable(false); // TODO: make this an enum!
 
-		DefaultEntityMetaData personMD = new DefaultEntityMetaData("query_person").setIdAttribute("email");
+		DefaultEntityMetaData personMD = new DefaultEntityMetaData("query_person");
+		personMD.setIdAttribute("email");
 		personMD.addAttribute("email").setNillable(false);
 		personMD.addAttribute("firstName");
 		personMD.addAttribute("lastName");
