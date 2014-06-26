@@ -227,6 +227,7 @@ public class EmxImportServiceImpl implements EmxImporterService
 			}
 
 			defaultAttributeMetaData.setLabel(attribute.getString(LABEL));
+			defaultAttributeMetaData.setDescription(attribute.getString(DESCRIPTION));
 
 			defaultEntityMetaData.addAttributeMetaData(defaultAttributeMetaData);
 		}
