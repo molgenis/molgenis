@@ -11,9 +11,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.mysql.MysqlRepository;
+import org.molgenis.data.Repository;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.util.MySqlFileUtil;
@@ -38,10 +39,11 @@ public class MutationsViewController extends MolgenisPluginController
 	private final DataService dataService;
 	private final MysqlViewService mysqlViewService;
 	public static List<String> HEADERS_NAMES = Arrays.asList("Mutation ID", "cDNA change", "Protein change",
-			"Exon/Intron", "Consequence", "Inheritance", "Patient ID", "Phenotype");
-	private static final String PATH_TO_INSERT_QUERY = File.separator + "mysql" + File.separator
+			"Exon/Intron", "Consequence",
+			"Inheritance", "Patient ID", "Phenotype");
+	private static final String PATH_TO_INSERT_QUERY = File.separatorChar + "mysql" + File.separatorChar
 			+ "mutationview_col7a1_prototype.sql";
-	private static final String PATH_TO_NA_QUERY = File.separator + "mysql" + File.separator
+	private static final String PATH_TO_NA_QUERY = File.separatorChar + "mysql" + File.separatorChar
 			+ "mutationview_col7a1_prototype_update_na.sql";
 
 	@Autowired
@@ -68,9 +70,9 @@ public class MutationsViewController extends MolgenisPluginController
 		List<Row> rows = null;
 		if (dataService.hasRepository(ENTITYNAME_MUTATIONSVIEW) && dataService.hasRepository(ENTITYNAME_MUTATIONS))
 		{
-			MysqlRepository mutationsViewRepo = (MysqlRepository) dataService
+			CrudRepository mutationsViewRepo = (CrudRepository) dataService
 					.getRepositoryByEntityName(ENTITYNAME_MUTATIONSVIEW);
-			MysqlRepository mutationsRepo = (MysqlRepository) dataService
+			CrudRepository mutationsRepo = (CrudRepository) dataService
 					.getRepositoryByEntityName(ENTITYNAME_MUTATIONS);
 			rows = createRows(mutationsViewRepo, mutationsRepo);
 		}
@@ -85,12 +87,13 @@ public class MutationsViewController extends MolgenisPluginController
 	{
 		if (dataService.hasRepository(ENTITYNAME_MUTATIONSVIEW))
 		{
-			MysqlRepository mutationsViewRepo = (MysqlRepository) dataService
+			Repository mutationsViewRepo = dataService
 					.getRepositoryByEntityName(ENTITYNAME_MUTATIONSVIEW);
-			mutationsViewRepo.truncate();
-			mutationsViewRepo.populateWithQuery(MySqlFileUtil.getMySqlQueryFromFile(this.getClass(),
+			this.mysqlViewService.truncate(mutationsViewRepo.getEntityMetaData().getName());
+			this.mysqlViewService.populateWithQuery(MySqlFileUtil.getMySqlQueryFromFile(MutationsViewController.class,
 					PATH_TO_INSERT_QUERY));
-			mutationsViewRepo.populateWithQuery(MySqlFileUtil.getMySqlQueryFromFile(this.getClass(), PATH_TO_NA_QUERY));
+			this.mysqlViewService.populateWithQuery(MySqlFileUtil.getMySqlQueryFromFile(MutationsViewController.class,
+					PATH_TO_NA_QUERY));
 			return true;
 		}
 		else
@@ -99,7 +102,7 @@ public class MutationsViewController extends MolgenisPluginController
 		}
 	}
 
-	private List<Row> createRows(MysqlRepository mutationsViewRepo, MysqlRepository mutationsRepo)
+	private List<Row> createRows(CrudRepository mutationsViewRepo, CrudRepository mutationsRepo)
 	{
 		Iterator<Entity> iterator = mutationsRepo.iterator();
 		List<Row> rows = new ArrayList<Row>();

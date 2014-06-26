@@ -91,21 +91,6 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		return "DROP TABLE IF EXISTS " + getEntityMetaData().getName();
 	}
 
-	public void truncate()
-	{
-		jdbcTemplate.execute(getTruncateSql());
-	}
-
-	protected String getTruncateSql()
-	{
-		return "TRUNCATE TABLE " + getEntityMetaData().getName() + ";";
-	}
-
-	public boolean containsData()
-	{
-		return jdbcTemplate.queryForObject("SELECT count(*) FROM " + getName(), Integer.class) > 0;
-	}
-
 	@Override
 	public void create()
 	{
@@ -128,19 +113,6 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		catch (Exception e)
 		{
 			logger.error("Exception creating MysqlRepository.", e);
-			throw new MolgenisDataException(e);
-		}
-	}
-
-	public void populateWithQuery(String insertQuery)
-	{
-		try
-		{
-			jdbcTemplate.execute(insertQuery);
-		}
-		catch (Exception e)
-		{
-			logger.error("Exception executing query: [" + insertQuery + "]", e);
 			throw new MolgenisDataException(e);
 		}
 	}

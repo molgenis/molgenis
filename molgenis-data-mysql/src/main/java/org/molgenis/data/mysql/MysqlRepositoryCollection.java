@@ -91,7 +91,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 				attributes.create();
 			}
 		}
-		else if (!entities.containsData())
+		else if (attributes.count() == 0)
 		{
 			// Update table structure to prevent errors is apps that don't use emx
 			attributes.drop();
