@@ -6,16 +6,31 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.sql.DataSource;
+
+import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
 public class MysqlViewService
 {
+	private static final Logger logger = Logger.getLogger(MysqlViewService.class);
+
 	@Autowired
 	private DataService dataService;
+
+	private JdbcTemplate jdbcTemplate;
+
+	@Autowired
+	public MysqlViewService(DataSource dataSource)
+	{
+		this.jdbcTemplate = new JdbcTemplate(dataSource);
+	}
 
 	/**
 	 * Return the values map to headers
@@ -170,5 +185,28 @@ public class MysqlViewService
 		}
 
 		return true;
+	}
+
+	public void truncate(String tableName)
+	{
+		jdbcTemplate.execute(getTruncateSql(tableName));
+	}
+
+	protected String getTruncateSql(String tableName)
+	{
+		return "TRUNCATE TABLE " + tableName + ";";
+	}
+
+	public void populateWithQuery(String insertQuery)
+	{
+		try
+		{
+			jdbcTemplate.execute(insertQuery);
+		}
+		catch (Exception e)
+		{
+			logger.error("Exception executing query: [" + insertQuery + "]", e);
+			throw new MolgenisDataException(e);
+		}
 	}
 }
