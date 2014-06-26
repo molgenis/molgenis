@@ -20,7 +20,6 @@ import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
@@ -29,9 +28,7 @@ import org.molgenis.data.Manageable;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
-import org.molgenis.data.Queryable;
-import org.molgenis.data.Repository;
-import org.molgenis.data.Writable;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.support.AbstractCrudRepository;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -43,7 +40,6 @@ import org.molgenis.fieldtypes.StringField;
 import org.molgenis.fieldtypes.TextField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.model.MolgenisModelException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -51,31 +47,30 @@ import org.springframework.jdbc.core.RowMapper;
 
 import com.google.common.collect.Lists;
 
-public class MysqlRepository extends AbstractCrudRepository implements Repository, Writable, Queryable, Manageable,
-		CrudRepository
+public class MysqlRepository extends AbstractCrudRepository implements Manageable
+
 {
 	public static final String URL_PREFIX = "mysql://";
 	public static final int BATCH_SIZE = 100000;
 	private static final Logger logger = Logger.getLogger(MysqlRepository.class);
-	private final EntityMetaData metaData;
-	private final MysqlRepositoryCollection repositoryCollection;
-	private JdbcTemplate jdbcTemplate;
+	private EntityMetaData metaData;
+	private final JdbcTemplate jdbcTemplate;
+	private RepositoryCollection repositoryCollection;
 
-	protected MysqlRepository(MysqlRepositoryCollection collection, EntityMetaData metaData,
-			EntityValidator entityValidator)
+	public MysqlRepository(DataSource dataSource, EntityValidator entityValidator)
 	{
-		super(URL_PREFIX + metaData.getName(), entityValidator);
-		if (metaData == null) throw new IllegalArgumentException("DataSource is null");
-		if (collection == null) throw new IllegalArgumentException("DataSource is null");
-		this.metaData = metaData;
-		this.repositoryCollection = collection;
-		setDataSource(collection.getDataSource());
+		super(null, entityValidator);
+		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
-	@Autowired
-	public void setDataSource(DataSource dataSource)
+	public void setMetaData(EntityMetaData metaData)
 	{
-		this.jdbcTemplate = new JdbcTemplate(dataSource);
+		this.metaData = metaData;
+	}
+
+	public void setRepositoryCollection(RepositoryCollection repositoryCollection)
+	{
+		this.repositoryCollection = repositoryCollection;
 	}
 
 	@Override
@@ -94,16 +89,6 @@ public class MysqlRepository extends AbstractCrudRepository implements Repositor
 	protected String getDropSql()
 	{
 		return "DROP TABLE IF EXISTS " + getEntityMetaData().getName();
-	}
-
-	public void truncate()
-	{
-		jdbcTemplate.execute(getTruncateSql());
-	}
-
-	protected String getTruncateSql()
-	{
-		return "TRUNCATE TABLE " + getEntityMetaData().getName() + ";";
 	}
 
 	@Override
@@ -128,19 +113,6 @@ public class MysqlRepository extends AbstractCrudRepository implements Repositor
 		catch (Exception e)
 		{
 			logger.error("Exception creating MysqlRepository.", e);
-			throw new MolgenisDataException(e);
-		}
-	}
-
-	public void populateWithQuery(String insertQuery)
-	{
-		try
-		{
-			jdbcTemplate.execute(insertQuery);
-		}
-		catch (Exception e)
-		{
-			logger.error("Exception executing query: [" + insertQuery + "]", e);
 			throw new MolgenisDataException(e);
 		}
 	}
@@ -199,11 +171,16 @@ public class MysqlRepository extends AbstractCrudRepository implements Repositor
 		}
 		// primary key is first attribute unless otherwise indicate
 		AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
+
+		if (idAttribute == null) throw new MolgenisDataException("Missing idAttribute for entity [" + getName() + "]");
+
 		if (idAttribute.getDataType() instanceof XrefField || idAttribute.getDataType() instanceof MrefField) throw new RuntimeException(
 				"primary key(" + getEntityMetaData().getName() + "." + idAttribute.getName()
 						+ ") cannot be XREF or MREF");
+
 		if (idAttribute.isNillable() == true) throw new RuntimeException("primary key(" + getEntityMetaData().getName()
 				+ "." + idAttribute.getName() + ") must be NOT NULL");
+
 		sql.append("PRIMARY KEY (").append('`').append(getEntityMetaData().getIdAttribute().getName()).append('`')
 				.append(')');
 
@@ -314,19 +291,25 @@ public class MysqlRepository extends AbstractCrudRepository implements Repositor
 	{
 		final AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
 		final AttributeMetaData refAttribute = att.getRefEntity().getIdAttribute();
+
 		StringBuilder mrefSql = new StringBuilder();
 		mrefSql.append("INSERT INTO ").append(getEntityMetaData().getName()).append('_').append(att.getName())
 				.append(" (").append('`').append(idAttribute.getName()).append('`').append(',').append('`')
 				.append(att.getName()).append('`').append(") VALUES (?,?)");
+
 		jdbcTemplate.batchUpdate(mrefSql.toString(), new BatchPreparedStatementSetter()
 		{
 			@Override
 			public void setValues(PreparedStatement preparedStatement, int i) throws SQLException
 			{
-				logger.debug("mref: " + mrefs.get(i).get(idAttribute.getName()) + ", "
-						+ mrefs.get(i).get(att.getName()));
+				if (logger.isDebugEnabled())
+				{
+					logger.debug("mref: " + mrefs.get(i).get(idAttribute.getName()) + ", "
+							+ mrefs.get(i).get(att.getName()));
+				}
 
 				preparedStatement.setObject(1, mrefs.get(i).get(idAttribute.getName()));
+
 				Object value = mrefs.get(i).get(att.getName());
 				if (value instanceof Entity)
 				{
@@ -433,12 +416,6 @@ public class MysqlRepository extends AbstractCrudRepository implements Repositor
 		}
 
 		return jdbcTemplate.query(sql, parameters.toArray(new Object[0]), new EntityMapper());
-	}
-
-	@Override
-	public <E extends Entity> Iterable<E> findAll(Query q, Class<E> clazz)
-	{
-		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -630,6 +607,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Repositor
 					if (type instanceof MrefField) predicate.append(att.getName()).append("_filter.")
 							.append(r.getField());
 					else predicate.append("this.").append('`').append(r.getField()).append('`');
+
 					switch (r.getOperator())
 					{
 						case EQUALS:
@@ -775,7 +753,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Repositor
 
 	}
 
-	public MysqlRepositoryCollection getRepositoryCollection()
+	public RepositoryCollection getRepositoryCollection()
 	{
 		return repositoryCollection;
 	}
@@ -801,7 +779,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Repositor
 		final AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
 		final Map<String, List<Entity>> mrefs = new HashMap<String, List<Entity>>();
 
-		jdbcTemplate.batchUpdate(this.getInsertSql(), new BatchPreparedStatementSetter()
+		jdbcTemplate.batchUpdate(getInsertSql(), new BatchPreparedStatementSetter()
 		{
 			@Override
 			public void setValues(PreparedStatement preparedStatement, int rowIndex) throws SQLException
@@ -820,6 +798,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Repositor
 								Entity mref = new MapEntity();
 								mref.set(idAttribute.getName(), batch.get(rowIndex).get(idAttribute.getName()));
 								mref.set(att.getName(), val);
+
 								mrefs.get(att.getName()).add(mref);
 							}
 						}
@@ -868,14 +847,14 @@ public class MysqlRepository extends AbstractCrudRepository implements Repositor
 	public void addInternal(Entity entity)
 	{
 		if (entity == null) throw new RuntimeException("MysqlRepository.add() failed: entity was null");
-		this.add(Arrays.asList(new Entity[]
+		addInternal(Arrays.asList(new Entity[]
 		{ entity }));
 	}
 
 	@Override
 	public void updateInternal(Entity entity)
 	{
-		update(Arrays.asList(new Entity[]
+		updateInternal(Arrays.asList(new Entity[]
 		{ entity }));
 	}
 
@@ -986,7 +965,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Repositor
 		@Override
 		public Entity mapRow(ResultSet resultSet, int i) throws SQLException
 		{
-			Entity e = new MysqlEntity(getEntityMetaData(), getRepositoryCollection());
+			Entity e = new MysqlEntity(getEntityMetaData(), repositoryCollection);
 
 			for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 			{

@@ -18,8 +18,6 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 	private String label;
 	private boolean abstract_ = false;
 	private String description;
-	private String idAttribute;
-	private String labelAttribute; // remove?
 	private EntityMetaData extends_;
 
 	public DefaultEntityMetaData(String name)
@@ -46,8 +44,8 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 		if (attributeMetaData == null) throw new IllegalArgumentException("AttributeMetaData cannot be null");
 		if (attributeMetaData.getName() == null) throw new IllegalArgumentException(
 				"Name of the AttributeMetaData cannot be null");
-		if (attributeMetaData.isLabelAttribute()) this.labelAttribute = attributeMetaData.getName();
-		if (attributeMetaData.isIdAtrribute()) this.idAttribute = attributeMetaData.getName();
+		if (attributeMetaData.isLabelAttribute()) setLabelAttribute(attributeMetaData.getName());
+		if (attributeMetaData.isIdAtrribute()) setIdAttribute(attributeMetaData.getName());
 
 		attributes.put(attributeMetaData.getName().toLowerCase(), attributeMetaData);
 	}
@@ -82,56 +80,6 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 		}
 		result.addAll(attributes.values());
 		return Collections.unmodifiableList(result);
-	}
-
-	@Override
-	public AttributeMetaData getIdAttribute()
-	{
-		if (idAttribute != null)
-		{
-			AttributeMetaData att = getAttribute(idAttribute);
-			if (att == null) throw new RuntimeException(getName() + ".getIdAttribute() failed: '" + idAttribute
-					+ "' unknown");
-			return att;
-		}
-		else if (getExtends() != null)
-		{
-			return getExtends().getIdAttribute();
-		}
-		return null;
-	}
-
-	public DefaultEntityMetaData setIdAttribute(String name)
-	{
-		this.idAttribute = name;
-		return this;
-	}
-
-	@Override
-	public AttributeMetaData getLabelAttribute()
-	{
-		if (labelAttribute != null)
-		{
-			AttributeMetaData att = getAttribute(labelAttribute);
-			if (att == null) throw new RuntimeException("getLabelAttribute() failed: '" + labelAttribute + "' unknown");
-			return att;
-		}
-		return getIdAttribute();
-	}
-
-	public DefaultEntityMetaData setLabelAttribute(String name)
-	{
-		this.labelAttribute = name;
-		return this;
-	}
-
-	@Override
-	public AttributeMetaData getAttribute(String attributeName)
-	{
-		if (attributeName == null) throw new IllegalArgumentException("AttributeName is null");
-		AttributeMetaData result = attributes.get(attributeName.toLowerCase());
-		if (result == null && getExtends() != null) return getExtends().getAttribute(attributeName);
-		else return result;
 	}
 
 	@Override

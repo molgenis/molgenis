@@ -13,12 +13,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.sql.DataSource;
+
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.mutationdb.Cell;
-import org.molgenis.mutationdb.MysqlViewService;
-import org.molgenis.mutationdb.Row;
-import org.molgenis.mutationdb.Value;
 import org.molgenis.mutationdb.MysqlViewServiceTest.Config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -26,7 +24,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 @WebAppConfiguration
@@ -39,12 +36,10 @@ public class MysqlViewServiceTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	public DataService dataService;
 
-	final List<String> headers = Arrays.asList("header1", "header2", "header3");
+	@Autowired
+	public DataSource dataSource;
 
-	@BeforeMethod
-	public void beforeMethod()
-	{
-	}
+	final List<String> headers = Arrays.asList("header1", "header2", "header3");
 
 	@Test
 	public void valuesPerHeader()
@@ -197,15 +192,21 @@ public class MysqlViewServiceTest extends AbstractTestNGSpringContextTests
 	public static class Config
 	{
 		@Bean
-		public MysqlViewService mysqlViewService()
-		{
-			return new MysqlViewService();
-		}
-
-		@Bean
 		public DataService dataService()
 		{
 			return mock(DataService.class);
+		}
+
+		@Bean
+		public DataSource dataSource()
+		{
+			return mock(DataSource.class);
+		}
+
+		@Bean
+		public MysqlViewService mysqlViewService()
+		{
+			return new MysqlViewService(this.dataSource());
 		}
 	}
 }
