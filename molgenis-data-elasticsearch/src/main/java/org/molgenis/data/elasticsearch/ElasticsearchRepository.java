@@ -7,13 +7,10 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.cache.clear.ClearIndicesCacheResponse;
@@ -34,7 +31,6 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.update.UpdateRequestBuilder;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.common.collect.Sets;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.QueryStringQueryBuilder.Operator;
@@ -52,6 +48,7 @@ import org.molgenis.data.*;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.elasticsearch.index.MappingsBuilder;
 import org.molgenis.elasticsearch.request.LuceneQueryStringBuilder;
+import org.molgenis.elasticsearch.response.ResponseParser;
 import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -60,7 +57,6 @@ import org.springframework.data.domain.Sort.Order;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
-import com.google.common.collect.Lists;
 
 public class ElasticsearchRepository implements CrudRepository, Manageable
 {
@@ -263,148 +259,7 @@ public class ElasticsearchRepository implements CrudRepository, Manageable
 		SearchResponse searchResponse = createSearchRequest(q).setSize(0).addAggregation(termsBuilder).execute()
 				.actionGet();
 
-		Aggregations aggregations = searchResponse.getAggregations();
-
-		// create aggregate result
-		List<List<Long>> matrix = Lists.newArrayList();
-		Set<String> xLabelsSet = Sets.newHashSet();
-		Set<String> yLabelsSet = Sets.newHashSet();
-		List<String> xLabels = new ArrayList<String>();
-		List<String> yLabels = new ArrayList<String>();
-		final int nrAggregations = Iterables.size(aggregations);
-		if (nrAggregations != 1)
-		{
-			throw new RuntimeException("Multiple aggregations [" + nrAggregations + "] not supported");
-		}
-
-		Aggregation aggregation = aggregations.iterator().next();
-		if (!(aggregation instanceof Terms))
-		{
-			throw new RuntimeException("Aggregation of type [" + aggregation.getClass().getName() + "] not supported");
-		}
-		Terms terms = (Terms) aggregation;
-
-		Collection<Bucket> buckets = terms.getBuckets();
-		if (buckets.size() > 0)
-		{
-			// distinguish between 1D and 2D aggregation
-			boolean hasSubAggregations = false;
-			for (Bucket bucket : buckets)
-			{
-				Aggregations subAggregations = bucket.getAggregations();
-				if (subAggregations != null && Iterables.size(subAggregations) > 0)
-				{
-					hasSubAggregations = true;
-					break;
-				}
-			}
-
-			if (hasSubAggregations)
-			{
-				// create labels
-				for (Bucket bucket : buckets)
-				{
-					if (!xLabelsSet.contains(bucket.getKey())) xLabelsSet.add(bucket.getKey());
-
-					Aggregations subAggregations = bucket.getAggregations();
-					if (subAggregations != null)
-					{
-						if (Iterables.size(subAggregations) > 1)
-						{
-							throw new RuntimeException("Multiple aggregations [" + nrAggregations + "] not supported");
-						}
-						Aggregation subAggregation = subAggregations.iterator().next();
-
-						if (!(subAggregation instanceof Terms))
-						{
-							throw new RuntimeException("Aggregation of type [" + subAggregation.getClass().getName()
-									+ "] not supported");
-						}
-						Terms subTerms = (Terms) subAggregation;
-
-						for (Bucket subBucket : subTerms.getBuckets())
-						{
-							yLabelsSet.add(subBucket.getKey());
-						}
-
-					}
-				}
-
-				xLabels = new ArrayList<String>(xLabelsSet);
-				Collections.sort(xLabels);
-				xLabels.add("Total");
-				yLabels = new ArrayList<String>(yLabelsSet);
-				Collections.sort(yLabels);
-				yLabels.add("Total");
-
-				// create label map
-				int idx = 0;
-				Map<String, Integer> yLabelMap = new HashMap<String, Integer>();
-				for (String yLabel : yLabels)
-				{
-					yLabelMap.put(yLabel, idx++);
-				}
-
-				for (Bucket bucket : buckets)
-				{
-					// create values
-					List<Long> yValues = new ArrayList<Long>();
-					for (int i = 0; i < idx; ++i)
-					{
-						yValues.add(0l);
-					}
-
-					Aggregations subAggregations = bucket.getAggregations();
-					if (subAggregations != null)
-					{
-						long count = 0;
-						Terms subTerms = (Terms) subAggregations.iterator().next();
-						for (Bucket subBucket : subTerms.getBuckets())
-						{
-							long bucketCount = subBucket.getDocCount();
-							yValues.set(yLabelMap.get(subBucket.getKey()), bucketCount);
-							count += bucketCount;
-						}
-						yValues.set(yLabelMap.get("Total"), count);
-					}
-
-					matrix.add(yValues);
-				}
-
-				// create value totals
-				List<Long> xTotals = new ArrayList<Long>();
-				for (int i = 0; i < idx; ++i)
-				{
-					xTotals.add(0l);
-				}
-
-				for (List<Long> values : matrix)
-				{
-					int nrValues = values.size();
-					for (int i = 0; i < nrValues; ++i)
-					{
-						xTotals.set(i, xTotals.get(i) + values.get(i));
-					}
-				}
-				matrix.add(xTotals);
-			}
-			else
-			{
-				long total = 0;
-				for (Bucket bucket : buckets)
-				{
-					xLabels.add(bucket.getKey());
-					long docCount = bucket.getDocCount();
-					matrix.add(Lists.newArrayList(Long.valueOf(docCount)));
-					total += docCount;
-				}
-				matrix.add(Lists.newArrayList(Long.valueOf(total)));
-				xLabels.add("Total");
-				yLabels.add("Count");
-			}
-		}
-
-		return new AggregateResult(matrix, xLabels, yLabels);
+		return ResponseParser.createAggregateResult(searchResponse);
 	}
 
 	@Override

@@ -147,7 +147,7 @@ public class VcfRepository extends AbstractRepository
 							sampleEntity.set(ID, UUID.randomUUID());
 							// FIXME remove entity ID from Sample label after #1400 is fixed, see also:
 							// jquery.molgenis.table.js line 152
-							sampleEntity.set(NAME, entity.get(ID) + "_" + sampleNameIterator.next());
+							sampleEntity.set(NAME, entity.get(POS) + "_" + entity.get(ALT) + "_" + sampleNameIterator.next());
 							samples.add(sampleEntity);
 						}
 						entity.set(SAMPLES, samples);
