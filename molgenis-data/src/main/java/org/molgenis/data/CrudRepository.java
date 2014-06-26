@@ -1,6 +1,6 @@
 package org.molgenis.data;
 
-public interface CrudRepository extends Repository, Queryable, Updateable, Aggregateable
+public interface CrudRepository extends Repository, Queryable, Updateable
 {
 
 }

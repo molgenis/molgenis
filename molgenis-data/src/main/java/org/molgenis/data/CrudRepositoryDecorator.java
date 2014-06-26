@@ -1,9 +1,9 @@
 package org.molgenis.data;
 
-import org.molgenis.data.support.QueryImpl;
-
 import java.io.IOException;
 import java.util.List;
+
+import org.molgenis.data.support.QueryImpl;
 
 /**
  * Base class for CrudRepository decorators.
@@ -164,9 +164,4 @@ public class CrudRepositoryDecorator extends RepositoryDecorator implements Crud
 		decoratedRepository.deleteById(id);
 	}
 
-	@Override
-	public AggregateResult aggregate(AttributeMetaData xAttr, AttributeMetaData yAttr, Query q)
-	{
-		return decoratedRepository.aggregate(xAttr, yAttr, q);
-	}
 }
