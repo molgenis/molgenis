@@ -18,7 +18,6 @@ import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DatabaseAction;
@@ -756,12 +755,6 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 	public RepositoryCollection getRepositoryCollection()
 	{
 		return repositoryCollection;
-	}
-
-	@Override
-	public AggregateResult aggregate(AttributeMetaData xAttr, AttributeMetaData yAttr, Query q)
-	{
-		throw new UnsupportedOperationException("not yet implemented");
 	}
 
 	@Override
