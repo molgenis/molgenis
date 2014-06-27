@@ -2,8 +2,6 @@
 	"use strict";
 	
 	var ontologyTree = null;
-	var ontologyUrl = null;
-	var treeMap = {};
 	
 	molgenis.OntologySerivce = function OntologySerivce(ontologyTreeObject){
 		ontologyTree = ontologyTreeObject;
@@ -31,6 +29,7 @@
 	
 	function createResults(entities){
 		var container = $('#match-result');
+		var isHidden = container.find('.termurl:eq(0)').is(':hidden');
 		container.empty();
 		$.each(entities, function(rowIndex, entity){
 			var layoutDiv = $('<div />').addClass('row-fluid');
@@ -68,6 +67,10 @@
 			var divWithColor = $('<div />').addClass('span12 well div-hover').append(layoutDiv);
 			$('<div />').addClass('row-fluid').append(divWithColor).appendTo(container);
 		});
+		if(isHidden){
+			container.find('.termurl').hide();
+			$('.matchterm').removeClass('span5').addClass('span8');
+		}
 		initToggle();
 	}
 	
