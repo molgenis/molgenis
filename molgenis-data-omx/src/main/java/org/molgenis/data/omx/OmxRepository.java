@@ -6,7 +6,16 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-import org.molgenis.data.*;
+import org.molgenis.data.AggregateResult;
+import org.molgenis.data.Aggregateable;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.CrudRepository;
+import org.molgenis.data.DataService;
+import org.molgenis.data.DatabaseAction;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Query;
 import org.molgenis.data.support.ConvertingIterable;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
@@ -40,7 +49,7 @@ import com.google.common.collect.Sets;
  * 
  * Uses the DataService to get the metadata and the SearchService to get the actual data itself
  */
-public class OmxRepository extends AbstractDataSetMatrixRepository implements CrudRepository
+public class OmxRepository extends AbstractDataSetMatrixRepository implements CrudRepository, Aggregateable
 {
 	public static final String BASE_URL = "omx://";
 	private static final String DATASET_ROW_IDENTIFIER_HEADER = "DataSet_Row_Id";
