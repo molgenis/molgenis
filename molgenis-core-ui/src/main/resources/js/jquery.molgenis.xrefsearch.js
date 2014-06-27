@@ -98,6 +98,7 @@
 			width: '80%',
 			minimumInputLength: 2,
             multiple: (attributeMetaData.fieldType === 'MREF'),
+            closeOnSelect: (attributeMetaData.fieldType === 'XREF'),
 			query: function (options){
 				var query = createQuery(lookupAttrNames, [options.term],'LIKE');
 				if(query)
