@@ -2,6 +2,7 @@
 	"use strict";
 	
 	var restApi = new molgenis.RestClient();
+	var standardModal = new molgenis.StandardModal();
 	var TREE_LABEL = "label";
 	var ROOT = "root";
 	var LAST = "isLast";
@@ -16,8 +17,11 @@
 	var PARENT_NODE_PATH = "parentNodePath";
 	var PARENT_ONTOLOGY_TERM_IRI = "parentOntologyTermIRI";
 	var treeDict = null;
+	var container = null;
 	
-	molgenis.OntologyTree = function OntologyTree(){};
+	molgenis.OntologyTree = function OntologyTree(treeContainerId){
+		container = $('#' + treeContainerId);
+	};
 	
 	molgenis.OntologyTree.prototype.updateOntologyTree = function(ontologyIRI){
 		var ontologyIndex = getOntologyTermByIri(ontologyIRI);
@@ -53,7 +57,7 @@
 	
 	molgenis.OntologyTree.prototype.queryTree = function(ontologyIRI, query){
 		if(query !== undefined && query !== ''){
-			var molgenisTree = $('#tree-container').tree('getTree');
+			var molgenisTree = container.tree('getTree');
 			treeDict = treeDict ? treeDict : molgenisTree.rootNode.toDict(true);
 			molgenisTree.reload();
 			var ontologyIndex = getOntologyTermByIri(ontologyIRI);
@@ -86,21 +90,25 @@
 	
 	molgenis.OntologyTree.prototype.restoreTree = function(){
 		if(treeDict){
-			var molgenisTree = $('#tree-container').tree('getTree');
+			var molgenisTree = container.tree('getTree');
 			molgenisTree.rootNode.fromDict(treeDict);
 			treeDict = null;
 		}
 	};
 	
 	molgenis.OntologyTree.prototype.locateTerm = function(ontologyTerm){
-		var molgenisTree = $('#tree-container').tree('getTree');
+		var molgenisTree = container.tree('getTree');
 		molgenisTree.reload();
 		ontologyTerm = getOntologyTerm(ontologyTerm);
-		ontologyTermInfo(ontologyTerm);
 		var currentNode = getParentNode(molgenisTree, ontologyTerm, true);
 		currentNode.setFocus();
-		var scroll = $(currentNode.li).position().top - $('#tree-container').position().top - $('#tree-container').height() / 3 * 2;
-		if(scroll > $('#tree-container').height() / 2) $('#tree-container').scrollTop(scroll);
+		var middlePosition = container.offset().top + container.height()/2;
+		var scrolledDis = Math.abs($(molgenisTree.rootNode.ul).offset().top - container.offset().top);
+		if($(currentNode.li).offset().top > middlePosition){
+			container.scrollTop($(currentNode.li).offset().top - middlePosition + scrolledDis);			
+		}else{
+			container.scrollTop(scrolledDis - middlePosition + $(currentNode.li).offset().top);
+		}
 	};
 	
 	function getParentNode(molgenisTree, ontologyTerm, showSibling){
@@ -114,7 +122,7 @@
 				var parentNode = getParentNode(molgenisTree, getParentOntologyTerm(ontologyTerm), showSibling);
 				//Add current node the tree
 				if(parentNode){
-					 $('#tree-container').tree('appendChildNodes', parentNode, showSibling ? removeDuplicate(parentOntologyTerm.attributes.items) : removeDuplicate([ontologyTerm]));
+					 container.tree('appendChildNodes', parentNode, showSibling ? removeDuplicate(parentOntologyTerm.attributes.items) : removeDuplicate([ontologyTerm]));
 				}else{
 					console.log('error parent node cannot but null!');
 				}	
@@ -208,19 +216,17 @@
 	}
 	
 	function createEntityMetaTree(entityMetaData, attributes) {
-		
-		var container = $('#tree-container').css({
+		container.css({
 			'height' : '500px',
 			'overflow' : 'auto'
-		});
-		container.tree({
+		}).tree({
 			'entityMetaData' : entityMetaData,
 			'selectedAttributes' : attributes,
 			'onAttributesSelect' : function(selects) {
 				console.log(selects);
 			},
 			'onAttributeClick' : function(attribute) {
-				ontologyTermInfo(attribute);
+				$('#ontology-term-info').empty().append(ontologyTermInfo(attribute));
 			},
 			'lazyload' : function(data, createChildren){
 				var href = data.node.data.attribute.href;
@@ -228,9 +234,29 @@
 				data.result = createChildren(removeDuplicate(ontologyTerm.attributes.items));
 			}
 		});
+		
+		container.on('hover', 'span.fancytree-title', function(event){
+			var node = $.ui.fancytree.getNode(event);
+			var selectorElement = node.li ? $(node.li) : $(node.ul);
+			var data = gatherSynonyms(node.data.attribute);
+			if(data.synonyms.length > 0){
+				var listOfSynonyms = $('<div />');
+				$.each(data.synonyms, function(index, synonym){
+					listOfSynonyms.append('* ' + synonym + '<br>');
+				});
+				$(node.li).children('span:eq(0)').popover({
+					'title' : 'Synonyms',
+					'trigger' : 'hover',
+					'placement' : 'bottom',
+					'html' : true,
+					'content' : listOfSynonyms
+				}).popover('show');
+			}
+		});
 	}
 	
-	function ontologyTermInfo(attribute){
+	function gatherSynonyms(attribute){
+		var data = {};
 		var ontologyTerm = restApi.get(attribute.href, {'expand' : ['attributes']}, null);
 		var baseUrl = ontologyTerm.href.substring(0, ontologyTerm.href.lastIndexOf('/') + 1)
 		var relatedOntologyTerms = restApi.get(baseUrl, {'expand' : ['attributes'], 'q' : {
@@ -241,24 +267,30 @@
 			}]
 		}}, null);
 		if(relatedOntologyTerms.items.length > 0){
-			var data = removeDuplicate(relatedOntologyTerms.items)[0];
-			var table = $('<table />').addClass('table');
-			table.append('<tr><th>Ontology</th><td><a href="' + data[ONTOLOGY_IRI] + '" target="_blank">' + data[ONTOLOGY_IRI] + '</a></td></tr>');
-			table.append('<tr><th>OntologyTerm</th><td><a href="' + data[ONTOLOGY_TERM_IRI] + '" target="_blank">' + data[ONTOLOGY_TERM_IRI] + '</a></td></tr>');
-			table.append('<tr><th>Name</th><td>' + data[ONTOLOGY_TERM] + '</td></tr>');
-			if(data.description){
-				table.append('<tr><th>Definition</th><td>' + data[ONTOLOGY_TERM_DEFINITION] + '</td></tr>');
-			}
-			if(data.synonyms && data.synonyms.length > 0){
-				var listOfSynonyms = $('<ul />');
-				$.each(data.synonyms, function(index, synonym){
-					listOfSynonyms.append('<li>' + synonym + '</li>');
-				});
-				var synonymContainer = $('<td />').append(listOfSynonyms);
-				$('<tr />').append('<th>Synonyms</th>').append(synonymContainer).appendTo(table);
-			}
-			table.find('th').width('30%');
-			$('#ontology-term-info').empty().append(table);
+			data = removeDuplicate(relatedOntologyTerms.items)[0];
 		}
+		return data;
+	}
+	
+	function ontologyTermInfo(attribute){
+		
+		var table = $('<table />').addClass('table').width('500px');
+		var data = gatherSynonyms(attribute);
+		table.append('<tr><th>Ontology</th><td><a href="' + data[ONTOLOGY_IRI] + '" target="_blank">' + data[ONTOLOGY_IRI] + '</a></td></tr>');
+		table.append('<tr><th>OntologyTerm</th><td><a href="' + data[ONTOLOGY_TERM_IRI] + '" target="_blank">' + data[ONTOLOGY_TERM_IRI] + '</a></td></tr>');
+		table.append('<tr><th>Name</th><td>' + data[ONTOLOGY_TERM] + '</td></tr>');
+		if(data.description){
+			table.append('<tr><th>Definition</th><td>' + data[ONTOLOGY_TERM_DEFINITION] + '</td></tr>');
+		}
+		if(data.synonyms && data.synonyms.length > 0){
+			var listOfSynonyms = $('<ul />');
+			$.each(data.synonyms, function(index, synonym){
+				listOfSynonyms.append('<li>' + synonym + '</li>');
+			});
+			var synonymContainer = $('<td />').append(listOfSynonyms);
+			$('<tr />').append('<th>Synonyms</th>').append(synonymContainer).appendTo(table);
+		}
+		table.find('th').width('30%');
+		return table;
 	}
 }($, window.top.molgenis = window.top.molgenis || {}));
