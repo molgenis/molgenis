@@ -1,5 +1,7 @@
 package org.molgenis.data.mysql;
 
+import static org.testng.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -14,6 +16,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 /** Test for MolgenisFieldTypes.MREF */
 public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
@@ -21,15 +24,17 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		DefaultEntityMetaData refEntity = new DefaultEntityMetaData("StringTarget2").setLabelAttribute("label")
-				.setIdAttribute("identifier");
+		DefaultEntityMetaData refEntity = new DefaultEntityMetaData("StringTarget2");
+		refEntity.setLabelAttribute("label");
+		refEntity.setIdAttribute("identifier");
 		refEntity.addAttribute("identifier").setNillable(false);
 
-		DefaultEntityMetaData refEntity2 = new DefaultEntityMetaData("IntTarget2").setIdAttribute("identifier");
+		DefaultEntityMetaData refEntity2 = new DefaultEntityMetaData("IntTarget2");
+		refEntity2.setIdAttribute("identifier");
 		refEntity2.addAttribute("identifier").setDataType(MolgenisFieldTypes.INT).setNillable(false);
 
-		DefaultEntityMetaData varcharMD = new DefaultEntityMetaData("MrefTest").setLabel("ref Test").setIdAttribute(
-				"identifier");
+		DefaultEntityMetaData varcharMD = new DefaultEntityMetaData("MrefTest").setLabel("ref Test");
+		varcharMD.setIdAttribute("identifier");
 		varcharMD.addAttribute("identifier").setNillable(false);
 		varcharMD.addAttribute("stringRef").setDataType(MolgenisFieldTypes.MREF).setRefEntity(refEntity)
 				.setNillable(false);
@@ -131,7 +136,9 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 		for (Entity e : mrefRepo.findAll(new QueryImpl().eq("stringRef", "ref1")))
 		{
 			logger.debug("found: " + e);
-			Assert.assertEquals(e.get("stringRef"), Arrays.asList(new String[]
+			Object obj = e.get("stringRef");
+			assertTrue(obj instanceof List<?>);
+			Assert.assertEquals(Sets.newHashSet((List<?>) obj), Sets.newHashSet(new String[]
 			{ "ref1", "ref2" }));
 		}
 

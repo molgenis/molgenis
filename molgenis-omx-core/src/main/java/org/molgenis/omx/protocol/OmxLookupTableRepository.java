@@ -77,6 +77,12 @@ public class OmxLookupTableRepository extends AbstractRepository implements Quer
 	}
 
 	@Override
+	public Query query()
+	{
+		return new QueryImpl(this);
+	}
+
+	@Override
 	public long count(Query q)
 	{
 		queryResolver.resolveRefIdentifiers(q.getRules(), getEntityMetaData());

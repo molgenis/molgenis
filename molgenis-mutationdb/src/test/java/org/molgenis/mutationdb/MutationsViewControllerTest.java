@@ -13,14 +13,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.sql.DataSource;
+
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.mutationdb.MutationsViewController;
-import org.molgenis.mutationdb.MysqlViewService;
-import org.molgenis.mutationdb.Row;
-import org.molgenis.mutationdb.Value;
 import org.molgenis.mutationdb.MutationsViewControllerTest.Config;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +45,9 @@ public class MutationsViewControllerTest extends AbstractTestNGSpringContextTest
 
 	@Autowired
 	public DataService dataService;
+
+	@Autowired
+	public DataSource dataSource;
 
 	@Autowired
 	public MutationsViewController mutationsViewController;
@@ -82,9 +84,16 @@ public class MutationsViewControllerTest extends AbstractTestNGSpringContextTest
 	@Test
 	public void refreshReturnTrue() throws Exception
 	{
+		MysqlRepository mutationsViewRepo = mock(MysqlRepository.class);
+
 		when(dataService.hasRepository(MutationsViewController.ENTITYNAME_MUTATIONSVIEW)).thenReturn(true);
-		when((MysqlRepository) dataService.getRepositoryByEntityName(MutationsViewController.ENTITYNAME_MUTATIONSVIEW))
-				.thenReturn(mock(MysqlRepository.class));
+		when(dataService.getRepositoryByEntityName(MutationsViewController.ENTITYNAME_MUTATIONSVIEW))
+				.thenReturn(mutationsViewRepo);
+
+		EntityMetaData entityMetaData = mock(EntityMetaData.class);
+		when(mutationsViewRepo.getEntityMetaData()).thenReturn(entityMetaData);
+		when(entityMetaData.getName()).thenReturn(MutationsViewController.ENTITYNAME_MUTATIONSVIEW);
+
 		MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get(MutationsViewController.URI + "/generate"))
 				.andExpect(status().isOk()).andReturn();
 		boolean content = Boolean.valueOf(result.getResponse().getContentAsString());
@@ -152,6 +161,12 @@ public class MutationsViewControllerTest extends AbstractTestNGSpringContextTest
 			return mock(DataService.class);
 		}
 		
+		@Bean
+		public DataSource dataSource()
+		{
+			return mock(DataSource.class);
+		}
+
 		@Bean
 		public MutationsViewController mutationsViewController()
 		{

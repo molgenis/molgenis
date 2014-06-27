@@ -244,6 +244,35 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
+	public Writable getWritableRepository(String entityName)
+	{
+		Repository repository = getRepositoryByEntityName(entityName);
+		if (repository instanceof Writable)
+		{
+			return (Writable) repository;
+		}
+		throw new MolgenisDataException("Repository [" + repository.getName() + "] is not Writable");
+	}
+
+	@Override
+	public Queryable getQueryableRepository(String entityName)
+	{
+		Repository repository = getRepositoryByEntityName(entityName);
+		if (repository instanceof Queryable)
+		{
+			return (Queryable) repository;
+		}
+		throw new MolgenisDataException("Repository [" + repository.getName() + "] is not Queryable");
+
+	}
+
+	@Override
+	public Query query(String entityName)
+	{
+		return new QueryImpl(getQueryableRepository(entityName));
+	}
+
+	@Override
 	public Iterable<Class<? extends Entity>> getEntityClasses()
 	{
 		List<Class<? extends Entity>> entityClasses = new ArrayList<Class<? extends Entity>>();

@@ -21,15 +21,17 @@ public class MysqlRepositoryXrefTest extends MysqlRepositoryAbstractDatatypeTest
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		DefaultEntityMetaData refEntity = new DefaultEntityMetaData("StringTarget").setLabelAttribute("label")
-				.setIdAttribute("identifier");
+		DefaultEntityMetaData refEntity = new DefaultEntityMetaData("StringTarget");
+		refEntity.setLabelAttribute("label");
+		refEntity.setIdAttribute("identifier");
 		refEntity.addAttribute("identifier").setNillable(false);
 
-		DefaultEntityMetaData refEntity2 = new DefaultEntityMetaData("IntTarget").setIdAttribute("identifier");
+		DefaultEntityMetaData refEntity2 = new DefaultEntityMetaData("IntTarget");
+		refEntity2.setIdAttribute("identifier");
 		refEntity2.addAttribute("identifier").setDataType(MolgenisFieldTypes.INT).setNillable(false);
 
-		DefaultEntityMetaData xrefEntity = new DefaultEntityMetaData("XrefTest").setLabel("Xref Test").setIdAttribute(
-				"identifier");
+		DefaultEntityMetaData xrefEntity = new DefaultEntityMetaData("XrefTest").setLabel("Xref Test");
+		xrefEntity.setIdAttribute("identifier");
 		xrefEntity.addAttribute("identifier").setNillable(false);
 		xrefEntity.addAttribute("stringRef").setDataType(MolgenisFieldTypes.XREF).setRefEntity(refEntity)
 				.setNillable(false);
