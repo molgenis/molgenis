@@ -87,8 +87,9 @@
 			data : JSON.stringify(data),
 			contentType : 'application/json',
 			success : function(aggregateResult) {
-				var items = ['<table class="table table-striped" >'];
-				
+				var countAboveZero = false;
+                var items = ['<table class="table table-striped" >'];
+				var noResultMessage = molgenis.dataexplorer.getNoResultMessage()
 				items.push('<tr>');
 				items.push('<td style="width: 18%"></td>');
 				$.each(aggregateResult.yLabels, function(index, label){
@@ -99,13 +100,17 @@
 					items.push('<tr>');
 					items.push('<th>' + aggregateResult.xLabels[index] + '</th>');
 					$.each(row, function(index, count) {
+                        countAboveZero = count > 0 || countAboveZero;
 						items.push('<td><div class="text-center">' + count + '</div></td>');
 					});
 					items.push('</tr>');
 				});
 				
 				items.push('</table>');
-				
+				if(!countAboveZero && noResultMessage !== undefined){
+                    items.length = 0;
+                    items.push("<br><div>"+noResultMessage+"<div>");
+                }
 				$('#aggregate-table-container').html(items.join(''));
 			}
 		});
