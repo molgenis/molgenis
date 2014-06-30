@@ -14,7 +14,6 @@ public class MySqlFileUtil
 
 	public static String getMySqlQueryFromFile(Class<?> clazzPath, String nameResource)
 	{
-		System.out.println("clazzPath.getResource(nameResource) " + clazzPath.getResource(nameResource));
 		final String pathname = clazzPath.getResource(nameResource).getFile();
 		try
 		{

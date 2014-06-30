@@ -1,5 +1,6 @@
 package org.molgenis.mutationdb;
 
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
@@ -13,16 +14,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.sql.DataSource;
+
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.mutationdb.MysqlViewService;
-import org.molgenis.mutationdb.PatientsViewController;
-import org.molgenis.mutationdb.Row;
-import org.molgenis.mutationdb.Value;
 import org.molgenis.mutationdb.PatientsViewControllerTest.Config;
 import org.molgenis.util.GsonHttpMessageConverter;
+import org.molgenis.util.MySqlFileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,6 +47,9 @@ public class PatientsViewControllerTest extends AbstractTestNGSpringContextTests
 
 	@Autowired
 	public DataService dataService;
+
+	@Autowired
+	public DataSource dataSource;
 
 	@Autowired
 	public PatientsViewController patientsViewController;
@@ -82,9 +86,20 @@ public class PatientsViewControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void refreshReturnTrue() throws Exception
 	{
+		MysqlRepository patientsViewRepo = mock(MysqlRepository.class);
+
 		when(dataService.hasRepository(PatientsViewController.ENTITYNAME_PATIENTSVIEW)).thenReturn(true);
-		when((MysqlRepository) dataService.getRepositoryByEntityName(PatientsViewController.ENTITYNAME_PATIENTSVIEW))
-				.thenReturn(mock(MysqlRepository.class));
+		doNothing().when(mysqlViewService).truncate(PatientsViewController.ENTITYNAME_PATIENTSVIEW);
+		doNothing().when(mysqlViewService).populateWithQuery(MySqlFileUtil.getMySqlQueryFromFile(
+				PatientsViewController.class,
+						PatientsViewController.PATH_TO_INSERT_QUERY));
+		when(
+				dataService.getRepositoryByEntityName(PatientsViewController.ENTITYNAME_PATIENTSVIEW)).thenReturn(
+				patientsViewRepo).getMock();
+
+		EntityMetaData entityMetaData = mock(EntityMetaData.class);
+		when(patientsViewRepo.getEntityMetaData()).thenReturn(entityMetaData);
+		when(entityMetaData.getName()).thenReturn(PatientsViewController.ENTITYNAME_PATIENTSVIEW);
 		MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get(PatientsViewController.URI + "/generate"))
 				.andExpect(status().isOk()).andReturn();
 		boolean content = Boolean.valueOf(result.getResponse().getContentAsString());
@@ -141,21 +156,27 @@ public class PatientsViewControllerTest extends AbstractTestNGSpringContextTests
 	public static class Config
 	{
 		@Bean
-		public MysqlViewService mysqlViewService()
-		{
-			return mock(MysqlViewService.class);
-		}
-
-		@Bean
 		public DataService dataService()
 		{
 			return mock(DataService.class);
 		}
 		
 		@Bean
+		public DataSource dataSource()
+		{
+			return mock(DataSource.class);
+		}
+
+		@Bean
 		public PatientsViewController patientsViewController()
 		{
 			return new PatientsViewController(dataService(), mysqlViewService());
+		}
+
+		@Bean
+		public MysqlViewService mysqlViewService()
+		{
+			return mock(MysqlViewService.class);
 		}
 	}
 }

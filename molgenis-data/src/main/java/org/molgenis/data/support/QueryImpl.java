@@ -30,6 +30,7 @@ public class QueryImpl implements Query
 
 	public QueryImpl(Queryable repository)
 	{
+		this();
 		this.repository = repository;
 	}
 

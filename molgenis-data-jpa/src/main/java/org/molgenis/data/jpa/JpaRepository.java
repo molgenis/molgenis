@@ -30,6 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AggregateResult;
+import org.molgenis.data.Aggregateable;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DatabaseAction;
@@ -57,7 +58,7 @@ import com.google.common.collect.Sets;
 /**
  * Repository implementation for (generated) jpa entities
  */
-public class JpaRepository extends AbstractCrudRepository
+public class JpaRepository extends AbstractCrudRepository implements Aggregateable
 {
 	public static final String BASE_URL = "jpa://";
 	private final EntityMetaData entityMetaData;

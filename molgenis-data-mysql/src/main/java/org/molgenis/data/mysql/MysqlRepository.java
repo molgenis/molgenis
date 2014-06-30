@@ -18,7 +18,6 @@ import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DatabaseAction;
@@ -91,21 +90,6 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		return "DROP TABLE IF EXISTS " + getEntityMetaData().getName();
 	}
 
-	public void truncate()
-	{
-		jdbcTemplate.execute(getTruncateSql());
-	}
-
-	protected String getTruncateSql()
-	{
-		return "TRUNCATE TABLE " + getEntityMetaData().getName() + ";";
-	}
-
-	public boolean containsData()
-	{
-		return jdbcTemplate.queryForObject("SELECT count(*) FROM " + getName(), Integer.class) > 0;
-	}
-
 	@Override
 	public void create()
 	{
@@ -128,19 +112,6 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		catch (Exception e)
 		{
 			logger.error("Exception creating MysqlRepository.", e);
-			throw new MolgenisDataException(e);
-		}
-	}
-
-	public void populateWithQuery(String insertQuery)
-	{
-		try
-		{
-			jdbcTemplate.execute(insertQuery);
-		}
-		catch (Exception e)
-		{
-			logger.error("Exception executing query: [" + insertQuery + "]", e);
 			throw new MolgenisDataException(e);
 		}
 	}
@@ -784,12 +755,6 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 	public RepositoryCollection getRepositoryCollection()
 	{
 		return repositoryCollection;
-	}
-
-	@Override
-	public AggregateResult aggregate(AttributeMetaData xAttr, AttributeMetaData yAttr, Query q)
-	{
-		throw new UnsupportedOperationException("not yet implemented");
 	}
 
 	@Override
