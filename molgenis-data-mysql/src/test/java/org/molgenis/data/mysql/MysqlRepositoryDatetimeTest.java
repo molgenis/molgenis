@@ -14,7 +14,8 @@ public class MysqlRepositoryDatetimeTest extends MysqlRepositoryAbstractDatatype
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		DefaultEntityMetaData varcharMD = new DefaultEntityMetaData("DatetimeTest").setLabel("Datetime Test").setIdAttribute("col1");
+		DefaultEntityMetaData varcharMD = new DefaultEntityMetaData("DatetimeTest").setLabel("Datetime Test");
+		varcharMD.setIdAttribute("col1");
 		varcharMD.addAttribute("col1").setDataType(MolgenisFieldTypes.DATETIME).setNillable(false);
 		varcharMD.addAttribute("col2").setDataType(MolgenisFieldTypes.DATETIME);
 		varcharMD.addAttribute("col3").setDataType(MolgenisFieldTypes.DATETIME)
@@ -25,7 +26,7 @@ public class MysqlRepositoryDatetimeTest extends MysqlRepositoryAbstractDatatype
 	@Override
 	public String createSql()
 	{
-		return "CREATE TABLE IF NOT EXISTS DatetimeTest(col1 DATETIME NOT NULL, col2 DATETIME, col3 DATETIME, PRIMARY KEY (col1)) ENGINE=InnoDB;";
+		return "CREATE TABLE IF NOT EXISTS `DatetimeTest`(`col1` DATETIME NOT NULL, `col2` DATETIME, `col3` DATETIME, PRIMARY KEY (`col1`)) ENGINE=InnoDB;";
 	}
 
 	@Override

@@ -3,6 +3,7 @@ package org.molgenis.elasticsearch.request;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.molgenis.data.Query;
+import org.molgenis.elasticsearch.index.MappingsBuilder;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 
@@ -32,7 +33,7 @@ public class SortGenerator implements QueryPartGenerator
 					throw new IllegalArgumentException("Missing sort direction");
 				}
 
-				String sortField = sort.getProperty() + ".sort";
+				String sortField = sort.getProperty() + '.' + MappingsBuilder.FIELD_NOT_ANALYZED;
 				SortOrder sortOrder = sort.getDirection() == Direction.ASC ? SortOrder.ASC : SortOrder.DESC;
 				searchRequestBuilder.addSort(sortField, sortOrder);
 			}

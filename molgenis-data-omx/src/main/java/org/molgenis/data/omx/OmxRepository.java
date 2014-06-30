@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import org.molgenis.data.AggregateResult;
+import org.molgenis.data.Aggregateable;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
@@ -48,16 +49,16 @@ import com.google.common.collect.Sets;
  * 
  * Uses the DataService to get the metadata and the SearchService to get the actual data itself
  */
-public class OmxRepository extends AbstractDataSetMatrixRepository implements CrudRepository
+public class OmxRepository extends AbstractDataSetMatrixRepository implements CrudRepository, Aggregateable
 {
 	public static final String BASE_URL = "omx://";
-	private static int FLUSH_SIZE = 20;
 	private static final String DATASET_ROW_IDENTIFIER_HEADER = "DataSet_Row_Id";
+	private static int FLUSH_SIZE = 20;
 	private final SearchService searchService;
 	private final DataService dataService;
 	private final ValueConverter valueConverter;
-	private LoadingCache<String, ObservableFeature> observableFeatureCache = null;
 	private final EntityValidator entityValidator;
+	private LoadingCache<String, ObservableFeature> observableFeatureCache = null;
 
 	public OmxRepository(DataService dataService, SearchService searchService, String dataSetIdentifier,
 			EntityValidator entityValidator)
@@ -80,6 +81,12 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Cr
 	public long count()
 	{
 		return count(new QueryImpl());
+	}
+
+	@Override
+	public Query query()
+	{
+		return new QueryImpl(this);
 	}
 
 	@Override

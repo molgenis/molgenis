@@ -1,6 +1,7 @@
 package org.molgenis.studymanager;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
@@ -14,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.catalog.Catalog;
 import org.molgenis.catalog.CatalogItem;
@@ -24,6 +26,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Writable;
 import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.study.StudyDataRequest;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -63,6 +66,12 @@ public class StudyManagerController extends MolgenisPluginController
 	private final CatalogManagerService catalogManagerService;
 	private final MolgenisPermissionService molgenisPermissionService;
 
+	public static final String EXPORT_BTN_TITLE = "plugin.studymanager.export.title";
+	public static final String EXPORT_ENABLED = "plugin.studymanager.export.enabled";
+
+	@Autowired
+	private MolgenisSettings molgenisSettings;
+
 	@Autowired
 	public StudyManagerController(StudyManagerService studyDefinitionManagerService,
 			CatalogManagerService catalogManagerService, MolgenisPermissionService molgenisPermissionService)
@@ -89,10 +98,23 @@ public class StudyManagerController extends MolgenisPluginController
 	public String getStudyDefinitions(Model model)
 	{
 		model.addAttribute("dataLoadingEnabled", studyDefinitionManagerService.canLoadStudyData());
-		model.addAttribute("studyDefinitionStates", StudyDefinition.Status.values());
+		if (molgenisSettings.getBooleanProperty(EXPORT_ENABLED, false))
+		{
+			model.addAttribute("studyDefinitionStates", StudyDefinition.Status.values());
+		}
+		else
+		{
+			model.addAttribute("studyDefinitionStates",
+					ArrayUtils.removeElement(StudyDefinition.Status.values(), StudyDefinition.Status.EXPORTED));
+		}
+		model.addAttribute("studyDefinitionUpdateStates",
+				ArrayUtils.removeElement(StudyDefinition.Status.values(), StudyDefinition.Status.EXPORTED));
 		model.addAttribute("defaultStudyDefinitionState", StudyDefinition.Status.SUBMITTED);
+		model.addAttribute("exportedStudyDefinitionState", StudyDefinition.Status.EXPORTED);
 		model.addAttribute("writePermission",
 				molgenisPermissionService.hasPermissionOnEntity(StudyDataRequest.ENTITY_NAME, Permission.WRITE));
+		model.addAttribute("exportTitle", molgenisSettings.getProperty(EXPORT_BTN_TITLE, "Export"));
+		model.addAttribute("exportEnabled", molgenisSettings.getBooleanProperty(EXPORT_ENABLED, false));
 		return VIEW_NAME;
 	}
 
@@ -101,11 +123,12 @@ public class StudyManagerController extends MolgenisPluginController
 	 * 
 	 * @return
 	 */
-	@RequestMapping(value = "/list", method = RequestMethod.GET)
+	@RequestMapping(value = "/list")
 	@ResponseBody
-	public StudyDefinitionsMetaResponse getStudyDefinitionsMeta(@RequestParam("state") StudyDefinition.Status status)
+	public StudyDefinitionsMetaResponse getStudyDefinitionsMeta(@RequestParam("state") StudyDefinition.Status status,
+			@RequestParam(value = "search", required = false) String search)
 	{
-		List<StudyDefinition> studyDefinitions = studyDefinitionManagerService.getStudyDefinitions(status);
+		List<StudyDefinition> studyDefinitions = studyDefinitionManagerService.findStudyDefinitions(status, search);
 		logger.debug("Got [" + studyDefinitions.size() + "] study definitions from service");
 
 		List<StudyDefinitionMetaModel> models = Lists.transform(studyDefinitions,
@@ -204,6 +227,31 @@ public class StudyManagerController extends MolgenisPluginController
 		else
 		{
 			throw new IllegalStateException("Cannot update APPROVED study definition");
+		}
+	}
+
+	@RequestMapping(value = "/export/{id}", method = RequestMethod.POST)
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void exportStudyDefinition(@PathVariable String id) throws UnknownStudyDefinitionException,
+			UnknownCatalogException
+	{
+		// get study definition and catalog used to create study definition
+		StudyDefinition studyDefinition = studyDefinitionManagerService.getStudyDefinition(id);
+		if (!studyDefinition.getStatus().equals(StudyDefinition.Status.EXPORTED))
+		{
+			final Catalog catalog = catalogManagerService.getCatalogOfStudyDefinition(studyDefinition.getId());
+			// export the studydefinition
+			studyDefinitionManagerService.exportStudyDefinition(studyDefinition.getId(), catalog.getId());
+
+			// update status for the study definition
+			StudyDefinitionImpl updatedStudyDefinition = new StudyDefinitionImpl(studyDefinition);
+			updatedStudyDefinition.setStatus(StudyDefinition.Status.EXPORTED);
+			// update study definition
+			studyDefinitionManagerService.updateStudyDefinition(updatedStudyDefinition);
+		}
+		else
+		{
+			throw new IllegalStateException("Cannot export already EXPORTED study definition");
 		}
 	}
 

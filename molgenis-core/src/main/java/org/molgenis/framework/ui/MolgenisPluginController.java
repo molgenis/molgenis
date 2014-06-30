@@ -1,5 +1,6 @@
 package org.molgenis.framework.ui;
 
+
 /**
  * Abstract base class for all MOLGENIS plugin controllers
  */

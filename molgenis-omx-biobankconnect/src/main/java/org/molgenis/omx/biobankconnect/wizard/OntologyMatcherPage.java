@@ -35,9 +35,13 @@ public class OntologyMatcherPage extends AbstractWizardPage
 			Integer selectedDataSetId = ((BiobankConnectWizard) wizard).getSelectedDataSet().getId();
 			List<Integer> selectedTargetDataSetIds = new ArrayList<Integer>();
 
-			for (String id : request.getParameter("selectedTargetDataSets").split(","))
+			String parameter = request.getParameter("selectedTargetDataSets");
+			if (parameter != null && !parameter.isEmpty())
 			{
-				selectedTargetDataSetIds.add(Integer.parseInt(id));
+				for (String id : parameter.split(","))
+				{
+					selectedTargetDataSetIds.add(Integer.parseInt(id));
+				}
 			}
 			biobankConnectWizard.setSelectedBiobanks(selectedTargetDataSetIds);
 

@@ -12,7 +12,8 @@ public class MysqlRepositoryTextTest extends MysqlRepositoryAbstractDatatypeTest
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		DefaultEntityMetaData varcharMD = new DefaultEntityMetaData("TextTest").setLabel("Text Test").setIdAttribute("identifier");
+		DefaultEntityMetaData varcharMD = new DefaultEntityMetaData("TextTest").setLabel("Text Test");
+		varcharMD.setIdAttribute("identifier");
 		varcharMD.addAttribute("identifier").setDataType(MolgenisFieldTypes.INT).setAuto(true).setNillable(false);
 		varcharMD.addAttribute("col1").setDataType(MolgenisFieldTypes.TEXT).setNillable(false);
 		varcharMD.addAttribute("col2").setDataType(MolgenisFieldTypes.TEXT);
@@ -23,7 +24,7 @@ public class MysqlRepositoryTextTest extends MysqlRepositoryAbstractDatatypeTest
 	@Override
 	public String createSql()
 	{
-		return "CREATE TABLE IF NOT EXISTS TextTest(identifier INTEGER NOT NULL AUTO_INCREMENT, col1 TEXT NOT NULL, col2 TEXT, col3 TEXT, PRIMARY KEY (identifier)) ENGINE=InnoDB;";
+		return "CREATE TABLE IF NOT EXISTS `TextTest`(`identifier` INTEGER NOT NULL AUTO_INCREMENT, `col1` TEXT NOT NULL, `col2` TEXT, `col3` TEXT, PRIMARY KEY (`identifier`)) ENGINE=InnoDB;";
 	}
 
 	@Override

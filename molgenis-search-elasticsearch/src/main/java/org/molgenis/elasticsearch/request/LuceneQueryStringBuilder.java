@@ -91,7 +91,7 @@ public class LuceneQueryStringBuilder
 				}
 				else
 				{
-					if (value.toString().matches("[\\.\\d]*") || !queryRule.getOperator().equals(SEARCH))
+					if (value.toString().matches("[\\.\\d]*") || (!queryRule.getOperator().equals(SEARCH)))
 					{
 						StringBuilder stringTransformer = new StringBuilder();
 						value = stringTransformer.append("\"").append(value).append("\"").toString();

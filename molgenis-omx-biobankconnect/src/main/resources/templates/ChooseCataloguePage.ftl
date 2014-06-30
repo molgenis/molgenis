@@ -1,8 +1,18 @@
-<form id="wizardForm" name="wizardForm" method="post" class="form-horizontal" enctype="multipart/form-data" action="">
+<script src="/js/jquery.bootstrap.pager.js"></script>
+<script src="/js/bootstrap-fileupload.min.js"></script>
+<script src="/js/common-component.js"></script>
+<script src="/js/biobank-connect.js"></script>
+<script src="/js/catalogue-chooser.js"></script>
+<link rel="stylesheet" type="text/css" href="/css/jquery-ui-1.9.2.custom.min.css">
+<link rel="stylesheet" type="text/css" href="/css/bootstrap-fileupload.min.css">
+<link rel="stylesheet" type="text/css" href="/css/biobank-connect.css">
+<link rel="stylesheet" type="text/css" href="/css/catalogue-chooser.css">
+<form id="wizardForm" name="wizardForm" method="post" class="form-horizontal" enctype="multipart/form-data">
 	<div class="row-fluid">
 		<div class="span12">
 			<div class="row-fluid">
-				<div id="div-info" class="span12 well">	
+				<div id="div-info" class="span12 well custom-white-well">	
+					<br>
 					<div class="row-fluid">
 						<div class="span9"><legend class="legend">
 							Browse catalogue : 
@@ -34,13 +44,7 @@
 					</div>
 					<div class="row-fluid">
 						<div class="span12">
-							<div class="data-table-container">
-								<table id="dataitem-table" class="table table-striped table-condensed">
-								</table>
-								<div class="pagination pagination-centered">
-									<ul></ul>
-								</div>
-							</div>
+							<div id="container" class="data-table-container"></div>
 						</div>
 					</div>
 				</div>
@@ -85,17 +89,22 @@
 		$(function(){
 			var molgenis = window.top.molgenis;
 			molgenis.ontologyMatcherRunning(function(){
-				molgenis.getCatalogueChooser().changeDataSet($('#selectedDataSetId').val());
+				var catalogueChooser = new molgenis.CatalogueChooser();
+				catalogueChooser.changeDataSet($('#selectedDataSetId').val());
+				
 				$('#selectedDataSetId').change(function(){
-					molgenis.getCatalogueChooser().changeDataSet($('#selectedDataSetId').val());
+					catalogueChooser.changeDataSet($('#selectedDataSetId').val());
 				});
+				
 				if($('#selectedDataSetId option').length === 0){
 					$('.pager li.next').addClass('disabled');
 				}
+				
 				$('#import-data-button').click(function(){
 					$('#import-features-modal').modal('show');
 					return false;
 				});
+				
 				$('#import-features').click(function(){
 					var alert = {};
 					var uploadedFile = $('#uploadedOntology').val();

@@ -225,7 +225,7 @@ public class ProtocolViewerController extends MolgenisPluginController
 	Integer catalogId) throws UnknownCatalogException, UnknownStudyDefinitionException
 	{
 		if (!getEnableOrderAction()) throw new MolgenisDataAccessException("Action not allowed");
-		logger.info("remove from cart: " + cartUpdateRequest.getHref());
+		logger.debug("remove from cart: " + cartUpdateRequest.getHref());
 		protocolViewerService.removeFromStudyDefinitionDraftForCurrentUser(cartUpdateRequest.getHref(),
 				catalogId.toString());
 	}

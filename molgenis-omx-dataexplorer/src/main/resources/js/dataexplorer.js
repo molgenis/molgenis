@@ -49,13 +49,13 @@
 	 */
 	function createModuleNav(modules, container) {
 		var items = [];
-		items.push('<ul class="nav nav-tabs">');
+		items.push('<ul class="nav nav-tabs pull-left">');
 		$.each(modules, function() {
 			var href = molgenis.getContextUrl() + '/module/' + this.id;
 			items.push('<li data-id="' + this.id + '"><a href="' + href + '" data-target="#tab-' + this.id + '" data-toggle="tab"><img src="/img/' + this.icon + '"> ' + this.label + '</a></li>');
 		});
 		items.push('</ul>');
-		items.push('<div class="tab-content">');
+		items.push('<div class="tab-content span9">');
 		$.each(modules, function() {
 			items.push('<div class="tab-pane" id="tab-' + this.id + '">Loading...</div>');
 		});
@@ -81,6 +81,22 @@
 				$(document).trigger('clickAttribute', {'attribute': attribute});
 			}
 		});
+	}
+	
+	/**
+	 * @memberOf molgenis.dataexplorer
+	 */
+	function createHeader(entityMetaData) {
+		$('#entity-class-name').html(entityMetaData.label);
+		
+		if (entityMetaData.description) {
+			var description = $('<span data-placement="bottom"></span>');
+			description.html(abbreviate(entityMetaData.description, 180));
+			description.attr('data-title', entityMetaData.description);
+			$('#entity-class-description').html(description.tooltip());
+		} else {
+			$('#entity-class-description').html('');
+		}
 	}
 
 	/**
@@ -181,7 +197,10 @@
 						self.filter.wizard.openFilterWizardModal(selectedEntityMetaData, attributeFilters);
 						showWizardOnInit = false;
 					}
+					
 				});
+				
+				createHeader(entityMetaData);
 			});
 		});
 		

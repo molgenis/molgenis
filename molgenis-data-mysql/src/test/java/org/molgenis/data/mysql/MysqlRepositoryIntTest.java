@@ -12,7 +12,8 @@ public class MysqlRepositoryIntTest extends MysqlRepositoryAbstractDatatypeTest
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		DefaultEntityMetaData varcharMD = new DefaultEntityMetaData("IntegerTest").setLabel("Integer Test").setIdAttribute("col1");
+		DefaultEntityMetaData varcharMD = new DefaultEntityMetaData("IntegerTest").setLabel("Integer Test");
+		varcharMD.setIdAttribute("col1");
 		varcharMD.addAttribute("col1").setDataType(MolgenisFieldTypes.INT).setNillable(false);
 		varcharMD.addAttribute("col2").setDataType(MolgenisFieldTypes.INT);
 		varcharMD.addAttribute("col3").setDataType(MolgenisFieldTypes.INT).setDefaultValue(-1);
@@ -22,7 +23,7 @@ public class MysqlRepositoryIntTest extends MysqlRepositoryAbstractDatatypeTest
 	@Override
 	public String createSql()
 	{
-		return "CREATE TABLE IF NOT EXISTS IntegerTest(col1 INTEGER NOT NULL, col2 INTEGER, col3 INTEGER, PRIMARY KEY (col1)) ENGINE=InnoDB;";
+		return "CREATE TABLE IF NOT EXISTS `IntegerTest`(`col1` INTEGER NOT NULL, `col2` INTEGER, `col3` INTEGER, PRIMARY KEY (`col1`)) ENGINE=InnoDB;";
 	}
 
 	@Override

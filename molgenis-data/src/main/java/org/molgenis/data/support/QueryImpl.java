@@ -3,12 +3,15 @@ package org.molgenis.data.support;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
+import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.Queryable;
 import org.springframework.data.domain.Sort;
 
 public class QueryImpl implements Query
@@ -18,10 +21,17 @@ public class QueryImpl implements Query
 	private int pageSize;
 	private int offset;
 	private Sort sort;
+	private Queryable repository;
 
 	public QueryImpl()
 	{
 		this.rules.add(new ArrayList<QueryRule>());
+	}
+
+	public QueryImpl(Queryable repository)
+	{
+		this();
+		this.repository = repository;
 	}
 
 	public QueryImpl(Query q)
@@ -52,6 +62,20 @@ public class QueryImpl implements Query
 	}
 
 	@Override
+	public Long count()
+	{
+		if (repository == null) throw new RuntimeException("Query failed: repository not set");
+		return repository.count(this);
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> findAll(Class<E> klazz)
+	{
+		if (repository == null) throw new RuntimeException("Query failed: repository not set");
+		return repository.findAll(this, klazz);
+	}
+
+	@Override
 	public List<QueryRule> getRules()
 	{
 		if (this.rules.size() > 1) throw new MolgenisDataException(
@@ -66,15 +90,15 @@ public class QueryImpl implements Query
 		else return Collections.emptyList();
 	}
 
-	public void setPageSize(int pageSize)
-	{
-		this.pageSize = pageSize;
-	}
-
 	@Override
 	public int getPageSize()
 	{
 		return pageSize;
+	}
+
+	public void setPageSize(int pageSize)
+	{
+		this.pageSize = pageSize;
 	}
 
 	@Override
@@ -88,15 +112,15 @@ public class QueryImpl implements Query
 		this.offset = offset;
 	}
 
-	public void setSort(Sort sort)
-	{
-		this.sort = sort;
-	}
-
 	@Override
 	public Sort getSort()
 	{
 		return sort;
+	}
+
+	public void setSort(Sort sort)
+	{
+		this.sort = sort;
 	}
 
 	@Override
@@ -221,15 +245,14 @@ public class QueryImpl implements Query
 		return this;
 	}
 
-    @Override
-    public Query sort(Sort.Direction direction, String ... fields)
-    {
-        this.sort(new Sort(direction, fields));
-        return this;
-    }
+	@Override
+	public Query sort(Sort.Direction direction, String... fields)
+	{
+		this.sort(new Sort(direction, fields));
+		return this;
+	}
 
-
-    @Override
+	@Override
 	public Query sort(Sort sort)
 	{
 		setSort(sort);
@@ -275,5 +298,12 @@ public class QueryImpl implements Query
 		}
 		else if (!sort.equals(other.sort)) return false;
 		return true;
+	}
+
+	@Override
+	public Iterator<Entity> iterator()
+	{
+		if (repository == null) throw new RuntimeException("Query failed: repository not set");
+		return repository.findAll(this).iterator();
 	}
 }

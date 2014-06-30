@@ -13,10 +13,17 @@
 	var self = molgenis.dataexplorer.data = molgenis.dataexplorer.data || {};
 	self.createDataTable = createDataTable;
 	self.createGenomeBrowser = createGenomeBrowser;
+    self.doShowGenomeBrowser = doShowGenomeBrowser;
+    self.setGenomeBrowserAttributes = setGenomeBrowserAttributes;
 
 	var restApi = new molgenis.RestClient();
 	var genomeBrowser;
 	var genomeEntities;
+
+    var genomebrowserStartAttribute;
+    var genomebrowserChromosomeAttribute;
+    var genomebrowserIdentifierAttribute;
+    var genomebrowserPatientAttribute;
 	/**
 	 * @memberOf molgenis.dataexplorer.data
 	 */
@@ -75,20 +82,31 @@
 	/**
 	 * @memberOf molgenis.dataexplorer.data
 	 */
-	function isGenomeBrowserEntity() {
-		// FIXME check attributes on all levels
-		var attrs = getEntity().attributes;
-		return attrs.hasOwnProperty("POS") &&
-			attrs.hasOwnProperty("ID") &&
-			attrs.hasOwnProperty("CHROM");
+	function doShowGenomeBrowser() {
+		return genomebrowserStartAttribute !== undefined &&
+            genomebrowserChromosomeAttribute !== undefined &&
+            genomebrowserIdentifierAttribute !== undefined;
 	}
+
+    function getAttributeFromList(attributesString){
+        var result;
+        var attrs = getEntity().attributes;
+        var list = attributesString.split(",");
+        for(var item in list){
+            result = attrs[list[item]];
+            if(result !== undefined){
+                break;
+            }
+        }
+        return result;
+    }
 
 	/**
 	 * @memberOf molgenis.dataexplorer.data
 	 */
 	function createGenomeBrowser(settings, genomeEntityKeyVals) {
 		genomeEntities = genomeEntityKeyVals;
-        if (isGenomeBrowserEntity()) {
+
             $('#genomebrowser').css('display', 'block');
             $('#genomebrowser').css('visibility', 'visible');
 
@@ -151,7 +169,7 @@
                                     var a = $('<a href="javascript:void(0)">' + patientID + '</a>');
                                     a.click(function() {
                                         $.each(getAttributes(), function(key, attribute) {
-                                            if(attribute.name === 'patient_id') {
+                                            if(attribute === genomebrowserPatientAttribute) {
                                                 createFilter(attribute, undefined, undefined, patientID);
                                             }
                                         });
@@ -167,7 +185,7 @@
                             var a = $('<a href="javascript:void(0)">' + f.id + '</a>');
                             a.click(function() {
                                 $.each(getAttributes(), function(key, attribute) {
-                                    if(attribute.name === 'ID') {
+                                    if(attribute === genomebrowserIdentifierAttribute) {
                                         createFilter(attribute, undefined, undefined, f.id);
                                     }
                                 });
@@ -181,9 +199,7 @@
                     }
                 }
             });
-		}else {
-            $('#genomebrowser').css('display', 'none');
-        }
+
 	}
 
 
@@ -192,13 +208,20 @@
 	 */
 	function setDallianceFilter() {
 		$.each(getAttributes(), function(key, attribute) {
-			if(attribute.name === 'POS') {
+			if(attribute === genomebrowserStartAttribute) {
                 createFilter(attribute, Math.floor(genomeBrowser.viewStart).toString(), Math.floor(genomeBrowser.viewEnd).toString());
-			} else if(attribute.name === 'CHROM') {
+			} else if(attribute === genomebrowserChromosomeAttribute) {
                 createFilter(attribute, undefined, undefined, genomeBrowser.chr);
 			}
 		});
 	}
+
+    function setGenomeBrowserAttributes(start, chromosome, id, patient){
+        genomebrowserStartAttribute = getAttributeFromList(start);
+        genomebrowserChromosomeAttribute = getAttributeFromList(chromosome);
+        genomebrowserIdentifierAttribute = getAttributeFromList(id);
+        genomebrowserPatientAttribute = getAttributeFromList(patient);
+    }
 	//--END genome browser--
 
 	/**
@@ -248,10 +271,10 @@
 		$(document).on('updateAttributeFilters.data', function(e, data) {
 			// TODO implement elegant solution for genome browser specific code
 			$.each(data.filters, function() {
-				if(this.attribute.name === 'POS'){
+				if(this.attribute === genomebrowserStartAttribute){
                     genomeBrowser.setLocation(genomeBrowser.chr, this.getFilters()[0].fromValue, this.getFilters()[0].toValue)
                 };
-				if(this.attribute.name === 'CHROM'){
+				if(this.attribute === genomebrowserChromosomeAttribute){
                     genomeBrowser.setLocation(this.getFilters()[0].getValues()[0], genomeBrowser.viewStart, genomeBrowser.viewEnd)
                 };
 			});
@@ -266,6 +289,35 @@
 			download();
 		});
 
+		$('form[name=galaxy-export-form]').validate({
+			rules : {
+				galaxyUrl : {
+					required : true,
+					url : true
+				},
+				galaxyApiKey : {
+					required : true,
+					minlength: 32,
+					maxlength: 32
+				}
+			}
+		});
+		$('form[name=galaxy-export-form]').submit(function(e) {
+			e.preventDefault();
+			if($(this).valid()) {
+				$.ajax({
+					type : $(this).attr('method'),
+					url : $(this).attr('action'),
+					data : JSON.stringify($.extend({}, $(this).serializeObject(), {dataRequest : createDownloadDataRequest()})),
+					contentType: 'application/json'
+				}).done(function() {
+					molgenis.createAlert([{'message' : 'Exported data set to Galaxy'}], 'success');
+				}).always(function() {
+					$('#galaxy-export-modal').modal('hide');
+				});
+			}
+		});
+		
 		$('#genomebrowser-filter-button').click(function() {
 			setDallianceFilter();
 		});
