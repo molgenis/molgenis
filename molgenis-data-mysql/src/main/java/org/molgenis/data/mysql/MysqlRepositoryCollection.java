@@ -2,6 +2,7 @@ package org.molgenis.data.mysql;
 
 import static org.molgenis.MolgenisFieldTypes.BOOL;
 import static org.molgenis.MolgenisFieldTypes.INT;
+import static org.molgenis.MolgenisFieldTypes.TEXT;
 import static org.molgenis.MolgenisFieldTypes.XREF;
 
 import java.sql.Connection;
@@ -62,6 +63,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		entityMD.addAttribute("abstract").setDataType(BOOL);
 		entityMD.addAttribute("label");
 		entityMD.addAttribute("extends");// TODO create XREF to entityMD when dependency resolving is fixed
+		entityMD.addAttribute("description").setDataType(TEXT);
 
 		entities = createMysqlRepsitory();
 		entities.setMetaData(entityMD);
@@ -78,6 +80,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		attributeMD.addAttribute("lookupAttribute").setDataType(BOOL);
 		attributeMD.addAttribute("visible").setDataType(BOOL);
 		attributeMD.addAttribute("label");
+		attributeMD.addAttribute("description").setDataType(TEXT);
 
 		attributes = createMysqlRepsitory();
 		attributes.setMetaData(attributeMD);
@@ -118,6 +121,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 			am.setLookupAttribute(a.getBoolean("lookupAttribute"));
 			am.setVisible(a.getBoolean("visible"));
 			am.setLabel(a.getString("label"));
+			am.setDescription(a.getString("description"));
 
 			md.addAttributeMetaData(am);
 		}
@@ -133,6 +137,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 			md.setAbstract(e.getBoolean("abstract"));
 			md.setIdAttribute(e.getString("idAttribute"));
 			md.setLabel(e.getString("label"));
+			md.setDescription(e.getString("description"));
 		}
 
 		// read extends
@@ -255,6 +260,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 			a.set("auto", att.isAuto());
 			a.set("visible", att.isVisible());
 			a.set("label", att.getLabel());
+			a.set("description", att.getDescription());
 
 			attributes.add(a);
 		}
