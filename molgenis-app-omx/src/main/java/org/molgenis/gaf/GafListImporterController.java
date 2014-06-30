@@ -13,7 +13,9 @@ import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,51 +35,44 @@ public class GafListImporterController extends MolgenisPluginController
 
 	public static final String ID = "gaflistimporter";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
-
-	private final GafListImporterService gafListImporterService;
 	private final GafListFileImporterService gafListFileImporterService;
 
 	@Autowired
-	public GafListImporterController(GafListImporterService gafListImporterService,
-			GafListFileImporterService gafListFileImporter)
+	public GafListImporterController(GafListFileImporterService gafListFileImporter)
 	{
 		super(URI);
-		if (gafListImporterService == null) throw new IllegalArgumentException("gafListImporterService is null");
-		this.gafListImporterService = gafListImporterService;
 
 		if (gafListFileImporter == null) throw new IllegalArgumentException("gafListFileImporter is null");
 		this.gafListFileImporterService = gafListFileImporter;
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	public String init()
 	{
 		return "view-gaflistimporter";
 	}
 
-	@RequestMapping(value = "/import", method = RequestMethod.POST)
-	@ResponseStatus(HttpStatus.OK)
-	public void importGafList() throws IOException, ServiceException, ValueConverterException, MessagingException
-	{
-		gafListImporterService.importGafListAsSuperuser();
-	}
-
 	@RequestMapping(value = "/import-file", method = RequestMethod.POST)
+	@Transactional(rollbackFor =
+	{ IOException.class, ServiceException.class, ValueConverterException.class, MessagingException.class })
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	public String importGafListFromFile(@RequestParam("csvFile") MultipartFile csvFile,
-			@RequestParam("separator") Character separator, Model model)
+			@RequestParam("separator") Character separator, Model model) throws IOException, ServiceException,
+			ValueConverterException, MessagingException
 	{
 		if (!csvFile.isEmpty())
 		{
-			gafListFileImporterService.createCsvRepository(csvFile, separator);
-			gafListFileImporterService.createValidationReport();
-			model.addAttribute("hasValidationError", gafListFileImporterService.hasValidationError());
-			model.addAttribute("validationReport", gafListFileImporterService.getValidationReportHtml());
+			this.gafListFileImporterService.createCsvRepository(csvFile, separator);
+			this.gafListFileImporterService.createValidationReport();
+			model.addAttribute("hasValidationError", this.gafListFileImporterService.hasValidationError());
+			model.addAttribute("validationReport", this.gafListFileImporterService.getValidationReportHtml());
 
-			if (!gafListFileImporterService.hasValidationError())
+			if (!this.gafListFileImporterService.hasValidationError())
 			{
 				try
 				{
-					String nameNewGafList = gafListFileImporterService.importValidatedGafList();
+					String nameNewGafList = this.gafListFileImporterService.importValidatedGafList();
 					model.addAttribute("importMessage", "Successfully imported! the new list name is: "
 							+ nameNewGafList);
 				}

@@ -8,6 +8,8 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.UUID;
 
+import javax.mail.MessagingException;
+
 import org.apache.log4j.Logger;
 import org.molgenis.data.CrudRepositorySecurityDecorator;
 import org.molgenis.data.DataService;
@@ -17,13 +19,18 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.gaf.GafListValidator.GafListValidationReport;
+import org.molgenis.omx.converters.ValueConverterException;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.search.DataSetsIndexer;
 import org.molgenis.search.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.google.gdata.util.ServiceException;
 
 @Service
 public class GafListFileImporterService
@@ -59,16 +66,21 @@ public class GafListFileImporterService
 		try
 		{
 			File tmpFile = copyDataToTempFile(csvFile);
-			this.csvRepo = new CsvRepository(tmpFile, null, separator);
-
-			// TODO JJ find a way to add two more columns
-			// 1. add two columns..
-			// fill the cells with th ergit info
+			this.csvRepo = new GafListFileRepository(tmpFile, null, separator);
 		}
 		catch (Exception e)
 		{
 			logger.error(e);
 		}
+	}
+
+	@Transactional(rollbackFor =
+	{ IOException.class, ServiceException.class, ValueConverterException.class, MessagingException.class })
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
+	public void importGafListAsSuperuser() throws IOException, ServiceException, ValueConverterException,
+			MessagingException
+	{
+
 	}
 
 	/**
@@ -155,17 +167,6 @@ public class GafListFileImporterService
 		return nameNewGafList;
 	}
 
-	/**
-	 * TODO JJ
-	 * 
-	 * @param repositoryFrom
-	 * @param repositoryTo
-	 */
-	public void copyData(OmxRepository repositoryFrom, OmxRepository repositoryTo)
-	{
-		repositoryTo.add(repositoryFrom);
-	}
-
 	public OmxRepository createNewGafListRepo(String identifier)
 	{
 		return new OmxRepository(dataService, searchService, identifier, entityValidator);
@@ -180,22 +181,6 @@ public class GafListFileImporterService
 		dataSet.setProtocolUsed(getGafListProtocolUsed());
 		return dataSet;
 	}
-
-	// TODO JJ
-	// public OmxRepository getLatestExistingGafRepository()
-	// {
-	//
-	// }
-
-	// TODO JJ
-	// public void sendEmail(){
-	//
-	// }
-
-	// TODO JJ
-	// public void setViewPermission(){
-	//
-	// }
 
 	public void indexDataSet(Integer identifier)
 	{
