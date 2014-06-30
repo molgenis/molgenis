@@ -2,6 +2,7 @@ package org.molgenis.data.mysql;
 
 import static org.molgenis.MolgenisFieldTypes.BOOL;
 import static org.molgenis.MolgenisFieldTypes.INT;
+import static org.molgenis.MolgenisFieldTypes.TEXT;
 import static org.molgenis.MolgenisFieldTypes.XREF;
 
 import java.sql.Connection;
@@ -61,6 +62,8 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		entityMD.addAttribute("idAttribute");
 		entityMD.addAttribute("abstract").setDataType(BOOL);
 		entityMD.addAttribute("label");
+		entityMD.addAttribute("extends");// TODO create XREF to entityMD when dependency resolving is fixed
+		entityMD.addAttribute("description").setDataType(TEXT);
 
 		entities = createMysqlRepsitory();
 		entities.setMetaData(entityMD);
@@ -77,6 +80,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		attributeMD.addAttribute("lookupAttribute").setDataType(BOOL);
 		attributeMD.addAttribute("visible").setDataType(BOOL);
 		attributeMD.addAttribute("label");
+		attributeMD.addAttribute("description").setDataType(TEXT);
 
 		attributes = createMysqlRepsitory();
 		attributes.setMetaData(attributeMD);
@@ -90,7 +94,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 				attributes.create();
 			}
 		}
-		else if (!attributes.containsData())
+		else if (attributes.count() == 0)
 		{
 			// Update table structure to prevent errors is apps that don't use emx
 			attributes.drop();
@@ -117,6 +121,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 			am.setLookupAttribute(a.getBoolean("lookupAttribute"));
 			am.setVisible(a.getBoolean("visible"));
 			am.setLabel(a.getString("label"));
+			am.setDescription(a.getString("description"));
 
 			md.addAttributeMetaData(am);
 		}
@@ -132,6 +137,22 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 			md.setAbstract(e.getBoolean("abstract"));
 			md.setIdAttribute(e.getString("idAttribute"));
 			md.setLabel(e.getString("label"));
+			md.setDescription(e.getString("description"));
+		}
+
+		// read extends
+		for (Entity e : entities)
+		{
+			String extendsEntityName = e.getString("extends");
+			if (extendsEntityName != null)
+			{
+				String entityName = e.getString("name");
+				DefaultEntityMetaData emd = metadata.get(entityName);
+				DefaultEntityMetaData extendsEmd = metadata.get(extendsEntityName);
+				if (extendsEmd == null) throw new RuntimeException("Missing super entity [" + extendsEntityName
+						+ "] of entity [" + entityName + "]");
+				emd.setExtends(extendsEmd);
+			}
 		}
 
 		// read the refEntity
@@ -197,9 +218,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 
 	public MysqlRepository add(EntityMetaData emd)
 	{
-		refreshRepositories();
-
-		if (repositories.containsKey(emd.getName()))
+		if (entities.query().eq("name", emd.getName()).count() > 0)
 		{
 			return repositories.get(emd.getName());
 		}
@@ -210,6 +229,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		e.set("abstract", emd.isAbstract());
 		if (emd.getIdAttribute() != null) e.set("idAttribute", emd.getIdAttribute().getName());
 		e.set("label", emd.getLabel());
+		if (emd.getExtends() != null) e.set("extends", emd.getExtends().getName());
 		entities.add(e);
 
 		// add attribute metadata
@@ -240,6 +260,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 			a.set("auto", att.isAuto());
 			a.set("visible", att.isVisible());
 			a.set("label", att.getLabel());
+			a.set("description", att.getDescription());
 
 			attributes.add(a);
 		}

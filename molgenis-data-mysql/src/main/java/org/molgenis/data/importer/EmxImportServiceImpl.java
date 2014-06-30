@@ -13,6 +13,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.mysql.MysqlRepository;
@@ -47,6 +48,7 @@ public class EmxImportServiceImpl implements EmxImporterService
 	private static final String ABSTRACT = "abstract";
 	private static final String VISIBLE = "visible";
 	private static final String LABEL = "label";
+	private static final String EXTENDS = "extends";
 
 	private MysqlRepositoryCollection store;
 
@@ -80,7 +82,7 @@ public class EmxImportServiceImpl implements EmxImporterService
 			DefaultEntityMetaData defaultEntityMetaData = entry.getValue();
 			if (defaultEntityMetaData == null) throw new IllegalArgumentException("Unknown entity: " + name);
 
-			if (!ENTITIES.equals(name) && !ATTRIBUTES.equals(name) && !defaultEntityMetaData.isAbstract())
+			if (!ENTITIES.equals(name) && !ATTRIBUTES.equals(name))
 			{
 				Repository from = source.getRepositoryByEntityName(name);
 
@@ -93,8 +95,11 @@ public class EmxImportServiceImpl implements EmxImporterService
 				}
 
 				// import
-				Integer count = to.add(from);
-				report.getNrImportedEntitiesMap().put(name, count);
+				if (to != null)
+				{
+					Integer count = to.add(from);
+					report.getNrImportedEntitiesMap().put(name, count);
+				}
 			}
 		}
 
@@ -222,6 +227,7 @@ public class EmxImportServiceImpl implements EmxImporterService
 			}
 
 			defaultAttributeMetaData.setLabel(attribute.getString(LABEL));
+			defaultAttributeMetaData.setDescription(attribute.getString(DESCRIPTION));
 
 			defaultEntityMetaData.addAttributeMetaData(defaultAttributeMetaData);
 		}
@@ -252,6 +258,18 @@ public class EmxImportServiceImpl implements EmxImporterService
 				md.setLabel(entity.getString(LABEL));
 				md.setDescription(entity.getString(DESCRIPTION));
 				if (entity.getBoolean(ABSTRACT) != null) md.setAbstract(entity.getBoolean(ABSTRACT));
+
+				String extendsEntityName = entity.getString(EXTENDS);
+				if (extendsEntityName != null)
+				{
+					DefaultEntityMetaData extendsEntityMeta = entities.get(extendsEntityName);
+					if (extendsEntityMeta == null)
+					{
+						throw new MolgenisDataException("Missing super entity " + extendsEntityName + " for entity "
+								+ entityName + " on line " + i);
+					}
+					md.setExtends(extendsEntityMeta);
+				}
 			}
 		}
 	}

@@ -1,6 +1,6 @@
 package org.molgenis.data.omx;
 
-import org.molgenis.data.CrudRepositorySecurityDecorator;
+import org.molgenis.data.AggregateableCrudRepositorySecurityDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.omx.observ.DataSet;
@@ -52,7 +52,7 @@ public class OmxRepositoryRegistrator implements ApplicationListener<ContextRefr
 			{
 				OmxRepository repo = new OmxRepository(dataService, searchService, dataSet.getIdentifier(),
 						entityValidator);
-				dataService.addRepository(new CrudRepositorySecurityDecorator(repo));
+				dataService.addRepository(new AggregateableCrudRepositorySecurityDecorator(repo));
 			}
 		}
 		finally
