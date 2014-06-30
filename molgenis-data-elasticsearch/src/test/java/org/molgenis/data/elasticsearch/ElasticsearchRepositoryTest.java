@@ -45,243 +45,249 @@ import static org.testng.Assert.assertFalse;
 
 public class ElasticsearchRepositoryTest
 {
-    private ElasticsearchRepository elasticsearchRepository;
-    private ElasticsearchRepositoryCollection elasticsearchRepositoryCollection;
-    private DataService dataService;
-    private ElasticSearchClient elasticSearchClient;
-    private AdminClient adminClient;
-    private IndicesAdminClient indicesAdminClient;
-    private Client client;
-    private EntityMetaData entityMetaData;
-    private AttributeMetaData attributeMetaData;
+	private ElasticsearchRepository elasticsearchRepository;
+	private ElasticsearchRepositoryCollection elasticsearchRepositoryCollection;
+	private DataService dataService;
+	private ElasticSearchClient elasticSearchClient;
+	private AdminClient adminClient;
+	private IndicesAdminClient indicesAdminClient;
+	private Client client;
+	private EntityMetaData entityMetaData;
+	private AttributeMetaData attributeMetaData;
 
-    @BeforeMethod
-    public void setUp() throws IOException
-    {
-        dataService = mock(DataService.class);
-        elasticSearchClient = mock(ElasticSearchClient.class);
-        adminClient = mock(AdminClient.class);
-        indicesAdminClient = mock(IndicesAdminClient.class);
-        client = mock(Client.class);
-        entityMetaData = mock(EntityMetaData.class);
-        when(entityMetaData.getName()).thenReturn("testRepo");
+	@BeforeMethod
+	public void setUp() throws IOException
+	{
+		dataService = mock(DataService.class);
+		elasticSearchClient = mock(ElasticSearchClient.class);
+		adminClient = mock(AdminClient.class);
+		indicesAdminClient = mock(IndicesAdminClient.class);
+		client = mock(Client.class);
+		entityMetaData = mock(EntityMetaData.class);
+		when(entityMetaData.getName()).thenReturn("testRepo");
 
-        elasticsearchRepository = new ElasticsearchRepository(client, ElasticsearchRepositoryCollection.INDEX_NAME, entityMetaData,
-                dataService);
-        attributeMetaData = mock(AttributeMetaData.class);
-        when(entityMetaData.getAttributes()).thenReturn(Collections.singletonList(attributeMetaData));
-        when(attributeMetaData.getName()).thenReturn("test");
-    }
+		elasticsearchRepository = new ElasticsearchRepository(client, ElasticsearchRepositoryCollection.INDEX_NAME,
+				entityMetaData, dataService);
+		attributeMetaData = mock(AttributeMetaData.class);
+		when(entityMetaData.getAttributes()).thenReturn(Collections.singletonList(attributeMetaData));
+		when(attributeMetaData.getName()).thenReturn("test");
+	}
 
-    @Test
-    public void testGetEntityMetaData()
-    {
-        assertEquals(elasticsearchRepository.getEntityMetaData(), entityMetaData);
-    }
+	@Test
+	public void testGetEntityMetaData()
+	{
+		assertEquals(elasticsearchRepository.getEntityMetaData(), entityMetaData);
+	}
 
-    @Test
-    public void testGetUrl()
-    {
-        assertEquals(elasticsearchRepository.getUrl(), ElasticsearchRepository.BASE_URL + "testRepo/");
-    }
+	@Test
+	public void testGetUrl()
+	{
+		assertEquals(elasticsearchRepository.getUrl(), ElasticsearchRepository.BASE_URL + "testRepo/");
+	}
 
-    @Test
-    public void testGetName()
-    {
-        assertEquals(elasticsearchRepository.getName(), "testRepo");
-    }
+	@Test
+	public void testGetName()
+	{
+		assertEquals(elasticsearchRepository.getName(), "testRepo");
+	}
 
-    @Test
-    public void testQuery()
-    {
-        assertEquals(elasticsearchRepository.query(), new QueryImpl(elasticsearchRepository));
-    }
+	@Test
+	public void testQuery()
+	{
+		assertEquals(elasticsearchRepository.query(), new QueryImpl(elasticsearchRepository));
+	}
 
-    @Test
-    public void testCount()
-    {
-        CountRequestBuilder countRequestBuilder = mock(CountRequestBuilder.class);
-        ListenableActionFuture listenableActionFuture = mock(ListenableActionFuture.class);
-        CountResponse countResponse = mock(CountResponse.class);
-        when(client.prepareCount("molgenis")).thenReturn(countRequestBuilder);
-        when(countRequestBuilder.setTypes("testRepo")).thenReturn(countRequestBuilder);
-        when(countRequestBuilder.execute()).thenReturn(listenableActionFuture);
-        when(listenableActionFuture.actionGet()).thenReturn(countResponse);
-        elasticsearchRepository.count();
-        verify(countResponse).getCount();
-    }
+	@Test
+	public void testCount()
+	{
+		CountRequestBuilder countRequestBuilder = mock(CountRequestBuilder.class);
+		ListenableActionFuture listenableActionFuture = mock(ListenableActionFuture.class);
+		CountResponse countResponse = mock(CountResponse.class);
+		when(client.prepareCount("molgenis")).thenReturn(countRequestBuilder);
+		when(countRequestBuilder.setTypes("testRepo")).thenReturn(countRequestBuilder);
+		when(countRequestBuilder.execute()).thenReturn(listenableActionFuture);
+		when(listenableActionFuture.actionGet()).thenReturn(countResponse);
+		elasticsearchRepository.count();
+		verify(countResponse).getCount();
+	}
 
-    @Test
-    public void testFindAll()
-    {
-        SearchHit hit1 = mock(SearchHit.class);
-        SearchHit hit2 = mock(SearchHit.class);
-        SearchHit[] hits = new SearchHit[]{hit1, hit2};
-        SearchRequestBuilder searchRequestBuilder = mock(SearchRequestBuilder.class);
-        ListenableActionFuture listenableActionFuture = mock(ListenableActionFuture.class);
-        SearchResponse searchResponse = mock(SearchResponse.class);
-        SearchHits searchHits = mock(SearchHits.class);
-        Map<String, Object> hitSource = new HashMap<String,Object>();
-        hitSource.put("test","testValue");
-        ElasticsearchEntity entity1 = new ElasticsearchEntity("1",hitSource,entityMetaData,dataService);
-        ElasticsearchEntity entity2 = new ElasticsearchEntity("2",hitSource,entityMetaData,dataService);
+	@Test
+	public void testFindAll()
+	{
+		SearchHit hit1 = mock(SearchHit.class);
+		SearchHit hit2 = mock(SearchHit.class);
+		SearchHit[] hits = new SearchHit[]
+		{ hit1, hit2 };
+		SearchRequestBuilder searchRequestBuilder = mock(SearchRequestBuilder.class);
+		ListenableActionFuture listenableActionFuture = mock(ListenableActionFuture.class);
+		SearchResponse searchResponse = mock(SearchResponse.class);
+		SearchHits searchHits = mock(SearchHits.class);
+		Map<String, Object> hitSource = new HashMap<String, Object>();
+		hitSource.put("test", "testValue");
+		ElasticsearchEntity entity1 = new ElasticsearchEntity("1", hitSource, entityMetaData, dataService);
+		ElasticsearchEntity entity2 = new ElasticsearchEntity("2", hitSource, entityMetaData, dataService);
 
-        when(client.prepareSearch("molgenis")).thenReturn(searchRequestBuilder);
-        when(searchRequestBuilder.setTypes("testRepo")).thenReturn(searchRequestBuilder);
-        when(searchRequestBuilder.execute()).thenReturn(listenableActionFuture);
-        when(listenableActionFuture.actionGet()).thenReturn(searchResponse);
-        when(searchResponse.getHits()).thenReturn(searchHits);
-        when(searchHits.totalHits()).thenReturn(new Long(2));
-        when(searchHits.getTotalHits()).thenReturn(new Long(2));
-        when(searchHits.getHits()).thenReturn(hits);
-        when(searchHits.hits()).thenReturn(hits);
-        when(searchHits.iterator()).thenReturn(Arrays.asList(hits).iterator());
-        when(hit1.getSource()).thenReturn(hitSource);
-        when(hit1.getId()).thenReturn("1");
-        when(hit2.getSource()).thenReturn(hitSource);
-        when(hit2.getId()).thenReturn("2");
+		when(client.prepareSearch("molgenis")).thenReturn(searchRequestBuilder);
+		when(searchRequestBuilder.setTypes("testRepo")).thenReturn(searchRequestBuilder);
+		when(searchRequestBuilder.execute()).thenReturn(listenableActionFuture);
+		when(listenableActionFuture.actionGet()).thenReturn(searchResponse);
+		when(searchResponse.getHits()).thenReturn(searchHits);
+		when(searchHits.totalHits()).thenReturn(new Long(2));
+		when(searchHits.getTotalHits()).thenReturn(new Long(2));
+		when(searchHits.getHits()).thenReturn(hits);
+		when(searchHits.hits()).thenReturn(hits);
+		when(searchHits.iterator()).thenReturn(Arrays.asList(hits).iterator());
+		when(hit1.getSource()).thenReturn(hitSource);
+		when(hit1.getId()).thenReturn("1");
+		when(hit2.getSource()).thenReturn(hitSource);
+		when(hit2.getId()).thenReturn("2");
 
-        Iterator<Entity> iter = elasticsearchRepository.findAll(new QueryImpl()).iterator();
-        assertTrue(iter.hasNext());
-        assertEquals(iter.next().getIdValue(), entity1.getIdValue());
-        assertEquals(iter.next().getIdValue(), entity2.getIdValue());
-        assertFalse(iter.hasNext());
-    }
+		Iterator<Entity> iter = elasticsearchRepository.findAll(new QueryImpl()).iterator();
+		assertTrue(iter.hasNext());
+		assertEquals(iter.next().getIdValue(), entity1.getIdValue());
+		assertEquals(iter.next().getIdValue(), entity2.getIdValue());
+		assertFalse(iter.hasNext());
+	}
 
-    @Test
-    public void testFindOne()
-    {
-        SearchHit hit1 = mock(SearchHit.class);
-        SearchHit hit2 = mock(SearchHit.class);
-        Map<String, Object> hitSource = new HashMap<String,Object>();
-        hitSource.put("test","testValue");
-        ElasticsearchEntity entity1 = new ElasticsearchEntity("1",hitSource,entityMetaData,dataService);
-        GetRequestBuilder getRequestBuilder = mock(GetRequestBuilder.class);
-        ListenableActionFuture listenableActionFuture = mock(ListenableActionFuture.class);
-        GetResponse getResponse = mock(GetResponse.class);
+	@Test
+	public void testFindOne()
+	{
+		SearchHit hit1 = mock(SearchHit.class);
+		SearchHit hit2 = mock(SearchHit.class);
+		Map<String, Object> hitSource = new HashMap<String, Object>();
+		hitSource.put("test", "testValue");
+		ElasticsearchEntity entity1 = new ElasticsearchEntity("1", hitSource, entityMetaData, dataService);
+		GetRequestBuilder getRequestBuilder = mock(GetRequestBuilder.class);
+		ListenableActionFuture listenableActionFuture = mock(ListenableActionFuture.class);
+		GetResponse getResponse = mock(GetResponse.class);
 
-        when(client.prepareGet("molgenis", "testRepo","1")).thenReturn(getRequestBuilder);
-        when(getRequestBuilder.execute()).thenReturn(listenableActionFuture);
-        when(listenableActionFuture.actionGet()).thenReturn(getResponse);
-        when(getResponse.isExists()).thenReturn(true);
-        when(getResponse.getId()).thenReturn("1");
-        when(getResponse.getSource()).thenReturn(hitSource);
+		when(client.prepareGet("molgenis", "testRepo", "1")).thenReturn(getRequestBuilder);
+		when(getRequestBuilder.execute()).thenReturn(listenableActionFuture);
+		when(listenableActionFuture.actionGet()).thenReturn(getResponse);
+		when(getResponse.isExists()).thenReturn(true);
+		when(getResponse.getId()).thenReturn("1");
+		when(getResponse.getSource()).thenReturn(hitSource);
 
-        assertEquals(elasticsearchRepository.findOne("1").getIdValue(), entity1.getIdValue());
-        assertEquals(elasticsearchRepository.findOne("1").get("test"), entity1.get("test"));
-        assertEquals(elasticsearchRepository.findOne("1").getEntityMetaData(), entity1.getEntityMetaData());
-    }
+		assertEquals(elasticsearchRepository.findOne("1").getIdValue(), entity1.getIdValue());
+		assertEquals(elasticsearchRepository.findOne("1").get("test"), entity1.get("test"));
+		assertEquals(elasticsearchRepository.findOne("1").getEntityMetaData(), entity1.getEntityMetaData());
+	}
 
-    @Test
-    public void testIterator()
-    {
-        SearchHit hit1 = mock(SearchHit.class);
-        SearchHit hit2 = mock(SearchHit.class);
-        SearchHit[] hits = new SearchHit[]{hit1, hit2};
-        SearchRequestBuilder searchRequestBuilder = mock(SearchRequestBuilder.class);
-        ListenableActionFuture listenableActionFuture = mock(ListenableActionFuture.class);
-        SearchResponse searchResponse = mock(SearchResponse.class);
-        SearchHits searchHits = mock(SearchHits.class);
-        Map<String, Object> hitSource = new HashMap<String,Object>();
-        hitSource.put("test","testValue");
-        ElasticsearchEntity entity1 = new ElasticsearchEntity("1",hitSource,entityMetaData,dataService);
-        ElasticsearchEntity entity2 = new ElasticsearchEntity("2",hitSource,entityMetaData,dataService);
+	@Test
+	public void testIterator()
+	{
+		SearchHit hit1 = mock(SearchHit.class);
+		SearchHit hit2 = mock(SearchHit.class);
+		SearchHit[] hits = new SearchHit[]
+		{ hit1, hit2 };
+		SearchRequestBuilder searchRequestBuilder = mock(SearchRequestBuilder.class);
+		ListenableActionFuture listenableActionFuture = mock(ListenableActionFuture.class);
+		SearchResponse searchResponse = mock(SearchResponse.class);
+		SearchHits searchHits = mock(SearchHits.class);
+		Map<String, Object> hitSource = new HashMap<String, Object>();
+		hitSource.put("test", "testValue");
+		ElasticsearchEntity entity1 = new ElasticsearchEntity("1", hitSource, entityMetaData, dataService);
+		ElasticsearchEntity entity2 = new ElasticsearchEntity("2", hitSource, entityMetaData, dataService);
 
-        when(client.prepareSearch("molgenis")).thenReturn(searchRequestBuilder);
-        when(searchRequestBuilder.setTypes("testRepo")).thenReturn(searchRequestBuilder);
-        when(searchRequestBuilder.setSize(Integer.MAX_VALUE)).thenReturn(searchRequestBuilder);
-        when(searchRequestBuilder.execute()).thenReturn(listenableActionFuture);
-        when(listenableActionFuture.actionGet()).thenReturn(searchResponse);
-        when(searchResponse.getHits()).thenReturn(searchHits);
-        when(searchHits.totalHits()).thenReturn(new Long(2));
-        when(searchHits.getTotalHits()).thenReturn(new Long(2));
-        when(searchHits.getHits()).thenReturn(hits);
-        when(searchHits.hits()).thenReturn(hits);
-        when(searchHits.iterator()).thenReturn(Arrays.asList(hits).iterator());
-        when(hit1.getSource()).thenReturn(hitSource);
-        when(hit1.getId()).thenReturn("1");
-        when(hit2.getSource()).thenReturn(hitSource);
-        when(hit2.getId()).thenReturn("2");
+		when(client.prepareSearch("molgenis")).thenReturn(searchRequestBuilder);
+		when(searchRequestBuilder.setTypes("testRepo")).thenReturn(searchRequestBuilder);
+		when(searchRequestBuilder.setSize(Integer.MAX_VALUE)).thenReturn(searchRequestBuilder);
+		when(searchRequestBuilder.execute()).thenReturn(listenableActionFuture);
+		when(listenableActionFuture.actionGet()).thenReturn(searchResponse);
+		when(searchResponse.getHits()).thenReturn(searchHits);
+		when(searchHits.totalHits()).thenReturn(new Long(2));
+		when(searchHits.getTotalHits()).thenReturn(new Long(2));
+		when(searchHits.getHits()).thenReturn(hits);
+		when(searchHits.hits()).thenReturn(hits);
+		when(searchHits.iterator()).thenReturn(Arrays.asList(hits).iterator());
+		when(hit1.getSource()).thenReturn(hitSource);
+		when(hit1.getId()).thenReturn("1");
+		when(hit2.getSource()).thenReturn(hitSource);
+		when(hit2.getId()).thenReturn("2");
 
-        Iterator<Entity> iter = elasticsearchRepository.iterator();
-        assertTrue(iter.hasNext());
-        assertEquals(iter.next().getIdValue(), entity1.getIdValue());
-        assertEquals(iter.next().getIdValue(), entity2.getIdValue());
-        assertFalse(iter.hasNext());
-    }
+		Iterator<Entity> iter = elasticsearchRepository.iterator();
+		assertTrue(iter.hasNext());
+		assertEquals(iter.next().getIdValue(), entity1.getIdValue());
+		assertEquals(iter.next().getIdValue(), entity2.getIdValue());
+		assertFalse(iter.hasNext());
+	}
 
-    @Test
-    public void testAdd()
-    {
-        Map<String, Object> hitSource = new HashMap<String,Object>();
-        hitSource.put("test","testValue");
-        IndexRequestBuilder indexRequestBuilder = mock(IndexRequestBuilder.class);
-        ElasticsearchEntity entity1 = new ElasticsearchEntity("1",hitSource,entityMetaData,dataService);
-        ListenableActionFuture listenableActionFuture = mock(ListenableActionFuture.class);
+	@Test
+	public void testAdd()
+	{
+		Map<String, Object> hitSource = new HashMap<String, Object>();
+		hitSource.put("test", "testValue");
+		IndexRequestBuilder indexRequestBuilder = mock(IndexRequestBuilder.class);
+		ElasticsearchEntity entity1 = new ElasticsearchEntity("1", hitSource, entityMetaData, dataService);
+		ListenableActionFuture listenableActionFuture = mock(ListenableActionFuture.class);
 
-        when(client.prepareIndex("molgenis", "testRepo")).thenReturn(indexRequestBuilder);
-        when(attributeMetaData.getDataType()).thenReturn(MolgenisFieldTypes.getType(MolgenisFieldTypes.FieldTypeEnum.STRING.toString().toLowerCase()));
-        when(indexRequestBuilder.setSource(hitSource)).thenReturn(indexRequestBuilder);
-        when(indexRequestBuilder.execute()).thenReturn(listenableActionFuture);
+		when(client.prepareIndex("molgenis", "testRepo")).thenReturn(indexRequestBuilder);
+		when(attributeMetaData.getDataType()).thenReturn(
+				MolgenisFieldTypes.getType(MolgenisFieldTypes.FieldTypeEnum.STRING.toString().toLowerCase()));
+		when(indexRequestBuilder.setSource(hitSource)).thenReturn(indexRequestBuilder);
+		when(indexRequestBuilder.execute()).thenReturn(listenableActionFuture);
 
-        elasticsearchRepository.add(entity1);
-        verify(listenableActionFuture).actionGet();
-    }
+		elasticsearchRepository.add(entity1);
+		verify(listenableActionFuture).actionGet();
+	}
 
-    @Test
-         public void testUpdate()
-{
-    Map<String, Object> hitSource = new HashMap<String,Object>();
-    hitSource.put("test","testValue");
-    UpdateRequestBuilder updateRequestBuilder = mock(UpdateRequestBuilder.class);
-    ElasticsearchEntity entity1 = new ElasticsearchEntity("1",hitSource,entityMetaData,dataService);
-    ListenableActionFuture listenableActionFuture = mock(ListenableActionFuture.class);
+	@Test
+	public void testUpdate()
+	{
+		Map<String, Object> hitSource = new HashMap<String, Object>();
+		hitSource.put("test", "testValue");
+		UpdateRequestBuilder updateRequestBuilder = mock(UpdateRequestBuilder.class);
+		ElasticsearchEntity entity1 = new ElasticsearchEntity("1", hitSource, entityMetaData, dataService);
+		ListenableActionFuture listenableActionFuture = mock(ListenableActionFuture.class);
 
-    when(client.prepareUpdate("molgenis", "testRepo", "1")).thenReturn(updateRequestBuilder);
-    when(attributeMetaData.getDataType()).thenReturn(MolgenisFieldTypes.getType(MolgenisFieldTypes.FieldTypeEnum.STRING.toString().toLowerCase()));
-    when(updateRequestBuilder.setDoc(hitSource)).thenReturn(updateRequestBuilder);
-    when(updateRequestBuilder.execute()).thenReturn(listenableActionFuture);
+		when(client.prepareUpdate("molgenis", "testRepo", "1")).thenReturn(updateRequestBuilder);
+		when(attributeMetaData.getDataType()).thenReturn(
+				MolgenisFieldTypes.getType(MolgenisFieldTypes.FieldTypeEnum.STRING.toString().toLowerCase()));
+		when(updateRequestBuilder.setDoc(hitSource)).thenReturn(updateRequestBuilder);
+		when(updateRequestBuilder.execute()).thenReturn(listenableActionFuture);
 
-    elasticsearchRepository.update(entity1);
-    verify(listenableActionFuture).actionGet();
-}
-    @Test
-    public void testDelete()
-    {
-        Map<String, Object> hitSource = new HashMap<String,Object>();
-        hitSource.put("test","testValue");
-        DeleteRequestBuilder deleteRequestBuilder = mock(DeleteRequestBuilder.class);
-        ElasticsearchEntity entity1 = new ElasticsearchEntity("1",hitSource,entityMetaData,dataService);
-        ListenableActionFuture listenableActionFuture = mock(ListenableActionFuture.class);
-        DeleteResponse deleteResponse = mock(DeleteResponse.class);
+		elasticsearchRepository.update(entity1);
+		verify(listenableActionFuture).actionGet();
+	}
 
-        when(client.prepareDelete("molgenis", "testRepo", "1")).thenReturn(deleteRequestBuilder);
-        when(attributeMetaData.getDataType()).thenReturn(MolgenisFieldTypes.getType(MolgenisFieldTypes.FieldTypeEnum.STRING.toString().toLowerCase()));
-        when(deleteRequestBuilder.execute()).thenReturn(listenableActionFuture);
-        when(listenableActionFuture.actionGet()).thenReturn(deleteResponse);
-        when(deleteResponse.isFound()).thenReturn(true);
+	@Test
+	public void testDelete()
+	{
+		Map<String, Object> hitSource = new HashMap<String, Object>();
+		hitSource.put("test", "testValue");
+		DeleteRequestBuilder deleteRequestBuilder = mock(DeleteRequestBuilder.class);
+		ElasticsearchEntity entity1 = new ElasticsearchEntity("1", hitSource, entityMetaData, dataService);
+		ListenableActionFuture listenableActionFuture = mock(ListenableActionFuture.class);
+		DeleteResponse deleteResponse = mock(DeleteResponse.class);
 
-        elasticsearchRepository.delete(entity1);
-        verify(listenableActionFuture).actionGet();
-    }
+		when(client.prepareDelete("molgenis", "testRepo", "1")).thenReturn(deleteRequestBuilder);
+		when(attributeMetaData.getDataType()).thenReturn(
+				MolgenisFieldTypes.getType(MolgenisFieldTypes.FieldTypeEnum.STRING.toString().toLowerCase()));
+		when(deleteRequestBuilder.execute()).thenReturn(listenableActionFuture);
+		when(listenableActionFuture.actionGet()).thenReturn(deleteResponse);
+		when(deleteResponse.isFound()).thenReturn(true);
 
-    @Test
-    public void testDeleteAll()
-    {
-        Map<String, Object> hitSource = new HashMap<String,Object>();
-        hitSource.put("test","testValue");
-        DeleteByQueryRequestBuilder deleteRequestBuilder = mock(DeleteByQueryRequestBuilder.class);
-        ListenableActionFuture listenableActionFuture = mock(ListenableActionFuture.class);
-        DeleteByQueryResponse deleteByQueryResponse = mock(DeleteByQueryResponse.class);
-        IndexDeleteByQueryResponse indexDeleteByQueryResponse = mock(IndexDeleteByQueryResponse.class);
+		elasticsearchRepository.delete(entity1);
+		verify(listenableActionFuture).actionGet();
+	}
 
-        when(client.prepareDeleteByQuery("molgenis")).thenReturn(deleteRequestBuilder);
-        when(deleteRequestBuilder.setTypes("testRepo")).thenReturn(deleteRequestBuilder);
-        when(deleteRequestBuilder.execute()).thenReturn(listenableActionFuture);
-        when(listenableActionFuture.actionGet()).thenReturn(deleteByQueryResponse);
-        when(deleteByQueryResponse.iterator()).thenReturn(Arrays.asList(indexDeleteByQueryResponse).iterator());
+	@Test
+	public void testDeleteAll()
+	{
+		Map<String, Object> hitSource = new HashMap<String, Object>();
+		hitSource.put("test", "testValue");
+		DeleteByQueryRequestBuilder deleteRequestBuilder = mock(DeleteByQueryRequestBuilder.class);
+		ListenableActionFuture listenableActionFuture = mock(ListenableActionFuture.class);
+		DeleteByQueryResponse deleteByQueryResponse = mock(DeleteByQueryResponse.class);
+		IndexDeleteByQueryResponse indexDeleteByQueryResponse = mock(IndexDeleteByQueryResponse.class);
 
-        elasticsearchRepository.deleteAll();
-        verify(listenableActionFuture).actionGet();
-    }
+		when(client.prepareDeleteByQuery("molgenis")).thenReturn(deleteRequestBuilder);
+		when(deleteRequestBuilder.setTypes("testRepo")).thenReturn(deleteRequestBuilder);
+		when(deleteRequestBuilder.execute()).thenReturn(listenableActionFuture);
+		when(listenableActionFuture.actionGet()).thenReturn(deleteByQueryResponse);
+		when(deleteByQueryResponse.iterator()).thenReturn(Arrays.asList(indexDeleteByQueryResponse).iterator());
+
+		elasticsearchRepository.deleteAll();
+		verify(listenableActionFuture).actionGet();
+	}
 }

@@ -112,12 +112,13 @@ public class ElasticsearchRepository implements CrudRepository, Aggregateable, M
 		return countResponse.getCount();
 	}
 
-    @Override
-    public Query query() {
-        return new QueryImpl(this);
-    }
+	@Override
+	public Query query()
+	{
+		return new QueryImpl(this);
+	}
 
-    @Override
+	@Override
 	public long count(Query q)
 	{
 		CountResponse countResponse = createCountRequest(q).execute().actionGet();
