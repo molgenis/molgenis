@@ -1,5 +1,6 @@
 package org.molgenis.ui.menu;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.molgenis.ui.MolgenisUiMenu;
@@ -11,9 +12,9 @@ import com.google.common.collect.Lists;
 
 public class MenuItemToMolgenisUiMenuAdapter extends MenuItemToMolgenisUiMenuItemAdapter implements MolgenisUiMenu
 {
-	private final Menu menu;
+	private final MenuItem menu;
 
-	public MenuItemToMolgenisUiMenuAdapter(Menu menu)
+	public MenuItemToMolgenisUiMenuAdapter(MenuItem menu)
 	{
 		super(menu);
 		if (menu == null) throw new IllegalArgumentException("menu is null");
@@ -23,14 +24,18 @@ public class MenuItemToMolgenisUiMenuAdapter extends MenuItemToMolgenisUiMenuIte
 	@Override
 	public List<MolgenisUiMenuItem> getItems()
 	{
-		return Lists.newArrayList(Iterables.transform(menu.getItems(), new Function<MenuItem, MolgenisUiMenuItem>()
-		{
-			@Override
-			public MolgenisUiMenuItem apply(MenuItem menuItem)
-			{
-				return new MenuItemToMolgenisUiMenuItemAdapter(menuItem);
-			}
-		}));
+		List<MenuItem> items = menu.getItems();
+		return items != null ? Lists.newArrayList(Iterables.transform(items,
+				new Function<MenuItem, MolgenisUiMenuItem>()
+				{
+					@Override
+					public MolgenisUiMenuItem apply(MenuItem menuItem)
+					{
+						if (menuItem.getType() == MenuItemType.PLUGIN) return new MenuItemToMolgenisUiMenuItemAdapter(
+								menuItem);
+						else return new MenuItemToMolgenisUiMenuAdapter(menuItem);
+					}
+				})) : Collections.<MolgenisUiMenuItem> emptyList();
 	}
 
 	@Override

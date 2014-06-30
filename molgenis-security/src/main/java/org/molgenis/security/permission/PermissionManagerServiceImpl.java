@@ -1,6 +1,5 @@
 package org.molgenis.security.permission;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -73,7 +72,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	public List<MolgenisPlugin> getPlugins()
 	{
-		return new ArrayList<MolgenisPlugin>(molgenisPluginRegistry.getPlugins());
+		return Lists.newArrayList(molgenisPluginRegistry);
 	}
 
 	@Override

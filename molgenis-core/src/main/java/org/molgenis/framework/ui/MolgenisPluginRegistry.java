@@ -1,10 +1,10 @@
 package org.molgenis.framework.ui;
 
-import java.util.Collection;
-
-public interface MolgenisPluginRegistry
+public interface MolgenisPluginRegistry extends Iterable<MolgenisPlugin>
 {
-	Collection<MolgenisPlugin> getPlugins();
+	void registerPlugin(MolgenisPlugin molgenisPlugin);
+
+	void registerPluginFactory(MolgenisPluginFactory molgenisPluginFactory);
 
 	MolgenisPlugin getPlugin(String id);
 }

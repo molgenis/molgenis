@@ -119,6 +119,7 @@ public class MolgenisUiMenuPermissionDecorator implements MolgenisUiMenu
 			case PLUGIN:
 				String menuItemId = molgenisUiMenuItem.getId();
 				hasPermission = molgenisPermissionService.hasPermissionOnPlugin(menuItemId, Permission.COUNT);
+				break;
 			default:
 				throw new RuntimeException("Unknown MolgenisUiMenuItem [" + molgenisUiMenuItem.getType() + "]");
 		}

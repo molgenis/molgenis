@@ -1,10 +1,11 @@
 package org.molgenis.ui;
 
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.molgenis.framework.ui.MolgenisPlugin;
+import org.molgenis.framework.ui.MolgenisPluginFactory;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -19,13 +20,13 @@ public class MolgenisUiPluginRegistry implements MolgenisPluginRegistry
 		this.molgenisUi = molgenisUi;
 	}
 
-	@Override
-	public Collection<MolgenisPlugin> getPlugins()
-	{
-		Map<String, MolgenisPlugin> plugins = new HashMap<String, MolgenisPlugin>();
-		getPluginsRec(molgenisUi.getMenu(), plugins);
-		return plugins.values();
-	}
+	// @Override
+	// public Collection<MolgenisPlugin> getPlugins()
+	// {
+	// Map<String, MolgenisPlugin> plugins = new HashMap<String, MolgenisPlugin>();
+	// getPluginsRec(molgenisUi.getMenu(), plugins);
+	// return plugins.values();
+	// }
 
 	@Override
 	public MolgenisPlugin getPlugin(String id)
@@ -60,5 +61,26 @@ public class MolgenisUiPluginRegistry implements MolgenisPluginRegistry
 			default:
 				throw new RuntimeException("Unknown menu item type [" + menuItem.getType() + "]");
 		}
+	}
+
+	@Override
+	public void registerPlugin(MolgenisPlugin molgenisPlugin)
+	{
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void registerPluginFactory(MolgenisPluginFactory molgenisPluginFactory)
+	{
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public Iterator<MolgenisPlugin> iterator()
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

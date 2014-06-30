@@ -6,12 +6,10 @@ import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.ui.menu.Menu;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.gson.GsonBuilder;
 
-@Service
 public class MenuManagerServiceImpl implements MenuManagerService
 {
 	private static final String KEY_MOLGENIS_MENU = "molgenis.menu";
@@ -46,7 +44,7 @@ public class MenuManagerServiceImpl implements MenuManagerService
 	@Transactional(readOnly = true)
 	public Iterable<MolgenisPlugin> getPlugins()
 	{
-		return molgenisPluginRegistry.getPlugins();
+		return molgenisPluginRegistry;
 	}
 
 	@Override

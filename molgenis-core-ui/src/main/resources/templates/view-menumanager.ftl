@@ -1,7 +1,7 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 <#assign css=["select2.css", "jquery-sortable.css", "menumanager.css"]>
-<#assign js=["select2.min.js","jquery-sortable-min.js", "menumanager.js"]>
+<#assign js=["handlebars.min.js","select2.min.js","jquery-sortable-min.js", "menumanager.js"]>
 <@header css js/>
 	<div class="row-fluid offset2 span8">
 		<p>Drag and drop menu items to update menu</p>
@@ -15,12 +15,7 @@
 				<div class="span5">
 					<legend>Create Menu</legend>
 					<form name="add-menu-group-form" class="form-horizontal">
-						<div class="control-group">
-							<label class="control-label" for="group-name">Name</label>
-							<div class="controls">
-								<input type="text" name="group-name">
-							</div>
-						</div>
+						<@create_edit_menu_inputs/>
 						<div class="control-group">
 							<div class="controls">
 								<button type="submit" class="btn">Create</button>
@@ -40,9 +35,9 @@
 							</div>
 						</div>
 						<div class="control-group">
-							<label class="control-label" for="menu-item-name">Name</label>
+							<label class="control-label" for="menu-item-name">Name *</label>
 							<div class="controls">
-								<input type="text" name="menu-item-name">
+								<input type="text" name="menu-item-name" required>
 							</div>
 						</div>
 						<div class="control-group">
@@ -67,8 +62,8 @@
 		</div>
 	</div>
 <@footer/>
-<form name="edit-menu-item-form" class="form-horizontal">
-	<div class="modal hide medium" id="edit-menu-item-modal" tabindex="-1" role="dialog" aria-hidden="true">
+<form name="edit-menu-form" class="form-horizontal">
+	<div class="modal hide medium" id="edit-menu-modal" tabindex="-1" role="dialog" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">				
 		      	<div class="modal-header">
@@ -77,12 +72,7 @@
 		     	</div>
 		      	<div class="modal-body">
 		      		<div class="form-horizontal">
-			      		<div class="control-group">
-			    			<label class="control-label" for="label">Menu item name *</label>
-			    			<div class="controls">
-			      				<input type="text" name="label" required>
-			    			</div>
-			  			</div>
+			      		<@create_edit_menu_inputs/>
 		      		</div>
 				</div>
 		      	<div class="modal-footer">
@@ -93,21 +83,35 @@
 		</div>
 	</div>
 </form>
+<#macro create_edit_menu_inputs>
+<div class="control-group">
+	<label class="control-label" for="menu-id">Id *</label>
+	<div class="controls">
+		<input type="text" name="menu-id" required>
+	</div>
+</div>
+<div class="control-group">
+	<label class="control-label" for="menu-name">Name *</label>
+	<div class="controls">
+		<input type="text" name="menu-name" required>
+	</div>
+</div>
+</#macro>
 <#macro create_menu_list menu is_root>
 	<#if is_root>
-	<ol class="vertical">
+	<ol class="vertical root">
 	</#if>
-		<li class="<#if is_root>root<#else>node highlight</#if>" data-id="${menu.id}" data-label="${menu.name}">
+		<li class="node highlight<#if is_root> root</#if>" data-id="${menu.id}" data-label="${menu.name}">
 		<#if !is_root>
 			<i class="icon-move"></i>
 		</#if>
-		<#if !is_root>
 			<span>${menu.name}</span>
 			<div class="pull-right">
-				<i class="icon-edit" data-toggle="modal" data-target="#edit-menu-item-modal"></i>
+				<i class="icon-edit edit-menu-btn" data-toggle="modal" data-target="#edit-menu-modal"></i>
+			<#if !is_root>
 				<i class="icon-trash"></i>
+			</#if>
 			</div>
-		</#if>
 			<ol>
 	<#list menu.items as item>
 		<#if item.type == "MENU">
@@ -117,7 +121,7 @@
 			<i class="icon-move"></i>
 			<span>${item.name}</span>
 			<div class="pull-right">
-				<i class="icon-edit" data-toggle="modal" data-target="#edit-menu-item-modal"></i>
+				<i class="icon-edit" data-toggle="modal" data-target="#edit-item-modal"></i>
 				<i class="icon-trash"></i>
 			</div>
 		</li>
@@ -129,3 +133,24 @@
 	</ol>
 </#if>
 </#macro>
+<script id="menu-template" type="text/x-handlebars-template">
+	<li class="node highlight" data-id="{{id}}" data-label="{{label}}">
+		<i class="icon-move"></i>
+		<span>{{label}}</span>
+		<div class="pull-right">
+			<i class="icon-edit edit-menu-btn" data-toggle="modal" data-target="#edit-menu-modal"></i>
+			<i class="icon-trash"></i>
+		</div>
+		<ol><ol>
+	</li>
+</script>
+<script id="item-template" type="text/x-handlebars-template">
+	<li class="node" data-id="{{id}}" data-label="{{label}}">
+		<i class="icon-move"></i>
+		<span>{{label}}</span>
+		<div class="pull-right">
+			<i class="icon-edit edit-item-btn" data-toggle="modal" data-target="#edit-item-modal"></i>
+			<i class="icon-trash"></i>
+		</div>
+	</li>
+</script>

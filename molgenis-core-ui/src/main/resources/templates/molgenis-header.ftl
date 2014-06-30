@@ -5,7 +5,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>${molgenis_ui.title?html}</title>
+		<title><#if molgenis_ui.title?has_content>${molgenis_ui.title?html}</#if></title>
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="chrome=1">
 		<link rel="icon" href="/img/molgenis.ico" type="image/x-icon">
