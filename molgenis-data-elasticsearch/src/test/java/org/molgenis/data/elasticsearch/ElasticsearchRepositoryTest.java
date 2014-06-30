@@ -3,9 +3,11 @@ package org.molgenis.data.elasticsearch;
 import org.elasticsearch.action.ListenableActionFuture;
 import org.elasticsearch.action.count.CountRequestBuilder;
 import org.elasticsearch.action.count.CountResponse;
-import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.delete.DeleteResponse;
+import org.elasticsearch.action.deletebyquery.DeleteByQueryRequestBuilder;
+import org.elasticsearch.action.deletebyquery.DeleteByQueryResponse;
+import org.elasticsearch.action.deletebyquery.IndexDeleteByQueryResponse;
 import org.elasticsearch.action.get.GetRequestBuilder;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequestBuilder;
@@ -28,11 +30,18 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Collections;
+import java.util.Arrays;
+import java.util.Iterator;
 
-import static org.mockito.Mockito.*;
-import static org.testng.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertFalse;
 
 public class ElasticsearchRepositoryTest
 {
@@ -144,7 +153,6 @@ public class ElasticsearchRepositoryTest
     {
         SearchHit hit1 = mock(SearchHit.class);
         SearchHit hit2 = mock(SearchHit.class);
-        SearchHit[] hits = new SearchHit[]{hit1, hit2};
         Map<String, Object> hitSource = new HashMap<String,Object>();
         hitSource.put("test","testValue");
         ElasticsearchEntity entity1 = new ElasticsearchEntity("1",hitSource,entityMetaData,dataService);
@@ -254,6 +262,26 @@ public class ElasticsearchRepositoryTest
         when(deleteResponse.isFound()).thenReturn(true);
 
         elasticsearchRepository.delete(entity1);
+        verify(listenableActionFuture).actionGet();
+    }
+
+    @Test
+    public void testDeleteAll()
+    {
+        Map<String, Object> hitSource = new HashMap<String,Object>();
+        hitSource.put("test","testValue");
+        DeleteByQueryRequestBuilder deleteRequestBuilder = mock(DeleteByQueryRequestBuilder.class);
+        ListenableActionFuture listenableActionFuture = mock(ListenableActionFuture.class);
+        DeleteByQueryResponse deleteByQueryResponse = mock(DeleteByQueryResponse.class);
+        IndexDeleteByQueryResponse indexDeleteByQueryResponse = mock(IndexDeleteByQueryResponse.class);
+
+        when(client.prepareDeleteByQuery("molgenis")).thenReturn(deleteRequestBuilder);
+        when(deleteRequestBuilder.setTypes("testRepo")).thenReturn(deleteRequestBuilder);
+        when(deleteRequestBuilder.execute()).thenReturn(listenableActionFuture);
+        when(listenableActionFuture.actionGet()).thenReturn(deleteByQueryResponse);
+        when(deleteByQueryResponse.iterator()).thenReturn(Arrays.asList(indexDeleteByQueryResponse).iterator());
+
+        elasticsearchRepository.deleteAll();
         verify(listenableActionFuture).actionGet();
     }
 }

@@ -58,7 +58,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 
-public class ElasticsearchRepository implements CrudRepository, Manageable
+public class ElasticsearchRepository implements CrudRepository, Aggregateable, Manageable
 {
 	public static final String BASE_URL = "elasticsearch://";
 
