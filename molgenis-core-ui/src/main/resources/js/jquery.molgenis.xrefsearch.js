@@ -27,7 +27,11 @@
 	            if (terms.length > 0) {
 	                $.each(terms, function(index) {
 	                    if(index > 0){
-	                        q.push({operator: 'OR'});
+                            if(search){
+                                q.push({operator: 'AND'});
+                            }else {
+                                q.push({operator: 'OR'});
+                            }
 	                    }
 	                    q.push({
 	                        field: attrName,
@@ -42,7 +46,7 @@
 			return undefined;
 		}
 	}
-	
+
 	function getLookupAttributeNames(entityMetaData) {
 		var attributeNames = [];
 		$.each(entityMetaData.attributes, function(attrName, attr) {
@@ -98,8 +102,9 @@
 			width: '80%',
 			minimumInputLength: 2,
             multiple: (attributeMetaData.fieldType === 'MREF'),
+            closeOnSelect: (attributeMetaData.fieldType === 'XREF'),
 			query: function (options){
-				var query = createQuery(lookupAttrNames, [options.term],'LIKE');
+				var query = createQuery(lookupAttrNames, options.term.match(/[^ ]+/g),'SEARCH', true);
 				if(query)
 				{
 					restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {num: 1000, q: query}}, function(data) {
@@ -109,7 +114,7 @@
             },
 			initSelection: function(element, callback) {
 				//Only called when the input has a value
-				var query = createQuery(lookupAttrNames, element.val().split(','), 'EQUALS');
+				var query = createQuery(lookupAttrNames, element.val().split(','), 'EQUALS', false);
 				if(query)
 				{
 					restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {q: query}}, function(data) {

@@ -100,6 +100,8 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String SOURCES = "genomebrowser.init.sources";
 	public static final String BROWSERLINKS = "genomebrowser.init.browserLinks";
 	public static final String WIZARD_TITLE = "plugin.dataexplorer.wizard.title";
+	public static final String WIZARD_BUTTON_TITLE = "plugin.dataexplorer.wizard.button.title";
+	public static final String AGGREGATES_NORESULTS_MESSAGE = "plugin.dataexplorer.mod.aggregates.noresults";
 
 	public static final String KEY_DATAEXPLORER_EDITABLE = "plugin.dataexplorer.editable";
 	private static final boolean DEFAULT_VAL_DATAEXPLORER_EDITABLE = false;
@@ -160,10 +162,10 @@ public class DataExplorerController extends MolgenisPluginController
 			}
 		}
 		model.addAttribute("selectedEntityName", selectedEntityName);
-		model.addAttribute(
-				"wizardtitle",
-				molgenisSettings.getProperty(WIZARD_TITLE) == null ? "Filter Wizard" : molgenisSettings
-						.getProperty(WIZARD_TITLE));
+		model.addAttribute("wizardtitle", molgenisSettings.getProperty(WIZARD_TITLE, "Filter Wizard"));
+		model.addAttribute("wizardbuttontitle", molgenisSettings.getProperty(WIZARD_BUTTON_TITLE, "Wizard"));
+		model.addAttribute("aggregatenoresults",
+				molgenisSettings.getProperty(AGGREGATES_NORESULTS_MESSAGE, "No results found"));
 		model.addAttribute("wizard", (wizard != null) && wizard.booleanValue());
 
 		boolean modDiseaseMatcher = molgenisSettings.getBooleanProperty(KEY_MOD_DISEASEMATCHER,

@@ -104,6 +104,8 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 				molgenisHomeDirAnnotationResources + "/Clinvar/variant_summary.txt");
 
 		runtimePropertyMap.put(DataExplorerController.WIZARD_TITLE, "Filter Wizard");
+		runtimePropertyMap.put(DataExplorerController.WIZARD_BUTTON_TITLE, "Wizard");
+		runtimePropertyMap.put(DataExplorerController.AGGREGATES_NORESULTS_MESSAGE, "No results found");
 
 		runtimePropertyMap.put(StudyManagerController.EXPORT_BTN_TITLE, "Export");
 		runtimePropertyMap.put(StudyManagerController.EXPORT_ENABLED, String.valueOf(false));
