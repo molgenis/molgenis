@@ -93,15 +93,16 @@
 						ontologyTermMatchDiv.append(newLineDiv);
 					}
 					var newScore = 0;
+					var childList = '';
 					$.each(parentChildData[nodePath], function(index, childHit){
-						popoverOption.content += '<u>' + childHit.columnValueMap.ontologyTerm + '</u>, ';
+						childList += '<u>' + childHit.columnValueMap.ontologyTerm + '</u>, ';
 						newScore = newScore + childHit.columnValueMap.combinedScore;
 					});
 					if((newScore / parentChildData[nodePath].length) > hit.columnValueMap.combinedScore){
 						popoverOption.content = 'Order has been re-arranged for this ontology term because the subclasses, ';
 						newLineDiv.find('div:last>center').html((newScore / parentChildData[nodePath].length).toFixed(2) + ' (' + hit.columnValueMap.combinedScore.toFixed(2) + ')');
 						newLineDiv.find('div:first').css('color', '#82108C');
-						popoverOption.content += ' are also selected as candidates, therefore suggests the parent class is likely to be the match!';
+						popoverOption.content += childList + ' are also selected as candidates, therefore suggests the parent class is likely to be the match!';
 						matchScoreDiv.addClass('show-popover').popover({
 							'placement' : 'bottom',
 							'trigger' : 'hover',
