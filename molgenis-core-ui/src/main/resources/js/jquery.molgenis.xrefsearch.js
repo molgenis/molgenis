@@ -16,7 +16,7 @@
 	
 	var restApi = new molgenis.RestClient();
 	
-	function createQuery(lookupAttributeNames, terms, operator) {
+	function createQuery(lookupAttributeNames, terms, operator, search) {
 		var q = [];
 		
 		if(lookupAttributeNames.length) {
