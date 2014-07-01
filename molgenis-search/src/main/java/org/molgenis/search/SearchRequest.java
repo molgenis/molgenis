@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
 
@@ -12,8 +13,8 @@ public class SearchRequest
 	private String documentType;
 	private QueryImpl query;
 	private final List<String> fieldsToReturn;
-	private String aggregateField1;
-	private String aggregateField2;
+	private AttributeMetaData aggregateField1;
+	private AttributeMetaData aggregateField2;
 
 	public SearchRequest()
 	{
@@ -27,8 +28,8 @@ public class SearchRequest
 		this.fieldsToReturn = fieldsToReturn;
 	}
 
-	public SearchRequest(String documentType, Query query, List<String> fieldsToReturn, String aggregateField1,
-			String aggregateField2)
+	public SearchRequest(String documentType, Query query, List<String> fieldsToReturn,
+			AttributeMetaData aggregateField1, AttributeMetaData aggregateField2)
 	{
 		this(documentType, query, fieldsToReturn);
 		this.aggregateField1 = aggregateField1;
@@ -55,12 +56,12 @@ public class SearchRequest
 		return fieldsToReturn;
 	}
 
-	public String getAggregateField1()
+	public AttributeMetaData getAggregateField1()
 	{
 		return aggregateField1;
 	}
 
-	public String getAggregateField2()
+	public AttributeMetaData getAggregateField2()
 	{
 		return aggregateField2;
 	}
