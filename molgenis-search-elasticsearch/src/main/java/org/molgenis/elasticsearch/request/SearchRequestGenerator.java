@@ -26,15 +26,19 @@ public class SearchRequestGenerator
 	/**
 	 * Add the 'searchType', 'fields', 'types' and 'query' of the SearchRequestBuilder
 	 * 
-	 * , can be null
-	 * 
+	 * @param searchRequestBuilder
+	 * @param entityNames
 	 * @param searchType
-	 *            , the queryRules to use, throws IllegalArgumentException if an invalid QueryRule is used
-	 * 
+	 * @param query
 	 * @param fieldsToReturn
-	 *            , can be null
-	 * 
-	 * @return SearchRequestBuilder
+	 * @param aggregateField1
+	 *            First Field to aggregate on, attributemetadata instead of name because of elasticsearch bug:
+	 *            http://elasticsearch
+	 *            -users.115913.n3.nabble.com/boolean-multi-field-silently-ignored-in-1-2-1-td4058107.html
+	 * @param aggregateField2
+	 *            Second Field to aggregate on, attributemetadata instead of name because of elasticsearch bug:
+	 *            http://elasticsearch
+	 *            -users.115913.n3.nabble.com/boolean-multi-field-silently-ignored-in-1-2-1-td4058107.html
 	 */
 	public void buildSearchRequest(SearchRequestBuilder searchRequestBuilder, List<String> entityNames,
 			SearchType searchType, Query query, List<String> fieldsToReturn, AttributeMetaData aggregateField1,
