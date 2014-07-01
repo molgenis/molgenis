@@ -46,7 +46,10 @@ public class SearchRequestGenerator
 	{
 		searchRequestBuilder.setSearchType(searchType);
 
-		// determine correct aggregateFieldNames;
+		/*
+		 * determine correct aggregateFieldNames (http://elasticsearch
+		 * -users.115913.n3.nabble.com/boolean-multi-field-silently-ignored-in-1-2-1-td4058107.html)
+		 */
 		String aggregateFieldName1 = aggregateField1 != null ? aggregateField1.getName() : null;
 		String aggregateFieldName2 = aggregateField2 != null ? aggregateField2.getName() : null;
 		String aggregateFieldName_not_analysed1 = aggregateField1 != null ? aggregateField1.getDataType().equals(
