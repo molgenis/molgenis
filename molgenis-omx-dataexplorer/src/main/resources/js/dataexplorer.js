@@ -7,6 +7,8 @@
 	self.getSelectedAttributes = getSelectedAttributes;
 	self.setShowWizardOnInit = setShowWizardOnInit; 
 	self.getEntityQuery = getEntityQuery;
+    self.setNoResultMessage = setNoResultMessage;
+    self.getNoResultMessage = getNoResultMessage;
 	
 	var restApi = new molgenis.RestClient();
 	var selectedEntityMetaData = null;
@@ -15,7 +17,22 @@
 	var searchQuery = null;
 	var showWizardOnInit = false;
 	var modules = [];
-	
+    var noResultMessage = '';
+
+    /**
+     * @memberOf molgenis.dataexplorer
+     */
+    function setNoResultMessage(message) {
+        noResultMessage = message;
+    }
+
+    /**
+     * @memberOf molgenis.dataexplorer
+     */
+    function getNoResultMessage() {
+        return noResultMessage;
+    }
+
 	/**
 	 * @memberOf molgenis.dataexplorer
 	 */
