@@ -749,6 +749,24 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 	@Override
 	public void updateInternal(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
 	{
+		if ((entities == null) || entities.isEmpty()) return;
+
+		// Query to find the existing entities
+		List<Entity> existing = null;
+
+		List<Object> ids = Lists.newArrayList();
+		for (Entity entity : entities)
+		{
+			Object id = entity.getIdValue();
+			if (id != null) ids.add(id);
+		}
+
+		if (!ids.isEmpty())
+		{
+			if (getEntityMetaData().getIdAttribute() == null) throw new MolgenisDataException(
+					"Missing is attribute for [" + getName() + "]");
+			existing = (List<Entity>) findAll(query().in(getEntityMetaData().getIdAttribute().getName(), ids));
+		}
 
 	}
 

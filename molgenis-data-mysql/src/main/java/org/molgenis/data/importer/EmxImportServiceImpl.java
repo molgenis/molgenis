@@ -27,6 +27,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.collect.Lists;
+
 @Component
 public class EmxImportServiceImpl implements EmxImporterService
 {
@@ -97,8 +99,9 @@ public class EmxImportServiceImpl implements EmxImporterService
 				// import
 				if (to != null)
 				{
-					Integer count = to.add(from);
-					report.getNrImportedEntitiesMap().put(name, count);
+					List<Entity> entities = Lists.newArrayList(from);
+					to.update(entities, databaseAction);
+					report.getNrImportedEntitiesMap().put(name, entities.size());
 				}
 			}
 		}
