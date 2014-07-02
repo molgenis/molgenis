@@ -14,7 +14,7 @@
 				<form id="gaflist-import-file-form" method="post" action="${context_url}/import-file" enctype="multipart/form-data">
 					<tr>
 						<td nowrap><i>Separator:</i></td>
-						<td><input type="text" name="separator" class="span2" maxlength="1" value=";"/></td>
+						<td><input type="text" name="separator" class="span2" maxlength="1" value=""/></td>
 						<td></td>
 					</tr>
 					<tr>
