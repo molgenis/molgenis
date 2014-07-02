@@ -269,14 +269,14 @@ public class ElasticSearchServiceTest
 		});
 
 		when(repoMock.getName()).thenReturn("person");
+		AttributeMetaData attr = new DefaultAttributeMetaData("name", FieldTypeEnum.STRING);
 		when(entityMetaData.getAtomicAttributes()).thenReturn(
-				Arrays.<AttributeMetaData> asList(new DefaultAttributeMetaData("id", FieldTypeEnum.INT),
-						new DefaultAttributeMetaData("name", FieldTypeEnum.STRING)));
+				Arrays.<AttributeMetaData> asList(new DefaultAttributeMetaData("id", FieldTypeEnum.INT), attr));
 
 		searchService.indexRepository(repoMock);
 		waitForIndexUpdate();
 
-		SearchResult result = searchService.search(new SearchRequest("person", new QueryImpl(), null, "name", null));
+		SearchResult result = searchService.search(new SearchRequest("person", new QueryImpl(), null, attr, null));
 		assertNotNull(result);
 		assertNotNull(result.getAggregate());
 
