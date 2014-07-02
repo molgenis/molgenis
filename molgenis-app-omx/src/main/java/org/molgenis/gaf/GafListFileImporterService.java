@@ -8,29 +8,21 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.UUID;
 
-import javax.mail.MessagingException;
-
 import org.apache.log4j.Logger;
 import org.molgenis.data.CrudRepositorySecurityDecorator;
 import org.molgenis.data.DataService;
-import org.molgenis.data.csv.CsvRepository;
 import org.molgenis.data.omx.OmxRepository;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.gaf.GafListValidator.GafListValidationReport;
-import org.molgenis.omx.converters.ValueConverterException;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.search.DataSetsIndexer;
 import org.molgenis.search.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import com.google.gdata.util.ServiceException;
 
 @Service
 public class GafListFileImporterService
@@ -58,29 +50,20 @@ public class GafListFileImporterService
 	@Autowired
 	private EntityValidator entityValidator;
 
-	private CsvRepository csvRepo;
-	private GafListValidationReport report;
+	private GafListFileRepository gafListFileRepository;
+	private GafListValidationReport report = null;
 
 	public void createCsvRepository(MultipartFile csvFile, Character separator)
 	{
 		try
 		{
 			File tmpFile = copyDataToTempFile(csvFile);
-			this.csvRepo = new GafListFileRepository(tmpFile, null, separator);
+			this.gafListFileRepository = new GafListFileRepository(tmpFile, null, separator, report);
 		}
 		catch (Exception e)
 		{
 			logger.error(e);
 		}
-	}
-
-	@Transactional(rollbackFor =
-	{ IOException.class, ServiceException.class, ValueConverterException.class, MessagingException.class })
-	@PreAuthorize("hasAnyRole('ROLE_SU')")
-	public void importGafListAsSuperuser() throws IOException, ServiceException, ValueConverterException,
-			MessagingException
-	{
-
 	}
 
 	/**
@@ -107,7 +90,7 @@ public class GafListFileImporterService
 	{
 		try
 		{
-			this.report = gafListValidator.validate(this.csvRepo);
+			this.report = gafListValidator.validate(this.gafListFileRepository);
 		}
 		catch (IOException e)
 		{
@@ -143,7 +126,7 @@ public class GafListFileImporterService
 				OmxRepository omxRepository = createNewGafListRepo(identifier);
 				dataService.addRepository(new CrudRepositorySecurityDecorator(omxRepository));
 				
-				dataService.add(identifier, this.csvRepo);
+				dataService.add(identifier, this.gafListFileRepository);
 			}
 			logger.info("finished importing valid gaf list with identifier: " + identifier);
 		}
@@ -151,7 +134,7 @@ public class GafListFileImporterService
 		{
 			try
 			{
-				this.csvRepo.close();
+				this.gafListFileRepository.close();
 				if (null != dataSet)
 				{
 					this.indexDataSet(dataSet.getId());
