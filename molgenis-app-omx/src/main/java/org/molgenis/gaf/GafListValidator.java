@@ -94,7 +94,7 @@ public class GafListValidator
 		COL_GAF_QC_DATE = "GAF_QC_Date";
 		COL_GAF_QC_STATUS = "GAF_QC_Status";
 		COL_GCC_ANALYSIS = "GCC_Analysis";
-		COL_PLATES_IN_STOCK__DNA_SEQUENCING = "Plates in stock - DNA sequencing";
+		COL_PLATES_IN_STOCK__DNA_SEQUENCING = "Plates in stock - RNA sequencing";
 		COL_REJECTED_FOR_PROCESSING = "Rejected for processing";
 		COL_PLATES_IN_STOCK__DNA_SEQUENCING__WHOLE_GENOME_CAPTURING = "Plates in stock - DNA sequencing (whole genome / capturing)";
 		COL_BARCODE_2 = "Barcode 2";
@@ -194,32 +194,16 @@ public class GafListValidator
 	 */
 	private void validateInternalSampleIdIncremental(List<Entity> entities, GafListValidationReport report)
 	{
-		Integer previousInternalSampleId = null;
 		int row = 2;
 		for (Entity entity : entities)
 		{
 			// skip empty rows
 			if (isEmptyRow(entity)) continue;
-
 			String runId = entity.getString(COL_RUN);
-			
 			Integer internalSampleId = null;
 			try{
 				internalSampleId = entity.getInt(COL_INTERNAL_SAMPLE_ID);
-
-				if (internalSampleId != null)
-				{
-					if (previousInternalSampleId != null)
-					{
-						if (internalSampleId != previousInternalSampleId + 1)
-						{
-							report.addEntry(runId, new GafListValidationError(row, COL_INTERNAL_SAMPLE_ID,
-									internalSampleId.toString(), "non-incremental"));
-						}
-					}
-					previousInternalSampleId = internalSampleId;
-				}
-				else
+				if (internalSampleId == null)
 				{
 					// internal sample id can not be null
 					report.addEntry(runId, new GafListValidationError(row, COL_INTERNAL_SAMPLE_ID, null,
@@ -410,11 +394,7 @@ public class GafListValidator
 		{
 			validateCellWithPattern(runId, row, colName, value, patterns, true, report);
 		}
-		else if (colName.equalsIgnoreCase(COL_EXTERNAL_SAMPLE_ID))
-		{
-			validateCellWithPattern(runId, row, colName, value, patterns, true, report);
-		}
-		else if (colName.equalsIgnoreCase(COL_PROJECT))
+		else if (colName.equalsIgnoreCase(COL_LANE))
 		{
 			validateCellWithPattern(runId, row, colName, value, patterns, true, report);
 		}
@@ -422,9 +402,9 @@ public class GafListValidator
 		{
 			validateCellWithLookupList(runId, row, colName, value, lookupLists, true, report);
 		}
-		else if (colName.equalsIgnoreCase(COL_CONTACT))
+		else if (colName.equalsIgnoreCase(COL_SAMPLE))
 		{
-			validateCellWithPattern(runId, row, colName, value, patterns, true, report);
+			validateCellWithPattern(runId, row, colName, value, patterns, false, report);
 		}
 		else if (colName.equalsIgnoreCase(COL_SEQUENCING_START_DATE))
 		{
@@ -438,19 +418,39 @@ public class GafListValidator
 		{
 			validateCellWithPattern(runId, row, colName, value, patterns, true, report);
 		}
-		else if (colName.equalsIgnoreCase(COL_LANE))
+		else if (colName.equalsIgnoreCase(COL_SEQ_TYPE))
 		{
-			validateCellWithPattern(runId, row, colName, value, patterns, true, report);
+			validateCellWithLookupList(runId, row, colName, value, lookupLists, true, report);
 		}
 		else if (colName.equalsIgnoreCase(COL_BARCODE_1))
 		{
 			validateCellWithPattern(runId, row, colName, value, patterns, false, report);
 		}
-		else if (colName.equalsIgnoreCase(COL_SEQ_TYPE))
+		else if (colName.equalsIgnoreCase(End_Product_Concentration_nmol__l))
 		{
-			validateCellWithLookupList(runId, row, colName, value, lookupLists, true, report);
+			validateCellWithPattern(runId, row, colName, value, patterns, false, report);
 		}
-		else if (colName.equalsIgnoreCase(COL_PREP_KIT))
+		else if (colName.equalsIgnoreCase(COL_EXTERNAL_SAMPLE_ID))
+		{
+			validateCellWithPattern(runId, row, colName, value, patterns, true, report);
+		}
+		else if (colName.equalsIgnoreCase(COL_PROJECT))
+		{
+			validateCellWithPattern(runId, row, colName, value, patterns, true, report);
+		}
+		else if (colName.equalsIgnoreCase(COL_CONTACT))
+		{
+			validateCellWithPattern(runId, row, colName, value, patterns, true, report);
+		}
+		else if (colName.equalsIgnoreCase(COL_SAMPLE_TYPE))
+		{
+			validateCellWithPattern(runId, row, colName, value, patterns, false, report);
+		}
+		else if (colName.equalsIgnoreCase(COL_ARRAY_FILE))
+		{
+			validateCellWithPattern(runId, row, colName, value, patterns, false, report);
+		}
+		else if (colName.equalsIgnoreCase(COL_ARRAY_ID))
 		{
 			validateCellWithPattern(runId, row, colName, value, patterns, false, report);
 		}
@@ -458,11 +458,7 @@ public class GafListValidator
 		{
 			validateCellWithLookupList(runId, row, colName, value, lookupLists, true, report);
 		}
-		else if (colName.equalsIgnoreCase(COL_ARRAY_FILE))
-		{
-			validateCellWithPattern(runId, row, colName, value, patterns, false, report);
-		}
-		else if (colName.equalsIgnoreCase(COL_ARRAY_ID))
+		else if (colName.equalsIgnoreCase(COL_PREP_KIT))
 		{
 			validateCellWithPattern(runId, row, colName, value, patterns, false, report);
 		}
@@ -481,6 +477,22 @@ public class GafListValidator
 		else if (colName.equalsIgnoreCase(COL_GCC_ANALYSIS))
 		{
 			validateCellWithLookupList(runId, row, colName, value, lookupLists, false, report);
+		}
+		else if (colName.equalsIgnoreCase(COL_PLATES_IN_STOCK__DNA_SEQUENCING))
+		{
+			validateCellWithPattern(runId, row, colName, value, patterns, false, report);
+		}
+		else if (colName.equalsIgnoreCase(COL_REJECTED_FOR_PROCESSING))
+		{
+			validateCellWithPattern(runId, row, colName, value, patterns, false, report);
+		}
+		else if (colName.equalsIgnoreCase(COL_PLATES_IN_STOCK__DNA_SEQUENCING__WHOLE_GENOME_CAPTURING))
+		{
+			validateCellWithPattern(runId, row, colName, value, patterns, false, report);
+		}
+		else if (colName.equalsIgnoreCase(COL_BARCODE_2))
+		{
+			validateCellWithPattern(runId, row, colName, value, patterns, false, report);
 		}
 		else if (colName.equalsIgnoreCase(COL_BARCODE))
 		{

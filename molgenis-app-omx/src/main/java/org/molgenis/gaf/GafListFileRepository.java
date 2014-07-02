@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.csv.CsvRepository;
 import org.molgenis.data.processor.CellProcessor;
+import org.molgenis.gaf.GafListValidator.GafListValidationReport;
 
 import com.google.gdata.util.ServiceException;
 
@@ -19,15 +20,14 @@ import com.google.gdata.util.ServiceException;
  */
 public class GafListFileRepository extends CsvRepository
 {
-	private final static String COLUMN__BARCODE_1 = "Barcode 1";
-	private final static String COLUMN__BARCODETYPE = "barcodeType";
-	private final static String COLUMN__BARCODE = "barcode";
+	private final GafListValidationReport report;
 
-	public GafListFileRepository(File tmpFile, @Nullable List<CellProcessor> cellProcessors,
-			Character separator)
+	public GafListFileRepository(File tmpFile, @Nullable List<CellProcessor> cellProcessors, Character separator,
+			GafListValidationReport report)
 			throws IOException, ServiceException
 	{
 		super(tmpFile, null, separator);
+		this.report = report;
 	}
 
 	@Override
@@ -67,11 +67,29 @@ public class GafListFileRepository extends CsvRepository
 			private Entity getNext()
 			{
 				Entity nextEntity = null;
-				if (it.hasNext())
+				if (null != report)
 				{
-					Entity entity = it.next();
-					addBarcodeTypeAndBarcodeToEntity(entity);
-					nextEntity = entity;
+					do
+					{
+						Entity entity = it.next();
+						String runId = entity.getString(GafListValidator.COL_RUN);
+						if (runId != null && !report.hasErrors(runId))
+						{
+							addBarcodeTypeAndBarcodeToEntity(entity);
+							nextEntity = entity;
+							break;
+						}
+					}
+					while (it.hasNext());
+				}
+				else
+				{
+					if (it.hasNext())
+					{
+						Entity entity = it.next();
+						addBarcodeTypeAndBarcodeToEntity(entity);
+						nextEntity = entity;
+					}
 				}
 				return nextEntity;
 			}

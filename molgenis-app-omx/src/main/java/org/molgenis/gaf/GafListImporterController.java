@@ -68,8 +68,8 @@ public class GafListImporterController extends MolgenisPluginController
 			model.addAttribute("hasValidationError", this.gafListFileImporterService.hasValidationError());
 			model.addAttribute("validationReport", this.gafListFileImporterService.getValidationReportHtml());
 
-			if (!this.gafListFileImporterService.hasValidationError())
-			{
+			// if (!this.gafListFileImporterService.hasValidationError())
+			// {
 				try
 				{
 					String nameNewGafList = this.gafListFileImporterService.importValidatedGafList();
@@ -81,7 +81,7 @@ public class GafListImporterController extends MolgenisPluginController
 					logger.error(e);
 					model.addAttribute("importMessage", "Failed to import data into database.");
 				}
-			}
+			// }
 		}
 		else
 		{
