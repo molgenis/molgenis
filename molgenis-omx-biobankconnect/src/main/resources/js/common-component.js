@@ -54,7 +54,6 @@
 		});
 		
 		this.modal.modal({
-			'backdrop' : false,
 			'show' : true
 		}).draggable();
 		
