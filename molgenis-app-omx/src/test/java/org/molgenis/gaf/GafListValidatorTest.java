@@ -77,7 +77,7 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 				.thenReturn("^(None)|(((GAF)|(RPI)|(AGI)|(MON)|(RTP)|(HP8))\\s[0-9]{2}\\s([ACGT]{6})([ATCG]{2})?)$");
 
 		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_SETTINGS_PREFIX + GafListValidator.COL_ARRAY_FILE))
-				.thenReturn("^.*[/\\]{1}[a-zA-Z0-9\\._]+$");
+				.thenReturn("^.*[\\/\\\\]{1}[a-zA-Z0-9\\._]+$");
 		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_SETTINGS_PREFIX + GafListValidator.COL_ARRAY_ID))
 				.thenReturn("^[1-9][0-9]*$");
 
