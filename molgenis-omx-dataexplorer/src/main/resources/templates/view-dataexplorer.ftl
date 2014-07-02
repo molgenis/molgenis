@@ -35,6 +35,7 @@
     <script>
     	molgenis.dataexplorer.setShowWizardOnInit(${wizard?string('true', 'false')});
         molgenis.dataexplorer.filter.wizard.setWizardTitle('${wizardtitle}');
+        molgenis.dataexplorer.setNoResultMessage('${aggregatenoresults}');
    	</script>
     
     <div id="entity-class" class="well">
@@ -80,7 +81,7 @@
 								<div class="accordion-inner">
 								    <div class="row-fluid" id="feature-filters"></div>
 								    <div class="row-fluid">
-								    	<a href="#" id="filter-wizard-btn" class="btn btn-small pull-right"><img src="/img/filter-bw.png"> Wizard</a>
+								    	<a href="#" id="filter-wizard-btn" class="btn btn-small pull-right"><img src="/img/filter-bw.png"> ${wizardbuttontitle}</a>
 									</div>
 								</div>
 							</div>
