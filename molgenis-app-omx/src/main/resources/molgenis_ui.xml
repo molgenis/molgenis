@@ -59,6 +59,10 @@
 			<plugin id="datasetdeleter" name="Data Set Deleter" url="datasetdeleter"/>
 			<plugin id="gaflistimporter" name="GAF List Importer" url="gaflistimporter"/>
 		</menu>
+		<menu label="Custom Views" name="custom_views">
+	        <plugin id="col7a1-patients" name="COL7A1-Patients" url="col7a1_patients"/>
+	        <plugin id="col7a1-mutations" name="COL7A1-Mutations" url="col7a1_mutations"/>
+		</menu>
 		<plugin id="useraccount" name="Account" url="useraccount"/>
 	</menu>
 </molgenis>

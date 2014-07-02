@@ -22,7 +22,7 @@ public class MysqlRepositoryDecimalTest extends MysqlRepositoryAbstractDatatypeT
 	@Override
 	public String createSql()
 	{
-		return "CREATE TABLE IF NOT EXISTS DecimalTest(col1 DOUBLE(65,30) NOT NULL, col2 DOUBLE(65,30), col3 DOUBLE(65,30), PRIMARY KEY (col1)) ENGINE=InnoDB;";
+		return "CREATE TABLE IF NOT EXISTS `DecimalTest`(`col1` DOUBLE(65,30) NOT NULL, `col2` DOUBLE(65,30), `col3` DOUBLE(65,30), PRIMARY KEY (`col1`)) ENGINE=InnoDB;";
 	}
 
 	@Override
