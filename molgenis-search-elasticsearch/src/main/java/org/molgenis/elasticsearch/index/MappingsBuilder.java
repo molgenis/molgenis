@@ -61,7 +61,7 @@ public class MappingsBuilder
 			{
 				jsonBuilder.startObject(attr.getName()).field("type", "multi_field").startObject("fields")
 						.startObject(attr.getName()).field("type", esType).endObject().startObject(FIELD_NOT_ANALYZED)
-						.field("type", esType).field("index", "not_analyzed").endObject().endObject().endObject();
+						.field("type", esType).endObject().endObject().endObject();
 
 			}
 		}
