@@ -9,7 +9,8 @@
 	"select2.css",
 	"iThing-min.css",
 	"bootstrap-switch.min.css",
-	"dataexplorer.css"]>
+	"dataexplorer.css",
+	"diseasematcher.css"]>
 <#assign js=[
 	"jquery-ui-1.9.2.custom.min.js",
 	"jquery.bootstrap.wizard.min.js",
@@ -25,10 +26,6 @@
 	"jquery.molgenis.xrefsearch.js",
 	"dataexplorer.js",
 	"jquery.molgenis.table.js"]>
-
-<#if modDiseaseMatcher == true>
-	<#assign css = css + ["diseasematcher.css"]/>
-</#if>
 
 <@header css js/>
     <script>
