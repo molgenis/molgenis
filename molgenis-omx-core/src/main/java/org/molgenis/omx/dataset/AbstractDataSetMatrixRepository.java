@@ -60,7 +60,7 @@ public abstract class AbstractDataSetMatrixRepository extends AbstractRepository
 
 		if (dataSet == null)
 		{
-			throw new UnknownEntityException("DataSet [" + dataSetIdentifier + "] not found");
+			throw new UnknownEntityException("DataSet with dataset identifier [" + dataSetIdentifier + "] is not found");
 		}
 
 		return dataSet;
