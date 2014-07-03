@@ -215,6 +215,16 @@
 		return writable;
 	};
 
+	molgenis.isFloat = function(n) {
+		if(typeof n === 'string')
+			n = parseFloat(n);
+		return n === +n && n !== (n | 0);
+	};
+
+	molgenis.isInteger = function(n) {
+		return n === +n && n === (n | 0);
+	};
+	
 }($, window.top.molgenis = window.top.molgenis || {}));
 
 // Add endsWith function to the string class
@@ -360,9 +370,21 @@ function createInput(attr, attrs, val, lbl) {
 			$('input', datepicker).val(val);
 		return datepicker.datetimepicker({pickTime: dataType === 'DATE_TIME'});
 	case 'DECIMAL':
+		var input = createBasicInput('number', $.extend({}, attrs, {'step': 'any'}), val);
+		if(!attr.nillable)
+			input.prop('required', true);
+		return input;
 	case 'INT':
 	case 'LONG':
-		return createBasicInput('number', attrs, val);
+		var opts = $.extend({}, attrs, {'step': '1'});
+		if(attr.range) {
+			if(attr.range.min) opts.min = attr.range.min;
+			if(attr.range.max) opts.max = attr.range.max;
+		}
+		var input = createBasicInput('number', opts, val);
+		if(!attr.nillable)
+			input.prop('required', true);
+		return input;
 	case 'EMAIL':
 		return createBasicInput('email', attrs, val);
 	case 'HTML':
