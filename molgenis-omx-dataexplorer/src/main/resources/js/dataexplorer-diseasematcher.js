@@ -131,7 +131,7 @@
 		$('#diseasematcher-disease-panel-tabs').tab();
 
 		localStorageSupported = browserSupportsLocalStorage();
-		//if (localStorageSupported) localStorage.clear();
+		if (localStorageSupported) localStorage.clear();
 		
 		toolAvailable = true;
 		checkToolAvailable('/api/v1/' + getEntity().name);
@@ -164,8 +164,7 @@
 			url : '/diseasematcher/' + selectionType,
 			data : JSON.stringify(request),
 			success : function(data) {
-				console.log('success');
-				
+			
 				if (selectionType === SelectionMode.DISEASE) {
 					// add the diseases (if any) to the disease list and init
 					// the pager
@@ -284,6 +283,8 @@
 			diseasePanel.append(warning);
 			return;
 		}
+		
+		console.log(omimObject);
 		
 		var entry = omimObject.omim.entryList[0].entry;
 		
