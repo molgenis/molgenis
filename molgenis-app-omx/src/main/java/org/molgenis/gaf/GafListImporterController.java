@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -54,8 +53,6 @@ public class GafListImporterController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = RequestMethod.POST)
-	@Transactional(rollbackFor =
-	{ IOException.class, ServiceException.class, ValueConverterException.class, MessagingException.class })
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	public String importGafListFromFile(@RequestParam("csvFile") MultipartFile csvFile,
 			@RequestParam("separator") Character separator, Model model) throws IOException, ServiceException,
@@ -68,19 +65,17 @@ public class GafListImporterController extends MolgenisPluginController
 			model.addAttribute("hasValidationError", this.gafListFileImporterService.hasValidationError());
 			model.addAttribute("validationReport", this.gafListFileImporterService.getValidationReportHtml());
 
-			// if (!this.gafListFileImporterService.hasValidationError())
-			// {
 			try
 			{
-				String nameNewGafList = this.gafListFileImporterService.importValidatedGafList();
-				model.addAttribute("importMessage", "Successfully imported! the new list name is: " + nameNewGafList);
+				// TODO JJ get imported runs
+				String nameGafList = this.gafListFileImporterService.importValidatedGafList();
+				model.addAttribute("importMessage", "Successfully imported! the new list name is: " + nameGafList);
 			}
 			catch (Exception e)
 			{
 				logger.error(e);
 				model.addAttribute("importMessage", "Failed to import data into database.");
 			}
-			// }
 		}
 		else
 		{

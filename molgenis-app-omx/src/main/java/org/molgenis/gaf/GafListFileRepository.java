@@ -67,30 +67,30 @@ public class GafListFileRepository extends CsvRepository
 			private Entity getNext()
 			{
 				Entity nextEntity = null;
-				// if (null != report)
-				// {
-				// do
-				// {
-				// Entity entity = it.next();
-				// String runId = entity.getString(GafListValidator.COL_RUN);
-				// if (runId != null && !report.hasErrors(runId))
-				// {
-				// addBarcodeTypeAndBarcodeToEntity(entity);
-				// nextEntity = entity;
-				// break;
-				// }
-				// }
-				// while (it.hasNext());
-				// }
-				// else
-				// {
+				if (null != report)
+				{
+					do
+					{
+						Entity entity = it.next();
+						String runId = entity.getString(GafListValidator.COL_RUN);
+						if (runId != null && !report.hasErrors(runId))
+						{
+							addBarcodeTypeAndBarcodeToEntity(entity);
+							nextEntity = entity;
+							break;
+						}
+					}
+					while (it.hasNext());
+				}
+				else
+				{
 					if (it.hasNext())
 					{
 						Entity entity = it.next();
 						addBarcodeTypeAndBarcodeToEntity(entity);
 						nextEntity = entity;
 					}
-				// }
+				}
 				return nextEntity;
 			}
 
