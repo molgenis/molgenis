@@ -362,6 +362,39 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
+	public void updateAttribute() throws Exception
+	{
+		mockMvc.perform(
+				post(HREF_ENTITY_ID + "/name").param("_method", "PUT").content("Klaas").contentType(APPLICATION_JSON))
+				.andExpect(status().isOk());
+		verify(dataService).update(Matchers.eq(ENTITY_NAME), Matchers.any(MapEntity.class));
+	}
+
+	@Test
+	public void updateAttribute_unknownEntity() throws Exception
+	{
+		mockMvc.perform(
+				post(BASE_URI + "/unknownentity/" + ENTITY_ID + "/name").param("_method", "PUT").content("Klaas")
+						.contentType(APPLICATION_JSON)).andExpect(status().isNotFound());
+	}
+
+	@Test
+	public void updateAttribute_unknownEntityId() throws Exception
+	{
+		mockMvc.perform(
+				post(HREF_ENTITY + "/666" + "/name").param("_method", "PUT").content("Klaas")
+						.contentType(APPLICATION_JSON)).andExpect(status().isNotFound());
+	}
+
+	@Test
+	public void updateAttribute_unknownAttribute() throws Exception
+	{
+		mockMvc.perform(
+				post(HREF_ENTITY_ID + "/unknownattribute").param("_method", "PUT").content("Klaas")
+						.contentType(APPLICATION_JSON)).andExpect(status().isNotFound());
+	}
+
+	@Test
 	public void updateFromFormPost() throws Exception
 	{
 		mockMvc.perform(
