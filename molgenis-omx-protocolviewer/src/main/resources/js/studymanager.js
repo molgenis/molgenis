@@ -205,7 +205,7 @@
             }
 
             if(exportStudyDefinitionBtn !== undefined){
-                if($('#state-select').val() === 'APPROVED' || $('#state-select').val() === 'REJECTED')
+                if($('#state-select').val() === 'APPROVED')
                 {
                     exportStudyDefinitionBtn.show();
                 }
