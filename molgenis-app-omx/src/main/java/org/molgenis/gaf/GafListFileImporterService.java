@@ -9,7 +9,7 @@ import java.util.Calendar;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
-import org.molgenis.data.CrudRepositorySecurityDecorator;
+import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.omx.OmxRepository;
 import org.molgenis.data.support.QueryImpl;
@@ -112,42 +112,61 @@ public class GafListFileImporterService
 
 	public String importValidatedGafList()
 	{
-		String identifier = UUID.randomUUID().toString();
+		String dataSetIdentifier = UUID.randomUUID().toString();
 		DataSet dataSet = null;
-		String nameNewGafList = "";
+		String dataSetName = "tODO JJ";
+
 		try
 		{
-			logger.info("importing valid gaf list runs ...");
-			if (!dataService.hasRepository(identifier))
+			logger.info("importing gaf list runs ...");
+			if (!dataService.hasRepository(dataSetName))
 			{
-				dataSet = createNewGafListDataSet(identifier);
-				dataService.add(DataSet.ENTITY_NAME, dataSet);
+				dataSet = createNewGafListDataSet(dataSetIdentifier);
+				dataSetName = dataSet.getName();
+				OmxRepository omxRepository = createNewGafListRepo(dataSetIdentifier);
 
-				OmxRepository omxRepository = createNewGafListRepo(identifier);
-				dataService.addRepository(new CrudRepositorySecurityDecorator(omxRepository));
-				
-				dataService.add(identifier, this.gafListFileRepository);
+				CrudRepository dataSetRepository = (CrudRepository) dataService
+						.getRepositoryByEntityName(DataSet.ENTITY_NAME);
+				dataSetRepository.add(dataSet);
+				try
+				{
+					dataSetRepository.close();
+				}
+				catch (IOException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+				System.out.println("lala1");
+				DataSet dataSetTEmo = dataService.findOne(DataSet.ENTITY_NAME,
+						new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier), DataSet.class);
+
+				// dataService.addRepository(new AggregateableCrudRepositorySecurityDecorator(omxRepository));
+
+				dataService.add(dataSetIdentifier, this.gafListFileRepository);
+
+				System.out.println("start indexing");
+				logger.info("start indexing");
+				dataSetIndexer.indexDataSets(Arrays.asList((Object) dataSet.getId()));
+				logger.info("finished indexing");
+				System.out.println("finished indexing");
 			}
-			logger.info("finished importing valid gaf list with identifier: " + identifier);
+			logger.info("finished importing valid gaf list with identifier: " + dataSetIdentifier);
 		}
 		finally
 		{
 			try
 			{
 				this.gafListFileRepository.close();
-				if (null != dataSet)
-				{
-					this.indexDataSet(dataSet.getId());
-					nameNewGafList = dataSet.getName();
-				}
 			}
 			catch (IOException e)
 			{
-				e.printStackTrace();
+				logger.error(e);
 			}
 		}
 
-		return nameNewGafList;
+		return dataSetName;
 	}
 
 	public OmxRepository createNewGafListRepo(String identifier)
@@ -155,21 +174,14 @@ public class GafListFileImporterService
 		return new OmxRepository(dataService, searchService, identifier, entityValidator);
 	}
 
-	public DataSet createNewGafListDataSet(String identifier)
+	public DataSet createNewGafListDataSet(String dataSetIdentifier)
 	{
 		String name = generateGafListRepoName();
 		DataSet dataSet = new DataSet();
-		dataSet.setIdentifier(identifier);
-		dataSet.setName(name);
+		dataSet.setIdentifier(dataSetIdentifier);
+		dataSet.setName(dataSetIdentifier);
 		dataSet.setProtocolUsed(getGafListProtocolUsed());
 		return dataSet;
-	}
-
-	public void indexDataSet(Integer identifier)
-	{
-		logger.info("indexing new gaf list data set ...");
-		dataSetIndexer.indexDataSets(Arrays.asList((Object) identifier));
-		logger.debug("finished indexing new gaf list data set");
 	}
 
 	public Protocol getGafListProtocolUsed()

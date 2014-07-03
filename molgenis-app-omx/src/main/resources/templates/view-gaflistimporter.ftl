@@ -11,7 +11,7 @@
 		<div class="span4">
 		<h4>Import CSV file</h4>
 			<table class="table">
-				<form id="gaflist-import-file-form" method="post" action="${context_url}/import-file" enctype="multipart/form-data">
+				<form id="gaflist-import-file-form" method="post" action="${context_url}" enctype="multipart/form-data">
 					<tr>
 						<td nowrap><i>Separator:</i></td>
 						<td><input type="text" name="separator" class="span2" maxlength="1" value=""/></td>

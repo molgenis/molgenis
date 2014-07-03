@@ -53,7 +53,7 @@ public class GafListImporterController extends MolgenisPluginController
 		return "view-gaflistimporter";
 	}
 
-	@RequestMapping(value = "/import-file", method = RequestMethod.POST)
+	@RequestMapping(method = RequestMethod.POST)
 	@Transactional(rollbackFor =
 	{ IOException.class, ServiceException.class, ValueConverterException.class, MessagingException.class })
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
@@ -70,17 +70,16 @@ public class GafListImporterController extends MolgenisPluginController
 
 			// if (!this.gafListFileImporterService.hasValidationError())
 			// {
-				try
-				{
-					String nameNewGafList = this.gafListFileImporterService.importValidatedGafList();
-					model.addAttribute("importMessage", "Successfully imported! the new list name is: "
-							+ nameNewGafList);
-				}
-				catch (Exception e)
-				{
-					logger.error(e);
-					model.addAttribute("importMessage", "Failed to import data into database.");
-				}
+			try
+			{
+				String nameNewGafList = this.gafListFileImporterService.importValidatedGafList();
+				model.addAttribute("importMessage", "Successfully imported! the new list name is: " + nameNewGafList);
+			}
+			catch (Exception e)
+			{
+				logger.error(e);
+				model.addAttribute("importMessage", "Failed to import data into database.");
+			}
 			// }
 		}
 		else
