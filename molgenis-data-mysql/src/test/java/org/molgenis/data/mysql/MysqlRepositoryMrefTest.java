@@ -1,5 +1,7 @@
 package org.molgenis.data.mysql;
 
+import static org.testng.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -13,21 +15,26 @@ import org.molgenis.data.support.QueryImpl;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+
 /** Test for MolgenisFieldTypes.MREF */
 public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 {
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		DefaultEntityMetaData refEntity = new DefaultEntityMetaData("StringTarget2").setLabelAttribute("label")
-				.setIdAttribute("identifier");
+		DefaultEntityMetaData refEntity = new DefaultEntityMetaData("StringTarget2");
+		refEntity.setLabelAttribute("label");
+		refEntity.setIdAttribute("identifier");
 		refEntity.addAttribute("identifier").setNillable(false);
 
-		DefaultEntityMetaData refEntity2 = new DefaultEntityMetaData("IntTarget2").setIdAttribute("identifier");
+		DefaultEntityMetaData refEntity2 = new DefaultEntityMetaData("IntTarget2");
+		refEntity2.setIdAttribute("identifier");
 		refEntity2.addAttribute("identifier").setDataType(MolgenisFieldTypes.INT).setNillable(false);
 
-		DefaultEntityMetaData varcharMD = new DefaultEntityMetaData("MrefTest").setLabel("ref Test").setIdAttribute(
-				"identifier");
+		DefaultEntityMetaData varcharMD = new DefaultEntityMetaData("MrefTest").setLabel("ref Test");
+		varcharMD.setIdAttribute("identifier");
 		varcharMD.addAttribute("identifier").setNillable(false);
 		varcharMD.addAttribute("stringRef").setDataType(MolgenisFieldTypes.MREF).setRefEntity(refEntity)
 				.setNillable(false);
@@ -47,6 +54,7 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 		return null;
 	}
 
+	@Override
 	@Test
 	public void test() throws Exception
 	{
@@ -99,7 +107,7 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 		Assert.assertEquals(mrefRepo.count(), 2);
 
 		Assert.assertEquals(
-				mrefRepo.getSelectSql(new QueryImpl()),
+				mrefRepo.getSelectSql(new QueryImpl(), Lists.newArrayList()),
 				"SELECT this.`identifier`, GROUP_CONCAT(DISTINCT(`stringRef`.`stringRef`)) AS `stringRef`, GROUP_CONCAT(DISTINCT(`intRef`.`intRef`)) AS `intRef` FROM `MrefTest` AS this LEFT JOIN `MrefTest_stringRef` AS `stringRef_filter` ON (this.`identifier` = `stringRef_filter`.`identifier`) LEFT JOIN `MrefTest_stringRef` AS `stringRef` ON (this.`identifier` = `stringRef`.`identifier`) LEFT JOIN `MrefTest_intRef` AS `intRef_filter` ON (this.`identifier` = `intRef_filter`.`identifier`) LEFT JOIN `MrefTest_intRef` AS `intRef` ON (this.`identifier` = `intRef`.`identifier`) GROUP BY this.`identifier`");
 		for (Entity e : mrefRepo.findAll(new QueryImpl().eq("identifier", "one")))
 		{
@@ -121,36 +129,38 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 		for (Entity e : mrefRepo.findAll(new QueryImpl().eq("stringRef", "ref3")))
 		{
 			logger.debug("found: " + e);
-			Assert.assertEquals(e.get("stringRef"), Arrays.asList(new String[]{"ref3"}));
+			Assert.assertEquals(e.get("stringRef"), Arrays.asList(new String[]
+			{ "ref3" }));
 		}
 
 		for (Entity e : mrefRepo.findAll(new QueryImpl().eq("stringRef", "ref1")))
 		{
 			logger.debug("found: " + e);
-			Assert.assertEquals(e.get("stringRef"),  Arrays.asList(new String[]{"ref1","ref2"}));
+			Object obj = e.get("stringRef");
+			assertTrue(obj instanceof List<?>);
+			Assert.assertEquals(Sets.newHashSet((List<?>) obj), Sets.newHashSet(new String[]
+			{ "ref1", "ref2" }));
 		}
 
 		for (Entity e : mrefRepo.findAll(new QueryImpl().gt("intRef", 1)))
 		{
 			logger.debug("found: " + e);
-			Assert.assertEquals(e.get("intRef"), Arrays.asList(new Integer[]{1,2}));
+			Assert.assertEquals(e.get("intRef"), Arrays.asList(new Integer[]
+			{ 1, 2 }));
 		}
 
 		// update
 
-        Entity e = mrefRepo.findOne("one");
-        e.set("stringRef","ref2,ref3");
-        mrefRepo.update(e);
+		Entity e = mrefRepo.findOne("one");
+		e.set("stringRef", "ref2,ref3");
+		mrefRepo.update(e);
 
-        e = mrefRepo.findOne("one");
-        Assert.assertEquals(e.getList("stringRef").size(),2);
-        Assert.assertTrue(e.getList("stringRef").contains("ref2"));
-        Assert.assertTrue(e.getList("stringRef").contains("ref3"));
+		e = mrefRepo.findOne("one");
+		Assert.assertEquals(e.getList("stringRef").size(), 2);
+		Assert.assertTrue(e.getList("stringRef").contains("ref2"));
+		Assert.assertTrue(e.getList("stringRef").contains("ref3"));
 
-
-
-
-        // verify not null error
+		// verify not null error
 
 		// verify default
 	}

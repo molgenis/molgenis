@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.catalog.CatalogItem;
 import org.molgenis.catalog.UnknownCatalogException;
 import org.molgenis.data.DataService;
@@ -56,19 +57,7 @@ public class OmxStudyManagerService implements StudyManagerService
 	@Override
 	public List<StudyDefinition> getStudyDefinitions(Status status)
 	{
-		Iterable<StudyDataRequest> studyDataRequest = dataService.findAll(StudyDataRequest.ENTITY_NAME,
-				new QueryImpl().eq(StudyDataRequest.REQUESTSTATUS, status.toString().toLowerCase()),
-				StudyDataRequest.class);
-
-		return Lists.newArrayList(Iterables.transform(studyDataRequest,
-				new Function<StudyDataRequest, StudyDefinition>()
-				{
-					@Override
-					public StudyDefinition apply(StudyDataRequest studyDataRequest)
-					{
-						return new OmxStudyDefinition(studyDataRequest, dataService);
-					}
-				}));
+		return findStudyDefinitions(status, null);
 	}
 
 	@Override
@@ -196,7 +185,7 @@ public class OmxStudyManagerService implements StudyManagerService
 						return feature;
 					}
 				})));
-		studyDataRequest.setRequestStatus(studyDefinition.getStatus().toString());
+		studyDataRequest.setRequestStatus(studyDefinition.getStatus().toString().toLowerCase());
 
 		dataService.update(StudyDataRequest.ENTITY_NAME, studyDataRequest);
 	}
@@ -220,5 +209,35 @@ public class OmxStudyManagerService implements StudyManagerService
 		}
 		studyDataRequest.setRequestStatus(Status.SUBMITTED.toString().toLowerCase());
 		dataService.update(StudyDataRequest.ENTITY_NAME, studyDataRequest);
+	}
+
+	@Override
+	public void exportStudyDefinition(String id, String catalogId) throws UnknownStudyDefinitionException,
+			UnknownCatalogException
+	{
+		throw new UnsupportedOperationException("No export functionality available for OMX");
+	}
+
+	@Override
+	public List<StudyDefinition> findStudyDefinitions(Status status, String search)
+	{
+		Query q = new QueryImpl().eq(StudyDataRequest.REQUESTSTATUS, status.toString().toLowerCase());
+		if (StringUtils.isNotBlank(search))
+		{
+			q.search(search);
+		}
+
+		Iterable<StudyDataRequest> studyDataRequest = dataService.findAll(StudyDataRequest.ENTITY_NAME, q,
+				StudyDataRequest.class);
+
+		return Lists.newArrayList(Iterables.transform(studyDataRequest,
+				new Function<StudyDataRequest, StudyDefinition>()
+				{
+					@Override
+					public StudyDefinition apply(StudyDataRequest studyDataRequest)
+					{
+						return new OmxStudyDefinition(studyDataRequest, dataService);
+					}
+				}));
 	}
 }

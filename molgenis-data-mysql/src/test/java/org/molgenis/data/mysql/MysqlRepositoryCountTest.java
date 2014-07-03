@@ -13,22 +13,26 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.Lists;
+
 /** Test for Query */
 @ContextConfiguration(classes = AppConfig.class)
 public class MysqlRepositoryCountTest extends AbstractTestNGSpringContextTests
 {
-    @Autowired
-    MysqlRepositoryCollection coll;
+	@Autowired
+	MysqlRepositoryCollection coll;
 	Logger logger = Logger.getLogger(getClass());
 
 	@Test
 	public void test()
 	{
 		// define model
-		DefaultEntityMetaData countryMD = new DefaultEntityMetaData("query_country").setIdAttribute("code");
+		DefaultEntityMetaData countryMD = new DefaultEntityMetaData("query_country");
+		countryMD.setIdAttribute("code");
 		countryMD.addAttribute("code").setNillable(false); // TODO: make this an enum!
 
-		DefaultEntityMetaData personMD = new DefaultEntityMetaData("query_person").setIdAttribute("email");
+		DefaultEntityMetaData personMD = new DefaultEntityMetaData("query_person");
+		personMD.setIdAttribute("email");
 		personMD.addAttribute("email").setNillable(false);
 		personMD.addAttribute("firstName");
 		personMD.addAttribute("lastName");
@@ -37,8 +41,8 @@ public class MysqlRepositoryCountTest extends AbstractTestNGSpringContextTests
 		personMD.addAttribute("active").setDataType(MolgenisFieldTypes.BOOL);
 		personMD.addAttribute("country").setDataType(MolgenisFieldTypes.XREF).setRefEntity(countryMD);
 
-        coll.drop(personMD.getName());
-        coll.drop(countryMD.getName());
+		coll.drop(personMD.getName());
+		coll.drop(countryMD.getName());
 		MysqlRepository countries = coll.add(countryMD);
 		MysqlRepository persons = coll.add(personMD);
 
@@ -82,11 +86,10 @@ public class MysqlRepositoryCountTest extends AbstractTestNGSpringContextTests
 
 		Assert.assertEquals(persons.count(), 3);
 
-        //search all text/string fields
-        Assert.assertEquals(persons.count(new QueryImpl().search("doe")), 2);
+		// search all text/string fields
+		Assert.assertEquals(persons.count(new QueryImpl().search("doe")), 2);
 
-
-        // string
+		// string
 		Assert.assertEquals(persons.count(new QueryImpl().eq("lastName", "doe")), 2);
 		Assert.assertEquals(persons.count(new QueryImpl().eq("lastName", "duck")), 1);
 		Assert.assertEquals(persons.count(new QueryImpl().eq("lastName", "duck").or().eq("lastName", "doe")), 3);
@@ -99,7 +102,7 @@ public class MysqlRepositoryCountTest extends AbstractTestNGSpringContextTests
 		Assert.assertEquals(persons.count(new QueryImpl().gt("height", 165).or().lt("height", 165)), 2);
 
 		// bool
-		logger.debug(persons.getSelectSql(new QueryImpl().eq("active", true)));
+		logger.debug(persons.getSelectSql(new QueryImpl().eq("active", true), Lists.newArrayList()));
 		Assert.assertEquals(persons.count(new QueryImpl().eq("active", true)), 2);
 		Assert.assertEquals(persons.count(new QueryImpl().eq("active", false)), 1);
 		Assert.assertEquals(persons.count(new QueryImpl().eq("active", true).or().eq("height", 165)), 3);

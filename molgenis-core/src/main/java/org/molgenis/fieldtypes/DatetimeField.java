@@ -121,7 +121,14 @@ public class DatetimeField extends FieldType
 			}
 			catch (Exception e)
 			{
-				throw new RuntimeException("DateField.convert(" + value + ") failed: " + e.getMessage());
+				try
+				{
+					return MolgenisDateFormat.getDateTimeFormat().parse(value.toString());
+				}
+				catch (Exception e1)
+				{
+					throw new RuntimeException("DateField.convert(" + value + ") failed: " + e1.getMessage());
+				}
 			}
 		}
 		throw new RuntimeException("DateField.convert(" + value + ") failed");

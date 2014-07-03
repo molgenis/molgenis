@@ -18,6 +18,8 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -221,7 +223,7 @@ public class RestController
 	 * @return
 	 * @throws UnknownEntityException
 	 */
-	@RequestMapping(value = "/{entityName}/{id}", method = GET, produces = APPLICATION_JSON_VALUE)
+	@RequestMapping(value = "/{entityName}/{id:.+}", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public Map<String, Object> retrieveEntity(@PathVariable("entityName") String entityName,
 			@PathVariable("id") Object id, @RequestParam(value = "attributes", required = false) String[] attributes,
@@ -562,7 +564,7 @@ public class RestController
 	@ResponseStatus(OK)
 	public void updateAttribute(@PathVariable("entityName") String entityName,
 			@PathVariable("attributeName") String attributeName, @PathVariable("id") Object id,
-			@RequestBody Object value)
+			@RequestBody Object paramValue)
 	{
 		Entity entity = dataService.findOne(entityName, id);
 		if (entity == null)
@@ -570,6 +572,15 @@ public class RestController
 			throw new UnknownEntityException("Entity of type " + entityName + " with id " + id + " not found");
 		}
 
+		EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
+		AttributeMetaData attr = entityMetaData.getAttribute(attributeName);
+		if (attr == null)
+		{
+			throw new UnknownAttributeException("Attribute '" + attributeName + "' of entity '" + entityName
+					+ "' does not exist");
+		}
+
+		Object value = toEntityValue(attr, paramValue);
 		entity.set(attributeName, value);
 		dataService.update(entityName, entity);
 	}
@@ -874,51 +885,55 @@ public class RestController
 		{
 			String paramName = attr.getName();
 			Object paramValue = request.get(paramName);
-			Object value = null;
-
-			// Treat empty strings as null
-			if ((paramValue != null) && (paramValue instanceof String) && StringUtils.isEmpty((String) paramValue))
-			{
-				paramValue = null;
-			}
-
-			if (paramValue != null)
-			{
-				if (attr.getDataType().getEnumType() == XREF || attr.getDataType().getEnumType() == CATEGORICAL)
-				{
-					value = dataService.findOne(attr.getRefEntity().getName(), paramValue);
-					if (value == null)
-					{
-						throw new IllegalArgumentException("No " + attr.getRefEntity().getName() + " with id "
-								+ paramValue + " found");
-					}
-				}
-				else if (attr.getDataType().getEnumType() == MREF)
-				{
-					List<Object> ids = DataConverter.toObjectList(paramValue);
-					if ((ids != null) && !ids.isEmpty())
-					{
-						Iterable<Entity> mrefs = dataService.findAll(attr.getRefEntity().getName(), ids);
-						List<Entity> mrefList = Lists.newArrayList(mrefs);
-						if (mrefList.size() != ids.size())
-						{
-							throw new IllegalArgumentException("Could not find all referencing ids for  "
-									+ attr.getName());
-						}
-
-						value = mrefList;
-					}
-				}
-				else
-				{
-					value = paramValue;
-				}
-			}
-
+			Object value = toEntityValue(attr, paramValue);
 			entity.set(attr.getName(), value);
 		}
 
 		return entity;
+	}
+
+	private Object toEntityValue(AttributeMetaData attr, Object paramValue)
+	{
+		Object value = null;
+
+		// Treat empty strings as null
+		if ((paramValue != null) && (paramValue instanceof String) && StringUtils.isEmpty((String) paramValue))
+		{
+			paramValue = null;
+		}
+
+		if (paramValue != null)
+		{
+			if (attr.getDataType().getEnumType() == XREF || attr.getDataType().getEnumType() == CATEGORICAL)
+			{
+				value = dataService.findOne(attr.getRefEntity().getName(), paramValue);
+				if (value == null)
+				{
+					throw new IllegalArgumentException("No " + attr.getRefEntity().getName() + " with id " + paramValue
+							+ " found");
+				}
+			}
+			else if (attr.getDataType().getEnumType() == MREF)
+			{
+				List<Object> ids = DataConverter.toObjectList(paramValue);
+				if ((ids != null) && !ids.isEmpty())
+				{
+					Iterable<Entity> mrefs = dataService.findAll(attr.getRefEntity().getName(), ids);
+					List<Entity> mrefList = Lists.newArrayList(mrefs);
+					if (mrefList.size() != ids.size())
+					{
+						throw new IllegalArgumentException("Could not find all referencing ids for  " + attr.getName());
+					}
+
+					value = mrefList;
+				}
+			}
+			else
+			{
+				value = paramValue;
+			}
+		}
+		return value;
 	}
 
 	// Handles a Query
@@ -955,7 +970,17 @@ public class RestController
 		if (null == meta) throw new IllegalArgumentException("meta is null");
 
 		Map<String, Object> entityMap = new LinkedHashMap<String, Object>();
-		entityMap.put("href", String.format(BASE_URI + "/%s/%s", meta.getName(), entity.getIdValue()));
+		try
+		{
+			entityMap.put(
+					"href",
+					(String.format(BASE_URI + "/%s/%s", meta.getName(),
+							URLEncoder.encode(DataConverter.toString(entity.getIdValue()), "UTF-8"))));
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			throw new RuntimeException(e);
+		}
 
 		// TODO system fields
 		for (AttributeMetaData attr : meta.getAtomicAttributes())

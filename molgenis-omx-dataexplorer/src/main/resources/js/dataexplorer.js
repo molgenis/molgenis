@@ -7,6 +7,8 @@
 	self.getSelectedAttributes = getSelectedAttributes;
 	self.setShowWizardOnInit = setShowWizardOnInit; 
 	self.getEntityQuery = getEntityQuery;
+    self.setNoResultMessage = setNoResultMessage;
+    self.getNoResultMessage = getNoResultMessage;
 	
 	var restApi = new molgenis.RestClient();
 	var selectedEntityMetaData = null;
@@ -15,7 +17,22 @@
 	var searchQuery = null;
 	var showWizardOnInit = false;
 	var modules = [];
-	
+    var noResultMessage = '';
+
+    /**
+     * @memberOf molgenis.dataexplorer
+     */
+    function setNoResultMessage(message) {
+        noResultMessage = message;
+    }
+
+    /**
+     * @memberOf molgenis.dataexplorer
+     */
+    function getNoResultMessage() {
+        return noResultMessage;
+    }
+
 	/**
 	 * @memberOf molgenis.dataexplorer
 	 */
@@ -83,19 +100,20 @@
 		});
 	}
 	
-	function createHeader(entityName) {
-		restApi.getAsync('/api/v1/' + entityName + '/meta', {attributes:['label', 'description']}, function(meta) {
-			$('#entity-class-name').html(meta.label);
-			
-			if (meta.description) {
-				var description = $('<span data-placement="bottom"></span>');
-				description.html(abbreviate(meta.description, 180));
-				description.attr('data-title', meta.description);
-				$('#entity-class-description').append(description.tooltip());
-			} else {
-				$('#entity-class-description').html('');
-			}
-		});
+	/**
+	 * @memberOf molgenis.dataexplorer
+	 */
+	function createHeader(entityMetaData) {
+		$('#entity-class-name').html(entityMetaData.label);
+		
+		if (entityMetaData.description) {
+			var description = $('<span data-placement="bottom"></span>');
+			description.html(abbreviate(entityMetaData.description, 180));
+			description.attr('data-title', entityMetaData.description);
+			$('#entity-class-description').html(description.tooltip());
+		} else {
+			$('#entity-class-description').html('');
+		}
 	}
 
 	/**
@@ -199,7 +217,7 @@
 					
 				});
 				
-				createHeader(entityMetaData.name);
+				createHeader(entityMetaData);
 			});
 		});
 		

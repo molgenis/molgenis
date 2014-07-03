@@ -15,7 +15,9 @@ import java.util.Map;
 import org.mockito.Mockito;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
+import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.GenomeConfig;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -49,15 +51,22 @@ public class DataSetElasticSearchRangeHandlingDataSourceTest
 	private DataService dataService;
 	private ArrayList<Hit> resultList;
 	private ArrayList<DasFeature> featureList;
+	private GenomeConfig config;
 
 	@BeforeMethod
 	public void setUp() throws HandleRequestDelegationException, Exception
 	{
 		dataService = mock(DataService.class);
+		config = mock(GenomeConfig.class);
 
 		ApplicationContext ctx = mock(ApplicationContext.class);
 		when(ctx.getBean(DataService.class)).thenReturn(dataService);
+		when(ctx.getBean(GenomeConfig.class)).thenReturn(config);
 		new ApplicationContextProvider().setApplicationContext(ctx);
+
+		EntityMetaData metaData = new DefaultEntityMetaData("dataset");
+		when(dataService.getEntityMetaData("dataset")).thenReturn(metaData);
+		when(config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_CHROM, metaData)).thenReturn("CHROM");
 
 		DasType type = new DasType("0", "", "", "type");
 		DasMethod method = new DasMethod("not_recorded", "not_recorded", "ECO:0000037");
@@ -72,25 +81,25 @@ public class DataSetElasticSearchRangeHandlingDataSourceTest
 
 		List<DasTarget> dasTarget = new ArrayList<DasTarget>();
 		dasTarget.add(new MolgenisDasTarget("mutation id", 10, 1000, "mutation name,description"));
-        List<String> notes = new ArrayList<String>();
-        notes.add("track:dataset");
-        notes.add("source:MOLGENIS");
+		List<String> notes = new ArrayList<String>();
+		notes.add("track:dataset");
+		notes.add("source:MOLGENIS");
 
-        dasFeature = new DasFeature("mutation id", "mutation name,description", type, method, 10, 1000, new Double(0),
-				DasFeatureOrientation.ORIENTATION_NOT_APPLICABLE, DasPhase.PHASE_NOT_APPLICABLE,
-                notes, linkout, dasTarget, new ArrayList<String>(), null);
+		dasFeature = new DasFeature("mutation id", "mutation name,description", type, method, 10, 1000, new Double(0),
+				DasFeatureOrientation.ORIENTATION_NOT_APPLICABLE, DasPhase.PHASE_NOT_APPLICABLE, notes, linkout,
+				dasTarget, new ArrayList<String>(), null);
 
-		Query q = new QueryImpl().eq(GenomeConfig.GENOMEBROWSER_CHROMOSOME, "1");
+		Query q = new QueryImpl().eq("CHROM", "1");
 		q.pageSize(100);
 		SearchResult result = mock(SearchResult.class);
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put(GenomeConfig.GENOMEBROWSER_STOP_POSITION, 1000);
-		map.put(GenomeConfig.GENOMEBROWSER_LINK, "http://www.molgenis.org/");
-		map.put(GenomeConfig.GENOMEBROWSER_NAME, "mutation name");
-		map.put(GenomeConfig.GENOMEBROWSER_DESCRIPTION, "description");
-		map.put(GenomeConfig.GENOMEBROWSER_START_POSITION, 10);
-		map.put(GenomeConfig.GENOMEBROWSER_ID, "mutation id");
-		map.put(GenomeConfig.GENOMEBROWSER_CHROMOSOME, "1");
+		map.put("STOP", 1000);
+		map.put("linkout", "http://www.molgenis.org/");
+		map.put("NAME", "mutation name");
+		map.put("INFO", "description");
+		map.put("POS", 10);
+		map.put("ID", "mutation id");
+		map.put("CHROM", "1");
 
 		MapEntity entity = new MapEntity(map);
 		resultList = new ArrayList<Hit>();
@@ -99,6 +108,22 @@ public class DataSetElasticSearchRangeHandlingDataSourceTest
 		featureList.add(dasFeature);
 		when(dataService.findAll("dataset", q)).thenReturn(Arrays.<Entity> asList(entity));
 		when(result.iterator()).thenReturn(resultList.iterator());
+
+		when(config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_CHROM, entity.getEntityMetaData()))
+				.thenReturn("CHROM");
+		when(config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_START, entity.getEntityMetaData()))
+				.thenReturn("POS");
+		when(config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_STOP, entity.getEntityMetaData()))
+				.thenReturn("STOP");
+		when(config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_ID, entity.getEntityMetaData()))
+				.thenReturn("ID");
+		when(config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_DESCRIPTION, entity.getEntityMetaData()))
+				.thenReturn("INFO");
+		when(config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_NAME, entity.getEntityMetaData()))
+				.thenReturn("NAME");
+		when(config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_LINK, entity.getEntityMetaData()))
+				.thenReturn("linkout");
+
 	}
 
 	@AfterMethod

@@ -22,6 +22,9 @@ import org.apache.commons.lang3.StringUtils;
 @XmlRootElement
 public class QueryRule
 {
+	public static final QueryRule AND = new QueryRule(Operator.AND);
+	public static final QueryRule OR = new QueryRule(Operator.OR);
+
 	/**
 	 * The operator being applied to the field and value
 	 */

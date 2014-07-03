@@ -97,11 +97,12 @@ public class DecimalField extends FieldType
 		return Arrays.asList("EQUALS", "NOT EQUALS", "LESS", "GREATER");
 	}
 
-    @Override
-    public Object convert(Object value) {
-        if(value == null) return null;
-        if(value instanceof Double) return value;
-        if(value instanceof String) return Double.parseDouble(value.toString());
-        throw new RuntimeException("DecimalField.convert(" + value + ") failed");
-    }
+	@Override
+	public Object convert(Object value)
+	{
+		if (value == null) return null;
+		else if (value instanceof Double) return value;
+		else if (value instanceof String || value instanceof Integer) return Double.parseDouble(value.toString());
+		throw new RuntimeException("DecimalField.convert(" + value + ") failed");
+	}
 }

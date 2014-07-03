@@ -1,36 +1,35 @@
 package org.molgenis.data;
 
-import static org.molgenis.security.core.utils.SecurityUtils.currentUserHasRole;
+import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
 
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.Permission;
 
-public class CrudRepositorySecurityDecorator extends CrudRepositoryDecorator implements CrudRepository
+public class CrudRepositorySecurityDecorator extends CrudRepositoryDecorator
 {
 	private final CrudRepository decoratedRepository;
-	private final String entityName;
 
 	public CrudRepositorySecurityDecorator(CrudRepository decoratedRepository)
 	{
 		super(decoratedRepository);
 		this.decoratedRepository = decoratedRepository;
-		this.entityName = decoratedRepository.getName();
 	}
 
 	@Override
 	public Iterator<Entity> iterator()
 	{
-		validatePermission(Permission.READ);
+		validatePermission(decoratedRepository.getName(), Permission.READ);
 		return decoratedRepository.iterator();
 	}
 
 	@Override
 	public void close() throws IOException
 	{
-		validatePermission(Permission.WRITE);
+		validatePermission(decoratedRepository.getName(), Permission.WRITE);
 		decoratedRepository.close();
 	}
 
@@ -49,7 +48,7 @@ public class CrudRepositorySecurityDecorator extends CrudRepositoryDecorator imp
 	@Override
 	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
 	{
-		validatePermission(Permission.READ);
+		validatePermission(decoratedRepository.getName(), Permission.READ);
 		return decoratedRepository.iterator(clazz);
 	}
 
@@ -60,172 +59,163 @@ public class CrudRepositorySecurityDecorator extends CrudRepositoryDecorator imp
 	}
 
 	@Override
+	public Query query()
+	{
+		return new QueryImpl(this);
+	}
+
+	@Override
 	public long count(Query q)
 	{
-		validatePermission(Permission.COUNT);
+		validatePermission(decoratedRepository.getName(), Permission.COUNT);
 		return decoratedRepository.count(q);
 	}
 
 	@Override
 	public Iterable<Entity> findAll(Query q)
 	{
-		validatePermission(Permission.READ);
+		validatePermission(decoratedRepository.getName(), Permission.READ);
 		return decoratedRepository.findAll(q);
 	}
 
 	@Override
 	public <E extends Entity> Iterable<E> findAll(Query q, Class<E> clazz)
 	{
-		validatePermission(Permission.READ);
+		validatePermission(decoratedRepository.getName(), Permission.READ);
 		return decoratedRepository.findAll(q, clazz);
 	}
 
 	@Override
 	public Entity findOne(Query q)
 	{
-		validatePermission(Permission.READ);
+		validatePermission(decoratedRepository.getName(), Permission.READ);
 		return decoratedRepository.findOne(q);
 	}
 
 	@Override
 	public Entity findOne(Object id)
 	{
-		validatePermission(Permission.READ);
+		validatePermission(decoratedRepository.getName(), Permission.READ);
 		return decoratedRepository.findOne(id);
 	}
 
 	@Override
 	public Iterable<Entity> findAll(Iterable<Object> ids)
 	{
-		validatePermission(Permission.READ);
+		validatePermission(decoratedRepository.getName(), Permission.READ);
 		return decoratedRepository.findAll(ids);
 	}
 
 	@Override
 	public <E extends Entity> Iterable<E> findAll(Iterable<Object> ids, Class<E> clazz)
 	{
-		validatePermission(Permission.READ);
+		validatePermission(decoratedRepository.getName(), Permission.READ);
 		return decoratedRepository.findAll(ids, clazz);
 	}
 
 	@Override
 	public <E extends Entity> E findOne(Object id, Class<E> clazz)
 	{
-		validatePermission(Permission.READ);
+		validatePermission(decoratedRepository.getName(), Permission.READ);
 		return decoratedRepository.findOne(id, clazz);
 	}
 
 	@Override
 	public <E extends Entity> E findOne(Query q, Class<E> clazz)
 	{
-		validatePermission(Permission.READ);
+		validatePermission(decoratedRepository.getName(), Permission.READ);
 		return decoratedRepository.findOne(q, clazz);
 	}
 
 	@Override
 	public long count()
 	{
-		validatePermission(Permission.COUNT);
+		validatePermission(decoratedRepository.getName(), Permission.COUNT);
 		return decoratedRepository.count();
 	}
 
 	@Override
 	public void update(Entity entity)
 	{
-		validatePermission(Permission.WRITE);
+		validatePermission(decoratedRepository.getName(), Permission.WRITE);
 		decoratedRepository.update(entity);
 	}
 
 	@Override
 	public void update(Iterable<? extends Entity> records)
 	{
-		validatePermission(Permission.WRITE);
+		validatePermission(decoratedRepository.getName(), Permission.WRITE);
 		decoratedRepository.update(records);
 	}
 
 	@Override
 	public void delete(Entity entity)
 	{
-		validatePermission(Permission.WRITE);
+		validatePermission(decoratedRepository.getName(), Permission.WRITE);
 		decoratedRepository.delete(entity);
 	}
 
 	@Override
 	public void delete(Iterable<? extends Entity> entities)
 	{
-		validatePermission(Permission.WRITE);
+		validatePermission(decoratedRepository.getName(), Permission.WRITE);
 		decoratedRepository.delete(entities);
 	}
 
 	@Override
 	public void deleteById(Object id)
 	{
-		validatePermission(Permission.WRITE);
+		validatePermission(decoratedRepository.getName(), Permission.WRITE);
 		decoratedRepository.deleteById(id);
 	}
 
 	@Override
 	public void deleteById(Iterable<Object> ids)
 	{
-		validatePermission(Permission.WRITE);
+		validatePermission(decoratedRepository.getName(), Permission.WRITE);
 		decoratedRepository.deleteById(ids);
 	}
 
 	@Override
 	public void deleteAll()
 	{
-		validatePermission(Permission.WRITE);
+		validatePermission(decoratedRepository.getName(), Permission.WRITE);
 		decoratedRepository.deleteAll();
 	}
 
 	@Override
 	public void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
 	{
-		validatePermission(Permission.WRITE);
+		validatePermission(decoratedRepository.getName(), Permission.WRITE);
 		decoratedRepository.update(entities, dbAction, keyName);
 	}
 
 	@Override
 	public void add(Entity entity)
 	{
-		validatePermission(Permission.WRITE);
+		validatePermission(decoratedRepository.getName(), Permission.WRITE);
 		decoratedRepository.add(entity);
 	}
 
 	@Override
 	public Integer add(Iterable<? extends Entity> entities)
 	{
-		validatePermission(Permission.WRITE);
+		validatePermission(decoratedRepository.getName(), Permission.WRITE);
 		return decoratedRepository.add(entities);
-	}
-
-	@Override
-	public AggregateResult aggregate(AttributeMetaData xAttr, AttributeMetaData yAttr, Query q)
-	{
-		validatePermission(Permission.COUNT);
-		return decoratedRepository.aggregate(xAttr, yAttr, q);
 	}
 
 	@Override
 	public void flush()
 	{
-		validatePermission(Permission.WRITE);
+		validatePermission(decoratedRepository.getName(), Permission.WRITE);
 		decoratedRepository.flush();
 	}
 
 	@Override
 	public void clearCache()
 	{
-		validatePermission(Permission.WRITE);
+		validatePermission(decoratedRepository.getName(), Permission.WRITE);
 		decoratedRepository.clearCache();
 	}
 
-	protected void validatePermission(Permission permission)
-	{
-		String role = String.format("ROLE_ENTITY_%s_%s", permission.toString(), entityName.toUpperCase());
-		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", role))
-		{
-			throw new MolgenisDataAccessException("No " + permission.toString() + " permission on entity " + entityName);
-		}
-	}
 }

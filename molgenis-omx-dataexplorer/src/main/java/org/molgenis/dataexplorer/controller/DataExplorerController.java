@@ -26,6 +26,7 @@ import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.data.AggregateResult;
+import org.molgenis.data.Aggregateable;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
@@ -99,6 +100,8 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String SOURCES = "genomebrowser.init.sources";
 	public static final String BROWSERLINKS = "genomebrowser.init.browserLinks";
 	public static final String WIZARD_TITLE = "plugin.dataexplorer.wizard.title";
+	public static final String WIZARD_BUTTON_TITLE = "plugin.dataexplorer.wizard.button.title";
+	public static final String AGGREGATES_NORESULTS_MESSAGE = "plugin.dataexplorer.mod.aggregates.noresults";
 
 	public static final String KEY_DATAEXPLORER_EDITABLE = "plugin.dataexplorer.editable";
 	private static final boolean DEFAULT_VAL_DATAEXPLORER_EDITABLE = false;
@@ -111,6 +114,9 @@ public class DataExplorerController extends MolgenisPluginController
 
 	@Autowired
 	private MolgenisSettings molgenisSettings;
+
+	@Autowired
+	private GenomeConfig genomeConfig;
 
 	public DataExplorerController()
 	{
@@ -156,10 +162,10 @@ public class DataExplorerController extends MolgenisPluginController
 			}
 		}
 		model.addAttribute("selectedEntityName", selectedEntityName);
-		model.addAttribute(
-				"wizardtitle",
-				molgenisSettings.getProperty(WIZARD_TITLE) == null ? "Filter Wizard" : molgenisSettings
-						.getProperty(WIZARD_TITLE));
+		model.addAttribute("wizardtitle", molgenisSettings.getProperty(WIZARD_TITLE, "Filter Wizard"));
+		model.addAttribute("wizardbuttontitle", molgenisSettings.getProperty(WIZARD_BUTTON_TITLE, "Wizard"));
+		model.addAttribute("aggregatenoresults",
+				molgenisSettings.getProperty(AGGREGATES_NORESULTS_MESSAGE, "No results found"));
 		model.addAttribute("wizard", (wizard != null) && wizard.booleanValue());
 
 		return "view-dataexplorer";
@@ -178,6 +184,18 @@ public class DataExplorerController extends MolgenisPluginController
 			model.addAttribute("chains", molgenisSettings.getProperty(CHAINS));
 			model.addAttribute("sources", molgenisSettings.getProperty(SOURCES));
 			model.addAttribute("browserLinks", molgenisSettings.getProperty(BROWSERLINKS));
+
+			model.addAttribute("genomebrowser_start_list",
+					molgenisSettings.getProperty(GenomeConfig.GENOMEBROWSER_START, "POS"));
+			model.addAttribute("genomebrowser_chrom_list",
+					molgenisSettings.getProperty(GenomeConfig.GENOMEBROWSER_CHROM, "CHROM"));
+			model.addAttribute("genomebrowser_id_list",
+					molgenisSettings.getProperty(GenomeConfig.GENOMEBROWSER_ID, "ID"));
+			model.addAttribute("genomebrowser_desc_list",
+					molgenisSettings.getProperty(GenomeConfig.GENOMEBROWSER_DESCRIPTION, "INFO"));
+			model.addAttribute("genomebrowser_patient_list",
+					molgenisSettings.getProperty(GenomeConfig.GENOMEBROWSER_PATIENT_ID, "patient_id"));
+
 			model.addAttribute("tableEditable",
 					molgenisSettings.getBooleanProperty(KEY_DATAEXPLORER_EDITABLE, DEFAULT_VAL_DATAEXPLORER_EDITABLE));
 			model.addAttribute("galaxyEnabled",
@@ -205,6 +223,12 @@ public class DataExplorerController extends MolgenisPluginController
 		boolean modAnnotators = molgenisSettings.getBooleanProperty(KEY_MOD_ANNOTATORS, DEFAULT_VAL_MOD_ANNOTATORS);
 		boolean modDiseasematcher = molgenisSettings.getBooleanProperty(KEY_MOD_DISEASEMATCHER,
 				DEFAULT_VAL_MOD_DISEASEMATCHER);
+
+		if (modAggregates)
+		{
+			// Check if the repository is aggregateable
+			modAggregates = dataService.getRepositoryByEntityName(entityName) instanceof Aggregateable;
+		}
 
 		// set data explorer permission
 		Permission pluginPermission = null;
@@ -281,10 +305,12 @@ public class DataExplorerController extends MolgenisPluginController
 
 	private boolean isGenomeBrowserEntity(EntityMetaData entityMetaData)
 	{
-		AttributeMetaData attributeStartPosition = entityMetaData
-				.getAttribute(GenomeConfig.GENOMEBROWSER_START_POSITION);
-		AttributeMetaData attributeId = entityMetaData.getAttribute(GenomeConfig.GENOMEBROWSER_ID);
-		AttributeMetaData attributeChromosome = entityMetaData.getAttribute(GenomeConfig.GENOMEBROWSER_CHROMOSOME);
+		AttributeMetaData attributeStartPosition = genomeConfig.getAttributeMetadataForAttributeNameArray(
+				GenomeConfig.GENOMEBROWSER_START, entityMetaData);
+		AttributeMetaData attributeId = genomeConfig.getAttributeMetadataForAttributeNameArray(
+				GenomeConfig.GENOMEBROWSER_ID, entityMetaData);
+		AttributeMetaData attributeChromosome = genomeConfig.getAttributeMetadataForAttributeNameArray(
+				GenomeConfig.GENOMEBROWSER_CHROM, entityMetaData);
 		return attributeStartPosition != null && attributeId != null && attributeChromosome != null;
 	}
 

@@ -12,12 +12,36 @@ import org.molgenis.framework.db.EntityImportReport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionException;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.SimpleTransactionStatus;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = AppConfig.class)
 public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 {
+	private static class SimplePlatformTransactionManager implements PlatformTransactionManager
+	{
+		@Override
+		public TransactionStatus getTransaction(TransactionDefinition definition) throws TransactionException
+		{
+			return new SimpleTransactionStatus();
+		}
+
+		@Override
+		public void commit(TransactionStatus status) throws TransactionException
+		{
+		}
+
+		@Override
+		public void rollback(TransactionStatus status) throws TransactionException
+		{
+		}
+	}
+
 	@Autowired
 	MysqlRepositoryCollection store;
 
@@ -31,6 +55,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		// create importer
 		EmxImportServiceImpl importer = new EmxImportServiceImpl();
 		importer.setRepositoryCollection(store);
+		importer.setPlatformTransactionManager(new SimplePlatformTransactionManager());
 
 		// generate report
 		EntitiesValidationReport report = importer.validateImport(source);
@@ -86,6 +111,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 
 		EmxImportServiceImpl importer = new EmxImportServiceImpl();
 		importer.setRepositoryCollection(store);
+		importer.setPlatformTransactionManager(new SimplePlatformTransactionManager());
 
 		// test import
 		EntityImportReport report = importer.doImport(source, null);
