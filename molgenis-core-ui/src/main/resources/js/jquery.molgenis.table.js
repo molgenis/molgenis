@@ -142,16 +142,23 @@
 			
 			// inject modal data
 			var refAttributes = molgenis.getAtomicAttributes(refEntity.attributes, restApi);
+			
+			// TODO use idAttribute once github #1400 is fixed
+			// TODO remove trim() once github #1401 is fixed
+			var val = refValue[refEntity.labelAttribute];
+			if (typeof val.trim == 'function') {
+				val = val.trim();
+			}
+			
 			var refQuery = {
 				'q' : [ {
 					// TODO use idAttribute once github #1400 is fixed
 					'field' : refEntity.labelAttribute, 
 					'operator' : 'EQUALS',
-					// TODO use idAttribute once github #1400 is fixed
-					// TODO remove trim() once github #1401 is fixed
-					'value' : refValue[refEntity.labelAttribute].trim()
+					'value' : val
 				} ]
 			}; 
+			
 			$('.ref-title', modal).html(attribute.label || attribute.name);
 			$('.ref-description-header', modal).html((refEntity.label || refEntity.name) + ' description');
 			$('.ref-description', modal).html(refEntity.description || 'No description available');
