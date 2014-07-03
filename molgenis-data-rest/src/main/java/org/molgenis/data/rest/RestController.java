@@ -930,7 +930,7 @@ public class RestController
 			}
 			else
 			{
-				value = paramValue;
+				value = DataConverter.convert(paramValue, attr);
 			}
 		}
 		return value;
