@@ -92,7 +92,8 @@ public class EmxImportServiceImpl implements EmxImporterService
 
 		try
 		{
-			return transactionTemplate.execute(new EmxImportTransactionCallback(source, metadata, addedEntities));
+			return transactionTemplate.execute(new EmxImportTransactionCallback(databaseAction, source, metadata,
+					addedEntities));
 		}
 		catch (Exception e)
 		{
@@ -315,10 +316,12 @@ public class EmxImportServiceImpl implements EmxImporterService
 		private final RepositoryCollection source;
 		private final Map<String, DefaultEntityMetaData> metadata;
 		private final Set<String> addedEntities;
+		private final DatabaseAction dbAction;
 
-		private EmxImportTransactionCallback(RepositoryCollection source, Map<String, DefaultEntityMetaData> metadata,
-				Set<String> addedEntities)
+		private EmxImportTransactionCallback(DatabaseAction dbAction, RepositoryCollection source,
+				Map<String, DefaultEntityMetaData> metadata, Set<String> addedEntities)
 		{
+			this.dbAction = dbAction;
 			this.source = source;
 			this.metadata = metadata;
 			this.addedEntities = addedEntities;
@@ -358,8 +361,9 @@ public class EmxImportServiceImpl implements EmxImporterService
 					if (to != null)
 					{
 						Repository from = source.getRepositoryByEntityName(name);
-						Integer count = to.add(from);
-						report.getNrImportedEntitiesMap().put(name, count);
+						List<Entity> entities = Lists.newArrayList(from);
+						to.update(entities, dbAction);
+						report.getNrImportedEntitiesMap().put(name, entities.size());
 					}
 				}
 
