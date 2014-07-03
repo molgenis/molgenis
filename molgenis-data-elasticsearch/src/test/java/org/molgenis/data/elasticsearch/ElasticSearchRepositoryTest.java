@@ -71,7 +71,7 @@ public class ElasticSearchRepositoryTest
 		AttributeMetaData xAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("xAttr").getMock();
 		AttributeMetaData yAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("yAttr").getMock();
 		Query q = mock(Query.class);
-		SearchRequest searchRequest = new SearchRequest("entity", q, Collections.<String> emptyList(), "xAttr", "yAttr");
+		SearchRequest searchRequest = new SearchRequest("entity", q, Collections.<String> emptyList(), xAttr, yAttr);
 		AggregateResult aggregate = mock(AggregateResult.class);
 		SearchResult searchResult = when(mock(SearchResult.class).getAggregate()).thenReturn(aggregate).getMock();
 		when(elasticSearchService.search(searchRequest)).thenReturn(searchResult);
