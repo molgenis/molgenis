@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.AppConfig;
+import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.framework.db.EntitiesValidationReport;
@@ -114,7 +115,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		importer.setPlatformTransactionManager(new SimplePlatformTransactionManager());
 
 		// test import
-		EntityImportReport report = importer.doImport(source, null);
+		EntityImportReport report = importer.doImport(source, DatabaseAction.ADD);
 
 		// test report
 		Assert.assertEquals(report.getNrImportedEntitiesMap().get("import_city"), new Integer(2));

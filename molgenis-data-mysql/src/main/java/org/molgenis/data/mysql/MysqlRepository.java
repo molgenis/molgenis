@@ -45,6 +45,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 public class MysqlRepository extends AbstractCrudRepository implements Manageable
 
@@ -749,7 +750,162 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 	@Override
 	public void updateInternal(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
 	{
+		if ((entities == null) || entities.isEmpty()) return;
+		if (getEntityMetaData().getIdAttribute() == null) throw new MolgenisDataException("Missing is attribute for ["
+				+ getName() + "]");
 
+		String idAttributeName = getEntityMetaData().getIdAttribute().getName();
+
+		// Split in existing and new entities
+		Map<Object, Entity> existingEntities = Maps.newLinkedHashMap();
+		List<Entity> newEntities = Lists.newArrayList();
+
+		List<Object> ids = Lists.newArrayList();
+		for (Entity entity : entities)
+		{
+			Object id = entity.get(idAttributeName);
+			if (id != null)
+			{
+				ids.add(id);
+			}
+		}
+
+		if (!ids.isEmpty())
+		{
+			List<Object> existingIds = Lists.newArrayList();
+
+			Query q = new QueryImpl();
+			for (int i = 0; i < ids.size(); i++)
+			{
+				if (i > 0)
+				{
+					q.or();
+				}
+				q.eq(idAttributeName, ids.get(i));
+			}
+
+			for (Entity existing : findAll(q))
+			{
+				existingIds.add(existing.getIdValue());
+			}
+
+			FieldType dataType = getEntityMetaData().getIdAttribute().getDataType();
+			for (Entity entity : entities)
+			{
+				Object id = entity.get(idAttributeName);
+				if ((id != null) && existingIds.contains(dataType.convert(id)))
+				{
+					existingEntities.put(id, entity);
+				}
+				else
+				{
+					newEntities.add(entity);
+				}
+			}
+		}
+
+		switch (dbAction)
+		{
+			case ADD:
+				if (!existingEntities.isEmpty())
+				{
+					List<Object> keys = Lists.newArrayList(existingEntities.keySet());
+
+					StringBuilder msg = new StringBuilder();
+					msg.append("Trying to add exsisting ").append(getName()).append(" entities as new insert: ");
+					msg.append(keys.subList(0, Math.min(5, keys.size())));
+					if (keys.size() > 5)
+					{
+						msg.append(" and ").append(keys.size() - 5).append(" more.");
+					}
+
+					throw new MolgenisDataException(msg.toString());
+				}
+
+				addInternal(entities);
+				break;
+
+			case ADD_IGNORE_EXISTING:
+				if (!newEntities.isEmpty())
+				{
+					addInternal(newEntities);
+				}
+				break;
+
+			case ADD_UPDATE_EXISTING:
+				if (!newEntities.isEmpty())
+				{
+					addInternal(newEntities);
+				}
+				if (!existingEntities.isEmpty())
+				{
+					updateInternal(existingEntities.values());
+				}
+				break;
+
+			case REMOVE:
+				if (!newEntities.isEmpty())
+				{
+					List<Object> keys = Lists.newArrayList();
+					for (Entity newEntity : newEntities)
+					{
+						keys.add(newEntity.get(idAttributeName));
+						if (keys.size() == 5)
+						{
+							break;
+						}
+					}
+
+					StringBuilder msg = new StringBuilder();
+					msg.append("Trying to remove not exsisting ").append(getName()).append(" entities:").append(keys);
+					if (newEntities.size() > 5)
+					{
+						msg.append(" and ").append(newEntities.size() - 5).append(" more.");
+					}
+
+					throw new MolgenisDataException(msg.toString());
+				}
+
+				deleteById(existingEntities.keySet());
+				break;
+
+			case REMOVE_IGNORE_MISSING:
+				deleteById(existingEntities.keySet());
+				break;
+
+			case UPDATE:
+				if (!newEntities.isEmpty())
+				{
+					List<Object> keys = Lists.newArrayList();
+					for (Entity newEntity : newEntities)
+					{
+						keys.add(newEntity.get(idAttributeName));
+						if (keys.size() == 5)
+						{
+							break;
+						}
+					}
+
+					StringBuilder msg = new StringBuilder();
+					msg.append("Trying to update not exsisting ").append(getName()).append(" entities:").append(keys);
+					if (newEntities.size() > 5)
+					{
+						msg.append(" and ").append(newEntities.size() - 5).append(" more.");
+					}
+
+					throw new MolgenisDataException(msg.toString());
+				}
+				updateInternal(existingEntities.values());
+				break;
+
+			case UPDATE_IGNORE_MISSING:
+				updateInternal(existingEntities.values());
+				break;
+
+			default:
+				break;
+
+		}
 	}
 
 	public RepositoryCollection getRepositoryCollection()
