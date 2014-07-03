@@ -260,7 +260,16 @@
 				var restApi = new molgenis.RestClient();
 				var entityMeta = restApi.get(attribute.refEntity.href);
 				var entitiesUri = entityMeta.href.replace(new RegExp('/meta[^/]*$'), ""); // TODO do not manipulate uri
-				var entities = restApi.get(entitiesUri);
+				var entities = restApi.get(entitiesUri, {
+					q : {
+						sort : {
+							orders : [ {
+								direction : 'ASC',
+								property : 'id'
+							} ]
+						}
+					}
+				});
 				$.each(entities.items, function() {
 					var attrs = {'name': name, 'id': name};
 					if(values && $.inArray(this[entityMeta.labelAttribute], values) > -1)
