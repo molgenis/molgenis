@@ -2,10 +2,12 @@ package org.molgenis.data.importer;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
@@ -13,6 +15,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.mysql.MysqlRepository;
@@ -24,11 +27,18 @@ import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 @Component
 public class EmxImportServiceImpl implements EmxImporterService
 {
+
 	private static final Logger logger = Logger.getLogger(EmxImportServiceImpl.class);
 
 	// Sheet names
@@ -44,8 +54,13 @@ public class EmxImportServiceImpl implements EmxImporterService
 	private static final String AUTO = "auto";
 	private static final String IDATTRIBUTE = "idAttribute";
 	private static final String NILLABLE = "nillable";
+	private static final String ABSTRACT = "abstract";
+	private static final String VISIBLE = "visible";
+	private static final String LABEL = "label";
+	private static final String EXTENDS = "extends";
 
-	MysqlRepositoryCollection store;
+	private MysqlRepositoryCollection store;
+	private TransactionTemplate transactionTemplate;
 
 	public EmxImportServiceImpl()
 	{
@@ -59,42 +74,40 @@ public class EmxImportServiceImpl implements EmxImporterService
 		logger.debug("MEntityImportServiceImpl created with coll=" + coll);
 	}
 
+	@Autowired
+	public void setPlatformTransactionManager(PlatformTransactionManager transactionManager)
+	{
+		this.transactionTemplate = new TransactionTemplate(transactionManager);
+	}
+
 	@Override
-	@Transactional(rollbackFor = IOException.class)
-	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction) throws IOException
+	public EntityImportReport doImport(final RepositoryCollection source, DatabaseAction databaseAction)
+			throws IOException
 	{
 		if (store == null) throw new RuntimeException("store was not set");
 
-		EntityImportReport report = new EntityImportReport();
-
-		// TODO: need to change order
-
 		Map<String, DefaultEntityMetaData> metadata = getEntityMetaData(source);
+		Set<String> addedEntities = Sets.newLinkedHashSet();
+		// TODO altered entities (merge, see getEntityMetaData)
 
-		for (Entry<String, DefaultEntityMetaData> entry : metadata.entrySet())
+		try
 		{
-			String name = entry.getKey();
-			DefaultEntityMetaData defaultEntityMetaData = entry.getValue();
-
-			if (!ENTITIES.equals(name) && !ATTRIBUTES.equals(name))
-			{
-				Repository from = source.getRepositoryByEntityName(name);
-
-				// TODO check if compatible with metadata
-				MysqlRepository to = (MysqlRepository) store.getRepositoryByEntityName(name);
-				if (to == null)
-				{
-					logger.debug("tyring to create: " + name);
-					if (defaultEntityMetaData == null) throw new IllegalArgumentException("Unknown entity: " + name);
-					to = store.add(defaultEntityMetaData);
-				}
-
-				// import
-				report.getNrImportedEntitiesMap().put(name, to.add(from));
-			}
+			return transactionTemplate.execute(new EmxImportTransactionCallback(source, metadata, addedEntities));
 		}
+		catch (Exception e)
+		{
+			// Rollback metadata, create table statements cannot be rolled back, we have to do it ourselfs
 
-		return report;
+			List<String> names = Lists.newArrayList(addedEntities);
+			Collections.reverse(names);
+
+			for (String name : names)
+			{
+				store.drop(name);
+			}
+
+			throw e;
+		}
 	}
 
 	@Override
@@ -130,7 +143,7 @@ public class EmxImportServiceImpl implements EmxImporterService
 					}
 					for (AttributeMetaData att : target.getAttributes())
 					{
-						if (!fieldsImportable.contains(att.getName()))
+						if (!att.isAuto() && !fieldsImportable.contains(att.getName()))
 						{
 							if (!att.isNillable()) fieldsRequired.add(att.getName());
 							else fieldsAvailable.add(att.getName());
@@ -177,13 +190,14 @@ public class EmxImportServiceImpl implements EmxImporterService
 			String entityName = attribute.getString(ENTITY);
 			String attributeName = attribute.getString(NAME);
 			String attributeDataType = attribute.getString(DATATYPE);
+			String refEntityName = attribute.getString(REFENTITY);
 
 			// required
 			if (entityName == null) throw new IllegalArgumentException("attributes.entity is missing");
 			if (attributeName == null) throw new IllegalArgumentException("attributes.name is missing");
 
 			// create entity if not yet defined
-			if (entities.get(entityName) == null) entities.put(entityName, new DefaultEntityMetaData(entityName));
+			if (!entities.containsKey(entityName)) entities.put(entityName, new DefaultEntityMetaData(entityName));
 			DefaultEntityMetaData defaultEntityMetaData = entities.get(entityName);
 
 			// create attribute meta data
@@ -204,9 +218,20 @@ public class EmxImportServiceImpl implements EmxImporterService
 			Boolean attributeNillable = attribute.getBoolean(NILLABLE);
 			Boolean attributeAuto = attribute.getBoolean(AUTO);
 			Boolean attributeIdAttribute = attribute.getBoolean(IDATTRIBUTE);
+			Boolean attributeVisible = attribute.getBoolean(VISIBLE);
+
 			if (attributeNillable != null) defaultAttributeMetaData.setNillable(attributeNillable);
 			if (attributeAuto != null) defaultAttributeMetaData.setAuto(attributeAuto);
 			if (attributeIdAttribute != null) defaultAttributeMetaData.setIdAttribute(attributeIdAttribute);
+			if (attributeVisible != null) defaultAttributeMetaData.setVisible(attributeVisible);
+
+			if (refEntityName != null)
+			{
+				defaultAttributeMetaData.setRefEntity(entities.get(refEntityName));
+			}
+
+			defaultAttributeMetaData.setLabel(attribute.getString(LABEL));
+			defaultAttributeMetaData.setDescription(attribute.getString(DESCRIPTION));
 
 			defaultEntityMetaData.addAttributeMetaData(defaultAttributeMetaData);
 		}
@@ -231,10 +256,24 @@ public class EmxImportServiceImpl implements EmxImporterService
 				// required
 				if (entityName == null) throw new IllegalArgumentException("entity.name is missing on line " + i);
 
-				if (entities.get(entityName) == null) entities.put(entityName, new DefaultEntityMetaData(entityName));
-				DefaultEntityMetaData md = entities.get(entityName);
+				if (!entities.containsKey(entityName)) entities.put(entityName, new DefaultEntityMetaData(entityName));
 
-				if (entity.get(DESCRIPTION) != null) md.setDescription(entity.getString(DESCRIPTION));
+				DefaultEntityMetaData md = entities.get(entityName);
+				md.setLabel(entity.getString(LABEL));
+				md.setDescription(entity.getString(DESCRIPTION));
+				if (entity.getBoolean(ABSTRACT) != null) md.setAbstract(entity.getBoolean(ABSTRACT));
+
+				String extendsEntityName = entity.getString(EXTENDS);
+				if (extendsEntityName != null)
+				{
+					DefaultEntityMetaData extendsEntityMeta = entities.get(extendsEntityName);
+					if (extendsEntityMeta == null)
+					{
+						throw new MolgenisDataException("Missing super entity " + extendsEntityName + " for entity "
+								+ entityName + " on line " + i);
+					}
+					md.setExtends(extendsEntityMeta);
+				}
 			}
 		}
 	}
@@ -251,8 +290,8 @@ public class EmxImportServiceImpl implements EmxImporterService
 		for (Entity attribute : source.getRepositoryByEntityName(ATTRIBUTES))
 		{
 			final String refEntityName = (String) attribute.get(REFENTITY);
-			final String entityName = (String) attribute.getString(ENTITY);
-			final String attributeName = (String) attribute.getString(NAME);
+			final String entityName = attribute.getString(ENTITY);
+			final String attributeName = attribute.getString(NAME);
 			i++;
 			if (refEntityName != null)
 			{
@@ -270,4 +309,69 @@ public class EmxImportServiceImpl implements EmxImporterService
 			}
 		}
 	}
+
+	private final class EmxImportTransactionCallback implements TransactionCallback<EntityImportReport>
+	{
+		private final RepositoryCollection source;
+		private final Map<String, DefaultEntityMetaData> metadata;
+		private final Set<String> addedEntities;
+
+		private EmxImportTransactionCallback(RepositoryCollection source, Map<String, DefaultEntityMetaData> metadata,
+				Set<String> addedEntities)
+		{
+			this.source = source;
+			this.metadata = metadata;
+			this.addedEntities = addedEntities;
+		}
+
+		@Override
+		public EntityImportReport doInTransaction(TransactionStatus status)
+		{
+			EntityImportReport report = new EntityImportReport();
+
+			try
+			{
+				// Import metadata
+				for (Entry<String, DefaultEntityMetaData> entry : metadata.entrySet())
+				{
+					String name = entry.getKey();
+					DefaultEntityMetaData defaultEntityMetaData = entry.getValue();
+					if (defaultEntityMetaData == null) throw new IllegalArgumentException("Unknown entity: " + name);
+
+					if (!ENTITIES.equals(name) && !ATTRIBUTES.equals(name))
+					{
+						// TODO check if compatible with metadata
+						MysqlRepository to = (MysqlRepository) store.getRepositoryByEntityName(name);
+						if (to == null)
+						{
+							logger.debug("tyring to create: " + name);
+							to = store.add(defaultEntityMetaData);
+							addedEntities.add(name);
+						}
+					}
+				}
+
+				// import data
+				for (String name : metadata.keySet())
+				{
+					MysqlRepository to = (MysqlRepository) store.getRepositoryByEntityName(name);
+					if (to != null)
+					{
+						Repository from = source.getRepositoryByEntityName(name);
+						Integer count = to.add(from);
+						report.getNrImportedEntitiesMap().put(name, count);
+					}
+				}
+
+				return report;
+			}
+			catch (Exception e)
+			{
+				status.setRollbackOnly();
+				throw e;
+			}
+
+		}
+	}
+
 }
