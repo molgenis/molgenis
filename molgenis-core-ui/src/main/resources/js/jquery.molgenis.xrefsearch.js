@@ -99,7 +99,7 @@
 		var hiddenInput = container.find('input[type=hidden]');
 		
 		hiddenInput.select2({
-			width: '80%',
+			width: options.width ? options.width : 'resolve',
 			minimumInputLength: 2,
             multiple: (attributeMetaData.fieldType === 'MREF'),
             closeOnSelect: (attributeMetaData.fieldType === 'XREF'),

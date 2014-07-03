@@ -313,7 +313,7 @@
 				var operator = filter ? filter.operator : 'OR';
 				controls.addClass("xrefsearch");
 				console.log(values);
-				controls.xrefsearch({attribute: attribute, values: values, operator: operator});
+				controls.xrefsearch({attribute: attribute, values: values, operator: operator, autofocus: 'autofocus', width: '80%'});
 				break;
 			case 'COMPOUND' :
 			case 'FILE':
