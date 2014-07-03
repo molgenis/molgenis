@@ -25,12 +25,14 @@ import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.tartarus.snowball.ext.PorterStemmer;
 
 public class OntologyService
 {
 	private final SearchService searchService;
 	private static final String COMBINED_SCORE = "combinedScore";
 	private static final String SCORE = "score";
+	private static final PorterStemmer stemmer = new PorterStemmer();
 
 	@Autowired
 	public OntologyService(SearchService searchService)
@@ -125,24 +127,20 @@ public class OntologyService
 		Set<String> uniqueTerms = new HashSet<String>(Arrays.asList(queryString.toLowerCase().trim()
 				.split("[^a-zA-Z0-9]")));
 		uniqueTerms.removeAll(NGramMatchingModel.STOPWORDSLIST);
-		QueryImpl q = new QueryImpl();
-		q.pageSize(100);
-
+		List<QueryRule> rules = new ArrayList<QueryRule>();
 		for (String term : uniqueTerms)
 		{
 			if (!term.isEmpty() && !term.matches(" +"))
 			{
-				if (q.getRules().size() > 0)
-				{
-					q.addRule(new QueryRule(Operator.OR));
-				}
-				term = term.replaceAll("[^(a-zA-Z0-9 )]", StringUtils.EMPTY);
-				q.addRule(new QueryRule(OntologyTermRepository.SYNONYMS, Operator.SEARCH, term));
+				stemmer.setCurrent(term.replaceAll("[^(a-zA-Z0-9 )]", StringUtils.EMPTY));
+				stemmer.stem();
+				rules.add(new QueryRule(OntologyTermRepository.SYNONYMS, Operator.EQUALS, stemmer.getCurrent() + "~0.8"));
 			}
 		}
-
-		queryString = StringUtils.join(uniqueTerms, " +");
-		SearchRequest request = new SearchRequest(createOntologyTermDocumentType(ontologyUrl), q, null);
+		QueryRule finalQuery = new QueryRule(rules);
+		finalQuery.setOperator(Operator.SHOULD);
+		SearchRequest request = new SearchRequest(createOntologyTermDocumentType(ontologyUrl),
+				new QueryImpl(finalQuery).pageSize(100), null);
 		Iterator<Hit> iterator = searchService.search(request).getSearchHits().iterator();
 
 		List<ComparableHit> comparableHits = new ArrayList<ComparableHit>();
@@ -151,7 +149,8 @@ public class OntologyService
 			Hit hit = iterator.next();
 			String ontologySynonym = hit.getColumnValueMap().get(OntologyTermRepository.SYNONYMS).toString();
 			BigDecimal luceneScore = new BigDecimal(hit.getColumnValueMap().get(SCORE).toString());
-			BigDecimal ngramScore = new BigDecimal(NGramMatchingModel.stringMatching(queryString, ontologySynonym));
+			BigDecimal ngramScore = new BigDecimal(NGramMatchingModel.stringMatching(
+					StringUtils.join(uniqueTerms, " "), ontologySynonym));
 			comparableHits.add(new ComparableHit(hit, luceneScore.multiply(ngramScore)));
 		}
 		Collections.sort(comparableHits);
