@@ -773,7 +773,18 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		if (!ids.isEmpty())
 		{
 			List<Object> existingIds = Lists.newArrayList();
-			for (Entity existing : findAll(query().in(idAttributeName, ids)))
+
+			Query q = new QueryImpl();
+			for (int i = 0; i < ids.size(); i++)
+			{
+				if (i > 0)
+				{
+					q.or();
+				}
+				q.eq(idAttributeName, ids.get(i));
+			}
+
+			for (Entity existing : findAll(q))
 			{
 				existingIds.add(existing.getIdValue());
 			}
