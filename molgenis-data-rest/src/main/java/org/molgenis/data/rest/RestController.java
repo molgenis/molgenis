@@ -564,7 +564,7 @@ public class RestController
 	@ResponseStatus(OK)
 	public void updateAttribute(@PathVariable("entityName") String entityName,
 			@PathVariable("attributeName") String attributeName, @PathVariable("id") Object id,
-			@RequestBody Object value)
+			@RequestBody Object paramValue)
 	{
 		Entity entity = dataService.findOne(entityName, id);
 		if (entity == null)
@@ -572,6 +572,15 @@ public class RestController
 			throw new UnknownEntityException("Entity of type " + entityName + " with id " + id + " not found");
 		}
 
+		EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
+		AttributeMetaData attr = entityMetaData.getAttribute(attributeName);
+		if (attr == null)
+		{
+			throw new UnknownAttributeException("Attribute '" + attributeName + "' of entity '" + entityName
+					+ "' does not exist");
+		}
+
+		Object value = toEntityValue(attr, paramValue);
 		entity.set(attributeName, value);
 		dataService.update(entityName, entity);
 	}
@@ -876,51 +885,55 @@ public class RestController
 		{
 			String paramName = attr.getName();
 			Object paramValue = request.get(paramName);
-			Object value = null;
-
-			// Treat empty strings as null
-			if ((paramValue != null) && (paramValue instanceof String) && StringUtils.isEmpty((String) paramValue))
-			{
-				paramValue = null;
-			}
-
-			if (paramValue != null)
-			{
-				if (attr.getDataType().getEnumType() == XREF || attr.getDataType().getEnumType() == CATEGORICAL)
-				{
-					value = dataService.findOne(attr.getRefEntity().getName(), paramValue);
-					if (value == null)
-					{
-						throw new IllegalArgumentException("No " + attr.getRefEntity().getName() + " with id "
-								+ paramValue + " found");
-					}
-				}
-				else if (attr.getDataType().getEnumType() == MREF)
-				{
-					List<Object> ids = DataConverter.toObjectList(paramValue);
-					if ((ids != null) && !ids.isEmpty())
-					{
-						Iterable<Entity> mrefs = dataService.findAll(attr.getRefEntity().getName(), ids);
-						List<Entity> mrefList = Lists.newArrayList(mrefs);
-						if (mrefList.size() != ids.size())
-						{
-							throw new IllegalArgumentException("Could not find all referencing ids for  "
-									+ attr.getName());
-						}
-
-						value = mrefList;
-					}
-				}
-				else
-				{
-					value = paramValue;
-				}
-			}
-
+			Object value = toEntityValue(attr, paramValue);
 			entity.set(attr.getName(), value);
 		}
 
 		return entity;
+	}
+
+	private Object toEntityValue(AttributeMetaData attr, Object paramValue)
+	{
+		Object value = null;
+
+		// Treat empty strings as null
+		if ((paramValue != null) && (paramValue instanceof String) && StringUtils.isEmpty((String) paramValue))
+		{
+			paramValue = null;
+		}
+
+		if (paramValue != null)
+		{
+			if (attr.getDataType().getEnumType() == XREF || attr.getDataType().getEnumType() == CATEGORICAL)
+			{
+				value = dataService.findOne(attr.getRefEntity().getName(), paramValue);
+				if (value == null)
+				{
+					throw new IllegalArgumentException("No " + attr.getRefEntity().getName() + " with id " + paramValue
+							+ " found");
+				}
+			}
+			else if (attr.getDataType().getEnumType() == MREF)
+			{
+				List<Object> ids = DataConverter.toObjectList(paramValue);
+				if ((ids != null) && !ids.isEmpty())
+				{
+					Iterable<Entity> mrefs = dataService.findAll(attr.getRefEntity().getName(), ids);
+					List<Entity> mrefList = Lists.newArrayList(mrefs);
+					if (mrefList.size() != ids.size())
+					{
+						throw new IllegalArgumentException("Could not find all referencing ids for  " + attr.getName());
+					}
+
+					value = mrefList;
+				}
+			}
+			else
+			{
+				value = paramValue;
+			}
+		}
+		return value;
 	}
 
 	// Handles a Query
