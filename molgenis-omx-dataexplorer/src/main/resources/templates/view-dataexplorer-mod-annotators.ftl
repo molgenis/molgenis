@@ -27,8 +27,8 @@
 	</form>
 </div>
 <script>
-	$.when($.ajax("/js/dataexplorer-diseasematcher.js", {'cache': true}))
+	$.when($.ajax("/js/dataexplorer-annotators.js", {'cache': true}))
 		.then(function() {
-			//	
-	});
+			molgenis.dataexplorer.annotators.setAnnotatorSelectBoxes();		
+		});
 </script>
