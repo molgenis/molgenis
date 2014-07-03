@@ -164,7 +164,7 @@
     		andOrSwitch.append(operatorInput);
         }
 		
-		var element = createInput(attributeMetaData.fieldType, attrs, options.values);
+		var element = createInput(attributeMetaData, attrs, options.values);
 		container.prepend(element);
 		createSelect2(container, attributeMetaData, options);
 	}
