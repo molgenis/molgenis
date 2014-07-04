@@ -3,14 +3,11 @@ package org.molgenis.gaf;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -151,13 +148,17 @@ public class GafListValidator
 		Iterator<Entity> it = repository.iterator();
 		while (it.hasNext())
 		{
-			entities.add(it.next());
+			Entity entity = it.next();
+			String runId = entity.getString(COL_RUN);
+			report.getAllRunIds().add(runId);
+			entities.add(entity);
 		}
 
 		validateCellValues(entities, attributes, patternMap, lookupLists, report);
 		validateInternalSampleIdIncremental(entities, report);
 		validateRun(entities, report);
-
+		report.populateStatusImportedRuns();
+		
 		return report;
 	}
 
@@ -172,6 +173,7 @@ public class GafListValidator
 
 			// validate individual cells
 			String runId = entity.getString(COL_RUN);
+
 			for (AttributeMetaData attributeMetaData : attributes)
 			{
 				String attributeName = attributeMetaData.getName();
@@ -545,126 +547,6 @@ public class GafListValidator
 			{
 				report.addEntry(runId, new GafListValidationError(row, colName, value, "regex does not match"));
 			}
-		}
-	}
-
-	public static class GafListValidationReport
-	{
-		private final Map<String, List<GafListValidationError>> validationErrors;
-
-		public GafListValidationReport()
-		{
-			validationErrors = new LinkedHashMap<String, List<GafListValidationError>>();
-		}
-
-		public void addEntry(String runId, GafListValidationError validationError)
-		{
-			List<GafListValidationError> runEntries = validationErrors.get(runId);
-			if (runEntries == null)
-			{
-				runEntries = new ArrayList<GafListValidationError>();
-				validationErrors.put(runId, runEntries);
-			}
-			runEntries.add(validationError);
-		}
-
-		public Map<String, List<GafListValidationError>> getEntries()
-		{
-			return Collections.unmodifiableMap(validationErrors);
-		}
-
-		public boolean hasErrors()
-		{
-			return !validationErrors.isEmpty();
-		}
-
-		public boolean hasErrors(String runId)
-		{
-			return validationErrors.containsKey(runId);
-		}
-
-		@Override
-		public String toString()
-		{
-			StringBuilder strBuilder = new StringBuilder();
-			for (Entry<String, List<GafListValidationError>> reportEntry : validationErrors.entrySet())
-			{
-				String runId = reportEntry.getKey();
-				if (runId == null) runId = "<undefined>";
-				strBuilder.append("Validation errors for run ").append(runId).append('\n');
-				for (GafListValidationError validationError : reportEntry.getValue())
-				{
-					strBuilder.append('\t').append(validationError).append('\n');
-				}
-			}
-			return strBuilder.toString();
-		}
-
-		public String toStringHtml()
-		{
-			StringBuilder strBuilder = new StringBuilder();
-			for (Entry<String, List<GafListValidationError>> reportEntry : validationErrors.entrySet())
-			{
-				String runId = reportEntry.getKey();
-				if (runId == null) runId = "NO RUN ID!";
-				strBuilder.append("Run: ").append(runId).append('\n');
-				strBuilder.append("<table class=\"table\">").append('\n');
-				strBuilder.append("<tr><th>Row</th><th>Column</th><th>Value</th><th>Message</th></tr>").append('\n');
-				for (GafListValidationError validationError : reportEntry.getValue())
-				{
-					strBuilder.append(validationError.toStringHtml()).append('\n');
-				}
-				strBuilder.append("</table>").append('\n');
-			}
-			return strBuilder.toString();
-		}
-	}
-
-	public static class GafListValidationError
-	{
-		private final int row;
-		private final String colName;
-		private final String value;
-		private final String msg;
-
-		public GafListValidationError(int row, String colName, String value, String msg)
-		{
-			this.row = row;
-			this.colName = colName;
-			this.value = value;
-			this.msg = msg;
-		}
-
-		public int getRow()
-		{
-			return row;
-		}
-
-		public String getColName()
-		{
-			return colName;
-		}
-
-		public String getValue()
-		{
-			return value;
-		}
-
-		public String getMsg()
-		{
-			return msg;
-		}
-
-		@Override
-		public String toString()
-		{
-			return "row: " + row + "\tcol: " + colName + "\tval: " + value + (msg != null ? "\tmsg: " + msg : "");
-		}
-
-		public String toStringHtml()
-		{
-			return "<tr><td>" + row + "</td><td>" + colName + "</td><td>" + value + "</td><td>"
-					+ (msg != null ? msg : "") + "</td></tr>";
 		}
 	}
 }

@@ -11,7 +11,6 @@ import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.csv.CsvRepository;
 import org.molgenis.data.processor.CellProcessor;
-import org.molgenis.gaf.GafListValidator.GafListValidationReport;
 
 import com.google.gdata.util.ServiceException;
 
@@ -69,18 +68,20 @@ public class GafListFileRepository extends CsvRepository
 				Entity nextEntity = null;
 				if (null != report)
 				{
-					do
+					while (it.hasNext())
 					{
 						Entity entity = it.next();
-						String runId = entity.getString(GafListValidator.COL_RUN);
-						if (runId != null && !report.hasErrors(runId))
+						if (null != entity)
 						{
-							addBarcodeTypeAndBarcodeToEntity(entity);
-							nextEntity = entity;
-							break;
+							String runId = entity.getString(GafListValidator.COL_RUN);
+							if (runId != null && !report.hasErrors(runId))
+							{
+								addBarcodeTypeAndBarcodeToEntity(entity);
+								nextEntity = entity;
+								break;
+							}
 						}
 					}
-					while (it.hasNext());
 				}
 				else
 				{

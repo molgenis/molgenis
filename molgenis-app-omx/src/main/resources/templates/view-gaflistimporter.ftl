@@ -11,7 +11,7 @@
 		<div class="span4">
 		<h4>Import CSV file</h4>
 			<table class="table">
-				<form id="gaflist-import-file-form" method="post" action="${context_url}" enctype="multipart/form-data">
+				<form id="gaflist-import-file-form" method="post" action="${context_url}" enctype="multipart/form-data" onsubmit="parent.showSpinner(); return true;">
 					<tr>
 						<td nowrap><i>Separator:</i></td>
 						<td><input type="text" name="separator" class="span2" maxlength="1" value=""/></td>
@@ -31,15 +31,20 @@
 			</table>
 		</div>
 		<div class="span8">
-		<#if hasValidationError??>
-			<h4>Validation report</h4>
-			<#if hasValidationError>
-				${validationReport?if_exists}
-			<#else>
-				No errors found!<br/>
-				${importMessage?if_exists}				
+			<h4>Import messages:</h4>
+			<#if messages?? == true>
+				<ul>
+				<#list messages as message>
+					<il>
+						<p>${message?if_exists}</p>
+					</il>
+				</#list>
+				</ul>
 			</#if>
-		</#if>
+			<#if (hasValidationError?? == true) && (hasValidationError == true)>
+				<h4>Validation report</h4>
+				${validationReport?if_exists}
+			</#if>
 		</div>
 	</div>
 </div>

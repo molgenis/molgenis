@@ -3,6 +3,8 @@ package org.molgenis.gaf;
 import static org.molgenis.gaf.GafListImporterController.URI;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.mail.MessagingException;
 
@@ -40,7 +42,6 @@ public class GafListImporterController extends MolgenisPluginController
 	public GafListImporterController(GafListFileImporterService gafListFileImporter)
 	{
 		super(URI);
-
 		if (gafListFileImporter == null) throw new IllegalArgumentException("gafListFileImporter is null");
 		this.gafListFileImporterService = gafListFileImporter;
 	}
@@ -58,6 +59,8 @@ public class GafListImporterController extends MolgenisPluginController
 			@RequestParam("separator") Character separator, Model model) throws IOException, ServiceException,
 			ValueConverterException, MessagingException
 	{
+		final List<String> messages = new ArrayList<String>();
+
 		if (!csvFile.isEmpty())
 		{
 			this.gafListFileImporterService.createCsvRepository(csvFile, separator);
@@ -67,20 +70,30 @@ public class GafListImporterController extends MolgenisPluginController
 
 			try
 			{
-				// TODO JJ get imported runs
 				String nameGafList = this.gafListFileImporterService.importValidatedGafList();
-				model.addAttribute("importMessage", "Successfully imported! the new list name is: " + nameGafList);
+				messages.add("Successfully imported! the new list name is: <input type=\"text\" value=\"" + nameGafList + "\">");
+				messages.add("The imported runs are: " + this.gafListFileImporterService.getReport().getValidRunIds());
+
+				if (this.gafListFileImporterService.hasValidationError())
+				{
+					messages.add("Not imported runs id's: "
+							+ this.gafListFileImporterService.getReport().getInvalidRunIds());
+				}
 			}
 			catch (Exception e)
 			{
-				logger.error(e);
-				model.addAttribute("importMessage", "Failed to import data into database.");
+				String errorMessage = "Failed to import data into database.";
+				messages.add(errorMessage);
+				logger.error(errorMessage, e);
 			}
 		}
 		else
 		{
-			logger.error("The file you try to upload is empty! Filename: " + csvFile);
+			String errorMessage = "The file you try to upload is empty! Filename: " + csvFile;
+			messages.add(errorMessage);
+			logger.error(errorMessage);
 		}
+		model.addAttribute("messages", messages);
 		return "view-gaflistimporter";
 	}
 

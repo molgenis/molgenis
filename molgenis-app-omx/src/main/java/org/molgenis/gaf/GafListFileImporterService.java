@@ -8,8 +8,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.UUID;
 
-import javax.mail.MessagingException;
-
 import org.apache.log4j.Logger;
 import org.molgenis.data.AggregateableCrudRepositorySecurityDecorator;
 import org.molgenis.data.DataService;
@@ -17,19 +15,13 @@ import org.molgenis.data.omx.OmxRepository;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.gaf.GafListValidator.GafListValidationReport;
-import org.molgenis.omx.converters.ValueConverterException;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.search.DataSetsIndexer;
 import org.molgenis.search.SearchService;
-import org.molgenis.security.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import com.google.gdata.util.ServiceException;
 
 @Service
 public class GafListFileImporterService
@@ -58,14 +50,17 @@ public class GafListFileImporterService
 	private EntityValidator entityValidator;
 
 	private GafListFileRepository gafListFileRepository;
-	private GafListValidationReport report = null;
+	private GafListValidationReport report;
+	private File tmpFile = null;
+	private Character separator = null;
 
 	public void createCsvRepository(MultipartFile csvFile, Character separator)
 	{
 		try
-		{
-			File tmpFile = copyDataToTempFile(csvFile);
-			this.gafListFileRepository = new GafListFileRepository(tmpFile, null, separator, report);
+		{	
+			this.tmpFile = copyDataToTempFile(csvFile);
+			this.separator = separator;
+			this.gafListFileRepository = new GafListFileRepository(tmpFile, null, separator, null);
 		}
 		catch (Exception e)
 		{
@@ -98,8 +93,9 @@ public class GafListFileImporterService
 		try
 		{
 			this.report = gafListValidator.validate(this.gafListFileRepository);
+			this.gafListFileRepository = new GafListFileRepository(tmpFile, null, separator, this.report);
 		}
-		catch (IOException e)
+		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
@@ -117,12 +113,9 @@ public class GafListFileImporterService
 		return report.toStringHtml();
 	}
 
-	@Transactional(rollbackFor =
-	{ IOException.class, ServiceException.class, ValueConverterException.class, MessagingException.class })
-	@RunAsSystem
 	public String importValidatedGafList()
 	{
-		String dataSetIdentifier = UUID.randomUUID().toString();
+		String dataSetIdentifier = UUID.randomUUID().toString().toLowerCase();
 		String dataSetName = generateGafListRepoName();
 		Object dataSetId;
 
@@ -135,16 +128,12 @@ public class GafListFileImporterService
 			dataService.add(DataSet.ENTITY_NAME, dataSet);
 			dataSetId = dataSet.getId();
 
-			OmxRepository omxRepository = new OmxRepository(dataService, searchService, dataSetIdentifier,
-					entityValidator);
+			AggregateableCrudRepositorySecurityDecorator repository = new AggregateableCrudRepositorySecurityDecorator(
+					new OmxRepository(dataService, searchService, dataSetIdentifier, entityValidator));
+			dataService.addRepository(repository);
 
-			System.out.println("dataService.getEntityMetaData(dataSetIdentifier).getName(): " + dataService.getEntityMetaData(dataSetIdentifier).getName());
-			System.out.println("dataService.getEntityMetaData(dataSetName).getIdAttribute().getName()"
-					+ dataService.getEntityMetaData(dataSetName).getIdAttribute().getName());
-
-			dataService.addRepository(new AggregateableCrudRepositorySecurityDecorator(omxRepository));
-
-			System.out.println("omxRepository.getName(): " + omxRepository.getName());
+			repository.flush();
+			repository.clearCache();
 
 			dataService.add(dataSetIdentifier, this.gafListFileRepository);
 		}
@@ -167,6 +156,14 @@ public class GafListFileImporterService
 		return dataSetName;
 	}
 
+	/**
+	 * @return the gafListFileRepository
+	 */
+	public GafListFileRepository getGafListFileRepository()
+	{
+		return gafListFileRepository;
+	}
+
 	public Protocol getGafListProtocolUsed()
 	{
 		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME,
@@ -178,5 +175,13 @@ public class GafListFileImporterService
 	public final static String generateGafListRepoName()
 	{
 		return PREFIX_REPO_NAME + new SimpleDateFormat("yyyy-MM-dd HH:mm").format(Calendar.getInstance().getTime());
+	}
+
+	/**
+	 * @return the report
+	 */
+	public GafListValidationReport getReport()
+	{
+		return report;
 	}
 }

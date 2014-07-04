@@ -19,7 +19,6 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.gaf.GafListValidator.GafListValidationReport;
 import org.molgenis.gaf.GafListValidatorTest.Config;
 import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.ObservableFeature;
