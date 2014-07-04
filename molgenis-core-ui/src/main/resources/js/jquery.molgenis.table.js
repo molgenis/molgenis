@@ -183,7 +183,6 @@
 	 * @memberOf molgenis.table.cell
 	 */
 	function renderEditCell(cell, entity, attribute, settings) {
-		console.log('renderEditCell');
 		cell.empty();
 		
 		var value = entity[attribute.name];
@@ -235,7 +234,6 @@
 			case 'MREF':
 				var refEntityMeta = settings.refEntitiesMeta[attribute.refEntity.href];
 				var lblValue = entity[attribute.name] ? $.map(entity[attribute.name].items, function(val) {return val[refEntityMeta.labelAttribute];}) : undefined; 
-				console.log(entity[attribute.name]);
 				var container = $('<div class="xrefsearch">');
 				container.xrefsearch({attribute: attribute, values: lblValue});
 				container.addClass('xref-select');
@@ -244,7 +242,6 @@
 			case 'XREF':
 				var refEntityMeta = settings.refEntitiesMeta[attribute.refEntity.href];
 				var lblValue = entity[attribute.name] ? entity[attribute.name][refEntityMeta.labelAttribute] : undefined;
-				console.log(entity[attribute.name]);
 				var container = $('<div class="xrefsearch">');
 				container.xrefsearch({attribute: attribute, values: lblValue});
 				container.addClass('xref-select');
@@ -261,9 +258,8 @@
 	 * @memberOf molgenis.table.cell
 	 */
 	function renderViewCell(cell, entity, attribute, settings) {
-		console.log('renderViewCell');
-		
 		cell.empty();
+		
 		var rawValue = entity[attribute.name];				
 		switch(attribute.fieldType) {
 			case 'XREF':
@@ -378,8 +374,6 @@
 	 * @memberOf molgenis.table.cell
 	 */
 	function persistCell(cell, settings) {
-		console.log('persistCell');
-		
 		var row = cell.closest('tr').index();
 		var col = cell.index();
 		var attribute = cell.closest('table').find('th').eq(col).data('attr');
@@ -393,7 +387,6 @@
 					if(btnValue === 'T') editValue = true;
 					else if(btnValue === 'F') editValue = false;
 					else editValue = undefined;
-					console.log(btnValue, editValue);
 				} else {
 					editValue = cell.find('input').is(':checked');
 				}
@@ -524,13 +517,6 @@
 				}
 				break;
 		}
-	}
-	
-	/**
-	 * @memberOf molgenis.table.cell
-	 */
-	function resetCell(cell, settings) {
-		console.log('todo implement undo value edit');
 	}
 	
 	/**
@@ -676,12 +662,6 @@
 		$(container).on('keydown', '.molgenis-table tbody.editable td', function(e) {
 			var cell = $(this);
 			switch(e.keyCode) {
-				case 13: // enter
-					persistCell(cell, settings);
-					break;
-				case 27: // escape
-					resetCell(cell, settings);
-					break;
 				case 37: // left arrow
 					cell.prev('td').focus();
 					break;
@@ -701,8 +681,6 @@
 		
 		// handle table cell focus out event (do not use focusout, since it triggers on children taking focus)
 		$(container).on('blur', '.molgenis-table tbody.editable td[contenteditable="true"]', function(e) {
-			console.log('focusout cell');
-			
 			// determine if focus was lost to child:
 			// http://marc.codewisp.com/2013/01/18/detecting-blur-child-elements-jquery/
 			setTimeout($.proxy(function()
@@ -757,7 +735,6 @@
 		
 		// XREF
 		$(container).on('change', '.molgenis-table tbody.editable .xref-select', function(e) {
-			console.log(e);
 			var cell = $(this).closest('td');
 			persistCell(cell, settings);
 		});
