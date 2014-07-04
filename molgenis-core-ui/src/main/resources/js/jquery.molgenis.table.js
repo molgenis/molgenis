@@ -201,23 +201,44 @@
             	}
 				break;
 			case 'CATEGORICAL':
-				// TODO do not construct uri from other uri
 				var refEntityMeta = settings.refEntitiesMeta[attribute.refEntity.href];
 				var refEntityCollectionUri = attribute.refEntity.href.replace("/meta", "");
-				restApi.getAsync(refEntityCollectionUri, null, function(data) {
-					var items = [];
-					items.push('<select class="categorical-select">');
-					if(attribute.nillable) {
-						items.push('<option value=""' + (value === undefined ? ' selected' : '') + '></option>');
-					}
-					$.each(data.items, function(i, item) {
-						var category = item[refEntityMeta.labelAttribute];
-						var selected = value ? category === value[refEntityMeta.labelAttribute] : false;
-						items.push('<option value="' + item.href + '"' + (selected ? ' selected' : '') + '>' + item[refEntityMeta.labelAttribute] + '</option>');
-					});
-					items.push('</select>');
-					cell.html(items.join(''));
-				});
+				
+				var opts = {
+					// lazy load drop-down content 
+				    query: function (query) {
+				    	restApi.getAsync(refEntityCollectionUri, null, function(data) {
+				    		var results = [];
+				    		$.each(data.items, function(i, item) {
+				    			results.push({id: item.href, text: item[refEntityMeta.labelAttribute]});
+				    		});
+				    		query.callback({results : results});
+				    	});
+				    },
+				    // disable search box
+				    minimumResultsForSearch: -1,
+				    width: '100%'
+				};
+				if(value) {
+					opts.initSelection = function(element, callback) {
+						callback({id: value.href, text: value[refEntityMeta.labelAttribute]});
+					};
+				}
+				if(attribute.nillable) {
+					opts.allowClear = true,
+					opts.placeholder = ' '; // cannot be an empty string
+				}
+				
+				var container = $('<input type="hidden" class="categorical-select">');
+				// first append container, then create select2
+				cell.html(container);
+				container.select2(opts);
+				
+				if(value && attribute.nillable) {
+					// initSelection not called in case of placeholder: https://github.com/ivaynberg/select2/issues/2086
+					// workaround:
+					container.select2('val', []);
+				}
 				break;
 			case 'DATE':
 			case 'DATE_TIME':
@@ -401,9 +422,10 @@
 				}
 				break;
 			case 'CATEGORICAL':
-				var editValue = cell.find('select').val();
-				var editLabel = cell.find('select option:selected').text();
 				var refEntityMeta = settings.refEntitiesMeta[attribute.refEntity.href];
+
+				var data = cell.find('.categorical-select').select2('data');
+				var editValue = data ? data.id : '';
             	var entity = settings.data.items[row];
 				value = entity[attribute.name] ? entity[attribute.name].href : '';
             	
@@ -417,7 +439,7 @@
 								if(!entity[attribute.name])
 									entity[attribute.name] = {};
 								entity[attribute.name].href = editValue;
-								entity[attribute.name][refEntityMeta.labelAttribute] = editLabel;	
+								entity[attribute.name][refEntityMeta.labelAttribute] = data.text;	
 							}
 							
 							cell.addClass('edited');
