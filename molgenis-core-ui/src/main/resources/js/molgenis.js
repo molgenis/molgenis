@@ -213,18 +213,7 @@
 		});
 
 		return writable;
-	};
-
-	molgenis.isFloat = function(n) {
-		if(typeof n === 'string')
-			n = parseFloat(n);
-		return n === +n && n !== (n | 0);
-	};
-
-	molgenis.isInteger = function(n) {
-		return n === +n && n === (n | 0);
-	};
-	
+	};	
 }($, window.top.molgenis = window.top.molgenis || {}));
 
 // Add endsWith function to the string class
