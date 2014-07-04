@@ -140,16 +140,17 @@
 				var cell = $('<td class="trash" tabindex="' + tabindex++ + '">');
 				var href = entity.href;
 				$('<i class="icon-trash delete-row-btn"></i>').click(function(e) {
-					alert('Are you sure you want to delete this row?');
-					restApi.remove(href, {
-						success: function() {
-							getTableData(settings, function(data) {
-								createTableBody(data, settings);
-								createTablePager(data, settings);
-								createTableFooter(data, settings);
-							});
-						}
-					});
+					if(confirm('Are you sure you want to delete this row?')) {
+						restApi.remove(href, {
+							success: function() {
+								getTableData(settings, function(data) {
+									createTableBody(data, settings);
+									createTablePager(data, settings);
+									createTableFooter(data, settings);
+								});
+							}
+						});
+					}
 				}).appendTo(cell);
 				row.append(cell);
 			}
