@@ -145,7 +145,7 @@
 		if(options.autofocus) {
 			attrs.autofocus = options.autofocus;
 		}
-        if (attributeMetaData.fieldType === 'MREF') {
+        if (options.isfilter && attributeMetaData.fieldType === 'MREF') {
             var checkbox = $('<input type="checkbox" class="exclude">');//Checkbox is only for jquery-switch, it should not be included in the query
     		checkbox.attr('checked', options.operator === 'OR');
     		container.prepend(checkbox);
