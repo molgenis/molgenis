@@ -41,6 +41,11 @@
     box-shadow: 0 0 10px gray;
 }
 
+.molgenis-table tbody.editable td {
+	padding-bottom: 0px;
+	padding-top: 0px;
+}
+
 .molgenis-table tbody td.edited:not(:focus) {
    	border: 2px solid #90ee90;
     border-radius: 7px;

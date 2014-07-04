@@ -155,7 +155,7 @@
 			}
 
 			$.each(settings.colAttributes, function(i, attribute) {
-				var cell = $('<td class="view">').data('id', entity.href + '/' + attribute.name);
+				var cell = $('<td>').data('id', entity.href + '/' + attribute.name);
 				renderCell(cell, entity, attribute, settings);
 				if(settings.editenabled) {
 					cell.attr('tabindex', tabindex++);
@@ -233,11 +233,21 @@
 				cell.html(input);
 				break;
 			case 'MREF':
+				var refEntityMeta = settings.refEntitiesMeta[attribute.refEntity.href];
+				var lblValue = entity[attribute.name] ? $.map(entity[attribute.name].items, function(val) {return val[refEntityMeta.labelAttribute];}) : undefined; 
+				console.log(entity[attribute.name]);
+				var container = $('<div class="xrefsearch">');
+				container.xrefsearch({attribute: attribute, values: lblValue});
+				container.addClass('xref-select');
+				cell.html(container);
+				break;
 			case 'XREF':
 				var refEntityMeta = settings.refEntitiesMeta[attribute.refEntity.href];
 				var lblValue = entity[attribute.name] ? entity[attribute.name][refEntityMeta.labelAttribute] : undefined;
+				console.log(entity[attribute.name]);
 				var container = $('<div class="xrefsearch">');
 				container.xrefsearch({attribute: attribute, values: lblValue});
+				container.addClass('xref-select');
 				cell.html(container);
 				break;
 			default:
@@ -456,15 +466,53 @@
 					}
 				}
 				break;
-			case 'MREF':	
+			case 'MREF':
+				var select = cell.find('input[type=hidden]');
+				var data = select.select2('data');
+				if(attribute.nillable || data.length > 0) {
+					var entity = settings.data.items[row];
+					var value = entity[attribute.name];
+					if(JSON.stringify(data) !== JSON.stringify(value.items) ) {
+						var editValue = $.map(data, function(val){ return restApi.getPrimaryKeyFromHref(val.href);});
+						restApi.update(cell.data('id'), editValue, {
+							success: function() {
+								entity[attribute.name].total = data.length;
+								entity[attribute.name].items = data;
+								cell.addClass('edited');
+							}
+						});
+					}
+				}
+				break;
 			case 'XREF':
-				var select = cell.find('select');
-				var editValue = select.val();
-				console.log(select.val());
+				var select = cell.find('input[type=hidden]');
+				var data = select.select2('data');
+				var refEntityMeta = settings.refEntitiesMeta[attribute.refEntity.href];
+            	var entity = settings.data.items[row];
+				value = entity[attribute.name] ? entity[attribute.name].href : '';
+				var editValue = data.href;
+				var editLabel = data[refEntityMeta.labelAttribute];
+				
+            	if(value !== editValue) {
+            		editValue = editValue !== '' ? restApi.getPrimaryKeyFromHref(editValue) : ''; 
+					restApi.update(cell.data('id'), editValue, {
+						success: function() {
+							if (editValue === '')
+								delete entity[attribute.name];
+							else {
+								if(!entity[attribute.name])
+									entity[attribute.name] = {};
+								entity[attribute.name].href = editValue;
+								entity[attribute.name][refEntityMeta.labelAttribute] = editLabel;	
+							}
+							
+							cell.addClass('edited');
+						}
+					});
+				}
 				break;
 			default:
 				var editValue = cell.text();
-			console.log('persistCell', value, editValue);
 				if(value !== editValue) {
 					restApi.update(cell.data('id'), editValue, {
 						success: function() {
@@ -701,12 +749,18 @@
 			persistCell(cell, settings);
 		});
 
-		// DECIMAL, INt, LONG
+		// DECIMAL, INT, LONG
 		$(container).on('change', '.molgenis-table tbody.editable .number-input', function(e) {			
 			var cell = $(this).closest('td');
 			persistCell(cell, settings);
 		});
 		
+		// XREF
+		$(container).on('change', '.molgenis-table tbody.editable .xref-select', function(e) {
+			console.log(e);
+			var cell = $(this).closest('td');
+			persistCell(cell, settings);
+		});
 		return this;
 	};
 
