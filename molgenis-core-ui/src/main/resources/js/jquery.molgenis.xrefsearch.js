@@ -99,7 +99,7 @@
 		var hiddenInput = container.find('input[type=hidden]');
 		
 		hiddenInput.select2({
-			width: '80%',
+			width: options.width ? options.width : 'resolve',
 			minimumInputLength: 2,
             multiple: (attributeMetaData.fieldType === 'MREF'),
             closeOnSelect: (attributeMetaData.fieldType === 'XREF'),
@@ -141,11 +141,11 @@
 	}
 
 	function addQueryPartSelect(container, attributeMetaData, options) {
-		var attrs = {
-				'autofocus': 'autofocus'
-			};
-
-        if (attributeMetaData.fieldType === 'MREF') {
+		var attrs = {};
+		if(options.autofocus) {
+			attrs.autofocus = options.autofocus;
+		}
+        if (options.isfilter && attributeMetaData.fieldType === 'MREF') {
             var checkbox = $('<input type="checkbox" class="exclude">');//Checkbox is only for jquery-switch, it should not be included in the query
     		checkbox.attr('checked', options.operator === 'OR');
     		container.prepend(checkbox);
@@ -164,7 +164,7 @@
     		andOrSwitch.append(operatorInput);
         }
 		
-		var element = createInput(attributeMetaData.fieldType, attrs, options.values);
+		var element = createInput(attributeMetaData, attrs, options.values);
 		container.prepend(element);
 		createSelect2(container, attributeMetaData, options);
 	}

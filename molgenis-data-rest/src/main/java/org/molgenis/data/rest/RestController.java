@@ -2,6 +2,8 @@ package org.molgenis.data.rest;
 
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DATE;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DATE_TIME;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
 import static org.molgenis.data.rest.RestController.BASE_URI;
@@ -20,6 +22,8 @@ import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -70,6 +74,7 @@ import org.molgenis.security.token.UnknownTokenException;
 import org.molgenis.ui.form.EntityForm;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
+import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionException;
@@ -930,7 +935,7 @@ public class RestController
 			}
 			else
 			{
-				value = paramValue;
+				value = DataConverter.convert(paramValue, attr);
 			}
 		}
 		return value;
@@ -1008,6 +1013,22 @@ public class RestController
 								attrName);
 						entityMap.put(attrName, Collections.singletonMap("href", attrHref));
 					}
+				}
+				else if (attrType == DATE)
+				{
+					Date date = entity.getDate(attrName);
+					entityMap
+							.put(attrName,
+									date != null ? new SimpleDateFormat(MolgenisDateFormat.DATEFORMAT_DATE)
+											.format(date) : null);
+				}
+				else if (attrType == DATE_TIME)
+				{
+					Date date = entity.getDate(attrName);
+					entityMap
+							.put(attrName,
+									date != null ? new SimpleDateFormat(MolgenisDateFormat.DATEFORMAT_DATETIME)
+											.format(date) : null);
 				}
 				else if (attrType != XREF && attrType != CATEGORICAL && attrType != MREF)
 				{
