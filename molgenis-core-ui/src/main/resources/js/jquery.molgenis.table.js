@@ -188,17 +188,21 @@
 		var value = entity[attribute.name];
 		switch(attribute.fieldType) {
 			case 'BOOL':
+				var items = [];
+				items.push('<div class="bool-btn-group">');
+				items.push('<button type="button" class="btn btn-mini');
+				if(value === true) items.push(' active');
+				items.push('" data-state="true">Yes</button>');
+				items.push('<button type="button" class="btn btn-mini');
+				if(value === false) items.push(' active');
+				items.push('" data-state="false">No</button>');
 				if(attribute.nillable) {
-            		cell.html('<div class="bool-nillable-btn-group">' +
-            		  '<button type="button" class="btn btn-mini' + (value === true ? ' active' : '') + '">T</button>' +
-            		  '<button type="button" class="btn btn-mini' + (value === false ? ' active' : '') + '">F</button>' +
-            		  '<button type="button" class="btn btn-mini' + (value === undefined ? ' active' : '') + '">N/A</button>' +
-            		'</div>');
-            	} else {
-            		var checkbox = $(formatTableCellValue(value, attribute.fieldType, true));
-            		checkbox.addClass('bool-checkbox');
-    				cell.html(checkbox);
-            	}
+					items.push('<button type="button" class="btn btn-mini');
+					if(value === undefined) items.push(' active');
+					items.push('" data-state="undefined">N/A</button>');
+				}
+				items.push('</div>');
+				cell.html(items.join(''));
 				break;
 			case 'CATEGORICAL':
 				var refEntityMeta = settings.refEntitiesMeta[attribute.refEntity.href];
@@ -404,14 +408,13 @@
 		switch(attribute.fieldType) {
 			case 'BOOL':
 				var editValue;
-				if(attribute.nillable) {
-					var btnValue = cell.find('button.active').text();
-					if(btnValue === 'T') editValue = true;
-					else if(btnValue === 'F') editValue = false;
-					else editValue = undefined;
-				} else {
-					editValue = cell.find('input').is(':checked');
-				}
+				
+				var state = cell.find('button.active').data('state');
+				if(state === true) editValue = true;
+				else if(state === false) editValue = false;
+				else if(state === 'undefined' && attribute.nillable) editValue = undefined;
+				else throw 'invalid state: ' + state;
+				
 				if(value !== editValue) {
 					restApi.update(cell.data('id'), editValue, {
 						success: function() {
@@ -721,15 +724,9 @@
 		});
 		
 		// edit event handlers
-		
+				
 		// BOOL
-		$(container).on('change', '.molgenis-table tbody.editable .bool-checkbox', function(e) {			
-			var cell = $(this).closest('td');
-			persistCell(cell, settings);
-		});
-		
-		// BOOL - nillable
-		$(container).on('click', '.molgenis-table tbody.editable .bool-nillable-btn-group button', function(e) {
+		$(container).on('click', '.molgenis-table tbody.editable .bool-btn-group button', function(e) {
 			// do not use bootstrap data-toggle to prevent race condition:
 			// http://stackoverflow.com/questions/9262827/twitter-bootstrap-onclick-event-on-buttons-radio
 			$(this).addClass('active').siblings().removeClass('active');
