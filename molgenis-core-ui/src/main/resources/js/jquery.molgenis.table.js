@@ -236,7 +236,7 @@
 				var lblValue = entity[attribute.name] ? $.map(entity[attribute.name].items, function(val) {return val[refEntityMeta.labelAttribute];}) : undefined; 
 				var container = $('<div class="xrefsearch">');
 				container.xrefsearch({attribute: attribute, values: lblValue});
-				container.addClass('xref-select');
+				container.addClass('ref-select');
 				cell.html(container);
 				break;
 			case 'XREF':
@@ -244,7 +244,7 @@
 				var lblValue = entity[attribute.name] ? entity[attribute.name][refEntityMeta.labelAttribute] : undefined;
 				var container = $('<div class="xrefsearch">');
 				container.xrefsearch({attribute: attribute, values: lblValue});
-				container.addClass('xref-select');
+				container.addClass('ref-select');
 				cell.html(container);
 				break;
 			default:
@@ -733,8 +733,8 @@
 			persistCell(cell, settings);
 		});
 		
-		// XREF
-		$(container).on('change', '.molgenis-table tbody.editable .xref-select', function(e) {
+		// XREF, MREF
+		$(container).on('change', '.molgenis-table tbody.editable .ref-select', function(e) {
 			var cell = $(this).closest('td');
 			persistCell(cell, settings);
 		});
