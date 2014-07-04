@@ -202,6 +202,7 @@
 				break;
 			case 'CATEGORICAL':
 				var refEntityMeta = settings.refEntitiesMeta[attribute.refEntity.href];
+				// TODO do not construct uri from other uri
 				var refEntityCollectionUri = attribute.refEntity.href.replace("/meta", "");
 				
 				var opts = {
