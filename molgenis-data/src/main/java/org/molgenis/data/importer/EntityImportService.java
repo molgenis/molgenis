@@ -1,5 +1,6 @@
 package org.molgenis.data.importer;
 
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
 
@@ -117,7 +118,8 @@ public class EntityImportService
 			boolean resolved = true;
 			for (AttributeMetaData attr : entityMetaData.getAttributes())
 			{
-				if ((attr.getDataType().getEnumType() == MREF) || (attr.getDataType().getEnumType() == XREF))
+				if ((attr.getDataType().getEnumType() == MREF) || (attr.getDataType().getEnumType() == XREF)
+						|| (attr.getDataType().getEnumType() == CATEGORICAL))
 				{
 					boolean attrResolved = resolveEntityRef(entityName, entityToImport, attr);
 					resolved = resolved && attrResolved;
@@ -170,7 +172,8 @@ public class EntityImportService
 					boolean resolved = true;
 					for (AttributeMetaData attr : entityMetaData.getAttributes())
 					{
-						if (((attr.getDataType().getEnumType() == MREF) || (attr.getDataType().getEnumType() == XREF))
+						if (((attr.getDataType().getEnumType() == MREF) || (attr.getDataType().getEnumType() == XREF) || (attr
+								.getDataType().getEnumType() == CATEGORICAL))
 								&& attr.getRefEntity().getName().equalsIgnoreCase(entityName))
 						{
 							resolved = resolved && resolveEntityRef(entityName, entityToImport, attr);
@@ -202,7 +205,8 @@ public class EntityImportService
 				// this entity)
 				for (AttributeMetaData attr : entityMetaData.getAttributes())
 				{
-					if (((attr.getDataType().getEnumType() == MREF) || (attr.getDataType().getEnumType() == XREF))
+					if (((attr.getDataType().getEnumType() == MREF) || (attr.getDataType().getEnumType() == XREF) || (attr
+							.getDataType().getEnumType() == CATEGORICAL))
 							&& attr.getRefEntity().getName().equalsIgnoreCase(entityName)
 							&& !resolveEntityRef(entityName, entity, attr))
 					{

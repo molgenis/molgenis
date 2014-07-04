@@ -2,6 +2,8 @@ package org.molgenis.data.rest;
 
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DATE;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DATE_TIME;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
 import static org.molgenis.data.rest.RestController.BASE_URI;
@@ -20,6 +22,8 @@ import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -70,6 +74,7 @@ import org.molgenis.security.token.UnknownTokenException;
 import org.molgenis.ui.form.EntityForm;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
+import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionException;
@@ -564,7 +569,7 @@ public class RestController
 	@ResponseStatus(OK)
 	public void updateAttribute(@PathVariable("entityName") String entityName,
 			@PathVariable("attributeName") String attributeName, @PathVariable("id") Object id,
-			@RequestBody Object value)
+			@RequestBody Object paramValue)
 	{
 		Entity entity = dataService.findOne(entityName, id);
 		if (entity == null)
@@ -572,6 +577,15 @@ public class RestController
 			throw new UnknownEntityException("Entity of type " + entityName + " with id " + id + " not found");
 		}
 
+		EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
+		AttributeMetaData attr = entityMetaData.getAttribute(attributeName);
+		if (attr == null)
+		{
+			throw new UnknownAttributeException("Attribute '" + attributeName + "' of entity '" + entityName
+					+ "' does not exist");
+		}
+
+		Object value = toEntityValue(attr, paramValue);
 		entity.set(attributeName, value);
 		dataService.update(entityName, entity);
 	}
@@ -876,51 +890,55 @@ public class RestController
 		{
 			String paramName = attr.getName();
 			Object paramValue = request.get(paramName);
-			Object value = null;
-
-			// Treat empty strings as null
-			if ((paramValue != null) && (paramValue instanceof String) && StringUtils.isEmpty((String) paramValue))
-			{
-				paramValue = null;
-			}
-
-			if (paramValue != null)
-			{
-				if (attr.getDataType().getEnumType() == XREF || attr.getDataType().getEnumType() == CATEGORICAL)
-				{
-					value = dataService.findOne(attr.getRefEntity().getName(), paramValue);
-					if (value == null)
-					{
-						throw new IllegalArgumentException("No " + attr.getRefEntity().getName() + " with id "
-								+ paramValue + " found");
-					}
-				}
-				else if (attr.getDataType().getEnumType() == MREF)
-				{
-					List<Object> ids = DataConverter.toObjectList(paramValue);
-					if ((ids != null) && !ids.isEmpty())
-					{
-						Iterable<Entity> mrefs = dataService.findAll(attr.getRefEntity().getName(), ids);
-						List<Entity> mrefList = Lists.newArrayList(mrefs);
-						if (mrefList.size() != ids.size())
-						{
-							throw new IllegalArgumentException("Could not find all referencing ids for  "
-									+ attr.getName());
-						}
-
-						value = mrefList;
-					}
-				}
-				else
-				{
-					value = paramValue;
-				}
-			}
-
+			Object value = toEntityValue(attr, paramValue);
 			entity.set(attr.getName(), value);
 		}
 
 		return entity;
+	}
+
+	private Object toEntityValue(AttributeMetaData attr, Object paramValue)
+	{
+		Object value = null;
+
+		// Treat empty strings as null
+		if ((paramValue != null) && (paramValue instanceof String) && StringUtils.isEmpty((String) paramValue))
+		{
+			paramValue = null;
+		}
+
+		if (paramValue != null)
+		{
+			if (attr.getDataType().getEnumType() == XREF || attr.getDataType().getEnumType() == CATEGORICAL)
+			{
+				value = dataService.findOne(attr.getRefEntity().getName(), paramValue);
+				if (value == null)
+				{
+					throw new IllegalArgumentException("No " + attr.getRefEntity().getName() + " with id " + paramValue
+							+ " found");
+				}
+			}
+			else if (attr.getDataType().getEnumType() == MREF)
+			{
+				List<Object> ids = DataConverter.toObjectList(paramValue);
+				if ((ids != null) && !ids.isEmpty())
+				{
+					Iterable<Entity> mrefs = dataService.findAll(attr.getRefEntity().getName(), ids);
+					List<Entity> mrefList = Lists.newArrayList(mrefs);
+					if (mrefList.size() != ids.size())
+					{
+						throw new IllegalArgumentException("Could not find all referencing ids for  " + attr.getName());
+					}
+
+					value = mrefList;
+				}
+			}
+			else
+			{
+				value = DataConverter.convert(paramValue, attr);
+			}
+		}
+		return value;
 	}
 
 	// Handles a Query
@@ -995,6 +1013,22 @@ public class RestController
 								attrName);
 						entityMap.put(attrName, Collections.singletonMap("href", attrHref));
 					}
+				}
+				else if (attrType == DATE)
+				{
+					Date date = entity.getDate(attrName);
+					entityMap
+							.put(attrName,
+									date != null ? new SimpleDateFormat(MolgenisDateFormat.DATEFORMAT_DATE)
+											.format(date) : null);
+				}
+				else if (attrType == DATE_TIME)
+				{
+					Date date = entity.getDate(attrName);
+					entityMap
+							.put(attrName,
+									date != null ? new SimpleDateFormat(MolgenisDateFormat.DATEFORMAT_DATETIME)
+											.format(date) : null);
 				}
 				else if (attrType != XREF && attrType != CATEGORICAL && attrType != MREF)
 				{

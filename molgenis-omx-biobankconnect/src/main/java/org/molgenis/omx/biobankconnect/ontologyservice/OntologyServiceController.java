@@ -83,6 +83,7 @@ public class OntologyServiceController extends MolgenisPluginController
 		this.ontologyUrl = ontologyUrl;
 		this.inputTerms = Arrays.asList(inputTerms.split("\n"));
 		model.addAttribute("total", inputTerms.split("\n").length);
+		model.addAttribute("ontologyUrl", this.ontologyUrl);
 		return "ontology-match-view-result";
 	}
 

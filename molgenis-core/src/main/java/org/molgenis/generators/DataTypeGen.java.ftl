@@ -16,6 +16,7 @@
 package ${package};
 
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.molgenis.data.AttributeMetaData;
@@ -406,7 +407,59 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 	@Override
 	public void set(String attributeName, Object value)
 	{
-		set(new MapEntity(attributeName, value), false);
+<#list allFields(entity) as f>
+		if("${f.name}".equalsIgnoreCase(attributeName)) {
+		<#assign type_label = f.getType().toString()>
+			this.set${JavaName(f)}((<#if f.type == "categorical" || f.type == "xref">${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)}<#elseif f.type="mref">List<${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)}><#else>${f.type.javaPropertyType}</#if>) value); 
+			<#--
+		<#if f.type == "mref">
+			this.set${JavaName(f)}(value);
+			
+			//set ${JavaName(f)}
+			if( entity.get("${f.name}") != null || entity.get("${f.name?lower_case}") != null ) 
+			{
+				Object mrefs = entity.get("${f.name}");
+				if(mrefs == null) mrefs = entity.get("${f.name?lower_case}");
+				if(entity.get("${entity.name?lower_case}_${f.name?lower_case}")!= null) mrefs = entity.get("${entity.name?lower_case}_${f.name?lower_case}");
+				else if(entity.get("${entity.name}_${f.name}")!= null) mrefs = entity.get("${entity.name}_${f.name}");									
+				this.set${JavaName(f)}((java.util.List<${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)}>) mrefs );
+			}
+					
+		<#else>
+			//set ${JavaName(f)}
+			// query formal name, else lowercase name
+			<#if f.type == "xref" || f.type == "categorical">
+			if( entity.get("${f.name}") != null) { 
+				this.set${JavaName(f)}((${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)})entity.get("${f.name}"));				
+			}
+			else if( entity.get("${f.name?lower_case}") != null) { 
+				this.set${JavaName(f)}((${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)})entity.get("${f.name?lower_case}"));				
+			}
+			else if( entity.get("${entity.name}_${f.name}") != null) { 
+				this.set${JavaName(f)}((${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)})entity.get("${entity.name}_${f.name}"));				
+			}
+			else if( entity.get("${entity.name?lower_case}_${f.name?lower_case}") != null) { 
+				this.set${JavaName(f)}((${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)})entity.get("${entity.name}_${f.name}"));				
+			}
+			<#else>
+			if(entity.get${settertype(f)}("${f.name?lower_case}") != null) this.set${JavaName(f)}(entity.get${settertype(f)}("${f.name?lower_case}"));
+			else if(entity.get${settertype(f)}("${f.name}") != null) this.set${JavaName(f)}(entity.get${settertype(f)}("${f.name}"));
+			if( entity.get${settertype(f)}("${entity.name?lower_case}_${f.name?lower_case}") != null) this.set${JavaName(f)}(entity.get${settertype(f)}("${entity.name?lower_case}_${f.name?lower_case}"));
+			else if( entity.get${settertype(f)}("${entity.name}_${f.name}") != null) this.set${JavaName(f)}(entity.get${settertype(f)}("${entity.name}_${f.name}"));
+			</#if>
+			<#if f.type == "file" || f.type=="image">
+			if(entity.getString("filefor_${f.name}") != null)
+				this.set${JavaName(f)}AttachedFile(new java.io.File(entity.getString("filefor_${f.name}")));
+			else if(entity.getString("filefor_${f.name?lower_case}") != null)
+				this.set${JavaName(f)}AttachedFile(new java.io.File(entity.getString("filefor_${f.name?lower_case}")));
+			if(entity.getString("filefor_${entity.name}_${f.name}") != null) this.set${JavaName(f)}AttachedFile(new java.io.File(entity.getString("filefor_${entity.name}_${f.name}"))); //FIXME filefor hack
+			else if(entity.getString("filefor_${entity.name?lower_case}_${f.name?lower_case}") != null) this.set${JavaName(f)}AttachedFile(new java.io.File(entity.getString("filefor_${entity.name?lower_case}_${f.name?lower_case}"))); //FIXME filefor hack
+			</#if>						
+		</#if>
+		-->			
+			return;
+		}
+</#list>
 	}
 
 <#-- Implement equals() and hashCode() using business key equality -->

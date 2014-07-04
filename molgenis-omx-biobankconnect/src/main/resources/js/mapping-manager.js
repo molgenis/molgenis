@@ -110,7 +110,7 @@
 		});
 		
 		//Calculate the number of digits to show in the cell and full content is displayed in popover
-		var numberOfDigit = Math.ceil(((table.width() - table.find('th:eq(0)').width()) / biobankDataSets.length - 80)/8);
+		var numberOfDigit = Math.ceil(((table.width() - table.find('th:eq(0)').width()) / biobankDataSets.length - 90)/8);
 		$.each(biobankDataSets, function(index, mappedDataSet){
 			var removeIcon = $('<i />').addClass('icon-trash show-popover float-right');
 			var editIcon = $('<i />').addClass('icon-pencil show-popover float-right');
