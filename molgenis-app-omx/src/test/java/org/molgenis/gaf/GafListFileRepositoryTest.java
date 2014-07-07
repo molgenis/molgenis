@@ -78,7 +78,7 @@ public class GafListFileRepositoryTest
 		
 		GafListValidationReport gafListValidationReport = mock(GafListValidationReport.class);
 		when(gafListValidationReport.hasErrors("1500")).thenReturn(false);
-		when(gafListValidationReport.hasErrors("1501")).thenReturn(false);
+		when(gafListValidationReport.hasErrors("1501")).thenReturn(true);
 		
 		@SuppressWarnings("resource")
 		GafListFileRepository gafListFileRepository = new GafListFileRepository(file, null, null,
