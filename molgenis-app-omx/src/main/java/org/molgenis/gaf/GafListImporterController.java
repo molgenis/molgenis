@@ -87,7 +87,7 @@ public class GafListImporterController extends MolgenisPluginController
 		}
 		else
 		{
-			String errorMessage = "The file you try to upload is empty! Filename: " + csvFile;
+			String errorMessage = "The file you try to upload is empty! Filename: " + csvFile.getOriginalFilename();
 			messages.add(errorMessage);
 			logger.error(errorMessage);
 		}
