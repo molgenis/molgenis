@@ -1,7 +1,7 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 <#assign css=["gaflistimporter.css"]>
-<#assign js=["gaflistimporter.js"]>
+<#assign js=[]>
 <@header css js/>
 <div class="container-fluid">
 	<div class="well">
@@ -10,7 +10,7 @@
 		</div>
 		<div class="row-fluid">	
 			<div class="span4">
-				<form id="gaflist-import-file-form" method="post" action="${context_url}" enctype="multipart/form-data">
+				<form id="gaflist-import-file-form" method="post" action="${context_url}" enctype="multipart/form-data" onsubmit="parent.showSpinner(function(){$('.modal-body').html('Validating and importing GAF list');});  return true;">
 					<h4>Import CSV file</h4>
 					<table class="table">
 						<tbody>
@@ -24,7 +24,7 @@
 							</tr>
 							<tr>
 								<td></td>
-								<td><button type="submit" class="btn btn-primary">Submit file</button></td>
+								<td><input id="submitButton" type="submit" value="Submit file" class="btn btn-primary" /></td>
 							</tr>
 						</tbody>
 					</table>
