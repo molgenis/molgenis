@@ -18,6 +18,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.support.DefaultAttributeMetaData;
@@ -235,34 +236,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		// add attribute metadata
 		for (AttributeMetaData att : emd.getAttributes())
 		{
-			Entity a = new MapEntity();
-			a.set("entity", emd.getName());
-			a.set("name", att.getName());
-			a.set("defaultValue", att.getDefaultValue());
-			a.set("dataType", att.getDataType());
-
-			boolean lookupAttribute = att.isLookupAttribute();
-			if (att.isIdAtrribute() || att.isLabelAttribute())
-			{
-				lookupAttribute = true;
-			}
-			a.set("lookupAttribute", lookupAttribute);
-
-			if (att.getRefEntity() != null) a.set("refEntity", att.getRefEntity().getName());
-
-			// add compound entities unless already there
-			if (att.getDataType() instanceof CompoundField
-					&& entities.count(new QueryImpl().eq("name", att.getRefEntity().getName())) == 0)
-			{
-				add(att.getRefEntity());
-			}
-			a.set("nillable", att.isNillable());
-			a.set("auto", att.isAuto());
-			a.set("visible", att.isVisible());
-			a.set("label", att.getLabel());
-			a.set("description", att.getDescription());
-
-			attributes.add(a);
+            addAttribute(emd, att);
 		}
 
 		// if not abstract add to repositories
@@ -281,7 +255,38 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		return null;
 	}
 
-	@Override
+    public void addAttribute(EntityMetaData emd, AttributeMetaData att) {
+        Entity a = new MapEntity();
+        a.set("entity", emd.getName());
+        a.set("name", att.getName());
+        a.set("defaultValue", att.getDefaultValue());
+        a.set("dataType", att.getDataType());
+
+        boolean lookupAttribute = att.isLookupAttribute();
+        if (att.isIdAtrribute() || att.isLabelAttribute())
+        {
+            lookupAttribute = true;
+        }
+        a.set("lookupAttribute", lookupAttribute);
+
+        if (att.getRefEntity() != null) a.set("refEntity", att.getRefEntity().getName());
+
+        // add compound entities unless already there
+        if (att.getDataType() instanceof CompoundField
+                && entities.count(new QueryImpl().eq("name", att.getRefEntity().getName())) == 0)
+        {
+            add(att.getRefEntity());
+        }
+        a.set("nillable", att.isNillable());
+        a.set("auto", att.isAuto());
+        a.set("visible", att.isVisible());
+        a.set("label", att.getLabel());
+        a.set("description", att.getDescription());
+
+        attributes.add(a);
+    }
+
+    @Override
 	public Iterable<String> getEntityNames()
 	{
 		return repositories.keySet();
@@ -314,4 +319,27 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		attributes.delete(attributes.findAll(new QueryImpl().eq("entity", name)));
 		entities.delete(entities.findAll(new QueryImpl().eq("name", name)));
 	}
+
+    public void update(EntityMetaData metadata) {
+        MysqlRepository repository = repositories.get(metadata.getName());
+        EntityMetaData entityMetaData = repository.getEntityMetaData();
+        for (AttributeMetaData attr : metadata.getAttributes()) {
+            AttributeMetaData currentAttribute = entityMetaData.getAttribute(attr.getName());
+            if (currentAttribute != null) {
+                if (!currentAttribute.getDataType().equals(attr.getDataType())) {
+                    throw new MolgenisDataException("Changing type for existing attributes is not currently supported");
+                }
+            }
+            else if(!attr.isNillable())
+            {
+                throw new MolgenisDataException("Adding non-nillable attributes is not currently supported");
+            }else
+            {
+                addAttribute(metadata, attr);
+                DefaultEntityMetaData metaData = (DefaultEntityMetaData)repository.getEntityMetaData();
+                metaData.addAttributeMetaData(attr);
+                repository.addAttribute(attr);
+            }
+        }
+    }
 }

@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.AppConfig;
+import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
@@ -20,6 +21,8 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.SimpleTransactionStatus;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import static org.mockito.Mockito.mock;
 
 @ContextConfiguration(classes = AppConfig.class)
 public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
@@ -46,15 +49,18 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	MysqlRepositoryCollection store;
 
+    DataService dataService;
+
 	@Test
 	public void testValidationReport() throws IOException, InvalidFormatException
 	{
 		// open test source
 		File f = new File(getClass().getResource("/example_invalid.xlsx").getFile());
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
+        dataService = mock(DataService.class);
 
 		// create importer
-		EmxImportServiceImpl importer = new EmxImportServiceImpl();
+		EmxImportServiceImpl importer = new EmxImportServiceImpl(dataService);
 		importer.setRepositoryCollection(store);
 		importer.setPlatformTransactionManager(new SimplePlatformTransactionManager());
 
@@ -110,7 +116,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		Assert.assertEquals(source.getNumberOfSheets(), 4);
 		Assert.assertNotNull(source.getRepositoryByEntityName("attributes"));
 
-		EmxImportServiceImpl importer = new EmxImportServiceImpl();
+		EmxImportServiceImpl importer = new EmxImportServiceImpl(dataService);
 		importer.setRepositoryCollection(store);
 		importer.setPlatformTransactionManager(new SimplePlatformTransactionManager());
 

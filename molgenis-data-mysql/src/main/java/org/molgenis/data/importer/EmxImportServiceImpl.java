@@ -3,6 +3,7 @@ package org.molgenis.data.importer;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DatabaseAction;
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
@@ -61,10 +63,12 @@ public class EmxImportServiceImpl implements EmxImporterService
 
 	private MysqlRepositoryCollection store;
 	private TransactionTemplate transactionTemplate;
+	private DataService dataService;
 
-	public EmxImportServiceImpl()
+	public EmxImportServiceImpl(DataService dataService)
 	{
 		logger.debug("MEntityImportServiceImpl created");
+		this.dataService = dataService;
 	}
 
 	@Autowired
@@ -86,7 +90,19 @@ public class EmxImportServiceImpl implements EmxImporterService
 	{
 		if (store == null) throw new RuntimeException("store was not set");
 
-		Map<String, DefaultEntityMetaData> metadata = getEntityMetaData(source);
+		Map<String, DefaultEntityMetaData> metadata = new HashMap<String, DefaultEntityMetaData>();
+		if (source.getRepositoryByEntityName(ATTRIBUTES) != null)
+		{
+			metadata = getEntityMetaData(source);
+		}
+		else
+		{
+			for (String name : source.getEntityNames())
+			{
+				metadata.put(name, (DefaultEntityMetaData) dataService.getRepositoryByEntityName(name)
+						.getEntityMetaData());
+			}
+		}
 		Set<String> addedEntities = Sets.newLinkedHashSet();
 		// TODO altered entities (merge, see getEntityMetaData)
 
@@ -117,7 +133,19 @@ public class EmxImportServiceImpl implements EmxImporterService
 		EntitiesValidationReportImpl report = new EntitiesValidationReportImpl();
 
 		// compare the data sheets against metadata in store or imported file
-		Map<String, DefaultEntityMetaData> metaDataMap = getEntityMetaData(source);
+		Map<String, DefaultEntityMetaData> metaDataMap = new HashMap<String, DefaultEntityMetaData>();
+		if (source.getRepositoryByEntityName(ATTRIBUTES) != null)
+		{
+			metaDataMap = getEntityMetaData(source);
+		}
+		else
+		{
+			for (String name : source.getEntityNames())
+			{
+				metaDataMap.put(name, (DefaultEntityMetaData) dataService.getRepositoryByEntityName(name)
+						.getEntityMetaData());
+			}
+		}
 
 		for (String sheet : source.getEntityNames())
 			if (!ENTITIES.equals(sheet) && !ATTRIBUTES.equals(sheet))
@@ -351,9 +379,12 @@ public class EmxImportServiceImpl implements EmxImporterService
 							to = store.add(defaultEntityMetaData);
 							addedEntities.add(name);
 						}
+						else
+						{
+							store.update(defaultEntityMetaData);
+						}
 					}
 				}
-
 				// import data
 				for (String name : metadata.keySet())
 				{
