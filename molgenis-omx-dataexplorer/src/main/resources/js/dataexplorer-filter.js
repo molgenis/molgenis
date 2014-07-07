@@ -252,8 +252,8 @@
 				var attrs = {'name': name};
 				var attrsTrue = values && values[0] === 'true' ? $.extend({}, attrs, {'checked': 'checked'}) : attrs;
 				var attrsFalse = values && values[0] === 'false' ? $.extend({}, attrs, {'checked': 'checked'}) : attrs;
-				var inputTrue = createInput(attribute.fieldType, attrsTrue, true);
-				var inputFalse = createInput(attribute.fieldType, attrsFalse, false);
+				var inputTrue = createInput(attribute, attrsTrue, true);
+				var inputFalse = createInput(attribute, attrsFalse, false);
 				controls.append(inputTrue.addClass('inline')).append(inputFalse.addClass('inline'));
 				break;
 			case 'CATEGORICAL':
@@ -265,7 +265,7 @@
 					var attrs = {'name': name, 'id': name};
 					if(values && $.inArray(this[entityMeta.labelAttribute], values) > -1)
 						attrs.checked = 'checked';
-					controls.append(createInput(attribute.fieldType, attrs, this[entityMeta.labelAttribute], this[entityMeta.labelAttribute]));
+					controls.append(createInput(attribute, attrs, this[entityMeta.labelAttribute], this[entityMeta.labelAttribute]));
 				});
 				break;
 			case 'DATE':
@@ -273,8 +273,8 @@
 				var nameFrom = name + '-from', nameTo = name + '-to';
 				var valFrom = fromValue ? fromValue : undefined;
 				var valTo = toValue ? toValue : undefined;
-				var inputFrom = createInput(attribute.fieldType, {'name': nameFrom, 'placeholder': 'Start date'}, valFrom);
-				var inputTo = createInput(attribute.fieldType, {'name': nameTo, 'placeholder': 'End date'}, valTo);
+				var inputFrom = createInput(attribute, {'name': nameFrom, 'placeholder': 'Start date'}, valFrom);
+				var inputTo = createInput(attribute, {'name': nameTo, 'placeholder': 'End date'}, valTo);
 				controls.append($('<div class="control-group">').append(inputFrom)).append($('<div class="control-group">').append(inputTo));
 				break;
 			case 'DECIMAL':
@@ -295,8 +295,8 @@
 					var nameFrom = name + '-from', nameTo = name + '-to';
 					var labelFrom = $('<label class="horizontal-inline" for="' + nameFrom + '">From</label>');
 					var labelTo = $('<label class="horizontal-inline inbetween" for="' + nameTo + '">To</label>');
-					var inputFrom = createInput(attribute.fieldType, {'name': nameFrom, 'id': nameFrom}, values ? fromValue : undefined).addClass('input-small');
-					var inputTo = createInput(attribute.fieldType, {'name': nameTo, 'id': nameTo}, values ? toValue : undefined).addClass('input-small');
+					var inputFrom = createInput(attribute, {'name': nameFrom, 'id': nameFrom}, values ? fromValue : undefined).addClass('input-small');
+					var inputTo = createInput(attribute, {'name': nameTo, 'id': nameTo}, values ? toValue : undefined).addClass('input-small');
 					controls.addClass('form-inline').append(labelFrom).append(inputFrom).append(labelTo).append(inputTo);
 				}
 				break;
@@ -306,13 +306,20 @@
 			case 'STRING':
 			case 'TEXT':
 			case 'ENUM':
-				controls.append(createInput(attribute.fieldType, {'name': name, 'id': name}, values ? values[0] : undefined));
+				controls.append(createInput(attribute, {'name': name, 'id': name}, values ? values[0] : undefined));
 				break;
 			case 'MREF':
 			case 'XREF':
 				var operator = filter ? filter.operator : 'OR';
 				controls.addClass("xrefsearch");
-				controls.xrefsearch({attribute: attribute, values: values, operator: operator});
+				controls.xrefsearch({
+					attribute : attribute,
+					values : values,
+					operator : operator,
+					autofocus : 'autofocus',
+					isfilter : true,
+					width : '80%'
+				});
 				break;
 			case 'COMPOUND' :
 			case 'FILE':

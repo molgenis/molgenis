@@ -34,6 +34,25 @@
 	background-image: url("images/ui-icons_ffffff_256x240.png");
 }
 
+.molgenis-table tbody td:focus {
+	border: 2px solid gray;
+    border-radius: 7px;
+    outline: none;
+    box-shadow: 0 0 10px gray;
+}
+
+.molgenis-table tbody.editable td {
+	padding-bottom: 0px;
+	padding-top: 0px;
+}
+
+.molgenis-table tbody td.edited:not(:focus) {
+   	border: 2px solid #90ee90;
+    border-radius: 7px;
+    outline: none;
+    box-shadow: 0 0 10px #90ee90;
+}
+
 .molgenis-table-striped tbody>tr:nth-child(odd)>td,.molgenis-table-striped tbody>tr:nth-child(odd)>th {
     background-color: #ddd;
 }
@@ -54,4 +73,12 @@
 	margin-left: auto;
 	margin-right: auto;
 	width: 100%;
+}
+
+.molgenis-table .delete-row-btn {
+	cursor: pointer;
+}
+
+.molgenis-table input,select,div.input-append {
+	margin-bottom: 0px;
 }
