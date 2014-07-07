@@ -12,8 +12,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.csv.CsvRepository;
 import org.molgenis.data.processor.CellProcessor;
 
-import com.google.gdata.util.ServiceException;
-
 /**
  * Google spreadsheet repository that only exposes valid GAF list runs
  */
@@ -22,8 +20,7 @@ public class GafListFileRepository extends CsvRepository
 	private final GafListValidationReport report;
 
 	public GafListFileRepository(File tmpFile, @Nullable List<CellProcessor> cellProcessors, Character separator,
-			GafListValidationReport report)
-			throws IOException, ServiceException
+			GafListValidationReport report) throws IOException
 	{
 		super(tmpFile, null, separator);
 		this.report = report;
