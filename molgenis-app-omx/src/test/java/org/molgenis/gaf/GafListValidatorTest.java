@@ -14,13 +14,11 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.gaf.GafListValidator.GafListValidationReport;
 import org.molgenis.gaf.GafListValidatorTest.Config;
 import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.ObservableFeature;
@@ -44,8 +42,6 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 
 	@Autowired
 	private MolgenisSettings molgenisSettings;
-	private EntityMetaData entityMetaData;
-	private Repository repository;
 
 	@BeforeMethod
 	public void setUp()
@@ -53,10 +49,6 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 		reset(dataService);
 		reset(molgenisSettings);
 
-		repository = mock(Repository.class);
-
-		entityMetaData = mock(EntityMetaData.class);
-		when(repository.getEntityMetaData()).thenReturn(entityMetaData);
 		when(
 				molgenisSettings.getProperty(GafListValidator.GAF_LIST_SETTINGS_PREFIX
 						+ GafListValidator.COL_INTERNAL_SAMPLE_ID)).thenReturn("^[0-9]+$");
@@ -69,7 +61,7 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 				.thenReturn("^[a-zA-Z0-9_]+$");
 		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_SETTINGS_PREFIX + GafListValidator.COL_CONTACT))
 				.thenReturn(
-						"^([^<>@+0-9_,]+ <[a-zA-Z0-9_\\\\.]+@[a-zA-Z0-9_\\\\.]+>, )*[^<>@+0-9_,]+ <[a-zA-Z0-9_\\\\.]+@[a-zA-Z0-9_\\\\.]+>$");
+						"^([^<>@+0-9_,]+ <[a-zA-Z0-9_\\.]+@[a-zA-Z0-9_\\.]+>, )*[^<>@+0-9_,]+ <[a-zA-Z0-9_\\.]+@[a-zA-Z0-9_\\.]+>$");
 		when(
 				molgenisSettings.getProperty(GafListValidator.GAF_LIST_SETTINGS_PREFIX
 						+ GafListValidator.COL_SEQUENCING_START_DATE)).thenReturn("^[0-9]{6}$");
@@ -79,28 +71,17 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 				.thenReturn("^(([AB][A-Z0-9]{7}XX)|(A[A-Z0-9]{4}))$");
 		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_SETTINGS_PREFIX + GafListValidator.COL_LANE))
 				.thenReturn("^[1-8](,[1-8])*$");
-		when(
-				molgenisSettings.getProperty(GafListValidator.GAF_LIST_SETTINGS_PREFIX
-						+ GafListValidator.COL_BARCODE_MENU)).thenReturn(
-				"^(None)|(((GAF)|(RPI)|(AGI)|(MON)|(RTP)|(HP8))\\\\s[0-9]{2}\\\\s([ACGT]{6})([ATCG]{2})?)$");
+
+		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_SETTINGS_PREFIX + GafListValidator.COL_BARCODE_1))
+				.thenReturn("^(None)|(((GAF)|(RPI)|(AGI)|(MON)|(RTP)|(HP8))\\s[0-9]{2}\\s([ACGT]{6})([ATCG]{2})?)$");
+
 		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_SETTINGS_PREFIX + GafListValidator.COL_ARRAY_FILE))
-				.thenReturn("^[a-z]+//:[a-zA-Z0-9][a-zA-Z0-9\\\\.\\\\-_]+/[a-zA-Z0-9\\\\._]+$");
+				.thenReturn("^.*[\\/\\\\]{1}[a-zA-Z0-9\\._]+$");
 		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_SETTINGS_PREFIX + GafListValidator.COL_ARRAY_ID))
 				.thenReturn("^[1-9][0-9]*$");
-		when(
-				molgenisSettings.getProperty(GafListValidator.GAF_LIST_SETTINGS_PREFIX
-						+ GafListValidator.COL_DATA_SHIPPED_DATE)).thenReturn("^[0-9]{8}$");
-		when(
-				molgenisSettings.getProperty(GafListValidator.GAF_LIST_SETTINGS_PREFIX
-						+ GafListValidator.COL_DATA_SHIPPED_TO))
-				.thenReturn(
-						"^([^<>@+0-9_,]+( <[a-zA-Z0-9_\\\\.]+@[a-zA-Z0-9_\\\\.]+>)?, )*[^<>@+0-9_,]+( <[a-zA-Z0-9_\\\\.]+@[a-zA-Z0-9_\\\\.]+>)?$");
 
-		Query q = new QueryImpl().eq(ObservableFeature.IDENTIFIER, GafListValidator.COL_LAB_STATUS_PHASE);
 		ObservableFeature feature = mock(ObservableFeature.class);
-		when(dataService.findOne(ObservableFeature.ENTITY_NAME, q, ObservableFeature.class)).thenReturn(feature);
 		Category category1 = mock(Category.class);
-		when(category1.getValueCode()).thenReturn(GafListValidator.LAB_STATUS_PHASE_FINISHED_SUCCESSFULLY);
 		when(
 				dataService.findAll(Category.ENTITY_NAME, new QueryImpl().eq(Category.OBSERVABLEFEATURE, feature),
 						Category.class)).thenReturn(Arrays.asList(category1));
@@ -108,16 +89,10 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void validate_internalSampleId() throws IOException
+	public void validate() throws IOException
 	{
-		MapEntity entity0 = new MapEntity();
-		entity0.set(GafListValidator.COL_LAB_STATUS_PHASE, GafListValidator.LAB_STATUS_PHASE_FINISHED_SUCCESSFULLY);
-		entity0.set(GafListValidator.COL_INTERNAL_SAMPLE_ID, "123");
-
-		when(entityMetaData.getAttributes()).thenReturn(
-				Arrays.<AttributeMetaData> asList(new DefaultAttributeMetaData(GafListValidator.COL_LAB_STATUS_PHASE,
-						FieldTypeEnum.CATEGORICAL), new DefaultAttributeMetaData(
-						GafListValidator.COL_INTERNAL_SAMPLE_ID, FieldTypeEnum.STRING)));
+		Repository repository = this.getDefaultValidSettingRepositoryMock();
+		MapEntity entity0 = getDefaultValidMapEntityMock();
 		when(repository.iterator()).thenReturn(Arrays.<Entity> asList(entity0).iterator());
 		GafListValidationReport report = gafListValidator.validate(repository);
 		assertFalse(report.hasErrors());
@@ -126,75 +101,60 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void validate_internalSampleId_invalid() throws IOException
 	{
-		MapEntity entity0 = new MapEntity();
-		entity0.set(GafListValidator.COL_LAB_STATUS_PHASE, GafListValidator.LAB_STATUS_PHASE_FINISHED_SUCCESSFULLY);
-		entity0.set(GafListValidator.COL_INTERNAL_SAMPLE_ID, "abc");
-
-		when(entityMetaData.getAttributes()).thenReturn(
-				Arrays.<AttributeMetaData> asList(new DefaultAttributeMetaData(GafListValidator.COL_LAB_STATUS_PHASE,
-						FieldTypeEnum.CATEGORICAL), new DefaultAttributeMetaData(
-						GafListValidator.COL_INTERNAL_SAMPLE_ID, FieldTypeEnum.STRING)));
-		when(repository.iterator()).thenReturn(Arrays.<Entity> asList(entity0).iterator());
-		GafListValidationReport report = gafListValidator.validate(repository);
-		assertTrue(report.hasErrors());
-	}
-
-	@Test
-	public void validate_externalSampleId() throws IOException
-	{
-		MapEntity entity0 = new MapEntity();
-		entity0.set(GafListValidator.COL_LAB_STATUS_PHASE, GafListValidator.LAB_STATUS_PHASE_FINISHED_SUCCESSFULLY);
-		entity0.set(GafListValidator.COL_EXTERNAL_SAMPLE_ID, "123");
-		when(repository.getEntityMetaData()).thenReturn(entityMetaData);
-		when(entityMetaData.getAttributes()).thenReturn(
-				Arrays.<AttributeMetaData> asList(new DefaultAttributeMetaData(GafListValidator.COL_LAB_STATUS_PHASE,
-						FieldTypeEnum.CATEGORICAL), new DefaultAttributeMetaData(
-						GafListValidator.COL_EXTERNAL_SAMPLE_ID, FieldTypeEnum.STRING)));
-		when(repository.iterator()).thenReturn(Arrays.<Entity> asList(entity0).iterator());
-		GafListValidationReport report = gafListValidator.validate(repository);
-		assertFalse(report.hasErrors());
+		invalidTest(GafListValidator.COL_INTERNAL_SAMPLE_ID, "1+");
 	}
 
 	@Test
 	public void validate_externalSampleId_invalid() throws IOException
 	{
-		MapEntity entity0 = new MapEntity();
-		entity0.set(GafListValidator.COL_LAB_STATUS_PHASE, GafListValidator.LAB_STATUS_PHASE_FINISHED_SUCCESSFULLY);
-		entity0.set(GafListValidator.COL_EXTERNAL_SAMPLE_ID, "+++");
-		when(entityMetaData.getAttributes()).thenReturn(
-				Arrays.<AttributeMetaData> asList(new DefaultAttributeMetaData(GafListValidator.COL_LAB_STATUS_PHASE,
-						FieldTypeEnum.CATEGORICAL), new DefaultAttributeMetaData(
-						GafListValidator.COL_EXTERNAL_SAMPLE_ID, FieldTypeEnum.STRING)));
-		when(repository.iterator()).thenReturn(Arrays.<Entity> asList(entity0).iterator());
-		GafListValidationReport report = gafListValidator.validate(repository);
-		assertTrue(report.hasErrors());
-	}
-
-	@Test
-	public void validate_project() throws IOException
-	{
-		MapEntity entity0 = new MapEntity();
-		entity0.set(GafListValidator.COL_LAB_STATUS_PHASE, GafListValidator.LAB_STATUS_PHASE_FINISHED_SUCCESSFULLY);
-		entity0.set(GafListValidator.COL_PROJECT, "abc");
-		when(entityMetaData.getAttributes()).thenReturn(
-				Arrays.<AttributeMetaData> asList(new DefaultAttributeMetaData(GafListValidator.COL_LAB_STATUS_PHASE,
-						FieldTypeEnum.CATEGORICAL), new DefaultAttributeMetaData(GafListValidator.COL_PROJECT,
-						FieldTypeEnum.STRING)));
-		when(repository.iterator()).thenReturn(Arrays.<Entity> asList(entity0).iterator());
-		GafListValidationReport report = gafListValidator.validate(repository);
-		assertFalse(report.hasErrors());
+		invalidTest(GafListValidator.COL_EXTERNAL_SAMPLE_ID, "1aA_+");
 	}
 
 	@Test
 	public void validate_project_invalid() throws IOException
 	{
-		MapEntity entity0 = new MapEntity();
-		entity0.set(GafListValidator.COL_LAB_STATUS_PHASE, GafListValidator.LAB_STATUS_PHASE_FINISHED_SUCCESSFULLY);
-		entity0.set(GafListValidator.COL_PROJECT, "+++");
+		invalidTest(GafListValidator.COL_PROJECT, "1aA_+");
+	}
+
+	private Repository getDefaultValidSettingRepositoryMock()
+	{
+		Repository repository = mock(Repository.class);
+		EntityMetaData entityMetaData = mock(EntityMetaData.class);
+
 		when(entityMetaData.getAttributes()).thenReturn(
-				Arrays.<AttributeMetaData> asList(new DefaultAttributeMetaData(GafListValidator.COL_LAB_STATUS_PHASE,
-						FieldTypeEnum.CATEGORICAL), new DefaultAttributeMetaData(GafListValidator.COL_PROJECT,
+				Arrays.<AttributeMetaData> asList(new DefaultAttributeMetaData(GafListValidator.COL_INTERNAL_SAMPLE_ID,
+						FieldTypeEnum.STRING), new DefaultAttributeMetaData(GafListValidator.COL_EXTERNAL_SAMPLE_ID,
+						FieldTypeEnum.STRING), new DefaultAttributeMetaData(GafListValidator.COL_PROJECT,
+						FieldTypeEnum.STRING), new DefaultAttributeMetaData(GafListValidator.COL_BARCODE_1,
 						FieldTypeEnum.STRING)));
+
+		when(repository.getEntityMetaData()).thenReturn(entityMetaData);
+
+		return repository;
+	}
+	
+	/**
+	 * returns a MapEntity with valid values
+	 * 
+	 * @return MapEntity
+	 */
+	private MapEntity getDefaultValidMapEntityMock()
+	{
+		MapEntity entity0 = new MapEntity();
+		entity0.set(GafListValidator.COL_INTERNAL_SAMPLE_ID, "1");
+		entity0.set(GafListValidator.COL_EXTERNAL_SAMPLE_ID, "1aA_");
+		entity0.set(GafListValidator.COL_PROJECT, "1aA_");
+		entity0.set(GafListValidator.COL_BARCODE_1, "RPI 12 GCTAATCA");
+		return entity0;
+	}
+	
+	private void invalidTest(String nameColumn, String value) throws IOException
+	{
+		Repository repository = this.getDefaultValidSettingRepositoryMock();
+		MapEntity entity0 = getDefaultValidMapEntityMock();
+
+		entity0.set(nameColumn, value);
+
 		when(repository.iterator()).thenReturn(Arrays.<Entity> asList(entity0).iterator());
 		GafListValidationReport report = gafListValidator.validate(repository);
 		assertTrue(report.hasErrors());
