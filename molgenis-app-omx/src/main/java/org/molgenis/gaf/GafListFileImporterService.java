@@ -99,9 +99,9 @@ public class GafListFileImporterService
 			}
 		}
 
-		logger.info("start indexing");
+		logger.debug("start indexing");
 		dataSetIndexer.indexDataSets(Arrays.asList(dataSetId));
-		logger.info("finished indexing");
+		logger.debug("finished indexing");
 
 		return report;
 	}
