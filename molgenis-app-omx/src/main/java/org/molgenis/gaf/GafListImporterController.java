@@ -60,24 +60,22 @@ public class GafListImporterController extends MolgenisPluginController
 			ValueConverterException, MessagingException
 	{
 		final List<String> messages = new ArrayList<String>();
-
 		if (!csvFile.isEmpty())
 		{
-			this.gafListFileImporterService.createCsvRepository(csvFile, separator);
-			this.gafListFileImporterService.createValidationReport();
-			model.addAttribute("hasValidationError", this.gafListFileImporterService.hasValidationError());
-			model.addAttribute("validationReport", this.gafListFileImporterService.getValidationReportHtml());
-
 			try
 			{
-				String nameGafList = this.gafListFileImporterService.importValidatedGafList();
-				messages.add("Successfully imported! the new list name is: <input type=\"text\" value=\"" + nameGafList + "\">");
-				messages.add("The imported runs are: " + this.gafListFileImporterService.getReport().getValidRunIds());
+				GafListValidationReport gafListValidationReport = this.gafListFileImporterService.importGafList(
+						csvFile, separator);
+				
+				model.addAttribute("hasValidationError", gafListValidationReport.hasErrors());
+				model.addAttribute("validationReport", gafListValidationReport.toStringHtml());
+				messages.add("Successfully imported GAF list named: <b>" + gafListValidationReport.getDataSetName()
+						+ "</b>");
+				messages.add("Imported run id's are: <b>" + gafListValidationReport.getValidRunIds() + "</b>");
 
-				if (this.gafListFileImporterService.hasValidationError())
+				if (gafListValidationReport.hasErrors())
 				{
-					messages.add("Not imported runs id's: "
-							+ this.gafListFileImporterService.getReport().getInvalidRunIds());
+					messages.add("Not imported run id's: <b>" + gafListValidationReport.getInvalidRunIds() + "</b>");
 				}
 			}
 			catch (Exception e)

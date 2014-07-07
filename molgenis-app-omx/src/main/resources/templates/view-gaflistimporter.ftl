@@ -31,13 +31,13 @@
 			</table>
 		</div>
 		<div class="span8">
-			<h4>Import messages:</h4>
 			<#if messages?? == true>
+				<h4>Import messages:</h4>
 				<ul>
 				<#list messages as message>
-					<il>
+					<li>
 						<p>${message?if_exists}</p>
-					</il>
+					</li>
 				</#list>
 				</ul>
 			</#if>

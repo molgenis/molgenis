@@ -13,6 +13,7 @@ public class GafListValidationReport
 	private final List<String> validRunIds = new ArrayList<String>();
 	private final List<String> invalidRunIds = new ArrayList<String>();
 	private List<String> allRunIds = new ArrayList<String>();
+	private String dataSetName = null;
 
 	public GafListValidationReport()
 	{
@@ -111,12 +112,29 @@ public class GafListValidationReport
 		{
 			if (this.hasErrors(runId))
 			{
-				invalidRunIds.add(runId);
+				if (!invalidRunIds.contains(runId)) invalidRunIds.add(runId);
 			}
 			else
 			{
-				validRunIds.add(runId);
+				if (!validRunIds.contains(runId)) validRunIds.add(runId);
 			}
 		}
+	}
+
+	/**
+	 * @return the dataSetName
+	 */
+	public String getDataSetName()
+	{
+		return dataSetName;
+	}
+
+	/**
+	 * @param dataSetName
+	 *            the dataSetName to set
+	 */
+	public void setDataSetName(String dataSetName)
+	{
+		this.dataSetName = dataSetName;
 	}
 }

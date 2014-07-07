@@ -23,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.google.gdata.util.ServiceException;
+
 @Service
 public class GafListFileImporterService
 {
@@ -49,74 +51,21 @@ public class GafListFileImporterService
 	@Autowired
 	private EntityValidator entityValidator;
 
-	private GafListFileRepository gafListFileRepository;
-	private GafListValidationReport report;
-	private File tmpFile = null;
-	private Character separator = null;
 
-	public void createCsvRepository(MultipartFile csvFile, Character separator)
+	public GafListValidationReport importGafList(MultipartFile csvFile, Character separator)
+			throws IOException,
+			ServiceException
 	{
-		try
-		{	
-			this.tmpFile = copyDataToTempFile(csvFile);
-			this.separator = separator;
-			this.gafListFileRepository = new GafListFileRepository(tmpFile, null, separator, null);
-		}
-		catch (Exception e)
-		{
-			logger.error(e);
-		}
-	}
-
-	/**
-	 * Copy the data of a multipart file to a temporary file.
-	 * 
-	 * @param multipart
-	 * @return the representation of file and directory pathnames
-	 * @throws IllegalStateException
-	 * @throws IOException
-	 */
-	public File copyDataToTempFile(MultipartFile multipart) throws IllegalStateException, IOException
-	{
-		File upLoadedfile = new File(System.getProperty("java.io.tmpdir") + System.getProperty("file.separator")
-				+ multipart.getOriginalFilename());
-		upLoadedfile.createNewFile();
-		FileOutputStream fos = new FileOutputStream(upLoadedfile);
-		fos.write(multipart.getBytes());
-		fos.close();
-
-		return upLoadedfile;
-	}
-
-	public void createValidationReport()
-	{
-		try
-		{
-			this.report = gafListValidator.validate(this.gafListFileRepository);
-			this.gafListFileRepository = new GafListFileRepository(tmpFile, null, separator, this.report);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
-
-	public Boolean hasValidationError()
-	{
-		if (null == report) return null;
-		return this.report.hasErrors();
-	}
-
-	public String getValidationReportHtml()
-	{
-		if (null == report) return "No validation report available";
-		return report.toStringHtml();
-	}
-
-	public String importValidatedGafList()
-	{
+		File tmpFile = copyDataToTempFile(csvFile);
+		GafListFileRepository gafListFileRepositoryToCreateReport = new GafListFileRepository(tmpFile, null, separator,
+				null);
+		GafListValidationReport report = gafListValidator.validate(gafListFileRepositoryToCreateReport);
+		GafListFileRepository gafListFileRepositoryToImport = new GafListFileRepository(tmpFile, null, separator,
+				report);
+		
 		String dataSetIdentifier = UUID.randomUUID().toString().toLowerCase();
 		String dataSetName = generateGafListRepoName();
+		report.setDataSetName(dataSetName);
 		Object dataSetId;
 
 		try
@@ -135,13 +84,14 @@ public class GafListFileImporterService
 			repository.flush();
 			repository.clearCache();
 
-			dataService.add(dataSetIdentifier, this.gafListFileRepository);
+			dataService.add(dataSetIdentifier, gafListFileRepositoryToImport);
 		}
 		finally
 		{
 			try
 			{
-				this.gafListFileRepository.close();
+				gafListFileRepositoryToCreateReport.close();
+				gafListFileRepositoryToImport.close();
 			}
 			catch (IOException e)
 			{
@@ -153,18 +103,30 @@ public class GafListFileImporterService
 		dataSetIndexer.indexDataSets(Arrays.asList(dataSetId));
 		logger.info("finished indexing");
 
-		return dataSetName;
+		return report;
 	}
 
 	/**
-	 * @return the gafListFileRepository
+	 * Copy the data of a multipart file to a temporary file.
+	 * 
+	 * @param multipart
+	 * @return the representation of file and directory pathnames
+	 * @throws IllegalStateException
+	 * @throws IOException
 	 */
-	public GafListFileRepository getGafListFileRepository()
+	protected File copyDataToTempFile(MultipartFile multipart) throws IllegalStateException, IOException
 	{
-		return gafListFileRepository;
+		File upLoadedfile = new File(System.getProperty("java.io.tmpdir") + System.getProperty("file.separator")
+				+ multipart.getOriginalFilename());
+		upLoadedfile.createNewFile();
+		FileOutputStream fos = new FileOutputStream(upLoadedfile);
+		fos.write(multipart.getBytes());
+		fos.close();
+
+		return upLoadedfile;
 	}
 
-	public Protocol getGafListProtocolUsed()
+	protected Protocol getGafListProtocolUsed()
 	{
 		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME,
 				new QueryImpl().eq(Protocol.IDENTIFIER, PROTOCOL_IDENTIFIER_GAF_LIST), Protocol.class);
@@ -172,16 +134,8 @@ public class GafListFileImporterService
 		return protocol;
 	}
 
-	public final static String generateGafListRepoName()
+	protected final static String generateGafListRepoName()
 	{
 		return PREFIX_REPO_NAME + new SimpleDateFormat("yyyy-MM-dd HH:mm").format(Calendar.getInstance().getTime());
-	}
-
-	/**
-	 * @return the report
-	 */
-	public GafListValidationReport getReport()
-	{
-		return report;
 	}
 }
