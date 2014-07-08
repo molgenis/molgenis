@@ -65,6 +65,7 @@ public class EmxImportServiceImpl implements EmxImporterService
 	private TransactionTemplate transactionTemplate;
 	private DataService dataService;
 
+	@Autowired
 	public EmxImportServiceImpl(DataService dataService)
 	{
 		logger.debug("MEntityImportServiceImpl created");
