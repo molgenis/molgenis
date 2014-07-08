@@ -2,6 +2,7 @@ package org.molgenis.util;
 
 import javax.mail.internet.MimeMessage;
 
+import org.apache.log4j.Logger;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
@@ -13,6 +14,8 @@ import org.springframework.scheduling.annotation.Async;
  */
 public class AsyncJavaMailSender extends JavaMailSenderImpl
 {
+	private static final Logger logger = Logger.getLogger(AsyncJavaMailSender.class);
+
 	@Override
 	@Async
 	public void send(MimeMessage mimeMessage) throws MailException
@@ -45,7 +48,14 @@ public class AsyncJavaMailSender extends JavaMailSenderImpl
 	@Async
 	public void send(SimpleMailMessage simpleMessage) throws MailException
 	{
-		super.send(simpleMessage);
+		try
+		{
+			super.send(simpleMessage);
+		}
+		catch (Exception e)
+		{
+			logger.error("Error sending e-mail.", e);
+		}
 	}
 
 	@Override
