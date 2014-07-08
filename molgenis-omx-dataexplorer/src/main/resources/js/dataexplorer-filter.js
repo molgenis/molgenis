@@ -164,7 +164,7 @@
 	 */
 	function createComplexFilterControls(attribute, filter, addLabel) 
 	{		
-		var container = createComplexFilterControlsContainer(attribute, filter, addLabel);		
+		var container = createComplexFilterControlsContainer(attribute, filter, addLabel);
 		if(filter){
 			if(filter.isType('complex')){
 				$.each(filter.getFilters(), function(index, value){
