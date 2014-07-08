@@ -146,26 +146,39 @@
 			attrs.autofocus = options.autofocus;
 		}
         if (options.isfilter && attributeMetaData.fieldType === 'MREF') {
-            var checkbox = $('<input type="checkbox" class="exclude">');//Checkbox is only for jquery-switch, it should not be included in the query
-    		checkbox.attr('checked', options.operator === 'OR');
-    		container.prepend(checkbox);
-    		
-    		var andOrSwitch = checkbox.bootstrapSwitch({
-    			onText: 'OR',
-    			offText: 'AND',
-    			onSwitchChange: function(event, state) {
-    				var operator = state ? 'OR' : 'AND';
-    				operatorInput.val(operator);
-    			}
-    		});
-    		
+//            var checkbox = $('<input type="checkbox" class="exclude">');//Checkbox is only for jquery-switch, it should not be included in the query
+//    		checkbox.attr('checked', options.operator === 'OR');
+//    		container.prepend(checkbox);
+//    		
+//    		var andOrSwitch = checkbox.bootstrapSwitch({
+//    			onText: 'OR',
+//    			offText: 'AND',
+//    			onSwitchChange: function(event, state) {
+//    				var operator = state ? 'OR' : 'AND';
+//    				operatorInput.val(operator);
+//    			}
+//    		});
+//    		
     		var operatorInput = $('<input type="hidden" class="operator top" >');
     		operatorInput.val(options.operator);
-    		andOrSwitch.append(operatorInput);
+//    		andOrSwitch.append(operatorInput);
+    		
+    		/// create dropdown
+    		var isAnd = options.operator === 'AND';
+    		var dropdown = $('<div class="btn-group"><button class="btn dropdown-toggle" data-toggle="dropdown">' + (isAnd ? 'AND' : 'OR&nbsp;&nbsp;') + ' <span class="caret"></span></button><ul class="dropdown-menu"><li><a data-value="OR">OR&nbsp;&nbsp;</a></li><li><a data-value="AND">AND</a></li></div>');
+    		$.each(dropdown.find('.dropdown-menu li a'), function(index, element){
+    			$(element).click(function(){
+    				console.log($(this).attr('data-value'));
+    				operatorInput.val($(this).attr('data-value'));
+    				dropdown.find('button:first').html($(this).text() + ' <span class="caret"></span>');
+    			});
+    		});
+    		
+    		container.prepend(dropdown);
         }
 		
 		var element = createInput(attributeMetaData, attrs, options.values);
-		container.prepend(element);
+		container.append(element);
 		createSelect2(container, attributeMetaData, options);
 	}
 	
