@@ -9,18 +9,21 @@ import java.util.Calendar;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
+import org.molgenis.data.AggregateableCrudRepositorySecurityDecorator;
 import org.molgenis.data.DataService;
-import org.molgenis.data.csv.CsvRepository;
+import org.molgenis.data.omx.OmxRepository;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.gaf.GafListValidator.GafListValidationReport;
-import org.molgenis.googlespreadsheet.GoogleSpreadsheetRepository.Visibility;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.search.DataSetsIndexer;
+import org.molgenis.search.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.google.gdata.util.ServiceException;
 
 @Service
 public class GafListFileImporterService
@@ -28,6 +31,7 @@ public class GafListFileImporterService
 	private static final Logger logger = Logger.getLogger(GafListFileImporterService.class);
 
 	private static final String PROTOCOL_IDENTIFIER_GAF_LIST = "gaf_list_protocol";
+	private static final String PREFIX_REPO_NAME = "GAF list ";
 
 	@Autowired
 	private MolgenisSettings molgenisSettings;
@@ -41,101 +45,97 @@ public class GafListFileImporterService
 	@Autowired
 	private DataService dataService;
 
-	private CsvRepository csvRepo;
-	private GafListValidationReport report;
+	@Autowired
+	private SearchService searchService;
 
-	public void createCsvRepo(MultipartFile csvFile, Character separator)
+	@Autowired
+	private EntityValidator entityValidator;
+
+
+	public GafListValidationReport importGafList(MultipartFile csvFile, Character separator)
+			throws IOException,
+			ServiceException
 	{
+		File tmpFile = copyDataToTempFile(csvFile);
+		GafListFileRepository gafListFileRepositoryToCreateReport = new GafListFileRepository(tmpFile, null, separator,
+				null);
+		GafListValidationReport report = gafListValidator.validate(gafListFileRepositoryToCreateReport);
+		GafListFileRepository gafListFileRepositoryToImport = new GafListFileRepository(tmpFile, null, separator,
+				report);
+		
+		String dataSetIdentifier = UUID.randomUUID().toString().toLowerCase();
+		String dataSetName = generateGafListRepoName();
+		report.setDataSetName(dataSetName);
+		Object dataSetId;
+
 		try
 		{
-			File tmpFile = multipartToFile(csvFile);
-			this.setCSVRepository(tmpFile, separator);
+			DataSet dataSet = new DataSet();
+			dataSet.set(DataSet.NAME, dataSetName);
+			dataSet.set(DataSet.IDENTIFIER, dataSetIdentifier);
+			dataSet.set(DataSet.PROTOCOLUSED, getGafListProtocolUsed());
+			dataService.add(DataSet.ENTITY_NAME, dataSet);
+			dataSetId = dataSet.getId();
+
+			AggregateableCrudRepositorySecurityDecorator repository = new AggregateableCrudRepositorySecurityDecorator(
+					new OmxRepository(dataService, searchService, dataSetIdentifier, entityValidator));
+			dataService.addRepository(repository);
+
+			repository.flush();
+			repository.clearCache();
+
+			dataService.add(dataSetIdentifier, gafListFileRepositoryToImport);
 		}
-		catch (Exception e)
+		finally
 		{
-			logger.error(e);
+			try
+			{
+				gafListFileRepositoryToCreateReport.close();
+				gafListFileRepositoryToImport.close();
+			}
+			catch (IOException e)
+			{
+				logger.error(e);
+			}
 		}
+
+		logger.debug("start indexing");
+		dataSetIndexer.indexDataSets(Arrays.asList(dataSetId));
+		logger.debug("finished indexing");
+
+		return report;
 	}
 
-	public File multipartToFile(MultipartFile multipart) throws IllegalStateException, IOException
+	/**
+	 * Copy the data of a multipart file to a temporary file.
+	 * 
+	 * @param multipart
+	 * @return the representation of file and directory pathnames
+	 * @throws IllegalStateException
+	 * @throws IOException
+	 */
+	protected File copyDataToTempFile(MultipartFile multipart) throws IllegalStateException, IOException
 	{
 		File upLoadedfile = new File(System.getProperty("java.io.tmpdir") + System.getProperty("file.separator")
 				+ multipart.getOriginalFilename());
 		upLoadedfile.createNewFile();
 		FileOutputStream fos = new FileOutputStream(upLoadedfile);
 		fos.write(multipart.getBytes());
-		fos.close(); // setting the value of fileUploaded variable
+		fos.close();
 
 		return upLoadedfile;
 	}
 
-	public void setCSVRepository(File f, Character separator)
+	protected Protocol getGafListProtocolUsed()
 	{
-		this.csvRepo = new CsvRepository(f, null, separator);
+		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME,
+				new QueryImpl().eq(Protocol.IDENTIFIER, PROTOCOL_IDENTIFIER_GAF_LIST), Protocol.class);
+
+		return protocol;
 	}
 
-	public void createValidationReport()
+	protected final static String generateGafListRepoName()
 	{
-		try
-		{
-			this.report = gafListValidator.validate(this.csvRepo);
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
-	}
-
-	public Boolean hasValidationError()
-	{
-		if (null == report) return null;
-		return this.report.hasErrors();
-	}
-
-	public String getValidationReportHtml()
-	{
-		if (null == report) return "No validation report available";
-		return report.toStringHtml();
-	}
-
-	public void importValidatedGafList()
-	{
-		Object dataSetId;
-//		GafListRepository gafListRepository = new GafListRepository(service, GAF_SHEET_ID, GAF_WORKBOOK_ID,
-//				Visibility.PRIVATE, report);
-		try
-		{
-			logger.debug("importing valid gaf list runs ...");
-			String dataSetIdentifier = UUID.randomUUID().toString();
-
-			Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME,
-					new QueryImpl().eq(Protocol.IDENTIFIER, PROTOCOL_IDENTIFIER_GAF_LIST), Protocol.class);
-			DataSet dataSet = new DataSet();
-			dataSet.setIdentifier(dataSetIdentifier);
-			String dateStr = new SimpleDateFormat("yyyy-MM-dd HH:mm").format(Calendar.getInstance().getTime());
-			dataSet.setName("GAF list " + dateStr);
-			dataSet.setProtocolUsed(protocol);
-			dataService.add(DataSet.ENTITY_NAME, dataSet);
-//			dataService.add(dataSetIdentifier, this.csvRepo);
-			dataSetId = dataSet.getId();
-			logger.debug("finished importing valid gaf list runs");
-		}
-		finally
-		{
-			try
-			{
-				this.csvRepo.close();
-			}
-			catch (IOException e)
-			{
-				e.printStackTrace();
-			}
-		}
-		logger.debug("indexing new gaf list data set ...");
-		
-		dataSetIndexer.indexDataSets(Arrays.asList(dataSetId));
-		logger.debug("finished indexing new gaf list data set");
-
-		logger.info("finished scheduled gaf list import task");
+		return PREFIX_REPO_NAME + new SimpleDateFormat("yyyy-MM-dd HH:mm").format(Calendar.getInstance().getTime());
 	}
 }
