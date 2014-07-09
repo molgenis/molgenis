@@ -1,14 +1,12 @@
 package org.molgenis.data.mysql;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.fail;
-
 import java.util.Arrays;
 
+import com.google.common.collect.Iterables;
 import org.molgenis.AppConfig;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -18,6 +16,8 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = AppConfig.class)
 public class MysqlUpdateInternalTest extends AbstractTestNGSpringContextTests
@@ -70,6 +70,33 @@ public class MysqlUpdateInternalTest extends AbstractTestNGSpringContextTests
 			// expected
 			assertEquals(repo.count(), 1);
 		}
+	}
+
+	@Test
+	public void testUpdateMetaData()
+	{
+		Entity entity = new MapEntity();
+		entity.set("id", "123");
+		entity.set("name", "piet");
+
+		repo.updateInternal(Arrays.asList(entity), DatabaseAction.ADD);
+		assertEquals(repo.count(), 1);
+		assertNull(repo.getEntityMetaData().getAttribute("extra"));
+
+		DefaultEntityMetaData meta = new DefaultEntityMetaData("Person");
+		meta.addAttribute("id").setIdAttribute(true).setNillable(false);
+		meta.addAttribute("name");
+		meta.addAttribute("extra");
+		repositoryCollection.update(meta);
+
+		Entity entity2 = new MapEntity();
+		entity2.set("id", "1234");
+		entity2.set("name", "klaas");
+		entity2.set("extra", "extra");
+
+		repo.updateInternal(Arrays.asList(entity2), DatabaseAction.ADD);
+		assertEquals(repo.count(), 2);
+		assertNotNull(repo.getEntityMetaData().getAttribute("extra"));
 	}
 
 	@Test

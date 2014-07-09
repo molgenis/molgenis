@@ -60,48 +60,52 @@ public class GafListFileImporterService
 		GafListFileRepository gafListFileRepositoryToCreateReport = new GafListFileRepository(tmpFile, null, separator,
 				null);
 		GafListValidationReport report = gafListValidator.validate(gafListFileRepositoryToCreateReport);
-		GafListFileRepository gafListFileRepositoryToImport = new GafListFileRepository(tmpFile, null, separator,
-				report);
-		
-		String dataSetIdentifier = UUID.randomUUID().toString().toLowerCase();
-		String dataSetName = generateGafListRepoName();
-		report.setDataSetName(dataSetName);
-		Object dataSetId;
 
-		try
+		if (!report.getValidRunIds().isEmpty())
 		{
-			DataSet dataSet = new DataSet();
-			dataSet.set(DataSet.NAME, dataSetName);
-			dataSet.set(DataSet.IDENTIFIER, dataSetIdentifier);
-			dataSet.set(DataSet.PROTOCOLUSED, getGafListProtocolUsed());
-			dataService.add(DataSet.ENTITY_NAME, dataSet);
-			dataSetId = dataSet.getId();
+			GafListFileRepository gafListFileRepositoryToImport = new GafListFileRepository(tmpFile, null, separator,
+					report);
 
-			AggregateableCrudRepositorySecurityDecorator repository = new AggregateableCrudRepositorySecurityDecorator(
-					new OmxRepository(dataService, searchService, dataSetIdentifier, entityValidator));
-			dataService.addRepository(repository);
+			String dataSetIdentifier = UUID.randomUUID().toString().toLowerCase();
+			String dataSetName = generateGafListRepoName();
+			report.setDataSetName(dataSetName);
+			Object dataSetId;
 
-			repository.flush();
-			repository.clearCache();
-
-			dataService.add(dataSetIdentifier, gafListFileRepositoryToImport);
-		}
-		finally
-		{
 			try
 			{
-				gafListFileRepositoryToCreateReport.close();
-				gafListFileRepositoryToImport.close();
-			}
-			catch (IOException e)
-			{
-				logger.error(e);
-			}
-		}
+				DataSet dataSet = new DataSet();
+				dataSet.set(DataSet.NAME, dataSetName);
+				dataSet.set(DataSet.IDENTIFIER, dataSetIdentifier);
+				dataSet.set(DataSet.PROTOCOLUSED, getGafListProtocolUsed());
+				dataService.add(DataSet.ENTITY_NAME, dataSet);
+				dataSetId = dataSet.getId();
 
-		logger.debug("start indexing");
-		dataSetIndexer.indexDataSets(Arrays.asList(dataSetId));
-		logger.debug("finished indexing");
+				AggregateableCrudRepositorySecurityDecorator repository = new AggregateableCrudRepositorySecurityDecorator(
+						new OmxRepository(dataService, searchService, dataSetIdentifier, entityValidator));
+				dataService.addRepository(repository);
+
+				repository.flush();
+				repository.clearCache();
+
+				dataService.add(dataSetIdentifier, gafListFileRepositoryToImport);
+			}
+			finally
+			{
+				try
+				{
+					gafListFileRepositoryToCreateReport.close();
+					gafListFileRepositoryToImport.close();
+				}
+				catch (IOException e)
+				{
+					logger.error(e);
+				}
+			}
+
+			logger.debug("start indexing");
+			dataSetIndexer.indexDataSets(Arrays.asList(dataSetId));
+			logger.debug("finished indexing");
+		}
 
 		return report;
 	}
