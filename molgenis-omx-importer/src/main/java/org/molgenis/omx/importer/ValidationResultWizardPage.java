@@ -11,9 +11,10 @@ import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.RepositoryDecorator;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.importer.EmxImporterService;
 import org.molgenis.data.mysql.MysqlRepository;
-import org.molgenis.data.RepositoryDecorator;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
@@ -93,19 +94,27 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 					boolean isEmxEntity = false;
 					for (String name : repositoryCollection.getEntityNames())
 					{
-						Repository repository = dataService.getRepositoryByEntityName(name);
-						String repositoryClassName;
-						if (repository instanceof RepositoryDecorator)
+						try
 						{
-							repositoryClassName = ((RepositoryDecorator) repository).getRepositoryClass();
+							Repository repository = dataService.getRepositoryByEntityName(name);
+
+							String repositoryClassName;
+							if (repository instanceof RepositoryDecorator)
+							{
+								repositoryClassName = ((RepositoryDecorator) repository).getRepositoryClass();
+							}
+							else
+							{
+								repositoryClassName = repository.getClass().getName();
+							}
+							if (repositoryClassName.equals(MysqlRepository.class.getSimpleName()))
+							{
+								isEmxEntity = true;
+							}
 						}
-						else
+						catch (UnknownEntityException e)
 						{
-							repositoryClassName = repository.getClass().getName();
-						}
-						if (repositoryClassName.equals(MysqlRepository.class.getSimpleName()))
-						{
-							isEmxEntity = true;
+							// Entity not yet known
 						}
 					}
 					// EMX entity: import to MySQL
