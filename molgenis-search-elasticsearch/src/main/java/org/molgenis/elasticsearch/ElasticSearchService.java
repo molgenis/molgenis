@@ -111,6 +111,9 @@ public class ElasticSearchService implements SearchService
 		return hit;
 	}
 
+	// TODO this method is only used by BiobankConnect and should be removed in
+	// the future
+	@Deprecated
 	public SearchResult multiSearch(SearchType searchType, MultiSearchRequest request)
 	{
 
@@ -140,7 +143,7 @@ public class ElasticSearchService implements SearchService
 			LOG.debug("SearchResponse:" + response);
 		}
 
-		return responseParser.parseSearchResponse(response);
+		return responseParser.parseSearchResponse(response, null);
 	}
 
 	private SearchResult search(SearchType searchType, SearchRequest request)
@@ -170,7 +173,7 @@ public class ElasticSearchService implements SearchService
 			LOG.debug("SearchResponse:" + response);
 		}
 
-		return responseParser.parseSearchResponse(response);
+		return responseParser.parseSearchResponse(response, entityMetaData);
 	}
 
 	@Override
@@ -197,7 +200,7 @@ public class ElasticSearchService implements SearchService
 		deleteDocumentsByType(repository.getName());
 
 		LOG.info("Going to insert documents of type [" + repository.getName() + "]");
-		IndexRequestGenerator requestGenerator = new IndexRequestGenerator(client, indexName);
+		IndexRequestGenerator requestGenerator = new IndexRequestGenerator(client, indexName, dataService);
 		Iterable<BulkRequestBuilder> requests = requestGenerator.buildIndexRequest(repository);
 		for (BulkRequestBuilder request : requests)
 		{
@@ -295,7 +298,7 @@ public class ElasticSearchService implements SearchService
 		}
 
 		LOG.info("Going to insert documents of type [" + repository.getName() + "]");
-		IndexRequestGenerator requestGenerator = new IndexRequestGenerator(client, indexName);
+		IndexRequestGenerator requestGenerator = new IndexRequestGenerator(client, indexName, dataService);
 		Iterable<BulkRequestBuilder> requests = requestGenerator.buildIndexRequest(repository);
 		for (BulkRequestBuilder request : requests)
 		{

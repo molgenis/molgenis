@@ -95,7 +95,6 @@ public class SearchRequestGenerator
 		if (StringUtils.isNotBlank(aggregateFieldName1) || StringUtils.isNotBlank(aggregateFieldName2))
 		{
 			searchRequestBuilder.setSize(0);
-			// searchRequestBuilder.setSize(Integer.MAX_VALUE);
 
 			TermsBuilder termsBuilder;
 			if (StringUtils.isNotBlank(aggregateFieldName1) && StringUtils.isNotBlank(aggregateFieldName2))
