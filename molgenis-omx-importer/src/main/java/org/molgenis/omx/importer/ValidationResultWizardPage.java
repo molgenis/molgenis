@@ -11,7 +11,10 @@ import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.RepositoryDecorator;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.importer.EmxImporterService;
+import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
@@ -79,49 +82,89 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 				// emd based import
 				if (repositoryCollection.getRepositoryByEntityName("attributes") != null)
 				{
+					// if any of the entities is EMX than use the EMX importer, else assume JPA
+					// we do not support "mixed import" of JPA and EMX at the moment
+
 					EntityImportReport importReport = emxImporterService.doImport(repositoryCollection, entityDbAction);
 					importWizard.setImportResult(importReport);
 				}
-				// omx based import
 				else
 				{
-
-					EntityImportReport importReport = omxImporterService.doImport(repositoryCollection, entityDbAction);
-					importWizard.setImportResult(importReport);
-
-					// publish dataset imported event(s)
-					Iterable<String> entities = repositoryCollection.getEntityNames();
-					for (String entityName : entities)
+					// check if the entity already exists in the mySQL repository
+					boolean isEmxEntity = false;
+					for (String name : repositoryCollection.getEntityNames())
 					{
-						if (entityName.startsWith(OmxImporterService.DATASET_SHEET_PREFIX))
+						try
 						{
-							// Import DataSet sheet, create new OmxRepository
-							String dataSetIdentifier = entityName.substring(OmxImporterService.DATASET_SHEET_PREFIX
-									.length());
-							DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME,
-									new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier), DataSet.class);
-							ApplicationContextProvider.getApplicationContext().publishEvent(
-									new EntityImportedEvent(this, DataSet.ENTITY_NAME, dataSet.getId()));
-						}
-						if (Protocol.ENTITY_NAME.equalsIgnoreCase(entityName))
-						{
-							Repository repo = repositoryCollection.getRepositoryByEntityName("protocol");
+							Repository repository = dataService.getRepositoryByEntityName(name);
 
-							for (Protocol protocol : repo.iterator(Protocol.class))
+							String repositoryClassName;
+							if (repository instanceof RepositoryDecorator)
 							{
-								if (protocol.getRoot())
+								repositoryClassName = ((RepositoryDecorator) repository).getRepositoryClass();
+							}
+							else
+							{
+								repositoryClassName = repository.getClass().getName();
+							}
+							if (repositoryClassName.equals(MysqlRepository.class.getSimpleName()))
+							{
+								isEmxEntity = true;
+							}
+						}
+						catch (UnknownEntityException e)
+						{
+							// Entity not yet known
+						}
+					}
+					// EMX entity: import to MySQL
+					if (isEmxEntity)
+					{
+						EntityImportReport importReport = emxImporterService.doImport(repositoryCollection,
+								entityDbAction);
+						importWizard.setImportResult(importReport);
+					}
+					// no attributes tab and entity not available in MySQL -> use omx importer to import as OMX of JPA
+					else
+					{
+						EntityImportReport importReport = omxImporterService.doImport(repositoryCollection,
+								entityDbAction);
+						importWizard.setImportResult(importReport);
+
+						// publish dataset imported event(s)
+						Iterable<String> entities = repositoryCollection.getEntityNames();
+						for (String entityName : entities)
+						{
+							if (entityName.startsWith(OmxImporterService.DATASET_SHEET_PREFIX))
+							{
+								// Import DataSet sheet, create new OmxRepository
+								String dataSetIdentifier = entityName.substring(OmxImporterService.DATASET_SHEET_PREFIX
+										.length());
+								DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME,
+										new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier), DataSet.class);
+								ApplicationContextProvider.getApplicationContext().publishEvent(
+										new EntityImportedEvent(this, DataSet.ENTITY_NAME, dataSet.getId()));
+							}
+							if (Protocol.ENTITY_NAME.equalsIgnoreCase(entityName))
+							{
+								Repository repo = repositoryCollection.getRepositoryByEntityName("protocol");
+
+								for (Protocol protocol : repo.iterator(Protocol.class))
 								{
-									Protocol rootProtocol = dataService.findOne(Protocol.ENTITY_NAME,
-											new QueryImpl().eq(Protocol.IDENTIFIER, protocol.getIdentifier()),
-											Protocol.class);
-									ApplicationContextProvider.getApplicationContext().publishEvent(
-											new EntityImportedEvent(this, Protocol.ENTITY_NAME, rootProtocol.getId()));
+									if (protocol.getRoot())
+									{
+										Protocol rootProtocol = dataService.findOne(Protocol.ENTITY_NAME,
+												new QueryImpl().eq(Protocol.IDENTIFIER, protocol.getIdentifier()),
+												Protocol.class);
+										ApplicationContextProvider.getApplicationContext().publishEvent(
+												new EntityImportedEvent(this, Protocol.ENTITY_NAME, rootProtocol
+														.getId()));
+									}
 								}
 							}
 						}
 					}
 				}
-
 				return "File successfully imported.";
 			}
 			catch (MolgenisValidationException e)
