@@ -94,7 +94,7 @@ public class GafListValidator
 		COL_PLATES_IN_STOCK__DNA_SEQUENCING = "Plates in stock - RNA sequencing";
 		COL_REJECTED_FOR_PROCESSING = "Rejected for processing";
 		COL_PLATES_IN_STOCK__DNA_SEQUENCING__WHOLE_GENOME_CAPTURING = "Plates in stock - DNA sequencing (whole genome / capturing)";
-		COL_BARCODE_2 = "Barcode 2 ";
+		COL_BARCODE_2 = "Barcode 2";
 		COL_BARCODE = "barcode";
 		COL_BARCODE_TYPE = "barcodeType";
 
