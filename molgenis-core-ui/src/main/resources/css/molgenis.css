@@ -208,3 +208,25 @@ label.horizontal-inline.inbetween {
 .form-horizontal .control-group {
 	margin-bottom: 10px;
 }
+
+/* Duplicate bootstrap css because datepicker just makes all ad-on buttons a calendar button and allso want a delete button */
+.add-on-workaround {
+	margin-left:-1px;
+	border-bottom-left-radius:0;
+  	border-bottom-right-radius:0;
+  	border-top-left-radius:0;
+  	border-top-right-radius:0;
+  	vertical-align:top;
+  	background-color:#EEEEEE;
+  	border:1px solid #CCCCCC;
+  	display:inline-block;
+  	font-size:14px;
+ 	font-weight:normal;
+  	height:20px;
+  	line-height:20px;
+  	min-width:16px;
+ 	padding:4px 5px;
+  	text-align:center;
+  	text-shadow:#FFFFFF 0 1px 0;
+  	width:auto;
+}
