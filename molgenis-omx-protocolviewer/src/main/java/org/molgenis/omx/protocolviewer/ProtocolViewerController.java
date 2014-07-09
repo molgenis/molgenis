@@ -104,11 +104,10 @@ public class ProtocolViewerController extends MolgenisPluginController
 	// TODO change to catalogId/selection
 	@RequestMapping(value = "/selection/{catalogId}", method = GET)
 	@ResponseBody
-	public SelectedItemsResponse getSelection(@PathVariable
-	Integer catalogId, @RequestParam(required = false)
-	Integer start, @RequestParam(required = false)
-	Integer end, @RequestParam(value = "excludes[]", required = false)
-	String[] excludedItems) throws UnknownStudyDefinitionException, UnknownCatalogException
+	public SelectedItemsResponse getSelection(@PathVariable Integer catalogId,
+			@RequestParam(required = false) Integer start, @RequestParam(required = false) Integer end,
+			@RequestParam(value = "excludes[]", required = false) String[] excludedItems)
+			throws UnknownStudyDefinitionException, UnknownCatalogException
 	{
 		Integer total;
 		List<SelectedItemResponse> selectedFeatureUris;
@@ -124,7 +123,16 @@ public class ProtocolViewerController extends MolgenisPluginController
 				// exclude specific items
 				if (excludedItems != null)
 				{
-					final Set<String> excludedItemsSet = new HashSet<String>(Arrays.asList(excludedItems));
+					List<String> idList = Lists.transform(Arrays.asList(excludedItems), new Function<String, String>()
+					{
+						@Override
+						public String apply(String id)
+						{
+							return id.substring(id.lastIndexOf('/') + 1);
+						}
+					});
+
+					final Set<String> excludedItemsSet = new HashSet<String>(idList);
 					catalogItems = Lists.newArrayList(Iterables.filter(catalogItems, new Predicate<CatalogItem>()
 					{
 						@Override
@@ -190,8 +198,8 @@ public class ProtocolViewerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/download/{catalogId}", method = GET)
-	public void downloadSelection(HttpServletResponse response, @PathVariable
-	Integer catalogId) throws IOException, UnknownCatalogException
+	public void downloadSelection(HttpServletResponse response, @PathVariable Integer catalogId) throws IOException,
+			UnknownCatalogException
 	{
 		if (!getEnableDownloadAction()) throw new MolgenisDataAccessException("Action not allowed");
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH.mm");
@@ -207,27 +215,28 @@ public class ProtocolViewerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/cart/add/{catalogId}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
-	public void addToCart(@Valid
-	@RequestBody
-	CartUpdateRequest cartUpdateRequest, @PathVariable
-	Integer catalogId) throws UnknownCatalogException, UnknownStudyDefinitionException
+	public void addToCart(@Valid @RequestBody CartUpdateRequest cartUpdateRequest, @PathVariable Integer catalogId)
+			throws UnknownCatalogException, UnknownStudyDefinitionException
 	{
 		if (!getEnableOrderAction()) throw new MolgenisDataAccessException("Action not allowed");
-		protocolViewerService
-				.addToStudyDefinitionDraftForCurrentUser(cartUpdateRequest.getHref(), catalogId.toString());
+		for (String item : cartUpdateRequest.getHref())
+		{
+			protocolViewerService.addToStudyDefinitionDraftForCurrentUser(item, catalogId.toString());
+		}
 	}
 
 	@RequestMapping(value = "/cart/remove/{catalogId}", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
-	public void removeFromCart(@Valid
-	@RequestBody
-	CartUpdateRequest cartUpdateRequest, @PathVariable
-	Integer catalogId) throws UnknownCatalogException, UnknownStudyDefinitionException
+	public void removeFromCart(@Valid @RequestBody CartUpdateRequest cartUpdateRequest, @PathVariable Integer catalogId)
+			throws UnknownCatalogException, UnknownStudyDefinitionException
 	{
 		if (!getEnableOrderAction()) throw new MolgenisDataAccessException("Action not allowed");
 		logger.debug("remove from cart: " + cartUpdateRequest.getHref());
-		protocolViewerService.removeFromStudyDefinitionDraftForCurrentUser(cartUpdateRequest.getHref(),
-				catalogId.toString());
+		for (String item : cartUpdateRequest.getHref())
+		{
+			protocolViewerService.removeFromStudyDefinitionDraftForCurrentUser(item, catalogId.toString());
+
+		}
 	}
 
 	@RequestMapping(value = "/order", method = RequestMethod.GET)
@@ -241,10 +250,8 @@ public class ProtocolViewerController extends MolgenisPluginController
 	// ModelAttribute
 	@RequestMapping(value = "/order", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void orderData(@RequestParam
-	Integer catalogId, @RequestParam
-	String name, @RequestParam
-	Part file) throws IOException, MessagingException, UnknownCatalogException, UnknownStudyDefinitionException
+	public void orderData(@RequestParam Integer catalogId, @RequestParam String name, @RequestParam Part file)
+			throws IOException, MessagingException, UnknownCatalogException, UnknownStudyDefinitionException
 	{
 		if (!getEnableOrderAction()) throw new MolgenisDataAccessException("Action not allowed");
 		protocolViewerService.submitStudyDefinitionDraftForCurrentUser(name, file, catalogId.toString());
@@ -262,8 +269,7 @@ public class ProtocolViewerController extends MolgenisPluginController
 				{
 					@Override
 					@Nullable
-					public StudyDefinitionResponse apply(@Nullable
-					StudyDefinition studyDefinition)
+					public StudyDefinitionResponse apply(@Nullable StudyDefinition studyDefinition)
 					{
 						return studyDefinition != null ? (studyDefinition.getStatus() != Status.DRAFT ? new StudyDefinitionResponse(
 								studyDefinition) : null) : null;
@@ -281,10 +287,8 @@ public class ProtocolViewerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/orders/{orderId}/view", method = RequestMethod.GET)
-	public ModelAndView getOrderDetailsForm(@Valid
-	@NotNull
-	@PathVariable
-	Integer orderId) throws UnknownStudyDefinitionException
+	public ModelAndView getOrderDetailsForm(@Valid @NotNull @PathVariable Integer orderId)
+			throws UnknownStudyDefinitionException
 	{
 		if (!getEnableOrderAction()) throw new MolgenisDataAccessException("Action not allowed");
 		StudyDefinition studyDefinition = protocolViewerService.getStudyDefinitionForCurrentUser(orderId);
@@ -311,8 +315,7 @@ public class ProtocolViewerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/items", method = RequestMethod.POST)
 	@ResponseBody
-	public SearchResult getItemsFromIndex(@RequestBody
-	Map<String, Object> request)
+	public SearchResult getItemsFromIndex(@RequestBody Map<String, Object> request)
 	{
 		Object catalogId = request.get("catalogId");
 		Object draftItems = request.get("items");
@@ -333,8 +336,7 @@ public class ProtocolViewerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/search", method = RequestMethod.POST)
 	@ResponseBody
-	public SearchResult searchItems(@RequestBody
-	Map<String, Object> request)
+	public SearchResult searchItems(@RequestBody Map<String, Object> request)
 	{
 		Object catalogId = request.get("catalogId");
 		Object queryString = request.get("queryString");
@@ -486,17 +488,17 @@ public class ProtocolViewerController extends MolgenisPluginController
 	private static final class CartUpdateRequest
 	{
 		@NotNull
-		private String href;
+		private List<String> features;
 
-		public String getHref()
+		public List<String> getHref()
 		{
-			return href;
+			return features;
 		}
 
 		@SuppressWarnings("unused")
-		public void setHref(String href)
+		public void setHref(List<String> features)
 		{
-			this.href = href;
+			this.features = features;
 		}
 	}
 }
