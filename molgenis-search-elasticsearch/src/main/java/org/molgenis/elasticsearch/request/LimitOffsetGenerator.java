@@ -1,6 +1,7 @@
 package org.molgenis.elasticsearch.request;
 
 import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 
 /**
@@ -13,7 +14,7 @@ public class LimitOffsetGenerator implements QueryPartGenerator
 {
 
 	@Override
-	public void generate(SearchRequestBuilder searchRequestBuilder, Query query)
+	public void generate(SearchRequestBuilder searchRequestBuilder, Query query, EntityMetaData entityMetaData)
 	{
 		if (query.getOffset() > 0)
 		{

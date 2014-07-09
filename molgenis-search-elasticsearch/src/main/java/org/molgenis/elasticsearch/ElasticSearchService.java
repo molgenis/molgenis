@@ -27,6 +27,8 @@ import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
+import org.molgenis.data.DataService;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.elasticsearch.index.IndexRequestGenerator;
@@ -38,6 +40,7 @@ import org.molgenis.search.MultiSearchRequest;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * ElasticSearch implementation of the SearchService interface
@@ -47,6 +50,9 @@ import org.molgenis.search.SearchService;
  */
 public class ElasticSearchService implements SearchService
 {
+
+	@Autowired
+	private DataService dataService;
 	private static final Logger LOG = Logger.getLogger(ElasticSearchService.class);
 	private final String indexName;
 	private final Client client;
@@ -121,7 +127,7 @@ public class ElasticSearchService implements SearchService
 		SearchRequestBuilder builder = client.prepareSearch(indexName);
 
 		generator.buildSearchRequest(builder, documentTypes, searchType, request.getQuery(),
-				request.getFieldsToReturn(), null, null);
+				request.getFieldsToReturn(), null, null, null);
 
 		if (LOG.isDebugEnabled())
 		{
@@ -140,10 +146,18 @@ public class ElasticSearchService implements SearchService
 	private SearchResult search(SearchType searchType, SearchRequest request)
 	{
 		SearchRequestBuilder builder = client.prepareSearch(indexName);
+		// TODO : A quick fix now! Need to find a better way to get
+		// EntityMetaData in
+		// ElasticSearchService, because ElasticSearchService should not be
+		// aware of DataService. E.g. Put EntityMetaData in the SearchRequest
+		// object
+		EntityMetaData entityMetaData = (request.getDocumentType() != null && dataService != null && dataService
+				.hasRepository(request.getDocumentType())) ? dataService.getEntityMetaData(request.getDocumentType()) : null;
 		String documentType = request.getDocumentType() == null ? null : sanitizeMapperType(request.getDocumentType());
 
-		generator.buildSearchRequest(builder, documentType, searchType, request.getQuery(),
-				request.getFieldsToReturn(), request.getAggregateField1(), request.getAggregateField2());
+		generator
+				.buildSearchRequest(builder, documentType, searchType, request.getQuery(), request.getFieldsToReturn(),
+						request.getAggregateField1(), request.getAggregateField2(), entityMetaData);
 
 		if (LOG.isDebugEnabled())
 		{

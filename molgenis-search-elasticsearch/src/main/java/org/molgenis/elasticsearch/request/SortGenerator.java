@@ -2,6 +2,7 @@ package org.molgenis.elasticsearch.request;
 
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.elasticsearch.index.MappingsBuilder;
 import org.springframework.data.domain.Sort;
@@ -17,7 +18,7 @@ public class SortGenerator implements QueryPartGenerator
 {
 
 	@Override
-	public void generate(SearchRequestBuilder searchRequestBuilder, Query query)
+	public void generate(SearchRequestBuilder searchRequestBuilder, Query query, EntityMetaData entityMetaData)
 	{
 		if (query.getSort() != null)
 		{
