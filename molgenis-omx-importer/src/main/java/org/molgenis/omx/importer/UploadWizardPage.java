@@ -120,7 +120,7 @@ public class UploadWizardPage extends AbstractWizardPage
 			// we do not support "mixed import" of JPA and EMX at the moment
 			for (String name : source.getEntityNames())
 			{
-				try {
+				if(dataService.hasRepository(name)) {
                     Repository repository = dataService.getRepositoryByEntityName(name);
 
                     String repositoryClassName;
@@ -132,8 +132,6 @@ public class UploadWizardPage extends AbstractWizardPage
                     if (repositoryClassName.equals(MysqlRepository.class.getSimpleName())) {
                         return validateEMXInput(file, wizard, source);
                     }
-                }catch(UnknownEntityException e){
-                    //Entity not yet known
                 }
 			}
 			// validate entity sheets
