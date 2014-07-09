@@ -94,7 +94,7 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 					boolean isEmxEntity = false;
 					for (String name : repositoryCollection.getEntityNames())
 					{
-                        if(dataService.hasRepository(name))
+						if (dataService.hasRepository(name))
 						{
 							Repository repository = dataService.getRepositoryByEntityName(name);
 
