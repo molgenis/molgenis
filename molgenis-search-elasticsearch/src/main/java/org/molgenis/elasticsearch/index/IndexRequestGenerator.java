@@ -35,8 +35,8 @@ import com.google.common.collect.Lists;
  */
 public class IndexRequestGenerator
 {
-	private DataService dataService;
 	private static final Logger LOG = Logger.getLogger(IndexRequestGenerator.class);
+	private final DataService dataService;
 	private final Client client;
 	private final String indexName;
 
@@ -50,6 +50,11 @@ public class IndexRequestGenerator
 		if (indexName == null)
 		{
 			throw new IllegalArgumentException("IndexName is null");
+		}
+
+		if (dataService == null)
+		{
+			throw new IllegalArgumentException("DataService is null");
 		}
 
 		this.dataService = dataService;

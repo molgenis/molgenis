@@ -40,7 +40,6 @@ import org.molgenis.search.MultiSearchRequest;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * ElasticSearch implementation of the SearchService interface
@@ -50,16 +49,14 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class ElasticSearchService implements SearchService
 {
-
-	@Autowired
-	private DataService dataService;
 	private static final Logger LOG = Logger.getLogger(ElasticSearchService.class);
+	private final DataService dataService;
 	private final String indexName;
 	private final Client client;
 	private final ResponseParser responseParser = new ResponseParser();
 	private final SearchRequestGenerator generator = new SearchRequestGenerator();
 
-	public ElasticSearchService(Client client, String indexName)
+	public ElasticSearchService(Client client, String indexName, DataService dataService)
 	{
 		if (client == null)
 		{
@@ -71,6 +68,12 @@ public class ElasticSearchService implements SearchService
 			throw new IllegalArgumentException("IndexName is null");
 		}
 
+		if (dataService == null)
+		{
+			throw new IllegalArgumentException("DataService is null");
+		}
+
+		this.dataService = dataService;
 		this.indexName = indexName;
 		this.client = client;
 
