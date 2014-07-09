@@ -117,6 +117,26 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		}
 	}
 
+	public void addAttribute(AttributeMetaData attributeMetaData)
+	{
+		try
+		{
+			if (attributeMetaData.getDataType() instanceof MrefField)
+			{
+				jdbcTemplate.execute(getMrefCreateSql(attributeMetaData));
+			}
+			else
+			{
+				jdbcTemplate.execute(getAlterSql(attributeMetaData));
+			}
+		}
+		catch (Exception e)
+		{
+			logger.error("Exception updating MysqlRepository.", e);
+			throw new MolgenisDataException(e);
+		}
+	}
+
 	protected String getMrefCreateSql(AttributeMetaData att) throws MolgenisModelException
 	{
 		AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
@@ -144,28 +164,9 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 		{
+			getAttributeSql(sql, att);
 			if (!(att.getDataType() instanceof MrefField))
 			{
-				sql.append('`').append(att.getName()).append('`').append(' ');
-				// xref adopt type of the identifier of referenced entity
-				if (att.getDataType() instanceof XrefField)
-				{
-					sql.append(att.getRefEntity().getIdAttribute().getDataType().getMysqlType());
-				}
-				else
-				{
-					sql.append(att.getDataType().getMysqlType());
-				}
-				// not null
-				if (!att.isNillable())
-				{
-					sql.append(" NOT NULL");
-				}
-				// int + auto = auto_increment
-				if (att.getDataType().equals(MolgenisFieldTypes.INT) && att.isAuto())
-				{
-					sql.append(" AUTO_INCREMENT");
-				}
 				sql.append(", ");
 			}
 		}
@@ -192,6 +193,42 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 			logger.debug("sql: " + sql);
 		}
 
+		return sql.toString();
+	}
+
+	private void getAttributeSql(StringBuilder sql, AttributeMetaData att) throws MolgenisModelException
+	{
+		if (!(att.getDataType() instanceof MrefField))
+		{
+			sql.append('`').append(att.getName()).append('`').append(' ');
+			// xref adopt type of the identifier of referenced entity
+			if (att.getDataType() instanceof XrefField)
+			{
+				sql.append(att.getRefEntity().getIdAttribute().getDataType().getMysqlType());
+			}
+			else
+			{
+				sql.append(att.getDataType().getMysqlType());
+			}
+			// not null
+			if (!att.isNillable())
+			{
+				sql.append(" NOT NULL");
+			}
+			// int + auto = auto_increment
+			if (att.getDataType().equals(MolgenisFieldTypes.INT) && att.isAuto())
+			{
+				sql.append(" AUTO_INCREMENT");
+			}
+		}
+	}
+
+	protected String getAlterSql(AttributeMetaData attributeMetaData) throws MolgenisModelException
+	{
+		StringBuilder sql = new StringBuilder();
+		sql.append("ALTER TABLE ").append('`').append(getEntityMetaData().getName()).append('`').append(" ADD ");
+		getAttributeSql(sql, attributeMetaData);
+		sql.append(";");
 		return sql.toString();
 	}
 
@@ -812,7 +849,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 					List<Object> keys = Lists.newArrayList(existingEntities.keySet());
 
 					StringBuilder msg = new StringBuilder();
-					msg.append("Trying to add exsisting ").append(getName()).append(" entities as new insert: ");
+					msg.append("Trying to add existing ").append(getName()).append(" entities as new insert: ");
 					msg.append(keys.subList(0, Math.min(5, keys.size())));
 					if (keys.size() > 5)
 					{
