@@ -12,11 +12,12 @@ import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.ImmutableSettings.Builder;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.node.Node;
+import org.molgenis.data.DataService;
 import org.molgenis.elasticsearch.ElasticSearchService;
 
 /**
- * Factory for creating an embedded ElasticSearch server service. An elastic search config file named
- * 'elasticsearch.yml' must be on the classpath
+ * Factory for creating an embedded ElasticSearch server service. An elastic
+ * search config file named 'elasticsearch.yml' must be on the classpath
  * 
  * @author erwin
  * 
@@ -36,8 +37,9 @@ public class EmbeddedElasticSearchServiceFactory implements Closeable
 	}
 
 	/**
-	 * Create an embedded ElasticSearch server service using 'elasticsearch.yml' and provided settings. The provided
-	 * settings override settings specified in 'elasticsearch.yml'
+	 * Create an embedded ElasticSearch server service using 'elasticsearch.yml'
+	 * and provided settings. The provided settings override settings specified
+	 * in 'elasticsearch.yml'
 	 * 
 	 * @param providedSettings
 	 */
@@ -52,8 +54,9 @@ public class EmbeddedElasticSearchServiceFactory implements Closeable
 	}
 
 	/**
-	 * Create an embedded ElasticSearch server service with the given index name using 'elasticsearch.yml' and provided
-	 * settings. The provided settings override settings specified in 'elasticsearch.yml'
+	 * Create an embedded ElasticSearch server service with the given index name
+	 * using 'elasticsearch.yml' and provided settings. The provided settings
+	 * override settings specified in 'elasticsearch.yml'
 	 * 
 	 * @param indexName
 	 * @param providedSettings
@@ -72,9 +75,9 @@ public class EmbeddedElasticSearchServiceFactory implements Closeable
 		LOG.info("Embedded elasticsearch server started, data path=[" + settings.get("path.data") + "]");
 	}
 
-	public ElasticSearchService create()
+	public ElasticSearchService create(DataService dataService)
 	{
-		return new ElasticSearchService(client, indexName);
+		return new ElasticSearchService(client, indexName, dataService);
 	}
 
 	@Override

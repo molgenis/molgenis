@@ -25,7 +25,7 @@ public class SortGeneratorTest
 	public void testGenerateASC()
 	{
 		SortGenerator sortGen = new SortGenerator();
-		sortGen.generate(searchRequestBuilderMock, new QueryImpl().sort(new Sort(Direction.ASC, "test")));
+		sortGen.generate(searchRequestBuilderMock, new QueryImpl().sort(new Sort(Direction.ASC, "test")), null);
 		verify(searchRequestBuilderMock).addSort("test.sort", SortOrder.ASC);
 	}
 
@@ -33,7 +33,7 @@ public class SortGeneratorTest
 	public void testGenerateDESC()
 	{
 		SortGenerator sortGen = new SortGenerator();
-		sortGen.generate(searchRequestBuilderMock, new QueryImpl().sort(new Sort(Direction.DESC, "test")));
+		sortGen.generate(searchRequestBuilderMock, new QueryImpl().sort(new Sort(Direction.DESC, "test")), null);
 		verify(searchRequestBuilderMock).addSort("test.sort", SortOrder.DESC);
 	}
 
@@ -42,7 +42,7 @@ public class SortGeneratorTest
 	{
 		SortGenerator sortGen = new SortGenerator();
 		sortGen.generate(searchRequestBuilderMock,
-				new QueryImpl().sort(new Sort(Direction.DESC, "test").and(new Sort(Direction.ASC, "xxx"))));
+				new QueryImpl().sort(new Sort(Direction.DESC, "test").and(new Sort(Direction.ASC, "xxx"))), null);
 		verify(searchRequestBuilderMock).addSort("test.sort", SortOrder.DESC);
 		verify(searchRequestBuilderMock).addSort("xxx.sort", SortOrder.ASC);
 	}
