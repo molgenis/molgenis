@@ -9,8 +9,11 @@ import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.DataService;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.elasticsearch.index.MappingsBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Builds a ElasticSearch search request
@@ -20,11 +23,15 @@ import org.molgenis.elasticsearch.index.MappingsBuilder;
  */
 public class SearchRequestGenerator
 {
+	@Autowired
+	private DataService dataService;
+
 	private final List<? extends QueryPartGenerator> generators = Arrays.asList(new QueryGenerator(),
 			new SortGenerator(), new LimitOffsetGenerator(), new DisMaxQueryGenerator());
 
 	/**
-	 * Add the 'searchType', 'fields', 'types' and 'query' of the SearchRequestBuilder
+	 * Add the 'searchType', 'fields', 'types' and 'query' of the
+	 * SearchRequestBuilder
 	 * 
 	 * @param searchRequestBuilder
 	 * @param entityNames
@@ -32,23 +39,30 @@ public class SearchRequestGenerator
 	 * @param query
 	 * @param fieldsToReturn
 	 * @param aggregateField1
-	 *            First Field to aggregate on, attributemetadata instead of name because of elasticsearch bug:
-	 *            http://elasticsearch
-	 *            -users.115913.n3.nabble.com/boolean-multi-field-silently-ignored-in-1-2-1-td4058107.html
+	 *            First Field to aggregate on, attributemetadata instead of name
+	 *            because of elasticsearch bug: http://elasticsearch
+	 *            -users.115913
+	 *            .n3.nabble.com/boolean-multi-field-silently-ignored
+	 *            -in-1-2-1-td4058107.html
 	 * @param aggregateField2
-	 *            Second Field to aggregate on, attributemetadata instead of name because of elasticsearch bug:
-	 *            http://elasticsearch
-	 *            -users.115913.n3.nabble.com/boolean-multi-field-silently-ignored-in-1-2-1-td4058107.html
+	 *            Second Field to aggregate on, attributemetadata instead of
+	 *            name because of elasticsearch bug: http://elasticsearch
+	 *            -users.115913
+	 *            .n3.nabble.com/boolean-multi-field-silently-ignored
+	 *            -in-1-2-1-td4058107.html
+	 * @param entityMetaData
 	 */
 	public void buildSearchRequest(SearchRequestBuilder searchRequestBuilder, List<String> entityNames,
 			SearchType searchType, Query query, List<String> fieldsToReturn, AttributeMetaData aggregateField1,
-			AttributeMetaData aggregateField2)
+			AttributeMetaData aggregateField2, EntityMetaData entityMetaData)
 	{
 		searchRequestBuilder.setSearchType(searchType);
 
 		/*
 		 * determine correct aggregateFieldNames (http://elasticsearch
-		 * -users.115913.n3.nabble.com/boolean-multi-field-silently-ignored-in-1-2-1-td4058107.html)
+		 * -users.115913
+		 * .n3.nabble.com/boolean-multi-field-silently-ignored-in-1-
+		 * 2-1-td4058107.html)
 		 */
 		String aggregateFieldName1 = aggregateField1 != null ? aggregateField1.getName() : null;
 		String aggregateFieldName2 = aggregateField2 != null ? aggregateField2.getName() : null;
@@ -74,7 +88,7 @@ public class SearchRequestGenerator
 		// Generate query
 		for (QueryPartGenerator generator : generators)
 		{
-			generator.generate(searchRequestBuilder, query);
+			generator.generate(searchRequestBuilder, query, entityMetaData);
 		}
 
 		// Aggregates
@@ -107,9 +121,9 @@ public class SearchRequestGenerator
 
 	public void buildSearchRequest(SearchRequestBuilder searchRequestBuilder, String entityName, SearchType searchType,
 			Query query, List<String> fieldsToReturn, AttributeMetaData aggregateField1,
-			AttributeMetaData aggregateField2)
+			AttributeMetaData aggregateField2, EntityMetaData entityMetaData)
 	{
 		buildSearchRequest(searchRequestBuilder, entityName == null ? null : Arrays.asList(entityName), searchType,
-				query, fieldsToReturn, aggregateField1, aggregateField2);
+				query, fieldsToReturn, aggregateField1, aggregateField2, entityMetaData);
 	}
 }

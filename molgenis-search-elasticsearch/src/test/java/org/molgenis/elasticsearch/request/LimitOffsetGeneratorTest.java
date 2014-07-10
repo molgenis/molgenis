@@ -22,7 +22,7 @@ public class LimitOffsetGeneratorTest
 	public void testGenerateSize()
 	{
 		LimitOffsetGenerator gen = new LimitOffsetGenerator();
-		gen.generate(searchRequestBuilderMock, new QueryImpl().pageSize(20));
+		gen.generate(searchRequestBuilderMock, new QueryImpl().pageSize(20), null);
 		verify(searchRequestBuilderMock).setSize(20);
 	}
 
@@ -30,7 +30,7 @@ public class LimitOffsetGeneratorTest
 	public void testGenerateFrom()
 	{
 		LimitOffsetGenerator gen = new LimitOffsetGenerator();
-		gen.generate(searchRequestBuilderMock, new QueryImpl().offset(20));
+		gen.generate(searchRequestBuilderMock, new QueryImpl().offset(20), null);
 		verify(searchRequestBuilderMock).setFrom(20);
 	}
 }

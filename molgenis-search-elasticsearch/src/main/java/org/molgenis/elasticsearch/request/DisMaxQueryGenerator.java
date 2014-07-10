@@ -8,6 +8,7 @@ import org.elasticsearch.index.query.BaseQueryBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.DisMaxQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 
@@ -15,7 +16,7 @@ public class DisMaxQueryGenerator implements QueryPartGenerator
 {
 
 	@Override
-	public void generate(SearchRequestBuilder searchRequestBuilder, Query query)
+	public void generate(SearchRequestBuilder searchRequestBuilder, Query query, EntityMetaData entityMetaData)
 	{
 		if (!query.getRules().isEmpty())
 		{
