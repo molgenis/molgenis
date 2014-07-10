@@ -168,7 +168,6 @@
     		var dropdown = $('<div class="btn-group"><button class="btn dropdown-toggle" data-toggle="dropdown">' + (isAnd ? 'AND' : 'OR&nbsp;&nbsp;') + ' <span class="caret"></span></button><ul class="dropdown-menu"><li><a data-value="OR">OR&nbsp;&nbsp;</a></li><li><a data-value="AND">AND</a></li></div>');
     		$.each(dropdown.find('.dropdown-menu li a'), function(index, element){
     			$(element).click(function(){
-    				console.log($(this).attr('data-value'));
     				operatorInput.val($(this).attr('data-value'));
     				dropdown.find('button:first').html($(this).text() + ' <span class="caret"></span>');
     			});
