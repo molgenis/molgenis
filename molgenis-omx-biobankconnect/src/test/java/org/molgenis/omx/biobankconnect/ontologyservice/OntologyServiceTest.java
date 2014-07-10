@@ -5,6 +5,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -127,15 +128,15 @@ public class OntologyServiceTest
 						OntologyTermRepository.ROOT, true).pageSize(10000), null))).thenReturn(
 				new SearchResult(1, Arrays.asList(hit3)));
 
-		QueryImpl query = new QueryImpl();
-		query.addRule(new QueryRule(OntologyTermRepository.SYNONYMS, Operator.SEARCH, "ontologyterm"));
-		query.addRule(new QueryRule(Operator.OR));
-		query.addRule(new QueryRule(OntologyTermRepository.SYNONYMS, Operator.SEARCH, "three"));
-		query.pageSize(100);
+		List<QueryRule> rules = new ArrayList<QueryRule>();
+		rules.add(new QueryRule(OntologyTermRepository.SYNONYMS, Operator.SEARCH, "ontologyterm~0.8"));
+		new QueryRule(OntologyTermRepository.SYNONYMS, Operator.SEARCH, "three~0.8");
+		QueryRule finalQuery = new QueryRule(rules);
+		finalQuery.setOperator(Operator.SHOULD);
 		when(
 				searchService.search(new SearchRequest(OntologyService
-						.createOntologyTermDocumentType("http://www.ontology.test"), query, null))).thenReturn(
-				new SearchResult(2, Arrays.asList(hit4, hit5)));
+						.createOntologyTermDocumentType("http://www.ontology.test"), new QueryImpl(finalQuery)
+						.pageSize(100), null))).thenReturn(new SearchResult(2, Arrays.asList(hit4, hit5)));
 
 		ontologyService = new OntologyService(searchService);
 	}

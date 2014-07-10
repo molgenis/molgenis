@@ -209,6 +209,18 @@
                             </configuration>
                         </execution>
                         <execution>
+                            <id>reserve-network-port-jetty</id>
+                            <goals>
+                                <goal>reserve-network-port</goal>
+                            </goals>
+                            <phase>process-resources</phase>
+                            <configuration>
+                                <portNames>
+                                    <portName>jetty.stop.http.port</portName>
+                                </portNames>
+                            </configuration>
+                        </execution>
+                        <execution>
                             <id>execution-molgenis-generator</id>
                             <phase>generate-sources</phase>
                             <goals>
@@ -270,7 +282,7 @@
                     <artifactId>jetty-maven-plugin</artifactId>
                     <version>8.1.12.v20130726</version>
                     <configuration>
-                        <stopPort>9999</stopPort>
+                        <stopPort>${jetty.stop.http.port}</stopPort>
                         <stopKey>jetty-stop</stopKey>
                         <reload>manual</reload>
                         <webAppConfig>

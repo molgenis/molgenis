@@ -91,7 +91,7 @@ public class JDBCMetaDatabase extends Model
 			${name(entity)}_${name(field)}_field.setDescription("${field.description?j_string}");
 							</#if>				
 			${name(entity)}_${name(field)}_field.setNillable(<#if field.isNillable() == true>true<#else>false</#if>);
-							<#if field.type == "xref" || field.type == "mref">
+							<#if field.type == "categorical" || field.type == "xref" || field.type == "mref">
 			${name(entity)}_${name(field)}_field.setXRefVariables("${field.xrefEntityName}", "${field.xrefFieldName}",Arrays.asList(new String[]{${csv(field.xrefLabelNames)}}));
 							</#if>
 			${name(entity)}_entity.addField(${name(entity)}_${name(field)}_field);

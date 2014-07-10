@@ -8,7 +8,7 @@ import java.util.Set;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.CrudRepositorySecurityDecorator;
+import org.molgenis.data.AggregateableCrudRepositorySecurityDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.EntityMetaData;
@@ -75,17 +75,17 @@ public class OmxImporterServiceImpl implements OmxImporterService
 		for (String name : repositories.getEntityNames())
 		{
 			Repository repository = repositories.getRepositoryByEntityName(name);
-			
+
 			if (repository.getName().startsWith(DATASET_SHEET_PREFIX))
 			{
 				// Import DataSet sheet, create new OmxRepository
 				String identifier = repository.getName().substring(DATASET_SHEET_PREFIX.length());
-				
+
 				if (!dataService.hasRepository(identifier))
 				{
 
-					dataService.addRepository(new CrudRepositorySecurityDecorator(new OmxRepository(dataService,
-							searchService, identifier, entityValidator)));
+					dataService.addRepository(new AggregateableCrudRepositorySecurityDecorator(new OmxRepository(
+							dataService, searchService, identifier, entityValidator)));
 					newRepoIdentifiers.add(identifier);
 
 					DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME,
@@ -168,7 +168,7 @@ public class OmxImporterServiceImpl implements OmxImporterService
 					{
 						dataService.removeRepository(newRepoIdentifier);
 					}
-					
+
 					throw e;
 				}
 

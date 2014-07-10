@@ -64,7 +64,7 @@ public class ResponseParserTest
 		when(searchHits.hits()).thenReturn(new SearchHit[0]);
 		when(response.getHits()).thenReturn(searchHits);
 
-		SearchResult searchResult = new ResponseParser().parseSearchResponse(response);
+		SearchResult searchResult = new ResponseParser().parseSearchResponse(response, null);
 		AggregateResult aggregateResult = searchResult.getAggregate();
 		assertEquals(aggregateResult.getxLabels(), Arrays.asList(col1, col2, colTotal));
 		assertEquals(aggregateResult.getyLabels(), Arrays.asList(row1));
@@ -111,7 +111,7 @@ public class ResponseParserTest
 		when(searchHits.hits()).thenReturn(new SearchHit[0]);
 		when(response.getHits()).thenReturn(searchHits);
 
-		SearchResult searchResult = new ResponseParser().parseSearchResponse(response);
+		SearchResult searchResult = new ResponseParser().parseSearchResponse(response, null);
 		AggregateResult aggregateResult = searchResult.getAggregate();
 		assertEquals(aggregateResult.getxLabels(), Arrays.asList(col1, col2, colTotal));
 		assertEquals(aggregateResult.getyLabels(), Arrays.asList(row1));
@@ -192,7 +192,7 @@ public class ResponseParserTest
 		when(searchHits.hits()).thenReturn(new SearchHit[0]);
 		when(response.getHits()).thenReturn(searchHits);
 
-		SearchResult searchResult = new ResponseParser().parseSearchResponse(response);
+		SearchResult searchResult = new ResponseParser().parseSearchResponse(response, null);
 		AggregateResult aggregateResult = searchResult.getAggregate();
 		assertEquals(aggregateResult.getxLabels(), Arrays.asList(col1, col2, colTotal));
 		assertEquals(aggregateResult.getyLabels(), Arrays.asList(row1, row2, rowTotal));
@@ -277,7 +277,7 @@ public class ResponseParserTest
 		when(searchHits.hits()).thenReturn(new SearchHit[0]);
 		when(response.getHits()).thenReturn(searchHits);
 
-		SearchResult searchResult = new ResponseParser().parseSearchResponse(response);
+		SearchResult searchResult = new ResponseParser().parseSearchResponse(response, null);
 		AggregateResult aggregateResult = searchResult.getAggregate();
 		assertEquals(aggregateResult.getxLabels(), Arrays.asList(col2, col1, colTotal));
 		assertEquals(aggregateResult.getyLabels(), Arrays.asList(row2, row1, rowTotal));

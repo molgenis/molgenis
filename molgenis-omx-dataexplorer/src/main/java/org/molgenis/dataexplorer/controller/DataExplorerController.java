@@ -100,6 +100,8 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String SOURCES = "genomebrowser.init.sources";
 	public static final String BROWSERLINKS = "genomebrowser.init.browserLinks";
 	public static final String WIZARD_TITLE = "plugin.dataexplorer.wizard.title";
+	public static final String WIZARD_BUTTON_TITLE = "plugin.dataexplorer.wizard.button.title";
+	public static final String AGGREGATES_NORESULTS_MESSAGE = "plugin.dataexplorer.mod.aggregates.noresults";
 
 	public static final String KEY_DATAEXPLORER_EDITABLE = "plugin.dataexplorer.editable";
 	private static final boolean DEFAULT_VAL_DATAEXPLORER_EDITABLE = false;
@@ -160,10 +162,10 @@ public class DataExplorerController extends MolgenisPluginController
 			}
 		}
 		model.addAttribute("selectedEntityName", selectedEntityName);
-		model.addAttribute(
-				"wizardtitle",
-				molgenisSettings.getProperty(WIZARD_TITLE) == null ? "Filter Wizard" : molgenisSettings
-						.getProperty(WIZARD_TITLE));
+		model.addAttribute("wizardtitle", molgenisSettings.getProperty(WIZARD_TITLE, "Filter Wizard"));
+		model.addAttribute("wizardbuttontitle", molgenisSettings.getProperty(WIZARD_BUTTON_TITLE, "Wizard"));
+		model.addAttribute("aggregatenoresults",
+				molgenisSettings.getProperty(AGGREGATES_NORESULTS_MESSAGE, "No results found"));
 		model.addAttribute("wizard", (wizard != null) && wizard.booleanValue());
 
 		boolean modDiseaseMatcher = molgenisSettings.getBooleanProperty(KEY_MOD_DISEASEMATCHER,
@@ -198,8 +200,7 @@ public class DataExplorerController extends MolgenisPluginController
 			model.addAttribute("genomebrowser_patient_list",
 					molgenisSettings.getProperty(GenomeConfig.GENOMEBROWSER_PATIENT_ID, "patient_id"));
 
-			model.addAttribute("tableEditable",
-					molgenisSettings.getBooleanProperty(KEY_DATAEXPLORER_EDITABLE, DEFAULT_VAL_DATAEXPLORER_EDITABLE));
+			model.addAttribute("tableEditable", isTableEditable());
 			model.addAttribute("galaxyEnabled",
 					molgenisSettings.getBooleanProperty(KEY_GALAXY_ENABLED, DEFAULT_VAL_GALAXY_ENABLED));
 			String galaxyUrl = molgenisSettings.getProperty(KEY_GALAXY_URL);
@@ -467,5 +468,11 @@ public class DataExplorerController extends MolgenisPluginController
 		logger.error(null, e);
 		return Collections.singletonMap("errorMessage",
 				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage());
+	}
+
+	private boolean isTableEditable()
+	{
+		return molgenisSettings.getBooleanProperty(KEY_DATAEXPLORER_EDITABLE, DEFAULT_VAL_DATAEXPLORER_EDITABLE)
+				&& molgenisPermissionService.hasPermissionOnPlugin(ID, Permission.READ);
 	}
 }

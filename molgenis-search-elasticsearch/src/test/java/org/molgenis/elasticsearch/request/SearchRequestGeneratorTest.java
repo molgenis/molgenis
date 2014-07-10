@@ -33,7 +33,7 @@ public class SearchRequestGeneratorTest
 		List<String> fieldsToReturn = Arrays.asList("field1", "field2");
 
 		gen.buildSearchRequest(searchRequestBuilderMock, entityName, searchType, new QueryImpl().search("test"),
-				fieldsToReturn, null, null);
+				fieldsToReturn, null, null, null);
 		verify(searchRequestBuilderMock).setSearchType(searchType);
 		verify(searchRequestBuilderMock).setTypes(entityName);
 		verify(searchRequestBuilderMock).addFields(new String[]

@@ -29,8 +29,8 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.elasticsearch.util.MapperTypeSanitizer;
 
 /**
- * Builds mappings for a documentType. For each column a multi_field is created, one analyzed for searching and one
- * not_analyzed for sorting
+ * Builds mappings for a documentType. For each column a multi_field is created,
+ * one analyzed for searching and one not_analyzed for sorting
  * 
  * @author erwin
  * 
@@ -84,7 +84,29 @@ public class MappingsBuilder
 		for (AttributeMetaData attr : meta.getAtomicAttributes())
 		{
 			String esType = getType(attr);
-			if (esType.equals("string"))
+			if (attr.getDataType().getEnumType().toString().equalsIgnoreCase(MolgenisFieldTypes.MREF.toString()))
+			{
+				jsonBuilder.startObject(attr.getName()).field("type", "nested").startObject("properties");
+
+				// TODO : what if the attributes in refEntity is also an MREF
+				// field?
+				for (AttributeMetaData refEntityAttr : attr.getRefEntity().getAttributes())
+				{
+					if (refEntityAttr.isLabelAttribute())
+					{
+						jsonBuilder.startObject(refEntityAttr.getName()).field("type", "multi_field")
+								.startObject("fields").startObject(refEntityAttr.getName()).field("type", "string")
+								.endObject().startObject(FIELD_NOT_ANALYZED).field("type", "string")
+								.field("index", "not_analyzed").endObject().endObject().endObject();
+					}
+					else
+					{
+						jsonBuilder.startObject(refEntityAttr.getName()).field("type", "string").endObject();
+					}
+				}
+				jsonBuilder.endObject().endObject();
+			}
+			else if (esType.equals("string"))
 			{
 				jsonBuilder.startObject(attr.getName()).field("type", "multi_field").startObject("fields")
 						.startObject(attr.getName()).field("type", "string").endObject()

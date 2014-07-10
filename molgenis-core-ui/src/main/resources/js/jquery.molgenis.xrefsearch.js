@@ -16,7 +16,7 @@
 	
 	var restApi = new molgenis.RestClient();
 	
-	function createQuery(lookupAttributeNames, terms, operator) {
+	function createQuery(lookupAttributeNames, terms, operator, search) {
 		var q = [];
 		
 		if(lookupAttributeNames.length) {
@@ -27,7 +27,11 @@
 	            if (terms.length > 0) {
 	                $.each(terms, function(index) {
 	                    if(index > 0){
-	                        q.push({operator: 'OR'});
+                            if(search){
+                                q.push({operator: 'AND'});
+                            }else {
+                                q.push({operator: 'OR'});
+                            }
 	                    }
 	                    q.push({
 	                        field: attrName,
@@ -42,7 +46,7 @@
 			return undefined;
 		}
 	}
-	
+
 	function getLookupAttributeNames(entityMetaData) {
 		var attributeNames = [];
 		$.each(entityMetaData.attributes, function(attrName, attr) {
@@ -95,11 +99,12 @@
 		var hiddenInput = container.find('input[type=hidden]');
 		
 		hiddenInput.select2({
-			width: '80%',
+			width: options.width ? options.width : 'resolve',
 			minimumInputLength: 2,
             multiple: (attributeMetaData.fieldType === 'MREF'),
+            closeOnSelect: (attributeMetaData.fieldType === 'XREF'),
 			query: function (options){
-				var query = createQuery(lookupAttrNames, [options.term],'LIKE');
+				var query = createQuery(lookupAttrNames, options.term.match(/[^ ]+/g),'SEARCH', true);
 				if(query)
 				{
 					restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {num: 1000, q: query}}, function(data) {
@@ -109,7 +114,7 @@
             },
 			initSelection: function(element, callback) {
 				//Only called when the input has a value
-				var query = createQuery(lookupAttrNames, element.val().split(','), 'EQUALS');
+				var query = createQuery(lookupAttrNames, element.val().split(','), 'EQUALS', false);
 				if(query)
 				{
 					restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {q: query}}, function(data) {
@@ -136,11 +141,11 @@
 	}
 
 	function addQueryPartSelect(container, attributeMetaData, options) {
-		var attrs = {
-				'autofocus': 'autofocus'
-			};
-
-        if (attributeMetaData.fieldType === 'MREF') {
+		var attrs = {};
+		if(options.autofocus) {
+			attrs.autofocus = options.autofocus;
+		}
+        if (options.isfilter && attributeMetaData.fieldType === 'MREF') {
             var checkbox = $('<input type="checkbox" class="exclude">');//Checkbox is only for jquery-switch, it should not be included in the query
     		checkbox.attr('checked', options.operator === 'OR');
     		container.prepend(checkbox);
@@ -159,7 +164,7 @@
     		andOrSwitch.append(operatorInput);
         }
 		
-		var element = createInput(attributeMetaData.fieldType, attrs, options.values);
+		var element = createInput(attributeMetaData, attrs, options.values);
 		container.prepend(element);
 		createSelect2(container, attributeMetaData, options);
 	}

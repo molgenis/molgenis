@@ -180,10 +180,7 @@ public class ElasticsearchRepositoryDecorator implements CrudRepository, Aggrega
 
 	public AggregateResult aggregate(AttributeMetaData xAttr, AttributeMetaData yAttr, Query q)
 	{
-		String xAttrName = xAttr != null ? xAttr.getName() : null;
-		String yAttrName = yAttr != null ? yAttr.getName() : null;
-		SearchRequest searchRequest = new SearchRequest(getName(), q, Collections.<String> emptyList(), xAttrName,
-				yAttrName);
+		SearchRequest searchRequest = new SearchRequest(getName(), q, Collections.<String> emptyList(), xAttr, yAttr);
 		SearchResult searchResults = elasticSearchService.search(searchRequest);
 		return searchResults.getAggregate();
 	}
