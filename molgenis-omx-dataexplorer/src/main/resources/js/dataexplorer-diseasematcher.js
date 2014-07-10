@@ -1,29 +1,65 @@
+/**
+ * Disease Matcher.
+ * A module for the Data Explorer of Molgenis to enable easy browsing through diseases within a dataset with variants or 
+ * other data that have gene symbols associated with them. Disease information is retrieved from the OMIM API and the referencing is
+ * made possible by the DiseaseMapping and Disease datasets (see org.molgenis.diseasematcher.data.preprocess for more information on
+ * these datasets, where to get them and how to process them).
+ * 
+ * @author Tommy de Boer
+ */
+
 (function($, molgenis) {
 	var restApi = new molgenis.RestClient();
 
+	/**
+	 * Regular expression containing all line break flavors, used for replacing line breaks.
+	 */
 	var lineBreaks = /(?:\r\n|\r|\n)/g;
 
+	/**
+	 * Types of selection modes, Enum style.
+	 */
 	var SelectionMode = {
 		DISEASE : 'diseases',
 		GENE : 'genes'
 	};
+	
+	/**
+	 * Global for keeping track of the current selection mode.
+	 */
 	var currentSelectionMode = SelectionMode.GENE;
+	
+	/**
+	 * Sets an upper limit to the amount of items visible in the selection list.
+	 */
 	var listMaxLength = 10;
+	
+	/**
+	 * True by default and set to false when one of the tool availability checks fail.
+	 */
 	var toolAvailable = true;
+	
+	/**
+	 * Global keeping storing if a browser support local storage.
+	 */
 	var localStorageSupported = false;
+	
+	/**
+	 * Sets the name of the column that contains gene symbols. In the future this column should be dynamically determined per dataset.
+	 */
+	var geneSymbolColumn = 'geneSymbol';
 	
 	
 	/**
-	 * Listen for data explorer query changes.
+	 * Listens for data explorer query changes and updates the selected gene/disease lists.
 	 */
-	$(document).on('changeQuery', function(e, query) {
-		
+	$(document).on('changeQuery', function(e, query) {	
 		updateSelectionList(currentSelectionMode);
 	});
 
 	
 	/**
-	 * Listen for attribute selection changes.
+	 * Listens for attribute selection changes and updates the variant table.
 	 */
 	$(document).on('changeAttributeSelection', function(e, data) {
 		var panel = $('#diseasematcher-variant-panel');
@@ -34,49 +70,43 @@
 
 	
 	/**
-	 * Listen for entity change events. Also gets called when page is loaded.
-	 */
-	$(document).on('changeEntity', function(e, entityUri) {
-
-		
-	});
-	
-	
-	/**
-	 * Checks if the current state of Molgenis meets the requirements of this
-	 * tool. Shows warnings and instructions when it does not.
+	 * Checks if the current state of Molgenis meets the requirements of this tool. 
+	 * Checks if the needed datasets are loaded (DiseaseMapping and Disease) and if the user's dataset has 
+	 * a gene symbol column. All calls are async to avoid hanging of the application.
+	 *
+	 * @param entityUri the URI of the entity to check for a gene symbol column
 	 */
 	function checkToolAvailable(entityUri) {
 		checkDatasetAvailable('Disease');
 		checkDatasetAvailable('DiseaseMapping');
 
-		// if an entity is selected, check if it has a 'geneSymbol' column and show a warning if it does not
-		// TODO determine which columns to check for, and which annotators to propose
+		// if an entity is selected, check if it has a gene symbol column and show a warning if it does not
 		restApi.getAsync(entityUri + '/meta', {}, function(data) {
-			if (data === null || !data.attributes.hasOwnProperty('geneSymbol')) {
+			if (data === null || !data.attributes.hasOwnProperty(geneSymbolColumn)) {
+				
+				// TODO determine which annotators to propose
 				var warning = '<div class="alert alert-warning" id="gene-symbol-warning">'
 						+ '<strong>No gene symbols found!</strong> For this tool to work, make sure '
 						+ 'your dataset has a \'geneSymbol\' column.</div>';
+				
 				if (!$('#diseasematcher-variant-panel #gene-symbol-warning').length) {
 					$('#diseasematcher-variant-panel').append(warning);
 					toolAvailable = false;
 				}
+				
 			} else {
-				$(('#diseasematcher-variant-panel #gene-symbol-warning')).remove();
+				$('#diseasematcher-variant-panel #gene-symbol-warning').remove();
 			}
 		});
 	}
 
 	
 	/**
-	 * Checks if a dataset is loaded. Shows a warning when it is not. Returns true or false depending on check.
+	 * Checks if a dataset is loaded. Shows a warning when it is not. 
 	 * 
-	 * @param dataset
-	 *            the dataset to check for
+	 * @param dataset the dataset to check for
 	 */
 	function checkDatasetAvailable(dataset) {
-		// check if a DiseaseMapping dataset is loaded, show a warning when it
-		// is not
 		restApi.getAsync('/api/v1/' + dataset, {'num' : 1},	function(data){
 			if (data.total === 0) {
 				var warning = '<div class="alert alert-warning" id="' + dataset + '-warning"><strong>' + dataset + ' not loaded!'
@@ -91,65 +121,71 @@
 		});
 	}
 
+	
+	/**
+	 * Click action for the navigation buttons in the Disease Matcher selection panel.
+	 * 
+	 * @param element the selected link
+	 * @selectionMode the appropriate selection mode to use
+	 */
+	function onClickNavBtn(element, selectionMode){
+		if (!toolAvailable) return;
+		
+		//reset navbar and activate the clicked button
+		$('#diseasematcher-selection-navbar li').attr('class', '');
+		$(element).parent().attr("class", "active");
+		
+		// update title of selection list
+		$('#diseasematcher-selection-title').html(selectionMode.charAt(0).toUpperCase() + selectionMode.slice(1));
+
+		currentSelectionMode = selectionMode;
+		updateSelectionList(selectionMode);
+	}
+	
+	
 	/**
 	 * On document ready.
 	 */
 	$(function() {
-
-		// selection nav bar diseases:
+		checkToolAvailable('/api/v1/' + getEntity().name);
+		
+		// bind button actions
 		$('#diseasematcher-diseases-select-button').click(function(e) {
 			e.preventDefault();
-			if (!toolAvailable) return;
+			onClickNavBtn(this, SelectionMode.DISEASE);
 			
-			$('#diseasematcher-selection-navbar li').attr('class', '');
-			$(this).parent().attr("class", "active");
-
-			$('#diseasematcher-selection-search').attr('placeholder',
-					'Search diseases');
-			$('#diseasematcher-selection-title').html('Diseases');
-
-			currentSelectionMode = SelectionMode.DISEASE;
-			updateSelectionList(SelectionMode.DISEASE);
 		});
 		
-		// selection nav bar genes:
 		var genesBtn = $('#diseasematcher-genes-select-button').click(function(e) {
 			e.preventDefault();
-			if (!toolAvailable) return;
-			
-			$('#diseasematcher-selection-navbar li').attr('class', '');
-			$(this).parent().attr("class", "active");
-	
-			$('#diseasematcher-selection-search').attr('placeholder', 'Search genes');
-			$('#diseasematcher-selection-title').html('Genes');
-	
-			currentSelectionMode = SelectionMode.GENE;
-			updateSelectionList(SelectionMode.GENE);
+			onClickNavBtn(this, SelectionMode.GENE);
 		})
 
 		// init tabs
 		$('#diseasematcher-disease-panel-tabs').tab();
 
+		// TODO: local storage
 		localStorageSupported = browserSupportsLocalStorage();
 		if (localStorageSupported) localStorage.clear();
+		localStorageSupported = false; // switched off for now
 		
-		toolAvailable = true;
-		checkToolAvailable('/api/v1/' + getEntity().name);
-
 		// TODO: make this process nicer (multiple async calls are confusing)
-		// wait till the checkToolAvailable calls are done. if tool is available pre-select the first button
+		// wait till the checkToolAvailable calls are done. if tool is available pre-select the genes button
 		$(document).ajaxStop(function() {
 		    $(this).unbind("ajaxStop"); //prevent running again when other calls finish
-		    if (toolAvailable) genesBtn.click();
+		    if (toolAvailable) onClickNavBtn($('#diseasematcher-genes-select-button'), SelectionMode.GENE);
 		});
-		
 	});
 
+		
 	
 	/**
+	 * Gets diseases/genes from the server for this dataset based on the current data explorer query and triggers 
+	 * refreshing of the selection list.
 	 * 
+	 * @param selectionMode 
 	 */
-	function updateSelectionList(selectionType) {
+	function updateSelectionList(selectionMode) {
 		var entityName = getEntity().name;
 		var request = {
 			'datasetName' : entityName,
@@ -157,37 +193,38 @@
 			'start' : 0
 		};
 		$.extend(request, getQuery());
-		console.log(request);
 		$.ajax({
 			type : 'POST',
 			contentType : 'application/json',
-			url : '/diseasematcher/' + selectionType,
+			url : '/diseasematcher/' + selectionMode,
 			data : JSON.stringify(request),
 			success : function(data) {
 			
-				if (selectionType === SelectionMode.DISEASE) {
-					// add the diseases (if any) to the disease list and init
-					// the pager
-					populateSelectionList(data.diseases, selectionType);
-					initPager(data.total, selectionType);
-				} else if (selectionType === SelectionMode.GENE) {
-					populateSelectionList(data.genes, selectionType);
-					initPager(data.total, selectionType);
+				// add the diseases/genes (if any) to the list and init the pager
+				if (selectionMode === SelectionMode.DISEASE) {				
+					populateSelectionList(data.diseases, selectionMode);
+				} else if (selectionMode === SelectionMode.GENE) {
+					populateSelectionList(data.genes, selectionMode);		
 				}
+				
+				initPager(data.total, selectionMode);
 			}
 		});
 	}
 
 	
 	/**
+	 * Adds items to the selection list and sets the click actions for each item. 
 	 * 
+	 * @param list the list of diseases or genes
+	 * @param selectionMode the current selection mode
 	 */
-	function populateSelectionList(list, selectionType) {
+	function populateSelectionList(list, selectionMode) {
 		$('#diseasematcher-selection-list').empty();
 		
 		if (list === null || list.length === 0) return;
 
-		if (selectionType === SelectionMode.DISEASE) {
+		if (selectionMode === SelectionMode.DISEASE) {
 			$.each(list, function(index, item) {
 				var name;
 				if (item.diseaseName === null) {
@@ -199,7 +236,7 @@
 						'<li><a href="#" class="diseasematcher-disease-listitem" id="'
 								+ item.diseaseId + '">' + name + '</a></li>');
 			});
-		} else if (selectionType === SelectionMode.GENE) {
+		} else if (selectionMode === SelectionMode.GENE) {
 			$.each(list, function(index, item) {
 				$('#diseasematcher-selection-list').append(
 						'<li><a href="#" class="diseasematcher-gene-listitem" id="'
@@ -218,16 +255,20 @@
 
 	
 	/**
-	 * Initializes a pager for the currently selected diseases.
+	 * Initializes a pager for the currently selected diseases. 
+	 * Needs a reference to selectionMode to pass to onPageChange().
+	 * 
+	 * @param total the total amount of items 
+	 * @param selectionMode the selection mode for this list
 	 */
-	function initPager(total, selectionType) {
+	function initPager(total, selectionMode) {
 		var container = $('#diseasematcher-selection-pager');
 		if (total > listMaxLength) {
 			container.pager({
 				'nrItems' : total,
 				'nrItemsPerPage' : listMaxLength,
 				'onPageChange' : function(page) {
-					onPageChange(page.start, page.end, selectionType);
+					onPageChange(page.start, page.end, selectionMode);
 				}
 			});
 			container.show();
@@ -237,9 +278,14 @@
 
 	
 	/**
+	 * Called when the selection list page changes. Retrieves a slice of the list from the server and 
+	 * triggers an update of the selection list.
 	 * 
+	 * @param pageStart index of the first item of this page
+	 * @param pageEnd index of the last item of this page
+	 * @param selectionMode the selection mode for this list
 	 */
-	function onPageChange(pageStart, pageEnd, selectionType) {
+	function onPageChange(pageStart, pageEnd, selectionMode) {
 		var entityName = getEntity().name;
 		var request = {
 				'datasetName' : entityName,
@@ -251,14 +297,14 @@
 		$.ajax({
 			type : 'POST',
 			contentType : 'application/json',
-			url : '/diseasematcher/' + selectionType,
+			url : '/diseasematcher/' + selectionMode,
 			data : JSON.stringify(request),
 			success : function(data) {
 				
-				if (selectionType === SelectionMode.DISEASE) {
-					populateSelectionList(data.diseases, selectionType);
-				} else if (selectionType === SelectionMode.GENE) {
-					populateSelectionList(data.genes, selectionType);
+				if (selectionMode === SelectionMode.DISEASE) {
+					populateSelectionList(data.diseases, selectionMode);
+				} else if (selectionMode === SelectionMode.GENE) {
+					populateSelectionList(data.genes, selectionMode);
 				}
 			}
 		});
@@ -266,9 +312,9 @@
 
 	
 	/**
+	 * Takes an OMIM object and transforms the data to content which is shown in a disease tab.
 	 * 
-	 * @param omimObject
-	 * @returns
+	 * @param omimObject the OMIM object to show
 	 */
 	function showOmimObject(omimObject){
 		
@@ -283,8 +329,6 @@
 			diseasePanel.append(warning);
 			return;
 		}
-		
-		console.log(omimObject);
 		
 		var entry = omimObject.omim.entryList[0].entry;
 		
@@ -373,6 +417,8 @@
 	
 	
 	/**
+	 * Disease tab selection action. Retrieves an OMIM object from the OMIM API or local storage and 
+	 * calls showOmimObject() to show it in the tab.
 	 * 
 	 * @param diseaseId
 	 * @returns
@@ -393,7 +439,6 @@
 					}
 					
 					showOmimObject(omimObject);
-
 				}
 			});
 		}
@@ -401,17 +446,19 @@
 
 	
 	/**
+	 * Called when a selection list item is selected. Refreshes the variant table and the disease tabs.
 	 * 
-	 * @param
+	 * @param link the item that was selected
+	 * @param selectionMode the current selection mode
 	 */
-	function onSelectListItem(link, selectionType) {
+	function onSelectListItem(link, selectionMode) {
 		// visually select the right item in the list
 		$('#diseasematcher-selection-list li').attr('class', '');
 		link.parent().attr('class', 'active');
 
 		entityName = getEntity().name;
 
-		if (selectionType == SelectionMode.DISEASE) {
+		if (selectionMode == SelectionMode.DISEASE) {
 			diseaseId = link.attr('id');
 			restApi.getAsync('/api/v1/DiseaseMapping', {
 				'q' : {
@@ -422,43 +469,40 @@
 					} ],
 					'num' : 10000
 				},
-				'attributes' : [ 'geneSymbol' ]
+				'attributes' : [ 'geneSymbo' ]
 			}, function(diseaseGenes) {
 				// get unique genes for this disease
 				var uniqueGenes = [];
 				$.each(diseaseGenes.items, function(index, disease) {
-					if ($.inArray(diseaseGenes.geneSymbol,
-							uniqueGenes) === -1) {
+					if ($.inArray(diseaseGenes.geneSymbol, uniqueGenes) === -1) {
 						uniqueGenes.push(disease.geneSymbol);
 					}
 				});
 
 				showVariants(uniqueGenes)
-				showDiseases(diseaseId, selectionType);
+				showDiseases(diseaseId, selectionMode);
 			});
-		} else if (selectionType == SelectionMode.GENE) {
+		} else if (selectionMode == SelectionMode.GENE) {
 			// make it an array for showVariants()
 			var geneId = [ link.attr('id') ];
 			showVariants(geneId);
-			showDiseases(geneId, selectionType);
+			showDiseases(geneId, selectionMode);
 		}
 	}
 	
 	
 	/**
+	 * Sets readable names for disease tabs (replace the default OMIM identifier).
 	 * 
+	 * @param diseaseIds the OMIM identifiers to get names for
 	 */
 	function setDiseaseTabNames(diseaseIds){
-		if (!(diseaseIds instanceof Array)){
-			diseaseIds = [diseaseIds];
-		}
-		
 		var requestParams = '?';
 		$.each(diseaseIds, function(index, diseaseId){
-			requestParams += 'diseaseId=' + diseaseId;
-			if (index !== diseaseIds.length - 1){
+			if (index > 0){
 				requestParams += '&';
 			}
+			requestParams += 'diseaseId=' + diseaseId;
 		});
 		
 		$.ajax({
@@ -475,24 +519,27 @@
 	
 	
 	/**
+	 * Refreshes and sets the disease tabs based on the currently selected gene or disease(s).
 	 * 
+	 * @param id OMIM id or gene symbol
+	 * @param selectionMode selection mode for the id
 	 */
-	function showDiseases(id, selectionType) {
+	function showDiseases(id, selectionMode) {
 		// empty disease tabs
 		$('#diseasematcher-disease-tab-content').empty();
 		$('#diseasematcher-disease-panel-tabs').empty();
 
-		if (selectionType === SelectionMode.DISEASE) {
+		if (selectionMode === SelectionMode.DISEASE) {
 			// add 1 tab for current disease
 			$('#diseasematcher-disease-panel-tabs').append('<li class="active"><a href="#' + id	+ '" data-toggle="tab">' + id + '</a></li>');
 			$('#diseasematcher-disease-tab-content').append('<div class="tab-pane active" id="' + id + '">' + '</div>');
 
 			
-			setDiseaseTabNames(diseaseId);
+			setDiseaseTabNames([diseaseId]);
 			onSelectDiseaseTab(diseaseId);
 			
 
-		} else if (selectionType === SelectionMode.GENE) {
+		} else if (selectionMode === SelectionMode.GENE) {
 			// add tabs for each disease this gene is known for
 			restApi.getAsync('/api/v1/DiseaseMapping', {
 				'q' : {
@@ -537,8 +584,12 @@
 		}
 	}
 
+	
 	/**
+	 * Initializes or refreshes the variants table based on a set of genes. 
+	 * The variant table shows variants in the user's dataset in a certain gene or genes.
 	 * 
+	 * @param genes the genes to get variants
 	 */
 	function showVariants(genes) {
 		var queryRules = [];
@@ -549,7 +600,7 @@
 				});
 			}
 			queryRules.push({
-				'field' : 'geneSymbol',
+				'field' : geneSymbolColumn,
 				'operator' : 'EQUALS',
 				'value' : gene
 			});
@@ -567,52 +618,65 @@
 				'query' : query
 			});
 		}
-		
-		
 	}
 
 	
 	/**
+	 * Escapes regular expression characters within a string.
 	 * 
+	 * @param string the string in which to escape regular expression characters
 	 */
 	function escapeRegExp(string) {
 	    return string.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
 	}
 	
+	
 	/**
+	 * Replaces all instances of a substring within a string with something else.
 	 * 
+	 * @param string the string in which to replace
+	 * @param find the substring(s) to be replaced
+	 * @param replace the value to replace the targets with
 	 */
 	function replaceAll(string, find, replace) {
 		  return string.replace(new RegExp(escapeRegExp(find), 'g'), replace);
 	}
 	
+	
 	/**
+	 * Returns the selected entity from the data explorer.
 	 * 
-	 */
-	function lineBreaksToBrTags(str) {
-		return str.replace(/(?:\r\n|\r|\n)/g, '<br />');
-	}
-
-	/**
-	 * Returns the selected entity from the data explorer
+	 * @returns the selected entity
 	 */
 	function getEntity() {
 		return molgenis.dataexplorer.getSelectedEntityMeta();
 	}
 	
+	
+	/**
+	 * Returns the currently active data explorer query.
+	 * 
+	 * @returns a data explorer query
+	 */
 	function getQuery() {
 		return molgenis.dataexplorer.getEntityQuery();
 	}
 
+	
 	/**
-	 * @memberOf molgenis.dataexplorer.data
+	 * Returns the currently selected attributes.
+	 * 
+	 * @returns attributes
 	 */
 	function getAttributes() {
 		return molgenis.dataexplorer.getSelectedAttributes();
 	}
 	
+	
 	/**
+	 * Checks if a browser supports local storage.
 	 * 
+	 * @returns boolean telling if a browser supports local storage
 	 */
 	function browserSupportsLocalStorage() {
 		try {

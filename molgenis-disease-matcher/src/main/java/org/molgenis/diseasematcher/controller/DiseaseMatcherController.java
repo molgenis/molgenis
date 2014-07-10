@@ -4,8 +4,8 @@ import static org.molgenis.diseasematcher.controller.DiseaseMatcherController.BA
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -29,10 +29,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
 /**
- * Controller for handling communication between the Data Explorer Disease Matcher plugin and the DiseaseMapping and
+ * Controller for handling communication between the Data Explorer Disease Matcher module and the DiseaseMapping and
  * Disease datasets.
  * 
  * @author tommydeboer
@@ -62,43 +63,14 @@ public class DiseaseMatcherController
 	}
 
 	/**
+	 * Get a list of disease names from Disease for a list of OMIM identifiers.
 	 * 
-	 * @param test
-	 * @return
+	 * @param diseaseIds
+	 *            the OMIM identifier(s)
+	 * @param query
+	 *            eventual data query
+	 * @return mapping of OMIM identifiers with corresponding disease names
 	 */
-	@RequestMapping(value = "/genesAsString", method = POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public List<String> findGenesAsString(@RequestParam("diseaseId") String diseaseId,
-			@RequestParam(value = "query", required = false) List<QueryRule> query)
-	{
-		// don't forget currentquery
-		Iterable<DiseaseMapping> mappings;
-		if (query == null)
-		{
-			System.out.println("query null");
-			QueryRule queryRule = new QueryRule(DiseaseMapping.DISEASEID, Operator.EQUALS, diseaseId);
-			System.out.println(queryRule.toString());
-			mappings = dataService.findAll(DiseaseMapping.ENTITY_NAME, new QueryImpl(queryRule), DiseaseMapping.class);
-		}
-		else
-		{
-			QueryRule queryRule = new QueryRule(DiseaseMapping.DISEASEID, Operator.EQUALS, diseaseId);
-			query.add(queryRule);
-			mappings = dataService.findAll(DiseaseMapping.DISEASEID, new QueryImpl(query), DiseaseMapping.class);
-		}
-
-		List<String> geneSymbols = new ArrayList<String>();
-		for (DiseaseMapping dm : mappings)
-		{
-			System.out.println(dm.toString());
-			geneSymbols.add(dm.getString("geneSymbol"));
-		}
-
-		System.out.println(geneSymbols.toString());
-
-		return geneSymbols;
-	}
-
 	@RequestMapping(value = "/diseaseNames", method = POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public Map<String, Collection<String>> getDiseaseNamesforDiseaseIds(
@@ -134,9 +106,12 @@ public class DiseaseMatcherController
 	}
 
 	/**
+	 * Finds unique genes in a dataset and returns a slice of that set (for paging) stored in a FindGenesResponse
+	 * object.
 	 * 
 	 * @param request
-	 * @return
+	 *            a FindRequest
+	 * @return a FindGenesResponse
 	 */
 	@RequestMapping(value = "/genes", method = POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -149,7 +124,6 @@ public class DiseaseMatcherController
 		}
 		else
 		{
-			System.out.println(request.getQuery().toString());
 			entities = dataService.findAll(request.getDatasetName(), new QueryImpl(request.getQuery()));
 		}
 
@@ -161,7 +135,7 @@ public class DiseaseMatcherController
 		int stop = request.getStart() + request.getNum();
 
 		Set<String> uniqueGenes = new HashSet<String>();
-		List<String> geneList = new ArrayList<String>();
+		List<String> geneList = Lists.newArrayList();
 		for (Entity e : entities)
 		{
 			if (!uniqueGenes.contains(e.getString("geneSymbol")))
@@ -187,11 +161,12 @@ public class DiseaseMatcherController
 	}
 
 	/**
-	 * Finds disease identifier and name couples in a dataset. Dataset needs to have a 'geneSymbol' column.
+	 * Finds unique diseases in a dataset and returns a slice of that set (for paging) stored in a FindDiseasesResponse
+	 * object.
 	 * 
-	 * @param dataset
-	 *            the name of the dataset in which to look for diseases
-	 * @return a map of disease identifiers as keys and disease names as values
+	 * @param request
+	 *            a FindRequest
+	 * @return a FindDiseasesResponse
 	 */
 	@RequestMapping(value = "/diseases", method = POST, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -208,19 +183,19 @@ public class DiseaseMatcherController
 			entities = dataService.findAll(request.getDatasetName(), new QueryImpl(request.getQuery()));
 		}
 
-		List<String> genes = new ArrayList<String>();
+		List<String> genes = Lists.newArrayList();
 		for (Entity e : entities)
 		{
 			genes.add(e.getString("geneSymbol"));
 		}
 
-		if (genes.size() == 0)
+		if (genes.isEmpty())
 		{
 			FindDiseasesResponse response = new FindDiseasesResponse();
 			response.setNum(request.getNum());
 			response.setStart(request.getStart());
 			response.setTotal(0);
-			response.setDiseases(new ArrayList<Disease>());
+			response.setDiseases(Collections.<Disease> emptyList());
 		}
 
 		// get disease identifiers based on genes from the DiseaseMapping dataset
@@ -229,7 +204,7 @@ public class DiseaseMatcherController
 		Iterable<DiseaseMapping> diseaseMappingIterator = dataService.findAll(DiseaseMapping.ENTITY_NAME, query,
 				DiseaseMapping.class);
 
-		List<String> diseaseIds = new ArrayList<String>();
+		List<String> diseaseIds = Lists.newArrayList();
 		for (DiseaseMapping dm : diseaseMappingIterator)
 		{
 			diseaseIds.add(dm.getDiseaseId());
@@ -243,7 +218,7 @@ public class DiseaseMatcherController
 		// TODO use aggregates to get unique values
 
 		// get unique diseases only
-		List<Disease> uniqueDiseases = new ArrayList<Disease>();
+		List<Disease> uniqueDiseases = Lists.newArrayList();
 		Set<String> temp = new HashSet<String>();
 		for (Disease d : diseases)
 		{
@@ -263,7 +238,7 @@ public class DiseaseMatcherController
 		int start = request.getStart();
 		int stop = request.getStart() + request.getNum();
 
-		List<Disease> responseDiseases = new ArrayList<Disease>();
+		List<Disease> responseDiseases = Lists.newArrayList();
 
 		for (Disease d : uniqueDiseases)
 		{

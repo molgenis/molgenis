@@ -28,9 +28,7 @@
 				</div>
 		
 				<div class="row-fluid">
-					<#-- add span12 to ensure that input is styled correctly at low and high solutions -->
 					<div class="input-append span12" id="disease-search-container">
-						<#-- add span10 to ensure that input is styled correctly at low and high solutions -->
 						<input class="span10" id="diseasematcher-selection-search" type="text" placeholder="">
 						<button class="btn" type="button" id="disease-search-button"><i class="icon-large icon-search"></i></button>
 					</div>					
@@ -56,7 +54,6 @@
                         </div>
                     </div>
             	</div>
-            	
 			</div>
 		</div>
 	</div>		

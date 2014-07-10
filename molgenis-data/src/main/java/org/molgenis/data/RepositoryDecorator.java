@@ -1,5 +1,7 @@
 package org.molgenis.data;
 
+import org.springframework.util.ClassUtils;
+
 import java.io.IOException;
 import java.util.Iterator;
 
@@ -9,7 +11,7 @@ public class RepositoryDecorator implements Repository
 
 	public RepositoryDecorator(Repository decoratedRepository)
 	{
-		if (decoratedRepository == null) throw new IllegalArgumentException("decoratedRepsitory is null");
+		if (decoratedRepository == null) throw new IllegalArgumentException("decoratedRepository is null");
 		this.decoratedRepository = decoratedRepository;
 	}
 
@@ -47,5 +49,10 @@ public class RepositoryDecorator implements Repository
 	public String getUrl()
 	{
 		return decoratedRepository.getUrl();
+	}
+
+	public String getRepositoryClass()
+	{
+		return ClassUtils.getShortName(decoratedRepository.getClass().getSimpleName());
 	}
 }

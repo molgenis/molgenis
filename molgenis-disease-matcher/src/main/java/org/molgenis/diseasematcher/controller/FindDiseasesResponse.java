@@ -4,6 +4,11 @@ import java.util.List;
 
 import org.molgenis.omx.diseasemapping.Disease;
 
+/**
+ * Response object for when diseases were requested. Stores the results and paging information.
+ * 
+ * @author tommydeboer
+ */
 public class FindDiseasesResponse
 {
 	private int num;

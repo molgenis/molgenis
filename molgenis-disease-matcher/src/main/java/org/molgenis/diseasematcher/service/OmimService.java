@@ -1,4 +1,4 @@
-package org.molgenis.diseasematcher.controller;
+package org.molgenis.diseasematcher.service;
 
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
@@ -24,18 +24,19 @@ import org.springframework.util.FileCopyUtils;
 @Service
 public class OmimService
 {
-	/**
-	 * 
-	 */
+
 	private ObjectPool<String> pool;
 
 	/**
+	 * Constructor for OmimServices. Takes OMIM API keys from molgenis.properties and puts them in a pool.
 	 * 
 	 * @param apiKeys
+	 *            list of OMIM API keys from molgenis.properties
 	 */
 	@Autowired
 	public OmimService(@Value("#{'${omim_key:@null}'.split(',')}") List<String> apiKeys)
 	{
+		// initialize a pool for OMIM keys to circulate them and protect them from over-use
 		PooledOmimKeyFactory keyFactory = new PooledOmimKeyFactory(apiKeys);
 
 		PooledObjectFactory<String> syncFactory = PoolUtils.synchronizedPooledFactory(keyFactory);
@@ -49,9 +50,12 @@ public class OmimService
 	}
 
 	/**
+	 * Retrieves data form the OMIM service and returns it.
 	 * 
 	 * @param omimId
+	 *            the OMIM identifier to request
 	 * @param out
+	 *            OutputStream with the response
 	 */
 	public void getOmimData(String omimId, OutputStream out)
 	{
@@ -84,10 +88,13 @@ public class OmimService
 	}
 
 	/**
+	 * Builds an OMIM API URI query based on an OMIM id and an API key.
 	 * 
 	 * @param omimId
+	 *            the OMIM identifier to request
 	 * @param apiKey
-	 * @return
+	 *            the OMIM API key to use
+	 * @return a formatted OMIM API URI
 	 * @throws UnsupportedEncodingException
 	 */
 	protected String buildQueryURIString(String omimId, String apiKey) throws UnsupportedEncodingException

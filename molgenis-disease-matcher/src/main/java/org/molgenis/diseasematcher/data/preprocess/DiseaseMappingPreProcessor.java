@@ -64,6 +64,9 @@ public class DiseaseMappingPreProcessor
 		HelpFormatter formatter = new HelpFormatter();
 		formatter.setWidth(100);
 
+		File diseaseMappingOutFile = null;
+		File diseaseNamesOutFile = null;
+
 		try
 		{
 			// See if help option flag is set
@@ -102,11 +105,11 @@ public class DiseaseMappingPreProcessor
 				// process files
 				System.out.println("Combining TYPICAL_FEATURES and ALL_FREQUENCIES files to " + DISEASEMAPPING_FILENAME
 						+ " ...");
-				File diseaseMappingOutFile = new File(outDir.getAbsolutePath() + "/" + DISEASEMAPPING_FILENAME);
+				diseaseMappingOutFile = new File(outDir.getAbsolutePath() + "/" + DISEASEMAPPING_FILENAME);
 				dmpp.makeDiseaseMappingFile(typicalFile, allFile, diseaseMappingOutFile);
 
 				System.out.println("Parsing morbidmap to " + DISEASE_FILENAME + " ...");
-				File diseaseNamesOutFile = new File(outDir.getAbsolutePath() + "/" + DISEASE_FILENAME);
+				diseaseNamesOutFile = new File(outDir.getAbsolutePath() + "/" + DISEASE_FILENAME);
 				dmpp.makeDiseaseNamesFile(morbidmapFile, diseaseNamesOutFile);
 
 				// zip output files
@@ -117,13 +120,6 @@ public class DiseaseMappingPreProcessor
 
 				File outputZipFile = new File(outDir.getAbsolutePath(), ZIP_FILENAME);
 				ZipUtils.compress(files, outputZipFile, DirectoryStructure.EXCLUDE_DIR);
-
-				// remove temp files
-				System.out.println("Removing temporary files...");
-				diseaseMappingOutFile.delete();
-				diseaseNamesOutFile.delete();
-
-				System.out.println("Done!");
 			}
 		}
 		catch (ParseException exp)
@@ -144,6 +140,13 @@ public class DiseaseMappingPreProcessor
 		catch (IOException e)
 		{
 			e.printStackTrace();
+		}
+		finally
+		{
+			// remove temp files
+			System.out.println("Removing temporary files...");
+			diseaseMappingOutFile.delete();
+			diseaseNamesOutFile.delete();
 		}
 	}
 

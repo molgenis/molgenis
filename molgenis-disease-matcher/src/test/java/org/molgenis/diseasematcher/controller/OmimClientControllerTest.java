@@ -8,6 +8,7 @@ import static org.testng.AssertJUnit.assertEquals;
 import java.io.OutputStream;
 
 import org.mockito.Mockito;
+import org.molgenis.diseasematcher.service.OmimService;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.testng.annotations.Test;
 

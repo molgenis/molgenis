@@ -1,10 +1,11 @@
-package org.molgenis.diseasematcher.controller;
+package org.molgenis.diseasematcher.service;
 
 import static org.testng.AssertJUnit.assertEquals;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 
+import org.molgenis.diseasematcher.service.OmimService;
 import org.testng.annotations.Test;
 
 public class OmimServiceTest

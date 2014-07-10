@@ -3,9 +3,9 @@ package org.molgenis.diseasematcher.controller;
 import java.util.List;
 
 /**
+ * Response object for when genes were requested. Stores the results and paging information.
  * 
  * @author tommydeboer
- * 
  */
 public class FindGenesResponse
 {

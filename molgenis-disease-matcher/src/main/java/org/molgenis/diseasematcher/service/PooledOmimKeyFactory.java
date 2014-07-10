@@ -1,4 +1,4 @@
-package org.molgenis.diseasematcher.controller;
+package org.molgenis.diseasematcher.service;
 
 import java.util.List;
 
@@ -6,6 +6,7 @@ import org.apache.commons.pool2.BasePooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
 
 /**
+ * A factory for OMIM keys for a GenericObjectPool.
  * 
  * @author tommydeboer
  * 
@@ -18,6 +19,7 @@ public class PooledOmimKeyFactory extends BasePooledObjectFactory<String>
 	/**
 	 * 
 	 * @param omimKeys
+	 *            list of OMIM keys
 	 */
 	public PooledOmimKeyFactory(List<String> omimKeys)
 	{
@@ -26,7 +28,9 @@ public class PooledOmimKeyFactory extends BasePooledObjectFactory<String>
 	}
 
 	/**
-	 * 
+	 * Called when an object is borrowed from the pool but does not exist yet. Throws an exception when there are more
+	 * objects created than OMIM keys available (this should not happen as long as the properties of the pool are set
+	 * correctly).
 	 */
 	@Override
 	public String create() throws IllegalArgumentException
@@ -39,9 +43,6 @@ public class PooledOmimKeyFactory extends BasePooledObjectFactory<String>
 		return omimKeys.get(index++);
 	}
 
-	/**
-	 * 
-	 */
 	@Override
 	public PooledObject<String> wrap(String key)
 	{
