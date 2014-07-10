@@ -15,9 +15,9 @@
 	self.createFilterControls = function createFilterControls(attribute, filter, addLabel) {
 		switch(attribute.fieldType) {
 			case 'BOOL':
+			case 'CATEGORICAL':
 				return createSimpleFilterControls(attribute, filter, addLabel);
 				break;
-			case 'CATEGORICAL':
 			case 'DATE':
 			case 'DATE_TIME':
 			case 'DECIMAL':
@@ -164,7 +164,7 @@
 	 */
 	function createComplexFilterControls(attribute, filter, addLabel) 
 	{		
-		var container = createComplexFilterControlsContainer(attribute, filter, addLabel);		
+		var container = createComplexFilterControlsContainer(attribute, filter, addLabel);
 		if(filter){
 			if(filter.isType('complex')){
 				$.each(filter.getFilters(), function(index, value){
