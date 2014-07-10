@@ -69,9 +69,19 @@ public class GafListImporterController extends MolgenisPluginController
 				
 				model.addAttribute("hasValidationError", gafListValidationReport.hasErrors());
 				model.addAttribute("validationReport", gafListValidationReport.toStringHtml());
-				messages.add("Successfully imported GAF list named: <b>" + gafListValidationReport.getDataSetName()
+
+				if (!gafListValidationReport.getValidRunIds().isEmpty())
+				{
+					messages.add("Successfully imported GAF list named: <b>" + gafListValidationReport.getDataSetName()
 						+ "</b>");
-				messages.add("Imported run id's: <b>" + gafListValidationReport.getValidRunIds() + "</b>");
+
+					messages.add("Imported run id's: <b>" + gafListValidationReport.getValidRunIds() + "</b>");
+				}
+				else
+				{
+					messages.add("This file is not imported because the validation for all runs failed");
+				}
+
 
 				if (gafListValidationReport.hasErrors())
 				{

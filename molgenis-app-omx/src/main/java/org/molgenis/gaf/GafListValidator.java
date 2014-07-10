@@ -176,7 +176,7 @@ public class GafListValidator
 
 			for (AttributeMetaData attributeMetaData : attributes)
 			{
-				String attributeName = attributeMetaData.getName();
+				String attributeName = attributeMetaData.getName().trim();
 				if (attributeName.isEmpty()) continue;
 				String value = entity.getString(attributeName);
 
