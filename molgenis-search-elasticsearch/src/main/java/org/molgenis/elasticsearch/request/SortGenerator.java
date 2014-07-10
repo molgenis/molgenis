@@ -46,6 +46,12 @@ public class SortGenerator implements QueryPartGenerator
 							.append('.')
 							.append(entityMetaData.getAttribute(sort.getProperty()).getRefEntity().getLabelAttribute()
 									.getName()).append('.').append(MappingsBuilder.FIELD_NOT_ANALYZED);
+				}else if (entityMetaData != null
+						&& entityMetaData.getAttribute(sort.getProperty()) != null
+						&& entityMetaData.getAttribute(sort.getProperty()).getDataType().getEnumType().toString()
+								.equalsIgnoreCase(MolgenisFieldTypes.BOOL.toString()))
+				{
+					sortField.append(sort.getProperty());
 				}
 				else
 				{
