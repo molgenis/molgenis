@@ -190,8 +190,7 @@ public class IndexRequestGenerator
 									List<Object> mrefIds = null;
 									List<String> mrefKeys = null;
 									List<Object> labelValues = Lists.newArrayListWithCapacity(values.size());
-									// List<Map<String, Object>> labelValues =
-									// new ArrayList<Map<String, Object>>();
+
 									for (Iterator<Entity> it = ((Collection<Entity>) values).iterator(); it.hasNext();)
 									{
 
@@ -202,11 +201,6 @@ public class IndexRequestGenerator
 
 										if (labelValue != null)
 										{
-											// Map<String, Object> refDoc = new
-											// HashMap<String, Object>();
-											// refDoc.put(refEntityMetaData.getLabelAttribute().getName(),
-											// labelValue);
-											// labelValues.add(refDoc);
 											labelValues.add(labelValue);
 										}
 
