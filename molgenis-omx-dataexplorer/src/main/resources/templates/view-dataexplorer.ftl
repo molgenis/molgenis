@@ -9,7 +9,8 @@
 	"select2.css",
 	"iThing-min.css",
 	"bootstrap-switch.min.css",
-	"dataexplorer.css"]>
+	"dataexplorer.css",
+	"diseasematcher.css"]>
 <#assign js=[
 	"jquery-ui-1.9.2.custom.min.js",
 	"jquery.bootstrap.wizard.min.js",
@@ -25,11 +26,6 @@
 	"jquery.molgenis.xrefsearch.js",
 	"dataexplorer.js",
 	"jquery.molgenis.table.js"]>
-
-<#if modDiseaseMatcher == true>
-	<#assign js = js + ["dataexplorer-disease-matcher.js"]/>
-	<#assign css = css + ["diseasematcher.css"]/>
-</#if>
 
 <@header css js/>
     <script>
@@ -106,8 +102,6 @@
 		</div>
 		
 		<div id="module-nav"></div>
-		
-		<#if modDiseaseMatcher == true> <#include "view-dataexplorer-mod-diseasematcher.ftl"> </#if>
 	
 	</div>
 <@footer/>
