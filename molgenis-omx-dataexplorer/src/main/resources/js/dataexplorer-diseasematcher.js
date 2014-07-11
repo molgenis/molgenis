@@ -609,13 +609,19 @@
 		var query = {'q' : queryRules};
 
 		// show associated variants in info panel
+		
+		if (tableEditable) {
+			tableEditable = molgenis.hasWritePermission(molgenis.dataexplorer.getSelectedEntityMeta().name);
+		}
+	
 		if ($('#diseasematcher-variant-panel').has('table').length){
 			$('#diseasematcher-variant-panel').table('setQuery', query);
 		}else{
 			$('#diseasematcher-variant-panel').table({
 				'entityMetaData' : getEntity(),
 				'attributes' : getAttributes(),
-				'query' : query
+				'query' : query,
+				'editable': tableEditable
 			});
 		}
 	}
