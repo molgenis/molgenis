@@ -59,8 +59,8 @@
 	</div>		
 </div>
 <script>
+	var tableEditable = ${tableEditable?string('true', 'false')};
 	$.when($.ajax("/js/dataexplorer-diseasematcher.js", {'cache': true}))
 			.then(function() {
-				//	
 	});
 </script>

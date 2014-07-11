@@ -202,6 +202,10 @@ public class DataExplorerController extends MolgenisPluginController
 			String galaxyUrl = molgenisSettings.getProperty(KEY_GALAXY_URL);
 			if (galaxyUrl != null) model.addAttribute(ATTR_GALAXY_URL, galaxyUrl);
 		}
+		else if (moduleId.equals("diseasematcher"))
+		{
+			model.addAttribute("tableEditable", isTableEditable());
+		}
 		return "view-dataexplorer-mod-" + moduleId; // TODO bad request in case of invalid module id
 	}
 
