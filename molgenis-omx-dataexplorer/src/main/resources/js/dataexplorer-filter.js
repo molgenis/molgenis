@@ -402,7 +402,9 @@
 			var toValue = this.toValue;
 			var operator = this.operator;
 			
-			$(":input",$domElement).not('[type=radio]:not(:checked)').not('[type=checkbox]:not(:checked)').not('.exclude').each(function(){
+			$(":input",$domElement).not('[type=radio]:not(:checked)')
+					.not('[type=checkbox]:not(:checked)')
+					.not('.exclude').each(function(){
 				var value = $(this).val();
 				var name =  $(this).attr("name");
 				

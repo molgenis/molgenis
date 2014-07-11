@@ -93,16 +93,16 @@
 		return result;
 	}
 
-	function createSelect2(container, attributeMetaData, options) {
+	function createSelect2($container, attributeMetaData, options) {
 		var refEntityMetaData = restApi.get(attributeMetaData.refEntity.href, {expand: ['attributes']});
 		var lookupAttrNames = getLookupAttributeNames(refEntityMetaData);
-		var hiddenInput = container.find('input[type=hidden]');
+		var hiddenInput = $(":input[type=hidden]",$container).not('[data-filter=operator]');
 
 		hiddenInput.select2({
 			width: options.width ? options.width : 'resolve',
 			minimumInputLength: 2,
-            multiple: (attributeMetaData.fieldType === 'MREF'),
-            closeOnSelect: (attributeMetaData.fieldType === 'XREF'),
+			multiple: (attributeMetaData.fieldType === 'MREF'),
+			closeOnSelect: (attributeMetaData.fieldType === 'XREF'),
 			query: function (options){
 				var query = createQuery(lookupAttrNames, options.term.match(/[^ ]+/g),'SEARCH', true);
 				if(query)
@@ -111,7 +111,7 @@
 						options.callback({results: data.items, more: false});
 					});
 				}
-            },
+			},
 			initSelection: function(element, callback) {
 				//Only called when the input has a value
 				var query = createQuery(lookupAttrNames, element.val().split(','), 'EQUALS', false);
@@ -131,42 +131,46 @@
 			id: function(entity) {
 				return entity[refEntityMetaData.labelAttribute];
 			},
-            separator: ',',
+			separator: ',',
 			dropdownCssClass: 'molgenis-xrefsearch'
 		});
 
 		if(!lookupAttrNames.length){
-			container.append($("<label>lookup attribute is not defined.</label>"));
+			$container.append($("<label>lookup attribute is not defined.</label>"));
 		}
 	}
 
-	function addQueryPartSelect(container, attributeMetaData, options) {
+	function addQueryPartSelect($container, attributeMetaData, options) {
 		var attrs = {};
 		if(options.autofocus) {
 			attrs.autofocus = options.autofocus;
 		}
-        if (options.isfilter && attributeMetaData.fieldType === 'MREF') {
-            var checkbox = $('<input type="checkbox" class="exclude">');//Checkbox is only for jquery-switch, it should not be included in the query
-    		checkbox.attr('checked', options.operator === 'OR');
-    		container.prepend(checkbox);
-    		
-    		var andOrSwitch = checkbox.bootstrapSwitch({
-    			onText: 'OR',
-    			offText: 'AND',
-    			onSwitchChange: function(event, state) {
-    				var operator = state ? 'OR' : 'AND';
-    				operatorInput.val(operator);
-    			}
-    		});
-    		
-    		var operatorInput = $('<input type="hidden" class="operator top" >');
-    		operatorInput.val(options.operator);
-    		andOrSwitch.append(operatorInput);
-        }
+		if (options.isfilter && attributeMetaData.fieldType === 'MREF') {
+			var $operatorInput = $('<input type="hidden" data-filter="operator" value="' + options.operator + '"class="operator" />');
+			var $dropdown = $('<div class="btn-group"><div>');
+			var orValue = "OR&nbsp;&nbsp;";
+			var andValue = "AND";
+			$dropdown.append($('<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">' + (options.operator === "AND" ? andValue : orValue) + ' <b class="caret"></a>'));
+			$dropdown.append($operatorInput);
+			$dropdown.append($('<ul class="dropdown-menu"><li><a data-value="OR">' + orValue + '</a></li><li><a data-value="AND">' + andValue + '</a></li></ul>'));
+
+			$.each($dropdown.find('.dropdown-menu li a'), function(index, element){
+				$(element).click(function(){
+					var dataValue = $(this).attr('data-value');
+					$operatorInput.val(dataValue);
+					$dropdown.find('a:first').html((dataValue === "AND" ? andValue : orValue) + ' <b class="caret"></b>');
+					$dropdown.find('a:first').val(dataValue);
+				});
+			});
+			
+			$dropdown.find('div:first').remove();
+			
+			$container.prepend($dropdown);
+		}
 
 		var element = createInput(attributeMetaData, attrs, options.values);
-		container.prepend(element);
-		createSelect2(container, attributeMetaData, options);
+		$container.append(element);
+		createSelect2($container, attributeMetaData, options);
 	}
 
 	/**
