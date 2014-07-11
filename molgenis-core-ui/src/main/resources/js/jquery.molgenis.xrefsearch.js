@@ -163,7 +163,7 @@
 				});
 			});
 			
-			$dropdown.find('div:first').remove();
+			$dropdown.find('div:first').remove();//This is a workaround FIX
 			
 			$container.prepend($dropdown);
 		}
