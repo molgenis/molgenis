@@ -133,6 +133,10 @@ a.accordion-toggle:hover,a.accordion-toggle:focus,a.accordion-toggle:active
 	color: #333;
 }
 
+.select2-input {
+	width: 100% !important;
+}
+
 .molgenis-xrefmrefsearch .select2-result:nth-child(even) {
 	background-color: #DDD;
 }
@@ -151,8 +155,8 @@ a.accordion-toggle:hover,a.accordion-toggle:focus,a.accordion-toggle:active
 }
 
 #filter-wizard-modal .modal-body {
-	min-height: 500px;
-	max-height: 500px;
+	min-height: 540px;
+	max-height: 540px;
 	padding-bottom: 0;
 }
 
@@ -172,6 +176,10 @@ a.accordion-toggle:hover,a.accordion-toggle:focus,a.accordion-toggle:active
 
 #filter-wizard-modal .wizard-steps {
 	margin-bottom: 10px
+}
+
+#filter-wizard-modal .form-horizontal .control-group .select2-choices{
+	position: static;
 }
 
 #filter-modal .modal-body {

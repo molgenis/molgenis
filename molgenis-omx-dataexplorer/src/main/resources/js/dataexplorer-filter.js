@@ -191,32 +191,56 @@
 	/**
 	 * @memberOf molgenis.dataexplorer
 	 */
-	function addComplexFilterControlsElementsToContainer(container, attribute, operator, simpleFilter, addLabel, addRemoveCapability) {
+	function addComplexFilterControlsElementsToContainer(container, attribute, operator, simpleFilter, addLabel, isNextRow) {
 		var elements = createSimpleFilterControlsElements(attribute, simpleFilter, false);
-		if(addRemoveCapability) {
-			addRemoveButton(elements);
-			elements.append($('<label class="control-label"></label>'));
+		if(isNextRow) {
+			elements = addNextRowToComplexFilterContainer(elements);
 		} else {
-			var label = attribute.label || attribute.name;
-			elements.append($('<label class="control-label" data-placement="right" data-title="' + attribute.description + '">' + label + '</label>').tooltip());
-			var row = $('<div class="controls controls-row">');
-			$('.controls.controls-row', elements).parent().append(row.append($('<button class="btn"  type="button"><i class="icon-plus"></i></button>').click(function(){
-				addComplexFilterControlsElementsToContainer(container, attribute, operator, undefined, addLabel, true);
-				if(!$('.complexFilter.operator', container).length){
-					createComplexFilterSelectOperator(operator, row);
-				}
-			})));
+			elements = addFirstRowToComplexFilterContainer(elements, container, attribute, operator, simpleFilter, addLabel);
 		}
-		
 		return container.append(elements);
+	}
+	
+	/**
+	 * Add the next rows to the complex filter.
+	 * 
+	 * 1. empty label
+	 * 2. filter
+	 * 3. remove button.
+	 */
+	function addNextRowToComplexFilterContainer(elements) {
+		addRemoveButton(elements);
+		elements.append($('<label class="control-label"></label>'));
+		return elements;
+	}
+	
+	/**
+	 * Add the first row with elements to the complex filter.
+	 * 
+	 * 1. label
+	 * 2. filter
+	 * 3. complex filter operator selection 
+	 */
+	function addFirstRowToComplexFilterContainer(elements, container, attribute, operator, simpleFilter, addLabel) {
+		var label = attribute.label || attribute.name;
+		elements.append($('<label class="control-label" data-placement="right" data-title="' + attribute.description + '">' + label + '</label>').tooltip());
+		var row = $('<div class="controls">');
+		$('.controls', elements).parent().append(row.append($('<button class="btn"  type="button"><i class="icon-plus"></i></button>').click(function(){
+			addComplexFilterControlsElementsToContainer(container, attribute, operator, undefined, addLabel, true);
+			if(!$('.complexFilter.operator', container).length){
+				createComplexFilterSelectOperator(operator, row);
+			}
+		})));
+		
+		return elements;
 	}
 	
 	/**
 	 * @memberOf molgenis.dataexplorer
 	 */
 	function addRemoveButton(elements){
-		$('.controls.controls-row', elements)
-			.parent().append($('<div class="controls controls-row">').append($('<button class="btn" type="button"><i class="icon-trash"></i></button>').click(function(){
+		$('.controls', elements)
+			.parent().append($('<div class="controls">').append($('<button class="btn" type="button"><i class="icon-trash"></i></button>').click(function(){
 				if($('.icon-trash', elements.parent()).length === 1){
 					$('.bootstrap-switch', elements.parent()).remove();
 				}
@@ -242,7 +266,7 @@
 	 */
 	function createSimpleFilterControlsElements(attribute, filter, addLabel) {
 		var container = $('<div class="control-group">');
-		var controls = $('<div class="controls controls-row">').width('40%');
+		var controls = $('<div class="controls">').width('40%');
 		var name = 'input-' + attribute.name + '-' + new Date().getTime();
 		var values = filter ? filter.getValues() : null;
 		var fromValue = filter ? filter.fromValue : null;
