@@ -16,6 +16,7 @@
 		switch(attribute.fieldType) {
 			case 'BOOL':
 			case 'CATEGORICAL':
+			case 'XREF':
 				return createSimpleFilterControls(attribute, filter, addLabel);
 				break;
 			case 'DATE':
@@ -30,7 +31,6 @@
 			case 'INT':
 			case 'TEXT':
 			case 'MREF':
-			case 'XREF':
 				return createComplexFilterControls(attribute, filter, addLabel);
 				break;
 			case 'COMPOUND' :
@@ -127,11 +127,11 @@
 			case 'STRING':
 			case 'TEXT':
 			case 'BOOL':
-			case 'XREF':
 			case 'ENUM':
 				return htmlEscape(values[0] ? values[0] : '');
 			case 'CATEGORICAL':
 			case 'MREF':
+			case 'XREF':
 				var operator = (filter.operator ? filter.operator.toLocaleLowerCase() : 'or');
 				var array = [];
 				$.each(values, function(key, value) {
@@ -417,7 +417,7 @@
 					// Add values
 					else 
 					{
-		                if(attribute.fieldType === 'MREF'){
+		                if(attribute.fieldType === 'MREF' || attribute.fieldType === 'XREF'){
 		                    var mrefValues = value.split(',');
 		                    $(mrefValues).each(function(i){
 		                    	values.push(mrefValues[i]);

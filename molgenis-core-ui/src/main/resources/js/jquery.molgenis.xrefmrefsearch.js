@@ -101,8 +101,8 @@
 		hiddenInput.select2({
 			width: options.width ? options.width : 'resolve',
 			minimumInputLength: 2,
-			multiple: (attributeMetaData.fieldType === 'MREF'),
-			closeOnSelect: (attributeMetaData.fieldType === 'XREF'),
+			multiple: (attributeMetaData.fieldType === 'MREF' || attributeMetaData.fieldType === 'XREF'),
+			closeOnSelect: false,
 			query: function (options){
 				var query = createQuery(lookupAttrNames, options.term.match(/[^ ]+/g),'SEARCH', true);
 				if(query)
@@ -142,30 +142,38 @@
 
 	function addQueryPartSelect($container, attributeMetaData, options) {
 		var attrs = {};
+		
 		if(options.autofocus) {
 			attrs.autofocus = options.autofocus;
 		}
-		if (options.isfilter && attributeMetaData.fieldType === 'MREF') {
+		
+		if (options.isfilter){
 			var $operatorInput = $('<input type="hidden" data-filter="operator" value="' + options.operator + '"class="operator" />');
-			var $dropdown = $('<div class="btn-group"><div>');
-			var orValue = "OR&nbsp;&nbsp;";
-			var andValue = "AND";
-			$dropdown.append($('<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">' + (options.operator === "AND" ? andValue : orValue) + ' <b class="caret"></a>'));
-			$dropdown.append($operatorInput);
-			$dropdown.append($('<ul class="dropdown-menu"><li><a data-value="OR">' + orValue + '</a></li><li><a data-value="AND">' + andValue + '</a></li></ul>'));
-
-			$.each($dropdown.find('.dropdown-menu li a'), function(index, element){
-				$(element).click(function(){
-					var dataValue = $(this).attr('data-value');
-					$operatorInput.val(dataValue);
-					$dropdown.find('a:first').html((dataValue === "AND" ? andValue : orValue) + ' <b class="caret"></b>');
-					$dropdown.find('a:first').val(dataValue);
+			if(attributeMetaData.fieldType === 'MREF') {
+				var $dropdown = $('<div class="btn-group"><div>');
+				var orValue = "OR&nbsp;&nbsp;";
+				var andValue = "AND";
+				$dropdown.append($('<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">' + (options.operator === "AND" ? andValue : orValue) + ' <b class="caret"></a>'));
+				$dropdown.append($operatorInput);
+				$dropdown.append($('<ul class="dropdown-menu"><li><a data-value="OR">' + orValue + '</a></li><li><a data-value="AND">' + andValue + '</a></li></ul>'));
+	
+				$.each($dropdown.find('.dropdown-menu li a'), function(index, element){
+					$(element).click(function(){
+						var dataValue = $(this).attr('data-value');
+						$operatorInput.val(dataValue);
+						$dropdown.find('a:first').html((dataValue === "AND" ? andValue : orValue) + ' <b class="caret"></b>');
+						$dropdown.find('a:first').val(dataValue);
+					});
 				});
-			});
+				
+				$dropdown.find('div:first').remove();//This is a workaround FIX
 			
-			$dropdown.find('div:first').remove();//This is a workaround FIX
-			
-			$container.prepend($dropdown);
+				$container.prepend($dropdown);
+			}
+			else if (attributeMetaData.fieldType === 'XREF') {
+				$operatorInput.val('OR');
+				$container.prepend($operatorInput);
+			}
 		}
 
 		var element = createInput(attributeMetaData, attrs, options.values);
