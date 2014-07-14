@@ -320,8 +320,8 @@
 			case 'MREF':
 			case 'XREF':
 				var operator = filter ? filter.operator : 'OR';
-				controls.addClass("xrefsearch");
-				controls.xrefsearch({
+				controls.addClass("xrefmrefsearch");
+				controls.xrefmrefsearch({
 					attribute : attribute,
 					values : values,
 					operator : operator,

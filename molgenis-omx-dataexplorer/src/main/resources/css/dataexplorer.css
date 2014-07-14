@@ -126,27 +126,27 @@ a.accordion-toggle:hover,a.accordion-toggle:focus,a.accordion-toggle:active
 	cursor: pointer;
 }
 
-.molgenis-xrefsearch .select2-result {
+.molgenis-xrefmrefsearch .select2-result {
 	vertical-align: top;
 	padding: 2px;
 	font-size: 12px;
 	color: #333;
 }
 
-.molgenis-xrefsearch .select2-result:nth-child(even) {
+.molgenis-xrefmrefsearch .select2-result:nth-child(even) {
 	background-color: #DDD;
 }
 
-.molgenis-xrefsearch .select2-result:nth-child(odd) {
+.molgenis-xrefmrefsearch .select2-result:nth-child(odd) {
 	background-color: #FFF;
 }
 
-.molgenis-xrefsearch .select2-results .select2-highlighted {
+.molgenis-xrefmrefsearch .select2-results .select2-highlighted {
     background: #04c;
     color: #fff;
 }
 
-.molgenis-xrefsearch .add-ref-query-part, .remove-ref-query-part {
+.molgenis-xrefmrefsearch .add-ref-query-part, .remove-ref-query-part {
 	margin-left: 10px;
 }
 

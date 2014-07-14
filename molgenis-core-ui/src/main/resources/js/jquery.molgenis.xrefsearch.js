@@ -3,11 +3,11 @@
  * 
  * usage: 
  * 
- * $('#id_of_hidden_input)').xrefsearch({attributeUri: 'api/v1/celiacsprue/meta/Celiac_Family'});
+ * $('#id_of_hidden_input)').xrefmrefsearch({attributeUri: 'api/v1/celiacsprue/meta/Celiac_Family'});
  * 
  * or
  * 
- * $('#id_of_hidden_input)').xrefsearch({attribute: attribute});
+ * $('#id_of_hidden_input)').xrefmrefsearch({attribute: attribute});
  * 
  * Depends on select2.js and molgenis.js
  */
@@ -132,7 +132,7 @@
 				return entity[refEntityMetaData.labelAttribute];
 			},
 			separator: ',',
-			dropdownCssClass: 'molgenis-xrefsearch'
+			dropdownCssClass: 'molgenis-xrefmrefsearch'
 		});
 
 		if(!lookupAttrNames.length){
@@ -186,7 +186,7 @@
 	 * 					
 	 * 				}
 	 */
-	$.fn.xrefsearch = function(options) {
+	$.fn.xrefmrefsearch = function(options) {//mref or xref select2
 		var container = this;
 		var attributeUri = options.attributeUri ? options.attributeUri : options.attribute.href;
 		restApi.getAsync(attributeUri, {attributes:['refEntity', 'fieldType'], expand:['refEntity']}, function(attributeMetaData) {
