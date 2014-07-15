@@ -30,6 +30,15 @@ import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.value.BoolValue;
+import org.molgenis.omx.observ.value.DateValue;
+import org.molgenis.omx.observ.value.DecimalValue;
+import org.molgenis.omx.observ.value.EmailValue;
+import org.molgenis.omx.observ.value.HtmlValue;
+import org.molgenis.omx.observ.value.HyperlinkValue;
+import org.molgenis.omx.observ.value.IntValue;
+import org.molgenis.omx.observ.value.LongValue;
+import org.molgenis.omx.observ.value.StringValue;
+import org.molgenis.omx.observ.value.TextValue;
 import org.molgenis.omx.observ.value.Value;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
@@ -318,7 +327,7 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Cr
 	}
 
 	/**
-	 * For now update only is implemented for boolean attributes
+	 * Update needs to be implemented for DateTimeValues, CategoricalValues, XrefValues and MrefValues
 	 */
 	@Override
 	public void update(Entity entity)
@@ -343,6 +352,8 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Cr
 		for (ObservedValue observedValue : observedValues)
 		{
 			Value value = observedValue.getValue();
+			
+			// update for every value type (boolean, string, integer etc..) except dateTime, xref, mref and categorical
 			if (value instanceof BoolValue)
 			{
 				String attrName = observedValue.getFeature().getIdentifier();
@@ -354,6 +365,90 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Cr
 
 				// Update ES
 				searchService.updateDocumentById(dataSetIdentifier, documentId, attrName + "=" + boolValue.getValue());
+			
+			}
+			else if(value instanceof StringValue)
+			{
+				String attrName = observedValue.getFeature().getIdentifier();
+				StringValue stringValue = (StringValue) value;
+				stringValue.setValue(entity.getString(attrName));
+				
+				dataService.update(StringValue.ENTITY_NAME, stringValue);
+				searchService.updateDocumentById(dataSetIdentifier, documentId, attrName + "='" + stringValue.getValue() + "'");
+				
+			}
+			else if(value instanceof TextValue)
+			{
+				String attrName = observedValue.getFeature().getIdentifier();
+				TextValue textValue = (TextValue) value;
+				textValue.setValue(entity.getString(attrName));
+				
+				dataService.update(TextValue.ENTITY_NAME, textValue);
+				searchService.updateDocumentById(dataSetIdentifier, documentId, attrName + "='" + textValue.getValue() + "'");
+			}
+			else if(value instanceof LongValue)
+			{
+				String attrName = observedValue.getFeature().getIdentifier();
+				LongValue longValue = (LongValue) value;
+				longValue.setValue(Long.parseLong(entity.getString(attrName)));
+				
+				dataService.update(LongValue.ENTITY_NAME, longValue);
+				searchService.updateDocumentById(dataSetIdentifier, documentId, attrName + "=" + longValue.getValue());
+			}
+			else if(value instanceof IntValue)
+			{
+				String attrName = observedValue.getFeature().getIdentifier();
+				IntValue intValue = (IntValue) value;
+				intValue.setValue(Integer.parseInt(entity.getString(attrName)));
+				
+				dataService.update(IntValue.ENTITY_NAME, intValue);
+				searchService.updateDocumentById(dataSetIdentifier, documentId, attrName + "=" + intValue.getValue());
+				
+			}
+			else if(value instanceof DecimalValue)
+			{
+				String attrName = observedValue.getFeature().getIdentifier();
+				DecimalValue decimalValue = (DecimalValue) value;
+				decimalValue.setValue(Double.parseDouble(entity.getString(attrName)));
+				
+				dataService.update(DecimalValue.ENTITY_NAME, decimalValue);
+				searchService.updateDocumentById(dataSetIdentifier, documentId, attrName + "=" + decimalValue.getValue());
+			}
+			else if(value instanceof HtmlValue)
+			{
+				String attrName = observedValue.getFeature().getIdentifier();
+				HtmlValue htmlValue = (HtmlValue) value;
+				htmlValue.setValue(entity.getString(attrName));
+
+				dataService.update(HtmlValue.ENTITY_NAME, htmlValue);
+				searchService.updateDocumentById(dataSetIdentifier, documentId, attrName + "='" + htmlValue.getValue() + "'");
+			}
+			else if(value instanceof HyperlinkValue)
+			{
+				String attrName = observedValue.getFeature().getIdentifier();
+				HyperlinkValue hyperlinkValue = (HyperlinkValue) value;
+				hyperlinkValue.setValue(entity.getString(attrName));
+				
+				dataService.update(HyperlinkValue.ENTITY_NAME, hyperlinkValue);
+				searchService.updateDocumentById(dataSetIdentifier, documentId, attrName + "='" + hyperlinkValue.getValue() + "'");
+			}
+			else if(value instanceof EmailValue)
+			{
+				String attrName = observedValue.getFeature().getIdentifier();
+				EmailValue emailValue = (EmailValue) value;
+				emailValue.setValue(entity.getString(attrName));
+
+				dataService.update(EmailValue.ENTITY_NAME, emailValue);
+				searchService.updateDocumentById(dataSetIdentifier, documentId, attrName + "='" + emailValue.getValue() + "'");
+			}
+			else if(value instanceof DateValue)
+			{
+				String attrName = observedValue.getFeature().getIdentifier();
+				DateValue dateValue = (DateValue) value;
+				dateValue.setValue(entity.getDate(attrName));
+				
+				dataService.update(DateValue.ENTITY_NAME, dateValue);
+				searchService.updateDocumentById(dataSetIdentifier, documentId, attrName + "='" + dateValue.getValue() + "'");
 			}
 		}
 	}
