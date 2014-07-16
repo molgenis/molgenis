@@ -77,12 +77,13 @@
 				var ontologyTermUrlDiv = $('<div />').addClass('span5 termurl').css('margin-bottom', '-6px').append('<a href="' + hit.columnValueMap.ontologyTermIRI + '" target="_blank">' + hit.columnValueMap.ontologyTermIRI + '</a>');
 				var matchScoreDiv = $('<div />').addClass('span2').css('margin-bottom', '-6px').append('<center>' + hit.columnValueMap.combinedScore.toFixed(2) + '</center>');
 				var newLineDiv = $('<div />').addClass('row-fluid').append(ontologyTermNameDiv).append(ontologyTermUrlDiv).append(matchScoreDiv);
+				var isEqual = hit.columnValueMap.ontologyTermSynonym === hit.columnValueMap.ontologyTerm;
 				var popoverOption = {
 					'placement' : 'bottom',
 					'trigger' : 'hover',
-					'title' : 'Look up in ontology',
+					'title' : 'Click to look up in ontology',
 					'html' : true,
-					'content' : 'Click to inspect the ontology term in the tree' 
+					'content' : 'Matched by <u>' + (isEqual ? 'lable' : 'synonym') + '</u> shown below : <br><br> <strong>' + hit.columnValueMap.ontologyTermSynonym + '</strong><br>'
 				};
 				
 				var nodePath = hit.columnValueMap.nodePath;
