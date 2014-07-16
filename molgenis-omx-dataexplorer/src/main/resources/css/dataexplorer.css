@@ -214,9 +214,9 @@ ul.fancytree-container {
 }
 
 .form-horizontal .controls {
-	margin: 4px;
 	display: inline-block;
 	padding-left: 20px;
+	margin-left: 0px;
 	vertical-align: top;
 }
 

@@ -96,7 +96,7 @@
 	function createSelect2($container, attributeMetaData, options) {
 		var refEntityMetaData = restApi.get(attributeMetaData.refEntity.href, {expand: ['attributes']});
 		var lookupAttrNames = getLookupAttributeNames(refEntityMetaData);
-		var hiddenInput = $(":input[type=hidden]",$container).not('[data-filter=operator]');
+		var hiddenInput = $(":input[type=hidden]",$container).not('[data-filter=xrefmref-operator]');
 
 		hiddenInput.select2({
 			width: options.width ? options.width : 'resolve',
@@ -148,7 +148,7 @@
 		}
 		
 		if (options.isfilter){
-			var $operatorInput = $('<input type="hidden" data-filter="operator" value="' + options.operator + '"class="operator" />');
+			var $operatorInput = $('<input type="hidden" data-filter="xrefmref-operator" value="' + options.operator + '" />');
 			if(attributeMetaData.fieldType === 'MREF') {
 				var $dropdown = $('<div class="btn-group"><div>');
 				var orValue = "OR&nbsp;&nbsp;";
@@ -173,6 +173,7 @@
 			else if (attributeMetaData.fieldType === 'XREF') {
 				$operatorInput.val('OR');
 				$container.prepend($operatorInput);
+				$container.append($('<label class="btn" data-toggle="dropdown" href="#">' + "OR&nbsp;&nbsp;&nbsp;&nbsp;" + '</label>'));
 			}
 		}
 
