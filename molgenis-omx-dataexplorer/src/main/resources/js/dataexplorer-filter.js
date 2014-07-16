@@ -153,7 +153,9 @@
 		}
 	}
 	
-	function createComplexFilterSelectOperator($controlGroup, complexOperator){
+	function createComplexFilterSelectOperator(complexOperator){
+		var $controlGroup = $('<div class="controls">').width('275px');
+		
 		var operator = (complexOperator === "AND" ? "AND" : "OR");
 		var $operatorInput = $('<input type="hidden" data-filter="complex-operator" value="' + operator + '"/>');
 		var $dropdown = $('<div class="btn-group" data-filter="complex-operator-container" style="margin-left: 140px"><div>');
@@ -173,8 +175,10 @@
 		});
 		
 		$dropdown.find('div:first').remove();//This is a workaround FIX
-	
+		
 		$controlGroup.append($dropdown);
+		
+		return $controlGroup;
 	}
 
 	/**
@@ -187,11 +191,11 @@
 		if(filter){
 			if(filter.isType('complex')){
 				$.each(filter.getComplexFilterElements(), function(index, complexFilterElement){
-					addComplexFilterElementsToContainer($container, attribute, complexFilterElement.operator, complexFilterElement.simpleFilter, wizard, (index > 0 ? false : true));
+					addComplexFilterElementToContainer($container, attribute, complexFilterElement.operator, complexFilterElement.simpleFilter, wizard, (index > 0 ? false : true), filter.getComplexFilterElements().length);
 				});
 			}
 		}else{
-			addComplexFilterElementsToContainer($container, attribute, undefined, undefined, wizard, true);
+			addComplexFilterElementToContainer($container, attribute, undefined, undefined, wizard, true, null);
 		}
 		
 		return $container;
@@ -200,44 +204,59 @@
 	/**
 	 * @memberOf molgenis.dataexplorer
 	 */
-	function addComplexFilterElementsToContainer($container, attribute, complexFilterOperator, simpleFilter, wizard, isFirstElement) 
+	function addComplexFilterElementToContainer($container, attribute, complexFilterOperator, simpleFilter, wizard, isFirstElement, totalNumberElements) 
 	{
 		// TODO complex-element
 		// $controlGroup
-		var $complexElement = $('<div class="complex-element">');
+		var $complexElementContainer = $('<div class="control-group complex-element-container"></div>');
+		var $complexElement = $('<div class="controls"></div>');
+		$complexElement.attr('data-filter', "complex-element");
+		$complexElement.addClass('complex-element');
 		
-		// Add create input
-		var $label = createFilterLabel(attribute, isFirstElement, wizard);
-		var $controlGroup = createSimpleFilterControlsElements(attribute, simpleFilter, $label);
+		// Make label
+		var $complexElementLabel = createFilterLabel(attribute, isFirstElement, wizard);
+		$complexElementContainer.append($complexElementLabel);
 		
-		// Add remove
-		$controlGroup.append(createRemoveButton($controlGroup));
-		
-		if(!isFirstElement)
-		{
-			// Add select complex filter operator
-			var $controlGroupComplexOperator = $('<div class="control-group">');
-			var $labelComplexOperator  = createFilterLabel(attribute, isFirstElement, wizard);
-			var $controlsComplexOperator  = $('<div class="controls">').width('275px');
-			$controlGroupComplexOperator.append($labelComplexOperator);
-			createComplexFilterSelectOperator($controlsComplexOperator, complexFilterOperator);
-			$controlGroupComplexOperator.append($controlsComplexOperator);
-			
-			$complexElement.append($controlGroupComplexOperator);
-		}
-		
-		
+		//Simple filter
+		var $controlGroupSimpleFilter = createSimpleFilterControlsElements(attribute, simpleFilter);
+		$controlGroupSimpleFilter.attr('data-filter', 'complex-simplefilter');
+		$controlGroupSimpleFilter.addClass('complex-simplefilter');
+				
 		if(isFirstElement) 
 		{
+			// Add simple filter
+			$complexElement.append($controlGroupSimpleFilter);
+			
+			if(totalNumberElements && totalNumberElements > 1) {
+				
+				// Add remove
+				$complexElement.append(createRemoveFirstComplexElementButton($container));
+			}
+			
 			// Add plus button
-			$controlGroup.append(createComplexFilterPlusButton($container, attribute, complexFilterOperator, wizard));
+			$complexElementContainer.append(createComplexFilterPlusButton($container, attribute, complexFilterOperator, wizard));
+		}else{
+			// Add select complex filter operator
+			var $complexOperatorControlGroup = $('<div class="control-group">');
+			$complexOperatorControlGroup.append(createFilterLabel(attribute, isFirstElement, wizard));
+			$complexOperatorControlGroup.append(createComplexFilterSelectOperator(complexFilterOperator));
+			
+			// Add operator
+			$complexElement.append($complexOperatorControlGroup);	
+			
+			// Add simple filter
+			$complexElement.append($controlGroupSimpleFilter);
+			
+			// Add remove
+			$complexElement.append(createRemoveButton($complexElementContainer));
 		}
 		
-		$controlGroup.attr('data-filter', "complex-simplefilter");
-		$complexElement.append($controlGroup);
-		$container.append($complexElement);
 		
-		return $container;
+
+		// Add complex element container to container
+		$container.append($complexElementContainer.prepend($complexElement));
+		
+		return $complexElementContainer;
 	}
 	
 	/**
@@ -266,17 +285,47 @@
 	function createComplexFilterPlusButton($container, attribute, complexFilterOperator, wizard)
 	{
 		return $('<div class="controls"></div>').append($('<button class="btn" type="button"><i class="icon-plus"></i></button>').click(function(){
-			addComplexFilterElementsToContainer($container, attribute, complexFilterOperator, undefined, wizard, false);
+			addComplexFilterElementToContainer($container, attribute, complexFilterOperator, undefined, wizard, false);
 		}));
 	}
 	
 	/**
 	 * @memberOf molgenis.dataexplorer
 	 */
-	function createRemoveButton($container){
+	function createRemoveButton($toRemoveElement){
 		return $('<div class="controls"></div>')
-					.append($('<button class="btn" type="button"><i class="icon-trash"></i></button>').click(function(){$container.remove();}));
+					.append($('<button class="btn" type="button"><i class="icon-minus"></i></button>').click(function(){
+						$toRemoveElement.remove();
+					}));
 	}
+	
+	/**
+	 * @memberOf molgenis.dataexplorer
+	 */
+	function createRemoveFirstComplexElementButton($container){
+		return $('<div class="controls"></div>')
+		.append($('<button class="btn" type="button"><i class="icon-minus"></i></button>').click(function(){
+			
+		//	$firstElementContainer = $('.control-group.complex-element-container', $container)[0];
+		//	$secondElementContainer = $('.control-group.complex-element-container', $container)[1];
+//			console.log($container);
+			var $firstElement = $('[data-filter=complex-element]', $container)[0];
+			var $secondElement = $('[data-filter=complex-element]', $container)[1];
+			
+			var $simpleFilterFirstElement = $('[data-filter=complex-simplefilter]', $firstElement);
+			var $simpleFilterSecondElement = $('[data-filter=complex-simplefilter]', $secondElement);
+			var $simpleFilterSecondElementContainer = $('.complex-element-container', $container)[1];
+			
+			$simpleFilterFirstElement.empty();
+			
+			alert($simpleFilterSecondElement.html());
+			
+			$simpleFilterFirstElement.append($simpleFilterSecondElement);
+			$simpleFilterSecondElementContainer.remove();
+			//console.log("$('[data-filter=complex-element]', $container): ", $('[data-filter=complex-element]', $container));
+		}));
+	}
+	
 	
 	/**
 	 * @memberOf molgenis.dataexplorer
@@ -284,7 +333,8 @@
 	function createSimpleFilterControls(attribute, filter, wizard) {
 		var $container = $('<div class="simpleFilterContainer"></div>');
 		var $label = createFilterLabel(attribute, true, wizard);
-		$container.append(createSimpleFilterControlsElements(attribute, filter, $label));
+		$container.append($label);
+		$container.append(createSimpleFilterControlsElements(attribute, filter));
 		$container.data('attribute', attribute);
 		return $container;
 	}
@@ -292,8 +342,7 @@
 	/**
 	 * @memberOf molgenis.dataexplorer
 	 */
-	function createSimpleFilterControlsElements(attribute, simpleFilter, $label) {
-		var $controlGroup = $('<div class="control-group">');
+	function createSimpleFilterControlsElements(attribute, simpleFilter) {
 		var $controls = $('<div class="controls">').width('314px');
 		var name = 'input-' + attribute.name + '-' + new Date().getTime();
 		var values = simpleFilter ? simpleFilter.getValues() : null;
@@ -389,9 +438,7 @@
 			default:
 				throw 'Unknown data type: ' + attribute.fieldType;			
 		}
-
-		$controlGroup.append($label);
-		return $controlGroup.append($controls);
+		return $controls;
 	}
 		
 	function Filter(){
@@ -614,8 +661,8 @@
 			this.operator = this.formatOperator($(':input[data-filter=complex-operator]', $domElement).val());
 			this.simpleFilter = (new self.SimpleFilter(attribute)).update($('[data-filter=complex-simplefilter]', $domElement));
 			
-			console.log("this.operator: ", this.operator);
-			console.log("this.simpleFilter: ", this.simpleFilter);
+//			console.log("this.operator: ", this.operator);
+//			console.log("this.simpleFilter: ", this.simpleFilter);
 			
 			return this;
 		};
@@ -629,16 +676,13 @@
 		this.attribute = attribute;
 		
 		this.update = function ($domElement) {			
-			$(".complex-element", $domElement).each(function(){
+			$('[data-filter=complex-element]', $domElement).each(function(){
 				var complexFilterElement = (new self.ComplexFilterElement(attribute)).update($(this));
-				console.log("complexFilterElement.simpleFilter: ", complexFilterElement.simpleFilter);
 				if(!complexFilterElement.simpleFilter.isEmpty())
 				{
 					complexFilterElements.push(complexFilterElement);
 				}
 			});
-			
-			console.log("complexFilterElements: ", complexFilterElements);
 			return this;
 		};
 

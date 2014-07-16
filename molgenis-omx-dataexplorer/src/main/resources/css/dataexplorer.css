@@ -220,6 +220,10 @@ ul.fancytree-container {
 	vertical-align: top;
 }
 
+.form-horizontal .controls.complex-simplefilter {
+	padding-left: 0px;
+}
+
 .form-horizontal.filter-controls {
 	margin-bottom: 60px;
 }
