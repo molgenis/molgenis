@@ -10,11 +10,8 @@ import org.molgenis.omx.biobankconnect.ontologyservice.OntologyService;
 import org.molgenis.omx.biobankconnect.utils.OntologyRepository;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
-import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import com.google.common.collect.Iterables;
 
 public class OntologyIndexRepository extends AbstractOntologyIndexRepository
 {
@@ -71,14 +68,12 @@ public class OntologyIndexRepository extends AbstractOntologyIndexRepository
 	@Override
 	public long count(Query q)
 	{
-		if (q.getRules().size() == 0)
+		if (q.getRules().size() > 0)
 		{
-			SearchResult result = searchService.search(new SearchRequest(null, new QueryImpl().eq(
-					OntologyRepository.ENTITY_TYPE, OntologyRepository.TYPE_ONTOLOGY), null));
-
-			return result.getTotalHitCount();
+			q.and();
 		}
-		return Iterables.size(findAll(q));
+		q.eq(OntologyRepository.ENTITY_TYPE, OntologyRepository.TYPE_ONTOLOGY);
+		return searchService.count(null, q.pageSize(Integer.MAX_VALUE).offset(Integer.MIN_VALUE));
 	}
 
 	@Override

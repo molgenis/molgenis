@@ -2,6 +2,8 @@ package org.molgenis.elasticsearch.request;
 
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.elasticsearch.index.MappingsBuilder;
 import org.springframework.data.domain.Sort;
@@ -17,7 +19,7 @@ public class SortGenerator implements QueryPartGenerator
 {
 
 	@Override
-	public void generate(SearchRequestBuilder searchRequestBuilder, Query query)
+	public void generate(SearchRequestBuilder searchRequestBuilder, Query query, EntityMetaData entityMetaData)
 	{
 		if (query.getSort() != null)
 		{
@@ -32,10 +34,31 @@ public class SortGenerator implements QueryPartGenerator
 				{
 					throw new IllegalArgumentException("Missing sort direction");
 				}
-
-				String sortField = sort.getProperty() + '.' + MappingsBuilder.FIELD_NOT_ANALYZED;
+				StringBuilder sortField = new StringBuilder();
+				// Check the field on which the sorting occurs is a MREF field
+				if (entityMetaData != null
+						&& entityMetaData.getAttribute(sort.getProperty()) != null
+						&& entityMetaData.getAttribute(sort.getProperty()).getDataType().getEnumType().toString()
+								.equalsIgnoreCase(MolgenisFieldTypes.MREF.toString()))
+				{
+					sortField
+							.append(sort.getProperty())
+							.append('.')
+							.append(entityMetaData.getAttribute(sort.getProperty()).getRefEntity().getLabelAttribute()
+									.getName()).append('.').append(MappingsBuilder.FIELD_NOT_ANALYZED);
+				}else if (entityMetaData != null
+						&& entityMetaData.getAttribute(sort.getProperty()) != null
+						&& entityMetaData.getAttribute(sort.getProperty()).getDataType().getEnumType().toString()
+								.equalsIgnoreCase(MolgenisFieldTypes.BOOL.toString()))
+				{
+					sortField.append(sort.getProperty());
+				}
+				else
+				{
+					sortField.append(sort.getProperty()).append('.').append(MappingsBuilder.FIELD_NOT_ANALYZED);
+				}
 				SortOrder sortOrder = sort.getDirection() == Direction.ASC ? SortOrder.ASC : SortOrder.DESC;
-				searchRequestBuilder.addSort(sortField, sortOrder);
+				searchRequestBuilder.addSort(sortField.toString(), sortOrder);
 			}
 		}
 	}

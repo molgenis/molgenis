@@ -94,7 +94,7 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 					boolean isEmxEntity = false;
 					for (String name : repositoryCollection.getEntityNames())
 					{
-						if (dataService.hasRepository(name))
+						try
 						{
 							Repository repository = dataService.getRepositoryByEntityName(name);
 
@@ -111,6 +111,10 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 							{
 								isEmxEntity = true;
 							}
+						}
+						catch (UnknownEntityException e)
+						{
+							// Entity not yet known
 						}
 					}
 					// EMX entity: import to MySQL
