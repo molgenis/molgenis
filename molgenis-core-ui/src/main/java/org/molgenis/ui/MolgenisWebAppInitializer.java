@@ -21,14 +21,14 @@ public class MolgenisWebAppInitializer
 {
 	private static final Logger logger = Logger.getLogger(MolgenisWebAppInitializer.class);
 
-    protected void onStartup(ServletContext servletContext, Class<?> appConfig, boolean isDasUsed)
-            throws ServletException
-    {
-        //no maximum fiel size profided? default to 32 Mb
-        onStartup(servletContext, appConfig, isDasUsed, 32);
-    }
+	protected void onStartup(ServletContext servletContext, Class<?> appConfig, boolean isDasUsed)
+			throws ServletException
+	{
+		// no maximum fiel size profided? default to 32 Mb
+		onStartup(servletContext, appConfig, isDasUsed, 32);
+	}
 
-    /**
+	/**
 	 * A Molgenis common web application initializer
 	 * 
 	 * @param servletContext
