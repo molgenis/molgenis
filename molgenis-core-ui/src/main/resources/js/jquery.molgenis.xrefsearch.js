@@ -13,12 +13,12 @@
  */
 (function($, molgenis) {
 	"use strict";
-	
+
 	var restApi = new molgenis.RestClient();
-	
+
 	function createQuery(lookupAttributeNames, terms, operator, search) {
 		var q = [];
-		
+
 		if(lookupAttributeNames.length) {
 			$.each(lookupAttributeNames, function(index, attrName) {
 				if (q.length > 0) {
@@ -56,14 +56,14 @@
 		});
 		return attributeNames;
 	}
-	
+
 	function formatResult(entity, entityMetaData, lookupAttributeNames) {
 		var items = [];
 		items.push('<div class="row-fluid">');
-		
+
 		if (lookupAttributeNames.length > 0) {
 			var width = Math.round(12 / lookupAttributeNames.length);// 12 is full width in px
-		
+
 			$.each(lookupAttributeNames, function(index, attrName) {
 				var attrLabel = entityMetaData.attributes[attrName].label || attrName;
 				var attrValue = entity[attrName] == undefined ?  '' :  entity[attrName];
@@ -72,12 +72,12 @@
 				items.push('</div>');
 			});
 		}
-		
+
 		items.push('</div>');
-		
+
 		return items.join('');
 	}
-	
+
 	function formatSelection(entity, refEntityMetaData) {
 		var result;
 		if(entity instanceof Array && entity.length)
@@ -97,9 +97,9 @@
 		var refEntityMetaData = restApi.get(attributeMetaData.refEntity.href, {expand: ['attributes']});
 		var lookupAttrNames = getLookupAttributeNames(refEntityMetaData);
 		var hiddenInput = container.find('input[type=hidden]');
-		
+
 		hiddenInput.select2({
-			width: '80%',
+			width: options.width ? options.width : 'resolve',
 			minimumInputLength: 2,
             multiple: (attributeMetaData.fieldType === 'MREF'),
             closeOnSelect: (attributeMetaData.fieldType === 'XREF'),
@@ -134,18 +134,18 @@
             separator: ',',
 			dropdownCssClass: 'molgenis-xrefsearch'
 		});
-		
+
 		if(!lookupAttrNames.length){
 			container.append($("<label>lookup attribute is not defined.</label>"));
 		}
 	}
 
 	function addQueryPartSelect(container, attributeMetaData, options) {
-		var attrs = {
-				'autofocus': 'autofocus'
-			};
-
-        if (attributeMetaData.fieldType === 'MREF') {
+		var attrs = {};
+		if(options.autofocus) {
+			attrs.autofocus = options.autofocus;
+		}
+        if (options.isfilter && attributeMetaData.fieldType === 'MREF') {
             var checkbox = $('<input type="checkbox" class="exclude">');//Checkbox is only for jquery-switch, it should not be included in the query
     		checkbox.attr('checked', options.operator === 'OR');
     		container.prepend(checkbox);
@@ -163,12 +163,12 @@
     		operatorInput.val(options.operator);
     		andOrSwitch.append(operatorInput);
         }
-		
-		var element = createInput(attributeMetaData.fieldType, attrs, options.values);
+
+		var element = createInput(attributeMetaData, attrs, options.values);
 		container.prepend(element);
 		createSelect2(container, attributeMetaData, options);
 	}
-	
+
 	/**
 	 * Creates a mref or xref select2 component
 	 * 
@@ -188,8 +188,8 @@
 		restApi.getAsync(attributeUri, {attributes:['refEntity', 'fieldType'], expand:['refEntity']}, function(attributeMetaData) {
 			    addQueryPartSelect(container, attributeMetaData, options);
 		});
-		
+
 		return container;
 	};
-	
+
 }($, window.top.molgenis = window.top.molgenis || {}));

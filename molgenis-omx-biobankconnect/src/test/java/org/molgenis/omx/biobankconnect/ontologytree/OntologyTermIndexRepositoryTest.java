@@ -96,6 +96,10 @@ public class OntologyTermIndexRepositoryTest
 								.eq(OntologyTermRepository.ENTITY_TYPE, OntologyTermRepository.TYPE_ONTOLOGYTERM), null)))
 				.thenReturn(new SearchResult(1, Arrays.asList(hit2)));
 
+		when(
+				searchService.count(OntologyService.createOntologyTermDocumentType(ontologyIRI), new QueryImpl()
+						.pageSize(Integer.MAX_VALUE).offset(Integer.MIN_VALUE))).thenReturn(new Long(3));
+
 		when(searchService.searchById(OntologyService.createOntologyTermDocumentType(ontologyIRI), "ontology-3"))
 				.thenReturn(hit3);
 

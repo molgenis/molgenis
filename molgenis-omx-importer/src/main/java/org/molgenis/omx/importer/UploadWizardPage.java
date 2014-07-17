@@ -22,7 +22,9 @@ import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.importer.EmxImportServiceImpl;
 import org.molgenis.data.importer.EmxImporterService;
+import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.RepositoryDecorator;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntitiesValidator;
 import org.molgenis.omx.observ.DataSet;
@@ -110,31 +112,30 @@ public class UploadWizardPage extends AbstractWizardPage
 		RepositoryCollection source = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 		if (source.getRepositoryByEntityName("attributes") != null)
 		{
-			EmxImporterService importer = new EmxImportServiceImpl();
-			EntitiesValidationReport validationReport = importer.validateImport(source);
-
-			wizard.setEntitiesImportable(validationReport.getSheetsImportable());
-			// wizard.setDataImportable(validationReport.getSheetsImportable());
-			wizard.setFieldsDetected(validationReport.getFieldsImportable());
-			wizard.setFieldsRequired(validationReport.getFieldsRequired());
-			wizard.setFieldsAvailable(validationReport.getFieldsAvailable());
-			wizard.setFieldsUnknown(validationReport.getFieldsUnknown());
-
-			String msg = null;
-			if (validationReport.valid())
-			{
-				wizard.setFile(file);
-				msg = "File is validated and can be imported.";
-			}
-			else
-			{
-				wizard.setValidationMessage("File did not pass validation see results below. Please resolve the errors and try again.");
-			}
-
-			return msg;
+			return validateEMXInput(file, wizard, source);
 		}
 		else
 		{
+			// if any of the entities is EMX than use the EMX importer, else assume JPA
+			// we do not support "mixed import" of JPA and EMX at the moment
+			for (String name : source.getEntityNames())
+			{
+				try {
+                    Repository repository = dataService.getRepositoryByEntityName(name);
+
+                    String repositoryClassName;
+                    if (repository instanceof RepositoryDecorator) {
+                        repositoryClassName = ((RepositoryDecorator) repository).getRepositoryClass();
+                    } else {
+                        repositoryClassName = repository.getClass().getName();
+                    }
+                    if (repositoryClassName.equals(MysqlRepository.class.getSimpleName())) {
+                        return validateEMXInput(file, wizard, source);
+                    }
+                }catch(UnknownEntityException e){
+                    //Entity not yet known
+                }
+			}
 			// validate entity sheets
 			EntitiesValidationReport validationReport = entitiesValidator.validate(file);
 
@@ -197,6 +198,32 @@ public class UploadWizardPage extends AbstractWizardPage
 
 			return msg;
 		}
+	}
+
+	private String validateEMXInput(File file, ImportWizard wizard, RepositoryCollection source)
+	{
+		EmxImporterService importer = new EmxImportServiceImpl(dataService);
+		EntitiesValidationReport validationReport = importer.validateImport(source);
+
+		wizard.setEntitiesImportable(validationReport.getSheetsImportable());
+		// wizard.setDataImportable(validationReport.getSheetsImportable());
+		wizard.setFieldsDetected(validationReport.getFieldsImportable());
+		wizard.setFieldsRequired(validationReport.getFieldsRequired());
+		wizard.setFieldsAvailable(validationReport.getFieldsAvailable());
+		wizard.setFieldsUnknown(validationReport.getFieldsUnknown());
+
+		String msg = null;
+		if (validationReport.valid())
+		{
+			wizard.setFile(file);
+			msg = "File is validated and can be imported.";
+		}
+		else
+		{
+			wizard.setValidationMessage("File did not pass validation see results below. Please resolve the errors and try again.");
+		}
+
+		return msg;
 	}
 
 	private Map<String, Boolean> validateDataSetInstances(

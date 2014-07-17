@@ -3,14 +3,11 @@ package org.molgenis.gaf;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -22,10 +19,10 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.omx.core.RuntimeProperty;
 import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -33,90 +30,80 @@ public class GafListValidator
 {
 	private static final Logger logger = Logger.getLogger(GafListValidator.class);
 
-	static final String GAF_LIST_SETTINGS_PREFIX = RuntimeProperty.class.getSimpleName() + "_gafList.validator.";
+	public static final String GAF_LIST_SETTINGS_PREFIX = "gafList.validator.";// RuntimeProperty.class.getSimpleName()
+																				// +
+																		// "_gafList.validator.";
 
 	private static final List<String> COLUMNS;
 
 	public static final String COL_INTERNAL_SAMPLE_ID;
-	public static final String COL_EXTERNAL_SAMPLE_ID;
-	public static final String COL_PROJECT;
+	public static final String COL_LANE;
 	public static final String COL_SEQUENCER;
-	public static final String COL_CONTACT;
-	public static final String COL_VALIDATION_LOG;
-	public static final String COL_LAB_STATUS_COMMENTS;
-	public static final String COL_LAB_STATUS_PHASE;
-	public static final String COL_LAST_UP_DATE;
+	public static final String COL_SAMPLE;
 	public static final String COL_SEQUENCING_START_DATE;
 	public static final String COL_RUN;
 	public static final String COL_FLOWCELL;
-	public static final String COL_LANE;
-	public static final String COL_BARCODE_MENU;
 	public static final String COL_SEQ_TYPE;
-	public static final String COL_PREP_KIT;
-	public static final String COL_CAPTURING_KIT;
+	public static final String COL_BARCODE_1;
+	public static final String End_Product_Concentration_nmol__l;
+	public static final String COL_EXTERNAL_SAMPLE_ID;
+	public static final String COL_PROJECT;
+	public static final String COL_CONTACT;
+	public static final String COL_SAMPLE_TYPE;
 	public static final String COL_ARRAY_FILE;
 	public static final String COL_ARRAY_ID;
+	public static final String COL_CAPTURING_KIT;
+	public static final String COL_PREP_KIT;
 	public static final String COL_GAF_QC_NAME;
 	public static final String COL_GAF_QC_DATE;
 	public static final String COL_GAF_QC_STATUS;
 	public static final String COL_GCC_ANALYSIS;
-	public static final String COL_GCC_QC_NAME;
-	public static final String COL_GCC_QC_DATE;
-	public static final String COL_GCC_QC_STATUS;
-	public static final String COL_TARGET_DATE_SHIPMENT;
-	public static final String COL_DATA_SHIPPED_DATE;
-	public static final String COL_DATA_SHIPPED_TO;
-	public static final String COL_DATA_SHIPPED_BY;
-	public static final String COL_COMMENTS;
+	public static final String COL_PLATES_IN_STOCK__DNA_SEQUENCING;
+	public static final String COL_REJECTED_FOR_PROCESSING;
+	public static final String COL_PLATES_IN_STOCK__DNA_SEQUENCING__WHOLE_GENOME_CAPTURING;
+	public static final String COL_BARCODE_2;
 	public static final String COL_BARCODE;
 	public static final String COL_BARCODE_TYPE;
-
-	static final String LAB_STATUS_PHASE_FINISHED_SUCCESSFULLY = "Finished Successfully";
+	
 	static final String BARCODE_NONE = "None";
 
 	static
 	{
 		COL_INTERNAL_SAMPLE_ID = "internalSampleID";
-		COL_EXTERNAL_SAMPLE_ID = "externalSampleID";
-		COL_PROJECT = "project";
+		COL_LANE = "lane";
 		COL_SEQUENCER = "sequencer";
-		COL_CONTACT = "contact";
-		COL_VALIDATION_LOG = "validationLog";
-		COL_LAB_STATUS_COMMENTS = "labStatusComments";
-		COL_LAB_STATUS_PHASE = "labStatusPhase";
-		COL_LAST_UP_DATE = "lastUpDate";
+		COL_SAMPLE = "Sample";
 		COL_SEQUENCING_START_DATE = "sequencingStartDate";
 		COL_RUN = "run";
 		COL_FLOWCELL = "flowcell";
-		COL_LANE = "lane";
-		COL_BARCODE_MENU = "barcodeMenu";
 		COL_SEQ_TYPE = "seqType";
-		COL_PREP_KIT = "prepKit";
-		COL_CAPTURING_KIT = "capturingKit";
+		COL_BARCODE_1 = "Barcode 1";
+		End_Product_Concentration_nmol__l = "End Product Concentration nmol/l";
+		COL_EXTERNAL_SAMPLE_ID = "externalSampleID";
+		COL_PROJECT = "project";
+		COL_CONTACT = "contact";
+		COL_SAMPLE_TYPE = "Sample Type";
 		COL_ARRAY_FILE = "arrayFile";
 		COL_ARRAY_ID = "arrayID";
+		COL_CAPTURING_KIT = "capturingKit";
+		COL_PREP_KIT = "prepKit";
 		COL_GAF_QC_NAME = "GAF_QC_Name";
 		COL_GAF_QC_DATE = "GAF_QC_Date";
 		COL_GAF_QC_STATUS = "GAF_QC_Status";
 		COL_GCC_ANALYSIS = "GCC_Analysis";
-		COL_GCC_QC_NAME = "GCC_QC_Name";
-		COL_GCC_QC_DATE = "GCC_QC_Date";
-		COL_GCC_QC_STATUS = "GCC_QC_Status";
-		COL_TARGET_DATE_SHIPMENT = "TargetDateShipment";
-		COL_DATA_SHIPPED_DATE = "DataShippedDate";
-		COL_DATA_SHIPPED_TO = "DataShippedTo";
-		COL_DATA_SHIPPED_BY = "DataShippedBy";
-		COL_COMMENTS = "Comments";
+		COL_PLATES_IN_STOCK__DNA_SEQUENCING = "Plates in stock - RNA sequencing";
+		COL_REJECTED_FOR_PROCESSING = "Rejected for processing";
+		COL_PLATES_IN_STOCK__DNA_SEQUENCING__WHOLE_GENOME_CAPTURING = "Plates in stock - DNA sequencing (whole genome / capturing)";
+		COL_BARCODE_2 = "Barcode 2";
 		COL_BARCODE = "barcode";
 		COL_BARCODE_TYPE = "barcodeType";
 
 		COLUMNS = Arrays.asList(COL_INTERNAL_SAMPLE_ID, COL_EXTERNAL_SAMPLE_ID, COL_PROJECT, COL_SEQUENCER,
-				COL_CONTACT, COL_VALIDATION_LOG, COL_LAB_STATUS_COMMENTS, COL_LAB_STATUS_PHASE, COL_LAST_UP_DATE,
-				COL_SEQUENCING_START_DATE, COL_RUN, COL_FLOWCELL, COL_LANE, COL_BARCODE_MENU, COL_SEQ_TYPE,
-				COL_PREP_KIT, COL_CAPTURING_KIT, COL_ARRAY_FILE, COL_ARRAY_ID, COL_GAF_QC_NAME, COL_GAF_QC_DATE,
-				COL_GAF_QC_STATUS, COL_GCC_ANALYSIS, COL_GCC_QC_NAME, COL_GCC_QC_DATE, COL_GCC_QC_STATUS,
-				COL_TARGET_DATE_SHIPMENT, COL_DATA_SHIPPED_DATE, COL_DATA_SHIPPED_TO, COL_DATA_SHIPPED_BY,
-				COL_COMMENTS, COL_BARCODE, COL_BARCODE_TYPE);
+				COL_CONTACT, COL_SEQUENCING_START_DATE, COL_RUN, COL_FLOWCELL, COL_LANE, COL_BARCODE_1, COL_BARCODE_2,
+				COL_SEQ_TYPE, COL_PREP_KIT, COL_CAPTURING_KIT, COL_ARRAY_FILE, COL_ARRAY_ID, COL_GAF_QC_NAME,
+				COL_GAF_QC_DATE, COL_GAF_QC_STATUS, COL_GCC_ANALYSIS, COL_BARCODE, COL_BARCODE_TYPE, COL_SAMPLE,
+				COL_SAMPLE_TYPE, COL_PLATES_IN_STOCK__DNA_SEQUENCING, COL_REJECTED_FOR_PROCESSING,
+				COL_PLATES_IN_STOCK__DNA_SEQUENCING__WHOLE_GENOME_CAPTURING);
 	}
 
 	@Autowired
@@ -155,40 +142,49 @@ public class GafListValidator
 			}
 		}
 
-		validateCellValues(repository, patternMap, lookupLists, report);
-		validateInternalSampleId(repository, report);
-		validateRun(repository, report);
+		List<Entity> entities = new ArrayList<Entity>();
+		Iterable<AttributeMetaData> attributes = repository.getEntityMetaData().getAttributes();
+		
+		Iterator<Entity> it = repository.iterator();
+		while (it.hasNext())
+		{
+			Entity entity = it.next();
+			String runId = entity.getString(COL_RUN);
+			report.getAllRunIds().add(runId);
+			entities.add(entity);
+		}
 
+		validateCellValues(entities, attributes, patternMap, lookupLists, report);
+		validateInternalSampleIdIncremental(entities, report);
+		validateRun(entities, report);
+		report.populateStatusImportedRuns();
+		
 		return report;
 	}
 
-	private void validateCellValues(Repository repository, Map<String, Pattern> patternMap,
-			Map<String, Set<String>> lookupLists, GafListValidationReport report)
+	private void validateCellValues(List<Entity> entities, Iterable<AttributeMetaData> attributes,
+			Map<String, Pattern> patternMap, Map<String, Set<String>> lookupLists, GafListValidationReport report)
 	{
 		int row = 2;
-		Iterable<AttributeMetaData> attributes = repository.getEntityMetaData().getAttributes();
-		for (Iterator<Entity> it = repository.iterator(); it.hasNext(); ++row)
+		for (Entity entity : entities)
 		{
-			Entity entity = it.next();
-
 			// skip empty rows
 			if (isEmptyRow(entity)) continue;
 
 			// validate individual cells
 			String runId = entity.getString(COL_RUN);
+
 			for (AttributeMetaData attributeMetaData : attributes)
 			{
-				String labStatusPhase = entity.getString(COL_LAB_STATUS_PHASE);
-				if (labStatusPhase != null && labStatusPhase.equals(LAB_STATUS_PHASE_FINISHED_SUCCESSFULLY))
-				{
-					String attributeName = attributeMetaData.getName();
-					if (attributeName.isEmpty()) continue;
-					String value = entity.getString(attributeName);
+				String attributeName = attributeMetaData.getName().trim();
+				if (attributeName.isEmpty()) continue;
+				String value = entity.getString(attributeName);
 
-					// validate cell
-					validateCell(runId, row, attributeName, value, patternMap, lookupLists, report);
-				}
+				// validate cell
+				validateCell(runId, row, attributeName, value, patternMap, lookupLists, report);
 			}
+
+			row++;
 		}
 	}
 
@@ -198,37 +194,31 @@ public class GafListValidator
 	 * @param repository
 	 * @param report
 	 */
-	private void validateInternalSampleId(Repository repository, GafListValidationReport report)
+	private void validateInternalSampleIdIncremental(List<Entity> entities, GafListValidationReport report)
 	{
-		Integer previousInternalSampleId = null;
 		int row = 2;
-		for (Iterator<Entity> it = repository.iterator(); it.hasNext(); ++row)
+		for (Entity entity : entities)
 		{
-			Entity entity = it.next();
-
 			// skip empty rows
 			if (isEmptyRow(entity)) continue;
-
 			String runId = entity.getString(COL_RUN);
-			Integer internalSampleId = entity.getInt(COL_INTERNAL_SAMPLE_ID);
-			if (internalSampleId != null)
-			{
-				if (previousInternalSampleId != null)
+			Integer internalSampleId = null;
+			try{
+				internalSampleId = entity.getInt(COL_INTERNAL_SAMPLE_ID);
+				if (internalSampleId == null)
 				{
-					if (internalSampleId != previousInternalSampleId + 1)
-					{
-						report.addEntry(runId,
-								new GafListValidationError(row, COL_INTERNAL_SAMPLE_ID, internalSampleId.toString(),
-										"non-incremental"));
-					}
+					// internal sample id can not be null
+					report.addEntry(runId, new GafListValidationError(row, COL_INTERNAL_SAMPLE_ID, null,
+							"value undefined"));
 				}
-				previousInternalSampleId = internalSampleId;
 			}
-			else
+			catch (ConversionFailedException cfe)
 			{
-				// internal sample id can not be null
-				report.addEntry(runId, new GafListValidationError(row, COL_INTERNAL_SAMPLE_ID, null, "value undefined"));
+				new GafListValidationError(row, COL_INTERNAL_SAMPLE_ID, null,
+						"value is not formatted correctly it need to be a number");
 			}
+			
+			row++;
 		}
 	}
 
@@ -241,16 +231,14 @@ public class GafListValidator
 	 * @param lookupLists
 	 * @param report
 	 */
-	private void validateRun(Repository repository, GafListValidationReport report)
+	private void validateRun(List<Entity> entities, GafListValidationReport report)
 	{
 		// group rows by run
 		Map<String, List<EntityRowPair>> runMap = new HashMap<String, List<EntityRowPair>>();
 
 		int row = 2;
-		for (Iterator<Entity> it = repository.iterator(); it.hasNext(); ++row)
+		for (Entity entity : entities)
 		{
-			Entity entity = it.next();
-
 			// skip empty rows
 			if (isEmptyRow(entity)) continue;
 
@@ -265,6 +253,7 @@ public class GafListValidator
 				}
 				entityRowPairs.add(new EntityRowPair(entity, row));
 			}
+			row++;
 		}
 
 		for (Map.Entry<String, List<EntityRowPair>> entry : runMap.entrySet())
@@ -341,7 +330,7 @@ public class GafListValidator
 				{
 					Entity laneEntity = laneEntityRowPair.getEntity();
 					String barcode = laneEntity.getString(COL_BARCODE);
-					if (!barcode.equals(BARCODE_NONE))
+					if (!BARCODE_NONE.equals(barcode))
 					{
 						if (barcodes.contains(barcode)) report.addEntry(runId, new GafListValidationError(
 								laneEntityRowPair.getRow(), COL_BARCODE, barcode, "run lane has duplicate "
@@ -375,10 +364,15 @@ public class GafListValidator
 		}
 	}
 
+	/**
+	 * Checks if row is empty.
+	 * skip empty rows. skip rows containing only a (prefilled) internal sample id
+	 * 
+	 * @param entity
+	 * @return
+	 */
 	private boolean isEmptyRow(Entity entity)
 	{
-		// skip empty rows
-		// skip rows containing only a (prefilled) internal sample id
 		boolean isEmptyRow = true;
 		for (String attributeName : entity.getAttributeNames())
 		{
@@ -402,11 +396,7 @@ public class GafListValidator
 		{
 			validateCellWithPattern(runId, row, colName, value, patterns, true, report);
 		}
-		else if (colName.equalsIgnoreCase(COL_EXTERNAL_SAMPLE_ID))
-		{
-			validateCellWithPattern(runId, row, colName, value, patterns, true, report);
-		}
-		else if (colName.equalsIgnoreCase(COL_PROJECT))
+		else if (colName.equalsIgnoreCase(COL_LANE))
 		{
 			validateCellWithPattern(runId, row, colName, value, patterns, true, report);
 		}
@@ -414,25 +404,9 @@ public class GafListValidator
 		{
 			validateCellWithLookupList(runId, row, colName, value, lookupLists, true, report);
 		}
-		else if (colName.equalsIgnoreCase(COL_CONTACT))
-		{
-			validateCellWithPattern(runId, row, colName, value, patterns, true, report);
-		}
-		else if (colName.equalsIgnoreCase(COL_VALIDATION_LOG))
+		else if (colName.equalsIgnoreCase(COL_SAMPLE))
 		{
 			validateCellWithPattern(runId, row, colName, value, patterns, false, report);
-		}
-		else if (colName.equalsIgnoreCase(COL_LAB_STATUS_COMMENTS))
-		{
-			validateCellWithPattern(runId, row, colName, value, patterns, false, report);
-		}
-		else if (colName.equalsIgnoreCase(COL_LAST_UP_DATE))
-		{
-			validateCellWithPattern(runId, row, colName, value, patterns, false, report);
-		}
-		else if (colName.equalsIgnoreCase(COL_LAB_STATUS_PHASE))
-		{
-			validateCellWithLookupList(runId, row, colName, value, lookupLists, true, report);
 		}
 		else if (colName.equalsIgnoreCase(COL_SEQUENCING_START_DATE))
 		{
@@ -446,19 +420,39 @@ public class GafListValidator
 		{
 			validateCellWithPattern(runId, row, colName, value, patterns, true, report);
 		}
-		else if (colName.equalsIgnoreCase(COL_LANE))
-		{
-			validateCellWithPattern(runId, row, colName, value, patterns, true, report);
-		}
-		else if (colName.equalsIgnoreCase(COL_BARCODE_MENU))
-		{
-			validateCellWithPattern(runId, row, colName, value, patterns, false, report);
-		}
 		else if (colName.equalsIgnoreCase(COL_SEQ_TYPE))
 		{
 			validateCellWithLookupList(runId, row, colName, value, lookupLists, true, report);
 		}
-		else if (colName.equalsIgnoreCase(COL_PREP_KIT))
+		else if (colName.equalsIgnoreCase(COL_BARCODE_1))
+		{
+			validateCellWithPattern(runId, row, colName, value, patterns, false, report);
+		}
+		else if (colName.equalsIgnoreCase(End_Product_Concentration_nmol__l))
+		{
+			validateCellWithPattern(runId, row, colName, value, patterns, false, report);
+		}
+		else if (colName.equalsIgnoreCase(COL_EXTERNAL_SAMPLE_ID))
+		{
+			validateCellWithPattern(runId, row, colName, value, patterns, true, report);
+		}
+		else if (colName.equalsIgnoreCase(COL_PROJECT))
+		{
+			validateCellWithPattern(runId, row, colName, value, patterns, true, report);
+		}
+		else if (colName.equalsIgnoreCase(COL_CONTACT))
+		{
+			validateCellWithPattern(runId, row, colName, value, patterns, true, report);
+		}
+		else if (colName.equalsIgnoreCase(COL_SAMPLE_TYPE))
+		{
+			validateCellWithPattern(runId, row, colName, value, patterns, false, report);
+		}
+		else if (colName.equalsIgnoreCase(COL_ARRAY_FILE))
+		{
+			validateCellWithPattern(runId, row, colName, value, patterns, false, report);
+		}
+		else if (colName.equalsIgnoreCase(COL_ARRAY_ID))
 		{
 			validateCellWithPattern(runId, row, colName, value, patterns, false, report);
 		}
@@ -466,11 +460,7 @@ public class GafListValidator
 		{
 			validateCellWithLookupList(runId, row, colName, value, lookupLists, true, report);
 		}
-		else if (colName.equalsIgnoreCase(COL_ARRAY_FILE))
-		{
-			validateCellWithPattern(runId, row, colName, value, patterns, false, report);
-		}
-		else if (colName.equalsIgnoreCase(COL_ARRAY_ID))
+		else if (colName.equalsIgnoreCase(COL_PREP_KIT))
 		{
 			validateCellWithPattern(runId, row, colName, value, patterns, false, report);
 		}
@@ -490,35 +480,19 @@ public class GafListValidator
 		{
 			validateCellWithLookupList(runId, row, colName, value, lookupLists, false, report);
 		}
-		else if (colName.equalsIgnoreCase(COL_GCC_QC_NAME))
+		else if (colName.equalsIgnoreCase(COL_PLATES_IN_STOCK__DNA_SEQUENCING))
 		{
 			validateCellWithPattern(runId, row, colName, value, patterns, false, report);
 		}
-		else if (colName.equalsIgnoreCase(COL_GCC_QC_DATE))
+		else if (colName.equalsIgnoreCase(COL_REJECTED_FOR_PROCESSING))
 		{
 			validateCellWithPattern(runId, row, colName, value, patterns, false, report);
 		}
-		else if (colName.equalsIgnoreCase(COL_GCC_QC_STATUS))
-		{
-			validateCellWithLookupList(runId, row, colName, value, lookupLists, false, report);
-		}
-		else if (colName.equalsIgnoreCase(COL_TARGET_DATE_SHIPMENT))
+		else if (colName.equalsIgnoreCase(COL_PLATES_IN_STOCK__DNA_SEQUENCING__WHOLE_GENOME_CAPTURING))
 		{
 			validateCellWithPattern(runId, row, colName, value, patterns, false, report);
 		}
-		else if (colName.equalsIgnoreCase(COL_DATA_SHIPPED_DATE))
-		{
-			validateCellWithPattern(runId, row, colName, value, patterns, false, report);
-		}
-		else if (colName.equalsIgnoreCase(COL_DATA_SHIPPED_TO))
-		{
-			validateCellWithPattern(runId, row, colName, value, patterns, false, report);
-		}
-		else if (colName.equalsIgnoreCase(COL_DATA_SHIPPED_BY))
-		{
-			validateCellWithPattern(runId, row, colName, value, patterns, false, report);
-		}
-		else if (colName.equalsIgnoreCase(COL_COMMENTS))
+		else if (colName.equalsIgnoreCase(COL_BARCODE_2))
 		{
 			validateCellWithPattern(runId, row, colName, value, patterns, false, report);
 		}
@@ -574,101 +548,5 @@ public class GafListValidator
 				report.addEntry(runId, new GafListValidationError(row, colName, value, "regex does not match"));
 			}
 		}
-	}
-
-	public static class GafListValidationReport
-	{
-		private final Map<String, List<GafListValidationError>> validationErrors;
-
-		public GafListValidationReport()
-		{
-			validationErrors = new LinkedHashMap<String, List<GafListValidationError>>();
-		}
-
-		public void addEntry(String runId, GafListValidationError validationError)
-		{
-			List<GafListValidationError> runEntries = validationErrors.get(runId);
-			if (runEntries == null)
-			{
-				runEntries = new ArrayList<GafListValidationError>();
-				validationErrors.put(runId, runEntries);
-			}
-			runEntries.add(validationError);
-		}
-
-		public Map<String, List<GafListValidationError>> getEntries()
-		{
-			return Collections.unmodifiableMap(validationErrors);
-		}
-
-		public boolean hasErrors()
-		{
-			return !validationErrors.isEmpty();
-		}
-
-		public boolean hasErrors(String runId)
-		{
-			return validationErrors.containsKey(runId);
-		}
-
-		@Override
-		public String toString()
-		{
-			StringBuilder strBuilder = new StringBuilder();
-			for (Entry<String, List<GafListValidationError>> reportEntry : validationErrors.entrySet())
-			{
-				String runId = reportEntry.getKey();
-				if (runId == null) runId = "<undefined>";
-				strBuilder.append("Validation errors for run ").append(runId).append('\n');
-				for (GafListValidationError validationError : reportEntry.getValue())
-				{
-					strBuilder.append('\t').append(validationError).append('\n');
-				}
-			}
-			return strBuilder.toString();
-		}
-	}
-
-	public static class GafListValidationError
-	{
-		private final int row;
-		private final String colName;
-		private final String value;
-		private final String msg;
-
-		public GafListValidationError(int row, String colName, String value, String msg)
-		{
-			this.row = row;
-			this.colName = colName;
-			this.value = value;
-			this.msg = msg;
-		}
-
-		public int getRow()
-		{
-			return row;
-		}
-
-		public String getColName()
-		{
-			return colName;
-		}
-
-		public String getValue()
-		{
-			return value;
-		}
-
-		public String getMsg()
-		{
-			return msg;
-		}
-
-		@Override
-		public String toString()
-		{
-			return "row: " + row + "\tcol: " + colName + "\tval: " + value + (msg != null ? "\tmsg: " + msg : "");
-		}
-
 	}
 }

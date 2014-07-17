@@ -137,7 +137,7 @@ public class OmxImporterServiceTest
 		dataService.addRepository(new TextValueRepository(entityManager, validator, queryResolver));
 
 		factory = new EmbeddedElasticSearchServiceFactory(Collections.singletonMap("path.data", "target/data"));
-		searchService = factory.create();
+		searchService = factory.create(dataService);
 
 		EntityImportService eis = new EntityImportService();
 		eis.setDataService(dataService);

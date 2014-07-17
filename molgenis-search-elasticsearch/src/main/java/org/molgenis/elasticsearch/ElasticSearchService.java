@@ -27,6 +27,8 @@ import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
+import org.molgenis.data.DataService;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.elasticsearch.index.IndexRequestGenerator;
@@ -48,12 +50,13 @@ import org.molgenis.search.SearchService;
 public class ElasticSearchService implements SearchService
 {
 	private static final Logger LOG = Logger.getLogger(ElasticSearchService.class);
+	private final DataService dataService;
 	private final String indexName;
 	private final Client client;
 	private final ResponseParser responseParser = new ResponseParser();
 	private final SearchRequestGenerator generator = new SearchRequestGenerator();
 
-	public ElasticSearchService(Client client, String indexName)
+	public ElasticSearchService(Client client, String indexName, DataService dataService)
 	{
 		if (client == null)
 		{
@@ -65,6 +68,12 @@ public class ElasticSearchService implements SearchService
 			throw new IllegalArgumentException("IndexName is null");
 		}
 
+		if (dataService == null)
+		{
+			throw new IllegalArgumentException("DataService is null");
+		}
+
+		this.dataService = dataService;
 		this.indexName = indexName;
 		this.client = client;
 
@@ -105,6 +114,9 @@ public class ElasticSearchService implements SearchService
 		return hit;
 	}
 
+	// TODO this method is only used by BiobankConnect and should be removed in
+	// the future
+	@Deprecated
 	public SearchResult multiSearch(SearchType searchType, MultiSearchRequest request)
 	{
 
@@ -121,7 +133,7 @@ public class ElasticSearchService implements SearchService
 		SearchRequestBuilder builder = client.prepareSearch(indexName);
 
 		generator.buildSearchRequest(builder, documentTypes, searchType, request.getQuery(),
-				request.getFieldsToReturn(), null, null);
+				request.getFieldsToReturn(), null, null, null);
 
 		if (LOG.isDebugEnabled())
 		{
@@ -134,16 +146,24 @@ public class ElasticSearchService implements SearchService
 			LOG.debug("SearchResponse:" + response);
 		}
 
-		return responseParser.parseSearchResponse(response);
+		return responseParser.parseSearchResponse(response, null);
 	}
 
 	private SearchResult search(SearchType searchType, SearchRequest request)
 	{
 		SearchRequestBuilder builder = client.prepareSearch(indexName);
+		// TODO : A quick fix now! Need to find a better way to get
+		// EntityMetaData in
+		// ElasticSearchService, because ElasticSearchService should not be
+		// aware of DataService. E.g. Put EntityMetaData in the SearchRequest
+		// object
+		EntityMetaData entityMetaData = (request.getDocumentType() != null && dataService != null && dataService
+				.hasRepository(request.getDocumentType())) ? dataService.getEntityMetaData(request.getDocumentType()) : null;
 		String documentType = request.getDocumentType() == null ? null : sanitizeMapperType(request.getDocumentType());
 
-		generator.buildSearchRequest(builder, documentType, searchType, request.getQuery(),
-				request.getFieldsToReturn(), request.getAggregateField1(), request.getAggregateField2());
+		generator
+				.buildSearchRequest(builder, documentType, searchType, request.getQuery(), request.getFieldsToReturn(),
+						request.getAggregateField1(), request.getAggregateField2(), entityMetaData);
 
 		if (LOG.isDebugEnabled())
 		{
@@ -156,7 +176,7 @@ public class ElasticSearchService implements SearchService
 			LOG.debug("SearchResponse:" + response);
 		}
 
-		return responseParser.parseSearchResponse(response);
+		return responseParser.parseSearchResponse(response, entityMetaData);
 	}
 
 	@Override
@@ -183,7 +203,7 @@ public class ElasticSearchService implements SearchService
 		deleteDocumentsByType(repository.getName());
 
 		LOG.info("Going to insert documents of type [" + repository.getName() + "]");
-		IndexRequestGenerator requestGenerator = new IndexRequestGenerator(client, indexName);
+		IndexRequestGenerator requestGenerator = new IndexRequestGenerator(client, indexName, dataService);
 		Iterable<BulkRequestBuilder> requests = requestGenerator.buildIndexRequest(repository);
 		for (BulkRequestBuilder request : requests)
 		{
@@ -281,7 +301,7 @@ public class ElasticSearchService implements SearchService
 		}
 
 		LOG.info("Going to insert documents of type [" + repository.getName() + "]");
-		IndexRequestGenerator requestGenerator = new IndexRequestGenerator(client, indexName);
+		IndexRequestGenerator requestGenerator = new IndexRequestGenerator(client, indexName, dataService);
 		Iterable<BulkRequestBuilder> requests = requestGenerator.buildIndexRequest(repository);
 		for (BulkRequestBuilder request : requests)
 		{

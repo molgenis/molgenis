@@ -11,6 +11,7 @@ import java.util.Set;
 
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.ShardSearchFailure;
+import org.elasticsearch.common.base.Joiner;
 import org.elasticsearch.common.collect.Iterables;
 import org.elasticsearch.common.collect.Sets;
 import org.elasticsearch.search.SearchHit;
@@ -19,7 +20,11 @@ import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
+import org.elasticsearch.search.suggest.term.TermSuggestion.Score;
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AggregateResult;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchResult;
 
@@ -33,7 +38,7 @@ import com.google.common.collect.Lists;
  */
 public class ResponseParser
 {
-	public SearchResult parseSearchResponse(SearchResponse response)
+	public SearchResult parseSearchResponse(SearchResponse response, EntityMetaData entityMetaData)
 	{
 		ShardSearchFailure[] failures = response.getShardFailures();
 		if ((failures != null) && (failures.length > 0))
@@ -68,13 +73,46 @@ public class ResponseParser
 			{
 				for (Map.Entry<String, Object> entry : hit.sourceAsMap().entrySet())
 				{
-					columnValueMap.put(entry.getKey(), entry.getValue());
+					// Check if the field is MREF, if so, only extract the
+					// information for labelAttribute from refeEntity and put it
+					// in the Hit result map
+					String fieldName = entry.getKey();
+					if (entityMetaData == null
+							|| entityMetaData.getAttribute(fieldName) == null
+							|| !entityMetaData.getAttribute(fieldName).getDataType().getEnumType().toString()
+									.equalsIgnoreCase(MolgenisFieldTypes.MREF.toString()))
+
+					{
+						columnValueMap.put(entry.getKey(), entry.getValue());
+					}
+					else
+					{
+						AttributeMetaData attributeMetaData = entityMetaData.getAttribute(fieldName).getRefEntity()
+								.getLabelAttribute();
+						List<Object> values = new ArrayList<Object>();
+						if (entry.getValue() instanceof List<?>)
+						{
+							for (Object eachElement : (List<?>) entry.getValue())
+							{
+								if (eachElement instanceof Map<?, ?>)
+								{
+									for (Map.Entry<?, ?> entrySet : ((Map<?, ?>) eachElement).entrySet())
+									{
+										if (entrySet.getKey().toString().equalsIgnoreCase(attributeMetaData.getName()))
+										{
+											Object value = entrySet.getValue();
+											if (value != null) values.add(value);
+											break;
+										}
+									}
+								}
+							}
+						}
+						columnValueMap.put(entry.getKey(), Joiner.on(',').join(values));
+					}
 				}
-				if ((hit.getScore() + "").equals("NaN"))
-				{
-					columnValueMap.put("score", 0);
-				}
-				else columnValueMap.put("score", hit.getScore());
+				columnValueMap.put(Score.class.getSimpleName().toLowerCase(),
+						String.valueOf(hit.getScore()).equals("NaN") ? 0 : hit.getScore());
 			}
 
 			searchHits.add(new Hit(hit.id(), hit.type(), columnValueMap));

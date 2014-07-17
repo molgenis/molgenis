@@ -168,10 +168,6 @@ public class DataExplorerController extends MolgenisPluginController
 				molgenisSettings.getProperty(AGGREGATES_NORESULTS_MESSAGE, "No results found"));
 		model.addAttribute("wizard", (wizard != null) && wizard.booleanValue());
 
-		boolean modDiseaseMatcher = molgenisSettings.getBooleanProperty(KEY_MOD_DISEASEMATCHER,
-				DEFAULT_VAL_MOD_DISEASEMATCHER);
-		model.addAttribute("modDiseaseMatcher", modDiseaseMatcher);
-
 		return "view-dataexplorer";
 	}
 
@@ -200,12 +196,15 @@ public class DataExplorerController extends MolgenisPluginController
 			model.addAttribute("genomebrowser_patient_list",
 					molgenisSettings.getProperty(GenomeConfig.GENOMEBROWSER_PATIENT_ID, "patient_id"));
 
-			model.addAttribute("tableEditable",
-					molgenisSettings.getBooleanProperty(KEY_DATAEXPLORER_EDITABLE, DEFAULT_VAL_DATAEXPLORER_EDITABLE));
+			model.addAttribute("tableEditable", isTableEditable());
 			model.addAttribute("galaxyEnabled",
 					molgenisSettings.getBooleanProperty(KEY_GALAXY_ENABLED, DEFAULT_VAL_GALAXY_ENABLED));
 			String galaxyUrl = molgenisSettings.getProperty(KEY_GALAXY_URL);
 			if (galaxyUrl != null) model.addAttribute(ATTR_GALAXY_URL, galaxyUrl);
+		}
+		else if (moduleId.equals("diseasematcher"))
+		{
+			model.addAttribute("tableEditable", isTableEditable());
 		}
 		return "view-dataexplorer-mod-" + moduleId; // TODO bad request in case of invalid module id
 	}
@@ -225,6 +224,8 @@ public class DataExplorerController extends MolgenisPluginController
 		boolean modData = molgenisSettings.getBooleanProperty(KEY_MOD_DATA, DEFAULT_VAL_MOD_DATA);
 		boolean modAggregates = molgenisSettings.getBooleanProperty(KEY_MOD_AGGREGATES, DEFAULT_VAL_MOD_AGGREGATES);
 		boolean modAnnotators = molgenisSettings.getBooleanProperty(KEY_MOD_ANNOTATORS, DEFAULT_VAL_MOD_ANNOTATORS);
+		boolean modDiseasematcher = molgenisSettings.getBooleanProperty(KEY_MOD_DISEASEMATCHER,
+				DEFAULT_VAL_MOD_DISEASEMATCHER);
 
 		if (modAggregates)
 		{
@@ -266,6 +267,11 @@ public class DataExplorerController extends MolgenisPluginController
 					if (modAnnotators)
 					{
 						modulesConfig.add(new ModuleConfig("annotators", "Annotators", "annotator-icon.png"));
+					}
+					if (modDiseasematcher)
+					{
+						modulesConfig.add(new ModuleConfig("diseasematcher", "Disease Matcher",
+								"diseasematcher-icon.png"));
 					}
 
 					break;
@@ -469,5 +475,11 @@ public class DataExplorerController extends MolgenisPluginController
 		logger.error(null, e);
 		return Collections.singletonMap("errorMessage",
 				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage());
+	}
+
+	private boolean isTableEditable()
+	{
+		return molgenisSettings.getBooleanProperty(KEY_DATAEXPLORER_EDITABLE, DEFAULT_VAL_DATAEXPLORER_EDITABLE)
+				&& molgenisPermissionService.hasPermissionOnPlugin(ID, Permission.READ);
 	}
 }
