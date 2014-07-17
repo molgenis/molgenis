@@ -119,11 +119,13 @@
 		var body = modal.find('div.modal-body:eq(0)').addClass('overflow-y-visible');
 		body.append(createFeatureInfo(title, restApiFeature, callback));
 		body.append(createSearchDiv(title, restApiFeature, callback));
-		modal.modal('show').css({
-			'width' : "60%",
-			'margin-left' : "-30%",
-			'top' : '20%'
-		});
+		modal.css({
+			'width' : '50%',
+			'left' : '25%',
+			'top' : '30%',
+			'margin-left' : 0,
+			'margin-top' : 0
+		}).modal('show');
 		return modal;
 		
 		function createFeatureInfo(title, restApiFeature, callback){

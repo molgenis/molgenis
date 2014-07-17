@@ -1,7 +1,6 @@
 (function($, molgenis, w) {
 	"use strict";
 	
-	var standardModal = new molgenis.StandardModal();
 	var restApi = new molgenis.RestClient();
 	var nrItemsPerPage = 10;
 	
