@@ -244,8 +244,8 @@
 			});
 		}
         else{
-            $('.catalog-search-tree', this).empty();
-            $('.catalog-search-tree', this).html('no matching items');
+            $('.catalog-search-tree').empty();
+            $('.catalog-search-tree').html('no matching items');
         }
 	};
 	
