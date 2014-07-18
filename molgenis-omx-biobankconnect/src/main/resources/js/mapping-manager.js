@@ -122,8 +122,7 @@
 					editIcon.click();
 				});
 				if(mappedFeatureNames.length > 0){
-					switchBackgroundIcon(editIcon, mappedFeatureNames);
-					topFeatureDivContainer.append(makePopoverComponenet(mappedFeatureNames.join(','), numberOfDigit, mappedFeatureNames.join('<br />')));
+					updateInfoInTableCell(editIcon, mappedFeatureNames, numberOfDigit);
 				}
 				
 				//Initialize the edit click events
@@ -144,19 +143,19 @@
 								
 								//Modal body information.
 								var body = modal.find('.modal-body:eq(0)').css('max-height','100%').append(createFeatureInfoPanel(feature));
-								var leftControlDiv = $('<div />').addClass('span6').css('margin-bottom','10px');
-								var rightControlDiv = $('<div />').addClass('span6').css('margin-bottom','10px');
+								var leftControlDiv = $('<div />').addClass('span6').css('margin-bottom','10px').append('<div><h4>' + selectedDataSet.Name +  '</h4></div>');
+								var rightControlDiv = $('<div />').addClass('span6').css('margin-bottom','10px').append('<div><h4>' + mappedDataSet.Name +  '</h4></div>');
 								var modalBodyDiv = $('<div />').addClass('row-fluid').append(leftControlDiv).append(rightControlDiv).appendTo(body);
 								var controlDiv = $('<div class="row-fluid"></div>').appendTo(body);
 								var mappingTable = createMappingTable(candidateMappedFeatures, mappedFeatureNames);
-								var tableDiv = $('<div />').addClass('row-fluid well').append(mappingTable).css({
+								
+								$('<div />').addClass('row-fluid well').append(mappingTable).css({
 									'overflow-y' : 'scroll',
 									'height' : $(document).height()/4,
 									'padding-right' : '5px',
 									'padding-left' : '5px'
-								});
-								rightControlDiv.append('<div><h4>' + mappedDataSet.Name +  '</h4></div>').append(tableDiv);
-								leftControlDiv.append('<div><h4>' + selectedDataSet.Name +  '</h4></div>');
+								}).appendTo(rightControlDiv);
+								
 								var searchRequest = {
 									'featureId' : molgenis.hrefToId(feature.href),
 									'sourceDataSetId' : molgenis.hrefToId(selectedDataSet.href),
@@ -172,16 +171,8 @@
 								confirmButton.click(function(){
 									var mappedFeatureMap = updateMappingInfo(feature, mappingTable, mappedDataSet, mappedFeatureNames);
 									mappedFeatureNames = mappedFeatureMap.mappedFeatureNames;
-									switchBackgroundIcon(editIcon, mappedFeatureNames);
-									editIcon.siblings('div:eq(0)').empty().append(makePopoverComponenet(mappedFeatureNames.join(','), numberOfDigit, mappedFeatureNames.join('<br />')));
+									updateInfoInTableCell(editIcon, mappedFeatureNames, numberOfDigit);
 									standardModal.closeModal();
-								});
-								//table check box handler
-								tableDiv.find('input[type="checkbox"]').click(function(){
-									var dataItems = [];
-									tableDiv.find('input:checked').each(function(index, checkbox){
-										dataItems.push($(checkbox).data('eachMapping').mappedFeature.Name);
-									});
 								});
 							});
 						});
@@ -243,7 +234,7 @@
 			return divRow;
 		}
 		
-		//Helper class for createTableRow function...
+		//Helper method for createTableRow function...
 		function makePopoverComponenet(text, length, content){
 			var popover = $('<span />').html(text.length < length ? text : text.substring(0, length) + '..');
 			if(!(text.length < length)){
@@ -257,12 +248,14 @@
 			return popover;
 		}
 		
-		function switchBackgroundIcon(editIcon, mappedFeatureNames){
+		//Helper method for updating the information in the table cells
+		function updateInfoInTableCell(editIcon, mappedFeatureNames, numberOfDigit){
 			if(mappedFeatureNames.length === 0){
 				editIcon.removeClass('icon-ok').addClass('icon-pencil').parents('td:eq(0)').css('background', '');
 			}else{
 				editIcon.removeClass('icon-pencil').addClass('icon-ok').parents('td:eq(0)').css('background-color', 'rgb(223, 235, 245)');
 			}
+			editIcon.siblings('div:eq(0)').empty().append(makePopoverComponenet(mappedFeatureNames.join(','), numberOfDigit, mappedFeatureNames.join('<br />')));
 		}
 		
 		//Create ace editor for defining the algorithms
@@ -332,9 +325,6 @@
 							$(document).data('previousScript',editor.getValue());
 							$(document).data('clickedCell').click();
 						});
-					},
-					error : function(request, textStatus, error){
-						console.log(error);
 					}
 				});
 			});
@@ -369,19 +359,13 @@
 					data : JSON.stringify(ontologyMatcherRequest),
 					contentType : 'application/json',
 					success : function(data, textStatus, request) {	
-						console.log(data);
-						var alerts = [];
-						alerts.push(data);
 						modalBody.find('.alert').remove();
-						molgenis.createAlert(alerts, 'success', modalBody);
-						getMapping(createDataSetIdentifier(searchRequest.sourceDataSetId, searchRequest.selectedDataSetIds[0]), searchRequest.featureId, function(mappedFeatureNames){
-							var editIcon = $(document).data('clickedCell');
-							switchBackgroundIcon(editIcon, mappedFeatureNames);
-							editIcon.siblings('div:eq(0)').empty().append(makePopoverComponenet(mappedFeatureNames.join(','), numberOfDigit, mappedFeatureNames.join('<br />')));
+						molgenis.createAlert([data], 'success', modalBody);
+						var mappedFeatureNames = extractFeatures(editor.getValue());
+						$.each(parentDiv.parents('.modal-body:first').find('table input'), function(index, checkbox){
+							$(checkbox).attr('checked',$.inArray($(checkbox).data('eachMapping').name, mappedFeatureNames) !== -1);
 						});
-					},
-					error : function(request, textStatus, error){
-						console.log(error);
+						updateInfoInTableCell($(document).data('clickedCell'), mappedFeatureNames, numberOfDigit);
 					}
 				});
 			});
@@ -396,6 +380,16 @@
 			table.append('<tr><th>Median</th><td>' + jStat.median(array) + '</td></tr>');
 			table.append('<tr><th>Standard Deviation</th><td>' + jStat.stdev(array) + '</td></tr>');
 			return table;
+		}
+		
+		function extractFeatures(algorithm){
+			var results = [];
+			if(algorithm && algorithm.length > 0){
+				$.each(algorithm.match(/\$\(\s*.[^\\$\\(\\)]+\s*\)/g), function(inex, group){
+					results.push(group.replace(/\$\(\s*'\s*/, '').replace(/\s*'\s*\)/, ''));
+				});
+			}
+			return results;
 		}
 	}
 	
