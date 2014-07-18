@@ -2,25 +2,16 @@ package org.molgenis.reportbuilder.controller;
 
 import static org.molgenis.reportbuilder.controller.ReportBuilderController.URI;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Query;
 import org.molgenis.data.Queryable;
-import org.molgenis.data.Repository;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.omx.core.MolgenisEntity;
-import org.molgenis.omx.observ.DataSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -31,9 +22,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.testng.collections.Lists;
-
-import com.sun.mail.util.QEncoderStream;
 
 /**
  * Controller for the reportbuilder
