@@ -39,7 +39,8 @@ public class OntologyLoader
 		synonymsProperties = new HashSet<String>(Arrays.asList(
 				"http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#FULL_SYN",
 				"http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#P90",
-				"http://www.geneontology.org/formats/oboInOwl#hasExactSynonym"));
+				"http://www.geneontology.org/formats/oboInOwl#hasExactSynonym",
+				"http://www.ebi.ac.uk/efo/alternative_term"));
 	}
 
 	private Set<String> owlObjectProperties;
@@ -276,5 +277,10 @@ public class OntologyLoader
 	public Set<OWLSubClassOfAxiom> getSubClassAxiomsForSubClass(OWLClass cls)
 	{
 		return ontology.getSubClassAxiomsForSubClass(cls);
+	}
+
+	public void addSynonymsProperties(Set<String> synonymsProperties)
+	{
+		this.synonymsProperties.addAll(synonymsProperties);
 	}
 }
