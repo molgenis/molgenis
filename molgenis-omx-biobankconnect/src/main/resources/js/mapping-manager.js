@@ -356,8 +356,8 @@
 					}
 				});
 			});
+			
 			saveScriptButton.click(function(){
-				console.log('The saveScriptButton button has been clicked!' + editor.getValue());
 				var modalBody = parentDiv.parents('.modal-body:eq(0)');
 				var ontologyMatcherRequest = $.extend(searchRequest, {
 					'algorithmScript' : editor.getValue()
@@ -580,7 +580,7 @@
 				row.append('<td>' + mappedFeature.Name + '</td><td>' + molgenis.i18nDescription(mappedFeature).en + '</td><td>' + score + '</td>');
 				row.append($('<td />').append($('<label class="checkbox"></label>').append(checkBox))).appendTo(mappingTable);
 				if(mappedFeature.dataType === 'categorical'){
-					row.css('cursor', 'pointer').click(function(){
+					row.children('td:lt(2)').css('cursor', 'pointer').click(function(){
 						retrieveAllInfoForFeature(row, mappedFeature);
 					});
 				}
