@@ -225,13 +225,13 @@
 			$.each(data.filters, function() {
 				attributeFilters[this.attribute.href] = this;
 			});
-			self.filter.createFiltersList(attributeFilters);
+			self.filter.createFilterQueryUserReadableList(attributeFilters);
 			$(document).trigger('changeQuery', createEntityQuery());
 		});
 		
 		$(document).on('removeAttributeFilter', function(e, data) {
 			delete attributeFilters[data.attributeUri];
-			self.filter.createFiltersList(attributeFilters);
+			self.filter.createFilterQueryUserReadableList(attributeFilters);
 			$(document).trigger('changeQuery', createEntityQuery());
 		});
 		

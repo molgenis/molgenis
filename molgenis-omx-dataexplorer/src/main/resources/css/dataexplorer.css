@@ -183,9 +183,13 @@ a.accordion-toggle:hover,a.accordion-toggle:focus,a.accordion-toggle:active
 }
 
 #filter-modal .modal-body {
-	min-height: 200px;
-	max-height: 400px;
+	min-height: 250px;
+	max-height: 540px;
 	padding-bottom: 0;
+}
+
+#filter-wizard-modal .form-horizontal .control-label{
+	width:30%;
 }
 
 #filter-modal .form-horizontal .control-group .select2-choices{
@@ -222,6 +226,14 @@ ul.fancytree-container {
 
 .form-horizontal .controls.complex-simplefilter {
 	padding-left: 0px;
+}
+
+.form-horizontal .controls.complex-removebutton-container, .form-horizontal .controls.complex-addbutton-container {
+	padding-left:0px;
+}
+
+.form-horizontal .controls.complex-addbutton-container>button, .form-horizontal .controls.complex-removebutton-container>button{
+	margin-left: 5px;
 }
 
 .form-horizontal.filter-controls {
