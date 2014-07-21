@@ -29,6 +29,6 @@
 <script>
 	$.when($.ajax("/js/dataexplorer-annotators.js", {'cache': true}))
 		.then(function() {
-			molgenis.dataexplorer.annotators.setAnnotatorSelectBoxes();		
+			molgenis.dataexplorer.annotators.getAnnotatorSelectBoxes();		
 		});
 </script>
