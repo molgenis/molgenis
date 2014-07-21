@@ -118,6 +118,7 @@
 			header.data('attr', attribute);
 			items.push(header);
 		});
+		items.push($('<th>Report</th>'));
 		container.html(items);
 	}
 
@@ -162,7 +163,9 @@
 					cell.attr('tabindex', tabindex++);
 				}
 				row.append(cell);
+			
 			});
+			row.append($('<td><button class="reportButton">Entity report</button></td>'));
 			items.push(row);
 		}
 		container.html(items);
@@ -759,6 +762,18 @@
 			var cell = $(this).closest('td');
 			persistCell(cell, settings);
 		});
+		
+		// Onclick for an Entity report
+		$(container).on('click', '.molgenis-table button.reportButton', function(e){
+			var entityData = $(this).closest('tr').data('entity').href.split('/');
+			var entityId = entityData.pop();
+			var entityName = entityData.pop();
+			
+			$('#entityReport').load("/menu/main/reportbuilder",{entityName: entityName, entityId: entityId, view: "entityReport"}, function() {
+				  $('#entityReportModal').modal("show");
+			});
+		}); 
+		
 		return this;
 	};
 
