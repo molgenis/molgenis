@@ -1,36 +1,5 @@
-<#include "molgenis-header.ftl">
-<#include "molgenis-footer.ftl">
-
-<#assign css=[
-	"jquery.bootstrap.wizard.css",
-	"bootstrap-datetimepicker.min.css",
-	"ui.fancytree.min.css",
-	"jquery-ui-1.9.2.custom.min.css",
-	"select2.css",
-	"iThing-min.css",
-	"bootstrap-switch.min.css",
-	"dataexplorer.css",
-	"diseasematcher.css"]>
-<#assign js=[
-	"jquery-ui-1.9.2.custom.min.js",
-	"jquery.bootstrap.wizard.min.js",
-	"bootstrap-datetimepicker.min.js",
-	"dataexplorer-filter.js",
-	"dataexplorer-filter-dialog.js",
-	"dataexplorer-filter-wizard.js",
-	"jquery.fancytree.min.js",
-	"jquery.molgenis.tree.js",
-	"select2.min.js",
-	"jQEditRangeSlider-min.js",
-	"bootstrap-switch.min.js",
-	"jquery.molgenis.xrefsearch.js",
-	"dataexplorer.js",
-	"jquery.molgenis.table.js"]>
-
-<@header css js/>
-
 <#-- modal for single entity data -->
-<div class="modal large" id="entityReportModal" tabindex="-1" aria-hidden="true">
+<div class="modal hide large" id="entityReportModal" tabindex="-1" aria-hidden="true">
 	<div class="modal-dialog">
 		<div class="modal-content">	
 		
@@ -93,5 +62,3 @@
 	    </div>
 	</div>
 </div>
-
-<@footer/>
