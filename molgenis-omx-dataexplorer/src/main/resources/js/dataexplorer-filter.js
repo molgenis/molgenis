@@ -30,8 +30,10 @@
 			case 'ENUM':
 			case 'INT':
 			case 'TEXT':
+				return self.createComplexFilter(attribute, filter, wizard, 'OR');
+				break;
 			case 'MREF':
-				return self.createComplexFilter(attribute, filter, wizard);
+				return self.createComplexFilter(attribute, filter, wizard, null);
 				break;
 			case 'COMPOUND' :
 			case 'FILE':
@@ -156,17 +158,37 @@
 	/**
 	 * Create complex filter
 	 */
-	self.createComplexFilter = function(attribute, filter, wizard) 
+	self.createComplexFilter = function(attribute, filter, wizard, fixedOperator) 
 	{		
 		var $container = $('<div class="complex-filter-container"></div>').data('attribute', attribute);
+		var useFixedOperator = (fixedOperator !== undefined && fixedOperator !== null ? true : false);
+		
+		//alert("attribute.name: " + attribute.name + ' fixedOperator: ' + fixedOperator + ' useFixedOperator: ' + useFixedOperator);
+		
 		if(filter){
 			if(filter.isType('complex')){
 				$.each(filter.getComplexFilterElements(), function(index, complexFilterElement){
-					self.addComplexFilterElementToContainer($container, attribute, complexFilterElement.operator, complexFilterElement.simpleFilter, wizard, (index > 0 ? false : true), filter.getComplexFilterElements().length);
+					self.addComplexFilterElementToContainer(
+							$container, 
+							attribute, 
+							(fixedOperator ? fixedOperator : complexFilterElement.operator), 
+							complexFilterElement.simpleFilter, 
+							wizard, 
+							(index > 0 ? false : true), 
+							filter.getComplexFilterElements().length,
+							useFixedOperator);
 				});
 			}
 		}else{
-			self.addComplexFilterElementToContainer($container, attribute, undefined, undefined, wizard, true, null);
+			self.addComplexFilterElementToContainer(
+					$container, 
+					attribute, 
+					(fixedOperator ? fixedOperator : null), 
+					null, 
+					wizard, 
+					true, 
+					null,
+					useFixedOperator);
 		}
 		return $container;
 	}
@@ -174,7 +196,7 @@
 	/**
 	 * Add a complex filter element to the complex filter container
 	 */
-	self.addComplexFilterElementToContainer = function($container, attribute, complexFilterOperator, simpleFilter, wizard, isFirstElement, totalNumberElements) 
+	self.addComplexFilterElementToContainer = function($container, attribute, complexFilterOperator, simpleFilter, wizard, isFirstElement, totalNumberElements, useFixedOperator) 
 	{
 		// The complex filter element container
 		var $complexElementContainer = $('<div class="control-group complex-element-container"></div>');
@@ -209,12 +231,12 @@
 			
 			// Add plus button
 			var $plusButtonContainer = $('<div class="controls complex-addbutton-container" data-filter=complex-addbutton-container></div>');
-			$plusButtonContainer.append(self.createComplexFilterAddButton($container, attribute, complexFilterOperator, wizard));
+			$plusButtonContainer.append(self.createComplexFilterAddButton($container, attribute, complexFilterOperator, wizard, useFixedOperator));
 			$complexElementContainer.append($plusButtonContainer);
 			$complexElementContainer.append($removeButtonContainer);
 		}else{
 			// Add select complex filter operator
-			var $complexOperatorControlGroup = self.createComplexFilterSelectOperator(complexFilterOperator);
+			var $complexOperatorControlGroup = self.createComplexFilterSelectOperator(complexFilterOperator, useFixedOperator);
 			
 			// Add operator
 			$complexElement.append($complexOperatorControlGroup);	
@@ -238,31 +260,35 @@
 	 * 
 	 * Options: OR, AND
 	 */
-	self.createComplexFilterSelectOperator = function (complexOperator){
-		var $controlGroup = $('<div class="controls">').width('275px');
-		
-		var operator = (complexOperator === "AND" ? "AND" : "OR");
+	self.createComplexFilterSelectOperator = function (complexOperator, useFixedOperator){
+		var $controlGroup = $('<div class="controls">');
+		var operator = (complexOperator === 'AND' ? 'AND' : 'OR');
+		var orLabel= 'OR&nbsp;&nbsp;';
+		var andLabel = 'AND';
+		var operatorLabel = operator === 'AND' ? andLabel : orLabel;
 		var $operatorInput = $('<input type="hidden" data-filter="complex-operator" value="' + operator + '"/>');
-		var $dropdown = $('<div class="btn-group" data-filter="complex-operator-container" style="margin-left: 140px"><div>');
-		var orValue = "OR&nbsp;&nbsp;";
-		var andValue = "AND";
-		$dropdown.append($('<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#">' + (operator === "AND" ? andValue : orValue) + ' <b class="caret"></a>'));
 		$controlGroup.append($operatorInput);
-		$dropdown.append($('<ul class="dropdown-menu"><li><a data-value="OR">' + orValue + '</a></li><li><a data-value="AND">' + andValue + '</a></li></ul>'));
-
-		$.each($dropdown.find('.dropdown-menu li a'), function(index, element){
-			$(element).click(function(){
-				var dataValue = $(this).attr('data-value');
-				$operatorInput.val(dataValue);
-				$dropdown.find('a:first').html((dataValue === "AND" ? andValue : orValue) + ' <b class="caret"></b>');
-				$dropdown.find('a:first').val(dataValue);
+		var $dropdown;
+		if(useFixedOperator === false){
+			$dropdown = $('<div class="btn-group" data-filter="complex-operator-container" style="margin-left: 120px"><div>');
+			$dropdown.append($('<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#">' + operatorLabel + ' <b class="caret"></a>'));
+			$dropdown.append($('<ul class="dropdown-menu"><li><a data-value="OR">' + orLabel + '</a></li><li><a data-value="AND">' + andLabel + '</a></li></ul>'));
+			$.each($dropdown.find('.dropdown-menu li a'), function(index, element){
+				$(element).click(function(){
+					var dataValue = $(this).attr('data-value');
+					$operatorInput.val(dataValue);
+					$dropdown.find('a:first').html((dataValue === 'AND' ? andLabel : orLabel) + ' <b class="caret"></b>');
+					$dropdown.find('a:first').val(dataValue);
+				});
 			});
-		});
-		
-		$dropdown.find('div:first').remove();//This is a workaround FIX
-		$controlGroup.append($dropdown);
-		
-		return $('<div class="control-group">').append($controlGroup);
+			$dropdown.find('div:first').remove();//This is a workaround FIX
+			
+		}else{
+			$dropdown = $('<div data-filter="complex-operator-container" style="margin-left: 120px"><div>');
+			$dropdown.append($('<a class="btn btn-mini" disabled data-toggle="dropdown" href="#">' + operatorLabel + '&nbsp;&nbsp;' + '</a>'));
+		}
+
+		return $('<div class="control-group">').append($controlGroup.append($dropdown));
 	}
 	
 	/**
@@ -288,14 +314,14 @@
 	/**
 	 * Create complex filter add button
 	 */
-	self.createComplexFilterAddButton = function($container, attribute, complexFilterOperator, wizard)
+	self.createComplexFilterAddButton = function($container, attribute, complexFilterOperator, wizard, useFixedOperator)
 	{
 		return ($('<button class="btn btn-mini" type="button"><i class="icon-plus"></i></button>').click(function(){
 					if($('[data-filter=complex-removebutton]', $container.parent()).length === 0)
 					{
 						$('[data-filter=complex-removebutton-container]', $container).append(self.createRemoveFirstComplexElementButton($container));
 					}
-					self.addComplexFilterElementToContainer($container, attribute, complexFilterOperator, undefined, wizard, false);
+					self.addComplexFilterElementToContainer($container, attribute, complexFilterOperator, null, wizard, false, null, useFixedOperator);
 				}));
 	}
 	

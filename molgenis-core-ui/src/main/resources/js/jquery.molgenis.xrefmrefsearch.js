@@ -173,7 +173,7 @@
 			else if (attributeMetaData.fieldType === 'XREF') {
 				$operatorInput.val('OR');
 				$container.prepend($operatorInput);
-				$container.append($('<label class="btn btn-mini" data-toggle="dropdown" href="#">' + "OR&nbsp;&nbsp;&nbsp;&nbsp;" + '</label>'));
+				$container.append($('<a class="btn btn-mini" disabled href="#">' + "OR&nbsp;&nbsp;&nbsp;&nbsp;" + '</a>'));
 			}
 		}
 
