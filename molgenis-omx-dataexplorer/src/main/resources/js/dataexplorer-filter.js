@@ -73,7 +73,7 @@
 	};
 	
 	/**
-	 * Create the filter 
+	 * Create the filter
 	 * 
 	 */
 	self.createFilterQueryUserReadableList = function (attributeFilters) {
@@ -91,7 +91,7 @@
 	};
 	
 	/**
-	 * Create a string representation of the query 
+	 * Create the user simple representation of the query 
 	 */
 	self.createFilterQueyUserReadable = function (filter) {
 		var s = '';
@@ -116,7 +116,7 @@
 	}
 	
 	/**
-	 * @memberOf molgenis.dataexplorer
+	 * Create the simple filter user simple representation of the query
 	 */
 	self.createSimpleFilterValuesRepresentation = function(filter) {
 		var values = filter.getValues();
@@ -183,7 +183,7 @@
 		var $complexElement = $('<div class="controls complex-element" data-filter="complex-element"></div>');
 		
 		// Make complex filter element label
-		var $complexElementLabel = createFilterLabel(attribute, isFirstElement, wizard);
+		var $complexElementLabel = self.createFilterLabel(attribute, isFirstElement, wizard);
 		
 		// Add label
 		$complexElementContainer.append($complexElementLabel);
@@ -268,7 +268,7 @@
 	/**
 	 * Create filter label
 	 */
-	function createFilterLabel(attribute, isFirstElement, wizard)
+	self.createFilterLabel function(attribute, isFirstElement, wizard)
 	{
 		var label = attribute.label || attribute.name;
 		if(isFirstElement && wizard) 
@@ -337,7 +337,7 @@
 	 */
 	self.createSimpleFilter = function(attribute, filter, wizard) {
 		var $container = $('<div class="simple-filter-container"></div>');
-		var $label = createFilterLabel(attribute, true, wizard);
+		var $label = self.createFilterLabel(attribute, true, wizard);
 		$container.append($label);
 		$container.append(self.createSimpleFilterControls(attribute, filter));
 		$container.data('attribute', attribute);
