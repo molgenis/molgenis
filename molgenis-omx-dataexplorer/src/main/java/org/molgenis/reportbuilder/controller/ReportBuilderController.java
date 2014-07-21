@@ -5,6 +5,7 @@ import static org.molgenis.reportbuilder.controller.ReportBuilderController.URI;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -47,7 +48,7 @@ public class ReportBuilderController extends MolgenisPluginController
 		super(URI);
 	}
 
-	@RequestMapping(method = RequestMethod.GET)
+	@RequestMapping(method = RequestMethod.POST)
 	public String init(@RequestParam(value = "entityName") String entityName,
 			@RequestParam(value = "entityId") String entityId,
 			@RequestParam(value = "parameters", required = false) String parameterString,
@@ -95,7 +96,7 @@ public class ReportBuilderController extends MolgenisPluginController
 	 */
 	private Map<String, String> getMapFromEntity(Entity entity)
 	{
-		Map<String, String> entityValueMap = new HashMap<String, String>();
+		Map<String, String> entityValueMap = new LinkedHashMap<String, String>();
 		Iterator<String> entityAttributes = entity.getAttributeNames().iterator();
 
 		if (entityAttributes != null)
