@@ -175,7 +175,7 @@
 			}
 			else if (attributeMetaData.fieldType === 'XREF') {
 				$operatorInput.val('OR');
-				$container.append($('<a class="btn btn-mini add-on-left" disabled href="#">' + "&nbsp;OR&nbsp;&nbsp;&nbsp;&nbsp;" + '</a>'));
+				$container.append($('<a class="btn btn-mini add-on-left" disabled href="#">' + "OR" + '</a>'));
 				$container.append($operatorInput);
 			}
 		}

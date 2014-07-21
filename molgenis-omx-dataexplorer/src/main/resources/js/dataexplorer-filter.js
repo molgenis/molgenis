@@ -283,7 +283,7 @@
 			
 		}else{
 			$dropdown = $('<div data-filter="complex-operator-container" style="margin-left: 120px"><div>');
-			$dropdown.append($('<a class="btn btn-mini" disabled data-toggle="dropdown" href="#">' + operatorLabel + '&nbsp;&nbsp;' + '</a>'));
+			$dropdown.append($('<a class="btn btn-mini" disabled data-toggle="dropdown" href="#">' + operator + '</a>'));
 		}
 
 		return $('<div class="control-group">').append($controlGroup.append($dropdown));
@@ -448,6 +448,17 @@
 				$controls.append(createInput(attribute, {'name': name, 'id': name, 'style' : 'width: 300px'}, values ? values[0] : undefined));
 				break;
 			case 'MREF':
+				var operator = simpleFilter ? simpleFilter.operator : 'OR';
+				$controls.addClass("xrefmrefsearch");
+				$controls.xrefmrefsearch({
+					attribute : attribute,
+					values : values,
+					operator : operator,
+					autofocus : 'autofocus',
+					isfilter : true,
+					width : '266px'
+				});
+				break;
 			case 'XREF':
 				var operator = simpleFilter ? simpleFilter.operator : 'OR';
 				$controls.addClass("xrefmrefsearch");
@@ -457,7 +468,7 @@
 					operator : operator,
 					autofocus : 'autofocus',
 					isfilter : true,
-					width : '267px'
+					width : '284px'
 				});
 				break;
 			case 'COMPOUND' :
