@@ -96,7 +96,9 @@
 	function createSelect2($container, attributeMetaData, options) {
 		var refEntityMetaData = restApi.get(attributeMetaData.refEntity.href, {expand: ['attributes']});
 		var lookupAttrNames = getLookupAttributeNames(refEntityMetaData);
-		var hiddenInput = $(":input[type=hidden]",$container).not('[data-filter=xrefmref-operator]');
+		var hiddenInput = $(":input[type=hidden]",$container)
+				.not('[data-filter=xrefmref-operator]')
+				.not('[data-filter=ignore]');
 
 		hiddenInput.select2({
 			width: options.width ? options.width : 'resolve',
@@ -149,12 +151,13 @@
 		
 		if (options.isfilter){
 			var $operatorInput = $('<input type="hidden" data-filter="xrefmref-operator" value="' + options.operator + '" />');
+
 			if(attributeMetaData.fieldType === 'MREF') {
 				var $dropdown = $('<div class="btn-group"><div>');
 				var orValue = "OR&nbsp;&nbsp;";
 				var andValue = "AND";
-				$dropdown.append($('<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#">' + (options.operator === "AND" ? andValue : orValue) + ' <b class="caret"></a>'));
 				$dropdown.append($operatorInput);
+				$dropdown.append($('<a class="btn btn-mini dropdown-toggle add-on-left" data-toggle="dropdown" href="#">' + (options.operator === "AND" ? andValue : orValue) + ' <b class="caret"></a>'));
 				$dropdown.append($('<ul class="dropdown-menu"><li><a data-value="OR">' + orValue + '</a></li><li><a data-value="AND">' + andValue + '</a></li></ul>'));
 	
 				$.each($dropdown.find('.dropdown-menu li a'), function(index, element){
@@ -172,8 +175,8 @@
 			}
 			else if (attributeMetaData.fieldType === 'XREF') {
 				$operatorInput.val('OR');
-				$container.prepend($operatorInput);
-				$container.append($('<a class="btn btn-mini" disabled href="#">' + "OR&nbsp;&nbsp;&nbsp;&nbsp;" + '</a>'));
+				$container.append($('<a class="btn btn-mini add-on-left" disabled href="#">' + "&nbsp;OR&nbsp;&nbsp;&nbsp;&nbsp;" + '</a>'));
+				$container.append($operatorInput);
 			}
 		}
 

@@ -162,9 +162,7 @@
 	{		
 		var $container = $('<div class="complex-filter-container"></div>').data('attribute', attribute);
 		var useFixedOperator = (fixedOperator !== undefined && fixedOperator !== null ? true : false);
-		
-		//alert("attribute.name: " + attribute.name + ' fixedOperator: ' + fixedOperator + ' useFixedOperator: ' + useFixedOperator);
-		
+
 		if(filter){
 			if(filter.isType('complex')){
 				$.each(filter.getComplexFilterElements(), function(index, complexFilterElement){
@@ -459,7 +457,7 @@
 					operator : operator,
 					autofocus : 'autofocus',
 					isfilter : true,
-					width : '268px'
+					width : '267px'
 				});
 				break;
 			case 'COMPOUND' :

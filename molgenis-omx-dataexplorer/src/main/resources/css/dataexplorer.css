@@ -224,15 +224,30 @@ ul.fancytree-container {
 	vertical-align: top;
 }
 
-.form-horizontal .controls.complex-simplefilter {
-	padding-left: 0px;
-}
-
-.form-horizontal .controls.complex-removebutton-container, .form-horizontal .controls.complex-addbutton-container {
+.form-horizontal .controls.complex-removebutton-container, 
+.form-horizontal .controls.complex-addbutton-container, 
+.form-horizontal .controls.complex-simplefilter{
 	padding-left:0px;
 }
 
-.form-horizontal .controls.complex-addbutton-container>button, .form-horizontal .controls.complex-removebutton-container>button{
+.xrefmrefsearch.complex-simplefilter input.select2-input{
+	padding-bottom: 3px !important;
+	padding-top: 3px !important;
+}
+
+.xrefmrefsearch .btn.btn-mini.add-on-left{
+	border-bottom-left-radius:4px !important;
+	-webkit-border-bottom-left-radius: 4px !important;
+	border-top-left-radius:4px !important;
+	-webkit-border-top-left-radius: 4px !important;
+	border-bottom-right-radius:0px !important;
+	-webkit-border-bottom-right-radius: 0px !important;
+	border-top-right-radius:0px !important;
+	-webkit-border-top-right-radius: 0px !important;
+}
+
+.form-horizontal .controls.complex-addbutton-container>button, 
+.form-horizontal .controls.complex-removebutton-container>button{
 	margin-left: 5px;
 }
 
