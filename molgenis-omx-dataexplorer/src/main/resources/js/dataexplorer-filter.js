@@ -211,6 +211,7 @@
 			var $plusButtonContainer = $('<div class="controls complex-addbutton-container" data-filter=complex-addbutton-container></div>');
 			$plusButtonContainer.append(self.createComplexFilterAddButton($container, attribute, complexFilterOperator, wizard));
 			$complexElementContainer.append($plusButtonContainer);
+			$complexElementContainer.append($removeButtonContainer);
 		}else{
 			// Add select complex filter operator
 			var $complexOperatorControlGroup = self.createComplexFilterSelectOperator(complexFilterOperator);
@@ -223,9 +224,8 @@
 			
 			// Add remove
 			$removeButtonContainer.append(self.createRemoveComplexFilterButton($complexElementContainer));
+			$complexElement.append($removeButtonContainer);
 		}
-		
-		$complexElement.append($removeButtonContainer);
 		
 		// Add complex element container to container
 		$container.append($complexElementContainer.prepend($complexElement));
