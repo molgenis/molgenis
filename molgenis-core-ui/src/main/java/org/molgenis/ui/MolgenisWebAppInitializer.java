@@ -21,6 +21,13 @@ public class MolgenisWebAppInitializer
 {
 	private static final Logger logger = Logger.getLogger(MolgenisWebAppInitializer.class);
 
+	protected void onStartup(ServletContext servletContext, Class<?> appConfig, boolean isDasUsed)
+			throws ServletException
+	{
+		// no maximum fiel size profided? default to 32 Mb
+		onStartup(servletContext, appConfig, isDasUsed, 32);
+	}
+
 	/**
 	 * A Molgenis common web application initializer
 	 * 
@@ -30,7 +37,7 @@ public class MolgenisWebAppInitializer
 	 *            is the molgenis-omx-das module used?
 	 * @throws ServletException
 	 */
-	protected void onStartup(ServletContext servletContext, Class<?> appConfig, boolean isDasUsed)
+	protected void onStartup(ServletContext servletContext, Class<?> appConfig, boolean isDasUsed, int maxFileSize)
 			throws ServletException
 	{
 		// Create the 'root' Spring application context
@@ -49,7 +56,7 @@ public class MolgenisWebAppInitializer
 		}
 		else
 		{
-			final int maxSize = 32 * 1024 * 1024;
+			final int maxSize = maxFileSize * 1024 * 1024;
 			int loadOnStartup = (isDasUsed ? 2 : 1);
 			dispatcherServlet.setLoadOnStartup(loadOnStartup);
 			dispatcherServlet.addMapping("/");

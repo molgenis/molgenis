@@ -3,7 +3,6 @@ package org.molgenis.omx.biobankconnect.ontologytree;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
@@ -71,7 +70,8 @@ public class OntologyTermIndexRepository extends AbstractOntologyIndexRepository
 	@Override
 	public long count(Query q)
 	{
-		return Iterables.size(findAll(q));
+		return searchService.count(OntologyService.createOntologyTermDocumentType(ontologyUrl),
+				q.pageSize(Integer.MAX_VALUE).offset(Integer.MIN_VALUE));
 	}
 
 	@Override
