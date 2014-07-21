@@ -153,7 +153,7 @@
 				var $dropdown = $('<div class="btn-group"><div>');
 				var orValue = "OR&nbsp;&nbsp;";
 				var andValue = "AND";
-				$dropdown.append($('<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">' + (options.operator === "AND" ? andValue : orValue) + ' <b class="caret"></a>'));
+				$dropdown.append($('<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#">' + (options.operator === "AND" ? andValue : orValue) + ' <b class="caret"></a>'));
 				$dropdown.append($operatorInput);
 				$dropdown.append($('<ul class="dropdown-menu"><li><a data-value="OR">' + orValue + '</a></li><li><a data-value="AND">' + andValue + '</a></li></ul>'));
 	
@@ -173,7 +173,7 @@
 			else if (attributeMetaData.fieldType === 'XREF') {
 				$operatorInput.val('OR');
 				$container.prepend($operatorInput);
-				$container.append($('<label class="btn" data-toggle="dropdown" href="#">' + "OR&nbsp;&nbsp;&nbsp;&nbsp;" + '</label>'));
+				$container.append($('<label class="btn btn-mini" data-toggle="dropdown" href="#">' + "OR&nbsp;&nbsp;&nbsp;&nbsp;" + '</label>'));
 			}
 		}
 

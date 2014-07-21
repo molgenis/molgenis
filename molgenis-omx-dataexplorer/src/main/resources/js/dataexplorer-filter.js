@@ -290,7 +290,7 @@
 	 */
 	self.createComplexFilterAddButton = function($container, attribute, complexFilterOperator, wizard)
 	{
-		return ($('<button class="btn" type="button"><i class="icon-plus"></i></button>').click(function(){
+		return ($('<button class="btn btn-mini" type="button"><i class="icon-plus"></i></button>').click(function(){
 					if($('[data-filter=complex-removebutton]', $container.parent()).length === 0)
 					{
 						$('[data-filter=complex-removebutton-container]', $container).append(self.createRemoveFirstComplexElementButton($container));
@@ -303,7 +303,7 @@
 	 * Create remove button to remove complex elements that are not the first
 	 */
 	self.createRemoveComplexFilterButton = function($complexElementContainer){
-		return $('<button class="btn" type="button" data-filter=complex-removebutton><i class="icon-minus"></i></button>').click(function(){
+		return $('<button class="btn btn-mini" type="button" data-filter=complex-removebutton><i class="icon-minus"></i></button>').click(function(){
 					if($('[data-filter=complex-removebutton]', $complexElementContainer.parent()).length === 2)
 					{
 						$('[data-filter=complex-removebutton]', $complexElementContainer.parent()).remove();
@@ -316,7 +316,7 @@
 	 * Create remove button to remove the first element in a complex filter
 	 */
 	self.createRemoveFirstComplexElementButton = function($container){
-		return $('<button class="btn" type="button" data-filter=complex-removebutton><i class="icon-minus"></i></button>').click(function(){
+		return $('<button class="btn btn-mini" type="button" data-filter=complex-removebutton><i class="icon-minus"></i></button>').click(function(){
 					var $firstElement = $('[data-filter=complex-element]', $container)[0];
 					var $secondElement = $('[data-filter=complex-element]', $container)[1];
 					var $simpleFilterFirstElement = $('[data-filter=complex-simplefilter]', $firstElement);
@@ -433,7 +433,7 @@
 					operator : operator,
 					autofocus : 'autofocus',
 					isfilter : true,
-					width : '244px'
+					width : '268px'
 				});
 				break;
 			case 'COMPOUND' :
