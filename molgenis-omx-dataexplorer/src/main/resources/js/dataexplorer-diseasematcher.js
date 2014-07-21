@@ -9,8 +9,11 @@
  */
 
 (function($, molgenis) {
+
 	var restApi = new molgenis.RestClient();
 
+	var infoPanel = $('#diseasematcher-infopanel');
+	
 	/**
 	 * Regular expression containing all line break flavors, used for replacing line breaks.
 	 */
@@ -84,18 +87,13 @@
 		restApi.getAsync(entityUri + '/meta', {}, function(data) {
 			if (data === null || !data.attributes.hasOwnProperty(geneSymbolColumn)) {
 				
+				var warningSrc = $("#hb-column-warning").html();
+				var template = Handlebars.compile(warningSrc);
+				var warning = template({column: geneSymbolColumn});
+				infoPanel.append(warning);
+				toolAvailable = false;
+		
 				// TODO determine which annotators to propose
-				var warning = '<div class="alert alert-warning" id="gene-symbol-warning">'
-						+ '<strong>No gene symbols found!</strong> For this tool to work, make sure '
-						+ 'your dataset has a \'geneSymbol\' column.</div>';
-				
-				if (!$('#diseasematcher-variant-panel #gene-symbol-warning').length) {
-					$('#diseasematcher-variant-panel').append(warning);
-					toolAvailable = false;
-				}
-				
-			} else {
-				$('#diseasematcher-variant-panel #gene-symbol-warning').remove();
 			}
 		});
 	}
@@ -109,18 +107,23 @@
 	function checkDatasetAvailable(dataset) {
 		restApi.getAsync('/api/v1/' + dataset, {'num' : 1},	function(data){
 			if (data.total === 0) {
-				var warning = '<div class="alert alert-warning" id="' + dataset + '-warning"><strong>' + dataset + ' not loaded!'
-						+ '</strong> For this tool to work, a valid ' + dataset	+ ' dataset should be uploaded.</div>';
-				if (!$('#diseasematcher-variant-panel #' + dataset + '-warning').length) {
-					$('#diseasematcher-variant-panel').append(warning);
-					toolAvailable = false;
-				}
-			} else {
-				$('#diseasematcher-variant-panel #'+ dataset + '-warning').remove();
+				var warningSrc = $('#hb-dataset-warning').html();
+				var template = Handlebars.compile(warningSrc);
+				var warning = template({dataset: dataset});
+				infoPanel.append(warning);
+				toolAvailable = false;
 			}
 		});
 	}
 
+	/**
+	 * Switches the layout for the info panel by using different Handlebars templates.
+	 */
+	function setInfoPanelLayout(){
+		var layoutSrc = $('#hb-layout-variant').html();
+		var template = Handlebars.compile(layoutSrc);
+		infoPanel.html(template({}));
+	}
 	
 	/**
 	 * Click action for the navigation buttons in the Disease Matcher selection panel.
@@ -130,6 +133,8 @@
 	 */
 	function onClickNavBtn(element, selectionMode){
 		if (!toolAvailable) return;
+		
+		setInfoPanelLayout();
 		
 		//reset navbar and activate the clicked button
 		$('#diseasematcher-selection-navbar li').attr('class', '');
@@ -173,7 +178,9 @@
 		// wait till the checkToolAvailable calls are done. if tool is available pre-select the genes button
 		$(document).ajaxStop(function() {
 		    $(this).unbind("ajaxStop"); //prevent running again when other calls finish
+		    
 		    if (toolAvailable) onClickNavBtn($('#diseasematcher-genes-select-button'), SelectionMode.GENE);
+		    
 		});
 	});
 

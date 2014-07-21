@@ -14,21 +14,14 @@
 	var self = molgenis.dataexplorer.annotators = molgenis.dataexplorer.annotators || {};
 
 	// module api
-	self.setAnnotatorSelectBoxes = setAnnotatorSelectBoxes;
+	self.getAnnotatorSelectBoxes = getAnnotatorSelectBoxes;
 	
 	var restApi = new molgenis.RestClient();
 	
-	/**
-	 * @memberOf molgenis.dataexplorer.annotators
-	 */
-	function setAnnotatorSelectBoxes(){
-		var entity = getEntity();
-		molgenis.getAnnotatorSelectBoxes(entity.href);
-	}
-	
-	molgenis.getAnnotatorSelectBoxes = function(dataSetUri) {
+	function getAnnotatorSelectBoxes() {
 		// reset
-		restApi.getAsync(dataSetUri, null, function(dataset) {		
+		var entity = getEntity();
+		restApi.getAsync(entity.href, null, function(dataset) {		
 			$.ajax({
 				type : 'POST',
 				url : '/annotators/get-available-annotators',
