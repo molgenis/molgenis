@@ -268,7 +268,7 @@
 	/**
 	 * Create filter label
 	 */
-	self.createFilterLabel function(attribute, isFirstElement, wizard)
+	self.createFilterLabel = function(attribute, isFirstElement, wizard)
 	{
 		var label = attribute.label || attribute.name;
 		if(isFirstElement && wizard) 
