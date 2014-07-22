@@ -25,7 +25,8 @@
 	"bootstrap-switch.min.js",
 	"jquery.molgenis.xrefmrefsearch.js",
 	"dataexplorer.js",
-	"jquery.molgenis.table.js"]>
+	"jquery.molgenis.table.js",
+	"handlebars-v1.3.0.js"]>
 
 <@header css js/>
     <script>
