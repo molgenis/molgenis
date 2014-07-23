@@ -104,7 +104,10 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String AGGREGATES_NORESULTS_MESSAGE = "plugin.dataexplorer.mod.aggregates.noresults";
 
 	public static final String KEY_DATAEXPLORER_EDITABLE = "plugin.dataexplorer.editable";
+	public static final String KEY_DATAEXPLORER_ROW_CLICKABLE = "plugin.dataexplorer.rowClickable";
+	
 	private static final boolean DEFAULT_VAL_DATAEXPLORER_EDITABLE = false;
+	private static final boolean DEFAULT_VAL_DATAEXPLORER_ROW_CLICKABLE = false;
 
 	@Autowired
 	private DataService dataService;
@@ -200,11 +203,13 @@ public class DataExplorerController extends MolgenisPluginController
 			model.addAttribute("galaxyEnabled",
 					molgenisSettings.getBooleanProperty(KEY_GALAXY_ENABLED, DEFAULT_VAL_GALAXY_ENABLED));
 			String galaxyUrl = molgenisSettings.getProperty(KEY_GALAXY_URL);
+			model.addAttribute("rowClickable", isRowClickable());
 			if (galaxyUrl != null) model.addAttribute(ATTR_GALAXY_URL, galaxyUrl);
 		}
 		else if (moduleId.equals("diseasematcher"))
 		{
 			model.addAttribute("tableEditable", isTableEditable());
+			model.addAttribute("rowClickable", isRowClickable());
 		}
 		return "view-dataexplorer-mod-" + moduleId; // TODO bad request in case of invalid module id
 	}
@@ -481,5 +486,9 @@ public class DataExplorerController extends MolgenisPluginController
 	{
 		return molgenisSettings.getBooleanProperty(KEY_DATAEXPLORER_EDITABLE, DEFAULT_VAL_DATAEXPLORER_EDITABLE)
 				&& molgenisPermissionService.hasPermissionOnPlugin(ID, Permission.READ);
+	}
+	
+	private boolean isRowClickable(){
+		return molgenisSettings.getBooleanProperty(KEY_DATAEXPLORER_ROW_CLICKABLE, DEFAULT_VAL_DATAEXPLORER_ROW_CLICKABLE);
 	}
 }
