@@ -126,33 +126,52 @@ a.accordion-toggle:hover,a.accordion-toggle:focus,a.accordion-toggle:active
 	cursor: pointer;
 }
 
-.molgenis-xrefsearch .select2-result {
+.molgenis-xrefmrefsearch .select2-result {
 	vertical-align: top;
 	padding: 2px;
 	font-size: 12px;
 	color: #333;
 }
 
-.molgenis-xrefsearch .select2-result:nth-child(even) {
+.select2-input {
+	width: 100% !important;
+}
+
+.molgenis-xrefmrefsearch .select2-result:nth-child(even) {
 	background-color: #DDD;
 }
 
-.molgenis-xrefsearch .select2-result:nth-child(odd) {
+.molgenis-xrefmrefsearch .select2-result:nth-child(odd) {
 	background-color: #FFF;
 }
 
-.molgenis-xrefsearch .select2-results .select2-highlighted {
+.molgenis-xrefmrefsearch .select2-results .select2-highlighted {
     background: #04c;
     color: #fff;
 }
 
-.molgenis-xrefsearch .add-ref-query-part, .remove-ref-query-part {
+.molgenis-xrefmrefsearch .select2-drop-active .select2-result{
+	width: 500px !important;
+}
+
+.molgenis-xrefmrefsearch.select2-drop-active{
+	overflow-x: visible !important;
+	width: 535px !important;
+	border: 1px solid #5897fb !important;
+}
+
+.select2-drop{
+	width: 100%;
+	margin-top: -1px;
+}
+
+.molgenis-xrefmrefsearch .add-ref-query-part, .remove-ref-query-part {
 	margin-left: 10px;
 }
 
 #filter-wizard-modal .modal-body {
-	min-height: 500px;
-	max-height: 500px;
+	min-height: 540px;
+	max-height: 540px;
 	padding-bottom: 0;
 }
 
@@ -172,6 +191,24 @@ a.accordion-toggle:hover,a.accordion-toggle:focus,a.accordion-toggle:active
 
 #filter-wizard-modal .wizard-steps {
 	margin-bottom: 10px
+}
+
+#filter-wizard-modal .form-horizontal .control-group .select2-choices{
+	position: static;
+}
+
+#filter-modal .modal-body {
+	min-height: 250px;
+	max-height: 540px;
+	padding-bottom: 0;
+}
+
+#filter-wizard-modal .form-horizontal .control-label{
+	width:20%;
+}
+
+#filter-modal .form-horizontal .control-group .select2-choices{
+	position: static;
 }
 
 /* default fancytree styling */
@@ -196,10 +233,41 @@ ul.fancytree-container {
 }
 
 .form-horizontal .controls {
-	margin: 4px;
 	display: inline-block;
 	padding-left: 20px;
+	margin-left: 0px;
 	vertical-align: top;
+}
+
+.form-horizontal .controls.complex-removebutton-container, 
+.form-horizontal .controls.complex-addbutton-container, 
+.form-horizontal .controls.complex-simplefilter{
+	padding-left:0px;
+}
+
+.xrefmrefsearch.complex-simplefilter input.select2-input{
+	padding-bottom: 3px !important;
+	padding-top: 3px !important;
+}
+
+.xrefmrefsearch .btn.btn-mini.add-on-left{
+	border-bottom-left-radius:4px !important;
+	-webkit-border-bottom-left-radius: 4px !important;
+	border-top-left-radius:4px !important;
+	-webkit-border-top-left-radius: 4px !important;
+	border-bottom-right-radius:0px !important;
+	-webkit-border-bottom-right-radius: 0px !important;
+	border-top-right-radius:0px !important;
+	-webkit-border-top-right-radius: 0px !important;
+}
+
+.form-horizontal .controls.complex-addbutton-container>button, 
+.form-horizontal .controls.complex-removebutton-container>button{
+	margin-left: 5px;
+}
+
+.form-horizontal.filter-controls {
+	margin-bottom: 60px;
 }
 
 .ui-rangeSlider-bar {

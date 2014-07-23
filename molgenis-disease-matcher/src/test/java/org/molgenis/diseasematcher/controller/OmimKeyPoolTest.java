@@ -111,6 +111,8 @@ public class OmimKeyPoolTest
 	@Test
 	public void testKeyTimeOutWithWait() throws NoSuchElementException, IllegalStateException, Exception
 	{
+		long startTime = System.currentTimeMillis();
+
 		String key1 = pool.borrowObject();
 		pool.returnObject(key1);
 
@@ -124,11 +126,21 @@ public class OmimKeyPoolTest
 		pool.returnObject(key4);
 
 		// wait a second and try again
-		Thread.sleep(1000);
 		String key5 = pool.borrowObject();
 		pool.returnObject(key5);
 
-		assertEquals(key5, "a");
+		long stopTime = System.currentTimeMillis();
+
+		// should take less than a second, but test can fail when build is slow
+		if (stopTime - startTime < 1000)
+		{
+			assertNotEquals(key5, "a");
+		}
+		else
+		{
+			assertEquals(key5, "a");
+		}
+
 	}
 
 }

@@ -4,14 +4,7 @@
 	
 		<#-- ANALYSIS ZONE -->
 		<div class="span9">
-			<div class="well">
-				<div class="span12" id="diseasematcher-variant-panel"></div>
-				<div class="row-fluid">
-					<div class="span12" id="diseasematcher-disease-panel">
-						<ul class="nav nav-tabs" id="diseasematcher-disease-panel-tabs" data-tabs="tabs"></ul>
-						<div id="diseasematcher-disease-tab-content"></div>
-					</div>
-				</div>
+			<div class="well" id="diseasematcher-infopanel">		
 			</div>
 		</div>
 		
@@ -58,6 +51,29 @@
 		</div>
 	</div>		
 </div>
+
+<script id="hb-dataset-warning" class="diseasematcher" type="text/x-handlebars-template">
+	<div class="alert alert-warning" id="{{dataset}}-warning">
+		<strong>{{dataset}} not loaded!</strong> For this tool to work, please upload a valid <em>{{dataset}}</em> dataset.
+	</div>	
+</script>
+
+<script id="hb-column-warning" class="diseasematcher" type="text/x-handlebars-template">
+	<div class="alert alert-warning" id="{{column}}-warning">
+		<strong>No {{column}} column found!</strong> For this tool to work, make sure your dataset has a <em>{{column}}</em> column.
+	</div>	
+</script>
+
+<script id="hb-layout-variant" class="diseasematcher" type="text/x-handlebars-template">
+	<div class="span12" id="diseasematcher-variant-panel"></div>
+	<div class="row-fluid">
+		<div class="span12" id="diseasematcher-disease-panel">
+			<ul class="nav nav-tabs" id="diseasematcher-disease-panel-tabs" data-tabs="tabs"></ul>
+			<div id="diseasematcher-disease-tab-content"></div>
+		</div>
+	</div>
+</script>
+
 <script>
 	var tableEditable = ${tableEditable?string('true', 'false')};
 	$.when($.ajax("/js/dataexplorer-diseasematcher.js", {'cache': true}))

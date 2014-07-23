@@ -110,8 +110,7 @@ public class EmxImportServiceImpl implements EmxImporterService
 		try
 		{
 			EntityImportReport entityImportReport = transactionTemplate.execute(new EmxImportTransactionCallback(
-					databaseAction, source, metadata,
-					addedEntities));
+					databaseAction, source, metadata, addedEntities));
 			return entityImportReport;
 		}
 		catch (Exception e)
@@ -397,13 +396,17 @@ public class EmxImportServiceImpl implements EmxImporterService
 				// import data
 				for (String name : metadata.keySet())
 				{
-					MysqlRepository to = (MysqlRepository) store.getRepositoryByEntityName(name);
-					if (to != null)
+					MysqlRepository mysqlEntityRepository = (MysqlRepository) store.getRepositoryByEntityName(name);
+					if (mysqlEntityRepository != null)
 					{
-						Repository from = source.getRepositoryByEntityName(name);
-						List<Entity> entities = Lists.newArrayList(from);
-						to.update(entities, dbAction);
-						report.getNrImportedEntitiesMap().put(name, entities.size());
+						Repository fileEntityRepository = source.getRepositoryByEntityName(name);
+						// check to prevent nullpointer when importing metadata only
+						if (fileEntityRepository != null)
+						{
+							List<Entity> entities = Lists.newArrayList(fileEntityRepository);
+							mysqlEntityRepository.update(entities, dbAction);
+							report.getNrImportedEntitiesMap().put(name, entities.size());
+						}
 					}
 				}
 
