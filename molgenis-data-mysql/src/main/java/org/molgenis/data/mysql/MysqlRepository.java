@@ -556,6 +556,11 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 						{
 							search.append(" OR this.").append('`').append(att.getName()).append('`').append(" LIKE ?");
 						}
+						else if (att.getDataType() instanceof MrefField)
+						{
+							search.append(" OR CAST(").append(att.getName()).append(".`").append(att.getName())
+									.append('`').append(" as CHAR) LIKE ?");
+						}
 						else
 						{
 							search.append(" OR CAST(this.").append('`').append(att.getName()).append('`')
