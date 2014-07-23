@@ -8,6 +8,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -50,11 +52,8 @@ public class ReportBuilderController extends MolgenisPluginController
 
 	@RequestMapping(method = RequestMethod.POST)
 	public String init(@RequestParam(value = "entityName") String entityName,
-			@RequestParam(value = "entityId") String entityId,
-			@RequestParam(value = "parameters", required = false) String parameterString,
-			@RequestParam(value = "view") String view, Model model) throws Exception
+			@RequestParam(value = "entityId") String entityId, Model model) throws Exception
 	{
-
 		if (dataService.hasRepository(entityName))
 		{
 			Queryable queryableRepository = dataService.getQueryableRepository(entityName);
@@ -65,16 +64,6 @@ public class ReportBuilderController extends MolgenisPluginController
 				model.addAttribute("entityName", entityName);
 				model.addAttribute("entityId", entityId);
 				model.addAttribute("entityMap", getMapFromEntity(entity));
-
-				if (parameterString != null)
-				{
-					Map<String, String> parameterMap = getMapFromRequestMappingUrl(parameterString);
-					model.addAttribute("parameterMap", parameterMap);
-				}
-				else
-				{
-					model.addAttribute("parameterMap", null);
-				}
 			}
 			else
 			{
@@ -85,7 +74,7 @@ public class ReportBuilderController extends MolgenisPluginController
 		{
 			throw new RuntimeException("unknown entity: " + entityName);
 		}
-		return "view-" + view;
+		return "view-entityReport";
 	}
 
 	/**
@@ -113,32 +102,6 @@ public class ReportBuilderController extends MolgenisPluginController
 		}
 
 		return entityValueMap;
-	}
-
-	private Map<String, String> getMapFromRequestMappingUrl(String parameterString)
-	{
-		Map<String, String> parameterMap = new HashMap<String, String>();
-
-		try
-		{
-			// expected key value pairs to be seperated by ','
-			String[] parameters = parameterString.split(",");
-			if (parameters.length > 0)
-			{
-				for (int i = 0; i < parameters.length; i++)
-				{
-					// expected key and value to be seperated by ':'
-					parameterMap.put(parameters[i].split(":")[0], parameters[i].split(":")[1]);
-				}
-			}
-		}
-		catch (Exception e)
-		{
-			throw new RuntimeException(
-					"the parameterMap key value pairs need to be in the following format: key:value,key:value");
-		}
-
-		return parameterMap;
 	}
 
 	@ExceptionHandler(RuntimeException.class)
