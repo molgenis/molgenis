@@ -150,6 +150,21 @@ a.accordion-toggle:hover,a.accordion-toggle:focus,a.accordion-toggle:active
     color: #fff;
 }
 
+.molgenis-xrefmrefsearch .select2-drop-active .select2-result{
+	width: 500px !important;
+}
+
+.molgenis-xrefmrefsearch.select2-drop-active{
+	overflow-x: visible !important;
+	width: 535px !important;
+	border: 1px solid #5897fb !important;
+}
+
+.select2-drop{
+	width: 100%;
+	margin-top: -1px;
+}
+
 .molgenis-xrefmrefsearch .add-ref-query-part, .remove-ref-query-part {
 	margin-left: 10px;
 }
@@ -189,7 +204,7 @@ a.accordion-toggle:hover,a.accordion-toggle:focus,a.accordion-toggle:active
 }
 
 #filter-wizard-modal .form-horizontal .control-label{
-	width:30%;
+	width:20%;
 }
 
 #filter-modal .form-horizontal .control-group .select2-choices{
