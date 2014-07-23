@@ -10,7 +10,11 @@
 		// create elements
 		var items = [];
 		items.push('<div class="row-fluid molgenis-table-container">');
-		items.push('<table class="table-striped table-condensed molgenis-table"><thead></thead><tbody></tbody></table>');
+		if(settings.rowClickable){
+			items.push('<table class="table-striped table-condensed molgenis-table table-hover"><thead></thead><tbody></tbody></table>');
+		}else{
+			items.push('<table class="table-striped table-condensed molgenis-table"><thead></thead><tbody></tbody></table>');
+		}
 		items.push('</div>');
 		items.push('<div class="row-fluid">');
 		items.push('<div class="span3"><div class="molgenis-table-controls pull-left">');
@@ -118,7 +122,6 @@
 			header.data('attr', attribute);
 			items.push(header);
 		});
-		items.push($('<th>Report</th>'));
 		container.html(items);
 	}
 
@@ -165,7 +168,6 @@
 				row.append(cell);
 			
 			});
-			row.append($('<td><button class="reportButton">Entity report</button></td>'));
 			items.push(row);
 		}
 		container.html(items);
@@ -310,16 +312,18 @@
 							case 'CATEGORICAL':
 							case 'XREF':
 								var cellValue = $('<a href="#">' + formatTableCellValue(rawValue[refAttribute], refAttributeType) + '</a>'); 
-								cellValue.click(function() {
+								cellValue.click(function(event) {
 									openRefAttributeModal(attribute, refEntity, refAttribute, rawValue);
+									event.stopPropagation();
 								});
 								cell.append(cellValue);
 								break;
 							case 'MREF':
 								$.each(rawValue.items, function(i, rawValue) {
 									var cellValuePart = $('<a href="#">' + formatTableCellValue(rawValue[refAttribute], refAttributeType) + '</a>');
-									cellValuePart.click(function() {
-										openRefAttributeModal(attribute, refEntity, refAttribute, rawValue); 
+									cellValuePart.click(function(event) {
+										openRefAttributeModal(attribute, refEntity, refAttribute, rawValue);
+										event.stopPropagation();
 									});
 									if (i > 0)
 										cell.append(',');
@@ -763,16 +767,20 @@
 			persistCell(cell, settings);
 		});
 		
-		// Onclick for an Entity report
-		$(container).on('click', '.molgenis-table button.reportButton', function(e){
-			var entityData = $(this).closest('tr').data('entity').href.split('/');
+		$(container).on('click', '.molgenis-table.table-hover tbody:not(.editable) tr', function(e){
+			// Issue #1400 ask for IdAttribute directly
+			var entityData = $(this).data('entity').href.split('/');
 			var entityId = entityData.pop();
 			var entityName = entityData.pop();
 			
-			$('#entityReport').load("/menu/main/reportbuilder",{entityName: entityName, entityId: entityId, view: "entityReport"}, function() {
+			$('#entityReport').load("/menu/main/reportbuilder",{entityName: entityName, entityId: entityId}, function() {
 				  $('#entityReportModal').modal("show");
+				  	  
+				  $("#csvDownloadButton", "#entityReport").on('click', function() {
+						$.download("/menu/main/reportbuilder/csv", {entityId: entityId}, "GET");
+				  });
 			});
-		}); 
+		});
 		
 		return this;
 	};
@@ -783,6 +791,7 @@
 		'maxRows' : 20,
 		'attributes' : null,
 		'query' : null,
-		'editable' : false
+		'editable' : false,
+		'rowClickable': false
 	};
 }($, window.top.molgenis = window.top.molgenis || {}));
