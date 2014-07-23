@@ -310,11 +310,9 @@ public class DataExplorerController extends MolgenisPluginController
 	{
 		AttributeMetaData attributeStartPosition = genomeConfig.getAttributeMetadataForAttributeNameArray(
 				GenomeConfig.GENOMEBROWSER_START, entityMetaData);
-		AttributeMetaData attributeId = genomeConfig.getAttributeMetadataForAttributeNameArray(
-				GenomeConfig.GENOMEBROWSER_ID, entityMetaData);
 		AttributeMetaData attributeChromosome = genomeConfig.getAttributeMetadataForAttributeNameArray(
 				GenomeConfig.GENOMEBROWSER_CHROM, entityMetaData);
-		return attributeStartPosition != null && attributeId != null && attributeChromosome != null;
+		return attributeStartPosition != null && attributeChromosome != null;
 	}
 
 	@RequestMapping(value = "/download", method = POST)

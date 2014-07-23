@@ -134,7 +134,7 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource i
 			try
 			{
 				valueStart = entity.getInt(startAttribute);
-				valueIdentifier = entity.getString(idAttribute);
+				valueIdentifier = StringUtils.isNotEmpty(idAttribute)?entity.getString(idAttribute):"-";
 			}
 			catch (ClassCastException e)
 			{
