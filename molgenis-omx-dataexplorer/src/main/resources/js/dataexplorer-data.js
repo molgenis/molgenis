@@ -250,6 +250,7 @@
         var complexFilter = new molgenis.dataexplorer.filter.ComplexFilter(attribute);
         var complexFilterElement = new molgenis.dataexplorer.filter.ComplexFilterElement(attribute);
         complexFilterElement.simpleFilter = attributeFilter;
+        complexFilterElement.operator = undefined;
         complexFilter.addComplexFilterElement(complexFilterElement);
         $(document).trigger('updateAttributeFilters', {'filters': [complexFilter]});
     }
