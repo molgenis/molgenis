@@ -30,8 +30,6 @@ import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
 import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.value.BoolValue;
-import org.molgenis.omx.observ.value.CategoricalValue;
-import org.molgenis.omx.observ.value.DateTimeValue;
 import org.molgenis.omx.observ.value.DateValue;
 import org.molgenis.omx.observ.value.DecimalValue;
 import org.molgenis.omx.observ.value.EmailValue;
@@ -46,7 +44,6 @@ import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
 import org.molgenis.util.EntityUtils;
-import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.beans.BeanUtils;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -453,46 +450,6 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Cr
 				dataService.update(DateValue.ENTITY_NAME, dateValue);
 				searchService.updateDocumentById(dataSetIdentifier, documentId, attrName + "='" + dateValue.getValue() + "'");
 			}
-			else if(value instanceof DateTimeValue)
-			{
-				String attrName = observedValue.getFeature().getIdentifier();	
-				DateTimeValue dateTimeValue = (DateTimeValue) value;
-				
-				// Correct string for elastic search, but not mysql?? Cant set to Date
-				String dateTime = MolgenisDateFormat.getDateTimeFormat().format(entity.getUtilDate(attrName));
-				dateTimeValue.setValue(entity.getUtilDate(attrName));
-				
-				dataService.update(DateTimeValue.ENTITY_NAME, dateTimeValue);
-				searchService.updateDocumentById(dataSetIdentifier, documentId, attrName + "='" + dateTime + "'");
-			}
-			else if(value instanceof CategoricalValue)
-			{
-				String attrName = observedValue.getFeature().getIdentifier();
-				CategoricalValue categoricalValue = (CategoricalValue) value;
-				categoricalValue.set(attrName, categoricalValue);
-				
-				dataService.update(CategoricalValue.ENTITY_NAME, categoricalValue);
-				// TODO what to put in elastic search???
-//				searchService.updateDocumentById(dataSetIdentifier, documentId, attrName + "=" + ???);
-			}
-//			else if(value instanceof XrefValue)
-//			{
-//				String attrName = observedValue.getFeature().getIdentifier();
-//				XrefValue xrefValue = (XrefValue) value;
-//				xrefValue.set(entity, true);
-//				
-//				dataService.update(XrefValue.ENTITY_NAME, xrefValue);
-//				searchService.updateDocumentById(dataSetIdentifier, documentId, attrName + "=" + xrefValue.getValue());
-//			}
-//			else if(value instanceof MrefValue)
-//			{
-//				String attrName = observedValue.getFeature().getIdentifier();
-//				MrefValue mrefValue = (MrefValue) value;
-//				mrefValue.setValue(characteristics);
-//				
-//				dataService.update(MrefValue.ENTITY_NAME, mrefValue);
-//				searchService.updateDocumentById(dataSetIdentifier, documentId, attrName + "=" + mrefValue.getValue());
-//			}
 		}
 	}
 
