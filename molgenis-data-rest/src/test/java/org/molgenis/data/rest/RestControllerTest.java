@@ -46,6 +46,7 @@ import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -60,6 +61,7 @@ import org.testng.annotations.Test;
 @ContextConfiguration(classes = RestControllerConfig.class)
 public class RestControllerTest extends AbstractTestNGSpringContextTests
 {
+	private static final MediaType MEDIA_TYPE_TEXT_CSV = new MediaType("text", "csv");
 	private static String ENTITY_NAME = "Person";
 	private static Object ENTITY_ID = "p1";
 	private static String HREF_ENTITY = BASE_URI + "/" + ENTITY_NAME;
@@ -116,7 +118,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(repo.getName()).thenReturn(ENTITY_NAME);
 
 		mockMvc = MockMvcBuilders.standaloneSetup(restController)
-				.setMessageConverters(new GsonHttpMessageConverter(), new CsvHttpMessageConverter()).build();
+				.setMessageConverters(new GsonHttpMessageConverter(), new CsvHttpMessageConverter(), new CsvEntityCollectionResponseConverter()).build();
 	}
 
 	@Test
@@ -229,6 +231,19 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 
 	}
 
+	@Test
+	public void retrieveEntityCollectionCSV() throws Exception {
+		mockMvc.perform(
+				get(HREF_ENTITY).param("start", "5").param("num", "10")
+						.param("q[0].operator", "EQUALS")
+						.param("q[0].field", "name")
+						.param("q[0].value", "Piet")
+						.accept(MEDIA_TYPE_TEXT_CSV))
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MEDIA_TYPE_TEXT_CSV))
+				.andExpect(content().string("\"href\",\"name\"\n\""+HREF_ENTITY_ID+"\",\"Piet\"\n"));
+	}
+	
 	@Test
 	public void retrieveEntityCollectionPost() throws Exception
 	{
