@@ -93,7 +93,14 @@ public class ReportBuilderController extends MolgenisPluginController
 			while (entityAttributes.hasNext())
 			{
 				String entityAttribute = entityAttributes.next();
-				entityValueMap.put(entityAttribute, entity.get(entityAttribute).toString());
+				if (entity.get(entityAttribute) == null)
+				{
+					entityValueMap.put(entityAttribute, " ");
+				}
+				else
+				{
+					entityValueMap.put(entityAttribute, entity.get(entityAttribute).toString());
+				}
 			}
 		}
 		else
