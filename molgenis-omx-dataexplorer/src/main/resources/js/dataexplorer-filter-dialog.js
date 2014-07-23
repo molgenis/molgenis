@@ -17,7 +17,7 @@
 		var modal = createFilterModal();
 		var title = attribute.label || attribute.name;
 		var description = attribute.description ? attribute.description : 'No description available';
-		var controls = molgenis.dataexplorer.filter.createFilterControls(attribute, attributeFilter);
+		var controls = molgenis.dataexplorer.filter.createFilter(attribute, attributeFilter, false);
 		
 		$('.filter-title', modal).html(title);
 		$('.filter-description', modal).html(description);

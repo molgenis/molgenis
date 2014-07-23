@@ -266,16 +266,16 @@
 			case 'MREF':
 				var refEntityMeta = settings.refEntitiesMeta[attribute.refEntity.href];
 				var lblValue = entity[attribute.name] ? $.map(entity[attribute.name].items, function(val) {return val[refEntityMeta.labelAttribute];}) : undefined; 
-				var container = $('<div class="xrefsearch">');
-				container.xrefsearch({attribute: attribute, values: lblValue});
+				var container = $('<div class="xrefmrefsearch">');
+				container.xrefmrefsearch({attribute: attribute, values: lblValue});
 				container.addClass('ref-select');
 				cell.html(container);
 				break;
 			case 'XREF':
 				var refEntityMeta = settings.refEntitiesMeta[attribute.refEntity.href];
 				var lblValue = entity[attribute.name] ? entity[attribute.name][refEntityMeta.labelAttribute] : undefined;
-				var container = $('<div class="xrefsearch">');
-				container.xrefsearch({attribute: attribute, values: lblValue});
+				var container = $('<div class="xrefmrefsearch">');
+				container.xrefmrefsearch({attribute: attribute, values: lblValue});
 				container.addClass('ref-select');
 				cell.html(container);
 				break;

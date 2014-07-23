@@ -23,9 +23,10 @@
 	"select2.min.js",
 	"jQEditRangeSlider-min.js",
 	"bootstrap-switch.min.js",
-	"jquery.molgenis.xrefsearch.js",
+	"jquery.molgenis.xrefmrefsearch.js",
 	"dataexplorer.js",
-	"jquery.molgenis.table.js"]>
+	"jquery.molgenis.table.js",
+	"handlebars-v1.3.0.js"]>
 
 <@header css js/>
     <script>
