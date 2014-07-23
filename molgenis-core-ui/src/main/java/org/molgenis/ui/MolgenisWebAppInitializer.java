@@ -56,6 +56,9 @@ public class MolgenisWebAppInitializer
 		}
 		else
 		{
+			
+			
+			
 			final int maxSize = maxFileSize * 1024 * 1024;
 			int loadOnStartup = (isDasUsed ? 2 : 1);
 			dispatcherServlet.setLoadOnStartup(loadOnStartup);
