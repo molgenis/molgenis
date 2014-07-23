@@ -116,11 +116,12 @@
             }
 
 			<#-- create data table -->
+			var rowClickable = ${rowClickable?string('true', 'false')};
 			var tableEditable = ${tableEditable?string('true', 'false')};
 			if (tableEditable) {
 				tableEditable = molgenis.hasWritePermission(molgenis.dataexplorer.getSelectedEntityMeta().name);
 			}
-			molgenis.dataexplorer.data.createDataTable(tableEditable);    	
+			molgenis.dataexplorer.data.createDataTable(tableEditable, rowClickable);    	
 		})
 		.fail(function() {
 			molgenis.createAlert([{'message': 'An error occured. Please contact the administrator.'}], 'error');

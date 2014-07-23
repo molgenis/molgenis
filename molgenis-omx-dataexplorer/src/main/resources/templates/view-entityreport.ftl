@@ -13,45 +13,21 @@
 	      	<div class="modal-body">
 	      		<div class="control-group form-horizontal">					
 	    			
-	    				
-    				<#-- table showing single entity data -->
-    				<table class="table table-responsive" style="margin:auto;">
-						<caption>Entity information</caption>
-						<thead>
-							<#list entityMap?keys as key>
+	    			 <dl class="dl-horizontal">
+	    			 		<#list entityMap?keys as key>
 								<#if entityMap[key] != entityId>
-									<th>${key}</th>
+									<dt>${key}</dt>
+									<dd>${entityMap[key]}</dd>
 								</#if>
-							</#list>		
-						</thead>
-						<tbody>
-							<tr>	
-								<#list entityMap?keys as key>
-									<#if entityMap[key] != entityId>
-										<td>${entityMap[key]}</td>
-									</#if>
-								</#list>
-							</tr>			
-						</tbody>	
-					</table>
-					
-					<#if parameterMap??>
-						<br />
-						<hr></hr>
-						<br />
-							
-						<#-- div for optional content in parameter map, like images -->	
-						<div>
-						
-							<#-- Idea is that we scan keys for generic html elements like img or button -->
-							<#-- based on values like file location we can then for example make an image -->
-							<#list parameterMap?keys as key>
-								${key} : ${parameterMap[key]} <br />
 							</#list>
+					</dl>
+
+					<#attempt>
+   						<#include "view-specific-"+entityName+".ftl">
+    					<#recover>
+					</#attempt>
 						
-						</div>
-					</#if>
-				
+					</div>					
 	      		</div>
 			</div>
 			

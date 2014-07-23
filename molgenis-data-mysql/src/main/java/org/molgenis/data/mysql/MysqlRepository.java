@@ -179,8 +179,8 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 				"primary key(" + getEntityMetaData().getName() + "." + idAttribute.getName()
 						+ ") cannot be XREF or MREF");
 
-		if (idAttribute.isNillable() == true) throw new RuntimeException("primary key(" + getEntityMetaData().getName()
-				+ "." + idAttribute.getName() + ") must be NOT NULL");
+		if (idAttribute.isNillable() == true) throw new RuntimeException("idAttribute ("
+				+ getEntityMetaData().getName() + "." + idAttribute.getName() + ") should not be nillable");
 
 		sql.append("PRIMARY KEY (").append('`').append(getEntityMetaData().getIdAttribute().getName()).append('`')
 				.append(')');

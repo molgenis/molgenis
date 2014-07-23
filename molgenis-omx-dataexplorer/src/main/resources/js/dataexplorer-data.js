@@ -27,13 +27,14 @@
 	/**
 	 * @memberOf molgenis.dataexplorer.data
 	 */
-	function createDataTable(editable) {
+	function createDataTable(editable, rowClickable) {
 		var attributes = getAttributes();
 		$('#data-table-container').table({
 			'entityMetaData' : getEntity(),
 			'attributes' : attributes,
 			'query' : getQuery(),
-			'editable' : editable
+			'editable' : editable,
+			'rowClickable': rowClickable
 		});
 	}
 	
