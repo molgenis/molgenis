@@ -291,3 +291,7 @@ input[name="ColNames"] {
 #module-nav .nav {
 	margin-left: 2.1277%;
 }
+
+.simple-filter-container{
+	padding-bottom: 10px;
+}
