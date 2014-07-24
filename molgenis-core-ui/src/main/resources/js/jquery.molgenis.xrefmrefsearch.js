@@ -56,6 +56,16 @@
 		});
 		return attributeNames;
 	}
+	
+	function getUniqueAttributeNames(entityMetaData) {
+		var attributeNames = [];
+		$.each(entityMetaData.attributes, function(attrName, attr) {
+			if (attr.unique === true) {
+				attributeNames.push(attr.name);
+			}
+		});
+		return attributeNames;
+	}
 
 	function formatResult(entity, entityMetaData, lookupAttributeNames) {
 		var items = [];
@@ -96,11 +106,13 @@
 	function createSelect2($container, attributeMetaData, options) {
 		var refEntityMetaData = restApi.get(attributeMetaData.refEntity.href, {expand: ['attributes']});
 		var lookupAttrNames = getLookupAttributeNames(refEntityMetaData);
-		var hiddenInput = $(":input[type=hidden]",$container)
+		var uniqueAttrNames = getUniqueAttributeNames(refEntityMetaData);
+		
+		var $hiddenInput = $(":input[type=hidden]",$container)
 				.not('[data-filter=xrefmref-operator]')
 				.not('[data-filter=ignore]');
 
-		hiddenInput.select2({
+		$hiddenInput.select2({
 			width: options.width ? options.width : 'resolve',
 			minimumInputLength: 2,
 			multiple: (attributeMetaData.fieldType === 'MREF' || attributeMetaData.fieldType === 'XREF'),
@@ -116,7 +128,8 @@
 			},
 			initSelection: function(element, callback) {
 				//Only called when the input has a value
-				var query = createQuery(lookupAttrNames, element.val().split(','), 'EQUALS', false);
+				var attrNames = (uniqueAttrNames.length ? uniqueAttrNames : lookupAttrNames);
+				var query = createQuery(attrNames, element.val().split(','), 'EQUALS', false);
 				if(query)
 				{
 					restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {q: query}}, function(data) {
@@ -128,6 +141,9 @@
 				return formatResult(entity, refEntityMetaData, lookupAttrNames);
 			},
 			formatSelection: function(entity) {
+				if($(".select2-choices .select2-search-choice", $container).length > 0){
+					$(".dropdown-toggle", $container).removeClass('disabled');
+				}
 				return formatSelection(entity, refEntityMetaData);
 			},
 			id: function(entity) {
@@ -136,7 +152,15 @@
 			separator: ',',
 			dropdownCssClass: 'molgenis-xrefmrefsearch'
 		});
+		
+		$hiddenInput.on("select2-removed", function(e) {
+				if($(".select2-choices .select2-search-choice", $container).length < 2){
+					$(".dropdown-toggle", $container).addClass('disabled');
+				}
+			});
 
+		$(".dropdown-toggle", $container).addClass('disabled');
+		
 		if(!lookupAttrNames.length){
 			$container.append($("<label>lookup attribute is not defined.</label>"));
 		}
