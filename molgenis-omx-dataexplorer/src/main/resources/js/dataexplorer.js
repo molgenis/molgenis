@@ -128,11 +128,38 @@
 
 		if (searchQuery) {
 			if (/\S/.test(searchQuery)) {
-				entityCollectionRequest.q.push({
-					operator : 'SEARCH',
-					value : searchQuery
-				});
-				count++;
+				// search pattern chrom:pos
+				if(searchQuery.match(/^(\d{1,2}|X|Y|XY|MT):\d+$/)) {
+					var chromosome = searchQuery.split(":")[0];
+					var position = searchQuery.split(":")[1];
+					
+			        entityCollectionRequest.q = 
+			        	    [{
+			        	        "operator": "NESTED",
+			        	        "nestedRules": [{
+			        	            "field": "Chr",
+			        	            "operator": "EQUALS",
+			        	            "value": chromosome
+			        	        }]
+			        	    }, {
+			        	        "operator": "AND"
+			        	    }, {
+			        	        "operator": "NESTED",
+			        	        "nestedRules": [{
+			        	            "field": "Pos",
+			        	            "operator": "EQUALS",
+			        	            "value": position
+			        	        }]
+			        	    }];
+			        
+					count += 2;
+				} else {
+					entityCollectionRequest.q.push({
+						operator : 'SEARCH',
+						value : searchQuery
+					});
+					count++;
+				}
 			}
 		}
 
@@ -166,6 +193,9 @@
 	 * @memberOf molgenis.dataexplorer
 	 */
 	$(function() {
+		
+		var searchTerm = $("#observationset-search").val();
+		
 		// lazy load tab contents
 		$(document).on('show', 'a[data-toggle="tab"]', function(e) {
 			var target = $($(e.target).attr('data-target'));
@@ -273,5 +303,11 @@
 		
 		// fire event handler
 		$('#dataset-select').change();
+		
+		// restore the search term and trigger change event to filter data table
+		if(searchTerm){
+			$("#observationset-search").val(searchTerm).change();
+		}
+		
 	});
 }($, window.top.molgenis = window.top.molgenis || {}));
