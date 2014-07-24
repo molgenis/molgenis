@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 /**
  * Controller for the report builder
  * 
- * @author mdehaan
+ * @author mdehaan, fkelpin
  * 
  */
 @Controller
@@ -50,8 +50,17 @@ public class ReportBuilderController extends MolgenisPluginController
 		super(URI);
 	}
 
+	/**
+	 * Builds a model based on one entity and returns the entityReport ftl view
+	 * 
+	 * @param entityName
+	 * @param entityId
+	 * @param model
+	 * @return
+	 * @throws Exception if an entity name or id is not found
+	 */
 	@RequestMapping(method = RequestMethod.POST)
-	public String init(@RequestParam(value = "entityName") String entityName,
+	public String getEntityReport(@RequestParam(value = "entityName") String entityName,
 			@RequestParam(value = "entityId") String entityId, Model model) throws Exception
 	{
 		if (dataService.hasRepository(entityName))
