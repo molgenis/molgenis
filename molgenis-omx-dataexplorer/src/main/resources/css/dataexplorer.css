@@ -292,6 +292,10 @@ input[name="ColNames"] {
 	margin-left: 2.1277%;
 }
 
+.simple-filter-container{
+	padding-bottom: 10px;
+}
+
 .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
 	background-color: #7CBAD1;
 }
