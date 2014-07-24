@@ -744,7 +744,7 @@
 		};
 
         this.addComplexFilterElement = function (complexFilterElement) {
-            if(!complexFilterElement.isEmpty())
+            if(!complexFilterElement !== null)
             {
             	complexFilterElements.push(complexFilterElement);
             }

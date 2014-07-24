@@ -17,6 +17,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,8 +30,10 @@ import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Aggregateable;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.Queryable;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.support.GenomeConfig;
 import org.molgenis.data.support.QueryImpl;
@@ -104,7 +107,10 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String AGGREGATES_NORESULTS_MESSAGE = "plugin.dataexplorer.mod.aggregates.noresults";
 
 	public static final String KEY_DATAEXPLORER_EDITABLE = "plugin.dataexplorer.editable";
+	public static final String KEY_DATAEXPLORER_ROW_CLICKABLE = "plugin.dataexplorer.rowClickable";
+	
 	private static final boolean DEFAULT_VAL_DATAEXPLORER_EDITABLE = false;
+	private static final boolean DEFAULT_VAL_DATAEXPLORER_ROW_CLICKABLE = false;
 
 	@Autowired
 	private DataService dataService;
@@ -200,11 +206,13 @@ public class DataExplorerController extends MolgenisPluginController
 			model.addAttribute("galaxyEnabled",
 					molgenisSettings.getBooleanProperty(KEY_GALAXY_ENABLED, DEFAULT_VAL_GALAXY_ENABLED));
 			String galaxyUrl = molgenisSettings.getProperty(KEY_GALAXY_URL);
+			model.addAttribute("rowClickable", isRowClickable());
 			if (galaxyUrl != null) model.addAttribute(ATTR_GALAXY_URL, galaxyUrl);
 		}
 		else if (moduleId.equals("diseasematcher"))
 		{
 			model.addAttribute("tableEditable", isTableEditable());
+			model.addAttribute("rowClickable", isRowClickable());
 		}
 		return "view-dataexplorer-mod-" + moduleId; // TODO bad request in case of invalid module id
 	}
@@ -310,11 +318,9 @@ public class DataExplorerController extends MolgenisPluginController
 	{
 		AttributeMetaData attributeStartPosition = genomeConfig.getAttributeMetadataForAttributeNameArray(
 				GenomeConfig.GENOMEBROWSER_START, entityMetaData);
-		AttributeMetaData attributeId = genomeConfig.getAttributeMetadataForAttributeNameArray(
-				GenomeConfig.GENOMEBROWSER_ID, entityMetaData);
 		AttributeMetaData attributeChromosome = genomeConfig.getAttributeMetadataForAttributeNameArray(
 				GenomeConfig.GENOMEBROWSER_CHROM, entityMetaData);
-		return attributeStartPosition != null && attributeId != null && attributeChromosome != null;
+		return attributeStartPosition != null && attributeChromosome != null;
 	}
 
 	@RequestMapping(value = "/download", method = POST)
@@ -364,6 +370,8 @@ public class DataExplorerController extends MolgenisPluginController
 		model.addAttribute(ATTR_GALAXY_URL, galaxyUrl);
 		model.addAttribute(ATTR_GALAXY_API_KEY, galaxyApiKey);
 	}
+	
+	
 
 	private void writeDataRequestCsv(DataRequest dataRequest, OutputStream outputStream, char separator)
 			throws IOException
@@ -457,6 +465,77 @@ public class DataExplorerController extends MolgenisPluginController
 
 		return dataService.aggregate(entityName, xAttributeMeta, yAttributeMeta, new QueryImpl(request.getQ()));
 	}
+	
+	/**
+	 * Builds a model based on one entity and returns the entityReport ftl view
+	 * 
+	 * @author mdehaan, fkelpin
+	 * @param entityName
+	 * @param entityId
+	 * @param model
+	 * @return entity report view
+	 * @throws Exception if an entity name or id is not found
+	 */
+	@RequestMapping(value = "/details", method = RequestMethod.POST)
+	public String viewEntityDetails(@RequestParam(value = "entityName") String entityName,
+			@RequestParam(value = "entityId") String entityId, Model model) throws Exception
+	{
+		if (dataService.hasRepository(entityName))
+		{
+			Queryable queryableRepository = dataService.getQueryableRepository(entityName);
+			Entity entity = queryableRepository.findOne(entityId);
+
+			if (entity != null)
+			{
+				model.addAttribute("entityName", entityName);
+				model.addAttribute("entityId", entityId);
+				model.addAttribute("entityMap", getMapFromEntity(entity));
+			}
+			else
+			{
+				throw new RuntimeException(entityName + " does not contain a row with id: " + entityId);
+			}
+		}
+		else
+		{
+			throw new RuntimeException("unknown entity: " + entityName);
+		}
+		return "view-entityReport";
+	}
+	
+	/**
+	 * Translates a single entity its attributes and respective values to a map
+	 * 
+	 * @param entity
+	 * @return A map with entity attribute as key and respective value as value
+	 */
+	private Map<String, String> getMapFromEntity(Entity entity)
+	{
+		Map<String, String> entityValueMap = new LinkedHashMap<String, String>();
+		Iterator<String> entityAttributes = entity.getAttributeNames().iterator();
+
+		if (entityAttributes != null)
+		{
+			while (entityAttributes.hasNext())
+			{
+				String entityAttribute = entityAttributes.next();
+				if (entity.get(entityAttribute) == null)
+				{
+					entityValueMap.put(entityAttribute, " ");
+				}
+				else
+				{
+					entityValueMap.put(entityAttribute, entity.get(entityAttribute).toString());
+				}
+			}
+		}
+		else
+		{
+			throw new RuntimeException("the selected row did not have any attributes");
+		}
+
+		return entityValueMap;
+	}
 
 	@ExceptionHandler(GalaxyDataExportException.class)
 	@ResponseBody
@@ -481,5 +560,9 @@ public class DataExplorerController extends MolgenisPluginController
 	{
 		return molgenisSettings.getBooleanProperty(KEY_DATAEXPLORER_EDITABLE, DEFAULT_VAL_DATAEXPLORER_EDITABLE)
 				&& molgenisPermissionService.hasPermissionOnPlugin(ID, Permission.READ);
+	}
+	
+	private boolean isRowClickable(){
+		return molgenisSettings.getBooleanProperty(KEY_DATAEXPLORER_ROW_CLICKABLE, DEFAULT_VAL_DATAEXPLORER_ROW_CLICKABLE);
 	}
 }

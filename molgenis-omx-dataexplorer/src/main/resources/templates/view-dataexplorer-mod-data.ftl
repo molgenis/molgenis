@@ -49,6 +49,10 @@
 	    </div>
 	</div>
 </div>
+
+<#-- Entity report modal placeholder -->
+<div id="entityReport"></div>
+
 <#if galaxyEnabled?? && galaxyEnabled == true>
 <#-- Galaxy export modal -->
 <form name="galaxy-export-form" class="form-horizontal" action="${context_url}/galaxy/export" method="POST">				
@@ -112,11 +116,12 @@
             }
 
 			<#-- create data table -->
+			var rowClickable = ${rowClickable?string('true', 'false')};
 			var tableEditable = ${tableEditable?string('true', 'false')};
 			if (tableEditable) {
 				tableEditable = molgenis.hasWritePermission(molgenis.dataexplorer.getSelectedEntityMeta().name);
 			}
-			molgenis.dataexplorer.data.createDataTable(tableEditable);    	
+			molgenis.dataexplorer.data.createDataTable(tableEditable, rowClickable);    	
 		})
 		.fail(function() {
 			molgenis.createAlert([{'message': 'An error occured. Please contact the administrator.'}], 'error');
