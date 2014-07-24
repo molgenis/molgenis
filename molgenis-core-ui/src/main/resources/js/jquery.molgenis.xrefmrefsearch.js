@@ -108,11 +108,11 @@
 		var lookupAttrNames = getLookupAttributeNames(refEntityMetaData);
 		var uniqueAttrNames = getUniqueAttributeNames(refEntityMetaData);
 		
-		var hiddenInput = $(":input[type=hidden]",$container)
+		var $hiddenInput = $(":input[type=hidden]",$container)
 				.not('[data-filter=xrefmref-operator]')
 				.not('[data-filter=ignore]');
 
-		hiddenInput.select2({
+		$hiddenInput.select2({
 			width: options.width ? options.width : 'resolve',
 			minimumInputLength: 2,
 			multiple: (attributeMetaData.fieldType === 'MREF' || attributeMetaData.fieldType === 'XREF'),
@@ -140,6 +140,9 @@
 				return formatResult(entity, refEntityMetaData, lookupAttrNames);
 			},
 			formatSelection: function(entity) {
+				if($(".select2-choices .select2-search-choice", $container).length > 0){
+					$(".dropdown-toggle", $container).removeClass('disabled');
+				}
 				return formatSelection(entity, refEntityMetaData);
 			},
 			id: function(entity) {
@@ -148,7 +151,15 @@
 			separator: ',',
 			dropdownCssClass: 'molgenis-xrefmrefsearch'
 		});
+		
+		$hiddenInput.on("select2-removed", function(e) {
+				if($(".select2-choices .select2-search-choice", $container).length < 2){
+					$(".dropdown-toggle", $container).addClass('disabled');
+				}
+			});
 
+		$(".dropdown-toggle", $container).addClass('disabled');
+		
 		if(!lookupAttrNames.length){
 			$container.append($("<label>lookup attribute is not defined.</label>"));
 		}
