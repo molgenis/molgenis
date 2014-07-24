@@ -56,6 +56,16 @@
 		});
 		return attributeNames;
 	}
+	
+	function getUniqueAttributeNames(entityMetaData) {
+		var attributeNames = [];
+		$.each(entityMetaData.attributes, function(attrName, attr) {
+			if (attr.unique === true) {
+				attributeNames.push(attr.name);
+			}
+		});
+		return attributeNames;
+	}
 
 	function formatResult(entity, entityMetaData, lookupAttributeNames) {
 		var items = [];
@@ -96,6 +106,8 @@
 	function createSelect2($container, attributeMetaData, options) {
 		var refEntityMetaData = restApi.get(attributeMetaData.refEntity.href, {expand: ['attributes']});
 		var lookupAttrNames = getLookupAttributeNames(refEntityMetaData);
+		var uniqueAttrNames = getUniqueAttributeNames(refEntityMetaData);
+		
 		var hiddenInput = $(":input[type=hidden]",$container)
 				.not('[data-filter=xrefmref-operator]')
 				.not('[data-filter=ignore]');
@@ -116,7 +128,7 @@
 			},
 			initSelection: function(element, callback) {
 				//Only called when the input has a value
-				var query = createQuery(lookupAttrNames, element.val().split(','), 'EQUALS', false);
+				var query = createQuery(uniqueAttrNames, element.val().split(','), 'EQUALS', false);
 				if(query)
 				{
 					restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {q: query}}, function(data) {
