@@ -128,7 +128,8 @@
 			},
 			initSelection: function(element, callback) {
 				//Only called when the input has a value
-				var query = createQuery(uniqueAttrNames, element.val().split(','), 'EQUALS', false);
+				var attrNames = (uniqueAttrNames.length ? uniqueAttrNames : lookupAttrNames);
+				var query = createQuery(attrNames, element.val().split(','), 'EQUALS', false);
 				if(query)
 				{
 					restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {q: query}}, function(data) {
