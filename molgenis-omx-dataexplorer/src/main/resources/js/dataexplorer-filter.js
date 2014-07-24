@@ -101,7 +101,7 @@
 			var complexFilterElements = filter.getComplexFilterElements();
 			if(complexFilterElements){
 				$.each(complexFilterElements, function(index, complexFilterElement){
-					if(complexFilterElement.operator)
+					if(complexFilterElement.operator && index !== 0)
 					{
 						s += ' ' + complexFilterElement.operator.toLowerCase() + ' ';
 					}
