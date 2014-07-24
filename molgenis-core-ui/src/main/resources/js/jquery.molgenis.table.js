@@ -776,8 +776,8 @@
 			$('#entityReport').load("/menu/main/reportbuilder",{entityName: entityName, entityId: entityId}, function() {
 				  $('#entityReportModal').modal("show");
 				  	  
-				  $("#csvDownloadButton", "#entityReport").on('click', function() {
-						$.download("/menu/main/reportbuilder/csv", {entityId: entityId}, "GET");
+				  $(".specific-content button", "#entityReport").on('click', function() {
+						$.download($(this).data('href'), {entityName: entityName, entityId: entityId}, "GET");
 				  });
 			});
 		});

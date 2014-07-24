@@ -14,14 +14,15 @@
 	      		<div class="control-group form-horizontal">					
 	    			
 	    			 <dl class="dl-horizontal">
-	    			 		<#list entityMap?keys as key>
-								<#if entityMap[key] != entityId>
-									<dt>${key}</dt>
-									<dd>${entityMap[key]}</dd>
-								</#if>
-							</#list>
+    			 		<#list entityMap?keys as key>
+							<#if entityMap[key] != entityId>
+								<dt>${key}</dt>
+								<dd>${entityMap[key]}</dd>
+							</#if>
+						</#list>
 					</dl>
 
+					<div class="specific-content">
 					<#attempt>
    						<#include "view-specific-"+entityName+".ftl">
     					<#recover>
