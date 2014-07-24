@@ -25,11 +25,10 @@
 
 					<#-- Specific content is imported here -->
 					<div class="specific-content">
-					<#attempt>
-   						<#include "view-specific-"+entityName+".ftl">
-    					<#recover>
-					</#attempt>
-						
+						<#attempt>
+	   						<#include "view-specific-"+entityName+".ftl">
+	    					<#recover>
+						</#attempt>
 					</div>					
 	      		</div>
 			</div>

@@ -773,7 +773,7 @@
 			var entityId = entityData.pop();
 			var entityName = entityData.pop();
 			
-			$('#entityReport').load("/menu/main/reportbuilder",{entityName: entityName, entityId: entityId}, function() {
+			$('#entityReport').load("dataexplorer/details",{entityName: entityName, entityId: entityId}, function() {
 				  $('#entityReportModal').modal("show");
 				  	  
 				  $(".specific-content button", "#entityReport").on('click', function() {
