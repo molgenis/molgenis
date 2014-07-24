@@ -10,7 +10,11 @@
 		// create elements
 		var items = [];
 		items.push('<div class="row-fluid molgenis-table-container">');
-		items.push('<table class="table-striped table-condensed molgenis-table"><thead></thead><tbody></tbody></table>');
+		if(settings.rowClickable){
+			items.push('<table class="table-striped table-condensed molgenis-table table-hover"><thead></thead><tbody></tbody></table>');
+		}else{
+			items.push('<table class="table-striped table-condensed molgenis-table"><thead></thead><tbody></tbody></table>');
+		}
 		items.push('</div>');
 		items.push('<div class="row-fluid">');
 		items.push('<div class="span3"><div class="molgenis-table-controls pull-left">');
@@ -162,6 +166,7 @@
 					cell.attr('tabindex', tabindex++);
 				}
 				row.append(cell);
+			
 			});
 			items.push(row);
 		}
@@ -307,16 +312,18 @@
 							case 'CATEGORICAL':
 							case 'XREF':
 								var cellValue = $('<a href="#">' + formatTableCellValue(rawValue[refAttribute], refAttributeType) + '</a>'); 
-								cellValue.click(function() {
+								cellValue.click(function(event) {
 									openRefAttributeModal(attribute, refEntity, refAttribute, rawValue);
+									event.stopPropagation();
 								});
 								cell.append(cellValue);
 								break;
 							case 'MREF':
 								$.each(rawValue.items, function(i, rawValue) {
 									var cellValuePart = $('<a href="#">' + formatTableCellValue(rawValue[refAttribute], refAttributeType) + '</a>');
-									cellValuePart.click(function() {
-										openRefAttributeModal(attribute, refEntity, refAttribute, rawValue); 
+									cellValuePart.click(function(event) {
+										openRefAttributeModal(attribute, refEntity, refAttribute, rawValue);
+										event.stopPropagation();
 									});
 									if (i > 0)
 										cell.append(',');
@@ -759,6 +766,22 @@
 			var cell = $(this).closest('td');
 			persistCell(cell, settings);
 		});
+		
+		$(container).on('click', '.molgenis-table.table-hover tbody:not(.editable) tr', function(e){
+			// Issue #1400 ask for IdAttribute directly
+			var entityData = $(this).data('entity').href.split('/');
+			var entityId = entityData.pop();
+			var entityName = entityData.pop();
+			
+			$('#entityReport').load("dataexplorer/details",{entityName: entityName, entityId: entityId}, function() {
+				  $('#entityReportModal').modal("show");
+				  	  
+				  $(".specific-content button", "#entityReport").on('click', function() {
+						$.download($(this).data('href'), {entityName: entityName, entityId: entityId}, "GET");
+				  });
+			});
+		});
+		
 		return this;
 	};
 
@@ -768,6 +791,7 @@
 		'maxRows' : 20,
 		'attributes' : null,
 		'query' : null,
-		'editable' : false
+		'editable' : false,
+		'rowClickable': false
 	};
 }($, window.top.molgenis = window.top.molgenis || {}));
