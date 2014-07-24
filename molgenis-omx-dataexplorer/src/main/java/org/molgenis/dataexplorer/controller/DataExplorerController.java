@@ -49,6 +49,7 @@ import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -137,7 +138,8 @@ public class DataExplorerController extends MolgenisPluginController
 	 */
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(@RequestParam(value = "dataset", required = false) String selectedEntityName,
-			@RequestParam(value = "wizard", required = false) Boolean wizard, Model model) throws Exception
+			@RequestParam(value = "wizard", required = false) Boolean wizard,
+			@RequestParam(value = "searchTerm", required = false) String searchTerm, Model model) throws Exception
 	{
 		boolean entityExists = false;
 		Iterable<EntityMetaData> entitiesMeta = Iterables.transform(dataService.getEntityNames(),
@@ -173,6 +175,7 @@ public class DataExplorerController extends MolgenisPluginController
 		model.addAttribute("aggregatenoresults",
 				molgenisSettings.getProperty(AGGREGATES_NORESULTS_MESSAGE, "No results found"));
 		model.addAttribute("wizard", (wizard != null) && wizard.booleanValue());
+		model.addAttribute("searchTerm", searchTerm);
 
 		return "view-dataexplorer";
 	}
