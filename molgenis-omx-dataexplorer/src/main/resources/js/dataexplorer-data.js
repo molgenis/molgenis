@@ -84,8 +84,7 @@
 	 */
 	function doShowGenomeBrowser() {
 		return genomebrowserStartAttribute !== undefined &&
-            genomebrowserChromosomeAttribute !== undefined &&
-            genomebrowserIdentifierAttribute !== undefined;
+            genomebrowserChromosomeAttribute !== undefined;
 	}
 
     function getAttributeFromList(attributesString){
@@ -181,19 +180,20 @@
                         });
                         //get the mutation note to create a mutations filter link
                         info.feature.notes.splice(molgenisIndex,1);
-                        if(selectedTrack){
+                        if(selectedTrack) {
                             var a = $('<a href="javascript:void(0)">' + f.id + '</a>');
-                            a.click(function() {
-                                $.each(getAttributes(), function(key, attribute) {
-                                    if(attribute === genomebrowserIdentifierAttribute) {
+                            a.click(function () {
+                                $.each(getAttributes(), function (key, attribute) {
+                                    if (attribute === genomebrowserIdentifierAttribute) {
                                         createFilter(attribute, undefined, undefined, f.id);
                                     }
                                 });
                             });
-                            self.test = a;
-                            info.add('Filter on mutation:', a[0]);
-                            //cache the information
-                            featureInfoMap[f.id+f.label] = info;
+                            if (f.id !== "-") {
+                                info.add('Filter on mutation:', a[0]);
+                                //cache the information
+                                featureInfoMap[f.id + f.label] = info;
+                            }
                             return false;
                         }
                     }
@@ -248,7 +248,10 @@
     function createFilter(attribute, fromValue, toValue, values){
         var attributeFilter = new molgenis.dataexplorer.filter.SimpleFilter(attribute, fromValue, toValue, values);
         var complexFilter = new molgenis.dataexplorer.filter.ComplexFilter(attribute);
-        complexFilter.addFilter(attributeFilter,'OR');
+        var complexFilterElement = new molgenis.dataexplorer.filter.ComplexFilterElement(attribute);
+        complexFilterElement.simpleFilter = attributeFilter;
+        complexFilterElement.operator = undefined;
+        complexFilter.addComplexFilterElement(complexFilterElement);
         $(document).trigger('updateAttributeFilters', {'filters': [complexFilter]});
     }
 
@@ -272,10 +275,10 @@
 			// TODO implement elegant solution for genome browser specific code
 			$.each(data.filters, function() {
 				if(this.attribute === genomebrowserStartAttribute){
-                    genomeBrowser.setLocation(genomeBrowser.chr, this.getFilters()[0].fromValue, this.getFilters()[0].toValue)
+                    genomeBrowser.setLocation(genomeBrowser.chr, this.getComplexFilterElements()[0].simpleFilter.fromValue, this.getComplexFilterElements()[0].simpleFilter.toValue)
                 };
 				if(this.attribute === genomebrowserChromosomeAttribute){
-                    genomeBrowser.setLocation(this.getFilters()[0].getValues()[0], genomeBrowser.viewStart, genomeBrowser.viewEnd)
+                    genomeBrowser.setLocation(this.getComplexFilterElements()[0].simpleFilter.getValues()[0], genomeBrowser.viewStart, genomeBrowser.viewEnd)
                 };
 			});
 		});
