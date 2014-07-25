@@ -109,9 +109,11 @@ public class DataExplorerController extends MolgenisPluginController
 
 	public static final String KEY_DATAEXPLORER_EDITABLE = "plugin.dataexplorer.editable";
 	public static final String KEY_DATAEXPLORER_ROW_CLICKABLE = "plugin.dataexplorer.rowClickable";
+	public static final String KEY_SEARCHQUERY_REGEX = "plugin.dataexplorer.searchquery.regex";
 	
 	private static final boolean DEFAULT_VAL_DATAEXPLORER_EDITABLE = false;
 	private static final boolean DEFAULT_VAL_DATAEXPLORER_ROW_CLICKABLE = false;
+	private static final String DEFAULT_SEARCHQUERY_REGEX = "^\\s*(?:chr)?([\\d]{1,2}|X|Y|MT|XY):([\\d]+)(?:-([\\d]+)+)?\\s*";
 
 	@Autowired
 	private DataService dataService;
@@ -176,6 +178,7 @@ public class DataExplorerController extends MolgenisPluginController
 				molgenisSettings.getProperty(AGGREGATES_NORESULTS_MESSAGE, "No results found"));
 		model.addAttribute("wizard", (wizard != null) && wizard.booleanValue());
 		model.addAttribute("searchTerm", searchTerm);
+		model.addAttribute("searchQueryRegex", molgenisSettings.getProperty(KEY_SEARCHQUERY_REGEX, DEFAULT_SEARCHQUERY_REGEX));
 
 		return "view-dataexplorer";
 	}
@@ -566,6 +569,7 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 	
 	private boolean isRowClickable(){
-		return molgenisSettings.getBooleanProperty(KEY_DATAEXPLORER_ROW_CLICKABLE, DEFAULT_VAL_DATAEXPLORER_ROW_CLICKABLE);
+		return molgenisSettings.getBooleanProperty(KEY_DATAEXPLORER_ROW_CLICKABLE,
+				DEFAULT_VAL_DATAEXPLORER_ROW_CLICKABLE);
 	}
 }
