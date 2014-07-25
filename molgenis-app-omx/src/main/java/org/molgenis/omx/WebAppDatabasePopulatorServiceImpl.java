@@ -80,9 +80,14 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		// DataExplorer table editable yes/no
 		runtimePropertyMap.put(DataExplorerController.KEY_DATAEXPLORER_EDITABLE, String.valueOf(false));
 		runtimePropertyMap.put(DataExplorerController.KEY_GALAXY_ENABLED, String.valueOf(false));
-		
+
 		// DataExplorer rows clickable yes / no
 		runtimePropertyMap.put(DataExplorerController.KEY_DATAEXPLORER_ROW_CLICKABLE, String.valueOf(false));
+
+		// Regex which is applied on the searchQuery box in the data explorer. Allows the submission of chr:pos and
+		// chr:pos-pos which applies a filter to chromosome and position columns when present in data set
+		runtimePropertyMap.put(DataExplorerController.KEY_SEARCHQUERY_REGEX,
+				"^\\s*(?:chr)?([\\d]{1,2}|X|Y|MT|XY):([\\d]+)(?:-([\\d]+)+)?\\s*");
 
 		// Annotators include files/tools
 		String molgenisHomeDir = System.getProperty("molgenis.home");
