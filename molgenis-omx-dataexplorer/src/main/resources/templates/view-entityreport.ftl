@@ -12,22 +12,35 @@
 	     	<#-- modal body -->
 	      	<div class="modal-body">
 	      		<div class="control-group form-horizontal">					
-	    			
-	    			<#-- Generic entity information -->
-					<dl class="dl-horizontal">
-						<#list entityMap?keys as key>
-							<#if entityMap[key] != entityId>
-								<dt>${key}</dt>
-								<dd>${entityMap[key]}</dd>
-							</#if>
-						</#list>
-					</dl>
 
 					<#-- Specific content is imported here -->
 					<div class="specific-content">
 						<#attempt>
-	   						<#include "view-specific-"+entityName+".ftl">
+	   						<#include "view-specific-"+entityName+".ftl">		
+	    					
+	    					<#-- If specific content is not present then recover is activated and standard entity report is loaded -->
 	    					<#recover>
+	    					
+	    					<#assign counter = 0 />
+			    			<#-- Generic entity information split in rows of three -->
+							<table class="table">
+								<tbody>
+									<tr>
+										<#list entityMap?keys as key>
+											<#if counter == 3>
+												</tr>
+												<tr>
+												<#assign counter = 0>
+											</#if>
+											
+											<th>${key}</th>
+											<td>${entityMap[key]}</td>
+											<#assign counter = counter + 1>
+										</#list>
+									</tr>
+								</tbody>
+							</table>	
+							
 						</#attempt>
 					</div>					
 	      		</div>
