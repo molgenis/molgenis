@@ -135,6 +135,7 @@
             settings.registry = 'https://www.dasregistry.org/das/sources';
             genomeBrowser = new Browser(settings);
             genomeBrowser.realInit();
+            genomeBrowser.highlightRegion(genomeBrowser.chr, (genomeBrowser.viewStart + 9990), (genomeBrowser.viewEnd - 9990));
             var featureInfoMap = {};
             genomeBrowser.addFeatureInfoPlugin(function(f, info) {
                 //check if there is cached information for this clicked item
