@@ -9,6 +9,8 @@
 	self.getEntityQuery = getEntityQuery;
     self.setNoResultMessage = setNoResultMessage;
     self.getNoResultMessage = getNoResultMessage;
+    self.setSearchQueryRegex = setSearchQueryRegex;
+    self.getSearchQueryRegex = getSearchQueryRegex;
 	
 	var restApi = new molgenis.RestClient();
 	var selectedEntityMetaData = null;
@@ -18,7 +20,24 @@
 	var showWizardOnInit = false;
 	var modules = [];
     var noResultMessage = '';
-
+    var searchQueryRegex = null;
+    
+    /**
+     * @memberOf molgenis.dataexplorer
+     */
+    function setSearchQueryRegex(regex) {
+    	// TODO make regex which comes from the model into a usable pattern
+    	// see new RegExp() function
+    	searchQueryRegex = regex
+    }
+    
+    /**
+     * @memberOf molgenis.dataexplorer
+     */
+    function getSearchQueryRegex(regex) {
+    	return searchQueryRegex;
+    }
+    
     /**
      * @memberOf molgenis.dataexplorer
      */
@@ -125,34 +144,84 @@
 		};
 		
 		var count = 0;
-
+		
 		if (searchQuery) {
 			if (/\S/.test(searchQuery)) {
-				// search pattern chrom:pos
-				if(searchQuery.match(/^(\d{1,2}|X|Y|XY|MT):\d+$/)) {
-					var chromosome = searchQuery.split(":")[0];
-					var position = searchQuery.split(":")[1];
+				
+			// TODO replace this hardcoded pattern with a pattern made from runtime property string	(searchQueryRegex)
+			// String processing throughout molgenis somehow messes with slashes and quotes 
+			// which makes it impossible to create a regex pattern from the searchQueryRegex string object
+			var tempSearchQueryRegex = /^\s*(?:chr)?([\d]{1,2}|X|Y|MT|XY):([\d]+)(?:-([\d]+)+)?\s*$/g 
+				if(tempSearchQueryRegex && searchQuery.match(tempSearchQueryRegex)) {
+					var match = tempSearchQueryRegex.exec(searchQuery);
 					
-			        entityCollectionRequest.q = 
-			        	    [{
-			        	        "operator": "NESTED",
-			        	        "nestedRules": [{
-			        	            "field": "Chr",
-			        	            "operator": "EQUALS",
-			        	            "value": chromosome
-			        	        }]
-			        	    }, {
-			        	        "operator": "AND"
-			        	    }, {
-			        	        "operator": "NESTED",
-			        	        "nestedRules": [{
-			        	            "field": "Pos",
-			        	            "operator": "EQUALS",
-			        	            "value": position
-			        	        }]
-			        	    }];
-			        
-					count += 2;
+					// only chromosome and position
+					if(match[3] === undefined){			
+						var chromosome = match[1];
+						var position = match[2];
+						
+				        entityCollectionRequest.q = 
+				        	    [{
+				        	        operator: "NESTED",
+				        	        nestedRules: [{
+				        	            field: "Chr",
+				        	            operator: "EQUALS",
+				        	            value: chromosome
+				        	        }]
+				        	    }, {
+				        	        operator: "AND"
+				        	    }, {
+				        	        operator: "NESTED",
+				        	        nestedRules: [{
+				        	            field: "Pos",
+				        	            operator: "EQUALS",
+				        	            value: position
+				        	        }]
+				        	    }];
+					// chromosome:startPos - endPos	
+					}else if(match[3]) {
+						
+						var chromosome = match[1];
+						var startPosition = match[2];
+						var stopPosition = match[3];
+						
+						entityCollectionRequest.q = 
+							[{
+								operator: "NESTED",
+						        nestedRules: [{
+							            operator: "NESTED",
+							            nestedRules: [{
+							                field: "Chr",
+							                operator: "EQUALS",
+							                value: chromosome
+						            }]
+						        }]
+						    }, {
+						    	operator: "AND"
+						    }, {
+						    	operator: "NESTED",
+						        nestedRules: [{
+						            operator: "NESTED",
+						            nestedRules: [{
+						            	operator: "NESTED",
+						                nestedRules: [{
+						                    field: "Pos",
+						                    operator: "GREATER_EQUAL",
+						                    value: startPosition
+						                }, {
+						                	operator: "AND"
+						                }, {
+						                    field: "Pos",
+						                    operator: "LESS_EQUAL",
+						                    value: stopPosition
+						                }]
+						            }]
+						        }]
+						    }];
+					}else {
+						// TODO Dont expect to ever come here....
+					}	
+					
 				} else {
 					entityCollectionRequest.q.push({
 						operator : 'SEARCH',
