@@ -25,22 +25,6 @@
     /**
      * @memberOf molgenis.dataexplorer
      */
-    function setSearchQueryRegex(regex) {
-    	// TODO make regex which comes from the model into a usable pattern
-    	// see new RegExp() function
-    	searchQueryRegex = regex
-    }
-    
-    /**
-     * @memberOf molgenis.dataexplorer
-     */
-    function getSearchQueryRegex(regex) {
-    	return searchQueryRegex;
-    }
-    
-    /**
-     * @memberOf molgenis.dataexplorer
-     */
     function setNoResultMessage(message) {
         noResultMessage = message;
     }
@@ -147,13 +131,10 @@
 		
 		if (searchQuery) {
 			if (/\S/.test(searchQuery)) {
+				var searchQueryRegex = /^\s*(?:chr)?([\d]{1,2}|X|Y|MT|XY):([\d]+)(?:-([\d]+)+)?\s*$/g;
 				
-			// TODO replace this hardcoded pattern with a pattern made from runtime property string	(searchQueryRegex)
-			// String processing throughout molgenis somehow messes with slashes and quotes 
-			// which makes it impossible to create a regex pattern from the searchQueryRegex string object
-			var tempSearchQueryRegex = /^\s*(?:chr)?([\d]{1,2}|X|Y|MT|XY):([\d]+)(?:-([\d]+)+)?\s*$/g 
-				if(tempSearchQueryRegex && searchQuery.match(tempSearchQueryRegex)) {
-					var match = tempSearchQueryRegex.exec(searchQuery);
+				if(searchQueryRegex && searchQuery.match(searchQueryRegex)) {
+					var match = searchQueryRegex.exec(searchQuery);
 					
 					// only chromosome and position
 					if(match[3] === undefined){			
@@ -219,7 +200,7 @@
 						        }]
 						    }];
 					}else {
-						// TODO Dont expect to ever come here....
+						// Dont expect to ever come here....
 					}	
 					
 				} else {

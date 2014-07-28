@@ -33,7 +33,6 @@
     	molgenis.dataexplorer.setShowWizardOnInit(${wizard?string('true', 'false')});
         molgenis.dataexplorer.filter.wizard.setWizardTitle('${wizardtitle}');
         molgenis.dataexplorer.setNoResultMessage('${aggregatenoresults}');
-        molgenis.dataexplorer.setSearchQueryRegex('${searchQueryRegex}');
    	</script>
     
     <div id="entity-class" class="well">
