@@ -171,8 +171,8 @@ a.accordion-toggle:hover,a.accordion-toggle:focus,a.accordion-toggle:active
 }
 
 #filter-wizard-modal .modal-body {
-	min-height: 540px;
-	max-height: 540px;
+	min-height: 500px;
+	max-height: 500px;
 	padding-bottom: 0;
 }
 
