@@ -938,11 +938,14 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 				selectedFeatureNames.add(standardFeatureName);
 			}
 
-			Iterable<ObservableFeature> iterators = dataService.findAll(ObservableFeature.ENTITY_NAME,
-					new QueryImpl().in(ObservableFeature.NAME, selectedFeatureNames), ObservableFeature.class);
-			for (ObservableFeature feature : iterators)
+			if (selectedFeatureNames.size() > 0)
 			{
-				featureIds.add(feature.getId());
+				Iterable<ObservableFeature> iterators = dataService.findAll(ObservableFeature.ENTITY_NAME,
+						new QueryImpl().in(ObservableFeature.NAME, selectedFeatureNames), ObservableFeature.class);
+				for (ObservableFeature feature : iterators)
+				{
+					featureIds.add(feature.getId());
+				}
 			}
 		}
 		return featureIds.size() == 0 ? StringUtils.EMPTY : featureIds.toString();
