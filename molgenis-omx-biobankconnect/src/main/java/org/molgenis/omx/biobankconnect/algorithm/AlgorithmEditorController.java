@@ -85,12 +85,12 @@ public class AlgorithmEditorController extends AbstractWizardController
 	private final OntologyAnnotatorPage ontologyAnnotatorPage;
 	private final ChooseCataloguePage chooseCataloguePage;
 	private final AlgorithmEditorPage algorithmEditorPage;
-	private final AlgorithmGeneratorPage algorithmGeneratorPage;
+	private final AlgorithmReportPage algorithmGeneratorPage;
 
 	@Autowired
 	public AlgorithmEditorController(ChooseBiobankPage chooseBiobanksPage, OntologyAnnotatorPage ontologyAnnotatorPage,
 			ChooseCataloguePage chooseCataloguePage, AlgorithmEditorPage algorithmEditorPage,
-			AlgorithmGeneratorPage algorithmGeneratorPage, DataService dataService)
+			AlgorithmReportPage algorithmGeneratorPage, DataService dataService)
 	{
 		super(URI, ID);
 		if (algorithmEditorPage == null) throw new IllegalArgumentException("algorithmEditorPage is null!");
@@ -254,18 +254,6 @@ public class AlgorithmEditorController extends AbstractWizardController
 			return ontologyMatcher.updateScript(userAccountService.getCurrentUser().getUsername(), request);
 		}
 		return Collections.<String, String> emptyMap();
-	}
-
-	@RequestMapping(method = RequestMethod.GET, value = "/progress", produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public Map<String, Object> progress(@RequestBody
-	OntologyMatcherRequest request)
-	{
-		Map<String, Object> jsonResults = new HashMap<String, Object>();
-		String userName = userAccountService.getCurrentUser().getUsername();
-		jsonResults.put("isRunning", currentUserStatus.isUserMatching(userName));
-		jsonResults.put("percentage", currentUserStatus.getPercentageOfProcessForUser(userName));
-		return jsonResults;
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/allattributes")

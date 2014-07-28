@@ -2,6 +2,7 @@ package org.molgenis.js.methods;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.text.DecimalFormat;
 
 import org.molgenis.js.ScriptableValue;
 import org.mozilla.javascript.Context;
@@ -32,8 +33,9 @@ public class NumericMethods
 		BigDecimal lhs = new BigDecimal(Context.toNumber(thisObj));
 		BigDecimal rhs = new BigDecimal(Context.toNumber(args[0]));
 		BigDecimal result = lhs.divide(rhs, MathContext.DECIMAL128);
+		DecimalFormat df = new DecimalFormat("#.##");
 
-		return new ScriptableValue(thisObj, result.doubleValue());
+		return new ScriptableValue(thisObj, df.format(result.doubleValue()));
 	}
 
 	/**

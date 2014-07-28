@@ -39,12 +39,20 @@ public class CurrentUserStatus
 		totalNumberOfQueriesForUser.put(userName, totalNumberOfQueries);
 	}
 
-	public void incrementFinishedNumberOfQueries(String userName)
+	public void incrementFinishedNumbersByOne(String userName)
 	{
 		Integer finishedNumber = null;
 		if (!finishedNumberOfQueriesForUser.containsKey(userName)) finishedNumber = 0;
 		else finishedNumber = finishedNumberOfQueriesForUser.get(userName);
 		finishedNumberOfQueriesForUser.put(userName, ++finishedNumber);
+	}
+
+	public void incrementFinishedNumbers(String userName, int size)
+	{
+		Integer finishedNumber = null;
+		if (!finishedNumberOfQueriesForUser.containsKey(userName)) finishedNumber = 0;
+		else finishedNumber = finishedNumberOfQueriesForUser.get(userName);
+		finishedNumberOfQueriesForUser.put(userName, (finishedNumber + size));
 	}
 
 	public int getPercentageOfProcessForUser(String userName)
