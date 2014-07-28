@@ -100,13 +100,24 @@
 		if(filter.isType('complex')) {
 			var complexFilterElements = filter.getComplexFilterElements();
 			if(complexFilterElements){
+				var tempOperator
 				$.each(complexFilterElements, function(index, complexFilterElement){
-					if(complexFilterElement.operator)
+					if(complexFilterElement.operator && index !== 0)
 					{
+						tempOperator = complexFilterElement.operator;
+						if(tempOperator === 'OR'){
+							s += ')';
+						}
 						s += ' ' + complexFilterElement.operator.toLowerCase() + ' ';
 					}
-					s += '(' + self.createSimpleFilterValuesRepresentation(complexFilterElement.simpleFilter) + ')';
+					
+					if(tempOperator === 'OR' || !tempOperator){
+						s += '(';
+					}
+					
+					s += self.createSimpleFilterValuesRepresentation(complexFilterElement.simpleFilter);
 				});
+				s += ')';
 			}
 		}
 		else if(filter.isType('simple'))
@@ -733,7 +744,7 @@
 		};
 
         this.addComplexFilterElement = function (complexFilterElement) {
-            if(!complexFilterElement.isEmpty())
+            if(!complexFilterElement !== null)
             {
             	complexFilterElements.push(complexFilterElement);
             }
@@ -754,19 +765,49 @@
 			return complexFilterElements;
 		};
 		
+		/**
+		 * Implements the SQL Logic Operator Precedence: And and Or
+		 * 
+		 * And has precedence over Or
+		 * 
+		 * Example: (A and B and C) or (D) or (E and F)
+		 */
 		this.createQueryRule = function() {
 			var nestedRules = [];
-			var operator = this.operator;
-			var rule;
+			var lastOperator, rule, lastNestedRule = null;
 			
 			$.each(complexFilterElements, function(index, complexFilterElement) {
 				if(index > 0){
-					nestedRules.push({
-						operator : complexFilterElement.operator
-					});
+					lastOperator = complexFilterElement.operator;
+					
+					if(lastOperator === 'AND'){
+						lastNestedRule.nestedRules.push({
+							operator : lastOperator
+						});
+					}
+					else if (lastOperator === 'OR'){
+						nestedRules.push(lastNestedRule);
+						lastNestedRule = null;
+						nestedRules.push({
+							operator : lastOperator
+						});
+					}
 				}
-				nestedRules.push(complexFilterElement.simpleFilter.createQueryRule());
+				
+				if(lastNestedRule === null){
+					lastNestedRule = {
+						operator: 'NESTED',
+						nestedRules:[]
+					};
+				}
+
+				lastNestedRule.nestedRules.push(complexFilterElement.simpleFilter.createQueryRule());
+				
 			});
+			
+			if(lastNestedRule !== null){
+				nestedRules.push(lastNestedRule);
+			}
 			
 			rule = {
 				operator: 'NESTED',

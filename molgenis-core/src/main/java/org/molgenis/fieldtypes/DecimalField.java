@@ -34,7 +34,7 @@ public class DecimalField extends FieldType
 	@Override
 	public String getMysqlType() throws MolgenisModelException
 	{
-		return "DOUBLE(65,30)";
+		return "DOUBLE";
 	}
 
 	@Override

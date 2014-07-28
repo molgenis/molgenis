@@ -24,7 +24,7 @@ public class MolgenisWebAppInitializer
 	protected void onStartup(ServletContext servletContext, Class<?> appConfig, boolean isDasUsed)
 			throws ServletException
 	{
-		// no maximum fiel size profided? default to 32 Mb
+		// no maximum field size provided? default to 32 Mb
 		onStartup(servletContext, appConfig, isDasUsed, 32);
 	}
 
