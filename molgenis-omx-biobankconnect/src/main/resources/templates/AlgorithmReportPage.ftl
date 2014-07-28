@@ -55,12 +55,42 @@
 	</div>
 </form>
 <script>
-	var molgenis = window.top.molgenis;
-	var currentStatus = {};
-	currentStatus['DeleteMapping'] = $('#delete-mapping');
-	currentStatus['CreateMapping'] = $('#create-mapping');
-	currentStatus['StoreMapping'] = $('#store-mapping');
-	$('.progress-bar-hidden').hide();
-	var algorithmReport = new molgenis.AlgorithmReport();
-	algorithmReport.progress($('#info-div'), currentStatus);
+	$(document).ready(function(){
+		var molgenis = window.top.molgenis;
+		var currentStatus = {};
+		currentStatus['DeleteMapping'] = $('#delete-mapping');
+		currentStatus['CreateMapping'] = $('#create-mapping');
+		currentStatus['StoreMapping'] = $('#store-mapping');
+		$('.progress-bar-hidden').hide();
+		var algorithmReport = new molgenis.AlgorithmReport();
+		algorithmReport.progress($('#info-div'), currentStatus);
+		
+		$('li.cancel').addClass('disabled').click(function(){
+			if(!$(this).hasClass('disabled')){
+				$('form').attr({
+					'action' : '${context_url}/reset',
+					'method' : 'GET'
+				}).submit();
+			}
+			return false;
+		});
+		$('li.next').addClass('disabled').click(function(){
+			if(!$(this).hasClass('disabled')){
+				$('form').attr({
+					'action' : '${context_url}/next',
+					'method' : 'GET',
+				}).submit();
+			}
+			return false;
+		});
+		$('li.previous').addClass('disabled').click(function(){
+			if(!$(this).hasClass('disabled')){
+				$('form').attr({
+					'action' : '${context_url}/prev',
+					'method' : 'GET'
+				}).submit();
+			}
+			return false;
+		});
+	});
 </script>

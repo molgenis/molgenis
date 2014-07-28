@@ -1,10 +1,11 @@
 (function($, molgenis) {
 	
+	var stages = ['DeleteMapping', 'CreateMapping', 'StoreMapping'];
 	var restApi = new molgenis.RestClient();
 	
 	molgenis.AlgorithmReport = function AlgorithmReport(){};
 	
-	molgenis.AlgorithmReport.prototype.progress = function(infoDiv, currentStatus, prevStage) {
+	molgenis.AlgorithmReport.prototype.progress = function(infoDiv, currentStatus) {
 		$.ajax({
 			type : 'GET',
 			url : molgenis.getContextUrl() + '/progress',
@@ -49,22 +50,23 @@
 				//Update progressbar accordingly
 				if(response.isRunning)
 				{
-					currentStatus[response.stage].show();
+					$.each(stages, function(index, stage){						
+						currentStatus[stage].show();
+						if(response.stage === stage){
+							return false;
+						}else{
+							var innerProgressBar = currentStatus[stage].find('div.bar:eq(0)');
+							$(innerProgressBar).width('100%').parents('div:eq(0)').removeClass('active');
+							$(innerProgressBar).append('<p style="font-size:14px;padding-top:4px;">Finished!</p>');
+						}
+					});
 					var progressBar = currentStatus[response.stage].children('.progress:eq(0)');					
 					var width = $(progressBar).find('.bar:eq(0)').width();
 					var parentWidth = $(progressBar).find('.bar:eq(0)').parent().width();
 					var percent = (100 * width / parentWidth) + (1 / response.totalUsers);
-                    if(percent < response.matchePercentage) percent = response.matchePercentage;
+                    if(percent < response.matchPercentage) percent = response.matchPercentage;
                     progressBar.find('div.bar:eq(0)').width((percent > 100 ? 100 : percent) + '%');
 					
-                    if(prevStage === undefined || prevStage === null){
-						prevStage = response.stage;
-					}else if(prevStage !== response.stage){
-						var innerProgressBar = currentStatus[prevStage].find('div.bar:eq(0)');
-						$(innerProgressBar).width('100%').parents('div:eq(0)').removeClass('active');
-						$(innerProgressBar).append('<p style="font-size:14px;padding-top:4px;">Finished!</p>');
-						prevStage = response.stage;
-					}
 					if(response.totalUsers > 1){
 						var warningDiv = null;
 						if($('#other-user-alert').length > 0) warningDiv = $('#other-user-alert');
@@ -76,7 +78,7 @@
 					}
 
 					setTimeout(function(){
-						molgenis.AlgorithmReport.prototype.progress(infoDiv, currentStatus, prevStage);
+						molgenis.AlgorithmReport.prototype.progress(infoDiv, currentStatus);
 					}, 3000);
 				}else {
 					$.each(currentStatus, function(stageName, progressBar){

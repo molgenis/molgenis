@@ -161,7 +161,8 @@
 									'sourceDataSetId' : molgenis.hrefToId(selectedDataSet.href),
 									'selectedDataSetIds' : [molgenis.hrefToId(mappedDataSet.href)]
 								};
-								addButtonsToControl(controlDiv, searchRequest, createEditorInModel(leftControlDiv, mappedDataSet, script));
+								var editor = createEditorInModel(leftControlDiv, mappedDataSet, script);
+								addButtonsToControl(controlDiv, searchRequest, editor);
 								
 								//Modal footer information.
 								var confirmButton = $('<button class="btn btn-primary">Confirm</button>');
@@ -173,6 +174,14 @@
 									mappedFeatureNames = mappedFeatureMap.mappedFeatureNames;
 									updateInfoInTableCell(editIcon, mappedFeatureNames, numberOfDigit);
 									standardModal.closeModal();
+								});
+								
+								$.each($(mappingTable).find('tr:gt(0)'), function(index, row){
+									$(row).children('td:first').click(function(){
+										var variable = '$(\'' + $(this).text() + '\')';
+										var value = editor.getValue();
+										editor.setValue((value + '\n' + variable));
+									})
 								});
 							});
 						});
@@ -277,9 +286,9 @@
 		        getCompletions: function(editor, session, pos, prefix, callback) {
 		            if (prefix.length === 0) { callback(null, []); return }
 		            molgenis.dataItemsTypeahead(molgenis.hrefToId(mappedDataSet.href), prefix, function(results){
-		            	callback(null, $.each(results, (function(index, featureName) {
+	            	callback(null, $.each(results, (function(index, featureName) {
 		            		var map = $(document).data('dataMap')[featureName];
-	                        return {'name' : '$(\'' + map.name + '\')', 'value' : '$(\'' + map.name + '\')', 'score' : map.score, 'meta': mappedDataSet.name};
+	                        return {name: '$(' + map.name + ')', value: '$(' + map.name + ')', score: map.score, meta: mappedDataSet.Name};
 	                    })));
 		            }, true);
 		        }
