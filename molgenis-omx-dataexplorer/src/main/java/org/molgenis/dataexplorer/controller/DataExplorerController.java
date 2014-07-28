@@ -502,7 +502,7 @@ public class DataExplorerController extends MolgenisPluginController
 		{
 			throw new RuntimeException("unknown entity: " + entityName);
 		}
-		return "view-entityReport";
+		return "view-entityreport";
 	}
 	
 	/**
