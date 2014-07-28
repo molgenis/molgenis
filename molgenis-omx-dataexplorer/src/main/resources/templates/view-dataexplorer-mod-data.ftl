@@ -87,32 +87,6 @@
 </form>
 </#if>
 <script>
-
-	var createGenomeBrowser = function (settings) {
-		<#-- create genome browser -->
-        molgenis.dataexplorer.data.setGenomeBrowserAttributes('${genomebrowser_start_list}', '${genomebrowser_chrom_list}', '${genomebrowser_id_list}', '${genomebrowser_patient_list}');
-        if(molgenis.dataexplorer.data.doShowGenomeBrowser() == true)
-        {
-        	var defaultSettings = {
-                ${initLocation},
-                coordSystem: ${coordSystem},
-                chains: ${chains},
-                sources: ${sources},
-                browserLinks: ${browserLinks}
-            };
-            var mySettings = $.extend({}, defaultSettings, settings);
-            molgenis.dataexplorer.data.createGenomeBrowser( 
-            	mySettings,
-            	[<#list genomeEntities?keys as entityName>{'name': '${entityName}', 'label': '${genomeEntities[entityName]}'}<#if entityName_has_next>,</#if></#list>]);
-        }
-        else
-        {
-            $('#genomebrowser').css('display', 'none');
-        }
-        
-        return 
-	}
-
 	<#-- load css dependencies -->
 	if (!$('link[href="/css/jquery.molgenis.table.css"]').length)
 		$('head').append('<link rel="stylesheet" href="/css/jquery.molgenis.table.css" type="text/css" />');
@@ -123,7 +97,25 @@
 		$.ajax("/js/dalliance-compiled.js", {'cache': true}),
 		$.ajax("/js/dataexplorer-data.js", {'cache': true}))
 		.done(function() {
-			createGenomeBrowser();
+			
+			molgenis.dataexplorer.data.setGenomeBrowserAttributes('${genomebrowser_start_list}', '${genomebrowser_chrom_list}', '${genomebrowser_id_list}', '${genomebrowser_patient_list}');
+			molgenis.dataexplorer.data.setGenomeBrowserSettings({
+			    ${initLocation},
+				coordSystem: ${coordSystem},
+				chains: ${chains},
+				sources: ${sources},
+				browserLinks: ${browserLinks}
+			});
+			molgenis.dataexplorer.data.setGenomeBrowserEntities([<#list genomeEntities?keys as entityName>{'name': '${entityName}', 'label': '${genomeEntities[entityName]}'}<#if entityName_has_next>,</#if></#list>])
+			
+			if(molgenis.dataexplorer.data.doShowGenomeBrowser() == true)
+		        {
+		            molgenis.dataexplorer.data.createGenomeBrowser();
+		        }
+		    else
+		        {
+		            $('#genomebrowser').css('display', 'none');
+		        }
 
 			<#-- create data table -->
 			var rowClickable = ${rowClickable?string('true', 'false')};
