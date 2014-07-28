@@ -68,7 +68,6 @@
 						<button class="btn" type="button" id="search-button"><i class="icon-large icon-search"></i></button>
 					</div>					
 				</div>
-				<br></br>
 				<div class="row-fluid">
 					<div class="accordion" id="feature-filters-container">
 						<div class="accordion-group">

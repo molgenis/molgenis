@@ -9,8 +9,6 @@
 	self.getEntityQuery = getEntityQuery;
     self.setNoResultMessage = setNoResultMessage;
     self.getNoResultMessage = getNoResultMessage;
-    self.setSearchQueryRegex = setSearchQueryRegex;
-    self.getSearchQueryRegex = getSearchQueryRegex;
 	
 	var restApi = new molgenis.RestClient();
 	var selectedEntityMetaData = null;
@@ -20,7 +18,6 @@
 	var showWizardOnInit = false;
 	var modules = [];
     var noResultMessage = '';
-    var searchQueryRegex = null;
     
     /**
      * @memberOf molgenis.dataexplorer
@@ -182,27 +179,18 @@
 						    }, {
 						    	operator: "NESTED",
 						        nestedRules: [{
-						            operator: "NESTED",
-						            nestedRules: [{
-						            	operator: "NESTED",
-						                nestedRules: [{
-						                    field: "Pos",
-						                    operator: "GREATER_EQUAL",
-						                    value: startPosition
-						                }, {
-						                	operator: "AND"
-						                }, {
-						                    field: "Pos",
-						                    operator: "LESS_EQUAL",
-						                    value: stopPosition
-						                }]
-						            }]
-						        }]
+				                    field: "Pos",
+				                    operator: "GREATER_EQUAL",
+				                    value: startPosition
+				                }, {
+				                	operator: "AND"
+				                }, {
+				                    field: "Pos",
+				                    operator: "LESS_EQUAL",
+				                    value: stopPosition
+				                }]
 						    }];
-					}else {
-						// Dont expect to ever come here....
-					}	
-					
+					}
 				} else {
 					entityCollectionRequest.q.push({
 						operator : 'SEARCH',
