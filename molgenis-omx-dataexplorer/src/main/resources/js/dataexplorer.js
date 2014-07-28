@@ -18,7 +18,7 @@
 	var showWizardOnInit = false;
 	var modules = [];
     var noResultMessage = '';
-
+    
     /**
      * @memberOf molgenis.dataexplorer
      */
@@ -125,14 +125,79 @@
 		};
 		
 		var count = 0;
-
+		
 		if (searchQuery) {
 			if (/\S/.test(searchQuery)) {
-				entityCollectionRequest.q.push({
-					operator : 'SEARCH',
-					value : searchQuery
-				});
-				count++;
+				var searchQueryRegex = /^\s*(?:chr)?([\d]{1,2}|X|Y|MT|XY):([\d]+)(?:-([\d]+)+)?\s*$/g;
+				
+				if(searchQueryRegex && searchQuery.match(searchQueryRegex)) {
+					var match = searchQueryRegex.exec(searchQuery);
+					
+					// only chromosome and position
+					if(match[3] === undefined){			
+						var chromosome = match[1];
+						var position = match[2];
+						
+				        entityCollectionRequest.q = 
+				        	    [{
+				        	        operator: "NESTED",
+				        	        nestedRules: [{
+				        	            field: "Chr",
+				        	            operator: "EQUALS",
+				        	            value: chromosome
+				        	        }]
+				        	    }, {
+				        	        operator: "AND"
+				        	    }, {
+				        	        operator: "NESTED",
+				        	        nestedRules: [{
+				        	            field: "Pos",
+				        	            operator: "EQUALS",
+				        	            value: position
+				        	        }]
+				        	    }];
+					// chromosome:startPos - endPos	
+					}else if(match[3]) {
+						
+						var chromosome = match[1];
+						var startPosition = match[2];
+						var stopPosition = match[3];
+						
+						entityCollectionRequest.q = 
+							[{
+								operator: "NESTED",
+						        nestedRules: [{
+							            operator: "NESTED",
+							            nestedRules: [{
+							                field: "Chr",
+							                operator: "EQUALS",
+							                value: chromosome
+						            }]
+						        }]
+						    }, {
+						    	operator: "AND"
+						    }, {
+						    	operator: "NESTED",
+						        nestedRules: [{
+				                    field: "Pos",
+				                    operator: "GREATER_EQUAL",
+				                    value: startPosition
+				                }, {
+				                	operator: "AND"
+				                }, {
+				                    field: "Pos",
+				                    operator: "LESS_EQUAL",
+				                    value: stopPosition
+				                }]
+						    }];
+					}
+				} else {
+					entityCollectionRequest.q.push({
+						operator : 'SEARCH',
+						value : searchQuery
+					});
+					count++;
+				}
 			}
 		}
 
@@ -166,6 +231,9 @@
 	 * @memberOf molgenis.dataexplorer
 	 */
 	$(function() {
+		
+		var searchTerm = $("#observationset-search").val();
+		
 		// lazy load tab contents
 		$(document).on('show', 'a[data-toggle="tab"]', function(e) {
 			var target = $($(e.target).attr('data-target'));
@@ -273,5 +341,11 @@
 		
 		// fire event handler
 		$('#dataset-select').change();
+		
+		// restore the search term and trigger change event to filter data table
+		if(searchTerm){
+			$("#observationset-search").val(searchTerm).change();
+		}
+		
 	});
 }($, window.top.molgenis = window.top.molgenis || {}));

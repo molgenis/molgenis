@@ -15,7 +15,9 @@
 	self.createGenomeBrowser = createGenomeBrowser;
     self.doShowGenomeBrowser = doShowGenomeBrowser;
     self.setGenomeBrowserAttributes = setGenomeBrowserAttributes;
-
+    self.setGenomeBrowserSettings = setGenomeBrowserSettings;
+    self.setGenomeBrowserEntities = setGenomeBrowserEntities;
+    
 	var restApi = new molgenis.RestClient();
 	var genomeBrowser;
 	var genomeEntities;
@@ -24,6 +26,22 @@
     var genomebrowserChromosomeAttribute;
     var genomebrowserIdentifierAttribute;
     var genomebrowserPatientAttribute;
+    var genomeBrowserSettings = {};
+    
+    /**
+	 * @memberOf molgenis.dataexplorer.data
+	 */
+    function setGenomeBrowserSettings(settings) {
+    	genomeBrowserSettings = settings;
+    }
+    
+    /**
+	 * @memberOf molgenis.dataexplorer.data
+	 */
+    function setGenomeBrowserEntities(genomeEntitiesKeyValues) {
+    	genomeEntities = genomeEntitiesKeyValues;
+    }
+    
 	/**
 	 * @memberOf molgenis.dataexplorer.data
 	 */
@@ -104,103 +122,106 @@
 	/**
 	 * @memberOf molgenis.dataexplorer.data
 	 */
-	function createGenomeBrowser(settings, genomeEntityKeyVals) {
-		genomeEntities = genomeEntityKeyVals;
+	function createGenomeBrowser(specificSettings) {
+		
+		var settings = $.extend(true, {}, genomeBrowserSettings, specificSettings || {});
+		
+        $('#genomebrowser').css('display', 'block');
+        $('#genomebrowser').css('visibility', 'visible');
 
-            $('#genomebrowser').css('display', 'block');
-            $('#genomebrowser').css('visibility', 'visible');
-
-            var entity = getEntity();
-            // add track for current genomic entity
-            var dallianceTrack = {
-                name : entity.label || entity.name,
-                uri : '/das/molgenis/dasdataset_' + entity.name + '/',
-                desc : entity.description,
-                stylesheet_uri : '/css/selected_dataset-track.xml'
-            };
-
-            settings.sources.push(dallianceTrack);
-            // add reference tracks for all other genomic entities
-            $.each(genomeEntities, function(i, refEntity) {
-                if(refEntity.name !== entity.name) {
-                    var dallianceTrack = {
-                        name : refEntity.label || refEntity.name,
-                        uri : '/das/molgenis/dasdataset_' + refEntity.name + '/',
-                        desc : refEntity.description,
-                        stylesheet_uri : '/css/not_selected_dataset-track.xml'
-                    };
-                    settings.sources.push(dallianceTrack);
-                }
-            });
-            settings.registry = 'https://www.dasregistry.org/das/sources';
-            genomeBrowser = new Browser(settings);
-            genomeBrowser.realInit();
-            var featureInfoMap = {};
-            genomeBrowser.addFeatureInfoPlugin(function(f, info) {
-                //check if there is cached information for this clicked item
-                if(featureInfoMap.hasOwnProperty(f.id+f.label)){
-                    $.each(featureInfoMap[f.id+f.label].sections, function(section) {
-                        info.sections.push(featureInfoMap[f.id+f.label].sections[section]);
+        var entity = getEntity();
+        // add track for current genomic entity
+        var dallianceTrack = {
+            name : entity.label || entity.name,
+            uri : '/das/molgenis/dasdataset_' + entity.name + '/',
+            desc : entity.description,
+            stylesheet_uri : '/css/selected_dataset-track.xml'
+        };
+        
+        settings.sources.push(dallianceTrack);
+        // add reference tracks for all other genomic entities
+        $.each(genomeEntities, function(i, refEntity) {
+            if(refEntity.name !== entity.name) {
+                var dallianceTrack = {
+                    name : refEntity.label || refEntity.name,
+                    uri : '/das/molgenis/dasdataset_' + refEntity.name + '/',
+                    desc : refEntity.description,
+                    stylesheet_uri : '/css/not_selected_dataset-track.xml'
+                };
+                settings.sources.push(dallianceTrack);
+            }
+        });
+            
+        settings.registry = 'https://www.dasregistry.org/das/sources';
+        genomeBrowser = new Browser(settings);
+        genomeBrowser.realInit();
+        // highlight region specified with viewStart and viewEnd
+        genomeBrowser.highlightRegion(genomeBrowser.chr, (genomeBrowser.viewStart + 9990), (genomeBrowser.viewEnd - 9990));
+        var featureInfoMap = {};
+        genomeBrowser.addFeatureInfoPlugin(function(f, info) {
+            //check if there is cached information for this clicked item
+            if(featureInfoMap.hasOwnProperty(f.id+f.label)){
+                $.each(featureInfoMap[f.id+f.label].sections, function(section) {
+                    info.sections.push(featureInfoMap[f.id+f.label].sections[section]);
+                });
+            }
+            else{
+                var selectedTrack = false;
+                var molgenisIndex = f.notes.indexOf("source:MOLGENIS");
+                if(molgenisIndex!==-1){
+                    //get the value of the "track" field to see if this is the selected Entity in the dataexplorer
+                    $.each(f.notes, function(note) {
+                        var trackIndex = f.notes[note].indexOf("track:");
+                        if(trackIndex!==-1){
+                            var trackName = f.notes[note].substr(trackIndex+6);
+                            if(entity.name == trackName){
+                                selectedTrack = true;
+                            }
+                            info.feature.notes.splice(trackIndex,1);
+                            return false;
+                        }
                     });
-                }
-                else{
-                    var selectedTrack = false;
-                    var molgenisIndex = f.notes.indexOf("source:MOLGENIS");
-                    if(molgenisIndex!==-1){
-                        //get the value of the "track" field to see if this is the selected Entity in the dataexplorer
-                        $.each(f.notes, function(note) {
-                            var trackIndex = f.notes[note].indexOf("track:");
-                            if(trackIndex!==-1){
-                                var trackName = f.notes[note].substr(trackIndex+6);
-                                if(entity.name == trackName){
-                                    selectedTrack = true;
-                                }
-                                info.feature.notes.splice(trackIndex,1);
-                                return false;
-                            }
-                        });
-                        //get the patient note to create a filter on patient link
-                        $.each(f.notes, function(note) {
-                            var patientIndex = f.notes[note].indexOf("patient:");
-                            if(patientIndex!==-1){
-                                var patientID = f.notes[note].substr(patientIndex+8);
-                                info.feature.notes.splice(note,1);
-                                if(selectedTrack){
-                                    var a = $('<a href="javascript:void(0)">' + patientID + '</a>');
-                                    a.click(function() {
-                                        $.each(getAttributes(), function(key, attribute) {
-                                            if(attribute === genomebrowserPatientAttribute) {
-                                                createFilter(attribute, undefined, undefined, patientID);
-                                            }
-                                        });
+                    //get the patient note to create a filter on patient link
+                    $.each(f.notes, function(note) {
+                        var patientIndex = f.notes[note].indexOf("patient:");
+                        if(patientIndex!==-1){
+                            var patientID = f.notes[note].substr(patientIndex+8);
+                            info.feature.notes.splice(note,1);
+                            if(selectedTrack){
+                                var a = $('<a href="javascript:void(0)">' + patientID + '</a>');
+                                a.click(function() {
+                                    $.each(getAttributes(), function(key, attribute) {
+                                        if(attribute === genomebrowserPatientAttribute) {
+                                            createFilter(attribute, undefined, undefined, patientID);
+                                        }
                                     });
-                                    info.add('Filter on patient:', a[0]);
-                                }
-                                return false;
-                            }
-                        });
-                        //get the mutation note to create a mutations filter link
-                        info.feature.notes.splice(molgenisIndex,1);
-                        if(selectedTrack) {
-                            var a = $('<a href="javascript:void(0)">' + f.id + '</a>');
-                            a.click(function () {
-                                $.each(getAttributes(), function (key, attribute) {
-                                    if (attribute === genomebrowserIdentifierAttribute) {
-                                        createFilter(attribute, undefined, undefined, f.id);
-                                    }
                                 });
-                            });
-                            if (f.id !== "-") {
-                                info.add('Filter on mutation:', a[0]);
-                                //cache the information
-                                featureInfoMap[f.id + f.label] = info;
+                                info.add('Filter on patient:', a[0]);
                             }
                             return false;
                         }
+                    });
+                    //get the mutation note to create a mutations filter link
+                    info.feature.notes.splice(molgenisIndex,1);
+                    if(selectedTrack) {
+                        var a = $('<a href="javascript:void(0)">' + f.id + '</a>');
+                        a.click(function () {
+                            $.each(getAttributes(), function (key, attribute) {
+                                if (attribute === genomebrowserIdentifierAttribute) {
+                                    createFilter(attribute, undefined, undefined, f.id);
+                                }
+                            });
+                        });
+                        if (f.id !== "-") {
+                            info.add('Filter on mutation:', a[0]);
+                            //cache the information
+                            featureInfoMap[f.id + f.label] = info;
+                        }
+                        return false;
                     }
                 }
-            });
-
+            }
+        });
 	}
 
 
@@ -217,6 +238,9 @@
 		});
 	}
 
+	/**
+	 * @memberOf molgenis.dataexplorer.data
+	 */
     function setGenomeBrowserAttributes(start, chromosome, id, patient){
         genomebrowserStartAttribute = getAttributeFromList(start);
         genomebrowserChromosomeAttribute = getAttributeFromList(chromosome);

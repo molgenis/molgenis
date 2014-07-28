@@ -111,7 +111,7 @@ public class DataExplorerController extends MolgenisPluginController
 	
 	private static final boolean DEFAULT_VAL_DATAEXPLORER_EDITABLE = false;
 	private static final boolean DEFAULT_VAL_DATAEXPLORER_ROW_CLICKABLE = false;
-
+	
 	@Autowired
 	private DataService dataService;
 
@@ -137,7 +137,8 @@ public class DataExplorerController extends MolgenisPluginController
 	 */
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(@RequestParam(value = "dataset", required = false) String selectedEntityName,
-			@RequestParam(value = "wizard", required = false) Boolean wizard, Model model) throws Exception
+			@RequestParam(value = "wizard", required = false) Boolean wizard,
+			@RequestParam(value = "searchTerm", required = false) String searchTerm, Model model) throws Exception
 	{
 		boolean entityExists = false;
 		Iterable<EntityMetaData> entitiesMeta = Iterables.transform(dataService.getEntityNames(),
@@ -173,6 +174,7 @@ public class DataExplorerController extends MolgenisPluginController
 		model.addAttribute("aggregatenoresults",
 				molgenisSettings.getProperty(AGGREGATES_NORESULTS_MESSAGE, "No results found"));
 		model.addAttribute("wizard", (wizard != null) && wizard.booleanValue());
+		model.addAttribute("searchTerm", searchTerm);
 
 		return "view-dataexplorer";
 	}
@@ -500,7 +502,7 @@ public class DataExplorerController extends MolgenisPluginController
 		{
 			throw new RuntimeException("unknown entity: " + entityName);
 		}
-		return "view-entityReport";
+		return "view-entityreport";
 	}
 	
 	/**
@@ -563,6 +565,7 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 	
 	private boolean isRowClickable(){
-		return molgenisSettings.getBooleanProperty(KEY_DATAEXPLORER_ROW_CLICKABLE, DEFAULT_VAL_DATAEXPLORER_ROW_CLICKABLE);
+		return molgenisSettings.getBooleanProperty(KEY_DATAEXPLORER_ROW_CLICKABLE,
+				DEFAULT_VAL_DATAEXPLORER_ROW_CLICKABLE);
 	}
 }
