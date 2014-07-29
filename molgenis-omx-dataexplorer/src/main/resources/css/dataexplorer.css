@@ -171,8 +171,8 @@ a.accordion-toggle:hover,a.accordion-toggle:focus,a.accordion-toggle:active
 }
 
 #filter-wizard-modal .modal-body {
-	min-height: 540px;
-	max-height: 540px;
+	min-height: 500px;
+	max-height: 500px;
 	padding-bottom: 0;
 }
 
@@ -182,7 +182,7 @@ a.accordion-toggle:hover,a.accordion-toggle:focus,a.accordion-toggle:active
 }
 
 .filter-wizard-fixed-height {
-	height: 400px;
+	height: 365px;
 }
 
 #filter-wizard-modal .pager {
@@ -200,7 +200,7 @@ a.accordion-toggle:hover,a.accordion-toggle:focus,a.accordion-toggle:active
 
 #filter-modal .modal-body {
 	min-height: 250px;
-	max-height: 540px;
+	max-height: 500px;
 	padding-bottom: 0;
 }
 
