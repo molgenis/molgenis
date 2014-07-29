@@ -18,7 +18,9 @@
 		//Initialize selectedDataset with default value null
 		selectedDataSet = null;
 		//Clear the previous messages if there are any 
-		if($('#mapping-unavailable')) $('#mapping-unavailable').remove();
+		if($('#mapping-unavailable')) {
+			$('#mapping-unavailable').remove();
+		}
 		//Check the nullibity of target selecteDataSetId
 		if(!selectedDataSetId || selectedDataSetId === ''){
 			var mappingUnavailable = $('<p />').attr('id', 'mapping-unavailable').addClass('text-align-center').append('The target catalogue cannot be empty!').css('margin-top', '50px');
@@ -582,9 +584,10 @@
 				checkBox.attr('checked', $.inArray(mappedFeature.Name, mappedFeatureNames) !== -1)
 				row.append('<td>' + mappedFeature.Name + '</td><td>' + molgenis.i18nDescription(mappedFeature).en + '</td><td>' + score + '</td>');
 				row.append($('<td />').append($('<label class="checkbox"></label>').append(checkBox))).appendTo(mappingTable);
-				if(mappedFeature.dataType === 'categorical'){
+				//If the query is matched with categories instead of feature description
+				if(mappedFeatureFromIndex.type === 'category'){
 					row.children('td:lt(2)').css('cursor', 'pointer').click(function(){
-						retrieveAllInfoForFeature(row, mappedFeature);
+						retrieveAllInfoForFeature(row, mappedFeature, mappedFeatureFromIndex.name);
 					});
 				}
 			}
@@ -596,7 +599,7 @@
 		});
 		return mappingTable;
 		
-		function retrieveAllInfoForFeature(clickedRow, featureEntity){
+		function retrieveAllInfoForFeature(clickedRow, featureEntity, categoryIdentifier){
 			var detailInfoTable = $('<table class="table table-bordered"></table>');
 			detailInfoTable.append('<tr><th>Id</th><td>' + molgenis.hrefToId(featureEntity.href) + '</td></tr>');
 			detailInfoTable.append('<tr><th>Name</th><td>' + featureEntity.Name + '</td></tr>');
@@ -609,7 +612,11 @@
 			if(categories.length > 0){
 				var categoryDiv = $('<div />');
 				$.each(categories, function(index, category){
-					categoryDiv.append('<div>' + category.valueCode + ' = ' + category.Name + '</div>');
+					if(category.Identifier === categoryIdentifier){
+						categoryDiv.append('<div style="color:#3F8B1C"><strong>' + category.valueCode + ' = ' + category.Name + '</strong><div class="float-right">(mapped code)</div></div>');
+					}else{						
+						categoryDiv.append('<div>' + category.valueCode + ' = ' + category.Name + '</div>');
+					}
 				});
 				detailInfoTable.append('<tr><th>Categories</th><td>' + categoryDiv.html() + '</td></tr>');
 			}
