@@ -492,6 +492,7 @@ public class DataExplorerController extends MolgenisPluginController
 				model.addAttribute("entityName", entityName);
 				model.addAttribute("entityId", entityId);
 				model.addAttribute("entityMap", getMapFromEntity(entity));
+				model.addAttribute("entity", entity);
 			}
 			else
 			{
