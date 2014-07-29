@@ -285,7 +285,7 @@
 					
 				});
 				
-				createHeader(entityMetaData);
+				self.createHeader(entityMetaData);
 			});
 		});
 		
