@@ -137,6 +137,9 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	public SearchResult generateMapping(String userName, Integer featureId, Integer targetDataSetId,
 			Integer sourceDataSetId)
 	{
+		// TODO : we might want to know how the mapping is produced, is that
+		// based on the description of features or categories?
+
 		PorterStemmer stemmer = new PorterStemmer();
 		DataSet sourceDataSet = dataService.findOne(DataSet.ENTITY_NAME, sourceDataSetId, DataSet.class);
 		DataSet targetDataSet = dataService.findOne(DataSet.ENTITY_NAME, targetDataSetId, DataSet.class);
