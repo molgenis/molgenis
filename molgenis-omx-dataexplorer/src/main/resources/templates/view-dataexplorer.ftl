@@ -26,7 +26,8 @@
 	"jquery.molgenis.xrefmrefsearch.js",
 	"dataexplorer.js",
 	"jquery.molgenis.table.js",
-	"handlebars-v1.3.0.js"]>
+	"handlebars-v1.3.0.js",
+	"custom.js"]>
 
 <@header css js/>
     <script>

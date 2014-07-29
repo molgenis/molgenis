@@ -776,7 +776,7 @@
 			$('#entityReport').load("dataexplorer/details",{entityName: entityName, entityId: entityId}, function() {
 				  $('#entityReportModal').modal("show");
 				  	  
-				  $(".specific-content button", "#entityReport").on('click', function() {
+				  $(".modal-body button", "#entityReport").on('click', function() {
 						$.download($(this).data('href'), {entityName: entityName, entityId: entityId}, "GET");
 				  });
 			});
