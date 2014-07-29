@@ -531,13 +531,25 @@
 			data : JSON.stringify(searchRequest),
 			contentType : 'application/json',
 			success : function(data, textStatus, request) {	
+				var uniqueFeatureMap = {};
 				var mappedFeatues = [];
 				var existingIds = [];
 				$.each(data.searchHits, function(index, hit){
+					
 					if($.inArray(hit.columnValueMap.id, existingIds) === -1){
 						existingIds.push(hit.columnValueMap.id);
 						mappedFeatues.push(hit.columnValueMap);
 					}
+					
+					if(!uniqueFeatureMap[hit.columnValueMap.id]){
+						hit.columnValueMap.category = [];
+						uniqueFeatureMap[hit.columnValueMap.id] = hit.columnValueMap;
+					}
+					
+					if(hit.columnValueMap.type === 'category'){
+						uniqueFeatureMap[hit.columnValueMap.id].category.push(hit.columnValueMap.name);
+					}
+					
 				});
 				callback(mappedFeatues);
 			},
@@ -585,9 +597,9 @@
 				row.append('<td>' + mappedFeature.Name + '</td><td>' + molgenis.i18nDescription(mappedFeature).en + '</td><td>' + score + '</td>');
 				row.append($('<td />').append($('<label class="checkbox"></label>').append(checkBox))).appendTo(mappingTable);
 				//If the query is matched with categories instead of feature description
-				if(mappedFeatureFromIndex.type === 'category'){
+				if(mappedFeatureFromIndex.type === 'category' || mappedFeature.dataType === 'categorical'){
 					row.children('td:lt(2)').css('cursor', 'pointer').click(function(){
-						retrieveAllInfoForFeature(row, mappedFeature, mappedFeatureFromIndex.name);
+						retrieveAllInfoForFeature(row, mappedFeature, mappedFeatureFromIndex.category);
 					});
 				}
 			}
@@ -599,7 +611,7 @@
 		});
 		return mappingTable;
 		
-		function retrieveAllInfoForFeature(clickedRow, featureEntity, categoryIdentifier){
+		function retrieveAllInfoForFeature(clickedRow, featureEntity, categoryIdentifiers){
 			var detailInfoTable = $('<table class="table table-bordered"></table>');
 			detailInfoTable.append('<tr><th>Id</th><td>' + molgenis.hrefToId(featureEntity.href) + '</td></tr>');
 			detailInfoTable.append('<tr><th>Name</th><td>' + featureEntity.Name + '</td></tr>');
@@ -612,7 +624,7 @@
 			if(categories.length > 0){
 				var categoryDiv = $('<div />');
 				$.each(categories, function(index, category){
-					if(category.Identifier === categoryIdentifier){
+					if($.inArray(category.Identifier, categoryIdentifiers) !== -1){
 						categoryDiv.append('<div style="color:#3F8B1C"><strong>' + category.valueCode + ' = ' + category.Name + '</strong><div class="float-right">(mapped code)</div></div>');
 					}else{						
 						categoryDiv.append('<div>' + category.valueCode + ' = ' + category.Name + '</div>');
