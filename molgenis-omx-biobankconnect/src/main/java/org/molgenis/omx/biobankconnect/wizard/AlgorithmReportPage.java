@@ -1,4 +1,4 @@
-package org.molgenis.omx.biobankconnect.algorithm;
+package org.molgenis.omx.biobankconnect.wizard;
 
 import javax.servlet.http.HttpServletRequest;
 

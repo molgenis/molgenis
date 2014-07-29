@@ -26,7 +26,6 @@ import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.omx.biobankconnect.algorithm.AlgorithmReportPage;
 import org.molgenis.omx.biobankconnect.algorithm.ApplyAlgorithms;
 import org.molgenis.omx.biobankconnect.ontologyannotator.OntologyAnnotator;
 import org.molgenis.omx.biobankconnect.ontologyannotator.UpdateIndexRequest;
