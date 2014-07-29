@@ -127,6 +127,11 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		createMappingStore(userName, selectedDataSetId, dataSetIdsToMatch);
 	}
 
+	/**
+	 * This method is to generate a list of candidate mappings for the chosen
+	 * feature by using ElasticSearch based on the information from ontology
+	 * terms
+	 */
 	@Override
 	@Transactional
 	public SearchResult generateMapping(String userName, Integer featureId, Integer targetDataSetId,
@@ -171,6 +176,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 						boostedOntologyTermUris);
 				List<QueryRule> subQueryRules = createQueryRules(description, ontologyTermContainers, stemmer);
 				List<QueryRule> subQueryRules_2 = getAlternativeOTs(description, ontologyTermContainers, stemmer);
+				List<QueryRule> subQueryRules_3 = getExistingMappings(feature, stemmer,
+						createMappingDataSetIdentifier(userName, targetDataSetId, sourceDataSetId));
 
 				QueryRule finalQueryRule = new QueryRule(new ArrayList<QueryRule>());
 				// Add original description of data items to the query
@@ -181,11 +188,74 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 				finalQueryRule.setOperator(Operator.DIS_MAX);
 				finalQueryRule.getNestedRules().addAll(subQueryRules);
 				finalQueryRule.getNestedRules().addAll(subQueryRules_2);
+				finalQueryRule.getNestedRules().addAll(subQueryRules_3);
 				return searchDisMaxQuery(sourceDataSet.getProtocolUsed().getId().toString(), new QueryImpl(
 						finalQueryRule));
 			}
 		}
 		return new SearchResult(0, Collections.<Hit> emptyList());
+	}
+
+	/**
+	 * This method is to collect existing mappings for the same desired data
+	 * element from other datasets and use them for query expansion as well
+	 * 
+	 * @param description
+	 * @param desiredDataElement
+	 * @param stemmer
+	 * @param dataSetIdentifier
+	 * @return
+	 */
+	private List<QueryRule> getExistingMappings(ObservableFeature desiredDataElement, PorterStemmer stemmer,
+			String dataSetIdentifier)
+	{
+		List<QueryRule> queryRules = new ArrayList<QueryRule>();
+
+		SearchResult searchResult = searchService.search(new SearchRequest(null, new QueryImpl().eq(
+				STORE_MAPPING_FEATURE, desiredDataElement.getId()).pageSize(Integer.MAX_VALUE), null));
+
+		// Collect all the mapped features and put their IDs in a list
+		List<Object> mappedFeatureIds = new ArrayList<Object>();
+		for (Hit hit : searchResult.getSearchHits())
+		{
+			// Only collect the mappings that are not from the dataset in which
+			// the mapping will be found
+			if (!hit.getDocumentType().equals(dataSetIdentifier))
+			{
+				Object entityID = hit.getColumnValueMap().get(STORE_MAPPING_MAPPED_FEATURE);
+				if (entityID != null)
+				{
+					String mappedIds = entityID.toString();
+					if (mappedIds.length() > 2)
+					{
+						for (String id : mappedIds.substring(1, mappedIds.length() - 1).split(","))
+						{
+							mappedFeatureIds.add(id.trim());
+						}
+					}
+				}
+			}
+		}
+		// If there are mappings already
+		if (mappedFeatureIds.size() > 0)
+		{
+			Iterable<ObservableFeature> mappedFeatures = dataService.findAll(ObservableFeature.ENTITY_NAME,
+					mappedFeatureIds, ObservableFeature.class);
+
+			for (ObservableFeature feature : mappedFeatures)
+			{
+				String description = feature.getDescription();
+				if (!StringUtils.isEmpty(description))
+				{
+					description = StringUtils.join(
+							stemMembers(Arrays.asList(removeStopWords(description).split(" +")), stemmer), " ");
+					queryRules.add(new QueryRule(ObservableFeature.DESCRIPTION, Operator.EQUALS, description));
+					queryRules.add(new QueryRule(FIELD_DESCRIPTION_STOPWORDS, Operator.EQUALS, description));
+				}
+			}
+		}
+
+		return queryRules;
 	}
 
 	/**
@@ -280,6 +350,14 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		return result;
 	}
 
+	/**
+	 * This method is to collect ontology term information from the index, which
+	 * will be used in composing queries next
+	 * 
+	 * @param ontologyTermUris
+	 * @param boostedOntologyTerms
+	 * @return
+	 */
 	private Collection<OntologyTermContainer> collectOntologyTermInfo(List<String> ontologyTermUris,
 			List<String> boostedOntologyTerms)
 	{
@@ -336,9 +414,10 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	private List<QueryRule> createQueryRules(String description,
 			Collection<OntologyTermContainer> ontologyTermContainers, PorterStemmer stemmer)
 	{
+		// Default position is -1, which means the ontologyterm cannot be
+		// located anywhere inside the description
 		Integer locationNotFound = -1;
-		// TODO : seems that synonyms are not used in composing the queries at
-		// the moment so that the results are far from correct!
+
 		List<QueryRule> queryRules = new ArrayList<QueryRule>();
 		List<QueryRule> shouldQueryRules = new ArrayList<QueryRule>();
 		List<String> uniqueTokens = stemMembers(Arrays.asList(description.split(" +")), stemmer);
