@@ -141,9 +141,6 @@
 				return formatResult(entity, refEntityMetaData, lookupAttrNames);
 			},
 			formatSelection: function(entity) {
-				if($(".select2-choices .select2-search-choice", $container).length > 0){
-					$(".dropdown-toggle", $container).removeClass('disabled');
-				}
 				return formatSelection(entity, refEntityMetaData);
 			},
 			id: function(entity) {
@@ -152,15 +149,7 @@
 			separator: ',',
 			dropdownCssClass: 'molgenis-xrefmrefsearch'
 		});
-		
-		$hiddenInput.on("select2-removed", function(e) {
-				if($(".select2-choices .select2-search-choice", $container).length < 2){
-					$(".dropdown-toggle", $container).addClass('disabled');
-				}
-			});
 
-		$(".dropdown-toggle", $container).addClass('disabled');
-		
 		if(!lookupAttrNames.length){
 			$container.append($("<label>lookup attribute is not defined.</label>"));
 		}
@@ -181,7 +170,7 @@
 				var orValue = "OR&nbsp;&nbsp;";
 				var andValue = "AND";
 				$dropdown.append($operatorInput);
-				$dropdown.append($('<a class="btn btn-mini dropdown-toggle add-on-left" data-toggle="dropdown" href="#">' + (options.operator === "AND" ? andValue : orValue) + ' <b class="caret"></a>'));
+				$dropdown.append($('<a class="btn dropdown-toggle add-on-left" data-toggle="dropdown" href="#">' + (options.operator === "AND" ? andValue : orValue) + ' <b class="caret"></a>'));
 				$dropdown.append($('<ul class="dropdown-menu"><li><a data-value="OR">' + orValue + '</a></li><li><a data-value="AND">' + andValue + '</a></li></ul>'));
 	
 				$.each($dropdown.find('.dropdown-menu li a'), function(index, element){
@@ -199,7 +188,7 @@
 			}
 			else if (attributeMetaData.fieldType === 'XREF') {
 				$operatorInput.val('OR');
-				$container.append($('<a class="btn btn-mini add-on-left" disabled href="#">' + "OR" + '</a>'));
+				$container.append($('<a class="btn add-on-left" disabled href="#">' + "OR" + '</a>'));
 				$container.append($operatorInput);
 			}
 		}
