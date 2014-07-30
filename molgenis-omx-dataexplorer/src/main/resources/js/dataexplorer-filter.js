@@ -446,7 +446,7 @@
 			case 'CATEGORICAL':
 				var restApi = new molgenis.RestClient();
 				var entityMeta = restApi.get(attribute.refEntity.href);
-				var entitiesUri = entityMeta.href.replace(new RegExp('/meta[^/]*$'), ""); // TODO do not manipulate uri
+				var entitiesUri = entityMeta.href.replace(new RegExp('/meta[^/]*$'), ''); // TODO do not manipulate uri
 				var entities = restApi.get(entitiesUri, {
 					q : {
 						sort : {
@@ -484,7 +484,7 @@
 						symmetricPositionning: true,
 						bounds: {min: attribute.range.min, max: attribute.range.max},
 						defaultValues: {min: min, max: max},
-						type: "number"
+						type: 'number'
 					});
 					$controls.append(slider);
 				} else {
@@ -507,7 +507,7 @@
 			case 'XREF':
 			case 'MREF':
 				var operator = simpleFilter ? simpleFilter.operator : 'OR';
-				$controls.addClass("xrefmrefsearch");
+				$controls.addClass('xrefmrefsearch');
 				$controls.xrefmrefsearch({
 					attribute : attribute,
 					values : values,
@@ -599,12 +599,12 @@
 			var toValue = this.toValue;
 			var operator = this.operator;
 			
-			$(":input",$domElement).not('[type=radio]:not(:checked)')
+			$(':input',$domElement).not('[type=radio]:not(:checked)')
 					.not('[type=checkbox]:not(:checked)')
 					.not('[data-filter=complex-operator]')
 					.not('.exclude').each(function(){
 				var value = $(this).val();
-				var name =  $(this).attr("name");
+				var name =  $(this).attr('name');
 				
 				if(value) {
 					// Add operator

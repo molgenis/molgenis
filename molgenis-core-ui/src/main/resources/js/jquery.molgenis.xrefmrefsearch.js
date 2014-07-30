@@ -108,7 +108,7 @@
 		var lookupAttrNames = getLookupAttributeNames(refEntityMetaData);
 		var uniqueAttrNames = getUniqueAttributeNames(refEntityMetaData);
 		
-		var $hiddenInput = $(":input[type=hidden]",$container)
+		var $hiddenInput = $(':input[type=hidden]',$container)
 				.not('[data-filter=xrefmref-operator]')
 				.not('[data-filter=ignore]');
 
@@ -144,15 +144,15 @@
 				return formatResult(entity, refEntityMetaData, lookupAttrNames);
 			},
 			formatSelection: function(entity) {
-				if($(".select2-choices .select2-search-choice", $container).length > 0 && !$(".dropdown-toggle", $container).is(":visible")){
-					$(".dropdown-toggle", $container).show();
+				if($('.select2-choices .select2-search-choice', $container).length > 0 && !$('.dropdown-toggle', $container).is(':visible')){
+					$('.dropdown-toggle', $container).show();
 					var $select2Container = $('.select2-container.select2-container-multi', $container);
 					if(attributeMetaData.fieldType === 'MREF'){
-						$select2Container.css("width", ($select2Container.width() - 55) + 'px');
+						$select2Container.css('width', ($select2Container.width() - 55) + 'px');
 					}else{
-						$select2Container.css("width", ($select2Container.width() - 36) + 'px');
+						$select2Container.css('width', ($select2Container.width() - 36) + 'px');
 					}
-					$(".dropdown-toggle", $container).show();
+					$('.dropdown-toggle', $container).show();
 				}
 				return formatSelection(entity, refEntityMetaData);
 			},
@@ -163,17 +163,17 @@
 			dropdownCssClass: 'molgenis-xrefmrefsearch'
 		});
 
-		$hiddenInput.on("select2-removed", function(e) {
-			if($(".select2-choices .select2-search-choice", $container).length < 2){
-				$(".dropdown-toggle", $container).hide();
+		$hiddenInput.on('select2-removed', function(e) {
+			if($('.select2-choices .select2-search-choice', $container).length < 2){
+				$('.dropdown-toggle', $container).hide();
 				$('.select2-container.select2-container-multi', $container).css('width', width);
 			}
 		});
 
-		$(".dropdown-toggle", $container).hide();
+		$('.dropdown-toggle', $container).hide();
 		
 		if(!lookupAttrNames.length){
-			$container.append($("<label>lookup attribute is not defined.</label>"));
+			$container.append($('<label>lookup attribute is not defined.</label>'));
 		}
 	}
 
@@ -192,14 +192,14 @@
 				var orValue = 'OR&nbsp;&nbsp;';
 				var andValue = 'AND';
 				$dropdown.append($operatorInput);
-				$dropdown.append($('<a class="btn dropdown-toggle add-on-left" data-toggle="dropdown" style="display:inline-block;padding:4px 5px" href="#">' + (options.operator === "AND" ? andValue : orValue) + ' <b class="caret"></a>'));
+				$dropdown.append($('<a class="btn dropdown-toggle add-on-left" data-toggle="dropdown" style="display:inline-block;padding:4px 5px" href="#">' + (options.operator === 'AND' ? andValue : orValue) + ' <b class="caret"></a>'));
 				$dropdown.append($('<ul class="dropdown-menu"><li><a data-value="OR">' + orValue + '</a></li><li><a data-value="AND">' + andValue + '</a></li></ul>'));
 	
 				$.each($dropdown.find('.dropdown-menu li a'), function(index, element){
 					$(element).click(function(){
 						var dataValue = $(this).attr('data-value');
 						$operatorInput.val(dataValue);
-						$dropdown.find('a:first').html((dataValue === "AND" ? andValue : orValue) + ' <b class="caret"></b>');
+						$dropdown.find('a:first').html((dataValue === 'AND' ? andValue : orValue) + ' <b class="caret"></b>');
 						$dropdown.find('a:first').val(dataValue);
 					});
 				});
