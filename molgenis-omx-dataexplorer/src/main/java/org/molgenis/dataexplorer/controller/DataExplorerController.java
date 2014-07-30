@@ -469,7 +469,7 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 	
 	/**
-	 * Builds a model based on one entity and returns the entityReport ftl view
+	 * Builds a model containing one entity and returns the entityReport ftl view
 	 * 
 	 * @author mdehaan, fkelpin
 	 * @param entityName
@@ -489,9 +489,7 @@ public class DataExplorerController extends MolgenisPluginController
 
 			if (entity != null)
 			{
-				model.addAttribute("entityName", entityName);
-				model.addAttribute("entityId", entityId);
-				model.addAttribute("entityMap", getMapFromEntity(entity));
+				model.addAttribute("entity", entity);
 			}
 			else
 			{
@@ -502,43 +500,9 @@ public class DataExplorerController extends MolgenisPluginController
 		{
 			throw new RuntimeException("unknown entity: " + entityName);
 		}
-		return "view-entityReport";
+		return "view-entityreport";
 	}
 	
-	/**
-	 * Translates a single entity its attributes and respective values to a map
-	 * 
-	 * @param entity
-	 * @return A map with entity attribute as key and respective value as value
-	 */
-	private Map<String, String> getMapFromEntity(Entity entity)
-	{
-		Map<String, String> entityValueMap = new LinkedHashMap<String, String>();
-		Iterator<String> entityAttributes = entity.getAttributeNames().iterator();
-
-		if (entityAttributes != null)
-		{
-			while (entityAttributes.hasNext())
-			{
-				String entityAttribute = entityAttributes.next();
-				if (entity.get(entityAttribute) == null)
-				{
-					entityValueMap.put(entityAttribute, " ");
-				}
-				else
-				{
-					entityValueMap.put(entityAttribute, entity.get(entityAttribute).toString());
-				}
-			}
-		}
-		else
-		{
-			throw new RuntimeException("the selected row did not have any attributes");
-		}
-
-		return entityValueMap;
-	}
-
 	@ExceptionHandler(GalaxyDataExportException.class)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
