@@ -112,8 +112,11 @@
 				.not('[data-filter=xrefmref-operator]')
 				.not('[data-filter=ignore]');
 
+		
+		var width = options.width ? options.width : 'resolve';
+		
 		$hiddenInput.select2({
-			width: options.width ? options.width : 'resolve',
+			width: width,
 			minimumInputLength: 2,
 			multiple: (attributeMetaData.fieldType === 'MREF' || attributeMetaData.fieldType === 'XREF'),
 			closeOnSelect: false,
@@ -141,6 +144,16 @@
 				return formatResult(entity, refEntityMetaData, lookupAttrNames);
 			},
 			formatSelection: function(entity) {
+				if($(".select2-choices .select2-search-choice", $container).length > 0 && !$(".dropdown-toggle", $container).is(":visible")){
+					$(".dropdown-toggle", $container).show();
+					var $select2Container = $('.select2-container.select2-container-multi', $container);
+					if(attributeMetaData.fieldType === 'MREF'){
+						$select2Container.css("width", ($select2Container.width() - 55) + 'px');
+					}else{
+						$select2Container.css("width", ($select2Container.width() - 36) + 'px');
+					}
+					$(".dropdown-toggle", $container).show();
+				}
 				return formatSelection(entity, refEntityMetaData);
 			},
 			id: function(entity) {
@@ -150,6 +163,15 @@
 			dropdownCssClass: 'molgenis-xrefmrefsearch'
 		});
 
+		$hiddenInput.on("select2-removed", function(e) {
+			if($(".select2-choices .select2-search-choice", $container).length < 2){
+				$(".dropdown-toggle", $container).hide();
+				$('.select2-container.select2-container-multi', $container).css('width', width);
+			}
+		});
+
+		$(".dropdown-toggle", $container).hide();
+		
 		if(!lookupAttrNames.length){
 			$container.append($("<label>lookup attribute is not defined.</label>"));
 		}
@@ -167,10 +189,10 @@
 
 			if(attributeMetaData.fieldType === 'MREF') {
 				var $dropdown = $('<div class="btn-group"><div>');
-				var orValue = "OR&nbsp;&nbsp;";
-				var andValue = "AND";
+				var orValue = 'OR&nbsp;&nbsp;';
+				var andValue = 'AND';
 				$dropdown.append($operatorInput);
-				$dropdown.append($('<a class="btn dropdown-toggle add-on-left" data-toggle="dropdown" href="#">' + (options.operator === "AND" ? andValue : orValue) + ' <b class="caret"></a>'));
+				$dropdown.append($('<a class="btn dropdown-toggle add-on-left" data-toggle="dropdown" style="display:inline-block;padding:4px 5px" href="#">' + (options.operator === "AND" ? andValue : orValue) + ' <b class="caret"></a>'));
 				$dropdown.append($('<ul class="dropdown-menu"><li><a data-value="OR">' + orValue + '</a></li><li><a data-value="AND">' + andValue + '</a></li></ul>'));
 	
 				$.each($dropdown.find('.dropdown-menu li a'), function(index, element){
@@ -188,7 +210,7 @@
 			}
 			else if (attributeMetaData.fieldType === 'XREF') {
 				$operatorInput.val('OR');
-				$container.append($('<a class="btn add-on-left" disabled href="#">' + "OR" + '</a>'));
+				$container.append($('<div class="dropdown-toggle" style="display:inline-block;padding: 4px 10px 4px 5px">' + 'OR' + '</div>'));
 				$container.append($operatorInput);
 			}
 		}
