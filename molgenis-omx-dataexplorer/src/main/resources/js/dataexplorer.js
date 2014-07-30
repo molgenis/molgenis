@@ -320,7 +320,7 @@
 		$("#observationset-search").focus();
 		
 		$("#observationset-search").change(function(e) {
-			searchQuery = $(this).val();
+			searchQuery = $(this).val().trim();
 			$(document).trigger('changeQuery', createEntityQuery());
 		});
 	
