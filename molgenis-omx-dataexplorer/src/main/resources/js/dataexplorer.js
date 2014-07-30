@@ -9,6 +9,7 @@
 	self.getEntityQuery = getEntityQuery;
     self.setNoResultMessage = setNoResultMessage;
     self.getNoResultMessage = getNoResultMessage;
+    self.createHeader = createHeader;
 	
 	var restApi = new molgenis.RestClient();
 	var selectedEntityMetaData = null;
