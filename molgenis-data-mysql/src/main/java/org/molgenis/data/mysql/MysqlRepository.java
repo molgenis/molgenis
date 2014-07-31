@@ -573,8 +573,6 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 							search.append(" OR CAST(").append(att.getName()).append(".`").append(att.getName())
 									.append('`').append(" as CHAR) LIKE ?");
 
-							// TODO: When EMX has lookup attributes functionality, implement
-							// refAtt.isLookupAttribute()
 							if (SecurityDecoratorUtils.isPermissionValid(att.getRefEntity().getName(), Permission.READ))
 							{
 								for (AttributeMetaData refAtt : att.getRefEntity().getAttributes())
