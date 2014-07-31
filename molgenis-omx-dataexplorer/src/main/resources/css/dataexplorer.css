@@ -21,6 +21,7 @@
 
 #observationset-search-container {
 	text-align: center;
+	padding-bottom: 15px;
 }
 
 .accordion-group {
@@ -170,8 +171,8 @@ a.accordion-toggle:hover,a.accordion-toggle:focus,a.accordion-toggle:active
 }
 
 #filter-wizard-modal .modal-body {
-	min-height: 540px;
-	max-height: 540px;
+	min-height: 500px;
+	max-height: 500px;
 	padding-bottom: 0;
 }
 
@@ -181,7 +182,7 @@ a.accordion-toggle:hover,a.accordion-toggle:focus,a.accordion-toggle:active
 }
 
 .filter-wizard-fixed-height {
-	height: 400px;
+	height: 365px;
 }
 
 #filter-wizard-modal .pager {
@@ -199,7 +200,7 @@ a.accordion-toggle:hover,a.accordion-toggle:focus,a.accordion-toggle:active
 
 #filter-modal .modal-body {
 	min-height: 250px;
-	max-height: 540px;
+	max-height: 500px;
 	padding-bottom: 0;
 }
 
@@ -250,7 +251,7 @@ ul.fancytree-container {
 	padding-top: 3px !important;
 }
 
-.xrefmrefsearch .btn.btn-mini.add-on-left{
+.xrefmrefsearch .btn.add-on-left{
 	border-bottom-left-radius:4px !important;
 	-webkit-border-bottom-left-radius: 4px !important;
 	border-top-left-radius:4px !important;
@@ -290,6 +291,10 @@ input[name="ColNames"] {
 
 #module-nav .nav {
 	margin-left: 2.1277%;
+}
+
+.simple-filter-container{
+	padding-bottom: 10px;
 }
 
 .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {

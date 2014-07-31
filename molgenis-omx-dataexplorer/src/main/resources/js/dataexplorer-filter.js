@@ -93,28 +93,59 @@
 	};
 	
 	/**
-	 * Create the user simple representation of the query 
+	 * Create the user simple representation of the query
 	 */
 	self.createFilterQueyUserReadable = function (filter) {
-		var s = '';
 		if(filter.isType('complex')) {
 			var complexFilterElements = filter.getComplexFilterElements();
+			var addBracket = true;
 			if(complexFilterElements){
+				var items = [];
+				var elementHasAndOperator = false;
 				$.each(complexFilterElements, function(index, complexFilterElement){
-					if(complexFilterElement.operator)
+					var s = '';
+					if(index > 0)
 					{
-						s += ' ' + complexFilterElement.operator.toLowerCase() + ' ';
+						if(complexFilterElement.operator === 'AND'){
+							addBracket
+							if(!elementHasAndOperator){
+								elementHasAndOperator = true;
+								items[items.length-1] = '(' + items[items.length-1];
+							}
+							addBracket = false;
+						}else{
+							// complexFilterElement.operator === 'OR'
+							if(elementHasAndOperator){
+								elementHasAndOperator = false;
+								s += ') ';
+							}
+						}
+						
+						items.push(' ' + complexFilterElement.operator.toLowerCase() + ' ');
 					}
-					s += '(' + self.createSimpleFilterValuesRepresentation(complexFilterElement.simpleFilter) + ')';
+					
+					items.push(self.createSimpleFilterValuesRepresentation(complexFilterElement.simpleFilter));
 				});
+				
+				if(elementHasAndOperator){
+					items.push(')');
+				}
+				
+				if(items.length < 2){
+					addBracket = false;
+				}
+			}
+			
+			if(addBracket){
+				return '(' + items.join('') + ')';
+			}else{
+				return items.join('');
 			}
 		}
 		else if(filter.isType('simple'))
 		{
-			s += self.createSimpleFilterValuesRepresentation(filter);
+			return self.createSimpleFilterValuesRepresentation(filter);
 		}
-		
-		return s;
 	}
 	
 	/**
@@ -128,7 +159,7 @@
 			case 'DECIMAL':
 			case 'INT':
 			case 'LONG':
-				return htmlEscape((filter.fromValue ? 'from ' + filter.fromValue : '') + (filter.toValue ? ' to ' + filter.toValue : ''));
+				return htmlEscape('(' + (filter.fromValue ? 'from ' + filter.fromValue : '') + (filter.toValue ? ' to ' + filter.toValue : '') + ')');
 			case 'EMAIL':
 			case 'HTML':
 			case 'HYPERLINK':
@@ -145,7 +176,7 @@
 				$.each(values, function(key, value) {
 					array.push('\'' + value + '\'');
 				});
-				return htmlEscape(array.join(' ' + operator + ' '));
+				return htmlEscape('(' + array.join(' ' + operator + ' ') + ')');
 			case 'COMPOUND' :
 			case 'FILE':
 			case 'IMAGE':
@@ -162,14 +193,17 @@
 	{		
 		var $container = $('<div class="complex-filter-container"></div>').data('attribute', attribute);
 		var useFixedOperator = (fixedOperator !== undefined && fixedOperator !== null ? true : false);
-
+		var filterElementOperator = null;
+		var $addButton = null;
+		
 		if(filter){
 			if(filter.isType('complex')){
 				$.each(filter.getComplexFilterElements(), function(index, complexFilterElement){
+					filterElementOperator = (fixedOperator ? fixedOperator : complexFilterElement.operator);
 					self.addComplexFilterElementToContainer(
 							$container, 
 							attribute, 
-							(fixedOperator ? fixedOperator : complexFilterElement.operator), 
+							filterElementOperator, 
 							complexFilterElement.simpleFilter, 
 							wizard, 
 							(index > 0 ? false : true), 
@@ -178,16 +212,21 @@
 				});
 			}
 		}else{
+			filterElementOperator = (fixedOperator ? fixedOperator : null);
 			self.addComplexFilterElementToContainer(
 					$container, 
 					attribute, 
-					(fixedOperator ? fixedOperator : null), 
+					filterElementOperator, 
 					null, 
 					wizard, 
 					true, 
 					null,
 					useFixedOperator);
 		}
+		
+		$addButton = self.createComplexFilterAddButton($container, attribute, filterElementOperator, wizard, useFixedOperator);
+		self.addComplexFilterAddButton($container, $addButton);
+
 		return $container;
 	}
 	
@@ -197,7 +236,7 @@
 	self.addComplexFilterElementToContainer = function($container, attribute, complexFilterOperator, simpleFilter, wizard, isFirstElement, totalNumberElements, useFixedOperator) 
 	{
 		// The complex filter element container
-		var $complexElementContainer = $('<div class="control-group complex-element-container"></div>');
+		var $complexElementContainer = $('<div class="control-group complex-element-container" data-filter="complex-element-container"></div>');
 		
 		// Complex element containing the simple filter and the operator
 		var $complexElement = $('<div class="controls complex-element" data-filter="complex-element"></div>');
@@ -214,24 +253,21 @@
 		$controlGroupSimpleFilter.addClass('complex-simplefilter');
 		
 		// Remove complex filter element button container
-		var $removeButtonContainer = $('<div class="controls complex-removebutton-container" data-filter=complex-removebutton-container></div>');
+		var $removeButtonContainer = $('<div class="controls complex-removebutton-container" data-filter="complex-removebutton-container"></div>');
+		
+		// Add complex filter element button container 
+		var $plusButtonContainer = $('<div class="controls complex-addbutton-container" data-filter="complex-addbutton-container"></div>');
 				
+		
 		if(isFirstElement) 
 		{
 			// Add simple filter
 			$complexElement.append($controlGroupSimpleFilter);
 			
-			if(totalNumberElements && totalNumberElements > 1) {
-				
+			if(totalNumberElements > 1) {
 				// Add remove
-				$removeButtonContainer.append(self.createRemoveFirstComplexElementButton($container));
+				$removeButtonContainer.append(self.createRemoveButtonFirstComplexElement($container));
 			}
-			
-			// Add plus button
-			var $plusButtonContainer = $('<div class="controls complex-addbutton-container" data-filter=complex-addbutton-container></div>');
-			$plusButtonContainer.append(self.createComplexFilterAddButton($container, attribute, complexFilterOperator, wizard, useFixedOperator));
-			$complexElementContainer.append($plusButtonContainer);
-			$complexElementContainer.append($removeButtonContainer);
 		}else{
 			// Add select complex filter operator
 			var $complexOperatorControlGroup = self.createComplexFilterSelectOperator(complexFilterOperator, useFixedOperator);
@@ -243,12 +279,14 @@
 			$complexElement.append($controlGroupSimpleFilter);
 			
 			// Add remove
-			$removeButtonContainer.append(self.createRemoveComplexFilterButton($complexElementContainer));
-			$complexElement.append($removeButtonContainer);
+			$removeButtonContainer.append(self.createRemoveButtonComplexElementFilter($complexElementContainer));
 		}
 		
-		// Add complex element container to container
-		$container.append($complexElementContainer.prepend($complexElement));
+		$complexElement.append($plusButtonContainer);
+		$complexElement.append($removeButtonContainer);
+		$complexElementContainer.append($complexElement)
+		
+		$container.append($complexElementContainer);
 		
 		return $complexElementContainer;
 	}
@@ -268,7 +306,7 @@
 		$controlGroup.append($operatorInput);
 		var $dropdown;
 		if(useFixedOperator === false){
-			$dropdown = $('<div class="btn-group" data-filter="complex-operator-container" style="margin-left: 120px"><div>');
+			$dropdown = $('<div class="btn-group" data-filter="complex-operator-container" style="margin-left: 126px"><div>');
 			$dropdown.append($('<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#">' + operatorLabel + ' <b class="caret"></a>'));
 			$dropdown.append($('<ul class="dropdown-menu"><li><a data-value="OR">' + orLabel + '</a></li><li><a data-value="AND">' + andLabel + '</a></li></ul>'));
 			$.each($dropdown.find('.dropdown-menu li a'), function(index, element){
@@ -282,8 +320,7 @@
 			$dropdown.find('div:first').remove();//This is a workaround FIX
 			
 		}else{
-			$dropdown = $('<div data-filter="complex-operator-container" style="margin-left: 120px"><div>');
-			$dropdown.append($('<a class="btn btn-mini" disabled data-toggle="dropdown" href="#">' + operator + '</a>'));
+			$dropdown = $('<div data-filter="complex-operator-container" style="margin-left: 120px">' + operator + '<div>');
 		}
 
 		return $('<div class="control-group">').append($controlGroup.append($dropdown));
@@ -310,28 +347,45 @@
 	}
 	
 	/**
-	 * Create complex filter add button
+	 * add complex filter add-button
+	 */
+	self.addComplexFilterAddButton = function($container, $addButton) {
+		$('[data-filter=complex-addbutton-container]', $container).last().append($addButton);
+	}
+	
+	/**
+	 * Create complex filter add-button
 	 */
 	self.createComplexFilterAddButton = function($container, attribute, complexFilterOperator, wizard, useFixedOperator)
 	{
-		return ($('<button class="btn btn-mini" type="button"><i class="icon-plus"></i></button>').click(function(){
-					if($('[data-filter=complex-removebutton]', $container.parent()).length === 0)
+		return ($('<button class="btn btn-mini" type="button" data-filter=complex-addbutton><i class="icon-plus"></i></button>').click(function(){
+					if($('[data-filter=complex-removebutton]', $container).length === 0)
 					{
-						$('[data-filter=complex-removebutton-container]', $container).append(self.createRemoveFirstComplexElementButton($container));
+						$('[data-filter=complex-removebutton-container]', $container).append(self.createRemoveButtonFirstComplexElement($container));
 					}
 					self.addComplexFilterElementToContainer($container, attribute, complexFilterOperator, null, wizard, false, null, useFixedOperator);
+					self.addComplexFilterAddButton($container, $('[data-filter=complex-addbutton]', $container));
 				}));
 	}
 	
 	/**
 	 * Create remove button to remove complex elements that are not the first
 	 */
-	self.createRemoveComplexFilterButton = function($complexElementContainer){
+	self.createRemoveButtonComplexElementFilter = function($complexElementContainer){
 		return $('<button class="btn btn-mini" type="button" data-filter=complex-removebutton><i class="icon-minus"></i></button>').click(function(){
-					if($('[data-filter=complex-removebutton]', $complexElementContainer.parent()).length === 2)
+					var $container = $complexElementContainer.parent();
+					var $addButton = $('[data-filter=complex-addbutton]', $container);
+					
+					if($('[data-filter=complex-removebutton]', $container).length === 2)
 					{
-						$('[data-filter=complex-removebutton]', $complexElementContainer.parent()).remove();
+						$('[data-filter=complex-removebutton]', $container).remove();
 					}
+					
+					if($('[data-filter=complex-addbutton]', $complexElementContainer).length){
+						var $prev = $('[data-filter=complex-addbutton-container]', $container).eq(-2);
+						$prev.append($addButton);
+					}
+					
 					$complexElementContainer.remove();
 				});
 	}
@@ -339,16 +393,19 @@
 	/**
 	 * Create remove button to remove the first element in a complex filter
 	 */
-	self.createRemoveFirstComplexElementButton = function($container){
+	self.createRemoveButtonFirstComplexElement = function($container){
 		return $('<button class="btn btn-mini" type="button" data-filter=complex-removebutton><i class="icon-minus"></i></button>').click(function(){
 					var $firstElement = $('[data-filter=complex-element]', $container)[0];
 					var $secondElement = $('[data-filter=complex-element]', $container)[1];
 					var $simpleFilterFirstElement = $('[data-filter=complex-simplefilter]', $firstElement);
 					var $simpleFilterSecondElement = $('[data-filter=complex-simplefilter]', $secondElement);
-					var $simpleFilterSecondElementContainer = $('.complex-element-container', $container)[1];
+					var $simpleFilterSecondElementButton = $('[data-filter=complex-addbutton]', $secondElement);
+					var $simpleFilterSecondElementContainer = $('[data-filter=complex-element-container]', $container).eq(1);
 					
 					$simpleFilterFirstElement.empty();
 					$simpleFilterFirstElement.append($simpleFilterSecondElement);
+					$('[data-filter=complex-addbutton-container]', $firstElement).append($simpleFilterSecondElementButton);
+					
 					$simpleFilterSecondElementContainer.remove();
 					if($('[data-filter=complex-removebutton]', $container.parent()).length === 1){
 						$('[data-filter=complex-removebutton]', $container.parent()).remove();
@@ -389,7 +446,7 @@
 			case 'CATEGORICAL':
 				var restApi = new molgenis.RestClient();
 				var entityMeta = restApi.get(attribute.refEntity.href);
-				var entitiesUri = entityMeta.href.replace(new RegExp('/meta[^/]*$'), ""); // TODO do not manipulate uri
+				var entitiesUri = entityMeta.href.replace(new RegExp('/meta[^/]*$'), ''); // TODO do not manipulate uri
 				var entities = restApi.get(entitiesUri, {
 					q : {
 						sort : {
@@ -427,7 +484,7 @@
 						symmetricPositionning: true,
 						bounds: {min: attribute.range.min, max: attribute.range.max},
 						defaultValues: {min: min, max: max},
-						type: "number"
+						type: 'number'
 					});
 					$controls.append(slider);
 				} else {
@@ -447,28 +504,17 @@
 			case 'ENUM':
 				$controls.append(createInput(attribute, {'name': name, 'id': name, 'style' : 'width: 300px'}, values ? values[0] : undefined));
 				break;
+			case 'XREF':
 			case 'MREF':
 				var operator = simpleFilter ? simpleFilter.operator : 'OR';
-				$controls.addClass("xrefmrefsearch");
+				$controls.addClass('xrefmrefsearch');
 				$controls.xrefmrefsearch({
 					attribute : attribute,
 					values : values,
 					operator : operator,
 					autofocus : 'autofocus',
 					isfilter : true,
-					width : '266px'
-				});
-				break;
-			case 'XREF':
-				var operator = simpleFilter ? simpleFilter.operator : 'OR';
-				$controls.addClass("xrefmrefsearch");
-				$controls.xrefmrefsearch({
-					attribute : attribute,
-					values : values,
-					operator : operator,
-					autofocus : 'autofocus',
-					isfilter : true,
-					width : '284px'
+					width : '314px'
 				});
 				break;
 			case 'COMPOUND' :
@@ -553,12 +599,12 @@
 			var toValue = this.toValue;
 			var operator = this.operator;
 			
-			$(":input",$domElement).not('[type=radio]:not(:checked)')
+			$(':input',$domElement).not('[type=radio]:not(:checked)')
 					.not('[type=checkbox]:not(:checked)')
 					.not('[data-filter=complex-operator]')
 					.not('.exclude').each(function(){
 				var value = $(this).val();
-				var name =  $(this).attr("name");
+				var name =  $(this).attr('name');
 				
 				if(value) {
 					// Add operator
@@ -733,7 +779,7 @@
 		};
 
         this.addComplexFilterElement = function (complexFilterElement) {
-            if(!complexFilterElement.isEmpty())
+            if(!complexFilterElement !== null)
             {
             	complexFilterElements.push(complexFilterElement);
             }
@@ -754,19 +800,49 @@
 			return complexFilterElements;
 		};
 		
+		/**
+		 * Implements the SQL Logic Operator Precedence: And and Or
+		 * 
+		 * And has precedence over Or
+		 * 
+		 * Example: (A and B and C) or (D) or (E and F)
+		 */
 		this.createQueryRule = function() {
 			var nestedRules = [];
-			var operator = this.operator;
-			var rule;
+			var lastOperator, rule, lastNestedRule = null;
 			
 			$.each(complexFilterElements, function(index, complexFilterElement) {
 				if(index > 0){
-					nestedRules.push({
-						operator : complexFilterElement.operator
-					});
+					lastOperator = complexFilterElement.operator;
+					
+					if(lastOperator === 'AND'){
+						lastNestedRule.nestedRules.push({
+							operator : lastOperator
+						});
+					}
+					else if (lastOperator === 'OR'){
+						nestedRules.push(lastNestedRule);
+						lastNestedRule = null;
+						nestedRules.push({
+							operator : lastOperator
+						});
+					}
 				}
-				nestedRules.push(complexFilterElement.simpleFilter.createQueryRule());
+				
+				if(lastNestedRule === null){
+					lastNestedRule = {
+						operator: 'NESTED',
+						nestedRules:[]
+					};
+				}
+
+				lastNestedRule.nestedRules.push(complexFilterElement.simpleFilter.createQueryRule());
+				
 			});
+			
+			if(lastNestedRule !== null){
+				nestedRules.push(lastNestedRule);
+			}
 			
 			rule = {
 				operator: 'NESTED',

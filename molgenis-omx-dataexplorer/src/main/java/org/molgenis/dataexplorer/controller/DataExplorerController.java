@@ -17,6 +17,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,8 +30,10 @@ import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Aggregateable;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.Queryable;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.support.GenomeConfig;
 import org.molgenis.data.support.QueryImpl;
@@ -108,7 +111,7 @@ public class DataExplorerController extends MolgenisPluginController
 	
 	private static final boolean DEFAULT_VAL_DATAEXPLORER_EDITABLE = false;
 	private static final boolean DEFAULT_VAL_DATAEXPLORER_ROW_CLICKABLE = false;
-
+	
 	@Autowired
 	private DataService dataService;
 
@@ -134,7 +137,8 @@ public class DataExplorerController extends MolgenisPluginController
 	 */
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(@RequestParam(value = "dataset", required = false) String selectedEntityName,
-			@RequestParam(value = "wizard", required = false) Boolean wizard, Model model) throws Exception
+			@RequestParam(value = "wizard", required = false) Boolean wizard,
+			@RequestParam(value = "searchTerm", required = false) String searchTerm, Model model) throws Exception
 	{
 		boolean entityExists = false;
 		Iterable<EntityMetaData> entitiesMeta = Iterables.transform(dataService.getEntityNames(),
@@ -170,6 +174,7 @@ public class DataExplorerController extends MolgenisPluginController
 		model.addAttribute("aggregatenoresults",
 				molgenisSettings.getProperty(AGGREGATES_NORESULTS_MESSAGE, "No results found"));
 		model.addAttribute("wizard", (wizard != null) && wizard.booleanValue());
+		model.addAttribute("searchTerm", searchTerm);
 
 		return "view-dataexplorer";
 	}
@@ -315,11 +320,9 @@ public class DataExplorerController extends MolgenisPluginController
 	{
 		AttributeMetaData attributeStartPosition = genomeConfig.getAttributeMetadataForAttributeNameArray(
 				GenomeConfig.GENOMEBROWSER_START, entityMetaData);
-		AttributeMetaData attributeId = genomeConfig.getAttributeMetadataForAttributeNameArray(
-				GenomeConfig.GENOMEBROWSER_ID, entityMetaData);
 		AttributeMetaData attributeChromosome = genomeConfig.getAttributeMetadataForAttributeNameArray(
 				GenomeConfig.GENOMEBROWSER_CHROM, entityMetaData);
-		return attributeStartPosition != null && attributeId != null && attributeChromosome != null;
+		return attributeStartPosition != null && attributeChromosome != null;
 	}
 
 	@RequestMapping(value = "/download", method = POST)
@@ -369,6 +372,8 @@ public class DataExplorerController extends MolgenisPluginController
 		model.addAttribute(ATTR_GALAXY_URL, galaxyUrl);
 		model.addAttribute(ATTR_GALAXY_API_KEY, galaxyApiKey);
 	}
+	
+	
 
 	private void writeDataRequestCsv(DataRequest dataRequest, OutputStream outputStream, char separator)
 			throws IOException
@@ -462,7 +467,42 @@ public class DataExplorerController extends MolgenisPluginController
 
 		return dataService.aggregate(entityName, xAttributeMeta, yAttributeMeta, new QueryImpl(request.getQ()));
 	}
+	
+	/**
+	 * Builds a model containing one entity and returns the entityReport ftl view
+	 * 
+	 * @author mdehaan, fkelpin
+	 * @param entityName
+	 * @param entityId
+	 * @param model
+	 * @return entity report view
+	 * @throws Exception if an entity name or id is not found
+	 */
+	@RequestMapping(value = "/details", method = RequestMethod.POST)
+	public String viewEntityDetails(@RequestParam(value = "entityName") String entityName,
+			@RequestParam(value = "entityId") String entityId, Model model) throws Exception
+	{
+		if (dataService.hasRepository(entityName))
+		{
+			Queryable queryableRepository = dataService.getQueryableRepository(entityName);
+			Entity entity = queryableRepository.findOne(entityId);
 
+			if (entity != null)
+			{
+				model.addAttribute("entity", entity);
+			}
+			else
+			{
+				throw new RuntimeException(entityName + " does not contain a row with id: " + entityId);
+			}
+		}
+		else
+		{
+			throw new RuntimeException("unknown entity: " + entityName);
+		}
+		return "view-entityreport";
+	}
+	
 	@ExceptionHandler(GalaxyDataExportException.class)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -489,6 +529,7 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 	
 	private boolean isRowClickable(){
-		return molgenisSettings.getBooleanProperty(KEY_DATAEXPLORER_ROW_CLICKABLE, DEFAULT_VAL_DATAEXPLORER_ROW_CLICKABLE);
+		return molgenisSettings.getBooleanProperty(KEY_DATAEXPLORER_ROW_CLICKABLE,
+				DEFAULT_VAL_DATAEXPLORER_ROW_CLICKABLE);
 	}
 }

@@ -26,7 +26,8 @@
 	"jquery.molgenis.xrefmrefsearch.js",
 	"dataexplorer.js",
 	"jquery.molgenis.table.js",
-	"handlebars-v1.3.0.js"]>
+	"handlebars-v1.3.0.js",
+	"custom.js"]>
 
 <@header css js/>
     <script>
@@ -64,7 +65,7 @@
 					<#-- add span12 to ensure that input is styled correctly at low and high solutions -->
 					<div class="input-append span12" id="observationset-search-container">
 						<#-- add span10 to ensure that input is styled correctly at low and high solutions -->
-						<input class="span10" id="observationset-search" type="text" placeholder="Search data values">
+						<input class="span10" id="observationset-search" type="text" <#if searchTerm??>value="${searchTerm}"</#if>  placeholder="Search data values"></input>
 						<button class="btn" type="button" id="search-button"><i class="icon-large icon-search"></i></button>
 					</div>					
 				</div>

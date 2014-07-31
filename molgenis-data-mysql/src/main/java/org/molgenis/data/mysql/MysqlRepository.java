@@ -39,6 +39,8 @@ import org.molgenis.fieldtypes.StringField;
 import org.molgenis.fieldtypes.TextField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.model.MolgenisModelException;
+import org.molgenis.security.core.Permission;
+import org.molgenis.util.SecurityDecoratorUtils;
 import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -520,6 +522,16 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 						.append(" AS ").append('`').append(att.getName()).append('`').append(" ON (this.").append('`')
 						.append(idAttribute.getName()).append('`').append(" = ").append('`').append(att.getName())
 						.append('`').append('.').append('`').append(idAttribute.getName()).append('`').append(')');
+
+				if (SecurityDecoratorUtils.isPermissionValid(att.getRefEntity().getName(), Permission.READ))
+				{
+					from.append(" LEFT JOIN ").append('`').append(att.getRefEntity().getName()).append('`')
+							.append(" AS ").append('`').append(att.getRefEntity().getName()).append("_RefTable` ON (")
+							.append('`').append(att.getName()).append('`').append('.').append('`')
+							.append(att.getName()).append('`').append(" = ").append('`').append(att.getName())
+							.append("_RefTable`.").append('`').append(att.getRefEntity().getIdAttribute().getName())
+							.append('`').append(')');
+				}
 			}
 
 		return from.toString();
@@ -560,6 +572,18 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 						{
 							search.append(" OR CAST(").append(att.getName()).append(".`").append(att.getName())
 									.append('`').append(" as CHAR) LIKE ?");
+
+							// TODO: When EMX has lookup attributes functionality, implement
+							// refAtt.isLookupAttribute()
+							if (SecurityDecoratorUtils.isPermissionValid(att.getRefEntity().getName(), Permission.READ))
+							{
+								for (AttributeMetaData refAtt : att.getRefEntity().getAttributes())
+								{
+									search.append(" OR CAST(").append(att.getName()).append("_RefTable").append(".`")
+											.append(refAtt.getName()).append('`').append(" as CHAR) LIKE ?");
+									parameters.add("%" + DataConverter.toString(r.getValue()) + "%");
+								}
+							}
 						}
 						else
 						{
