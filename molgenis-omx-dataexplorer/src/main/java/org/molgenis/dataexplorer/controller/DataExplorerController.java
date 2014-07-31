@@ -88,7 +88,7 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String KEY_GALAXY_ENABLED = "plugin.dataexplorer.galaxy.enabled";
 	public static final String KEY_GALAXY_URL = "plugin.dataexplorer.galaxy.url";
 	private static final boolean DEFAULT_VAL_MOD_AGGREGATES = true;
-	private static final boolean DEFAULT_VAL_MOD_ANNOTATORS = true;
+	private static final boolean DEFAULT_VAL_MOD_ANNOTATORS = false;
 	private static final boolean DEFAULT_VAL_MOD_CHARTS = true;
 	private static final boolean DEFAULT_VAL_MOD_DATA = true;
 	private static final boolean DEFAULT_VAL_MOD_DISEASEMATCHER = false;
