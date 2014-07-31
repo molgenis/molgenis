@@ -25,7 +25,7 @@
 		items.push('<div class="span3"><div class="molgenis-table-info pull-right"></div></div>');
 		items.push('</div>');
 		settings.container.html(items.join(''));
-
+		
 		// add data to elements
 		getTableMetaData(settings, function(attributes, refEntitiesMeta) {
 			settings.colAttributes = attributes;
@@ -775,7 +775,8 @@
 			
 			$('#entityReport').load("dataexplorer/details",{entityName: entityName, entityId: entityId}, function() {
 				  $('#entityReportModal').modal("show");
-				  	  
+				  
+				  // Button event handler when a button is placed inside an entity report ftl
 				  $(".modal-body button", "#entityReport").on('click', function() {
 						$.download($(this).data('href'), {entityName: entityName, entityId: entityId}, "GET");
 				  });
