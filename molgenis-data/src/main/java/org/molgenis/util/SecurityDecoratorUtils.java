@@ -17,4 +17,18 @@ public class SecurityDecoratorUtils
 		}
 	}
 
+	public static boolean isPermissionValid(String entityName, Permission permission)
+	{
+		String role = String.format("ROLE_ENTITY_%s_%s", permission.toString(), entityName.toUpperCase());
+		if (!currentUserHasRole("ROLE_SU", "ROLE_SYSTEM", role))
+		{
+			return false;
+		}
+		else
+		{
+			return true;
+		}
+
+	}
+
 }
