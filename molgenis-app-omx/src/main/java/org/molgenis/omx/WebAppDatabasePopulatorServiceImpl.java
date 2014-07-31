@@ -76,6 +76,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		runtimePropertyMap.put(DataExplorerController.KEY_MOD_CHARTS, String.valueOf(true));
 		runtimePropertyMap.put(DataExplorerController.KEY_MOD_DATA, String.valueOf(true));
 		runtimePropertyMap.put(DataExplorerController.KEY_MOD_DISEASEMATCHER, String.valueOf(false));
+		runtimePropertyMap.put(DataExplorerController.KEY_MOD_ANNOTATORS, String.valueOf(false));
 
 		// DataExplorer table editable yes/no
 		runtimePropertyMap.put(DataExplorerController.KEY_DATAEXPLORER_EDITABLE, String.valueOf(false));
