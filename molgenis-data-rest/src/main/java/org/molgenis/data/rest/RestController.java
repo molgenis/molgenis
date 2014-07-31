@@ -345,7 +345,7 @@ public class RestController
 	 * @return
 	 * @throws UnknownEntityException
 	 */
-	@RequestMapping(value = "/{entityName}", method = GET, produces = {APPLICATION_JSON_VALUE, "text/csv"})
+	@RequestMapping(value = "/{entityName}", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public EntityCollectionResponse retrieveEntityCollection(@PathVariable("entityName") String entityName,
 			@Valid EntityCollectionRequest request,
