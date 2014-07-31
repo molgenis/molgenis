@@ -25,7 +25,11 @@
 		items.push('<div class="span3"><div class="molgenis-table-info pull-right"></div></div>');
 		items.push('</div>');
 		settings.container.html(items.join(''));
-
+		
+		if(settings.rowClickable) {
+			$(".molgenis-table-container").css({cursor: "pointer"});
+		}
+		
 		// add data to elements
 		getTableMetaData(settings, function(attributes, refEntitiesMeta) {
 			settings.colAttributes = attributes;
