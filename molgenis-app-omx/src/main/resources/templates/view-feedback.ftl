@@ -7,7 +7,7 @@
 		<h1>Thanks!</h1>
 		<p>Thank you for your feedback.</p>
 	</div>
-<#else>
+<#elseif adminEmails?has_content>
 	<div class="page-header">
 		<h3>We&rsquo;re here to help with any questions or comments.<br/>
 		<small>If you just want to say hi, that&rsquo;s cool too.</small>
@@ -15,8 +15,15 @@
 	<div class="container">
 		<form accept-charset="UTF-8" method="post" action="feedback">
 			<fieldset>
+				<#assign emails = "" />
+				<#list adminEmails as email>
+					<#assign emails = emails + email/>
+   					<#if email_has_next>
+   						<#assign emails = emails + ';'/>
+   					</#if>
+				</#list>
 				<p>
-					Feel free to email us at <a href="mailto:${adminEmail}">${adminEmail}</a>
+					Feel free to email us at <a href='mailto:${emails}'>${emails}</a>
 				</p>
 				<label class="control-label" for="form_name">Name</label>
 				<input
@@ -39,5 +46,7 @@
 			<button type="submit" class="btn btn-success">Send</button>
 		</form>
 	</div>
+<#else>
+	<p> error </p>
 </#if>
 <@footer/>
