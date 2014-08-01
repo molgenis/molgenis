@@ -21,6 +21,9 @@ public class FeedbackController extends MolgenisPluginController
 		super(URI);
 	}
 	
+	/**
+	 * Serves feedback form.
+	 */
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(final Model model)
 	{
@@ -28,6 +31,9 @@ public class FeedbackController extends MolgenisPluginController
 		return "view-feedback";
 	}
 	
+	/**
+	 * Handles feedback form submission.
+	 */
 	@RequestMapping(method = RequestMethod.POST)
 	public String submitFeedback(final Model model)
 	{
