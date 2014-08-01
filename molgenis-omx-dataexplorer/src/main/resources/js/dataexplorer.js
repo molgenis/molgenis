@@ -163,6 +163,12 @@
 						var startPosition = match[2];
 						var stopPosition = match[3];
 						
+						if(parseInt(startPosition, 10) > parseInt(stopPosition, 10)) {
+							molgenis.createAlert([{message: 'Start is greater then stop, please check your input'}], 'warning');
+						}else {
+							$('.alerts').empty();
+						}
+						
 						entityCollectionRequest.q = 
 							[{
 								operator: "NESTED",
