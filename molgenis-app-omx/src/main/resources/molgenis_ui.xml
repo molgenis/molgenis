@@ -45,11 +45,12 @@
 	        <plugin id="ontologytree" name="Ontology Tree" url="ontologytree"/>
         </menu>
         <plugin id="workflowdataentry" name="Workflow Editor" url="workflowdataentry"/>
-        <menu label="Background" name="background">    
+        <menu label="About" name="background">    
 	        <plugin id="news" name="News" url="news"/>
 	        <plugin id="background" name="Background" url="background"/>
 	        <plugin id="references" name="References" url="references"/>
 	        <plugin id="contact" name="Contact" url="contact"/>
+	        <plugin id="feedback" name="Feedback" url="feedback"/>
         </menu>
         <plugin id="entityexplorer" name="Entity Explorer" url="entityexplorer"/> 
         <menu label="Admin" name="admin">
