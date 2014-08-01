@@ -1,17 +1,22 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 <@header/>
-<div id="contact-molgenis">
+
+<#if submitted??>
+	<div class="hero-unit">
+		<h1>Thanks!</h1>
+		<p>Thank you for your feedback.</p>
+	</div>
+<#else>
 	<div class="page-header">
 		<h3>We&rsquo;re here to help with any questions or comments.<br/>
 		<small>If you just want to say hi, that&rsquo;s cool too.</small>
 	</div>
-	<p class="muted"></p>
 	<div class="container">
-		<form accept-charset="UTF-8" action="/feedback" method="post">
+		<form accept-charset="UTF-8" method="post" action="feedback">
 			<fieldset>
 				<p>
-					Feel free to email us at <a href="mailto:molgenis@molgenis.org">molgenis@molgenis.org</a>
+					Feel free to email us at <a href="mailto:${adminEmail}">${adminEmail}</a>
 				</p>
 				<label class="control-label" for="form_name">Name</label>
 				<input
@@ -34,5 +39,5 @@
 			<button type="submit" class="btn btn-success">Send</button>
 		</form>
 	</div>
-</div>
+</#if>
 <@footer/>
