@@ -125,8 +125,7 @@
 			q : []
 		};
 		
-		var count = 0;
-		
+		// add rules for the search term to the query
 		if (searchQuery) {
 			if (/\S/.test(searchQuery)) {
 				var searchQueryRegex = /^\s*(?:chr)?([\d]{1,2}|X|Y|MT|XY):([\d]+)(?:-([\d]+)+)?\s*$/g;
@@ -197,23 +196,20 @@
 						operator : 'SEARCH',
 						value : searchQuery
 					});
-					count++;
 				}
 			}
 		}
 
+		// add rules for attribute filters to the query
 		$.each(attributeFilters, function(attributeUri, filter) {
 			var rule = filter.createQueryRule();
-			
-			if (count > 0) {
-				entityCollectionRequest.q.push({
-					operator : 'AND'
-				});
-			}
-			
 			if(rule){
+				if (entityCollectionRequest.q.length > 0) {
+					entityCollectionRequest.q.push({
+						operator : 'AND'
+					});
+				}
 				entityCollectionRequest.q.push(rule);
-				count++;
 			}
 		});
 		
