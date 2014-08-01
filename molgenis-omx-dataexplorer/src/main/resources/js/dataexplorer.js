@@ -165,7 +165,7 @@
 						
 						if(parseInt(startPosition, 10) > parseInt(stopPosition, 10)) {
 							molgenis.createAlert([{message: 'Start is greater then stop, please check your input'}], 'warning');
-						}else {
+						}else{
 							$('.alerts').empty();
 						}
 						
