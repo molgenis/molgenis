@@ -306,7 +306,7 @@
 		$controlGroup.append($operatorInput);
 		var $dropdown;
 		if(useFixedOperator === false){
-			$dropdown = $('<div class="btn-group" data-filter="complex-operator-container" style="margin-left: 126px"><div>');
+			$dropdown = $('<div class="btn-group" data-filter="complex-operator-container" style="margin-left: 154px"><div>');
 			$dropdown.append($('<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#">' + operatorLabel + ' <b class="caret"></a>'));
 			$dropdown.append($('<ul class="dropdown-menu"><li><a data-value="OR">' + orLabel + '</a></li><li><a data-value="AND">' + andLabel + '</a></li></ul>'));
 			$.each($dropdown.find('.dropdown-menu li a'), function(index, element){
@@ -320,7 +320,7 @@
 			$dropdown.find('div:first').remove();//This is a workaround FIX
 			
 		}else{
-			$dropdown = $('<div data-filter="complex-operator-container" style="margin-left: 120px">' + operator + '<div>');
+			$dropdown = $('<div data-filter="complex-operator-container" style="margin-left: 160px">' + operator + '<div>');
 		}
 
 		return $('<div class="control-group">').append($controlGroup.append($dropdown));
@@ -429,7 +429,7 @@
 	 * Create simple filter controls
 	 */
 	self.createSimpleFilterControls = function(attribute, simpleFilter) {
-		var $controls = $('<div class="controls">').width('314px');
+		var $controls = $('<div class="controls">').width('384px');
 		var name = 'input-' + attribute.name + '-' + new Date().getTime();
 		var values = simpleFilter ? simpleFilter.getValues() : null;
 		var fromValue = simpleFilter ? simpleFilter.fromValue : null;
@@ -469,15 +469,15 @@
 				var nameFrom = name + '-from', nameTo = name + '-to';
 				var valFrom = fromValue ? fromValue : undefined;
 				var valTo = toValue ? toValue : undefined;
-				var inputFrom = createInput(attribute, {'name': nameFrom, 'placeholder': 'Start date', 'style' : 'width: 244px'}, valFrom);
-				var inputTo = createInput(attribute, {'name': nameTo, 'placeholder': 'End date', 'style' : 'width: 244px'}, valTo);
+				var inputFrom = createInput(attribute, {'name': nameFrom, 'placeholder': 'Start date', 'style' : 'width: 315px'}, valFrom);
+				var inputTo = createInput(attribute, {'name': nameTo, 'placeholder': 'End date', 'style' : 'width: 315px'}, valTo);
 				$controls.append($('<div class="control-group">').append(inputFrom)).append($('<div class="control-group">').append(inputTo));
 				break;
 			case 'DECIMAL':
 			case 'INT':
 			case 'LONG':
 				if (attribute.range) {
-					var slider = $('<div id="slider" class="control-group"></div>');
+					var slider = $('<div id="slider" class="control-group"></div>').width('334px');
 					var min = fromValue ? fromValue : attribute.range.min;
 					var max = toValue ? toValue : attribute.range.max;
 					slider.editRangeSlider({
@@ -491,8 +491,8 @@
 					var nameFrom = name + '-from', nameTo = name + '-to';
 					var labelFrom = $('<label class="horizontal-inline" for="' + nameFrom + '">From</label>');
 					var labelTo = $('<label class="horizontal-inline inbetween" for="' + nameTo + '">To</label>');
-					var inputFrom = createInput(attribute, {'name': nameFrom, 'id': nameFrom, 'style' : 'width: 111px'}, values ? fromValue : undefined).addClass('input-small');
-					var inputTo = createInput(attribute, {'name': nameTo, 'id': nameTo, 'style' : 'width: 111px'}, values ? toValue : undefined).addClass('input-small');
+					var inputFrom = createInput(attribute, {'name': nameFrom, 'id': nameFrom, 'style' : 'width: 146px'}, values ? fromValue : undefined).addClass('input-small');
+					var inputTo = createInput(attribute, {'name': nameTo, 'id': nameTo, 'style' : 'width: 146px'}, values ? toValue : undefined).addClass('input-small');
 					$controls.addClass('form-inline').append(labelFrom).append(inputFrom).append(labelTo).append(inputTo);
 				}
 				break;
@@ -502,7 +502,7 @@
 			case 'STRING':
 			case 'TEXT':
 			case 'ENUM':
-				$controls.append(createInput(attribute, {'name': name, 'id': name, 'style' : 'width: 300px'}, values ? values[0] : undefined));
+				$controls.append(createInput(attribute, {'name': name, 'id': name, 'style' : 'width: 370px'}, values ? values[0] : undefined));
 				break;
 			case 'XREF':
 			case 'MREF':
@@ -514,7 +514,7 @@
 					operator : operator,
 					autofocus : 'autofocus',
 					isfilter : true,
-					width : '314px'
+					width : '384px'
 				});
 				break;
 			case 'COMPOUND' :
