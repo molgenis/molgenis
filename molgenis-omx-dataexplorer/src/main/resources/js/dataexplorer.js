@@ -164,7 +164,7 @@
 						var stopPosition = match[3];
 						
 						if(parseInt(startPosition, 10) > parseInt(stopPosition, 10)) {
-							molgenis.createAlert([{message: 'Start is greater then stop, please check your input'}], 'warning');
+							molgenis.createAlert([{message: 'The start position of the queried range is larger than the stop position. Please check the search query.'}], 'warning');
 						}else{
 							$('.alerts').empty();
 						}
