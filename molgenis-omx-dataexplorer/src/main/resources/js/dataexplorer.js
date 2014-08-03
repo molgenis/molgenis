@@ -9,6 +9,7 @@
 	self.getEntityQuery = getEntityQuery;
     self.setNoResultMessage = setNoResultMessage;
     self.getNoResultMessage = getNoResultMessage;
+    self.createHeader = createHeader;
 	
 	var restApi = new molgenis.RestClient();
 	var selectedEntityMetaData = null;
@@ -124,8 +125,7 @@
 			q : []
 		};
 		
-		var count = 0;
-		
+		// add rules for the search term to the query
 		if (searchQuery) {
 			if (/\S/.test(searchQuery)) {
 				var searchQueryRegex = /^\s*(?:chr)?([\d]{1,2}|X|Y|MT|XY):([\d]+)(?:-([\d]+)+)?\s*$/g;
@@ -163,6 +163,12 @@
 						var startPosition = match[2];
 						var stopPosition = match[3];
 						
+						if(parseInt(startPosition, 10) > parseInt(stopPosition, 10)) {
+							molgenis.createAlert([{message: 'The start position of the queried range is larger than the stop position. Please check the search query.'}], 'warning');
+						}else{
+							$('.alerts').empty();
+						}
+						
 						entityCollectionRequest.q = 
 							[{
 								operator: "NESTED",
@@ -196,23 +202,20 @@
 						operator : 'SEARCH',
 						value : searchQuery
 					});
-					count++;
 				}
 			}
 		}
 
+		// add rules for attribute filters to the query
 		$.each(attributeFilters, function(attributeUri, filter) {
 			var rule = filter.createQueryRule();
-			
-			if (count > 0) {
-				entityCollectionRequest.q.push({
-					operator : 'AND'
-				});
-			}
-			
 			if(rule){
+				if (entityCollectionRequest.q.length > 0) {
+					entityCollectionRequest.q.push({
+						operator : 'AND'
+					});
+				}
 				entityCollectionRequest.q.push(rule);
-				count++;
 			}
 		});
 		
@@ -320,7 +323,7 @@
 		$("#observationset-search").focus();
 		
 		$("#observationset-search").change(function(e) {
-			searchQuery = $(this).val();
+			searchQuery = $(this).val().trim();
 			$(document).trigger('changeQuery', createEntityQuery());
 		});
 	

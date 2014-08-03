@@ -251,7 +251,7 @@ ul.fancytree-container {
 	padding-top: 3px !important;
 }
 
-.xrefmrefsearch .btn.btn-mini.add-on-left{
+.xrefmrefsearch .btn.add-on-left{
 	border-bottom-left-radius:4px !important;
 	-webkit-border-bottom-left-radius: 4px !important;
 	border-top-left-radius:4px !important;
@@ -299,4 +299,9 @@ input[name="ColNames"] {
 
 .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
 	background-color: #7CBAD1;
+	
 }
+
+.table-hover {
+	cursor: pointer;
+} 

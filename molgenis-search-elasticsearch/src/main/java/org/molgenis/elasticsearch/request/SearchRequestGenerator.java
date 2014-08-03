@@ -9,11 +9,9 @@ import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.elasticsearch.index.MappingsBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Builds a ElasticSearch search request
@@ -23,9 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class SearchRequestGenerator
 {
-	@Autowired
-	private DataService dataService;
-
 	private final List<? extends QueryPartGenerator> generators = Arrays.asList(new QueryGenerator(),
 			new SortGenerator(), new LimitOffsetGenerator(), new DisMaxQueryGenerator());
 
