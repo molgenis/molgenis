@@ -1,6 +1,10 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
-<@header/>
+
+<#assign css=['molgenis-form.css']>
+<#assign js=['jquery.validate.min.js']>
+
+<@header css/>
 
 <#if submitted??>
 	<div class="hero-unit">
@@ -13,7 +17,7 @@
 		<small>If you just want to say hi, that&rsquo;s cool too.</small>
 	</div>
 	<div class="container">
-		<form accept-charset="UTF-8" method="post" action="feedback">
+		<form accept-charset="UTF-8" method="post" action="feedback" id="feedbackForm">
 			<fieldset>
 				<#assign adminEmailsString = "" />
 				<#list adminEmails as adminEmail>
@@ -54,6 +58,9 @@
 			</fieldset>
 			<button type="submit" class="btn btn-success">Send</button>
 		</form>
+		<script>
+			$("#feedbackForm").validate();
+		</script>
 	</div>
 <#else>
 	<p>Admin email addresses not known.</p>
