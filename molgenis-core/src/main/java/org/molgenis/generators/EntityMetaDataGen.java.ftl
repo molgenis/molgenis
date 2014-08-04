@@ -67,9 +67,9 @@ public class ${JavaName(entity)}MetaData extends DefaultEntityMetaData
 		</#if>
 		${name(f)}.setAggregateable(${f.aggregateable?string('true', 'false')});
 		<#if f.minRange?? || f.maxRange??>
-		Long min = <#if f.minRange??>${f.minRange?c}l<#else>null</#if>;
-		Long max = <#if f.maxRange??>${f.maxRange?c}l<#else>null</#if>;
-		${name(f)}.setRange(new org.molgenis.data.Range(min, max));
+		Long ${name(f)}Min = <#if f.minRange??>${f.minRange?c}l<#else>null</#if>;
+		Long ${name(f)}Max = <#if f.maxRange??>${f.maxRange?c}l<#else>null</#if>;
+		${name(f)}.setRange(new org.molgenis.data.Range(${name(f)}Min, ${name(f)}Max));
 		</#if>
 		addAttributeMetaData(${name(f)});	
 </#list>

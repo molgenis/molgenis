@@ -38,6 +38,8 @@
 				return container.data('tree')[options]();
 			else if (args.length === 1)
 				return container.data('tree')[options](args[0]);
+			else if (args.length === 2)
+				return container.data('tree')[options](args[0], args[1]);
 		}
 
 		// cleanup existing tree
@@ -46,12 +48,6 @@
 
 		// create tree container
 		var items = [];
-		items.push('<div class="row-fluid molgenis-tree-controls">');
-		items
-				.push('<a href="#" class="btn btn-link pull-right tree-deselect-all-btn">Deselect all</a>');
-		items
-				.push('<a href="#" class="btn btn-link pull-right tree-select-all-btn">Select all</a>');
-		items.push('</div>');
 		items.push('<div class="row-fluid molgenis-tree"></div>');
 		container.html(items.join(''));
 
@@ -70,6 +66,20 @@
 				return $.map(selectedNodes, function(selectedNode) {
 					return selectedNode.data.attribute;
 				});
+			},
+			'appendChildNodes' : function(parentNode, attributes){
+				parentNode.expanded = true;
+				var molgenisTree = $('.molgenis-tree').fancytree('getTree');
+				var childrenToAdd = [];
+				$.each(createChildren(attributes), function(index, childNode){
+					if(!molgenisTree.getNodeByKey(childNode.key)){
+						childrenToAdd.push(childNode)
+					}
+				});
+				parentNode.addChildren(childrenToAdd);
+			},
+			'getTree' : function(){
+				return $('.molgenis-tree').fancytree('getTree');
 			}
 		});
 

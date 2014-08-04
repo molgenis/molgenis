@@ -80,7 +80,8 @@ public class OntologyTermIndexEntityTest
 						.createOntologyTermDocumentType("http://www.ontology.test"), new QueryImpl()
 						.eq(OntologyTermRepository.PARENT_NODE_PATH, "1").and()
 						.eq(OntologyTermRepository.PARENT_ONTOLOGY_TERM_URL, "http://www.ontology.test#term1")
-						.pageSize(500), null))).thenReturn(new SearchResult(2, Arrays.asList(hit2, hit3)));
+						.pageSize(Integer.MAX_VALUE), null)))
+				.thenReturn(new SearchResult(2, Arrays.asList(hit2, hit3)));
 
 		OntologyIndexRepository ontologyIndexRepository = mock(OntologyIndexRepository.class);
 		ontologyTermIndexEntity = new OntologyTermIndexEntity(hit1, ontologyIndexRepository.getEntityMetaData(),

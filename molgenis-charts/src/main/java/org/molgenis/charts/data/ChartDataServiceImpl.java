@@ -245,13 +245,16 @@ public class ChartDataServiceImpl implements ChartDataService
 			List<Double> normalList = new ArrayList<Double>();
 			for (Double o : list)
 			{
-				if (o < lowBorder || o > highBorder)
+				if (null != o)
 				{
-					outlierList.add(new XYData(count, o));
-				}
-				else
-				{
-					normalList.add(o);
+					if (o < lowBorder || o > highBorder)
+					{
+						outlierList.add(new XYData(count, o));
+					}
+					else
+					{
+						normalList.add(o);
+					}
 				}
 			}
 

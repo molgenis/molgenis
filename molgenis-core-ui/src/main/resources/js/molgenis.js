@@ -213,8 +213,7 @@
 		});
 
 		return writable;
-	};
-
+	};	
 }($, window.top.molgenis = window.top.molgenis || {}));
 
 // Add endsWith function to the string class
@@ -268,7 +267,6 @@ function getCurrentTimezoneOffset() {
  * dataexplorer and the forms plugin
  */
 function formatTableCellValue(value, dataType, editable) {
-
 	if (dataType.toLowerCase() == 'bool') {
 		var checked = (value === true);
 		value = '<input type="checkbox" ';
@@ -337,7 +335,7 @@ function abbreviate(s, maxLength) {
  * @param lbl
  *            input label (for checkbox and radio inputs)
  */
-function createInput(dataType, attrs, val, lbl) {
+function createInput(attr, attrs, val, lbl) {
 	function createBasicInput(type, attrs, val) {
 		var $input = $('<input type="' + type + '">');
 		if (attrs)
@@ -346,7 +344,7 @@ function createInput(dataType, attrs, val, lbl) {
 			$input.val(val);
 		return $input;
 	}
-
+	var dataType = attr.fieldType;
 	switch (dataType) {
 	case 'BOOL':
 		var label = $('<label class="radio">');
@@ -363,10 +361,12 @@ function createInput(dataType, attrs, val, lbl) {
 		var items = [];
 		items.push('<div class="input-append date">');
 		items.push('<input data-format="' + format
-				+ '" data-language="en" type="text">');
+				+ '" data-language="en" type="text"' + (attr.nillable? ' class="nillable"' : '') + '>');
+		// workaround, because adding a add-on span will introduce an extra calendar icon on top of the remove icon
+		if(attr.nillable)
+			items.push('<span class="add-on-workaround"><i class="icon-remove empty-date-input clear-date-time-btn"></i></span>');
 		items.push('<span class="add-on">');
-		items
-				.push('<i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>');
+		items.push('<i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>'); // FIXME date type should not display time
 		items.push('</span>');
 		items.push('</div>');
 		var datepicker = $(items.join(''));
@@ -374,11 +374,23 @@ function createInput(dataType, attrs, val, lbl) {
 			$('input', datepicker).attr(attrs);
 		if (val !== undefined)
 			$('input', datepicker).val(val);
-		return datepicker.datetimepicker();
+		return datepicker.datetimepicker({pickTime: dataType === 'DATE_TIME'});
 	case 'DECIMAL':
+		var input = createBasicInput('number', $.extend({}, attrs, {'step': 'any'}), val);
+		if(!attr.nillable)
+			input.prop('required', true);
+		return input;
 	case 'INT':
 	case 'LONG':
-		return createBasicInput('number', attrs, val);
+		var opts = $.extend({}, attrs, {'step': '1'});
+		if(attr.range) {
+			if(attr.range.min) opts.min = attr.range.min;
+			if(attr.range.max) opts.max = attr.range.max;
+		}
+		var input = createBasicInput('number', opts, val);
+		if(!attr.nillable)
+			input.prop('required', true);
+		return input;
 	case 'EMAIL':
 		return createBasicInput('email', attrs, val);
 	case 'HTML':
@@ -506,8 +518,8 @@ function createInput(dataType, attrs, val, lbl) {
 			contentType : 'application/json',
 			data : JSON.stringify(entity),
 			async : false,
-			success : callback.success,
-			error : callback.error
+			success : callback && callback.success ? callback.success : function() {},
+			error : callback && callback.error ? callback.error : function() {},
 		});
 	};
 
@@ -708,4 +720,10 @@ $(function() {
 		});
 		return o;
 	};
+	
+	// clear datetimepicker on pressing cancel button
+	$(document).on('click', '.clear-date-time-btn', function(e) {
+		$(this).closest('div.date').find('input').val('');
+		$(this).trigger('changeDate');
+	});
 });

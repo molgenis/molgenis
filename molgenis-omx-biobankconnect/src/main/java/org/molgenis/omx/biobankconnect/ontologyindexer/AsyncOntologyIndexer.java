@@ -1,5 +1,7 @@
 package org.molgenis.omx.biobankconnect.ontologyindexer;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -8,6 +10,7 @@ import org.apache.log4j.Logger;
 import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.biobankconnect.ontologytree.OntologyTermIndexRepository;
 import org.molgenis.omx.biobankconnect.utils.OntologyLoader;
 import org.molgenis.omx.biobankconnect.utils.OntologyRepository;
@@ -27,9 +30,12 @@ public class AsyncOntologyIndexer implements OntologyIndexer, InitializingBean
 {
 	@Autowired
 	private DataService dataService;
+	@Autowired
+	private MolgenisSettings molgenisSettings;
 	private SearchService searchService;
 	private String ontologyUri = null;
 	private boolean isCorrectOntology = true;
+	private static final String SYNONYM_FIELDS = "plugin.ontology.synonym.field";
 	private static final Logger logger = Logger.getLogger(AsyncOntologyIndexer.class);
 
 	private final AtomicInteger runningIndexProcesses = new AtomicInteger();
@@ -61,6 +67,9 @@ public class AsyncOntologyIndexer implements OntologyIndexer, InitializingBean
 
 		try
 		{
+			String property = molgenisSettings.getProperty(SYNONYM_FIELDS);
+			if (!StringUtils.isBlank(property)) model.addSynonymsProperties(new HashSet<String>(Arrays.asList(property
+					.split(","))));
 			ontologyUri = model.getOntologyIRI() == null ? StringUtils.EMPTY : model.getOntologyIRI();
 			searchService.indexRepository(new OntologyRepository(model, "ontology-" + ontologyUri));
 			searchService.indexRepository(new OntologyTermRepository(model, "ontologyTerm-" + ontologyUri));

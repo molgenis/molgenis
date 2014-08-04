@@ -1,13 +1,16 @@
 package org.molgenis.elasticsearch.request;
 
 import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 
 /**
- * Generates a part of the elasticsearch query of the SearchRequestBuilder. There are generators for the lucene
- * queryString part, the offset/limit part and the sort part.
+ * Generates a part of the elasticsearch query of the SearchRequestBuilder.
+ * There are generators for the lucene queryString part, the offset/limit part
+ * and the sort part.
  * 
- * The supportsOperator method determines wich QueryRule is supported by this generator
+ * The supportsOperator method determines wich QueryRule is supported by this
+ * generator
  * 
  * @author erwin
  * 
@@ -19,5 +22,5 @@ public interface QueryPartGenerator
 	 * 
 	 * @param searchRequestBuilder
 	 */
-	void generate(SearchRequestBuilder searchRequestBuilder, Query query);
+	void generate(SearchRequestBuilder searchRequestBuilder, Query query, EntityMetaData entityMetaData);
 }

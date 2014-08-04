@@ -9,7 +9,9 @@
 	"select2.css",
 	"iThing-min.css",
 	"bootstrap-switch.min.css",
-	"dataexplorer.css"]>
+	"dataexplorer.css",
+	"dataexplorer-filter.css",
+	"diseasematcher.css"]>
 <#assign js=[
 	"jquery-ui-1.9.2.custom.min.js",
 	"jquery.bootstrap.wizard.min.js",
@@ -22,19 +24,17 @@
 	"select2.min.js",
 	"jQEditRangeSlider-min.js",
 	"bootstrap-switch.min.js",
-	"jquery.molgenis.xrefsearch.js",
+	"jquery.molgenis.xrefmrefsearch.js",
 	"dataexplorer.js",
-	"jquery.molgenis.table.js"]>
-
-<#if modDiseaseMatcher == true>
-	<#assign js = js + ["dataexplorer-disease-matcher.js"]/>
-	<#assign css = css + ["diseasematcher.css"]/>
-</#if>
+	"jquery.molgenis.table.js",
+	"handlebars-v1.3.0.js",
+	"custom.js"]>
 
 <@header css js/>
     <script>
     	molgenis.dataexplorer.setShowWizardOnInit(${wizard?string('true', 'false')});
         molgenis.dataexplorer.filter.wizard.setWizardTitle('${wizardtitle}');
+        molgenis.dataexplorer.setNoResultMessage('${aggregatenoresults}');
    	</script>
     
     <div id="entity-class" class="well">
@@ -66,7 +66,7 @@
 					<#-- add span12 to ensure that input is styled correctly at low and high solutions -->
 					<div class="input-append span12" id="observationset-search-container">
 						<#-- add span10 to ensure that input is styled correctly at low and high solutions -->
-						<input class="span10" id="observationset-search" type="text" placeholder="Search data values">
+						<input class="span10" id="observationset-search" type="text" <#if searchTerm??>value="${searchTerm}"</#if>  placeholder="Search data values"></input>
 						<button class="btn" type="button" id="search-button"><i class="icon-large icon-search"></i></button>
 					</div>					
 				</div>
@@ -80,7 +80,7 @@
 								<div class="accordion-inner">
 								    <div class="row-fluid" id="feature-filters"></div>
 								    <div class="row-fluid">
-								    	<a href="#" id="filter-wizard-btn" class="btn btn-small pull-right"><img src="/img/filter-bw.png"> Wizard</a>
+								    	<a href="#" id="filter-wizard-btn" class="btn btn-small pull-right"><img src="/img/filter-bw.png"> ${wizardbuttontitle}</a>
 									</div>
 								</div>
 							</div>
@@ -105,8 +105,6 @@
 		</div>
 		
 		<div id="module-nav"></div>
-		
-		<#if modDiseaseMatcher == true> <#include "view-dataexplorer-mod-diseasematcher.ftl"> </#if>
 	
 	</div>
 <@footer/>

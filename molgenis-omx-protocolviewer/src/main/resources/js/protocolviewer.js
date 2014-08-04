@@ -250,7 +250,7 @@
 		$.ajax({
 			type : 'POST',
 			url : molgenis.getContextUrl() + '/cart/' + (select ? 'add' : 'remove') + '/' + catalogId,
-			data : JSON.stringify({'href' : resourceUri}),
+			data : JSON.stringify({'features' : [resourceUri]}),
 			contentType : 'application/json',
 			success: function() {
 				callback();
