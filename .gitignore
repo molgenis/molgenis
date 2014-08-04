@@ -19,3 +19,6 @@ molgenis-app-omx/data
 molgenis-app-ngs/data
 test-output/
 derby.log
+
+.RData
+.RHistory
