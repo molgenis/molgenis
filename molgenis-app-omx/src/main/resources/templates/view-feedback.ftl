@@ -30,22 +30,12 @@
 					Feel free to email us at <a href='mailto:${adminEmailsString}'>${adminEmailsString}</a>
 				</p>
 				<label class="control-label" for="form_name">Name</label>
-				<#if userName??>
-					<span class="input-xlarge uneditable-input" id="form_name">${userName}</span>
-					<input type="hidden" name="name" value="${userName}"/>
-				<#else>
-					<input
-						class="input-xlarge" name="name" size="30" id="form_name"
-						type="text" />
-				</#if>
+				<input
+					class="input-xlarge" name="name" size="30" id="form_name" <#if userName??>value="${userName}"</#if>
+					type="text" />
 				<label class="control-label" for="form_email">Email</label>
-				<#if userEmail??>
-					<span class="input-xlarge uneditable-input">${userEmail}</span>
-					<input type="hidden" name="email" id="form_email" value="${userEmail}"/>
-				<#else>
-					<input class="input-xlarge" name="email" id="form_email"
-						size="30" type="email" />
-				</#if>
+				<input class="input-xlarge" name="email" id="form_email"
+					size="30" type="email" <#if userEmail??>value="${userEmail}"</#if>/>
 				<label class="control-label"
 					for="form_subject">Subject</label>
 				<input class="input-xxlarge"
