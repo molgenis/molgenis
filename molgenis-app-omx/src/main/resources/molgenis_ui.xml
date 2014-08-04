@@ -50,7 +50,6 @@
 	        <plugin id="background" name="Background" url="background"/>
 	        <plugin id="references" name="References" url="references"/>
 	        <plugin id="contact" name="Contact" url="contact"/>
-	        <plugin id="feedback" name="Feedback" url="feedback"/>
         </menu>
         <plugin id="entityexplorer" name="Entity Explorer" url="entityexplorer"/> 
         <menu label="Admin" name="admin">
@@ -67,5 +66,6 @@
 	        <plugin id="col7a1-mutations" name="COL7A1-Mutations" url="col7a1_mutations"/>
 		</menu>
 		<plugin id="useraccount" name="Account" url="useraccount"/>
+        <plugin id="feedback" name="Feedback" url="feedback"/>
 	</menu>
 </molgenis>
