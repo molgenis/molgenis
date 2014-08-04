@@ -5,7 +5,10 @@ import java.util.List;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import javax.validation.Valid;
 
+import org.hibernate.validator.constraints.Email;
+import org.hibernate.validator.constraints.NotBlank;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.auth.MolgenisUser;
@@ -19,7 +22,6 @@ import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * Controller that handles feedback page requests.
@@ -28,6 +30,67 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping(FeedbackController.URI)
 public class FeedbackController extends MolgenisPluginController
 {
+	public static class FeedbackForm
+	{
+		private String name;
+		private String email;
+		private String subject;
+		private String feedback;
+		private boolean submitted;
+
+		public String getName()
+		{
+			return name;
+		}
+
+		public void setName(String name)
+		{
+			this.name = name;
+		}
+
+		@Email
+		public String getEmail()
+		{
+			return email;
+		}
+
+		public void setEmail(String email)
+		{
+			this.email = email;
+		}
+
+		public String getSubject()
+		{
+			return subject;
+		}
+
+		public void setSubject(String subject)
+		{
+			this.subject = subject;
+		}
+
+		@NotBlank
+		public String getFeedback()
+		{
+			return feedback;
+		}
+
+		public void setFeedback(String feedback)
+		{
+			this.feedback = feedback;
+		}
+
+		public void setSubmitted(boolean b)
+		{
+			this.submitted = b;
+		}
+
+		public boolean isSubmitted()
+		{
+			return submitted;
+		}
+	}
+
 	public static final String ID = "feedback";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
@@ -67,28 +130,25 @@ public class FeedbackController extends MolgenisPluginController
 	 * @throws MessagingException
 	 */
 	@RequestMapping(method = RequestMethod.POST)
-	public String submitFeedback(@RequestParam(value = "form[name]") final String name,
-			@RequestParam(value = "form[subject]") final String subject,
-			@RequestParam(value = "form[email]") final String email,
-			@RequestParam(value = "form[comments]", required = true) final String comments, final Model model)
-			throws MessagingException
+	public String submitFeedback(@Valid FeedbackForm form) throws MessagingException
 	{
+
 		MimeMessage message = mailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(message, false);
 		helper.setTo(molgenisUserService.getSuEmailAddresses().toArray(new String[0]));
-		if (email != null)
+		if (form.getEmail() != null)
 		{
-			helper.setCc(email);
-			helper.setReplyTo(email);
+			helper.setCc(form.getEmail());
+			helper.setReplyTo(form.getEmail());
 		}
-		helper.setSubject(getSubject(name, subject));
-		helper.setText(comments);
+		helper.setSubject(getSubject(form.getSubject()));
+		helper.setText(form.getFeedback());
 		mailSender.send(message);
-		model.addAttribute("submitted", Boolean.TRUE);
+		form.setSubmitted(true);
 		return "view-feedback";
 	}
 
-	private String getSubject(final String name, String subject) throws MessagingException
+	private String getSubject(String subject) throws MessagingException
 	{
 		String appName = molgenisSettings.getProperty("app.name");
 		if (appName == null)

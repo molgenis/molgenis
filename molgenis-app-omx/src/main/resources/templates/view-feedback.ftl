@@ -6,7 +6,7 @@
 
 <@header css/>
 
-<#if submitted??>
+<#if feedbackForm?? && feedbackForm.submitted??>
 	<div class="hero-unit">
 		<h1>Thanks!</h1>
 		<p>Thank you for your feedback.</p>
@@ -31,28 +31,28 @@
 				</p>
 				<label class="control-label" for="form_name">Name</label>
 				<#if userName??>
-					<span class="input-xlarge uneditable-input">${userName}</span>
-					<input type="hidden" name="form[name]" value="${userName}"/>
+					<span class="input-xlarge uneditable-input" id="form_name">${userName}</span>
+					<input type="hidden" name="name" value="${userName}"/>
 				<#else>
 					<input
-						class="input-xlarge" name="form[name]" size="30"
+						class="input-xlarge" name="name" size="30" id="form_name"
 						type="text" />
 				</#if>
 				<label class="control-label" for="form_email">Email</label>
 				<#if userEmail??>
 					<span class="input-xlarge uneditable-input">${userEmail}</span>
-					<input type="hidden" name="form[email]" value="${userEmail}"/>
+					<input type="hidden" name="email" id="form_email" value="${userEmail}"/>
 				<#else>
-					<input class="input-xlarge" name="form[email]"
+					<input class="input-xlarge" name="email" id="form_email"
 						size="30" type="email" />
 				</#if>
 				<label class="control-label"
 					for="form_subject">Subject</label>
 				<input class="input-xxlarge"
-					maxlength="72" name="form[subject]" size="72"
+					maxlength="72" name="subject" id="form_subject" size="72"
 					type="text" />
-				<label class="control-label" for="form_body">Body</label>
-				<textarea class="input-xxlarge" name="form[comments]"
+				<label class="control-label" for="form_feedback">Body</label>
+				<textarea class="input-xxlarge" name="feedback" id="form_feedback"
 					placeholder="If you use 140 characters or fewer, we&rsquo;ll give you a gold star."
 					required="true" rows="10"></textarea>
 			</fieldset>

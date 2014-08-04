@@ -6,6 +6,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.reset;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -51,7 +53,7 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 
 	@Autowired
 	private JavaMailSender javaMailSender;
-	
+
 	@Autowired
 	private MolgenisSettings molgenisSettings;
 
@@ -125,18 +127,20 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 		when(molgenisSettings.getProperty("app.name")).thenReturn("app123");
 		mockMvcFeedback
 				.perform(
-						MockMvcRequestBuilders.post(FeedbackController.URI).param("form[name]", "First Last")
-								.param("form[subject]", "Feedback form").param("form[email]", "user@domain.com")
-								.param("form[comments]", "Feedback.\nLine two.")).andExpect(status().isOk())
-				.andExpect(view().name("view-feedback")).andExpect(model().attribute("submitted", true));
+						MockMvcRequestBuilders.post(FeedbackController.URI).param("name", "First Last")
+								.param("subject", "Feedback form").param("email", "user@domain.com")
+								.param("feedback", "Feedback.\nLine two.")).andExpect(status().isOk())
+				.andExpect(view().name("view-feedback"))
+				.andExpect(model().attribute("feedbackForm", hasProperty("submitted", equalTo(true))));
 		verify(message, times(1)).setRecipients(RecipientType.TO, new InternetAddress[]
 		{ new InternetAddress("molgenis@molgenis.org") });
 		verify(message, times(1)).setRecipient(RecipientType.CC, new InternetAddress("user@domain.com"));
-		verify(message, times(1)).setReplyTo(new InternetAddress[]{ new InternetAddress("user@domain.com")});
+		verify(message, times(1)).setReplyTo(new InternetAddress[]
+		{ new InternetAddress("user@domain.com") });
 		verify(message, times(1)).setSubject("[feedback-app123] Feedback form");
 		verify(message, times(1)).setText("Feedback.\nLine two.");
 	}
-	
+
 	@Test
 	public void submitAppNameNotSpecified() throws Exception
 	{
@@ -146,11 +150,21 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 		when(molgenisUserService.getSuEmailAddresses()).thenReturn(adminEmails);
 		mockMvcFeedback
 				.perform(
-						MockMvcRequestBuilders.post(FeedbackController.URI).param("form[name]", "First Last")
-								.param("form[subject]", "Feedback form").param("form[email]", "user@domain.com")
-								.param("form[comments]", "Feedback.\nLine two.")).andExpect(status().isOk())
-				.andExpect(view().name("view-feedback")).andExpect(model().attribute("submitted", true));
+						MockMvcRequestBuilders.post(FeedbackController.URI).param("name", "First Last")
+								.param("subject", "Feedback form").param("email", "user@domain.com")
+								.param("feedback", "Feedback.\nLine two.")).andExpect(status().isOk())
+				.andExpect(view().name("view-feedback"))
+				.andExpect(model().attribute("feedbackForm", hasProperty("submitted", equalTo(true))));
 		verify(message, times(1)).setSubject("[feedback-molgenis] Feedback form");
+	}
+
+	@Test
+	public void submitCommentsNotSpecified() throws Exception
+	{
+		mockMvcFeedback.perform(
+				MockMvcRequestBuilders.post(FeedbackController.URI).param("name", "First Last")
+						.param("subject", "Feedback form").param("email", "user@domain.com").param("feedback", ""))
+				.andExpect(status().is4xxClientError());
 	}
 
 	@Configuration
@@ -167,7 +181,7 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 		{
 			return mock(MolgenisUserService.class);
 		}
-		
+
 		@Bean
 		public MolgenisSettings molgenisSettings()
 		{
@@ -179,5 +193,6 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 		{
 			return mock(JavaMailSender.class);
 		}
+
 	}
 }
