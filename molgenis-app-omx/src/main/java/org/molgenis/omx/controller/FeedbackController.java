@@ -6,6 +6,7 @@ import java.util.List;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
+import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -32,6 +33,9 @@ public class FeedbackController extends MolgenisPluginController
 
 	@Autowired
 	private MolgenisUserService molgenisUserService;
+
+	@Autowired
+	private MolgenisSettings molgenisSettings;
 
 	@Autowired
 	private JavaMailSender mailSender;
@@ -69,7 +73,6 @@ public class FeedbackController extends MolgenisPluginController
 			@RequestParam(value = "form[comments]", required = true) final String comments, final Model model)
 			throws MessagingException
 	{
-
 		MimeMessage message = mailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(message, false);
 		helper.setTo(molgenisUserService.getSuEmailAddresses().toArray(new String[0]));
@@ -78,25 +81,32 @@ public class FeedbackController extends MolgenisPluginController
 			helper.setCc(email);
 			helper.setReplyTo(email);
 		}
-		if (subject != null)
-		{
-			helper.setSubject("[feedback-molgenis] " + subject);
-		}
-		else
-		{
-			helper.setSubject("[feedback-molgenis] Feedback from " + name);
-		}
+		helper.setSubject(getSubject(name, subject));
 		helper.setText(comments);
 		mailSender.send(message);
 		model.addAttribute("submitted", Boolean.TRUE);
 		return "view-feedback";
 	}
 
+	private String getSubject(final String name, String subject) throws MessagingException
+	{
+		String appName = molgenisSettings.getProperty("app.name");
+		if (appName == null)
+		{
+			appName = "molgenis";
+		}
+		if (subject == null)
+		{
+			subject = "<no subject>";
+		}
+		return String.format("[feedback-%s] %s", appName, subject);
+	}
+
 	private MolgenisUser getCurrentUser()
 	{
 		return molgenisUserService.getUser(SecurityUtils.getCurrentUsername());
 	}
-	
+
 	private static String getFormattedName(MolgenisUser user)
 	{
 		List<String> parts = new ArrayList<String>();
@@ -112,7 +122,7 @@ public class FeedbackController extends MolgenisPluginController
 		{
 			parts.add(user.getLastName());
 		}
-		
+
 		if (parts.isEmpty())
 		{
 			return null;

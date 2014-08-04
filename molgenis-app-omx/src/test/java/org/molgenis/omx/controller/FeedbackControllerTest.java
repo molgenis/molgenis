@@ -5,6 +5,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.reset;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -17,6 +18,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMessage.RecipientType;
 
+import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.controller.FeedbackControllerTest.Config;
 import org.molgenis.security.user.MolgenisUserService;
@@ -49,6 +51,9 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 
 	@Autowired
 	private JavaMailSender javaMailSender;
+	
+	@Autowired
+	private MolgenisSettings molgenisSettings;
 
 	private MockMvc mockMvcFeedback;
 
@@ -57,6 +62,7 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 	@BeforeMethod
 	public void beforeMethod()
 	{
+		reset(javaMailSender, molgenisSettings, molgenisUserService);
 		mockMvcFeedback = MockMvcBuilders.standaloneSetup(feedbackController)
 				.setMessageConverters(new GsonHttpMessageConverter()).build();
 		authentication = new TestingAuthenticationToken("userName", null);
@@ -81,7 +87,7 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void initFeedbackLoggedInNameKnown() throws Exception
+	public void initFeedbackLoggedIn() throws Exception
 	{
 		List<String> adminEmails = Collections.singletonList("molgenis@molgenis.org");
 		MolgenisUser user = new MolgenisUser();
@@ -97,7 +103,7 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void initFeedbackLoggedInDetailsNotSpecified() throws Exception
+	public void initFeedbackLoggedInDetailsUnknown() throws Exception
 	{
 		MolgenisUser user = new MolgenisUser();
 		when(molgenisUserService.getUser("userName")).thenReturn(user);
@@ -110,7 +116,29 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void submitAllFieldsFilledIn() throws Exception
+	public void submit() throws Exception
+	{
+		MimeMessage message = mock(MimeMessage.class);
+		when(javaMailSender.createMimeMessage()).thenReturn(message);
+		List<String> adminEmails = Collections.singletonList("molgenis@molgenis.org");
+		when(molgenisUserService.getSuEmailAddresses()).thenReturn(adminEmails);
+		when(molgenisSettings.getProperty("app.name")).thenReturn("app123");
+		mockMvcFeedback
+				.perform(
+						MockMvcRequestBuilders.post(FeedbackController.URI).param("form[name]", "First Last")
+								.param("form[subject]", "Feedback form").param("form[email]", "user@domain.com")
+								.param("form[comments]", "Feedback.\nLine two.")).andExpect(status().isOk())
+				.andExpect(view().name("view-feedback")).andExpect(model().attribute("submitted", true));
+		verify(message, times(1)).setRecipients(RecipientType.TO, new InternetAddress[]
+		{ new InternetAddress("molgenis@molgenis.org") });
+		verify(message, times(1)).setRecipient(RecipientType.CC, new InternetAddress("user@domain.com"));
+		verify(message, times(1)).setReplyTo(new InternetAddress[]{ new InternetAddress("user@domain.com")});
+		verify(message, times(1)).setSubject("[feedback-app123] Feedback form");
+		verify(message, times(1)).setText("Feedback.\nLine two.");
+	}
+	
+	@Test
+	public void submitAppNameNotSpecified() throws Exception
 	{
 		MimeMessage message = mock(MimeMessage.class);
 		when(javaMailSender.createMimeMessage()).thenReturn(message);
@@ -122,12 +150,7 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 								.param("form[subject]", "Feedback form").param("form[email]", "user@domain.com")
 								.param("form[comments]", "Feedback.\nLine two.")).andExpect(status().isOk())
 				.andExpect(view().name("view-feedback")).andExpect(model().attribute("submitted", true));
-		verify(message, times(1)).setRecipients(RecipientType.TO, new InternetAddress[]
-		{ new InternetAddress("molgenis@molgenis.org") });
-		verify(message, times(1)).setRecipient(RecipientType.CC, new InternetAddress("user@domain.com"));
-		verify(message, times(1)).setReplyTo(new InternetAddress[]{ new InternetAddress("user@domain.com")});
 		verify(message, times(1)).setSubject("[feedback-molgenis] Feedback form");
-		verify(message, times(1)).setText("Feedback.\nLine two.");
 	}
 
 	@Configuration
@@ -143,6 +166,12 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 		public MolgenisUserService molgenisUserService()
 		{
 			return mock(MolgenisUserService.class);
+		}
+		
+		@Bean
+		public MolgenisSettings molgenisSettings()
+		{
+			return mock(MolgenisSettings.class);
 		}
 
 		@Bean
