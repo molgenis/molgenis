@@ -21,7 +21,7 @@
 		
 		$('.filter-title', modal).html(title);
 		$('.filter-description', modal).html(description);
-		$('.filter-controls', modal).html(controls);
+		$('.form-horizontal', modal).html(controls);
 		
 		modal.modal('show');
 	};
@@ -39,7 +39,7 @@
 			items.push('<legend>Description</legend>');
 			items.push('<p class="filter-description"></p>');
 			items.push('<legend>Filter</legend>');
-			items.push('<form class="form-horizontal filter-controls"></form>');
+			items.push('<form class="form-horizontal"></form>');
 			items.push('</div>');
 			items.push('<div class="modal-footer">');
 			items.push('<a href="#" class="btn" data-dismiss="modal">Cancel</a>');
