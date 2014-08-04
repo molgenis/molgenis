@@ -1,15 +1,21 @@
 package org.molgenis.omx.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,10 +25,10 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 @Controller
 @RequestMapping(FeedbackController.URI)
-public class FeedbackController extends MolgenisPluginController {
+public class FeedbackController extends MolgenisPluginController
+{
 	public static final String ID = "feedback";
-	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX
-			+ ID;
+	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
 	@Autowired
 	private MolgenisUserService molgenisUserService;
@@ -30,7 +36,8 @@ public class FeedbackController extends MolgenisPluginController {
 	@Autowired
 	private JavaMailSender mailSender;
 
-	public FeedbackController() {
+	public FeedbackController()
+	{
 		super(URI);
 	}
 
@@ -38,9 +45,15 @@ public class FeedbackController extends MolgenisPluginController {
 	 * Serves feedback form.
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(final Model model) {
-		model.addAttribute("adminEmails",
-				molgenisUserService.getSuEmailAddresses());
+	public String init(final Model model)
+	{
+		model.addAttribute("adminEmails", molgenisUserService.getSuEmailAddresses());
+		if (SecurityUtils.currentUserIsAuthenticated())
+		{
+			MolgenisUser currentUser = getCurrentUser();
+			model.addAttribute("userName", getFormattedName(currentUser));
+			model.addAttribute("userEmail", currentUser.getEmail());
+		}
 		return "view-feedback";
 	}
 
@@ -50,28 +63,63 @@ public class FeedbackController extends MolgenisPluginController {
 	 * @throws MessagingException
 	 */
 	@RequestMapping(method = RequestMethod.POST)
-	public String submitFeedback(
-			@RequestParam(value = "form[name]") final String name,
+	public String submitFeedback(@RequestParam(value = "form[name]") final String name,
 			@RequestParam(value = "form[subject]") final String subject,
 			@RequestParam(value = "form[email]") final String email,
-			@RequestParam(value = "form[comments]", required = true) final String comments,
-			final Model model) throws MessagingException {
+			@RequestParam(value = "form[comments]", required = true) final String comments, final Model model)
+			throws MessagingException
+	{
+
 		MimeMessage message = mailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(message, false);
-		helper.setTo(molgenisUserService.getSuEmailAddresses().toArray(
-				new String[0]));
-		if( email != null ) {
+		helper.setTo(molgenisUserService.getSuEmailAddresses().toArray(new String[0]));
+		if (email != null)
+		{
 			helper.setCc(email);
 			helper.setReplyTo(email);
 		}
-		if( subject != null ) {
-			helper.setSubject("[feedback-molgenis] "+subject);
-		} else {
-			helper.setSubject("[feedback-molgenis] Feedback from "+ name);
+		if (subject != null)
+		{
+			helper.setSubject("[feedback-molgenis] " + subject);
+		}
+		else
+		{
+			helper.setSubject("[feedback-molgenis] Feedback from " + name);
 		}
 		helper.setText(comments);
 		mailSender.send(message);
 		model.addAttribute("submitted", Boolean.TRUE);
 		return "view-feedback";
+	}
+
+	private MolgenisUser getCurrentUser()
+	{
+		return molgenisUserService.getUser(SecurityUtils.getCurrentUsername());
+	}
+	
+	private static String getFormattedName(MolgenisUser user)
+	{
+		List<String> parts = new ArrayList<String>();
+		if (user.getFirstName() != null)
+		{
+			parts.add(user.getFirstName());
+		}
+		if (user.getMiddleNames() != null)
+		{
+			parts.add(user.getMiddleNames());
+		}
+		if (user.getLastName() != null)
+		{
+			parts.add(user.getLastName());
+		}
+		
+		if (parts.isEmpty())
+		{
+			return null;
+		}
+		else
+		{
+			return StringUtils.collectionToDelimitedString(parts, " ");
+		}
 	}
 }
