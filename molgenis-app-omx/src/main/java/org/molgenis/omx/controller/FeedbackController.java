@@ -61,6 +61,10 @@ public class FeedbackController extends MolgenisPluginController
 
 		public String getSubject()
 		{
+			if (subject == null)
+			{
+				return "<no subject>";
+			}
 			return subject;
 		}
 
@@ -141,25 +145,14 @@ public class FeedbackController extends MolgenisPluginController
 			helper.setCc(form.getEmail());
 			helper.setReplyTo(form.getEmail());
 		}
-		helper.setSubject(getSubject(form.getSubject()));
+		String subject = String.format("[feedback-%s] %s", 
+				molgenisSettings.getProperty("app.name", "molgenis"),
+				form.getSubject());
+		helper.setSubject(subject);
 		helper.setText(form.getFeedback());
 		mailSender.send(message);
 		form.setSubmitted(true);
 		return "view-feedback";
-	}
-
-	private String getSubject(String subject) throws MessagingException
-	{
-		String appName = molgenisSettings.getProperty("app.name");
-		if (appName == null)
-		{
-			appName = "molgenis";
-		}
-		if (subject == null)
-		{
-			subject = "<no subject>";
-		}
-		return String.format("[feedback-%s] %s", appName, subject);
 	}
 
 	private MolgenisUser getCurrentUser()

@@ -124,7 +124,7 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 		when(javaMailSender.createMimeMessage()).thenReturn(message);
 		List<String> adminEmails = Collections.singletonList("molgenis@molgenis.org");
 		when(molgenisUserService.getSuEmailAddresses()).thenReturn(adminEmails);
-		when(molgenisSettings.getProperty("app.name")).thenReturn("app123");
+		when(molgenisSettings.getProperty("app.name", "molgenis")).thenReturn("app123");
 		mockMvcFeedback
 				.perform(
 						MockMvcRequestBuilders.post(FeedbackController.URI).param("name", "First Last")
@@ -148,6 +148,7 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 		when(javaMailSender.createMimeMessage()).thenReturn(message);
 		List<String> adminEmails = Collections.singletonList("molgenis@molgenis.org");
 		when(molgenisUserService.getSuEmailAddresses()).thenReturn(adminEmails);
+		when(molgenisSettings.getProperty("app.name", "molgenis")).thenReturn("molgenis");
 		mockMvcFeedback
 				.perform(
 						MockMvcRequestBuilders.post(FeedbackController.URI).param("name", "First Last")
@@ -156,6 +157,24 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 				.andExpect(view().name("view-feedback"))
 				.andExpect(model().attribute("feedbackForm", hasProperty("submitted", equalTo(true))));
 		verify(message, times(1)).setSubject("[feedback-molgenis] Feedback form");
+	}
+	
+	@Test
+	public void submitAppNameAndSubjectNotSpecified() throws Exception
+	{
+		MimeMessage message = mock(MimeMessage.class);
+		when(javaMailSender.createMimeMessage()).thenReturn(message);
+		List<String> adminEmails = Collections.singletonList("molgenis@molgenis.org");
+		when(molgenisUserService.getSuEmailAddresses()).thenReturn(adminEmails);
+		when(molgenisSettings.getProperty("app.name", "molgenis")).thenReturn("molgenis");
+		mockMvcFeedback
+				.perform(
+						MockMvcRequestBuilders.post(FeedbackController.URI).param("name", "First Last")
+								.param("email", "user@domain.com")
+								.param("feedback", "Feedback.\nLine two.")).andExpect(status().isOk())
+				.andExpect(view().name("view-feedback"))
+				.andExpect(model().attribute("feedbackForm", hasProperty("submitted", equalTo(true))));
+		verify(message, times(1)).setSubject("[feedback-molgenis] <no subject>");
 	}
 
 	@Test
