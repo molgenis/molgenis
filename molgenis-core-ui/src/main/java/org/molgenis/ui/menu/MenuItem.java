@@ -58,6 +58,16 @@ public class MenuItem
 		this.label = label;
 	}
 
+	public String getParams()
+	{
+		return params;
+	}
+
+	public void setParams(String params)
+	{
+		this.params = params;
+	}
+
 	public List<MenuItem> getItems()
 	{
 		return items;
