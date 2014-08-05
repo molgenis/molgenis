@@ -163,6 +163,12 @@
 						var startPosition = match[2];
 						var stopPosition = match[3];
 						
+						if(parseInt(startPosition, 10) > parseInt(stopPosition, 10)) {
+							molgenis.createAlert([{message: 'The start position of the queried range is larger than the stop position. Please check the search query.'}], 'warning');
+						}else{
+							$('.alerts').empty();
+						}
+						
 						entityCollectionRequest.q = 
 							[{
 								operator: "NESTED",

@@ -1,0 +1,87 @@
+#filter-wizard-modal .modal-body {
+	min-height: 500px;
+	max-height: 500px;
+	padding-bottom: 0;
+}
+
+#filter-wizard-modal .well {
+	overflow: auto;
+	margin-bottom: 10px;
+}
+
+.filter-wizard-fixed-height {
+	height: 365px;
+}
+
+#filter-wizard-modal .pager {
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
+
+#filter-wizard-modal .wizard-steps {
+	margin-bottom: 10px
+}
+
+#filter-wizard-modal .form-horizontal .control-group .select2-choices{
+	position: static;
+}
+
+#filter-wizard-modal .controls.xrefmrefsearch.complex-simplefilter,
+#filter-modal .controls.xrefmrefsearch.complex-simplefilter{
+	width: 384px;
+}
+
+#filter-wizard-modal .form-horizontal .control-label{
+	width:20%;
+}
+
+#filter-modal .modal-body {
+	min-height: 250px;
+	max-height: 500px;
+	padding-bottom: 0;
+}
+
+#filter-modal .form-horizontal .control-group .select2-choices{
+	position: static;
+}
+
+
+#filter-wizard-modal .controls.complex-removebutton-container, 
+#filter-wizard-modal .controls.complex-addbutton-container, 
+#filter-wizard-modal .controls.complex-simplefilter,
+#filter-modal .controls.complex-removebutton-container, 
+#filter-modal .controls.complex-addbutton-container, 
+#filter-modal .controls.complex-simplefilter{
+	padding-left:0px;
+}
+
+#filter-wizard-modal .xrefmrefsearch.complex-simplefilter input.select2-input,
+#filter-modal .xrefmrefsearch.complex-simplefilter input.select2-input{
+	padding-bottom: 3px !important;
+	padding-top: 3px !important;
+}
+
+#filter-wizard-modal .xrefmrefsearch .btn.add-on-left,
+#filter-modal .xrefmrefsearch .btn.add-on-left{
+	border-bottom-left-radius:4px !important;
+	-webkit-border-bottom-left-radius: 4px !important;
+	border-top-left-radius:4px !important;
+	-webkit-border-top-left-radius: 4px !important;
+	border-bottom-right-radius:0px !important;
+	-webkit-border-bottom-right-radius: 0px !important;
+	border-top-right-radius:0px !important;
+	-webkit-border-top-right-radius: 0px !important;
+}
+
+.complex-addbutton-container>button, 
+.complex-removebutton-container>button{
+	margin-left: 5px;
+}
+
+#filter-modal .form-horizontal {
+	margin-bottom: 60px;
+}
+
+.simple-filter-container{
+	padding-bottom: 10px;
+}
