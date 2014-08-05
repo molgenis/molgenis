@@ -29,7 +29,8 @@ public class MenuItemToMolgenisUiMenuItemAdapter implements MolgenisUiMenuItem
 	@Override
 	public String getUrl()
 	{
-		return menuItem.getId();
+		String params = menuItem.getParams();
+		return params != null && !params.isEmpty() ? menuItem.getId() + '?' + params : menuItem.getId();
 	}
 
 	@Override
