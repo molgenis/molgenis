@@ -20,6 +20,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMessage.RecipientType;
 
+import org.mockito.Mockito;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.controller.FeedbackControllerTest.Config;
@@ -28,6 +29,8 @@ import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.mail.MailException;
+import org.springframework.mail.MailSendException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -139,6 +142,7 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 		{ new InternetAddress("user@domain.com") });
 		verify(message, times(1)).setSubject("[feedback-app123] Feedback form");
 		verify(message, times(1)).setText("Feedback from First Last (user@domain.com):\n\n" + "Feedback.\nLine two.");
+		verify(javaMailSender, times(1)).send(message);
 	}
 
 	@Test
@@ -183,6 +187,32 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 				MockMvcRequestBuilders.post(FeedbackController.URI).param("name", "First Last")
 						.param("subject", "Feedback form").param("email", "user@domain.com").param("feedback", ""))
 				.andExpect(status().is4xxClientError());
+	}
+
+	@Test
+	public void submitErrorWhileSendingMail() throws Exception
+	{
+		MimeMessage message = mock(MimeMessage.class);
+		when(javaMailSender.createMimeMessage()).thenReturn(message);
+		List<String> adminEmails = Collections.singletonList("molgenis@molgenis.org");
+		when(molgenisUserService.getSuEmailAddresses()).thenReturn(adminEmails);
+		when(molgenisSettings.getProperty("app.name", "molgenis")).thenReturn("app123");
+		Mockito.doThrow(new MailSendException("ERRORRR!")).when(javaMailSender).send(message);
+		mockMvcFeedback
+				.perform(
+						MockMvcRequestBuilders.post(FeedbackController.URI).param("name", "First Last")
+								.param("subject", "Feedback form").param("email", "user@domain.com")
+								.param("feedback", "Feedback.\nLine two."))
+				.andExpect(status().isOk())
+				.andExpect(view().name("view-feedback"))
+				.andExpect(model().attribute("feedbackForm", hasProperty("submitted", equalTo(false))))
+				.andExpect(
+						model().attribute(
+								"feedbackForm",
+								hasProperty(
+										"errorMessage",
+										equalTo("Unfortunately, we were unable to send the mail containing "
+												+ "your feedback.<br/>Please contact the administrator."))));
 	}
 
 	@Configuration

@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
  * Controller that handles feedback page requests.
+ * The user can fill in this feedback form to send a mail to the app's administrators.
  */
 @Controller
 @RequestMapping(FeedbackController.URI)
@@ -35,7 +36,7 @@ public class FeedbackController extends MolgenisPluginController
 {
 	public static final String ID = "feedback";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
-	private static final Logger logger = Logger.getLogger(MolgenisPluginController.class);
+	private static final Logger LOGGER = Logger.getLogger(MolgenisPluginController.class);
 
 	@Autowired
 	private MolgenisUserService molgenisUserService;
@@ -60,7 +61,7 @@ public class FeedbackController extends MolgenisPluginController
 		model.addAttribute("adminEmails", molgenisUserService.getSuEmailAddresses());
 		if (SecurityUtils.currentUserIsAuthenticated())
 		{
-			MolgenisUser currentUser = getCurrentUser();
+			MolgenisUser currentUser = molgenisUserService.getUser(SecurityUtils.getCurrentUsername());
 			model.addAttribute("userName", getFormattedName(currentUser));
 			model.addAttribute("userEmail", currentUser.getEmail());
 		}
@@ -69,30 +70,31 @@ public class FeedbackController extends MolgenisPluginController
 
 	/**
 	 * Handles feedback form submission.
-	 * 
-	 * @throws MessagingException
 	 */
 	@RequestMapping(method = RequestMethod.POST)
 	public String submitFeedback(@Valid FeedbackForm form)
 	{
 		try
 		{
-			logger.info("Sending feedback:" + form);
+			LOGGER.info("Sending feedback:" + form);
 			MimeMessage message = createFeedbackMessage(form);
 			mailSender.send(message);
 			form.setSubmitted(true);
 		}
 		catch (MessagingException e)
 		{
-			logger.warn("Unable to create mime message for feedback form.", e);
+			LOGGER.warn("Unable to create mime message for feedback form.", e);
+			form.setErrorMessage("Unfortunately, we were unable to create an email message for the feedback you specified.");
 		}
 		catch (MailAuthenticationException e)
 		{
-			logger.error("Error authenticating with email server.", e);
+			LOGGER.error("Error authenticating with email server.", e);
+			form.setErrorMessage("Unfortunately, we were unable to send the mail containing your feedback.<br/>Please contact the administrator.");
 		}
 		catch (MailSendException e)
 		{
-			logger.error("Error sending mail", e);
+			LOGGER.error("Error sending mail", e);
+			form.setErrorMessage("Unfortunately, we were unable to send the mail containing your feedback.<br/>Please contact the administrator.");
 		}
 		return "view-feedback";
 	}
@@ -119,11 +121,6 @@ public class FeedbackController extends MolgenisPluginController
 		helper.setSubject(String.format("[feedback-%s] %s", appName, form.getSubject()));
 		helper.setText(String.format("Feedback from %s:\n\n%s", form.getFrom(), form.getFeedback()));
 		return message;
-	}
-
-	private MolgenisUser getCurrentUser()
-	{
-		return molgenisUserService.getUser(SecurityUtils.getCurrentUsername());
 	}
 
 	/**
@@ -162,7 +159,7 @@ public class FeedbackController extends MolgenisPluginController
 	}
 
 	/**
-	 * Bean for the feedback form data. Allows for annotation-based validation.
+	 * Bean for the feedback form data.
 	 */
 	public static class FeedbackForm
 	{
@@ -170,7 +167,7 @@ public class FeedbackController extends MolgenisPluginController
 		private String email;
 		private String subject;
 		private String feedback;
-		private boolean submitted;
+		private boolean submitted = false;
 		private String errorMessage;
 
 		public String getName()

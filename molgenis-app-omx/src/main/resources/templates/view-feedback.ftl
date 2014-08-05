@@ -6,11 +6,18 @@
 
 <@header css/>
 
-<#if feedbackForm?? && feedbackForm.submitted??>
-	<div class="hero-unit">
-		<h1>Thanks!</h1>
-		<p>Thank you for your feedback.</p>
-	</div>
+<!-- view-feedback.ftl -->
+<#if feedbackForm??>
+	<#if feedbackForm.submitted>
+		<div class="hero-unit">
+			<h1>Thanks!</h1>
+			<p>Thank you for your feedback.</p>
+		</div>
+	<#else>
+		<div class="alert">
+			<strong>Error!</strong><br/>${feedbackForm.errorMessage}
+		</div>
+	</#if>
 <#elseif adminEmails?has_content>
 	<div class="page-header">
 		<h3>We&rsquo;re here to help with any questions or comments.<br/>
@@ -44,7 +51,7 @@
 				<label class="control-label" for="form_feedback">Body</label>
 				<textarea class="input-xxlarge" name="feedback" id="form_feedback"
 					placeholder="If you use 140 characters or fewer, we&rsquo;ll give you a gold star."
-					required="true" rows="10"></textarea>
+					required="true" rows="8"></textarea>
 			</fieldset>
 			<button type="submit" class="btn btn-success">Send</button>
 		</form>
@@ -55,4 +62,6 @@
 <#else>
 	<p>Admin email addresses not known.</p>
 </#if>
+<!-- end view-feedback.ftl -->
+
 <@footer/>
