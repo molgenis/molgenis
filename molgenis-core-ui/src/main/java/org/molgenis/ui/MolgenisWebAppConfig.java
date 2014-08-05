@@ -21,7 +21,6 @@ import org.molgenis.security.freemarker.NotHasPermissionDirective;
 import org.molgenis.ui.freemarker.FormLinkDirective;
 import org.molgenis.ui.freemarker.LimitMethod;
 import org.molgenis.util.ApplicationContextProvider;
-import org.molgenis.util.AsyncJavaMailSender;
 import org.molgenis.util.FileStore;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
