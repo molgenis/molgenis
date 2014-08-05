@@ -15,6 +15,7 @@ import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserService;
+import org.molgenis.ui.controller.AbstractStaticContentController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailAuthenticationException;
 import org.springframework.mail.MailSendException;
@@ -32,7 +33,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
  */
 @Controller
 @RequestMapping(FeedbackController.URI)
-public class FeedbackController extends MolgenisPluginController
+public class FeedbackController extends AbstractStaticContentController
 {
 	public static final String ID = "feedback";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
@@ -49,7 +50,7 @@ public class FeedbackController extends MolgenisPluginController
 
 	public FeedbackController()
 	{
-		super(URI);
+		super(ID, URI);
 	}
 
 	/**
@@ -58,6 +59,7 @@ public class FeedbackController extends MolgenisPluginController
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(final Model model)
 	{
+		super.init(model);
 		model.addAttribute("adminEmails", molgenisUserService.getSuEmailAddresses());
 		if (SecurityUtils.currentUserIsAuthenticated())
 		{

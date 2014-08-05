@@ -19,10 +19,24 @@
 		</div>
 	</#if>
 <#elseif adminEmails?has_content>
-	<div class="page-header">
-		<h3>We&rsquo;re here to help with any questions or comments.<br/>
-		<small>If you just want to say hi, that&rsquo;s cool too.</small>
+	<#if isCurrentUserCanEdit?has_content && isCurrentUserCanEdit>
+	<div class="row-fluid">
+	   <div class="control-group">
+			<div class="controls">
+				<div class="btn-group">
+					<ul>
+						<li><a id="editBtn" href="${context_url}/edit" class="btn">Edit page header</a></li>
+					</ul>
+				</div>
+			</div>
+		</div>	
 	</div>
+	</#if>
+	<#if content?has_content>
+	<div class="page-header">
+		${content}
+	</div>
+	</#if>
 	<div class="container">
 		<form accept-charset="UTF-8" method="post" action="feedback" id="feedbackForm">
 			<fieldset>
@@ -50,7 +64,6 @@
 					type="text" />
 				<label class="control-label" for="form_feedback">Body</label>
 				<textarea class="input-xxlarge" name="feedback" id="form_feedback"
-					placeholder="If you use 140 characters or fewer, we&rsquo;ll give you a gold star."
 					required="true" rows="8"></textarea>
 			</fieldset>
 			<button type="submit" class="btn btn-success">Send</button>

@@ -1,13 +1,14 @@
 package org.molgenis.omx.controller;
 
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasProperty;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.reset;
-import static org.hamcrest.Matchers.hasProperty;
-import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -20,16 +21,16 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMessage.RecipientType;
 
-import org.mockito.Mockito;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.controller.FeedbackControllerTest.Config;
 import org.molgenis.security.user.MolgenisUserService;
+import org.molgenis.ui.controller.StaticContentService;
+import org.molgenis.util.FileStore;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.mail.MailException;
 import org.springframework.mail.MailSendException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.TestingAuthenticationToken;
@@ -59,6 +60,12 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 
 	@Autowired
 	private MolgenisSettings molgenisSettings;
+	
+	@Autowired
+	private StaticContentService staticContentService;
+	
+	@Autowired
+	private FileStore fileStore;
 
 	private MockMvc mockMvcFeedback;
 
@@ -197,7 +204,7 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 		List<String> adminEmails = Collections.singletonList("molgenis@molgenis.org");
 		when(molgenisUserService.getSuEmailAddresses()).thenReturn(adminEmails);
 		when(molgenisSettings.getProperty("app.name", "molgenis")).thenReturn("app123");
-		Mockito.doThrow(new MailSendException("ERRORRR!")).when(javaMailSender).send(message);
+		doThrow(new MailSendException("ERRORRR!")).when(javaMailSender).send(message);
 		mockMvcFeedback
 				.perform(
 						MockMvcRequestBuilders.post(FeedbackController.URI).param("name", "First Last")
@@ -240,6 +247,18 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 		public JavaMailSender mailSender()
 		{
 			return mock(JavaMailSender.class);
+		}
+		
+		@Bean
+		public StaticContentService staticContentService()
+		{
+			return mock(StaticContentService.class);
+		}
+		
+		@Bean
+		public FileStore fileStore()
+		{
+			return mock(FileStore.class);
 		}
 
 	}
