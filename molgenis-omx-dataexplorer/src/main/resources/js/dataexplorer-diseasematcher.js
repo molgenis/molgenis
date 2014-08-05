@@ -60,7 +60,6 @@
 	
 	//disease matcher parts
 	var infoPanel = $('#diseasematcher-infopanel');
-	var variantPanel = $('#diseasematcher-variant-panel');
 	var selectionList = $('#diseasematcher-selection-list');
 	var selectionNav = $("#diseasematcher-selection-navbar");
 	var selectionTitle = $('#diseasematcher-selection-title');
@@ -76,7 +75,8 @@
 	 * Listens for attribute selection changes and updates the variant table.
 	 */
 	$(document).on('changeAttributeSelection', function(e, data) {
-		if (!variantPanel.is(':empty')) {
+		variantPanel = $('#diseasematcher-variant-panel');
+		if (!variantPanel.is(':empty')) {	
 			variantPanel.table('setAttributes', data.attributes);
 		}
 	});
