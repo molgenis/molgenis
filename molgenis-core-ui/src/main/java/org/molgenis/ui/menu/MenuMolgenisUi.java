@@ -44,29 +44,25 @@ public class MenuMolgenisUi implements MolgenisUi
 	public MolgenisUiMenu getMenu()
 	{
 		Menu menu = menuReaderService.getMenu();
-		return new MenuItemToMolgenisUiMenuAdapter(menu);
+		return new MenuItemToMolgenisUiMenuAdapter(menu, menu);
 	}
 
 	@Override
 	public MolgenisUiMenu getMenu(String menuId)
 	{
-		Menu menu = findMenu(menuReaderService.getMenu(), menuId);
-		return menu != null ? new MenuItemToMolgenisUiMenuAdapter(menu) : null;
+		Menu rootMenu = menuReaderService.getMenu();
+		MenuItem menu = findMenu(rootMenu, menuId);
+		return menu != null ? new MenuItemToMolgenisUiMenuAdapter(menu, rootMenu) : null;
 	}
 
-	private Menu findMenu(Menu menu, String menuId)
+	private MenuItem findMenu(MenuItem menu, String menuId)
 	{
 		if (menuId.equals(menu.getId())) return menu;
 		for (MenuItem menuItem : menu.getItems())
 		{
 			if (menuItem.getType() == MenuItemType.MENU)
 			{
-				if (!(menuItem instanceof Menu))
-				{
-					throw new RuntimeException("Invalid type " + menuItem.getClass().getSimpleName() + ", expected "
-							+ Menu.class.getSimpleName());
-				}
-				Menu submenu = findMenu((Menu) menuItem, menuId);
+				MenuItem submenu = findMenu(menuItem, menuId);
 				if (submenu != null)
 				{
 					return submenu;
