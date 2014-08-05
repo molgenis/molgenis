@@ -9,6 +9,7 @@
 	self.getEntityQuery = getEntityQuery;
     self.setNoResultMessage = setNoResultMessage;
     self.getNoResultMessage = getNoResultMessage;
+    self.createHeader = createHeader;
 	
 	var restApi = new molgenis.RestClient();
 	var selectedEntityMetaData = null;
@@ -18,7 +19,7 @@
 	var showWizardOnInit = false;
 	var modules = [];
     var noResultMessage = '';
-
+    
     /**
      * @memberOf molgenis.dataexplorer
      */
@@ -124,30 +125,97 @@
 			q : []
 		};
 		
-		var count = 0;
-
+		// add rules for the search term to the query
 		if (searchQuery) {
 			if (/\S/.test(searchQuery)) {
-				entityCollectionRequest.q.push({
-					operator : 'SEARCH',
-					value : searchQuery
-				});
-				count++;
+				var searchQueryRegex = /^\s*(?:chr)?([\d]{1,2}|X|Y|MT|XY):([\d]+)(?:-([\d]+)+)?\s*$/g;
+				
+				if(searchQueryRegex && searchQuery.match(searchQueryRegex)) {
+					var match = searchQueryRegex.exec(searchQuery);
+					
+					// only chromosome and position
+					if(match[3] === undefined){			
+						var chromosome = match[1];
+						var position = match[2];
+						
+				        entityCollectionRequest.q = 
+				        	    [{
+				        	        operator: "NESTED",
+				        	        nestedRules: [{
+				        	            field: "Chr",
+				        	            operator: "EQUALS",
+				        	            value: chromosome
+				        	        }]
+				        	    }, {
+				        	        operator: "AND"
+				        	    }, {
+				        	        operator: "NESTED",
+				        	        nestedRules: [{
+				        	            field: "Pos",
+				        	            operator: "EQUALS",
+				        	            value: position
+				        	        }]
+				        	    }];
+					// chromosome:startPos - endPos	
+					}else if(match[3]) {
+						
+						var chromosome = match[1];
+						var startPosition = match[2];
+						var stopPosition = match[3];
+						
+						if(parseInt(startPosition, 10) > parseInt(stopPosition, 10)) {
+							molgenis.createAlert([{message: 'The start position of the queried range is larger than the stop position. Please check the search query.'}], 'warning');
+						}else{
+							$('.alerts').empty();
+						}
+						
+						entityCollectionRequest.q = 
+							[{
+								operator: "NESTED",
+						        nestedRules: [{
+							            operator: "NESTED",
+							            nestedRules: [{
+							                field: "Chr",
+							                operator: "EQUALS",
+							                value: chromosome
+						            }]
+						        }]
+						    }, {
+						    	operator: "AND"
+						    }, {
+						    	operator: "NESTED",
+						        nestedRules: [{
+				                    field: "Pos",
+				                    operator: "GREATER_EQUAL",
+				                    value: startPosition
+				                }, {
+				                	operator: "AND"
+				                }, {
+				                    field: "Pos",
+				                    operator: "LESS_EQUAL",
+				                    value: stopPosition
+				                }]
+						    }];
+					}
+				} else {
+					entityCollectionRequest.q.push({
+						operator : 'SEARCH',
+						value : searchQuery
+					});
+				}
 			}
 		}
 
+		// add rules for attribute filters to the query
 		$.each(attributeFilters, function(attributeUri, filter) {
 			var rule = filter.createQueryRule();
-			
-			if (count > 0) {
-				entityCollectionRequest.q.push({
-					operator : 'AND'
-				});
-			}
-			
 			if(rule){
+				if (entityCollectionRequest.q.length > 0) {
+					entityCollectionRequest.q.push({
+						operator : 'AND'
+					});
+				}
 				entityCollectionRequest.q.push(rule);
-				count++;
 			}
 		});
 		
@@ -166,6 +234,9 @@
 	 * @memberOf molgenis.dataexplorer
 	 */
 	$(function() {
+		
+		var searchTerm = $("#observationset-search").val();
+		
 		// lazy load tab contents
 		$(document).on('show', 'a[data-toggle="tab"]', function(e) {
 			var target = $($(e.target).attr('data-target'));
@@ -217,7 +288,7 @@
 					
 				});
 				
-				createHeader(entityMetaData);
+				self.createHeader(entityMetaData);
 			});
 		});
 		
@@ -252,7 +323,7 @@
 		$("#observationset-search").focus();
 		
 		$("#observationset-search").change(function(e) {
-			searchQuery = $(this).val();
+			searchQuery = $(this).val().trim();
 			$(document).trigger('changeQuery', createEntityQuery());
 		});
 	
@@ -273,5 +344,11 @@
 		
 		// fire event handler
 		$('#dataset-select').change();
+		
+		// restore the search term and trigger change event to filter data table
+		if(searchTerm){
+			$("#observationset-search").val(searchTerm).change();
+		}
+		
 	});
 }($, window.top.molgenis = window.top.molgenis || {}));

@@ -21,6 +21,7 @@
 
 #observationset-search-container {
 	text-align: center;
+	padding-bottom: 15px;
 }
 
 .accordion-group {
@@ -150,50 +151,26 @@ a.accordion-toggle:hover,a.accordion-toggle:focus,a.accordion-toggle:active
     color: #fff;
 }
 
+.molgenis-xrefmrefsearch.select2-drop-active{
+	overflow-x: visible !important;
+	width: auto !important;
+	border: 1px solid #5897fb !important;
+}
+
+.molgenis-xrefmrefsearch.select2-drop-active .select2-no-results{
+	width: 100%;
+}
+
+.select2-drop{
+	margin-top: -1px;
+}
+
+.molgenis-xrefmrefsearch.select2-drop-active .select2-result-selectable{
+	width: 600px;
+}
+
 .molgenis-xrefmrefsearch .add-ref-query-part, .remove-ref-query-part {
 	margin-left: 10px;
-}
-
-#filter-wizard-modal .modal-body {
-	min-height: 540px;
-	max-height: 540px;
-	padding-bottom: 0;
-}
-
-#filter-wizard-modal .well {
-	overflow: auto;
-	margin-bottom: 10px;
-}
-
-.filter-wizard-fixed-height {
-	height: 400px;
-}
-
-#filter-wizard-modal .pager {
-	margin-top: 0px;
-	margin-bottom: 0px;
-}
-
-#filter-wizard-modal .wizard-steps {
-	margin-bottom: 10px
-}
-
-#filter-wizard-modal .form-horizontal .control-group .select2-choices{
-	position: static;
-}
-
-#filter-modal .modal-body {
-	min-height: 250px;
-	max-height: 540px;
-	padding-bottom: 0;
-}
-
-#filter-wizard-modal .form-horizontal .control-label{
-	width:30%;
-}
-
-#filter-modal .form-horizontal .control-group .select2-choices{
-	position: static;
 }
 
 /* default fancytree styling */
@@ -213,8 +190,8 @@ ul.fancytree-container {
 }
 
 #slider {
-	margin: 0 30px;
-	width: 350px;
+	margin: 0px 25px;
+	width: 400px;
 }
 
 .form-horizontal .controls {
@@ -222,22 +199,6 @@ ul.fancytree-container {
 	padding-left: 20px;
 	margin-left: 0px;
 	vertical-align: top;
-}
-
-.form-horizontal .controls.complex-simplefilter {
-	padding-left: 0px;
-}
-
-.form-horizontal .controls.complex-removebutton-container, .form-horizontal .controls.complex-addbutton-container {
-	padding-left:0px;
-}
-
-.form-horizontal .controls.complex-addbutton-container>button, .form-horizontal .controls.complex-removebutton-container>button{
-	margin-left: 5px;
-}
-
-.form-horizontal.filter-controls {
-	margin-bottom: 60px;
 }
 
 .ui-rangeSlider-bar {
@@ -261,3 +222,12 @@ input[name="ColNames"] {
 #module-nav .nav {
 	margin-left: 2.1277%;
 }
+
+.table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
+	background-color: #7CBAD1;
+	
+}
+
+.table-hover {
+	cursor: pointer;
+} 
