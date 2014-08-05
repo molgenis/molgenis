@@ -1,4 +1,8 @@
-(function($, molgenis) {
+$.when( $, 
+		window.top.molgenis = window.top.molgenis || {}, 
+		$.get('dataexplorer/settings') 
+).then(
+function($, molgenis, settings) {	
 	"use strict";
 	var self = molgenis.dataexplorer = molgenis.dataexplorer || {};
 	
@@ -351,4 +355,4 @@
 		}
 		
 	});
-}($, window.top.molgenis = window.top.molgenis || {}));
+});
