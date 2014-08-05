@@ -30,7 +30,7 @@
 				<#list adminEmails as adminEmail>
 					<#assign adminEmailsString = adminEmailsString + adminEmail/>
    					<#if adminEmail_has_next>
-   						<#assign adminEmailsString = adminEmailsString + ';'/>
+   						<#assign adminEmailsString = adminEmailsString + ', '/>
    					</#if>
 				</#list>
 				<p>
