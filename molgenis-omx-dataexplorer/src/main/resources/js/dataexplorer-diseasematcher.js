@@ -12,8 +12,6 @@
 
 	var restApi = new molgenis.RestClient();
 
-	var infoPanel = $('#diseasematcher-infopanel');
-	
 	/**
 	 * Regular expression containing all line break flavors, used for replacing line breaks.
 	 */
@@ -59,15 +57,27 @@
 	$(document).on('changeQuery', function(e, query) {	
 		updateSelectionList(currentSelectionMode);
 	});
+	
+	//disease matcher parts
+	var infoPanel = $('#diseasematcher-infopanel');
+	var variantPanel = $('#diseasematcher-variant-panel');
+	var selectionList = $('#diseasematcher-selection-list');
+	var selectionNav = $("#diseasematcher-selection-navbar");
+	var selectionTitle = $('#diseasematcher-selection-title');
+	
+	//handlebars templates
+	var hbColumnWarning = $("#hb-column-warning");
+	var hbDatasetWarning = $("#hb-dataset-warning");
+	var hbVariantLayout = $("#hb-layout-variant");
+	var hbSelectionList = $("#hb-selection-list");
 
 	
 	/**
 	 * Listens for attribute selection changes and updates the variant table.
 	 */
 	$(document).on('changeAttributeSelection', function(e, data) {
-		var panel = $('#diseasematcher-variant-panel');
-		if (!panel.is(':empty')) {
-			panel.table('setAttributes', data.attributes);
+		if (!variantPanel.is(':empty')) {
+			variantPanel.table('setAttributes', data.attributes);
 		}
 	});
 
@@ -87,8 +97,7 @@
 		restApi.getAsync(entityUri + '/meta', {}, function(data) {
 			if (data === null || !data.attributes.hasOwnProperty(geneSymbolColumn)) {
 				
-				var warningSrc = $("#hb-column-warning").html();
-				var template = Handlebars.compile(warningSrc);
+				var template = Handlebars.compile(hbColumnWarning.html());
 				var warning = template({column: geneSymbolColumn});
 				infoPanel.append(warning);
 				toolAvailable = false;
@@ -107,8 +116,7 @@
 	function checkDatasetAvailable(dataset) {
 		restApi.getAsync('/api/v1/' + dataset, {'num' : 1},	function(data){
 			if (data.total === 0) {
-				var warningSrc = $('#hb-dataset-warning').html();
-				var template = Handlebars.compile(warningSrc);
+				var template = Handlebars.compile(hbDatasetWarning.html());
 				var warning = template({dataset: dataset});
 				infoPanel.append(warning);
 				toolAvailable = false;
@@ -120,8 +128,7 @@
 	 * Switches the layout for the info panel by using different Handlebars templates.
 	 */
 	function setInfoPanelLayout(){
-		var layoutSrc = $('#hb-layout-variant').html();
-		var template = Handlebars.compile(layoutSrc);
+		var template = Handlebars.compile(hbVariantLayout.html());
 		infoPanel.html(template({}));
 	}
 	
@@ -137,11 +144,11 @@
 		setInfoPanelLayout();
 		
 		//reset navbar and activate the clicked button
-		$('#diseasematcher-selection-navbar li').attr('class', '');
+		selectionNav.find('li').attr('class', '');
 		$(element).parent().attr("class", "active");
 		
 		// update title of selection list
-		$('#diseasematcher-selection-title').html(selectionMode.charAt(0).toUpperCase() + selectionMode.slice(1));
+		selectionTitle.html(selectionMode.charAt(0).toUpperCase() + selectionMode.slice(1));
 
 		currentSelectionMode = selectionMode;
 		updateSelectionList(selectionMode);
@@ -227,37 +234,21 @@
 	 * @param selectionMode the current selection mode
 	 */
 	function populateSelectionList(list, selectionMode) {
-		$('#diseasematcher-selection-list').empty();
+		//TODO handle nulls
 		
+		var template = Handlebars.compile(hbSelectionList.html());
+		var selectionListFilled = template(list);
+		selectionList.html(selectionListFilled);
+
 		if (list === null || list.length === 0) return;
 
-		if (selectionMode === SelectionMode.DISEASE) {
-			$.each(list, function(index, item) {
-				var name;
-				if (item.diseaseName === null) {
-					name = item.diseaseId;
-				} else {
-					name = item.diseaseName;
-				}
-				$('#diseasematcher-selection-list').append(
-						'<li><a href="#" class="diseasematcher-disease-listitem" id="'
-								+ item.diseaseId + '">' + name + '</a></li>');
-			});
-		} else if (selectionMode === SelectionMode.GENE) {
-			$.each(list, function(index, item) {
-				$('#diseasematcher-selection-list').append(
-						'<li><a href="#" class="diseasematcher-gene-listitem" id="'
-								+ item + '">' + item + '</a></li>');
-			});
-		}
-
-		$('#diseasematcher-selection-list a').click(function(e) {
+		selectionList.find('a').click(function(e) {
 			e.preventDefault(); // stop jumping to top of page
 			onSelectListItem($(this), currentSelectionMode);
 		});
 
 		// pre-select top-most disease
-		onSelectListItem($('#diseasematcher-selection-list li a').first(), currentSelectionMode);
+		onSelectListItem(selectionList.find('li a').first(), currentSelectionMode);
 	}
 
 	

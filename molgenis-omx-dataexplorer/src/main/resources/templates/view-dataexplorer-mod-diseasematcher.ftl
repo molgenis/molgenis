@@ -74,6 +74,30 @@
 	</div>
 </script>
 
+<script id="hb-selection-list" class="diseasematcher" type="text/x-handlebars-template">
+	{{#if this.0.diseaseId}}
+		{{#each this}}
+			<li><a href="#" class="diseasematcher-disease-listitem" id="{{diseaseId}}">
+				{{#if diseaseName}}
+					{{diseaseName}}
+				{{else}}
+					{{diseaseId}}
+				{{/if}}	
+			</a></li>
+		{{else}}
+			<p>No diseases found...</p>
+		{{/each}}
+	{{else}}
+		{{#each this}}
+			<li><a href="#" class="diseasematcher-disease-listitem" id="{{this}}">
+				{{this}}
+			</a></li>
+		{{else}}
+			<p>No genes found...</p>
+		{{/each}}
+	{{/if}}
+</script>
+
 <script>
 	var tableEditable = ${tableEditable?string('true', 'false')};
 	$.when($.ajax("/js/dataexplorer-diseasematcher.js", {'cache': true}))
