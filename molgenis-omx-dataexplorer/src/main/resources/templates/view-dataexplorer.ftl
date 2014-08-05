@@ -10,6 +10,7 @@
 	"iThing-min.css",
 	"bootstrap-switch.min.css",
 	"dataexplorer.css",
+	"dataexplorer-filter.css",
 	"diseasematcher.css"]>
 <#assign js=[
 	"jquery-ui-1.9.2.custom.min.js",
