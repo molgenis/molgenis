@@ -77,21 +77,22 @@ public class FeedbackController extends MolgenisPluginController
 	{
 		try
 		{
+			logger.info("Sending feedback:" + form);
 			MimeMessage message = createFeedbackMessage(form);
 			mailSender.send(message);
 			form.setSubmitted(true);
 		}
 		catch (MessagingException e)
 		{
-			logger.warn("Unable to create mime message for feedback form.");
+			logger.warn("Unable to create mime message for feedback form.", e);
 		}
 		catch (MailAuthenticationException e)
 		{
-
+			logger.error("Error authenticating with email server.", e);
 		}
 		catch (MailSendException e)
 		{
-
+			logger.error("Error sending mail", e);
 		}
 		return "view-feedback";
 	}
@@ -116,14 +117,7 @@ public class FeedbackController extends MolgenisPluginController
 		}
 		String appName = molgenisSettings.getProperty("app.name", "molgenis");
 		helper.setSubject(String.format("[feedback-%s] %s", appName, form.getSubject()));
-		if (form.hasName())
-		{
-			helper.setText(String.format("Feedback from %s:\n\n%s", form.getName(), form.getFeedback()));
-		}
-		else
-		{
-			helper.setText("Anonymous feedback:\n\n" + form.getFeedback());
-		}
+		helper.setText(String.format("Feedback from %s:\n\n%s", form.getFrom(), form.getFeedback()));
 		return message;
 	}
 
@@ -210,6 +204,34 @@ public class FeedbackController extends MolgenisPluginController
 			return email != null && !email.trim().isEmpty();
 		}
 
+		public String getFrom()
+		{
+			StringBuilder result = new StringBuilder();
+			if (!hasName() && !hasEmail())
+			{
+				result.append("Anonymous");
+			}
+			else
+			{
+				if (hasName())
+				{
+					result.append(getName());
+				}
+				if (hasEmail())
+				{
+					if (hasName())
+					{
+						result.append(String.format(" (%s)", getEmail()));
+					}
+					else
+					{
+						result.append(getEmail());
+					}
+				}
+			}
+			return result.toString();
+		}
+
 		public String getSubject()
 		{
 			if (subject == null || subject.trim().isEmpty())
@@ -255,5 +277,18 @@ public class FeedbackController extends MolgenisPluginController
 			this.errorMessage = errorMessage;
 		}
 
+		@Override
+		public String toString()
+		{
+			StringBuilder builder = new StringBuilder();
+			builder.append("[From: ");
+			builder.append(getFrom());
+			builder.append("\nSubject: ");
+			builder.append(getSubject());
+			builder.append("\nBody: ");
+			builder.append(getFeedback());
+			builder.append(']');
+			return builder.toString();
+		}
 	}
 }

@@ -138,8 +138,7 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 		verify(message, times(1)).setReplyTo(new InternetAddress[]
 		{ new InternetAddress("user@domain.com") });
 		verify(message, times(1)).setSubject("[feedback-app123] Feedback form");
-		verify(message, times(1)).setText("Feedback from First Last:\n\n"
-				+ "Feedback.\nLine two.");
+		verify(message, times(1)).setText("Feedback from First Last (user@domain.com):\n\n" + "Feedback.\nLine two.");
 	}
 
 	@Test
@@ -159,7 +158,7 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 				.andExpect(model().attribute("feedbackForm", hasProperty("submitted", equalTo(true))));
 		verify(message, times(1)).setSubject("[feedback-molgenis] Feedback form");
 	}
-	
+
 	@Test
 	public void submitAppNameAndSubjectNotSpecified() throws Exception
 	{
@@ -171,15 +170,14 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 		mockMvcFeedback
 				.perform(
 						MockMvcRequestBuilders.post(FeedbackController.URI).param("name", "First Last")
-								.param("email", "user@domain.com")
-								.param("feedback", "Feedback.\nLine two.")).andExpect(status().isOk())
-				.andExpect(view().name("view-feedback"))
+								.param("email", "user@domain.com").param("feedback", "Feedback.\nLine two."))
+				.andExpect(status().isOk()).andExpect(view().name("view-feedback"))
 				.andExpect(model().attribute("feedbackForm", hasProperty("submitted", equalTo(true))));
 		verify(message, times(1)).setSubject("[feedback-molgenis] <no subject>");
 	}
 
 	@Test
-	public void submitCommentsNotSpecified() throws Exception
+	public void submitFeedbackNotSpecified() throws Exception
 	{
 		mockMvcFeedback.perform(
 				MockMvcRequestBuilders.post(FeedbackController.URI).param("name", "First Last")
