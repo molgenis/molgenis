@@ -138,7 +138,8 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 		verify(message, times(1)).setReplyTo(new InternetAddress[]
 		{ new InternetAddress("user@domain.com") });
 		verify(message, times(1)).setSubject("[feedback-app123] Feedback form");
-		verify(message, times(1)).setText("Feedback.\nLine two.");
+		verify(message, times(1)).setText("Feedback from First Last:\n\n"
+				+ "Feedback.\nLine two.");
 	}
 
 	@Test
