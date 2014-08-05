@@ -21,6 +21,7 @@
 					menu.push({
 						'id' : id,
 						'label' : label,
+						'params' : $(this).data('params'),
 						'type' : 'plugin'
 					});
 				}
@@ -57,7 +58,7 @@
 			}
 		});
 		
-		// delete menu item
+		// delete menu / menu item
 		var container = $('#menu-editor-container');
 		$(container).on('click', '.icon-trash', function(e) {
 			e.preventDefault();
@@ -65,16 +66,17 @@
 			$(this).closest('li').remove();
 		});
 		
-		// edit menu item
+		// edit menu
 		var editMenuForm = $('form[name="edit-menu-form"]');
 		editMenuForm.validate();
 		editMenuForm.submit(function(e) {
 			e.preventDefault();
 			if($(this).valid()) {
-				editMenuForm.data('element').html(menuTemplate({
+				var element = editMenuForm.data('element');
+				element.replaceWith($(menuTemplate({
 					id : $('input[name="menu-id"]', editMenuForm).val(),
 					label : $('input[name="menu-name"]', editMenuForm).val()
-				}));		
+				})).append(element.children('ol')));
 				$('#edit-menu-modal').modal('hide');
 			}
 		});
@@ -98,6 +100,10 @@
 				}));
 			}
 		});
+		$('input[name="menu-name"]', addGroupForm).keyup(function() {
+			var id = $(this).val().trim().replace(/\s+/g, '').toLowerCase();
+			$('input[name="menu-id"]', addGroupForm).val(id);
+		});
 		
 		// add menu item
 		var addItemForm = $('form[name="add-menu-item-form"]');
@@ -106,10 +112,33 @@
 			e.preventDefault();
 			if($(this).valid()) {
 				$('li.root>ol', container).prepend(itemTemplate({
-					id : $('#menu-item-select').val(),
+					id : $('select[name="menu-item-select"]', addItemForm).val(),
 					label : $('input[name="menu-item-name"]', addItemForm).val()
 				}));
 			}
+		});
+		
+		// edit menu item
+		var editItemForm = $('form[name="edit-item-form"]');
+		editItemForm.validate();
+		editItemForm.submit(function(e) {
+			e.preventDefault();
+			if($(this).valid()) {
+				editItemForm.data('element').replaceWith(itemTemplate({
+					id : $('select[name="menu-item-select"]', editItemForm).val(),
+					label : $('input[name="menu-item-name"]', editItemForm).val(),
+					params : $('input[name="menu-item-params"]', editItemForm).val()
+				}));
+				$('#edit-item-modal').modal('hide');
+			}
+		});
+		
+		$(container).on('click', '.edit-item-btn', function () {
+			var element = $(this).closest('li');
+			$('select[name="menu-item-select"]', editItemForm).val(element.data('id'));
+			$('input[name="menu-item-name"]', editItemForm).val(element.data('label'));
+			$('input[name="menu-item-params"]', editItemForm).val(element.data('params'));
+			editItemForm.data('element', element);
 		});
 		
 		// save menu

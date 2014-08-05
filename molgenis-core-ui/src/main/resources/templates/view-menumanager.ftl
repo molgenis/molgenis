@@ -24,28 +24,7 @@
 					</form>
 					<legend>Create Menu Item</legend>
 					<form name="add-menu-item-form" class="form-horizontal">
-						<div class="control-group">
-							<label class="control-label" for="menu-item">Plugin *</label>
-							<div class="controls">
-								<select id="menu-item-select" required>
-								<#list plugins as plugin>
-									<option value="${plugin.id}">${plugin.id}</option>
-								</#list>
-								</select>
-							</div>
-						</div>
-						<div class="control-group">
-							<label class="control-label" for="menu-item-name">Name *</label>
-							<div class="controls">
-								<input type="text" name="menu-item-name" required>
-							</div>
-						</div>
-						<div class="control-group">
-							<label class="control-label" for="menu-item-params">Query string</label>
-							<div class="controls">
-								<input type="text" name="menu-item-params">
-							</div>
-						</div>
+						<@create_edit_item_inputs false/>
 						<div class="control-group">
 							<div class="controls">
 								<button type="submit" class="btn">Create</button>
@@ -68,7 +47,7 @@
 			<div class="modal-content">				
 		      	<div class="modal-header">
 		        	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-		        	<h4 class="modal-title">Edit menu item</h4>
+		        	<h4 class="modal-title">Edit menu</h4>
 		     	</div>
 		      	<div class="modal-body">
 		      		<div class="form-horizontal">
@@ -83,17 +62,62 @@
 		</div>
 	</div>
 </form>
+<form name="edit-item-form" class="form-horizontal">
+	<div class="modal hide medium" id="edit-item-modal" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">				
+		      	<div class="modal-header">
+		        	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+		        	<h4 class="modal-title">Edit menu item</h4>
+		     	</div>
+		      	<div class="modal-body">
+		      		<div class="form-horizontal">
+			      		<@create_edit_item_inputs true/>
+		      		</div>
+				</div>
+		      	<div class="modal-footer">
+		        	<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+		        	<button type="submit" class="btn btn-primary">Save</button>
+		      	</div>
+		    </div>
+		</div>
+	</div>
+</form>
 <#macro create_edit_menu_inputs>
 <div class="control-group">
 	<label class="control-label" for="menu-id">Id *</label>
 	<div class="controls">
-		<input type="text" name="menu-id" required>
+		<input type="text" name="menu-id" required disabled>
 	</div>
 </div>
 <div class="control-group">
 	<label class="control-label" for="menu-name">Name *</label>
 	<div class="controls">
 		<input type="text" name="menu-name" required>
+	</div>
+</div>
+</#macro>
+<#macro create_edit_item_inputs is_edit>
+<div class="control-group">
+	<label class="control-label" for="menu-item">Plugin *</label>
+	<div class="controls">
+		<select name="menu-item-select" required<#if is_edit> disabled</#if>>
+		<#list plugins as plugin>
+			<option value="${plugin.id}">${plugin.id}</option>
+		</#list>
+		</select>
+	</div>
+</div>
+<div class="control-group">
+	<label class="control-label" for="menu-item-name">Name *</label>
+	<div class="controls">
+		<input type="text" name="menu-item-name" required>
+	</div>
+</div>
+<div class="control-group">
+	<label class="control-label" for="menu-item-params">Query string</label>
+	<div class="controls">
+		<input type="text" name="menu-item-params">
 	</div>
 </div>
 </#macro>
@@ -107,7 +131,9 @@
 		</#if>
 			<span>${menu.name}</span>
 			<div class="pull-right">
+			<#if !is_root>
 				<i class="icon-edit edit-menu-btn" data-toggle="modal" data-target="#edit-menu-modal"></i>
+			</#if>
 			<#if !is_root>
 				<i class="icon-trash"></i>
 			</#if>
@@ -117,11 +143,12 @@
 		<#if item.type == "MENU">
 			<@create_menu_list item false/>
 		<#else>
-		<li class="node" data-id="${item.id}" data-label="${item.name}">
+		<#-- extract query string from url -->
+		<li class="node" data-id="${item.id}" data-label="${item.name}" <#if item.id != item.url> data-params="${item.url?substring(item.id?length + 1)?html}"</#if>>
 			<i class="icon-move"></i>
 			<span>${item.name}</span>
 			<div class="pull-right">
-				<i class="icon-edit" data-toggle="modal" data-target="#edit-item-modal"></i>
+				<i class="icon-edit edit-item-btn" data-toggle="modal" data-target="#edit-item-modal"></i>
 				<i class="icon-trash"></i>
 			</div>
 		</li>
@@ -145,7 +172,7 @@
 	</li>
 </script>
 <script id="item-template" type="text/x-handlebars-template">
-	<li class="node" data-id="{{id}}" data-label="{{label}}">
+	<li class="node" data-id="{{id}}" data-label="{{label}}" data-params="{{params}}">
 		<i class="icon-move"></i>
 		<span>{{label}}</span>
 		<div class="pull-right">
