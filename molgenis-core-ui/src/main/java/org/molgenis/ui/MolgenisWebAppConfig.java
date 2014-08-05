@@ -262,15 +262,6 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	{
 		MolgenisUi molgenisUi = new MenuMolgenisUi(molgenisSettings, menuManagerService());
 		return new MolgenisUiPermissionDecorator(molgenisUi, molgenisPermissionService);
-
-		// try
-		// {
-		// return new XmlMolgenisUi(new XmlMolgenisUiLoader(), molgenisSettings, molgenisPermissionService);
-		// }
-		// catch (IOException e)
-		// {
-		// throw new RuntimeException(e);
-		// }
 	}
 
 	@Bean
