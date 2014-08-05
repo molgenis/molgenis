@@ -36,6 +36,7 @@ import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.BufferedImageHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.ViewResolver;
@@ -145,7 +146,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Bean
 	public JavaMailSender mailSender()
 	{
-		AsyncJavaMailSender mailSender = new AsyncJavaMailSender();
+		JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
 		mailSender.setHost(mailHost);
 		mailSender.setPort(mailPort);
 		mailSender.setProtocol(mailProtocol);
