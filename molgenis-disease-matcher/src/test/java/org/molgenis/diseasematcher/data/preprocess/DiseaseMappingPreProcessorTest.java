@@ -14,11 +14,12 @@ import org.apache.commons.io.FileUtils;
 import org.springframework.util.FileCopyUtils;
 import org.testng.annotations.Test;
 
-public class DiseaseMappingProcessorTest
+public class DiseaseMappingPreProcessorTest
 {
+	DiseaseMappingPreProcessor dmpp = new DiseaseMappingPreProcessor();
 
 	@Test
-	public void testProcessFiles() throws FileNotFoundException, IOException
+	public void testMakeDiseaseMappingFile() throws FileNotFoundException, IOException
 	{
 
 		InputStream allIn = getClass().getResourceAsStream("/ALL_FREQUENCIES.txt");
@@ -31,8 +32,7 @@ public class DiseaseMappingProcessorTest
 
 		File outFile = File.createTempFile("diseasemapping", "tsv");
 
-		DiseaseMappingProcessor dmp = new DiseaseMappingProcessor();
-		dmp.processFiles(typicalFile, allFile, outFile);
+		dmpp.makeDiseaseMappingFile(typicalFile, allFile, outFile);
 
 		Reader in = new FileReader(outFile);
 		String out = FileCopyUtils.copyToString(in);
@@ -42,4 +42,22 @@ public class DiseaseMappingProcessorTest
 		assertEquals(out, check);
 	}
 
+	@Test
+	public void testMakeDiseaseNamesFile() throws FileNotFoundException, IOException
+	{
+		InputStream morbidmapIn = getClass().getResourceAsStream("/morbidmap.txt");
+		File morbidmapFile = new File(FileUtils.getTempDirectory(), "morbidmap.txt");
+		FileCopyUtils.copy(morbidmapIn, new FileOutputStream(morbidmapFile));
+
+		File outFile = File.createTempFile("diseasenames", "tsv");
+
+		dmpp.makeDiseaseNamesFile(morbidmapFile, outFile);
+
+		Reader in = new FileReader(outFile);
+		String out = FileCopyUtils.copyToString(in);
+
+		String check = "\"identifier\"	\"diseaseId\"	\"diseaseName\"	\"mappingMethod\"\n\"17,20-lyase deficiency, isolated, 202110 (3)\"	\"OMIM:202110\"	\"17,20-lyase deficiency, isolated\"	\"(3)\"\n\"Aicardi-Goutieres syndrome 2, 610181 (3)\"	\"OMIM:610181\"	\"Aicardi-Goutieres syndrome 2\"	\"(3)\"\n";
+
+		assertEquals(out, check);
+	}
 }

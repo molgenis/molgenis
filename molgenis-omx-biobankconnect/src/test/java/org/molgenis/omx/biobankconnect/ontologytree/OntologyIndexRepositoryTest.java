@@ -68,6 +68,18 @@ public class OntologyIndexRepositoryTest
 						.eq(OntologyRepository.ENTITY_TYPE, OntologyRepository.TYPE_ONTOLOGY), null))).thenReturn(
 				new SearchResult(3, Arrays.asList(hit3)));
 
+		when(
+				searchService.count(
+						null,
+						new QueryImpl().eq(OntologyRepository.ENTITY_TYPE, OntologyRepository.TYPE_ONTOLOGY)
+								.pageSize(Integer.MAX_VALUE).offset(Integer.MIN_VALUE))).thenReturn(new Long(3));
+		when(
+				searchService.count(
+						null,
+						new QueryImpl().eq(OntologyRepository.ONTOLOGY_URL, "http://www.final.ontology.test").and()
+								.eq(OntologyRepository.ENTITY_TYPE, OntologyRepository.TYPE_ONTOLOGY)
+								.pageSize(Integer.MAX_VALUE).offset(Integer.MIN_VALUE))).thenReturn(new Long(1));
+
 		when(searchService.searchById(null, "ontology-2")).thenReturn(hit2);
 
 		ontologyIndexRepository = new OntologyIndexRepository("ontologyindex", ontologyService, searchService);

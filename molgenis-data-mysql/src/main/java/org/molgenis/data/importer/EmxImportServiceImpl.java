@@ -13,8 +13,8 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.DataService;
+import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
@@ -109,8 +109,9 @@ public class EmxImportServiceImpl implements EmxImporterService
 
 		try
 		{
-			return transactionTemplate.execute(new EmxImportTransactionCallback(databaseAction, source, metadata,
-					addedEntities));
+			EntityImportReport entityImportReport = transactionTemplate.execute(new EmxImportTransactionCallback(
+					databaseAction, source, metadata, addedEntities));
+			return entityImportReport;
 		}
 		catch (Exception e)
 		{
@@ -149,6 +150,7 @@ public class EmxImportServiceImpl implements EmxImporterService
 		}
 
 		for (String sheet : source.getEntityNames())
+		{
 			if (!ENTITIES.equals(sheet) && !ATTRIBUTES.equals(sheet))
 			{
 				// check if sheet is known?
@@ -186,6 +188,8 @@ public class EmxImportServiceImpl implements EmxImporterService
 					report.getFieldsImportable().put(sheet, fieldsImportable);
 				}
 			}
+		}
+
 		return report;
 	}
 
@@ -194,7 +198,6 @@ public class EmxImportServiceImpl implements EmxImporterService
 	{
 		// TODO: this task is actually a 'merge' instead of 'import'
 		// so we need to consider both new metadata as existing ...
-
 		Map<String, DefaultEntityMetaData> entities = new LinkedHashMap<String, DefaultEntityMetaData>();
 
 		// load attributes first (because entities are optional).
@@ -254,15 +257,18 @@ public class EmxImportServiceImpl implements EmxImporterService
 			if (attributeAuto != null) defaultAttributeMetaData.setAuto(attributeAuto);
 			if (attributeIdAttribute != null) defaultAttributeMetaData.setIdAttribute(attributeIdAttribute);
 			if (attributeVisible != null) defaultAttributeMetaData.setVisible(attributeVisible);
-
-			if (refEntityName != null)
-			{
-				defaultAttributeMetaData.setRefEntity(entities.get(refEntityName));
-			}
+			if (refEntityName != null) defaultAttributeMetaData.setRefEntity(entities.get(refEntityName));
 
 			defaultAttributeMetaData.setLabel(attribute.getString(LABEL));
 			defaultAttributeMetaData.setDescription(attribute.getString(DESCRIPTION));
 
+			boolean lookupAttribute = false;
+			if (null != attributeIdAttribute && attributeIdAttribute)
+			{
+				lookupAttribute = true;
+			}
+
+			defaultAttributeMetaData.setLookupAttribute(lookupAttribute);
 			defaultEntityMetaData.addAttributeMetaData(defaultAttributeMetaData);
 		}
 	}
@@ -386,16 +392,21 @@ public class EmxImportServiceImpl implements EmxImporterService
 						}
 					}
 				}
+
 				// import data
 				for (String name : metadata.keySet())
 				{
-					MysqlRepository to = (MysqlRepository) store.getRepositoryByEntityName(name);
-					if (to != null)
+					MysqlRepository mysqlEntityRepository = (MysqlRepository) store.getRepositoryByEntityName(name);
+					if (mysqlEntityRepository != null)
 					{
-						Repository from = source.getRepositoryByEntityName(name);
-						List<Entity> entities = Lists.newArrayList(from);
-						to.update(entities, dbAction);
-						report.getNrImportedEntitiesMap().put(name, entities.size());
+						Repository fileEntityRepository = source.getRepositoryByEntityName(name);
+						// check to prevent nullpointer when importing metadata only
+						if (fileEntityRepository != null)
+						{
+							List<Entity> entities = Lists.newArrayList(fileEntityRepository);
+							mysqlEntityRepository.update(entities, dbAction);
+							report.getNrImportedEntitiesMap().put(name, entities.size());
+						}
 					}
 				}
 
@@ -406,8 +417,6 @@ public class EmxImportServiceImpl implements EmxImporterService
 				status.setRollbackOnly();
 				throw e;
 			}
-
 		}
 	}
-
 }

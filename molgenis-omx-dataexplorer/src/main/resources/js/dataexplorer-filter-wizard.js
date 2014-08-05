@@ -107,7 +107,7 @@
 			
 			$.each(compoundAttribute.attributes, function(i, attribute) {
 				if(attribute.fieldType !== 'COMPOUND') {
-					paneContainer.append(molgenis.dataexplorer.filter.createFilterControls(attribute, attributeFilters[attribute.href], true));
+					paneContainer.append(molgenis.dataexplorer.filter.createFilter(attribute, attributeFilters[attribute.href], true));
 				}
 			});
 			pane.append(paneContainer);

@@ -242,7 +242,11 @@
 					createTreeNodes(tree, subTrees, treeConfig, callback);
 				}
 			});
-		}		
+		}
+        else{
+            $('.catalog-search-tree').empty();
+            $('.catalog-search-tree').html('no matching items');
+        }
 	};
 	
 	function getDataItemsByIds(catalogId, items, callback){
@@ -382,7 +386,7 @@
 				onItemSelect : selectNode
 			});
 			
-			createSearchTreeConfig(searchText.val(), treeSettings, container, function(treeConfig) {				
+			createSearchTreeConfig(searchText.val(), treeSettings, container, function(treeConfig) {
 				if(!catalogSearchTree.is(':empty')) {
 					catalogSearchTree.fancytree('destroy');
 					catalogSearchTree.empty();

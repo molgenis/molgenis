@@ -260,7 +260,15 @@ public class OmimHpoAnnotator extends LocusAnnotator
 				{
 					String[] split = line.split("\\|");
 
-					String entry = split[0].substring(split[0].length() - 10, split[0].length() - 4);
+					// trim mapping method field, example: (3)
+					String entry = split[0];
+					entry = entry.substring(0, entry.length() - 3);
+
+					// trim trailing whitespace
+					entry = entry.trim();
+
+					// last six characters should be OMIM id
+					entry = entry.substring(entry.length() - 6);
 					if (entry.matches("[0-9]+"))
 					{
 						List<String> genes = Arrays.asList(split[1].split(", "));

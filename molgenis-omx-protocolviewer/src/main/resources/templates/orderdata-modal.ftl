@@ -63,9 +63,8 @@
 				var start = page ? page.start : 0;
 				var end = page ? page.end : nrItemsPerPage;
 				
-				var pendingDeleteIds = $.map(pendingDeletes, function(pendingDelete){return pendingDelete.feature;});
 				$.ajax({
-					url: molgenis.getContextUrl() + '/selection/' + catalogId + '?start=' + start + '&end=' + end + '&excludes[]=' + pendingDeleteIds.join(','),
+					url: molgenis.getContextUrl() + '/selection/' + catalogId + '?start=' + start + '&end=' + end + '&excludes[]=' + pendingDeletes.join(','),
 					success : function(selection) {
 						var selectionTable = $('#orderdata-selection-table-container');
 						var selectionTablePager = $('#orderdata-selection-table-pager');
@@ -96,9 +95,7 @@
 	                            var deleteCol = $('<td class="center">');
 	                            var deleteBtn = $('<i class="icon-remove"></i>');
 	                            deleteBtn.click(function () {
-	                                pendingDeletes.push({
-	                                    'feature': feature.href.substring(feature.href.lastIndexOf('/') + 1)
-	                                });
+	                                pendingDeletes.push(feature.href);
 	                                updateFeatureSelectionContainer();
 	                                // restore focus
 	                                form.find('input:visible:first').focus();

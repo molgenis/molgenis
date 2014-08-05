@@ -248,15 +248,8 @@
 
 			$('#scatterplot-select-xaxis-feature').html(createAttributeSelectOptions(xaxisAttributes, $('#scatterplot-select-xaxis-feature').val()));
 			$('#scatterplot-select-yaxis-feature').html(createAttributeSelectOptions(yaxisAttributes, $('#scatterplot-select-yaxis-feature').val()));
-			$('#scatterplot-select-split-feature').html(createAttributeSelectOptions(attributes, $('#scatterplot-select-split-feature').val()));
-			
-			$('#scatterplot-designer-modal-create-button').click(function() {
-				var attributeMap = toAttributeMap(attributes);
-				var xaxisAttribute = attributeMap[$('#scatterplot-select-xaxis-feature').val()];
-				var yaxisAttribute = attributeMap[$('#scatterplot-select-yaxis-feature').val()];
-				var splitAttribute = attributeMap[$('#scatterplot-select-split-feature').val()];
-				ns.createScatterPlot(getEntity(), getEntityQuery(), xaxisAttribute, yaxisAttribute, splitAttribute);
-			});
+			$('#scatterplot-select-split-feature').html(createAttributeSelectOptions(getAttributes(), $('#scatterplot-select-split-feature').val()));
+			$('#scatterplot-designer-modal-create-button').data('attributes', attributes);
 			
 			activateDesignerSubmitButtonScatterPlot();
 		});
@@ -275,16 +268,27 @@
 			
 			$('#boxplot-select-feature').html(createAttributeSelectOptions(attributeAttributes, $('#boxplot-select-feature').val()));
 			$('#boxplot-select-split-feature').html(createAttributeSelectOptions(attributes, $('#boxplot-select-split-feature').val()));
-			
-			$('#boxplot-designer-modal-create-button').click(function(){
-				var attributeMap = toAttributeMap(attributes);
-				var attribute = attributeMap[$('#boxplot-select-feature').val()];
-				var splitAttribute = attributeMap[$('#boxplot-select-split-feature').val()];
-				ns.createBoxPlot(getEntity(), getEntityQuery(), attribute, splitAttribute);
-			});	
+			$('#boxplot-designer-modal-create-button').data('attributes', attributes);
 			
 			activateDesignerSubmitButtonBoxPlot();
 		});
+		
+		$('#scatterplot-designer-modal-create-button').click(function() {
+			var attributeMap = toAttributeMap($('#scatterplot-designer-modal-create-button').data('attributes'));
+			var xaxisAttribute = attributeMap[$('#scatterplot-select-xaxis-feature').val()];
+			var yaxisAttribute = attributeMap[$('#scatterplot-select-yaxis-feature').val()];
+			var splitAttribute = attributeMap[$('#scatterplot-select-split-feature').val()];
+			ns.createScatterPlot(getEntity(), getEntityQuery(), xaxisAttribute, yaxisAttribute, splitAttribute);
+			$('#scatterplot-designer-modal-create-button').removeData();
+		});
+		
+		$('#boxplot-designer-modal-create-button').click(function(){
+			var attributeMap = toAttributeMap($('#boxplot-designer-modal-create-button').data('attributes'));
+			var attribute = attributeMap[$('#boxplot-select-feature').val()];
+			var splitAttribute = attributeMap[$('#boxplot-select-split-feature').val()];
+			ns.createBoxPlot(getEntity(), getEntityQuery(), attribute, splitAttribute);
+			$('#boxplot-designer-modal-create-button').removeData();
+		});	
 		
 		$('#boxplot-select-feature').change(activateDesignerSubmitButtonBoxPlot);
 	});

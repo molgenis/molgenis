@@ -38,10 +38,8 @@ public class MySqlConfiguration
 			{
 				MysqlRepository repo = mysqlRepository();
 				repo.setRepositoryCollection(this);
-
 				return repo;
 			}
-
 		};
 	}
 }

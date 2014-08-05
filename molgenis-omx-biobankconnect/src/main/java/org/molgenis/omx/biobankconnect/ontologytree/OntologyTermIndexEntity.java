@@ -50,7 +50,8 @@ public class OntologyTermIndexEntity extends IndexEntity
 				String currentOntologyTermUrl = columnValueMap.get(OntologyTermRepository.ONTOLOGY_TERM_IRI).toString();
 				String ontologyUrl = columnValueMap.get(OntologyTermRepository.ONTOLOGY_IRI).toString();
 				Query q = new QueryImpl().eq(OntologyTermRepository.PARENT_NODE_PATH, currentNodePath).and()
-						.eq(OntologyTermRepository.PARENT_ONTOLOGY_TERM_URL, currentOntologyTermUrl).pageSize(500);
+						.eq(OntologyTermRepository.PARENT_ONTOLOGY_TERM_URL, currentOntologyTermUrl)
+						.pageSize(Integer.MAX_VALUE);
 				String documentType = OntologyService.createOntologyTermDocumentType(ontologyUrl);
 				SearchRequest searchRequest = new SearchRequest(documentType, q, null);
 				SearchResult result = searchService.search(searchRequest);
