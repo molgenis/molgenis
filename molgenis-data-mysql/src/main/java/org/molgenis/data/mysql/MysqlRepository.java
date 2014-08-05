@@ -39,8 +39,6 @@ import org.molgenis.fieldtypes.StringField;
 import org.molgenis.fieldtypes.TextField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.model.MolgenisModelException;
-import org.molgenis.security.core.Permission;
-import org.molgenis.util.SecurityDecoratorUtils;
 import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -512,25 +510,16 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 			if (att.getDataType() instanceof MrefField)
 			{
-				String entityName = getEntityMetaData().getName();
-				String attributeName = att.getName();
-				String idAttributeName = idAttribute.getName();
-				String refEntityName = att.getRefEntity().getName();
-				String refEntityIdAttributeName = att.getRefEntity().getIdAttribute().getName();
-
 				// extra join so we can filter on the mrefs
-				// TODO Why the same join twice?
-				String filterLeftJoins = " LEFT JOIN `%1$s_%2$s` AS `%2$s_filter` ON (this.`%3$s` = `%2$s_filter`.`%3$s`) "
-						+ "LEFT JOIN `%1$s_%2$s` AS `%2$s` ON (this.`%3$s` = `%2$s`.`%3$s`)";
-
-				from.append(String.format(filterLeftJoins, entityName, attributeName, idAttributeName));
-
-				if (SecurityDecoratorUtils.isPermissionValid(att.getRefEntity().getName(), Permission.READ))
-				{
-					String searchLeftJoin = " LEFT JOIN `%1$s` AS `%1$s_RefTable` ON (`%2$s`.`%2$s` = `%1$s_RefTable`.`%3$s`)";
-
-					from.append(String.format(searchLeftJoin, refEntityName, attributeName, refEntityIdAttributeName));
-				}
+				from.append(" LEFT JOIN ").append('`').append(getEntityMetaData().getName()).append('_')
+						.append(att.getName()).append('`').append(" AS ").append('`').append(att.getName())
+						.append("_filter` ON (this.").append('`').append(idAttribute.getName()).append('`')
+						.append(" = ").append('`').append(att.getName()).append("_filter`.").append('`')
+						.append(idAttribute.getName()).append('`').append(") LEFT JOIN ").append('`')
+						.append(getEntityMetaData().getName()).append('_').append(att.getName()).append('`')
+						.append(" AS ").append('`').append(att.getName()).append('`').append(" ON (this.").append('`')
+						.append(idAttribute.getName()).append('`').append(" = ").append('`').append(att.getName())
+						.append('`').append('.').append('`').append(idAttribute.getName()).append('`').append(')');
 			}
 
 		return from.toString();
@@ -571,16 +560,6 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 						{
 							search.append(" OR CAST(").append(att.getName()).append(".`").append(att.getName())
 									.append('`').append(" as CHAR) LIKE ?");
-
-							if (SecurityDecoratorUtils.isPermissionValid(att.getRefEntity().getName(), Permission.READ))
-							{
-								for (AttributeMetaData refAtt : att.getRefEntity().getAttributes())
-								{
-									search.append(" OR CAST(").append(att.getName()).append("_RefTable").append(".`")
-											.append(refAtt.getName()).append('`').append(" as CHAR) LIKE ?");
-									parameters.add("%" + DataConverter.toString(r.getValue()) + "%");
-								}
-							}
 						}
 						else
 						{
