@@ -258,10 +258,6 @@ function getCurrentTimezoneOffset() {
 	};
 }(window));
 
-// function htmlEscape(text) {
-//	return $('<div/>').text(text).html();
-//}
-
 /*
  * Create a table cell to show data of a certain type Is used by the
  * dataexplorer and the forms plugin
