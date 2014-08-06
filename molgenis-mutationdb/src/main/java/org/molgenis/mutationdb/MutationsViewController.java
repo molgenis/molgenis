@@ -4,7 +4,6 @@ import static org.molgenis.mutationdb.MutationsViewController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -39,12 +38,9 @@ public class MutationsViewController extends MolgenisPluginController
 	private final DataService dataService;
 	private final MysqlViewService mysqlViewService;
 	public static List<String> HEADERS_NAMES = Arrays.asList("Mutation ID", "cDNA change", "Protein change",
-			"Exon/Intron", "Consequence",
-			"Inheritance", "Patient ID", "Phenotype");
-	private static final String PATH_TO_INSERT_QUERY = File.separatorChar + "mysql" + File.separatorChar
-			+ "mutationview_col7a1_prototype.sql";
-	private static final String PATH_TO_NA_QUERY = File.separatorChar + "mysql" + File.separatorChar
-			+ "mutationview_col7a1_prototype_update_na.sql";
+			"Exon/Intron", "Consequence", "Inheritance", "Patient ID", "Phenotype");
+	private static final String PATH_TO_INSERT_QUERY = "/mysql/mutationview_col7a1_prototype.sql";
+	private static final String PATH_TO_NA_QUERY = "/mysql/mutationview_col7a1_prototype_update_na.sql";
 
 	@Autowired
 	public MutationsViewController(DataService dataService, MysqlViewService mysqlViewService)
@@ -72,8 +68,7 @@ public class MutationsViewController extends MolgenisPluginController
 		{
 			CrudRepository mutationsViewRepo = (CrudRepository) dataService
 					.getRepositoryByEntityName(ENTITYNAME_MUTATIONSVIEW);
-			CrudRepository mutationsRepo = (CrudRepository) dataService
-					.getRepositoryByEntityName(ENTITYNAME_MUTATIONS);
+			CrudRepository mutationsRepo = (CrudRepository) dataService.getRepositoryByEntityName(ENTITYNAME_MUTATIONS);
 			rows = createRows(mutationsViewRepo, mutationsRepo);
 		}
 		model.addAttribute("rows", rows);
@@ -87,8 +82,7 @@ public class MutationsViewController extends MolgenisPluginController
 	{
 		if (dataService.hasRepository(ENTITYNAME_MUTATIONSVIEW))
 		{
-			Repository mutationsViewRepo = dataService
-					.getRepositoryByEntityName(ENTITYNAME_MUTATIONSVIEW);
+			Repository mutationsViewRepo = dataService.getRepositoryByEntityName(ENTITYNAME_MUTATIONSVIEW);
 			this.mysqlViewService.truncate(mutationsViewRepo.getEntityMetaData().getName());
 			this.mysqlViewService.populateWithQuery(MySqlFileUtil.getMySqlQueryFromFile(MutationsViewController.class,
 					PATH_TO_INSERT_QUERY));
