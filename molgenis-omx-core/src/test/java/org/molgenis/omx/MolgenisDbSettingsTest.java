@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.isA;
+import static org.hamcrest.Matchers.contains;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -18,7 +19,6 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.hamcrest.Matchers;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule.Operator;
@@ -81,7 +81,7 @@ public class MolgenisDbSettingsTest extends AbstractTestNGSpringContextTests
 							eq(RuntimeProperty.ENTITY_NAME),
 							argThat(allOf(
 									isA(Query.class),
-									hasProperty("rules", Matchers.contains(allOf(
+									hasProperty("rules", contains(allOf(
 											hasProperty("field", equalTo("identifier")),
 											hasProperty("operator", equalTo(Operator.LIKE)),
 											hasProperty("value", equalTo("RuntimeProperty_plugin.dataexplorer"))))))),
