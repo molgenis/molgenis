@@ -24,13 +24,13 @@ public class QueryGeneratorHelper
 	private final EntityMetaData entityMetaData;
 	private final LinkedHashMap<BaseQueryBuilder, Operator> baseQueryCollection;
 	private final List<QueryRule> queryRules;
-	private final List<QueryRule> mrefRules;
+	private final List<QueryRule> mrefRulesOfSameField;
 
 	public QueryGeneratorHelper(List<QueryRule> rules, EntityMetaData metaData)
 	{
 		if (rules.size() == 0) throw new RuntimeException("The queryRules cannot be empty : " + rules);
 		baseQueryCollection = new LinkedHashMap<BaseQueryBuilder, Operator>(rules.size());
-		mrefRules = new ArrayList<QueryRule>();
+		mrefRulesOfSameField = new ArrayList<QueryRule>();
 		queryRules = rules;
 		entityMetaData = metaData;
 	}
@@ -48,7 +48,7 @@ public class QueryGeneratorHelper
 			if (queryRule.getOperator().equals(NESTED))
 			{
 				QueryGeneratorHelper helper = new QueryGeneratorHelper(queryRule.getNestedRules(), entityMetaData);
-				addQueryToCollection(queryRule, helper.generateQuery());
+				baseQueryCollection.put(helper.generateQuery(), getLogicOperator(queryRule));
 			}
 			else if (isMref(queryRule))
 			{
@@ -59,10 +59,11 @@ public class QueryGeneratorHelper
 				// the rules
 				if (mrefField.toString().equals(queryRule.getField()))
 				{
-					int index = queryRules.indexOf(queryRule);
-					if (index > 0 && validateOperator(queryRules.get(index - 1)))
+					// Only add logic operator to mrefRules when there are mref
+					// queryRules already stored
+					if (mrefRulesOfSameField.size() > 0)
 					{
-						mrefRules.add(queryRules.get(index - 1));
+						mrefRulesOfSameField.add(new QueryRule(getLogicOperator(queryRule)));
 					}
 				}
 				else
@@ -73,7 +74,7 @@ public class QueryGeneratorHelper
 					addNestedQueryToCollection();
 				}
 				mrefField.delete(0, mrefField.length()).append(queryRule.getField());
-				mrefRules.add(queryRule);
+				mrefRulesOfSameField.add(queryRule);
 			}
 			else
 			{
@@ -82,9 +83,9 @@ public class QueryGeneratorHelper
 				// in mrefRules list.
 				addNestedQueryToCollection();
 				mrefField.delete(0, mrefField.length());
-
-				addQueryToCollection(queryRule,
-						QueryBuilders.queryString(LuceneQueryStringBuilder.buildQueryString(Arrays.asList(queryRule))));
+				baseQueryCollection.put(
+						QueryBuilders.queryString(LuceneQueryStringBuilder.buildQueryString(Arrays.asList(queryRule))),
+						getLogicOperator(queryRule));
 			}
 		}
 		// Generate nesteQuery for MREF if there are any
@@ -101,15 +102,16 @@ public class QueryGeneratorHelper
 	 */
 	private void addNestedQueryToCollection()
 	{
-		if (mrefRules.size() > 0)
+		if (mrefRulesOfSameField.size() > 0)
 		{
-			String path = mrefRules.get(0).getField();
+			String path = mrefRulesOfSameField.get(0).getField();
 			StringBuilder queryStringBuilder = new StringBuilder();
 			queryStringBuilder.append('(');
-			for (QueryRule rule : mrefRules)
+			for (QueryRule rule : mrefRulesOfSameField)
 			{
 				if (rule.getField() == null)
 				{
+
 					queryStringBuilder.append(' ').append(rule.getOperator().toString()).append(' ');
 				}
 				else
@@ -121,20 +123,22 @@ public class QueryGeneratorHelper
 				}
 			}
 			queryStringBuilder.append(')');
-			addQueryToCollection(mrefRules.get(0),
-					QueryBuilders.nestedQuery(path, QueryBuilders.queryString(queryStringBuilder.toString())));
-			mrefRules.clear();
+
+			baseQueryCollection.put(
+					QueryBuilders.nestedQuery(path, QueryBuilders.queryString(queryStringBuilder.toString())),
+					getLogicOperator(mrefRulesOfSameField.get(0)));
+
+			mrefRulesOfSameField.clear();
 		}
 	}
 
 	/**
-	 * A helper function to add BaseQueryBuilder to the queryBuilder collection
-	 * as well as the connected Operator (AND/OR)
+	 * A helper function to get the connected Operator (AND/OR)
 	 * 
 	 * @param queryRule
 	 * @param queryBuilder
 	 */
-	private void addQueryToCollection(QueryRule queryRule, BaseQueryBuilder queryBuilder)
+	private Operator getLogicOperator(QueryRule queryRule)
 	{
 		// Initialize the Operator with 'AND' always
 		QueryRule operator = new QueryRule(AND);
@@ -152,31 +156,14 @@ public class QueryGeneratorHelper
 			operator = queryRules.get(index - 1);
 		}
 
-		if (validateOperator(operator))
+		if (operator.getOperator() != null && (operator.getOperator().equals(AND) || operator.getOperator().equals(OR)))
 		{
-			baseQueryCollection.put(queryBuilder, operator.getOperator());
-		}
-	}
-
-	/**
-	 * The logic operator can only be AND/OR, otherwise a RuntimeException will
-	 * be thrown
-	 * 
-	 * @param connectedOperator
-	 * @return
-	 */
-	private boolean validateOperator(QueryRule connectedOperator)
-	{
-		if (connectedOperator.getOperator() != null
-				&& (connectedOperator.getOperator().equals(AND) || connectedOperator.getOperator().equals(OR)))
-		{
-			return true;
+			return operator.getOperator();
 		}
 		else
 		{
-			throw new RuntimeException("The query operator is not valid : " + connectedOperator.toString());
+			throw new RuntimeException("The query operator is not valid : " + operator.toString());
 		}
-
 	}
 
 	/**
@@ -194,10 +181,10 @@ public class QueryGeneratorHelper
 	}
 
 	/**
-	 * Helper class to generate a ElasticSearch BaseQueryBuilder Object based on
-	 * previously collected QueryBuilders. Create a BoolQueryBuilder only if
-	 * there are more than one queryBuilder in the collection, otherwise only
-	 * return the first QueryBuilder.
+	 * A helper function to generate a ElasticSearch BaseQueryBuilder Object
+	 * based on previously collected QueryBuilders. Create a BoolQueryBuilder
+	 * only if there are more than one queryBuilder in the collection, otherwise
+	 * only return the first QueryBuilder.
 	 * 
 	 * @return
 	 */
