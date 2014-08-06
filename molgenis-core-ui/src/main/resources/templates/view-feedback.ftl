@@ -6,7 +6,6 @@
 
 <@header css/>
 
-<!-- view-feedback.ftl -->
 <#if feedbackForm??>
 	<#if feedbackForm.submitted>
 		<div class="hero-unit">
@@ -75,6 +74,5 @@
 <#else>
 	<p>Admin email addresses not known.</p>
 </#if>
-<!-- end view-feedback.ftl -->
 
 <@footer/>
