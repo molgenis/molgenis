@@ -18,6 +18,7 @@ import org.molgenis.catalog.CatalogFolder;
 import org.molgenis.catalog.CatalogItem;
 import org.molgenis.catalog.CatalogMeta;
 import org.molgenis.catalog.UnknownCatalogException;
+import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -58,6 +59,12 @@ public class CatalogManagerControllerTest extends AbstractTestNGSpringContextTes
 		public CatalogManagerController catalogManagerController()
 		{
 			return new CatalogManagerController(catalogManagerService());
+		}
+
+		@Bean
+		public MolgenisPluginRegistry molgenisPluginRegistry()
+		{
+			return mock(MolgenisPluginRegistry.class);
 		}
 
 		@Bean
@@ -111,8 +118,7 @@ public class CatalogManagerControllerTest extends AbstractTestNGSpringContextTes
 		this.mockMvc
 				.perform(
 						post(CatalogManagerController.URI + "/activation").param("id", "1")
-								.param("activate", "activate")
-								.contentType(MediaType.APPLICATION_FORM_URLENCODED))
+								.param("activate", "activate").contentType(MediaType.APPLICATION_FORM_URLENCODED))
 				.andExpect(status().isOk())
 				.andExpect(view().name("view-catalogmanager"))
 				.andExpect(model().attributeExists("succesMessage"))
@@ -136,8 +142,7 @@ public class CatalogManagerControllerTest extends AbstractTestNGSpringContextTes
 		this.mockMvc
 				.perform(
 						post(CatalogManagerController.URI + "/activation").param("id", "1")
-								.param("activate", "activate")
-								.contentType(MediaType.APPLICATION_FORM_URLENCODED))
+								.param("activate", "activate").contentType(MediaType.APPLICATION_FORM_URLENCODED))
 				.andExpect(status().isOk())
 				.andExpect(view().name("view-catalogmanager"))
 				.andExpect(model().attributeExists("succesMessage"))
@@ -154,9 +159,9 @@ public class CatalogManagerControllerTest extends AbstractTestNGSpringContextTes
 		this.mockMvc
 				.perform(
 						post(CatalogManagerController.URI + "/activation").param("id", "bogus")
-								.param("activate", "activate")
-								.contentType(MediaType.APPLICATION_FORM_URLENCODED)).andExpect(status().isOk())
-				.andExpect(view().name("view-catalogmanager")).andExpect(model().attributeExists("errorMessage"));
+								.param("activate", "activate").contentType(MediaType.APPLICATION_FORM_URLENCODED))
+				.andExpect(status().isOk()).andExpect(view().name("view-catalogmanager"))
+				.andExpect(model().attributeExists("errorMessage"));
 	}
 
 	@Test
@@ -174,8 +179,7 @@ public class CatalogManagerControllerTest extends AbstractTestNGSpringContextTes
 		this.mockMvc
 				.perform(
 						post(CatalogManagerController.URI + "/activation").param("id", catalogId)
-								.param("deactivate", "deactivate")
-								.contentType(MediaType.APPLICATION_FORM_URLENCODED))
+								.param("deactivate", "deactivate").contentType(MediaType.APPLICATION_FORM_URLENCODED))
 				.andExpect(status().isOk())
 				.andExpect(view().name("view-catalogmanager"))
 				.andExpect(model().attributeExists("successMessage"))
@@ -198,8 +202,7 @@ public class CatalogManagerControllerTest extends AbstractTestNGSpringContextTes
 		this.mockMvc
 				.perform(
 						post(CatalogManagerController.URI + "/activation").param("id", "1")
-								.param("deactivate", "deactivate")
-								.contentType(MediaType.APPLICATION_FORM_URLENCODED))
+								.param("deactivate", "deactivate").contentType(MediaType.APPLICATION_FORM_URLENCODED))
 				.andExpect(status().isOk())
 				.andExpect(view().name("view-catalogmanager"))
 				.andExpect(model().attributeExists("errorMessage"))
@@ -217,9 +220,9 @@ public class CatalogManagerControllerTest extends AbstractTestNGSpringContextTes
 		this.mockMvc
 				.perform(
 						post(CatalogManagerController.URI + "/activation").param("id", "bogus")
-								.param("deactivate", "deactivate")
-								.contentType(MediaType.APPLICATION_FORM_URLENCODED)).andExpect(status().isOk())
-				.andExpect(view().name("view-catalogmanager")).andExpect(model().attributeExists("errorMessage"));
+								.param("deactivate", "deactivate").contentType(MediaType.APPLICATION_FORM_URLENCODED))
+				.andExpect(status().isOk()).andExpect(view().name("view-catalogmanager"))
+				.andExpect(model().attributeExists("errorMessage"));
 	}
 
 	@Test

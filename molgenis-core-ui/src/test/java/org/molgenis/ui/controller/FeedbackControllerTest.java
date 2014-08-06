@@ -2,13 +2,13 @@ package org.molgenis.ui.controller;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasProperty;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -22,6 +22,7 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMessage.RecipientType;
 
 import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.ui.controller.FeedbackController;
@@ -61,10 +62,10 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 
 	@Autowired
 	private MolgenisSettings molgenisSettings;
-	
+
 	@Autowired
 	private StaticContentService staticContentService;
-	
+
 	@Autowired
 	private FileStore fileStore;
 
@@ -217,8 +218,7 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 				.andExpect(
 						model().attribute(
 								"feedbackForm",
-								hasProperty(
-										"errorMessage",
+								hasProperty("errorMessage",
 										equalTo("Unfortunately, we were unable to send the mail containing "
 												+ "your feedback.<br/>Please contact the administrator."))));
 	}
@@ -245,17 +245,23 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
+		public MolgenisPluginRegistry molgenisPluginRegistry()
+		{
+			return mock(MolgenisPluginRegistry.class);
+		}
+
+		@Bean
 		public JavaMailSender mailSender()
 		{
 			return mock(JavaMailSender.class);
 		}
-		
+
 		@Bean
 		public StaticContentService staticContentService()
 		{
 			return mock(StaticContentService.class);
 		}
-		
+
 		@Bean
 		public FileStore fileStore()
 		{

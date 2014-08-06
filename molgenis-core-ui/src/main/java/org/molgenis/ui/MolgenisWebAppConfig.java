@@ -13,6 +13,7 @@ import org.molgenis.framework.db.WebAppDatabasePopulatorService;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
+import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
 import org.molgenis.messageconverter.CsvHttpMessageConverter;
 import org.molgenis.security.CorsInterceptor;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -20,6 +21,12 @@ import org.molgenis.security.freemarker.HasPermissionDirective;
 import org.molgenis.security.freemarker.NotHasPermissionDirective;
 import org.molgenis.ui.freemarker.FormLinkDirective;
 import org.molgenis.ui.freemarker.LimitMethod;
+import org.molgenis.ui.menu.MenuMolgenisUi;
+import org.molgenis.ui.menu.MenuReaderService;
+import org.molgenis.ui.menu.MenuReaderServiceImpl;
+import org.molgenis.ui.menumanager.MenuManagerService;
+import org.molgenis.ui.menumanager.MenuManagerServiceImpl;
+import org.molgenis.ui.security.MolgenisUiPermissionDecorator;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.FileStore;
 import org.molgenis.util.GsonHttpMessageConverter;
@@ -247,22 +254,28 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	@Bean
+	public MenuReaderService menuReaderService()
+	{
+		return new MenuReaderServiceImpl(molgenisSettings);
+	}
+
+	@Bean
+	public MenuManagerService menuManagerService()
+	{
+		return new MenuManagerServiceImpl(menuReaderService(), molgenisSettings, molgenisPluginRegistry());
+	}
+
+	@Bean
 	public MolgenisUi molgenisUi()
 	{
-		try
-		{
-			return new XmlMolgenisUi(new XmlMolgenisUiLoader(), molgenisSettings, molgenisPermissionService);
-		}
-		catch (IOException e)
-		{
-			throw new RuntimeException(e);
-		}
+		MolgenisUi molgenisUi = new MenuMolgenisUi(molgenisSettings, menuReaderService());
+		return new MolgenisUiPermissionDecorator(molgenisUi, molgenisPermissionService);
 	}
 
 	@Bean
 	public MolgenisPluginRegistry molgenisPluginRegistry()
 	{
-		return new MolgenisUiPluginRegistry(molgenisUi());
+		return new MolgenisPluginRegistryImpl();
 	}
 
 	@Bean
