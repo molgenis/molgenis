@@ -8,6 +8,7 @@ import org.molgenis.ui.MolgenisUiMenu;
 import org.molgenis.ui.MolgenisUiMenuItem;
 import org.molgenis.ui.MolgenisUiMenuItemType;
 
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -66,14 +67,32 @@ public class MolgenisUiMenuPermissionDecorator implements MolgenisUiMenu
 	@Override
 	public List<MolgenisUiMenuItem> getItems()
 	{
-		return Lists.newArrayList(Iterables.filter(molgenisUiMenu.getItems(), new Predicate<MolgenisUiMenuItem>()
-		{
-			@Override
-			public boolean apply(MolgenisUiMenuItem molgenisUiMenuItem)
-			{
-				return hasPermission(molgenisUiMenuItem);
-			}
-		}));
+		return Lists.newArrayList(Iterables.filter(
+				Iterables.transform(molgenisUiMenu.getItems(), new Function<MolgenisUiMenuItem, MolgenisUiMenuItem>()
+				{
+					@Override
+					public MolgenisUiMenuItem apply(MolgenisUiMenuItem molgenisUiMenuItem)
+					{
+						switch (molgenisUiMenuItem.getType())
+						{
+							case MENU:
+								return new MolgenisUiMenuPermissionDecorator((MolgenisUiMenu) molgenisUiMenuItem,
+										molgenisPermissionService);
+							case PLUGIN:
+								return molgenisUiMenuItem;
+							default:
+								throw new RuntimeException("Unknown MolgenisUiMenuItem ["
+										+ molgenisUiMenuItem.getType() + "]");
+						}
+					}
+				}), new Predicate<MolgenisUiMenuItem>()
+				{
+					@Override
+					public boolean apply(MolgenisUiMenuItem molgenisUiMenuItem)
+					{
+						return hasPermission(molgenisUiMenuItem);
+					}
+				}));
 	}
 
 	@Override
@@ -114,7 +133,7 @@ public class MolgenisUiMenuPermissionDecorator implements MolgenisUiMenu
 		switch (molgenisUiMenuItem.getType())
 		{
 			case MENU:
-				hasPermission = true;
+				hasPermission = !((MolgenisUiMenu) molgenisUiMenuItem).getItems().isEmpty();
 				break;
 			case PLUGIN:
 				String menuItemId = molgenisUiMenuItem.getId();

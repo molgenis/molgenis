@@ -62,7 +62,8 @@ public class MolgenisEntityFormPluginController extends MolgenisPluginController
 					@Override
 					public MolgenisPlugin apply(String entityName)
 					{
-						return new MolgenisPlugin(PLUGIN_NAME_PREFIX + entityName, "", "", ""); // FIXME
+						String pluginId = PLUGIN_NAME_PREFIX + entityName;
+						return new MolgenisPlugin(pluginId, pluginId, "", ""); // FIXME
 					}
 				}).iterator();
 			}

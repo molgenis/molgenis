@@ -15,6 +15,7 @@ import org.molgenis.ui.XmlMolgenisUiLoader;
 import org.molgenis.ui.menu.Menu;
 import org.molgenis.ui.menu.MenuItem;
 import org.molgenis.ui.menu.MenuItemType;
+import org.molgenis.ui.menu.MenuReaderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -29,14 +30,18 @@ public class MenuManagerServiceImpl implements MenuManagerService, ApplicationLi
 
 	public static final String KEY_MOLGENIS_MENU = "molgenis.menu";
 
+	private final MenuReaderService menuReaderService;
 	private final MolgenisSettings molgenisSettings;
 	private final MolgenisPluginRegistry molgenisPluginRegistry;
 
 	@Autowired
-	public MenuManagerServiceImpl(MolgenisSettings molgenisSettings, MolgenisPluginRegistry molgenisPluginRegistry)
+	public MenuManagerServiceImpl(MenuReaderService menuReaderService, MolgenisSettings molgenisSettings,
+			MolgenisPluginRegistry molgenisPluginRegistry)
 	{
+		if (menuReaderService == null) throw new IllegalArgumentException("menuReaderService is null");
 		if (molgenisSettings == null) throw new IllegalArgumentException("molgenisSettings is null");
 		if (molgenisPluginRegistry == null) throw new IllegalArgumentException("molgenisPluginRegistry is null");
+		this.menuReaderService = menuReaderService;
 		this.molgenisSettings = molgenisSettings;
 		this.molgenisPluginRegistry = molgenisPluginRegistry;
 	}
@@ -46,12 +51,7 @@ public class MenuManagerServiceImpl implements MenuManagerService, ApplicationLi
 	@Transactional(readOnly = true)
 	public Menu getMenu()
 	{
-		String menuJson = molgenisSettings.getProperty(KEY_MOLGENIS_MENU);
-		if (menuJson == null)
-		{
-			throw new RuntimeException("Missing required molgenis setting [" + KEY_MOLGENIS_MENU + "]");
-		}
-		return new GsonBuilder().create().fromJson(menuJson, Menu.class);
+		return menuReaderService.getMenu();
 	}
 
 	@Override

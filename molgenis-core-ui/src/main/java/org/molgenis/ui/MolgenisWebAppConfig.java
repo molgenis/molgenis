@@ -22,6 +22,8 @@ import org.molgenis.security.freemarker.NotHasPermissionDirective;
 import org.molgenis.ui.freemarker.FormLinkDirective;
 import org.molgenis.ui.freemarker.LimitMethod;
 import org.molgenis.ui.menu.MenuMolgenisUi;
+import org.molgenis.ui.menu.MenuReaderService;
+import org.molgenis.ui.menu.MenuReaderServiceImpl;
 import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.ui.menumanager.MenuManagerServiceImpl;
 import org.molgenis.ui.security.MolgenisUiPermissionDecorator;
@@ -252,15 +254,21 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	@Bean
+	public MenuReaderService menuReaderService()
+	{
+		return new MenuReaderServiceImpl(molgenisSettings);
+	}
+
+	@Bean
 	public MenuManagerService menuManagerService()
 	{
-		return new MenuManagerServiceImpl(molgenisSettings, molgenisPluginRegistry());
+		return new MenuManagerServiceImpl(menuReaderService(), molgenisSettings, molgenisPluginRegistry());
 	}
 
 	@Bean
 	public MolgenisUi molgenisUi()
 	{
-		MolgenisUi molgenisUi = new MenuMolgenisUi(molgenisSettings, menuManagerService());
+		MolgenisUi molgenisUi = new MenuMolgenisUi(molgenisSettings, menuReaderService());
 		return new MolgenisUiPermissionDecorator(molgenisUi, molgenisPermissionService);
 	}
 

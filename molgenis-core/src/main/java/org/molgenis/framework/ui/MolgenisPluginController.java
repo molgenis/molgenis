@@ -54,7 +54,7 @@ public abstract class MolgenisPluginController
 	@PostConstruct
 	private void registerPlugin()
 	{
-		molgenisPluginRegistry.registerPlugin(new MolgenisPlugin(getId(), "", "", "")); // FIXME
+		molgenisPluginRegistry.registerPlugin(new MolgenisPlugin(getId(), getId(), "", "")); // FIXME
 		if (molgenisPluginFactory != null)
 		{
 			molgenisPluginRegistry.registerPluginFactory(molgenisPluginFactory);
