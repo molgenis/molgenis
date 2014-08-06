@@ -8,6 +8,10 @@ import org.molgenis.security.core.MolgenisPermissionService;
 
 import com.google.common.collect.Lists;
 
+/**
+ * @deprecated use {@link org.molgenis.ui.menu.MenuItemToMolgenisUiMenuAdapter} instead
+ */
+@Deprecated
 public class XmlMolgenisUiMenu implements MolgenisUiMenu
 {
 	private final MenuType menuType;
