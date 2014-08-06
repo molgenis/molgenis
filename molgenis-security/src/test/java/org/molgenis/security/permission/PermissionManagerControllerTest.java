@@ -11,6 +11,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Arrays;
 
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.framework.ui.MolgenisPluginRegistry;
+import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
 import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.permission.PermissionManagerControllerTest.Config;
@@ -39,6 +41,12 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 		public PermissionManagerController permissionManagerController()
 		{
 			return new PermissionManagerController(permissionManagerService());
+		}
+
+		@Bean
+		public MolgenisPluginRegistry molgenisPluginRegistry()
+		{
+			return new MolgenisPluginRegistryImpl();
 		}
 
 		@Bean

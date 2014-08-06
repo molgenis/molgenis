@@ -47,7 +47,7 @@ public class GafListFileRepositoryTest
 	public void iteratorWithoutReport() throws IOException
 	{
 		StringBuilder path = new StringBuilder();
-		path.append(File.separatorChar).append("flowexport_test_gaflistfilerepository.csv");
+		path.append('/').append("flowexport_test_gaflistfilerepository.csv");
 		File file = new File(getClass().getResource(path.toString()).getFile());
 		@SuppressWarnings("resource")
 		GafListFileRepository gafListFileRepository = new GafListFileRepository(file, null, null, null);
@@ -72,14 +72,12 @@ public class GafListFileRepositoryTest
 	@Test
 	public void iteratorWithReport() throws IOException
 	{
-		StringBuilder path = new StringBuilder();
-		path.append(File.separatorChar).append("flowexport_test_gaflistfilerepository.csv");
-		File file = new File(getClass().getResource(path.toString()).getFile());
-		
+		File file = new File(getClass().getResource("/flowexport_test_gaflistfilerepository.csv").getFile());
+
 		GafListValidationReport gafListValidationReport = mock(GafListValidationReport.class);
 		when(gafListValidationReport.hasErrors("1500")).thenReturn(false);
 		when(gafListValidationReport.hasErrors("1501")).thenReturn(true);
-		
+
 		@SuppressWarnings("resource")
 		GafListFileRepository gafListFileRepository = new GafListFileRepository(file, null, null,
 				gafListValidationReport);

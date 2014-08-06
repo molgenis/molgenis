@@ -502,7 +502,17 @@ public class DataExplorerController extends MolgenisPluginController
 		}
 		return "view-entityreport";
 	}
-	
+
+	@RequestMapping(value = "/settings", method = RequestMethod.GET)
+	public @ResponseBody Map<String, String> getSettings(@RequestParam(required = false) String keyStartsWith)
+	{
+		if (keyStartsWith == null)
+		{
+			keyStartsWith = "";
+		}
+		return molgenisSettings.getProperties("plugin.dataexplorer" + keyStartsWith);
+	}
+
 	@ExceptionHandler(GalaxyDataExportException.class)
 	@ResponseBody
 	@ResponseStatus(HttpStatus.BAD_REQUEST)

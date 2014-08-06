@@ -1,4 +1,8 @@
-(function($, molgenis) {
+$.when( $, 
+		window.top.molgenis = window.top.molgenis || {}, 
+		$.get('dataexplorer/settings') 
+).then(
+function($, molgenis, settings) {	
 	"use strict";
 	var self = molgenis.dataexplorer = molgenis.dataexplorer || {};
 	
@@ -109,7 +113,8 @@
 		
 		if (entityMetaData.description) {
 			var description = $('<span data-placement="bottom"></span>');
-			description.html(abbreviate(entityMetaData.description, 180));
+			description.html(abbreviate(entityMetaData.description, 
+					settings['header.abbreviate']||180));
 			description.attr('data-title', entityMetaData.description);
 			$('#entity-class-description').html(description.tooltip());
 		} else {
@@ -351,4 +356,4 @@
 		}
 		
 	});
-}($, window.top.molgenis = window.top.molgenis || {}));
+});

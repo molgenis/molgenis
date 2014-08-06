@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -56,11 +57,16 @@ public class CosmicServiceAnnotator extends AbstractRepositoryAnnotator implemen
 	public static final String CONSEQUENCE_TYPE = "consequence_type";
 	public static final String STRAND = "strand";
 	public static final String START = "start";
-	private final DefaultHttpClient httpClient;
+	private final HttpClient httpClient;
 
 	public CosmicServiceAnnotator()
 	{
-		httpClient = new DefaultHttpClient();
+		this(new DefaultHttpClient());
+	}
+
+	CosmicServiceAnnotator(HttpClient httpClient)
+	{
+		this.httpClient = httpClient;
 	}
 
 	@Override
