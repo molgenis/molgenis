@@ -1,0 +1,27 @@
+#menu-editor-container .icon-edit:hover {
+	cursor: pointer;
+}
+
+#menu-editor-container .icon-trash:hover {
+	cursor: pointer;
+}
+
+#menu-editor-container li.root {
+	background: none;
+	border: none;
+	color: black;
+	font-weight:bold; 
+}
+
+#menu-editor-container li.node {
+	font-weight:normal; 
+}
+
+#menu-editor-container span {
+	padding-left: 5px;
+}
+
+#menu-editor-tree {
+	max-height: 600px;
+	overflow: auto;
+}

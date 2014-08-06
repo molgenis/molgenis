@@ -45,7 +45,7 @@
 	        <plugin id="ontologytree" name="Ontology Tree" url="ontologytree"/>
         </menu>
         <plugin id="workflowdataentry" name="Workflow Editor" url="workflowdataentry"/>
-        <menu label="Background" name="background">    
+        <menu label="About" name="background">    
 	        <plugin id="news" name="News" url="news"/>
 	        <plugin id="background" name="Background" url="background"/>
 	        <plugin id="references" name="References" url="references"/>
@@ -53,6 +53,7 @@
         </menu>
         <plugin id="entityexplorer" name="Entity Explorer" url="entityexplorer"/> 
         <menu label="Admin" name="admin">
+        	<plugin id="menumanager" name="Menu Manager" url="menumanager"/>
 	        <plugin id="permissionmanager" name="Permission Manager" url="permissionmanager"/>
 	        <plugin id="usermanager" name="User Manager" url="usermanager"/>
         	<plugin id="catalogmanager" name="Catalog Manager" url="catalogmanager"/>
@@ -66,5 +67,6 @@
 	        <plugin id="col7a1-mutations" name="COL7A1-Mutations" url="col7a1_mutations"/>
 		</menu>
 		<plugin id="useraccount" name="Account" url="useraccount"/>
+        <plugin id="feedback" name="Feedback" url="feedback"/>
 	</menu>
 </molgenis>
