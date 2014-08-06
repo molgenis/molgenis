@@ -16,6 +16,7 @@
 					<th>Type</th>
 					<th>Result file extension</th>
 					<th>Parameters</th>
+					<th>Excute</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -32,6 +33,7 @@
 							</#list>
 						</#if>
 					</td>
+					<td><a href="#" class="icon-large icon-refresh"></a></td>
 				</tr>
 				</#list>
 			</#if>
