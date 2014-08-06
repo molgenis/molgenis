@@ -11,7 +11,6 @@ import java.util.List;
 
 import javax.validation.Valid;
 
-import org.apache.log4j.Logger;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ui.MolgenisUi;
@@ -31,12 +30,13 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.TreeTraverser;
 
+/**
+ * Plugin to view and modify the app UI menu
+ */
 @Controller
 @RequestMapping(URI)
 public class MenuManagerController extends MolgenisPluginController
 {
-	private static final Logger logger = Logger.getLogger(MenuManagerController.class);
-
 	public static final String ID = "menumanager";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
