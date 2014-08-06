@@ -1,5 +1,6 @@
 package org.molgenis.ui.form;
 
+import java.util.Iterator;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -13,7 +14,9 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.framework.ui.MolgenisPluginFactory;
 import org.molgenis.model.MolgenisModelException;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
@@ -30,6 +33,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
+
 @Controller
 public class MolgenisEntityFormPluginController extends MolgenisPluginController
 {
@@ -43,10 +49,25 @@ public class MolgenisEntityFormPluginController extends MolgenisPluginController
 	private final MolgenisPermissionService molgenisPermissionService;
 
 	@Autowired
-	public MolgenisEntityFormPluginController(DataService dataService,
+	public MolgenisEntityFormPluginController(final DataService dataService,
 			MolgenisPermissionService molgenisPermissionService)
 	{
-		super(URI);
+		super(URI, new MolgenisPluginFactory()
+		{
+			@Override
+			public Iterator<MolgenisPlugin> iterator()
+			{
+				return Iterables.transform(dataService.getEntityNames(), new Function<String, MolgenisPlugin>()
+				{
+					@Override
+					public MolgenisPlugin apply(String entityName)
+					{
+						String pluginId = PLUGIN_NAME_PREFIX + entityName;
+						return new MolgenisPlugin(pluginId, pluginId, "", ""); // FIXME
+					}
+				}).iterator();
+			}
+		});
 		if (dataService == null) throw new IllegalArgumentException("DataService is null");
 		if (molgenisPermissionService == null) throw new IllegalArgumentException("MolgenisPermissionService is null");
 		this.dataService = dataService;
@@ -135,11 +156,10 @@ public class MolgenisEntityFormPluginController extends MolgenisPluginController
 		}
 
 		Repository repo = dataService.getRepositoryByEntityName(entityName);
-        Entity entity = null;
-        if(repo.getEntityMetaData().getEntityClass() != Entity.class)
-		    entity = BeanUtils.instantiateClass(repo.getEntityMetaData().getEntityClass());
-        else
-            entity = new MapEntity();
+		Entity entity = null;
+		if (repo.getEntityMetaData().getEntityClass() != Entity.class) entity = BeanUtils.instantiateClass(repo
+				.getEntityMetaData().getEntityClass());
+		else entity = new MapEntity();
 		EntityMetaData entityMeta = repo.getEntityMetaData();
 
 		Map<String, String[]> parameterMap = request.getParameterMap();
@@ -180,8 +200,8 @@ public class MolgenisEntityFormPluginController extends MolgenisPluginController
 	private Entity findEntityById(EntityMetaData entityMetaData, Object id)
 	{
 		String entityName = entityMetaData.getName();
-        Object typedId = entityMetaData.getIdAttribute().getDataType().convert(id);
-        Entity entity = dataService.findOne(entityName, typedId);
+		Object typedId = entityMetaData.getIdAttribute().getDataType().convert(id);
+		Entity entity = dataService.findOne(entityName, typedId);
 
 		if (entity == null)
 		{
