@@ -495,7 +495,13 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 	@Override
 	public <E extends Entity> E findOne(Query q, Class<E> clazz)
 	{
-		return findAll(q, clazz).iterator().next();
+		Iterator<E> it = findAll(q, clazz).iterator();
+		if (it.hasNext())
+		{
+			return it.next();
+		}
+
+		return null;
 	}
 
 	@Override

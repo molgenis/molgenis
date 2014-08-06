@@ -14,7 +14,11 @@ molgenis.env <- new.env()
 
 local({
   molgenis.api.url <- "${api_url}"
-  molgenis.token <- ${token}
+  <#if token??>
+  molgenis.token <- "${token}"
+  <#else>
+  molgenis.token <- NULL
+  </#if>
 }, env = molgenis.env)
 
 ###################################################################

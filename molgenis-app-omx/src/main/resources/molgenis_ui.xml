@@ -35,6 +35,8 @@
         		<plugin id="form.MolgenisGroup" name="MolgenisGroup" url="form.MolgenisGroup"/>
         		<plugin id="form.EntityClass" name="EntityClass" url="form.EntityClass?subForms=AttributeClass.entityClass"/>
         		<plugin id="form.MolgenisToken" name="Tokens" url="form.MolgenisToken"/>
+        		<plugin id="form.Script" name="Script" url="form.Script"/>
+        		<plugin id="form.ScriptParameter" name="ScriptParameter" url="form.ScriptParameter"/>
 	        </menu>
 	    <menu label="BiobankConnect" name="biobankconnect">    
 		   	<plugin id="biobankconnect" name="BiobankConnect Wizard" url="biobankconnect"/>
@@ -66,5 +68,6 @@
 	        <plugin id="col7a1-mutations" name="COL7A1-Mutations" url="col7a1_mutations"/>
 		</menu>
 		<plugin id="useraccount" name="Account" url="useraccount"/>
+		<plugin id="scripts" name="Scripts" url="scripts" />
 	</menu>
 </molgenis>

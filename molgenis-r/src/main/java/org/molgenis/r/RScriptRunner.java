@@ -12,6 +12,9 @@ import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.FileWriterWithEncoding;
+import org.molgenis.script.Script;
+import org.molgenis.script.ScriptRunner;
+import org.molgenis.script.ScriptRunnerFactory;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,7 +25,7 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
 @Service
-public class RScriptRunner
+public class RScriptRunner implements ScriptRunner
 {
 	private static final Charset CHARSET = Charset.forName("utf-8");
 	private final RScriptExecutor rScriptExecutor;
@@ -30,11 +33,13 @@ public class RScriptRunner
 	private final FreeMarkerConfigurer freeMarkerConfig;
 
 	@Autowired
-	public RScriptRunner(RScriptExecutor rScriptExecutor, FileStore fileStore, FreeMarkerConfigurer freeMarkerConfig)
+	public RScriptRunner(RScriptExecutor rScriptExecutor, FileStore fileStore, FreeMarkerConfigurer freeMarkerConfig,
+			ScriptRunnerFactory scriptRunnerFactory)
 	{
 		this.rScriptExecutor = rScriptExecutor;
 		this.fileStore = fileStore;
 		this.freeMarkerConfig = freeMarkerConfig;
+		scriptRunnerFactory.registerScriptExecutor("r", this);
 	}
 
 	/**
@@ -99,8 +104,15 @@ public class RScriptRunner
 		rScriptExecutor.executeScript(file, outputHandler);
 	}
 
+	@Override
+	public void runScript(Script script, Map<String, Object> parameters)
+	{
+		File rScriptFile = script.generateScript(fileStore, "r", parameters);
+		runRScript(rScriptFile, null);
+	}
+
 	/**
-	 * Run an R script a
+	 * Run an R script
 	 * 
 	 * @param script
 	 * @param outputHandler
@@ -114,4 +126,5 @@ public class RScriptRunner
 	{
 		return UUID.randomUUID().toString().replaceAll("-", "") + ".r";
 	}
+
 }

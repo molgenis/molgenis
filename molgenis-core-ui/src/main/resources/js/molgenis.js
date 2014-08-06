@@ -381,6 +381,7 @@ function createInput(attr, attrs, val, lbl) {
 	case 'STRING':
 	case 'TEXT':
 	case 'ENUM':
+	case 'SCRIPT':
 		return createBasicInput('text', attrs, val);
 	case 'MREF':
 	case 'XREF':

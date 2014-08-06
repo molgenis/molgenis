@@ -46,7 +46,7 @@ public class EntityForm implements Form
 	@Override
 	public FormMetaData getMetaData()
 	{
-		return new EntityFormMetaData(entityMetaData);
+		return new EntityFormMetaData(entityMetaData, primaryKey != null);
 	}
 
 	@Override

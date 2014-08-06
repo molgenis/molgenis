@@ -9,10 +9,12 @@ import org.molgenis.data.EntityMetaData;
 public class EntityFormMetaData implements FormMetaData
 {
 	private final EntityMetaData entityMetaData;
+	private final boolean forUpdate;
 
-	public EntityFormMetaData(EntityMetaData entityMetaData)
+	public EntityFormMetaData(EntityMetaData entityMetaData, boolean forUpdate)
 	{
 		this.entityMetaData = entityMetaData;
+		this.forUpdate = forUpdate;
 	}
 
 	@Override
@@ -21,7 +23,14 @@ public class EntityFormMetaData implements FormMetaData
 		List<AttributeMetaData> attributes = new ArrayList<AttributeMetaData>();
 		for (AttributeMetaData attr : entityMetaData.getAtomicAttributes())
 		{
-			if (!attr.isIdAtrribute() && !attr.getName().equals("__Type"))// TODO system fields in AttributeMetaData
+			if (attr.isIdAtrribute())
+			{
+				if (!attr.isAuto() && !forUpdate)
+				{
+					attributes.add(attr);
+				}
+			}
+			else if (!attr.getName().equals("__Type"))
 			{
 				attributes.add(attr);
 			}
