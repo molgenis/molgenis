@@ -6,6 +6,10 @@ import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.springframework.beans.factory.annotation.Autowired;
 
+/**
+ * @deprecated use {@link org.molgenis.ui.menu.MenuMolgenisUi} instead
+ */
+@Deprecated
 public class XmlMolgenisUi implements MolgenisUi
 {
 	static final String DEFAULT_APP_HREF_LOGO = "/img/logo_molgenis_small.png";

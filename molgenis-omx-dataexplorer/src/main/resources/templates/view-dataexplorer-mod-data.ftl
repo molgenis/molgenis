@@ -4,7 +4,7 @@
 	        <div class="accordion-heading">
 	            <a class="accordion-toggle" data-toggle="collapse" href="#dalliance"><i class="icon-chevron-down"></i> Genome Browser</a>
 	        </div>
-	        <div id="dalliance" class="accordion-body collapse in">
+	        <div id="dalliance" class="accordion-body collapse out">
 	            <div class="accordion-inner">
 	            	<#-- dalliance default id to print browser -->
 	                <div id="svgHolder"></div>
@@ -49,6 +49,10 @@
 	    </div>
 	</div>
 </div>
+
+<#-- Entity report modal placeholder -->
+<div id="entityReport"></div>
+
 <#if galaxyEnabled?? && galaxyEnabled == true>
 <#-- Galaxy export modal -->
 <form name="galaxy-export-form" class="form-horizontal" action="${context_url}/galaxy/export" method="POST">				
@@ -93,30 +97,33 @@
 		$.ajax("/js/dalliance-compiled.js", {'cache': true}),
 		$.ajax("/js/dataexplorer-data.js", {'cache': true}))
 		.done(function() {
-			<#-- create genome browser -->
-            molgenis.dataexplorer.data.setGenomeBrowserAttributes('${genomebrowser_start_list}', '${genomebrowser_chrom_list}', '${genomebrowser_id_list}', '${genomebrowser_patient_list}');
-            if(molgenis.dataexplorer.data.doShowGenomeBrowser() == true)
-            {
-                molgenis.dataexplorer.data.createGenomeBrowser(
-                {
-                    ${initLocation},
-                    coordSystem: ${coordSystem},
-                    chains: ${chains},
-                    sources: ${sources},
-                    browserLinks: ${browserLinks}
-                }, [<#list genomeEntities?keys as entityName>{'name': '${entityName}', 'label': '${genomeEntities[entityName]}'}<#if entityName_has_next>,</#if></#list>]);
-            }
-            else
-            {
-                $('#genomebrowser').css('display', 'none');
-            }
+			
+			molgenis.dataexplorer.data.setGenomeBrowserAttributes('${genomebrowser_start_list}', '${genomebrowser_chrom_list}', '${genomebrowser_id_list}', '${genomebrowser_patient_list}');
+			molgenis.dataexplorer.data.setGenomeBrowserSettings({
+			    ${initLocation},
+				coordSystem: ${coordSystem},
+				chains: ${chains},
+				sources: ${sources},
+				browserLinks: ${browserLinks}
+			});
+			molgenis.dataexplorer.data.setGenomeBrowserEntities([<#list genomeEntities?keys as entityName>{'name': '${entityName}', 'label': '${genomeEntities[entityName]}'}<#if entityName_has_next>,</#if></#list>])
+			
+			if(molgenis.dataexplorer.data.doShowGenomeBrowser() == true)
+		        {
+		            molgenis.dataexplorer.data.createGenomeBrowser();
+		        }
+		    else
+		        {
+		            $('#genomebrowser').css('display', 'none');
+		        }
 
 			<#-- create data table -->
+			var rowClickable = ${rowClickable?string('true', 'false')};
 			var tableEditable = ${tableEditable?string('true', 'false')};
 			if (tableEditable) {
 				tableEditable = molgenis.hasWritePermission(molgenis.dataexplorer.getSelectedEntityMeta().name);
 			}
-			molgenis.dataexplorer.data.createDataTable(tableEditable);    	
+			molgenis.dataexplorer.data.createDataTable(tableEditable, rowClickable);    	
 		})
 		.fail(function() {
 			molgenis.createAlert([{'message': 'An error occured. Please contact the administrator.'}], 'error');

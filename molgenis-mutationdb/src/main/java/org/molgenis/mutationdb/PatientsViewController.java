@@ -4,7 +4,6 @@ import static org.molgenis.mutationdb.PatientsViewController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -32,8 +31,7 @@ public class PatientsViewController extends MolgenisPluginController
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	public final static List<String> HEADERS_NAMES = Arrays.asList("Patient ID", "Phenotype", "Mutation",
 			"cDNA change", "Protein change", "Exon", "Consequence", "Reference");
-	public final static String PATH_TO_INSERT_QUERY = File.separatorChar + "mysql" + File.separatorChar
-			+ "patientview_col7a1_prototype.sql";
+	public final static String PATH_TO_INSERT_QUERY = "/mysql/patientview_col7a1_prototype.sql";
 	public static final String ENTITYNAME_PATIENTS = "import_patients";
 	public static final String ENTITYNAME_PATIENTSVIEW = "import_patientsview";
 	public static final String PATIENT_ID = "Patient ID";
@@ -66,11 +64,10 @@ public class PatientsViewController extends MolgenisPluginController
 		if (dataService.hasRepository(ENTITYNAME_PATIENTSVIEW))
 		{
 			CrudRepository patientsViewRepo = (CrudRepository) dataService
-				.getRepositoryByEntityName(ENTITYNAME_PATIENTSVIEW);
+					.getRepositoryByEntityName(ENTITYNAME_PATIENTSVIEW);
 			this.mysqlViewService.truncate(patientsViewRepo.getEntityMetaData().getName());
 			patientsViewRepo.deleteAll();
-			this.mysqlViewService.populateWithQuery(MySqlFileUtil.getMySqlQueryFromFile(
-					PatientsViewController.class,
+			this.mysqlViewService.populateWithQuery(MySqlFileUtil.getMySqlQueryFromFile(PatientsViewController.class,
 					PATH_TO_INSERT_QUERY));
 			return true;
 		}

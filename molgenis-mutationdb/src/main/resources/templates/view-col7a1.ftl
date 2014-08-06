@@ -23,7 +23,7 @@
 	"select2.min.js",
 	"jQEditRangeSlider-min.js",
 	"bootstrap-switch.min.js",
-	"jquery.molgenis.xrefsearch.js",
+	"jquery.molgenis.xrefmrefsearch.js",
 	"dataexplorer.js",
 	"jquery.molgenis.table.js",
 	"col7a1.js"]>	

@@ -3,11 +3,11 @@
  * 
  * usage: 
  * 
- * $('#id_of_hidden_input)').xrefsearch({attributeUri: 'api/v1/celiacsprue/meta/Celiac_Family'});
+ * $('#id_of_hidden_input)').xrefmrefsearch({attributeUri: 'api/v1/celiacsprue/meta/Celiac_Family'});
  * 
  * or
  * 
- * $('#id_of_hidden_input)').xrefsearch({attribute: attribute});
+ * $('#id_of_hidden_input)').xrefmrefsearch({attribute: attribute});
  * 
  * Depends on select2.js and molgenis.js
  */
@@ -56,6 +56,16 @@
 		});
 		return attributeNames;
 	}
+	
+	function getUniqueAttributeNames(entityMetaData) {
+		var attributeNames = [];
+		$.each(entityMetaData.attributes, function(attrName, attr) {
+			if (attr.unique === true) {
+				attributeNames.push(attr.name);
+			}
+		});
+		return attributeNames;
+	}
 
 	function formatResult(entity, entityMetaData, lookupAttributeNames) {
 		var items = [];
@@ -93,16 +103,23 @@
 		return result;
 	}
 
-	function createSelect2(container, attributeMetaData, options) {
+	function createSelect2($container, attributeMetaData, options) {
 		var refEntityMetaData = restApi.get(attributeMetaData.refEntity.href, {expand: ['attributes']});
 		var lookupAttrNames = getLookupAttributeNames(refEntityMetaData);
-		var hiddenInput = container.find('input[type=hidden]');
+		var uniqueAttrNames = getUniqueAttributeNames(refEntityMetaData);
+		
+		var $hiddenInput = $(':input[type=hidden]',$container)
+				.not('[data-filter=xrefmref-operator]')
+				.not('[data-filter=ignore]');
 
-		hiddenInput.select2({
-			width: options.width ? options.width : 'resolve',
+		
+		var width = options.width ? options.width : 'resolve';
+		
+		$hiddenInput.select2({
+			width: width,
 			minimumInputLength: 2,
-            multiple: (attributeMetaData.fieldType === 'MREF'),
-            closeOnSelect: (attributeMetaData.fieldType === 'XREF'),
+			multiple: (attributeMetaData.fieldType === 'MREF' || attributeMetaData.fieldType === 'XREF'),
+			closeOnSelect: false,
 			query: function (options){
 				var query = createQuery(lookupAttrNames, options.term.match(/[^ ]+/g),'SEARCH', true);
 				if(query)
@@ -111,10 +128,11 @@
 						options.callback({results: data.items, more: false});
 					});
 				}
-            },
+			},
 			initSelection: function(element, callback) {
 				//Only called when the input has a value
-				var query = createQuery(lookupAttrNames, element.val().split(','), 'EQUALS', false);
+				var attrNames = (uniqueAttrNames.length ? uniqueAttrNames : lookupAttrNames);
+				var query = createQuery(attrNames, element.val().split(','), 'EQUALS', false);
 				if(query)
 				{
 					restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {q: query}}, function(data) {
@@ -126,47 +144,76 @@
 				return formatResult(entity, refEntityMetaData, lookupAttrNames);
 			},
 			formatSelection: function(entity) {
+				if($('.select2-choices .select2-search-choice', $container).length > 0 && !$('.dropdown-toggle', $container).is(':visible')){
+					$('.dropdown-toggle', $container).show();
+					var $select2Container = $('.select2-container.select2-container-multi', $container);
+					$select2Container.css('width', ($select2Container.width() - 56) + 'px');
+					$('.dropdown-toggle', $container).show();
+				}
 				return formatSelection(entity, refEntityMetaData);
 			},
 			id: function(entity) {
 				return entity[refEntityMetaData.labelAttribute];
 			},
-            separator: ',',
-			dropdownCssClass: 'molgenis-xrefsearch'
+			separator: ',',
+			dropdownCssClass: 'molgenis-xrefmrefsearch'
 		});
 
+		$hiddenInput.on('select2-removed', function(e) {
+			if($('.select2-choices .select2-search-choice', $container).length < 2){
+				$('.dropdown-toggle', $container).hide();
+				$('.select2-container.select2-container-multi', $container).css('width', width);
+			}
+		});
+
+		$('.dropdown-toggle', $container).hide();
+		
 		if(!lookupAttrNames.length){
-			container.append($("<label>lookup attribute is not defined.</label>"));
+			$container.append($('<label>lookup attribute is not defined.</label>'));
 		}
 	}
 
-	function addQueryPartSelect(container, attributeMetaData, options) {
+	function addQueryPartSelect($container, attributeMetaData, options) {
 		var attrs = {};
+		
 		if(options.autofocus) {
 			attrs.autofocus = options.autofocus;
 		}
-        if (options.isfilter && attributeMetaData.fieldType === 'MREF') {
-            var checkbox = $('<input type="checkbox" class="exclude">');//Checkbox is only for jquery-switch, it should not be included in the query
-    		checkbox.attr('checked', options.operator === 'OR');
-    		container.prepend(checkbox);
-    		
-    		var andOrSwitch = checkbox.bootstrapSwitch({
-    			onText: 'OR',
-    			offText: 'AND',
-    			onSwitchChange: function(event, state) {
-    				var operator = state ? 'OR' : 'AND';
-    				operatorInput.val(operator);
-    			}
-    		});
-    		
-    		var operatorInput = $('<input type="hidden" class="operator top" >');
-    		operatorInput.val(options.operator);
-    		andOrSwitch.append(operatorInput);
-        }
+		
+		if (options.isfilter){
+			var $operatorInput = $('<input type="hidden" data-filter="xrefmref-operator" value="' + options.operator + '" />');
+
+			if(attributeMetaData.fieldType === 'MREF') {
+				var $dropdown = $('<div class="btn-group"><div>');
+				var orValue = 'OR&nbsp;&nbsp;';
+				var andValue = 'AND';
+				$dropdown.append($operatorInput);
+				$dropdown.append($('<a class="btn dropdown-toggle add-on-left" data-toggle="dropdown" style="display:inline-block;padding:4px 5px;width:43px" href="#">' + (options.operator === 'AND' ? andValue : orValue) + ' <b class="caret"></a>'));
+				$dropdown.append($('<ul class="dropdown-menu"><li><a data-value="OR">' + orValue + '</a></li><li><a data-value="AND">' + andValue + '</a></li></ul>'));
+	
+				$.each($dropdown.find('.dropdown-menu li a'), function(index, element){
+					$(element).click(function(){
+						var dataValue = $(this).attr('data-value');
+						$operatorInput.val(dataValue);
+						$dropdown.find('a:first').html((dataValue === 'AND' ? andValue : orValue) + ' <b class="caret"></b>');
+						$dropdown.find('a:first').val(dataValue);
+					});
+				});
+				
+				$dropdown.find('div:first').remove();//This is a workaround FIX
+			
+				$container.prepend($dropdown);
+			}
+			else if (attributeMetaData.fieldType === 'XREF') {
+				$operatorInput.val('OR');
+				$container.append($('<div class="dropdown-toggle" style="display:inline-block;padding: 4px 10px 4px 5px;width:38px">' + 'OR' + '</div>'));
+				$container.append($operatorInput);
+			}
+		}
 
 		var element = createInput(attributeMetaData, attrs, options.values);
-		container.prepend(element);
-		createSelect2(container, attributeMetaData, options);
+		$container.append(element);
+		createSelect2($container, attributeMetaData, options);
 	}
 
 	/**
@@ -182,7 +229,7 @@
 	 * 					
 	 * 				}
 	 */
-	$.fn.xrefsearch = function(options) {
+	$.fn.xrefmrefsearch = function(options) {//mref or xref select2
 		var container = this;
 		var attributeUri = options.attributeUri ? options.attributeUri : options.attribute.href;
 		restApi.getAsync(attributeUri, {attributes:['refEntity', 'fieldType'], expand:['refEntity']}, function(attributeMetaData) {

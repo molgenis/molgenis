@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.molgenis.data.DataService;
+import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.model.elements.Entity;
 import org.molgenis.model.elements.Model;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -78,6 +79,12 @@ public class MolgenisEntityFormPluginControllerTest extends AbstractTestNGSpring
 		public MolgenisPermissionService permissionService()
 		{
 			return mock(MolgenisPermissionService.class);
+		}
+
+		@Bean
+		public MolgenisPluginRegistry molgenisPluginRegistry()
+		{
+			return mock(MolgenisPluginRegistry.class);
 		}
 
 		@Bean

@@ -171,7 +171,8 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 		when(plugin2.getName()).thenReturn("plugin2");
 		plugin3 = when(mock(MolgenisPlugin.class).getId()).thenReturn("3").getMock();
 		when(plugin3.getName()).thenReturn("plugin3n");
-		when(molgenisPluginRegistry.getPlugins()).thenReturn(Arrays.<MolgenisPlugin> asList(plugin1, plugin2, plugin3));
+		when(molgenisPluginRegistry.iterator()).thenReturn(
+				Arrays.<MolgenisPlugin> asList(plugin1, plugin2, plugin3).iterator());
 
 		when(dataService.getEntityNames()).thenReturn(Lists.<String> newArrayList());
 	}

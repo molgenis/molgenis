@@ -179,8 +179,8 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 				"primary key(" + getEntityMetaData().getName() + "." + idAttribute.getName()
 						+ ") cannot be XREF or MREF");
 
-		if (idAttribute.isNillable() == true) throw new RuntimeException("primary key(" + getEntityMetaData().getName()
-				+ "." + idAttribute.getName() + ") must be NOT NULL");
+		if (idAttribute.isNillable() == true) throw new RuntimeException("idAttribute ("
+				+ getEntityMetaData().getName() + "." + idAttribute.getName() + ") should not be nillable");
 
 		sql.append("PRIMARY KEY (").append('`').append(getEntityMetaData().getIdAttribute().getName()).append('`')
 				.append(')');
@@ -555,6 +555,11 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 						if (att.getDataType() instanceof StringField || att.getDataType() instanceof TextField)
 						{
 							search.append(" OR this.").append('`').append(att.getName()).append('`').append(" LIKE ?");
+						}
+						else if (att.getDataType() instanceof MrefField)
+						{
+							search.append(" OR CAST(").append(att.getName()).append(".`").append(att.getName())
+									.append('`').append(" as CHAR) LIKE ?");
 						}
 						else
 						{

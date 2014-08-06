@@ -64,7 +64,7 @@
 	<script src="/js/jquery.fancytree.min.js" type="text/javascript"></script>
 	<script src="/js/jquery.molgenis.tree.js" type="text/javascript"></script>
 	<script src="/js/select2.min.js" type="text/javascript"></script>
-	<script src="/js/jquery.molgenis.xrefsearch.js" type="text/javascript"></script>
+	<script src="/js/jquery.molgenis.xrefmrefsearch.js" type="text/javascript"></script>
 	<script src="/js/dataexplorer.js" type="text/javascript"></script>
 	
 	<link rel="stylesheet" href="/css/jquery.bootstrap.wizard.css" type="text/css">
