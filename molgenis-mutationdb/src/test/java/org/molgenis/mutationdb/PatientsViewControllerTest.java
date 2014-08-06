@@ -21,6 +21,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.framework.ui.MolgenisPluginRegistry;
+import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
 import org.molgenis.mutationdb.PatientsViewControllerTest.Config;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.MySqlFileUtil;
@@ -41,7 +43,7 @@ import org.testng.annotations.Test;
 @WebAppConfiguration
 @ContextConfiguration(classes = Config.class)
 public class PatientsViewControllerTest extends AbstractTestNGSpringContextTests
-{	
+{
 	@Autowired
 	public MysqlViewService mysqlViewService;
 
@@ -67,8 +69,8 @@ public class PatientsViewControllerTest extends AbstractTestNGSpringContextTests
 	public void init() throws Exception
 	{
 		mockMvc.perform(MockMvcRequestBuilders.get(PatientsViewController.URI))
-				.andExpect(MockMvcResultMatchers.status().isOk())
-				.andExpect(view().name("view-col7a1")).andExpect(model().attributeExists("title"));
+				.andExpect(MockMvcResultMatchers.status().isOk()).andExpect(view().name("view-col7a1"))
+				.andExpect(model().attributeExists("title"));
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
@@ -90,11 +92,10 @@ public class PatientsViewControllerTest extends AbstractTestNGSpringContextTests
 
 		when(dataService.hasRepository(PatientsViewController.ENTITYNAME_PATIENTSVIEW)).thenReturn(true);
 		doNothing().when(mysqlViewService).truncate(PatientsViewController.ENTITYNAME_PATIENTSVIEW);
-		doNothing().when(mysqlViewService).populateWithQuery(MySqlFileUtil.getMySqlQueryFromFile(
-				PatientsViewController.class,
+		doNothing().when(mysqlViewService).populateWithQuery(
+				MySqlFileUtil.getMySqlQueryFromFile(PatientsViewController.class,
 						PatientsViewController.PATH_TO_INSERT_QUERY));
-		when(
-				dataService.getRepositoryByEntityName(PatientsViewController.ENTITYNAME_PATIENTSVIEW)).thenReturn(
+		when(dataService.getRepositoryByEntityName(PatientsViewController.ENTITYNAME_PATIENTSVIEW)).thenReturn(
 				patientsViewRepo).getMock();
 
 		EntityMetaData entityMetaData = mock(EntityMetaData.class);
@@ -121,32 +122,32 @@ public class PatientsViewControllerTest extends AbstractTestNGSpringContextTests
 	{
 		MysqlRepository patientsViewRepo = mock(MysqlRepository.class);
 		MysqlRepository patientsRepo = mock(MysqlRepository.class);
-		
+
 		Entity entity = mock(Entity.class);
 		when(entity.getString(PatientsViewController.PATIENT_ID)).thenReturn("P1");
 		List<Entity> entities = Arrays.asList(entity);
 		when(patientsRepo.iterator()).thenReturn(entities.iterator());
-		
+
 		when(patientsViewRepo.findAll(new QueryImpl().eq(PatientsViewController.PATIENT_ID, "P1")))
 				.thenReturn(entities);
-		
+
 		Map<String, List<Value>> valuesPerHeader = new HashMap<String, List<Value>>();
 		when(this.mysqlViewService.valuesPerHeader(PatientsViewController.HEADERS_NAMES, entities)).thenReturn(
 				valuesPerHeader);
-		
+
 		when(
 				this.mysqlViewService.createRowByMergingValuesIfEquales(PatientsViewController.HEADERS_NAMES,
 						valuesPerHeader)).thenReturn(new Row());
-		
+
 		when((MysqlRepository) dataService.getRepositoryByEntityName(PatientsViewController.ENTITYNAME_PATIENTSVIEW))
 				.thenReturn(patientsViewRepo);
-				
+
 		when((MysqlRepository) dataService.getRepositoryByEntityName(PatientsViewController.ENTITYNAME_PATIENTS))
 				.thenReturn(patientsRepo);
-		
+
 		when(dataService.hasRepository(PatientsViewController.ENTITYNAME_PATIENTS)).thenReturn(true);
 		when(dataService.hasRepository(PatientsViewController.ENTITYNAME_PATIENTSVIEW)).thenReturn(true);
-		
+
 		mockMvc.perform(MockMvcRequestBuilders.get(PatientsViewController.URI + "/create")).andExpect(status().isOk())
 				.andExpect(view().name("view-col7a1-table")).andExpect(model().attributeExists("rows"))
 				.andExpect(model().attributeExists("headers"));
@@ -160,11 +161,17 @@ public class PatientsViewControllerTest extends AbstractTestNGSpringContextTests
 		{
 			return mock(DataService.class);
 		}
-		
+
 		@Bean
 		public DataSource dataSource()
 		{
 			return mock(DataSource.class);
+		}
+
+		@Bean
+		public MolgenisPluginRegistry molgenisPluginRegistry()
+		{
+			return new MolgenisPluginRegistryImpl();
 		}
 
 		@Bean

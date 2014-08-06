@@ -241,9 +241,22 @@ function getCurrentTimezoneOffset() {
 	return offset;
 }
 
-function htmlEscape(text) {
-	return $('<div/>').text(text).html();
-}
+(function() {
+	var entityMap = {
+		"&" : "&amp;",
+		"<" : "&lt;",
+		">" : "&gt;",
+		'"' : '&quot;',
+		"'" : '&#39;',
+		"/" : '&#x2F;'
+	};
+
+	window.htmlEscape = function(string) {
+		return String(string).replace(/[&<>"'\/]/g, function(s) {
+			return entityMap[s];
+		});
+	};
+}(window));
 
 /*
  * Create a table cell to show data of a certain type Is used by the

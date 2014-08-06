@@ -20,6 +20,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.framework.ui.MolgenisPluginRegistry;
+import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
 import org.molgenis.mutationdb.MutationsViewControllerTest.Config;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +41,7 @@ import org.testng.annotations.Test;
 @WebAppConfiguration
 @ContextConfiguration(classes = Config.class)
 public class MutationsViewControllerTest extends AbstractTestNGSpringContextTests
-{	
+{
 	@Autowired
 	public MysqlViewService mysqlViewService;
 
@@ -65,8 +67,8 @@ public class MutationsViewControllerTest extends AbstractTestNGSpringContextTest
 	public void init() throws Exception
 	{
 		mockMvc.perform(MockMvcRequestBuilders.get(MutationsViewController.URI))
-				.andExpect(MockMvcResultMatchers.status().isOk())
-				.andExpect(view().name("view-col7a1")).andExpect(model().attributeExists("title"));
+				.andExpect(MockMvcResultMatchers.status().isOk()).andExpect(view().name("view-col7a1"))
+				.andExpect(model().attributeExists("title"));
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
@@ -87,8 +89,8 @@ public class MutationsViewControllerTest extends AbstractTestNGSpringContextTest
 		MysqlRepository mutationsViewRepo = mock(MysqlRepository.class);
 
 		when(dataService.hasRepository(MutationsViewController.ENTITYNAME_MUTATIONSVIEW)).thenReturn(true);
-		when(dataService.getRepositoryByEntityName(MutationsViewController.ENTITYNAME_MUTATIONSVIEW))
-				.thenReturn(mutationsViewRepo);
+		when(dataService.getRepositoryByEntityName(MutationsViewController.ENTITYNAME_MUTATIONSVIEW)).thenReturn(
+				mutationsViewRepo);
 
 		EntityMetaData entityMetaData = mock(EntityMetaData.class);
 		when(mutationsViewRepo.getEntityMetaData()).thenReturn(entityMetaData);
@@ -115,32 +117,32 @@ public class MutationsViewControllerTest extends AbstractTestNGSpringContextTest
 	{
 		MysqlRepository mutationsViewRepo = mock(MysqlRepository.class);
 		MysqlRepository mutaionRepo = mock(MysqlRepository.class);
-		
+
 		Entity entity = mock(Entity.class);
 		when(entity.getString(MutationsViewController.MUTATIONS__MUTATION_ID)).thenReturn("M1");
 		List<Entity> entities = Arrays.asList(entity);
 		when(mutaionRepo.iterator()).thenReturn(entities.iterator());
-		
+
 		when(mutationsViewRepo.findAll(new QueryImpl().eq(MutationsViewController.MUTATIONS__MUTATION_ID, "M1")))
 				.thenReturn(entities);
-		
+
 		Map<String, List<Value>> valuesPerHeader = new HashMap<String, List<Value>>();
 		when(this.mysqlViewService.valuesPerHeader(MutationsViewController.HEADERS_NAMES, entities)).thenReturn(
 				valuesPerHeader);
-		
+
 		when(
 				this.mysqlViewService.createRowByMergingValuesIfEquales(MutationsViewController.HEADERS_NAMES,
 						valuesPerHeader)).thenReturn(new Row());
-		
+
 		when((MysqlRepository) dataService.getRepositoryByEntityName(MutationsViewController.ENTITYNAME_MUTATIONSVIEW))
 				.thenReturn(mutationsViewRepo);
-				
+
 		when((MysqlRepository) dataService.getRepositoryByEntityName(MutationsViewController.ENTITYNAME_MUTATIONS))
 				.thenReturn(mutaionRepo);
-		
+
 		when(dataService.hasRepository(MutationsViewController.ENTITYNAME_MUTATIONS)).thenReturn(true);
 		when(dataService.hasRepository(MutationsViewController.ENTITYNAME_MUTATIONSVIEW)).thenReturn(true);
-		
+
 		mockMvc.perform(MockMvcRequestBuilders.get(MutationsViewController.URI + "/create")).andExpect(status().isOk())
 				.andExpect(view().name("view-col7a1-table")).andExpect(model().attributeExists("rows"))
 				.andExpect(model().attributeExists("headers"));
@@ -160,11 +162,17 @@ public class MutationsViewControllerTest extends AbstractTestNGSpringContextTest
 		{
 			return mock(DataService.class);
 		}
-		
+
 		@Bean
 		public DataSource dataSource()
 		{
 			return mock(DataSource.class);
+		}
+
+		@Bean
+		public MolgenisPluginRegistry molgenisPluginRegistry()
+		{
+			return new MolgenisPluginRegistryImpl();
 		}
 
 		@Bean

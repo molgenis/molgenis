@@ -11,6 +11,7 @@ import java.util.Collections;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.omx.controller.DataSetsIndexerController.DataSetIndexRequest;
 import org.molgenis.omx.controller.DataSetsIndexerControllerTest.Config;
 import org.molgenis.omx.observ.DataSet;
@@ -83,6 +84,12 @@ public class DataSetsIndexerControllerTest extends AbstractTestNGSpringContextTe
 		public DataService dataService()
 		{
 			return mock(DataService.class);
+		}
+
+		@Bean
+		public MolgenisPluginRegistry molgenisPluginRegistry()
+		{
+			return mock(MolgenisPluginRegistry.class);
 		}
 
 		@Bean
