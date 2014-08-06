@@ -60,8 +60,7 @@ public class MolgenisUiMenuPermissionDecorator implements MolgenisUiMenu
 	@Override
 	public boolean isAuthorized()
 	{
-		// TODO Auto-generated method stub
-		return false;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
