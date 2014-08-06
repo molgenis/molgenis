@@ -113,7 +113,8 @@
 			if($(this).valid()) {
 				$('li.root>ol', container).prepend(itemTemplate({
 					id : $('select[name="menu-item-select"]', addItemForm).val(),
-					label : $('input[name="menu-item-name"]', addItemForm).val()
+					label : $('input[name="menu-item-name"]', addItemForm).val(),
+					params: $('input[name="menu-item-params"]', addItemForm).val()
 				}));
 			}
 		});
