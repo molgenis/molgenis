@@ -7,11 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.omx.controller.BackgroundController;
-import org.molgenis.omx.controller.ContactController;
-import org.molgenis.omx.controller.HomeController;
-import org.molgenis.omx.controller.NewsController;
-import org.molgenis.omx.controller.ReferencesController;
+import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.omx.controller.ContentControllersTest.Config;
 import org.molgenis.ui.controller.StaticContentService;
 import org.molgenis.util.FileStore;
@@ -233,6 +229,12 @@ public class ContentControllersTest extends AbstractTestNGSpringContextTests
 		public FileStore fileStore()
 		{
 			return mock(FileStore.class);
+		}
+
+		@Bean
+		public MolgenisPluginRegistry molgenisPluginRegistry()
+		{
+			return mock(MolgenisPluginRegistry.class);
 		}
 
 		@Bean
