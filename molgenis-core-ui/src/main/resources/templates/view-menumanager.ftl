@@ -4,7 +4,7 @@
 <#assign js=["handlebars.min.js","select2.min.js","jquery-sortable-min.js", "menumanager.js"]>
 <@header css js/>
 	<div class="row-fluid offset2 span8">
-		<p>Drag and drop menu items to update menu</p>
+		<p>Drag and drop menu items to update menu, press Save to store the menu. Each menu should contain at least one item.</p>
 		<div class="row-fluid" id="menu-editor-container">
 			<div class="row-fluid">
 				<div class="span7">
