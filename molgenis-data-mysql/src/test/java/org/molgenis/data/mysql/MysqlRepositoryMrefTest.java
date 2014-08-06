@@ -12,8 +12,6 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.springframework.security.authentication.TestingAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -108,17 +106,9 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 
 		Assert.assertEquals(mrefRepo.count(), 2);
 
-		SecurityContextHolder.getContext().setAuthentication(new TestingAuthenticationToken("user", "password", "ROLE_ENTITY_READ_STRINGTARGET2"));
 		Assert.assertEquals(
 				mrefRepo.getSelectSql(new QueryImpl(), Lists.newArrayList()),
-				"SELECT this.`identifier`, GROUP_CONCAT(DISTINCT(`stringRef`.`stringRef`)) AS `stringRef`, "
-						+ "GROUP_CONCAT(DISTINCT(`intRef`.`intRef`)) AS `intRef` FROM `MrefTest` AS this "
-						+ "LEFT JOIN `MrefTest_stringRef` AS `stringRef_filter` ON (this.`identifier` = `stringRef_filter`.`identifier`) "
-						+ "LEFT JOIN `MrefTest_stringRef` AS `stringRef` ON (this.`identifier` = `stringRef`.`identifier`) "
-						+ "LEFT JOIN `StringTarget2` AS `StringTarget2_RefTable` ON (`stringRef`.`stringRef` = `StringTarget2_RefTable`.`identifier`) "
-						+ "LEFT JOIN `MrefTest_intRef` AS `intRef_filter` ON (this.`identifier` = `intRef_filter`.`identifier`) "
-						+ "LEFT JOIN `MrefTest_intRef` AS `intRef` ON (this.`identifier` = `intRef`.`identifier`) "
-						+ "GROUP BY this.`identifier`");
+				"SELECT this.`identifier`, GROUP_CONCAT(DISTINCT(`stringRef`.`stringRef`)) AS `stringRef`, GROUP_CONCAT(DISTINCT(`intRef`.`intRef`)) AS `intRef` FROM `MrefTest` AS this LEFT JOIN `MrefTest_stringRef` AS `stringRef_filter` ON (this.`identifier` = `stringRef_filter`.`identifier`) LEFT JOIN `MrefTest_stringRef` AS `stringRef` ON (this.`identifier` = `stringRef`.`identifier`) LEFT JOIN `MrefTest_intRef` AS `intRef_filter` ON (this.`identifier` = `intRef_filter`.`identifier`) LEFT JOIN `MrefTest_intRef` AS `intRef` ON (this.`identifier` = `intRef`.`identifier`) GROUP BY this.`identifier`");
 		for (Entity e : mrefRepo.findAll(new QueryImpl().eq("identifier", "one")))
 		{
 			logger.info("found: " + e);
