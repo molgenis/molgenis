@@ -114,7 +114,7 @@ function($, molgenis, settings) {
 		if (entityMetaData.description) {
 			var description = $('<span data-placement="bottom"></span>');
 			description.html(abbreviate(entityMetaData.description, 
-					settings['header.abbreviate']||180)));
+					settings['header.abbreviate']||180));
 			description.attr('data-title', entityMetaData.description);
 			$('#entity-class-description').html(description.tooltip());
 		} else {
