@@ -2,7 +2,7 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=['select2.css', 'bootstrap-datetimepicker.min.css', 'molgenis-form.css']>
-<#assign js=['jquery.validate.min.js', 'select2.min.js']>
+<#assign js=['jquery.validate.min.js', 'select2.min.js', 'scripts.js']>
 
 <@header css js/>
 

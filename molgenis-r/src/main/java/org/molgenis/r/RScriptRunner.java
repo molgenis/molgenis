@@ -105,10 +105,14 @@ public class RScriptRunner implements ScriptRunner
 	}
 
 	@Override
-	public void runScript(Script script, Map<String, Object> parameters)
+	public String runScript(Script script, Map<String, Object> parameters)
 	{
 		File rScriptFile = script.generateScript(fileStore, "r", parameters);
-		runRScript(rScriptFile, null);
+
+		StringROutputHandler handler = new StringROutputHandler();
+		runRScript(rScriptFile, handler);
+
+		return handler.toString();
 	}
 
 	/**

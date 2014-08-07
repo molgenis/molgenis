@@ -4,5 +4,5 @@ import java.util.Map;
 
 public interface ScriptRunner
 {
-	void runScript(Script script, Map<String, Object> parameters);
+	String runScript(Script script, Map<String, Object> parameters);
 }

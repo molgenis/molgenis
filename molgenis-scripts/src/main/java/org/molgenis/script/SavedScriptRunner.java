@@ -33,7 +33,7 @@ public class SavedScriptRunner
 		mysqlRepositoryCollection.add(Script.META_DATA);
 	}
 
-	public String runScript(String scriptName, Map<String, Object> parameters)
+	public ScriptResult runScript(String scriptName, Map<String, Object> parameters)
 	{
 		Script script = dataService.findOne(Script.ENTITY_NAME, new QueryImpl().eq(Script.NAME, scriptName),
 				Script.class);
@@ -70,9 +70,9 @@ public class SavedScriptRunner
 		}
 
 		ScriptRunner scriptRunner = scriptRunnerFactory.getScriptRunner(script.getType());
-		scriptRunner.runScript(script, parameters);
+		String output = scriptRunner.runScript(script, parameters);
 
-		return outputFile;
+		return new ScriptResult(outputFile, output);
 	}
 
 	private String generateRandomString()

@@ -3,11 +3,13 @@ package org.molgenis.script;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URLConnection;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
@@ -31,10 +33,11 @@ public class ScriptRunnerController
 	public void runScript(@PathVariable("name") String scriptName, @RequestParam Map<String, Object> parameters,
 			HttpServletResponse response) throws IOException
 	{
-		String outputFile = savedScriptRunner.runScript(scriptName, parameters);
-		if (outputFile != null)
+		ScriptResult result = savedScriptRunner.runScript(scriptName, parameters);
+
+		if (result.getOutputFile() != null)
 		{
-			File f = new File(outputFile);
+			File f = new File(result.getOutputFile());
 			if (f.exists())
 			{
 				String guessedContentType = URLConnection.guessContentTypeFromName(f.getName());
@@ -45,6 +48,14 @@ public class ScriptRunnerController
 
 				FileCopyUtils.copy(new FileInputStream(f), response.getOutputStream());
 			}
+		}
+		else if (StringUtils.isNotBlank(result.getOutput()))
+		{
+			response.setContentType("text/plain");
+
+			PrintWriter pw = response.getWriter();
+			pw.write(result.getOutput());
+			pw.flush();
 		}
 	}
 
