@@ -84,7 +84,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 
 		// DataExplorer rows clickable yes / no
 		runtimePropertyMap.put(DataExplorerController.KEY_DATAEXPLORER_ROW_CLICKABLE, String.valueOf(false));
-		
+
 		// Annotators include files/tools
 		String molgenisHomeDir = System.getProperty("molgenis.home");
 
@@ -107,9 +107,13 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		runtimePropertyMap.put(ClinVarServiceAnnotator.CLINVAR_FILE_LOCATION_PROPERTY,
 				molgenisHomeDirAnnotationResources + "/Clinvar/variant_summary.txt");
 
-		runtimePropertyMap.put(DataExplorerController.WIZARD_TITLE, "Filter Wizard");
-		runtimePropertyMap.put(DataExplorerController.WIZARD_BUTTON_TITLE, "Wizard");
-		runtimePropertyMap.put(DataExplorerController.AGGREGATES_NORESULTS_MESSAGE, "No results found");
+		runtimePropertyMap.put(DataExplorerController.WIZARD_TITLE, DataExplorerController.DEFAULT_VAL_WIZARD_TITLE);
+		runtimePropertyMap.put(DataExplorerController.WIZARD_BUTTON_TITLE,
+				DataExplorerController.DEFAULT_VAL_WIZARD_BTN_TITLE);
+		runtimePropertyMap.put(DataExplorerController.KEY_SHOW_WIZARD_ONINIT,
+				String.valueOf(DataExplorerController.DEFAULT_VAL_SHOW_WIZARD_ONINIT));
+		runtimePropertyMap.put(DataExplorerController.AGGREGATES_NORESULTS_MESSAGE,
+				DataExplorerController.DEFAULT_AGGREGATES_NORESULTS_MESSAGE);
 
 		runtimePropertyMap.put(StudyManagerController.EXPORT_BTN_TITLE, "Export");
 		runtimePropertyMap.put(StudyManagerController.EXPORT_ENABLED, String.valueOf(false));
