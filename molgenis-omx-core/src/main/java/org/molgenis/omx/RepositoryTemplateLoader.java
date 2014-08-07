@@ -8,22 +8,18 @@ import org.apache.log4j.Logger;
 import org.molgenis.data.Queryable;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.core.FreemarkerTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import freemarker.cache.TemplateLoader;
 
 /**
  * Loads FreemarkerTemplates from a DataService.
  */
-@Component
 public class RepositoryTemplateLoader implements TemplateLoader
 {
 	private final Queryable repository;
 
 	private static final Logger LOGGER = Logger.getLogger(RepositoryTemplateLoader.class);
 
-	@Autowired
 	public RepositoryTemplateLoader(Queryable repository)
 	{
 		this.repository = repository;
