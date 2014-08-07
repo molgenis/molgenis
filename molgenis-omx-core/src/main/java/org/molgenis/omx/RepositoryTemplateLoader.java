@@ -12,7 +12,7 @@ import org.molgenis.omx.core.FreemarkerTemplate;
 import freemarker.cache.TemplateLoader;
 
 /**
- * Loads FreemarkerTemplates from a DataService.
+ * Loads FreemarkerTemplates from a repository.
  */
 public class RepositoryTemplateLoader implements TemplateLoader
 {
