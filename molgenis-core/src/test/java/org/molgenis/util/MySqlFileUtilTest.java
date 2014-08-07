@@ -11,8 +11,7 @@ public class MySqlFileUtilTest
 	@Test
 	public void getMySqlQueryFromFileTest() throws IOException
 	{
-		String pathname = "/test_mysql_repo_util_query.sql";
-		String query = MySqlFileUtil.getMySqlQueryFromFile(getClass(), pathname);
+		String query = ResourceUtils.getString(getClass(), "/test_mysql_repo_util_query.sql");
 		assertEquals(query, "SELECT * FROM `test` WHERE `test`='test';");
 	}
 }

@@ -4,6 +4,7 @@ import static org.molgenis.mutationdb.PatientsViewController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -15,7 +16,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.util.MySqlFileUtil;
+import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -67,8 +68,14 @@ public class PatientsViewController extends MolgenisPluginController
 					.getRepositoryByEntityName(ENTITYNAME_PATIENTSVIEW);
 			this.mysqlViewService.truncate(patientsViewRepo.getEntityMetaData().getName());
 			patientsViewRepo.deleteAll();
-			this.mysqlViewService.populateWithQuery(MySqlFileUtil.getMySqlQueryFromFile(PatientsViewController.class,
-					PATH_TO_INSERT_QUERY));
+			try
+			{
+				this.mysqlViewService.populateWithQuery(ResourceUtils.getString(getClass(), PATH_TO_INSERT_QUERY));
+			}
+			catch (IOException e)
+			{
+				throw new RuntimeException(e);
+			}
 			return true;
 		}
 		else
