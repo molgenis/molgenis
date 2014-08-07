@@ -26,20 +26,18 @@ public class QueryGeneratorHelper
 	private final EntityMetaData entityMetaData;
 	private final LinkedHashMap<BaseQueryBuilder, Operator> baseQueryCollection;
 	private final List<QueryRule> queryRules;
-	private final List<QueryRule> mrefRulesOfSameField;
 
 	public QueryGeneratorHelper(List<QueryRule> rules, EntityMetaData metaData)
 	{
 		if (rules.size() == 0) throw new RuntimeException("The queryRules cannot be empty : " + rules);
 		baseQueryCollection = new LinkedHashMap<BaseQueryBuilder, Operator>(rules.size());
-		mrefRulesOfSameField = new ArrayList<QueryRule>();
 		queryRules = rules;
 		entityMetaData = metaData;
 	}
 
 	public BaseQueryBuilder generateQuery()
 	{
-		StringBuilder mrefField = new StringBuilder();
+		List<QueryRule> mrefRulesOfSameField = new ArrayList<QueryRule>();
 
 		for (QueryRule queryRule : queryRules)
 		{
@@ -68,48 +66,50 @@ public class QueryGeneratorHelper
 			}
 			else if (isMref(queryRule.getField()))
 			{
-				// Initialize the mrefField the first time
-				if (mrefField.length() == 0) mrefField.append(queryRule.getField());
-
-				// Encounter a new mref queryRule add Operator between them to
-				// the rules
-				if (mrefField.toString().equals(queryRule.getField()))
-				{
-					// Only add logic operator to mrefRules when there are mref
-					// queryRules already stored
-					if (mrefRulesOfSameField.size() > 0)
-					{
-						mrefRulesOfSameField.add(new QueryRule(getLogicOperator(queryRule)));
-					}
-				}
-				else
-				{
-					// Deal with the case where the next mref does not have the
-					// same
-					// field name as current mref queryRule
-					addNestedQueryToCollection();
-				}
-				mrefField.delete(0, mrefField.length()).append(queryRule.getField());
 				mrefRulesOfSameField.add(queryRule);
 			}
 			else
 			{
-				// Generate nesteQuery for MREF if there are any
-				// queryRules left
-				// in mrefRules list.
-				addNestedQueryToCollection();
-				mrefField.delete(0, mrefField.length());
 				baseQueryCollection.put(
 						QueryBuilders.queryString(LuceneQueryStringBuilder.buildQueryString(Arrays.asList(queryRule))),
 						getLogicOperator(queryRule));
 			}
 		}
-		// Generate nesteQuery for MREF if there are any
-		// queryRules left
-		// in mrefRules list.
-		addNestedQueryToCollection();
+
+		createMrefQueryBuilder(mrefRulesOfSameField);
 
 		return combineQueryBuilders();
+	}
+
+	private void createMrefQueryBuilder(List<QueryRule> mrefRulesOfSameField)
+	{
+		LinkedHashMap<String, List<QueryRule>> nestedRulesMap = new LinkedHashMap<String, List<QueryRule>>(
+				mrefRulesOfSameField.size());
+
+		if (mrefRulesOfSameField.size() > 0)
+		{
+			for (QueryRule queryRule : mrefRulesOfSameField)
+			{
+				String field = queryRule.getField();
+				if (!nestedRulesMap.containsKey(field))
+				{
+					nestedRulesMap.put(field, new ArrayList<QueryRule>());
+				}
+				if (nestedRulesMap.get(field).size() > 0)
+				{
+					nestedRulesMap.get(field).add(new QueryRule(getLogicOperator(queryRule)));
+				}
+				nestedRulesMap.get(field).add(queryRule);
+			}
+
+			for (Entry<String, List<QueryRule>> entry : nestedRulesMap.entrySet())
+			{
+				baseQueryCollection.put(
+						QueryBuilders.nestedQuery(entry.getKey(),
+								QueryBuilders.queryString(getNestedMrefQuery(entry.getValue()))),
+						getLogicOperator(entry.getValue().get(0)));
+			}
+		}
 	}
 
 	/**
@@ -187,42 +187,6 @@ public class QueryGeneratorHelper
 			}
 		}
 		return fields;
-	}
-
-	/**
-	 * A helper function to generate the ElasticSearch NestetQueryBuilder object
-	 * for the collected MREFs and add it to the queryBuilder collection
-	 */
-	private void addNestedQueryToCollection()
-	{
-		if (mrefRulesOfSameField.size() > 0)
-		{
-			String path = mrefRulesOfSameField.get(0).getField();
-			StringBuilder queryStringBuilder = new StringBuilder();
-			queryStringBuilder.append('(');
-			for (QueryRule rule : mrefRulesOfSameField)
-			{
-				if (rule.getField() == null)
-				{
-
-					queryStringBuilder.append(' ').append(rule.getOperator().toString()).append(' ');
-				}
-				else
-				{
-					EntityMetaData refEntity = entityMetaData.getAttribute(rule.getField()).getRefEntity();
-					String nestedField = rule.getField() + "." + refEntity.getLabelAttribute().getName();
-					queryStringBuilder.append(nestedField).append(':').append("\"").append(rule.getValue())
-							.append("\"");
-				}
-			}
-			queryStringBuilder.append(')');
-
-			baseQueryCollection.put(
-					QueryBuilders.nestedQuery(path, QueryBuilders.queryString(queryStringBuilder.toString())),
-					getLogicOperator(mrefRulesOfSameField.get(0)));
-
-			mrefRulesOfSameField.clear();
-		}
 	}
 
 	/**
