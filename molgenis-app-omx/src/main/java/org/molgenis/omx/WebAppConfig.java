@@ -10,7 +10,6 @@ import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
 import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.omx.catalogmanager.OmxCatalogManagerService;
 import org.molgenis.omx.config.DataExplorerConfig;
-import org.molgenis.omx.core.FreemarkerTemplate;
 import org.molgenis.omx.core.FreemarkerTemplateRepository;
 import org.molgenis.omx.studymanager.OmxStudyManagerService;
 import org.molgenis.security.user.MolgenisUserService;

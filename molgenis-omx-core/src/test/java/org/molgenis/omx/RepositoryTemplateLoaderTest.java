@@ -3,6 +3,7 @@ package org.molgenis.omx;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
@@ -11,9 +12,6 @@ import java.io.StringReader;
 
 import org.apache.commons.io.IOUtils;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.molgenis.data.Entity;
 import org.molgenis.data.Queryable;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.RepositoryTemplateLoaderTest.Config;
@@ -38,7 +36,7 @@ public class RepositoryTemplateLoaderTest extends AbstractTestNGSpringContextTes
 		{
 			return mock(Queryable.class);
 		}
-		
+
 		@Bean
 		public RepositoryTemplateLoader repositoryTemplateLoader()
 		{
@@ -63,18 +61,18 @@ public class RepositoryTemplateLoaderTest extends AbstractTestNGSpringContextTes
 		template1.setId(1234);
 		template1.setName("template1");
 		template1.setValue("template1\ncontents");
-		
+
 		template1Modified = new FreemarkerTemplate();
 		template1Modified.setId(1234);
 		template1Modified.setName("template1");
 		template1Modified.setValue("template1\nmodified contents");
-		
+
 		template2 = new FreemarkerTemplate();
 		template2.setId(2345);
 		template2.setName("template2");
 		template2.setValue("template2\ncontents");
 	}
-	
+
 	@BeforeMethod
 	public void reset()
 	{
@@ -82,82 +80,58 @@ public class RepositoryTemplateLoaderTest extends AbstractTestNGSpringContextTes
 	}
 
 	@Test
-	public void loadAndReadUnmodified() throws IOException
+	public void loadAndRead() throws IOException
 	{
 		when(repository.findOne(new QueryImpl().eq("Name", "template1"))).thenReturn(template1);
-		when(repository.findOne(new Integer(1234))).thenAnswer(new Answer<Entity>()
-				{
-					@Override
-					public Entity answer(InvocationOnMock invocation) throws Throwable
-					{
-						Thread.sleep(10);
-						return template1;
-					}
-				});
 		Object source = repositoryTemplateLoader.findTemplateSource("template1");
-		long retrievalTime = System.currentTimeMillis();
 		assertNotNull(source);
 		Reader reader = repositoryTemplateLoader.getReader(source, null);
 		assertTrue(IOUtils.contentEquals(reader, new StringReader(template1.getValue())));
-		assertTrue(repositoryTemplateLoader.getLastModified(source) <= retrievalTime);
 	}
-	
+
 	@Test
-	public void lastModifiedChangesWhenContentChanges() throws IOException
+	public void lastModifiedEqualsMinusOne() throws IOException
 	{
 		when(repository.findOne(new QueryImpl().eq("Name", "template1"))).thenReturn(template1);
-		when(repository.findOne(new Integer(1234))).thenAnswer(new Answer<Entity>()
-		{
-			@Override
-			public Entity answer(InvocationOnMock invocation) throws Throwable
-			{
-				Thread.sleep(10);
-				return template1Modified;
-			}
-		});
-
 		Object source = repositoryTemplateLoader.findTemplateSource("template1");
-		long retrievalTime = System.currentTimeMillis();
-		assertNotNull(source);
-		assertTrue(repositoryTemplateLoader.getLastModified(source) > retrievalTime);
+		assertTrue(repositoryTemplateLoader.getLastModified(source) == -1);
 	}
-	
+
 	@Test
 	public void newSourceReturnedWhenContentChanges() throws IOException
 	{
 		when(repository.findOne(new QueryImpl().eq("Name", "template1"))).thenReturn(template1, template1Modified);
 		Object source = repositoryTemplateLoader.findTemplateSource("template1");
-		assertTrue(IOUtils.contentEquals(repositoryTemplateLoader.getReader(source, null), 
+		assertTrue(IOUtils.contentEquals(repositoryTemplateLoader.getReader(source, null),
 				new StringReader(template1.getValue())));
-		
-		when(repository.findOne(new QueryImpl().eq("Name", "template1"))).thenReturn(template1Modified);
-		Object source2 = repositoryTemplateLoader.findTemplateSource("template1");
-		assertTrue(IOUtils.contentEquals(repositoryTemplateLoader.getReader(source2, null), 
-				new StringReader(template1Modified.getValue())));
+		Object modifiedSource = repositoryTemplateLoader.findTemplateSource("template1");
+		assertNotEquals(source, modifiedSource);
+		assertTrue(IOUtils.contentEquals(repositoryTemplateLoader.getReader(modifiedSource, null), new StringReader(
+				template1Modified.getValue())));
 	}
-	
+
 	@Test
 	public void sourceBelongsToContentAndCanBeReadMultipleTimes() throws IOException
 	{
 		when(repository.findOne(new QueryImpl().eq("Name", "template1"))).thenReturn(template1);
 		when(repository.findOne(new QueryImpl().eq("Name", "template2"))).thenReturn(template2);
-		
+
 		Object source1 = repositoryTemplateLoader.findTemplateSource("template1");
 		Object source2 = repositoryTemplateLoader.findTemplateSource("template2");
-		
-		assertTrue(IOUtils.contentEquals(repositoryTemplateLoader.getReader(source2, null), 
+
+		assertTrue(IOUtils.contentEquals(repositoryTemplateLoader.getReader(source2, null),
 				new StringReader(template2.getValue())));
 
-		assertTrue(IOUtils.contentEquals(repositoryTemplateLoader.getReader(source1, null), 
+		assertTrue(IOUtils.contentEquals(repositoryTemplateLoader.getReader(source1, null),
 				new StringReader(template1.getValue())));
-		
-		assertTrue(IOUtils.contentEquals(repositoryTemplateLoader.getReader(source1, null), 
+
+		assertTrue(IOUtils.contentEquals(repositoryTemplateLoader.getReader(source1, null),
 				new StringReader(template1.getValue())));
-		
-		assertTrue(IOUtils.contentEquals(repositoryTemplateLoader.getReader(source1, null), 
+
+		assertTrue(IOUtils.contentEquals(repositoryTemplateLoader.getReader(source1, null),
 				new StringReader(template1.getValue())));
-		
-		assertTrue(IOUtils.contentEquals(repositoryTemplateLoader.getReader(source2, null), 
+
+		assertTrue(IOUtils.contentEquals(repositoryTemplateLoader.getReader(source2, null),
 				new StringReader(template2.getValue())));
 
 	}

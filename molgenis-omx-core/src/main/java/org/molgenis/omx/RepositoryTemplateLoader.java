@@ -24,7 +24,7 @@ public class RepositoryTemplateLoader implements TemplateLoader
 	{
 		this.repository = repository;
 	}
-	
+
 	@Override
 	public void closeTemplateSource(Object arg0) throws IOException
 	{
@@ -39,24 +39,29 @@ public class RepositoryTemplateLoader implements TemplateLoader
 		{
 			return null;
 		}
-		LOGGER.info("Loaded Freemarker Template " + template.getName());
-		return new TemplateSource(template);
+		TemplateSource templateSource = new TemplateSource(template);
+		LOGGER.debug("Created " + templateSource);
+		return templateSource;
 	}
 
+	/**
+	 * The repository does not offer a way to check last modified date.
+	 */
 	@Override
 	public long getLastModified(Object source)
 	{
-		return ((TemplateSource) source).getLastModified();
+		return -1;
 	}
 
 	@Override
 	public Reader getReader(Object source, String encoding) throws IOException
 	{
-		return ((TemplateSource) source).getReader();
+		TemplateSource r = ((TemplateSource) source);
+		return new StringReader(r.getValue());
 	}
 
 	/**
-	 * Template source class. Needed to enable caching.
+	 * Template source class. Needed to have a correct {@link #equals(Object)} method. Also used for logging creation time.
 	 */
 	public class TemplateSource
 	{
@@ -71,7 +76,7 @@ public class RepositoryTemplateLoader implements TemplateLoader
 		@Override
 		public String toString()
 		{
-			return template.getName();
+			return String.format("Freemarker Template \"%s\" (loaded on %TT.%2$TL)", template.getName(), lastModified);
 		}
 
 		@Override
@@ -98,34 +103,9 @@ public class RepositoryTemplateLoader implements TemplateLoader
 			return true;
 		}
 
-		public String getValue()
+		private String getValue()
 		{
 			return template.getValue();
-		}
-
-		public Reader getReader()
-		{
-			LOGGER.info("Read Freemarker Template " + this + " from FreemarkerTemplate repository.");
-			return new StringReader(getValue());
-		}
-
-		/**
-		 * Checks if this version still exists in the repository.
-		 */
-		private long getLastModified()
-		{
-			long result = lastModified;
-			FreemarkerTemplate currentVersion = (FreemarkerTemplate) repository.findOne(template.getId());
-			if (currentVersion == null || !currentVersion.getValue().equals(template.getValue()))
-			{
-				LOGGER.debug(this + " is modified!");
-				result = System.currentTimeMillis();
-			}
-			else
-			{
-				LOGGER.debug(this + " is unchanged");
-			}
-			return result;
 		}
 	}
 }
