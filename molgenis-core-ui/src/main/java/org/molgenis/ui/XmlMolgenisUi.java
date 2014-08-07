@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Deprecated
 public class XmlMolgenisUi implements MolgenisUi
 {
+	static final String DEFAULT_TITLE = "MOLGENIS";
+
 	static final String DEFAULT_APP_HREF_LOGO = "/img/logo_molgenis_small.png";
 	static final String KEY_APP_NAME = "app.name";
 	public static final String KEY_APP_HREF_LOGO = "app.href.logo";
@@ -39,6 +41,7 @@ public class XmlMolgenisUi implements MolgenisUi
 		String title = molgenisSettings.getProperty(KEY_APP_NAME);
 		if (title == null) title = molgenisUi.getLabel();
 		if (title == null) title = molgenisUi.getName();
+		if (title == null) title = DEFAULT_TITLE;
 		return title;
 	}
 
