@@ -2,6 +2,11 @@ package org.molgenis.ui;
 
 public interface MolgenisUi
 {
+	/**
+	 * Returns app title or 'MOLGENIS' if app title does not exist
+	 * 
+	 * @return
+	 */
 	String getTitle();
 
 	String getHrefLogo();

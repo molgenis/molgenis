@@ -34,6 +34,7 @@ import org.molgenis.jaxb.Diagnosis;
 import org.molgenis.jaxb.ParticipantCollectionSummary;
 import org.molgenis.jaxb.Race;
 import org.molgenis.util.FileUploadUtils;
+import org.molgenis.util.ResourceUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -106,7 +107,7 @@ public class CbmToOmxConverterController extends MolgenisPluginController
 
 			// get uploaded file and do checks
 
-			File currentXsdfile = new File(this.getClass().getResource("/schemas/CBM.xsd").getFile());
+			File currentXsdfile = ResourceUtils.getFile(this.getClass(), "/schemas/CBM.xsd");
 			// if no error, set file, and continue
 			this.setCurrentFile(file);
 			// Here the actual data is going to be imported.

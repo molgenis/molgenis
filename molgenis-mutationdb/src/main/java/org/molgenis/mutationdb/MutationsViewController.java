@@ -4,7 +4,7 @@ import static org.molgenis.mutationdb.MutationsViewController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
-import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -17,7 +17,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.util.MySqlFileUtil;
+import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -39,12 +39,9 @@ public class MutationsViewController extends MolgenisPluginController
 	private final DataService dataService;
 	private final MysqlViewService mysqlViewService;
 	public static List<String> HEADERS_NAMES = Arrays.asList("Mutation ID", "cDNA change", "Protein change",
-			"Exon/Intron", "Consequence",
-			"Inheritance", "Patient ID", "Phenotype");
-	private static final String PATH_TO_INSERT_QUERY = File.separatorChar + "mysql" + File.separatorChar
-			+ "mutationview_col7a1_prototype.sql";
-	private static final String PATH_TO_NA_QUERY = File.separatorChar + "mysql" + File.separatorChar
-			+ "mutationview_col7a1_prototype_update_na.sql";
+			"Exon/Intron", "Consequence", "Inheritance", "Patient ID", "Phenotype");
+	private static final String PATH_TO_INSERT_QUERY = "/mysql/mutationview_col7a1_prototype.sql";
+	private static final String PATH_TO_NA_QUERY = "/mysql/mutationview_col7a1_prototype_update_na.sql";
 
 	@Autowired
 	public MutationsViewController(DataService dataService, MysqlViewService mysqlViewService)
@@ -72,8 +69,7 @@ public class MutationsViewController extends MolgenisPluginController
 		{
 			CrudRepository mutationsViewRepo = (CrudRepository) dataService
 					.getRepositoryByEntityName(ENTITYNAME_MUTATIONSVIEW);
-			CrudRepository mutationsRepo = (CrudRepository) dataService
-					.getRepositoryByEntityName(ENTITYNAME_MUTATIONS);
+			CrudRepository mutationsRepo = (CrudRepository) dataService.getRepositoryByEntityName(ENTITYNAME_MUTATIONS);
 			rows = createRows(mutationsViewRepo, mutationsRepo);
 		}
 		model.addAttribute("rows", rows);
@@ -87,13 +83,17 @@ public class MutationsViewController extends MolgenisPluginController
 	{
 		if (dataService.hasRepository(ENTITYNAME_MUTATIONSVIEW))
 		{
-			Repository mutationsViewRepo = dataService
-					.getRepositoryByEntityName(ENTITYNAME_MUTATIONSVIEW);
+			Repository mutationsViewRepo = dataService.getRepositoryByEntityName(ENTITYNAME_MUTATIONSVIEW);
 			this.mysqlViewService.truncate(mutationsViewRepo.getEntityMetaData().getName());
-			this.mysqlViewService.populateWithQuery(MySqlFileUtil.getMySqlQueryFromFile(MutationsViewController.class,
-					PATH_TO_INSERT_QUERY));
-			this.mysqlViewService.populateWithQuery(MySqlFileUtil.getMySqlQueryFromFile(MutationsViewController.class,
-					PATH_TO_NA_QUERY));
+			try
+			{
+				this.mysqlViewService.populateWithQuery(ResourceUtils.getString(getClass(), PATH_TO_INSERT_QUERY));
+				this.mysqlViewService.populateWithQuery(ResourceUtils.getString(getClass(), PATH_TO_NA_QUERY));
+			}
+			catch (IOException e)
+			{
+				throw new RuntimeException(e);
+			}
 			return true;
 		}
 		else
