@@ -117,7 +117,7 @@
 		
 		$hiddenInput.select2({
 			width: width,
-			minimumInputLength: 2,
+			minimumInputLength: 1,
 			multiple: (attributeMetaData.fieldType === 'MREF' || attributeMetaData.fieldType === 'XREF'),
 			closeOnSelect: false,
 			query: function (options){
