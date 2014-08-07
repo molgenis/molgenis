@@ -6,10 +6,12 @@ import static org.molgenis.data.QueryRule.Operator.OR;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.elasticsearch.index.query.BaseQueryBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -44,13 +46,27 @@ public class QueryGeneratorHelper
 			// Jump to next round if the queryRule is just logic operators
 			if (queryRule.getOperator().equals(AND) || queryRule.getOperator().equals(OR)) continue;
 
-			// Take special care of NESTED operator
 			if (queryRule.getOperator().equals(NESTED))
 			{
-				QueryGeneratorHelper helper = new QueryGeneratorHelper(queryRule.getNestedRules(), entityMetaData);
-				baseQueryCollection.put(helper.generateQuery(), getLogicOperator(queryRule));
+				Set<String> fieldNames = getFieldTypes(queryRule);
+				// If all the nestedQueryRules are of MREF type and have the
+				// same field name
+				if (isNestedQueryTypeMref(fieldNames) && fieldNames.size() == 1)
+				{
+					Iterator<String> iterator = fieldNames.iterator();
+					baseQueryCollection.put(
+							QueryBuilders.nestedQuery(iterator.next(),
+									QueryBuilders.queryString(getNestedMrefQuery(queryRule.getNestedRules()))),
+							getLogicOperator(queryRule));
+				}
+				else
+				{
+					QueryGeneratorHelper helper = new QueryGeneratorHelper(queryRule.getNestedRules(), entityMetaData);
+					baseQueryCollection.put(helper.generateQuery(), getLogicOperator(queryRule));
+				}
+
 			}
-			else if (isMref(queryRule))
+			else if (isMref(queryRule.getField()))
 			{
 				// Initialize the mrefField the first time
 				if (mrefField.length() == 0) mrefField.append(queryRule.getField());
@@ -94,6 +110,83 @@ public class QueryGeneratorHelper
 		addNestedQueryToCollection();
 
 		return combineQueryBuilders();
+	}
+
+	/**
+	 * A recursive function that creates QueryString for Mref nestedQueryRules.
+	 * 
+	 * @param nestedRules
+	 * @return Return a query for ElasticSearch Nested Query
+	 */
+	private String getNestedMrefQuery(List<QueryRule> nestedRules)
+	{
+		StringBuilder queryStringBuilder = new StringBuilder();
+		if (nestedRules.size() > 1) queryStringBuilder.append('(');
+		for (QueryRule queryRule : nestedRules)
+		{
+			if (queryRule.getOperator().equals(NESTED))
+			{
+				queryStringBuilder.append(getNestedMrefQuery(queryRule.getNestedRules()));
+			}
+			else if (queryRule.getOperator().equals(AND) || queryRule.getOperator().equals(OR))
+			{
+				queryStringBuilder.append(' ').append(queryRule.getOperator().toString()).append(' ');
+			}
+			else
+			{
+				EntityMetaData refEntity = entityMetaData.getAttribute(queryRule.getField()).getRefEntity();
+				String nestedField = queryRule.getField() + "." + refEntity.getLabelAttribute().getName();
+				queryStringBuilder.append(nestedField).append(':').append("\"").append(queryRule.getValue())
+						.append("\"");
+			}
+		}
+		if (nestedRules.size() > 1) queryStringBuilder.append(')');
+
+		return queryStringBuilder.toString();
+	}
+
+	/**
+	 * A helper function that checks if all the descendant nestedQueryRules are
+	 * type of MREFs and have the same field
+	 * 
+	 * @param fieldNames
+	 * @return
+	 */
+	private boolean isNestedQueryTypeMref(Set<String> fieldNames)
+	{
+		boolean nested = true;
+		for (String fieldName : fieldNames)
+		{
+			nested = (nested && isMref(fieldName));
+		}
+		return nested;
+	}
+
+	/**
+	 * Get all available fields from nestedQueryRule
+	 * 
+	 * @param nestedQueryRule
+	 * @return
+	 */
+	private Set<String> getFieldTypes(QueryRule nestedQueryRule)
+	{
+		Set<String> fields = new HashSet<String>();
+
+		for (QueryRule queryRule : nestedQueryRule.getNestedRules())
+		{
+			if (!queryRule.getOperator().equals(AND) && !queryRule.getOperator().equals(OR))
+			{
+				if (queryRule.getOperator().equals(NESTED))
+				{
+					fields.addAll(getFieldTypes(queryRule));
+				}
+				else
+				{
+					fields.add(queryRule.getField());
+				}
+			}
+		}
+		return fields;
 	}
 
 	/**
@@ -172,11 +265,11 @@ public class QueryGeneratorHelper
 	 * @param queryRule
 	 * @return
 	 */
-	private boolean isMref(QueryRule queryRule)
+	private boolean isMref(String fieldName)
 	{
-		if (entityMetaData == null || queryRule.getField() == null) return false;
+		if (entityMetaData == null || fieldName == null) return false;
 
-		return entityMetaData.getAttribute(queryRule.getField()).getDataType().getEnumType().toString()
+		return entityMetaData.getAttribute(fieldName).getDataType().getEnumType().toString()
 				.equalsIgnoreCase(MolgenisFieldTypes.MREF.toString());
 	}
 
