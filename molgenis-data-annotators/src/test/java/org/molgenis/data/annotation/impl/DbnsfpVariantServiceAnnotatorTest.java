@@ -18,6 +18,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.util.ResourceUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -43,7 +44,7 @@ public class DbnsfpVariantServiceAnnotatorTest
 	{
 		MolgenisSettings settings = mock(MolgenisSettings.class);
 		when(settings.getProperty(DbnsfpVariantServiceAnnotator.CHROMOSOME_FILE_LOCATION_PROPERTY)).thenReturn(
-				getClass().getResource("/dbNSFP_variant_example_chr").getFile());
+				ResourceUtils.getFile(getClass(), "/dbNSFP_variant_example_chr").getPath());
 
 		metaDataCanAnnotate = mock(EntityMetaData.class);
 

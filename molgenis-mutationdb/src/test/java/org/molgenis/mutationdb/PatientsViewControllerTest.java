@@ -25,7 +25,7 @@ import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
 import org.molgenis.mutationdb.PatientsViewControllerTest.Config;
 import org.molgenis.util.GsonHttpMessageConverter;
-import org.molgenis.util.MySqlFileUtil;
+import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -92,9 +92,7 @@ public class PatientsViewControllerTest extends AbstractTestNGSpringContextTests
 
 		when(dataService.hasRepository(PatientsViewController.ENTITYNAME_PATIENTSVIEW)).thenReturn(true);
 		doNothing().when(mysqlViewService).truncate(PatientsViewController.ENTITYNAME_PATIENTSVIEW);
-		doNothing().when(mysqlViewService).populateWithQuery(
-				MySqlFileUtil.getMySqlQueryFromFile(PatientsViewController.class,
-						PatientsViewController.PATH_TO_INSERT_QUERY));
+		doNothing().when(mysqlViewService).populateWithQuery(ResourceUtils.getString(getClass(), PatientsViewController.PATH_TO_INSERT_QUERY));
 		when(dataService.getRepositoryByEntityName(PatientsViewController.ENTITYNAME_PATIENTSVIEW)).thenReturn(
 				patientsViewRepo).getMock();
 

@@ -18,6 +18,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.util.ResourceUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -47,7 +48,7 @@ public class CaddServiceAnnotatorTest
 		MolgenisSettings settings = mock(MolgenisSettings.class);
 
 		when(settings.getProperty(CaddServiceAnnotator.CADD_FILE_LOCATION_PROPERTY))
-				.thenReturn(getClass().getResource("/1000G.vcf.gz").getFile());
+				.thenReturn(ResourceUtils.getFile(getClass(), "/1000G.vcf.gz").getPath());
 
 		attributeMetaDataChrom = mock(AttributeMetaData.class);
 		attributeMetaDataPos = mock(AttributeMetaData.class);

@@ -24,6 +24,7 @@ import org.molgenis.data.annotation.provider.CgdDataProvider;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.util.ResourceUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -45,8 +46,7 @@ public class ClinicalGenomicsDatabaseServiceAnnotatorTest
 	{
 		MolgenisSettings settings = mock(MolgenisSettings.class);
 
-		when(settings.getProperty(CgdDataProvider.CGD_FILE_LOCATION_PROPERTY)).thenReturn(
-				getClass().getResource("/cgd_example.txt").getFile());
+		when(settings.getProperty(CgdDataProvider.CGD_FILE_LOCATION_PROPERTY)).thenReturn(ResourceUtils.getFile(getClass(), "/cgd_example.txt").getPath());
 
 		metaDataCanAnnotate = mock(EntityMetaData.class);
 		attributeMetaDataChrom = mock(AttributeMetaData.class);
