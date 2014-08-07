@@ -29,7 +29,7 @@ public class QueryGeneratorHelper
 
 	public QueryGeneratorHelper(List<QueryRule> rules, EntityMetaData metaData)
 	{
-		if (rules.size() == 0) throw new RuntimeException("The queryRules cannot be empty : " + rules);
+		if (rules.isEmpty()) throw new RuntimeException("The queryRules cannot be empty : " + rules);
 		baseQueryCollection = new LinkedHashMap<BaseQueryBuilder, Operator>(rules.size());
 		queryRules = rules;
 		entityMetaData = metaData;
