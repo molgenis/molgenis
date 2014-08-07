@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class MenuMolgenisUi implements MolgenisUi
 {
+	static final String DEFAULT_TITLE = "MOLGENIS";
+
 	static final String KEY_HREF_LOGO = "app.href.logo";
 	static final String KEY_HREF_CSS = "app.href.css";
 	static final String KEY_TITLE = "app.name";
@@ -25,7 +27,7 @@ public class MenuMolgenisUi implements MolgenisUi
 	@Override
 	public String getTitle()
 	{
-		return molgenisSettings.getProperty(KEY_TITLE);
+		return molgenisSettings.getProperty(KEY_TITLE, DEFAULT_TITLE);
 	}
 
 	@Override
