@@ -37,6 +37,7 @@ public class QueryGeneratorHelper
 
 	public BaseQueryBuilder generateQuery()
 	{
+		baseQueryCollection.clear();
 		List<QueryRule> mrefRulesOfSameField = new ArrayList<QueryRule>();
 
 		for (QueryRule queryRule : queryRules)
