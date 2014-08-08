@@ -85,7 +85,7 @@ public class MenuMolgenisUiTest
 	public void getTitle()
 	{
 		String title = "title";
-		when(molgenisSettings.getProperty(MenuMolgenisUi.KEY_TITLE)).thenReturn(title);
+		when(molgenisSettings.getProperty(MenuMolgenisUi.KEY_TITLE, "MOLGENIS")).thenReturn(title);
 		assertEquals(menuMolgenisUi.getTitle(), title);
 	}
 }
