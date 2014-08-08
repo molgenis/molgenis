@@ -21,6 +21,7 @@ import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.util.ResourceUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -44,7 +45,7 @@ public class DbnsfpGeneServiceAnnotatorTest
 
 		MolgenisSettings settings = mock(MolgenisSettings.class);
 		when(settings.getProperty(DbnsfpGeneServiceAnnotator.GENE_FILE_LOCATION_PROPERTY)).thenReturn(
-				getClass().getResource("/dbNSFP_gene_example.txt").getFile());
+				ResourceUtils.getFile(getClass(), "/dbNSFP_gene_example.txt").getPath());
 
 		attributeMetaDataChrom = mock(AttributeMetaData.class);
 		attributeMetaDataPos = mock(AttributeMetaData.class);

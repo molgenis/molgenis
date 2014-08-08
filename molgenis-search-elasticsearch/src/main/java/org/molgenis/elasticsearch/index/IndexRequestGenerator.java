@@ -1,6 +1,7 @@
 package org.molgenis.elasticsearch.index;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -80,16 +81,19 @@ public class IndexRequestGenerator
 	 * 
 	 * @param refEntityData
 	 * @param entityMetaData
+	 * @param mrefMaps
 	 * @return
 	 */
-	private Map<String, Object> createMapValue(Entity refEntityData, EntityMetaData entityMetaData)
+	private void createMapValue(Entity refEntityData, EntityMetaData entityMetaData, Map<String, List<Object>> mrefMaps)
 	{
-		Map<String, Object> mapValue = new HashMap<String, Object>();
 		for (String attributeName : refEntityData.getAttributeNames())
 		{
-			mapValue.put(attributeName, refEntityData.get(attributeName));
+			if (!mrefMaps.containsKey(attributeName))
+			{
+				mrefMaps.put(attributeName, new ArrayList<>());
+			}
+			mrefMaps.get(attributeName).add(refEntityData.get(attributeName));
 		}
-		return mapValue;
 	}
 
 	private Iterator<BulkRequestBuilder> indexRequestIterator(final Repository repository)
@@ -154,7 +158,7 @@ public class IndexRequestGenerator
 						}
 						if (value instanceof Collection)
 						{
-							List<Map<String, Object>> mrefMaps = new ArrayList<Map<String, Object>>();
+							Map<String, List<Object>> mrefMaps = new HashMap<String, List<Object>>();
 							Collection<?> values = (Collection<?>) value;
 							if (!values.isEmpty())
 							{
@@ -180,7 +184,7 @@ public class IndexRequestGenerator
 										}
 										Entity refEntityData = dataService.findOne(entityMetaData
 												.getAttribute(attrName).getRefEntity().getName(), cellId);
-										mrefMaps.add(createMapValue(refEntityData, entityMetaData));
+										createMapValue(refEntityData, entityMetaData, mrefMaps);
 									}
 									if (mrefIds != null) id = mrefIds;
 									if (mrefKeys != null) key = mrefKeys;
@@ -218,7 +222,7 @@ public class IndexRequestGenerator
 											mrefKeys.add(cellKey);
 										}
 
-										mrefMaps.add(createMapValue(cell, entityMetaData));
+										createMapValue(cell, entityMetaData, mrefMaps);
 									}
 									if (mrefIds != null) id = mrefIds;
 									if (mrefKeys != null) key = mrefKeys;
@@ -233,12 +237,12 @@ public class IndexRequestGenerator
 
 							value = Joiner.on(",").join((Collection<?>) value);
 
-							doc.put(attrName, mrefMaps);
+							doc.put(attrName, Arrays.asList(mrefMaps));
 						}
 						if (id != null) doc.put("id-" + attrName, id);
 						if (key != null) doc.put("key-" + attrName, key);
 
-						// If the attribute is MREF
+						// If the attribute is not MREF
 						if (entityMetaData.getAttribute(attrName) == null
 								|| !entityMetaData.getAttribute(attrName).getDataType().getEnumType().toString()
 										.equalsIgnoreCase(MolgenisFieldTypes.MREF.toString()))

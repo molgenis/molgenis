@@ -1,4 +1,4 @@
-package org.molgenis.omx.controller;
+package org.molgenis.ui.controller;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasProperty;
@@ -24,10 +24,10 @@ import javax.mail.internet.MimeMessage.RecipientType;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.omx.controller.FeedbackControllerTest.Config;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.ui.controller.FeedbackController;
 import org.molgenis.ui.controller.StaticContentService;
+import org.molgenis.ui.controller.FeedbackControllerTest.Config;
 import org.molgenis.util.FileStore;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
