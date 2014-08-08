@@ -13,7 +13,7 @@
 			<p>Thank you for your feedback.</p>
 		</div>
 	<#else>
-		<div class="alert">
+		<div class="alert alert-error">
 			<strong>Error!</strong><br/>${feedbackForm.errorMessage}
 		</div>
 	</#if>
