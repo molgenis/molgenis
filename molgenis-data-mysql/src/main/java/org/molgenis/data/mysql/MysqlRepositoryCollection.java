@@ -167,8 +167,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 			{
 				EntityMetaData entityMetaData = metadata.get(attribute.getString("entity"));
 				DefaultAttributeMetaData attributeMetaData = (DefaultAttributeMetaData) entityMetaData
-						.getAttribute(attribute
-						.getString("name"));
+						.getAttribute(attribute.getString("name"));
 				EntityMetaData ref = metadata.get(attribute.getString("refEntity"));
 				if (ref == null) throw new RuntimeException("refEntity '" + attribute.getString("refEntity")
 						+ "' missing for " + entityMetaData.getName() + "." + attributeMetaData.getName());
@@ -227,7 +226,13 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 	{
 		if (entities.query().eq("name", emd.getName()).count() > 0)
 		{
-			return repositories.get(emd.getName());
+			MysqlRepository repo = repositories.get(emd.getName());
+			if (!dataService.hasRepository(emd.getName()))
+			{
+				dataService.addRepository(repo);
+			}
+
+			return repo;
 		}
 
 		Entity e = new MapEntity();
