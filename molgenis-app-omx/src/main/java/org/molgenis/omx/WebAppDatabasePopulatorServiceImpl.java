@@ -110,6 +110,8 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		runtimePropertyMap.put(DataExplorerController.WIZARD_TITLE, DataExplorerController.DEFAULT_VAL_WIZARD_TITLE);
 		runtimePropertyMap.put(DataExplorerController.WIZARD_BUTTON_TITLE,
 				DataExplorerController.DEFAULT_VAL_WIZARD_BTN_TITLE);
+		runtimePropertyMap.put(DataExplorerController.KEY_HEADER_ABBREVIATE,
+				DataExplorerController.DEFAULT_VAL_HEADER_ABBREVIATE);
 		runtimePropertyMap.put(DataExplorerController.KEY_SHOW_WIZARD_ONINIT,
 				String.valueOf(DataExplorerController.DEFAULT_VAL_SHOW_WIZARD_ONINIT));
 		runtimePropertyMap.put(DataExplorerController.AGGREGATES_NORESULTS_MESSAGE,

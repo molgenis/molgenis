@@ -87,6 +87,7 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String KEY_GALAXY_ENABLED = "plugin.dataexplorer.galaxy.enabled";
 	public static final String KEY_GALAXY_URL = "plugin.dataexplorer.galaxy.url";
 	public static final String KEY_SHOW_WIZARD_ONINIT = "plugin.dataexplorer.wizard.oninit";
+	public static final String KEY_HEADER_ABBREVIATE = "plugin.dataexplorer.header.abbreviate";
 	private static final boolean DEFAULT_VAL_MOD_AGGREGATES = true;
 	private static final boolean DEFAULT_VAL_MOD_ANNOTATORS = false;
 	private static final boolean DEFAULT_VAL_MOD_CHARTS = true;
@@ -96,6 +97,7 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final boolean DEFAULT_VAL_SHOW_WIZARD_ONINIT = false;
 	public static final String DEFAULT_VAL_WIZARD_TITLE = "Filter Wizard";
 	public static final String DEFAULT_VAL_WIZARD_BTN_TITLE = "Wizard";
+	public static final String DEFAULT_VAL_HEADER_ABBREVIATE = "180";
 	public static final String DEFAULT_AGGREGATES_NORESULTS_MESSAGE = "No results found";
 
 	static final String ATTR_GALAXY_URL = "galaxyUrl";
