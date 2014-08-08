@@ -273,7 +273,7 @@ function($, molgenis, settingsXhr) {
 					$('a[data-toggle="tab"]', $('#module-nav')).first().click();
 					
 					//Show wizard on show of dataexplorer if url param 'wizard=true' is added
-					if (settings['wizard.oninit']) {
+					if (settings['wizard.oninit'] && settings['wizard.oninit'] === 'true') {
 						self.filter.wizard.openFilterWizardModal(selectedEntityMetaData, attributeFilters);
 					}
 					
