@@ -8,6 +8,10 @@ import org.molgenis.security.core.MolgenisPermissionService;
 
 import com.google.common.collect.Lists;
 
+/**
+ * @deprecated use {@link org.molgenis.ui.menu.MenuItemToMolgenisUiMenuAdapter} instead
+ */
+@Deprecated
 public class XmlMolgenisUiMenu implements MolgenisUiMenu
 {
 	private final MenuType menuType;
@@ -75,6 +79,16 @@ public class XmlMolgenisUiMenu implements MolgenisUiMenu
 			if (pluginMenuItem.isAuthorized()) pluginMenuItems.add(pluginMenuItem);
 		}
 		return pluginMenuItems;
+	}
+
+	@Override
+	public boolean containsItem(String itemId)
+	{
+		for (MolgenisUiMenuItem molgenisUiMenuItem : getItems())
+		{
+			if (molgenisUiMenuItem.getId().equals(itemId)) return true;
+		}
+		return false;
 	}
 
 	@Override

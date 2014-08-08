@@ -5,7 +5,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>${molgenis_ui.title?html}</title>
+		<title><#if molgenis_ui.title?has_content>${molgenis_ui.title?html}</#if></title>
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="chrome=1">
 		<link rel="icon" href="/img/molgenis.ico" type="image/x-icon">
@@ -82,7 +82,7 @@
 					<#list menu.items as item>
 						<#if item.type != "MENU">
 							<#if item.name=="Home">
-								<li><a href="/menu/${menu.id?html}/${item.url?html}"><img src="${molgenis_ui.hrefLogo?html}" alt="${molgenis_ui.title?html}"></a></li>
+								<li><a href="/menu/${menu.id?html}/${item.url?html}"><img src="<#if molgenis_ui.hrefLogo?has_content>${molgenis_ui.hrefLogo?html}<#else>/img/logo_molgenis_small.png</#if>" alt="<#if molgenis_ui.title?has_content>${molgenis_ui.title?html}</#if>"></a></li>
 							<#else>
 								<#if item.id == plugin_id>
 									<li class="active"><a href="#">${item.name?html}</a></li>
