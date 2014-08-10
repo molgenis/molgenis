@@ -25,7 +25,7 @@
 	
 	molgenis.OntologyTree.prototype.updateOntologyTree = function(ontologyIRI){
 		var ontologyIndex = getOntologyTermByIri(ontologyIRI);
-		if(ontologyIndex.items.length > 0){
+		if(ontologyIndex && ontologyIndex.items.length > 0){
 			var topNode = ontologyIndex.items[0];
 			topNode.attributes = removeDuplicate(getRootOntologyTerms(topNode));
 			createEntityMetaTree(topNode, null);
@@ -171,14 +171,17 @@
 	}
 	
 	function getOntologyTermByIri(ontologyIRI){
-		var request = {
-			'q' : [{
-				'field' : ONTOLOGY_IRI,
-				'operator' : 'EQUALS',
-				'value' : ontologyIRI
-			}]
-		};
-		return restApi.get("/api/v1/ontologyindex/", {'q' : request}, null);
+		if(ontologyIRI){
+			var request = {
+				'q' : [{
+					'field' : ONTOLOGY_IRI,
+					'operator' : 'EQUALS',
+					'value' : ontologyIRI
+				}]
+			};
+			return restApi.get("/api/v1/ontologyindex/", {'q' : request}, null);
+		}
+		return null;
 	}
 	
 	function getOntologyTerm(option){
