@@ -2,6 +2,7 @@ package org.molgenis.omx.biobankconnect.ontology.repository;
 
 import java.io.IOException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -31,7 +32,6 @@ public abstract class AbstractOntologyRepository implements Repository
 	public final static String ONTOLOGY_TERM_IRI = "ontologyTermIRI";
 	public final static String SYNONYMS = "ontologyTermSynonym";
 	public final static String ALTERNATIVE_DEFINITION = "alternativeDefinition";
-	public final static String ONTOLOGY_LABEL = "ontologyLabel";
 	public final static String ENTITY_TYPE = "entity_type";
 	public final static String TYPE_ONTOLOGYTERM = "ontologyTerm";
 	public final static String CHIDLREN = "children";
@@ -39,6 +39,8 @@ public abstract class AbstractOntologyRepository implements Repository
 	@Autowired
 	public AbstractOntologyRepository(String entityName, SearchService searchService)
 	{
+		if (searchService == null) throw new IllegalArgumentException("SearchService is null!");
+		if (StringUtils.isEmpty(entityName)) throw new IllegalArgumentException("The ontology entityName is null!");
 		this.entityName = entityName;
 		this.searchService = searchService;
 	}
@@ -72,9 +74,10 @@ public abstract class AbstractOntologyRepository implements Repository
 					FieldTypeEnum.BOOL));
 			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(
 					OntologyTermIndexRepository.ONTOLOGY_TERM_DEFINITION));
+			entityMetaData
+					.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermIndexRepository.ONTOLOGY_NAME));
 			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermIndexRepository.ONTOLOGY_IRI,
 					FieldTypeEnum.HYPERLINK));
-			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyIndexRepository.ONTOLOGY_LABEL));
 			DefaultAttributeMetaData childrenAttributeMetatData = new DefaultAttributeMetaData("attributes",
 					FieldTypeEnum.MREF);
 			childrenAttributeMetatData.setRefEntity(entityMetaData);

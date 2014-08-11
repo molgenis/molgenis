@@ -12,8 +12,8 @@ import java.util.Map;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermQueryRepository;
 import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermIndexRepository;
+import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermQueryRepository;
 import org.molgenis.omx.biobankconnect.ontologyservice.OntologyService;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
@@ -35,7 +35,7 @@ public class OntologyTermIndexRepositoryTest
 		Map<String, Object> columnValueMap1 = new HashMap<String, Object>();
 		columnValueMap1.put(OntologyTermIndexRepository.ENTITY_TYPE, OntologyTermIndexRepository.TYPE_ONTOLOGYTERM);
 		columnValueMap1.put(OntologyTermIndexRepository.ONTOLOGY_IRI, ontologyIRI);
-		columnValueMap1.put(OntologyTermIndexRepository.ONTOLOGY_LABEL, "test ontology");
+		columnValueMap1.put(OntologyTermIndexRepository.ONTOLOGY_NAME, "test ontology");
 		columnValueMap1.put(OntologyTermIndexRepository.LAST, false);
 		columnValueMap1.put(OntologyTermIndexRepository.ROOT, true);
 		columnValueMap1.put(OntologyTermIndexRepository.NODE_PATH, "1.2");
@@ -49,7 +49,7 @@ public class OntologyTermIndexRepositoryTest
 		Map<String, Object> columnValueMap2 = new HashMap<String, Object>();
 		columnValueMap2.put(OntologyTermIndexRepository.ENTITY_TYPE, OntologyTermIndexRepository.TYPE_ONTOLOGYTERM);
 		columnValueMap2.put(OntologyTermIndexRepository.ONTOLOGY_IRI, ontologyIRI);
-		columnValueMap2.put(OntologyTermIndexRepository.ONTOLOGY_LABEL, "test ontology");
+		columnValueMap2.put(OntologyTermIndexRepository.ONTOLOGY_NAME, "test ontology");
 		columnValueMap2.put(OntologyTermIndexRepository.LAST, false);
 		columnValueMap2.put(OntologyTermIndexRepository.ROOT, false);
 		columnValueMap2.put(OntologyTermIndexRepository.NODE_PATH, "1.2.3");
@@ -65,7 +65,7 @@ public class OntologyTermIndexRepositoryTest
 		Map<String, Object> columnValueMap3 = new HashMap<String, Object>();
 		columnValueMap3.put(OntologyTermIndexRepository.ENTITY_TYPE, OntologyTermIndexRepository.TYPE_ONTOLOGYTERM);
 		columnValueMap3.put(OntologyTermIndexRepository.ONTOLOGY_IRI, ontologyIRI);
-		columnValueMap3.put(OntologyTermIndexRepository.ONTOLOGY_LABEL, "test ontology");
+		columnValueMap3.put(OntologyTermIndexRepository.ONTOLOGY_NAME, "test ontology");
 		columnValueMap3.put(OntologyTermIndexRepository.LAST, false);
 		columnValueMap3.put(OntologyTermIndexRepository.ROOT, false);
 		columnValueMap3.put(OntologyTermIndexRepository.NODE_PATH, "1.2.4");
@@ -81,21 +81,27 @@ public class OntologyTermIndexRepositoryTest
 		SearchService searchService = mock(SearchService.class);
 		when(
 				searchService.search(new SearchRequest(OntologyService.createOntologyTermDocumentType(ontologyIRI),
+						new QueryImpl().eq(OntologyTermIndexRepository.ENTITY_TYPE,
+								OntologyTermIndexRepository.TYPE_ONTOLOGYTERM), null))).thenReturn(
+				new SearchResult(3, Arrays.asList(hit1, hit2, hit3)));
+
+		when(
+				searchService.search(new SearchRequest(OntologyService.createOntologyTermDocumentType(ontologyIRI),
 						new QueryImpl()
-								.eq(OntologyTermIndexRepository.ENTITY_TYPE, OntologyTermIndexRepository.TYPE_ONTOLOGYTERM), null)))
-				.thenReturn(new SearchResult(3, Arrays.asList(hit1, hit2, hit3)));
+								.eq(OntologyTermIndexRepository.PARENT_NODE_PATH, "1.2")
+								.and()
+								.eq(OntologyTermIndexRepository.ENTITY_TYPE,
+										OntologyTermIndexRepository.TYPE_ONTOLOGYTERM), null))).thenReturn(
+				new SearchResult(2, Arrays.asList(hit2, hit3)));
 
 		when(
 				searchService.search(new SearchRequest(OntologyService.createOntologyTermDocumentType(ontologyIRI),
-						new QueryImpl().eq(OntologyTermIndexRepository.PARENT_NODE_PATH, "1.2").and()
-								.eq(OntologyTermIndexRepository.ENTITY_TYPE, OntologyTermIndexRepository.TYPE_ONTOLOGYTERM), null)))
-				.thenReturn(new SearchResult(2, Arrays.asList(hit2, hit3)));
-
-		when(
-				searchService.search(new SearchRequest(OntologyService.createOntologyTermDocumentType(ontologyIRI),
-						new QueryImpl().eq(OntologyTermIndexRepository.NODE_PATH, "1.2.3").and()
-								.eq(OntologyTermIndexRepository.ENTITY_TYPE, OntologyTermIndexRepository.TYPE_ONTOLOGYTERM), null)))
-				.thenReturn(new SearchResult(1, Arrays.asList(hit2)));
+						new QueryImpl()
+								.eq(OntologyTermIndexRepository.NODE_PATH, "1.2.3")
+								.and()
+								.eq(OntologyTermIndexRepository.ENTITY_TYPE,
+										OntologyTermIndexRepository.TYPE_ONTOLOGYTERM), null))).thenReturn(
+				new SearchResult(1, Arrays.asList(hit2)));
 
 		when(
 				searchService.count(OntologyService.createOntologyTermDocumentType(ontologyIRI), new QueryImpl()
@@ -126,8 +132,8 @@ public class OntologyTermIndexRepositoryTest
 						OntologyTermIndexRepository.PARENT_NODE_PATH, entity.get(OntologyTermIndexRepository.NODE_PATH)
 								.toString())))
 				{
-					assertTrue(validOntologyTermIris.contains(subEntity.get(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI)
-							.toString()));
+					assertTrue(validOntologyTermIris.contains(subEntity.get(
+							OntologyTermIndexRepository.ONTOLOGY_TERM_IRI).toString()));
 				}
 			}
 		}

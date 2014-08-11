@@ -53,11 +53,11 @@ public class OntologyRepositoryRegistrator implements ApplicationListener<Contex
 		{
 			// Register ontology content (terms) using separate repos
 			Map<String, Object> columnValueMap = hit.getColumnValueMap();
-			String ontologyTermEntityName = columnValueMap.containsKey(OntologyTermIndexRepository.ONTOLOGY_LABEL) ? columnValueMap
-					.get(OntologyIndexRepository.ONTOLOGY_LABEL).toString() : OntologyTermQueryRepository.DEFAULT_ONTOLOGY_TERM_REPO;
-			String ontologyUrl = columnValueMap.containsKey(OntologyTermIndexRepository.ONTOLOGY_LABEL) ? columnValueMap
+			String ontologyTermEntityName = columnValueMap.containsKey(OntologyTermIndexRepository.ONTOLOGY_NAME) ? columnValueMap
+					.get(OntologyIndexRepository.ONTOLOGY_NAME).toString() : OntologyTermQueryRepository.DEFAULT_ONTOLOGY_TERM_REPO;
+			String ontologyIri = columnValueMap.containsKey(OntologyTermIndexRepository.ONTOLOGY_NAME) ? columnValueMap
 					.get(OntologyIndexRepository.ONTOLOGY_IRI).toString() : OntologyTermQueryRepository.DEFAULT_ONTOLOGY_TERM_REPO;
-			dataService.addRepository(new OntologyTermQueryRepository(ontologyTermEntityName, ontologyUrl,
+			dataService.addRepository(new OntologyTermQueryRepository(ontologyTermEntityName, ontologyIri,
 					searchService));
 		}
 	}

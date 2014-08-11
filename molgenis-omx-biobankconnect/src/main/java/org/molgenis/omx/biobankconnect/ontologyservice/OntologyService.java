@@ -120,7 +120,7 @@ public class OntologyService
 			Ontology ontology = new Ontology();
 			ontology.setIdentifier(hit.getColumnValueMap().get(OntologyIndexRepository.ONTOLOGY_IRI).toString());
 			ontology.setOntologyURI(hit.getColumnValueMap().get(OntologyIndexRepository.ONTOLOGY_IRI).toString());
-			ontology.setName(hit.getColumnValueMap().get(OntologyIndexRepository.ONTOLOGY_LABEL).toString());
+			ontology.setName(hit.getColumnValueMap().get(OntologyIndexRepository.ONTOLOGY_NAME).toString());
 			ontologies.add(ontology);
 		}
 		return ontologies;

@@ -17,14 +17,12 @@ public class OntologyQueryRepository extends AbstractOntologyQueryRepository
 {
 	public final static String DEFAULT_ONTOLOGY_REPO = "ontologyindex";
 	private final static String BASE_URL = "ontologyindex://";
-	private final OntologyIndexRepository ontologyRepository;
 	private final OntologyService ontologySerivce;
 
 	@Autowired
 	public OntologyQueryRepository(String entityName, OntologyService ontologyService, SearchService searchService)
 	{
 		super(entityName, searchService);
-		this.ontologyRepository = new OntologyIndexRepository(null, entityName, searchService);
 		this.ontologySerivce = ontologyService;
 	}
 
@@ -79,6 +77,6 @@ public class OntologyQueryRepository extends AbstractOntologyQueryRepository
 	@Override
 	public String getUrl()
 	{
-		return BASE_URL + ontologyRepository.getName();
+		return BASE_URL + entityName;
 	}
 }

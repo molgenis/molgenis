@@ -35,7 +35,7 @@ public class OntologyServiceTest
 		Map<String, Object> columnValueMap1 = new HashMap<String, Object>();
 		columnValueMap1.put(OntologyTermIndexRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY);
 		columnValueMap1.put(OntologyTermIndexRepository.ONTOLOGY_IRI, "http://www.ontology.test");
-		columnValueMap1.put(OntologyTermIndexRepository.ONTOLOGY_LABEL, "test ontology");
+		columnValueMap1.put(OntologyTermIndexRepository.ONTOLOGY_NAME, "test ontology");
 		Hit hit1 = mock(Hit.class);
 		when(hit1.getId()).thenReturn("ontology-1");
 		when(hit1.getColumnValueMap()).thenReturn(columnValueMap1);
@@ -43,7 +43,7 @@ public class OntologyServiceTest
 		Map<String, Object> columnValueMap2 = new HashMap<String, Object>();
 		columnValueMap2.put(OntologyTermIndexRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY);
 		columnValueMap2.put(OntologyTermIndexRepository.ONTOLOGY_IRI, "http://www.another.ontology.test");
-		columnValueMap2.put(OntologyTermIndexRepository.ONTOLOGY_LABEL, "another ontology");
+		columnValueMap2.put(OntologyTermIndexRepository.ONTOLOGY_NAME, "another ontology");
 		Hit hit2 = mock(Hit.class);
 		when(hit2.getId()).thenReturn("ontology-2");
 		when(hit2.getColumnValueMap()).thenReturn(columnValueMap2);
@@ -51,7 +51,7 @@ public class OntologyServiceTest
 		Map<String, Object> columnValueMap3 = new HashMap<String, Object>();
 		columnValueMap3.put(OntologyTermIndexRepository.ENTITY_TYPE, OntologyTermIndexRepository.TYPE_ONTOLOGYTERM);
 		columnValueMap3.put(OntologyTermIndexRepository.ONTOLOGY_IRI, "http://www.ontology.test");
-		columnValueMap3.put(OntologyTermIndexRepository.ONTOLOGY_LABEL, "test ontology");
+		columnValueMap3.put(OntologyTermIndexRepository.ONTOLOGY_NAME, "test ontology");
 		columnValueMap3.put(OntologyTermIndexRepository.LAST, false);
 		columnValueMap3.put(OntologyTermIndexRepository.ROOT, true);
 		columnValueMap3.put(OntologyTermIndexRepository.NODE_PATH, "1.2");
@@ -65,7 +65,7 @@ public class OntologyServiceTest
 		Map<String, Object> columnValueMap4 = new HashMap<String, Object>();
 		columnValueMap4.put(OntologyTermIndexRepository.ENTITY_TYPE, OntologyTermIndexRepository.TYPE_ONTOLOGYTERM);
 		columnValueMap4.put(OntologyTermIndexRepository.ONTOLOGY_IRI, "http://www.ontology.test");
-		columnValueMap4.put(OntologyTermIndexRepository.ONTOLOGY_LABEL, "test ontology");
+		columnValueMap4.put(OntologyTermIndexRepository.ONTOLOGY_NAME, "test ontology");
 		columnValueMap4.put(OntologyTermIndexRepository.LAST, false);
 		columnValueMap4.put(OntologyTermIndexRepository.ROOT, false);
 		columnValueMap4.put(OntologyTermIndexRepository.NODE_PATH, "1.2.3");
@@ -82,7 +82,7 @@ public class OntologyServiceTest
 		Map<String, Object> columnValueMap5 = new HashMap<String, Object>();
 		columnValueMap5.put(OntologyTermIndexRepository.ENTITY_TYPE, OntologyTermIndexRepository.TYPE_ONTOLOGYTERM);
 		columnValueMap5.put(OntologyTermIndexRepository.ONTOLOGY_IRI, "http://www.ontology.test");
-		columnValueMap5.put(OntologyTermIndexRepository.ONTOLOGY_LABEL, "test ontology");
+		columnValueMap5.put(OntologyTermIndexRepository.ONTOLOGY_NAME, "test ontology");
 		columnValueMap5.put(OntologyTermIndexRepository.LAST, false);
 		columnValueMap5.put(OntologyTermIndexRepository.ROOT, false);
 		columnValueMap5.put(OntologyTermIndexRepository.NODE_PATH, "1.2.4");

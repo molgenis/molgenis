@@ -30,7 +30,7 @@ public class OntologyRepositoryTest
 	@Test
 	public void getAllColumns()
 	{
-		assertEquals(Iterables.size(repository.getEntityMetaData().getAttributes()), 3);
+		assertEquals(Iterables.size(repository.getEntityMetaData().getAttributes()), 14);
 	}
 
 	@Test
@@ -48,6 +48,6 @@ public class OntologyRepositoryTest
 		Entity entity = it.next();
 		assertEquals(entity.get(OntologyIndexRepository.ONTOLOGY_IRI), "http://harmonization/test/owl/1.0.0");
 		assertEquals(entity.get(OntologyIndexRepository.ENTITY_TYPE), "indexedOntology");
-		assertEquals(entity.get(OntologyIndexRepository.ONTOLOGY_LABEL), "ontology-test");
+		assertEquals(entity.get(OntologyIndexRepository.ONTOLOGY_NAME), "ontology-test");
 	}
 }

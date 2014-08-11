@@ -34,7 +34,7 @@ public class OntologyIndexRepositoryTest
 		Map<String, Object> columnValueMap1 = new HashMap<String, Object>();
 		columnValueMap1.put(OntologyTermIndexRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY);
 		columnValueMap1.put(OntologyTermIndexRepository.ONTOLOGY_IRI, "http://www.ontology.test");
-		columnValueMap1.put(OntologyTermIndexRepository.ONTOLOGY_LABEL, "test ontology");
+		columnValueMap1.put(OntologyTermIndexRepository.ONTOLOGY_NAME, "test ontology");
 		Hit hit1 = mock(Hit.class);
 		when(hit1.getId()).thenReturn("ontology-1");
 		when(hit1.getColumnValueMap()).thenReturn(columnValueMap1);
@@ -42,7 +42,7 @@ public class OntologyIndexRepositoryTest
 		Map<String, Object> columnValueMap2 = new HashMap<String, Object>();
 		columnValueMap2.put(OntologyTermIndexRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY);
 		columnValueMap2.put(OntologyTermIndexRepository.ONTOLOGY_IRI, "http://www.another.ontology.test");
-		columnValueMap2.put(OntologyTermIndexRepository.ONTOLOGY_LABEL, "another ontology");
+		columnValueMap2.put(OntologyTermIndexRepository.ONTOLOGY_NAME, "another ontology");
 		Hit hit2 = mock(Hit.class);
 		when(hit2.getId()).thenReturn("ontology-2");
 		when(hit2.getColumnValueMap()).thenReturn(columnValueMap2);
@@ -50,7 +50,7 @@ public class OntologyIndexRepositoryTest
 		Map<String, Object> columnValueMap3 = new HashMap<String, Object>();
 		columnValueMap3.put(OntologyTermIndexRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY);
 		columnValueMap3.put(OntologyTermIndexRepository.ONTOLOGY_IRI, "http://www.final.ontology.test");
-		columnValueMap3.put(OntologyTermIndexRepository.ONTOLOGY_LABEL, "final ontology");
+		columnValueMap3.put(OntologyTermIndexRepository.ONTOLOGY_NAME, "final ontology");
 		Hit hit3 = mock(Hit.class);
 		when(hit3.getId()).thenReturn("ontology-3");
 		when(hit3.getColumnValueMap()).thenReturn(columnValueMap3);
@@ -109,14 +109,14 @@ public class OntologyIndexRepositoryTest
 	{
 		Entity entity = ontologyIndexRepository.findOne(new QueryImpl().eq(OntologyIndexRepository.ONTOLOGY_IRI,
 				"http://www.final.ontology.test"));
-		assertEquals(entity.get(OntologyIndexRepository.ONTOLOGY_LABEL).toString(), "final ontology");
+		assertEquals(entity.get(OntologyIndexRepository.ONTOLOGY_NAME).toString(), "final ontology");
 	}
 
 	@Test
 	public void findOneObject()
 	{
 		Entity entity = ontologyIndexRepository.findOne("ontology-2");
-		assertEquals(entity.get(OntologyIndexRepository.ONTOLOGY_LABEL).toString(), "another ontology");
+		assertEquals(entity.get(OntologyIndexRepository.ONTOLOGY_NAME).toString(), "another ontology");
 	}
 
 	@Test

@@ -63,13 +63,16 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 		try
 		{
 			String property = molgenisSettings.getProperty(SYNONYM_FIELDS);
-			if (!StringUtils.isBlank(property)) ontologyLoader.addSynonymsProperties(new HashSet<String>(Arrays
-					.asList(property.split(","))));
-			indexingOntologyIri = ontologyLoader.getOntologyIRI() == null ? StringUtils.EMPTY : ontologyLoader.getOntologyIRI();
-			searchService.indexRepository(new OntologyIndexRepository(ontologyLoader, "ontology-" + indexingOntologyIri,
-					searchService));
+			if (!StringUtils.isBlank(property))
+			{
+				ontologyLoader.addSynonymsProperties(new HashSet<String>(Arrays.asList(property.split(","))));
+			}
+			indexingOntologyIri = ontologyLoader.getOntologyIRI() == null ? StringUtils.EMPTY : ontologyLoader
+					.getOntologyIRI();
+			searchService.indexRepository(new OntologyIndexRepository(ontologyLoader,
+					createOntologyDocumentType(indexingOntologyIri), searchService));
 			searchService.indexRepository(new OntologyTermIndexRepository(ontologyLoader,
-					"ontologyTerm-" + indexingOntologyIri, searchService));
+					createOntologyTermDocumentType(indexingOntologyIri), searchService));
 		}
 		catch (Exception e)
 		{
@@ -82,13 +85,13 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 			if (!dataService.hasRepository(ontologyName))
 			{
 				Hit hit = searchService
-						.search(new SearchRequest("ontology-" + indexingOntologyIri, new QueryImpl().eq(
+						.search(new SearchRequest(createOntologyDocumentType(indexingOntologyIri), new QueryImpl().eq(
 								OntologyIndexRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY), null))
 						.getSearchHits().get(0);
 				Map<String, Object> columnValueMap = hit.getColumnValueMap();
-				String ontologyTermEntityName = columnValueMap.containsKey(OntologyTermIndexRepository.ONTOLOGY_LABEL) ? columnValueMap
-						.get(OntologyIndexRepository.ONTOLOGY_LABEL).toString() : OntologyTermQueryRepository.DEFAULT_ONTOLOGY_TERM_REPO;
-				String ontologyIri = columnValueMap.containsKey(OntologyTermIndexRepository.ONTOLOGY_LABEL) ? columnValueMap
+				String ontologyTermEntityName = columnValueMap.containsKey(OntologyTermIndexRepository.ONTOLOGY_NAME) ? columnValueMap
+						.get(OntologyIndexRepository.ONTOLOGY_NAME).toString() : OntologyTermQueryRepository.DEFAULT_ONTOLOGY_TERM_REPO;
+				String ontologyIri = columnValueMap.containsKey(OntologyTermIndexRepository.ONTOLOGY_NAME) ? columnValueMap
 						.get(OntologyIndexRepository.ONTOLOGY_IRI).toString() : OntologyTermQueryRepository.DEFAULT_ONTOLOGY_TERM_REPO;
 				dataService.addRepository(new OntologyTermQueryRepository(ontologyTermEntityName, ontologyIri,
 						searchService));
@@ -117,21 +120,21 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 			dataService.delete(Ontology.ENTITY_NAME, ontologies);
 		}
 
-		SearchRequest request = new SearchRequest("ontology-" + ontologyIri, new QueryImpl().eq(
+		SearchRequest request = new SearchRequest(createOntologyDocumentType(ontologyIri), new QueryImpl().eq(
 				OntologyIndexRepository.ONTOLOGY_IRI, ontologyIri), null);
 		SearchResult result = searchService.search(request);
 		if (result.getTotalHitCount() > 0)
 		{
 			Hit hit = result.getSearchHits().get(0);
-			String ontologyEntityName = hit.getColumnValueMap().get(OntologyIndexRepository.ONTOLOGY_LABEL).toString();
+			String ontologyEntityName = hit.getColumnValueMap().get(OntologyIndexRepository.ONTOLOGY_NAME).toString();
 			if (dataService.hasRepository(ontologyEntityName))
 			{
 				dataService.removeRepository(ontologyEntityName);
 			}
 		}
 
-		searchService.deleteDocumentsByType("ontology-" + ontologyIri);
-		searchService.deleteDocumentsByType("ontologyTerm-" + ontologyIri);
+		searchService.deleteDocumentsByType(createOntologyDocumentType(ontologyIri));
+		searchService.deleteDocumentsByType(createOntologyTermDocumentType(ontologyIri));
 	}
 
 	public String getOntologyUri()
@@ -142,5 +145,19 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 	public boolean isCorrectOntology()
 	{
 		return isCorrectOntology;
+	}
+
+	private String createOntologyDocumentType(String ontologyIri)
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append("ontology-").append(ontologyIri);
+		return stringBuilder.toString();
+	}
+
+	private String createOntologyTermDocumentType(String ontologyIri)
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append("ontologyTerm-").append(ontologyIri);
+		return stringBuilder.toString();
 	}
 }

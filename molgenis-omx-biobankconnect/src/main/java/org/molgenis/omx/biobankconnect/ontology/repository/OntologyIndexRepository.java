@@ -11,13 +11,14 @@ import org.molgenis.search.SearchService;
 
 public class OntologyIndexRepository extends AbstractOntologyRepository
 {
-	private final OntologyLoader loader;
+	private final OntologyLoader ontologyLoader;
 	public final static String TYPE_ONTOLOGY = "indexedOntology";
 
 	public OntologyIndexRepository(OntologyLoader loader, String name, SearchService searchService)
 	{
 		super(name, searchService);
-		this.loader = loader;
+		if (loader == null) throw new IllegalArgumentException("OntologyLoader is null!");
+		ontologyLoader = loader;
 	}
 
 	@Override
@@ -26,8 +27,8 @@ public class OntologyIndexRepository extends AbstractOntologyRepository
 		List<Entity> entities = new ArrayList<Entity>();
 
 		Entity entity = new MapEntity();
-		entity.set(ONTOLOGY_IRI, loader.getOntologyIRI());
-		entity.set(ONTOLOGY_LABEL, loader.getOntologyName());
+		entity.set(ONTOLOGY_IRI, ontologyLoader.getOntologyIRI());
+		entity.set(ONTOLOGY_NAME, ontologyLoader.getOntologyName());
 		entity.set(ENTITY_TYPE, TYPE_ONTOLOGY);
 		entities.add(entity);
 

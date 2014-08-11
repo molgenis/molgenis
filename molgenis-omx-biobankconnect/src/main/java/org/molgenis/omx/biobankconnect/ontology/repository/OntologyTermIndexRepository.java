@@ -18,8 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class OntologyTermIndexRepository extends AbstractOntologyRepository implements Countable
 {
 	private final OntologyLoader ontologyLoader;
-	private final String ontologyIRI;
-	private final String ontologyName;
 	private static String ONTOLOGY_TERM_REPLACEMENT_PATTERN = "[^a-zA-Z0-9 ]";
 	private static String NODE_PATH_REPLACEMENT_PATTERN = "\\.[0-9]+$";
 	private static String ONTOLOGY_TERM_REPLACEMENT_VALUE = "\\s";
@@ -28,17 +26,8 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 	public OntologyTermIndexRepository(OntologyLoader loader, String name, SearchService searchService)
 	{
 		super(name, searchService);
+		if (loader == null) throw new IllegalArgumentException("OntologyLoader is null!");
 		ontologyLoader = loader;
-		if (ontologyLoader != null)
-		{
-			ontologyName = ontologyLoader.getOntologyName();
-			ontologyIRI = ontologyLoader.getOntologyIRI();
-		}
-		else
-		{
-			ontologyName = name;
-			ontologyIRI = name;
-		}
 	}
 
 	@Override
@@ -103,12 +92,11 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 			entity.set(PARENT_ONTOLOGY_TERM_URL, parentTermUrl);
 			entity.set(ROOT, root);
 			entity.set(LAST, listOfChildren.size() == 0);
-			entity.set(ONTOLOGY_IRI, ontologyIRI);
-			entity.set(ONTOLOGY_NAME, ontologyName);
+			entity.set(ONTOLOGY_IRI, ontologyLoader.getOntologyIRI());
+			entity.set(ONTOLOGY_NAME, ontologyLoader.getOntologyName());
 			entity.set(ONTOLOGY_TERM, label);
 			entity.set(ONTOLOGY_TERM_DEFINITION, definition);
 			entity.set(ONTOLOGY_TERM_IRI, cls.getIRI().toString());
-			entity.set(ONTOLOGY_LABEL, ontologyLoader.getOntologyName());
 			entity.set(ENTITY_TYPE, TYPE_ONTOLOGYTERM);
 			entity.set(SYNONYMS, synonym.replaceAll(ONTOLOGY_TERM_REPLACEMENT_PATTERN, ONTOLOGY_TERM_REPLACEMENT_VALUE));
 			entity.set(ALTERNATIVE_DEFINITION, alternativeDefinitions.toString());
