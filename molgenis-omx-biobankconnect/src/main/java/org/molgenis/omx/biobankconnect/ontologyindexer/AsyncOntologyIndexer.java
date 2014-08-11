@@ -31,7 +31,7 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 	private MolgenisSettings molgenisSettings;
 	private final DataService dataService;
 	private final SearchService searchService;
-	private String ontologyUri = null;
+	private String indexingOntologyIri = null;
 	private boolean isCorrectOntology = true;
 	private static final String SYNONYM_FIELDS = "plugin.ontology.synonym.field";
 	private static final Logger logger = Logger.getLogger(AsyncOntologyIndexer.class);
@@ -55,7 +55,7 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 	@Override
 	@Async
 	@RunAsSystem
-	public void index(OntologyLoader model)
+	public void index(OntologyLoader ontologyLoader)
 	{
 		isCorrectOntology = true;
 		runningIndexProcesses.incrementAndGet();
@@ -63,12 +63,13 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 		try
 		{
 			String property = molgenisSettings.getProperty(SYNONYM_FIELDS);
-			if (!StringUtils.isBlank(property)) model.addSynonymsProperties(new HashSet<String>(Arrays.asList(property
-					.split(","))));
-			ontologyUri = model.getOntologyIRI() == null ? StringUtils.EMPTY : model.getOntologyIRI();
-			searchService.indexRepository(new OntologyIndexRepository(model, "ontology-" + ontologyUri, searchService));
-			searchService.indexRepository(new OntologyTermIndexRepository(model, "ontologyTerm-" + ontologyUri,
+			if (!StringUtils.isBlank(property)) ontologyLoader.addSynonymsProperties(new HashSet<String>(Arrays
+					.asList(property.split(","))));
+			indexingOntologyIri = ontologyLoader.getOntologyIRI() == null ? StringUtils.EMPTY : ontologyLoader.getOntologyIRI();
+			searchService.indexRepository(new OntologyIndexRepository(ontologyLoader, "ontology-" + indexingOntologyIri,
 					searchService));
+			searchService.indexRepository(new OntologyTermIndexRepository(ontologyLoader,
+					"ontologyTerm-" + indexingOntologyIri, searchService));
 		}
 		catch (Exception e)
 		{
@@ -77,32 +78,32 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 		}
 		finally
 		{
-			String ontologyName = model.getOntologyName();
+			String ontologyName = ontologyLoader.getOntologyName();
 			if (!dataService.hasRepository(ontologyName))
 			{
 				Hit hit = searchService
-						.search(new SearchRequest("ontology-" + ontologyUri, new QueryImpl().eq(
+						.search(new SearchRequest("ontology-" + indexingOntologyIri, new QueryImpl().eq(
 								OntologyIndexRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY), null))
 						.getSearchHits().get(0);
 				Map<String, Object> columnValueMap = hit.getColumnValueMap();
 				String ontologyTermEntityName = columnValueMap.containsKey(OntologyTermIndexRepository.ONTOLOGY_LABEL) ? columnValueMap
 						.get(OntologyIndexRepository.ONTOLOGY_LABEL).toString() : OntologyTermQueryRepository.DEFAULT_ONTOLOGY_TERM_REPO;
-				String ontologyUrl = columnValueMap.containsKey(OntologyTermIndexRepository.ONTOLOGY_LABEL) ? columnValueMap
+				String ontologyIri = columnValueMap.containsKey(OntologyTermIndexRepository.ONTOLOGY_LABEL) ? columnValueMap
 						.get(OntologyIndexRepository.ONTOLOGY_IRI).toString() : OntologyTermQueryRepository.DEFAULT_ONTOLOGY_TERM_REPO;
-				dataService.addRepository(new OntologyTermQueryRepository(ontologyTermEntityName, ontologyUrl,
+				dataService.addRepository(new OntologyTermQueryRepository(ontologyTermEntityName, ontologyIri,
 						searchService));
 			}
 			runningIndexProcesses.decrementAndGet();
-			ontologyUri = null;
+			indexingOntologyIri = null;
 		}
 	}
 
 	@Override
 	@RunAsSystem
-	public void removeOntology(String ontologyURI)
+	public void removeOntology(String ontologyIri)
 	{
 		Iterable<Ontology> ontologies = dataService.findAll(Ontology.ENTITY_NAME,
-				new QueryImpl().eq(Ontology.IDENTIFIER, ontologyURI), Ontology.class);
+				new QueryImpl().eq(Ontology.IDENTIFIER, ontologyIri), Ontology.class);
 
 		if (Iterables.size(ontologies) > 0)
 		{
@@ -116,8 +117,8 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 			dataService.delete(Ontology.ENTITY_NAME, ontologies);
 		}
 
-		SearchRequest request = new SearchRequest("ontology-" + ontologyURI, new QueryImpl().eq(
-				OntologyIndexRepository.ONTOLOGY_IRI, ontologyURI), null);
+		SearchRequest request = new SearchRequest("ontology-" + ontologyIri, new QueryImpl().eq(
+				OntologyIndexRepository.ONTOLOGY_IRI, ontologyIri), null);
 		SearchResult result = searchService.search(request);
 		if (result.getTotalHitCount() > 0)
 		{
@@ -129,17 +130,17 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 			}
 		}
 
-		searchService.deleteDocumentsByType("ontology-" + ontologyURI);
-		searchService.deleteDocumentsByType("ontologyTerm-" + ontologyURI);
+		searchService.deleteDocumentsByType("ontology-" + ontologyIri);
+		searchService.deleteDocumentsByType("ontologyTerm-" + ontologyIri);
 	}
 
 	public String getOntologyUri()
 	{
-		return ontologyUri;
+		return indexingOntologyIri;
 	}
 
 	public boolean isCorrectOntology()
 	{
-		return this.isCorrectOntology;
+		return isCorrectOntology;
 	}
 }
