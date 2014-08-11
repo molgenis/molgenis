@@ -29,10 +29,9 @@ import org.springframework.scheduling.annotation.Async;
 public class AsyncOntologyIndexer implements OntologyIndexer, InitializingBean
 {
 	@Autowired
-	private DataService dataService;
-	@Autowired
 	private MolgenisSettings molgenisSettings;
-	private SearchService searchService;
+	private final DataService dataService;
+	private final SearchService searchService;
 	private String ontologyUri = null;
 	private boolean isCorrectOntology = true;
 	private static final String SYNONYM_FIELDS = "plugin.ontology.synonym.field";
@@ -41,9 +40,12 @@ public class AsyncOntologyIndexer implements OntologyIndexer, InitializingBean
 	private final AtomicInteger runningIndexProcesses = new AtomicInteger();
 
 	@Autowired
-	public void setSearchService(SearchService searchService)
+	public AsyncOntologyIndexer(SearchService searchService, DataService dataService)
 	{
+		if (searchService == null) throw new IllegalArgumentException("SearchService is null!");
+		if (dataService == null) throw new IllegalArgumentException("DataService is null!");
 		this.searchService = searchService;
+		this.dataService = dataService;
 	}
 
 	@Override
