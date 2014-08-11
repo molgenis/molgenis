@@ -34,18 +34,18 @@
 				var targetDataSetDiv = $('<div />').addClass('row-fluid').appendTo(infoDiv);
 				var sourceDataSetDiv = $('<div />').addClass('row-fluid').appendTo(infoDiv);
 				
-				$('<div />').addClass('span3').append('<strong>Desired items : </strong>').appendTo(targetDataSetDiv);
-				$('<div />').addClass('offset3 span6').append('<div class="float-right">' + targetDataSet.Name + '</div>').appendTo(targetDataSetDiv);
-				$('<div />').addClass('span3').append('<strong>Selected catalogues : </strong>').appendTo(sourceDataSetDiv);
-				$('<div />').addClass('offset3 span6').append('<div class="float-right">' + selectedSourceDataSets.join(',') + '</div>').appendTo(sourceDataSetDiv);
+				$('<div />').addClass('span5').append('<strong>Desired items : </strong>').appendTo(targetDataSetDiv);
+				$('<div />').addClass('offset2 span5').append('<div class="float-right">' + targetDataSet.Name + '</div>').appendTo(targetDataSetDiv);
+				$('<div />').addClass('span5').append('<strong>Selected catalogues : </strong>').appendTo(sourceDataSetDiv);
+				$('<div />').addClass('offset2 span5').append('<div class="float-right">' + selectedSourceDataSets.join(',') + '</div>').appendTo(sourceDataSetDiv);
 				
 				//Create link out to the harmonized dataset when the value generation is done
 				if(response.derivedDataSetId)
 				{
 					var derivedDataSet = restApi.get('/api/v1/dataset/' + response.derivedDataSetId);
 					var derivedDataSetLinkOutDiv = $('<div />').addClass('row-fluid').appendTo(infoDiv);
-					$('<div />').addClass('span4').append('<strong>Link out to harmonized data :  </strong>').appendTo(derivedDataSetLinkOutDiv);
-					$('<div />').addClass('offset4 span4').append('<div class="float-right"><a href="/menu/main/dataexplorer?dataset=' + derivedDataSet.Identifier + '">' + derivedDataSet.Identifier + '</a></div>').appendTo(derivedDataSetLinkOutDiv);
+					$('<div />').addClass('span5').append('<strong>Link out to harmonized data :  </strong>').appendTo(derivedDataSetLinkOutDiv);
+					$('<div />').addClass('offset2 span5').append('<div class="float-right"><a href="/menu/main/dataexplorer?dataset=' + derivedDataSet.Identifier + '">' + derivedDataSet.Identifier + '</a></div>').appendTo(derivedDataSetLinkOutDiv);
 				}
 				//Update progressbar accordingly
 				if(response.isRunning)
