@@ -1,15 +1,14 @@
 package org.molgenis.omx.biobankconnect.ontology.repository;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
+import org.molgenis.data.Countable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.omx.biobankconnect.utils.OntologyLoader;
 import org.molgenis.search.SearchService;
 
-public class OntologyIndexRepository extends AbstractOntologyRepository
+public class OntologyIndexRepository extends AbstractOntologyRepository implements Countable
 {
 	private final OntologyLoader ontologyLoader;
 	public final static String TYPE_ONTOLOGY = "indexedOntology";
@@ -24,15 +23,38 @@ public class OntologyIndexRepository extends AbstractOntologyRepository
 	@Override
 	public Iterator<Entity> iterator()
 	{
-		List<Entity> entities = new ArrayList<Entity>();
+		return new Iterator<Entity>()
+		{
+			private int count = 0;
 
-		Entity entity = new MapEntity();
-		entity.set(ONTOLOGY_IRI, ontologyLoader.getOntologyIRI());
-		entity.set(ONTOLOGY_NAME, ontologyLoader.getOntologyName());
-		entity.set(ENTITY_TYPE, TYPE_ONTOLOGY);
-		entities.add(entity);
+			@Override
+			public boolean hasNext()
+			{
+				if (count < count())
+				{
+					count++;
+					return true;
+				}
+				return false;
+			}
 
-		return entities.iterator();
+			@Override
+			public Entity next()
+			{
+				Entity entity = new MapEntity();
+				entity.set(ONTOLOGY_IRI, ontologyLoader.getOntologyIRI());
+				entity.set(ONTOLOGY_NAME, ontologyLoader.getOntologyName());
+				entity.set(ENTITY_TYPE, TYPE_ONTOLOGY);
+				return entity;
+			}
+
+			@Override
+			public void remove()
+			{
+				throw new UnsupportedOperationException();
+			}
+
+		};
 	}
 
 	public long count()

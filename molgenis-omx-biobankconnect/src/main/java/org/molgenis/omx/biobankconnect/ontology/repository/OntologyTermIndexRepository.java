@@ -50,7 +50,7 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 	private void createOntologyTable(List<Entity> entities, OntologyLoader model)
 	{
 		int count = 0;
-		for (OWLClass subClass : model.getTopClasses())
+		for (OWLClass subClass : model.getRootClasses())
 		{
 			recursiveAddEntity("0[0]." + count, null, subClass, entities, true);
 			count++;

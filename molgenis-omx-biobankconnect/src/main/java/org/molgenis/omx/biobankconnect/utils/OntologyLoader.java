@@ -99,7 +99,7 @@ public class OntologyLoader
 		return axioms;
 	}
 
-	public Set<OWLClass> getTopClasses()
+	public Set<OWLClass> getRootClasses()
 	{
 		Set<OWLClass> listOfTopClasses = new HashSet<OWLClass>();
 		for (OWLClass cls : ontology.getClassesInSignature())

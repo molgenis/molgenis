@@ -35,7 +35,7 @@ public class OntologyLoaderTest
 		OWLClass parentEntity = mock(OWLClass.class);
 		when(parentEntity.getIRI()).thenReturn(IRI.create("http://harmonization/test/owl/1.0.0#Parent"));
 
-		List<OWLClass> topClasses = new ArrayList<OWLClass>(loader.getTopClasses());
+		List<OWLClass> topClasses = new ArrayList<OWLClass>(loader.getRootClasses());
 
 		int count = 0;
 		for (OWLClass childClass : loader.getChildClass(topClasses.get(0)))
@@ -49,7 +49,7 @@ public class OntologyLoaderTest
 	@Test
 	public void getLabel()
 	{
-		List<OWLClass> topClasses = new ArrayList<OWLClass>(loader.getTopClasses());
+		List<OWLClass> topClasses = new ArrayList<OWLClass>(loader.getRootClasses());
 		assertEquals(loader.getLabel(topClasses.get(0)), "Person label test");
 	}
 
@@ -62,7 +62,7 @@ public class OntologyLoaderTest
 	@Test
 	public void getSynonyms()
 	{
-		List<OWLClass> topClasses = new ArrayList<OWLClass>(loader.getTopClasses());
+		List<OWLClass> topClasses = new ArrayList<OWLClass>(loader.getRootClasses());
 		Iterator<String> iterator = loader.getSynonyms(topClasses.get(0)).iterator();
 		if (iterator.hasNext()) assertEquals(iterator.next(), "People");
 
@@ -73,7 +73,7 @@ public class OntologyLoaderTest
 	{
 		OWLClass person = mock(OWLClass.class);
 		when(person.getIRI()).thenReturn(IRI.create("http://harmonization/test/owl/1.0.0#Person"));
-		for (OWLClass cls : loader.getTopClasses())
+		for (OWLClass cls : loader.getRootClasses())
 		{
 			assertEquals(cls.getIRI(), person.getIRI());
 		}
