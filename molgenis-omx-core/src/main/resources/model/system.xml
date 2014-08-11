@@ -33,5 +33,10 @@
 			<field name="Value" type="text" nillable="false" />
 			<unique fields="Name" description="Name is unique within its type " />
 		</entity>
+		<entity name="FreemarkerTemplate" implements="Autoid">
+			<field name="Name" type="string" description="Name of the entity" nillable="false" />
+			<field name="Value" type="script" nillable="false" />
+			<unique fields="Name" description="Name is unique within its type" />
+		</entity>
 	</module>
 </molgenis>
