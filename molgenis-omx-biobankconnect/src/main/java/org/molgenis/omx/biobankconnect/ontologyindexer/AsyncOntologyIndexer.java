@@ -11,10 +11,10 @@ import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.omx.biobankconnect.ontologytree.OntologyTermIndexRepository;
+import org.molgenis.omx.biobankconnect.ontology.repository.OntologyIndexRepository;
+import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermIndexRepository;
+import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermQueryRepository;
 import org.molgenis.omx.biobankconnect.utils.OntologyLoader;
-import org.molgenis.omx.biobankconnect.utils.OntologyRepository;
-import org.molgenis.omx.biobankconnect.utils.OntologyTermRepository;
 import org.molgenis.omx.observ.target.Ontology;
 import org.molgenis.omx.observ.target.OntologyTerm;
 import org.molgenis.search.Hit;
@@ -71,8 +71,9 @@ public class AsyncOntologyIndexer implements OntologyIndexer, InitializingBean
 			if (!StringUtils.isBlank(property)) model.addSynonymsProperties(new HashSet<String>(Arrays.asList(property
 					.split(","))));
 			ontologyUri = model.getOntologyIRI() == null ? StringUtils.EMPTY : model.getOntologyIRI();
-			searchService.indexRepository(new OntologyRepository(model, "ontology-" + ontologyUri));
-			searchService.indexRepository(new OntologyTermRepository(model, "ontologyTerm-" + ontologyUri));
+			searchService.indexRepository(new OntologyIndexRepository(model, "ontology-" + ontologyUri, searchService));
+			searchService.indexRepository(new OntologyTermIndexRepository(model, "ontologyTerm-" + ontologyUri,
+					searchService));
 		}
 		catch (Exception e)
 		{
@@ -86,14 +87,14 @@ public class AsyncOntologyIndexer implements OntologyIndexer, InitializingBean
 			{
 				Hit hit = searchService
 						.search(new SearchRequest("ontology-" + ontologyUri, new QueryImpl().eq(
-								OntologyRepository.ENTITY_TYPE, OntologyRepository.TYPE_ONTOLOGY), null))
+								OntologyIndexRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY), null))
 						.getSearchHits().get(0);
 				Map<String, Object> columnValueMap = hit.getColumnValueMap();
-				String ontologyTermEntityName = columnValueMap.containsKey(OntologyTermRepository.ONTOLOGY_LABEL) ? columnValueMap
-						.get(OntologyRepository.ONTOLOGY_LABEL).toString() : OntologyTermIndexRepository.DEFAULT_ONTOLOGY_TERM_REPO;
-				String ontologyUrl = columnValueMap.containsKey(OntologyTermRepository.ONTOLOGY_LABEL) ? columnValueMap
-						.get(OntologyRepository.ONTOLOGY_URL).toString() : OntologyTermIndexRepository.DEFAULT_ONTOLOGY_TERM_REPO;
-				dataService.addRepository(new OntologyTermIndexRepository(ontologyTermEntityName, ontologyUrl,
+				String ontologyTermEntityName = columnValueMap.containsKey(OntologyTermIndexRepository.ONTOLOGY_LABEL) ? columnValueMap
+						.get(OntologyIndexRepository.ONTOLOGY_LABEL).toString() : OntologyTermQueryRepository.DEFAULT_ONTOLOGY_TERM_REPO;
+				String ontologyUrl = columnValueMap.containsKey(OntologyTermIndexRepository.ONTOLOGY_LABEL) ? columnValueMap
+						.get(OntologyIndexRepository.ONTOLOGY_IRI).toString() : OntologyTermQueryRepository.DEFAULT_ONTOLOGY_TERM_REPO;
+				dataService.addRepository(new OntologyTermQueryRepository(ontologyTermEntityName, ontologyUrl,
 						searchService));
 			}
 			runningIndexProcesses.decrementAndGet();
@@ -121,12 +122,12 @@ public class AsyncOntologyIndexer implements OntologyIndexer, InitializingBean
 		}
 
 		SearchRequest request = new SearchRequest("ontology-" + ontologyURI, new QueryImpl().eq(
-				OntologyRepository.ONTOLOGY_URL, ontologyURI), null);
+				OntologyIndexRepository.ONTOLOGY_IRI, ontologyURI), null);
 		SearchResult result = searchService.search(request);
 		if (result.getTotalHitCount() > 0)
 		{
 			Hit hit = result.getSearchHits().get(0);
-			String ontologyEntityName = hit.getColumnValueMap().get(OntologyRepository.ONTOLOGY_LABEL).toString();
+			String ontologyEntityName = hit.getColumnValueMap().get(OntologyIndexRepository.ONTOLOGY_LABEL).toString();
 			if (dataService.hasRepository(ontologyEntityName))
 			{
 				dataService.removeRepository(ontologyEntityName);

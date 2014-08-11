@@ -7,21 +7,22 @@ import java.util.Map;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.omx.biobankconnect.ontology.repository.OntologyIndexRepository;
+import org.molgenis.omx.biobankconnect.ontology.repository.OntologyQueryRepository;
+import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermIndexRepository;
 import org.molgenis.omx.biobankconnect.ontologyservice.OntologyService;
-import org.molgenis.omx.biobankconnect.utils.OntologyRepository;
-import org.molgenis.omx.biobankconnect.utils.OntologyTermRepository;
 import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
 
-public class OntologyIndexEntity extends IndexEntity
+public class OntologyEntity extends AbstractOntologyEntity
 {
 	private static final long serialVersionUID = 1L;
 	private final OntologyService ontologyService;
 
-	public OntologyIndexEntity(Hit hit, EntityMetaData entityMetaData, OntologyService ontologyService,
+	public OntologyEntity(Hit hit, EntityMetaData entityMetaData, OntologyService ontologyService,
 			SearchService searchService)
 	{
 		super(hit, entityMetaData, searchService);
@@ -38,36 +39,36 @@ public class OntologyIndexEntity extends IndexEntity
 			return hit.getId();
 		}
 
-		if (attributeName.equalsIgnoreCase(OntologyIndexRepository.FIELDTYPE))
+		if (attributeName.equalsIgnoreCase(OntologyQueryRepository.FIELDTYPE))
 		{
 			String documentType = OntologyService.createOntologyDocumentType(columnValueMap.get(
-					OntologyRepository.ONTOLOGY_URL).toString());
+					OntologyIndexRepository.ONTOLOGY_IRI).toString());
 			SearchResult result = searchService.search(new SearchRequest(documentType, new QueryImpl(), null));
 			return result.getTotalHitCount() == 0 ? MolgenisFieldTypes.STRING.toString().toUpperCase() : MolgenisFieldTypes.COMPOUND
 					.toString().toUpperCase();
 		}
 
-		if (attributeName.equalsIgnoreCase(OntologyTermRepository.LAST))
+		if (attributeName.equalsIgnoreCase(OntologyTermIndexRepository.LAST))
 		{
 			String documentType = OntologyService.createOntologyDocumentType(columnValueMap.get(
-					OntologyRepository.ONTOLOGY_URL).toString());
+					OntologyIndexRepository.ONTOLOGY_IRI).toString());
 			SearchResult result = searchService.search(new SearchRequest(documentType, new QueryImpl(), null));
 			return result.getTotalHitCount() == 0;
 		}
 
-		if (attributeName.equalsIgnoreCase(OntologyTermRepository.ROOT))
+		if (attributeName.equalsIgnoreCase(OntologyTermIndexRepository.ROOT))
 		{
 			return true;
 		}
 
 		if (attributeName.equalsIgnoreCase("attributes"))
 		{
-			List<OntologyTermIndexEntity> refEntities = new ArrayList<OntologyTermIndexEntity>();
+			List<OntologyTermEntity> refEntities = new ArrayList<OntologyTermEntity>();
 
 			for (Hit hit : ontologyService.getRootOntologyTerms(this.hit.getColumnValueMap()
-					.get(OntologyTermRepository.ONTOLOGY_IRI).toString()))
+					.get(OntologyTermIndexRepository.ONTOLOGY_IRI).toString()))
 			{
-				refEntities.add(new OntologyTermIndexEntity(hit, getEntityMetaData(), searchService));
+				refEntities.add(new OntologyTermEntity(hit, getEntityMetaData(), searchService));
 			}
 
 			return refEntities;

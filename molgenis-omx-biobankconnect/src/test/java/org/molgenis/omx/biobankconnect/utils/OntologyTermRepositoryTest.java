@@ -8,6 +8,7 @@ import java.util.Iterator;
 
 import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.data.Entity;
+import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermIndexRepository;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -15,13 +16,13 @@ import org.testng.annotations.Test;
 public class OntologyTermRepositoryTest
 {
 	OntologyLoader loader;
-	OntologyTermRepository repository;
+	OntologyTermIndexRepository repository;
 
 	@BeforeMethod
 	public void setUp() throws OWLOntologyCreationException
 	{
 		loader = new OntologyLoader("ontology-test", new File("src/test/resources/test-ontology-loader.owl"));
-		repository = new OntologyTermRepository(loader, "Test");
+		repository = new OntologyTermIndexRepository(loader, "Test");
 	}
 
 	@Test

@@ -1,4 +1,4 @@
-package org.molgenis.omx.biobankconnect.ontologytree;
+package org.molgenis.omx.biobankconnect.ontology.repository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,24 +7,24 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.biobankconnect.ontologyservice.OntologyService;
-import org.molgenis.omx.biobankconnect.utils.OntologyRepository;
+import org.molgenis.omx.biobankconnect.ontologytree.OntologyEntity;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class OntologyIndexRepository extends AbstractOntologyIndexRepository
+public class OntologyQueryRepository extends AbstractOntologyQueryRepository
 {
 	public final static String DEFAULT_ONTOLOGY_REPO = "ontologyindex";
 	private final static String BASE_URL = "ontologyindex://";
-	private final OntologyRepository ontologyRepository;
+	private final OntologyIndexRepository ontologyRepository;
 	private final OntologyService ontologySerivce;
 
 	@Autowired
-	public OntologyIndexRepository(String entityName, OntologyService ontologyService, SearchService searchService)
+	public OntologyQueryRepository(String entityName, OntologyService ontologyService, SearchService searchService)
 	{
 		super(entityName, searchService);
-		this.ontologyRepository = new OntologyRepository(null, entityName);
+		this.ontologyRepository = new OntologyIndexRepository(null, entityName, searchService);
 		this.ontologySerivce = ontologyService;
 	}
 
@@ -33,10 +33,10 @@ public class OntologyIndexRepository extends AbstractOntologyIndexRepository
 	{
 		List<Entity> entities = new ArrayList<Entity>();
 		if (q.getRules().size() > 0) q.and();
-		q.eq(OntologyRepository.ENTITY_TYPE, OntologyRepository.TYPE_ONTOLOGY);
+		q.eq(OntologyIndexRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY);
 		for (Hit hit : searchService.search(new SearchRequest(null, q, null)).getSearchHits())
 		{
-			entities.add(new OntologyIndexEntity(hit, getEntityMetaData(), ontologySerivce, searchService));
+			entities.add(new OntologyEntity(hit, getEntityMetaData(), ontologySerivce, searchService));
 		}
 		return entities;
 	}
@@ -45,9 +45,9 @@ public class OntologyIndexRepository extends AbstractOntologyIndexRepository
 	public Entity findOne(Query q)
 	{
 		if (q.getRules().size() > 0) q.and();
-		q.eq(OntologyRepository.ENTITY_TYPE, OntologyRepository.TYPE_ONTOLOGY);
+		q.eq(OntologyIndexRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY);
 		Hit hit = findOneInternal(null, q);
-		if (hit != null) return new OntologyIndexEntity(hit, getEntityMetaData(), ontologySerivce, searchService);
+		if (hit != null) return new OntologyEntity(hit, getEntityMetaData(), ontologySerivce, searchService);
 		return null;
 	}
 
@@ -55,7 +55,7 @@ public class OntologyIndexRepository extends AbstractOntologyIndexRepository
 	public Entity findOne(Object id)
 	{
 		Hit hit = searchService.searchById(null, id.toString());
-		if (hit != null) return new OntologyIndexEntity(hit, getEntityMetaData(), ontologySerivce, searchService);
+		if (hit != null) return new OntologyEntity(hit, getEntityMetaData(), ontologySerivce, searchService);
 		return null;
 	}
 
@@ -72,7 +72,7 @@ public class OntologyIndexRepository extends AbstractOntologyIndexRepository
 		{
 			q.and();
 		}
-		q.eq(OntologyRepository.ENTITY_TYPE, OntologyRepository.TYPE_ONTOLOGY);
+		q.eq(OntologyIndexRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY);
 		return searchService.count(null, q.pageSize(Integer.MAX_VALUE).offset(Integer.MIN_VALUE));
 	}
 

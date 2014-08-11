@@ -1,6 +1,5 @@
-package org.molgenis.omx.biobankconnect.utils;
+package org.molgenis.omx.biobankconnect.ontology.repository;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -9,52 +8,33 @@ import java.util.Set;
 
 import org.molgenis.data.Countable;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.support.AbstractRepository;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.omx.biobankconnect.utils.OntologyLoader;
+import org.molgenis.search.SearchService;
 import org.semanticweb.owlapi.model.OWLClass;
+import org.springframework.beans.factory.annotation.Autowired;
 
-public class OntologyTermRepository extends AbstractRepository implements Countable
+public class OntologyTermIndexRepository extends AbstractOntologyRepository implements Countable
 {
 	private final OntologyLoader ontologyLoader;
 	private final String ontologyIRI;
 	private final String ontologyName;
-	private final String name;
-	private final static String ID = "id";
-	public final static String NODE_PATH = "nodePath";
-	public final static String PARENT_NODE_PATH = "parentNodePath";
-	public final static String PARENT_ONTOLOGY_TERM_URL = "parentOntologyTermIRI";
-	public final static String ROOT = "root";
-	public final static String LAST = "isLast";
-	public final static String ONTOLOGY_IRI = "ontologyIRI";
-	public final static String ONTOLOGY_NAME = "ontologyName";
-	public final static String ONTOLOGY_TERM = "ontologyTerm";
-	public final static String ONTOLOGY_TERM_DEFINITION = "definition";
-	public final static String ONTOLOGY_TERM_IRI = "ontologyTermIRI";
-	public final static String SYNONYMS = "ontologyTermSynonym";
-	public final static String ALTERNATIVE_DEFINITION = "alternativeDefinition";
-	public final static String ONTOLOGY_LABEL = "ontologyLabel";
-	public final static String ENTITY_TYPE = "entity_type";
-	public final static String TYPE_ONTOLOGYTERM = "ontologyTerm";
-	public final static String CHIDLREN = "children";
 
-	public OntologyTermRepository(OntologyLoader loader, String name)
+	@Autowired
+	public OntologyTermIndexRepository(OntologyLoader loader, String name, SearchService searchService)
 	{
-		super("ontologyterm://" + name);
+		super(name, searchService);
 		this.ontologyLoader = loader;
-		if (this.ontologyLoader != null)
+		if (ontologyLoader != null)
 		{
-			this.ontologyName = this.ontologyLoader.getOntologyName();
-			this.ontologyIRI = this.ontologyLoader.getOntologyIRI();
+			this.ontologyName = ontologyLoader.getOntologyName();
+			this.ontologyIRI = ontologyLoader.getOntologyIRI();
 		}
 		else
 		{
-			this.ontologyName = name;
-			this.ontologyIRI = name;
+			ontologyName = name;
+			ontologyIRI = name;
 		}
-		this.name = name;
 	}
 
 	@Override
@@ -62,7 +42,6 @@ public class OntologyTermRepository extends AbstractRepository implements Counta
 	{
 		List<Entity> entities = new ArrayList<Entity>();
 		createOntologyTable(entities, ontologyLoader);
-
 		return entities.size();
 	}
 
@@ -73,34 +52,6 @@ public class OntologyTermRepository extends AbstractRepository implements Counta
 		createOntologyTable(entities, ontologyLoader);
 
 		return entities.iterator();
-	}
-
-	@Override
-	public void close() throws IOException
-	{
-		// Nothing
-	}
-
-	@Override
-	public EntityMetaData getEntityMetaData()
-	{
-		DefaultEntityMetaData metaData = new DefaultEntityMetaData(name, MapEntity.class);
-		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ID));
-		metaData.addAttributeMetaData(new DefaultAttributeMetaData(NODE_PATH));
-		metaData.addAttributeMetaData(new DefaultAttributeMetaData(PARENT_NODE_PATH));
-		metaData.addAttributeMetaData(new DefaultAttributeMetaData(PARENT_ONTOLOGY_TERM_URL));
-		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ROOT));
-		metaData.addAttributeMetaData(new DefaultAttributeMetaData(LAST));
-		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_IRI));
-		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_TERM));
-		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_TERM_DEFINITION));
-		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_TERM_IRI));
-		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_LABEL));
-		metaData.addAttributeMetaData(new DefaultAttributeMetaData(SYNONYMS));
-		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ENTITY_TYPE));
-		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ALTERNATIVE_DEFINITION));
-
-		return metaData;
 	}
 
 	private void createOntologyTable(List<Entity> entities, OntologyLoader model)

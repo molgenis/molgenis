@@ -8,19 +8,20 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermQueryRepository;
+import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermIndexRepository;
 import org.molgenis.omx.biobankconnect.ontologyservice.OntologyService;
-import org.molgenis.omx.biobankconnect.utils.OntologyTermRepository;
 import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
 
-public class OntologyTermIndexEntity extends IndexEntity
+public class OntologyTermEntity extends AbstractOntologyEntity
 {
 	private static final long serialVersionUID = 1L;
 
-	public OntologyTermIndexEntity(Hit hit, EntityMetaData entityMetaData, SearchService searchService)
+	public OntologyTermEntity(Hit hit, EntityMetaData entityMetaData, SearchService searchService)
 	{
 		super(hit, entityMetaData, searchService);
 	}
@@ -35,29 +36,29 @@ public class OntologyTermIndexEntity extends IndexEntity
 			return hit.getId();
 		}
 
-		if (attributeName.equalsIgnoreCase(OntologyTermIndexRepository.FIELDTYPE))
+		if (attributeName.equalsIgnoreCase(OntologyTermQueryRepository.FIELDTYPE))
 		{
-			return Boolean.parseBoolean(columnValueMap.get(OntologyTermRepository.LAST).toString()) ? MolgenisFieldTypes.STRING
+			return Boolean.parseBoolean(columnValueMap.get(OntologyTermIndexRepository.LAST).toString()) ? MolgenisFieldTypes.STRING
 					.toString().toUpperCase() : MolgenisFieldTypes.COMPOUND.toString().toUpperCase();
 		}
 
 		if (attributeName.equalsIgnoreCase("attributes"))
 		{
-			List<OntologyTermIndexEntity> refEntities = new ArrayList<OntologyTermIndexEntity>();
-			if (!Boolean.parseBoolean(columnValueMap.get(OntologyTermRepository.LAST).toString()))
+			List<OntologyTermEntity> refEntities = new ArrayList<OntologyTermEntity>();
+			if (!Boolean.parseBoolean(columnValueMap.get(OntologyTermIndexRepository.LAST).toString()))
 			{
-				String currentNodePath = columnValueMap.get(OntologyTermRepository.NODE_PATH).toString();
-				String currentOntologyTermUrl = columnValueMap.get(OntologyTermRepository.ONTOLOGY_TERM_IRI).toString();
-				String ontologyUrl = columnValueMap.get(OntologyTermRepository.ONTOLOGY_IRI).toString();
-				Query q = new QueryImpl().eq(OntologyTermRepository.PARENT_NODE_PATH, currentNodePath).and()
-						.eq(OntologyTermRepository.PARENT_ONTOLOGY_TERM_URL, currentOntologyTermUrl)
+				String currentNodePath = columnValueMap.get(OntologyTermIndexRepository.NODE_PATH).toString();
+				String currentOntologyTermUrl = columnValueMap.get(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI).toString();
+				String ontologyUrl = columnValueMap.get(OntologyTermIndexRepository.ONTOLOGY_IRI).toString();
+				Query q = new QueryImpl().eq(OntologyTermIndexRepository.PARENT_NODE_PATH, currentNodePath).and()
+						.eq(OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_URL, currentOntologyTermUrl)
 						.pageSize(Integer.MAX_VALUE);
 				String documentType = OntologyService.createOntologyTermDocumentType(ontologyUrl);
 				SearchRequest searchRequest = new SearchRequest(documentType, q, null);
 				SearchResult result = searchService.search(searchRequest);
 				for (Hit hit : result.getSearchHits())
 				{
-					refEntities.add(new OntologyTermIndexEntity(hit, getEntityMetaData(), searchService));
+					refEntities.add(new OntologyTermEntity(hit, getEntityMetaData(), searchService));
 				}
 			}
 

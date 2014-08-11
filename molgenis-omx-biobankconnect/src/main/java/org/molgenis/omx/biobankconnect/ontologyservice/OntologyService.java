@@ -16,9 +16,9 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.omx.biobankconnect.ontology.repository.OntologyIndexRepository;
+import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermIndexRepository;
 import org.molgenis.omx.biobankconnect.utils.NGramMatchingModel;
-import org.molgenis.omx.biobankconnect.utils.OntologyRepository;
-import org.molgenis.omx.biobankconnect.utils.OntologyTermRepository;
 import org.molgenis.omx.observ.target.Ontology;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
@@ -45,9 +45,10 @@ public class OntologyService
 	{
 		QueryImpl q = new QueryImpl();
 		q.pageSize(1000);
-		q.addRule(new QueryRule(OntologyRepository.ENTITY_TYPE, Operator.EQUALS, OntologyRepository.TYPE_ONTOLOGY));
+		q.addRule(new QueryRule(OntologyIndexRepository.ENTITY_TYPE, Operator.EQUALS,
+				OntologyIndexRepository.TYPE_ONTOLOGY));
 		q.addRule(new QueryRule(Operator.AND));
-		q.addRule(new QueryRule(OntologyRepository.ONTOLOGY_URL, Operator.EQUALS, ontologyUrl));
+		q.addRule(new QueryRule(OntologyIndexRepository.ONTOLOGY_IRI, Operator.EQUALS, ontologyUrl));
 		SearchRequest searchRequest = new SearchRequest(createOntologyDocumentType(ontologyUrl), q, null);
 		List<Hit> searchHits = searchService.search(searchRequest).getSearchHits();
 		if (searchHits.size() > 0) return searchHits.get(0);
@@ -56,27 +57,28 @@ public class OntologyService
 
 	public Hit findOntologyTerm(String ontologyUrl, String ontologyTermUrl, String nodePath)
 	{
-		Query q = new QueryImpl().eq(OntologyTermRepository.NODE_PATH, nodePath).and()
-				.eq(OntologyTermRepository.ONTOLOGY_TERM_IRI, ontologyTermUrl).pageSize(5000);
+		Query q = new QueryImpl().eq(OntologyTermIndexRepository.NODE_PATH, nodePath).and()
+				.eq(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI, ontologyTermUrl).pageSize(5000);
 		String documentType = createOntologyTermDocumentType(ontologyUrl);
 		SearchResult result = searchService.search(new SearchRequest(documentType, q, null));
 		for (Hit hit : result.getSearchHits())
 		{
-			if (hit.getColumnValueMap().get(OntologyTermRepository.NODE_PATH).toString().equals(nodePath)) return hit;
+			if (hit.getColumnValueMap().get(OntologyTermIndexRepository.NODE_PATH).toString().equals(nodePath)) return hit;
 		}
 		return new Hit(null, documentType, Collections.<String, Object> emptyMap());
 	}
 
 	public List<Hit> getChildren(String ontologyUrl, String parentOntologyTermUrl, String parentNodePath)
 	{
-		Query q = new QueryImpl().eq(OntologyTermRepository.PARENT_NODE_PATH, parentNodePath).and()
-				.eq(OntologyTermRepository.PARENT_ONTOLOGY_TERM_URL, parentOntologyTermUrl).pageSize(5000);
+		Query q = new QueryImpl().eq(OntologyTermIndexRepository.PARENT_NODE_PATH, parentNodePath).and()
+				.eq(OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_URL, parentOntologyTermUrl).pageSize(5000);
 		String documentType = createOntologyTermDocumentType(ontologyUrl);
 		List<Hit> listOfHits = new ArrayList<Hit>();
 		Set<String> processedOntologyTerms = new HashSet<String>();
 		for (Hit hit : searchService.search(new SearchRequest(documentType, q, null)).getSearchHits())
 		{
-			String ontologyTermUrl = hit.getColumnValueMap().get(OntologyTermRepository.ONTOLOGY_TERM_IRI).toString();
+			String ontologyTermUrl = hit.getColumnValueMap().get(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI)
+					.toString();
 			if (!processedOntologyTerms.contains(ontologyTermUrl))
 			{
 				listOfHits.add(hit);
@@ -89,12 +91,13 @@ public class OntologyService
 	public List<Hit> getRootOntologyTerms(String ontologyUrl)
 	{
 		SearchRequest searchRequest = new SearchRequest(OntologyService.createOntologyTermDocumentType(ontologyUrl),
-				new QueryImpl().pageSize(10000).eq(OntologyTermRepository.ROOT, true), null);
+				new QueryImpl().pageSize(10000).eq(OntologyTermIndexRepository.ROOT, true), null);
 		List<Hit> listOfHits = new ArrayList<Hit>();
 		Set<String> processedOntologyTerms = new HashSet<String>();
 		for (Hit hit : searchService.search(searchRequest))
 		{
-			String ontologyTermUrl = hit.getColumnValueMap().get(OntologyTermRepository.ONTOLOGY_TERM_IRI).toString();
+			String ontologyTermUrl = hit.getColumnValueMap().get(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI)
+					.toString();
 			if (!processedOntologyTerms.contains(ontologyTermUrl))
 			{
 				listOfHits.add(hit);
@@ -109,14 +112,15 @@ public class OntologyService
 		List<Ontology> ontologies = new ArrayList<Ontology>();
 		QueryImpl q = new QueryImpl();
 		q.pageSize(1000);
-		q.addRule(new QueryRule(OntologyRepository.ENTITY_TYPE, Operator.EQUALS, OntologyRepository.TYPE_ONTOLOGY));
+		q.addRule(new QueryRule(OntologyIndexRepository.ENTITY_TYPE, Operator.EQUALS,
+				OntologyIndexRepository.TYPE_ONTOLOGY));
 		SearchRequest searchRequest = new SearchRequest(null, q, null);
 		for (Hit hit : searchService.search(searchRequest).getSearchHits())
 		{
 			Ontology ontology = new Ontology();
-			ontology.setIdentifier(hit.getColumnValueMap().get(OntologyRepository.ONTOLOGY_URL).toString());
-			ontology.setOntologyURI(hit.getColumnValueMap().get(OntologyRepository.ONTOLOGY_URL).toString());
-			ontology.setName(hit.getColumnValueMap().get(OntologyRepository.ONTOLOGY_LABEL).toString());
+			ontology.setIdentifier(hit.getColumnValueMap().get(OntologyIndexRepository.ONTOLOGY_IRI).toString());
+			ontology.setOntologyURI(hit.getColumnValueMap().get(OntologyIndexRepository.ONTOLOGY_IRI).toString());
+			ontology.setName(hit.getColumnValueMap().get(OntologyIndexRepository.ONTOLOGY_LABEL).toString());
 			ontologies.add(ontology);
 		}
 		return ontologies;
@@ -134,7 +138,8 @@ public class OntologyService
 			{
 				stemmer.setCurrent(term.replaceAll("[^(a-zA-Z0-9 )]", StringUtils.EMPTY));
 				stemmer.stem();
-				rules.add(new QueryRule(OntologyTermRepository.SYNONYMS, Operator.EQUALS, stemmer.getCurrent() + "~0.8"));
+				rules.add(new QueryRule(OntologyTermIndexRepository.SYNONYMS, Operator.EQUALS, stemmer.getCurrent()
+						+ "~0.8"));
 			}
 		}
 		QueryRule finalQuery = new QueryRule(rules);
@@ -147,7 +152,7 @@ public class OntologyService
 		while (iterator.hasNext())
 		{
 			Hit hit = iterator.next();
-			String ontologySynonym = hit.getColumnValueMap().get(OntologyTermRepository.SYNONYMS).toString();
+			String ontologySynonym = hit.getColumnValueMap().get(OntologyTermIndexRepository.SYNONYMS).toString();
 			BigDecimal luceneScore = new BigDecimal(hit.getColumnValueMap().get(SCORE).toString());
 			BigDecimal ngramScore = new BigDecimal(NGramMatchingModel.stringMatching(
 					StringUtils.join(uniqueTerms, " "), ontologySynonym));
@@ -164,7 +169,7 @@ public class OntologyService
 		for (ComparableHit comparableHit : comparableHits)
 		{
 			Hit hit = comparableHit.getHit();
-			String identifier = hit.getColumnValueMap().get(OntologyTermRepository.ONTOLOGY_TERM_IRI).toString();
+			String identifier = hit.getColumnValueMap().get(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI).toString();
 			if (uniqueIdentifiers.contains(identifier)) continue;
 			uniqueIdentifiers.add(identifier);
 			Map<String, Object> columnValueMap = new HashMap<String, Object>();
