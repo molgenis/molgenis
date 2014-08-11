@@ -22,11 +22,10 @@ import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
 import org.molgenis.security.runas.RunAsSystem;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 
-public class AsyncOntologyIndexer implements OntologyIndexer, InitializingBean
+public class AsyncOntologyIndexer implements OntologyIndexer
 {
 	@Autowired
 	private MolgenisSettings molgenisSettings;
@@ -46,12 +45,6 @@ public class AsyncOntologyIndexer implements OntologyIndexer, InitializingBean
 		if (dataService == null) throw new IllegalArgumentException("DataService is null!");
 		this.searchService = searchService;
 		this.dataService = dataService;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		if (searchService == null) throw new IllegalArgumentException("Missing bean of type SearchService");
 	}
 
 	public boolean isIndexingRunning()
