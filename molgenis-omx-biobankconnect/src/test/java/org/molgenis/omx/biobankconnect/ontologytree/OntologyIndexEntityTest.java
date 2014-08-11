@@ -12,8 +12,8 @@ import java.util.Map;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.omx.biobankconnect.ontology.repository.OntologyQueryRepository;
 import org.molgenis.omx.biobankconnect.ontology.repository.OntologyIndexRepository;
+import org.molgenis.omx.biobankconnect.ontology.repository.OntologyQueryRepository;
 import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermIndexRepository;
 import org.molgenis.omx.biobankconnect.ontologyservice.OntologyService;
 import org.molgenis.omx.observ.Characteristic;
@@ -36,21 +36,21 @@ public class OntologyIndexEntityTest
 	{
 		Map<String, Object> columnValueMap1 = new HashMap<String, Object>();
 		columnValueMap1.put(OntologyTermIndexRepository.ROOT, true);
-		columnValueMap1.put(OntologyIndexRepository.ONTOLOGY_URL, "http://www.ontology.test");
+		columnValueMap1.put(OntologyIndexRepository.ONTOLOGY_IRI, "http://www.ontology.test");
 		Hit hit1 = mock(Hit.class);
 		when(hit1.getId()).thenReturn("forged-id");
 		when(hit1.getColumnValueMap()).thenReturn(columnValueMap1);
 
 		Map<String, Object> columnValueMap2 = new HashMap<String, Object>();
 		columnValueMap2.put(OntologyTermIndexRepository.ROOT, true);
-		columnValueMap2.put(OntologyIndexRepository.ONTOLOGY_URL, "http://www.ontology.test");
+		columnValueMap2.put(OntologyIndexRepository.ONTOLOGY_IRI, "http://www.ontology.test");
 		Hit hit2 = mock(Hit.class);
 		when(hit2.getId()).thenReturn("forged-id-2");
 		when(hit2.getColumnValueMap()).thenReturn(columnValueMap2);
 
 		Map<String, Object> columnValueMap3 = new HashMap<String, Object>();
 		columnValueMap3.put(OntologyTermIndexRepository.ROOT, true);
-		columnValueMap3.put(OntologyIndexRepository.ONTOLOGY_URL, "http://www.ontology.test");
+		columnValueMap3.put(OntologyIndexRepository.ONTOLOGY_IRI, "http://www.ontology.test");
 		Hit hit3 = mock(Hit.class);
 		when(hit3.getId()).thenReturn("forged-id-3");
 		when(hit3.getColumnValueMap()).thenReturn(columnValueMap3);
@@ -72,8 +72,8 @@ public class OntologyIndexEntityTest
 
 		OntologyQueryRepository ontologyIndexRepository = mock(OntologyQueryRepository.class);
 
-		ontologyIndexEntity = new OntologyEntity(hit1, ontologyIndexRepository.getEntityMetaData(),
-				ontologyService, searchService);
+		ontologyIndexEntity = new OntologyEntity(hit1, ontologyIndexRepository.getEntityMetaData(), ontologyService,
+				searchService);
 	}
 
 	@Test

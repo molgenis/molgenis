@@ -12,8 +12,8 @@ import java.util.Map;
 
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.omx.biobankconnect.ontology.repository.OntologyQueryRepository;
 import org.molgenis.omx.biobankconnect.ontology.repository.OntologyIndexRepository;
+import org.molgenis.omx.biobankconnect.ontology.repository.OntologyQueryRepository;
 import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermIndexRepository;
 import org.molgenis.omx.biobankconnect.ontologyservice.OntologyService;
 import org.molgenis.omx.observ.Characteristic;
@@ -39,7 +39,7 @@ public class OntologyTermIndexEntityTest
 		columnValueMap1.put(OntologyTermIndexRepository.ROOT, true);
 		columnValueMap1.put(OntologyTermIndexRepository.LAST, false);
 		columnValueMap1.put(OntologyTermIndexRepository.NODE_PATH, "1");
-		columnValueMap1.put(OntologyIndexRepository.ONTOLOGY_URL, "http://www.ontology.test");
+		columnValueMap1.put(OntologyIndexRepository.ONTOLOGY_IRI, "http://www.ontology.test");
 		columnValueMap1.put(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI, "http://www.ontology.test#term1");
 		Hit hit1 = mock(Hit.class);
 		when(hit1.getId()).thenReturn("forged-id");
@@ -51,7 +51,7 @@ public class OntologyTermIndexEntityTest
 		columnValueMap2.put(OntologyTermIndexRepository.NODE_PATH, "1.2");
 		columnValueMap2.put(OntologyTermIndexRepository.PARENT_NODE_PATH, "1");
 		columnValueMap2.put(OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_URL, "http://www.ontology.test");
-		columnValueMap2.put(OntologyIndexRepository.ONTOLOGY_URL, "http://www.ontology.test");
+		columnValueMap2.put(OntologyIndexRepository.ONTOLOGY_IRI, "http://www.ontology.test");
 		columnValueMap2.put(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI, "http://www.ontology.test#term2");
 		Hit hit2 = mock(Hit.class);
 		when(hit2.getId()).thenReturn("forged-id-2");
@@ -63,7 +63,7 @@ public class OntologyTermIndexEntityTest
 		columnValueMap3.put(OntologyTermIndexRepository.NODE_PATH, "1.3");
 		columnValueMap3.put(OntologyTermIndexRepository.PARENT_NODE_PATH, "1");
 		columnValueMap3.put(OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_URL, "http://www.ontology.test");
-		columnValueMap3.put(OntologyIndexRepository.ONTOLOGY_URL, "http://www.ontology.test");
+		columnValueMap3.put(OntologyIndexRepository.ONTOLOGY_IRI, "http://www.ontology.test");
 		columnValueMap3.put(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI, "http://www.ontology.test#term3");
 		Hit hit3 = mock(Hit.class);
 		when(hit3.getId()).thenReturn("forged-id-3");
@@ -93,7 +93,8 @@ public class OntologyTermIndexEntityTest
 	public void get()
 	{
 		assertEquals(ontologyTermIndexEntity.get(Characteristic.ID).toString(), "forged-id");
-		assertEquals(Boolean.parseBoolean(ontologyTermIndexEntity.get(OntologyTermIndexRepository.ROOT).toString()), true);
+		assertEquals(Boolean.parseBoolean(ontologyTermIndexEntity.get(OntologyTermIndexRepository.ROOT).toString()),
+				true);
 		Object attributes = ontologyTermIndexEntity.get("attributes");
 		if (attributes instanceof List<?>)
 		{

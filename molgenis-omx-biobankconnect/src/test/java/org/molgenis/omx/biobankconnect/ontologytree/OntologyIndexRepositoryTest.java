@@ -12,8 +12,8 @@ import java.util.Map;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.omx.biobankconnect.ontology.repository.OntologyQueryRepository;
 import org.molgenis.omx.biobankconnect.ontology.repository.OntologyIndexRepository;
+import org.molgenis.omx.biobankconnect.ontology.repository.OntologyQueryRepository;
 import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermIndexRepository;
 import org.molgenis.omx.biobankconnect.ontologyservice.OntologyService;
 import org.molgenis.search.Hit;
@@ -65,20 +65,18 @@ public class OntologyIndexRepositoryTest
 
 		when(
 				searchService.search(new SearchRequest(null, new QueryImpl()
-						.eq(OntologyIndexRepository.ONTOLOGY_URL, "http://www.final.ontology.test").and()
-						.eq(OntologyIndexRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY), null))).thenReturn(
-				new SearchResult(3, Arrays.asList(hit3)));
+						.eq(OntologyIndexRepository.ONTOLOGY_IRI, "http://www.final.ontology.test").and()
+						.eq(OntologyIndexRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY), null)))
+				.thenReturn(new SearchResult(3, Arrays.asList(hit3)));
 
 		when(
-				searchService.count(
-						null,
+				searchService.count(null,
 						new QueryImpl().eq(OntologyIndexRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY)
 								.pageSize(Integer.MAX_VALUE).offset(Integer.MIN_VALUE))).thenReturn(new Long(3));
 		when(
-				searchService.count(
-						null,
-						new QueryImpl().eq(OntologyIndexRepository.ONTOLOGY_URL, "http://www.final.ontology.test").and()
-								.eq(OntologyIndexRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY)
+				searchService.count(null,
+						new QueryImpl().eq(OntologyIndexRepository.ONTOLOGY_IRI, "http://www.final.ontology.test")
+								.and().eq(OntologyIndexRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY)
 								.pageSize(Integer.MAX_VALUE).offset(Integer.MIN_VALUE))).thenReturn(new Long(1));
 
 		when(searchService.searchById(null, "ontology-2")).thenReturn(hit2);
@@ -90,7 +88,7 @@ public class OntologyIndexRepositoryTest
 	public void count()
 	{
 		assertEquals(ontologyIndexRepository.count(new QueryImpl()), 3);
-		assertEquals(ontologyIndexRepository.count(new QueryImpl().eq(OntologyIndexRepository.ONTOLOGY_URL,
+		assertEquals(ontologyIndexRepository.count(new QueryImpl().eq(OntologyIndexRepository.ONTOLOGY_IRI,
 				"http://www.final.ontology.test")), 1);
 	}
 
@@ -102,14 +100,14 @@ public class OntologyIndexRepositoryTest
 
 		for (Entity entity : ontologyIndexRepository.findAll(new QueryImpl()))
 		{
-			assertTrue(validOntologyIris.contains(entity.get(OntologyIndexRepository.ONTOLOGY_URL).toString()));
+			assertTrue(validOntologyIris.contains(entity.get(OntologyIndexRepository.ONTOLOGY_IRI).toString()));
 		}
 	}
 
 	@Test
 	public void findOneQuery()
 	{
-		Entity entity = ontologyIndexRepository.findOne(new QueryImpl().eq(OntologyIndexRepository.ONTOLOGY_URL,
+		Entity entity = ontologyIndexRepository.findOne(new QueryImpl().eq(OntologyIndexRepository.ONTOLOGY_IRI,
 				"http://www.final.ontology.test"));
 		assertEquals(entity.get(OntologyIndexRepository.ONTOLOGY_LABEL).toString(), "final ontology");
 	}

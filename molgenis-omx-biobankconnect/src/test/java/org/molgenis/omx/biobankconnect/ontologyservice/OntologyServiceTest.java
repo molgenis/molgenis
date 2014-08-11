@@ -106,14 +106,14 @@ public class OntologyServiceTest
 				searchService.search(new SearchRequest(OntologyService
 						.createOntologyDocumentType("http://www.ontology.test"), new QueryImpl()
 						.eq(OntologyIndexRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY).and()
-						.eq(OntologyIndexRepository.ONTOLOGY_URL, "http://www.ontology.test").pageSize(1000), null)))
+						.eq(OntologyIndexRepository.ONTOLOGY_IRI, "http://www.ontology.test").pageSize(1000), null)))
 				.thenReturn(new SearchResult(1, Arrays.asList(hit1)));
 		when(
 				searchService.search(new SearchRequest(OntologyService
 						.createOntologyTermDocumentType("http://www.ontology.test"), new QueryImpl()
 						.eq(OntologyTermIndexRepository.NODE_PATH, "1.2").and()
-						.eq(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI, "http://www.ontology.test#term1").pageSize(5000),
-						null))).thenReturn(new SearchResult(1, Arrays.asList(hit3)));
+						.eq(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI, "http://www.ontology.test#term1")
+						.pageSize(5000), null))).thenReturn(new SearchResult(1, Arrays.asList(hit3)));
 
 		when(
 				searchService.search(new SearchRequest(OntologyService
@@ -178,7 +178,8 @@ public class OntologyServiceTest
 		Hit parent = ontologyService.findOntologyTerm("http://www.ontology.test", "http://www.ontology.test#term1",
 				"1.2");
 		String ontologyIri = parent.getColumnValueMap().get(OntologyTermIndexRepository.ONTOLOGY_IRI).toString();
-		String parentOntologyTermPath = parent.getColumnValueMap().get(OntologyTermIndexRepository.NODE_PATH).toString();
+		String parentOntologyTermPath = parent.getColumnValueMap().get(OntologyTermIndexRepository.NODE_PATH)
+				.toString();
 		String parentOntologyTermIri = parent.getColumnValueMap().get(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI)
 				.toString();
 		List<Hit> children = ontologyService.getChildren(ontologyIri, parentOntologyTermIri, parentOntologyTermPath);

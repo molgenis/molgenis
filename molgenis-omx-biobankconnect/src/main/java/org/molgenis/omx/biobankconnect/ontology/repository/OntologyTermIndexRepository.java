@@ -24,11 +24,11 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 	public OntologyTermIndexRepository(OntologyLoader loader, String name, SearchService searchService)
 	{
 		super(name, searchService);
-		this.ontologyLoader = loader;
+		ontologyLoader = loader;
 		if (ontologyLoader != null)
 		{
-			this.ontologyName = ontologyLoader.getOntologyName();
-			this.ontologyIRI = ontologyLoader.getOntologyIRI();
+			ontologyName = ontologyLoader.getOntologyName();
+			ontologyIRI = ontologyLoader.getOntologyIRI();
 		}
 		else
 		{

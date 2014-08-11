@@ -46,4 +46,9 @@ public class OntologyIndexRepository extends AbstractOntologyRepository
 		metaData.addAttributeMetaData(new DefaultAttributeMetaData(ENTITY_TYPE));
 		return metaData;
 	}
+
+	public long count()
+	{
+		return 1;
+	}
 }
