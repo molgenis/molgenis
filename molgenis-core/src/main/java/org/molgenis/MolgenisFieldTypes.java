@@ -20,6 +20,7 @@ import org.molgenis.fieldtypes.ImageField;
 import org.molgenis.fieldtypes.IntField;
 import org.molgenis.fieldtypes.LongField;
 import org.molgenis.fieldtypes.MrefField;
+import org.molgenis.fieldtypes.ScriptField;
 import org.molgenis.fieldtypes.StringField;
 import org.molgenis.fieldtypes.TextField;
 import org.molgenis.fieldtypes.XrefField;
@@ -41,7 +42,7 @@ public class MolgenisFieldTypes
 
 	public enum FieldTypeEnum
 	{
-		BOOL, CATEGORICAL, COMPOUND, DATE, DATE_TIME, DECIMAL, EMAIL, ENUM, FILE, HTML, HYPERLINK, IMAGE, INT, LONG, MREF, STRING, TEXT, XREF
+		BOOL, CATEGORICAL, COMPOUND, DATE, DATE_TIME, DECIMAL, EMAIL, ENUM, FILE, HTML, HYPERLINK, IMAGE, INT, LONG, MREF, STRING, TEXT, XREF, SCRIPT
 	}
 
 	public static final FieldType STRING = new StringField();
@@ -54,6 +55,7 @@ public class MolgenisFieldTypes
 	public static final FieldType DATE = new DateField();
 	public static final FieldType DATETIME = new DatetimeField();
 	public static final FieldType COMPOUND = new CompoundField();
+	public static final FieldType SCRIPT = new ScriptField();
 
 	/** Initialize default field types */
 	private static void init()
@@ -78,6 +80,7 @@ public class MolgenisFieldTypes
 			addType(STRING);
 			addType(new TextField());
 			addType(new XrefField());
+			addType(SCRIPT);
 
 			init = true;
 		}

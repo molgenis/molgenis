@@ -9,7 +9,7 @@ public interface TokenService
 {
 
 	/**
-	 * Generates a token and associates it with a user. For now tokens will not expire.
+	 * Generates a token and associates it with a user. Token expires after 2 hours.
 	 * 
 	 * @param user
 	 * @return

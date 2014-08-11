@@ -102,6 +102,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
 		.antMatchers("/permission/**").authenticated()
 
+		.antMatchers("/scripts/**/run").authenticated()
+
 		.anyRequest().denyAll().and()
 
 		.formLogin().loginPage("/login").failureUrl("/login?error").and()
