@@ -36,6 +36,9 @@ public class FeedbackController extends AbstractStaticContentController
 {
 	public static final String ID = "feedback";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+	public static final String MESSAGING_EXCEPTION_MESSAGE = "Unfortunately, we were unable to create an email message for the feedback you specified.";
+	public static final String MAIL_AUTHENTICATION_EXCEPTION_MESSAGE = "Unfortunately, we were unable to send the mail containing your feedback.<br/>Please contact the administrator.";
+	public static final String MAIL_SEND_EXCEPTION_MESSAGE = MAIL_AUTHENTICATION_EXCEPTION_MESSAGE;
 	private static final Logger LOGGER = Logger.getLogger(MolgenisPluginController.class);
 
 	@Autowired
@@ -85,17 +88,17 @@ public class FeedbackController extends AbstractStaticContentController
 		catch (MessagingException e)
 		{
 			LOGGER.warn("Unable to create mime message for feedback form.", e);
-			form.setErrorMessage("Unfortunately, we were unable to create an email message for the feedback you specified.");
+			form.setErrorMessage(MESSAGING_EXCEPTION_MESSAGE);
 		}
 		catch (MailAuthenticationException e)
 		{
 			LOGGER.error("Error authenticating with email server.", e);
-			form.setErrorMessage("Unfortunately, we were unable to send the mail containing your feedback.<br/>Please contact the administrator.");
+			form.setErrorMessage(MAIL_AUTHENTICATION_EXCEPTION_MESSAGE);
 		}
 		catch (MailSendException e)
 		{
 			LOGGER.error("Error sending mail", e);
-			form.setErrorMessage("Unfortunately, we were unable to send the mail containing your feedback.<br/>Please contact the administrator.");
+			form.setErrorMessage(MAIL_SEND_EXCEPTION_MESSAGE);
 		}
 		return "view-feedback";
 	}
