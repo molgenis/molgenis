@@ -8,10 +8,9 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermQueryRepository;
 import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermIndexRepository;
+import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermQueryRepository;
 import org.molgenis.omx.biobankconnect.ontologyservice.OntologyService;
-import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
@@ -31,7 +30,7 @@ public class OntologyTermEntity extends AbstractOntologyEntity
 	{
 		Map<String, Object> columnValueMap = hit.getColumnValueMap();
 
-		if (attributeName.equalsIgnoreCase(Characteristic.ID))
+		if (attributeName.equalsIgnoreCase(OntologyTermQueryRepository.ID))
 		{
 			return hit.getId();
 		}
@@ -48,7 +47,8 @@ public class OntologyTermEntity extends AbstractOntologyEntity
 			if (!Boolean.parseBoolean(columnValueMap.get(OntologyTermIndexRepository.LAST).toString()))
 			{
 				String currentNodePath = columnValueMap.get(OntologyTermIndexRepository.NODE_PATH).toString();
-				String currentOntologyTermUrl = columnValueMap.get(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI).toString();
+				String currentOntologyTermUrl = columnValueMap.get(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI)
+						.toString();
 				String ontologyUrl = columnValueMap.get(OntologyTermIndexRepository.ONTOLOGY_IRI).toString();
 				Query q = new QueryImpl().eq(OntologyTermIndexRepository.PARENT_NODE_PATH, currentNodePath).and()
 						.eq(OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_URL, currentOntologyTermUrl)

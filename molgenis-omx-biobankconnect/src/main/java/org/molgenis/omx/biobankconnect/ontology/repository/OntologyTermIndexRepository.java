@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +23,7 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 	private static String ONTOLOGY_TERM_REPLACEMENT_PATTERN = "[^a-zA-Z0-9 ]";
 	private static String NODE_PATH_REPLACEMENT_PATTERN = "\\.[0-9]+$";
 	private static String ONTOLOGY_TERM_REPLACEMENT_VALUE = "\\s";
+	private final Set<String> dynamaticFields;
 
 	@Autowired
 	public OntologyTermIndexRepository(OntologyLoader loader, String entityName, SearchService searchService)
@@ -28,6 +31,7 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 		super(entityName, searchService);
 		if (loader == null) throw new IllegalArgumentException("OntologyLoader is null!");
 		ontologyLoader = loader;
+		dynamaticFields = new HashSet<String>();
 	}
 
 	@Override
@@ -83,6 +87,7 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 			alternativeDefinitions.append(newDefinition);
 		}
 
+		Map<String, Set<String>> allDatabaseIds = ontologyLoader.getAllDatabaseIds(cls);
 		for (String synonym : synonyms)
 		{
 			Entity entity = new MapEntity();
@@ -100,6 +105,14 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 			entity.set(ENTITY_TYPE, TYPE_ONTOLOGYTERM);
 			entity.set(SYNONYMS, synonym.replaceAll(ONTOLOGY_TERM_REPLACEMENT_PATTERN, ONTOLOGY_TERM_REPLACEMENT_VALUE));
 			entity.set(ALTERNATIVE_DEFINITION, alternativeDefinitions.toString());
+			for (Entry<String, Set<String>> entry : allDatabaseIds.entrySet())
+			{
+				entity.set(entry.getKey(), entry.getValue());
+				if (!dynamaticFields.contains(entry.getKey()))
+				{
+					dynamaticFields.add(entry.getKey());
+				}
+			}
 			entities.add(entity);
 		}
 
@@ -121,5 +134,10 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 		nodePathStringBuilder.append(parentNodePath).append('[').append(parentNodePath.split("\\.").length - 1)
 				.append(']');
 		return nodePathStringBuilder.toString();
+	}
+
+	public Set<String> getDynamaticFields()
+	{
+		return dynamaticFields;
 	}
 }

@@ -1,15 +1,34 @@
 package org.molgenis.omx.biobankconnect.ontologyindexer;
 
+import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
+
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.elasticsearch.ElasticsearchException;
+import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
+import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.client.Client;
 import org.elasticsearch.common.collect.Iterables;
+import org.elasticsearch.common.settings.ImmutableSettings;
+import org.elasticsearch.common.settings.ImmutableSettings.Builder;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.node.Node;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.elasticsearch.index.MappingsBuilder;
+import org.molgenis.elasticsearch.util.MapperTypeSanitizer;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.biobankconnect.ontology.repository.OntologyIndexRepository;
 import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermIndexRepository;
@@ -33,6 +52,7 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 	private final SearchService searchService;
 	private String indexingOntologyIri = null;
 	private boolean isCorrectOntology = true;
+	private static int BATCH_SIZE = 10000;
 	private static final String SYNONYM_FIELDS = "plugin.ontology.synonym.field";
 	private static final Logger logger = Logger.getLogger(AsyncOntologyIndexer.class);
 
@@ -71,8 +91,7 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 					.getOntologyIRI();
 			searchService.indexRepository(new OntologyIndexRepository(ontologyLoader,
 					createOntologyDocumentType(indexingOntologyIri), searchService));
-			searchService.indexRepository(new OntologyTermIndexRepository(ontologyLoader,
-					createOntologyTermDocumentType(indexingOntologyIri), searchService));
+			internalIndex(ontologyLoader);
 		}
 		catch (Exception e)
 		{
@@ -84,21 +103,102 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 			String ontologyName = ontologyLoader.getOntologyName();
 			if (!dataService.hasRepository(ontologyName))
 			{
-				Hit hit = searchService
-						.search(new SearchRequest(createOntologyDocumentType(indexingOntologyIri), new QueryImpl().eq(
-								OntologyIndexRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY), null))
-						.getSearchHits().get(0);
-				Map<String, Object> columnValueMap = hit.getColumnValueMap();
-				String ontologyTermEntityName = columnValueMap.containsKey(OntologyTermIndexRepository.ONTOLOGY_NAME) ? columnValueMap
-						.get(OntologyIndexRepository.ONTOLOGY_NAME).toString() : OntologyTermQueryRepository.DEFAULT_ONTOLOGY_TERM_REPO;
-				String ontologyIri = columnValueMap.containsKey(OntologyTermIndexRepository.ONTOLOGY_NAME) ? columnValueMap
-						.get(OntologyIndexRepository.ONTOLOGY_IRI).toString() : OntologyTermQueryRepository.DEFAULT_ONTOLOGY_TERM_REPO;
-				dataService.addRepository(new OntologyTermQueryRepository(ontologyTermEntityName, ontologyIri,
+				dataService.addRepository(new OntologyTermQueryRepository(ontologyName, indexingOntologyIri,
 						searchService));
 			}
 			runningIndexProcesses.decrementAndGet();
 			indexingOntologyIri = null;
 		}
+	}
+
+	private void internalIndex(OntologyLoader ontologyLoader) throws IOException
+	{
+		Builder builder = ImmutableSettings.settingsBuilder().loadFromClasspath("elasticsearch.yml");
+		Settings settings = builder.build();
+		Node node = nodeBuilder().settings(settings).local(true).node();
+		Client client = node.client();
+		OntologyTermIndexRepository ontologyTermIndexRepository = new OntologyTermIndexRepository(ontologyLoader,
+				createOntologyTermDocumentType(indexingOntologyIri), searchService);
+		String documentType = MapperTypeSanitizer.sanitizeMapperType(ontologyTermIndexRepository.getName());
+		createMappings(client, ontologyTermIndexRepository);
+		Iterator<Entity> iterator = ontologyTermIndexRepository.iterator();
+		Set<String> dynamaticFields = ontologyTermIndexRepository.getDynamaticFields();
+		long count = 0;
+		long start = 0;
+		long t0 = System.currentTimeMillis();
+		BulkRequestBuilder bulkRequest = null;
+		while (iterator.hasNext())
+		{
+			if (count % BATCH_SIZE == 0)
+			{
+				start = count;
+				bulkRequest = client.prepareBulk();
+			}
+
+			Entity entity = iterator.next();
+			Map<String, Object> docs = new HashMap<String, Object>();
+			Iterable<String> attributeNames = entity.getAttributeNames();
+			for (String attributeName : attributeNames)
+			{
+				docs.put(attributeName, entity.get(attributeName));
+			}
+			// Add dynamic fields to all the docs so that they have exactly set
+			// of attributes
+			for (String dynamaticField : dynamaticFields)
+			{
+				if (!docs.containsKey(dynamaticField))
+				{
+					docs.put(dynamaticField, StringUtils.EMPTY);
+				}
+			}
+			bulkRequest.add(client.prepareIndex("molgenis", documentType).setSource(docs));
+			count++;
+
+			// Commit if BATCH_SIZE is reached
+			if (count == (start + BATCH_SIZE))
+			{
+				BulkResponse bulkResponse = bulkRequest.execute().actionGet();
+				if (bulkResponse.hasFailures())
+				{
+					throw new RuntimeException("error while indexing row [" + count + "]: " + bulkResponse);
+				}
+
+				long t = (System.currentTimeMillis() - t0) / 1000;
+				logger.info("Imported [" + count + "] rows in [" + t + "] sec.");
+			}
+		}
+
+		// Commit the rest
+		BulkResponse bulkResponse = bulkRequest.execute().actionGet();
+		if (bulkResponse.hasFailures())
+		{
+			throw new RuntimeException("error while indexing row [" + count + "]: " + bulkResponse);
+		}
+
+		long t = (System.currentTimeMillis() - t0) / 1000;
+		logger.info("Import of ontology term from ontology [" + documentType + "] completed in " + t + " sec. Added ["
+				+ count + "] rows.");
+
+		ontologyTermIndexRepository.close();
+	}
+
+	private void createMappings(Client client, OntologyTermIndexRepository ontologyTermIndexRepository)
+			throws IOException
+	{
+		String documentType = MapperTypeSanitizer.sanitizeMapperType(ontologyTermIndexRepository.getName());
+		XContentBuilder jsonBuilder = MappingsBuilder.buildMapping(ontologyTermIndexRepository);
+		logger.info("Going to create mapping [" + jsonBuilder.string() + "]");
+
+		PutMappingResponse response = client.admin().indices().preparePutMapping("molgenis").setType(documentType)
+				.setSource(jsonBuilder).execute().actionGet();
+
+		if (!response.isAcknowledged())
+		{
+			throw new ElasticsearchException("Creation of mapping for documentType [PalgaSample] failed. Response="
+					+ response);
+		}
+
+		logger.info("Mapping for documentType [" + documentType + "] created");
 	}
 
 	@Override
@@ -147,14 +247,14 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 		return isCorrectOntology;
 	}
 
-	private String createOntologyDocumentType(String ontologyIri)
+	public static String createOntologyDocumentType(String ontologyIri)
 	{
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append("ontology-").append(ontologyIri);
 		return stringBuilder.toString();
 	}
 
-	private String createOntologyTermDocumentType(String ontologyIri)
+	public static String createOntologyTermDocumentType(String ontologyIri)
 	{
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append("ontologyTerm-").append(ontologyIri);
