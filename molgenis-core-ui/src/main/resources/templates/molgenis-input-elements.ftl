@@ -113,6 +113,26 @@
 				
 			<#elseif field.dataType.enumType =='INT' || field.dataType.enumType = 'LONG'>
 				<input type="number" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" <#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)?c}"</#if> <@validationOptions field /> >
+			
+			<#elseif field.dataType.enumType == 'SCRIPT'>
+				<#if entity!='' && entity.get(fieldName)??>
+					<textarea name="${fieldName}" id="${fieldName}-textarea">${entity.get(fieldName)!?html}</textarea>
+				<#else>
+					<textarea name="${fieldName}" id="${fieldName}-textarea"></textarea>
+				</#if>
+				<div style="width: 100%; height:500px" class="uneditable-input" id="${fieldName}-editor"></div>
+				<script>
+					var editor = ace.edit("${fieldName}-editor");
+					editor.setTheme("ace/theme/eclipse");
+    				editor.getSession().setMode("ace/mode/r");
+    					
+    				var textarea = $("#${fieldName}-textarea").hide();
+					editor.getSession().setValue(textarea.val());
+					editor.getSession().on('change', function(){
+  						textarea.val(editor.getSession().getValue());
+					});	
+				</script> 
+			
 			<#else>
 				<input type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" <#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string?html}"</#if> <@validationOptions field /> >
 			</#if>
