@@ -1,5 +1,6 @@
 package org.molgenis.omx;
 
+import java.io.IOException;
 import java.util.Map;
 
 import org.molgenis.DatabaseConfig;
@@ -9,6 +10,7 @@ import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
 import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.omx.catalogmanager.OmxCatalogManagerService;
 import org.molgenis.omx.config.DataExplorerConfig;
+import org.molgenis.omx.core.FreemarkerTemplateRepository;
 import org.molgenis.omx.studymanager.OmxStudyManagerService;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.studymanager.StudyManagerService;
@@ -22,6 +24,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
+
+import freemarker.template.TemplateException;
 
 @Configuration
 @EnableTransactionManagement
@@ -37,6 +42,8 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	private DataService dataService;
 	@Autowired
 	private MolgenisUserService molgenisUserService;
+	@Autowired
+	private FreemarkerTemplateRepository freemarkerTemplateRepository;
 
 	@Bean
 	@Qualifier("catalogService")
@@ -56,5 +63,14 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	{
 		freemarkerVariables.put("dataExplorerLink", new DataExplorerHyperlinkDirective(molgenisPluginRegistry(),
 				dataService));
+	}
+	
+	@Override
+	public FreeMarkerConfigurer freeMarkerConfigurer() throws IOException, TemplateException
+	{
+		FreeMarkerConfigurer result = super.freeMarkerConfigurer();
+		// Look up unknown templates in the FreemarkerTemplate repository
+		result.setPostTemplateLoaders(new RepositoryTemplateLoader(freemarkerTemplateRepository));
+		return result;
 	}
 }

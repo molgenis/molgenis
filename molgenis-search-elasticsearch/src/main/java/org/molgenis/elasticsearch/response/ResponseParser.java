@@ -101,8 +101,18 @@ public class ResponseParser
 										if (entrySet.getKey().toString().equalsIgnoreCase(attributeMetaData.getName()))
 										{
 											Object value = entrySet.getValue();
-											if (value != null) values.add(value);
-											break;
+											if (value != null)
+											{
+												if (value instanceof List<?>)
+												{
+													values.addAll((List<?>) value);
+												}
+												else
+												{
+													values.add(value);
+												}
+												break;
+											}
 										}
 									}
 								}
