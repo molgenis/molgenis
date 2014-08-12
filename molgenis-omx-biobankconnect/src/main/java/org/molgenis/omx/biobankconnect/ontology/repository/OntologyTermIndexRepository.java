@@ -57,15 +57,15 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 		}
 	}
 
-	private void recursiveAddEntity(String parentNodePath, String parentTermUrl, OWLClass cls, List<Entity> entities,
+	private void recursiveAddEntity(String parentNodePath, String parentTermIri, OWLClass cls, List<Entity> entities,
 			boolean root)
 	{
-		String label = ontologyLoader.getLabel(cls).replaceAll(ONTOLOGY_TERM_REPLACEMENT_PATTERN,
+		String ontologyTermLabel = ontologyLoader.getLabel(cls).replaceAll(ONTOLOGY_TERM_REPLACEMENT_PATTERN,
 				ONTOLOGY_TERM_REPLACEMENT_VALUE);
 		String definition = ontologyLoader.getDefinition(cls);
 		Set<OWLClass> listOfChildren = ontologyLoader.getChildClass(cls);
 		Set<String> synonyms = new HashSet<String>();
-		synonyms.add(label);
+		synonyms.add(ontologyTermLabel);
 		synonyms.addAll(ontologyLoader.getSynonyms(cls));
 		StringBuilder alternativeDefinitions = new StringBuilder();
 		for (Set<OWLClass> alternativeDefinition : ontologyLoader.getAssociatedClasses(cls))
@@ -89,12 +89,12 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 			entity.set(ID, ontologyLoader.getId(cls));
 			entity.set(NODE_PATH, constructNodePath(parentNodePath));
 			entity.set(PARENT_NODE_PATH, parentNodePath.replaceAll(NODE_PATH_REPLACEMENT_PATTERN, StringUtils.EMPTY));
-			entity.set(PARENT_ONTOLOGY_TERM_URL, parentTermUrl);
+			entity.set(PARENT_ONTOLOGY_TERM_URL, parentTermIri);
 			entity.set(ROOT, root);
 			entity.set(LAST, listOfChildren.size() == 0);
 			entity.set(ONTOLOGY_IRI, ontologyLoader.getOntologyIRI());
 			entity.set(ONTOLOGY_NAME, ontologyLoader.getOntologyName());
-			entity.set(ONTOLOGY_TERM, label);
+			entity.set(ONTOLOGY_TERM, ontologyTermLabel);
 			entity.set(ONTOLOGY_TERM_DEFINITION, definition);
 			entity.set(ONTOLOGY_TERM_IRI, cls.getIRI().toString());
 			entity.set(ENTITY_TYPE, TYPE_ONTOLOGYTERM);
