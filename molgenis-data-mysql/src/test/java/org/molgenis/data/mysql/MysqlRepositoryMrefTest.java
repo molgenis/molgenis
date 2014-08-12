@@ -1,5 +1,6 @@
 package org.molgenis.data.mysql;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -108,7 +109,9 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 
 		Assert.assertEquals(
 				mrefRepo.getSelectSql(new QueryImpl(), Lists.newArrayList()),
-				"SELECT this.`identifier`, GROUP_CONCAT(DISTINCT(`stringRef`.`stringRef`)) AS `stringRef`, GROUP_CONCAT(DISTINCT(`intRef`.`intRef`)) AS `intRef` FROM `MrefTest` AS this LEFT JOIN `MrefTest_stringRef` AS `stringRef_filter` ON (this.`identifier` = `stringRef_filter`.`identifier`) LEFT JOIN `MrefTest_stringRef` AS `stringRef` ON (this.`identifier` = `stringRef`.`identifier`) LEFT JOIN `MrefTest_intRef` AS `intRef_filter` ON (this.`identifier` = `intRef_filter`.`identifier`) LEFT JOIN `MrefTest_intRef` AS `intRef` ON (this.`identifier` = `intRef`.`identifier`) GROUP BY this.`identifier`");
+				"SELECT this.`identifier`, GROUP_CONCAT(DISTINCT(`stringRef`.`stringRef`)) AS `stringRef`, GROUP_CONCAT(DISTINCT(`intRef`.`intRef`)) AS `intRef` FROM `MrefTest` AS this LEFT JOIN `MrefTest_stringRef` AS `stringRef` ON (this.`identifier` = `stringRef`.`identifier`) LEFT JOIN `MrefTest_intRef` AS `intRef` ON (this.`identifier` = `intRef`.`identifier`) GROUP BY this.`identifier`");
+
+		assertEquals(mrefRepo.query().eq("identifier", "one").count(), Long.valueOf(1));
 		for (Entity e : mrefRepo.findAll(new QueryImpl().eq("identifier", "one")))
 		{
 			logger.info("found: " + e);
@@ -126,6 +129,7 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 			Assert.assertEquals(result.get(1).getString("identifier"), "ref2");
 		}
 
+		assertEquals(mrefRepo.query().eq("stringRef", "ref3").count(), Long.valueOf(1));
 		for (Entity e : mrefRepo.findAll(new QueryImpl().eq("stringRef", "ref3")))
 		{
 			logger.debug("found: " + e);
@@ -133,6 +137,7 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 			{ "ref3" }));
 		}
 
+		assertEquals(mrefRepo.query().eq("stringRef", "ref1").count(), Long.valueOf(1));
 		for (Entity e : mrefRepo.findAll(new QueryImpl().eq("stringRef", "ref1")))
 		{
 			logger.debug("found: " + e);
@@ -142,12 +147,18 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 			{ "ref1", "ref2" }));
 		}
 
+		assertEquals(mrefRepo.query().gt("intRef", 1).count(), Long.valueOf(1));
 		for (Entity e : mrefRepo.findAll(new QueryImpl().gt("intRef", 1)))
 		{
 			logger.debug("found: " + e);
 			Assert.assertEquals(e.get("intRef"), Arrays.asList(new Integer[]
 			{ 1, 2 }));
 		}
+
+		assertEquals(mrefRepo.query().eq("stringRef", "ref1").and().eq("stringRef", "ref2").count(), Long.valueOf(1));
+		assertEquals(mrefRepo.query().eq("intRef", 1).and().eq("intRef", 2).count(), Long.valueOf(1));
+		assertEquals(mrefRepo.query().in("stringRef", Arrays.asList("ref1", "ref2")).count(), Long.valueOf(1));
+		assertEquals(mrefRepo.query().in("intRef", Arrays.asList(1, 2)).count(), Long.valueOf(1));
 
 		// update
 
