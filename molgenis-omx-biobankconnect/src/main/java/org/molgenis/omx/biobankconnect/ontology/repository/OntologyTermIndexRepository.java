@@ -23,9 +23,9 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 	private static String ONTOLOGY_TERM_REPLACEMENT_VALUE = "\\s";
 
 	@Autowired
-	public OntologyTermIndexRepository(OntologyLoader loader, String name, SearchService searchService)
+	public OntologyTermIndexRepository(OntologyLoader loader, String entityName, SearchService searchService)
 	{
-		super(name, searchService);
+		super(entityName, searchService);
 		if (loader == null) throw new IllegalArgumentException("OntologyLoader is null!");
 		ontologyLoader = loader;
 	}
