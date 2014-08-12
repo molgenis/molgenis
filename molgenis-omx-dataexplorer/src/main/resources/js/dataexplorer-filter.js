@@ -454,7 +454,7 @@
 						sort : {
 							orders : [ {
 								direction : 'ASC',
-								property : 'id'
+								property : entityMeta.labelAttribute
 							} ]
 						}
 					}
