@@ -244,7 +244,7 @@
 				var result = [];
 				var dataMap = {};
 				$.each(data.searchHits, function(index, hit){
-					var ontologyName = hit.columnValueMap.ontologyLabel;
+					var ontologyName = hit.columnValueMap.ontologyName;
 					var termName = hit.columnValueMap.ontologyTermSynonym;
 					termName = ontologyName === '' ? termName : ontologyName + ':' + termName;
 					if($.inArray(termName, result) === -1){					

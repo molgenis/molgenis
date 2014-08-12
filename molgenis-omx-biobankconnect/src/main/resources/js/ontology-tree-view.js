@@ -8,7 +8,7 @@
 	var LAST = "isLast";
 	var ENTITY_TYPE = "entity_type";
 	var ONTOLOGY_IRI = "ontologyIRI";
-	var ONTOLOGY_LABEL = "ontologyLabel";
+	var ONTOLOGY_NAME = "ontologyName";
 	var ONTOLOGY_TERM = "ontologyTerm";
 	var ONTOLOGY_TERM_IRI = "ontologyTermIRI";
 	var SYNONYMS = "ontologyTermSynonym";
@@ -32,7 +32,7 @@
 		}
 		
 		function getRootOntologyTerms(ontology){
-			var rootOntologyTerms = restApi.get('/api/v1/' + ontology[ONTOLOGY_LABEL], {'expand' : ['attributes'], 'q' : {
+			var rootOntologyTerms = restApi.get('/api/v1/' + ontology[ONTOLOGY_NAME], {'expand' : ['attributes'], 'q' : {
 				'q' : [{
 					'field' : ROOT,
 					'operator' : 'EQUALS',
@@ -77,7 +77,7 @@
 		}
 		
 		function searchByQuery(ontology, query){
-			var ontologyTermResult = restApi.get('/api/v1/' + ontology[ONTOLOGY_LABEL], {'expand' : ['attributes'], 'q' : {
+			var ontologyTermResult = restApi.get('/api/v1/' + ontology[ONTOLOGY_NAME], {'expand' : ['attributes'], 'q' : {
 				'q' : [{
 					'field' : SYNONYMS,
 					'operator' : 'EQUALS',
@@ -158,8 +158,8 @@
 				if(value[ONTOLOGY_TERM]){
 					value[TREE_LABEL] = value[ONTOLOGY_TERM];
 				}
-				else if(value[ONTOLOGY_LABEL]){
-					value[TREE_LABEL] = value[ONTOLOGY_LABEL];
+				else if(value[ONTOLOGY_NAME]){
+					value[TREE_LABEL] = value[ONTOLOGY_NAME];
 				}
 				uniqueNodes.push(value);
 			});
@@ -185,7 +185,7 @@
 	}
 	
 	function getOntologyTerm(option){
-		var ontologyTerms = restApi.get('/api/v1/' + option[ONTOLOGY_LABEL], {'expand' : ['attributes'], 'q' : {
+		var ontologyTerms = restApi.get('/api/v1/' + option[ONTOLOGY_NAME], {'expand' : ['attributes'], 'q' : {
 			'q' : [{
 				'field' : ONTOLOGY_TERM_IRI,
 				'operator' : 'EQUALS',
@@ -202,7 +202,7 @@
 	}
 	
 	function getParentOntologyTerm(option){
-		var parentOntologyTerms = restApi.get('/api/v1/' + option[ONTOLOGY_LABEL], {'expand' : ['attributes'], 'q' : {
+		var parentOntologyTerms = restApi.get('/api/v1/' + option[ONTOLOGY_NAME], {'expand' : ['attributes'], 'q' : {
 			'q' : [{
 				'field' : ONTOLOGY_TERM_IRI,
 				'operator' : 'EQUALS',

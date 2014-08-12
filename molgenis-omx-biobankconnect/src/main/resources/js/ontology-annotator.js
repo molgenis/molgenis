@@ -217,7 +217,7 @@
 		if(ontologyDiv.find('input').length === 0){
 			$.each(indexedOntologies.items, function(index, ontology){
 				var ontologyUri = ontology.ontologyIRI;
-				var ontologyName = ontology.ontologyLabel;
+				var ontologyName = ontology.ontologyName;
 			    $('<label />').addClass('checkbox').append('<input type="checkbox" value="' + ontologyUri + '" checked>' + ontologyName).click(function(){
 			    	$('#selectedOntologies').val(getAllOntologyUris(ontologyDiv));
 			    }).appendTo(ontologyDiv);
@@ -361,7 +361,7 @@
 			if(key === 'ontology') value = molgenis.hrefToId(value.href);
 			query[key] = value;
 		});
-		query.Name = data.ontologyLabel + ':' + data.ontologyTermSynonym;
+		query.Name = data.ontologyName + ':' + data.ontologyTermSynonym;
 		query.definition = data.ontologyTermSynonym;
 		$.ajax({
 			type : 'PUT',
@@ -384,8 +384,8 @@
 		var ontology = createOntology(data);
 		var ontologyTermId = null;
 		var query = {};
-		query.Name =  data.ontologyLabel + ':' + data.ontologyTerm;
-		query.Identifier = data.ontologyLabel + ':' + data.ontologyTermIRI;
+		query.Name =  data.ontologyName + ':' + data.ontologyTerm;
+		query.Identifier = data.ontologyName + ':' + data.ontologyTermIRI;
 		query.termAccession = data.ontologyTermIRI;
 		query.description = data.ontologyTermLabel;
 		query.ontology = molgenis.hrefToId(ontology.href);

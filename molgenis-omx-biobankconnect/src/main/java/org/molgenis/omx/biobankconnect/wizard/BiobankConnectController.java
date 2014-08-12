@@ -29,6 +29,7 @@ import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.biobankconnect.algorithm.ApplyAlgorithms;
 import org.molgenis.omx.biobankconnect.ontologyannotator.OntologyAnnotator;
 import org.molgenis.omx.biobankconnect.ontologyannotator.UpdateIndexRequest;
+import org.molgenis.omx.biobankconnect.ontologyindexer.AsyncOntologyIndexer;
 import org.molgenis.omx.biobankconnect.ontologymatcher.AlgorithmGenerateResponse;
 import org.molgenis.omx.biobankconnect.ontologymatcher.AsyncOntologyMatcher;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcher;
@@ -173,7 +174,7 @@ public class BiobankConnectController extends AbstractWizardController
 			List<String> documentTypes = new ArrayList<String>();
 			for (String ontologyUri : request.getParameter("selectedOntologies").split(","))
 			{
-				documentTypes.add("ontologyTerm-" + ontologyUri);
+				documentTypes.add(AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyUri));
 			}
 			ontologyAnnotator.annotate(wizard.getSelectedDataSet().getId(), documentTypes);
 		}
