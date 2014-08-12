@@ -13,6 +13,7 @@ import java.util.Iterator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,9 +47,7 @@ public class GafListFileRepositoryTest
 	@Test
 	public void iteratorWithoutReport() throws IOException
 	{
-		StringBuilder path = new StringBuilder();
-		path.append('/').append("flowexport_test_gaflistfilerepository.csv");
-		File file = new File(getClass().getResource(path.toString()).getFile());
+		File file = ResourceUtils.getFile(getClass(), "/flowexport_test_gaflistfilerepository.csv");
 		@SuppressWarnings("resource")
 		GafListFileRepository gafListFileRepository = new GafListFileRepository(file, null, null, null);
 		Iterator<Entity> it = gafListFileRepository.iterator();
@@ -72,7 +71,7 @@ public class GafListFileRepositoryTest
 	@Test
 	public void iteratorWithReport() throws IOException
 	{
-		File file = new File(getClass().getResource("/flowexport_test_gaflistfilerepository.csv").getFile());
+		File file = ResourceUtils.getFile(getClass(), "/flowexport_test_gaflistfilerepository.csv");
 
 		GafListValidationReport gafListValidationReport = mock(GafListValidationReport.class);
 		when(gafListValidationReport.hasErrors("1500")).thenReturn(false);
