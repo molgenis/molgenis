@@ -66,6 +66,12 @@
 	
 			// build table after all meta data for referenced entities was loaded
 			$.when.apply($, dfds).done(function() {
+				// inject referenced entities meta data in attributes
+				$.each(colAttributes, function(i, attribute) {
+					if(attribute.fieldType === 'XREF' || attribute.fieldType === 'MREF' || attribute.fieldType === 'CATEGORICAL') {
+						attribute.refEntity = refEntitiesMeta[attribute.refEntity.href];
+					}
+				});
 				callback(colAttributes, refEntitiesMeta);
 			});
 		} else callback([], {});
@@ -215,41 +221,40 @@
 				// TODO do not construct uri from other uri
 				var refEntityCollectionUri = attribute.refEntity.href.replace("/meta", "");
 				
+				var format = function(item) {
+					if (item)
+						return item[refEntityMeta.labelAttribute];
+				};
+				
 				var opts = {
-					// lazy load drop-down content 
+					id: 'href',
+					allowClear : attribute.nillable ? true : false,
+					placeholder : ' ', // cannot be an empty string
+					initSelection: function(element, callback) {
+						callback(value);
+					},
 				    query: function (query) {
-				    	restApi.getAsync(refEntityCollectionUri, null, function(data) {
-				    		var results = [];
-				    		$.each(data.items, function(i, item) {
-				    			results.push({id: item.href, text: item[refEntityMeta.labelAttribute]});
-				    		});
-				    		query.callback({results : results});
+				    	var num = 25;
+					    var q = {
+							q : {
+								start : (query.page - 1) * num, 
+								num : num
+							}
+						};
+				    	
+				    	restApi.getAsync(refEntityCollectionUri, q, function(data) {
+				    		query.callback({results: data.items, more: data.nextHref ? true : false});
 				    	});
 				    },
-				    // disable search box
-				    minimumResultsForSearch: -1,
+				    formatResult: format,
+				    formatSelection: format,
+				    minimumResultsForSearch: -1, // permanently hide the search field
 				    width: '100%'
 				};
-				if(value) {
-					opts.initSelection = function(element, callback) {
-						callback({id: value.href, text: value[refEntityMeta.labelAttribute]});
-					};
-				}
-				if(attribute.nillable) {
-					opts.allowClear = true,
-					opts.placeholder = ' '; // cannot be an empty string
-				}
 				
-				var container = $('<input type="hidden" class="categorical-select">');
-				// first append container, then create select2
-				cell.html(container);
-				container.select2(opts);
-				
-				if(value && attribute.nillable) {
-					// initSelection not called in case of placeholder: https://github.com/ivaynberg/select2/issues/2086
-					// workaround:
-					container.select2('val', []);
-				}
+				var container = $('<input type="hidden" class="ref-select">');
+				cell.html(container); // first append container, then create select2
+				container.select2(opts).select2('val', []); // create select2 and trigger initSelection
 				break;
 			case 'DATE':
 			case 'DATE_TIME':
@@ -265,19 +270,90 @@
 				break;
 			case 'MREF':
 				var refEntityMeta = settings.refEntitiesMeta[attribute.refEntity.href];
-				var lblValue = entity[attribute.name] ? $.map(entity[attribute.name].items, function(val) {return val[refEntityMeta.labelAttribute];}) : undefined; 
-				var container = $('<div class="xrefmrefsearch">');
-				container.xrefmrefsearch({attribute: attribute, values: lblValue});
-				container.addClass('ref-select');
-				cell.html(container);
+				// TODO do not construct uri from other uri
+				var refEntityCollectionUri = attribute.refEntity.href.replace("/meta", "");
+				
+				var format = function(item) {
+					return item[refEntityMeta.labelAttribute];
+				};
+				
+				// note: allowClear not possible in combination with multiple select
+				var opts = {
+					id: 'href', 
+					multiple: true,
+					initSelection: function(element, callback) {
+						callback(value.items);
+					},
+				    query: function (query) {
+				    	var num = 100;
+					    var q = {
+							q : {
+								start : (query.page - 1) * num, 
+								num : num,
+								q : [ {
+									field : refEntityMeta.labelAttribute,
+									operator : 'SEARCH',
+									value : query.term
+								} ]
+							}
+						};
+				    	
+				    	restApi.getAsync(refEntityCollectionUri, q, function(data) {
+				    		query.callback({results: data.items, more: data.nextHref ? true : false});
+				    	});
+				    },
+				    formatResult: format,
+				    formatSelection: format,
+				    width: '400px' // preserve row height changes by limiting y overflow
+				};
+				
+				var container = $('<input type="hidden" class="ref-select">');
+				cell.html(container); // first append container, then create select2
+				container.select2(opts).select2('val', []); // create select2 and trigger initSelection
 				break;
 			case 'XREF':
 				var refEntityMeta = settings.refEntitiesMeta[attribute.refEntity.href];
-				var lblValue = entity[attribute.name] ? entity[attribute.name][refEntityMeta.labelAttribute] : undefined;
-				var container = $('<div class="xrefmrefsearch">');
-				container.xrefmrefsearch({attribute: attribute, values: lblValue});
-				container.addClass('ref-select');
-				cell.html(container);
+				// TODO do not construct uri from other uri
+				var refEntityCollectionUri = attribute.refEntity.href.replace("/meta", "");
+				
+				var format = function(item) {
+					if(item)
+						return item[refEntityMeta.labelAttribute];
+				};
+				
+				var opts = {
+					id: 'href',
+					allowClear : attribute.nillable ? true : false,
+					placeholder : ' ', // cannot be an empty string
+					initSelection: function(element, callback) {
+						callback(value);
+					},
+				    query: function (query) {
+				    	var num = 100;
+					    var q = {
+							q : {
+								start : (query.page - 1) * num, 
+								num : num,
+								q : [ {
+									field : refEntityMeta.labelAttribute,
+									operator : 'SEARCH',
+									value : query.term
+								} ]
+							}
+						};
+				    	
+				    	restApi.getAsync(refEntityCollectionUri, q, function(data) {
+				    		query.callback({results: data.items, more: data.nextHref ? true : false});
+				    	});
+				    },
+				    formatResult: format,
+				    formatSelection: format,
+				    width: '100%'
+				};
+				
+				var container = $('<input type="hidden" class="ref-select">');
+				cell.html(container); // first append container, then create select2
+				container.select2(opts).select2('val', []); // create select2 and trigger initSelection
 				break;
 			default:
 				var value = entity[attribute.name];
@@ -433,32 +509,6 @@
 					});
 				}
 				break;
-			case 'CATEGORICAL':
-				var refEntityMeta = settings.refEntitiesMeta[attribute.refEntity.href];
-
-				var data = cell.find('.categorical-select').select2('data');
-				var editValue = data ? data.id : '';
-            	var entity = settings.data.items[row];
-				value = entity[attribute.name] ? entity[attribute.name].href : '';
-            	
-            	if(value !== editValue) {
-            		editValue = editValue !== '' ? restApi.getPrimaryKeyFromHref(editValue) : ''; 
-					restApi.update(cell.data('id'), editValue, {
-						success: function() {
-							if (editValue === '')
-								delete entity[attribute.name];
-							else {
-								if(!entity[attribute.name])
-									entity[attribute.name] = {};
-								entity[attribute.name].href = editValue;
-								entity[attribute.name][refEntityMeta.labelAttribute] = data.text;	
-							}
-							
-							cell.addClass('edited');
-						}
-					});
-				}
-				break;
 			case 'DATE':
 			case 'DATE_TIME':
 				var editValue = cell.find('input').val();
@@ -511,31 +561,35 @@
 					}
 				}
 				break;
+			case 'CATEGORICAL' :
 			case 'XREF':
 				var select = cell.find('input[type=hidden]');
 				var data = select.select2('data');
-				var refEntityMeta = settings.refEntitiesMeta[attribute.refEntity.href];
-            	var entity = settings.data.items[row];
-				value = entity[attribute.name] ? entity[attribute.name].href : '';
-				var editValue = data.href;
-				var editLabel = data[refEntityMeta.labelAttribute];
-				
-            	if(value !== editValue) {
-            		editValue = editValue !== '' ? restApi.getPrimaryKeyFromHref(editValue) : ''; 
-					restApi.update(cell.data('id'), editValue, {
-						success: function() {
-							if (editValue === '')
-								delete entity[attribute.name];
-							else {
-								if(!entity[attribute.name])
-									entity[attribute.name] = {};
-								entity[attribute.name].href = editValue;
-								entity[attribute.name][refEntityMeta.labelAttribute] = editLabel;	
+				if(attribute.nillable || data) {
+	            	var entity = settings.data.items[row];
+					var value = entity[attribute.name] ? entity[attribute.name].href : '';
+					var editValue = data ? data.href : '';
+					
+	            	if(value !== editValue) {
+	            		var refEntityMeta = settings.refEntitiesMeta[attribute.refEntity.href];
+	            		var editLabel = data ? data[refEntityMeta.labelAttribute] : '';
+	            		
+	            		editValue = editValue !== '' ? restApi.getPrimaryKeyFromHref(editValue) : ''; 
+						restApi.update(cell.data('id'), editValue, {
+							success: function() {
+								if (editValue === '')
+									delete entity[attribute.name];
+								else {
+									if(!entity[attribute.name])
+										entity[attribute.name] = {};
+									entity[attribute.name].href = editValue;
+									entity[attribute.name][refEntityMeta.labelAttribute] = editLabel;	
+								}
+								
+								cell.addClass('edited');
 							}
-							
-							cell.addClass('edited');
-						}
-					});
+						});
+					}
 				}
 				break;
 			default:
