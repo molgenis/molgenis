@@ -120,7 +120,7 @@
 				<#else>
 					<textarea name="${fieldName}" id="${fieldName}-textarea"></textarea>
 				</#if>
-				<div style="width: 100%; height:500px" class="uneditable-input" id="${fieldName}-editor"></div>
+				<div style="width: 100%; height:250px" class="uneditable-input" id="${fieldName}-editor"></div>
 				<script>
 					var editor = ace.edit("${fieldName}-editor");
 					editor.setTheme("ace/theme/eclipse");

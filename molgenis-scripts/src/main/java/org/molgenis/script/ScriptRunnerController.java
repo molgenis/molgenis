@@ -18,6 +18,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+/**
+ * Controller for running a script
+ * 
+ * Url: /scripts/${scriptname}/run
+ * 
+ * If the script generates an outputfile that file is streamed to the outputstream else the script output
+ */
 @Controller
 public class ScriptRunnerController
 {
