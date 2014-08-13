@@ -15,6 +15,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.biobankconnect.ontology.repository.OntologyIndexRepository;
 import org.molgenis.omx.biobankconnect.ontology.repository.OntologyQueryRepository;
 import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermIndexRepository;
+import org.molgenis.omx.biobankconnect.ontologyindexer.AsyncOntologyIndexer;
 import org.molgenis.omx.biobankconnect.ontologyservice.OntologyService;
 import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.search.Hit;
@@ -57,11 +58,11 @@ public class OntologyIndexEntityTest
 
 		SearchService searchService = mock(SearchService.class);
 		when(
-				searchService.search(new SearchRequest(OntologyService
+				searchService.search(new SearchRequest(AsyncOntologyIndexer
 						.createOntologyDocumentType("http://www.ontology.test"), new QueryImpl(), null))).thenReturn(
 				new SearchResult(2, Arrays.asList(hit2, hit3)));
 		when(
-				searchService.search(new SearchRequest(OntologyService
+				searchService.search(new SearchRequest(AsyncOntologyIndexer
 						.createOntologyTermDocumentType("http://www.ontology.test"), new QueryImpl().pageSize(10000)
 						.eq(OntologyTermIndexRepository.ROOT, true), null))).thenReturn(
 				new SearchResult(1, Arrays.asList(hit1)));

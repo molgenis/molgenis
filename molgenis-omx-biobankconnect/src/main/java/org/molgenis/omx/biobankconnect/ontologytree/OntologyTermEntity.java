@@ -10,7 +10,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermIndexRepository;
 import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermQueryRepository;
-import org.molgenis.omx.biobankconnect.ontologyservice.OntologyService;
+import org.molgenis.omx.biobankconnect.ontologyindexer.AsyncOntologyIndexer;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
@@ -53,7 +53,7 @@ public class OntologyTermEntity extends AbstractOntologyEntity
 				Query q = new QueryImpl().eq(OntologyTermIndexRepository.PARENT_NODE_PATH, currentNodePath).and()
 						.eq(OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_URL, currentOntologyTermUrl)
 						.pageSize(Integer.MAX_VALUE);
-				String documentType = OntologyService.createOntologyTermDocumentType(ontologyUrl);
+				String documentType = AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyUrl);
 				SearchRequest searchRequest = new SearchRequest(documentType, q, null);
 				SearchResult result = searchService.search(searchRequest);
 				for (Hit hit : result.getSearchHits())

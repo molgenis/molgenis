@@ -20,9 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class OntologyTermIndexRepository extends AbstractOntologyRepository implements Countable
 {
 	private final OntologyLoader ontologyLoader;
-	private static String ONTOLOGY_TERM_REPLACEMENT_PATTERN = "[^a-zA-Z0-9 ]";
-	private static String NODE_PATH_REPLACEMENT_PATTERN = "\\.[0-9]+$";
-	private static String ONTOLOGY_TERM_REPLACEMENT_VALUE = "\\s";
 	private final Set<String> dynamaticFields;
 
 	@Autowired
@@ -64,8 +61,8 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 	private void recursiveAddEntity(String parentNodePath, String parentTermIri, OWLClass cls, List<Entity> entities,
 			boolean root)
 	{
-		String ontologyTermLabel = ontologyLoader.getLabel(cls).replaceAll(ONTOLOGY_TERM_REPLACEMENT_PATTERN,
-				ONTOLOGY_TERM_REPLACEMENT_VALUE);
+		String ontologyTermLabel = ontologyLoader.getLabel(cls).replaceAll(ILLEGAL_CHARACTERS_PATTERN,
+				ILLEGAL_CHARACTERS_REPLACEMENT);
 		String definition = ontologyLoader.getDefinition(cls);
 		Set<OWLClass> listOfChildren = ontologyLoader.getChildClass(cls);
 		Set<String> synonyms = new HashSet<String>();
@@ -103,7 +100,7 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 			entity.set(ONTOLOGY_TERM_DEFINITION, definition);
 			entity.set(ONTOLOGY_TERM_IRI, cls.getIRI().toString());
 			entity.set(ENTITY_TYPE, TYPE_ONTOLOGYTERM);
-			entity.set(SYNONYMS, synonym.replaceAll(ONTOLOGY_TERM_REPLACEMENT_PATTERN, ONTOLOGY_TERM_REPLACEMENT_VALUE));
+			entity.set(SYNONYMS, synonym.replaceAll(ILLEGAL_CHARACTERS_PATTERN, ILLEGAL_CHARACTERS_REPLACEMENT));
 			entity.set(ALTERNATIVE_DEFINITION, alternativeDefinitions.toString());
 			for (Entry<String, Set<String>> entry : allDatabaseIds.entrySet())
 			{

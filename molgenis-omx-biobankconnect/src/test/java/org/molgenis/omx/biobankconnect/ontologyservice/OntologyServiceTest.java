@@ -16,6 +16,7 @@ import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.biobankconnect.ontology.repository.OntologyIndexRepository;
 import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermIndexRepository;
+import org.molgenis.omx.biobankconnect.ontologyindexer.AsyncOntologyIndexer;
 import org.molgenis.omx.observ.target.Ontology;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
@@ -103,27 +104,27 @@ public class OntologyServiceTest
 				new SearchResult(2, Arrays.asList(hit1, hit2)));
 
 		when(
-				searchService.search(new SearchRequest(OntologyService
+				searchService.search(new SearchRequest(AsyncOntologyIndexer
 						.createOntologyDocumentType("http://www.ontology.test"), new QueryImpl()
 						.eq(OntologyIndexRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY).and()
 						.eq(OntologyIndexRepository.ONTOLOGY_IRI, "http://www.ontology.test").pageSize(1000), null)))
 				.thenReturn(new SearchResult(1, Arrays.asList(hit1)));
 		when(
-				searchService.search(new SearchRequest(OntologyService
+				searchService.search(new SearchRequest(AsyncOntologyIndexer
 						.createOntologyTermDocumentType("http://www.ontology.test"), new QueryImpl()
 						.eq(OntologyTermIndexRepository.NODE_PATH, "1.2").and()
 						.eq(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI, "http://www.ontology.test#term1")
 						.pageSize(5000), null))).thenReturn(new SearchResult(1, Arrays.asList(hit3)));
 
 		when(
-				searchService.search(new SearchRequest(OntologyService
+				searchService.search(new SearchRequest(AsyncOntologyIndexer
 						.createOntologyTermDocumentType("http://www.ontology.test"), new QueryImpl()
 						.eq(OntologyTermIndexRepository.PARENT_NODE_PATH, "1.2").and()
 						.eq(OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_URL, "http://www.ontology.test#term1")
 						.pageSize(5000), null))).thenReturn(new SearchResult(2, Arrays.asList(hit4, hit5)));
 
 		when(
-				searchService.search(new SearchRequest(OntologyService
+				searchService.search(new SearchRequest(AsyncOntologyIndexer
 						.createOntologyTermDocumentType("http://www.ontology.test"), new QueryImpl().eq(
 						OntologyTermIndexRepository.ROOT, true).pageSize(10000), null))).thenReturn(
 				new SearchResult(1, Arrays.asList(hit3)));
@@ -134,7 +135,7 @@ public class OntologyServiceTest
 		QueryRule finalQuery = new QueryRule(rules);
 		finalQuery.setOperator(Operator.SHOULD);
 		when(
-				searchService.search(new SearchRequest(OntologyService
+				searchService.search(new SearchRequest(AsyncOntologyIndexer
 						.createOntologyTermDocumentType("http://www.ontology.test"), new QueryImpl(finalQuery)
 						.pageSize(100), null))).thenReturn(new SearchResult(2, Arrays.asList(hit4, hit5)));
 
@@ -144,14 +145,14 @@ public class OntologyServiceTest
 	@Test
 	public void createOntologyDocumentType()
 	{
-		assertEquals(OntologyService.createOntologyDocumentType("http://www.ontology.test"),
+		assertEquals(AsyncOntologyIndexer.createOntologyDocumentType("http://www.ontology.test"),
 				"ontology-http://www.ontology.test");
 	}
 
 	@Test
 	public void createOntologyTermDocumentType()
 	{
-		assertEquals(OntologyService.createOntologyTermDocumentType("http://www.ontology.test"),
+		assertEquals(AsyncOntologyIndexer.createOntologyTermDocumentType("http://www.ontology.test"),
 				"ontologyTerm-http://www.ontology.test");
 	}
 

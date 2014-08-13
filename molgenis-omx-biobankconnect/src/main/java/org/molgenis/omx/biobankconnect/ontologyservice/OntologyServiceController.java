@@ -30,7 +30,9 @@ import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.Writable;
 import org.molgenis.data.csv.CsvRepository;
 import org.molgenis.data.excel.ExcelWriter;
+import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.LowerCaseProcessor;
+import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.rest.EntityCollectionResponse;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.support.MapEntity;
@@ -59,7 +61,7 @@ public class OntologyServiceController extends MolgenisPluginController
 	public static final String ID = "ontologyservice";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	private String ontologyUrl = null;
-	private List<String> inputTerms = new ArrayList<String>();
+	private List<String> inputLines = new ArrayList<String>();
 
 	public OntologyServiceController()
 	{
@@ -81,7 +83,7 @@ public class OntologyServiceController extends MolgenisPluginController
 		if (ontologyUrl == null || inputTerms == null || ontologyUrl.isEmpty() || inputTerms.isEmpty()) return init(model);
 
 		this.ontologyUrl = ontologyUrl;
-		this.inputTerms = Arrays.asList(inputTerms.split("\n"));
+		this.inputLines = Arrays.asList(inputTerms.split("\n"));
 		model.addAttribute("total", inputTerms.split("\n").length);
 		model.addAttribute("ontologyUrl", this.ontologyUrl);
 		return "ontology-match-view-result";
@@ -98,8 +100,11 @@ public class OntologyServiceController extends MolgenisPluginController
 		try
 		{
 			File uploadFile = fileStore.store(file.getInputStream(), file.getName() + "_input.txt");
-			inputTerms = collectAllLinesFromFile(uploadFile);
-			model.addAttribute("total", inputTerms.size());
+			CsvRepository csvRepository = new CsvRepository(uploadFile, Arrays.<CellProcessor> asList(
+					new LowerCaseProcessor(), new TrimProcessor()), OntologyService.DEFAULT_SEPARATOR);
+
+			inputLines = collectAllLinesFromFile(uploadFile);
+			model.addAttribute("total", inputLines.size());
 		}
 		finally
 		{
@@ -111,7 +116,7 @@ public class OntologyServiceController extends MolgenisPluginController
 	@RequestMapping(method = GET, value = "/match/download")
 	public void download(HttpServletResponse response, Model model) throws IOException
 	{
-		if (ontologyUrl != null && inputTerms != null)
+		if (ontologyUrl != null && inputLines != null)
 		{
 			ExcelWriter excelWriter = null;
 			try
@@ -120,16 +125,16 @@ public class OntologyServiceController extends MolgenisPluginController
 				response.addHeader("Content-Disposition", "attachment; filename=" + getCsvFileName("match-result"));
 				excelWriter = new ExcelWriter(response.getOutputStream());
 				excelWriter.addCellProcessor(new LowerCaseProcessor(true, false));
-				int iteration = inputTerms.size() / 1000 + 1;
+				int iteration = inputLines.size() / 1000 + 1;
 				List<String> columnHeaders = Arrays.asList("InputTerm", "OntologyTerm", "Synonym used for matching",
 						"OntologyTermUrl", "OntologyUrl", "CombinedScore", "LuceneScore");
 				for (int i = 0; i < iteration; i++)
 				{
 					Writable sheetWriter = excelWriter.createWritable("result" + (i + 1), columnHeaders);
 					int lowerBound = i * 1000;
-					int upperBound = (i + 1) * 1000 < inputTerms.size() ? (i + 1) * 1000 : inputTerms.size();
+					int upperBound = (i + 1) * 1000 < inputLines.size() ? (i + 1) * 1000 : inputLines.size();
 
-					for (String term : inputTerms.subList(lowerBound, upperBound))
+					for (String term : inputLines.subList(lowerBound, upperBound))
 					{
 						for (Hit hit : ontologyService.search(ontologyUrl, term).getSearchHits())
 						{
@@ -158,20 +163,20 @@ public class OntologyServiceController extends MolgenisPluginController
 	public EntityCollectionResponse matchResult(@RequestBody
 	EntityPager entityPager)
 	{
-		if (inputTerms == null || inputTerms.isEmpty()) throw new UnknownEntityException("The inputTerms is empty!");
+		if (inputLines == null || inputLines.isEmpty()) throw new UnknownEntityException("The inputTerms is empty!");
 		if (ontologyUrl == null || ontologyUrl.isEmpty()) throw new UnknownEntityException("The ontologyUrl is empty!");
 		List<Map<String, Object>> entities = new ArrayList<Map<String, Object>>();
 
-		int count = inputTerms.size();
+		int count = inputLines.size();
 		int start = entityPager.getStart();
 		int num = entityPager.getNum();
 		int toIndex = start + num;
 
-		for (String term : inputTerms.subList(start, toIndex > count ? count : toIndex))
+		for (String eachLine : inputLines.subList(start, toIndex > count ? count : toIndex))
 		{
 			Map<String, Object> entity = new HashMap<String, Object>();
-			entity.put("term", term);
-			entity.put("results", ontologyService.search(ontologyUrl, term));
+			entity.put("term", eachLine);
+			entity.put("results", ontologyService.search(ontologyUrl, eachLine));
 			entities.add(entity);
 		}
 		EntityPager pager = new EntityPager(start, num, (long) count, null);

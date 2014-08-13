@@ -13,7 +13,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.omx.biobankconnect.ontologyservice.OntologyService;
+import org.molgenis.omx.biobankconnect.ontologyindexer.AsyncOntologyIndexer;
 import org.molgenis.omx.biobankconnect.ontologytree.OntologyTermEntity;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
@@ -47,7 +47,7 @@ public class OntologyTermQueryRepository extends AbstractOntologyQueryRepository
 			{
 				availableAttributes.add(attributeMetaData.getName().toLowerCase());
 			}
-			SearchResult resultResult = searchService.search(new SearchRequest(OntologyService
+			SearchResult resultResult = searchService.search(new SearchRequest(AsyncOntologyIndexer
 					.createOntologyTermDocumentType(ontologyUrl),
 					new QueryImpl().eq(OntologyTermQueryRepository.ENTITY_TYPE,
 							OntologyTermQueryRepository.TYPE_ONTOLOGYTERM).pageSize(1), null));
@@ -73,7 +73,7 @@ public class OntologyTermQueryRepository extends AbstractOntologyQueryRepository
 		if (q.getRules().size() > 0) q.and();
 		q.eq(OntologyTermQueryRepository.ENTITY_TYPE, OntologyTermQueryRepository.TYPE_ONTOLOGYTERM);
 		for (Hit hit : searchService.search(
-				new SearchRequest(OntologyService.createOntologyTermDocumentType(ontologyUrl), q, null))
+				new SearchRequest(AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyUrl), q, null))
 				.getSearchHits())
 		{
 			entities.add(new OntologyTermEntity(hit, getEntityMetaData(), searchService));
@@ -86,14 +86,15 @@ public class OntologyTermQueryRepository extends AbstractOntologyQueryRepository
 	{
 		if (q.getRules().size() > 0) q.and();
 		q.eq(OntologyTermIndexRepository.ENTITY_TYPE, OntologyTermIndexRepository.TYPE_ONTOLOGYTERM);
-		Hit hit = findOneInternal(OntologyService.createOntologyTermDocumentType(ontologyUrl), q);
+		Hit hit = findOneInternal(AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyUrl), q);
 		return hit != null ? new OntologyTermEntity(hit, getEntityMetaData(), searchService) : null;
 	}
 
 	@Override
 	public Entity findOne(Object id)
 	{
-		Hit hit = searchService.searchById(OntologyService.createOntologyTermDocumentType(ontologyUrl), id.toString());
+		Hit hit = searchService.searchById(AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyUrl),
+				id.toString());
 		return hit != null ? new OntologyTermEntity(hit, getEntityMetaData(), searchService) : null;
 	}
 
@@ -106,7 +107,7 @@ public class OntologyTermQueryRepository extends AbstractOntologyQueryRepository
 	@Override
 	public long count(Query q)
 	{
-		return searchService.count(OntologyService.createOntologyTermDocumentType(ontologyUrl),
+		return searchService.count(AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyUrl),
 				q.pageSize(Integer.MAX_VALUE).offset(Integer.MIN_VALUE));
 	}
 

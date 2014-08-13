@@ -10,6 +10,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.biobankconnect.ontology.repository.OntologyIndexRepository;
 import org.molgenis.omx.biobankconnect.ontology.repository.OntologyQueryRepository;
 import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermIndexRepository;
+import org.molgenis.omx.biobankconnect.ontologyindexer.AsyncOntologyIndexer;
 import org.molgenis.omx.biobankconnect.ontologyservice.OntologyService;
 import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.search.Hit;
@@ -41,7 +42,7 @@ public class OntologyEntity extends AbstractOntologyEntity
 
 		if (attributeName.equalsIgnoreCase(OntologyQueryRepository.FIELDTYPE))
 		{
-			String documentType = OntologyService.createOntologyDocumentType(columnValueMap.get(
+			String documentType = AsyncOntologyIndexer.createOntologyDocumentType(columnValueMap.get(
 					OntologyIndexRepository.ONTOLOGY_IRI).toString());
 			SearchResult result = searchService.search(new SearchRequest(documentType, new QueryImpl(), null));
 			return result.getTotalHitCount() == 0 ? MolgenisFieldTypes.STRING.toString().toUpperCase() : MolgenisFieldTypes.COMPOUND
@@ -50,7 +51,7 @@ public class OntologyEntity extends AbstractOntologyEntity
 
 		if (attributeName.equalsIgnoreCase(OntologyTermIndexRepository.LAST))
 		{
-			String documentType = OntologyService.createOntologyDocumentType(columnValueMap.get(
+			String documentType = AsyncOntologyIndexer.createOntologyDocumentType(columnValueMap.get(
 					OntologyIndexRepository.ONTOLOGY_IRI).toString());
 			SearchResult result = searchService.search(new SearchRequest(documentType, new QueryImpl(), null));
 			return result.getTotalHitCount() == 0;

@@ -14,7 +14,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermIndexRepository;
 import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermQueryRepository;
-import org.molgenis.omx.biobankconnect.ontologyservice.OntologyService;
+import org.molgenis.omx.biobankconnect.ontologyindexer.AsyncOntologyIndexer;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
@@ -80,14 +80,15 @@ public class OntologyTermIndexRepositoryTest
 
 		SearchService searchService = mock(SearchService.class);
 		when(
-				searchService.search(new SearchRequest(OntologyService.createOntologyTermDocumentType(ontologyIRI),
+				searchService.search(new SearchRequest(
+						AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyIRI),
 						new QueryImpl().eq(OntologyTermIndexRepository.ENTITY_TYPE,
 								OntologyTermIndexRepository.TYPE_ONTOLOGYTERM), null))).thenReturn(
 				new SearchResult(3, Arrays.asList(hit1, hit2, hit3)));
 
 		when(
-				searchService.search(new SearchRequest(OntologyService.createOntologyTermDocumentType(ontologyIRI),
-						new QueryImpl()
+				searchService.search(new SearchRequest(
+						AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyIRI), new QueryImpl()
 								.eq(OntologyTermIndexRepository.PARENT_NODE_PATH, "1.2")
 								.and()
 								.eq(OntologyTermIndexRepository.ENTITY_TYPE,
@@ -95,8 +96,8 @@ public class OntologyTermIndexRepositoryTest
 				new SearchResult(2, Arrays.asList(hit2, hit3)));
 
 		when(
-				searchService.search(new SearchRequest(OntologyService.createOntologyTermDocumentType(ontologyIRI),
-						new QueryImpl()
+				searchService.search(new SearchRequest(
+						AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyIRI), new QueryImpl()
 								.eq(OntologyTermIndexRepository.NODE_PATH, "1.2.3")
 								.and()
 								.eq(OntologyTermIndexRepository.ENTITY_TYPE,
@@ -104,10 +105,10 @@ public class OntologyTermIndexRepositoryTest
 				new SearchResult(1, Arrays.asList(hit2)));
 
 		when(
-				searchService.count(OntologyService.createOntologyTermDocumentType(ontologyIRI), new QueryImpl()
+				searchService.count(AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyIRI), new QueryImpl()
 						.pageSize(Integer.MAX_VALUE).offset(Integer.MIN_VALUE))).thenReturn(new Long(3));
 
-		when(searchService.searchById(OntologyService.createOntologyTermDocumentType(ontologyIRI), "ontology-3"))
+		when(searchService.searchById(AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyIRI), "ontology-3"))
 				.thenReturn(hit3);
 
 		ontologyTermIndexRepository = new OntologyTermQueryRepository("test-ontology", ontologyIRI, searchService);

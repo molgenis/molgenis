@@ -28,6 +28,7 @@ import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.biobankconnect.ontology.repository.OntologyIndexRepository;
 import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermIndexRepository;
+import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermQueryRepository;
 import org.molgenis.omx.biobankconnect.ontologyindexer.AsyncOntologyIndexer;
 import org.molgenis.omx.biobankconnect.utils.NGramMatchingModel;
 import org.molgenis.omx.biobankconnect.utils.TermComparison;
@@ -56,9 +57,11 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 
 	private static final AtomicInteger runningProcesses = new AtomicInteger();
 	private static final Logger logger = Logger.getLogger(AsyncOntologyAnnotator.class);
-	private static final String ILLEGAL_CHARACTERS_PATTERN = "[^(a-zA-Z0-9\\s)]";
-	private static final String ILLEGAL_CHARACTERS_REPLACEMENT = StringUtils.EMPTY;
-	private static final String MULTI_WHITESPACE = " +";
+	// private static final String ILLEGAL_CHARACTERS_PATTERN =
+	// "[^(a-zA-Z0-9\\s)]";
+	// private static final String ILLEGAL_CHARACTERS_REPLACEMENT =
+	// StringUtils.EMPTY;
+	// private static final String MULTI_WHITESPACE = " +";
 	private static final String PROTOCOLTREE_PREFIX = "protocolTree-";
 	private static final String PROTOCOLTREE_TYPE_FIELD = "type";
 	private boolean complete = false;
@@ -274,11 +277,20 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 						ObservableFeature.class);
 				ObservableFeature feature = toObservableFeature(f);
 
-				String name = hit.getColumnValueMap().get(ObservableFeature.NAME.toLowerCase()).toString()
-						.toLowerCase().replaceAll(ILLEGAL_CHARACTERS_PATTERN, ILLEGAL_CHARACTERS_REPLACEMENT).trim();
-				String description = hit.getColumnValueMap().get(ObservableFeature.DESCRIPTION.toLowerCase())
-						.toString().toLowerCase()
-						.replaceAll(ILLEGAL_CHARACTERS_PATTERN, ILLEGAL_CHARACTERS_REPLACEMENT).trim();
+				String name = hit
+						.getColumnValueMap()
+						.get(ObservableFeature.NAME.toLowerCase())
+						.toString()
+						.toLowerCase()
+						.replaceAll(OntologyTermQueryRepository.ILLEGAL_CHARACTERS_PATTERN,
+								OntologyTermQueryRepository.ILLEGAL_CHARACTERS_REPLACEMENT).trim();
+				String description = hit
+						.getColumnValueMap()
+						.get(ObservableFeature.DESCRIPTION.toLowerCase())
+						.toString()
+						.toLowerCase()
+						.replaceAll(OntologyTermQueryRepository.ILLEGAL_CHARACTERS_PATTERN,
+								OntologyTermQueryRepository.ILLEGAL_CHARACTERS_REPLACEMENT).trim();
 				List<OntologyTerm> definitions = new ArrayList<OntologyTerm>();
 
 				for (String documentType : documentTypes)
@@ -367,7 +379,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			PorterStemmer stemmer)
 	{
 		Set<String> uniqueTerms = new HashSet<String>();
-		for (String eachTerm : Arrays.asList(description.split(MULTI_WHITESPACE)))
+		for (String eachTerm : Arrays.asList(description.split(OntologyTermQueryRepository.MULTI_WHITESPACES)))
 		{
 			eachTerm = eachTerm.toLowerCase();
 			if (!NGramMatchingModel.STOPWORDSLIST.contains(eachTerm) && !uniqueTerms.contains(eachTerm)) uniqueTerms
@@ -380,13 +392,14 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		boolean first = true;
 		for (String term : uniqueTerms)
 		{
-			if (!term.isEmpty() && !term.matches(MULTI_WHITESPACE))
+			if (!term.isEmpty() && !term.matches(OntologyTermQueryRepository.MULTI_WHITESPACES))
 			{
 				if (!first)
 				{
 					q.addRule(new QueryRule(Operator.OR));
 				}
-				term = term.replaceAll(ILLEGAL_CHARACTERS_PATTERN, ILLEGAL_CHARACTERS_REPLACEMENT);
+				term = term.replaceAll(OntologyTermQueryRepository.ILLEGAL_CHARACTERS_PATTERN,
+						OntologyTermQueryRepository.ILLEGAL_CHARACTERS_REPLACEMENT);
 				q.addRule(new QueryRule(OntologyTermIndexRepository.SYNONYMS, Operator.SEARCH, term));
 				first = false;
 			}
@@ -536,8 +549,8 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 	private boolean validateOntologyTerm(Set<String> uniqueSets, String ontologyTermSynonym, PorterStemmer stemmer,
 			Set<String> positionFilter)
 	{
-		Set<String> termsFromDescription = stemMembers(Arrays.asList(ontologyTermSynonym.split(MULTI_WHITESPACE)),
-				stemmer);
+		Set<String> termsFromDescription = stemMembers(
+				Arrays.asList(ontologyTermSynonym.split(OntologyTermQueryRepository.MULTI_WHITESPACES)), stemmer);
 		for (String eachTerm : termsFromDescription)
 		{
 			if (!uniqueSets.contains(eachTerm)) return false;
