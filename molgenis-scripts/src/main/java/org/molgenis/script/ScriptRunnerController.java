@@ -10,6 +10,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
+import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
@@ -29,11 +30,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class ScriptRunnerController
 {
 	private final SavedScriptRunner savedScriptRunner;
+	private final FileStore fileStore;
 
 	@Autowired
-	private ScriptRunnerController(SavedScriptRunner savedScriptRunner)
+	private ScriptRunnerController(SavedScriptRunner savedScriptRunner, FileStore fileStore)
 	{
 		this.savedScriptRunner = savedScriptRunner;
+		this.fileStore = fileStore;
 	}
 
 	@RequestMapping("/scripts/{name}/run")
@@ -54,6 +57,7 @@ public class ScriptRunnerController
 				}
 
 				FileCopyUtils.copy(new FileInputStream(f), response.getOutputStream());
+				f.delete();
 			}
 		}
 		else if (StringUtils.isNotBlank(result.getOutput()))
