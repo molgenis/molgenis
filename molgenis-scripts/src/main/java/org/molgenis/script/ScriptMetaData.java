@@ -9,7 +9,8 @@ public class ScriptMetaData extends DefaultEntityMetaData
 	{
 		super(Script.ENTITY_NAME, Script.class);
 		addAttribute(Script.NAME).setIdAttribute(true).setNillable(false).setLabel("Name");
-		addAttribute(Script.TYPE).setNillable(false).setLabel("Type");
+		addAttribute(Script.TYPE).setNillable(false).setLabel("Type").setDataType(MolgenisFieldTypes.XREF)
+				.setRefEntity(ScriptType.META_DATA);
 		addAttribute(Script.CONTENT).setNillable(false).setDataType(MolgenisFieldTypes.SCRIPT).setLabel("Content");
 		addAttribute(Script.GENERATE_TOKEN).setDataType(MolgenisFieldTypes.BOOL).setLabel("Generate security token")
 				.setDefaultValue(false);
