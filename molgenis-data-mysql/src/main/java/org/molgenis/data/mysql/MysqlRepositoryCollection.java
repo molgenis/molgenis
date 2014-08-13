@@ -125,6 +125,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 			attributeMetaData.setVisible(attribute.getBoolean("visible"));
 			attributeMetaData.setLabel(attribute.getString("label"));
 			attributeMetaData.setDescription(attribute.getString("description"));
+			attributeMetaData.setAggregateable(true);
 
 			entityMetaData.addAttributeMetaData(attributeMetaData);
 		}
@@ -167,8 +168,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 			{
 				EntityMetaData entityMetaData = metadata.get(attribute.getString("entity"));
 				DefaultAttributeMetaData attributeMetaData = (DefaultAttributeMetaData) entityMetaData
-						.getAttribute(attribute
-						.getString("name"));
+						.getAttribute(attribute.getString("name"));
 				EntityMetaData ref = metadata.get(attribute.getString("refEntity"));
 				if (ref == null) throw new RuntimeException("refEntity '" + attribute.getString("refEntity")
 						+ "' missing for " + entityMetaData.getName() + "." + attributeMetaData.getName());

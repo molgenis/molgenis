@@ -1,5 +1,7 @@
 package org.molgenis.data.mysql;
 
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.BOOL;
+
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -12,12 +14,16 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AggregateResult;
+import org.molgenis.data.Aggregateable;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DatabaseAction;
@@ -46,8 +52,9 @@ import org.springframework.jdbc.core.RowMapper;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
-public class MysqlRepository extends AbstractCrudRepository implements Manageable
+public class MysqlRepository extends AbstractCrudRepository implements Manageable, Aggregateable
 
 {
 	public static final String URL_PREFIX = "mysql://";
@@ -452,7 +459,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 			logger.debug("sql: " + sql + ",parameters:" + parameters);
 		}
 
-		return jdbcTemplate.query(sql, parameters.toArray(new Object[0]), new EntityMapper());
+		return jdbcTemplate.query(sql, parameters.toArray(new Object[0]), new EntityMapper(getEntityMetaData()));
 	}
 
 	@Override
@@ -600,7 +607,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 			{
 				case SEARCH:
 					StringBuilder search = new StringBuilder();
-					for (AttributeMetaData att : getEntityMetaData().getAttributes())
+					for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 					{
 						// TODO: other data types???
 						if (att.getDataType() instanceof StringField || att.getDataType() instanceof TextField)
@@ -1188,15 +1195,225 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 
 	}
 
+	@Override
+	public AggregateResult aggregate(AttributeMetaData xAttributeMeta, AttributeMetaData yAttributeMeta, Query query)
+	{
+		if ((xAttributeMeta == null) && (yAttributeMeta == null))
+		{
+			throw new MolgenisDataException("Missing aggregate attribute");
+		}
+
+		FieldTypeEnum xDataType = null;
+		String xAttributeName = null;
+		if (xAttributeMeta != null)
+		{
+			xAttributeName = xAttributeMeta.getName();
+
+			if (!xAttributeMeta.isAggregateable())
+			{
+				throw new MolgenisDataException("Attribute '" + xAttributeName + "' is not aggregateable");
+			}
+
+			xDataType = xAttributeMeta.getDataType().getEnumType();
+		}
+
+		FieldTypeEnum yDataType = null;
+		String yAttributeName = null;
+		if (yAttributeMeta != null)
+		{
+			yAttributeName = yAttributeMeta.getName();
+			if (!yAttributeMeta.isAggregateable())
+			{
+				throw new MolgenisDataException("Attribute '" + yAttributeName + "' is not aggregateable");
+			}
+
+			yDataType = yAttributeMeta.getDataType().getEnumType();
+		}
+
+		List<Object> xValues = Lists.newArrayList();
+		List<Object> yValues = Lists.newArrayList();
+		List<List<Long>> matrix = new ArrayList<List<Long>>();
+		Set<String> xLabels = Sets.newLinkedHashSet();
+		Set<String> yLabels = Sets.newLinkedHashSet();
+
+		if (xDataType != null)
+		{
+			if (xDataType == BOOL)
+			{
+				xValues.add(Boolean.TRUE);
+				xValues.add(Boolean.FALSE);
+				xLabels.add(xAttributeName + ": true");
+				xLabels.add(xAttributeName + ": false");
+			}
+			else
+			{
+				for (Object value : getDistinctColumnValues(xAttributeMeta))
+				{
+					String valueStr = DataConverter.toString(value);
+					xLabels.add(valueStr);
+					xValues.add(valueStr);
+				}
+			}
+		}
+
+		if (yDataType != null)
+		{
+			if (yDataType == BOOL)
+			{
+				yValues.add(Boolean.TRUE);
+				yValues.add(Boolean.FALSE);
+				yLabels.add(yAttributeName + ": true");
+				yLabels.add(yAttributeName + ": false");
+			}
+			else
+			{
+				for (Object value : getDistinctColumnValues(yAttributeMeta))
+				{
+					String valueStr = DataConverter.toString(value);
+					yLabels.add(valueStr);
+					yValues.add(valueStr);
+				}
+			}
+		}
+
+		boolean hasXValues = !xValues.isEmpty();
+		boolean hasYValues = !yValues.isEmpty();
+
+		if (hasXValues)
+		{
+			List<Long> totals = Lists.newArrayList();
+
+			for (Object xValue : xValues)
+			{
+				List<Long> row = Lists.newArrayList();
+
+				if (hasYValues)
+				{
+					int i = 0;
+
+					for (Object yValue : yValues)
+					{
+
+						// Both x and y choosen
+						Query finalQ = query.getRules().isEmpty() ? new QueryImpl() : new QueryImpl(query).and();
+						finalQ.eq(xAttributeName, xValue).and().eq(yAttributeName, yValue);
+						long count = count(finalQ);
+						row.add(count);
+						if (totals.size() == i)
+						{
+							totals.add(count);
+						}
+						else
+						{
+							totals.set(i, totals.get(i) + count);
+						}
+						i++;
+					}
+				}
+				else
+				{
+					// No y attribute chosen
+					Query finalQ = query.getRules().isEmpty() ? new QueryImpl() : new QueryImpl(query).and();
+					finalQ.eq(xAttributeName, xValue);
+					long count = count(finalQ);
+					row.add(count);
+					if (totals.isEmpty())
+					{
+						totals.add(count);
+					}
+					else
+					{
+						totals.set(0, totals.get(0) + count);
+					}
+
+				}
+
+				matrix.add(row);
+			}
+
+			yLabels.add(hasYValues ? "Total" : "Count");
+			xLabels.add("Total");
+
+			matrix.add(totals);
+		}
+		else
+		{
+			// No xattribute chosen
+			List<Long> row = Lists.newArrayList();
+			for (Object yValue : yValues)
+			{
+				Query finalQ = query.getRules().isEmpty() ? new QueryImpl() : new QueryImpl(query).and();
+				finalQ.eq(yAttributeName, yValue);
+				long count = count(finalQ);
+				row.add(count);
+			}
+			matrix.add(row);
+
+			xLabels.add("Count");
+			yLabels.add("Total");
+		}
+
+		// Count row totals
+		if (hasYValues)
+		{
+			for (List<Long> row : matrix)
+			{
+				long total = 0;
+				for (Long count : row)
+				{
+					total += count;
+				}
+				row.add(total);
+			}
+		}
+
+		return new AggregateResult(matrix, new ArrayList<String>(xLabels), new ArrayList<String>(yLabels));
+	}
+
+	private List<Object> getDistinctColumnValues(AttributeMetaData attr)
+	{
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT DISTINCT(`").append(attr.getName()).append("`) FROM `").append(getName())
+				.append("` AS this ");
+
+		if (attr.getDataType() instanceof MrefField)
+		{
+			AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
+
+			sql.append(" LEFT JOIN ").append('`').append(getEntityMetaData().getName()).append('_')
+					.append(attr.getName()).append('`').append(" AS ").append('`').append(attr.getName()).append('`')
+					.append(" ON (this.").append('`').append(idAttribute.getName()).append('`').append(" = ")
+					.append('`').append(attr.getName()).append('`').append('.').append('`')
+					.append(idAttribute.getName()).append('`').append(')');
+		}
+
+		sql.append(" WHERE `").append(attr.getName()).append("` IS NOT NULL");
+
+		return jdbcTemplate.query(sql.toString(), new RowMapper<Object>()
+		{
+			@Override
+			public Object mapRow(ResultSet rs, int rowNum) throws SQLException
+			{
+				return rs.getObject(1);
+			}
+		});
+	}
+
 	private class EntityMapper implements RowMapper<Entity>
 	{
+		private final EntityMetaData entityMetaData;
+
+		private EntityMapper(EntityMetaData entityMetaData)
+		{
+			this.entityMetaData = entityMetaData;
+		}
 
 		@Override
 		public Entity mapRow(ResultSet resultSet, int i) throws SQLException
 		{
-			Entity e = new MysqlEntity(getEntityMetaData(), repositoryCollection);
+			Entity e = new MysqlEntity(entityMetaData, repositoryCollection);
 
-			for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
+			for (AttributeMetaData att : entityMetaData.getAtomicAttributes())
 			{
 				if (att.getDataType() instanceof MrefField)
 				{
