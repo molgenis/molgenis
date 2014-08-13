@@ -970,6 +970,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		final List<Entity> batch = new ArrayList<Entity>();
 		if (entities != null) for (Entity e : entities)
 		{
+			System.out.println(e);
 			batch.add(e);
 			count.addAndGet(1);
 		}
@@ -1009,8 +1010,14 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 						}
 						else if (att.getDataType() instanceof XrefField)
 						{
+							Object value = batch.get(rowIndex).get(att.getName());
+							if (value instanceof Entity)
+							{
+								value = ((Entity) value).get(att.getRefEntity().getIdAttribute().getName());
+							}
+
 							preparedStatement.setObject(fieldIndex++, att.getRefEntity().getIdAttribute().getDataType()
-									.convert(batch.get(rowIndex).get(att.getName())));
+									.convert(value));
 						}
 						else
 						{
