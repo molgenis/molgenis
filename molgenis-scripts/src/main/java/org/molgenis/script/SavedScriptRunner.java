@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
-import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.token.TokenService;
@@ -13,6 +12,18 @@ import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+/**
+ * Runs a script.
+ * 
+ * Retrieve script from the database as freemarker template, render the script and return the result, script output
+ * and/or the name of a generated outputfile
+ * 
+ * If the script requires a security token, a token is generated that is available to the script as a parameter named
+ * 'molgenisToken'
+ * 
+ * If the script results in an outputfile (if script.resultFileExtension is not null) a ramdom name is generated with
+ * the correct extension, this is available to the script as a parameter named 'outputFile'
+ */
 @Service
 public class SavedScriptRunner
 {
@@ -22,17 +33,26 @@ public class SavedScriptRunner
 	private final TokenService tokenService;
 
 	@Autowired
-	public SavedScriptRunner(ScriptRunnerFactory scriptRunnerFactory, DataService dataService,
-			MysqlRepositoryCollection mysqlRepositoryCollection, FileStore fileStore, TokenService tokenService)
+	public SavedScriptRunner(ScriptRunnerFactory scriptRunnerFactory, DataService dataService, FileStore fileStore,
+			TokenService tokenService)
 	{
 		this.scriptRunnerFactory = scriptRunnerFactory;
 		this.dataService = dataService;
 		this.fileStore = fileStore;
 		this.tokenService = tokenService;
-		mysqlRepositoryCollection.add(ScriptParameter.META_DATA);
-		mysqlRepositoryCollection.add(Script.META_DATA);
 	}
 
+	/**
+	 * Run a script with parameters
+	 * 
+	 * @param scriptName
+	 * @param parameters
+	 * @return ScripResult
+	 * @throws UnknownScriptException
+	 *             if scriptName is unknown
+	 * @throws GenerateScriptException
+	 *             , if parameter is missing
+	 */
 	public ScriptResult runScript(String scriptName, Map<String, Object> parameters)
 	{
 		Script script = dataService.findOne(Script.ENTITY_NAME, new QueryImpl().eq(Script.NAME, scriptName),

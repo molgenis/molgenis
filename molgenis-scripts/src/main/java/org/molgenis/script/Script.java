@@ -14,7 +14,6 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.util.FileStore;
-import org.springframework.util.StringUtils;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -25,11 +24,16 @@ public class Script extends MapEntity
 	private static final long serialVersionUID = 2462642767382046869L;
 	public static final String ENTITY_NAME = "Script";
 	public static final String NAME = "name";
-	public static final String TYPE = "type";
-	public static final String CONTENT = "content";
-	public static final String GENERATE_TOKEN = "generateToken";
-	public static final String RESULT_FILE_EXTENSION = "resultFileExtension";
-	public static final String PARAMETERS = "parameters";
+	public static final String TYPE = "type";// The ScriptType like r
+	public static final String CONTENT = "content";// The freemarker code
+	public static final String GENERATE_TOKEN = "generateToken";// If true a security token is generated for the script
+																// (available as ${molgenisToken})
+	public static final String RESULT_FILE_EXTENSION = "resultFileExtension"; // If the script generates an outputfile,
+																				// this is it's file extension
+																				// (outputfile available as
+																				// ${outputFile})
+	public static final String PARAMETERS = "parameters";// The names of the parameters required by this script
+															// (excluding 'molgenisToken' and 'outputFile'
 	public static final EntityMetaData META_DATA = new ScriptMetaData();
 	private static final Charset CHARSET = Charset.forName("utf-8");
 
@@ -83,9 +87,10 @@ public class Script extends MapEntity
 		return getList(PARAMETERS);
 	}
 
-	public Boolean isGenerateToken()
+	public boolean isGenerateToken()
 	{
-		return getBoolean(GENERATE_TOKEN);
+		Boolean generateToken = getBoolean(GENERATE_TOKEN);
+		return generateToken != null && generateToken.booleanValue();
 	}
 
 	public void setGenerateToken(Boolean generateToken)
@@ -101,13 +106,7 @@ public class Script extends MapEntity
 
 	public File generateScript(FileStore fileStore, String fileExtension, Map<String, Object> parameterValues)
 	{
-		String name = getName();
-		if (name.endsWith(fileExtension))
-		{
-			name = StringUtils.stripFilenameExtension(name);
-		}
-
-		name = name + "_" + RandomStringUtils.randomAlphanumeric(10) + "." + fileExtension;
+		String name = RandomStringUtils.randomAlphanumeric(10) + "." + fileExtension;
 		File rScriptFile = fileStore.getFile(name);
 
 		Writer w = null;
