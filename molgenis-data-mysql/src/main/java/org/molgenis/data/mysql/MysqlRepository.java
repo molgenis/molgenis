@@ -240,7 +240,7 @@ public class MysqlRepository extends AbstractAggregateableCrudRepository impleme
 		List<String> sql = new ArrayList<String>();
 		// foreign keys
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
-			if (att.getDataType().equals(MolgenisFieldTypes.XREF))
+			if (att.getDataType() instanceof XrefField)
 			{
 				sql.add(new StringBuilder().append("ALTER TABLE ").append(getEntityMetaData().getName())
 						.append(" ADD FOREIGN KEY (").append('`').append(att.getName()).append('`')
