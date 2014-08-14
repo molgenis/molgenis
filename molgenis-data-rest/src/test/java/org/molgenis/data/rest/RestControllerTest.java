@@ -165,6 +165,18 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
+	public void getEntityMetaDataPost() throws Exception
+	{
+		String json = "{\"attributes\":[\"name\"]}";
+		mockMvc.perform(post(HREF_ENTITY_META).param("_method", "GET").content(json).contentType(APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(APPLICATION_JSON))
+				.andExpect(
+						content().string(
+								"{\"href\":\"" + HREF_ENTITY_META + "\",\"name\":\"" + ENTITY_NAME + "\"}"));
+	}
+	
+	@Test
 	public void getEntityMetaDataSelectAttributes() throws Exception
 	{
 		mockMvc.perform(get(HREF_ENTITY_META).param("attributes", "name"))
