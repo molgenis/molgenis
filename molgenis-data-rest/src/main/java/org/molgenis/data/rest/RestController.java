@@ -188,6 +188,25 @@ public class RestController
 	}
 
 	/**
+	 * Same as getEntityMetaData (GET) only tunneled through POST.
+	 * 
+	 * Example url: /api/v1/person/meta?_method=GET
+	 * 
+	 * @param entityName
+	 * @return EntityMetaData
+	 */
+	@RequestMapping(value = "/{entityName}/meta", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public EntityMetaDataResponse getEntityMetaDataPost(@PathVariable("entityName") String entityName, @Valid @RequestBody EntityMetaRequest request)
+	{
+		Set<String> attributesSet = toAttributeSet(request != null ? request.getAttributes() : null);
+		Map<String, Set<String>> attributeExpandSet = toExpandMap(request != null ? request.getExpand() : null);
+
+		EntityMetaData meta = dataService.getEntityMetaData(entityName);
+		return new EntityMetaDataResponse(meta, attributesSet, attributeExpandSet);
+	}
+	
+	/**
 	 * Example url: /api/v1/person/meta/emailaddresses
 	 * 
 	 * @param entityName
@@ -373,12 +392,10 @@ public class RestController
 	@RequestMapping(value = "/{entityName}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public EntityCollectionResponse retrieveEntityCollectionPost(@PathVariable("entityName") String entityName,
-			@Valid @RequestBody EntityCollectionRequest request,
-			@RequestParam(value = "attributes", required = false) String[] attributes,
-			@RequestParam(value = "expand", required = false) String[] attributeExpands)
+			@Valid @RequestBody EntityCollectionRequest request)
 	{
-		Set<String> attributesSet = toAttributeSet(attributes);
-		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
+		Set<String> attributesSet = toAttributeSet(request != null ? request.getAttributes() : null);
+		Map<String, Set<String>> attributeExpandSet = toExpandMap(request != null ? request.getExpand() : null);
 
 		request = request != null ? request : new EntityCollectionRequest();
 
@@ -1092,7 +1109,7 @@ public class RestController
 	 */
 	private Set<String> toAttributeSet(String[] attributes)
 	{
-		return attributes != null ? Sets.newHashSet(Iterables.transform(Arrays.asList(attributes),
+		return attributes != null && attributes.length > 0 ? Sets.newHashSet(Iterables.transform(Arrays.asList(attributes),
 				new Function<String, String>()
 				{
 					@Override
