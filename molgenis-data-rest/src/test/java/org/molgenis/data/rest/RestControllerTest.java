@@ -173,8 +173,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 				.andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(
 						content().string(
-								"{\"href\":\"" + HREF_ENTITY_META + "\",\"name\":\"" + ENTITY_NAME
-										+ "\",\"attributes\":{\"name\":{\"href\":\"" + HREF_ENTITY_META + "/name\"}}}"));
+								"{\"href\":\"" + HREF_ENTITY_META + "\",\"name\":\"" + ENTITY_NAME + "\"}"));
 	}
 	
 	@Test
