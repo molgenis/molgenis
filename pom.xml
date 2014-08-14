@@ -606,5 +606,6 @@
         <module>molgenis-disease-matcher</module>
         <module>molgenis-data-examples</module>
         <module>molgenis-mutationdb</module>
+        <module>molgenis-scripts</module>
     </modules>
 </project>

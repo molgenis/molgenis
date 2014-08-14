@@ -11,7 +11,7 @@ import freemarker.template.TemplateException;
 /**
  * Directive that prints the body of the tag if the current user has permission on entity
  * 
- * usage: <@hasPermission entity='celiacsprue' permission="WRITE">write permission</@hasPermission>
+ * usage: <@hasPermission entityName='celiacsprue' permission="WRITE">write permission</@hasPermission>
  */
 public class HasPermissionDirective extends PermissionDirective
 {

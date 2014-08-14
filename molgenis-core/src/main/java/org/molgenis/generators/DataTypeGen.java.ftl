@@ -142,7 +142,7 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 	@javax.xml.bind.annotation.XmlElement(name="${name(field)}")
 				</#if>
 			<#else>
-				<#if field.type == "text" >			
+				<#if field.type == "text" || field.type == 'script' >			
 	@javax.persistence.Lob
 	@javax.persistence.Column(name="${SqlName(field)}"<#if !field.nillable>, nullable=false</#if>)
 				<#else>

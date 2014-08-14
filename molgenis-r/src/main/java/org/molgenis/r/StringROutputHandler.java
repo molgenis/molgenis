@@ -7,7 +7,7 @@ public class StringROutputHandler implements ROutputHandler
 	@Override
 	public void outputReceived(String output)
 	{
-		sb.append(output);
+		sb.append(output).append("\n");
 	}
 
 	@Override

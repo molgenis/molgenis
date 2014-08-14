@@ -65,17 +65,18 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 
 		// test where clauses
 		List<Object> params = Lists.newArrayList();
-		Assert.assertEquals(repo.getWhereSql(new QueryImpl().eq("firstName", "John"), params), "this.`firstName` = ?");
+		Assert.assertEquals(repo.getWhereSql(new QueryImpl().eq("firstName", "John"), params, 0),
+				"this.`firstName` = ?");
 		Assert.assertEquals(params, Lists.<Object> newArrayList("John"));
 
 		params.clear();
-		Assert.assertEquals(repo.getWhereSql(new QueryImpl().eq("firstName", "John").eq("age", "5"), params),
+		Assert.assertEquals(repo.getWhereSql(new QueryImpl().eq("firstName", "John").eq("age", "5"), params, 0),
 				"this.`firstName` = ?  AND this.`age` = ?");
 		Assert.assertEquals(params, Lists.<Object> newArrayList("John", 5));
 
 		// search
 		params.clear();
-		Assert.assertEquals(repo.getWhereSql(new QueryImpl().search("John"), params),
+		Assert.assertEquals(repo.getWhereSql(new QueryImpl().search("John"), params, 0),
 				"(this.`firstName` LIKE ? OR this.`lastName` LIKE ? OR CAST(this.`age` as CHAR) LIKE ?)");
 		Assert.assertEquals(params, Lists.<Object> newArrayList("%John%", "%John%", "%John%"));
 
@@ -87,7 +88,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 
 		params.clear();
 		Assert.assertEquals(repo.getWhereSql(
-				new QueryImpl().eq("firstName", "John").sort(Sort.Direction.DESC, "firstName"), params),
+				new QueryImpl().eq("firstName", "John").sort(Sort.Direction.DESC, "firstName"), params, 0),
 				"this.`firstName` = ?");
 		Assert.assertEquals(params, Lists.<Object> newArrayList("John"));
 

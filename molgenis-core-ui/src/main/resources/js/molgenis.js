@@ -380,8 +380,8 @@ function createInput(attr, attrs, val, lbl) {
 	case 'LONG':
 		var opts = $.extend({}, attrs, {'step': '1'});
 		if(attr.range) {
-			if(attr.range.min) opts.min = attr.range.min;
-			if(attr.range.max) opts.max = attr.range.max;
+			if(typeof attr.range.min) opts.min = attr.range.min;
+			if(typeof attr.range.max !== 'undefined') opts.max = attr.range.max;
 		}
 		var input = createBasicInput('number', opts, val);
 		if(!attr.nillable)
@@ -394,6 +394,7 @@ function createInput(attr, attrs, val, lbl) {
 	case 'STRING':
 	case 'TEXT':
 	case 'ENUM':
+	case 'SCRIPT':
 		return createBasicInput('text', attrs, val);
 	case 'MREF':
 	case 'XREF':

@@ -33,13 +33,12 @@ public class MolgenisRController
 
 		// If the request contains a molgenis security token, use it
 		String token = TokenExtractor.getToken(request);
-		if (token == null)
+		if (token != null)
 		{
-			token = "NULL";
+			model.addAttribute("token", token);
 		}
 
 		model.addAttribute("api_url", apiUrl);
-		model.addAttribute("token", token);
 
 		return "molgenis.r";
 	}
