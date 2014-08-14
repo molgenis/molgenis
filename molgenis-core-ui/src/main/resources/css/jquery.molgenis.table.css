@@ -53,6 +53,13 @@
     box-shadow: 0 0 10px #90ee90;
 }
 
+.molgenis-table tbody td.invalid-input:not(:focus) {
+   	border: 2px solid red;
+    border-radius: 7px;
+    outline: none;
+    box-shadow: 0 0 10px red;
+}
+
 .molgenis-table-striped tbody>tr:nth-child(odd)>td,.molgenis-table-striped tbody>tr:nth-child(odd)>th {
     background-color: #ddd;
 }
