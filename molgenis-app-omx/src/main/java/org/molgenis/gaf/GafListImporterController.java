@@ -9,6 +9,7 @@ import java.util.List;
 import javax.mail.MessagingException;
 
 import org.apache.log4j.Logger;
+import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.converters.ValueConverterException;
 import org.molgenis.util.ErrorMessageResponse;
@@ -36,10 +37,12 @@ public class GafListImporterController extends MolgenisPluginController
 
 	public static final String ID = "gaflistimporter";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+	public static final String KEY_GAF_LIST_PROTOCOL_NAME = "gafList.protocol.name";
+	public static final String KEY_GAF_LIST_DATASET_IDENTIFIER = "gafList.dataset.identifier";
 	private final GafListFileImporterService gafListFileImporterService;
 
 	@Autowired
-	public GafListImporterController(GafListFileImporterService gafListFileImporter)
+	public GafListImporterController(GafListFileImporterService gafListFileImporter, MolgenisSettings molgenisSettings)
 	{
 		super(URI);
 		if (gafListFileImporter == null) throw new IllegalArgumentException("gafListFileImporter is null");
@@ -65,7 +68,7 @@ public class GafListImporterController extends MolgenisPluginController
 			try
 			{
 				GafListValidationReport gafListValidationReport = this.gafListFileImporterService.importGafList(
-						csvFile, separator);
+						csvFile, separator, KEY_GAF_LIST_PROTOCOL_NAME);
 
 				model.addAttribute("hasValidationError", gafListValidationReport.hasErrors());
 				model.addAttribute("validationReport", gafListValidationReport.toStringHtml());

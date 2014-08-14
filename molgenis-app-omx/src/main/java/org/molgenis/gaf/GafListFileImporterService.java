@@ -29,8 +29,6 @@ import com.google.gdata.util.ServiceException;
 public class GafListFileImporterService
 {
 	private static final Logger logger = Logger.getLogger(GafListFileImporterService.class);
-
-	private static final String PROTOCOL_IDENTIFIER_GAF_LIST = "gaf_list_protocol";
 	private static final String PREFIX_REPO_NAME = "GAF list ";
 
 	@Autowired
@@ -52,9 +50,8 @@ public class GafListFileImporterService
 	private EntityValidator entityValidator;
 
 
-	public GafListValidationReport importGafList(MultipartFile csvFile, Character separator)
-			throws IOException,
-			ServiceException
+	public GafListValidationReport importGafList(MultipartFile csvFile, Character separator,
+			String key_gaf_list_protocol_name) throws IOException, ServiceException
 	{
 		File tmpFile = copyDataToTempFile(csvFile);
 		GafListFileRepository gafListFileRepositoryToCreateReport = new GafListFileRepository(tmpFile, null, separator,
@@ -76,7 +73,8 @@ public class GafListFileImporterService
 				DataSet dataSet = new DataSet();
 				dataSet.set(DataSet.NAME, dataSetName);
 				dataSet.set(DataSet.IDENTIFIER, dataSetIdentifier);
-				dataSet.set(DataSet.PROTOCOLUSED, getGafListProtocolUsed());
+				dataSet.set(DataSet.PROTOCOLUSED,
+						getGafListProtocolUsed(molgenisSettings.getProperty(key_gaf_list_protocol_name)));
 				dataService.add(DataSet.ENTITY_NAME, dataSet);
 				dataSetId = dataSet.getId();
 
@@ -130,10 +128,10 @@ public class GafListFileImporterService
 		return upLoadedfile;
 	}
 
-	protected Protocol getGafListProtocolUsed()
+	protected Protocol getGafListProtocolUsed(String protocolName)
 	{
 		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME,
-				new QueryImpl().eq(Protocol.IDENTIFIER, PROTOCOL_IDENTIFIER_GAF_LIST), Protocol.class);
+				new QueryImpl().eq(Protocol.IDENTIFIER, protocolName), Protocol.class);
 
 		return protocol;
 	}
