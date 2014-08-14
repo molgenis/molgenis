@@ -1,5 +1,7 @@
 package org.molgenis.data.mysql;
 
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.BOOL;
+
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -12,6 +14,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.sql.DataSource;
@@ -28,7 +31,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.support.AbstractCrudRepository;
+import org.molgenis.data.support.AbstractAggregateableCrudRepository;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.EntityValidator;
@@ -47,7 +50,7 @@ import org.springframework.jdbc.core.RowMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-public class MysqlRepository extends AbstractCrudRepository implements Manageable
+public class MysqlRepository extends AbstractAggregateableCrudRepository implements Manageable
 
 {
 	public static final String URL_PREFIX = "mysql://";
@@ -243,7 +246,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 						.append(" ADD FOREIGN KEY (").append('`').append(att.getName()).append('`')
 						.append(") REFERENCES ").append('`').append(att.getRefEntity().getName()).append('`')
 						.append('(').append('`').append(att.getRefEntity().getIdAttribute().getName()).append('`')
-						.append(')').toString());
+						.append(") ON DELETE CASCADE").toString());
 			}
 
 		return sql;
@@ -452,7 +455,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 			logger.debug("sql: " + sql + ",parameters:" + parameters);
 		}
 
-		return jdbcTemplate.query(sql, parameters.toArray(new Object[0]), new EntityMapper());
+		return jdbcTemplate.query(sql, parameters.toArray(new Object[0]), new EntityMapper(getEntityMetaData()));
 	}
 
 	@Override
@@ -600,7 +603,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 			{
 				case SEARCH:
 					StringBuilder search = new StringBuilder();
-					for (AttributeMetaData att : getEntityMetaData().getAttributes())
+					for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 					{
 						// TODO: other data types???
 						if (att.getDataType() instanceof StringField || att.getDataType() instanceof TextField)
@@ -1002,7 +1005,6 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		final List<Entity> batch = new ArrayList<Entity>();
 		if (entities != null) for (Entity e : entities)
 		{
-			System.out.println(e);
 			batch.add(e);
 			count.addAndGet(1);
 		}
@@ -1195,15 +1197,71 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 
 	}
 
+	@Override
+	protected void addAggregateValuesAndLabels(AttributeMetaData attr, List<Object> values, Set<String> labels)
+	{
+		if (attr.getDataType().getEnumType() == BOOL)
+		{
+			values.add(Boolean.TRUE);
+			values.add(Boolean.FALSE);
+			labels.add(attr.getName() + ": true");
+			labels.add(attr.getName() + ": false");
+		}
+		else
+		{
+			for (Object value : getDistinctColumnValues(attr))
+			{
+				String valueStr = DataConverter.toString(value);
+				labels.add(valueStr);
+				values.add(valueStr);
+			}
+		}
+	}
+
+	private List<Object> getDistinctColumnValues(AttributeMetaData attr)
+	{
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT DISTINCT(`").append(attr.getName()).append("`) FROM `").append(getName())
+				.append("` AS this ");
+
+		if (attr.getDataType() instanceof MrefField)
+		{
+			AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
+
+			sql.append(" LEFT JOIN ").append('`').append(getEntityMetaData().getName()).append('_')
+					.append(attr.getName()).append('`').append(" AS ").append('`').append(attr.getName()).append('`')
+					.append(" ON (this.").append('`').append(idAttribute.getName()).append('`').append(" = ")
+					.append('`').append(attr.getName()).append('`').append('.').append('`')
+					.append(idAttribute.getName()).append('`').append(')');
+		}
+
+		sql.append(" WHERE `").append(attr.getName()).append("` IS NOT NULL");
+
+		return jdbcTemplate.query(sql.toString(), new RowMapper<Object>()
+		{
+			@Override
+			public Object mapRow(ResultSet rs, int rowNum) throws SQLException
+			{
+				return rs.getObject(1);
+			}
+		});
+	}
+
 	private class EntityMapper implements RowMapper<Entity>
 	{
+		private final EntityMetaData entityMetaData;
+
+		private EntityMapper(EntityMetaData entityMetaData)
+		{
+			this.entityMetaData = entityMetaData;
+		}
 
 		@Override
 		public Entity mapRow(ResultSet resultSet, int i) throws SQLException
 		{
-			Entity e = new MysqlEntity(getEntityMetaData(), repositoryCollection);
+			Entity e = new MysqlEntity(entityMetaData, repositoryCollection);
 
-			for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
+			for (AttributeMetaData att : entityMetaData.getAtomicAttributes())
 			{
 				if (att.getDataType() instanceof MrefField)
 				{

@@ -60,10 +60,11 @@ public class EmxImportServiceImpl implements EmxImporterService
 	private static final String VISIBLE = "visible";
 	private static final String LABEL = "label";
 	private static final String EXTENDS = "extends";
+	private static final String AGGREGATEABLE = "aggregateable";
 
 	private MysqlRepositoryCollection store;
 	private TransactionTemplate transactionTemplate;
-	private DataService dataService;
+	private final DataService dataService;
 
 	@Autowired
 	public EmxImportServiceImpl(DataService dataService)
@@ -252,11 +253,13 @@ public class EmxImportServiceImpl implements EmxImporterService
 			Boolean attributeAuto = attribute.getBoolean(AUTO);
 			Boolean attributeIdAttribute = attribute.getBoolean(IDATTRIBUTE);
 			Boolean attributeVisible = attribute.getBoolean(VISIBLE);
+			Boolean attributeAggregateable = attribute.getBoolean(AGGREGATEABLE);
 
 			if (attributeNillable != null) defaultAttributeMetaData.setNillable(attributeNillable);
 			if (attributeAuto != null) defaultAttributeMetaData.setAuto(attributeAuto);
 			if (attributeIdAttribute != null) defaultAttributeMetaData.setIdAttribute(attributeIdAttribute);
 			if (attributeVisible != null) defaultAttributeMetaData.setVisible(attributeVisible);
+			if (attributeAggregateable != null) defaultAttributeMetaData.setAggregateable(attributeAggregateable);
 			if (refEntityName != null) defaultAttributeMetaData.setRefEntity(entities.get(refEntityName));
 
 			defaultAttributeMetaData.setLabel(attribute.getString(LABEL));

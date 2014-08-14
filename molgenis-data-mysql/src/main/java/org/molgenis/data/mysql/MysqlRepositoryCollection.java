@@ -26,6 +26,8 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.CompoundField;
+import org.molgenis.model.MolgenisModelException;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 public abstract class MysqlRepositoryCollection implements RepositoryCollection
 {
@@ -82,6 +84,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		attributesMetaData.addAttribute("visible").setDataType(BOOL);
 		attributesMetaData.addAttribute("label");
 		attributesMetaData.addAttribute("description").setDataType(TEXT);
+		attributesMetaData.addAttribute("aggregateable").setDataType(BOOL);
 
 		attributes = createMysqlRepsitory();
 		attributes.setMetaData(attributesMetaData);
@@ -102,6 +105,22 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 			entities.drop();
 			entities.create();
 			attributes.create();
+		}
+
+		// Update attributes table if needed
+		if (!columnExists("attributes", "aggregateable"))
+		{
+			String sql;
+			try
+			{
+				sql = attributes.getAlterSql(attributesMetaData.getAttribute("aggregateable"));
+			}
+			catch (MolgenisModelException e)
+			{
+				throw new RuntimeException(e);
+			}
+
+			new JdbcTemplate(ds).execute(sql);
 		}
 
 		Map<String, DefaultEntityMetaData> metadata = new LinkedHashMap<String, DefaultEntityMetaData>();
@@ -125,6 +144,8 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 			attributeMetaData.setVisible(attribute.getBoolean("visible"));
 			attributeMetaData.setLabel(attribute.getString("label"));
 			attributeMetaData.setDescription(attribute.getString("description"));
+			attributeMetaData.setAggregateable(attribute.getBoolean("aggregateable") == null ? false : attribute
+					.getBoolean("aggregateable"));
 
 			entityMetaData.addAttributeMetaData(attributeMetaData);
 		}
@@ -196,14 +217,35 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 			conn = ds.getConnection();
 			DatabaseMetaData dbm = conn.getMetaData();
 			ResultSet tables = dbm.getTables(null, null, table, null);
-			if (tables.next())
+			return tables.next();
+		}
+		catch (Exception e)
+		{
+			throw new RuntimeException(e);
+		}
+		finally
+		{
+			try
 			{
-				return true;
+				conn.close();
 			}
-			else
+			catch (Exception e2)
 			{
-				return false;
+				e2.printStackTrace();
 			}
+		}
+	}
+
+	private boolean columnExists(String table, String column)
+	{
+		Connection conn = null;
+		try
+		{
+
+			conn = ds.getConnection();
+			DatabaseMetaData dbm = conn.getMetaData();
+			ResultSet columns = dbm.getColumns(null, null, table, column);
+			return columns.next();
 		}
 		catch (Exception e)
 		{
@@ -226,6 +268,11 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 	{
 		if (entities.query().eq("name", emd.getName()).count() > 0)
 		{
+			if (emd.isAbstract())
+			{
+				return null;
+			}
+
 			MysqlRepository repo = repositories.get(emd.getName());
 			if (!dataService.hasRepository(emd.getName()))
 			{
@@ -295,6 +342,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		a.set("visible", att.isVisible());
 		a.set("label", att.getLabel());
 		a.set("description", att.getDescription());
+		a.set("aggregateable", att.isAggregateable());
 
 		attributes.add(a);
 	}
