@@ -14,6 +14,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.AggregateableCrudRepositorySecurityDecorator;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -276,7 +277,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 			MysqlRepository repo = repositories.get(emd.getName());
 			if (!dataService.hasRepository(emd.getName()))
 			{
-				dataService.addRepository(repo);
+				dataService.addRepository(new AggregateableCrudRepositorySecurityDecorator(repo));
 			}
 
 			return repo;
@@ -305,7 +306,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 			repository.create();
 
 			repositories.put(emd.getName(), repository);
-			dataService.addRepository(repository);
+			dataService.addRepository(new AggregateableCrudRepositorySecurityDecorator(repository));
 
 			return repository;
 		}
@@ -356,7 +357,13 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 	@Override
 	public Repository getRepositoryByEntityName(String name)
 	{
-		return repositories.get(name);
+		MysqlRepository repo = repositories.get(name);
+		if (repo == null)
+		{
+			return null;
+		}
+
+		return new AggregateableCrudRepositorySecurityDecorator(repo);
 	}
 
 	public void drop(EntityMetaData md)
