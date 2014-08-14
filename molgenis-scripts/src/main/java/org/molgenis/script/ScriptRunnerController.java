@@ -54,6 +54,7 @@ public class ScriptRunnerController
 				}
 
 				FileCopyUtils.copy(new FileInputStream(f), response.getOutputStream());
+				f.delete();
 			}
 		}
 		else if (StringUtils.isNotBlank(result.getOutput()))

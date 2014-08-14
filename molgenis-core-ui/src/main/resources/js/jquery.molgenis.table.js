@@ -145,23 +145,10 @@
 		var tabindex = 1;
 		for ( var i = 0; i < data.items.length; ++i) {
 			var entity = data.items[i];
-			var row = $('<tr>').data('entity', entity).data('id', entity.href); // FIXME remove id
+			var row = $('<tr>').data('entity', entity).data('id', entity.href);
 			if (settings.editenabled) {
 				var cell = $('<td class="trash" tabindex="' + tabindex++ + '">');
-				var href = entity.href;
-				$('<i class="icon-trash delete-row-btn"></i>').click(function(e) {
-					if(confirm('Are you sure you want to delete this row?')) {
-						restApi.remove(href, {
-							success: function() {
-								getTableData(settings, function(data) {
-									createTableBody(data, settings);
-									createTablePager(data, settings);
-									createTableFooter(data, settings);
-								});
-							}
-						});
-					}
-				}).appendTo(cell);
+				$('<i class="icon-trash delete-row-btn"></i>').appendTo(cell);
 				row.append(cell);
 			}
 
@@ -201,7 +188,7 @@
 		switch(attribute.fieldType) {
 			case 'BOOL':
 				var items = [];
-				items.push('<div class="bool-btn-group">');
+				items.push('<div class="bool-btn-group btn-group">');
 				items.push('<button type="button" class="btn btn-mini');
 				if(value === true) items.push(' active');
 				items.push('" data-state="true">Yes</button>');
@@ -537,10 +524,12 @@
 						restApi.update(cell.data('id'), editValue, {
 							success: function() {
 								settings.data.items[row][attribute.name] = editValue;
-								cell.addClass('edited');
+								cell.removeClass('invalid-input').addClass('edited');
 							}
 						});
 					}
+				} else {
+					cell.removeClass('edited').addClass('invalid-input');
 				}
 				break;
 			case 'MREF':
@@ -743,6 +732,25 @@
 					createTableBody(data, settings);
 				});
 				$('.molgenis-table tbody').removeClass('editable');
+			}
+		});
+		
+		// toggle edit table mode
+		$(container).on('click', '.delete-row-btn', function(e) {
+			e.preventDefault();
+			e.stopPropagation();
+			
+			if(confirm('Are you sure you want to delete this row?')) {
+				var href = $(this).closest('tr').data('id');
+				restApi.remove(href, {
+					success: function() {
+						getTableData(settings, function(data) {
+							createTableBody(data, settings);
+							createTablePager(data, settings);
+							createTableFooter(data, settings);
+						});
+					}
+				});
 			}
 		});
 		
