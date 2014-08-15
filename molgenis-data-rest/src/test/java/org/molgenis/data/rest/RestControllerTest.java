@@ -153,7 +153,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void getEntityMetaData() throws Exception
+	public void retrieveEntityMeta() throws Exception
 	{
 		mockMvc.perform(get(HREF_ENTITY_META))
 				.andExpect(status().isOk())
@@ -165,7 +165,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void getEntityMetaDataPost() throws Exception
+	public void retrieveEntityMetaPost() throws Exception
 	{
 		String json = "{\"attributes\":[\"name\"]}";
 		mockMvc.perform(post(HREF_ENTITY_META).param("_method", "GET").content(json).contentType(APPLICATION_JSON))
@@ -177,7 +177,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	}
 	
 	@Test
-	public void getEntityMetaDataSelectAttributes() throws Exception
+	public void retrieveEntityMetaSelectAttributes() throws Exception
 	{
 		mockMvc.perform(get(HREF_ENTITY_META).param("attributes", "name"))
 				.andExpect(status().isOk())
@@ -186,7 +186,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void getEntityMetaDataExpandAttributes() throws Exception
+	public void retrieveEntityMetaExpandAttributes() throws Exception
 	{
 		mockMvc.perform(get(HREF_ENTITY_META).param("expand", "attributes"))
 				.andExpect(status().isOk())
@@ -265,6 +265,15 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 				.andExpect(content().string("{\"href\":\"" + HREF_ENTITY_ID + "/name\",\"name\":\"Piet\"}"));
 	}
 
+	@Test
+	public void retrieveEntityAttributePost() throws Exception
+	{
+		String json = "{\"attributes\":[\"name\"]}";
+		mockMvc.perform(post(HREF_ENTITY_ID + "/name").param("_method", "GET").content(json).contentType(APPLICATION_JSON)).andExpect(status().isOk())
+				.andExpect(content().contentType(APPLICATION_JSON))
+				.andExpect(content().string("{\"href\":\"" + HREF_ENTITY_ID + "/name\",\"name\":\"Piet\"}"));
+	}
+	
 	@Test
 	public void retrieveEntityAttributeUnknownAttribute() throws Exception
 	{
