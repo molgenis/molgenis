@@ -176,7 +176,7 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/meta", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public EntityMetaDataResponse getEntityMetaData(@PathVariable("entityName") String entityName,
+	public EntityMetaDataResponse retrieveEntityMeta(@PathVariable("entityName") String entityName,
 			@RequestParam(value = "attributes", required = false) String[] attributes,
 			@RequestParam(value = "expand", required = false) String[] attributeExpands)
 	{
@@ -188,7 +188,7 @@ public class RestController
 	}
 
 	/**
-	 * Same as getEntityMetaData (GET) only tunneled through POST.
+	 * Same as retrieveEntityMeta (GET) only tunneled through POST.
 	 * 
 	 * Example url: /api/v1/person/meta?_method=GET
 	 * 
@@ -197,7 +197,7 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/meta", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public EntityMetaDataResponse getEntityMetaDataPost(@PathVariable("entityName") String entityName, @Valid @RequestBody EntityMetaRequest request)
+	public EntityMetaDataResponse retrieveEntityMetaPost(@PathVariable("entityName") String entityName, @Valid @RequestBody EntityMetaRequest request)
 	{
 		Set<String> attributesSet = toAttributeSet(request != null ? request.getAttributes() : null);
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(request != null ? request.getExpand() : null);
@@ -214,7 +214,7 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/meta/{attributeName}", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public AttributeMetaDataResponse getAttributeMetaData(@PathVariable("entityName") String entityName,
+	public AttributeMetaDataResponse retrieveEntityAttributeMeta(@PathVariable("entityName") String entityName,
 			@PathVariable("attributeName") String attributeName,
 			@RequestParam(value = "attributes", required = false) String[] attributes,
 			@RequestParam(value = "expand", required = false) String[] attributeExpands)
@@ -222,18 +222,26 @@ public class RestController
 		Set<String> attributeSet = toAttributeSet(attributes);
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
 
-		EntityMetaData meta = dataService.getEntityMetaData(entityName);
-		AttributeMetaData attributeMetaData = meta.getAttribute(attributeName);
-		if (attributeMetaData != null)
-		{
-			return new AttributeMetaDataResponse(entityName, attributeMetaData, attributeSet, attributeExpandSet);
-		}
-		else
-		{
-			throw new UnknownAttributeException(attributeName);
-		}
+		return getAttributeMetaDataPostInternal(entityName, attributeName, attributeSet, attributeExpandSet);
 	}
 
+	/**
+	 * Same as retrieveEntityAttributeMeta (GET) only tunneled through POST.
+	 * 
+	 * @param entityName
+	 * @return EntityMetaData
+	 */
+	@RequestMapping(value = "/{entityName}/meta/{attributeName}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public AttributeMetaDataResponse retrieveEntityAttributeMetaPost(@PathVariable("entityName") String entityName,
+			@PathVariable("attributeName") String attributeName, @Valid @RequestBody EntityMetaRequest request)
+	{
+		Set<String> attributeSet = toAttributeSet(request != null ? request.getAttributes() : null);
+		Map<String, Set<String>> attributeExpandSet = toExpandMap(request != null ? request.getExpand() : null);
+
+		return getAttributeMetaDataPostInternal(entityName, attributeName, attributeSet, attributeExpandSet);
+	}
+	
 	/**
 	 * Get's an entity by it's id
 	 * 
@@ -292,67 +300,37 @@ public class RestController
 		Set<String> attributesSet = toAttributeSet(attributes);
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
 
-		EntityMetaData meta = dataService.getEntityMetaData(entityName);
-
-		// Check if the entity has an attribute with name refAttributeName
-		AttributeMetaData attr = meta.getAttribute(refAttributeName);
-		if (attr == null)
-		{
-			throw new UnknownAttributeException(entityName + " does not have an attribute named " + refAttributeName);
-		}
-
-		// Get the entity
-		Entity entity = dataService.findOne(entityName, id);
-		if (entity == null)
-		{
-			throw new UnknownEntityException(entityName + " " + id + " not found");
-		}
-
-		String attrHref = String.format(BASE_URI + "/%s/%s/%s", meta.getName(), entity.getIdValue(), refAttributeName);
-		switch (attr.getDataType().getEnumType())
-		{
-			case COMPOUND:
-				Map<String, Object> entityHasAttributeMap = new LinkedHashMap<String, Object>();
-				entityHasAttributeMap.put("href", attrHref);
-				@SuppressWarnings("unchecked")
-				Iterable<AttributeMetaData> attributeParts = (Iterable<AttributeMetaData>) entity.get(refAttributeName);
-				for (AttributeMetaData attributeMetaData : attributeParts)
-				{
-					String attrName = attributeMetaData.getName();
-					entityHasAttributeMap.put(attrName, entity.get(attrName));
-				}
-				return entityHasAttributeMap;
-			case MREF:
-				List<Entity> mrefEntities = new ArrayList<Entity>();
-				for (Entity e : entity.getEntities((attr.getName())))
-					mrefEntities.add(e);
-				int count = mrefEntities.size();
-				int toIndex = request.getStart() + request.getNum();
-				mrefEntities = mrefEntities.subList(request.getStart(), toIndex > count ? count : toIndex);
-
-				List<Map<String, Object>> refEntityMaps = new ArrayList<Map<String, Object>>();
-				for (Entity refEntity : mrefEntities)
-				{
-					Map<String, Object> refEntityMap = getEntityAsMap(refEntity, attr.getRefEntity(), attributesSet,
-							attributeExpandSet);
-					refEntityMaps.add(refEntityMap);
-				}
-
-				EntityPager pager = new EntityPager(request.getStart(), request.getNum(), (long) count, mrefEntities);
-				return new EntityCollectionResponse(pager, refEntityMaps, attrHref);
-			case XREF:
-				Map<String, Object> entityXrefAttributeMap = getEntityAsMap((Entity) entity.get(refAttributeName),
-						attr.getRefEntity(), attributesSet, attributeExpandSet);
-				entityXrefAttributeMap.put("href", attrHref);
-				return entityXrefAttributeMap;
-			default:
-				Map<String, Object> entityAttributeMap = new LinkedHashMap<String, Object>();
-				entityAttributeMap.put("href", attrHref);
-				entityAttributeMap.put(refAttributeName, entity.get(refAttributeName));
-				return entityAttributeMap;
-		}
+		return retrieveEntityAttributeInternal(entityName, id, refAttributeName, request, attributesSet, attributeExpandSet);
 	}
 
+	/**
+	 * Get's an XREF entity or a list of MREF entities
+	 * 
+	 * Example:
+	 * 
+	 * /api/v1/person/99/address
+	 * 
+	 * @param entityName
+	 * @param id
+	 * @param refAttributeName
+	 * @param request
+	 * @param attributeExpands
+	 * @return
+	 * @throws UnknownEntityException
+	 */
+	@RequestMapping(value = "/{entityName}/{id}/{refAttributeName}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public Object retrieveEntityAttributePost(@PathVariable("entityName") String entityName, @PathVariable("id") Object id,
+			@PathVariable("refAttributeName") String refAttributeName, @Valid @RequestBody EntityCollectionRequest request)
+	{
+		Set<String> attributesSet = toAttributeSet(request != null ? request.getAttributes() : null);
+		Map<String, Set<String>> attributeExpandSet = toExpandMap(request != null ? request.getExpand() : null);
+		
+		return retrieveEntityAttributeInternal(entityName, id, refAttributeName, request, attributesSet, attributeExpandSet);
+	}
+	
+	
+	
 	/**
 	 * Do a query
 	 * 
@@ -958,6 +936,83 @@ public class RestController
 		return value;
 	}
 
+	private AttributeMetaDataResponse getAttributeMetaDataPostInternal(String entityName, String attributeName,
+			Set<String> attributeSet, Map<String, Set<String>> attributeExpandSet)
+	{
+		EntityMetaData meta = dataService.getEntityMetaData(entityName);
+		AttributeMetaData attributeMetaData = meta.getAttribute(attributeName);
+		if (attributeMetaData != null)
+		{
+			return new AttributeMetaDataResponse(entityName, attributeMetaData, attributeSet, attributeExpandSet);
+		}
+		else
+		{
+			throw new UnknownAttributeException(attributeName);
+		}
+	}
+	
+	private Object retrieveEntityAttributeInternal(String entityName, Object id, String refAttributeName, EntityCollectionRequest request, Set<String> attributesSet, Map<String, Set<String>> attributeExpandSet) {
+		EntityMetaData meta = dataService.getEntityMetaData(entityName);
+
+		// Check if the entity has an attribute with name refAttributeName
+		AttributeMetaData attr = meta.getAttribute(refAttributeName);
+		if (attr == null)
+		{
+			throw new UnknownAttributeException(entityName + " does not have an attribute named " + refAttributeName);
+		}
+
+		// Get the entity
+		Entity entity = dataService.findOne(entityName, id);
+		if (entity == null)
+		{
+			throw new UnknownEntityException(entityName + " " + id + " not found");
+		}
+
+		String attrHref = String.format(BASE_URI + "/%s/%s/%s", meta.getName(), entity.getIdValue(), refAttributeName);
+		switch (attr.getDataType().getEnumType())
+		{
+			case COMPOUND:
+				Map<String, Object> entityHasAttributeMap = new LinkedHashMap<String, Object>();
+				entityHasAttributeMap.put("href", attrHref);
+				@SuppressWarnings("unchecked")
+				Iterable<AttributeMetaData> attributeParts = (Iterable<AttributeMetaData>) entity.get(refAttributeName);
+				for (AttributeMetaData attributeMetaData : attributeParts)
+				{
+					String attrName = attributeMetaData.getName();
+					entityHasAttributeMap.put(attrName, entity.get(attrName));
+				}
+				return entityHasAttributeMap;
+			case MREF:
+				List<Entity> mrefEntities = new ArrayList<Entity>();
+				for (Entity e : entity.getEntities((attr.getName())))
+					mrefEntities.add(e);
+				int count = mrefEntities.size();
+				int toIndex = request.getStart() + request.getNum();
+				mrefEntities = mrefEntities.subList(request.getStart(), toIndex > count ? count : toIndex);
+
+				List<Map<String, Object>> refEntityMaps = new ArrayList<Map<String, Object>>();
+				for (Entity refEntity : mrefEntities)
+				{
+					Map<String, Object> refEntityMap = getEntityAsMap(refEntity, attr.getRefEntity(), attributesSet,
+							attributeExpandSet);
+					refEntityMaps.add(refEntityMap);
+				}
+
+				EntityPager pager = new EntityPager(request.getStart(), request.getNum(), (long) count, mrefEntities);
+				return new EntityCollectionResponse(pager, refEntityMaps, attrHref);
+			case XREF:
+				Map<String, Object> entityXrefAttributeMap = getEntityAsMap((Entity) entity.get(refAttributeName),
+						attr.getRefEntity(), attributesSet, attributeExpandSet);
+				entityXrefAttributeMap.put("href", attrHref);
+				return entityXrefAttributeMap;
+			default:
+				Map<String, Object> entityAttributeMap = new LinkedHashMap<String, Object>();
+				entityAttributeMap.put("href", attrHref);
+				entityAttributeMap.put(refAttributeName, entity.get(refAttributeName));
+				return entityAttributeMap;
+		}
+	}
+	
 	// Handles a Query
 	private EntityCollectionResponse retrieveEntityCollectionInternal(String entityName,
 			EntityCollectionRequest request, Set<String> attributesSet, Map<String, Set<String>> attributeExpandsSet)
