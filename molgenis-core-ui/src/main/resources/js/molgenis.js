@@ -276,7 +276,7 @@ function formatTableCellValue(value, dataType, editable) {
 		return value + '/>';
 	}
 
-	if (!value) {
+	if (typeof value === 'undefined' || value === null) {
 		return '';
 	}
 
