@@ -175,31 +175,4 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 
 		// verify default
 	}
-
-	@Test
-	public void testPerformance()
-	{
-		final int SIZE = 10;
-
-		List<Entity> eList = new ArrayList<Entity>();
-		for (int i = 0; i < SIZE; i++)
-		{
-			Entity entity = new MapEntity();
-			entity.set("identifier", "id" + i);
-			entity.set("stringRef", Arrays.asList(new String[]
-			{ "ref1", "ref2" }));
-			entity.set("intRef", Arrays.asList(new Integer[]
-			{ 1, 2 }));
-			eList.add(entity);
-		}
-
-		MysqlRepository mrefRepo = (MysqlRepository) coll.getRepositoryByEntityName(this.getMetaData().getName());
-		long startTime = System.currentTimeMillis();
-		mrefRepo.add(eList);
-		long stopTime = System.currentTimeMillis();
-		long elapsedTime = stopTime - startTime;
-
-		logger.debug("inserted mrefs with " + SIZE * 1000 / elapsedTime + " records per second");
-
-	}
 }
