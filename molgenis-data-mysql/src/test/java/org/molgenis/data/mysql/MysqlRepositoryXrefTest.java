@@ -67,7 +67,7 @@ public class MysqlRepositoryXrefTest extends MysqlRepositoryAbstractDatatypeTest
 		Assert.assertEquals(xrefRepo.getCreateSql(), createSql());
 
 		Assert.assertEquals(xrefRepo.getCreateFKeySql().get(0),
-				"ALTER TABLE XrefTest ADD FOREIGN KEY (`stringRef`) REFERENCES `StringTarget`(`identifier`)");
+				"ALTER TABLE XrefTest ADD FOREIGN KEY (`stringRef`) REFERENCES `StringTarget`(`identifier`) ON DELETE CASCADE");
 
 		xrefRepo.drop();
 		stringRepo.drop();

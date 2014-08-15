@@ -1,33 +1,26 @@
 package org.molgenis.data.mysql;
 
-import java.beans.PropertyVetoException;
 import java.util.Locale;
 
-import javax.sql.DataSource;
-
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
 import org.molgenis.AppConfig;
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.AggregateableCrudRepositorySecurityDecorator;
+import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
+import org.molgenis.data.Repository;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 @ContextConfiguration(classes = AppConfig.class)
 public class MysqlRepositoryCollectionTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired
 	MysqlRepositoryCollection coll;
-	DataSource ds;
-	Logger logger;
 
 	@Test
 	public void test()
@@ -51,7 +44,7 @@ public class MysqlRepositoryCollectionTest extends AbstractTestNGSpringContextTe
 		// destroy and rebuild
 		Assert.assertNotNull(coll.getRepositoryByEntityName("coll_person"));
 
-		MysqlRepository repo = (MysqlRepository) coll.getRepositoryByEntityName("coll_person");
+		CrudRepository repo = (CrudRepository) coll.getRepositoryByEntityName("coll_person");
 		String[] locale = Locale.getISOCountries();
 		for (int i = 0; i < 10; i++)
 		{
@@ -65,22 +58,19 @@ public class MysqlRepositoryCollectionTest extends AbstractTestNGSpringContextTe
 		}
 
 		// and again
-		repo = (MysqlRepository) coll.getRepositoryByEntityName("coll_person");
+		repo = (CrudRepository) coll.getRepositoryByEntityName("coll_person");
 		Assert.assertEquals(repo.count(), 10);
 	}
 
-	@BeforeClass
-	public void setup() throws PropertyVetoException
+	@Test
+	public void testSecurityDecorator()
 	{
-		BasicConfigurator.configure();
-		logger = Logger.getRootLogger();
-
-		ComboPooledDataSource dataSource = new ComboPooledDataSource();
-		dataSource.setDriverClass("com.mysql.jdbc.Driver");
-		dataSource.setJdbcUrl("jdbc:mysql://localhost:3306/omx?rewriteBatchedStatements=true)");
-		dataSource.setUser("molgenis");
-		dataSource.setPassword("molgenis");
-
-		ds = dataSource;
+		coll.drop("test");
+		DefaultEntityMetaData meta = new DefaultEntityMetaData("test");
+		meta.addAttribute("id").setIdAttribute(true).setNillable(false);
+		coll.add(meta);
+		Repository repo = coll.getRepositoryByEntityName("test");
+		Assert.assertNotNull(repo);
+		Assert.assertTrue(repo instanceof AggregateableCrudRepositorySecurityDecorator);
 	}
 }

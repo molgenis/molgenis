@@ -14,7 +14,9 @@ public class EntityCollectionRequest
 	public static final int DEFAULT_ROW_COUNT = 100;
 	private List<QueryRule> q;
 	private Sort sort;
-
+	private String[] attributes;
+	private String[] expand;
+	
 	@Min(0)
 	private int start = 0;
 	@Min(0)
@@ -59,5 +61,25 @@ public class EntityCollectionRequest
 	public void setSort(Sort sort)
 	{
 		this.sort = sort;
+	}
+
+	public String[] getAttributes()
+	{
+		return attributes;
+	}
+
+	public void setAttributes(String[] attributes)
+	{
+		this.attributes = attributes;
+	}
+
+	public String[] getExpand()
+	{
+		return expand;
+	}
+
+	public void setExpand(String[] expand)
+	{
+		this.expand = expand;
 	}
 }

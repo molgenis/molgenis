@@ -20,7 +20,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.mysql.MysqlRepository;
+import org.molgenis.data.Updateable;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -60,10 +60,11 @@ public class EmxImportServiceImpl implements EmxImporterService
 	private static final String VISIBLE = "visible";
 	private static final String LABEL = "label";
 	private static final String EXTENDS = "extends";
+	private static final String AGGREGATEABLE = "aggregateable";
 
 	private MysqlRepositoryCollection store;
 	private TransactionTemplate transactionTemplate;
-	private DataService dataService;
+	private final DataService dataService;
 
 	@Autowired
 	public EmxImportServiceImpl(DataService dataService)
@@ -252,11 +253,13 @@ public class EmxImportServiceImpl implements EmxImporterService
 			Boolean attributeAuto = attribute.getBoolean(AUTO);
 			Boolean attributeIdAttribute = attribute.getBoolean(IDATTRIBUTE);
 			Boolean attributeVisible = attribute.getBoolean(VISIBLE);
+			Boolean attributeAggregateable = attribute.getBoolean(AGGREGATEABLE);
 
 			if (attributeNillable != null) defaultAttributeMetaData.setNillable(attributeNillable);
 			if (attributeAuto != null) defaultAttributeMetaData.setAuto(attributeAuto);
 			if (attributeIdAttribute != null) defaultAttributeMetaData.setIdAttribute(attributeIdAttribute);
 			if (attributeVisible != null) defaultAttributeMetaData.setVisible(attributeVisible);
+			if (attributeAggregateable != null) defaultAttributeMetaData.setAggregateable(attributeAggregateable);
 			if (refEntityName != null) defaultAttributeMetaData.setRefEntity(entities.get(refEntityName));
 
 			defaultAttributeMetaData.setLabel(attribute.getString(LABEL));
@@ -379,7 +382,7 @@ public class EmxImportServiceImpl implements EmxImporterService
 					if (!ENTITIES.equals(name) && !ATTRIBUTES.equals(name))
 					{
 						// TODO check if compatible with metadata
-						MysqlRepository to = (MysqlRepository) store.getRepositoryByEntityName(name);
+						Repository to = store.getRepositoryByEntityName(name);
 						if (to == null)
 						{
 							logger.debug("tyring to create: " + name);
@@ -396,15 +399,15 @@ public class EmxImportServiceImpl implements EmxImporterService
 				// import data
 				for (String name : metadata.keySet())
 				{
-					MysqlRepository mysqlEntityRepository = (MysqlRepository) store.getRepositoryByEntityName(name);
-					if (mysqlEntityRepository != null)
+					Updateable updateable = (Updateable) store.getRepositoryByEntityName(name);
+					if (updateable != null)
 					{
 						Repository fileEntityRepository = source.getRepositoryByEntityName(name);
 						// check to prevent nullpointer when importing metadata only
 						if (fileEntityRepository != null)
 						{
 							List<Entity> entities = Lists.newArrayList(fileEntityRepository);
-							mysqlEntityRepository.update(entities, dbAction);
+							updateable.update(entities, dbAction);
 							report.getNrImportedEntitiesMap().put(name, entities.size());
 						}
 					}

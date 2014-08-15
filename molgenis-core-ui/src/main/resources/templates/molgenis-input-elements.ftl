@@ -105,9 +105,15 @@
 					
 				</script>
 				
-			<#elseif field.dataType.enumType == 'DATE_TIME' || field.dataType.enumType == 'DATE'>
-				<div class="input-append date">
+			<#elseif field.dataType.enumType == 'DATE_TIME'>
+				<div class="input-append datetime">
 					<input readonly type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" <#if field.nillable>class="nillable"</#if> <#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string("yyyy-MM-dd'''T'''HH:mm:ssZ")}"</#if> <@validationOptions field /> >
+					<#if field.nillable><span class="add-on-workaround"><i class="icon-remove empty-date-input"></i></span></#if> <span class="add-on"><i></i></span>
+				</div>
+				
+			<#elseif field.dataType.enumType == 'DATE'>
+				<div class="input-append date">
+					<input readonly type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" <#if field.nillable>class="nillable"</#if> <#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string("yyyy-MM-dd")}"</#if> <@validationOptions field /> >
 					<#if field.nillable><span class="add-on-workaround"><i class="icon-remove empty-date-input"></i></span></#if> <span class="add-on"><i></i></span>
 				</div>
 				
@@ -120,7 +126,7 @@
 				<#else>
 					<textarea name="${fieldName}" id="${fieldName}-textarea"></textarea>
 				</#if>
-				<div style="width: 100%; height:500px" class="uneditable-input" id="${fieldName}-editor"></div>
+				<div style="width: 100%; height:250px" class="uneditable-input" id="${fieldName}-editor"></div>
 				<script>
 					var editor = ace.edit("${fieldName}-editor");
 					editor.setTheme("ace/theme/eclipse");

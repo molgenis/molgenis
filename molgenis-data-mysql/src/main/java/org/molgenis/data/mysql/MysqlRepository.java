@@ -1,5 +1,7 @@
 package org.molgenis.data.mysql;
 
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.BOOL;
+
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -12,6 +14,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.sql.DataSource;
@@ -28,7 +31,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.support.AbstractCrudRepository;
+import org.molgenis.data.support.AbstractAggregateableCrudRepository;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.EntityValidator;
@@ -47,7 +50,7 @@ import org.springframework.jdbc.core.RowMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-public class MysqlRepository extends AbstractCrudRepository implements Manageable
+public class MysqlRepository extends AbstractAggregateableCrudRepository implements Manageable
 
 {
 	public static final String URL_PREFIX = "mysql://";
@@ -237,13 +240,13 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		List<String> sql = new ArrayList<String>();
 		// foreign keys
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
-			if (att.getDataType().equals(MolgenisFieldTypes.XREF))
+			if (att.getDataType() instanceof XrefField)
 			{
 				sql.add(new StringBuilder().append("ALTER TABLE ").append(getEntityMetaData().getName())
 						.append(" ADD FOREIGN KEY (").append('`').append(att.getName()).append('`')
 						.append(") REFERENCES ").append('`').append(att.getRefEntity().getName()).append('`')
 						.append('(').append('`').append(att.getRefEntity().getIdAttribute().getName()).append('`')
-						.append(')').toString());
+						.append(") ON DELETE CASCADE").toString());
 			}
 
 		return sql;
@@ -425,9 +428,9 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		}
 
 		// from
-		StringBuilder result = new StringBuilder().append(select).append(getFromSql());
+		StringBuilder result = new StringBuilder().append(select).append(getFromSql(q));
 		// where
-		String where = getWhereSql(q, parameters);
+		String where = getWhereSql(q, parameters, 0);
 		if (where.length() > 0) result.append(" WHERE ").append(where);
 		// group by
 		if (select.indexOf("GROUP_CONCAT") != -1 && group.length() > 0) result.append(" GROUP BY ").append(group);
@@ -452,7 +455,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 			logger.debug("sql: " + sql + ",parameters:" + parameters);
 		}
 
-		return jdbcTemplate.query(sql, parameters.toArray(new Object[0]), new EntityMapper());
+		return jdbcTemplate.query(sql, parameters.toArray(new Object[0]), new EntityMapper(getEntityMetaData()));
 	}
 
 	@Override
@@ -508,33 +511,65 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		return count(new QueryImpl());
 	}
 
-	protected String getFromSql()
+	protected String getFromSql(Query q)
 	{
 		StringBuilder from = new StringBuilder();
 		from.append(" FROM ").append('`').append(getEntityMetaData().getName()).append('`').append(" AS this");
+
 		AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
+		List<String> mrefQueryFields = Lists.newArrayList();
+		getMrefQueryFields(q.getRules(), mrefQueryFields);
+
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 			if (att.getDataType() instanceof MrefField)
 			{
-				// extra join so we can filter on the mrefs
 				from.append(" LEFT JOIN ").append('`').append(getEntityMetaData().getName()).append('_')
-						.append(att.getName()).append('`').append(" AS ").append('`').append(att.getName())
-						.append("_filter` ON (this.").append('`').append(idAttribute.getName()).append('`')
-						.append(" = ").append('`').append(att.getName()).append("_filter`.").append('`')
-						.append(idAttribute.getName()).append('`').append(") LEFT JOIN ").append('`')
-						.append(getEntityMetaData().getName()).append('_').append(att.getName()).append('`')
-						.append(" AS ").append('`').append(att.getName()).append('`').append(" ON (this.").append('`')
-						.append(idAttribute.getName()).append('`').append(" = ").append('`').append(att.getName())
-						.append('`').append('.').append('`').append(idAttribute.getName()).append('`').append(')');
+						.append(att.getName()).append('`').append(" AS ").append('`').append(att.getName()).append('`')
+						.append(" ON (this.").append('`').append(idAttribute.getName()).append('`').append(" = ")
+						.append('`').append(att.getName()).append('`').append('.').append('`')
+						.append(idAttribute.getName()).append('`').append(')');
+
 			}
+
+		for (int i = 0; i < mrefQueryFields.size(); i++)
+		{
+			// extra join so we can filter on the mrefs
+			AttributeMetaData att = getEntityMetaData().getAttribute(mrefQueryFields.get(i));
+
+			from.append(" LEFT JOIN ").append('`').append(getEntityMetaData().getName()).append('_')
+					.append(att.getName()).append('`').append(" AS ").append('`').append(att.getName())
+					.append("_filter").append(i + 1).append("` ON (this.").append('`').append(idAttribute.getName())
+					.append('`').append(" = ").append('`').append(att.getName()).append("_filter").append(i + 1)
+					.append("`.").append('`').append(idAttribute.getName()).append('`').append(')');
+		}
 
 		return from.toString();
 	}
 
+	private void getMrefQueryFields(List<QueryRule> rules, List<String> fields)
+	{
+		for (QueryRule rule : rules)
+		{
+			if (rule.getField() != null)
+			{
+				AttributeMetaData attr = this.getEntityMetaData().getAttribute(rule.getField());
+				if (attr != null && attr.getDataType() instanceof MrefField)
+				{
+					fields.add(rule.getField());
+				}
+			}
+
+			if (rule.getNestedRules() != null && !rule.getNestedRules().isEmpty())
+			{
+				getMrefQueryFields(rule.getNestedRules(), fields);
+			}
+		}
+	}
+
 	protected String getCountSql(Query q, List<Object> parameters)
 	{
-		String where = getWhereSql(q, parameters);
-		String from = getFromSql();
+		String where = getWhereSql(q, parameters, 0);
+		String from = getFromSql(q);
 		String idAttribute = getEntityMetaData().getIdAttribute().getName();
 
 		if (where.length() > 0) return new StringBuilder("SELECT COUNT(DISTINCT this.").append('`').append(idAttribute)
@@ -544,18 +579,31 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 				.append(from).toString();
 	}
 
-	protected String getWhereSql(Query q, List<Object> parameters)
+	protected String getWhereSql(Query q, List<Object> parameters, int mrefFilterIndex)
 	{
 		StringBuilder result = new StringBuilder();
 		for (QueryRule r : q.getRules())
 		{
+			AttributeMetaData attr = null;
+			if (r.getField() != null)
+			{
+				attr = getEntityMetaData().getAttribute(r.getField());
+				if (attr == null)
+				{
+					throw new MolgenisDataException("Unknown attribute [" + r.getField() + "]");
+				}
+				if (attr.getDataType() instanceof MrefField)
+				{
+					mrefFilterIndex++;
+				}
+			}
 
 			StringBuilder predicate = new StringBuilder();
 			switch (r.getOperator())
 			{
 				case SEARCH:
 					StringBuilder search = new StringBuilder();
-					for (AttributeMetaData att : getEntityMetaData().getAttributes())
+					for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 					{
 						// TODO: other data types???
 						if (att.getDataType() instanceof StringField || att.getDataType() instanceof TextField)
@@ -581,37 +629,26 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 					break;
 				case NESTED:
 					result.append("(");
-					result.append(getWhereSql(new QueryImpl(r.getNestedRules()), parameters));
+					result.append(getWhereSql(new QueryImpl(r.getNestedRules()), parameters, mrefFilterIndex));
 					result.append(")");
 					break;
 				case OR:
 					result.append(" OR ");
 					break;
 				case LIKE:
-					AttributeMetaData att = getEntityMetaData().getAttribute(r.getField());
-					if (att == null)
-					{
-						throw new MolgenisDataException("Unknown attribute [" + r.getField() + "]");
-					}
 
-					if (att.getDataType() instanceof StringField || att.getDataType() instanceof TextField)
+					if (attr.getDataType() instanceof StringField || attr.getDataType() instanceof TextField)
 					{
-						result.append(" this.").append('`').append(att.getName()).append('`').append(" LIKE ?");
+						result.append(" this.").append('`').append(attr.getName()).append('`').append(" LIKE ?");
 					}
 					else
 					{
-						result.append(" CAST(this.").append('`').append(att.getName()).append('`')
+						result.append(" CAST(this.").append('`').append(attr.getName()).append('`')
 								.append(" as CHAR) LIKE ?");
 					}
 					parameters.add("%" + DataConverter.toString(r.getValue()) + "%");
 					break;
 				case IN:
-					att = getEntityMetaData().getAttribute(r.getField());
-					if (att == null)
-					{
-						throw new MolgenisDataException("Unknown attribute [" + r.getField() + "]");
-					}
-
 					StringBuilder in = new StringBuilder();
 					List<Object> values = new ArrayList<Object>();
 					if (r.getValue() == null)
@@ -636,25 +673,23 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 						}
 
 						in.append("?");
-						parameters.add(att.getDataType().convert(values.get(i)));
+						parameters.add(attr.getDataType().convert(values.get(i)));
 					}
 
-					if (att.getDataType() instanceof MrefField) result.append(att.getName()).append("_filter.")
-							.append(r.getField()).append(" IN (").append(in).append(')');
-					else result.append("this.").append(r.getField()).append(" IN (").append(in).append(')');
+					if (attr.getDataType() instanceof MrefField) result.append(attr.getName()).append("_filter")
+							.append(mrefFilterIndex);
+					else result.append("this");
+
+					result.append(".`").append(r.getField()).append("` IN (").append(in).append(')');
 					break;
 				default:
 					// comparable values...
-					att = getEntityMetaData().getAttribute(r.getField());
-					if (att == null)
-					{
-						throw new MolgenisDataException("Unknown attribute [" + r.getField() + "]");
-					}
+					FieldType type = attr.getDataType();
+					if (type instanceof MrefField) predicate.append(attr.getName()).append("_filter")
+							.append(mrefFilterIndex);
+					else predicate.append("this");
 
-					FieldType type = att.getDataType();
-					if (type instanceof MrefField) predicate.append(att.getName()).append("_filter.")
-							.append(r.getField());
-					else predicate.append("this.").append('`').append(r.getField()).append('`');
+					predicate.append(".`").append(r.getField()).append('`');
 
 					switch (r.getOperator())
 					{
@@ -677,7 +712,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 							throw new MolgenisDataException("cannot solve query rule:  " + r);
 					}
 					predicate.append(" ? ");
-					parameters.add(att.getDataType().convert(r.getValue()));
+					parameters.add(attr.getDataType().convert(r.getValue()));
 
 					if (result.length() > 0 && !result.toString().endsWith(" OR ")
 							&& !result.toString().endsWith(" AND ")) result.append(" AND ");
@@ -1009,8 +1044,14 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 						}
 						else if (att.getDataType() instanceof XrefField)
 						{
+							Object value = batch.get(rowIndex).get(att.getName());
+							if (value instanceof Entity)
+							{
+								value = ((Entity) value).get(att.getRefEntity().getIdAttribute().getName());
+							}
+
 							preparedStatement.setObject(fieldIndex++, att.getRefEntity().getIdAttribute().getDataType()
-									.convert(batch.get(rowIndex).get(att.getName())));
+									.convert(value));
 						}
 						else
 						{
@@ -1156,15 +1197,71 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 
 	}
 
+	@Override
+	protected void addAggregateValuesAndLabels(AttributeMetaData attr, List<Object> values, Set<String> labels)
+	{
+		if (attr.getDataType().getEnumType() == BOOL)
+		{
+			values.add(Boolean.TRUE);
+			values.add(Boolean.FALSE);
+			labels.add(attr.getName() + ": true");
+			labels.add(attr.getName() + ": false");
+		}
+		else
+		{
+			for (Object value : getDistinctColumnValues(attr))
+			{
+				String valueStr = DataConverter.toString(value);
+				labels.add(valueStr);
+				values.add(valueStr);
+			}
+		}
+	}
+
+	private List<Object> getDistinctColumnValues(AttributeMetaData attr)
+	{
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT DISTINCT(`").append(attr.getName()).append("`) FROM `").append(getName())
+				.append("` AS this ");
+
+		if (attr.getDataType() instanceof MrefField)
+		{
+			AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
+
+			sql.append(" LEFT JOIN ").append('`').append(getEntityMetaData().getName()).append('_')
+					.append(attr.getName()).append('`').append(" AS ").append('`').append(attr.getName()).append('`')
+					.append(" ON (this.").append('`').append(idAttribute.getName()).append('`').append(" = ")
+					.append('`').append(attr.getName()).append('`').append('.').append('`')
+					.append(idAttribute.getName()).append('`').append(')');
+		}
+
+		sql.append(" WHERE `").append(attr.getName()).append("` IS NOT NULL");
+
+		return jdbcTemplate.query(sql.toString(), new RowMapper<Object>()
+		{
+			@Override
+			public Object mapRow(ResultSet rs, int rowNum) throws SQLException
+			{
+				return rs.getObject(1);
+			}
+		});
+	}
+
 	private class EntityMapper implements RowMapper<Entity>
 	{
+		private final EntityMetaData entityMetaData;
+
+		private EntityMapper(EntityMetaData entityMetaData)
+		{
+			this.entityMetaData = entityMetaData;
+		}
 
 		@Override
 		public Entity mapRow(ResultSet resultSet, int i) throws SQLException
 		{
-			Entity e = new MysqlEntity(getEntityMetaData(), repositoryCollection);
+			Entity e = new MysqlEntity(entityMetaData, repositoryCollection);
 
-			for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
+			for (AttributeMetaData att : entityMetaData.getAtomicAttributes())
 			{
 				if (att.getDataType() instanceof MrefField)
 				{

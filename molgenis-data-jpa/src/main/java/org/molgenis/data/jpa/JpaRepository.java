@@ -29,8 +29,6 @@ import javax.persistence.criteria.Root;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AggregateResult;
-import org.molgenis.data.Aggregateable;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DatabaseAction;
@@ -41,7 +39,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.support.AbstractCrudRepository;
+import org.molgenis.data.support.AbstractAggregateableCrudRepository;
 import org.molgenis.data.support.ConvertingIterable;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -53,12 +51,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 /**
  * Repository implementation for (generated) jpa entities
  */
-public class JpaRepository extends AbstractCrudRepository implements Aggregateable
+public class JpaRepository extends AbstractAggregateableCrudRepository
 {
 	public static final String BASE_URL = "jpa://";
 	private final EntityMetaData entityMetaData;
@@ -908,200 +905,35 @@ public class JpaRepository extends AbstractCrudRepository implements Aggregateab
 	}
 
 	@Override
-	public AggregateResult aggregate(AttributeMetaData xAttributeMeta, AttributeMetaData yAttributeMeta, Query query)
+	protected void addAggregateValuesAndLabels(AttributeMetaData attr, List<Object> values, Set<String> labels)
 	{
-		if ((xAttributeMeta == null) && (yAttributeMeta == null))
+		if (attr.getDataType().getEnumType() == BOOL)
 		{
-			throw new MolgenisDataException("Missing aggregate attribute");
+			values.add(Boolean.TRUE);
+			values.add(Boolean.FALSE);
+			labels.add(attr.getName() + ": true");
+			labels.add(attr.getName() + ": false");
 		}
-
-		FieldTypeEnum xDataType = null;
-		String xAttributeName = null;
-		if (xAttributeMeta != null)
+		else if (attr.getRefEntity() != null)
 		{
-			xAttributeName = xAttributeMeta.getName();
+			EntityMetaData refEntityMeta = attr.getRefEntity();
+			String refEntityLblAttr = refEntityMeta.getLabelAttribute().getName();
 
-			if (!xAttributeMeta.isAggregateable())
+			for (Entity refEntity : findAll(refEntityMeta.getEntityClass()))
 			{
-				throw new MolgenisDataException("Attribute '" + xAttributeName + "' is not aggregateable");
+				labels.add(refEntity.getString(refEntityLblAttr));
+				values.add(refEntity.get(refEntityLblAttr));
 			}
-
-			xDataType = xAttributeMeta.getDataType().getEnumType();
-		}
-
-		FieldTypeEnum yDataType = null;
-		String yAttributeName = null;
-		if (yAttributeMeta != null)
-		{
-			yAttributeName = yAttributeMeta.getName();
-			if (!yAttributeMeta.isAggregateable())
-			{
-				throw new MolgenisDataException("Attribute '" + yAttributeName + "' is not aggregateable");
-			}
-
-			yDataType = yAttributeMeta.getDataType().getEnumType();
-		}
-
-		List<Object> xValues = Lists.newArrayList();
-		List<Object> yValues = Lists.newArrayList();
-		List<List<Long>> matrix = new ArrayList<List<Long>>();
-		Set<String> xLabels = Sets.newLinkedHashSet();
-		Set<String> yLabels = Sets.newLinkedHashSet();
-
-		if (xDataType != null)
-		{
-			if (xDataType == BOOL)
-			{
-				xValues.add(Boolean.TRUE);
-				xValues.add(Boolean.FALSE);
-				xLabels.add(xAttributeName + ": true");
-				xLabels.add(xAttributeName + ": false");
-			}
-			else if (xAttributeMeta.getRefEntity() != null)
-			{
-				EntityMetaData xRefEntityMeta = xAttributeMeta.getRefEntity();
-				String xRefEntityLblAttr = xRefEntityMeta.getLabelAttribute().getName();
-
-				for (Entity xRefEntity : findAll(xRefEntityMeta.getEntityClass()))
-				{
-					xLabels.add(xRefEntity.getString(xRefEntityLblAttr));
-					xValues.add(xRefEntity.get(xRefEntityLblAttr));
-				}
-			}
-			else
-			{
-				for (Object value : getDistinctValues(xAttributeMeta))
-				{
-					String valueStr = DataConverter.toString(value);
-					xLabels.add(valueStr);
-					xValues.add(valueStr);
-				}
-			}
-		}
-
-		if (yDataType != null)
-		{
-			if (yDataType == BOOL)
-			{
-				yValues.add(Boolean.TRUE);
-				yValues.add(Boolean.FALSE);
-				yLabels.add(yAttributeName + ": true");
-				yLabels.add(yAttributeName + ": false");
-			}
-			else if (yAttributeMeta.getRefEntity() != null)
-			{
-				EntityMetaData yRefEntityMeta = yAttributeMeta.getRefEntity();
-				String yRefEntityLblAttr = yRefEntityMeta.getLabelAttribute().getName();
-
-				for (Entity yRefEntity : findAll(yRefEntityMeta.getEntityClass()))
-				{
-					yLabels.add(yRefEntity.getString(yRefEntityLblAttr));
-					yValues.add(yRefEntity.get(yRefEntityLblAttr));
-				}
-			}
-			else
-			{
-				for (Object value : getDistinctValues(yAttributeMeta))
-				{
-					String valueStr = DataConverter.toString(value);
-					yLabels.add(valueStr);
-					yValues.add(valueStr);
-				}
-			}
-		}
-
-		boolean hasXValues = !xValues.isEmpty();
-		boolean hasYValues = !yValues.isEmpty();
-
-		if (hasXValues)
-		{
-			List<Long> totals = Lists.newArrayList();
-
-			for (Object xValue : xValues)
-			{
-				List<Long> row = Lists.newArrayList();
-
-				if (hasYValues)
-				{
-					int i = 0;
-
-					for (Object yValue : yValues)
-					{
-
-						// Both x and y choosen
-						Query finalQ = query.getRules().isEmpty() ? new QueryImpl() : new QueryImpl(query).and();
-						finalQ.eq(xAttributeName, xValue).and().eq(yAttributeName, yValue);
-						long count = count(finalQ);
-						row.add(count);
-						if (totals.size() == i)
-						{
-							totals.add(count);
-						}
-						else
-						{
-							totals.set(i, totals.get(i) + count);
-						}
-						i++;
-					}
-				}
-				else
-				{
-					// No y attribute chosen
-					Query finalQ = query.getRules().isEmpty() ? new QueryImpl() : new QueryImpl(query).and();
-					finalQ.eq(xAttributeName, xValue);
-					long count = count(finalQ);
-					row.add(count);
-					if (totals.isEmpty())
-					{
-						totals.add(count);
-					}
-					else
-					{
-						totals.set(0, totals.get(0) + count);
-					}
-
-				}
-
-				matrix.add(row);
-			}
-
-			yLabels.add(hasYValues ? "Total" : "Count");
-			xLabels.add("Total");
-
-			matrix.add(totals);
 		}
 		else
 		{
-			// No xattribute chosen
-			List<Long> row = Lists.newArrayList();
-			for (Object yValue : yValues)
+			for (Object value : getDistinctValues(attr))
 			{
-				Query finalQ = query.getRules().isEmpty() ? new QueryImpl() : new QueryImpl(query).and();
-				finalQ.eq(yAttributeName, yValue);
-				long count = count(finalQ);
-				row.add(count);
-			}
-			matrix.add(row);
-
-			xLabels.add("Count");
-			yLabels.add("Total");
-		}
-
-		// Count row totals
-		if (hasYValues)
-		{
-			for (List<Long> row : matrix)
-			{
-				long total = 0;
-				for (Long count : row)
-				{
-					total += count;
-				}
-				row.add(total);
+				String valueStr = DataConverter.toString(value);
+				labels.add(valueStr);
+				values.add(valueStr);
 			}
 		}
-
-		return new AggregateResult(matrix, new ArrayList<String>(xLabels), new ArrayList<String>(yLabels));
 	}
 
 	// Get all distinct values of an attribute

@@ -32,6 +32,8 @@ public class ScriptPluginController extends MolgenisPluginController
 	{
 
 		model.addAttribute("scripts", Lists.newArrayList(dataService.findAll(Script.ENTITY_NAME, Script.class)));
+		model.addAttribute("parameters",
+				Lists.newArrayList(dataService.findAll(ScriptParameter.ENTITY_NAME, ScriptParameter.class)));
 		return "view-scripts";
 	}
 }
