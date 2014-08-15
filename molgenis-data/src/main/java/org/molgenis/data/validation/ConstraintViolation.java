@@ -27,6 +27,12 @@ public class ConstraintViolation
 
 	public String getMessage()
 	{
+		if (rownr > 0)
+		{
+
+			return message + " (row " + (rownr + 1) + ")";
+		}
+
 		return message;
 	}
 

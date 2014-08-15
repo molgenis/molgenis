@@ -61,7 +61,7 @@ public class DefaultEntityValidator implements EntityValidator
 	{
 		Set<ConstraintViolation> violations = Sets.newLinkedHashSet();
 
-		for (AttributeMetaData attr : meta.getAttributes())
+		for (AttributeMetaData attr : meta.getAtomicAttributes())
 		{
 			if (!attr.isNillable() && !attr.isIdAtrribute() && !attr.isAuto() && (attr.getDefaultValue() == null))
 			{
@@ -88,7 +88,7 @@ public class DefaultEntityValidator implements EntityValidator
 	{
 		Set<ConstraintViolation> violations = Sets.newLinkedHashSet();
 
-		for (AttributeMetaData attr : meta.getAttributes())
+		for (AttributeMetaData attr : meta.getAtomicAttributes())
 		{
 			if (attr.isUnique()
 					&& !attr.isIdAtrribute()
