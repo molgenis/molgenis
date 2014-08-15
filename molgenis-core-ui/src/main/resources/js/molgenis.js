@@ -454,9 +454,17 @@ function createInput(attr, attrs, val, lbl) {
 				}
 			}
 			
+			var url = resourceUri;
+			if (resourceUri.indexOf('?') == -1) {
+				url = url + '?';
+			} else {
+				url = url + '&';
+			}
+			url = url + '_method=GET';
+			
 			$.extend(config, {
 				'type' : 'POST',
-				'url' : resourceUri + '?_method=GET',
+				'url' : url,
 				'data' : JSON.stringify(options),
 				'contentType' : 'application/json'
 			});
