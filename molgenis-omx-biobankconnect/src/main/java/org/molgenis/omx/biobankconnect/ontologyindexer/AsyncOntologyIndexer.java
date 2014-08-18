@@ -111,6 +111,13 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 		}
 	}
 
+	/**
+	 * Created a specific indexer to index list of primitive types (string),
+	 * because the standard molgenis index does not handle List<String>
+	 * 
+	 * @param ontologyLoader
+	 * @throws IOException
+	 */
 	private void internalIndex(OntologyLoader ontologyLoader) throws IOException
 	{
 		Builder builder = ImmutableSettings.settingsBuilder().loadFromClasspath("elasticsearch.yml");
