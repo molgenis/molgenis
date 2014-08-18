@@ -100,15 +100,15 @@ public class OntologyServiceTest
 		SearchService searchService = mock(SearchService.class);
 		when(
 				searchService.search(new SearchRequest(null, new QueryImpl().eq(OntologyIndexRepository.ENTITY_TYPE,
-						OntologyIndexRepository.TYPE_ONTOLOGY).pageSize(1000), null))).thenReturn(
+						OntologyIndexRepository.TYPE_ONTOLOGY).pageSize(Integer.MAX_VALUE), null))).thenReturn(
 				new SearchResult(2, Arrays.asList(hit1, hit2)));
 
 		when(
 				searchService.search(new SearchRequest(AsyncOntologyIndexer
 						.createOntologyDocumentType("http://www.ontology.test"), new QueryImpl()
 						.eq(OntologyIndexRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY).and()
-						.eq(OntologyIndexRepository.ONTOLOGY_IRI, "http://www.ontology.test").pageSize(1000), null)))
-				.thenReturn(new SearchResult(1, Arrays.asList(hit1)));
+						.eq(OntologyIndexRepository.ONTOLOGY_IRI, "http://www.ontology.test")
+						.pageSize(Integer.MAX_VALUE), null))).thenReturn(new SearchResult(1, Arrays.asList(hit1)));
 		when(
 				searchService.search(new SearchRequest(AsyncOntologyIndexer
 						.createOntologyTermDocumentType("http://www.ontology.test"), new QueryImpl()
@@ -126,7 +126,7 @@ public class OntologyServiceTest
 		when(
 				searchService.search(new SearchRequest(AsyncOntologyIndexer
 						.createOntologyTermDocumentType("http://www.ontology.test"), new QueryImpl().eq(
-						OntologyTermIndexRepository.ROOT, true).pageSize(10000), null))).thenReturn(
+						OntologyTermIndexRepository.ROOT, true).pageSize(Integer.MAX_VALUE), null))).thenReturn(
 				new SearchResult(1, Arrays.asList(hit3)));
 
 		List<QueryRule> rules = new ArrayList<QueryRule>();

@@ -30,7 +30,7 @@ public class OntologyRepositoryTest
 	@Test
 	public void getAllColumns()
 	{
-		assertEquals(Iterables.size(repository.getEntityMetaData().getAttributes()), 14);
+		assertEquals(Iterables.size(repository.getEntityMetaData().getAttributes()), 15);
 	}
 
 	@Test

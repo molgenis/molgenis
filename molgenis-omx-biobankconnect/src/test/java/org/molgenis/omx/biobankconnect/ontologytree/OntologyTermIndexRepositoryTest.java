@@ -81,6 +81,12 @@ public class OntologyTermIndexRepositoryTest
 		SearchService searchService = mock(SearchService.class);
 		when(
 				searchService.search(new SearchRequest(
+						AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyIRI), new QueryImpl().eq(
+								OntologyTermIndexRepository.ENTITY_TYPE, OntologyTermIndexRepository.TYPE_ONTOLOGYTERM)
+								.pageSize(1), null))).thenReturn(new SearchResult(3, Arrays.asList(hit1)));
+
+		when(
+				searchService.search(new SearchRequest(
 						AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyIRI),
 						new QueryImpl().eq(OntologyTermIndexRepository.ENTITY_TYPE,
 								OntologyTermIndexRepository.TYPE_ONTOLOGYTERM), null))).thenReturn(
