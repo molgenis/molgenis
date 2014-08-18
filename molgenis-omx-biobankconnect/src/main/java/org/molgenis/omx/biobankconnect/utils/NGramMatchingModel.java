@@ -1,8 +1,10 @@
 package org.molgenis.omx.biobankconnect.utils;
 
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 import org.tartarus.snowball.ext.PorterStemmer;
@@ -115,7 +117,7 @@ public class NGramMatchingModel
 		double totalToken = Math.max(inputStringTokens.size(), ontologyTermTokens.size());
 		inputStringTokens.retainAll(ontologyTermTokens);
 		matchedTokens = inputStringTokens.size();
-		DecimalFormat df = new DecimalFormat("#0.000");
+		DecimalFormat df = new DecimalFormat("##.###", new DecimalFormatSymbols(Locale.ENGLISH));
 		return Double.parseDouble(df.format(matchedTokens / totalToken * 100));
 	}
 
