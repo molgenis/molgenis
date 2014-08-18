@@ -26,7 +26,7 @@ public class RunAsSystemBeanPostProcessor implements BeanPostProcessor
 	{
 		Class<?> clazz = bean.getClass();
 
-		if (bean instanceof Advised)
+		if (bean instanceof Advised && ((Advised) bean).getTargetClass() != null)
 		{
 			Advised advised = (Advised) bean;
 			for (Method method : advised.getTargetClass().getMethods())
