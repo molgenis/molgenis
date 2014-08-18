@@ -135,7 +135,7 @@ public class OntologyService
 		return ontologies;
 	}
 
-	public SearchResult search(String ontologyUrl, String queryString)
+	public SearchResult search(String ontologyIri, String queryString)
 	{
 		Set<String> uniqueTerms = new HashSet<String>(Arrays.asList(queryString.toLowerCase().trim()
 				.split(NON_WORD_SEPARATOR)));
@@ -143,7 +143,7 @@ public class OntologyService
 		List<QueryRule> rules = new ArrayList<QueryRule>();
 		for (String term : uniqueTerms)
 		{
-			if (!term.isEmpty() && !term.matches(OntologyTermQueryRepository.MULTI_WHITESPACES))
+			if (!StringUtils.isEmpty(term) && !term.matches(OntologyTermQueryRepository.MULTI_WHITESPACES))
 			{
 				stemmer.setCurrent(term.replaceAll(OntologyTermQueryRepository.ILLEGAL_CHARACTERS_PATTERN,
 						StringUtils.EMPTY));
@@ -154,7 +154,7 @@ public class OntologyService
 		}
 		QueryRule finalQuery = new QueryRule(rules);
 		finalQuery.setOperator(Operator.SHOULD);
-		SearchRequest request = new SearchRequest(AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyUrl),
+		SearchRequest request = new SearchRequest(AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyIri),
 				new QueryImpl(finalQuery).pageSize(MAX_NUMBER_MATCHES), null);
 		Iterator<Hit> iterator = searchService.search(request).getSearchHits().iterator();
 

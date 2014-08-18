@@ -484,7 +484,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 							if (!nodePath.equals(currentNodePath))
 							{
 								matcher = pattern.matcher(ontologyTermSynonym);
-								if (!matcher.find() && !ontologyTermSynonym.isEmpty())
+
+								if (!matcher.find() && !StringUtils.isEmpty(ontologyTermSynonym))
 								{
 									int levelDown = nodePath.split("\\.").length - parentNodeLevel;
 									double boostedNumber = Math.pow(0.5, levelDown);
@@ -501,7 +502,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 
 							// Add the non-empty one of the ontology term
 							// synonyms to the term collection
-							if (!ontologyTermSynonym.toString().isEmpty())
+							if (!StringUtils.isEmpty(ontologyTermSynonym))
 							{
 								subQueryRules.add(new QueryRule(FIELD_DESCRIPTION_STOPWORDS, Operator.EQUALS,
 										ontologyTermSynonym));
@@ -903,7 +904,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		{
 			return request.getMappedFeatureIds().toString();
 		}
-		if (request.getAlgorithmScript() != null && !request.getAlgorithmScript().isEmpty())
+
+		if (!StringUtils.isEmpty(request.getAlgorithmScript()))
 		{
 			List<String> selectedFeatureNames = new ArrayList<String>();
 			for (String standardFeatureName : ApplyAlgorithms.extractFeatureName(request.getAlgorithmScript()))

@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
@@ -103,13 +104,13 @@ public class AlgorithmEditorController extends MolgenisPluginController
 		Map<String, Object> jsonResults = new HashMap<String, Object>();
 		String algorithm = request.getAlgorithmScript();
 		List<Integer> selectedDataSetIds = request.getSelectedDataSetIds();
-		if (selectedDataSetIds.size() != 0 && !algorithm.isEmpty())
+		if (selectedDataSetIds.size() != 0 && !StringUtils.isEmpty(algorithm))
 		{
 			Integer sourceDataSetId = selectedDataSetIds.get(0);
 			ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME, request.getFeatureId(),
 					ObservableFeature.class);
 			String message = applyAlgorithms.validateAlgorithmInputs(sourceDataSetId, algorithm);
-			Collection<Object> results = message.isEmpty() ? applyAlgorithms.createValueFromAlgorithm(
+			Collection<Object> results = StringUtils.isEmpty(message) ? applyAlgorithms.createValueFromAlgorithm(
 					feature.getDataType(), sourceDataSetId, algorithm).values() : Collections.emptyList();
 			jsonResults.put("results", results);
 			jsonResults.put("message", message);

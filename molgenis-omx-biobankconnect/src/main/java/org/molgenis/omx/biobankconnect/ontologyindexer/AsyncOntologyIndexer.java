@@ -249,7 +249,7 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 
 	public static String createOntologyDocumentType(String ontologyIri)
 	{
-		if (ontologyIri.isEmpty()) return StringUtils.EMPTY;
+		if (StringUtils.isEmpty(ontologyIri)) return null;
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append("ontology-").append(ontologyIri);
 		return stringBuilder.toString();
@@ -257,7 +257,7 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 
 	public static String createOntologyTermDocumentType(String ontologyIri)
 	{
-		if (ontologyIri.isEmpty()) return StringUtils.EMPTY;
+		if (StringUtils.isEmpty(ontologyIri)) return null;
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append("ontologyTerm-").append(ontologyIri);
 		return stringBuilder.toString();

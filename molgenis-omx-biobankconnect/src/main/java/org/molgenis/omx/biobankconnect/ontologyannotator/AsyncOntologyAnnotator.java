@@ -392,7 +392,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		boolean first = true;
 		for (String term : uniqueTerms)
 		{
-			if (!term.isEmpty() && !term.matches(OntologyTermQueryRepository.MULTI_WHITESPACES))
+			if (!StringUtils.isEmpty(term) && !term.matches(OntologyTermQueryRepository.MULTI_WHITESPACES))
 			{
 				if (!first)
 				{
@@ -481,9 +481,9 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			String ontologyName = data.get(OntologyTermIndexRepository.ONTOLOGY_NAME) == null ? StringUtils.EMPTY : data
 					.get(OntologyTermIndexRepository.ONTOLOGY_NAME).toString();
 			String ontologyTermSynonym = data.get(OntologyTermIndexRepository.SYNONYMS).toString();
-			String term = ontologyName.isEmpty() ? ontologyTermSynonym.toLowerCase() : ontologyName + ":"
+			String term = StringUtils.isEmpty(ontologyName) ? ontologyTermSynonym.toLowerCase() : ontologyName + ":"
 					+ ontologyTermSynonym.toLowerCase();
-			String termIdentifier = ontologyName.isEmpty() ? uri : ontologyName + ":" + uri;
+			String termIdentifier = StringUtils.isEmpty(ontologyName) ? uri : ontologyName + ":" + uri;
 			OntologyTerm ot = new OntologyTerm();
 			ot.setIdentifier(termIdentifier);
 			ot.setTermAccession(uri);

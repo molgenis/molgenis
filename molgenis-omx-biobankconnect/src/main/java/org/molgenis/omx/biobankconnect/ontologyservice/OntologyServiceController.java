@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.Writable;
@@ -78,7 +79,8 @@ public class OntologyServiceController extends MolgenisPluginController
 	String ontologyUrl, @RequestParam(value = "inputTerms", required = true)
 	String inputTerms, Model model)
 	{
-		if (ontologyUrl == null || inputTerms == null || ontologyUrl.isEmpty() || inputTerms.isEmpty()) return init(model);
+
+		if (StringUtils.isEmpty(ontologyUrl) || StringUtils.isEmpty(inputTerms)) return init(model);
 
 		this.ontologyUrl = ontologyUrl;
 		this.inputLines = Arrays.asList(inputTerms.split("\n"));
@@ -92,7 +94,7 @@ public class OntologyServiceController extends MolgenisPluginController
 	String ontologyUrl, @RequestParam(value = "file", required = true)
 	Part file, Model model) throws IOException
 	{
-		if (ontologyUrl == null || file == null || ontologyUrl.isEmpty()) return init(model);
+		if (StringUtils.isEmpty(ontologyUrl) || file == null) return init(model);
 		this.ontologyUrl = ontologyUrl;
 		CsvRepository reader = null;
 		try
@@ -159,7 +161,7 @@ public class OntologyServiceController extends MolgenisPluginController
 	EntityPager entityPager)
 	{
 		if (inputLines == null || inputLines.isEmpty()) throw new UnknownEntityException("The inputTerms is empty!");
-		if (ontologyUrl == null || ontologyUrl.isEmpty()) throw new UnknownEntityException("The ontologyUrl is empty!");
+		if (StringUtils.isEmpty(ontologyUrl)) throw new UnknownEntityException("The ontologyUrl is empty!");
 		List<Map<String, Object>> entities = new ArrayList<Map<String, Object>>();
 
 		int count = inputLines.size();
@@ -201,7 +203,7 @@ public class OntologyServiceController extends MolgenisPluginController
 			bufferedReader = new BufferedReader(new InputStreamReader(inputStream, Charset.forName("UTF-8")));
 			while ((line = bufferedReader.readLine()) != null)
 			{
-				if (!line.isEmpty()) terms.add(line.trim());
+				if (!StringUtils.isEmpty(line)) terms.add(line.trim());
 			}
 		}
 		finally

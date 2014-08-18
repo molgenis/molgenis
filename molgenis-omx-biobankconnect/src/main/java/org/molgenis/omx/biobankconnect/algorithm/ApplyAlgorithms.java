@@ -259,7 +259,7 @@ public class ApplyAlgorithms
 
 	public String validateAlgorithmInputs(Integer dataSetId, String algorithm)
 	{
-		if (algorithm.isEmpty())
+		if (StringUtils.isEmpty(algorithm))
 		{
 			return ("Algorithm is not defined!");
 		}
@@ -285,7 +285,7 @@ public class ApplyAlgorithms
 	public Map<Integer, Object> createValueFromAlgorithm(String dataType, Integer sourceDataSetId,
 			String algorithmScript)
 	{
-		if (algorithmScript.isEmpty()) return Collections.emptyMap();
+		if (StringUtils.isEmpty(algorithmScript)) return Collections.emptyMap();
 		List<String> featureNames = extractFeatureName(algorithmScript);
 		Iterable<ObservableFeature> featureIterators = dataService.findAll(ObservableFeature.ENTITY_NAME,
 				new QueryImpl().in(ObservableFeature.NAME, featureNames), ObservableFeature.class);
