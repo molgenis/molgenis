@@ -30,9 +30,7 @@ import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.Writable;
 import org.molgenis.data.csv.CsvRepository;
 import org.molgenis.data.excel.ExcelWriter;
-import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.LowerCaseProcessor;
-import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.rest.EntityCollectionResponse;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.support.MapEntity;
@@ -100,9 +98,6 @@ public class OntologyServiceController extends MolgenisPluginController
 		try
 		{
 			File uploadFile = fileStore.store(file.getInputStream(), file.getName() + "_input.txt");
-			CsvRepository csvRepository = new CsvRepository(uploadFile, Arrays.<CellProcessor> asList(
-					new LowerCaseProcessor(), new TrimProcessor()), OntologyService.DEFAULT_SEPARATOR);
-
 			inputLines = collectAllLinesFromFile(uploadFile);
 			model.addAttribute("total", inputLines.size());
 		}
