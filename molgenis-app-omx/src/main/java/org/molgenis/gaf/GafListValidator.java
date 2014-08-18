@@ -49,10 +49,8 @@ public class GafListValidator
 	@Autowired
 	private MolgenisSettings molgenisSettings;
 
-	public GafListValidationReport validate(Repository repository) throws IOException
+	public GafListValidationReport validate(GafListValidationReport report, Repository repository) throws IOException
 	{
-		GafListValidationReport report = new GafListValidationReport();
-
 		// retrieve validation patterns
 		Map<String, Pattern> patternMap = new HashMap<String, Pattern>();
 		for (String colName : COLUMNS)

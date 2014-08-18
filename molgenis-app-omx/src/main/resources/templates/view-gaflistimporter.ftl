@@ -10,22 +10,30 @@
 		</div>
 		<div class="row-fluid">	
 			<div class="span4">
-				<form id="gaflist-import-file-form" method="post" action="${context_url}" enctype="multipart/form-data" onsubmit="parent.showSpinner(function(){$('.modal-body').html('Validating and importing GAF list');});  return true;">
+				<form id="gaflist-import-file-form" method="post" action="${context_url}${action}" enctype="${enctype}" onsubmit="parent.showSpinner(function(){$('.modal-body').html('Work in progress..');});  return true;">
 					<h4>Import CSV file</h4>
 					<table class="table">
 						<tbody>
-							<tr>
-								<td nowrap><i>Separator:</i></td>
-								<td><input type="text" name="separator" class="span2" maxlength="1" value=""/></td>
-							</tr>
-							<tr>
-								<td nowrap><i>Choose file:</i></td>
-								<td><input type="file" name="csvFile" required/></td>
-							</tr>
-							<tr>
-								<td></td>
-								<td><input id="submitButton" type="submit" value="Submit file" class="btn btn-primary" /></td>
-							</tr>
+							<#if submit_state?? && submit_state>
+								<tr>
+									<td>File name: </td>
+									<td><#if fileName?has_content>${fileName}</#if></td>
+								</tr>
+								<tr>
+									<td></td>
+									<td><a id="backButton" href="${context_url}" class="btn">Back</a>
+									<input id="submitButton" type="submit" value="Import file" class="btn btn-success"/></td>
+								</tr>
+							<#else>
+								<tr>
+									<td nowrap><i>Choose file:</i></td>
+									<td><input type="file" name="csvFile" required/></td>
+								</tr>
+								<tr>
+									<td></td>
+									<td><input id="validateButton" type="submit" value="Validate file" class="btn btn-primary"/></td>
+								</tr>
+							</#if>
 						</tbody>
 					</table>
 				</form>
@@ -43,7 +51,7 @@
 					</ul>
 				</#if>
 				<#if (hasValidationError?? == true) && (hasValidationError == true)>
-					<h4>Validation report</h4>
+					<h4>Validation error report</h4>
 					${validationReport?if_exists}
 				</#if>
 			</div>

@@ -7,13 +7,29 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.annotation.PreDestroy;
+
+import org.apache.log4j.Logger;
+import org.molgenis.util.FileStore;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
+@Component
+@Scope("session")
 public class GafListValidationReport
 {
+	private static final Logger logger = Logger.getLogger(GafListValidationReport.class);
 	private final Map<String, List<GafListValidationError>> validationErrors;
 	private final List<String> validRunIds = new ArrayList<String>();
 	private final List<String> invalidRunIds = new ArrayList<String>();
 	private List<String> allRunIds = new ArrayList<String>();
 	private String dataSetName = null;
+	private String tempFileName;
+	private String tempFileOriginalName;
+
+	@Autowired
+	FileStore fileStore;
 
 	public GafListValidationReport()
 	{
@@ -136,5 +152,41 @@ public class GafListValidationReport
 	public void setDataSetName(String dataSetName)
 	{
 		this.dataSetName = dataSetName;
+	}
+
+	public String getTempFileName()
+	{
+		return tempFileName;
+	}
+
+	public void setTempFileName(String tempFileName)
+	{
+		this.tempFileName = tempFileName;
+	}
+
+	public String getTempFileOriginalName()
+	{
+		return tempFileOriginalName;
+	}
+
+	public void setTempFileOriginalName(String tempFileOriginalName)
+	{
+		this.tempFileOriginalName = tempFileOriginalName;
+	}
+
+	@PreDestroy
+	public void cleanUp() throws Exception
+	{
+		String fileName = this.getTempFileName();
+		if (null != fileName && !fileStore.delete(fileName)) logger.error("File " + this.getTempFileName()
+				+ " cannot be deleted from filestore!");
+
+		this.validationErrors.clear();
+		this.validRunIds.clear();
+		this.invalidRunIds.clear();
+		this.allRunIds.clear();
+		this.dataSetName = null;
+		this.tempFileName = null;
+		this.tempFileOriginalName = null;
 	}
 }
