@@ -1,7 +1,9 @@
 package org.molgenis.omx.biobankconnect.wizard;
 
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -62,7 +64,7 @@ public class CurrentUserStatus
 
 		long totalNumber = totalNumberOfQueriesForUser.get(userName);
 		int finishedNumber = finishedNumberOfQueriesForUser.get(userName);
-		DecimalFormat df = new DecimalFormat("#.##");
+		DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(Locale.ENGLISH));
 		Double percentage = totalNumber == 0 ? new Double(0) : ((double) finishedNumber) / totalNumber;
 		percentage = Double.parseDouble(df.format(percentage * 100));
 		return percentage.intValue();
