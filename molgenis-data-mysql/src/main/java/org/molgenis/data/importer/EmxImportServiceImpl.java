@@ -240,8 +240,8 @@ public class EmxImportServiceImpl implements EmxImporterService
 			if (attributeDataType != null)
 			{
 				FieldType t = MolgenisFieldTypes.getType(attributeDataType);
-				if (t == null) throw new IllegalArgumentException("attributes.type error on line " + i + ": "
-						+ attributeDataType + " unknown");
+				if (t == null) throw new IllegalArgumentException("attributes.dataType error on line " + i + ": "
+						+ attributeDataType + " unknown data type");
 				defaultAttributeMetaData.setDataType(t);
 			}
 			else
