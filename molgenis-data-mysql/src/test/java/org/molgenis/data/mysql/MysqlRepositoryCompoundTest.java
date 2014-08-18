@@ -14,6 +14,7 @@ public class MysqlRepositoryCompoundTest extends MysqlRepositoryAbstractDatatype
 	{
 		DefaultEntityMetaData compoundMD = new DefaultEntityMetaData("compound").setAbstract(true);
 		compoundMD.addAttribute("col2").setDataType(MolgenisFieldTypes.BOOL);
+		coll.add(compoundMD);
 
 		DefaultEntityMetaData rootMD = new DefaultEntityMetaData("CompoundTest").setLabel("CompoundTest");
 		rootMD.setIdAttribute("col1");
