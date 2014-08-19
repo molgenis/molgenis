@@ -47,6 +47,18 @@ public class ResourceUtils
 		return getString(resourceUrl, charset);
 	}
 
+	public static byte[] getBytes(String resourceName) throws IOException
+	{
+		URL resourceUrl = Resources.getResource(resourceName);
+		return getBytes(resourceUrl);
+	}
+
+	public static byte[] getBytes(Class<?> contextClass, String resourceName) throws IOException
+	{
+		URL resourceUrl = Resources.getResource(contextClass, resourceName);
+		return getBytes(resourceUrl);
+	}
+
 	/**
 	 * Workaround for http://bugs.java.com/bugdatabase/view_bug.do?bug_id=4466485
 	 * 
@@ -68,5 +80,10 @@ public class ResourceUtils
 	private static String getString(URL resourceUrl, Charset charset) throws IOException
 	{
 		return Resources.toString(resourceUrl, charset);
+	}
+
+	private static byte[] getBytes(URL resourceUrl) throws IOException
+	{
+		return Resources.toByteArray(resourceUrl);
 	}
 }

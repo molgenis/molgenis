@@ -1,3 +1,4 @@
+<#include "resource-macros.ftl">
 <#include "/charts-forms/view-scatterplot.ftl" parse=false>
 <#include "/charts-forms/view-boxplot.ftl" parse=false>
 <#include "/charts-forms/view-heatmap.ftl" parse=false>
@@ -13,13 +14,13 @@
 <script>
 	if (typeof Highcharts === 'undefined') {
 		$.when(
-			$.ajax("/js/highstock-1.3.6/highstock.js", {'cache': true})
+			$.ajax("<@resource_href "/js/highstock-1.3.6/highstock.js"/>", {'cache': true})
 		).then(function() {
 			$.when(
-				$.ajax("/js/highstock-1.3.6/highcharts-more.js", {'cache': true})
+				$.ajax("<@resource_href "/js/highstock-1.3.6/highcharts-more.js"/>", {'cache': true})
 			);
 		});
 	}
 	
-	$.ajax("/js/dataexplorer-charts.js", {'cache': true});
+	$.ajax("<@resource_href "/js/dataexplorer-charts.js"/>", {'cache': true});
 </script>

@@ -9,6 +9,7 @@ public class MolgenisPluginAttributes
 	public static final String KEY_PLUGIN_ID = "plugin_id";
 	public static final String KEY_MOLGENIS_UI = "molgenis_ui";
 	public static final String KEY_AUTHENTICATED = "authenticated";
+	public static final String KEY_RESOURCE_FINGERPRINT_REGISTRY = "resource_fingerprint_registry";
 
 	private MolgenisPluginAttributes()
 	{
