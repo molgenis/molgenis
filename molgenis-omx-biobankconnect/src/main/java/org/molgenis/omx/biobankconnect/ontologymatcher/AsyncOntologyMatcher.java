@@ -29,6 +29,8 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.DefaultEntityValidator;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.omx.biobankconnect.algorithm.ApplyAlgorithms;
+import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermQueryRepository;
+import org.molgenis.omx.biobankconnect.ontologyindexer.AsyncOntologyIndexer;
 import org.molgenis.omx.biobankconnect.utils.NGramMatchingModel;
 import org.molgenis.omx.biobankconnect.utils.StoreMappingRepository;
 import org.molgenis.omx.biobankconnect.wizard.CurrentUserStatus;
@@ -77,7 +79,12 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	private static final String ENTITY_ID = "id";
 	private static final String ENTITY_TYPE = "type";
 	private static final String PATTERN_MATCH = "[^a-zA-Z0-9 ]";
-	private static final String REPLACEMENT_STRING = " ";
+	private static final String COMMON_SEPERATOR = ",";
+	private static final String ALTERNATIVE_DEFINITION_SEPERATOR = "&&&";
+	private static final int DEFAULT_RETRIEVAL_DOCUMENTS_SIZE = 50;
+	private static final String MULTIPLE_NUMBERS_PATTERN = "[0-9]+";
+	private static final String NODEPATH_SEPARATOR = "\\.";
+
 	private static final AtomicInteger runningProcesses = new AtomicInteger();
 
 	@Autowired
@@ -158,10 +165,10 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			if (feature != null)
 			{
 				List<String> boostedOntologyTermUris = Arrays.asList(columnValueMap.get(FIELD_BOOST_ONTOLOGYTERM)
-						.toString().split(","));
+						.toString().split(COMMON_SEPERATOR));
 				String description = StringUtils.isEmpty(feature.getDescription()) ? feature.getName().replaceAll(
-						PATTERN_MATCH, REPLACEMENT_STRING) : feature.getDescription().replaceAll(PATTERN_MATCH,
-						REPLACEMENT_STRING);
+						PATTERN_MATCH, OntologyTermQueryRepository.SINGLE_WHITESPACE) : feature.getDescription()
+						.replaceAll(PATTERN_MATCH, OntologyTermQueryRepository.SINGLE_WHITESPACE);
 
 				List<String> ontologyTermUris = Lists.transform(feature.getDefinitions(),
 						new Function<OntologyTerm, String>()
@@ -229,9 +236,13 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 				if (entityID != null)
 				{
 					String mappedIds = entityID.toString();
+					// Because a list of IDs is stored as string in the
+					// index/database such as [1,2], therefore an empty check is
+					// needed here. If the value is an empty list like '[]', the
+					// minimal length is 2
 					if (mappedIds.length() > 2)
 					{
-						for (String id : mappedIds.substring(1, mappedIds.length() - 1).split(","))
+						for (String id : mappedIds.substring(1, mappedIds.length() - 1).split(COMMON_SEPERATOR))
 						{
 							mappedFeatureIds.add(id.trim());
 						}
@@ -251,7 +262,10 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 				if (!StringUtils.isEmpty(description))
 				{
 					description = StringUtils.join(
-							stemMembers(Arrays.asList(removeStopWords(description).split(" +")), stemmer), " ");
+							stemMembers(
+									Arrays.asList(removeStopWords(description).split(
+											OntologyTermQueryRepository.MULTI_WHITESPACES)), stemmer),
+							OntologyTermQueryRepository.SINGLE_WHITESPACE);
 					queryRules.add(new QueryRule(ObservableFeature.DESCRIPTION, Operator.EQUALS, description));
 					queryRules.add(new QueryRule(FIELD_DESCRIPTION_STOPWORDS, Operator.EQUALS, description));
 				}
@@ -318,7 +332,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	private SearchResult retrieveFeatureFromIndex(Integer protocolId, Iterable<Integer> featureIds)
 	{
 		QueryImpl query = new QueryImpl();
-		query.pageSize(100000);
+		query.pageSize(Integer.MAX_VALUE);
 		if (featureIds != null && Iterables.size(featureIds) > 0)
 		{
 			for (Integer featureId : featureIds)
@@ -340,7 +354,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		SearchResult result = null;
 		try
 		{
-			q.pageSize(50);
+			q.pageSize(DEFAULT_RETRIEVAL_DOCUMENTS_SIZE);
 			MultiSearchRequest request = new MultiSearchRequest(Arrays.asList(CATALOGUE_PREFIX + protocolId,
 					FEATURE_CATEGORY + protocolId), q, null);
 			result = searchService.multiSearch(request);
@@ -423,20 +437,20 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 
 		List<QueryRule> queryRules = new ArrayList<QueryRule>();
 		List<QueryRule> shouldQueryRules = new ArrayList<QueryRule>();
-		List<String> uniqueTokens = stemMembers(Arrays.asList(description.split(" +")), stemmer);
+		List<String> uniqueTokens = stemMembers(
+				Arrays.asList(description.split(OntologyTermQueryRepository.MULTI_WHITESPACES)), stemmer);
 		for (OntologyTermContainer ontologyTermContainer : ontologyTermContainers)
 		{
 			Set<String> existingQueryStrings = new HashSet<String>();
 			for (Entry<String, Boolean> entry : ontologyTermContainer.getAllPaths().entrySet())
 			{
 				String currentNodePath = entry.getKey();
-				int parentNodeLevel = currentNodePath.split("\\.").length;
-
+				int parentNodeLevel = currentNodePath.split(NODEPATH_SEPARATOR).length;
 				Query query = new QueryImpl().eq(NODE_PATH, entry.getKey()).pageSize(Integer.MAX_VALUE);
-				SearchResult result = searchService.search(new SearchRequest("ontologyTerm-"
-						+ ontologyTermContainer.getOntologyIRI(), query, null));
+				SearchResult result = searchService.search(new SearchRequest(AsyncOntologyIndexer
+						.createOntologyTermDocumentType(ontologyTermContainer.getOntologyIRI()), query, null));
 
-				Pattern pattern = Pattern.compile("[0-9]+");
+				Pattern pattern = Pattern.compile(MULTIPLE_NUMBERS_PATTERN);
 				Matcher matcher = null;
 
 				// Assume the position is -1, which represents the ontology term
@@ -487,13 +501,15 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 
 								if (!matcher.find() && !StringUtils.isEmpty(ontologyTermSynonym))
 								{
-									int levelDown = nodePath.split("\\.").length - parentNodeLevel;
+									int levelDown = nodePath.split(NODEPATH_SEPARATOR).length - parentNodeLevel;
 									double boostedNumber = Math.pow(0.5, levelDown);
 
 									StringBuilder boostedSynonym = new StringBuilder();
-									for (String eachToken : ontologyTermSynonym.split(" +"))
+									for (String eachToken : ontologyTermSynonym
+											.split(OntologyTermQueryRepository.MULTI_WHITESPACES))
 									{
-										if (eachToken.length() != 0) boostedSynonym.append(' ');
+										if (eachToken.length() != 0) boostedSynonym
+												.append(OntologyTermQueryRepository.SINGLE_WHITESPACE);
 										boostedSynonym.append(eachToken).append('^').append(boostedNumber);
 									}
 									ontologyTermSynonym = boostedSynonym.toString();
@@ -558,9 +574,9 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 				{
 					String nodePath = entry.getKey();
 					boolean isBoosted = ontologyTermContainer.getAllPaths().get(nodePath);
-					for (String definition : alternativeDefinitions.split("&&&"))
+					for (String definition : alternativeDefinitions.split(ALTERNATIVE_DEFINITION_SEPERATOR))
 					{
-						List<String> ontologyTermUris = Arrays.asList(definition.split(","));
+						List<String> ontologyTermUris = Arrays.asList(definition.split(COMMON_SEPERATOR));
 						queryRules.addAll(createQueryRules(
 								description,
 								collectOntologyTermInfo(ontologyTermUris,
@@ -574,15 +590,17 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 
 	private String removeStopWords(String originalTerm)
 	{
-		Set<String> tokens = new LinkedHashSet<String>(Arrays.asList(originalTerm.trim().toLowerCase().split(" +")));
+		Set<String> tokens = new LinkedHashSet<String>(Arrays.asList(originalTerm.trim().toLowerCase()
+				.split(OntologyTermQueryRepository.MULTI_WHITESPACES)));
 		tokens.removeAll(NGramMatchingModel.STOPWORDSLIST);
-		return StringUtils.join(tokens.toArray(), ' ');
+		return StringUtils.join(tokens.toArray(), OntologyTermQueryRepository.SINGLE_WHITESPACE);
 	}
 
 	private Integer locateTermInDescription(List<String> uniqueSets, String ontologyTermSynonym, PorterStemmer stemmer)
 	{
 		int finalIndex = -1;
-		List<String> termsFromDescription = stemMembers(Arrays.asList(ontologyTermSynonym.split(" +")), stemmer);
+		List<String> termsFromDescription = stemMembers(
+				Arrays.asList(ontologyTermSynonym.split(OntologyTermQueryRepository.MULTI_WHITESPACES)), stemmer);
 		for (String eachTerm : termsFromDescription)
 		{
 			if (!uniqueSets.contains(eachTerm))
@@ -822,7 +840,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	private boolean updateExistingMapping(String mappingDataSetIdentifier, OntologyMatcherRequest request)
 	{
 		QueryImpl query = new QueryImpl();
-		query.pageSize(100000);
+		query.pageSize(Integer.MAX_VALUE);
 		query.addRule(new QueryRule(STORE_MAPPING_FEATURE, Operator.EQUALS, request.getFeatureId()));
 		SearchResult result = searchService.search(new SearchRequest(mappingDataSetIdentifier, query, null));
 
@@ -858,11 +876,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 					dataService.update(StringValue.ENTITY_NAME, algorithmScriptValue);
 					dataService.getCrudRepository(StringValue.ENTITY_NAME).flush();
 					// Update algorithm script in index
-					StringBuilder updateScriptBuilder = new StringBuilder();
-					updateScriptBuilder.append(STORE_MAPPING_ALGORITHM_SCRIPT).append('=').append("\"")
-							.append(algorithmScript).append("\"");
 					searchService.updateDocumentById(mappingDataSetIdentifier, hit.getId(),
-							updateScriptBuilder.toString());
+							constructIndexUpdateScript(STORE_MAPPING_ALGORITHM_SCRIPT, algorithmScript));
 				}
 			}
 
@@ -886,17 +901,35 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 					dataService.update(StringValue.ENTITY_NAME, mappedFeaturesValue);
 					dataService.getCrudRepository(StringValue.ENTITY_NAME).flush();
 					// Update mappedFeatures in index
-					StringBuilder updateMappedFeaturesBuilder = new StringBuilder();
-					updateMappedFeaturesBuilder.append(STORE_MAPPING_MAPPED_FEATURE).append('=').append("\"")
-							.append(convertToFeatureIds.toString()).append("\"");
 					searchService.updateDocumentById(mappingDataSetIdentifier, hit.getId(),
-							updateMappedFeaturesBuilder.toString());
+							constructIndexUpdateScript(STORE_MAPPING_MAPPED_FEATURE, convertToFeatureIds.toString()));
 				}
 			}
 		}
 		return result.getTotalHitCount() > 0;
 	}
 
+	/**
+	 * A help function to create ElasticSerach update script syntax
+	 * 
+	 * @param field
+	 * @param newValue
+	 * @return
+	 */
+	private String constructIndexUpdateScript(String field, String newValue)
+	{
+		StringBuilder updateScriptSyntax = new StringBuilder();
+		updateScriptSyntax.append(field).append('=').append("\"").append(newValue).append("\"");
+		return updateScriptSyntax.toString();
+	}
+
+	/**
+	 * A helper function to extract featureName from the algorithm script and
+	 * convert them to database IDs
+	 * 
+	 * @param request
+	 * @return
+	 */
 	private String convertToFeatureIds(OntologyMatcherRequest request)
 	{
 		List<Integer> featureIds = new ArrayList<Integer>();

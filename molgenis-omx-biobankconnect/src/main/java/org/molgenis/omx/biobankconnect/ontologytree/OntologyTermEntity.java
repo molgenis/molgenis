@@ -47,13 +47,13 @@ public class OntologyTermEntity extends AbstractOntologyEntity
 			if (!Boolean.parseBoolean(columnValueMap.get(OntologyTermIndexRepository.LAST).toString()))
 			{
 				String currentNodePath = columnValueMap.get(OntologyTermIndexRepository.NODE_PATH).toString();
-				String currentOntologyTermUrl = columnValueMap.get(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI)
+				String currentOntologyTermIri = columnValueMap.get(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI)
 						.toString();
-				String ontologyUrl = columnValueMap.get(OntologyTermIndexRepository.ONTOLOGY_IRI).toString();
+				String ontologyIri = columnValueMap.get(OntologyTermIndexRepository.ONTOLOGY_IRI).toString();
 				Query q = new QueryImpl().eq(OntologyTermIndexRepository.PARENT_NODE_PATH, currentNodePath).and()
-						.eq(OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_URL, currentOntologyTermUrl)
+						.eq(OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_IRI, currentOntologyTermIri)
 						.pageSize(Integer.MAX_VALUE);
-				String documentType = AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyUrl);
+				String documentType = AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyIri);
 				SearchRequest searchRequest = new SearchRequest(documentType, q, null);
 				SearchResult result = searchService.search(searchRequest);
 				for (Hit hit : result.getSearchHits())

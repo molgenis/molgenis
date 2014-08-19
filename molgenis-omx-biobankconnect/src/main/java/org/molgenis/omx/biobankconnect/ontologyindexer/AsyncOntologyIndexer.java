@@ -126,67 +126,73 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 		Client client = node.client();
 		OntologyTermIndexRepository ontologyTermIndexRepository = new OntologyTermIndexRepository(ontologyLoader,
 				createOntologyTermDocumentType(indexingOntologyIri), searchService);
-		String documentType = MapperTypeSanitizer.sanitizeMapperType(ontologyTermIndexRepository.getName());
-		createMappings(client, ontologyTermIndexRepository);
-		Iterator<Entity> iterator = ontologyTermIndexRepository.iterator();
-		Set<String> dynamaticFields = ontologyTermIndexRepository.getDynamaticFields();
-		long count = 0;
-		long start = 0;
-		long t0 = System.currentTimeMillis();
-		BulkRequestBuilder bulkRequest = null;
-		while (iterator.hasNext())
+		try
 		{
-			if (count % BATCH_SIZE == 0)
+			String documentType = MapperTypeSanitizer.sanitizeMapperType(ontologyTermIndexRepository.getName());
+			createMappings(client, ontologyTermIndexRepository);
+			Iterator<Entity> iterator = ontologyTermIndexRepository.iterator();
+			Set<String> dynamaticFields = ontologyTermIndexRepository.getDynamaticFields();
+			long count = 0;
+			long start = 0;
+			long t0 = System.currentTimeMillis();
+			BulkRequestBuilder bulkRequest = null;
+			while (iterator.hasNext())
 			{
-				start = count;
-				bulkRequest = client.prepareBulk();
-			}
-
-			Entity entity = iterator.next();
-			Map<String, Object> docs = new HashMap<String, Object>();
-			Iterable<String> attributeNames = entity.getAttributeNames();
-			for (String attributeName : attributeNames)
-			{
-				docs.put(attributeName, entity.get(attributeName));
-			}
-			// Add dynamic fields to all the docs so that they have exactly set
-			// of attributes
-			for (String dynamaticField : dynamaticFields)
-			{
-				if (!docs.containsKey(dynamaticField))
+				if (count % BATCH_SIZE == 0)
 				{
-					docs.put(dynamaticField, StringUtils.EMPTY);
-				}
-			}
-			bulkRequest.add(client.prepareIndex("molgenis", documentType).setSource(docs));
-			count++;
-
-			// Commit if BATCH_SIZE is reached
-			if (count == (start + BATCH_SIZE))
-			{
-				BulkResponse bulkResponse = bulkRequest.execute().actionGet();
-				if (bulkResponse.hasFailures())
-				{
-					throw new RuntimeException("error while indexing row [" + count + "]: " + bulkResponse);
+					start = count;
+					bulkRequest = client.prepareBulk();
 				}
 
-				long t = (System.currentTimeMillis() - t0) / 1000;
-				logger.info("Imported [" + count + "] rows in [" + t + "] sec.");
+				Entity entity = iterator.next();
+				Map<String, Object> docs = new HashMap<String, Object>();
+				Iterable<String> attributeNames = entity.getAttributeNames();
+				for (String attributeName : attributeNames)
+				{
+					docs.put(attributeName, entity.get(attributeName));
+				}
+				// Add dynamic fields to all the docs so that they have exactly
+				// set
+				// of attributes
+				for (String dynamaticField : dynamaticFields)
+				{
+					if (!docs.containsKey(dynamaticField))
+					{
+						docs.put(dynamaticField, StringUtils.EMPTY);
+					}
+				}
+				bulkRequest.add(client.prepareIndex("molgenis", documentType).setSource(docs));
+				count++;
+
+				// Commit if BATCH_SIZE is reached
+				if (count == (start + BATCH_SIZE))
+				{
+					BulkResponse bulkResponse = bulkRequest.execute().actionGet();
+					if (bulkResponse.hasFailures())
+					{
+						throw new RuntimeException("error while indexing row [" + count + "]: " + bulkResponse);
+					}
+
+					long t = (System.currentTimeMillis() - t0) / 1000;
+					logger.info("Imported [" + count + "] rows in [" + t + "] sec.");
+				}
 			}
-		}
 
-		// Commit the rest
-		BulkResponse bulkResponse = bulkRequest.execute().actionGet();
-		if (bulkResponse.hasFailures())
+			// Commit the rest
+			BulkResponse bulkResponse = bulkRequest.execute().actionGet();
+			if (bulkResponse.hasFailures())
+			{
+				throw new RuntimeException("error while indexing row [" + count + "]: " + bulkResponse);
+			}
+
+			long t = (System.currentTimeMillis() - t0) / 1000;
+			logger.info("Import of ontology term from ontology [" + documentType + "] completed in " + t
+					+ " sec. Added [" + count + "] rows.");
+		}
+		finally
 		{
-			throw new RuntimeException("error while indexing row [" + count + "]: " + bulkResponse);
+			if (ontologyTermIndexRepository != null) ontologyTermIndexRepository.close();
 		}
-
-		long t = (System.currentTimeMillis() - t0) / 1000;
-		logger.info("Import of ontology term from ontology [" + documentType + "] completed in " + t + " sec. Added ["
-				+ count + "] rows.");
-
-		ontologyTermIndexRepository.close();
 	}
 
 	private void createMappings(Client client, OntologyTermIndexRepository ontologyTermIndexRepository)

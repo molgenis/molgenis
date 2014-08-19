@@ -185,7 +185,7 @@ public class OntologyServiceController extends MolgenisPluginController
 	public SearchResult query(@RequestBody
 	OntologyServiceRequest ontologyTermRequest)
 	{
-		String ontologyUrl = ontologyTermRequest.getOntologyUrl();
+		String ontologyUrl = ontologyTermRequest.getOntologyIri();
 		String queryString = ontologyTermRequest.getQueryString();
 		if (ontologyUrl == null || queryString == null) return new SearchResult(0, Collections.<Hit> emptyList());
 		return ontologyService.search(ontologyUrl, queryString);

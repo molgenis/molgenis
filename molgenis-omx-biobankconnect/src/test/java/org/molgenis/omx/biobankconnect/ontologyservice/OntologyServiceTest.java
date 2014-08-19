@@ -71,7 +71,7 @@ public class OntologyServiceTest
 		columnValueMap4.put(OntologyTermIndexRepository.ROOT, false);
 		columnValueMap4.put(OntologyTermIndexRepository.NODE_PATH, "1.2.3");
 		columnValueMap4.put(OntologyTermIndexRepository.PARENT_NODE_PATH, "1.2");
-		columnValueMap4.put(OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_URL, "http://www.ontology.test#term1");
+		columnValueMap4.put(OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_IRI, "http://www.ontology.test#term1");
 		columnValueMap4.put(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI, "http://www.ontology.test#term2");
 		columnValueMap4.put(OntologyTermIndexRepository.ONTOLOGY_TERM, "ontology term 2");
 		columnValueMap4.put(OntologyTermIndexRepository.SYNONYMS, "OntologyTerm two");
@@ -88,7 +88,7 @@ public class OntologyServiceTest
 		columnValueMap5.put(OntologyTermIndexRepository.ROOT, false);
 		columnValueMap5.put(OntologyTermIndexRepository.NODE_PATH, "1.2.4");
 		columnValueMap5.put(OntologyTermIndexRepository.PARENT_NODE_PATH, "1.2");
-		columnValueMap5.put(OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_URL, "http://www.ontology.test#term1");
+		columnValueMap5.put(OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_IRI, "http://www.ontology.test#term1");
 		columnValueMap5.put(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI, "http://www.ontology.test#term3");
 		columnValueMap5.put(OntologyTermIndexRepository.ONTOLOGY_TERM, "ontology term 3");
 		columnValueMap5.put(OntologyTermIndexRepository.SYNONYMS, "OntologyTerm three");
@@ -120,7 +120,7 @@ public class OntologyServiceTest
 				searchService.search(new SearchRequest(AsyncOntologyIndexer
 						.createOntologyTermDocumentType("http://www.ontology.test"), new QueryImpl()
 						.eq(OntologyTermIndexRepository.PARENT_NODE_PATH, "1.2").and()
-						.eq(OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_URL, "http://www.ontology.test#term1")
+						.eq(OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_IRI, "http://www.ontology.test#term1")
 						.pageSize(5000), null))).thenReturn(new SearchResult(2, Arrays.asList(hit4, hit5)));
 
 		when(
@@ -197,7 +197,7 @@ public class OntologyServiceTest
 	@Test
 	public void getOntologyByUrl()
 	{
-		Hit hit = ontologyService.getOntologyByUrl("http://www.ontology.test");
+		Hit hit = ontologyService.getOntologyByIri("http://www.ontology.test");
 		assertEquals(hit.getId(), "ontology-1");
 
 	}

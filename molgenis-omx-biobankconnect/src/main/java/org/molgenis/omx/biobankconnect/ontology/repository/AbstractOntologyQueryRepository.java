@@ -1,6 +1,7 @@
 package org.molgenis.omx.biobankconnect.ontology.repository;
 
 import java.util.Iterator;
+import java.util.List;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -21,11 +22,8 @@ public abstract class AbstractOntologyQueryRepository extends AbstractOntologyRe
 
 	public Hit findOneInternal(String documentType, Query q)
 	{
-		for (Hit hit : searchService.search(new SearchRequest(documentType, q, null)).getSearchHits())
-		{
-			return hit;
-		}
-		return null;
+		List<Hit> searchHits = searchService.search(new SearchRequest(documentType, q, null)).getSearchHits();
+		return searchHits != null && searchHits.size() > 0 ? searchHits.get(0) : null;
 	}
 
 	@Override

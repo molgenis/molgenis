@@ -54,7 +54,7 @@ public class OntologyTermIndexRepositoryTest
 		columnValueMap2.put(OntologyTermIndexRepository.ROOT, false);
 		columnValueMap2.put(OntologyTermIndexRepository.NODE_PATH, "1.2.3");
 		columnValueMap2.put(OntologyTermIndexRepository.PARENT_NODE_PATH, "1.2");
-		columnValueMap2.put(OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_URL, ontologyIRI + "#term1");
+		columnValueMap2.put(OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_IRI, ontologyIRI + "#term1");
 		columnValueMap2.put(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI, ontologyIRI + "#term2");
 		columnValueMap2.put(OntologyTermIndexRepository.ONTOLOGY_TERM, "ontology term 2");
 		columnValueMap2.put(OntologyTermIndexRepository.SYNONYMS, "OT-2");
@@ -70,7 +70,7 @@ public class OntologyTermIndexRepositoryTest
 		columnValueMap3.put(OntologyTermIndexRepository.ROOT, false);
 		columnValueMap3.put(OntologyTermIndexRepository.NODE_PATH, "1.2.4");
 		columnValueMap3.put(OntologyTermIndexRepository.PARENT_NODE_PATH, "1.2");
-		columnValueMap3.put(OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_URL, ontologyIRI + "#term1");
+		columnValueMap3.put(OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_IRI, ontologyIRI + "#term1");
 		columnValueMap3.put(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI, ontologyIRI + "#term3");
 		columnValueMap3.put(OntologyTermIndexRepository.ONTOLOGY_TERM, "ontology term 3");
 		columnValueMap3.put(OntologyTermIndexRepository.SYNONYMS, "OT-3");

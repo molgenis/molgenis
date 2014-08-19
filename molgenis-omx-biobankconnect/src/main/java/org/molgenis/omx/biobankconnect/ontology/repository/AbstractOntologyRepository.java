@@ -21,7 +21,7 @@ public abstract class AbstractOntologyRepository implements Repository
 	public final static String ID = "id";
 	public final static String NODE_PATH = "nodePath";
 	public final static String PARENT_NODE_PATH = "parentNodePath";
-	public final static String PARENT_ONTOLOGY_TERM_URL = "parentOntologyTermIRI";
+	public final static String PARENT_ONTOLOGY_TERM_IRI = "parentOntologyTermIRI";
 	public final static String FIELDTYPE = "fieldType";
 	public final static String ROOT = "root";
 	public final static String LAST = "isLast";
@@ -39,6 +39,7 @@ public abstract class AbstractOntologyRepository implements Repository
 	public final static String ILLEGAL_CHARACTERS_REPLACEMENT = "\\s";
 	public final static String NODE_PATH_REPLACEMENT_PATTERN = "\\.[0-9]+$";
 	public final static String MULTI_WHITESPACES = " +";
+	public final static String SINGLE_WHITESPACE = " ";
 
 	@Autowired
 	public AbstractOntologyRepository(String entityName, SearchService searchService)
@@ -70,7 +71,7 @@ public abstract class AbstractOntologyRepository implements Repository
 			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(
 					OntologyTermIndexRepository.PARENT_NODE_PATH));
 			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(
-					OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_URL));
+					OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_IRI));
 			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(FIELDTYPE));
 			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermIndexRepository.LAST,
 					FieldTypeEnum.BOOL));
@@ -104,17 +105,7 @@ public abstract class AbstractOntologyRepository implements Repository
 
 	}
 
-	@Override
-	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
+	public abstract <E extends Entity> Iterable<E> iterator(Class<E> clazz);
 
-	@Override
-	public String getUrl()
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
+	public abstract String getUrl();
 }

@@ -26,13 +26,13 @@ public class OntologyTermQueryRepository extends AbstractOntologyQueryRepository
 	public final static String DEFAULT_ONTOLOGY_TERM_REPO = "ontologytermindex";
 	private final static String BASE_URL = "ontologytermindex://";
 	private final static List<String> reservedAttributeName = Arrays.asList("score");
-	private final String ontologyUrl;
+	private final String ontologyIri;
 
 	@Autowired
-	public OntologyTermQueryRepository(String entityName, String ontologyUrl, SearchService searchService)
+	public OntologyTermQueryRepository(String entityName, String ontologyIri, SearchService searchService)
 	{
 		super(entityName, searchService);
-		this.ontologyUrl = ontologyUrl;
+		this.ontologyIri = ontologyIri;
 		dynamicEntityMetaData();
 	}
 
@@ -48,7 +48,7 @@ public class OntologyTermQueryRepository extends AbstractOntologyQueryRepository
 				availableAttributes.add(attributeMetaData.getName().toLowerCase());
 			}
 			SearchResult resultResult = searchService.search(new SearchRequest(AsyncOntologyIndexer
-					.createOntologyTermDocumentType(ontologyUrl),
+					.createOntologyTermDocumentType(ontologyIri),
 					new QueryImpl().eq(OntologyTermQueryRepository.ENTITY_TYPE,
 							OntologyTermQueryRepository.TYPE_ONTOLOGYTERM).pageSize(1), null));
 			if (resultResult.getTotalHitCount() > 0)
@@ -73,7 +73,7 @@ public class OntologyTermQueryRepository extends AbstractOntologyQueryRepository
 		if (q.getRules().size() > 0) q.and();
 		q.eq(OntologyTermQueryRepository.ENTITY_TYPE, OntologyTermQueryRepository.TYPE_ONTOLOGYTERM);
 		for (Hit hit : searchService.search(
-				new SearchRequest(AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyUrl), q, null))
+				new SearchRequest(AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyIri), q, null))
 				.getSearchHits())
 		{
 			entities.add(new OntologyTermEntity(hit, getEntityMetaData(), searchService));
@@ -86,14 +86,14 @@ public class OntologyTermQueryRepository extends AbstractOntologyQueryRepository
 	{
 		if (q.getRules().size() > 0) q.and();
 		q.eq(OntologyTermIndexRepository.ENTITY_TYPE, OntologyTermIndexRepository.TYPE_ONTOLOGYTERM);
-		Hit hit = findOneInternal(AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyUrl), q);
+		Hit hit = findOneInternal(AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyIri), q);
 		return hit != null ? new OntologyTermEntity(hit, getEntityMetaData(), searchService) : null;
 	}
 
 	@Override
 	public Entity findOne(Object id)
 	{
-		Hit hit = searchService.searchById(AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyUrl),
+		Hit hit = searchService.searchById(AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyIri),
 				id.toString());
 		return hit != null ? new OntologyTermEntity(hit, getEntityMetaData(), searchService) : null;
 	}
@@ -107,7 +107,7 @@ public class OntologyTermQueryRepository extends AbstractOntologyQueryRepository
 	@Override
 	public long count(Query q)
 	{
-		return searchService.count(AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyUrl),
+		return searchService.count(AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyIri),
 				q.pageSize(Integer.MAX_VALUE).offset(Integer.MIN_VALUE));
 	}
 

@@ -57,13 +57,9 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 
 	private static final AtomicInteger runningProcesses = new AtomicInteger();
 	private static final Logger logger = Logger.getLogger(AsyncOntologyAnnotator.class);
-	// private static final String ILLEGAL_CHARACTERS_PATTERN =
-	// "[^(a-zA-Z0-9\\s)]";
-	// private static final String ILLEGAL_CHARACTERS_REPLACEMENT =
-	// StringUtils.EMPTY;
-	// private static final String MULTI_WHITESPACE = " +";
 	private static final String PROTOCOLTREE_PREFIX = "protocolTree-";
 	private static final String PROTOCOLTREE_TYPE_FIELD = "type";
+	private static final int SIZE_OF_ANNOTATION = 100;
 	private boolean complete = false;
 
 	@Autowired
@@ -258,7 +254,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			PorterStemmer stemmer = new PorterStemmer();
 
 			QueryImpl q = new QueryImpl();
-			q.pageSize(100000);
+			q.pageSize(Integer.MAX_VALUE);
 
 			q.addRule(new QueryRule(PROTOCOLTREE_TYPE_FIELD, Operator.EQUALS, ObservableFeature.ENTITY_NAME
 					.toLowerCase()));
@@ -387,7 +383,8 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		}
 
 		QueryImpl q = new QueryImpl();
-		q.pageSize(100);
+
+		q.pageSize(SIZE_OF_ANNOTATION);
 
 		boolean first = true;
 		for (String term : uniqueTerms)

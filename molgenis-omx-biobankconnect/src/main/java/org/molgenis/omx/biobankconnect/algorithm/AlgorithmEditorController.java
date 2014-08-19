@@ -37,7 +37,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.google.common.collect.Iterables;
 import com.google.gson.Gson;
 
 @Controller
@@ -188,10 +187,10 @@ public class AlgorithmEditorController extends MolgenisPluginController
 	public SearchResult query(@RequestBody
 	OntologyServiceRequest ontologyTermRequest)
 	{
-		String ontologyUrl = ontologyTermRequest.getOntologyUrl();
+		String ontologyIri = ontologyTermRequest.getOntologyIri();
 		String queryString = ontologyTermRequest.getQueryString();
 		if (queryString == null) return new SearchResult(0, Collections.<Hit> emptyList());
-		return ontologyService.search(ontologyUrl, queryString);
+		return ontologyService.search(ontologyIri, queryString);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/getmapping", produces = APPLICATION_JSON_VALUE)
@@ -248,11 +247,10 @@ public class AlgorithmEditorController extends MolgenisPluginController
 	 * @param sourceDataSetId
 	 * @return
 	 */
-	private Integer countRowsByDataSet(Integer sourceDataSetId)
+	private long countRowsByDataSet(Integer sourceDataSetId)
 	{
 		DataSet sourceDataSet = dataService.findOne(DataSet.ENTITY_NAME, sourceDataSetId, DataSet.class);
-		Iterable<ObservationSet> observationSets = dataService.findAll(ObservationSet.ENTITY_NAME,
-				new QueryImpl().eq(ObservationSet.PARTOFDATASET, sourceDataSet), ObservationSet.class);
-		return Iterables.size(observationSets);
+		return dataService.count(ObservationSet.ENTITY_NAME,
+				new QueryImpl().eq(ObservationSet.PARTOFDATASET, sourceDataSet));
 	}
 }

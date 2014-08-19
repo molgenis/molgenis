@@ -47,27 +47,27 @@ public class OntologyService
 		this.searchService = searchService;
 	}
 
-	public Hit getOntologyByUrl(String ontologyUrl)
+	public Hit getOntologyByIri(String ontologyIri)
 	{
 		QueryImpl q = new QueryImpl();
 		q.pageSize(Integer.MAX_VALUE);
 		q.addRule(new QueryRule(OntologyIndexRepository.ENTITY_TYPE, Operator.EQUALS,
 				OntologyIndexRepository.TYPE_ONTOLOGY));
 		q.addRule(new QueryRule(Operator.AND));
-		q.addRule(new QueryRule(OntologyIndexRepository.ONTOLOGY_IRI, Operator.EQUALS, ontologyUrl));
-		SearchRequest searchRequest = new SearchRequest(AsyncOntologyIndexer.createOntologyDocumentType(ontologyUrl),
+		q.addRule(new QueryRule(OntologyIndexRepository.ONTOLOGY_IRI, Operator.EQUALS, ontologyIri));
+		SearchRequest searchRequest = new SearchRequest(AsyncOntologyIndexer.createOntologyDocumentType(ontologyIri),
 				q, null);
 		List<Hit> searchHits = searchService.search(searchRequest).getSearchHits();
 		if (searchHits.size() > 0) return searchHits.get(0);
-		return new Hit(null, AsyncOntologyIndexer.createOntologyDocumentType(ontologyUrl),
+		return new Hit(null, AsyncOntologyIndexer.createOntologyDocumentType(ontologyIri),
 				Collections.<String, Object> emptyMap());
 	}
 
-	public Hit findOntologyTerm(String ontologyUrl, String ontologyTermUrl, String nodePath)
+	public Hit findOntologyTerm(String ontologyIri, String ontologyTermIri, String nodePath)
 	{
 		Query q = new QueryImpl().eq(OntologyTermIndexRepository.NODE_PATH, nodePath).and()
-				.eq(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI, ontologyTermUrl).pageSize(5000);
-		String documentType = AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyUrl);
+				.eq(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI, ontologyTermIri).pageSize(5000);
+		String documentType = AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyIri);
 		SearchResult result = searchService.search(new SearchRequest(documentType, q, null));
 		for (Hit hit : result.getSearchHits())
 		{
@@ -76,41 +76,41 @@ public class OntologyService
 		return new Hit(null, documentType, Collections.<String, Object> emptyMap());
 	}
 
-	public List<Hit> getChildren(String ontologyUrl, String parentOntologyTermUrl, String parentNodePath)
+	public List<Hit> getChildren(String ontologyIri, String parentOntologyTermIri, String parentNodePath)
 	{
 		Query q = new QueryImpl().eq(OntologyTermIndexRepository.PARENT_NODE_PATH, parentNodePath).and()
-				.eq(OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_URL, parentOntologyTermUrl).pageSize(5000);
-		String documentType = AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyUrl);
+				.eq(OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_IRI, parentOntologyTermIri).pageSize(5000);
+		String documentType = AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyIri);
 		List<Hit> listOfHits = new ArrayList<Hit>();
 		Set<String> processedOntologyTerms = new HashSet<String>();
 		for (Hit hit : searchService.search(new SearchRequest(documentType, q, null)).getSearchHits())
 		{
-			String ontologyTermUrl = hit.getColumnValueMap().get(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI)
+			String ontologyTermIri = hit.getColumnValueMap().get(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI)
 					.toString();
-			if (!processedOntologyTerms.contains(ontologyTermUrl))
+			if (!processedOntologyTerms.contains(ontologyTermIri))
 			{
 				listOfHits.add(hit);
-				processedOntologyTerms.add(ontologyTermUrl);
+				processedOntologyTerms.add(ontologyTermIri);
 			}
 		}
 		return listOfHits;
 	}
 
-	public List<Hit> getRootOntologyTerms(String ontologyUrl)
+	public List<Hit> getRootOntologyTerms(String ontologyIri)
 	{
 		SearchRequest searchRequest = new SearchRequest(
-				AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyUrl), new QueryImpl().pageSize(
+				AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyIri), new QueryImpl().pageSize(
 						Integer.MAX_VALUE).eq(OntologyTermIndexRepository.ROOT, true), null);
 		List<Hit> listOfHits = new ArrayList<Hit>();
 		Set<String> processedOntologyTerms = new HashSet<String>();
 		for (Hit hit : searchService.search(searchRequest))
 		{
-			String ontologyTermUrl = hit.getColumnValueMap().get(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI)
+			String ontologyTermIri = hit.getColumnValueMap().get(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI)
 					.toString();
-			if (!processedOntologyTerms.contains(ontologyTermUrl))
+			if (!processedOntologyTerms.contains(ontologyTermIri))
 			{
 				listOfHits.add(hit);
-				processedOntologyTerms.add(ontologyTermUrl);
+				processedOntologyTerms.add(ontologyTermIri);
 			}
 		}
 		return listOfHits;

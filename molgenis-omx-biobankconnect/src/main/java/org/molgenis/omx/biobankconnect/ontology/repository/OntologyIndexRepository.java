@@ -61,4 +61,16 @@ public class OntologyIndexRepository extends AbstractOntologyRepository implemen
 	{
 		return 1;
 	}
+
+	@Override
+	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public String getUrl()
+	{
+		throw new UnsupportedOperationException();
+	}
 }

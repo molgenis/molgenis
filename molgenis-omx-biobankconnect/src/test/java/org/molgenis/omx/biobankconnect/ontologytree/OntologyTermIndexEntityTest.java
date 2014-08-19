@@ -50,7 +50,7 @@ public class OntologyTermIndexEntityTest
 		columnValueMap2.put(OntologyTermIndexRepository.LAST, true);
 		columnValueMap2.put(OntologyTermIndexRepository.NODE_PATH, "1.2");
 		columnValueMap2.put(OntologyTermIndexRepository.PARENT_NODE_PATH, "1");
-		columnValueMap2.put(OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_URL, "http://www.ontology.test");
+		columnValueMap2.put(OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_IRI, "http://www.ontology.test");
 		columnValueMap2.put(OntologyIndexRepository.ONTOLOGY_IRI, "http://www.ontology.test");
 		columnValueMap2.put(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI, "http://www.ontology.test#term2");
 		Hit hit2 = mock(Hit.class);
@@ -62,7 +62,7 @@ public class OntologyTermIndexEntityTest
 		columnValueMap3.put(OntologyTermIndexRepository.LAST, true);
 		columnValueMap3.put(OntologyTermIndexRepository.NODE_PATH, "1.3");
 		columnValueMap3.put(OntologyTermIndexRepository.PARENT_NODE_PATH, "1");
-		columnValueMap3.put(OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_URL, "http://www.ontology.test");
+		columnValueMap3.put(OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_IRI, "http://www.ontology.test");
 		columnValueMap3.put(OntologyIndexRepository.ONTOLOGY_IRI, "http://www.ontology.test");
 		columnValueMap3.put(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI, "http://www.ontology.test#term3");
 		Hit hit3 = mock(Hit.class);
@@ -80,7 +80,7 @@ public class OntologyTermIndexEntityTest
 				searchService.search(new SearchRequest(AsyncOntologyIndexer
 						.createOntologyTermDocumentType("http://www.ontology.test"), new QueryImpl()
 						.eq(OntologyTermIndexRepository.PARENT_NODE_PATH, "1").and()
-						.eq(OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_URL, "http://www.ontology.test#term1")
+						.eq(OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_IRI, "http://www.ontology.test#term1")
 						.pageSize(Integer.MAX_VALUE), null)))
 				.thenReturn(new SearchResult(2, Arrays.asList(hit2, hit3)));
 

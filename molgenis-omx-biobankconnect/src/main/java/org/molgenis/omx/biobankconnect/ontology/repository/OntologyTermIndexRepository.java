@@ -91,7 +91,7 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 			entity.set(ID, ontologyLoader.getId(cls));
 			entity.set(NODE_PATH, constructNodePath(parentNodePath));
 			entity.set(PARENT_NODE_PATH, parentNodePath.replaceAll(NODE_PATH_REPLACEMENT_PATTERN, StringUtils.EMPTY));
-			entity.set(PARENT_ONTOLOGY_TERM_URL, parentTermIri);
+			entity.set(PARENT_ONTOLOGY_TERM_IRI, parentTermIri);
 			entity.set(ROOT, root);
 			entity.set(LAST, listOfChildren.size() == 0);
 			entity.set(ONTOLOGY_IRI, ontologyLoader.getOntologyIRI());
@@ -136,5 +136,17 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 	public Set<String> getDynamaticFields()
 	{
 		return dynamaticFields;
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public String getUrl()
+	{
+		throw new UnsupportedOperationException();
 	}
 }
