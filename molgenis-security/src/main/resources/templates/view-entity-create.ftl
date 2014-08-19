@@ -1,3 +1,4 @@
+<#include "resource-macros.ftl">
 <#import "molgenis-input-elements.ftl" as input>
 <#import "form-macros.ftl" as f>
 
@@ -13,4 +14,4 @@
 
 <@f.remoteValidationRules form />
 
-<script src="/js/molgenis-form-edit.js"></script>
+<script src="<@resource_href "/js/molgenis-form-edit.js"/>"></script>

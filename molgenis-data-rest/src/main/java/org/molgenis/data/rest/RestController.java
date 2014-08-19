@@ -197,7 +197,8 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/meta", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public EntityMetaDataResponse retrieveEntityMetaPost(@PathVariable("entityName") String entityName, @Valid @RequestBody EntityMetaRequest request)
+	public EntityMetaDataResponse retrieveEntityMetaPost(@PathVariable("entityName") String entityName,
+			@Valid @RequestBody EntityMetaRequest request)
 	{
 		Set<String> attributesSet = toAttributeSet(request != null ? request.getAttributes() : null);
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(request != null ? request.getExpand() : null);
@@ -205,7 +206,7 @@ public class RestController
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
 		return new EntityMetaDataResponse(meta, attributesSet, attributeExpandSet);
 	}
-	
+
 	/**
 	 * Example url: /api/v1/person/meta/emailaddresses
 	 * 
@@ -241,7 +242,7 @@ public class RestController
 
 		return getAttributeMetaDataPostInternal(entityName, attributeName, attributeSet, attributeExpandSet);
 	}
-	
+
 	/**
 	 * Get's an entity by it's id
 	 * 
@@ -263,6 +264,34 @@ public class RestController
 	{
 		Set<String> attributesSet = toAttributeSet(attributes);
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
+
+		EntityMetaData meta = dataService.getEntityMetaData(entityName);
+		Entity entity = dataService.findOne(entityName, id);
+
+		if (entity == null)
+		{
+			throw new UnknownEntityException(entityName + " " + id + " not found");
+		}
+
+		return getEntityAsMap(entity, meta, attributesSet, attributeExpandSet);
+	}
+
+	/**
+	 * Same as retrieveEntity (GET) only tunneled through POST.
+	 * 
+	 * @param entityName
+	 * @param id
+	 * @param attributes
+	 * @param attributeExpands
+	 * @return
+	 */
+	@RequestMapping(value = "/{entityName}/{id:.+}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public Map<String, Object> retrieveEntity(@PathVariable("entityName") String entityName,
+			@PathVariable("id") Object id, @Valid @RequestBody EntityMetaRequest request)
+	{
+		Set<String> attributesSet = toAttributeSet(request != null ? request.getAttributes() : null);
+		Map<String, Set<String>> attributeExpandSet = toExpandMap(request != null ? request.getExpand() : null);
 
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
 		Entity entity = dataService.findOne(entityName, id);
@@ -300,7 +329,8 @@ public class RestController
 		Set<String> attributesSet = toAttributeSet(attributes);
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
 
-		return retrieveEntityAttributeInternal(entityName, id, refAttributeName, request, attributesSet, attributeExpandSet);
+		return retrieveEntityAttributeInternal(entityName, id, refAttributeName, request, attributesSet,
+				attributeExpandSet);
 	}
 
 	/**
@@ -320,17 +350,17 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/{id}/{refAttributeName}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Object retrieveEntityAttributePost(@PathVariable("entityName") String entityName, @PathVariable("id") Object id,
-			@PathVariable("refAttributeName") String refAttributeName, @Valid @RequestBody EntityCollectionRequest request)
+	public Object retrieveEntityAttributePost(@PathVariable("entityName") String entityName,
+			@PathVariable("id") Object id, @PathVariable("refAttributeName") String refAttributeName,
+			@Valid @RequestBody EntityCollectionRequest request)
 	{
 		Set<String> attributesSet = toAttributeSet(request != null ? request.getAttributes() : null);
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(request != null ? request.getExpand() : null);
-		
-		return retrieveEntityAttributeInternal(entityName, id, refAttributeName, request, attributesSet, attributeExpandSet);
+
+		return retrieveEntityAttributeInternal(entityName, id, refAttributeName, request, attributesSet,
+				attributeExpandSet);
 	}
-	
-	
-	
+
 	/**
 	 * Do a query
 	 * 
@@ -950,8 +980,10 @@ public class RestController
 			throw new UnknownAttributeException(attributeName);
 		}
 	}
-	
-	private Object retrieveEntityAttributeInternal(String entityName, Object id, String refAttributeName, EntityCollectionRequest request, Set<String> attributesSet, Map<String, Set<String>> attributeExpandSet) {
+
+	private Object retrieveEntityAttributeInternal(String entityName, Object id, String refAttributeName,
+			EntityCollectionRequest request, Set<String> attributesSet, Map<String, Set<String>> attributeExpandSet)
+	{
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
 
 		// Check if the entity has an attribute with name refAttributeName
@@ -1012,7 +1044,7 @@ public class RestController
 				return entityAttributeMap;
 		}
 	}
-	
+
 	// Handles a Query
 	private EntityCollectionResponse retrieveEntityCollectionInternal(String entityName,
 			EntityCollectionRequest request, Set<String> attributesSet, Map<String, Set<String>> attributeExpandsSet)
@@ -1164,8 +1196,8 @@ public class RestController
 	 */
 	private Set<String> toAttributeSet(String[] attributes)
 	{
-		return attributes != null && attributes.length > 0 ? Sets.newHashSet(Iterables.transform(Arrays.asList(attributes),
-				new Function<String, String>()
+		return attributes != null && attributes.length > 0 ? Sets.newHashSet(Iterables.transform(
+				Arrays.asList(attributes), new Function<String, String>()
 				{
 					@Override
 					public String apply(String attribute)

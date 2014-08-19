@@ -1,3 +1,4 @@
+<#include "resource-macros.ftl">
 <!--DISEASE MATCHER / PHENOVIEWER -->
 <div class="row-fluid">	
 	<div class="span12" id="disease-matcher">
@@ -76,7 +77,7 @@
 
 <script>
 	var tableEditable = ${tableEditable?string('true', 'false')};
-	$.when($.ajax("/js/dataexplorer-diseasematcher.js", {'cache': true}))
+	$.when($.ajax("<@resource_href "/js/dataexplorer-diseasematcher.js"/>", {'cache': true}))
 			.then(function() {
 	});
 </script>

@@ -1,3 +1,4 @@
+<#include "resource-macros.ftl">
 <div id="annotator-select-container">
 	<form id="annotate-dataset-form" role="form">
 		<div class="form-group">
@@ -27,7 +28,7 @@
 	</form>
 </div>
 <script>
-	$.when($.ajax("/js/dataexplorer-annotators.js", {'cache': true}))
+	$.when($.ajax("<@resource_href "/js/dataexplorer-annotators.js"/>", {'cache': true}))
 		.then(function() {
 			molgenis.dataexplorer.annotators.getAnnotatorSelectBoxes();		
 		});
