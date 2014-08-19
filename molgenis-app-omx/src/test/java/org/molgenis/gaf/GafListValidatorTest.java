@@ -43,6 +43,9 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	private MolgenisSettings molgenisSettings;
 
+	@Autowired
+	private GafListValidationReport report;
+
 	@BeforeMethod
 	public void setUp()
 	{
@@ -97,7 +100,7 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 		Repository repository = this.getDefaultValidSettingRepositoryMock();
 		MapEntity entity0 = getDefaultValidMapEntityMock();
 		when(repository.iterator()).thenReturn(Arrays.<Entity> asList(entity0).iterator());
-		GafListValidationReport report = gafListValidator.validate(repository);
+		gafListValidator.validate(report, repository);
 		assertFalse(report.hasErrors());
 	}
 
@@ -159,7 +162,7 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 		entity0.set(nameColumn, value);
 
 		when(repository.iterator()).thenReturn(Arrays.<Entity> asList(entity0).iterator());
-		GafListValidationReport report = gafListValidator.validate(repository);
+		gafListValidator.validate(report, repository);
 		assertTrue(report.hasErrors());
 	}
 
@@ -182,6 +185,12 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 		public GafListValidator gafListValidator()
 		{
 			return new GafListValidator();
+		}
+
+		@Bean
+		public GafListValidationReport report()
+		{
+			return new GafListValidationReport();
 		}
 	}
 }

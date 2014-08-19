@@ -1,11 +1,13 @@
 package org.molgenis.gaf;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 
 import javax.annotation.PreDestroy;
 
@@ -14,6 +16,7 @@ import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 @Component
 @Scope("session")
@@ -25,6 +28,7 @@ public class GafListValidationReport
 	private final List<String> invalidRunIds = new ArrayList<String>();
 	private List<String> allRunIds = new ArrayList<String>();
 	private String dataSetName = null;
+	private File tempFile;
 	private String tempFileName;
 	private String tempFileOriginalName;
 
@@ -87,13 +91,21 @@ public class GafListValidationReport
 			String runId = reportEntry.getKey();
 			if (runId == null) runId = "NO RUN ID!";
 			strBuilder.append("Run: ").append(runId).append('\n');
-			strBuilder.append("<table class=\"table\">").append('\n');
-			strBuilder.append("<tr><th>Row</th><th>Column</th><th>Value</th><th>Message</th></tr>").append('\n');
+			strBuilder.append("<div class=\"molgenis-table-container\" id=\"table-container\">").append(
+					'\n');
+			strBuilder.append(
+"<table class=\"table molgenis-table table-striped table-bordered table-hover table-condensed listtable\">")
+					.append('\n');
+			strBuilder.append("<thead><tr><th>Row</th><th>Column</th><th>Value</th><th>Message</th></tr></thead>")
+					.append('\n')
+			.append("<tbody>");
 			for (GafListValidationError validationError : reportEntry.getValue())
 			{
 				strBuilder.append(validationError.toStringHtml()).append('\n');
 			}
+			strBuilder.append("</tbody>");
 			strBuilder.append("</table>").append('\n');
+			strBuilder.append("</div>").append('\n');
 		}
 		return strBuilder.toString();
 	}
@@ -159,7 +171,7 @@ public class GafListValidationReport
 		return tempFileName;
 	}
 
-	public void setTempFileName(String tempFileName)
+	protected void setTempFileName(String tempFileName)
 	{
 		this.tempFileName = tempFileName;
 	}
@@ -169,7 +181,7 @@ public class GafListValidationReport
 		return tempFileOriginalName;
 	}
 
-	public void setTempFileOriginalName(String tempFileOriginalName)
+	protected void setTempFileOriginalName(String tempFileOriginalName)
 	{
 		this.tempFileOriginalName = tempFileOriginalName;
 	}
@@ -178,15 +190,43 @@ public class GafListValidationReport
 	public void cleanUp() throws Exception
 	{
 		String fileName = this.getTempFileName();
-		if (null != fileName && !fileStore.delete(fileName)) logger.error("File " + this.getTempFileName()
-				+ " cannot be deleted from filestore!");
+		if (null != fileName)
+		{
+			boolean deleted = fileStore.delete(fileName);
+			if (!deleted)
+			{
+				logger.error("File " + this.getTempFileName() + " cannot be deleted from filestore!");
+			}
+		}
 
 		this.validationErrors.clear();
 		this.validRunIds.clear();
 		this.invalidRunIds.clear();
 		this.allRunIds.clear();
 		this.dataSetName = null;
+		this.tempFile = null;
 		this.tempFileName = null;
 		this.tempFileOriginalName = null;
 	}
+
+	public File getTempFile()
+	{
+		return tempFile;
+	}
+
+	protected void setTempFile(File tempFile)
+	{
+		this.tempFile = tempFile;
+	}
+
+	public void uploadCsvFile(MultipartFile csvFile) throws Exception
+	{
+		this.cleanUp();
+		String fileName = UUID.randomUUID().toString().toLowerCase() + csvFile.getOriginalFilename();
+		File tmpFile = fileStore.store(csvFile.getInputStream(), fileName);
+		this.setTempFileName(tmpFile.getName());
+		this.setTempFileOriginalName(csvFile.getOriginalFilename());
+		this.setTempFile(tmpFile);
+	}
 }
+

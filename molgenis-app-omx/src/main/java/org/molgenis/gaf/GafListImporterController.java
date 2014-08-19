@@ -60,7 +60,6 @@ public class GafListImporterController extends MolgenisPluginController
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	public String init(Model model) throws Exception
 	{
-		this.report.cleanUp();
 		model.addAttribute("action", "/validate");
 		model.addAttribute("enctype", "multipart/form-data");
 		return "view-gaflistimporter";
@@ -85,8 +84,6 @@ public class GafListImporterController extends MolgenisPluginController
 	public String validateGAFList(HttpServletRequest request, @RequestParam("csvFile") MultipartFile csvFile,
 			Model model) throws IOException, ServiceException, ValueConverterException, MessagingException, Exception
 	{
-		this.report.cleanUp();
-		
 		boolean submitState = false;
 		String action = "/validate";
 		String enctype = "multipart/form-data";
@@ -121,7 +118,6 @@ public class GafListImporterController extends MolgenisPluginController
 			}
 			catch (Exception e)
 			{
-				this.report.cleanUp();
 				String errorMessage = "Failed to validate this file";
 				messages.add(errorMessage);
 				logger.error(errorMessage, e);
@@ -129,7 +125,6 @@ public class GafListImporterController extends MolgenisPluginController
 		}
 		else
 		{
-			this.report.cleanUp();
 			String errorMessage = "The file you try to upload is empty! Filename: " + csvFile.getOriginalFilename();
 			messages.add(errorMessage);
 			logger.error(errorMessage);
@@ -165,7 +160,6 @@ public class GafListImporterController extends MolgenisPluginController
 		}
 		catch (Exception e)
 		{
-			this.report.cleanUp();
 			String errorMessage = "Failed to import this file";
 			messages.add(errorMessage);
 			logger.error(errorMessage, e);
@@ -174,9 +168,9 @@ public class GafListImporterController extends MolgenisPluginController
 		{
 			model.addAttribute("messages", messages);
 			model.addAttribute("submit_state", false);
-			model.addAttribute("action", URI + "/validate");
+			model.addAttribute("action", "/validate");
 			model.addAttribute("enctype", "multipart/form-data");
-			this.report.cleanUp();
+			report.cleanUp();
 		}
 
 		return "view-gaflistimporter";

@@ -53,20 +53,17 @@ public class GafListFileImporterService
 	FileStore fileStore;
 
 	public GafListValidationReport validateGAFList(GafListValidationReport report, MultipartFile csvFile)
-			throws IOException, ServiceException
+			throws IOException, ServiceException, Exception
 	{
-		File tmpFile = copyDataToTempFile(csvFile);
-		report.setTempFileName(tmpFile.getName());
-		report.setTempFileOriginalName(csvFile.getOriginalFilename());
-		GafListFileRepository repo = new GafListFileRepository(tmpFile, null, null, null);
+		report.uploadCsvFile(csvFile);
+		GafListFileRepository repo = new GafListFileRepository(report.getTempFile(), null, null, null);
 		gafListValidator.validate(report, repo);
 		repo.close();
 		return report;
 	}
 	
 	public void importGAFList(GafListValidationReport report,
-			String key_gaf_list_protocol_name)
- throws IOException,
+ String key_gaf_list_protocol_name) throws IOException,
 			ServiceException
 	{
 		File tmpFile = fileStore.getFile(report.getTempFileName());
@@ -116,21 +113,6 @@ public class GafListFileImporterService
 			dataSetIndexer.indexDataSets(Arrays.asList(dataSetId));
 			logger.debug("finished indexing");
 		}
-	}
-
-	/**
-	 * Copy the data of a multipart file to a temporary file.
-	 * 
-	 * @param multipart
-	 * @return the representation of file and directory pathnames
-	 * @throws IllegalStateException
-	 * @throws IOException
-	 */
-	protected File copyDataToTempFile(MultipartFile multipart) throws IllegalStateException, IOException
-	{
-		String fileName = UUID.randomUUID().toString().toLowerCase() + multipart.getOriginalFilename();
-		File upLoadedfile = fileStore.store(multipart.getInputStream(), fileName);
-		return upLoadedfile;
 	}
 
 	protected Protocol getGafListProtocolUsed(String protocolName)
