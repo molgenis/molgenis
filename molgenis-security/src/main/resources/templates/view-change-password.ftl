@@ -1,15 +1,16 @@
+<#include "resource-macros.ftl">
 <!DOCTYPE html>
 <html>
 	<head>
 		<title>Change password</title>
 		<meta charset="utf-8">
-		<link rel="icon" href="/img/molgenis.ico" type="image/x-icon">
-		<link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css">
-		<link rel="stylesheet" href="/css/molgenis.css" type="text/css">
-		<script src="/js/jquery-1.8.3.min.js"></script>
-		<script src="/js/bootstrap.min.js"></script>
-		<script src="/js/jquery.validate.min.js"></script>
-		<script src="/js/molgenis.js"></script>
+		<link rel="icon" href="<@resource_href "/img/molgenis.ico"/>" type="image/x-icon">
+		<link rel="stylesheet" href="<@resource_href "/css/bootstrap.min.css"/>" type="text/css">
+		<link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
+		<script src="<@resource_href "/js/jquery-1.8.3.min.js"/>"></script>
+		<script src="<@resource_href "/js/bootstrap.min.js"/>"></script>
+		<script src="<@resource_href "/js/jquery.validate.min.js"/>"></script>
+		<script src="<@resource_href "/js/molgenis.js"/>"></script>
 		<script type="text/javascript">
 			$(function() {
 		  		var modal = $('#change-password-modal');
