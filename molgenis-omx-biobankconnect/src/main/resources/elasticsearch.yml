@@ -1,3 +1,6 @@
+#This is copied/pasted from ElasticSearch module because a specific indexer is#
+#created for BiobankConnect where a list of primitive types need to be indexed#
+#e.g. List, which is not handled by Standard indexer yet ######################
 ##################### ElasticSearch Configuration Example #####################
 
 # This file contains an overview of various configuration settings,
