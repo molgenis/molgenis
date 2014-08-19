@@ -351,9 +351,6 @@
 						if(data.suggestedScript){
 							editor.setValue(data.suggestedScript);
 						}
-					},
-					error : function(request, textStatus, error){
-						console.log(error);
 					}
 				});
 			});
@@ -554,7 +551,6 @@
 				callback(mappedFeatues);
 			},
 			error : function(request, textStatus, error){
-				console.log(error);
 				callback([]);
 			}
 		});
