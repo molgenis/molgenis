@@ -28,6 +28,7 @@ public class GafListValidationReport
 	private final List<String> invalidRunIds = new ArrayList<String>();
 	private List<String> allRunIds = new ArrayList<String>();
 	private String dataSetName = null;
+	private String dataSetIdentifier = null;
 	private File tempFile;
 	private String tempFileName;
 	private String tempFileOriginalName;
@@ -204,6 +205,7 @@ public class GafListValidationReport
 		this.invalidRunIds.clear();
 		this.allRunIds.clear();
 		this.dataSetName = null;
+		this.dataSetIdentifier = null;
 		this.tempFile = null;
 		this.tempFileName = null;
 		this.tempFileOriginalName = null;
@@ -227,6 +229,16 @@ public class GafListValidationReport
 		this.setTempFileName(tmpFile.getName());
 		this.setTempFileOriginalName(csvFile.getOriginalFilename());
 		this.setTempFile(tmpFile);
+	}
+
+	public String getDataSetIdentifier()
+	{
+		return dataSetIdentifier;
+	}
+
+	public void setDataSetIdentifier(String dataSetIdentifier)
+	{
+		this.dataSetIdentifier = dataSetIdentifier;
 	}
 }
 

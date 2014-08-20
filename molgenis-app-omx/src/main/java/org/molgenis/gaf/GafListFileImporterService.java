@@ -76,6 +76,7 @@ public class GafListFileImporterService
 			String dataSetIdentifier = UUID.randomUUID().toString().toLowerCase();
 			String dataSetName = generateGafListRepoName();
 			report.setDataSetName(dataSetName);
+			report.setDataSetIdentifier(dataSetIdentifier);
 			Object dataSetId;
 
 			try
