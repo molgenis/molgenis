@@ -42,6 +42,8 @@ public class VcfImporterService
 	{
 		RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory
 				.createFileRepositoryCollection(vcfFile);
+		ElasticsearchRepository sampleRepository = null;
+
 		for (String inEntityName : repositoryCollection.getEntityNames())
 		{
 			Repository inRepository = repositoryCollection.getRepositoryByEntityName(inEntityName);
@@ -60,9 +62,12 @@ public class VcfImporterService
 						dataService);
 				outRepository.create();
 				AttributeMetaData sampleAttribute = entityMetaData.getAttribute("SAMPLES");
-				ElasticsearchRepository sampleRepository = new ElasticsearchRepository(client, indexName,
-						sampleAttribute.getRefEntity(), dataService);
-				sampleRepository.create();
+				if (sampleAttribute != null)
+				{
+					sampleRepository = new ElasticsearchRepository(client, indexName, sampleAttribute.getRefEntity(),
+							dataService);
+					sampleRepository.create();
+				}
 				Iterator<Entity> inIterator = inRepository.iterator();
 				try
 				{
@@ -70,15 +75,22 @@ public class VcfImporterService
 					{
 						Entity entity = inIterator.next();
 						outRepository.add(entity);
-						sampleRepository.add(entity.getEntities("SAMPLES"));
+						if (sampleRepository != null)
+						{
+							sampleRepository.add(entity.getEntities("SAMPLES"));
+						}
 					}
 				}
+
 				finally
 				{
 					outRepository.close();
 				}
 				dataService.addRepository(outRepository);
-				dataService.addRepository(sampleRepository);
+				if (sampleRepository != null)
+				{
+					dataService.addRepository(sampleRepository);
+				}
 			}
 			finally
 			{

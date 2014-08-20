@@ -23,6 +23,7 @@ public class EmbeddedElasticSearchConfig
 {
     private static final String MOLGENIS_INDEX_NAME = "molgenis";
 
+    @Autowired
 	private DataService dataService;
 
 	@Bean(destroyMethod = "close")
