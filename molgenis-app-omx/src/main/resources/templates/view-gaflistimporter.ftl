@@ -19,24 +19,24 @@
 			<div class="span6">
 				<form id="gaflist-import-file-form" method="post" action="${context_url}${action}" enctype="${enctype}" onsubmit="parent.showSpinner(function(){$('.modal-body').html('Work in progress..');});  return true;">
 					<h4>Import CSV file</h4>
-					<table class="table">
-						<tbody>
-							<#if submit_state?? && submit_state>
-								<tr>
-									<td>File: </td>
-									<td><#if fileName?has_content>${fileName}</#if></td>
-									<td><a id="backButton" href="${context_url}" class="btn">Back</a>
-									<input id="submitButton" type="submit" value="Import file" class="btn btn-success"/></td>
-								</tr>
-							<#else>
-								<tr>
-									<td nowrap><i>Choose file:</i></td>
-									<td><input type="file" name="csvFile" required/></td>
-									<td><input id="validateButton" type="submit" value="Validate file" class="btn btn-primary"/></td>
-								</tr>
-							</#if>
-						</tbody>
-					</table>
+					<#if submit_state?? && submit_state>
+						<div class="row-fluid">
+							<i>File:</i>
+							<span><#if fileName?has_content>${fileName}</#if></span>
+							<span class="pull-right">
+								<a id="backButton" href="${context_url}" class="btn">Back</a>
+								<input id="submitButton" type="submit" value="Import file" class="btn btn-success"/>
+							</span>
+						</div>
+					<#else>
+						<div class="row-fluid">
+							<i>Choose file:</i>
+							<span><input type="file" name="csvFile" required/></span>
+							<span class="pull-right">
+								<input id="validateButton" type="submit" value="Validate file" class="btn btn-primary"/>
+							</span>
+						</div>
+					</#if>
 				</form>
 			</div>
 		</div>
