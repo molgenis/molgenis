@@ -1,5 +1,6 @@
 package org.molgenis.omx.biobankconnect;
 
+import org.molgenis.data.DataService;
 import org.molgenis.omx.biobankconnect.algorithm.AlgorithmGenerator;
 import org.molgenis.omx.biobankconnect.algorithm.AlgorithmScriptLibrary;
 import org.molgenis.omx.biobankconnect.algorithm.AlgorithmUnitConverter;
@@ -25,6 +26,9 @@ public class BiobankConnectConfig
 	@Autowired
 	private SearchService searchService;
 
+	@Autowired
+	private DataService dataService;
+
 	/**
 	 * Get a reference to a HarmonizationIndexer.
 	 * 
@@ -33,7 +37,7 @@ public class BiobankConnectConfig
 	@Bean
 	public AsyncOntologyIndexer harmonizationIndexer()
 	{
-		return new AsyncOntologyIndexer();
+		return new AsyncOntologyIndexer(searchService, dataService);
 	}
 
 	@Bean

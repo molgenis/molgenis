@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.QueryRule;
@@ -62,7 +63,7 @@ public class AlgorithmGenerator
 			String scriptTemplate = algorithmScriptLibrary.findScriptTemplate(standardFeature);
 			if (searchResult.getTotalHitCount() > 0)
 			{
-				if (scriptTemplate.isEmpty())
+				if (StringUtils.isEmpty(scriptTemplate))
 				{
 					suggestedScript.append(convertToJavascript(standardFeature, searchResult));
 				}
@@ -187,7 +188,7 @@ public class AlgorithmGenerator
 	{
 		StringBuilder javaScriptName = new StringBuilder();
 		javaScriptName.append(escaped ? "\\$\\('" : "$('").append(mappedFeatureName).append(escaped ? "'\\)" : "')");
-		if (suffix != null && !suffix.isEmpty()) javaScriptName.append(suffix);
+		if (!StringUtils.isEmpty(suffix)) javaScriptName.append(suffix);
 		return javaScriptName.toString();
 	}
 

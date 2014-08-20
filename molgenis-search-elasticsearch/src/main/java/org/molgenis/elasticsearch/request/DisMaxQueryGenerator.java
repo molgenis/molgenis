@@ -3,6 +3,9 @@ package org.molgenis.elasticsearch.request;
 import static org.molgenis.data.QueryRule.Operator.DIS_MAX;
 import static org.molgenis.data.QueryRule.Operator.SHOULD;
 
+import java.util.regex.Pattern;
+
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.index.query.BaseQueryBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -14,6 +17,9 @@ import org.molgenis.data.QueryRule;
 
 public class DisMaxQueryGenerator implements QueryPartGenerator
 {
+	private static final String LUCENE_ESCAPE_CHARS_VALUE = "[-&+!\\|\\(\\){}\\[\\]\"\\*\\?:\\\\\\/]";
+	private static final Pattern LUCENE_PATTERN_VALUE = Pattern.compile(LUCENE_ESCAPE_CHARS_VALUE);
+	private static final String REPLACEMENT_STRING = "\\\\$0";
 
 	@Override
 	public void generate(SearchRequestBuilder searchRequestBuilder, Query query, EntityMetaData entityMetaData)
@@ -55,9 +61,15 @@ public class DisMaxQueryGenerator implements QueryPartGenerator
 		}
 		else
 		{
+			String value = escapeValue(queryRule.getValue() != null ? queryRule.getValue().toString() : StringUtils.EMPTY);
 			StringBuilder queryStringBuilder = new StringBuilder();
-			queryStringBuilder.append(queryRule.getField()).append(":(").append(queryRule.getValue()).append(')');
+			queryStringBuilder.append(queryRule.getField()).append(":(").append(value).append(')');
 			return QueryBuilders.queryString(queryStringBuilder.toString());
 		}
+	}
+
+	public static String escapeValue(String value)
+	{
+		return LUCENE_PATTERN_VALUE.matcher(value).replaceAll(REPLACEMENT_STRING);
 	}
 }

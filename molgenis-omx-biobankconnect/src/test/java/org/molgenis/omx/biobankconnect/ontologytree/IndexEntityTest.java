@@ -21,7 +21,7 @@ import com.google.common.collect.Iterables;
 
 public class IndexEntityTest
 {
-	IndexEntity indexEntity;
+	AbstractOntologyEntity indexEntity;
 	DefaultEntityMetaData entityMetaData;
 
 	@BeforeClass
@@ -38,7 +38,7 @@ public class IndexEntityTest
 
 		Hit hit = mock(Hit.class);
 		when(hit.getId()).thenReturn("forged-ID");
-		indexEntity = new OntologyIndexEntity(hit, entityMetaData, null, null);
+		indexEntity = new OntologyEntity(hit, entityMetaData, null, null);
 	}
 
 	@Test
