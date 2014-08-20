@@ -22,6 +22,7 @@ import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.gaf.GafListValidatorTest.Config;
 import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -191,6 +192,12 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 		public GafListValidationReport report()
 		{
 			return new GafListValidationReport();
+		}
+
+		@Bean
+		public FileStore fileStore()
+		{
+			return mock(FileStore.class);
 		}
 	}
 }
