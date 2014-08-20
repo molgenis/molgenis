@@ -4,9 +4,11 @@ import java.util.Map;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.omx.biobankconnect.ontology.repository.OntologyIndexRepository;
+import org.molgenis.omx.biobankconnect.ontology.repository.OntologyQueryRepository;
+import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermIndexRepository;
+import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermQueryRepository;
 import org.molgenis.omx.biobankconnect.ontologyservice.OntologyService;
-import org.molgenis.omx.biobankconnect.utils.OntologyRepository;
-import org.molgenis.omx.biobankconnect.utils.OntologyTermRepository;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchService;
@@ -42,20 +44,20 @@ public class OntologyRepositoryRegistrator implements ApplicationListener<Contex
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
 		// Register ontology info
-		dataService.addRepository(new OntologyIndexRepository(OntologyIndexRepository.DEFAULT_ONTOLOGY_REPO,
+		dataService.addRepository(new OntologyQueryRepository(OntologyQueryRepository.DEFAULT_ONTOLOGY_REPO,
 				ontologyService, searchService));
 
 		for (Hit hit : searchService.search(
-				new SearchRequest(null, new QueryImpl().eq(OntologyRepository.ENTITY_TYPE,
-						OntologyRepository.TYPE_ONTOLOGY), null)).getSearchHits())
+				new SearchRequest(null, new QueryImpl().eq(OntologyIndexRepository.ENTITY_TYPE,
+						OntologyIndexRepository.TYPE_ONTOLOGY), null)).getSearchHits())
 		{
 			// Register ontology content (terms) using separate repos
 			Map<String, Object> columnValueMap = hit.getColumnValueMap();
-			String ontologyTermEntityName = columnValueMap.containsKey(OntologyTermRepository.ONTOLOGY_LABEL) ? columnValueMap
-					.get(OntologyRepository.ONTOLOGY_LABEL).toString() : OntologyTermIndexRepository.DEFAULT_ONTOLOGY_TERM_REPO;
-			String ontologyUrl = columnValueMap.containsKey(OntologyTermRepository.ONTOLOGY_LABEL) ? columnValueMap
-					.get(OntologyRepository.ONTOLOGY_URL).toString() : OntologyTermIndexRepository.DEFAULT_ONTOLOGY_TERM_REPO;
-			dataService.addRepository(new OntologyTermIndexRepository(ontologyTermEntityName, ontologyUrl,
+			String ontologyTermEntityName = columnValueMap.containsKey(OntologyTermIndexRepository.ONTOLOGY_NAME) ? columnValueMap
+					.get(OntologyIndexRepository.ONTOLOGY_NAME).toString() : OntologyTermQueryRepository.DEFAULT_ONTOLOGY_TERM_REPO;
+			String ontologyIri = columnValueMap.containsKey(OntologyTermIndexRepository.ONTOLOGY_NAME) ? columnValueMap
+					.get(OntologyIndexRepository.ONTOLOGY_IRI).toString() : OntologyTermQueryRepository.DEFAULT_ONTOLOGY_TERM_REPO;
+			dataService.addRepository(new OntologyTermQueryRepository(ontologyTermEntityName, ontologyIri,
 					searchService));
 		}
 	}

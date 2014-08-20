@@ -11,14 +11,14 @@ import org.molgenis.data.support.AbstractEntity;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchService;
 
-public abstract class IndexEntity extends AbstractEntity
+public abstract class AbstractOntologyEntity extends AbstractEntity
 {
 	private static final long serialVersionUID = 1L;
 	protected final EntityMetaData entityMetaData;
 	protected final SearchService searchService;
 	protected final Hit hit;
 
-	public IndexEntity(Hit hit, EntityMetaData entityMetaData, SearchService searchService)
+	public AbstractOntologyEntity(Hit hit, EntityMetaData entityMetaData, SearchService searchService)
 	{
 		this.entityMetaData = entityMetaData;
 		this.searchService = searchService;

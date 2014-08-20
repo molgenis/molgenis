@@ -164,7 +164,7 @@ public class CategoryRepository extends AbstractRepository implements Countable
 					entity.set(FIELD_TYPE, Category.class.getSimpleName().toLowerCase());
 					entity.set(FIELD_ID, c.getObservableFeature().getId());
 					entity.set(FIELD_NAME, name);
-					entity.set(FIELD_DESCRIPTION, name);
+					entity.set(FIELD_DESCRIPTION, description);
 					entity.set(FIELD_DESCRIPTION_STOPWORDS, StringUtils.join(descriptionStopWords.toArray(), ' '));
 					entities.add(entity);
 				}

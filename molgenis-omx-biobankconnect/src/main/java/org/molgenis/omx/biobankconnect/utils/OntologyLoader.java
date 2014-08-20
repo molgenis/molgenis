@@ -18,6 +18,7 @@ import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLEntity;
 import org.semanticweb.owlapi.model.OWLLiteral;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -28,6 +29,7 @@ import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
 
 public class OntologyLoader
 {
+	private static String DB_ID_PATTERN = "(\\w*):(\\d*)";
 	private String ontologyIRI = null;
 	private String ontologyName = null;
 	private File ontologyFile = null;
@@ -99,7 +101,7 @@ public class OntologyLoader
 		return axioms;
 	}
 
-	public Set<OWLClass> getTopClasses()
+	public Set<OWLClass> getRootClasses()
 	{
 		Set<OWLClass> listOfTopClasses = new HashSet<OWLClass>();
 		for (OWLClass cls : ontology.getClassesInSignature())
@@ -203,16 +205,16 @@ public class OntologyLoader
 		return StringUtils.EMPTY;
 	}
 
-	public String getLabel(OWLClass cls)
+	public String getLabel(OWLEntity entity)
 	{
-		for (String annotation : getAnnotation(cls, OWLRDFVocabulary.RDFS_LABEL.toString()))
+		for (String annotation : getAnnotation(entity, OWLRDFVocabulary.RDFS_LABEL.toString()))
 		{
 			return annotation;
 		}
 		return StringUtils.EMPTY;
 	}
 
-	private Set<String> getAnnotation(OWLClass entity, String property)
+	private Set<String> getAnnotation(OWLEntity entity, String property)
 	{
 		Set<String> annotations = new HashSet<String>();
 		try
@@ -232,6 +234,30 @@ public class OntologyLoader
 			throw new RuntimeException("Failed to get label for OWLClass " + entity);
 		}
 		return annotations;
+	}
+
+	public Map<String, Set<String>> getAllDatabaseIds(OWLClass entity)
+	{
+		Map<String, Set<String>> dbAnnotations = new HashMap<String, Set<String>>();
+
+		for (OWLAnnotation annotation : entity.getAnnotations(ontology))
+		{
+			if (annotation.getValue() instanceof OWLLiteral)
+			{
+				OWLLiteral val = (OWLLiteral) annotation.getValue();
+				String value = val.getLiteral().toString();
+				if (value.matches(DB_ID_PATTERN))
+				{
+					String databaseName = value.replaceAll(DB_ID_PATTERN, "$1");
+					if (!dbAnnotations.containsKey(databaseName))
+					{
+						dbAnnotations.put(databaseName, new HashSet<String>());
+					}
+					dbAnnotations.get(databaseName).add(value.replaceAll(DB_ID_PATTERN, "$2"));
+				}
+			}
+		}
+		return dbAnnotations;
 	}
 
 	public String getOntologyLabel()

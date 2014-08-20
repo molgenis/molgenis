@@ -6,9 +6,15 @@
 <script src="/js/mapping-manager.js"></script>
 <script src="/js/biobank-connect.js"></script>
 <script src="/js/simple_statistics.js"></script>
+<script src="/js/d3.min.js"></script>
+<script src="/js/vega.min.js"></script>
+<script src="/js/jstat.min.js"></script>
+<script src="/js/biobankconnect-graph.js"></script>
+<script src="/js/ace-min/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="/js/ace-min/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
 <link rel="stylesheet" type="text/css" href="/css/jquery-ui-1.9.2.custom.min.css">
 <link rel="stylesheet" type="text/css" href="/css/biobank-connect.css">
-<form id="wizardForm" name="wizardForm" class="form-horizontal">
+<form id="wizardForm" name="wizardForm" method="post" class="form-horizontal">
 	<div class="row-fluid">
 		<div class="span12 well custom-white-well">	
 			<div class="row-fluid">

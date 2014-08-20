@@ -65,8 +65,6 @@ legend {
 .float-right {
 	float : right;
 	margin-right : 5px;
-	cursor: hand; 
-	cursor: pointer;
 }
 
 .show-popover {

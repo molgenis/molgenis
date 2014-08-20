@@ -12,9 +12,15 @@
 	"ontology-annotator.js", 
 	"mapping-manager.js",
 	"biobank-connect.js", 
-	"simple_statistics.js"]>	
+	"simple_statistics.js"]>
 
 <@header css js/>
+<script src="/js/d3.min.js"></script>
+<script src="/js/vega.min.js"></script>
+<script src="/js/jstat.min.js"></script>
+<script src="/js/biobankconnect-graph.js"></script>
+<script src="/js/ace-min/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="/js/ace-min/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
 <form id="wizardForm" class="form-horizontal" enctype="multipart/form-data">
 	<div class="row-fluid">
 		<div class="span12 well custom-white-well">
@@ -71,7 +77,7 @@
 		$(document).ready(function(){
 			var molgenis = window.top.molgenis;
 			var contextUrl = '${context_url}';
-			contextUrl = contextUrl.replace('/mappingmanager', '/algorithm')
+			contextUrl = contextUrl.replace('/mappingmanager', '/biobankconnect');
 			molgenis.setContextUrl(contextUrl);
 			molgenis.ontologyMatcherRunning(function(){
 				var mappingManager = new molgenis.MappingManager();

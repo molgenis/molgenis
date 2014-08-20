@@ -3,20 +3,20 @@ package org.molgenis.omx.biobankconnect.ontologyservice;
 
 public class OntologyServiceRequest
 {
-	private final String ontologyUrl;
+	private final String ontologyIri;
 	private final String queryField;
 	private final String queryString;
 
-	public OntologyServiceRequest(String ontologyTermUrl, String queryField, String queryString)
+	public OntologyServiceRequest(String ontologyIri, String queryField, String queryString)
 	{
-		this.ontologyUrl = ontologyTermUrl;
+		this.ontologyIri = ontologyIri;
 		this.queryField = queryField;
 		this.queryString = queryString;
 	}
 
-	public String getOntologyUrl()
+	public String getOntologyIri()
 	{
-		return ontologyUrl;
+		return ontologyIri;
 	}
 
 	public String getQueryString()
