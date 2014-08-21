@@ -19,7 +19,7 @@ public class ResourceFingerprintRegistry
 
 	public String getFingerprint(String resourceName) throws IOException
 	{
-		return getFingerprint(null, resourceName);
+		return getFingerprint(this.getClass(), resourceName);
 	}
 
 	public String getFingerprint(Class<?> contextClass, String resourceName) throws IOException
