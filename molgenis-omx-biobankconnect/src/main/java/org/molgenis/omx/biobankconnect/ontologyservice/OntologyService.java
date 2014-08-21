@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
@@ -39,6 +40,7 @@ public class OntologyService
 	private static final int MAX_NUMBER_MATCHES = 100;
 	private static final PorterStemmer stemmer = new PorterStemmer();
 	public static final Character DEFAULT_SEPARATOR = '|';
+	public static final List<String> defaultFields = Arrays.asList("name", "synonym");
 
 	@Autowired
 	public OntologyService(SearchService searchService)
@@ -135,6 +137,100 @@ public class OntologyService
 		return ontologies;
 	}
 
+	/**
+	 * This method is to search multiple fields information collected from the
+	 * given entity. The fields 'name' and 'synonym' in the entity will be
+	 * translated into ontologyTermSynonym in ElasticSearch. However there might
+	 * be other dynamic fields involved such as OMIM
+	 * 
+	 * @param ontologyIriBySession
+	 * @param entity
+	 * @return
+	 */
+	public SearchResult searchEntity(String ontologyIri, Entity entity)
+	{
+		List<QueryRule> allQueryRules = new ArrayList<QueryRule>();
+		List<QueryRule> rulesForOntologyTermFields = new ArrayList<QueryRule>();
+		for (String attributeName : entity.getAttributeNames())
+		{
+			if (defaultFields.contains(attributeName.toLowerCase()))
+			{
+				if (rulesForOntologyTermFields.size() > 0) rulesForOntologyTermFields.add(new QueryRule(Operator.OR));
+				rulesForOntologyTermFields.add(new QueryRule(OntologyTermQueryRepository.SYNONYMS, Operator.EQUALS,
+						entity.get(attributeName)));
+			}
+			else if (entity.get(attributeName) != null && !StringUtils.isEmpty(entity.get(attributeName).toString()))
+			{
+				QueryRule queryRule = new QueryRule(Arrays.asList(new QueryRule(attributeName, Operator.EQUALS, entity
+						.get(attributeName))));
+				queryRule.setOperator(Operator.NESTED);
+				if (allQueryRules.size() > 0) allQueryRules.add(new QueryRule(Operator.OR));
+				allQueryRules.add(queryRule);
+			}
+		}
+		QueryRule nestedQueryRule = new QueryRule(rulesForOntologyTermFields);
+		nestedQueryRule.setOperator(Operator.NESTED);
+		if (allQueryRules.size() > 0) allQueryRules.add(new QueryRule(Operator.OR));
+		allQueryRules.add(nestedQueryRule);
+		SearchRequest request = new SearchRequest(AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyIri),
+				new QueryImpl(allQueryRules).pageSize(MAX_NUMBER_MATCHES), null);
+
+		Iterator<Hit> iterator = searchService.search(request).getSearchHits().iterator();
+
+		List<ComparableHit> comparableHits = new ArrayList<ComparableHit>();
+		while (iterator.hasNext())
+		{
+			Hit hit = iterator.next();
+			Map<String, Object> columnValueMap = hit.getColumnValueMap();
+			BigDecimal luceneScore = new BigDecimal(columnValueMap.get(SCORE).toString());
+			BigDecimal maxNgramScore = new BigDecimal(0);
+			for (String attributeName : entity.getAttributeNames())
+			{
+				if (defaultFields.contains(attributeName.toLowerCase()))
+				{
+					BigDecimal ngramScore = new BigDecimal(NGramMatchingModel.stringMatching(
+							StringUtils.join(entity.getString(attributeName),
+									OntologyTermQueryRepository.ILLEGAL_CHARACTERS_REPLACEMENT),
+							columnValueMap.get(OntologyTermIndexRepository.SYNONYMS).toString()));
+					if (maxNgramScore.doubleValue() < ngramScore.doubleValue())
+					{
+						maxNgramScore = ngramScore;
+					}
+				}
+				else
+				{
+					for (String key : columnValueMap.keySet())
+					{
+						if (attributeName.equalsIgnoreCase(key))
+						{
+							BigDecimal ngramScore = new BigDecimal(NGramMatchingModel.stringMatching(StringUtils.join(
+									entity.getString(attributeName),
+									OntologyTermQueryRepository.ILLEGAL_CHARACTERS_REPLACEMENT), columnValueMap
+									.get(key).toString()));
+							if (maxNgramScore.doubleValue() < ngramScore.doubleValue())
+							{
+								maxNgramScore = ngramScore;
+							}
+						}
+					}
+				}
+			}
+
+			comparableHits.add(new ComparableHit(hit, luceneScore.multiply(maxNgramScore)));
+		}
+		Collections.sort(comparableHits);
+		return convertResults(comparableHits);
+	}
+
+	/**
+	 * This method is to search simple query in a specified ontology. By
+	 * default, ontology ontologyTermSynonym field is involved in the
+	 * ElasticSearch
+	 * 
+	 * @param ontologyIri
+	 * @param queryString
+	 * @return
+	 */
 	public SearchResult search(String ontologyIri, String queryString)
 	{
 		Set<String> uniqueTerms = new HashSet<String>(Arrays.asList(queryString.toLowerCase().trim()

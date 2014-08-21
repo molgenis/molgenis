@@ -39,7 +39,8 @@
 			//Collect all the scores from the candidate ontology term mappings
 			var scoreGroup = [];
 			$.each(entity.results.searchHits, function(index, hit){
-				scoreGroup.push(parseFloat(hit.columnValueMap.combinedScore.toFixed(2)));
+				var eachScore = hit.columnValueMap.combinedScore ? hit.columnValueMap.combinedScore : hit.columnValueMap.score;
+				scoreGroup.push(parseFloat(eachScore.toFixed(2)));
 			});
 			
 			//Get the index at which two groups are separated statistically based on the scores
@@ -75,7 +76,7 @@
 				if(index >= 20) return false;
 				var ontologyTermNameDiv = $('<div />').addClass('span5 matchterm show-popover').css('margin-bottom', '-6px').append(hit.columnValueMap.ontologyTerm);
 				var ontologyTermUrlDiv = $('<div />').addClass('span5 termurl').css('margin-bottom', '-6px').append('<a href="' + hit.columnValueMap.ontologyTermIRI + '" target="_blank">' + hit.columnValueMap.ontologyTermIRI + '</a>');
-				var matchScoreDiv = $('<div />').addClass('span2').css('margin-bottom', '-6px').append('<center>' + hit.columnValueMap.combinedScore.toFixed(2) + '</center>');
+				var matchScoreDiv = $('<div />').addClass('span2').css('margin-bottom', '-6px').append('<center>' + (hit.columnValueMap.combinedScore ? hit.columnValueMap.combinedScore.toFixed(2) :  hit.columnValueMap.score.toFixed(2)) + '</center>');
 				var newLineDiv = $('<div />').addClass('row-fluid').append(ontologyTermNameDiv).append(ontologyTermUrlDiv).append(matchScoreDiv);
 				var isEqual = hit.columnValueMap.ontologyTermSynonym === hit.columnValueMap.ontologyTerm;
 				var popoverOption = {
