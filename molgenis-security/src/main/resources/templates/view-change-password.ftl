@@ -97,20 +97,20 @@
   			</div>
   			<div class="modal-body">
 				<form id="change-password-form" class="form-horizontal" method="POST" action="">
-	  				<div class="control-group">
-	    				<label class="control-label" for="loginPassword">Password</label>
-	    				<div class="controls">
+	  				<div class="form-group">
+	    				<label class="col-md-3 control-label" for="loginPassword">Password</label>
+	    				<div class="col-md-9">
 	      					<input type="password" id="password1" name="password1">
 	   	 				</div>
 	  				</div>
-	  				<div class="control-group">
-	    				<label class="control-label" for="loginPassword">Retype password</label>
-	    				<div class="controls">
+	  				<div class="form-group">
+	    				<label class="col-md-3 control-label" for="loginPassword">Retype password</label>
+	    				<div class="col-md-9">
 	      					<input type="password" id="password2" name="password2">
 	   	 				</div>
 	  				</div>
-	  				<div class="control-group">
-	    				<div class="controls">
+	  				<div class="form-group">
+	    				<div class="col-md-9">
 	      					<button id="change-password-btn" type="submit" class="btn btn-primary">Change password</button>
 	    				</div>
 	  				</div>

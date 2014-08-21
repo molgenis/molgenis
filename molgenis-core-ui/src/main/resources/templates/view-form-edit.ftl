@@ -25,8 +25,8 @@
 	</#if>
 	
 	<div class="pull-left">
-		<div id="success-message" class="control-group" style="display: none">
-    		<div class="controls">
+		<div id="success-message" class="form-group" style="display: none">
+    		<div class="col-md-9">
 				<div class="alert alert-success">
   					<button type="button" class="close">&times;</button>
   					<strong>${form.title} saved.</strong>
@@ -49,8 +49,8 @@
     	</#list>
     	
     	<#if form.hasWritePermission>
-    		<div class="control-group">
-    			<div class="controls">
+    		<div class="form-group">
+    			<div class="col-md-9">
       				<button type="submit" class="btn btn-large pull-right">Save</button>
     			</div>
   			</div>

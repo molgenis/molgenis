@@ -40,6 +40,54 @@
 				</li>
 			</ul>
 		</description>
+		<entity name="TypeTest" xref_label="xenum">
+			<field name="id" type="autoid" hidden="true" />
+			<field name="xbool" type="bool" />
+			<field name="xboolnillable" type="bool" nillable="true" />
+			<field name="xcategorical" type="categorical" xref_entity="TypeTestRef" />
+			<field name="xcategoricalnillable" type="categorical" nillable="true" xref_entity="TypeTestRef" />
+			<field name="xdate" type="date" />
+			<field name="xdatenillable" type="date" nillable="true" />
+			<field name="xdatetime" type="datetime" />
+			<field name="xdatetimenillable" type="datetime" nillable="true" />
+			<field name="xdecimal" type="decimal" />
+			<field name="xdecimalnillable" type="decimal" nillable="true" />
+			<field name="xemail" type="email" />
+			<field name="xemailnillable" type="email" nillable="true" />
+			<field name="xenum" type="enum" enum_options="[enum1,enum2,enum3]"/>
+			<field name="xenumnillable" type="enum" nillable="true" enum_options="[enum1,enum2,enum3]"/>
+			<!-- add file type -->
+			<!-- add file type nillable -->
+			<field name="xhtml" type="html" />
+			<field name="xhtmlnillable" type="html" nillable="true" />
+			<field name="xhyperlink" type="hyperlink" />
+			<field name="xhyperlinknillable" type="hyperlink" nillable="true" />
+			<!--  add image type -->
+			<!--  add image type nillable -->
+			<field name="xint" type="int" />
+			<field name="xintnillable" type="int" nillable="true" />
+			<field name="xintrange" type="int" minRange="0" maxRange="10" />
+			<field name="xintrangenillable" type="int" minRange="0" maxRange="10" nillable="true" />
+			<field name="xlong" type="long" />
+			<field name="xlongnillable" type="long" nillable="true" />
+			<field name="xlongrange" type="long" minRange="0" maxRange="10" />
+			<field name="xlongrangenillable" type="long" minRange="0" maxRange="10" nillable="true" />
+			<field name="xmref" type="mref" xref_entity="TypeTestRef"/>
+			<field name="xmrefnillable" type="mref" nillable="true" xref_entity="TypeTestRef"/>
+			<field name="xstring" type="string" />
+			<field name="xstringnillable" type="string" nillable="true" />
+			<field name="xtext" type="text" />
+			<field name="xtextnillable" type="text" nillable="true" />
+			<field name="xxref" type="xref" xref_entity="TypeTestRef" />
+			<field name="xxrefnillable" type="xref" nillable="true" xref_entity="TypeTestRef"/>
+		</entity>
+		<entity name="TypeTestRef" xref_label="value" xref_lookup="value">
+			<field name="id" type="autoid" hidden="true" />
+			<field name="value" type="string" />
+			<unique fields="value"/>
+		</entity>
+		
+		
 		<entity name="Characteristic" implements="Identifiable"
 			xref_lookup="Identifier,Name,description">
 			<description> Characteristics are yes-no statements about things in

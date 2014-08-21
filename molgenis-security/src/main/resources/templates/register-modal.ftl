@@ -7,89 +7,89 @@
   <div class="modal-body">
   	<#-- register form -->
 	<form id="register-form" class="form-horizontal">
-	  <div class="control-group">
-	    <label class="control-label" for="reg-username">Username *</label>
-	    <div class="controls">
+	  <div class="form-group">
+	    <label class="col-md-3 control-label" for="reg-username">Username *</label>
+	    <div class="col-md-9">
 	      <input type="text" id="reg-username" name="username" required>
 	    </div>
 	  </div>
-	  <div class="control-group">
-	    <label class="control-label" for="reg-password">Password *</label>
-	    <div class="controls">
+	  <div class="form-group">
+	    <label class="col-md-3 control-label" for="reg-password">Password *</label>
+	    <div class="col-md-9">
 	      <input type="password" id="reg-password" name="password" required>
 	    </div>
 	  </div>
-	  <div class="control-group">
-	    <label class="control-label" for="reg-password-confirm">Repeat password *</label>
-	    <div class="controls">
+	  <div class="form-group">
+	    <label class="col-md-3 control-label" for="reg-password-confirm">Repeat password *</label>
+	    <div class="col-md-9">
 	      <input type="password" id="reg-password-confirm" name="confirmPassword" required>
 	    </div>
 	  </div>
-	  <div class="control-group">
-	    <label class="control-label" for="reg-email">Email address *</label>
-	    <div class="controls">
+	  <div class="form-group">
+	    <label class="col-md-3 control-label" for="reg-email">Email address *</label>
+	    <div class="col-md-9">
 	      <input type="email" id="reg-email" name="email" required>
 	    </div>
 	  </div>
 	  <hr>
 	  <h4>Personal and professional details</h4>
-	  <div class="control-group">
-	    <label class="control-label" for="reg-phone">Phone</label>
-	    <div class="controls">
+	  <div class="form-group">
+	    <label class="col-md-3 control-label" for="reg-phone">Phone</label>
+	    <div class="col-md-9">
 	      <input type="text" id="reg-phone" name="phone">
 	    </div>
 	  </div>
-	  <div class="control-group">
-	    <label class="control-label" for="reg-fax">Fax</label>
-	    <div class="controls">
+	  <div class="form-group">
+	    <label class="col-md-3 control-label" for="reg-fax">Fax</label>
+	    <div class="col-md-9">
 	      <input type="text" id="reg-fax" name="fax">
 	    </div>
 	  </div>
-	  <div class="control-group">
-	    <label class="control-label" for="reg-toll-free-phone">Toll-free phone</label>
-	    <div class="controls">
+	  <div class="form-group">
+	    <label class="col-md-3 control-label" for="reg-toll-free-phone">Toll-free phone</label>
+	    <div class="col-md-9">
 	      <input type="text" id="reg-toll-free-phone" name="tollFreePhone">
 	    </div>
 	  </div> 
-	  <div class="control-group">
-	    <label class="control-label" for="reg-title">Title</label>
-	    <div class="controls">
+	  <div class="form-group">
+	    <label class="col-md-3 control-label" for="reg-title">Title</label>
+	    <div class="col-md-9">
 	      <input type="text" id="reg-title" name="title">
 	    </div>
 	  </div>
-	  <div class="control-group">
-	    <label class="control-label" for="reg-last-name">Last name</label>
-	    <div class="controls">
+	  <div class="form-group">
+	    <label class="col-md-3 control-label" for="reg-last-name">Last name</label>
+	    <div class="col-md-9">
 	      <input type="text" id="reg-last-name" name="lastname">
 	    </div>
 	  </div>
-	  <div class="control-group">
-	    <label class="control-label" for="reg-first-name">First name</label>
-	    <div class="controls">
+	  <div class="form-group">
+	    <label class="col-md-3 control-label" for="reg-first-name">First name</label>
+	    <div class="col-md-9">
 	      <input type="text" id="reg-first-name" name="firstname">
 	    </div>
 	  </div>
-	  <div class="control-group">
-	    <label class="control-label" for="reg-department">Department</label>
-	    <div class="controls">
+	  <div class="form-group">
+	    <label class="col-md-3 control-label" for="reg-department">Department</label>
+	    <div class="col-md-9">
 	      <input type="text" id="reg-department" name="department">
 	    </div>
 	  </div>
-	  <div class="control-group">
-	    <label class="control-label" for="reg-address">Address</label>
-	    <div class="controls">
+	  <div class="form-group">
+	    <label class="col-md-3 control-label" for="reg-address">Address</label>
+	    <div class="col-md-9">
 	      <input type="text" id="reg-address" name="address">
 	    </div>
 	  </div>
-	  <div class="control-group">
-	    <label class="control-label" for="reg-city">City</label>
-	    <div class="controls">
+	  <div class="form-group">
+	    <label class="col-md-3 control-label" for="reg-city">City</label>
+	    <div class="col-md-9">
 	      <input type="text" id="reg-city" name="city">
 	    </div>
 	  </div>
-	  <div class="control-group">
-	    <label class="control-label" for="reg-country">Country</label>
-	    <div class="controls">
+	  <div class="form-group">
+	    <label class="col-md-3 control-label" for="reg-country">Country</label>
+	    <div class="col-md-9">
 	      <select id="reg-country" name="country">
 	      	<option value="" disabled selected>Please Select</option>
 	      <#list countries?keys as countryCode>
@@ -100,21 +100,21 @@
 	  </div>
 	  <hr>
 	  <h4>Code validation</h4>
-	  <div class="control-group">
-	  	<div class="controls">
+	  <div class="form-group">
+	  	<div class="col-md-9">
 	  		<a href="#" id="captcha-href"><img id="captcha-img" src="/captcha"></a>
 	  	</div>
 	  </div>
-	  <div class="control-group">
-	    <label class="control-label" for="reg-captcha">Code</label>
-	    <div class="controls">
+	  <div class="form-group">
+	    <label class="col-md-3 control-label" for="reg-captcha">Code</label>
+	    <div class="col-md-9">
 	      <input type="text" id="reg-captcha" name="captcha">
 	    </div>
 	  </div>     
 	</form>
   </div>
   <div class="modal-footer">
-    <a href="#" id="register-btn-close" class="btn" aria-hidden="true">Close</a>
+    <a href="#" id="register-btn-close" class="btn btn-default" aria-hidden="true">Close</a>
     <a href="#" id="register-btn" class="btn btn-primary" aria-hidden="true">Sign up</a>
   </div>
 </div>

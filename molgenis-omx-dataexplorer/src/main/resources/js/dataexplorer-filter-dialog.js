@@ -42,7 +42,7 @@
 			items.push('<form class="form-horizontal"></form>');
 			items.push('</div>');
 			items.push('<div class="modal-footer">');
-			items.push('<a href="#" class="btn" data-dismiss="modal">Cancel</a>');
+			items.push('<a href="#" class="btn btn-default" data-dismiss="modal">Cancel</a>');
 			items.push('<a href="#" class="btn btn-primary filter-apply-btn" data-dismiss="modal">Apply</a>');
 			items.push('</div>');
 			items.push('</div>');

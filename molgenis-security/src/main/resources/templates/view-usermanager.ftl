@@ -6,7 +6,7 @@
 
 <@header css js/>
 <div class="container-fluid">
-	<div class="row-fluid">
+	<div class="row">
 		<ul class="nav nav-pills">
 			<li id="usersTab" <#if "users"==viewState>class="active"</#if>><a href="#user-manager" data-toggle="tab">Users</a></li>
 			<li id="groupsTab"<#if "groups"==viewState>class="active"</#if>><a href="#group-manager" data-toggle="tab">Groups</a></li>

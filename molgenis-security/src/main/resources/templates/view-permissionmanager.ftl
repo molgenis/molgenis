@@ -3,10 +3,10 @@
 <#assign css=["permissionmanager.css"]>
 <#assign js=["permissionmanager.js"]>
 <@header css js/>
-	<div class="row-fluid">
-		<div class="span1"></div>
-		<div class="span10">
-			<div class="row-fluid">
+	<div class="row">
+		<div class="col-md-1"></div>
+		<div class="col-md-10">
+			<div class="row">
 				<div class="tabbable tabs-left">
 					<ul class="nav nav-tabs">
 						<li class="active"><a href="#plugin-permission-manager" data-toggle="tab">Plugin Permissions</a></li>
@@ -27,6 +27,6 @@
 				</div>
 			</div>
 		</div>
-		<div class="span1"></div>
+		<div class="col-md-1"></div>
 	</div>
 <@footer/>

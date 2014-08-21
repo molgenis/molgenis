@@ -3,7 +3,7 @@
 <#assign css=["bwizard.min.css", "importwizard.css"]>
 <#assign js=["bwizard.min.js"]>
 <@header css js/>
-	<div class="row-fluid">
+	<div class="row">
 				<div id="wizard">
 				<ol>
 					<#list wizard.pages as wizardPage>

@@ -1,8 +1,8 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 <@header/>
-	<div class="row-fluid">
-		<div class="span9">
+	<div class="row">
+		<div class="col-md-9">
 		<h4>Index datasets:</h4>
 		<div style="width:400px">
 			<a href="#" id="deselect-all" style="float:right;margin-left:10px">Deselect all</a>
@@ -15,11 +15,11 @@
 				</label> 
 			</#list>
 		</div>
-		<input type="submit" value="Start indexing" class="btn" style="margin-top: 20px" />
+		<input type="submit" value="Start indexing" class="btn btn-default" style="margin-top: 20px" />
 		</div>
 	</div>
-    <div class="row-fluid">
-        <div class="span9">
+    <div class="row">
+        <div class="col-md-9">
             <h4>Index protocols:</h4>
             <div style="width:400px">
                 <a href="#" id="deselect-all-protocols" style="float:right;margin-left:10px">Deselect all</a>
@@ -32,7 +32,7 @@
                 </label>
             </#list>
             </div>
-            <input id="indexProtocol" type="submit" value="Start indexing" class="btn" style="margin-top: 20px" />
+            <input id="indexProtocol" type="submit" value="Start indexing" class="btn btn-default" style="margin-top: 20px" />
         </div>
     </div>
 	<script type="text/javascript">

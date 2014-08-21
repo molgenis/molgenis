@@ -159,12 +159,12 @@
 					    items.push('">');
 					    items.push('<div class="accordion-inner">');
 					    items.push('<div class="container-fluid">');
-					    items.push('<div class="row-fluid">');
-					    items.push('<div class="span3">');
+					    items.push('<div class="row">');
+					    items.push('<div class="col-md-3">');
 					    items.push('<h3>Protocol summary</h3>');
 					    items.push('<p>' + (protocol.description || 'N/A') + '</p>');
 					    items.push('</div>');
-					    items.push('<div id="table-protocol-container" class="span9">');
+					    items.push('<div id="table-protocol-container" class="col-md-9">');
 					    
 						// build protocol result table
 						var features = $.merge(matchedFeatures, remainingFeatures);

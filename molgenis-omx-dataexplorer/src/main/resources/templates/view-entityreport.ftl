@@ -18,7 +18,7 @@
 				</div>
 				
 				<div class="modal-body">
-					<div class="control-group form-horizontal">
+					<div class="form-group form-horizontal">
 				
 						<table class="table">
 							<tbody>

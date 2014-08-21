@@ -38,7 +38,7 @@
 	<body>
 		<div id="wrap">
 			<div class="container-fluid">
-				<div class="row-fluid">
+				<div class="row">
 					<#if menu_id??>
 						<#if !(plugin_id??)>
 							<#assign plugin_id="NULL">
@@ -50,10 +50,10 @@
 					</#if>			
 				</div>
 				<div id="login-modal-container-header"></div>
-				<div class="row-fluid">
+				<div class="row">
 					<div class="datasetsindexerAlerts"></div>
 				</div>
-				<div class="row-fluid">
+				<div class="row">
 					<div class="alerts"><#if errorMessage??>
 						<#assign message = errorMessage>
 						<#assign messageType = "error"> 
@@ -72,53 +72,69 @@
 					</#if>
 				</div>
 			</div>
-			<div class="row-fluid">
+			<div class="row">
 				<div id="plugin-container" class="container-fluid">
 	</#macro>
 	<#--topmenu -->
 	<#macro topmenu menu plugin_id>
-		<div class="navbar"> 
-			<div class="navbar-inner"> 	
-				<ul class="nav">
-					<#list menu.items as item>
-						<#if item.type != "MENU">
-							<#if item.name=="Home">
-								<li><a href="/menu/${menu.id?html}/${item.url?html}"><img src="<#if molgenis_ui.hrefLogo?has_content>${molgenis_ui.hrefLogo?html}<#else><@resource_href "/img/logo_molgenis_small.png"/></#if>" alt="<#if molgenis_ui.title?has_content>${molgenis_ui.title?html}</#if>"></a></li>
-							<#else>
-								<#if item.id == plugin_id>
-									<li class="active"><a href="#">${item.name?html}</a></li>
-								<#else>
-									<li><a href="/menu/${menu.id?html}/${item.url?html}">${item.name?html}</a></li>
-								</#if>
-							</#if>
-						<#elseif item.type == "MENU">
-							<#assign sub_menu = item>
-							<li class="dropdown">
-								<a class="dropdown-toggle" data-toggle="dropdown" href="#">${item.name?html}<b class="caret"></b></a>
-								<ul class="dropdown-menu">
-									<#list sub_menu.items as subitem>
-										<#if subitem.type != "MENU">
-											<li><a href="/menu/${sub_menu.id?html}/${subitem.url?html}">${subitem.name?html}</a></li>
-										<#elseif subitem.type == "MENU">
-											<li>
-												<a tabindex="-1" href="/menu/${subitem.id?html}">${subitem.name?html}</a>
-											</li>
-										</#if>
-									</#list>
-								</ul>
-							</li>
-						</#if>
-					</#list>
-				</ul>
-				<#if authenticated?? && authenticated>
-				<form class="navbar-form pull-right" method="post" action="/logout">
-					<button type="submit" class="btn btn-inverse btn-link">Sign out</button>
-				</form>
-				<#else>
-				<a class="modal-href pull-right btn btn-inverse btn-link" href="/account/login" data-target="login-modal-container-header">Sign in</a>
-				</#if>
+        <nav class="navbar navbar-default navbar-static-top" role="navigation">
+			<div class="container-fluid">
+                <#-- TODO refactor to remove depency on 'Home' -->
+                <#list menu.items as item>
+                    <#if item.type != "MENU" && item.name == "Home">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-molgenis-navbar">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="/menu/${menu.id?html}/${item.url?html}"><img class="img-responsive" src="<#if molgenis_ui.hrefLogo?has_content>${molgenis_ui.hrefLogo?html}<#else><@resource_href "/img/logo_molgenis_small.png"/></#if>" alt="<#if molgenis_ui.title?has_content>${molgenis_ui.title?html}</#if>"></a>
+                </div>
+                        <#break>
+                    </#if>
+                </#list>
+                <div class="collapse navbar-collapse" id="bs-molgenis-navbar">
+    				<ul class="nav navbar-nav">
+    					<#list menu.items as item>
+    						<#if item.type != "MENU">
+                                <#-- TODO refactor to remove depency on 'Home' -->
+    							<#if item.name != "Home">
+    								<#if item.id == plugin_id>
+    									<li class="active"><a href="#">${item.name?html}</a></li>
+    								<#else>
+    									<li><a href="/menu/${menu.id?html}/${item.url?html}">${item.name?html}</a></li>
+    								</#if>
+    							</#if>
+    						<#elseif item.type == "MENU">
+    							<#assign sub_menu = item>
+    							<li class="dropdown">
+    								<a class="dropdown-toggle" data-toggle="dropdown" href="#">${item.name?html}<b class="caret"></b></a>
+    								<ul class="dropdown-menu">
+    									<#list sub_menu.items as subitem>
+    										<#if subitem.type != "MENU">
+    											<li><a href="/menu/${sub_menu.id?html}/${subitem.url?html}">${subitem.name?html}</a></li>
+    										<#elseif subitem.type == "MENU">
+    											<li>
+    												<a tabindex="-1" href="/menu/${subitem.id?html}">${subitem.name?html}</a>
+    											</li>
+    										</#if>
+    									</#list>
+    								</ul>
+    							</li>
+    						</#if>
+    					</#list>
+    				</ul>
+    				<#if authenticated?? && authenticated>
+    				<form class="navbar-form navbar-right" method="post" action="/logout">
+    					<button type="submit" class="btn btn-inverse btn-link">Sign out</button>
+    				</form>
+    				<#else>
+    				<a class="modal-href btn btn-default navbar-btn navbar-right" href="/account/login" data-target="login-modal-container-header">Sign in</a>
+    				</#if>
+				</div>
 			</div>
-		</div>
+		</nav>
 	</#macro>
 <#--submenu -->
 	<#macro submenu menu plugin_id>

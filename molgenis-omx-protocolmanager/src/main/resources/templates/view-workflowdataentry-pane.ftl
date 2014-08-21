@@ -91,7 +91,7 @@
 </#if>
 	</tbody>
 </table>
-<div class="row-fluid">
+<div class="row">
 <#if connectedFeatures?has_content>
 	<#list workflowElement.elementConnections as elementConnection>
 		<#if elementConnection.outputFeature.dataType == "mref">

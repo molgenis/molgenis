@@ -5,7 +5,7 @@
 <#assign js=['molgenis-wizard.js'] + javascripts>
 
 <@header css js/>
-	<div class="row-fluid">
+	<div class="row">
 		<div id="wizard">
 			<ol class="bwizard-steps clearfix" role="tablist">
 				<#list wizard.pages as wizardPage>

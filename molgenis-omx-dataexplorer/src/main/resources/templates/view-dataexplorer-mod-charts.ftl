@@ -2,14 +2,14 @@
 <#include "/charts-forms/view-scatterplot.ftl" parse=false>
 <#include "/charts-forms/view-boxplot.ftl" parse=false>
 <#include "/charts-forms/view-heatmap.ftl" parse=false>
-<div class="row-fluid">
-	<div class="btn-group" class="span9">
-		<a href="#chart-designer-modal-scatterplot" id="chart-designer-modal-scatterplot-button" role="button" class="btn" data-toggle="modal">Create scatter plot <i class="icon-plus"></i></a>
-		<a href="#chart-designer-modal-boxplot" id="chart-designer-modal-boxplot-button" role="button" class="btn" data-toggle="modal">Create box plot <i class="icon-plus"></i></a>
+<div class="row">
+	<div class="btn-group" class="col-md-9">
+		<a href="#chart-designer-modal-scatterplot" id="chart-designer-modal-scatterplot-button" role="button" class="btn btn-default" data-toggle="modal">Create scatter plot <i class="icon-plus"></i></a>
+		<a href="#chart-designer-modal-boxplot" id="chart-designer-modal-boxplot-button" role="button" class="btn btn-default" data-toggle="modal">Create box plot <i class="icon-plus"></i></a>
 	</div>
 </div>
-<div class="row-fluid">
-	<div id="chart-view" class="span9"></div>
+<div class="row">
+	<div id="chart-view" class="col-md-9"></div>
 </div>
 <script>
 	if (typeof Highcharts === 'undefined') {

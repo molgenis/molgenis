@@ -7,7 +7,7 @@
 <@header css js/>
 
 <div class="container-fluid">
-	<div class="row-fluid">
+	<div class="row">
 		<h3>Scripts <@hasPermission entityName='script' permission="WRITE"><a id="create-script-btn" href="#" style="margin:30px 10px"><img src="/img/new.png"></a></@hasPermission></h3>
 		<table class="table table-condensed table-bordered">
 			<thead>
@@ -52,7 +52,7 @@
 			</tbody>
 		</table>
 	</div>
-	<div class="row-fluid">
+	<div class="row">
 		<h3>Parameters <@hasPermission entityName='scriptparameter' permission="WRITE"><a id="create-scriptparameter-btn" href="#" style="margin:30px 10px"><img src="/img/new.png"></a></@hasPermission></h3>
 		<table class="table table-condensed table-bordered" style="width: 25%">
 			<thead>
@@ -111,9 +111,9 @@
 
 <script id="parameters-template" type="text/x-handlebars-template">
 	{{#each parameters}}
-		<div class="control-group">
-			<label class="control-label">{{name}}</label>
-			<div class="controls">
+		<div class="form-group">
+			<label class="col-md-3 control-label">{{name}}</label>
+			<div class="col-md-9">
     			<input type="text" name="{{name}}" value="" class="required">
     		</div>
 		</div>	

@@ -14,12 +14,12 @@
 	        </div>
 	    </div>
 	</div>
-	<div class="row-fluid data-table-container" id="data-table-container"></div>
-		<div class="row-fluid data-table-pager-container">
+	<div class="row data-table-container" id="data-table-container"></div>
+		<div class="row data-table-pager-container">
 			<div class="pull-right">
-				<a id="download-modal-button" class="btn" data-toggle="modal" data-target="#downloadModal">Download as CSV</a>
+				<a id="download-modal-button" class="btn btn-default" data-toggle="modal" data-target="#downloadModal">Download as CSV</a>
 			<#if galaxyEnabled?? && galaxyEnabled == true>
-				<a id="galaxy-export-modal-button" class="btn" data-toggle="modal" data-target="#galaxy-export-modal">Export to Galaxy</a>
+				<a id="galaxy-export-modal-button" class="btn btn-default" data-toggle="modal" data-target="#galaxy-export-modal">Export to Galaxy</a>
 			</#if>
 			</div>
 		</div>
@@ -35,9 +35,9 @@
 	        	<h4 class="modal-title">Download as csv</h4>
 	     	</div>
 	      	<div class="modal-body">
-	      		<div class="control-group form-horizontal">
-					<label class="control-label">As column names i want</label>
-	    			<div class="controls">
+	      		<div class="form-group form-horizontal">
+					<label class="col-md-3 control-label">As column names i want</label>
+	    			<div class="col-md-9">
 	    				<label><input type="radio" name="ColNames" value ="ATTRIBUTE_LABELS" checked="true"> Attribute labels</label>
 	    				<label><input type="radio" name="ColNames" value ="ATTRIBUTE_NAMES"> Attribute names</label>
 					</div>
@@ -65,16 +65,16 @@
 		        	<h4 class="modal-title">Export data set to Galaxy</h4>
 		     	</div>
 		      	<div class="modal-body">
-		      		<div class="control-group">
-			      		<label class="control-label" for="galaxy-export-url">Galaxy server URL *</label>
-					    <div class="controls">
-					    	<input type="text" id="galaxy-export-url" name="galaxyUrl" <#if galaxyUrl??>value="${galaxyUrl?html}" </#if>required><span class="help-block">e.g. https://usegalaxy.org/</span>
+		      		<div class="form-group">
+			      		<label class="col-md-3 control-label" for="galaxy-export-url">Galaxy server URL *</label>
+					    <div class="col-md-9">
+					    	<input type="text" id="galaxy-export-url" name="galaxyUrl" <#if galaxyUrl??>value="${galaxyUrl?html}" </#if>required><col-md- class="help-block">e.g. https://usegalaxy.org/</col-md->
 					    </div>
 		      		</div>
-		      		<div class="control-group">
-		      			<label class="control-label" for="galaxy-export-api-key">Galaxy API key *</label>
-					    <div class="controls">
-					    	<input type="password" id="galaxy-export-api-key" name="galaxyApiKey" <#if galaxyApiKey??>value="${galaxyApiKey?html}" </#if>required><span class="help-block">See 'Select API Keys' in menu 'User' on e.g. https://usegalaxy.org/</span>
+		      		<div class="form-group">
+		      			<label class="col-md-3 control-label" for="galaxy-export-api-key">Galaxy API key *</label>
+					    <div class="col-md-9">
+					    	<input type="password" id="galaxy-export-api-key" name="galaxyApiKey" <#if galaxyApiKey??>value="${galaxyApiKey?html}" </#if>required><col-md- class="help-block">See 'Select API Keys' in menu 'User' on e.g. https://usegalaxy.org/</col-md->
 					    </div>
 		      		</div>
 				</div>

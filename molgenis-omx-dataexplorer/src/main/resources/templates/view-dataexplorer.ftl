@@ -34,17 +34,17 @@
         molgenis.dataexplorer.filter.wizard.setWizardTitle('${wizardtitle}');
    	</script>
     <div id="entity-class" class="well">
-		<div class="row-fluid">
+		<div class="row">
 			<h3 id="entity-class-name"></h3>
-			<span id="entity-class-description"></span>
+			<col-md- id="entity-class-description"></col-md->
 		</div>
 	</div>
      
     <div class="pull-right"<#if hideDatasetSelect??> style="display:none"</#if>>
-   		<div class="row-fluid  form-horizontal">
+   		<div class="row  form-horizontal">
        		<div id="dataset-select-container" class="pull-right form-horizontal">
-            	<label class="control-label" for="dataset-select">Choose a dataset:</label>
-                <div class="controls">
+            	<label class="col-md-3 control-label" for="dataset-select">Choose a dataset:</label>
+                <div class="col-md-9">
                 	<select data-placeholder="Choose a Entity (example: dataset, protocol..." id="dataset-select">
                     	<#list entitiesMeta.iterator() as entityMeta>
                         	<option value="/api/v1/${entityMeta.name}" <#if entityMeta.name == selectedEntityName> selected</#if>><#if entityMeta.label?has_content>${entityMeta.label}<#else>${entityMeta.name}</#if></option>
@@ -55,18 +55,18 @@
      	</div>
    	</div>
      
-	<div class="row-fluid">
-		<div class="span3">
+	<div class="row">
+		<div class="col-md-3">
 			<div class="well">
-				<div class="row-fluid">
-					<#-- add span12 to ensure that input is styled correctly at low and high solutions -->
-					<div class="input-append span12" id="observationset-search-container">
-						<#-- add span10 to ensure that input is styled correctly at low and high solutions -->
-						<input class="span10" id="observationset-search" type="text" <#if searchTerm??>value="${searchTerm}"</#if>  placeholder="Search data values"></input>
-						<button class="btn" type="button" id="search-button"><i class="icon-large icon-search"></i></button>
+				<div class="row">
+					<#-- add col-md-12 to ensure that input is styled correctly at low and high solutions -->
+					<div class="group-append col-md-12" id="observationset-search-container">
+						<#-- add col-md-10 to ensure that input is styled correctly at low and high solutions -->
+						<input class="col-md-10" id="observationset-search" type="text" <#if searchTerm??>value="${searchTerm}"</#if>  placeholder="Search data values"></input>
+						<button class="btn btn-default" type="button" id="search-button"><i class="icon-large icon-search"></i></button>
 					</div>					
 				</div>
-				<div class="row-fluid">
+				<div class="row">
 					<div class="accordion" id="feature-filters-container">
 						<div class="accordion-group">
 						    <div class="accordion-heading">
@@ -74,8 +74,8 @@
 							</div>
 							<div class="accordion-body collapse in">
 								<div class="accordion-inner">
-								    <div class="row-fluid" id="feature-filters"></div>
-								    <div class="row-fluid">
+								    <div class="row" id="feature-filters"></div>
+								    <div class="row">
 								    	<a href="#" id="filter-wizard-btn" class="btn btn-small pull-right"><img src="/img/filter-bw.png"> ${wizardbuttontitle}</a>
 									</div>
 								</div>
@@ -83,7 +83,7 @@
 						</div>
 					</div>
 				</div>
-                <div class="row-fluid"<#if hideDataItemSelect??> style="display:none"</#if>>
+                <div class="row"<#if hideDataItemSelect??> style="display:none"</#if>>
                     <div class="accordion" id="feature-selection-container">
                         <div class="accordion-group">
                             <div class="accordion-heading">
@@ -91,7 +91,7 @@
                             </div>
                             <div class="accordion-body collapse in">
                                 <div class="accordion-inner">
-                                    <div class="row-fluid" id="feature-selection"></div>
+                                    <div class="row" id="feature-selection"></div>
                                 </div>
                             </div>
                         </div>

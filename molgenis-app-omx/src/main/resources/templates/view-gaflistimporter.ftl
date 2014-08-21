@@ -5,18 +5,18 @@
 <@header css js/>
 <div class="container-fluid">
 	<div class="well">
-		<div class="row-fluid">
+		<div class="row">
 			<H2>Import GAF list</H2>
 		</div>
-		<div class="row-fluid">	
-			<div class="span4">
+		<div class="row">	
+			<div class="col-md-4">
 				<form id="gaflist-import-file-form" method="post" action="${context_url}" enctype="multipart/form-data" onsubmit="parent.showSpinner(function(){$('.modal-body').html('Validating and importing GAF list');});  return true;">
 					<h4>Import CSV file</h4>
 					<table class="table">
 						<tbody>
 							<tr>
 								<td nowrap><i>Separator:</i></td>
-								<td><input type="text" name="separator" class="span2" maxlength="1" value=""/></td>
+								<td><input type="text" name="separator" class="col-md-2" maxlength="1" value=""/></td>
 							</tr>
 							<tr>
 								<td nowrap><i>Choose file:</i></td>
@@ -31,7 +31,7 @@
 				</form>
 			</div>
 			
-			<div class="span8">
+			<div class="col-md-8">
 				<#if messages?? == true>
 					<h4>Import messages:</h4>
 					<ul>

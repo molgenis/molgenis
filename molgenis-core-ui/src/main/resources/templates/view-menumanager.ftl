@@ -3,37 +3,37 @@
 <#assign css=["select2.css", "jquery-sortable.css", "menumanager.css"]>
 <#assign js=["handlebars.min.js","select2.min.js","jquery-sortable-min.js", "menumanager.js"]>
 <@header css js/>
-	<div class="row-fluid offset2 span8">
+	<div class="row col-md-offset-2 col-md-8">
 		<p>Drag and drop menu items to update menu, press Save to store the menu. Each menu should contain at least one item.</p>
-		<div class="row-fluid" id="menu-editor-container">
-			<div class="row-fluid">
-				<div class="span7">
+		<div class="row" id="menu-editor-container">
+			<div class="row">
+				<div class="col-md-7">
 					<div id="menu-editor-tree">
 						<@create_menu_list molgenis_ui.menu true/>
 					</div>
 				</div>
-				<div class="span5">
+				<div class="col-md-5">
 					<legend>Create Menu</legend>
 					<form name="add-menu-group-form" class="form-horizontal">
 						<@create_edit_menu_inputs/>
-						<div class="control-group">
-							<div class="controls">
-								<button type="submit" class="btn">Create</button>
+						<div class="form-group">
+							<div class="col-md-9">
+								<button type="submit" class="btn btn-default">Create</button>
 							</div>
 						</div>
 					</form>
 					<legend>Create Menu Item</legend>
 					<form name="add-menu-item-form" class="form-horizontal">
 						<@create_edit_item_inputs false/>
-						<div class="control-group">
-							<div class="controls">
-								<button type="submit" class="btn">Create</button>
+						<div class="form-group">
+							<div class="col-md-9">
+								<button type="submit" class="btn btn-default">Create</button>
 							</div>
 						</div>
 					</form>
 				</div>
 			</div>
-			<div class="row-fluid">
+			<div class="row">
 				<form name="save-menu-form" action="${context_url}/save" method="POST">
 					<button type="submit" class="btn btn-primary pull-right">Save</button>
 				</form>
@@ -84,23 +84,23 @@
 	</div>
 </form>
 <#macro create_edit_menu_inputs>
-<div class="control-group">
-	<label class="control-label" for="menu-id">Id *</label>
-	<div class="controls">
+<div class="form-group">
+	<label class="col-md-3 control-label" for="menu-id">Id *</label>
+	<div class="col-md-9">
 		<input type="text" name="menu-id" required disabled>
 	</div>
 </div>
-<div class="control-group">
-	<label class="control-label" for="menu-name">Name *</label>
-	<div class="controls">
+<div class="form-group">
+	<label class="col-md-3 control-label" for="menu-name">Name *</label>
+	<div class="col-md-9">
 		<input type="text" name="menu-name" required>
 	</div>
 </div>
 </#macro>
 <#macro create_edit_item_inputs is_edit>
-<div class="control-group">
-	<label class="control-label" for="menu-item">Plugin *</label>
-	<div class="controls">
+<div class="form-group">
+	<label class="col-md-3 control-label" for="menu-item">Plugin *</label>
+	<div class="col-md-9">
 		<select name="menu-item-select" required<#if is_edit> disabled</#if>>
 		<#list plugins as plugin>
 			<option value="${plugin.id}">${plugin.id}</option>
@@ -108,15 +108,15 @@
 		</select>
 	</div>
 </div>
-<div class="control-group">
-	<label class="control-label" for="menu-item-name">Name *</label>
-	<div class="controls">
+<div class="form-group">
+	<label class="col-md-3 control-label" for="menu-item-name">Name *</label>
+	<div class="col-md-9">
 		<input type="text" name="menu-item-name" required>
 	</div>
 </div>
-<div class="control-group">
-	<label class="control-label" for="menu-item-params">Query string</label>
-	<div class="controls">
+<div class="form-group">
+	<label class="col-md-3 control-label" for="menu-item-params">Query string</label>
+	<div class="col-md-9">
 		<input type="text" name="menu-item-params">
 	</div>
 </div>

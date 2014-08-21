@@ -8,17 +8,17 @@
     <div class="modal-body">
     <#-- order data form -->
         <form id="orderdata-form" class="form-horizontal" enctype="multipart/form-data">
-            <div class="control-group">
-                <label class="control-label" for="orderdata-name">Project title *</label>
+            <div class="form-group">
+                <label class="col-md-3 control-label" for="orderdata-name">Project title *</label>
 
-                <div class="controls">
+                <div class="col-md-9">
                     <input type="text" id="orderdata-name" name="name" required>
                 </div>
             </div>
-            <div class="control-group">
-                <label class="control-label" for="orderdata-file">Request form *</label>
+            <div class="form-group">
+                <label class="col-md-3 control-label" for="orderdata-file">Request form *</label>
 
-                <div class="controls">
+                <div class="col-md-9">
                     <input type="file" id="orderdata-file" name="file" required>
                 </div>
             </div>
@@ -29,7 +29,7 @@
         </div>
     </div>
     <div class="modal-footer">
-        <a href="#" id="orderdata-btn-close" class="btn" aria-hidden="true">Cancel</a>
+        <a href="#" id="orderdata-btn-close" class="btn btn-default" aria-hidden="true">Cancel</a>
         <a href="#" id="orderdata-btn" class="btn btn-primary" aria-hidden="true">Submit</a>
     </div>
 </div>

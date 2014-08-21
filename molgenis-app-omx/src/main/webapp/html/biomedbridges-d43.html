@@ -28,7 +28,7 @@
 	<body>
 		<div class="container-fluid">
 			<div class="page-header">
-				<div class="row-fluid">
+				<div class="row">
 					<div style="float:left;">
 						<img src="../img/logo_bmb.png">
 					</div>
@@ -36,24 +36,24 @@
 						<a id="example" href="#" class="btn btn-large btn-info" data-toggle="popover" data-placement="left" title="" data-content="Select a data set and enter a query to search real-time through multiple biobank datasets hosted on different servers. Explore integrated search results." data-original-title="Pilot integration using REST Web Services">How does it work?</a>
 					</div>
 				</div>
-				<div class="row-fluid">
-					<div class="span8 center">
+				<div class="row">
+					<div class="col-md-8 center">
 						<div id="dataset-select-container">
-							<div class="controls">
+							<div class="col-md-9">
 								<select data-placeholder="Choose a Dataset" id="dataset-select">
 									<option value="cbm">cbm</option>
 								</select>
-								<div class="input-append">
+								<div class="group-append">
 									<input id="search-text" type="text" value="Liver">
-									<button class="btn" id="search-btn" type="button">Search</button>
+									<button class="btn btn-default" id="search-btn" type="button">Search</button>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-			<div class="row-fluid">
-				<div class="span8 center">
+			<div class="row">
+				<div class="col-md-8 center">
 					<ul class="inline" id="server-list"></ul>
 					<div id="search-results-container"></div>
 				</div>
@@ -170,7 +170,7 @@
 				// update server list
 				var items = [];
 				for(var i = 0; i < servers.length; ++i)
-					items.push('<li><span class="badge badge-info">' + servers[i].name + '</span></li>');
+					items.push('<li><col-md- class="badge badge-info">' + servers[i].name + '</col-md-></li>');
 				$('#server-list').html(items.join(''));
 				
 				$("#search-btn").click(function() {

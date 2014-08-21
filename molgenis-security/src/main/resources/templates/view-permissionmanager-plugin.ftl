@@ -6,8 +6,8 @@
 					<div class="tab-content">
 					    <div class="tab-pane active" id="plugin-group-permission-manager">
 							<form class="form-horizontal" id="plugin-group-permission-form" method="post" action="${context_url}/update/plugin/group">
-								<label class="control-label" for="plugin-group-select">Select Group:</label>
-				    			<div class="controls">
+								<label class="col-md-3 control-label" for="plugin-group-select">Select Group:</label>
+				    			<div class="col-md-9">
 									<select name="groupId" id="plugin-group-select">
 								<#list groups as group>
 										<option value="${group.id?c}"<#if group_index == 0> selected</#if>>${group.name}</option>
@@ -34,8 +34,8 @@
 					    </div>
 					    <div class="tab-pane" id="plugin-user-permission-manager">
 							<form class="form-horizontal" id="plugin-user-permission-form" method="post" action="${context_url}/update/plugin/user">
-								<label class="control-label" for="plugin-user-select">Select User:</label>
-				    			<div class="controls">
+								<label class="col-md-3 control-label" for="plugin-user-select">Select User:</label>
+				    			<div class="col-md-9">
 									<select name="userId" id="plugin-user-select">
 								<#list users as user>
 										<option value="${user.id?c}"<#if user_index == 0> selected</#if>>${user.username}</option>

@@ -6,10 +6,10 @@
 	<#if workflows?size == 0>
 		<span>No workflows</span>
 	<#else>
-			<div class="row-fluid">
-				<div class="control-group pull-right form-horizontal">
-					<label class="control-label" for="workflow-select">Choose a protocol:</label>
-					<div class="controls">
+			<div class="row">
+				<div class="form-group pull-right form-horizontal">
+					<label class="col-md-3 control-label" for="workflow-select">Choose a protocol:</label>
+					<div class="col-md-9">
 		    			<select id="workflow-application-select">
 		<#list workflows as workflow>
 								<option value="${workflow.id?c}">${workflow.name}</option>
@@ -18,7 +18,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="row-fluid">
+			<div class="row">
 				<div id="workflow-application-container">
 					<div id="workflow-wizard">
 						<ul id="workflow-nav">

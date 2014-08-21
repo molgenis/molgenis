@@ -355,12 +355,12 @@ function createInput(attr, attrs, val, lbl) {
 		var format = dataType === 'DATE' ? 'yyyy-MM-dd'
 				: 'yyyy-MM-dd\'T\'hh:mm:ss' + getCurrentTimezoneOffset();
 		var items = [];
-		items.push('<div class="input-append date">');
+		items.push('<div class="group-append date">');
 		items.push('<input data-format="' + format
 				+ '" data-language="en" type="text"' + (attr.nillable? ' class="nillable"' : '') + '>');
 		// workaround, because adding a add-on span will introduce an extra calendar icon on top of the remove icon
 		if(attr.nillable)
-			items.push('<span class="add-on-workaround"><i class="icon-remove empty-date-input clear-date-time-btn"></i></span>');
+			items.push('<span class="add-on-workaround"><span class="glyphicon glyphicon-remove empty-date-input clear-date-time-btn"></span></span>');
 		items.push('<span class="add-on">');
 		items.push('<i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>'); // FIXME date type should not display time
 		items.push('</span>');

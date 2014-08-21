@@ -16,12 +16,12 @@
 	</#if>
 <#elseif adminEmails?has_content>
 	<#if isCurrentUserCanEdit?has_content && isCurrentUserCanEdit>
-	<div class="row-fluid">
-	   <div class="control-group">
-			<div class="controls">
+	<div class="row">
+	   <div class="form-group">
+			<div class="col-md-9">
 				<div class="btn-group">
 					<ul>
-						<li><a id="editBtn" href="${context_url}/edit" class="btn">Edit page header</a></li>
+						<li><a id="editBtn" href="${context_url}/edit" class="btn btn-default">Edit page header</a></li>
 					</ul>
 				</div>
 			</div>
@@ -46,19 +46,19 @@
 				<p>
 					Feel free to email us at <a href='mailto:${adminEmailsString}'>${adminEmailsString}</a>
 				</p>
-				<label class="control-label" for="form_name">Name</label>
+				<label class="col-md-3 control-label" for="form_name">Name</label>
 				<input
 					class="input-xlarge" name="name" size="30" id="form_name" <#if userName??>value="${userName}"</#if>
 					type="text" />
-				<label class="control-label" for="form_email">Email</label>
+				<label class="col-md-3 control-label" for="form_email">Email</label>
 				<input class="input-xlarge" name="email" id="form_email"
 					size="30" type="email" <#if userEmail??>value="${userEmail}"</#if>/>
-				<label class="control-label"
+				<label class="col-md-3 control-label"
 					for="form_subject">Subject</label>
 				<input class="input-xxlarge"
 					maxlength="72" name="subject" id="form_subject" size="72"
 					type="text" />
-				<label class="control-label" for="form_feedback">Body</label>
+				<label class="col-md-3 control-label" for="form_feedback">Body</label>
 				<textarea class="input-xxlarge" name="feedback" id="form_feedback"
 					required="true" rows="8"></textarea>
 			</fieldset>

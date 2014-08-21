@@ -9,20 +9,20 @@
 	function createTable(settings) {
 		// create elements
 		var items = [];
-		items.push('<div class="row-fluid molgenis-table-container">');
+		items.push('<div class="row molgenis-table-container">');
 		if(settings.rowClickable){
 			items.push('<table class="table-striped table-condensed molgenis-table table-hover"><thead></thead><tbody></tbody></table>');
 		}else{
 			items.push('<table class="table-striped table-condensed molgenis-table"><thead></thead><tbody></tbody></table>');
 		}
 		items.push('</div>');
-		items.push('<div class="row-fluid">');
-		items.push('<div class="span3"><div class="molgenis-table-controls pull-left">');
+		items.push('<div class="row">');
+		items.push('<div class="col-md-3"><div class="molgenis-table-controls pull-left">');
 		if(settings.editable)
-			items.push('<a class="btn edit-table-btn" href="#" data-toggle="button"><i class="icon-edit"></i></a>');
+			items.push('<a class="btn edit-table-btn" href="#" data-toggle="button"><span class="glyphicon glyphicon-edit"></span></a>');
 		items.push('</div></div>');
-		items.push('<div class="span6"><div class="molgenis-table-pager"></div></div>');
-		items.push('<div class="span3"><div class="molgenis-table-info pull-right"></div></div>');
+		items.push('<div class="col-md-6"><div class="molgenis-table-pager"></div></div>');
+		items.push('<div class="col-md-3"><div class="molgenis-table-info pull-right"></div></div>');
 		items.push('</div>');
 		settings.container.html(items.join(''));
 		
@@ -148,7 +148,7 @@
 			var row = $('<tr>').data('entity', entity).data('id', entity.href);
 			if (settings.editenabled) {
 				var cell = $('<td class="trash" tabindex="' + tabindex++ + '">');
-				$('<i class="icon-trash delete-row-btn"></i>').appendTo(cell);
+				$('<span class="glyphicon glyphicon-trash delete-row-btn"></span>').appendTo(cell);
 				row.append(cell);
 			}
 

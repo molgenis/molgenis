@@ -238,7 +238,7 @@
 	self.addComplexFilterElementToContainer = function($container, attribute, complexFilterOperator, simpleFilter, wizard, isFirstElement, totalNumberElements, useFixedOperator) 
 	{
 		// The complex filter element container
-		var $complexElementContainer = $('<div class="control-group complex-element-container" data-filter="complex-element-container"></div>');
+		var $complexElementContainer = $('<div class="form-group complex-element-container" data-filter="complex-element-container"></div>');
 		
 		// Complex element containing the simple filter and the operator
 		var $complexElement = $('<div class="controls complex-element" data-filter="complex-element"></div>');
@@ -299,7 +299,7 @@
 	 * Options: OR, AND
 	 */
 	self.createComplexFilterSelectOperator = function (complexOperator, useFixedOperator){
-		var $controlGroup = $('<div class="controls">');
+		var $controlGroup = $('<div class="col-md-9">');
 		var operator = (complexOperator === 'AND' ? 'AND' : 'OR');
 		var orLabel= 'OR&nbsp;&nbsp;';
 		var andLabel = 'AND';
@@ -325,7 +325,7 @@
 			$dropdown = $('<div data-filter="complex-operator-container" style="margin-left: 160px">' + operator + '<div>');
 		}
 
-		return $('<div class="control-group">').append($controlGroup.append($dropdown));
+		return $('<div class="form-group">').append($controlGroup.append($dropdown));
 	}
 	
 	/**
@@ -336,11 +336,11 @@
 		var label = attribute.label || attribute.name;
 		if(isFirstElement && wizard) 
 		{
-			return $('<label class="control-label" data-placement="right" data-title="' + attribute.description + '">' + label + '</label>').tooltip();
+			return $('<label class="col-md-3 control-label" data-placement="right" data-title="' + attribute.description + '">' + label + '</label>').tooltip();
 		}
 		else if (!isFirstElement && wizard) 
 		{
-			return $('<label class="control-label"></label>');
+			return $('<label class="col-md-3 control-label"></label>');
 		} 
 		else
 		{
@@ -431,7 +431,7 @@
 	 * Create simple filter controls
 	 */
 	self.createSimpleFilterControls = function(attribute, simpleFilter) {
-		var $controls = $('<div class="controls">').width('384px');
+		var $controls = $('<div class="col-md-9">').width('384px');
 		var name = 'input-' + attribute.name + '-' + new Date().getTime();
 		var values = simpleFilter ? simpleFilter.getValues() : null;
 		var fromValue = simpleFilter ? simpleFilter.fromValue : null;
@@ -473,13 +473,13 @@
 				var valTo = toValue ? toValue : undefined;
 				var inputFrom = createInput(attribute, {'name': nameFrom, 'placeholder': 'Start date', 'style' : 'width: 315px'}, valFrom);
 				var inputTo = createInput(attribute, {'name': nameTo, 'placeholder': 'End date', 'style' : 'width: 315px'}, valTo);
-				$controls.append($('<div class="control-group">').append(inputFrom)).append($('<div class="control-group">').append(inputTo));
+				$controls.append($('<div class="form-group">').append(inputFrom)).append($('<div class="form-group">').append(inputTo));
 				break;
 			case 'DECIMAL':
 			case 'INT':
 			case 'LONG':
 				if (attribute.range) {
-					var slider = $('<div id="slider" class="control-group"></div>').width('334px');
+					var slider = $('<div id="slider" class="form-group"></div>').width('334px');
 					var min = fromValue ? fromValue : attribute.range.min;
 					var max = toValue ? toValue : attribute.range.max;
 					slider.editRangeSlider({

@@ -7,16 +7,16 @@
   <div class="modal-body">
   	<#-- reset password form -->
 	<form id="resetpassword-form" class="form-horizontal">
-	  <div class="control-group">
-	    <label class="control-label" for="resetpassword-email">Email *</label>
-	    <div class="controls">
+	  <div class="form-group">
+	    <label class="col-md-3 control-label" for="resetpassword-email">Email *</label>
+	    <div class="col-md-9">
 	      <input type="email" id="resetpassword-email" name="email" required>
 	    </div>
 	  </div>
 	</form>
   </div>
   <div class="modal-footer">
-    <a href="#" id="resetpassword-btn-close" class="btn" aria-hidden="true">Close</a>
+    <a href="#" id="resetpassword-btn-close" class="btn btn-default" aria-hidden="true">Close</a>
     <a href="#" id="resetpassword-btn" class="btn btn-primary" aria-hidden="true">Reset password</a>
   </div>
 </div>

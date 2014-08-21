@@ -307,7 +307,7 @@
 
 		// create catalog controls
 		var items = [];
-		items.push('<div class="input-append">');
+		items.push('<div class="group-append">');
 		items.push('<input class="catalog-search-text" type="text" title="Enter your search term">');
 		items.push('<button class="catalog-search-btn btn" type="button"><i class="icon-large icon-search"></i></button>');
 		items.push('<button class="catalog-search-clear-btn btn" type="button"><i class="icon-large icon-remove"></i></button>');

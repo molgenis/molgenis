@@ -64,7 +64,7 @@ function($, molgenis, settingsXhr) {
 			items.push('<li data-id="' + this.id + '"><a href="' + href + '" data-target="#tab-' + this.id + '" data-toggle="tab"><img src="/img/' + this.icon + '"> ' + this.label + '</a></li>');
 		});
 		items.push('</ul>');
-		items.push('<div class="tab-content span9">');
+		items.push('<div class="tab-content col-md-9">');
 		$.each(modules, function() {
 			items.push('<div class="tab-pane" id="tab-' + this.id + '">Loading...</div>');
 		});
