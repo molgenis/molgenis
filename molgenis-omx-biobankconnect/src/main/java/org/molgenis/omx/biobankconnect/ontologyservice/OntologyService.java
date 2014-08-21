@@ -155,25 +155,24 @@ public class OntologyService
 		{
 			if (defaultFields.contains(attributeName.toLowerCase()))
 			{
-				if (rulesForOntologyTermFields.size() > 0) rulesForOntologyTermFields.add(new QueryRule(Operator.OR));
-				rulesForOntologyTermFields.add(new QueryRule(OntologyTermQueryRepository.SYNONYMS, Operator.EQUALS,
-						entity.get(attributeName)));
+				rulesForOntologyTermFields.add(new QueryRule(OntologyTermIndexRepository.SYNONYMS, Operator.EQUALS,
+						medicalStemProxy(entity.getString(attributeName))));
 			}
 			else if (entity.get(attributeName) != null && !StringUtils.isEmpty(entity.get(attributeName).toString()))
 			{
-				QueryRule queryRule = new QueryRule(Arrays.asList(new QueryRule(attributeName, Operator.EQUALS, entity
-						.get(attributeName))));
-				queryRule.setOperator(Operator.NESTED);
-				if (allQueryRules.size() > 0) allQueryRules.add(new QueryRule(Operator.OR));
-				allQueryRules.add(queryRule);
+				allQueryRules.add(new QueryRule(attributeName, Operator.EQUALS, entity.get(attributeName)));
 			}
 		}
+
 		QueryRule nestedQueryRule = new QueryRule(rulesForOntologyTermFields);
-		nestedQueryRule.setOperator(Operator.NESTED);
-		if (allQueryRules.size() > 0) allQueryRules.add(new QueryRule(Operator.OR));
+		nestedQueryRule.setOperator(Operator.DIS_MAX);
 		allQueryRules.add(nestedQueryRule);
+
+		QueryRule finalQueryRule = new QueryRule(allQueryRules);
+		finalQueryRule.setOperator(Operator.SHOULD);
+
 		SearchRequest request = new SearchRequest(AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyIri),
-				new QueryImpl(allQueryRules).pageSize(MAX_NUMBER_MATCHES), null);
+				new QueryImpl(finalQueryRule).pageSize(MAX_NUMBER_MATCHES), null);
 
 		Iterator<Hit> iterator = searchService.search(request).getSearchHits().iterator();
 
@@ -182,16 +181,16 @@ public class OntologyService
 		{
 			Hit hit = iterator.next();
 			Map<String, Object> columnValueMap = hit.getColumnValueMap();
-			BigDecimal luceneScore = new BigDecimal(columnValueMap.get(SCORE).toString());
+			// BigDecimal luceneScore = new
+			// BigDecimal(columnValueMap.get(SCORE).toString());
 			BigDecimal maxNgramScore = new BigDecimal(0);
 			for (String attributeName : entity.getAttributeNames())
 			{
 				if (defaultFields.contains(attributeName.toLowerCase()))
 				{
-					BigDecimal ngramScore = new BigDecimal(NGramMatchingModel.stringMatching(
-							StringUtils.join(entity.getString(attributeName),
-									OntologyTermQueryRepository.ILLEGAL_CHARACTERS_REPLACEMENT),
-							columnValueMap.get(OntologyTermIndexRepository.SYNONYMS).toString()));
+					BigDecimal ngramScore = new BigDecimal(NGramMatchingModel.stringMatching(entity
+							.getString(attributeName), columnValueMap.get(OntologyTermIndexRepository.SYNONYMS)
+							.toString()));
 					if (maxNgramScore.doubleValue() < ngramScore.doubleValue())
 					{
 						maxNgramScore = ngramScore;
@@ -203,10 +202,8 @@ public class OntologyService
 					{
 						if (attributeName.equalsIgnoreCase(key))
 						{
-							BigDecimal ngramScore = new BigDecimal(NGramMatchingModel.stringMatching(StringUtils.join(
-									entity.getString(attributeName),
-									OntologyTermQueryRepository.ILLEGAL_CHARACTERS_REPLACEMENT), columnValueMap
-									.get(key).toString()));
+							BigDecimal ngramScore = new BigDecimal(NGramMatchingModel.stringMatching(
+									entity.getString(attributeName), columnValueMap.get(key).toString()));
 							if (maxNgramScore.doubleValue() < ngramScore.doubleValue())
 							{
 								maxNgramScore = ngramScore;
@@ -216,7 +213,7 @@ public class OntologyService
 				}
 			}
 
-			comparableHits.add(new ComparableHit(hit, luceneScore.multiply(maxNgramScore)));
+			comparableHits.add(new ComparableHit(hit, maxNgramScore));
 		}
 		Collections.sort(comparableHits);
 		return convertResults(comparableHits);
@@ -267,6 +264,26 @@ public class OntologyService
 		}
 		Collections.sort(comparableHits);
 		return convertResults(comparableHits);
+	}
+
+	private String medicalStemProxy(String queryString)
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		Set<String> uniqueTerms = new HashSet<String>(Arrays.asList(queryString.toLowerCase().trim()
+				.split(NON_WORD_SEPARATOR)));
+		uniqueTerms.removeAll(NGramMatchingModel.STOPWORDSLIST);
+		for (String term : uniqueTerms)
+		{
+			if (!StringUtils.isEmpty(term) && !term.matches(OntologyTermQueryRepository.MULTI_WHITESPACES))
+			{
+				stemmer.setCurrent(term.replaceAll(OntologyTermQueryRepository.ILLEGAL_CHARACTERS_PATTERN,
+						StringUtils.EMPTY));
+				stemmer.stem();
+				stringBuilder.append(stemmer.getCurrent()).append(FUZZY_MATCH_SIMILARITY)
+						.append(OntologyTermQueryRepository.SINGLE_WHITESPACE);
+			}
+		}
+		return stringBuilder.toString().trim();
 	}
 
 	private SearchResult convertResults(List<ComparableHit> comparableHits)
