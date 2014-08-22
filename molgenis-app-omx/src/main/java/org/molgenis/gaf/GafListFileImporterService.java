@@ -1,7 +1,6 @@
 package org.molgenis.gaf;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -19,6 +18,7 @@ import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.search.DataSetsIndexer;
 import org.molgenis.search.SearchService;
+import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,9 +29,7 @@ import com.google.gdata.util.ServiceException;
 public class GafListFileImporterService
 {
 	private static final Logger logger = Logger.getLogger(GafListFileImporterService.class);
-
-	private static final String PROTOCOL_IDENTIFIER_GAF_LIST = "gaf_list_protocol";
-	private static final String PREFIX_REPO_NAME = "GAF list ";
+	private static final String PREFIX_REPO_NAME = "GAF ";
 
 	@Autowired
 	private MolgenisSettings molgenisSettings;
@@ -51,24 +49,34 @@ public class GafListFileImporterService
 	@Autowired
 	private EntityValidator entityValidator;
 
+	@Autowired
+	FileStore fileStore;
 
-	public GafListValidationReport importGafList(MultipartFile csvFile, Character separator)
-			throws IOException,
+	public GafListValidationReport validateGAFList(GafListValidationReport report, MultipartFile csvFile)
+			throws IOException, ServiceException, Exception
+	{
+		report.uploadCsvFile(csvFile);
+		GafListFileRepository repo = new GafListFileRepository(report.getTempFile(), null, null, null);
+		gafListValidator.validate(report, repo);
+		repo.close();
+		return report;
+	}
+	
+	public void importGAFList(GafListValidationReport report,
+ String key_gaf_list_protocol_name) throws IOException,
 			ServiceException
 	{
-		File tmpFile = copyDataToTempFile(csvFile);
-		GafListFileRepository gafListFileRepositoryToCreateReport = new GafListFileRepository(tmpFile, null, separator,
-				null);
-		GafListValidationReport report = gafListValidator.validate(gafListFileRepositoryToCreateReport);
+		File tmpFile = fileStore.getFile(report.getTempFileName());
 
 		if (!report.getValidRunIds().isEmpty())
 		{
-			GafListFileRepository gafListFileRepositoryToImport = new GafListFileRepository(tmpFile, null, separator,
+			GafListFileRepository gafListFileRepositoryToImport = new GafListFileRepository(tmpFile, null, null,
 					report);
 
 			String dataSetIdentifier = UUID.randomUUID().toString().toLowerCase();
 			String dataSetName = generateGafListRepoName();
 			report.setDataSetName(dataSetName);
+			report.setDataSetIdentifier(dataSetIdentifier);
 			Object dataSetId;
 
 			try
@@ -76,7 +84,8 @@ public class GafListFileImporterService
 				DataSet dataSet = new DataSet();
 				dataSet.set(DataSet.NAME, dataSetName);
 				dataSet.set(DataSet.IDENTIFIER, dataSetIdentifier);
-				dataSet.set(DataSet.PROTOCOLUSED, getGafListProtocolUsed());
+				dataSet.set(DataSet.PROTOCOLUSED,
+						getGafListProtocolUsed(molgenisSettings.getProperty(key_gaf_list_protocol_name)));
 				dataService.add(DataSet.ENTITY_NAME, dataSet);
 				dataSetId = dataSet.getId();
 
@@ -93,7 +102,6 @@ public class GafListFileImporterService
 			{
 				try
 				{
-					gafListFileRepositoryToCreateReport.close();
 					gafListFileRepositoryToImport.close();
 				}
 				catch (IOException e)
@@ -106,34 +114,12 @@ public class GafListFileImporterService
 			dataSetIndexer.indexDataSets(Arrays.asList(dataSetId));
 			logger.debug("finished indexing");
 		}
-
-		return report;
 	}
 
-	/**
-	 * Copy the data of a multipart file to a temporary file.
-	 * 
-	 * @param multipart
-	 * @return the representation of file and directory pathnames
-	 * @throws IllegalStateException
-	 * @throws IOException
-	 */
-	protected File copyDataToTempFile(MultipartFile multipart) throws IllegalStateException, IOException
-	{
-		File upLoadedfile = new File(System.getProperty("java.io.tmpdir") + System.getProperty("file.separator")
-				+ multipart.getOriginalFilename());
-		upLoadedfile.createNewFile();
-		FileOutputStream fos = new FileOutputStream(upLoadedfile);
-		fos.write(multipart.getBytes());
-		fos.close();
-
-		return upLoadedfile;
-	}
-
-	protected Protocol getGafListProtocolUsed()
+	protected Protocol getGafListProtocolUsed(String protocolName)
 	{
 		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME,
-				new QueryImpl().eq(Protocol.IDENTIFIER, PROTOCOL_IDENTIFIER_GAF_LIST), Protocol.class);
+				new QueryImpl().eq(Protocol.IDENTIFIER, protocolName), Protocol.class);
 
 		return protocol;
 	}
