@@ -40,7 +40,7 @@ public class OntologyService
 	private static final int MAX_NUMBER_MATCHES = 100;
 	private static final PorterStemmer stemmer = new PorterStemmer();
 	public static final Character DEFAULT_SEPARATOR = '|';
-	public static final List<String> defaultFields = Arrays.asList("name", "synonym");
+	public static final List<String> DEFAULT_MATCHING_FIELDS = Arrays.asList("name", "synonym");
 
 	@Autowired
 	public OntologyService(SearchService searchService)
@@ -153,7 +153,7 @@ public class OntologyService
 		List<QueryRule> rulesForOntologyTermFields = new ArrayList<QueryRule>();
 		for (String attributeName : entity.getAttributeNames())
 		{
-			if (defaultFields.contains(attributeName.toLowerCase()))
+			if (DEFAULT_MATCHING_FIELDS.contains(attributeName.toLowerCase()))
 			{
 				rulesForOntologyTermFields.add(new QueryRule(OntologyTermIndexRepository.SYNONYMS, Operator.EQUALS,
 						medicalStemProxy(entity.getString(attributeName))));
@@ -163,6 +163,9 @@ public class OntologyService
 				allQueryRules.add(new QueryRule(attributeName, Operator.EQUALS, entity.get(attributeName)));
 			}
 		}
+
+		if (rulesForOntologyTermFields.size() == 0) return new SearchResult(
+				"Please specify the headers of the input data!");
 
 		QueryRule nestedQueryRule = new QueryRule(rulesForOntologyTermFields);
 		nestedQueryRule.setOperator(Operator.DIS_MAX);
@@ -186,7 +189,7 @@ public class OntologyService
 			BigDecimal maxNgramScore = new BigDecimal(0);
 			for (String attributeName : entity.getAttributeNames())
 			{
-				if (defaultFields.contains(attributeName.toLowerCase()))
+				if (DEFAULT_MATCHING_FIELDS.contains(attributeName.toLowerCase()))
 				{
 					BigDecimal ngramScore = new BigDecimal(NGramMatchingModel.stringMatching(entity
 							.getString(attributeName), columnValueMap.get(OntologyTermIndexRepository.SYNONYMS)

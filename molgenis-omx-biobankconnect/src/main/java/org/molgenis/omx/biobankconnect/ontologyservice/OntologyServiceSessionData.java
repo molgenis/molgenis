@@ -6,7 +6,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.csv.CsvRepository;
 
 public class OntologyServiceSessionData
@@ -39,7 +41,7 @@ public class OntologyServiceSessionData
 	public int getTotalNumberBySession(String sessionId)
 	{
 		int count = 0;
-		if (sessionToCsvRepository.containsKey(sessionId))
+		if (validationAttributesBySession(sessionId) && sessionToCsvRepository.containsKey(sessionId))
 		{
 			Iterator<Entity> iterator = sessionToCsvRepository.get(sessionId).iterator();
 			while (iterator.hasNext())
@@ -55,6 +57,16 @@ public class OntologyServiceSessionData
 	{
 		if (sessionToOntologyIri.containsKey(sessionId)) sessionToOntologyIri.remove(sessionId);
 		if (sessionToCsvRepository.containsKey(sessionId)) sessionToCsvRepository.remove(sessionId);
+	}
+
+	public boolean validationAttributesBySession(String sessionId)
+	{
+		EntityMetaData entityMetaData = sessionToCsvRepository.get(sessionId).getEntityMetaData();
+		for (AttributeMetaData attributeMetaData : entityMetaData.getAttributes())
+		{
+			if (OntologyService.DEFAULT_MATCHING_FIELDS.contains(attributeMetaData.getName().toLowerCase())) return true;
+		}
+		return false;
 	}
 
 	public List<Entity> getSubList(String sessionId, int start, int end)

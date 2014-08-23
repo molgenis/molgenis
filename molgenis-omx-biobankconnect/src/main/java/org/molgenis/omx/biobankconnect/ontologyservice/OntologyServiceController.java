@@ -5,15 +5,10 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,17 +19,21 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
+import org.molgenis.data.Writable;
 import org.molgenis.data.csv.CsvRepository;
+import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.LowerCaseProcessor;
 import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.rest.EntityCollectionResponse;
 import org.molgenis.data.rest.EntityPager;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchResult;
@@ -127,57 +126,54 @@ public class OntologyServiceController extends MolgenisPluginController
 		return "ontology-match-view-result";
 	}
 
-	// @RequestMapping(method = GET, value = "/match/download")
-	// public void download(HttpServletResponse response, Model model) throws
-	// IOException
-	// {
-	// if (ontologyUrl != null && inputLines != null)
-	// {
-	// ExcelWriter excelWriter = null;
-	// try
-	// {
-	// response.setContentType("application/vnd.ms-excel");
-	// response.addHeader("Content-Disposition", "attachment; filename=" +
-	// getCsvFileName("match-result"));
-	// excelWriter = new ExcelWriter(response.getOutputStream());
-	// excelWriter.addCellProcessor(new LowerCaseProcessor(true, false));
-	// int iteration = inputLines.size() / 1000 + 1;
-	// List<String> columnHeaders = Arrays.asList("InputTerm", "OntologyTerm",
-	// "Synonym used for matching",
-	// "OntologyTermUrl", "OntologyUrl", "CombinedScore", "LuceneScore");
-	// for (int i = 0; i < iteration; i++)
-	// {
-	// Writable sheetWriter = excelWriter.createWritable("result" + (i + 1),
-	// columnHeaders);
-	// int lowerBound = i * 1000;
-	// int upperBound = (i + 1) * 1000 < inputLines.size() ? (i + 1) * 1000 :
-	// inputLines.size();
-	//
-	// for (String term : inputLines.subList(lowerBound, upperBound))
-	// {
-	// for (Hit hit : ontologyService.search(ontologyUrl, term).getSearchHits())
-	// {
-	// Entity row = new MapEntity();
-	// row.set("InputTerm", term);
-	// row.set("OntologyTerm", hit.getColumnValueMap().get("ontologyTerm"));
-	// row.set("Synonym used for matching",
-	// hit.getColumnValueMap().get("ontologyTermSynonym"));
-	// row.set("OntologyTermUrl",
-	// hit.getColumnValueMap().get("ontologyTermIRI"));
-	// row.set("OntologyUrl", hit.getColumnValueMap().get("ontologyIRI"));
-	// row.set("CombinedScore", hit.getColumnValueMap().get("combinedScore"));
-	// row.set("LuceneScore", hit.getColumnValueMap().get("score"));
-	// sheetWriter.add(row);
-	// }
-	// }
-	// }
-	// }
-	// finally
-	// {
-	// if (excelWriter != null) IOUtils.closeQuietly(excelWriter);
-	// }
-	// }
-	// }
+	@RequestMapping(method = GET, value = "/match/download")
+	public void download(HttpServletResponse response, Model model, HttpServletRequest httpServletRequest)
+			throws IOException
+	{
+		String sessionId = httpServletRequest.getSession().getId();
+		if (!StringUtils.isEmpty(ontologyServiceSessionData.getOntologyIriBySession(sessionId))
+				&& ontologyServiceSessionData.getCsvRepositoryBySession(sessionId) != null)
+		{
+			ExcelWriter excelWriter = null;
+			try
+			{
+				response.setContentType("application/vnd.ms-excel");
+				response.addHeader("Content-Disposition", "attachment; filename=" + getCsvFileName("match-result"));
+				excelWriter = new ExcelWriter(response.getOutputStream());
+				excelWriter.addCellProcessor(new LowerCaseProcessor(true, false));
+				int totalNumberBySession = ontologyServiceSessionData.getTotalNumberBySession(sessionId);
+				int iteration = totalNumberBySession / 1000 + 1;
+				List<String> columnHeaders = Arrays.asList("InputTerm", "OntologyTerm", "Synonym used for matching",
+						"OntologyTermUrl", "OntologyUrl", "Score");
+				for (int i = 0; i < iteration; i++)
+				{
+					Writable sheetWriter = excelWriter.createWritable("result" + (i + 1), columnHeaders);
+					int lowerBound = i * 1000;
+					int upperBound = (i + 1) * 1000 < totalNumberBySession ? (i + 1) * 1000 : totalNumberBySession;
+
+					for (Entity entity : ontologyServiceSessionData.getSubList(sessionId, lowerBound, upperBound))
+					{
+						for (Hit hit : ontologyService.searchEntity(
+								ontologyServiceSessionData.getOntologyIriBySession(sessionId), entity))
+						{
+							Entity row = new MapEntity();
+							row.set("InputTerm", gatherInfo(entity));
+							row.set("OntologyTerm", hit.getColumnValueMap().get("ontologyTerm"));
+							row.set("Synonym used for matching", hit.getColumnValueMap().get("ontologyTermSynonym"));
+							row.set("OntologyTermUrl", hit.getColumnValueMap().get("ontologyTermIRI"));
+							row.set("OntologyUrl", hit.getColumnValueMap().get("ontologyIRI"));
+							row.set("Score", hit.getColumnValueMap().get("combinedScore"));
+							sheetWriter.add(row);
+						}
+					}
+				}
+			}
+			finally
+			{
+				if (excelWriter != null) IOUtils.closeQuietly(excelWriter);
+			}
+		}
+	}
 
 	@RequestMapping(method = POST, value = "/match/retrieve")
 	@ResponseBody
@@ -193,22 +189,27 @@ public class OntologyServiceController extends MolgenisPluginController
 
 		List<Map<String, Object>> entities = new ArrayList<Map<String, Object>>();
 
-		int count = ontologyServiceSessionData.getTotalNumberBySession(sessionId);
-		int start = entityPager.getStart();
-		int num = entityPager.getNum();
-		int toIndex = start + num;
-
-		for (Entity entity : ontologyServiceSessionData.getSubList(sessionId, start, toIndex > count ? count : toIndex))
+		if (ontologyServiceSessionData.validationAttributesBySession(sessionId))
 		{
-			Map<String, Object> outputEntity = new HashMap<String, Object>();
-			outputEntity.put("term", gatherInfo(entity));
-			outputEntity
-					.put("results", ontologyService.searchEntity(
-							ontologyServiceSessionData.getOntologyIriBySession(sessionId), entity));
-			entities.add(outputEntity);
+			int count = ontologyServiceSessionData.getTotalNumberBySession(sessionId);
+			int start = entityPager.getStart();
+			int num = entityPager.getNum();
+			int toIndex = start + num;
+
+			for (Entity entity : ontologyServiceSessionData.getSubList(sessionId, start,
+					toIndex > count ? count : toIndex))
+			{
+				Map<String, Object> outputEntity = new HashMap<String, Object>();
+				outputEntity.put("term", gatherInfo(entity));
+				outputEntity.put("results", ontologyService.searchEntity(
+						ontologyServiceSessionData.getOntologyIriBySession(sessionId), entity));
+				entities.add(outputEntity);
+			}
+			EntityPager pager = new EntityPager(start, num, (long) count, null);
+			return new EntityCollectionResponse(pager, entities, "/match/retrieve");
 		}
-		EntityPager pager = new EntityPager(start, num, (long) count, null);
-		return new EntityCollectionResponse(pager, entities, "/match/retrieve");
+		return new EntityCollectionResponse(new EntityPager(0, 0, (long) 0, null),
+				Collections.<Map<String, Object>> emptyList(), "/match/retrieve");
 	}
 
 	@RequestMapping(method = POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
@@ -232,28 +233,6 @@ public class OntologyServiceController extends MolgenisPluginController
 			break;
 		}
 		return stringBuilder.toString();
-	}
-
-	private List<String> collectAllLinesFromFile(File uploadFile) throws IOException
-	{
-		List<String> terms = new ArrayList<String>();
-		InputStream inputStream = null;
-		BufferedReader bufferedReader = null;
-		String line = null;
-		try
-		{
-			inputStream = new FileInputStream(uploadFile);
-			bufferedReader = new BufferedReader(new InputStreamReader(inputStream, Charset.forName("UTF-8")));
-			while ((line = bufferedReader.readLine()) != null)
-			{
-				if (!StringUtils.isEmpty(line)) terms.add(line.trim());
-			}
-		}
-		finally
-		{
-			if (bufferedReader != null) bufferedReader.close();
-		}
-		return terms;
 	}
 
 	private String getCsvFileName(String dataSetName)
