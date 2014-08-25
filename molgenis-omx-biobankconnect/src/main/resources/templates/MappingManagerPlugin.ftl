@@ -12,15 +12,14 @@
 	"ontology-annotator.js", 
 	"mapping-manager.js",
 	"biobank-connect.js", 
-	"simple_statistics.js"]>
-
+	"simple_statistics.js",
+	"d3.min.js",
+	"vega.min.js",
+	"jstat.min.js",
+	"biobankconnect-graph.js"]>
 <@header css js/>
-<script src="/js/d3.min.js"></script>
-<script src="/js/vega.min.js"></script>
-<script src="/js/jstat.min.js"></script>
-<script src="/js/biobankconnect-graph.js"></script>
-<script src="/js/ace-min/ace.js" type="text/javascript" charset="utf-8"></script>
-<script src="/js/ace-min/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
+<script src="<@resource_href "/js/ace-min/ace.js"/>" type="text/javascript" charset="utf-8"></script>
+<script src="<@resource_href "/js/ace-min/ext-language_tools.js"/>" type="text/javascript" charset="utf-8"></script>
 <form id="wizardForm" class="form-horizontal" enctype="multipart/form-data">
 	<div class="row">
 		<div class="col-md-12 well custom-white-well">

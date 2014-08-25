@@ -1,12 +1,12 @@
-<script src="/js/jquery.bootstrap.pager.js"></script>
-<script src="/js/bootstrap-fileupload.min.js"></script>
-<script src="/js/common-component.js"></script>
-<script src="/js/biobank-connect.js"></script>
-<script src="/js/catalogue-chooser.js"></script>
-<link rel="stylesheet" type="text/css" href="/css/jquery-ui-1.9.2.custom.min.css">
-<link rel="stylesheet" type="text/css" href="/css/bootstrap-fileupload.min.css">
-<link rel="stylesheet" type="text/css" href="/css/biobank-connect.css">
-<link rel="stylesheet" type="text/css" href="/css/catalogue-chooser.css">
+<script src="<@resource_href "/js/jquery.bootstrap.pager.js"/>"></script>
+<script src="<@resource_href "/js/bootstrap-fileupload.min.js"/>"></script>
+<script src="<@resource_href "/js/common-component.js"/>"></script>
+<script src="<@resource_href "/js/biobank-connect.js"/>"></script>
+<script src="<@resource_href "/js/catalogue-chooser.js"/>"></script>
+<link rel="stylesheet" href="<@resource_href "/css/jquery-ui-1.9.2.custom.min.css"/>" type="text/css">
+<link rel="stylesheet" href="<@resource_href "/css/bootstrap-fileupload.min.css"/>" type="text/css">
+<link rel="stylesheet" href="<@resource_href "/css/biobank-connect.css"/>" type="text/css">
+<link rel="stylesheet" href="<@resource_href "/css/catalogue-chooser.css"/>" type="text/css">
 <form id="wizardForm" name="wizardForm" method="post" class="form-horizontal" enctype="multipart/form-data">
 	<div class="row">
 		<div class="col-md-12">

@@ -1,20 +1,20 @@
-<script src="/js/jquery-ui-1.9.2.custom.min.js"></script>
-<script src="/js/jquery.bootstrap.pager.js"></script>
-<script src="/js/bootstrap-fileupload.min.js"></script>
-<script src="/js/common-component.js"></script>
-<script src="/js/ontology-annotator.js"></script>
-<script src="/js/mapping-manager.js"></script>
-<script src="/js/biobank-connect.js"></script>
-<script src="/js/algorithm-report.js"></script>
-<script src="/js/simple_statistics.js"></script>
-<script src="/js/d3.min.js"></script>
-<script src="/js/vega.min.js"></script>
-<script src="/js/jstat.min.js"></script>
-<script src="/js/biobankconnect-graph.js"></script>
-<script src="/js/ace-min/ace.js" type="text/javascript" charset="utf-8"></script>
-<script src="/js/ace-min/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
-<link rel="stylesheet" type="text/css" href="/css/jquery-ui-1.9.2.custom.min.css">
-<link rel="stylesheet" type="text/css" href="/css/biobank-connect.css">
+<script src="<@resource_href "/js/jquery-ui-1.9.2.custom.min.js"/>"></script>
+<script src="<@resource_href "/js/jquery.bootstrap.pager.js"/>"></script>
+<script src="<@resource_href "/js/bootstrap-fileupload.min.js"/>"></script>
+<script src="<@resource_href "/js/common-component.js"/>"></script>
+<script src="<@resource_href "/js/ontology-annotator.js"/>"></script>
+<script src="<@resource_href "/js/mapping-manager.js"/>"></script>
+<script src="<@resource_href "/js/biobank-connect.js"/>"></script>
+<script src="<@resource_href "/js/algorithm-report.js"/>"></script>
+<script src="<@resource_href "/js/simple_statistics.js"/>"></script>
+<script src="<@resource_href "/js/d3.min.js"/>"></script>
+<script src="<@resource_href "/js/vega.min.js"/>"></script>
+<script src="<@resource_href "/js/jstat.min.js"/>"></script>
+<script src="<@resource_href "/js/biobankconnect-graph.js"/>"></script>
+<script src="<@resource_href "/js/ace-min/ace.js"/>" type="text/javascript" charset="utf-8"></script>
+<script src="<@resource_href "/js/ace-min/ext-language_tools.js"/>" type="text/javascript" charset="utf-8"></script>
+<link rel="stylesheet" href="<@resource_href "/css/jquery-ui-1.9.2.custom.min.css"/>" type="text/css">
+<link rel="stylesheet" href="<@resource_href "/css/biobank-connect.css"/>" type="text/css">
 <form id="wizardForm" name="wizardForm" method="post" class="form-horizontal" action="">
 	<div class="row">
 		<div class="col-md-12 well custom-white-well" style="min-height:500px;">
