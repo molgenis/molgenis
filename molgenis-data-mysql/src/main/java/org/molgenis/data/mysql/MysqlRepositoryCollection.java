@@ -1,10 +1,5 @@
 package org.molgenis.data.mysql;
 
-import static org.molgenis.MolgenisFieldTypes.BOOL;
-import static org.molgenis.MolgenisFieldTypes.INT;
-import static org.molgenis.MolgenisFieldTypes.TEXT;
-import static org.molgenis.MolgenisFieldTypes.XREF;
-
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -59,36 +54,11 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 	{
 		repositories = new LinkedHashMap<String, MysqlRepository>();
 
-		DefaultEntityMetaData entitiesMetaData = new DefaultEntityMetaData("entities");
-		entitiesMetaData.setIdAttribute("name");
-		entitiesMetaData.addAttribute("name").setNillable(false);
-		entitiesMetaData.addAttribute("idAttribute");
-		entitiesMetaData.addAttribute("abstract").setDataType(BOOL);
-		entitiesMetaData.addAttribute("label");
-		entitiesMetaData.addAttribute("extends");// TODO create XREF to entityMD when dependency resolving is fixed
-		entitiesMetaData.addAttribute("description").setDataType(TEXT);
-
 		entities = createMysqlRepsitory();
-		entities.setMetaData(entitiesMetaData);
-
-		DefaultEntityMetaData attributesMetaData = new DefaultEntityMetaData("attributes");
-		attributesMetaData.setIdAttribute("identifier");
-		attributesMetaData.addAttribute("identifier").setNillable(false).setDataType(INT).setAuto(true);
-		attributesMetaData.addAttribute("entity").setNillable(false);
-		attributesMetaData.addAttribute("name").setNillable(false);
-		attributesMetaData.addAttribute("dataType");
-		attributesMetaData.addAttribute("refEntity").setDataType(XREF).setRefEntity(entitiesMetaData);
-		attributesMetaData.addAttribute("nillable").setDataType(BOOL);
-		attributesMetaData.addAttribute("auto").setDataType(BOOL);
-		attributesMetaData.addAttribute("idAttribute").setDataType(BOOL);
-		attributesMetaData.addAttribute("lookupAttribute").setDataType(BOOL);
-		attributesMetaData.addAttribute("visible").setDataType(BOOL);
-		attributesMetaData.addAttribute("label");
-		attributesMetaData.addAttribute("description").setDataType(TEXT);
-		attributesMetaData.addAttribute("aggregateable").setDataType(BOOL);
+		entities.setMetaData(new EntityMetaDataMetaData());
 
 		attributes = createMysqlRepsitory();
-		attributes.setMetaData(attributesMetaData);
+		attributes.setMetaData(new AttributeMetaDataMetaData());
 
 		if (!tableExists("entities"))
 		{
@@ -114,7 +84,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 			String sql;
 			try
 			{
-				sql = attributes.getAlterSql(attributesMetaData.getAttribute("aggregateable"));
+				sql = attributes.getAlterSql(AttributeMetaDataRepository.META_DATA.getAttribute("aggregateable"));
 			}
 			catch (MolgenisModelException e)
 			{
@@ -270,7 +240,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 	{
 		MysqlRepository repository = null;
 
-		if (entities.query().eq("name", emd.getName()).count() > 0)
+		if (getEntityMetaDataEntity(emd.getName()) != null)
 		{
 			if (emd.isAbstract())
 			{
@@ -367,6 +337,11 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		return new AggregateableCrudRepositorySecurityDecorator(repo);
 	}
 
+	public Entity getEntityMetaDataEntity(String name)
+	{
+		return entities.findOne(name);
+	}
+
 	public void drop(EntityMetaData md)
 	{
 		assert md != null;
@@ -394,9 +369,11 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 	{
 		MysqlRepository repository = repositories.get(metadata.getName());
 		EntityMetaData entityMetaData = repository.getEntityMetaData();
+
 		for (AttributeMetaData attr : metadata.getAttributes())
 		{
 			AttributeMetaData currentAttribute = entityMetaData.getAttribute(attr.getName());
+
 			if (currentAttribute != null)
 			{
 				if (!currentAttribute.getDataType().equals(attr.getDataType()))

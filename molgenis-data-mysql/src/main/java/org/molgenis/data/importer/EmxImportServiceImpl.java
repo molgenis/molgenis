@@ -7,8 +7,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
@@ -27,6 +25,7 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
+import org.molgenis.util.DependencyResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -35,7 +34,6 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 @Component
 public class EmxImportServiceImpl implements EmxImporterService
@@ -92,36 +90,40 @@ public class EmxImportServiceImpl implements EmxImporterService
 	{
 		if (store == null) throw new RuntimeException("store was not set");
 
-		Map<String, DefaultEntityMetaData> metadata = new HashMap<String, DefaultEntityMetaData>();
+		List<EntityMetaData> metadataList = Lists.newArrayList();
+
 		if (source.getRepositoryByEntityName(ATTRIBUTES) != null)
 		{
-			metadata = getEntityMetaData(source);
+			Map<String, DefaultEntityMetaData> metadata = getEntityMetaData(source);
+			for (String name : metadata.keySet())
+			{
+				metadataList.add(metadata.get(name));
+			}
 		}
 		else
 		{
 			for (String name : source.getEntityNames())
 			{
-				metadata.put(name, (DefaultEntityMetaData) dataService.getRepositoryByEntityName(name)
-						.getEntityMetaData());
+				metadataList.add(dataService.getRepositoryByEntityName(name).getEntityMetaData());
 			}
 		}
-		Set<String> addedEntities = Sets.newLinkedHashSet();
+
+		List<String> addedEntities = Lists.newArrayList();
 		// TODO altered entities (merge, see getEntityMetaData)
 
 		try
 		{
 			EntityImportReport entityImportReport = transactionTemplate.execute(new EmxImportTransactionCallback(
-					databaseAction, source, metadata, addedEntities));
+					databaseAction, source, metadataList, addedEntities));
+
 			return entityImportReport;
 		}
 		catch (Exception e)
 		{
 			// Rollback metadata, create table statements cannot be rolled back, we have to do it ourselfs
+			Collections.reverse(addedEntities);
 
-			List<String> names = Lists.newArrayList(addedEntities);
-			Collections.reverse(names);
-
-			for (String name : names)
+			for (String name : addedEntities)
 			{
 				store.drop(name);
 			}
@@ -137,6 +139,7 @@ public class EmxImportServiceImpl implements EmxImporterService
 
 		// compare the data sheets against metadata in store or imported file
 		Map<String, DefaultEntityMetaData> metaDataMap = new HashMap<String, DefaultEntityMetaData>();
+
 		if (source.getRepositoryByEntityName(ATTRIBUTES) != null)
 		{
 			metaDataMap = getEntityMetaData(source);
@@ -352,12 +355,12 @@ public class EmxImportServiceImpl implements EmxImporterService
 	private final class EmxImportTransactionCallback implements TransactionCallback<EntityImportReport>
 	{
 		private final RepositoryCollection source;
-		private final Map<String, DefaultEntityMetaData> metadata;
-		private final Set<String> addedEntities;
+		private final List<EntityMetaData> metadata;
+		private final List<String> addedEntities;
 		private final DatabaseAction dbAction;
 
 		private EmxImportTransactionCallback(DatabaseAction dbAction, RepositoryCollection source,
-				Map<String, DefaultEntityMetaData> metadata, Set<String> addedEntities)
+				List<EntityMetaData> metadata, List<String> addedEntities)
 		{
 			this.dbAction = dbAction;
 			this.source = source;
@@ -373,32 +376,32 @@ public class EmxImportServiceImpl implements EmxImporterService
 			try
 			{
 				// Import metadata
-				for (Entry<String, DefaultEntityMetaData> entry : metadata.entrySet())
-				{
-					String name = entry.getKey();
-					DefaultEntityMetaData defaultEntityMetaData = entry.getValue();
-					if (defaultEntityMetaData == null) throw new IllegalArgumentException("Unknown entity: " + name);
+				List<EntityMetaData> resolved = DependencyResolver.resolve(metadata);
 
+				for (EntityMetaData entityMetaData : resolved)
+				{
+					String name = entityMetaData.getName();
 					if (!ENTITIES.equals(name) && !ATTRIBUTES.equals(name))
 					{
 						// TODO check if compatible with metadata
-						Repository to = store.getRepositoryByEntityName(name);
-						if (to == null)
+						Entity toMeta = store.getEntityMetaDataEntity(name);
+						if (toMeta == null)
 						{
 							logger.debug("tyring to create: " + name);
-							to = store.add(defaultEntityMetaData);
 							addedEntities.add(name);
+							store.add(entityMetaData);
 						}
 						else
 						{
-							store.update(defaultEntityMetaData);
+							store.update(entityMetaData);
 						}
 					}
 				}
 
 				// import data
-				for (String name : metadata.keySet())
+				for (EntityMetaData entityMetaData : resolved)
 				{
+					String name = entityMetaData.getName();
 					Updateable updateable = (Updateable) store.getRepositoryByEntityName(name);
 					if (updateable != null)
 					{

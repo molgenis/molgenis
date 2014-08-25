@@ -3,7 +3,7 @@ package org.molgenis.data.mysql;
 import javax.sql.DataSource;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.validation.EntityValidator;
+import org.molgenis.data.validation.EntityAttributesValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,14 +18,11 @@ public class MySqlConfiguration
 	@Autowired
 	private DataSource dataSource;
 
-	@Autowired
-	private EntityValidator entityValidator;
-
 	@Bean
 	@Scope("prototype")
 	public MysqlRepository mysqlRepository()
 	{
-		return new MysqlRepository(dataSource, entityValidator);
+		return new MysqlRepository(dataSource, new MysqlEntityValidator(dataService, new EntityAttributesValidator()));
 	}
 
 	@Bean
