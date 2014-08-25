@@ -22,7 +22,8 @@
 	 */
 	var SelectionMode = {
 		DISEASE : 'diseases',
-		GENE : 'genes'
+		GENE : 'genes',
+		PATIENT: 'patient'
 	};
 	
 	/**
@@ -60,6 +61,7 @@
 	
 	//disease matcher parts
 	var infoPanel = $('#diseasematcher-infopanel');
+	var patientPanel = $('#diseasematcher-patientpanel');
 	var selectionList = $('#diseasematcher-selection-list');
 	var selectionNav = $("#diseasematcher-selection-navbar");
 	var selectionTitle = $('#diseasematcher-selection-title');
@@ -67,7 +69,6 @@
 	//handlebars templates
 	var hbColumnWarning = $("#hb-column-warning");
 	var hbDatasetWarning = $("#hb-dataset-warning");
-	var hbVariantLayout = $("#hb-layout-variant");
 	var hbSelectionList = $("#hb-selection-list");
 
 	
@@ -125,14 +126,6 @@
 	}
 
 	/**
-	 * Switches the layout for the info panel by using different Handlebars templates.
-	 */
-	function setInfoPanelLayout(){
-		var template = Handlebars.compile(hbVariantLayout.html());
-		infoPanel.html(template({}));
-	}
-	
-	/**
 	 * Click action for the navigation buttons in the Disease Matcher selection panel.
 	 * 
 	 * @param element the selected link
@@ -141,17 +134,86 @@
 	function onClickNavBtn(element, selectionMode){
 		if (!toolAvailable) return;
 		
-		setInfoPanelLayout();
-		
 		//reset navbar and activate the clicked button
 		selectionNav.find('li').attr('class', '');
 		$(element).parent().attr("class", "active");
 		
-		// update title of selection list
-		selectionTitle.html(selectionMode.charAt(0).toUpperCase() + selectionMode.slice(1));
-
-		currentSelectionMode = selectionMode;
-		updateSelectionList(selectionMode);
+		if (selectionMode === SelectionMode.PATIENT){
+			infoPanel.hide();
+			patientPanel.show();
+		}else{		
+			patientPanel.hide();
+			infoPanel.show();
+			
+			// update title of selection list
+			selectionTitle.html(selectionMode.charAt(0).toUpperCase() + selectionMode.slice(1));
+	
+			currentSelectionMode = selectionMode;
+			updateSelectionList(selectionMode);
+		}
+	}
+	
+	function rankHPOTerms(terms){
+		
+		
+		var queryString = '';
+		$.each(terms, function(index, t){
+			if (index > 0){
+				queryString += '&';
+			}else{
+				queryString += '?';
+			}
+			t.replace(':', '%3A');
+			queryString += 'symptom=' + t;
+		});
+		
+		console.log(queryString);
+			
+		$.ajax({
+			type : 'GET',
+			contentType : 'text/html',
+			url : '/phenotips' + queryString,
+			success : function(data) {
+				$('#diseasematcher-phenotips-output').empty();
+				$('#diseasematcher-phenotips-output').html(data);
+			}
+		});
+		
+	}
+	
+	function filterPhenotipsOutput(){
+		var entityName = getEntity().name;
+		var request = {
+				'datasetName' : entityName,
+				'num' : 1000,
+				'start' : 0
+			};
+			$.extend(request, getQuery());
+		
+		// get diseases from dataset
+		$.ajax({
+			type : 'POST',
+			contentType : 'application/json',
+			url : '/diseasematcher/diseases',
+			data : JSON.stringify(request),
+			success : function(diseases) {
+				console.log(diseases);
+				var omims = [];
+				$.each(diseases.diseases, function(i, dis){
+					omims.push(dis.diseaseId.substring(5));
+				});
+				
+				var items = $('#diseasematcher-phenotips-output ul li');
+				$.each(items, function(i, disorder){
+					var id = $(disorder).find('.id')[0];
+					var o = $(id).attr('title');
+					if ($.inArray(o, omims) === -1){
+						$(disorder).css('display', 'none');
+					}
+				});
+			}
+		});
+	
 	}
 	
 	
@@ -171,7 +233,24 @@
 		var genesBtn = $('#diseasematcher-genes-select-button').click(function(e) {
 			e.preventDefault();
 			onClickNavBtn(this, SelectionMode.GENE);
-		})
+		});
+		
+		$('#diseasematcher-patient-select-button').click(function(e){
+			e.preventDefault();
+			onClickNavBtn(this, SelectionMode.PATIENT);
+		});
+		
+		$('#btn-get-phenotips').click(function(e){
+			e.preventDefault();
+			var terms = $('#hpoTermsInput').val();
+			terms = terms.split(',');
+			rankHPOTerms(terms);
+			
+		});
+		$('#btn-filter-phenotips').click(function(e){
+			e.preventDefault();
+			filterPhenotipsOutput();
+		});
 
 		// init tabs
 		$('#diseasematcher-disease-panel-tabs').tab();

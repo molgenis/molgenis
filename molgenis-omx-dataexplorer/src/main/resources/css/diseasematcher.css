@@ -11,3 +11,8 @@
 	font-size: 15px;
 	font-weight: normal;
 }
+
+.divider-vertical {
+	 border-right:1px solid #ddd;
+}
+

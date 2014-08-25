@@ -4,7 +4,26 @@
 	
 		<#-- ANALYSIS ZONE -->
 		<div class="span9">
-			<div class="well" id="diseasematcher-infopanel">		
+			<div class="well" id="diseasematcher-infopanel">
+				<div class="span12" id="diseasematcher-variant-panel"></div>
+				<div class="row-fluid">
+					<div class="span12" id="diseasematcher-disease-panel">
+						<ul class="nav nav-tabs" id="diseasematcher-disease-panel-tabs" data-tabs="tabs"></ul>
+						<div id="diseasematcher-disease-tab-content"></div>
+					</div>
+				</div>
+			</div>
+			<div class="well" id="diseasematcher-patientpanel" style="display: none;">
+
+				<legend>Phenotips</legend>
+				<label for="hpoTerms">HPO terms:</label>
+				<textarea id="hpoTermsInput" name="hpoTerms" rows="3" cols="30">HP:0012111,HP:0001943,HP:0000818,HP:0001939</textarea>
+				<br/>
+				<button type="button" id="btn-get-phenotips">DISEASES GET</button>
+				<button type="button" id="btn-filter-phenotips">FILTER</button>
+
+				<div id="diseasematcher-phenotips-output"></div>
+
 			</div>
 		</div>
 		
@@ -16,6 +35,9 @@
 						<ul class="nav">
 							<li><a href="#" id="diseasematcher-genes-select-button">Genes</a></li>
 							<li><a href="#" id="diseasematcher-diseases-select-button">Diseases</a></li>
+						</ul>
+						<ul class="nav pull-right">
+							<li><a href="#" id="diseasematcher-patient-select-button">Patient</a></li>
 						</ul>
 					</div>
 				</div>
@@ -62,16 +84,6 @@
 	<div class="alert alert-warning" id="{{column}}-warning">
 		<strong>No {{column}} column found!</strong> For this tool to work, make sure your dataset has a <em>{{column}}</em> column.
 	</div>	
-</script>
-
-<script id="hb-layout-variant" class="diseasematcher" type="text/x-handlebars-template">
-	<div class="span12" id="diseasematcher-variant-panel"></div>
-	<div class="row-fluid">
-		<div class="span12" id="diseasematcher-disease-panel">
-			<ul class="nav nav-tabs" id="diseasematcher-disease-panel-tabs" data-tabs="tabs"></ul>
-			<div id="diseasematcher-disease-tab-content"></div>
-		</div>
-	</div>
 </script>
 
 <script id="hb-selection-list" class="diseasematcher" type="text/x-handlebars-template">
