@@ -13,15 +13,19 @@
         <span>No active catalogs</span>
     <#else>
         <div class="row grid<#if (catalogs?size == 1)> hide</#if>">
-            <div id="catalog-select-container" class="form-group form-horizontal pull-right">
-                <label class="col-md-3 control-label" for="catalog-select">Choose a catalog:</label>
-                <div class="col-md-9">
-                    <select data-placeholder="Choose a catalog" id="catalog-select">
-                <#list catalogs as catalog>
-                        <option value="${catalog.id}"<#if catalog_index == 0> selected</#if>>${catalog.name}</option>
-                </#list>
-                    </select>
-                </div>
+            <div id="catalog-select-container" class="col-md-4 col-md-offset-8">
+                <form class="form-horizontal" role="form">
+                    <div class="form-group">
+                        <label class="col-md-5 control-label" for="catalog-select">Choose a catalog:</label>
+                        <div class="col-md-7">
+                            <select data-placeholder="Choose a catalog" id="catalog-select" class="form-control">
+                        <#list catalogs as catalog>
+                                <option value="${catalog.id}"<#if catalog_index == 0> selected</#if>>${catalog.name}</option>
+                        </#list>
+                            </select>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
         <div class="row grid">

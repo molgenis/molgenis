@@ -304,14 +304,20 @@
 			else if (args.length === 1)
 				return container.data('catalog')[options](args[0]);
 		}
-
+		
 		// create catalog controls
 		var items = [];
-		items.push('<div class="group-append">');
-		items.push('<input class="catalog-search-text" type="text" title="Enter your search term">');
-		items.push('<button class="catalog-search-btn btn" type="button"><i class="icon-large icon-search"></i></button>');
-		items.push('<button class="catalog-search-clear-btn btn" type="button"><i class="icon-large icon-remove"></i></button>');
+		items.push('<form id="model-search-form" role="form">');
+		items.push('<div class="form-group">');
+		items.push('<div class="col-md-9 input-group">');
+		items.push('<input class="catalog-search-text form-control" type="text" placeholder="Search" autofocus="autofocus">');
+		items.push('<span class="input-group-btn">');
+		items.push('<button class="catalog-search-clear-btn btn btn-default" type="button"><span class="glyphicon glyphicon-remove"></span></button>');
+		items.push('<button class="catalog-search-btn btn btn-default" type="button"><span class="glyphicon glyphicon-search"></span></button>');
+		items.push('</span>');
 		items.push('</div>');
+		items.push('</div>');
+		items.push('</form>');
 		items.push('<div id="catalog-tree" class="catalog-tree"></div>');
 		items.push('<div id="catalog-search-tree" class="catalog-search-tree"></div>');
 		$('.catalog-tree', container).fancytree('destroy'); // cleanup

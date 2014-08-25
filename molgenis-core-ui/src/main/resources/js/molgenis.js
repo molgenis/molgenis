@@ -15,6 +15,7 @@
 	};
 
 	molgenis.createAlert = function(alerts, type, container) {
+		console.log(alerts, type, container);
 		if (type !== 'error' && type !== 'warning' && type !== 'success')
 			type = 'error';
 		if (container === undefined) {
@@ -24,7 +25,7 @@
 
 		var items = [];
 		items.push('<div class="alert alert-');
-		items.push(type);
+		items.push(type === 'error' ? 'danger' : type); // backwards compatibility
 		items
 				.push('"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>');
 		items.push(type.charAt(0).toUpperCase() + type.slice(1));
@@ -691,6 +692,16 @@ $(function() {
 		}
 	});
 
+	// support overlapping bootstrap modals:
+	// http://stackoverflow.com/questions/19305821/bootstrap-3-0-multiple-modals-overlay
+	$(document).on('show.bs.modal', '.modal', function (event) {
+	    var zIndex = 1040 + (10 * $('.modal:visible').length);
+	    $(this).css('z-index', zIndex);
+	    setTimeout(function() {
+	        $('.modal-backdrop').not('.modal-stack').css('z-index', zIndex - 1).addClass('modal-stack');
+	    }, 0);
+	});
+	
 	/**
 	 * Add download functionality to JQuery. data can be string of parameters or
 	 * array/object

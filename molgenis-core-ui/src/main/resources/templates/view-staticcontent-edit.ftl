@@ -5,8 +5,7 @@
 <@header css js/>
 <div class="row">
 	<div class="col-md-12">
-	
-		<form id="contentForm" method="post">
+		<form id="contentForm" method="post" role="form">
 		<div class="row">
 		   <div class="form-group">
 				<div class="col-md-9">

@@ -84,7 +84,7 @@
 			  		  var errorMessage = "Error occurred while trying to delete data row";
 			  	  }
 				  $('#plugin-container .alert').remove();
-				  $('#plugin-container').prepend('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> ' + errorMessage + '</div>');
+				  $('#plugin-container').prepend('<div class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> ' + errorMessage + '</div>');
 			  });
 		});
 		$(document).on('click', '.create-row-btn', function(e) {
@@ -105,7 +105,7 @@
 			  		  var errorMessage = "Error occurred while trying to create data row";
 			  	  }
 				  $('#plugin-container .alert').remove();
-				  $('#plugin-container').prepend('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> ' + errorMessage + '</div>');
+				  $('#plugin-container').prepend('<div class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> ' + errorMessage + '</div>');
 			  });
 		});
 		
@@ -113,7 +113,7 @@
 			var selectedRows = $('input:checked');
 			if(selectedRows.length <= 1) {
 				$('#plugin-container .alert').remove();
-				  $('#plugin-container').prepend('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> Please select two or more rows to combine</div>');
+				  $('#plugin-container').prepend('<div class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> Please select two or more rows to combine</div>');
 			}
 			else {
 				var elementId = $(selectedRows[0]).closest('.workflow-element-pane').data('element');
@@ -133,7 +133,7 @@
 				  		  var errorMessage = "Error occurred while trying to combine selected elements";
 				  	  }
 					  $('#plugin-container .alert').remove();
-					  $('#plugin-container').prepend('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> ' + errorMessage + '</div>');
+					  $('#plugin-container').prepend('<div class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> ' + errorMessage + '</div>');
 				  });
 			}
 		});
@@ -152,7 +152,7 @@
 		  		  var errorMessage = "Error occurred while trying to create or update value";
 		  	  }
 				  $('#plugin-container .alert').remove();
-				  $('#plugin-container').prepend('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> ' + errorMessage + '</div>');
+				  $('#plugin-container').prepend('<div class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> ' + errorMessage + '</div>');
 			  });
 		});
 		
