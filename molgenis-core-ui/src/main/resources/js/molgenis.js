@@ -598,19 +598,21 @@ function showSpinner(callback) {
 	if (spinner.length === 0) {
 		// do not add fade effect on modal: http://stackoverflow.com/a/22101894
 		var items = [];
-		items
-				.push('<div id="spinner" class="modal hide" data-backdrop="static">');
-		items.push('<div class="modal-header"><h3>Loading ...</h3></div>');
-		items
-				.push('<div class="modal-body"><div class="modal-body-inner"><img src="/img/waiting-spinner.gif"></div></div>');
+		items.push('<div class="modal" id="spinner" tabindex="-1" aria-labelledby="spinner-modal-label" aria-hidden="true">');
+		items.push('<div class="modal-dialog">');
+		items.push('<div class="modal-content">');
+		items.push('<div class="modal-header"><h4 class="modal-title" id="spinner-modal-label">Loading ...</h4></div>');
+		items.push('<div class="modal-body"><div class="modal-body-inner"><img src="/img/waiting-spinner.gif"></div></div>');
 		items.push('</div>');
+		items.push('</div>');
+		
 		$('body').append(items.join(''));
 		spinner = $('#spinner');
 		spinner.data('count', 0);
 	}
 
 	if (callback) {
-		spinner.on('shown', function() {
+		spinner.on('shown.bs.modal', function() {
 			callback();
 		});
 	}

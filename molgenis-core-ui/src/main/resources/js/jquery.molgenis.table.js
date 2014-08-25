@@ -422,10 +422,12 @@
 		var modal = $('#table-ref-modal');
 		if(!modal.length) {
 			var items = [];
-			items.push('<div class="modal hide medium" id="table-ref-modal" tabindex="-1">');
+			items.push('<div class="modal" id="table-ref-modal" tabindex="-1" aria-labelledby="table-ref-modal-label" aria-hidden="true">');
+			items.push('<div class="modal-dialog">');
+			items.push('<div class="modal-content">');
 			items.push('<div class="modal-header">');
-			items.push('<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>');
-			items.push('<h3 class="ref-title"></h3>');
+			items.push('<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>');
+			items.push('<h4 class="modal-title ref-title" id="table-ref-modal-label">Sign up</h4>');
 			items.push('</div>');
 			items.push('<div class="modal-body">');
 			items.push('<legend class="ref-description-header"></legend>');

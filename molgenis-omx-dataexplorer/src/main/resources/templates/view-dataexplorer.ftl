@@ -39,35 +39,31 @@
 	</div>
      
     <div class="col-md-4 col-md-offset-8" id="dataset-select-container"<#if hideDatasetSelect??> style="display:none"</#if>>
-        <form class="form-horizontal" role="form">
-            <div class="form-group">
-                <label class="col-md-4 control-label" for="dataset-select">Choose a dataset:</label>
-                <div class="col-md-8">
-                	<select class="form-control" id="dataset-select" data-placeholder="Choose a Entity (example: dataset, protocol..." id="dataset-select">
-                    	<#list entitiesMeta.iterator() as entityMeta>
-                        	<option value="/api/v1/${entityMeta.name}" <#if entityMeta.name == selectedEntityName> selected</#if>><#if entityMeta.label?has_content>${entityMeta.label}<#else>${entityMeta.name}</#if></option>
-                       	</#list>
-                    </select>
-               	</div>
-         	</div>
-     	</form>
+        <div class="form-horizontal form-group">
+            <label class="col-md-4 control-label" for="dataset-select">Choose a dataset:</label>
+            <div class="col-md-8">
+            	<select class="form-control" id="dataset-select" data-placeholder="Choose a Entity (example: dataset, protocol..." id="dataset-select">
+                	<#list entitiesMeta.iterator() as entityMeta>
+                    	<option value="/api/v1/${entityMeta.name}" <#if entityMeta.name == selectedEntityName> selected</#if>><#if entityMeta.label?has_content>${entityMeta.label}<#else>${entityMeta.name}</#if></option>
+                   	</#list>
+                </select>
+           	</div>
+     	</div>
    	</div>
      
 	<div class="row">
 		<div class="col-md-3">
 			<div class="well">
 				<div class="row">
-				    <form role="form">
-                        <div class="form-group">
-                            <div class="col-md-12 input-group">
-                                <input type="text" class="form-control" id="observationset-search" placeholder="Search data values" autofocus="autofocus"<#if searchTerm??> value="${searchTerm}"</#if>>
-                                <span class="input-group-btn">
-                                    <button class="search-clear-button btn btn-default" type="button"><span class="glyphicon glyphicon-remove"></span></button>
-                                    <button class="search-button btn btn-default" type="button"><span class="glyphicon glyphicon-search"></span></button>
-                                </span>
-                            </div>
+                    <div class="form-group">
+                        <div class="col-md-12 input-group">
+                            <input type="text" class="form-control" id="observationset-search" placeholder="Search data values" autofocus="autofocus"<#if searchTerm??> value="${searchTerm}"</#if>>
+                            <span class="input-group-btn">
+                                <button class="search-clear-button btn btn-default" type="button"><span class="glyphicon glyphicon-remove"></span></button>
+                                <button class="search-button btn btn-default" type="button"><span class="glyphicon glyphicon-search"></span></button>
+                            </span>
                         </div>
-                    </form>				
+                    </div>		
 				</div>
 				<div class="row">
 				    <div class="panel">

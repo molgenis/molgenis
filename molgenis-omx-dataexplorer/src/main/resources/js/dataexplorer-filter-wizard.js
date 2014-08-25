@@ -25,12 +25,14 @@
 
 		if(modal.length === 0){
 			var items = [];
-			items.push('<div class="modal large hide" id="filter-wizard-modal" tabindex="-1">');
+			items.push('<div class="modal" id="filter-wizard-modal" tabindex="-1" aria-labelledby="filter-wizard-modal-label" aria-hidden="true">');
+			items.push('<div class="modal-dialog">');
+			items.push('<div class="modal-content">');
 			items.push('<div class="modal-header">');
-			items.push('<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>');
-	        items.push('<h3>');
-	        items.push(wizardTitle);
-	        items.push('</h3>');
+			items.push('<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>');
+			items.push('<h4 class="modal-title" id="filter-wizard-modal-label">');
+			items.push(wizardTitle);
+	        items.push('</h4>');
 			items.push('</div>');
 			items.push('<div class="modal-body">');
 			items.push('<div class="filter-wizard">');
@@ -46,6 +48,8 @@
 			items.push('<div class="modal-footer">');
 			items.push('<a href="#" class="btn btn-default" data-dismiss="modal">Cancel</a>');
 			items.push('<a href="#" class="btn btn-primary filter-wizard-apply-btn" data-dismiss="modal">Apply</a>');
+			items.push('</div>');
+			items.push('</div>');
 			items.push('</div>');
 			items.push('</div>');
 	

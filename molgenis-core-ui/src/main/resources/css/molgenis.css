@@ -72,12 +72,12 @@ html, body {
 	font: menu;
 	font-style: italic;
 }
-
+/*
 #spinner {
 	width: 180px;
 	margin:150px 100px 0px -100px;
 }
-
+*/
 #spinner img {
 	display: block;
 	margin:0 auto;
