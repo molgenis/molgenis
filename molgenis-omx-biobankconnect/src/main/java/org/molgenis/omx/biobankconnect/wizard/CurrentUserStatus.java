@@ -1,7 +1,9 @@
 package org.molgenis.omx.biobankconnect.wizard;
 
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -39,12 +41,20 @@ public class CurrentUserStatus
 		totalNumberOfQueriesForUser.put(userName, totalNumberOfQueries);
 	}
 
-	public void incrementFinishedNumberOfQueries(String userName)
+	public void incrementFinishedNumbersByOne(String userName)
 	{
 		Integer finishedNumber = null;
 		if (!finishedNumberOfQueriesForUser.containsKey(userName)) finishedNumber = 0;
 		else finishedNumber = finishedNumberOfQueriesForUser.get(userName);
 		finishedNumberOfQueriesForUser.put(userName, ++finishedNumber);
+	}
+
+	public void incrementFinishedNumbers(String userName, int size)
+	{
+		Integer finishedNumber = null;
+		if (!finishedNumberOfQueriesForUser.containsKey(userName)) finishedNumber = 0;
+		else finishedNumber = finishedNumberOfQueriesForUser.get(userName);
+		finishedNumberOfQueriesForUser.put(userName, (finishedNumber + size));
 	}
 
 	public int getPercentageOfProcessForUser(String userName)
@@ -54,7 +64,7 @@ public class CurrentUserStatus
 
 		long totalNumber = totalNumberOfQueriesForUser.get(userName);
 		int finishedNumber = finishedNumberOfQueriesForUser.get(userName);
-		DecimalFormat df = new DecimalFormat("#.##");
+		DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(Locale.ENGLISH));
 		Double percentage = totalNumber == 0 ? new Double(0) : ((double) finishedNumber) / totalNumber;
 		percentage = Double.parseDouble(df.format(percentage * 100));
 		return percentage.intValue();

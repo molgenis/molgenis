@@ -21,8 +21,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 public abstract class AbstractStaticContentController extends MolgenisPluginController
 {
 	private static final Logger logger = Logger.getLogger(AbstractStaticContentController.class);
-	private static final String ERRORMESSAGE_PAGE = "There is an error occurred trying loading this page.";
-	private static final String ERRORMESSAGE_SUBMIT = "There is an error occurred trying to save the content.";
+	private static final String ERRORMESSAGE_PAGE = "An error occurred trying loading this page.";
+	private static final String ERRORMESSAGE_SUBMIT = "An error occurred trying to save the content.";
 	private static final String ERRORMESSAGE_LOGO = "The logo needs to be an image file like png or jpg.";
 
 	@Autowired

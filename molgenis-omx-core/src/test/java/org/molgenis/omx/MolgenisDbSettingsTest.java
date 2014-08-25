@@ -1,5 +1,12 @@
 package org.molgenis.omx;
 
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.isA;
+import static org.hamcrest.Matchers.contains;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -8,8 +15,13 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.TreeMap;
+
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.core.RuntimeProperty;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +44,14 @@ public class MolgenisDbSettingsTest extends AbstractTestNGSpringContextTests
 			return new MolgenisDbSettings(dataService());
 		}
 
+		private static RuntimeProperty createRuntimeProperty(String name, String value){
+			RuntimeProperty result = new RuntimeProperty();
+			result.setIdentifier("RuntimeProperty_"+name);
+			result.setName(name);
+			result.setValue(value);
+			return result;
+		}
+		
 		@Bean
 		public DataService dataService()
 		{
@@ -55,6 +75,20 @@ public class MolgenisDbSettingsTest extends AbstractTestNGSpringContextTests
 			RuntimeProperty property2 = new RuntimeProperty();
 			property2.setValue("false");
 			when(dataservice.findOne(RuntimeProperty.ENTITY_NAME, q2, RuntimeProperty.class)).thenReturn(property2);
+			
+			when(
+					dataservice.findAll(
+							eq(RuntimeProperty.ENTITY_NAME),
+							argThat(allOf(
+									isA(Query.class),
+									hasProperty("rules", contains(allOf(
+											hasProperty("field", equalTo("identifier")),
+											hasProperty("operator", equalTo(Operator.LIKE)),
+											hasProperty("value", equalTo("RuntimeProperty_plugin.dataexplorer"))))))),
+							eq(RuntimeProperty.class))).thenReturn(
+					Arrays.asList(createRuntimeProperty("plugin.dataexplorer.editable", "true"),
+							createRuntimeProperty("plugin.dataexplorer.genomebrowser.data.desc", "INFO"),
+							createRuntimeProperty("prefix.RuntimeProperty_plugin.dataexplorer", "farfetched case that must be filtered out")));
 
 			return dataservice;
 		}
@@ -124,5 +158,13 @@ public class MolgenisDbSettingsTest extends AbstractTestNGSpringContextTests
 		property0.setName("property0");
 		property0.setValue("value0-updated");
 		verify(dataService).update(RuntimeProperty.ENTITY_NAME, property0);
+	}
+	
+	@Test void getProperties()
+	{
+		Map<String, String> expected = new TreeMap<String, String>();
+		expected.put("editable", "true");
+		expected.put("genomebrowser.data.desc","INFO");
+		assertEquals(expected, molgenisDbSettings.getProperties("plugin.dataexplorer"));
 	}
 }

@@ -1,5 +1,6 @@
 package org.molgenis.security.login;
 
+import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -7,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.molgenis.security.login.MolgenisLoginControllerTest.Config;
 import org.molgenis.util.GsonHttpMessageConverter;
+import org.molgenis.util.ResourceFingerprintRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -54,7 +56,13 @@ public class MolgenisLoginControllerTest extends AbstractTestNGSpringContextTest
 		@Bean
 		public MolgenisLoginController molgenisLoginController()
 		{
-			return new MolgenisLoginController();
+			return new MolgenisLoginController(resourceFingerprintRegistry());
+		}
+
+		@Bean
+		public ResourceFingerprintRegistry resourceFingerprintRegistry()
+		{
+			return mock(ResourceFingerprintRegistry.class);
 		}
 	}
 }

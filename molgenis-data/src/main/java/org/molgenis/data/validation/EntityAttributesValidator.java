@@ -27,7 +27,7 @@ public class EntityAttributesValidator
 	{
 		Set<ConstraintViolation> violations = Sets.newLinkedHashSet();
 
-		for (AttributeMetaData attr : meta.getAttributes())
+		for (AttributeMetaData attr : meta.getAtomicAttributes())
 		{
 			ConstraintViolation violation = null;
 			switch (attr.getDataType().getEnumType())

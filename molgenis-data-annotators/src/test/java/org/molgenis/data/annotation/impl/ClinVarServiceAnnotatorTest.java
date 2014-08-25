@@ -22,6 +22,7 @@ import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.util.ResourceUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -43,7 +44,7 @@ public class ClinVarServiceAnnotatorTest
 	{
 		MolgenisSettings settings = mock(MolgenisSettings.class);
 		when(settings.getProperty(ClinVarServiceAnnotator.CLINVAR_FILE_LOCATION_PROPERTY)).thenReturn(
-				getClass().getResource("/clinvar_example.txt").getFile());
+				ResourceUtils.getFile(getClass(), "/clinvar_example.txt").getPath());
 
 		metaDataCanAnnotate = mock(EntityMetaData.class);
 		attributeMetaDataChrom = mock(AttributeMetaData.class);

@@ -1,13 +1,15 @@
-(function($, molgenis) {
+$.when( $, 
+		window.top.molgenis = window.top.molgenis || {}, 
+		$.get('dataexplorer/settings') 
+).then(
+function($, molgenis, settingsXhr) {	
 	"use strict";
 	var self = molgenis.dataexplorer = molgenis.dataexplorer || {};
 	
 	// module api
 	self.getSelectedEntityMeta = getSelectedEntityMeta;
-	self.getSelectedAttributes = getSelectedAttributes;
-	self.setShowWizardOnInit = setShowWizardOnInit; 
+	self.getSelectedAttributes = getSelectedAttributes; 
 	self.getEntityQuery = getEntityQuery;
-    self.setNoResultMessage = setNoResultMessage;
     self.getNoResultMessage = getNoResultMessage;
     self.createHeader = createHeader;
 	
@@ -16,22 +18,18 @@
 	var attributeFilters = {};
 	var selectedAttributes = [];
 	var searchQuery = null;
-	var showWizardOnInit = false;
 	var modules = [];
-    var noResultMessage = '';
-    
-    /**
-     * @memberOf molgenis.dataexplorer
-     */
-    function setNoResultMessage(message) {
-        noResultMessage = message;
-    }
 
+	if(settingsXhr[1] !== 'success') {
+		molgenis.createAlert([{message: 'An error occurred initializing the data explorer.'}], 'error');
+	}
+	var settings = settingsXhr[0];
+	
     /**
      * @memberOf molgenis.dataexplorer
      */
     function getNoResultMessage() {
-        return noResultMessage;
+        return settings['mod.aggregates.noresults'];
     }
 
 	/**
@@ -46,13 +44,6 @@
 	 */
 	function getSelectedAttributes() {
 		return selectedAttributes;
-	}
-	
-	/**
-	 * @memberOf molgenis.dataexplorer
-	 */
-	function setShowWizardOnInit(show) {
-		showWizardOnInit = show;
 	}
 	
 	/**
@@ -109,7 +100,8 @@
 		
 		if (entityMetaData.description) {
 			var description = $('<span data-placement="bottom"></span>');
-			description.html(abbreviate(entityMetaData.description, 180));
+			description.html(abbreviate(entityMetaData.description, 
+					settings['header.abbreviate']||180));
 			description.attr('data-title', entityMetaData.description);
 			$('#entity-class-description').html(description.tooltip());
 		} else {
@@ -281,9 +273,8 @@
 					$('a[data-toggle="tab"]', $('#module-nav')).first().click();
 					
 					//Show wizard on show of dataexplorer if url param 'wizard=true' is added
-					if (showWizardOnInit) {
+					if (settings['wizard.oninit'] && settings['wizard.oninit'] === 'true') {
 						self.filter.wizard.openFilterWizardModal(selectedEntityMetaData, attributeFilters);
-						showWizardOnInit = false;
 					}
 					
 				});
@@ -351,4 +342,4 @@
 		}
 		
 	});
-}($, window.top.molgenis = window.top.molgenis || {}));
+});

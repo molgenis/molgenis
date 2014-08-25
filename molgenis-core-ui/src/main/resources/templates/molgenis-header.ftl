@@ -1,37 +1,38 @@
 <#-- write HTML header and plugin menu -->
 <#--   css (optional) list of additional stylesheets to include -->
 <#--   js  (optional) list of additional js files to include -->
+<#include "resource-macros.ftl">
 <#macro header css=[] js=[]>
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>${molgenis_ui.title?html}</title>
+		<title><#if molgenis_ui.title?has_content>${molgenis_ui.title?html}</#if></title>
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="chrome=1">
-		<link rel="icon" href="/img/molgenis.ico" type="image/x-icon">
-		<link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css">
-		<link rel="stylesheet" href="/css/molgenis.css" type="text/css">
+		<link rel="icon" href="<@resource_href "/img/molgenis.ico"/>" type="image/x-icon">
+		<link rel="stylesheet" href="<@resource_href "/css/bootstrap.min.css"/>" type="text/css">
+		<link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
 	<#list css as css_file_name>
-		<link rel="stylesheet" href="/css/${css_file_name?html}" type="text/css">
+		<link rel="stylesheet" href="<@resource_href "/css/${css_file_name?html}"/>" type="text/css">
 	</#list>
 	<#if molgenis_ui.hrefCss?has_content>
-		<link rel="stylesheet" href="/css/${molgenis_ui.hrefCss?html}" type="text/css">
+		<link rel="stylesheet" href="<@resource_href "/css/${molgenis_ui.hrefCss?html}"/>" type="text/css">
 	</#if>
-		<script src="/js/jquery-1.8.3.min.js"></script>
-		<script src="/js/bootstrap.min.js"></script>
-		<script src="/js/jquery.validate.min.js"></script>
-		<script src="/js/molgenis.js"></script>
+		<script src="<@resource_href "/js/jquery-1.8.3.min.js"/>"></script>
+		<script src="<@resource_href "/js/bootstrap.min.js"/>"></script>
+		<script src="<@resource_href "/js/jquery.validate.min.js"/>"></script>
+		<script src="<@resource_href "/js/molgenis.js"/>"></script>
 	<#if context_url??>
 		<script>top.molgenis.setContextUrl('${context_url}');</script>
 	</#if>
 		<!--[if lt IE 9]>
-			<script src="/js/molgenis-ie8.js"></script>
+			<script src="<@resource_href "/js/molgenis-ie8.js"/>"></script>
 		<![endif]-->
 	<#list js as js_file_name>
-		<script src="/js/${js_file_name?html}"></script>
+		<script src="<@resource_href "/js/${js_file_name?html}"/>"></script>
 	</#list>		
 	<#if molgenis_ui.hrefJs?has_content>
-		<script src="/js/${molgenis_ui.hrefJs?html}"></script>
+		<script src="<@resource_href "/js/${molgenis_ui.hrefJs?html}"/>"></script>
 	</#if>
 	</head>
 	<body>
@@ -82,7 +83,7 @@
 					<#list menu.items as item>
 						<#if item.type != "MENU">
 							<#if item.name=="Home">
-								<li><a href="/menu/${menu.id?html}/${item.url?html}"><img src="${molgenis_ui.hrefLogo?html}" alt="${molgenis_ui.title?html}"></a></li>
+								<li><a href="/menu/${menu.id?html}/${item.url?html}"><img src="<#if molgenis_ui.hrefLogo?has_content>${molgenis_ui.hrefLogo?html}<#else><@resource_href "/img/logo_molgenis_small.png"/></#if>" alt="<#if molgenis_ui.title?has_content>${molgenis_ui.title?html}</#if>"></a></li>
 							<#else>
 								<#if item.id == plugin_id>
 									<li class="active"><a href="#">${item.name?html}</a></li>

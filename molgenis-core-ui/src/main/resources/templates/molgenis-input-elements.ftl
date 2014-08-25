@@ -105,14 +105,40 @@
 					
 				</script>
 				
-			<#elseif field.dataType.enumType == 'DATE_TIME' || field.dataType.enumType == 'DATE'>
-				<div class="input-append date">
+			<#elseif field.dataType.enumType == 'DATE_TIME'>
+				<div class="input-append datetime">
 					<input readonly type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" <#if field.nillable>class="nillable"</#if> <#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string("yyyy-MM-dd'''T'''HH:mm:ssZ")}"</#if> <@validationOptions field /> >
+					<#if field.nillable><span class="add-on-workaround"><i class="icon-remove empty-date-input"></i></span></#if> <span class="add-on"><i></i></span>
+				</div>
+				
+			<#elseif field.dataType.enumType == 'DATE'>
+				<div class="input-append date">
+					<input readonly type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" <#if field.nillable>class="nillable"</#if> <#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string("yyyy-MM-dd")}"</#if> <@validationOptions field /> >
 					<#if field.nillable><span class="add-on-workaround"><i class="icon-remove empty-date-input"></i></span></#if> <span class="add-on"><i></i></span>
 				</div>
 				
 			<#elseif field.dataType.enumType =='INT' || field.dataType.enumType = 'LONG'>
 				<input type="number" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" <#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)?c}"</#if> <@validationOptions field /> >
+			
+			<#elseif field.dataType.enumType == 'SCRIPT'>
+				<#if entity!='' && entity.get(fieldName)??>
+					<textarea name="${fieldName}" id="${fieldName}-textarea">${entity.get(fieldName)!?html}</textarea>
+				<#else>
+					<textarea name="${fieldName}" id="${fieldName}-textarea"></textarea>
+				</#if>
+				<div style="width: 100%; height:250px" class="uneditable-input" id="${fieldName}-editor"></div>
+				<script>
+					var editor = ace.edit("${fieldName}-editor");
+					editor.setTheme("ace/theme/eclipse");
+    				editor.getSession().setMode("ace/mode/r");
+    					
+    				var textarea = $("#${fieldName}-textarea").hide();
+					editor.getSession().setValue(textarea.val());
+					editor.getSession().on('change', function(){
+  						textarea.val(editor.getSession().getValue());
+					});	
+				</script> 
+			
 			<#else>
 				<input type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" <#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string?html}"</#if> <@validationOptions field /> >
 			</#if>

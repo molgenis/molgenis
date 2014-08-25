@@ -37,6 +37,12 @@ public class FileStore
 		return new File(storageDir + '/' + fileName);
 	}
 
+	public boolean delete(String fileName)
+	{
+		File file = new File(storageDir + '/' + fileName);
+		return file.delete();
+	}
+
 	public String getStorageDir()
 	{
 		return storageDir;

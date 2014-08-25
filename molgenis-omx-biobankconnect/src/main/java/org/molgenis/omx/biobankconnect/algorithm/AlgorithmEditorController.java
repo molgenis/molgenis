@@ -11,23 +11,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.omx.biobankconnect.ontologyannotator.OntologyAnnotator;
-import org.molgenis.omx.biobankconnect.ontologyannotator.UpdateIndexRequest;
 import org.molgenis.omx.biobankconnect.ontologymatcher.AsyncOntologyMatcher;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcher;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcherRequest;
 import org.molgenis.omx.biobankconnect.ontologyservice.OntologyService;
 import org.molgenis.omx.biobankconnect.ontologyservice.OntologyServiceRequest;
-import org.molgenis.omx.biobankconnect.wizard.BiobankConnectWizard;
-import org.molgenis.omx.biobankconnect.wizard.ChooseCataloguePage;
 import org.molgenis.omx.biobankconnect.wizard.CurrentUserStatus;
-import org.molgenis.omx.biobankconnect.wizard.OntologyAnnotatorPage;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
@@ -36,25 +30,19 @@ import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
 import org.molgenis.security.user.UserAccountService;
-import org.molgenis.ui.wizard.AbstractWizardController;
-import org.molgenis.ui.wizard.Wizard;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.google.common.collect.Iterables;
 import com.google.gson.Gson;
 
 @Controller
 @RequestMapping(URI)
-public class AlgorithmEditorController extends AbstractWizardController
+public class AlgorithmEditorController extends MolgenisPluginController
 {
-
 	public static final String ID = "algorithm";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
@@ -63,114 +51,21 @@ public class AlgorithmEditorController extends AbstractWizardController
 	@Autowired
 	private OntologyMatcher ontologyMatcher;
 	@Autowired
-	private OntologyAnnotator ontologyAnnotator;
-	@Autowired
 	private UserAccountService userAccountService;
 	@Autowired
 	private CurrentUserStatus currentUserStatus;
-	@Autowired
-	private AlgorithmUnitConverter algorithmUnitConverter;
-	@Autowired
-	private AlgorithmScriptLibrary algorithmScriptLibrary;
 	@Autowired
 	private AlgorithmGenerator algorithmGenerator;
 	@Autowired
 	private ApplyAlgorithms applyAlgorithms;
 	@Autowired
 	private SearchService searchService;
-
-	private BiobankConnectWizard wizard;
-	private final DataService dataService;
-	private final ChooseBiobankPage chooseBiobanksPage;
-	private final OntologyAnnotatorPage ontologyAnnotatorPage;
-	private final ChooseCataloguePage chooseCataloguePage;
-	private final AlgorithmEditorPage algorithmEditorPage;
-	private final AlgorithmGeneratorPage algorithmGeneratorPage;
-
 	@Autowired
-	public AlgorithmEditorController(ChooseBiobankPage chooseBiobanksPage, OntologyAnnotatorPage ontologyAnnotatorPage,
-			ChooseCataloguePage chooseCataloguePage, AlgorithmEditorPage algorithmEditorPage,
-			AlgorithmGeneratorPage algorithmGeneratorPage, DataService dataService)
-	{
-		super(URI, ID);
-		if (algorithmEditorPage == null) throw new IllegalArgumentException("algorithmEditorPage is null!");
-		if (chooseBiobanksPage == null) throw new IllegalArgumentException("chooseBiobanksPage is null!");
-		if (chooseCataloguePage == null) throw new IllegalArgumentException("chooseCataloguePage is null!");
-		if (ontologyAnnotatorPage == null) throw new IllegalArgumentException("ontologyAnnotatorPage is null!");
-		if (algorithmGeneratorPage == null) throw new IllegalArgumentException("algorithmGeneratorPage is null!");
-		if (dataService == null) throw new IllegalArgumentException("dataService is null!");
-		this.chooseBiobanksPage = chooseBiobanksPage;
-		this.ontologyAnnotatorPage = ontologyAnnotatorPage;
-		this.chooseCataloguePage = chooseCataloguePage;
-		this.algorithmEditorPage = algorithmEditorPage;
-		this.algorithmGeneratorPage = algorithmGeneratorPage;
-		this.dataService = dataService;
-	}
+	private DataService dataService;
 
-	@Override
-	public void onInit(HttpServletRequest request)
+	public AlgorithmEditorController()
 	{
-		wizard.setDataSets(getBiobankDataSets());
-		currentUserStatus.setUserLoggedIn(userAccountService.getCurrentUser().getUsername(),
-				request.getRequestedSessionId());
-	}
-
-	@Override
-	protected Wizard createWizard()
-	{
-		wizard = new BiobankConnectWizard();
-		wizard.setDataSets(getBiobankDataSets());
-		wizard.setUserName(userAccountService.getCurrentUser().getUsername());
-		wizard.addPage(chooseCataloguePage);
-		wizard.addPage(ontologyAnnotatorPage);
-		wizard.addPage(chooseBiobanksPage);
-		wizard.addPage(algorithmEditorPage);
-		wizard.addPage(algorithmGeneratorPage);
-		return wizard;
-	}
-
-	private List<DataSet> getBiobankDataSets()
-	{
-		List<DataSet> dataSets = new ArrayList<DataSet>();
-		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME, DataSet.class);
-		for (DataSet dataSet : allDataSets)
-		{
-			if (dataSet.getProtocolUsed().getIdentifier().equals(AsyncOntologyMatcher.PROTOCOL_IDENTIFIER)) continue;
-			if (dataSet.getIdentifier().matches("^" + userAccountService.getCurrentUser().getUsername() + ".*derived$")) continue;
-			dataSets.add(dataSet);
-		}
-		return dataSets;
-	}
-
-	@RequestMapping(value = "/annotate", method = RequestMethod.POST)
-	public String annotate(HttpServletRequest request)
-	{
-		ontologyAnnotator.removeAnnotations(wizard.getSelectedDataSet().getId());
-		if (request.getParameter("selectedOntologies") != null)
-		{
-			List<String> documentTypes = new ArrayList<String>();
-			for (String ontologyUri : request.getParameter("selectedOntologies").split(","))
-			{
-				documentTypes.add("ontologyTerm-" + ontologyUri);
-			}
-			ontologyAnnotator.annotate(wizard.getSelectedDataSet().getId(), documentTypes);
-		}
-		return init(request);
-	}
-
-	@RequestMapping(value = "/annotate/remove", method = RequestMethod.POST)
-	public String removeAnnotations(HttpServletRequest request) throws Exception
-	{
-		ontologyAnnotator.removeAnnotations(wizard.getSelectedDataSet().getId());
-		return init(request);
-	}
-
-	@RequestMapping(method = RequestMethod.POST, value = "/annotate/update", consumes = APPLICATION_JSON_VALUE)
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void updateDocument(@RequestBody
-	UpdateIndexRequest request)
-	{
-		ontologyAnnotator.updateIndex(request);
+		super(URI);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/createmapping", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
@@ -208,27 +103,19 @@ public class AlgorithmEditorController extends AbstractWizardController
 		Map<String, Object> jsonResults = new HashMap<String, Object>();
 		String algorithm = request.getAlgorithmScript();
 		List<Integer> selectedDataSetIds = request.getSelectedDataSetIds();
-		if (selectedDataSetIds.size() != 0 && !algorithm.isEmpty())
+		if (selectedDataSetIds.size() != 0 && !StringUtils.isEmpty(algorithm))
 		{
 			Integer sourceDataSetId = selectedDataSetIds.get(0);
 			ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME, request.getFeatureId(),
 					ObservableFeature.class);
 			String message = applyAlgorithms.validateAlgorithmInputs(sourceDataSetId, algorithm);
-			Collection<Object> results = message.isEmpty() ? applyAlgorithms.createValueFromAlgorithm(
+			Collection<Object> results = StringUtils.isEmpty(message) ? applyAlgorithms.createValueFromAlgorithm(
 					feature.getDataType(), sourceDataSetId, algorithm).values() : Collections.emptyList();
 			jsonResults.put("results", results);
 			jsonResults.put("message", message);
 			jsonResults.put("totalCounts", countRowsByDataSet(sourceDataSetId));
 		}
 		return jsonResults;
-	}
-
-	private Integer countRowsByDataSet(Integer sourceDataSetId)
-	{
-		DataSet sourceDataSet = dataService.findOne(DataSet.ENTITY_NAME, sourceDataSetId, DataSet.class);
-		Iterable<ObservationSet> observationSets = dataService.findAll(ObservationSet.ENTITY_NAME,
-				new QueryImpl().eq(ObservationSet.PARTOFDATASET, sourceDataSet), ObservationSet.class);
-		return Iterables.size(observationSets);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/savescript", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
@@ -256,19 +143,7 @@ public class AlgorithmEditorController extends AbstractWizardController
 		return Collections.<String, String> emptyMap();
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/progress", produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public Map<String, Object> progress(@RequestBody
-	OntologyMatcherRequest request)
-	{
-		Map<String, Object> jsonResults = new HashMap<String, Object>();
-		String userName = userAccountService.getCurrentUser().getUsername();
-		jsonResults.put("isRunning", currentUserStatus.isUserMatching(userName));
-		jsonResults.put("percentage", currentUserStatus.getPercentageOfProcessForUser(userName));
-		return jsonResults;
-	}
-
-	@RequestMapping(method = RequestMethod.POST, value = "/allattributes")
+	@RequestMapping(method = RequestMethod.POST, value = "/allattributes", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public SearchResult getAllAttributes(@RequestBody
 	Map<String, Object> request)
@@ -298,7 +173,7 @@ public class AlgorithmEditorController extends AbstractWizardController
 				.search(new SearchRequest("protocolTree-" + dataSet.getProtocolUsed().getId(), query, null));
 	}
 
-	@RequestMapping(method = RequestMethod.POST, value = "/attribute")
+	@RequestMapping(method = RequestMethod.POST, value = "/attribute", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public SearchResult getOneAttribute(@RequestBody
 	String featureId)
@@ -307,15 +182,15 @@ public class AlgorithmEditorController extends AbstractWizardController
 				.eq("type", "observablefeature"), null));
 	}
 
-	@RequestMapping(method = POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE, value = "/ontologyterm")
+	@RequestMapping(method = POST, value = "/ontologyterm", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public SearchResult query(@RequestBody
 	OntologyServiceRequest ontologyTermRequest)
 	{
-		String ontologyUrl = ontologyTermRequest.getOntologyUrl();
+		String ontologyIri = ontologyTermRequest.getOntologyIri();
 		String queryString = ontologyTermRequest.getQueryString();
 		if (queryString == null) return new SearchResult(0, Collections.<Hit> emptyList());
-		return ontologyService.search(ontologyUrl, queryString);
+		return ontologyService.search(ontologyIri, queryString);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/getmapping", produces = APPLICATION_JSON_VALUE)
@@ -363,5 +238,19 @@ public class AlgorithmEditorController extends AbstractWizardController
 		}
 		results.put("results", dataSets);
 		return results;
+	}
+
+	/**
+	 * Helper class to count the number of observationSets in a dataset, in
+	 * another word the number of rows in a dataset
+	 * 
+	 * @param sourceDataSetId
+	 * @return
+	 */
+	private long countRowsByDataSet(Integer sourceDataSetId)
+	{
+		DataSet sourceDataSet = dataService.findOne(DataSet.ENTITY_NAME, sourceDataSetId, DataSet.class);
+		return dataService.count(ObservationSet.ENTITY_NAME,
+				new QueryImpl().eq(ObservationSet.PARTOFDATASET, sourceDataSet));
 	}
 }

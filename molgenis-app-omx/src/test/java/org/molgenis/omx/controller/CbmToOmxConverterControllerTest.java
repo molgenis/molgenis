@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.omx.controller.CbmToOmxConverterControllerTest.Config;
 import org.molgenis.util.FileStore;
 import org.molgenis.util.GsonHttpMessageConverter;
@@ -31,8 +32,8 @@ public class CbmToOmxConverterControllerTest extends AbstractTestNGSpringContext
 	@BeforeMethod
 	public void setUp()
 	{
-		mockMvc = MockMvcBuilders.standaloneSetup(cbmToOmxConverterController).setMessageConverters(new GsonHttpMessageConverter())
-				.build();
+		mockMvc = MockMvcBuilders.standaloneSetup(cbmToOmxConverterController)
+				.setMessageConverters(new GsonHttpMessageConverter()).build();
 	}
 
 	@Test
@@ -55,7 +56,13 @@ public class CbmToOmxConverterControllerTest extends AbstractTestNGSpringContext
 		{
 			return mock(MolgenisSettings.class);
 		}
-		
+
+		@Bean
+		public MolgenisPluginRegistry molgenisPluginRegistry()
+		{
+			return mock(MolgenisPluginRegistry.class);
+		}
+
 		@Bean
 		public FileStore fileStore()
 		{

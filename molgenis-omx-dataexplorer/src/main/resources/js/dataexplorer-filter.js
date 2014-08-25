@@ -30,6 +30,7 @@
 			case 'ENUM':
 			case 'INT':
 			case 'TEXT':
+			case 'SCRIPT':
 				return self.createComplexFilter(attribute, filter, wizard, 'OR');
 				break;
 			case 'MREF':
@@ -167,6 +168,7 @@
 			case 'TEXT':
 			case 'BOOL':
 			case 'ENUM':
+			case 'SCRIPT':
 				return htmlEscape(values[0] ? values[0] : '');
 			case 'CATEGORICAL':
 			case 'MREF':
@@ -452,7 +454,7 @@
 						sort : {
 							orders : [ {
 								direction : 'ASC',
-								property : 'id'
+								property : entityMeta.labelAttribute
 							} ]
 						}
 					}
@@ -502,6 +504,7 @@
 			case 'STRING':
 			case 'TEXT':
 			case 'ENUM':
+			case 'SCRIPT':
 				$controls.append(createInput(attribute, {'name': name, 'id': name, 'style' : 'width: 370px'}, values ? values[0] : undefined));
 				break;
 			case 'XREF':

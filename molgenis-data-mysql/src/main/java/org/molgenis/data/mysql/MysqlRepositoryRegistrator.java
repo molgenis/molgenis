@@ -1,8 +1,8 @@
 package org.molgenis.data.mysql;
 
 import org.apache.log4j.Logger;
-import org.molgenis.data.CrudRepositorySecurityDecorator;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Repository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -38,8 +38,8 @@ public class MysqlRepositoryRegistrator implements ApplicationListener<ContextRe
 			logger.debug("MysqlRepositoryRegistrator: loading mysqlrepo " + name);
 			if (!dataService.hasRepository(name))
 			{
-				MysqlRepository repo = (MysqlRepository) repositoryCollection.getRepositoryByEntityName(name);
-				dataService.addRepository(new CrudRepositorySecurityDecorator(repo));
+				Repository repo = repositoryCollection.getRepositoryByEntityName(name);
+				dataService.addRepository(repo);
 			}
 		}
 	}

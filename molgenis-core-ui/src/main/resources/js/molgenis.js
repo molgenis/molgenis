@@ -241,9 +241,22 @@ function getCurrentTimezoneOffset() {
 	return offset;
 }
 
-function htmlEscape(text) {
-	return $('<div/>').text(text).html();
-}
+(function() {
+	var entityMap = {
+		"&" : "&amp;",
+		"<" : "&lt;",
+		">" : "&gt;",
+		'"' : '&quot;',
+		"'" : '&#39;',
+		"/" : '&#x2F;'
+	};
+
+	window.htmlEscape = function(string) {
+		return String(string).replace(/[&<>"'\/]/g, function(s) {
+			return entityMap[s];
+		});
+	};
+}(window));
 
 /*
  * Create a table cell to show data of a certain type Is used by the
@@ -263,7 +276,7 @@ function formatTableCellValue(value, dataType, editable) {
 		return value + '/>';
 	}
 
-	if (!value) {
+	if (typeof value === 'undefined' || value === null) {
 		return '';
 	}
 
@@ -367,8 +380,8 @@ function createInput(attr, attrs, val, lbl) {
 	case 'LONG':
 		var opts = $.extend({}, attrs, {'step': '1'});
 		if(attr.range) {
-			if(attr.range.min) opts.min = attr.range.min;
-			if(attr.range.max) opts.max = attr.range.max;
+			if(typeof attr.range.min) opts.min = attr.range.min;
+			if(typeof attr.range.max !== 'undefined') opts.max = attr.range.max;
 		}
 		var input = createBasicInput('number', opts, val);
 		if(!attr.nillable)
@@ -381,6 +394,7 @@ function createInput(attr, attrs, val, lbl) {
 	case 'STRING':
 	case 'TEXT':
 	case 'ENUM':
+	case 'SCRIPT':
 		return createBasicInput('text', attrs, val);
 	case 'MREF':
 	case 'XREF':
@@ -415,10 +429,9 @@ function createInput(attr, attrs, val, lbl) {
 		var resource = null;
 
 		var async = callback !== undefined;
-
+		
 		var config = {
 			'dataType' : 'json',
-			'url' : this._toApiUri(resourceUri, options),
 			'cache' : true,
 			'async' : async,
 			'success' : function(data) {
@@ -429,13 +442,36 @@ function createInput(attr, attrs, val, lbl) {
 			}
 		};
 
-		// tunnel get requests with query through a post,
+		// tunnel get requests with options through a post,
 		// because it might not fit in the URL
-		if (options && options.q) {
+		if(options) {
+			// backward compatibility for legacy code
+			if(options.q && typeof options.q === 'object') {
+				var obj = jQuery.extend({}, options.q);
+				delete options.q;
+				for(var i = 0, keys = Object.keys(obj); i < keys.length; ++i) {
+					options[keys[i]] = obj[keys[i]];
+				}
+			}
+			
+			var url = resourceUri;
+			if (resourceUri.indexOf('?') == -1) {
+				url = url + '?';
+			} else {
+				url = url + '&';
+			}
+			url = url + '_method=GET';
+			
 			$.extend(config, {
 				'type' : 'POST',
-				'data' : JSON.stringify(options.q),
+				'url' : url,
+				'data' : JSON.stringify(options),
 				'contentType' : 'application/json'
+			});
+		} else {
+			$.extend(config, {
+				'type' : 'GET',
+				'url' : resourceUri
 			});
 		}
 

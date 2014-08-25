@@ -1,7 +1,11 @@
 package org.molgenis.data.importer;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.AppConfig;
@@ -14,6 +18,7 @@ import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
+import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -24,9 +29,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.SimpleTransactionStatus;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @ContextConfiguration(classes = AppConfig.class)
 public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
@@ -56,10 +58,10 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 	DataService dataService;
 
 	@Test
-	public void testValidationReport() throws IOException, InvalidFormatException
+	public void testValidationReport() throws IOException, InvalidFormatException, URISyntaxException
 	{
 		// open test source
-		File f = new File(getClass().getResource("/example_invalid.xlsx").getFile());
+		File f = ResourceUtils.getFile(getClass(), "/example_invalid.xlsx");
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
 		dataService = mock(DataService.class);
 
@@ -112,7 +114,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		store.drop("import_country");
 
 		// create test excel
-		File f = new File(getClass().getResource("/example.xlsx").getFile());
+		File f = ResourceUtils.getFile(getClass(), "/example.xlsx");
 		// TODO add good example to repo
 
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
@@ -160,7 +162,8 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		store.drop("import_country");
 
 		// create test excel
-		File f = new File(getClass().getResource("/example.xlsx").getFile());
+		
+		File f = ResourceUtils.getFile(getClass(), "/example.xlsx");
 		// TODO add good example to repo
 
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
@@ -175,7 +178,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		Thread.sleep(1000);
 
 		// create test excel
-		File file_no_meta = new File(getClass().getResource("/example_no_meta.xlsx").getFile());
+		File file_no_meta = ResourceUtils.getFile(getClass(), "/example_no_meta.xlsx");
 		ExcelRepositoryCollection source_no_meta = new ExcelRepositoryCollection(file_no_meta);
 
 		importer.setRepositoryCollection(store);

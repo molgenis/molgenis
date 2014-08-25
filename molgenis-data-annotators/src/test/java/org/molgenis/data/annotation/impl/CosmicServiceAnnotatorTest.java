@@ -47,7 +47,6 @@ public class CosmicServiceAnnotatorTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		annotator = new CosmicServiceAnnotator();
 
 		metaDataCanAnnotate = mock(EntityMetaData.class);
 		attributeMetaDataCanAnnotate = mock(AttributeMetaData.class);
@@ -75,6 +74,8 @@ public class CosmicServiceAnnotatorTest
 		input.add(entity);
 
 		this.httpClient = mock(HttpClient.class);
+
+		annotator = new CosmicServiceAnnotator(this.httpClient);
 
 		SERVICE_RESPONSE = "[{\"ID\":\"COSM911918\",\"feature_type\":\"somatic_variation\",\"alt_alleles\":[\"C\",\"A\"],\"end\":69345,\"seq_region_name\":\"1\",\"consequence_type\":\"synonymous_variant\",\"strand\":1,\"start\":69345},{\"ID\":\"COSM426644\",\"feature_type\":\"somatic_variation\",\"alt_alleles\":[\"G\",\"T\"],\"end\":69523,\"seq_region_name\":\"1\",\"consequence_type\":\"missense_variant\",\"strand\":1,\"start\":69523},{\"ID\":\"COSM75742\",\"feature_type\":\"somatic_variation\",\"alt_alleles\":[\"G\",\"A\"],\"end\":69538,\"seq_region_name\":\"1\",\"consequence_type\":\"missense_variant\",\"strand\":1,\"start\":69538}]";
 	}

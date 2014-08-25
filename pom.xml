@@ -54,8 +54,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring.version>4.0.2.RELEASE</spring.version>
-        <spring.security.version>3.2.1.RELEASE</spring.security.version>
+        <spring.version>4.0.6.RELEASE</spring.version>
+        <spring.security.version>3.2.5.RELEASE</spring.security.version>
         <mysql.connector.java.version>5.1.28</mysql.connector.java.version>
 
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
@@ -606,5 +606,6 @@
         <module>molgenis-disease-matcher</module>
         <module>molgenis-data-examples</module>
         <module>molgenis-mutationdb</module>
+        <module>molgenis-scripts</module>
     </modules>
 </project>
