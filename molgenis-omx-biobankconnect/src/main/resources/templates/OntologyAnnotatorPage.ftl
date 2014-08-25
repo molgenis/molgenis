@@ -48,7 +48,7 @@
 					</div>
 					<div class="row">
 						<div class="col-md-4">
-							Number of data items : <col-md- id="dataitem-number"></col-md->
+							Number of data items : <span id="dataitem-number"></span>
 						</div>
 					</div>
 					<div class="row">

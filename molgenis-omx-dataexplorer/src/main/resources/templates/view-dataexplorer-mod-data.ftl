@@ -68,13 +68,13 @@
 		      		<div class="form-group">
 			      		<label class="col-md-3 control-label" for="galaxy-export-url">Galaxy server URL *</label>
 					    <div class="col-md-9">
-					    	<input type="text" id="galaxy-export-url" name="galaxyUrl" <#if galaxyUrl??>value="${galaxyUrl?html}" </#if>required><col-md- class="help-block">e.g. https://usegalaxy.org/</col-md->
+					    	<input type="text" id="galaxy-export-url" name="galaxyUrl" <#if galaxyUrl??>value="${galaxyUrl?html}" </#if>required><span class="help-block">e.g. https://usegalaxy.org/</span>
 					    </div>
 		      		</div>
 		      		<div class="form-group">
 		      			<label class="col-md-3 control-label" for="galaxy-export-api-key">Galaxy API key *</label>
 					    <div class="col-md-9">
-					    	<input type="password" id="galaxy-export-api-key" name="galaxyApiKey" <#if galaxyApiKey??>value="${galaxyApiKey?html}" </#if>required><col-md- class="help-block">See 'Select API Keys' in menu 'User' on e.g. https://usegalaxy.org/</col-md->
+					    	<input type="password" id="galaxy-export-api-key" name="galaxyApiKey" <#if galaxyApiKey??>value="${galaxyApiKey?html}" </#if>required><span class="help-block">See 'Select API Keys' in menu 'User' on e.g. https://usegalaxy.org/</span>
 					    </div>
 		      		</div>
 				</div>

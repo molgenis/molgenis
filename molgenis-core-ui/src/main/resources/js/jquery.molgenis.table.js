@@ -19,7 +19,7 @@
 		items.push('<div class="row">');
 		items.push('<div class="col-md-3"><div class="molgenis-table-controls pull-left">');
 		if(settings.editable)
-			items.push('<a class="btn edit-table-btn" href="#" data-toggle="button"><span class="glyphicon glyphicon-edit"></span></a>');
+			items.push('<a class="btn btn-default edit-table-btn" href="#" data-toggle="button"><span class="glyphicon glyphicon-edit"></span></a>');
 		items.push('</div></div>');
 		items.push('<div class="col-md-6"><div class="molgenis-table-pager"></div></div>');
 		items.push('<div class="col-md-3"><div class="molgenis-table-info pull-right"></div></div>');
@@ -188,15 +188,15 @@
 		switch(attribute.fieldType) {
 			case 'BOOL':
 				var items = [];
-				items.push('<div class="bool-btn-group btn-group">');
-				items.push('<button type="button" class="btn btn-mini');
+				items.push('<div class="bool-btn-group btn-group-xs">');
+				items.push('<button type="button" class="btn btn-default');
 				if(value === true) items.push(' active');
 				items.push('" data-state="true">Yes</button>');
-				items.push('<button type="button" class="btn btn-mini');
+				items.push('<button type="button" class="btn btn-default');
 				if(value === false) items.push(' active');
 				items.push('" data-state="false">No</button>');
 				if(attribute.nillable) {
-					items.push('<button type="button" class="btn btn-mini');
+					items.push('<button type="button" class="btn btn-default');
 					if(value === undefined) items.push(' active');
 					items.push('" data-state="undefined">N/A</button>');
 				}

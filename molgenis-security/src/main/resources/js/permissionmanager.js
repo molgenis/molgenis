@@ -27,7 +27,7 @@
 				if(data.hierarchyPermissionMap && data.hierarchyPermissionMap[entityId.toLowerCase()]) {
 					$.each(data.hierarchyPermissionMap[entityId.toLowerCase()], function(idx, perm) {
 						items.push('<tr>');
-						items.push('<td><col-md- class="muted inherited-permission">inherited from hierarchy</col-md-></td>');
+						items.push('<td><span class="muted inherited-permission">inherited from hierarchy</span></td>');
 						items.push('<td><input type="radio"' + (perm.type === "write" ? ' checked' : '') + ' disabled></td>');
 						items.push('<td><input type="radio"' + (perm.type === "read" ? ' checked' : '') + ' disabled></td>');
 						items.push('<td><input type="radio"' + (perm.type === "count" ? ' checked' : '') + ' disabled></td>');
@@ -64,7 +64,7 @@
 				if(data.groupPermissionMap && data.groupPermissionMap[entityId.toLowerCase()]) {
 					$.each(data.groupPermissionMap[entityId.toLowerCase()], function(idx, perm) {
 						items.push('<tr>');
-						items.push('<td><col-md- class="muted inherited-permission">inherited from group: ' + perm.group + '</col-md-></td>');
+						items.push('<td><span class="muted inherited-permission">inherited from group: ' + perm.group + '</span></td>');
 						items.push('<td><input type="radio"' + (perm.type === "write" ? ' checked' : '') + ' disabled></td>');
 						items.push('<td><input type="radio"' + (perm.type === "read" ? ' checked' : '') + ' disabled></td>');
 						items.push('<td><input type="radio"' + (perm.type === "count" ? ' checked' : '') + ' disabled></td>');
