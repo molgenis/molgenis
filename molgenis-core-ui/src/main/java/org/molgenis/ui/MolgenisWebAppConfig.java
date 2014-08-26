@@ -1,5 +1,9 @@
 package org.molgenis.ui;
 
+import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_CSS;
+import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_IMG;
+import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_JS;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -30,6 +34,7 @@ import org.molgenis.ui.security.MolgenisUiPermissionDecorator;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.FileStore;
 import org.molgenis.util.GsonHttpMessageConverter;
+import org.molgenis.util.ResourceFingerprintRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
@@ -70,9 +75,10 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry)
 	{
-		registry.addResourceHandler("/css/**").addResourceLocations("/css/", "classpath:/css/").setCachePeriod(3600);
-		registry.addResourceHandler("/img/**").addResourceLocations("/img/", "classpath:/img/").setCachePeriod(3600);
-		registry.addResourceHandler("/js/**").addResourceLocations("/js/", "classpath:/js/").setCachePeriod(3600);
+		final int aYear = 31536000;
+		registry.addResourceHandler(PATTERN_CSS).addResourceLocations("/css/", "classpath:/css/").setCachePeriod(aYear);
+		registry.addResourceHandler(PATTERN_IMG).addResourceLocations("/img/", "classpath:/img/").setCachePeriod(aYear);
+		registry.addResourceHandler(PATTERN_JS).addResourceLocations("/js/", "classpath:/js/").setCachePeriod(aYear);
 		registry.addResourceHandler("/generated-doc/**").addResourceLocations("/generated-doc/").setCachePeriod(3600);
 		registry.addResourceHandler("/html/**").addResourceLocations("/html/", "classpath:/html/").setCachePeriod(3600);
 	}
@@ -106,9 +112,15 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	@Bean
+	public ResourceFingerprintRegistry resourceFingerprintRegistry()
+	{
+		return new ResourceFingerprintRegistry();
+	}
+
+	@Bean
 	public MolgenisPluginInterceptor molgenisPluginInterceptor()
 	{
-		return new MolgenisPluginInterceptor(molgenisUi());
+		return new MolgenisPluginInterceptor(molgenisUi(), resourceFingerprintRegistry());
 	}
 
 	@Bean

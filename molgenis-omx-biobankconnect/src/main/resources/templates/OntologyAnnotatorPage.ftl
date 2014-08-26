@@ -1,12 +1,12 @@
-<script src="/js/jquery-ui-1.9.2.custom.min.js"></script>
-<script src="/js/jquery.bootstrap.pager.js"></script>
-<script src="/js/bootstrap-fileupload.min.js"></script>
-<script src="/js/common-component.js"></script>
-<script src="/js/biobank-connect.js"></script>
-<script src="/js/ontology-annotator.js"></script>
-<link rel="stylesheet" type="text/css" href="/css/jquery-ui-1.9.2.custom.min.css">
-<link rel="stylesheet" type="text/css" href="/css/biobank-connect.css">
-<link rel="stylesheet" type="text/css" href="/css/ontology-annotator.css">
+<script src="<@resource_href "/js/jquery-ui-1.9.2.custom.min.js"/>"></script>
+<script src="<@resource_href "/js/jquery.bootstrap.pager.js"/>"></script>
+<script src="<@resource_href "/js/bootstrap-fileupload.min.js"/>"></script>
+<script src="<@resource_href "/js/common-component.js"/>"></script>
+<script src="<@resource_href "/js/ontology-annotator.js"/>"></script>
+<script src="<@resource_href "/js/biobank-connect.js"/>"></script>
+<link rel="stylesheet" href="<@resource_href "/css/jquery-ui-1.9.2.custom.min.css"/>" type="text/css">
+<link rel="stylesheet" href="<@resource_href "/css/biobank-connect.css"/>" type="text/css">
+<link rel="stylesheet" href="<@resource_href "/css/ontology-annotator.css"/>" type="text/css">
 <form id="wizardForm" name="wizardForm" method="post" class="form-horizontal">
 	<div class="row-fluid">
 		<div class="span12">

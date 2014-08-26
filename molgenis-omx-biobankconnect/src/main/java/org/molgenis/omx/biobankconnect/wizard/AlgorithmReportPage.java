@@ -1,4 +1,4 @@
-package org.molgenis.omx.biobankconnect.algorithm;
+package org.molgenis.omx.biobankconnect.wizard;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -8,14 +8,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
 
 @Component
-public class AlgorithmGeneratorPage extends AbstractWizardPage
+public class AlgorithmReportPage extends AbstractWizardPage
 {
 	private static final long serialVersionUID = 1L;
 
 	@Override
 	public String getTitle()
 	{
-		return "Algorithm generator";
+		return "Harmonization Report";
 	}
 
 	@Override

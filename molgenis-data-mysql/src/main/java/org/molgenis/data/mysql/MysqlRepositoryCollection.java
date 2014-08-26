@@ -14,6 +14,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.AggregateableCrudRepositorySecurityDecorator;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -25,9 +26,9 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.fieldtypes.CompoundField;
 import org.molgenis.model.MolgenisModelException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.annotation.Transactional;
 
 public abstract class MysqlRepositoryCollection implements RepositoryCollection
 {
@@ -264,8 +265,11 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		}
 	}
 
+	@Transactional
 	public MysqlRepository add(EntityMetaData emd)
 	{
+		MysqlRepository repository = null;
+
 		if (entities.query().eq("name", emd.getName()).count() > 0)
 		{
 			if (emd.isAbstract())
@@ -273,15 +277,32 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 				return null;
 			}
 
-			MysqlRepository repo = repositories.get(emd.getName());
+			repository = repositories.get(emd.getName());
+			if (repository == null) throw new IllegalStateException("Repository [" + emd.getName()
+					+ "] registered in entities table but missing in the MysqlRepositoryCollection");
+
 			if (!dataService.hasRepository(emd.getName()))
 			{
-				dataService.addRepository(repo);
+				dataService.addRepository(new AggregateableCrudRepositorySecurityDecorator(repository));
 			}
 
-			return repo;
+			return repository;
 		}
 
+		// if not abstract add to repositories
+		if (!emd.isAbstract())
+		{
+			repository = createMysqlRepsitory();
+			repository.setMetaData(emd);
+			repository.create();
+
+			repositories.put(emd.getName(), repository);
+			dataService.addRepository(new AggregateableCrudRepositorySecurityDecorator(repository));
+		}
+
+		// Add to entities and attributes tables, this should be done AFTER the creation of new tables because create
+		// table statements are ddl statements and when these are executed mysql does an implicit commit. So when the
+		// create table fails a rollback does not work anymore
 		Entity e = new MapEntity();
 		e.set("name", emd.getName());
 		e.set("description", emd.getDescription());
@@ -297,22 +318,10 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 			addAttribute(emd, att);
 		}
 
-		// if not abstract add to repositories
-		if (!emd.isAbstract())
-		{
-			MysqlRepository repository = createMysqlRepsitory();
-			repository.setMetaData(emd);
-			repository.create();
-
-			repositories.put(emd.getName(), repository);
-			dataService.addRepository(repository);
-
-			return repository;
-		}
-
-		return null;
+		return repository;
 	}
 
+	@Transactional
 	public void addAttribute(EntityMetaData emd, AttributeMetaData att)
 	{
 		Entity a = new MapEntity();
@@ -321,28 +330,21 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		a.set("defaultValue", att.getDefaultValue());
 		a.set("dataType", att.getDataType());
 		a.set("idAttribute", att.isIdAtrribute());
-
-		boolean lookupAttribute = att.isLookupAttribute();
-		if (att.isIdAtrribute() || att.isLabelAttribute())
-		{
-			lookupAttribute = true;
-		}
-		a.set("lookupAttribute", lookupAttribute);
-
-		if (att.getRefEntity() != null) a.set("refEntity", att.getRefEntity().getName());
-
-		// add compound entities unless already there
-		if (att.getDataType() instanceof CompoundField
-				&& entities.count(new QueryImpl().eq("name", att.getRefEntity().getName())) == 0)
-		{
-			add(att.getRefEntity());
-		}
 		a.set("nillable", att.isNillable());
 		a.set("auto", att.isAuto());
 		a.set("visible", att.isVisible());
 		a.set("label", att.getLabel());
 		a.set("description", att.getDescription());
 		a.set("aggregateable", att.isAggregateable());
+
+		if (att.getRefEntity() != null) a.set("refEntity", att.getRefEntity().getName());
+
+		boolean lookupAttribute = att.isLookupAttribute();
+		if (att.isIdAtrribute())
+		{
+			lookupAttribute = true;
+		}
+		a.set("lookupAttribute", lookupAttribute);
 
 		attributes.add(a);
 	}
@@ -356,7 +358,13 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 	@Override
 	public Repository getRepositoryByEntityName(String name)
 	{
-		return repositories.get(name);
+		MysqlRepository repo = repositories.get(name);
+		if (repo == null)
+		{
+			return null;
+		}
+
+		return new AggregateableCrudRepositorySecurityDecorator(repo);
 	}
 
 	public void drop(EntityMetaData md)
@@ -381,6 +389,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		entities.delete(entities.findAll(new QueryImpl().eq("name", name)));
 	}
 
+	@Transactional
 	public void update(EntityMetaData metadata)
 	{
 		MysqlRepository repository = repositories.get(metadata.getName());

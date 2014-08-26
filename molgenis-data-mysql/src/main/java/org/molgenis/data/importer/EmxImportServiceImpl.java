@@ -20,7 +20,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.mysql.MysqlRepository;
+import org.molgenis.data.Updateable;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -240,8 +240,8 @@ public class EmxImportServiceImpl implements EmxImporterService
 			if (attributeDataType != null)
 			{
 				FieldType t = MolgenisFieldTypes.getType(attributeDataType);
-				if (t == null) throw new IllegalArgumentException("attributes.type error on line " + i + ": "
-						+ attributeDataType + " unknown");
+				if (t == null) throw new IllegalArgumentException("attributes.dataType error on line " + i + ": "
+						+ attributeDataType + " unknown data type");
 				defaultAttributeMetaData.setDataType(t);
 			}
 			else
@@ -382,7 +382,7 @@ public class EmxImportServiceImpl implements EmxImporterService
 					if (!ENTITIES.equals(name) && !ATTRIBUTES.equals(name))
 					{
 						// TODO check if compatible with metadata
-						MysqlRepository to = (MysqlRepository) store.getRepositoryByEntityName(name);
+						Repository to = store.getRepositoryByEntityName(name);
 						if (to == null)
 						{
 							logger.debug("tyring to create: " + name);
@@ -399,15 +399,15 @@ public class EmxImportServiceImpl implements EmxImporterService
 				// import data
 				for (String name : metadata.keySet())
 				{
-					MysqlRepository mysqlEntityRepository = (MysqlRepository) store.getRepositoryByEntityName(name);
-					if (mysqlEntityRepository != null)
+					Updateable updateable = (Updateable) store.getRepositoryByEntityName(name);
+					if (updateable != null)
 					{
 						Repository fileEntityRepository = source.getRepositoryByEntityName(name);
 						// check to prevent nullpointer when importing metadata only
 						if (fileEntityRepository != null)
 						{
 							List<Entity> entities = Lists.newArrayList(fileEntityRepository);
-							mysqlEntityRepository.update(entities, dbAction);
+							updateable.update(entities, dbAction);
 							report.getNrImportedEntitiesMap().put(name, entities.size());
 						}
 					}

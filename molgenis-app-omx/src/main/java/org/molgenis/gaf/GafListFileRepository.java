@@ -70,7 +70,7 @@ public class GafListFileRepository extends CsvRepository
 						Entity entity = it.next();
 						if (null != entity)
 						{
-							String runId = entity.getString(GafListValidator.COL_RUN);
+							String runId = entity.getString(GAFCol.RUN.toString());
 							if (runId != null && !report.hasErrors(runId))
 							{
 								addBarcodeTypeAndBarcodeToEntity(entity);
@@ -101,7 +101,7 @@ public class GafListFileRepository extends CsvRepository
 			 */
 			private void addBarcodeTypeAndBarcodeToEntity(Entity entity)
 			{
-				String barcodeMenu = entity.getString(GafListValidator.COL_BARCODE_1);
+				String barcodeMenu = entity.getString(GAFCol.BARCODE_1.toString());
 				String barcodeType = "";
 				String barcode = "";
 
@@ -115,8 +115,8 @@ public class GafListFileRepository extends CsvRepository
 					}
 				}
 
-				entity.set(GafListValidator.COL_BARCODE_TYPE, barcodeType);
-				entity.set(GafListValidator.COL_BARCODE, barcode);
+				entity.set(GAFCol.BARCODE_TYPE.toString(), barcodeType);
+				entity.set(GAFCol.BARCODE.toString(), barcode);
 			}
 
 			@Override
