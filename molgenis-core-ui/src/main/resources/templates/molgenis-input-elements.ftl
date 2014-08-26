@@ -106,24 +106,15 @@
 				</script>
 				
 			<#elseif field.dataType.enumType == 'DATE_TIME'>
-				<div class="group-append datetime input-group<#if field.nillable> nillable</#if>">
-					<input type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" 
-					data-date-format="YYYY-MM-DDTHH:mm:ssZZ"
-					<#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> 
-					<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string("yyyy-MM-dd'''T'''HH:mm:ssZ")}"</#if> 
-					 >
-					<span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span>
-					<#if field.nillable><span class="input-group-addon"><span class="glyphicon glyphicon-remove empty-date-input"></span></span></#if>
-					<span class="input-group-addon datepickerbutton"><span class="glyphicon glyphicon-calendar"></span></span>
+				<div class="input-append datetime">
+					<input readonly type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" <#if field.nillable>class="nillable"</#if> <#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string("yyyy-MM-dd'''T'''HH:mm:ssZ")}"</#if> <@validationOptions field /> >
+					<#if field.nillable><span class="add-on-workaround"><i class="icon-remove empty-date-input"></i></span></#if> <span class="add-on"><i></i></span>
 				</div>
+				
 			<#elseif field.dataType.enumType == 'DATE'>
-				<div class="group-append date">
-					<input type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" class="form-control" 
-					<#if field.nillable>class="nillable"</#if> 
-					<#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> 
-					<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string("yyyy-MM-dd")}"</#if> 
-					<@validationOptions field /> >
-					<#if field.nillable><span class="input-group-addon"><span class="glyphicon glyphicon-remove empty-date-input"></span></span></#if> <span class="add-on"><i></i></span>
+				<div class="input-append date">
+					<input readonly type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" <#if field.nillable>class="nillable"</#if> <#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string("yyyy-MM-dd")}"</#if> <@validationOptions field /> >
+					<#if field.nillable><span class="add-on-workaround"><i class="icon-remove empty-date-input"></i></span></#if> <span class="add-on"><i></i></span>
 				</div>
 				
 			<#elseif field.dataType.enumType =='INT' || field.dataType.enumType = 'LONG'>
