@@ -34,34 +34,33 @@
 	</div>
 	</#if>
 	<div class="container">
-		<form accept-charset="UTF-8" method="post" action="feedback" id="feedbackForm">
-			<fieldset>
-				<#assign adminEmailsString = "" />
-				<#list adminEmails as adminEmail>
-					<#assign adminEmailsString = adminEmailsString + adminEmail/>
-   					<#if adminEmail_has_next>
-   						<#assign adminEmailsString = adminEmailsString + ', '/>
-   					</#if>
-				</#list>
-				<p>
-					Feel free to email us at <a href='mailto:${adminEmailsString}'>${adminEmailsString}</a>
-				</p>
+		<form accept-charset="UTF-8" role="form" method="post" action="feedback" id="feedbackForm">
+			<#assign adminEmailsString = "" />
+			<#list adminEmails as adminEmail>
+				<#assign adminEmailsString = adminEmailsString + adminEmail/>
+				<#if adminEmail_has_next>
+					<#assign adminEmailsString = adminEmailsString + ', '/>
+				</#if>
+			</#list>
+			<p>
+				Feel free to email us at <a href='mailto:${adminEmailsString}'>${adminEmailsString}</a>
+			</p>
+			<div class="form-group">
 				<label class="col-md-3 control-label" for="form_name">Name</label>
-				<input
-					class="input-xlarge" name="name" size="30" id="form_name" <#if userName??>value="${userName}"</#if>
-					type="text" />
+                <input class="form-control" name="name" size="30" id="form_name" <#if userName??>value="${userName}"</#if> type="text" />
+			</div>
+			<div class="form-group">
 				<label class="col-md-3 control-label" for="form_email">Email</label>
-				<input class="input-xlarge" name="email" id="form_email"
-					size="30" type="email" <#if userEmail??>value="${userEmail}"</#if>/>
-				<label class="col-md-3 control-label"
-					for="form_subject">Subject</label>
-				<input class="input-xxlarge"
-					maxlength="72" name="subject" id="form_subject" size="72"
-					type="text" />
-				<label class="col-md-3 control-label" for="form_feedback">Body</label>
-				<textarea class="input-xxlarge" name="feedback" id="form_feedback"
-					required="true" rows="8"></textarea>
-			</fieldset>
+				<input class="form-control" name="email" id="form_email" size="30" type="email" <#if userEmail??>value="${userEmail}"</#if>/>
+			</div>
+			<div class="form-group">
+				<label class="col-md-3 control-label" for="form_subject">Subject</label>
+				<input class="form-control" maxlength="72" name="subject" id="form_subject" size="72" type="text" />
+			</div>
+			<div class="form-group">
+			    <label class="col-md-3 control-label" for="form_feedback">Body</label>
+			    <textarea class="form-control" name="feedback" id="form_feedback" required="true" rows="8"></textarea>
+            </div>
 			<button type="submit" class="btn btn-success">Send</button>
 		</form>
 		<script>
