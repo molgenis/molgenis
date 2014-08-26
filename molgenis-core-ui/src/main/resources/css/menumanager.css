@@ -1,8 +1,4 @@
-#menu-editor-container .icon-edit:hover {
-	cursor: pointer;
-}
-
-#menu-editor-container .icon-trash:hover {
+#menu-editor-container .glyphicon:hover {
 	cursor: pointer;
 }
 
