@@ -1,7 +1,7 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
-<#assign css=["ui.dynatree.css", "studymanager.css"]>
-<#assign js=["jquery-ui-1.9.2.custom.min.js", "jquery.dynatree.min.js", "studymanager.js"]>
+<#assign css=["ui.fancytree.min.css", "studymanager.css"]>
+<#assign js=["jquery-ui-1.9.2.custom.min.js", "jquery.fancytree.min.js", "studymanager.js"]>
 <@header css js/>
 	<div class="col-md-10 col-md-offset-1">
 		<div class="row">	
