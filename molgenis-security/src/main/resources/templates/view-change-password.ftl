@@ -74,24 +74,24 @@
 	       <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title" id="change-password-modal-label">Sign up</h4>
+                        <h4 class="modal-title" id="change-password-modal-label">Change password</h4>
                     </div>
                     <div class="modal-body">
                         <form id="change-password-form" class="form-horizontal" method="POST" action="" role="form">
                             <div class="form-group">
-                                <label class="col-md-3 control-label" for="loginPassword">Password</label>
-                                <div class="col-md-9">
+                                <label class="col-md-4 control-label" for="loginPassword">Password</label>
+                                <div class="col-md-8">
                                     <input type="password" class="form-control" id="password1" name="password1">
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="col-md-3 control-label" for="loginPassword">Retype password</label>
-                                <div class="col-md-9">
+                                <label class="col-md-4 control-label" for="loginPassword">Retype password</label>
+                                <div class="col-md-8">
                                     <input type="password" class="form-control" id="password2" name="password2">
                                 </div>
                             </div>
                             <div class="form-group">
-                                <div class="col-md-9">
+                                <div class="col-md-8 col-md-offset-4">
                                     <button id="change-password-btn" type="submit" class="btn btn-primary">Change password</button>
                                 </div>
                             </div>
