@@ -353,7 +353,7 @@ function createInput(attr, attrs, val, lbl) {
 		return label.append($input).append(lbl);
 	case 'DATE':
 	case 'DATE_TIME':
-		var $div = $('<div>').addClass('group-append date input-group').css('min-width', '250px');
+		var $div = $('<div>').addClass('group-append date input-group');
 		var $input = createBasicInput('text', attrs, val)
 		    .addClass('form-control')
 		    .attr('data-date-format', dataType === 'DATE' ? 'YYYY-MM-DD' : 'YYYY-MM-DDTHH:mm:ssZZ')
