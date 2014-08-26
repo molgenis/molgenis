@@ -65,6 +65,7 @@ import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.fieldtypes.BoolField;
 import org.molgenis.framework.db.EntityNotFoundException;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -936,6 +937,12 @@ public class RestController
 		if ((paramValue != null) && (paramValue instanceof String) && StringUtils.isEmpty((String) paramValue))
 		{
 			paramValue = null;
+		}
+
+		// boolean false is not posted (http feature), so if null and required, should be false
+		if ((paramValue == null) && (attr.getDataType() instanceof BoolField) && !attr.isNillable())
+		{
+			value = false;
 		}
 
 		if (paramValue != null)
