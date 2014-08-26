@@ -69,7 +69,7 @@
 										<div id="study-definition-viewer-tree">
 										</div>
 									</div>
-									<button id="download-study-definition-btn" class="btn pull-right" type="button">Download</button>
+									<button id="download-study-definition-btn" class="btn btn-default pull-right" type="button">Download</button>
                                     <#if exportEnabled>
                                         <input id="export-study-definition-btn" type="button" class="btn pull-right" value="${exportTitle}" />
                                     </#if>
@@ -79,7 +79,7 @@
 								    	<div id="study-definition-editor-info">
 										</div>
                                         <div id="study-definition-state-select">
-                                            <select id="edit-state-select" name="edit-state-select">
+                                            <select class="form-control" id="edit-state-select" name="edit-state-select">
                                                 <#list studyDefinitionUpdateStates as studyDefinitionState>
                                                     <option value="${studyDefinitionState}">${studyDefinitionState}</option>
                                                 </#list>
