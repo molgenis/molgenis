@@ -353,25 +353,24 @@ function createInput(attr, attrs, val, lbl) {
 		return label.append($input).append(lbl);
 	case 'DATE':
 	case 'DATE_TIME':
-		var format = dataType === 'DATE' ? 'yyyy-MM-dd'
-				: 'yyyy-MM-dd\'T\'hh:mm:ss' + getCurrentTimezoneOffset();
-		var items = [];
-		items.push('<div class="group-append date">');
-		items.push('<input data-format="' + format
-				+ '" data-language="en" type="text"' + (attr.nillable? ' class="nillable"' : '') + '>');
-		// workaround, because adding a add-on span will introduce an extra calendar icon on top of the remove icon
-		if(attr.nillable)
-			items.push('<span class="add-on-workaround"><span class="glyphicon glyphicon-remove empty-date-input clear-date-time-btn"></span></span>');
-		items.push('<span class="add-on">');
-		items.push('<i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>'); // FIXME date type should not display time
-		items.push('</span>');
-		items.push('</div>');
-		var datepicker = $(items.join(''));
-		if (attrs)
-			$('input', datepicker).attr(attrs);
-		if (val !== undefined)
-			$('input', datepicker).val(val);
-		return datepicker.datetimepicker({pickTime: dataType === 'DATE_TIME'});
+		var $div = $('<div>').addClass('group-append date input-group').css('min-width', '250px');
+		var $input = createBasicInput('text', attrs, val)
+		    .addClass('form-control')
+		    .attr('data-date-format', dataType === 'DATE' ? 'YYYY-MM-DD' : 'YYYY-MM-DDTHH:mm:ssZZ')
+		    .appendTo($div);
+		if (attr.nillable) {
+		    $input.addClass('nillable');
+		    $('<span>')
+		        .addClass('input-group-addon')
+		        .append($('<span>')
+		        		.addClass('glyphicon glyphicon-remove empty-date-input clear-date-time-btn'))
+		        .appendTo($div);
+		}
+		$('<span>').addClass('input-group-addon datepickerbutton')
+		    .append($('<span>').addClass('glyphicon glyp2icon-calendar'))
+		    .appendTo($div);
+		$div.datetimepicker({useSeconds : dataType === 'DATE_TIME'});
+		return $div;
 	case 'DECIMAL':
 		var input = createBasicInput('number', $.extend({}, attrs, {'step': 'any'}), val);
 		if(!attr.nillable)

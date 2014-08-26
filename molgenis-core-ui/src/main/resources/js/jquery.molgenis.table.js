@@ -814,7 +814,7 @@
 		});
 
 		// DATE, DATE_TIME
-		$(container).on('changeDate', function(e) {
+		$(container).on('dp.change', function(e) {
 			var cell = $(e.target).closest('td');
 			persistCell(cell, settings);
 		});
