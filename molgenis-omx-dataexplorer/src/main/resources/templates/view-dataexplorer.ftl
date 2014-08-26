@@ -73,7 +73,7 @@
                         <div class="panel-body">
                             <div class="row" id="feature-filters"></div>
                             <div class="row">
-                                <a href="#" id="filter-wizard-btn" class="btn btn-default btn-small pull-right"><img src="/img/filter-bw.png"> ${wizardbuttontitle}</a>
+                                <a href="#" id="filter-wizard-btn" class="btn btn-default btn-sm pull-right"><img src="/img/filter-bw.png"> ${wizardbuttontitle}</a>
                             </div>
                         </div>
                     </div>
