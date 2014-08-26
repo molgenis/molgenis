@@ -67,7 +67,9 @@
 				</div>
 				<div class="row">
 				    <div class="panel">
-                        <div class="panel-heading">Data item filters</div>
+                        <div class="panel-heading">
+                            <h4 class="panel-title">Data item filters</h4>
+                        </div>
                         <div class="panel-body">
                             <div class="row" id="feature-filters"></div>
                             <div class="row">
@@ -78,7 +80,9 @@
 				</div>
 				<div class="row"<#if hideDataItemSelect??> style="display:none"</#if>>
                     <div class="panel">
-                        <div class="panel-heading">Data item selection</div>
+                        <div class="panel-heading">
+                            <h4 class="panel-title">Data item selection</h4>
+                        </div>
                         <div class="panel-body">
                             <div id="feature-selection"></div>
                         </div>
@@ -86,6 +90,8 @@
                 </div>
 			</div>		
 		</div>
-		<div id="module-nav"></div>
+		<div class="col-md-9">
+            <div id="module-nav"></div>
+		</div>
 	</div>
 <@footer/>

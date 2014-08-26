@@ -21,7 +21,10 @@
 }
 
 .panel-heading {
-	background-color: #5B82A4;
+	background-color: #5B82A4;	
+}
+
+.panel-title {
 	color: white;
 }
 
@@ -200,11 +203,11 @@ input[name="ColNames"] {
 	display: inline;
 	margin-right: 10px;
 }
-
+/*
 #module-nav .nav {
 	margin-left: 2.1277%;
 }
-
+*/
 .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
 	background-color: #7CBAD1;
 	

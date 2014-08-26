@@ -15,6 +15,16 @@ html, body {
 	height: 40px;
 }
 
+/* Support collapsable panels */
+.panel-heading a:after {
+    font-family: 'Glyphicons Halflings';
+    content: "\e114";    
+    float: right;
+}
+.panel-heading a.collapsed:after {
+    content: "\e080";
+}
+
 /*
 .container-fluid {
 	padding-right: 10px;
