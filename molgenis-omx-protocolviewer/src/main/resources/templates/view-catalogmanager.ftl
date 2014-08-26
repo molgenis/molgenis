@@ -1,7 +1,7 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
-<#assign css=["ui.dynatree.css", "catalogmanager.css"]>
-<#assign js=["jquery-ui-1.9.2.custom.min.js", "jquery.dynatree.min.js", "catalogmanager.js"]>
+<#assign css=["ui.fancytree.min.css", "catalogmanager.css"]>
+<#assign js=["jquery-ui-1.9.2.custom.min.js", "jquery.fancytree.min.js", "catalogmanager.js"]>
 <@header css js/>
 	<div class="row">
 		<div class="col-md-8 col-md-offset-2">
@@ -35,7 +35,7 @@
 												<label for="catalog_${catalog.id}">${catalog.id}</label>
 											</td>
 											<td>
-												<label for="catalog_${catalog.id}">${catalog.name}<#if catalog.activated><span class="text-success pull-right">Activated</span><#else><p class="text-error pull-right">Deactivated</span></#if></label>
+												<label for="catalog_${catalog.id}">${catalog.name}</label><#if catalog.activated><span class="text-success pull-right">Activated</span><#else><p class="text-error pull-right">Deactivated</span></#if>
 											</td>
 										</tr>
 									</#list>
