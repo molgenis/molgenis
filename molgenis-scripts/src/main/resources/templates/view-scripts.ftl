@@ -73,12 +73,12 @@
 	</div>
 </div>
 
-<div class="modal fade medium" id="parametersModal" tabindex="-1" role="dialog" aria-hidden="true">
-	<div class="modal-dialog">
+<div class="modal" id="parametersModal" tabindex="-1" role="dialog" aria-labelledby="parametersModal-label" aria-hidden="true">
+	<div class="modal-dialog modal-sm">
 		<div class="modal-content">				
 	      	<div class="modal-header">
-	        	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-	        	<h4 class="modal-title">Parameters</h4>
+	      	    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="parametersModal-label">Parameters</h4>
 	     	</div>
 	      	<div class="modal-body">
 				<form id="parametersForm" class="form-horizontal"></form>
@@ -91,11 +91,11 @@
 	</div>
 </div>
 
-<div class="modal fade medium" id="formModal" tabindex="-1" role="dialog" aria-hidden="true">
-	<div class="modal-dialog">
+<div class="modal" id="formModal" tabindex="-1" role="dialog" aria-labelledby="formModalTitle" aria-hidden="true">
+	<div class="modal-dialog modal-lg">
 		<div class="modal-content">				
 	      	<div class="modal-header">
-	        	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	        	<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
 	        	<h4 class="modal-title" id="formModalTitle"></h4>
 	     	</div>
 	      	<div class="modal-body">
