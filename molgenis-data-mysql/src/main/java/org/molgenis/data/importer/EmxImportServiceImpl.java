@@ -10,6 +10,8 @@ import static org.molgenis.data.mysql.AttributeMetaDataMetaData.ID_ATTRIBUTE;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.LABEL;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.NAME;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.NILLABLE;
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.RANGE_MAX;
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.RANGE_MIN;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.REF_ENTITY;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.VISIBLE;
 import static org.molgenis.data.mysql.EntityMetaDataMetaData.ABSTRACT;
@@ -31,6 +33,7 @@ import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Range;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.Updateable;
@@ -41,10 +44,13 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.FieldType;
+import org.molgenis.fieldtypes.IntField;
+import org.molgenis.fieldtypes.LongField;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.util.DependencyResolver;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
@@ -279,6 +285,43 @@ public class EmxImportServiceImpl implements EmxImporterService
 							+ defaultAttributeMetaData.getName() + "] of entity [" + entityName + "]");
 				}
 				defaultAttributeMetaData.setEnumOptions(enumOptions);
+			}
+
+			Long rangeMin;
+			Long rangeMax;
+			try
+			{
+				rangeMin = attribute.getLong(RANGE_MIN);
+			}
+			catch (ConversionFailedException e)
+			{
+				throw new MolgenisDataException("Invalid range rangeMin [" + attribute.getString(RANGE_MIN)
+						+ "] value for attribute [" + attributeName + "] of entity [" + entityName
+						+ "], should be a long");
+			}
+
+			try
+			{
+				rangeMax = attribute.getLong(RANGE_MAX);
+			}
+			catch (ConversionFailedException e)
+			{
+				throw new MolgenisDataException("Invalid rangeMax value [" + attribute.getString(RANGE_MAX)
+						+ "] for attribute [" + attributeName + "] of entity [" + entityName + "], should be a long");
+			}
+
+			if ((rangeMin != null) || (rangeMax != null))
+			{
+				if (!(defaultAttributeMetaData.getDataType() instanceof IntField)
+						&& !(defaultAttributeMetaData.getDataType() instanceof LongField))
+				{
+					throw new MolgenisDataException("Range not supported for ["
+							+ defaultAttributeMetaData.getDataType().getEnumType()
+							+ "] fields only int and long are supported. (attribute ["
+							+ defaultAttributeMetaData.getName() + "] of entity [" + entityName + "])");
+				}
+
+				defaultAttributeMetaData.setRange(new Range(rangeMin, rangeMax));
 			}
 
 			boolean lookupAttribute = false;

@@ -6,6 +6,7 @@ import static org.molgenis.MolgenisFieldTypes.TEXT;
 import static org.molgenis.MolgenisFieldTypes.XREF;
 
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.fieldtypes.LongField;
 
 public class AttributeMetaDataMetaData extends DefaultEntityMetaData
 {
@@ -24,6 +25,8 @@ public class AttributeMetaDataMetaData extends DefaultEntityMetaData
 	public static final String DESCRIPTION = "description";
 	public static final String AGGREGATEABLE = "aggregateable";
 	public static final String ENUM_OPTIONS = "enumOptions";
+	public static final String RANGE_MIN = "rangeMin";
+	public static final String RANGE_MAX = "rangeMax";
 
 	public AttributeMetaDataMetaData()
 	{
@@ -43,6 +46,7 @@ public class AttributeMetaDataMetaData extends DefaultEntityMetaData
 		addAttribute(DESCRIPTION).setDataType(TEXT);
 		addAttribute(AGGREGATEABLE).setDataType(BOOL);
 		addAttribute(ENUM_OPTIONS).setDataType(TEXT);
+		addAttribute(RANGE_MIN).setDataType(new LongField());
+		addAttribute(RANGE_MAX).setDataType(new LongField());
 	}
-
 }

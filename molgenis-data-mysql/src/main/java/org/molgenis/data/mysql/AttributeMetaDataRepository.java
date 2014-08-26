@@ -11,6 +11,8 @@ import static org.molgenis.data.mysql.AttributeMetaDataMetaData.LABEL;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.LOOKUP_ATTRIBUTE;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.NAME;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.NILLABLE;
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.RANGE_MAX;
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.RANGE_MIN;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.REF_ENTITY;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.VISIBLE;
 
@@ -22,6 +24,7 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Range;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -82,6 +85,12 @@ public class AttributeMetaDataRepository extends MysqlRepository
 			attributeMetaDataEntity.set(ENUM_OPTIONS, Joiner.on(",").join(att.getEnumOptions()));
 		}
 
+		if (att.getRange() != null)
+		{
+			attributeMetaDataEntity.set(RANGE_MIN, att.getRange().getMin());
+			attributeMetaDataEntity.set(RANGE_MAX, att.getRange().getMax());
+		}
+
 		if (att.getRefEntity() != null) attributeMetaDataEntity.set(REF_ENTITY, att.getRefEntity().getName());
 
 		boolean lookupAttribute = att.isLookupAttribute();
@@ -108,6 +117,13 @@ public class AttributeMetaDataRepository extends MysqlRepository
 		attributeMetaData.setAggregateable(entity.getBoolean(AGGREGATEABLE) == null ? false : entity
 				.getBoolean(AGGREGATEABLE));
 		attributeMetaData.setEnumOptions(entity.getList(ENUM_OPTIONS));
+
+		Long rangeMin = entity.getLong(RANGE_MIN);
+		Long rangeMax = entity.getLong(RANGE_MAX);
+		if ((rangeMin != null) || (rangeMax != null))
+		{
+			attributeMetaData.setRange(new Range(rangeMin, rangeMax));
+		}
 
 		return attributeMetaData;
 	}
