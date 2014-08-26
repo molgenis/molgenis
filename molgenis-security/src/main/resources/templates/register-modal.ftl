@@ -1,5 +1,5 @@
 <#-- Bootstrap register modal -->
-<div id="register-modal" class="modal" tabindex="-1" aria-labelledby="register-modal-label" aria-hidden="true">
+<div id="register-modal" class="modal" tabindex="-1" role="dialog" aria-labelledby="register-modal-label" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
