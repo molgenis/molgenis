@@ -103,6 +103,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	{
 		String pluginInterceptPattern = MolgenisPluginController.PLUGIN_URI_PREFIX + "**";
 		String corsInterceptPattern = "/api/**";
+		registry.addInterceptor(molgenisInterceptor());
 		registry.addInterceptor(molgenisPluginInterceptor()).addPathPatterns(pluginInterceptPattern);
 		registry.addInterceptor(corsInterceptor()).addPathPatterns(corsInterceptPattern);
 	}
@@ -121,9 +122,15 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	@Bean
+	public MolgenisInterceptor molgenisInterceptor()
+	{
+		return new MolgenisInterceptor(resourceFingerprintRegistry());
+	}
+
+	@Bean
 	public MolgenisPluginInterceptor molgenisPluginInterceptor()
 	{
-		return new MolgenisPluginInterceptor(molgenisUi(), resourceFingerprintRegistry());
+		return new MolgenisPluginInterceptor(molgenisUi());
 	}
 
 	@Bean
