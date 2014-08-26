@@ -17,15 +17,7 @@
 <#elseif adminEmails?has_content>
 	<#if isCurrentUserCanEdit?has_content && isCurrentUserCanEdit>
 	<div class="row">
-	   <div class="form-group">
-			<div class="col-md-9">
-				<div class="btn-group">
-					<ul>
-						<li><a id="editBtn" href="${context_url}/edit" class="btn btn-default">Edit page header</a></li>
-					</ul>
-				</div>
-			</div>
-		</div>	
+        <a href="${context_url}/edit" class="btn btn-default pull-right">Edit page header</a>
 	</div>
 	</#if>
 	<#if content?has_content>
