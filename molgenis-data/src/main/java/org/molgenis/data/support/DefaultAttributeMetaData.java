@@ -265,9 +265,10 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		return range;
 	}
 
-	public void setRange(Range range)
+	public DefaultAttributeMetaData setRange(Range range)
 	{
 		this.range = range;
+		return this;
 	}
 
 	@Override
@@ -281,12 +282,14 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		return null;
 	}
 
-	public void setEnumOptions(List<String> enumOptions)
+	public DefaultAttributeMetaData setEnumOptions(List<String> enumOptions)
 	{
 		if (fieldType instanceof EnumField)
 		{
 			((EnumField) fieldType).setEnumOptions(enumOptions);
 		}
+
+		return this;
 	}
 
 	@Override

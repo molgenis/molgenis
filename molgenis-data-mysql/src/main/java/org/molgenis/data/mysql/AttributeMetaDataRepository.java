@@ -55,17 +55,6 @@ public class AttributeMetaDataRepository extends MysqlRepository
 		return attributes;
 	}
 
-	public DefaultAttributeMetaData getAttributeMetaData(String entityName, String name)
-	{
-		Entity attribute = findOne(name);
-		if (attribute == null)
-		{
-			return null;
-		}
-
-		return toAttributeMetaData(attribute);
-	}
-
 	public void addAttributeMetaData(String entityName, AttributeMetaData att)
 	{
 		Entity attributeMetaDataEntity = new MapEntity();
