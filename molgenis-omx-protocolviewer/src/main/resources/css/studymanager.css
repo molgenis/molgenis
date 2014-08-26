@@ -37,8 +37,3 @@
 .table-borderless th, .table-borderless td {
 	border-top: none;
 }
-
-#state-select {
-	width: 120px;
-	margin-left: 4px;
-}

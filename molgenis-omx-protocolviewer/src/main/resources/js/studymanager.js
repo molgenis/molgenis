@@ -42,7 +42,7 @@
 			return items.join('');
 		}
 		
-		function updateStudyDefinitionTable() {
+		function updateStudyDefinitionTable() {			
 			$.ajax({
 				type : 'POST',
 				url : molgenis.getContextUrl() + '/list',
@@ -230,6 +230,11 @@
 		$('#state-select').change();
 		
 		$('#search-button').on('click', function(){
+			updateStudyDefinitionTable();
+		});
+		
+		$('#search-clear-button').on('click', function(){
+			$('#studydefinition-search').val('');
 			updateStudyDefinitionTable();
 		});
 		
