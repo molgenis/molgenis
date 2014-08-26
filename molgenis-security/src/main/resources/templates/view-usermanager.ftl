@@ -7,9 +7,9 @@
 <@header css js/>
 <div class="container-fluid">
 	<div class="row">
-		<ul class="nav nav-pills">
-			<li id="usersTab" <#if "users"==viewState>class="active"</#if>><a href="#user-manager" data-toggle="tab">Users</a></li>
-			<li id="groupsTab"<#if "groups"==viewState>class="active"</#if>><a href="#group-manager" data-toggle="tab">Groups</a></li>
+		<ul class="nav nav-pills" role="tablist">
+			<li id="usersTab" <#if "users"==viewState>class="active"</#if>><a href="#user-manager" role="tab" data-toggle="tab">Users</a></li>
+			<li id="groupsTab"<#if "groups"==viewState>class="active"</#if>><a href="#group-manager" role="tab" data-toggle="tab">Groups</a></li>
 		</ul>
 		<div class="tab-content">
 			<div class="tab-pane <#if "users"==viewState>active</#if>" id="user-manager">
@@ -73,14 +73,12 @@
 		</div>
 	</div>
 </div>
-
-
-<!-- Modal -->
-<div class="modal fade medium" id="managerModal" tabindex="-1" role="dialog" aria-hidden="true">
+<#-- Modal -->
+<div class="modal" id="managerModal" tabindex="-1" role="dialog" aria-labelledby="managerModalTitle" aria-hidden="true">
 	<div class="modal-dialog">
 		<div class="modal-content">				
 	      	<div class="modal-header">
-	        	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	        	<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
 	        	<h4 class="modal-title" id="managerModalTitle"></h4>
 	     	</div>
 	      	<div class="modal-body">
@@ -93,5 +91,4 @@
 	    </div>
 	</div>
 </div>
-
 <@footer/>

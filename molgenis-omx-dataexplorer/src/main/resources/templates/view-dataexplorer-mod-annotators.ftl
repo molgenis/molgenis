@@ -11,7 +11,7 @@
 						title= "These annotations are not available for the selected data set because: 
 						1) The annotation data is not available on the server, 2) A webservice might be offline or 3) Your data set does not contain the correct columns"> 
 							
-						<col-md- class="icon icon-question-sign"></col-md->
+						<span class="icon icon-question-sign"></span>
 					</a>
 				</h5> 
 			</label>

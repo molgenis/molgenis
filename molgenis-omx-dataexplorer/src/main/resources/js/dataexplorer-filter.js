@@ -309,7 +309,7 @@
 		var $dropdown;
 		if(useFixedOperator === false){
 			$dropdown = $('<div class="btn-group" data-filter="complex-operator-container" style="margin-left: 154px"><div>');
-			$dropdown.append($('<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#">' + operatorLabel + ' <b class="caret"></a>'));
+			$dropdown.append($('<a class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" href="#">' + operatorLabel + ' <b class="caret"></a>'));
 			$dropdown.append($('<ul class="dropdown-menu"><li><a data-value="OR">' + orLabel + '</a></li><li><a data-value="AND">' + andLabel + '</a></li></ul>'));
 			$.each($dropdown.find('.dropdown-menu li a'), function(index, element){
 				$(element).click(function(){
@@ -360,7 +360,7 @@
 	 */
 	self.createComplexFilterAddButton = function($container, attribute, complexFilterOperator, wizard, useFixedOperator)
 	{
-		return ($('<button class="btn btn-mini" type="button" data-filter=complex-addbutton><i class="icon-plus"></i></button>').click(function(){
+		return ($('<button class="btn btn-default btn-xs" type="button" data-filter=complex-addbutton><i class="icon-plus"></i></button>').click(function(){
 					if($('[data-filter=complex-removebutton]', $container).length === 0)
 					{
 						$('[data-filter=complex-removebutton-container]', $container).append(self.createRemoveButtonFirstComplexElement($container));
@@ -374,7 +374,7 @@
 	 * Create remove button to remove complex elements that are not the first
 	 */
 	self.createRemoveButtonComplexElementFilter = function($complexElementContainer){
-		return $('<button class="btn btn-mini" type="button" data-filter=complex-removebutton><i class="icon-minus"></i></button>').click(function(){
+		return $('<button class="btn btn-default btn-xs" type="button" data-filter=complex-removebutton><i class="icon-minus"></i></button>').click(function(){
 					var $container = $complexElementContainer.parent();
 					var $addButton = $('[data-filter=complex-addbutton]', $container);
 					
@@ -396,7 +396,7 @@
 	 * Create remove button to remove the first element in a complex filter
 	 */
 	self.createRemoveButtonFirstComplexElement = function($container){
-		return $('<button class="btn btn-mini" type="button" data-filter=complex-removebutton><i class="icon-minus"></i></button>').click(function(){
+		return $('<button class="btn btn-default btn-xs" type="button" data-filter=complex-removebutton><i class="icon-minus"></i></button>').click(function(){
 					var $firstElement = $('[data-filter=complex-element]', $container)[0];
 					var $secondElement = $('[data-filter=complex-element]', $container)[1];
 					var $simpleFilterFirstElement = $('[data-filter=complex-simplefilter]', $firstElement);

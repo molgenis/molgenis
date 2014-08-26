@@ -170,7 +170,7 @@
 				// update server list
 				var items = [];
 				for(var i = 0; i < servers.length; ++i)
-					items.push('<li><col-md- class="badge badge-info">' + servers[i].name + '</col-md-></li>');
+					items.push('<li><span class="badge badge-info">' + servers[i].name + '</span></li>');
 				$('#server-list').html(items.join(''));
 				
 				$("#search-btn").click(function() {

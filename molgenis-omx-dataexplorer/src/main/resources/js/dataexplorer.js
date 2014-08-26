@@ -58,10 +58,10 @@ function($, molgenis, settingsXhr) {
 	 */
 	function createModuleNav(modules, container) {
 		var items = [];
-		items.push('<ul class="nav nav-tabs pull-left">');
+		items.push('<ul class="nav nav-tabs pull-left" role="tablist">');
 		$.each(modules, function() {
 			var href = molgenis.getContextUrl() + '/module/' + this.id;
-			items.push('<li data-id="' + this.id + '"><a href="' + href + '" data-target="#tab-' + this.id + '" data-toggle="tab"><img src="/img/' + this.icon + '"> ' + this.label + '</a></li>');
+			items.push('<li data-id="' + this.id + '"><a href="' + href + '" data-target="#tab-' + this.id + '" role="tab" data-toggle="tab"><img src="/img/' + this.icon + '"> ' + this.label + '</a></li>');
 		});
 		items.push('</ul>');
 		items.push('<div class="tab-content col-md-9">');
@@ -230,7 +230,7 @@ function($, molgenis, settingsXhr) {
 		var searchTerm = $("#observationset-search").val();
 		
 		// lazy load tab contents
-		$(document).on('show', 'a[data-toggle="tab"]', function(e) {
+		$(document).on('show.bs.tab', 'a[data-toggle="tab"]', function(e) {
 			var target = $($(e.target).attr('data-target'));
 			if(target.data('status') !== 'loaded') {
 				target.load($(e.target).attr('href'), function() {
