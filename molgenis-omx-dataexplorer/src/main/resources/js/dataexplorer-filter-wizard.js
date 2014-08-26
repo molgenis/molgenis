@@ -71,7 +71,7 @@
 			}
 		});
 		
-		modal.on('shown', function () {
+		modal.on('shown.bs.modal', function () {
 			$('form input:visible:first', modal).focus();
 		});
 		

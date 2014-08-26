@@ -59,8 +59,8 @@
                         <div class="col-md-12 input-group">
                             <input type="text" class="form-control" id="observationset-search" placeholder="Search data values" autofocus="autofocus"<#if searchTerm??> value="${searchTerm}"</#if>>
                             <span class="input-group-btn">
-                                <button class="search-clear-button btn btn-default" type="button"><span class="glyphicon glyphicon-remove"></span></button>
-                                <button class="search-button btn btn-default" type="button"><span class="glyphicon glyphicon-search"></span></button>
+                                <button id="search-clear-button" class="btn btn-default" type="button"><span class="glyphicon glyphicon-remove"></span></button>
+                                <button id="search-button" class="btn btn-default" type="button"><span class="glyphicon glyphicon-search"></span></button>
                             </span>
                         </div>
                     </div>		

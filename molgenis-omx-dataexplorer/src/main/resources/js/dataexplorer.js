@@ -317,7 +317,17 @@ function($, molgenis, settingsXhr) {
 			searchQuery = $(this).val().trim();
 			$(document).trigger('changeQuery', createEntityQuery());
 		});
-	
+		
+		$("#observationset-search").change(function(e) {
+			searchQuery = $(this).val().trim();
+			$(document).trigger('changeQuery', createEntityQuery());
+		});
+		
+		$('#search-clear-button').click(function(){
+			$("#observationset-search").val('');
+			$("#observationset-search").change();
+		});
+		
 		$('#filter-wizard-btn').click(function() {
 			self.filter.wizard.openFilterWizardModal(selectedEntityMetaData, attributeFilters);
 		});

@@ -65,7 +65,7 @@
 			}
 		});
 		
-		$('#workflow-nav').on('show', 'a[data-toggle="tab"]', function(e){
+		$('#workflow-nav').on('show.bs.modal', 'a[data-toggle="tab"]', function(e){
 			var workflowId = $(e.target).data('workflow');
 			var workflowElementId = $(e.target).data('element');
 			ns.createWorkflowElementContainer(workflowId, workflowElementId, $('#workflow-element-pane-' + workflowElementId));
