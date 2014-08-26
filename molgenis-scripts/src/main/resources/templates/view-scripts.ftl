@@ -45,7 +45,7 @@
 							</#list>
 						</#if>
 					</td>
-					<td><a href="#" data-hasAttributes="${script.parameters?has_content?string("true","false")}" class="icon-large icon-refresh execute"></a></td>
+					<td><a href="#" data-hasAttributes="${script.parameters?has_content?string("true","false")}" class="execute"><span class="glyphicon glyphicon-refresh"></span></a></td>
 				</tr>
 				</#list>
 			</#if>

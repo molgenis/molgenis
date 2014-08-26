@@ -54,7 +54,7 @@
 	border: solid thin white;
 }
 
-i:hover {
+.glyphicon-remove:hover {
 	cursor: pointer;
 }
 

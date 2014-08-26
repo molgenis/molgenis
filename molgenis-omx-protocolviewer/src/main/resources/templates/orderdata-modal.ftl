@@ -94,7 +94,7 @@
 	                            row.append('<td>' + (feature.description ? molgenis.i18n.get(feature.description) : '') + '</td>');
 	
 	                            var deleteCol = $('<td class="center">');
-	                            var deleteBtn = $('<i class="icon-remove"></i>');
+	                            var deleteBtn = $('<span class="glyphicon glyphicon-remove"></span>');
 	                            deleteBtn.click(function () {
 	                                pendingDeletes.push(feature.href);
 	                                updateFeatureSelectionContainer();
