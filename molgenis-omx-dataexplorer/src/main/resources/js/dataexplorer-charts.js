@@ -235,7 +235,7 @@
 		// bind event handlers with namespace
 		
 		// scatter plot modal
-		$(document).on('show.charts', '#chart-designer-modal-scatterplot', function() {
+		$(document).on('show.bs.modal.charts', '#chart-designer-modal-scatterplot', function() {
 			$("#scatterplot-designer-modal-create-button").prop('disabled', true); // reset
 			
 			var attributes = getAttributes();
@@ -258,7 +258,7 @@
 		$('#scatterplot-select-yaxis-feature').change(activateDesignerSubmitButtonScatterPlot);
 		
 		// box plot modal
-		$(document).on('show.charts', '#chart-designer-modal-boxplot', function() {
+		$(document).on('show.bs.modal.charts', '#chart-designer-modal-boxplot', function() {
 			$("#boxplot-designer-modal-create-button").prop('disabled', true); // reset
 			
 			var attributes = getAttributes();

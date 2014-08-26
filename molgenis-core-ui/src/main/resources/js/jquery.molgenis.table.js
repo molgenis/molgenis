@@ -10,11 +10,13 @@
 		// create elements
 		var items = [];
 		items.push('<div class="row molgenis-table-container">');
+		items.push('<div class="col-md-12">');
 		if(settings.rowClickable){
 			items.push('<table class="table-striped table-condensed molgenis-table table-hover"><thead></thead><tbody></tbody></table>');
 		}else{
 			items.push('<table class="table-striped table-condensed molgenis-table"><thead></thead><tbody></tbody></table>');
 		}
+		items.push('</div>');
 		items.push('</div>');
 		items.push('<div class="row">');
 		items.push('<div class="col-md-3"><div class="molgenis-table-controls pull-left">');

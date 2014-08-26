@@ -10,7 +10,7 @@
 				<input type="checkbox" name="${fieldName}" id="${fieldName}" value="true" <#if entity!='' && entity.get(fieldName)?? && entity.get(fieldName)?string("true", "false") == "true">checked</#if>  <#if field.readonly || hasWritePermission?string("true", "false") == "false" >disabled="disabled"</#if>  >
 	
 			<#elseif field.dataType.enumType == 'TEXT' || field.dataType.enumType =='HTML'>
-				<textarea name="${fieldName}" id="${fieldName}" <#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <@validationOptions field /> ><#if entity!='' && entity.get(fieldName)??>${entity.get(fieldName)!?html}</#if></textarea>
+				<textarea class="form-control" name="${fieldName}" id="${fieldName}" <#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <@validationOptions field /> ><#if entity!='' && entity.get(fieldName)??>${entity.get(fieldName)!?html}</#if></textarea>
 			
 			<#elseif field.dataType.enumType == 'XREF' || field.dataType.enumType == 'CATEGORICAL'>
 				<input type="hidden" name="${fieldName}" id="${fieldName}" <@validationOptions field />>
@@ -133,13 +133,13 @@
 				</div>
 				
 			<#elseif field.dataType.enumType =='INT' || field.dataType.enumType = 'LONG'>
-				<input type="number" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" <#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)?c}"</#if> <@validationOptions field /> >
+				<input type="number" class="form-control" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" <#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)?c}"</#if> <@validationOptions field /> >
 			
 			<#elseif field.dataType.enumType == 'SCRIPT'>
 				<#if entity!='' && entity.get(fieldName)??>
-					<textarea name="${fieldName}" id="${fieldName}-textarea">${entity.get(fieldName)!?html}</textarea>
+					<textarea class="form-control" name="${fieldName}" id="${fieldName}-textarea">${entity.get(fieldName)!?html}</textarea>
 				<#else>
-					<textarea name="${fieldName}" id="${fieldName}-textarea"></textarea>
+					<textarea class="form-control" name="${fieldName}" id="${fieldName}-textarea"></textarea>
 				</#if>
 				<div style="width: 100%; height:250px" class="uneditable-input" id="${fieldName}-editor"></div>
 				<script>
@@ -155,7 +155,7 @@
 				</script> 
 			
 			<#else>
-				<input type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" <#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string?html}"</#if> <@validationOptions field /> >
+				<input type="text" class="form-control" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" <#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string?html}"</#if> <@validationOptions field /> >
 			</#if>
 		</div>
 	</div>

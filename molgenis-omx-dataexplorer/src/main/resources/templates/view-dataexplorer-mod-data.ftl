@@ -1,21 +1,30 @@
 <#include "resource-macros.ftl">
 <div id="dataexplorer-grid-data">
-	<div class="accordion" id="genomebrowser">
-	    <div class="accordion-group">
-	        <div class="accordion-heading">
-	            <a class="accordion-toggle" data-toggle="collapse" href="#dalliance"><i class="icon-chevron-down"></i> Genome Browser</a>
-	        </div>
-	        <div id="dalliance" class="accordion-body collapse out">
-	            <div class="accordion-inner">
-	            	<#-- dalliance default id to print browser -->
-	                <div id="svgHolder"></div>
-	                <div class="pull-right"><a id="genomebrowser-filter-button" class="btn btn-small"><img src="/img/filter-bw.png"> Apply filter</a></div>
-	            </div>
-	        </div>
-	    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel" id="genomebrowser">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a data-toggle="collapse" data-target="#genomebrowser-collapse" href="#genomebrowser-collapse">Genome Browser</a>
+                    </h4>
+                </div>
+                <div id="genomebrowser-collapse" class="panel-collapse collapse in">
+                    <div class="panel-body">
+                        <#-- dalliance default id to print browser -->
+                        <div id="svgHolder"></div>
+                        <div class="pull-right"><a id="genomebrowser-filter-button" class="btn btn-default btn-sm"><img src="/img/filter-bw.png"> Apply filter</a></div>
+                    </div>
+                </div>
+            </div>
+        </div>
 	</div>
-	<div class="row data-table-container" id="data-table-container"></div>
-		<div class="row data-table-pager-container">
+	<div class="row">
+        <div class="col-md-12">
+            <div class="data-table-container" id="data-table-container"></div>
+        </div>
+    </div>
+    <div class="row">
+		<div class="data-table-pager-container">
 			<div class="pull-right">
 				<a id="download-modal-button" class="btn btn-default" data-toggle="modal" data-target="#downloadModal">Download as CSV</a>
 			<#if galaxyEnabled?? && galaxyEnabled == true>
@@ -27,19 +36,23 @@
 </div>
 
 <#-- CSV download modal -->
-<div class="modal hide medium" id="downloadModal" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal" id="downloadModal" tabindex="-1" role="dialog" aria-labelledby="download-modal-label" aria-hidden="true">
 	<div class="modal-dialog">
 		<div class="modal-content">				
 	      	<div class="modal-header">
-	        	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-	        	<h4 class="modal-title">Download as csv</h4>
+	        	<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+	        	<h4 class="modal-title" id="download-modal-label">Download as csv</h4>
 	     	</div>
 	      	<div class="modal-body">
 	      		<div class="form-group form-horizontal">
 					<label class="col-md-3 control-label">As column names i want</label>
 	    			<div class="col-md-9">
-	    				<label><input type="radio" name="ColNames" value ="ATTRIBUTE_LABELS" checked="true"> Attribute labels</label>
-	    				<label><input type="radio" name="ColNames" value ="ATTRIBUTE_NAMES"> Attribute names</label>
+	    			    <div class="radio">
+	    				   <label><input type="radio" name="ColNames" value ="ATTRIBUTE_LABELS" checked="true"> Attribute labels</label>
+                        </div>
+                        <div class="radio">                                                   
+	    				   <label><input type="radio" name="ColNames" value ="ATTRIBUTE_NAMES"> Attribute names</label>
+                        </div>
 					</div>
 	      		</div>
 			</div>
@@ -87,6 +100,8 @@
 	</div>
 </form>
 </#if>
+    </div>
+</div>
 <script>
 	<#-- load css dependencies -->
 	if (!$('link[href="<@resource_href "/css/jquery.molgenis.table.css"/>"]').length)
