@@ -40,7 +40,7 @@ public class MysqlEntityValidator implements EntityValidator
 		violations.addAll(checkIdValues(entities, meta, dbAction));
 
 		if (dbAction != DatabaseAction.REMOVE && dbAction != DatabaseAction.REMOVE_IGNORE_MISSING
-				&& !meta.getName().equalsIgnoreCase("attributes"))
+				&& !meta.getName().equalsIgnoreCase("attributes") && !meta.getName().equalsIgnoreCase("entities"))
 		{
 			violations.addAll(checkRefs(entities, meta));
 		}

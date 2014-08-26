@@ -1,5 +1,20 @@
 package org.molgenis.data.importer;
 
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.AGGREGATEABLE;
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.AUTO;
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.DATA_TYPE;
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.DESCRIPTION;
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.ENTITY;
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.ENUM_OPTIONS;
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.ID_ATTRIBUTE;
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.LABEL;
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.NAME;
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.NILLABLE;
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.REF_ENTITY;
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.VISIBLE;
+import static org.molgenis.data.mysql.EntityMetaDataMetaData.ABSTRACT;
+import static org.molgenis.data.mysql.EntityMetaDataMetaData.EXTENDS;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,9 +34,12 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.Updateable;
+import org.molgenis.data.mysql.AttributeMetaDataMetaData;
+import org.molgenis.data.mysql.EntityMetaDataMetaData;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
@@ -38,27 +56,11 @@ import com.google.common.collect.Lists;
 @Component
 public class EmxImportServiceImpl implements EmxImporterService
 {
-
 	private static final Logger logger = Logger.getLogger(EmxImportServiceImpl.class);
 
 	// Sheet names
-	private static final String ENTITIES = "entities";
-	private static final String ATTRIBUTES = "attributes";
-
-	// Column names
-	private static final String NAME = "name";
-	private static final String DESCRIPTION = "description";
-	private static final String REFENTITY = "refEntity";
-	private static final String ENTITY = "entity";
-	private static final String DATATYPE = "dataType";
-	private static final String AUTO = "auto";
-	private static final String IDATTRIBUTE = "idAttribute";
-	private static final String NILLABLE = "nillable";
-	private static final String ABSTRACT = "abstract";
-	private static final String VISIBLE = "visible";
-	private static final String LABEL = "label";
-	private static final String EXTENDS = "extends";
-	private static final String AGGREGATEABLE = "aggregateable";
+	private static final String ENTITIES = EntityMetaDataMetaData.ENTITY_NAME;
+	private static final String ATTRIBUTES = AttributeMetaDataMetaData.ENTITY_NAME;
 
 	private MysqlRepositoryCollection store;
 	private TransactionTemplate transactionTemplate;
@@ -226,8 +228,8 @@ public class EmxImportServiceImpl implements EmxImporterService
 			int i = 1;
 			String entityName = attribute.getString(ENTITY);
 			String attributeName = attribute.getString(NAME);
-			String attributeDataType = attribute.getString(DATATYPE);
-			String refEntityName = attribute.getString(REFENTITY);
+			String attributeDataType = attribute.getString(DATA_TYPE);
+			String refEntityName = attribute.getString(REF_ENTITY);
 
 			// required
 			if (entityName == null) throw new IllegalArgumentException("attributes.entity is missing");
@@ -254,7 +256,7 @@ public class EmxImportServiceImpl implements EmxImporterService
 
 			Boolean attributeNillable = attribute.getBoolean(NILLABLE);
 			Boolean attributeAuto = attribute.getBoolean(AUTO);
-			Boolean attributeIdAttribute = attribute.getBoolean(IDATTRIBUTE);
+			Boolean attributeIdAttribute = attribute.getBoolean(ID_ATTRIBUTE);
 			Boolean attributeVisible = attribute.getBoolean(VISIBLE);
 			Boolean attributeAggregateable = attribute.getBoolean(AGGREGATEABLE);
 
@@ -267,6 +269,17 @@ public class EmxImportServiceImpl implements EmxImporterService
 
 			defaultAttributeMetaData.setLabel(attribute.getString(LABEL));
 			defaultAttributeMetaData.setDescription(attribute.getString(DESCRIPTION));
+
+			if (defaultAttributeMetaData.getDataType() instanceof EnumField)
+			{
+				List<String> enumOptions = attribute.getList(ENUM_OPTIONS);
+				if ((enumOptions == null) || enumOptions.isEmpty())
+				{
+					throw new MolgenisDataException("Missing enum options for attribute ["
+							+ defaultAttributeMetaData.getName() + "] of entity [" + entityName + "]");
+				}
+				defaultAttributeMetaData.setEnumOptions(enumOptions);
+			}
 
 			boolean lookupAttribute = false;
 			if (null != attributeIdAttribute && attributeIdAttribute)
@@ -331,7 +344,7 @@ public class EmxImportServiceImpl implements EmxImporterService
 		int i = 1;
 		for (Entity attribute : source.getRepositoryByEntityName(ATTRIBUTES))
 		{
-			final String refEntityName = (String) attribute.get(REFENTITY);
+			final String refEntityName = (String) attribute.get(REF_ENTITY);
 			final String entityName = attribute.getString(ENTITY);
 			final String attributeName = attribute.getString(NAME);
 			i++;

@@ -1,6 +1,7 @@
 package org.molgenis.data.support;
 
 import java.util.Collections;
+import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -141,6 +142,12 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 
 			@Override
 			public Range getRange()
+			{
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public List<String> getEnumOptions()
 			{
 				throw new UnsupportedOperationException();
 			}

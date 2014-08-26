@@ -26,9 +26,24 @@ public class MySqlConfiguration
 	}
 
 	@Bean
+	public EntityMetaDataRepository entityMetaDataRepository()
+	{
+		return new EntityMetaDataRepository(dataSource, new MysqlEntityValidator(dataService,
+				new EntityAttributesValidator()));
+	}
+
+	@Bean
+	public AttributeMetaDataRepository attributeMetaDataRepository()
+	{
+		return new AttributeMetaDataRepository(dataSource, new MysqlEntityValidator(dataService,
+				new EntityAttributesValidator()));
+	}
+
+	@Bean
 	public MysqlRepositoryCollection mysqlRepositoryCollection()
 	{
-		return new MysqlRepositoryCollection(dataSource, dataService)
+		return new MysqlRepositoryCollection(dataSource, dataService, entityMetaDataRepository(),
+				attributeMetaDataRepository())
 		{
 			@Override
 			protected MysqlRepository createMysqlRepsitory()

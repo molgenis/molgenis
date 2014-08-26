@@ -161,4 +161,10 @@ public class ProtocolAttributeMetaData implements AttributeMetaData
 	{
 		return null;
 	}
+
+	@Override
+	public List<String> getEnumOptions()
+	{
+		return null;
+	}
 }
