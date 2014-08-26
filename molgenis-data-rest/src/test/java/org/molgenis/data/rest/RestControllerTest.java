@@ -161,7 +161,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 				.andExpect(
 						content().string(
 								"{\"href\":\"" + HREF_ENTITY_META + "\",\"name\":\"" + ENTITY_NAME
-										+ "\",\"attributes\":{\"name\":{\"href\":\"" + HREF_ENTITY_META + "/name\"}}}"));
+										+ "\",\"attributes\":{\"name\":{\"href\":\"" + HREF_ENTITY_META
+										+ "/name\"}},\"idAttribute\":\"id\"}"));
 	}
 
 	@Test
@@ -171,11 +172,9 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		mockMvc.perform(post(HREF_ENTITY_META).param("_method", "GET").content(json).contentType(APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(content().contentType(APPLICATION_JSON))
-				.andExpect(
-						content().string(
-								"{\"href\":\"" + HREF_ENTITY_META + "\",\"name\":\"" + ENTITY_NAME + "\"}"));
+				.andExpect(content().string("{\"href\":\"" + HREF_ENTITY_META + "\",\"name\":\"" + ENTITY_NAME + "\"}"));
 	}
-	
+
 	@Test
 	public void retrieveEntityMetaSelectAttributes() throws Exception
 	{
@@ -199,7 +198,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 										+ ENTITY_NAME
 										+ "\",\"attributes\":{\"name\":{\"href\":\""
 										+ HREF_ENTITY_META
-										+ "/name\",\"fieldType\":\"STRING\",\"name\":\"name\",\"label\":\"name\",\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false,\"lookupAttribute\":true,\"aggregateable\":false}}}"));
+										+ "/name\",\"fieldType\":\"STRING\",\"name\":\"name\",\"label\":\"name\",\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false,\"lookupAttribute\":true,\"aggregateable\":false}},\"idAttribute\":\"id\"}"));
 
 	}
 
@@ -269,11 +268,12 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	public void retrieveEntityAttributePost() throws Exception
 	{
 		String json = "{\"attributes\":[\"name\"]}";
-		mockMvc.perform(post(HREF_ENTITY_ID + "/name").param("_method", "GET").content(json).contentType(APPLICATION_JSON)).andExpect(status().isOk())
-				.andExpect(content().contentType(APPLICATION_JSON))
+		mockMvc.perform(
+				post(HREF_ENTITY_ID + "/name").param("_method", "GET").content(json).contentType(APPLICATION_JSON))
+				.andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(content().string("{\"href\":\"" + HREF_ENTITY_ID + "/name\",\"name\":\"Piet\"}"));
 	}
-	
+
 	@Test
 	public void retrieveEntityAttributeUnknownAttribute() throws Exception
 	{
