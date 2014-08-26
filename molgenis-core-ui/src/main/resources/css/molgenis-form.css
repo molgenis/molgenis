@@ -61,22 +61,6 @@ input.error {
 	font-size: 18px;
 }
 
-.date input[type=text] {
-	width: 476px;	
-}
-
-.date input[type=text].nillable {
-	width: 450px;
-}
-
-.date .add-on {
-	height: 30px;
-}
-
-.date .add-on i {
-	margin-top: 7px;
-}
-
 .controls input[type=checkbox] {
 	width: 24px;
 	height: 24px;

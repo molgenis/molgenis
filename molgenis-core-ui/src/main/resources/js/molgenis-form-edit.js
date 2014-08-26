@@ -64,17 +64,9 @@
 	
 	$(function() {
 		//Enable datepickers
-		$('.datetime').datetimepicker({
-			format: "yyyy-MM-dd'T'hh:mm:ss" + getCurrentTimezoneOffset(),
-			language: 'en',
-		    pickTime: true
-		});
+		$('.datetime').datetimepicker({useSeconds : true});
 		
-		$('.date').datetimepicker({
-			format: "yyyy-MM-dd",
-			language: 'en',
-		    pickTime: false
-		});
+		$('.date').datetimepicker({pickTime: false});
 		
 		//If validation succeeds call onFormSubmit
 		$.validator.setDefaults({

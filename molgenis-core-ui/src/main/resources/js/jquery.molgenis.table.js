@@ -246,8 +246,11 @@
 				container.select2(opts).select2('val', []); // create select2 and trigger initSelection
 				break;
 			case 'DATE':
+				var datepicker = createInput(attribute, {'style': 'min-width: 100px'}, entity[attribute.name]);
+				cell.html(datepicker);
+				break;
 			case 'DATE_TIME':
-				var datepicker = createInput(attribute, null, entity[attribute.name]);
+				var datepicker = createInput(attribute, {'style': 'min-width: 210px'}, entity[attribute.name]);
 				cell.html(datepicker);
 				break;
 			case 'DECIMAL':
@@ -816,7 +819,7 @@
 		});
 
 		// DATE, DATE_TIME
-		$(container).on('changeDate', function(e) {
+		$(container).on('dp.change', function(e) {
 			var cell = $(e.target).closest('td');
 			persistCell(cell, settings);
 		});
