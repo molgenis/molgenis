@@ -133,7 +133,7 @@ public class UploadWizardPage extends AbstractWizardPage
                         return validateEMXInput(file, wizard, source);
                     }
                 }catch(UnknownEntityException e){
-                    //Entity not yet known
+                	logger.error("validateInput() --- Entity is not yet known", e);
                 }
 			}
 			// validate entity sheets
