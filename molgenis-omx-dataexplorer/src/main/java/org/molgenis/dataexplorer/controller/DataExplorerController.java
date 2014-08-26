@@ -87,6 +87,7 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String KEY_GALAXY_ENABLED = "plugin.dataexplorer.galaxy.enabled";
 	public static final String KEY_GALAXY_URL = "plugin.dataexplorer.galaxy.url";
 	public static final String KEY_SHOW_WIZARD_ONINIT = "plugin.dataexplorer.wizard.oninit";
+	public static final String KEY_HIDE_SELECT = "plugin.dataexplorer.select.hide";
 	public static final String KEY_HEADER_ABBREVIATE = "plugin.dataexplorer.header.abbreviate";
 	private static final boolean DEFAULT_VAL_MOD_AGGREGATES = true;
 	private static final boolean DEFAULT_VAL_MOD_ANNOTATORS = false;
@@ -117,6 +118,7 @@ public class DataExplorerController extends MolgenisPluginController
 
 	private static final boolean DEFAULT_VAL_DATAEXPLORER_EDITABLE = false;
 	private static final boolean DEFAULT_VAL_DATAEXPLORER_ROW_CLICKABLE = false;
+	private static final boolean DEFAULT_VAL_KEY_HIDE_SELECT = true;
 
 	@Autowired
 	private DataService dataService;
@@ -161,7 +163,7 @@ public class DataExplorerController extends MolgenisPluginController
 			entityExists = dataService.hasRepository(selectedEntityName);
 		}
 
-		if (entityExists)
+		if (entityExists && molgenisSettings.getBooleanProperty(KEY_HIDE_SELECT, DEFAULT_VAL_KEY_HIDE_SELECT))
 		{
 			model.addAttribute("hideDatasetSelect", true);
 		}
