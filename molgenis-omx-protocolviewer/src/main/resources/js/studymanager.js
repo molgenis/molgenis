@@ -13,7 +13,7 @@
 		
 		function createTreeConfig(catalog) {
 			function createTreeConfigRec(node, treeNode, expanded) {
-				var treeChild = {key: node.id, title: node.name, expanded: expanded, select: node.selected, folder: true, children:[]};
+				var treeChild = {key: node.id, title: node.name, expanded: expanded, selected: node.selected, folder: true, children:[]};
 				treeNode.push(treeChild);
 				if(node.children) {
 					$.each(node.children, function(idx, child) {
@@ -22,7 +22,7 @@
 				}
 				if(node.items) {
 					$.each(node.items, function(idx, item) {
-						treeChild.children.push({key: item.id, title: item.name, select: item.selected});
+						treeChild.children.push({key: item.id, title: item.name, selected: item.selected});
 					});
 				}
 			}
