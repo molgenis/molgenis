@@ -25,6 +25,14 @@ html, body {
     content: "\e080";
 }
 
+.panel-heading {
+    background-color: #5B82A4;  
+}
+
+.panel-title {
+    color: white;
+}
+
 /*
 .container-fluid {
 	padding-right: 10px;
