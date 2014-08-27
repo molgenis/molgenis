@@ -24,7 +24,7 @@
 				<div class="row">
 					<div class="group-append col-md-12" id="disease-search-container">
 						<input class="col-md-10" id="diseasematcher-selection-search" type="text" placeholder="">
-						<button class="btn btn-default" type="button" id="disease-search-button"><i class="icon-large icon-search"></i></button>
+						<button class="btn btn-default" type="button" id="disease-search-button"><span class="glyphicon glyphicon-search"></span></button>
 					</div>					
 				</div>
 				

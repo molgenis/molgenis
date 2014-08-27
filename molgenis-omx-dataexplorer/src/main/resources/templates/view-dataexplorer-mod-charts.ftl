@@ -6,8 +6,8 @@
     <div class="col-md-12">
         <div class="row">
         	<div class="btn-group" class="col-md-9">
-        		<a href="#chart-designer-modal-scatterplot" id="chart-designer-modal-scatterplot-button" role="button" class="btn btn-default" data-toggle="modal">Create scatter plot <i class="icon-plus"></i></a>
-        		<a href="#chart-designer-modal-boxplot" id="chart-designer-modal-boxplot-button" role="button" class="btn btn-default" data-toggle="modal">Create box plot <i class="icon-plus"></i></a>
+        		<a href="#chart-designer-modal-scatterplot" id="chart-designer-modal-scatterplot-button" role="button" class="btn btn-default" data-toggle="modal">Create scatter plot <span class="glyphicon glyphicon-plus"></span></a>
+        		<a href="#chart-designer-modal-boxplot" id="chart-designer-modal-boxplot-button" role="button" class="btn btn-default" data-toggle="modal">Create box plot <span class="glyphicon glyphicon-plus"></span></a>
         	</div>
         </div>
         <div class="row">
