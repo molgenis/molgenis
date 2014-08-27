@@ -8,19 +8,19 @@
 <#assign js=[
 	"jquery-ui-1.9.2.custom.min.js",
 	"jquery.bootstrap.wizard.min.js",
-	"jquery.molgenis.table.js"]>	
+	"jquery.molgenis.table.js"]>
 <@header css js/>
 <div class="container-fluid">
 	<div class="well">
-		<div class="row-fluid">
+		<div class="row">
 			<H2>Import GAF list</H2>
 		</div>
-		<div class="row-fluid">	
-			<div class="span6">
+		<div class="row">
+			<div class="col-md-6">
 				<form id="gaflist-import-file-form" method="post" action="${context_url}${action}" enctype="${enctype}" onsubmit="parent.showSpinner(function(){$('.modal-body').html('Work in progress..');});  return true;">
 					<h4>Import CSV file</h4>
 					<#if submit_state?? && submit_state>
-						<div class="row-fluid">
+						<div class="row">
 							<i>File:</i>
 							<span><#if fileName?has_content>${fileName}</#if></span>
 							<span class="pull-right">
@@ -29,7 +29,7 @@
 							</span>
 						</div>
 					<#else>
-						<div class="row-fluid">
+						<div class="row">
 							<i>Choose file:</i>
 							<span><input type="file" name="csvFile" required/></span>
 							<span class="pull-right">
@@ -40,8 +40,8 @@
 				</form>
 			</div>
 		</div>
-		<div class="row-fluid">	
-			<div class="span12">
+		<div class="row">
+			<div class="col-md-12">
 				<#if messages?? == true>
 					<h4>Import messages:</h4>
 					<ul>
@@ -54,8 +54,8 @@
 				</#if>
 			</div>
 		</div>
-		<div class="row-fluid">	
-			<div class="span12">		
+		<div class="row">
+			<div class="col-md-12">
 				<#if (hasValidationError?? == true) && (hasValidationError == true)>
 					<h4>Validation error report</h4>
 					${validationReport?if_exists}
