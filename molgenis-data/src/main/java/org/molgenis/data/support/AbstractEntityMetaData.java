@@ -163,28 +163,35 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 	@Override
 	public AttributeMetaData getIdAttribute()
 	{
+		AttributeMetaData idAttributeMetaData = null;
 		if (idAttribute != null)
 		{
 			AttributeMetaData att = getAttribute(idAttribute);
 			if (att == null) throw new RuntimeException(getName() + ".getIdAttribute() failed: '" + idAttribute
 					+ "' unknown");
-			return att;
+			idAttributeMetaData = att;
 		}
-
-		for (AttributeMetaData attribute : getAttributesTraverser())
+		if (idAttributeMetaData == null)
 		{
-			if (attribute.isIdAtrribute())
+			for (AttributeMetaData attribute : getAttributesTraverser())
 			{
-				return attribute;
+				if (attribute.isIdAtrribute())
+				{
+					idAttributeMetaData = attribute;
+					break;
+				}
+			}
+
+			if (getExtends() != null)
+			{
+				idAttributeMetaData = getExtends().getIdAttribute();
+			}
+			if (idAttributeMetaData == null)
+			{
+				new RuntimeException("No idAttribute specified, this attribute is required");
 			}
 		}
-
-		if (getExtends() != null)
-		{
-			return getExtends().getIdAttribute();
-		}
-
-		return null;
+		return idAttributeMetaData;
 	}
 
 	public void setIdAttribute(String name)
