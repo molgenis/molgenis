@@ -3,6 +3,7 @@ package org.molgenis.data.mysql;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
@@ -100,6 +101,11 @@ public class MysqlEntityValidator implements EntityValidator
 						for (Object ref : refs)
 						{
 							Object refId = (ref instanceof Entity) ? ((Entity) ref).getIdValue() : ref;
+							if ((refId != null) && (refId instanceof String))
+							{
+								refId = StringUtils.trim((String) refId);
+							}
+
 							if (!refIds.contains(attr.getRefEntity().getIdAttribute().getDataType().convert(refId)))
 							{
 								String message = String.format(
