@@ -1,7 +1,7 @@
 <#macro renderList form index=0>
-<div id="list-holder" class="row-fluid">
+<div id="list-holder" class="row">
 	<div id="list-navigation">
-		<div class="span4">
+		<div class="col-md-4">
 			<h3 class="pull-left">${form.title} (<span id="entity-count-${index}"></span>)</h3>
 			<#if form.hasWritePermission>
 				<a id="create-${index}" style="margin:30px 10px" class="pull-left" href="${form.getBaseUri(context_url)}/create?back=${current_uri?url('UTF-8')}">
@@ -10,7 +10,7 @@
 			</#if>
 		</div>
 				
-		<div class="data-table-pager-container span4">
+		<div class="data-table-pager-container col-md-4">
 			<div id="data-table-pager-${index}" class="pagination pagination-centered"></div>
 		</div>
 		
@@ -28,9 +28,9 @@
 					<option id="NOT">NOT EQUALS</option>
 					<option id="LIKE">LIKE</option>
 				</select>
-				<div class="input-append">
-    				<input type="search" class="span8 search-query" name="q" placeholder="SEARCH">
-    				<button type="submit" class="btn"><i class="icon-search icon-large"></i> </button>
+				<div class="group-append">
+    				<input type="search" class="col-md-8 search-query" name="q" placeholder="SEARCH">
+    				<button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
   				</div>
 			</form>
 		</#if>				

@@ -8,50 +8,54 @@
 		molgenis.Catalog.setEnableSelection(true);
 	</script>
 </#if>
-	<div class="row-fluid">			
+	<div class="row">			
     <#if (catalogs?size == 0)>
         <span>No active catalogs</span>
     <#else>
-        <div class="row-fluid grid<#if (catalogs?size == 1)> hide</#if>">
-            <div id="catalog-select-container" class="control-group form-horizontal pull-right">
-                <label class="control-label" for="catalog-select">Choose a catalog:</label>
-                <div class="controls">
-                    <select data-placeholder="Choose a catalog" id="catalog-select">
-                <#list catalogs as catalog>
-                        <option value="${catalog.id}"<#if catalog_index == 0> selected</#if>>${catalog.name}</option>
-                </#list>
-                    </select>
-                </div>
+        <div class="row grid<#if (catalogs?size == 1)> hide</#if>">
+            <div id="catalog-select-container" class="col-md-4 col-md-offset-8">
+                <form class="form-horizontal" role="form">
+                    <div class="form-group">
+                        <label class="col-md-5 control-label" for="catalog-select">Choose a catalog:</label>
+                        <div class="col-md-7">
+                            <select data-placeholder="Choose a catalog" id="catalog-select" class="form-control">
+                        <#list catalogs as catalog>
+                                <option value="${catalog.id}"<#if catalog_index == 0> selected</#if>>${catalog.name}</option>
+                        </#list>
+                            </select>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
-        <div class="row-fluid grid">
-            <div class="span4">
+        <div class="row grid">
+            <div class="col-md-4">
                 <p class="box-title">Browse variables</p>
                 <div id="catalog-container"></div>
             </div>
-            <div class="span8">
-                <div class="row-fluid grid" id="feature-information">
+            <div class="col-md-8">
+                <div class="row grid" id="feature-information">
                     <p class="box-title">Variable description</p>
                     <div id="feature-details">
                     </div>
                 </div>
 			<#if authenticated>               
-                <div class="row-fluid grid" id="feature-shopping">
+                <div class="row grid" id="feature-shopping">
                     <p class="box-title">Variable selection</p>
                     <div id="feature-selection-table-container">
                     </div>
 	                <div id="feature-selection-table-pager">
 	                </div>    
                 </div>
-                <div class="row-fluid grid" id="feature-shopping-controls">
-                    <div class="span9">
+                <div class="row grid" id="feature-shopping-controls">
+                    <div class="col-md-9">
                         <div class="btn-group pull-left">
                     <#if enableDownloadAction>
-                            <button class="btn" id="download-xls-button">Download</button>
+                            <button class="btn btn-default" id="download-xls-button">Download</button>
                     </#if>
                         </div>
                     </div>
-                    <div class="span3">
+                    <div class="col-md-3">
                     <div id="orderdata-modal-container"></div>
                     <div id="ordersview-modal-container"></div>
                     <#if enableOrderAction>

@@ -29,7 +29,7 @@ h3 {
 	width: 110px;	
 }
 
-.form-search .input-append {
+.form-search .group-append {
 	width: 150px;
 }
 
@@ -61,22 +61,6 @@ input.error {
 	font-size: 18px;
 }
 
-.date input[type=text] {
-	width: 476px;	
-}
-
-.date input[type=text].nillable {
-	width: 450px;
-}
-
-.date .add-on {
-	height: 30px;
-}
-
-.date .add-on i {
-	margin-top: 7px;
-}
-
 .controls input[type=checkbox] {
 	width: 24px;
 	height: 24px;
@@ -90,7 +74,6 @@ input.error {
 
 .control-label {
 	color: #5B82A4;
-	font-size: 18px;
 }
 
 .nav-icon-prev {

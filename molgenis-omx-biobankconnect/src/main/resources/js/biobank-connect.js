@@ -167,7 +167,7 @@
 					if($('#wizardForm').data('childElements') === null || $('#wizardForm').data('childElements') === undefined)
 						$('#wizardForm').data('childElements', childElements);
 					var items = [];
-					items.push('<div class="row-fluid" style="min-height:400px;font-size:16px;margin-top:5%;"><div class="span12"><center><strong>Message : </strong>');
+					items.push('<div class="row" style="min-height:400px;font-size:16px;margin-top:5%;"><div class="col-md-12"><center><strong>Message : </strong>');
 					items.push('Other user is currently running BiobankConnect using the same account, please be patient or login as another user!</center></div></div>');
 					$('#wizardForm').html(items.join(''));
 					setTimeout(function(){

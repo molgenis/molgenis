@@ -1,19 +1,19 @@
 <#include "resource-macros.ftl">
 <!--DISEASE MATCHER / PHENOVIEWER -->
-<div class="row-fluid">	
-	<div class="span12" id="disease-matcher">
+<div class="row">	
+	<div class="col-md-12" id="disease-matcher">
 	
 		<#-- ANALYSIS ZONE -->
-		<div class="span9">
+		<div class="col-md-9">
 			<div class="well" id="diseasematcher-infopanel">		
 			</div>
 		</div>
 		
 		<#-- DISEASE ZONE-->
-		<div class="span3">
+		<div class="col-md-3">
 			<div class="well">
-				<div class="navbar" id="diseasematcher-selection-navbar">
-					<div class="navbar-inner">
+				<div class="navbar-nav" id="diseasematcher-selection-navbar-nav">
+					<div class="navbar-nav-inner">
 						<ul class="nav">
 							<li><a href="#" id="diseasematcher-genes-select-button">Genes</a></li>
 							<li><a href="#" id="diseasematcher-diseases-select-button">Diseases</a></li>
@@ -21,14 +21,14 @@
 					</div>
 				</div>
 		
-				<div class="row-fluid">
-					<div class="input-append span12" id="disease-search-container">
-						<input class="span10" id="diseasematcher-selection-search" type="text" placeholder="">
-						<button class="btn" type="button" id="disease-search-button"><i class="icon-large icon-search"></i></button>
+				<div class="row">
+					<div class="group-append col-md-12" id="disease-search-container">
+						<input class="col-md-10" id="diseasematcher-selection-search" type="text" placeholder="">
+						<button class="btn btn-default" type="button" id="disease-search-button"><span class="glyphicon glyphicon-search"></span></button>
 					</div>					
 				</div>
 				
-				<div class="row-fluid">
+				<div class="row">
 					<div class="accordion" id="disease-selection-container">
                         <div class="accordion-group">
                             <div class="accordion-heading">
@@ -37,7 +37,7 @@
                     
                             <div class="accordion-body collapse in">
                                 <div class="accordion-inner">
-                                    <div class="row-fluid" id="disease-selection">
+                                    <div class="row" id="disease-selection">
                                     	
                                     	<ul class="nav nav-tabs nav-stacked" id="diseasematcher-selection-list"></ul>
                                     	<div class="pagination pagination-centered" id="diseasematcher-selection-pager"></div>
@@ -66,9 +66,9 @@
 </script>
 
 <script id="hb-layout-variant" class="diseasematcher" type="text/x-handlebars-template">
-	<div class="span12" id="diseasematcher-variant-panel"></div>
-	<div class="row-fluid">
-		<div class="span12" id="diseasematcher-disease-panel">
+	<div class="col-md-12" id="diseasematcher-variant-panel"></div>
+	<div class="row">
+		<div class="col-md-12" id="diseasematcher-disease-panel">
 			<ul class="nav nav-tabs" id="diseasematcher-disease-panel-tabs" data-tabs="tabs"></ul>
 			<div id="diseasematcher-disease-tab-content"></div>
 		</div>

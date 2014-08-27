@@ -41,11 +41,11 @@
 		
 		// create tree container
 		var items = [];
-		items.push('<div class="row-fluid molgenis-tree-controls">');
+		items.push('<div class="row molgenis-tree-controls">');
 		items.push('<a href="#" class="btn btn-link pull-right tree-deselect-all-btn">Deselect all</a>');
 		items.push('<a href="#" class="btn btn-link pull-right tree-select-all-btn">Select all</a>');
 		items.push('</div>');
-		items.push('<div class="row-fluid molgenis-tree"></div>');
+		items.push('<div class="row molgenis-tree"></div>');
 		container.html(items.join(''));
 
 		// create tree container

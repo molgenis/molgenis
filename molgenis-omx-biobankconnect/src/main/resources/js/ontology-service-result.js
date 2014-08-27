@@ -32,9 +32,9 @@
 		var isHidden = container.find('.termurl:eq(0)').is(':hidden');
 		container.empty();
 		$.each(entities, function(rowIndex, entity){
-			var layoutDiv = $('<div />').addClass('row-fluid');
-			var termDiv = $('<div />').addClass('span4').append(entity.term).appendTo(layoutDiv);
-			var ontologyTermMatchDiv= $('<div />').addClass('span8 div-expandable').appendTo(layoutDiv);
+			var layoutDiv = $('<div />').addClass('row');
+			var termDiv = $('<div />').addClass('col-md-4').append(entity.term).appendTo(layoutDiv);
+			var ontologyTermMatchDiv= $('<div />').addClass('col-md-8 div-expandable').appendTo(layoutDiv);
 			
 			//Collect all the scores from the candidate ontology term mappings
 			var scoreGroup = [];
@@ -73,10 +73,10 @@
 			//Create the html visualizations for the mappings
 			$.each(entity.results.searchHits, function(index, hit){
 				if(index >= 20) return false;
-				var ontologyTermNameDiv = $('<div />').addClass('span5 matchterm show-popover').css('margin-bottom', '-6px').append(hit.columnValueMap.ontologyTerm);
-				var ontologyTermUrlDiv = $('<div />').addClass('span5 termurl').css('margin-bottom', '-6px').append('<a href="' + hit.columnValueMap.ontologyTermIRI + '" target="_blank">' + hit.columnValueMap.ontologyTermIRI + '</a>');
-				var matchScoreDiv = $('<div />').addClass('span2').css('margin-bottom', '-6px').append('<center>' + hit.columnValueMap.combinedScore.toFixed(2) + '</center>');
-				var newLineDiv = $('<div />').addClass('row-fluid').append(ontologyTermNameDiv).append(ontologyTermUrlDiv).append(matchScoreDiv);
+				var ontologyTermNameDiv = $('<div />').addClass('col-md-5 matchterm show-popover').css('margin-bottom', '-6px').append(hit.columnValueMap.ontologyTerm);
+				var ontologyTermUrlDiv = $('<div />').addClass('col-md-5 termurl').css('margin-bottom', '-6px').append('<a href="' + hit.columnValueMap.ontologyTermIRI + '" target="_blank">' + hit.columnValueMap.ontologyTermIRI + '</a>');
+				var matchScoreDiv = $('<div />').addClass('col-md-2').css('margin-bottom', '-6px').append('<center>' + hit.columnValueMap.combinedScore.toFixed(2) + '</center>');
+				var newLineDiv = $('<div />').addClass('row').append(ontologyTermNameDiv).append(ontologyTermUrlDiv).append(matchScoreDiv);
 				var isEqual = hit.columnValueMap.ontologyTermSynonym === hit.columnValueMap.ontologyTerm;
 				var popoverOption = {
 					'placement' : 'bottom',
@@ -88,8 +88,8 @@
 				
 				var nodePath = hit.columnValueMap.nodePath;
 				if(parentChildMap[nodePath] !== undefined && parentChildMap[nodePath] !== null && parentChildData[nodePath].length > 2){
-					if(ontologyTermMatchDiv.children('div.row-fluid:eq(' + parentChildMap[nodePath] + ')').length > 0){
-						ontologyTermMatchDiv.children('div.row-fluid:eq(' + parentChildMap[nodePath] + ')').before(newLineDiv);
+					if(ontologyTermMatchDiv.children('div.row:eq(' + parentChildMap[nodePath] + ')').length > 0){
+						ontologyTermMatchDiv.children('div.row:eq(' + parentChildMap[nodePath] + ')').before(newLineDiv);
 					}else{
 						ontologyTermMatchDiv.append(newLineDiv);
 					}
@@ -125,16 +125,16 @@
 						'padding-bottom':'5px',
 						'border-bottom-color':'#CC0025'
 					});
-					$('<div />').addClass('row-fluid').append(separatLine).appendTo(ontologyTermMatchDiv);
+					$('<div />').addClass('row').append(separatLine).appendTo(ontologyTermMatchDiv);
 				}
 			});
 			
-			var divWithColor = $('<div />').addClass('span12 well div-hover').append(layoutDiv);
-			$('<div />').addClass('row-fluid').append(divWithColor).appendTo(container);
+			var divWithColor = $('<div />').addClass('col-md-12 well div-hover').append(layoutDiv);
+			$('<div />').addClass('row').append(divWithColor).appendTo(container);
 		});
 		if(isHidden){
 			container.find('.termurl').hide();
-			$('.matchterm').removeClass('span5').addClass('span8');
+			$('.matchterm').removeClass('col-md-5').addClass('col-md-8');
 		}
 		initToggle();
 	}

@@ -31,21 +31,21 @@
 						selectedSourceDataSets.push(dataSet.Name);
 					});
 				}
-				var targetDataSetDiv = $('<div />').addClass('row-fluid').appendTo(infoDiv);
-				var sourceDataSetDiv = $('<div />').addClass('row-fluid').appendTo(infoDiv);
+				var targetDataSetDiv = $('<div />').addClass('row').appendTo(infoDiv);
+				var sourceDataSetDiv = $('<div />').addClass('row').appendTo(infoDiv);
 				
-				$('<div />').addClass('span5').append('<strong>Desired items : </strong>').appendTo(targetDataSetDiv);
-				$('<div />').addClass('offset2 span5').append('<div class="float-right">' + targetDataSet.Name + '</div>').appendTo(targetDataSetDiv);
-				$('<div />').addClass('span5').append('<strong>Selected catalogues : </strong>').appendTo(sourceDataSetDiv);
-				$('<div />').addClass('offset2 span5').append('<div class="float-right">' + selectedSourceDataSets.join(',') + '</div>').appendTo(sourceDataSetDiv);
+				$('<div />').addClass('col-md-5').append('<strong>Desired items : </strong>').appendTo(targetDataSetDiv);
+				$('<div />').addClass('col-md-offset-2 col-md-5').append('<div class="float-right">' + targetDataSet.Name + '</div>').appendTo(targetDataSetDiv);
+				$('<div />').addClass('col-md-5').append('<strong>Selected catalogues : </strong>').appendTo(sourceDataSetDiv);
+				$('<div />').addClass('col-md-offset-2 col-md-5').append('<div class="float-right">' + selectedSourceDataSets.join(',') + '</div>').appendTo(sourceDataSetDiv);
 				
 				//Create link out to the harmonized dataset when the value generation is done
 				if(response.derivedDataSetId)
 				{
 					var derivedDataSet = restApi.get('/api/v1/dataset/' + response.derivedDataSetId);
-					var derivedDataSetLinkOutDiv = $('<div />').addClass('row-fluid').appendTo(infoDiv);
-					$('<div />').addClass('span5').append('<strong>Link out to harmonized data :  </strong>').appendTo(derivedDataSetLinkOutDiv);
-					$('<div />').addClass('offset2 span5').append('<div class="float-right"><a href="/menu/main/dataexplorer?dataset=' + derivedDataSet.Identifier + '">' + derivedDataSet.Identifier + '</a></div>').appendTo(derivedDataSetLinkOutDiv);
+					var derivedDataSetLinkOutDiv = $('<div />').addClass('row').appendTo(infoDiv);
+					$('<div />').addClass('col-md-5').append('<strong>Link out to harmonized data :  </strong>').appendTo(derivedDataSetLinkOutDiv);
+					$('<div />').addClass('col-md-offset-2 col-md-5').append('<div class="float-right"><a href="/menu/main/dataexplorer?dataset=' + derivedDataSet.Identifier + '">' + derivedDataSet.Identifier + '</a></div>').appendTo(derivedDataSetLinkOutDiv);
 				}
 				//Update progressbar accordingly
 				if(response.isRunning)
@@ -70,7 +70,7 @@
 					if(response.totalUsers > 1){
 						var warningDiv = null;
 						if($('#other-user-alert').length > 0) warningDiv = $('#other-user-alert');
-						else warningDiv = $('<div id="other-user-alert" class="row-fluid" style="margin-bottom:10px;"></div>');
+						else warningDiv = $('<div id="other-user-alert" class="row" style="margin-bottom:10px;"></div>');
 						warningDiv.empty().append('<div class="span12"><span style="display: block;font-size:16px;text-align:center;">Other users are using BiobankConnect, it might slow down the process. Please be patient!</span></div>');
 						$('body').find('.progress:eq(0)').parents('div:eq(0)').before(warningDiv);
 					}else{
