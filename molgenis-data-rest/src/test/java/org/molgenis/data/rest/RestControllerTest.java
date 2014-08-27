@@ -43,6 +43,7 @@ import org.molgenis.messageconverter.CsvHttpMessageConverter;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.token.TokenService;
 import org.molgenis.util.GsonHttpMessageConverter;
+import org.molgenis.util.ResourceFingerprintRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -493,7 +494,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		public RestController restController()
 		{
 			return new RestController(dataService(), tokenService(), authenticationManager(),
-					molgenisPermissionService(), new MolgenisRSQL());
+					molgenisPermissionService(), new MolgenisRSQL(), new ResourceFingerprintRegistry());
 		}
 	}
 

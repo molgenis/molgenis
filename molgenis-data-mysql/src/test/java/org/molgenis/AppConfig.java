@@ -3,7 +3,10 @@ package org.molgenis;
 import javax.sql.DataSource;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.mysql.AttributeMetaDataRepository;
 import org.molgenis.data.mysql.EmbeddedMysqlDatabaseBuilder;
+import org.molgenis.data.mysql.EntityMetaDataRepository;
+import org.molgenis.data.mysql.MysqlEntityValidator;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
@@ -52,19 +55,32 @@ public class AppConfig
 	}
 
 	@Bean
+	public EntityMetaDataRepository entityMetaDataRepository()
+	{
+		return new EntityMetaDataRepository(dataSource(), new MysqlEntityValidator(dataService(),
+				new EntityAttributesValidator()));
+	}
+
+	@Bean
+	public AttributeMetaDataRepository attributeMetaDataRepository()
+	{
+		return new AttributeMetaDataRepository(dataSource(), new MysqlEntityValidator(dataService(),
+				new EntityAttributesValidator()));
+	}
+
+	@Bean
 	public MysqlRepositoryCollection mysqlRepositoryCollection()
 	{
-		return new MysqlRepositoryCollection(dataSource(), dataService())
+		return new MysqlRepositoryCollection(dataSource(), dataService(), entityMetaDataRepository(),
+				attributeMetaDataRepository())
 		{
 			@Override
 			protected MysqlRepository createMysqlRepsitory()
 			{
 				MysqlRepository repo = mysqlRepository();
 				repo.setRepositoryCollection(this);
-
 				return repo;
 			}
-
 		};
 	}
 }
