@@ -40,7 +40,7 @@ public interface EntityMetaData
 	Iterable<AttributeMetaData> getAtomicAttributes();
 
 	/**
-	 * Attribute that is used as unique Id. If no label exist, returns null.
+	 * Attribute that is used as unique Id. Id attribute should always be provided.
 	 */
 	AttributeMetaData getIdAttribute();
 

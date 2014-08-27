@@ -1,8 +1,4 @@
-#menu-editor-container .icon-edit:hover {
-	cursor: pointer;
-}
-
-#menu-editor-container .icon-trash:hover {
+#menu-editor-container .glyphicon:hover {
 	cursor: pointer;
 }
 
@@ -17,7 +13,7 @@
 	font-weight:normal; 
 }
 
-#menu-editor-container span {
+#menu-editor-container col-md- {
 	padding-left: 5px;
 }
 

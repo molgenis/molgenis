@@ -15,42 +15,22 @@ html, body {
 	height: 40px;
 }
 
-.container-fluid {
-	padding-right: 10px;
-	padding-left: 10px;
+/* Support collapsable panels */
+.panel-title {
+    color: white;
 }
 
-.nav, .navbar {
-	margin-bottom: 10px;
+.panel-heading {
+    background-color: #5B82A4;  
 }
 
-.navbar-inner {
-	padding-left: 0px;
-	padding-right:0px;	
+.panel-heading a:after {
+    font-family: 'Glyphicons Halflings';
+    content: "\e114";    
+    float: right;
 }
-
-.btn-link 	{
-	text-shadow:none;
-}
-
-.navbar .nav li img {
-	margin-top:-5px;
-}
-
-.navbar .nav>li>a {
-	padding: 10px 10px 10px;
-}
-
-.nav-tabs>li>a {
-	padding-top: 5px;
-	padding-bottom: 5px;
-	padding-right: 8px;
-	padding-left: 8px;
-}
-
-#molgenis-menu.nav li.active a {
-	background-color: #3079C2;
-	color: white;
+.panel-heading a.collapsed:after {
+    content: "\e080";
 }
 
 #molgenis-breadcrumb {
@@ -61,8 +41,6 @@ html, body {
 
 #plugin-container {
 	background: #F8FAFB;
-	padding: 10px;
-	margin-bottom: 10px;
 	height: 100%;
 }
 
@@ -70,11 +48,6 @@ html, body {
 	text-align: center;
 	font: menu;
 	font-style: italic;
-}
-
-#spinner {
-	width: 180px;
-	margin:150px 100px 0px -100px;
 }
 
 #spinner img {
@@ -90,30 +63,6 @@ html, body {
 	opacity: .3;
 }
 
-.alert {
-	margin-bottom: 10px;
-}
-
-.modal.large {
-    width: 80%;
-    margin-left:-40%;
-    top: 5%;
-}
-	
-@media (min-width: 1281px) {
-	.modal.medium {
-	    width: 50%;
-	    margin-left:-25%; 
-	}
-}
-
-@media (max-width: 1280px) {
-	.modal.medium {
-		width: 80%;
-    	margin-left:-40%;
-	}
-}
-
 label.horizontal-inline {
 	margin-right: 5px;
 }
@@ -122,111 +71,95 @@ label.horizontal-inline.inbetween {
 	margin-left: 5px;
 }
 
-<!--
-	Bootstrap tooltip style
--->
-.tooltip{
-    position:absolute;
-    z-index:1020;
-    display:block;
-    visibility:visible;
-    padding:5px;
-    font-size:14px;
-    opacity:1;
-    filter:alpha(opacity=1)
+/* Bootstrap tooltip style */
+.tooltip {
+	position: absolute;
+	z-index: 1020;
+	display: block;
+	visibility: visible;
+	padding: 5px;
+	font-size: 14px;
+	opacity: 1;
+	filter: alpha(opacity = 1)
 }
-.tooltip.in{
-    opacity:1;
-    filter:alpha(opacity=1)
+
+.tooltip.in {
+	opacity: 1;
+	filter: alpha(opacity = 1)
 }
-.tooltip.top{
-    margin-top:-2px
+
+.tooltip.top {
+	margin-top: -2px
 }
-.tooltip.right{
-    margin-left:2px
+
+.tooltip.right {
+	margin-left: 2px
 }
-.tooltip.bottom{
-    margin-top:2px
+
+.tooltip.bottom {
+	margin-top: 2px
 }
-.tooltip.left{
-    margin-left:-2px
+
+.tooltip.left {
+	margin-left: -2px
 }
-.tooltip.top .tooltip-arrow{
-    bottom:0;
-    left:50%;
-    margin-left:-5px;
-    border-left:5px solid transparent;
-    border-right:5px solid transparent;
-    border-top:5px solid #333333
+
+.tooltip.top .tooltip-arrow {
+	bottom: 0;
+	left: 50%;
+	margin-left: -5px;
+	border-left: 5px solid transparent;
+	border-right: 5px solid transparent;
+	border-top: 5px solid #333333
 }
-.tooltip.left .tooltip-arrow{
-    top:50%;
-    right:0;
-    margin-top:-5px;
-    border-top:5px solid transparent;
-    border-bottom:5px solid transparent;
-    border-left:5px solid #333333
+
+.tooltip.left .tooltip-arrow {
+	top: 50%;
+	right: 0;
+	margin-top: -5px;
+	border-top: 5px solid transparent;
+	border-bottom: 5px solid transparent;
+	border-left: 5px solid #333333
 }
-.tooltip.bottom .tooltip-arrow{
-    top:0;
-    left:50%;
-    margin-left:-5px;
-    border-left:5px solid transparent;
-    border-right:5px solid transparent;
-    border-bottom:5px solid #333333
+
+.tooltip.bottom .tooltip-arrow {
+	top: 0;
+	left: 50%;
+	margin-left: -5px;
+	border-left: 5px solid transparent;
+	border-right: 5px solid transparent;
+	border-bottom: 5px solid #333333
 }
-.tooltip.right .tooltip-arrow{
-    top:50%;
-    left:0;
-    margin-top:-5px;
-    border-top:5px solid transparent;
-    border-bottom:5px solid transparent;
-    border-right:5px solid #333333
+
+.tooltip.right .tooltip-arrow {
+	top: 50%;
+	left: 0;
+	margin-top: -5px;
+	border-top: 5px solid transparent;
+	border-bottom: 5px solid transparent;
+	border-right: 5px solid #333333
 }
-.tooltip-inner{
-    max-width:300px;
-    padding:3px 8px;
-    color:#333333;
-    text-align:center;
-    text-decoration:none;
-    background-color:#ffffcf;
-    border-style:solid;
-	border-color:#333333;
-	border-width:1px;
-    -webkit-border-radius:4px;
-    -moz-border-radius:4px;
-    border-radius:4px;
-    font-size: 14px;
+
+.tooltip-inner {
+	max-width: 300px;
+	padding: 3px 8px;
+	color: #333333;
+	text-align: center;
+	text-decoration: none;
+	background-color: #ffffcf;
+	border-style: solid;
+	border-color: #333333;
+	border-width: 1px;
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	font-size: 14px;
 	font-weight: normal;
 }
-.tooltip-arrow{
-    position:absolute;
-    width:0;
-    height:0
-}
 
-.form-horizontal .control-group {
-	margin-bottom: 10px;
+.tooltip-arrow {
+	position: absolute;
+	width: 0;
+	height: 0
 }
-
-/* Duplicate bootstrap css because datepicker just makes all ad-on buttons a calendar button and allso want a delete button */
-.add-on-workaround {
-	margin-left:-1px;
-	border-bottom-left-radius:0;
-  	border-bottom-right-radius:0;
-  	border-top-left-radius:0;
-  	border-top-right-radius:0;
-  	vertical-align:top;
-  	background-color:#EEEEEE;
-  	border:1px solid #CCCCCC;
-  	display:inline-block;
-  	font-size:14px;
- 	font-weight:normal;
-  	height:20px;
-  	line-height:20px;
-  	min-width:16px;
- 	padding:4px 5px;
-  	text-align:center;
-  	text-shadow:#FFFFFF 0 1px 0;
-  	width:auto;
-}
+/* end of Bootstrap tooltip style*/

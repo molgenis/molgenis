@@ -182,10 +182,10 @@
 	};
 	
 	function createSearchDiv(title, feature, callback){
-		var searchDiv = $('<div class="row-fluid"></div>').css('z-index', 10000);
-		var searchGroup = $('<div class="input-append span4"></div>');
+		var searchDiv = $('<div class="row"></div>').css('z-index', 10000);
+		var searchGroup = $('<div class="group-append col-md-4"></div>');
 		var searchField = $('<input type="text" data-provide="typeahead" />');
-		var addTermButton = $('<button class="btn" type="button">Add annotation</button>');
+		var addTermButton = $('<button class="btn btn-default" type="button">Add annotation</button>');
 		searchField.appendTo(searchGroup);
 		addTermButton.appendTo(searchGroup);
 		searchField.typeahead({

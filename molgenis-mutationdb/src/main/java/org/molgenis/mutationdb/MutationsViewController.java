@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping(URI)
 public class MutationsViewController extends MolgenisPluginController
 {
-	public static final String ID = "col7a1_mutations";
+	public static final String ID = "col7a1-mutations";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	public static final String ENTITYNAME_MUTATIONSVIEW = "import_mutationsview";
 	public static final String ENTITYNAME_MUTATIONS = "import_mutations";

@@ -32,9 +32,9 @@
 		var isHidden = container.find('.termurl:eq(0)').is(':hidden');
 		container.empty();
 		$.each(entities, function(rowIndex, entity){
-			var layoutDiv = $('<div />').addClass('row-fluid');
-			var termDiv = $('<div />').addClass('span4').append(entity.term).appendTo(layoutDiv);
-			var ontologyTermMatchDiv= $('<div />').addClass('span8 div-expandable').appendTo(layoutDiv);
+			var layoutDiv = $('<div />').addClass('row');
+			var termDiv = $('<div />').addClass('col-md-4').append(entity.term).appendTo(layoutDiv);
+			var ontologyTermMatchDiv= $('<div />').addClass('col-md-8 div-expandable').appendTo(layoutDiv);
 			
 			//Collect all the scores from the candidate ontology term mappings
 			var scoreGroup = [];
@@ -58,7 +58,6 @@
 					'html' : true,
 					'content' : 'Matched by <u>' + (isEqual ? 'lable' : 'synonym') + '</u> shown below : <br><br> <strong>' + hit.columnValueMap.ontologyTermSynonym + '</strong><br>'
 				};
-				
 				ontologyTermMatchDiv.append(newLineDiv);
 				ontologyTermNameDiv.popover(popoverOption).click(function(){
 					ontologyTree.locateTerm(hit.columnValueMap);
@@ -79,12 +78,12 @@
 				}
 			});
 			
-			var divWithColor = $('<div />').addClass('span12 well div-hover').append(layoutDiv);
-			$('<div />').addClass('row-fluid').append(divWithColor).appendTo(container);
+			var divWithColor = $('<div />').addClass('col-md-12 well div-hover').append(layoutDiv);
+			$('<div />').addClass('row').append(divWithColor).appendTo(container);
 		});
 		if(isHidden){
 			container.find('.termurl').hide();
-			$('.matchterm').removeClass('span5').addClass('span8');
+			$('.matchterm').removeClass('col-md-5').addClass('col-md-8');
 		}
 		initToggle();
 	}

@@ -9,9 +9,9 @@ import java.net.URISyntaxException;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.AppConfig;
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
@@ -141,20 +141,26 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 	public void testImportReportNoMeta() throws IOException, InvalidFormatException, InterruptedException
 	{
 		dataService = mock(DataService.class);
-		MysqlRepository repository = mock(MysqlRepository.class);
-		EntityMetaData entityMetaDataPerson = new DefaultEntityMetaData("import_person");
-		EntityMetaData entityMetaDataCity = new DefaultEntityMetaData("import_city");
-		entityMetaDataPerson.getAttribute("firstName");
-		entityMetaDataPerson.getAttribute("lastName");
-		entityMetaDataPerson.getAttribute("height");
-		entityMetaDataPerson.getAttribute("active");
-		entityMetaDataPerson.getAttribute("children");
-		entityMetaDataPerson.getAttribute("birthplace");
-		entityMetaDataCity.getAttribute("name");
-		when(dataService.getRepositoryByEntityName("import_person")).thenReturn(repository);
-		when(repository.getEntityMetaData()).thenReturn(entityMetaDataPerson);
-		when(dataService.getRepositoryByEntityName("import_city")).thenReturn(repository);
-		when(repository.getEntityMetaData()).thenReturn(entityMetaDataCity);
+
+		MysqlRepository repositoryCity = mock(MysqlRepository.class);
+		DefaultEntityMetaData entityMetaDataCity = new DefaultEntityMetaData("import_city");
+		entityMetaDataCity.addAttribute("name").setIdAttribute(true).setNillable(false);
+		when(dataService.getRepositoryByEntityName("import_city")).thenReturn(repositoryCity);
+		when(repositoryCity.getEntityMetaData()).thenReturn(entityMetaDataCity);
+
+		MysqlRepository repositoryPerson = mock(MysqlRepository.class);
+		DefaultEntityMetaData entityMetaDataPerson = new DefaultEntityMetaData("import_person");
+		entityMetaDataPerson.addAttribute("firstName").setIdAttribute(true).setNillable(false);
+		entityMetaDataPerson.addAttribute("lastName");
+		entityMetaDataPerson.addAttribute("height").setDataType(MolgenisFieldTypes.INT);
+		entityMetaDataPerson.addAttribute("active").setDataType(MolgenisFieldTypes.BOOL);
+		entityMetaDataPerson.addAttribute("children").setDataType(MolgenisFieldTypes.MREF)
+				.setRefEntity(entityMetaDataPerson);
+		entityMetaDataPerson.addAttribute("birthplace").setDataType(MolgenisFieldTypes.XREF)
+				.setRefEntity(entityMetaDataCity);
+
+		when(dataService.getRepositoryByEntityName("import_person")).thenReturn(repositoryPerson);
+		when(repositoryPerson.getEntityMetaData()).thenReturn(entityMetaDataPerson);
 
 		// cleanup
 		store.drop("import_person");
@@ -162,7 +168,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		store.drop("import_country");
 
 		// create test excel
-		
+
 		File f = ResourceUtils.getFile(getClass(), "/example.xlsx");
 		// TODO add good example to repo
 
