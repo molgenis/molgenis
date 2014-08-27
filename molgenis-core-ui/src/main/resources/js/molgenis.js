@@ -372,7 +372,7 @@ function createInput(attr, attrs, val, lbl) {
 		$div.datetimepicker(dataType === 'DATE' ? { pickTime : false } : { pickTime : true, useSeconds : true });
 		return $div;
 	case 'DECIMAL':
-		var input = createBasicInput('number', $.extend({}, attrs, {'step': 'any'}), val);
+		var input = createBasicInput('number', $.extend({}, attrs, {'step': 'any'}), val).addClass('form-control');
 		if(!attr.nillable)
 			input.prop('required', true);
 		return input;
@@ -383,22 +383,22 @@ function createInput(attr, attrs, val, lbl) {
 			if(typeof attr.range.min) opts.min = attr.range.min;
 			if(typeof attr.range.max !== 'undefined') opts.max = attr.range.max;
 		}
-		var input = createBasicInput('number', opts, val);
+		var input = createBasicInput('number', opts, val).addClass('form-control');
 		if(!attr.nillable)
 			input.prop('required', true);
 		return input;
 	case 'EMAIL':
-		return createBasicInput('email', attrs, val);
+		return createBasicInput('email', attrs, val).addClass('form-control');
 	case 'HTML':
 	case 'HYPERLINK':
 	case 'STRING':
 	case 'TEXT':
 	case 'ENUM':
 	case 'SCRIPT':
-		return createBasicInput('text', attrs, val);
+		return createBasicInput('text', attrs, val).addClass('form-control');
 	case 'MREF':
 	case 'XREF':
-		return createBasicInput('hidden', attrs, val);
+		return createBasicInput('hidden', attrs, val).addClass('form-control');
 	case 'FILE':
 	case 'IMAGE':
 		throw 'Unsupported data type: ' + dataType;
