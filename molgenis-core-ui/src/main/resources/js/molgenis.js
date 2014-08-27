@@ -598,7 +598,7 @@ function showSpinner(callback) {
 		// do not add fade effect on modal: http://stackoverflow.com/a/22101894
 		var items = [];
 		items.push('<div class="modal" id="spinner" tabindex="-1" aria-labelledby="spinner-modal-label" aria-hidden="true">');
-		items.push('<div class="modal-dialog">');
+		items.push('<div class="modal-dialog modal-sm">');
 		items.push('<div class="modal-content">');
 		items.push('<div class="modal-header"><h4 class="modal-title" id="spinner-modal-label">Loading ...</h4></div>');
 		items.push('<div class="modal-body"><div class="modal-body-inner"><img src="/img/waiting-spinner.gif"></div></div>');
