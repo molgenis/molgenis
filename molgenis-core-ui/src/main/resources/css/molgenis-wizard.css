@@ -10,3 +10,8 @@ ul.pager {
 ul.pager li.next {
 	margin-left: 12px;
 }
+
+.bwizard-steps .badge.inverse{
+	background-color: white;
+	color: #007acc;
+}

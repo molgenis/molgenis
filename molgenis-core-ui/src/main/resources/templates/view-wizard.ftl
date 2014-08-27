@@ -5,17 +5,17 @@
 <#assign js=['molgenis-wizard.js'] + javascripts>
 
 <@header css js/>
-	<div class="row-fluid">
+	<div class="row">
 		<div id="wizard">
 			<ol class="bwizard-steps clearfix" role="tablist">
 				<#list wizard.pages as wizardPage>
 					<#if wizardPage == wizard.currentPage>
 						<li role="tab" class="active">
-							<span class="label badge-inverse">${wizardPage_index + 1}</span> ${wizardPage.title}
+							<span class="badge inverse">${wizardPage_index + 1}</span> ${wizardPage.title}
 						</li>
 					<#else>
 						<li role="tab">
-							<span class="label">${wizardPage_index + 1}</span> ${wizardPage.title}
+							<span class="badge">${wizardPage_index + 1}</span> ${wizardPage.title}
 						</li>
 					</#if>
 				</#list>

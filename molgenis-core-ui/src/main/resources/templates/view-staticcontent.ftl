@@ -2,27 +2,13 @@
 <#include "molgenis-footer.ftl">
 <@header/>
 <#if isCurrentUserCanEdit?has_content && isCurrentUserCanEdit>
-<div class="row-fluid">
-   <div class="control-group">
-		<div class="controls">
-			<div class="btn-group">
-				<ul>
-					<li>
-						<form action="${context_url}/upload-logo" method="POST" enctype="multipart/form-data">
-							<input type="file" name="logo" />
-							<input type="submit" value="Upload logo" class="btn" />
-						</form>
-					</li>
-					<li><a id="editBtn" href="${context_url}/edit" class="btn">Edit page</a></li>
-				</ul>
-			</div>
-		</div>
-	</div>	
+<div class="row">
+    <a href="${context_url}/edit" class="btn btn-default pull-right">Edit page</a>
 </div>
 </#if>
 <#if content?has_content>
-<div class="row-fluid">
-	<div class="span12">${content}</div>
+<div class="row">
+	<div class="col-md-12">${content}</div>
 </div>
 </#if>
 <@footer/>

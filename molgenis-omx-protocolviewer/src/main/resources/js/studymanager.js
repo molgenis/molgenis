@@ -11,25 +11,25 @@
 		var updateStudyDefinitionBtn = $('#update-study-definition-btn');
         var exportStudyDefinitionBtn = $('#export-study-definition-btn');
 		
-		function createDynatreeConfig(catalog) {
-			function createDynatreeConfigRec(node, dynaNode) {
-				var dynaChild = {key: node.id, title: node.name, select: node.selected, isFolder: true, children:[]};
-				dynaNode.push(dynaChild);
+		function createTreeConfig(catalog) {
+			function createTreeConfigRec(node, treeNode, expanded) {
+				var treeChild = {key: node.id, title: node.name, expanded: expanded, selected: node.selected, folder: true, children:[]};
+				treeNode.push(treeChild);
 				if(node.children) {
 					$.each(node.children, function(idx, child) {
-						createDynatreeConfigRec(child, dynaChild.children);
+						createTreeConfigRec(child, treeChild.children, false);
 					});
 				}
 				if(node.items) {
 					$.each(node.items, function(idx, item) {
-						dynaChild.children.push({key: item.id, title: item.name, select: item.selected});
+						treeChild.children.push({key: item.id, title: item.name, selected: item.selected});
 					});
 				}
 			}
 			
-			var dynaNodes = [];
-			createDynatreeConfigRec(catalog, dynaNodes);
-			return dynaNodes;
+			var treeNodes = [];
+			createTreeConfigRec(catalog, treeNodes, true);
+			return treeNodes;
 		}
 		
 		function createCatalogInfo(catalog) {
@@ -42,7 +42,7 @@
 			return items.join('');
 		}
 		
-		function updateStudyDefinitionTable() {
+		function updateStudyDefinitionTable() {			
 			$.ajax({
 				type : 'POST',
 				url : molgenis.getContextUrl() + '/list',
@@ -81,7 +81,7 @@
 		function updateStudyDefinitionViewer() {
 			// clear previous tree
 			if (viewTreeContainer.children('ul').length > 0)
-				viewTreeContainer.dynatree('destroy');
+				viewTreeContainer.fancytree('destroy');
 			viewInfoContainer.empty();
 			viewTreeContainer.empty();
 			viewTreeContainer.html('Loading viewer ...');
@@ -94,7 +94,12 @@
 				success : function(result) {
 					viewInfoContainer.html(createCatalogInfo(result.catalog));
 					viewTreeContainer.empty();
-					viewTreeContainer.dynatree({'minExpandLevel': 2, 'children': createDynatreeConfig(result.catalog), 'selectMode': 3, 'debugLevel': 0});
+					viewTreeContainer.fancytree({'minExpandLevel': 2, 'source': createTreeConfig(result.catalog), 'selectMode': 3, 'debugLevel': 0});
+					viewTreeContainer.fancytree('getTree').getRootNode().sortChildren(function(a, b) { 
+						if(a.folder && !b.folder) return -1;
+						else if(!a.folder && b.folder) return 1;
+						else return molgenis.naturalSort(a.title, b.title);
+					}, true);
 				},
 				error: function (xhr) {
 					viewTreeContainer.empty();
@@ -110,7 +115,7 @@
             {
                 // clear previous tree
                 if (editTreeContainer.children('ul').length > 0)
-                    editTreeContainer.dynatree('destroy');
+                    editTreeContainer.fancytree('destroy');
                 editInfoContainer.empty();
                 editTreeContainer.empty();
                 editTreeContainer.html('Loading editor ...');
@@ -123,7 +128,12 @@
                     success : function(result) {
                         editInfoContainer.html(createCatalogInfo(result.catalog));
                         editTreeContainer.empty();
-                        editTreeContainer.dynatree({'minExpandLevel': 2, 'children': createDynatreeConfig(result.catalog), 'selectMode': 3, 'debugLevel': 0, 'checkbox': true});
+                        editTreeContainer.fancytree({'minExpandLevel': 2, 'source': createTreeConfig(result.catalog), 'selectMode': 3, 'debugLevel': 0, 'checkbox': true});
+                        editTreeContainer.fancytree('getTree').getRootNode().sortChildren(function(a, b) { 
+    						if(a.folder && !b.folder) return -1;
+    						else if(!a.folder && b.folder) return 1;
+    						else return molgenis.naturalSort(a.title, b.title);
+    					}, true);
                         editStateSelect.val(result.status);
                     },
                     error: function (xhr) {
@@ -139,10 +149,10 @@
 			if($('#study-definition-editor').is(':visible'))
 				updateStudyDefinitionEditor();
 		});
-		$('a[data-toggle="tab"][href="#study-definition-viewer"]').on('show', function (e) {
+		$('a[data-toggle="tab"][href="#study-definition-viewer"]').on('show.bs.tab', function (e) {
 			updateStudyDefinitionViewer();
 		});
-		$('a[data-toggle="tab"][href="#study-definition-editor"]').on('show', function (e) {
+		$('a[data-toggle="tab"][href="#study-definition-editor"]').on('show.bs.tab', function (e) {
 			updateStudyDefinitionEditor();
 		});
 		
@@ -157,7 +167,7 @@
 			var studyDefinitionId = $('#studyDefinitionForm input[type="radio"]:checked').val();
 
             // get selected nodes
-            var catalogItemIds = $.map(editTreeContainer.dynatree('getTree').getSelectedNodes(), function (node) {
+            var catalogItemIds = $.map(editTreeContainer.fancytree('getTree').getSelectedNodes(), function (node) {
                 if (!node.data.isFolder) {
                     return node.data.key;
                 }
@@ -220,6 +230,11 @@
 		$('#state-select').change();
 		
 		$('#search-button').on('click', function(){
+			updateStudyDefinitionTable();
+		});
+		
+		$('#search-clear-button').on('click', function(){
+			$('#studydefinition-search').val('');
 			updateStudyDefinitionTable();
 		});
 		

@@ -51,7 +51,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 public class MysqlRepository extends AbstractAggregateableCrudRepository implements Manageable
-
 {
 	public static final String URL_PREFIX = "mysql://";
 	public static final int BATCH_SIZE = 100000;
@@ -330,7 +329,7 @@ public class MysqlRepository extends AbstractAggregateableCrudRepository impleme
 	private void addMrefs(final List<Entity> mrefs, final AttributeMetaData att)
 	{
 		final AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
-		final AttributeMetaData refAttribute = att.getRefEntity().getIdAttribute();
+		final AttributeMetaData refEntityIdAttribute = att.getRefEntity().getIdAttribute();
 
 		StringBuilder mrefSql = new StringBuilder();
 		mrefSql.append("INSERT INTO ").append(getEntityMetaData().getName()).append('_').append(att.getName())
@@ -342,6 +341,7 @@ public class MysqlRepository extends AbstractAggregateableCrudRepository impleme
 			@Override
 			public void setValues(PreparedStatement preparedStatement, int i) throws SQLException
 			{
+
 				if (logger.isDebugEnabled())
 				{
 					logger.debug("mref: " + mrefs.get(i).get(idAttribute.getName()) + ", "
@@ -353,12 +353,14 @@ public class MysqlRepository extends AbstractAggregateableCrudRepository impleme
 				Object value = mrefs.get(i).get(att.getName());
 				if (value instanceof Entity)
 				{
-					preparedStatement.setObject(2,
-							refAttribute.getDataType().convert(((Entity) value).get(idAttribute.getName())));
+					preparedStatement.setObject(
+							2,
+							refEntityIdAttribute.getDataType().convert(
+									((Entity) value).get(refEntityIdAttribute.getName())));
 				}
 				else
 				{
-					preparedStatement.setObject(2, refAttribute.getDataType().convert(value));
+					preparedStatement.setObject(2, refEntityIdAttribute.getDataType().convert(value));
 				}
 			}
 
@@ -1109,7 +1111,7 @@ public class MysqlRepository extends AbstractAggregateableCrudRepository impleme
 		final List<Object> ids = new ArrayList<Object>();
 		final Map<String, List<Entity>> mrefs = new HashMap<String, List<Entity>>();
 
-		jdbcTemplate.batchUpdate(this.getUpdateSql(), new BatchPreparedStatementSetter()
+		jdbcTemplate.batchUpdate(getUpdateSql(), new BatchPreparedStatementSetter()
 		{
 			@Override
 			public void setValues(PreparedStatement preparedStatement, int rowIndex) throws SQLException

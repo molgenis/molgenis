@@ -7,7 +7,7 @@
 <@header css js/>
 
 <div class="container-fluid">
-	<div class="row-fluid">
+	<div class="row">
 		<h3>Scripts <@hasPermission entityName='script' permission="WRITE"><a id="create-script-btn" href="#" style="margin:30px 10px"><img src="/img/new.png"></a></@hasPermission></h3>
 		<table class="table table-condensed table-bordered">
 			<thead>
@@ -45,14 +45,14 @@
 							</#list>
 						</#if>
 					</td>
-					<td><a href="#" data-hasAttributes="${script.parameters?has_content?string("true","false")}" class="icon-large icon-refresh execute"></a></td>
+					<td><a href="#" data-hasAttributes="${script.parameters?has_content?string("true","false")}" class="execute"><span class="glyphicon glyphicon-refresh"></span></a></td>
 				</tr>
 				</#list>
 			</#if>
 			</tbody>
 		</table>
 	</div>
-	<div class="row-fluid">
+	<div class="row">
 		<h3>Parameters <@hasPermission entityName='scriptparameter' permission="WRITE"><a id="create-scriptparameter-btn" href="#" style="margin:30px 10px"><img src="/img/new.png"></a></@hasPermission></h3>
 		<table class="table table-condensed table-bordered" style="width: 25%">
 			<thead>
@@ -73,12 +73,12 @@
 	</div>
 </div>
 
-<div class="modal fade medium" id="parametersModal" tabindex="-1" role="dialog" aria-hidden="true">
-	<div class="modal-dialog">
+<div class="modal" id="parametersModal" tabindex="-1" role="dialog" aria-labelledby="parametersModal-label" aria-hidden="true">
+	<div class="modal-dialog modal-sm">
 		<div class="modal-content">				
 	      	<div class="modal-header">
-	        	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-	        	<h4 class="modal-title">Parameters</h4>
+	      	    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="parametersModal-label">Parameters</h4>
 	     	</div>
 	      	<div class="modal-body">
 				<form id="parametersForm" class="form-horizontal"></form>
@@ -91,11 +91,11 @@
 	</div>
 </div>
 
-<div class="modal fade medium" id="formModal" tabindex="-1" role="dialog" aria-hidden="true">
-	<div class="modal-dialog">
+<div class="modal" id="formModal" tabindex="-1" role="dialog" aria-labelledby="formModalTitle" aria-hidden="true">
+	<div class="modal-dialog modal-lg">
 		<div class="modal-content">				
 	      	<div class="modal-header">
-	        	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	        	<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
 	        	<h4 class="modal-title" id="formModalTitle"></h4>
 	     	</div>
 	      	<div class="modal-body">
@@ -111,9 +111,9 @@
 
 <script id="parameters-template" type="text/x-handlebars-template">
 	{{#each parameters}}
-		<div class="control-group">
-			<label class="control-label">{{name}}</label>
-			<div class="controls">
+		<div class="form-group">
+			<label class="col-md-3 control-label">{{name}}</label>
+			<div class="col-md-9">
     			<input type="text" name="{{name}}" value="" class="required">
     		</div>
 		</div>	

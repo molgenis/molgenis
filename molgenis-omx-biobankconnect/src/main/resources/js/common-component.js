@@ -43,7 +43,7 @@
 		}
 		var footer = $('<div />');
 		footer.addClass('modal-footer');
-		footer.append('<button name="annotation-btn-close" class="btn" data-dismiss="#annotation-modal" aria-hidden="true">Close</button>');
+		footer.append('<button name="annotation-btn-close" class="btn btn-default" data-dismiss="#annotation-modal" aria-hidden="true">Close</button>');
 
 		this.modal.append(header);
 		this.modal.append(body);
@@ -80,7 +80,7 @@
 	
 		var footer = $('<div />');
 		footer.addClass('modal-footer');
-		footer.append('<button name="annotation-btn-close" class="btn" data-dismiss="modal" aria-hidden="true">Close</button>');
+		footer.append('<button name="annotation-btn-close" class="btn btn-default" data-dismiss="modal" aria-hidden="true">Close</button>');
 
 		this.modal.append(header);
 		this.modal.append(body);

@@ -159,12 +159,12 @@
 					    items.push('">');
 					    items.push('<div class="accordion-inner">');
 					    items.push('<div class="container-fluid">');
-					    items.push('<div class="row-fluid">');
-					    items.push('<div class="span3">');
+					    items.push('<div class="row">');
+					    items.push('<div class="col-md-3">');
 					    items.push('<h3>Protocol summary</h3>');
 					    items.push('<p>' + (protocol.description || 'N/A') + '</p>');
 					    items.push('</div>');
-					    items.push('<div id="table-protocol-container" class="span9">');
+					    items.push('<div id="table-protocol-container" class="col-md-9">');
 					    
 						// build protocol result table
 						var features = $.merge(matchedFeatures, remainingFeatures);
@@ -236,12 +236,6 @@
 		});
 		$('#entity-instance-select').change(function() {
 			molgenis.onEntitySelectionChange($(this).val());
-		});
-
-		$(document).on('show', '#accordion .collapse', function() {
-		    $(this).parent().find(".icon-chevron-right").removeClass("icon-chevron-right").addClass("icon-chevron-down");
-		}).on('hide', '#accordion .collapse', function() {
-		    $(this).parent().find(".icon-chevron-down").removeClass("icon-chevron-down").addClass("icon-chevron-right");
 		});
 		
 		var selected = $('#entity-instance-select').val();

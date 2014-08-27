@@ -111,21 +111,21 @@
 				error: function (xhr, textStatus, errorThrown) {
 					var errorMessage = JSON.parse(xhr.responseText).errorMessage;
 					$('#plugin-container .alert').remove();
-					$('#plugin-container').prepend('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> ' + errorMessage + '</div>');
+					$('#plugin-container').prepend('<div class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> ' + errorMessage + '</div>');
 				}
 			});
 		});
 
-		$('a[data-toggle="tab"][href="#plugin-group-permission-manager"]').on('show', function (e) {
+		$('a[data-toggle="tab"][href="#plugin-group-permission-manager"]').on('show.bs.tab', function (e) {
 			$('#plugin-group-select').change();
 		});
-		$('a[data-toggle="tab"][href="#plugin-user-permission-manager"]').on('show', function (e) {
+		$('a[data-toggle="tab"][href="#plugin-user-permission-manager"]').on('show.bs.tab', function (e) {
 			$('#plugin-user-select').change();
 		});
-		$('a[data-toggle="tab"][href="#entity-class-group-permission-manager"]').on('show', function (e) {
+		$('a[data-toggle="tab"][href="#entity-class-group-permission-manager"]').on('show.bs.tab', function (e) {
 			$('#entity-class-group-select').change();
 		});
-		$('a[data-toggle="tab"][href="#entity-class-user-permission-manager"]').on('show', function (e) {
+		$('a[data-toggle="tab"][href="#entity-class-user-permission-manager"]').on('show.bs.tab', function (e) {
 			$('#entity-class-user-select').change();
 		});
 		

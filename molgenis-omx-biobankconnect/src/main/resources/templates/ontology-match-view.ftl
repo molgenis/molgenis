@@ -4,17 +4,17 @@
 <#assign js=["jquery-ui-1.9.2.custom.min.js", "bootstrap-fileupload.min.js", "simple_statistics.js"]>
 <@header css js/>
 <form id="evaluationForm" class="form-horizontal" enctype="multipart/form-data">
-	<div class="row-fluid">
-		<div class="span12">
-			<div class="row-fluid">
-				<div class="span12">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="row">
+				<div class="col-md-12">
 					<legend><center><h3>Ontology Annotator</h3></center></legend>
 				</div>
 			</div>
-			<div class="row-fluid">
-				<div class="offset4 span4 well">
-					<div class="row-fluid">
-						<div class="offset1">
+			<div class="row">
+				<div class="col-md-offset-4 col-md-4 well">
+					<div class="row">
+						<div class="col-md-offset-1">
 							<#if ontologies?? & (ontologies?size > 0)>
 							<center><strong>Please select ontologies for annotation:</strong></center>
 							<div class="radio">
@@ -35,10 +35,10 @@
 					</div>
 				</div>
 			</div>
-			<div class="row-fluid">
-				<div class="offset2 span8">
+			<div class="row">
+				<div class="col-md-offset-2 col-md-8">
 					<div class="fileupload fileupload-new" data-provides="fileupload">
-						<div class="input-append">
+						<div class="group-append">
 							<div class="uneditable-input">
 								<i class="icon-file fileupload-exists"></i>
 								<span class="fileupload-preview"></span>
@@ -55,14 +55,14 @@
 					</div>
 				</div>
 			</div>
-			<div class="row-fluid">
-				<div class="offset2 span8">
+			<div class="row">
+				<div class="col-md-offset-2 col-md-8">
 					<center><textarea name="inputTerms" style="width:100%;resize:none" class="form-control" rows="12" placeholder="Please paste a list of terms here. E.g. absent radius"></textarea></center>
 				</div>
 			</div>
 			<br>
-			<div class="row-fluid">
-				<div class="offset2 span8">
+			<div class="row">
+				<div class="col-md-offset-2 col-md-8">
 					<button id="match-button" type="button" class="btn btn-primary">Match</button>
 				</div>
 			</div>

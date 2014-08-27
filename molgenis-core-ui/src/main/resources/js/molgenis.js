@@ -15,6 +15,7 @@
 	};
 
 	molgenis.createAlert = function(alerts, type, container) {
+		console.log(alerts, type, container);
 		if (type !== 'error' && type !== 'warning' && type !== 'success')
 			type = 'error';
 		if (container === undefined) {
@@ -24,7 +25,7 @@
 
 		var items = [];
 		items.push('<div class="alert alert-');
-		items.push(type);
+		items.push(type === 'error' ? 'danger' : type); // backwards compatibility
 		items
 				.push('"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>');
 		items.push(type.charAt(0).toUpperCase() + type.slice(1));
@@ -352,27 +353,26 @@ function createInput(attr, attrs, val, lbl) {
 		return label.append($input).append(lbl);
 	case 'DATE':
 	case 'DATE_TIME':
-		var format = dataType === 'DATE' ? 'yyyy-MM-dd'
-				: 'yyyy-MM-dd\'T\'hh:mm:ss' + getCurrentTimezoneOffset();
-		var items = [];
-		items.push('<div class="input-append date">');
-		items.push('<input data-format="' + format
-				+ '" data-language="en" type="text"' + (attr.nillable? ' class="nillable"' : '') + '>');
-		// workaround, because adding a add-on span will introduce an extra calendar icon on top of the remove icon
-		if(attr.nillable)
-			items.push('<span class="add-on-workaround"><i class="icon-remove empty-date-input clear-date-time-btn"></i></span>');
-		items.push('<span class="add-on">');
-		items.push('<i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>'); // FIXME date type should not display time
-		items.push('</span>');
-		items.push('</div>');
-		var datepicker = $(items.join(''));
-		if (attrs)
-			$('input', datepicker).attr(attrs);
-		if (val !== undefined)
-			$('input', datepicker).val(val);
-		return datepicker.datetimepicker({pickTime: dataType === 'DATE_TIME'});
+		var $div = $('<div>').addClass('group-append date input-group');
+		var $input = createBasicInput('text', attrs, val)
+		    .addClass('form-control')
+		    .attr('data-date-format', dataType === 'DATE' ? 'YYYY-MM-DD' : 'YYYY-MM-DDTHH:mm:ssZZ')
+		    .appendTo($div);
+		if (attr.nillable) {
+		    $input.addClass('nillable');
+		    $('<span>')
+		        .addClass('input-group-addon')
+		        .append($('<span>')
+		        		.addClass('glyphicon glyphicon-remove empty-date-input clear-date-time-btn'))
+		        .appendTo($div);
+		}
+		$('<span>').addClass('input-group-addon datepickerbutton')
+		    .append($('<span>').addClass('glyphicon glyp2icon-calendar'))
+		    .appendTo($div);
+		$div.datetimepicker(dataType === 'DATE' ? { pickTime : false } : { pickTime : true, useSeconds : true });
+		return $div;
 	case 'DECIMAL':
-		var input = createBasicInput('number', $.extend({}, attrs, {'step': 'any'}), val);
+		var input = createBasicInput('number', $.extend({}, attrs, {'step': 'any'}), val).addClass('form-control');
 		if(!attr.nillable)
 			input.prop('required', true);
 		return input;
@@ -383,22 +383,22 @@ function createInput(attr, attrs, val, lbl) {
 			if(typeof attr.range.min) opts.min = attr.range.min;
 			if(typeof attr.range.max !== 'undefined') opts.max = attr.range.max;
 		}
-		var input = createBasicInput('number', opts, val);
+		var input = createBasicInput('number', opts, val).addClass('form-control');
 		if(!attr.nillable)
 			input.prop('required', true);
 		return input;
 	case 'EMAIL':
-		return createBasicInput('email', attrs, val);
+		return createBasicInput('email', attrs, val).addClass('form-control');
 	case 'HTML':
 	case 'HYPERLINK':
 	case 'STRING':
 	case 'TEXT':
 	case 'ENUM':
 	case 'SCRIPT':
-		return createBasicInput('text', attrs, val);
+		return createBasicInput('text', attrs, val).addClass('form-control');
 	case 'MREF':
 	case 'XREF':
-		return createBasicInput('hidden', attrs, val);
+		return createBasicInput('hidden', attrs, val).addClass('form-control');
 	case 'FILE':
 	case 'IMAGE':
 		throw 'Unsupported data type: ' + dataType;
@@ -597,19 +597,21 @@ function showSpinner(callback) {
 	if (spinner.length === 0) {
 		// do not add fade effect on modal: http://stackoverflow.com/a/22101894
 		var items = [];
-		items
-				.push('<div id="spinner" class="modal hide" data-backdrop="static">');
-		items.push('<div class="modal-header"><h3>Loading ...</h3></div>');
-		items
-				.push('<div class="modal-body"><div class="modal-body-inner"><img src="/img/waiting-spinner.gif"></div></div>');
+		items.push('<div class="modal" id="spinner" tabindex="-1" aria-labelledby="spinner-modal-label" aria-hidden="true">');
+		items.push('<div class="modal-dialog modal-sm">');
+		items.push('<div class="modal-content">');
+		items.push('<div class="modal-header"><h4 class="modal-title" id="spinner-modal-label">Loading ...</h4></div>');
+		items.push('<div class="modal-body"><div class="modal-body-inner"><img src="/img/waiting-spinner.gif"></div></div>');
 		items.push('</div>');
+		items.push('</div>');
+		
 		$('body').append(items.join(''));
 		spinner = $('#spinner');
 		spinner.data('count', 0);
 	}
 
 	if (callback) {
-		spinner.on('shown', function() {
+		spinner.on('shown.bs.modal', function() {
 			callback();
 		});
 	}
@@ -691,6 +693,21 @@ $(function() {
 		}
 	});
 
+	// support overlapping bootstrap modals:
+	// http://stackoverflow.com/questions/19305821/bootstrap-3-0-multiple-modals-overlay
+	$(document).on('show.bs.modal', '.modal', function (event) {
+	    var zIndex = 1040 + (10 * $('.modal:visible').length);
+	    $(this).css('z-index', zIndex);
+	    setTimeout(function() {
+	        $('.modal-backdrop').not('.modal-stack').css('z-index', zIndex - 1).addClass('modal-stack');
+	    }, 0);
+	});
+	
+	// focus first input on modal display
+	$(document).on('shown.bs.modal', '.modal', function() {
+		$(this).find('input:visible:first').focus();
+	});
+	
 	/**
 	 * Add download functionality to JQuery. data can be string of parameters or
 	 * array/object

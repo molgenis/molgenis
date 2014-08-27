@@ -284,13 +284,6 @@
 	 * @memberOf molgenis.dataexplorer.data
 	 */
 	$(function() {
-		// bind event handlers with namespace
-		$(document).on('show.data', '#genomebrowser .collapse', function() {
-            $(this).parent().find(".icon-chevron-right").removeClass("icon-chevron-right").addClass("icon-chevron-down");
-        }).on('hide.data', '#genomebrowser .collapse', function() {
-            $(this).parent().find(".icon-chevron-down").removeClass("icon-chevron-down").addClass("icon-chevron-right");
-        });
-
 		$(document).on('changeAttributeSelection.data', function(e, data) {
 			if($('#data-table-container'))
 				$('#data-table-container').table('setAttributes', data.attributes);

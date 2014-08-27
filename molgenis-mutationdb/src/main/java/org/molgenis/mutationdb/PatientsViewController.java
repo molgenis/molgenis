@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping(URI)
 public class PatientsViewController extends MolgenisPluginController
 {
-	public static final String ID = "col7a1_patients";
+	public static final String ID = "col7a1-patients";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	public final static List<String> HEADERS_NAMES = Arrays.asList("Patient ID", "Phenotype", "Mutation",
 			"cDNA change", "Protein change", "Exon", "Consequence", "Reference");

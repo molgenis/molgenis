@@ -1,5 +1,7 @@
 package org.molgenis.data.support;
 
+import java.util.List;
+
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
@@ -7,6 +9,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Range;
 import org.molgenis.fieldtypes.CategoricalField;
+import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
@@ -262,9 +265,31 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		return range;
 	}
 
-	public void setRange(Range range)
+	public DefaultAttributeMetaData setRange(Range range)
 	{
 		this.range = range;
+		return this;
+	}
+
+	@Override
+	public List<String> getEnumOptions()
+	{
+		if (fieldType instanceof EnumField)
+		{
+			return ((EnumField) fieldType).getEnumOptions();
+		}
+
+		return null;
+	}
+
+	public DefaultAttributeMetaData setEnumOptions(List<String> enumOptions)
+	{
+		if (fieldType instanceof EnumField)
+		{
+			((EnumField) fieldType).setEnumOptions(enumOptions);
+		}
+
+		return this;
 	}
 
 	@Override

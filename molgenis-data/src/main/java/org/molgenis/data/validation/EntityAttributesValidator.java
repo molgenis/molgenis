@@ -2,6 +2,7 @@ package org.molgenis.data.validation;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 import java.util.Set;
 
 import org.hibernate.validator.constraints.impl.EmailValidator;
@@ -64,6 +65,10 @@ public class EntityAttributesValidator
 						violation = checkRange(entity, attr, meta);
 					}
 					break;
+				case ENUM:
+					violation = checkEnum(entity, attr, meta);
+					break;
+
 				default:
 					break;
 
@@ -199,6 +204,28 @@ public class EntityAttributesValidator
 		if ((value != null) && ((value < range.getMin()) || (value > range.getMax())))
 		{
 			return createConstraintViolation(entity, attribute, meta);
+		}
+
+		return null;
+	}
+
+	private ConstraintViolation checkEnum(Entity entity, AttributeMetaData attribute, EntityMetaData meta)
+	{
+		String value = entity.getString(attribute.getName());
+		if (value != null)
+		{
+			List<String> enumOptions = attribute.getEnumOptions();
+
+			// Keep OMX/JPA happy
+			if (enumOptions == null)
+			{
+				return null;
+			}
+
+			if (!enumOptions.contains(value))
+			{
+				return createConstraintViolation(entity, attribute, meta);
+			}
 		}
 
 		return null;
