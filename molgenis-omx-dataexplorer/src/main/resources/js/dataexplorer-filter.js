@@ -193,7 +193,7 @@
 	 */
 	self.createComplexFilter = function(attribute, filter, wizard, fixedOperator) 
 	{		
-		var $container = $('<div class="complex-filter-container"></div>').data('attribute', attribute);
+		var $container = $('<div class="complex-filter-container form-group"></div>').data('attribute', attribute);
 		var useFixedOperator = (fixedOperator !== undefined && fixedOperator !== null ? true : false);
 		var filterElementOperator = null;
 		var $addButton = null;
@@ -419,7 +419,7 @@
 	 * Create simple filter
 	 */
 	self.createSimpleFilter = function(attribute, filter, wizard) {
-		var $container = $('<div class="simple-filter-container"></div>');
+		var $container = $('<div class="simple-filter-container form-group"></div>');
 		var $label = self.createFilterLabel(attribute, true, wizard);
 		$container.append($label);
 		$container.append(self.createSimpleFilterControls(attribute, filter));
