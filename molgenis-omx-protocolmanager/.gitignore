@@ -1,5 +1,2 @@
-bin/
-target/
-test-output/
-.classpath
-.project
+/target/
+/target/
