@@ -46,22 +46,25 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 			@Override
 			public Iterable<OWLClassContainer> children(OWLClassContainer classContainer)
 			{
+				// In order to index the synonyms, ontology term entries are
+				// duplicated for that purpose. However we only index the
+				// ontology terms that are original.
 				if (!classContainer.isOriginal()) return Collections.emptySet();
 
-				Set<OWLClassContainer> orderedList = new HashSet<OWLClassContainer>();
 				int count = 0;
+				Set<OWLClassContainer> orderedList = new HashSet<OWLClassContainer>();
 				OWLClass parentOWLClass = classContainer.getOWLClass();
 				for (OWLClass childClass : ontologyLoader.getChildClass(parentOWLClass))
 				{
-					// Not only the subClass is added to returned List, but also
-					// synonym treated as OWLClass is added in the ordered List
 					String definition = ontologyLoader.getDefinition(childClass);
 					String parentOntologyTermIRI = parentOWLClass.getIRI().toString();
-					String nodePath = constructNodePath(classContainer.getNodePath()) + "." + count;
+					String nodePath = constructNodePath(classContainer.getNodePath(), count);
 					String parentNodePath = classContainer.getNodePath();
 					Set<String> synonyms = ontologyLoader.getSynonyms(childClass);
 					synonyms.add(ontologyLoader.getLabel(childClass));
 
+					// Not only the subClass is added to returned List, but also
+					// synonym treated as OWLClass is added in the ordered List
 					for (String synonym : synonyms)
 					{
 						orderedList.add(new OWLClassContainer(childClass, synonym, definition, nodePath,
@@ -77,11 +80,14 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 
 		return new Iterator<Entity>()
 		{
+			// Since there are multiple root classes, in order to use tree
+			// traverse function from Guava, a psudoRoot class is created to
+			// hold all the real root classes
 			private final OWLClass pseudoRootClass = ontologyLoader.createClass(PSEUDO_ROOT_CLASS_LABEL,
 					ontologyLoader.getRootClasses());
 			private final Iterator<OWLClassContainer> iterator = traverser.preOrderTraversal(
-					new OWLClassContainer(pseudoRootClass, PSEUDO_ROOT_CLASS_LABEL, null, "0", null, null, true, false,
-							true, null)).iterator();
+					new OWLClassContainer(pseudoRootClass, PSEUDO_ROOT_CLASS_LABEL, null, "0[0]", null, null, true,
+							false, true, null)).iterator();
 
 			@Override
 			public boolean hasNext()
@@ -125,11 +131,25 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 		};
 	}
 
-	private String constructNodePath(String parentNodePath)
+	/**
+	 * A helper function to construct the nodePath with a pattern which is
+	 * started with the position of current node compared to its siblings and
+	 * followed by the depth of the tree such as 2[1]. Moreover it the parent
+	 * node is prepended to the current node to construct complete path such as
+	 * 0[0].2[1]
+	 * 
+	 * @param parentNodePath
+	 * @return
+	 */
+	private String constructNodePath(String parentNodePath, int currentPosition)
 	{
 		StringBuilder nodePathStringBuilder = new StringBuilder();
-		nodePathStringBuilder.append(parentNodePath).append('[').append(parentNodePath.split("\\.").length - 1)
-				.append(']');
+		// If the parentNodePath is empty, that is the starting position of the
+		// tree
+		if (!StringUtils.isEmpty(parentNodePath)) nodePathStringBuilder.append(parentNodePath).append('.');
+		// Create pattern of current node and add it to the path
+		nodePathStringBuilder.append(currentPosition).append('[')
+				.append(nodePathStringBuilder.toString().split("\\.").length - 1).append(']');
 		return nodePathStringBuilder.toString();
 	}
 
