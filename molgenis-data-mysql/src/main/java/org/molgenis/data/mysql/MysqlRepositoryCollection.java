@@ -5,6 +5,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -22,6 +23,9 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.model.MolgenisModelException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 public abstract class MysqlRepositoryCollection implements RepositoryCollection
 {
@@ -79,39 +83,10 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		// Upgrade old databases
 		upgradeMetaDataTables();
 
-		Map<String, DefaultEntityMetaData> metadata = new LinkedHashMap<String, DefaultEntityMetaData>();
-
-		// read the entity meta data
-		for (DefaultEntityMetaData entityMetaData : entityMetaDataRepository.getEntityMetaDatas())
-		{
-			metadata.put(entityMetaData.getName(), entityMetaData);
-
-			// add the attribute meta data of the entity
-			for (AttributeMetaData attributeMetaData : attributeMetaDataRepository
-					.getEntityAttributeMetaData(entityMetaData.getName()))
-			{
-				entityMetaData.addAttributeMetaData(attributeMetaData);
-			}
-		}
-
-		// read the refEntity
-		for (Entity attribute : attributeMetaDataRepository)
-		{
-			if (attribute.getString(AttributeMetaDataMetaData.REF_ENTITY) != null)
-			{
-				DefaultEntityMetaData entityMetaData = metadata.get(attribute
-						.getString(AttributeMetaDataMetaData.ENTITY));
-				DefaultAttributeMetaData attributeMetaData = (DefaultAttributeMetaData) entityMetaData
-						.getAttribute(attribute.getString(AttributeMetaDataMetaData.NAME));
-				EntityMetaData ref = metadata.get(attribute.getString(AttributeMetaDataMetaData.REF_ENTITY));
-				if (ref == null) throw new RuntimeException("refEntity '" + attribute.getString("refEntity")
-						+ "' missing for " + entityMetaData.getName() + "." + attributeMetaData.getName());
-				attributeMetaData.setRefEntity(ref);
-			}
-		}
+		Set<EntityMetaData> metadata = getAllEntityMetaDataIncludingAbstract();
 
 		// instantiate the repos
-		for (EntityMetaData emd : metadata.values())
+		for (EntityMetaData emd : metadata)
 		{
 			if (!emd.isAbstract())
 			{
@@ -314,6 +289,47 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		return new AggregateableCrudRepositorySecurityDecorator(repo);
 	}
 
+	public Set<EntityMetaData> getAllEntityMetaDataIncludingAbstract()
+	{
+		Map<String, EntityMetaData> metadata = Maps.newLinkedHashMap();
+
+		// read the entity meta data
+		for (DefaultEntityMetaData entityMetaData : entityMetaDataRepository.getEntityMetaDatas())
+		{
+			metadata.put(entityMetaData.getName(), entityMetaData);
+
+			// add the attribute meta data of the entity
+			for (AttributeMetaData attributeMetaData : attributeMetaDataRepository
+					.getEntityAttributeMetaData(entityMetaData.getName()))
+			{
+				entityMetaData.addAttributeMetaData(attributeMetaData);
+			}
+		}
+
+		// read the refEntity
+		for (Entity attribute : attributeMetaDataRepository)
+		{
+			if (attribute.getString(AttributeMetaDataMetaData.REF_ENTITY) != null)
+			{
+				EntityMetaData entityMetaData = metadata.get(attribute.getString(AttributeMetaDataMetaData.ENTITY));
+				DefaultAttributeMetaData attributeMetaData = (DefaultAttributeMetaData) entityMetaData
+						.getAttribute(attribute.getString(AttributeMetaDataMetaData.NAME));
+				EntityMetaData ref = metadata.get(attribute.getString(AttributeMetaDataMetaData.REF_ENTITY));
+				if (ref == null) throw new RuntimeException("refEntity '" + attribute.getString("refEntity")
+						+ "' missing for " + entityMetaData.getName() + "." + attributeMetaData.getName());
+				attributeMetaData.setRefEntity(ref);
+			}
+		}
+
+		Set<EntityMetaData> metadataSet = Sets.newLinkedHashSet();
+		for (String name : metadata.keySet())
+		{
+			metadataSet.add(metadata.get(name));
+		}
+
+		return metadataSet;
+	}
+
 	public Entity getEntityMetaDataEntity(String name)
 	{
 		return entityMetaDataRepository.findOne(name);
@@ -355,7 +371,8 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 
 			if (currentAttribute != null)
 			{
-				if (!currentAttribute.getDataType().equals(attr.getDataType()))
+				// TODO fix the equals method of FieldType (throws nullpointer)
+				if (currentAttribute.getDataType().getEnumType() != attr.getDataType().getEnumType())
 				{
 					throw new MolgenisDataException("Changing type for existing attributes is not currently supported");
 				}

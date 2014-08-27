@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
@@ -431,8 +432,11 @@ public class EmxImportServiceImpl implements EmxImporterService
 
 			try
 			{
+				Set<EntityMetaData> allMetaData = store.getAllEntityMetaDataIncludingAbstract();
+				allMetaData.addAll(metadata);
+
 				// Import metadata
-				List<EntityMetaData> resolved = DependencyResolver.resolve(metadata);
+				List<EntityMetaData> resolved = DependencyResolver.resolve(allMetaData);
 
 				for (EntityMetaData entityMetaData : resolved)
 				{
@@ -447,7 +451,7 @@ public class EmxImportServiceImpl implements EmxImporterService
 							addedEntities.add(name);
 							store.add(entityMetaData);
 						}
-						else
+						else if (!entityMetaData.isAbstract())
 						{
 							store.update(entityMetaData);
 						}
