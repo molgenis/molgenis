@@ -18,6 +18,7 @@ public class EntityMetaDataResponse
 	private final String description;
 	private final Map<String, Object> attributes;
 	private final String labelAttribute;
+	private final String idAttribute;
 
 	/**
 	 * 
@@ -81,6 +82,13 @@ public class EntityMetaDataResponse
 			this.labelAttribute = labelAttribute != null ? labelAttribute.getName() : null;
 		}
 		else this.labelAttribute = null;
+
+		if (attributesSet == null || attributesSet.contains("idAttribute".toLowerCase()))
+		{
+			AttributeMetaData idAttribute = meta.getIdAttribute();
+			this.idAttribute = idAttribute != null ? idAttribute.getName() : null;
+		}
+		else this.idAttribute = null;
 	}
 
 	public String getHref()
@@ -101,6 +109,11 @@ public class EntityMetaDataResponse
 	public String getDescription()
 	{
 		return description;
+	}
+
+	public String getIdAttribute()
+	{
+		return idAttribute;
 	}
 
 	public Map<String, Object> getAttributes()

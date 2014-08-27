@@ -86,14 +86,14 @@ public class EntitiesValidatorImpl implements EntitiesValidator
 			
 				try
 				{
-					boolean isImportableEntity = ENTITIES_IMPORTABLE.containsKey(repository.getName().toLowerCase());
+					String nameLowerCase = name.toLowerCase();
+					boolean isImportableEntity = ENTITIES_IMPORTABLE.containsKey(nameLowerCase);
 					if (isImportableEntity)
 					{
-						Class<? extends Entity> entityClazz = ENTITIES_IMPORTABLE.get(repository.getName()
-								.toLowerCase());
-						validateTable(repository.getName(), repository, entityClazz, validationReport);
+						Class<? extends Entity> entityClazz = ENTITIES_IMPORTABLE.get(nameLowerCase);
+						validateTable(name, repository, entityClazz, validationReport);
 					}
-					validationReport.getSheetsImportable().put(repository.getName(), isImportableEntity);
+					validationReport.getSheetsImportable().put(name, isImportableEntity);
 				}
 				finally
 				{
