@@ -446,7 +446,7 @@ function createInput(attr, attrs, val, lbl) {
 		// because it might not fit in the URL
 		if(options) {
 			// backward compatibility for legacy code
-			if(options.q && typeof options.q === 'object') {
+			if(options.q && Object.prototype.toString.call(options.q) !== '[object Array]') {
 				var obj = jQuery.extend({}, options.q);
 				delete options.q;
 				for(var i = 0, keys = Object.keys(obj); i < keys.length; ++i) {
