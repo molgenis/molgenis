@@ -237,12 +237,6 @@
 		$('#entity-instance-select').change(function() {
 			molgenis.onEntitySelectionChange($(this).val());
 		});
-
-		$(document).on('show.bs.modal', '#accordion .collapse', function() {
-		    $(this).parent().find(".icon-chevron-right").removeClass("icon-chevron-right").addClass("icon-chevron-down");
-		}).on('hide', '#accordion .collapse', function() {
-		    $(this).parent().find(".icon-chevron-down").removeClass("icon-chevron-down").addClass("icon-chevron-right");
-		});
 		
 		var selected = $('#entity-instance-select').val();
 		if (selected != null)

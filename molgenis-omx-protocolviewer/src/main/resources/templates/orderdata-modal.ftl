@@ -119,9 +119,6 @@
             // create selection table with pager
 			updateFeatureSelectionContainer();
         });
-        modal.on('shown.bs.modal', function () {
-            form.find('input:visible:first').focus();
-        });
         modal.on('hide.bs.modal', function () {
             form[0].reset();
             $('#orderdata-selection-table-container').empty();

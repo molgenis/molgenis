@@ -703,6 +703,11 @@ $(function() {
 	    }, 0);
 	});
 	
+	// focus first input on modal display
+	$(document).on('shown.bs.modal', '.modal', function() {
+		$(this).find('input:visible:first').focus();
+	});
+	
 	/**
 	 * Add download functionality to JQuery. data can be string of parameters or
 	 * array/object

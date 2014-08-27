@@ -32,11 +32,6 @@
   		form.validate();
 
   		<#-- modal events -->
-  		modal.on('shown.bs.modal', function (e) {
-  			e.preventDefault();
-			e.stopPropagation();
-	  		form.find('input:visible:first').focus();
-  		});
   		modal.on('hide.bs.modal', function (e) {
 			e.stopPropagation();
 	  		form[0].reset();
