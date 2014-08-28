@@ -21,6 +21,7 @@ import org.molgenis.data.validation.DefaultEntityValidator;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.js.ScriptEvaluator;
 import org.molgenis.omx.biobankconnect.wizard.CurrentUserStatus;
+import org.molgenis.omx.biobankconnect.wizard.CurrentUserStatus.STAGE;
 import org.molgenis.omx.dataset.DataSetMatrixRepository;
 import org.molgenis.omx.datasetdeleter.DataSetDeleterService;
 import org.molgenis.omx.observ.Category;
@@ -41,6 +42,7 @@ import org.molgenis.security.runas.RunAsSystem;
 import org.molgenis.security.user.UserAccountService;
 import org.mozilla.javascript.Context;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Iterables;
@@ -76,33 +78,34 @@ public class ApplyAlgorithms
 		entityMap.put(CategoricalValue.ENTITY_NAME, CategoricalValue.class);
 	}
 
+	@Async
 	@RunAsSystem
 	@Transactional
 	public void applyAlgorithm(String userName, Integer targetDataSetId, List<Integer> sourceDataSetIds)
 	{
-		Collections.sort(sourceDataSetIds);
+		currentUserStatus.setUserCurrentStage(userName, STAGE.DeleteMapping);
 		removeExistingDerivedDataSets(userName, targetDataSetId, sourceDataSetIds);
+		currentUserStatus.setUserCurrentStage(userName, STAGE.CreateMapping);
 		createDerivedDataSets(userName, targetDataSetId, sourceDataSetIds);
 		SearchResult allFeaturesResult = findAllFeatures(targetDataSetId);
 		currentUserStatus.setUserTotalNumberOfQueries(userName,
 				allFeaturesResult.getTotalHitCount() * sourceDataSetIds.size());
 
 		QueryImpl query = new QueryImpl();
-		query.pageSize(100000);
+		query.pageSize(Integer.MAX_VALUE);
 		for (Hit hit : allFeaturesResult.getSearchHits())
 		{
 			if (query.getRules().size() > 0) query.addRule(new QueryRule(Operator.OR));
 			query.addRule(new QueryRule(STORE_MAPPING_FEATURE, Operator.EQUALS, hit.getColumnValueMap().get(ENTITY_ID)));
 		}
-
-		findAllAlgorithms(userName, query, targetDataSetId, sourceDataSetIds);
-		currentUserStatus.setUserIsRunning(userName, false);
+		generateValues(userName, query, targetDataSetId, sourceDataSetIds);
+		currentUserStatus.setUserCurrentStage(userName, STAGE.StoreMapping);
 		searchService.indexRepository(new DataSetMatrixRepository(dataService, createDerivedDataSetIdentifier(userName,
 				targetDataSetId.toString(), StringUtils.join(sourceDataSetIds, '-'))));
-
+		currentUserStatus.setUserIsRunning(userName, false);
 	}
 
-	private void findAllAlgorithms(String userName, QueryImpl query, Integer targetDataSetId,
+	private void generateValues(String userName, QueryImpl query, Integer targetDataSetId,
 			List<Integer> sourceDataSetIds)
 	{
 		String derivedDataSetIdentifier = createDerivedDataSetIdentifier(userName, targetDataSetId.toString(),
@@ -139,7 +142,7 @@ public class ApplyAlgorithms
 					addValueByType(feature, observedValue, entry.getValue());
 					listOfObservedValues.add(observedValue);
 				}
-				currentUserStatus.incrementFinishedNumberOfQueries(userName);
+				currentUserStatus.incrementFinishedNumbersByOne(userName);
 			}
 		}
 		dataService.add(ObservationSet.ENTITY_NAME, observationSetMap.values());
@@ -187,37 +190,6 @@ public class ApplyAlgorithms
 		}
 	}
 
-	private String createObservationSetIdentifier(String userName, Integer targetDataSetId, Integer sourceDataSetId,
-			Integer observationSetId)
-	{
-		StringBuilder observationSetIdentifier = new StringBuilder();
-		observationSetIdentifier.append(userName).append('-').append(targetDataSetId).append('-')
-				.append(sourceDataSetId).append('-').append(observationSetId);
-		return observationSetIdentifier.toString();
-	}
-
-	private String createDerivedDataSetIdentifier(String userName, String targetDataSetId, String sourceDataSetId)
-	{
-		StringBuilder dataSetIdentifier = new StringBuilder();
-		dataSetIdentifier.append(userName).append('-').append(targetDataSetId).append('-').append(sourceDataSetId)
-				.append("-derived");
-		return dataSetIdentifier.toString();
-	}
-
-	private String createDerivedDataSetName(String userName, String targetDataSetName)
-	{
-		StringBuilder dataSetIdentifier = new StringBuilder();
-		dataSetIdentifier.append(userName).append(": derived dataset for ").append(targetDataSetName);
-		return dataSetIdentifier.toString();
-	}
-
-	private String createMappingDataSetIdentifier(String userName, Integer targetDataSetId, Integer sourceDataSetId)
-	{
-		StringBuilder dataSetIdentifier = new StringBuilder();
-		dataSetIdentifier.append(userName).append('-').append(targetDataSetId).append('-').append(sourceDataSetId);
-		return dataSetIdentifier.toString();
-	}
-
 	private void removeExistingDerivedDataSets(String userName, Integer targetDataSetId, List<Integer> sourceDataSetIds)
 	{
 		String dataSetIdentifier = createDerivedDataSetIdentifier(userName, targetDataSetId.toString(),
@@ -233,7 +205,8 @@ public class ApplyAlgorithms
 			{
 				Iterable<ObservedValue> observedValues = dataService.findAll(ObservedValue.ENTITY_NAME,
 						new QueryImpl().in(ObservedValue.OBSERVATIONSET, observationSets), ObservedValue.class);
-
+				currentUserStatus.setUserTotalNumberOfQueries(userName,
+						(long) (Iterables.size(observedValues) * sourceDataSetIds.size()));
 				for (ObservedValue value : observedValues)
 				{
 					String valueType = value.getValue().get__Type();
@@ -249,17 +222,18 @@ public class ApplyAlgorithms
 				String valueType = entryValuesByType.getKey();
 				List<Object> ids = new ArrayList<Object>(entryValuesByType.getValue());
 				dataService.delete(valueType, dataService.findAll(valueType, ids));
+				currentUserStatus.incrementFinishedNumbers(userName, ids.size());
 			}
 			dataService.getCrudRepository(ObservedValue.ENTITY_NAME).flush();
 		}
 	}
 
-	private void createDerivedDataSets(String userName, Integer targetDataSetId, List<Integer> sourceDataSetIds)
+	private DataSet createDerivedDataSets(String userName, Integer targetDataSetId, List<Integer> sourceDataSetIds)
 	{
 		DataSet targetDataSet = dataService.findOne(DataSet.ENTITY_NAME, targetDataSetId, DataSet.class);
 		DataSet derivedDataSet = new DataSet();
 		derivedDataSet.setIdentifier(createDerivedDataSetIdentifier(userName, targetDataSet.getId().toString(),
-				StringUtils.join(sourceDataSetIds, '-')));
+				sourceDataSetIds));
 		derivedDataSet.setName(createDerivedDataSetName(userName, targetDataSet.getName()));
 		derivedDataSet.setProtocolUsed(targetDataSet.getProtocolUsed());
 		dataService.add(DataSet.ENTITY_NAME, derivedDataSet);
@@ -270,6 +244,7 @@ public class ApplyAlgorithms
 			dataService.addRepository(new OmxRepository(dataService, searchService, derivedDataSet.getIdentifier(),
 					new DefaultEntityValidator(dataService, new EntityAttributesValidator())));
 		}
+		return derivedDataSet;
 	}
 
 	private SearchResult findAllFeatures(Integer targetDataSetId)
@@ -284,7 +259,7 @@ public class ApplyAlgorithms
 
 	public String validateAlgorithmInputs(Integer dataSetId, String algorithm)
 	{
-		if (algorithm.isEmpty())
+		if (StringUtils.isEmpty(algorithm))
 		{
 			return ("Algorithm is not defined!");
 		}
@@ -310,7 +285,7 @@ public class ApplyAlgorithms
 	public Map<Integer, Object> createValueFromAlgorithm(String dataType, Integer sourceDataSetId,
 			String algorithmScript)
 	{
-		if (algorithmScript.isEmpty()) return Collections.emptyMap();
+		if (StringUtils.isEmpty(algorithmScript)) return Collections.emptyMap();
 		List<String> featureNames = extractFeatureName(algorithmScript);
 		Iterable<ObservableFeature> featureIterators = dataService.findAll(ObservableFeature.ENTITY_NAME,
 				new QueryImpl().in(ObservableFeature.NAME, featureNames), ObservableFeature.class);
@@ -388,5 +363,43 @@ public class ApplyAlgorithms
 			if (!featureNames.contains(matcher.group(1))) featureNames.add(matcher.group(1));
 		}
 		return featureNames;
+	}
+
+	private String createObservationSetIdentifier(String userName, Integer targetDataSetId, Integer sourceDataSetId,
+			Integer observationSetId)
+	{
+		StringBuilder observationSetIdentifier = new StringBuilder();
+		observationSetIdentifier.append(userName).append('-').append(targetDataSetId).append('-')
+				.append(sourceDataSetId).append('-').append(observationSetId);
+		return observationSetIdentifier.toString();
+	}
+
+	public static String createDerivedDataSetIdentifier(String userName, String targetDataSetId,
+			List<Integer> sourceDataSetIds)
+	{
+		Collections.sort(sourceDataSetIds);
+		return createDerivedDataSetIdentifier(userName, targetDataSetId, StringUtils.join(sourceDataSetIds, '-'));
+	}
+
+	public static String createDerivedDataSetIdentifier(String userName, String targetDataSetId, String sourceDataSetId)
+	{
+		StringBuilder dataSetIdentifier = new StringBuilder();
+		dataSetIdentifier.append(userName).append('-').append(targetDataSetId).append('-').append(sourceDataSetId)
+				.append("-derived");
+		return dataSetIdentifier.toString();
+	}
+
+	private String createDerivedDataSetName(String userName, String targetDataSetName)
+	{
+		StringBuilder dataSetIdentifier = new StringBuilder();
+		dataSetIdentifier.append(userName).append(": derived dataset for ").append(targetDataSetName);
+		return dataSetIdentifier.toString();
+	}
+
+	private String createMappingDataSetIdentifier(String userName, Integer targetDataSetId, Integer sourceDataSetId)
+	{
+		StringBuilder dataSetIdentifier = new StringBuilder();
+		dataSetIdentifier.append(userName).append('-').append(targetDataSetId).append('-').append(sourceDataSetId);
+		return dataSetIdentifier.toString();
 	}
 }

@@ -1,6 +1,7 @@
 package org.molgenis.ui;
 
 import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_CSS;
+import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_FONTS;
 import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_IMG;
 import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_JS;
 
@@ -79,6 +80,8 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		registry.addResourceHandler(PATTERN_CSS).addResourceLocations("/css/", "classpath:/css/").setCachePeriod(aYear);
 		registry.addResourceHandler(PATTERN_IMG).addResourceLocations("/img/", "classpath:/img/").setCachePeriod(aYear);
 		registry.addResourceHandler(PATTERN_JS).addResourceLocations("/js/", "classpath:/js/").setCachePeriod(aYear);
+		registry.addResourceHandler(PATTERN_FONTS).addResourceLocations("/fonts/", "classpath:/fonts/")
+				.setCachePeriod(aYear);
 		registry.addResourceHandler("/generated-doc/**").addResourceLocations("/generated-doc/").setCachePeriod(3600);
 		registry.addResourceHandler("/html/**").addResourceLocations("/html/", "classpath:/html/").setCachePeriod(3600);
 	}
@@ -100,6 +103,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	{
 		String pluginInterceptPattern = MolgenisPluginController.PLUGIN_URI_PREFIX + "**";
 		String corsInterceptPattern = "/api/**";
+		registry.addInterceptor(molgenisInterceptor());
 		registry.addInterceptor(molgenisPluginInterceptor()).addPathPatterns(pluginInterceptPattern);
 		registry.addInterceptor(corsInterceptor()).addPathPatterns(corsInterceptPattern);
 	}
@@ -118,9 +122,15 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	@Bean
+	public MolgenisInterceptor molgenisInterceptor()
+	{
+		return new MolgenisInterceptor(resourceFingerprintRegistry());
+	}
+
+	@Bean
 	public MolgenisPluginInterceptor molgenisPluginInterceptor()
 	{
-		return new MolgenisPluginInterceptor(molgenisUi(), resourceFingerprintRegistry());
+		return new MolgenisPluginInterceptor(molgenisUi());
 	}
 
 	@Bean

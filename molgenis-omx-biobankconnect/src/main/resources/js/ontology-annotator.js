@@ -119,11 +119,13 @@
 		var body = modal.find('div.modal-body:eq(0)').addClass('overflow-y-visible');
 		body.append(createFeatureInfo(title, restApiFeature, callback));
 		body.append(createSearchDiv(title, restApiFeature, callback));
-		modal.modal('show').css({
-			'width' : "60%",
-			'margin-left' : "-30%",
-			'top' : '20%'
-		});
+		modal.css({
+			'width' : '50%',
+			'left' : '25%',
+			'top' : '30%',
+			'margin-left' : 0,
+			'margin-top' : 0
+		}).modal('show');
 		return modal;
 		
 		function createFeatureInfo(title, restApiFeature, callback){
@@ -180,10 +182,10 @@
 	};
 	
 	function createSearchDiv(title, feature, callback){
-		var searchDiv = $('<div class="row-fluid"></div>').css('z-index', 10000);
-		var searchGroup = $('<div class="input-append span4"></div>');
+		var searchDiv = $('<div class="row"></div>').css('z-index', 10000);
+		var searchGroup = $('<div class="group-append col-md-4"></div>');
 		var searchField = $('<input type="text" data-provide="typeahead" />');
-		var addTermButton = $('<button class="btn" type="button">Add annotation</button>');
+		var addTermButton = $('<button class="btn btn-default" type="button">Add annotation</button>');
 		searchField.appendTo(searchGroup);
 		addTermButton.appendTo(searchGroup);
 		searchField.typeahead({
@@ -215,7 +217,7 @@
 		if(ontologyDiv.find('input').length === 0){
 			$.each(indexedOntologies.items, function(index, ontology){
 				var ontologyUri = ontology.ontologyIRI;
-				var ontologyName = ontology.ontologyLabel;
+				var ontologyName = ontology.ontologyName;
 			    $('<label />').addClass('checkbox').append('<input type="checkbox" value="' + ontologyUri + '" checked>' + ontologyName).click(function(){
 			    	$('#selectedOntologies').val(getAllOntologyUris(ontologyDiv));
 			    }).appendTo(ontologyDiv);
@@ -359,7 +361,7 @@
 			if(key === 'ontology') value = molgenis.hrefToId(value.href);
 			query[key] = value;
 		});
-		query.Name = data.ontologyLabel + ':' + data.ontologyTermSynonym;
+		query.Name = data.ontologyName + ':' + data.ontologyTermSynonym;
 		query.definition = data.ontologyTermSynonym;
 		$.ajax({
 			type : 'PUT',
@@ -382,8 +384,8 @@
 		var ontology = createOntology(data);
 		var ontologyTermId = null;
 		var query = {};
-		query.Name =  data.ontologyLabel + ':' + data.ontologyTerm;
-		query.Identifier = data.ontologyLabel + ':' + data.ontologyTermIRI;
+		query.Name =  data.ontologyName + ':' + data.ontologyTerm;
+		query.Identifier = data.ontologyName + ':' + data.ontologyTermIRI;
 		query.termAccession = data.ontologyTermIRI;
 		query.description = data.ontologyTermLabel;
 		query.ontology = molgenis.hrefToId(ontology.href);

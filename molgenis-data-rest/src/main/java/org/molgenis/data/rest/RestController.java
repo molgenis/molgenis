@@ -7,6 +7,7 @@ import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DATE_TIME;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
 import static org.molgenis.data.rest.RestController.BASE_URI;
+import static org.molgenis.ui.MolgenisPluginAttributes.KEY_RESOURCE_FINGERPRINT_REGISTRY;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
@@ -64,6 +65,7 @@ import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.fieldtypes.BoolField;
 import org.molgenis.framework.db.EntityNotFoundException;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -75,6 +77,7 @@ import org.molgenis.ui.form.EntityForm;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.util.MolgenisDateFormat;
+import org.molgenis.util.ResourceFingerprintRegistry;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionException;
@@ -130,22 +133,26 @@ public class RestController
 	private final String ENTITY_FORM_MODEL_ATTRIBUTE = "form";
 	private final MolgenisPermissionService molgenisPermissionService;
 	private final MolgenisRSQL molgenisRSQL;
+	private final ResourceFingerprintRegistry resourceFingerprintRegistry;
 
 	@Autowired
 	public RestController(DataService dataService, TokenService tokenService,
 			AuthenticationManager authenticationManager, MolgenisPermissionService molgenisPermissionService,
-			MolgenisRSQL molgenisRSQL)
+			MolgenisRSQL molgenisRSQL, ResourceFingerprintRegistry resourceFingerprintRegistry)
 	{
 		if (dataService == null) throw new IllegalArgumentException("dataService is null");
 		if (tokenService == null) throw new IllegalArgumentException("tokenService is null");
 		if (authenticationManager == null) throw new IllegalArgumentException("authenticationManager is null");
 		if (molgenisPermissionService == null) throw new IllegalArgumentException("molgenisPermissionService is null");
+		if (resourceFingerprintRegistry == null) throw new IllegalArgumentException(
+				"resourceFingerprintRegistry is null");
 
 		this.dataService = dataService;
 		this.tokenService = tokenService;
 		this.authenticationManager = authenticationManager;
 		this.molgenisPermissionService = molgenisPermissionService;
 		this.molgenisRSQL = molgenisRSQL;
+		this.resourceFingerprintRegistry = resourceFingerprintRegistry;
 	}
 
 	/**
@@ -687,7 +694,7 @@ public class RestController
 		else entity = new MapEntity();
 		EntityMetaData entityMeta = repo.getEntityMetaData();
 		model.addAttribute(ENTITY_FORM_MODEL_ATTRIBUTE, new EntityForm(entityMeta, true, entity));
-
+		model.addAttribute(KEY_RESOURCE_FINGERPRINT_REGISTRY, resourceFingerprintRegistry);
 		model.addAttribute("entity", entity);
 
 		return "view-entity-create";
@@ -703,7 +710,7 @@ public class RestController
 
 		boolean hasWritePermission = molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITE);
 		model.addAttribute(ENTITY_FORM_MODEL_ATTRIBUTE, new EntityForm(entityMetaData, entity, id, hasWritePermission));
-
+		model.addAttribute(KEY_RESOURCE_FINGERPRINT_REGISTRY, resourceFingerprintRegistry);
 		model.addAttribute("entity", entity);
 
 		return "view-entity-edit";
@@ -930,6 +937,12 @@ public class RestController
 		if ((paramValue != null) && (paramValue instanceof String) && StringUtils.isEmpty((String) paramValue))
 		{
 			paramValue = null;
+		}
+
+		// boolean false is not posted (http feature), so if null and required, should be false
+		if ((paramValue == null) && (attr.getDataType() instanceof BoolField) && !attr.isNillable())
+		{
+			value = false;
 		}
 
 		if (paramValue != null)

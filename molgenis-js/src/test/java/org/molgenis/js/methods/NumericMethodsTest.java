@@ -2,6 +2,10 @@ package org.molgenis.js.methods;
 
 import static org.testng.Assert.assertEquals;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
+
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.js.MolgenisJsTest;
@@ -33,7 +37,8 @@ public class NumericMethodsTest extends MolgenisJsTest
 		person.set("height", 189);
 
 		Object bmi = ScriptEvaluator.eval("$('weight').div($('height').div(100).pow(2))", person);
-		assertEquals(Context.toNumber(bmi), 82.0 / (1.89 * 1.89));
+		DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(Locale.ENGLISH));
+		assertEquals(Context.toNumber(bmi), Context.toNumber(df.format(82.0 / (1.89 * 1.89))));
 	}
 
 	@Test
@@ -43,6 +48,7 @@ public class NumericMethodsTest extends MolgenisJsTest
 		glucose.set("GLUC_1", 4.1);
 
 		Object bmi = ScriptEvaluator.eval("$('GLUC_1').div(100)", glucose);
-		assertEquals(Context.toNumber(bmi), 4.1 / 100);
+		DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(Locale.ENGLISH));
+		assertEquals(Context.toNumber(bmi), Context.toNumber(df.format(4.1 / 100)));
 	}
 }

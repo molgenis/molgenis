@@ -1,5 +1,22 @@
 package org.molgenis.data.importer;
 
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.AGGREGATEABLE;
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.AUTO;
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.DATA_TYPE;
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.DESCRIPTION;
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.ENTITY;
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.ENUM_OPTIONS;
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.ID_ATTRIBUTE;
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.LABEL;
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.NAME;
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.NILLABLE;
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.RANGE_MAX;
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.RANGE_MIN;
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.REF_ENTITY;
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.VISIBLE;
+import static org.molgenis.data.mysql.EntityMetaDataMetaData.ABSTRACT;
+import static org.molgenis.data.mysql.EntityMetaDataMetaData.EXTENDS;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -7,8 +24,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
@@ -18,16 +33,24 @@ import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Range;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.Updateable;
+import org.molgenis.data.mysql.AttributeMetaDataMetaData;
+import org.molgenis.data.mysql.EntityMetaDataMetaData;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.FieldType;
+import org.molgenis.fieldtypes.IntField;
+import org.molgenis.fieldtypes.LongField;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
+import org.molgenis.util.DependencyResolver;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
@@ -35,32 +58,15 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 @Component
 public class EmxImportServiceImpl implements EmxImporterService
 {
-
 	private static final Logger logger = Logger.getLogger(EmxImportServiceImpl.class);
 
 	// Sheet names
-	private static final String ENTITIES = "entities";
-	private static final String ATTRIBUTES = "attributes";
-
-	// Column names
-	private static final String NAME = "name";
-	private static final String DESCRIPTION = "description";
-	private static final String REFENTITY = "refEntity";
-	private static final String ENTITY = "entity";
-	private static final String DATATYPE = "dataType";
-	private static final String AUTO = "auto";
-	private static final String IDATTRIBUTE = "idAttribute";
-	private static final String NILLABLE = "nillable";
-	private static final String ABSTRACT = "abstract";
-	private static final String VISIBLE = "visible";
-	private static final String LABEL = "label";
-	private static final String EXTENDS = "extends";
-	private static final String AGGREGATEABLE = "aggregateable";
+	private static final String ENTITIES = EntityMetaDataMetaData.ENTITY_NAME;
+	private static final String ATTRIBUTES = AttributeMetaDataMetaData.ENTITY_NAME;
 
 	private MysqlRepositoryCollection store;
 	private TransactionTemplate transactionTemplate;
@@ -92,36 +98,40 @@ public class EmxImportServiceImpl implements EmxImporterService
 	{
 		if (store == null) throw new RuntimeException("store was not set");
 
-		Map<String, DefaultEntityMetaData> metadata = new HashMap<String, DefaultEntityMetaData>();
+		List<EntityMetaData> metadataList = Lists.newArrayList();
+
 		if (source.getRepositoryByEntityName(ATTRIBUTES) != null)
 		{
-			metadata = getEntityMetaData(source);
+			Map<String, DefaultEntityMetaData> metadata = getEntityMetaData(source);
+			for (String name : metadata.keySet())
+			{
+				metadataList.add(metadata.get(name));
+			}
 		}
 		else
 		{
 			for (String name : source.getEntityNames())
 			{
-				metadata.put(name, (DefaultEntityMetaData) dataService.getRepositoryByEntityName(name)
-						.getEntityMetaData());
+				metadataList.add(dataService.getRepositoryByEntityName(name).getEntityMetaData());
 			}
 		}
-		Set<String> addedEntities = Sets.newLinkedHashSet();
+
+		List<String> addedEntities = Lists.newArrayList();
 		// TODO altered entities (merge, see getEntityMetaData)
 
 		try
 		{
 			EntityImportReport entityImportReport = transactionTemplate.execute(new EmxImportTransactionCallback(
-					databaseAction, source, metadata, addedEntities));
+					databaseAction, source, metadataList, addedEntities));
+
 			return entityImportReport;
 		}
 		catch (Exception e)
 		{
 			// Rollback metadata, create table statements cannot be rolled back, we have to do it ourselfs
+			Collections.reverse(addedEntities);
 
-			List<String> names = Lists.newArrayList(addedEntities);
-			Collections.reverse(names);
-
-			for (String name : names)
+			for (String name : addedEntities)
 			{
 				store.drop(name);
 			}
@@ -137,6 +147,7 @@ public class EmxImportServiceImpl implements EmxImporterService
 
 		// compare the data sheets against metadata in store or imported file
 		Map<String, DefaultEntityMetaData> metaDataMap = new HashMap<String, DefaultEntityMetaData>();
+
 		if (source.getRepositoryByEntityName(ATTRIBUTES) != null)
 		{
 			metaDataMap = getEntityMetaData(source);
@@ -223,8 +234,8 @@ public class EmxImportServiceImpl implements EmxImporterService
 			int i = 1;
 			String entityName = attribute.getString(ENTITY);
 			String attributeName = attribute.getString(NAME);
-			String attributeDataType = attribute.getString(DATATYPE);
-			String refEntityName = attribute.getString(REFENTITY);
+			String attributeDataType = attribute.getString(DATA_TYPE);
+			String refEntityName = attribute.getString(REF_ENTITY);
 
 			// required
 			if (entityName == null) throw new IllegalArgumentException("attributes.entity is missing");
@@ -251,7 +262,7 @@ public class EmxImportServiceImpl implements EmxImporterService
 
 			Boolean attributeNillable = attribute.getBoolean(NILLABLE);
 			Boolean attributeAuto = attribute.getBoolean(AUTO);
-			Boolean attributeIdAttribute = attribute.getBoolean(IDATTRIBUTE);
+			Boolean attributeIdAttribute = attribute.getBoolean(ID_ATTRIBUTE);
 			Boolean attributeVisible = attribute.getBoolean(VISIBLE);
 			Boolean attributeAggregateable = attribute.getBoolean(AGGREGATEABLE);
 
@@ -264,6 +275,54 @@ public class EmxImportServiceImpl implements EmxImporterService
 
 			defaultAttributeMetaData.setLabel(attribute.getString(LABEL));
 			defaultAttributeMetaData.setDescription(attribute.getString(DESCRIPTION));
+
+			if (defaultAttributeMetaData.getDataType() instanceof EnumField)
+			{
+				List<String> enumOptions = attribute.getList(ENUM_OPTIONS);
+				if ((enumOptions == null) || enumOptions.isEmpty())
+				{
+					throw new MolgenisDataException("Missing enum options for attribute ["
+							+ defaultAttributeMetaData.getName() + "] of entity [" + entityName + "]");
+				}
+				defaultAttributeMetaData.setEnumOptions(enumOptions);
+			}
+
+			Long rangeMin;
+			Long rangeMax;
+			try
+			{
+				rangeMin = attribute.getLong(RANGE_MIN);
+			}
+			catch (ConversionFailedException e)
+			{
+				throw new MolgenisDataException("Invalid range rangeMin [" + attribute.getString(RANGE_MIN)
+						+ "] value for attribute [" + attributeName + "] of entity [" + entityName
+						+ "], should be a long");
+			}
+
+			try
+			{
+				rangeMax = attribute.getLong(RANGE_MAX);
+			}
+			catch (ConversionFailedException e)
+			{
+				throw new MolgenisDataException("Invalid rangeMax value [" + attribute.getString(RANGE_MAX)
+						+ "] for attribute [" + attributeName + "] of entity [" + entityName + "], should be a long");
+			}
+
+			if ((rangeMin != null) || (rangeMax != null))
+			{
+				if (!(defaultAttributeMetaData.getDataType() instanceof IntField)
+						&& !(defaultAttributeMetaData.getDataType() instanceof LongField))
+				{
+					throw new MolgenisDataException("Range not supported for ["
+							+ defaultAttributeMetaData.getDataType().getEnumType()
+							+ "] fields only int and long are supported. (attribute ["
+							+ defaultAttributeMetaData.getName() + "] of entity [" + entityName + "])");
+				}
+
+				defaultAttributeMetaData.setRange(new Range(rangeMin, rangeMax));
+			}
 
 			boolean lookupAttribute = false;
 			if (null != attributeIdAttribute && attributeIdAttribute)
@@ -328,7 +387,7 @@ public class EmxImportServiceImpl implements EmxImporterService
 		int i = 1;
 		for (Entity attribute : source.getRepositoryByEntityName(ATTRIBUTES))
 		{
-			final String refEntityName = (String) attribute.get(REFENTITY);
+			final String refEntityName = (String) attribute.get(REF_ENTITY);
 			final String entityName = attribute.getString(ENTITY);
 			final String attributeName = attribute.getString(NAME);
 			i++;
@@ -352,12 +411,12 @@ public class EmxImportServiceImpl implements EmxImporterService
 	private final class EmxImportTransactionCallback implements TransactionCallback<EntityImportReport>
 	{
 		private final RepositoryCollection source;
-		private final Map<String, DefaultEntityMetaData> metadata;
-		private final Set<String> addedEntities;
+		private final List<EntityMetaData> metadata;
+		private final List<String> addedEntities;
 		private final DatabaseAction dbAction;
 
 		private EmxImportTransactionCallback(DatabaseAction dbAction, RepositoryCollection source,
-				Map<String, DefaultEntityMetaData> metadata, Set<String> addedEntities)
+				List<EntityMetaData> metadata, List<String> addedEntities)
 		{
 			this.dbAction = dbAction;
 			this.source = source;
@@ -373,32 +432,32 @@ public class EmxImportServiceImpl implements EmxImporterService
 			try
 			{
 				// Import metadata
-				for (Entry<String, DefaultEntityMetaData> entry : metadata.entrySet())
-				{
-					String name = entry.getKey();
-					DefaultEntityMetaData defaultEntityMetaData = entry.getValue();
-					if (defaultEntityMetaData == null) throw new IllegalArgumentException("Unknown entity: " + name);
+				List<EntityMetaData> resolved = DependencyResolver.resolve(metadata);
 
+				for (EntityMetaData entityMetaData : resolved)
+				{
+					String name = entityMetaData.getName();
 					if (!ENTITIES.equals(name) && !ATTRIBUTES.equals(name))
 					{
 						// TODO check if compatible with metadata
-						Repository to = store.getRepositoryByEntityName(name);
-						if (to == null)
+						Entity toMeta = store.getEntityMetaDataEntity(name);
+						if (toMeta == null)
 						{
 							logger.debug("tyring to create: " + name);
-							to = store.add(defaultEntityMetaData);
 							addedEntities.add(name);
+							store.add(entityMetaData);
 						}
 						else
 						{
-							store.update(defaultEntityMetaData);
+							store.update(entityMetaData);
 						}
 					}
 				}
 
 				// import data
-				for (String name : metadata.keySet())
+				for (EntityMetaData entityMetaData : resolved)
 				{
+					String name = entityMetaData.getName();
 					Updateable updateable = (Updateable) store.getRepositoryByEntityName(name);
 					if (updateable != null)
 					{

@@ -1,36 +1,37 @@
 <#-- Bootstrap order data modal for protocol viewer -->
-<div id="orderdata-modal" class="modal hide" tabindex="-1">
-    <div class="modal-header">
-        <button type="button" class="close" data-dismiss="#orderdata-modal" data-backdrop="true"
-                aria-hidden="true">&times;</button>
-        <h3>Submit Study Request</h3>
-    </div>
-    <div class="modal-body">
-    <#-- order data form -->
-        <form id="orderdata-form" class="form-horizontal" enctype="multipart/form-data">
-            <div class="control-group">
-                <label class="control-label" for="orderdata-name">Project title *</label>
-
-                <div class="controls">
-                    <input type="text" id="orderdata-name" name="name" required>
+<div id="orderdata-modal" class="modal" tabindex="-1" aria-labelledby="orderdata-modal-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="orderdata-modal-label">Submit Study Request</h4>
+            </div>
+            <div class="modal-body">
+                <#-- order data form -->
+                <form id="orderdata-form" class="form-horizontal" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label class="col-md-3 control-label" for="orderdata-name">Project title *</label>
+                        <div class="col-md-9">
+                            <input type="text" class="form-control" id="orderdata-name" name="name" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-md-3 control-label" for="orderdata-file">Request form *</label>
+                        <div class="col-md-9">
+                            <input type="file" class="form-control" id="orderdata-file" name="file" required>
+                        </div>
+                    </div>
+                </form>
+                <div id="orderdata-selection-container">
+                    <div id="orderdata-selection-table-container"></div>
+                    <div id="orderdata-selection-table-pager"></div>
                 </div>
             </div>
-            <div class="control-group">
-                <label class="control-label" for="orderdata-file">Request form *</label>
-
-                <div class="controls">
-                    <input type="file" id="orderdata-file" name="file" required>
-                </div>
+            <div class="modal-footer">
+                <a href="#" id="orderdata-btn-close" class="btn btn-default" aria-hidden="true">Cancel</a>
+                <a href="#" id="orderdata-btn" class="btn btn-primary" aria-hidden="true">Submit</a>
             </div>
-        </form>
-        <div id="orderdata-selection-container">
-            <div id="orderdata-selection-table-container"></div>
-            <div id="orderdata-selection-table-pager"></div>
         </div>
-    </div>
-    <div class="modal-footer">
-        <a href="#" id="orderdata-btn-close" class="btn" aria-hidden="true">Cancel</a>
-        <a href="#" id="orderdata-btn" class="btn btn-primary" aria-hidden="true">Submit</a>
     </div>
 </div>
 <script type="text/javascript">
@@ -54,7 +55,7 @@
         form.validate();
 
     <#-- modal events -->
-        modal.on('show', function () {
+        modal.on('show.bs.modal', function () {
         	submitBtn.addClass('disabled');
             pendingDeletes = [];
             
@@ -93,7 +94,7 @@
 	                            row.append('<td>' + (feature.description ? molgenis.i18n.get(feature.description) : '') + '</td>');
 	
 	                            var deleteCol = $('<td class="center">');
-	                            var deleteBtn = $('<i class="icon-remove"></i>');
+	                            var deleteBtn = $('<span class="glyphicon glyphicon-remove"></span>');
 	                            deleteBtn.click(function () {
 	                                pendingDeletes.push(feature.href);
 	                                updateFeatureSelectionContainer();
@@ -118,10 +119,7 @@
             // create selection table with pager
 			updateFeatureSelectionContainer();
         });
-        modal.on('shown', function () {
-            form.find('input:visible:first').focus();
-        });
-        modal.on('hide', function () {
+        modal.on('hide.bs.modal', function () {
             form[0].reset();
             $('#orderdata-selection-table-container').empty();
 

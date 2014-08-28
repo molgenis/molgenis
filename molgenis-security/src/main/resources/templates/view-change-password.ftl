@@ -37,34 +37,12 @@
   				});
   		
   				<#-- modal events -->
-  				modal.on('shown', function () {
-	  				form.find('input:visible:first').focus();
-  				});
-  				modal.on('hide', function (e) {
+  				modal.on('hide.bs.modal', function (e) {
   					e.stopPropagation();
 	  				form[0].reset();
 	  				$('.text-error', modal).remove();
 	  				$('.alert', modal).remove();
   				});
-  				$('.close', modal).click(function(e) {<#-- workaround: Bootstrap closes the whole stack of modals when closing one modal -->
-	  				e.preventDefault();
-	        		modal.modal('hide');
-	    		});
-	    		modal.keyup(function(e) {<#-- workaround: Bootstrap closes the whole stack of modals when closing one modal -->
-	    			if(e.which == 27) {
-		    			e.preventDefault();
-			   	 		e.stopPropagation();
-	    			}
-	    		});
-	   			modal.keydown(function(e) {<#-- workaround: Bootstrap closes the whole stack of modals when closing one modal -->
-	    			if(e.which == 27) {
-			    		if(modal.data('modal').isShown) {
-				    		e.preventDefault();
-				    		e.stopPropagation();
-			    			modal.modal('hide');
-			    		}
-	    			}
-	    		});
 	    
   				<#-- form events -->
   				form.submit(function(e) {
@@ -85,38 +63,39 @@
 						form.submit();
 	    			}
 				});
-		
-		
 	   		});
 	   </script>
 	</head>
 	<body>
-		<div id="change-password-modal" class="modal hide" tabindex="-1">
-  			<div class="modal-header">
-    			<h3>Please change your password</h3>
-  			</div>
-  			<div class="modal-body">
-				<form id="change-password-form" class="form-horizontal" method="POST" action="">
-	  				<div class="control-group">
-	    				<label class="control-label" for="loginPassword">Password</label>
-	    				<div class="controls">
-	      					<input type="password" id="password1" name="password1">
-	   	 				</div>
-	  				</div>
-	  				<div class="control-group">
-	    				<label class="control-label" for="loginPassword">Retype password</label>
-	    				<div class="controls">
-	      					<input type="password" id="password2" name="password2">
-	   	 				</div>
-	  				</div>
-	  				<div class="control-group">
-	    				<div class="controls">
-	      					<button id="change-password-btn" type="submit" class="btn btn-primary">Change password</button>
-	    				</div>
-	  				</div>
-				</form>
-			</div>
+	   <div class="modal" id="change-password-modal" tabindex="-1" aria-labelledby="change-password-modal-label" aria-hidden="true">
+	       <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="change-password-modal-label">Change password</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form id="change-password-form" class="form-horizontal" method="POST" action="" role="form">
+                            <div class="form-group">
+                                <label class="col-md-4 control-label" for="loginPassword">Password</label>
+                                <div class="col-md-8">
+                                    <input type="password" class="form-control" id="password1" name="password1">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-md-4 control-label" for="loginPassword">Retype password</label>
+                                <div class="col-md-8">
+                                    <input type="password" class="form-control" id="password2" name="password2">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-8 col-md-offset-4">
+                                    <button id="change-password-btn" type="submit" class="btn btn-primary">Change password</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
 		</div>
 	</body>
-	
 </html>

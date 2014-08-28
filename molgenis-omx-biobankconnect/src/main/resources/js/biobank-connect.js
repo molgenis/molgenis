@@ -1,7 +1,6 @@
 (function($, molgenis, w) {
 	"use strict";
 	
-	var standardModal = new molgenis.StandardModal();
 	var restApi = new molgenis.RestClient();
 	var nrItemsPerPage = 10;
 	
@@ -157,11 +156,10 @@
 		return eval('(' + feature.description + ')');
 	};
 	
-	molgenis.ontologyMatcherRunning = function (callback, contextUrl) {
-		if(contextUrl === undefined || contextUrl === null) contextUrl = molgenis.getContextUrl();
+	molgenis.ontologyMatcherRunning = function (callback) {
 		$.ajax({
 			type : 'GET',
-			url : contextUrl + '/running',
+			url : 'biobankconnect/running',
 			contentType : 'application/json',
 			success : function(response) {
 				if(response.isRunning){
@@ -169,11 +167,11 @@
 					if($('#wizardForm').data('childElements') === null || $('#wizardForm').data('childElements') === undefined)
 						$('#wizardForm').data('childElements', childElements);
 					var items = [];
-					items.push('<br><div class="row-fluid"><div class="offset2 span1"><strong>Message </strong></div>');
-					items.push('<div class="offset1"><p>other user is currently running BiobankConnect using the same account, please be patient or login as another user!</p></div></div>');
+					items.push('<div class="row" style="min-height:400px;font-size:16px;margin-top:5%;"><div class="col-md-12"><center><strong>Message : </strong>');
+					items.push('Other user is currently running BiobankConnect using the same account, please be patient or login as another user!</center></div></div>');
 					$('#wizardForm').html(items.join(''));
 					setTimeout(function(){
-						molgenis.ontologyMatcherRunning(callback, contextUrl);
+						molgenis.ontologyMatcherRunning(callback);
 					}, 5000);
 				}else{
 					var childElements = $('#wizardForm').data('childElements');
@@ -192,58 +190,6 @@
 					}
 				}
 			}
-		});
-	};
-	
-	molgenis.checkMatchingStatus = function(contextUrl, parentElement, currentStatus, prevStage) {
-		$.ajax({
-			type : 'GET',
-			url : contextUrl + '/match/status',
-			contentType : 'application/json',
-			success : function(response){
-				if(response.isRunning){
-					currentStatus[response.stage].show();
-					var progressBar = currentStatus[response.stage].children('.progress:eq(0)');					
-					var width = $(progressBar).find('.bar:eq(0)').width();
-					var parentWidth = $(progressBar).find('.bar:eq(0)').parent().width();
-					var percent = (100 * width / parentWidth) + (1 / response.totalUsers);
-                    if(percent < response.matchePercentage) percent = response.matchePercentage;
-                    progressBar.find('div.bar:eq(0)').width((percent > 100 ? 100 : percent) + '%');
-					if(prevStage === undefined || prevStage === null || prevStage !== response.stage){
-						prevStage = response.stage;
-						$.each(currentStatus, function(stageName, progressBar){
-							if(stageName === response.stage) return false;
-							progressBar.show();
-							var innerProgressBar = progressBar.find('div.bar:eq(0)');
-							$(innerProgressBar).width('100%').parents('div:eq(0)').removeClass('active');
-							$(innerProgressBar).append('<p style="font-size:14px;padding-top:4px;">Finished!</p>');
-						});
-					}
-					if(response.totalUsers > 1){
-						var warningDiv = null;
-						if($('#other-user-alert').length > 0) warningDiv = $('#other-user-alert');
-						else warningDiv = $('<div id="other-user-alert" class="row-fluid" style="margin-bottom:10px;"></div>');
-						warningDiv.empty().append('<div class="span12"><span style="display: block;font-size:16px;text-align:center;">Other users are using BiobankConnect, it might slow down the process. Please be patient!</span></div>');
-						parentElement.find('.progress:eq(0)').parents('div:eq(0)').before(warningDiv);
-					}else{
-						$('#other-user-alert').remove();
-					}
-					setTimeout(function(){
-						molgenis.checkMatchingStatus(contextUrl, parentElement, currentStatus)
-					}, 3000);
-				}else {
-					$.each(currentStatus, function(stageName, progressBar){
-						progressBar.show();
-						var innerProgressBar = progressBar.find('div.bar:eq(0)');
-						$(innerProgressBar).width('100%').parents('div:eq(0)').removeClass('active');
-						$(innerProgressBar).append('<p style="font-size:14px;padding-top:4px;">Finished!</p>');
-					});
-					$('ul.pager li').removeClass('disabled');
-				}
-			},
-			error : function(request, textStatus, error){
-				console.log(error);
-			} 
 		});
 	};
 	
@@ -298,7 +244,7 @@
 				var result = [];
 				var dataMap = {};
 				$.each(data.searchHits, function(index, hit){
-					var ontologyName = hit.columnValueMap.ontologyLabel;
+					var ontologyName = hit.columnValueMap.ontologyName;
 					var termName = hit.columnValueMap.ontologyTermSynonym;
 					termName = ontologyName === '' ? termName : ontologyName + ':' + termName;
 					if($.inArray(termName, result) === -1){					

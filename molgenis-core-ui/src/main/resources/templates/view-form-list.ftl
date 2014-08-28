@@ -17,7 +17,7 @@
   	<strong id="success-message-content"></strong>
 </div>
 
-<div id="error-message" class="alert alert-error" style="display: none">
+<div id="error-message" class="alert alert-danger" style="display: none">
 	<button type="button" class="close">&times;</button>
   	<strong id="error-message-content"></strong>
   	<p id="error-message-details"></p>

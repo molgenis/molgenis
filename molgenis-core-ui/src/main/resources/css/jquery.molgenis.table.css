@@ -86,6 +86,6 @@
 	cursor: pointer;
 }
 
-.molgenis-table input,select,div.input-append {
+.molgenis-table input,select,div.group-append {
 	margin-bottom: 0px;
 }

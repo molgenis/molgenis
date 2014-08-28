@@ -7,13 +7,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.mail.MessagingException;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
+import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.converters.ValueConverterException;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -28,18 +31,25 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.google.gdata.util.ServiceException;
 
+
 @Controller
 @RequestMapping(URI)
+@Scope("request")
 public class GafListImporterController extends MolgenisPluginController
 {
 	private static final Logger logger = Logger.getLogger(GafListImporterController.class);
 
 	public static final String ID = "gaflistimporter";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+	public static final String KEY_GAF_LIST_PROTOCOL_NAME = "gafList.protocol.name";
+	public static final String KEY_GAF_LIST_DATASET_IDENTIFIER = "gafList.dataset.identifier";
 	private final GafListFileImporterService gafListFileImporterService;
 
 	@Autowired
-	public GafListImporterController(GafListFileImporterService gafListFileImporter)
+	private GafListValidationReport report;
+
+	@Autowired
+	public GafListImporterController(GafListFileImporterService gafListFileImporter, MolgenisSettings molgenisSettings)
 	{
 		super(URI);
 		if (gafListFileImporter == null) throw new IllegalArgumentException("gafListFileImporter is null");
@@ -48,48 +58,67 @@ public class GafListImporterController extends MolgenisPluginController
 
 	@RequestMapping(method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
-	public String init()
+	public String init(Model model) throws Exception
 	{
+		model.addAttribute("action", "/validate");
+		model.addAttribute("enctype", "multipart/form-data");
 		return "view-gaflistimporter";
 	}
 
-	@RequestMapping(method = RequestMethod.POST)
+	@RequestMapping(method = RequestMethod.GET, value = "/validate")
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
-	public String importGafListFromFile(@RequestParam("csvFile") MultipartFile csvFile,
-			@RequestParam("separator") Character separator, Model model) throws IOException, ServiceException,
-			ValueConverterException, MessagingException
+	public String validateGAFList(Model model) throws Exception
 	{
+		return init(model);
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/import")
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
+	public String importGAFList(Model model) throws Exception
+	{
+		return init(model);
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/validate")
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
+	public String validateGAFList(HttpServletRequest request, @RequestParam("csvFile") MultipartFile csvFile,
+			Model model) throws IOException, ServiceException, ValueConverterException, MessagingException, Exception
+	{
+		boolean submitState = false;
+		String action = "/validate";
+		String enctype = "multipart/form-data";
+
 		final List<String> messages = new ArrayList<String>();
 		if (!csvFile.isEmpty())
 		{
 			try
 			{
-				GafListValidationReport gafListValidationReport = this.gafListFileImporterService.importGafList(
-						csvFile, separator);
+				this.gafListFileImporterService.validateGAFList(report, csvFile);
+				model.addAttribute("hasValidationError", report.hasErrors());
+				model.addAttribute("validationReport", report.toStringHtml());
 
-				model.addAttribute("hasValidationError", gafListValidationReport.hasErrors());
-				model.addAttribute("validationReport", gafListValidationReport.toStringHtml());
-
-				if (!gafListValidationReport.getValidRunIds().isEmpty())
+				if (!report.getValidRunIds().isEmpty())
 				{
-					messages.add("Successfully imported GAF list named: <b>" + gafListValidationReport.getDataSetName()
-							+ "</b>");
-
-					messages.add("Imported run id's: <b>" + gafListValidationReport.getValidRunIds() + "</b>");
+					submitState = true;
+					action = "/import";
+					enctype = "application/x-www-form-urlencoded";
+					model.addAttribute("fileName", report.getTempFileOriginalName());
+					messages.add("Run id's: <b>" + report.getValidRunIds() + "</b> can be imported");
 				}
 				else
 				{
-					messages.add("This file is not imported because the validation for all runs failed");
+					messages.add("Validation for all runs failed");
 				}
 
-				if (gafListValidationReport.hasErrors())
+				if (report.hasErrors())
 				{
-					messages.add("Not imported run id's: <b>" + gafListValidationReport.getInvalidRunIds() + "</b>");
+					messages.add("Run id's: <b>" + report.getInvalidRunIds()
+							+ "</b> cannot be imported");
 				}
 			}
 			catch (Exception e)
 			{
-				String errorMessage = "Failed to import data into database.";
+				String errorMessage = "Failed to validate this file";
 				messages.add(errorMessage);
 				logger.error(errorMessage, e);
 			}
@@ -100,7 +129,53 @@ public class GafListImporterController extends MolgenisPluginController
 			messages.add(errorMessage);
 			logger.error(errorMessage);
 		}
+		model.addAttribute("action", action);
+		model.addAttribute("enctype", enctype);
+		model.addAttribute("submit_state", submitState);
 		model.addAttribute("messages", messages);
+		return "view-gaflistimporter";
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/import")
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
+	public String importGAFList(HttpServletRequest request, Model model) throws IOException, ServiceException,
+			ValueConverterException, MessagingException, Exception
+	{
+		final List<String> messages = new ArrayList<String>();
+		try
+		{
+			this.gafListFileImporterService.importGAFList(report, KEY_GAF_LIST_PROTOCOL_NAME);
+
+			if (!report.getValidRunIds().isEmpty())
+			{
+				messages.add("Successfully imported GAF list named: <b><a href="
+ + "/menu/main/dataexplorer?dataset="
+						+ report.getDataSetIdentifier() + ">"
+						+ report.getDataSetName() + "</a></b>");
+
+				messages.add("Imported run id's: <b>" + report.getValidRunIds() + "</b>");
+			}
+
+			if (report.hasErrors())
+			{
+				messages.add("Not imported run id's: <b>" + report.getInvalidRunIds() + "</b>");
+			}
+		}
+		catch (Exception e)
+		{
+			String errorMessage = "Failed to import this file";
+			messages.add(errorMessage);
+			logger.error(errorMessage, e);
+		}
+		finally
+		{
+			model.addAttribute("messages", messages);
+			model.addAttribute("submit_state", false);
+			model.addAttribute("action", "/validate");
+			model.addAttribute("enctype", "multipart/form-data");
+			report.cleanUp();
+		}
+
 		return "view-gaflistimporter";
 	}
 

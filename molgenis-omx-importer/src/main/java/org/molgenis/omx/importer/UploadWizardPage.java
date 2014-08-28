@@ -19,12 +19,12 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.RepositoryDecorator;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.importer.EmxImportServiceImpl;
 import org.molgenis.data.importer.EmxImporterService;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.RepositoryDecorator;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntitiesValidator;
 import org.molgenis.omx.observ.DataSet;
@@ -133,7 +133,7 @@ public class UploadWizardPage extends AbstractWizardPage
                         return validateEMXInput(file, wizard, source);
                     }
                 }catch(UnknownEntityException e){
-                    //Entity not yet known
+					logger.info("validateInput() --- Entity is not yet known", e);
                 }
 			}
 			// validate entity sheets

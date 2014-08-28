@@ -1,37 +1,45 @@
 <#macro renderList form index=0>
-<div id="list-holder" class="row-fluid">
+<div id="list-holder" class="row">
 	<div id="list-navigation">
-		<div class="span4">
+		<div class="col-md-4">
 			<h3 class="pull-left">${form.title} (<span id="entity-count-${index}"></span>)</h3>
 			<#if form.hasWritePermission>
-				<a id="create-${index}" style="margin:30px 10px" class="pull-left" href="${form.getBaseUri(context_url)}/create?back=${current_uri?url('UTF-8')}">
+				<a id="create-${index}" style="margin:20px 10px" class="pull-left" href="${form.getBaseUri(context_url)}/create?back=${current_uri?url('UTF-8')}">
 					<img src="/img/new.png" />
 				</a>
 			</#if>
 		</div>
 				
-		<div class="data-table-pager-container span4">
-			<div id="data-table-pager-${index}" class="pagination pagination-centered"></div>
+		<div class="data-table-pager-container col-md-4">
+			<div id="data-table-pager-${index}"></div>
 		</div>
 		
 		<#if index==0>
-			<form class="form-search text-center pull-right" method="get" action="#">
-				<select id="query-fields">
-					<#list form.metaData.fields as field>
-						<#if field.dataType.enumType == 'STRING'>
-							<option id="${field.name}">${field.name}</option>
-						</#if>
-					</#list>
-				</select>
-				<select id="operators">
-					<option id="EQUALS">EQUALS</option>
-					<option id="NOT">NOT EQUALS</option>
-					<option id="LIKE">LIKE</option>
-				</select>
-				<div class="input-append">
-    				<input type="search" class="span8 search-query" name="q" placeholder="SEARCH">
-    				<button type="submit" class="btn"><i class="icon-search icon-large"></i> </button>
-  				</div>
+			<form class="form-search form-inline text-center pull-right col-md-4" method="get" action="#">
+                <div class="form-group">
+    				<select class="form-control" id="query-fields">
+    					<#list form.metaData.fields as field>
+    						<#if field.dataType.enumType == 'STRING'>
+    							<option id="${field.name}">${field.name}</option>
+    						</#if>
+    					</#list>
+    				</select>
+				</div>
+				<div class="form-group">
+    				<select class="form-control" id="operators">
+    					<option id="EQUALS">EQUALS</option>
+    					<option id="NOT">NOT EQUALS</option>
+    					<option id="LIKE">LIKE</option>
+    				</select>
+				</div>
+				<div class="form-group">
+    				<div class="input-group">
+    				    <input type="search" class="col-md-8 search-query form-control" name="q" placeholder="SEARCH">
+                        <span class="input-group-btn">
+                            <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
+                        </span>
+                    </div>
+                </div>
 			</form>
 		</#if>				
 	</div>

@@ -1,24 +1,28 @@
 <#-- Bootstrap reset password modal -->
-<div id="resetpassword-modal" class="modal hide" tabindex="-1">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="#resetpassword-modal" data-backdrop="true" aria-hidden="true">&times;</button>
-    <h3>Reset password</h3>
-  </div>
-  <div class="modal-body">
-  	<#-- reset password form -->
-	<form id="resetpassword-form" class="form-horizontal">
-	  <div class="control-group">
-	    <label class="control-label" for="resetpassword-email">Email *</label>
-	    <div class="controls">
-	      <input type="email" id="resetpassword-email" name="email" required>
-	    </div>
-	  </div>
-	</form>
-  </div>
-  <div class="modal-footer">
-    <a href="#" id="resetpassword-btn-close" class="btn" aria-hidden="true">Close</a>
-    <a href="#" id="resetpassword-btn" class="btn btn-primary" aria-hidden="true">Reset password</a>
-  </div>
+<div id="resetpassword-modal" class="modal" tabindex="-1" aria-labelledby="resetpassword-modal-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="resetpassword-modal-label">Reset password</h4>
+            </div>
+            <div class="modal-body">
+                <#-- reset password form -->
+                <form id="resetpassword-form" class="form-horizontal" role="form">
+                    <div class="form-group">
+                        <label class="col-md-4 control-label" for="resetpassword-email">Email *</label>
+                        <div class="col-md-6">
+                            <input type="email" class="form-control" id="resetpassword-email" name="email" required>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <a href="#" id="resetpassword-btn-close" class="btn btn-default" aria-hidden="true">Close</a>
+                <a href="#" id="resetpassword-btn" class="btn btn-primary" aria-hidden="true">Reset password</a>
+            </div>
+        </div>
+    </div>
 </div>
 <script type="text/javascript">
 	$(function() {
@@ -28,35 +32,11 @@
   		form.validate();
 
   		<#-- modal events -->
-  		modal.on('shown', function (e) {
-  			e.preventDefault();
-			e.stopPropagation();
-	  		form.find('input:visible:first').focus();
-  		});
-  		modal.on('hide', function (e) {
+  		modal.on('hide.bs.modal', function (e) {
 			e.stopPropagation();
 	  		form[0].reset();
 	  		$('.alert', modal).remove();
   		});
-  		$('.close', modal).click(function(e) {<#-- workaround: Bootstrap closes the whole stack of modals when closing one modal -->
-	  		e.preventDefault();
-	        modal.modal('hide');
-	    });
-	    modal.keyup(function(e) {<#-- workaround: Bootstrap closes the whole stack of modals when closing one modal -->
-	    	if(e.which == 27) {
-		    	e.preventDefault();
-			    e.stopPropagation();
-	    	}
-	    });
-	    modal.keydown(function(e) {<#-- workaround: Bootstrap closes the whole stack of modals when closing one modal -->
-	    	if(e.which == 27) {
-			    if(modal.data('modal').isShown) {
-			    	e.preventDefault();
-				    e.stopPropagation();
-			    	modal.modal('hide');
-			    }
-	    	}
-	    });
 	   	$('#resetpassword-btn-close').click(function() {
 		    modal.modal('hide');
 		});
@@ -69,6 +49,7 @@
 		            type: 'POST',
 		            url:  '/account/password/reset',
 		            data: form.serialize(),
+		            global: false, // do not trigger default molgenis error handler
 		            success: function () {
 		            	$(document).trigger('molgenis-passwordresetted', 'Password resetted, an email has been send to you');
 		        		modal.modal('hide');

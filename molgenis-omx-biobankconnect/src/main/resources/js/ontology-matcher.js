@@ -23,7 +23,7 @@
 			$.each(selectedOptions, function(index, targetDataSetId){
 				var dataSet = restApi.get('/api/v1/dataset/' + targetDataSetId);
 				var nameDiv = $('<div />').addClass('span4').append(dataSet.Name);
-				var controlDiv = $('<div />').addClass('offset4 span4');
+				var controlDiv = $('<div />').addClass('col-md-offset-4 span4');
 				var viewCatalogue = $('<button type="btn" class="btn btn-link view-button">View</button>').click(function(){
 					if($(this).hasClass('view-button')){
 						changeDataSet(targetDataSetId);
@@ -47,7 +47,7 @@
 					return false;
 				});
 				$('<div />').addClass('btn-group').append(viewCatalogue).append(removeCatalogue).appendTo(controlDiv);
-				$('<div />').addClass('row-fluid').append(nameDiv).append(controlDiv).appendTo(dataSetDiv);
+				$('<div />').addClass('row').append(nameDiv).append(controlDiv).appendTo(dataSetDiv);
 			});
 		}
 		

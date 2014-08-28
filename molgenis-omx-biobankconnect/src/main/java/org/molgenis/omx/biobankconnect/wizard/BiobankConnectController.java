@@ -26,12 +26,14 @@ import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.omx.biobankconnect.algorithm.ApplyAlgorithms;
 import org.molgenis.omx.biobankconnect.ontologyannotator.OntologyAnnotator;
 import org.molgenis.omx.biobankconnect.ontologyannotator.UpdateIndexRequest;
+import org.molgenis.omx.biobankconnect.ontologyindexer.AsyncOntologyIndexer;
+import org.molgenis.omx.biobankconnect.ontologymatcher.AlgorithmGenerateResponse;
 import org.molgenis.omx.biobankconnect.ontologymatcher.AsyncOntologyMatcher;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcher;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcherRequest;
-import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcherResponse;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.search.Hit;
@@ -67,6 +69,7 @@ public class BiobankConnectController extends AbstractWizardController
 	private final OntologyAnnotatorPage ontologyAnnotatorPager;
 	private final OntologyMatcherPage ontologyMatcherPager;
 	private final MappingManagerPage mappingManagerPager;
+	private final AlgorithmReportPage algorithmReportPager;
 	private BiobankConnectWizard wizard;
 
 	@Autowired
@@ -90,17 +93,19 @@ public class BiobankConnectController extends AbstractWizardController
 	@Autowired
 	public BiobankConnectController(ChooseCataloguePage chooseCataloguePager,
 			OntologyAnnotatorPage ontologyAnnotatorPager, OntologyMatcherPage ontologyMatcherPager,
-			MappingManagerPage mappingManagerPager)
+			MappingManagerPage mappingManagerPager, AlgorithmReportPage algorithmReportPager)
 	{
 		super(URI, "biobankconnect");
 		if (chooseCataloguePager == null) throw new IllegalArgumentException("ChooseCataloguePager is null");
 		if (ontologyAnnotatorPager == null) throw new IllegalArgumentException("OntologyAnnotatorPager is null");
 		if (ontologyMatcherPager == null) throw new IllegalArgumentException("OntologyMatcherPager is null");
 		if (mappingManagerPager == null) throw new IllegalArgumentException("MappingManagerPager is null");
+		if (algorithmReportPager == null) throw new IllegalArgumentException("AlgorithmGeneratorPage is null");
 		this.chooseCataloguePager = chooseCataloguePager;
 		this.ontologyAnnotatorPager = ontologyAnnotatorPager;
 		this.ontologyMatcherPager = ontologyMatcherPager;
 		this.mappingManagerPager = mappingManagerPager;
+		this.algorithmReportPager = algorithmReportPager;
 		this.wizard = new BiobankConnectWizard();
 	}
 
@@ -122,6 +127,7 @@ public class BiobankConnectController extends AbstractWizardController
 		wizard.addPage(ontologyAnnotatorPager);
 		wizard.addPage(ontologyMatcherPager);
 		wizard.addPage(mappingManagerPager);
+		wizard.addPage(algorithmReportPager);
 		return wizard;
 	}
 
@@ -168,7 +174,7 @@ public class BiobankConnectController extends AbstractWizardController
 			List<String> documentTypes = new ArrayList<String>();
 			for (String ontologyUri : request.getParameter("selectedOntologies").split(","))
 			{
-				documentTypes.add("ontologyTerm-" + ontologyUri);
+				documentTypes.add(AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyUri));
 			}
 			ontologyAnnotator.annotate(wizard.getSelectedDataSet().getId(), documentTypes);
 		}
@@ -192,14 +198,14 @@ public class BiobankConnectController extends AbstractWizardController
 
 	@RequestMapping(method = RequestMethod.POST, value = "/rematch", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public OntologyMatcherResponse rematch(@RequestBody
+	public AlgorithmGenerateResponse rematch(@RequestBody
 	OntologyMatcherRequest request)
 	{
 		String userName = userAccountService.getCurrentUser().getUsername();
 		ontologyMatcher.match(userName, request.getTargetDataSetId(), request.getSelectedDataSetIds(),
 				request.getFeatureId());
-		OntologyMatcherResponse response = new OntologyMatcherResponse(null, ontologyMatcher.isRunning(),
-				ontologyMatcher.matchPercentage(userName), null);
+		AlgorithmGenerateResponse response = new AlgorithmGenerateResponse(null, ontologyMatcher.isRunning(),
+				ontologyMatcher.matchPercentage(userName), null, null, null, null);
 		return response;
 	}
 
@@ -215,14 +221,25 @@ public class BiobankConnectController extends AbstractWizardController
 		return result;
 	}
 
-	@RequestMapping(method = RequestMethod.GET, value = "/match/status", produces = APPLICATION_JSON_VALUE)
+	@RequestMapping(method = RequestMethod.GET, value = "/progress", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public OntologyMatcherResponse checkMatch()
+	public AlgorithmGenerateResponse checkMatch()
 	{
 		String userName = userAccountService.getCurrentUser().getUsername();
-		OntologyMatcherResponse response = new OntologyMatcherResponse(currentUserStatus.getUserCurrentStage(userName),
-				currentUserStatus.isUserMatching(userName), ontologyMatcher.matchPercentage(userName),
-				currentUserStatus.getTotalNumberOfUsers());
+		DataSet derivedDataSet = null;
+		if (!currentUserStatus.isUserMatching(userName))
+		{
+			String deriveDataSetIdentifier = ApplyAlgorithms.createDerivedDataSetIdentifier(userName, wizard
+					.getSelectedDataSet().getId().toString(), wizard.getSelectedBiobanks());
+			derivedDataSet = dataService.findOne(DataSet.ENTITY_NAME,
+					new QueryImpl().eq(DataSet.IDENTIFIER, deriveDataSetIdentifier), DataSet.class);
+
+		}
+		AlgorithmGenerateResponse response = new AlgorithmGenerateResponse(
+				currentUserStatus.getUserCurrentStage(userName), currentUserStatus.isUserMatching(userName),
+				ontologyMatcher.matchPercentage(userName), currentUserStatus.getTotalNumberOfUsers(), wizard
+						.getSelectedDataSet().getId(), wizard.getSelectedBiobanks(),
+				derivedDataSet != null ? derivedDataSet.getId() : null);
 		return response;
 	}
 
