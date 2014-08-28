@@ -3,7 +3,7 @@
 
 	var restApi = new molgenis.RestClient();
 	var maxItems = 10000;
-	
+
 	function createTreeConfig(settings, callback) {
 		function createTreeNodes(tree, subTrees, treeConfig, callback) {
 			function createTreeNodesRec(tree, selectedNodes, parentNode) {
@@ -184,6 +184,7 @@
 		         // displaySiblings: yes
                  // displaySiblings: no
 		if(settings.displayedItems.length > 0) {
+            $('.no-results-message').hide();
 			// FIXME search API does not support IN query
 			var items = [];
 			$.each(settings.displayedItems, function(i, item) {
@@ -244,8 +245,9 @@
 			});
 		}
         else{
-            $('.catalog-search-tree').empty();
-            $('.catalog-search-tree').html('no matching items');
+            $('.catalog-search-tree').hide();
+            $('.catalog-tree').hide();
+            $('.no-results-message').show();
         }
 	};
 	
@@ -314,6 +316,7 @@
 		items.push('</div>');
 		items.push('<div id="catalog-tree" class="catalog-tree"></div>');
 		items.push('<div id="catalog-search-tree" class="catalog-search-tree"></div>');
+        items.push('<div id="no-results-message" class="no-results-message">no matching items</div>');
 		$('.catalog-tree', container).fancytree('destroy'); // cleanup
 		container.html(items.join(''));
 
@@ -322,6 +325,7 @@
 		
 		var catalogTree = $('.catalog-tree', container);
 		var catalogSearchTree = $('.catalog-search-tree', container);
+        var noResultsMessage = $('.no-results-message', container);
 		var searchText = $('.catalog-search-text', container);
 		var searchBtn = $('.catalog-search-btn', container);
 		var searchClearBtn = $('.catalog-search-clear-btn', container);
@@ -403,9 +407,10 @@
 				if(catalogSearchTree.is(':visible')) catalogSearchTree.hide();
 				catalogSearchTree.fancytree('destroy');
 				catalogSearchTree.empty();
-				searchText.val('');
-				if(catalogTree.is(':hidden')) catalogTree.show();
 			}
+            searchText.val('');
+            if(catalogTree.is(':hidden')) catalogTree.show();
+            noResultsMessage.hide();
 		});
 		
 		// create tree
