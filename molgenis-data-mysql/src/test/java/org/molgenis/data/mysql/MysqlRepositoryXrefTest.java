@@ -55,9 +55,9 @@ public class MysqlRepositoryXrefTest extends MysqlRepositoryAbstractDatatypeTest
 	@Test
 	public void test() throws Exception
 	{
-		coll.drop(getMetaData().getName());
-		coll.drop(getMetaData().getAttribute("stringRef").getRefEntity().getName());
-		coll.drop(getMetaData().getAttribute("intRef").getRefEntity().getName());
+		coll.dropEntityMetaData(getMetaData().getName());
+		coll.dropEntityMetaData(getMetaData().getAttribute("stringRef").getRefEntity().getName());
+		coll.dropEntityMetaData(getMetaData().getAttribute("intRef").getRefEntity().getName());
 
 		// create
 		MysqlRepository stringRepo = coll.add(getMetaData().getAttribute("stringRef").getRefEntity());

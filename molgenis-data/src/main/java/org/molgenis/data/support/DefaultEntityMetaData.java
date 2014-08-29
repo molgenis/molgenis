@@ -2,18 +2,18 @@ package org.molgenis.data.support;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.util.CaseInsensitiveLinkedHashMap;
 
 public class DefaultEntityMetaData extends AbstractEntityMetaData
 {
 	private final String name;
-	private final Map<String, AttributeMetaData> attributes = new LinkedHashMap<String, AttributeMetaData>();
+	private final Map<String, AttributeMetaData> attributes = new CaseInsensitiveLinkedHashMap<AttributeMetaData>();
 	private final Class<? extends Entity> entityClass;
 	private String label;
 	private boolean abstract_ = false;

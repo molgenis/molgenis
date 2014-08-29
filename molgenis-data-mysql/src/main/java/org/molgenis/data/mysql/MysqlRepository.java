@@ -88,6 +88,13 @@ public class MysqlRepository extends AbstractAggregateableCrudRepository impleme
 		jdbcTemplate.execute(getDropSql());
 	}
 
+	public void dropAttribute(String attributeName)
+	{
+		String sql = String.format("ALTER TABLE %s DROP COLUMN %s", getName(), attributeName);
+		jdbcTemplate.execute(sql);
+
+	}
+
 	protected String getDropSql()
 	{
 		return "DROP TABLE IF EXISTS " + getEntityMetaData().getName();

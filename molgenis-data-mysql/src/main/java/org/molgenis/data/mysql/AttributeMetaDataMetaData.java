@@ -48,5 +48,6 @@ public class AttributeMetaDataMetaData extends DefaultEntityMetaData
 		addAttribute(ENUM_OPTIONS).setDataType(TEXT);
 		addAttribute(RANGE_MIN).setDataType(new LongField());
 		addAttribute(RANGE_MAX).setDataType(new LongField());
+
 	}
 }

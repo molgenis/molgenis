@@ -125,9 +125,9 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 	public void testImportReport() throws IOException, InvalidFormatException, InterruptedException
 	{
 		// cleanup
-		store.drop("import_person");
-		store.drop("import_city");
-		store.drop("import_country");
+		store.dropEntityMetaData("import_person");
+		store.dropEntityMetaData("import_city");
+		store.dropEntityMetaData("import_country");
 
 		// create test excel
 		File f = ResourceUtils.getFile(getClass(), "/example.xlsx");
@@ -175,15 +175,12 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		when(repositoryPerson.getEntityMetaData()).thenReturn(entityMetaDataPerson);
 
 		// cleanup
-		store.drop("import_person");
-		store.drop("import_city");
-		store.drop("import_country");
+		store.dropEntityMetaData("import_person");
+		store.dropEntityMetaData("import_city");
+		store.dropEntityMetaData("import_country");
 
 		// create test excel
-
 		File f = ResourceUtils.getFile(getClass(), "/example.xlsx");
-		// TODO add good example to repo
-
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
 
 		EmxImportServiceImpl importer = new EmxImportServiceImpl(dataService);
@@ -192,15 +189,10 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 
 		// test import
 		importer.doImport(source, DatabaseAction.ADD);
-		// wait to make sure logger has outputted
-		Thread.sleep(1000);
 
 		// create test excel
 		File file_no_meta = ResourceUtils.getFile(getClass(), "/example_no_meta.xlsx");
 		ExcelRepositoryCollection source_no_meta = new ExcelRepositoryCollection(file_no_meta);
-
-		importer.setRepositoryCollection(store);
-		importer.setPlatformTransactionManager(new SimplePlatformTransactionManager());
 
 		// test import
 		EntityImportReport report = importer.doImport(source_no_meta, DatabaseAction.ADD);
@@ -208,7 +200,5 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		Assert.assertEquals(report.getNrImportedEntitiesMap().get("import_city"), new Integer(4));
 		Assert.assertEquals(report.getNrImportedEntitiesMap().get("import_person"), new Integer(4));
 
-		// wait to make sure logger has outputted
-		Thread.sleep(1000);
 	}
 }
