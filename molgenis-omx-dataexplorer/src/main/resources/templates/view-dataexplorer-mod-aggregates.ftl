@@ -4,7 +4,7 @@
         <div class="row">
             <div class="col-md-12">        
                 <div id="feature-select-container">
-                	<label class="col-md-3 control-label" for="feature-select">Group by:</label>
+                	<label class="col-md-3 control-label" for="feature-select">${i18n.dataexplorer_aggregates_group_by}</label>
                 	<div id="feature-select" class="controls">
                 	</div>
                 </div>
@@ -25,3 +25,7 @@
 			molgenis.dataexplorer.aggregates.createAggregatesTable();
 		});
 </script>
+<script id="aggregates-no-result-message-template" type="text/x-handlebars-template">
+    <br><div>${i18n.dataexplorer_aggregates_no_result_message}<div>
+</script>
+

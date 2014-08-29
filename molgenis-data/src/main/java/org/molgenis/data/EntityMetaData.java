@@ -45,7 +45,7 @@ public interface EntityMetaData
 	AttributeMetaData getIdAttribute();
 
 	/**
-	 * Attribute that is used as unique label. If no label exist, returns getIdAttribute().
+	 * Attribute that is used as label. If no label exist, returns getIdAttribute().
 	 */
 	AttributeMetaData getLabelAttribute();
 
