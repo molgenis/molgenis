@@ -20,14 +20,26 @@
 			}
 		});
 		
-		var uri = '/api/v1/' + forms[formIndex].meta.name + '?num=' + NR_ROWS_PER_PAGE + '&start=' + (currentPage-1) * NR_ROWS_PER_PAGE;
-		
+		var uri = '/api/v1/' + forms[formIndex].meta.name;
+		var options = {
+			start: (currentPage-1) * NR_ROWS_PER_PAGE,
+			num: NR_ROWS_PER_PAGE,
+			expand: expands
+		};
 		if ((formIndex == 0) && (search != null) && (search.value != '')) {
-			uri += '&q[0].field=' + search.field + '&q[0].operator=' + search.operator + '&q[0].value=' + encodeURIComponent(search.value);
+			options.q = [ {
+				field : search.field,
+				operator : search.operator,
+				value : search.value
+			} ];
 		}
 		
 		if ((formIndex > 0) && (selectedEntityLabelValue != null)) {
-			uri += '&q[0].field=' + forms[formIndex].xrefFieldName + '&q[0].operator=EQUALS&q[0].value=' + selectedEntityLabelValue;
+			options.q = [ {
+				field : forms[formIndex].xrefFieldName,
+				operator : 'EQUALS',
+				value : selectedEntityLabelValue
+			} ];
 		} 
 		
 		var entities = {};
@@ -36,7 +48,7 @@
 			entities.items = [];
 			entities.total = 0;
 		} else {
-			entities = restApi.get(uri, {'expand': expands});
+			entities = restApi.get(uri, options);
 		}
 		
 		var items = [];
