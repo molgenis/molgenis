@@ -27,16 +27,7 @@ import javax.validation.Valid;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.molgenis.data.AggregateResult;
-import org.molgenis.data.Aggregateable;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.CrudRepository;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.data.Queryable;
-import org.molgenis.data.Repository;
+import org.molgenis.data.*;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.support.GenomeConfig;
 import org.molgenis.data.support.QueryImpl;
@@ -153,6 +144,7 @@ public class DataExplorerController extends MolgenisPluginController
 			@RequestParam(value = "searchTerm", required = false) String searchTerm, Model model) throws Exception
 	{
 		boolean entityExists = false;
+		boolean hasEntityPermission = false;
 		Iterable<EntityMetaData> entitiesMeta = Iterables.transform(dataService.getEntityNames(),
 				new Function<String, EntityMetaData>()
 				{
@@ -166,14 +158,22 @@ public class DataExplorerController extends MolgenisPluginController
 		if (selectedEntityName != null)
 		{
 			entityExists = dataService.hasRepository(selectedEntityName);
+			hasEntityPermission = molgenisPermissionService.hasPermissionOnEntity(selectedEntityName, Permission.COUNT);
+
 		}
 
-		if (entityExists && molgenisSettings.getBooleanProperty(KEY_HIDE_SELECT, DEFAULT_VAL_KEY_HIDE_SELECT))
+		if (entityExists && hasEntityPermission)
 		{
-			model.addAttribute("hideDatasetSelect", true);
+			if (molgenisSettings.getBooleanProperty(KEY_HIDE_SELECT, DEFAULT_VAL_KEY_HIDE_SELECT)) model.addAttribute(
+					"hideDatasetSelect", true);
 		}
 		else
 		{
+			if (selectedEntityName != null)
+			{
+				model.addAttribute("warningMessage",
+						"Entity does not exist or you do not have permission on this entity");
+			}
 			Iterator<EntityMetaData> entitiesIterator = entitiesMeta.iterator();
 			if (entitiesIterator.hasNext())
 			{
