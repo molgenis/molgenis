@@ -8,6 +8,7 @@ import static org.molgenis.data.mysql.AttributeMetaDataMetaData.ENTITY;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.ENUM_OPTIONS;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.ID_ATTRIBUTE;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.LABEL;
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.LABEL_ATTRIBUTE;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.LOOKUP_ATTRIBUTE;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.NAME;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.NILLABLE;
@@ -69,6 +70,7 @@ public class AttributeMetaDataRepository extends MysqlRepository
 		attributeMetaDataEntity.set(DESCRIPTION, att.getDescription());
 		attributeMetaDataEntity.set(AGGREGATEABLE, att.isAggregateable());
 		attributeMetaDataEntity.set(LOOKUP_ATTRIBUTE, att.isLookupAttribute());
+		attributeMetaDataEntity.set(LABEL_ATTRIBUTE, att.isLabelAttribute());
 
 		if (att.getDataType() instanceof EnumField)
 		{
@@ -95,7 +97,6 @@ public class AttributeMetaDataRepository extends MysqlRepository
 		{
 			delete(entity);
 		}
-
 	}
 
 	private DefaultAttributeMetaData toAttributeMetaData(Entity entity)
@@ -112,6 +113,8 @@ public class AttributeMetaDataRepository extends MysqlRepository
 		attributeMetaData.setAggregateable(entity.getBoolean(AGGREGATEABLE) == null ? false : entity
 				.getBoolean(AGGREGATEABLE));
 		attributeMetaData.setEnumOptions(entity.getList(ENUM_OPTIONS));
+		attributeMetaData.setLabelAttribute(entity.getBoolean(LABEL_ATTRIBUTE) == null ? false : entity
+				.getBoolean(LABEL_ATTRIBUTE));
 
 		Long rangeMin = entity.getLong(RANGE_MIN);
 		Long rangeMax = entity.getLong(RANGE_MAX);

@@ -8,6 +8,7 @@ import static org.molgenis.data.mysql.AttributeMetaDataMetaData.ENTITY;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.ENUM_OPTIONS;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.ID_ATTRIBUTE;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.LABEL;
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.LABEL_ATTRIBUTE;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.LOOKUP_ATTRIBUTE;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.NAME;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.NILLABLE;
@@ -281,6 +282,7 @@ public class EmxImportServiceImpl implements EmxImporterService
 			Boolean attributeVisible = attribute.getBoolean(VISIBLE);
 			Boolean attributeAggregateable = attribute.getBoolean(AGGREGATEABLE);
 			Boolean lookupAttribute = attribute.getBoolean(LOOKUP_ATTRIBUTE);
+			Boolean labelAttribute = attribute.getBoolean(LABEL_ATTRIBUTE);
 
 			if (attributeNillable != null) defaultAttributeMetaData.setNillable(attributeNillable);
 			if (attributeAuto != null) defaultAttributeMetaData.setAuto(attributeAuto);
@@ -289,6 +291,7 @@ public class EmxImportServiceImpl implements EmxImporterService
 			if (attributeAggregateable != null) defaultAttributeMetaData.setAggregateable(attributeAggregateable);
 			if (refEntityName != null) defaultAttributeMetaData.setRefEntity(entities.get(refEntityName));
 			if (lookupAttribute != null) defaultAttributeMetaData.setLookupAttribute(lookupAttribute);
+			if (labelAttribute != null) defaultAttributeMetaData.setLabelAttribute(labelAttribute);
 
 			defaultAttributeMetaData.setLabel(attribute.getString(LABEL));
 			defaultAttributeMetaData.setDescription(attribute.getString(DESCRIPTION));

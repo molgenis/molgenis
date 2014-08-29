@@ -120,62 +120,22 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 	private void upgradeMetaDataTables()
 	{
 		// Update attributes table if needed
+		addAttributeToTable(AttributeMetaDataMetaData.AGGREGATEABLE);
+		addAttributeToTable(AttributeMetaDataMetaData.RANGE_MIN);
+		addAttributeToTable(AttributeMetaDataMetaData.RANGE_MAX);
+		addAttributeToTable(AttributeMetaDataMetaData.ENUM_OPTIONS);
+		addAttributeToTable(AttributeMetaDataMetaData.LABEL_ATTRIBUTE);
+	}
 
-		if (!columnExists(attributeMetaDataRepository.getName(), AttributeMetaDataMetaData.AGGREGATEABLE))
+	private void addAttributeToTable(String attributeName)
+	{
+		if (!columnExists(attributeMetaDataRepository.getName(), attributeName))
 		{
 			String sql;
 			try
 			{
 				sql = attributeMetaDataRepository.getAlterSql(AttributeMetaDataRepository.META_DATA
-						.getAttribute(AttributeMetaDataMetaData.AGGREGATEABLE));
-			}
-			catch (MolgenisModelException e)
-			{
-				throw new RuntimeException(e);
-			}
-
-			new JdbcTemplate(ds).execute(sql);
-		}
-
-		if (!columnExists(attributeMetaDataRepository.getName(), AttributeMetaDataMetaData.RANGE_MIN))
-		{
-			String sql;
-			try
-			{
-				sql = attributeMetaDataRepository.getAlterSql(AttributeMetaDataRepository.META_DATA
-						.getAttribute(AttributeMetaDataMetaData.RANGE_MIN));
-			}
-			catch (MolgenisModelException e)
-			{
-				throw new RuntimeException(e);
-			}
-
-			new JdbcTemplate(ds).execute(sql);
-		}
-
-		if (!columnExists(attributeMetaDataRepository.getName(), AttributeMetaDataMetaData.RANGE_MAX))
-		{
-			String sql;
-			try
-			{
-				sql = attributeMetaDataRepository.getAlterSql(AttributeMetaDataRepository.META_DATA
-						.getAttribute(AttributeMetaDataMetaData.RANGE_MAX));
-			}
-			catch (MolgenisModelException e)
-			{
-				throw new RuntimeException(e);
-			}
-
-			new JdbcTemplate(ds).execute(sql);
-		}
-
-		if (!columnExists(attributeMetaDataRepository.getName(), AttributeMetaDataMetaData.ENUM_OPTIONS))
-		{
-			String sql;
-			try
-			{
-				sql = attributeMetaDataRepository.getAlterSql(AttributeMetaDataRepository.META_DATA
-						.getAttribute(AttributeMetaDataMetaData.ENUM_OPTIONS));
+						.getAttribute(attributeName));
 			}
 			catch (MolgenisModelException e)
 			{
