@@ -40,6 +40,7 @@ import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.core.FreemarkerTemplate;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.util.GsonHttpMessageConverter;
@@ -171,8 +172,12 @@ public class DataExplorerController extends MolgenisPluginController
 		{
 			if (selectedEntityName != null)
 			{
-				model.addAttribute("warningMessage",
-						"Entity does not exist or you do not have permission on this entity");
+                StringBuilder message = new StringBuilder("Entity does not exist or you do not have permission on this entity");
+                if(!SecurityUtils.currentUserIsAuthenticated()){
+                      message.append(", log in to view more entities");
+                }
+                model.addAttribute("warningMessage",
+						message.toString());
 			}
 			Iterator<EntityMetaData> entitiesIterator = entitiesMeta.iterator();
 			if (entitiesIterator.hasNext())
