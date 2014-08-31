@@ -41,25 +41,25 @@
 				Feel free to email us at <a href='mailto:${adminEmailsString}'>${adminEmailsString}</a>
 			</p>
 			<div class="form-group">
-				<label class="col-md-2 control-label" for="name">Name</label>
+				<label class="col-md-2 control-label" for="form_name">Name</label>
 				<div class="col-md-10">
                 	<input class="form-control" name="name" size="30" id="form_name" <#if userName??>value="${userName}"</#if> type="text" />
                 </div>
 			</div>
 			<div class="form-group">
-				<label class="col-md-2 control-label" for="email">Email</label>
+				<label class="col-md-2 control-label" for="form_email">Email</label>
 				<div class="col-md-10">
 					<input class="form-control" name="email" id="form_email" size="30" type="email" <#if userEmail??>value="${userEmail}"</#if>/>
 				</div>
 			</div>
 			<div class="form-group">
-				<label class="col-md-2 control-label" for="subject">Subject</label>
+				<label class="col-md-2 control-label" for="form_subject">Subject</label>
 				<div class="col-md-10">
 					<input class="form-control" maxlength="72" name="subject" id="form_subject" size="72" type="text" />
 				</div>
 			</div>
 			<div class="form-group">
-			    <label class="col-md-2 control-label" for="feedback">Body</label>
+			    <label class="col-md-2 control-label" for="form_feedback">Body</label>
 			    <div class="col-md-10">
 			    	<textarea class="form-control" name="feedback" id="form_feedback" required="true" rows="8"></textarea>
 			    </div>
