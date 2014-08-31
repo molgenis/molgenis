@@ -41,35 +41,61 @@
 				Feel free to email us at <a href='mailto:${adminEmailsString}'>${adminEmailsString}</a>
 			</p>
 			<div class="form-group">
-				<label class="col-md-2 control-label" for="form_name">Name</label>
+				<label class="col-md-2 control-label" for="name">Name</label>
 				<div class="col-md-10">
                 	<input class="form-control" name="name" size="30" id="form_name" <#if userName??>value="${userName}"</#if> type="text" />
                 </div>
 			</div>
 			<div class="form-group">
-				<label class="col-md-2 control-label" for="form_email">Email</label>
+				<label class="col-md-2 control-label" for="email">Email</label>
 				<div class="col-md-10">
 					<input class="form-control" name="email" id="form_email" size="30" type="email" <#if userEmail??>value="${userEmail}"</#if>/>
 				</div>
 			</div>
 			<div class="form-group">
-				<label class="col-md-2 control-label" for="form_subject">Subject</label>
+				<label class="col-md-2 control-label" for="subject">Subject</label>
 				<div class="col-md-10">
 					<input class="form-control" maxlength="72" name="subject" id="form_subject" size="72" type="text" />
 				</div>
 			</div>
 			<div class="form-group">
-			    <label class="col-md-2 control-label" for="form_feedback">Body</label>
+			    <label class="col-md-2 control-label" for="feedback">Body</label>
 			    <div class="col-md-10">
 			    	<textarea class="form-control" name="feedback" id="form_feedback" required="true" rows="8"></textarea>
 			    </div>
             </div>
+            <hr>
+            <h4>Code validation</h4>
+            <div class="form-group">
+                <div class="col-md-10 col-md-offset-2">
+                    <a href="#" id="captcha-href"><img id="captcha-img" src="/captcha"></a>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-2 control-label" for="reg-captcha">Code</label>
+                <div class="col-md-10">
+                    <input type="text" class="form-control" id="reg-captcha" name="captcha">
+                </div>
+            </div>     
+            
             <div class="col-md-10 col-md-offset-2">
 				<button type="submit" class="btn btn-success">Send</button>
 			</div>
 		</form>
 		<script>
 			$("#feedbackForm").validate();
+			$('#reg-captcha').rules('add', {
+	            required: true,
+	            remote: {
+	                url: '/captcha',
+	                type: 'POST'
+	            }
+	        });
+	        $('#captcha-href').click(function(e){
+	            e.preventDefault();
+	            $('#captcha-img').attr('src', '/captcha?_=' + Date.now());
+	            $('captcha').val('');
+	        });
 		</script>
 	</div>
 <#else>
