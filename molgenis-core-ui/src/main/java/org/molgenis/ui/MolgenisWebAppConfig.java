@@ -124,7 +124,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Bean
 	public MolgenisInterceptor molgenisInterceptor()
 	{
-		return new MolgenisInterceptor(resourceFingerprintRegistry());
+		return new MolgenisInterceptor(resourceFingerprintRegistry(), molgenisSettings);
 	}
 
 	@Bean

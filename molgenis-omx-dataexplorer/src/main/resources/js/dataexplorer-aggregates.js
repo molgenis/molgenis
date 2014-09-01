@@ -109,7 +109,8 @@
 				items.push('</table>');
 				if(!countAboveZero && noResultMessage !== undefined){
                     items.length = 0;
-                    items.push("<br><div>"+noResultMessage+"<div>");
+                    var messageTemplate = Handlebars.compile($("#aggregates-no-result-message-template").html());
+                    items.push(messageTemplate({}));
                 }
 				$('#aggregate-table-container').html(items.join(''));
 			}

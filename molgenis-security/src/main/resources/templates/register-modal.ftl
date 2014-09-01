@@ -147,6 +147,7 @@
         $('#captcha-href').click(function(e){
             e.preventDefault();
             $('#captcha-img').attr('src', '/captcha?_=' + Date.now());
+            $('captcha').val('');
         });
 
         <#-- modal events -->
