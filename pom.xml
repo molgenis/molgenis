@@ -101,6 +101,7 @@
                     <version>2.4</version>
                     <configuration>
                         <failOnMissingWebXml>false</failOnMissingWebXml>
+                        <warSourceDirectory>/src/main/resources</warSourceDirectory>
                     </configuration>
                 </plugin>
                 <!-- specify plugin version -->
@@ -289,7 +290,7 @@
                             <contextPath>/</contextPath>
                             <baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
                                 <resourcesAsCSV>
-                                    ${basedir}/src/main/webapp,${basedir}/target/generated-sources/molgenis/doc
+                                    ${basedir}/src/main/resources,${basedir}/target/generated-sources/molgenis/doc
                                 </resourcesAsCSV>
                             </baseResource>
                             <webInfIncludeJarPattern>.*/molgenis-[^/]*\.jar$|.*spring-[^/]*\.jar$

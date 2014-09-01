@@ -1,0 +1,134 @@
+/* Wrapper for page content to push down footer */
+#wrap {
+    background-image: url('/img/palga.png');
+}
+li.active:nth-child(1){
+    display:none;
+}
+
+
+div.complex-filter-container:nth-child(1) > div:nth-child(1) > label:nth-child(1) {
+    visibility: hidden;
+    text-indent: -9999px;
+    line-height: 0; /* Collapse the original line */
+}
+
+div.complex-filter-container:nth-child(1) > div:nth-child(1) > label:nth-child(1)::after {
+    visibility: visible;
+    content: "Zoekterm";
+    text-indent: 0;
+    display: block;
+    line-height: initial; /* New content takes up original line height */
+}
+
+div.complex-filter-container:nth-child(2) > div:nth-child(1) > label:nth-child(1) {
+    visibility: hidden;
+    text-indent: -9999px;
+    line-height: 0; /* Collapse the original line */
+}
+
+div.complex-filter-container:nth-child(2) > div:nth-child(1) > label:nth-child(1)::after {
+    visibility: visible;
+    content: "Retrievalterm";
+    text-indent: 0;
+    display: block;
+    line-height: initial; /* New content takes up original line height */
+}
+
+.modal-footer > a:nth-child(1){
+    text-indent: -9999px;
+    line-height: 0; /* Collapse the original line */
+}
+
+.modal-footer > a:nth-child(1)::after{
+    content: "Annuleren";
+    line-height: initial;
+    display: block;
+    text-indent: 0;
+}
+
+.btn-primary{
+    text-indent: -9999px;
+    line-height: 0; /* Collapse the original line */
+}
+
+.btn-primary::after{
+    content: "Zoeken";
+    line-height: initial;
+    display: block;
+    text-indent: 0;
+}
+
+#filter-wizard-btn{
+    text-indent: -9999px;
+    line-height: 0; /* Collapse the original line */
+}
+
+#filter-wizard-btn::after{
+    content: "Aanpassen";
+    line-height: initial;
+    display: block;
+    height:30px;
+    text-indent: 0;
+    font-weight: bold;
+
+}
+
+.table > tbody:nth-child(1) > tr:nth-child(4) > th:nth-child(1) {
+    text-indent: -9999px;
+    line-height: 0; /* Collapse the original line */
+}
+
+.table > tbody:nth-child(1) > tr:nth-child(4) > th:nth-child(1)::after {
+    visibility: visible;
+    content: "Totaal";
+    text-indent: 0;
+    display: block;
+    line-height: initial; /* New content takes up original line height */
+}
+
+.table > tbody:nth-child(1) > tr:nth-child(1) > th:nth-child(4) > div:nth-child(1){
+    text-indent: -9999px;
+    line-height: 0; /* Collapse the original line */
+}
+
+
+.table > tbody:nth-child(1) > tr:nth-child(1) > th:nth-child(4) > div:nth-child(1)::after{
+    visibility: visible;
+    content: "Totaal";
+    text-indent: 0;
+    display: block;
+    line-height: initial; /* New content takes up original line height */
+}
+
+
+#feature-select-container > label:nth-child(1) {
+    visibility: hidden;
+    text-indent: -9999px;
+    line-height: 0; /* Collapse the original line */
+}
+
+
+#observationset-search-container{
+    display:none;!important;
+}
+
+#feature-selection-container{
+    display:none;!important;
+}
+
+#feature-filters-container > div:nth-child(1) > div:nth-child(1) > a:nth-child(1){
+    text-indent: -9999px;
+    line-height: 0; /* Collapse the original line */
+}
+
+#feature-filters-container > div:nth-child(1) > div:nth-child(1) > a:nth-child(1):after{
+    visibility: visible;
+    content: "Toegepaste filters";
+    text-indent: 0;
+    display: block;
+    line-height: initial; /* New content takes up original line height */
+}
+
+
+
