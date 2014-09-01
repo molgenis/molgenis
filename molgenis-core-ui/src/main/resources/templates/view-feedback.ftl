@@ -64,12 +64,38 @@
 			    	<textarea class="form-control" name="feedback" id="form_feedback" required="true" rows="8"></textarea>
 			    </div>
             </div>
+            <hr>
+            <h4>Code validation</h4>
+            <div class="form-group">
+                <div class="col-md-10 col-md-offset-2">
+                    <a href="#" id="captcha-href"><img id="captcha-img" src="/captcha"></a>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-2 control-label" for="reg-captcha">Code</label>
+                <div class="col-md-10">
+                    <input type="text" class="form-control" id="reg-captcha" name="captcha">
+                </div>
+            </div>     
+            
             <div class="col-md-10 col-md-offset-2">
 				<button type="submit" class="btn btn-success">Send</button>
 			</div>
 		</form>
 		<script>
 			$("#feedbackForm").validate();
+			$('#reg-captcha').rules('add', {
+	            required: true,
+	            remote: {
+	                url: '/captcha',
+	                type: 'POST'
+	            }
+	        });
+	        $('#captcha-href').click(function(e){
+	            e.preventDefault();
+	            $('#captcha-img').attr('src', '/captcha?_=' + Date.now());
+	            $('captcha').val('');
+	        });
 		</script>
 	</div>
 <#else>
