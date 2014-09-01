@@ -101,7 +101,7 @@
                     <version>2.4</version>
                     <configuration>
                         <failOnMissingWebXml>false</failOnMissingWebXml>
-                        <warSourceDirectory>/src/main/resources</warSourceDirectory>
+                        <warSourceDirectory>${basedir}/src/main/resources</warSourceDirectory>
                     </configuration>
                 </plugin>
                 <!-- specify plugin version -->
