@@ -18,14 +18,6 @@
 	
 	var restApi = new molgenis.RestClient();
 
-    var resourceBundle;
-
-    self.setResourceBundle = function(bundle) {
-        if(bundle !== undefined) {
-            resourceBundle = bundle;
-        }
-    };
-
 	/**
 	 * @memberOf molgenis.dataexplorer.aggregates
 	 */

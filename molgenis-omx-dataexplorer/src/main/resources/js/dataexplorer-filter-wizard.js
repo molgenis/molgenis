@@ -6,13 +6,6 @@
 	var self = molgenis.dataexplorer.filter.wizard = molgenis.dataexplorer.filter.wizard || {};
 
 	var restApi = new molgenis.RestClient();
-	var resourceBundle;
-
-    self.setResourceBundle = function(bundle) {
-        if(bundle !== undefined) {
-            resourceBundle = bundle;
-        }
-    };
 
 	self.openFilterWizardModal = function(entityMetaData, attributeFilters) {
 		var modal = createFilterWizardModal();
