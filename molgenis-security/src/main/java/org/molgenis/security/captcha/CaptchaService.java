@@ -20,6 +20,12 @@ public class CaptchaService
 	@Autowired
 	private HttpSession session;
 
+	/**
+	 * Creates a {@link Captcha} and stores it in the session.
+	 * @param width the width of the image
+	 * @param height the height of the image
+	 * @return {@link BufferedImage} containing the captcha image
+	 */
 	public BufferedImage createCaptcha(int width, int height)
 	{
 		Captcha captcha = new Captcha.Builder(width, height).addText().addBackground(new GradiatedBackgroundProducer())
@@ -28,10 +34,33 @@ public class CaptchaService
 		return captcha.getImage();
 	}
 
+	/**
+	 * Validates a captcha answer.
+	 * The same captcha can be validated multiple times.
+	 * @param captchaAnswer the String to validate
+	 * @return boolean indicating if the answer is correct
+	 * @throws CaptchaException if no captcha found to validate
+	 */
 	public boolean validateCaptcha(String captchaAnswer) throws CaptchaException
 	{
 		Captcha captcha = (Captcha) session.getAttribute(Captcha.NAME);
 		if (captcha == null) throw new CaptchaException("no captcha to validate");
 		return captcha.isCorrect(captchaAnswer);
+	}
+	
+	/**
+	 * Validates and consumes a captcha.
+	 * Validates the answer and removes the captcha from the user's session if the answer was correct.
+	 * A captcha can be consumed only once.
+	 * @returns boolean indicating if answer is correct and the captcha was consumed
+	 * @throws CaptchaException if no captcha found to consume
+	 */
+	public boolean consumeCaptcha(String captchaAnswer) throws CaptchaException
+	{
+		if(!validateCaptcha(captchaAnswer)){
+			return false;
+		};
+		session.removeAttribute(Captcha.NAME);
+		return true;
 	}
 }
