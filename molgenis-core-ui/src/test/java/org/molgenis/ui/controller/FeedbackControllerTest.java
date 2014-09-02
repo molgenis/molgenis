@@ -24,9 +24,9 @@ import javax.mail.internet.MimeMessage.RecipientType;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.security.captcha.CaptchaException;
+import org.molgenis.security.captcha.CaptchaService;
 import org.molgenis.security.user.MolgenisUserService;
-import org.molgenis.ui.controller.FeedbackController;
-import org.molgenis.ui.controller.StaticContentService;
 import org.molgenis.ui.controller.FeedbackControllerTest.Config;
 import org.molgenis.util.FileStore;
 import org.molgenis.util.GsonHttpMessageConverter;
@@ -67,6 +67,9 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 	private StaticContentService staticContentService;
 
 	@Autowired
+	private CaptchaService captchaService;
+
+	@Autowired
 	private FileStore fileStore;
 
 	private MockMvc mockMvcFeedback;
@@ -74,7 +77,7 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 	private Authentication authentication;
 
 	@BeforeMethod
-	public void beforeMethod()
+	public void beforeMethod() throws CaptchaException
 	{
 		reset(javaMailSender, molgenisSettings, molgenisUserService);
 		mockMvcFeedback = MockMvcBuilders.standaloneSetup(feedbackController)
@@ -82,6 +85,7 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 		authentication = new TestingAuthenticationToken("userName", null);
 		authentication.setAuthenticated(true);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
+		when(captchaService.validateCaptcha("validCaptcha")).thenReturn(true);
 	}
 
 	@Test
@@ -141,8 +145,8 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 				.perform(
 						MockMvcRequestBuilders.post(FeedbackController.URI).param("name", "First Last")
 								.param("subject", "Feedback form").param("email", "user@domain.com")
-								.param("feedback", "Feedback.\nLine two.")).andExpect(status().isOk())
-				.andExpect(view().name("view-feedback"))
+								.param("feedback", "Feedback.\nLine two.").param("captcha", "validCaptcha"))
+				.andExpect(status().isOk()).andExpect(view().name("view-feedback"))
 				.andExpect(model().attribute("feedbackForm", hasProperty("submitted", equalTo(true))));
 		verify(message, times(1)).setRecipients(RecipientType.TO, new InternetAddress[]
 		{ new InternetAddress("molgenis@molgenis.org") });
@@ -166,8 +170,8 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 				.perform(
 						MockMvcRequestBuilders.post(FeedbackController.URI).param("name", "First Last")
 								.param("subject", "Feedback form").param("email", "user@domain.com")
-								.param("feedback", "Feedback.\nLine two.")).andExpect(status().isOk())
-				.andExpect(view().name("view-feedback"))
+								.param("feedback", "Feedback.\nLine two.").param("captcha", "validCaptcha"))
+				.andExpect(status().isOk()).andExpect(view().name("view-feedback"))
 				.andExpect(model().attribute("feedbackForm", hasProperty("submitted", equalTo(true))));
 		verify(message, times(1)).setSubject("[feedback-molgenis] Feedback form");
 	}
@@ -183,8 +187,9 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 		mockMvcFeedback
 				.perform(
 						MockMvcRequestBuilders.post(FeedbackController.URI).param("name", "First Last")
-								.param("email", "user@domain.com").param("feedback", "Feedback.\nLine two."))
-				.andExpect(status().isOk()).andExpect(view().name("view-feedback"))
+								.param("email", "user@domain.com").param("feedback", "Feedback.\nLine two.")
+								.param("captcha", "validCaptcha")).andExpect(status().isOk())
+				.andExpect(view().name("view-feedback"))
 				.andExpect(model().attribute("feedbackForm", hasProperty("submitted", equalTo(true))));
 		verify(message, times(1)).setSubject("[feedback-molgenis] <no subject>");
 	}
@@ -194,8 +199,8 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 	{
 		mockMvcFeedback.perform(
 				MockMvcRequestBuilders.post(FeedbackController.URI).param("name", "First Last")
-						.param("subject", "Feedback form").param("email", "user@domain.com").param("feedback", ""))
-				.andExpect(status().is4xxClientError());
+						.param("subject", "Feedback form").param("email", "user@domain.com").param("feedback", "")
+						.param("captcha", "validCaptcha")).andExpect(status().is4xxClientError());
 	}
 
 	@Test
@@ -211,7 +216,7 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 				.perform(
 						MockMvcRequestBuilders.post(FeedbackController.URI).param("name", "First Last")
 								.param("subject", "Feedback form").param("email", "user@domain.com")
-								.param("feedback", "Feedback.\nLine two."))
+								.param("feedback", "Feedback.\nLine two.").param("captcha", "validCaptcha"))
 				.andExpect(status().isOk())
 				.andExpect(view().name("view-feedback"))
 				.andExpect(model().attribute("feedbackForm", hasProperty("submitted", equalTo(false))))
@@ -221,6 +226,19 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 								hasProperty("errorMessage",
 										equalTo("Unfortunately, we were unable to send the mail containing "
 												+ "your feedback.<br/>Please contact the administrator."))));
+	}
+
+	@Test
+	public void submitInvalidCaptcha() throws Exception
+	{
+		mockMvcFeedback
+				.perform(
+						MockMvcRequestBuilders.post(FeedbackController.URI).param("name", "First Last")
+								.param("subject", "Feedback form").param("email", "user@domain.com")
+								.param("feedback", "Feedback.\nLine two.").param("captcha", "invalidCaptcha"))
+				.andExpect(status().isOk()).andExpect(view().name("view-feedback"))
+				.andExpect(model().attribute("feedbackForm", hasProperty("submitted", equalTo(false))))
+				.andExpect(model().attribute("feedbackForm", hasProperty("errorMessage", equalTo("Invalid captcha."))));
 	}
 
 	@Configuration
@@ -266,6 +284,12 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 		public FileStore fileStore()
 		{
 			return mock(FileStore.class);
+		}
+
+		@Bean
+		public CaptchaService captchaService()
+		{
+			return mock(CaptchaService.class);
 		}
 
 	}

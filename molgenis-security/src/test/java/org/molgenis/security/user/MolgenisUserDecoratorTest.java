@@ -1,13 +1,18 @@
 package org.molgenis.security.user;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.molgenis.data.CrudRepository;
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.omx.auth.UserAuthority;
+import org.molgenis.omx.auth.UserAuthorityRepository;
 import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,6 +24,7 @@ public class MolgenisUserDecoratorTest
 	private CrudRepository decoratedRepository;
 	private MolgenisUserDecorator molgenisUserDecorator;
 	private PasswordEncoder passwordEncoder;
+	private UserAuthorityRepository userAuthorityRepository;
 
 	@BeforeMethod
 	public void setUp()
@@ -28,6 +34,10 @@ public class MolgenisUserDecoratorTest
 		ApplicationContext ctx = mock(ApplicationContext.class);
 		passwordEncoder = mock(PasswordEncoder.class);
 		when(ctx.getBean(PasswordEncoder.class)).thenReturn(passwordEncoder);
+		userAuthorityRepository = mock(UserAuthorityRepository.class);
+		DataService dataService = mock(DataService.class);
+		when(ctx.getBean(DataService.class)).thenReturn(dataService);
+		when(dataService.getCrudRepository(UserAuthority.ENTITY_NAME)).thenReturn(userAuthorityRepository);
 		new ApplicationContextProvider().setApplicationContext(ctx);
 	}
 
@@ -37,8 +47,23 @@ public class MolgenisUserDecoratorTest
 		String password = "password";
 		Entity entity = new MapEntity();
 		entity.set(MolgenisUser.PASSWORD_, password);
+		entity.set(MolgenisUser.SUPERUSER, false);
 		molgenisUserDecorator.add(entity);
 		verify(passwordEncoder).encode(password);
 		verify(decoratedRepository).add(entity);
+		verify(userAuthorityRepository, times(0)).add(any(UserAuthority.class));
+	}
+
+	@Test
+	public void addEntitySu()
+	{
+		String password = "password";
+		Entity entity = new MapEntity();
+		entity.set(MolgenisUser.PASSWORD_, password);
+		entity.set(MolgenisUser.SUPERUSER, true);
+		molgenisUserDecorator.add(entity);
+		verify(passwordEncoder).encode(password);
+		verify(decoratedRepository).add(entity);
+		verify(userAuthorityRepository, times(1)).add(any(UserAuthority.class));
 	}
 }

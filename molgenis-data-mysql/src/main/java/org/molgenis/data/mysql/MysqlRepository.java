@@ -8,7 +8,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -49,6 +48,7 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -698,14 +698,14 @@ public class MysqlRepository extends AbstractAggregateableCrudRepository impleme
 					{
 						throw new MolgenisDataException("Missing value for IN query");
 					}
-					else if (!(r.getValue() instanceof List))
+					else if (!(r.getValue() instanceof Iterable<?>))
 					{
 						for (String str : r.getValue().toString().split(","))
 							values.add(str);
 					}
 					else
 					{
-						values.addAll((Collection<?>) r.getValue());
+						Iterables.addAll(values, (Iterable<?>) r.getValue());
 					}
 
 					for (int i = 0; i < values.size(); i++)
