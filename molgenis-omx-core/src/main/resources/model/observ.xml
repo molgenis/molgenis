@@ -143,11 +143,11 @@
 			<field name="ProtocolType" nillable="true" type="xref"
 				xref_entity="OntologyTerm" description="classification of protocol" />
 			<field name="subprotocols" type="mref" xref_entity="Protocol"
-				nillable="true" description="Subprotocols of this protocol" fetchType="EAGER"/>
+				nillable="true" description="Subprotocols of this protocol" />
 			<field name="Features" type="mref" nillable="true" xref_entity="ObservableFeature"
-				description="parameters (in/out) that are used or produced by this protocol." fetchType="EAGER"/>
+				description="parameters (in/out) that are used or produced by this protocol." />
 			<field name="RequiredFeatures" type="mref" nillable="true"
-				xref_entity="ObservableFeature" description=".........." fetchType="EAGER"/>
+				xref_entity="ObservableFeature" description=".........." />
 			<field name="root" type="boolean" default="false"
 				description="Indicator whether this protocol defines a workflow (e.g is the first protocol of a workflow)." />
 			<field name="active" type="bool" default="true"
