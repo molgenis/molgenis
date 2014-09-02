@@ -81,7 +81,6 @@
 	 */
 	self.createFilterQueryUserReadableList = function (attributeFilters) {
 		var items = [];
-		
 		$.each(attributeFilters, function(attributeUri, filter) {
 			var attributeLabel = filter.attribute.label || filter.attribute.name;
 			items.push('<p><a class="feature-filter-edit" data-href="' + attributeUri + '" href="#">'
@@ -108,7 +107,6 @@
 					if(index > 0)
 					{
 						if(complexFilterElement.operator === 'AND'){
-							addBracket
 							if(!elementHasAndOperator){
 								elementHasAndOperator = true;
 								items[items.length-1] = '(' + items[items.length-1];
@@ -175,7 +173,7 @@
 			case 'XREF':
 				var operator = (filter.operator ? filter.operator.toLocaleLowerCase() : 'or');
 				var array = [];
-				$.each(values, function(key, value) {
+				$.each(filter.getLabels(), function(key, value) {
 					array.push('\'' + value + '\'');
 				});
 				return htmlEscape('(' + array.join(' ' + operator + ' ') + ')');
@@ -461,9 +459,9 @@
 				});
 				$.each(entities.items, function() {
 					var attrs = {'name': name, 'id': name};
-					if(values && $.inArray(this[entityMeta.labelAttribute], values) > -1)
+					if(values && $.inArray(this[entityMeta.idAttribute], values) > -1)
 						attrs.checked = 'checked';
-					$controls.append(createInput(attribute, attrs, this[entityMeta.labelAttribute], this[entityMeta.labelAttribute]));
+					$controls.append(createInput(attribute, attrs, this[entityMeta.idAttribute], this[entityMeta.labelAttribute]));
 				});
 				break;
 			case 'DATE':
@@ -514,6 +512,7 @@
 				$controls.xrefmrefsearch({
 					attribute : attribute,
 					values : values,
+					labels : simpleFilter ? simpleFilter.getLabels() : null,
 					operator : operator,
 					autofocus : 'autofocus',
 					isfilter : true,
@@ -582,6 +581,7 @@
 		this.fromValue = fromValue;
 		this.toValue = toValue;
 		var values = [];
+		var labels = [];
 		this.type = 'simple';
 		this.attribute = attribute;
 
@@ -595,6 +595,11 @@
 		this.getValues = function ()
 		{
 			return values;
+		};
+		
+		this.getLabels = function()
+		{
+			return labels;
 		};
 		
 		this.update = function ($domElement) {
@@ -623,7 +628,13 @@
 							$(mrefValues).each(function(i){
 								values.push(mrefValues[i]);
 							});
+							
+							labels = $(this).data('labels');
 						} 
+						else if(attribute.fieldType == 'CATEGORICAL') {
+							labels.push($(this).parent().text());
+							values[values.length] = value;
+						}
 						else if(attribute.fieldType === 'INT'
 							|| attribute.fieldType === 'LONG'
 								|| attribute.fieldType === 'DECIMAL'
@@ -644,6 +655,7 @@
 						else
 						{
 							values[values.length] = value;
+							labels[values.length] = value;
 						}
 					}
 				}
