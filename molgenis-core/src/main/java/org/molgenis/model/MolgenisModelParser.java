@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-import javax.persistence.FetchType;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -350,7 +349,7 @@ public class MolgenisModelParser
 				"unique", "hidden", "length", "enum_options", "default_code", "xref", "xref_entity", "xref_field",
 				"xref_label", "xref_name", "mref_name", "mref_localid", "mref_remoteid", "filter", "filtertype",
 				"filterfield", "filtervalue", "xref_cascade", "allocationSize", "jpaCascade", "aggregateable",
-				"minRange", "maxRange", "fetchType" };
+				"minRange", "maxRange" };
 		List<String> key_words = new ArrayList<String>(Arrays.asList(keywords));
 		for (int i = 0; i < element.getAttributes().getLength(); i++)
 		{
@@ -496,19 +495,10 @@ public class MolgenisModelParser
 				jpaCascade = element.getAttribute("jpaCascade");
 			}
 		}
-		
-		FetchType fetchType = null;
-		if (type.equals("mref") || type.equals("xref") || type.equals("categorical"))
-		{
-			if (element.hasAttribute("fetchType"))
-			{
-				fetchType = FetchType.valueOf(element.getAttribute("fetchType"));
-			}
-		}
 
 		// construct
 		Field field = new Field(entity, MolgenisFieldTypes.getType(type), name, label, Boolean.parseBoolean(auto),
-				Boolean.parseBoolean(nillable), Boolean.parseBoolean(readonly), default_value, jpaCascade, fetchType);
+				Boolean.parseBoolean(nillable), Boolean.parseBoolean(readonly), default_value, jpaCascade);
 		logger.debug("read: " + field.toString());
 
 		if (aggregateable.isEmpty())

@@ -123,7 +123,7 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
         <#if field.type == "mref">
 			<#assign multipleXrefs = model.getNumberOfReferencesTo(field.xrefEntity)/>
 	@javax.persistence.OrderColumn 	
-    @javax.persistence.ManyToMany(fetch=<#if field.fetchType??>javax.persistence.FetchType.${field.fetchType}<#else>javax.persistence.FetchType.LAZY</#if><#if field.jpaCascade??>, cascade={${field.jpaCascade}}<#else> /*cascade={javax.persistence.CascadeType.MERGE, javax.persistence.CascadeType.PERSIST, javax.persistence.CascadeType.REFRESH}*/</#if>)
+    @javax.persistence.ManyToMany(<#if field.jpaCascade??>fetch=javax.persistence.FetchType.LAZY, cascade={${field.jpaCascade}}<#else>fetch=javax.persistence.FetchType.LAZY /*cascade={javax.persistence.CascadeType.MERGE, javax.persistence.CascadeType.PERSIST, javax.persistence.CascadeType.REFRESH}*/</#if>)
     @javax.persistence.JoinColumn(name="${SqlName(field)}", insertable=true, updatable=true, nullable=${field.isNillable()?string})
 			<#if multipleXrefs &gt; 1>
 	@javax.persistence.JoinTable(name="${Name(entity)}_${SqlName(field)}", 
@@ -133,7 +133,7 @@ public class ${JavaName(entity)} extends <#if entity.hasAncestor()>${entity.getA
 			joinColumns=@javax.persistence.JoinColumn(name="${Name(entity)}"), inverseJoinColumns=@javax.persistence.JoinColumn(name="${SqlName(field)}"))			
 			</#if>			
        	<#elseif field.type == "xref" || field.type == "categorical">
-    @javax.persistence.ManyToOne(fetch=<#if field.fetchType??>javax.persistence.FetchType.${field.fetchType}<#else>javax.persistence.FetchType.EAGER</#if><#if field.jpaCascade??>, cascade={${field.jpaCascade}}<#else> /*cascade={javax.persistence.CascadeType.MERGE, javax.persistence.CascadeType.PERSIST, javax.persistence.CascadeType.REFRESH}*/</#if>)
+    @javax.persistence.ManyToOne(<#if field.jpaCascade??>fetch=javax.persistence.FetchType.EAGER, cascade={${field.jpaCascade}}<#else>fetch=javax.persistence.FetchType.EAGER /*cascade={javax.persistence.CascadeType.MERGE, javax.persistence.CascadeType.PERSIST, javax.persistence.CascadeType.REFRESH}*/</#if>)
     @javax.persistence.JoinColumn(name="${SqlName(field)}"<#if !field.nillable>, nullable=false</#if>)  
        	<#else>
 			<#if isPrimaryKey(field,entity)>

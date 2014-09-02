@@ -18,8 +18,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Vector;
 
-import javax.persistence.FetchType;
-
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.FieldType;
@@ -46,7 +44,7 @@ public class Field implements Serializable
 
 	public Field(Entity parent, String name, FieldType type)
 	{
-		this(parent, type, name, name, false, false, false, null, null, null);
+		this(parent, type, name, name, false, false, false, null, null);
 	}
 
 	// constructor(s)
@@ -67,13 +65,11 @@ public class Field implements Serializable
 	 * @param readonly
 	 *            Indicates whether this field is readonly.
 	 * @param jpaCascade
-	 *            Makes it possible to use JPA Cascade options to streamline object database interaction, see JPA
+	 *            Makes it possible to use JPA Cascade options to streamline object datbase interaction, see JPA
 	 *            documentation for details
-	 * @param fetchType
-	 *            For references, specifies how the references should be fetched
 	 */
 	public Field(Entity parent, FieldType type, String name, String label, boolean auto, boolean nillable,
-			boolean readonly, String default_value, String jpaCascade, FetchType fetchType)
+			boolean readonly, String default_value, String jpaCascade)
 	{
 		this.entity = parent;
 
@@ -102,7 +98,6 @@ public class Field implements Serializable
 		this.user_data = null;
 
 		this.jpaCascade = jpaCascade;
-		this.fetchType = fetchType;
 	}
 
 	public Field(String name)
@@ -132,7 +127,7 @@ public class Field implements Serializable
 	public Field(Entity parent, FieldType type, String name, String label, boolean auto, boolean nillable,
 			boolean readonly, String default_value)
 	{
-		this(parent, type, name, label, auto, nillable, readonly, default_value, null, null);
+		this(parent, type, name, label, auto, nillable, readonly, default_value, null);
 	}
 
 	/**
@@ -165,7 +160,6 @@ public class Field implements Serializable
 		this.xref_field = field.xref_field;
 		this.xref_labels = field.xref_labels;
 		this.xref_entity = field.xref_entity;
-		this.fetchType = field.fetchType;
 	}
 
 	// global access methods
@@ -1024,11 +1018,6 @@ public class Field implements Serializable
 	 */
 	private String jpaCascade = null;
 	/**
-	 * Fetch type for ref fields
-	 */
-	private FetchType fetchType = null;
-	
-	/**
 	 * When this field is of type Type.XREF_MULTIPLE, this is the name of the link-table.
 	 */
 	private String mref_name;
@@ -1238,16 +1227,6 @@ public class Field implements Serializable
 	{
 		this.jpaCascade = jpaCascade;
 	}
-	
-	public void setFetchType(FetchType fetchType)
-	{
-		this.fetchType = fetchType;
-	}
-	
-	public FetchType getFetchType()
-	{
-		return fetchType;
-	}
 
 	public void setTableName(String tableName)
 	{
@@ -1290,5 +1269,4 @@ public class Field implements Serializable
 
 		return false;
 	}
-	
 }
