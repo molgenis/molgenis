@@ -5,9 +5,9 @@ import static org.mockito.Mockito.mock;
 import javax.sql.DataSource;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.mysql.AttributeMetaDataRepository;
 import org.molgenis.data.mysql.EmbeddedMysqlDatabaseBuilder;
-import org.molgenis.data.mysql.EntityMetaDataRepository;
+import org.molgenis.data.mysql.MysqlAttributeMetaDataRepository;
+import org.molgenis.data.mysql.MysqlEntityMetaDataRepository;
 import org.molgenis.data.mysql.MysqlEntityValidator;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
@@ -58,16 +58,16 @@ public class AppConfig
 	}
 
 	@Bean
-	public EntityMetaDataRepository entityMetaDataRepository()
+	public MysqlEntityMetaDataRepository entityMetaDataRepository()
 	{
-		return new EntityMetaDataRepository(dataSource(), new MysqlEntityValidator(dataService(),
+		return new MysqlEntityMetaDataRepository(dataSource(), new MysqlEntityValidator(dataService(),
 				new EntityAttributesValidator()));
 	}
 
 	@Bean
-	public AttributeMetaDataRepository attributeMetaDataRepository()
+	public MysqlAttributeMetaDataRepository attributeMetaDataRepository()
 	{
-		return new AttributeMetaDataRepository(dataSource(), new MysqlEntityValidator(dataService(),
+		return new MysqlAttributeMetaDataRepository(dataSource(), new MysqlEntityValidator(dataService(),
 				new EntityAttributesValidator()));
 	}
 
