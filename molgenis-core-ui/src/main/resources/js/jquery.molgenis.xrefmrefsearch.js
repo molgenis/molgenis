@@ -152,7 +152,7 @@
 					$select2Container.css('width', ($select2Container.width() - 56) + 'px');
 					$('.dropdown-toggle', $container).show();
 				}
-				return formatSelection(entity, refEntityMetaData);;
+				return formatSelection(entity, refEntityMetaData);
 			},
 			id: function(entity) {
 				return entity[refEntityMetaData.idAttribute];
