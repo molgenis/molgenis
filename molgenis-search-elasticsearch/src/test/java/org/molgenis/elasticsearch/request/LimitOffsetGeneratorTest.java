@@ -27,10 +27,27 @@ public class LimitOffsetGeneratorTest
 	}
 
 	@Test
+	public void testGenerateSizeUndefined()
+	{
+		LimitOffsetGenerator gen = new LimitOffsetGenerator();
+		gen.generate(searchRequestBuilderMock, new QueryImpl(), null);
+		verify(searchRequestBuilderMock).setSize(Integer.MAX_VALUE);
+	}
+
+	@Test
 	public void testGenerateFrom()
 	{
 		LimitOffsetGenerator gen = new LimitOffsetGenerator();
 		gen.generate(searchRequestBuilderMock, new QueryImpl().offset(20), null);
 		verify(searchRequestBuilderMock).setFrom(20);
 	}
+
+	@Test
+	public void testGenerateFromUndefined()
+	{
+		LimitOffsetGenerator gen = new LimitOffsetGenerator();
+		gen.generate(searchRequestBuilderMock, new QueryImpl(), null);
+		verify(searchRequestBuilderMock).setFrom(0);
+	}
+
 }
