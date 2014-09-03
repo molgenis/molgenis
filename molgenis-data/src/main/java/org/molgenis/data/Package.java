@@ -1,7 +1,8 @@
 package org.molgenis.data;
 
 /**
- * Represents a package of EntityMetaData 
+ * Package defines the structure and attributes of a Package. Attributes are unique. Other software components
+ * can use this to interact with Packages and/or to configure backends and frontends, including Repository instances.
  */
 public interface Package
 {

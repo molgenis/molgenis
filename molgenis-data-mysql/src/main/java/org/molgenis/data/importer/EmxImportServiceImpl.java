@@ -43,6 +43,7 @@ import org.molgenis.data.Updateable;
 import org.molgenis.data.mysql.AttributeMetaDataMetaData;
 import org.molgenis.data.mysql.EntityMetaDataMetaData;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
+import org.molgenis.data.mysql.PackageMetaData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.fieldtypes.EnumField;
@@ -72,6 +73,7 @@ public class EmxImportServiceImpl implements EmxImporterService
 	// Sheet names
 	private static final String ENTITIES = EntityMetaDataMetaData.ENTITY_NAME;
 	private static final String ATTRIBUTES = AttributeMetaDataMetaData.ENTITY_NAME;
+	private static final String PACKAGES = PackageMetaData.ENTITY_NAME;
 
 	private MysqlRepositoryCollection store;
 	private TransactionTemplate transactionTemplate;
@@ -228,9 +230,10 @@ public class EmxImportServiceImpl implements EmxImporterService
 		// so we need to consider both new metadata as existing ...
 		Map<String, DefaultEntityMetaData> entities = new LinkedHashMap<String, DefaultEntityMetaData>();
 
-		// load attributes first (because entities are optional).
+		// load attributes first, entities and packages are optional
 		loadAllAttributesToMap(source, entities);
 		loadAllEntitiesToMap(source, entities);
+		loadAllPackagesToMap(source, entities);
 		reiterateToMapRefEntity(source, entities);
 
 		return entities;
@@ -385,6 +388,37 @@ public class EmxImportServiceImpl implements EmxImporterService
 					}
 					md.setExtends(extendsEntityMeta);
 				}
+			}
+		}
+	}
+
+	/**
+	 * Load all packages (optional)
+	 * 
+	 * @param source
+	 *            the map to add package meta data
+	 */
+	private void loadAllPackagesToMap(RepositoryCollection source, Map<String, DefaultEntityMetaData> entities)
+	{
+		if (source.getRepositoryByEntityName(PACKAGES) != null)
+		{
+			int i = 1;
+			for (Entity pack : source.getRepositoryByEntityName(PACKAGES))
+			{
+				i++;
+				String packageName = pack.getString(NAME);
+
+				// required
+				if (packageName == null) throw new IllegalArgumentException("package.name is missing on line " + i);
+
+				if (!entities.containsKey(packageName)) entities.put(packageName,
+						new DefaultEntityMetaData(packageName));
+
+				// Add description to package
+				DefaultEntityMetaData md = entities.get(packageName);
+				md.setDescription(pack.getString(DESCRIPTION));
+
+				// TODO read entities implementing this package
 			}
 		}
 	}
