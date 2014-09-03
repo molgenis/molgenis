@@ -425,7 +425,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 	private Repository getSecuredAndOptionallyIndexedRepository(CrudRepository repository)
 	{
 		CrudRepository decoratedRepository = repository;
-		if (this.elasticSearchService != null)
+		if (elasticSearchService != null)
 		{
 			decoratedRepository = new ElasticsearchRepositoryDecorator(decoratedRepository, elasticSearchService);
 		}
@@ -434,23 +434,31 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 	}
 
 	/**
-	 * Returns an indexed meta data repository for attributes
+	 * Returns an optionally indexed meta data repository for attributes
 	 * 
 	 * @return
 	 */
 	private AttributeMetaDataRepository getAttributeMetaDataRepository()
 	{
-		return new ElasticsearchAttributeMetaDataRepository(attributeMetaDataRepository, dataService,
-				elasticSearchService);
+		if (elasticSearchService != null)
+		{
+			return new ElasticsearchAttributeMetaDataRepository(attributeMetaDataRepository, dataService,
+					elasticSearchService);
+		}
+		return attributeMetaDataRepository;
 	}
 
 	/**
-	 * Returns an indexed meta data repository for entities
+	 * Returns an optionally indexed meta data repository for entities
 	 * 
 	 * @return
 	 */
 	private EntityMetaDataRepository getEntityMetaDataRepository()
 	{
-		return new ElasticsearchEntityMetaDataRepository(entityMetaDataRepository, elasticSearchService);
+		if (elasticSearchService != null)
+		{
+			return new ElasticsearchEntityMetaDataRepository(entityMetaDataRepository, elasticSearchService);
+		}
+		return entityMetaDataRepository;
 	}
 }
