@@ -1,6 +1,5 @@
 package org.molgenis.omx.importer;
 
-import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.fail;
@@ -139,7 +138,7 @@ public class OmxImporterServiceTest
 		dataService.addRepository(new TextValueRepository(entityManager, validator, queryResolver));
 
 		factory = new EmbeddedElasticSearchServiceFactory(Collections.singletonMap("path.data", "target/data"));
-		EntityToSourceConverter entityToSourceConverter = mock(EntityToSourceConverter.class);
+		EntityToSourceConverter entityToSourceConverter = new EntityToSourceConverter(dataService);
 		searchService = factory.create(dataService, entityToSourceConverter);
 
 		EntityImportService eis = new EntityImportService();
