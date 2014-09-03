@@ -93,6 +93,7 @@ public class JpaRepository extends AbstractCrudRepository
 	}
 
 	@Override
+	@Transactional
 	public void add(Entity entity)
 	{
 		Entity jpaEntity = getTypedEntity(entity);
@@ -106,6 +107,7 @@ public class JpaRepository extends AbstractCrudRepository
 	}
 
 	@Override
+	@Transactional
 	public Integer add(Iterable<? extends Entity> entities)
 	{
 		Integer count = 0;

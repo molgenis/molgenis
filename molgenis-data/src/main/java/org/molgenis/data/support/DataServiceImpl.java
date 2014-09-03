@@ -109,7 +109,6 @@ public class DataServiceImpl implements DataService
 	public boolean hasRepository(String entityName)
 	{
 		return repositories.containsKey(entityName.toLowerCase());
-
 	}
 
 	@Override

@@ -57,8 +57,7 @@ public class RepositoryValidationDecorator extends CrudRepositoryDecorator imple
 	@Override
 	public void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
 	{
-		// TODO Auto-generated method stub
-
+		getDecoratedRepository().update(entities, dbAction, keyName);
 	}
 
 	@Override
