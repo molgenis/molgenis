@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Aggregateable;
 import org.molgenis.data.AttributeMetaData;
@@ -118,7 +117,6 @@ public class ElasticsearchRepositoryDecorator implements CrudRepository, Aggrega
 		}
 
 		Iterable<String> ids = elasticSearchService.search(q, getEntityMetaData());
-		System.out.println(Lists.newArrayList(ids));
 		return !Iterables.isEmpty(ids) ? ((Queryable) repository).findAll(toEntityIds(ids)) : Collections
 				.<Entity> emptyList();
 	}
