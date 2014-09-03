@@ -39,12 +39,11 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.support.AbstractAggregateableCrudRepository;
+import org.molgenis.data.support.AbstractCrudRepository;
 import org.molgenis.data.support.ConvertingIterable;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.QueryResolver;
-import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.generators.GeneratorHelper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Sort;
@@ -55,7 +54,7 @@ import com.google.common.collect.Lists;
 /**
  * Repository implementation for (generated) jpa entities
  */
-public class JpaRepository extends AbstractAggregateableCrudRepository
+public class JpaRepository extends AbstractCrudRepository
 {
 	public static final String BASE_URL = "jpa://";
 	private final EntityMetaData entityMetaData;
@@ -64,17 +63,16 @@ public class JpaRepository extends AbstractAggregateableCrudRepository
 	@PersistenceContext
 	private EntityManager entityManager;
 
-	public JpaRepository(EntityMetaData entityMetaData, EntityValidator entityValidator, QueryResolver queryResolver)
+	public JpaRepository(EntityMetaData entityMetaData, QueryResolver queryResolver)
 	{
-		super(BASE_URL + entityMetaData.getEntityClass().getName(), entityValidator);
+		super(BASE_URL + entityMetaData.getEntityClass().getName());
 		this.entityMetaData = entityMetaData;
 		this.queryResolver = queryResolver;
 	}
 
-	public JpaRepository(EntityManager entityManager, EntityMetaData entityMetaData, EntityValidator entityValidator,
-			QueryResolver queryResolver)
+	public JpaRepository(EntityManager entityManager, EntityMetaData entityMetaData, QueryResolver queryResolver)
 	{
-		this(entityMetaData, entityValidator, queryResolver);
+		this(entityMetaData, queryResolver);
 		this.entityManager = entityManager;
 	}
 
@@ -95,7 +93,7 @@ public class JpaRepository extends AbstractAggregateableCrudRepository
 	}
 
 	@Override
-	protected void addInternal(Entity entity)
+	public void add(Entity entity)
 	{
 		Entity jpaEntity = getTypedEntity(entity);
 
@@ -108,12 +106,12 @@ public class JpaRepository extends AbstractAggregateableCrudRepository
 	}
 
 	@Override
-	protected Integer addInternal(Iterable<? extends Entity> entities)
+	public Integer add(Iterable<? extends Entity> entities)
 	{
 		Integer count = 0;
 		for (Entity e : entities)
 		{
-			addInternal(e);
+			add(e);
 			count++;
 		}
 		return count;
@@ -242,7 +240,7 @@ public class JpaRepository extends AbstractAggregateableCrudRepository
 	}
 
 	@Override
-	protected void updateInternal(Entity entity)
+	public void update(Entity entity)
 	{
 		EntityManager em = getEntityManager();
 
@@ -255,7 +253,7 @@ public class JpaRepository extends AbstractAggregateableCrudRepository
 	}
 
 	@Override
-	protected void updateInternal(Iterable<? extends Entity> entities)
+	public void update(Iterable<? extends Entity> entities)
 	{
 		EntityManager em = getEntityManager();
 		int batchSize = 500;
@@ -284,7 +282,7 @@ public class JpaRepository extends AbstractAggregateableCrudRepository
 	}
 
 	@Override
-	protected void updateInternal(List<? extends Entity> entities, DatabaseAction dbAction, String... keyNames)
+	public void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyNames)
 	{
 		if (keyNames.length == 0) throw new MolgenisDataException("At least one key must be provided, e.g. 'name'");
 
@@ -430,7 +428,7 @@ public class JpaRepository extends AbstractAggregateableCrudRepository
 			case ADD:
 				if (existingEntities.size() == 0)
 				{
-					addInternal(newEntities);
+					add(newEntities);
 				}
 				else
 				{
@@ -450,7 +448,7 @@ public class JpaRepository extends AbstractAggregateableCrudRepository
 			case ADD_IGNORE_EXISTING:
 				if (logger.isDebugEnabled()) logger.debug("updateByName(List<" + entityName + "," + dbAction
 						+ ">) will skip " + existingEntities.size() + " existing entities");
-				addInternal(newEntities);
+				add(newEntities);
 				break;
 
 			// will try to update(existingEntities) entities and
@@ -460,7 +458,7 @@ public class JpaRepository extends AbstractAggregateableCrudRepository
 				if (logger.isDebugEnabled()) logger.debug("updateByName(List<" + entityName + "," + dbAction
 						+ ">)  will try to update " + existingEntities.size() + " existing entities and add "
 						+ newEntities.size() + " new entities");
-				addInternal(newEntities);
+				add(newEntities);
 				update(existingEntities);
 				break;
 
@@ -468,7 +466,7 @@ public class JpaRepository extends AbstractAggregateableCrudRepository
 			case UPDATE:
 				if (newEntities.size() == 0)
 				{
-					updateInternal(existingEntities);
+					update(existingEntities);
 				}
 				else
 				{
@@ -484,7 +482,7 @@ public class JpaRepository extends AbstractAggregateableCrudRepository
 				if (logger.isDebugEnabled()) logger.debug("updateByName(List<" + entityName + "," + dbAction
 						+ ">) will try to update " + existingEntities.size() + " existing entities and skip "
 						+ newEntities.size() + " new entities");
-				updateInternal(existingEntities);
+				update(existingEntities);
 				break;
 
 			// remove all elements in list, test if no elements are missing

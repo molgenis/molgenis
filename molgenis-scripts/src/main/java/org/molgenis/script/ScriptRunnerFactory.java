@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
+import org.molgenis.security.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,6 +30,7 @@ public class ScriptRunnerFactory
 		mysqlRepositoryCollection.add(Script.META_DATA);
 	}
 
+	@RunAsSystem
 	public void registerScriptExecutor(String type, ScriptRunner scriptExecutor)
 	{
 		scriptRunners.put(type, scriptExecutor);

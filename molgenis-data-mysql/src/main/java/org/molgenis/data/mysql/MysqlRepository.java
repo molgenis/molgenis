@@ -32,10 +32,9 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.Queryable;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.support.AbstractAggregateableCrudRepository;
+import org.molgenis.data.support.AbstractCrudRepository;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.IntField;
 import org.molgenis.fieldtypes.MrefField;
@@ -52,7 +51,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-public class MysqlRepository extends AbstractAggregateableCrudRepository implements Manageable
+public class MysqlRepository extends AbstractCrudRepository implements Manageable
 {
 	public static final String URL_PREFIX = "mysql://";
 	public static final int BATCH_SIZE = 100000;
@@ -61,9 +60,9 @@ public class MysqlRepository extends AbstractAggregateableCrudRepository impleme
 	private final JdbcTemplate jdbcTemplate;
 	private RepositoryCollection repositoryCollection;
 
-	public MysqlRepository(DataSource dataSource, EntityValidator entityValidator)
+	public MysqlRepository(DataSource dataSource)
 	{
-		super(null, entityValidator);
+		super(null);// TODO url
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
@@ -874,7 +873,7 @@ public class MysqlRepository extends AbstractAggregateableCrudRepository impleme
 	}
 
 	@Override
-	public void updateInternal(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
+	public void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
 	{
 		if ((entities == null) || entities.isEmpty()) return;
 		if (getEntityMetaData().getIdAttribute() == null) throw new MolgenisDataException("Missing is attribute for ["
@@ -948,24 +947,24 @@ public class MysqlRepository extends AbstractAggregateableCrudRepository impleme
 					throw new MolgenisDataException(msg.toString());
 				}
 
-				addInternal(entities);
+				add(entities);
 				break;
 
 			case ADD_IGNORE_EXISTING:
 				if (!newEntities.isEmpty())
 				{
-					addInternal(newEntities);
+					add(newEntities);
 				}
 				break;
 
 			case ADD_UPDATE_EXISTING:
 				if (!newEntities.isEmpty())
 				{
-					addInternal(newEntities);
+					add(newEntities);
 				}
 				if (!existingEntities.isEmpty())
 				{
-					updateInternal(existingEntities.values());
+					update(existingEntities.values());
 				}
 				break;
 
@@ -1021,11 +1020,11 @@ public class MysqlRepository extends AbstractAggregateableCrudRepository impleme
 
 					throw new MolgenisDataException(msg.toString());
 				}
-				updateInternal(existingEntities.values());
+				update(existingEntities.values());
 				break;
 
 			case UPDATE_IGNORE_MISSING:
-				updateInternal(existingEntities.values());
+				update(existingEntities.values());
 				break;
 
 			default:
@@ -1040,7 +1039,7 @@ public class MysqlRepository extends AbstractAggregateableCrudRepository impleme
 	}
 
 	@Override
-	public Integer addInternal(Iterable<? extends Entity> entities)
+	public Integer add(Iterable<? extends Entity> entities)
 	{
 		AtomicInteger count = new AtomicInteger(0);
 
@@ -1125,22 +1124,22 @@ public class MysqlRepository extends AbstractAggregateableCrudRepository impleme
 	}
 
 	@Override
-	public void addInternal(Entity entity)
+	public void add(Entity entity)
 	{
 		if (entity == null) throw new RuntimeException("MysqlRepository.add() failed: entity was null");
-		addInternal(Arrays.asList(new Entity[]
+		add(Arrays.asList(new Entity[]
 		{ entity }));
 	}
 
 	@Override
-	public void updateInternal(Entity entity)
+	public void update(Entity entity)
 	{
-		updateInternal(Arrays.asList(new Entity[]
+		update(Arrays.asList(new Entity[]
 		{ entity }));
 	}
 
 	@Override
-	public void updateInternal(Iterable<? extends Entity> entities)
+	public void update(Iterable<? extends Entity> entities)
 	{
 		// TODO, split in subbatches
 		final List<Entity> batch = new ArrayList<Entity>();
