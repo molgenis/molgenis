@@ -1,5 +1,7 @@
 package org.molgenis;
 
+import static org.mockito.Mockito.mock;
+
 import javax.sql.DataSource;
 
 import org.molgenis.data.DataService;
@@ -12,6 +14,7 @@ import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.validation.DefaultEntityValidator;
 import org.molgenis.data.validation.EntityAttributesValidator;
+import org.molgenis.elasticsearch.ElasticSearchService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -82,5 +85,11 @@ public class AppConfig
 				return repo;
 			}
 		};
+	}
+
+	@Bean
+	public ElasticSearchService elasticsearchService()
+	{
+		return mock(ElasticSearchService.class);
 	}
 }

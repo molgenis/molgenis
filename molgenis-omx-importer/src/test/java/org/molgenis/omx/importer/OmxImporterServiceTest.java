@@ -1,5 +1,6 @@
 package org.molgenis.omx.importer;
 
+import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.fail;
@@ -30,6 +31,7 @@ import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
+import org.molgenis.elasticsearch.index.EntityToSourceConverter;
 import org.molgenis.omx.converters.ValueConverterException;
 import org.molgenis.omx.dataset.DataSetMatrixRepository;
 import org.molgenis.omx.observ.CategoryRepository;
@@ -137,7 +139,8 @@ public class OmxImporterServiceTest
 		dataService.addRepository(new TextValueRepository(entityManager, validator, queryResolver));
 
 		factory = new EmbeddedElasticSearchServiceFactory(Collections.singletonMap("path.data", "target/data"));
-		searchService = factory.create(dataService);
+		EntityToSourceConverter entityToSourceConverter = mock(EntityToSourceConverter.class);
+		searchService = factory.create(dataService, entityToSourceConverter);
 
 		EntityImportService eis = new EntityImportService();
 		eis.setDataService(dataService);

@@ -4,6 +4,7 @@ import javax.sql.DataSource;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.validation.EntityAttributesValidator;
+import org.molgenis.elasticsearch.ElasticSearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +15,9 @@ public class MySqlConfiguration
 {
 	@Autowired
 	private DataService dataService;
+
+	@Autowired
+	private ElasticSearchService elasticSearchService;
 
 	@Autowired
 	private DataSource dataSource;
@@ -43,7 +47,7 @@ public class MySqlConfiguration
 	public MysqlRepositoryCollection mysqlRepositoryCollection()
 	{
 		return new MysqlRepositoryCollection(dataSource, dataService, entityMetaDataRepository(),
-				attributeMetaDataRepository())
+				attributeMetaDataRepository(), elasticSearchService)
 		{
 			@Override
 			protected MysqlRepository createMysqlRepsitory()
