@@ -42,45 +42,54 @@ public class MolgenisFieldTypes
 
 	public enum FieldTypeEnum
 	{
-		BOOL, CATEGORICAL, COMPOUND, DATE, DATE_TIME, DECIMAL, EMAIL, ENUM, FILE, HTML, HYPERLINK, IMAGE, INT, LONG, MREF, STRING, TEXT, XREF, SCRIPT
+		BOOL, CATEGORICAL, COMPOUND, DATE, DATE_TIME, DECIMAL, EMAIL, ENUM, FILE, HTML, HYPERLINK, IMAGE, INT, LONG, MREF, SCRIPT, STRING, TEXT, XREF
 	}
 
-	public static final FieldType STRING = new StringField();
-	public static final FieldType INT = new IntField();
-	public static final FieldType DECIMAL = new DecimalField();
 	public static final FieldType BOOL = new BoolField();
-	public static final FieldType TEXT = new TextField();
-	public static final FieldType XREF = new XrefField();
-	public static final FieldType MREF = new MrefField();
+	public static final FieldType CATEGORICAL = new CategoricalField();
+	public static final FieldType COMPOUND = new CompoundField();
 	public static final FieldType DATE = new DateField();
 	public static final FieldType DATETIME = new DatetimeField();
-	public static final FieldType COMPOUND = new CompoundField();
+	public static final FieldType DECIMAL = new DecimalField();
+	public static final FieldType EMAIL = new EmailField();
+	public static final FieldType ENUM = new EnumField();
+	@Deprecated
+	public static final FieldType FILE = new FileField();
+	public static final FieldType HTML = new HtmlField();
+	public static final FieldType HYPERLINK = new HyperlinkField();
+	public static final FieldType IMAGE = new ImageField();
+	public static final FieldType INT = new IntField();
+	public static final FieldType LONG = new LongField();
+	public static final FieldType MREF = new MrefField();
 	public static final FieldType SCRIPT = new ScriptField();
+	public static final FieldType STRING = new StringField();
+	public static final FieldType TEXT = new TextField();
+	public static final FieldType XREF = new XrefField();
 
 	/** Initialize default field types */
 	private static void init()
 	{
 		if (!init)
 		{
-			addType(new BoolField());
-			addType(new CategoricalField());
-			addType(new CompoundField());
-			addType(new DateField());
-			addType(new DatetimeField());
-			addType(new DecimalField());
-			addType(new EnumField());
-			addType(new EmailField());
-			addType(new FileField());
-			addType(new HtmlField());
-			addType(new HyperlinkField());
-			addType(new ImageField());
-			addType(new IntField());
-			addType(new LongField());
-			addType(new MrefField());
+			addType(BOOL);
+			addType(CATEGORICAL);
+			addType(COMPOUND);
+			addType(DATE);
+			addType(DATETIME);
+			addType(DECIMAL);
+			addType(EMAIL);
+			addType(ENUM);
+			addType(FILE);
+			addType(HTML);
+			addType(HYPERLINK);
+			addType(IMAGE);
+			addType(INT);
+			addType(LONG);
+			addType(MREF);
 			addType(STRING);
-			addType(new TextField());
-			addType(new XrefField());
 			addType(SCRIPT);
+			addType(TEXT);
+			addType(XREF);
 
 			init = true;
 		}

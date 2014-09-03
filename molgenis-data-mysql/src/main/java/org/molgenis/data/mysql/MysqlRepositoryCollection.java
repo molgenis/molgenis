@@ -12,15 +12,18 @@ import javax.sql.DataSource;
 
 import org.molgenis.data.AggregateableCrudRepositorySecurityDecorator;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.elasticsearch.ElasticsearchRepositoryDecorator;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.elasticsearch.ElasticSearchService;
 import org.molgenis.model.MolgenisModelException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,14 +39,23 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 	private Map<String, MysqlRepository> repositories;
 	private final EntityMetaDataRepository entityMetaDataRepository;
 	private final AttributeMetaDataRepository attributeMetaDataRepository;
+	private final ElasticSearchService elasticSearchService;
 
 	public MysqlRepositoryCollection(DataSource ds, DataService dataService,
 			EntityMetaDataRepository entityMetaDataRepository, AttributeMetaDataRepository attributeMetaDataRepository)
+	{
+		this(ds, dataService, entityMetaDataRepository, attributeMetaDataRepository, null);
+	}
+
+	public MysqlRepositoryCollection(DataSource ds, DataService dataService,
+			EntityMetaDataRepository entityMetaDataRepository, AttributeMetaDataRepository attributeMetaDataRepository,
+			ElasticSearchService elasticSearchService)
 	{
 		this.ds = ds;
 		this.dataService = dataService;
 		this.entityMetaDataRepository = entityMetaDataRepository;
 		this.attributeMetaDataRepository = attributeMetaDataRepository;
+		this.elasticSearchService = elasticSearchService;
 
 		entityMetaDataRepository.setRepositoryCollection(this);
 		attributeMetaDataRepository.setRepositoryCollection(this);
@@ -220,7 +232,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 
 			if (!dataService.hasRepository(emd.getName()))
 			{
-				dataService.addRepository(new AggregateableCrudRepositorySecurityDecorator(repository));
+				dataService.addRepository(getSecuredAndOptionallyIndexedRepository(repository));
 			}
 
 			return repository;
@@ -266,7 +278,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 			return null;
 		}
 
-		return new AggregateableCrudRepositorySecurityDecorator(repo);
+		return getSecuredAndOptionallyIndexedRepository(repo);
 	}
 
 	public Set<EntityMetaData> getAllEntityMetaDataIncludingAbstract()
@@ -395,5 +407,22 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		}
 
 		return addedAttributes;
+	}
+
+	/**
+	 * Returns a secured and optionally indexed repository for the given repository
+	 * 
+	 * @param repository
+	 * @return
+	 */
+	private Repository getSecuredAndOptionallyIndexedRepository(CrudRepository repository)
+	{
+		CrudRepository decoratedRepository = repository;
+		if (this.elasticSearchService != null)
+		{
+			decoratedRepository = new ElasticsearchRepositoryDecorator(decoratedRepository, elasticSearchService);
+		}
+		decoratedRepository = new AggregateableCrudRepositorySecurityDecorator(decoratedRepository);
+		return decoratedRepository;
 	}
 }
