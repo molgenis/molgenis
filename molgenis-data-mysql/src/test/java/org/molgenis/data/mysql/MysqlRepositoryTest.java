@@ -36,7 +36,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testAggregates()
 	{
-		coll.drop("fruit");
+		coll.dropEntityMetaData("fruit");
 
 		DefaultEntityMetaData meta = new DefaultEntityMetaData("Fruit");
 		meta.addAttribute("name").setIdAttribute(true).setNillable(false);
@@ -76,7 +76,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		metaData.setIdAttribute("lastName");
 		Assert.assertEquals(metaData.getIdAttribute().getName(), "lastName");
 
-		coll.drop(metaData.getName());
+		coll.dropEntityMetaData(metaData.getName());
 		MysqlRepository repo = coll.add(metaData);
 
 		Assert.assertEquals(repo.iteratorSql(), "SELECT firstName, lastName FROM MysqlPerson");
@@ -127,7 +127,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		// test delete clauses
 		Assert.assertEquals(repo.getDeleteSql(), "DELETE FROM `MysqlPerson` WHERE `lastName` = ?");
 
-		coll.drop(metaData.getName());
+		coll.dropEntityMetaData(metaData.getName());
 		repo = coll.add(metaData);
 
 		// Entity generator to monitor performance (set batch to 100000 to show up to >10,000 records/second)

@@ -10,6 +10,8 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.Sets;
+
 public class DependencyResolverTest
 {
 
@@ -28,7 +30,8 @@ public class DependencyResolverTest
 		e3.addAttribute("refSelf").setDataType(MolgenisFieldTypes.XREF).setRefEntity(e3);
 		e4.addAttribute("ref").setDataType(MolgenisFieldTypes.XREF).setRefEntity(e2);
 
-		List<EntityMetaData> resolved = DependencyResolver.resolve(Arrays.<EntityMetaData> asList(e1, e2, e3, e4, e5));
+		List<EntityMetaData> resolved = DependencyResolver
+				.resolve(Sets.<EntityMetaData> newHashSet(e1, e2, e3, e4, e5));
 		assertEquals(resolved, Arrays.asList(e2, e4, e3, e5, e1));
 	}
 }

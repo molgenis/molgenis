@@ -2,7 +2,6 @@ package org.molgenis.data.mysql;
 
 import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
-import org.molgenis.data.Repository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -16,16 +15,12 @@ import org.springframework.stereotype.Component;
 public class MysqlRepositoryRegistrator implements ApplicationListener<ContextRefreshedEvent>, Ordered
 {
 	private static final Logger logger = Logger.getLogger(MysqlRepositoryRegistrator.class);
-
-	private final DataService dataService;
 	private final MysqlRepositoryCollection repositoryCollection;
 
 	@Autowired
 	public MysqlRepositoryRegistrator(DataService dataService, MysqlRepositoryCollection repositoryCollection)
 	{
-		if (dataService == null) throw new IllegalArgumentException("DataService is null");
 		if (repositoryCollection == null) throw new IllegalArgumentException("MysqlRepositoryCollection is missing");
-		this.dataService = dataService;
 		this.repositoryCollection = repositoryCollection;
 		logger.debug("MysqlRepositoryRegistrator: initialized");
 	}
@@ -33,15 +28,7 @@ public class MysqlRepositoryRegistrator implements ApplicationListener<ContextRe
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
-		for (String name : repositoryCollection.getEntityNames())
-		{
-			logger.debug("MysqlRepositoryRegistrator: loading mysqlrepo " + name);
-			if (!dataService.hasRepository(name))
-			{
-				Repository repo = repositoryCollection.getRepositoryByEntityName(name);
-				dataService.addRepository(repo);
-			}
-		}
+		repositoryCollection.registerMysqlRepos();
 	}
 
 	@Override

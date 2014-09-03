@@ -88,7 +88,7 @@
 		return items.join('');
 	}
 
-	function formatSelection(entity, refEntityMetaData) {
+	function formatSelection(entity, refEntityMetaData, t) {
 		var result;
 		if(entity instanceof Array && entity.length)
 		{
@@ -100,6 +100,7 @@
 		{
 			result = entity[refEntityMetaData.labelAttribute];	
 		}
+		
 		return result;
 	}
 
@@ -112,6 +113,7 @@
 				.not('[data-filter=xrefmref-operator]')
 				.not('[data-filter=ignore]');
 
+		$hiddenInput.data('labels', options.labels);
 		
 		var width = options.width ? options.width : 'resolve';
 		
@@ -153,12 +155,28 @@
 				return formatSelection(entity, refEntityMetaData);
 			},
 			id: function(entity) {
-				return entity[refEntityMetaData.labelAttribute];
+				return entity[refEntityMetaData.idAttribute];
 			},
 			separator: ',',
 			dropdownCssClass: 'molgenis-xrefmrefsearch'
+		}).change(function (event) {
+			var labels = $hiddenInput.data('labels');
+			if (!labels) labels = [];
+			
+			if (event.added) {
+				labels.push(event.added.label);
+			}
+			
+			if (event.removed) {
+				labels = labels.filter(function (label){
+					return label !== event.removed.label;
+				});
+			}
+			
+			$hiddenInput.data('labels', labels);
 		});
-
+		
+		
 		$hiddenInput.on('select2-removed', function(e) {
 			if($('.select2-choices .select2-search-choice', $container).length < 2){
 				$('.dropdown-toggle', $container).hide();
@@ -223,7 +241,7 @@
 	 * 				{
 	 * 					attribute 	 ==> the meta data of the attribute
 	 * 					operator ==> AND or OR or undefined
-	 * 					values 	 ==> the values that are concatenate with a operator
+	 * 					values 	 ==> the values that are concatenate with an operator
 	 *						1. example one: a AND b AND c
 	 *						2. example two: a OR b OR c
 	 * 					

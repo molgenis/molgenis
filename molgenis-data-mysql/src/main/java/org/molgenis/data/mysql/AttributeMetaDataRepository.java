@@ -8,6 +8,7 @@ import static org.molgenis.data.mysql.AttributeMetaDataMetaData.ENTITY;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.ENUM_OPTIONS;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.ID_ATTRIBUTE;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.LABEL;
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.LABEL_ATTRIBUTE;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.LOOKUP_ATTRIBUTE;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.NAME;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.NILLABLE;
@@ -23,7 +24,7 @@ import javax.sql.DataSource;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Query;
 import org.molgenis.data.Range;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -36,7 +37,7 @@ import com.google.common.collect.Lists;
 
 public class AttributeMetaDataRepository extends MysqlRepository
 {
-	public static final EntityMetaData META_DATA = new AttributeMetaDataMetaData();
+	public static final AttributeMetaDataMetaData META_DATA = new AttributeMetaDataMetaData();
 
 	public AttributeMetaDataRepository(DataSource dataSource, EntityValidator entityValidator)
 	{
@@ -68,6 +69,8 @@ public class AttributeMetaDataRepository extends MysqlRepository
 		attributeMetaDataEntity.set(LABEL, att.getLabel());
 		attributeMetaDataEntity.set(DESCRIPTION, att.getDescription());
 		attributeMetaDataEntity.set(AGGREGATEABLE, att.isAggregateable());
+		attributeMetaDataEntity.set(LOOKUP_ATTRIBUTE, att.isLookupAttribute());
+		attributeMetaDataEntity.set(LABEL_ATTRIBUTE, att.isLabelAttribute());
 
 		if (att.getDataType() instanceof EnumField)
 		{
@@ -82,14 +85,18 @@ public class AttributeMetaDataRepository extends MysqlRepository
 
 		if (att.getRefEntity() != null) attributeMetaDataEntity.set(REF_ENTITY, att.getRefEntity().getName());
 
-		boolean lookupAttribute = att.isLookupAttribute();
-		if (att.isIdAtrribute())
-		{
-			lookupAttribute = true;
-		}
-		attributeMetaDataEntity.set(LOOKUP_ATTRIBUTE, lookupAttribute);
-
 		add(attributeMetaDataEntity);
+	}
+
+	public void removeAttributeMetaData(String entityName, String attributeName)
+	{
+		Query q = new QueryImpl().eq(AttributeMetaDataMetaData.ENTITY, entityName).and()
+				.eq(AttributeMetaDataMetaData.NAME, attributeName);
+		Entity entity = findOne(q);
+		if (entity != null)
+		{
+			delete(entity);
+		}
 	}
 
 	private DefaultAttributeMetaData toAttributeMetaData(Entity entity)
@@ -106,6 +113,8 @@ public class AttributeMetaDataRepository extends MysqlRepository
 		attributeMetaData.setAggregateable(entity.getBoolean(AGGREGATEABLE) == null ? false : entity
 				.getBoolean(AGGREGATEABLE));
 		attributeMetaData.setEnumOptions(entity.getList(ENUM_OPTIONS));
+		attributeMetaData.setLabelAttribute(entity.getBoolean(LABEL_ATTRIBUTE) == null ? false : entity
+				.getBoolean(LABEL_ATTRIBUTE));
 
 		Long rangeMin = entity.getLong(RANGE_MIN);
 		Long rangeMax = entity.getLong(RANGE_MAX);
