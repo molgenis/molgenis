@@ -1,36 +1,53 @@
 package org.molgenis.elasticsearch;
 
 import static org.elasticsearch.client.Requests.refreshRequest;
+import static org.molgenis.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchId;
 import static org.molgenis.elasticsearch.util.MapperTypeSanitizer.sanitizeMapperType;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Semaphore;
 
 import org.apache.log4j.Logger;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
 import org.elasticsearch.action.admin.indices.exists.types.TypesExistsRequest;
+import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
+import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
+import org.elasticsearch.action.bulk.BulkProcessor;
+import org.elasticsearch.action.bulk.BulkProcessor.Listener;
+import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.deletebyquery.DeleteByQueryResponse;
 import org.elasticsearch.action.deletebyquery.IndexDeleteByQueryResponse;
 import org.elasticsearch.action.get.GetResponse;
+import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.cluster.metadata.MappingMetaData;
+import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.search.SearchHit;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
+import org.molgenis.data.support.QueryImpl;
+import org.molgenis.elasticsearch.index.EntityToSourceConverter;
 import org.molgenis.elasticsearch.index.IndexRequestGenerator;
 import org.molgenis.elasticsearch.index.MappingsBuilder;
 import org.molgenis.elasticsearch.request.SearchRequestGenerator;
@@ -40,6 +57,10 @@ import org.molgenis.search.MultiSearchRequest;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.molgenis.search.SearchService;
+import org.molgenis.util.Pair;
+
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 
 /**
  * ElasticSearch implementation of the SearchService interface
@@ -50,34 +71,47 @@ import org.molgenis.search.SearchService;
 public class ElasticSearchService implements SearchService
 {
 	private static final Logger LOG = Logger.getLogger(ElasticSearchService.class);
+
+	public static enum IndexingMode
+	{
+		ADD, UPDATE
+	};
+
 	private final DataService dataService;
 	private final String indexName;
 	private final Client client;
 	private final ResponseParser responseParser = new ResponseParser();
 	private final SearchRequestGenerator generator = new SearchRequestGenerator();
+	private final EntityToSourceConverter entityToSourceConverter;
 
-	public ElasticSearchService(Client client, String indexName, DataService dataService)
+	public ElasticSearchService(Client client, String indexName, DataService dataService,
+			EntityToSourceConverter entityToSourceConverter)
 	{
-		if (client == null)
-		{
-			throw new IllegalArgumentException("Client is null");
-		}
+		this(client, indexName, dataService, entityToSourceConverter, true);
+	}
 
-		if (indexName == null)
-		{
-			throw new IllegalArgumentException("IndexName is null");
-		}
-
-		if (dataService == null)
-		{
-			throw new IllegalArgumentException("DataService is null");
-		}
-
-		this.dataService = dataService;
+	/**
+	 * Testability
+	 * 
+	 * @param client
+	 * @param indexName
+	 * @param dataService
+	 * @param entityToSourceConverter
+	 * @param createIndexIfNotExists
+	 */
+	ElasticSearchService(Client client, String indexName, DataService dataService,
+			EntityToSourceConverter entityToSourceConverter, boolean createIndexIfNotExists)
+	{
+		if (client == null) throw new IllegalArgumentException("Client is null");
+		if (indexName == null) throw new IllegalArgumentException("IndexName is null");
+		if (dataService == null) throw new IllegalArgumentException("DataService is null");
+		if (entityToSourceConverter == null) throw new IllegalArgumentException("EntityToSourceConverter is null");
 		this.indexName = indexName;
 		this.client = client;
+		this.dataService = dataService;
+		this.entityToSourceConverter = entityToSourceConverter;
 
-		createIndexIfNotExists();
+		if (createIndexIfNotExists) createIndexIfNotExists();
 	}
 
 	@Override
@@ -190,7 +224,7 @@ public class ElasticSearchService implements SearchService
 		try
 		{
 			LOG.info("Going to create mapping for repository [" + repository.getName() + "]");
-			createMappings(repository);
+			createMappings(repository, true);
 		}
 		catch (IOException e)
 		{
@@ -203,7 +237,7 @@ public class ElasticSearchService implements SearchService
 		deleteDocumentsByType(repository.getName());
 
 		LOG.info("Going to insert documents of type [" + repository.getName() + "]");
-		IndexRequestGenerator requestGenerator = new IndexRequestGenerator(client, indexName, dataService);
+		IndexRequestGenerator requestGenerator = new IndexRequestGenerator(client, indexName, entityToSourceConverter);
 		Iterable<BulkRequestBuilder> requests = requestGenerator.buildIndexRequest(repository);
 		for (BulkRequestBuilder request : requests)
 		{
@@ -291,7 +325,7 @@ public class ElasticSearchService implements SearchService
 		try
 		{
 			LOG.info("Going to create mapping for repository [" + repository.getName() + "]");
-			createMappings(repository);
+			createMappings(repository, true);
 		}
 		catch (IOException e)
 		{
@@ -301,7 +335,7 @@ public class ElasticSearchService implements SearchService
 		}
 
 		LOG.info("Going to insert documents of type [" + repository.getName() + "]");
-		IndexRequestGenerator requestGenerator = new IndexRequestGenerator(client, indexName, dataService);
+		IndexRequestGenerator requestGenerator = new IndexRequestGenerator(client, indexName, entityToSourceConverter);
 		Iterable<BulkRequestBuilder> requests = requestGenerator.buildIndexRequest(repository);
 		for (BulkRequestBuilder request : requests)
 		{
@@ -358,9 +392,21 @@ public class ElasticSearchService implements SearchService
 		}
 	}
 
-	private void createMappings(Repository repository) throws IOException
+	public boolean hasMapping(Repository repository)
 	{
-		XContentBuilder jsonBuilder = MappingsBuilder.buildMapping(repository);
+		String docType = sanitizeMapperType(repository.getName());
+
+		GetMappingsResponse getMappingsResponse = client.admin().indices().prepareGetMappings("molgenis").execute()
+				.actionGet();
+		ImmutableOpenMap<String, ImmutableOpenMap<String, MappingMetaData>> allMappings = getMappingsResponse
+				.getMappings();
+		final ImmutableOpenMap<String, MappingMetaData> indexMappings = allMappings.get("molgenis");
+		return indexMappings.containsKey(docType);
+	}
+
+	public void createMappings(Repository repository, boolean storeSource) throws IOException
+	{
+		XContentBuilder jsonBuilder = MappingsBuilder.buildMapping(repository, storeSource);
 		LOG.info("Going to create mapping [" + jsonBuilder.string() + "]");
 
 		PutMappingResponse response = client.admin().indices().preparePutMapping(indexName)
@@ -378,6 +424,348 @@ public class ElasticSearchService implements SearchService
 	@Override
 	public void refresh()
 	{
-		client.admin().indices().refresh(refreshRequest()).actionGet();
+		if (LOG.isDebugEnabled()) LOG.debug("Refreshing Elasticsearch index [" + indexName + "]");
+		RefreshResponse refreshResponse = client.admin().indices().refresh(refreshRequest(indexName)).actionGet();
+		if (refreshResponse == null || refreshResponse.getFailedShards() > 0)
+		{
+			throw new ElasticsearchException("Delete failed. Returned headers:" + refreshResponse.getHeaders());
+		}
+		if (LOG.isDebugEnabled()) LOG.debug("Refreshed Elasticsearch index [" + indexName + "]");
+	}
+
+	public long count(Query q, EntityMetaData entityMetaData)
+	{
+		String entityName = entityMetaData.getName();
+		String type = sanitizeMapperType(entityName);
+		List<String> fieldsToReturn = Collections.<String> emptyList();
+
+		SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName);
+		generator.buildSearchRequest(searchRequestBuilder, type, SearchType.COUNT, q, fieldsToReturn, null, null,
+				entityMetaData);
+		SearchResponse searchResponse = searchRequestBuilder.execute().actionGet();
+		if (searchResponse.getFailedShards() > 0)
+		{
+			throw new ElasticsearchException("Search failed. Returned headers:" + searchResponse.getHeaders());
+		}
+		return searchResponse.getHits().totalHits();
+	}
+
+	public void index(Entity entity, EntityMetaData entityMetaData, IndexingMode indexingMode)
+	{
+		index(entity, entityMetaData, indexingMode, true);
+		refresh();
+	}
+
+	private void index(Entity entity, EntityMetaData entityMetaData, IndexingMode indexingMode, boolean updateIndex)
+	{
+		String type = sanitizeMapperType(entityMetaData.getName());
+		String id = toElasticsearchId(entity, entityMetaData);
+		Map<String, Object> source = entityToSourceConverter.convert(entity, entityMetaData);
+		client.prepareIndex(indexName, type, id).setSource(source).execute().actionGet();
+
+		if (updateIndex && indexingMode == IndexingMode.UPDATE) updateReferences(entity, entityMetaData);
+	}
+
+	public void index(Iterable<? extends Entity> entities, EntityMetaData entityMetaData, IndexingMode indexingMode)
+	{
+		index(entities, entityMetaData, indexingMode, true);
+		refresh();
+	}
+
+	void index(Iterable<? extends Entity> entities, EntityMetaData entityMetaData, IndexingMode indexingMode,
+			boolean updateIndex)
+	{
+		String entityName = entityMetaData.getName();
+		String type = sanitizeMapperType(entityName);
+
+		SynchronizedBulkProcessor bulkProcessor = new SynchronizedBulkProcessor(client);
+		try
+		{
+			for (Entity entity : entities)
+			{
+				String id = toElasticsearchId(entity, entityMetaData);
+				Map<String, Object> source = entityToSourceConverter.convert(entity, entityMetaData);
+				bulkProcessor.add(new IndexRequest(indexName, type, id).source(source));
+			}
+		}
+		finally
+		{
+			bulkProcessor.close();
+		}
+
+		if (updateIndex == true && indexingMode == IndexingMode.UPDATE) updateReferences(entities, entityMetaData);
+	}
+
+	public Iterable<String> search(Query q, final EntityMetaData entityMetaData)
+	{
+		String entityName = entityMetaData.getName();
+		String type = sanitizeMapperType(entityName);
+		List<String> fieldsToReturn = Collections.<String> emptyList();
+
+		SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName);
+		generator.buildSearchRequest(searchRequestBuilder, type, SearchType.QUERY_AND_FETCH, q, fieldsToReturn, null,
+				null, entityMetaData);
+
+		SearchResponse searchResponse = searchRequestBuilder.execute().actionGet();
+		if (searchResponse.getFailedShards() > 0)
+		{
+			throw new ElasticsearchException("Search failed. Returned headers:" + searchResponse.getHeaders());
+		}
+
+		return Iterables.transform(searchResponse.getHits(), new Function<SearchHit, String>()
+		{
+			@Override
+			public String apply(SearchHit searchHit)
+			{
+				return searchHit.getId();
+			}
+		});
+	}
+
+	public void delete(Entity entity, EntityMetaData entityMetaData)
+	{
+		String elasticsearchId = toElasticsearchId(entity, entityMetaData);
+		deleteById(elasticsearchId, entityMetaData);
+	}
+
+	public void deleteById(String id, EntityMetaData entityMetaData)
+	{
+		String entityName = entityMetaData.getName();
+		String type = sanitizeMapperType(entityName);
+
+		DeleteResponse deleteResponse = client.prepareDelete(indexName, type, id.toString()).setRefresh(true).execute()
+				.actionGet();
+		if (!deleteResponse.isFound())
+		{
+			throw new ElasticsearchException("Delete failed. Returned headers:" + deleteResponse.getHeaders());
+		}
+	}
+
+	static class SynchronizedBulkProcessor
+	{
+		private Semaphore sem;
+		private BulkProcessor bulkProcessor;
+
+		public SynchronizedBulkProcessor(Client client)
+		{
+			bulkProcessor = BulkProcessor.builder(client, new Listener()
+			{
+				@Override
+				public void beforeBulk(long executionId, BulkRequest request)
+				{
+					if (LOG.isDebugEnabled())
+					{
+						LOG.debug("Going to execute new bulk composed of " + request.numberOfActions() + " actions");
+					}
+				}
+
+				@Override
+				public void afterBulk(long executionId, BulkRequest request, BulkResponse response)
+				{
+					if (LOG.isDebugEnabled())
+					{
+						LOG.debug("Executed bulk composed of " + request.numberOfActions() + " actions");
+					}
+					sem.release();
+				}
+
+				@Override
+				public void afterBulk(long executionId, BulkRequest request, Throwable failure)
+				{
+					LOG.warn("Error executing bulk", failure);
+					sem.release();
+				}
+			}).build();
+			sem = new Semaphore(1);
+		}
+
+		public int hashCode()
+		{
+			return bulkProcessor.hashCode();
+		}
+
+		public boolean equals(Object obj)
+		{
+			return bulkProcessor.equals(obj);
+		}
+
+		public void close()
+		{
+			bulkProcessor.close();
+			awaitCompletion();
+		}
+
+		public BulkProcessor add(IndexRequest request)
+		{
+			return bulkProcessor.add(request);
+		}
+
+		public BulkProcessor add(DeleteRequest request)
+		{
+			return bulkProcessor.add(request);
+		}
+
+		private void awaitCompletion()
+		{
+			try
+			{
+				sem.acquire();
+			}
+			catch (InterruptedException e)
+			{
+				throw new RuntimeException(e);
+			}
+		}
+
+	}
+
+	public void deleteById(Iterable<String> ids, EntityMetaData entityMetaData)
+	{
+		String entityName = entityMetaData.getName();
+		String type = sanitizeMapperType(entityName);
+
+		Semaphore sem = new Semaphore(1);
+		try
+		{
+			sem.acquire();
+
+			SynchronizedBulkProcessor bulkProcessor = new SynchronizedBulkProcessor(client);
+			try
+			{
+				for (Object id : ids)
+				{
+					bulkProcessor.add(new DeleteRequest(indexName, type, id.toString()));
+				}
+			}
+			finally
+			{
+				bulkProcessor.close();
+			}
+
+			sem.acquire();
+		}
+		catch (InterruptedException e)
+		{
+			throw new RuntimeException(e);
+		}
+		refresh();
+	}
+
+	public void delete(Iterable<? extends Entity> entities, EntityMetaData entityMetaData)
+	{
+		String entityName = entityMetaData.getName();
+		String type = sanitizeMapperType(entityName);
+
+		Semaphore sem = new Semaphore(1);
+		try
+		{
+			sem.acquire();
+
+			SynchronizedBulkProcessor bulkProcessor = new SynchronizedBulkProcessor(client);
+			try
+			{
+				for (Entity entity : entities)
+				{
+					String elasticsearchId = toElasticsearchId(entity, entityMetaData);
+					bulkProcessor.add(new DeleteRequest(indexName, type, elasticsearchId));
+				}
+			}
+			finally
+			{
+				bulkProcessor.close();
+			}
+
+			sem.acquire();
+		}
+		catch (InterruptedException e)
+		{
+			throw new RuntimeException(e);
+		}
+		refresh();
+	}
+
+	public void delete(EntityMetaData entityMetaData)
+	{
+		String type = sanitizeMapperType(entityMetaData.getName());
+		DeleteByQueryResponse deleteByQueryResponse = client.prepareDeleteByQuery(indexName)
+				.setQuery(new TermQueryBuilder("_type", type)).execute().actionGet();
+
+		if (deleteByQueryResponse != null)
+		{
+			IndexDeleteByQueryResponse idbqr = deleteByQueryResponse.getIndex(indexName);
+			if (idbqr != null && idbqr.getFailedShards() > 0)
+			{
+				throw new ElasticsearchException("Delete failed. Returned headers:" + idbqr.getHeaders());
+			}
+		}
+		refresh();
+	}
+
+	private void updateReferences(Entity entity, EntityMetaData entityMetaData)
+	{
+		List<Pair<EntityMetaData, List<AttributeMetaData>>> referencingEntityMetaData = getReferencingEntityMetaData(entityMetaData);
+
+		for (Pair<EntityMetaData, List<AttributeMetaData>> pair : referencingEntityMetaData)
+		{
+			EntityMetaData refEntityMetaData = pair.getA();
+			QueryImpl q = null;
+			for (AttributeMetaData attributeMetaData : pair.getB())
+			{
+				if (q == null) q = new QueryImpl();
+				else q.or();
+				q.eq(attributeMetaData.getName(), entity);
+			}
+
+			Iterable<Entity> refEntities = dataService.findAll(refEntityMetaData.getName(), q);
+			if (!Iterables.isEmpty(refEntities))
+			{
+				index(refEntities, refEntityMetaData, IndexingMode.UPDATE, false);
+			}
+		}
+	}
+
+	private void updateReferences(Iterable<? extends Entity> entities, EntityMetaData entityMetaData)
+	{
+		for (Entity entity : entities)
+		{
+			updateReferences(entity, entityMetaData);
+		}
+	}
+
+	private List<Pair<EntityMetaData, List<AttributeMetaData>>> getReferencingEntityMetaData(
+			EntityMetaData entityMetaData)
+	{
+		List<Pair<EntityMetaData, List<AttributeMetaData>>> referencingEntityMetaData = null;
+
+		// get entity types that referencing the given entity (including self)
+		String entityName = entityMetaData.getName();
+		for (String otherEntityName : dataService.getEntityNames())
+		{
+			EntityMetaData otherEntityMetaData = dataService.getEntityMetaData(otherEntityName);
+
+			// get referencing attributes for other entity
+			List<AttributeMetaData> referencingAttributes = null;
+			for (AttributeMetaData attributeMetaData : otherEntityMetaData.getAtomicAttributes())
+			{
+				EntityMetaData refEntityMetaData = attributeMetaData.getRefEntity();
+				if (refEntityMetaData != null && refEntityMetaData.getName().equals(entityName))
+				{
+					if (referencingAttributes == null) referencingAttributes = new ArrayList<AttributeMetaData>();
+					referencingAttributes.add(attributeMetaData);
+				}
+			}
+
+			// store references
+			if (referencingAttributes != null)
+			{
+				if (referencingEntityMetaData == null) referencingEntityMetaData = new ArrayList<Pair<EntityMetaData, List<AttributeMetaData>>>();
+				referencingEntityMetaData.add(new Pair<EntityMetaData, List<AttributeMetaData>>(otherEntityMetaData,
+						referencingAttributes));
+			}
+		}
+
+		return referencingEntityMetaData != null ? referencingEntityMetaData : Collections
+				.<Pair<EntityMetaData, List<AttributeMetaData>>> emptyList();
+
 	}
 }

@@ -32,6 +32,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.elasticsearch.index.EntityToSourceConverter;
 import org.molgenis.search.Hit;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
@@ -40,7 +41,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class ElasticSearchServiceTest
+public class ElasticSearchServiceIntegrationTest
 {
 	private Client client;
 	private ElasticSearchService searchService;
@@ -50,7 +51,9 @@ public class ElasticSearchServiceTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		searchService = new ElasticSearchService(client, "molgenis", mock(DataService.class));
+		DataService dataService = mock(DataService.class);
+		EntityToSourceConverter entityToSourceConverter = new EntityToSourceConverter(dataService);
+		searchService = new ElasticSearchService(client, "molgenis", dataService, entityToSourceConverter);
 		repoMock = mock(Repository.class);
 		entityMetaData = mock(EntityMetaData.class);
 		when(repoMock.getEntityMetaData()).thenReturn(entityMetaData);
