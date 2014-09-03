@@ -26,7 +26,7 @@ public class MysqlRepositoryCollectionTest extends AbstractTestNGSpringContextTe
 	public void test()
 	{
 		// delete old stuff
-		coll.drop("coll_person");
+		coll.dropEntityMetaData("coll_person");
 
 		// create collection, add repo, destroy and reload
 		DefaultEntityMetaData personMD = new DefaultEntityMetaData("coll_person");
@@ -65,7 +65,7 @@ public class MysqlRepositoryCollectionTest extends AbstractTestNGSpringContextTe
 	@Test
 	public void testSecurityDecorator()
 	{
-		coll.drop("test");
+		coll.dropEntityMetaData("test");
 		DefaultEntityMetaData meta = new DefaultEntityMetaData("test");
 		meta.addAttribute("id").setIdAttribute(true).setNillable(false);
 		coll.add(meta);

@@ -55,9 +55,9 @@ public class MysqlRepositoryXrefTest extends MysqlRepositoryAbstractDatatypeTest
 	@Test
 	public void test() throws Exception
 	{
-		coll.drop(getMetaData().getName());
-		coll.drop(getMetaData().getAttribute("stringRef").getRefEntity().getName());
-		coll.drop(getMetaData().getAttribute("intRef").getRefEntity().getName());
+		coll.dropEntityMetaData(getMetaData().getName());
+		coll.dropEntityMetaData(getMetaData().getAttribute("stringRef").getRefEntity().getName());
+		coll.dropEntityMetaData(getMetaData().getAttribute("intRef").getRefEntity().getName());
 
 		// create
 		MysqlRepository stringRepo = coll.add(getMetaData().getAttribute("stringRef").getRefEntity());
@@ -67,7 +67,7 @@ public class MysqlRepositoryXrefTest extends MysqlRepositoryAbstractDatatypeTest
 		Assert.assertEquals(xrefRepo.getCreateSql(), createSql());
 
 		Assert.assertEquals(xrefRepo.getCreateFKeySql().get(0),
-				"ALTER TABLE XrefTest ADD FOREIGN KEY (`stringRef`) REFERENCES `StringTarget`(`identifier`) ON DELETE CASCADE");
+				"ALTER TABLE XrefTest ADD FOREIGN KEY (`stringRef`) REFERENCES `StringTarget`(`identifier`)");
 
 		xrefRepo.drop();
 		stringRepo.drop();

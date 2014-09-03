@@ -8,6 +8,8 @@ import static org.molgenis.data.mysql.AttributeMetaDataMetaData.ENTITY;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.ENUM_OPTIONS;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.ID_ATTRIBUTE;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.LABEL;
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.LABEL_ATTRIBUTE;
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.LOOKUP_ATTRIBUTE;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.NAME;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.NILLABLE;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.RANGE_MAX;
@@ -24,6 +26,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
@@ -58,6 +61,8 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 @Component
 public class EmxImportServiceImpl implements EmxImporterService
@@ -117,23 +122,34 @@ public class EmxImportServiceImpl implements EmxImporterService
 		}
 
 		List<String> addedEntities = Lists.newArrayList();
+		Map<String, List<String>> addedAttributes = Maps.newLinkedHashMap();
 		// TODO altered entities (merge, see getEntityMetaData)
 
 		try
 		{
-			EntityImportReport entityImportReport = transactionTemplate.execute(new EmxImportTransactionCallback(
-					databaseAction, source, metadataList, addedEntities));
-
-			return entityImportReport;
+			return transactionTemplate.execute(new EmxImportTransactionCallback(databaseAction, source, metadataList,
+					addedEntities, addedAttributes));
 		}
 		catch (Exception e)
 		{
 			// Rollback metadata, create table statements cannot be rolled back, we have to do it ourselfs
 			Collections.reverse(addedEntities);
 
-			for (String name : addedEntities)
+			for (String entityName : addedEntities)
 			{
-				store.drop(name);
+				store.dropEntityMetaData(entityName);
+			}
+
+			List<String> entities = Lists.newArrayList(addedAttributes.keySet());
+			Collections.reverse(entities);
+
+			for (String entityName : entities)
+			{
+				List<String> attributes = addedAttributes.get(entityName);
+				for (String attributeName : attributes)
+				{
+					store.dropAttributeMetaData(entityName, attributeName);
+				}
 			}
 
 			throw e;
@@ -265,6 +281,8 @@ public class EmxImportServiceImpl implements EmxImporterService
 			Boolean attributeIdAttribute = attribute.getBoolean(ID_ATTRIBUTE);
 			Boolean attributeVisible = attribute.getBoolean(VISIBLE);
 			Boolean attributeAggregateable = attribute.getBoolean(AGGREGATEABLE);
+			Boolean lookupAttribute = attribute.getBoolean(LOOKUP_ATTRIBUTE);
+			Boolean labelAttribute = attribute.getBoolean(LABEL_ATTRIBUTE);
 
 			if (attributeNillable != null) defaultAttributeMetaData.setNillable(attributeNillable);
 			if (attributeAuto != null) defaultAttributeMetaData.setAuto(attributeAuto);
@@ -272,6 +290,8 @@ public class EmxImportServiceImpl implements EmxImporterService
 			if (attributeVisible != null) defaultAttributeMetaData.setVisible(attributeVisible);
 			if (attributeAggregateable != null) defaultAttributeMetaData.setAggregateable(attributeAggregateable);
 			if (refEntityName != null) defaultAttributeMetaData.setRefEntity(entities.get(refEntityName));
+			if (lookupAttribute != null) defaultAttributeMetaData.setLookupAttribute(lookupAttribute);
+			if (labelAttribute != null) defaultAttributeMetaData.setLabelAttribute(labelAttribute);
 
 			defaultAttributeMetaData.setLabel(attribute.getString(LABEL));
 			defaultAttributeMetaData.setDescription(attribute.getString(DESCRIPTION));
@@ -324,13 +344,6 @@ public class EmxImportServiceImpl implements EmxImporterService
 				defaultAttributeMetaData.setRange(new Range(rangeMin, rangeMax));
 			}
 
-			boolean lookupAttribute = false;
-			if (null != attributeIdAttribute && attributeIdAttribute)
-			{
-				lookupAttribute = true;
-			}
-
-			defaultAttributeMetaData.setLookupAttribute(lookupAttribute);
 			defaultEntityMetaData.addAttributeMetaData(defaultAttributeMetaData);
 		}
 	}
@@ -411,17 +424,19 @@ public class EmxImportServiceImpl implements EmxImporterService
 	private final class EmxImportTransactionCallback implements TransactionCallback<EntityImportReport>
 	{
 		private final RepositoryCollection source;
-		private final List<EntityMetaData> metadata;
+		private final List<EntityMetaData> sourceMetadata;
 		private final List<String> addedEntities;
+		private final Map<String, List<String>> addedAttributes;// Attributes per entity
 		private final DatabaseAction dbAction;
 
 		private EmxImportTransactionCallback(DatabaseAction dbAction, RepositoryCollection source,
-				List<EntityMetaData> metadata, List<String> addedEntities)
+				List<EntityMetaData> metadata, List<String> addedEntities, Map<String, List<String>> addedAttributes)
 		{
 			this.dbAction = dbAction;
 			this.source = source;
-			this.metadata = metadata;
+			this.sourceMetadata = metadata;
 			this.addedEntities = addedEntities;
+			this.addedAttributes = addedAttributes;
 		}
 
 		@Override
@@ -431,15 +446,21 @@ public class EmxImportServiceImpl implements EmxImporterService
 
 			try
 			{
-				// Import metadata
-				List<EntityMetaData> resolved = DependencyResolver.resolve(metadata);
+				Set<EntityMetaData> allMetaData = Sets.newLinkedHashSet(sourceMetadata);
+				Set<EntityMetaData> existingMetaData = store.getAllEntityMetaDataIncludingAbstract();
+				allMetaData.addAll(existingMetaData);
+
+				// Use all metadata for dependency resolving
+				List<EntityMetaData> resolved = DependencyResolver.resolve(allMetaData);
+
+				// Only import source
+				resolved.retainAll(sourceMetadata);
 
 				for (EntityMetaData entityMetaData : resolved)
 				{
 					String name = entityMetaData.getName();
 					if (!ENTITIES.equals(name) && !ATTRIBUTES.equals(name))
 					{
-						// TODO check if compatible with metadata
 						Entity toMeta = store.getEntityMetaDataEntity(name);
 						if (toMeta == null)
 						{
@@ -447,9 +468,13 @@ public class EmxImportServiceImpl implements EmxImporterService
 							addedEntities.add(name);
 							store.add(entityMetaData);
 						}
-						else
+						else if (!entityMetaData.isAbstract())
 						{
-							store.update(entityMetaData);
+							List<String> addedEntityAttributes = store.update(entityMetaData);
+							if ((addedEntityAttributes != null) && !addedEntityAttributes.isEmpty())
+							{
+								addedAttributes.put(entityMetaData.getName(), addedEntityAttributes);
+							}
 						}
 					}
 				}

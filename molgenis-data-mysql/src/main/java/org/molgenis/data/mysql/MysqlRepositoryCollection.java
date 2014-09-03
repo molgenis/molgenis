@@ -4,7 +4,9 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -23,6 +25,10 @@ import org.molgenis.model.MolgenisModelException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+
 public abstract class MysqlRepositoryCollection implements RepositoryCollection
 {
 	private final DataSource ds;
@@ -38,6 +44,10 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		this.dataService = dataService;
 		this.entityMetaDataRepository = entityMetaDataRepository;
 		this.attributeMetaDataRepository = attributeMetaDataRepository;
+
+		entityMetaDataRepository.setRepositoryCollection(this);
+		attributeMetaDataRepository.setRepositoryCollection(this);
+
 		refreshRepositories();
 	}
 
@@ -54,8 +64,6 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 	public void refreshRepositories()
 	{
 		repositories = new LinkedHashMap<String, MysqlRepository>();
-		entityMetaDataRepository.setRepositoryCollection(this);
-		attributeMetaDataRepository.setRepositoryCollection(this);
 
 		// create meta data table
 		if (!tableExists(EntityMetaDataMetaData.ENTITY_NAME))
@@ -79,39 +87,10 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		// Upgrade old databases
 		upgradeMetaDataTables();
 
-		Map<String, DefaultEntityMetaData> metadata = new LinkedHashMap<String, DefaultEntityMetaData>();
-
-		// read the entity meta data
-		for (DefaultEntityMetaData entityMetaData : entityMetaDataRepository.getEntityMetaDatas())
-		{
-			metadata.put(entityMetaData.getName(), entityMetaData);
-
-			// add the attribute meta data of the entity
-			for (AttributeMetaData attributeMetaData : attributeMetaDataRepository
-					.getEntityAttributeMetaData(entityMetaData.getName()))
-			{
-				entityMetaData.addAttributeMetaData(attributeMetaData);
-			}
-		}
-
-		// read the refEntity
-		for (Entity attribute : attributeMetaDataRepository)
-		{
-			if (attribute.getString(AttributeMetaDataMetaData.REF_ENTITY) != null)
-			{
-				DefaultEntityMetaData entityMetaData = metadata.get(attribute
-						.getString(AttributeMetaDataMetaData.ENTITY));
-				DefaultAttributeMetaData attributeMetaData = (DefaultAttributeMetaData) entityMetaData
-						.getAttribute(attribute.getString(AttributeMetaDataMetaData.NAME));
-				EntityMetaData ref = metadata.get(attribute.getString(AttributeMetaDataMetaData.REF_ENTITY));
-				if (ref == null) throw new RuntimeException("refEntity '" + attribute.getString("refEntity")
-						+ "' missing for " + entityMetaData.getName() + "." + attributeMetaData.getName());
-				attributeMetaData.setRefEntity(ref);
-			}
-		}
+		Set<EntityMetaData> metadata = getAllEntityMetaDataIncludingAbstract();
 
 		// instantiate the repos
-		for (EntityMetaData emd : metadata.values())
+		for (EntityMetaData emd : metadata)
 		{
 			if (!emd.isAbstract())
 			{
@@ -120,67 +99,43 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 				repositories.put(emd.getName(), repo);
 			}
 		}
+
+		registerMysqlRepos();
+	}
+
+	public void registerMysqlRepos()
+	{
+		for (String name : getEntityNames())
+		{
+			if (dataService.hasRepository(name))
+			{
+				dataService.removeRepository(name);
+			}
+
+			Repository repo = getRepositoryByEntityName(name);
+			dataService.addRepository(repo);
+		}
 	}
 
 	private void upgradeMetaDataTables()
 	{
 		// Update attributes table if needed
+		addAttributeToTable(AttributeMetaDataMetaData.AGGREGATEABLE);
+		addAttributeToTable(AttributeMetaDataMetaData.RANGE_MIN);
+		addAttributeToTable(AttributeMetaDataMetaData.RANGE_MAX);
+		addAttributeToTable(AttributeMetaDataMetaData.ENUM_OPTIONS);
+		addAttributeToTable(AttributeMetaDataMetaData.LABEL_ATTRIBUTE);
+	}
 
-		if (!columnExists(attributeMetaDataRepository.getName(), AttributeMetaDataMetaData.AGGREGATEABLE))
+	private void addAttributeToTable(String attributeName)
+	{
+		if (!columnExists(attributeMetaDataRepository.getName(), attributeName))
 		{
 			String sql;
 			try
 			{
 				sql = attributeMetaDataRepository.getAlterSql(AttributeMetaDataRepository.META_DATA
-						.getAttribute(AttributeMetaDataMetaData.AGGREGATEABLE));
-			}
-			catch (MolgenisModelException e)
-			{
-				throw new RuntimeException(e);
-			}
-
-			new JdbcTemplate(ds).execute(sql);
-		}
-
-		if (!columnExists(attributeMetaDataRepository.getName(), AttributeMetaDataMetaData.RANGE_MIN))
-		{
-			String sql;
-			try
-			{
-				sql = attributeMetaDataRepository.getAlterSql(AttributeMetaDataRepository.META_DATA
-						.getAttribute(AttributeMetaDataMetaData.RANGE_MIN));
-			}
-			catch (MolgenisModelException e)
-			{
-				throw new RuntimeException(e);
-			}
-
-			new JdbcTemplate(ds).execute(sql);
-		}
-
-		if (!columnExists(attributeMetaDataRepository.getName(), AttributeMetaDataMetaData.RANGE_MAX))
-		{
-			String sql;
-			try
-			{
-				sql = attributeMetaDataRepository.getAlterSql(AttributeMetaDataRepository.META_DATA
-						.getAttribute(AttributeMetaDataMetaData.RANGE_MAX));
-			}
-			catch (MolgenisModelException e)
-			{
-				throw new RuntimeException(e);
-			}
-
-			new JdbcTemplate(ds).execute(sql);
-		}
-
-		if (!columnExists(attributeMetaDataRepository.getName(), AttributeMetaDataMetaData.ENUM_OPTIONS))
-		{
-			String sql;
-			try
-			{
-				sql = attributeMetaDataRepository.getAlterSql(AttributeMetaDataRepository.META_DATA
-						.getAttribute(AttributeMetaDataMetaData.ENUM_OPTIONS));
+						.getAttribute(attributeName));
 			}
 			catch (MolgenisModelException e)
 			{
@@ -314,6 +269,47 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		return new AggregateableCrudRepositorySecurityDecorator(repo);
 	}
 
+	public Set<EntityMetaData> getAllEntityMetaDataIncludingAbstract()
+	{
+		Map<String, EntityMetaData> metadata = Maps.newLinkedHashMap();
+
+		// read the entity meta data
+		for (DefaultEntityMetaData entityMetaData : entityMetaDataRepository.getEntityMetaDatas())
+		{
+			metadata.put(entityMetaData.getName(), entityMetaData);
+
+			// add the attribute meta data of the entity
+			for (AttributeMetaData attributeMetaData : attributeMetaDataRepository
+					.getEntityAttributeMetaData(entityMetaData.getName()))
+			{
+				entityMetaData.addAttributeMetaData(attributeMetaData);
+			}
+		}
+
+		// read the refEntity
+		for (Entity attribute : attributeMetaDataRepository)
+		{
+			if (attribute.getString(AttributeMetaDataMetaData.REF_ENTITY) != null)
+			{
+				EntityMetaData entityMetaData = metadata.get(attribute.getString(AttributeMetaDataMetaData.ENTITY));
+				DefaultAttributeMetaData attributeMetaData = (DefaultAttributeMetaData) entityMetaData
+						.getAttribute(attribute.getString(AttributeMetaDataMetaData.NAME));
+				EntityMetaData ref = metadata.get(attribute.getString(AttributeMetaDataMetaData.REF_ENTITY));
+				if (ref == null) throw new RuntimeException("refEntity '" + attribute.getString("refEntity")
+						+ "' missing for " + entityMetaData.getName() + "." + attributeMetaData.getName());
+				attributeMetaData.setRefEntity(ref);
+			}
+		}
+
+		Set<EntityMetaData> metadataSet = Sets.newLinkedHashSet();
+		for (String name : metadata.keySet())
+		{
+			metadataSet.add(metadata.get(name));
+		}
+
+		return metadataSet;
+	}
+
 	public Entity getEntityMetaDataEntity(String name)
 	{
 		return entityMetaDataRepository.findOne(name);
@@ -322,10 +318,10 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 	public void drop(EntityMetaData md)
 	{
 		assert md != null;
-		drop(md.getName());
+		dropEntityMetaData(md.getName());
 	}
 
-	public void drop(String name)
+	public void dropEntityMetaData(String name)
 	{
 		// remove the repo
 		MysqlRepository r = repositories.get(name);
@@ -343,21 +339,45 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 				EntityMetaDataMetaData.NAME, name)));
 	}
 
+	public void dropAttributeMetaData(String entityName, String attributeName)
+	{
+		MysqlRepository r = repositories.get(entityName);
+		if (r != null)
+		{
+			r.dropAttribute(attributeName);
+		}
+
+		// Update AttributeMetaDataRepository
+		attributeMetaDataRepository.removeAttributeMetaData(entityName, attributeName);
+
+		refreshRepositories();
+	}
+
+	/**
+	 * Add new AttributeMetaData to an existing EntityMetaData. Trying to edit an exiting AttributeMetaData will throw
+	 * an exception
+	 * 
+	 * @param sourceEntityMetaData
+	 * @return the names of the added AttributeMetaData
+	 */
 	@Transactional
-	public void update(EntityMetaData sourceEntityMetaData)
+	public List<String> update(EntityMetaData sourceEntityMetaData)
 	{
 		MysqlRepository repository = repositories.get(sourceEntityMetaData.getName());
 		EntityMetaData existingEntityMetaData = repository.getEntityMetaData();
+		List<String> addedAttributes = Lists.newArrayList();
 
 		for (AttributeMetaData attr : sourceEntityMetaData.getAttributes())
 		{
 			AttributeMetaData currentAttribute = existingEntityMetaData.getAttribute(attr.getName());
-
 			if (currentAttribute != null)
 			{
-				if (!currentAttribute.getDataType().equals(attr.getDataType()))
+				if (!currentAttribute.isSameAs(attr))
 				{
-					throw new MolgenisDataException("Changing type for existing attributes is not currently supported");
+					throw new MolgenisDataException(
+							"Changing existing attributes is not currently supported. You tried to alter attribute ["
+									+ attr.getName() + "] of entity [" + sourceEntityMetaData.getName()
+									+ "]. Only adding of new atrtibutes to existing entities is supported.");
 				}
 			}
 			else if (!attr.isNillable())
@@ -370,7 +390,10 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 				DefaultEntityMetaData defaultEntityMetaData = (DefaultEntityMetaData) repository.getEntityMetaData();
 				defaultEntityMetaData.addAttributeMetaData(attr);
 				repository.addAttribute(attr);
+				addedAttributes.add(attr.getName());
 			}
 		}
+
+		return addedAttributes;
 	}
 }

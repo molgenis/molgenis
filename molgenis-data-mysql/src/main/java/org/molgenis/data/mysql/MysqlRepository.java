@@ -29,6 +29,8 @@ import org.molgenis.data.Manageable;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
+import org.molgenis.data.Queryable;
+import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.support.AbstractAggregateableCrudRepository;
 import org.molgenis.data.support.MapEntity;
@@ -86,6 +88,13 @@ public class MysqlRepository extends AbstractAggregateableCrudRepository impleme
 			}
 		}
 		jdbcTemplate.execute(getDropSql());
+	}
+
+	public void dropAttribute(String attributeName)
+	{
+		String sql = String.format("ALTER TABLE %s DROP COLUMN %s", getName(), attributeName);
+		jdbcTemplate.execute(sql);
+
 	}
 
 	protected String getDropSql()
@@ -245,7 +254,7 @@ public class MysqlRepository extends AbstractAggregateableCrudRepository impleme
 						.append(" ADD FOREIGN KEY (").append('`').append(att.getName()).append('`')
 						.append(") REFERENCES ").append('`').append(att.getRefEntity().getName()).append('`')
 						.append('(').append('`').append(att.getRefEntity().getIdAttribute().getName()).append('`')
-						.append(") ON DELETE CASCADE").toString());
+						.append(")").toString());
 			}
 
 		return sql;
@@ -611,18 +620,50 @@ public class MysqlRepository extends AbstractAggregateableCrudRepository impleme
 						if (att.getDataType() instanceof StringField || att.getDataType() instanceof TextField)
 						{
 							search.append(" OR this.").append('`').append(att.getName()).append('`').append(" LIKE ?");
+							parameters.add("%" + DataConverter.toString(r.getValue()) + "%");
+						}
+						else if (att.getDataType() instanceof XrefField)
+						{
+							Repository repo = repositoryCollection.getRepositoryByEntityName(att.getRefEntity()
+									.getName());
+							if (repo instanceof Queryable)
+							{
+								Query refQ = new QueryImpl().like(att.getRefEntity().getLabelAttribute().getName(),
+										r.getValue());
+								Iterator<Entity> it = ((Queryable) repo).findAll(refQ).iterator();
+								if (it.hasNext())
+								{
+									search.append(" OR this.").append('`').append(att.getName()).append('`')
+											.append(" IN (");
+									while (it.hasNext())
+									{
+										Entity ref = it.next();
+										search.append("?");
+										parameters.add(att.getDataType().convert(
+												ref.get(att.getRefEntity().getIdAttribute().getName())));
+										if (it.hasNext())
+										{
+											search.append(",");
+										}
+									}
+									search.append(")");
+								}
+							}
 						}
 						else if (att.getDataType() instanceof MrefField)
 						{
 							search.append(" OR CAST(").append(att.getName()).append(".`").append(att.getName())
 									.append('`').append(" as CHAR) LIKE ?");
+							parameters.add("%" + DataConverter.toString(r.getValue()) + "%");
+
 						}
 						else
 						{
 							search.append(" OR CAST(this.").append('`').append(att.getName()).append('`')
 									.append(" as CHAR) LIKE ?");
+							parameters.add("%" + DataConverter.toString(r.getValue()) + "%");
+
 						}
-						parameters.add("%" + DataConverter.toString(r.getValue()) + "%");
 					}
 					if (search.length() > 0) result.append('(').append(search.substring(4)).append(')');
 					break;
@@ -1290,6 +1331,7 @@ public class MysqlRepository extends AbstractAggregateableCrudRepository impleme
 				}
 			}
 			return e;
+
 		}
 	}
 
