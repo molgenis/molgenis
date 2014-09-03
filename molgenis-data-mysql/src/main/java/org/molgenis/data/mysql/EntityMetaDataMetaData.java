@@ -10,11 +10,14 @@ public class EntityMetaDataMetaData extends DefaultEntityMetaData
 {
 	public static final String ENTITY_NAME = "entities";
 	public static final String NAME = "name";
+	
 	public static final String ID_ATTRIBUTE = "idAttribute";
 	public static final String ABSTRACT = "abstract";
 	public static final String LABEL = "label";
+	// FULLY QUALIFIED name van de entity die hij extend
 	public static final String EXTENDS = "extends";
 	public static final String DESCRIPTION = "description";
+	public static final String PACKAGE = "package";
 
 	public EntityMetaDataMetaData()
 	{
@@ -26,6 +29,7 @@ public class EntityMetaDataMetaData extends DefaultEntityMetaData
 		addAttribute(LABEL);
 		addAttribute(EXTENDS).setDataType(XREF).setRefEntity(this);
 		addAttribute(DESCRIPTION).setDataType(TEXT);
+		addAttribute(PACKAGE).setDataType(XREF);
 	}
 
 }

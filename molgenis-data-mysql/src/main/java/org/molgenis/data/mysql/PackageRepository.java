@@ -14,19 +14,18 @@ import javax.sql.DataSource;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Query;
+import org.molgenis.data.Package;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.EntityValidator;
 
 import com.google.common.collect.Lists;
 
-public class EntityMetaDataRepository extends MysqlRepository
+public class PackageRepository extends MysqlRepository
 {
-	public static final EntityMetaDataMetaData META_DATA = new EntityMetaDataMetaData();
+	public static final PackageMetaData META_DATA = new PackageMetaData();
 
-	public EntityMetaDataRepository(DataSource dataSource, EntityValidator entityValidator)
+	public PackageRepository(DataSource dataSource, EntityValidator entityValidator)
 	{
 		super(dataSource, entityValidator);
 		setMetaData(META_DATA);
@@ -42,47 +41,16 @@ public class EntityMetaDataRepository extends MysqlRepository
 
 		return meta;
 	}
-	
-	/**
-	 * Gets all EntityMetaData in a package
-	 * @param packageName the name of the package
-	 */
-	public List<DefaultEntityMetaData> getEntityMetaDatas(String packageName)
-	{
-		List<DefaultEntityMetaData> meta = Lists.newArrayList();
-		for (Entity entity : this)
-		{
-			meta.add(toEntityMetaData(entity));
-		}
 
-		return meta;
-	}
-
-	/**
-	 * Retrieves an EntityMetaData.
-	 * @param name the fully qualified name of the entity
-	 */
-	public DefaultEntityMetaData getEntityMetaData(String fullyQualifiedName)
+	public DefaultEntityMetaData getEntityMetaData(String name)
 	{
-		Query q = new QueryImpl().eq(EntityMetaDataMetaData.ENTITY_NAME, getEntityName(fullyQualifiedName)).and()
-				.eq(EntityMetaDataMetaData.PACKAGE, getPackageName(fullyQualifiedName));
-		Entity entity = findOne(q);
+		Entity entity = findOne(name);
 		if (entity == null)
 		{
 			return null;
 		}
 
 		return toEntityMetaData(entity);
-	}
-	
-	private String getPackageName(String fullyQualifiedName){
-		int lastDotIndex = fullyQualifiedName.lastIndexOf('.');
-		return fullyQualifiedName.substring(0, lastDotIndex);
-	}
-	
-	private String getEntityName(String fullyQualifiedName){
-		int lastDotIndex = fullyQualifiedName.lastIndexOf('.');
-		return fullyQualifiedName.substring(lastDotIndex + 1);
 	}
 
 	private DefaultEntityMetaData toEntityMetaData(Entity entity)
@@ -106,18 +74,13 @@ public class EntityMetaDataRepository extends MysqlRepository
 
 		return entityMetaData;
 	}
-
-	public void addEntityMetaData(EntityMetaData emd)
+	
+	public void addPackage(Package p)
 	{
-		Entity entityMetaDataEntity = new MapEntity();
-		entityMetaDataEntity.set(NAME, emd.getName());
-		entityMetaDataEntity.set(DESCRIPTION, emd.getDescription());
-		entityMetaDataEntity.set(ABSTRACT, emd.isAbstract());
-		if (emd.getIdAttribute() != null) entityMetaDataEntity.set(ID_ATTRIBUTE, emd.getIdAttribute().getName());
-		entityMetaDataEntity.set(LABEL, emd.getLabel());
-		if (emd.getExtends() != null) entityMetaDataEntity.set(EXTENDS, emd.getExtends().getName());
-
-		add(entityMetaDataEntity);
+		Entity packageEntity = new MapEntity();
+		packageEntity.set(NAME, p.getName());
+		packageEntity.set(DESCRIPTION, p.getDescription());
+		add(packageEntity);
 	}
 
 }
