@@ -20,10 +20,18 @@ public class LimitOffsetGenerator implements QueryPartGenerator
 		{
 			searchRequestBuilder.setFrom(query.getOffset());
 		}
+		else
+		{
+			searchRequestBuilder.setFrom(0);
+		}
 
 		if (query.getPageSize() > 0)
 		{
 			searchRequestBuilder.setSize(query.getPageSize());
+		}
+		else
+		{
+			searchRequestBuilder.setSize(Integer.MAX_VALUE);
 		}
 	}
 }

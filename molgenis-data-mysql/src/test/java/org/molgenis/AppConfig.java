@@ -1,5 +1,7 @@
 package org.molgenis;
 
+import static org.mockito.Mockito.mock;
+
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
@@ -10,6 +12,7 @@ import org.molgenis.data.mysql.EntityMetaDataRepository;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
+import org.molgenis.elasticsearch.ElasticSearchService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -86,5 +89,11 @@ public class AppConfig
 				return repo;
 			}
 		};
+	}
+
+	@Bean
+	public ElasticSearchService elasticsearchService()
+	{
+		return mock(ElasticSearchService.class);
 	}
 }
