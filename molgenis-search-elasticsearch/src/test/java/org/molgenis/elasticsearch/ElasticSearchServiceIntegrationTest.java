@@ -81,7 +81,7 @@ public class ElasticSearchServiceIntegrationTest
 		assertFalse(searchService.documentTypeExists("xxx"));
 
 		when(repoMock.iterator()).thenReturn(Arrays.<Entity> asList(new MapEntity()).iterator());
-		when(repoMock.getName()).thenReturn("beer");
+		when(entityMetaData.getName()).thenReturn("beer");
 		when(repoMock.getEntityMetaData().getAttributes()).thenReturn(Collections.<AttributeMetaData> emptyList());
 
 		searchService.indexRepository(repoMock);
@@ -119,6 +119,7 @@ public class ElasticSearchServiceIntegrationTest
 		});
 
 		when(repoMock.getName()).thenReturn("person");
+		when(entityMetaData.getName()).thenReturn("person");
 		when(entityMetaData.getAtomicAttributes()).thenReturn(
 				Arrays.<AttributeMetaData> asList(new DefaultAttributeMetaData("id", FieldTypeEnum.INT),
 						new DefaultAttributeMetaData("name", FieldTypeEnum.STRING)));
@@ -174,7 +175,8 @@ public class ElasticSearchServiceIntegrationTest
 			}
 		});
 		when(repoMock.getName()).thenReturn("fruit");
-		when(repoMock.getEntityMetaData().getAtomicAttributes()).thenReturn(
+		when(entityMetaData.getName()).thenReturn("fruit");
+		when(entityMetaData.getAtomicAttributes()).thenReturn(
 				Arrays.<AttributeMetaData> asList(new DefaultAttributeMetaData("id", FieldTypeEnum.INT),
 						new DefaultAttributeMetaData("name", FieldTypeEnum.STRING), new DefaultAttributeMetaData(
 								"color", FieldTypeEnum.STRING)));
@@ -271,8 +273,8 @@ public class ElasticSearchServiceIntegrationTest
 				return entities.iterator();
 			}
 		});
-
 		when(repoMock.getName()).thenReturn("person");
+		when(entityMetaData.getName()).thenReturn("person");
 		AttributeMetaData attr = new DefaultAttributeMetaData("name", FieldTypeEnum.STRING);
 		when(entityMetaData.getAtomicAttributes()).thenReturn(
 				Arrays.<AttributeMetaData> asList(new DefaultAttributeMetaData("id", FieldTypeEnum.INT), attr));
