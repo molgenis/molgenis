@@ -33,6 +33,31 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 		this.entityClass = entityClass;
 	}
 
+	/**
+	 * Copy-constructor
+	 * 
+	 * @param entityMetaData
+	 */
+	public DefaultEntityMetaData(EntityMetaData entityMetaData)
+	{
+		this.name = entityMetaData.getName();
+		this.entityClass = entityMetaData.getEntityClass();
+		this.label = entityMetaData.getLabel();
+		this.abstract_ = entityMetaData.isAbstract();
+		this.description = entityMetaData.getDescription();
+		EntityMetaData extends_ = entityMetaData.getExtends();
+		this.extends_ = extends_ != null ? new DefaultEntityMetaData(extends_) : null;
+		// deep copy attributes
+		Iterable<AttributeMetaData> attributes = entityMetaData.getAttributes();
+		if (attributes != null)
+		{
+			for (AttributeMetaData attributeMetaData : attributes)
+			{
+				addAttributeMetaData(new DefaultAttributeMetaData(attributeMetaData));
+			}
+		}
+	}
+
 	@Override
 	public String getName()
 	{

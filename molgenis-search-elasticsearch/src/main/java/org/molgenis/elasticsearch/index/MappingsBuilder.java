@@ -62,10 +62,7 @@ public class MappingsBuilder
 	private static final String ATTRIBUTE_READONLY = "readonly";
 	private static final String ATTRIBUTE_NILLABLE = "nillable";
 	private static final String ATTRIBUTE_DATA_TYPE = "dataType";
-<<<<<<< HEAD
-=======
 
->>>>>>> 959baf5454bb601546a4c0c9352aaec2ff6a53d6
 	public static final String FIELD_NOT_ANALYZED = "sort";
 
 	/**
@@ -77,7 +74,6 @@ public class MappingsBuilder
 	 */
 	public static XContentBuilder buildMapping(Repository repository) throws IOException
 	{
-<<<<<<< HEAD
 		return buildMapping(repository.getEntityMetaData());
 	}
 
@@ -85,7 +81,7 @@ public class MappingsBuilder
 	{
 		String documentType = MapperTypeSanitizer.sanitizeMapperType(meta.getName());
 		XContentBuilder jsonBuilder = XContentFactory.jsonBuilder().startObject().startObject(documentType);
-=======
+
 		return buildMapping(repository, true);
 	}
 
@@ -100,14 +96,41 @@ public class MappingsBuilder
 	 */
 	public static XContentBuilder buildMapping(Repository repository, boolean storeSource) throws IOException
 	{
-		String documentType = MapperTypeSanitizer.sanitizeMapperType(repository.getName());
+		return buildMapping(repository.getEntityMetaData(), storeSource);
+	}
+
+	/**
+	 * Creates a Elasticsearch mapping for the given entity meta data, documents are stored in the index
+	 * 
+	 * @param entityMetaData
+	 * @return
+	 * @throws IOException
+	 */
+	public static XContentBuilder buildMapping(EntityMetaData entityMetaData) throws IOException
+	{
+		return buildMapping(entityMetaData, true);
+	}
+
+	/**
+	 * Creates a Elasticsearch mapping for the given entity meta data
+	 * 
+	 * @param entityMetaData
+	 * @param storeSource
+	 *            whether or not documents are stored in the index
+	 * @return
+	 * @throws IOException
+	 */
+	public static XContentBuilder buildMapping(EntityMetaData meta, boolean storeSource) throws IOException
+	{
+		String documentType = MapperTypeSanitizer.sanitizeMapperType(meta.getName());
 		XContentBuilder jsonBuilder = XContentFactory.jsonBuilder().startObject().startObject(documentType)
 				.startObject("_source").field("enabled", storeSource).endObject().startObject("properties");
->>>>>>> 959baf5454bb601546a4c0c9352aaec2ff6a53d6
 
-		// create elasticsearch mapping
-		jsonBuilder.startObject("properties");
+		EntityMetaData meta = repository.getEntityMetaData();
 
+        // create elasticsearch mapping
+        jsonBuilder.startObject("properties");
+        
 		for (AttributeMetaData attr : meta.getAtomicAttributes())
 		{
 			String esType = getType(attr);
@@ -166,7 +189,7 @@ public class MappingsBuilder
 			}
 		}
 
-		jsonBuilder.endObject(); // properties
+		jsonBuilder.endObject().endObject().endObject();
 
 		// create custom meta data
 		jsonBuilder.startObject("_meta");

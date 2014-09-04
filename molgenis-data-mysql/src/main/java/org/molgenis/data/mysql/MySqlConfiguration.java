@@ -3,6 +3,7 @@ package org.molgenis.data.mysql;
 import javax.sql.DataSource;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.elasticsearch.ElasticSearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -29,15 +30,15 @@ public class MySqlConfiguration
 	}
 
 	@Bean
-	public EntityMetaDataRepository entityMetaDataRepository()
+	public MysqlEntityMetaDataRepository entityMetaDataRepository()
 	{
-		return new EntityMetaDataRepository(dataSource);
+		return new MysqlEntityMetaDataRepository(dataSource);
 	}
 
 	@Bean
-	public AttributeMetaDataRepository attributeMetaDataRepository()
+	public MysqlAttributeMetaDataRepository attributeMetaDataRepository()
 	{
-		return new AttributeMetaDataRepository(dataSource);
+		return new MysqlAttributeMetaDataRepository(dataSource);
 	}
 
 	@Bean
