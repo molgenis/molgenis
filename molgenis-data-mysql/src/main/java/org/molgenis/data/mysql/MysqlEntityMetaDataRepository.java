@@ -14,24 +14,31 @@ import javax.sql.DataSource;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.meta.EntityMetaDataRepository;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 
 import com.google.common.collect.Lists;
 
-public class EntityMetaDataRepository extends MysqlRepository
+public class MysqlEntityMetaDataRepository extends MysqlRepository implements EntityMetaDataRepository
 {
 	public static final EntityMetaDataMetaData META_DATA = new EntityMetaDataMetaData();
 
-	public EntityMetaDataRepository(DataSource dataSource)
+	public MysqlEntityMetaDataRepository(DataSource dataSource)
 	{
 		super(dataSource);
 		setMetaData(META_DATA);
 	}
 
-	public List<DefaultEntityMetaData> getEntityMetaDatas()
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.molgenis.data.mysql.EntityMetaDataRepository#getEntityMetaDatas()
+	 */
+	@Override
+	public Iterable<EntityMetaData> getEntityMetaDatas()
 	{
-		List<DefaultEntityMetaData> meta = Lists.newArrayList();
+		List<EntityMetaData> meta = Lists.newArrayList();
 		for (Entity entity : this)
 		{
 			meta.add(toEntityMetaData(entity));
@@ -40,6 +47,12 @@ public class EntityMetaDataRepository extends MysqlRepository
 		return meta;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.molgenis.data.mysql.EntityMetaDataRepository#getEntityMetaData(java.lang.String)
+	 */
+	@Override
 	public DefaultEntityMetaData getEntityMetaData(String name)
 	{
 		Entity entity = findOne(name);
@@ -73,6 +86,12 @@ public class EntityMetaDataRepository extends MysqlRepository
 		return entityMetaData;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.molgenis.data.mysql.EntityMetaDataRepository#addEntityMetaData(org.molgenis.data.EntityMetaData)
+	 */
+	@Override
 	public void addEntityMetaData(EntityMetaData emd)
 	{
 		Entity entityMetaDataEntity = new MapEntity();

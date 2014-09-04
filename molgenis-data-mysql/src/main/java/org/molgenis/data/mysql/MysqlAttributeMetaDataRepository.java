@@ -27,6 +27,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Range;
+import org.molgenis.data.meta.AttributeMetaDataRepository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -35,19 +36,25 @@ import org.molgenis.fieldtypes.EnumField;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
-public class AttributeMetaDataRepository extends MysqlRepository
+public class MysqlAttributeMetaDataRepository extends MysqlRepository implements AttributeMetaDataRepository
 {
 	public static final AttributeMetaDataMetaData META_DATA = new AttributeMetaDataMetaData();
 
-	public AttributeMetaDataRepository(DataSource dataSource)
+	public MysqlAttributeMetaDataRepository(DataSource dataSource)
 	{
 		super(dataSource);
 		setMetaData(META_DATA);
 	}
 
-	public List<DefaultAttributeMetaData> getEntityAttributeMetaData(String entityName)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.molgenis.data.mysql.AttributeMetaDataRepository#getEntityAttributeMetaData(java.lang.String)
+	 */
+	@Override
+	public Iterable<AttributeMetaData> getEntityAttributeMetaData(String entityName)
 	{
-		List<DefaultAttributeMetaData> attributes = Lists.newArrayList();
+		List<AttributeMetaData> attributes = Lists.newArrayList();
 		for (Entity entity : findAll(new QueryImpl().eq(ENTITY, entityName)))
 		{
 			attributes.add(toAttributeMetaData(entity));
@@ -56,6 +63,13 @@ public class AttributeMetaDataRepository extends MysqlRepository
 		return attributes;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.molgenis.data.mysql.AttributeMetaDataRepository#addAttributeMetaData(java.lang.String,
+	 * org.molgenis.data.AttributeMetaData)
+	 */
+	@Override
 	public void addAttributeMetaData(String entityName, AttributeMetaData att)
 	{
 		Entity attributeMetaDataEntity = new MapEntity();
@@ -89,6 +103,13 @@ public class AttributeMetaDataRepository extends MysqlRepository
 		add(attributeMetaDataEntity);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.molgenis.data.mysql.AttributeMetaDataRepository#removeAttributeMetaData(java.lang.String,
+	 * java.lang.String)
+	 */
+	@Override
 	public void removeAttributeMetaData(String entityName, String attributeName)
 	{
 		Query q = new QueryImpl().eq(AttributeMetaDataMetaData.ENTITY, entityName).and()
