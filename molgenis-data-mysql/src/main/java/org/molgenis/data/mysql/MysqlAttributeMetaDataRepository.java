@@ -14,6 +14,7 @@ import static org.molgenis.data.mysql.AttributeMetaDataMetaData.NAME;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.NILLABLE;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.RANGE_MAX;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.RANGE_MIN;
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.READ_ONLY;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.REF_ENTITY;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.VISIBLE;
 
@@ -30,7 +31,6 @@ import org.molgenis.data.meta.AttributeMetaDataRepository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.fieldtypes.EnumField;
 
 import com.google.common.base.Joiner;
@@ -40,9 +40,9 @@ public class MysqlAttributeMetaDataRepository extends MysqlRepository implements
 {
 	public static final AttributeMetaDataMetaData META_DATA = new AttributeMetaDataMetaData();
 
-	public MysqlAttributeMetaDataRepository(DataSource dataSource, EntityValidator entityValidator)
+	public MysqlAttributeMetaDataRepository(DataSource dataSource)
 	{
-		super(dataSource, entityValidator);
+		super(dataSource);
 		setMetaData(META_DATA);
 	}
 
@@ -85,6 +85,7 @@ public class MysqlAttributeMetaDataRepository extends MysqlRepository implements
 		attributeMetaDataEntity.set(AGGREGATEABLE, att.isAggregateable());
 		attributeMetaDataEntity.set(LOOKUP_ATTRIBUTE, att.isLookupAttribute());
 		attributeMetaDataEntity.set(LABEL_ATTRIBUTE, att.isLabelAttribute());
+		attributeMetaDataEntity.set(READ_ONLY, att.isReadonly());
 
 		if (att.getDataType() instanceof EnumField)
 		{
@@ -136,6 +137,7 @@ public class MysqlAttributeMetaDataRepository extends MysqlRepository implements
 		attributeMetaData.setEnumOptions(entity.getList(ENUM_OPTIONS));
 		attributeMetaData.setLabelAttribute(entity.getBoolean(LABEL_ATTRIBUTE) == null ? false : entity
 				.getBoolean(LABEL_ATTRIBUTE));
+		attributeMetaData.setReadOnly(entity.getBoolean(READ_ONLY) == null ? false : entity.getBoolean(READ_ONLY));
 
 		Long rangeMin = entity.getLong(RANGE_MIN);
 		Long rangeMax = entity.getLong(RANGE_MAX);

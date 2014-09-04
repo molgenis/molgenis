@@ -17,7 +17,6 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.EntityMetaDataRepository;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.validation.EntityValidator;
 
 import com.google.common.collect.Lists;
 
@@ -25,9 +24,9 @@ public class MysqlEntityMetaDataRepository extends MysqlRepository implements En
 {
 	public static final EntityMetaDataMetaData META_DATA = new EntityMetaDataMetaData();
 
-	public MysqlEntityMetaDataRepository(DataSource dataSource, EntityValidator entityValidator)
+	public MysqlEntityMetaDataRepository(DataSource dataSource)
 	{
-		super(dataSource, entityValidator);
+		super(dataSource);
 		setMetaData(META_DATA);
 	}
 

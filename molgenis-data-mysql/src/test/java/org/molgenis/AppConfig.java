@@ -2,24 +2,24 @@ package org.molgenis;
 
 import static org.mockito.Mockito.mock;
 
+import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.mysql.EmbeddedMysqlDatabaseBuilder;
 import org.molgenis.data.mysql.MysqlAttributeMetaDataRepository;
 import org.molgenis.data.mysql.MysqlEntityMetaDataRepository;
-import org.molgenis.data.mysql.MysqlEntityValidator;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.validation.DefaultEntityValidator;
-import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.elasticsearch.ElasticSearchService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -35,6 +35,13 @@ public class AppConfig
 	public DataSource dataSource()
 	{
 		return new EmbeddedMysqlDatabaseBuilder().build();
+	}
+
+	@PostConstruct
+	public void login()
+	{
+		SecurityContextHolder.getContext().setAuthentication(
+				new TestingAuthenticationToken("admin", "admin", "ROLE_SYSTEM"));
 	}
 
 	@Bean
@@ -53,22 +60,19 @@ public class AppConfig
 	@Scope("prototype")
 	public MysqlRepository mysqlRepository()
 	{
-		return new MysqlRepository(dataSource(), new DefaultEntityValidator(dataService(),
-				new EntityAttributesValidator()));
+		return new MysqlRepository(dataSource());
 	}
 
 	@Bean
 	public MysqlEntityMetaDataRepository entityMetaDataRepository()
 	{
-		return new MysqlEntityMetaDataRepository(dataSource(), new MysqlEntityValidator(dataService(),
-				new EntityAttributesValidator()));
+		return new MysqlEntityMetaDataRepository(dataSource());
 	}
 
 	@Bean
 	public MysqlAttributeMetaDataRepository attributeMetaDataRepository()
 	{
-		return new MysqlAttributeMetaDataRepository(dataSource(), new MysqlEntityValidator(dataService(),
-				new EntityAttributesValidator()));
+		return new MysqlAttributeMetaDataRepository(dataSource());
 	}
 
 	@Bean

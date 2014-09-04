@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
+import org.molgenis.security.runas.RunAsSystem;
 import org.molgenis.ui.MenuType;
 import org.molgenis.ui.Molgenis;
 import org.molgenis.ui.PluginType;
@@ -77,6 +78,7 @@ public class MenuManagerServiceImpl implements MenuManagerService, ApplicationLi
 	 * @param event
 	 */
 	@Override
+	@RunAsSystem
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
 		if (!molgenisSettings.propertyExists(KEY_MOLGENIS_MENU))

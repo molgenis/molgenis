@@ -26,21 +26,19 @@ public class MySqlConfiguration
 	@Scope("prototype")
 	public MysqlRepository mysqlRepository()
 	{
-		return new MysqlRepository(dataSource, new MysqlEntityValidator(dataService, new EntityAttributesValidator()));
+		return new MysqlRepository(dataSource);
 	}
 
 	@Bean
 	public MysqlEntityMetaDataRepository entityMetaDataRepository()
 	{
-		return new MysqlEntityMetaDataRepository(dataSource, new MysqlEntityValidator(dataService,
-				new EntityAttributesValidator()));
+		return new MysqlEntityMetaDataRepository(dataSource);
 	}
 
 	@Bean
 	public MysqlAttributeMetaDataRepository attributeMetaDataRepository()
 	{
-		return new MysqlAttributeMetaDataRepository(dataSource, new MysqlEntityValidator(dataService,
-				new EntityAttributesValidator()));
+		return new MysqlAttributeMetaDataRepository(dataSource);
 	}
 
 	@Bean
