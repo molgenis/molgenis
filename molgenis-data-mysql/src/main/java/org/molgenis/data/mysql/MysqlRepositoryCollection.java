@@ -86,7 +86,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		else if (attributeMetaDataRepository.count() == 0)
 		{
 			// Update table structure to prevent errors is apps that don't use emx
-			resetMetaDataRepositories();
+			recreateMetaDataRepositories();
 		}
 
 		// Upgrade old databases
@@ -108,7 +108,10 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		registerMysqlRepos();
 	}
 
-	public void resetMetaDataRepositories()
+	/**
+	 * Drops and creates the metadata repositories.
+	 */
+	public void recreateMetaDataRepositories()
 	{
 		attributeMetaDataRepository.drop();
 		entityMetaDataRepository.drop();

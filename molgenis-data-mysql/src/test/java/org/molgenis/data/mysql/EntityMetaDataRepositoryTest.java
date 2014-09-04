@@ -39,7 +39,7 @@ public class EntityMetaDataRepositoryTest extends AbstractTestNGSpringContextTes
 	@AfterClass
 	public void reset()
 	{
-		coll.resetMetaDataRepositories();
+		coll.recreateMetaDataRepositories();
 	}
 
 	@Test

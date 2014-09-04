@@ -37,7 +37,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 	@BeforeMethod
 	public void reset()
 	{
-		coll.resetMetaDataRepositories();
+		coll.recreateMetaDataRepositories();
 	}
 
 	@Test
