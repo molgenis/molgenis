@@ -21,7 +21,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
-import org.molgenis.data.importer.EntityImportService;
+import org.molgenis.data.jpa.importer.EntityImportService;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.QueryResolver;
@@ -94,7 +94,7 @@ public class OmxImporterServiceTest
 
 	protected DataService dataService;
 	private EntityManager entityManager;
-	private OmxImporterService importer;
+	private OmxImporterServiceImpl importer;
 	private EmbeddedElasticSearchServiceFactory factory;
 	private SearchService searchService;
 	private FileRepositoryCollectionFactory fileRepositorySourceFactory;

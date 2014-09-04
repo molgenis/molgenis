@@ -12,8 +12,12 @@ import org.molgenis.data.CrudRepositorySecurityDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.importer.EntitiesValidationReportImpl;
+import org.molgenis.data.importer.ImportService;
+import org.molgenis.data.jpa.importer.EntitiesImporter;
 import org.molgenis.data.omx.OmxRepository;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.QueryResolver;
@@ -21,7 +25,7 @@ import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.fieldtypes.FieldType;
-import org.molgenis.framework.db.EntitiesImporter;
+import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
@@ -30,16 +34,21 @@ import org.molgenis.omx.protocol.OmxLookupTableEntityMetaData;
 import org.molgenis.omx.protocol.OmxLookupTableRepository;
 import org.molgenis.omx.utils.ProtocolUtils;
 import org.molgenis.search.SearchService;
+import org.molgenis.util.ApplicationContextProvider;
+import org.molgenis.util.EntityImportedEvent;
 import org.molgenis.util.RepositoryUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.Ordered;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Sets;
 
 @Service
-public class OmxImporterServiceImpl implements OmxImporterService
+public class OmxImporterServiceImpl implements ImportService
 {
+	public static final String DATASET_SHEET_PREFIX = "dataset_";
+
 	private final DataService dataService;
 	private final SearchService searchService;
 	private final EntitiesImporter entitiesImporter;
@@ -58,15 +67,37 @@ public class OmxImporterServiceImpl implements OmxImporterService
 	}
 
 	@Override
-	@Transactional(rollbackFor = IOException.class)
+	public EntitiesValidationReport validateImport(RepositoryCollection source)
+	{
+		// TODO Auto-generated method stub
+		return new EntitiesValidationReportImpl();
+	}
+
+	@Override
+	public boolean canImport(String fileName, RepositoryCollection source)
+	{
+		// Use this as fallback
+		return true;
+	}
+
+	@Override
+	@Transactional
 	public EntityImportReport doImport(RepositoryCollection repositories, DatabaseAction databaseAction)
-			throws IOException
+
 	{
 		// All new repository identifiers
 		List<String> newRepoIdentifiers = new ArrayList<String>();
 
 		// First import entities, the data sheets are ignored in the entitiesimporter
-		EntityImportReport importReport = entitiesImporter.importEntities(repositories, databaseAction);
+		EntityImportReport importReport;
+		try
+		{
+			importReport = entitiesImporter.importEntities(repositories, databaseAction);
+		}
+		catch (IOException e1)
+		{
+			throw new MolgenisDataException(e1);
+		}
 
 		// RULE: Feature can only belong to one Protocol in a DataSet. Check it (see issue #1136)
 		checkFeatureCanOnlyBelongToOneProtocolForOneDataSet();
@@ -178,6 +209,39 @@ public class OmxImporterServiceImpl implements OmxImporterService
 			}
 		}
 
+		// publish dataset imported event(s) if we are in a spring environment
+		if (ApplicationContextProvider.getApplicationContext() != null)
+		{
+			Iterable<String> entities = repositories.getEntityNames();
+			for (String entityName : entities)
+			{
+				if (entityName.startsWith(DATASET_SHEET_PREFIX))
+				{
+					// Import DataSet sheet, create new OmxRepository
+					String dataSetIdentifier = entityName.substring(DATASET_SHEET_PREFIX.length());
+					DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME,
+							new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier), DataSet.class);
+					ApplicationContextProvider.getApplicationContext().publishEvent(
+							new EntityImportedEvent(this, DataSet.ENTITY_NAME, dataSet.getId()));
+				}
+				if (Protocol.ENTITY_NAME.equalsIgnoreCase(entityName))
+				{
+					Repository repo = repositories.getRepositoryByEntityName("protocol");
+
+					for (Protocol protocol : repo.iterator(Protocol.class))
+					{
+						if (protocol.getRoot())
+						{
+							Protocol rootProtocol = dataService.findOne(Protocol.ENTITY_NAME,
+									new QueryImpl().eq(Protocol.IDENTIFIER, protocol.getIdentifier()), Protocol.class);
+							ApplicationContextProvider.getApplicationContext().publishEvent(
+									new EntityImportedEvent(this, Protocol.ENTITY_NAME, rootProtocol.getId()));
+						}
+					}
+				}
+			}
+		}
+
 		return importReport;
 	}
 
@@ -211,4 +275,11 @@ public class OmxImporterServiceImpl implements OmxImporterService
 		}
 
 	}
+
+	@Override
+	public int getOrder()
+	{
+		return Ordered.LOWEST_PRECEDENCE;
+	}
+
 }

@@ -3,13 +3,11 @@ package org.molgenis.data.elasticsearch;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Aggregateable;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
-import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataAccessException;
@@ -311,18 +309,6 @@ public class ElasticSearchRepository implements CrudRepository, Aggregateable
 			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Updateable");
 		}
 		((Updateable) repository).deleteAll();
-
-		// TODO update index
-	}
-
-	@Override
-	public void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
-	{
-		if (!(repository instanceof Updateable))
-		{
-			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Updateable");
-		}
-		((Updateable) repository).update(entities, dbAction, keyName);
 
 		// TODO update index
 	}

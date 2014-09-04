@@ -283,7 +283,6 @@ public class JpaRepository extends AbstractCrudRepository
 		em.flush();
 	}
 
-	@Override
 	public void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyNames)
 	{
 		if (keyNames.length == 0) throw new MolgenisDataException("At least one key must be provided, e.g. 'name'");

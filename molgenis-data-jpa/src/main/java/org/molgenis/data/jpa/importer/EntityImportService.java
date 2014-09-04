@@ -1,4 +1,4 @@
-package org.molgenis.data.importer;
+package org.molgenis.data.jpa.importer;
 
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
@@ -18,7 +18,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
-import org.molgenis.data.Updateable;
+import org.molgenis.data.jpa.JpaRepository;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
@@ -70,12 +70,12 @@ public class EntityImportService
 	public int importEntity(String entityName, Repository source, DatabaseAction dbAction)
 	{
 		final Repository repo = dataService.getRepositoryByEntityName(entityName);
-		if (!(repo instanceof Updateable))
+		if (!(repo instanceof JpaRepository))
 		{
-			throw new MolgenisDataException(repo.getName() + " is not updateable");
+			throw new MolgenisDataException(repo.getName() + " is not a jpa repository");
 		}
 
-		Updateable updateable = (Updateable) repo;
+		JpaRepository jpaRepository = (JpaRepository) repo;
 
 		// Convert to MapEntity so we can be sure we can set xref/mref fields on it
 		List<Entity> entitiesToImport = Lists.newArrayList();
@@ -145,16 +145,16 @@ public class EntityImportService
 
 			if (batch.size() == BATCH_SIZE)
 			{
-				updateable.update(batch, dbAction, updateKey);
-				updateable.flush();
+				jpaRepository.update(batch, dbAction, updateKey);
+				jpaRepository.flush();
 				batch.clear();
 			}
 		}
 
 		if (!batch.isEmpty())
 		{
-			updateable.update(batch, dbAction, updateKey);
-			updateable.flush();
+			jpaRepository.update(batch, dbAction, updateKey);
+			jpaRepository.flush();
 			batch.clear();
 		}
 
@@ -185,8 +185,8 @@ public class EntityImportService
 						// Add to the repository and remove from unresolved list
 						it.remove();
 						batch.add(entityToImport);
-						updateable.update(batch, dbAction, updateKey);
-						updateable.flush();
+						jpaRepository.update(batch, dbAction, updateKey);
+						jpaRepository.flush();
 						batch.clear();
 					}
 				}
@@ -222,8 +222,8 @@ public class EntityImportService
 
 		if (!batch.isEmpty())
 		{
-			updateable.update(batch, dbAction, updateKey);
-			updateable.flush();
+			jpaRepository.update(batch, dbAction, updateKey);
+			jpaRepository.flush();
 		}
 
 		return entitiesToImport.size();

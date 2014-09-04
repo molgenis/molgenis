@@ -1,4 +1,4 @@
-package org.molgenis.framework.db;
+package org.molgenis.data.jpa.importer;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;

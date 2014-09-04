@@ -7,14 +7,12 @@ import static org.molgenis.elasticsearch.util.ElasticsearchEntityUtils.toEntityI
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Aggregateable;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Countable;
 import org.molgenis.data.CrudRepository;
-import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataAccessException;
@@ -365,37 +363,6 @@ public class ElasticsearchRepositoryDecorator implements CrudRepository, Aggrega
 		((Updateable) repository).deleteAll();
 
 		elasticSearchService.delete(getEntityMetaData());
-	}
-
-	@Override
-	@Transactional
-	public void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
-	{
-		if (!(repository instanceof Updateable))
-		{
-			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Updateable");
-		}
-		((Updateable) repository).update(entities, dbAction, keyName);
-
-		EntityMetaData entityMetaData = getEntityMetaData();
-		switch (dbAction)
-		{
-			case ADD:
-			case ADD_IGNORE_EXISTING:
-			case ADD_UPDATE_EXISTING:
-				elasticSearchService.index(entities, entityMetaData, IndexingMode.ADD);
-				break;
-			case UPDATE:
-			case UPDATE_IGNORE_MISSING:
-				elasticSearchService.index(entities, entityMetaData, IndexingMode.UPDATE);
-				break;
-			case REMOVE:
-			case REMOVE_IGNORE_MISSING:
-				elasticSearchService.delete(entities, entityMetaData);
-				break;
-			default:
-				throw new RuntimeException("Unknown DatabaseAction [" + dbAction + "]");
-		}
 	}
 
 	public Repository getRepository()

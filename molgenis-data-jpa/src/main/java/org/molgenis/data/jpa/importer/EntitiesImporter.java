@@ -1,10 +1,11 @@
-package org.molgenis.framework.db;
+package org.molgenis.data.jpa.importer;
 
 import java.io.File;
 import java.io.IOException;
 
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.framework.db.EntityImportReport;
 
 /**
  * Import entities into the database

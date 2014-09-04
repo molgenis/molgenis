@@ -20,8 +20,8 @@ import static org.molgenis.data.mysql.AttributeMetaDataMetaData.VISIBLE;
 import static org.molgenis.data.mysql.EntityMetaDataMetaData.ABSTRACT;
 import static org.molgenis.data.mysql.EntityMetaDataMetaData.EXTENDS;
 
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -30,22 +30,25 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Query;
 import org.molgenis.data.Range;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.Updateable;
 import org.molgenis.data.mysql.AttributeMetaDataMetaData;
 import org.molgenis.data.mysql.EntityMetaDataMetaData;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.IntField;
@@ -54,21 +57,24 @@ import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.util.DependencyResolver;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.Ordered;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 @Component
-public class EmxImportServiceImpl implements EmxImporterService
+public class EmxImportServiceImpl implements ImportService
 {
 	private static final Logger logger = Logger.getLogger(EmxImportServiceImpl.class);
+	private static final List<String> SUPPORTED_FILE_EXTENSIONS = Arrays.asList("xls", "xlsx");
 
 	// Sheet names
 	private static final String ENTITIES = EntityMetaDataMetaData.ENTITY_NAME;
@@ -99,8 +105,23 @@ public class EmxImportServiceImpl implements EmxImporterService
 	}
 
 	@Override
+	public boolean canImport(String fileName, RepositoryCollection source)
+	{
+		String fileNameExtension = StringUtils.getFilenameExtension(fileName);
+		if (SUPPORTED_FILE_EXTENSIONS.contains(fileNameExtension.toLowerCase()))
+		{
+			for (String entityName : source.getEntityNames())
+			{
+				if (entityName.equalsIgnoreCase(AttributeMetaDataMetaData.ENTITY_NAME)) return true;
+				if (store.getRepositoryByEntityName(entityName) != null) return true;
+			}
+		}
+
+		return false;
+	}
+
+	@Override
 	public EntityImportReport doImport(final RepositoryCollection source, DatabaseAction databaseAction)
-			throws IOException
 	{
 		if (store == null) throw new RuntimeException("store was not set");
 
@@ -222,7 +243,6 @@ public class EmxImportServiceImpl implements EmxImporterService
 		return report;
 	}
 
-	@Override
 	public Map<String, DefaultEntityMetaData> getEntityMetaData(RepositoryCollection source)
 	{
 		// TODO: this task is actually a 'merge' instead of 'import'
@@ -486,16 +506,15 @@ public class EmxImportServiceImpl implements EmxImporterService
 				for (EntityMetaData entityMetaData : resolved)
 				{
 					String name = entityMetaData.getName();
-					Updateable updateable = (Updateable) store.getRepositoryByEntityName(name);
-					if (updateable != null)
+					CrudRepository crudRepository = (CrudRepository) store.getRepositoryByEntityName(name);
+					if (crudRepository != null)
 					{
 						Repository fileEntityRepository = source.getRepositoryByEntityName(name);
 						// check to prevent nullpointer when importing metadata only
 						if (fileEntityRepository != null)
 						{
-							List<Entity> entities = Lists.newArrayList(fileEntityRepository);
-							updateable.update(entities, dbAction);
-							report.getNrImportedEntitiesMap().put(name, entities.size());
+							update(crudRepository, fileEntityRepository, dbAction);
+							report.getNrImportedEntitiesMap().put(name, Iterables.size(fileEntityRepository));
 						}
 					}
 				}
@@ -508,5 +527,172 @@ public class EmxImportServiceImpl implements EmxImporterService
 				throw e;
 			}
 		}
+
+		public void update(CrudRepository repo, Iterable<? extends Entity> entities, DatabaseAction dbAction)
+		{
+			if (entities == null) return;
+			String idAttributeName = repo.getEntityMetaData().getIdAttribute().getName();
+
+			// Split in existing and new entities
+			Map<Object, Entity> existingEntities = Maps.newLinkedHashMap();
+			List<Entity> newEntities = Lists.newArrayList();
+
+			List<Object> ids = Lists.newArrayList();
+			for (Entity entity : entities)
+			{
+				Object id = entity.get(idAttributeName);
+				if (id != null)
+				{
+					ids.add(id);
+				}
+			}
+
+			if (!ids.isEmpty())
+			{
+				List<Object> existingIds = Lists.newArrayList();
+
+				Query q = new QueryImpl();
+				for (int i = 0; i < ids.size(); i++)
+				{
+					if (i > 0)
+					{
+						q.or();
+					}
+					q.eq(idAttributeName, ids.get(i));
+				}
+
+				for (Entity existing : repo.findAll(q))
+				{
+					existingIds.add(existing.getIdValue());
+				}
+
+				FieldType dataType = repo.getEntityMetaData().getIdAttribute().getDataType();
+				for (Entity entity : entities)
+				{
+					Object id = entity.get(idAttributeName);
+					if ((id != null) && existingIds.contains(dataType.convert(id)))
+					{
+						existingEntities.put(id, entity);
+					}
+					else
+					{
+						newEntities.add(entity);
+					}
+				}
+			}
+
+			switch (dbAction)
+			{
+				case ADD:
+					if (!existingEntities.isEmpty())
+					{
+						List<Object> keys = Lists.newArrayList(existingEntities.keySet());
+
+						StringBuilder msg = new StringBuilder();
+						msg.append("Trying to add existing ").append(repo.getName())
+								.append(" entities as new insert: ");
+						msg.append(keys.subList(0, Math.min(5, keys.size())));
+						if (keys.size() > 5)
+						{
+							msg.append(" and ").append(keys.size() - 5).append(" more.");
+						}
+
+						throw new MolgenisDataException(msg.toString());
+					}
+
+					repo.add(entities);
+					break;
+
+				case ADD_IGNORE_EXISTING:
+					if (!newEntities.isEmpty())
+					{
+						repo.add(newEntities);
+					}
+					break;
+
+				case ADD_UPDATE_EXISTING:
+					if (!newEntities.isEmpty())
+					{
+						repo.add(newEntities);
+					}
+					if (!existingEntities.isEmpty())
+					{
+						repo.update(existingEntities.values());
+					}
+					break;
+
+				case REMOVE:
+					if (!newEntities.isEmpty())
+					{
+						List<Object> keys = Lists.newArrayList();
+						for (Entity newEntity : newEntities)
+						{
+							keys.add(newEntity.get(idAttributeName));
+							if (keys.size() == 5)
+							{
+								break;
+							}
+						}
+
+						StringBuilder msg = new StringBuilder();
+						msg.append("Trying to remove not exsisting ").append(repo.getName()).append(" entities:")
+								.append(keys);
+						if (newEntities.size() > 5)
+						{
+							msg.append(" and ").append(newEntities.size() - 5).append(" more.");
+						}
+
+						throw new MolgenisDataException(msg.toString());
+					}
+
+					repo.deleteById(existingEntities.keySet());
+					break;
+
+				case REMOVE_IGNORE_MISSING:
+					repo.deleteById(existingEntities.keySet());
+					break;
+
+				case UPDATE:
+					if (!newEntities.isEmpty())
+					{
+						List<Object> keys = Lists.newArrayList();
+						for (Entity newEntity : newEntities)
+						{
+							keys.add(newEntity.get(idAttributeName));
+							if (keys.size() == 5)
+							{
+								break;
+							}
+						}
+
+						StringBuilder msg = new StringBuilder();
+						msg.append("Trying to update not exsisting ").append(repo.getName()).append(" entities:")
+								.append(keys);
+						if (newEntities.size() > 5)
+						{
+							msg.append(" and ").append(newEntities.size() - 5).append(" more.");
+						}
+
+						throw new MolgenisDataException(msg.toString());
+					}
+					repo.update(existingEntities.values());
+					break;
+
+				case UPDATE_IGNORE_MISSING:
+					repo.update(existingEntities.values());
+					break;
+
+				default:
+					break;
+
+			}
+		}
 	}
+
+	@Override
+	public int getOrder()
+	{
+		return Ordered.HIGHEST_PRECEDENCE;
+	}
+
 }

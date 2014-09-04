@@ -1,7 +1,6 @@
 package org.molgenis.data.validation;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
@@ -10,7 +9,6 @@ import org.molgenis.data.Aggregateable;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.CrudRepositoryDecorator;
-import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
@@ -52,12 +50,6 @@ public class RepositoryValidationDecorator extends CrudRepositoryDecorator imple
 	public void delete(Entity entity)
 	{
 		getDecoratedRepository().delete(entity);
-	}
-
-	@Override
-	public void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
-	{
-		getDecoratedRepository().update(entities, dbAction, keyName);
 	}
 
 	@Override

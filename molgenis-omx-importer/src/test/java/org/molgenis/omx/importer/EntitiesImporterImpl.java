@@ -10,8 +10,8 @@ package org.molgenis.omx.importer;
 import java.util.Set;
 
 import org.molgenis.data.FileRepositoryCollectionFactory;
-import org.molgenis.data.importer.EntityImportService;
-import org.molgenis.framework.db.AbstractEntitiesImporter;
+import org.molgenis.data.jpa.importer.AbstractEntitiesImporter;
+import org.molgenis.data.jpa.importer.EntityImportService;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
