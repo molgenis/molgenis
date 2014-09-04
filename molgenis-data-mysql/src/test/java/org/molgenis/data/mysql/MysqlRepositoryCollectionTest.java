@@ -4,8 +4,8 @@ import java.util.Locale;
 
 import org.molgenis.AppConfig;
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AggregateableCrudRepositorySecurityDecorator;
 import org.molgenis.data.CrudRepository;
+import org.molgenis.data.CrudRepositorySecurityDecorator;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -26,7 +26,7 @@ public class MysqlRepositoryCollectionTest extends AbstractTestNGSpringContextTe
 	public void test()
 	{
 		// delete old stuff
-		coll.drop("coll_person");
+		coll.dropEntityMetaData("coll_person");
 
 		// create collection, add repo, destroy and reload
 		DefaultEntityMetaData personMD = new DefaultEntityMetaData("coll_person");
@@ -65,12 +65,12 @@ public class MysqlRepositoryCollectionTest extends AbstractTestNGSpringContextTe
 	@Test
 	public void testSecurityDecorator()
 	{
-		coll.drop("test");
+		coll.dropEntityMetaData("test");
 		DefaultEntityMetaData meta = new DefaultEntityMetaData("test");
 		meta.addAttribute("id").setIdAttribute(true).setNillable(false);
 		coll.add(meta);
 		Repository repo = coll.getRepositoryByEntityName("test");
 		Assert.assertNotNull(repo);
-		Assert.assertTrue(repo instanceof AggregateableCrudRepositorySecurityDecorator);
+		Assert.assertTrue(repo instanceof CrudRepositorySecurityDecorator);
 	}
 }

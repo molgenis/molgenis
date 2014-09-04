@@ -25,8 +25,7 @@ public class SearchRequestGenerator
 			new SortGenerator(), new LimitOffsetGenerator(), new DisMaxQueryGenerator());
 
 	/**
-	 * Add the 'searchType', 'fields', 'types' and 'query' of the
-	 * SearchRequestBuilder
+	 * Add the 'searchType', 'fields', 'types' and 'query' of the SearchRequestBuilder
 	 * 
 	 * @param searchRequestBuilder
 	 * @param entityNames
@@ -34,16 +33,12 @@ public class SearchRequestGenerator
 	 * @param query
 	 * @param fieldsToReturn
 	 * @param aggregateField1
-	 *            First Field to aggregate on, attributemetadata instead of name
-	 *            because of elasticsearch bug: http://elasticsearch
-	 *            -users.115913
-	 *            .n3.nabble.com/boolean-multi-field-silently-ignored
+	 *            First Field to aggregate on, attributemetadata instead of name because of elasticsearch bug:
+	 *            http://elasticsearch -users.115913 .n3.nabble.com/boolean-multi-field-silently-ignored
 	 *            -in-1-2-1-td4058107.html
 	 * @param aggregateField2
-	 *            Second Field to aggregate on, attributemetadata instead of
-	 *            name because of elasticsearch bug: http://elasticsearch
-	 *            -users.115913
-	 *            .n3.nabble.com/boolean-multi-field-silently-ignored
+	 *            Second Field to aggregate on, attributemetadata instead of name because of elasticsearch bug:
+	 *            http://elasticsearch -users.115913 .n3.nabble.com/boolean-multi-field-silently-ignored
 	 *            -in-1-2-1-td4058107.html
 	 * @param entityMetaData
 	 */
@@ -54,10 +49,8 @@ public class SearchRequestGenerator
 		searchRequestBuilder.setSearchType(searchType);
 
 		/*
-		 * determine correct aggregateFieldNames (http://elasticsearch
-		 * -users.115913
-		 * .n3.nabble.com/boolean-multi-field-silently-ignored-in-1-
-		 * 2-1-td4058107.html)
+		 * determine correct aggregateFieldNames (http://elasticsearch -users.115913
+		 * .n3.nabble.com/boolean-multi-field-silently-ignored-in-1- 2-1-td4058107.html)
 		 */
 		String aggregateFieldName1 = aggregateField1 != null ? aggregateField1.getName() : null;
 		String aggregateFieldName2 = aggregateField2 != null ? aggregateField2.getName() : null;

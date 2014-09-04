@@ -14,25 +14,8 @@ import com.google.common.collect.Sets;
 
 public class DependencyResolver
 {
-	// public static List<Entity> resolveEntitiesWithSelfReference(List<Entity> entities, EntityMetaData entityMetaData)
-	// {
-	// Map<Object, Entity> entitiesById = Maps.newHashMap();
-	// Map<Object, Set<Entity>> dependenciesById = Maps.newHashMap();
-	//
-	// for (Entity entity : entities)
-	// {
-	// entitiesById.put(entity.getIdValue(), entity);
-	// Set<Entity> dependencies = Sets.newHashSet();
-	// dependenciesById.put(entity.getIdValue(), dependencies);
-	//
-	// for (AttributeMetaData attr : entityMetaData.getAttributes())
-	// {
-	//
-	// }
-	// }
-	// }
 
-	public static List<EntityMetaData> resolve(List<EntityMetaData> coll)
+	public static List<EntityMetaData> resolve(Set<EntityMetaData> coll)
 	{
 		// EntityMetaData by entityname
 		Map<String, EntityMetaData> metaDataByName = Maps.newHashMap();
@@ -77,11 +60,11 @@ public class DependencyResolver
 				}
 			}
 
-			// When there aren't any we got a circular dependency
+			// When there aren't any we got a non resolvable
 			if (ready.isEmpty())
 			{
-				throw new MolgenisDataException("Circular references found between entities "
-						+ dependenciesByName.keySet());
+				throw new MolgenisDataException("Could not resolve dependencies of entities "
+						+ dependenciesByName.keySet() + " are there circular dependencies?");
 			}
 
 			// Remove found metadata from dependency graph

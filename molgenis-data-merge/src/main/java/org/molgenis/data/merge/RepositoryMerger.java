@@ -1,4 +1,4 @@
-package org.molgenis.merge;
+package org.molgenis.data.merge;
 
 import org.molgenis.MolgenisFieldTypes;
 

@@ -7,10 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
-import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
@@ -29,16 +27,14 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.elasticsearch.util.MapperTypeSanitizer;
 
 /**
- * Builds mappings for a documentType. For each column a multi_field is created,
- * one analyzed for searching and one not_analyzed for sorting
+ * Builds mappings for a documentType. For each column a multi_field is created, one analyzed for searching and one
+ * not_analyzed for sorting
  * 
  * @author erwin
  * 
  */
 public class MappingsBuilder
 {
-	private static final Logger logger = Logger.getLogger(MappingsBuilder.class);
-
 	private static final String ENTITY_NAME = "name";
 	private static final String ENTITY_LABEL = "label";
 	private static final String ENTITY_DESCRIPTION = "description";
@@ -66,10 +62,22 @@ public class MappingsBuilder
 	private static final String ATTRIBUTE_READONLY = "readonly";
 	private static final String ATTRIBUTE_NILLABLE = "nillable";
 	private static final String ATTRIBUTE_DATA_TYPE = "dataType";
+<<<<<<< HEAD
+=======
+
+>>>>>>> 959baf5454bb601546a4c0c9352aaec2ff6a53d6
 	public static final String FIELD_NOT_ANALYZED = "sort";
 
+	/**
+	 * Creates entity meta data for the given repository, documents are stored in the index
+	 * 
+	 * @param repository
+	 * @return
+	 * @throws IOException
+	 */
 	public static XContentBuilder buildMapping(Repository repository) throws IOException
 	{
+<<<<<<< HEAD
 		return buildMapping(repository.getEntityMetaData());
 	}
 
@@ -77,6 +85,25 @@ public class MappingsBuilder
 	{
 		String documentType = MapperTypeSanitizer.sanitizeMapperType(meta.getName());
 		XContentBuilder jsonBuilder = XContentFactory.jsonBuilder().startObject().startObject(documentType);
+=======
+		return buildMapping(repository, true);
+	}
+
+	/**
+	 * Creates entity meta data for the given repository
+	 * 
+	 * @param repository
+	 * @param storeSource
+	 *            whether or not documents are stored in the index
+	 * @return
+	 * @throws IOException
+	 */
+	public static XContentBuilder buildMapping(Repository repository, boolean storeSource) throws IOException
+	{
+		String documentType = MapperTypeSanitizer.sanitizeMapperType(repository.getName());
+		XContentBuilder jsonBuilder = XContentFactory.jsonBuilder().startObject().startObject(documentType)
+				.startObject("_source").field("enabled", storeSource).endObject().startObject("properties");
+>>>>>>> 959baf5454bb601546a4c0c9352aaec2ff6a53d6
 
 		// create elasticsearch mapping
 		jsonBuilder.startObject("properties");
@@ -126,8 +153,9 @@ public class MappingsBuilder
 				}
 
 				jsonBuilder.startObject(attr.getName()).field("type", "multi_field").startObject("fields")
-						.startObject(attr.getName()).field("type", "date").endObject().startObject(FIELD_NOT_ANALYZED)
-						.field("type", "date").field("format", dateFormat).endObject().endObject().endObject();
+						.startObject(attr.getName()).field("type", "date").field("format", dateFormat).endObject()
+						.startObject(FIELD_NOT_ANALYZED).field("type", "date").field("format", dateFormat).endObject()
+						.endObject().endObject();
 			}
 			else
 			{

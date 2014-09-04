@@ -2,8 +2,10 @@ package org.molgenis.script;
 
 import java.util.Map;
 
-import org.molgenis.data.DataService;
+import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
+import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,24 +20,24 @@ import com.google.common.collect.Maps;
 public class ScriptRunnerFactory
 {
 	private final Map<String, ScriptRunner> scriptRunners = Maps.newHashMap();
-	private final DataService dataService;
+	private final MysqlRepository scriptTypeRepo;
 
 	@Autowired
-	public ScriptRunnerFactory(DataService dataService, MysqlRepositoryCollection mysqlRepositoryCollection)
+	public ScriptRunnerFactory(MysqlRepositoryCollection mysqlRepositoryCollection)
 	{
-		this.dataService = dataService;
 		mysqlRepositoryCollection.add(ScriptParameter.META_DATA);
-		mysqlRepositoryCollection.add(ScriptType.META_DATA);
+		scriptTypeRepo = mysqlRepositoryCollection.add(ScriptType.META_DATA);
 		mysqlRepositoryCollection.add(Script.META_DATA);
 	}
 
+	@RunAsSystem
 	public void registerScriptExecutor(String type, ScriptRunner scriptExecutor)
 	{
 		scriptRunners.put(type, scriptExecutor);
 
-		if (dataService.query(ScriptType.ENTITY_NAME).eq(ScriptType.NAME, type).count() == 0)
+		if (scriptTypeRepo.count(new QueryImpl().eq(ScriptType.NAME, type)) == 0)
 		{
-			dataService.add(ScriptType.ENTITY_NAME, new ScriptType(type));
+			scriptTypeRepo.add(new ScriptType(type));
 		}
 	}
 

@@ -99,4 +99,6 @@ public interface AttributeMetaData
 	 * For enum fields returns the posible enum values
 	 */
 	List<String> getEnumOptions();
+
+	boolean isSameAs(AttributeMetaData attributeMetaData);
 }

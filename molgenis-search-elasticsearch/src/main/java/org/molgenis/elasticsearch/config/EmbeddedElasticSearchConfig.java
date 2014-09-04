@@ -5,14 +5,14 @@ import java.util.Collections;
 
 import org.molgenis.data.DataService;
 import org.molgenis.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
+import org.molgenis.elasticsearch.index.EntityToSourceConverter;
 import org.molgenis.search.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Spring config for embedded elastic search server. Use this in your own app by
- * importing this in your spring config:
+ * Spring config for embedded elastic search server. Use this in your own app by importing this in your spring config:
  * <code> @Import(EmbeddedElasticSearchConfig.class)</code>
  * 
  * @author erwin
@@ -25,6 +25,9 @@ public class EmbeddedElasticSearchConfig
 
     @Autowired
 	private DataService dataService;
+
+	@Autowired
+	public EntityToSourceConverter entityToSourceConverter;
 
 	@Bean(destroyMethod = "close")
 	public EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory()
@@ -60,6 +63,6 @@ public class EmbeddedElasticSearchConfig
 	@Bean
 	public SearchService searchService()
 	{
-		return embeddedElasticSearchServiceFactory().create(dataService);
+		return embeddedElasticSearchServiceFactory().create(dataService, entityToSourceConverter);
 	}
 }
