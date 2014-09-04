@@ -14,6 +14,7 @@ import static org.molgenis.data.mysql.AttributeMetaDataMetaData.NAME;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.NILLABLE;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.RANGE_MAX;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.RANGE_MIN;
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.READ_ONLY;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.REF_ENTITY;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.VISIBLE;
 import static org.molgenis.data.mysql.EntityMetaDataMetaData.ABSTRACT;
@@ -283,6 +284,7 @@ public class EmxImportServiceImpl implements EmxImporterService
 			Boolean attributeAggregateable = attribute.getBoolean(AGGREGATEABLE);
 			Boolean lookupAttribute = attribute.getBoolean(LOOKUP_ATTRIBUTE);
 			Boolean labelAttribute = attribute.getBoolean(LABEL_ATTRIBUTE);
+			Boolean readOnly = attribute.getBoolean(READ_ONLY);
 
 			if (attributeNillable != null) defaultAttributeMetaData.setNillable(attributeNillable);
 			if (attributeAuto != null) defaultAttributeMetaData.setAuto(attributeAuto);
@@ -292,6 +294,7 @@ public class EmxImportServiceImpl implements EmxImporterService
 			if (refEntityName != null) defaultAttributeMetaData.setRefEntity(entities.get(refEntityName));
 			if (lookupAttribute != null) defaultAttributeMetaData.setLookupAttribute(lookupAttribute);
 			if (labelAttribute != null) defaultAttributeMetaData.setLabelAttribute(labelAttribute);
+			if (readOnly != null) defaultAttributeMetaData.setReadOnly(readOnly);
 
 			defaultAttributeMetaData.setLabel(attribute.getString(LABEL));
 			defaultAttributeMetaData.setDescription(attribute.getString(DESCRIPTION));

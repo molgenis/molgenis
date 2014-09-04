@@ -4,8 +4,8 @@ import java.util.Locale;
 
 import org.molgenis.AppConfig;
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AggregateableCrudRepositorySecurityDecorator;
 import org.molgenis.data.CrudRepository;
+import org.molgenis.data.CrudRepositorySecurityDecorator;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -71,6 +71,6 @@ public class MysqlRepositoryCollectionTest extends AbstractTestNGSpringContextTe
 		coll.add(meta);
 		Repository repo = coll.getRepositoryByEntityName("test");
 		Assert.assertNotNull(repo);
-		Assert.assertTrue(repo instanceof AggregateableCrudRepositorySecurityDecorator);
+		Assert.assertTrue(repo instanceof CrudRepositorySecurityDecorator);
 	}
 }

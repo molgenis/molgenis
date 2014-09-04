@@ -23,16 +23,16 @@ import org.springframework.stereotype.Repository;
 public class ${JavaName(entity)}Repository extends JpaRepository
 {	
 	@Autowired
-	public ${JavaName(entity)}Repository(EntityValidator entityValidator, QueryResolver queryResolver)
+	public ${JavaName(entity)}Repository(QueryResolver queryResolver)
 	{
-		super(new ${JavaName(entity)}MetaData(), entityValidator, queryResolver);
+		super(new ${JavaName(entity)}MetaData(), queryResolver);
 	}
 	
     /**
 	 * For testing purposes
 	 */
-	public ${JavaName(entity)}Repository(EntityManager entityManager, EntityValidator entityValidator, QueryResolver queryResolver)
+	public ${JavaName(entity)}Repository(EntityManager entityManager, QueryResolver queryResolver)
 	{
-		super(entityManager, new ${JavaName(entity)}MetaData(), entityValidator, queryResolver);
+		super(entityManager, new ${JavaName(entity)}MetaData(), queryResolver);
 	}
 }

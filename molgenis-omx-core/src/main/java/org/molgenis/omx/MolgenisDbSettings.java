@@ -139,6 +139,7 @@ public class MolgenisDbSettings implements MolgenisSettings
 	}
 
 	@Override
+	@RunAsSystem
 	public boolean propertyExists(String key)
 	{
 		long count = dataService.count(RuntimeProperty.ENTITY_NAME,

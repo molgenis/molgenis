@@ -10,9 +10,9 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
-import org.molgenis.data.AggregateableCrudRepositorySecurityDecorator;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
+import org.molgenis.data.CrudRepositorySecurityDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -23,6 +23,8 @@ import org.molgenis.data.elasticsearch.ElasticsearchRepositoryDecorator;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.validation.EntityAttributesValidator;
+import org.molgenis.data.validation.RepositoryValidationDecorator;
 import org.molgenis.elasticsearch.ElasticSearchService;
 import org.molgenis.model.MolgenisModelException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -137,6 +139,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		addAttributeToTable(AttributeMetaDataMetaData.RANGE_MAX);
 		addAttributeToTable(AttributeMetaDataMetaData.ENUM_OPTIONS);
 		addAttributeToTable(AttributeMetaDataMetaData.LABEL_ATTRIBUTE);
+		addAttributeToTable(AttributeMetaDataMetaData.READ_ONLY);
 	}
 
 	private void addAttributeToTable(String attributeName)
@@ -246,7 +249,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 			repository.create();
 
 			repositories.put(emd.getName(), repository);
-			dataService.addRepository(new AggregateableCrudRepositorySecurityDecorator(repository));
+			dataService.addRepository(new CrudRepositorySecurityDecorator(repository));
 		}
 
 		// Add to entities and attributes tables, this should be done AFTER the creation of new tables because create
@@ -422,7 +425,8 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		{
 			decoratedRepository = new ElasticsearchRepositoryDecorator(decoratedRepository, elasticSearchService);
 		}
-		decoratedRepository = new AggregateableCrudRepositorySecurityDecorator(decoratedRepository);
+		decoratedRepository = new CrudRepositorySecurityDecorator(new RepositoryValidationDecorator(
+				decoratedRepository, new EntityAttributesValidator()));
 		return decoratedRepository;
 	}
 }
