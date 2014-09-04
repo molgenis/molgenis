@@ -21,6 +21,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.Iterables;
@@ -32,6 +33,12 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired
 	MysqlRepositoryCollection coll;
+
+	@BeforeMethod
+	public void reset()
+	{
+		coll.resetMetaDataRepositories();
+	}
 
 	@Test
 	public void testAggregates()
@@ -220,7 +227,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		String idAttributeName = "id";
 		final String exampleId = "id123";
 
-		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("test");
+		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("testiter");
 		entityMetaData.setIdAttribute(idAttributeName);
 		entityMetaData.setLabelAttribute(idAttributeName);
 		DefaultAttributeMetaData idAttributeMetaData = new DefaultAttributeMetaData(idAttributeName);
