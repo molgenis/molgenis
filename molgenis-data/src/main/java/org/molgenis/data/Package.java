@@ -6,11 +6,8 @@ package org.molgenis.data;
  */
 public interface Package
 {
-	/**
-	 * Get names of all the entities in this source
-	 */
-	Iterable<String> getEntityNames();
-	
+	public static final String DEFAULT_PACKAGE_NAME = "default";
+
 	/**
 	 * Gets the name of this package
 	 * @return

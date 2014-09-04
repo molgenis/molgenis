@@ -1,6 +1,5 @@
 package org.molgenis.omx.protocol;
 
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.*;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.BOOL;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.INT;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
@@ -29,14 +28,14 @@ public class OmxLookupTableEntityMetaData extends AbstractEntityMetaData
 		if (categoricalFeature == null) throw new IllegalArgumentException("categoricalFeature is null");
 		this.categoricalFeature = categoricalFeature;
 	}
-	
+
 	public static final String createOmxLookupTableEntityMetaDataName(String categoricalFeatureIdentifier)
 	{
 		return categoricalFeatureIdentifier + POSTFIX_OMXLOOKUPTABLE_NAME; // yes, Identifier
 	}
 
 	@Override
-	public String getName()
+	public String getFullyQualifiedName()
 	{
 		return createOmxLookupTableEntityMetaDataName(categoricalFeature.getIdentifier()); // yes, Identifier
 	}
