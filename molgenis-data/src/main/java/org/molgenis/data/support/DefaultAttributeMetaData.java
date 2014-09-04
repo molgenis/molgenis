@@ -1,5 +1,6 @@
 package org.molgenis.data.support;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes;
@@ -53,6 +54,44 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		if (name == null) throw new IllegalArgumentException("Name cannot be null");
 		this.name = name;
 		this.fieldType = MolgenisFieldTypes.STRING;
+	}
+
+	/**
+	 * Copy constructor
+	 * 
+	 * @param attributeMetaData
+	 */
+	public DefaultAttributeMetaData(AttributeMetaData attributeMetaData)
+	{
+		this.name = attributeMetaData.getName();
+		this.fieldType = attributeMetaData.getDataType();
+		this.description = attributeMetaData.getDescription();
+		this.nillable = attributeMetaData.isNillable();
+		this.readOnly = attributeMetaData.isReadonly();
+		this.defaultValue = attributeMetaData.getDefaultValue();
+		this.idAttribute = attributeMetaData.isIdAtrribute();
+		this.labelAttribute = attributeMetaData.isLabelAttribute();
+		this.lookupAttribute = attributeMetaData.isLookupAttribute();
+		EntityMetaData refEntity = attributeMetaData.getRefEntity();
+		this.refEntity = refEntity != null ? new DefaultEntityMetaData(refEntity) : null; // deep copy
+		this.label = attributeMetaData.getLabel();
+		this.visible = attributeMetaData.isVisible();
+		this.unique = attributeMetaData.isUnique();
+		this.auto = attributeMetaData.isAuto();
+		this.aggregateable = attributeMetaData.isAggregateable();
+		this.range = attributeMetaData.getRange();
+
+		// deep copy
+		Iterable<AttributeMetaData> attributeParts = attributeMetaData.getAttributeParts();
+		if (attributeParts != null)
+		{
+			List<AttributeMetaData> attributesMetaData = new ArrayList<AttributeMetaData>();
+			for (AttributeMetaData attributePart : attributeParts)
+			{
+				attributesMetaData.add(new DefaultAttributeMetaData(attributePart));
+			}
+			this.attributesMetaData = attributesMetaData;
+		}
 	}
 
 	@Override

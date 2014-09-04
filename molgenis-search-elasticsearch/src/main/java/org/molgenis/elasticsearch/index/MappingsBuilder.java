@@ -74,7 +74,7 @@ public class MappingsBuilder
 	 */
 	public static XContentBuilder buildMapping(Repository repository) throws IOException
 	{
-		return buildMapping(repository, true);
+		return buildMapping(repository.getEntityMetaData());
 	}
 
 	/**
@@ -88,11 +88,35 @@ public class MappingsBuilder
 	 */
 	public static XContentBuilder buildMapping(Repository repository, boolean storeSource) throws IOException
 	{
-		String documentType = MapperTypeSanitizer.sanitizeMapperType(repository.getName());
+		return buildMapping(repository.getEntityMetaData(), storeSource);
+	}
+
+	/**
+	 * Creates a Elasticsearch mapping for the given entity meta data, documents are stored in the index
+	 * 
+	 * @param entityMetaData
+	 * @return
+	 * @throws IOException
+	 */
+	public static XContentBuilder buildMapping(EntityMetaData entityMetaData) throws IOException
+	{
+		return buildMapping(entityMetaData, true);
+	}
+
+	/**
+	 * Creates a Elasticsearch mapping for the given entity meta data
+	 * 
+	 * @param entityMetaData
+	 * @param storeSource
+	 *            whether or not documents are stored in the index
+	 * @return
+	 * @throws IOException
+	 */
+	public static XContentBuilder buildMapping(EntityMetaData meta, boolean storeSource) throws IOException
+	{
+		String documentType = MapperTypeSanitizer.sanitizeMapperType(meta.getName());
 		XContentBuilder jsonBuilder = XContentFactory.jsonBuilder().startObject().startObject(documentType)
 				.startObject("_source").field("enabled", storeSource).endObject().startObject("properties");
-
-		EntityMetaData meta = repository.getEntityMetaData();
 
 		for (AttributeMetaData attr : meta.getAtomicAttributes())
 		{
