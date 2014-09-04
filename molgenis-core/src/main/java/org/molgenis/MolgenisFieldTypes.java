@@ -48,6 +48,7 @@ public class MolgenisFieldTypes
 	public static final FieldType STRING = new StringField();
 	public static final FieldType INT = new IntField();
 	public static final FieldType DECIMAL = new DecimalField();
+    public static final FieldType LONG = new LongField();
 	public static final FieldType BOOL = new BoolField();
 	public static final FieldType TEXT = new TextField();
 	public static final FieldType XREF = new XrefField();

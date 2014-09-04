@@ -80,6 +80,11 @@ public class EmbeddedElasticSearchServiceFactory implements Closeable
 		return new ElasticSearchService(client, indexName, dataService);
 	}
 
+	public Client getClient()
+	{
+		return client;
+	}
+
 	@Override
 	public void close() throws IOException
 	{

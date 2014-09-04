@@ -21,7 +21,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class EmbeddedElasticSearchConfig
 {
-	@Autowired
+    private static final String MOLGENIS_INDEX_NAME = "molgenis";
+
+    @Autowired
 	private DataService dataService;
 
 	@Bean(destroyMethod = "close")
@@ -47,6 +49,12 @@ public class EmbeddedElasticSearchConfig
 		}
 
 		return new EmbeddedElasticSearchServiceFactory(Collections.singletonMap("path.data", molgenisDataDirStr));
+	}
+
+	@Bean
+	public ElasticSearchClient client()
+	{
+		return new ElasticSearchClient(embeddedElasticSearchServiceFactory().getClient(), MOLGENIS_INDEX_NAME);
 	}
 
 	@Bean

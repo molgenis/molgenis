@@ -25,9 +25,9 @@ import org.molgenis.search.SearchResult;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class ElasticSearchRepositoryTest
+public class ElasticsearchRepositoryDecoratorTest
 {
-	private ElasticSearchRepository elasticSearchRepository;
+	private ElasticsearchRepositoryDecorator elasticSearchRepository;
 	private ElasticSearchService elasticSearchService;
 	private CrudRepository repository;
 
@@ -36,14 +36,14 @@ public class ElasticSearchRepositoryTest
 	{
 		elasticSearchService = mock(ElasticSearchService.class);
 		repository = mock(CrudRepository.class);
-		elasticSearchRepository = new ElasticSearchRepository(elasticSearchService, repository);
+		elasticSearchRepository = new ElasticsearchRepositoryDecorator(elasticSearchService, repository);
 	}
 
 	@SuppressWarnings("resource")
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void ElasticSearchRepository()
 	{
-		new ElasticSearchRepository(null, null);
+		new ElasticsearchRepositoryDecorator(null, null);
 	}
 
 	@Test
@@ -250,7 +250,7 @@ public class ElasticSearchRepositoryTest
 	public void getUrl()
 	{
 		when(repository.getName()).thenReturn("entity");
-		assertEquals(elasticSearchRepository.getUrl(), "elasticsearch://entity/");
+		assertEquals(elasticSearchRepository.getUrl(), "elasticsearchdecorator://entity/");
 	}
 
 	@Test
