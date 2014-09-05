@@ -46,6 +46,7 @@ import org.molgenis.data.mysql.EntityMetaDataMetaData;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.TransformedEntity;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.IntField;
@@ -61,6 +62,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -81,6 +83,7 @@ public class EmxImportServiceImpl implements EmxImporterService
 	@Autowired
 	public EmxImportServiceImpl(DataService dataService)
 	{
+		if (dataService == null) throw new IllegalArgumentException("dataService is null");
 		logger.debug("MEntityImportServiceImpl created");
 		this.dataService = dataService;
 	}
@@ -483,7 +486,7 @@ public class EmxImportServiceImpl implements EmxImporterService
 				}
 
 				// import data
-				for (EntityMetaData entityMetaData : resolved)
+				for (final EntityMetaData entityMetaData : resolved)
 				{
 					String name = entityMetaData.getName();
 					Updateable updateable = (Updateable) store.getRepositoryByEntityName(name);
@@ -493,7 +496,16 @@ public class EmxImportServiceImpl implements EmxImporterService
 						// check to prevent nullpointer when importing metadata only
 						if (fileEntityRepository != null)
 						{
-							List<Entity> entities = Lists.newArrayList(fileEntityRepository);
+							// transforms entities so that they match the entity meta data of the output repository
+							List<Entity> entities = Lists.transform(Lists.newArrayList(fileEntityRepository),
+									new Function<Entity, Entity>()
+									{
+										@Override
+										public Entity apply(Entity entity)
+										{
+											return new TransformedEntity(entity, entityMetaData, dataService);
+										}
+									});
 							updateable.update(entities, dbAction);
 							report.getNrImportedEntitiesMap().put(name, entities.size());
 						}

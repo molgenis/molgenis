@@ -6,7 +6,6 @@ import static org.testng.Assert.assertEquals;
 
 import java.text.ParseException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -23,12 +22,6 @@ import org.testng.annotations.Test;
 
 public class EntityToSourceConverterTest
 {
-	@Test(expectedExceptions = IllegalArgumentException.class)
-	public void EntityToSourceConverter()
-	{
-		new EntityToSourceConverter(null);
-	}
-
 	@Test
 	public void convert() throws ParseException
 	{
@@ -37,10 +30,13 @@ public class EntityToSourceConverterTest
 
 		String idAttributeName = "id";
 
-		String refLabelAttributeName = "label";
+		String refLabelAttributeName = "reflabel";
+		String refMrefAttributeName = "refmref";
 		DefaultEntityMetaData refEntityMetaData = new DefaultEntityMetaData(refEntityName);
 		refEntityMetaData.addAttribute(idAttributeName).setIdAttribute(true).setUnique(true);
 		refEntityMetaData.addAttribute(refLabelAttributeName).setLabelAttribute(true).setUnique(true);
+		refEntityMetaData.addAttribute(refMrefAttributeName).setDataType(MolgenisFieldTypes.MREF).setNillable(true)
+				.setRefEntity(refEntityMetaData);
 
 		String boolAttributeName = "xbool";
 		String categoricalAttributeName = "xcategorical";
@@ -103,6 +99,7 @@ public class EntityToSourceConverterTest
 		MapEntity refEntity1 = new MapEntity(idAttributeName);
 		refEntity1.set(idAttributeName, refIdValue1);
 		refEntity1.set(refLabelAttributeName, refLabelValue1);
+		refEntity1.set(refMrefAttributeName, Arrays.asList(refEntity0, refEntity1));
 
 		String idValue = "entityid";
 		Boolean boolValue = Boolean.TRUE;
@@ -150,6 +147,8 @@ public class EntityToSourceConverterTest
 		Map<String, List<Object>> expectedMrefValue = new HashMap<String, List<Object>>();
 		expectedMrefValue.put(idAttributeName, Arrays.<Object> asList(refIdValue0, refIdValue1));
 		expectedMrefValue.put(refLabelAttributeName, Arrays.<Object> asList(refLabelValue0, refLabelValue1));
+		expectedMrefValue.put(refMrefAttributeName,
+				Arrays.<Object> asList(Arrays.<Object> asList(refLabelValue0, refLabelValue1)));
 		DataService dataService = mock(DataService.class);
 		when(dataService.getEntityMetaData(entityName)).thenReturn(entityMetaData);
 		when(dataService.getEntityMetaData(refEntityName)).thenReturn(refEntityMetaData);
@@ -158,7 +157,6 @@ public class EntityToSourceConverterTest
 		expectedSource.put(idAttributeName, idValue);
 		expectedSource.put(boolAttributeName, boolValue);
 		expectedSource.put(categoricalAttributeName, categoricalValue.get(refLabelAttributeName));
-		expectedSource.put("key-" + categoricalAttributeName, categoricalValue.get(idAttributeName));
 		expectedSource.put(dateAttributeName, dateValueStr);
 		expectedSource.put(dateTimeAttributeName, dateTimeValueStr);
 		expectedSource.put(decimalAttributeName, decimalValue);
@@ -169,18 +167,14 @@ public class EntityToSourceConverterTest
 		expectedSource.put(intAttributeName, intValue);
 		expectedSource.put(longAttributeName, longValue);
 		expectedSource.put(mrefAttributeName, Arrays.asList(expectedMrefValue));
-		expectedSource.put("id-" + mrefAttributeName, expectedMrefValue.get(idAttributeName));
-		expectedSource.put("key-" + mrefAttributeName, expectedMrefValue.get(idAttributeName));
 		expectedSource.put(scriptAttributeName, scriptValue);
 		expectedSource.put(stringAttributeName, stringValue);
 		expectedSource.put(textAttributeName, textValue);
 		expectedSource.put(xrefAttributeName, xrefValue.get(refLabelAttributeName));
-		expectedSource.put("key-" + xrefAttributeName, xrefValue.get(idAttributeName));
 		expectedSource.put(compoundPart0AttributeName, compoundPart0Value);
 		expectedSource.put(compoundPart1AttributeName, compoundPart1Value);
-		expectedSource.put("_xrefvalue", Collections.emptySet());
 
-		Map<String, Object> source = new EntityToSourceConverter(dataService).convert(entity, entityMetaData);
+		Map<String, Object> source = new EntityToSourceConverter().convert(entity, entityMetaData);
 		assertEquals(source, expectedSource);
 	}
 }
