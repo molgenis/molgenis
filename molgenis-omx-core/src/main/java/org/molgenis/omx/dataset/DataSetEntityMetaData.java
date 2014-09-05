@@ -21,7 +21,7 @@ public class DataSetEntityMetaData extends AbstractEntityMetaData
 	}
 
 	@Override
-	public String getName()
+	public String getFullyQualifiedName()
 	{
 		return dataSet.getIdentifier(); // yes, getIdentifier and not getName
 	}

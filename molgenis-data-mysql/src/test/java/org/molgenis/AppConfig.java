@@ -9,6 +9,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.mysql.EmbeddedMysqlDatabaseBuilder;
 import org.molgenis.data.mysql.MysqlAttributeMetaDataRepository;
 import org.molgenis.data.mysql.MysqlEntityMetaDataRepository;
+import org.molgenis.data.mysql.MysqlPackageRepository;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
@@ -78,10 +79,16 @@ public class AppConfig
 	}
 
 	@Bean
+	public MysqlPackageRepository packageRepository()
+	{
+		return new MysqlPackageRepository(dataSource());
+	}
+
+	@Bean
 	public MysqlRepositoryCollection mysqlRepositoryCollection()
 	{
-		return new MysqlRepositoryCollection(dataSource(), dataService(), entityMetaDataRepository(),
-				attributeMetaDataRepository())
+		return new MysqlRepositoryCollection(dataSource(), dataService(), packageRepository(),
+				entityMetaDataRepository(), attributeMetaDataRepository())
 		{
 			@Override
 			protected MysqlRepository createMysqlRepsitory()

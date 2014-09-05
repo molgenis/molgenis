@@ -8,6 +8,7 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Package;
 import org.molgenis.data.Range;
 import org.molgenis.fieldtypes.FieldType;
 
@@ -171,6 +172,34 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 				return attributeMetaData.getDataType().getEnumType() != FieldTypeEnum.COMPOUND;
 			}
 		});
+	}
+
+	/**
+	 * Gets the name of the Package that this EntityMetaData resides in.
+	 * Derived from {@link #getFullyQualifiedName()}.
+	 */
+	@Override
+	public String getPackageName()
+	{
+		String fullyQualifiedName = getFullyQualifiedName();
+		int lastDotIndex = fullyQualifiedName.lastIndexOf('.');
+		if (lastDotIndex == -1)
+		{
+			return Package.DEFAULT_PACKAGE_NAME;
+		}
+		return fullyQualifiedName.substring(0, lastDotIndex);
+	}
+
+	/**
+	 * Gets the name of this EntityMetaData.
+	 * Derived from {@link #getFullyQualifiedName()}.
+	 */
+	@Override
+	public String getName()
+	{
+		String fullyQualifiedName = getFullyQualifiedName();
+		int lastDotIndex = fullyQualifiedName.lastIndexOf('.');
+		return fullyQualifiedName.substring(lastDotIndex + 1);
 	}
 
 	@Override
