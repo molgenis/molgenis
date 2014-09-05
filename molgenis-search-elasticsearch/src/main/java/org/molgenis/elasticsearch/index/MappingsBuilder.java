@@ -7,8 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
+import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
@@ -35,6 +37,8 @@ import org.molgenis.elasticsearch.util.MapperTypeSanitizer;
  */
 public class MappingsBuilder
 {
+	private static final Logger logger = Logger.getLogger(MappingsBuilder.class);
+
 	private static final String ENTITY_NAME = "name";
 	private static final String ENTITY_LABEL = "label";
 	private static final String ENTITY_DESCRIPTION = "description";
@@ -62,38 +66,13 @@ public class MappingsBuilder
 	private static final String ATTRIBUTE_READONLY = "readonly";
 	private static final String ATTRIBUTE_NILLABLE = "nillable";
 	private static final String ATTRIBUTE_DATA_TYPE = "dataType";
-
 	public static final String FIELD_NOT_ANALYZED = "sort";
 
-	/**
-	 * Creates entity meta data for the given repository, documents are stored in the index
-	 * 
-	 * @param repository
-	 * @return
-	 * @throws IOException
-	 */
 	public static XContentBuilder buildMapping(Repository repository) throws IOException
 	{
-		return buildMapping(repository.getEntityMetaData());
+		return buildMapping(repository);
 	}
 
-	public static XContentBuilder buildMapping(EntityMetaData meta) throws IOException
-	{
-		String documentType = MapperTypeSanitizer.sanitizeMapperType(meta.getName());
-		XContentBuilder jsonBuilder = XContentFactory.jsonBuilder().startObject().startObject(documentType);
-
-		return buildMapping(repository, true);
-	}
-
-	/**
-	 * Creates entity meta data for the given repository
-	 * 
-	 * @param repository
-	 * @param storeSource
-	 *            whether or not documents are stored in the index
-	 * @return
-	 * @throws IOException
-	 */
 	public static XContentBuilder buildMapping(Repository repository, boolean storeSource) throws IOException
 	{
 		return buildMapping(repository.getEntityMetaData(), storeSource);
@@ -126,11 +105,6 @@ public class MappingsBuilder
 		XContentBuilder jsonBuilder = XContentFactory.jsonBuilder().startObject().startObject(documentType)
 				.startObject("_source").field("enabled", storeSource).endObject().startObject("properties");
 
-		EntityMetaData meta = repository.getEntityMetaData();
-
-        // create elasticsearch mapping
-        jsonBuilder.startObject("properties");
-        
 		for (AttributeMetaData attr : meta.getAtomicAttributes())
 		{
 			String esType = getType(attr);
@@ -189,7 +163,7 @@ public class MappingsBuilder
 			}
 		}
 
-		jsonBuilder.endObject().endObject().endObject();
+		jsonBuilder.endObject(); // properties
 
 		// create custom meta data
 		jsonBuilder.startObject("_meta");

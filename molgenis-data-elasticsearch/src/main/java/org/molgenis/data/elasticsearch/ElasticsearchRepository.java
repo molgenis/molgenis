@@ -149,8 +149,12 @@ public class ElasticsearchRepository implements CrudRepository, Aggregateable, M
 	{
 		SearchResponse searchResponse = createSearchRequest(q).setSize(1).execute().actionGet();
 		SearchHits searchHits = searchResponse.getHits();
-		SearchHit searchHit = searchHits.getHits()[0];
-		return new ElasticsearchEntity(searchHit, getEntityMetaData(), dataService);
+		if (searchHits.getHits().length > 0)
+		{
+			SearchHit searchHit = searchHits.getHits()[0];
+			return new ElasticsearchEntity(searchHit, getEntityMetaData(), dataService);
+		}
+		return null;
 	}
 
 	@Override

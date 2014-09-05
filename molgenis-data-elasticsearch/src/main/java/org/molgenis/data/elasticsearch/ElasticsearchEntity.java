@@ -116,7 +116,7 @@ public class ElasticsearchEntity extends AbstractEntity
 	@Override
 	public void set(String attributeName, Object value)
 	{
-		throw new UnsupportedOperationException();
+		source.put(attributeName, value);
 	}
 
 	@Override

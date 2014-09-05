@@ -18,7 +18,6 @@ import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Queryable;
 import org.molgenis.data.Repository;
@@ -49,19 +48,6 @@ public class ElasticsearchRepositoryDecorator implements CrudRepository, Aggrega
 		if (elasticSearchService == null) throw new IllegalArgumentException("elasticSearchService is null");
 		this.repository = repository;
 		this.elasticSearchService = elasticSearchService;
-
-		// persist entity meta data if entity meta data does not exist in elasticsearch index
-		if (!elasticSearchService.hasMapping(repository))
-		{
-			try
-			{
-				elasticSearchService.createMappings(repository, false);
-			}
-			catch (IOException e)
-			{
-				throw new MolgenisDataException(e);
-			}
-		}
 	}
 
 	@Override

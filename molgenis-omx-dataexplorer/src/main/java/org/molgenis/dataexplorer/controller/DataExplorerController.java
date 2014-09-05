@@ -61,7 +61,6 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-import org.springframework.web.servlet.ModelAndView;
 
 /**
  * Controller class for the data explorer.
@@ -109,15 +108,18 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String SOURCES = "genomebrowser.init.sources";
 	public static final String BROWSERLINKS = "genomebrowser.init.browserLinks";
 	public static final String AGGREGATES_NORESULTS_MESSAGE = "plugin.dataexplorer.mod.aggregates.noresults";
+    public static final String HIGHLIGHTREGION = "genomebrowser.init.highlightRegion";
 
-	public static final String KEY_DATAEXPLORER_EDITABLE = "plugin.dataexplorer.editable";
+    public static final String KEY_DATAEXPLORER_EDITABLE = "plugin.dataexplorer.editable";
 	public static final String KEY_DATAEXPLORER_ROW_CLICKABLE = "plugin.dataexplorer.rowClickable";
 
 	private static final boolean DEFAULT_VAL_DATAEXPLORER_EDITABLE = false;
 	private static final boolean DEFAULT_VAL_DATAEXPLORER_ROW_CLICKABLE = false;
 	private static final boolean DEFAULT_VAL_KEY_HIDE_SELECT = true;
+    private static final boolean DEFAULT_VAL_KEY_HIGLIGHTREGION = false;
 
-	@Autowired
+
+    @Autowired
 	private DataService dataService;
 
 	@Autowired
@@ -206,8 +208,9 @@ public class DataExplorerController extends MolgenisPluginController
 			model.addAttribute("chains", molgenisSettings.getProperty(CHAINS));
 			model.addAttribute("sources", molgenisSettings.getProperty(SOURCES));
 			model.addAttribute("browserLinks", molgenisSettings.getProperty(BROWSERLINKS));
+            model.addAttribute("showHighlight", String.valueOf(molgenisSettings.getBooleanProperty(HIGHLIGHTREGION, DEFAULT_VAL_KEY_HIGLIGHTREGION)));
 
-			model.addAttribute("genomebrowser_start_list",
+            model.addAttribute("genomebrowser_start_list",
 					molgenisSettings.getProperty(GenomeConfig.GENOMEBROWSER_START, "POS"));
 			model.addAttribute("genomebrowser_chrom_list",
 					molgenisSettings.getProperty(GenomeConfig.GENOMEBROWSER_CHROM, "CHROM"));

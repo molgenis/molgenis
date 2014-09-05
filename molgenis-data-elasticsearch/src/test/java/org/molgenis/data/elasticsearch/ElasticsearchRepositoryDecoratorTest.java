@@ -36,7 +36,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	{
 		elasticSearchService = mock(ElasticSearchService.class);
 		repository = mock(CrudRepository.class);
-		elasticSearchRepository = new ElasticsearchRepositoryDecorator(elasticSearchService, repository);
+		elasticSearchRepository = new ElasticsearchRepositoryDecorator(repository, elasticSearchService);
 	}
 
 	@SuppressWarnings("resource")

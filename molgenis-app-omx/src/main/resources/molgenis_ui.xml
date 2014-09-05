@@ -72,5 +72,6 @@
 		<plugin id="useraccount" name="Account" url="useraccount"/>
 		<plugin id="scripts" name="Scripts" url="scripts" />
         <plugin id="feedback" name="Feedback" url="feedback"/>
+        <plugin id="geneticrepositorymerger" name="Merge" url="geneticrepositorymerger"/>
 	</menu>
 </molgenis>

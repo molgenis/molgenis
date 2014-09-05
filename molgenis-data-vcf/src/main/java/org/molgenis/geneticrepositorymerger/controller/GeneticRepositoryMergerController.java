@@ -6,17 +6,18 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.vcf.RepositoryMerger;
-import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.data.merge.RepositoryMerger;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.search.SearchService;
-import org.molgenis.security.core.MolgenisPermissionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RequestMethod;
 
-import java.util.*;
+import java.util.List;
+import java.util.ArrayList;
 
 import static org.molgenis.geneticrepositorymerger.controller.GeneticRepositoryMergerController.URI;
 
@@ -28,35 +29,36 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 	public static final String ID = "geneticrepositorymerger";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
-	public static final DefaultAttributeMetaData CHROM = new DefaultAttributeMetaData("CHROM", MolgenisFieldTypes.FieldTypeEnum.STRING);
-	public static final DefaultAttributeMetaData POS = new DefaultAttributeMetaData("POS", MolgenisFieldTypes.FieldTypeEnum.STRING);
-	public static final DefaultAttributeMetaData REF = new DefaultAttributeMetaData("REF", MolgenisFieldTypes.FieldTypeEnum.STRING);
-	public static final DefaultAttributeMetaData ALT = new DefaultAttributeMetaData("ALT", MolgenisFieldTypes.FieldTypeEnum.STRING);
-    private final ArrayList<AttributeMetaData> commonAttributes;
+	public static final DefaultAttributeMetaData CHROM = new DefaultAttributeMetaData("#CHROM",
+			MolgenisFieldTypes.FieldTypeEnum.STRING);
+	public static final DefaultAttributeMetaData POS = new DefaultAttributeMetaData("POS",
+			MolgenisFieldTypes.FieldTypeEnum.STRING);
+	public static final DefaultAttributeMetaData REF = new DefaultAttributeMetaData("REF",
+			MolgenisFieldTypes.FieldTypeEnum.STRING);
+	public static final DefaultAttributeMetaData ALT = new DefaultAttributeMetaData("ALT",
+			MolgenisFieldTypes.FieldTypeEnum.STRING);
 
-    @Autowired
-    private RepositoryMerger repositoryMerger;
+	public static final String VKGL = "VKGL";
 
-    @Autowired
-	private MolgenisPermissionService molgenisPermissionService;
+	private final ArrayList<AttributeMetaData> commonAttributes;
 
 	@Autowired
-	private SearchService searchService;
+	private RepositoryMerger repositoryMerger;
 
 	@Autowired
 	private DataService dataService;
 
 	@Autowired
-	private MolgenisSettings molgenisSettings;
+	private SearchService searchService;
 
 	public GeneticRepositoryMergerController()
 	{
-        super(URI);
-        commonAttributes = new ArrayList<AttributeMetaData>();
-        commonAttributes.add(CHROM);
-        commonAttributes.add(POS);
-        commonAttributes.add(REF);
-        commonAttributes.add(ALT);
+		super(URI);
+		commonAttributes = new ArrayList<AttributeMetaData>();
+		commonAttributes.add(CHROM);
+		commonAttributes.add(POS);
+		commonAttributes.add(REF);
+		commonAttributes.add(ALT);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -68,8 +70,19 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 
 	@RequestMapping(method = RequestMethod.POST, value = "mergeRepositories")
 	@ResponseStatus(HttpStatus.OK)
-	public void merge(@RequestParam String mergedRepositoryName)
+	public void merge()
 	{
+		if (dataService.hasRepository(VKGL))
+		{
+			if (searchService.documentTypeExists(VKGL))
+			{
+				searchService.deleteDocumentsByType(VKGL);
+			}
+			else
+			{
+				throw new RuntimeException("Repository " + VKGL + " is not a ElasticSearchRepository");
+			}
+		}
 		dataService.getEntityNames();
 		List<Repository> geneticRepositories = new ArrayList<Repository>();
 		for (String name : dataService.getEntityNames())
@@ -79,9 +92,12 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 					&& dataService.getEntityMetaData(name).getAttribute(REF.getName()) != null
 					&& dataService.getEntityMetaData(name).getAttribute(ALT.getName()) != null)
 			{
-                 geneticRepositories.add(dataService.getRepositoryByEntityName(name));
+				if (!name.equals(VKGL))
+				{
+					geneticRepositories.add(dataService.getRepositoryByEntityName(name));
+				}
 			}
 		}
-        repositoryMerger.merge(geneticRepositories, commonAttributes, mergedRepositoryName);
+		repositoryMerger.merge(geneticRepositories, commonAttributes, VKGL);
 	}
 }
