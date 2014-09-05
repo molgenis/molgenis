@@ -174,7 +174,7 @@
 	 * @memberOf molgenis.table.cell
 	 */
 	function renderCell(cell, entity, attribute, settings) {
-		if(settings.editenabled)
+		if(settings.editenabled && !attribute.readOnly)
 			renderEditCell(cell, entity, attribute, settings);
 		else
 			renderViewCell(cell, entity, attribute, settings);
