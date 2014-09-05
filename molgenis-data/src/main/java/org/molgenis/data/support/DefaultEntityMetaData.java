@@ -12,7 +12,7 @@ import org.molgenis.util.CaseInsensitiveLinkedHashMap;
 
 public class DefaultEntityMetaData extends AbstractEntityMetaData
 {
-	private final String name;
+	private final String fullyQualifiedName;
 	private final Map<String, AttributeMetaData> attributes = new CaseInsensitiveLinkedHashMap<AttributeMetaData>();
 	private final Class<? extends Entity> entityClass;
 	private String label;
@@ -20,23 +20,23 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 	private String description;
 	private EntityMetaData extends_;
 
-	public DefaultEntityMetaData(String name)
+	public DefaultEntityMetaData(String fullyQualifiedName)
 	{
-		this(name, Entity.class);
+		this(fullyQualifiedName, Entity.class);
 	}
 
-	public DefaultEntityMetaData(String name, Class<? extends Entity> entityClass)
+	public DefaultEntityMetaData(String fullyQualifiedName, Class<? extends Entity> entityClass)
 	{
-		if (name == null) throw new IllegalArgumentException("Name cannot be null");
+		if (fullyQualifiedName == null) throw new IllegalArgumentException("Name cannot be null");
 		if (entityClass == null) throw new IllegalArgumentException("EntityClass cannot be null");
-		this.name = name;
+		this.fullyQualifiedName = fullyQualifiedName;
 		this.entityClass = entityClass;
 	}
 
 	@Override
-	public String getName()
+	public String getFullyQualifiedName()
 	{
-		return name;
+		return fullyQualifiedName;
 	}
 
 	public void addAttributeMetaData(AttributeMetaData attributeMetaData)
@@ -85,7 +85,7 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 	@Override
 	public String getLabel()
 	{
-		return label != null ? label : name;
+		return label != null ? label : getName();
 	}
 
 	public DefaultEntityMetaData setLabel(String label)
@@ -117,7 +117,7 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 	{
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((fullyQualifiedName == null) ? 0 : fullyQualifiedName.hashCode());
 		return result;
 	}
 
@@ -128,11 +128,11 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
 		DefaultEntityMetaData other = (DefaultEntityMetaData) obj;
-		if (name == null)
+		if (fullyQualifiedName == null)
 		{
-			if (other.name != null) return false;
+			if (other.fullyQualifiedName != null) return false;
 		}
-		else if (!name.equals(other.name)) return false;
+		else if (!fullyQualifiedName.equals(other.fullyQualifiedName)) return false;
 		return true;
 	}
 
@@ -186,4 +186,5 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 		}
 		return strBuilder.toString();
 	}
+
 }

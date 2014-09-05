@@ -34,17 +34,20 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 	private final DataSource ds;
 	private final DataService dataService;
 	private Map<String, MysqlRepository> repositories;
+	private final MysqlPackageRepository packageRepository;
 	private final EntityMetaDataRepository entityMetaDataRepository;
 	private final AttributeMetaDataRepository attributeMetaDataRepository;
 
-	public MysqlRepositoryCollection(DataSource ds, DataService dataService,
+	public MysqlRepositoryCollection(DataSource ds, DataService dataService, MysqlPackageRepository packageRepository,
 			EntityMetaDataRepository entityMetaDataRepository, AttributeMetaDataRepository attributeMetaDataRepository)
 	{
 		this.ds = ds;
 		this.dataService = dataService;
+		this.packageRepository = packageRepository;
 		this.entityMetaDataRepository = entityMetaDataRepository;
 		this.attributeMetaDataRepository = attributeMetaDataRepository;
 
+		packageRepository.setRepositoryCollection(this);
 		entityMetaDataRepository.setRepositoryCollection(this);
 		attributeMetaDataRepository.setRepositoryCollection(this);
 
@@ -65,23 +68,25 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 	{
 		repositories = new LinkedHashMap<String, MysqlRepository>();
 
-		// create meta data table
-		if (!tableExists(EntityMetaDataMetaData.ENTITY_NAME))
+		// create meta data tables
+		if (!tableExists(PackageMetaData.ENTITY_NAME))
 		{
-			entityMetaDataRepository.create();
+			packageRepository.create();
 
-			if (!tableExists(AttributeMetaDataMetaData.ENTITY_NAME))
+			if (!tableExists(EntityMetaDataMetaData.ENTITY_NAME))
 			{
-				attributeMetaDataRepository.create();
+				entityMetaDataRepository.create();
+
+				if (!tableExists(AttributeMetaDataMetaData.ENTITY_NAME))
+				{
+					attributeMetaDataRepository.create();
+				}
 			}
 		}
 		else if (attributeMetaDataRepository.count() == 0)
 		{
 			// Update table structure to prevent errors is apps that don't use emx
-			attributeMetaDataRepository.drop();
-			entityMetaDataRepository.drop();
-			entityMetaDataRepository.create();
-			attributeMetaDataRepository.create();
+			recreateMetaDataRepositories();
 		}
 
 		// Upgrade old databases
@@ -101,6 +106,19 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		}
 
 		registerMysqlRepos();
+	}
+
+	/**
+	 * Drops and creates the metadata repositories.
+	 */
+	public void recreateMetaDataRepositories()
+	{
+		attributeMetaDataRepository.drop();
+		entityMetaDataRepository.drop();
+		packageRepository.drop();
+		packageRepository.create();
+		entityMetaDataRepository.create();
+		attributeMetaDataRepository.create();
 	}
 
 	public void registerMysqlRepos()

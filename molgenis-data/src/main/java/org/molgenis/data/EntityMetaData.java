@@ -7,7 +7,22 @@ package org.molgenis.data;
 public interface EntityMetaData
 {
 	/**
-	 * Every EntityMetaData has a unique name
+	 * Every EntityMetaData has a unique name. This is the fully qualified name, including the package name. If no
+	 * package name is included, the entity resides in the default package.
+	 */
+	String getFullyQualifiedName();
+
+	/**
+	 * Gets the package name.
+	 * 
+	 * @return
+	 */
+	String getPackageName();
+
+	/**
+	 * Gets the entity name.
+	 * 
+	 * @return
 	 */
 	String getName();
 
