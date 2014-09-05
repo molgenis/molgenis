@@ -406,19 +406,25 @@ public class ElasticSearchService implements SearchService
 
 	public void createMappings(Repository repository, boolean storeSource) throws IOException
 	{
-		XContentBuilder jsonBuilder = MappingsBuilder.buildMapping(repository, storeSource);
+		createMappings(repository.getEntityMetaData(), storeSource);
+	}
+
+	public void createMappings(EntityMetaData entityMetaData, boolean storeSource) throws IOException
+	{
+		XContentBuilder jsonBuilder = MappingsBuilder.buildMapping(entityMetaData, storeSource);
 		LOG.info("Going to create mapping [" + jsonBuilder.string() + "]");
+		String entityName = entityMetaData.getName();
 
 		PutMappingResponse response = client.admin().indices().preparePutMapping(indexName)
-				.setType(sanitizeMapperType(repository.getName())).setSource(jsonBuilder).execute().actionGet();
+				.setType(sanitizeMapperType(entityName)).setSource(jsonBuilder).execute().actionGet();
 
 		if (!response.isAcknowledged())
 		{
-			throw new ElasticsearchException("Creation of mapping for documentType [" + repository.getName()
+			throw new ElasticsearchException("Creation of mapping for documentType [" + entityName
 					+ "] failed. Response=" + response);
 		}
 
-		LOG.info("Mapping for documentType [" + repository.getName() + "] created");
+		LOG.info("Mapping for documentType [" + entityName + "] created");
 	}
 
 	@Override

@@ -20,6 +20,10 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.elasticsearch.ElasticsearchRepositoryDecorator;
+import org.molgenis.data.elasticsearch.meta.ElasticsearchAttributeMetaDataRepository;
+import org.molgenis.data.elasticsearch.meta.ElasticsearchEntityMetaDataRepository;
+import org.molgenis.data.meta.AttributeMetaDataRepository;
+import org.molgenis.data.meta.EntityMetaDataRepository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
@@ -39,19 +43,20 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 	private final DataSource ds;
 	private final DataService dataService;
 	private Map<String, MysqlRepository> repositories;
-	private final EntityMetaDataRepository entityMetaDataRepository;
-	private final AttributeMetaDataRepository attributeMetaDataRepository;
+	private final MysqlEntityMetaDataRepository entityMetaDataRepository;
+	private final MysqlAttributeMetaDataRepository attributeMetaDataRepository;
 	private final ElasticSearchService elasticSearchService;
 
 	public MysqlRepositoryCollection(DataSource ds, DataService dataService,
-			EntityMetaDataRepository entityMetaDataRepository, AttributeMetaDataRepository attributeMetaDataRepository)
+			MysqlEntityMetaDataRepository entityMetaDataRepository,
+			MysqlAttributeMetaDataRepository attributeMetaDataRepository)
 	{
 		this(ds, dataService, entityMetaDataRepository, attributeMetaDataRepository, null);
 	}
 
 	public MysqlRepositoryCollection(DataSource ds, DataService dataService,
-			EntityMetaDataRepository entityMetaDataRepository, AttributeMetaDataRepository attributeMetaDataRepository,
-			ElasticSearchService elasticSearchService)
+			MysqlEntityMetaDataRepository entityMetaDataRepository,
+			MysqlAttributeMetaDataRepository attributeMetaDataRepository, ElasticSearchService elasticSearchService)
 	{
 		this.ds = ds;
 		this.dataService = dataService;
@@ -149,7 +154,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 			String sql;
 			try
 			{
-				sql = attributeMetaDataRepository.getAlterSql(AttributeMetaDataRepository.META_DATA
+				sql = attributeMetaDataRepository.getAlterSql(MysqlAttributeMetaDataRepository.META_DATA
 						.getAttribute(attributeName));
 			}
 			catch (MolgenisModelException e)
@@ -255,11 +260,12 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		// Add to entities and attributes tables, this should be done AFTER the creation of new tables because create
 		// table statements are ddl statements and when these are executed mysql does an implicit commit. So when the
 		// create table fails a rollback does not work anymore
-		entityMetaDataRepository.addEntityMetaData(emd);
+		getEntityMetaDataRepository().addEntityMetaData(emd);
 
 		// add attribute metadata
 		for (AttributeMetaData att : emd.getAttributes())
 		{
+			// do not use getAttributeMetaDataRepository(), actions already take place during addEntityMetaData
 			attributeMetaDataRepository.addAttributeMetaData(emd.getName(), att);
 		}
 
@@ -289,15 +295,16 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		Map<String, EntityMetaData> metadata = Maps.newLinkedHashMap();
 
 		// read the entity meta data
-		for (DefaultEntityMetaData entityMetaData : entityMetaDataRepository.getEntityMetaDatas())
+		for (EntityMetaData entityMetaData : entityMetaDataRepository.getEntityMetaDatas())
 		{
-			metadata.put(entityMetaData.getName(), entityMetaData);
+			DefaultEntityMetaData entityMetaDataWithAttributes = new DefaultEntityMetaData(entityMetaData);
+			metadata.put(entityMetaDataWithAttributes.getName(), entityMetaDataWithAttributes);
 
 			// add the attribute meta data of the entity
 			for (AttributeMetaData attributeMetaData : attributeMetaDataRepository
-					.getEntityAttributeMetaData(entityMetaData.getName()))
+					.getEntityAttributeMetaData(entityMetaDataWithAttributes.getName()))
 			{
-				entityMetaData.addAttributeMetaData(attributeMetaData);
+				entityMetaDataWithAttributes.addAttributeMetaData(attributeMetaData);
 			}
 		}
 
@@ -401,7 +408,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 			}
 			else
 			{
-				attributeMetaDataRepository.addAttributeMetaData(sourceEntityMetaData.getName(), attr);
+				getAttributeMetaDataRepository().addAttributeMetaData(sourceEntityMetaData.getName(), attr);
 				DefaultEntityMetaData defaultEntityMetaData = (DefaultEntityMetaData) repository.getEntityMetaData();
 				defaultEntityMetaData.addAttributeMetaData(attr);
 				repository.addAttribute(attr);
@@ -421,12 +428,41 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 	private Repository getSecuredAndOptionallyIndexedRepository(CrudRepository repository)
 	{
 		CrudRepository decoratedRepository = repository;
-		if (this.elasticSearchService != null)
+		if (elasticSearchService != null)
 		{
 			decoratedRepository = new ElasticsearchRepositoryDecorator(decoratedRepository, elasticSearchService);
 		}
 		decoratedRepository = new CrudRepositorySecurityDecorator(new RepositoryValidationDecorator(
 				decoratedRepository, new EntityAttributesValidator()));
 		return decoratedRepository;
+	}
+
+	/**
+	 * Returns an optionally indexed meta data repository for attributes
+	 * 
+	 * @return
+	 */
+	private AttributeMetaDataRepository getAttributeMetaDataRepository()
+	{
+		if (elasticSearchService != null)
+		{
+			return new ElasticsearchAttributeMetaDataRepository(attributeMetaDataRepository, dataService,
+					elasticSearchService);
+		}
+		return attributeMetaDataRepository;
+	}
+
+	/**
+	 * Returns an optionally indexed meta data repository for entities
+	 * 
+	 * @return
+	 */
+	private EntityMetaDataRepository getEntityMetaDataRepository()
+	{
+		if (elasticSearchService != null)
+		{
+			return new ElasticsearchEntityMetaDataRepository(entityMetaDataRepository, elasticSearchService);
+		}
+		return entityMetaDataRepository;
 	}
 }

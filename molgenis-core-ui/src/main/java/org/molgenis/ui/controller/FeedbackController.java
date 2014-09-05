@@ -86,7 +86,7 @@ public class FeedbackController extends AbstractStaticContentController
 	@RequestMapping(method = RequestMethod.POST)
 	public String submitFeedback(@Valid FeedbackForm form, @Valid @ModelAttribute CaptchaRequest captchaRequest) throws CaptchaException
 	{
-		if(!captchaService.validateCaptcha(captchaRequest.getCaptcha()))
+		if(!captchaService.consumeCaptcha(captchaRequest.getCaptcha()))
 		{
 			form.setErrorMessage("Invalid captcha.");
 			return "view-feedback";
