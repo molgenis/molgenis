@@ -12,7 +12,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Package;
 import org.molgenis.data.PackageRepository;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.validation.EntityValidator;
 
 /**
  * Repository to add and retrieve Package entities.
@@ -21,9 +20,9 @@ public class MysqlPackageRepository extends MysqlRepository implements PackageRe
 {
 	public static final PackageMetaData META_DATA = new PackageMetaData();
 
-	public MysqlPackageRepository(DataSource dataSource, EntityValidator entityValidator)
+	public MysqlPackageRepository(DataSource dataSource)
 	{
-		super(dataSource, entityValidator);
+		super(dataSource);
 		setMetaData(META_DATA);
 	}
 

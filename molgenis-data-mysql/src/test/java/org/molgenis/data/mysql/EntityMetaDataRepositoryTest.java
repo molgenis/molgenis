@@ -8,9 +8,11 @@ import static org.testng.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.List;
 
+import org.elasticsearch.common.collect.Lists;
 import org.junit.BeforeClass;
 import org.molgenis.AppConfig;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.meta.AttributeMetaDataRepository;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -26,7 +28,7 @@ public class EntityMetaDataRepositoryTest extends AbstractTestNGSpringContextTes
 	private AttributeMetaDataRepository attributeMetaDataRepository;
 
 	@Autowired
-	private EntityMetaDataRepository entityMetaDataRepository;
+	private MysqlEntityMetaDataRepository entityMetaDataRepository;
 
 	@Autowired
 	private MysqlPackageRepository packageRepository;
@@ -76,7 +78,7 @@ public class EntityMetaDataRepositoryTest extends AbstractTestNGSpringContextTes
 		DefaultEntityMetaData test2 = new DefaultEntityMetaData("test2");
 		entityMetaDataRepository.addEntityMetaData(test2);
 
-		List<DefaultEntityMetaData> meta = entityMetaDataRepository.getEntityMetaDatas();
+		List<EntityMetaData> meta = Lists.newArrayList(entityMetaDataRepository.getEntityMetaDatas());
 		assertNotNull(meta);
 		assertEquals(meta.size(), 3);
 		assertTrue(meta.contains(test));

@@ -4,6 +4,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -65,7 +66,9 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 		mockMvc = MockMvcBuilders.standaloneSetup(authenticationController)
 				.setMessageConverters(new FormHttpMessageConverter(), new GsonHttpMessageConverter()).build();
 
+		reset(captchaService);
 		when(captchaService.validateCaptcha("validCaptcha")).thenReturn(true);
+		when(captchaService.consumeCaptcha("validCaptcha")).thenReturn(true);
 		reset(accountService); // mocks in the config class are not resetted after each test
 	}
 
@@ -110,6 +113,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 				.andExpect(
 						content().string(
 								"{\"message\":\"" + AccountController.REGISTRATION_SUCCESS_MESSAGE_USER + "\"}"));
+		verify(captchaService).consumeCaptcha("validCaptcha");
 	}
 
 	@Test
@@ -126,6 +130,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 				.andExpect(
 						content().string(
 								"{\"message\":\"" + AccountController.REGISTRATION_SUCCESS_MESSAGE_ADMIN + "\"}"));
+		verify(captchaService).consumeCaptcha("validCaptcha");
 	}
 
 	@Test
@@ -136,6 +141,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 						.param("confirmPassword", "adminpw-invalid").param("lastname", "min").param("firstname", "ad")
 						.param("captcha", "validCaptcha").contentType(MediaType.APPLICATION_FORM_URLENCODED))
 				.andExpect(status().isBadRequest());
+		verify(captchaService, times(0)).consumeCaptcha("validCaptcha");
 	}
 
 	@Test
@@ -146,6 +152,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 						.param("confirmPassword", "adminpw-invalid-typo").param("email", "admin@molgenis.org")
 						.param("lastname", "min").param("firstname", "ad").param("captcha", "validCaptcha")
 						.contentType(MediaType.APPLICATION_FORM_URLENCODED)).andExpect(status().isBadRequest());
+		verify(captchaService, times(0)).consumeCaptcha("validCaptcha");
 	}
 
 	@Test

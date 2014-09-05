@@ -1,12 +1,15 @@
 package org.molgenis.data.mysql;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+import static org.testng.Assert.fail;
+
 import java.util.Arrays;
 
-import com.google.common.collect.Iterables;
 import org.molgenis.AppConfig;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -16,8 +19,6 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = AppConfig.class)
 public class MysqlUpdateInternalTest extends AbstractTestNGSpringContextTests
@@ -53,7 +54,7 @@ public class MysqlUpdateInternalTest extends AbstractTestNGSpringContextTests
 		entity.set("id", "123");
 		entity.set("name", "piet");
 
-		repo.updateInternal(Arrays.asList(entity), DatabaseAction.ADD);
+		repo.update(Arrays.asList(entity), DatabaseAction.ADD);
 		assertEquals(repo.count(), 1);
 
 		Entity entity1 = new MapEntity();
@@ -62,7 +63,7 @@ public class MysqlUpdateInternalTest extends AbstractTestNGSpringContextTests
 
 		try
 		{
-			repo.updateInternal(Arrays.asList(entity1), DatabaseAction.ADD);
+			repo.update(Arrays.asList(entity1), DatabaseAction.ADD);
 			fail("Should have thrown MolgenisDataException");
 		}
 		catch (MolgenisDataException e)
@@ -79,7 +80,7 @@ public class MysqlUpdateInternalTest extends AbstractTestNGSpringContextTests
 		entity.set("id", "123");
 		entity.set("name", "piet");
 
-		repo.updateInternal(Arrays.asList(entity), DatabaseAction.ADD);
+		repo.update(Arrays.asList(entity), DatabaseAction.ADD);
 		assertEquals(repo.count(), 1);
 		assertNull(repo.getEntityMetaData().getAttribute("extra"));
 
@@ -94,7 +95,7 @@ public class MysqlUpdateInternalTest extends AbstractTestNGSpringContextTests
 		entity2.set("name", "klaas");
 		entity2.set("extra", "extra");
 
-		repo.updateInternal(Arrays.asList(entity2), DatabaseAction.ADD);
+		repo.update(Arrays.asList(entity2), DatabaseAction.ADD);
 		assertEquals(repo.count(), 2);
 		assertNotNull(repo.getEntityMetaData().getAttribute("extra"));
 	}
@@ -105,12 +106,12 @@ public class MysqlUpdateInternalTest extends AbstractTestNGSpringContextTests
 		Entity entity = new MapEntity();
 		entity.set("id", "123");
 		entity.set("name", "piet");
-		repo.updateInternal(Arrays.asList(entity), DatabaseAction.ADD_IGNORE_EXISTING);
+		repo.update(Arrays.asList(entity), DatabaseAction.ADD_IGNORE_EXISTING);
 
 		Entity entity1 = new MapEntity();
 		entity1.set("id", "123");// Same id, should ignore it
 		entity1.set("name", "klaas");
-		repo.updateInternal(Arrays.asList(entity1), DatabaseAction.ADD_IGNORE_EXISTING);
+		repo.update(Arrays.asList(entity1), DatabaseAction.ADD_IGNORE_EXISTING);
 
 		assertEquals(repo.count(), 1);
 	}
@@ -121,7 +122,7 @@ public class MysqlUpdateInternalTest extends AbstractTestNGSpringContextTests
 		Entity entity1 = new MapEntity();
 		entity1.set("id", "123");
 		entity1.set("name", "piet");
-		repo.updateInternal(Arrays.asList(entity1), DatabaseAction.ADD);
+		repo.update(Arrays.asList(entity1), DatabaseAction.ADD);
 
 		Entity entity2 = new MapEntity();
 		entity2.set("id", "123");// Same id, should update it
@@ -131,7 +132,7 @@ public class MysqlUpdateInternalTest extends AbstractTestNGSpringContextTests
 		entity3.set("id", "345");// New id, should add it
 		entity3.set("name", "jaap");
 
-		repo.updateInternal(Arrays.asList(entity2, entity3), DatabaseAction.ADD_UPDATE_EXISTING);
+		repo.update(Arrays.asList(entity2, entity3), DatabaseAction.ADD_UPDATE_EXISTING);
 
 		assertEquals(repo.count(), 2);
 
@@ -146,12 +147,12 @@ public class MysqlUpdateInternalTest extends AbstractTestNGSpringContextTests
 		Entity entity = new MapEntity();
 		entity.set("id", "123");
 		entity.set("name", "piet");
-		repo.updateInternal(Arrays.asList(entity), DatabaseAction.ADD);
+		repo.update(Arrays.asList(entity), DatabaseAction.ADD);
 
 		Entity entity1 = new MapEntity();
 		entity1.set("id", "123");// Same id, should update it
 		entity1.set("name", "klaas");
-		repo.updateInternal(Arrays.asList(entity1), DatabaseAction.UPDATE);
+		repo.update(Arrays.asList(entity1), DatabaseAction.UPDATE);
 
 		assertEquals(repo.count(), 1);
 		Entity updated = repo.findOne("123");
@@ -164,7 +165,7 @@ public class MysqlUpdateInternalTest extends AbstractTestNGSpringContextTests
 
 		try
 		{
-			repo.updateInternal(Arrays.asList(entity3), DatabaseAction.UPDATE);
+			repo.update(Arrays.asList(entity3), DatabaseAction.UPDATE);
 			fail("Should have thrown MolgenisDataException");
 		}
 		catch (MolgenisDataException e)
@@ -180,7 +181,7 @@ public class MysqlUpdateInternalTest extends AbstractTestNGSpringContextTests
 		Entity entity = new MapEntity();
 		entity.set("id", "123");
 		entity.set("name", "piet");
-		repo.updateInternal(Arrays.asList(entity), DatabaseAction.ADD);
+		repo.update(Arrays.asList(entity), DatabaseAction.ADD);
 
 		Entity entity1 = new MapEntity();
 		entity1.set("id", "123");// Same id, should update it
@@ -190,7 +191,7 @@ public class MysqlUpdateInternalTest extends AbstractTestNGSpringContextTests
 		entity2.set("id", "345");// New id, should ignore it
 		entity2.set("name", "jaap");
 
-		repo.updateInternal(Arrays.asList(entity1), DatabaseAction.UPDATE_IGNORE_MISSING);
+		repo.update(Arrays.asList(entity1), DatabaseAction.UPDATE_IGNORE_MISSING);
 		assertEquals(repo.count(), 1);
 		Entity updated = repo.findOne("123");
 		assertNotNull(updated);
@@ -204,18 +205,18 @@ public class MysqlUpdateInternalTest extends AbstractTestNGSpringContextTests
 		entity.set("id", "123");
 		entity.set("name", "piet");
 
-		repo.updateInternal(Arrays.asList(entity), DatabaseAction.ADD);
+		repo.update(Arrays.asList(entity), DatabaseAction.ADD);
 		assertEquals(repo.count(), 1);
 
 		Entity entity1 = new MapEntity();
 		entity1.set("id", "123");
 
-		repo.updateInternal(Arrays.asList(entity1), DatabaseAction.REMOVE);
+		repo.update(Arrays.asList(entity1), DatabaseAction.REMOVE);
 		assertEquals(repo.count(), 0);
 
 		try
 		{
-			repo.updateInternal(Arrays.asList(entity1), DatabaseAction.REMOVE);
+			repo.update(Arrays.asList(entity1), DatabaseAction.REMOVE);
 			fail("Should have thrown MolgenisDataException");
 		}
 		catch (MolgenisDataException e)
@@ -231,7 +232,7 @@ public class MysqlUpdateInternalTest extends AbstractTestNGSpringContextTests
 		entity.set("id", "123");
 		entity.set("name", "piet");
 
-		repo.updateInternal(Arrays.asList(entity), DatabaseAction.ADD);
+		repo.update(Arrays.asList(entity), DatabaseAction.ADD);
 		assertEquals(repo.count(), 1);
 
 		Entity entity1 = new MapEntity();
@@ -240,7 +241,7 @@ public class MysqlUpdateInternalTest extends AbstractTestNGSpringContextTests
 		Entity entity2 = new MapEntity();
 		entity2.set("id", "123");
 
-		repo.updateInternal(Arrays.asList(entity1, entity2), DatabaseAction.REMOVE_IGNORE_MISSING);
+		repo.update(Arrays.asList(entity1, entity2), DatabaseAction.REMOVE_IGNORE_MISSING);
 		assertEquals(repo.count(), 0);
 	}
 

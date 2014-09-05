@@ -21,10 +21,10 @@ public class PackageRepositoryTest extends AbstractTestNGSpringContextTests
 	private MysqlPackageRepository packageRepository;
 
 	@Autowired
-	private EntityMetaDataRepository entityMetaDataRepository;
+	private MysqlEntityMetaDataRepository entityMetaDataRepository;
 
 	@Autowired
-	private AttributeMetaDataRepository attributeMetaDataRepository;
+	private MysqlAttributeMetaDataRepository attributeMetaDataRepository;
 
 	@BeforeMethod
 	@AfterClass

@@ -13,8 +13,8 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
-import org.molgenis.data.mysql.AttributeMetaDataRepository;
-import org.molgenis.data.mysql.EntityMetaDataRepository;
+import org.molgenis.data.mysql.MysqlAttributeMetaDataRepository;
+import org.molgenis.data.mysql.MysqlEntityMetaDataRepository;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -61,16 +61,17 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 	DataService dataService;
 
 	@Autowired
-	EntityMetaDataRepository entityMetaDataRepository;
+	MysqlEntityMetaDataRepository entityMetaDataRepository;
 
 	@Autowired
-	AttributeMetaDataRepository attributeMetaDataRepository;
+	MysqlAttributeMetaDataRepository attributeMetaDataRepository;
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
 		attributeMetaDataRepository.deleteAll();
 		entityMetaDataRepository.deleteAll();
+		dataService = mock(DataService.class);
 	}
 
 	@Test
@@ -79,7 +80,6 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		// open test source
 		File f = ResourceUtils.getFile(getClass(), "/example_invalid.xlsx");
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
-		dataService = mock(DataService.class);
 
 		// create importer
 		EmxImportServiceImpl importer = new EmxImportServiceImpl(dataService);
@@ -152,8 +152,6 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testImportReportNoMeta() throws IOException, InvalidFormatException, InterruptedException
 	{
-		dataService = mock(DataService.class);
-
 		MysqlRepository repositoryCity = mock(MysqlRepository.class);
 		DefaultEntityMetaData entityMetaDataCity = new DefaultEntityMetaData("import_city");
 		entityMetaDataCity.addAttribute("name").setIdAttribute(true).setNillable(false);

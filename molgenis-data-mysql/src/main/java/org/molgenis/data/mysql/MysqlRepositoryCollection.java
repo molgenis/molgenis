@@ -10,17 +10,26 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
-import org.molgenis.data.AggregateableCrudRepositorySecurityDecorator;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.CrudRepository;
+import org.molgenis.data.CrudRepositorySecurityDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.elasticsearch.ElasticsearchRepositoryDecorator;
+import org.molgenis.data.elasticsearch.meta.ElasticsearchAttributeMetaDataRepository;
+import org.molgenis.data.elasticsearch.meta.ElasticsearchEntityMetaDataRepository;
+import org.molgenis.data.meta.AttributeMetaDataRepository;
+import org.molgenis.data.meta.EntityMetaDataRepository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.validation.EntityAttributesValidator;
+import org.molgenis.data.validation.RepositoryValidationDecorator;
+import org.molgenis.elasticsearch.ElasticSearchService;
 import org.molgenis.model.MolgenisModelException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,17 +44,27 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 	private final DataService dataService;
 	private Map<String, MysqlRepository> repositories;
 	private final MysqlPackageRepository packageRepository;
-	private final EntityMetaDataRepository entityMetaDataRepository;
-	private final AttributeMetaDataRepository attributeMetaDataRepository;
+	private final MysqlEntityMetaDataRepository entityMetaDataRepository;
+	private final MysqlAttributeMetaDataRepository attributeMetaDataRepository;
+	private final ElasticSearchService elasticSearchService;
 
 	public MysqlRepositoryCollection(DataSource ds, DataService dataService, MysqlPackageRepository packageRepository,
-			EntityMetaDataRepository entityMetaDataRepository, AttributeMetaDataRepository attributeMetaDataRepository)
+			MysqlEntityMetaDataRepository entityMetaDataRepository,
+			MysqlAttributeMetaDataRepository attributeMetaDataRepository)
+	{
+		this(ds, dataService, packageRepository, entityMetaDataRepository, attributeMetaDataRepository, null);
+	}
+
+	public MysqlRepositoryCollection(DataSource ds, DataService dataService, MysqlPackageRepository packageRepository,
+			MysqlEntityMetaDataRepository entityMetaDataRepository,
+			MysqlAttributeMetaDataRepository attributeMetaDataRepository, ElasticSearchService elasticSearchService)
 	{
 		this.ds = ds;
 		this.dataService = dataService;
 		this.packageRepository = packageRepository;
 		this.entityMetaDataRepository = entityMetaDataRepository;
 		this.attributeMetaDataRepository = attributeMetaDataRepository;
+		this.elasticSearchService = elasticSearchService;
 
 		packageRepository.setRepositoryCollection(this);
 		entityMetaDataRepository.setRepositoryCollection(this);
@@ -143,6 +162,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		addAttributeToTable(AttributeMetaDataMetaData.RANGE_MAX);
 		addAttributeToTable(AttributeMetaDataMetaData.ENUM_OPTIONS);
 		addAttributeToTable(AttributeMetaDataMetaData.LABEL_ATTRIBUTE);
+		addAttributeToTable(AttributeMetaDataMetaData.READ_ONLY);
 	}
 
 	private void addAttributeToTable(String attributeName)
@@ -152,7 +172,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 			String sql;
 			try
 			{
-				sql = attributeMetaDataRepository.getAlterSql(AttributeMetaDataRepository.META_DATA
+				sql = attributeMetaDataRepository.getAlterSql(MysqlAttributeMetaDataRepository.META_DATA
 						.getAttribute(attributeName));
 			}
 			catch (MolgenisModelException e)
@@ -238,7 +258,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 
 			if (!dataService.hasRepository(emd.getName()))
 			{
-				dataService.addRepository(new AggregateableCrudRepositorySecurityDecorator(repository));
+				dataService.addRepository(getSecuredAndOptionallyIndexedRepository(repository));
 			}
 
 			return repository;
@@ -252,17 +272,18 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 			repository.create();
 
 			repositories.put(emd.getName(), repository);
-			dataService.addRepository(new AggregateableCrudRepositorySecurityDecorator(repository));
+			dataService.addRepository(new CrudRepositorySecurityDecorator(repository));
 		}
 
 		// Add to entities and attributes tables, this should be done AFTER the creation of new tables because create
 		// table statements are ddl statements and when these are executed mysql does an implicit commit. So when the
 		// create table fails a rollback does not work anymore
-		entityMetaDataRepository.addEntityMetaData(emd);
+		getEntityMetaDataRepository().addEntityMetaData(emd);
 
 		// add attribute metadata
 		for (AttributeMetaData att : emd.getAttributes())
 		{
+			// do not use getAttributeMetaDataRepository(), actions already take place during addEntityMetaData
 			attributeMetaDataRepository.addAttributeMetaData(emd.getName(), att);
 		}
 
@@ -284,7 +305,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 			return null;
 		}
 
-		return new AggregateableCrudRepositorySecurityDecorator(repo);
+		return getSecuredAndOptionallyIndexedRepository(repo);
 	}
 
 	public Set<EntityMetaData> getAllEntityMetaDataIncludingAbstract()
@@ -292,15 +313,16 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		Map<String, EntityMetaData> metadata = Maps.newLinkedHashMap();
 
 		// read the entity meta data
-		for (DefaultEntityMetaData entityMetaData : entityMetaDataRepository.getEntityMetaDatas())
+		for (EntityMetaData entityMetaData : entityMetaDataRepository.getEntityMetaDatas())
 		{
-			metadata.put(entityMetaData.getName(), entityMetaData);
+			DefaultEntityMetaData entityMetaDataWithAttributes = new DefaultEntityMetaData(entityMetaData);
+			metadata.put(entityMetaDataWithAttributes.getName(), entityMetaDataWithAttributes);
 
 			// add the attribute meta data of the entity
 			for (AttributeMetaData attributeMetaData : attributeMetaDataRepository
-					.getEntityAttributeMetaData(entityMetaData.getName()))
+					.getEntityAttributeMetaData(entityMetaDataWithAttributes.getName()))
 			{
-				entityMetaData.addAttributeMetaData(attributeMetaData);
+				entityMetaDataWithAttributes.addAttributeMetaData(attributeMetaData);
 			}
 		}
 
@@ -404,7 +426,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 			}
 			else
 			{
-				attributeMetaDataRepository.addAttributeMetaData(sourceEntityMetaData.getName(), attr);
+				getAttributeMetaDataRepository().addAttributeMetaData(sourceEntityMetaData.getName(), attr);
 				DefaultEntityMetaData defaultEntityMetaData = (DefaultEntityMetaData) repository.getEntityMetaData();
 				defaultEntityMetaData.addAttributeMetaData(attr);
 				repository.addAttribute(attr);
@@ -413,5 +435,52 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		}
 
 		return addedAttributes;
+	}
+
+	/**
+	 * Returns a secured and optionally indexed repository for the given repository
+	 * 
+	 * @param repository
+	 * @return
+	 */
+	private Repository getSecuredAndOptionallyIndexedRepository(CrudRepository repository)
+	{
+		CrudRepository decoratedRepository = repository;
+		if (elasticSearchService != null)
+		{
+			decoratedRepository = new ElasticsearchRepositoryDecorator(decoratedRepository, elasticSearchService);
+		}
+		decoratedRepository = new CrudRepositorySecurityDecorator(new RepositoryValidationDecorator(
+				decoratedRepository, new EntityAttributesValidator()));
+		return decoratedRepository;
+	}
+
+	/**
+	 * Returns an optionally indexed meta data repository for attributes
+	 * 
+	 * @return
+	 */
+	private AttributeMetaDataRepository getAttributeMetaDataRepository()
+	{
+		if (elasticSearchService != null)
+		{
+			return new ElasticsearchAttributeMetaDataRepository(attributeMetaDataRepository, dataService,
+					elasticSearchService);
+		}
+		return attributeMetaDataRepository;
+	}
+
+	/**
+	 * Returns an optionally indexed meta data repository for entities
+	 * 
+	 * @return
+	 */
+	private EntityMetaDataRepository getEntityMetaDataRepository()
+	{
+		if (elasticSearchService != null)
+		{
+			return new ElasticsearchEntityMetaDataRepository(entityMetaDataRepository, elasticSearchService);
+		}
+		return entityMetaDataRepository;
 	}
 }
