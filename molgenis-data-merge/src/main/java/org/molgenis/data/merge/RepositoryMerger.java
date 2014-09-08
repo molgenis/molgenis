@@ -2,23 +2,18 @@ package org.molgenis.data.merge;
 
 import org.molgenis.MolgenisFieldTypes;
 
-import org.molgenis.data.DataService;
+import org.molgenis.data.CrudRepository;
+import org.molgenis.data.Repository;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Repository;
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
-
-import org.molgenis.data.elasticsearch.ElasticsearchEntity;
-import org.molgenis.data.elasticsearch.ElasticsearchRepository;
-import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.support.AbstractEntity;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
-
-import org.elasticsearch.client.Client;
-
-import org.molgenis.elasticsearch.config.ElasticSearchClient;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -35,15 +30,10 @@ public class RepositoryMerger {
 
     private final static String ID = "ID";
     private DataService dataService;
-    private ElasticsearchRepository mergedRepository;
-    private Client client;
-    private ElasticSearchClient elasticSearchClient;
 
     @Autowired
-    public RepositoryMerger(DataService dataService, ElasticSearchClient elasticSearchClient) {
+    public RepositoryMerger(DataService dataService) {
         this.dataService = dataService;
-        this.elasticSearchClient = elasticSearchClient;
-        this.client = elasticSearchClient.getClient();
     }
 
     /**
@@ -54,15 +44,12 @@ public class RepositoryMerger {
      *
      * @param repositoryList list of repositories to be merged
      * @param commonAttributes list of common attributes, these columns are use to 'join'/'merge' on
-     * @param mergedRepositoryName the name the resulting repository will have
+     * @param mergedRepository the resulting repository
      * @return mergedRepository ElasticSearchRepository containing the merged data
      */
-    public Repository merge(List<Repository> repositoryList, List<AttributeMetaData> commonAttributes, String mergedRepositoryName){
-        EntityMetaData metaData = mergeMetaData(repositoryList, commonAttributes, mergedRepositoryName);
-        this.mergedRepository = new ElasticsearchRepository(client, elasticSearchClient.getIndexName(), metaData, dataService);
-        this.mergedRepository.create();
+    public CrudRepository merge(List<Repository> repositoryList, List<AttributeMetaData> commonAttributes, CrudRepository mergedRepository){
         dataService.addRepository(mergedRepository);
-        mergeData(repositoryList, metaData, (ElasticsearchRepository) dataService.getRepositoryByEntityName(mergedRepositoryName), commonAttributes);
+        mergeData(repositoryList, mergedRepository.getEntityMetaData(), (CrudRepository) dataService.getRepositoryByEntityName(mergedRepository.getName()), commonAttributes);
 
         return mergedRepository;
     }
@@ -70,15 +57,15 @@ public class RepositoryMerger {
     /**
      * Merge the data of all repositories based on the common columns
      */
-    private void mergeData(List<Repository> originalRepositoriesList, EntityMetaData mergedEntityMetaData, ElasticsearchRepository mergedElasticsearchRepository, List<AttributeMetaData> commonAttributes) {
+    private void mergeData(List<Repository> originalRepositoriesList, EntityMetaData mergedEntityMetaData, CrudRepository mergedElasticsearchRepository, List<AttributeMetaData> commonAttributes) {
         for(Repository repository : originalRepositoriesList){
             for(Entity entity : repository){
                 boolean newEntity = false;
-                ElasticsearchEntity mergedEntity = getMergedEntity(mergedElasticsearchRepository, commonAttributes, entity);
+                AbstractEntity mergedEntity = getMergedEntity(mergedElasticsearchRepository, commonAttributes, entity);
                 //if no entity for all the common columns exists, create a new one, containing these fields
                 if(mergedEntity == null){
                     newEntity = true;
-                    mergedEntity = createMergedEntity(mergedEntityMetaData, commonAttributes, entity);
+                    mergedEntity = createMergedEntity(commonAttributes, entity);
                 }
                 //add all data for non common fields
                 for(AttributeMetaData attributeMetaData : entity.getEntityMetaData().getAtomicAttributes()){
@@ -99,9 +86,10 @@ public class RepositoryMerger {
     /**
      * create a new entity based on the merged entity metadata
      */
-    private ElasticsearchEntity createMergedEntity(EntityMetaData mergedEntityMetaData, List<AttributeMetaData> commonAttributes, Entity entity) {
-        ElasticsearchEntity mergedEntity;
-        mergedEntity = new ElasticsearchEntity(UUID.randomUUID().toString(), new HashMap<String, Object>(),mergedEntityMetaData,dataService);
+    private AbstractEntity createMergedEntity(List<AttributeMetaData> commonAttributes, Entity entity) {
+        AbstractEntity mergedEntity;
+        mergedEntity = new MapEntity(new HashMap<String, Object>());
+        mergedEntity.set(ID,UUID.randomUUID().toString());
         for(AttributeMetaData attributeMetaData : commonAttributes) {
             mergedEntity.set(attributeMetaData.getName(), entity.get(attributeMetaData.getName()));
         }
@@ -111,18 +99,18 @@ public class RepositoryMerger {
     /**
      * check if an entity for the common attributes already exists and if so, return it
      */
-    private ElasticsearchEntity getMergedEntity(ElasticsearchRepository MergedElasticsearchRepository, List<AttributeMetaData> commonAttributes, Entity entity) {
+    private AbstractEntity getMergedEntity(CrudRepository mergedElasticsearchRepository, List<AttributeMetaData> commonAttributes, Entity entity) {
         Query findMergedEntityQuery = new QueryImpl();
         for (AttributeMetaData attributeMetaData : commonAttributes)
             findMergedEntityQuery = findMergedEntityQuery.eq(attributeMetaData.getName(), entity.get(attributeMetaData.getName()));
-        return (ElasticsearchEntity)MergedElasticsearchRepository.findOne(findMergedEntityQuery);
+        return (AbstractEntity)mergedElasticsearchRepository.findOne(findMergedEntityQuery);
     }
 
     /**
      * Create new EntityMetaData with the common attributes at root level,
      * and all other columns in a compound attribute per original repository
      */
-    private EntityMetaData mergeMetaData(List<Repository> repositoryList, List<AttributeMetaData> commonAttributes, String outRepositoryName) {
+    public EntityMetaData mergeMetaData(List<Repository> repositoryList, List<AttributeMetaData> commonAttributes, String outRepositoryName) {
         DefaultEntityMetaData mergedMetaData = new DefaultEntityMetaData(outRepositoryName);
         DefaultAttributeMetaData idAttribute = new DefaultAttributeMetaData(ID, MolgenisFieldTypes.FieldTypeEnum.STRING);
         idAttribute.setIdAttribute(true);

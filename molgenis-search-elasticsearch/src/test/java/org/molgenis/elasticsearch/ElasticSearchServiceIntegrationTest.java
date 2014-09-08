@@ -123,8 +123,11 @@ public class ElasticSearchServiceIntegrationTest
 		when(entityMetaData.getAtomicAttributes()).thenReturn(
 				Arrays.<AttributeMetaData> asList(new DefaultAttributeMetaData("id", FieldTypeEnum.INT),
 						new DefaultAttributeMetaData("name", FieldTypeEnum.STRING)));
+        when(entityMetaData.getAttributes()).thenReturn(
+                Arrays.<AttributeMetaData> asList(new DefaultAttributeMetaData("id", FieldTypeEnum.INT),
+                        new DefaultAttributeMetaData("name", FieldTypeEnum.STRING)));
 
-		searchService.indexRepository(repoMock);
+        searchService.indexRepository(repoMock);
 		waitForIndexUpdate();
 
 		long count = searchService.count("person", new QueryImpl().eq("name", "Piet"));
@@ -180,8 +183,12 @@ public class ElasticSearchServiceIntegrationTest
 				Arrays.<AttributeMetaData> asList(new DefaultAttributeMetaData("id", FieldTypeEnum.INT),
 						new DefaultAttributeMetaData("name", FieldTypeEnum.STRING), new DefaultAttributeMetaData(
 								"color", FieldTypeEnum.STRING)));
+        when(entityMetaData.getAttributes()).thenReturn(
+                Arrays.<AttributeMetaData> asList(new DefaultAttributeMetaData("id", FieldTypeEnum.INT),
+                        new DefaultAttributeMetaData("name", FieldTypeEnum.STRING), new DefaultAttributeMetaData(
+                                "color", FieldTypeEnum.STRING)));
 
-		searchService.indexRepository(repoMock);
+        searchService.indexRepository(repoMock);
 		waitForIndexUpdate();
 
 		// Search1
@@ -278,6 +285,8 @@ public class ElasticSearchServiceIntegrationTest
 		AttributeMetaData attr = new DefaultAttributeMetaData("name", FieldTypeEnum.STRING);
 		when(entityMetaData.getAtomicAttributes()).thenReturn(
 				Arrays.<AttributeMetaData> asList(new DefaultAttributeMetaData("id", FieldTypeEnum.INT), attr));
+        when(entityMetaData.getAttributes()).thenReturn(
+                Arrays.<AttributeMetaData> asList(new DefaultAttributeMetaData("id", FieldTypeEnum.INT), attr));
 
 		searchService.indexRepository(repoMock);
 		waitForIndexUpdate();

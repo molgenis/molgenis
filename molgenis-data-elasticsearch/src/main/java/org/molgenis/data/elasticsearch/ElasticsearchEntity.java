@@ -130,4 +130,9 @@ public class ElasticsearchEntity extends AbstractEntity
 	{
 		throw new UnsupportedOperationException();
 	}
+
+    public Map<String, Object> getSource()
+    {
+        return source;
+    }
 }

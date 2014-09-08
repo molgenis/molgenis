@@ -68,11 +68,27 @@ public class MappingsBuilder
 	private static final String ATTRIBUTE_DATA_TYPE = "dataType";
 	public static final String FIELD_NOT_ANALYZED = "sort";
 
+	/**
+	 * Creates entity meta data for the given repository, documents are stored in the index
+	 *
+	 * @param repository
+	 * @return
+	 * @throws IOException
+	 */
 	public static XContentBuilder buildMapping(Repository repository) throws IOException
 	{
-		return buildMapping(repository);
+		return buildMapping(repository.getEntityMetaData());
 	}
 
+	/**
+	 * Creates entity meta data for the given repository
+	 *
+	 * @param repository
+	 * @param storeSource
+	 *            whether or not documents are stored in the index
+	 * @return
+	 * @throws IOException
+	 */
 	public static XContentBuilder buildMapping(Repository repository, boolean storeSource) throws IOException
 	{
 		return buildMapping(repository.getEntityMetaData(), storeSource);
@@ -410,24 +426,24 @@ public class MappingsBuilder
 		}
 	}
 
-	public static boolean hasMapping(Client client, EntityMetaData entityMetaData)
+	public static boolean hasMapping(Client client, EntityMetaData entityMetaData, String indexName)
 	{
 		String docType = sanitizeMapperType(entityMetaData.getName());
 
-		GetMappingsResponse getMappingsResponse = client.admin().indices().prepareGetMappings("molgenis").execute()
+		GetMappingsResponse getMappingsResponse = client.admin().indices().prepareGetMappings(indexName).execute()
 				.actionGet();
 		ImmutableOpenMap<String, ImmutableOpenMap<String, MappingMetaData>> allMappings = getMappingsResponse
 				.getMappings();
-		final ImmutableOpenMap<String, MappingMetaData> indexMappings = allMappings.get("molgenis");
+		final ImmutableOpenMap<String, MappingMetaData> indexMappings = allMappings.get(indexName);
 		return indexMappings.containsKey(docType);
 	}
 
-	public static void createMapping(Client client, EntityMetaData entityMetaData) throws IOException
+	public static void createMapping(Client client, EntityMetaData entityMetaData, String indexName) throws IOException
 	{
 		XContentBuilder jsonBuilder = MappingsBuilder.buildMapping(entityMetaData);
 
 		String docType = sanitizeMapperType(entityMetaData.getName());
-		PutMappingResponse response = client.admin().indices().preparePutMapping("molgenis").setType(docType)
+		PutMappingResponse response = client.admin().indices().preparePutMapping(indexName).setType(docType)
 				.setSource(jsonBuilder).execute().actionGet();
 
 		if (!response.isAcknowledged())

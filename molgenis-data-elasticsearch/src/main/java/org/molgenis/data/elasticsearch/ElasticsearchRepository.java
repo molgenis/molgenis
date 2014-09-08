@@ -69,9 +69,11 @@ public class ElasticsearchRepository implements CrudRepository, Aggregateable, M
 	private final String docType;
 	private final EntityMetaData entityMetaData;
 	private final DataService dataService;
+    private final MappingManager mappingManager;
 
-	public ElasticsearchRepository(Client client, String indexName, EntityMetaData entityMetaData,
-			DataService dataService)
+
+    public ElasticsearchRepository(Client client, String indexName, EntityMetaData entityMetaData,
+			DataService dataService, MappingManager mappingManager)
 	{
 		if (client == null) throw new IllegalArgumentException("client is null");
 		if (indexName == null) throw new IllegalArgumentException("indexName is null");
@@ -81,6 +83,7 @@ public class ElasticsearchRepository implements CrudRepository, Aggregateable, M
 		this.entityMetaData = entityMetaData;
 		this.docType = sanitizeMapperType(entityMetaData.getName());
 		this.dataService = dataService;
+        this.mappingManager = mappingManager;
 	}
 
 	@Override
@@ -270,7 +273,7 @@ public class ElasticsearchRepository implements CrudRepository, Aggregateable, M
 	@Override
 	public void add(Entity entity)
 	{
-		createIndexRequest(entity).execute().actionGet();
+        createIndexRequest(entity).execute().actionGet();
 	}
 
 	@Override
@@ -694,17 +697,7 @@ public class ElasticsearchRepository implements CrudRepository, Aggregateable, M
 	@Override
 	public void create()
 	{
-		if (!MappingsBuilder.hasMapping(client, entityMetaData))
-		{
-			try
-			{
-				MappingsBuilder.createMapping(client, entityMetaData);
-			}
-			catch (IOException e)
-			{
-				throw new MolgenisDataException(e);
-			}
-		}
+        mappingManager.create(client, entityMetaData, indexName);
 	}
 
 	@Override

@@ -83,7 +83,7 @@ public class VcfImporterController extends MolgenisPluginController
 				{
 					inputStream.close();
 				}
-				vcfImporterService.importVcf(tempFile, entityName);
+				vcfImporterService.importVcf(tempFile);
 			}
 			finally
 			{

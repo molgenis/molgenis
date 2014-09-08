@@ -67,7 +67,7 @@ public class ElasticsearchRepositoryTest
 		when(entityMetaData.getName()).thenReturn("testRepo");
 
 		elasticsearchRepository = new ElasticsearchRepository(client, ElasticsearchRepositoryCollection.INDEX_NAME,
-				entityMetaData, dataService);
+				entityMetaData, dataService, new MappingManagerImpl());
 		attributeMetaData = mock(AttributeMetaData.class);
 		when(entityMetaData.getAttributes()).thenReturn(Collections.singletonList(attributeMetaData));
 		when(attributeMetaData.getName()).thenReturn("test");

@@ -64,6 +64,6 @@ public class ElasticsearchRepositoryCollection implements RepositoryCollection
 		{
 			throw new RuntimeException(e);
 		}
-		return new ElasticsearchRepository(client, elasticSearchClient.getIndexName(), entityMetaData, dataService);
+		return new ElasticsearchRepository(client, elasticSearchClient.getIndexName(), entityMetaData, dataService, new MappingManagerImpl());
 	}
 }

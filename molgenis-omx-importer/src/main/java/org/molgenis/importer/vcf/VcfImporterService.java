@@ -14,6 +14,7 @@ import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.elasticsearch.ElasticsearchRepository;
+import org.molgenis.data.elasticsearch.MappingManagerImpl;
 import org.molgenis.elasticsearch.config.ElasticSearchClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,7 +39,7 @@ public class VcfImporterService
 		this.elasticSearchClient = elasticSearchClient;
 	}
 
-	public void importVcf(File vcfFile, String entityName) throws IOException
+	public void importVcf(File vcfFile) throws IOException
 	{
 		RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory
 				.createFileRepositoryCollection(vcfFile);
@@ -59,13 +60,13 @@ public class VcfImporterService
 				String indexName = elasticSearchClient.getIndexName();
 				EntityMetaData entityMetaData = inRepository.getEntityMetaData();
 				ElasticsearchRepository outRepository = new ElasticsearchRepository(client, indexName, entityMetaData,
-						dataService);
+						dataService, new MappingManagerImpl());
 				outRepository.create();
 				AttributeMetaData sampleAttribute = entityMetaData.getAttribute("SAMPLES");
 				if (sampleAttribute != null)
 				{
 					sampleRepository = new ElasticsearchRepository(client, indexName, sampleAttribute.getRefEntity(),
-							dataService);
+							dataService, new MappingManagerImpl());
 					sampleRepository.create();
 				}
 				Iterator<Entity> inIterator = inRepository.iterator();

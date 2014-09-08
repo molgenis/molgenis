@@ -1,12 +1,18 @@
 package org.molgenis.geneticrepositorymerger.controller;
 
 import org.apache.log4j.Logger;
+import org.elasticsearch.client.Client;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
+import org.molgenis.data.elasticsearch.ElasticsearchEntity;
+import org.molgenis.data.elasticsearch.ElasticsearchRepository;
+import org.molgenis.data.elasticsearch.MappingManagerImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.merge.RepositoryMerger;
+import org.molgenis.elasticsearch.config.ElasticSearchClient;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.search.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,19 +47,21 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 	public static final String VKGL = "VKGL";
 
 	private final ArrayList<AttributeMetaData> commonAttributes;
-
-	@Autowired
-	private RepositoryMerger repositoryMerger;
-
-	@Autowired
+    private final ElasticSearchClient elasticSearchClient;
+    private RepositoryMerger repositoryMerger;
 	private DataService dataService;
-
-	@Autowired
 	private SearchService searchService;
 
-	public GeneticRepositoryMergerController()
+    @Autowired
+	public GeneticRepositoryMergerController(RepositoryMerger repositoryMerger, DataService dataService, SearchService searchService, ElasticSearchClient elasticSearchClient)
 	{
 		super(URI);
+
+        this.repositoryMerger = repositoryMerger;
+        this.dataService = dataService;
+        this.searchService = searchService;
+        this.elasticSearchClient = elasticSearchClient;
+
 		commonAttributes = new ArrayList<AttributeMetaData>();
 		commonAttributes.add(CHROM);
 		commonAttributes.add(POS);
@@ -98,6 +106,8 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 				}
 			}
 		}
-		repositoryMerger.merge(geneticRepositories, commonAttributes, VKGL);
+        EntityMetaData mergedEntityMetaData = repositoryMerger.mergeMetaData(geneticRepositories,commonAttributes,VKGL);
+        ElasticsearchRepository mergedRepository = new ElasticsearchRepository(elasticSearchClient.getClient(),elasticSearchClient.getIndexName(),mergedEntityMetaData,dataService,new MappingManagerImpl());
+		repositoryMerger.merge(geneticRepositories, commonAttributes, mergedRepository);
 	}
 }
