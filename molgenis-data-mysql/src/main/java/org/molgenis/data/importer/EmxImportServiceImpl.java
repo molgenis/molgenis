@@ -49,6 +49,7 @@ import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.support.TransformedEntity;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.IntField;

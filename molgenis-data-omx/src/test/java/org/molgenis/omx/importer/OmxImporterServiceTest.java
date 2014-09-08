@@ -1,7 +1,6 @@
 package org.molgenis.omx.importer;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.fail;
 
 import java.io.File;
@@ -17,14 +16,12 @@ import javax.persistence.Persistence;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
-import org.molgenis.data.Entity;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.jpa.importer.EntityImportService;
 import org.molgenis.data.omx.importer.OmxImporterServiceImpl;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.QueryResolver;
 import org.molgenis.data.validation.DefaultEntityValidator;
 import org.molgenis.data.validation.EntityAttributesValidator;
@@ -33,17 +30,13 @@ import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.elasticsearch.index.EntityToSourceConverter;
 import org.molgenis.omx.converters.ValueConverterException;
-import org.molgenis.omx.dataset.DataSetMatrixRepository;
 import org.molgenis.omx.observ.CategoryRepository;
 import org.molgenis.omx.observ.CharacteristicRepository;
-import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.DataSetRepository;
-import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservableFeatureRepository;
 import org.molgenis.omx.observ.ObservationSetRepository;
 import org.molgenis.omx.observ.ObservationTargetRepository;
 import org.molgenis.omx.observ.ObservedValueRepository;
-import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.observ.ProtocolRepository;
 import org.molgenis.omx.observ.target.IndividualRepository;
 import org.molgenis.omx.observ.target.PanelRepository;
@@ -154,26 +147,6 @@ public class OmxImporterServiceTest
 				.<SimpleGrantedAuthority> asList(new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_SU));
 		SecurityContextHolder.getContext().setAuthentication(
 				new UsernamePasswordAuthenticationToken(null, null, authorities));
-	}
-
-	@Test
-	public void testImportSampleOmx() throws IOException, ValueConverterException
-	{
-		RepositoryCollection source = fileRepositorySourceFactory
-				.createFileRepositoryCollection(loadTestFile("example-omx.xls"));
-		importer.doImport(source, DatabaseAction.ADD_UPDATE_EXISTING);
-
-		assertEquals(dataService.count(DataSet.ENTITY_NAME, new QueryImpl()), 1);
-		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME, new QueryImpl(), DataSet.class);
-		searchService.indexRepository(new DataSetMatrixRepository(dataService, dataSet.getIdentifier()));
-		searchService.refresh();
-
-		assertEquals(dataService.count(ObservableFeature.ENTITY_NAME, new QueryImpl()), 18);
-		assertEquals(dataService.count(Protocol.ENTITY_NAME, new QueryImpl()), 6);
-		assertEquals(dataService.count("celiacsprue", new QueryImpl()), 4);
-
-		Entity patient44 = dataService.findOne("celiacsprue", new QueryImpl().eq("Celiac_Individual", "id_103"));
-		assertNotNull(patient44);
 	}
 
 	@Test
