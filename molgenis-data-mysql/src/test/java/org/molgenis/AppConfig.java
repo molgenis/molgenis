@@ -13,6 +13,8 @@ import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.elasticsearch.ElasticSearchService;
+import org.molgenis.framework.ui.MolgenisPluginRegistry;
+import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -95,5 +97,11 @@ public class AppConfig
 	public ElasticSearchService elasticsearchService()
 	{
 		return mock(ElasticSearchService.class);
+	}
+
+	@Bean
+	public MolgenisPluginRegistry molgenisPluginRegistry()
+	{
+		return new MolgenisPluginRegistryImpl();
 	}
 }

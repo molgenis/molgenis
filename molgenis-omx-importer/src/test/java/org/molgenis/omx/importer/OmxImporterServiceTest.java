@@ -137,7 +137,7 @@ public class OmxImporterServiceTest
 		dataService.addRepository(new ObservableFeatureRepository(entityManager, queryResolver));
 
 		factory = new EmbeddedElasticSearchServiceFactory(Collections.singletonMap("path.data", "target/data"));
-		EntityToSourceConverter entityToSourceConverter = new EntityToSourceConverter(dataService);
+		EntityToSourceConverter entityToSourceConverter = new EntityToSourceConverter();
 		searchService = factory.create(dataService, entityToSourceConverter);
 		EntityValidator validator = new DefaultEntityValidator(dataService, new EntityAttributesValidator());
 

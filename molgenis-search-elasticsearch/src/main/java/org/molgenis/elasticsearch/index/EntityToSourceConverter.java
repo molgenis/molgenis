@@ -3,251 +3,182 @@ package org.molgenis.elasticsearch.index;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import org.elasticsearch.common.base.Joiner;
-import org.molgenis.MolgenisFieldTypes;
+import org.elasticsearch.common.collect.Lists;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.util.Cell;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.util.MolgenisDateFormat;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Lists;
+import com.google.common.base.Function;
+import com.google.common.base.Predicates;
+import com.google.common.collect.Iterables;
 
+/**
+ * Converts entities to Elasticsearch documents
+ */
 @Component
 public class EntityToSourceConverter
 {
-	private final DataService dataService;
-
-	@Autowired
-	public EntityToSourceConverter(DataService dataService)
+	/**
+	 * Converts entity to Elasticsearch document
+	 * 
+	 * @param entity
+	 * @param entityMetaData
+	 * @return
+	 */
+	public Map<String, Object> convert(Entity entity, EntityMetaData entityMetaData)
 	{
-		if (dataService == null) throw new IllegalArgumentException("dataService is null");
-		this.dataService = dataService;
+		return convert(entity, entityMetaData, true);
 	}
 
-	// FIXME iterate over meta data attributes instead of entity attributes
-	@SuppressWarnings("unchecked")
-	public Map<String, Object> convert(Entity entity, EntityMetaData entityMetaData)
+	/**
+	 * Converts entity to Elasticsearch document
+	 * 
+	 * @param entity
+	 * @param entityMetaData
+	 * @return
+	 */
+	private Map<String, Object> convert(Entity entity, EntityMetaData entityMetaData, boolean createNestedTypes)
 	{
 		Map<String, Object> doc = new HashMap<String, Object>();
 
-		final Set<String> xrefAndMrefColumns = new HashSet<String>();
-		for (AttributeMetaData attr : entityMetaData.getAtomicAttributes())
+		for (AttributeMetaData attributeMetaData : entityMetaData.getAtomicAttributes())
 		{
-			FieldTypeEnum fieldType = attr.getDataType().getEnumType();
-			boolean isXrefOrMref = fieldType.equals(FieldTypeEnum.XREF) || fieldType.equals(FieldTypeEnum.MREF);
-			if (isXrefOrMref) xrefAndMrefColumns.add(attr.getName());
+			String attrName = attributeMetaData.getName();
+			Object value = convertAttribute(entity, attributeMetaData, createNestedTypes);
+			doc.put(attrName, value);
 		}
-
-		for (String attrName : entity.getAttributeNames())
-		{
-			// Serialize collections to be able to sort on them,
-			// elasticsearch does not support sorting on
-			// list fields
-			Object id = null;
-			Object key = null;
-			Object value = entity.get(attrName);
-
-			if (value != null)
-			{
-				if (value instanceof Entity)
-				{
-					Entity refEntity = (Entity) value;
-					EntityMetaData refEntityMetaData = entityMetaData.getAttribute(attrName).getRefEntity();
-					key = refEntity.get(refEntityMetaData.getIdAttribute().getName());
-					value = refEntity.get(refEntityMetaData.getLabelAttribute().getName());
-				}
-				if (value instanceof Cell)
-				{
-					Cell<?> cell = (Cell<?>) value;
-					id = cell.getId();
-					key = cell.getKey();
-					value = cell.getValue();
-				}
-				if (value instanceof Collection)
-				{
-					Map<String, List<Object>> mrefMaps = new HashMap<String, List<Object>>();
-					Collection<?> values = (Collection<?>) value;
-					if (!values.isEmpty())
-					{
-						Object exampleValue = values.iterator().next();
-						if (exampleValue instanceof Cell)
-						{
-							List<Integer> mrefIds = null;
-							List<String> mrefKeys = null;
-							for (Iterator<Cell<?>> it = ((Collection<Cell<?>>) values).iterator(); it.hasNext();)
-							{
-								Cell<?> cell = it.next();
-								Integer cellId = cell.getId();
-								if (cellId != null)
-								{
-									if (mrefIds == null) mrefIds = new ArrayList<Integer>();
-									mrefIds.add(cellId);
-								}
-								String cellKey = cell.getKey();
-								if (cellKey != null)
-								{
-									if (mrefKeys == null) mrefKeys = new ArrayList<String>();
-									mrefKeys.add(cellKey);
-								}
-								Entity refEntityData = dataService.findOne(entityMetaData.getAttribute(attrName)
-										.getRefEntity().getName(), cellId);
-								createMapValue(refEntityData, entityMetaData, mrefMaps);
-							}
-							if (mrefIds != null) id = mrefIds;
-							if (mrefKeys != null) key = mrefKeys;
-						}
-						else if (exampleValue instanceof Entity)
-						{
-							EntityMetaData refEntityMetaData = entityMetaData.getAttribute(attrName).getRefEntity();
-
-							List<Object> mrefIds = null;
-							List<String> mrefKeys = null;
-							List<Object> labelValues = Lists.newArrayListWithCapacity(values.size());
-
-							for (Iterator<Entity> it = ((Collection<Entity>) values).iterator(); it.hasNext();)
-							{
-
-								Entity cell = it.next();
-
-								Object labelValue = cell.get(refEntityMetaData.getLabelAttribute().getName());
-
-								if (labelValue != null)
-								{
-									labelValues.add(labelValue);
-								}
-
-								Object cellId = cell.getIdValue();
-								if (cellId != null)
-								{
-									if (mrefIds == null) mrefIds = new ArrayList<Object>();
-									mrefIds.add(cellId);
-								}
-
-								String cellKey = cell.getString(refEntityMetaData.getIdAttribute().getName());
-								if (cellKey != null)
-								{
-									if (mrefKeys == null) mrefKeys = new ArrayList<String>();
-									mrefKeys.add(cellKey);
-								}
-
-								createMapValue(cell, entityMetaData, mrefMaps);
-							}
-							if (mrefIds != null) id = mrefIds;
-							if (mrefKeys != null) key = mrefKeys;
-							value = labelValues;
-						}
-						else
-						{
-							throw new RuntimeException("Unsupported value type [" + exampleValue.getClass().getName()
-									+ "]");
-						}
-					}
-
-					value = Joiner.on(",").join((Collection<?>) value);
-
-					doc.put(attrName, Arrays.asList(mrefMaps));
-				}
-				else
-				{
-					AttributeMetaData attr = entityMetaData.getAttribute(attrName);
-					if (attr != null)
-					{
-						switch (attr.getDataType().getEnumType())
-						{
-							case DATE:
-							{
-								if (!(value instanceof String)) // FIXME remove temp workaround
-								{
-									Date date = entity.getDate(attrName);
-									value = MolgenisDateFormat.getDateFormat().format(date);
-								}
-								break;
-							}
-							case DATE_TIME:
-							{
-								if (!(value instanceof String)) // FIXME remove temp workaround
-								{
-									Date date = entity.getDate(attrName);
-									value = MolgenisDateFormat.getDateTimeFormat().format(date);
-								}
-								break;
-							}
-							default:
-								break;
-						}
-					}
-				}
-				if (id != null) doc.put("id-" + attrName, id);
-				if (key != null) doc.put("key-" + attrName, key);
-			}
-			// If the attribute is not MREF
-			if (entityMetaData.getAttribute(attrName) == null
-					|| !entityMetaData.getAttribute(attrName).getDataType().getEnumType().toString()
-							.equalsIgnoreCase(MolgenisFieldTypes.MREF.toString()))
-			{
-				doc.put(attrName, value);
-			}
-		}
-
-		Set<String> xrefAndMrefValues = new HashSet<String>();
-		for (String attrName : entity.getAttributeNames())
-		{
-			if (xrefAndMrefColumns.contains(attrName))
-			{
-				Object value = entity.get(attrName);
-				if (value instanceof Cell)
-				{
-					Cell<?> cell = (Cell<?>) value;
-					if (cell.getValue() instanceof Collection<?>)
-					{
-						for (Cell<?> mrefCell : (Collection<Cell<?>>) cell.getValue())
-						{
-							xrefAndMrefValues.add(mrefCell.getKey());
-						}
-					}
-					else
-					{
-						xrefAndMrefValues.add(cell.getKey());
-					}
-				}
-			}
-		}
-		doc.put("_xrefvalue", xrefAndMrefValues);
 
 		return doc;
 	}
 
-	/**
-	 * Translate the entity into a map so that we can put this map in the list for Mref case, this list is indexed as a
-	 * nested type in ElasticSearch
-	 * 
-	 * @param refEntityData
-	 * @param entityMetaData
-	 * @param mrefMaps
-	 * @return
-	 */
-	private void createMapValue(Entity refEntityData, EntityMetaData entityMetaData, Map<String, List<Object>> mrefMaps)
+	private Object convertAttribute(Entity entity, AttributeMetaData attributeMetaData, boolean createNestedTypes)
 	{
-		for (String attributeName : refEntityData.getAttributeNames())
+		Object value;
+
+		String attrName = attributeMetaData.getName();
+		FieldTypeEnum dataType = attributeMetaData.getDataType().getEnumType();
+		switch (dataType)
 		{
-			if (!mrefMaps.containsKey(attributeName))
+			case BOOL:
+				value = entity.getBoolean(attrName);
+				break;
+			case DECIMAL:
+				value = entity.getDouble(attrName);
+				break;
+			case INT:
+				value = entity.getInt(attrName);
+				break;
+			case LONG:
+				value = entity.getLong(attrName);
+				break;
+			case EMAIL:
+			case ENUM:
+			case HTML:
+			case HYPERLINK:
+			case SCRIPT:
+			case STRING:
+			case TEXT:
+				value = entity.getString(attrName);
+				break;
+			case DATE:
+				Date date = entity.getDate(attrName);
+				value = date != null ? MolgenisDateFormat.getDateFormat().format(date) : null;
+				break;
+			case DATE_TIME:
+				Date dateTime = entity.getDate(attrName);
+				value = dateTime != null ? MolgenisDateFormat.getDateTimeFormat().format(dateTime) : null;
+				break;
+			case CATEGORICAL:
+			case XREF:
 			{
-				mrefMaps.put(attributeName, new ArrayList<>());
+				// TODO store categorical/xref values as nested types
+				// (requires query generator and mapping builder changes)
+				Entity xrefEntity = entity.getEntity(attrName);
+				if (xrefEntity != null)
+				{
+					// flatten referenced entity
+					value = convertAttribute(xrefEntity, attributeMetaData.getRefEntity().getLabelAttribute(), false);
+				}
+				else
+				{
+					value = null;
+				}
+				break;
 			}
-			mrefMaps.get(attributeName).add(refEntityData.get(attributeName));
+			case MREF:
+			{
+				Iterable<Entity> refEntities = entity.getEntities(attrName);
+				if (refEntities != null && !Iterables.isEmpty(refEntities))
+				{
+					final EntityMetaData refEntityMetaData = attributeMetaData.getRefEntity();
+
+					if (createNestedTypes)
+					{
+						// TODO ask Chao why a list of nested docs is not working
+
+						// store nested referenced entity
+						Map<String, List<Object>> refValueMap = new HashMap<String, List<Object>>();
+
+						for (Entity refEntity : refEntities)
+						{
+							Map<String, Object> refDoc = convert(refEntity, refEntityMetaData, false);
+
+							// merge doc
+							for (Map.Entry<String, Object> entry : refDoc.entrySet())
+							{
+								Object refAttributeValue = entry.getValue();
+								if (refAttributeValue != null)
+								{
+									String refAttributeName = entry.getKey();
+									List<Object> refValue = refValueMap.get(refAttributeName);
+									if (refValue == null)
+									{
+										refValue = new ArrayList<Object>();
+										refValueMap.put(refAttributeName, refValue);
+									}
+									refValue.add(refAttributeValue);
+								}
+							}
+						}
+
+						value = Arrays.asList(refValueMap);
+					}
+					else
+					{
+						// store flattened referenced entity
+						value = Lists.newArrayList(Iterables.filter(
+								Iterables.transform(refEntities, new Function<Entity, Object>()
+								{
+									@Override
+									public Object apply(Entity refEntity)
+									{
+										return convertAttribute(refEntity, refEntityMetaData.getLabelAttribute(), false);
+									}
+								}), Predicates.notNull()));
+					}
+				}
+				else
+				{
+					value = null;
+				}
+				break;
+			}
+			case COMPOUND:
+				throw new RuntimeException("Compound attribute is not an atomic attribute");
+			case FILE:
+			case IMAGE:
+				throw new MolgenisDataException("Unsupported data type for indexing [" + dataType + "]");
+			default:
+				throw new RuntimeException("Unknown data type [" + dataType + "]");
 		}
+		return value;
 	}
 }

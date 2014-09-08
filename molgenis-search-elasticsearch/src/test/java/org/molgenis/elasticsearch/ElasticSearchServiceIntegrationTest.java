@@ -52,7 +52,7 @@ public class ElasticSearchServiceIntegrationTest
 	public void beforeMethod()
 	{
 		DataService dataService = mock(DataService.class);
-		EntityToSourceConverter entityToSourceConverter = new EntityToSourceConverter(dataService);
+		EntityToSourceConverter entityToSourceConverter = new EntityToSourceConverter();
 		searchService = new ElasticSearchService(client, "molgenis", dataService, entityToSourceConverter);
 		repoMock = mock(Repository.class);
 		entityMetaData = mock(EntityMetaData.class);
