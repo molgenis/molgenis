@@ -25,11 +25,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
@@ -57,6 +59,7 @@ import org.molgenis.fieldtypes.LongField;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.util.DependencyResolver;
+import org.molgenis.util.HugeSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.convert.ConversionFailedException;
@@ -68,6 +71,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.StringUtils;
 
 import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -517,7 +521,7 @@ public class EmxImportServiceImpl implements ImportService
 						if (fileEntityRepository != null)
 						{
 							// transforms entities so that they match the entity meta data of the output repository
-							List<Entity> entities = Lists.transform(Lists.newArrayList(fileEntityRepository),
+							Iterable<Entity> entities = Iterables.transform(fileEntityRepository,
 									new Function<Entity, Entity>()
 									{
 										@Override
@@ -526,8 +530,8 @@ public class EmxImportServiceImpl implements ImportService
 											return new TransformedEntity(entity, entityMetaData, dataService);
 										}
 									});
-							update(crudRepository, entities, dbAction);
-							report.getNrImportedEntitiesMap().put(name, entities.size());
+							int count = update(crudRepository, entities, dbAction);
+							report.getNrImportedEntitiesMap().put(name, count);
 						}
 					}
 				}
@@ -541,59 +545,74 @@ public class EmxImportServiceImpl implements ImportService
 			}
 		}
 
-		public void update(CrudRepository repo, Iterable<? extends Entity> entities, DatabaseAction dbAction)
+		public int update(CrudRepository repo, Iterable<? extends Entity> entities, DatabaseAction dbAction)
 		{
-			if (entities == null) return;
+			if (entities == null) return 0;
 			String idAttributeName = repo.getEntityMetaData().getIdAttribute().getName();
 
 			// Split in existing and new entities
 			Map<Object, Entity> existingEntities = Maps.newLinkedHashMap();
 			List<Entity> newEntities = Lists.newArrayList();
 
-			List<Object> ids = Lists.newArrayList();
-			for (Entity entity : entities)
+			HugeSet<Object> ids = new HugeSet<Object>();
+			try
 			{
-				Object id = entity.get(idAttributeName);
-				if (id != null)
-				{
-					ids.add(id);
-				}
-			}
-
-			if (!ids.isEmpty())
-			{
-				List<Object> existingIds = Lists.newArrayList();
-
-				Query q = new QueryImpl();
-				for (int i = 0; i < ids.size(); i++)
-				{
-					if (i > 0)
-					{
-						q.or();
-					}
-					q.eq(idAttributeName, ids.get(i));
-				}
-
-				for (Entity existing : repo.findAll(q))
-				{
-					existingIds.add(existing.getIdValue());
-				}
-
-				FieldType dataType = repo.getEntityMetaData().getIdAttribute().getDataType();
 				for (Entity entity : entities)
 				{
 					Object id = entity.get(idAttributeName);
-					if ((id != null) && existingIds.contains(dataType.convert(id)))
+					if (id != null)
 					{
-						existingEntities.put(id, entity);
+						ids.add(id);
 					}
-					else
+				}
+
+				if (!ids.isEmpty())
+				{
+					HugeSet<Object> existingIds = new HugeSet<Object>();
+					try
 					{
-						newEntities.add(entity);
+						Query q = new QueryImpl();
+						Iterator<Object> it = ids.iterator();
+						while (it.hasNext())
+						{
+							q.eq(idAttributeName, it.next());
+							if (it.hasNext())
+							{
+								q.or();
+							}
+						}
+
+						for (Entity existing : repo.findAll(q))
+						{
+							existingIds.add(existing.getIdValue());
+						}
+
+						FieldType dataType = repo.getEntityMetaData().getIdAttribute().getDataType();
+						for (Entity entity : entities)
+						{
+							Object id = entity.get(idAttributeName);
+							if ((id != null) && existingIds.contains(dataType.convert(id)))
+							{
+								existingEntities.put(id, entity);
+							}
+							else
+							{
+								newEntities.add(entity);
+							}
+						}
+					}
+					finally
+					{
+						IOUtils.closeQuietly(existingIds);
 					}
 				}
 			}
+			finally
+			{
+				IOUtils.closeQuietly(ids);
+			}
 
+			int count = 0;
 			switch (dbAction)
 			{
 				case ADD:
@@ -613,24 +632,25 @@ public class EmxImportServiceImpl implements ImportService
 						throw new MolgenisDataException(msg.toString());
 					}
 
-					repo.add(entities);
+					count = repo.add(entities);
 					break;
 
 				case ADD_IGNORE_EXISTING:
 					if (!newEntities.isEmpty())
 					{
-						repo.add(newEntities);
+						count = repo.add(newEntities);
 					}
 					break;
 
 				case ADD_UPDATE_EXISTING:
 					if (!newEntities.isEmpty())
 					{
-						repo.add(newEntities);
+						count = repo.add(newEntities);
 					}
 					if (!existingEntities.isEmpty())
 					{
 						repo.update(existingEntities.values());
+						count += existingEntities.size();
 					}
 					break;
 
@@ -659,10 +679,12 @@ public class EmxImportServiceImpl implements ImportService
 					}
 
 					repo.deleteById(existingEntities.keySet());
+					count = existingEntities.size();
 					break;
 
 				case REMOVE_IGNORE_MISSING:
 					repo.deleteById(existingEntities.keySet());
+					count = existingEntities.size();
 					break;
 
 				case UPDATE:
@@ -689,16 +711,20 @@ public class EmxImportServiceImpl implements ImportService
 						throw new MolgenisDataException(msg.toString());
 					}
 					repo.update(existingEntities.values());
+					count = existingEntities.size();
 					break;
 
 				case UPDATE_IGNORE_MISSING:
 					repo.update(existingEntities.values());
+					count = existingEntities.size();
 					break;
 
 				default:
 					break;
 
 			}
+
+			return count;
 		}
 	}
 
