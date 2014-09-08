@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
@@ -67,6 +66,7 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.StringUtils;
 
+import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -88,6 +88,7 @@ public class EmxImportServiceImpl implements ImportService
 	@Autowired
 	public EmxImportServiceImpl(DataService dataService)
 	{
+		if (dataService == null) throw new IllegalArgumentException("dataService is null");
 		logger.debug("MEntityImportServiceImpl created");
 		this.dataService = dataService;
 	}
@@ -504,7 +505,7 @@ public class EmxImportServiceImpl implements ImportService
 				}
 
 				// import data
-				for (EntityMetaData entityMetaData : resolved)
+				for (final EntityMetaData entityMetaData : resolved)
 				{
 					String name = entityMetaData.getName();
 					CrudRepository crudRepository = (CrudRepository) store.getRepositoryByEntityName(name);
@@ -514,8 +515,18 @@ public class EmxImportServiceImpl implements ImportService
 						// check to prevent nullpointer when importing metadata only
 						if (fileEntityRepository != null)
 						{
-							update(crudRepository, fileEntityRepository, dbAction);
-							report.getNrImportedEntitiesMap().put(name, Iterables.size(fileEntityRepository));
+							// transforms entities so that they match the entity meta data of the output repository
+							List<Entity> entities = Lists.transform(Lists.newArrayList(fileEntityRepository),
+									new Function<Entity, Entity>()
+									{
+										@Override
+										public Entity apply(Entity entity)
+										{
+											return new TransformedEntity(entity, entityMetaData, dataService);
+										}
+									});
+							update(crudRepository, entities, dbAction);
+							report.getNrImportedEntitiesMap().put(name, entities.size());
 						}
 					}
 				}

@@ -120,13 +120,13 @@ public class AccountController
 			@Valid @ModelAttribute CaptchaRequest captchaRequest, HttpServletRequest request) throws CaptchaException,
 			BindException
 	{
-		if (!captchaService.validateCaptcha(captchaRequest.getCaptcha()))
-		{
-			throw new CaptchaException("invalid captcha answer");
-		}
 		if (!registerRequest.getPassword().equals(registerRequest.getConfirmPassword()))
 		{
 			throw new BindException(RegisterRequest.class, "password does not match confirm password");
+		}
+		if (!captchaService.consumeCaptcha(captchaRequest.getCaptcha()))
+		{
+			throw new CaptchaException("invalid captcha answer");
 		}
 		MolgenisUser molgenisUser = toMolgenisUser(registerRequest);
 		String activationUri = null;
