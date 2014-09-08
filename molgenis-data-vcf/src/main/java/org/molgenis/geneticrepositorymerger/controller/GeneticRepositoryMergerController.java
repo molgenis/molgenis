@@ -108,6 +108,7 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 		}
         EntityMetaData mergedEntityMetaData = repositoryMerger.mergeMetaData(geneticRepositories,commonAttributes,VKGL);
         ElasticsearchRepository mergedRepository = new ElasticsearchRepository(elasticSearchClient.getClient(),elasticSearchClient.getIndexName(),mergedEntityMetaData,dataService,new MappingManagerImpl());
-		repositoryMerger.merge(geneticRepositories, commonAttributes, mergedRepository);
+		mergedRepository.create();
+        repositoryMerger.merge(geneticRepositories, commonAttributes, mergedRepository);
 	}
 }

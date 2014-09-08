@@ -697,7 +697,17 @@ public class ElasticsearchRepository implements CrudRepository, Aggregateable, M
 	@Override
 	public void create()
 	{
-        mappingManager.create(client, entityMetaData, indexName);
+		if (!MappingsBuilder.hasMapping(client, entityMetaData, indexName))
+		{
+			try
+			{
+				MappingsBuilder.createMapping(client, entityMetaData, indexName);
+			}
+			catch (IOException e)
+			{
+				throw new MolgenisDataException(e);
+			}
+		}
 	}
 
 	@Override

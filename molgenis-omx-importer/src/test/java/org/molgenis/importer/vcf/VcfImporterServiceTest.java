@@ -44,6 +44,6 @@ public class VcfImporterServiceTest
         FileCopyUtils.copy(in_data, new FileOutputStream(testdata));
         when(fileRepositoryCollectionFactory.createFileRepositoryCollection(testdata)).thenReturn(fileRepositoryCollection);
         when(fileRepositoryCollection.getEntityNames()).thenReturn(Collections.singletonList(entityName));
-        vcfImporterService.importVcf(testdata, "test");
+        vcfImporterService.importVcf(testdata);
 	}
 }
