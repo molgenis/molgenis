@@ -32,6 +32,7 @@ import org.molgenis.data.Queryable;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.support.AbstractCrudRepository;
+import org.molgenis.data.support.ConvertingIterable;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.FieldType;
@@ -491,7 +492,8 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 	@Override
 	public <E extends Entity> Iterable<E> findAll(Iterable<Object> ids, Class<E> clazz)
 	{
-		throw new UnsupportedOperationException();
+		if (ids == null) return Collections.emptyList();
+		return new ConvertingIterable<E>(clazz, findAll(ids));
 	}
 
 	@Override

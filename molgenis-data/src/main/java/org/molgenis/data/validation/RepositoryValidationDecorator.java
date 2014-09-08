@@ -121,7 +121,7 @@ public class RepositoryValidationDecorator extends CrudRepositoryDecorator imple
 					{
 						String message = String.format("The attribute '%s' of entity '%s' can not be null.",
 								attr.getName(), getName());
-						violations.add(new ConstraintViolation(message, rownr));
+						violations.add(new ConstraintViolation(message, attr, rownr));
 						if (violations.size() > 4) return violations;
 					}
 				}
@@ -144,7 +144,7 @@ public class RepositoryValidationDecorator extends CrudRepositoryDecorator imple
 				for (Entity entity : this)
 				{
 					Object value = entity.get(attr.getName());
-					if (value != null)
+					if ((value != null) && (entity.getIdValue() != null))
 					{
 						values.put(value, entity.getIdValue());
 					}
@@ -165,12 +165,15 @@ public class RepositoryValidationDecorator extends CrudRepositoryDecorator imple
 					if (values.containsKey(value) && (!forUpdate || !entityHasId(entity, id)))
 					{
 						violations.add(new ConstraintViolation("Duplicate value [" + value + "] for unique attribute ["
-								+ attr.getName() + "] from entity [" + getName() + "]", rownr));
+								+ attr.getName() + "] from entity [" + getName() + "]", attr, rownr));
 						if (violations.size() > 4) break;
 					}
 					else
 					{
-						values.put(value, entity.getIdValue());
+						if (entity.getIdValue() != null)
+						{
+							values.put(value, entity.getIdValue());
+						}
 					}
 				}
 			}

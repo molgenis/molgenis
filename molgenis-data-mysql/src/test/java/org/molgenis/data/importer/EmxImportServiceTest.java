@@ -87,7 +87,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		importer.setPlatformTransactionManager(new SimplePlatformTransactionManager());
 
 		// generate report
-		EntitiesValidationReport report = importer.validateImport(source);
+		EntitiesValidationReport report = importer.validateImport(f, source);
 
 		// SheetsImportable
 		Assert.assertEquals(report.getSheetsImportable().size(), 4);

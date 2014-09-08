@@ -1,5 +1,6 @@
 package org.molgenis.data.importer;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,11 +32,11 @@ public class ImportServiceFactory
 	 * @param source
 	 * @return
 	 */
-	public ImportService getImportService(String fileName, RepositoryCollection source)
+	public ImportService getImportService(File file, RepositoryCollection source)
 	{
 		for (ImportService importService : importServices)
 		{
-			if (importService.canImport(fileName, source)) return importService;
+			if (importService.canImport(file, source)) return importService;
 		}
 
 		throw new MolgenisDataException("Can not import file. No suitable importer found");

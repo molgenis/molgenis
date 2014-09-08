@@ -1,5 +1,7 @@
 package org.molgenis.data.importer;
 
+import java.io.File;
+
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.framework.db.EntitiesValidationReport;
@@ -10,7 +12,7 @@ public interface ImportService extends Ordered
 {
 	EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction);
 
-	EntitiesValidationReport validateImport(RepositoryCollection source);
+	EntitiesValidationReport validateImport(File file, RepositoryCollection source);
 
-	boolean canImport(String fileName, RepositoryCollection source);
+	boolean canImport(File file, RepositoryCollection source);
 }

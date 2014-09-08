@@ -20,6 +20,7 @@ import static org.molgenis.data.mysql.AttributeMetaDataMetaData.VISIBLE;
 import static org.molgenis.data.mysql.EntityMetaDataMetaData.ABSTRACT;
 import static org.molgenis.data.mysql.EntityMetaDataMetaData.EXTENDS;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -105,9 +106,9 @@ public class EmxImportServiceImpl implements ImportService
 	}
 
 	@Override
-	public boolean canImport(String fileName, RepositoryCollection source)
+	public boolean canImport(File file, RepositoryCollection source)
 	{
-		String fileNameExtension = StringUtils.getFilenameExtension(fileName);
+		String fileNameExtension = StringUtils.getFilenameExtension(file.getName());
 		if (SUPPORTED_FILE_EXTENSIONS.contains(fileNameExtension.toLowerCase()))
 		{
 			for (String entityName : source.getEntityNames())
@@ -179,7 +180,7 @@ public class EmxImportServiceImpl implements ImportService
 	}
 
 	@Override
-	public EntitiesValidationReport validateImport(RepositoryCollection source)
+	public EntitiesValidationReport validateImport(File file, RepositoryCollection source)
 	{
 		EntitiesValidationReportImpl report = new EntitiesValidationReportImpl();
 

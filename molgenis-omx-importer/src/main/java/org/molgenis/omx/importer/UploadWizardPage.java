@@ -86,8 +86,8 @@ public class UploadWizardPage extends AbstractWizardPage
 	{
 		// decide what importer to use...
 		RepositoryCollection source = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
-		ImportService importService = importServiceFactory.getImportService(file.getName(), source);
-		EntitiesValidationReport validationReport = importService.validateImport(source);
+		ImportService importService = importServiceFactory.getImportService(file, source);
+		EntitiesValidationReport validationReport = importService.validateImport(file, source);
 
 		wizard.setEntitiesImportable(validationReport.getSheetsImportable());
 		// wizard.setDataImportable(validationReport.getSheetsImportable());

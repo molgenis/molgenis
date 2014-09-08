@@ -22,6 +22,7 @@ import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.jpa.importer.EntityImportService;
+import org.molgenis.data.omx.importer.OmxImporterServiceImpl;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.QueryResolver;
@@ -144,7 +145,7 @@ public class OmxImporterServiceTest
 		EntityImportService eis = new EntityImportService();
 		eis.setDataService(dataService);
 		importer = new OmxImporterServiceImpl(dataService, searchService, new EntitiesImporterImpl(
-				fileRepositorySourceFactory, eis), validator, new QueryResolver(dataService));
+				fileRepositorySourceFactory, eis), validator, new QueryResolver(dataService), null);
 
 		entityManager.getTransaction().begin();
 

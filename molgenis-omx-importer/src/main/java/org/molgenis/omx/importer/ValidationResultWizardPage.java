@@ -61,7 +61,7 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 
 				RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory
 						.createFileRepositoryCollection(importWizard.getFile());
-				ImportService importService = importServiceFactory.getImportService(importWizard.getFile().getName(),
+				ImportService importService = importServiceFactory.getImportService(importWizard.getFile(),
 						repositoryCollection);
 
 				EntityImportReport importReport = importService.doImport(repositoryCollection, entityDbAction);

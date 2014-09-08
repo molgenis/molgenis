@@ -1,8 +1,12 @@
-package org.molgenis.omx.importer;
+package org.molgenis.data.omx.importer;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.molgenis.MolgenisFieldTypes;
@@ -15,7 +19,6 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.importer.EntitiesValidationReportImpl;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.jpa.importer.EntitiesImporter;
 import org.molgenis.data.omx.OmxRepository;
@@ -26,6 +29,7 @@ import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.framework.db.EntitiesValidationReport;
+import org.molgenis.framework.db.EntitiesValidator;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
@@ -53,28 +57,52 @@ public class OmxImporterServiceImpl implements ImportService
 	private final SearchService searchService;
 	private final EntitiesImporter entitiesImporter;
 	private final EntityValidator entityValidator;
+	private final EntitiesValidator entitiesValidator;
 	private final QueryResolver queryResolver;
 
 	@Autowired
 	public OmxImporterServiceImpl(DataService dataService, SearchService searchService,
-			EntitiesImporter entitiesImporter, EntityValidator entityValidator, QueryResolver queryResolver)
+			EntitiesImporter entitiesImporter, EntityValidator entityValidator, QueryResolver queryResolver,
+			EntitiesValidator entitiesValidator)
 	{
 		this.dataService = dataService;
 		this.searchService = searchService;
 		this.entitiesImporter = entitiesImporter;
 		this.entityValidator = entityValidator;
 		this.queryResolver = queryResolver;
+		this.entitiesValidator = entitiesValidator;
 	}
 
 	@Override
-	public EntitiesValidationReport validateImport(RepositoryCollection source)
+	public EntitiesValidationReport validateImport(File file, RepositoryCollection source)
 	{
-		// TODO Auto-generated method stub
-		return new EntitiesValidationReportImpl();
+		try
+		{
+			EntitiesValidationReport validationReport = entitiesValidator.validate(file);
+
+			// remove data sheets
+			Map<String, Boolean> entitiesImportable = validationReport.getSheetsImportable();
+			if (entitiesImportable != null)
+			{
+				for (Iterator<Entry<String, Boolean>> it = entitiesImportable.entrySet().iterator(); it.hasNext();)
+				{
+					if (it.next().getKey().toLowerCase().startsWith("dataset_"))
+					{
+						it.remove();
+					}
+				}
+			}
+
+			return validationReport;
+		}
+		catch (IOException e)
+		{
+			throw new MolgenisDataException(e);
+		}
 	}
 
 	@Override
-	public boolean canImport(String fileName, RepositoryCollection source)
+	public boolean canImport(File file, RepositoryCollection source)
 	{
 		// Use this as fallback
 		return true;
@@ -83,7 +111,6 @@ public class OmxImporterServiceImpl implements ImportService
 	@Override
 	@Transactional
 	public EntityImportReport doImport(RepositoryCollection repositories, DatabaseAction databaseAction)
-
 	{
 		// All new repository identifiers
 		List<String> newRepoIdentifiers = new ArrayList<String>();
@@ -114,7 +141,6 @@ public class OmxImporterServiceImpl implements ImportService
 
 				if (!dataService.hasRepository(identifier))
 				{
-
 					dataService.addRepository(new CrudRepositorySecurityDecorator(new OmxRepository(dataService,
 							searchService, identifier, entityValidator)));
 					newRepoIdentifiers.add(identifier);
@@ -217,7 +243,6 @@ public class OmxImporterServiceImpl implements ImportService
 			{
 				if (entityName.startsWith(DATASET_SHEET_PREFIX))
 				{
-					// Import DataSet sheet, create new OmxRepository
 					String dataSetIdentifier = entityName.substring(DATASET_SHEET_PREFIX.length());
 					DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME,
 							new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier), DataSet.class);
@@ -240,6 +265,7 @@ public class OmxImporterServiceImpl implements ImportService
 					}
 				}
 			}
+
 		}
 
 		return importReport;
