@@ -90,7 +90,6 @@ input.error {
 .back-text {
 	color: #5B82A4; 
 	font-size: 18px;
-	margin-left: 8px;
 }
 
 #data-table-pager {
@@ -107,4 +106,8 @@ input.error {
   	display:block;
   	height:16px;
  	 width:16px;
+}
+
+.form-input-element-width-setting {
+	width: 50%;
 }

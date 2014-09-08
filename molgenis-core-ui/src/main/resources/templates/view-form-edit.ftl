@@ -21,15 +21,21 @@
 	</div>
 </div>
 
-<form role="form" class="form-horizontal col-md-12" id="entity-form" method="POST" action="/api/v1/${form.metaData.name?lower_case}<#if form.primaryKey??><#if form.primaryKey?is_number>/${form.primaryKey?c}<#else>/${form.primaryKey}</#if></#if>">
-	<#if back??>
-		<a href="${back}" class="pull-left">
-			<div id="back">
-				<div class="back-text pull-left">Back to list</div>
-			</div>
-			<div class="clearfix"></div>
-		</a>
-	</#if>
+<#if back??>
+	<a href="${back}" class="pull-left">
+		<div id="back">
+			<div class="back-text">Back to list</div>
+		</div>
+		<div class="clearfix"></div>
+	</a>
+</#if>
+
+
+
+<form role="form" class="form-horizontal col-md-12 pull-left" id="entity-form" method="POST" action="/api/v1/${form.metaData.name?lower_case}<#if form.primaryKey??><#if form.primaryKey?is_number>/${form.primaryKey?c}<#else>/${form.primaryKey}</#if></#if>">
+	
+	<h4>${form.title} form</h4>	
+	<hr></hr>
 	
 	<div class="form-group">
 		<#if form.primaryKey??>
@@ -37,7 +43,9 @@
 		<#else>
 			<input type="hidden" name="_method" value="" >
 		</#if>
-		
+	</div>
+	
+	<div class="form-input-element-width-setting">	
 		<#list form.metaData.fields as field>
 			<#if form.entity??>
 				<@input.render field form.hasWritePermission form.entity />
@@ -48,12 +56,15 @@
 		
 		<#if form.hasWritePermission>
 			<div class="form-group">
-				<div class="col-md-9">
-	  				<button type="submit" class="btn btn-large pull-right">Save</button>
+				<div class="col-md-12">
+	  				<button type="submit" class="btn btn-large btn-primary pull-right">Save</button>
 				</div>
 			</div>
 		</#if>
+		
 	</div>
+	
+	<hr></hr>
 </form>
 
 <@f.remoteValidationRules form />
