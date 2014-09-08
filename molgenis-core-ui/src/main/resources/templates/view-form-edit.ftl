@@ -12,28 +12,26 @@
 	var forms = [];
 </script>
 
-<form class="form-horizontal" id="entity-form" method="POST" action="/api/v1/${form.metaData.name?lower_case}<#if form.primaryKey??><#if form.primaryKey?is_number>/${form.primaryKey?c}<#else>/${form.primaryKey}</#if></#if>">
+<div id="success-message" class="form-group" style="display: none">
+	<div class="col-md-12">
+		<div class="alert alert-success">
+			<button type="button" class="close">&times;</button>
+			<strong>${form.title} saved.</strong>
+		</div>
+	</div>
+</div>
+
+<form role="form" class="form-horizontal col-md-12" id="entity-form" method="POST" action="/api/v1/${form.metaData.name?lower_case}<#if form.primaryKey??><#if form.primaryKey?is_number>/${form.primaryKey?c}<#else>/${form.primaryKey}</#if></#if>">
 	<#if back??>
 		<a href="${back}" class="pull-left">
 			<div id="back">
-				<div class="nav-icon-prev pull-left"></div>
-				<div class="nav-icon-prev pull-left"></div>
 				<div class="back-text pull-left">Back to list</div>
 			</div>
 			<div class="clearfix"></div>
 		</a>
 	</#if>
 	
-	<div class="pull-left">
-		<div id="success-message" class="form-group" style="display: none">
-    		<div class="col-md-9">
-				<div class="alert alert-success">
-  					<button type="button" class="close">&times;</button>
-  					<strong>${form.title} saved.</strong>
-				</div>
-			</div>
-		</div>
-		
+	<div class="form-group">
 		<#if form.primaryKey??>
 			<input type="hidden" name="_method" value="PUT" >
 		<#else>
@@ -46,18 +44,16 @@
 			<#else>
 				<@input.render field form.hasWritePermission />
 			</#if>
-    	</#list>
-    	
-    	<#if form.hasWritePermission>
-    		<div class="form-group">
-    			<div class="col-md-9">
-      				<button type="submit" class="btn btn-large pull-right">Save</button>
-    			</div>
-  			</div>
-  		</#if>
-  		
+		</#list>
+		
+		<#if form.hasWritePermission>
+			<div class="form-group">
+				<div class="col-md-9">
+	  				<button type="submit" class="btn btn-large pull-right">Save</button>
+				</div>
+			</div>
+		</#if>
 	</div>
-	
 </form>
 
 <@f.remoteValidationRules form />
