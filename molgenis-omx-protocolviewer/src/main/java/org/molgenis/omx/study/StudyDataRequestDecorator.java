@@ -1,10 +1,8 @@
 package org.molgenis.omx.study;
 
 import java.util.Iterator;
-import java.util.List;
 
 import org.molgenis.data.CrudRepositoryDecorator;
-import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.Query;
@@ -73,16 +71,6 @@ public class StudyDataRequestDecorator extends CrudRepositoryDecorator
 			checkEntitiesPermission(entity);
 		}
 		super.update(entities);
-	}
-
-	@Override
-	public void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
-	{
-		for (Entity entity : entities)
-		{
-			checkEntitiesPermission(entity);
-		}
-		super.update(entities, dbAction, keyName);
 	}
 
 	@Override

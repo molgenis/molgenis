@@ -155,11 +155,10 @@
 				</script> 
 			
 			<#else>
-				<input type="text" class="form-control" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" <#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string?html}"</#if> <@validationOptions field /> >
+				<input type="text" class="form-control <#compress><@validationOptions field /></#compress>" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" <#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string?html}"</#if>  >
 			</#if>
 		</div>
 	</div>
-	
 </#macro>
 
 <#macro validationOptions field>
@@ -184,9 +183,9 @@
     <#if field.dataType.enumType == 'HYPERLINK'>
     	<#assign validations = validations + ['url']>
     </#if>
-    
+	
     <#if validations?size &gt; 0>
-    	class="<#list validations as validation>${validation} </#list>"
+    	<#list validations as validation> ${validation}</#list>
    	</#if>
 </#macro>
 

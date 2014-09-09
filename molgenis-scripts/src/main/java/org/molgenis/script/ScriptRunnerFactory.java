@@ -2,7 +2,7 @@ package org.molgenis.script;
 
 import java.util.Map;
 
-import org.molgenis.data.mysql.MysqlRepository;
+import org.molgenis.data.DataService;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.runas.RunAsSystem;
@@ -20,13 +20,14 @@ import com.google.common.collect.Maps;
 public class ScriptRunnerFactory
 {
 	private final Map<String, ScriptRunner> scriptRunners = Maps.newHashMap();
-	private final MysqlRepository scriptTypeRepo;
+	private final DataService dataService;
 
 	@Autowired
-	public ScriptRunnerFactory(MysqlRepositoryCollection mysqlRepositoryCollection)
+	public ScriptRunnerFactory(MysqlRepositoryCollection mysqlRepositoryCollection, DataService dataService)
 	{
+		this.dataService = dataService;
 		mysqlRepositoryCollection.add(ScriptParameter.META_DATA);
-		scriptTypeRepo = mysqlRepositoryCollection.add(ScriptType.META_DATA);
+		mysqlRepositoryCollection.add(ScriptType.META_DATA);
 		mysqlRepositoryCollection.add(Script.META_DATA);
 	}
 
@@ -35,9 +36,9 @@ public class ScriptRunnerFactory
 	{
 		scriptRunners.put(type, scriptExecutor);
 
-		if (scriptTypeRepo.count(new QueryImpl().eq(ScriptType.NAME, type)) == 0)
+		if (dataService.count(ScriptType.ENTITY_NAME, new QueryImpl().eq(ScriptType.NAME, type)) == 0)
 		{
-			scriptTypeRepo.add(new ScriptType(type));
+			dataService.add(ScriptType.ENTITY_NAME, new ScriptType(type));
 		}
 	}
 

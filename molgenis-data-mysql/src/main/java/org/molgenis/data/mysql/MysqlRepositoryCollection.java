@@ -254,7 +254,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 			repository.create();
 
 			repositories.put(emd.getName(), repository);
-			dataService.addRepository(new CrudRepositorySecurityDecorator(repository));
+			dataService.addRepository(getSecuredAndOptionallyIndexedRepository(repository));
 		}
 
 		// Add to entities and attributes tables, this should be done AFTER the creation of new tables because create

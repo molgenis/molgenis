@@ -80,22 +80,9 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 	}
 
 	@Override
-	@Async
 	@RunAsSystem
 	public void indexDataSets(List<Object> dataSetIds)
 	{
-		while (isIndexingRunning())
-		{
-			try
-			{
-				Thread.sleep(5000);
-			}
-			catch (InterruptedException e)
-			{
-				throw new RuntimeException(e);
-			}
-		}
-
 		runningIndexProcesses.incrementAndGet();
 		try
 		{
