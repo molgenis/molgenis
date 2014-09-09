@@ -414,7 +414,7 @@
 				catalogSearchTree.fancytree('destroy');
 				catalogSearchTree.empty();
 			}
-            searchtext.val('');
+            searchText.val('');
             if(catalogTree.is(':hidden')) catalogTree.show();
             noResultsMessage.hide();
 		});

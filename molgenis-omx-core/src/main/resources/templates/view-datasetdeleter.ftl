@@ -9,12 +9,11 @@
 			<div class="well" style="width: 400px; max-height:400px; overflow:auto">
 				<form id="deletedataset-form" enctype="multipart/form-data">
 					<div class="form-group">
-						<label class="col-md-3 control-label" for="dataset-select">Choose a dataset:</label>
-						<select data-placeholder="Choose a Dataset to delete" id="dataset-select" name="dataset">
-						</select>
+						<label class="col-md-10 control-label" for="dataset-select">Choose a dataset:</label>
+						<select style="width: 80%" data-placeholder="Choose a Dataset to delete" id="dataset-select" name="dataset"></select>
 					</div>
 					<div class="form-group">
-						<label class="checkbox">
+						<label class="col-md-12 checkbox">
 							<input type="checkbox" name="deletemetadata"> Delete the metadata of this dataset.
 						</label>
 					</div>

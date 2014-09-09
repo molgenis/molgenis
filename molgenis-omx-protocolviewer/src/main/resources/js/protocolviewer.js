@@ -144,11 +144,15 @@
 					} else {
 						$('#orderdata-href-btn').removeClass('disabled');
 						if(page === undefined) {
-							selectionTablePager.pager({
-								'nrItems' : selection.total,
-								'nrItemsPerPage' : nrItemsPerPage,
-								'onPageChange' : updateFeatureSelectionContainer
-							});	
+							if (selection.total <= nrItemsPerPage) {
+								selectionTablePager.empty();
+							} else {							
+								selectionTablePager.pager({
+									'nrItems' : selection.total,
+									'nrItemsPerPage' : nrItemsPerPage,
+									'onPageChange' : updateFeatureSelectionContainer
+								});
+							}
 						}
 						
 						var catalogItems = selection.items;

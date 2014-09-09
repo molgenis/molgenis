@@ -137,7 +137,7 @@
 			</div>
 		</nav>
 	</#macro>
-<#--submenu -->
+	<#--submenu -->
 	<#macro submenu menu plugin_id>
 	<div id="submenu">
 		<ul id="submenu-menu" class="nav nav-tabs">
@@ -165,7 +165,7 @@
 				</#if>
 			</#list>
 		</ul>
-	<#assign breadcrumb = menu.breadcrumb>
+		<#assign breadcrumb = menu.breadcrumb>
 		<#if (breadcrumb?size > 1)>
 			<ul id="molgenis-breadcrumb" class="breadcrumb">
 				<#list breadcrumb as menu>

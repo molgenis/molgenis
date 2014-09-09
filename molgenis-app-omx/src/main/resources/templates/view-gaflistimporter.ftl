@@ -24,7 +24,7 @@
 							<i>File:</i>
 							<span><#if fileName?has_content>${fileName}</#if></span>
 							<span class="pull-right">
-								<a id="backButton" href="${context_url}" class="btn">Back</a>
+								<a id="backButton" href="${context_url}" class="btn btn-default">Back</a>
 								<input id="submitButton" type="submit" value="Import file" class="btn btn-success"/>
 							</span>
 						</div>
