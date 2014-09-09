@@ -39,7 +39,7 @@
 		</#if>
 	</div>
 	
-	<div class="form-input-element-width-setting">	
+	<div class="col-md-6">	
 		<#list form.metaData.fields as field>
 			<#if form.entity??>
 				<@input.render field form.hasWritePermission form.entity />
