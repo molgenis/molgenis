@@ -3,17 +3,17 @@
 	<#assign fieldName=field.name/>
 	
 	<div class="form-group">
-    	<label class="col-md-3 control-label" for="${fieldName}">${field.label} <#if field.nillable?string('true', 'false') == 'false'>*</#if></label>
+    	<label class="col-md-3 control-label" for="${fieldName}">${field.label}&nbsp;<#if field.nillable?string('true', 'false') == 'false'>*</#if></label>
     	<div class="col-md-9">
     		
     		<#if field.dataType.enumType == 'BOOL'>
 				<input type="checkbox" name="${fieldName}" id="${fieldName}" value="true" <#if entity!='' && entity.get(fieldName)?? && entity.get(fieldName)?string("true", "false") == "true">checked</#if>  <#if field.readonly || hasWritePermission?string("true", "false") == "false" >disabled="disabled"</#if>  >
 	
 			<#elseif field.dataType.enumType == 'TEXT' || field.dataType.enumType =='HTML'>
-				<textarea class="form-control" name="${fieldName}" id="${fieldName}" <#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <@validationOptions field /> ><#if entity!='' && entity.get(fieldName)??>${entity.get(fieldName)!?html}</#if></textarea>
+				<textarea class="form-control" name="${fieldName}" id="${fieldName}" <#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <#if field.nillable?string('true', 'false') == 'false'>required="required"</#if> ><#if entity!='' && entity.get(fieldName)??>${entity.get(fieldName)!?html}</#if></textarea>
 			
 			<#elseif field.dataType.enumType == 'XREF' || field.dataType.enumType == 'CATEGORICAL'>
-				<input type="hidden" name="${fieldName}" id="${fieldName}" <@validationOptions field />>
+				<input type="hidden" name="${fieldName}" id="${fieldName}" <#if field.nillable?string('true', 'false') == 'false'>required="required"</#if>>
 				<script>
 					$(document).ready(function() {
 						$('#${fieldName}').select2({
@@ -57,7 +57,7 @@
 					
 				</script>
 			<#elseif field.dataType.enumType == 'MREF'>
-				<input type="hidden" name="${fieldName}" id="${fieldName}" <@validationOptions field />>
+				<input type="hidden" name="${fieldName}" id="${fieldName}" <#if field.nillable?string('true', 'false') == 'false'>required="required"</#if>>
 				<script>
 					$(document).ready(function() {
 						var xrefs = [];
@@ -107,41 +107,45 @@
 				
 			<#elseif field.dataType.enumType == 'DATE_TIME'>
 				<div class="group-append datetime input-group">
+					<#if field.nillable><span class='input-group-addon'>
+						<span class='glyphicon glyphicon-remove empty-date-input clear-date-time-btn'></span></span>
+					</#if>
+					<span class='input-group-addon datepickerbutton'><span class='glyp2icon-calendar glyphicon glyphicon-calendar '></span></span>
 					<input type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" 
 						data-date-format='YYYY-MM-DDTHH:mm:ssZZ'
 						class="form-control<#if field.nillable> nillable</#if>" 
 						<#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> 
 						<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string("yyyy-MM-dd'T'HH:mm:ssZ")}"</#if>
-						<@validationOptions field /> />
+						<#if field.nillable?string('true', 'false') == 'false'>required="required"</#if> data-rule-date="true" />
+				</div>
+			<#elseif field.dataType.enumType == 'DATE'>
+				<div class="group-append date input-group">
 					<#if field.nillable><span class='input-group-addon'>
 						<span class='glyphicon glyphicon-remove empty-date-input clear-date-time-btn'></span></span>
 					</#if>
 					<span class='input-group-addon datepickerbutton'><span class='glyp2icon-calendar glyphicon glyphicon-calendar '></span></span>
-				</div>
-			<#elseif field.dataType.enumType == 'DATE'>
-				<div class="group-append date input-group">
 					<input type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.name}"
 						data-date-format='YYYY-MM-DD' 
 						class="form-control<#if field.nillable> nillable</#if>" 
 						<#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> 
 						<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string("yyyy-MM-dd")}"</#if> 
-						<@validationOptions field /> />
-					<#if field.nillable><span class='input-group-addon'>
-						<span class='glyphicon glyphicon-remove empty-date-input clear-date-time-btn'></span></span>
-					</#if>
-					<span class='input-group-addon datepickerbutton'><span class='glyp2icon-calendar glyphicon glyphicon-calendar '></span></span>
+						<#if field.nillable?string('true', 'false') == 'false'>required="required"</#if>
+						data-rule-date-ISO="true" />
 				</div>
 				
 			<#elseif field.dataType.enumType =='INT' || field.dataType.enumType = 'LONG'>
-				<input type="number" class="form-control" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" <#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)?c}"</#if> <@validationOptions field /> >
+				<input type="number" class="form-control" data-rule-digits="true" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" 
+					<#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> 
+					<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)?c}"</#if> 
+					<#if field.nillable?string('true', 'false') == 'false'>required="required"</#if> >
 			
 			<#elseif field.dataType.enumType == 'SCRIPT'>
-				<#if entity!='' && entity.get(fieldName)??>
-					<textarea class="form-control" name="${fieldName}" id="${fieldName}-textarea">${entity.get(fieldName)!?html}</textarea>
-				<#else>
-					<textarea class="form-control" name="${fieldName}" id="${fieldName}-textarea"></textarea>
-				</#if>
 				<div style="width: 100%; height:250px" class="uneditable-input" id="${fieldName}-editor"></div>
+				<#if entity!='' && entity.get(fieldName)??>
+					<textarea class="form-control" name="${fieldName}" id="${fieldName}-textarea" <#if field.nillable?string('true', 'false') == 'false'>required="required"</#if>>${entity.get(fieldName)!?html}</textarea>
+				<#else>
+					<textarea class="form-control" name="${fieldName}" id="${fieldName}-textarea" <#if field.nillable?string('true', 'false') == 'false'>required="required"</#if>></textarea>
+				</#if>
 				<script>
 					var editor = ace.edit("${fieldName}-editor");
 					editor.setTheme("ace/theme/eclipse");
@@ -152,41 +156,22 @@
 					editor.getSession().on('change', function(){
   						textarea.val(editor.getSession().getValue());
 					});	
-				</script> 
-			
+				</script>
+			<#elseif field.dataType.enumType == 'EMAIL'>
+				<input type="email" class="form-control" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" 
+					<#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> 
+					<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string?html}"</#if> 
+					<#if field.nillable?string('true', 'false') == 'false'>required="required"</#if> 
 			<#else>
-				<input type="text" class="form-control <#compress><@validationOptions field /></#compress>" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" <#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string?html}"</#if>  >
+				<input type="text" class="form-control" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" 
+					<#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> 
+					<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string?html}"</#if> 
+					<#if field.nillable?string('true', 'false') == 'false'>required="required"</#if> 
+					<#if field.dataType.enumType == 'DECIMAL'>data-rule-number="true"</#if>
+    				<#if field.dataType.enumType == 'HYPERLINK'>data-rule-url="true"</#if>>
 			</#if>
 		</div>
 	</div>
-</#macro>
-
-<#macro validationOptions field>
-	<#assign validations = []>
-    
-    <#if field.nillable?string('true', 'false') == 'false'>
-    	<#assign validations = validations + ['required']>
-    </#if>
-    
-    <#if field.dataType.enumType == 'INT' || field.dataType.enumType == 'LONG'>
-    	<#assign validations = validations + ['digits']>
-    </#if>
-    
-    <#if field.dataType.enumType == 'DECIMAL'>
-    	<#assign validations = validations + ['number']>
-    </#if>
-    
-    <#if field.dataType.enumType == 'EMAIL'>
-    	<#assign validations = validations + ['email']>
-    </#if>
-    
-    <#if field.dataType.enumType == 'HYPERLINK'>
-    	<#assign validations = validations + ['url']>
-    </#if>
-	
-    <#if validations?size &gt; 0>
-    	<#list validations as validation> ${validation}</#list>
-   	</#if>
 </#macro>
 
 <#macro formatValue fieldEnumType value>
