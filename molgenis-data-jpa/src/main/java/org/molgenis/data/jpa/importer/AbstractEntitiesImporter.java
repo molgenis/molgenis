@@ -1,4 +1,4 @@
-package org.molgenis.framework.db;
+package org.molgenis.data.jpa.importer;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,10 +8,10 @@ import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.importer.EntityImportService;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.framework.db.EntityImportReport;
 import org.springframework.transaction.annotation.Transactional;
 
 public abstract class AbstractEntitiesImporter implements EntitiesImporter

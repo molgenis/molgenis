@@ -1,7 +1,8 @@
 package org.molgenis.data.mysql;
 
 import org.apache.log4j.Logger;
-import org.molgenis.data.DataService;
+import org.molgenis.data.importer.EmxImportServiceImpl;
+import org.molgenis.data.importer.ImportServiceFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -16,12 +17,16 @@ public class MysqlRepositoryRegistrator implements ApplicationListener<ContextRe
 {
 	private static final Logger logger = Logger.getLogger(MysqlRepositoryRegistrator.class);
 	private final MysqlRepositoryCollection repositoryCollection;
+	private final ImportServiceFactory importServiceFactory;
+	private final EmxImportServiceImpl emxImportServiceImpl;
 
 	@Autowired
-	public MysqlRepositoryRegistrator(DataService dataService, MysqlRepositoryCollection repositoryCollection)
+	public MysqlRepositoryRegistrator(MysqlRepositoryCollection repositoryCollection,
+			ImportServiceFactory importServiceFactory, EmxImportServiceImpl emxImportServiceImpl)
 	{
-		if (repositoryCollection == null) throw new IllegalArgumentException("MysqlRepositoryCollection is missing");
 		this.repositoryCollection = repositoryCollection;
+		this.importServiceFactory = importServiceFactory;
+		this.emxImportServiceImpl = emxImportServiceImpl;
 		logger.debug("MysqlRepositoryRegistrator: initialized");
 	}
 
@@ -29,6 +34,7 @@ public class MysqlRepositoryRegistrator implements ApplicationListener<ContextRe
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
 		repositoryCollection.registerMysqlRepos();
+		importServiceFactory.addImportService(emxImportServiceImpl);
 	}
 
 	@Override

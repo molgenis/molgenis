@@ -20,6 +20,13 @@ public class ConstraintViolation
 		this.rownr = rownr;
 	}
 
+	public ConstraintViolation(String message, AttributeMetaData violatedAttribute, long rownr)
+	{
+		this.message = message;
+		this.violatedAttribute = violatedAttribute;
+		this.rownr = rownr;
+	}
+
 	public ConstraintViolation(String message, Object invalidValue, Entity entity, AttributeMetaData violatedAttribute,
 			EntityMetaData entityMetaData, long rownr)
 	{

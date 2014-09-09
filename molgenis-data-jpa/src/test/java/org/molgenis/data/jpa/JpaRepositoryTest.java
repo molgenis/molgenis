@@ -14,6 +14,7 @@ import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
+import org.molgenis.data.jpa.importer.EntityImportService;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.data.domain.Sort;
@@ -228,13 +229,15 @@ public class JpaRepositoryTest extends BaseJpaTest
 		e.set("firstName", "Piet");
 		e.set("lastName", "Paulusma");
 
-		repo.update(Arrays.asList(e), DatabaseAction.ADD, "firstName");
+		EntityImportService eis = new EntityImportService();
+
+		eis.update(repo, Arrays.asList(e), DatabaseAction.ADD, "firstName");
 		assertEquals(repo.count(), 1);
 
 		Entity e1 = new MapEntity("id");
 		e1.set("firstName", "Piet");
 		e1.set("lastName", "Paulusma");
-		repo.update(Arrays.asList(e1), DatabaseAction.ADD, "firstName");
+		eis.update(repo, Arrays.asList(e1), DatabaseAction.ADD, "firstName");
 	}
 
 	@Test
@@ -244,13 +247,15 @@ public class JpaRepositoryTest extends BaseJpaTest
 		e.set("firstName", "Piet");
 		e.set("lastName", "Paulusma");
 
-		repo.update(Arrays.asList(e), DatabaseAction.ADD_IGNORE_EXISTING, "firstName");
+		EntityImportService eis = new EntityImportService();
+
+		eis.update(repo, Arrays.asList(e), DatabaseAction.ADD_IGNORE_EXISTING, "firstName");
 		assertEquals(repo.count(), 1);
 
 		Entity e1 = new MapEntity("id");
 		e1.set("firstName", "Piet");
 		e1.set("lastName", "Paulusma");
-		repo.update(Arrays.asList(e1), DatabaseAction.ADD_IGNORE_EXISTING, "firstName");
+		eis.update(repo, Arrays.asList(e1), DatabaseAction.ADD_IGNORE_EXISTING, "firstName");
 		assertEquals(repo.count(), 1);
 	}
 
@@ -261,13 +266,15 @@ public class JpaRepositoryTest extends BaseJpaTest
 		e.set("firstName", "Piet");
 		e.set("lastName", "Paulusma");
 
-		repo.update(Arrays.asList(e), DatabaseAction.ADD_UPDATE_EXISTING, "firstName");
+		EntityImportService eis = new EntityImportService();
+
+		eis.update(repo, Arrays.asList(e), DatabaseAction.ADD_UPDATE_EXISTING, "firstName");
 		assertEquals(repo.count(), 1);
 
 		Entity e1 = new MapEntity("id");
 		e1.set("firstName", "Piet");
 		e1.set("lastName", "XXX");
-		repo.update(Arrays.asList(e1), DatabaseAction.ADD_UPDATE_EXISTING, "firstName");
+		eis.update(repo, Arrays.asList(e1), DatabaseAction.ADD_UPDATE_EXISTING, "firstName");
 		assertEquals(repo.count(), 1);
 		assertEquals(repo.iterator(Person.class).iterator().next().getLastName(), "XXX");
 	}
@@ -279,7 +286,8 @@ public class JpaRepositoryTest extends BaseJpaTest
 		e.set("firstName", "Piet");
 		e.set("lastName", "Paulusma");
 
-		repo.update(Arrays.asList(e), DatabaseAction.UPDATE, "firstName");
+		EntityImportService eis = new EntityImportService();
+		eis.update(repo, Arrays.asList(e), DatabaseAction.UPDATE, "firstName");
 	}
 
 	@Test
@@ -293,7 +301,9 @@ public class JpaRepositoryTest extends BaseJpaTest
 		Entity e1 = new MapEntity("id");
 		e1.set("firstName", "Piet");
 		e1.set("lastName", "XXX");
-		repo.update(Arrays.asList(e1), DatabaseAction.UPDATE, "firstName");
+
+		EntityImportService eis = new EntityImportService();
+		eis.update(repo, Arrays.asList(e1), DatabaseAction.UPDATE, "firstName");
 		assertEquals(repo.count(), 1);
 		assertEquals(repo.iterator(Person.class).iterator().next().getLastName(), "XXX");
 	}
@@ -304,7 +314,8 @@ public class JpaRepositoryTest extends BaseJpaTest
 		Entity e1 = new MapEntity("id");
 		e1.set("firstName", "Piet");
 		e1.set("lastName", "XXX");
-		repo.update(Arrays.asList(e1), DatabaseAction.UPDATE_IGNORE_MISSING, "firstName");
+		EntityImportService eis = new EntityImportService();
+		eis.update(repo, Arrays.asList(e1), DatabaseAction.UPDATE_IGNORE_MISSING, "firstName");
 		assertEquals(repo.count(), 0);
 	}
 
@@ -319,7 +330,9 @@ public class JpaRepositoryTest extends BaseJpaTest
 		Entity e1 = new MapEntity("id");
 		e1.set("firstName", "Piet");
 		e1.set("lastName", "XXXX");
-		repo.update(Arrays.asList(e1), DatabaseAction.REMOVE, "firstName");
+
+		EntityImportService eis = new EntityImportService();
+		eis.update(repo, Arrays.asList(e1), DatabaseAction.REMOVE, "firstName");
 		assertEquals(repo.count(), 0);
 	}
 
@@ -329,7 +342,9 @@ public class JpaRepositoryTest extends BaseJpaTest
 		Entity e1 = new MapEntity("id");
 		e1.set("firstName", "Piet");
 		e1.set("lastName", "XXXX");
-		repo.update(Arrays.asList(e1), DatabaseAction.REMOVE, "firstName");
+
+		EntityImportService eis = new EntityImportService();
+		eis.update(repo, Arrays.asList(e1), DatabaseAction.REMOVE, "firstName");
 	}
 
 	@Test
@@ -343,7 +358,9 @@ public class JpaRepositoryTest extends BaseJpaTest
 		Entity e1 = new MapEntity("id");
 		e1.set("firstName", "Piet");
 		e1.set("lastName", "XXXX");
-		repo.update(Arrays.asList(e1), DatabaseAction.REMOVE_IGNORE_MISSING, "firstName");
+
+		EntityImportService eis = new EntityImportService();
+		eis.update(repo, Arrays.asList(e1), DatabaseAction.REMOVE_IGNORE_MISSING, "firstName");
 		assertEquals(repo.count(), 0);
 	}
 
@@ -353,7 +370,8 @@ public class JpaRepositoryTest extends BaseJpaTest
 		Entity e1 = new MapEntity("id");
 		e1.set("firstName", "Piet");
 		e1.set("lastName", "XXXX");
-		repo.update(Arrays.asList(e1), DatabaseAction.REMOVE_IGNORE_MISSING, "firstName");
+		EntityImportService eis = new EntityImportService();
+		eis.update(repo, Arrays.asList(e1), DatabaseAction.REMOVE_IGNORE_MISSING, "firstName");
 		assertEquals(repo.count(), 0);
 	}
 

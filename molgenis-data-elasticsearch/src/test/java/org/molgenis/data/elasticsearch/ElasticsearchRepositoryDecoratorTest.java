@@ -19,7 +19,6 @@ import org.mockito.Matchers;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
-import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
@@ -359,15 +358,4 @@ public class ElasticsearchRepositoryDecoratorTest
 				eq(IndexingMode.UPDATE));
 	}
 
-	@Test
-	public void updateListextendsEntityDatabaseActionString()
-	{
-		String keyName = "key";
-		DatabaseAction dbAction = DatabaseAction.UPDATE_IGNORE_MISSING;
-		List<? extends Entity> entities = Arrays.asList(mock(Entity.class), mock(Entity.class));
-		elasticSearchRepository.update(entities, dbAction, keyName);
-		verify(repository).update(entities, dbAction, keyName);
-		verify(elasticSearchService).index(Matchers.<Iterable<Entity>> any(), eq(repositoryEntityMetaData),
-				eq(IndexingMode.UPDATE));
-	}
 }
