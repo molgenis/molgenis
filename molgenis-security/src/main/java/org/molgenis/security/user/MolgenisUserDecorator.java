@@ -1,11 +1,8 @@
 package org.molgenis.security.user;
 
-import java.util.List;
-
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.CrudRepositoryDecorator;
 import org.molgenis.data.DataService;
-import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.auth.MolgenisUser;
@@ -18,7 +15,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 
 public class MolgenisUserDecorator extends CrudRepositoryDecorator
 {
@@ -85,44 +81,6 @@ public class MolgenisUserDecorator extends CrudRepositoryDecorator
 		// id is only guaranteed to be generated at flush time
 		super.flush();
 		updateSuperuserAuthorities(entities);
-	}
-
-	@Override
-	public void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
-	{
-		super.update(Lists.transform(entities, new Function<Entity, Entity>()
-		{
-			@Override
-			public Entity apply(Entity entity)
-			{
-				updatePassword(entity);
-				return entity;
-			}
-		}), dbAction, keyName);
-
-		// id is only guaranteed to be generated at flush time
-		super.flush();
-
-		switch (dbAction)
-		{
-			case ADD:
-				addSuperuserAuthorities(entities);
-				break;
-			case UPDATE:
-				updateSuperuserAuthorities(entities);
-				break;
-			case REMOVE:
-			case REMOVE_IGNORE_MISSING:
-				throw new UnsupportedOperationException(
-						"MolgenisUser deletion not allowed, use MolgenisUser.active to enable/disable users");
-			case ADD_IGNORE_EXISTING:
-			case ADD_UPDATE_EXISTING:
-			case UPDATE_IGNORE_MISSING:
-				throw new UnsupportedOperationException("DatabaseAction [" + dbAction + "] not supported");
-			default:
-				throw new RuntimeException("Unknown DatabaseAction [" + dbAction + "]");
-
-		}
 	}
 
 	private void updatePassword(Entity entity)

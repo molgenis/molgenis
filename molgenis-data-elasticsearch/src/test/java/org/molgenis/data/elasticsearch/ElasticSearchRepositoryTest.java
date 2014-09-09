@@ -14,7 +14,6 @@ import java.util.List;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
-import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.MapEntity;
@@ -286,14 +285,4 @@ public class ElasticSearchRepositoryTest
 		// TODO verify index update
 	}
 
-	@Test
-	public void updateListextendsEntityDatabaseActionString()
-	{
-		String keyName = "key";
-		DatabaseAction dbAction = DatabaseAction.UPDATE_IGNORE_MISSING;
-		List<? extends Entity> entities = Arrays.asList(mock(Entity.class), mock(Entity.class));
-		elasticSearchRepository.update(entities, dbAction, keyName);
-		verify(repository).update(entities, dbAction, keyName);
-		// TODO verify index update
-	}
 }

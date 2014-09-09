@@ -13,7 +13,6 @@ public class ImportWizard extends Wizard
 	private File file;
 	private EntityImportReport importResult;
 	private Map<String, Boolean> entitiesImportable;
-	private Map<String, Boolean> dataImportable;
 	private Map<String, Collection<String>> fieldsDetected;
 	private Map<String, Collection<String>> fieldsUnknown;
 	private Map<String, Collection<String>> fieldsRequired;
@@ -49,16 +48,6 @@ public class ImportWizard extends Wizard
 	public void setEntitiesImportable(Map<String, Boolean> entitiesImportable)
 	{
 		this.entitiesImportable = entitiesImportable;
-	}
-
-	public Map<String, Boolean> getDataImportable()
-	{
-		return dataImportable;
-	}
-
-	public void setDataImportable(Map<String, Boolean> dataImportable)
-	{
-		this.dataImportable = dataImportable;
 	}
 
 	public Map<String, Collection<String>> getFieldsDetected()

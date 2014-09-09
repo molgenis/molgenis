@@ -1,7 +1,11 @@
 package org.molgenis.data.jpa;
 
+import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.validation.EntityAttributesValidator;
+import org.molgenis.data.validation.RepositoryValidationDecorator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationListener;
@@ -19,8 +23,8 @@ public class JpaRepositoryRegistrator implements ApplicationListener<ContextRefr
 	private final RepositoryCollection repositoryCollection;
 
 	@Autowired
-	public JpaRepositoryRegistrator(DataService dataService, @Qualifier("JpaRepositoryCollection")
-	RepositoryCollection repositoryCollection)
+	public JpaRepositoryRegistrator(DataService dataService,
+			@Qualifier("JpaRepositoryCollection") RepositoryCollection repositoryCollection)
 	{
 		if (dataService == null) throw new IllegalArgumentException("DataService is null");
 		if (repositoryCollection == null) throw new IllegalArgumentException("JpaRepositoryCollection is missing");
@@ -33,7 +37,9 @@ public class JpaRepositoryRegistrator implements ApplicationListener<ContextRefr
 	{
 		for (String name : repositoryCollection.getEntityNames())
 		{
-			dataService.addRepository(repositoryCollection.getRepositoryByEntityName(name));
+			Repository repo = repositoryCollection.getRepositoryByEntityName(name);
+			dataService.addRepository(new RepositoryValidationDecorator((CrudRepository) repo,
+					new EntityAttributesValidator()));
 		}
 	}
 
