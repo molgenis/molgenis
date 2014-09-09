@@ -21,12 +21,11 @@
 	</div>
 </div>
 
-<form role="form" class="form-horizontal col-md-12 pull-left" id="entity-form" method="POST" action="/api/v1/${form.metaData.name?lower_case}<#if form.primaryKey??><#if form.primaryKey?is_number>/${form.primaryKey?c}<#else>/${form.primaryKey}</#if></#if>">
-	
-	<h4>Create new ${form.title} entity</h4>
+<form role="form" class="form-horizontal col-md-12 pull-left" id="entity-form" method="POST" action="/api/v1/${form.metaData.name?lower_case}<#if form.primaryKey??><#if form.primaryKey?is_number>/${form.primaryKey?c}<#else>/${form.primaryKey}</#if></#if>">	
 	
 	<#if back??>
-		<a href="${back}" class="btn btn-default">Back to list</a>
+		<br>
+		<a href="${back}" class="btn btn-default btn-xs">Back to list</a>
 	</#if>
 		
 	<hr></hr>
