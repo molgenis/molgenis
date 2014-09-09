@@ -8,7 +8,7 @@
                         <a data-toggle="collapse" data-target="#genomebrowser-collapse" href="#genomebrowser-collapse">Genome Browser</a>
                     </h4>
                 </div>
-                <div id="genomebrowser-collapse" class="panel-collapse collapse">
+                <div id="genomebrowser-collapse" class="panel-collapse collapse in">
                     <div class="panel-body">
                         <#-- dalliance default id to print browser -->
                         <div id="svgHolder"></div>
@@ -126,7 +126,7 @@
 			
 			if(molgenis.dataexplorer.data.doShowGenomeBrowser() == true)
 		        {
-		            molgenis.dataexplorer.data.createGenomeBrowser();
+		            molgenis.dataexplorer.data.createGenomeBrowser({showHighlight: ${showHighlight}});
 		        }
 		    else
 		        {
