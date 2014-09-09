@@ -14,6 +14,10 @@ $(function() {
 		return false;
 	});
 	
+	// Call bootstrap js to give input buttons of type file a nice bootstrap look
+   	$('input[type=file]').bootstrapFileInput();
+   	$('.file-inputs').bootstrapFileInput();
+	
 	//Getting the indexer error alert!
 	molgenis.createDatasetsindexerAlert();
 });

@@ -8,25 +8,25 @@
 	var restApi = new molgenis.RestClient();
 
 	self.openFilterWizardModal = function(entityMetaData, attributeFilters) {
-		var modal = createFilterWizardModal();
+		var modal = createFilterWizardModal(attributeFilters);
 		createFilterWizardContent(entityMetaData, attributeFilters, modal);
 		modal.modal('show');
 	};
 	
-	function createFilterWizardModal() {		
+	function createFilterWizardModal(attributeFilters) {
 		var modal = $('#filter-wizard-modal');
 
 		if(modal.length === 0){
             var wizardTemplate = Handlebars.compile($("#filter-wizard-modal-template").html());
 
             modal = $(wizardTemplate({}));
-			createFilterModalControls(modal);
+			createFilterModalControls(modal, attributeFilters);
 		}
 		
 		return modal;
 	}
 	
-	function createFilterModalControls(modal) {
+	function createFilterModalControls(modal, attributeFilters) {
 		$('.filter-wizard-apply-btn', modal).click(function() {
 			var filters = molgenis.dataexplorer.filter.createFilters($('form', modal));
 
@@ -34,6 +34,21 @@
 				$(document).trigger('updateAttributeFilters', {
 					'filters' : filters
 				});
+                for (var attributeFilter in attributeFilters) {
+                    var isFilterStillPresent
+                    for(var key in filters){
+                        var filter = filters[key];
+                        if(filter.attribute.href != undefined) {
+                            isFilterStillPresent = (filter.attribute.href === attributeFilter) || attributeFilters[filter.attribute.href] === undefined;
+                            if (isFilterStillPresent) {
+                                break
+                            }
+                        }
+                    }
+                    if(!isFilterStillPresent) {
+                        $(document).trigger('removeAttributeFilter', {'attributeUri': attributeFilter});
+                    }
+                }
 			}
 		});
 		
