@@ -108,7 +108,7 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String SOURCES = "genomebrowser.init.sources";
 	public static final String BROWSERLINKS = "genomebrowser.init.browserLinks";
 	public static final String AGGREGATES_NORESULTS_MESSAGE = "plugin.dataexplorer.mod.aggregates.noresults";
-    public static final String HIGHLIGHTREGION = "genomebrowser.init.highlightRegion";
+	public static final String HIGHLIGHTREGION = "genomebrowser.init.highlightRegion";
 
 	public static final String KEY_DATAEXPLORER_EDITABLE = "plugin.dataexplorer.editable";
 	public static final String KEY_DATAEXPLORER_ROW_CLICKABLE = "plugin.dataexplorer.rowClickable";
@@ -116,7 +116,7 @@ public class DataExplorerController extends MolgenisPluginController
 	private static final boolean DEFAULT_VAL_DATAEXPLORER_EDITABLE = false;
 	private static final boolean DEFAULT_VAL_DATAEXPLORER_ROW_CLICKABLE = false;
 	private static final boolean DEFAULT_VAL_KEY_HIDE_SELECT = true;
-    private static final boolean DEFAULT_VAL_KEY_HIGLIGHTREGION = false;
+	private static final boolean DEFAULT_VAL_KEY_HIGLIGHTREGION = false;
 
 	@Autowired
 	private DataService dataService;
@@ -173,12 +173,13 @@ public class DataExplorerController extends MolgenisPluginController
 		{
 			if (selectedEntityName != null)
 			{
-                StringBuilder message = new StringBuilder("Entity does not exist or you do not have permission on this entity");
-                if(!SecurityUtils.currentUserIsAuthenticated()){
-                      message.append(", log in to view more entities");
-                }
-                model.addAttribute("warningMessage",
-						message.toString());
+				StringBuilder message = new StringBuilder(
+						"Entity does not exist or you do not have permission on this entity");
+				if (!SecurityUtils.currentUserIsAuthenticated())
+				{
+					message.append(", log in to view more entities");
+				}
+				model.addAttribute("warningMessage", message.toString());
 			}
 			Iterator<EntityMetaData> entitiesIterator = entitiesMeta.iterator();
 			if (entitiesIterator.hasNext())
@@ -207,7 +208,8 @@ public class DataExplorerController extends MolgenisPluginController
 			model.addAttribute("chains", molgenisSettings.getProperty(CHAINS));
 			model.addAttribute("sources", molgenisSettings.getProperty(SOURCES));
 			model.addAttribute("browserLinks", molgenisSettings.getProperty(BROWSERLINKS));
-            model.addAttribute("showHighlight", String.valueOf(molgenisSettings.getBooleanProperty(HIGHLIGHTREGION, DEFAULT_VAL_KEY_HIGLIGHTREGION)));
+			model.addAttribute("showHighlight", String.valueOf(molgenisSettings.getBooleanProperty(HIGHLIGHTREGION,
+					DEFAULT_VAL_KEY_HIGLIGHTREGION)));
 
 			model.addAttribute("genomebrowser_start_list",
 					molgenisSettings.getProperty(GenomeConfig.GENOMEBROWSER_START, "POS"));
