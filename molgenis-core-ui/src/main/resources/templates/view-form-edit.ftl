@@ -21,20 +21,18 @@
 	</div>
 </div>
 
-<#if back??>
-	<a href="${back}" class="pull-left">
-		<div id="back">
-			<div class="back-text">Back to list</div>
-		</div>
-		<div class="clearfix"></div>
-	</a>
-</#if>
+
 
 
 
 <form role="form" class="form-horizontal col-md-12 pull-left" id="entity-form" method="POST" action="/api/v1/${form.metaData.name?lower_case}<#if form.primaryKey??><#if form.primaryKey?is_number>/${form.primaryKey?c}<#else>/${form.primaryKey}</#if></#if>">
 	
-	<h4>${form.title} form</h4>	
+	<h4>Create new ${form.title} entity</h4>
+	
+	<#if back??>
+		<a href="${back}" class="btn btn-default">Back to list</a>
+	</#if>
+		
 	<hr></hr>
 	
 	<div class="form-group">
@@ -61,10 +59,7 @@
 				</div>
 			</div>
 		</#if>
-		
 	</div>
-	
-	<hr></hr>
 </form>
 
 <@f.remoteValidationRules form />
