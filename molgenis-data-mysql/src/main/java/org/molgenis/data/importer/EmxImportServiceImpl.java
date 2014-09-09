@@ -287,7 +287,6 @@ public class EmxImportServiceImpl implements ImportService
 			String attributeName = attribute.getString(NAME);
 			String attributeDataType = attribute.getString(DATA_TYPE);
 			String refEntityName = attribute.getString(REF_ENTITY);
-			System.out.println(entityName + "." + attributeName);
 
 			// required
 			if (entityName == null) throw new IllegalArgumentException("attributes.entity is missing");
@@ -538,6 +537,7 @@ public class EmxImportServiceImpl implements ImportService
 											return new TransformedEntity(entity, entityMetaData, dataService);
 										}
 									});
+							entities = DependencyResolver.resolveSelfReferences(entities, entityMetaData);
 							int count = update(crudRepository, entities, dbAction);
 							report.getNrImportedEntitiesMap().put(name, count);
 						}
