@@ -53,7 +53,7 @@ import com.google.common.collect.Lists;
 public class MysqlRepository extends AbstractCrudRepository implements Manageable
 {
 	public static final String URL_PREFIX = "mysql://";
-	public static final int BATCH_SIZE = 100000;
+	public static final int BATCH_SIZE = 1000;
 	private static final Logger logger = Logger.getLogger(MysqlRepository.class);
 	private EntityMetaData metaData;
 	private final JdbcTemplate jdbcTemplate;
@@ -880,82 +880,91 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 	@Override
 	public Integer add(Iterable<? extends Entity> entities)
 	{
+		if (entities == null) return 0;
 		AtomicInteger count = new AtomicInteger(0);
 
-		// TODO, split in subbatches
 		final List<Entity> batch = new ArrayList<Entity>();
-		if (entities != null) for (Entity e : entities)
-		{
-			batch.add(e);
-			count.addAndGet(1);
-		}
-		final AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
-		final Map<String, List<Entity>> mrefs = new HashMap<String, List<Entity>>();
 
-		jdbcTemplate.batchUpdate(getInsertSql(), new BatchPreparedStatementSetter()
+		Iterator<? extends Entity> it = entities.iterator();
+		while (it.hasNext())
 		{
-			@Override
-			public void setValues(PreparedStatement preparedStatement, int rowIndex) throws SQLException
+			batch.add(it.next());
+			count.addAndGet(1);
+
+			if ((batch.size() == BATCH_SIZE) || !it.hasNext())
 			{
-				int fieldIndex = 1;
+				final AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
+				final Map<String, List<Entity>> mrefs = new HashMap<String, List<Entity>>();
+
+				jdbcTemplate.batchUpdate(getInsertSql(), new BatchPreparedStatementSetter()
+				{
+					@Override
+					public void setValues(PreparedStatement preparedStatement, int rowIndex) throws SQLException
+					{
+						int fieldIndex = 1;
+						for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
+						{
+							// create the mref records
+							if (att.getDataType() instanceof MrefField)
+							{
+								if (mrefs.get(att.getName()) == null) mrefs.put(att.getName(), new ArrayList<Entity>());
+								if (batch.get(rowIndex).get(att.getName()) != null)
+								{
+									for (Object val : batch.get(rowIndex).getList(att.getName()))
+									{
+										Entity mref = new MapEntity();
+										mref.set(idAttribute.getName(), batch.get(rowIndex).get(idAttribute.getName()));
+										mref.set(att.getName(), val);
+
+										mrefs.get(att.getName()).add(mref);
+									}
+								}
+							}
+							else
+							{
+								// default value, if any
+								if (batch.get(rowIndex).get(att.getName()) == null)
+								{
+									preparedStatement.setObject(fieldIndex++, att.getDefaultValue());
+								}
+								else if (att.getDataType() instanceof XrefField)
+								{
+									Object value = batch.get(rowIndex).get(att.getName());
+									if (value instanceof Entity)
+									{
+										value = ((Entity) value).get(att.getRefEntity().getIdAttribute().getName());
+									}
+
+									preparedStatement.setObject(fieldIndex++, att.getRefEntity().getIdAttribute()
+											.getDataType().convert(value));
+								}
+								else
+								{
+									preparedStatement.setObject(fieldIndex++,
+											att.getDataType().convert(batch.get(rowIndex).get(att.getName())));
+								}
+							}
+						}
+					}
+
+					@Override
+					public int getBatchSize()
+					{
+						return batch.size();
+					}
+				});
+
+				// add mrefs as well
 				for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 				{
-					// create the mref records
 					if (att.getDataType() instanceof MrefField)
 					{
-						if (mrefs.get(att.getName()) == null) mrefs.put(att.getName(), new ArrayList<Entity>());
-						if (batch.get(rowIndex).get(att.getName()) != null)
-						{
-							for (Object val : batch.get(rowIndex).getList(att.getName()))
-							{
-								Entity mref = new MapEntity();
-								mref.set(idAttribute.getName(), batch.get(rowIndex).get(idAttribute.getName()));
-								mref.set(att.getName(), val);
-
-								mrefs.get(att.getName()).add(mref);
-							}
-						}
-					}
-					else
-					{
-						// default value, if any
-						if (batch.get(rowIndex).get(att.getName()) == null)
-						{
-							preparedStatement.setObject(fieldIndex++, att.getDefaultValue());
-						}
-						else if (att.getDataType() instanceof XrefField)
-						{
-							Object value = batch.get(rowIndex).get(att.getName());
-							if (value instanceof Entity)
-							{
-								value = ((Entity) value).get(att.getRefEntity().getIdAttribute().getName());
-							}
-
-							preparedStatement.setObject(fieldIndex++, att.getRefEntity().getIdAttribute().getDataType()
-									.convert(value));
-						}
-						else
-						{
-							preparedStatement.setObject(fieldIndex++,
-									att.getDataType().convert(batch.get(rowIndex).get(att.getName())));
-						}
+						addMrefs(mrefs.get(att.getName()), att);
 					}
 				}
-			}
 
-			@Override
-			public int getBatchSize()
-			{
-				return batch.size();
-			}
-		});
-
-		// add mrefs as well
-		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
-		{
-			if (att.getDataType() instanceof MrefField)
-			{
-				addMrefs(mrefs.get(att.getName()), att);
+				logger.info("Added " + count.get() + " " + getName() + " entities.");
+				batch.clear();
 			}
 		}
 

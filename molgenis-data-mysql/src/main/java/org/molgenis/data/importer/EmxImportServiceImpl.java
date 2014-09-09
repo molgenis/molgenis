@@ -80,7 +80,7 @@ import com.google.common.collect.Sets;
 public class EmxImportServiceImpl implements ImportService
 {
 	private static final Logger logger = Logger.getLogger(EmxImportServiceImpl.class);
-	private static final List<String> SUPPORTED_FILE_EXTENSIONS = Arrays.asList("xls", "xlsx");
+	private static final List<String> SUPPORTED_FILE_EXTENSIONS = Arrays.asList("xls", "xlsx", "csv", "zip");
 
 	// Sheet names
 	private static final String ENTITIES = EntityMetaDataMetaData.ENTITY_NAME;
@@ -131,6 +131,7 @@ public class EmxImportServiceImpl implements ImportService
 	public EntityImportReport doImport(final RepositoryCollection source, DatabaseAction databaseAction)
 	{
 		if (store == null) throw new RuntimeException("store was not set");
+		long t0 = System.currentTimeMillis();
 
 		List<EntityMetaData> metadataList = Lists.newArrayList();
 
@@ -156,8 +157,13 @@ public class EmxImportServiceImpl implements ImportService
 
 		try
 		{
-			return transactionTemplate.execute(new EmxImportTransactionCallback(databaseAction, source, metadataList,
-					addedEntities, addedAttributes));
+			EntityImportReport report = transactionTemplate.execute(new EmxImportTransactionCallback(databaseAction,
+					source, metadataList, addedEntities, addedAttributes));
+
+			long t = System.currentTimeMillis() - t0;
+			logger.info("Import done in " + t + " msec");
+
+			return report;
 		}
 		catch (Exception e)
 		{
@@ -183,6 +189,7 @@ public class EmxImportServiceImpl implements ImportService
 
 			throw e;
 		}
+
 	}
 
 	@Override
@@ -280,6 +287,7 @@ public class EmxImportServiceImpl implements ImportService
 			String attributeName = attribute.getString(NAME);
 			String attributeDataType = attribute.getString(DATA_TYPE);
 			String refEntityName = attribute.getString(REF_ENTITY);
+			System.out.println(entityName + "." + attributeName);
 
 			// required
 			if (entityName == null) throw new IllegalArgumentException("attributes.entity is missing");
@@ -568,23 +576,34 @@ public class EmxImportServiceImpl implements ImportService
 
 				if (!ids.isEmpty())
 				{
+					// Check if the ids already exist
 					HugeSet<Object> existingIds = new HugeSet<Object>();
 					try
 					{
-						Query q = new QueryImpl();
-						Iterator<Object> it = ids.iterator();
-						while (it.hasNext())
+						if (repo.count() > 0)
 						{
-							q.eq(idAttributeName, it.next());
-							if (it.hasNext())
+							int batchSize = 100;
+							Query q = new QueryImpl();
+							Iterator<Object> it = ids.iterator();
+							int batchCount = 0;
+							while (it.hasNext())
 							{
-								q.or();
+								q.eq(idAttributeName, it.next());
+								batchCount++;
+								if (batchCount == batchSize || !it.hasNext())
+								{
+									for (Entity existing : repo.findAll(q))
+									{
+										existingIds.add(existing.getIdValue());
+									}
+									q = new QueryImpl();
+									batchCount = 0;
+								}
+								else
+								{
+									q.or();
+								}
 							}
-						}
-
-						for (Entity existing : repo.findAll(q))
-						{
-							existingIds.add(existing.getIdValue());
 						}
 
 						FieldType dataType = repo.getEntityMetaData().getIdAttribute().getDataType();
