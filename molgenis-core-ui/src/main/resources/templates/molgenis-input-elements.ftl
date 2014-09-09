@@ -17,6 +17,7 @@
 				<script>
 					$(document).ready(function() {
 						$('#${fieldName}').select2({
+							width: '60%',
 							placeholder: 'Select ${field.refEntity.name!}',
 							allowClear: ${field.nillable?string('true', 'false')},
 							query: function (query) {
@@ -68,6 +69,7 @@
 						</#if>
 								
 						$('#${fieldName}').select2({
+							width: '60%',
 							placeholder: 'Select ${field.refEntity.name!}',
 							allowClear: ${field.nillable?string('true', 'false')},
 							multiple: true,
