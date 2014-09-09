@@ -5,10 +5,10 @@
 			<i>(${entityClass.entityClassIdentifier})</i>
 			
 			<@hasPermission plugin='dataexplorer' entityName=entityClass.entityClassIdentifier permission='COUNT'>
-				<@dataExplorerLink entityName=entityClass.entityClassIdentifier class='btn entity-btn'>Explore data</@dataExplorerLink>
+				<@dataExplorerLink entityName=entityClass.entityClassIdentifier class='btn entity-btn btn-default'>Explore data</@dataExplorerLink>
 			</@hasPermission>
 			<#if showViewButton>
-				<a href="${context_url}/${entityClass.entityClassIdentifier}" class="btn entity-btn">View</a>
+				<a href="${context_url}/${entityClass.entityClassIdentifier}" class="btn entity-btn btn-default">View</a>
 			</#if>
 		</div>
 		<div class="row">
