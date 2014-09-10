@@ -98,6 +98,11 @@ public class RepositoryValidationDecorator extends CrudRepositoryDecorator imple
 
 		violations.addAll(checkNillable(entities));
 
+		if (forUpdate)
+		{
+			violations.addAll(checkReadonlyByUpdate(entities));
+		}
+
 		if (!violations.isEmpty())
 		{
 			throw new MolgenisValidationException(violations);
@@ -121,6 +126,45 @@ public class RepositoryValidationDecorator extends CrudRepositoryDecorator imple
 					{
 						String message = String.format("The attribute '%s' of entity '%s' can not be null.",
 								attr.getName(), getName());
+						violations.add(new ConstraintViolation(message, attr, rownr));
+						if (violations.size() > 4) return violations;
+					}
+				}
+			}
+		}
+
+		return violations;
+	}
+
+	protected Set<ConstraintViolation> checkReadonlyByUpdate(Iterable<? extends Entity> entities)
+	{
+		Set<ConstraintViolation> violations = Sets.newHashSet();
+
+		long rownr = 0;
+		for (Entity entity : entities)
+		{
+			rownr++;
+			Entity oldEntity = this.findOne(entity.getIdValue());
+			if (null == oldEntity)
+			{
+				String message = String
+						.format("The original entity with id: '%s' does not exists", entity.getIdValue());
+				violations.add(new ConstraintViolation(message, entity.getEntityMetaData().getIdAttribute(), rownr));
+				if (violations.size() > 4) return violations;
+			}
+
+			for (AttributeMetaData attr : getEntityMetaData().getAtomicAttributes())
+			{
+				if (attr.isReadonly())
+				{
+					Object newValue = entity.get(attr.getName());
+					Object oldValue = oldEntity.get(attr.getName());
+					
+					if ((null == newValue && null == oldValue) || !newValue.equals(oldValue))
+					{
+						String message = String.format(
+								"The attribute '%s' of entity '%s' can not be changed it is readonly.", attr.getName(),
+								getEntityMetaData().getLabel());
 						violations.add(new ConstraintViolation(message, attr, rownr));
 						if (violations.size() > 4) return violations;
 					}
