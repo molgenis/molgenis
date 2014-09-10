@@ -182,11 +182,6 @@ ul.fancytree-container {
 	width: 4em;
 }
 
-input[name="ColNames"] {
-  margin-top: -1px;
-  vertical-align: middle;
-}
-
 #entity-class h3 {
 	display: inline;
 	margin-right: 10px;
@@ -198,7 +193,6 @@ input[name="ColNames"] {
 */
 .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
 	background-color: #7CBAD1;
-	
 }
 
 .table-hover {

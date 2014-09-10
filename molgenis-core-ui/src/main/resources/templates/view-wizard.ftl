@@ -2,7 +2,7 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 <#assign css=['bwizard.min.css', 'molgenis-wizard.css'] + stylesheets>
-<#assign js=['molgenis-wizard.js'] + javascripts>
+<#assign js=['molgenis-wizard.js', 'bootstrap.file-input.js'] + javascripts>
 
 <@header css js/>
 	<div class="row">

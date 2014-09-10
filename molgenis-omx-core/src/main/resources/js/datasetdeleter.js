@@ -11,11 +11,15 @@
 		restApi.getAsync('/api/v1/dataset', {'q': {'num': maxNrOfDataSets}}, function(datasets) {
 			var items = [];
 			
+			// select2 data-placeholder does not work without atleast one empty option
+			items.push('<option value=""></option>');
+			
 			$.each(datasets.items, function(key, val) {
 				items.push('<option value="' + val.Identifier + '">' + val.Name + '</option>');
 			});
+			
 			$('#dataset-select').html(items.join(''));
-			$('#dataset-select').select2({ width: 'resolve' });
+			$('#dataset-select').select2({ width: 'resolve'});
 		});
 	};
 
