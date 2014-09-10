@@ -1,13 +1,11 @@
-package org.molgenis.geneticrepositorymerger.controller;
+package org.molgenis.merge;
 
 import org.apache.log4j.Logger;
-import org.elasticsearch.client.Client;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
-import org.molgenis.data.elasticsearch.ElasticsearchEntity;
 import org.molgenis.data.elasticsearch.ElasticsearchRepository;
 import org.molgenis.data.elasticsearch.MappingManagerImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
@@ -25,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import java.util.List;
 import java.util.ArrayList;
 
-import static org.molgenis.geneticrepositorymerger.controller.GeneticRepositoryMergerController.URI;
+import static org.molgenis.merge.GeneticRepositoryMergerController.URI;
 
 @Controller
 @RequestMapping(URI)
@@ -73,7 +71,7 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 	@RequestMapping(method = RequestMethod.GET)
 	public String init() throws Exception
 	{
-		return "view-vcfrepositorymerger";
+		return "view-geneticrepositorymerger";
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "mergeRepositories")
