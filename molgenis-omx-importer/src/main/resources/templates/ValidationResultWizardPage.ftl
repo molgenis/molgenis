@@ -9,29 +9,6 @@
 			
 <form method="post" id="wizardForm" name="wizardForm" action="">		
 <div>
-<#if wizard.dataImportable??>
-	<table class="table table-bordered table-condensed pull-left" style="width: 25%;">
-		<thead>
-			<tr><th colspan="2" style="text-align: center;"><h4>Data</h4></th></tr>
-			<tr>
-				<th>Name</th>
-				<th>Importable</th>
-			</tr>
-		</thead>
-		<tbody>
-			<#list wizard.dataImportable?keys as name>
-				<tr>
-					<td>${name}</td>
-					<#if wizard.dataImportable[name] == true>
-						<td class="alert alert-success" style="text-align: center;">Yes</td>
-					<#else>
-						<td class="alert alert-danger" style="text-align: center;">No</td>
-					</#if>
-				</tr>
-			</#list>
-		</tbody>
-	</table>
-</#if>
 
 <#if wizard.entitiesImportable??>
 

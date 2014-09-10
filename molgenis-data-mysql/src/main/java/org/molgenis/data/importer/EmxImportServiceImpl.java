@@ -20,32 +20,37 @@ import static org.molgenis.data.mysql.AttributeMetaDataMetaData.VISIBLE;
 import static org.molgenis.data.mysql.EntityMetaDataMetaData.ABSTRACT;
 import static org.molgenis.data.mysql.EntityMetaDataMetaData.EXTENDS;
 
-import java.io.IOException;
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Query;
 import org.molgenis.data.Range;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.Updateable;
 import org.molgenis.data.mysql.AttributeMetaDataMetaData;
 import org.molgenis.data.mysql.EntityMetaDataMetaData;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.TransformedEntity;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.FieldType;
@@ -54,23 +59,28 @@ import org.molgenis.fieldtypes.LongField;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.util.DependencyResolver;
+import org.molgenis.util.HugeSet;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.Ordered;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.StringUtils;
 
 import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 @Component
-public class EmxImportServiceImpl implements EmxImporterService
+public class EmxImportServiceImpl implements ImportService
 {
 	private static final Logger logger = Logger.getLogger(EmxImportServiceImpl.class);
+	private static final List<String> SUPPORTED_FILE_EXTENSIONS = Arrays.asList("xls", "xlsx", "csv", "zip");
 
 	// Sheet names
 	private static final String ENTITIES = EntityMetaDataMetaData.ENTITY_NAME;
@@ -102,10 +112,26 @@ public class EmxImportServiceImpl implements EmxImporterService
 	}
 
 	@Override
+	public boolean canImport(File file, RepositoryCollection source)
+	{
+		String fileNameExtension = StringUtils.getFilenameExtension(file.getName());
+		if (SUPPORTED_FILE_EXTENSIONS.contains(fileNameExtension.toLowerCase()))
+		{
+			for (String entityName : source.getEntityNames())
+			{
+				if (entityName.equalsIgnoreCase(AttributeMetaDataMetaData.ENTITY_NAME)) return true;
+				if (store.getRepositoryByEntityName(entityName) != null) return true;
+			}
+		}
+
+		return false;
+	}
+
+	@Override
 	public EntityImportReport doImport(final RepositoryCollection source, DatabaseAction databaseAction)
-			throws IOException
 	{
 		if (store == null) throw new RuntimeException("store was not set");
+		long t0 = System.currentTimeMillis();
 
 		List<EntityMetaData> metadataList = Lists.newArrayList();
 
@@ -131,8 +157,13 @@ public class EmxImportServiceImpl implements EmxImporterService
 
 		try
 		{
-			return transactionTemplate.execute(new EmxImportTransactionCallback(databaseAction, source, metadataList,
-					addedEntities, addedAttributes));
+			EntityImportReport report = transactionTemplate.execute(new EmxImportTransactionCallback(databaseAction,
+					source, metadataList, addedEntities, addedAttributes));
+
+			long t = System.currentTimeMillis() - t0;
+			logger.info("Import done in " + t + " msec");
+
+			return report;
 		}
 		catch (Exception e)
 		{
@@ -158,10 +189,11 @@ public class EmxImportServiceImpl implements EmxImporterService
 
 			throw e;
 		}
+
 	}
 
 	@Override
-	public EntitiesValidationReport validateImport(RepositoryCollection source)
+	public EntitiesValidationReport validateImport(File file, RepositoryCollection source)
 	{
 		EntitiesValidationReportImpl report = new EntitiesValidationReportImpl();
 
@@ -225,7 +257,6 @@ public class EmxImportServiceImpl implements EmxImporterService
 		return report;
 	}
 
-	@Override
 	public Map<String, DefaultEntityMetaData> getEntityMetaData(RepositoryCollection source)
 	{
 		// TODO: this task is actually a 'merge' instead of 'import'
@@ -256,6 +287,7 @@ public class EmxImportServiceImpl implements EmxImporterService
 			String attributeName = attribute.getString(NAME);
 			String attributeDataType = attribute.getString(DATA_TYPE);
 			String refEntityName = attribute.getString(REF_ENTITY);
+			System.out.println(entityName + "." + attributeName);
 
 			// required
 			if (entityName == null) throw new IllegalArgumentException("attributes.entity is missing");
@@ -489,15 +521,15 @@ public class EmxImportServiceImpl implements EmxImporterService
 				for (final EntityMetaData entityMetaData : resolved)
 				{
 					String name = entityMetaData.getName();
-					Updateable updateable = (Updateable) store.getRepositoryByEntityName(name);
-					if (updateable != null)
+					CrudRepository crudRepository = (CrudRepository) store.getRepositoryByEntityName(name);
+					if (crudRepository != null)
 					{
 						Repository fileEntityRepository = source.getRepositoryByEntityName(name);
 						// check to prevent nullpointer when importing metadata only
 						if (fileEntityRepository != null)
 						{
 							// transforms entities so that they match the entity meta data of the output repository
-							List<Entity> entities = Lists.transform(Lists.newArrayList(fileEntityRepository),
+							Iterable<Entity> entities = Iterables.transform(fileEntityRepository,
 									new Function<Entity, Entity>()
 									{
 										@Override
@@ -506,8 +538,8 @@ public class EmxImportServiceImpl implements EmxImporterService
 											return new TransformedEntity(entity, entityMetaData, dataService);
 										}
 									});
-							updateable.update(entities, dbAction);
-							report.getNrImportedEntitiesMap().put(name, entities.size());
+							int count = update(crudRepository, entities, dbAction);
+							report.getNrImportedEntitiesMap().put(name, count);
 						}
 					}
 				}
@@ -520,5 +552,205 @@ public class EmxImportServiceImpl implements EmxImporterService
 				throw e;
 			}
 		}
+
+		public int update(CrudRepository repo, Iterable<? extends Entity> entities, DatabaseAction dbAction)
+		{
+			if (entities == null) return 0;
+			String idAttributeName = repo.getEntityMetaData().getIdAttribute().getName();
+
+			// Split in existing and new entities
+			Map<Object, Entity> existingEntities = Maps.newLinkedHashMap();
+			List<Entity> newEntities = Lists.newArrayList();
+
+			HugeSet<Object> ids = new HugeSet<Object>();
+			try
+			{
+				for (Entity entity : entities)
+				{
+					Object id = entity.get(idAttributeName);
+					if (id != null)
+					{
+						ids.add(id);
+					}
+				}
+
+				if (!ids.isEmpty())
+				{
+					// Check if the ids already exist
+					HugeSet<Object> existingIds = new HugeSet<Object>();
+					try
+					{
+						if (repo.count() > 0)
+						{
+							int batchSize = 100;
+							Query q = new QueryImpl();
+							Iterator<Object> it = ids.iterator();
+							int batchCount = 0;
+							while (it.hasNext())
+							{
+								q.eq(idAttributeName, it.next());
+								batchCount++;
+								if (batchCount == batchSize || !it.hasNext())
+								{
+									for (Entity existing : repo.findAll(q))
+									{
+										existingIds.add(existing.getIdValue());
+									}
+									q = new QueryImpl();
+									batchCount = 0;
+								}
+								else
+								{
+									q.or();
+								}
+							}
+						}
+
+						FieldType dataType = repo.getEntityMetaData().getIdAttribute().getDataType();
+						for (Entity entity : entities)
+						{
+							Object id = entity.get(idAttributeName);
+							if ((id != null) && existingIds.contains(dataType.convert(id)))
+							{
+								existingEntities.put(id, entity);
+							}
+							else
+							{
+								newEntities.add(entity);
+							}
+						}
+					}
+					finally
+					{
+						IOUtils.closeQuietly(existingIds);
+					}
+				}
+			}
+			finally
+			{
+				IOUtils.closeQuietly(ids);
+			}
+
+			int count = 0;
+			switch (dbAction)
+			{
+				case ADD:
+					if (!existingEntities.isEmpty())
+					{
+						List<Object> keys = Lists.newArrayList(existingEntities.keySet());
+
+						StringBuilder msg = new StringBuilder();
+						msg.append("Trying to add existing ").append(repo.getName())
+								.append(" entities as new insert: ");
+						msg.append(keys.subList(0, Math.min(5, keys.size())));
+						if (keys.size() > 5)
+						{
+							msg.append(" and ").append(keys.size() - 5).append(" more.");
+						}
+
+						throw new MolgenisDataException(msg.toString());
+					}
+
+					count = repo.add(entities);
+					break;
+
+				case ADD_IGNORE_EXISTING:
+					if (!newEntities.isEmpty())
+					{
+						count = repo.add(newEntities);
+					}
+					break;
+
+				case ADD_UPDATE_EXISTING:
+					if (!newEntities.isEmpty())
+					{
+						count = repo.add(newEntities);
+					}
+					if (!existingEntities.isEmpty())
+					{
+						repo.update(existingEntities.values());
+						count += existingEntities.size();
+					}
+					break;
+
+				case REMOVE:
+					if (!newEntities.isEmpty())
+					{
+						List<Object> keys = Lists.newArrayList();
+						for (Entity newEntity : newEntities)
+						{
+							keys.add(newEntity.get(idAttributeName));
+							if (keys.size() == 5)
+							{
+								break;
+							}
+						}
+
+						StringBuilder msg = new StringBuilder();
+						msg.append("Trying to remove not exsisting ").append(repo.getName()).append(" entities:")
+								.append(keys);
+						if (newEntities.size() > 5)
+						{
+							msg.append(" and ").append(newEntities.size() - 5).append(" more.");
+						}
+
+						throw new MolgenisDataException(msg.toString());
+					}
+
+					repo.deleteById(existingEntities.keySet());
+					count = existingEntities.size();
+					break;
+
+				case REMOVE_IGNORE_MISSING:
+					repo.deleteById(existingEntities.keySet());
+					count = existingEntities.size();
+					break;
+
+				case UPDATE:
+					if (!newEntities.isEmpty())
+					{
+						List<Object> keys = Lists.newArrayList();
+						for (Entity newEntity : newEntities)
+						{
+							keys.add(newEntity.get(idAttributeName));
+							if (keys.size() == 5)
+							{
+								break;
+							}
+						}
+
+						StringBuilder msg = new StringBuilder();
+						msg.append("Trying to update not exsisting ").append(repo.getName()).append(" entities:")
+								.append(keys);
+						if (newEntities.size() > 5)
+						{
+							msg.append(" and ").append(newEntities.size() - 5).append(" more.");
+						}
+
+						throw new MolgenisDataException(msg.toString());
+					}
+					repo.update(existingEntities.values());
+					count = existingEntities.size();
+					break;
+
+				case UPDATE_IGNORE_MISSING:
+					repo.update(existingEntities.values());
+					count = existingEntities.size();
+					break;
+
+				default:
+					break;
+
+			}
+
+			return count;
+		}
 	}
+
+	@Override
+	public int getOrder()
+	{
+		return Ordered.HIGHEST_PRECEDENCE;
+	}
+
 }

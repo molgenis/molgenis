@@ -33,12 +33,6 @@ html, body {
     content: "\e080";
 }
 
-#molgenis-breadcrumb {
-	margin-bottom: -10px;
-	font-size:10px;
-	float:left;	
-}
-
 #plugin-container {
 	background: #F8FAFB;
 	height: 100%;

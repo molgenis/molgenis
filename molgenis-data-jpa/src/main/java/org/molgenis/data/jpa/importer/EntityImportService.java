@@ -1,24 +1,28 @@
-package org.molgenis.data.importer;
+package org.molgenis.data.jpa.importer;
 
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
-import org.molgenis.data.Updateable;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
@@ -70,12 +74,12 @@ public class EntityImportService
 	public int importEntity(String entityName, Repository source, DatabaseAction dbAction)
 	{
 		final Repository repo = dataService.getRepositoryByEntityName(entityName);
-		if (!(repo instanceof Updateable))
+		if (!(repo instanceof CrudRepository))
 		{
-			throw new MolgenisDataException(repo.getName() + " is not updateable");
+			throw new MolgenisDataException(repo.getName() + " is not a CrudRepository");
 		}
 
-		Updateable updateable = (Updateable) repo;
+		CrudRepository jpaRepository = (CrudRepository) repo;
 
 		// Convert to MapEntity so we can be sure we can set xref/mref fields on it
 		List<Entity> entitiesToImport = Lists.newArrayList();
@@ -145,16 +149,16 @@ public class EntityImportService
 
 			if (batch.size() == BATCH_SIZE)
 			{
-				updateable.update(batch, dbAction, updateKey);
-				updateable.flush();
+				update(jpaRepository, batch, dbAction, updateKey);
+				jpaRepository.flush();
 				batch.clear();
 			}
 		}
 
 		if (!batch.isEmpty())
 		{
-			updateable.update(batch, dbAction, updateKey);
-			updateable.flush();
+			update(jpaRepository, batch, dbAction, updateKey);
+			jpaRepository.flush();
 			batch.clear();
 		}
 
@@ -185,8 +189,8 @@ public class EntityImportService
 						// Add to the repository and remove from unresolved list
 						it.remove();
 						batch.add(entityToImport);
-						updateable.update(batch, dbAction, updateKey);
-						updateable.flush();
+						update(jpaRepository, batch, dbAction, updateKey);
+						jpaRepository.flush();
 						batch.clear();
 					}
 				}
@@ -222,11 +226,274 @@ public class EntityImportService
 
 		if (!batch.isEmpty())
 		{
-			updateable.update(batch, dbAction, updateKey);
-			updateable.flush();
+			update(jpaRepository, batch, dbAction, updateKey);
+			jpaRepository.flush();
 		}
 
 		return entitiesToImport.size();
+	}
+
+	public void update(CrudRepository repo, List<? extends Entity> entities, DatabaseAction dbAction,
+			String... keyNames)
+	{
+		if (keyNames.length == 0) throw new MolgenisDataException("At least one key must be provided, e.g. 'name'");
+
+		// nothing todo?
+		if (entities.size() == 0) return;
+
+		// retrieve entity class and name
+		String entityName = repo.getEntityMetaData().getEntityClass().getSimpleName();
+
+		// create maps to store key values and entities
+		// key is a concat of all key values for an entity
+		Map<String, Entity> entityIndex = new LinkedHashMap<String, Entity>();
+		// list of all keys, each list item a map of a (composite) key for one
+		// entity e.g. investigation_name + name
+		List<Map<String, Object>> keyIndex = new ArrayList<Map<String, Object>>();
+
+		// select existing for update, only works if one (composit key allows
+		// for nulls) the key values are set
+		// otherwise skipped
+		boolean keysMissing = false;
+		for (Entity entity : entities)
+		{
+			// get all the value of all keys (composite key)
+			// use an index to hash the entities
+			StringBuilder combinedKeyBuilder = new StringBuilder();
+
+			// extract its key values and put in map
+			Map<String, Object> keyValues = new LinkedHashMap<String, Object>();
+			boolean incompleteKey = true;
+
+			// note: we can expect null values in composite keys but need at
+			// least one key value.
+			for (String key : keyNames)
+			{
+				// create a hash that concats all key values into one string
+				combinedKeyBuilder.append(';');
+
+				if (entity.get(key) != null)
+				{
+					combinedKeyBuilder.append(entity.get(key));
+					incompleteKey = false;
+					keyValues.put(key, entity.get(key));
+				}
+			}
+			// check if we have missing key
+			if (incompleteKey) keysMissing = true;
+
+			// add the keys to the index, if exists
+			if (!keysMissing)
+			{
+				keyIndex.add(keyValues);
+				// create the entity index using the hash
+				entityIndex.put(combinedKeyBuilder.toString(), entity);
+			}
+			else
+			{
+				if ((dbAction.equals(DatabaseAction.ADD) || dbAction.equals(DatabaseAction.ADD_IGNORE_EXISTING) || dbAction
+						.equals(DatabaseAction.ADD_UPDATE_EXISTING))
+						&& keyNames.length == 1
+						&& keyNames[0].equals(repo.getEntityMetaData().getIdAttribute().getName()))
+				{
+					// don't complain is 'id' field is emptyr
+				}
+				else
+				{
+					throw new MolgenisDataException("keys are missing: "
+							+ repo.getEntityMetaData().getEntityClass().getSimpleName() + "." + Arrays.asList(keyNames));
+				}
+			}
+		}
+
+		// split lists in new and existing entities, but only if keys are set
+		List<? extends Entity> newEntities = entities;
+		List<Entity> existingEntities = new ArrayList<Entity>();
+		if (!keysMissing && keyIndex.size() > 0)
+		{
+			newEntities = new ArrayList<Entity>();
+			QueryImpl q = new QueryImpl();
+
+			// in case of one field key, simply query
+			if (keyNames.length == 1)
+			{
+				List<Object> values = new ArrayList<Object>();
+				for (Map<String, Object> keyValues : keyIndex)
+				{
+					values.add(keyValues.get(keyNames[0]));
+				}
+				q.in(keyNames[0], values);
+			}
+			// in case of composite key make massive 'OR' query
+			// form (key1 = x AND key2 = X) OR (key1=y AND key2=y)
+			else
+			{
+				// very expensive!
+				for (Map<String, Object> keyValues : keyIndex)
+				{
+					for (int i = 0; i < keyNames.length; i++)
+					{
+						if (i > 0) q.or();
+						q.eq(keyNames[i], keyValues.get(keyNames[i]));
+					}
+				}
+			}
+			Iterable<Entity> selectForUpdate = repo.findAll(q);
+
+			// separate existing from new entities
+			for (Entity p : selectForUpdate)
+			{
+				// reconstruct composite key so we can use the entityIndex
+				StringBuilder combinedKeyBuilder = new StringBuilder();
+				for (String key : keyNames)
+				{
+					combinedKeyBuilder.append(';').append(p.get(key));
+				}
+				// copy existing from entityIndex to existingEntities
+				entityIndex.remove(combinedKeyBuilder.toString());
+				existingEntities.add(p);
+			}
+			// copy remaining to newEntities
+			newEntities = new ArrayList<Entity>(entityIndex.values());
+		}
+
+		// if existingEntities are going to be updated, they will need to
+		// receive new values from 'entities' in addition to be mapped to the
+		// database as is the case at this point
+		if (existingEntities.size() > 0
+				&& (dbAction == DatabaseAction.ADD_UPDATE_EXISTING || dbAction == DatabaseAction.UPDATE || dbAction == DatabaseAction.UPDATE_IGNORE_MISSING))
+		{
+			matchByNameAndUpdateFields(existingEntities, entities);
+		}
+
+		switch (dbAction)
+		{
+
+		// will test for existing entities before add
+		// (so only add if existingEntities.size == 0).
+			case ADD:
+				if (existingEntities.size() == 0)
+				{
+					repo.add(newEntities);
+				}
+				else
+				{
+					throw new MolgenisDataException("Tried to add existing "
+							+ entityName
+							+ " elements as new insert: "
+							+ Arrays.asList(keyNames)
+							+ "="
+							+ existingEntities.subList(0, Math.min(5, existingEntities.size()))
+							+ (existingEntities.size() > 5 ? " and " + (existingEntities.size() - 5) + "more" : ""
+									+ existingEntities));
+				}
+				break;
+
+			// will not test for existing entities before add
+			// (so will ignore existingEntities)
+			case ADD_IGNORE_EXISTING:
+				repo.add(newEntities);
+				break;
+
+			// will try to update(existingEntities) entities and
+			// add(missingEntities)
+			// so allows user to be sloppy in adding/updating
+			case ADD_UPDATE_EXISTING:
+				repo.add(newEntities);
+				repo.update(existingEntities);
+				break;
+
+			// update while testing for newEntities.size == 0
+			case UPDATE:
+				if (newEntities.size() == 0)
+				{
+					repo.update(existingEntities);
+				}
+				else
+				{
+					throw new MolgenisDataException("Tried to update non-existing " + entityName + "elements "
+							+ Arrays.asList(keyNames) + "=" + entityIndex.values());
+				}
+				break;
+
+			// update that doesn't test for newEntities but just ignores
+			// those
+			// (so only updates exsiting)
+			case UPDATE_IGNORE_MISSING:
+				repo.update(existingEntities);
+				break;
+
+			// remove all elements in list, test if no elements are missing
+			// (so test for newEntities == 0)
+			case REMOVE:
+				if (newEntities.size() == 0)
+				{
+					repo.delete(existingEntities);
+				}
+				else
+				{
+					throw new MolgenisDataException("Tried to remove non-existing " + entityName + " elements "
+							+ Arrays.asList(keyNames) + "=" + entityIndex.values());
+
+				}
+				break;
+
+			// remove entities that are in the list, ignore if they don't
+			// exist in database
+			// (so don't check the newEntities.size == 0)
+			case REMOVE_IGNORE_MISSING:
+				repo.delete(existingEntities);
+				break;
+
+			// unexpected error
+			default:
+				throw new MolgenisDataException("updateByName failed because of unknown dbAction " + dbAction);
+		}
+	}
+
+	private void matchByNameAndUpdateFields(List<? extends Entity> existingEntities, List<? extends Entity> entities)
+	{
+		for (Entity entityInDb : existingEntities)
+		{
+			for (Entity newEntity : entities)
+			{
+				boolean match = false;
+				// check if there are any label fields otherwise check impossible
+				if (entityInDb.getLabelAttributeNames().size() > 0)
+				{
+					match = true;
+				}
+				for (String labelField : entityInDb.getLabelAttributeNames())
+				{
+					Object x1 = entityInDb.get(labelField);
+					Object x2 = newEntity.get(labelField);
+
+					if (!x1.equals(x2))
+					{
+						match = false;
+						break;
+					}
+				}
+
+				if (match)
+				{
+					try
+					{
+						MapEntity mapEntity = new MapEntity();
+						for (String field : entityInDb.getAttributeNames())
+						{
+							mapEntity.set(field, newEntity.get(field));
+						}
+						entityInDb.set(mapEntity, false);
+					}
+					catch (Exception ex)
+					{
+						throw new MolgenisDataException(ex);
+					}
+				}
+
+			}
+		}
 	}
 
 	private long getRowNr(Entity entityToFind, Iterable<Entity> entities, String keyAttr)

@@ -332,37 +332,6 @@ public class ElasticsearchRepositoryDecorator implements IndexedCrudRepository, 
 	}
 
 	@Override
-	@Transactional
-	public void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
-	{
-		if (!(repository instanceof Updateable))
-		{
-			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Updateable");
-		}
-		((Updateable) repository).update(entities, dbAction, keyName);
-
-		EntityMetaData entityMetaData = getEntityMetaData();
-		switch (dbAction)
-		{
-			case ADD:
-			case ADD_IGNORE_EXISTING:
-			case ADD_UPDATE_EXISTING:
-				elasticSearchService.index(entities, entityMetaData, IndexingMode.ADD);
-				break;
-			case UPDATE:
-			case UPDATE_IGNORE_MISSING:
-				elasticSearchService.index(entities, entityMetaData, IndexingMode.UPDATE);
-				break;
-			case REMOVE:
-			case REMOVE_IGNORE_MISSING:
-				elasticSearchService.delete(entities, entityMetaData);
-				break;
-			default:
-				throw new RuntimeException("Unknown DatabaseAction [" + dbAction + "]");
-		}
-	}
-
-	@Override
 	public void rebuildIndex()
 	{
 		EntityMetaData entityMetaData = getEntityMetaData();
