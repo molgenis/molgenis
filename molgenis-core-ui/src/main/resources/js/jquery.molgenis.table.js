@@ -12,9 +12,9 @@
 		items.push('<div class="row molgenis-table-container">');
 		items.push('<div class="col-md-12">');
 		if(settings.rowClickable){
-			items.push('<table class="table-striped table-condensed molgenis-table table-hover"><thead></thead><tbody></tbody></table>');
+			items.push('<table class="table table-striped table-condensed molgenis-table table-hover"><thead></thead><tbody></tbody></table>');
 		}else{
-			items.push('<table class="table-striped table-condensed molgenis-table"><thead></thead><tbody></tbody></table>');
+			items.push('<table class="table table-striped table-condensed molgenis-table"><thead><th>xxx</th></thead><tbody></tbody></table>');
 		}
 		items.push('</div>');
 		items.push('</div>');
