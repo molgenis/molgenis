@@ -98,6 +98,11 @@ public class RepositoryValidationDecorator extends CrudRepositoryDecorator imple
 
 		violations.addAll(checkNillable(entities));
 
+		if (forUpdate)
+		{
+			violations.addAll(checkReadonly(entities));
+		}
+
 		if (!violations.isEmpty())
 		{
 			throw new MolgenisValidationException(violations);
@@ -120,6 +125,37 @@ public class RepositoryValidationDecorator extends CrudRepositoryDecorator imple
 					if ((value == null) && !attr.isAuto() && (attr.getDefaultValue() == null))
 					{
 						String message = String.format("The attribute '%s' of entity '%s' can not be null.",
+								attr.getName(), getName());
+						violations.add(new ConstraintViolation(message, attr, rownr));
+						if (violations.size() > 4) return violations;
+					}
+				}
+			}
+		}
+
+		return violations;
+	}
+
+	protected Set<ConstraintViolation> checkReadonly(Iterable<? extends Entity> entities)
+	{
+		Set<ConstraintViolation> violations = Sets.newHashSet();
+
+		long rownr = 0;
+		for (Entity entity : entities)
+		{
+			rownr++;
+			Entity oldEntity = this.findOne(entity.getIdValue());
+			for (AttributeMetaData attr : getEntityMetaData().getAtomicAttributes())
+			{
+				if (attr.isReadonly())
+				{
+					Object newValue = entity.get(attr.getName());
+					Object oldValue = oldEntity.get(attr.getName());
+					
+					if ((null == newValue && null == oldValue) || !newValue.equals(oldValue))
+					{
+						String message = String.format(
+								"The attribute '%s' of entity '%s' can not be changed it is readonly.",
 								attr.getName(), getName());
 						violations.add(new ConstraintViolation(message, attr, rownr));
 						if (violations.size() > 4) return violations;
