@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
@@ -120,65 +119,91 @@ public class MappingsBuilder
 
 		for (AttributeMetaData attr : meta.getAtomicAttributes())
 		{
-			String esType = getType(attr);
-			if (attr.getDataType().getEnumType().toString().equalsIgnoreCase(MolgenisFieldTypes.MREF.toString()))
-			{
-				jsonBuilder.startObject(attr.getName()).field("type", "nested").startObject("properties");
-
-				// TODO : what if the attributes in refEntity is also an MREF
-				// field?
-				for (AttributeMetaData refEntityAttr : attr.getRefEntity().getAttributes())
-				{
-					if (refEntityAttr.isLabelAttribute())
-					{
-						jsonBuilder.startObject(refEntityAttr.getName()).field("type", "multi_field")
-								.startObject("fields").startObject(refEntityAttr.getName()).field("type", "string")
-								.endObject().startObject(FIELD_NOT_ANALYZED).field("type", "string")
-								.field("index", "not_analyzed").endObject().endObject().endObject();
-					}
-					else
-					{
-						jsonBuilder.startObject(refEntityAttr.getName()).field("type", "string").endObject();
-					}
-				}
-				jsonBuilder.endObject().endObject();
-			}
-			else if (esType.equals("string"))
-			{
-				jsonBuilder.startObject(attr.getName()).field("type", "multi_field").startObject("fields")
-						.startObject(attr.getName()).field("type", "string").endObject()
-						.startObject(FIELD_NOT_ANALYZED).field("type", "string").field("index", "not_analyzed")
-						.endObject().endObject().endObject();
-
-			}
-			else if (esType.equals("date"))
-			{
-				String dateFormat;
-				if (attr.getDataType().getEnumType() == FieldTypeEnum.DATE) dateFormat = "date"; // yyyy-MM-dd
-				else if (attr.getDataType().getEnumType() == FieldTypeEnum.DATE_TIME) dateFormat = "date_time_no_millis"; // yyyy-MM-dd’T’HH:mm:ssZZ
-				else
-				{
-					throw new MolgenisDataException("invalid molgenis field type for elasticsearch date format ["
-							+ attr.getDataType().getEnumType() + "]");
-				}
-
-				jsonBuilder.startObject(attr.getName()).field("type", "multi_field").startObject("fields")
-						.startObject(attr.getName()).field("type", "date").field("format", dateFormat).endObject()
-						.startObject(FIELD_NOT_ANALYZED).field("type", "date").field("format", dateFormat).endObject()
-						.endObject().endObject();
-			}
-			else
-			{
-				jsonBuilder.startObject(attr.getName()).field("type", "multi_field").startObject("fields")
-						.startObject(attr.getName()).field("type", esType).endObject().startObject(FIELD_NOT_ANALYZED)
-						.field("type", esType).endObject().endObject().endObject();
-
-			}
+			createAttributeMapping(attr, true, jsonBuilder);
 		}
 
 		jsonBuilder.endObject().endObject().endObject();
 
 		return jsonBuilder;
+	}
+
+	// FIXME check if sort mapping are correct for all data types
+	private static void createAttributeMapping(AttributeMetaData attr, boolean nestRefs, XContentBuilder jsonBuilder)
+			throws IOException
+	{
+		String attrName = attr.getName();
+		FieldTypeEnum dataType = attr.getDataType().getEnumType();
+		switch (dataType)
+		{
+			case BOOL:
+				jsonBuilder.startObject(attrName).field("type", "multi_field").startObject("fields")
+						.startObject(attrName).field("type", "boolean").endObject().startObject(FIELD_NOT_ANALYZED)
+						.field("type", "boolean").endObject().endObject().endObject();
+				break;
+			case CATEGORICAL:
+			case MREF:
+			case XREF:
+				EntityMetaData refEntity = attr.getRefEntity();
+				if (nestRefs)
+				{
+					jsonBuilder.startObject(attrName).field("type", "nested").startObject("properties");
+					for (AttributeMetaData refAttr : refEntity.getAtomicAttributes())
+					{
+						createAttributeMapping(refAttr, false, jsonBuilder);
+					}
+					jsonBuilder.endObject().endObject();
+				}
+				else
+				{
+					createAttributeMapping(refEntity.getLabelAttribute(), false, jsonBuilder);
+				}
+				break;
+			case COMPOUND:
+				throw new UnsupportedOperationException();
+			case DATE:
+				jsonBuilder.startObject(attrName).field("type", "multi_field").startObject("fields")
+						.startObject(attrName).field("type", "date").field("format", "date").endObject()
+						.startObject(FIELD_NOT_ANALYZED).field("type", "date").field("format", "date").endObject()
+						.endObject().endObject();
+				break;
+			case DATE_TIME:
+				jsonBuilder.startObject(attrName).field("type", "multi_field").startObject("fields")
+						.startObject(attrName).field("type", "date").field("format", "date_time_no_millis").endObject()
+						.startObject(FIELD_NOT_ANALYZED).field("type", "date").field("format", "date_time_no_millis")
+						.endObject().endObject().endObject();
+				break;
+			case DECIMAL:
+				jsonBuilder.startObject(attrName).field("type", "multi_field").startObject("fields")
+						.startObject(attrName).field("type", "double").endObject().startObject(FIELD_NOT_ANALYZED)
+						.field("type", "double").endObject().endObject().endObject();
+				break;
+			case FILE:
+			case IMAGE:
+				throw new MolgenisDataException("Unsupported data type [" + dataType + "]");
+			case INT:
+				jsonBuilder.startObject(attrName).field("type", "multi_field").startObject("fields")
+						.startObject(attrName).field("type", "integer").endObject().startObject(FIELD_NOT_ANALYZED)
+						.field("type", "integer").endObject().endObject().endObject();
+				break;
+			case LONG:
+				jsonBuilder.startObject(attrName).field("type", "multi_field").startObject("fields")
+						.startObject(attrName).field("type", "long").endObject().startObject(FIELD_NOT_ANALYZED)
+						.field("type", "long").endObject().endObject().endObject();
+				break;
+			case EMAIL:
+			case ENUM:
+			case HTML:
+			case HYPERLINK:
+			case SCRIPT:
+			case STRING:
+			case TEXT:
+				jsonBuilder.startObject(attrName).field("type", "multi_field").startObject("fields")
+						.startObject(attrName).field("type", "string").endObject().startObject(FIELD_NOT_ANALYZED)
+						.field("type", "string").field("index", "not_analyzed").endObject().endObject().endObject();
+				break;
+			default:
+				throw new RuntimeException("Unknown data type [" + dataType + "]");
+		}
 	}
 
 	public static void serializeEntityMeta(EntityMetaData entityMetaData, XContentBuilder jsonBuilder)
@@ -376,43 +401,5 @@ public class MappingsBuilder
 		}
 		return attribute;
 
-	}
-
-	private static String getType(AttributeMetaData attr)
-	{
-		FieldTypeEnum enumType = attr.getDataType().getEnumType();
-		switch (enumType)
-		{
-			case BOOL:
-				return "boolean";
-			case DATE:
-			case DATE_TIME:
-				return "date";
-			case DECIMAL:
-				return "double";
-			case INT:
-				return "integer";
-			case LONG:
-				return "long";
-			case CATEGORICAL:
-			case EMAIL:
-			case ENUM:
-			case HTML:
-			case HYPERLINK:
-			case STRING:
-			case TEXT:
-				return "string";
-			case MREF:
-			case XREF:
-			{
-				// return type of referenced label field
-				return getType(attr.getRefEntity().getLabelAttribute());
-			}
-			case FILE:
-			case IMAGE:
-				throw new ElasticsearchException("indexing of molgenis field type [" + enumType + "] not supported");
-			default:
-				return "string";
-		}
 	}
 }

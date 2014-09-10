@@ -48,7 +48,7 @@ public class ElasticsearchAttributeMetaDataRepositoryTest
 		AttributeMetaData attribute = mock(AttributeMetaData.class);
 		elasticsearchAttributeMetaDataRepository.addAttributeMetaData(entityName, attribute);
 		verify(attributeMetaDataRepository).addAttributeMetaData(entityName, attribute);
-		verify(elasticSearchService).createMappings(entityMetaData, false);
+		verify(elasticSearchService).createMappings(entityMetaData, true);
 	}
 
 	@Test
@@ -70,6 +70,6 @@ public class ElasticsearchAttributeMetaDataRepositoryTest
 		when(dataService.getEntityMetaData(entityName)).thenReturn(entityMetaData);
 		elasticsearchAttributeMetaDataRepository.removeAttributeMetaData(entityName, attributeName);
 		verify(attributeMetaDataRepository).removeAttributeMetaData(entityName, attributeName);
-		verify(elasticSearchService).createMappings(entityMetaData, false);
+		verify(elasticSearchService).createMappings(entityMetaData, true);
 	}
 }

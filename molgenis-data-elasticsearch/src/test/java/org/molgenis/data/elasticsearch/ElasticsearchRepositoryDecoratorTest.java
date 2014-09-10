@@ -297,6 +297,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	{
 		elasticSearchRepository.flush();
 		verify(repository).flush();
+		verify(elasticSearchService).flush();
 	}
 
 	@Test

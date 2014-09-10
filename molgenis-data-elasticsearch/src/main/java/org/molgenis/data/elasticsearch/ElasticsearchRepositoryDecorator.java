@@ -1,180 +1,45 @@
 package org.molgenis.data.elasticsearch;
 
-import static org.molgenis.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchId;
-import static org.molgenis.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchIds;
-
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
 
 import org.molgenis.data.AggregateResult;
-import org.molgenis.data.Aggregateable;
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Countable;
-import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IndexedCrudRepository;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
-import org.molgenis.data.Queryable;
 import org.molgenis.data.Repository;
 import org.molgenis.data.Updateable;
 import org.molgenis.data.Writable;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.elasticsearch.ElasticSearchService;
 import org.molgenis.elasticsearch.ElasticSearchService.IndexingMode;
 import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.collect.Iterables;
-
 /**
  * Repository that wraps an existing repository and retrieves count/aggregate information from a Elasticsearch index
  */
-public class ElasticsearchRepositoryDecorator implements IndexedCrudRepository, Aggregateable
+public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepository implements IndexedCrudRepository
 {
 	public static final String BASE_URL = "elasticsearch://";
 
 	private final Repository repository;
-	private final ElasticSearchService elasticSearchService;
 
 	public ElasticsearchRepositoryDecorator(Repository repository, ElasticSearchService elasticSearchService)
 	{
+		super(elasticSearchService);
 		if (repository == null) throw new IllegalArgumentException("repository is null");
-		if (elasticSearchService == null) throw new IllegalArgumentException("elasticSearchService is null");
 		this.repository = repository;
-		this.elasticSearchService = elasticSearchService;
 	}
 
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
 		return repository.getEntityMetaData();
-	}
-
-	@Override
-	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
-	{
-		return repository.iterator(clazz);
-	}
-
-	@Override
-	public String getUrl()
-	{
-		return BASE_URL + getName() + '/';
-	}
-
-	@Override
-	public long count()
-	{
-		if (!(repository instanceof Countable))
-		{
-			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Countable");
-		}
-		return ((Countable) repository).count();
-	}
-
-	@Override
-	public Query query()
-	{
-		return new QueryImpl(this);
-	}
-
-	@Override
-	public long count(Query q)
-	{
-		if (!(repository instanceof Queryable))
-		{
-			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Queryable");
-		}
-		return elasticSearchService.count(q, getEntityMetaData());
-	}
-
-	@Override
-	public Iterable<Entity> findAll(Query q)
-	{
-		if (!(repository instanceof Queryable))
-		{
-			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Queryable");
-		}
-		return elasticSearchService.search(q, getEntityMetaData());
-	}
-
-	@Override
-	public <E extends Entity> Iterable<E> findAll(Query q, Class<E> clazz)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public Entity findOne(Query q)
-	{
-		if (!(repository instanceof Queryable))
-		{
-			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Queryable");
-		}
-		Iterable<Entity> entities = elasticSearchService.search(q, getEntityMetaData());
-		return !Iterables.isEmpty(entities) ? entities.iterator().next() : null;
-	}
-
-	@Override
-	public Entity findOne(Object id)
-	{
-		if (!(repository instanceof Queryable))
-		{
-			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Queryable");
-		}
-		return ((Queryable) repository).findOne(id);
-	}
-
-	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids)
-	{
-		if (!(repository instanceof Queryable))
-		{
-			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Queryable");
-		}
-		return ((Queryable) repository).findAll(ids);
-	}
-
-	@Override
-	public <E extends Entity> Iterable<E> findAll(Iterable<Object> ids, Class<E> clazz)
-	{
-		throw new UnsupportedOperationException(); // FIXME
-	}
-
-	@Override
-	public <E extends Entity> E findOne(Object id, Class<E> clazz)
-	{
-		throw new UnsupportedOperationException(); // FIXME
-	}
-
-	@Override
-	public <E extends Entity> E findOne(Query q, Class<E> clazz)
-	{
-		throw new UnsupportedOperationException(); // FIXME
-	}
-
-	@Override
-	public Iterator<Entity> iterator()
-	{
-		return repository.iterator();
-	}
-
-	@Override
-	public void close() throws IOException
-	{
-		// noop
-	}
-
-	@Override
-	public String getName()
-	{
-		return repository.getName();
 	}
 
 	@Override
@@ -195,8 +60,7 @@ public class ElasticsearchRepositoryDecorator implements IndexedCrudRepository, 
 		}
 		((Writable) repository).add(entity);
 
-		EntityMetaData entityMetaData = getEntityMetaData();
-		elasticSearchService.index(entity, entityMetaData, IndexingMode.ADD);
+		super.add(entity);
 	}
 
 	@Override
@@ -209,8 +73,7 @@ public class ElasticsearchRepositoryDecorator implements IndexedCrudRepository, 
 		}
 		Integer count = ((Writable) repository).add(entities);
 
-		EntityMetaData entityMetaData = getEntityMetaData();
-		elasticSearchService.index(entities, entityMetaData, IndexingMode.ADD);
+		super.add(entities);
 		return count;
 	}
 
@@ -222,6 +85,8 @@ public class ElasticsearchRepositoryDecorator implements IndexedCrudRepository, 
 			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Updateable");
 		}
 		((Writable) repository).flush();
+
+		super.flush();
 	}
 
 	@Override
@@ -232,6 +97,8 @@ public class ElasticsearchRepositoryDecorator implements IndexedCrudRepository, 
 			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Updateable");
 		}
 		((Writable) repository).clearCache();
+
+		super.clearCache();
 	}
 
 	@Override
@@ -244,8 +111,7 @@ public class ElasticsearchRepositoryDecorator implements IndexedCrudRepository, 
 		}
 		((Updateable) repository).update(entity);
 
-		EntityMetaData entityMetaData = getEntityMetaData();
-		elasticSearchService.index(entity, entityMetaData, IndexingMode.UPDATE);
+		super.update(entity);
 	}
 
 	@Override
@@ -258,8 +124,7 @@ public class ElasticsearchRepositoryDecorator implements IndexedCrudRepository, 
 		}
 		((Updateable) repository).update(entities);
 
-		EntityMetaData entityMetaData = getEntityMetaData();
-		elasticSearchService.index(entities, entityMetaData, IndexingMode.UPDATE);
+		super.update(entities);
 	}
 
 	@Override
@@ -272,8 +137,7 @@ public class ElasticsearchRepositoryDecorator implements IndexedCrudRepository, 
 		}
 		((Updateable) repository).delete(entity);
 
-		EntityMetaData entityMetaData = getEntityMetaData();
-		elasticSearchService.delete(entity, entityMetaData);
+		super.delete(entity);
 	}
 
 	@Override
@@ -286,8 +150,7 @@ public class ElasticsearchRepositoryDecorator implements IndexedCrudRepository, 
 		}
 		((Updateable) repository).delete(entities);
 
-		EntityMetaData entityMetaData = getEntityMetaData();
-		elasticSearchService.delete(entities, entityMetaData);
+		super.delete(entities);
 	}
 
 	@Override
@@ -300,8 +163,7 @@ public class ElasticsearchRepositoryDecorator implements IndexedCrudRepository, 
 		}
 		((Updateable) repository).deleteById(id);
 
-		EntityMetaData entityMetaData = getEntityMetaData();
-		elasticSearchService.deleteById(toElasticsearchId(id), entityMetaData);
+		super.deleteById(id);
 	}
 
 	@Override
@@ -314,8 +176,7 @@ public class ElasticsearchRepositoryDecorator implements IndexedCrudRepository, 
 		}
 		((Updateable) repository).deleteById(ids);
 
-		EntityMetaData entityMetaData = getEntityMetaData();
-		elasticSearchService.deleteById(toElasticsearchIds(ids), entityMetaData);
+		super.deleteById(ids);
 	}
 
 	@Override
@@ -328,12 +189,13 @@ public class ElasticsearchRepositoryDecorator implements IndexedCrudRepository, 
 		}
 		((Updateable) repository).deleteAll();
 
-		elasticSearchService.delete(getEntityMetaData());
+		super.deleteAll();
 	}
 
 	@Override
 	public void rebuildIndex()
 	{
+		// FIXME not working?
 		EntityMetaData entityMetaData = getEntityMetaData();
 		try
 		{

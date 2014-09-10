@@ -45,7 +45,7 @@ public class ElasticsearchEntityMetaDataRepository implements EntityMetaDataRepo
 
 		try
 		{
-			elasticSearchService.createMappings(entityMetaData, false);
+			elasticSearchService.createMappings(entityMetaData, true);
 		}
 		catch (IOException e)
 		{

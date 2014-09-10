@@ -56,7 +56,7 @@ public class ElasticsearchAttributeMetaDataRepository implements AttributeMetaDa
 	{
 		try
 		{
-			elasticSearchService.createMappings(dataService.getEntityMetaData(entityName), false);
+			elasticSearchService.createMappings(dataService.getEntityMetaData(entityName), true);
 		}
 		catch (IOException e)
 		{

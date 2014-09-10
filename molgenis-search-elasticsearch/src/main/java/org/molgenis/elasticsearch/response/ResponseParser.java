@@ -18,6 +18,8 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.aggregations.bucket.nested.Nested;
+import org.elasticsearch.search.aggregations.bucket.nested.ReverseNested;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
 import org.elasticsearch.search.suggest.term.TermSuggestion.Score;
@@ -143,13 +145,7 @@ public class ResponseParser
 				throw new RuntimeException("Multiple aggregations [" + nrAggregations + "] not supported");
 			}
 
-			Aggregation aggregation = aggregations.iterator().next();
-			if (!(aggregation instanceof Terms))
-			{
-				throw new RuntimeException("Aggregation of type [" + aggregation.getClass().getName()
-						+ "] not supported");
-			}
-			Terms terms = (Terms) aggregation;
+			Terms terms = getTermsAggregation(aggregations);
 
 			Collection<Bucket> buckets = terms.getBuckets();
 			int nrBuckets = buckets.size();
@@ -201,14 +197,7 @@ public class ResponseParser
 								throw new RuntimeException("Multiple aggregations [" + nrAggregations
 										+ "] not supported");
 							}
-							Aggregation subAggregation = subAggregations.iterator().next();
-
-							if (!(subAggregation instanceof Terms))
-							{
-								throw new RuntimeException("Aggregation of type ["
-										+ subAggregation.getClass().getName() + "] not supported");
-							}
-							Terms subTerms = (Terms) subAggregation;
+							Terms subTerms = getTermsAggregation(subAggregations);
 
 							for (Bucket subBucket : subTerms.getBuckets())
 							{
@@ -242,7 +231,7 @@ public class ResponseParser
 						if (subAggregations != null)
 						{
 							long count = 0;
-							Terms subTerms = (Terms) subAggregations.iterator().next();
+							Terms subTerms = getTermsAggregation(subAggregations);
 							for (Bucket subBucket : subTerms.getBuckets())
 							{
 								long bucketCount = subBucket.getDocCount();
@@ -290,5 +279,25 @@ public class ResponseParser
 		}
 
 		return new SearchResult(totalCount, searchHits, aggregate);
+	}
+
+	private Terms getTermsAggregation(Aggregations aggregations)
+	{
+		Aggregation aggregation = aggregations.iterator().next();
+		if (aggregation instanceof ReverseNested)
+		{
+			Aggregations reverseNestedAggregations = ((ReverseNested) aggregation).getAggregations();
+			aggregation = reverseNestedAggregations.iterator().next();
+		}
+		if (aggregation instanceof Nested)
+		{
+			Aggregations nestedAggregations = ((Nested) aggregation).getAggregations();
+			aggregation = nestedAggregations.iterator().next();
+		}
+		if (!(aggregation instanceof Terms))
+		{
+			throw new RuntimeException("Aggregation of type [" + aggregation.getClass().getName() + "] not supported");
+		}
+		return (Terms) aggregation;
 	}
 }
