@@ -86,6 +86,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	private static final String NODEPATH_SEPARATOR = "\\.";
 
 	private static final AtomicInteger runningProcesses = new AtomicInteger();
+	private static final double DEFAULT_BOOST = 10;
 
 	@Autowired
 	private DataService dataService;
@@ -184,19 +185,17 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 				// ElasticSearch queries
 				Collection<OntologyTermContainer> ontologyTermContainers = collectOntologyTermInfo(ontologyTermUris,
 						boostedOntologyTermUris);
-				List<QueryRule> subQueryRules = createQueryRules(description, ontologyTermContainers, stemmer);
+				QueryRule subQueryRules_0 = createQueryRulesForDescription(description, stemmer);
+				List<QueryRule> subQueryRules_1 = createQueryRules(description, ontologyTermContainers, stemmer);
 				List<QueryRule> subQueryRules_2 = getAlternativeOTs(description, ontologyTermContainers, stemmer);
 				List<QueryRule> subQueryRules_3 = getExistingMappings(feature, stemmer,
 						createMappingDataSetIdentifier(userName, targetDataSetId, sourceDataSetId));
 
 				QueryRule finalQueryRule = new QueryRule(new ArrayList<QueryRule>());
 				// Add original description of data items to the query
-				finalQueryRule.getNestedRules().add(
-						new QueryRule(FIELD_DESCRIPTION_STOPWORDS, Operator.EQUALS, removeStopWords(description)));
-				finalQueryRule.getNestedRules().add(
-						new QueryRule(ObservableFeature.DESCRIPTION, Operator.EQUALS, removeStopWords(description)));
 				finalQueryRule.setOperator(Operator.DIS_MAX);
-				finalQueryRule.getNestedRules().addAll(subQueryRules);
+				finalQueryRule.getNestedRules().add(subQueryRules_0);
+				finalQueryRule.getNestedRules().addAll(subQueryRules_1);
 				finalQueryRule.getNestedRules().addAll(subQueryRules_2);
 				finalQueryRule.getNestedRules().addAll(subQueryRules_3);
 				return searchDisMaxQuery(sourceDataSet.getProtocolUsed().getId().toString(), new QueryImpl(
@@ -204,6 +203,17 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			}
 		}
 		return new SearchResult(0, Collections.<Hit> emptyList());
+	}
+
+	private QueryRule createQueryRulesForDescription(String description, PorterStemmer stemmer)
+	{
+		QueryRule queryRule = new QueryRule(new ArrayList<QueryRule>());
+		queryRule.getNestedRules().add(
+				new QueryRule(FIELD_DESCRIPTION_STOPWORDS, Operator.EQUALS, removeStopWords(description)));
+		queryRule.getNestedRules().add(
+				new QueryRule(ObservableFeature.DESCRIPTION, Operator.EQUALS, removeStopWords(description)));
+		queryRule.setOperator(Operator.DIS_MAX);
+		return queryRule;
 	}
 
 	/**
@@ -462,7 +472,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 				List<QueryRule> subQueryRules = new ArrayList<QueryRule>();
 				QueryRule disJunctQuery = new QueryRule(subQueryRules);
 				disJunctQuery.setOperator(Operator.DIS_MAX);
-
+				disJunctQuery.setValue(entry.getValue() ? DEFAULT_BOOST : null);
 				// Retrieve all the ontology terms that are 'under' specific
 				// node (all descendants)
 				for (Hit hit : result.getSearchHits())
@@ -503,16 +513,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 								{
 									int levelDown = nodePath.split(NODEPATH_SEPARATOR).length - parentNodeLevel;
 									double boostedNumber = Math.pow(0.5, levelDown);
-
-									StringBuilder boostedSynonym = new StringBuilder();
-									for (String eachToken : ontologyTermSynonym
-											.split(OntologyTermQueryRepository.MULTI_WHITESPACES))
-									{
-										if (eachToken.length() != 0) boostedSynonym
-												.append(OntologyTermQueryRepository.SINGLE_WHITESPACE);
-										boostedSynonym.append(eachToken).append('^').append(boostedNumber);
-									}
-									ontologyTermSynonym = boostedSynonym.toString();
+									ontologyTermSynonym = createQueryWithBoost(ontologyTermSynonym, boostedNumber);
 								}
 							}
 
@@ -574,18 +575,47 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 				{
 					String nodePath = entry.getKey();
 					boolean isBoosted = ontologyTermContainer.getAllPaths().get(nodePath);
-					for (String definition : alternativeDefinitions.split(ALTERNATIVE_DEFINITION_SEPERATOR))
+					for (String alternativeDefinition : alternativeDefinitions.split(ALTERNATIVE_DEFINITION_SEPERATOR))
 					{
-						List<String> ontologyTermUris = Arrays.asList(definition.split(COMMON_SEPERATOR));
-						queryRules.addAll(createQueryRules(
-								description,
-								collectOntologyTermInfo(ontologyTermUris,
-										isBoosted ? ontologyTermUris : Collections.<String> emptyList()), stemmer));
+						List<QueryRule> subQueryRules = new ArrayList<QueryRule>();
+						for (String ontologyTermUri : Arrays.asList(alternativeDefinition.split(COMMON_SEPERATOR)))
+						{
+							List<QueryRule> rules = createQueryRules(
+									description,
+									collectOntologyTermInfo(
+											Arrays.asList(ontologyTermUri),
+											isBoosted ? Arrays.asList(ontologyTermUri) : Collections
+													.<String> emptyList()), stemmer);
+							subQueryRules.addAll(rules);
+
+						}
+						if (subQueryRules.size() > 1)
+						{
+							QueryRule shouldQueryRule = new QueryRule(subQueryRules);
+							shouldQueryRule.setOperator(Operator.SHOULD);
+							queryRules.add(shouldQueryRule);
+						}
+						else
+						{
+							queryRules.addAll(subQueryRules);
+						}
 					}
 				}
 			}
 		}
 		return queryRules;
+	}
+
+	private String createQueryWithBoost(String ontologyTermSynonym, double boostedNumber)
+	{
+		StringBuilder boostedSynonym = new StringBuilder();
+		for (String eachToken : ontologyTermSynonym.split(OntologyTermQueryRepository.MULTI_WHITESPACES))
+		{
+			if (boostedSynonym.length() != 0) boostedSynonym.append(OntologyTermQueryRepository.SINGLE_WHITESPACE);
+			boostedSynonym.append(eachToken).append('^').append(boostedNumber);
+		}
+		ontologyTermSynonym = boostedSynonym.toString();
+		return boostedSynonym.toString();
 	}
 
 	private String removeStopWords(String originalTerm)

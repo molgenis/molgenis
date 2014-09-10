@@ -579,8 +579,8 @@
 				highScoresIndex.push(index);
 			});
 		}
-		var soretedMappedFeatures = sortByScoreAndLength(candidateMappedFeatures);
-		$.each(soretedMappedFeatures, function(index, mappedFeatureFromIndex){
+//		var soretedMappedFeatures = sortByScoreAndLength(candidateMappedFeatures);
+		$.each(candidateMappedFeatures, function(index, mappedFeatureFromIndex){
 			var mappedFeatureId = mappedFeatureFromIndex.id;
 			var score = mappedFeatureFromIndex.score;
 			var mappedFeature = restApi.get('/api/v1/observablefeature/' + mappedFeatureId);
