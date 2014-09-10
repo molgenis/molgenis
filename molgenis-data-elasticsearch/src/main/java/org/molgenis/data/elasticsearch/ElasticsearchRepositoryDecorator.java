@@ -2,7 +2,6 @@ package org.molgenis.data.elasticsearch;
 
 import static org.molgenis.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchId;
 import static org.molgenis.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchIds;
-import static org.molgenis.elasticsearch.util.ElasticsearchEntityUtils.toEntityIds;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -13,11 +12,12 @@ import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Aggregateable;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Countable;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.IndexedCrudRepository;
 import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Queryable;
 import org.molgenis.data.Repository;
@@ -35,7 +35,7 @@ import com.google.common.collect.Iterables;
 /**
  * Repository that wraps an existing repository and retrieves count/aggregate information from a Elasticsearch index
  */
-public class ElasticsearchRepositoryDecorator implements CrudRepository, Aggregateable
+public class ElasticsearchRepositoryDecorator implements IndexedCrudRepository, Aggregateable
 {
 	public static final String BASE_URL = "elasticsearch://";
 
@@ -101,22 +101,13 @@ public class ElasticsearchRepositoryDecorator implements CrudRepository, Aggrega
 		{
 			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Queryable");
 		}
-
-		Iterable<String> ids = elasticSearchService.search(q, getEntityMetaData());
-		return !Iterables.isEmpty(ids) ? ((Queryable) repository).findAll(toEntityIds(ids)) : Collections
-				.<Entity> emptyList();
+		return elasticSearchService.search(q, getEntityMetaData());
 	}
 
 	@Override
 	public <E extends Entity> Iterable<E> findAll(Query q, Class<E> clazz)
 	{
-		if (!(repository instanceof Queryable))
-		{
-			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Queryable");
-		}
-		Iterable<String> ids = elasticSearchService.search(q, getEntityMetaData());
-		return !Iterables.isEmpty(ids) ? ((Queryable) repository).findAll(toEntityIds(ids), clazz) : Collections
-				.<E> emptyList();
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -126,8 +117,8 @@ public class ElasticsearchRepositoryDecorator implements CrudRepository, Aggrega
 		{
 			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Queryable");
 		}
-		Iterable<String> ids = elasticSearchService.search(q, getEntityMetaData());
-		return !Iterables.isEmpty(ids) ? ((Queryable) repository).findOne(toEntityIds(ids).iterator().next()) : null;
+		Iterable<Entity> entities = elasticSearchService.search(q, getEntityMetaData());
+		return !Iterables.isEmpty(entities) ? entities.iterator().next() : null;
 	}
 
 	@Override
@@ -153,32 +144,19 @@ public class ElasticsearchRepositoryDecorator implements CrudRepository, Aggrega
 	@Override
 	public <E extends Entity> Iterable<E> findAll(Iterable<Object> ids, Class<E> clazz)
 	{
-		if (!(repository instanceof Queryable))
-		{
-			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Queryable");
-		}
-		return ((Queryable) repository).findAll(ids, clazz);
+		throw new UnsupportedOperationException(); // FIXME
 	}
 
 	@Override
 	public <E extends Entity> E findOne(Object id, Class<E> clazz)
 	{
-		if (!(repository instanceof Queryable))
-		{
-			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Queryable");
-		}
-		return ((Queryable) repository).findOne(id, clazz);
+		throw new UnsupportedOperationException(); // FIXME
 	}
 
 	@Override
 	public <E extends Entity> E findOne(Query q, Class<E> clazz)
 	{
-		if (!(repository instanceof Queryable))
-		{
-			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Queryable");
-		}
-		Iterable<String> ids = elasticSearchService.search(q, getEntityMetaData());
-		return !Iterables.isEmpty(ids) ? ((Queryable) repository).findOne(toEntityIds(ids).iterator().next(), clazz) : null;
+		throw new UnsupportedOperationException(); // FIXME
 	}
 
 	@Override
@@ -384,8 +362,23 @@ public class ElasticsearchRepositoryDecorator implements CrudRepository, Aggrega
 		}
 	}
 
-	public Repository getRepository()
+	@Override
+	public void rebuildIndex()
 	{
-		return repository;
+		EntityMetaData entityMetaData = getEntityMetaData();
+		try
+		{
+			if (elasticSearchService.hasMapping(entityMetaData))
+			{
+				elasticSearchService.delete(entityMetaData);
+			}
+			elasticSearchService.createMappings(entityMetaData, true);
+			elasticSearchService.index(repository, entityMetaData, IndexingMode.ADD);
+		}
+		catch (IOException e)
+		{
+			throw new MolgenisDataException(e);
+		}
+		elasticSearchService.indexRepository(repository);
 	}
 }
