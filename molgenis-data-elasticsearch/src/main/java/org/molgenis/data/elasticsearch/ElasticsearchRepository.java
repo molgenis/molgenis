@@ -274,6 +274,8 @@ public class ElasticsearchRepository implements CrudRepository, Aggregateable, M
 	public void add(Entity entity)
 	{
         createIndexRequest(entity).execute().actionGet();
+
+        client.admin().indices().prepareRefresh(indexName).execute().actionGet();
 	}
 
 	@Override
@@ -312,6 +314,7 @@ public class ElasticsearchRepository implements CrudRepository, Aggregateable, M
 	public void update(Entity entity)
 	{
 		createUpdateRequest(entity).execute().actionGet();
+        client.admin().indices().prepareRefresh(indexName).execute().actionGet();
 	}
 
 	@Override

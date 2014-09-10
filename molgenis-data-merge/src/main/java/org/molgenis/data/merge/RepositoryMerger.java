@@ -49,7 +49,7 @@ public class RepositoryMerger {
      */
     public CrudRepository merge(List<Repository> repositoryList, List<AttributeMetaData> commonAttributes, CrudRepository mergedRepository){
         dataService.addRepository(mergedRepository);
-        mergeData(repositoryList, mergedRepository.getEntityMetaData(), (CrudRepository) dataService.getRepositoryByEntityName(mergedRepository.getName()), commonAttributes);
+        mergeData(repositoryList, (CrudRepository) dataService.getRepositoryByEntityName(mergedRepository.getName()), commonAttributes);
 
         return mergedRepository;
     }
@@ -57,11 +57,11 @@ public class RepositoryMerger {
     /**
      * Merge the data of all repositories based on the common columns
      */
-    private void mergeData(List<Repository> originalRepositoriesList, EntityMetaData mergedEntityMetaData, CrudRepository mergedElasticsearchRepository, List<AttributeMetaData> commonAttributes) {
+    private void mergeData(List<Repository> originalRepositoriesList, CrudRepository crudRepository, List<AttributeMetaData> commonAttributes) {
         for(Repository repository : originalRepositoriesList){
             for(Entity entity : repository){
                 boolean newEntity = false;
-                AbstractEntity mergedEntity = getMergedEntity(mergedElasticsearchRepository, commonAttributes, entity);
+                AbstractEntity mergedEntity = getMergedEntity(crudRepository, commonAttributes, entity);
                 //if no entity for all the common columns exists, create a new one, containing these fields
                 if(mergedEntity == null){
                     newEntity = true;
@@ -74,10 +74,10 @@ public class RepositoryMerger {
                     }
                 }
                 if(newEntity){
-                    mergedElasticsearchRepository.add(mergedEntity);
+                    crudRepository.add(mergedEntity);
                 }
                 else{
-                    mergedElasticsearchRepository.update(mergedEntity);
+                    crudRepository.update(mergedEntity);
                 }
             }
         }
@@ -99,11 +99,13 @@ public class RepositoryMerger {
     /**
      * check if an entity for the common attributes already exists and if so, return it
      */
-    private AbstractEntity getMergedEntity(CrudRepository mergedElasticsearchRepository, List<AttributeMetaData> commonAttributes, Entity entity) {
+    private AbstractEntity getMergedEntity(CrudRepository crudRepository, List<AttributeMetaData> commonAttributes, Entity entity) {
         Query findMergedEntityQuery = new QueryImpl();
         for (AttributeMetaData attributeMetaData : commonAttributes)
             findMergedEntityQuery = findMergedEntityQuery.eq(attributeMetaData.getName(), entity.get(attributeMetaData.getName()));
-        return (AbstractEntity)mergedElasticsearchRepository.findOne(findMergedEntityQuery);
+        AbstractEntity result = (AbstractEntity)crudRepository.findOne(findMergedEntityQuery);
+        System.out.println(result);
+        return result;
     }
 
     /**

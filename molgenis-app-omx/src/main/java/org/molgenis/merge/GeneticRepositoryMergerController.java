@@ -83,6 +83,7 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 			if (searchService.documentTypeExists(VKGL))
 			{
 				searchService.deleteDocumentsByType(VKGL);
+                dataService.removeRepository(VKGL);
 			}
 			else
 			{
