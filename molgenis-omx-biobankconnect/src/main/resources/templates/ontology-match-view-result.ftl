@@ -4,16 +4,16 @@
 <#assign js=["jquery-ui-1.9.2.custom.min.js", "bootstrap-fileupload.min.js", "jquery.fancytree.min.js", "common-component.js", "ontology-tree-view.js", "ontology.tree.plugin.js", "ontology-service-result.js", "jquery.bootstrap.pager.js", "simple_statistics.js"]>
 <@header css js/>
 <form class="form-horizontal">
-	<div class="row-fluid">
-		<div class="span12">
-			<div class="row-fluid">
-				<div class="span12">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="row">
+				<div class="col-md-12">
 					<legend><center><h3>Ontology Annotator</h3></center></legend>
 				</div>
 			</div>
 			<#if (total > 0)>
-			<div class="row-fluid">
-				<div class="span1">
+			<div class="row">
+				<div class="col-md-1">
 					<a id="back-button" href="${context_url}" type="button" class="btn btn-info">Back</a>
 				</div>
 				<div>
@@ -24,23 +24,23 @@
 				</div>
 			</div>
 			<br>
-			<div class="row-fluid">
-				<div class="span12 custom-white-well">
-					<div class="row-fluid">
-						<div id="match-result-panel" class="span12" style="min-height:500px;">
-							<div class="row-fluid">
-								<div class="span12 well">
-									<div class="row-fluid">
-										<div class="span4"><strong>Input terms</strong></div>
-										<div class="span8">
-											<div class="row-fluid">
-												<div class="span5 matchterm" style="margin-bottom:-10px;">
+			<div class="row">
+				<div class="col-md-12 custom-white-well">
+					<div class="row">
+						<div id="match-result-panel" class="col-md-12" style="min-height:500px;">
+							<div class="row">
+								<div class="col-md-12 well">
+									<div class="row">
+										<div class="col-md-4"><strong>Input terms</strong></div>
+										<div class="col-md-8">
+											<div class="row">
+												<div class="col-md-5 matchterm" style="margin-bottom:-10px;">
 													<strong>Matched ontologyterms</strong>
 												</div>
-												<div class="span5 termurl" style="margin-bottom:-10px;">
+												<div class="col-md-5 termurl" style="margin-bottom:-10px;">
 													<strong>Ontologyterm Url</strong>
 												</div>
-												<div class="span2" style="margin-bottom:-10px;">
+												<div class="col-md-2" style="margin-bottom:-10px;">
 													<a id="score-explanation"><center>?Score</center></a>
 												</div>
 											</div>
@@ -48,20 +48,20 @@
 									</div>
 								</div>
 							</div>
-							<div id="match-result" class="row-fluid"></div>
-							<div class="row-fluid"><div id="pager"></div></div>
+							<div id="match-result" class="row"></div>
+							<div class="row"><div id="pager"></div></div>
 						</div>
-						<div id="tree-visual-panel" class="span4" style="display:none;">
-							<div class="row-fluid">
-								<div class="span12 well">
-									<div class="row-fluid">
-										<div class="span12">
+						<div id="tree-visual-panel" class="col-md-4" style="display:none;">
+							<div class="row">
+								<div class="col-md-12 well">
+									<div class="row">
+										<div class="col-md-12">
 											<strong>Ontology tree</strong>
 										</div>
 									</div>
 								</div>
 							</div>
-							<div class="row-fluid">
+							<div class="row">
 								<div id="tree-container" style="position:relative;top:10px;"></div>	
 							</div>
 						</div>
@@ -100,15 +100,15 @@
 		
 		$('#show-tree-button').click(function(){
 			if($('#tree-visual-panel').is(':hidden')){
-				$('#match-result-panel').removeClass('span12').addClass('span8');
+				$('#match-result-panel').removeClass('col-md-12').addClass('col-md-8');
 				$('.termurl').hide();
-				$('.matchterm').removeClass('span5').addClass('span8');
+				$('.matchterm').removeClass('col-md-5').addClass('col-md-8');
 				$('#tree-visual-panel').show();
 				$('#show-tree-button').html('Hide tree');
 			}else{
-				$('#match-result-panel').removeClass('span8').addClass('span12');
+				$('#match-result-panel').removeClass('col-md-8').addClass('col-md-12');
 				$('.termurl').show();
-				$('.matchterm').removeClass('span8').addClass('span5');
+				$('.matchterm').removeClass('col-md-8').addClass('col-md-5');
 				$('#tree-visual-panel').hide();
 				$('#show-tree-button').html('Show tree');
 			}

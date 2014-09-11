@@ -85,6 +85,9 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		// DataExplorer rows clickable yes / no
 		runtimePropertyMap.put(DataExplorerController.KEY_DATAEXPLORER_ROW_CLICKABLE, String.valueOf(false));
 
+		// DataExplorer hide select if dataset selected through url
+		runtimePropertyMap.put(DataExplorerController.KEY_HIDE_SELECT, String.valueOf(true));
+
 		// Annotators include files/tools
 		String molgenisHomeDir = System.getProperty("molgenis.home");
 

@@ -43,7 +43,7 @@
 		var oldContainer = null;
 		$('ol.vertical').sortable({
 			group : 'nested',
-			handle: 'i.icon-move',
+			handle: 'span.glyphicon-move',
 			afterMove : function(placeholder, container) {
 				if (oldContainer != container) {
 					if (oldContainer)
@@ -60,7 +60,7 @@
 		
 		// delete menu / menu item
 		var container = $('#menu-editor-container');
-		$(container).on('click', '.icon-trash', function(e) {
+		$(container).on('click', '.glyphicon-trash', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
 			$(this).closest('li').remove();

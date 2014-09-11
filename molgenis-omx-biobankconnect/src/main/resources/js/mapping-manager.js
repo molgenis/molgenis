@@ -117,7 +117,7 @@
 		$.each(biobankDataSets, function(index, mappedDataSet){
 			var removeIcon = $('<i />').addClass('icon-trash show-popover float-right');
 			var editIcon = $('<i />').addClass('icon-pencil show-popover float-right');
-			var cellDiv = $('<div />').addClass('row-fluid text-align-center').append(removeIcon).append(editIcon);
+			var cellDiv = $('<div />').addClass('row text-align-center').append(removeIcon).append(editIcon);
 			$('<td />').append(cellDiv).appendTo(row);
 			getMapping(createDataSetIdentifier(selectedDataSet, mappedDataSet), molgenis.hrefToId(feature.href), function(mappedFeatureNames){
 				var topFeatureDivContainer = $('<div />').addClass('show-popover').appendTo(cellDiv).click(function(){
@@ -145,13 +145,13 @@
 								
 								//Modal body information.
 								var body = modal.find('.modal-body:eq(0)').css('max-height','100%').append(createFeatureInfoPanel(feature));
-								var leftControlDiv = $('<div />').addClass('span6').css('margin-bottom','10px').append('<div><h4>' + selectedDataSet.Name +  '</h4></div>');
-								var rightControlDiv = $('<div />').addClass('span6').css('margin-bottom','10px').append('<div><h4>' + mappedDataSet.Name +  '</h4></div>');
-								var modalBodyDiv = $('<div />').addClass('row-fluid').append(leftControlDiv).append(rightControlDiv).appendTo(body);
-								var controlDiv = $('<div class="row-fluid"></div>').appendTo(body);
+								var leftControlDiv = $('<div />').addClass('col-md-6').css('margin-bottom','10px').append('<div><h4>' + selectedDataSet.Name +  '</h4></div>');
+								var rightControlDiv = $('<div />').addClass('col-md-6').css('margin-bottom','10px').append('<div><h4>' + mappedDataSet.Name +  '</h4></div>');
+								var modalBodyDiv = $('<div />').addClass('row').append(leftControlDiv).append(rightControlDiv).appendTo(body);
+								var controlDiv = $('<div class="row"></div>').appendTo(body);
 								var mappingTable = createMappingTable(candidateMappedFeatures, mappedFeatureNames);
 								
-								$('<div />').addClass('row-fluid well').append(mappingTable).css({
+								$('<div />').addClass('row well').append(mappingTable).css({
 									'overflow-y' : 'scroll',
 									'height' : $(document).height()/4,
 									'padding-right' : '5px',
@@ -224,22 +224,22 @@
 		
 		//Create the general info about parameter of interest
 		function createFeatureInfoPanel(feature){
-			var divRow = $('<div />').addClass('row-fluid');
-			var infoDiv = $('<div />').addClass('span3');
+			var divRow = $('<div />').addClass('row');
+			var infoDiv = $('<div />').addClass('col-md-3');
 			$('<div />').append('<span class="info"><strong>Data item : </strong></span>').append('<span>' + feature.Name + '</span>').appendTo(infoDiv);
 			if(feature.unit){
 				$('<div />').append('<span class="info"><strong>Unit : </strong></span>').append('<span>' + feature.unit.Name + '</span>').appendTo(infoDiv);
 			}
 			$('<div />').append('<span class="info"><strong>Data type : </strong></span>').append('<span>' + feature.dataType + '</span>').appendTo(infoDiv);
 			$('<div />').append('<span class="info"><strong>Description : </strong></span>').append('<span>' + molgenis.i18nDescription(feature).en + '</span>').appendTo(infoDiv);
-			var middleDiv = $('<div />').addClass('span9');
+			var middleDiv = $('<div />').addClass('col-md-9');
 			var categories = getCategoriesByFeatureIdentifier(feature.Identifier);
 			if(categories.length > 0){
-				var categoryDiv = $('<div />').addClass('span8').css('margin-left', '30px');
+				var categoryDiv = $('<div />').addClass('col-md-8').css('margin-left', '30px');
 				$.each(categories, function(index, category){
 					categoryDiv.append('<div>' + category.valueCode + ' = ' + category.Name + '</div>');
 				});
-				$('<div />').addClass('row-fluid').append('<div class="span1"><strong>Categories: </strong></div>').append(categoryDiv).appendTo(middleDiv);
+				$('<div />').addClass('row').append('<div class="col-md-1"><strong>Categories: </strong></div>').append(categoryDiv).appendTo(middleDiv);
 			}
 			divRow.append(infoDiv).append(middleDiv);
 			return divRow;
@@ -303,7 +303,7 @@
 			var testStatisticsButton = $('<button class="btn btn-info">Test</button>');
 			var suggestScriptButtion = $('<button class="btn btn-primary">Suggestion</button>');
 			var saveScriptButton = $('<button class="btn btn-success">Save script</button>').css('float','right');
-			$('<div class="span7"></div>').append(testStatisticsButton).append(' ').append(suggestScriptButtion).append(' ').append(saveScriptButton).appendTo(parentDiv);
+			$('<div class="col-md-7"></div>').append(testStatisticsButton).append(' ').append(suggestScriptButtion).append(' ').append(saveScriptButton).appendTo(parentDiv);
 			
 			testStatisticsButton.click(function(){
 				var modalBody = parentDiv.parents('.modal-body:first');
@@ -326,11 +326,11 @@
 						var backButton = $('<button />').addClass('btn btn-primary').append('Go back');
 						var featureObject = restApi.get('/api/v1/observablefeature/' + ontologyMatcherRequest['featureId']);
 						var dataSetObject = restApi.get('/api/v1/dataset/' + ontologyMatcherRequest['selectedDataSetIds'][0]);
-						var algorithmDiv = $('<div />').addClass('offset3 span6 well text-align-center').append('Test for variable <strong>' + featureObject.Name + '</strong> in dataset <strong>' + dataSetObject.Name + '</strong>');
-						var tableDiv = $('<div />').addClass('span6 well').css('min-height', statisticsDivHeight).append('<div class="legend-align-center">Summary statistics</div>').append(statisticsTable(data));
-						var graphDiv = $('<div />').attr('id', graphDivId).addClass('span6 well').css('min-height', statisticsDivHeight).append('<div class="legend-align-center">Distribution plot</div>').bcgraph(data.results);
-						$('<div />').addClass('row-fluid').append(algorithmDiv).appendTo(modalBody);
-						$('<div />').addClass('row-fluid').append(tableDiv).append(graphDiv).appendTo(modalBody);
+						var algorithmDiv = $('<div />').addClass('col-md-offset-3 col-md-6 well text-align-center').append('Test for variable <strong>' + featureObject.Name + '</strong> in dataset <strong>' + dataSetObject.Name + '</strong>');
+						var tableDiv = $('<div />').addClass('col-md-6 well').css('min-height', statisticsDivHeight).append('<div class="legend-align-center">Summary statistics</div>').append(statisticsTable(data));
+						var graphDiv = $('<div />').attr('id', graphDivId).addClass('col-md-6 well').css('min-height', statisticsDivHeight).append('<div class="legend-align-center">Distribution plot</div>').bcgraph(data.results);
+						$('<div />').addClass('row').append(algorithmDiv).appendTo(modalBody);
+						$('<div />').addClass('row').append(tableDiv).append(graphDiv).appendTo(modalBody);
 						modalBody.next('div:first').empty().prepend(backButton);
 						backButton.click(function(){
 							$(document).data('previousScript',editor.getValue());
@@ -683,7 +683,7 @@
 	
 	function createRematchingModal(feature){
 		standardModal.createModalCallback('Rematch research variable : ' + feature.Name, function(modal){
-			var divControlPanel = $('<div />').addClass('row-fluid');
+			var divControlPanel = $('<div />').addClass('row');
 			var selectTag = $('<select />');
 			var rematchedSelectedDataSetIds = [];
 			$.each(biobankDataSets, function(index, dataSet){
@@ -695,12 +695,12 @@
 			var removeAllButton = $('<button type="btn" class="btn btn">Remove all</button>');
 			var matchButton = $('<button type="btn" class="btn btn-primary">Rematch</button>');
 			
-			$('<div />').addClass('offset1 span3').append(selectTag).appendTo(divControlPanel);
-			$('<div />').addClass('offset1 span5 btn-group').append(selectButton).append(selectAllButton).append(removeAllButton).appendTo(divControlPanel);
+			$('<div />').addClass('col-md-offset-1 col-md-3').append(selectTag).appendTo(divControlPanel);
+			$('<div />').addClass('col-md-offset-1 col-md-5 btn-group').append(selectButton).append(selectAllButton).append(removeAllButton).appendTo(divControlPanel);
 			
-			var infoContainer = $('<div />').addClass('row-fluid');
-			var dataSetsContainer = $('<div />').addClass('offset1 span10 well').appendTo(infoContainer);
-			$('<div />').addClass('span12').append('<legend class="legend-small">Selected catalogues : </legend>').appendTo(dataSetsContainer);
+			var infoContainer = $('<div />').addClass('row');
+			var dataSetsContainer = $('<div />').addClass('col-md-offset-1 col-md-10 well').appendTo(infoContainer);
+			$('<div />').addClass('col-md-12').append('<legend class="legend-small">Selected catalogues : </legend>').appendTo(dataSetsContainer);
 			
 			modal.find('div.modal-body:eq(0)').append(divControlPanel).append(infoContainer);
 			modal.find('div.modal-footer:eq(0)').prepend(matchButton);
@@ -756,10 +756,10 @@
 			dataSetsContainer.find('div:gt(0)').remove();
 			$.each(rematchedSelectedDataSetIds, function(index, dataSetId){
 				var dataSet = restApi.get('/api/v1/dataset/' + dataSetId);
-				var newRow = $('<div />').addClass('row-fluid');
-				$('<div />').addClass('offset2 span3').append(dataSet.Name).appendTo(newRow);
+				var newRow = $('<div />').addClass('row');
+				$('<div />').addClass('col-md-offset-2 col-md-3').append(dataSet.Name).appendTo(newRow);
 				var removeButton = $('<button type="btn" class="btn btn-link">Remove</button>');
-				$('<div />').addClass('offset3 span2').append(removeButton).appendTo(newRow);
+				$('<div />').addClass('col-md-offset-3 col-md-2').append(removeButton).appendTo(newRow);
 				dataSetsContainer.append(newRow);
 				removeButton.click(function(){
 					rematchedSelectedDataSetIds.splice($.inArray(dataSetId, rematchedSelectedDataSetIds), 1);

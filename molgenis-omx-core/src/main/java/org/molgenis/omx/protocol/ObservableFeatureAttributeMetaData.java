@@ -1,5 +1,7 @@
 package org.molgenis.omx.protocol;
 
+import java.util.List;
+
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
@@ -133,6 +135,12 @@ public class ObservableFeatureAttributeMetaData implements AttributeMetaData
 		{
 			return new Range(this.observableFeature.getMinRange(), this.observableFeature.getMaxRange());
 		}
+		return null;
+	}
+
+	@Override
+	public List<String> getEnumOptions()
+	{
 		return null;
 	}
 }

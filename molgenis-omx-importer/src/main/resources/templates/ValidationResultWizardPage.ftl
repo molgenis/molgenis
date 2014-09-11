@@ -1,7 +1,7 @@
 <#if wizard.validationMessage??>
 	<script>
 		$(function() {
-			$('.bwizard-steps').after($('<div class="alert alert-block alert-error">${wizard.validationMessage}</div>'));
+			$('.bwizard-steps').after($('<div class="alert alert-block alert-danger">${wizard.validationMessage}</div>'));
 			$('.pager .next').addClass('disabled');
 		});
 	</script>
@@ -25,7 +25,7 @@
 					<#if wizard.dataImportable[name] == true>
 						<td class="alert alert-success" style="text-align: center;">Yes</td>
 					<#else>
-						<td class="alert alert-error" style="text-align: center;">No</td>
+						<td class="alert alert-danger" style="text-align: center;">No</td>
 					</#if>
 				</tr>
 			</#list>
@@ -57,7 +57,7 @@
 			<#if wizard.entitiesImportable[entity] == true>
 				<td class="alert alert-success" style="text-align: center;">Yes</td>
 			<#else>
-				<td class="alert alert-error" style="text-align: center;">No</td>
+				<td class="alert alert-danger" style="text-align: center;">No</td>
 			</#if>
 			
 		</tr>
@@ -92,11 +92,11 @@
 						</#list>
 					</td>
 				<#else>
-					<td class="alert alert-error">No fields detected</td>
+					<td class="alert alert-danger">No fields detected</td>
 				</#if>
 				
 				<#if wizard.fieldsRequired[entity]?size gt 0>
-					<td class="alert alert-error">
+					<td class="alert alert-danger">
 						<#list wizard.fieldsRequired[entity] as field>
 							${field}<#if field_has_next>, </#if>
 						</#list>

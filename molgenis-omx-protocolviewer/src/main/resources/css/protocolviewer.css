@@ -10,10 +10,6 @@
 	border-spacing: 0px;
 }
 
-ul.dynatree-container {
-	height: auto;
-}
-
 .box-title {
 	font-size: 10pt;
 	font-weight: bold;
@@ -58,7 +54,7 @@ ul.dynatree-container {
 	border: solid thin white;
 }
 
-i:hover {
+.glyphicon-remove:hover {
 	cursor: pointer;
 }
 

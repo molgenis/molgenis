@@ -1,20 +1,20 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
-<#assign css=["ui.dynatree.css", "catalogmanager.css"]>
-<#assign js=["jquery-ui-1.9.2.custom.min.js", "jquery.dynatree.min.js", "catalogmanager.js"]>
+<#assign css=["ui.fancytree.min.css", "catalogmanager.css"]>
+<#assign js=["jquery-ui-1.9.2.custom.min.js", "jquery.fancytree.min.js", "catalogmanager.js"]>
 <@header css js/>
-	<div class="row-fluid">
-		<div class="span8 offset2">
+	<div class="row">
+		<div class="col-md-8 col-md-offset-2">
 		<#if catalogs??>	
 			<div class="well">
-				<div class="row-fluid">
+				<div class="row">
 					<p id="loader-title" class="box-title">Choose a catalog</p>
 				<#if catalogs?size == 0>
 					<p>No catalogs found</p>
 				<#else>
 					<form id="catalogForm" name="catalogForm" method="post" action="${context_url}/activation">
-						<div class="row-fluid">
-							<div class="span6">	
+						<div class="row">
+							<div class="col-md-6">	
 								<div id="resultsTable">
 									<table class="table table-striped table-hover listtable selection-table">
 										<thead>
@@ -35,7 +35,7 @@
 												<label for="catalog_${catalog.id}">${catalog.id}</label>
 											</td>
 											<td>
-												<label for="catalog_${catalog.id}">${catalog.name}<#if catalog.activated><span class="text-success pull-right">Activated</span><#else><p class="text-error pull-right">Deactivated</span></#if></label>
+												<label for="catalog_${catalog.id}">${catalog.name}</label><#if catalog.activated><span class="text-success pull-right">Activated</span><#else><p class="text-error pull-right">Deactivated</span></#if>
 											</td>
 										</tr>
 									</#list>
@@ -43,7 +43,7 @@
 									</table>
 								</div>
 							</div>
-							<div class="span6">
+							<div class="col-md-6">
 								<div id="catalog-preview">
 									<div id="catalog-preview-info">
 									</div>

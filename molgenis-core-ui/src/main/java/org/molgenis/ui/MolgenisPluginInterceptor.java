@@ -1,7 +1,6 @@
 package org.molgenis.ui;
 
 import static org.molgenis.ui.MolgenisPluginAttributes.KEY_AUTHENTICATED;
-import static org.molgenis.ui.MolgenisPluginAttributes.KEY_RESOURCE_FINGERPRINT_REGISTRY;
 import static org.molgenis.ui.MolgenisPluginAttributes.KEY_MOLGENIS_UI;
 import static org.molgenis.ui.MolgenisPluginAttributes.KEY_PLUGIN_ID;
 
@@ -10,7 +9,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.util.ResourceFingerprintRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
@@ -19,7 +17,6 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 {
 	private final MolgenisUi molgenisUi;
-	private final ResourceFingerprintRegistry resourceFingerprintRegistry;
 
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception
@@ -37,13 +34,10 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 	}
 
 	@Autowired
-	public MolgenisPluginInterceptor(MolgenisUi molgenisUi, ResourceFingerprintRegistry resourceFingerprintRegistry)
+	public MolgenisPluginInterceptor(MolgenisUi molgenisUi)
 	{
 		if (molgenisUi == null) throw new IllegalArgumentException("molgenis ui is null");
-		if (resourceFingerprintRegistry == null) throw new IllegalArgumentException(
-				"resourceFingerprintRegistry ui is null");
 		this.molgenisUi = molgenisUi;
-		this.resourceFingerprintRegistry = resourceFingerprintRegistry;
 	}
 
 	@Override
@@ -61,7 +55,6 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 			}
 			modelAndView.addObject(KEY_MOLGENIS_UI, molgenisUi);
 			modelAndView.addObject(KEY_AUTHENTICATED, SecurityUtils.currentUserIsAuthenticated());
-			modelAndView.addObject(KEY_RESOURCE_FINGERPRINT_REGISTRY, resourceFingerprintRegistry);
 		}
 	}
 

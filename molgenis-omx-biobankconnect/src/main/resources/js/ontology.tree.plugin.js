@@ -48,7 +48,7 @@
 
 		// create tree container
 		var items = [];
-		items.push('<div class="row-fluid molgenis-tree"></div>');
+		items.push('<div class="row molgenis-tree"></div>');
 		container.html(items.join(''));
 
 		// create tree container

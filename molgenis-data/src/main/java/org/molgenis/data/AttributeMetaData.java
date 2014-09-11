@@ -1,5 +1,7 @@
 package org.molgenis.data;
 
+import java.util.List;
+
 import org.molgenis.fieldtypes.FieldType;
 
 /**
@@ -92,4 +94,9 @@ public interface AttributeMetaData
 	 * For int and long fields, the value must be between min and max (included) of the range
 	 **/
 	Range getRange();
+
+	/**
+	 * For enum fields returns the posible enum values
+	 */
+	List<String> getEnumOptions();
 }

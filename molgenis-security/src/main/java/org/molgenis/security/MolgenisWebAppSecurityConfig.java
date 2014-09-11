@@ -1,6 +1,7 @@
 package org.molgenis.security;
 
 import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_CSS;
+import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_FONTS;
 import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_IMG;
 import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_JS;
 
@@ -72,7 +73,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	{
 		// do not write cache control headers for static resources
 		RequestMatcher matcher = new NegatedRequestMatcher(new OrRequestMatcher(new AntPathRequestMatcher(PATTERN_CSS),
-				new AntPathRequestMatcher(PATTERN_JS), new AntPathRequestMatcher(PATTERN_IMG)));
+				new AntPathRequestMatcher(PATTERN_JS), new AntPathRequestMatcher(PATTERN_IMG),
+				new AntPathRequestMatcher(PATTERN_FONTS)));
 
 		DelegatingRequestMatcherHeaderWriter cacheControlHeaderWriter = new DelegatingRequestMatcherHeaderWriter(
 				matcher, new CacheControlHeadersWriter());
@@ -108,6 +110,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 		.antMatchers(PATTERN_IMG).permitAll()
 
 		.antMatchers(PATTERN_JS).permitAll()
+
+		.antMatchers(PATTERN_FONTS).permitAll()
 
 		.antMatchers("/html/**").permitAll()
 

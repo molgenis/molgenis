@@ -5,59 +5,71 @@
 					</ul>
 					<div class="tab-content">
 					    <div class="tab-pane active" id="entity-class-group-permission-manager">
-							<form class="form-horizontal" id="entity-class-group-permission-form" method="post" action="${context_url}/update/entityclass/group">
-								<label class="control-label" for="entity-class-group-select">Select Group:</label>
-				    			<div class="controls">
-									<select name="groupId" id="entity-class-group-select">
-								<#list groups as group>
-										<option value="${group.id?c}"<#if group_index == 0> selected</#if>>${group.name}</option>
-								</#list>
-									</select>
+							<form class="form-horizontal" id="entity-class-group-permission-form" method="post" action="${context_url}/update/entityclass/group" role="form">
+                                <div class="form-group">
+    								<label class="col-md-3 control-label" for="entity-class-group-select">Select Group:</label>
+    				    			<div class="col-md-4">
+    									<select class="form-control" name="groupId" id="entity-class-group-select">
+    								<#list groups as group>
+    										<option value="${group.id?c}"<#if group_index == 0> selected</#if>>${group.name}</option>
+    								</#list>
+    									</select>
+    								</div>
 								</div>
-								<div class="permission-table-container">
-							  		<table class="table table-condensed table-borderless" id="entity-class-group-permission-table">
-							  			<thead>
-							  				<tr>
-							  					<th>Entity Class</th>
-							  					<th>Edit</th>
-							  					<th>View</th>
-							  					<th>Count</th>
-							  					<th>None</th>
-							  				</tr>
-							  			</thead>
-							  			<tbody>
-							  			</tbody>
-							  		</table>
+								<div class="form-group">
+    								<div class="permission-table-container">
+    							  		<table class="table table-condensed table-borderless" id="entity-class-group-permission-table">
+    							  			<thead>
+    							  				<tr>
+    							  					<th>Entity Class</th>
+    							  					<th>Edit</th>
+    							  					<th>View</th>
+    							  					<th>Count</th>
+    							  					<th>None</th>
+    							  				</tr>
+    							  			</thead>
+    							  			<tbody>
+    							  			</tbody>
+    							  		</table>
+    						  		</div>
 						  		</div>
-						  		<button type="submit" class="btn pull-right">Save</button>
+						  		<div class="form-group">
+                                    <button type="submit" class="btn pull-right">Save</button>
+						  		</div>
 							</form>
 					    </div>
 					    <div class="tab-pane" id="entity-class-user-permission-manager">
-							<form class="form-horizontal" id="entity-class-user-permission-form" method="post" action="${context_url}/update/entityclass/user">
-								<label class="control-label" for="entity-class-user-select">Select User:</label>
-				    			<div class="controls">
-									<select name="userId" id="entity-class-user-select">
-								<#list users as user>
-										<option value="${user.id?c}"<#if user_index == 0> selected</#if>>${user.username}</option>
-								</#list>
-									</select>
+							<form class="form-horizontal" id="entity-class-user-permission-form" method="post" action="${context_url}/update/entityclass/user" role="form">
+								<div class="form-group">
+    								<label class="col-md-3 control-label" for="entity-class-user-select">Select User:</label>
+    				    			<div class="col-md-4">
+    									<select class="form-control" name="userId" id="entity-class-user-select">
+    								<#list users as user>
+    										<option value="${user.id?c}"<#if user_index == 0> selected</#if>>${user.username}</option>
+    								</#list>
+    									</select>
+    								</div>
 								</div>
-								<div class="permission-table-container">
-							  		<table class="table table-condensed table-borderless" id="entity-class-user-permission-table">
-							  			<thead>
-							  				<tr>
-							  					<th>Entity Class</th>
-							  					<th>Edit</th>
-							  					<th>View</th>
-							  					<th>Count</th>
-							  					<th>None</th>
-							  				</tr>
-							  			</thead>
-							  			<tbody>
-							  			</tbody>
-							  		</table>
+								<div class="form-group">
+    								<div class="permission-table-container">
+    							  		<table class="table table-condensed table-borderless" id="entity-class-user-permission-table">
+    							  			<thead>
+    							  				<tr>
+    							  					<th>Entity Class</th>
+    							  					<th>Edit</th>
+    							  					<th>View</th>
+    							  					<th>Count</th>
+    							  					<th>None</th>
+    							  				</tr>
+    							  			</thead>
+    							  			<tbody>
+    							  			</tbody>
+    							  		</table>
+    						  		</div>
 						  		</div>
-						  		<button type="submit" class="btn pull-right">Save</button>
+						  		<div class="form-group">
+                                    <button type="submit" class="btn pull-right">Save</button>
+						  		</div>
 							</form>
 					    </div>
 					</div>

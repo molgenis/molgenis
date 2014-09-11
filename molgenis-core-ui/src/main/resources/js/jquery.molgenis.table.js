@@ -9,20 +9,22 @@
 	function createTable(settings) {
 		// create elements
 		var items = [];
-		items.push('<div class="row-fluid molgenis-table-container">');
+		items.push('<div class="row molgenis-table-container">');
+		items.push('<div class="col-md-12">');
 		if(settings.rowClickable){
 			items.push('<table class="table-striped table-condensed molgenis-table table-hover"><thead></thead><tbody></tbody></table>');
 		}else{
 			items.push('<table class="table-striped table-condensed molgenis-table"><thead></thead><tbody></tbody></table>');
 		}
 		items.push('</div>');
-		items.push('<div class="row-fluid">');
-		items.push('<div class="span3"><div class="molgenis-table-controls pull-left">');
+		items.push('</div>');
+		items.push('<div class="row">');
+		items.push('<div class="col-md-3"><div class="molgenis-table-controls pull-left">');
 		if(settings.editable)
-			items.push('<a class="btn edit-table-btn" href="#" data-toggle="button"><i class="icon-edit"></i></a>');
+			items.push('<a class="btn btn-default edit-table-btn" href="#" data-toggle="button"><span class="glyphicon glyphicon-edit"></span></a>');
 		items.push('</div></div>');
-		items.push('<div class="span6"><div class="molgenis-table-pager"></div></div>');
-		items.push('<div class="span3"><div class="molgenis-table-info pull-right"></div></div>');
+		items.push('<div class="col-md-6"><div class="molgenis-table-pager"></div></div>');
+		items.push('<div class="col-md-3"><div class="molgenis-table-info pull-right"></div></div>');
 		items.push('</div>');
 		settings.container.html(items.join(''));
 		
@@ -148,7 +150,7 @@
 			var row = $('<tr>').data('entity', entity).data('id', entity.href);
 			if (settings.editenabled) {
 				var cell = $('<td class="trash" tabindex="' + tabindex++ + '">');
-				$('<i class="icon-trash delete-row-btn"></i>').appendTo(cell);
+				$('<span class="glyphicon glyphicon-trash delete-row-btn"></span>').appendTo(cell);
 				row.append(cell);
 			}
 
@@ -188,15 +190,15 @@
 		switch(attribute.fieldType) {
 			case 'BOOL':
 				var items = [];
-				items.push('<div class="bool-btn-group btn-group">');
-				items.push('<button type="button" class="btn btn-mini');
+				items.push('<div class="bool-btn-group btn-group-xs">');
+				items.push('<button type="button" class="btn btn-default');
 				if(value === true) items.push(' active');
 				items.push('" data-state="true">Yes</button>');
-				items.push('<button type="button" class="btn btn-mini');
+				items.push('<button type="button" class="btn btn-default');
 				if(value === false) items.push(' active');
 				items.push('" data-state="false">No</button>');
 				if(attribute.nillable) {
-					items.push('<button type="button" class="btn btn-mini');
+					items.push('<button type="button" class="btn btn-default');
 					if(value === undefined) items.push(' active');
 					items.push('" data-state="undefined">N/A</button>');
 				}
@@ -244,8 +246,11 @@
 				container.select2(opts).select2('val', []); // create select2 and trigger initSelection
 				break;
 			case 'DATE':
+				var datepicker = createInput(attribute, {'style': 'min-width: 100px'}, entity[attribute.name]);
+				cell.html(datepicker);
+				break;
 			case 'DATE_TIME':
-				var datepicker = createInput(attribute, null, entity[attribute.name]);
+				var datepicker = createInput(attribute, {'style': 'min-width: 210px'}, entity[attribute.name]);
 				cell.html(datepicker);
 				break;
 			case 'DECIMAL':
@@ -422,10 +427,12 @@
 		var modal = $('#table-ref-modal');
 		if(!modal.length) {
 			var items = [];
-			items.push('<div class="modal hide medium" id="table-ref-modal" tabindex="-1">');
+			items.push('<div class="modal" id="table-ref-modal" tabindex="-1" aria-labelledby="table-ref-modal-label" aria-hidden="true">');
+			items.push('<div class="modal-dialog">');
+			items.push('<div class="modal-content">');
 			items.push('<div class="modal-header">');
-			items.push('<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>');
-			items.push('<h3 class="ref-title"></h3>');
+			items.push('<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>');
+			items.push('<h4 class="modal-title ref-title" id="table-ref-modal-label">Sign up</h4>');
 			items.push('</div>');
 			items.push('<div class="modal-body">');
 			items.push('<legend class="ref-description-header"></legend>');
@@ -812,7 +819,7 @@
 		});
 
 		// DATE, DATE_TIME
-		$(container).on('changeDate', function(e) {
+		$(container).on('dp.change', function(e) {
 			var cell = $(e.target).closest('td');
 			persistCell(cell, settings);
 		});
