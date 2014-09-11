@@ -39,27 +39,35 @@
 <div class="modal" id="downloadModal" tabindex="-1" role="dialog" aria-labelledby="download-modal-label" aria-hidden="true">
 	<div class="modal-dialog">
 		<div class="modal-content">				
+	      	
 	      	<div class="modal-header">
 	        	<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
 	        	<h4 class="modal-title" id="download-modal-label">Download as csv</h4>
 	     	</div>
+	      	
 	      	<div class="modal-body">
 	      		<div class="form-group form-horizontal">
-					<label class="col-md-3 control-label">As column names i want</label>
-	    			<div class="col-md-9">
-	    			    <div class="radio">
-	    				   <label><input type="radio" name="ColNames" value ="ATTRIBUTE_LABELS" checked="true"> Attribute labels</label>
-                        </div>
-                        <div class="radio">                                                   
-	    				   <label><input type="radio" name="ColNames" value ="ATTRIBUTE_NAMES"> Attribute names</label>
-                        </div>
+		      		<div class="row">
+						<div class="control-group">
+							<label class="col-md-3 control-label">As column names I want:</label>	
+							<div class="controls col-md-9">
+								<label class="radio">
+		  							<input type="radio" name="colNames" value="ATTRIBUTE_NAMES" checked> Attribute Labels
+			    				</label>
+								<label class="radio">
+		  							<input type="radio" name="colNames" value="ATTRIBUTE_LABELS">Attribute Names
+								</label>
+		  					</div>
+						</div>
 					</div>
-	      		</div>
+				</div>
 			</div>
+	      	
 	      	<div class="modal-footer">
 	        	<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
 	        	<button id="download-button" class="btn btn-primary">Download</button>
 	      	</div>
+	      	
 	    </div>
 	</div>
 </div>

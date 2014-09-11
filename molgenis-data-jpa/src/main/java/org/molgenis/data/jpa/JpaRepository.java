@@ -237,6 +237,7 @@ public class JpaRepository extends AbstractCrudRepository
 	}
 
 	@Override
+	@Transactional
 	public void update(Entity entity)
 	{
 		EntityManager em = getEntityManager();
@@ -250,6 +251,7 @@ public class JpaRepository extends AbstractCrudRepository
 	}
 
 	@Override
+	@Transactional
 	public void update(Iterable<? extends Entity> entities)
 	{
 		EntityManager em = getEntityManager();
