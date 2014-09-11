@@ -429,7 +429,7 @@
 	 * Create simple filter controls
 	 */
 	self.createSimpleFilterControls = function(attribute, simpleFilter) {
-		var $controls = $('<div class="col-md-9">').width('384px');
+		var $controls = $('<div class="col-md-12">').width('auto');
 		var name = 'input-' + attribute.name + '-' + new Date().getTime();
 		var values = simpleFilter ? simpleFilter.getValues() : null;
 		var fromValue = simpleFilter ? simpleFilter.fromValue : null;
