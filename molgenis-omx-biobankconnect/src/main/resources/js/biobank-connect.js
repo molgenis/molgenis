@@ -67,7 +67,7 @@
 			if(options.updatePager || options.container.find('#pager-' + options.dataSetId).length === 0){
 				options.updatePager = false;
 				var tablePager = $('<div/>').attr('id', 'pager-' + options.dataSetId);
-				options.container.find('div.pagination').remove();
+				options.container.find('#pager-' + options.dataSetId).remove();
 				options.container.append(tablePager);
 				tablePager.pager({
 					'nrItems' : totalHitCount,
@@ -218,16 +218,16 @@
 			contentType : 'application/json',
 			success : function(data, textStatus, request){
 				var result = [];
-				var dataMap = {};
+//				var dataMap = {};
 				$.each(data.searchHits, function(index, hit){
 					var value = hit.columnValueMap.name;
 					if($.inArray(value, result) === -1){
-						var name = hit.columnValueMap.name;
-						result.push(name);
-						dataMap[name] = hit.columnValueMap;
+//						var name = hit.columnValueMap.name;
+//						dataMap[name] = hit.columnValueMap;
+						result.push(hit.columnValueMap);
 					}
 				});
-				$(document).data('dataMap', dataMap);
+//				$(document).data('dataMap', dataMap);
 				response(result);
 			}		
 		});

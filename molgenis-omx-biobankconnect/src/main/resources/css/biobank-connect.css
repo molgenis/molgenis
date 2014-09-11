@@ -1,3 +1,7 @@
+.twitter-typeahead{
+	float:left; width:100%
+}
+
 table {
 	border : 1px solid #5B82A4;
 }
@@ -23,6 +27,8 @@ th.text-align-center,.text-align-center{
 
 h3 {
 	color : #3079C2;
+	margin-top : -5px;
+	margin-bottom : -5px;
 }
 
 div#progress-bar-div {

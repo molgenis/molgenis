@@ -3,88 +3,55 @@
 <script src="<@resource_href "/js/common-component.js"/>"></script>
 <script src="<@resource_href "/js/biobank-connect.js"/>"></script>
 <script src="<@resource_href "/js/catalogue-chooser.js"/>"></script>
+<script src="<@resource_href "/js/bootstrap-select/bootstrap-select.js"/>"></script>
+<script src="<@resource_href "/js/bootstrap-typeahead/typeahead.bundle.min.js"/>"></script>
 <link rel="stylesheet" href="<@resource_href "/css/jquery-ui-1.9.2.custom.min.css"/>" type="text/css">
 <link rel="stylesheet" href="<@resource_href "/css/bootstrap-fileupload.min.css"/>" type="text/css">
 <link rel="stylesheet" href="<@resource_href "/css/biobank-connect.css"/>" type="text/css">
+<link rel="stylesheet" href="<@resource_href "/css/bootstrap-select/bootstrap-select.min.css"/>" type="text/css">
 <link rel="stylesheet" href="<@resource_href "/css/catalogue-chooser.css"/>" type="text/css">
 <form id="wizardForm" name="wizardForm" method="post" class="form-horizontal" enctype="multipart/form-data">
-	<div class="row">
-		<div class="col-md-12">
-			<div class="row">
-				<div id="div-info" class="col-md-12 well custom-white-well">	
-					<br>
-					<div class="row">
-						<div class="col-md-9"><legend class="legend">
-							Browse catalogue : 
-							<select id="selectedDataSetId" name="selectedDataSetId">
-								<#if wizard.selectedDataSet??>
-									<#list wizard.dataSets as dataset>
-										<option value="${dataset.id?c}"<#if dataset.id?c == wizard.selectedDataSet.id?c> selected</#if>>${dataset.name}</option>
-									</#list>
-								<#else>
-									<#list wizard.dataSets as dataset>
-										<option value="${dataset.id?c}"<#if dataset_index == 0> selected</#if>>${dataset.name}</option>
-									</#list>
-								</#if>
-							</select>
-							<button id="import-data-button" class="btn btn-primary" type="btn">Import data</button>
-						</div>
-						<div  id="div-search" class="col-md-3">
-							<div><strong>Search data items :</strong></div>
-							<div class="group-append">
-								<input id="search-dataitem" type="text" title="Enter your search term" />
-								<button class="btn btn-default" type="button" id="search-button"><i class="icon-large icon-search"></i></button>
-							</div>
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-md-4">
-							Number of data items : <span id="dataitem-number"></span>
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-md-12">
-							<div id="container" class="data-table-container"></div>
-						</div>
-					</div>
+	<div id="div-info" class="col-md-12 well custom-white-well">	
+		<div class="row">
+			<div class="col-md-offset-3 col-md-6 text-align-center">
+				<legend class="custom-purple-legend">
+					Browse catalogue
+					<select id="selectedDataSetId" name="selectedDataSetId" class="selectpicker">
+						<#if wizard.selectedDataSet??>
+							<#list wizard.dataSets as dataset>
+								<option value="${dataset.id?c}"<#if dataset.id?c == wizard.selectedDataSet.id?c> selected</#if>>${dataset.name}</option>
+							</#list>
+						<#else>
+							<#list wizard.dataSets as dataset>
+								<option value="${dataset.id?c}"<#if dataset_index == 0> selected</#if>>${dataset.name}</option>
+							</#list>
+						</#if>
+					</select>
+				</legend>
+			</div>
+			<div class="col-md-3"><button id="import-data-button" class="btn btn-primary float-right" type="btn">Import data</button></div>
+		</div>
+		<div class="row">
+			<div id="div-search" class="col-md-2">
+				<div><strong>Search data items :</strong></div>
+				<div class="input-group">
+					<input id="search-dataitem" class="form-control typeahead" title="Enter your search term" />
+					<div id="search-button" class="input-group-addon"><span class="glyphicon glyphicon-search"></span></div>
 				</div>
 			</div>
 		</div>
-	</div>
-	<div class="row">
-		<div id="import-features-modal" class="modal hide">
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-				<h3>Import features</h3>
+		<div class="row">
+			<div class="col-md-4">
+				Number of data items : <span id="dataitem-number"></span>
 			</div>
-			<div class="modal-body">
-				<div><strong>Please input dataSet name</strong></div>
-				<div><input type="text" id="dataSetName" name="dataSetName"/><span class="float-right">E.g. LifeLines</span></div><br>
-				<div><strong>Please upload features</strong></div>
-				<div>
-					<div class="fileupload fileupload-new" data-provides="fileupload">
-						<div class="group-append">
-							<div class="uneditable-input">
-								<i class="icon-file fileupload-exists"></i>
-								<span class="fileupload-preview"></span>
-							</div>
-							<span class="btn btn-file btn-info">
-								<span class="fileupload-new">Select file</span>
-								<span class="fileupload-exists">Change</span>
-								<input type="file" id="uploadedOntology" name="file" required/>
-							</span>
-							<a href="#" class="btn btn-danger fileupload-exists" data-dismiss="fileupload">Remove</a>
-						</div>
-						<div class="float-right"><a href="/html/example-data.csv">Download example data</a></div>
-					</div>
-				</div>
-			</div>
-			<div class="modal-footer">
-				<a href="#" class="btn btn-default" data-dismiss="modal">Close</a>
-				<a href="#" class="btn btn-primary" id="import-features">Import features</a>
+		</div><br>
+		<div class="row">
+			<div class="col-md-12">
+				<div id="container" class="data-table-container"></div>
 			</div>
 		</div>
 	</div>
+</div>
 	<script type="text/javascript">
 		$(function(){
 			var molgenis = window.top.molgenis;
