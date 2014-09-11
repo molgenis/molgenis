@@ -19,6 +19,7 @@ public class PersonMetaData extends DefaultEntityMetaData
 		id.setIdAttribute(true);
 		id.setNillable(false);
 		id.setReadOnly(true);
+		id.setAuto(true);
 		addAttributeMetaData(id);
 
 		DefaultAttributeMetaData firstName = new DefaultAttributeMetaData("firstName", STRING);

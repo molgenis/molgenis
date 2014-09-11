@@ -1,6 +1,9 @@
 package org.molgenis.data.mysql;
 
+import static org.testng.Assert.assertEquals;
+
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -20,6 +23,7 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 /** Simple test of all apsects of the repository */
@@ -32,7 +36,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testAggregates()
 	{
-		coll.drop("fruit");
+		coll.dropEntityMetaData("fruit");
 
 		DefaultEntityMetaData meta = new DefaultEntityMetaData("Fruit");
 		meta.addAttribute("name").setIdAttribute(true).setNillable(false);
@@ -72,7 +76,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		metaData.setIdAttribute("lastName");
 		Assert.assertEquals(metaData.getIdAttribute().getName(), "lastName");
 
-		coll.drop(metaData.getName());
+		coll.dropEntityMetaData(metaData.getName());
 		MysqlRepository repo = coll.add(metaData);
 
 		Assert.assertEquals(repo.iteratorSql(), "SELECT firstName, lastName FROM MysqlPerson");
@@ -123,7 +127,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		// test delete clauses
 		Assert.assertEquals(repo.getDeleteSql(), "DELETE FROM `MysqlPerson` WHERE `lastName` = ?");
 
-		coll.drop(metaData.getName());
+		coll.dropEntityMetaData(metaData.getName());
 		repo = coll.add(metaData);
 
 		// Entity generator to monitor performance (set batch to 100000 to show up to >10,000 records/second)
@@ -208,5 +212,40 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 			count++;
 		}
 		return count;
+	}
+
+	@Test
+	public void findAllIterableObject_Iterable()
+	{
+		String idAttributeName = "id";
+		final String exampleId = "id123";
+
+		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("test");
+		entityMetaData.setIdAttribute(idAttributeName);
+		entityMetaData.setLabelAttribute(idAttributeName);
+		DefaultAttributeMetaData idAttributeMetaData = new DefaultAttributeMetaData(idAttributeName);
+		idAttributeMetaData.setDataType(MolgenisFieldTypes.STRING);
+		idAttributeMetaData.setIdAttribute(true);
+		idAttributeMetaData.setLabelAttribute(true);
+		idAttributeMetaData.setNillable(false);
+		entityMetaData.addAttributeMetaData(idAttributeMetaData);
+
+		MysqlRepository testRepository = coll.add(entityMetaData);
+
+		MapEntity entity = new MapEntity();
+		entity.set(idAttributeName, exampleId);
+		testRepository.add(entity);
+
+		Iterable<Entity> entities = testRepository.findAll(new Iterable<Object>()
+		{
+			@Override
+			public Iterator<Object> iterator()
+			{
+				return Collections.<Object> singletonList(exampleId).iterator();
+			}
+		});
+
+		assertEquals(Iterables.size(entities), 1);
+		assertEquals(entities.iterator().next().getIdValue(), exampleId);
 	}
 }

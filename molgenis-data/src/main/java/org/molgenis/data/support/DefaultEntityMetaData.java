@@ -2,18 +2,18 @@ package org.molgenis.data.support;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.util.CaseInsensitiveLinkedHashMap;
 
 public class DefaultEntityMetaData extends AbstractEntityMetaData
 {
 	private final String name;
-	private final Map<String, AttributeMetaData> attributes = new LinkedHashMap<String, AttributeMetaData>();
+	private final Map<String, AttributeMetaData> attributes = new CaseInsensitiveLinkedHashMap<AttributeMetaData>();
 	private final Class<? extends Entity> entityClass;
 	private String label;
 	private boolean abstract_ = false;
@@ -31,6 +31,31 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 		if (entityClass == null) throw new IllegalArgumentException("EntityClass cannot be null");
 		this.name = name;
 		this.entityClass = entityClass;
+	}
+
+	/**
+	 * Copy-constructor
+	 * 
+	 * @param entityMetaData
+	 */
+	public DefaultEntityMetaData(EntityMetaData entityMetaData)
+	{
+		this.name = entityMetaData.getName();
+		this.entityClass = entityMetaData.getEntityClass();
+		this.label = entityMetaData.getLabel();
+		this.abstract_ = entityMetaData.isAbstract();
+		this.description = entityMetaData.getDescription();
+		EntityMetaData extends_ = entityMetaData.getExtends();
+		this.extends_ = extends_ != null ? new DefaultEntityMetaData(extends_) : null;
+		// deep copy attributes
+		Iterable<AttributeMetaData> attributes = entityMetaData.getAttributes();
+		if (attributes != null)
+		{
+			for (AttributeMetaData attributeMetaData : attributes)
+			{
+				addAttributeMetaData(new DefaultAttributeMetaData(attributeMetaData));
+			}
+		}
 	}
 
 	@Override

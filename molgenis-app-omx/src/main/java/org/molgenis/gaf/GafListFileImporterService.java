@@ -8,7 +8,7 @@ import java.util.Calendar;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
-import org.molgenis.data.AggregateableCrudRepositorySecurityDecorator;
+import org.molgenis.data.CrudRepositorySecurityDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.omx.OmxRepository;
 import org.molgenis.data.support.QueryImpl;
@@ -39,7 +39,7 @@ public class GafListFileImporterService
 
 	@Autowired
 	private DataSetsIndexer dataSetIndexer;
-	
+
 	@Autowired
 	private DataService dataService;
 
@@ -61,17 +61,15 @@ public class GafListFileImporterService
 		repo.close();
 		return report;
 	}
-	
-	public void importGAFList(GafListValidationReport report,
- String key_gaf_list_protocol_name) throws IOException,
+
+	public void importGAFList(GafListValidationReport report, String key_gaf_list_protocol_name) throws IOException,
 			ServiceException
 	{
 		File tmpFile = fileStore.getFile(report.getTempFileName());
 
 		if (!report.getValidRunIds().isEmpty())
 		{
-			GafListFileRepository gafListFileRepositoryToImport = new GafListFileRepository(tmpFile, null, null,
-					report);
+			GafListFileRepository gafListFileRepositoryToImport = new GafListFileRepository(tmpFile, null, null, report);
 
 			String dataSetIdentifier = UUID.randomUUID().toString().toLowerCase();
 			String dataSetName = generateGafListRepoName();
@@ -89,8 +87,8 @@ public class GafListFileImporterService
 				dataService.add(DataSet.ENTITY_NAME, dataSet);
 				dataSetId = dataSet.getId();
 
-				AggregateableCrudRepositorySecurityDecorator repository = new AggregateableCrudRepositorySecurityDecorator(
-						new OmxRepository(dataService, searchService, dataSetIdentifier, entityValidator));
+				CrudRepositorySecurityDecorator repository = new CrudRepositorySecurityDecorator(new OmxRepository(
+						dataService, searchService, dataSetIdentifier, entityValidator));
 				dataService.addRepository(repository);
 
 				repository.flush();

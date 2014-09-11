@@ -123,7 +123,10 @@
 	 * @memberOf molgenis.dataexplorer.data
 	 */
 	function createGenomeBrowser(specificSettings) {
-		
+        var showHighlight = false;
+        if(specificSettings != null) {
+            showHighlight = specificSettings.highlightRegion;
+        }
 		var settings = $.extend(true, {}, genomeBrowserSettings, specificSettings || {});
 		
         $('#genomebrowser').css('display', 'block');
@@ -156,8 +159,9 @@
         genomeBrowser = new Browser(settings);
         genomeBrowser.realInit();
         // highlight region specified with viewStart and viewEnd
-        genomeBrowser.highlightRegion(genomeBrowser.chr, (genomeBrowser.viewStart + 9990), (genomeBrowser.viewEnd - 9990));
-        var featureInfoMap = {};
+        if(showHighlight === true) {
+            genomeBrowser.highlightRegion(genomeBrowser.chr, (genomeBrowser.viewStart + 9990), (genomeBrowser.viewEnd - 9990));
+        }var featureInfoMap = {};
         genomeBrowser.addFeatureInfoPlugin(function(f, info) {
             //check if there is cached information for this clicked item
             if(featureInfoMap.hasOwnProperty(f.id+f.label)){

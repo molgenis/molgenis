@@ -8,7 +8,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -23,18 +22,19 @@ import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
-import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Manageable;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
+import org.molgenis.data.Queryable;
+import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.support.AbstractAggregateableCrudRepository;
+import org.molgenis.data.support.AbstractCrudRepository;
+import org.molgenis.data.support.ConvertingIterable;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.IntField;
 import org.molgenis.fieldtypes.MrefField;
@@ -47,21 +47,21 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
-public class MysqlRepository extends AbstractAggregateableCrudRepository implements Manageable
+public class MysqlRepository extends AbstractCrudRepository implements Manageable
 {
 	public static final String URL_PREFIX = "mysql://";
-	public static final int BATCH_SIZE = 100000;
+	public static final int BATCH_SIZE = 1000;
 	private static final Logger logger = Logger.getLogger(MysqlRepository.class);
 	private EntityMetaData metaData;
 	private final JdbcTemplate jdbcTemplate;
 	private RepositoryCollection repositoryCollection;
 
-	public MysqlRepository(DataSource dataSource, EntityValidator entityValidator)
+	public MysqlRepository(DataSource dataSource)
 	{
-		super(null, entityValidator);
+		super(null);// TODO url
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
@@ -86,6 +86,13 @@ public class MysqlRepository extends AbstractAggregateableCrudRepository impleme
 			}
 		}
 		jdbcTemplate.execute(getDropSql());
+	}
+
+	public void dropAttribute(String attributeName)
+	{
+		String sql = String.format("ALTER TABLE %s DROP COLUMN %s", getName(), attributeName);
+		jdbcTemplate.execute(sql);
+
 	}
 
 	protected String getDropSql()
@@ -245,7 +252,7 @@ public class MysqlRepository extends AbstractAggregateableCrudRepository impleme
 						.append(" ADD FOREIGN KEY (").append('`').append(att.getName()).append('`')
 						.append(") REFERENCES ").append('`').append(att.getRefEntity().getName()).append('`')
 						.append('(').append('`').append(att.getRefEntity().getIdAttribute().getName()).append('`')
-						.append(") ON DELETE CASCADE").toString());
+						.append(")").toString());
 			}
 
 		return sql;
@@ -485,7 +492,8 @@ public class MysqlRepository extends AbstractAggregateableCrudRepository impleme
 	@Override
 	public <E extends Entity> Iterable<E> findAll(Iterable<Object> ids, Class<E> clazz)
 	{
-		throw new UnsupportedOperationException();
+		if (ids == null) return Collections.emptyList();
+		return new ConvertingIterable<E>(clazz, findAll(ids));
 	}
 
 	@Override
@@ -611,18 +619,50 @@ public class MysqlRepository extends AbstractAggregateableCrudRepository impleme
 						if (att.getDataType() instanceof StringField || att.getDataType() instanceof TextField)
 						{
 							search.append(" OR this.").append('`').append(att.getName()).append('`').append(" LIKE ?");
+							parameters.add("%" + DataConverter.toString(r.getValue()) + "%");
+						}
+						else if (att.getDataType() instanceof XrefField)
+						{
+							Repository repo = repositoryCollection.getRepositoryByEntityName(att.getRefEntity()
+									.getName());
+							if (repo instanceof Queryable)
+							{
+								Query refQ = new QueryImpl().like(att.getRefEntity().getLabelAttribute().getName(),
+										r.getValue());
+								Iterator<Entity> it = ((Queryable) repo).findAll(refQ).iterator();
+								if (it.hasNext())
+								{
+									search.append(" OR this.").append('`').append(att.getName()).append('`')
+											.append(" IN (");
+									while (it.hasNext())
+									{
+										Entity ref = it.next();
+										search.append("?");
+										parameters.add(att.getDataType().convert(
+												ref.get(att.getRefEntity().getIdAttribute().getName())));
+										if (it.hasNext())
+										{
+											search.append(",");
+										}
+									}
+									search.append(")");
+								}
+							}
 						}
 						else if (att.getDataType() instanceof MrefField)
 						{
 							search.append(" OR CAST(").append(att.getName()).append(".`").append(att.getName())
 									.append('`').append(" as CHAR) LIKE ?");
+							parameters.add("%" + DataConverter.toString(r.getValue()) + "%");
+
 						}
 						else
 						{
 							search.append(" OR CAST(this.").append('`').append(att.getName()).append('`')
 									.append(" as CHAR) LIKE ?");
+							parameters.add("%" + DataConverter.toString(r.getValue()) + "%");
+
 						}
-						parameters.add("%" + DataConverter.toString(r.getValue()) + "%");
 					}
 					if (search.length() > 0) result.append('(').append(search.substring(4)).append(')');
 					break;
@@ -657,14 +697,14 @@ public class MysqlRepository extends AbstractAggregateableCrudRepository impleme
 					{
 						throw new MolgenisDataException("Missing value for IN query");
 					}
-					else if (!(r.getValue() instanceof List))
+					else if (!(r.getValue() instanceof Iterable<?>))
 					{
 						for (String str : r.getValue().toString().split(","))
 							values.add(str);
 					}
 					else
 					{
-						values.addAll((Collection<?>) r.getValue());
+						Iterables.addAll(values, (Iterable<?>) r.getValue());
 					}
 
 					for (int i = 0; i < values.size(); i++)
@@ -832,251 +872,99 @@ public class MysqlRepository extends AbstractAggregateableCrudRepository impleme
 		delete(this);
 	}
 
-	@Override
-	public void updateInternal(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
-	{
-		if ((entities == null) || entities.isEmpty()) return;
-		if (getEntityMetaData().getIdAttribute() == null) throw new MolgenisDataException("Missing is attribute for ["
-				+ getName() + "]");
-
-		String idAttributeName = getEntityMetaData().getIdAttribute().getName();
-
-		// Split in existing and new entities
-		Map<Object, Entity> existingEntities = Maps.newLinkedHashMap();
-		List<Entity> newEntities = Lists.newArrayList();
-
-		List<Object> ids = Lists.newArrayList();
-		for (Entity entity : entities)
-		{
-			Object id = entity.get(idAttributeName);
-			if (id != null)
-			{
-				ids.add(id);
-			}
-		}
-
-		if (!ids.isEmpty())
-		{
-			List<Object> existingIds = Lists.newArrayList();
-
-			Query q = new QueryImpl();
-			for (int i = 0; i < ids.size(); i++)
-			{
-				if (i > 0)
-				{
-					q.or();
-				}
-				q.eq(idAttributeName, ids.get(i));
-			}
-
-			for (Entity existing : findAll(q))
-			{
-				existingIds.add(existing.getIdValue());
-			}
-
-			FieldType dataType = getEntityMetaData().getIdAttribute().getDataType();
-			for (Entity entity : entities)
-			{
-				Object id = entity.get(idAttributeName);
-				if ((id != null) && existingIds.contains(dataType.convert(id)))
-				{
-					existingEntities.put(id, entity);
-				}
-				else
-				{
-					newEntities.add(entity);
-				}
-			}
-		}
-
-		switch (dbAction)
-		{
-			case ADD:
-				if (!existingEntities.isEmpty())
-				{
-					List<Object> keys = Lists.newArrayList(existingEntities.keySet());
-
-					StringBuilder msg = new StringBuilder();
-					msg.append("Trying to add existing ").append(getName()).append(" entities as new insert: ");
-					msg.append(keys.subList(0, Math.min(5, keys.size())));
-					if (keys.size() > 5)
-					{
-						msg.append(" and ").append(keys.size() - 5).append(" more.");
-					}
-
-					throw new MolgenisDataException(msg.toString());
-				}
-
-				addInternal(entities);
-				break;
-
-			case ADD_IGNORE_EXISTING:
-				if (!newEntities.isEmpty())
-				{
-					addInternal(newEntities);
-				}
-				break;
-
-			case ADD_UPDATE_EXISTING:
-				if (!newEntities.isEmpty())
-				{
-					addInternal(newEntities);
-				}
-				if (!existingEntities.isEmpty())
-				{
-					updateInternal(existingEntities.values());
-				}
-				break;
-
-			case REMOVE:
-				if (!newEntities.isEmpty())
-				{
-					List<Object> keys = Lists.newArrayList();
-					for (Entity newEntity : newEntities)
-					{
-						keys.add(newEntity.get(idAttributeName));
-						if (keys.size() == 5)
-						{
-							break;
-						}
-					}
-
-					StringBuilder msg = new StringBuilder();
-					msg.append("Trying to remove not exsisting ").append(getName()).append(" entities:").append(keys);
-					if (newEntities.size() > 5)
-					{
-						msg.append(" and ").append(newEntities.size() - 5).append(" more.");
-					}
-
-					throw new MolgenisDataException(msg.toString());
-				}
-
-				deleteById(existingEntities.keySet());
-				break;
-
-			case REMOVE_IGNORE_MISSING:
-				deleteById(existingEntities.keySet());
-				break;
-
-			case UPDATE:
-				if (!newEntities.isEmpty())
-				{
-					List<Object> keys = Lists.newArrayList();
-					for (Entity newEntity : newEntities)
-					{
-						keys.add(newEntity.get(idAttributeName));
-						if (keys.size() == 5)
-						{
-							break;
-						}
-					}
-
-					StringBuilder msg = new StringBuilder();
-					msg.append("Trying to update not exsisting ").append(getName()).append(" entities:").append(keys);
-					if (newEntities.size() > 5)
-					{
-						msg.append(" and ").append(newEntities.size() - 5).append(" more.");
-					}
-
-					throw new MolgenisDataException(msg.toString());
-				}
-				updateInternal(existingEntities.values());
-				break;
-
-			case UPDATE_IGNORE_MISSING:
-				updateInternal(existingEntities.values());
-				break;
-
-			default:
-				break;
-
-		}
-	}
-
 	public RepositoryCollection getRepositoryCollection()
 	{
 		return repositoryCollection;
 	}
 
 	@Override
-	public Integer addInternal(Iterable<? extends Entity> entities)
+	public Integer add(Iterable<? extends Entity> entities)
 	{
+		if (entities == null) return 0;
 		AtomicInteger count = new AtomicInteger(0);
 
-		// TODO, split in subbatches
 		final List<Entity> batch = new ArrayList<Entity>();
-		if (entities != null) for (Entity e : entities)
-		{
-			batch.add(e);
-			count.addAndGet(1);
-		}
-		final AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
-		final Map<String, List<Entity>> mrefs = new HashMap<String, List<Entity>>();
 
-		jdbcTemplate.batchUpdate(getInsertSql(), new BatchPreparedStatementSetter()
+		Iterator<? extends Entity> it = entities.iterator();
+		while (it.hasNext())
 		{
-			@Override
-			public void setValues(PreparedStatement preparedStatement, int rowIndex) throws SQLException
+			batch.add(it.next());
+			count.addAndGet(1);
+
+			if ((batch.size() == BATCH_SIZE) || !it.hasNext())
 			{
-				int fieldIndex = 1;
+				final AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
+				final Map<String, List<Entity>> mrefs = new HashMap<String, List<Entity>>();
+
+				jdbcTemplate.batchUpdate(getInsertSql(), new BatchPreparedStatementSetter()
+				{
+					@Override
+					public void setValues(PreparedStatement preparedStatement, int rowIndex) throws SQLException
+					{
+						int fieldIndex = 1;
+						for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
+						{
+							// create the mref records
+							if (att.getDataType() instanceof MrefField)
+							{
+								if (mrefs.get(att.getName()) == null) mrefs.put(att.getName(), new ArrayList<Entity>());
+								if (batch.get(rowIndex).get(att.getName()) != null)
+								{
+									for (Object val : batch.get(rowIndex).getList(att.getName()))
+									{
+										Entity mref = new MapEntity();
+										mref.set(idAttribute.getName(), batch.get(rowIndex).get(idAttribute.getName()));
+										mref.set(att.getName(), val);
+
+										mrefs.get(att.getName()).add(mref);
+									}
+								}
+							}
+							else
+							{
+								// default value, if any
+								if (batch.get(rowIndex).get(att.getName()) == null)
+								{
+									preparedStatement.setObject(fieldIndex++, att.getDefaultValue());
+								}
+								else if (att.getDataType() instanceof XrefField)
+								{
+									Object value = batch.get(rowIndex).get(att.getName());
+									if (value instanceof Entity)
+									{
+										value = ((Entity) value).get(att.getRefEntity().getIdAttribute().getName());
+									}
+
+									preparedStatement.setObject(fieldIndex++, att.getRefEntity().getIdAttribute()
+											.getDataType().convert(value));
+								}
+								else
+								{
+									preparedStatement.setObject(fieldIndex++,
+											att.getDataType().convert(batch.get(rowIndex).get(att.getName())));
+								}
+							}
+						}
+					}
+
+					@Override
+					public int getBatchSize()
+					{
+						return batch.size();
+					}
+				});
+
+				// add mrefs as well
 				for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 				{
-					// create the mref records
 					if (att.getDataType() instanceof MrefField)
 					{
-						if (mrefs.get(att.getName()) == null) mrefs.put(att.getName(), new ArrayList<Entity>());
-						if (batch.get(rowIndex).get(att.getName()) != null)
-						{
-							for (Object val : batch.get(rowIndex).getList(att.getName()))
-							{
-								Entity mref = new MapEntity();
-								mref.set(idAttribute.getName(), batch.get(rowIndex).get(idAttribute.getName()));
-								mref.set(att.getName(), val);
-
-								mrefs.get(att.getName()).add(mref);
-							}
-						}
-					}
-					else
-					{
-						// default value, if any
-						if (batch.get(rowIndex).get(att.getName()) == null)
-						{
-							preparedStatement.setObject(fieldIndex++, att.getDefaultValue());
-						}
-						else if (att.getDataType() instanceof XrefField)
-						{
-							Object value = batch.get(rowIndex).get(att.getName());
-							if (value instanceof Entity)
-							{
-								value = ((Entity) value).get(att.getRefEntity().getIdAttribute().getName());
-							}
-
-							preparedStatement.setObject(fieldIndex++, att.getRefEntity().getIdAttribute().getDataType()
-									.convert(value));
-						}
-						else
-						{
-							preparedStatement.setObject(fieldIndex++,
-									att.getDataType().convert(batch.get(rowIndex).get(att.getName())));
-						}
+						addMrefs(mrefs.get(att.getName()), att);
 					}
 				}
-			}
 
-			@Override
-			public int getBatchSize()
-			{
-				return batch.size();
-			}
-		});
-
-		// add mrefs as well
-		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
-		{
-			if (att.getDataType() instanceof MrefField)
-			{
-				addMrefs(mrefs.get(att.getName()), att);
+				logger.info("Added " + count.get() + " " + getName() + " entities.");
+				batch.clear();
 			}
 		}
 
@@ -1084,22 +972,22 @@ public class MysqlRepository extends AbstractAggregateableCrudRepository impleme
 	}
 
 	@Override
-	public void addInternal(Entity entity)
+	public void add(Entity entity)
 	{
 		if (entity == null) throw new RuntimeException("MysqlRepository.add() failed: entity was null");
-		addInternal(Arrays.asList(new Entity[]
+		add(Arrays.asList(new Entity[]
 		{ entity }));
 	}
 
 	@Override
-	public void updateInternal(Entity entity)
+	public void update(Entity entity)
 	{
-		updateInternal(Arrays.asList(new Entity[]
+		update(Arrays.asList(new Entity[]
 		{ entity }));
 	}
 
 	@Override
-	public void updateInternal(Iterable<? extends Entity> entities)
+	public void update(Iterable<? extends Entity> entities)
 	{
 		// TODO, split in subbatches
 		final List<Entity> batch = new ArrayList<Entity>();
@@ -1290,6 +1178,7 @@ public class MysqlRepository extends AbstractAggregateableCrudRepository impleme
 				}
 			}
 			return e;
+
 		}
 	}
 

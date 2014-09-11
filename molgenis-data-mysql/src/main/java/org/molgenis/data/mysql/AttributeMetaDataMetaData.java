@@ -27,16 +27,18 @@ public class AttributeMetaDataMetaData extends DefaultEntityMetaData
 	public static final String ENUM_OPTIONS = "enumOptions";
 	public static final String RANGE_MIN = "rangeMin";
 	public static final String RANGE_MAX = "rangeMax";
+	public static final String LABEL_ATTRIBUTE = "labelAttribute";
+	public static final String READ_ONLY = "readOnly";
 
 	public AttributeMetaDataMetaData()
 	{
 		super(ENTITY_NAME);
 
 		addAttribute(IDENTIFIER).setIdAttribute(true).setNillable(false).setDataType(INT).setAuto(true);
-		addAttribute("ENTITY").setNillable(false).setDataType(XREF).setRefEntity(EntityMetaDataRepository.META_DATA);
+		addAttribute(ENTITY).setNillable(false).setDataType(XREF).setRefEntity(MysqlEntityMetaDataRepository.META_DATA);
 		addAttribute(NAME).setNillable(false);
 		addAttribute(DATA_TYPE);
-		addAttribute(REF_ENTITY).setDataType(XREF).setRefEntity(EntityMetaDataRepository.META_DATA);
+		addAttribute(REF_ENTITY).setDataType(XREF).setRefEntity(MysqlEntityMetaDataRepository.META_DATA);
 		addAttribute(NILLABLE).setDataType(BOOL);
 		addAttribute(AUTO).setDataType(BOOL);
 		addAttribute(ID_ATTRIBUTE).setDataType(BOOL);
@@ -48,5 +50,7 @@ public class AttributeMetaDataMetaData extends DefaultEntityMetaData
 		addAttribute(ENUM_OPTIONS).setDataType(TEXT);
 		addAttribute(RANGE_MIN).setDataType(new LongField());
 		addAttribute(RANGE_MAX).setDataType(new LongField());
+		addAttribute(LABEL_ATTRIBUTE).setDataType(BOOL);
+		addAttribute(READ_ONLY).setDataType(BOOL).setDefaultValue(false);
 	}
 }

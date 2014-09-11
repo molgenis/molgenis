@@ -1,5 +1,6 @@
 package org.molgenis.data.support;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes;
@@ -13,6 +14,8 @@ import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
+
+import com.google.common.collect.Lists;
 
 /**
  * Default implementation of the AttributeMetaData interface
@@ -51,6 +54,44 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		if (name == null) throw new IllegalArgumentException("Name cannot be null");
 		this.name = name;
 		this.fieldType = MolgenisFieldTypes.STRING;
+	}
+
+	/**
+	 * Copy constructor
+	 * 
+	 * @param attributeMetaData
+	 */
+	public DefaultAttributeMetaData(AttributeMetaData attributeMetaData)
+	{
+		this.name = attributeMetaData.getName();
+		this.fieldType = attributeMetaData.getDataType();
+		this.description = attributeMetaData.getDescription();
+		this.nillable = attributeMetaData.isNillable();
+		this.readOnly = attributeMetaData.isReadonly();
+		this.defaultValue = attributeMetaData.getDefaultValue();
+		this.idAttribute = attributeMetaData.isIdAtrribute();
+		this.labelAttribute = attributeMetaData.isLabelAttribute();
+		this.lookupAttribute = attributeMetaData.isLookupAttribute();
+		EntityMetaData refEntity = attributeMetaData.getRefEntity();
+		this.refEntity = refEntity != null ? new DefaultEntityMetaData(refEntity) : null; // deep copy
+		this.label = attributeMetaData.getLabel();
+		this.visible = attributeMetaData.isVisible();
+		this.unique = attributeMetaData.isUnique();
+		this.auto = attributeMetaData.isAuto();
+		this.aggregateable = attributeMetaData.isAggregateable();
+		this.range = attributeMetaData.getRange();
+
+		// deep copy
+		Iterable<AttributeMetaData> attributeParts = attributeMetaData.getAttributeParts();
+		if (attributeParts != null)
+		{
+			List<AttributeMetaData> attributesMetaData = new ArrayList<AttributeMetaData>();
+			for (AttributeMetaData attributePart : attributeParts)
+			{
+				attributesMetaData.add(new DefaultAttributeMetaData(attributePart));
+			}
+			this.attributesMetaData = attributesMetaData;
+		}
 	}
 
 	@Override
@@ -135,6 +176,12 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public DefaultAttributeMetaData setIdAttribute(boolean idAttribute)
 	{
 		this.idAttribute = idAttribute;
+		if (idAttribute)
+		{
+			unique = true;
+			readOnly = true;
+		}
+
 		return this;
 	}
 
@@ -309,5 +356,83 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public int hashCode()
 	{
 		return name != null ? name.hashCode() : 0;
+	}
+
+	@Override
+	public boolean isSameAs(AttributeMetaData other)
+	{
+		if (this == other) return true;
+		if (other == null) return false;
+
+		if (isAggregateable() != other.isAggregateable()) return false;
+		if (isAuto() != other.isAuto()) return false;
+		if (getDefaultValue() == null)
+		{
+			if (other.getDefaultValue() != null) return false;
+		}
+		else if (!getDefaultValue().equals(other.getDefaultValue())) return false;
+		if (getDescription() == null)
+		{
+			if (other.getDescription() != null) return false;
+		}
+		else if (!getDescription().equals(other.getDescription())) return false;
+		if (getDataType() == null)
+		{
+			if (other.getDataType() != null) return false;
+		}
+		else
+		{
+			if (getDataType().getEnumType() != other.getDataType().getEnumType()) return false;
+			if (getDataType().getEnumType() == FieldTypeEnum.ENUM)
+			{
+				if (((EnumField) getDataType()).getEnumOptions() == null)
+				{
+					if (((EnumField) other.getDataType()).getEnumOptions() != null) return false;
+					if (!((EnumField) getDataType()).getEnumOptions().equals(
+							((EnumField) other.getDataType()).getEnumOptions())) return true;
+				}
+			}
+		}
+		if (isIdAtrribute() != other.isIdAtrribute()) return false;
+		if (getLabel() == null)
+		{
+			if (other.getLabel() != null) return false;
+		}
+		else if (!getLabel().equals(other.getLabel())) return false;
+		if (isLabelAttribute() != other.isLabelAttribute()) return false;
+		if (isLookupAttribute() != other.isLookupAttribute()) return false;
+		if (getName() == null)
+		{
+			if (other.getName() != null) return false;
+		}
+		else if (!getName().equals(other.getName())) return false;
+		if (isNillable() != other.isNillable()) return false;
+
+		if (getRange() == null)
+		{
+			if (other.getRange() != null) return false;
+		}
+		else if (!getRange().equals(other.getRange())) return false;
+		if (isReadonly() != other.isReadonly()) return false;
+		if (getRefEntity() == null)
+		{
+			if (other.getRefEntity() != null) return false;
+		}
+		else if (!getRefEntity().getName().equals(other.getRefEntity().getName())) return false;
+		if (isUnique() != other.isUnique()) return false;
+		if (isVisible() != other.isVisible()) return false;
+
+		// attributeparts
+		if (getAttributeParts() == null)
+		{
+			if (other.getAttributeParts() != null) return false;
+		}
+		else
+		{
+			if (other.getAttributeParts() == null) return false;
+			if (!Lists.newArrayList(getAttributeParts()).equals(Lists.newArrayList(other.getAttributeParts()))) return false;
+		}
+
+		return true;
 	}
 }

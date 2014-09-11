@@ -10,16 +10,6 @@
 	
 	<dependencies>
 		<dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-omx-core</artifactId>
-            <version>1.2.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-mysql</artifactId>
-            <version>1.2.0-SNAPSHOT</version>
-        </dependency>
-		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-core</artifactId>
 			<version>1.2.0-SNAPSHOT</version>
@@ -28,38 +18,6 @@
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-core-ui</artifactId>
 			<version>1.2.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-data-csv</artifactId>
-			<version>1.2.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-data-excel</artifactId>
-			<version>1.2.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-data-omx</artifactId>
-			<version>1.2.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-search</artifactId>
-			<version>1.2.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>hsqldb</groupId>
-			<artifactId>hsqldb</artifactId>
-			<version>1.8.0.10</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-search-elasticsearch</artifactId>
-			<version>1.2.0-SNAPSHOT</version>
-			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>

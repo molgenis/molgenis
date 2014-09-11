@@ -12,9 +12,9 @@
 		items.push('<div class="row molgenis-table-container">');
 		items.push('<div class="col-md-12">');
 		if(settings.rowClickable){
-			items.push('<table class="table-striped table-condensed molgenis-table table-hover"><thead></thead><tbody></tbody></table>');
+			items.push('<table class="table table-striped table-condensed molgenis-table table-hover"><thead></thead><tbody></tbody></table>');
 		}else{
-			items.push('<table class="table-striped table-condensed molgenis-table"><thead></thead><tbody></tbody></table>');
+			items.push('<table class="table table-striped table-condensed molgenis-table"><thead><th></th></thead><tbody></tbody></table>');
 		}
 		items.push('</div>');
 		items.push('</div>');
@@ -174,7 +174,7 @@
 	 * @memberOf molgenis.table.cell
 	 */
 	function renderCell(cell, entity, attribute, settings) {
-		if(settings.editenabled)
+		if(settings.editenabled && !attribute.readOnly)
 			renderEditCell(cell, entity, attribute, settings);
 		else
 			renderViewCell(cell, entity, attribute, settings);

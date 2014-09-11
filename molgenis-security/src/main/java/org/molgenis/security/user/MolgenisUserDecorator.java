@@ -1,12 +1,13 @@
 package org.molgenis.security.user;
 
-import java.util.List;
-
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.CrudRepositoryDecorator;
-import org.molgenis.data.DatabaseAction;
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.omx.auth.UserAuthority;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
@@ -14,7 +15,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 
 public class MolgenisUserDecorator extends CrudRepositoryDecorator
 {
@@ -28,6 +28,10 @@ public class MolgenisUserDecorator extends CrudRepositoryDecorator
 	{
 		encodePassword(entity);
 		super.add(entity);
+
+		// id is only guaranteed to be generated at flush time
+		super.flush();
+		addSuperuserAuthority(entity);
 	}
 
 	@Override
@@ -35,12 +39,16 @@ public class MolgenisUserDecorator extends CrudRepositoryDecorator
 	{
 		updatePassword(entity);
 		super.update(entity);
+
+		// id is only guaranteed to be generated at flush time
+		super.flush();
+		updateSuperuserAuthority(entity);
 	}
 
 	@Override
 	public Integer add(Iterable<? extends Entity> entities)
 	{
-		return super.add(Iterables.transform(entities, new Function<Entity, Entity>()
+		Integer nr = super.add(Iterables.transform(entities, new Function<Entity, Entity>()
 		{
 			@Override
 			public Entity apply(Entity entity)
@@ -49,12 +57,18 @@ public class MolgenisUserDecorator extends CrudRepositoryDecorator
 				return entity;
 			}
 		}));
+
+		// id is only guaranteed to be generated at flush time
+		super.flush();
+		addSuperuserAuthorities(entities);
+
+		return nr;
 	}
 
 	@Override
-	public void update(Iterable<? extends Entity> records)
+	public void update(Iterable<? extends Entity> entities)
 	{
-		super.update(Iterables.transform(records, new Function<Entity, Entity>()
+		super.update(Iterables.transform(entities, new Function<Entity, Entity>()
 		{
 			@Override
 			public Entity apply(Entity entity)
@@ -63,20 +77,10 @@ public class MolgenisUserDecorator extends CrudRepositoryDecorator
 				return entity;
 			}
 		}));
-	}
 
-	@Override
-	public void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
-	{
-		super.update(Lists.transform(entities, new Function<Entity, Entity>()
-		{
-			@Override
-			public Entity apply(Entity entity)
-			{
-				updatePassword(entity);
-				return entity;
-			}
-		}), dbAction, keyName);
+		// id is only guaranteed to be generated at flush time
+		super.flush();
+		updateSuperuserAuthorities(entities);
 	}
 
 	private void updatePassword(Entity entity)
@@ -98,6 +102,69 @@ public class MolgenisUserDecorator extends CrudRepositoryDecorator
 		entity.set(MolgenisUser.PASSWORD_, encodedPassword);
 	}
 
+	private void addSuperuserAuthorities(Iterable<? extends Entity> entities)
+	{
+		// performance improvement: add filtered iterable to repo
+		for (Entity entity : entities)
+		{
+			addSuperuserAuthority(entity);
+		}
+	}
+
+	private void addSuperuserAuthority(Entity entity)
+	{
+		Boolean isSuperuser = entity.getBoolean(MolgenisUser.SUPERUSER);
+		if (isSuperuser != null && isSuperuser == true)
+		{
+			MolgenisUser molgenisUser = findOne(entity.getIdValue(), MolgenisUser.class);
+
+			UserAuthority userAuthority = new UserAuthority();
+			userAuthority.setMolgenisUser(molgenisUser);
+			userAuthority.setRole(SecurityUtils.AUTHORITY_SU);
+			getUserAuthorityRepository().add(userAuthority);
+		}
+	}
+
+	private void updateSuperuserAuthorities(Iterable<? extends Entity> entities)
+	{
+		// performance improvement: add filtered iterable to repo
+		for (Entity entity : entities)
+		{
+			updateSuperuserAuthority(entity);
+		}
+	}
+
+	private void updateSuperuserAuthority(Entity entity)
+	{
+		MolgenisUser molgenisUser = findOne(entity.getIdValue(), MolgenisUser.class);
+
+		CrudRepository userAuthorityRepository = getUserAuthorityRepository();
+
+		UserAuthority suAuthority = userAuthorityRepository.findOne(
+				new QueryImpl().eq(UserAuthority.MOLGENISUSER, molgenisUser).and()
+						.eq(UserAuthority.ROLE, SecurityUtils.AUTHORITY_SU), UserAuthority.class);
+
+		Boolean isSuperuser = entity.getBoolean(MolgenisUser.SUPERUSER);
+		if (isSuperuser != null && isSuperuser == true)
+		{
+			if (suAuthority == null)
+			{
+
+				UserAuthority userAuthority = new UserAuthority();
+				userAuthority.setMolgenisUser(molgenisUser);
+				userAuthority.setRole(SecurityUtils.AUTHORITY_SU);
+				userAuthorityRepository.add(userAuthority);
+			}
+		}
+		else
+		{
+			if (suAuthority != null)
+			{
+				userAuthorityRepository.deleteById(suAuthority.getId());
+			}
+		}
+	}
+
 	private PasswordEncoder getPasswordEncoder()
 	{
 		ApplicationContext applicationContext = ApplicationContextProvider.getApplicationContext();
@@ -111,5 +178,25 @@ public class MolgenisUserDecorator extends CrudRepositoryDecorator
 			throw new RuntimeException(new ApplicationContextException("missing required PasswordEncoder bean"));
 		}
 		return passwordEncoder;
+	}
+
+	private CrudRepository getUserAuthorityRepository()
+	{
+		ApplicationContext applicationContext = ApplicationContextProvider.getApplicationContext();
+		if (applicationContext == null)
+		{
+			throw new RuntimeException(new ApplicationContextException("missing required application context"));
+		}
+		DataService dataService = applicationContext.getBean(DataService.class);
+		if (dataService == null)
+		{
+			throw new RuntimeException(new ApplicationContextException("missing required DataService bean"));
+		}
+		CrudRepository userAuthorityRepository = dataService.getCrudRepository(UserAuthority.class.getSimpleName());
+		if (userAuthorityRepository == null)
+		{
+			throw new RuntimeException("missing required UserAuthority repository");
+		}
+		return userAuthorityRepository;
 	}
 }

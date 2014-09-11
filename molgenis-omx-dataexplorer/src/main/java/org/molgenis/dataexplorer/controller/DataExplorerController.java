@@ -19,22 +19,15 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.molgenis.data.AggregateResult;
-import org.molgenis.data.Aggregateable;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.CrudRepository;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.data.Queryable;
-import org.molgenis.data.Repository;
+import org.molgenis.data.*;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.support.GenomeConfig;
 import org.molgenis.data.support.QueryImpl;
@@ -47,6 +40,7 @@ import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.core.FreemarkerTemplate;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.util.GsonHttpMessageConverter;
@@ -92,6 +86,9 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String KEY_SHOW_WIZARD_ONINIT = "plugin.dataexplorer.wizard.oninit";
 	public static final String KEY_HIDE_SELECT = "plugin.dataexplorer.select.hide";
 	public static final String KEY_HEADER_ABBREVIATE = "plugin.dataexplorer.header.abbreviate";
+	public static final String KEY_HIDE_SEARCH_BOX = "plugin.dataexplorer.hide.searchbox";
+	public static final String KEY_HIDE_ITEM_SELECTION = "plugin.dataexplorer.hide.itemselection";
+
 	private static final boolean DEFAULT_VAL_MOD_AGGREGATES = true;
 	private static final boolean DEFAULT_VAL_MOD_ANNOTATORS = false;
 	private static final boolean DEFAULT_VAL_MOD_CHARTS = true;
@@ -99,8 +96,6 @@ public class DataExplorerController extends MolgenisPluginController
 	private static final boolean DEFAULT_VAL_MOD_DISEASEMATCHER = false;
 	private static final boolean DEFAULT_VAL_GALAXY_ENABLED = false;
 	public static final boolean DEFAULT_VAL_SHOW_WIZARD_ONINIT = false;
-	public static final String DEFAULT_VAL_WIZARD_TITLE = "Filter Wizard";
-	public static final String DEFAULT_VAL_WIZARD_BTN_TITLE = "Wizard";
 	public static final String DEFAULT_VAL_HEADER_ABBREVIATE = "180";
 	public static final String DEFAULT_AGGREGATES_NORESULTS_MESSAGE = "No results found";
 
@@ -112,9 +107,8 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String CHAINS = "genomebrowser.init.chains";
 	public static final String SOURCES = "genomebrowser.init.sources";
 	public static final String BROWSERLINKS = "genomebrowser.init.browserLinks";
-	public static final String WIZARD_TITLE = "plugin.dataexplorer.wizard.title";
-	public static final String WIZARD_BUTTON_TITLE = "plugin.dataexplorer.wizard.button.title";
 	public static final String AGGREGATES_NORESULTS_MESSAGE = "plugin.dataexplorer.mod.aggregates.noresults";
+	public static final String HIGHLIGHTREGION = "genomebrowser.init.highlightRegion";
 
 	public static final String KEY_DATAEXPLORER_EDITABLE = "plugin.dataexplorer.editable";
 	public static final String KEY_DATAEXPLORER_ROW_CLICKABLE = "plugin.dataexplorer.rowClickable";
@@ -122,6 +116,7 @@ public class DataExplorerController extends MolgenisPluginController
 	private static final boolean DEFAULT_VAL_DATAEXPLORER_EDITABLE = false;
 	private static final boolean DEFAULT_VAL_DATAEXPLORER_ROW_CLICKABLE = false;
 	private static final boolean DEFAULT_VAL_KEY_HIDE_SELECT = true;
+	private static final boolean DEFAULT_VAL_KEY_HIGLIGHTREGION = false;
 
 	@Autowired
 	private DataService dataService;
@@ -151,6 +146,7 @@ public class DataExplorerController extends MolgenisPluginController
 			@RequestParam(value = "searchTerm", required = false) String searchTerm, Model model) throws Exception
 	{
 		boolean entityExists = false;
+		boolean hasEntityPermission = false;
 		Iterable<EntityMetaData> entitiesMeta = Iterables.transform(dataService.getEntityNames(),
 				new Function<String, EntityMetaData>()
 				{
@@ -164,14 +160,27 @@ public class DataExplorerController extends MolgenisPluginController
 		if (selectedEntityName != null)
 		{
 			entityExists = dataService.hasRepository(selectedEntityName);
+			hasEntityPermission = molgenisPermissionService.hasPermissionOnEntity(selectedEntityName, Permission.COUNT);
+
 		}
 
-		if (entityExists && molgenisSettings.getBooleanProperty(KEY_HIDE_SELECT, DEFAULT_VAL_KEY_HIDE_SELECT))
+		if (entityExists && hasEntityPermission)
 		{
-			model.addAttribute("hideDatasetSelect", true);
+			if (molgenisSettings.getBooleanProperty(KEY_HIDE_SELECT, DEFAULT_VAL_KEY_HIDE_SELECT)) model.addAttribute(
+					"hideDatasetSelect", true);
 		}
 		else
 		{
+			if (selectedEntityName != null)
+			{
+				StringBuilder message = new StringBuilder(
+						"Entity does not exist or you do not have permission on this entity");
+				if (!SecurityUtils.currentUserIsAuthenticated())
+				{
+					message.append(", log in to view more entities");
+				}
+				model.addAttribute("warningMessage", message.toString());
+			}
 			Iterator<EntityMetaData> entitiesIterator = entitiesMeta.iterator();
 			if (entitiesIterator.hasNext())
 			{
@@ -179,10 +188,9 @@ public class DataExplorerController extends MolgenisPluginController
 			}
 		}
 		model.addAttribute("selectedEntityName", selectedEntityName);
-		model.addAttribute("wizardtitle", molgenisSettings.getProperty(WIZARD_TITLE, DEFAULT_VAL_WIZARD_TITLE));
-		model.addAttribute("wizardbuttontitle",
-				molgenisSettings.getProperty(WIZARD_BUTTON_TITLE, DEFAULT_VAL_WIZARD_BTN_TITLE));
 		model.addAttribute("searchTerm", searchTerm);
+		model.addAttribute("hideSearchBox", molgenisSettings.getBooleanProperty(KEY_HIDE_SEARCH_BOX, false));
+		model.addAttribute("hideDataItemSelect", molgenisSettings.getBooleanProperty(KEY_HIDE_ITEM_SELECTION, false));
 
 		return "view-dataexplorer";
 	}
@@ -200,6 +208,8 @@ public class DataExplorerController extends MolgenisPluginController
 			model.addAttribute("chains", molgenisSettings.getProperty(CHAINS));
 			model.addAttribute("sources", molgenisSettings.getProperty(SOURCES));
 			model.addAttribute("browserLinks", molgenisSettings.getProperty(BROWSERLINKS));
+			model.addAttribute("showHighlight", String.valueOf(molgenisSettings.getBooleanProperty(HIGHLIGHTREGION,
+					DEFAULT_VAL_KEY_HIGLIGHTREGION)));
 
 			model.addAttribute("genomebrowser_start_list",
 					molgenisSettings.getProperty(GenomeConfig.GENOMEBROWSER_START, "POS"));
@@ -258,6 +268,11 @@ public class DataExplorerController extends MolgenisPluginController
 		else if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.COUNT)) pluginPermission = Permission.COUNT;
 
 		ModulesConfigResponse modulesConfig = new ModulesConfigResponse();
+
+		Locale locale = new Locale("molgenis", "molgenis");
+		ResourceBundle i18n = ResourceBundle.getBundle("i18n", locale);
+		String aggregatesTitle = i18n.getString("dataexplorer_aggregates_title");
+
 		if (pluginPermission != null)
 		{
 			switch (pluginPermission)
@@ -265,7 +280,7 @@ public class DataExplorerController extends MolgenisPluginController
 				case COUNT:
 					if (modAggregates)
 					{
-						modulesConfig.add(new ModuleConfig("aggregates", "Aggregates", "grid-icon.png"));
+						modulesConfig.add(new ModuleConfig("aggregates", aggregatesTitle, "grid-icon.png"));
 					}
 					break;
 				case READ:
@@ -276,7 +291,7 @@ public class DataExplorerController extends MolgenisPluginController
 					}
 					if (modAggregates)
 					{
-						modulesConfig.add(new ModuleConfig("aggregates", "Aggregates", "aggregate-icon.png"));
+						modulesConfig.add(new ModuleConfig("aggregates", aggregatesTitle, "aggregate-icon.png"));
 					}
 					if (modCharts)
 					{
@@ -491,7 +506,7 @@ public class DataExplorerController extends MolgenisPluginController
 	{
 		model.addAttribute("entity", dataService.getQueryableRepository(entityName).findOne(entityId));
 		model.addAttribute("entityMetadata", dataService.getEntityMetaData(entityName));
-		model.addAttribute("viewName",getViewName(entityName));
+		model.addAttribute("viewName", getViewName(entityName));
 		return "view-entityreport";
 	}
 
@@ -512,7 +527,7 @@ public class DataExplorerController extends MolgenisPluginController
 	private boolean viewExists(String viewName)
 	{
 		Queryable templateRepository = dataService.getQueryableRepository(FreemarkerTemplate.ENTITY_NAME);
-		return templateRepository.count(new QueryImpl().eq("Name", viewName+".ftl")) > 0;
+		return templateRepository.count(new QueryImpl().eq("Name", viewName + ".ftl")) > 0;
 	}
 
 	@RequestMapping(value = "/settings", method = RequestMethod.GET)

@@ -6,12 +6,12 @@ import static org.testng.Assert.assertNotNull;
 import java.util.Arrays;
 import java.util.List;
 
+import org.elasticsearch.common.collect.Lists;
 import org.molgenis.AppConfig;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Range;
-import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.fieldtypes.EnumField;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,10 +24,10 @@ import org.testng.annotations.Test;
 public class AttributeMetaDataRepositoryTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired
-	private AttributeMetaDataRepository attributeMetaDataRepository;
+	private MysqlAttributeMetaDataRepository attributeMetaDataRepository;
 
 	@Autowired
-	private EntityMetaDataRepository entityMetaDataRepository;
+	private MysqlEntityMetaDataRepository entityMetaDataRepository;
 
 	@BeforeMethod
 	public void beforeMethod()
@@ -50,8 +50,8 @@ public class AttributeMetaDataRepositoryTest extends AbstractTestNGSpringContext
 				.setRange(new Range(1l, 5l));
 		attributeMetaDataRepository.addAttributeMetaData(emd.getName(), intRangeAttr);
 
-		List<DefaultAttributeMetaData> retrieved = attributeMetaDataRepository
-				.getEntityAttributeMetaData(emd.getName());
+		List<AttributeMetaData> retrieved = Lists.newArrayList(attributeMetaDataRepository
+				.getEntityAttributeMetaData(emd.getName()));
 
 		assertNotNull(retrieved);
 		assertEquals(retrieved.size(), 2);

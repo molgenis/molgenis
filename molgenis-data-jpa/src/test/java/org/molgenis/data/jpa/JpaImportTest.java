@@ -13,11 +13,11 @@ import java.io.InputStream;
 import java.util.Set;
 
 import org.molgenis.data.DatabaseAction;
-import org.molgenis.data.importer.EntityImportService;
+import org.molgenis.data.jpa.importer.AbstractEntitiesImporter;
+import org.molgenis.data.jpa.importer.EntitiesImporter;
+import org.molgenis.data.jpa.importer.EntityImportService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.MolgenisValidationException;
-import org.molgenis.framework.db.AbstractEntitiesImporter;
-import org.molgenis.framework.db.EntitiesImporter;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 import org.testng.annotations.BeforeMethod;
@@ -92,7 +92,6 @@ public class JpaImportTest extends BaseJpaTest
 		{
 			assertEquals(e.getViolations().size(), 1);
 			assertEquals(e.getViolations().iterator().next().getViolatedAttribute().getName(), "age");
-			assertEquals(e.getViolations().iterator().next().getRownr(), 1);
 		}
 	}
 

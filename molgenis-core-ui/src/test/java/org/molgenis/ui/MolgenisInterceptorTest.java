@@ -1,11 +1,13 @@
 package org.molgenis.ui;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ResourceFingerprintRegistry;
 import org.springframework.web.servlet.ModelAndView;
 import org.testng.annotations.BeforeMethod;
@@ -24,13 +26,16 @@ public class MolgenisInterceptorTest
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void MolgenisInterceptor()
 	{
-		new MolgenisInterceptor(null);
+		MolgenisSettings molgenisSettings = mock(MolgenisSettings.class);
+		new MolgenisInterceptor(null, molgenisSettings);
 	}
 
 	@Test
 	public void postHandle() throws Exception
 	{
-		MolgenisInterceptor molgenisInterceptor = new MolgenisInterceptor(resourceFingerprintRegistry);
+		MolgenisSettings molgenisSettings = mock(MolgenisSettings.class);
+		when(molgenisSettings.getProperty("i18nLocale", "en")).thenReturn("en");
+		MolgenisInterceptor molgenisInterceptor = new MolgenisInterceptor(resourceFingerprintRegistry, molgenisSettings);
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		HttpServletResponse response = mock(HttpServletResponse.class);
 		Object handler = mock(Object.class);

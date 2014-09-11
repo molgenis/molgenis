@@ -1,7 +1,6 @@
 package org.molgenis.data.support;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -10,7 +9,6 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
 import org.molgenis.data.convert.DateToStringConverter;
-import org.molgenis.fieldtypes.MrefField;
 import org.springframework.beans.BeanUtils;
 
 public abstract class AbstractEntity implements Entity
@@ -145,19 +143,19 @@ public abstract class AbstractEntity implements Entity
 		return DataConverter.toIntList(get(attributeName));
 	}
 
-    @Override
-    public String toString()
-    {
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.getClass().getSimpleName() + "{");
-        for(String attrName : this.getAttributeNames())
-        {
-            sb.append(attrName + "='" +this.get(attrName) + "', ");
-        }
-        sb.delete(sb.length()-2, sb.length());
-        sb.append("}");
-        return sb.toString();
-    }
+	@Override
+	public String toString()
+	{
+		StringBuilder sb = new StringBuilder();
+		sb.append(this.getClass().getSimpleName() + "{");
+		for (String attrName : this.getAttributeNames())
+		{
+			sb.append(attrName + "='" + this.get(attrName) + "', ");
+		}
+		sb.delete(sb.length() - 2, sb.length());
+		sb.append("}");
+		return sb.toString();
+	}
 
 	public static boolean isObjectRepresentation(String objStr)
 	{

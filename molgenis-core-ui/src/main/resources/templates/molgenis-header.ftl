@@ -9,6 +9,7 @@
 		<title><#if molgenis_ui.title?has_content>${molgenis_ui.title?html}</#if></title>
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<link rel="icon" href="<@resource_href "/img/molgenis.ico"/>" type="image/x-icon">
 		<link rel="stylesheet" href="<@resource_href "/css/bootstrap.min.css"/>" type="text/css">
 		<link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
@@ -136,7 +137,7 @@
 			</div>
 		</nav>
 	</#macro>
-<#--submenu -->
+	<#--submenu -->
 	<#macro submenu menu plugin_id>
 	<div id="submenu">
 		<ul id="submenu-menu" class="nav nav-tabs">
@@ -164,7 +165,7 @@
 				</#if>
 			</#list>
 		</ul>
-	<#assign breadcrumb = menu.breadcrumb>
+		<#assign breadcrumb = menu.breadcrumb>
 		<#if (breadcrumb?size > 1)>
 			<ul id="molgenis-breadcrumb" class="breadcrumb">
 				<#list breadcrumb as menu>

@@ -1,7 +1,9 @@
 package org.molgenis.data.omx;
 
-import org.molgenis.data.AggregateableCrudRepositorySecurityDecorator;
+import org.molgenis.data.CrudRepositorySecurityDecorator;
 import org.molgenis.data.DataService;
+import org.molgenis.data.importer.ImportServiceFactory;
+import org.molgenis.data.omx.importer.OmxImporterServiceImpl;
 import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.search.SearchService;
@@ -23,17 +25,24 @@ public class OmxRepositoryRegistrator implements ApplicationListener<ContextRefr
 	private final DataService dataService;
 	private final SearchService searchService;
 	private final EntityValidator entityValidator;
+	private final ImportServiceFactory importServiceFactory;
+	private final OmxImporterServiceImpl omxImporterServiceImpl;
 
 	@Autowired
 	public OmxRepositoryRegistrator(DataService dataService, SearchService searchService,
-			EntityValidator entityValidator)
+			EntityValidator entityValidator, ImportServiceFactory importServiceFactory,
+			OmxImporterServiceImpl omxImporterServiceImpl)
 	{
 		if (dataService == null) throw new IllegalArgumentException("dataService is null");
 		if (searchService == null) throw new IllegalArgumentException("searchService is null");
 		if (entityValidator == null) throw new IllegalArgumentException("entityValidator is null");
+		if (importServiceFactory == null) throw new IllegalArgumentException("importServiceFactory is null");
+		if (omxImporterServiceImpl == null) throw new IllegalArgumentException("omxImporterServiceImpl is null");
 		this.dataService = dataService;
 		this.searchService = searchService;
 		this.entityValidator = entityValidator;
+		this.importServiceFactory = importServiceFactory;
+		this.omxImporterServiceImpl = omxImporterServiceImpl;
 	}
 
 	@Override
@@ -52,7 +61,7 @@ public class OmxRepositoryRegistrator implements ApplicationListener<ContextRefr
 			{
 				OmxRepository repo = new OmxRepository(dataService, searchService, dataSet.getIdentifier(),
 						entityValidator);
-				dataService.addRepository(new AggregateableCrudRepositorySecurityDecorator(repo));
+				dataService.addRepository(new CrudRepositorySecurityDecorator(repo));
 			}
 		}
 		finally
@@ -61,6 +70,7 @@ public class OmxRepositoryRegistrator implements ApplicationListener<ContextRefr
 			SecurityContextHolder.setContext(origCtx);
 		}
 
+		importServiceFactory.addImportService(omxImporterServiceImpl);
 	}
 
 	@Override

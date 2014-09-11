@@ -7,12 +7,25 @@ import org.molgenis.data.EntityMetaData;
 public class ConstraintViolation
 {
 	private final String message;
-	private final Object invalidValue;
-	private final Entity entity;
-	private final AttributeMetaData violatedAttribute;
-	private final EntityMetaData entityMetaData;
+	private Object invalidValue;
+	private Entity entity;
+	private AttributeMetaData violatedAttribute;
+	private EntityMetaData entityMetaData;
 	private String importInfo;
 	private long rownr;
+
+	public ConstraintViolation(String message, long rownr)
+	{
+		this.message = message;
+		this.rownr = rownr;
+	}
+
+	public ConstraintViolation(String message, AttributeMetaData violatedAttribute, long rownr)
+	{
+		this.message = message;
+		this.violatedAttribute = violatedAttribute;
+		this.rownr = rownr;
+	}
 
 	public ConstraintViolation(String message, Object invalidValue, Entity entity, AttributeMetaData violatedAttribute,
 			EntityMetaData entityMetaData, long rownr)
