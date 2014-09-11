@@ -50,6 +50,11 @@
                     }
                 }
 			}
+            else{
+                for (var attributeFilter in attributeFilters) {
+                    $(document).trigger('removeAttributeFilter', {'attributeUri': attributeFilter});
+                }
+            }
 		});
 		
 		modal.on('shown.bs.modal', function () {
