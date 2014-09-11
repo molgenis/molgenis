@@ -445,15 +445,15 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		// located anywhere inside the description
 		Integer locationNotFound = -1;
 
-		List<QueryRule> queryRules = new ArrayList<QueryRule>();
-		List<QueryRule> shouldQueryRules = new ArrayList<QueryRule>();
+		List<QueryRule> disjuncQueryRules = new ArrayList<QueryRule>();
+		Map<Integer, List<QueryRule>> shouldQueryRules = new HashMap<Integer, List<QueryRule>>();
 		List<String> uniqueTokens = stemMembers(
 				Arrays.asList(description.split(OntologyTermQueryRepository.MULTI_WHITESPACES)), stemmer);
 		for (OntologyTermContainer ontologyTermContainer : ontologyTermContainers)
 		{
-			Set<String> existingQueryStrings = new HashSet<String>();
 			for (Entry<String, Boolean> entry : ontologyTermContainer.getAllPaths().entrySet())
 			{
+				Set<String> existingQueryStrings = new HashSet<String>();
 				String currentNodePath = entry.getKey();
 				int parentNodeLevel = currentNodePath.split(NODEPATH_SEPARATOR).length;
 				Query query = new QueryImpl().eq(NODE_PATH, entry.getKey()).pageSize(Integer.MAX_VALUE);
@@ -533,33 +533,41 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 				// therefore create Disjunction Max query
 				if (finalIndexPosition == locationNotFound)
 				{
-					if (disJunctQuery.getNestedRules().size() > 0) queryRules.add(disJunctQuery);
+					disjuncQueryRules.add(disJunctQuery);
 				}
 				else
 				{
-					if (disJunctQuery.getNestedRules().size() > 0) shouldQueryRules.add(disJunctQuery);
+					if (!shouldQueryRules.containsKey(finalIndexPosition))
+					{
+						shouldQueryRules.put(finalIndexPosition, new ArrayList<QueryRule>());
+					}
+					shouldQueryRules.get(finalIndexPosition).add(disJunctQuery);
 				}
+
 			}
 		}
 
 		// Process should queryRules
-		if (shouldQueryRules.size() > 0)
+		QueryRule combinedQuery = new QueryRule(new ArrayList<QueryRule>());
+		combinedQuery.setOperator(Operator.SHOULD);
+		for (List<QueryRule> rules : shouldQueryRules.values())
 		{
-			// If there are multiple rules in the shouldQueryRules list, create
-			// a Should QueryRule to hold the list
-			if (shouldQueryRules.size() != 1)
+			if (rules.size() == 1)
 			{
-				QueryRule combinedQuery = new QueryRule(shouldQueryRules);
-				combinedQuery.setOperator(Operator.SHOULD);
-				queryRules.add(combinedQuery);
+				combinedQuery.getNestedRules().addAll(rules);
 			}
-			// Otherwise simply add one query to the disJunctionQuery list
 			else
 			{
-				queryRules.add(shouldQueryRules.get(0));
+				QueryRule disJuncQuery = new QueryRule(rules);
+				disJuncQuery.setOperator(Operator.DIS_MAX);
+				combinedQuery.getNestedRules().add(disJuncQuery);
 			}
 		}
-		return queryRules;
+
+		disjuncQueryRules
+				.add(combinedQuery.getNestedRules().size() == 1 ? combinedQuery.getNestedRules().get(0) : combinedQuery);
+
+		return disjuncQueryRules;
 	}
 
 	private List<QueryRule> getAlternativeOTs(String description,
