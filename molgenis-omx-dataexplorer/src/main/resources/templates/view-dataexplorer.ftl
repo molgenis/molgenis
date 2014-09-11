@@ -93,31 +93,39 @@
 	</div>
 
 
-<script id="filter-wizard-modal-template" type="text/x-handlebars-template">
+<script id="filter-wizard-modal-template" type="text/x-handlebars-template">   
     <div class="modal" id="filter-wizard-modal" tabindex="-1" role="dialog" aria-labelledby="filter-wizard-modal-label" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
+                
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
                     <h4 class="modal-title" id="filter-wizard-modal-label">${i18n.dataexplorer_wizard_title}</h4>
-                    </div>
+                    <button type="button" class="close" data-dismiss="modal">
+                    	<span aria-hidden="true">&times;</span>
+                    	<span class="sr-only">Close</span>
+                	</button>
+                </div>
+                
                 <div class="modal-body">
                     <div class="filter-wizard">
                         <form class="form-horizontal">
                             <ul class="wizard-steps"></ul>
-                            <div class="tab-content wizard-page "></div>
+                            <div class="tab-content wizard-page"></div>
                             <ul class="pager wizard">
-                                <li class="previous"><a href="#">Previous</a></li><li class="next"><a href="#">Next</a></li>
-                                </ul>
-                            </form>
-                        </div>
-                    </div>
-                <div class="modal-footer">
-                    <a href="#" class="btn btn-default" data-dismiss="modal">${i18n.dataexplorer_wizard_cancel}</a>
-                    <a href="#" class="btn btn-primary filter-wizard-apply-btn" data-dismiss="modal">${i18n.dataexplorer_wizard_apply}</a>
+                            	<li class="previous"><a href="#">Previous</a></li>
+                            	<li class="next"><a href="#">Next</a></li>
+                            </ul>
+                        </form>
                     </div>
                 </div>
+                
+                <div class="modal-footer">
+                	<a href="#" class="btn btn-default" data-dismiss="modal">${i18n.dataexplorer_wizard_cancel}</a>
+                    <a href="#" class="btn btn-primary filter-wizard-apply-btn" data-dismiss="modal">${i18n.dataexplorer_wizard_apply}</a>
+                </div>
+                
             </div>
-        </div>
+    	</div>
+    </div>
 </script>
 <@footer/>
