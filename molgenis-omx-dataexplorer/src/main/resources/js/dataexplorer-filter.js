@@ -372,7 +372,7 @@
 	 * Create remove button to remove complex elements that are not the first
 	 */
 	self.createRemoveButtonComplexElementFilter = function($complexElementContainer){
-		return $('<button class="btn btn-default btn-xs" type="button" data-filter=complex-removebutton><i class="icon-minus"></i></button>').click(function(){
+		return $('<button class="btn btn-default btn-xs" type="button" data-filter=complex-removebutton><i class="glyphicon glyphicon-minus"></i></button>').click(function(){
 					var $container = $complexElementContainer.parent();
 					var $addButton = $('[data-filter=complex-addbutton]', $container);
 					
