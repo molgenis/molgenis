@@ -128,4 +128,29 @@
     	</div>
     </div>
 </script>
+
+<script id="filter-modal-template" type="text/x-handlebars-template">
+	<div id="filter-modal" class="modal" tabindex="-1" aria-labelledby="filter-modal-label" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+					<h4 class="modal-title filter-title" id="filter-modal-label"></h4>
+				</div>
+				
+				<div class="modal-body">
+				<legend>Description</legend>
+				<p class="filter-description"></p>
+				<legend>Filter</legend>
+				<form class="form-horizontal"></form>
+				
+				<div class="modal-footer">
+					<a href="#" class="btn btn-default" data-dismiss="modal">Cancel</a>
+					<a href="#" class="btn btn-primary filter-apply-btn" data-dismiss="modal">Apply</a>
+				</div>	
+			</div>
+		</div>
+	</div>
+</script>
 <@footer/>
