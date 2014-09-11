@@ -29,10 +29,6 @@
 	border-left:1px solid #ddd;
 }
 
-.table-bordered tbody tr:first-child th:not(:first-child){
-	border-right:1px solid #ddd;
-}
-
 table thead th,th {	
     background-color: #428bca; 
     color: white;
@@ -94,7 +90,7 @@ legend {
 	margin-right : 5px;
 }
 
-.show-popover, .glyphicon{
+.show-popover,.glyphicon,.ui-icon{
 	cursor: hand; 
 	cursor: pointer;
 }
@@ -104,6 +100,8 @@ legend {
 	border-left:none;
 	border-right:none;
 	border-radius:10px;
+	padding-left:20px;
+	padding-right:20px;
 }
 
 .custom-purple-legend {
