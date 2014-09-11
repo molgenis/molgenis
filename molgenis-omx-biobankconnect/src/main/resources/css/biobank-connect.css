@@ -1,24 +1,45 @@
 .twitter-typeahead{
-	float:left; width:100%
+	float:left; 
+	width:100%;
 }
 
-table {
-	border : 1px solid #5B82A4;
+.table-bordered tr:first-child th:first-child{
+	border-top-left-radius:5px;
 }
 
-table thead th {	
-    background-color: #5B82A4; 
-    border:2px solid #5B82A4;
+.table-bordered tr:first-child th:last-child{
+	border-top-right-radius:5px;
+}
+
+.table-bordered {
+	border:none;
+}
+
+.table-bordered tbody tr th{
+	border : none;
+}
+
+.table-bordered tbody tr:first-child th:first-child{
+	border:none;
+	border-right:1px solid #ddd;
+}
+
+.table-bordered tbody tr:first-child th:last-child{
+	border:none;
+	border-left:1px solid #ddd;
+}
+
+.table-bordered tbody tr:first-child th:not(:first-child){
+	border-right:1px solid #ddd;
+}
+
+table thead th,th {	
+    background-color: #428bca; 
     color: white;
 }
 
 tbody tr:hover,.div-hover:hover {
 	background: #CEECF5; 
-}
-
-th {	
-    background-color: #5B82A4; 
-    color: white;
 }
 
 th.text-align-center,.text-align-center{
@@ -73,7 +94,7 @@ legend {
 	margin-right : 5px;
 }
 
-.show-popover {
+.show-popover, .glyphicon{
 	cursor: hand; 
 	cursor: pointer;
 }

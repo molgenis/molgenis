@@ -67,7 +67,7 @@
 			if(options.updatePager || options.container.find('#pager-' + options.dataSetId).length === 0){
 				options.updatePager = false;
 				var tablePager = $('<div/>').attr('id', 'pager-' + options.dataSetId);
-				options.container.find('#pager-' + options.dataSetId).remove();
+				options.container.find('.pagination').parents('div:eq(1)').remove();
 				options.container.append(tablePager);
 				tablePager.pager({
 					'nrItems' : totalHitCount,

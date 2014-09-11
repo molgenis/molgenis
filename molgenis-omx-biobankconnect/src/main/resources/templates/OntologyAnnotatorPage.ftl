@@ -38,10 +38,10 @@
 			</div>
 		</div>
 		<div class="row">
-			<div id="div-search" class="col-md-2">
+			<div id="div-search" class="col-md-3">
 				<div><strong>Search data items :</strong></div>
 				<div class="input-group">
-					<input id="search-dataitem" class="form-control" title="Enter your search term" />
+					<input id="search-dataitem" class="typeahead-rounded-corner form-control" title="Enter your search term" style="border-top-left-radius:5px;border-bottom-left-radius:5px;"/>
 					<div id="search-button" class="input-group-addon"><span class="glyphicon glyphicon-search"></span></div>
 				</div>
 			</div>

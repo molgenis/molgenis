@@ -32,18 +32,22 @@
 				source: function(query, cb) {
 					molgenis.dataItemsTypeahead(molgenis.hrefToId(selectedDataSet.href), query, cb);
 				}
-			}).on('keydown', function(e){
+			});
+			$('#search-button').click(function(){
+				updateMatrix(options);
+			});
+			
+			$('#search-dataitem').on('keydown', function(e){
 			    if (e.which == 13) {
 			    	$('#search-button').click();
 			    	return false;
 			    }
-			}).on('keyup', function(e){
+			});
+			$('#search-dataitem').on('keyup', function(e){
 				if($(this).val() === ''){
+					$('#search-dataitem').val('');
 					updateMatrix(options);
 			    }
-			});
-			$('#search-button').click(function(){
-				updateMatrix(options);
 			});
 		}
 	};
