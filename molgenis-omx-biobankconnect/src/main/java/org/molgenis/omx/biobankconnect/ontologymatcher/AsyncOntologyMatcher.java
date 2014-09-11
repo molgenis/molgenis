@@ -282,7 +282,9 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			}
 		}
 
-		return queryRules;
+		QueryRule finalQueryRule = new QueryRule(queryRules);
+		finalQueryRule.setOperator(Operator.DIS_MAX);
+		return queryRules.size() > 0 ? Arrays.<QueryRule> asList(finalQueryRule) : Collections.<QueryRule> emptyList();
 	}
 
 	/**
@@ -419,11 +421,17 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 				{
 					totalHits.put(ontologyIRI, new OntologyTermContainer(ontologyIRI));
 				}
-				String alternativeDefinitions = columnValueMap.get(ALTERNATIVE_DEFINITION) == null ? StringUtils.EMPTY : columnValueMap
-						.get(ALTERNATIVE_DEFINITION).toString();
-				totalHits.get(ontologyIRI).getAllPaths().put(nodePath, boost);
-				totalHits.get(ontologyIRI).getSelectedOntologyTerms().add(hit.getId());
-				totalHits.get(ontologyIRI).getAlternativeDefinitions().put(nodePath, alternativeDefinitions);
+				// prevent the duplicated ontology terms from being added to the
+				// list (because one ontology term could appear mulitple times
+				// within one ontology)
+				if (!totalHits.get(ontologyIRI).getSelectedOntologyTerms().contains(ontologyTermName))
+				{
+					String alternativeDefinitions = columnValueMap.get(ALTERNATIVE_DEFINITION) == null ? StringUtils.EMPTY : columnValueMap
+							.get(ALTERNATIVE_DEFINITION).toString();
+					totalHits.get(ontologyIRI).getAllPaths().put(nodePath, boost);
+					totalHits.get(ontologyIRI).getSelectedOntologyTerms().add(ontologyTermName);
+					totalHits.get(ontologyIRI).getAlternativeDefinitions().put(nodePath, alternativeDefinitions);
+				}
 			}
 		}
 		return totalHits.values();
@@ -453,7 +461,6 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		{
 			for (Entry<String, Boolean> entry : ontologyTermContainer.getAllPaths().entrySet())
 			{
-				Set<String> existingQueryStrings = new HashSet<String>();
 				String currentNodePath = entry.getKey();
 				int parentNodeLevel = currentNodePath.split(NODEPATH_SEPARATOR).length;
 				Query query = new QueryImpl().eq(NODE_PATH, entry.getKey()).pageSize(Integer.MAX_VALUE);
@@ -487,45 +494,37 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 						String ontologyTermSynonym = columnValueMap.get(ONTOLOGYTERM_SYNONYM).toString().trim()
 								.toLowerCase();
 
-						// Only process new ontologyTermSynonym
-						if (!existingQueryStrings.contains(ontologyTermSynonym))
+						// Keep looking for the potential location of the
+						// ontology term synonym until it is found
+						if (finalIndexPosition == locationNotFound)
 						{
-							// Remember the synonyms that have been added to the
-							// query already
-							existingQueryStrings.add(ontologyTermSynonym);
+							finalIndexPosition = locateTermInDescription(uniqueTokens, ontologyTermSynonym, stemmer);
+						}
 
-							// Keep looking for the potential location of the
-							// ontology term synonym until it is found
-							if (finalIndexPosition == locationNotFound)
+						// If the node is different from currentNode, that
+						// means the node is subclass of currentNode.
+						// Depending on number of levels down, we assign
+						// different weights
+						if (!nodePath.equals(currentNodePath))
+						{
+							matcher = pattern.matcher(ontologyTermSynonym);
+
+							if (!matcher.find() && !StringUtils.isEmpty(ontologyTermSynonym))
 							{
-								finalIndexPosition = locateTermInDescription(uniqueTokens, ontologyTermSynonym, stemmer);
+								int levelDown = nodePath.split(NODEPATH_SEPARATOR).length - parentNodeLevel;
+								double boostedNumber = Math.pow(0.5, levelDown);
+								ontologyTermSynonym = createQueryWithBoost(ontologyTermSynonym, boostedNumber);
 							}
+						}
 
-							// If the node is different from currentNode, that
-							// means the node is subclass of currentNode.
-							// Depending on number of levels down, we assign
-							// different weights
-							if (!nodePath.equals(currentNodePath))
-							{
-								matcher = pattern.matcher(ontologyTermSynonym);
-
-								if (!matcher.find() && !StringUtils.isEmpty(ontologyTermSynonym))
-								{
-									int levelDown = nodePath.split(NODEPATH_SEPARATOR).length - parentNodeLevel;
-									double boostedNumber = Math.pow(0.5, levelDown);
-									ontologyTermSynonym = createQueryWithBoost(ontologyTermSynonym, boostedNumber);
-								}
-							}
-
-							// Add the non-empty one of the ontology term
-							// synonyms to the term collection
-							if (!StringUtils.isEmpty(ontologyTermSynonym))
-							{
-								subQueryRules.add(new QueryRule(FIELD_DESCRIPTION_STOPWORDS, Operator.EQUALS,
-										ontologyTermSynonym));
-								subQueryRules.add(new QueryRule(ObservableFeature.DESCRIPTION, Operator.EQUALS,
-										ontologyTermSynonym));
-							}
+						// Add the non-empty one of the ontology term
+						// synonyms to the term collection
+						if (!StringUtils.isEmpty(ontologyTermSynonym))
+						{
+							subQueryRules.add(new QueryRule(FIELD_DESCRIPTION_STOPWORDS, Operator.EQUALS,
+									ontologyTermSynonym));
+							subQueryRules.add(new QueryRule(ObservableFeature.DESCRIPTION, Operator.EQUALS,
+									ontologyTermSynonym));
 						}
 					}
 				}
@@ -564,7 +563,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			}
 		}
 
-		disjuncQueryRules
+		if (combinedQuery.getNestedRules().size() > 0) disjuncQueryRules
 				.add(combinedQuery.getNestedRules().size() == 1 ? combinedQuery.getNestedRules().get(0) : combinedQuery);
 
 		return disjuncQueryRules;
