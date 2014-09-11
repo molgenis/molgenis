@@ -2,6 +2,12 @@ package org.molgenis.ui;
 
 public interface MolgenisUi
 {
+	static final String DEFAULT_TITLE = "MOLGENIS";
+
+	static final String KEY_HREF_LOGO = "app.href.logo";
+	static final String KEY_HREF_CSS = "app.href.css";
+	static final String KEY_TITLE = "app.name";
+
 	/**
 	 * Returns app title or 'MOLGENIS' if app title does not exist
 	 * 
@@ -12,6 +18,8 @@ public interface MolgenisUi
 	String getHrefLogo();
 
 	String getHrefCss();
+
+	void setHrefLogo(String file);
 
 	/**
 	 * Returns the main menu
