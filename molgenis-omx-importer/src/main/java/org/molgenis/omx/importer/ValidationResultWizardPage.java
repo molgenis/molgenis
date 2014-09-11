@@ -114,10 +114,8 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 		DatabaseAction dbAction;
 
 		if (actionStr.equals("add")) dbAction = DatabaseAction.ADD;
-		else if (actionStr.equals("add_ignore")) dbAction = DatabaseAction.ADD_IGNORE_EXISTING;
 		else if (actionStr.equals("add_update")) dbAction = DatabaseAction.ADD_UPDATE_EXISTING;
 		else if (actionStr.equals("update")) dbAction = DatabaseAction.UPDATE;
-		else if (actionStr.equals("update_ignore")) dbAction = DatabaseAction.UPDATE_IGNORE_MISSING;
 		else dbAction = null;
 
 		return dbAction;

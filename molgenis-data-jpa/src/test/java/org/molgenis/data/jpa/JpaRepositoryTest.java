@@ -241,25 +241,6 @@ public class JpaRepositoryTest extends BaseJpaTest
 	}
 
 	@Test
-	public void testImportAddIgnoreExisting()
-	{
-		Entity e = new MapEntity("id");
-		e.set("firstName", "Piet");
-		e.set("lastName", "Paulusma");
-
-		EntityImportService eis = new EntityImportService();
-
-		eis.update(repo, Arrays.asList(e), DatabaseAction.ADD_IGNORE_EXISTING, "firstName");
-		assertEquals(repo.count(), 1);
-
-		Entity e1 = new MapEntity("id");
-		e1.set("firstName", "Piet");
-		e1.set("lastName", "Paulusma");
-		eis.update(repo, Arrays.asList(e1), DatabaseAction.ADD_IGNORE_EXISTING, "firstName");
-		assertEquals(repo.count(), 1);
-	}
-
-	@Test
 	public void testImportAddUpdateIgnoreExisting()
 	{
 		Entity e = new MapEntity("id");
@@ -306,73 +287,6 @@ public class JpaRepositoryTest extends BaseJpaTest
 		eis.update(repo, Arrays.asList(e1), DatabaseAction.UPDATE, "firstName");
 		assertEquals(repo.count(), 1);
 		assertEquals(repo.iterator(Person.class).iterator().next().getLastName(), "XXX");
-	}
-
-	@Test
-	public void testImportUpdateIgnoreMissing()
-	{
-		Entity e1 = new MapEntity("id");
-		e1.set("firstName", "Piet");
-		e1.set("lastName", "XXX");
-		EntityImportService eis = new EntityImportService();
-		eis.update(repo, Arrays.asList(e1), DatabaseAction.UPDATE_IGNORE_MISSING, "firstName");
-		assertEquals(repo.count(), 0);
-	}
-
-	@Test
-	public void testRemove()
-	{
-		Entity e = new MapEntity("id");
-		e.set("firstName", "Piet");
-		e.set("lastName", "Paulusma");
-		repo.add(e);
-
-		Entity e1 = new MapEntity("id");
-		e1.set("firstName", "Piet");
-		e1.set("lastName", "XXXX");
-
-		EntityImportService eis = new EntityImportService();
-		eis.update(repo, Arrays.asList(e1), DatabaseAction.REMOVE, "firstName");
-		assertEquals(repo.count(), 0);
-	}
-
-	@Test(expectedExceptions = MolgenisDataException.class)
-	public void testRemoveMissing()
-	{
-		Entity e1 = new MapEntity("id");
-		e1.set("firstName", "Piet");
-		e1.set("lastName", "XXXX");
-
-		EntityImportService eis = new EntityImportService();
-		eis.update(repo, Arrays.asList(e1), DatabaseAction.REMOVE, "firstName");
-	}
-
-	@Test
-	public void testRemoveIgnoreMissing()
-	{
-		Entity e = new MapEntity("id");
-		e.set("firstName", "Piet");
-		e.set("lastName", "Paulusma");
-		repo.add(e);
-
-		Entity e1 = new MapEntity("id");
-		e1.set("firstName", "Piet");
-		e1.set("lastName", "XXXX");
-
-		EntityImportService eis = new EntityImportService();
-		eis.update(repo, Arrays.asList(e1), DatabaseAction.REMOVE_IGNORE_MISSING, "firstName");
-		assertEquals(repo.count(), 0);
-	}
-
-	@Test
-	public void testRemoveIgnoreMissingMissing()
-	{
-		Entity e1 = new MapEntity("id");
-		e1.set("firstName", "Piet");
-		e1.set("lastName", "XXXX");
-		EntityImportService eis = new EntityImportService();
-		eis.update(repo, Arrays.asList(e1), DatabaseAction.REMOVE_IGNORE_MISSING, "firstName");
-		assertEquals(repo.count(), 0);
 	}
 
 	@Test

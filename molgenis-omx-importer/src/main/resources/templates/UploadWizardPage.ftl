@@ -42,31 +42,11 @@
 	                                <td>
 	                                    <div class="radio">
 	                                        <label>
-	                                            <input type="radio" name="entity_option" value="add_ignore">Add entities / ignore existing
-	                                        </label>
-	                                    </div>
-	                                </td>
-	                                <td>Importer adds new entities or skips if entity exists</td>
-	                            </tr>
-	                            <tr>
-	                                <td>
-	                                    <div class="radio">
-	                                        <label>
 	                                            <input type="radio" name="entity_option" value="update">Update Entities
 	                                        </label>
 	                                    </div>
 	                                </td>
 	                                <td>Importer updates existing entities or fails if entity does not exist</td>
-	                            </tr>
-	                            <tr>
-	                                <td>
-	                                    <div class="radio">
-	                                        <label>
-	                                            <input type="radio" name="entity_option" value="update_ignore">Update Entities / ignore not existing
-	                                        </label>
-	                                    </div>
-	                                </td>
-	                                <td>Importer updates existing entities or skips if entity does not exist</td>
 	                            </tr>
 	                        </table>
 	                    </div>
