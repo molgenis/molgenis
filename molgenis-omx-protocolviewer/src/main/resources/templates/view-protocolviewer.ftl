@@ -8,7 +8,7 @@
 		molgenis.Catalog.setEnableSelection(true);
 	</script>
 </#if>
-	<div class="row">			
+	<div class="row col-md-12">			
     <#if (catalogs?size == 0)>
         <span>No active catalogs</span>
     <#else>
