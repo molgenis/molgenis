@@ -3,6 +3,7 @@ package org.molgenis.elasticsearch.request;
 import static org.molgenis.data.QueryRule.Operator.EQUALS;
 import static org.molgenis.data.QueryRule.Operator.GREATER;
 import static org.molgenis.data.QueryRule.Operator.GREATER_EQUAL;
+import static org.molgenis.data.QueryRule.Operator.IN;
 import static org.molgenis.data.QueryRule.Operator.LESS;
 import static org.molgenis.data.QueryRule.Operator.LESS_EQUAL;
 import static org.molgenis.data.QueryRule.Operator.LIKE;
@@ -11,6 +12,7 @@ import static org.molgenis.data.QueryRule.Operator.NOT;
 import static org.molgenis.data.QueryRule.Operator.OR;
 import static org.molgenis.data.QueryRule.Operator.SEARCH;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -55,7 +57,6 @@ public class LuceneQueryStringBuilder
 		}
 
 		StringBuilder sb = new StringBuilder();
-		QueryRule previousRule = null;
 
 		for (QueryRule queryRule : queryRules)
 		{
@@ -69,21 +70,28 @@ public class LuceneQueryStringBuilder
 			{
 				sb.append(" " + queryRule.getOperator() + " ");
 			}
+			else if (queryRule.getOperator() == IN)
+			{
+				Iterator<?> it = ((Iterable<?>) queryRule.getValue()).iterator();
+				while (it.hasNext())
+				{
+					sb.append(escapeField(queryRule.getField())).append(":").append(getValue(it.next()));
+					if (it.hasNext())
+					{
+						sb.append(" OR ");
+					}
+				}
+			}
 			else if (queryRule.getOperator() == EQUALS || queryRule.getOperator() == NOT
 					|| queryRule.getOperator() == LIKE || queryRule.getOperator() == LESS
 					|| queryRule.getOperator() == LESS_EQUAL || queryRule.getOperator() == GREATER
 					|| queryRule.getOperator() == GREATER_EQUAL || queryRule.getOperator() == SEARCH)
 			{
-				if (previousRule != null)
-				{
-					sb.append(previousRule);
-				}
-
 				if (queryRule.getOperator() == NOT)
 				{
 					sb.append("-");
 				}
-				Object value = getValue(queryRule);
+				Object value = getValue(queryRule.getValue());
 
 				if (((value == null) || (value.equals(""))) && (queryRule.getOperator() == Operator.EQUALS))
 				{
@@ -140,8 +148,6 @@ public class LuceneQueryStringBuilder
 									+ "] not supported");
 					}
 				}
-
-				previousRule = null;
 			}
 		}
 
@@ -149,15 +155,14 @@ public class LuceneQueryStringBuilder
 	}
 
 	// Get the value from the QueryRule for use with lucene
-	private static Object getValue(QueryRule queryRule)
+	private static Object getValue(Object valueObj)
 	{
 		Object value = null;
-		Object valueObj = queryRule.getValue();
 		if (valueObj != null)
 		{
 			if (valueObj instanceof String)
 			{
-				value = escapeValue((String) queryRule.getValue());
+				value = escapeValue((String) valueObj);
 			}
 			else if (valueObj instanceof Double)
 			{

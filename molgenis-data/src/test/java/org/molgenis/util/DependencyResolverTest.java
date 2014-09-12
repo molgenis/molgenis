@@ -6,10 +6,16 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.TransformedEntity;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 public class DependencyResolverTest
@@ -33,5 +39,48 @@ public class DependencyResolverTest
 		List<EntityMetaData> resolved = DependencyResolver
 				.resolve(Sets.<EntityMetaData> newHashSet(e1, e2, e3, e4, e5));
 		assertEquals(resolved, Arrays.asList(e2, e4, e3, e5, e1));
+	}
+
+	@Test
+	public void resolveSelfReferences()
+	{
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("Person");
+		emd.addAttribute("name").setIdAttribute(true).setNillable(false);
+		emd.addAttribute("father").setDataType(MolgenisFieldTypes.XREF).setNillable(true).setRefEntity(emd);
+		emd.addAttribute("mother").setDataType(MolgenisFieldTypes.XREF).setNillable(true).setRefEntity(emd);
+
+		Entity piet = new MapEntity("name");
+		piet.set("name", "Piet");
+
+		Entity klaas = new MapEntity("name");
+		klaas.set("name", "Klaas");
+		klaas.set("father", "Piet");
+		klaas.set("mother", "Katrijn");
+
+		Entity jan = new MapEntity("name");
+		jan.set("name", "Jan");
+		jan.set("father", "Piet");
+		jan.set("mother", "Marie");
+
+		Entity katrijn = new MapEntity("name");
+		katrijn.set("name", "Katrijn");
+		katrijn.set("father", "Jan");
+		katrijn.set("mother", "Marie");
+
+		Entity marie = new MapEntity("name");
+		marie.set("name", "Marie");
+
+		DataService ds = new DataServiceImpl();
+		Iterable<Entity> entities = Arrays.<Entity> asList(new TransformedEntity(piet, emd, ds), new TransformedEntity(
+				klaas, emd, ds), new TransformedEntity(jan, emd, ds), new TransformedEntity(katrijn, emd, ds),
+				new TransformedEntity(marie, emd, ds));
+		Iterable<Entity> sorted = DependencyResolver.resolveSelfReferences(entities, emd);
+		List<Entity> sortedList = Lists.newArrayList(sorted);
+		assertEquals(sortedList.size(), 5);
+		assertEquals(sortedList.get(0).getIdValue(), "Piet");
+		assertEquals(sortedList.get(1).getIdValue(), "Marie");
+		assertEquals(sortedList.get(2).getIdValue(), "Jan");
+		assertEquals(sortedList.get(3).getIdValue(), "Katrijn");
+		assertEquals(sortedList.get(4).getIdValue(), "Klaas");
 	}
 }
