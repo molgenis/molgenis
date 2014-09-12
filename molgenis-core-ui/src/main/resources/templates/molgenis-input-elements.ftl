@@ -139,7 +139,7 @@
 				<input type="number" class="form-control" data-rule-digits="true" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" 
 					<#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> 
 					<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)?c}"</#if> 
-					<#if field.nillable?string('true', 'false') == 'false'>required="required"</#if> >
+					<#if field.nillable?string('true', 'false') == 'false'>required="required"</#if> />
 			
 			<#elseif field.dataType.enumType == 'SCRIPT'>
 				<div style="width: 100%; height:250px" class="uneditable-input" id="${fieldName}-editor"></div>
@@ -163,42 +163,17 @@
 				<input type="email" class="form-control" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" 
 					<#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> 
 					<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string?html}"</#if> 
-					<#if field.nillable?string('true', 'false') == 'false'>required="required"</#if> 
+					<#if field.nillable?string('true', 'false') == 'false'>required="required"</#if> />
 			<#else>
-				<input type="text" class="form-control <#compress><@validationOptions field /></#compress>" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" 
-				<#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> 
-				<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string?html}"</#if>  />
+					<input type="text" class="form-control" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" 
+						<#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> 
+						<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string?html}"</#if> 
+						<#if field.nillable?string('true', 'false') == 'false'>required="required"</#if> 
+						<#if field.dataType.enumType == 'DECIMAL'>data-rule-number="true"</#if>
+						<#if field.dataType.enumType == 'HYPERLINK'>data-rule-url="true"</#if> />
 			</#if>
 		</div>
 	</div>
-</#macro>
-
-<#macro validationOptions field>
-	<#assign validations = []>
-    
-    <#if field.nillable?string('true', 'false') == 'false'>
-    	<#assign validations = validations + ['required']>
-    </#if>
-    
-    <#if field.dataType.enumType == 'INT' || field.dataType.enumType == 'LONG'>
-    	<#assign validations = validations + ['digits']>
-    </#if>
-    
-    <#if field.dataType.enumType == 'DECIMAL'>
-    	<#assign validations = validations + ['number']>
-    </#if>
-    
-    <#if field.dataType.enumType == 'EMAIL'>
-    	<#assign validations = validations + ['email']>
-    </#if>
-    
-    <#if field.dataType.enumType == 'HYPERLINK'>
-    	<#assign validations = validations + ['url']>
-    </#if>
-	
-    <#if validations?size &gt; 0>
-    	<#list validations as validation> ${validation}</#list>
-   	</#if>
 </#macro>
 
 <#macro formatValue fieldEnumType value>
