@@ -15,8 +15,8 @@
 		<div class="row">
 			<div class="col-md-offset-3 col-md-6 text-align-center">
 				<legend class="custom-purple-legend">
-					Browse catalogue
-					<select id="selectedDataSetId" name="selectedDataSetId" class="selectpicker">
+					Browse catalogue &nbsp;
+					<select id="selectedDataSetId" name="selectedDataSetId" class="selectpicker" data-style="btn-primary">
 						<#if wizard.selectedDataSet??>
 							<#list wizard.dataSets as dataset>
 								<option value="${dataset.id?c}"<#if dataset.id?c == wizard.selectedDataSet.id?c> selected</#if>>${dataset.name}</option>

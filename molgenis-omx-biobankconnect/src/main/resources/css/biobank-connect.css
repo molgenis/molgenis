@@ -90,7 +90,7 @@ legend {
 	margin-right : 5px;
 }
 
-.show-popover,.glyphicon,.ui-icon{
+.show-popover,.glyphicon,.input-group-addon,.ui-icon{
 	cursor: hand; 
 	cursor: pointer;
 }

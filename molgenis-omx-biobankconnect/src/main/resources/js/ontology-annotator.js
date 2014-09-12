@@ -28,7 +28,6 @@
 				  highlight: true,
 				  minLength: 3
 			},{
-				name: selectedDataSet.Name,
 				displayKey: 'name',
 				source: function(query, cb) {
 					molgenis.dataItemsTypeahead(molgenis.hrefToId(selectedDataSet.href), query, cb);
@@ -189,29 +188,32 @@
 	function createSearchDiv(title, feature, callback){
 		var searchDiv = $('<div />').css('z-index', 10000);
 		var searchGroup = $('<div class="input-group col-md-8"></div>');
-		var searchField = $('<input data-provide="typeahead" class="form-control"/>');
-		var addTermButton = $('<div class="input-group-addon show-popover">Add annotation</div>');
+		var searchField = $('<input data-provide="typeahead" class="form-control" style="border-top-left-radius:5px;border-bottom-left-radius:5px;"/>');
+		var addTermButton = $('<div class="input-group-addon show-popover"><strong>Add annotation</strong></div>');
 		searchField.appendTo(searchGroup);
 		addTermButton.appendTo(searchGroup);
-//		searchField.typeahead({
-//			source: function(query, process) {
-//				molgenis.ontologyTermTypeahead('ontologyTermSynonym', query, process);
-//			},
-//			minLength : 3,
-//			items : 20
-//		});
+		searchField.typeahead({
+			  hint: true,
+			  highlight: true,
+			  minLength: 3
+		},{
+			displayKey: 'identifier',
+			source: function(query, cb) {
+				molgenis.ontologyTermTypeahead('ontologyTermSynonym', query, cb);
+			}
+		}).on('typeahead:selected', function($e, object){
+			addTermButton.data('ontologyTermIndex', object);
+			console.log(object);
+		});
+		
 		addTermButton.click(function(){
-			var termFound = false;
-			$.each($(document).data('dataMap'), function(key, value){
-				termFound = true;
-				return false;
-			});
-			if(termFound){
-				checkOntologyTerm(searchField, feature);
+			if($(this).data('ontologyTermIndex')){
+				checkOntologyTerm($(this).data('ontologyTermIndex'), feature);
 				restApi.getAsync(feature.href, {'expand': ["unit", "definitions"]}, function(updatedFeature){
 					molgenis.OntologyAnnotator.prototype.createFeatureTable(title, updatedFeature, callback);
 					if(callback !== undefined && callback !== null) callback(updatedFeature);
 				});
+				$(this).removeData('ontologyTermIndex');
 			}
 		});
 		return searchDiv.append(searchGroup);
@@ -286,13 +288,8 @@
 		});
 	}
 
-	function checkOntologyTerm(searchField, feature){
-		var dataMap = $(document).data('dataMap');
-		var ontologyTerm = searchField.val();
-		var toCreate = true;
-		var toUpdate = false;
-		if(dataMap && ontologyTerm !== '' && dataMap[ontologyTerm]){
-			var ontologyTermFromIndex = dataMap[ontologyTerm];
+	function checkOntologyTerm(ontologyTermFromIndex, feature){
+		if(ontologyTermFromIndex){
 			var ontology = createOntology(ontologyTermFromIndex);
 			var queryRules = [];
 			queryRules.push({
@@ -305,16 +302,16 @@
 			};
 			var result = restApi.get('/api/v1/ontologyterm/', {'expand': ['ontology'], 'q' : request});
 			var ontologyTermId = null;
-			var ontologyTermRestApi = null;
 			if(result.items.length !== 0) {
-				toCreate = false;
 				ontologyTermId = molgenis.hrefToId(result.items[0].href);
-				ontologyTermRestApi = result.items[0];
-				toUpdate = (result.items[0].Name !== ontologyTermFromIndex.ontologyTermSynonym);
+				//Update the information regarding the ontology term stored in mysql database, if the ontology term name is different from ontology term synonym, we store synonym in mysql database
+				if(result.items[0].Name !== ontologyTermFromIndex.ontologyTermSynonym){
+					updateOntologyTerm(result.items[0], ontologyTermFromIndex);
+				}
+			}else{
+				ontologyTermId = createOntologyTerm(ontologyTermFromIndex);
 			}
-			if(toCreate) ontologyTermId = createOntologyTerm(dataMap[ontologyTerm]);
-			if(toUpdate) updateOntologyTerm(ontologyTermRestApi, dataMap[ontologyTerm]);
-			if(ontologyTermId != null) updateAnnotation(feature, ontologyTermId, true);
+			updateAnnotation(feature, ontologyTermId, true);
 		}
 	}
 
@@ -369,6 +366,7 @@
 		});
 		query.Name = data.ontologyName + ':' + data.ontologyTermSynonym;
 		query.definition = data.ontologyTermSynonym;
+		query.__Type = 'OntologyTerm';
 		$.ajax({
 			type : 'PUT',
 			dataType : 'json',
