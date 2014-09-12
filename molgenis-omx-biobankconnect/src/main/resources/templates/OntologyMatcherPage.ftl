@@ -35,7 +35,7 @@
 								</select>
 								<input type="hidden" id="selectedTargetDataSets" name="selectedTargetDataSets">
 							</div>
-							<div class="btn-group col-md-offset-2 col-md-4">
+							<div class="btn-group col-md-offset-2 col-md-5">
 								<button id="add-target-dataset" class="btn btn-info" type="btn">Select</button>
 								<button id="add-target-all-datasets" class="btn btn-primary" type="btn">Select all</button>
 								<button id="remove-target-all-datasets" class="btn btn-default" type="btn">Remove all</button>

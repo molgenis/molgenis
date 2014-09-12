@@ -45,7 +45,7 @@
 					<div id="search-button" class="input-group-addon"><span class="glyphicon glyphicon-search"></span></div>
 				</div>
 			</div>
-		</div><br>
+		</div>
 		<div class="row">
 			<div class="col-md-4">
 				Number of data items : <span id="dataitem-number"></span>

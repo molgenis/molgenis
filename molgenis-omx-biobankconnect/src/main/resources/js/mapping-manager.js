@@ -57,24 +57,32 @@
 		function initSearchDataItems() {
 			var options = {'updatePager' : true};
 			$('#search-dataitem').typeahead({
-				source: function(query, process) {
-					molgenis.dataItemsTypeahead(molgenis.hrefToId(selectedDataSet.href), query, process);
-				},
-				minLength : 3,
-				items : 20
-			}).on('keydown', function(e){
-			    if (e.which == 13) {
-			    	$('#search-button').click();
-			    	return false;
-			    }
-			}).on('keyup', function(e){
-				if($(this).val() === ''){
-					updateMatrix(options);
-			    }
+				  hint: true,
+				  highlight: true,
+				  minLength: 3
+			},{
+				name: selectedDataSet.Name,
+				displayKey: 'name',
+				source: function(query, cb) {
+					molgenis.dataItemsTypeahead(molgenis.hrefToId(selectedDataSet.href), query, cb);
+				}
 			});
 			$('#search-button').click(function(){
 				updateMatrix(options);
 			});
+			
+			$('#search-dataitem').on('keydown', function(e){
+			    if (e.which == 13) {
+			    	$('#search-button').click();
+			    	return false;
+			    }
+			});
+			$('#search-dataitem').on('keyup', function(e){
+				if($(this).val() === ''){
+					$('#search-dataitem').val('');
+					updateMatrix(options);
+			    }
+			});	
 		}
 	};
 	
@@ -115,8 +123,8 @@
 		//Calculate the number of letters to show in the cell and full content is displayed in popover
 		var numberOfDigit = Math.ceil(((table.width() - table.find('th:eq(0)').width()) / biobankDataSets.length - 100)/8);
 		$.each(biobankDataSets, function(index, mappedDataSet){
-			var removeIcon = $('<i />').addClass('icon-trash show-popover float-right');
-			var editIcon = $('<i />').addClass('icon-pencil show-popover float-right');
+			var removeIcon = $('<span />').addClass('glyphicon glyphicon-trash float-right').css('margin-right','15px');
+			var editIcon = $('<span />').addClass('glyphicon glyphicon-pencil float-right');
 			var cellDiv = $('<div />').addClass('row text-align-center').append(removeIcon).append(editIcon);
 			$('<td />').append(cellDiv).appendTo(row);
 			getMapping(createDataSetIdentifier(selectedDataSet, mappedDataSet), molgenis.hrefToId(feature.href), function(mappedFeatureNames){
@@ -135,13 +143,16 @@
 						getMapping(createDataSetIdentifier(selectedDataSet, mappedDataSet), molgenis.hrefToId(feature.href), function(mappedFeatureNames, script){
 							standardModal.createModalCallback('Candidate mappings', function(modal){
 								//Customize modal
-								modal.attr('data-backdrop', true).css({
-									'width' : '90%',
+								modal.find('.modal-dialog').css({
+									'width' : '90%'
+								});
+								modal.css({
 									'left' : '5%',
 									'top' : '10%',
 									'margin-left' : 0,
 									'margin-top' : 0
-								}).modal('show');
+								});
+								modal.attr('data-backdrop', true).modal('show');
 								
 								//Modal body information.
 								var body = modal.find('.modal-body:eq(0)').css('max-height','100%').append(createFeatureInfoPanel(feature));
@@ -200,13 +211,8 @@
 						confirmationMessage.append('<span style="text-decoration:underline;"><strong>' + mappedDataSet.Name + '</strong></span> ?');
 						modal.find('div.modal-body:eq(0)').append(confirmationMessage);
 						modal.find('div.modal-footer:eq(0)').prepend(confirmButton);
-						modal.css({
-							'width' : '50%',
-							'left' : '25%',
-							'top' : '30%',
-							'margin-left' : 0,
-							'margin-top' : 0
-						}).modal('show');
+						modal.find('.modal-dialog').css('width','50%');
+						modal.css('top','30%').modal('show');
 						//Initialize the event for confirm button
 						confirmButton.click(function(){
 							removeSelectedMappings(molgenis.hrefToId(feature.href), [molgenis.hrefToId(mappedDataSet.href)], function(data){
@@ -262,9 +268,9 @@
 		//Helper method for updating the information in the table cells
 		function updateInfoInTableCell(editIcon, mappedFeatureNames, numberOfDigit){
 			if(mappedFeatureNames.length === 0){
-				editIcon.removeClass('icon-ok').addClass('icon-pencil').parents('td:eq(0)').css('background', '');
+				editIcon.removeClass('glyphicon-ok').addClass('glyphicon-pencil').parents('td:eq(0)').css('background', '');
 			}else{
-				editIcon.removeClass('icon-pencil').addClass('icon-ok').parents('td:eq(0)').css('background-color', 'rgb(223, 235, 245)');
+				editIcon.removeClass('glyphicon-pencil').addClass('glyphicon-ok').parents('td:eq(0)').css('background-color', 'rgb(223, 235, 245)');
 			}
 			editIcon.siblings('div:eq(0)').empty().append(makePopoverComponenet(mappedFeatureNames.join(','), numberOfDigit, mappedFeatureNames.join('<br />')));
 		}
@@ -586,12 +592,12 @@
 			var mappedFeature = restApi.get('/api/v1/observablefeature/' + mappedFeatureId);
 			if(mappedFeature){
 				var row = $('<tr />');
-				var checkBox = $('<input type="checkbox">');
+				var checkBox = $('<input type="checkbox" class="show-popover">');
 				mappedFeatureFromIndex.mappedFeature = mappedFeature;
 				checkBox.data('eachMapping', mappedFeatureFromIndex);
 				checkBox.attr('checked', $.inArray(mappedFeature.Name, mappedFeatureNames) !== -1)
 				row.append('<td>' + mappedFeature.Name + '</td><td>' + molgenis.i18nDescription(mappedFeature).en + '</td><td>' + score + '</td>');
-				row.append($('<td />').append($('<label class="checkbox"></label>').append(checkBox))).appendTo(mappingTable);
+				row.append($('<td />').append(checkBox)).appendTo(mappingTable);
 				//If the query is matched with categories instead of feature description
 				if(mappedFeatureFromIndex.type === 'category' || mappedFeature.dataType === 'categorical'){
 					row.children('td:lt(2)').css('cursor', 'pointer').click(function(){
@@ -695,22 +701,23 @@
 			var removeAllButton = $('<button type="btn" class="btn btn">Remove all</button>');
 			var matchButton = $('<button type="btn" class="btn btn-primary">Rematch</button>');
 			
+			var buttonGroup = $('<div />').addClass('btn-group float-right-align').append(selectButton).append(selectAllButton).append(removeAllButton);
+			
 			$('<div />').addClass('col-md-offset-1 col-md-3').append(selectTag).appendTo(divControlPanel);
-			$('<div />').addClass('col-md-offset-1 col-md-5 btn-group').append(selectButton).append(selectAllButton).append(removeAllButton).appendTo(divControlPanel);
+			$('<div />').addClass('col-md-offset-1 col-md-6').append(buttonGroup).appendTo(divControlPanel);
+			
+			var lengendContainer = $('<div />').addClass('row');
+			$('<div />').addClass('col-md-offset-1 col-md-10').append('<legend class="legend-small">Selected catalogues : </legend><br>').appendTo(lengendContainer);
 			
 			var infoContainer = $('<div />').addClass('row');
-			var dataSetsContainer = $('<div />').addClass('col-md-offset-1 col-md-10 well').appendTo(infoContainer);
-			$('<div />').addClass('col-md-12').append('<legend class="legend-small">Selected catalogues : </legend>').appendTo(dataSetsContainer);
+			var dataSetsContainer = $('<div />').addClass('col-md-offset-1 col-md-10').appendTo(infoContainer);
 			
-			modal.find('div.modal-body:eq(0)').append(divControlPanel).append(infoContainer);
+			modal.find('div.modal-body:eq(0)').append(divControlPanel).append('<br>').append(lengendContainer).append(infoContainer);
 			modal.find('div.modal-footer:eq(0)').prepend(matchButton);
-			modal.css({
-				'width' : '50%',
-				'left' : '25%',
-				'top' : '30%',
-				'margin-left' : 0,
-				'margin-top' : 0
-			}).modal('show');
+			modal.find('.modal-dialog').css('width','50%');
+			modal.css('top','20%').modal('show');
+			
+			selectTag.select2({'width':'200px'});
 			
 			//Initialize all the button events
 			selectButton.click(function(){
@@ -757,9 +764,9 @@
 			$.each(rematchedSelectedDataSetIds, function(index, dataSetId){
 				var dataSet = restApi.get('/api/v1/dataset/' + dataSetId);
 				var newRow = $('<div />').addClass('row');
-				$('<div />').addClass('col-md-offset-2 col-md-3').append(dataSet.Name).appendTo(newRow);
-				var removeButton = $('<button type="btn" class="btn btn-link">Remove</button>');
-				$('<div />').addClass('col-md-offset-3 col-md-2').append(removeButton).appendTo(newRow);
+				$('<div />').addClass('col-md-6').append(dataSet.Name).appendTo(newRow);
+				var removeButton = $('<button type="btn" class="btn btn-link float-right-align">Remove</button>');
+				$('<div />').addClass('col-md-6').append(removeButton).appendTo(newRow);
 				dataSetsContainer.append(newRow);
 				removeButton.click(function(){
 					rematchedSelectedDataSetIds.splice($.inArray(dataSetId, rematchedSelectedDataSetIds), 1);
@@ -823,19 +830,14 @@
 	
 	molgenis.MappingManager.prototype.createHelpModal = function(){
 		var container = $('<div />');
-		$('<div />').append('<i class="icon-ok"></i><span class="float-right text-success">Mappings have been selected</span>').appendTo(container);
-		$('<div />').append('<i class="icon-pencil"></i><span class="float-right text-info">Select the mappings</span>').appendTo(container);
-		$('<div />').append('<i class="icon-trash"></i><span class="float-right text-warning">Delete all mappings</span>').appendTo(container);
-		$('<div />').append('<i class="icon-ban-circle"></i><span class="float-right text-error">No candidate available</span>').appendTo(container);
+		$('<div />').append('<span class="glyphicon glyphicon-ok"></span><span class="float-right text-success">Mappings have been selected</span>').appendTo(container);
+		$('<div />').append('<span class="glyphicon glyphicon-pencil"></span><span class="float-right text-info">Select the mappings</span>').appendTo(container);
+		$('<div />').append('<span class="glyphicon glyphicon-trash"></span><span class="float-right text-warning">Delete all mappings</span>').appendTo(container);
+		$('<div />').append('<span class="glyphicon glyphicon-ban-circle"></span><span class="float-right text-error">No candidate available</span>').appendTo(container);
 		standardModal.createModalCallback('Icon meanings', function(modal){
 			modal.find('.modal-body:eq(0)').append(container);
-			modal.css({
-				'width' : '50%',
-				'left' : '25%',
-				'top' : '30%',
-				'margin-left' : 0,
-				'margin-top' : 0
-			}).modal('show');
+			modal.find('.modal-dialog').css('width','50%');
+			modal.css('top','30%').modal('show');
 		});
 	};
 	
