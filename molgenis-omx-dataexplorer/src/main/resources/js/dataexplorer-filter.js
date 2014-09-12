@@ -469,8 +469,8 @@
 				var nameFrom = name + '-from', nameTo = name + '-to';
 				var valFrom = fromValue ? fromValue : undefined;
 				var valTo = toValue ? toValue : undefined;
-				var inputFrom = createInput(attribute, {'name': nameFrom, 'placeholder': 'Start date', 'style' : 'width: 315px'}, valFrom);
-				var inputTo = createInput(attribute, {'name': nameTo, 'placeholder': 'End date', 'style' : 'width: 315px'}, valTo);
+				var inputFrom = createInput(attribute, {'name': nameFrom, 'placeholder': 'Start date', 'style' : 'width: auto'}, valFrom);
+				var inputTo = createInput(attribute, {'name': nameTo, 'placeholder': 'End date', 'style' : 'width: auto'}, valTo);
 				$controls.append($('<div class="form-group">').append(inputFrom)).append($('<div class="form-group">').append(inputTo));
 				break;
 			case 'DECIMAL':
