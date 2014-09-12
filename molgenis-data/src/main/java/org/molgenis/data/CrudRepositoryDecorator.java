@@ -163,9 +163,8 @@ public class CrudRepositoryDecorator extends RepositoryDecorator implements Crud
 	}
 
 	@Override
-	public AggregateResult aggregate(AttributeMetaData xAttr, AttributeMetaData yAttr, Query q)
+	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
-		return decoratedRepository.aggregate(xAttr, yAttr, q);
+		return decoratedRepository.aggregate(aggregateQuery);
 	}
-
 }

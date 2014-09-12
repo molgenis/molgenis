@@ -6,6 +6,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -14,12 +15,14 @@ import java.util.List;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
+import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
+import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.elasticsearch.ElasticSearchService;
 import org.molgenis.elasticsearch.ElasticSearchService.IndexingMode;
@@ -87,12 +90,18 @@ public class ElasticsearchRepositoryDecoratorTest
 		when(elasticSearchRepository.getName()).thenReturn("entity");
 		AttributeMetaData xAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("xAttr").getMock();
 		AttributeMetaData yAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("yAttr").getMock();
+		AttributeMetaData distinctAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("distinctAttr")
+				.getMock();
 		Query q = mock(Query.class);
-		SearchRequest searchRequest = new SearchRequest("entity", q, Collections.<String> emptyList(), xAttr, yAttr);
+		SearchRequest searchRequest = new SearchRequest("entity", q, Collections.<String> emptyList(), xAttr, yAttr,
+				distinctAttr);
 		AggregateResult aggregate = mock(AggregateResult.class);
 		SearchResult searchResult = when(mock(SearchResult.class).getAggregate()).thenReturn(aggregate).getMock();
 		when(elasticSearchService.search(searchRequest)).thenReturn(searchResult);
-		assertEquals(elasticSearchRepository.aggregate(xAttr, yAttr, q), aggregate);
+
+		AggregateQuery aggregateQuery = new AggregateQueryImpl().attrX(xAttr).attrY(yAttr).attrDistinct(distinctAttr)
+				.query(q);
+		assertEquals(elasticSearchRepository.aggregate(aggregateQuery), aggregate);
 	}
 
 	@Test
@@ -113,7 +122,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	public void count()
 	{
 		elasticSearchRepository.count();
-		verify(repository).count();
+		verify(elasticSearchService).count(repositoryEntityMetaData);
 	}
 
 	@Test
@@ -215,7 +224,7 @@ public class ElasticsearchRepositoryDecoratorTest
 	{
 		List<Object> ids = Arrays.asList(mock(Object.class), mock(Object.class));
 		elasticSearchRepository.findAll(ids);
-		verify(repository).findAll(ids);
+		verify(elasticSearchService).get(ids, repositoryEntityMetaData);
 	}
 
 	@Test
@@ -224,38 +233,36 @@ public class ElasticsearchRepositoryDecoratorTest
 		List<Object> ids = Arrays.asList(mock(Object.class), mock(Object.class));
 		Class<? extends Entity> clazz = new MapEntity().getClass();
 		elasticSearchRepository.findAll(ids, clazz);
-		verify(repository).findAll(ids, clazz);
+		verify(elasticSearchService).get(ids, repositoryEntityMetaData);
 	}
 
-	// FIXME
-	// @Test
-	// public void findOneQuery()
-	// {
-	// Query q = mock(Query.class);
-	// String id0 = "0";
-	// String id1 = "1";
-	// List<String> ids = Arrays.<String> asList(entityName + id0, entityName + id1);
-	// when(elasticSearchService.search(q, repositoryEntityMetaData)).thenReturn(ids);
-	// elasticSearchRepository.findOne(q);
-	// verify(repository).findOne(id0);
-	// }
+	@Test
+	public void findOneQuery()
+	{
+		Query q = mock(Query.class);
+		Entity entity0 = mock(Entity.class);
+		Entity entity1 = mock(Entity.class);
+		when(elasticSearchService.search(q, repositoryEntityMetaData)).thenReturn(
+				Arrays.<Entity> asList(entity0, entity1));
+		elasticSearchRepository.findOne(q);
+		verify(elasticSearchService).search(q, repositoryEntityMetaData);
+	}
 
-	// FIXME
-	// @Test
-	// public void findOneQuery_noResults()
-	// {
-	// Query q = mock(Query.class);
-	// List<String> ids = Collections.emptyList();
-	// when(elasticSearchService.search(q, repositoryEntityMetaData)).thenReturn(ids);
-	// assertNull(elasticSearchRepository.findOne(q));
-	// }
+	@Test
+	public void findOneQuery_noResults()
+	{
+		Query q = mock(Query.class);
+		List<Entity> entities = Collections.emptyList();
+		when(elasticSearchService.search(q, repositoryEntityMetaData)).thenReturn(entities);
+		assertNull(elasticSearchRepository.findOne(q));
+	}
 
 	@Test
 	public void findOneObject()
 	{
 		Object id = mock(Object.class);
 		elasticSearchRepository.findOne(id);
-		verify(repository).findOne(id);
+		verify(elasticSearchService).get(id, repositoryEntityMetaData);
 	}
 
 	@Test
@@ -264,7 +271,7 @@ public class ElasticsearchRepositoryDecoratorTest
 		Object id = mock(Object.class);
 		Class<? extends Entity> clazz = new MapEntity().getClass();
 		elasticSearchRepository.findOne(id, clazz);
-		verify(repository).findOne(id, clazz);
+		verify(elasticSearchService).get(id, repositoryEntityMetaData);
 	}
 
 	// FIXME
@@ -310,31 +317,33 @@ public class ElasticsearchRepositoryDecoratorTest
 	@Test
 	public void getName()
 	{
-		elasticSearchRepository.getName();
-		verify(repository).getName();
+		assertEquals(elasticSearchRepository.getName(), repositoryEntityMetaData.getName());
 	}
 
 	@Test
 	public void getUrl()
 	{
-		when(repository.getName()).thenReturn("entity");
+		when(repositoryEntityMetaData.getName()).thenReturn("entity");
 		assertEquals(elasticSearchRepository.getUrl(), "elasticsearch://entity/");
 	}
 
-	@Test
-	public void iteratorClassE()
-	{
-		Class<? extends Entity> clazz = new MapEntity().getClass();
-		elasticSearchRepository.iterator(clazz);
-		verify(repository).iterator(clazz);
-	}
-
-	@Test
-	public void iterator()
-	{
-		elasticSearchRepository.iterator();
-		verify(repository).iterator();
-	}
+	// FIXME
+	// @Test
+	// public void iteratorClassE()
+	// {
+	// Class<? extends Entity> clazz = new MapEntity().getClass();
+	// elasticSearchRepository.iterator(clazz);
+	// verify(repository).iterator(clazz);
+	// }
+	//
+	// @Test
+	// public void iterator()
+	// {
+	// elasticSearchRepository.iterator();
+	// when(elasticSearchService.search(new QueryImpl(), repositoryEntityMetaData)).thenReturn(
+	// Collections.<Entity> emptyList());
+	// verify(elasticSearchService).search(new QueryImpl(), repositoryEntityMetaData);
+	// }
 
 	@Test
 	public void updateEntity()

@@ -5,6 +5,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Aggregateable;
 import org.molgenis.data.AttributeMetaData;
@@ -496,14 +497,19 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Cr
 	}
 
 	@Override
-	public AggregateResult aggregate(AttributeMetaData xAttr, AttributeMetaData yAttr, Query q)
+	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
+		Query q = aggregateQuery.getQuery();
+		AttributeMetaData xAttr = aggregateQuery.getAttributeX();
+		AttributeMetaData yAttr = aggregateQuery.getAttributeY();
+		AttributeMetaData distinctAttr = aggregateQuery.getAttributeDistinct();
+
 		if ((xAttr == null) && (yAttr == null))
 		{
 			throw new MolgenisDataException("Missing aggregate attribute");
 		}
 
-		SearchRequest request = new SearchRequest(dataSetIdentifier, q, null, xAttr, yAttr);
+		SearchRequest request = new SearchRequest(dataSetIdentifier, q, null, xAttr, yAttr, distinctAttr);
 		SearchResult result = searchService.search(request);
 
 		return result.getAggregate();

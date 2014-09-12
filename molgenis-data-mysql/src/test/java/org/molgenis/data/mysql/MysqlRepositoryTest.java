@@ -12,6 +12,7 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -55,7 +56,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		conference.set("type", "Pear");
 		repo.add(conference);
 
-		AggregateResult result = repo.aggregate(meta.getAttribute("type"), null, new QueryImpl());
+		AggregateResult result = repo.aggregate(new AggregateQueryImpl().attrX(meta.getAttribute("type")));
 		Assert.assertEquals(result.getxLabels(), Arrays.asList("Pear", "Apple", "Total"));
 		Assert.assertEquals(result.getyLabels(), Arrays.asList("Count"));
 		Assert.assertEquals(result.getMatrix(), Arrays.asList(Arrays.asList(1l), Arrays.asList(2l), Arrays.asList(3l)));

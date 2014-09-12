@@ -197,10 +197,10 @@ public class CrudRepositorySecurityDecorator extends CrudRepositoryDecorator
 	}
 
 	@Override
-	public AggregateResult aggregate(AttributeMetaData xAttr, AttributeMetaData yAttr, Query q)
+	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
 		validatePermission(getName(), Permission.COUNT);
-		return decoratedRepository.aggregate(xAttr, yAttr, q);
+		return decoratedRepository.aggregate(aggregateQuery);
 	}
 
 	@Override

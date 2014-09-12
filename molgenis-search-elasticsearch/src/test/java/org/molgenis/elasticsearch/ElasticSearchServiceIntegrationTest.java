@@ -282,7 +282,8 @@ public class ElasticSearchServiceIntegrationTest
 		searchService.indexRepository(repoMock);
 		waitForIndexUpdate();
 
-		SearchResult result = searchService.search(new SearchRequest("person", new QueryImpl(), null, attr, null));
+		SearchResult result = searchService
+				.search(new SearchRequest("person", new QueryImpl(), null, attr, null, null));
 		assertNotNull(result);
 		assertNotNull(result.getAggregate());
 

@@ -15,6 +15,7 @@ public class SearchRequest
 	private final List<String> fieldsToReturn;
 	private AttributeMetaData aggregateField1;
 	private AttributeMetaData aggregateField2;
+	private AttributeMetaData aggregateFieldDistinct;
 
 	public SearchRequest()
 	{
@@ -29,11 +30,13 @@ public class SearchRequest
 	}
 
 	public SearchRequest(String documentType, Query query, List<String> fieldsToReturn,
-			AttributeMetaData aggregateField1, AttributeMetaData aggregateField2)
+			AttributeMetaData aggregateField1, AttributeMetaData aggregateField2,
+			AttributeMetaData aggregateFieldDistinct)
 	{
 		this(documentType, query, fieldsToReturn);
 		this.aggregateField1 = aggregateField1;
 		this.aggregateField2 = aggregateField2;
+		this.aggregateFieldDistinct = aggregateFieldDistinct;
 	}
 
 	public String getDocumentType()
@@ -66,6 +69,11 @@ public class SearchRequest
 		return aggregateField2;
 	}
 
+	public AttributeMetaData getAggregateFieldDistinct()
+	{
+		return aggregateFieldDistinct;
+	}
+
 	@Override
 	public String toString()
 	{
@@ -80,6 +88,7 @@ public class SearchRequest
 		result = prime * result + ((documentType == null) ? 0 : documentType.hashCode());
 		result = prime * result + ((aggregateField1 == null) ? 0 : aggregateField1.hashCode());
 		result = prime * result + ((aggregateField2 == null) ? 0 : aggregateField2.hashCode());
+		result = prime * result + ((aggregateFieldDistinct == null) ? 0 : aggregateField2.hashCode());
 		result = prime * result + ((fieldsToReturn == null) ? 0 : fieldsToReturn.hashCode());
 		result = prime * result + ((query == null) ? 0 : query.hashCode());
 		return result;
@@ -107,6 +116,11 @@ public class SearchRequest
 			if (other.aggregateField2 != null) return false;
 		}
 		else if (!aggregateField2.equals(other.aggregateField2)) return false;
+		if (aggregateFieldDistinct == null)
+		{
+			if (other.aggregateFieldDistinct != null) return false;
+		}
+		else if (!aggregateFieldDistinct.equals(other.aggregateFieldDistinct)) return false;
 		if (fieldsToReturn == null)
 		{
 			if (other.fieldsToReturn != null) return false;

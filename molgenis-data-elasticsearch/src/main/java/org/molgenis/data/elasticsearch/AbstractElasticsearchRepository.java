@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 
+import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Aggregateable;
 import org.molgenis.data.AttributeMetaData;
@@ -47,7 +48,6 @@ public abstract class AbstractElasticsearchRepository implements CrudRepository,
 		final AbstractElasticsearchRepository self = this;
 		return new ConvertingIterable<E>(clazz, new Iterable<Entity>()
 		{
-
 			@Override
 			public Iterator<Entity> iterator()
 			{
@@ -121,14 +121,14 @@ public abstract class AbstractElasticsearchRepository implements CrudRepository,
 	public <E extends Entity> E findOne(Object id, Class<E> clazz)
 	{
 		Entity entity = findOne(id);
-		return new ConvertingIterable<E>(clazz, Arrays.asList(entity)).iterator().next();
+		return entity != null ? new ConvertingIterable<E>(clazz, Arrays.asList(entity)).iterator().next() : null;
 	}
 
 	@Override
 	public <E extends Entity> E findOne(Query q, Class<E> clazz)
 	{
 		Entity entity = findOne(q);
-		return new ConvertingIterable<E>(clazz, Arrays.asList(entity)).iterator().next();
+		return entity != null ? new ConvertingIterable<E>(clazz, Arrays.asList(entity)).iterator().next() : null;
 	}
 
 	@Override
@@ -150,9 +150,14 @@ public abstract class AbstractElasticsearchRepository implements CrudRepository,
 	}
 
 	@Override
-	public AggregateResult aggregate(AttributeMetaData xAttr, AttributeMetaData yAttr, Query q)
+	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
-		SearchRequest searchRequest = new SearchRequest(getName(), q, Collections.<String> emptyList(), xAttr, yAttr);
+		Query q = aggregateQuery.getQuery();
+		AttributeMetaData xAttr = aggregateQuery.getAttributeX();
+		AttributeMetaData yAttr = aggregateQuery.getAttributeY();
+		AttributeMetaData distinctAttr = aggregateQuery.getAttributeDistinct();
+		SearchRequest searchRequest = new SearchRequest(getName(), q, Collections.<String> emptyList(), xAttr, yAttr,
+				distinctAttr);
 		SearchResult searchResults = elasticSearchService.search(searchRequest);
 		return searchResults.getAggregate();
 	}

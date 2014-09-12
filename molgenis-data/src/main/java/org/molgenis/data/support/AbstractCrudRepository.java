@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
@@ -37,12 +38,22 @@ public abstract class AbstractCrudRepository extends AbstractRepository implemen
 	}
 
 	@Override
-	public AggregateResult aggregate(AttributeMetaData xAttributeMeta, AttributeMetaData yAttributeMeta, Query query)
+	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
+		AttributeMetaData xAttributeMeta = aggregateQuery.getAttributeX();
+		AttributeMetaData yAttributeMeta = aggregateQuery.getAttributeY();
+
 		if ((xAttributeMeta == null) && (yAttributeMeta == null))
 		{
 			throw new MolgenisDataException("Missing aggregate attribute");
 		}
+
+		AttributeMetaData distinctAttr = aggregateQuery.getAttributeDistinct();
+		if (distinctAttr != null)
+		{
+			throw new UnsupportedOperationException("Distinct aggregates not supported");
+		}
+		Query query = aggregateQuery.getQuery();
 
 		FieldTypeEnum xDataType = null;
 		String xAttributeName = null;

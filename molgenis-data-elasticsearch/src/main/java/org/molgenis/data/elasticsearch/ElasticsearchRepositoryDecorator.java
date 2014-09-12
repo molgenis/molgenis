@@ -1,23 +1,17 @@
 package org.molgenis.data.elasticsearch;
 
 import java.io.IOException;
-import java.util.Collections;
 
-import org.molgenis.data.AggregateResult;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IndexedCrudRepository;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.Updateable;
 import org.molgenis.data.Writable;
 import org.molgenis.elasticsearch.ElasticSearchService;
 import org.molgenis.elasticsearch.ElasticSearchService.IndexingMode;
-import org.molgenis.search.SearchRequest;
-import org.molgenis.search.SearchResult;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -40,14 +34,6 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	public EntityMetaData getEntityMetaData()
 	{
 		return repository.getEntityMetaData();
-	}
-
-	@Override
-	public AggregateResult aggregate(AttributeMetaData xAttr, AttributeMetaData yAttr, Query q)
-	{
-		SearchRequest searchRequest = new SearchRequest(getName(), q, Collections.<String> emptyList(), xAttr, yAttr);
-		SearchResult searchResults = elasticSearchService.search(searchRequest);
-		return searchResults.getAggregate();
 	}
 
 	@Override

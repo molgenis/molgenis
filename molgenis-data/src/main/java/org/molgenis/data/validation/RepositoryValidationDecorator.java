@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
+import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Aggregateable;
 import org.molgenis.data.AttributeMetaData;
@@ -11,7 +12,6 @@ import org.molgenis.data.CrudRepository;
 import org.molgenis.data.CrudRepositoryDecorator;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Query;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.util.HugeMap;
 
@@ -67,9 +67,9 @@ public class RepositoryValidationDecorator extends CrudRepositoryDecorator imple
 	}
 
 	@Override
-	public AggregateResult aggregate(AttributeMetaData xAttr, AttributeMetaData yAttr, Query q)
+	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
-		return ((Aggregateable) getDecoratedRepository()).aggregate(xAttr, yAttr, q);
+		return ((Aggregateable) getDecoratedRepository()).aggregate(aggregateQuery);
 	}
 
 	private void validate(Iterable<? extends Entity> entities, boolean forUpdate)
@@ -159,7 +159,7 @@ public class RepositoryValidationDecorator extends CrudRepositoryDecorator imple
 				{
 					Object newValue = entity.get(attr.getName());
 					Object oldValue = oldEntity.get(attr.getName());
-					
+
 					if ((null == newValue && null == oldValue) || !newValue.equals(oldValue))
 					{
 						String message = String.format(

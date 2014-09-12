@@ -15,6 +15,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.jpa.importer.EntityImportService;
+import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.data.domain.Sort;
@@ -701,8 +702,9 @@ public class JpaRepositoryTest extends BaseJpaTest
 		Person p3 = new Person("Klaas", "Vaak", 35);
 		repo.add(Arrays.asList(p1, p2, p3));
 
-		AggregateResult result = repo.aggregate(repo.getEntityMetaData().getAttribute("firstName"), repo
-				.getEntityMetaData().getAttribute("age"), new QueryImpl());
+		AggregateResult result = repo
+				.aggregate(new AggregateQueryImpl().attrX(repo.getEntityMetaData().getAttribute("firstName")).attrY(
+						repo.getEntityMetaData().getAttribute("age")));
 		assertNotNull(result);
 		List<List<Long>> matrix = Lists.newArrayList();
 		matrix.add(Lists.newArrayList(1l, 1l, 2l));

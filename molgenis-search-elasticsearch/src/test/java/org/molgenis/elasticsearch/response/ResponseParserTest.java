@@ -19,6 +19,9 @@ import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.data.AggregateResult;
+import org.molgenis.data.DataService;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 import org.testng.annotations.Test;
 
@@ -64,7 +67,11 @@ public class ResponseParserTest
 		when(searchHits.hits()).thenReturn(new SearchHit[0]);
 		when(response.getHits()).thenReturn(searchHits);
 
-		SearchResult searchResult = new ResponseParser().parseSearchResponse(response, null);
+		SearchRequest request = mock(SearchRequest.class);
+		EntityMetaData entityMetaData = mock(EntityMetaData.class);
+		DataService dataService = mock(DataService.class);
+		SearchResult searchResult = new ResponseParser().parseSearchResponse(request, response, entityMetaData,
+				dataService);
 		AggregateResult aggregateResult = searchResult.getAggregate();
 		assertEquals(aggregateResult.getxLabels(), Arrays.asList(col1, col2, colTotal));
 		assertEquals(aggregateResult.getyLabels(), Arrays.asList(row1));
@@ -111,7 +118,11 @@ public class ResponseParserTest
 		when(searchHits.hits()).thenReturn(new SearchHit[0]);
 		when(response.getHits()).thenReturn(searchHits);
 
-		SearchResult searchResult = new ResponseParser().parseSearchResponse(response, null);
+		SearchRequest request = mock(SearchRequest.class);
+		EntityMetaData entityMetaData = mock(EntityMetaData.class);
+		DataService dataService = mock(DataService.class);
+		SearchResult searchResult = new ResponseParser().parseSearchResponse(request, response, entityMetaData,
+				dataService);
 		AggregateResult aggregateResult = searchResult.getAggregate();
 		assertEquals(aggregateResult.getxLabels(), Arrays.asList(col1, col2, colTotal));
 		assertEquals(aggregateResult.getyLabels(), Arrays.asList(row1));
@@ -192,7 +203,11 @@ public class ResponseParserTest
 		when(searchHits.hits()).thenReturn(new SearchHit[0]);
 		when(response.getHits()).thenReturn(searchHits);
 
-		SearchResult searchResult = new ResponseParser().parseSearchResponse(response, null);
+		SearchRequest request = mock(SearchRequest.class);
+		EntityMetaData entityMetaData = mock(EntityMetaData.class);
+		DataService dataService = mock(DataService.class);
+		SearchResult searchResult = new ResponseParser().parseSearchResponse(request, response, entityMetaData,
+				dataService);
 		AggregateResult aggregateResult = searchResult.getAggregate();
 		assertEquals(aggregateResult.getxLabels(), Arrays.asList(col1, col2, colTotal));
 		assertEquals(aggregateResult.getyLabels(), Arrays.asList(row1, row2, rowTotal));
@@ -277,7 +292,11 @@ public class ResponseParserTest
 		when(searchHits.hits()).thenReturn(new SearchHit[0]);
 		when(response.getHits()).thenReturn(searchHits);
 
-		SearchResult searchResult = new ResponseParser().parseSearchResponse(response, null);
+		SearchRequest request = mock(SearchRequest.class);
+		EntityMetaData entityMetaData = mock(EntityMetaData.class);
+		DataService dataService = mock(DataService.class);
+		SearchResult searchResult = new ResponseParser().parseSearchResponse(request, response, entityMetaData,
+				dataService);
 		AggregateResult aggregateResult = searchResult.getAggregate();
 		assertEquals(aggregateResult.getxLabels(), Arrays.asList(col2, col1, colTotal));
 		assertEquals(aggregateResult.getyLabels(), Arrays.asList(row2, row1, rowTotal));

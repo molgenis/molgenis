@@ -28,238 +28,263 @@ public class QueryGenerator implements QueryPartGenerator
 	{
 		List<QueryRule> queryRules = query.getRules();
 		if (queryRules == null || queryRules.isEmpty()) return;
-		searchRequestBuilder.setQuery(createBoolQuery(queryRules, entityMetaData));
+		searchRequestBuilder.setQuery(createQueryBuilder(queryRules, entityMetaData));
 	}
 
-	@SuppressWarnings("deprecation")
-	private BoolQueryBuilder createBoolQuery(List<QueryRule> queryRules, EntityMetaData entityMetaData)
+	private QueryBuilder createQueryBuilder(List<QueryRule> queryRules, EntityMetaData entityMetaData)
 	{
-		Operator occur = null;
-		BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+		QueryBuilder queryBuilder;
+
 		final int nrQueryRules = queryRules.size();
-		for (int i = 0; i < nrQueryRules; i += 2)
+		if (nrQueryRules == 1)
 		{
-			QueryRule queryRule = queryRules.get(i);
+			queryBuilder = createQueryClause(queryRules.get(0), entityMetaData);
+		}
+		else
+		{
 
-			// read ahead to retrieve and validate occur operator
-			if (nrQueryRules == 1)
+			Operator occur = null;
+			BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+			for (int i = 0; i < nrQueryRules; i += 2)
 			{
-				occur = Operator.AND;
-			}
-			else if (i + 1 < nrQueryRules)
-			{
-				QueryRule occurQueryRule = queryRules.get(i + 1);
-				Operator occurOperator = occurQueryRule.getOperator();
-				if (occurOperator == null) throw new MolgenisQueryException("Missing expected occur operator");
+				QueryRule queryRule = queryRules.get(i);
 
-				switch (occurOperator)
+				// read ahead to retrieve and validate occur operator
+				if (nrQueryRules == 1)
+				{
+					occur = Operator.AND;
+				}
+				else if (i + 1 < nrQueryRules)
+				{
+					QueryRule occurQueryRule = queryRules.get(i + 1);
+					Operator occurOperator = occurQueryRule.getOperator();
+					if (occurOperator == null) throw new MolgenisQueryException("Missing expected occur operator");
+
+					switch (occurOperator)
+					{
+						case AND:
+						case OR:
+						case NOT:
+							if (occur != null && occurOperator != occur)
+							{
+								throw new MolgenisQueryException(
+										"Mixing query operators not allowed, use nested queries");
+							}
+							occur = occurOperator;
+							break;
+						// $CASES-OMITTED$
+						default:
+							throw new MolgenisQueryException("Expected query occur operator instead of ["
+									+ occurOperator + "]");
+					}
+				}
+
+				QueryBuilder queryPartBuilder = createQueryClause(queryRule, entityMetaData);
+				if (queryPartBuilder == null) continue; // skip SHOULD and DIS_MAX query rules
+
+				// add query part to query
+				switch (occur)
 				{
 					case AND:
+						boolQuery.must(queryPartBuilder);
+						break;
 					case OR:
+						boolQuery.should(queryPartBuilder).minimumNumberShouldMatch(1);
+						break;
 					case NOT:
-						if (occur != null && occurOperator != occur)
-						{
-							throw new MolgenisQueryException("Mixing query operators not allowed, use nested queries");
-						}
-						occur = occurOperator;
+						boolQuery.mustNot(queryPartBuilder);
 						break;
 					// $CASES-OMITTED$
 					default:
-						throw new MolgenisQueryException("Expected query occur operator instead of [" + occurOperator
-								+ "]");
+						throw new MolgenisQueryException("Unknown occurence operator [" + occur + "]");
 				}
 			}
+			queryBuilder = boolQuery;
+		}
+		return queryBuilder;
+	}
 
-			// create query rule
-			String queryField = queryRule.getField();
-			Operator queryOperator = queryRule.getOperator();
-			Object queryValue = queryRule.getValue();
+	/**
+	 * Create query clause for query rule
+	 * 
+	 * @param queryRule
+	 * @param entityMetaData
+	 * @return query class or null for SHOULD and DIS_MAX query rules
+	 */
+	@SuppressWarnings("deprecation")
+	private QueryBuilder createQueryClause(QueryRule queryRule, EntityMetaData entityMetaData)
+	{
+		// create query rule
+		String queryField = queryRule.getField();
+		Operator queryOperator = queryRule.getOperator();
+		Object queryValue = queryRule.getValue();
 
-			QueryBuilder queryBuilder;
+		QueryBuilder queryBuilder;
 
-			switch (queryOperator)
+		switch (queryOperator)
+		{
+			case AND:
+			case OR:
+			case NOT:
+				throw new UnsupportedOperationException("Unexpected query operator [" + queryOperator + ']');
+			case SHOULD:
+			case DIS_MAX:
+				// SHOULD and DIS_MAX are handled in DisMaxQueryGenerator
+				// TODO merge DisMaxQueryGenerator with this class
+				return null;
+			case EQUALS:
 			{
-				case AND:
-				case OR:
-				case NOT:
-					throw new UnsupportedOperationException("Unexpected query operator [" + queryOperator
-							+ "] at position [" + i + ']');
-				case SHOULD:
-				case DIS_MAX:
-					// SHOULD and DIS_MAX are handled in DisMaxQueryGenerator
-					// TODO merge DisMaxQueryGenerator with this class
-					continue;
-				case EQUALS:
-				{
-					// As a general rule, filters should be used instead of queries:
-					// - for binary yes/no searches
-					// - for queries on exact values
+				// As a general rule, filters should be used instead of queries:
+				// - for binary yes/no searches
+				// - for queries on exact values
 
+				AttributeMetaData attr = entityMetaData.getAttribute(queryField);
+				if (attr == null) throw new UnknownAttributeException(queryField);
+
+				// construct query part
+				FilterBuilder filterBuilder;
+				if (queryValue != null)
+				{
+					FieldTypeEnum dataType = attr.getDataType().getEnumType();
+					switch (dataType)
+					{
+						case BOOL:
+						case DATE:
+						case DATE_TIME:
+						case DECIMAL:
+						case INT:
+						case LONG:
+							filterBuilder = FilterBuilders.termFilter(queryField, queryValue);
+							break;
+						case EMAIL:
+						case ENUM:
+						case HTML:
+						case HYPERLINK:
+						case SCRIPT:
+						case STRING:
+						case TEXT:
+							filterBuilder = FilterBuilders.termFilter(queryField + '.'
+									+ MappingsBuilder.FIELD_NOT_ANALYZED, queryValue);
+							break;
+						case CATEGORICAL:
+						case MREF:
+						case XREF:
+							AttributeMetaData refIdAttr = attr.getRefEntity().getIdAttribute();
+							filterBuilder = FilterBuilders.nestedFilter(queryField,
+									FilterBuilders.termFilter(queryField + '.' + refIdAttr.getName(), queryValue));
+							break;
+						case COMPOUND:
+						case FILE:
+						case IMAGE:
+							throw new UnsupportedOperationException();
+						default:
+							throw new RuntimeException("Unknown data type [" + dataType + "]");
+					}
+				}
+				else
+				{
+					filterBuilder = FilterBuilders.missingFilter("").existence(true).nullValue(true);
+				}
+				queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
+				break;
+			}
+			case GREATER:
+			{
+				if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
+				FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).gt(queryValue);
+				queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
+				break;
+			}
+			case GREATER_EQUAL:
+			{
+				if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
+				FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).gte(queryValue);
+				queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
+				break;
+			}
+			case IN:
+			{
+				if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
+				FilterBuilder filterBuilder = FilterBuilders.inFilter(queryField, queryValue);
+				queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
+				break;
+			}
+			case LESS:
+			{
+				if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
+				FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).lt(queryValue);
+				queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
+				break;
+			}
+			case LESS_EQUAL:
+			{
+				if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
+				FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).lte(queryValue);
+				queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
+				break;
+			}
+			case NESTED:
+				List<QueryRule> nestedQueryRules = queryRule.getNestedRules();
+				if (nestedQueryRules == null || nestedQueryRules.isEmpty())
+				{
+					throw new MolgenisQueryException("Missing nested rules for nested query");
+				}
+				queryBuilder = createQueryBuilder(nestedQueryRules, entityMetaData);
+				break;
+			case LIKE:
+			case SEARCH:
+			{
+				if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
+
+				// 1. attribute: search in attribute
+				// 2. no attribute: search in all
+				if (queryField == null)
+				{
+					queryBuilder = QueryBuilders.matchQuery("_all", queryValue);
+				}
+				else
+				{
 					AttributeMetaData attr = entityMetaData.getAttribute(queryField);
 					if (attr == null) throw new UnknownAttributeException(queryField);
 
 					// construct query part
-					FilterBuilder filterBuilder;
-					if (queryValue != null)
+					FieldTypeEnum dataType = attr.getDataType().getEnumType();
+					switch (dataType)
 					{
-						FieldTypeEnum dataType = attr.getDataType().getEnumType();
-						switch (dataType)
-						{
-							case BOOL:
-							case DATE:
-							case DATE_TIME:
-							case DECIMAL:
-							case INT:
-							case LONG:
-								filterBuilder = FilterBuilders.termFilter(queryField, queryValue);
-								break;
-							case EMAIL:
-							case ENUM:
-							case HTML:
-							case HYPERLINK:
-							case SCRIPT:
-							case STRING:
-							case TEXT:
-								filterBuilder = FilterBuilders.termFilter(queryField + '.'
-										+ MappingsBuilder.FIELD_NOT_ANALYZED, queryValue);
-								break;
-							case CATEGORICAL:
-							case MREF:
-							case XREF:
-								AttributeMetaData refIdAttr = attr.getRefEntity().getIdAttribute();
-								filterBuilder = FilterBuilders.nestedFilter(queryField,
-										FilterBuilders.termFilter(queryField + '.' + refIdAttr.getName(), queryValue));
-								break;
-							case COMPOUND:
-							case FILE:
-							case IMAGE:
-								throw new UnsupportedOperationException();
-							default:
-								throw new RuntimeException("Unknown data type [" + dataType + "]");
-						}
+						case BOOL:
+						case DATE:
+						case DATE_TIME:
+						case DECIMAL:
+						case EMAIL:
+						case ENUM:
+						case HTML:
+						case HYPERLINK:
+						case INT:
+						case LONG:
+						case SCRIPT:
+						case STRING:
+						case TEXT:
+							queryBuilder = QueryBuilders.matchQuery(queryField, queryValue);
+							break;
+						case CATEGORICAL:
+						case MREF:
+						case XREF:
+							queryBuilder = QueryBuilders.nestedQuery(queryField,
+									QueryBuilders.matchQuery(queryField + '.' + "_all", queryValue));
+							break;
+						case COMPOUND:
+						case FILE:
+						case IMAGE:
+							throw new UnsupportedOperationException();
+						default:
+							throw new RuntimeException("Unknown data type [" + dataType + "]");
 					}
-					else
-					{
-						filterBuilder = FilterBuilders.missingFilter("").existence(true).nullValue(true);
-					}
-					queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
-					break;
 				}
-				case GREATER:
-				{
-					if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
-					FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).gt(queryValue);
-					queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
-					break;
-				}
-				case GREATER_EQUAL:
-				{
-					if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
-					FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).gte(queryValue);
-					queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
-					break;
-				}
-				case IN:
-				{
-					if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
-					FilterBuilder filterBuilder = FilterBuilders.inFilter(queryField, queryValue);
-					queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
-					break;
-				}
-				case LESS:
-				{
-					if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
-					FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).lt(queryValue);
-					queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
-					break;
-				}
-				case LESS_EQUAL:
-				{
-					if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
-					FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).lte(queryValue);
-					queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
-					break;
-				}
-				case NESTED:
-					List<QueryRule> nestedQueryRules = queryRule.getNestedRules();
-					if (nestedQueryRules == null || nestedQueryRules.isEmpty())
-					{
-						throw new MolgenisQueryException("Missing nested rules for nested query");
-					}
-					queryBuilder = createBoolQuery(nestedQueryRules, entityMetaData);
-					break;
-				case LIKE:
-				case SEARCH:
-				{
-					if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
-
-					// 1. attribute: search in attribute
-					// 2. no attribute: search in all
-					if (queryField == null)
-					{
-						queryBuilder = QueryBuilders.matchQuery("_all", queryValue);
-					}
-					else
-					{
-						AttributeMetaData attr = entityMetaData.getAttribute(queryField);
-						if (attr == null) throw new UnknownAttributeException(queryField);
-
-						// construct query part
-						FieldTypeEnum dataType = attr.getDataType().getEnumType();
-						switch (dataType)
-						{
-							case BOOL:
-							case DATE:
-							case DATE_TIME:
-							case DECIMAL:
-							case EMAIL:
-							case ENUM:
-							case HTML:
-							case HYPERLINK:
-							case INT:
-							case LONG:
-							case SCRIPT:
-							case STRING:
-							case TEXT:
-								queryBuilder = QueryBuilders.matchQuery(queryField, queryValue);
-								break;
-							case CATEGORICAL:
-							case MREF:
-							case XREF:
-								queryBuilder = QueryBuilders.nestedQuery(queryField,
-										QueryBuilders.matchQuery(queryField + '.' + "_all", queryValue));
-								break;
-							case COMPOUND:
-							case FILE:
-							case IMAGE:
-								throw new UnsupportedOperationException();
-							default:
-								throw new RuntimeException("Unknown data type [" + dataType + "]");
-						}
-					}
-					break;
-				}
-				default:
-					throw new MolgenisQueryException("Unknown query operator [" + queryOperator + "]");
+				break;
 			}
-
-			// add query part to query
-			switch (occur)
-			{
-				case AND:
-					boolQuery.must(queryBuilder);
-					break;
-				case OR:
-					boolQuery.should(queryBuilder).minimumNumberShouldMatch(1);
-					break;
-				case NOT:
-					boolQuery.mustNot(queryBuilder);
-					break;
-				// $CASES-OMITTED$
-				default:
-					throw new MolgenisQueryException("Unknown occurence operator [" + occur + "]");
-			}
+			default:
+				throw new MolgenisQueryException("Unknown query operator [" + queryOperator + "]");
 		}
-		return boolQuery;
+		return queryBuilder;
 	}
 }

@@ -4,6 +4,7 @@ import java.sql.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.elasticsearch.common.collect.Lists;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
@@ -119,7 +120,7 @@ public class EntityToSourceConverter
 				if (refEntities != null && !Iterables.isEmpty(refEntities))
 				{
 					final EntityMetaData refEntityMetaData = attributeMetaData.getRefEntity();
-					value = Iterables.transform(refEntities, new Function<Entity, Object>()
+					value = Lists.newArrayList(Iterables.transform(refEntities, new Function<Entity, Object>()
 					{
 						@Override
 						public Object apply(Entity refEntity)
@@ -133,7 +134,7 @@ public class EntityToSourceConverter
 								return convertAttribute(refEntity, refEntityMetaData.getLabelAttribute(), false);
 							}
 						}
-					});
+					}));
 				}
 				else
 				{

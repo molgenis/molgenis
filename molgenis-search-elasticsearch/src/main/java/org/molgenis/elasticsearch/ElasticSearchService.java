@@ -196,7 +196,7 @@ public class ElasticSearchService implements SearchService
 		SearchRequestBuilder builder = client.prepareSearch(indexName);
 
 		generator.buildSearchRequest(builder, documentTypes, searchType, request.getQuery(),
-				request.getFieldsToReturn(), null, null, null);
+				request.getFieldsToReturn(), null, null, null, null);
 
 		if (LOG.isDebugEnabled())
 		{
@@ -209,7 +209,8 @@ public class ElasticSearchService implements SearchService
 			LOG.debug("SearchResponse:" + response);
 		}
 
-		return responseParser.parseSearchResponse(response, null);
+		// FIXME passing null as request is not cool (and breaks aggregates)
+		return responseParser.parseSearchResponse(null, response, null, dataService);
 	}
 
 	private SearchResult search(SearchType searchType, SearchRequest request)
@@ -224,9 +225,9 @@ public class ElasticSearchService implements SearchService
 				.hasRepository(request.getDocumentType())) ? dataService.getEntityMetaData(request.getDocumentType()) : null;
 		String documentType = request.getDocumentType() == null ? null : sanitizeMapperType(request.getDocumentType());
 
-		generator
-				.buildSearchRequest(builder, documentType, searchType, request.getQuery(), request.getFieldsToReturn(),
-						request.getAggregateField1(), request.getAggregateField2(), entityMetaData);
+		generator.buildSearchRequest(builder, documentType, searchType, request.getQuery(),
+				request.getFieldsToReturn(), request.getAggregateField1(), request.getAggregateField2(),
+				request.getAggregateFieldDistinct(), entityMetaData);
 
 		if (LOG.isDebugEnabled())
 		{
@@ -238,11 +239,11 @@ public class ElasticSearchService implements SearchService
 		{
 			LOG.debug("SearchResponse:" + response);
 		}
-		System.out.println("*****************");
+		System.out.println("*****************"); // FIXME remove
 		System.out.println(builder);
 		System.out.println("*****************");
 		System.out.println(response);
-		return responseParser.parseSearchResponse(response, entityMetaData);
+		return responseParser.parseSearchResponse(request, response, entityMetaData, dataService);
 	}
 
 	@Override
@@ -479,7 +480,7 @@ public class ElasticSearchService implements SearchService
 
 	public long count(EntityMetaData entityMetaData)
 	{
-		return count(null, entityMetaData);
+		return count(new QueryImpl(), entityMetaData);
 	}
 
 	public long count(Query q, EntityMetaData entityMetaData)
@@ -489,7 +490,7 @@ public class ElasticSearchService implements SearchService
 		List<String> fieldsToReturn = Collections.<String> emptyList();
 
 		SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName);
-		generator.buildSearchRequest(searchRequestBuilder, type, SearchType.COUNT, q, fieldsToReturn, null, null,
+		generator.buildSearchRequest(searchRequestBuilder, type, SearchType.COUNT, q, fieldsToReturn, null, null, null,
 				entityMetaData);
 		SearchResponse searchResponse = searchRequestBuilder.execute().actionGet();
 		if (searchResponse.getFailedShards() > 0)
@@ -816,11 +817,18 @@ public class ElasticSearchService implements SearchService
 		return response.isExists() ? new ElasticsearchDocumentEntity(response.getSource(), entityMetaData, this) : null;
 	}
 
-	public Iterable<Entity> get(Iterable<Object> entityIds, EntityMetaData entityMetaData)
+	public Iterable<Entity> get(Iterable<Object> entityIds, final EntityMetaData entityMetaData)
 	{
-		// TODO return typed entity
-		// TODO implement
-		throw new UnsupportedOperationException();
+		// FIXME performance bottleneck
+		return Iterables.transform(entityIds, new Function<Object, Entity>()
+		{
+
+			@Override
+			public Entity apply(Object entityId)
+			{
+				return get(entityId, entityMetaData);
+			}
+		});
 	}
 
 	// TODO replace Iterable<Entity> with EntityCollection and add EntityCollection.getTotal()
@@ -832,7 +840,7 @@ public class ElasticSearchService implements SearchService
 
 		SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName);
 		generator.buildSearchRequest(searchRequestBuilder, type, SearchType.QUERY_AND_FETCH, q, fieldsToReturn, null,
-				null, entityMetaData);
+				null, null, entityMetaData);
 
 		if (LOG.isDebugEnabled()) LOG.debug("executing search: " + searchRequestBuilder.toString());
 		SearchResponse searchResponse = searchRequestBuilder.execute().actionGet();
