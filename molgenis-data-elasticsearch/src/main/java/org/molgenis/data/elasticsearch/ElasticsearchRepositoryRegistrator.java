@@ -2,6 +2,8 @@ package org.molgenis.data.elasticsearch;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.elasticsearch.ElasticSearchService;
+import org.molgenis.search.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationListener;
@@ -32,9 +34,11 @@ public class ElasticsearchRepositoryRegistrator implements ApplicationListener<C
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
+        //FIXME get mappings from elastic search and use those for registration, only if _meta exists
 		for (String name : repositoryCollection.getEntityNames())
 		{
-			dataService.addRepository(repositoryCollection.getRepositoryByEntityName(name));
+            if(!dataService.hasRepository(name))
+			    dataService.addRepository(repositoryCollection.getRepositoryByEntityName(name));
 		}
 	}
 
