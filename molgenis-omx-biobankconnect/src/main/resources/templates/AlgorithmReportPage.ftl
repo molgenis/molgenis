@@ -31,24 +31,30 @@
 				<div class="col-md-offset-2 col-md-10">
 					Deleting existing mappings
 				</div>
-				<div class="progress progress-striped progress-warning active col-md-offset-2 col-md-8">
-					<div class="bar text-align-center"></div>
+				<div class="col-md-offset-2 col-md-8">
+					<div class="progress">
+						<div class="progress-bar progress-bar-striped progress-bar-warning active" rolw="progressbar" aria-valuemin="0" aria-valuemax="100"></div>
+					</div>
 				</div>
 			</div>
 			<div id="create-mapping" class="row progress-bar-hidden">
 				<div class="col-md-offset-2 col-md-10">
 					Create mappings
 				</div>
-				<div class="progress progress-striped active col-md-offset-2 col-md-8">
-					<div class="bar text-align-center"></div>
+				<div class="col-md-offset-2 col-md-8">
+					<div class="progress">
+						<div class="progress-bar progress-bar-striped active" rolw="progressbar" aria-valuemin="0" aria-valuemax="100"></div>
+					</div>
 				</div>
 			</div>
 			<div id="store-mapping" class="row progress-bar-hidden">
 				<div class="col-md-offset-2 col-md-10">
 					Store mappings
 				</div>
-				<div class="progress progress-striped progress-success active col-md-offset-2 col-md-8">
-					<div class="bar text-align-center"></div>
+				<div class="col-md-offset-2 col-md-8">
+					<div class="progress">
+						<div class="progress-bar progress-bar-striped progress-bar-success active" rolw="progressbar" aria-valuemin="0" aria-valuemax="100"></div>
+					</div>
 				</div>
 			</div>
 		</div>

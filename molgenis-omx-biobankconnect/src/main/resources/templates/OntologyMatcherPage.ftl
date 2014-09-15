@@ -25,7 +25,7 @@
 				<div class="row">
 					<div class="col-md-12">
 						<div class="row">
-							<div class="col-md-offset-1 col-md-4">
+							<div class="col-md-offset-1 col-md-3">
 								<select id="targetDataSets" name="targetDataSets">
 									<#list wizard.dataSets as dataset>
 										<#if dataset.id?c != wizard.selectedDataSet.id?c>

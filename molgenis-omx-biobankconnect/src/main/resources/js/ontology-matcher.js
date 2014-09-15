@@ -22,8 +22,8 @@
 			targetCatalogues.css('margin-top', '20px').empty().append(dataSetDiv);
 			$.each(selectedOptions, function(index, targetDataSetId){
 				var dataSet = restApi.get('/api/v1/dataset/' + targetDataSetId);
-				var nameDiv = $('<div />').addClass('col-md-offset-1 col-md-4').append(dataSet.Name);
-				var controlDiv = $('<div />').addClass('col-md-offset-3 col-md-4');
+				var nameDiv = $('<div />').addClass('col-md-offset-1 col-md-3').append(dataSet.Name);
+				var controlDiv = $('<div />').addClass('col-md-offset-2 col-md-5');
 				var viewCatalogue = $('<button type="btn" class="btn btn-link view-button">View</button>').click(function(){
 					if($(this).hasClass('view-button')){
 						changeDataSet(targetDataSetId);

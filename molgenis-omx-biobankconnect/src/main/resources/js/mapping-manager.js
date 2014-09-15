@@ -26,7 +26,7 @@
 			var mappingUnavailable = $('<p />').attr('id', 'mapping-unavailable').addClass('text-align-center').append('The target catalogue cannot be empty!').css('margin-top', '50px');
 			$('#container').empty().after(mappingUnavailable);
 			$('#dataitem-number').empty().append('Nothing selected');
-			$('#div-search').hide();
+			$('#control-panel').hide();
 		}else{
 			selectedDataSet = restApi.get('/api/v1/dataset/' + selectedDataSetId, {'expand' : ['protocolUsed']});
 			//Check the nullibity of selecte biobank dataSetIds
@@ -34,9 +34,9 @@
 				var mappingUnavailable = $('<p />').attr('id', 'mapping-unavailable').addClass('text-align-center').append('There are no matches produced for catalog <strong>' + selectedDataSet.Name + '</strong> . Please click on BiobankConnectWizard to produce new match sets!').css('margin-top', '50px');
 				$('#container').empty().after(mappingUnavailable);
 				$('#dataitem-number').empty().append('Nothing selected');
-				$('#div-search').hide();
+				$('#control-panel').hide();
 			}else{
-				$('#div-search').show();
+				$('#control-panel').show();
 				setUserName(userName); 
 				biobankDataSets = restApi.get('/api/v1/dataset/', {
 					'q' : {
