@@ -15,8 +15,9 @@
 	border:none;
 }
 
-.table-bordered tbody tr th{
+.table-bordered tbody tr th:not(first-child){
 	border : none;
+	border-right:1px solid #ddd;
 }
 
 .table-bordered tbody tr:first-child th:first-child{
@@ -81,8 +82,8 @@ dd {
 }
 
 legend {
-	margin-top : -10px;
 	padding-bottom : 10px;
+	font-size:20px;
 }
 
 .float-right {

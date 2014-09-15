@@ -61,6 +61,7 @@ public class OntologyServiceController extends MolgenisPluginController
 
 	public static final String ID = "ontologyservice";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+	public static final int INVALID_TOTAL_NUMBER = -1;
 
 	public OntologyServiceController()
 	{
@@ -82,6 +83,7 @@ public class OntologyServiceController extends MolgenisPluginController
 	{
 		if (StringUtils.isEmpty(ontologyIri) || StringUtils.isEmpty(inputTerms)) return init(model);
 		String sessionId = httpServletRequest.getSession().getId();
+
 		File uploadFile = fileStore.store(new ByteArrayInputStream(inputTerms.getBytes("UTF8")), sessionId
 				+ "_input.txt");
 		ontologyServiceSessionData.addDataBySession(
@@ -186,7 +188,8 @@ public class OntologyServiceController extends MolgenisPluginController
 
 		List<Map<String, Object>> entities = new ArrayList<Map<String, Object>>();
 
-		if (ontologyServiceSessionData.validationAttributesBySession(sessionId))
+		if (ontologyServiceSessionData.validationAttributesBySession(sessionId)
+				&& ontologyServiceSessionData.getTotalNumberBySession(sessionId) != INVALID_TOTAL_NUMBER)
 		{
 			int count = ontologyServiceSessionData.getTotalNumberBySession(sessionId);
 			int start = entityPager.getStart();

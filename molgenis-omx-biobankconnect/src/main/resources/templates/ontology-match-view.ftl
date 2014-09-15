@@ -6,8 +6,9 @@
 <form id="evaluationForm" class="form-horizontal" enctype="multipart/form-data">
 	<div class="row">
 		<div class="col-md-12">
+			<br>
 			<div class="row">
-				<div class="col-md-12">
+				<div class="col-md-offset-3 col-md-6">
 					<legend><center><h3>Ontology Annotator</h3></center></legend>
 				</div>
 			</div>
@@ -59,9 +60,9 @@
 				<div class="col-md-offset-2 col-md-8">
 					<center><textarea name="inputTerms" style="width:100%;resize:none;" class="form-control" rows="12" placeholder="Please paste a list of terms in pipe-delimited format. The header header 'Name' is compulsory whereas other headers/columns are optional! Example is shown below:
 							
-												Name|Synonym|HP
-       												visual impairment|Reduced visual acuity|0000505
-       												Abnormality of eye movement|Abnormal eye motility|0000496"></textarea></center>
+												Name|Synonym|HP|
+       												visual impairment|Reduced visual acuity|0000505|
+       												Abnormality of eye movement|Abnormal eye motility|0000496|"></textarea></center>
 				</div>	
 			</div>
 			<br>

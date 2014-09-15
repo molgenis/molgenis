@@ -153,14 +153,18 @@ public class OntologyService
 		List<QueryRule> rulesForOntologyTermFields = new ArrayList<QueryRule>();
 		for (String attributeName : entity.getAttributeNames())
 		{
-			if (DEFAULT_MATCHING_FIELDS.contains(attributeName.toLowerCase()))
+			if (!StringUtils.isEmpty(entity.getString(attributeName)))
 			{
-				rulesForOntologyTermFields.add(new QueryRule(OntologyTermIndexRepository.SYNONYMS, Operator.EQUALS,
-						medicalStemProxy(entity.getString(attributeName))));
-			}
-			else if (entity.get(attributeName) != null && !StringUtils.isEmpty(entity.get(attributeName).toString()))
-			{
-				allQueryRules.add(new QueryRule(attributeName, Operator.EQUALS, entity.get(attributeName)));
+				if (DEFAULT_MATCHING_FIELDS.contains(attributeName.toLowerCase()))
+				{
+					rulesForOntologyTermFields.add(new QueryRule(OntologyTermIndexRepository.SYNONYMS, Operator.EQUALS,
+							medicalStemProxy(entity.getString(attributeName))));
+				}
+				else if (entity.get(attributeName) != null
+						&& !StringUtils.isEmpty(entity.get(attributeName).toString()))
+				{
+					allQueryRules.add(new QueryRule(attributeName, Operator.EQUALS, entity.get(attributeName)));
+				}
 			}
 		}
 
@@ -184,32 +188,33 @@ public class OntologyService
 		{
 			Hit hit = iterator.next();
 			Map<String, Object> columnValueMap = hit.getColumnValueMap();
-			// BigDecimal luceneScore = new
-			// BigDecimal(columnValueMap.get(SCORE).toString());
 			BigDecimal maxNgramScore = new BigDecimal(0);
 			for (String attributeName : entity.getAttributeNames())
 			{
-				if (DEFAULT_MATCHING_FIELDS.contains(attributeName.toLowerCase()))
+				if (!StringUtils.isEmpty(entity.getString(attributeName)))
 				{
-					BigDecimal ngramScore = new BigDecimal(NGramMatchingModel.stringMatching(entity
-							.getString(attributeName), columnValueMap.get(OntologyTermIndexRepository.SYNONYMS)
-							.toString()));
-					if (maxNgramScore.doubleValue() < ngramScore.doubleValue())
+					if (DEFAULT_MATCHING_FIELDS.contains(attributeName.toLowerCase()))
 					{
-						maxNgramScore = ngramScore;
-					}
-				}
-				else
-				{
-					for (String key : columnValueMap.keySet())
-					{
-						if (attributeName.equalsIgnoreCase(key))
+						BigDecimal ngramScore = new BigDecimal(NGramMatchingModel.stringMatching(
+								entity.getString(attributeName),
+								columnValueMap.get(OntologyTermIndexRepository.SYNONYMS).toString()));
+						if (maxNgramScore.doubleValue() < ngramScore.doubleValue())
 						{
-							BigDecimal ngramScore = new BigDecimal(NGramMatchingModel.stringMatching(
-									entity.getString(attributeName), columnValueMap.get(key).toString()));
-							if (maxNgramScore.doubleValue() < ngramScore.doubleValue())
+							maxNgramScore = ngramScore;
+						}
+					}
+					else
+					{
+						for (String key : columnValueMap.keySet())
+						{
+							if (attributeName.equalsIgnoreCase(key))
 							{
-								maxNgramScore = ngramScore;
+								BigDecimal ngramScore = new BigDecimal(NGramMatchingModel.stringMatching(
+										entity.getString(attributeName), columnValueMap.get(key).toString()));
+								if (maxNgramScore.doubleValue() < ngramScore.doubleValue())
+								{
+									maxNgramScore = ngramScore;
+								}
 							}
 						}
 					}

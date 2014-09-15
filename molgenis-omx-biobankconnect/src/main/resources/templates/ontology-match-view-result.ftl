@@ -1,13 +1,14 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
-<#assign css=["jquery-ui-1.9.2.custom.min.css", "bootstrap-fileupload.min.css", "ui.fancytree.min.css", "biobank-connect.css"]>
+<#assign css=["jquery-ui-1.9.2.custom.min.css", "bootstrap-fileupload.min.css", "ui.fancytree.min.css", "ontology-service.css"]>
 <#assign js=["jquery-ui-1.9.2.custom.min.js", "bootstrap-fileupload.min.js", "jquery.fancytree.min.js", "common-component.js", "ontology-tree-view.js", "ontology.tree.plugin.js", "ontology-service-result.js", "jquery.bootstrap.pager.js", "simple_statistics.js"]>
 <@header css js/>
 <form class="form-horizontal">
 	<div class="row">
 		<div class="col-md-12">
+			<br>
 			<div class="row">
-				<div class="col-md-12">
+				<div class="col-md-offset-3 col-md-6">
 					<legend><center><h3>Ontology Annotator</h3></center></legend>
 				</div>
 			</div>
@@ -69,7 +70,18 @@
 				</div>
 			</div>
 			<#else>
-			<div><center>There are not ontology annotations found for the list of terms provided!</center></div>
+				<div class="row">
+					<div class="col-md-offset-3 col-md-4">
+						<a id="back-button" href="${context_url}" type="button" class="btn btn-info">Back</a>
+					</div>
+				</div>
+				<div class="error-report-panel"><center>
+				<#if (total == -1)>
+					Please check your input file, there are errors in your input file!
+				<#else>
+					There are not ontology annotations found for the list of terms provided!
+				</#if>
+				</center></div>
 			</#if>
 		</div>
 	</div>

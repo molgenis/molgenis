@@ -41,14 +41,21 @@ public class OntologyServiceSessionData
 	public int getTotalNumberBySession(String sessionId)
 	{
 		int count = 0;
-		if (validationAttributesBySession(sessionId) && sessionToCsvRepository.containsKey(sessionId))
+		try
 		{
-			Iterator<Entity> iterator = sessionToCsvRepository.get(sessionId).iterator();
-			while (iterator.hasNext())
+			if (validationAttributesBySession(sessionId) && sessionToCsvRepository.containsKey(sessionId))
 			{
-				iterator.next();
-				count++;
+				Iterator<Entity> iterator = sessionToCsvRepository.get(sessionId).iterator();
+				while (iterator.hasNext())
+				{
+					iterator.next();
+					count++;
+				}
 			}
+		}
+		catch (Exception e)
+		{
+			return OntologyServiceController.INVALID_TOTAL_NUMBER;
 		}
 		return count;
 	}
