@@ -172,7 +172,7 @@ public class OntologyService
 		allQueryRules.add(nestedQueryRule);
 
 		QueryRule finalQueryRule = new QueryRule(allQueryRules);
-		finalQueryRule.setOperator(Operator.SHOULD);
+		finalQueryRule.setOperator(Operator.DIS_MAX);
 
 		SearchRequest request = new SearchRequest(AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyIri),
 				new QueryImpl(finalQueryRule).pageSize(MAX_NUMBER_MATCHES), null);
