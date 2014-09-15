@@ -1,6 +1,6 @@
-package org.molgenis.omx.importer;
+package org.molgenis.data.importer;
 
-import static org.molgenis.omx.importer.ImportWizardController.URI;
+import static org.molgenis.data.importer.ImportWizardController.URI;
 
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ui.wizard.AbstractWizardController;

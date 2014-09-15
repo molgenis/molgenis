@@ -1,4 +1,4 @@
-package org.molgenis.omx.importer;
+package org.molgenis.data.importer;
 
 import javax.servlet.http.HttpServletRequest;
 

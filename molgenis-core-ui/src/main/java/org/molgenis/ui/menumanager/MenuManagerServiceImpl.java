@@ -48,7 +48,7 @@ public class MenuManagerServiceImpl implements MenuManagerService, ApplicationLi
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU, ROLE_PLUGIN_READ_MENUMANAGER')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSTEM, ROLE_SU, ROLE_PLUGIN_READ_MENUMANAGER')")
 	@Transactional(readOnly = true)
 	public Menu getMenu()
 	{
@@ -56,7 +56,7 @@ public class MenuManagerServiceImpl implements MenuManagerService, ApplicationLi
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU, ROLE_PLUGIN_READ_MENUMANAGER')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSTEM, ROLE_SU, ROLE_PLUGIN_READ_MENUMANAGER')")
 	@Transactional(readOnly = true)
 	public Iterable<MolgenisPlugin> getPlugins()
 	{
@@ -64,7 +64,7 @@ public class MenuManagerServiceImpl implements MenuManagerService, ApplicationLi
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU, ROLE_PLUGIN_WRITE_MENUMANAGER')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSTEM, ROLE_SU, ROLE_PLUGIN_WRITE_MENUMANAGER')")
 	@Transactional
 	public void saveMenu(Menu molgenisMenu)
 	{
