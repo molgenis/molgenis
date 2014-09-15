@@ -2,3 +2,8 @@
 	height : 300px;
 	padding-top : 50px;
 }
+
+.glyphicon-plus, .glyphicon-minus{
+	cursor:pointer;
+	float:right;
+}

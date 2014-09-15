@@ -41,8 +41,8 @@
 												<div class="col-md-6 termurl" style="margin-bottom:-10px;">
 													<strong>Ontologyterm Url</strong>
 												</div>
-												<div class="col-md-2" style="margin-bottom:-10px;">
-													<a id="score-explanation"><center>?Score</center></a>
+												<div class="col-md-1" style="margin-bottom:-10px;">
+													<strong>Score</strong>
 												</div>
 											</div>
 										</div>
@@ -52,7 +52,7 @@
 							<div id="match-result" class="row"></div>
 							<div class="row"><div id="pager"></div></div>
 						</div>
-						<div id="tree-visual-panel" class="col-md-4" style="display:none;">
+						<div id="tree-visual-panel" class="col-md-4" style="display:none;padding-left:40px;">
 							<div class="row">
 								<div class="col-md-12 well">
 									<div class="row">
@@ -103,24 +103,17 @@
 			'end' : ${total?c} < itermsPerPage ? ${total?c} : itermsPerPage
 		});
 		
-		$('#score-explanation').popover({
-			'placement' : 'bottom',
-			'trigger' : 'hover',
-			'title' : 'Explanation',
-			'content' : 'This is not an absolute score and thereby cannot be compared among groups. However the scores can be compared within groups!' 
-		});
-		
 		$('#show-tree-button').click(function(){
 			if($('#tree-visual-panel').is(':hidden')){
 				$('#match-result-panel').removeClass('col-md-12').addClass('col-md-8');
 				$('.termurl').hide();
-				$('.matchterm').removeClass('col-md-5').addClass('col-md-8');
+				$('.matchterm').removeClass('col-md-4').addClass('col-md-9');
 				$('#tree-visual-panel').show();
 				$('#show-tree-button').html('Hide tree');
 			}else{
 				$('#match-result-panel').removeClass('col-md-8').addClass('col-md-12');
 				$('.termurl').show();
-				$('.matchterm').removeClass('col-md-8').addClass('col-md-5');
+				$('.matchterm').removeClass('col-md-9').addClass('col-md-4');
 				$('#tree-visual-panel').hide();
 				$('#show-tree-button').html('Show tree');
 			}

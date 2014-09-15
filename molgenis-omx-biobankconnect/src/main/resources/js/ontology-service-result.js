@@ -48,7 +48,8 @@
 				if(index >= 20) return false;
 				var ontologyTermNameDiv = $('<div />').addClass('col-md-4 matchterm show-popover').css('margin-bottom', '-6px').append(hit.columnValueMap.ontologyTerm);
 				var ontologyTermUrlDiv = $('<div />').addClass('col-md-6 termurl').css('margin-bottom', '-6px').append('<a href="' + hit.columnValueMap.ontologyTermIRI + '" target="_blank">' + hit.columnValueMap.ontologyTermIRI + '</a>');
-				var matchScoreDiv = $('<div />').addClass('col-md-2').css('margin-bottom', '-6px').append('<center>' + (hit.columnValueMap.combinedScore ? hit.columnValueMap.combinedScore.toFixed(2) :  hit.columnValueMap.score.toFixed(2)) + '%</center>');
+				var matchScoreDiv = $('<div />').addClass('col-md-1').css('margin-bottom', '-6px').append('<center>' + (hit.columnValueMap.combinedScore ? hit.columnValueMap.combinedScore.toFixed(2) :  hit.columnValueMap.score.toFixed(2)) + '%</center>');
+				
 				var newLineDiv = $('<div />').addClass('row').css({
 					'padding-top':'3px',
 					'padding-bottom':'3px'
@@ -78,6 +79,11 @@
 						}
 					});
 				}
+				
+				//Only add plus icon to the first matched candidate
+				if(index === 0){
+					$('<div />').addClass('col-md-1').append('<span class="glyphicon glyphicon-plus"></span>').appendTo(newLineDiv);
+				}
 			});
 			$('<div />').addClass('col-md-12 well div-hover').append(layoutDiv).appendTo(container);
 		});
@@ -92,14 +98,7 @@
 		$('div.div-expandable').each(function(index, element){
 			if($(element).children().length > 1){
 				$(element).children('div:gt(0)').hide();
-				var toggle = $('<span class="glyphicon glyphicon-plus"></span>').css({
-					'cursor':'pointer',
-					'float' :'right',
-					'margin-right' : '-15px'
-				});
-//				var buttonDiv = $('<div />').css('float','right').append(toggle);
-				$(element).before(toggle);
-				toggle.click(function(){
+				$(element).find('.glyphicon-plus:eq(0)').click(function(){
 					if($(this).hasClass('glyphicon-plus')){
 						$(element).children().show();
 						$(this).removeClass('glyphicon-plus').addClass('glyphicon-minus');
