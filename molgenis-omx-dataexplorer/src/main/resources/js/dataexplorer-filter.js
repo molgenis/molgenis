@@ -516,7 +516,7 @@
 					operator : operator,
 					autofocus : 'autofocus',
 					isfilter : true,
-					width : '384px'
+					width : '370px',
 				});
 				break;
 			case 'COMPOUND' :

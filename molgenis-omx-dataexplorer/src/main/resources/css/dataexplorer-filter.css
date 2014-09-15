@@ -6,8 +6,8 @@
 
 #filter-wizard-modal .well {
 	overflow: auto;
-	min-height: 500px;
-	max-height: 500px;
+	min-height: 490px;
+	max-height: 490px;
 	margin-bottom: 10px;
 }
 
@@ -28,9 +28,13 @@
 	position: static;
 }
 
+.xrefmrefsearch {
+	padding-left: 25px;
+}
+
 #filter-wizard-modal .controls.xrefmrefsearch.complex-simplefilter,
 #filter-modal .controls.xrefmrefsearch.complex-simplefilter{
-	width: 384px;
+	width: 370px;
 }
 
 #filter-wizard-modal .form-horizontal .control-label{
