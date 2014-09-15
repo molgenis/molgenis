@@ -58,11 +58,14 @@ import org.molgenis.fieldtypes.IntField;
 import org.molgenis.fieldtypes.LongField;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
+import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.DependencyResolver;
 import org.molgenis.util.HugeSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.convert.ConversionFailedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
@@ -77,9 +80,9 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 @Component
-public class EmxImportServiceImpl implements ImportService
+public class EmxImportService implements ImportService
 {
-	private static final Logger logger = Logger.getLogger(EmxImportServiceImpl.class);
+	private static final Logger logger = Logger.getLogger(EmxImportService.class);
 	private static final List<String> SUPPORTED_FILE_EXTENSIONS = Arrays.asList("xls", "xlsx", "csv", "zip");
 
 	// Sheet names
@@ -89,9 +92,10 @@ public class EmxImportServiceImpl implements ImportService
 	private MysqlRepositoryCollection store;
 	private TransactionTemplate transactionTemplate;
 	private final DataService dataService;
+	private PermissionSystemService permissionSystemService;
 
 	@Autowired
-	public EmxImportServiceImpl(DataService dataService)
+	public EmxImportService(DataService dataService)
 	{
 		if (dataService == null) throw new IllegalArgumentException("dataService is null");
 		logger.debug("MEntityImportServiceImpl created");
@@ -108,7 +112,13 @@ public class EmxImportServiceImpl implements ImportService
 	@Autowired
 	public void setPlatformTransactionManager(PlatformTransactionManager transactionManager)
 	{
-		this.transactionTemplate = new TransactionTemplate(transactionManager);
+		transactionTemplate = new TransactionTemplate(transactionManager);
+	}
+
+	@Autowired
+	public void setPermissionSystemService(PermissionSystemService permissionSystemService)
+	{
+		this.permissionSystemService = permissionSystemService;
 	}
 
 	@Override
@@ -131,7 +141,6 @@ public class EmxImportServiceImpl implements ImportService
 	public EntityImportReport doImport(final RepositoryCollection source, DatabaseAction databaseAction)
 	{
 		if (store == null) throw new RuntimeException("store was not set");
-		long t0 = System.currentTimeMillis();
 
 		List<EntityMetaData> metadataList = Lists.newArrayList();
 
@@ -157,16 +166,13 @@ public class EmxImportServiceImpl implements ImportService
 
 		try
 		{
-			EntityImportReport report = transactionTemplate.execute(new EmxImportTransactionCallback(databaseAction,
-					source, metadataList, addedEntities, addedAttributes));
-
-			long t = System.currentTimeMillis() - t0;
-			logger.info("Import done in " + t + " msec");
-
-			return report;
+			return transactionTemplate.execute(new EmxImportTransactionCallback(databaseAction, source, metadataList,
+					addedEntities, addedAttributes, permissionSystemService));
 		}
 		catch (Exception e)
 		{
+			logger.info("Error during import, rollback.", e);
+
 			// Rollback metadata, create table statements cannot be rolled back, we have to do it ourselfs
 			Collections.reverse(addedEntities);
 
@@ -465,10 +471,13 @@ public class EmxImportServiceImpl implements ImportService
 		private final List<String> addedEntities;
 		private final Map<String, List<String>> addedAttributes;// Attributes per entity
 		private final DatabaseAction dbAction;
+		private final PermissionSystemService permissionSystemService;
 
 		private EmxImportTransactionCallback(DatabaseAction dbAction, RepositoryCollection source,
-				List<EntityMetaData> metadata, List<String> addedEntities, Map<String, List<String>> addedAttributes)
+				List<EntityMetaData> metadata, List<String> addedEntities, Map<String, List<String>> addedAttributes,
+				PermissionSystemService permissionSystemService)
 		{
+			this.permissionSystemService = permissionSystemService;
 			this.dbAction = dbAction;
 			this.source = source;
 			this.sourceMetadata = metadata;
@@ -503,6 +512,7 @@ public class EmxImportServiceImpl implements ImportService
 						{
 							logger.debug("tyring to create: " + name);
 							addedEntities.add(name);
+							report.addNewEntity(name);
 							store.add(entityMetaData);
 						}
 						else if (!entityMetaData.isAbstract())
@@ -510,10 +520,19 @@ public class EmxImportServiceImpl implements ImportService
 							List<String> addedEntityAttributes = store.update(entityMetaData);
 							if ((addedEntityAttributes != null) && !addedEntityAttributes.isEmpty())
 							{
-								addedAttributes.put(entityMetaData.getName(), addedEntityAttributes);
+								addedAttributes.put(name, addedEntityAttributes);
 							}
 						}
 					}
+				}
+
+				// Give user permission to see and edit his imported entities (not if user is admin, admins can do that
+				// anyway)
+				if (!SecurityUtils.currentUserIsSu())
+				{
+					// String userName = SecurityUtils.getCurrentUsername();
+					permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
+							addedEntities);
 				}
 
 				// import data
@@ -548,6 +567,7 @@ public class EmxImportServiceImpl implements ImportService
 			}
 			catch (Exception e)
 			{
+				logger.info("Error in import transaction, setRollbackOnly", e);
 				status.setRollbackOnly();
 				throw e;
 			}
@@ -601,7 +621,6 @@ public class EmxImportServiceImpl implements ImportService
 							}
 						}
 					}
-
 				}
 
 				int count = 0;
@@ -630,10 +649,8 @@ public class EmxImportServiceImpl implements ImportService
 							{
 								msg.append(" and more.");
 							}
-
 							throw new MolgenisDataException(msg.toString());
 						}
-
 						count = repo.add(entities);
 						break;
 

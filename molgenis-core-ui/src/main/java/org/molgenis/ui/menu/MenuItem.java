@@ -28,6 +28,17 @@ public class MenuItem
 	@SerializedName("items")
 	private List<MenuItem> items;
 
+	public MenuItem()
+	{
+	}
+
+	public MenuItem(MenuItemType type, String id, String label)
+	{
+		this.type = type;
+		this.id = id;
+		this.label = label;
+	}
+
 	public MenuItemType getType()
 	{
 		return type;

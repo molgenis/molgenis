@@ -58,7 +58,6 @@ public abstract class AbstractEntitiesImporter implements EntitiesImporter
 					if (nr > 0)
 					{
 						importReport.addEntityCount(entityName, nr);
-						importReport.addNrImported(nr);
 					}
 				}
 				catch (MolgenisValidationException e)

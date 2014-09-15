@@ -580,7 +580,6 @@
         <module>molgenis-omx-core</module>
         <module>molgenis-omx-das</module>
         <module>molgenis-omx-dataexplorer</module>
-        <module>molgenis-omx-importer</module>
         <module>molgenis-omx-protocolviewer</module>
         <module>molgenis-app-omx</module>
         <module>molgenis-search</module>
@@ -606,5 +605,6 @@
         <module>molgenis-data-examples</module>
         <module>molgenis-mutationdb</module>
         <module>molgenis-scripts</module>
+        <module>molgenis-data-import</module>
     </modules>
 </project>

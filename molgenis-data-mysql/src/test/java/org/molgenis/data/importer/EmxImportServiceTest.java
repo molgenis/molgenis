@@ -82,7 +82,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
 
 		// create importer
-		EmxImportServiceImpl importer = new EmxImportServiceImpl(dataService);
+		EmxImportService importer = new EmxImportService(dataService);
 		importer.setRepositoryCollection(store);
 		importer.setPlatformTransactionManager(new SimplePlatformTransactionManager());
 
@@ -136,7 +136,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		Assert.assertEquals(source.getNumberOfSheets(), 4);
 		Assert.assertNotNull(source.getRepositoryByEntityName("attributes"));
 
-		EmxImportServiceImpl importer = new EmxImportServiceImpl(dataService);
+		EmxImportService importer = new EmxImportService(dataService);
 		importer.setRepositoryCollection(store);
 		importer.setPlatformTransactionManager(new SimplePlatformTransactionManager());
 
@@ -181,7 +181,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		File f = ResourceUtils.getFile(getClass(), "/example.xlsx");
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
 
-		EmxImportServiceImpl importer = new EmxImportServiceImpl(dataService);
+		EmxImportService importer = new EmxImportService(dataService);
 		importer.setRepositoryCollection(store);
 		importer.setPlatformTransactionManager(new SimplePlatformTransactionManager());
 

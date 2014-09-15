@@ -31,15 +31,18 @@ public class SecurityUtils
 		{
 			return null;
 		}
+		return getUsername(authentication);
+	}
+
+	public static String getUsername(Authentication authentication)
+	{
 		Object principal = authentication.getPrincipal();
 		if (principal instanceof UserDetails)
 		{
 			return ((UserDetails) principal).getUsername();
 		}
-		else
-		{
-			return principal.toString();
-		}
+
+		return principal.toString();
 	}
 
 	/**

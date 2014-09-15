@@ -1,4 +1,4 @@
-package org.molgenis.omx.importer;
+package org.molgenis.data.importer;
 
 import java.io.File;
 import java.util.Collection;
@@ -19,6 +19,7 @@ public class ImportWizard extends Wizard
 	private Map<String, Collection<String>> fieldsAvailable;
 	private String entityImportOption;
 	private String validationMessage;
+	private Integer importRunId;
 
 	public File getFile()
 	{
@@ -108,6 +109,16 @@ public class ImportWizard extends Wizard
 	public void setValidationMessage(String validationMessage)
 	{
 		this.validationMessage = validationMessage;
+	}
+
+	public Integer getImportRunId()
+	{
+		return importRunId;
+	}
+
+	public void setImportRunId(Integer importRunId)
+	{
+		this.importRunId = importRunId;
 	}
 
 }
