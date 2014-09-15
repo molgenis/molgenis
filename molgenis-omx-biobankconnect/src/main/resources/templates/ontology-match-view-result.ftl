@@ -31,13 +31,13 @@
 							<div class="row">
 								<div class="col-md-12 well">
 									<div class="row">
-										<div class="col-md-4"><strong>Input terms</strong></div>
-										<div class="col-md-8">
+										<div class="col-md-3"><strong>Input terms</strong></div>
+										<div class="col-md-9">
 											<div class="row">
-												<div class="col-md-5 matchterm" style="margin-bottom:-10px;">
+												<div class="col-md-4 matchterm" style="margin-bottom:-10px;">
 													<strong>Matched ontologyterms</strong>
 												</div>
-												<div class="col-md-5 termurl" style="margin-bottom:-10px;">
+												<div class="col-md-6 termurl" style="margin-bottom:-10px;">
 													<strong>Ontologyterm Url</strong>
 												</div>
 												<div class="col-md-2" style="margin-bottom:-10px;">

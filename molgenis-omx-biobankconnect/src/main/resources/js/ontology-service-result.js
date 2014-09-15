@@ -33,8 +33,8 @@
 		container.empty();
 		$.each(entities, function(rowIndex, entity){
 			var layoutDiv = $('<div />').addClass('row');
-			var termDiv = $('<div />').addClass('col-md-4').append(entity.term).appendTo(layoutDiv);
-			var ontologyTermMatchDiv= $('<div />').addClass('col-md-8 div-expandable').appendTo(layoutDiv);
+			var termDiv = $('<div />').addClass('col-md-3').append(entity.term).appendTo(layoutDiv);
+			var ontologyTermMatchDiv= $('<div />').addClass('col-md-9 div-expandable').appendTo(layoutDiv);
 			
 			//Collect all the scores from the candidate ontology term mappings
 			var scoreGroup = [];
@@ -46,8 +46,8 @@
 			//Create the html visualizations for the mappings
 			$.each(entity.results.searchHits, function(index, hit){
 				if(index >= 20) return false;
-				var ontologyTermNameDiv = $('<div />').addClass('col-md-5 matchterm show-popover').css('margin-bottom', '-6px').append(hit.columnValueMap.ontologyTerm);
-				var ontologyTermUrlDiv = $('<div />').addClass('col-md-5 termurl').css('margin-bottom', '-6px').append('<a href="' + hit.columnValueMap.ontologyTermIRI + '" target="_blank">' + hit.columnValueMap.ontologyTermIRI + '</a>');
+				var ontologyTermNameDiv = $('<div />').addClass('col-md-4 matchterm show-popover').css('margin-bottom', '-6px').append(hit.columnValueMap.ontologyTerm);
+				var ontologyTermUrlDiv = $('<div />').addClass('col-md-6 termurl').css('margin-bottom', '-6px').append('<a href="' + hit.columnValueMap.ontologyTermIRI + '" target="_blank">' + hit.columnValueMap.ontologyTermIRI + '</a>');
 				var matchScoreDiv = $('<div />').addClass('col-md-2').css('margin-bottom', '-6px').append('<center>' + (hit.columnValueMap.combinedScore ? hit.columnValueMap.combinedScore.toFixed(2) :  hit.columnValueMap.score.toFixed(2)) + '%</center>');
 				var newLineDiv = $('<div />').addClass('row').css({
 					'padding-top':'3px',
