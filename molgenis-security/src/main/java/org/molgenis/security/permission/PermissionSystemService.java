@@ -54,7 +54,8 @@ public class PermissionSystemService
 					userAuthority.setRole(role);
 					dataService.add(UserAuthority.ENTITY_NAME, userAuthority);
 
-					role = SecurityUtils.AUTHORITY_PLUGIN_PREFIX + permission.toString() + "_" + entity.toUpperCase();
+					role = SecurityUtils.AUTHORITY_PLUGIN_PREFIX + permission.toString() + "_FORM."
+							+ entity.toUpperCase();
 					roles.add(new SimpleGrantedAuthority(role));
 					userAuthority = new UserAuthority();
 					userAuthority.setMolgenisUser(user);

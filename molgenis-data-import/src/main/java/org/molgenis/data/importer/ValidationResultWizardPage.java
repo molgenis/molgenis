@@ -81,7 +81,7 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 
 					asyncImportJobs.execute(new ImportJob(importService, SecurityContextHolder.getContext(),
 							repositoryCollection, entityDbAction, importRun.getId(), importRunService,
-							importPostProcessingService));
+							importPostProcessingService, request.getSession()));
 				}
 
 			}
