@@ -3,3 +3,8 @@
 	overflow: auto;
 	margin-bottom: 10px;
 }
+
+#entity-class h3 {
+	display: inline;
+	margin-right: 10px;
+}

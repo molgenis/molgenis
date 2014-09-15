@@ -6,6 +6,11 @@
 
 <@header css js/>
 
+<div id="entity-class" class="well">
+	<h3 id="entity-class-name"></h3>
+	<span id="entity-class-description"></span>
+</div>
+
 <div class="row">
 	<div class="pull-right col-md-4" <#if hideDatasetSelect??> style="display:none"</#if>>
     	<div class="form-horizontal form-group">

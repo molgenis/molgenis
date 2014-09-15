@@ -14,6 +14,19 @@
 		});
 	}
 	
+	function createHeader(entityMetaData) {
+		$('#entity-class-name').html(entityMetaData.label);
+		
+		if (entityMetaData.description) {
+			var description = $('<span data-placement="bottom"></span>');
+			description.html(abbreviate(entityMetaData.description, 180));
+			description.attr('data-title', entityMetaData.description);
+			$('#entity-class-description').html(description.tooltip());
+		} else {
+			$('#entity-class-description').html('');
+		}
+	}
+	
 	$(function() {
 		$('#entity-select').on('change', function() {
 			var entityUri = $(this).val();
@@ -22,6 +35,7 @@
 					return attribute.fieldType !== 'COMPOUND' ? attribute : null;
 				});
 				
+				createHeader(entityMetaData);
 				createEntityMetaTree(entityMetaData, selectedAttributes);
 			});
 		});
