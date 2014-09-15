@@ -62,9 +62,6 @@ public class OntologyServiceController extends MolgenisPluginController
 	public static final String ID = "ontologyservice";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
-	// private String ontologyUrl = null;
-	// private List<String> inputLines = new ArrayList<String>();
-
 	public OntologyServiceController()
 	{
 		super(URI);

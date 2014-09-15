@@ -46,10 +46,13 @@
 			//Create the html visualizations for the mappings
 			$.each(entity.results.searchHits, function(index, hit){
 				if(index >= 20) return false;
-				var ontologyTermNameDiv = $('<div />').addClass('span5 matchterm show-popover').css('margin-bottom', '-6px').append(hit.columnValueMap.ontologyTerm);
-				var ontologyTermUrlDiv = $('<div />').addClass('span5 termurl').css('margin-bottom', '-6px').append('<a href="' + hit.columnValueMap.ontologyTermIRI + '" target="_blank">' + hit.columnValueMap.ontologyTermIRI + '</a>');
-				var matchScoreDiv = $('<div />').addClass('span2').css('margin-bottom', '-6px').append('<center>' + (hit.columnValueMap.combinedScore ? hit.columnValueMap.combinedScore.toFixed(2) :  hit.columnValueMap.score.toFixed(2)) + '%</center>');
-				var newLineDiv = $('<div />').addClass('row-fluid').append(ontologyTermNameDiv).append(ontologyTermUrlDiv).append(matchScoreDiv);
+				var ontologyTermNameDiv = $('<div />').addClass('col-md-5 matchterm show-popover').css('margin-bottom', '-6px').append(hit.columnValueMap.ontologyTerm);
+				var ontologyTermUrlDiv = $('<div />').addClass('col-md-5 termurl').css('margin-bottom', '-6px').append('<a href="' + hit.columnValueMap.ontologyTermIRI + '" target="_blank">' + hit.columnValueMap.ontologyTermIRI + '</a>');
+				var matchScoreDiv = $('<div />').addClass('col-md-2').css('margin-bottom', '-6px').append('<center>' + (hit.columnValueMap.combinedScore ? hit.columnValueMap.combinedScore.toFixed(2) :  hit.columnValueMap.score.toFixed(2)) + '%</center>');
+				var newLineDiv = $('<div />').addClass('row').css({
+					'padding-top':'3px',
+					'padding-bottom':'3px'
+				}).append(ontologyTermNameDiv).append(ontologyTermUrlDiv).append(matchScoreDiv);
 				var isEqual = hit.columnValueMap.ontologyTermSynonym === hit.columnValueMap.ontologyTerm;
 				var popoverOption = {
 					'placement' : 'bottom',
@@ -68,18 +71,15 @@
 					$.each(classifications, function(i, score){
 						if(i != 0 && i != classifications.length - 1 && index == scoreGroup.lastIndexOf(score)){
 							var separatLine = $('<legend />').css({
-								'padding-top':'15px',
-								'padding-bottom':'5px',
+								'padding-top':'20px',
 								'border-bottom-color':'#CC0025'
 							});
-							$('<div />').addClass('row-fluid').append(separatLine).appendTo(ontologyTermMatchDiv);
+							$('<div />').addClass('row').append(separatLine).appendTo(ontologyTermMatchDiv);
 						}
 					});
 				}
 			});
-			
-			var divWithColor = $('<div />').addClass('col-md-12 well div-hover').append(layoutDiv);
-			$('<div />').addClass('row').append(divWithColor).appendTo(container);
+			$('<div />').addClass('col-md-12 well div-hover').append(layoutDiv).appendTo(container);
 		});
 		if(isHidden){
 			container.find('.termurl').hide();
@@ -92,19 +92,20 @@
 		$('div.div-expandable').each(function(index, element){
 			if($(element).children().length > 1){
 				$(element).children('div:gt(0)').hide();
-				var toggle = $('<i class="icon-plus"></icon>').css({
+				var toggle = $('<span class="glyphicon glyphicon-plus"></span>').css({
 					'cursor':'pointer',
+					'float' :'right',
 					'margin-right' : '-15px'
 				});
-				var buttonDiv = $('<div />').css('float','right').append(toggle);
-				$(element).before(buttonDiv);
+//				var buttonDiv = $('<div />').css('float','right').append(toggle);
+				$(element).before(toggle);
 				toggle.click(function(){
-					if($(this).hasClass('icon-plus')){
+					if($(this).hasClass('glyphicon-plus')){
 						$(element).children().show();
-						$(this).removeClass('icon-plus').addClass('icon-minus');
+						$(this).removeClass('glyphicon-plus').addClass('glyphicon-minus');
 					}else{
 						$(element).children('div:gt(0)').hide();
-						$(this).removeClass('icon-minus').addClass('icon-plus');
+						$(this).removeClass('glyphicon-minus').addClass('glyphicon-plus');
 					}
 				});
 			}
