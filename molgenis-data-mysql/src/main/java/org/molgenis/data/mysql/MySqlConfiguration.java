@@ -3,10 +3,10 @@ package org.molgenis.data.mysql;
 import javax.sql.DataSource;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.importer.EmxImportService;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
-import org.molgenis.elasticsearch.ElasticSearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,7 +19,7 @@ public class MySqlConfiguration
 	private DataService dataService;
 
 	@Autowired
-	private ElasticSearchService elasticSearchService;
+	private SearchService elasticSearchService;
 
 	@Autowired
 	private DataSource dataSource;

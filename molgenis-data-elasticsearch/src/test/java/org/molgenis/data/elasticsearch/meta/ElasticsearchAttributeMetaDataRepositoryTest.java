@@ -10,8 +10,8 @@ import java.io.IOException;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.elasticsearch.ElasticSearchService;
 import org.molgenis.data.meta.AttributeMetaDataRepository;
-import org.molgenis.elasticsearch.ElasticSearchService;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
