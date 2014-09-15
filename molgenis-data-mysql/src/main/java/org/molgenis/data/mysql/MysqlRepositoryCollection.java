@@ -16,10 +16,12 @@ import org.molgenis.data.CrudRepositorySecurityDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.IndexedCrudRepositorySecurityDecorator;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.elasticsearch.ElasticsearchRepositoryDecorator;
+import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.meta.ElasticsearchAttributeMetaDataRepository;
 import org.molgenis.data.elasticsearch.meta.ElasticsearchEntityMetaDataRepository;
 import org.molgenis.data.meta.AttributeMetaDataRepository;
@@ -28,8 +30,8 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.EntityAttributesValidator;
+import org.molgenis.data.validation.IndexedRepositoryValidationDecorator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
-import org.molgenis.elasticsearch.ElasticSearchService;
 import org.molgenis.model.MolgenisModelException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,7 +47,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 	private Map<String, MysqlRepository> repositories;
 	private final MysqlEntityMetaDataRepository entityMetaDataRepository;
 	private final MysqlAttributeMetaDataRepository attributeMetaDataRepository;
-	private final ElasticSearchService elasticSearchService;
+	private final SearchService elasticSearchService;
 
 	public MysqlRepositoryCollection(DataSource ds, DataService dataService,
 			MysqlEntityMetaDataRepository entityMetaDataRepository,
@@ -56,7 +58,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 
 	public MysqlRepositoryCollection(DataSource ds, DataService dataService,
 			MysqlEntityMetaDataRepository entityMetaDataRepository,
-			MysqlAttributeMetaDataRepository attributeMetaDataRepository, ElasticSearchService elasticSearchService)
+			MysqlAttributeMetaDataRepository attributeMetaDataRepository, SearchService elasticSearchService)
 	{
 		this.ds = ds;
 		this.dataService = dataService;
@@ -246,6 +248,11 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 			return repository;
 		}
 
+		if (dataService.hasRepository(emd.getName()))
+		{
+			throw new MolgenisDataException("Entity with name [" + emd.getName() + "] already exists.");
+		}
+
 		// if not abstract add to repositories
 		if (!emd.isAbstract())
 		{
@@ -389,6 +396,16 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		EntityMetaData existingEntityMetaData = repository.getEntityMetaData();
 		List<String> addedAttributes = Lists.newArrayList();
 
+		for (AttributeMetaData attr : existingEntityMetaData.getAttributes())
+		{
+			if (sourceEntityMetaData.getAttribute(attr.getName()) == null)
+			{
+				throw new MolgenisDataException(
+						"Removing of existing attributes is currently not sypported. You tried to remove attribute ["
+								+ attr.getName() + "]");
+			}
+		}
+
 		for (AttributeMetaData attr : sourceEntityMetaData.getAttributes())
 		{
 			AttributeMetaData currentAttribute = existingEntityMetaData.getAttribute(attr.getName());
@@ -430,10 +447,22 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		CrudRepository decoratedRepository = repository;
 		if (elasticSearchService != null)
 		{
-			decoratedRepository = new ElasticsearchRepositoryDecorator(decoratedRepository, elasticSearchService);
+			// 1. security decorator
+			// 2. index decorator
+			// 3. validation decorator
+			// 4. repository
+			decoratedRepository = new IndexedCrudRepositorySecurityDecorator(new IndexedRepositoryValidationDecorator(
+					new ElasticsearchRepositoryDecorator(decoratedRepository, elasticSearchService),
+					new EntityAttributesValidator()));
 		}
-		decoratedRepository = new CrudRepositorySecurityDecorator(new RepositoryValidationDecorator(
-				decoratedRepository, new EntityAttributesValidator()));
+		else
+		{
+			// 1. security decorator
+			// 2. validation decorator
+			// 3. repository
+			decoratedRepository = new CrudRepositorySecurityDecorator(new RepositoryValidationDecorator(
+					decoratedRepository, new EntityAttributesValidator()));
+		}
 		return decoratedRepository;
 	}
 

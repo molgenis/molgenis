@@ -14,6 +14,10 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
+import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.elasticsearch.util.Hit;
+import org.molgenis.data.elasticsearch.util.SearchRequest;
+import org.molgenis.data.elasticsearch.util.SearchResult;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.biobankconnect.ontologymatcher.AsyncOntologyMatcher;
@@ -25,10 +29,6 @@ import org.molgenis.omx.biobankconnect.wizard.CurrentUserStatus;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
-import org.molgenis.search.Hit;
-import org.molgenis.search.SearchRequest;
-import org.molgenis.search.SearchResult;
-import org.molgenis.search.SearchService;
 import org.molgenis.security.user.UserAccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -70,8 +70,7 @@ public class AlgorithmEditorController extends MolgenisPluginController
 
 	@RequestMapping(method = RequestMethod.POST, value = "/createmapping", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public SearchResult createMappings(@RequestBody
-	OntologyMatcherRequest request)
+	public SearchResult createMappings(@RequestBody OntologyMatcherRequest request)
 	{
 		String userName = userAccountService.getCurrentUser().getUsername();
 		List<Integer> selectedDataSetIds = request.getSelectedDataSetIds();
@@ -85,8 +84,7 @@ public class AlgorithmEditorController extends MolgenisPluginController
 
 	@RequestMapping(method = RequestMethod.POST, value = "/suggestscript", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Map<String, Object> suggestScript(@RequestBody
-	OntologyMatcherRequest request)
+	public Map<String, Object> suggestScript(@RequestBody OntologyMatcherRequest request)
 	{
 		Map<String, Object> jsonResults = new HashMap<String, Object>();
 		String userName = userAccountService.getCurrentUser().getUsername();
@@ -97,8 +95,7 @@ public class AlgorithmEditorController extends MolgenisPluginController
 
 	@RequestMapping(method = RequestMethod.POST, value = "/testscript", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Map<String, Object> testScrpit(@RequestBody
-	OntologyMatcherRequest request)
+	public Map<String, Object> testScrpit(@RequestBody OntologyMatcherRequest request)
 	{
 		Map<String, Object> jsonResults = new HashMap<String, Object>();
 		String algorithm = request.getAlgorithmScript();
@@ -120,8 +117,7 @@ public class AlgorithmEditorController extends MolgenisPluginController
 
 	@RequestMapping(method = RequestMethod.POST, value = "/savescript", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Map<String, String> saveScript(@RequestBody
-	OntologyMatcherRequest request)
+	public Map<String, String> saveScript(@RequestBody OntologyMatcherRequest request)
 	{
 		Integer targetDataSetId = request.getTargetDataSetId();
 		List<Integer> selectedDataSetIds = request.getSelectedDataSetIds();
@@ -145,8 +141,7 @@ public class AlgorithmEditorController extends MolgenisPluginController
 
 	@RequestMapping(method = RequestMethod.POST, value = "/allattributes", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public SearchResult getAllAttributes(@RequestBody
-	Map<String, Object> request)
+	public SearchResult getAllAttributes(@RequestBody Map<String, Object> request)
 	{
 		if (request.get("dataSetId") == null) return new SearchResult("dataSetId cannot be null!");
 		Object dataSetId = request.get("dataSetId");
@@ -175,8 +170,7 @@ public class AlgorithmEditorController extends MolgenisPluginController
 
 	@RequestMapping(method = RequestMethod.POST, value = "/attribute", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public SearchResult getOneAttribute(@RequestBody
-	String featureId)
+	public SearchResult getOneAttribute(@RequestBody String featureId)
 	{
 		return searchService.search(new SearchRequest(null, new QueryImpl().eq(ObservableFeature.ID, featureId).and()
 				.eq("type", "observablefeature"), null));
@@ -184,8 +178,7 @@ public class AlgorithmEditorController extends MolgenisPluginController
 
 	@RequestMapping(method = POST, value = "/ontologyterm", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public SearchResult query(@RequestBody
-	OntologyServiceRequest ontologyTermRequest)
+	public SearchResult query(@RequestBody OntologyServiceRequest ontologyTermRequest)
 	{
 		String ontologyIri = ontologyTermRequest.getOntologyIri();
 		String queryString = ontologyTermRequest.getQueryString();
@@ -195,8 +188,7 @@ public class AlgorithmEditorController extends MolgenisPluginController
 
 	@RequestMapping(method = RequestMethod.POST, value = "/getmapping", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public SearchResult getMappings(@RequestBody
-	Map<String, Object> request)
+	public SearchResult getMappings(@RequestBody Map<String, Object> request)
 	{
 		if (request.get("dataSetIdentifier") == null) return new SearchResult("dataSetId cannot be null!");
 		Object dataSetIdentifier = request.get("dataSetIdentifier");
@@ -216,8 +208,7 @@ public class AlgorithmEditorController extends MolgenisPluginController
 
 	@RequestMapping(method = RequestMethod.POST, value = "/getstores", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Map<String, List<DataSet>> getDataSetsForMappings(@RequestBody
-	String dataSetId)
+	public Map<String, List<DataSet>> getDataSetsForMappings(@RequestBody String dataSetId)
 	{
 		Map<String, List<DataSet>> results = new HashMap<String, List<DataSet>>();
 		List<DataSet> dataSets = new ArrayList<DataSet>();
@@ -241,8 +232,7 @@ public class AlgorithmEditorController extends MolgenisPluginController
 	}
 
 	/**
-	 * Helper class to count the number of observationSets in a dataset, in
-	 * another word the number of rows in a dataset
+	 * Helper class to count the number of observationSets in a dataset, in another word the number of rows in a dataset
 	 * 
 	 * @param sourceDataSetId
 	 * @return

@@ -15,6 +15,8 @@ public class AggregateRequest
 
 	private String yAxisAttributeName;
 
+	private String distinctAttributeName;
+
 	private List<QueryRule> q;
 
 	public String getEntityName()
@@ -45,6 +47,16 @@ public class AggregateRequest
 	public void setYAxisAttributeName(String yAxisAttributeName)
 	{
 		this.yAxisAttributeName = yAxisAttributeName;
+	}
+
+	public String getDistinctAttributeName()
+	{
+		return distinctAttributeName;
+	}
+
+	public void setDistinctAttributeName(String distinctAttributeName)
+	{
+		this.distinctAttributeName = distinctAttributeName;
 	}
 
 	public List<QueryRule> getQ()

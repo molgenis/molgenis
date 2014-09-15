@@ -19,6 +19,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.jpa.importer.EntitiesImporter;
 import org.molgenis.data.omx.OmxRepository;
@@ -37,7 +38,6 @@ import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.protocol.OmxLookupTableEntityMetaData;
 import org.molgenis.omx.protocol.OmxLookupTableRepository;
 import org.molgenis.omx.utils.ProtocolUtils;
-import org.molgenis.search.SearchService;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.EntityImportedEvent;
 import org.molgenis.util.RepositoryUtils;
@@ -231,7 +231,6 @@ public class OmxImporterServiceImpl implements ImportService
 
 				int count = (int) RepositoryUtils.count(repository);
 				importReport.addEntityCount(identifier, count);
-				importReport.addNrImported(count);
 			}
 		}
 

@@ -33,16 +33,18 @@
 			$('#feature-select').append(' x ');
 			if(aggregableAttributes.length > 1) createAtributeDropdown($('#feature-select'), aggregableAttributes, 'y-aggr-attribute', aggregableAttributes[1]);
 			else createAtributeDropdown($('#feature-select'), aggregableAttributes, 'y-aggr-attribute', false);
-
+			$('#distinct-attr-select').empty();
+			createAtributeDropdown($('#distinct-attr-select'), attributes, 'distinct-aggr-attribute', false);
+			
 			$('#feature-select-container').show();
 			$('#aggregate-table-container').empty();
 			
 			$('.attribute-dropdown').on('change', function() {
-				updateAggregatesTable($('#x-aggr-attribute').val(), $('#y-aggr-attribute').val());
+				updateAggregatesTable($('#x-aggr-attribute').val(), $('#y-aggr-attribute').val(), $('#distinct-aggr-attribute').val());
 			});
 
 			//render first results
-			updateAggregatesTable($('#x-aggr-attribute').val(), $('#y-aggr-attribute').val());
+			updateAggregatesTable($('#x-aggr-attribute').val(), $('#y-aggr-attribute').val(), $('#distinct-aggr-attribute').val());
 		} else {
 			$('#feature-select-container').hide();
 			$('#aggregate-table-container').html('<p>No aggregable items</p>');
@@ -69,7 +71,7 @@
 	/**
 	 * @memberOf molgenis.dataexplorer.aggregates
 	 */
-	function updateAggregatesTable(xAttributeName, yAttributeName) {
+	function updateAggregatesTable(xAttributeName, yAttributeName, distinctAttributeName) {
 		if (!xAttributeName && !yAttributeName) {
 			$('#aggregate-table-container').html('');
 			return;
@@ -79,6 +81,7 @@
 			'entityName': getEntity().name,
 			'xAxisAttributeName': xAttributeName,
 			'yAxisAttributeName': yAttributeName,
+			'distinctAttributeName': distinctAttributeName,
 			'q': getEntityQuery()
 		};
 		$.ajax({
@@ -152,15 +155,15 @@
 		});
 		
 		$(document).on('updateAttributeFilters.aggregates', function(e, data) {
-			molgenis.dataexplorer.aggregates.updateAggregatesTable($('#x-aggr-attribute').val(), $('#y-aggr-attribute').val());
+			molgenis.dataexplorer.aggregates.updateAggregatesTable($('#x-aggr-attribute').val(), $('#y-aggr-attribute').val(), $('#distinct-aggr-attribute').val());
 		});
 		
 		$(document).on('removeAttributeFilter.aggregates', function(e, data) {
-			molgenis.dataexplorer.aggregates.updateAggregatesTable($('#x-aggr-attribute').val(), $('#y-aggr-attribute').val());
+			molgenis.dataexplorer.aggregates.updateAggregatesTable($('#x-aggr-attribute').val(), $('#y-aggr-attribute').val(), $('#distinct-aggr-attribute').val());
 		});
 		
 		$(document).on('changeQuery.aggregates', function(e, entitySearchQuery) {
-			molgenis.dataexplorer.aggregates.updateAggregatesTable($('#x-aggr-attribute').val(), $('#y-aggr-attribute').val());
+			molgenis.dataexplorer.aggregates.updateAggregatesTable($('#x-aggr-attribute').val(), $('#y-aggr-attribute').val(), $('#distinct-aggr-attribute').val());
 		});
 	});
 })($, window.top.molgenis = window.top.molgenis || {});

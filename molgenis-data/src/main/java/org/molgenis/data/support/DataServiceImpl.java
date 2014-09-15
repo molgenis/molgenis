@@ -9,9 +9,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Aggregateable;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -315,7 +315,7 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public AggregateResult aggregate(String entityName, AttributeMetaData xAttr, AttributeMetaData yAttr, Query q)
+	public AggregateResult aggregate(String entityName, AggregateQuery aggregateQuery)
 	{
 		Repository repo = getRepositoryByEntityName(entityName);
 		if (!(repo instanceof Aggregateable))
@@ -323,6 +323,6 @@ public class DataServiceImpl implements DataService
 			throw new MolgenisDataException("Repository of [" + entityName + "] isn't aggregateable");
 		}
 
-		return ((Aggregateable) repo).aggregate(xAttr, yAttr, q);
+		return ((Aggregateable) repo).aggregate(aggregateQuery);
 	}
 }

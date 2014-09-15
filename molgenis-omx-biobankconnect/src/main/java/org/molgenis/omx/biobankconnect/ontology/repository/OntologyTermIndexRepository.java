@@ -11,9 +11,9 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Countable;
 import org.molgenis.data.Entity;
+import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.omx.biobankconnect.utils.OntologyLoader;
-import org.molgenis.search.SearchService;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.springframework.beans.factory.annotation.Autowired;
 

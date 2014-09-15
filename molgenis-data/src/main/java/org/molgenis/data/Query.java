@@ -9,17 +9,17 @@ import org.springframework.data.domain.Sort;
  */
 public interface Query extends Iterable<Entity>
 {
-    /**
-     * Count entities matching query
-     *
-     * @return count or Exception of not bound to repository
-     */
-    Long count();
+	/**
+	 * Count entities matching query
+	 *
+	 * @return count or Exception of not bound to repository
+	 */
+	Long count();
 
-    <E extends Entity> Iterable<E> findAll(Class<E> klazz);
+	<E extends Entity> Iterable<E> findAll(Class<E> klazz);
 
 	/**
-	 * Filtering rules
+	 * Filtering rules, seperated by QueryRule.AND and QueryRule.OR clauses
 	 */
 	List<QueryRule> getRules();
 
@@ -43,10 +43,23 @@ public interface Query extends Iterable<Entity>
 	 */
 	Query search(String searchTerms);
 
+	/**
+	 * Search field
+	 */
+	Query search(String field, String searchTerms);
+
 	Query or();
 
 	Query and();
 
+	/**
+	 * Deprecated, replaced by search(field, searchTerms)
+	 * 
+	 * @param field
+	 * @param value
+	 * @return
+	 */
+	@Deprecated
 	Query like(String field, Object value);
 
 	/**
@@ -97,7 +110,7 @@ public interface Query extends Iterable<Entity>
 
 	Query offset(int offset);
 
-    Query sort(Sort.Direction direction, String ... fields);
+	Query sort(Sort.Direction direction, String... fields);
 
 	Query sort(Sort sort);
 }
