@@ -30,14 +30,14 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.Writable;
 import org.molgenis.data.csv.CsvRepository;
+import org.molgenis.data.elasticsearch.util.Hit;
+import org.molgenis.data.elasticsearch.util.SearchResult;
 import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.data.processor.LowerCaseProcessor;
 import org.molgenis.data.rest.EntityCollectionResponse;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.search.Hit;
-import org.molgenis.search.SearchResult;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -75,9 +75,8 @@ public class OntologyServiceController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = POST, value = "/match")
-	public String match(@RequestParam(value = "selectOntologies", required = true)
-	String ontologyUrl, @RequestParam(value = "inputTerms", required = true)
-	String inputTerms, Model model)
+	public String match(@RequestParam(value = "selectOntologies", required = true) String ontologyUrl,
+			@RequestParam(value = "inputTerms", required = true) String inputTerms, Model model)
 	{
 
 		if (StringUtils.isEmpty(ontologyUrl) || StringUtils.isEmpty(inputTerms)) return init(model);
@@ -90,9 +89,8 @@ public class OntologyServiceController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = POST, value = "/match/upload", headers = "Content-Type=multipart/form-data")
-	public String upload(@RequestParam(value = "selectOntologies", required = true)
-	String ontologyUrl, @RequestParam(value = "file", required = true)
-	Part file, Model model) throws IOException
+	public String upload(@RequestParam(value = "selectOntologies", required = true) String ontologyUrl,
+			@RequestParam(value = "file", required = true) Part file, Model model) throws IOException
 	{
 		if (StringUtils.isEmpty(ontologyUrl) || file == null) return init(model);
 		this.ontologyUrl = ontologyUrl;
@@ -157,8 +155,7 @@ public class OntologyServiceController extends MolgenisPluginController
 
 	@RequestMapping(method = POST, value = "/match/retrieve")
 	@ResponseBody
-	public EntityCollectionResponse matchResult(@RequestBody
-	EntityPager entityPager)
+	public EntityCollectionResponse matchResult(@RequestBody EntityPager entityPager)
 	{
 		if (inputLines == null || inputLines.isEmpty()) throw new UnknownEntityException("The inputTerms is empty!");
 		if (StringUtils.isEmpty(ontologyUrl)) throw new UnknownEntityException("The ontologyUrl is empty!");
@@ -182,8 +179,7 @@ public class OntologyServiceController extends MolgenisPluginController
 
 	@RequestMapping(method = POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public SearchResult query(@RequestBody
-	OntologyServiceRequest ontologyTermRequest)
+	public SearchResult query(@RequestBody OntologyServiceRequest ontologyTermRequest)
 	{
 		String ontologyUrl = ontologyTermRequest.getOntologyIri();
 		String queryString = ontologyTermRequest.getQueryString();

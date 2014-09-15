@@ -21,10 +21,10 @@ import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
+import org.molgenis.data.elasticsearch.ElasticSearchService;
+import org.molgenis.data.elasticsearch.ElasticSearchService.IndexingMode;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.elasticsearch.ElasticSearchService;
-import org.molgenis.elasticsearch.ElasticSearchService.IndexingMode;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

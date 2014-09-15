@@ -6,13 +6,13 @@ import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.mysql.EmbeddedMysqlDatabaseBuilder;
 import org.molgenis.data.mysql.MysqlAttributeMetaDataRepository;
 import org.molgenis.data.mysql.MysqlEntityMetaDataRepository;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.elasticsearch.ElasticSearchService;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
 import org.molgenis.security.permission.PermissionSystemService;
@@ -101,9 +101,9 @@ public class AppConfig
 	}
 
 	@Bean
-	public ElasticSearchService elasticsearchService()
+	public SearchService searchService()
 	{
-		return mock(ElasticSearchService.class);
+		return mock(SearchService.class);
 	}
 
 	@Bean

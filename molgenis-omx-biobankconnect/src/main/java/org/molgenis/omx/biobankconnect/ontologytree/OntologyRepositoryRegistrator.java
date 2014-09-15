@@ -1,8 +1,8 @@
 package org.molgenis.omx.biobankconnect.ontologytree;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.omx.biobankconnect.ontologyservice.OntologyService;
-import org.molgenis.search.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;

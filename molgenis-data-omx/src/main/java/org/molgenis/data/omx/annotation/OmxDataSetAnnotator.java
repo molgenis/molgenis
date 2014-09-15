@@ -19,6 +19,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.omx.OmxRepository;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.EntityValidator;
@@ -31,7 +32,6 @@ import org.molgenis.omx.observ.ObservedValue;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.observ.value.Value;
 import org.molgenis.omx.search.DataSetsIndexer;
-import org.molgenis.search.SearchService;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
