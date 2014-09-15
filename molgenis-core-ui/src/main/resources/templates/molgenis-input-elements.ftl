@@ -1,19 +1,21 @@
-<#macro render field hasWritePermission entity=''>
+<#macro render field hasWritePermission entity='' forUpdate=true>
 
 	<#assign fieldName=field.name/>
+	<#assign readonly = (forUpdate && field.readonly) || !hasWritePermission>
+	<#assign nillable = field.nillable>
 	
 	<div class="form-group">
-    	<label class="col-md-3 control-label" for="${fieldName}">${field.label}&nbsp;<#if field.nillable?string('true', 'false') == 'false'>*</#if></label>
+    	<label class="col-md-3 control-label" for="${fieldName}">${field.label}&nbsp;<#if !nillable>*</#if></label>
     	<div class="col-md-9">
     		
     		<#if field.dataType.enumType == 'BOOL'>
 				<input type="checkbox" name="${fieldName}" id="${fieldName}" value="true" <#if entity!='' && entity.get(fieldName)?? && entity.get(fieldName)?string("true", "false") == "true">checked</#if>  <#if field.readonly || hasWritePermission?string("true", "false") == "false" >disabled="disabled"</#if>  >
 	
 			<#elseif field.dataType.enumType == 'TEXT' || field.dataType.enumType =='HTML'>
-				<textarea class="form-control" name="${fieldName}" id="${fieldName}" <#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <#if field.nillable?string('true', 'false') == 'false'>required="required"</#if> ><#if entity!='' && entity.get(fieldName)??>${entity.get(fieldName)!?html}</#if></textarea>
+				<textarea class="form-control" name="${fieldName}" id="${fieldName}" <#if readonly>disabled="disabled"</#if> <#if !nillable>required="required"</#if> ><#if entity!='' && entity.get(fieldName)??>${entity.get(fieldName)!?html}</#if></textarea>
 			
 			<#elseif field.dataType.enumType == 'XREF' || field.dataType.enumType == 'CATEGORICAL'>
-				<input type="hidden" name="${fieldName}" id="${fieldName}" <#if field.nillable?string('true', 'false') == 'false'>required="required"</#if>>
+				<input type="hidden" name="${fieldName}" id="${fieldName}" <#if !nillable>required="required"</#if> />
 				<script>
 					$(document).ready(function() {
 						$('#${fieldName}').select2({
@@ -21,7 +23,7 @@
 							placeholder: 'Select ${field.refEntity.name!}',
 							allowClear: ${field.nillable?string('true', 'false')},
 							query: function (query) {
-								var queryResult = {more:false, results:[<#if field.nillable?string('true', 'false') == 'true'>{id:'', text:''}</#if>]};
+								var queryResult = {more:false, results:[<#if nillable>{id:'', text:''}</#if>]};
 								
 								//Get posible xref values
 								var restApi = new window.top.molgenis.RestClient(); 
@@ -51,14 +53,14 @@
 							$('#${fieldName}').select2('val', '<@formatValue field.refEntity.idAttribute.dataType.enumType entity.getEntity(fieldName).idValue />');
 						</#if>
 						
-						<#if field.readonly || hasWritePermission?string("true", "false") == "false">
+						<#if readonly>
 							$('#${fieldName}').select2('readonly', true);
 						</#if>
 					});
 					
 				</script>
 			<#elseif field.dataType.enumType == 'MREF'>
-				<input type="hidden" name="${fieldName}" id="${fieldName}" <#if field.nillable?string('true', 'false') == 'false'>required="required"</#if>>
+				<input type="hidden" name="${fieldName}" id="${fieldName}" <#if !nillable>required="required"</#if>>
 				<script>
 					$(document).ready(function() {
 						var xrefs = [];
@@ -100,7 +102,7 @@
 						
 						$('#${fieldName}').select2('val', xrefs);
 							
-						<#if field.readonly || hasWritePermission?string("true", "false") == "false">
+						<#if readonly>
 							$('#${fieldName}').select2('readonly', true);
 						</#if>
 					});
@@ -116,9 +118,9 @@
 					<input type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" 
 						data-date-format='YYYY-MM-DDTHH:mm:ssZZ'
 						class="form-control<#if field.nillable> nillable</#if>" 
-						<#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> 
+						<#if readonly>disabled="disabled"</#if> 
 						<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string("yyyy-MM-dd'T'HH:mm:ssZ")}"</#if>
-						<#if field.nillable?string('true', 'false') == 'false'>required="required"</#if> data-rule-date="true" />
+						<#if !nillable>required="required"</#if> data-rule-date="true" />
 				</div>
 			<#elseif field.dataType.enumType == 'DATE'>
 				<div class="group-append date input-group">
@@ -129,24 +131,24 @@
 					<input type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.name}"
 						data-date-format='YYYY-MM-DD' 
 						class="form-control<#if field.nillable> nillable</#if>" 
-						<#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> 
+						<#if readonly>disabled="disabled"</#if> 
 						<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string("yyyy-MM-dd")}"</#if> 
-						<#if field.nillable?string('true', 'false') == 'false'>required="required"</#if>
+						<#if !nillable>required="required"</#if>
 						data-rule-date-ISO="true" />
 				</div>
 				
 			<#elseif field.dataType.enumType =='INT' || field.dataType.enumType = 'LONG'>
 				<input type="number" class="form-control" data-rule-digits="true" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" 
-					<#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> 
+					<#if readonly>disabled="disabled"</#if> 
 					<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)?c}"</#if> 
-					<#if field.nillable?string('true', 'false') == 'false'>required="required"</#if> />
+					<#if !nillable>required="required"</#if> />
 			
 			<#elseif field.dataType.enumType == 'SCRIPT'>
 				<div style="width: 100%; height:250px" class="uneditable-input" id="${fieldName}-editor"></div>
 				<#if entity!='' && entity.get(fieldName)??>
-					<textarea class="form-control" name="${fieldName}" id="${fieldName}-textarea" <#if field.nillable?string('true', 'false') == 'false'>required="required"</#if>>${entity.get(fieldName)!?html}</textarea>
+					<textarea class="form-control" name="${fieldName}" id="${fieldName}-textarea" <#if !nillable>required="required"</#if>>${entity.get(fieldName)!?html}</textarea>
 				<#else>
-					<textarea class="form-control" name="${fieldName}" id="${fieldName}-textarea" <#if field.nillable?string('true', 'false') == 'false'>required="required"</#if>></textarea>
+					<textarea class="form-control" name="${fieldName}" id="${fieldName}-textarea" <#if !nillable>required="required"</#if>></textarea>
 				</#if>
 				<script>
 					var editor = ace.edit("${fieldName}-editor");
@@ -160,15 +162,15 @@
 					});	
 				</script>
 			<#elseif field.dataType.enumType == 'EMAIL'>
-				<input type="email" class="form-control" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" 
-					<#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> 
+				<input type="email" class="form-control" data-rule-email="true" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" 
+					<#if readonly>disabled="disabled"</#if> 
 					<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string?html}"</#if> 
-					<#if field.nillable?string('true', 'false') == 'false'>required="required"</#if> />
+					<#if !nillable>data-rule-required="true" </#if>/>
 			<#else>
 					<input type="text" class="form-control" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" 
-						<#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> 
+						<#if readonly>disabled="disabled"</#if> 
 						<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string?html}"</#if> 
-						<#if field.nillable?string('true', 'false') == 'false'>required="required"</#if> 
+						<#if !nillable>required="required"</#if> 
 						<#if field.dataType.enumType == 'DECIMAL'>data-rule-number="true"</#if>
 						<#if field.dataType.enumType == 'HYPERLINK'>data-rule-url="true"</#if> />
 			</#if>
