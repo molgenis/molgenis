@@ -100,3 +100,7 @@
 .controls complex-element {
 	width: 500px;
 }
+
+.ui-rangeSlider-label-value {
+	color: black;
+}
