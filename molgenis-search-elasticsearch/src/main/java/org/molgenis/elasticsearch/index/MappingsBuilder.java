@@ -416,7 +416,11 @@ public class MappingsBuilder
 			case XREF:
 			{
 				// return type of referenced label field
-				return getType(attr.getRefEntity().getLabelAttribute());
+                //FIXME hack for vcf's
+                if(attr.getRefEntity()!=null) {
+                    return getType(attr.getRefEntity().getLabelAttribute());
+                }
+                return "string";
 			}
 			case FILE:
 			case IMAGE:

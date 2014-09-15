@@ -98,15 +98,18 @@ public class ElasticsearchEntity extends AbstractEntity
 			FieldType dataType = attributeMetaData.getDataType();
 			if (dataType.getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.MREF))
 			{
-				Iterable<Entity> iterable = dataService.getRepositoryByEntityName(attributeMetaData.getRefEntity()
-						.getName().toLowerCase());
-				QueryRule rule = new QueryRule(attributeMetaData.getRefEntity().getIdAttribute().getName(),
-						QueryRule.Operator.EQUALS, get(attributeName + "."
-								+ attributeMetaData.getRefEntity().getIdAttribute().getName().toLowerCase()));
-				QueryImpl q = new QueryImpl();
-				q.addRule(rule);
-				entities = ((Queryable) iterable).findAll(q);
+				if (attributeMetaData.getRefEntity() != null)
+				{
+					Iterable<Entity> iterable = dataService.getRepositoryByEntityName(attributeMetaData.getRefEntity()
+							.getName().toLowerCase());
 
+					QueryRule rule = new QueryRule(attributeMetaData.getRefEntity().getIdAttribute().getName(),
+							QueryRule.Operator.EQUALS, get(attributeName + "."
+									+ attributeMetaData.getRefEntity().getIdAttribute().getName().toLowerCase()));
+					QueryImpl q = new QueryImpl();
+					q.addRule(rule);
+					entities = ((Queryable) iterable).findAll(q);
+				}
 				return entities;
 			}
 		}

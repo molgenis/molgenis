@@ -2,7 +2,9 @@ package org.molgenis.importer.vcf;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.elasticsearch.client.Client;
 import org.molgenis.data.DataService;
@@ -78,7 +80,10 @@ public class VcfImporterService
 						outRepository.add(entity);
 						if (sampleRepository != null)
 						{
-							sampleRepository.add(entity.getEntities("SAMPLES"));
+                            Iterable<Entity> samples = entity.getEntities("SAMPLES");
+                            if(samples != null && !samples.iterator().hasNext()) {
+                                sampleRepository.add(samples);
+                            }
 						}
 					}
 				}

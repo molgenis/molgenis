@@ -134,23 +134,23 @@ public class VcfRepository extends AbstractRepository
 					{
 						List<Entity> samples = new ArrayList<Entity>();
 						Iterator<VcfSample> sampleIterator = vcfRecord.getSamples().iterator();
-						Iterator<String> sampleNameIterator = finalVcfReader.getVcfMeta().getSampleNames().iterator();
-						while (sampleIterator.hasNext())
-						{
-							String[] format = vcfRecord.getFormat();
-							VcfSample sample = sampleIterator.next();
-							Entity sampleEntity = new MapEntity(sampleEntityMetaData);
-							for (int i = 0; i < format.length; i = i + 1)
-							{
-								sampleEntity.set(format[i], sample.getData(i));
-							}
-							sampleEntity.set(ID, UUID.randomUUID());
-							// FIXME remove entity ID from Sample label after #1400 is fixed, see also:
-							// jquery.molgenis.table.js line 152
-							sampleEntity.set(NAME, entity.get(POS) + "_" + entity.get(ALT) + "_" + sampleNameIterator.next());
-							samples.add(sampleEntity);
-						}
-						entity.set(SAMPLES, samples);
+                        if(vcfRecord.getNrSamples() > 0) {
+                            Iterator<String> sampleNameIterator = finalVcfReader.getVcfMeta().getSampleNames().iterator();
+                            while (sampleIterator.hasNext()) {
+                                String[] format = vcfRecord.getFormat();
+                                VcfSample sample = sampleIterator.next();
+                                Entity sampleEntity = new MapEntity(sampleEntityMetaData);
+                                for (int i = 0; i < format.length; i = i + 1) {
+                                    sampleEntity.set(format[i], sample.getData(i));
+                                }
+                                sampleEntity.set(ID, UUID.randomUUID());
+                                // FIXME remove entity ID from Sample label after #1400 is fixed, see also:
+                                // jquery.molgenis.table.js line 152
+                                sampleEntity.set(NAME, entity.get(POS) + "_" + entity.get(ALT) + "_" + sampleNameIterator.next());
+                                samples.add(sampleEntity);
+                            }
+                        }
+                        entity.set(SAMPLES, samples);
 					}
 				}
 				catch (IOException e)
