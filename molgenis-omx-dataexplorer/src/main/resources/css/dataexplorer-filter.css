@@ -6,6 +6,8 @@
 
 #filter-wizard-modal .well {
 	overflow: auto;
+	min-height: 500px;
+	max-height: 500px;
 	margin-bottom: 10px;
 }
 
@@ -44,7 +46,6 @@
 #filter-modal .form-horizontal .form-group .select2-choices{
 	position: static;
 }
-
 
 #filter-wizard-modal .controls.complex-removebutton-container, 
 #filter-wizard-modal .controls.complex-addbutton-container, 
