@@ -1,4 +1,4 @@
-package org.molgenis.omx.importer;
+package org.molgenis.data.importer;
 
 import java.io.File;
 

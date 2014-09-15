@@ -291,8 +291,7 @@ public class EntityImportService
 			}
 			else
 			{
-				if ((dbAction.equals(DatabaseAction.ADD) || dbAction.equals(DatabaseAction.ADD_IGNORE_EXISTING) || dbAction
-						.equals(DatabaseAction.ADD_UPDATE_EXISTING))
+				if ((dbAction.equals(DatabaseAction.ADD) || dbAction.equals(DatabaseAction.ADD_UPDATE_EXISTING))
 						&& keyNames.length == 1
 						&& keyNames[0].equals(repo.getEntityMetaData().getIdAttribute().getName()))
 				{
@@ -361,7 +360,7 @@ public class EntityImportService
 		// receive new values from 'entities' in addition to be mapped to the
 		// database as is the case at this point
 		if (existingEntities.size() > 0
-				&& (dbAction == DatabaseAction.ADD_UPDATE_EXISTING || dbAction == DatabaseAction.UPDATE || dbAction == DatabaseAction.UPDATE_IGNORE_MISSING))
+				&& (dbAction == DatabaseAction.ADD_UPDATE_EXISTING || dbAction == DatabaseAction.UPDATE))
 		{
 			matchByNameAndUpdateFields(existingEntities, entities);
 		}
@@ -389,12 +388,6 @@ public class EntityImportService
 				}
 				break;
 
-			// will not test for existing entities before add
-			// (so will ignore existingEntities)
-			case ADD_IGNORE_EXISTING:
-				repo.add(newEntities);
-				break;
-
 			// will try to update(existingEntities) entities and
 			// add(missingEntities)
 			// so allows user to be sloppy in adding/updating
@@ -414,35 +407,6 @@ public class EntityImportService
 					throw new MolgenisDataException("Tried to update non-existing " + entityName + "elements "
 							+ Arrays.asList(keyNames) + "=" + entityIndex.values());
 				}
-				break;
-
-			// update that doesn't test for newEntities but just ignores
-			// those
-			// (so only updates exsiting)
-			case UPDATE_IGNORE_MISSING:
-				repo.update(existingEntities);
-				break;
-
-			// remove all elements in list, test if no elements are missing
-			// (so test for newEntities == 0)
-			case REMOVE:
-				if (newEntities.size() == 0)
-				{
-					repo.delete(existingEntities);
-				}
-				else
-				{
-					throw new MolgenisDataException("Tried to remove non-existing " + entityName + " elements "
-							+ Arrays.asList(keyNames) + "=" + entityIndex.values());
-
-				}
-				break;
-
-			// remove entities that are in the list, ignore if they don't
-			// exist in database
-			// (so don't check the newEntities.size == 0)
-			case REMOVE_IGNORE_MISSING:
-				repo.delete(existingEntities);
 				break;
 
 			// unexpected error

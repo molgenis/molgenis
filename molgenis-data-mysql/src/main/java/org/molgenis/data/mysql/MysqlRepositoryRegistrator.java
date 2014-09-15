@@ -1,32 +1,28 @@
 package org.molgenis.data.mysql;
 
 import org.apache.log4j.Logger;
-import org.molgenis.data.importer.EmxImportServiceImpl;
+import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.Ordered;
-import org.springframework.stereotype.Component;
 
 /**
  * Register the JpaRepositories by the DataService
  */
-@Component
 public class MysqlRepositoryRegistrator implements ApplicationListener<ContextRefreshedEvent>, Ordered
 {
 	private static final Logger logger = Logger.getLogger(MysqlRepositoryRegistrator.class);
 	private final MysqlRepositoryCollection repositoryCollection;
 	private final ImportServiceFactory importServiceFactory;
-	private final EmxImportServiceImpl emxImportServiceImpl;
+	private final ImportService emxImportService;
 
-	@Autowired
 	public MysqlRepositoryRegistrator(MysqlRepositoryCollection repositoryCollection,
-			ImportServiceFactory importServiceFactory, EmxImportServiceImpl emxImportServiceImpl)
+			ImportServiceFactory importServiceFactory, ImportService emxImportService)
 	{
 		this.repositoryCollection = repositoryCollection;
 		this.importServiceFactory = importServiceFactory;
-		this.emxImportServiceImpl = emxImportServiceImpl;
+		this.emxImportService = emxImportService;
 		logger.debug("MysqlRepositoryRegistrator: initialized");
 	}
 
@@ -34,7 +30,7 @@ public class MysqlRepositoryRegistrator implements ApplicationListener<ContextRe
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
 		repositoryCollection.registerMysqlRepos();
-		importServiceFactory.addImportService(emxImportServiceImpl);
+		importServiceFactory.addImportService(emxImportService);
 	}
 
 	@Override

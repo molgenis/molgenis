@@ -246,6 +246,11 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 			return repository;
 		}
 
+		if (dataService.hasRepository(emd.getName()))
+		{
+			throw new MolgenisDataException("Entity with name [" + emd.getName() + "] already exists.");
+		}
+
 		// if not abstract add to repositories
 		if (!emd.isAbstract())
 		{
@@ -388,6 +393,16 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		MysqlRepository repository = repositories.get(sourceEntityMetaData.getName());
 		EntityMetaData existingEntityMetaData = repository.getEntityMetaData();
 		List<String> addedAttributes = Lists.newArrayList();
+
+		for (AttributeMetaData attr : existingEntityMetaData.getAttributes())
+		{
+			if (sourceEntityMetaData.getAttribute(attr.getName()) == null)
+			{
+				throw new MolgenisDataException(
+						"Removing of existing attributes is currently not sypported. You tried to remove attribute ["
+								+ attr.getName() + "]");
+			}
+		}
 
 		for (AttributeMetaData attr : sourceEntityMetaData.getAttributes())
 		{
