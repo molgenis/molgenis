@@ -15,7 +15,7 @@ public class SystemSecurityToken extends UsernamePasswordAuthenticationToken
 
 	public SystemSecurityToken()
 	{
-		super(new User("SYSTEM", "", Arrays.asList(new SimpleGrantedAuthority("ROLE_SYSTEM"))), null, Arrays
+		super(new User("SYSTEM", "", Arrays.asList(new SimpleGrantedAuthority("ROLE_SYSTEM"))), "", Arrays
 				.asList(new SimpleGrantedAuthority("ROLE_SYSTEM")));
 	}
 }
