@@ -71,9 +71,11 @@
 			'debugLevel' : 0,
 			'checkbox' : true,
 			'keyPathSeparator' : '|',
-			'init' : function() {
+			'init' : function(e, data) {
 				if (settings.onInit)
 					settings.onInit();
+				
+				data.tree.getFirstChild().setActive(true);
 			},
 			'lazyload' : function (e, data) {
 				var node = data.node;
@@ -151,6 +153,7 @@
 	$.fn.tree.defaults = {
 		'entityMetaData' : null,
 		'selectedAttributes' : null,
+		'focusedAttribute' : null,
 		'icon' : null,
 		'onAttributeClick' : null,
 		'onAttributesSelect' : null

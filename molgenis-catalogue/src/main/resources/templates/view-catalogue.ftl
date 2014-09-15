@@ -29,7 +29,7 @@
 	<div class="pull-right col-md-9">
 		<div id="entity-select-holder" class="pull-right col-md-6" <#if hideDatasetSelect??> style="display:none"</#if>>
     		<div class="form-horizontal form-group">
-        		<label class="col-md-4 control-label" for="dataset-select">Choose a dataset:</label>
+        		<label class="col-md-4 control-label" for="dataset-select">Choose an entity:</label>
         		<div class="col-md-8">
         			<select class="form-control" id="entity-select" data-placeholder="Choose an Entity (example: dataset, protocol..." id="dataset-select">
             		<#list entitiesMeta as entityMeta>

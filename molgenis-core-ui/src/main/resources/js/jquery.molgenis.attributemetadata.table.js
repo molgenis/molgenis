@@ -1,29 +1,39 @@
 (function($, molgenis) {
 	"use strict";
+	var restApi = new molgenis.RestClient();
 	
 	$.fn.attributeMetadataTable = function(options) {
 		var container = this;
 		var attributeMetadata = options.attributeMetadata;
-		console.log(JSON.stringify(attributeMetadata));
+		container.html('');
 		
-		var items = [];
+		var table = $('<table class="table"></table>');
+		container.append(table);
 		
-		items.push('<table class="table">');
-		items.push('<tbody>');
-		
-		for (var f in attributeMetadata) {
-			if (f !== 'href') {
-				items.push('<tr>');
-				items.push('<td>' + f + '</td>');
-				items.push('<td>' + attributeMetadata[f] + '</td>');
-				items.push('</tr>')
-			};
+		for (var key in attributeMetadata) {
+			if (key !== 'href' && key != 'attributes') {
+				var value = attributeMetadata[key];
+				var tr = $('<tr></tr>');
+				table.append(tr);
+				
+				var th = $('<th></th>');
+				tr.append(th);
+				th.text(key);
+				
+				var td = $('<td></td>');
+				tr.append(td);
+				
+				if (key === 'refEntity') {
+					(function (td) {
+						restApi.getAsync(value.href, {}, function(entity){
+							td.text(entity.label);
+						});
+					})(td);
+				} else {
+					td.text(value);
+				}
+			}
 		}
-		items.push('</tbody>');
-		items.push('</table');
-		
-		
-		container.html(items.join(''));
 	}
 	
 }($, window.top.molgenis = window.top.molgenis || {}));

@@ -8,10 +8,17 @@
 			onAttributesSelect: function(selects) {
 			},
 			onAttributeClick: function(attribute) {
-				$('#attributes-table').attributeMetadataTable({
-					attributeMetadata:attribute
-				});
+				createAttributeMetadataTable(attribute);
 			}
+		});
+	}
+	
+	function createAttributeMetadataTable(attributeMetadata) {
+		if ($('#attributes-table').attributeMetadataTable) {
+			$('#attributes-table').attributeMetadataTable('destroy');
+		}
+		$('#attributes-table').attributeMetadataTable({
+			attributeMetadata: attributeMetadata
 		});
 	}
 	
@@ -28,12 +35,26 @@
 		}
 	}
 	
+	function getFirstAttribute(entityMetaData) {
+		for (var name in entityMetaData.attributes)
+			return entityMetaData.attributes[name];
+	}
+	
 	$(function() {
 		$('#entity-select').on('change', function() {
 			var entityUri = $(this).val();
 			restApi.getAsync(entityUri + '/meta', {'expand': ['attributes']}, function(entityMetaData) {
 				createHeader(entityMetaData);
 				createEntityMetaTree(entityMetaData);
+					
+				var firstAttr = getFirstAttribute(entityMetaData);
+				if (firstAttr.fieldType !== 'COMPOUND') {
+					$('#attributes-table').attributeMetadataTable({
+						attributeMetadata: firstAttr 
+					});
+				} else {
+					$('#attributes-table').html('');
+				}
 			});
 		});
 		
