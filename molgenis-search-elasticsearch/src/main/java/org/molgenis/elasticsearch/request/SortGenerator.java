@@ -1,10 +1,14 @@
 package org.molgenis.elasticsearch.request;
 
 import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.search.sort.FieldSortBuilder;
+import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
-import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
+import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.elasticsearch.index.MappingsBuilder;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -25,41 +29,63 @@ public class SortGenerator implements QueryPartGenerator
 		{
 			for (Sort.Order sort : query.getSort())
 			{
-				if (sort.getProperty() == null)
-				{
-					throw new IllegalArgumentException(
-							"Missing property for Sorting, for sorting property should be set to the fieldname where to sort on");
-				}
-				if (sort.getDirection() == null)
-				{
-					throw new IllegalArgumentException("Missing sort direction");
-				}
-				StringBuilder sortField = new StringBuilder();
-				// Check the field on which the sorting occurs is a MREF field
-				if (entityMetaData != null
-						&& entityMetaData.getAttribute(sort.getProperty()) != null
-						&& entityMetaData.getAttribute(sort.getProperty()).getDataType().getEnumType().toString()
-								.equalsIgnoreCase(MolgenisFieldTypes.MREF.toString()))
-				{
-					sortField
-							.append(sort.getProperty())
-							.append('.')
-							.append(entityMetaData.getAttribute(sort.getProperty()).getRefEntity().getLabelAttribute()
-									.getName()).append('.').append(MappingsBuilder.FIELD_NOT_ANALYZED);
-				}else if (entityMetaData != null
-						&& entityMetaData.getAttribute(sort.getProperty()) != null
-						&& entityMetaData.getAttribute(sort.getProperty()).getDataType().getEnumType().toString()
-								.equalsIgnoreCase(MolgenisFieldTypes.BOOL.toString()))
-				{
-					sortField.append(sort.getProperty());
-				}
-				else
-				{
-					sortField.append(sort.getProperty()).append('.').append(MappingsBuilder.FIELD_NOT_ANALYZED);
-				}
-				SortOrder sortOrder = sort.getDirection() == Direction.ASC ? SortOrder.ASC : SortOrder.DESC;
-				searchRequestBuilder.addSort(sortField.toString(), sortOrder);
+				String sortAttrName = sort.getProperty();
+				if (sortAttrName == null) throw new IllegalArgumentException("Sort property is null");
+
+				Direction sortDirection = sort.getDirection();
+				if (sortDirection == null) throw new IllegalArgumentException("Missing sort direction");
+
+				AttributeMetaData sortAttr = entityMetaData.getAttribute(sortAttrName);
+				if (sortAttr == null) throw new UnknownAttributeException(sortAttrName);
+
+				String sortField = getSortField(sortAttr);
+				SortOrder sortOrder = sortDirection == Direction.ASC ? SortOrder.ASC : SortOrder.DESC;
+				FieldSortBuilder sortBuilder = SortBuilders.fieldSort(sortField).order(sortOrder).sortMode("min");
+				searchRequestBuilder.addSort(sortBuilder);
 			}
 		}
+	}
+
+	private String getSortField(AttributeMetaData attr)
+	{
+		String sortField;
+		FieldTypeEnum dataType = attr.getDataType().getEnumType();
+		switch (dataType)
+		{
+			case BOOL:
+			case DATE:
+			case DATE_TIME:
+			case DECIMAL:
+			case INT:
+			case LONG:
+				// use indexed field for sorting
+				sortField = attr.getName();
+				break;
+			case EMAIL:
+			case ENUM:
+			case HTML:
+			case HYPERLINK:
+			case SCRIPT:
+			case STRING:
+			case TEXT:
+				// use raw field for sorting
+				sortField = new StringBuilder(attr.getName()).append('.').append(MappingsBuilder.FIELD_NOT_ANALYZED)
+						.toString();
+				break;
+			case CATEGORICAL:
+			case MREF:
+			case XREF:
+				// use nested field for sorting
+				String refSortField = getSortField(attr.getRefEntity().getLabelAttribute());
+				sortField = new StringBuilder(attr.getName()).append('.').append(refSortField).toString();
+				break;
+			case COMPOUND:
+			case FILE:
+			case IMAGE:
+				throw new UnsupportedOperationException();
+			default:
+				throw new RuntimeException("Unknown data type [" + dataType + "]");
+		}
+		return sortField;
 	}
 }

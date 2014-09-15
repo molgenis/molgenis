@@ -12,22 +12,30 @@ import java.util.Set;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.ShardSearchFailure;
 import org.elasticsearch.common.base.Joiner;
-import org.elasticsearch.common.collect.Iterables;
 import org.elasticsearch.common.collect.Sets;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.aggregations.bucket.nested.Nested;
+import org.elasticsearch.search.aggregations.bucket.nested.ReverseNested;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
+import org.elasticsearch.search.aggregations.metrics.cardinality.Cardinality;
 import org.elasticsearch.search.suggest.term.TermSuggestion.Score;
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.search.Hit;
+import org.molgenis.search.SearchRequest;
 import org.molgenis.search.SearchResult;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 /**
@@ -38,7 +46,8 @@ import com.google.common.collect.Lists;
  */
 public class ResponseParser
 {
-	public SearchResult parseSearchResponse(SearchResponse response, EntityMetaData entityMetaData)
+	public SearchResult parseSearchResponse(SearchRequest request, SearchResponse response,
+			EntityMetaData entityMetaData, DataService dataService)
 	{
 		ShardSearchFailure[] failures = response.getShardFailures();
 		if ((failures != null) && (failures.length > 0))
@@ -143,30 +152,24 @@ public class ResponseParser
 				throw new RuntimeException("Multiple aggregations [" + nrAggregations + "] not supported");
 			}
 
-			Aggregation aggregation = aggregations.iterator().next();
-			if (!(aggregation instanceof Terms))
-			{
-				throw new RuntimeException("Aggregation of type [" + aggregation.getClass().getName()
-						+ "] not supported");
-			}
-			Terms terms = (Terms) aggregation;
+			Terms terms = getTermsAggregation(aggregations);
 
 			Collection<Bucket> buckets = terms.getBuckets();
 			int nrBuckets = buckets.size();
 			if (nrBuckets > 0)
 			{
-				// create initial valuesT
+				// create initial values
 				for (int i = 0; i < nrBuckets; ++i)
 					matrix.add(null);
 
 				// distinguish between 1D and 2D aggregation
-				boolean hasSubAggregations = false;
+				boolean is2dAggregation = false;
 				for (Bucket bucket : buckets)
 				{
 					Aggregations subAggregations = bucket.getAggregations();
 					if (subAggregations != null && Iterables.size(subAggregations) > 0)
 					{
-						hasSubAggregations = true;
+						is2dAggregation = hasTermsAggregation(subAggregations);
 						break;
 					}
 				}
@@ -188,7 +191,7 @@ public class ResponseParser
 					xLabelMap.put(xLabel, xIdx++);
 				}
 
-				if (hasSubAggregations)
+				if (is2dAggregation)
 				{
 					// create labels
 					for (Bucket bucket : buckets)
@@ -201,14 +204,7 @@ public class ResponseParser
 								throw new RuntimeException("Multiple aggregations [" + nrAggregations
 										+ "] not supported");
 							}
-							Aggregation subAggregation = subAggregations.iterator().next();
-
-							if (!(subAggregation instanceof Terms))
-							{
-								throw new RuntimeException("Aggregation of type ["
-										+ subAggregation.getClass().getName() + "] not supported");
-							}
-							Terms subTerms = (Terms) subAggregation;
+							Terms subTerms = getTermsAggregation(subAggregations);
 
 							for (Bucket subBucket : subTerms.getBuckets())
 							{
@@ -242,10 +238,19 @@ public class ResponseParser
 						if (subAggregations != null)
 						{
 							long count = 0;
-							Terms subTerms = (Terms) subAggregations.iterator().next();
+							Terms subTerms = getTermsAggregation(subAggregations);
 							for (Bucket subBucket : subTerms.getBuckets())
 							{
-								long bucketCount = subBucket.getDocCount();
+								Aggregations distinctAggregations = subBucket.getAggregations();
+								long bucketCount;
+								if (distinctAggregations != null && !Iterables.isEmpty(distinctAggregations))
+								{
+									bucketCount = getCardinalityAggregation(distinctAggregations).getValue();
+								}
+								else
+								{
+									bucketCount = subBucket.getDocCount();
+								}
 								yValues.set(yLabelMap.get(subBucket.getKey()), bucketCount);
 								count += bucketCount;
 							}
@@ -277,12 +282,53 @@ public class ResponseParser
 					long total = 0;
 					for (Bucket bucket : buckets)
 					{
-						long docCount = bucket.getDocCount();
-						matrix.set(xLabelMap.get(bucket.getKey()), Lists.newArrayList(Long.valueOf(docCount)));
-						total += docCount;
+						Aggregations distinctAggregations = bucket.getAggregations();
+						long bucketCount;
+						if (distinctAggregations != null)
+						{
+							bucketCount = getCardinalityAggregation(distinctAggregations).getValue();
+						}
+						else
+						{
+							bucketCount = bucket.getDocCount();
+						}
+						matrix.set(xLabelMap.get(bucket.getKey()), Lists.newArrayList(Long.valueOf(bucketCount)));
+						total += bucketCount;
 					}
 					matrix.add(Lists.newArrayList(Long.valueOf(total)));
 					yLabels.add("Count");
+				}
+			}
+
+			// matrix labels are ids for categorical/xref/mref aggregates, convert to label attribute values
+			AttributeMetaData xAggregateField = request.getAggregateField1();
+			if (xAggregateField != null)
+			{
+				FieldTypeEnum xDataType = xAggregateField.getDataType().getEnumType();
+				switch (xDataType)
+				{
+					case CATEGORICAL:
+					case MREF:
+					case XREF:
+						convertIdtoLabelLabels(xLabels, xAggregateField.getRefEntity(), dataService);
+						// $CASES-OMITTED$
+					default:
+						break;
+				}
+			}
+			AttributeMetaData yAggregateField = request.getAggregateField2();
+			if (xAggregateField != null)
+			{
+				FieldTypeEnum yDataType = yAggregateField.getDataType().getEnumType();
+				switch (yDataType)
+				{
+					case CATEGORICAL:
+					case MREF:
+					case XREF:
+						convertIdtoLabelLabels(yLabels, yAggregateField.getRefEntity(), dataService);
+						// $CASES-OMITTED$
+					default:
+						break;
 				}
 			}
 
@@ -290,5 +336,106 @@ public class ResponseParser
 		}
 
 		return new SearchResult(totalCount, searchHits, aggregate);
+	}
+
+	private Terms getTermsAggregation(Aggregations aggregations)
+	{
+		Aggregation aggregation = aggregations.iterator().next();
+		if (aggregation instanceof ReverseNested)
+		{
+			Aggregations reverseNestedAggregations = ((ReverseNested) aggregation).getAggregations();
+			aggregation = reverseNestedAggregations.iterator().next();
+		}
+		if (aggregation instanceof Nested)
+		{
+			Aggregations nestedAggregations = ((Nested) aggregation).getAggregations();
+			aggregation = nestedAggregations.iterator().next();
+		}
+		if (!(aggregation instanceof Terms))
+		{
+			throw new RuntimeException("Aggregation of type [" + aggregation.getClass().getName() + "] not supported");
+		}
+		return (Terms) aggregation;
+	}
+
+	/**
+	 * Unwrap possible nested and reverse nested aggregations and check if resulting aggregation is a terms aggregation
+	 * 
+	 * @param aggregations
+	 * @return
+	 */
+	private boolean hasTermsAggregation(Aggregations aggregations)
+	{
+		Aggregation aggregation = aggregations.iterator().next();
+		if (aggregation instanceof ReverseNested)
+		{
+			Aggregations reverseNestedAggregations = ((ReverseNested) aggregation).getAggregations();
+			aggregation = reverseNestedAggregations.iterator().next();
+		}
+		if (aggregation instanceof Nested)
+		{
+			Aggregations nestedAggregations = ((Nested) aggregation).getAggregations();
+			aggregation = nestedAggregations.iterator().next();
+		}
+		return aggregation != null && aggregation instanceof Terms;
+	}
+
+	private Cardinality getCardinalityAggregation(Aggregations aggregations)
+	{
+		int nrCardinalityAggregations = Iterables.size(aggregations);
+		if (nrCardinalityAggregations > 1)
+		{
+			throw new RuntimeException("Multiple aggregations [" + nrCardinalityAggregations + "] not supported");
+		}
+		Aggregation aggregation = aggregations.iterator().next();
+		if (aggregation instanceof ReverseNested)
+		{
+			Aggregations reverseNestedAggregations = ((ReverseNested) aggregation).getAggregations();
+			aggregation = reverseNestedAggregations.iterator().next();
+		}
+		if (!(aggregation instanceof Cardinality))
+		{
+			throw new RuntimeException("Aggregation of type [" + aggregation.getClass().getName() + "] not supported");
+		}
+		return (Cardinality) aggregation;
+	}
+
+	/**
+	 * Convert matrix labels that contain ids to label attribute values. Keeps in mind that the last label on a axis is
+	 * "Total".
+	 * 
+	 * @param idLabels
+	 * @param entityMetaData
+	 * @param dataService
+	 */
+	private void convertIdtoLabelLabels(List<String> idLabels, EntityMetaData entityMetaData, DataService dataService)
+	{
+		// Replace id labels with label labels (skip last label for "Total")
+		int nrLabelsWithoutTotalLabel = idLabels.size() - 1;
+
+		// Get entities for ids
+		// Use Iterables.transform to work around List<String> to Iterable<Object> cast error
+		Iterable<Entity> entities = dataService.findAll(entityMetaData.getName(), Iterables.transform(
+				Iterables.limit(idLabels, nrLabelsWithoutTotalLabel), new Function<String, Object>()
+				{
+					@Override
+					public Object apply(String id)
+					{
+						return id;
+					}
+				}));
+
+		// Map entity ids to labels
+		Map<String, String> idToLabelMap = new HashMap<String, String>();
+		for (Entity entity : entities)
+		{
+			idToLabelMap.put(entity.getIdValue().toString(), entity.getLabelValue());
+		}
+
+		for (int i = 0; i < nrLabelsWithoutTotalLabel; ++i)
+		{
+			String id = idLabels.get(i);
+			idLabels.set(i, idToLabelMap.get(id));
+		}
 	}
 }

@@ -1,10 +1,7 @@
 package org.molgenis.elasticsearch.index;
 
 import java.sql.Date;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.elasticsearch.common.collect.Lists;
@@ -17,7 +14,6 @@ import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Function;
-import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
 
 /**
@@ -45,21 +41,21 @@ public class EntityToSourceConverter
 	 * @param entityMetaData
 	 * @return
 	 */
-	private Map<String, Object> convert(Entity entity, EntityMetaData entityMetaData, boolean createNestedTypes)
+	private Map<String, Object> convert(Entity entity, EntityMetaData entityMetaData, boolean nestRefs)
 	{
 		Map<String, Object> doc = new HashMap<String, Object>();
 
 		for (AttributeMetaData attributeMetaData : entityMetaData.getAtomicAttributes())
 		{
 			String attrName = attributeMetaData.getName();
-			Object value = convertAttribute(entity, attributeMetaData, createNestedTypes);
+			Object value = convertAttribute(entity, attributeMetaData, nestRefs);
 			doc.put(attrName, value);
 		}
 
 		return doc;
 	}
 
-	private Object convertAttribute(Entity entity, AttributeMetaData attributeMetaData, boolean createNestedTypes)
+	private Object convertAttribute(Entity entity, AttributeMetaData attributeMetaData, final boolean nestRefs)
 	{
 		Object value;
 
@@ -99,13 +95,18 @@ public class EntityToSourceConverter
 			case CATEGORICAL:
 			case XREF:
 			{
-				// TODO store categorical/xref values as nested types
-				// (requires query generator and mapping builder changes)
 				Entity xrefEntity = entity.getEntity(attrName);
 				if (xrefEntity != null)
 				{
-					// flatten referenced entity
-					value = convertAttribute(xrefEntity, attributeMetaData.getRefEntity().getLabelAttribute(), false);
+					EntityMetaData xrefEntityMetaData = attributeMetaData.getRefEntity();
+					if (nestRefs)
+					{
+						value = convert(xrefEntity, xrefEntityMetaData, false);
+					}
+					else
+					{
+						value = convertAttribute(xrefEntity, xrefEntityMetaData.getLabelAttribute(), false);
+					}
 				}
 				else
 				{
@@ -115,55 +116,25 @@ public class EntityToSourceConverter
 			}
 			case MREF:
 			{
-				Iterable<Entity> refEntities = entity.getEntities(attrName);
+				final Iterable<Entity> refEntities = entity.getEntities(attrName);
 				if (refEntities != null && !Iterables.isEmpty(refEntities))
 				{
 					final EntityMetaData refEntityMetaData = attributeMetaData.getRefEntity();
-
-					if (createNestedTypes)
+					value = Lists.newArrayList(Iterables.transform(refEntities, new Function<Entity, Object>()
 					{
-						// TODO ask Chao why a list of nested docs is not working
-
-						// store nested referenced entity
-						Map<String, List<Object>> refValueMap = new HashMap<String, List<Object>>();
-
-						for (Entity refEntity : refEntities)
+						@Override
+						public Object apply(Entity refEntity)
 						{
-							Map<String, Object> refDoc = convert(refEntity, refEntityMetaData, false);
-
-							// merge doc
-							for (Map.Entry<String, Object> entry : refDoc.entrySet())
+							if (nestRefs)
 							{
-								Object refAttributeValue = entry.getValue();
-								if (refAttributeValue != null)
-								{
-									String refAttributeName = entry.getKey();
-									List<Object> refValue = refValueMap.get(refAttributeName);
-									if (refValue == null)
-									{
-										refValue = new ArrayList<Object>();
-										refValueMap.put(refAttributeName, refValue);
-									}
-									refValue.add(refAttributeValue);
-								}
+								return convert(refEntity, refEntityMetaData, false);
+							}
+							else
+							{
+								return convertAttribute(refEntity, refEntityMetaData.getLabelAttribute(), false);
 							}
 						}
-
-						value = Arrays.asList(refValueMap);
-					}
-					else
-					{
-						// store flattened referenced entity
-						value = Lists.newArrayList(Iterables.filter(
-								Iterables.transform(refEntities, new Function<Entity, Object>()
-								{
-									@Override
-									public Object apply(Entity refEntity)
-									{
-										return convertAttribute(refEntity, refEntityMetaData.getLabelAttribute(), false);
-									}
-								}), Predicates.notNull()));
-					}
+					}));
 				}
 				else
 				{

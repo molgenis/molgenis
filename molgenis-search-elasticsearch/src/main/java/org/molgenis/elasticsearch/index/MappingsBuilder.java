@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
@@ -63,7 +62,7 @@ public class MappingsBuilder
 	private static final String ATTRIBUTE_NILLABLE = "nillable";
 	private static final String ATTRIBUTE_DATA_TYPE = "dataType";
 
-	public static final String FIELD_NOT_ANALYZED = "sort";
+	public static final String FIELD_NOT_ANALYZED = "raw";
 
 	/**
 	 * Creates entity meta data for the given repository, documents are stored in the index
@@ -80,15 +79,19 @@ public class MappingsBuilder
 	/**
 	 * Creates entity meta data for the given repository
 	 * 
+	 * @deprecated see buildMapping(EntityMetaData)
+	 * 
 	 * @param repository
 	 * @param storeSource
 	 *            whether or not documents are stored in the index
 	 * @return
 	 * @throws IOException
 	 */
-	public static XContentBuilder buildMapping(Repository repository, boolean storeSource) throws IOException
+	@Deprecated
+	public static XContentBuilder buildMapping(Repository repository, boolean storeSource, boolean enableNorms,
+			boolean createAllIndex) throws IOException
 	{
-		return buildMapping(repository.getEntityMetaData(), storeSource);
+		return buildMapping(repository.getEntityMetaData(), storeSource, enableNorms, createAllIndex);
 	}
 
 	/**
@@ -100,7 +103,7 @@ public class MappingsBuilder
 	 */
 	public static XContentBuilder buildMapping(EntityMetaData entityMetaData) throws IOException
 	{
-		return buildMapping(entityMetaData, true);
+		return buildMapping(entityMetaData, true, true, true);
 	}
 
 	/**
@@ -112,7 +115,8 @@ public class MappingsBuilder
 	 * @return
 	 * @throws IOException
 	 */
-	public static XContentBuilder buildMapping(EntityMetaData meta, boolean storeSource) throws IOException
+	public static XContentBuilder buildMapping(EntityMetaData meta, boolean storeSource, boolean enableNorms,
+			boolean createAllIndex) throws IOException
 	{
 		String documentType = MapperTypeSanitizer.sanitizeMapperType(meta.getName());
 		XContentBuilder jsonBuilder = XContentFactory.jsonBuilder().startObject().startObject(documentType)
@@ -120,65 +124,85 @@ public class MappingsBuilder
 
 		for (AttributeMetaData attr : meta.getAtomicAttributes())
 		{
-			String esType = getType(attr);
-			if (attr.getDataType().getEnumType().toString().equalsIgnoreCase(MolgenisFieldTypes.MREF.toString()))
-			{
-				jsonBuilder.startObject(attr.getName()).field("type", "nested").startObject("properties");
-
-				// TODO : what if the attributes in refEntity is also an MREF
-				// field?
-				for (AttributeMetaData refEntityAttr : attr.getRefEntity().getAttributes())
-				{
-					if (refEntityAttr.isLabelAttribute())
-					{
-						jsonBuilder.startObject(refEntityAttr.getName()).field("type", "multi_field")
-								.startObject("fields").startObject(refEntityAttr.getName()).field("type", "string")
-								.endObject().startObject(FIELD_NOT_ANALYZED).field("type", "string")
-								.field("index", "not_analyzed").endObject().endObject().endObject();
-					}
-					else
-					{
-						jsonBuilder.startObject(refEntityAttr.getName()).field("type", "string").endObject();
-					}
-				}
-				jsonBuilder.endObject().endObject();
-			}
-			else if (esType.equals("string"))
-			{
-				jsonBuilder.startObject(attr.getName()).field("type", "multi_field").startObject("fields")
-						.startObject(attr.getName()).field("type", "string").endObject()
-						.startObject(FIELD_NOT_ANALYZED).field("type", "string").field("index", "not_analyzed")
-						.endObject().endObject().endObject();
-
-			}
-			else if (esType.equals("date"))
-			{
-				String dateFormat;
-				if (attr.getDataType().getEnumType() == FieldTypeEnum.DATE) dateFormat = "date"; // yyyy-MM-dd
-				else if (attr.getDataType().getEnumType() == FieldTypeEnum.DATE_TIME) dateFormat = "date_time_no_millis"; // yyyy-MM-dd’T’HH:mm:ssZZ
-				else
-				{
-					throw new MolgenisDataException("invalid molgenis field type for elasticsearch date format ["
-							+ attr.getDataType().getEnumType() + "]");
-				}
-
-				jsonBuilder.startObject(attr.getName()).field("type", "multi_field").startObject("fields")
-						.startObject(attr.getName()).field("type", "date").field("format", dateFormat).endObject()
-						.startObject(FIELD_NOT_ANALYZED).field("type", "date").field("format", dateFormat).endObject()
-						.endObject().endObject();
-			}
-			else
-			{
-				jsonBuilder.startObject(attr.getName()).field("type", "multi_field").startObject("fields")
-						.startObject(attr.getName()).field("type", esType).endObject().startObject(FIELD_NOT_ANALYZED)
-						.field("type", esType).endObject().endObject().endObject();
-
-			}
+			createAttributeMapping(attr, enableNorms, createAllIndex, true, jsonBuilder);
 		}
 
 		jsonBuilder.endObject().endObject().endObject();
 
 		return jsonBuilder;
+	}
+
+	// TODO discuss: use null_value for nillable attributes?
+	private static void createAttributeMapping(AttributeMetaData attr, boolean enableNorms, boolean createAllIndex,
+			boolean nestRefs, XContentBuilder jsonBuilder) throws IOException
+	{
+		String attrName = attr.getName();
+		jsonBuilder.startObject(attrName);
+
+		FieldTypeEnum dataType = attr.getDataType().getEnumType();
+		switch (dataType)
+		{
+			case BOOL:
+				jsonBuilder.field("type", "boolean");
+				break;
+			case CATEGORICAL:
+			case MREF:
+			case XREF:
+				EntityMetaData refEntity = attr.getRefEntity();
+				if (nestRefs)
+				{
+					jsonBuilder.field("type", "nested").startObject("properties");
+					for (AttributeMetaData refAttr : refEntity.getAtomicAttributes())
+					{
+						createAttributeMapping(refAttr, enableNorms, createAllIndex, false, jsonBuilder);
+					}
+					jsonBuilder.endObject();
+				}
+				else
+				{
+					createAttributeMapping(refEntity.getLabelAttribute(), enableNorms, createAllIndex, false,
+							jsonBuilder);
+				}
+				break;
+			case COMPOUND:
+				throw new UnsupportedOperationException();
+			case DATE:
+				jsonBuilder.field("type", "date").field("format", "date");
+				break;
+			case DATE_TIME:
+				jsonBuilder.field("type", "date").field("format", "date_time_no_millis");
+				break;
+			case DECIMAL:
+				jsonBuilder.field("type", "double");
+				break;
+			case FILE:
+			case IMAGE:
+				throw new MolgenisDataException("Unsupported data type [" + dataType + "]");
+			case INT:
+				jsonBuilder.field("type", "integer");
+				break;
+			case LONG:
+				jsonBuilder.field("type", "long");
+				break;
+			case EMAIL:
+			case ENUM:
+			case HTML:
+			case HYPERLINK:
+			case SCRIPT:
+			case STRING:
+			case TEXT:
+				jsonBuilder.field("type", "multi_field").startObject("fields").startObject(attrName)
+						.field("type", "string").endObject().startObject(FIELD_NOT_ANALYZED).field("type", "string")
+						.field("index", "not_analyzed").endObject().endObject();
+				break;
+			default:
+				throw new RuntimeException("Unknown data type [" + dataType + "]");
+		}
+
+		jsonBuilder.field("norms").startObject().field("enabled", enableNorms).endObject();
+		jsonBuilder.field("include_in_all", createAllIndex && attr.isVisible());
+
+		jsonBuilder.endObject();
 	}
 
 	public static void serializeEntityMeta(EntityMetaData entityMetaData, XContentBuilder jsonBuilder)
@@ -376,43 +400,5 @@ public class MappingsBuilder
 		}
 		return attribute;
 
-	}
-
-	private static String getType(AttributeMetaData attr)
-	{
-		FieldTypeEnum enumType = attr.getDataType().getEnumType();
-		switch (enumType)
-		{
-			case BOOL:
-				return "boolean";
-			case DATE:
-			case DATE_TIME:
-				return "date";
-			case DECIMAL:
-				return "double";
-			case INT:
-				return "integer";
-			case LONG:
-				return "long";
-			case CATEGORICAL:
-			case EMAIL:
-			case ENUM:
-			case HTML:
-			case HYPERLINK:
-			case STRING:
-			case TEXT:
-				return "string";
-			case MREF:
-			case XREF:
-			{
-				// return type of referenced label field
-				return getType(attr.getRefEntity().getLabelAttribute());
-			}
-			case FILE:
-			case IMAGE:
-				throw new ElasticsearchException("indexing of molgenis field type [" + enumType + "] not supported");
-			default:
-				return "string";
-		}
 	}
 }

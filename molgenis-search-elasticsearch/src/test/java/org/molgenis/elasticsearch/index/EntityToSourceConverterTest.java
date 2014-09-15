@@ -14,6 +14,7 @@ import java.util.Map;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -103,7 +104,7 @@ public class EntityToSourceConverterTest
 
 		String idValue = "entityid";
 		Boolean boolValue = Boolean.TRUE;
-		MapEntity categoricalValue = refEntity0;
+		Entity categoricalValue = refEntity0;
 		String compoundPart0Value = "compoundpart0";
 		String compoundPart1Value = "compoundpart1";
 		String dateValueStr = "2014-09-03";
@@ -121,7 +122,7 @@ public class EntityToSourceConverterTest
 		String scriptValue = "a cool R script";
 		String stringValue = "string";
 		String textValue = "some interesting text";
-		MapEntity xrefValue = refEntity1;
+		Entity xrefValue = refEntity1;
 
 		MapEntity entity = new MapEntity(idAttributeName);
 		entity.set(idAttributeName, idValue);
@@ -133,7 +134,7 @@ public class EntityToSourceConverterTest
 		entity.set(dateTimeAttributeName, dateTimeValue);
 		entity.set(decimalAttributeName, decimalValue);
 		entity.set(emailAttributeName, emailValue);
-		entity.set(enumAttributeName, enumValue); // FIXME update
+		entity.set(enumAttributeName, enumValue);
 		entity.set(htmlAttributeName, htmlValue);
 		entity.set(hyperlinkAttributeName, hyperlinkValue);
 		entity.set(intAttributeName, intValue);
@@ -142,13 +143,18 @@ public class EntityToSourceConverterTest
 		entity.set(scriptAttributeName, scriptValue);
 		entity.set(stringAttributeName, stringValue);
 		entity.set(textAttributeName, textValue);
-		entity.set(xrefAttributeName, refEntity1);
+		entity.set(xrefAttributeName, xrefValue);
 
-		Map<String, List<Object>> expectedMrefValue = new HashMap<String, List<Object>>();
-		expectedMrefValue.put(idAttributeName, Arrays.<Object> asList(refIdValue0, refIdValue1));
-		expectedMrefValue.put(refLabelAttributeName, Arrays.<Object> asList(refLabelValue0, refLabelValue1));
-		expectedMrefValue.put(refMrefAttributeName,
-				Arrays.<Object> asList(Arrays.<Object> asList(refLabelValue0, refLabelValue1)));
+		Map<String, Object> expectedRefEntity0Value = new HashMap<String, Object>();
+		expectedRefEntity0Value.put(idAttributeName, refIdValue0);
+		expectedRefEntity0Value.put(refLabelAttributeName, refLabelValue0);
+		expectedRefEntity0Value.put(refMrefAttributeName, null);
+
+		Map<String, Object> expectedRefEntity1Value = new HashMap<String, Object>();
+		expectedRefEntity1Value.put(idAttributeName, refIdValue1);
+		expectedRefEntity1Value.put(refLabelAttributeName, refLabelValue1);
+		expectedRefEntity1Value.put(refMrefAttributeName, Arrays.asList(refLabelValue0, refLabelValue1));
+
 		DataService dataService = mock(DataService.class);
 		when(dataService.getEntityMetaData(entityName)).thenReturn(entityMetaData);
 		when(dataService.getEntityMetaData(refEntityName)).thenReturn(refEntityMetaData);
@@ -156,7 +162,7 @@ public class EntityToSourceConverterTest
 		Map<String, Object> expectedSource = new HashMap<String, Object>();
 		expectedSource.put(idAttributeName, idValue);
 		expectedSource.put(boolAttributeName, boolValue);
-		expectedSource.put(categoricalAttributeName, categoricalValue.get(refLabelAttributeName));
+		expectedSource.put(categoricalAttributeName, expectedRefEntity0Value);
 		expectedSource.put(dateAttributeName, dateValueStr);
 		expectedSource.put(dateTimeAttributeName, dateTimeValueStr);
 		expectedSource.put(decimalAttributeName, decimalValue);
@@ -166,11 +172,11 @@ public class EntityToSourceConverterTest
 		expectedSource.put(hyperlinkAttributeName, hyperlinkValue);
 		expectedSource.put(intAttributeName, intValue);
 		expectedSource.put(longAttributeName, longValue);
-		expectedSource.put(mrefAttributeName, Arrays.asList(expectedMrefValue));
+		expectedSource.put(mrefAttributeName, Arrays.asList(expectedRefEntity0Value, expectedRefEntity1Value));
 		expectedSource.put(scriptAttributeName, scriptValue);
 		expectedSource.put(stringAttributeName, stringValue);
 		expectedSource.put(textAttributeName, textValue);
-		expectedSource.put(xrefAttributeName, xrefValue.get(refLabelAttributeName));
+		expectedSource.put(xrefAttributeName, expectedRefEntity1Value);
 		expectedSource.put(compoundPart0AttributeName, compoundPart0Value);
 		expectedSource.put(compoundPart1AttributeName, compoundPart1Value);
 
