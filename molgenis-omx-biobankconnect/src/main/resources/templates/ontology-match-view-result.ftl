@@ -1,6 +1,6 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
-<#assign css=["jquery-ui-1.9.2.custom.min.css", "bootstrap-fileupload.min.css", "ui.fancytree.min.css", "ontology-service.css"]>
+<#assign css=["jquery-ui-1.9.2.custom.min.css", "bootstrap-fileupload.min.css", "ui.fancytree.min.css", "ontology-service.css", "biobank-connect.css"]>
 <#assign js=["jquery-ui-1.9.2.custom.min.js", "bootstrap-fileupload.min.js", "jquery.fancytree.min.js", "common-component.js", "ontology-tree-view.js", "ontology.tree.plugin.js", "ontology-service-result.js", "jquery.bootstrap.pager.js", "simple_statistics.js"]>
 <@header css js/>
 <form class="form-horizontal">
@@ -17,11 +17,11 @@
 				<div class="col-md-1">
 					<a id="back-button" href="${context_url}" type="button" class="btn btn-info">Back</a>
 				</div>
-				<div>
+				<div class="col-md-2">
 					<a id="download-button" href="${context_url}/match/download" type="button" class="btn btn-primary">Download</a>
 				</div>
-				<div>
-					<a id="show-tree-button" type="button" class="btn float-right">Show tree</a>
+				<div class="col-md-9">
+					<a id="show-tree-button" type="button" class="btn float-right-align">Show tree</a>
 				</div>
 			</div>
 			<br>
