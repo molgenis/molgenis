@@ -71,6 +71,7 @@
 					<button id="match-button" type="button" class="btn btn-primary">Match</button>
 				</div>
 			</div>
+			<br>
 		</div>
 	</div>
 </form>

@@ -47,7 +47,7 @@
 					<div class="col-md-12">
 						<input type="hidden" name="ontologyUri"/>
 						<div class="row">
-							<div id="div-index-ontology" class="col-md-7 well">
+							<div id="div-index-ontology" class="col-md-8">
 								<div class="row">
 									<div class="col-md-12">
 										<table id="ontology-table" class="table table-bordered">
@@ -93,7 +93,7 @@
 									</div>
 								</div>
 							</div>
-							<div class="col-md-5">
+							<div class="col-md-4">
 								<div class="panel panel-primary">
 								    <div class="panel-heading">
 										<h5 class="panel-title">Actions</h5>	

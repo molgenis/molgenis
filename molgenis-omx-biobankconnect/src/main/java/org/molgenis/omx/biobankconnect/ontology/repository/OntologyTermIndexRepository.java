@@ -3,6 +3,8 @@ package org.molgenis.omx.biobankconnect.ontology.repository;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -62,6 +64,7 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 					String parentNodePath = classContainer.getNodePath();
 					Set<String> synonyms = ontologyLoader.getSynonyms(childClass);
 					synonyms.add(ontologyLoader.getLabel(childClass));
+					Map<String, Set<String>> allDatabaseIds = ontologyLoader.getAllDatabaseIds(childClass);
 
 					// Not only the subClass is added to returned List, but also
 					// synonym treated as OWLClass is added in the ordered List
@@ -70,7 +73,7 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 						orderedList.add(new OWLClassContainer(childClass, synonym, definition, nodePath,
 								parentNodePath, parentOntologyTermIRI, false, ontologyLoader.getChildClass(childClass)
 										.size() == 0, synonym.equals(ontologyLoader.getLabel(childClass)),
-								createAlternativeDefinitions(childClass)));
+								createAlternativeDefinitions(childClass), allDatabaseIds));
 					}
 					count++;
 				}
@@ -87,7 +90,7 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 					ontologyLoader.getRootClasses());
 			private final Iterator<OWLClassContainer> iterator = traverser.preOrderTraversal(
 					new OWLClassContainer(pseudoRootClass, PSEUDO_ROOT_CLASS_LABEL, null, "0[0]", null, null, true,
-							false, true, null)).iterator();
+							false, true, null, null)).iterator();
 
 			@Override
 			public boolean hasNext()
@@ -120,6 +123,18 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 						classContainer.getClassLabel().replaceAll(ILLEGAL_CHARACTERS_PATTERN,
 								ILLEGAL_CHARACTERS_REPLACEMENT));
 				entity.set(ALTERNATIVE_DEFINITION, classContainer.getAssociatedClasses());
+
+				if (classContainer.getAllDatabaseIds() != null)
+				{
+					for (Entry<String, Set<String>> entry : classContainer.getAllDatabaseIds().entrySet())
+					{
+						entity.set(entry.getKey(), entry.getValue());
+						if (!dynamaticFields.contains(entry.getKey()))
+						{
+							dynamaticFields.add(entry.getKey());
+						}
+					}
+				}
 				return entity;
 			}
 

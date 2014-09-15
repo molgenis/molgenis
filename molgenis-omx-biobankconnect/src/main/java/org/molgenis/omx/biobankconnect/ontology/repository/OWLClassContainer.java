@@ -1,5 +1,8 @@
 package org.molgenis.omx.biobankconnect.ontology.repository;
 
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
 import org.semanticweb.owlapi.model.OWLClass;
 
@@ -15,10 +18,11 @@ public class OWLClassContainer
 	final boolean last;
 	final boolean original;
 	final String alternativeDefinitions;
+	final Map<String, Set<String>> allDatabaseIds;
 
 	public OWLClassContainer(OWLClass cls, String synonym, String classDefinition, String nodePath,
 			String parentNodePath, String parentOntologyTermIRI, boolean root, boolean last, boolean original,
-			String alternativeDefinitions)
+			String alternativeDefinitions, Map<String, Set<String>> allDatabaseIds)
 	{
 		this.owlClass = cls;
 		this.classLabel = synonym;
@@ -30,6 +34,7 @@ public class OWLClassContainer
 		this.last = last;
 		this.original = original;
 		this.alternativeDefinitions = alternativeDefinitions;
+		this.allDatabaseIds = allDatabaseIds;
 	}
 
 	public OWLClass getOWLClass()
@@ -80,5 +85,10 @@ public class OWLClassContainer
 	public boolean isOriginal()
 	{
 		return original;
+	}
+
+	public Map<String, Set<String>> getAllDatabaseIds()
+	{
+		return allDatabaseIds;
 	}
 }
