@@ -606,5 +606,6 @@
         <module>molgenis-mutationdb</module>
         <module>molgenis-scripts</module>
         <module>molgenis-data-import</module>
+        <module>molgenis-catalogue</module>
     </modules>
 </project>

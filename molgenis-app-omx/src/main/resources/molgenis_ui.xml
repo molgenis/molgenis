@@ -2,7 +2,7 @@
 <molgenis label="OMX" name="omx">
 	<menu label="Home" name="main">
 		<plugin id="home" name="Home" url="home"/>
-		<plugin id="protocolviewer" name="Catalog" url="protocolviewer"/>
+		<plugin id="catalogue" name="Catalogue" url="catalogue"/>
 		<plugin id="dataexplorer" name="Data Explorer" url="dataexplorer"/>	
 		<plugin id="importwizard" name="Upload" url="importwizard"/>
 		<plugin id="models" name="Model registry" url="models" />
