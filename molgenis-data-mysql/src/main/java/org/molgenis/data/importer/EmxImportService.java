@@ -530,7 +530,6 @@ public class EmxImportService implements ImportService
 				// anyway)
 				if (!SecurityUtils.currentUserIsSu())
 				{
-					// String userName = SecurityUtils.getCurrentUsername();
 					permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
 							addedEntities);
 				}

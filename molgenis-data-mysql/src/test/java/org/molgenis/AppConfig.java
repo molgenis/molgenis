@@ -15,6 +15,7 @@ import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.elasticsearch.ElasticSearchService;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
+import org.molgenis.security.permission.PermissionSystemService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -75,6 +76,12 @@ public class AppConfig
 	public MysqlAttributeMetaDataRepository attributeMetaDataRepository()
 	{
 		return new MysqlAttributeMetaDataRepository(dataSource());
+	}
+
+	@Bean
+	public PermissionSystemService permissionSystemService()
+	{
+		return new PermissionSystemService(dataService());
 	}
 
 	@Bean

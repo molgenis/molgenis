@@ -35,39 +35,41 @@ public class PermissionSystemService
 	{
 		Authentication auth = securityContext.getAuthentication();
 
-		MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME,
-				new QueryImpl().eq(MolgenisUser.USERNAME, SecurityUtils.getUsername(auth)), MolgenisUser.class);
-
-		if (user != null)
+		if (!auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))
+				&& !auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_SYSTEM")))
 		{
-			List<GrantedAuthority> roles = Lists.newArrayList(auth.getAuthorities());
+			MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME,
+					new QueryImpl().eq(MolgenisUser.USERNAME, SecurityUtils.getUsername(auth)), MolgenisUser.class);
 
-			for (String entity : entities)
+			if (user != null)
 			{
-				for (Permission permission : Permission.values())
+				List<GrantedAuthority> roles = Lists.newArrayList(auth.getAuthorities());
+
+				for (String entity : entities)
 				{
-					String role = SecurityUtils.AUTHORITY_ENTITY_PREFIX + permission.toString() + "_"
-							+ entity.toUpperCase();
-					roles.add(new SimpleGrantedAuthority(role));
-					UserAuthority userAuthority = new UserAuthority();
-					userAuthority.setMolgenisUser(user);
-					userAuthority.setRole(role);
-					dataService.add(UserAuthority.ENTITY_NAME, userAuthority);
+					for (Permission permission : Permission.values())
+					{
+						String role = SecurityUtils.AUTHORITY_ENTITY_PREFIX + permission.toString() + "_"
+								+ entity.toUpperCase();
+						roles.add(new SimpleGrantedAuthority(role));
+						UserAuthority userAuthority = new UserAuthority();
+						userAuthority.setMolgenisUser(user);
+						userAuthority.setRole(role);
+						dataService.add(UserAuthority.ENTITY_NAME, userAuthority);
 
-					role = SecurityUtils.AUTHORITY_PLUGIN_PREFIX + permission.toString() + "_FORM."
-							+ entity.toUpperCase();
-					roles.add(new SimpleGrantedAuthority(role));
-					userAuthority = new UserAuthority();
-					userAuthority.setMolgenisUser(user);
-					userAuthority.setRole(role);
-					dataService.add(UserAuthority.ENTITY_NAME, userAuthority);
+						role = SecurityUtils.AUTHORITY_PLUGIN_PREFIX + permission.toString() + "_FORM."
+								+ entity.toUpperCase();
+						roles.add(new SimpleGrantedAuthority(role));
+						userAuthority = new UserAuthority();
+						userAuthority.setMolgenisUser(user);
+						userAuthority.setRole(role);
+						dataService.add(UserAuthority.ENTITY_NAME, userAuthority);
+					}
 				}
+
+				auth = new UsernamePasswordAuthenticationToken(auth.getPrincipal(), null, roles);
+				securityContext.setAuthentication(auth);
 			}
-
-			auth = new UsernamePasswordAuthenticationToken(auth.getPrincipal(), null, roles);
-			securityContext.setAuthentication(auth);
 		}
-
 	}
-
 }

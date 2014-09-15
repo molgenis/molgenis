@@ -20,6 +20,7 @@ import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
+import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -66,12 +67,16 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	MysqlAttributeMetaDataRepository attributeMetaDataRepository;
 
+	@Autowired
+	PermissionSystemService permissionSystemService;
+
 	@BeforeMethod
 	public void beforeMethod()
 	{
 		attributeMetaDataRepository.deleteAll();
 		entityMetaDataRepository.deleteAll();
 		dataService = mock(DataService.class);
+
 	}
 
 	@Test
@@ -85,6 +90,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		EmxImportService importer = new EmxImportService(dataService);
 		importer.setRepositoryCollection(store);
 		importer.setPlatformTransactionManager(new SimplePlatformTransactionManager());
+		importer.setPermissionSystemService(permissionSystemService);
 
 		// generate report
 		EntitiesValidationReport report = importer.validateImport(f, source);
@@ -139,6 +145,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		EmxImportService importer = new EmxImportService(dataService);
 		importer.setRepositoryCollection(store);
 		importer.setPlatformTransactionManager(new SimplePlatformTransactionManager());
+		importer.setPermissionSystemService(permissionSystemService);
 
 		// test import
 		EntityImportReport report = importer.doImport(source, DatabaseAction.ADD);
@@ -184,6 +191,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		EmxImportService importer = new EmxImportService(dataService);
 		importer.setRepositoryCollection(store);
 		importer.setPlatformTransactionManager(new SimplePlatformTransactionManager());
+		importer.setPermissionSystemService(permissionSystemService);
 
 		// test import
 		importer.doImport(source, DatabaseAction.ADD);
