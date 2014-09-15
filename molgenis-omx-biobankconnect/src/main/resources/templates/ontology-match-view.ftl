@@ -58,7 +58,7 @@
 			</div>
 			<div class="row">
 				<div class="col-md-offset-2 col-md-8">
-					<center><textarea name="inputTerms" style="width:100%;resize:none;" class="form-control" rows="12" placeholder="Please paste a list of terms in pipe-delimited format. The header header 'Name' is compulsory whereas other headers/columns are optional! Example is shown below:
+					<center><textarea name="inputTerms" style="width:100%;resize:none;" class="form-control" rows="12" placeholder="Please paste a list of terms in pipe-delimited format. The header 'Name' is compulsory whereas other headers/columns are optional! Example is shown below:
 							
 												Name|Synonym|HP|
        												visual impairment|Reduced visual acuity|0000505|
