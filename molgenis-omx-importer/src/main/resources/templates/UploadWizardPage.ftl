@@ -8,42 +8,51 @@
 	    </div>
 	    
 	    <div class="row">
-	        <div class="col-md-4">
-				<div class="panel">
-					<div class="panel-heading">
-		    			<h3 class="panel-title">
-		    				<a data-toggle="collapse" data-target="#upload-options-collapse" href="#upload-options-collapse">Advanced options</a>
-		    			</h3>
-		  			</div>
-		  			<div id="upload-options-collapse" class="panel-collapse collapse">
-		  				<div class="panel-body">
-							<div class="col-md-12">
-								<label class="radio">
-									<input type="radio" name="entity_option" value="add_update">Add entities / update existing
-								</label>
-								<span>Importer adds new entities or updates existing entities<span>
-								<label class="radio">
-									<input type="radio" name="entity_option" value="add" checked>Add entities		
-								</label>
-								<span>Importer adds new entities or fails if entity exists</span>
-								<label class="radio">
-                                	<input type="radio" name="entity_option" value="add_ignore">Add entities / ignore existing
-                                </label>
-                                <span>Importer adds new entities or skips if entity exists</span>
-                                <label class="radio">
-                            		<input type="radio" name="entity_option" value="update">Update Entities
-                            	</label>
-                            	<span>Importer updates existing entities or fails if entity does not exist</span>
-                            	<label class="radio">
-                              		<input type="radio" name="entity_option" value="update_ignore">Update Entities / ignore not existing
-                            	</label>
-                            	<span>Importer updates existing entities or skips if entity does not exist</span>
-							</div>
-			  			</div>
-		  			</div>
-				</div>
-			</div>
+	        <div class="col-md-8">
+	            <div class="panel">
+	                <div class="panel-heading">
+	                    <h4 class="panel-title">
+	                        <a data-toggle="collapse" data-target="#upload-options-collapse" href="#upload-options-collapse">Advanced options</a>
+	                    </h4>
+	                </div>
+	                <div id="upload-options-collapse" class="panel-collapse collapse">
+	                    <div class="panel-body">
+	                        <table style="width: 75%;">
+	                            <tr>
+	                                <td>
+	                                    <div class="radio">
+	                                        <label>
+	                                            <input type="radio" name="entity_option" value="add_update">Add entities / update existing
+	                                        </label>
+	                                    </div>
+	                                </td>
+	                                <td>Importer adds new entities or updates existing entities</td>
+	                            </tr>
+	                            <tr>
+	                                <td>
+	                                    <div class="radio">
+	                                        <label>
+	                                            <input type="radio" name="entity_option" value="add" checked>Add entities
+	                                        </label>
+	                                    </div>
+	                                </td>
+	                                <td>Importer adds new entities or fails if entity exists</td>
+	                            </tr>
+	                            <tr>
+	                                <td>
+	                                    <div class="radio">
+	                                        <label>
+	                                            <input type="radio" name="entity_option" value="update">Update Entities
+	                                        </label>
+	                                    </div>
+	                                </td>
+	                                <td>Importer updates existing entities or fails if entity does not exist</td>
+	                            </tr>
+	                        </table>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
 	    </div>
-	    
 	</div> 
 </form>

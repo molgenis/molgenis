@@ -20,9 +20,12 @@ public class SecurityUtils
 	public static final String AUTHORITY_PLUGIN_PREFIX = "ROLE_PLUGIN_";
 	public static final String AUTHORITY_PLUGIN_READ_PREFIX = AUTHORITY_PLUGIN_PREFIX + Permission.READ + "_";
 	public static final String AUTHORITY_PLUGIN_WRITE_PREFIX = AUTHORITY_PLUGIN_PREFIX + Permission.WRITE + "_";
+	public static final String AUTHORITY_PLUGIN_COUNT_PREFIX = AUTHORITY_PLUGIN_PREFIX + Permission.COUNT + "_";
+
 	public static final String AUTHORITY_ENTITY_PREFIX = "ROLE_ENTITY_";
 	public static final String AUTHORITY_ENTITY_READ_PREFIX = AUTHORITY_ENTITY_PREFIX + Permission.READ + "_";
 	public static final String AUTHORITY_ENTITY_WRITE_PREFIX = AUTHORITY_ENTITY_PREFIX + Permission.WRITE + "_";
+	public static final String AUTHORITY_ENTITY_COUNT_PREFIX = AUTHORITY_ENTITY_PREFIX + Permission.COUNT + "_";
 
 	public static String getCurrentUsername()
 	{
@@ -31,15 +34,18 @@ public class SecurityUtils
 		{
 			return null;
 		}
+		return getUsername(authentication);
+	}
+
+	public static String getUsername(Authentication authentication)
+	{
 		Object principal = authentication.getPrincipal();
 		if (principal instanceof UserDetails)
 		{
 			return ((UserDetails) principal).getUsername();
 		}
-		else
-		{
-			return principal.toString();
-		}
+
+		return principal.toString();
 	}
 
 	/**

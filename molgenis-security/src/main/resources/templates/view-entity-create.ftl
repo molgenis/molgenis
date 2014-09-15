@@ -5,9 +5,9 @@
 <form class="form-horizontal" id="entity-form" method="POST" action="/api/v1/${entityName}">
 	<#list form.metaData.fields as field>
 		<#if form.entity??>
-			<@input.render field form.hasWritePermission form.entity />
+			<@input.render field form.hasWritePermission form.entity form.metaData.forUpdate/>
 		<#else>
-			<@input.render field form.hasWritePermission />
+			<@input.render field form.hasWritePermission '' form.metaData.forUpdate/>
 		</#if>
 	</#list>
 </form>

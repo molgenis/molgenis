@@ -231,7 +231,6 @@ public class OmxImporterServiceImpl implements ImportService
 
 				int count = (int) RepositoryUtils.count(repository);
 				importReport.addEntityCount(identifier, count);
-				importReport.addNrImported(count);
 			}
 		}
 

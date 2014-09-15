@@ -18,7 +18,7 @@
 			<field name="Role" type="string" nillable="true" description="Indicate role of the contact, e.g. lab worker or PI."/>
 			<field name="Address" type="text" nillable="true" description="The address of the Contact."/>
 			<field name="Phone" nillable="true" description="The telephone number of the Contact including the suitable area codes."/>
-			<field name="Email" description="The email address of the Contact."/>
+			<field name="Email" type="email" description="The email address of the Contact."/>
 			<field name="Fax" nillable="true" type="varchar" description="The fax number of the Contact."/>
 			<field name="tollFreePhone" label="Toll-free phone" nillable="true" type="string" description="A toll free phone number for the Contact, including suitable area codes."/>
 			<field name="City" type="string" nillable="true" description="Added from the old definition of MolgenisUser. City of this contact."/>

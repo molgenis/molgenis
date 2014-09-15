@@ -74,11 +74,11 @@ public class RepositoryValidationDecorator extends CrudRepositoryDecorator imple
 
 	private void validate(Iterable<? extends Entity> entities, boolean forUpdate)
 	{
-		Set<ConstraintViolation> violations = Sets.newHashSet();
+		Set<ConstraintViolation> violations = null;
 		for (Entity entity : entities)
 		{
-			violations.addAll(entityAttributesValidator.validate(entity, getEntityMetaData()));
-			if (violations.size() > 4)
+			violations = entityAttributesValidator.validate(entity, getEntityMetaData());
+			if (!violations.isEmpty())
 			{
 				throw new MolgenisValidationException(violations);
 			}
@@ -88,25 +88,29 @@ public class RepositoryValidationDecorator extends CrudRepositoryDecorator imple
 		{
 			if (attr.isUnique())
 			{
-				violations.addAll(checkUniques(entities, attr, true));
-				if (violations.size() > 4)
+				violations = checkUniques(entities, attr, true);
+				if (!violations.isEmpty())
 				{
 					throw new MolgenisValidationException(violations);
 				}
 			}
 		}
 
-		violations.addAll(checkNillable(entities));
-
-		if (forUpdate)
-		{
-			violations.addAll(checkReadonlyByUpdate(entities));
-		}
-
+		violations = checkNillable(entities);
 		if (!violations.isEmpty())
 		{
 			throw new MolgenisValidationException(violations);
 		}
+
+		if (forUpdate)
+		{
+			violations = checkReadonlyByUpdate(entities);
+			if (!violations.isEmpty())
+			{
+				throw new MolgenisValidationException(violations);
+			}
+		}
+
 	}
 
 	protected Set<ConstraintViolation> checkNillable(Iterable<? extends Entity> entities)

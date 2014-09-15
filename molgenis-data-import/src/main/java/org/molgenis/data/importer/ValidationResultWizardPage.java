@@ -1,22 +1,22 @@
-package org.molgenis.omx.importer;
+package org.molgenis.data.importer;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
+import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.importer.ImportService;
-import org.molgenis.data.importer.ImportServiceFactory;
-import org.molgenis.data.validation.ConstraintViolation;
-import org.molgenis.data.validation.MolgenisValidationException;
-import org.molgenis.framework.db.EntityImportReport;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.ui.wizard.AbstractWizardPage;
 import org.molgenis.ui.wizard.Wizard;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
@@ -26,12 +26,22 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 {
 	private static final Logger logger = Logger.getLogger(ValidationResultWizardPage.class);
 	private static final long serialVersionUID = 1L;
+	private final ExecutorService asyncImportJobs = Executors.newCachedThreadPool();
 
 	@Autowired
 	private ImportServiceFactory importServiceFactory;
 
 	@Autowired
 	private FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
+
+	@Autowired
+	private DataService dataService;
+
+	@Autowired
+	private ImportRunService importRunService;
+
+	@Autowired
+	private ImportPostProcessingService importPostProcessingService;
 
 	@Override
 	public String getTitle()
@@ -64,31 +74,16 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 				ImportService importService = importServiceFactory.getImportService(importWizard.getFile(),
 						repositoryCollection);
 
-				EntityImportReport importReport = importService.doImport(repositoryCollection, entityDbAction);
-				importWizard.setImportResult(importReport);
-
-				return "File successfully imported.";
-			}
-			catch (MolgenisValidationException e)
-			{
-				File file = importWizard.getFile();
-				logger.warn("Import of file [" + file.getName() + "] failed for action [" + entityImportOption + "]", e);
-
-				StringBuilder sb = new StringBuilder("<b>Your import failed:</b><br /><br />");
-				for (ConstraintViolation violation : e.getViolations())
+				synchronized (this)
 				{
-					sb.append(violation.getMessage());
+					ImportRun importRun = importRunService.addImportRun(SecurityUtils.getCurrentUsername());
+					((ImportWizard) wizard).setImportRunId(importRun.getId());
 
-					if (violation.getImportInfo() != null)
-					{
-						sb.append(" ").append(violation.getImportInfo());
-					}
-
-					sb.append("<br />");
-
+					asyncImportJobs.execute(new ImportJob(importService, SecurityContextHolder.getContext(),
+							repositoryCollection, entityDbAction, importRun.getId(), importRunService,
+							importPostProcessingService, request.getSession()));
 				}
 
-				result.addError(new ObjectError("wizard", sb.toString()));
 			}
 			catch (RuntimeException e)
 			{
@@ -114,10 +109,8 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 		DatabaseAction dbAction;
 
 		if (actionStr.equals("add")) dbAction = DatabaseAction.ADD;
-		else if (actionStr.equals("add_ignore")) dbAction = DatabaseAction.ADD_IGNORE_EXISTING;
 		else if (actionStr.equals("add_update")) dbAction = DatabaseAction.ADD_UPDATE_EXISTING;
 		else if (actionStr.equals("update")) dbAction = DatabaseAction.UPDATE;
-		else if (actionStr.equals("update_ignore")) dbAction = DatabaseAction.UPDATE_IGNORE_MISSING;
 		else dbAction = null;
 
 		return dbAction;

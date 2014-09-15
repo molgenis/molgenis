@@ -43,11 +43,13 @@ public class TransformedEntity implements Entity
 		this.dataService = dataService;
 	}
 
+	@Override
 	public EntityMetaData getEntityMetaData()
 	{
 		return entityMetaData;
 	}
 
+	@Override
 	public Iterable<String> getAttributeNames()
 	{
 		// TODO create utility method to get all attributes (atomics + compounds) and use this method here
@@ -86,21 +88,25 @@ public class TransformedEntity implements Entity
 		return Iterables.concat(atomicAttributes, compoundAttributes);
 	}
 
+	@Override
 	public Object getIdValue()
 	{
 		return entity.get(entityMetaData.getIdAttribute().getName());
 	}
 
+	@Override
 	public String getLabelValue()
 	{
 		return entity.getString(entityMetaData.getLabelAttribute().getName());
 	}
 
+	@Override
 	public List<String> getLabelAttributeNames()
 	{
 		return Collections.singletonList(entityMetaData.getLabelAttribute().getName());
 	}
 
+	@Override
 	public Object get(String attributeName)
 	{
 		AttributeMetaData attribute = entityMetaData.getAttribute(attributeName);
