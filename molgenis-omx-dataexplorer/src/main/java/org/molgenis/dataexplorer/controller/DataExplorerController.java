@@ -492,7 +492,6 @@ public class DataExplorerController extends MolgenisPluginController
 				throw new InputValidationException("Attribute '" + yAttributeName + "' is not aggregateable");
 			}
 		}
-
 		AttributeMetaData distinctAttributeMeta = null;
 		if (StringUtils.isNotBlank(distinctAttributeName))
 		{

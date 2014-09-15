@@ -4,8 +4,19 @@
         <div class="row">
             <div class="col-md-12">        
                 <div id="feature-select-container">
-                	<label class="col-md-3 control-label" for="feature-select">${i18n.dataexplorer_aggregates_group_by}</label>
-                	<div id="feature-select" class="controls">
+                    <div class="form-horizontal">
+                        <div class="form-group">
+                        	<label class="col-md-2 control-label" for="feature-select">${i18n.dataexplorer_aggregates_group_by}</label>
+                        	<div class="col-md-4">
+                            	<div id="feature-select"></div>
+                        	</div>
+                    	</div>                	
+                    	<div class="form-group">
+                            <label class="col-md-2 control-label"for="distinct-attr-select">${i18n.dataexplorer_aggregates_distinct}</label>
+                            <div class="col-md-3">
+                                <div id="distinct-attr-select"></div>
+                            </div>
+                    	</div>
                 	</div>
                 </div>
             </div>

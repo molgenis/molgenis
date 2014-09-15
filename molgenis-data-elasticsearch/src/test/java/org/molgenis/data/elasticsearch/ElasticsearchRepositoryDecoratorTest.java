@@ -16,7 +16,6 @@ import java.util.List;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.molgenis.data.AggregateQuery;
-import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
@@ -26,8 +25,6 @@ import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.elasticsearch.ElasticSearchService;
 import org.molgenis.elasticsearch.ElasticSearchService.IndexingMode;
-import org.molgenis.search.SearchRequest;
-import org.molgenis.search.SearchResult;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -93,15 +90,11 @@ public class ElasticsearchRepositoryDecoratorTest
 		AttributeMetaData distinctAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("distinctAttr")
 				.getMock();
 		Query q = mock(Query.class);
-		SearchRequest searchRequest = new SearchRequest("entity", q, Collections.<String> emptyList(), xAttr, yAttr,
-				distinctAttr);
-		AggregateResult aggregate = mock(AggregateResult.class);
-		SearchResult searchResult = when(mock(SearchResult.class).getAggregate()).thenReturn(aggregate).getMock();
-		when(elasticSearchService.search(searchRequest)).thenReturn(searchResult);
-
 		AggregateQuery aggregateQuery = new AggregateQueryImpl().attrX(xAttr).attrY(yAttr).attrDistinct(distinctAttr)
 				.query(q);
-		assertEquals(elasticSearchRepository.aggregate(aggregateQuery), aggregate);
+
+		elasticSearchRepository.aggregate(aggregateQuery);
+		verify(elasticSearchService).aggregate(aggregateQuery, repositoryEntityMetaData);
 	}
 
 	@Test
@@ -371,6 +364,6 @@ public class ElasticsearchRepositoryDecoratorTest
 	public void rebuildIndex()
 	{
 		elasticSearchRepository.rebuildIndex();
-		verify(elasticSearchService).indexRepository(repository);
+		verify(elasticSearchService).rebuildIndex(repository, repositoryEntityMetaData);
 	}
 }

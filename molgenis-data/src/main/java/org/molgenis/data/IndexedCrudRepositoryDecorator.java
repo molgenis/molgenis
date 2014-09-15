@@ -11,6 +11,12 @@ public class IndexedCrudRepositoryDecorator extends CrudRepositoryDecorator impl
 	}
 
 	@Override
+	public AggregateResult aggregate(AggregateQuery aggregateQuery)
+	{
+		return decoratedRepository.aggregate(aggregateQuery);
+	}
+
+	@Override
 	public void rebuildIndex()
 	{
 		decoratedRepository.rebuildIndex();

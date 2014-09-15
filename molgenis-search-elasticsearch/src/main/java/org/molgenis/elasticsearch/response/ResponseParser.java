@@ -142,7 +142,6 @@ public class ResponseParser
 		if (aggregations != null)
 		{
 			List<List<Long>> matrix = Lists.newArrayList();
-			String xRefAttrName = null, yRefAttrName = null;
 			Set<String> xLabelsSet = Sets.newHashSet();
 			Set<String> yLabelsSet = Sets.newHashSet();
 			List<String> xLabels = new ArrayList<String>();
@@ -153,7 +152,6 @@ public class ResponseParser
 				throw new RuntimeException("Multiple aggregations [" + nrAggregations + "] not supported");
 			}
 
-			xRefAttrName = getAggregateAttributeName(aggregations); // can be null
 			Terms terms = getTermsAggregation(aggregations);
 
 			Collection<Bucket> buckets = terms.getBuckets();
@@ -206,7 +204,6 @@ public class ResponseParser
 								throw new RuntimeException("Multiple aggregations [" + nrAggregations
 										+ "] not supported");
 							}
-							yRefAttrName = getAggregateAttributeName(aggregations); // can be null
 							Terms subTerms = getTermsAggregation(subAggregations);
 
 							for (Bucket subBucket : subTerms.getBuckets())
@@ -440,16 +437,5 @@ public class ResponseParser
 			String id = idLabels.get(i);
 			idLabels.set(i, idToLabelMap.get(id));
 		}
-	}
-
-	private String getAggregateAttributeName(Aggregations aggregations)
-	{
-		Aggregation aggregation = aggregations.iterator().next();
-		if (aggregation instanceof ReverseNested)
-		{
-			Aggregations reverseNestedAggregations = ((ReverseNested) aggregation).getAggregations();
-			aggregation = reverseNestedAggregations.iterator().next();
-		}
-		return aggregation instanceof Nested ? aggregation.getName() : null;
 	}
 }

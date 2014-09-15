@@ -5,13 +5,11 @@ import static org.molgenis.elasticsearch.util.ElasticsearchEntityUtils.toElastic
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Aggregateable;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -20,8 +18,6 @@ import org.molgenis.data.support.ConvertingIterable;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.elasticsearch.ElasticSearchService;
 import org.molgenis.elasticsearch.ElasticSearchService.IndexingMode;
-import org.molgenis.search.SearchRequest;
-import org.molgenis.search.SearchResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Iterables;
@@ -152,14 +148,7 @@ public abstract class AbstractElasticsearchRepository implements CrudRepository,
 	@Override
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
-		Query q = aggregateQuery.getQuery();
-		AttributeMetaData xAttr = aggregateQuery.getAttributeX();
-		AttributeMetaData yAttr = aggregateQuery.getAttributeY();
-		AttributeMetaData distinctAttr = aggregateQuery.getAttributeDistinct();
-		SearchRequest searchRequest = new SearchRequest(getName(), q, Collections.<String> emptyList(), xAttr, yAttr,
-				distinctAttr);
-		SearchResult searchResults = elasticSearchService.search(searchRequest);
-		return searchResults.getAggregate();
+		return elasticSearchService.aggregate(aggregateQuery, getEntityMetaData());
 	}
 
 	@Override
@@ -167,6 +156,7 @@ public abstract class AbstractElasticsearchRepository implements CrudRepository,
 	public void add(Entity entity)
 	{
 		elasticSearchService.index(entity, getEntityMetaData(), IndexingMode.ADD);
+		elasticSearchService.refresh();
 	}
 
 	@Override
@@ -174,6 +164,7 @@ public abstract class AbstractElasticsearchRepository implements CrudRepository,
 	public Integer add(Iterable<? extends Entity> entities)
 	{
 		elasticSearchService.index(entities, getEntityMetaData(), IndexingMode.ADD);
+		elasticSearchService.refresh();
 		return Iterables.size(entities); // TODO solve possible performance bottleneck
 	}
 
@@ -194,6 +185,7 @@ public abstract class AbstractElasticsearchRepository implements CrudRepository,
 	public void update(Entity entity)
 	{
 		elasticSearchService.index(entity, getEntityMetaData(), IndexingMode.UPDATE);
+		elasticSearchService.refresh();
 	}
 
 	@Override
@@ -201,6 +193,7 @@ public abstract class AbstractElasticsearchRepository implements CrudRepository,
 	public void update(Iterable<? extends Entity> entities)
 	{
 		elasticSearchService.index(entities, getEntityMetaData(), IndexingMode.UPDATE);
+		elasticSearchService.refresh();
 	}
 
 	@Override
@@ -208,6 +201,7 @@ public abstract class AbstractElasticsearchRepository implements CrudRepository,
 	public void delete(Entity entity)
 	{
 		elasticSearchService.delete(entity, getEntityMetaData());
+		elasticSearchService.refresh();
 	}
 
 	@Override
@@ -215,6 +209,7 @@ public abstract class AbstractElasticsearchRepository implements CrudRepository,
 	public void delete(Iterable<? extends Entity> entities)
 	{
 		elasticSearchService.delete(entities, getEntityMetaData());
+		elasticSearchService.refresh();
 	}
 
 	@Override
@@ -222,6 +217,7 @@ public abstract class AbstractElasticsearchRepository implements CrudRepository,
 	public void deleteById(Object id)
 	{
 		elasticSearchService.deleteById(toElasticsearchId(id), getEntityMetaData());
+		elasticSearchService.refresh();
 	}
 
 	@Override
@@ -229,6 +225,7 @@ public abstract class AbstractElasticsearchRepository implements CrudRepository,
 	public void deleteById(Iterable<Object> ids)
 	{
 		elasticSearchService.deleteById(toElasticsearchIds(ids), getEntityMetaData());
+		elasticSearchService.refresh();
 	}
 
 	@Override
@@ -236,5 +233,6 @@ public abstract class AbstractElasticsearchRepository implements CrudRepository,
 	public void deleteAll()
 	{
 		elasticSearchService.delete(getEntityMetaData());
+		elasticSearchService.refresh();
 	}
 }

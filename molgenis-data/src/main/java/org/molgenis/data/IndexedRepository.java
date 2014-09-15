@@ -1,6 +1,6 @@
 package org.molgenis.data;
 
-public interface IndexedRepository
+public interface IndexedRepository extends Aggregateable
 {
 	/**
 	 * Rebuild current index

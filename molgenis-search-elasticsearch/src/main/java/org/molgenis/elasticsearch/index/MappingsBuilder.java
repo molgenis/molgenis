@@ -62,7 +62,7 @@ public class MappingsBuilder
 	private static final String ATTRIBUTE_NILLABLE = "nillable";
 	private static final String ATTRIBUTE_DATA_TYPE = "dataType";
 
-	public static final String FIELD_NOT_ANALYZED = "sort";
+	public static final String FIELD_NOT_ANALYZED = "raw";
 
 	/**
 	 * Creates entity meta data for the given repository, documents are stored in the index
@@ -79,15 +79,19 @@ public class MappingsBuilder
 	/**
 	 * Creates entity meta data for the given repository
 	 * 
+	 * @deprecated see buildMapping(EntityMetaData)
+	 * 
 	 * @param repository
 	 * @param storeSource
 	 *            whether or not documents are stored in the index
 	 * @return
 	 * @throws IOException
 	 */
-	public static XContentBuilder buildMapping(Repository repository, boolean storeSource) throws IOException
+	@Deprecated
+	public static XContentBuilder buildMapping(Repository repository, boolean storeSource, boolean enableNorms,
+			boolean createAllIndex) throws IOException
 	{
-		return buildMapping(repository.getEntityMetaData(), storeSource);
+		return buildMapping(repository.getEntityMetaData(), storeSource, enableNorms, createAllIndex);
 	}
 
 	/**
@@ -99,7 +103,7 @@ public class MappingsBuilder
 	 */
 	public static XContentBuilder buildMapping(EntityMetaData entityMetaData) throws IOException
 	{
-		return buildMapping(entityMetaData, true);
+		return buildMapping(entityMetaData, true, true, true);
 	}
 
 	/**
@@ -111,7 +115,8 @@ public class MappingsBuilder
 	 * @return
 	 * @throws IOException
 	 */
-	public static XContentBuilder buildMapping(EntityMetaData meta, boolean storeSource) throws IOException
+	public static XContentBuilder buildMapping(EntityMetaData meta, boolean storeSource, boolean enableNorms,
+			boolean createAllIndex) throws IOException
 	{
 		String documentType = MapperTypeSanitizer.sanitizeMapperType(meta.getName());
 		XContentBuilder jsonBuilder = XContentFactory.jsonBuilder().startObject().startObject(documentType)
@@ -119,7 +124,7 @@ public class MappingsBuilder
 
 		for (AttributeMetaData attr : meta.getAtomicAttributes())
 		{
-			createAttributeMapping(attr, true, jsonBuilder);
+			createAttributeMapping(attr, enableNorms, createAllIndex, true, jsonBuilder);
 		}
 
 		jsonBuilder.endObject().endObject().endObject();
@@ -127,18 +132,18 @@ public class MappingsBuilder
 		return jsonBuilder;
 	}
 
-	// FIXME check if sort mapping are correct for all data types
-	private static void createAttributeMapping(AttributeMetaData attr, boolean nestRefs, XContentBuilder jsonBuilder)
-			throws IOException
+	// TODO discuss: use null_value for nillable attributes?
+	private static void createAttributeMapping(AttributeMetaData attr, boolean enableNorms, boolean createAllIndex,
+			boolean nestRefs, XContentBuilder jsonBuilder) throws IOException
 	{
 		String attrName = attr.getName();
+		jsonBuilder.startObject(attrName);
+
 		FieldTypeEnum dataType = attr.getDataType().getEnumType();
 		switch (dataType)
 		{
 			case BOOL:
-				jsonBuilder.startObject(attrName).field("type", "multi_field").startObject("fields")
-						.startObject(attrName).field("type", "boolean").endObject().startObject(FIELD_NOT_ANALYZED)
-						.field("type", "boolean").endObject().endObject().endObject();
+				jsonBuilder.field("type", "boolean");
 				break;
 			case CATEGORICAL:
 			case MREF:
@@ -146,49 +151,38 @@ public class MappingsBuilder
 				EntityMetaData refEntity = attr.getRefEntity();
 				if (nestRefs)
 				{
-					jsonBuilder.startObject(attrName).field("type", "nested").startObject("properties");
+					jsonBuilder.field("type", "nested").startObject("properties");
 					for (AttributeMetaData refAttr : refEntity.getAtomicAttributes())
 					{
-						createAttributeMapping(refAttr, false, jsonBuilder);
+						createAttributeMapping(refAttr, enableNorms, createAllIndex, false, jsonBuilder);
 					}
-					jsonBuilder.endObject().endObject();
+					jsonBuilder.endObject();
 				}
 				else
 				{
-					createAttributeMapping(refEntity.getLabelAttribute(), false, jsonBuilder);
+					createAttributeMapping(refEntity.getLabelAttribute(), enableNorms, createAllIndex, false,
+							jsonBuilder);
 				}
 				break;
 			case COMPOUND:
 				throw new UnsupportedOperationException();
 			case DATE:
-				jsonBuilder.startObject(attrName).field("type", "multi_field").startObject("fields")
-						.startObject(attrName).field("type", "date").field("format", "date").endObject()
-						.startObject(FIELD_NOT_ANALYZED).field("type", "date").field("format", "date").endObject()
-						.endObject().endObject();
+				jsonBuilder.field("type", "date").field("format", "date");
 				break;
 			case DATE_TIME:
-				jsonBuilder.startObject(attrName).field("type", "multi_field").startObject("fields")
-						.startObject(attrName).field("type", "date").field("format", "date_time_no_millis").endObject()
-						.startObject(FIELD_NOT_ANALYZED).field("type", "date").field("format", "date_time_no_millis")
-						.endObject().endObject().endObject();
+				jsonBuilder.field("type", "date").field("format", "date_time_no_millis");
 				break;
 			case DECIMAL:
-				jsonBuilder.startObject(attrName).field("type", "multi_field").startObject("fields")
-						.startObject(attrName).field("type", "double").endObject().startObject(FIELD_NOT_ANALYZED)
-						.field("type", "double").endObject().endObject().endObject();
+				jsonBuilder.field("type", "double");
 				break;
 			case FILE:
 			case IMAGE:
 				throw new MolgenisDataException("Unsupported data type [" + dataType + "]");
 			case INT:
-				jsonBuilder.startObject(attrName).field("type", "multi_field").startObject("fields")
-						.startObject(attrName).field("type", "integer").endObject().startObject(FIELD_NOT_ANALYZED)
-						.field("type", "integer").endObject().endObject().endObject();
+				jsonBuilder.field("type", "integer");
 				break;
 			case LONG:
-				jsonBuilder.startObject(attrName).field("type", "multi_field").startObject("fields")
-						.startObject(attrName).field("type", "long").endObject().startObject(FIELD_NOT_ANALYZED)
-						.field("type", "long").endObject().endObject().endObject();
+				jsonBuilder.field("type", "long");
 				break;
 			case EMAIL:
 			case ENUM:
@@ -197,13 +191,18 @@ public class MappingsBuilder
 			case SCRIPT:
 			case STRING:
 			case TEXT:
-				jsonBuilder.startObject(attrName).field("type", "multi_field").startObject("fields")
-						.startObject(attrName).field("type", "string").endObject().startObject(FIELD_NOT_ANALYZED)
-						.field("type", "string").field("index", "not_analyzed").endObject().endObject().endObject();
+				jsonBuilder.field("type", "multi_field").startObject("fields").startObject(attrName)
+						.field("type", "string").endObject().startObject(FIELD_NOT_ANALYZED).field("type", "string")
+						.field("index", "not_analyzed").endObject().endObject();
 				break;
 			default:
 				throw new RuntimeException("Unknown data type [" + dataType + "]");
 		}
+
+		jsonBuilder.field("norms").startObject().field("enabled", enableNorms).endObject();
+		jsonBuilder.field("include_in_all", createAllIndex && attr.isVisible());
+
+		jsonBuilder.endObject();
 	}
 
 	public static void serializeEntityMeta(EntityMetaData entityMetaData, XContentBuilder jsonBuilder)

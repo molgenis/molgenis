@@ -1,17 +1,13 @@
 package org.molgenis.data.elasticsearch;
 
-import java.io.IOException;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IndexedCrudRepository;
 import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.Updateable;
 import org.molgenis.data.Writable;
 import org.molgenis.elasticsearch.ElasticSearchService;
-import org.molgenis.elasticsearch.ElasticSearchService.IndexingMode;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -181,21 +177,6 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	@Override
 	public void rebuildIndex()
 	{
-		// FIXME not working?
-		EntityMetaData entityMetaData = getEntityMetaData();
-		try
-		{
-			if (elasticSearchService.hasMapping(entityMetaData))
-			{
-				elasticSearchService.delete(entityMetaData);
-			}
-			elasticSearchService.createMappings(entityMetaData, true);
-			elasticSearchService.index(repository, entityMetaData, IndexingMode.ADD);
-		}
-		catch (IOException e)
-		{
-			throw new MolgenisDataException(e);
-		}
-		elasticSearchService.indexRepository(repository);
+		elasticSearchService.rebuildIndex(repository, getEntityMetaData());
 	}
 }

@@ -16,6 +16,13 @@ public class IndexedCrudRepositorySecurityDecorator extends CrudRepositorySecuri
 	}
 
 	@Override
+	public AggregateResult aggregate(AggregateQuery aggregateQuery)
+	{
+		validatePermission(decoratedRepository.getName(), Permission.COUNT);
+		return decoratedRepository.aggregate(aggregateQuery);
+	}
+
+	@Override
 	public void rebuildIndex()
 	{
 		validatePermission(decoratedRepository.getName(), Permission.WRITE);

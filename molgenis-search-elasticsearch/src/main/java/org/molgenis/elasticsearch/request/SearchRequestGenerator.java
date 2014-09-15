@@ -60,9 +60,12 @@ public class SearchRequestGenerator
 		}
 
 		// Generate query
-		for (QueryPartGenerator generator : generators)
+		if (query != null)
 		{
-			generator.generate(searchRequestBuilder, query, entityMetaData);
+			for (QueryPartGenerator generator : generators)
+			{
+				generator.generate(searchRequestBuilder, query, entityMetaData);
+			}
 		}
 
 		// Aggregates

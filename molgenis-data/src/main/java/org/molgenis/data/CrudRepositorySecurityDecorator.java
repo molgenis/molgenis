@@ -197,13 +197,6 @@ public class CrudRepositorySecurityDecorator extends CrudRepositoryDecorator
 	}
 
 	@Override
-	public AggregateResult aggregate(AggregateQuery aggregateQuery)
-	{
-		validatePermission(getName(), Permission.COUNT);
-		return decoratedRepository.aggregate(aggregateQuery);
-	}
-
-	@Override
 	public void flush()
 	{
 		validatePermission(decoratedRepository.getName(), Permission.WRITE);

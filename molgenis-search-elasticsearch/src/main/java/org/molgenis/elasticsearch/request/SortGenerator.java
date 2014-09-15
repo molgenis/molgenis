@@ -38,48 +38,54 @@ public class SortGenerator implements QueryPartGenerator
 				AttributeMetaData sortAttr = entityMetaData.getAttribute(sortAttrName);
 				if (sortAttr == null) throw new UnknownAttributeException(sortAttrName);
 
-				String sortField;
-				FieldTypeEnum dataType = sortAttr.getDataType().getEnumType();
-				switch (dataType)
-				{
-					case BOOL:
-						sortField = sortAttrName;
-						break;
-					case DATE:
-					case DATE_TIME:
-					case DECIMAL:
-					case EMAIL:
-					case ENUM:
-					case HTML:
-					case HYPERLINK:
-					case INT:
-					case LONG:
-					case SCRIPT:
-					case STRING:
-					case TEXT:
-						// <attr_name>.<not_analyzed_field>
-						sortField = new StringBuilder(sortAttrName).append('.')
-								.append(MappingsBuilder.FIELD_NOT_ANALYZED).toString();
-						break;
-					case CATEGORICAL:
-					case MREF:
-					case XREF:
-						// <nested_type>.<attr_name>.<not_analyzed_field>
-						String refLabelAttrName = sortAttr.getRefEntity().getLabelAttribute().getName();
-						sortField = new StringBuilder(sortAttrName).append('.').append(refLabelAttrName).append('.')
-								.append(MappingsBuilder.FIELD_NOT_ANALYZED).toString();
-						break;
-					case COMPOUND:
-					case FILE:
-					case IMAGE:
-						throw new UnsupportedOperationException();
-					default:
-						throw new RuntimeException("Unknown data type [" + dataType + "]");
-				}
+				String sortField = getSortField(sortAttr);
 				SortOrder sortOrder = sortDirection == Direction.ASC ? SortOrder.ASC : SortOrder.DESC;
 				FieldSortBuilder sortBuilder = SortBuilders.fieldSort(sortField).order(sortOrder).sortMode("min");
 				searchRequestBuilder.addSort(sortBuilder);
 			}
 		}
+	}
+
+	private String getSortField(AttributeMetaData attr)
+	{
+		String sortField;
+		FieldTypeEnum dataType = attr.getDataType().getEnumType();
+		switch (dataType)
+		{
+			case BOOL:
+			case DATE:
+			case DATE_TIME:
+			case DECIMAL:
+			case INT:
+			case LONG:
+				// use indexed field for sorting
+				sortField = attr.getName();
+				break;
+			case EMAIL:
+			case ENUM:
+			case HTML:
+			case HYPERLINK:
+			case SCRIPT:
+			case STRING:
+			case TEXT:
+				// use raw field for sorting
+				sortField = new StringBuilder(attr.getName()).append('.').append(MappingsBuilder.FIELD_NOT_ANALYZED)
+						.toString();
+				break;
+			case CATEGORICAL:
+			case MREF:
+			case XREF:
+				// use nested field for sorting
+				String refSortField = getSortField(attr.getRefEntity().getLabelAttribute());
+				sortField = new StringBuilder(attr.getName()).append('.').append(refSortField).toString();
+				break;
+			case COMPOUND:
+			case FILE:
+			case IMAGE:
+				throw new UnsupportedOperationException();
+			default:
+				throw new RuntimeException("Unknown data type [" + dataType + "]");
+		}
+		return sortField;
 	}
 }
