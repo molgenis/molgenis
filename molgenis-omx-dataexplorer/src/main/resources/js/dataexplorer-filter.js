@@ -372,7 +372,7 @@
 	 * Create remove button to remove complex elements that are not the first
 	 */
 	self.createRemoveButtonComplexElementFilter = function($complexElementContainer){
-		return $('<button class="btn btn-default btn-xs" type="button" data-filter=complex-removebutton><i class="icon-minus"></i></button>').click(function(){
+		return $('<button class="btn btn-default btn-xs" type="button" data-filter=complex-removebutton><i class="glyphicon glyphicon-minus"></i></button>').click(function(){
 					var $container = $complexElementContainer.parent();
 					var $addButton = $('[data-filter=complex-addbutton]', $container);
 					
@@ -394,7 +394,7 @@
 	 * Create remove button to remove the first element in a complex filter
 	 */
 	self.createRemoveButtonFirstComplexElement = function($container){
-		return $('<button class="btn btn-default btn-xs" type="button" data-filter=complex-removebutton><i class="icon-minus"></i></button>').click(function(){
+		return $('<button class="btn btn-default btn-xs" type="button" data-filter=complex-removebutton><i class="glyphicon glyphicon-minus"></i></button>').click(function(){
 					var $firstElement = $('[data-filter=complex-element]', $container)[0];
 					var $secondElement = $('[data-filter=complex-element]', $container)[1];
 					var $simpleFilterFirstElement = $('[data-filter=complex-simplefilter]', $firstElement);
@@ -429,7 +429,7 @@
 	 * Create simple filter controls
 	 */
 	self.createSimpleFilterControls = function(attribute, simpleFilter) {
-		var $controls = $('<div class="col-md-9">').width('384px');
+		var $controls = $('<div class="col-md-12">').width('auto');
 		var name = 'input-' + attribute.name + '-' + new Date().getTime();
 		var values = simpleFilter ? simpleFilter.getValues() : null;
 		var fromValue = simpleFilter ? simpleFilter.fromValue : null;
@@ -469,8 +469,8 @@
 				var nameFrom = name + '-from', nameTo = name + '-to';
 				var valFrom = fromValue ? fromValue : undefined;
 				var valTo = toValue ? toValue : undefined;
-				var inputFrom = createInput(attribute, {'name': nameFrom, 'placeholder': 'Start date', 'style' : 'width: 315px'}, valFrom);
-				var inputTo = createInput(attribute, {'name': nameTo, 'placeholder': 'End date', 'style' : 'width: 315px'}, valTo);
+				var inputFrom = createInput(attribute, {'name': nameFrom, 'placeholder': 'Start date', 'style' : 'width: auto'}, valFrom);
+				var inputTo = createInput(attribute, {'name': nameTo, 'placeholder': 'End date', 'style' : 'width: auto'}, valTo);
 				$controls.append($('<div class="form-group">').append(inputFrom)).append($('<div class="form-group">').append(inputTo));
 				break;
 			case 'DECIMAL':

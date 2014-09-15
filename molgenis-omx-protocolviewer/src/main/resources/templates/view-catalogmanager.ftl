@@ -53,7 +53,7 @@
 							</div>
 						</div>
 					<#if foundCatalog>
-						<input id="activationButton" type="submit" name="activate" class="btn pull-right" value="Activate" />
+						<input id="activationButton" type="submit" name="activate" class="btn pull-right btn-primary" value="Activate" />
 					</#if>
 					</form>
 				</#if>
