@@ -9,6 +9,8 @@
 	min-height: 490px;
 	max-height: 490px;
 	margin-bottom: 10px;
+	max-width: 100%;
+    overflow-x: hidden;
 }
 
 .filter-wizard-fixed-height {
@@ -28,17 +30,17 @@
 	position: static;
 }
 
-.xrefmrefsearch {
-	padding-left: 25px;
+#filter-wizard-modal-label {
+	display: inline-block;
 }
 
 #filter-wizard-modal .controls.xrefmrefsearch.complex-simplefilter,
 #filter-modal .controls.xrefmrefsearch.complex-simplefilter{
-	width: 370px;
+/* 	width: 370; */
 }
 
 #filter-wizard-modal .form-horizontal .control-label{
-	width:20%;
+/* 	width:20%; */
 }
 
 #filter-modal .modal-body {
@@ -84,9 +86,17 @@
 }
 
 #filter-modal .form-horizontal {
-	margin-bottom: 60px;
+/* 	margin-bottom: 60px; */
 }
 
 .simple-filter-container{
-	padding-bottom: 10px;
+/* 	padding-bottom: 10px; */
+}
+
+.xrefmrefsearch {
+/* 	padding-left: 25px; */
+}
+
+.controls complex-element {
+	width: 500px;
 }

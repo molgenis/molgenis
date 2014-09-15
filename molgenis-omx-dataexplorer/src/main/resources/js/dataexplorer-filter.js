@@ -239,7 +239,7 @@
 		var $complexElementContainer = $('<div class="form-group complex-element-container" data-filter="complex-element-container"></div>');
 		
 		// Complex element containing the simple filter and the operator
-		var $complexElement = $('<div class="controls complex-element" data-filter="complex-element"></div>');
+		var $complexElement = $('<div class="controls complex-element col-md-9" data-filter="complex-element"></div>');
 		
 		// Make complex filter element label
 		var $complexElementLabel = self.createFilterLabel(attribute, isFirstElement, wizard);
@@ -251,6 +251,7 @@
 		var $controlGroupSimpleFilter = self.createSimpleFilterControls(attribute, simpleFilter);
 		$controlGroupSimpleFilter.attr('data-filter', 'complex-simplefilter');
 		$controlGroupSimpleFilter.addClass('complex-simplefilter');
+		$controlGroupSimpleFilter.css('display', 'inline-block');
 		
 		// Remove complex filter element button container
 		var $removeButtonContainer = $('<div class="controls complex-removebutton-container" data-filter="complex-removebutton-container"></div>');
@@ -429,7 +430,8 @@
 	 * Create simple filter controls
 	 */
 	self.createSimpleFilterControls = function(attribute, simpleFilter) {
-		var $controls = $('<div class="col-md-12">').width('auto');
+		var $controls = $('<div>');
+		$controls.addClass('col-md-9');
 		var name = 'input-' + attribute.name + '-' + new Date().getTime();
 		var values = simpleFilter ? simpleFilter.getValues() : null;
 		var fromValue = simpleFilter ? simpleFilter.fromValue : null;
@@ -441,7 +443,7 @@
 				var attrsFalse = values && values[0] === 'false' ? $.extend({}, attrs, {'checked': 'checked'}) : attrs;
 				var inputTrue = createInput(attribute, attrsTrue, true);
 				var inputFalse = createInput(attribute, attrsFalse, false);
-				$controls.append(inputTrue.addClass('inline')).append(inputFalse.addClass('inline'));
+				$controls.append(inputTrue.addClass('radio-inline')).append(inputFalse.addClass('radio-inline'));
 				break;
 			case 'CATEGORICAL':
 				var restApi = new molgenis.RestClient();
@@ -469,8 +471,8 @@
 				var nameFrom = name + '-from', nameTo = name + '-to';
 				var valFrom = fromValue ? fromValue : undefined;
 				var valTo = toValue ? toValue : undefined;
-				var inputFrom = createInput(attribute, {'name': nameFrom, 'placeholder': 'Start date', 'style' : 'width: auto'}, valFrom);
-				var inputTo = createInput(attribute, {'name': nameTo, 'placeholder': 'End date', 'style' : 'width: auto'}, valTo);
+				var inputFrom = createInput(attribute, {'name': nameFrom, 'placeholder': 'Start date'}, valFrom);
+				var inputTo = createInput(attribute, {'name': nameTo, 'placeholder': 'End date'}, valTo);
 				$controls.append($('<div class="form-group">').append(inputFrom)).append($('<div class="form-group">').append(inputTo));
 				break;
 			case 'DECIMAL':
@@ -503,7 +505,7 @@
 			case 'TEXT':
 			case 'ENUM':
 			case 'SCRIPT':
-				$controls.append(createInput(attribute, {'name': name, 'id': name, 'style' : 'width: 370px'}, values ? values[0] : undefined));
+				$controls.append(createInput(attribute, {'name': name, 'id': name, 'style' : 'width: 400px'}, values ? values[0] : undefined));
 				break;
 			case 'XREF':
 			case 'MREF':
@@ -516,7 +518,7 @@
 					operator : operator,
 					autofocus : 'autofocus',
 					isfilter : true,
-					width : '370px',
+					width : '400px',
 				});
 				break;
 			case 'COMPOUND' :
