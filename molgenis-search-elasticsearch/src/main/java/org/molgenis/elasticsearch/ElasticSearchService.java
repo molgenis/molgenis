@@ -7,6 +7,7 @@ import static org.molgenis.elasticsearch.util.MapperTypeSanitizer.sanitizeMapper
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
@@ -16,6 +17,7 @@ import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequest;
 import org.elasticsearch.action.admin.indices.exists.types.TypesExistsRequest;
+import org.elasticsearch.action.admin.indices.mapping.delete.DeleteMappingResponse;
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
@@ -29,21 +31,25 @@ import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.deletebyquery.DeleteByQueryResponse;
 import org.elasticsearch.action.deletebyquery.IndexDeleteByQueryResponse;
 import org.elasticsearch.action.get.GetResponse;
+import org.elasticsearch.action.get.MultiGetItemResponse;
+import org.elasticsearch.action.get.MultiGetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
-import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.SearchHit;
+import org.molgenis.data.AggregateQuery;
+import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.support.QueryImpl;
@@ -52,6 +58,7 @@ import org.molgenis.elasticsearch.index.IndexRequestGenerator;
 import org.molgenis.elasticsearch.index.MappingsBuilder;
 import org.molgenis.elasticsearch.request.SearchRequestGenerator;
 import org.molgenis.elasticsearch.response.ResponseParser;
+import org.molgenis.elasticsearch.util.ElasticsearchEntityUtils;
 import org.molgenis.search.Hit;
 import org.molgenis.search.MultiSearchRequest;
 import org.molgenis.search.SearchRequest;
@@ -63,10 +70,10 @@ import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 
 /**
- * ElasticSearch implementation of the SearchService interface
+ * ElasticSearch implementation of the SearchService interface. TODO use scroll-scan where possible:
+ * http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-request-scroll.html#scroll-scans
  * 
  * @author erwin
- * 
  */
 public class ElasticSearchService implements SearchService
 {
@@ -114,26 +121,69 @@ public class ElasticSearchService implements SearchService
 		if (createIndexIfNotExists) createIndexIfNotExists();
 	}
 
+	/**
+	 * Returns all type names for this index
+	 * 
+	 * @return
+	 */
+	public Iterable<String> getTypes()
+	{
+		if (LOG.isTraceEnabled()) LOG.trace("Retrieving Elasticsearch type names ...");
+		GetMappingsResponse mappingsResponse = client.admin().indices().prepareGetMappings(indexName).execute()
+				.actionGet();
+		if (LOG.isDebugEnabled()) LOG.debug("Retrieved Elasticsearch type names");
+
+		final ImmutableOpenMap<String, MappingMetaData> indexMappings = mappingsResponse.getMappings().get(indexName);
+		return new Iterable<String>()
+		{
+
+			@Override
+			public Iterator<String> iterator()
+			{
+				return indexMappings.keysIt();
+			}
+		};
+	}
+
+	/**
+	 * @deprecated see search(Query, EntityMetaData) or aggregate(AggregateQuery, EntityMetaData)
+	 */
 	@Override
+	@Deprecated
 	public SearchResult search(SearchRequest request)
 	{
 		return search(SearchType.QUERY_AND_FETCH, request);
 	}
 
+	// TODO this method is only used by BiobankConnect and should be removed in the future
 	@Override
+	@Deprecated
 	public SearchResult multiSearch(MultiSearchRequest request)
 	{
 		return multiSearch(SearchType.QUERY_AND_FETCH, request);
 	}
 
+	/**
+	 * @deprecated see count(Query, EntityMetaData)
+	 */
 	@Override
+	@Deprecated
 	public long count(String documentType, Query q)
 	{
+		String type = sanitizeMapperType(documentType);
 
-		SearchRequest request = new SearchRequest(documentType, q, Collections.<String> emptyList());
-		SearchResult result = search(SearchType.COUNT, request);
+		if (LOG.isTraceEnabled())
+		{
+			LOG.trace("Counting Elasticsearch '" + type + "' docs using query [" + q + "] ...");
+		}
+		SearchRequest request = new SearchRequest(type, q, Collections.<String> emptyList());
+		long count = search(SearchType.COUNT, request).getTotalHitCount();
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Counted " + count + " Elasticsearch '" + type + "' docs using query [" + q + "] ...");
+		}
 
-		return result.getTotalHitCount();
+		return count;
 	}
 
 	@Override
@@ -167,11 +217,11 @@ public class ElasticSearchService implements SearchService
 		SearchRequestBuilder builder = client.prepareSearch(indexName);
 
 		generator.buildSearchRequest(builder, documentTypes, searchType, request.getQuery(),
-				request.getFieldsToReturn(), null, null, null);
+				request.getFieldsToReturn(), null, null, null, null);
 
-		if (LOG.isDebugEnabled())
+		if (LOG.isTraceEnabled())
 		{
-			LOG.debug("SearchRequestBuilder:" + builder);
+			LOG.trace("SearchRequestBuilder:" + builder);
 		}
 
 		SearchResponse response = builder.execute().actionGet();
@@ -180,7 +230,8 @@ public class ElasticSearchService implements SearchService
 			LOG.debug("SearchResponse:" + response);
 		}
 
-		return responseParser.parseSearchResponse(response, null);
+		// FIXME passing null as request is not cool (and breaks aggregates)
+		return responseParser.parseSearchResponse(null, response, null, dataService);
 	}
 
 	private SearchResult search(SearchType searchType, SearchRequest request)
@@ -195,25 +246,18 @@ public class ElasticSearchService implements SearchService
 				.hasRepository(request.getDocumentType())) ? dataService.getEntityMetaData(request.getDocumentType()) : null;
 		String documentType = request.getDocumentType() == null ? null : sanitizeMapperType(request.getDocumentType());
 
-		generator
-				.buildSearchRequest(builder, documentType, searchType, request.getQuery(), request.getFieldsToReturn(),
-						request.getAggregateField1(), request.getAggregateField2(), entityMetaData);
-
-		if (LOG.isDebugEnabled())
-		{
-			LOG.debug("SearchRequestBuilder:" + builder);
-		}
-
+		generator.buildSearchRequest(builder, documentType, searchType, request.getQuery(),
+				request.getFieldsToReturn(), request.getAggregateField1(), request.getAggregateField2(),
+				request.getAggregateFieldDistinct(), entityMetaData);
 		SearchResponse response = builder.execute().actionGet();
-		if (LOG.isDebugEnabled())
-		{
-			LOG.debug("SearchResponse:" + response);
-		}
-
-		return responseParser.parseSearchResponse(response, entityMetaData);
+		return responseParser.parseSearchResponse(request, response, entityMetaData, dataService);
 	}
 
+	/**
+	 * @deprecated see index(Iterable<Entity>, EntityMetaData)
+	 */
 	@Override
+	@Deprecated
 	public void indexRepository(Repository repository)
 	{
 		if (!repository.iterator().hasNext())
@@ -224,7 +268,7 @@ public class ElasticSearchService implements SearchService
 		try
 		{
 			LOG.info("Going to create mapping for repository [" + repository.getName() + "]");
-			createMappings(repository, true);
+			createMappings(repository, true, true, true);
 		}
 		catch (IOException e)
 		{
@@ -242,9 +286,9 @@ public class ElasticSearchService implements SearchService
 		for (BulkRequestBuilder request : requests)
 		{
 			LOG.info("Request created");
-			if (LOG.isDebugEnabled())
+			if (LOG.isTraceEnabled())
 			{
-				LOG.debug("BulkRequest:" + request);
+				LOG.trace("BulkRequest:" + request);
 			}
 
 			BulkResponse response = request.execute().actionGet();
@@ -270,7 +314,11 @@ public class ElasticSearchService implements SearchService
 		{ indexName }, documentTypeSantized)).actionGet().isExists();
 	}
 
+	/**
+	 * @deprecated see delete(EntityMetaData)
+	 */
 	@Override
+	@Deprecated
 	public void deleteDocumentsByType(String documentType)
 	{
 		LOG.info("Going to delete all documents of type [" + documentType + "]");
@@ -292,12 +340,15 @@ public class ElasticSearchService implements SearchService
 		LOG.info("Delete done.");
 	}
 
+	/**
+	 * @deprecated see delete(Iterable<Entity>, EntityMetaData)
+	 */
 	@Override
+	@Deprecated
 	public void deleteDocumentByIds(String documentType, List<String> documentIds)
 	{
-		LOG.info("Going to delete document of type [" + documentType + "] with Id : " + documentIds);
-
 		String documentTypeSantized = sanitizeMapperType(documentType);
+		LOG.info("Deleting Elasticsearch '" + documentTypeSantized + "' docs with ids [" + documentIds + "]");
 
 		for (String documentId : documentIds)
 		{
@@ -311,7 +362,7 @@ public class ElasticSearchService implements SearchService
 				}
 			}
 		}
-		LOG.info("Delete done.");
+		LOG.info("Deleted Elasticsearch '" + documentTypeSantized + "' docs with ids [" + documentIds + "]");
 	}
 
 	@Override
@@ -325,7 +376,7 @@ public class ElasticSearchService implements SearchService
 		try
 		{
 			LOG.info("Going to create mapping for repository [" + repository.getName() + "]");
-			createMappings(repository, true);
+			createMappings(repository, true, true, true);
 		}
 		catch (IOException e)
 		{
@@ -339,14 +390,12 @@ public class ElasticSearchService implements SearchService
 		Iterable<BulkRequestBuilder> requests = requestGenerator.buildIndexRequest(repository);
 		for (BulkRequestBuilder request : requests)
 		{
-			LOG.info("Request created");
-			if (LOG.isDebugEnabled())
+			if (LOG.isTraceEnabled())
 			{
-				LOG.debug("BulkRequest:" + request);
+				LOG.trace("BulkRequest:" + request);
 			}
 
 			BulkResponse response = request.execute().actionGet();
-			LOG.info("Request done");
 			if (LOG.isDebugEnabled())
 			{
 				LOG.debug("BulkResponse:" + response);
@@ -362,18 +411,19 @@ public class ElasticSearchService implements SearchService
 	@Override
 	public void updateDocumentById(String documentType, String documentId, String updateScript)
 	{
-		LOG.info("Going to update document of type [" + documentType + "] with Id : " + documentId);
-
-		String documentTypeSantized = sanitizeMapperType(documentType);
-		UpdateResponse updateResponse = client.prepareUpdate(indexName, documentTypeSantized, documentId)
-				.setScript("ctx._source." + updateScript).execute().actionGet();
-
-		if (updateResponse == null)
-		{
-			throw new ElasticsearchException("update failed.");
-		}
-
-		LOG.info("Update done.");
+		// LOG.info("Going to update document of type [" + documentType + "] with Id : " + documentId);
+		//
+		// String documentTypeSantized = sanitizeMapperType(documentType);
+		// UpdateResponse updateResponse = client.prepareUpdate(indexName, documentTypeSantized, documentId)
+		// .setScript("ctx._source." + updateScript).execute().actionGet();
+		//
+		// if (updateResponse == null)
+		// {
+		// throw new ElasticsearchException("update failed.");
+		// }
+		//
+		// LOG.info("Update done.");
+		// FIXME
 	}
 
 	private void createIndexIfNotExists()
@@ -383,18 +433,24 @@ public class ElasticSearchService implements SearchService
 		boolean hasIndex = client.admin().indices().exists(new IndicesExistsRequest(indexName)).actionGet().isExists();
 		if (!hasIndex)
 		{
+			if (LOG.isTraceEnabled()) LOG.trace("Creating Elasticsearch index [" + indexName + "] ...");
 			CreateIndexResponse response = client.admin().indices().prepareCreate(indexName).execute().actionGet();
 			if (!response.isAcknowledged())
 			{
 				throw new ElasticsearchException("Creation of index [" + indexName + "] failed. Response=" + response);
 			}
-			LOG.info("Index [" + indexName + "] created");
+			LOG.info("Created Elasticsearch index [" + indexName + "]");
 		}
 	}
 
 	public boolean hasMapping(Repository repository)
 	{
-		String docType = sanitizeMapperType(repository.getName());
+		return hasMapping(repository.getEntityMetaData());
+	}
+
+	public boolean hasMapping(EntityMetaData entityMetaData)
+	{
+		String docType = sanitizeMapperType(entityMetaData.getName());
 
 		GetMappingsResponse getMappingsResponse = client.admin().indices().prepareGetMappings("molgenis").execute()
 				.actionGet();
@@ -404,15 +460,27 @@ public class ElasticSearchService implements SearchService
 		return indexMappings.containsKey(docType);
 	}
 
-	public void createMappings(Repository repository, boolean storeSource) throws IOException
+	/**
+	 * @deprecated see createMappings(EntityMetaData)
+	 */
+	@Deprecated
+	public void createMappings(Repository repository, boolean storeSource, boolean enableNorms, boolean createAllIndex)
+			throws IOException
 	{
-		createMappings(repository.getEntityMetaData(), storeSource);
+		createMappings(repository.getEntityMetaData(), storeSource, enableNorms, createAllIndex);
 	}
 
-	public void createMappings(EntityMetaData entityMetaData, boolean storeSource) throws IOException
+	public void createMappings(EntityMetaData entityMetaData) throws IOException
 	{
-		XContentBuilder jsonBuilder = MappingsBuilder.buildMapping(entityMetaData, storeSource);
-		LOG.info("Going to create mapping [" + jsonBuilder.string() + "]");
+		createMappings(entityMetaData, true, true, true);
+	}
+
+	public void createMappings(EntityMetaData entityMetaData, boolean storeSource, boolean enableNorms,
+			boolean createAllIndex) throws IOException
+	{
+		XContentBuilder jsonBuilder = MappingsBuilder.buildMapping(entityMetaData, storeSource, enableNorms,
+				createAllIndex);
+		if (LOG.isTraceEnabled()) LOG.trace("Creating Elasticsearch mapping [" + jsonBuilder.string() + "] ...");
 		String entityName = entityMetaData.getName();
 
 		PutMappingResponse response = client.admin().indices().preparePutMapping(indexName)
@@ -424,13 +492,16 @@ public class ElasticSearchService implements SearchService
 					+ "] failed. Response=" + response);
 		}
 
-		LOG.info("Mapping for documentType [" + entityName + "] created");
+		if (LOG.isDebugEnabled()) LOG.debug("Created Elasticsearch mapping [" + jsonBuilder.string() + "]");
 	}
 
+	/**
+	 * Refresh index, making all operations performed since the last refresh available for search
+	 */
 	@Override
 	public void refresh()
 	{
-		if (LOG.isDebugEnabled()) LOG.debug("Refreshing Elasticsearch index [" + indexName + "]");
+		if (LOG.isTraceEnabled()) LOG.trace("Refreshing Elasticsearch index [" + indexName + "]");
 		RefreshResponse refreshResponse = client.admin().indices().refresh(refreshRequest(indexName)).actionGet();
 		if (refreshResponse == null || refreshResponse.getFailedShards() > 0)
 		{
@@ -439,21 +510,49 @@ public class ElasticSearchService implements SearchService
 		if (LOG.isDebugEnabled()) LOG.debug("Refreshed Elasticsearch index [" + indexName + "]");
 	}
 
+	public long count(EntityMetaData entityMetaData)
+	{
+		return count(null, entityMetaData);
+	}
+
 	public long count(Query q, EntityMetaData entityMetaData)
 	{
 		String entityName = entityMetaData.getName();
 		String type = sanitizeMapperType(entityName);
 		List<String> fieldsToReturn = Collections.<String> emptyList();
 
+		if (LOG.isTraceEnabled())
+		{
+			if (q != null)
+			{
+				LOG.trace("Counting Elasticsearch '" + type + "' docs using query [" + q + "] ...");
+			}
+			else LOG.trace("Counting Elasticsearch '" + type + "' docs ...");
+		}
 		SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName);
-		generator.buildSearchRequest(searchRequestBuilder, type, SearchType.COUNT, q, fieldsToReturn, null, null,
+		generator.buildSearchRequest(searchRequestBuilder, type, SearchType.COUNT, q, fieldsToReturn, null, null, null,
 				entityMetaData);
 		SearchResponse searchResponse = searchRequestBuilder.execute().actionGet();
 		if (searchResponse.getFailedShards() > 0)
 		{
 			throw new ElasticsearchException("Search failed. Returned headers:" + searchResponse.getHeaders());
 		}
-		return searchResponse.getHits().totalHits();
+		long count = searchResponse.getHits().totalHits();
+		if (LOG.isDebugEnabled())
+		{
+			if (q != null)
+			{
+				LOG.debug("Counted " + count + " Elasticsearch '" + type + "' docs using query [" + q + "] in "
+						+ searchResponse.getTookInMillis() + "ms");
+			}
+			else
+			{
+				LOG.debug("Counted " + count + " Elasticsearch '" + type + "' docs in "
+						+ searchResponse.getTookInMillis() + "ms");
+			}
+		}
+
+		return count;
 	}
 
 	public void index(Entity entity, EntityMetaData entityMetaData, IndexingMode indexingMode)
@@ -502,32 +601,6 @@ public class ElasticSearchService implements SearchService
 		if (updateIndex == true && indexingMode == IndexingMode.UPDATE) updateReferences(entities, entityMetaData);
 	}
 
-	public Iterable<String> search(Query q, final EntityMetaData entityMetaData)
-	{
-		String entityName = entityMetaData.getName();
-		String type = sanitizeMapperType(entityName);
-		List<String> fieldsToReturn = Collections.<String> emptyList();
-
-		SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName);
-		generator.buildSearchRequest(searchRequestBuilder, type, SearchType.QUERY_AND_FETCH, q, fieldsToReturn, null,
-				null, entityMetaData);
-
-		SearchResponse searchResponse = searchRequestBuilder.execute().actionGet();
-		if (searchResponse.getFailedShards() > 0)
-		{
-			throw new ElasticsearchException("Search failed. Returned headers:" + searchResponse.getHeaders());
-		}
-
-		return Iterables.transform(searchResponse.getHits(), new Function<SearchHit, String>()
-		{
-			@Override
-			public String apply(SearchHit searchHit)
-			{
-				return searchHit.getId();
-			}
-		});
-	}
-
 	public void delete(Entity entity, EntityMetaData entityMetaData)
 	{
 		String elasticsearchId = toElasticsearchId(entity, entityMetaData);
@@ -539,90 +612,20 @@ public class ElasticSearchService implements SearchService
 		String entityName = entityMetaData.getName();
 		String type = sanitizeMapperType(entityName);
 
+		if (LOG.isTraceEnabled())
+		{
+			LOG.trace("Deleting Elasticsearch '" + type + "' doc with id [" + id + "] ...");
+		}
 		DeleteResponse deleteResponse = client.prepareDelete(indexName, type, id.toString()).setRefresh(true).execute()
 				.actionGet();
 		if (!deleteResponse.isFound())
 		{
 			throw new ElasticsearchException("Delete failed. Returned headers:" + deleteResponse.getHeaders());
 		}
-	}
-
-	static class SynchronizedBulkProcessor
-	{
-		private Semaphore sem;
-		private BulkProcessor bulkProcessor;
-
-		public SynchronizedBulkProcessor(Client client)
+		if (LOG.isDebugEnabled())
 		{
-			bulkProcessor = BulkProcessor.builder(client, new Listener()
-			{
-				@Override
-				public void beforeBulk(long executionId, BulkRequest request)
-				{
-					if (LOG.isDebugEnabled())
-					{
-						LOG.debug("Going to execute new bulk composed of " + request.numberOfActions() + " actions");
-					}
-				}
-
-				@Override
-				public void afterBulk(long executionId, BulkRequest request, BulkResponse response)
-				{
-					if (LOG.isDebugEnabled())
-					{
-						LOG.debug("Executed bulk composed of " + request.numberOfActions() + " actions");
-					}
-					sem.release();
-				}
-
-				@Override
-				public void afterBulk(long executionId, BulkRequest request, Throwable failure)
-				{
-					LOG.warn("Error executing bulk", failure);
-					sem.release();
-				}
-			}).build();
-			sem = new Semaphore(1);
+			LOG.debug("Deleted Elasticsearch '" + type + "' doc with id [" + id + "]");
 		}
-
-		public int hashCode()
-		{
-			return bulkProcessor.hashCode();
-		}
-
-		public boolean equals(Object obj)
-		{
-			return bulkProcessor.equals(obj);
-		}
-
-		public void close()
-		{
-			bulkProcessor.close();
-			awaitCompletion();
-		}
-
-		public BulkProcessor add(IndexRequest request)
-		{
-			return bulkProcessor.add(request);
-		}
-
-		public BulkProcessor add(DeleteRequest request)
-		{
-			return bulkProcessor.add(request);
-		}
-
-		private void awaitCompletion()
-		{
-			try
-			{
-				sem.acquire();
-			}
-			catch (InterruptedException e)
-			{
-				throw new RuntimeException(e);
-			}
-		}
-
 	}
 
 	public void deleteById(Iterable<String> ids, EntityMetaData entityMetaData)
@@ -630,6 +633,10 @@ public class ElasticSearchService implements SearchService
 		String entityName = entityMetaData.getName();
 		String type = sanitizeMapperType(entityName);
 
+		if (LOG.isTraceEnabled())
+		{
+			LOG.trace("Deleting Elasticsearch '" + type + "' docs with ids [" + ids + "] ...");
+		}
 		Semaphore sem = new Semaphore(1);
 		try
 		{
@@ -654,6 +661,10 @@ public class ElasticSearchService implements SearchService
 		{
 			throw new RuntimeException(e);
 		}
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Deleted Elasticsearch '" + type + "' docs with ids [" + ids + "] ...");
+		}
 		refresh();
 	}
 
@@ -662,6 +673,10 @@ public class ElasticSearchService implements SearchService
 		String entityName = entityMetaData.getName();
 		String type = sanitizeMapperType(entityName);
 
+		if (LOG.isTraceEnabled())
+		{
+			LOG.trace("Bulk deleting Elasticsearch '" + type + "' docs ...");
+		}
 		Semaphore sem = new Semaphore(1);
 		try
 		{
@@ -687,24 +702,180 @@ public class ElasticSearchService implements SearchService
 		{
 			throw new RuntimeException(e);
 		}
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Bulk deleted Elasticsearch '" + type + "' docs");
+		}
+
 		refresh();
 	}
 
 	public void delete(EntityMetaData entityMetaData)
 	{
 		String type = sanitizeMapperType(entityMetaData.getName());
-		DeleteByQueryResponse deleteByQueryResponse = client.prepareDeleteByQuery(indexName)
-				.setQuery(new TermQueryBuilder("_type", type)).execute().actionGet();
-
-		if (deleteByQueryResponse != null)
+		if (LOG.isTraceEnabled())
 		{
-			IndexDeleteByQueryResponse idbqr = deleteByQueryResponse.getIndex(indexName);
-			if (idbqr != null && idbqr.getFailedShards() > 0)
-			{
-				throw new ElasticsearchException("Delete failed. Returned headers:" + idbqr.getHeaders());
-			}
+			LOG.trace("Deleting all Elasticsearch '" + type + "' docs ...");
 		}
+
+		DeleteMappingResponse deleteMappingResponse = client.admin().indices().prepareDeleteMapping(indexName)
+				.setType(type).execute().actionGet();
+		if (!deleteMappingResponse.isAcknowledged())
+		{
+			throw new ElasticsearchException("Delete failed. Returned headers:" + deleteMappingResponse.getHeaders());
+		}
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Deleted all Elasticsearch '" + type + "' docs");
+		}
+		// FIXME only deletes mappings?
+		// deleteMapping(request)
+		// DeleteByQueryResponse deleteByQueryResponse = client.prepareDeleteByQuery(indexName)
+		// .setQuery(new TermQueryBuilder("_type", type)).execute().actionGet();
+		//
+		// if (deleteByQueryResponse != null)
+		// {
+		// IndexDeleteByQueryResponse idbqr = deleteByQueryResponse.getIndex(indexName);
+		// if (idbqr != null && idbqr.getFailedShards() > 0)
+		// {
+		// throw new ElasticsearchException("Delete failed. Returned headers:" + idbqr.getHeaders());
+		// }
+		// }
 		refresh();
+	}
+
+	/**
+	 * Returns entity with given id or null if entity does not exist
+	 * 
+	 * @param entityId
+	 * @param entityMetaData
+	 * @return
+	 */
+	public ElasticsearchDocumentEntity get(Object entityId, EntityMetaData entityMetaData)
+	{
+		String entityName = entityMetaData.getName();
+		String type = sanitizeMapperType(entityName);
+		String id = ElasticsearchEntityUtils.toElasticsearchId(entityId);
+
+		if (LOG.isTraceEnabled())
+		{
+			LOG.trace("Retrieving Elasticsearch '" + type + "' doc with id [" + id + "] ...");
+		}
+		GetResponse response = client.prepareGet(indexName, type, id).execute().actionGet();
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Retrieved Elasticsearch '" + type + "' doc with id [" + id + "]");
+		}
+		return response.isExists() ? new ElasticsearchDocumentEntity(response.getSource(), entityMetaData, this) : null;
+	}
+
+	public Iterable<Entity> get(Iterable<Object> entityIds, final EntityMetaData entityMetaData)
+	{
+		String entityName = entityMetaData.getName();
+		String type = sanitizeMapperType(entityName);
+
+		if (LOG.isTraceEnabled())
+		{
+			LOG.trace("Retrieving Elasticsearch '" + type + "' docs with ids [" + entityIds + "] ...");
+		}
+		MultiGetResponse response = client.prepareMultiGet()
+				.add(indexName, type, ElasticsearchEntityUtils.toElasticsearchIds(entityIds)).execute().actionGet();
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Retrieved Elasticsearch '" + type + "' docs with ids [" + entityIds + "] ...");
+		}
+
+		final ElasticSearchService self = this;
+		return Iterables.transform(response, new Function<MultiGetItemResponse, Entity>()
+		{
+			@Override
+			public Entity apply(MultiGetItemResponse itemResponse)
+			{
+				if (itemResponse.isFailed())
+				{
+					throw new ElasticsearchException("Search failed. Returned headers:" + itemResponse.getFailure());
+				}
+				GetResponse getResponse = itemResponse.getResponse();
+				return getResponse.isExists() ? new ElasticsearchDocumentEntity(getResponse.getSource(),
+						entityMetaData, self) : null;
+			}
+		});
+	}
+
+	// TODO replace Iterable<Entity> with EntityCollection and add EntityCollection.getTotal()
+	public Iterable<Entity> search(Query q, final EntityMetaData entityMetaData)
+	{
+		String entityName = entityMetaData.getName();
+		String type = sanitizeMapperType(entityName);
+		List<String> fieldsToReturn = Collections.<String> emptyList();
+
+		SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName);
+		generator.buildSearchRequest(searchRequestBuilder, type, SearchType.QUERY_AND_FETCH, q, fieldsToReturn, null,
+				null, null, entityMetaData);
+
+		if (LOG.isTraceEnabled())
+		{
+			LOG.trace("Searching Elasticsearch '" + type + "' docs using query [" + q + "] ...");
+		}
+		SearchResponse searchResponse = searchRequestBuilder.execute().actionGet();
+		if (searchResponse.getFailedShards() > 0)
+		{
+			throw new ElasticsearchException("Search failed. Returned headers:" + searchResponse.getHeaders());
+		}
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Searched Elasticsearch '" + type + "' docs using query [" + q + "] in "
+					+ searchResponse.getTotalShards() + "ms");
+		}
+
+		final ElasticSearchService elasticSearchService = this;
+		return Iterables.transform(searchResponse.getHits(), new Function<SearchHit, Entity>()
+		{
+			@Override
+			public Entity apply(SearchHit searchHit)
+			{
+				return new ElasticsearchSearchHitEntity(searchHit, entityMetaData, elasticSearchService);
+			}
+		});
+	}
+
+	public AggregateResult aggregate(AggregateQuery aggregateQuery, final EntityMetaData entityMetaData)
+	{
+		Query q = aggregateQuery.getQuery();
+		AttributeMetaData xAttr = aggregateQuery.getAttributeX();
+		AttributeMetaData yAttr = aggregateQuery.getAttributeY();
+		AttributeMetaData distinctAttr = aggregateQuery.getAttributeDistinct();
+		SearchRequest searchRequest = new SearchRequest(entityMetaData.getName(), q, Collections.<String> emptyList(),
+				xAttr, yAttr, distinctAttr);
+		SearchResult searchResults = search(searchRequest);
+		return searchResults.getAggregate();
+	}
+
+	/**
+	 * Frees memory from the index by flushing data to the index storage and clearing the internal transaction log
+	 */
+	public void flush()
+	{
+		if (LOG.isTraceEnabled()) LOG.trace("Flushing Elasticsearch index [" + indexName + "] ...");
+		client.admin().indices().prepareFlush(indexName).execute().actionGet();
+		if (LOG.isDebugEnabled()) LOG.debug("Flushed Elasticsearch index [" + indexName + "]");
+	}
+
+	public void rebuildIndex(Iterable<? extends Entity> entities, EntityMetaData entityMetaData)
+	{
+		try
+		{
+			if (hasMapping(entityMetaData))
+			{
+				delete(entityMetaData);
+			}
+			createMappings(entityMetaData);
+			index(entities, entityMetaData, IndexingMode.ADD);
+		}
+		catch (IOException e)
+		{
+			throw new MolgenisDataException(e);
+		}
 	}
 
 	private void updateReferences(Entity entity, EntityMetaData entityMetaData)
@@ -772,6 +943,84 @@ public class ElasticSearchService implements SearchService
 
 		return referencingEntityMetaData != null ? referencingEntityMetaData : Collections
 				.<Pair<EntityMetaData, List<AttributeMetaData>>> emptyList();
+
+	}
+
+	static class SynchronizedBulkProcessor
+	{
+		private Semaphore sem;
+		private BulkProcessor bulkProcessor;
+
+		public SynchronizedBulkProcessor(Client client)
+		{
+			bulkProcessor = BulkProcessor.builder(client, new Listener()
+			{
+				@Override
+				public void beforeBulk(long executionId, BulkRequest request)
+				{
+					if (LOG.isTraceEnabled())
+					{
+						LOG.trace("Going to execute new bulk composed of " + request.numberOfActions() + " actions");
+					}
+				}
+
+				@Override
+				public void afterBulk(long executionId, BulkRequest request, BulkResponse response)
+				{
+					if (LOG.isTraceEnabled())
+					{
+						LOG.trace("Executed bulk composed of " + request.numberOfActions() + " actions");
+					}
+					sem.release();
+				}
+
+				@Override
+				public void afterBulk(long executionId, BulkRequest request, Throwable failure)
+				{
+					LOG.warn("Error executing bulk", failure);
+					sem.release();
+				}
+			}).build();
+			sem = new Semaphore(1);
+		}
+
+		public int hashCode()
+		{
+			return bulkProcessor.hashCode();
+		}
+
+		public boolean equals(Object obj)
+		{
+			return bulkProcessor.equals(obj);
+		}
+
+		public void close()
+		{
+			bulkProcessor.close();
+			awaitCompletion();
+		}
+
+		public BulkProcessor add(IndexRequest request)
+		{
+			return bulkProcessor.add(request);
+		}
+
+		public BulkProcessor add(DeleteRequest request)
+		{
+			return bulkProcessor.add(request);
+		}
+
+		private void awaitCompletion()
+		{
+			try
+			{
+				sem.acquire();
+			}
+			catch (InterruptedException e)
+			{
+				throw new RuntimeException(e);
+			}
+		}
 
 	}
 }

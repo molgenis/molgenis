@@ -4,20 +4,16 @@ import java.util.Arrays;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
-import org.molgenis.data.AggregateResult;
-import org.molgenis.data.Aggregateable;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.CrudRepositoryDecorator;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Query;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.util.HugeMap;
 
 import com.google.common.collect.Sets;
 
-public class RepositoryValidationDecorator extends CrudRepositoryDecorator implements Aggregateable
+public class RepositoryValidationDecorator extends CrudRepositoryDecorator
 {
 	private final EntityAttributesValidator entityAttributesValidator;
 
@@ -25,11 +21,6 @@ public class RepositoryValidationDecorator extends CrudRepositoryDecorator imple
 	{
 		super(repository);
 		this.entityAttributesValidator = entityAttributesValidator;
-
-		if (!(repository instanceof Aggregateable))
-		{
-			throw new MolgenisDataException("Repository not aggregateable");
-		}
 	}
 
 	@Override
@@ -64,12 +55,6 @@ public class RepositoryValidationDecorator extends CrudRepositoryDecorator imple
 	{
 		validate(entities, false);
 		return getDecoratedRepository().add(entities);
-	}
-
-	@Override
-	public AggregateResult aggregate(AttributeMetaData xAttr, AttributeMetaData yAttr, Query q)
-	{
-		return ((Aggregateable) getDecoratedRepository()).aggregate(xAttr, yAttr, q);
 	}
 
 	private void validate(Iterable<? extends Entity> entities, boolean forUpdate)

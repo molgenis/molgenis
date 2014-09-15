@@ -134,7 +134,9 @@ index:
     		default_tokenizer:
     			type: pattern
     			pattern: ([\W\.]+)
-	
+
+# disable automatic mapping creation
+index.mapper.dynamic: false	
 index.number_of_shards: 1
 index.number_of_replicas: 0
 

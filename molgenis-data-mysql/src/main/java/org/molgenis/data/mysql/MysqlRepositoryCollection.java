@@ -16,6 +16,7 @@ import org.molgenis.data.CrudRepositorySecurityDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.IndexedCrudRepositorySecurityDecorator;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
@@ -28,6 +29,7 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.EntityAttributesValidator;
+import org.molgenis.data.validation.IndexedRepositoryValidationDecorator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
 import org.molgenis.elasticsearch.ElasticSearchService;
 import org.molgenis.model.MolgenisModelException;
@@ -445,10 +447,22 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		CrudRepository decoratedRepository = repository;
 		if (elasticSearchService != null)
 		{
-			decoratedRepository = new ElasticsearchRepositoryDecorator(decoratedRepository, elasticSearchService);
+			// 1. security decorator
+			// 2. index decorator
+			// 3. validation decorator
+			// 4. repository
+			decoratedRepository = new IndexedCrudRepositorySecurityDecorator(new IndexedRepositoryValidationDecorator(
+					new ElasticsearchRepositoryDecorator(decoratedRepository, elasticSearchService),
+					new EntityAttributesValidator()));
 		}
-		decoratedRepository = new CrudRepositorySecurityDecorator(new RepositoryValidationDecorator(
-				decoratedRepository, new EntityAttributesValidator()));
+		else
+		{
+			// 1. security decorator
+			// 2. validation decorator
+			// 3. repository
+			decoratedRepository = new CrudRepositorySecurityDecorator(new RepositoryValidationDecorator(
+					decoratedRepository, new EntityAttributesValidator()));
+		}
 		return decoratedRepository;
 	}
 

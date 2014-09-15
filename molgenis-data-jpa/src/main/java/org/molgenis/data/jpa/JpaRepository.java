@@ -1,18 +1,14 @@
 package org.molgenis.data.jpa;
 
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.BOOL;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaBuilder.In;
@@ -617,74 +613,6 @@ public class JpaRepository extends AbstractCrudRepository
 		E e = BeanUtils.instantiate(clazz);
 		e.set(entity);
 		return e;
-	}
-
-	@Override
-	protected void addAggregateValuesAndLabels(AttributeMetaData attr, List<Object> values, Set<String> labels)
-	{
-		if (attr.getDataType().getEnumType() == BOOL)
-		{
-			values.add(Boolean.TRUE);
-			values.add(Boolean.FALSE);
-			labels.add(attr.getName() + ": true");
-			labels.add(attr.getName() + ": false");
-		}
-		else if (attr.getRefEntity() != null)
-		{
-			EntityMetaData refEntityMeta = attr.getRefEntity();
-			String refEntityLblAttr = refEntityMeta.getLabelAttribute().getName();
-
-			for (Entity refEntity : findAll(refEntityMeta.getEntityClass()))
-			{
-				labels.add(refEntity.getString(refEntityLblAttr));
-				values.add(refEntity.get(refEntityLblAttr));
-			}
-		}
-		else
-		{
-			for (Object value : getDistinctValues(attr))
-			{
-				String valueStr = DataConverter.toString(value);
-				labels.add(valueStr);
-				values.add(valueStr);
-			}
-		}
-	}
-
-	// Get all distinct values of an attribute
-	private List<?> getDistinctValues(AttributeMetaData attr)
-	{
-		EntityManager em = getEntityManager();
-		CriteriaBuilder cb = em.getCriteriaBuilder();
-		CriteriaQuery<Tuple> cq = cb.createTupleQuery();
-
-		String attrName = attr.getName().substring(0, 1).toLowerCase() + attr.getName().substring(1);
-		Root<? extends Entity> root = cq.from(getEntityClass());
-		cq.distinct(true).multiselect(root.get(attrName));
-
-		TypedQuery<Tuple> tq = em.createQuery(cq);
-		List<Tuple> tuples = tq.getResultList();
-
-		List<Object> result = Lists.newArrayList();
-		for (Tuple tuple : tuples)
-		{
-			result.add(tuple.get(0));
-		}
-
-		return result;
-	}
-
-	// Find all instances of an jpa entity
-	private List<? extends Entity> findAll(Class<? extends Entity> entityClass)
-	{
-		EntityManager em = getEntityManager();
-		CriteriaBuilder cb = em.getCriteriaBuilder();
-
-		@SuppressWarnings("unchecked")
-		CriteriaQuery<Entity> cq = (CriteriaQuery<Entity>) cb.createQuery(entityClass);
-		TypedQuery<Entity> tq = em.createQuery(cq.select(cq.from(entityClass)));
-
-		return tq.getResultList();
 	}
 
 	/*

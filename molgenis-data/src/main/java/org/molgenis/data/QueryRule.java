@@ -69,7 +69,7 @@ public class QueryRule
 	public enum Operator
 	{
 		/**
-		 * search all fields
+		 * 'field' like 'value', searches all fields if field is not defined
 		 */
 		SEARCH("search"),
 
@@ -82,16 +82,6 @@ public class QueryRule
 		 * 'field' in 'value' (value being a list).
 		 */
 		IN("IN"),
-
-		/**
-		 * 'field in (value)' with value being a subquery
-		 */
-		IN_SUBQUERY("IN_SUB"),
-
-		/**
-		 * 'content of subQuery 8
-		 */
-		SUBQUERY("SUBQUERY"),
 
 		/**
 		 * 'field' less-than 'value'
@@ -115,7 +105,10 @@ public class QueryRule
 
 		/**
 		 * 'field' equal to '%value%' (% is a wildcard)
+		 * 
+		 * Deprecated, replaced by SEARCH
 		 */
+		@Deprecated
 		LIKE("LIKE"),
 
 		/**
@@ -137,16 +130,6 @@ public class QueryRule
 		 * indicates that 'value' is a nested array of QueryRule. The parameter 'field' is ommitted.
 		 */
 		NESTED(""),
-
-		/**
-		 * show the last elements from the list, so LIMIT from the end
-		 */
-		LAST(""),
-
-		/**
-		 * enables the joining of two fields; value is a fieldname
-		 */
-		JOIN("JOIN"),
 
 		/**
 		 * Boolean query
@@ -197,7 +180,7 @@ public class QueryRule
 	 */
 	public QueryRule(String field, Operator operator, Object value)
 	{
-		if (operator == Operator.LAST || operator == Operator.AND || operator == Operator.OR)
+		if (operator == Operator.AND || operator == Operator.OR)
 		{
 			throw new IllegalArgumentException("QueryRule(): Operator." + operator
 					+ " cannot be used with two arguments");
@@ -248,7 +231,7 @@ public class QueryRule
 
 	public QueryRule(Operator operator, QueryRule nestedRules)
 	{
-		if (operator == Operator.NOT || operator == Operator.IN_SUBQUERY)
+		if (operator == Operator.NOT)
 		{
 			this.operator = operator;
 			this.nestedRules = Arrays.asList(nestedRules);
@@ -265,7 +248,7 @@ public class QueryRule
 	 */
 	public QueryRule(Operator operator)
 	{
-		if (operator == Operator.LAST || operator == Operator.AND || operator == Operator.OR)
+		if (operator == Operator.AND || operator == Operator.OR)
 		{
 			this.operator = operator;
 		}
