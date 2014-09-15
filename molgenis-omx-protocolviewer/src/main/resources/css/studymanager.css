@@ -37,3 +37,7 @@
 .table-borderless th, .table-borderless td {
 	border-top: none;
 }
+
+.input-group>.form-control {
+	width: 180px !important;
+}
