@@ -34,15 +34,6 @@
 	display: inline-block;
 }
 
-#filter-wizard-modal .controls.xrefmrefsearch.complex-simplefilter,
-#filter-modal .controls.xrefmrefsearch.complex-simplefilter{
-/* 	width: 370; */
-}
-
-#filter-wizard-modal .form-horizontal .control-label{
-/* 	width:20%; */
-}
-
 #filter-modal .modal-body {
 	min-height: 250px;
 	max-height: 500px;
@@ -83,14 +74,6 @@
 .complex-addbutton-container>button, 
 .complex-removebutton-container>button{
 	margin-left: 5px;
-}
-
-#filter-modal .form-horizontal {
-/* 	margin-bottom: 60px; */
-}
-
-.simple-filter-container{
-/* 	padding-bottom: 10px; */
 }
 
 .controls complex-element {
