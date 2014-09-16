@@ -111,7 +111,6 @@ public class QueryGenerator implements QueryPartGenerator
 	 * @param entityMetaData
 	 * @return query class or null for SHOULD and DIS_MAX query rules
 	 */
-	@SuppressWarnings("deprecation")
 	private QueryBuilder createQueryClause(QueryRule queryRule, EntityMetaData entityMetaData)
 	{
 		// create query rule
