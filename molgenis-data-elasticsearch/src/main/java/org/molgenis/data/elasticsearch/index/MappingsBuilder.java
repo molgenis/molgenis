@@ -173,10 +173,16 @@ public class MappingsBuilder
 			case COMPOUND:
 				throw new UnsupportedOperationException();
 			case DATE:
-				jsonBuilder.field("type", "date").field("format", "date");
+				// not-analyzed field for aggregation
+				jsonBuilder.field("type", "date").field("format", "date").startObject("fields")
+						.startObject(FIELD_NOT_ANALYZED).field("type", "string").field("index", "not_analyzed")
+						.endObject().endObject();
 				break;
 			case DATE_TIME:
-				jsonBuilder.field("type", "date").field("format", "date_time_no_millis");
+				// not-analyzed field for aggregation
+				jsonBuilder.field("type", "date").field("format", "date_time_no_millis").startObject("fields")
+						.startObject(FIELD_NOT_ANALYZED).field("type", "string").field("index", "not_analyzed")
+						.endObject().endObject();
 				break;
 			case DECIMAL:
 				jsonBuilder.field("type", "double");
