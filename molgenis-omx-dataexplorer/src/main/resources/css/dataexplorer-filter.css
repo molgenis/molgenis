@@ -1,9 +1,3 @@
-#filter-wizard-modal .modal-body {
-	min-height: 500px;
-	max-height: 500px;
-	padding-bottom: 0;
-}
-
 #filter-wizard-modal .well {
 	overflow: auto;
 	min-height: 490px;
