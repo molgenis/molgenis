@@ -359,7 +359,7 @@
 	 */
 	self.createComplexFilterAddButton = function($container, attribute, complexFilterOperator, wizard, useFixedOperator)
 	{
-		return ($('<button class="btn btn-default btn-xs" type="button" data-filter=complex-addbutton><span class="glyphicon glyphicon-plus"></span></button>').click(function(){
+		return ($('<button class="btn btn-default btn-xs" type="button" data-filter=complex-addbutton><i class="glyphicon glyphicon-plus"></i></button>').click(function(){
 					if($('[data-filter=complex-removebutton]', $container).length === 0)
 					{
 						$('[data-filter=complex-removebutton-container]', $container).append(self.createRemoveButtonFirstComplexElement($container));
@@ -396,15 +396,15 @@
 	 */
 	self.createRemoveButtonFirstComplexElement = function($container){
 		return $('<button class="btn btn-default btn-xs" type="button" data-filter=complex-removebutton><i class="glyphicon glyphicon-minus"></i></button>').click(function(){
-					var $firstElement = $('[data-filter=complex-element]', $container)[0];
-					var $secondElement = $('[data-filter=complex-element]', $container)[1];
+					var $firstElement = $($('[data-filter=complex-element]', $container)[0]);
+					var $secondElement = $($('[data-filter=complex-element]', $container)[1]);
 					var $simpleFilterFirstElement = $('[data-filter=complex-simplefilter]', $firstElement);
 					var $simpleFilterSecondElement = $('[data-filter=complex-simplefilter]', $secondElement);
 					var $simpleFilterSecondElementButton = $('[data-filter=complex-addbutton]', $secondElement);
 					var $simpleFilterSecondElementContainer = $('[data-filter=complex-element-container]', $container).eq(1);
-					
-					$simpleFilterFirstElement.empty();
-					$simpleFilterFirstElement.append($simpleFilterSecondElement);
+									
+					$simpleFilterFirstElement.remove();
+					$firstElement.append($simpleFilterSecondElement);
 					$('[data-filter=complex-addbutton-container]', $firstElement).append($simpleFilterSecondElementButton);
 					
 					$simpleFilterSecondElementContainer.remove();
