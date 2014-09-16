@@ -15,8 +15,8 @@ import org.molgenis.data.MolgenisQueryException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.elasticsearch.index.MappingsBuilder;
 import org.molgenis.data.UnknownAttributeException;
+import org.molgenis.data.elasticsearch.index.MappingsBuilder;
 
 /**
  * Creates Elasticsearch query from MOLGENIS query
@@ -232,6 +232,49 @@ public class QueryGenerator implements QueryPartGenerator
 				queryBuilder = createQueryBuilder(nestedQueryRules, entityMetaData);
 				break;
 			case LIKE:
+			{
+				AttributeMetaData attr = entityMetaData.getAttribute(queryField);
+				if (attr == null) throw new UnknownAttributeException(queryField);
+
+				// construct query part
+				FieldTypeEnum dataType = attr.getDataType().getEnumType();
+				switch (dataType)
+				{
+					case BOOL:
+					case DATE:
+					case DATE_TIME:
+					case DECIMAL:
+					case COMPOUND:
+					case FILE:
+					case IMAGE:
+					case INT:
+					case LONG:
+						throw new UnsupportedOperationException();
+					case CATEGORICAL:
+					case MREF:
+					case XREF:
+						throw new UnsupportedOperationException(); // is there a use case to support this?
+					case EMAIL:
+					case ENUM:
+					case HTML:
+					case HYPERLINK:
+					case SCRIPT:
+					case STRING:
+					case TEXT:
+						// escape '?' and '*' wildcard characters
+						String queryValueStr = queryValue.toString().replaceAll("\\*", "\\\\*")
+								.replaceAll("\\?", "\\\\?");
+
+						// see note about extremely slow wildcard queries:
+						// http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/query-dsl-wildcard-query.html
+						String wildcardQueryValue = new StringBuilder('*').append(queryValueStr).append('*').toString();
+						queryBuilder = QueryBuilders.wildcardQuery(queryField, wildcardQueryValue);
+						break;
+					default:
+						throw new RuntimeException("Unknown data type [" + dataType + "]");
+				}
+				break;
+			}
 			case SEARCH:
 			{
 				if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
