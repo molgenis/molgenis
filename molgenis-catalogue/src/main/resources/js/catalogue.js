@@ -28,7 +28,7 @@
 		
 		$.ajax({
 			type: "POST",
-			url: '/plugin/catalogue/shoppingcart',
+			url: 'catalogue/shoppingcart',
 			data: JSON.stringify(request),
 			contentType: 'application/json'
 		});
