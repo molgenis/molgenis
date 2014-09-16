@@ -12,7 +12,6 @@ import java.util.Set;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.CrudRepositorySecurityDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.EntityMetaData;
@@ -141,8 +140,8 @@ public class OmxImporterServiceImpl implements ImportService
 
 				if (!dataService.hasRepository(identifier))
 				{
-					dataService.addRepository(new CrudRepositorySecurityDecorator(new OmxRepository(dataService,
-							searchService, identifier, entityValidator)));
+					dataService
+							.addRepository(new OmxRepository(dataService, searchService, identifier, entityValidator));
 					newRepoIdentifiers.add(identifier);
 
 					DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME,
