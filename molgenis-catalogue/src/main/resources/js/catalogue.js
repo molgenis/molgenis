@@ -72,7 +72,9 @@
 			});
 		});
 		
-		$('#entity-select').change();
+		if ($('#entity-select option').size() > 0) {
+			$('#entity-select').change();
+		}
 		
 		$('#cart-button').click(function(){
 			$('#cart-modal').load(

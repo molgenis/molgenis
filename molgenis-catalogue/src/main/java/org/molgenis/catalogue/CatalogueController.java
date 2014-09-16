@@ -55,7 +55,7 @@ public class CatalogueController extends MolgenisPluginController
 		List<EntityMetaData> emds = Lists.newArrayList();
 		for (String entityName : dataService.getEntityNames())
 		{
-			if (currentUserHasRole(AUTHORITY_SU, AUTHORITY_ENTITY_READ_PREFIX + entityName))
+			if (currentUserHasRole(AUTHORITY_SU, AUTHORITY_ENTITY_READ_PREFIX + entityName.toUpperCase()))
 			{
 				emds.add(dataService.getEntityMetaData(entityName));
 				if (StringUtils.isNotBlank(selectedEntityName) && selectedEntityName.equalsIgnoreCase(entityName))
