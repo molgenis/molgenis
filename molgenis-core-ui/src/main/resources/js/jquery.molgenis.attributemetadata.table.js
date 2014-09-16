@@ -1,7 +1,7 @@
 (function($, molgenis) {
 	"use strict";
 	var restApi = new molgenis.RestClient();
-	var ATTRIBUTE_KEYS = ['name', 'label', 'fieldType', 'description', 'refEntity', 'nillable', 'readOnly', 'unique'];
+	var ATTRIBUTE_KEYS = ['name', 'label', 'fieldType', 'description', 'nillable', 'readOnly', 'unique'];
 
 	
 	$.fn.attributeMetadataTable = function(options) {
@@ -23,24 +23,23 @@
 			var tr = $('<tr></tr>');
 			table.append(tr);
 				
-			if ((key !== 'refEntity') || (attributeMetadata.fieldType === 'CATEGORICAL')) {
-				var th = $('<th></th>');
-				tr.append(th);
-				th.text(key);
+			var th = $('<th></th>');
+			tr.append(th);
+			th.text(key);
 				
-				var td = $('<td></td>');
-				tr.append(td);
-			}
-
-			if (key !== 'refEntity') {
+			var td = $('<td></td>');
+			tr.append(td);
+			
+			if (value) {
 				td.text(value);
-			} else if (attributeMetadata.fieldType === 'CATEGORICAL') {
-				(function (td) {
-					restApi.getAsync(value.href, {}, function(entity){
-						td.text(entity.label);
-					});
-				})(td);
 			}
+		}	
+		
+		var refEntity = attributeMetadata['refEntity'];
+		if (refEntity && (attributeMetadata.fieldType !== 'COMPOUND')) {
+			restApi.getAsync(refEntity.href, {}, function(entity){
+				table.append('<tr><th>refEntity</th><td>' +  entity.label + '</td></tr>');
+			});
 		}
 		
 		if (attributeMetadata.fieldType === 'CATEGORICAL') {
