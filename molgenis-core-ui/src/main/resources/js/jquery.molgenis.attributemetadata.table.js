@@ -12,27 +12,17 @@
 		var panel = $('<div class="panel"></div>');
 		container.append(panel);
 		panel.append('<div class="panel-heading"><h4 class="panel-title">Data item details</h4></div>');
+		
 		var panelBody = $('<div class="panel-body"></div>');
 		panel.append(panelBody);
+		
 		var table = $('<table class="table"></table>');
 		panelBody.append(table);
 		
 		for (var i = 0;i < ATTRIBUTE_KEYS.length; i++) {
 			var key = ATTRIBUTE_KEYS[i];
-			var value = attributeMetadata[key];
-			var tr = $('<tr></tr>');
-			table.append(tr);
-				
-			var th = $('<th></th>');
-			tr.append(th);
-			th.text(key);
-				
-			var td = $('<td></td>');
-			tr.append(td);
-			
-			if (value) {
-				td.text(value);
-			}
+			var value = attributeMetadata[key] || '';
+			table.append('<tr><th>' + key + '</th><td>' + value + '</td></tr>');
 		}	
 		
 		var refEntity = attributeMetadata['refEntity'];
