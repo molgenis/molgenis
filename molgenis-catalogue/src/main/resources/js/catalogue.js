@@ -82,6 +82,7 @@
 		$('#cart-button').click(function(){
 			$('#cart-contents').load(
 				'catalogue/shoppingcart/show', 
+				{entityName: selectedEntity.name},
 				function(){
 					$('#cart-modal').modal('show');
 				}
