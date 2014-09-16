@@ -51,21 +51,37 @@ public class CatalogueController extends MolgenisPluginController
 	@RequestMapping
 	public String showView(@RequestParam(value = "entity", required = false) String selectedEntityName, Model model)
 	{
-		// TODO check permission and existence of selectedEntityName
+		boolean showEntitySelect = true;
 		List<EntityMetaData> emds = Lists.newArrayList();
 		for (String entityName : dataService.getEntityNames())
 		{
 			if (currentUserHasRole(AUTHORITY_SU, AUTHORITY_ENTITY_READ_PREFIX + entityName))
 			{
 				emds.add(dataService.getEntityMetaData(entityName));
+				if (StringUtils.isNotBlank(selectedEntityName) && selectedEntityName.equalsIgnoreCase(entityName))
+				{
+					// Hide entity dropdown
+					showEntitySelect = false;
+				}
 			}
 		}
 
-		model.addAttribute("showEntitySelect", StringUtils.isBlank(selectedEntityName));
+		model.addAttribute("showEntitySelect", showEntitySelect);
 
-		if ((selectedEntityName == null) && !emds.isEmpty())
+		if (showEntitySelect)
 		{
-			selectedEntityName = emds.get(0).getName();
+			if (StringUtils.isNotBlank(selectedEntityName))
+			{
+				// selectedEntityName not found -> show warning
+				model.addAttribute("warningMessage",
+						"Entity does not exist or you do not have permission on this entity");
+			}
+
+			if (!emds.isEmpty())
+			{
+				// Select first entity
+				selectedEntityName = emds.get(0).getName();
+			}
 		}
 
 		model.addAttribute("entitiesMeta", emds);
