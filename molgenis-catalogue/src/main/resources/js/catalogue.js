@@ -78,6 +78,15 @@
 		});
 		
 		$('#entity-select').change();
+		
+		$('#cart-button').click(function(){
+			$('#cart-contents').load(
+				'catalogue/shoppingcart/show', 
+				function(){
+					$('#cart-modal').modal('show');
+				}
+			);
+		});
 	});
 	
 }($, window.top.molgenis = window.top.molgenis || {}));
