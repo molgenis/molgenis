@@ -76,14 +76,19 @@ public class CatalogueController extends MolgenisPluginController
 		return VIEW_NAME;
 	}
 
+	/* CART */
 	@RequestMapping(value = SHOPPINGCART_URI, method = RequestMethod.POST)
 	@ResponseStatus(OK)
-	public void refreshShoppingCart(@Valid @RequestBody RefreshShoppingCartRequest request)
+	public void refreshShoppingCart(@Valid @RequestBody RefreshShoppingCartRequest request, HttpSession session)
 	{
-		System.out.println(request);
+		ShoppingCart cart = getShoppingCart(session);
+		cart.clear();
+		String entityName = request.getEntityName();
+		for (String attributeName : request.getAttributeNames())
+		{
+			cart.addAttribute(entityName, attributeName);
+		}
 	}
-
-	/* CART */
 
 	/**
 	 * Adds an attribute to the shopping cart. e.g.
