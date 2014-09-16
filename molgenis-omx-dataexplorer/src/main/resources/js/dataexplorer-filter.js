@@ -16,9 +16,9 @@
 		switch(attribute.fieldType) {
 			case 'BOOL':
 			case 'CATEGORICAL':
+				return self.createSimpleFilter(attribute, filter, wizard, false);
 			case 'XREF':
-				return self.createSimpleFilter(attribute, filter, wizard);
-				break;
+				return self.createSimpleFilter(attribute, filter, wizard, true);
 			case 'DATE':
 			case 'DATE_TIME':
 			case 'DECIMAL':
@@ -417,12 +417,17 @@
 	/**
 	 * Create simple filter
 	 */
-	self.createSimpleFilter = function(attribute, filter, wizard) {
+	self.createSimpleFilter = function(attribute, filter, wizard, wrap) {
 		var $container = $('<div class="simple-filter-container form-group"></div>');
 		var $label = self.createFilterLabel(attribute, true, wizard);
 		$container.append($label);
 		$container.append(self.createSimpleFilterControls(attribute, filter));
 		$container.data('attribute', attribute);
+		if( wrap ) {
+			var $wrapper = $('<div>').addClass('col-md-9 fdlk');
+			$container.children('.col-md-9').wrap($wrapper);
+			return $container;
+		}
 		return $container;
 	}
 	
