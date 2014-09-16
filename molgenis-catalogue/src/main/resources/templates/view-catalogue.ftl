@@ -9,8 +9,9 @@
 <div id="entity-class" class="well">
 	<h3 id="entity-class-name"></h3>
 	<span id="entity-class-description"></span>
-	<button type="button" class="pull-right btn-default"><span class="glyphicon glyphicon-shopping-cart"></span></button>			
+	<button type="button" class="pull-right btn btn-default"><span class="glyphicon glyphicon-shopping-cart"></span></button>				
 </div>
+
 
 <div class="row">
 	<div id="entity-select-holder" class="pull-right col-md-5" <#if showEntitySelect?string('true', 'false') == 'false'> style="display:none"</#if>>

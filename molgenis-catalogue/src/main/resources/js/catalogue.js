@@ -1,6 +1,7 @@
 (function($, molgenis) {	
 	"use strict";
 	var restApi = new molgenis.RestClient();
+	var selectedEntity;
 	
 	function createEntityMetaTree(entityMetaData) {
 		$('#attribute-selection').tree({
@@ -16,7 +17,21 @@
 	
 	function refreshShoppingCart() {
 		var attributes = $('#attribute-selection').tree('getSelectedAttributes');
-		console.log(JSON.stringify(attributes));
+		var request = {
+				entityName: selectedEntity.name,
+				attributeNames: []
+		}
+		
+		$.each(attributes, function(){
+			request.attributeNames.push(this.name);
+		});
+		
+		$.ajax({
+			type: "POST",
+			url: '/plugin/catalogue/shoppingcart',
+			data: JSON.stringify(request),
+			contentType: 'application/json'
+		});
 	}
 	
 	function createAttributeMetadataTable(attributeMetadata) {
@@ -47,6 +62,7 @@
 		$('#entity-select').on('change', function() {
 			var entityUri = $(this).val();
 			restApi.getAsync(entityUri + '/meta', {'expand': ['attributes']}, function(entityMetaData) {
+				selectedEntity = entityMetaData;
 				createHeader(entityMetaData);
 				createEntityMetaTree(entityMetaData);
 					

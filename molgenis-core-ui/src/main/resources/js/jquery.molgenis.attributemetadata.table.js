@@ -57,7 +57,8 @@
 					table.append('<th>' + this.label + '</th>');
 				});
 				
-				restApi.getAsync(attributeMetadata.refEntity.href.replace('/meta', ''), {}, function(data){
+				var maxRows = 3;
+				restApi.getAsync(attributeMetadata.refEntity.href.replace('/meta', ''), {num: maxRows}, function(data){
 					$.each(data.items, function(index, item) {
 						var tr = $('<tr></tr>');
 						table.append(tr);
@@ -65,6 +66,10 @@
 							tr.append('<td>' + item[attr.name] + '</td>');
 						});
 					});
+					
+					if (data.total > maxRows) {
+						panelBody.append('<a href="/menu/main/dataexplorer?dataset=' + refEntityMetadata.name + '">And ' + (data.total-maxRows) + ' more...</a>');
+					}
 				});
 			});
 		}
