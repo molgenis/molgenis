@@ -104,11 +104,8 @@ public class QueryRule
 		GREATER_EQUAL(">="),
 
 		/**
-		 * 'field' equal to '%value%' (% is a wildcard)
-		 * 
-		 * Deprecated, replaced by SEARCH
+		 * 'field' like 'value' (works like equals with wildcard before and after value)
 		 */
-		@Deprecated
 		LIKE("LIKE"),
 
 		/**
