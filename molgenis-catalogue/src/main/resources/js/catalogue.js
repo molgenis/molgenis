@@ -88,6 +88,18 @@
 				}
 			);
 		});
+		
+		$('#cart-modal').on('click', '.remove-attribute', function(){
+			var attributeName = $(this).data('attribute-name');
+			var $this = $(this);
+			console.log('remove ' + attributeName);
+			$.get('catalogue/shoppingcart/remove',
+					{entityName: selectedEntity.name, attributeName: attributeName}, 
+					function(){
+						console.log('callback!');
+						$this.closest('tr').hide();	
+					});
+		});
 	});
 	
 }($, window.top.molgenis = window.top.molgenis || {}));
