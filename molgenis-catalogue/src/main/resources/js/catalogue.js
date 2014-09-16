@@ -6,6 +6,7 @@
 		$('#attribute-selection').tree({
 			entityMetaData: entityMetaData,
 			onAttributesSelect: function(selects) {
+				refreshShoppingCart();
 			},
 			onAttributeClick: function(attribute) {
 				createAttributeMetadataTable(attribute);
@@ -13,10 +14,12 @@
 		});
 	}
 	
+	function refreshShoppingCart() {
+		var attributes = $('#attribute-selection').tree('getSelectedAttributes');
+		console.log(JSON.stringify(attributes));
+	}
+	
 	function createAttributeMetadataTable(attributeMetadata) {
-		if ($('#attributes-table').attributeMetadataTable) {
-			$('#attributes-table').attributeMetadataTable('destroy');
-		}
 		$('#attributes-table').attributeMetadataTable({
 			attributeMetadata: attributeMetadata
 		});

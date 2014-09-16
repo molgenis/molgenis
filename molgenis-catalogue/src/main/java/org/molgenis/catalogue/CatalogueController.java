@@ -7,6 +7,7 @@ import static org.molgenis.security.core.utils.SecurityUtils.currentUserHasRole;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.framework.ui.MolgenisPluginController;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.google.common.collect.Lists;
@@ -47,6 +49,8 @@ public class CatalogueController extends MolgenisPluginController
 			}
 		}
 
+		model.addAttribute("showEntitySelect", StringUtils.isBlank(selectedEntityName));
+
 		if ((selectedEntityName == null) && !emds.isEmpty())
 		{
 			selectedEntityName = emds.get(0).getName();
@@ -56,5 +60,11 @@ public class CatalogueController extends MolgenisPluginController
 		model.addAttribute("selectedEntityName", selectedEntityName);
 
 		return VIEW_NAME;
+	}
+
+	@RequestMapping(value = "/shoppingcart", method = RequestMethod.POST)
+	public void refreshShoppingCart(List<String> attributes)
+	{
+
 	}
 }
