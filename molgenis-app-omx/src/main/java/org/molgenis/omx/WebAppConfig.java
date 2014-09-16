@@ -6,7 +6,23 @@ import java.util.Map;
 import org.molgenis.DatabaseConfig;
 import org.molgenis.catalogmanager.CatalogManagerService;
 import org.molgenis.data.DataService;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.IndexedCrudRepository;
+import org.molgenis.data.IndexedCrudRepositorySecurityDecorator;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryDecoratorFactory;
+import org.molgenis.data.elasticsearch.ElasticsearchRepositoryDecorator;
+import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
+import org.molgenis.data.elasticsearch.meta.ElasticsearchAttributeMetaDataRepository;
+import org.molgenis.data.elasticsearch.meta.ElasticsearchEntityMetaDataRepository;
+import org.molgenis.data.meta.AttributeMetaDataRepository;
+import org.molgenis.data.meta.AttributeMetaDataRepositoryDecoratorFactory;
+import org.molgenis.data.meta.EntityMetaDataRepository;
+import org.molgenis.data.meta.EntityMetaDataRepositoryDecoratorFactory;
+import org.molgenis.data.validation.EntityAttributesValidator;
+import org.molgenis.data.validation.IndexedRepositoryValidationDecorator;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
 import org.molgenis.omx.catalogmanager.OmxCatalogManagerService;
 import org.molgenis.omx.config.DataExplorerConfig;
@@ -44,6 +60,8 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	private MolgenisUserService molgenisUserService;
 	@Autowired
 	private FreemarkerTemplateRepository freemarkerTemplateRepository;
+	@Autowired
+	private SearchService elasticSearchService;
 
 	@Bean
 	@Qualifier("catalogService")
@@ -64,7 +82,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		freemarkerVariables.put("dataExplorerLink", new DataExplorerHyperlinkDirective(molgenisPluginRegistry(),
 				dataService));
 	}
-	
+
 	@Override
 	public FreeMarkerConfigurer freeMarkerConfigurer() throws IOException, TemplateException
 	{
@@ -72,5 +90,81 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		// Look up unknown templates in the FreemarkerTemplate repository
 		result.setPostTemplateLoaders(new RepositoryTemplateLoader(freemarkerTemplateRepository));
 		return result;
+	}
+
+	// temporary workaround for module dependencies
+	@Bean
+	public RepositoryDecoratorFactory repositoryDecoratorFactory()
+	{
+		return new RepositoryDecoratorFactory()
+		{
+			@Override
+			public Repository createDecoratedRepository(Repository repository)
+			{
+				// do not index an indexed repository
+				if (repository instanceof IndexedCrudRepository)
+				{
+					// 1. security decorator
+					// 2. validation decorator
+					// 3. indexed repository
+					return new IndexedCrudRepositorySecurityDecorator(new IndexedRepositoryValidationDecorator(
+							(IndexedCrudRepository) repository, new EntityAttributesValidator()));
+				}
+				else
+				{
+					// create indexing meta data if meta data does not exist
+					EntityMetaData entityMetaData = repository.getEntityMetaData();
+					if (!elasticSearchService.hasMapping(entityMetaData))
+					{
+						try
+						{
+							elasticSearchService.createMappings(entityMetaData);
+						}
+						catch (IOException e)
+						{
+							throw new MolgenisDataException(e);
+						}
+					}
+
+					// 1. security decorator
+					// 2. validation decorator
+					// 3. indexing decorator
+					// 4. repository
+					return new IndexedCrudRepositorySecurityDecorator(new IndexedRepositoryValidationDecorator(
+							new ElasticsearchRepositoryDecorator(repository, elasticSearchService),
+							new EntityAttributesValidator()));
+				}
+			}
+		};
+	}
+
+	// temporary workaround for module dependencies
+	@Bean
+	public AttributeMetaDataRepositoryDecoratorFactory attributeMetaDataRepositoryDecoratorFactory()
+	{
+		return new AttributeMetaDataRepositoryDecoratorFactory()
+		{
+			@Override
+			public AttributeMetaDataRepository createDecoratedRepository(AttributeMetaDataRepository repository)
+			{
+				// 1. indexing decorator
+				return new ElasticsearchAttributeMetaDataRepository(repository, dataService, elasticSearchService);
+			}
+		};
+	}
+
+	// temporary workaround for module dependencies
+	@Bean
+	public EntityMetaDataRepositoryDecoratorFactory entityMetaDataRepositoryDecoratorFactory()
+	{
+		return new EntityMetaDataRepositoryDecoratorFactory()
+		{
+			@Override
+			public EntityMetaDataRepository createDecoratedRepository(EntityMetaDataRepository repository)
+			{
+				// 1. indexing decorator
+				return new ElasticsearchEntityMetaDataRepository(repository, elasticSearchService);
+			}
+		};
 	}
 }

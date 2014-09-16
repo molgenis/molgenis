@@ -98,5 +98,4 @@ public class ExcelEntity extends AbstractMetaDataEntity
 	{
 		return colNamesMap.keySet();
 	}
-
 }

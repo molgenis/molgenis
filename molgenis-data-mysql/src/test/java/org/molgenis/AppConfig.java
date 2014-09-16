@@ -1,12 +1,15 @@
 package org.molgenis;
 
-import static org.mockito.Mockito.mock;
-
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryDecoratorFactory;
+import org.molgenis.data.meta.AttributeMetaDataRepository;
+import org.molgenis.data.meta.AttributeMetaDataRepositoryDecoratorFactory;
+import org.molgenis.data.meta.EntityMetaDataRepository;
+import org.molgenis.data.meta.EntityMetaDataRepositoryDecoratorFactory;
 import org.molgenis.data.mysql.EmbeddedMysqlDatabaseBuilder;
 import org.molgenis.data.mysql.MysqlAttributeMetaDataRepository;
 import org.molgenis.data.mysql.MysqlEntityMetaDataRepository;
@@ -101,14 +104,50 @@ public class AppConfig
 	}
 
 	@Bean
-	public SearchService searchService()
-	{
-		return mock(SearchService.class);
-	}
-
-	@Bean
 	public MolgenisPluginRegistry molgenisPluginRegistry()
 	{
 		return new MolgenisPluginRegistryImpl();
+	}
+
+	// temporary workaround for module dependencies
+	@Bean
+	public RepositoryDecoratorFactory repositoryDecoratorFactory()
+	{
+		return new RepositoryDecoratorFactory()
+		{
+			@Override
+			public Repository createDecoratedRepository(Repository repository)
+			{
+				return repository;
+			}
+		};
+	}
+
+	// temporary workaround for module dependencies
+	@Bean
+	public AttributeMetaDataRepositoryDecoratorFactory attributeMetaDataRepositoryDecoratorFactory()
+	{
+		return new AttributeMetaDataRepositoryDecoratorFactory()
+		{
+			@Override
+			public AttributeMetaDataRepository createDecoratedRepository(AttributeMetaDataRepository repository)
+			{
+				return repository;
+			}
+		};
+	}
+
+	// temporary workaround for module dependencies
+	@Bean
+	public EntityMetaDataRepositoryDecoratorFactory entityMetaDataRepositoryDecoratorFactory()
+	{
+		return new EntityMetaDataRepositoryDecoratorFactory()
+		{
+			@Override
+			public EntityMetaDataRepository createDecoratedRepository(EntityMetaDataRepository repository)
+			{
+				return repository;
+			}
+		};
 	}
 }

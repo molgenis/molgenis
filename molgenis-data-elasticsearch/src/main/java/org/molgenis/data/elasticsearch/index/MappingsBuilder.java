@@ -138,7 +138,13 @@ public class MappingsBuilder
 	{
 		String attrName = attr.getName();
 		jsonBuilder.startObject(attrName);
+		createAttributeMappingContents(attr, enableNorms, createAllIndex, nestRefs, jsonBuilder);
+		jsonBuilder.endObject();
+	}
 
+	private static void createAttributeMappingContents(AttributeMetaData attr, boolean enableNorms,
+			boolean createAllIndex, boolean nestRefs, XContentBuilder jsonBuilder) throws IOException
+	{
 		FieldTypeEnum dataType = attr.getDataType().getEnumType();
 		switch (dataType)
 		{
@@ -160,7 +166,7 @@ public class MappingsBuilder
 				}
 				else
 				{
-					createAttributeMapping(refEntity.getLabelAttribute(), enableNorms, createAllIndex, false,
+					createAttributeMappingContents(refEntity.getLabelAttribute(), enableNorms, createAllIndex, false,
 							jsonBuilder);
 				}
 				break;
@@ -191,9 +197,8 @@ public class MappingsBuilder
 			case SCRIPT:
 			case STRING:
 			case TEXT:
-				jsonBuilder.field("type", "multi_field").startObject("fields").startObject(attrName)
-						.field("type", "string").endObject().startObject(FIELD_NOT_ANALYZED).field("type", "string")
-						.field("index", "not_analyzed").endObject().endObject();
+				jsonBuilder.field("type", "string").startObject("fields").startObject(FIELD_NOT_ANALYZED)
+						.field("type", "string").field("index", "not_analyzed").endObject().endObject();
 				break;
 			default:
 				throw new RuntimeException("Unknown data type [" + dataType + "]");
@@ -201,8 +206,6 @@ public class MappingsBuilder
 
 		jsonBuilder.field("norms").startObject().field("enabled", enableNorms).endObject();
 		jsonBuilder.field("include_in_all", createAllIndex && attr.isVisible());
-
-		jsonBuilder.endObject();
 	}
 
 	public static void serializeEntityMeta(EntityMetaData entityMetaData, XContentBuilder jsonBuilder)

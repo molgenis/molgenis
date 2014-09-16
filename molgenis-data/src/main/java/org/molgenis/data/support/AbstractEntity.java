@@ -1,6 +1,7 @@
 package org.molgenis.data.support;
 
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -126,9 +127,23 @@ public abstract class AbstractEntity implements Entity
 	}
 
 	@Override
+	public <E extends Entity> E getEntity(String attributeName, Class<E> clazz)
+	{
+		Entity entity = getEntity(attributeName);
+		return entity != null ? new ConvertingIterable<E>(clazz, Arrays.asList(entity)).iterator().next() : null;
+	}
+
+	@Override
 	public Iterable<Entity> getEntities(String attributeName)
 	{
 		return DataConverter.toEntities(get(attributeName));
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> getEntities(String attributeName, Class<E> clazz)
+	{
+		Iterable<Entity> entities = getEntities(attributeName);
+		return entities != null ? new ConvertingIterable<E>(clazz, entities) : null;
 	}
 
 	@Override

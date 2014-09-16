@@ -1,11 +1,9 @@
 package org.molgenis.data.jpa;
 
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.validation.EntityAttributesValidator;
-import org.molgenis.data.validation.RepositoryValidationDecorator;
+import org.molgenis.data.RepositoryDecoratorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationListener;
@@ -21,15 +19,18 @@ public class JpaRepositoryRegistrator implements ApplicationListener<ContextRefr
 {
 	private final DataService dataService;
 	private final RepositoryCollection repositoryCollection;
+	private final RepositoryDecoratorFactory repositoryDecoratorFactory;
 
 	@Autowired
 	public JpaRepositoryRegistrator(DataService dataService,
-			@Qualifier("JpaRepositoryCollection") RepositoryCollection repositoryCollection)
+			@Qualifier("JpaRepositoryCollection") RepositoryCollection repositoryCollection,
+			RepositoryDecoratorFactory repositoryDecoratorFactory)
 	{
 		if (dataService == null) throw new IllegalArgumentException("DataService is null");
 		if (repositoryCollection == null) throw new IllegalArgumentException("JpaRepositoryCollection is missing");
 		this.dataService = dataService;
 		this.repositoryCollection = repositoryCollection;
+		this.repositoryDecoratorFactory = repositoryDecoratorFactory;
 	}
 
 	@Override
@@ -37,9 +38,10 @@ public class JpaRepositoryRegistrator implements ApplicationListener<ContextRefr
 	{
 		for (String name : repositoryCollection.getEntityNames())
 		{
-			Repository repo = repositoryCollection.getRepositoryByEntityName(name);
-			dataService.addRepository(new RepositoryValidationDecorator((CrudRepository) repo,
-					new EntityAttributesValidator()));
+			Repository repository = repositoryCollection.getRepositoryByEntityName(name);
+
+			// apply repository decorators (e.g. security, indexing, validation)
+			dataService.addRepository(repositoryDecoratorFactory.createDecoratedRepository(repository));
 		}
 	}
 
