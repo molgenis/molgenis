@@ -105,8 +105,6 @@ public class QueryRule
 
 		/**
 		 * 'field' like 'value' (works like equals with wildcard before and after value)
-		 * 
-		 * Deprecated, replaced by SEARCH
 		 */
 		LIKE("LIKE"),
 
