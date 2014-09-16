@@ -5,12 +5,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
+import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.omx.dataset.DataSetMatrixRepository;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.protocol.CategoryRepository;
 import org.molgenis.omx.protocol.ProtocolTreeRepository;
-import org.molgenis.search.SearchService;
 import org.molgenis.security.runas.RunAsSystem;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;

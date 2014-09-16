@@ -7,7 +7,6 @@ import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.Updateable;
 import org.molgenis.data.Writable;
-import org.molgenis.elasticsearch.ElasticSearchService;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -19,7 +18,7 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 
 	private final Repository repository;
 
-	public ElasticsearchRepositoryDecorator(Repository repository, ElasticSearchService elasticSearchService)
+	public ElasticsearchRepositoryDecorator(Repository repository, SearchService elasticSearchService)
 	{
 		super(elasticSearchService);
 		if (repository == null) throw new IllegalArgumentException("repository is null");

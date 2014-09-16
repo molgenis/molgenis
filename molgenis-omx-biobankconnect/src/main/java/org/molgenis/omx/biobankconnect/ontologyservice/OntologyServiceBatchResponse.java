@@ -1,6 +1,6 @@
 package org.molgenis.omx.biobankconnect.ontologyservice;
 
-import org.molgenis.search.SearchResult;
+import org.molgenis.data.elasticsearch.util.SearchResult;
 
 public class OntologyServiceBatchResponse
 {

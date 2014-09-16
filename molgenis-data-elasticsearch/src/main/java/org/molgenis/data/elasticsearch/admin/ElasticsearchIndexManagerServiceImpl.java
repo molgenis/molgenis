@@ -10,7 +10,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IndexedRepository;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.Repository;
-import org.molgenis.elasticsearch.ElasticSearchService;
+import org.molgenis.data.elasticsearch.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -22,10 +22,10 @@ import org.springframework.stereotype.Service;
 public class ElasticsearchIndexManagerServiceImpl implements ElasticsearchIndexManagerService
 {
 	private final DataService dataService;
-	private final ElasticSearchService elasticSearchService;
+	private final SearchService elasticSearchService;
 
 	@Autowired
-	public ElasticsearchIndexManagerServiceImpl(DataService dataService, ElasticSearchService elasticSearchService)
+	public ElasticsearchIndexManagerServiceImpl(DataService dataService, SearchService elasticSearchService)
 	{
 		if (dataService == null) throw new IllegalArgumentException("dataService is null");
 		if (elasticSearchService == null) throw new IllegalArgumentException("elasticSearchService is null");

@@ -2,11 +2,11 @@ package org.molgenis.data.omx;
 
 import org.molgenis.data.CrudRepositorySecurityDecorator;
 import org.molgenis.data.DataService;
+import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.omx.importer.OmxImporterServiceImpl;
 import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.omx.observ.DataSet;
-import org.molgenis.search.SearchService;
 import org.molgenis.security.runas.SystemSecurityToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;

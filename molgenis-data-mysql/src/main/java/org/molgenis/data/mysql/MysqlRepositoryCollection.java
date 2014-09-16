@@ -21,6 +21,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.elasticsearch.ElasticsearchRepositoryDecorator;
+import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.meta.ElasticsearchAttributeMetaDataRepository;
 import org.molgenis.data.elasticsearch.meta.ElasticsearchEntityMetaDataRepository;
 import org.molgenis.data.meta.AttributeMetaDataRepository;
@@ -31,7 +32,6 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.IndexedRepositoryValidationDecorator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
-import org.molgenis.elasticsearch.ElasticSearchService;
 import org.molgenis.model.MolgenisModelException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,7 +47,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 	private Map<String, MysqlRepository> repositories;
 	private final MysqlEntityMetaDataRepository entityMetaDataRepository;
 	private final MysqlAttributeMetaDataRepository attributeMetaDataRepository;
-	private final ElasticSearchService elasticSearchService;
+	private final SearchService elasticSearchService;
 
 	public MysqlRepositoryCollection(DataSource ds, DataService dataService,
 			MysqlEntityMetaDataRepository entityMetaDataRepository,
@@ -58,7 +58,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 
 	public MysqlRepositoryCollection(DataSource ds, DataService dataService,
 			MysqlEntityMetaDataRepository entityMetaDataRepository,
-			MysqlAttributeMetaDataRepository attributeMetaDataRepository, ElasticSearchService elasticSearchService)
+			MysqlAttributeMetaDataRepository attributeMetaDataRepository, SearchService elasticSearchService)
 	{
 		this.ds = ds;
 		this.dataService = dataService;

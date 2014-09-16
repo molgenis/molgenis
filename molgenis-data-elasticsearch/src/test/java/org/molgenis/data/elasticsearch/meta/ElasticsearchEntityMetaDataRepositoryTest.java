@@ -6,8 +6,9 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.elasticsearch.ElasticSearchService;
+import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.meta.EntityMetaDataRepository;
-import org.molgenis.elasticsearch.ElasticSearchService;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -15,7 +16,7 @@ public class ElasticsearchEntityMetaDataRepositoryTest
 {
 	private ElasticsearchEntityMetaDataRepository elasticsearchEntityMetaDataRepository;
 	private EntityMetaDataRepository entityMetaDataRepository;
-	private ElasticSearchService elasticSearchService;
+	private SearchService elasticSearchService;
 
 	@BeforeMethod
 	public void setUp()

@@ -16,14 +16,14 @@ import javax.validation.constraints.Size;
 import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.elasticsearch.util.SearchRequest;
+import org.molgenis.data.elasticsearch.util.SearchResult;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.observ.Characteristic;
-import org.molgenis.search.SearchRequest;
-import org.molgenis.search.SearchResult;
-import org.molgenis.search.SearchService;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,10 +68,9 @@ public class EntityExplorerController extends MolgenisPluginController
 
 	@SuppressWarnings("unchecked")
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(@RequestParam(required = false)
-	String entity, @RequestParam(required = false)
-	String identifier, @RequestParam(required = false)
-	String query, Model model) throws Exception
+	public String init(@RequestParam(required = false) String entity,
+			@RequestParam(required = false) String identifier, @RequestParam(required = false) String query, Model model)
+			throws Exception
 	{
 		// set dataExplorer URL for link to DataExplorer for x/mrefs, but only
 		// if the user has permission to see the
@@ -163,11 +162,7 @@ public class EntityExplorerController extends MolgenisPluginController
 
 	@RequestMapping(method = RequestMethod.POST, value = "entities")
 	@ResponseBody
-	public SearchResult getRelatedEntities(@RequestBody
-	@Valid
-	@NotNull
-	@Size(min = 1)
-	String _xrefvalue)
+	public SearchResult getRelatedEntities(@RequestBody @Valid @NotNull @Size(min = 1) String _xrefvalue)
 	{
 		return searchService.search(new SearchRequest(null, new QueryImpl().eq("_xrefvalue", _xrefvalue).pageSize(
 				1000000), null));

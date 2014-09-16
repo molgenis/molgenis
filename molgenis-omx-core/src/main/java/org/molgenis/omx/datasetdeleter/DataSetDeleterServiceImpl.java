@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.Characteristic;
@@ -17,7 +18,6 @@ import org.molgenis.omx.observ.target.OntologyTerm;
 import org.molgenis.omx.observ.value.CategoricalValue;
 import org.molgenis.omx.observ.value.Value;
 import org.molgenis.omx.protocol.OmxLookupTableEntityMetaData;
-import org.molgenis.search.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -181,7 +181,7 @@ public class DataSetDeleterServiceImpl implements DataSetDeleterService
 		deleteFeatures(subFeatures, allEntitiesList);
 		dataService.delete(Protocol.ENTITY_NAME, protocol);
 	}
-	
+
 	/**
 	 * Deletes a protocol and all his subprotocols which do not have multiple Protocols referencing them
 	 * 
@@ -191,7 +191,7 @@ public class DataSetDeleterServiceImpl implements DataSetDeleterService
 	 */
 	void deleteProtocol(Protocol protocol)
 	{
-		
+
 		List<Entity> allEntitiesList = Lists.newArrayList(dataService.findAll(ObservedValue.ENTITY_NAME,
 				new QueryImpl()));
 		allEntitiesList.addAll(Lists.newArrayList(dataService.findAll(Protocol.ENTITY_NAME, new QueryImpl())));
@@ -259,7 +259,8 @@ public class DataSetDeleterServiceImpl implements DataSetDeleterService
 	 */
 	void deleteOntologyTerms(List<OntologyTerm> ontologyTerms)
 	{
-		for(OntologyTerm ontologyTerm :ontologyTerms){
+		for (OntologyTerm ontologyTerm : ontologyTerms)
+		{
 			dataService.delete(OntologyTerm.ENTITY_NAME, ontologyTerm);
 		}
 	}

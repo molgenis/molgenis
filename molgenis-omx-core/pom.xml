@@ -59,10 +59,10 @@
 			<version>1.2.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-search</artifactId>
-			<version>1.2.0-SNAPSHOT</version>
-		</dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-data-elasticsearch</artifactId>
+            <version>1.2.0-SNAPSHOT</version>
+        </dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-security</artifactId>

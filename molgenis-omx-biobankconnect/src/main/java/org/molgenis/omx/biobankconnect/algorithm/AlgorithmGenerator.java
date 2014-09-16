@@ -14,6 +14,10 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.elasticsearch.util.Hit;
+import org.molgenis.data.elasticsearch.util.SearchRequest;
+import org.molgenis.data.elasticsearch.util.SearchResult;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcher;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcherRequest;
@@ -21,10 +25,6 @@ import org.molgenis.omx.biobankconnect.utils.NGramMatchingModel;
 import org.molgenis.omx.observ.Category;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.target.OntologyTerm;
-import org.molgenis.search.Hit;
-import org.molgenis.search.SearchRequest;
-import org.molgenis.search.SearchResult;
-import org.molgenis.search.SearchService;
 import org.molgenis.security.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -138,8 +138,7 @@ public class AlgorithmGenerator
 	}
 
 	/**
-	 * Convert to Javascript based on the formula pre-defined. E.g. BMI,
-	 * Hypertension
+	 * Convert to Javascript based on the formula pre-defined. E.g. BMI, Hypertension
 	 * 
 	 * @param scriptTemplate
 	 * @param standardFeature

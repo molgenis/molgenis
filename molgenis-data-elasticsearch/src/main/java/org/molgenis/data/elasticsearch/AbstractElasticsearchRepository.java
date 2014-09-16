@@ -1,7 +1,7 @@
 package org.molgenis.data.elasticsearch;
 
-import static org.molgenis.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchId;
-import static org.molgenis.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchIds;
+import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchId;
+import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchIds;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -14,10 +14,9 @@ import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
+import org.molgenis.data.elasticsearch.ElasticSearchService.IndexingMode;
 import org.molgenis.data.support.ConvertingIterable;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.elasticsearch.ElasticSearchService;
-import org.molgenis.elasticsearch.ElasticSearchService.IndexingMode;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Iterables;
@@ -26,9 +25,9 @@ public abstract class AbstractElasticsearchRepository implements CrudRepository,
 {
 	public static final String BASE_URL = "elasticsearch://";
 
-	protected final ElasticSearchService elasticSearchService;
+	protected final SearchService elasticSearchService;
 
-	public AbstractElasticsearchRepository(ElasticSearchService elasticSearchService)
+	public AbstractElasticsearchRepository(SearchService elasticSearchService)
 	{
 		if (elasticSearchService == null) throw new IllegalArgumentException("elasticSearchService is null");
 		this.elasticSearchService = elasticSearchService;
