@@ -66,21 +66,16 @@
 				createHeader(entityMetaData);
 				createEntityMetaTree(entityMetaData);
 					
-				var firstAttr = getFirstAttribute(entityMetaData);
-				if (firstAttr.fieldType !== 'COMPOUND') {
-					$('#attributes-table').attributeMetadataTable({
-						attributeMetadata: firstAttr 
-					});
-				} else {
-					$('#attributes-table').html('');
-				}
+				$('#attributes-table').attributeMetadataTable({
+					attributeMetadata: getFirstAttribute(entityMetaData) 
+				});
 			});
 		});
 		
 		$('#entity-select').change();
 		
 		$('#cart-button').click(function(){
-			$('#cart-contents').load(
+			$('#cart-modal').load(
 				'catalogue/shoppingcart/show', 
 				{entityName: selectedEntity.name},
 				function(){
@@ -92,12 +87,14 @@
 		$('#cart-modal').on('click', '.remove-attribute', function(){
 			var attributeName = $(this).data('attribute-name');
 			var $this = $(this);
-			console.log('remove ' + attributeName);
 			$.get('catalogue/shoppingcart/remove',
 					{entityName: selectedEntity.name, attributeName: attributeName}, 
 					function(){
-						console.log('callback!');
 						$this.closest('tr').hide();	
+						var node = $('#attribute-selection').tree('getNodeByUri', '/api/v1/' + selectedEntity.name + '/meta/' + attributeName);
+						if (node) {
+							node.setSelected(false);
+						}
 					});
 		});
 	});

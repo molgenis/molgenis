@@ -12,7 +12,6 @@
 	<button type="button" class="pull-right btn btn-default" id="cart-button"><span class="glyphicon glyphicon-shopping-cart"></span></button>				
 </div>
 
-
 <div class="row">
 	<div id="entity-select-holder" class="pull-right col-md-5" <#if showEntitySelect?string('true', 'false') == 'false'> style="display:none"</#if>>
    		<div class="form-horizontal form-group">
@@ -48,21 +47,6 @@
 	
 </div>
 
-<div class="modal fade" id="cart-modal">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-        <h4 class="modal-title">Shopping Cart</h4>
-      </div>
-      <div class="modal-body">
-        <div id="cart-contents"/>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
+<div class="modal" id="cart-modal"></div>
 
 <@footer/>

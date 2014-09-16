@@ -12,3 +12,8 @@
 #entity-select-holder {
 	margin-bottom: 18px;	
 }
+
+#shoppingcart {
+	max-height: 500px;
+	overflow: auto;
+}

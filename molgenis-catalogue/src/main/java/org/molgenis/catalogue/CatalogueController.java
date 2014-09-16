@@ -28,8 +28,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 @Controller
@@ -83,6 +81,7 @@ public class CatalogueController extends MolgenisPluginController
 	{
 		ShoppingCart cart = getShoppingCart(session);
 		cart.clear();
+
 		String entityName = request.getEntityName();
 		for (String attributeName : request.getAttributeNames())
 		{
@@ -90,35 +89,16 @@ public class CatalogueController extends MolgenisPluginController
 		}
 	}
 
-	/**
-	 * Adds an attribute to the shopping cart. e.g.
-	 * http://localhost:8080/menu/main/catalogue/shoppingcart/add?entityName=MolgenisUser&attributeName=userName
-	 * 
-	 * @param session
-	 *            the user's session
-	 * @param entityName
-	 *            the name of the entity
-	 * @param attributeName
-	 *            the name of the attribute
-	 * @return ShoppingCart with the current contents of the cart
-	 * 
-	 */
-	@RequestMapping(SHOPPINGCART_URI + "/add")
-	public @ResponseBody ShoppingCart addToShoppingCart(HttpSession session,
-			@RequestParam(required = true) String entityName, @RequestParam(required = true) String attributeName)
-	{
-		return getShoppingCart(session).addAttribute(entityName, attributeName);
-	}
-
 	@RequestMapping(SHOPPINGCART_URI + "/remove")
-	public @ResponseBody ShoppingCart removeFromShoppingCart(HttpSession session,
-			@RequestParam(required = true) String attributeName)
+	public @ResponseBody
+	ShoppingCart removeFromShoppingCart(HttpSession session, @RequestParam(required = true) String attributeName)
 	{
 		return getShoppingCart(session).removeAttribute(attributeName);
 	}
 
 	@RequestMapping(SHOPPINGCART_URI + "/clear")
-	public @ResponseBody ShoppingCart clearShoppingCart(HttpSession session)
+	public @ResponseBody
+	ShoppingCart clearShoppingCart(HttpSession session)
 	{
 		return getShoppingCart(session).clear();
 	}
@@ -138,17 +118,18 @@ public class CatalogueController extends MolgenisPluginController
 		else
 		{
 			EntityMetaData metaData = dataService.getEntityMetaData(cart.getEntityName());
-			System.out.println(metaData);
-			Iterable<AttributeMetaData> selectedAttributes = Iterables.filter(metaData.getAtomicAttributes(),
-					new Predicate<AttributeMetaData>()
-					{
-						@Override
-						public boolean apply(AttributeMetaData input)
-						{
-							return cart.getAttributes().contains(input.getName());
-						}
-					});
-			model.addAttribute("attributes", Lists.newArrayList(selectedAttributes));
+
+			List<AttributeMetaData> selectedAttributes = Lists.newArrayList();
+			for (String attrName : cart.getAttributes())
+			{
+				AttributeMetaData attr = metaData.getAttribute(attrName);
+				if (attr != null)
+				{
+					selectedAttributes.add(attr);
+				}
+			}
+
+			model.addAttribute("attributes", selectedAttributes);
 
 		}
 		return CART_VIEW_NAME;

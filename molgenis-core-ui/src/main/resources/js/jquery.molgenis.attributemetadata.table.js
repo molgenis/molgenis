@@ -20,34 +20,32 @@
 		for (var i = 0;i < ATTRIBUTE_KEYS.length; i++) {
 			var key = ATTRIBUTE_KEYS[i];
 			var value = attributeMetadata[key];
-			
-			if ((key !== 'refEntity') || (attributeMetadata.fieldType === 'CATEGORICAL')) {
-				var tr = $('<tr></tr>');
-				table.append(tr);
+			var tr = $('<tr></tr>');
+			table.append(tr);
 				
+			if ((key !== 'refEntity') || (attributeMetadata.fieldType === 'CATEGORICAL')) {
 				var th = $('<th></th>');
 				tr.append(th);
 				th.text(key);
 				
 				var td = $('<td></td>');
 				tr.append(td);
-				
-				if (key === 'refEntity') {
-					(function (td) {
-						restApi.getAsync(value.href, {}, function(entity){
-							td.text(entity.label);
-						});
-					})(td);
-				} else {
-					td.text(value);
-				}
+			}
+
+			if (key !== 'refEntity') {
+				td.text(value);
+			} else if (attributeMetadata.fieldType === 'CATEGORICAL') {
+				(function (td) {
+					restApi.getAsync(value.href, {}, function(entity){
+						td.text(entity.label);
+					});
+				})(td);
 			}
 		}
 		
 		if (attributeMetadata.fieldType === 'CATEGORICAL') {
 			var panel = $('<div class="panel"></div>');
 			container.append(panel);
-			
 			
 			restApi.getAsync(attributeMetadata.refEntity.href,  {'expand': ['attributes']}, function(refEntityMetadata){	
 				panel.append('<div class="panel-heading"><h4 class="panel-title">Possible values (refEntity = ' + refEntityMetadata.label + ')</h4></div>');

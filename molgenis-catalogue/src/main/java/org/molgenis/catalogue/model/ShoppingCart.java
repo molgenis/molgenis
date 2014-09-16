@@ -1,6 +1,7 @@
 package org.molgenis.catalogue.model;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -8,7 +9,7 @@ import java.util.TreeSet;
 public class ShoppingCart
 {
 	private String entityName;
-	private SortedSet<String> attributes = new TreeSet<String>();
+	private final SortedSet<String> attributes = new TreeSet<String>();
 
 	public String getEntityName()
 	{
@@ -18,6 +19,13 @@ public class ShoppingCart
 	public Set<String> getAttributes()
 	{
 		return Collections.unmodifiableSet(attributes);
+	}
+
+	public ShoppingCart addAttributes(String entityName, List<String> names)
+	{
+		setEntityName(entityName);
+		attributes.addAll(names);
+		return this;
 	}
 
 	public ShoppingCart addAttribute(String entityName, String name)

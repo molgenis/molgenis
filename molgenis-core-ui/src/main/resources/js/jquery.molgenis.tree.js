@@ -62,6 +62,9 @@
 				return $.map(selectedNodes, function(selectedNode) {
 					return selectedNode.data.attribute;
 				});
+			},
+			'getNodeByUri' : function(uri) {
+				return tree.fancytree('getTree').getNodeByKey(uri);
 			}
 		});
 		
