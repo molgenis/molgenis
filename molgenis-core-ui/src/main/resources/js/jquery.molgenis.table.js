@@ -167,7 +167,7 @@
 		}
 		container.html(items);
 
-		$('.show-popover').popover({trigger:'hover', placement: 'bottom'});
+		$('.show-popover').popover({trigger:'hover', placement: 'bottom', container: 'body'});
 	}
 
 	/**
