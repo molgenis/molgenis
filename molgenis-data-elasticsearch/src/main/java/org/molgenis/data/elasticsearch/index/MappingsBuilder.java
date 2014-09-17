@@ -149,9 +149,10 @@ public class MappingsBuilder
 		switch (dataType)
 		{
 			case BOOL:
+				jsonBuilder.field("type", "boolean");
 				// disable norms for numeric fields
 				// note: https://github.com/elasticsearch/elasticsearch/issues/5502
-				jsonBuilder.field("type", "boolean").field("norms").startObject().field("enabled", false).endObject();
+				jsonBuilder.field("norms").startObject().field("enabled", false).endObject();
 				break;
 			case CATEGORICAL:
 			case MREF:
@@ -159,7 +160,9 @@ public class MappingsBuilder
 				EntityMetaData refEntity = attr.getRefEntity();
 				if (nestRefs)
 				{
-					jsonBuilder.field("type", "nested").startObject("properties");
+					jsonBuilder.field("type", "nested");
+					jsonBuilder.field("norms").startObject().field("enabled", enableNorms).endObject();
+					jsonBuilder.startObject("properties");
 					for (AttributeMetaData refAttr : refEntity.getAtomicAttributes())
 					{
 						createAttributeMapping(refAttr, enableNorms, createAllIndex, false, jsonBuilder);
@@ -175,9 +178,9 @@ public class MappingsBuilder
 			case COMPOUND:
 				throw new UnsupportedOperationException();
 			case DATE:
+				jsonBuilder.field("type", "date").field("format", "date");
 				// disable norms for numeric fields
-				jsonBuilder.field("type", "date").field("format", "date").field("norms").startObject()
-						.field("enabled", false).endObject();
+				jsonBuilder.field("norms").startObject().field("enabled", false).endObject();
 				// not-analyzed field for aggregation
 				// note: the include_in_all setting is ignored on any field that is defined in the fields options
 				// note: the norms settings defaults to false for not_analyzed fields
@@ -185,9 +188,9 @@ public class MappingsBuilder
 						.field("index", "not_analyzed").endObject().endObject();
 				break;
 			case DATE_TIME:
+				jsonBuilder.field("type", "date").field("format", "date_time_no_millis");
 				// disable norms for numeric fields
-				jsonBuilder.field("type", "date").field("format", "date_time_no_millis").field("norms").startObject()
-						.field("enabled", false).endObject();
+				jsonBuilder.field("norms").startObject().field("enabled", false).endObject();
 				// not-analyzed field for aggregation
 				// note: the include_in_all setting is ignored on any field that is defined in the fields options
 				// note: the norms settings defaults to false for not_analyzed fields
@@ -195,19 +198,22 @@ public class MappingsBuilder
 						.field("index", "not_analyzed").endObject().endObject();
 				break;
 			case DECIMAL:
+				jsonBuilder.field("type", "double");
 				// disable norms for numeric fields
-				jsonBuilder.field("type", "double").field("norms").startObject().field("enabled", false).endObject();
+				jsonBuilder.field("norms").startObject().field("enabled", false).endObject();
 				break;
 			case FILE:
 			case IMAGE:
 				throw new MolgenisDataException("Unsupported data type [" + dataType + "]");
 			case INT:
+				jsonBuilder.field("type", "integer");
 				// disable norms for numeric fields
-				jsonBuilder.field("type", "integer").field("norms").startObject().field("enabled", false).endObject();
+				jsonBuilder.field("norms").startObject().field("enabled", false).endObject();
 				break;
 			case LONG:
+				jsonBuilder.field("type", "long");
 				// disable norms for numeric fields
-				jsonBuilder.field("type", "long").field("norms").startObject().field("enabled", false).endObject();
+				jsonBuilder.field("norms").startObject().field("enabled", false).endObject();
 				break;
 			case EMAIL:
 			case ENUM:
@@ -217,8 +223,8 @@ public class MappingsBuilder
 			case STRING:
 			case TEXT:
 				// enable/disable norms based on given value
-				jsonBuilder.field("type", "string").field("norms").startObject().field("enabled", enableNorms)
-						.endObject();
+				jsonBuilder.field("type", "string");
+				jsonBuilder.field("norms").startObject().field("enabled", enableNorms).endObject();
 				// not-analyzed field for sorting and wildcard queries
 				// note: the include_in_all setting is ignored on any field that is defined in the fields options
 				// note: the norms settings defaults to false for not_analyzed fields
