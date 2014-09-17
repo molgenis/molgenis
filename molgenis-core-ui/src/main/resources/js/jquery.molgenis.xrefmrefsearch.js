@@ -202,7 +202,7 @@
 			var $operatorInput = $('<input type="hidden" data-filter="xrefmref-operator" value="' + options.operator + '" />');
 
 			if(attributeMetaData.fieldType === 'MREF') {
-				var $dropdown = $('<div class="btn-group"><div>');
+				var $dropdown = $('<div>');
 				var orValue = 'OR&nbsp;&nbsp;';
 				var andValue = 'AND';
 				$dropdown.append($operatorInput);

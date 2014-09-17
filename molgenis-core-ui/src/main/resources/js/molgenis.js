@@ -348,9 +348,9 @@ function createInput(attr, attrs, val, lbl) {
 		var $input = createBasicInput('radio', attrs, val);
 		return label.append($input).append(val ? 'True' : 'False');
 	case 'CATEGORICAL':
-		var label = $('<label class="checkbox">');
+		var label = $('<label>');
 		var $input = createBasicInput('checkbox', attrs, val);
-		return label.append($input).append(lbl);
+		return $('<div class="checkbox">').append(label.append($input).append(lbl));
 	case 'DATE':
 	case 'DATE_TIME':
 		var $div = $('<div>').addClass('group-append date input-group');
