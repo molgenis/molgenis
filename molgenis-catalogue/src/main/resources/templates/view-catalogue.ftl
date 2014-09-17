@@ -6,31 +6,35 @@
 
 <@header css js/>
 
-<div id="entity-class" class="well">
+<div id="entity-class" class="well clearfix">
 	<h3 id="entity-class-name"></h3>
 	<span id="entity-class-description"></span>
-	<button type="button" class="pull-right btn btn-default" id="cart-button"><span class="glyphicon glyphicon-shopping-cart"></span></button>				
+
+	<#if showEntitySelect?string('true', 'false') == 'true'>
+		<div class="dropdown pull-right">
+  			<button class="btn btn-default dropdown-toggle" type="button" id="dropdown-menu-entities" data-toggle="dropdown">
+  				Choose an entity <span class="caret"></span>
+  			</button>
+  			<ul class="dropdown-menu scrollable-menu" role="menu" aria-labelledby="dropdown-menu-entities">
+    			<#list entitiesMeta as entityMeta>
+                	<li role="presentation">
+                		<a role="menuitem" tabindex="-1" href="#" id="/api/v1/${entityMeta.name}" class="entity-dropdown-item">${entityMeta.label}</a>
+                	</li>
+            	</#list>
+    		</ul>
+		</div>
+	</#if>
 </div>
 
 <div class="row">
-	<div id="entity-select-holder" class="pull-right col-md-5" <#if showEntitySelect?string('true', 'false') == 'false'> style="display:none"</#if>>
-   		<div class="form-horizontal form-group">
-        	<label class="col-md-4 control-label" for="dataset-select">Choose an entity:</label>
-        	<div class="col-md-8">
-        		<select class="form-control" id="entity-select" data-placeholder="Choose an Entity (example: dataset, protocol..." id="dataset-select">
-            		<#list entitiesMeta as entityMeta>
-                		<option value="/api/v1/${entityMeta.name}" <#if entityMeta.name == selectedEntityName> selected</#if>><#if entityMeta.label?has_content>${entityMeta.label}<#else>${entityMeta.name}</#if></option>
-               		</#list>
-            	</select>
-       		</div>
- 		</div>
-	</div>
-	
 	<div class="col-md-3">
 		<div class="well">
 			<div class="panel">
     			<div class="panel-heading">
-        			<h4 class="panel-title">Data item selection</h4>
+        			<h4 class="panel-title clearfix">
+        				Data item selection
+        				<button type="button" title="Show shoppingcard" class="pull-right btn btn-default btn-sm" id="cart-button"><span class="glyphicon glyphicon-shopping-cart"></span></button>				
+        			</h4>
         		</div>
         		<div class="panel-body">
         			<div id="attribute-selection"></div>
@@ -48,5 +52,9 @@
 </div>
 
 <div class="modal" id="cart-modal"></div>
+
+<#if selectedEntityName??>
+<script>var selectedEntityName='${selectedEntityName}';</script>
+</#if>
 
 <@footer/>

@@ -58,23 +58,23 @@
 			return entityMetaData.attributes[name];
 	}
 	
-	$(function() {
-		$('#entity-select').on('change', function() {
-			var entityUri = $(this).val();
-			restApi.getAsync(entityUri + '/meta', {'expand': ['attributes']}, function(entityMetaData) {
-				selectedEntity = entityMetaData;
-				createHeader(entityMetaData);
-				createEntityMetaTree(entityMetaData);
-					
-				$('#attributes-table').attributeMetadataTable({
-					attributeMetadata: getFirstAttribute(entityMetaData) 
-				});
+	function load(entityUri) {
+		restApi.getAsync(entityUri + '/meta', {'expand': ['attributes']}, function(entityMetaData) {
+			selectedEntity = entityMetaData;
+			createHeader(entityMetaData);
+			createEntityMetaTree(entityMetaData);
+				
+			$('#attributes-table').attributeMetadataTable({
+				attributeMetadata: getFirstAttribute(entityMetaData) 
 			});
 		});
-		
-		if ($('#entity-select option').size() > 0) {
-			$('#entity-select').change();
-		}
+	}
+	
+	$(function() {
+		$('.entity-dropdown-item').click(function() {
+			var entityUri = $(this).attr('id');
+			load(entityUri);
+		});
 		
 		$('#cart-button').click(function(){
 			$('#cart-modal').load(
@@ -92,13 +92,22 @@
 			$.get('catalogue/shoppingcart/remove',
 					{entityName: selectedEntity.name, attributeName: attributeName}, 
 					function(){
-						$this.closest('tr').hide();	
+						$this.closest('tr').remove();	
 						var node = $('#attribute-selection').tree('getNodeByUri', '/api/v1/' + selectedEntity.name + '/meta/' + attributeName);
 						if (node) {
 							node.setSelected(false);
 						}
+						
+						var nrOfHeaderRows = 1;
+						if ($('#shoppingcart tr').size() === nrOfHeaderRows) {
+							$('#cart-contents').html('<p>Cart is empty</p>');
+						}
 					});
 		});
+		
+		if (selectedEntityName) {
+			load('/api/v1/' + selectedEntityName);
+		}
 	});
 	
 }($, window.top.molgenis = window.top.molgenis || {}));
