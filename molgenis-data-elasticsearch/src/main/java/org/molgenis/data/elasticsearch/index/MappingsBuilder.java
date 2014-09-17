@@ -149,7 +149,9 @@ public class MappingsBuilder
 		switch (dataType)
 		{
 			case BOOL:
-				jsonBuilder.field("type", "boolean");
+				// disable norms for numeric fields
+				// note: https://github.com/elasticsearch/elasticsearch/issues/5502
+				jsonBuilder.field("type", "boolean").field("norms").startObject().field("enabled", false).endObject();
 				break;
 			case CATEGORICAL:
 			case MREF:
@@ -173,28 +175,39 @@ public class MappingsBuilder
 			case COMPOUND:
 				throw new UnsupportedOperationException();
 			case DATE:
+				// disable norms for numeric fields
+				jsonBuilder.field("type", "date").field("format", "date").field("norms").startObject()
+						.field("enabled", false).endObject();
 				// not-analyzed field for aggregation
-				jsonBuilder.field("type", "date").field("format", "date").startObject("fields")
-						.startObject(FIELD_NOT_ANALYZED).field("type", "string").field("index", "not_analyzed")
-						.endObject().endObject();
+				// note: the include_in_all setting is ignored on any field that is defined in the fields options
+				// note: the norms settings defaults to false for not_analyzed fields
+				jsonBuilder.startObject("fields").startObject(FIELD_NOT_ANALYZED).field("type", "string")
+						.field("index", "not_analyzed").endObject().endObject();
 				break;
 			case DATE_TIME:
+				// disable norms for numeric fields
+				jsonBuilder.field("type", "date").field("format", "date_time_no_millis").field("norms").startObject()
+						.field("enabled", false).endObject();
 				// not-analyzed field for aggregation
-				jsonBuilder.field("type", "date").field("format", "date_time_no_millis").startObject("fields")
-						.startObject(FIELD_NOT_ANALYZED).field("type", "string").field("index", "not_analyzed")
-						.endObject().endObject();
+				// note: the include_in_all setting is ignored on any field that is defined in the fields options
+				// note: the norms settings defaults to false for not_analyzed fields
+				jsonBuilder.startObject("fields").startObject(FIELD_NOT_ANALYZED).field("type", "string")
+						.field("index", "not_analyzed").endObject().endObject();
 				break;
 			case DECIMAL:
-				jsonBuilder.field("type", "double");
+				// disable norms for numeric fields
+				jsonBuilder.field("type", "double").field("norms").startObject().field("enabled", false).endObject();
 				break;
 			case FILE:
 			case IMAGE:
 				throw new MolgenisDataException("Unsupported data type [" + dataType + "]");
 			case INT:
-				jsonBuilder.field("type", "integer");
+				// disable norms for numeric fields
+				jsonBuilder.field("type", "integer").field("norms").startObject().field("enabled", false).endObject();
 				break;
 			case LONG:
-				jsonBuilder.field("type", "long");
+				// disable norms for numeric fields
+				jsonBuilder.field("type", "long").field("norms").startObject().field("enabled", false).endObject();
 				break;
 			case EMAIL:
 			case ENUM:
@@ -203,14 +216,19 @@ public class MappingsBuilder
 			case SCRIPT:
 			case STRING:
 			case TEXT:
-				jsonBuilder.field("type", "string").startObject("fields").startObject(FIELD_NOT_ANALYZED)
-						.field("type", "string").field("index", "not_analyzed").endObject().endObject();
+				// enable/disable norms based on given value
+				jsonBuilder.field("type", "string").field("norms").startObject().field("enabled", enableNorms)
+						.endObject();
+				// not-analyzed field for sorting and wildcard queries
+				// note: the include_in_all setting is ignored on any field that is defined in the fields options
+				// note: the norms settings defaults to false for not_analyzed fields
+				jsonBuilder.startObject("fields").startObject(FIELD_NOT_ANALYZED).field("type", "string")
+						.field("index", "not_analyzed").endObject().endObject();
 				break;
 			default:
 				throw new RuntimeException("Unknown data type [" + dataType + "]");
 		}
 
-		jsonBuilder.field("norms").startObject().field("enabled", enableNorms).endObject();
 		jsonBuilder.field("include_in_all", createAllIndex && attr.isVisible());
 	}
 
