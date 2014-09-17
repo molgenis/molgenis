@@ -459,11 +459,10 @@ public class DataExplorerController extends MolgenisPluginController
 	@ResponseBody
 	public AggregateResult aggregate(@Valid @RequestBody AggregateRequest request)
 	{
-		boolean modCharts = molgenisSettings.getBooleanProperty(KEY_MOD_CHARTS, DEFAULT_VAL_MOD_CHARTS);
 		String entityName = request.getEntityName();
 		String xAttributeName = request.getXAxisAttributeName();
 		String yAttributeName = request.getYAxisAttributeName();
-		String distinctAttributeName = request.getDistinctAttributeName();
+		String distinctAttributeName = getDistinctAttributeName(request);
 
 		if (StringUtils.isBlank(xAttributeName) && StringUtils.isBlank(yAttributeName))
 		{
@@ -514,6 +513,36 @@ public class DataExplorerController extends MolgenisPluginController
 		AggregateQueryImpl aggregateQuery = new AggregateQueryImpl().attrX(xAttributeMeta).attrY(yAttributeMeta)
 				.attrDistinct(distinctAttributeMeta).query(new QueryImpl(request.getQ()));
 		return dataService.aggregate(entityName, aggregateQuery);
+	}
+
+	/**
+	 * Retrieves the distinct attribute from the request, overriding it if the runtime property is set.
+	 * 
+	 * @param request
+	 *            the {@link AggregateRequest}
+	 * @return the name of the distinct attribute
+	 */
+	private String getDistinctAttributeName(AggregateRequest request)
+	{
+		String rtpKey = KEY_MOD_AGGREGATES_DISTINCT_OVERRIDE + '.' + request.getEntityName();
+		String overrideDistinctAttributeName = molgenisSettings.getProperty(rtpKey);
+		String distinctAttributeName = request.getDistinctAttributeName();
+		if (overrideDistinctAttributeName != null)
+		{
+			if (distinctAttributeName != null)
+			{
+				logger.info("[mod-aggregate] Overriding distinct attribute from request! Request specifies "
+						+ distinctAttributeName + ", runtime property " + rtpKey + " specifies "
+						+ overrideDistinctAttributeName);
+			}
+			else
+			{
+				logger.debug("[mod-aggregate] Using distinct attribute " + overrideDistinctAttributeName
+						+ " from runtime property " + rtpKey);
+			}
+			return overrideDistinctAttributeName;
+		}
+		return distinctAttributeName;
 	}
 
 	/**
