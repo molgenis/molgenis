@@ -10,13 +10,15 @@
                         	<div class="col-md-4">
                             	<div id="feature-select"></div>
                         	</div>
-                    	</div>                	
+                    	</div>
+                    	<#if !hideAggregateDistinctSelect>               	
                     	<div class="form-group">
                             <label class="col-md-2 control-label"for="distinct-attr-select">${i18n.dataexplorer_aggregates_distinct}</label>
                             <div class="col-md-3">
                                 <div id="distinct-attr-select"></div>
                             </div>
                     	</div>
+                    	</#if>
                 	</div>
                 </div>
             </div>

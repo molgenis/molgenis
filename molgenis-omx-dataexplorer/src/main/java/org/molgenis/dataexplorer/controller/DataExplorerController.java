@@ -95,6 +95,8 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String KEY_HEADER_ABBREVIATE = "plugin.dataexplorer.header.abbreviate";
 	public static final String KEY_HIDE_SEARCH_BOX = "plugin.dataexplorer.hide.searchbox";
 	public static final String KEY_HIDE_ITEM_SELECTION = "plugin.dataexplorer.hide.itemselection";
+	public static final String KEY_MOD_AGGREGATES_DISTINCT_HIDE = KEY_MOD_AGGREGATES + ".distinct.hide";
+	public static final String KEY_MOD_AGGREGATES_DISTINCT_OVERRIDE = KEY_MOD_AGGREGATES + ".distinct.override";
 
 	private static final boolean DEFAULT_VAL_MOD_AGGREGATES = true;
 	private static final boolean DEFAULT_VAL_MOD_ANNOTATORS = false;
@@ -105,6 +107,7 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final boolean DEFAULT_VAL_SHOW_WIZARD_ONINIT = false;
 	public static final String DEFAULT_VAL_HEADER_ABBREVIATE = "180";
 	public static final String DEFAULT_AGGREGATES_NORESULTS_MESSAGE = "No results found";
+	private static final boolean DEFAULT_VAL_MOD_AGGREGATES_DISTINCT_HIDE = false;
 
 	static final String ATTR_GALAXY_URL = "galaxyUrl";
 	static final String ATTR_GALAXY_API_KEY = "galaxyApiKey";
@@ -240,6 +243,11 @@ public class DataExplorerController extends MolgenisPluginController
 		{
 			model.addAttribute("tableEditable", isTableEditable());
 			model.addAttribute("rowClickable", isRowClickable());
+		}
+		else if (moduleId.equals("aggregates"))
+		{
+			model.addAttribute("hideAggregateDistinctSelect", molgenisSettings.getBooleanProperty(
+					KEY_MOD_AGGREGATES_DISTINCT_HIDE, DEFAULT_VAL_MOD_AGGREGATES_DISTINCT_HIDE));
 		}
 		return "view-dataexplorer-mod-" + moduleId; // TODO bad request in case of invalid module id
 	}
@@ -451,6 +459,7 @@ public class DataExplorerController extends MolgenisPluginController
 	@ResponseBody
 	public AggregateResult aggregate(@Valid @RequestBody AggregateRequest request)
 	{
+		boolean modCharts = molgenisSettings.getBooleanProperty(KEY_MOD_CHARTS, DEFAULT_VAL_MOD_CHARTS);
 		String entityName = request.getEntityName();
 		String xAttributeName = request.getXAxisAttributeName();
 		String yAttributeName = request.getYAxisAttributeName();
