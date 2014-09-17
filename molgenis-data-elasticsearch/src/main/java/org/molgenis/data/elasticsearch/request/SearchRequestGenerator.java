@@ -195,19 +195,19 @@ public class SearchRequestGenerator
 		switch (dataType)
 		{
 			case BOOL:
+			case INT:
+			case LONG:
+			case DECIMAL:
 				// work around elasticsearch bug for boolean multi-fields:
 				// http://elasticsearch-users.115913.n3.nabble.com/boolean-multi-field-silently-ignored-in-1-
 				// 2-1-td4058107.html
 				return AggregationBuilders.terms(attrName).size(Integer.MAX_VALUE).field(attrName);
 			case DATE:
 			case DATE_TIME:
-			case DECIMAL:
 			case EMAIL:
 			case ENUM:
 			case HTML:
 			case HYPERLINK:
-			case INT:
-			case LONG:
 			case SCRIPT:
 			case STRING:
 			case TEXT:

@@ -2,6 +2,7 @@ package org.molgenis.data.elasticsearch;
 
 import java.sql.Timestamp;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.UnknownAttributeException;
+import org.molgenis.data.support.ConvertingIterable;
 import org.molgenis.util.MolgenisDateFormat;
 
 import com.google.common.base.Function;
@@ -219,7 +221,21 @@ public abstract class ElasticsearchEntity implements Entity
 	public abstract Entity getEntity(String attributeName);
 
 	@Override
+	public <E extends Entity> E getEntity(String attributeName, Class<E> clazz)
+	{
+		Entity entity = getEntity(attributeName);
+		return entity != null ? new ConvertingIterable<E>(clazz, Arrays.asList(entity)).iterator().next() : null;
+	}
+
+	@Override
 	public abstract Iterable<Entity> getEntities(String attributeName);
+
+	@Override
+	public <E extends Entity> Iterable<E> getEntities(String attributeName, Class<E> clazz)
+	{
+		Iterable<Entity> entities = getEntities(attributeName);
+		return entities != null ? new ConvertingIterable<E>(clazz, entities) : null;
+	}
 
 	@Override
 	public List<String> getList(String attributeName)

@@ -10,6 +10,7 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisQueryException;
 import org.molgenis.data.Query;
@@ -168,9 +169,12 @@ public class QueryGenerator implements QueryPartGenerator
 						case CATEGORICAL:
 						case MREF:
 						case XREF:
+							// support both entity as entity id as value
+							Object queryIdValue = queryValue instanceof Entity ? ((Entity) queryValue).getIdValue() : queryValue;
+
 							AttributeMetaData refIdAttr = attr.getRefEntity().getIdAttribute();
 							filterBuilder = FilterBuilders.nestedFilter(queryField,
-									FilterBuilders.termFilter(queryField + '.' + refIdAttr.getName(), queryValue));
+									FilterBuilders.termFilter(queryField + '.' + refIdAttr.getName(), queryIdValue));
 							break;
 						case COMPOUND:
 						case FILE:

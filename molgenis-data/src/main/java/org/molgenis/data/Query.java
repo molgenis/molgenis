@@ -63,7 +63,11 @@ public interface Query extends Iterable<Entity>
 	Query like(String field, Object value);
 
 	/**
-	 * Equals
+	 * 
+	 * @param field
+	 * @param value
+	 *            value, or id for references
+	 * @return
 	 */
 	Query eq(String field, Object value);
 

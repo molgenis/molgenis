@@ -82,9 +82,19 @@ public interface Entity extends Serializable
 	Entity getEntity(String attributeName);
 
 	/**
+	 * Retrieves the value of the designated column as entity of the give type
+	 */
+	<E extends Entity> E getEntity(String attributeName, Class<E> clazz);
+
+	/**
 	 * Retrieves the value of the designated column as a entity iterable
 	 */
 	Iterable<Entity> getEntities(String attributeName);
+
+	/**
+	 * Retrieves the value of the designated column as a entity of the given type iterable
+	 */
+	<E extends Entity> Iterable<E> getEntities(String attributeName, Class<E> clazz);
 
 	/**
 	 * Retrieves the value of the designated column as List<String>.

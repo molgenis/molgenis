@@ -6,7 +6,6 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.List;
 
-import org.elasticsearch.common.collect.Lists;
 import org.molgenis.AppConfig;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -15,6 +14,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.google.common.collect.Lists;
 
 @ContextConfiguration(classes = AppConfig.class)
 public class EntityMetaDataRepositoryTest extends AbstractTestNGSpringContextTests

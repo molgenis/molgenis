@@ -138,12 +138,21 @@ public class MappingsBuilder
 	{
 		String attrName = attr.getName();
 		jsonBuilder.startObject(attrName);
+		createAttributeMappingContents(attr, enableNorms, createAllIndex, nestRefs, jsonBuilder);
+		jsonBuilder.endObject();
+	}
 
+	private static void createAttributeMappingContents(AttributeMetaData attr, boolean enableNorms,
+			boolean createAllIndex, boolean nestRefs, XContentBuilder jsonBuilder) throws IOException
+	{
 		FieldTypeEnum dataType = attr.getDataType().getEnumType();
 		switch (dataType)
 		{
 			case BOOL:
 				jsonBuilder.field("type", "boolean");
+				// disable norms for numeric fields
+				// note: https://github.com/elasticsearch/elasticsearch/issues/5502
+				jsonBuilder.field("norms").startObject().field("enabled", false).endObject();
 				break;
 			case CATEGORICAL:
 			case MREF:
@@ -151,7 +160,9 @@ public class MappingsBuilder
 				EntityMetaData refEntity = attr.getRefEntity();
 				if (nestRefs)
 				{
-					jsonBuilder.field("type", "nested").startObject("properties");
+					jsonBuilder.field("type", "nested");
+					jsonBuilder.field("norms").startObject().field("enabled", enableNorms).endObject();
+					jsonBuilder.startObject("properties");
 					for (AttributeMetaData refAttr : refEntity.getAtomicAttributes())
 					{
 						createAttributeMapping(refAttr, enableNorms, createAllIndex, false, jsonBuilder);
@@ -160,7 +171,7 @@ public class MappingsBuilder
 				}
 				else
 				{
-					createAttributeMapping(refEntity.getLabelAttribute(), enableNorms, createAllIndex, false,
+					createAttributeMappingContents(refEntity.getLabelAttribute(), enableNorms, createAllIndex, false,
 							jsonBuilder);
 				}
 				break;
@@ -168,21 +179,41 @@ public class MappingsBuilder
 				throw new UnsupportedOperationException();
 			case DATE:
 				jsonBuilder.field("type", "date").field("format", "date");
+				// disable norms for numeric fields
+				jsonBuilder.field("norms").startObject().field("enabled", false).endObject();
+				// not-analyzed field for aggregation
+				// note: the include_in_all setting is ignored on any field that is defined in the fields options
+				// note: the norms settings defaults to false for not_analyzed fields
+				jsonBuilder.startObject("fields").startObject(FIELD_NOT_ANALYZED).field("type", "string")
+						.field("index", "not_analyzed").endObject().endObject();
 				break;
 			case DATE_TIME:
 				jsonBuilder.field("type", "date").field("format", "date_time_no_millis");
+				// disable norms for numeric fields
+				jsonBuilder.field("norms").startObject().field("enabled", false).endObject();
+				// not-analyzed field for aggregation
+				// note: the include_in_all setting is ignored on any field that is defined in the fields options
+				// note: the norms settings defaults to false for not_analyzed fields
+				jsonBuilder.startObject("fields").startObject(FIELD_NOT_ANALYZED).field("type", "string")
+						.field("index", "not_analyzed").endObject().endObject();
 				break;
 			case DECIMAL:
 				jsonBuilder.field("type", "double");
+				// disable norms for numeric fields
+				jsonBuilder.field("norms").startObject().field("enabled", false).endObject();
 				break;
 			case FILE:
 			case IMAGE:
 				throw new MolgenisDataException("Unsupported data type [" + dataType + "]");
 			case INT:
 				jsonBuilder.field("type", "integer");
+				// disable norms for numeric fields
+				jsonBuilder.field("norms").startObject().field("enabled", false).endObject();
 				break;
 			case LONG:
 				jsonBuilder.field("type", "long");
+				// disable norms for numeric fields
+				jsonBuilder.field("norms").startObject().field("enabled", false).endObject();
 				break;
 			case EMAIL:
 			case ENUM:
@@ -191,18 +222,20 @@ public class MappingsBuilder
 			case SCRIPT:
 			case STRING:
 			case TEXT:
-				jsonBuilder.field("type", "multi_field").startObject("fields").startObject(attrName)
-						.field("type", "string").endObject().startObject(FIELD_NOT_ANALYZED).field("type", "string")
+				// enable/disable norms based on given value
+				jsonBuilder.field("type", "string");
+				jsonBuilder.field("norms").startObject().field("enabled", enableNorms).endObject();
+				// not-analyzed field for sorting and wildcard queries
+				// note: the include_in_all setting is ignored on any field that is defined in the fields options
+				// note: the norms settings defaults to false for not_analyzed fields
+				jsonBuilder.startObject("fields").startObject(FIELD_NOT_ANALYZED).field("type", "string")
 						.field("index", "not_analyzed").endObject().endObject();
 				break;
 			default:
 				throw new RuntimeException("Unknown data type [" + dataType + "]");
 		}
 
-		jsonBuilder.field("norms").startObject().field("enabled", enableNorms).endObject();
 		jsonBuilder.field("include_in_all", createAllIndex && attr.isVisible());
-
-		jsonBuilder.endObject();
 	}
 
 	public static void serializeEntityMeta(EntityMetaData entityMetaData, XContentBuilder jsonBuilder)
