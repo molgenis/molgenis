@@ -2,6 +2,7 @@ package org.molgenis.data.support;
 
 import java.sql.Timestamp;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -217,6 +218,7 @@ public class TransformedEntity implements Entity
 					return MolgenisDateFormat.getDateFormat().parse(value.toString());
 				case DATE_TIME:
 					return MolgenisDateFormat.getDateTimeFormat().parse(value.toString());
+					// $CASES-OMITTED$
 				default:
 					throw new MolgenisDataException("Type [" + dataType + "] is not a date type");
 
@@ -258,6 +260,13 @@ public class TransformedEntity implements Entity
 	}
 
 	@Override
+	public <E extends Entity> E getEntity(String attributeName, Class<E> clazz)
+	{
+		Entity entity = getEntity(attributeName);
+		return entity != null ? new ConvertingIterable<E>(clazz, Arrays.asList(entity)).iterator().next() : null;
+	}
+
+	@Override
 	public Iterable<Entity> getEntities(String attributeName)
 	{
 		List<String> list = getList(attributeName);
@@ -277,6 +286,13 @@ public class TransformedEntity implements Entity
 			});
 		}
 		return null;
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> getEntities(String attributeName, Class<E> clazz)
+	{
+		Iterable<Entity> entities = getEntities(attributeName);
+		return entities != null ? new ConvertingIterable<E>(clazz, entities) : null;
 	}
 
 	@Override
