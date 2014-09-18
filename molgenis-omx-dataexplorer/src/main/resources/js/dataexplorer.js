@@ -24,6 +24,7 @@ function($, molgenis, settingsXhr) {
 		molgenis.createAlert([{message: 'An error occurred initializing the data explorer.'}], 'error');
 	}
 	var settings = settingsXhr[0];
+	self.settings = settings;
 	
     /**
      * @memberOf molgenis.dataexplorer

@@ -34,7 +34,19 @@
 			if(aggregableAttributes.length > 1) createAtributeDropdown($('#feature-select'), aggregableAttributes, 'y-aggr-attribute', aggregableAttributes[1]);
 			else createAtributeDropdown($('#feature-select'), aggregableAttributes, 'y-aggr-attribute', false);
 			$('#distinct-attr-select').empty();
-			createAtributeDropdown($('#distinct-attr-select'), attributes, 'distinct-aggr-attribute', false);
+			if( molgenis.dataexplorer.settings && (molgenis.dataexplorer.settings['mod.aggregates.distinct.hide']==='true') ){
+				$('#distinct-attr').hide();
+			} else {
+				$('#distinct-attr').show();
+				if( molgenis.dataexplorer.settings && 
+						molgenis.dataexplorer.settings.hasOwnProperty('mod.aggregates.distinct.override.'+getEntity().name)) {
+					// show fixed value for this entity
+					$('#distinct-attr-select').append($('<p>').addClass('form-control-static')
+							.text(molgenis.dataexplorer.settings['mod.aggregates.distinct.override.'+getEntity().name]));
+				} else {
+					createAtributeDropdown($('#distinct-attr-select'), attributes, 'distinct-aggr-attribute', false);
+				}
+			}
 			
 			$('#feature-select-container').show();
 			$('#aggregate-table-container').empty();
