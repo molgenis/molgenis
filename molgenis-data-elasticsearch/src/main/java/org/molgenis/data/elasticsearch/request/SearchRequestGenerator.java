@@ -230,14 +230,26 @@ public class SearchRequestGenerator
 		}
 	}
 
-	private CardinalityBuilder createDistinctAggregateBuilder(AttributeMetaData attr)
+	private AbstractAggregationBuilder createDistinctAggregateBuilder(AttributeMetaData attr)
 	{
 		// http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-aggregations-metrics-cardinality-aggregation.html
 		// The precision_threshold options allows to trade memory for accuracy, and defines a unique count below which
 		// counts are expected to be close to accurate. Above this value, counts might become a bit more fuzzy. The
 		// maximum supported value is 40000, thresholds above this number will have the same effect as a threshold of
 		// 40000.
-		return AggregationBuilders.cardinality("distinct").field(getAggregateFieldName(attr))
-				.precisionThreshold(40000l);
+		CardinalityBuilder distinctAggregationBuilder = AggregationBuilders.cardinality("distinct")
+				.field(getAggregateFieldName(attr)).precisionThreshold(40000l);
+
+		switch (attr.getDataType().getEnumType())
+		{
+			case CATEGORICAL:
+			case MREF:
+			case XREF:
+				return AggregationBuilders.nested("distinct").path(attr.getName())
+						.subAggregation(distinctAggregationBuilder);
+				// $CASES-OMITTED$
+			default:
+				return distinctAggregationBuilder;
+		}
 	}
 }
