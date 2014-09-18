@@ -190,6 +190,12 @@ public class SearchRequestGenerator
 
 	private TermsBuilder createTermAggregateBuilder(AttributeMetaData attr)
 	{
+		String fieldName = getAggregateFieldName(attr);
+		return AggregationBuilders.terms(attr.getName()).size(Integer.MAX_VALUE).field(fieldName);
+	}
+
+	private String getAggregateFieldName(AttributeMetaData attr)
+	{
 		String attrName = attr.getName();
 		FieldTypeEnum dataType = attr.getDataType().getEnumType();
 		switch (dataType)
@@ -198,10 +204,7 @@ public class SearchRequestGenerator
 			case INT:
 			case LONG:
 			case DECIMAL:
-				// work around elasticsearch bug for boolean multi-fields:
-				// http://elasticsearch-users.115913.n3.nabble.com/boolean-multi-field-silently-ignored-in-1-
-				// 2-1-td4058107.html
-				return AggregationBuilders.terms(attrName).size(Integer.MAX_VALUE).field(attrName);
+				return attrName;
 			case DATE:
 			case DATE_TIME:
 			case EMAIL:
@@ -212,16 +215,12 @@ public class SearchRequestGenerator
 			case STRING:
 			case TEXT:
 				// use non-analyzed field
-				return AggregationBuilders.terms(attrName).size(Integer.MAX_VALUE)
-						.field(attrName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED);
+				return attrName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED;
 			case CATEGORICAL:
 			case XREF:
 			case MREF:
-				// use non-analyzed nested field
-				// do not wrap in a nested aggregation builder yet, sub aggregations might have to be added
-				AttributeMetaData refIdAttribute = attr.getRefEntity().getIdAttribute();
-				String fieldName = attrName + '.' + refIdAttribute.getName() + '.' + MappingsBuilder.FIELD_NOT_ANALYZED;
-				return AggregationBuilders.terms(attrName).size(Integer.MAX_VALUE).field(fieldName);
+				// use id attribute of nested field
+				return attrName + '.' + getAggregateFieldName(attr.getRefEntity().getIdAttribute());
 			case COMPOUND:
 			case FILE:
 			case IMAGE:
@@ -231,13 +230,26 @@ public class SearchRequestGenerator
 		}
 	}
 
-	private CardinalityBuilder createDistinctAggregateBuilder(AttributeMetaData attr)
+	private AbstractAggregationBuilder createDistinctAggregateBuilder(AttributeMetaData attr)
 	{
 		// http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-aggregations-metrics-cardinality-aggregation.html
 		// The precision_threshold options allows to trade memory for accuracy, and defines a unique count below which
 		// counts are expected to be close to accurate. Above this value, counts might become a bit more fuzzy. The
 		// maximum supported value is 40000, thresholds above this number will have the same effect as a threshold of
 		// 40000.
-		return AggregationBuilders.cardinality("distinct").field(attr.getName()).precisionThreshold(40000l);
+		CardinalityBuilder distinctAggregationBuilder = AggregationBuilders.cardinality("distinct")
+				.field(getAggregateFieldName(attr)).precisionThreshold(40000l);
+
+		switch (attr.getDataType().getEnumType())
+		{
+			case CATEGORICAL:
+			case MREF:
+			case XREF:
+				return AggregationBuilders.nested("distinct").path(attr.getName())
+						.subAggregation(distinctAggregationBuilder);
+				// $CASES-OMITTED$
+			default:
+				return distinctAggregationBuilder;
+		}
 	}
 }

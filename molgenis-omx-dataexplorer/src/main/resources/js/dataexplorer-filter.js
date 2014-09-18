@@ -238,8 +238,13 @@
 		// The complex filter element container
 		var $complexElementContainer = $('<div class="form-group complex-element-container" data-filter="complex-element-container"></div>');
 		
-		// Complex element containing the simple filter and the operator
-		var $complexElement = $('<div class="controls complex-element col-md-9" data-filter="complex-element"></div>');
+		if(wizard){
+			// Complex element containing the simple filter and the operator
+			var $complexElement = $('<div class="controls complex-element col-md-9" data-filter="complex-element"></div>');
+		} else{
+			// if its for a single attribute 
+			var $complexElement = $('<div class="controls complex-element col-md-12" data-filter="complex-element"></div>');
+		}
 		
 		// Make complex filter element label
 		var $complexElementLabel = self.createFilterLabel(attribute, isFirstElement, wizard);

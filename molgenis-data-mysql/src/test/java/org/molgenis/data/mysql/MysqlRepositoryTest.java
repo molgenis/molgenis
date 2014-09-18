@@ -190,7 +190,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		String idAttributeName = "id";
 		final String exampleId = "id123";
 
-		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("test");
+		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("testje");
 		entityMetaData.setIdAttribute(idAttributeName);
 		entityMetaData.setLabelAttribute(idAttributeName);
 		DefaultAttributeMetaData idAttributeMetaData = new DefaultAttributeMetaData(idAttributeName);
