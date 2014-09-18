@@ -237,6 +237,7 @@ public class SearchRequestGenerator
 		// counts are expected to be close to accurate. Above this value, counts might become a bit more fuzzy. The
 		// maximum supported value is 40000, thresholds above this number will have the same effect as a threshold of
 		// 40000.
-		return AggregationBuilders.cardinality("distinct").field(attr.getName()).precisionThreshold(40000l);
+		return AggregationBuilders.cardinality("distinct").field(getAggregateFieldName(attr))
+				.precisionThreshold(40000l);
 	}
 }
