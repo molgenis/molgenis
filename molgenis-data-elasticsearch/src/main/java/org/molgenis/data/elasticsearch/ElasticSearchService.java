@@ -1080,7 +1080,7 @@ public class ElasticSearchService implements SearchService
 
 	static class SynchronizedBulkProcessor
 	{
-		private final Semaphore sem;
+		private final Semaphore sem = new Semaphore(0);
 		private final BulkProcessor bulkProcessor;
 
 		public SynchronizedBulkProcessor(Client client)
@@ -1113,7 +1113,6 @@ public class ElasticSearchService implements SearchService
 					sem.release();
 				}
 			}).build();
-			sem = new Semaphore(1);
 		}
 
 		@Override
