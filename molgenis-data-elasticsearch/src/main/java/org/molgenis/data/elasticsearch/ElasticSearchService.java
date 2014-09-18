@@ -752,21 +752,25 @@ public class ElasticSearchService implements SearchService
 		try
 		{
 			sem.acquire();
-
-			SynchronizedBulkProcessor bulkProcessor = new SynchronizedBulkProcessor(client);
 			try
 			{
-				for (Object id : ids)
+				SynchronizedBulkProcessor bulkProcessor = new SynchronizedBulkProcessor(client);
+				try
 				{
-					bulkProcessor.add(new DeleteRequest(indexName, type, id.toString()));
+					for (Object id : ids)
+					{
+						bulkProcessor.add(new DeleteRequest(indexName, type, id.toString()));
+					}
+				}
+				finally
+				{
+					bulkProcessor.close();
 				}
 			}
 			finally
 			{
-				bulkProcessor.close();
+				sem.release();
 			}
-
-			sem.acquire();
 		}
 		catch (InterruptedException e)
 		{
