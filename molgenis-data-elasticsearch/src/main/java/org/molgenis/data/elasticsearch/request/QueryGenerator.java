@@ -1,8 +1,11 @@
 package org.molgenis.data.elasticsearch.request;
 
+import java.util.Iterator;
 import java.util.List;
 
 import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.common.collect.Iterables;
+import org.elasticsearch.common.collect.Lists;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
@@ -208,7 +211,39 @@ public class QueryGenerator implements QueryPartGenerator
 			case IN:
 			{
 				if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
-				FilterBuilder filterBuilder = FilterBuilders.inFilter(queryField, queryValue);
+
+				FilterBuilder filterBuilder;
+				if (queryValue instanceof Iterable)
+				{
+					// Look ahead to see if it are entities
+					Iterable<?> iterable = (Iterable<?>) queryValue;
+					Iterator<?> it = iterable.iterator();
+					boolean isEntity = it.hasNext() && (it.next() instanceof Entity);
+					if (isEntity)
+					{
+						List<Object> values = Lists.newArrayList();
+						for (Object obj : iterable)
+						{
+							Entity entity = (Entity) obj;
+							values.add(entity.getIdValue());
+						}
+
+						AttributeMetaData attr = entityMetaData.getAttribute(queryField);
+						if (attr == null) throw new UnknownAttributeException(queryField);
+
+						filterBuilder = FilterBuilders.nestedFilter(queryField, FilterBuilders.inFilter(queryField
+								+ '.' + attr.getRefEntity().getIdAttribute().getName(), values.toArray(new Object[0])));
+					}
+					else
+					{
+						filterBuilder = FilterBuilders.inFilter(queryField, Iterables.toArray(iterable, Object.class));
+					}
+				}
+				else
+				{
+					filterBuilder = FilterBuilders.inFilter(queryField, queryValue);
+				}
+
 				queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
 				break;
 			}
