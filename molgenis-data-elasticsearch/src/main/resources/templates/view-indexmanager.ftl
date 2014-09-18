@@ -8,7 +8,7 @@
     <#list entities as entity>
         <div class="radio">
             <label>
-                <input type="radio" name="type" value="${entity.label?html}"<#if entity_index == 0> checked</#if>>${entity.label?html}
+                <input type="radio" name="type" value="${entity.name?html}"<#if entity_index == 0> checked</#if>>${entity.label?html}
             </label>
         </div>
     </#list>

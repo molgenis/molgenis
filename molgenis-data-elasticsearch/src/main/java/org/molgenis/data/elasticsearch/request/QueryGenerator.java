@@ -271,7 +271,8 @@ public class QueryGenerator implements QueryPartGenerator
 						// see note about extremely slow wildcard queries:
 						// http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/query-dsl-wildcard-query.html
 						String wildcardQueryValue = new StringBuilder('*').append(queryValueStr).append('*').toString();
-						queryBuilder = QueryBuilders.wildcardQuery(queryField, wildcardQueryValue);
+						queryBuilder = QueryBuilders.wildcardQuery(queryField + '.'
+								+ MappingsBuilder.FIELD_NOT_ANALYZED, wildcardQueryValue);
 						break;
 					default:
 						throw new RuntimeException("Unknown data type [" + dataType + "]");

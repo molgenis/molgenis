@@ -393,6 +393,11 @@ public class ResponseParser
 			Aggregations reverseNestedAggregations = ((ReverseNested) aggregation).getAggregations();
 			aggregation = reverseNestedAggregations.iterator().next();
 		}
+		if (aggregation instanceof Nested)
+		{
+			Aggregations nestedAggregations = ((Nested) aggregation).getAggregations();
+			aggregation = nestedAggregations.iterator().next();
+		}
 		if (!(aggregation instanceof Cardinality))
 		{
 			throw new RuntimeException("Aggregation of type [" + aggregation.getClass().getName() + "] not supported");
