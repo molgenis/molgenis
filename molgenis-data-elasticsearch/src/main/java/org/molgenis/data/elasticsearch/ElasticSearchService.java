@@ -748,34 +748,20 @@ public class ElasticSearchService implements SearchService
 		{
 			LOG.trace("Deleting Elasticsearch '" + type + "' docs with ids [" + ids + "] ...");
 		}
-		Semaphore sem = new Semaphore(1);
+
+		SynchronizedBulkProcessor bulkProcessor = new SynchronizedBulkProcessor(client);
 		try
 		{
-			sem.acquire();
-			try
+			for (Object id : ids)
 			{
-				SynchronizedBulkProcessor bulkProcessor = new SynchronizedBulkProcessor(client);
-				try
-				{
-					for (Object id : ids)
-					{
-						bulkProcessor.add(new DeleteRequest(indexName, type, id.toString()));
-					}
-				}
-				finally
-				{
-					bulkProcessor.close();
-				}
-			}
-			finally
-			{
-				sem.release();
+				bulkProcessor.add(new DeleteRequest(indexName, type, id.toString()));
 			}
 		}
-		catch (InterruptedException e)
+		finally
 		{
-			throw new RuntimeException(e);
+			bulkProcessor.close();
 		}
+
 		if (LOG.isDebugEnabled())
 		{
 			LOG.debug("Deleted Elasticsearch '" + type + "' docs with ids [" + ids + "] ...");
@@ -798,35 +784,19 @@ public class ElasticSearchService implements SearchService
 		{
 			LOG.trace("Bulk deleting Elasticsearch '" + type + "' docs ...");
 		}
-		Semaphore sem = new Semaphore(1);
+
+		SynchronizedBulkProcessor bulkProcessor = new SynchronizedBulkProcessor(client);
 		try
 		{
-			sem.acquire();
-
-			try
+			for (Entity entity : entities)
 			{
-				SynchronizedBulkProcessor bulkProcessor = new SynchronizedBulkProcessor(client);
-				try
-				{
-					for (Entity entity : entities)
-					{
-						String elasticsearchId = toElasticsearchId(entity, entityMetaData);
-						bulkProcessor.add(new DeleteRequest(indexName, type, elasticsearchId));
-					}
-				}
-				finally
-				{
-					bulkProcessor.close();
-				}
-			}
-			finally
-			{
-				sem.release();
+				String elasticsearchId = toElasticsearchId(entity, entityMetaData);
+				bulkProcessor.add(new DeleteRequest(indexName, type, elasticsearchId));
 			}
 		}
-		catch (InterruptedException e)
+		finally
 		{
-			throw new RuntimeException(e);
+			bulkProcessor.close();
 		}
 
 		if (LOG.isDebugEnabled())
