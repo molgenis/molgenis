@@ -302,7 +302,7 @@ public class JpaRepository extends AbstractCrudRepository
 			logger.debug("removing " + getEntityClass().getSimpleName() + " [" + entity.getIdValue() + "]");
 		}
 
-		em.remove(getTypedEntity(entity));
+		em.remove(findOne(entity.getIdValue()));
 		if (logger.isDebugEnabled()) logger.debug("flushing entity manager");
 		em.flush();
 	}
@@ -315,7 +315,7 @@ public class JpaRepository extends AbstractCrudRepository
 
 		for (Entity r : entities)
 		{
-			em.remove(getTypedEntity(r));
+			em.remove(findOne(r.getIdValue()));
 			if (logger.isDebugEnabled())
 			{
 				logger.debug("removing " + getEntityClass().getSimpleName() + " [" + r.getIdValue() + "]");

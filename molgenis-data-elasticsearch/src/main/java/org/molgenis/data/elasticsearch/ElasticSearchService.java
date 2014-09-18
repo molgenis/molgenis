@@ -160,6 +160,7 @@ public class ElasticSearchService implements SearchService
 	/*
 	 * TODO this method is only used by BiobankConnect and should be removed in the future
 	 */
+	@Override
 	@Deprecated
 	public SearchResult multiSearch(MultiSearchRequest request)
 	{
@@ -209,6 +210,7 @@ public class ElasticSearchService implements SearchService
 	 * @see org.molgenis.data.elasticsearch.SearchService#multiSearch(org.elasticsearch.action.search.SearchType,
 	 * org.elasticsearch.action.search.MultiSearchRequest)
 	 */
+	@Override
 	@Deprecated
 	public SearchResult multiSearch(SearchType searchType, MultiSearchRequest request)
 	{
@@ -746,30 +748,20 @@ public class ElasticSearchService implements SearchService
 		{
 			LOG.trace("Deleting Elasticsearch '" + type + "' docs with ids [" + ids + "] ...");
 		}
-		Semaphore sem = new Semaphore(1);
+
+		SynchronizedBulkProcessor bulkProcessor = new SynchronizedBulkProcessor(client);
 		try
 		{
-			sem.acquire();
-
-			SynchronizedBulkProcessor bulkProcessor = new SynchronizedBulkProcessor(client);
-			try
+			for (Object id : ids)
 			{
-				for (Object id : ids)
-				{
-					bulkProcessor.add(new DeleteRequest(indexName, type, id.toString()));
-				}
+				bulkProcessor.add(new DeleteRequest(indexName, type, id.toString()));
 			}
-			finally
-			{
-				bulkProcessor.close();
-			}
-
-			sem.acquire();
 		}
-		catch (InterruptedException e)
+		finally
 		{
-			throw new RuntimeException(e);
+			bulkProcessor.close();
 		}
+
 		if (LOG.isDebugEnabled())
 		{
 			LOG.debug("Deleted Elasticsearch '" + type + "' docs with ids [" + ids + "] ...");
@@ -792,31 +784,21 @@ public class ElasticSearchService implements SearchService
 		{
 			LOG.trace("Bulk deleting Elasticsearch '" + type + "' docs ...");
 		}
-		Semaphore sem = new Semaphore(1);
+
+		SynchronizedBulkProcessor bulkProcessor = new SynchronizedBulkProcessor(client);
 		try
 		{
-			sem.acquire();
-
-			SynchronizedBulkProcessor bulkProcessor = new SynchronizedBulkProcessor(client);
-			try
+			for (Entity entity : entities)
 			{
-				for (Entity entity : entities)
-				{
-					String elasticsearchId = toElasticsearchId(entity, entityMetaData);
-					bulkProcessor.add(new DeleteRequest(indexName, type, elasticsearchId));
-				}
+				String elasticsearchId = toElasticsearchId(entity, entityMetaData);
+				bulkProcessor.add(new DeleteRequest(indexName, type, elasticsearchId));
 			}
-			finally
-			{
-				bulkProcessor.close();
-			}
-
-			sem.acquire();
 		}
-		catch (InterruptedException e)
+		finally
 		{
-			throw new RuntimeException(e);
+			bulkProcessor.close();
 		}
+
 		if (LOG.isDebugEnabled())
 		{
 			LOG.debug("Bulk deleted Elasticsearch '" + type + "' docs");
@@ -1098,8 +1080,8 @@ public class ElasticSearchService implements SearchService
 
 	static class SynchronizedBulkProcessor
 	{
-		private Semaphore sem;
-		private BulkProcessor bulkProcessor;
+		private final Semaphore sem;
+		private final BulkProcessor bulkProcessor;
 
 		public SynchronizedBulkProcessor(Client client)
 		{
@@ -1134,11 +1116,13 @@ public class ElasticSearchService implements SearchService
 			sem = new Semaphore(1);
 		}
 
+		@Override
 		public int hashCode()
 		{
 			return bulkProcessor.hashCode();
 		}
 
+		@Override
 		public boolean equals(Object obj)
 		{
 			return bulkProcessor.equals(obj);
