@@ -299,15 +299,13 @@ public class QueryGenerator implements QueryPartGenerator
 					case SCRIPT:
 					case STRING:
 					case TEXT:
-						// escape '?' and '*' wildcard characters
-						String queryValueStr = queryValue.toString().replaceAll("\\*", "\\\\*")
-								.replaceAll("\\?", "\\\\?");
-
 						// see note about extremely slow wildcard queries:
 						// http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/query-dsl-wildcard-query.html
-						String wildcardQueryValue = new StringBuilder('*').append(queryValueStr).append('*').toString();
-						queryBuilder = QueryBuilders.wildcardQuery(queryField + '.'
-								+ MappingsBuilder.FIELD_NOT_ANALYZED, wildcardQueryValue);
+						// FIXME escape regexp characters, unfortunately Pattern.quote does not work
+						String wildcardQueryValue = new StringBuilder(".*").append(queryValue.toString()).append(".*")
+								.toString();
+						queryBuilder = QueryBuilders.regexpQuery(queryField + '.' + MappingsBuilder.FIELD_NOT_ANALYZED,
+								wildcardQueryValue);
 						break;
 					default:
 						throw new RuntimeException("Unknown data type [" + dataType + "]");
