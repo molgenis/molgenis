@@ -40,7 +40,11 @@ public class OntologyService
 	private static final int MAX_NUMBER_MATCHES = 100;
 	private static final PorterStemmer stemmer = new PorterStemmer();
 	public static final Character DEFAULT_SEPARATOR = '|';
-	public static final List<String> DEFAULT_MATCHING_FIELDS = Arrays.asList("name", "synonym");
+	public static final String DEFAULT_MATCHING_NAME_FIELD = "name";
+	public static final String DEFAULT_MATCHING_SYNONYM_FIELD = "synonym";
+
+	// public static final String DEFAULT_MATCHING_FIELD = Arrays.asList("name",
+	// "synonym");
 
 	@Autowired
 	public OntologyService(SearchService searchService)
@@ -155,7 +159,10 @@ public class OntologyService
 		{
 			if (!StringUtils.isEmpty(entity.getString(attributeName)))
 			{
-				if (DEFAULT_MATCHING_FIELDS.contains(attributeName.toLowerCase()))
+				// The attribute name is either equal to 'Name' or starts with
+				// string 'Synonym'
+				if (DEFAULT_MATCHING_NAME_FIELD.equals(attributeName.toLowerCase())
+						|| attributeName.toLowerCase().startsWith(DEFAULT_MATCHING_SYNONYM_FIELD))
 				{
 					rulesForOntologyTermFields.add(new QueryRule(OntologyTermIndexRepository.SYNONYMS, Operator.EQUALS,
 							medicalStemProxy(entity.getString(attributeName))));
@@ -193,7 +200,8 @@ public class OntologyService
 			{
 				if (!StringUtils.isEmpty(entity.getString(attributeName)))
 				{
-					if (DEFAULT_MATCHING_FIELDS.contains(attributeName.toLowerCase()))
+					if (DEFAULT_MATCHING_NAME_FIELD.equals(attributeName.toLowerCase())
+							|| attributeName.toLowerCase().startsWith(DEFAULT_MATCHING_SYNONYM_FIELD))
 					{
 						BigDecimal ngramScore = new BigDecimal(NGramMatchingModel.stringMatching(
 								entity.getString(attributeName),
@@ -209,13 +217,17 @@ public class OntologyService
 						{
 							if (attributeName.equalsIgnoreCase(key))
 							{
-								for (Object databaseId : (List<?>) columnValueMap.get(key))
+								if (columnValueMap.containsKey(key)
+										&& !StringUtils.isEmpty(columnValueMap.get(key).toString()))
 								{
-									BigDecimal ngramScore = new BigDecimal(NGramMatchingModel.stringMatching(
-											entity.getString(attributeName), databaseId.toString()));
-									if (maxNgramScore.doubleValue() < ngramScore.doubleValue())
+									for (Object databaseId : (List<?>) columnValueMap.get(key))
 									{
-										maxNgramScore = ngramScore;
+										BigDecimal ngramScore = new BigDecimal(NGramMatchingModel.stringMatching(
+												entity.getString(attributeName), databaseId.toString()));
+										if (maxNgramScore.doubleValue() < ngramScore.doubleValue())
+										{
+											maxNgramScore = ngramScore;
+										}
 									}
 								}
 							}
