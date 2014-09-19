@@ -95,6 +95,8 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String KEY_HEADER_ABBREVIATE = "plugin.dataexplorer.header.abbreviate";
 	public static final String KEY_HIDE_SEARCH_BOX = "plugin.dataexplorer.hide.searchbox";
 	public static final String KEY_HIDE_ITEM_SELECTION = "plugin.dataexplorer.hide.itemselection";
+	public static final String KEY_MOD_AGGREGATES_DISTINCT_HIDE = KEY_MOD_AGGREGATES + ".distinct.hide";
+	public static final String KEY_MOD_AGGREGATES_DISTINCT_OVERRIDE = KEY_MOD_AGGREGATES + ".distinct.override";
 
 	private static final boolean DEFAULT_VAL_MOD_AGGREGATES = true;
 	private static final boolean DEFAULT_VAL_MOD_ANNOTATORS = false;
@@ -454,7 +456,7 @@ public class DataExplorerController extends MolgenisPluginController
 		String entityName = request.getEntityName();
 		String xAttributeName = request.getXAxisAttributeName();
 		String yAttributeName = request.getYAxisAttributeName();
-		String distinctAttributeName = request.getDistinctAttributeName();
+		String distinctAttributeName = getDistinctAttributeName(request);
 
 		if (StringUtils.isBlank(xAttributeName) && StringUtils.isBlank(yAttributeName))
 		{
@@ -505,6 +507,36 @@ public class DataExplorerController extends MolgenisPluginController
 		AggregateQueryImpl aggregateQuery = new AggregateQueryImpl().attrX(xAttributeMeta).attrY(yAttributeMeta)
 				.attrDistinct(distinctAttributeMeta).query(new QueryImpl(request.getQ()));
 		return dataService.aggregate(entityName, aggregateQuery);
+	}
+
+	/**
+	 * Retrieves the distinct attribute from the request, overriding it if the runtime property is set.
+	 * 
+	 * @param request
+	 *            the {@link AggregateRequest}
+	 * @return the name of the distinct attribute
+	 */
+	private String getDistinctAttributeName(AggregateRequest request)
+	{
+		String rtpKey = KEY_MOD_AGGREGATES_DISTINCT_OVERRIDE + '.' + request.getEntityName();
+		String overrideDistinctAttributeName = molgenisSettings.getProperty(rtpKey);
+		String distinctAttributeName = request.getDistinctAttributeName();
+		if (overrideDistinctAttributeName != null)
+		{
+			if (distinctAttributeName != null)
+			{
+				logger.info("[mod-aggregate] Overriding distinct attribute from request! Request specifies "
+						+ distinctAttributeName + ", runtime property " + rtpKey + " specifies "
+						+ overrideDistinctAttributeName);
+			}
+			else
+			{
+				logger.debug("[mod-aggregate] Using distinct attribute " + overrideDistinctAttributeName
+						+ " from runtime property " + rtpKey);
+			}
+			return overrideDistinctAttributeName;
+		}
+		return distinctAttributeName;
 	}
 
 	/**
