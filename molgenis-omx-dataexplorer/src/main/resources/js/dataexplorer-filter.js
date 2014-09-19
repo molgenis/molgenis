@@ -520,15 +520,16 @@
 			case 'XREF':
 			case 'MREF':
 				var operator = simpleFilter ? simpleFilter.operator : 'OR';
-				$controls.addClass('xrefmrefsearch');
-				$controls.xrefmrefsearch({
+				var container = $('<div class="row">');
+				$controls.append(container);
+				container.addClass('xrefmrefsearch');
+				container.xrefmrefsearch({
 					attribute : attribute,
 					values : values,
 					labels : simpleFilter ? simpleFilter.getLabels() : null,
 					operator : operator,
 					autofocus : 'autofocus',
-					isfilter : true,
-					width : '400px',
+					isfilter : true
 				});
 				break;
 			case 'COMPOUND' :
