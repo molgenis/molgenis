@@ -585,12 +585,15 @@
 		return this;
 	}
 	
-	self.SimpleFilter = function(attribute, fromValue, toValue, value, labels)
+	/**
+	 * JavaScript representation of a simple filter
+	 */
+	self.SimpleFilter = function(attribute, fromValue, toValue, value)
 	{
 		this.fromValue = fromValue;
 		this.toValue = toValue;
 		var values = [];
-		var labels = labels||[];
+		var labels = [];
 		this.type = 'simple';
 		this.attribute = attribute;
 
