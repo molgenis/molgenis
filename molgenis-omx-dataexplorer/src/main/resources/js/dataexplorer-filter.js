@@ -65,7 +65,7 @@
 			filter.update($(this));
 			filters[filter.attribute.href] = filter;
 		});
-		
+
 		return Object.keys(filters)
 			.map(function (key) {
 				return filters[key];
@@ -528,7 +528,7 @@
 					operator : operator,
 					autofocus : 'autofocus',
 					isfilter : true,
-					width : '400px',
+					width : '400px'
 				});
 				break;
 			case 'COMPOUND' :
