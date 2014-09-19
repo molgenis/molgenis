@@ -29,10 +29,10 @@
 
 		if (aggregableAttributes.length > 0) {
 			$('#feature-select').empty();
-			createAtributeDropdown($('#feature-select'), aggregableAttributes, 'x-aggr-attribute', aggregableAttributes[0], true);
+			createAttributeDropdown($('#feature-select'), aggregableAttributes, 'x-aggr-attribute', aggregableAttributes[0], true);
 			$('#feature-select').append(' x ');
-			if(aggregableAttributes.length > 1) createAtributeDropdown($('#feature-select'), aggregableAttributes, 'y-aggr-attribute', aggregableAttributes[1]);
-			else createAtributeDropdown($('#feature-select'), aggregableAttributes, 'y-aggr-attribute', false);
+			if(aggregableAttributes.length > 1) createAttributeDropdown($('#feature-select'), aggregableAttributes, 'y-aggr-attribute', aggregableAttributes[1]);
+			else createAttributeDropdown($('#feature-select'), aggregableAttributes, 'y-aggr-attribute', false);
 			$('#distinct-attr-select').empty();
 			if( molgenis.dataexplorer.settings && (molgenis.dataexplorer.settings['mod.aggregates.distinct.hide']==='true') ){
 				$('#distinct-attr').hide();
@@ -44,7 +44,7 @@
 					$('#distinct-attr-select').append($('<p>').addClass('form-control-static')
 							.text(molgenis.dataexplorer.settings['mod.aggregates.distinct.override.'+getEntity().name]));
 				} else {
-					createAtributeDropdown($('#distinct-attr-select'), attributes, 'distinct-aggr-attribute', false);
+					createAttributeDropdown($('#distinct-attr-select'), attributes, 'distinct-aggr-attribute', false);
 				}
 			}
 			
@@ -63,7 +63,7 @@
 		}
 	}
 	
-	function createAtributeDropdown(parent, aggregableAttributes, id, defaultValue, hasDefault) {
+	function createAttributeDropdown(parent, aggregableAttributes, id, defaultValue, hasDefault) {
         if(defaultValue && hasDefault){
             var attributeSelect = $('<select id="' + id + '" class="attribute-dropdown"/>');
         }
