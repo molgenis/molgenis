@@ -77,7 +77,7 @@
 		});
 		
 		parent.append(attributeSelect);
-		attributeSelect.select2({ width: 'resolve' });
+		attributeSelect.select2();
 	}
 	
 	/**
