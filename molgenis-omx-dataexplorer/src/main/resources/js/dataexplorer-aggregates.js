@@ -104,7 +104,6 @@
 			success : function(aggregateResult) {
 				var countAboveZero = false;
                 var items = ['<table class="table table-striped" >'];
-				var noResultMessage = molgenis.dataexplorer.getNoResultMessage()
 				items.push('<tr>');
 				items.push('<td style="width: 18%"></td>');
 				$.each(aggregateResult.yLabels, function(index, label){
@@ -122,7 +121,7 @@
 				});
 				
 				items.push('</table>');
-				if(!countAboveZero && noResultMessage !== undefined){
+				if(!countAboveZero){
                     items.length = 0;
                     var messageTemplate = Handlebars.compile($("#aggregates-no-result-message-template").html());
                     items.push(messageTemplate({}));
