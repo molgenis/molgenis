@@ -340,7 +340,11 @@
 		var label = attribute.label || attribute.name;
 		if(isFirstElement && wizard) 
 		{
-			return $('<label class="col-md-3 control-label" data-placement="right" data-title="' + attribute.description + '">' + label + '</label>').tooltip();
+            var labelHtml = $('<label class="col-md-3 control-label" data-placement="right" data-title="' + attribute.description + '">' + label + '</label>');
+            if(attribute.description !== undefined){
+                labelHtml.tooltip()
+            }
+			return labelHtml;
 		}
 		else if (!isFirstElement && wizard) 
 		{
