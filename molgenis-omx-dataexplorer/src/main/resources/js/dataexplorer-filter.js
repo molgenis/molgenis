@@ -65,7 +65,7 @@
 			filter.update($(this));
 			filters[filter.attribute.href] = filter;
 		});
-		
+
 		return Object.keys(filters)
 			.map(function (key) {
 				return filters[key];
@@ -528,7 +528,7 @@
 					operator : operator,
 					autofocus : 'autofocus',
 					isfilter : true,
-					width : '400px',
+					width : '400px'
 				});
 				break;
 			case 'COMPOUND' :
@@ -585,15 +585,12 @@
 		return this;
 	}
 	
-	/**
-	 * JavaScript representation of a simple filter
-	 */
-	self.SimpleFilter = function(attribute, fromValue, toValue, value)
+	self.SimpleFilter = function(attribute, fromValue, toValue, value, labels)
 	{
 		this.fromValue = fromValue;
 		this.toValue = toValue;
 		var values = [];
-		var labels = [];
+		var labels = labels||[];
 		this.type = 'simple';
 		this.attribute = attribute;
 
