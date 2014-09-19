@@ -114,7 +114,7 @@
 				.not('[data-filter=ignore]');
 
 		$hiddenInput.data('labels', options.labels);
-		
+
 		var width = options.width ? options.width : 'resolve';
 		
 		$hiddenInput.select2({
@@ -162,12 +162,12 @@
 			if (!labels) labels = [];
 			
 			if (event.added) {
-				labels.push(event.added.label);
+				labels.push(event.added[refEntityMetaData.labelAttribute]);
 			}
 			
 			if (event.removed) {
 				labels = labels.filter(function (label){
-					return label !== event.removed.label;
+					return label !== event.removed[refEntityMetaData.labelAttribute];
 				});
 			}
 			

@@ -65,7 +65,7 @@
 			filter.update($(this));
 			filters[filter.attribute.href] = filter;
 		});
-		
+
 		return Object.keys(filters)
 			.map(function (key) {
 				return filters[key];
