@@ -298,37 +298,37 @@ public class ResponseParser
 					matrix.add(Lists.newArrayList(Long.valueOf(total)));
 					yLabels.add("Count");
 				}
-			}
 
-			// matrix labels are ids for categorical/xref/mref aggregates, convert to label attribute values
-			AttributeMetaData xAggregateField = request.getAggregateField1();
-			if (xAggregateField != null)
-			{
-				FieldTypeEnum xDataType = xAggregateField.getDataType().getEnumType();
-				switch (xDataType)
+				// matrix labels are ids for categorical/xref/mref aggregates, convert to label attribute values
+				AttributeMetaData xAggregateField = request.getAggregateField1();
+				if (xAggregateField != null)
 				{
-					case CATEGORICAL:
-					case MREF:
-					case XREF:
-						convertIdtoLabelLabels(xLabels, xAggregateField.getRefEntity(), dataService);
-						// $CASES-OMITTED$
-					default:
-						break;
+					FieldTypeEnum xDataType = xAggregateField.getDataType().getEnumType();
+					switch (xDataType)
+					{
+						case CATEGORICAL:
+						case MREF:
+						case XREF:
+							convertIdtoLabelLabels(xLabels, xAggregateField.getRefEntity(), dataService);
+							// $CASES-OMITTED$
+						default:
+							break;
+					}
 				}
-			}
-			AttributeMetaData yAggregateField = request.getAggregateField2();
-			if (xAggregateField != null)
-			{
-				FieldTypeEnum yDataType = yAggregateField.getDataType().getEnumType();
-				switch (yDataType)
+				AttributeMetaData yAggregateField = request.getAggregateField2();
+				if (xAggregateField != null)
 				{
-					case CATEGORICAL:
-					case MREF:
-					case XREF:
-						convertIdtoLabelLabels(yLabels, yAggregateField.getRefEntity(), dataService);
-						// $CASES-OMITTED$
-					default:
-						break;
+					FieldTypeEnum yDataType = yAggregateField.getDataType().getEnumType();
+					switch (yDataType)
+					{
+						case CATEGORICAL:
+						case MREF:
+						case XREF:
+							convertIdtoLabelLabels(yLabels, yAggregateField.getRefEntity(), dataService);
+							// $CASES-OMITTED$
+						default:
+							break;
+					}
 				}
 			}
 
