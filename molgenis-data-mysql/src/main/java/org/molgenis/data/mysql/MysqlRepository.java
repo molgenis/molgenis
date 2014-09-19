@@ -1,7 +1,5 @@
 package org.molgenis.data.mysql;
 
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.BOOL;
-
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,7 +11,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.sql.DataSource;
@@ -1085,56 +1082,6 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 			}
 		}
 
-	}
-
-	@Override
-	protected void addAggregateValuesAndLabels(AttributeMetaData attr, List<Object> values, Set<String> labels)
-	{
-		if (attr.getDataType().getEnumType() == BOOL)
-		{
-			values.add(Boolean.TRUE);
-			values.add(Boolean.FALSE);
-			labels.add(attr.getName() + ": true");
-			labels.add(attr.getName() + ": false");
-		}
-		else
-		{
-			for (Object value : getDistinctColumnValues(attr))
-			{
-				String valueStr = DataConverter.toString(value);
-				labels.add(valueStr);
-				values.add(valueStr);
-			}
-		}
-	}
-
-	private List<Object> getDistinctColumnValues(AttributeMetaData attr)
-	{
-		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT DISTINCT(`").append(attr.getName()).append("`) FROM `").append(getName())
-				.append("` AS this ");
-
-		if (attr.getDataType() instanceof MrefField)
-		{
-			AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
-
-			sql.append(" LEFT JOIN ").append('`').append(getEntityMetaData().getName()).append('_')
-					.append(attr.getName()).append('`').append(" AS ").append('`').append(attr.getName()).append('`')
-					.append(" ON (this.").append('`').append(idAttribute.getName()).append('`').append(" = ")
-					.append('`').append(attr.getName()).append('`').append('.').append('`')
-					.append(idAttribute.getName()).append('`').append(')');
-		}
-
-		sql.append(" WHERE `").append(attr.getName()).append("` IS NOT NULL");
-
-		return jdbcTemplate.query(sql.toString(), new RowMapper<Object>()
-		{
-			@Override
-			public Object mapRow(ResultSet rs, int rowNum) throws SQLException
-			{
-				return rs.getObject(1);
-			}
-		});
 	}
 
 	private class EntityMapper implements RowMapper<Entity>

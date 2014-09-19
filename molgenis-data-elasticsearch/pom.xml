@@ -14,10 +14,10 @@
 			<artifactId>molgenis-data</artifactId>
 			<version>1.2.0-SNAPSHOT</version>
 		</dependency>
-		<dependency>
-			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-search-elasticsearch</artifactId>
-			<version>1.2.0-SNAPSHOT</version>
-		</dependency>
+        <dependency>
+            <groupId>org.elasticsearch</groupId>
+            <artifactId>elasticsearch</artifactId>
+            <version>1.3.2</version>
+        </dependency>
 	</dependencies>
 </project>

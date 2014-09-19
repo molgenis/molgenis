@@ -123,7 +123,7 @@
 			multiple: (attributeMetaData.fieldType === 'MREF' || attributeMetaData.fieldType === 'XREF'),
 			closeOnSelect: false,
 			query: function (options){
-				var query = createQuery(lookupAttrNames, options.term.match(/[^ ]+/g),'SEARCH', true);
+				var query = createQuery(lookupAttrNames, options.term.match(/[^ ]+/g),'LIKE', true);
 				if(query)
 				{
 					restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {num: 1000, q: query}}, function(data) {
@@ -202,7 +202,7 @@
 			var $operatorInput = $('<input type="hidden" data-filter="xrefmref-operator" value="' + options.operator + '" />');
 
 			if(attributeMetaData.fieldType === 'MREF') {
-				var $dropdown = $('<div class="btn-group"><div>');
+				var $dropdown = $('<div>');
 				var orValue = 'OR&nbsp;&nbsp;';
 				var andValue = 'AND';
 				$dropdown.append($operatorInput);

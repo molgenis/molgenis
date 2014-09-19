@@ -17,18 +17,25 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.molgenis.data.*;
+import org.molgenis.data.AggregateResult;
+import org.molgenis.data.Aggregateable;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.DataService;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.Queryable;
 import org.molgenis.data.csv.CsvWriter;
+import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.GenomeConfig;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataRequest.ColNames;
@@ -447,6 +454,7 @@ public class DataExplorerController extends MolgenisPluginController
 		String entityName = request.getEntityName();
 		String xAttributeName = request.getXAxisAttributeName();
 		String yAttributeName = request.getYAxisAttributeName();
+		String distinctAttributeName = request.getDistinctAttributeName();
 
 		if (StringUtils.isBlank(xAttributeName) && StringUtils.isBlank(yAttributeName))
 		{
@@ -473,7 +481,6 @@ public class DataExplorerController extends MolgenisPluginController
 		AttributeMetaData yAttributeMeta = null;
 		if (StringUtils.isNotBlank(yAttributeName))
 		{
-
 			yAttributeMeta = entityMeta.getAttribute(yAttributeName);
 			if (yAttributeMeta == null)
 			{
@@ -485,8 +492,19 @@ public class DataExplorerController extends MolgenisPluginController
 				throw new InputValidationException("Attribute '" + yAttributeName + "' is not aggregateable");
 			}
 		}
+		AttributeMetaData distinctAttributeMeta = null;
+		if (StringUtils.isNotBlank(distinctAttributeName))
+		{
+			distinctAttributeMeta = entityMeta.getAttribute(distinctAttributeName);
+			if (distinctAttributeName == null)
+			{
+				throw new InputValidationException("Unknow attribute '" + distinctAttributeName + "'");
+			}
+		}
 
-		return dataService.aggregate(entityName, xAttributeMeta, yAttributeMeta, new QueryImpl(request.getQ()));
+		AggregateQueryImpl aggregateQuery = new AggregateQueryImpl().attrX(xAttributeMeta).attrY(yAttributeMeta)
+				.attrDistinct(distinctAttributeMeta).query(new QueryImpl(request.getQ()));
+		return dataService.aggregate(entityName, aggregateQuery);
 	}
 
 	/**
@@ -531,8 +549,7 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/settings", method = RequestMethod.GET)
-	public @ResponseBody
-	Map<String, String> getSettings(@RequestParam(required = false) String keyStartsWith)
+	public @ResponseBody Map<String, String> getSettings(@RequestParam(required = false) String keyStartsWith)
 	{
 		if (keyStartsWith == null)
 		{

@@ -8,8 +8,8 @@ import java.util.Calendar;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
-import org.molgenis.data.CrudRepositorySecurityDecorator;
 import org.molgenis.data.DataService;
+import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.omx.OmxRepository;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.EntityValidator;
@@ -17,7 +17,6 @@ import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.search.DataSetsIndexer;
-import org.molgenis.search.SearchService;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -87,8 +86,8 @@ public class GafListFileImporterService
 				dataService.add(DataSet.ENTITY_NAME, dataSet);
 				dataSetId = dataSet.getId();
 
-				CrudRepositorySecurityDecorator repository = new CrudRepositorySecurityDecorator(new OmxRepository(
-						dataService, searchService, dataSetIdentifier, entityValidator));
+				OmxRepository repository = new OmxRepository(dataService, searchService, dataSetIdentifier,
+						entityValidator);
 				dataService.addRepository(repository);
 
 				repository.flush();

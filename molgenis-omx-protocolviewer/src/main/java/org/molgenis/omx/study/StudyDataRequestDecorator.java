@@ -2,6 +2,7 @@ package org.molgenis.omx.study;
 
 import java.util.Iterator;
 
+import org.molgenis.data.CrudRepository;
 import org.molgenis.data.CrudRepositoryDecorator;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataAccessException;
@@ -21,7 +22,7 @@ import org.springframework.context.ApplicationContextException;
  */
 public class StudyDataRequestDecorator extends CrudRepositoryDecorator
 {
-	public StudyDataRequestDecorator(CrudRepositoryDecorator crudRepositoryDecorator)
+	public StudyDataRequestDecorator(CrudRepository crudRepositoryDecorator)
 	{
 		super(crudRepositoryDecorator);
 	}

@@ -27,7 +27,7 @@ public class QueryRuleTest
 		assertFalse(q1.equals(q2));
 
 		q1 = new QueryRule("field", Operator.EQUALS, "test");
-		q2 = new QueryRule("field", Operator.LIKE, "test");
+		q2 = new QueryRule("field", Operator.SEARCH, "test");
 		assertFalse(q1.equals(q2));
 
 		q1 = new QueryRule("field", Operator.EQUALS, "test1");
@@ -44,10 +44,6 @@ public class QueryRuleTest
 
 		QueryRule nested = new QueryRule("field", Operator.EQUALS, "Test");
 		q = new QueryRule(Operator.NOT, new QueryRule(nested));
-		assertEquals(q.getNestedRules().size(), 1);
-		assertEquals(nested, q.getNestedRules().get(0));
-
-		q = new QueryRule(Operator.IN_SUBQUERY, new QueryRule(nested));
 		assertEquals(q.getNestedRules().size(), 1);
 		assertEquals(nested, q.getNestedRules().get(0));
 	}

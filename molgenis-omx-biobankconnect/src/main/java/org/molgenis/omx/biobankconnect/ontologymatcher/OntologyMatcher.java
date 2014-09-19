@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.DataService;
-import org.molgenis.search.SearchResult;
+import org.molgenis.data.elasticsearch.util.SearchResult;
 
 public interface OntologyMatcher
 {

@@ -6,8 +6,8 @@ import java.util.Map;
 import org.molgenis.DatabaseConfig;
 import org.molgenis.catalogmanager.CatalogManagerService;
 import org.molgenis.data.DataService;
+import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
-import org.molgenis.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.omx.catalogmanager.OmxCatalogManagerService;
 import org.molgenis.omx.config.DataExplorerConfig;
 import org.molgenis.omx.core.FreemarkerTemplateRepository;
@@ -64,7 +64,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		freemarkerVariables.put("dataExplorerLink", new DataExplorerHyperlinkDirective(molgenisPluginRegistry(),
 				dataService));
 	}
-	
+
 	@Override
 	public FreeMarkerConfigurer freeMarkerConfigurer() throws IOException, TemplateException
 	{

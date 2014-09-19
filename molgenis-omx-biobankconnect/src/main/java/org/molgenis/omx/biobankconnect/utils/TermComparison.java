@@ -2,7 +2,7 @@ package org.molgenis.omx.biobankconnect.utils;
 
 import java.util.Map;
 
-import org.molgenis.search.Hit;
+import org.molgenis.data.elasticsearch.util.Hit;
 
 public class TermComparison implements Comparable<TermComparison>
 {

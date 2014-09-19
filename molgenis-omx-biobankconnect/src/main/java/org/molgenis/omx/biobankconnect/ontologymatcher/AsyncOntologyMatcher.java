@@ -24,6 +24,11 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.elasticsearch.util.Hit;
+import org.molgenis.data.elasticsearch.util.MultiSearchRequest;
+import org.molgenis.data.elasticsearch.util.SearchRequest;
+import org.molgenis.data.elasticsearch.util.SearchResult;
 import org.molgenis.data.omx.OmxRepository;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.DefaultEntityValidator;
@@ -42,11 +47,6 @@ import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.observ.target.OntologyTerm;
 import org.molgenis.omx.observ.value.IntValue;
 import org.molgenis.omx.observ.value.StringValue;
-import org.molgenis.search.Hit;
-import org.molgenis.search.MultiSearchRequest;
-import org.molgenis.search.SearchRequest;
-import org.molgenis.search.SearchResult;
-import org.molgenis.search.SearchService;
 import org.molgenis.security.runas.RunAsSystem;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -136,9 +136,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	}
 
 	/**
-	 * This method is to generate a list of candidate mappings for the chosen
-	 * feature by using ElasticSearch based on the information from ontology
-	 * terms
+	 * This method is to generate a list of candidate mappings for the chosen feature by using ElasticSearch based on
+	 * the information from ontology terms
 	 */
 	@Override
 	@Transactional
@@ -217,8 +216,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	}
 
 	/**
-	 * This method is to collect existing mappings for the same desired data
-	 * element from other datasets and use them for query expansion as well
+	 * This method is to collect existing mappings for the same desired data element from other datasets and use them
+	 * for query expansion as well
 	 * 
 	 * @param description
 	 * @param desiredDataElement
@@ -288,8 +287,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	}
 
 	/**
-	 * Compare whether or not the ontology annotation of feature of interest and
-	 * candidate feature are the same
+	 * Compare whether or not the ontology annotation of feature of interest and candidate feature are the same
 	 * 
 	 * @param featureId
 	 * @param sourceDataSetId
@@ -333,9 +331,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	}
 
 	/**
-	 * Retrieve feature information from Index based on given featureIds list.
-	 * If featureIds is empty, all of features are retrieved for particular
-	 * dataset
+	 * Retrieve feature information from Index based on given featureIds list. If featureIds is empty, all of features
+	 * are retrieved for particular dataset
 	 * 
 	 * @param protocolId
 	 * @param featureIds
@@ -380,8 +377,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	}
 
 	/**
-	 * This method is to collect ontology term information from the index, which
-	 * will be used in composing queries next
+	 * This method is to collect ontology term information from the index, which will be used in composing queries next
 	 * 
 	 * @param ontologyTermUris
 	 * @param boostedOntologyTerms
@@ -438,8 +434,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	}
 
 	/**
-	 * The method is to create ElasticSearch queries with Molgenis queryRule by
-	 * using ontology term information
+	 * The method is to create ElasticSearch queries with Molgenis queryRule by using ontology term information
 	 * 
 	 * @param description
 	 * @param ontologyTermContainers
@@ -961,8 +956,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	}
 
 	/**
-	 * A helper function to extract featureName from the algorithm script and
-	 * convert them to database IDs
+	 * A helper function to extract featureName from the algorithm script and convert them to database IDs
 	 * 
 	 * @param request
 	 * @return

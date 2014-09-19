@@ -4,20 +4,16 @@ import java.util.Arrays;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
-import org.molgenis.data.AggregateResult;
-import org.molgenis.data.Aggregateable;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.CrudRepositoryDecorator;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Query;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.util.HugeMap;
 
 import com.google.common.collect.Sets;
 
-public class RepositoryValidationDecorator extends CrudRepositoryDecorator implements Aggregateable
+public class RepositoryValidationDecorator extends CrudRepositoryDecorator
 {
 	private final EntityAttributesValidator entityAttributesValidator;
 
@@ -25,11 +21,6 @@ public class RepositoryValidationDecorator extends CrudRepositoryDecorator imple
 	{
 		super(repository);
 		this.entityAttributesValidator = entityAttributesValidator;
-
-		if (!(repository instanceof Aggregateable))
-		{
-			throw new MolgenisDataException("Repository not aggregateable");
-		}
 	}
 
 	@Override
@@ -66,19 +57,13 @@ public class RepositoryValidationDecorator extends CrudRepositoryDecorator imple
 		return getDecoratedRepository().add(entities);
 	}
 
-	@Override
-	public AggregateResult aggregate(AttributeMetaData xAttr, AttributeMetaData yAttr, Query q)
-	{
-		return ((Aggregateable) getDecoratedRepository()).aggregate(xAttr, yAttr, q);
-	}
-
 	private void validate(Iterable<? extends Entity> entities, boolean forUpdate)
 	{
-		Set<ConstraintViolation> violations = Sets.newHashSet();
+		Set<ConstraintViolation> violations = null;
 		for (Entity entity : entities)
 		{
-			violations.addAll(entityAttributesValidator.validate(entity, getEntityMetaData()));
-			if (violations.size() > 4)
+			violations = entityAttributesValidator.validate(entity, getEntityMetaData());
+			if (!violations.isEmpty())
 			{
 				throw new MolgenisValidationException(violations);
 			}
@@ -88,25 +73,29 @@ public class RepositoryValidationDecorator extends CrudRepositoryDecorator imple
 		{
 			if (attr.isUnique())
 			{
-				violations.addAll(checkUniques(entities, attr, true));
-				if (violations.size() > 4)
+				violations = checkUniques(entities, attr, true);
+				if (!violations.isEmpty())
 				{
 					throw new MolgenisValidationException(violations);
 				}
 			}
 		}
 
-		violations.addAll(checkNillable(entities));
-
-		if (forUpdate)
-		{
-			violations.addAll(checkReadonlyByUpdate(entities));
-		}
-
+		violations = checkNillable(entities);
 		if (!violations.isEmpty())
 		{
 			throw new MolgenisValidationException(violations);
 		}
+
+		if (forUpdate)
+		{
+			violations = checkReadonlyByUpdate(entities);
+			if (!violations.isEmpty())
+			{
+				throw new MolgenisValidationException(violations);
+			}
+		}
+
 	}
 
 	protected Set<ConstraintViolation> checkNillable(Iterable<? extends Entity> entities)
@@ -159,7 +148,7 @@ public class RepositoryValidationDecorator extends CrudRepositoryDecorator imple
 				{
 					Object newValue = entity.get(attr.getName());
 					Object oldValue = oldEntity.get(attr.getName());
-					
+
 					if ((null == newValue && null == oldValue) || !newValue.equals(oldValue))
 					{
 						String message = String.format(

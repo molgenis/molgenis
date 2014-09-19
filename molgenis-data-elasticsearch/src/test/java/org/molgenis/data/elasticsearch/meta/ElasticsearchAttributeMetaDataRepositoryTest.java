@@ -10,8 +10,8 @@ import java.io.IOException;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.elasticsearch.ElasticSearchService;
 import org.molgenis.data.meta.AttributeMetaDataRepository;
-import org.molgenis.elasticsearch.ElasticSearchService;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -48,7 +48,7 @@ public class ElasticsearchAttributeMetaDataRepositoryTest
 		AttributeMetaData attribute = mock(AttributeMetaData.class);
 		elasticsearchAttributeMetaDataRepository.addAttributeMetaData(entityName, attribute);
 		verify(attributeMetaDataRepository).addAttributeMetaData(entityName, attribute);
-		verify(elasticSearchService).createMappings(entityMetaData, false);
+		verify(elasticSearchService).createMappings(entityMetaData);
 	}
 
 	@Test
@@ -70,6 +70,6 @@ public class ElasticsearchAttributeMetaDataRepositoryTest
 		when(dataService.getEntityMetaData(entityName)).thenReturn(entityMetaData);
 		elasticsearchAttributeMetaDataRepository.removeAttributeMetaData(entityName, attributeName);
 		verify(attributeMetaDataRepository).removeAttributeMetaData(entityName, attributeName);
-		verify(elasticSearchService).createMappings(entityMetaData, false);
+		verify(elasticSearchService).createMappings(entityMetaData);
 	}
 }

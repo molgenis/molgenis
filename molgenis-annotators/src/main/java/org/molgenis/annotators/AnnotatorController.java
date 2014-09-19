@@ -2,10 +2,10 @@ package org.molgenis.annotators;
 
 import static org.molgenis.annotators.AnnotatorController.URI;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -15,10 +15,10 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.omx.annotation.OmxDataSetAnnotator;
 import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.omx.search.DataSetsIndexer;
-import org.molgenis.search.SearchService;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

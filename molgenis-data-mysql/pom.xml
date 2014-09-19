@@ -17,26 +17,21 @@
             <artifactId>molgenis-data</artifactId>
             <version>1.2.0-SNAPSHOT</version>
         </dependency>
-		<dependency>
-			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-data-elasticsearch</artifactId>
-			<version>1.2.0-SNAPSHOT</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.molgenis</groupId>
-					<artifactId>molgenis-data-jpa</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.29</version>
-        </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data-excel</artifactId>
             <version>1.2.0-SNAPSHOT</version>
+        </dependency>
+         <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-security</artifactId>
+            <version>1.2.0-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.molgenis</groupId>
+                    <artifactId>molgenis-data-jpa</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>

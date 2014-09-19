@@ -5,8 +5,8 @@ import java.io.IOException;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.meta.AttributeMetaDataRepository;
-import org.molgenis.elasticsearch.ElasticSearchService;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -16,10 +16,10 @@ public class ElasticsearchAttributeMetaDataRepository implements AttributeMetaDa
 {
 	private final AttributeMetaDataRepository attributeMetaDataRepository;
 	private final DataService dataService;
-	private final ElasticSearchService elasticSearchService;
+	private final SearchService elasticSearchService;
 
 	public ElasticsearchAttributeMetaDataRepository(AttributeMetaDataRepository attributeMetaDataRepository,
-			DataService dataService, ElasticSearchService elasticSearchService)
+			DataService dataService, SearchService elasticSearchService)
 	{
 		if (attributeMetaDataRepository == null) throw new IllegalArgumentException(
 				"attributeMetaDataRepository is null");
@@ -56,7 +56,7 @@ public class ElasticsearchAttributeMetaDataRepository implements AttributeMetaDa
 	{
 		try
 		{
-			elasticSearchService.createMappings(dataService.getEntityMetaData(entityName), false);
+			elasticSearchService.createMappings(dataService.getEntityMetaData(entityName));
 		}
 		catch (IOException e)
 		{

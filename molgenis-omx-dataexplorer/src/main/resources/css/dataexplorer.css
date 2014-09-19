@@ -1,6 +1,24 @@
+.modal-xxl
+{
+    width: 90%;
+}
+
+.modal-xxl .modal-body
+{
+	overflow: auto;
+}
+
 #dataset-select-label {
 	margin-right: 10px;
 	font-size: 15.4px;
+}
+
+#filter-wizard-btn {
+	margin-right: 10px;
+}
+
+#feature-filters {
+	margin-left: 10px;
 }
 
 #feature-selection label {

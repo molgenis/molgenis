@@ -5,6 +5,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Aggregateable;
 import org.molgenis.data.AttributeMetaData;
@@ -15,6 +16,9 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
+import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.elasticsearch.util.SearchRequest;
+import org.molgenis.data.elasticsearch.util.SearchResult;
 import org.molgenis.data.support.ConvertingIterable;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
@@ -39,9 +43,6 @@ import org.molgenis.omx.observ.value.LongValue;
 import org.molgenis.omx.observ.value.StringValue;
 import org.molgenis.omx.observ.value.TextValue;
 import org.molgenis.omx.observ.value.Value;
-import org.molgenis.search.SearchRequest;
-import org.molgenis.search.SearchResult;
-import org.molgenis.search.SearchService;
 import org.molgenis.util.EntityUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.transaction.annotation.Transactional;
@@ -496,14 +497,19 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Cr
 	}
 
 	@Override
-	public AggregateResult aggregate(AttributeMetaData xAttr, AttributeMetaData yAttr, Query q)
+	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
+		Query q = aggregateQuery.getQuery();
+		AttributeMetaData xAttr = aggregateQuery.getAttributeX();
+		AttributeMetaData yAttr = aggregateQuery.getAttributeY();
+		AttributeMetaData distinctAttr = aggregateQuery.getAttributeDistinct();
+
 		if ((xAttr == null) && (yAttr == null))
 		{
 			throw new MolgenisDataException("Missing aggregate attribute");
 		}
 
-		SearchRequest request = new SearchRequest(dataSetIdentifier, q, null, xAttr, yAttr);
+		SearchRequest request = new SearchRequest(dataSetIdentifier, q, null, xAttr, yAttr, distinctAttr);
 		SearchResult result = searchService.search(request);
 
 		return result.getAggregate();
