@@ -151,10 +151,6 @@ public class QueryImpl implements Query
 		return this;
 	}
 
-	/**
-	 * Deprecated, replaced by search(field, searchTerms)
-	 */
-	@Deprecated
 	@Override
 	public Query like(String field, Object value)
 	{
