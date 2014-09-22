@@ -165,14 +165,6 @@
 			molgenis.dataexplorer.aggregates.createAggregatesTable();
 		});
 		
-		$(document).on('updateAttributeFilters.aggregates', function(e, data) {
-			molgenis.dataexplorer.aggregates.updateAggregatesTable($('#x-aggr-attribute').val(), $('#y-aggr-attribute').val(), $('#distinct-aggr-attribute').val());
-		});
-		
-		$(document).on('removeAttributeFilter.aggregates', function(e, data) {
-			molgenis.dataexplorer.aggregates.updateAggregatesTable($('#x-aggr-attribute').val(), $('#y-aggr-attribute').val(), $('#distinct-aggr-attribute').val());
-		});
-		
 		$(document).on('changeQuery.aggregates', function(e, entitySearchQuery) {
 			molgenis.dataexplorer.aggregates.updateAggregatesTable($('#x-aggr-attribute').val(), $('#y-aggr-attribute').val(), $('#distinct-aggr-attribute').val());
 		});
