@@ -1,13 +1,5 @@
 package org.molgenis.data.elasticsearch.request;
 
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.EMAIL;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.ENUM;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.HTML;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.HYPERLINK;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.SCRIPT;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.TEXT;
-
 import java.util.Iterator;
 import java.util.List;
 
@@ -184,16 +176,7 @@ public class QueryGenerator implements QueryPartGenerator
 							Object queryIdValue = queryValue instanceof Entity ? ((Entity) queryValue).getIdValue() : queryValue;
 
 							AttributeMetaData refIdAttr = attr.getRefEntity().getIdAttribute();
-							String indexFieldName = queryField + '.' + refIdAttr.getName();
-							FieldTypeEnum refAttrType = refIdAttr.getDataType().getEnumType();
-
-							// Use raw field for string types
-							if (refAttrType == EMAIL || refAttrType == ENUM || refAttrType == HTML
-									|| refAttrType == HYPERLINK || refAttrType == SCRIPT || refAttrType == STRING
-									|| refAttrType == TEXT)
-							{
-								indexFieldName = indexFieldName + "." + MappingsBuilder.FIELD_NOT_ANALYZED;
-							}
+							String indexFieldName = getXRefEqualsSearchFieldName(refIdAttr, queryField);
 
 							filterBuilder = FilterBuilders.nestedFilter(queryField,
 									FilterBuilders.termFilter(indexFieldName, queryIdValue));
@@ -385,5 +368,41 @@ public class QueryGenerator implements QueryPartGenerator
 				throw new MolgenisQueryException("Unknown query operator [" + queryOperator + "]");
 		}
 		return queryBuilder;
+	}
+
+	private String getXRefEqualsSearchFieldName(AttributeMetaData refIdAttr, String queryField)
+	{
+		String indexFieldName = queryField + '.' + refIdAttr.getName();
+		FieldTypeEnum refAttrType = refIdAttr.getDataType().getEnumType();
+
+		switch (refAttrType)
+		{
+			case XREF:
+			case BOOL:
+			case CATEGORICAL:
+			case COMPOUND:
+			case DATE:
+			case DATE_TIME:
+			case DECIMAL:
+			case FILE:
+			case IMAGE:
+			case INT:
+			case LONG:
+			case MREF:
+				return indexFieldName;
+
+			case EMAIL:
+			case ENUM:
+			case HTML:
+			case HYPERLINK:
+			case SCRIPT:
+			case STRING:
+			case TEXT:
+				return indexFieldName + "." + MappingsBuilder.FIELD_NOT_ANALYZED;
+
+			default:
+				throw new RuntimeException("Unknown data type [" + refAttrType + "]");
+		}
+
 	}
 }
