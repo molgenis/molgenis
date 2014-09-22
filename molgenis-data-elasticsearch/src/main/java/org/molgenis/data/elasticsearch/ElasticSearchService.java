@@ -1151,7 +1151,7 @@ public class ElasticSearchService implements SearchService
 				{
 					LOG.warn("Error executing bulk", failure);
 				}
-			}).build();
+			}).setConcurrentRequests(0).build();
 		}
 	}
 }
