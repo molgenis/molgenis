@@ -537,7 +537,7 @@ function createInput(attr, attrs, val, lbl) {
 			data : JSON.stringify(entity),
 			async : false,
 			success : callback && callback.success ? callback.success : function() {},
-			error : callback && callback.error ? callback.error : function() {},
+			error : callback && callback.error ? callback.error : function() {}
 		});
 	};
 
@@ -607,6 +607,7 @@ function showSpinner(callback) {
 		$('body').append(items.join(''));
 		spinner = $('#spinner');
 		spinner.data('count', 0);
+        spinner.modal({backdrop: 'static'});
 	}
 
 	if (callback) {
