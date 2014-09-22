@@ -433,7 +433,7 @@
 		$container.append(self.createSimpleFilterControls(attribute, filter));
 		$container.data('attribute', attribute);
 		if( wrap ) {
-			var $wrapper = $('<div>').addClass('col-md-9 fdlk');
+			var $wrapper = $('<div>').addClass('col-md-9');
 			$container.children('.col-md-9').wrap($wrapper);
 			return $container;
 		}
@@ -501,6 +501,14 @@
 						bounds: {min: attribute.range.min, max: attribute.range.max},
 						defaultValues: {min: min, max: max},
 						type: 'number'
+					});
+					if (fromValue || toValue){
+						// Values differ from range min and max
+						$controls.data('dirty', true);
+					}
+					slider.bind("userValuesChanged", function(e, data){
+						// User changed slider values
+						$controls.data('dirty', true);
 					});
 					$controls.append(slider);
 				} else {
@@ -658,15 +666,17 @@
 									|| attribute.fieldType === 'DATE'
 										|| attribute.fieldType === 'DATE_TIME'
 								){
-							
-							// Add toValue
-							if(name && (name.match(/-to$/g) || name === 'sliderright')){
-								toValue = value;
-							}
-							
-							// Add fromValue
-							if(name && (name.match(/-from$/g) || name === 'sliderleft')){
-								fromValue = value;
+							if($domElement.closest('.col-md-9').data('dirty'))
+							{
+								// Add toValue
+								if(name && (name.match(/-to$/g) || name === 'sliderright')){
+									toValue = value;
+								}
+								
+								// Add fromValue
+								if(name && (name.match(/-from$/g) || name === 'sliderleft')){
+									fromValue = value;
+								}
 							}
 						}
 						else
