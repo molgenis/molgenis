@@ -373,10 +373,17 @@ public class EmxImportService implements ImportService
 				List<String> enumOptions = attribute.getList(ENUM_OPTIONS);
 				if ((enumOptions == null) || enumOptions.isEmpty())
 				{
-					throw new MolgenisDataException("Missing enum options for attribute ["
+					throw new IllegalArgumentException("Missing enum options for attribute ["
 							+ defaultAttributeMetaData.getName() + "] of entity [" + entityName + "]");
 				}
 				defaultAttributeMetaData.setEnumOptions(enumOptions);
+			}
+
+			if (((defaultAttributeMetaData.getDataType() instanceof XrefField) || (defaultAttributeMetaData
+					.getDataType() instanceof MrefField)) && StringUtils.isEmpty(refEntityName))
+			{
+				throw new IllegalArgumentException("Missing refEntity on line " + i + " (" + entityName + "."
+						+ attributeName + ")");
 			}
 
 			Long rangeMin;
