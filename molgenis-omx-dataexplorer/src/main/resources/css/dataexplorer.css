@@ -44,7 +44,7 @@
 	vertical-align: middle;
 }
 
-#feature-selection .molgenis-tree {
+body:not(.modal-open) #feature-selection .molgenis-tree {
 	height: 400px;
 	overflow: auto;
 	margin-bottom: 10px;
