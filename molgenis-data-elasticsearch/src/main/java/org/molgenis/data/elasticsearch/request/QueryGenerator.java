@@ -1,5 +1,13 @@
 package org.molgenis.data.elasticsearch.request;
 
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.EMAIL;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.ENUM;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.HTML;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.HYPERLINK;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.SCRIPT;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.TEXT;
+
 import java.util.Iterator;
 import java.util.List;
 
@@ -176,8 +184,19 @@ public class QueryGenerator implements QueryPartGenerator
 							Object queryIdValue = queryValue instanceof Entity ? ((Entity) queryValue).getIdValue() : queryValue;
 
 							AttributeMetaData refIdAttr = attr.getRefEntity().getIdAttribute();
+							String indexFieldName = queryField + '.' + refIdAttr.getName();
+							FieldTypeEnum refAttrType = refIdAttr.getDataType().getEnumType();
+
+							// Use raw field for string types
+							if (refAttrType == EMAIL || refAttrType == ENUM || refAttrType == HTML
+									|| refAttrType == HYPERLINK || refAttrType == SCRIPT || refAttrType == STRING
+									|| refAttrType == TEXT)
+							{
+								indexFieldName = indexFieldName + "." + MappingsBuilder.FIELD_NOT_ANALYZED;
+							}
+
 							filterBuilder = FilterBuilders.nestedFilter(queryField,
-									FilterBuilders.termFilter(queryField + '.' + refIdAttr.getName(), queryIdValue));
+									FilterBuilders.termFilter(indexFieldName, queryIdValue));
 							break;
 						case COMPOUND:
 						case FILE:
