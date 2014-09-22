@@ -90,4 +90,46 @@ public class AggregateQueryImpl implements AggregateQuery
 	{
 		return attrDistinct;
 	}
+
+	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((attrDistinct == null) ? 0 : attrDistinct.hashCode());
+		result = prime * result + ((attrX == null) ? 0 : attrX.hashCode());
+		result = prime * result + ((attrY == null) ? 0 : attrY.hashCode());
+		result = prime * result + ((q == null) ? 0 : q.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
+		AggregateQueryImpl other = (AggregateQueryImpl) obj;
+		if (attrDistinct == null)
+		{
+			if (other.attrDistinct != null) return false;
+		}
+		else if (!attrDistinct.equals(other.attrDistinct)) return false;
+		if (attrX == null)
+		{
+			if (other.attrX != null) return false;
+		}
+		else if (!attrX.equals(other.attrX)) return false;
+		if (attrY == null)
+		{
+			if (other.attrY != null) return false;
+		}
+		else if (!attrY.equals(other.attrY)) return false;
+		if (q == null)
+		{
+			if (other.q != null) return false;
+		}
+		else if (!q.equals(other.q)) return false;
+		return true;
+	}
 }
