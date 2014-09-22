@@ -316,7 +316,7 @@ public class ResponseParser
 					}
 				}
 				AttributeMetaData yAggregateField = request.getAggregateField2();
-				if (xAggregateField != null)
+				if (yAggregateField != null)
 				{
 					FieldTypeEnum yDataType = yAggregateField.getDataType().getEnumType();
 					switch (yDataType)
