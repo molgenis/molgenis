@@ -147,8 +147,8 @@
 				</div>
 				
 				<div class="modal-footer">
-					<a href="#" class="btn btn-default" data-dismiss="modal">Cancel</a>
-					<a href="#" class="btn btn-primary filter-apply-btn" data-dismiss="modal">Apply</a>
+					<a href="#" class="btn btn-default" data-dismiss="modal">${i18n.dataexplorer_wizard_cancel}</a>
+					<a href="#" class="btn btn-primary filter-apply-btn" data-dismiss="modal">${i18n.dataexplorer_wizard_apply}</a>
 				</div>	
 			</div>
 		</div>
