@@ -57,7 +57,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		Map<String, String> runtimePropertyMap = new HashMap<String, String>();
 
 		runtimePropertyMap.put(DataExplorerController.INITLOCATION,
-				"chr:'1',viewStart:10000000,viewEnd:10100000,cookieKey:'human',nopersist:true");
+				"chr:'6',viewStart:112435264,viewEnd:112537682,cookieKey:'human',nopersist:true");
 		runtimePropertyMap.put(DataExplorerController.COORDSYSTEM,
 				"{speciesName: 'Human',taxon: 9606,auth: 'GRCh',version: '37',ucscName: 'hg19'}");
 		runtimePropertyMap

@@ -16,9 +16,9 @@
 		switch(attribute.fieldType) {
 			case 'BOOL':
 			case 'CATEGORICAL':
+				return self.createSimpleFilter(attribute, filter, wizard, false);
 			case 'XREF':
-				return self.createSimpleFilter(attribute, filter, wizard);
-				break;
+				return self.createSimpleFilter(attribute, filter, wizard, true);
 			case 'DATE':
 			case 'DATE_TIME':
 			case 'DECIMAL':
@@ -65,7 +65,7 @@
 			filter.update($(this));
 			filters[filter.attribute.href] = filter;
 		});
-		
+
 		return Object.keys(filters)
 			.map(function (key) {
 				return filters[key];
@@ -238,9 +238,14 @@
 		// The complex filter element container
 		var $complexElementContainer = $('<div class="form-group complex-element-container" data-filter="complex-element-container"></div>');
 		
-		// Complex element containing the simple filter and the operator
-		var $complexElement = $('<div class="controls complex-element" data-filter="complex-element"></div>');
-		
+		if(wizard){
+			// Complex element containing the simple filter and the operator
+			var $complexElement = $('<div class="controls complex-element col-md-9" data-filter="complex-element"></div>');
+		} else{
+			// if its for a single attribute
+			var $complexElement = $('<div class="controls complex-element col-md-12" data-filter="complex-element"></div>');
+		}
+
 		// Make complex filter element label
 		var $complexElementLabel = self.createFilterLabel(attribute, isFirstElement, wizard);
 		
@@ -251,7 +256,8 @@
 		var $controlGroupSimpleFilter = self.createSimpleFilterControls(attribute, simpleFilter);
 		$controlGroupSimpleFilter.attr('data-filter', 'complex-simplefilter');
 		$controlGroupSimpleFilter.addClass('complex-simplefilter');
-		
+		$controlGroupSimpleFilter.css('display', 'inline-block');
+
 		// Remove complex filter element button container
 		var $removeButtonContainer = $('<div class="controls complex-removebutton-container" data-filter="complex-removebutton-container"></div>');
 		
@@ -334,9 +340,13 @@
 		var label = attribute.label || attribute.name;
 		if(isFirstElement && wizard) 
 		{
-			return $('<label class="col-md-3 control-label" data-placement="right" data-title="' + attribute.description + '">' + label + '</label>').tooltip();
+            var labelHtml = $('<label class="col-md-3 control-label" data-placement="right" data-title="' + attribute.description + '">' + label + '</label>');
+            if(attribute.description !== undefined){
+                labelHtml.tooltip()
+            }
+			return labelHtml;
 		}
-		else if (!isFirstElement && wizard) 
+		else if (!isFirstElement && wizard)
 		{
 			return $('<label class="col-md-3 control-label"></label>');
 		} 
@@ -358,7 +368,7 @@
 	 */
 	self.createComplexFilterAddButton = function($container, attribute, complexFilterOperator, wizard, useFixedOperator)
 	{
-		return ($('<button class="btn btn-default btn-xs" type="button" data-filter=complex-addbutton><span class="glyphicon glyphicon-plus"></span></button>').click(function(){
+		return ($('<button class="btn btn-default btn-xs" type="button" data-filter=complex-addbutton><i class="glyphicon glyphicon-plus"></i></button>').click(function(){
 					if($('[data-filter=complex-removebutton]', $container).length === 0)
 					{
 						$('[data-filter=complex-removebutton-container]', $container).append(self.createRemoveButtonFirstComplexElement($container));
@@ -372,7 +382,7 @@
 	 * Create remove button to remove complex elements that are not the first
 	 */
 	self.createRemoveButtonComplexElementFilter = function($complexElementContainer){
-		return $('<button class="btn btn-default btn-xs" type="button" data-filter=complex-removebutton><i class="icon-minus"></i></button>').click(function(){
+		return $('<button class="btn btn-default btn-xs" type="button" data-filter=complex-removebutton><i class="glyphicon glyphicon-minus"></i></button>').click(function(){
 					var $container = $complexElementContainer.parent();
 					var $addButton = $('[data-filter=complex-addbutton]', $container);
 					
@@ -394,16 +404,16 @@
 	 * Create remove button to remove the first element in a complex filter
 	 */
 	self.createRemoveButtonFirstComplexElement = function($container){
-		return $('<button class="btn btn-default btn-xs" type="button" data-filter=complex-removebutton><i class="icon-minus"></i></button>').click(function(){
-					var $firstElement = $('[data-filter=complex-element]', $container)[0];
-					var $secondElement = $('[data-filter=complex-element]', $container)[1];
+		return $('<button class="btn btn-default btn-xs" type="button" data-filter=complex-removebutton><i class="glyphicon glyphicon-minus"></i></button>').click(function(){
+					var $firstElement = $($('[data-filter=complex-element]', $container)[0]);
+					var $secondElement = $($('[data-filter=complex-element]', $container)[1]);
 					var $simpleFilterFirstElement = $('[data-filter=complex-simplefilter]', $firstElement);
 					var $simpleFilterSecondElement = $('[data-filter=complex-simplefilter]', $secondElement);
 					var $simpleFilterSecondElementButton = $('[data-filter=complex-addbutton]', $secondElement);
 					var $simpleFilterSecondElementContainer = $('[data-filter=complex-element-container]', $container).eq(1);
-					
-					$simpleFilterFirstElement.empty();
-					$simpleFilterFirstElement.append($simpleFilterSecondElement);
+
+					$simpleFilterFirstElement.remove();
+					$firstElement.append($simpleFilterSecondElement);
 					$('[data-filter=complex-addbutton-container]', $firstElement).append($simpleFilterSecondElementButton);
 					
 					$simpleFilterSecondElementContainer.remove();
@@ -416,7 +426,7 @@
 	/**
 	 * Create simple filter
 	 */
-	self.createSimpleFilter = function(attribute, filter, wizard) {
+	self.createSimpleFilter = function(attribute, filter, wizard, wrap) {
 		var $container = $('<div class="simple-filter-container form-group"></div>');
 		var $label = self.createFilterLabel(attribute, true, wizard);
 		$container.append($label);
