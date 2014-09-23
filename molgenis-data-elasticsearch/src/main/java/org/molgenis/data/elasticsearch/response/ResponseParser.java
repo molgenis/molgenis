@@ -8,6 +8,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.ShardSearchFailure;
@@ -49,11 +51,11 @@ public class ResponseParser
 	public SearchResult parseSearchResponse(SearchRequest request, SearchResponse response,
 			EntityMetaData entityMetaData, DataService dataService)
 	{
-        Locale locale = new Locale("molgenis", "molgenis");
-        ResourceBundle i18n = ResourceBundle.getBundle("i18n", locale);
-        String aggregatesTotal = i18n.getString("dataexplorer_aggregates_total");
+		Locale locale = new Locale("molgenis", "molgenis");
+		ResourceBundle i18n = ResourceBundle.getBundle("i18n", locale);
+		String aggregatesTotal = i18n.getString("dataexplorer_aggregates_total");
 
-        ShardSearchFailure[] failures = response.getShardFailures();
+		ShardSearchFailure[] failures = response.getShardFailures();
 		if ((failures != null) && (failures.length > 0))
 		{
 			StringBuilder sb = new StringBuilder("Exception while searching:\n");
@@ -184,7 +186,7 @@ public class ResponseParser
 					if (!xLabelsSet.contains(bucket.getKey())) xLabelsSet.add(bucket.getKey());
 				}
 
-                xLabels = new ArrayList<String>(xLabelsSet);
+				xLabels = new ArrayList<String>(xLabelsSet);
 				Collections.sort(xLabels);
 				xLabels.add(aggregatesTotal);
 
