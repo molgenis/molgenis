@@ -59,6 +59,11 @@
 	}
 	
 	function load(entityUri) {
+		$.ajax({
+			url: 'catalogue/shoppingcart/clear',
+			async: false
+		});
+		
 		restApi.getAsync(entityUri + '/meta', {'expand': ['attributes']}, function(entityMetaData) {
 			selectedEntity = entityMetaData;
 			createHeader(entityMetaData);

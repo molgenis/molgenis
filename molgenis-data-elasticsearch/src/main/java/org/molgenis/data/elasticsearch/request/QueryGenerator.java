@@ -176,8 +176,10 @@ public class QueryGenerator implements QueryPartGenerator
 							Object queryIdValue = queryValue instanceof Entity ? ((Entity) queryValue).getIdValue() : queryValue;
 
 							AttributeMetaData refIdAttr = attr.getRefEntity().getIdAttribute();
+							String indexFieldName = getXRefEqualsSearchFieldName(refIdAttr, queryField);
+
 							filterBuilder = FilterBuilders.nestedFilter(queryField,
-									FilterBuilders.termFilter(queryField + '.' + refIdAttr.getName(), queryIdValue));
+									FilterBuilders.termFilter(indexFieldName, queryIdValue));
 							break;
 						case COMPOUND:
 						case FILE:
@@ -366,5 +368,41 @@ public class QueryGenerator implements QueryPartGenerator
 				throw new MolgenisQueryException("Unknown query operator [" + queryOperator + "]");
 		}
 		return queryBuilder;
+	}
+
+	private String getXRefEqualsSearchFieldName(AttributeMetaData refIdAttr, String queryField)
+	{
+		String indexFieldName = queryField + '.' + refIdAttr.getName();
+		FieldTypeEnum refAttrType = refIdAttr.getDataType().getEnumType();
+
+		switch (refAttrType)
+		{
+			case XREF:
+			case BOOL:
+			case CATEGORICAL:
+			case COMPOUND:
+			case DATE:
+			case DATE_TIME:
+			case DECIMAL:
+			case FILE:
+			case IMAGE:
+			case INT:
+			case LONG:
+			case MREF:
+				return indexFieldName;
+
+			case EMAIL:
+			case ENUM:
+			case HTML:
+			case HYPERLINK:
+			case SCRIPT:
+			case STRING:
+			case TEXT:
+				return indexFieldName + "." + MappingsBuilder.FIELD_NOT_ANALYZED;
+
+			default:
+				throw new RuntimeException("Unknown data type [" + refAttrType + "]");
+		}
+
 	}
 }
