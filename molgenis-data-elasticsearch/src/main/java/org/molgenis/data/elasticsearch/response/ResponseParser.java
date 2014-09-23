@@ -49,7 +49,11 @@ public class ResponseParser
 	public SearchResult parseSearchResponse(SearchRequest request, SearchResponse response,
 			EntityMetaData entityMetaData, DataService dataService)
 	{
-		ShardSearchFailure[] failures = response.getShardFailures();
+        Locale locale = new Locale("molgenis", "molgenis");
+        ResourceBundle i18n = ResourceBundle.getBundle("i18n", locale);
+        String aggregatesTotal = i18n.getString("dataexplorer_aggregates_total");
+
+        ShardSearchFailure[] failures = response.getShardFailures();
 		if ((failures != null) && (failures.length > 0))
 		{
 			StringBuilder sb = new StringBuilder("Exception while searching:\n");
@@ -180,9 +184,9 @@ public class ResponseParser
 					if (!xLabelsSet.contains(bucket.getKey())) xLabelsSet.add(bucket.getKey());
 				}
 
-				xLabels = new ArrayList<String>(xLabelsSet);
+                xLabels = new ArrayList<String>(xLabelsSet);
 				Collections.sort(xLabels);
-				xLabels.add("Total");
+				xLabels.add(aggregatesTotal);
 
 				int xIdx = 0;
 				Map<String, Integer> xLabelMap = new HashMap<String, Integer>();
@@ -216,7 +220,7 @@ public class ResponseParser
 
 					yLabels = new ArrayList<String>(yLabelsSet);
 					Collections.sort(yLabels);
-					yLabels.add("Total");
+					yLabels.add(aggregatesTotal);
 
 					int yIdx = 0;
 					Map<String, Integer> yLabelMap = new HashMap<String, Integer>();
@@ -254,7 +258,7 @@ public class ResponseParser
 								yValues.set(yLabelMap.get(subBucket.getKey()), bucketCount);
 								count += bucketCount;
 							}
-							yValues.set(yLabelMap.get("Total"), count);
+							yValues.set(yLabelMap.get(aggregatesTotal), count);
 						}
 
 						matrix.set(xLabelMap.get(bucket.getKey()), yValues);
