@@ -2,8 +2,8 @@
 <#include "molgenis-footer.ftl">
 <@header/>
 	<div class="row">
-		<form id="account-form" class="form-horizontal" role="form" action="${context_url}/update" method="POST">
 			<div class="col-md-8 col-md-offset-2">
+		<form id="account-form" class="form-horizontal" role="form" action="${context_url}/update" method="POST">
 				<legend>Account information</legend>
 				<div class="row">
 					<div class="col-md-6">
@@ -140,21 +140,23 @@
 						</div>
 					</div>
 				</div>
-			</div>
 		</form>
+			</div>
 	</div>	
 	<div class="row">
 		<div class="col-md-8 col-md-offset-2">
 			<legend>Group information</legend>
-			<div class="col-md-4">
-				A member of the following groups:
-			</div>
-			<div class="col-md-4">
-				<ul id="groups" class="inline">
-					<#list groups as group>
-						<li>${group.name}</li>
-					</#list>
-				</ul>
+			<div class="row">
+    			<div class="col-md-4">
+    				A member of the following groups:
+    			</div>
+    			<div class="col-md-4">
+    				<ul id="groups" class="inline">
+    					<#list groups as group>
+    						<li>${group.name}</li>
+    					</#list>
+    				</ul>
+    			</div>
 			</div>
 		</div>
 	</div>
