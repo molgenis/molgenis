@@ -216,3 +216,7 @@ ul.fancytree-container {
 .table-hover {
 	cursor: pointer;
 } 
+
+#chartCreationButtons {
+	padding-top: 10px;
+}
