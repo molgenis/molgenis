@@ -53,25 +53,30 @@ public interface Query extends Iterable<Entity>
 	Query and();
 
 	/**
-	 * Deprecated, replaced by search(field, searchTerms)
 	 * 
 	 * @param field
 	 * @param value
 	 * @return
 	 */
-	@Deprecated
-	Query like(String field, Object value);
+	Query like(String field, String value);
 
 	/**
 	 * 
 	 * @param field
 	 * @param value
-	 *            value, or id for references
+	 *            categorical/xref: entity or entity id; mref: entity iterable or id iterable; else: value
 	 * @return
 	 */
 	Query eq(String field, Object value);
 
-	Query in(String field, Iterable<?> objectIterator);
+	/**
+	 * 
+	 * @param field
+	 * @param values
+	 *            ids or entities
+	 * @return
+	 */
+	Query in(String field, Iterable<?> values);
 
 	/**
 	 * Greater than

@@ -693,7 +693,7 @@ public class JpaRepository extends AbstractCrudRepository
 									|| fieldType == FieldTypeEnum.TEXT || fieldType == FieldTypeEnum.HTML
 									|| fieldType == FieldTypeEnum.HYPERLINK || fieldType == FieldTypeEnum.EMAIL)
 							{
-								Query q = new QueryImpl().like(refAttr.getName(), searchValue);
+								Query q = new QueryImpl().like(refAttr.getName(), searchValue.toString());
 								EntityManager em = getEntityManager();
 								CriteriaBuilder cb = em.getCriteriaBuilder();
 
