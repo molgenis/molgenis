@@ -69,11 +69,7 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 	@Test
 	public void submitContent()
 	{
-<<<<<<< HEAD
-		assertTrue(this.staticContentService.submitContent("home", "content"));
-=======
 		assertTrue(this.staticContentService.submitContent("home", "<p>Welcome to Molgenis!</p>"));
->>>>>>> 195fdb806063edc7a892b6aef696bcb1402927cc
 	}
 
 	private void setSecurityContextSuperUser()
@@ -131,24 +127,14 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 		public StaticContentService staticContentService()
 		{
 			MolgenisSettings molgenisSettings = mock(MolgenisSettings.class);
-<<<<<<< HEAD
 			when(molgenisSettings.getProperty(StaticContentServiceImpl.PREFIX_KEY + "home")).thenReturn(
-=======
-			when(
-molgenisSettings.getProperty(StaticContentServiceImpl.PREFIX_KEY + "home")).thenReturn(
->>>>>>> 195fdb806063edc7a892b6aef696bcb1402927cc
 					"<p>Welcome to Molgenis!</p>");
 
 			when(molgenisSettings.propertyExists(StaticContentServiceImpl.PREFIX_KEY + "home")).thenReturn(true);
 
-<<<<<<< HEAD
-			when(molgenisSettings.updateProperty(StaticContentServiceImpl.PREFIX_KEY + "home", "content")).thenReturn(
-=======
 			when(
 					molgenisSettings.updateProperty(StaticContentServiceImpl.PREFIX_KEY + "home",
-							"<p>Welcome to Molgenis!</p>")).thenReturn(
->>>>>>> 195fdb806063edc7a892b6aef696bcb1402927cc
-					true);
+							"<p>Welcome to Molgenis!</p>")).thenReturn(true);
 
 			StaticContentService staticContentService = new StaticContentServiceImpl(molgenisSettings);
 			return staticContentService;
