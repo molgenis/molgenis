@@ -67,7 +67,13 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 		this.setSecurityContextAnonymousUsers();
 		assertFalse(this.staticContentService.isCurrentUserCanEdit());
 	}
-	
+
+	@Test
+	public void submitContent()
+	{
+		assertTrue(this.staticContentService.submitContent("home", StaticContentServiceImpl.DEFAULT_CONTENT));
+	}
+
 	private void setSecurityContextSuperUser()
 	{
 		Collection<? extends GrantedAuthority> authorities = Arrays
@@ -119,6 +125,24 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 	@EnableGlobalMethodSecurity(prePostEnabled = true)
 	public static class Config extends WebSecurityConfigurerAdapter
 	{
+		@Bean
+		public StaticContentService staticContentService()
+		{
+			MolgenisSettings molgenisSettings = mock(MolgenisSettings.class);
+			when(
+					molgenisSettings.getProperty(StaticContentServiceImpl.PREFIX_KEY + "home",
+							StaticContentServiceImpl.DEFAULT_CONTENT)).thenReturn("<p>Welcome to Molgenis!</p>");
+
+			when(molgenisSettings.propertyExists(StaticContentServiceImpl.PREFIX_KEY + "home")).thenReturn(true);
+
+			when(
+					molgenisSettings.updateProperty(StaticContentServiceImpl.PREFIX_KEY + "home",
+							StaticContentServiceImpl.DEFAULT_CONTENT)).thenReturn(true);
+
+			StaticContentService staticContentService = new StaticContentServiceImpl(molgenisSettings);
+			return staticContentService;
+		}
+
 		@Override
 		protected UserDetailsService userDetailsService()
 		{
