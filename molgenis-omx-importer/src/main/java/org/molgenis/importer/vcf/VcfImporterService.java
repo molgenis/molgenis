@@ -43,6 +43,11 @@ public class VcfImporterService
 
 	public void importVcf(File vcfFile) throws IOException
 	{
+		importVcf(vcfFile, 1000);
+	}
+
+	public void importVcf(File vcfFile, int batchSize) throws IOException
+	{
 		RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory
 				.createFileRepositoryCollection(vcfFile);
 		ElasticsearchRepository sampleRepository = null;
@@ -74,18 +79,31 @@ public class VcfImporterService
 				Iterator<Entity> inIterator = inRepository.iterator();
 				try
 				{
+					List<Entity> sampleEntities = new ArrayList<Entity>();
+
 					while (inIterator.hasNext())
 					{
 						Entity entity = inIterator.next();
-						outRepository.add(entity);
 						if (sampleRepository != null)
 						{
-                            Iterable<Entity> samples = entity.getEntities("SAMPLES");
-                            if(samples != null && !samples.iterator().hasNext()) {
-                                sampleRepository.add(samples);
-                            }
+							Iterable<Entity> samples = entity.getEntities("SAMPLES");
+							if (samples != null)
+							{
+								Iterator<Entity> sampleIterator = samples.iterator();
+								while (sampleIterator.hasNext())
+								{
+									sampleEntities.add(sampleIterator.next());
+                                    if (sampleEntities.size() > batchSize)
+                                    {
+                                        outRepository.add(sampleEntities);
+                                        sampleEntities.clear();
+                                    }
+								}
+							}
 						}
 					}
+					outRepository.add(inRepository);
+					outRepository.add(sampleEntities);
 				}
 
 				finally
