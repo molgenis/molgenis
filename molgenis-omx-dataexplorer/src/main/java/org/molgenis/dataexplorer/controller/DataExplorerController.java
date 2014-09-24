@@ -105,6 +105,7 @@ public class DataExplorerController extends MolgenisPluginController
 	private static final boolean DEFAULT_VAL_MOD_DISEASEMATCHER = false;
 	private static final boolean DEFAULT_VAL_GALAXY_ENABLED = false;
 	public static final boolean DEFAULT_VAL_SHOW_WIZARD_ONINIT = false;
+	public static final boolean DEFAULT_VAL_DISTINCT_HIDE = false;
 	public static final String DEFAULT_VAL_HEADER_ABBREVIATE = "180";
 	public static final String DEFAULT_AGGREGATES_NORESULTS_MESSAGE = "No results found";
 
