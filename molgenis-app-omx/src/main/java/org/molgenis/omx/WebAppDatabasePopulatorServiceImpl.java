@@ -120,7 +120,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		runtimePropertyMap.put(DataExplorerController.AGGREGATES_NORESULTS_MESSAGE,
 				DataExplorerController.DEFAULT_AGGREGATES_NORESULTS_MESSAGE);
 		runtimePropertyMap.put(DataExplorerController.KEY_MOD_AGGREGATES_DISTINCT_HIDE,
-				String.valueOf(DataExplorerController.DEFAULT_VAL_DISTINCT_HIDE));
+				String.valueOf(DataExplorerController.DEFAULT_VAL_AGGREGATES_DISTINCT_HIDE));
 
 		runtimePropertyMap.put(StudyManagerController.EXPORT_BTN_TITLE, "Export");
 		runtimePropertyMap.put(StudyManagerController.EXPORT_ENABLED, String.valueOf(false));
