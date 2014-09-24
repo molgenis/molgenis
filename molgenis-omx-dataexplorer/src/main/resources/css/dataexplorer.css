@@ -96,6 +96,7 @@ body:not(.modal-open) #feature-selection .molgenis-tree {
 
 #feature-select-container{	
 	margin-bottom: 20px;
+	margin-top: 10px;
 }
 
 #filter-nav li a:hover{
