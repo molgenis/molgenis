@@ -169,6 +169,7 @@ public class MolgenisDbSettings implements MolgenisSettings
 	}
 
 	@Override
+	@RunAsSystem
 	public Integer getIntegerProperty(String key)
 	{
 		String value = getProperty(key);

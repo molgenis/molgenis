@@ -9,7 +9,7 @@ import org.molgenis.security.core.Permission;
 public class IndexedCrudRepositorySecurityDecorator extends CrudRepositorySecurityDecorator implements
 		IndexedRepository
 {
-	private static final String SETTINGS_KEY_AGGREGATE_ANONYMIZATION_THRESHOLD = "aggregate.anonymization.threshold";
+	public static final String SETTINGS_KEY_AGGREGATE_ANONYMIZATION_THRESHOLD = "aggregate.anonymization.threshold";
 	private final IndexedCrudRepository decoratedRepository;
 	private final MolgenisSettings molgenisSettings;
 
@@ -30,7 +30,7 @@ public class IndexedCrudRepositorySecurityDecorator extends CrudRepositorySecuri
 		if (threshold != null)
 		{
 			if ((aggregateQuery.getAnonymizationThreshold() == null)
-					|| (threshold < aggregateQuery.getAnonymizationThreshold()))
+					|| (threshold > aggregateQuery.getAnonymizationThreshold()))
 			{
 				aggregateQuery = new AggregateQueryImpl().anonymizationThreshold(threshold)
 						.attrDistinct(aggregateQuery.getAttributeDistinct()).attrX(aggregateQuery.getAttributeX())
