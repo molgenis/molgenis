@@ -13,8 +13,6 @@ import java.util.Collection;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserDetailsService;
-import org.molgenis.ui.controller.StaticContentService;
-import org.molgenis.ui.controller.StaticContentServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -71,7 +69,7 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 	@Test
 	public void submitContent()
 	{
-		assertTrue(this.staticContentService.submitContent("home", StaticContentServiceImpl.DEFAULT_CONTENT));
+		assertTrue(this.staticContentService.submitContent("home", "<p>Welcome to Molgenis!</p>"));
 	}
 
 	private void setSecurityContextSuperUser()
@@ -130,14 +128,15 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 		{
 			MolgenisSettings molgenisSettings = mock(MolgenisSettings.class);
 			when(
-					molgenisSettings.getProperty(StaticContentServiceImpl.PREFIX_KEY + "home",
-							StaticContentServiceImpl.DEFAULT_CONTENT)).thenReturn("<p>Welcome to Molgenis!</p>");
+molgenisSettings.getProperty(StaticContentServiceImpl.PREFIX_KEY + "home")).thenReturn(
+					"<p>Welcome to Molgenis!</p>");
 
 			when(molgenisSettings.propertyExists(StaticContentServiceImpl.PREFIX_KEY + "home")).thenReturn(true);
 
 			when(
 					molgenisSettings.updateProperty(StaticContentServiceImpl.PREFIX_KEY + "home",
-							StaticContentServiceImpl.DEFAULT_CONTENT)).thenReturn(true);
+							"<p>Welcome to Molgenis!</p>")).thenReturn(
+					true);
 
 			StaticContentService staticContentService = new StaticContentServiceImpl(molgenisSettings);
 			return staticContentService;
