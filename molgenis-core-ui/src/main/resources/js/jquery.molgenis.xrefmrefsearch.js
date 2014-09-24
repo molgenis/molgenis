@@ -220,7 +220,7 @@
 			}
 			else if (attributeMetaData.fieldType === 'XREF') {
 				$operatorInput.val('OR');
-				$container.append($('<div class="dropdown-toggle" style="display:inline-block;padding: 4px 10px 4px 5px;width:38px">' + 'OR' + '</div>'));
+				$container.append($('<div class="col-md-2 dropdown-toggle-container" style="display:inline-block;width:38px"><p class="form-control-static">OR</div>'));
 				$container.append($operatorInput);
 			}
 		}

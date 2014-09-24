@@ -8,6 +8,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.ShardSearchFailure;
@@ -49,6 +51,10 @@ public class ResponseParser
 	public SearchResult parseSearchResponse(SearchRequest request, SearchResponse response,
 			EntityMetaData entityMetaData, DataService dataService)
 	{
+		Locale locale = new Locale("molgenis", "molgenis");
+		ResourceBundle i18n = ResourceBundle.getBundle("i18n", locale);
+		String aggregatesTotal = i18n.getString("dataexplorer_aggregates_total");
+
 		ShardSearchFailure[] failures = response.getShardFailures();
 		if ((failures != null) && (failures.length > 0))
 		{
@@ -182,7 +188,7 @@ public class ResponseParser
 
 				xLabels = new ArrayList<String>(xLabelsSet);
 				Collections.sort(xLabels);
-				xLabels.add("Total");
+				xLabels.add(aggregatesTotal);
 
 				int xIdx = 0;
 				Map<String, Integer> xLabelMap = new HashMap<String, Integer>();
@@ -216,7 +222,7 @@ public class ResponseParser
 
 					yLabels = new ArrayList<String>(yLabelsSet);
 					Collections.sort(yLabels);
-					yLabels.add("Total");
+					yLabels.add(aggregatesTotal);
 
 					int yIdx = 0;
 					Map<String, Integer> yLabelMap = new HashMap<String, Integer>();
@@ -254,7 +260,7 @@ public class ResponseParser
 								yValues.set(yLabelMap.get(subBucket.getKey()), bucketCount);
 								count += bucketCount;
 							}
-							yValues.set(yLabelMap.get("Total"), count);
+							yValues.set(yLabelMap.get(aggregatesTotal), count);
 						}
 
 						matrix.set(xLabelMap.get(bucket.getKey()), yValues);

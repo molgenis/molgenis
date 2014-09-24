@@ -134,8 +134,8 @@ public class ResponseParserTest
 	@Test
 	public void parseSearchResponse_aggregation2D()
 	{
-		String col1 = "col1", col2 = "col2", colTotal = "Total";
-		String row1 = "row1", row2 = "row2", rowTotal = "Total";
+		String col1 = "col1", col2 = "col2", colTotal = "TestTotal";
+		String row1 = "row1", row2 = "row2", rowTotal = "TestTotal";
 		long valRow1Col1 = 1l, valRow1Col2 = 2l, valRow1Total = valRow1Col1 + valRow1Col2;
 		long valRow2Col1 = 1l, valRow2Col2 = 2l, valRow2Total = valRow2Col1 + valRow2Col2;
 		long valCol1Total = valRow1Col1 + valRow2Col1, valCol2Total = valRow1Col2 + valRow2Col2;
@@ -223,8 +223,8 @@ public class ResponseParserTest
 	@Test
 	public void parseSearchResponse_aggregation2D_colSort()
 	{
-		String col1 = "Z_col1", col2 = "A_col2", colTotal = "Total";
-		String row1 = "Z_row1", row2 = "A_row2", rowTotal = "Total";
+		String col1 = "Z_col1", col2 = "A_col2", colTotal = "TestTotal";
+		String row1 = "Z_row1", row2 = "A_row2", rowTotal = "TestTotal";
 		long valRow1Col1 = 1l, valRow1Col2 = 2l, valRow1Total = valRow1Col1 + valRow1Col2;
 		long valRow2Col1 = 1l, valRow2Col2 = 2l, valRow2Total = valRow2Col1 + valRow2Col2;
 		long valCol1Total = valRow1Col1 + valRow2Col1, valCol2Total = valRow1Col2 + valRow2Col2;

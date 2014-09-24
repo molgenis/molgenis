@@ -117,6 +117,6 @@ public class MolgenisRSQLTest
 		assertEquals(
 				q,
 				new QueryImpl().nest().nest().eq("name", "piet").and().eq("age", 87).unnest().or().nest()
-						.eq("name", "piet").and().gt("age", 100).unnest().unnest());
+						.eq("name", "klaas").and().gt("age", 100).unnest().unnest());
 	}
 }
