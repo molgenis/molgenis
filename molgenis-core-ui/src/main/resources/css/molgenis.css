@@ -1,19 +1,30 @@
-html, body {
-	height:100%;
-}
-
-/* Wrapper for page content to push down footer */
-#wrap {
+/* Sticky footer - start */
+html {
+	position: relative;
 	min-height: 100%;
-	height: auto !important;
-	height: 100%;
-	margin: 0 auto -40px; /* Negative indent footer by it's height */
 }
 
-/* Set the fixed height of the footer here */
-#push, #footer {
+body {
+	/* Margin bottom by footer height */
+	margin-bottom: 40px;
+}
+
+.footer {
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+	/* Set the fixed height of the footer here */
 	height: 40px;
 }
+
+.footer p {
+    margin: 0 0 5px;
+}
+
+body>.container-fluid {
+    padding-top: 60px;
+}
+/* Sticky footer - end */
 
 /* Support collapsable panels */
 .panel-title {
@@ -36,12 +47,7 @@ html, body {
 #plugin-container {
 	background: #F8FAFB;
 	height: 100%;
-}
-
-#footer p {
-	text-align: center;
-	font: menu;
-	font-style: italic;
+	padding: 5px;
 }
 
 #spinner img {
