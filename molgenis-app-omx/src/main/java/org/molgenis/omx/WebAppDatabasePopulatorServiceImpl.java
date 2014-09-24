@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.IndexedCrudRepositorySecurityDecorator;
 import org.molgenis.data.annotation.impl.CaddServiceAnnotator;
 import org.molgenis.data.annotation.impl.ClinVarServiceAnnotator;
 import org.molgenis.data.annotation.impl.DbnsfpGeneServiceAnnotator;
@@ -88,6 +89,10 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 
 		// DataExplorer hide select if dataset selected through url
 		runtimePropertyMap.put(DataExplorerController.KEY_HIDE_SELECT, String.valueOf(true));
+
+		// Aggregate anonymization threshold (default no threshold)
+		runtimePropertyMap.put(IndexedCrudRepositorySecurityDecorator.SETTINGS_KEY_AGGREGATE_ANONYMIZATION_THRESHOLD,
+				Integer.toString(0));
 
 		// Annotators include files/tools
 		String molgenisHomeDir = System.getProperty("molgenis.home");
