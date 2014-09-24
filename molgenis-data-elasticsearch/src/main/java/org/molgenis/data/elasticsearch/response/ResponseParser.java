@@ -332,7 +332,7 @@ public class ResponseParser
 				}
 			}
 
-			aggregate = new AggregateResult(matrix, xLabels, yLabels);
+			aggregate = new AggregateResult(matrix, xLabels, yLabels, request.getAggregateAnonymizationThreshold());
 		}
 
 		return new SearchResult(totalCount, searchHits, aggregate);

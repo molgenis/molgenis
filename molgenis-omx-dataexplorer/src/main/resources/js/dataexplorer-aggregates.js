@@ -9,6 +9,8 @@
 (function($, molgenis) {
 	"use strict";
 	
+	var AGGREGATE_ANONYMIZATION_VALUE = -1;
+	
 	molgenis.dataexplorer = molgenis.dataexplorer || {};
 	var self = molgenis.dataexplorer.aggregates = molgenis.dataexplorer.aggregates || {};
 	
@@ -106,19 +108,72 @@
                 var items = ['<table class="table table-striped" >'];
 				items.push('<tr>');
 				items.push('<td style="width: 18%"></td>');
+				
 				$.each(aggregateResult.yLabels, function(index, label){
 					items.push('<th><div class="text-center">' + label + '</div></th>');
 				});
+				items.push('<th><div class="text-center">' + totalCaption + '</div></th></tr>');
 				
+				var columnCounts = [];
 				$.each(aggregateResult.matrix, function(index, row) {
 					items.push('<tr>');
 					items.push('<th>' + aggregateResult.xLabels[index] + '</th>');
+					
+					var rowCount = 0;
+					var rowCountIsAnonimized = false;
 					$.each(row, function(index, count) {
-                        countAboveZero = count > 0 || countAboveZero;
-						items.push('<td><div class="text-center">' + count + '</div></td>');
+						countAboveZero = count > 0 || countAboveZero;						
+						if (!columnCounts[index]) {
+							columnCounts[index] = {count: 0, anonymized: false};
+						}
+						
+                    	items.push('<td><div class="text-center">');
+                    	
+                    	if (count == AGGREGATE_ANONYMIZATION_VALUE) {
+                    		rowCountIsAnonimized = true;
+                    		items.push('&lt;' + aggregateResult.anonymizationThreshold);
+                    		rowCount += aggregateResult.anonymizationThreshold;
+                            columnCounts[index].count += aggregateResult.anonymizationThreshold;
+                            columnCounts[index].anonymized = true;
+                    	} else {
+                    		rowCount += count;
+                    		columnCounts[index].count += count;
+                    		items.push(count);
+                    	}
+                		
+                    	items.push('</div></td>');
 					});
+					
+					items.push('<td><div class="text-center">');
+					if (rowCountIsAnonimized) {
+						items.push('&lt;');
+					}
+					items.push(rowCount + '</div></td>');
 					items.push('</tr>');
 				});
+				
+				items.push('<tr>');
+				items.push('<th>' + totalCaption + '</th>');
+				
+				var grantTotal = {count: 0, anonymized: false};
+				$.each(columnCounts, function(){
+					items.push('<td><div class="text-center">');
+					if (this.anonymized) {
+						items.push('&lt');
+						grantTotal.anonymized = true;
+					}
+					
+					grantTotal.count += this.count;
+					items.push(this.count);
+					items.push('</div></td>');
+				});
+				
+				items.push('<td><div class="text-center">');
+				if (grantTotal.anonymized) items.push('&lt;');
+				items.push(grantTotal.count);
+				items.push('</div></td>');
+				
+				items.push('</tr>');
 				
 				items.push('</table>');
 				if(!countAboveZero){

@@ -345,7 +345,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 					// 2. validation decorator
 					// 3. indexed repository
 					return new IndexedCrudRepositorySecurityDecorator(new IndexedRepositoryValidationDecorator(
-							(IndexedCrudRepository) repository, new EntityAttributesValidator()));
+							(IndexedCrudRepository) repository, new EntityAttributesValidator()), molgenisSettings);
 				}
 				else
 				{
@@ -369,7 +369,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 					// 4. repository
 					return new IndexedCrudRepositorySecurityDecorator(new IndexedRepositoryValidationDecorator(
 							new ElasticsearchRepositoryDecorator(repository, elasticSearchService),
-							new EntityAttributesValidator()));
+							new EntityAttributesValidator()), molgenisSettings);
 				}
 			}
 		};
