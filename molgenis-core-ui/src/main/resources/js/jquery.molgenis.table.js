@@ -9,13 +9,15 @@
 	function createTable(settings) {
 		// create elements
 		var items = [];
-		items.push('<div class="row molgenis-table-container">');
+		items.push('<div class="row">');
 		items.push('<div class="col-md-12">');
+		items.push('<div class="molgenis-table-container">');
 		if(settings.rowClickable){
 			items.push('<table class="table table-striped table-condensed molgenis-table table-hover"><thead></thead><tbody></tbody></table>');
 		}else{
 			items.push('<table class="table table-striped table-condensed molgenis-table"><thead><th></th></thead><tbody></tbody></table>');
 		}
+		items.push('</div>');
 		items.push('</div>');
 		items.push('</div>');
 		items.push('<div class="row">');

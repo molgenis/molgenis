@@ -3,7 +3,9 @@
 <@header/>
 <#if isCurrentUserCanEdit?has_content && isCurrentUserCanEdit>
 <div class="row">
-    <a href="${context_url}/edit" class="btn btn-default pull-right">Edit page</a>
+    <div class="col-md-12">
+        <a href="${context_url}/edit" class="btn btn-default pull-right">Edit page</a>
+    </div>
 </div>
 </#if>
 <#if content?has_content>
