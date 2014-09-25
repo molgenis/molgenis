@@ -110,14 +110,14 @@
 				items.push('<td style="width: 18%"></td>');
 				
 				$.each(aggregateResult.yLabels, function(index, label){
-					items.push('<th><div class="text-center">' + label + '</div></th>');
+					items.push('<th><div class="text-center">' + htmlEscape(label) + '</div></th>');
 				});
 				items.push('<th><div class="text-center">' + totalCaption + '</div></th></tr>');
 				
 				var columnCounts = [];
 				$.each(aggregateResult.matrix, function(index, row) {
 					items.push('<tr>');
-					items.push('<th>' + aggregateResult.xLabels[index] + '</th>');
+					items.push('<th>' + htmlEscape(aggregateResult.xLabels[index]) + '</th>');
 					
 					var rowCount = 0;
 					var rowCountIsAnonimized = false;
