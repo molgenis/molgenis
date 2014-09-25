@@ -85,6 +85,7 @@ public class MolgenisDbSettings implements MolgenisSettings
 	}
 
 	@Override
+	@RunAsSystem
 	public Boolean getBooleanProperty(String key)
 	{
 		String value = getProperty(key);
@@ -97,6 +98,7 @@ public class MolgenisDbSettings implements MolgenisSettings
 	}
 
 	@Override
+	@RunAsSystem
 	public boolean getBooleanProperty(String key, boolean defaultValue)
 	{
 		Boolean value = getBooleanProperty(key);
@@ -109,7 +111,6 @@ public class MolgenisDbSettings implements MolgenisSettings
 	}
 
 	@Override
-	@RunAsSystem
 	public boolean updateProperty(String key, String content)
 	{
 		if (null == content)
