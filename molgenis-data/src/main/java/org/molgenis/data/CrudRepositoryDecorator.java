@@ -1,7 +1,6 @@
 package org.molgenis.data;
 
 import java.io.IOException;
-import java.util.List;
 
 import org.molgenis.data.support.QueryImpl;
 
@@ -129,12 +128,6 @@ public class CrudRepositoryDecorator extends RepositoryDecorator implements Crud
 	}
 
 	@Override
-	public void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
-	{
-		decoratedRepository.update(entities, dbAction, keyName);
-	}
-
-	@Override
 	public <E extends Entity> Iterable<E> findAll(Query q, Class<E> clazz)
 	{
 		return decoratedRepository.findAll(q, clazz);
@@ -168,11 +161,4 @@ public class CrudRepositoryDecorator extends RepositoryDecorator implements Crud
 	{
 		return decoratedRepository;
 	}
-
-	@Override
-	public AggregateResult aggregate(AttributeMetaData xAttr, AttributeMetaData yAttr, Query q)
-	{
-		return decoratedRepository.aggregate(xAttr, yAttr, q);
-	}
-
 }

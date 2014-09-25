@@ -131,6 +131,13 @@ public class QueryImpl implements Query
 	}
 
 	@Override
+	public Query search(String field, String searchTerms)
+	{
+		rules.get(this.rules.size() - 1).add(new QueryRule(field, Operator.SEARCH, searchTerms));
+		return this;
+	}
+
+	@Override
 	public Query or()
 	{
 		rules.get(this.rules.size() - 1).add(new QueryRule(Operator.OR));

@@ -2,6 +2,7 @@ package org.molgenis.data.support;
 
 import java.sql.Timestamp;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -43,11 +44,13 @@ public class TransformedEntity implements Entity
 		this.dataService = dataService;
 	}
 
+	@Override
 	public EntityMetaData getEntityMetaData()
 	{
 		return entityMetaData;
 	}
 
+	@Override
 	public Iterable<String> getAttributeNames()
 	{
 		// TODO create utility method to get all attributes (atomics + compounds) and use this method here
@@ -86,21 +89,25 @@ public class TransformedEntity implements Entity
 		return Iterables.concat(atomicAttributes, compoundAttributes);
 	}
 
+	@Override
 	public Object getIdValue()
 	{
 		return entity.get(entityMetaData.getIdAttribute().getName());
 	}
 
+	@Override
 	public String getLabelValue()
 	{
 		return entity.getString(entityMetaData.getLabelAttribute().getName());
 	}
 
+	@Override
 	public List<String> getLabelAttributeNames()
 	{
 		return Collections.singletonList(entityMetaData.getLabelAttribute().getName());
 	}
 
+	@Override
 	public Object get(String attributeName)
 	{
 		AttributeMetaData attribute = entityMetaData.getAttribute(attributeName);
@@ -211,6 +218,7 @@ public class TransformedEntity implements Entity
 					return MolgenisDateFormat.getDateFormat().parse(value.toString());
 				case DATE_TIME:
 					return MolgenisDateFormat.getDateTimeFormat().parse(value.toString());
+					// $CASES-OMITTED$
 				default:
 					throw new MolgenisDataException("Type [" + dataType + "] is not a date type");
 
@@ -252,6 +260,13 @@ public class TransformedEntity implements Entity
 	}
 
 	@Override
+	public <E extends Entity> E getEntity(String attributeName, Class<E> clazz)
+	{
+		Entity entity = getEntity(attributeName);
+		return entity != null ? new ConvertingIterable<E>(clazz, Arrays.asList(entity)).iterator().next() : null;
+	}
+
+	@Override
 	public Iterable<Entity> getEntities(String attributeName)
 	{
 		List<String> list = getList(attributeName);
@@ -271,6 +286,13 @@ public class TransformedEntity implements Entity
 			});
 		}
 		return null;
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> getEntities(String attributeName, Class<E> clazz)
+	{
+		Iterable<Entity> entities = getEntities(attributeName);
+		return entities != null ? new ConvertingIterable<E>(clazz, entities) : null;
 	}
 
 	@Override

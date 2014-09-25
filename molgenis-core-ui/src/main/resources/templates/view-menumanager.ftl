@@ -31,6 +31,15 @@
 							</div>
 						</div>
 					</form>
+					<legend>Upload logo</legend>
+					<form name="upload-new-logo" class="class-horizontal" role="form" action="${context_url}/upload-logo" method="POST" enctype="multipart/form-data">
+						<@upload_new_logo />
+						<div class="form-group">
+							<div class="col-md-9 col-md-offset-3">
+								<input type="submit" value="Upload logo" class="btn btn-default" />	
+							</div>
+						</div>
+					</form>
 				</div>
 			</div>
 			<div class="row">
@@ -159,6 +168,14 @@
 <#if is_root>
 	</ol>
 </#if>
+</#macro>
+<#macro upload_new_logo>
+	<div class="form-group">
+		<label class="col-md-3 control-label" for="menu-id">Choose file</label>
+		<div class="col-md-9">
+			<input type="file" name="logo" data-filename-placement="inside" title="Select a file...">
+		</div>
+	</div>
 </#macro>
 <script id="menu-template" type="text/x-handlebars-template">
 	<li class="node highlight" data-id="{{id}}" data-label="{{label}}">

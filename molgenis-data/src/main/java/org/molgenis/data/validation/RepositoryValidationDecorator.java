@@ -1,25 +1,19 @@
 package org.molgenis.data.validation;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
-import org.molgenis.data.AggregateResult;
-import org.molgenis.data.Aggregateable;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.CrudRepositoryDecorator;
-import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Query;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.util.HugeMap;
 
 import com.google.common.collect.Sets;
 
-public class RepositoryValidationDecorator extends CrudRepositoryDecorator implements Aggregateable
+public class RepositoryValidationDecorator extends CrudRepositoryDecorator
 {
 	private final EntityAttributesValidator entityAttributesValidator;
 
@@ -27,11 +21,6 @@ public class RepositoryValidationDecorator extends CrudRepositoryDecorator imple
 	{
 		super(repository);
 		this.entityAttributesValidator = entityAttributesValidator;
-
-		if (!(repository instanceof Aggregateable))
-		{
-			throw new MolgenisDataException("Repository not aggregateable");
-		}
 	}
 
 	@Override
@@ -55,12 +44,6 @@ public class RepositoryValidationDecorator extends CrudRepositoryDecorator imple
 	}
 
 	@Override
-	public void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
-	{
-		getDecoratedRepository().update(entities, dbAction, keyName);
-	}
-
-	@Override
 	public void add(Entity entity)
 	{
 		validate(Arrays.asList(entity), false);
@@ -74,19 +57,13 @@ public class RepositoryValidationDecorator extends CrudRepositoryDecorator imple
 		return getDecoratedRepository().add(entities);
 	}
 
-	@Override
-	public AggregateResult aggregate(AttributeMetaData xAttr, AttributeMetaData yAttr, Query q)
-	{
-		return ((Aggregateable) getDecoratedRepository()).aggregate(xAttr, yAttr, q);
-	}
-
 	private void validate(Iterable<? extends Entity> entities, boolean forUpdate)
 	{
-		Set<ConstraintViolation> violations = Sets.newHashSet();
+		Set<ConstraintViolation> violations = null;
 		for (Entity entity : entities)
 		{
-			violations.addAll(entityAttributesValidator.validate(entity, getEntityMetaData()));
-			if (violations.size() > 4)
+			violations = entityAttributesValidator.validate(entity, getEntityMetaData());
+			if (!violations.isEmpty())
 			{
 				throw new MolgenisValidationException(violations);
 			}
@@ -96,20 +73,29 @@ public class RepositoryValidationDecorator extends CrudRepositoryDecorator imple
 		{
 			if (attr.isUnique())
 			{
-				violations.addAll(checkUniques(entities, attr, true));
-				if (violations.size() > 4)
+				violations = checkUniques(entities, attr, true);
+				if (!violations.isEmpty())
 				{
 					throw new MolgenisValidationException(violations);
 				}
 			}
 		}
 
-		violations.addAll(checkNillable(entities));
-
+		violations = checkNillable(entities);
 		if (!violations.isEmpty())
 		{
 			throw new MolgenisValidationException(violations);
 		}
+
+		if (forUpdate)
+		{
+			violations = checkReadonlyByUpdate(entities);
+			if (!violations.isEmpty())
+			{
+				throw new MolgenisValidationException(violations);
+			}
+		}
+
 	}
 
 	protected Set<ConstraintViolation> checkNillable(Iterable<? extends Entity> entities)
@@ -129,7 +115,46 @@ public class RepositoryValidationDecorator extends CrudRepositoryDecorator imple
 					{
 						String message = String.format("The attribute '%s' of entity '%s' can not be null.",
 								attr.getName(), getName());
-						violations.add(new ConstraintViolation(message, rownr));
+						violations.add(new ConstraintViolation(message, attr, rownr));
+						if (violations.size() > 4) return violations;
+					}
+				}
+			}
+		}
+
+		return violations;
+	}
+
+	protected Set<ConstraintViolation> checkReadonlyByUpdate(Iterable<? extends Entity> entities)
+	{
+		Set<ConstraintViolation> violations = Sets.newHashSet();
+
+		long rownr = 0;
+		for (Entity entity : entities)
+		{
+			rownr++;
+			Entity oldEntity = this.findOne(entity.getIdValue());
+			if (null == oldEntity)
+			{
+				String message = String
+						.format("The original entity with id: '%s' does not exists", entity.getIdValue());
+				violations.add(new ConstraintViolation(message, entity.getEntityMetaData().getIdAttribute(), rownr));
+				if (violations.size() > 4) return violations;
+			}
+
+			for (AttributeMetaData attr : getEntityMetaData().getAtomicAttributes())
+			{
+				if (attr.isReadonly())
+				{
+					Object newValue = entity.get(attr.getName());
+					Object oldValue = oldEntity.get(attr.getName());
+
+					if ((null == newValue && null == oldValue) || !newValue.equals(oldValue))
+					{
+						String message = String.format(
+								"The attribute '%s' of entity '%s' can not be changed it is readonly.", attr.getName(),
+								getEntityMetaData().getLabel());
+						violations.add(new ConstraintViolation(message, attr, rownr));
 						if (violations.size() > 4) return violations;
 					}
 				}
@@ -152,7 +177,7 @@ public class RepositoryValidationDecorator extends CrudRepositoryDecorator imple
 				for (Entity entity : this)
 				{
 					Object value = entity.get(attr.getName());
-					if (value != null)
+					if ((value != null) && (entity.getIdValue() != null))
 					{
 						values.put(value, entity.getIdValue());
 					}
@@ -173,12 +198,15 @@ public class RepositoryValidationDecorator extends CrudRepositoryDecorator imple
 					if (values.containsKey(value) && (!forUpdate || !entityHasId(entity, id)))
 					{
 						violations.add(new ConstraintViolation("Duplicate value [" + value + "] for unique attribute ["
-								+ attr.getName() + "] from entity [" + getName() + "]", rownr));
+								+ attr.getName() + "] from entity [" + getName() + "]", attr, rownr));
 						if (violations.size() > 4) break;
 					}
 					else
 					{
-						values.put(value, entity.getIdValue());
+						if (entity.getIdValue() != null)
+						{
+							values.put(value, entity.getIdValue());
+						}
 					}
 				}
 			}

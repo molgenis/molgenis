@@ -7,13 +7,12 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
 
-import org.molgenis.data.AggregateResult;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
+import org.molgenis.data.jpa.importer.EntityImportService;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.data.domain.Sort;
@@ -228,30 +227,15 @@ public class JpaRepositoryTest extends BaseJpaTest
 		e.set("firstName", "Piet");
 		e.set("lastName", "Paulusma");
 
-		repo.update(Arrays.asList(e), DatabaseAction.ADD, "firstName");
+		EntityImportService eis = new EntityImportService();
+
+		eis.update(repo, Arrays.asList(e), DatabaseAction.ADD, "firstName");
 		assertEquals(repo.count(), 1);
 
 		Entity e1 = new MapEntity("id");
 		e1.set("firstName", "Piet");
 		e1.set("lastName", "Paulusma");
-		repo.update(Arrays.asList(e1), DatabaseAction.ADD, "firstName");
-	}
-
-	@Test
-	public void testImportAddIgnoreExisting()
-	{
-		Entity e = new MapEntity("id");
-		e.set("firstName", "Piet");
-		e.set("lastName", "Paulusma");
-
-		repo.update(Arrays.asList(e), DatabaseAction.ADD_IGNORE_EXISTING, "firstName");
-		assertEquals(repo.count(), 1);
-
-		Entity e1 = new MapEntity("id");
-		e1.set("firstName", "Piet");
-		e1.set("lastName", "Paulusma");
-		repo.update(Arrays.asList(e1), DatabaseAction.ADD_IGNORE_EXISTING, "firstName");
-		assertEquals(repo.count(), 1);
+		eis.update(repo, Arrays.asList(e1), DatabaseAction.ADD, "firstName");
 	}
 
 	@Test
@@ -261,13 +245,15 @@ public class JpaRepositoryTest extends BaseJpaTest
 		e.set("firstName", "Piet");
 		e.set("lastName", "Paulusma");
 
-		repo.update(Arrays.asList(e), DatabaseAction.ADD_UPDATE_EXISTING, "firstName");
+		EntityImportService eis = new EntityImportService();
+
+		eis.update(repo, Arrays.asList(e), DatabaseAction.ADD_UPDATE_EXISTING, "firstName");
 		assertEquals(repo.count(), 1);
 
 		Entity e1 = new MapEntity("id");
 		e1.set("firstName", "Piet");
 		e1.set("lastName", "XXX");
-		repo.update(Arrays.asList(e1), DatabaseAction.ADD_UPDATE_EXISTING, "firstName");
+		eis.update(repo, Arrays.asList(e1), DatabaseAction.ADD_UPDATE_EXISTING, "firstName");
 		assertEquals(repo.count(), 1);
 		assertEquals(repo.iterator(Person.class).iterator().next().getLastName(), "XXX");
 	}
@@ -279,7 +265,8 @@ public class JpaRepositoryTest extends BaseJpaTest
 		e.set("firstName", "Piet");
 		e.set("lastName", "Paulusma");
 
-		repo.update(Arrays.asList(e), DatabaseAction.UPDATE, "firstName");
+		EntityImportService eis = new EntityImportService();
+		eis.update(repo, Arrays.asList(e), DatabaseAction.UPDATE, "firstName");
 	}
 
 	@Test
@@ -293,68 +280,11 @@ public class JpaRepositoryTest extends BaseJpaTest
 		Entity e1 = new MapEntity("id");
 		e1.set("firstName", "Piet");
 		e1.set("lastName", "XXX");
-		repo.update(Arrays.asList(e1), DatabaseAction.UPDATE, "firstName");
+
+		EntityImportService eis = new EntityImportService();
+		eis.update(repo, Arrays.asList(e1), DatabaseAction.UPDATE, "firstName");
 		assertEquals(repo.count(), 1);
 		assertEquals(repo.iterator(Person.class).iterator().next().getLastName(), "XXX");
-	}
-
-	@Test
-	public void testImportUpdateIgnoreMissing()
-	{
-		Entity e1 = new MapEntity("id");
-		e1.set("firstName", "Piet");
-		e1.set("lastName", "XXX");
-		repo.update(Arrays.asList(e1), DatabaseAction.UPDATE_IGNORE_MISSING, "firstName");
-		assertEquals(repo.count(), 0);
-	}
-
-	@Test
-	public void testRemove()
-	{
-		Entity e = new MapEntity("id");
-		e.set("firstName", "Piet");
-		e.set("lastName", "Paulusma");
-		repo.add(e);
-
-		Entity e1 = new MapEntity("id");
-		e1.set("firstName", "Piet");
-		e1.set("lastName", "XXXX");
-		repo.update(Arrays.asList(e1), DatabaseAction.REMOVE, "firstName");
-		assertEquals(repo.count(), 0);
-	}
-
-	@Test(expectedExceptions = MolgenisDataException.class)
-	public void testRemoveMissing()
-	{
-		Entity e1 = new MapEntity("id");
-		e1.set("firstName", "Piet");
-		e1.set("lastName", "XXXX");
-		repo.update(Arrays.asList(e1), DatabaseAction.REMOVE, "firstName");
-	}
-
-	@Test
-	public void testRemoveIgnoreMissing()
-	{
-		Entity e = new MapEntity("id");
-		e.set("firstName", "Piet");
-		e.set("lastName", "Paulusma");
-		repo.add(e);
-
-		Entity e1 = new MapEntity("id");
-		e1.set("firstName", "Piet");
-		e1.set("lastName", "XXXX");
-		repo.update(Arrays.asList(e1), DatabaseAction.REMOVE_IGNORE_MISSING, "firstName");
-		assertEquals(repo.count(), 0);
-	}
-
-	@Test
-	public void testRemoveIgnoreMissingMissing()
-	{
-		Entity e1 = new MapEntity("id");
-		e1.set("firstName", "Piet");
-		e1.set("lastName", "XXXX");
-		repo.update(Arrays.asList(e1), DatabaseAction.REMOVE_IGNORE_MISSING, "firstName");
-		assertEquals(repo.count(), 0);
 	}
 
 	@Test
@@ -673,25 +603,5 @@ public class JpaRepositoryTest extends BaseJpaTest
 
 		assertEquals(Iterables.size(it), 1);
 		assertTrue(Iterables.contains(it, p3));
-	}
-
-	@Test
-	public void testAggregate()
-	{
-		Person p1 = new Person("Piet", "Paulusma", 30);
-		Person p2 = new Person("Piet", "de Boskabouter", 35);
-		Person p3 = new Person("Klaas", "Vaak", 35);
-		repo.add(Arrays.asList(p1, p2, p3));
-
-		AggregateResult result = repo.aggregate(repo.getEntityMetaData().getAttribute("firstName"), repo
-				.getEntityMetaData().getAttribute("age"), new QueryImpl());
-		assertNotNull(result);
-		List<List<Long>> matrix = Lists.newArrayList();
-		matrix.add(Lists.newArrayList(1l, 1l, 2l));
-		matrix.add(Lists.newArrayList(1l, 0l, 1l));
-		matrix.add(Lists.newArrayList(2l, 1l, 3l));
-		assertEquals(
-				result,
-				new AggregateResult(matrix, Arrays.asList("Piet", "Klaas", "Total"), Arrays.asList("35", "30", "Total")));
 	}
 }

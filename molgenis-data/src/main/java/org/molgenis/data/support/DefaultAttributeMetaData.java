@@ -176,6 +176,12 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public DefaultAttributeMetaData setIdAttribute(boolean idAttribute)
 	{
 		this.idAttribute = idAttribute;
+		if (idAttribute)
+		{
+			unique = true;
+			readOnly = true;
+		}
+
 		return this;
 	}
 

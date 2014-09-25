@@ -15,7 +15,6 @@
 	};
 
 	molgenis.createAlert = function(alerts, type, container) {
-		console.log(alerts, type, container);
 		if (type !== 'error' && type !== 'warning' && type !== 'success')
 			type = 'error';
 		if (container === undefined) {
@@ -348,9 +347,9 @@ function createInput(attr, attrs, val, lbl) {
 		var $input = createBasicInput('radio', attrs, val);
 		return label.append($input).append(val ? 'True' : 'False');
 	case 'CATEGORICAL':
-		var label = $('<label class="checkbox">');
+		var label = $('<label>');
 		var $input = createBasicInput('checkbox', attrs, val);
-		return label.append($input).append(lbl);
+		return $('<div class="checkbox">').append(label.append($input).append(lbl));
 	case 'DATE':
 	case 'DATE_TIME':
 		var $div = $('<div>').addClass('group-append date input-group');
@@ -538,7 +537,7 @@ function createInput(attr, attrs, val, lbl) {
 			data : JSON.stringify(entity),
 			async : false,
 			success : callback && callback.success ? callback.success : function() {},
-			error : callback && callback.error ? callback.error : function() {},
+			error : callback && callback.error ? callback.error : function() {}
 		});
 	};
 
@@ -608,6 +607,7 @@ function showSpinner(callback) {
 		$('body').append(items.join(''));
 		spinner = $('#spinner');
 		spinner.data('count', 0);
+        spinner.modal({backdrop: 'static'});
 	}
 
 	if (callback) {

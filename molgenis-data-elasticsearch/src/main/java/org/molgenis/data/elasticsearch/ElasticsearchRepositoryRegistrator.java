@@ -2,8 +2,6 @@ package org.molgenis.data.elasticsearch;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.elasticsearch.ElasticSearchService;
-import org.molgenis.search.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationListener;
@@ -17,10 +15,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class ElasticsearchRepositoryRegistrator implements ApplicationListener<ContextRefreshedEvent>, Ordered
 {
-	private final DataService dataService;
-	private final RepositoryCollection repositoryCollection;
+	//private final DataService dataService;
+	//private final RepositoryCollection repositoryCollection;
 
-	@Autowired
+/**	@Autowired
 	public ElasticsearchRepositoryRegistrator(DataService dataService,
 			@Qualifier("ElasticsearchRepositoryCollection") RepositoryCollection repositoryCollection)
 	{
@@ -29,17 +27,15 @@ public class ElasticsearchRepositoryRegistrator implements ApplicationListener<C
 				"ElasticsearchRepositoryCollection is missing");
 		this.dataService = dataService;
 		this.repositoryCollection = repositoryCollection;
-	}
+	} */
 
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
-        //FIXME get mappings from elastic search and use those for registration, only if _meta exists
-		for (String name : repositoryCollection.getEntityNames())
+		/**for (String name : repositoryCollection.getEntityNames())
 		{
-            if(!dataService.hasRepository(name))
-			    dataService.addRepository(repositoryCollection.getRepositoryByEntityName(name));
-		}
+			dataService.addRepository(repositoryCollection.getRepositoryByEntityName(name));
+		}  */
 	}
 
 	@Override

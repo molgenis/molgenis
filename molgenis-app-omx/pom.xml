@@ -112,6 +112,27 @@
 				</configuration>
 			</plugin>
 		</plugins>
+		<pluginManagement>
+			<plugins>
+				<!-- web server -->
+				<plugin>
+					<groupId>org.mortbay.jetty</groupId>
+					<artifactId>jetty-maven-plugin</artifactId>
+					<configuration>
+						<systemProperties>
+							<systemProperty>
+								<name>molgenis.home</name>
+								<value>${user.home}${file.separator}.molgenis${file.separator}omx</value>
+							</systemProperty>
+							<systemProperty>
+								<name>log4j.configuration</name>
+								<value>log4j-molgenis.properties</value>
+							</systemProperty>
+						</systemProperties>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
 	
 	<dependencies>
@@ -152,12 +173,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-search</artifactId>
-			<version>1.2.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-search-elasticsearch</artifactId>
+			<artifactId>molgenis-data-elasticsearch</artifactId>
 			<version>1.2.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
@@ -168,11 +184,6 @@
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-omx-dataexplorer</artifactId>
-			<version>1.2.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-omx-importer</artifactId>
 			<version>1.2.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
@@ -249,6 +260,16 @@
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data-mysql</artifactId>
+            <version>1.2.0-SNAPSHOT</version>
+        </dependency>
+         <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-data-import</artifactId>
+            <version>1.2.0-SNAPSHOT</version>
+        </dependency>
+         <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-catalogue</artifactId>
             <version>1.2.0-SNAPSHOT</version>
         </dependency>
         <dependency>

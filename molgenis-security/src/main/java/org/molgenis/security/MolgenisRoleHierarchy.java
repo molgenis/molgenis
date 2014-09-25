@@ -1,9 +1,15 @@
 package org.molgenis.security;
 
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ENTITY_COUNT_PREFIX;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_PLUGIN_COUNT_PREFIX;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX;
+
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.molgenis.security.core.Permission;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -17,26 +23,51 @@ public class MolgenisRoleHierarchy implements RoleHierarchy
 		Collection<GrantedAuthority> hierarchicalAuthorities = new ArrayList<GrantedAuthority>();
 		for (GrantedAuthority authority : authorities)
 		{
-			String[] tokens = authority.getAuthority().split("_");
-			if (tokens.length == 4)
+			if (authority.getAuthority().startsWith(AUTHORITY_ENTITY_WRITE_PREFIX))
 			{
-				String mode = tokens[2];
-				if (mode.equals(Permission.WRITE.toString()))
-				{
-					String readRole = String.format("%s_%s_%s_%s", tokens[0], tokens[1], Permission.READ.toString(),
-							tokens[3]);
-					hierarchicalAuthorities.add(new SimpleGrantedAuthority(readRole));
-					String countRole = String.format("%s_%s_%s_%s", tokens[0], tokens[1], Permission.COUNT.toString(),
-							tokens[3]);
-					hierarchicalAuthorities.add(new SimpleGrantedAuthority(countRole));
-				}
-				else if (mode.equals(Permission.READ.toString()))
-				{
-					String countRole = String.format("%s_%s_%s_%s", tokens[0], tokens[1], Permission.COUNT.toString(),
-							tokens[3]);
-					hierarchicalAuthorities.add(new SimpleGrantedAuthority(countRole));
-				}
+				String entity = authority.getAuthority().substring(AUTHORITY_ENTITY_WRITE_PREFIX.length());
+				hierarchicalAuthorities.add(new SimpleGrantedAuthority(AUTHORITY_ENTITY_READ_PREFIX + entity));
+				hierarchicalAuthorities.add(new SimpleGrantedAuthority(AUTHORITY_ENTITY_COUNT_PREFIX + entity));
+				hierarchicalAuthorities
+						.add(new SimpleGrantedAuthority(AUTHORITY_PLUGIN_WRITE_PREFIX + "FORM." + entity));
+				hierarchicalAuthorities
+						.add(new SimpleGrantedAuthority(AUTHORITY_PLUGIN_READ_PREFIX + "FORM." + entity));
+				hierarchicalAuthorities
+						.add(new SimpleGrantedAuthority(AUTHORITY_PLUGIN_COUNT_PREFIX + "FORM." + entity));
 			}
+			else if (authority.getAuthority().startsWith(AUTHORITY_ENTITY_READ_PREFIX))
+			{
+				String entity = authority.getAuthority().substring(AUTHORITY_ENTITY_READ_PREFIX.length());
+				hierarchicalAuthorities.add(new SimpleGrantedAuthority(AUTHORITY_ENTITY_COUNT_PREFIX + entity));
+			}
+			else if (authority.getAuthority().startsWith(AUTHORITY_PLUGIN_WRITE_PREFIX))
+			{
+				String entity = authority.getAuthority().substring(AUTHORITY_PLUGIN_WRITE_PREFIX.length());
+				hierarchicalAuthorities.add(new SimpleGrantedAuthority(AUTHORITY_PLUGIN_READ_PREFIX + entity));
+				hierarchicalAuthorities.add(new SimpleGrantedAuthority(AUTHORITY_PLUGIN_COUNT_PREFIX + entity));
+			}
+			else if (authority.getAuthority().startsWith(AUTHORITY_PLUGIN_READ_PREFIX))
+			{
+				String entity = authority.getAuthority().substring(AUTHORITY_PLUGIN_READ_PREFIX.length());
+				hierarchicalAuthorities.add(new SimpleGrantedAuthority(AUTHORITY_PLUGIN_COUNT_PREFIX + entity));
+			}
+
+			if (authority.getAuthority().equals(AUTHORITY_PLUGIN_READ_PREFIX + "IMPORTWIZARD")
+					|| authority.getAuthority().equals(AUTHORITY_PLUGIN_WRITE_PREFIX + "IMPORTWIZARD"))
+			{
+				hierarchicalAuthorities
+						.add(new SimpleGrantedAuthority(AUTHORITY_ENTITY_READ_PREFIX + "RUNTIMEPROPERTY"));
+				hierarchicalAuthorities.add(new SimpleGrantedAuthority(AUTHORITY_ENTITY_READ_PREFIX + "IMPORTRUN"));
+				hierarchicalAuthorities.add(new SimpleGrantedAuthority(AUTHORITY_ENTITY_WRITE_PREFIX + "IMPORTRUN"));
+				hierarchicalAuthorities.add(new SimpleGrantedAuthority(AUTHORITY_ENTITY_COUNT_PREFIX + "IMPORTRUN"));
+				hierarchicalAuthorities
+						.add(new SimpleGrantedAuthority(AUTHORITY_PLUGIN_WRITE_PREFIX + "FORM.IMPORTRUN"));
+				hierarchicalAuthorities
+						.add(new SimpleGrantedAuthority(AUTHORITY_PLUGIN_READ_PREFIX + "FORM.IMPORTRUN"));
+				hierarchicalAuthorities
+						.add(new SimpleGrantedAuthority(AUTHORITY_PLUGIN_COUNT_PREFIX + "FORM.IMPORTRUN"));
+			}
+
 			hierarchicalAuthorities.add(authority);
 		}
 		return hierarchicalAuthorities;

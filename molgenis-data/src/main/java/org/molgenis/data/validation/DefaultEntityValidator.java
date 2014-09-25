@@ -90,9 +90,8 @@ public class DefaultEntityValidator implements EntityValidator
 
 		for (AttributeMetaData attr : meta.getAtomicAttributes())
 		{
-			if (attr.isUnique()
-					&& !attr.isIdAtrribute()
-					&& !(attr.isLabelAttribute() && ((dbAction == DatabaseAction.ADD_IGNORE_EXISTING) || (dbAction == DatabaseAction.ADD_UPDATE_EXISTING))))
+			if (attr.isUnique() && !attr.isIdAtrribute()
+					&& !(attr.isLabelAttribute() && (dbAction == DatabaseAction.ADD_UPDATE_EXISTING)))
 			{
 				// Gather all attribute values
 				List<Object> values = Lists.newArrayList();

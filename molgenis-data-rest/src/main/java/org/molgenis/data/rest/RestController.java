@@ -614,6 +614,12 @@ public class RestController
 					+ "' does not exist");
 		}
 
+		if (attr.isReadonly())
+		{
+			throw new MolgenisDataAccessException("Attribute '" + attributeName + "' of entity '" + entityName
+					+ "' is readonly");
+		}
+
 		Object value = toEntityValue(attr, paramValue);
 		entity.set(attributeName, value);
 		dataService.update(entityName, entity);

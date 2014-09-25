@@ -26,9 +26,13 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.node.Node;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.elasticsearch.index.MappingsBuilder;
+import org.molgenis.data.elasticsearch.util.Hit;
+import org.molgenis.data.elasticsearch.util.MapperTypeSanitizer;
+import org.molgenis.data.elasticsearch.util.SearchRequest;
+import org.molgenis.data.elasticsearch.util.SearchResult;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.elasticsearch.index.MappingsBuilder;
-import org.molgenis.elasticsearch.util.MapperTypeSanitizer;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.biobankconnect.ontology.repository.OntologyIndexRepository;
 import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermIndexRepository;
@@ -36,10 +40,6 @@ import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermQueryRepo
 import org.molgenis.omx.biobankconnect.utils.OntologyLoader;
 import org.molgenis.omx.observ.target.Ontology;
 import org.molgenis.omx.observ.target.OntologyTerm;
-import org.molgenis.search.Hit;
-import org.molgenis.search.SearchRequest;
-import org.molgenis.search.SearchResult;
-import org.molgenis.search.SearchService;
 import org.molgenis.security.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -112,8 +112,8 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 	}
 
 	/**
-	 * Created a specific indexer to index list of primitive types (string),
-	 * because the standard molgenis index does not handle List<String>
+	 * Created a specific indexer to index list of primitive types (string), because the standard molgenis index does
+	 * not handle List<String>
 	 * 
 	 * @param ontologyLoader
 	 * @throws IOException

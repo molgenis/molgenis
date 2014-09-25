@@ -1,6 +1,24 @@
+.modal-xxl
+{
+    width: 90%;
+}
+
+.modal-xxl .modal-body
+{
+	overflow: auto;
+}
+
 #dataset-select-label {
 	margin-right: 10px;
 	font-size: 15.4px;
+}
+
+#filter-wizard-btn {
+	margin-right: 10px;
+}
+
+#feature-filters {
+	margin-left: 10px;
 }
 
 #feature-selection label {
@@ -26,7 +44,7 @@
 	vertical-align: middle;
 }
 
-#feature-selection .molgenis-tree {
+body:not(.modal-open) #feature-selection .molgenis-tree {
 	height: 400px;
 	overflow: auto;
 	margin-bottom: 10px;
@@ -182,11 +200,6 @@ ul.fancytree-container {
 	width: 4em;
 }
 
-input[name="ColNames"] {
-  margin-top: -1px;
-  vertical-align: middle;
-}
-
 #entity-class h3 {
 	display: inline;
 	margin-right: 10px;
@@ -198,7 +211,6 @@ input[name="ColNames"] {
 */
 .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
 	background-color: #7CBAD1;
-	
 }
 
 .table-hover {

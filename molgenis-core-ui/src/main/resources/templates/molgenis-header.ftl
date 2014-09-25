@@ -44,10 +44,7 @@
 						<#if !(plugin_id??)>
 							<#assign plugin_id="NULL">
 						</#if>
-							<@topmenu molgenis_ui.getMenu() plugin_id/>
-						<#if plugin_id?starts_with("form")>
-							<@submenu molgenis_ui.getMenu(menu_id) plugin_id/>
-						</#if>	
+						<@topmenu molgenis_ui.getMenu() plugin_id/>
 					</#if>			
 				</div>
 				<div id="login-modal-container-header"></div>
@@ -136,46 +133,4 @@
 				</div>
 			</div>
 		</nav>
-	</#macro>
-<#--submenu -->
-	<#macro submenu menu plugin_id>
-	<div id="submenu">
-		<ul id="submenu-menu" class="nav nav-tabs">
-			<#list menu.items as item>	
-				<#if item.type != "MENU">
-					<#if item.id == plugin_id>
-						<li class="active"><a href="#">${item.name?html}</a></li>
-					<#else>
-						<li><a href="/menu/${menu.id?html}/${item.url?html}">${item.name?html}</a></li>
-					</#if>
-				<#elseif item.type == "MENU">
-					<#assign sub_menu = item>
-					<li class="dropdown">
-						<a class="dropdown-toggle" data-toggle="dropdown" href="#">${item.name?html}<b class="caret"></b></a>
-						<ul class="dropdown-menu">
-							<#list sub_menu.items as item>
-								<#if item.type != "MENU">
-									<li><a href="/menu/${sub_menu.id?html}/${item.url?html}">${item.name?html}</a></li>
-								<#elseif item.type == "MENU">
-									<a tabindex="-1" href="/menu/${item.id?html}">${item.name?html}</a>
-								</#if>
-							</#list>
-						</ul>
-					</li>
-				</#if>
-			</#list>
-		</ul>
-	<#assign breadcrumb = menu.breadcrumb>
-		<#if (breadcrumb?size > 1)>
-			<ul id="molgenis-breadcrumb" class="breadcrumb">
-				<#list breadcrumb as menu>
-					<#if menu_has_next>
-						<li><a href="/menu/${menu.id?html}">${menu.name?html}</a> <span class="divider">/</span></li>
-					<#else>
-						<li class="active">${menu.name?html}</li>
-					</#if>	
-				</#list>
-			</ul>
-		</#if>
-	</div>
 </#macro>

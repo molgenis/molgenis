@@ -4,8 +4,8 @@ import java.io.IOException;
 
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.meta.EntityMetaDataRepository;
-import org.molgenis.elasticsearch.ElasticSearchService;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -14,10 +14,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class ElasticsearchEntityMetaDataRepository implements EntityMetaDataRepository
 {
 	private final EntityMetaDataRepository entityMetaDataRepository;
-	private final ElasticSearchService elasticSearchService;
+	private final SearchService elasticSearchService;
 
 	public ElasticsearchEntityMetaDataRepository(EntityMetaDataRepository entityMetaDataRepository,
-			ElasticSearchService elasticSearchService)
+			SearchService elasticSearchService)
 	{
 		if (entityMetaDataRepository == null) throw new IllegalArgumentException("entityMetaDataRepository is null");
 		if (elasticSearchService == null) throw new IllegalArgumentException("elasticSearchService is null");
@@ -45,7 +45,7 @@ public class ElasticsearchEntityMetaDataRepository implements EntityMetaDataRepo
 
 		try
 		{
-			elasticSearchService.createMappings(entityMetaData, false);
+			elasticSearchService.createMappings(entityMetaData);
 		}
 		catch (IOException e)
 		{

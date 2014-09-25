@@ -17,10 +17,9 @@ package ${package};
 
 import java.util.Set;
 
-import org.molgenis.framework.db.AbstractEntitiesImporter;
-
-import org.molgenis.data.importer.EntityImportService;
 import org.molgenis.data.FileRepositoryCollectionFactory;
+import org.molgenis.data.jpa.importer.AbstractEntitiesImporter;
+import org.molgenis.data.jpa.importer.EntityImportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

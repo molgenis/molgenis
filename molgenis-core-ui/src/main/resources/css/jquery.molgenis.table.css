@@ -12,6 +12,7 @@
 .molgenis-table thead th {
 	background-color: #5B82A4;
 	color: white;
+	padding-left: 8px;
 }
 
 .molgenis-table thead th .ui-icon {
@@ -32,6 +33,10 @@
 .molgenis-table thead th .down {
 	vertical-align: bottom;
 	background-image: url("images/ui-icons_ffffff_256x240.png");
+}
+
+.molgenis-table tbody td {
+	padding-left: 8px;	
 }
 
 .molgenis-table tbody td:focus {

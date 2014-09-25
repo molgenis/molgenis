@@ -6,10 +6,10 @@ import java.util.List;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Queryable;
+import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.elasticsearch.util.Hit;
+import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.search.Hit;
-import org.molgenis.search.SearchRequest;
-import org.molgenis.search.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class AbstractOntologyQueryRepository extends AbstractOntologyRepository implements Queryable

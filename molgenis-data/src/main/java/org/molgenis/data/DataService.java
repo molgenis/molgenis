@@ -223,12 +223,11 @@ public interface DataService extends RepositoryCollection
 	 */
 	CrudRepository getCrudRepository(String entityName);
 
+	Writable getWritableRepository(String entityName);
 
-    Writable getWritableRepository(String entityName);
+	Queryable getQueryableRepository(String entityName);
 
-    Queryable getQueryableRepository(String entityName);
-
-    Query query(String entityName);
+	Query query(String entityName);
 
 	// TODO remove
 	/**
@@ -295,9 +294,8 @@ public interface DataService extends RepositoryCollection
 	/**
 	 * Creates counts off all possible combinations of xAttr and yAttr attributes of an entity
 	 * 
-	 * @param xAttr
-	 * @param yAttr
+	 * @param aggregateQuery
 	 * @return
 	 */
-	AggregateResult aggregate(String entityName, AttributeMetaData xAttr, AttributeMetaData yAttr, Query q);
+	AggregateResult aggregate(String entityName, AggregateQuery aggregateQuery);
 }

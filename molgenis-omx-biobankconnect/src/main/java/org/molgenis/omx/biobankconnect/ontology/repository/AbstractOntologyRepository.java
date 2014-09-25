@@ -7,10 +7,10 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
+import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.omx.observ.Characteristic;
-import org.molgenis.search.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class AbstractOntologyRepository implements Repository

@@ -83,4 +83,10 @@ public class XmlMolgenisUi implements MolgenisUi
 		}
 		return null;
 	}
+
+	@Override
+	public void setHrefLogo(String file)
+	{
+		molgenisSettings.setProperty(KEY_APP_HREF_LOGO, file);
+	}
 }

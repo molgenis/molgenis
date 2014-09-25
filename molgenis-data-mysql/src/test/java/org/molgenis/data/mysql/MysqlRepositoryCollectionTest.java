@@ -5,9 +5,7 @@ import java.util.Locale;
 import org.molgenis.AppConfig;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.CrudRepository;
-import org.molgenis.data.CrudRepositorySecurityDecorator;
 import org.molgenis.data.Entity;
-import org.molgenis.data.Repository;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,17 +58,5 @@ public class MysqlRepositoryCollectionTest extends AbstractTestNGSpringContextTe
 		// and again
 		repo = (CrudRepository) coll.getRepositoryByEntityName("coll_person");
 		Assert.assertEquals(repo.count(), 10);
-	}
-
-	@Test
-	public void testSecurityDecorator()
-	{
-		coll.dropEntityMetaData("test");
-		DefaultEntityMetaData meta = new DefaultEntityMetaData("test");
-		meta.addAttribute("id").setIdAttribute(true).setNillable(false);
-		coll.add(meta);
-		Repository repo = coll.getRepositoryByEntityName("test");
-		Assert.assertNotNull(repo);
-		Assert.assertTrue(repo instanceof CrudRepositorySecurityDecorator);
 	}
 }
