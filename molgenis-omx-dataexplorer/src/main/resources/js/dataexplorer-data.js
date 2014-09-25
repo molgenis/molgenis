@@ -80,7 +80,7 @@
 			query : {
 				rules : [entityQuery.q]
 			},
-			colNames : $('input[name=ColNames]:checked').val()
+			colNames : $('input[name=colNames]:checked').val()
 		};
 
 		dataRequest.query.sort = $('#data-table-container').table('getSort');

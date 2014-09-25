@@ -52,10 +52,10 @@
 							<label class="col-md-3 control-label">As column names I want:</label>	
 							<div class="controls col-md-9">
 								<label class="radio">
-		  							<input type="radio" name="colNames" value="ATTRIBUTE_NAMES" checked> Attribute Labels
+		  							<input type="radio" name="colNames" value="ATTRIBUTE_LABELS" checked> Attribute Labels
 			    				</label>
 								<label class="radio">
-		  							<input type="radio" name="colNames" value="ATTRIBUTE_LABELS">Attribute Names
+		  							<input type="radio" name="colNames" value="ATTRIBUTE_NAMES">Attribute Names
 								</label>
 		  					</div>
 						</div>
