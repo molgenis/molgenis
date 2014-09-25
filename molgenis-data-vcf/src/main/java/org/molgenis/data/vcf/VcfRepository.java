@@ -114,7 +114,7 @@ public class VcfRepository extends AbstractRepository
 											return allele.toString();
 										}
 									}), ','));
-					
+
 					entity.set(POS, vcfRecord.getPosition());
 					entity.set(REF, vcfRecord.getReferenceAllele().toString());
 					entity.set(FILTER, vcfRecord.getFilterStatus());
@@ -134,23 +134,28 @@ public class VcfRepository extends AbstractRepository
 					{
 						List<Entity> samples = new ArrayList<Entity>();
 						Iterator<VcfSample> sampleIterator = vcfRecord.getSamples().iterator();
-                        if(vcfRecord.getNrSamples() > 0) {
-                            Iterator<String> sampleNameIterator = finalVcfReader.getVcfMeta().getSampleNames().iterator();
-                            while (sampleIterator.hasNext()) {
-                                String[] format = vcfRecord.getFormat();
-                                VcfSample sample = sampleIterator.next();
-                                Entity sampleEntity = new MapEntity(sampleEntityMetaData);
-                                for (int i = 0; i < format.length; i = i + 1) {
-                                    sampleEntity.set(format[i], sample.getData(i));
-                                }
-                                sampleEntity.set(ID, UUID.randomUUID());
-                                // FIXME remove entity ID from Sample label after #1400 is fixed, see also:
-                                // jquery.molgenis.table.js line 152
-                                sampleEntity.set(NAME, entity.get(POS) + "_" + entity.get(ALT) + "_" + sampleNameIterator.next());
-                                samples.add(sampleEntity);
-                            }
-                        }
-                        entity.set(SAMPLES, samples);
+						if (vcfRecord.getNrSamples() > 0)
+						{
+							Iterator<String> sampleNameIterator = finalVcfReader.getVcfMeta().getSampleNames()
+									.iterator();
+							while (sampleIterator.hasNext())
+							{
+								String[] format = vcfRecord.getFormat();
+								VcfSample sample = sampleIterator.next();
+								Entity sampleEntity = new MapEntity(sampleEntityMetaData);
+								for (int i = 0; i < format.length; i = i + 1)
+								{
+									sampleEntity.set(format[i], sample.getData(i));
+								}
+								sampleEntity.set(ID, UUID.randomUUID());
+								// FIXME remove entity ID from Sample label after #1400 is fixed, see also:
+								// jquery.molgenis.table.js line 152
+								sampleEntity.set(NAME, entity.get(POS) + "_" + entity.get(ALT) + "_"
+										+ sampleNameIterator.next());
+								samples.add(sampleEntity);
+							}
+						}
+						entity.set(SAMPLES, samples);
 					}
 				}
 				catch (IOException e)
@@ -200,9 +205,9 @@ public class VcfRepository extends AbstractRepository
 						MolgenisFieldTypes.FieldTypeEnum.STRING));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(QUAL,
 						MolgenisFieldTypes.FieldTypeEnum.STRING));
-                DefaultAttributeMetaData idAttributeMetaData = new DefaultAttributeMetaData(ID,
-                        MolgenisFieldTypes.FieldTypeEnum.STRING);
-                idAttributeMetaData.setIdAttribute(true);
+				DefaultAttributeMetaData idAttributeMetaData = new DefaultAttributeMetaData(ID,
+						MolgenisFieldTypes.FieldTypeEnum.STRING);
+				idAttributeMetaData.setIdAttribute(true);
 				entityMetaData.addAttributeMetaData(idAttributeMetaData);
 				DefaultAttributeMetaData infoMetaData = new DefaultAttributeMetaData(INFO,
 						MolgenisFieldTypes.FieldTypeEnum.COMPOUND);
