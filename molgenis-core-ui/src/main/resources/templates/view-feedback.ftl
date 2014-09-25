@@ -77,9 +77,10 @@
                     <input type="text" class="form-control" id="reg-captcha" name="captcha">
                 </div>
             </div>     
-            
-            <div class="col-md-10 col-md-offset-2">
-				<button type="submit" class="btn btn-success">Send</button>
+            <div class="row">
+                <div class="col-md-10 col-md-offset-2">
+    				<button type="submit" class="btn btn-success">Send</button>
+    			</div>
 			</div>
 		</form>
 		<script>

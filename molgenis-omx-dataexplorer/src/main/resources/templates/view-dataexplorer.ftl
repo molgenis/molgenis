@@ -39,48 +39,60 @@
      
 <div class="row">
 	<div class="col-md-3">
-		<div class="well">
+		<div class="well well-sm">
 			<div class="row">
-                <div class="form-group">
-                    <div class="col-md-12 input-group" <#if hideSearchBox == true> style="display:none"</#if>>
-                        <input type="text" class="form-control" id="observationset-search" placeholder="Search data values" autofocus="autofocus"<#if searchTerm??> value="${searchTerm}"</#if>>
-                        <span class="input-group-btn">
-                            <button id="search-clear-button" class="btn btn-default" type="button"><span class="glyphicon glyphicon-remove"></span></button>
-                            <button id="search-button" class="btn btn-default" type="button"><span class="glyphicon glyphicon-search"></span></button>
-                        </span>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <div class="col-md-12 input-group" <#if hideSearchBox == true> style="display:none"</#if>>
+                            <input type="text" class="form-control" id="observationset-search" placeholder="Search data values" autofocus="autofocus"<#if searchTerm??> value="${searchTerm}"</#if>>
+                            <span class="input-group-btn">
+                                <button id="search-clear-button" class="btn btn-default" type="button"><span class="glyphicon glyphicon-remove"></span></button>
+                                <button id="search-button" class="btn btn-default" type="button"><span class="glyphicon glyphicon-search"></span></button>
+                            </span>
+                        </div>
                     </div>
-                </div>		
+                </div>
 			</div>
 			<div class="row">
-			    <div class="panel">
-                    <div class="panel-heading">
-                        <h4 class="panel-title"> ${i18n.dataexplorer_data_data_item_filters}</h4>
-                    </div>
-                    <div class="panel-body">
-                        <div class="row" id="feature-filters"></div>
-                        <div class="row">
-                            <a href="#" id="filter-wizard-btn" class="btn btn-default btn-xs pull-right"><img src="/img/filter-bw.png"> ${i18n.dataexplorer_wizard_button}</a>
+                <div class="col-md-12">
+    			    <div class="panel">
+                        <div class="panel-heading">
+                            <h4 class="panel-title"> ${i18n.dataexplorer_data_data_item_filters}</h4>
+                        </div>
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div id="feature-filters"></div>    
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <a href="#" id="filter-wizard-btn" class="btn btn-default btn-xs pull-right"><img src="/img/filter-bw.png"> ${i18n.dataexplorer_wizard_button}</a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 			</div>
 			<div class="row"<#if hideDataItemSelect == true> style="display:none"</#if>>
-                <div class="panel">
-                    <div class="panel-heading">
-                        <h4 class="panel-title">Data item selection</h4>
-                    </div>
-                    <div class="panel-body">
-                        <div id="feature-selection"></div>
+                <div class="col-md-12">
+                    <div class="panel">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">Data item selection</h4>
+                        </div>
+                        <div class="panel-body">
+                            <div id="feature-selection"></div>
+                        </div>
                     </div>
                 </div>
             </div>
 		</div>		
 	</div>
 	<div class="col-md-9">
-		<div class="pull-right col-md-6" id="dataset-select-container"<#if hideDatasetSelect??> style="display:none"</#if>>
+		<div class="pull-right" id="dataset-select-container"<#if hideDatasetSelect??> style="display:none"</#if>>
     		<div class="form-horizontal form-group">
-        		<label class="col-md-4 control-label" for="dataset-select">Choose a dataset:</label>
-        		<div class="col-md-8">
+        		<label class="col-md-5 control-label" for="dataset-select">Choose a dataset:</label>
+        		<div class="col-md-7">
         			<select class="form-control" id="dataset-select" data-placeholder="Choose an Entity (example: dataset, protocol..." id="dataset-select">
             		<#list entitiesMeta.iterator() as entityMeta>
                 		<option value="/api/v1/${entityMeta.name}" <#if entityMeta.name == selectedEntityName> selected</#if>><#if entityMeta.label?has_content>${entityMeta.label}<#else>${entityMeta.name}</#if></option>
