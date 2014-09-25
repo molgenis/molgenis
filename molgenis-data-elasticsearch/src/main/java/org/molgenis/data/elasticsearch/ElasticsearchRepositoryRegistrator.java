@@ -34,8 +34,8 @@ public class ElasticsearchRepositoryRegistrator implements ApplicationListener<C
 	{
 		for (String name : repositoryCollection.getEntityNames())
 		{
-            if(!dataService.hasRepository(name))
-			    dataService.addRepository(repositoryCollection.getRepositoryByEntityName(name));
+			if (!dataService.hasRepository(name)) dataService.addRepository(repositoryCollection
+					.getRepositoryByEntityName(name));
 		}
 	}
 
