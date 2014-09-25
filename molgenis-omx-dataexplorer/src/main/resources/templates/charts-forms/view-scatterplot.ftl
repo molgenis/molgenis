@@ -38,8 +38,8 @@
         		</div>
         		<div class="modal-footer">
         			<div class="form-group">
-        				<div class="col-md-9">
-        					<input id="scatterplot-designer-modal-create-button" class="btn btn-default" type="button" value="Create Chart" data-dismiss="modal" aria-hidden="true">
+        				<div class="col-md-12">
+        					<input id="scatterplot-designer-modal-create-button" class="btn btn-default pull right" type="button" value="Create Chart" data-dismiss="modal" aria-hidden="true">
         				</div>
         			</div>
         		</div>
