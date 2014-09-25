@@ -147,7 +147,7 @@ public class RepositoryMerger
 	{
 		AbstractEntity mergedEntity;
 		mergedEntity = new MapEntity(new HashMap<String, Object>());
-		mergedEntity.set(ID, UUID.randomUUID().toString());//"CHROM"+entity.get("#CHROM")+"POS"+entity.get("POS"));
+		mergedEntity.set(ID, UUID.randomUUID().toString());// "CHROM"+entity.get("#CHROM")+"POS"+entity.get("POS"));
 		for (AttributeMetaData attributeMetaData : commonAttributes)
 		{
 			mergedEntity.set(attributeMetaData.getName(), entity.get(attributeMetaData.getName()));
@@ -162,12 +162,12 @@ public class RepositoryMerger
 			Entity entity)
 	{
 		Query findMergedEntityQuery = new QueryImpl();
-		for (AttributeMetaData attributeMetaData : commonAttributes) {
-            if(!findMergedEntityQuery.getRules().isEmpty())
-                findMergedEntityQuery = findMergedEntityQuery.and();
-            findMergedEntityQuery = findMergedEntityQuery.eq(attributeMetaData.getName(),
-                    entity.get(attributeMetaData.getName()));
-        }
+		for (AttributeMetaData attributeMetaData : commonAttributes)
+		{
+			if (!findMergedEntityQuery.getRules().isEmpty()) findMergedEntityQuery = findMergedEntityQuery.and();
+			findMergedEntityQuery = findMergedEntityQuery.eq(attributeMetaData.getName(),
+					entity.get(attributeMetaData.getName()));
+		}
 
 		Entity result = (Entity) crudRepository.findOne(findMergedEntityQuery);
 		return result;
