@@ -57,7 +57,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		Map<String, String> runtimePropertyMap = new HashMap<String, String>();
 
 		runtimePropertyMap.put(DataExplorerController.INITLOCATION,
-				"chr:'6',viewStart:112435264,viewEnd:112537682,cookieKey:'human',nopersist:true");
+				"chr:'1',viewStart:10000000,viewEnd:10100000,cookieKey:'human',nopersist:true");
 		runtimePropertyMap.put(DataExplorerController.COORDSYSTEM,
 				"{speciesName: 'Human',taxon: 9606,auth: 'GRCh',version: '37',ucscName: 'hg19'}");
 		runtimePropertyMap
@@ -74,8 +74,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 
 		// include/exclude dataexplorer mods
 		runtimePropertyMap.put(DataExplorerController.KEY_MOD_AGGREGATES, String.valueOf(true));
-        runtimePropertyMap.put(DataExplorerController.KEY_MOD_ANNOTATORS, String.valueOf(false));
-        runtimePropertyMap.put(DataExplorerController.KEY_MOD_CHARTS, String.valueOf(true));
+		runtimePropertyMap.put(DataExplorerController.KEY_MOD_CHARTS, String.valueOf(true));
 		runtimePropertyMap.put(DataExplorerController.KEY_MOD_DATA, String.valueOf(true));
 		runtimePropertyMap.put(DataExplorerController.KEY_MOD_DISEASEMATCHER, String.valueOf(false));
 		runtimePropertyMap.put(DataExplorerController.KEY_MOD_ANNOTATORS, String.valueOf(false));

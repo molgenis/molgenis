@@ -7,7 +7,13 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
 
-import org.molgenis.data.*;
+import org.molgenis.data.AggregateQuery;
+import org.molgenis.data.AggregateResult;
+import org.molgenis.data.Aggregateable;
+import org.molgenis.data.CrudRepository;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.ElasticSearchService.IndexingMode;
 import org.molgenis.data.support.ConvertingIterable;
 import org.molgenis.data.support.QueryImpl;

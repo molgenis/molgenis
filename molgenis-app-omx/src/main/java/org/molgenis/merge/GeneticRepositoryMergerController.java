@@ -2,17 +2,12 @@ package org.molgenis.merge;
 
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataService;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Repository;
+import org.molgenis.data.*;
 import org.molgenis.data.elasticsearch.ElasticsearchRepository;
-import org.molgenis.data.elasticsearch.MappingManagerImpl;
-import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.merge.RepositoryMerger;
-import org.molgenis.elasticsearch.config.ElasticSearchClient;
+import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.search.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -20,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -45,20 +41,18 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 	public static final String VKGL = "VKGL";
 
 	private final ArrayList<AttributeMetaData> commonAttributes;
-    private final ElasticSearchClient elasticSearchClient;
     private RepositoryMerger repositoryMerger;
 	private DataService dataService;
 	private SearchService searchService;
 
     @Autowired
-	public GeneticRepositoryMergerController(RepositoryMerger repositoryMerger, DataService dataService, SearchService searchService, ElasticSearchClient elasticSearchClient)
+	public GeneticRepositoryMergerController(RepositoryMerger repositoryMerger, DataService dataService, SearchService searchService)
 	{
 		super(URI);
 
         this.repositoryMerger = repositoryMerger;
         this.dataService = dataService;
         this.searchService = searchService;
-        this.elasticSearchClient = elasticSearchClient;
 
 		commonAttributes = new ArrayList<AttributeMetaData>();
 		commonAttributes.add(CHROM);
@@ -76,8 +70,7 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 
 	@RequestMapping(method = RequestMethod.POST, value = "mergeRepositories")
 	@ResponseStatus(HttpStatus.OK)
-	public void merge()
-	{
+	public void merge() throws IOException {
 		if (dataService.hasRepository(VKGL))
 		{
 			if (searchService.documentTypeExists(VKGL))
@@ -106,8 +99,14 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 			}
 		}
         EntityMetaData mergedEntityMetaData = repositoryMerger.mergeMetaData(geneticRepositories,commonAttributes,VKGL);
-        ElasticsearchRepository mergedRepository = new ElasticsearchRepository(elasticSearchClient.getClient(),elasticSearchClient.getIndexName(),mergedEntityMetaData,dataService,new MappingManagerImpl());
-		mergedRepository.create();
+        searchService.createMappings(mergedEntityMetaData);
+        ElasticsearchRepository outRepository = new ElasticsearchRepository(mergedEntityMetaData,
+                searchService);
+        searchService.createMappings(mergedEntityMetaData,true,true,true,true);
+
+        searchService.createMappings(mergedEntityMetaData);
+
+        ElasticsearchRepository mergedRepository = new ElasticsearchRepository(mergedEntityMetaData,searchService);
         repositoryMerger.merge(geneticRepositories, commonAttributes, mergedRepository);
 	}
 }

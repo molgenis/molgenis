@@ -15,10 +15,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class ElasticsearchRepositoryRegistrator implements ApplicationListener<ContextRefreshedEvent>, Ordered
 {
-	//private final DataService dataService;
-	//private final RepositoryCollection repositoryCollection;
+	private final DataService dataService;
+	private final RepositoryCollection repositoryCollection;
 
-/**	@Autowired
+	@Autowired
 	public ElasticsearchRepositoryRegistrator(DataService dataService,
 			@Qualifier("ElasticsearchRepositoryCollection") RepositoryCollection repositoryCollection)
 	{
@@ -27,20 +27,21 @@ public class ElasticsearchRepositoryRegistrator implements ApplicationListener<C
 				"ElasticsearchRepositoryCollection is missing");
 		this.dataService = dataService;
 		this.repositoryCollection = repositoryCollection;
-	} */
+	}
 
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
-		/**for (String name : repositoryCollection.getEntityNames())
+		for (String name : repositoryCollection.getEntityNames())
 		{
-			dataService.addRepository(repositoryCollection.getRepositoryByEntityName(name));
-		}  */
+            if(!dataService.hasRepository(name))
+			    dataService.addRepository(repositoryCollection.getRepositoryByEntityName(name));
+		}
 	}
 
 	@Override
 	public int getOrder()
 	{
-		return Ordered.HIGHEST_PRECEDENCE;
+		return Ordered.LOWEST_PRECEDENCE;
 	}
 }

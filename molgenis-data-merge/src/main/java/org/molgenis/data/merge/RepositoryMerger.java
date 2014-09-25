@@ -97,7 +97,7 @@ public class RepositoryMerger
 			{
 				boolean newEntity = false;
 
-				AbstractEntity mergedEntity = getMergedEntity(resultRepository, commonAttributes, entity);
+				Entity mergedEntity = getMergedEntity(resultRepository, commonAttributes, entity);
 				// if no entity for all the common columns exists, create a new one, containing these fields
 				if (mergedEntity == null)
 				{
@@ -147,7 +147,7 @@ public class RepositoryMerger
 	{
 		AbstractEntity mergedEntity;
 		mergedEntity = new MapEntity(new HashMap<String, Object>());
-		mergedEntity.set(ID, "CHROM"+entity.get("#CHROM")+"POS"+entity.get("POS"));//UUID.randomUUID().toString());
+		mergedEntity.set(ID, UUID.randomUUID().toString());//"CHROM"+entity.get("#CHROM")+"POS"+entity.get("POS"));
 		for (AttributeMetaData attributeMetaData : commonAttributes)
 		{
 			mergedEntity.set(attributeMetaData.getName(), entity.get(attributeMetaData.getName()));
@@ -158,14 +158,18 @@ public class RepositoryMerger
 	/**
 	 * check if an entity for the common attributes already exists and if so, return it
 	 */
-	private AbstractEntity getMergedEntity(CrudRepository crudRepository, List<AttributeMetaData> commonAttributes,
+	private Entity getMergedEntity(CrudRepository crudRepository, List<AttributeMetaData> commonAttributes,
 			Entity entity)
 	{
 		Query findMergedEntityQuery = new QueryImpl();
-		for (AttributeMetaData attributeMetaData : commonAttributes)
-			findMergedEntityQuery = findMergedEntityQuery.eq(attributeMetaData.getName(),
-					entity.get(attributeMetaData.getName()));
-		AbstractEntity result = (AbstractEntity) crudRepository.findOne(findMergedEntityQuery);
+		for (AttributeMetaData attributeMetaData : commonAttributes) {
+            if(!findMergedEntityQuery.getRules().isEmpty())
+                findMergedEntityQuery = findMergedEntityQuery.and();
+            findMergedEntityQuery = findMergedEntityQuery.eq(attributeMetaData.getName(),
+                    entity.get(attributeMetaData.getName()));
+        }
+
+		Entity result = (Entity) crudRepository.findOne(findMergedEntityQuery);
 		return result;
 	}
 

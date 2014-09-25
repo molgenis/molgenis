@@ -200,8 +200,10 @@ public class VcfRepository extends AbstractRepository
 						MolgenisFieldTypes.FieldTypeEnum.STRING));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(QUAL,
 						MolgenisFieldTypes.FieldTypeEnum.STRING));
-				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ID,
-						MolgenisFieldTypes.FieldTypeEnum.STRING));
+                DefaultAttributeMetaData idAttributeMetaData = new DefaultAttributeMetaData(ID,
+                        MolgenisFieldTypes.FieldTypeEnum.STRING);
+                idAttributeMetaData.setIdAttribute(true);
+				entityMetaData.addAttributeMetaData(idAttributeMetaData);
 				DefaultAttributeMetaData infoMetaData = new DefaultAttributeMetaData(INFO,
 						MolgenisFieldTypes.FieldTypeEnum.COMPOUND);
 				List<AttributeMetaData> metadataInfoField = new ArrayList<AttributeMetaData>();

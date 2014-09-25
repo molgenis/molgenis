@@ -163,6 +163,7 @@
             genomeBrowser.highlightRegion(genomeBrowser.chr, (genomeBrowser.viewStart + 9990), (genomeBrowser.viewEnd - 9990));
         }var featureInfoMap = {};
         genomeBrowser.addFeatureInfoPlugin(function(f, info) {
+            var molgenisIndex = f.notes.indexOf("source:MOLGENIS");
             //check if there is cached information for this clicked item
             if(featureInfoMap.hasOwnProperty(f.id+f.label)){
                 $.each(featureInfoMap[f.id+f.label].sections, function(section) {
@@ -171,7 +172,6 @@
             }
             else{
                 var selectedTrack = false;
-                var molgenisIndex = f.notes.indexOf("source:MOLGENIS");
                 if(molgenisIndex!==-1){
                     //get the value of the "track" field to see if this is the selected Entity in the dataexplorer
                     $.each(f.notes, function(note) {

@@ -288,7 +288,8 @@ public class RestController
 	 * 
 	 * @param entityName
 	 * @param id
-	 * @param request
+	 * @param attributes
+	 * @param attributeExpands
 	 * @return
 	 */
 	@RequestMapping(value = "/{entityName}/{id:.+}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
@@ -350,6 +351,7 @@ public class RestController
 	 * @param id
 	 * @param refAttributeName
 	 * @param request
+	 * @param attributeExpands
 	 * @return
 	 * @throws UnknownEntityException
 	 */
@@ -398,7 +400,8 @@ public class RestController
 	 * Returns json
 	 * 
 	 * @param request
-	 * @param entityName
+	 * @param attributes
+	 * @param attributeExpands
 	 * @return
 	 */
 	@RequestMapping(value = "/{entityName}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)

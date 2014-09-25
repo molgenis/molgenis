@@ -18,40 +18,49 @@ import org.springframework.stereotype.Component;
 @Component("ElasticsearchRepositoryCollection")
 public class ElasticsearchRepositoryCollection implements RepositoryCollection
 {
-    public static final String INDEX_NAME = "molgenis";
+	public static final String INDEX_NAME = "molgenis";
 
-    private final ElasticSearchService elasticSearchService;
-    private final DataService dataService;
+	private final ElasticSearchService elasticSearchService;
+	private final DataService dataService;
 
-    @Autowired
-    public ElasticsearchRepositoryCollection(ElasticSearchService elasticSearchService, DataService dataService)
-    {
-        if (elasticSearchService == null) throw new IllegalArgumentException("elasticSearchService is null");
-        this.elasticSearchService = elasticSearchService;
-        this.dataService = dataService;
-    }
+	@Autowired
+	public ElasticsearchRepositoryCollection(ElasticSearchService elasticSearchService, DataService dataService)
+	{
+		if (elasticSearchService == null) throw new IllegalArgumentException("elasticSearchClient is null");
+		this.elasticSearchService = elasticSearchService;
+		this.dataService = dataService;
+	}
 
-    @Override
-    public Iterable<String> getEntityNames()
-    {
-        GetMappingsResponse getMappingsResponse = elasticSearchService.getMappings();
-        ImmutableOpenMap<String, ImmutableOpenMap<String, MappingMetaData>> allMappings = getMappingsResponse
-                .getMappings();
-        final ImmutableOpenMap<String, MappingMetaData> indexMappings = allMappings.get(INDEX_NAME);
-        return new Iterable<String>()
-        {
-            @Override
-            public Iterator<String> iterator()
-            {
-                return indexMappings.keysIt();
-            }
-        };
-    }
+	@Override
+	public Iterable<String> getEntityNames()
+	{
 
-    @Override
-    public Repository getRepositoryByEntityName(String name)
-    {
-        EntityMetaData entityMetaData = elasticSearchService.getEntityMetaData(name);
-        return new ElasticsearchRepository(entityMetaData, elasticSearchService);
-    }
+		GetMappingsResponse getMappingsResponse = elasticSearchService.getMappings();
+		ImmutableOpenMap<String, ImmutableOpenMap<String, MappingMetaData>> allMappings = getMappingsResponse
+				.getMappings();
+		final ImmutableOpenMap<String, MappingMetaData> indexMappings = allMappings.get(INDEX_NAME);
+		return new Iterable<String>()
+		{
+			@Override
+			public Iterator<String> iterator()
+			{
+				return indexMappings.keysIt();
+			}
+		};
+	}
+
+	@Override
+	public Repository getRepositoryByEntityName(String name)
+	{
+		EntityMetaData entityMetaData;
+		try
+		{
+			entityMetaData = elasticSearchService.deserializeEntityMeta(name);
+		}
+		catch (IOException e)
+		{
+			throw new RuntimeException(e);
+		}
+		return new ElasticsearchRepository(entityMetaData, elasticSearchService);
+	}
 }

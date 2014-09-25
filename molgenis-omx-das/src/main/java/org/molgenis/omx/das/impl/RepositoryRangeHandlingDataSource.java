@@ -53,6 +53,15 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource i
 		this.type = dataSourceConfig.getDataSourceProperties().get("type").getValue();
 		this.mutationType = new DasType(type, null, "?", type);
 		this.method = new DasMethod("not_recorded", "not_recorded", "ECO:0000037");
+        /**<TEXT>
+        <STRING>Some static text</STRING>
+        <FONT>courier</FONT>
+        <FONTSIZE>10</FONTSIZE>
+        <FGCOLOR>purple</FGCOLOR>
+        <BGCOLOR>green</BGCOLOR>
+        <LABEL>no</LABEL>
+        <BUMP>yes</BUMP>
+        </TEXT>*/
 	}
 
 	public RepositoryRangeHandlingDataSource() throws DataSourceException

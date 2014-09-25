@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.elasticsearch.client.Client;
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.FileRepositoryCollectionFactory;
@@ -17,6 +17,13 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.elasticsearch.ElasticsearchRepository;
 import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.elasticsearch.meta.ElasticsearchAttributeMetaDataRepository;
+import org.molgenis.data.elasticsearch.meta.ElasticsearchEntityMetaDataRepository;
+import org.molgenis.data.meta.AttributeMetaDataRepository;
+import org.molgenis.data.meta.AttributeMetaDataRepositoryDecoratorFactory;
+import org.molgenis.data.meta.EntityMetaDataRepository;
+import org.molgenis.data.meta.EntityMetaDataRepositoryDecoratorFactory;
+import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +35,7 @@ public class VcfImporterService
     private final SearchService searchService;
 
 	@Autowired
-	public VcfImporterService(FileRepositoryCollectionFactory fileRepositoryCollectionFactory, DataService dataService, SearchService searchService)
+	public VcfImporterService(FileRepositoryCollectionFactory fileRepositoryCollectionFactory, DataService dataService, SearchService searchService, EntityMetaDataRepositoryDecoratorFactory mysqlEntityMetaDataRepository, AttributeMetaDataRepositoryDecoratorFactory mysqlAttributeMetaDataRepository)
 	{
 		if (fileRepositoryCollectionFactory == null) throw new IllegalArgumentException(
 				"fileRepositoryCollectionFactory is null");
@@ -63,8 +70,10 @@ public class VcfImporterService
 			try
 			{
 				EntityMetaData entityMetaData = inRepository.getEntityMetaData();
-				ElasticsearchRepository outRepository = new ElasticsearchRepository(entityMetaData,
-						searchService);
+                ElasticsearchRepository outRepository = new ElasticsearchRepository(entityMetaData,
+                        searchService);
+                searchService.createMappings(entityMetaData,true,true,true,true);
+
 				AttributeMetaData sampleAttribute = entityMetaData.getAttribute("SAMPLES");
 				if (sampleAttribute != null)
 				{

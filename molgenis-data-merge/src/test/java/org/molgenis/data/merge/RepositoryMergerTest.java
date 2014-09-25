@@ -13,13 +13,11 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Repository;
 
 import org.molgenis.data.elasticsearch.ElasticsearchRepository;
-import org.molgenis.data.elasticsearch.MappingManager;
+import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 
 import org.elasticsearch.client.Client;
-
-import org.molgenis.elasticsearch.config.ElasticSearchClient;
 
 import org.springframework.stereotype.Component;
 import org.testng.annotations.AfterMethod;
@@ -37,10 +35,10 @@ import static org.testng.AssertJUnit.assertEquals;
 @Component
 public class RepositoryMergerTest {
 
+    private SearchService searchService;
     private DataService dataService;
+
     private Client client;
-    private ElasticSearchClient elasticSearchClient;
-    private MappingManager mappingManager;
     private SearchRequestBuilder searchRequestBuilder;
     private ListenableActionFuture listenableActionFuture;
     private SearchResponse searchResponse;
@@ -106,10 +104,8 @@ public class RepositoryMergerTest {
         entityMetaDataMerged.addAttributeMetaData(metaData1Compound);
         entityMetaDataMerged.addAttributeMetaData(metaData2Compound);
 
-        dataService = mock(DataService.class);
-        elasticSearchClient = mock(ElasticSearchClient.class);
+        searchService = mock(SearchService.class);
         client = mock(Client.class);
-        mappingManager = mock(MappingManager.class);
         searchRequestBuilder = mock(SearchRequestBuilder.class);
         listenableActionFuture = mock(ListenableActionFuture.class);
         searchResponse = mock(SearchResponse.class);
@@ -118,8 +114,6 @@ public class RepositoryMergerTest {
         indexRequestBuilder = mock(IndexRequestBuilder.class);
         indexRequestBuilder2 = mock(IndexRequestBuilder.class);
 
-        when(elasticSearchClient.getClient()).thenReturn(client);
-        when(elasticSearchClient.getIndexName()).thenReturn("testindex");
         when(client.prepareSearch("testindex")).thenReturn(searchRequestBuilder);
         when(searchRequestBuilder.setTypes("mergedRepo")).thenReturn(searchRequestBuilder);
         when(searchRequestBuilder.setTypes("meta1")).thenReturn(searchRequestBuilder);
@@ -139,16 +133,14 @@ public class RepositoryMergerTest {
     @AfterMethod
     public void teardown()
     {
-        Mockito.reset(dataService);
+        Mockito.reset(searchService);
     }
 
     @Test
     public void mergeTest()
     {
-        when(mappingManager.create(client, entityMetaData1, "testindex")).thenReturn(true);
-
-        ElasticsearchRepository repo1 = new ElasticsearchRepository(client,"testindex",entityMetaData1,dataService,mappingManager);
-        ElasticsearchRepository repo2 = new ElasticsearchRepository(client,"testindex",entityMetaData2,dataService,mappingManager);
+        ElasticsearchRepository repo1 = new ElasticsearchRepository(entityMetaData1,searchService);
+        ElasticsearchRepository repo2 = new ElasticsearchRepository(entityMetaData1, searchService);
 
         List<Repository> repositoryList = new ArrayList<Repository>();
         repositoryList.add(repo1);
