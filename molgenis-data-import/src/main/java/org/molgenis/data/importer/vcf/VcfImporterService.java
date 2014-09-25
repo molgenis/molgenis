@@ -32,19 +32,21 @@ public class VcfImporterService
 {
 	private final FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
 	private final DataService dataService;
-    private final SearchService searchService;
+	private final SearchService searchService;
 
 	@Autowired
-	public VcfImporterService(FileRepositoryCollectionFactory fileRepositoryCollectionFactory, DataService dataService, SearchService searchService, EntityMetaDataRepositoryDecoratorFactory mysqlEntityMetaDataRepository, AttributeMetaDataRepositoryDecoratorFactory mysqlAttributeMetaDataRepository)
+	public VcfImporterService(FileRepositoryCollectionFactory fileRepositoryCollectionFactory, DataService dataService,
+			SearchService searchService, EntityMetaDataRepositoryDecoratorFactory mysqlEntityMetaDataRepository,
+			AttributeMetaDataRepositoryDecoratorFactory mysqlAttributeMetaDataRepository)
 	{
 		if (fileRepositoryCollectionFactory == null) throw new IllegalArgumentException(
 				"fileRepositoryCollectionFactory is null");
 		if (dataService == null) throw new IllegalArgumentException("dataservice is null");
-        if (searchService == null) throw new IllegalArgumentException("seachservice is null");
+		if (searchService == null) throw new IllegalArgumentException("seachservice is null");
 
-        this.fileRepositoryCollectionFactory = fileRepositoryCollectionFactory;
-        this.dataService = dataService;
-        this.searchService = searchService;
+		this.fileRepositoryCollectionFactory = fileRepositoryCollectionFactory;
+		this.dataService = dataService;
+		this.searchService = searchService;
 	}
 
 	public void importVcf(File vcfFile) throws IOException
@@ -70,15 +72,13 @@ public class VcfImporterService
 			try
 			{
 				EntityMetaData entityMetaData = inRepository.getEntityMetaData();
-                ElasticsearchRepository outRepository = new ElasticsearchRepository(entityMetaData,
-                        searchService);
-                searchService.createMappings(entityMetaData,true,true,true,true);
+				ElasticsearchRepository outRepository = new ElasticsearchRepository(entityMetaData, searchService);
+				searchService.createMappings(entityMetaData, true, true, true, true);
 
 				AttributeMetaData sampleAttribute = entityMetaData.getAttribute("SAMPLES");
 				if (sampleAttribute != null)
 				{
-					sampleRepository = new ElasticsearchRepository(sampleAttribute.getRefEntity(),
-							searchService);
+					sampleRepository = new ElasticsearchRepository(sampleAttribute.getRefEntity(), searchService);
 				}
 				Iterator<Entity> inIterator = inRepository.iterator();
 				try
@@ -97,11 +97,11 @@ public class VcfImporterService
 								while (sampleIterator.hasNext())
 								{
 									sampleEntities.add(sampleIterator.next());
-                                    if (sampleEntities.size() > batchSize)
-                                    {
-                                        outRepository.add(sampleEntities);
-                                        sampleEntities.clear();
-                                    }
+									if (sampleEntities.size() > batchSize)
+									{
+										outRepository.add(sampleEntities);
+										sampleEntities.clear();
+									}
 								}
 							}
 						}
