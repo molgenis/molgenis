@@ -127,16 +127,14 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 		public StaticContentService staticContentService()
 		{
 			MolgenisSettings molgenisSettings = mock(MolgenisSettings.class);
-			when(
-molgenisSettings.getProperty(StaticContentServiceImpl.PREFIX_KEY + "home")).thenReturn(
+			when(molgenisSettings.getProperty(StaticContentServiceImpl.PREFIX_KEY + "home")).thenReturn(
 					"<p>Welcome to Molgenis!</p>");
 
 			when(molgenisSettings.propertyExists(StaticContentServiceImpl.PREFIX_KEY + "home")).thenReturn(true);
 
 			when(
 					molgenisSettings.updateProperty(StaticContentServiceImpl.PREFIX_KEY + "home",
-							"<p>Welcome to Molgenis!</p>")).thenReturn(
-					true);
+							"<p>Welcome to Molgenis!</p>")).thenReturn(true);
 
 			StaticContentService staticContentService = new StaticContentServiceImpl(molgenisSettings);
 			return staticContentService;
@@ -161,13 +159,12 @@ molgenisSettings.getProperty(StaticContentServiceImpl.PREFIX_KEY + "home")).then
 		{
 			return super.authenticationManagerBean();
 		}
-		
+
 		@Autowired
 		@Override
-		public void configure(AuthenticationManagerBuilder auth) throws Exception {
-		    auth
-		        .inMemoryAuthentication()
-		            .withUser("user").password("password").authorities("ROLE_USER");
+		public void configure(AuthenticationManagerBuilder auth) throws Exception
+		{
+			auth.inMemoryAuthentication().withUser("user").password("password").authorities("ROLE_USER");
 		}
 	}
 }
