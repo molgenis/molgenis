@@ -128,14 +128,14 @@ public class MappingsBuilder
 			createAttributeMapping(attr, enableNorms, createAllIndex, true, jsonBuilder);
 		}
 
-        jsonBuilder.endObject();
-        // create custom meta data
-        if(storeFullMetadata)
-        {
-            jsonBuilder.startObject("_meta");
-            serializeEntityMeta(entityMetaData, jsonBuilder);
-            jsonBuilder.endObject();
-        }
+		jsonBuilder.endObject();
+		// create custom meta data
+		if (storeFullMetadata)
+		{
+			jsonBuilder.startObject("_meta");
+			serializeEntityMeta(entityMetaData, jsonBuilder);
+			jsonBuilder.endObject();
+		}
 
 		jsonBuilder.endObject().endObject();
 
@@ -323,14 +323,15 @@ public class MappingsBuilder
 		String docType = sanitizeMapperType(entityName);
 
 		GetMappingsResponse getMappingsResponse = client.admin().indices().prepareGetMappings("molgenis").execute()
-                .actionGet();
+				.actionGet();
 		ImmutableOpenMap<String, MappingMetaData> indexMappings = getMappingsResponse.getMappings().get("molgenis");
 		MappingMetaData mappingMetaData = indexMappings.get(docType);
-        Map<String, Object> metaMap = null;
-        //get full entitymetadata stored in elastic search
-        metaMap = (Map<String, Object>) mappingMetaData.sourceAsMap().get("_meta");
-        //get properties if full entitymetadata is not stored in elastic search
-        if(metaMap==null||metaMap.isEmpty())metaMap = (Map<String, Object>) mappingMetaData.sourceAsMap().get("properties");
+		Map<String, Object> metaMap = null;
+		// get full entitymetadata stored in elastic search
+		metaMap = (Map<String, Object>) mappingMetaData.sourceAsMap().get("_meta");
+		// get properties if full entitymetadata is not stored in elastic search
+		if (metaMap == null || metaMap.isEmpty()) metaMap = (Map<String, Object>) mappingMetaData.sourceAsMap().get(
+				"properties");
 		// create entity meta
 		String name = (String) metaMap.get(ENTITY_NAME);
 
