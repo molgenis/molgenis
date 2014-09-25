@@ -17,8 +17,8 @@ import org.molgenis.util.CaseInsensitiveLinkedHashMap;
 public class MapEntity extends AbstractEntity
 {
 	private static final long serialVersionUID = -8283375007931769373L;
-    private EntityMetaData entityMetaData;
-    private Map<String, Object> values = new CaseInsensitiveLinkedHashMap<Object>();
+	private EntityMetaData entityMetaData;
+	private Map<String, Object> values = new CaseInsensitiveLinkedHashMap<Object>();
 	private String idAttributeName = null;
 
 	public MapEntity()
@@ -45,11 +45,11 @@ public class MapEntity extends AbstractEntity
 		values.put(attributeName, value);
 	}
 
-    public MapEntity(EntityMetaData metaData)
-    {
-        this.entityMetaData = metaData;
-        this.idAttributeName = entityMetaData.getIdAttribute().getName();
-    }
+	public MapEntity(EntityMetaData metaData)
+	{
+		this.entityMetaData = metaData;
+		this.idAttributeName = entityMetaData.getIdAttribute().getName();
+	}
 
 	@Override
 	public Object get(String attributeName)
@@ -97,22 +97,25 @@ public class MapEntity extends AbstractEntity
 	@Override
 	public Iterable<String> getAttributeNames()
 	{
-        if(entityMetaData != null){
-            return Iterables.transform(entityMetaData.getAttributes(), new Function<AttributeMetaData, String>() {
-                @Override
-                public String apply(AttributeMetaData input) {
-                    return input.getName();
-                }
-            });
-        }
+		if (entityMetaData != null)
+		{
+			return Iterables.transform(entityMetaData.getAttributes(), new Function<AttributeMetaData, String>()
+			{
+				@Override
+				public String apply(AttributeMetaData input)
+				{
+					return input.getName();
+				}
+			});
+		}
 		return values.keySet();
 	}
 
-    @Override
-    public List<String> getLabelAttributeNames()
-    {
-        return Collections.singletonList(entityMetaData.getLabelAttribute().getName());
-    }
+	@Override
+	public List<String> getLabelAttributeNames()
+	{
+		return Collections.singletonList(entityMetaData.getLabelAttribute().getName());
+	}
 
 	@Override
 	public EntityMetaData getEntityMetaData()
