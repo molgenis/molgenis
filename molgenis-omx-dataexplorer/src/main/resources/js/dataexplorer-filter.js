@@ -502,6 +502,7 @@
 						defaultValues: {min: min, max: max},
 						type: 'number'
 					});
+					$controls.addClass('range-container');
 					if (fromValue || toValue){
 						// Values differ from range min and max
 						$controls.data('dirty', true);
@@ -666,7 +667,8 @@
 									|| attribute.fieldType === 'DATE'
 										|| attribute.fieldType === 'DATE_TIME'
 								){
-							if($domElement.closest('.col-md-9').data('dirty'))
+						
+							if($domElement.closest('.range-container').data('dirty') || !attribute.range)
 							{
 								// Add toValue
 								if(name && (name.match(/-to$/g) || name === 'sliderright')){
