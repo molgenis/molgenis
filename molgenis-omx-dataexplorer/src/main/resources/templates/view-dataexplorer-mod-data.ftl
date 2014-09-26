@@ -24,12 +24,14 @@
         </div>
     </div>
     <div class="row">
-		<div class="data-table-pager-container">
-			<div class="pull-right">
-				<a id="download-modal-button" class="btn btn-default" data-toggle="modal" data-target="#downloadModal">Download as CSV</a>
-			<#if galaxyEnabled?? && galaxyEnabled == true>
-				<a id="galaxy-export-modal-button" class="btn btn-default" data-toggle="modal" data-target="#galaxy-export-modal">Export to Galaxy</a>
-			</#if>
+    	<div class="col-md-12">
+			<div class="data-table-pager-container">
+				<div class="pull-right">
+					<a id="download-modal-button" class="btn btn-default" data-toggle="modal" data-target="#downloadModal">Download as CSV</a>
+				<#if galaxyEnabled?? && galaxyEnabled == true>
+					<a id="galaxy-export-modal-button" class="btn btn-default" data-toggle="modal" data-target="#galaxy-export-modal">Export to Galaxy</a>
+				</#if>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -52,10 +54,10 @@
 							<label class="col-md-3 control-label">As column names I want:</label>	
 							<div class="controls col-md-9">
 								<label class="radio">
-		  							<input type="radio" name="colNames" value="ATTRIBUTE_NAMES" checked> Attribute Labels
+		  							<input type="radio" name="colNames" value="ATTRIBUTE_LABELS" checked> Attribute Labels
 			    				</label>
 								<label class="radio">
-		  							<input type="radio" name="colNames" value="ATTRIBUTE_LABELS">Attribute Names
+		  							<input type="radio" name="colNames" value="ATTRIBUTE_NAMES">Attribute Names
 								</label>
 		  					</div>
 						</div>

@@ -5,7 +5,8 @@
 <#assign js=['molgenis-wizard.js', 'bootstrap.file-input.js'] + javascripts>
 
 <@header css js/>
-	<div class="row">
+<div class="row">
+    <div class="col-md-12">
 		<div id="wizard">
 			<ol class="bwizard-steps clearfix" role="tablist">
 				<#list wizard.pages as wizardPage>
@@ -49,4 +50,5 @@
 			</ul>
 		</div>
 	</div>
+</div>
 <@footer/>

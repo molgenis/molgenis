@@ -65,7 +65,7 @@
 			filter.update($(this));
 			filters[filter.attribute.href] = filter;
 		});
-		
+
 		return Object.keys(filters)
 			.map(function (key) {
 				return filters[key];
@@ -340,7 +340,11 @@
 		var label = attribute.label || attribute.name;
 		if(isFirstElement && wizard) 
 		{
-			return $('<label class="col-md-3 control-label" data-placement="right" data-title="' + attribute.description + '">' + label + '</label>').tooltip();
+            var labelHtml = $('<label class="col-md-3 control-label" data-placement="right" data-title="' + attribute.description + '">' + label + '</label>');
+            if(attribute.description !== undefined){
+                labelHtml.tooltip()
+            }
+			return labelHtml;
 		}
 		else if (!isFirstElement && wizard) 
 		{
@@ -429,7 +433,7 @@
 		$container.append(self.createSimpleFilterControls(attribute, filter));
 		$container.data('attribute', attribute);
 		if( wrap ) {
-			var $wrapper = $('<div>').addClass('col-md-9 fdlk');
+			var $wrapper = $('<div>').addClass('col-md-9');
 			$container.children('.col-md-9').wrap($wrapper);
 			return $container;
 		}
@@ -498,6 +502,15 @@
 						defaultValues: {min: min, max: max},
 						type: 'number'
 					});
+					$controls.addClass('range-container');
+					if (fromValue || toValue){
+						// Values differ from range min and max
+						$controls.data('dirty', true);
+					}
+					slider.bind("userValuesChanged", function(e, data){
+						// User changed slider values
+						$controls.data('dirty', true);
+					});
 					$controls.append(slider);
 				} else {
 					var nameFrom = name + '-from', nameTo = name + '-to';
@@ -520,15 +533,16 @@
 			case 'XREF':
 			case 'MREF':
 				var operator = simpleFilter ? simpleFilter.operator : 'OR';
-				$controls.addClass('xrefmrefsearch');
-				$controls.xrefmrefsearch({
+				var container = $('<div class="row">');
+				$controls.append(container);
+				container.addClass('xrefmrefsearch');
+				container.xrefmrefsearch({
 					attribute : attribute,
 					values : values,
 					labels : simpleFilter ? simpleFilter.getLabels() : null,
 					operator : operator,
 					autofocus : 'autofocus',
-					isfilter : true,
-					width : '400px',
+					isfilter : true
 				});
 				break;
 			case 'COMPOUND' :
@@ -653,15 +667,18 @@
 									|| attribute.fieldType === 'DATE'
 										|| attribute.fieldType === 'DATE_TIME'
 								){
-							
-							// Add toValue
-							if(name && (name.match(/-to$/g) || name === 'sliderright')){
-								toValue = value;
-							}
-							
-							// Add fromValue
-							if(name && (name.match(/-from$/g) || name === 'sliderleft')){
-								fromValue = value;
+						
+							if($domElement.closest('.range-container').data('dirty') || !attribute.range)
+							{
+								// Add toValue
+								if(name && (name.match(/-to$/g) || name === 'sliderright')){
+									toValue = value;
+								}
+								
+								// Add fromValue
+								if(name && (name.match(/-from$/g) || name === 'sliderleft')){
+									fromValue = value;
+								}
 							}
 						}
 						else

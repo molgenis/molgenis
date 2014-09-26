@@ -29,12 +29,24 @@
 
 		if (aggregableAttributes.length > 0) {
 			$('#feature-select').empty();
-			createAtributeDropdown($('#feature-select'), aggregableAttributes, 'x-aggr-attribute', aggregableAttributes[0], true);
+			createAttributeDropdown($('#feature-select'), aggregableAttributes, 'x-aggr-attribute', aggregableAttributes[0], true);
 			$('#feature-select').append(' x ');
-			if(aggregableAttributes.length > 1) createAtributeDropdown($('#feature-select'), aggregableAttributes, 'y-aggr-attribute', aggregableAttributes[1]);
-			else createAtributeDropdown($('#feature-select'), aggregableAttributes, 'y-aggr-attribute', false);
+			if(aggregableAttributes.length > 1) createAttributeDropdown($('#feature-select'), aggregableAttributes, 'y-aggr-attribute', aggregableAttributes[1]);
+			else createAttributeDropdown($('#feature-select'), aggregableAttributes, 'y-aggr-attribute', false);
 			$('#distinct-attr-select').empty();
-			createAtributeDropdown($('#distinct-attr-select'), attributes, 'distinct-aggr-attribute', false);
+			if( molgenis.dataexplorer.settings && (molgenis.dataexplorer.settings['mod.aggregates.distinct.hide']==='true') ){
+				$('#distinct-attr').hide();
+			} else {
+				$('#distinct-attr').show();
+				if( molgenis.dataexplorer.settings && 
+						molgenis.dataexplorer.settings.hasOwnProperty('mod.aggregates.distinct.override.'+getEntity().name)) {
+					// show fixed value for this entity
+					$('#distinct-attr-select').append($('<p>').addClass('form-control-static')
+							.text(molgenis.dataexplorer.settings['mod.aggregates.distinct.override.'+getEntity().name]));
+				} else {
+					createAttributeDropdown($('#distinct-attr-select'), attributes, 'distinct-aggr-attribute', false);
+				}
+			}
 			
 			$('#feature-select-container').show();
 			$('#aggregate-table-container').empty();
@@ -51,7 +63,7 @@
 		}
 	}
 	
-	function createAtributeDropdown(parent, aggregableAttributes, id, defaultValue, hasDefault) {
+	function createAttributeDropdown(parent, aggregableAttributes, id, defaultValue, hasDefault) {
         if(defaultValue && hasDefault){
             var attributeSelect = $('<select id="' + id + '" class="attribute-dropdown"/>');
         }
@@ -65,7 +77,7 @@
 		});
 		
 		parent.append(attributeSelect);
-		attributeSelect.select2({ width: 'resolve' });
+		attributeSelect.select2();
 	}
 	
 	/**
@@ -92,7 +104,6 @@
 			success : function(aggregateResult) {
 				var countAboveZero = false;
                 var items = ['<table class="table table-striped" >'];
-				var noResultMessage = molgenis.dataexplorer.getNoResultMessage()
 				items.push('<tr>');
 				items.push('<td style="width: 18%"></td>');
 				$.each(aggregateResult.yLabels, function(index, label){
@@ -110,7 +121,7 @@
 				});
 				
 				items.push('</table>');
-				if(!countAboveZero && noResultMessage !== undefined){
+				if(!countAboveZero){
                     items.length = 0;
                     var messageTemplate = Handlebars.compile($("#aggregates-no-result-message-template").html());
                     items.push(messageTemplate({}));
@@ -152,14 +163,6 @@
 		// bind event handlers with namespace
 		$(document).on('changeAttributeSelection.aggregates', function(e, data) {
 			molgenis.dataexplorer.aggregates.createAggregatesTable();
-		});
-		
-		$(document).on('updateAttributeFilters.aggregates', function(e, data) {
-			molgenis.dataexplorer.aggregates.updateAggregatesTable($('#x-aggr-attribute').val(), $('#y-aggr-attribute').val(), $('#distinct-aggr-attribute').val());
-		});
-		
-		$(document).on('removeAttributeFilter.aggregates', function(e, data) {
-			molgenis.dataexplorer.aggregates.updateAggregatesTable($('#x-aggr-attribute').val(), $('#y-aggr-attribute').val(), $('#distinct-aggr-attribute').val());
 		});
 		
 		$(document).on('changeQuery.aggregates', function(e, entitySearchQuery) {

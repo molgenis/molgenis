@@ -5,16 +5,9 @@ import java.util.List;
 
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchType;
-import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
-import org.elasticsearch.search.aggregations.AggregationBuilder;
-import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
-import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityBuilder;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
-import org.molgenis.data.elasticsearch.index.MappingsBuilder;
 
 /**
  * Builds a ElasticSearch search request
@@ -24,8 +17,15 @@ import org.molgenis.data.elasticsearch.index.MappingsBuilder;
  */
 public class SearchRequestGenerator
 {
-	private final List<? extends QueryPartGenerator> generators = Arrays.asList(new QueryGenerator(),
-			new SortGenerator(), new LimitOffsetGenerator(), new DisMaxQueryGenerator());
+	private final List<? extends QueryPartGenerator> queryGenerators;
+	private final AggregateQueryGenerator aggregateQueryGenerator;
+
+	public SearchRequestGenerator()
+	{
+		aggregateQueryGenerator = new AggregateQueryGenerator();
+		queryGenerators = Arrays.asList(new QueryGenerator(), new SortGenerator(), new LimitOffsetGenerator(),
+				new DisMaxQueryGenerator());
+	}
 
 	/**
 	 * Add the 'searchType', 'fields', 'types' and 'query' of the SearchRequestBuilder
@@ -35,15 +35,15 @@ public class SearchRequestGenerator
 	 * @param searchType
 	 * @param query
 	 * @param fieldsToReturn
-	 * @param aggregateField1
+	 * @param aggAttr1
 	 *            First Field to aggregate on
-	 * @param aggregateField2
+	 * @param aggAttr2
 	 *            Second Field to aggregate on
 	 * @param entityMetaData
 	 */
 	public void buildSearchRequest(SearchRequestBuilder searchRequestBuilder, List<String> entityNames,
-			SearchType searchType, Query query, List<String> fieldsToReturn, AttributeMetaData aggregateField1,
-			AttributeMetaData aggregateField2, AttributeMetaData aggregateFieldDistinct, EntityMetaData entityMetaData)
+			SearchType searchType, Query query, List<String> fieldsToReturn, AttributeMetaData aggAttr1,
+			AttributeMetaData aggAttr2, AttributeMetaData aggAttrDistinct, EntityMetaData entityMetaData)
 	{
 		searchRequestBuilder.setSearchType(searchType);
 
@@ -62,98 +62,16 @@ public class SearchRequestGenerator
 		// Generate query
 		if (query != null)
 		{
-			for (QueryPartGenerator generator : generators)
+			for (QueryPartGenerator generator : queryGenerators)
 			{
 				generator.generate(searchRequestBuilder, query, entityMetaData);
 			}
 		}
 
 		// Aggregates
-		if (aggregateField1 != null || aggregateField2 != null)
+		if (aggAttr1 != null || aggAttr2 != null)
 		{
-			// TODO add missing aggregation for nillable attributes
-			searchRequestBuilder.setSize(0);
-
-			AggregationBuilder<?> aggregationBuilder;
-			if (aggregateField1 != null && aggregateField2 != null)
-			{
-				// see: http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-aggregations.html
-				AggregationBuilder<?> aggregationBuilder1 = createTermAggregateBuilder(aggregateField1);
-				AggregationBuilder<?> aggregationBuilder2 = createTermAggregateBuilder(aggregateField2);
-
-				boolean shouldNestAggregation1 = isRequiresNestedAggregation(aggregateField1);
-				boolean shouldNestAggregation2 = isRequiresNestedAggregation(aggregateField2);
-
-				if (aggregateFieldDistinct != null)
-				{
-					AbstractAggregationBuilder cardinalityBuilder = createDistinctAggregateBuilder(aggregateFieldDistinct);
-
-					// order is important
-					if (shouldNestAggregation2)
-					{
-						cardinalityBuilder = AggregationBuilders.reverseNested("reverse").subAggregation(
-								cardinalityBuilder);
-					}
-					aggregationBuilder2.subAggregation(cardinalityBuilder);
-				}
-				if (shouldNestAggregation2)
-				{
-					aggregationBuilder2 = nestAggregateBuilder(aggregateField2, aggregationBuilder2);
-				}
-				if (shouldNestAggregation1)
-				{
-					aggregationBuilder2 = AggregationBuilders.reverseNested("reverse").subAggregation(
-							aggregationBuilder2);
-				}
-				aggregationBuilder1.subAggregation(aggregationBuilder2);
-
-				if (shouldNestAggregation1)
-				{
-					aggregationBuilder1 = nestAggregateBuilder(aggregateField1, aggregationBuilder1);
-				}
-				aggregationBuilder = aggregationBuilder1;
-			}
-			else if (aggregateField1 != null)
-			{
-				aggregationBuilder = createTermAggregateBuilder(aggregateField1);
-
-				boolean shouldNestAggregation1 = isRequiresNestedAggregation(aggregateField1);
-				if (aggregateFieldDistinct != null)
-				{
-					AbstractAggregationBuilder cardinalityBuilder = createDistinctAggregateBuilder(aggregateFieldDistinct);
-					if (shouldNestAggregation1)
-					{
-						cardinalityBuilder = AggregationBuilders.reverseNested("reverse").subAggregation(
-								cardinalityBuilder);
-					}
-					aggregationBuilder.subAggregation(cardinalityBuilder);
-				}
-				if (isRequiresNestedAggregation(aggregateField1))
-				{
-					aggregationBuilder = nestAggregateBuilder(aggregateField1, aggregationBuilder);
-				}
-			}
-			else
-			{
-				aggregationBuilder = createTermAggregateBuilder(aggregateField2);
-
-				boolean shouldNestAggregation2 = isRequiresNestedAggregation(aggregateField2);
-				if (aggregateFieldDistinct != null)
-				{
-					AbstractAggregationBuilder cardinalityBuilder = createDistinctAggregateBuilder(aggregateFieldDistinct);
-					if (shouldNestAggregation2)
-					{
-						cardinalityBuilder = AggregationBuilders.reverseNested("reverse").subAggregation(
-								cardinalityBuilder);
-					}
-					aggregationBuilder.subAggregation(cardinalityBuilder);
-				}
-				if (shouldNestAggregation2)
-				{
-					aggregationBuilder = nestAggregateBuilder(aggregateField2, aggregationBuilder);
-				}
-			}
-			searchRequestBuilder.addAggregation(aggregationBuilder);
+			aggregateQueryGenerator.generate(searchRequestBuilder, aggAttr1, aggAttr2, aggAttrDistinct);
 		}
 	}
 
@@ -163,93 +81,5 @@ public class SearchRequestGenerator
 	{
 		buildSearchRequest(searchRequestBuilder, entityName == null ? null : Arrays.asList(entityName), searchType,
 				query, fieldsToReturn, aggregateField1, aggregateField2, aggregateFieldDistinct, entityMetaData);
-	}
-
-	private boolean isRequiresNestedAggregation(AttributeMetaData attr)
-	{
-		FieldTypeEnum dataType = attr.getDataType().getEnumType();
-		return dataType == FieldTypeEnum.CATEGORICAL || dataType == FieldTypeEnum.XREF
-				|| dataType == FieldTypeEnum.MREF;
-	}
-
-	private AggregationBuilder<?> nestAggregateBuilder(AttributeMetaData attr, AggregationBuilder<?> aggregationBuilder)
-	{
-		FieldTypeEnum dataType = attr.getDataType().getEnumType();
-		switch (dataType)
-		{
-			case CATEGORICAL:
-			case MREF:
-			case XREF:
-				String attrName = attr.getName();
-				return AggregationBuilders.nested(attrName).path(attrName).subAggregation(aggregationBuilder);
-				// $CASES-OMITTED$
-			default:
-				throw new RuntimeException("Nested aggregation not possible for data type [" + dataType + "]");
-		}
-	}
-
-	private TermsBuilder createTermAggregateBuilder(AttributeMetaData attr)
-	{
-		String fieldName = getAggregateFieldName(attr);
-		return AggregationBuilders.terms(attr.getName()).size(Integer.MAX_VALUE).field(fieldName);
-	}
-
-	private String getAggregateFieldName(AttributeMetaData attr)
-	{
-		String attrName = attr.getName();
-		FieldTypeEnum dataType = attr.getDataType().getEnumType();
-		switch (dataType)
-		{
-			case BOOL:
-			case INT:
-			case LONG:
-			case DECIMAL:
-				return attrName;
-			case DATE:
-			case DATE_TIME:
-			case EMAIL:
-			case ENUM:
-			case HTML:
-			case HYPERLINK:
-			case SCRIPT:
-			case STRING:
-			case TEXT:
-				// use non-analyzed field
-				return attrName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED;
-			case CATEGORICAL:
-			case XREF:
-			case MREF:
-				// use id attribute of nested field
-				return attrName + '.' + getAggregateFieldName(attr.getRefEntity().getIdAttribute());
-			case COMPOUND:
-			case FILE:
-			case IMAGE:
-				throw new UnsupportedOperationException();
-			default:
-				throw new RuntimeException("Unknown data type [" + dataType + "]");
-		}
-	}
-
-	private AbstractAggregationBuilder createDistinctAggregateBuilder(AttributeMetaData attr)
-	{
-		// http://www.elasticsearch.org/guide/en/elasticsearch/reference/1.x/search-aggregations-metrics-cardinality-aggregation.html
-		// The precision_threshold options allows to trade memory for accuracy, and defines a unique count below which
-		// counts are expected to be close to accurate. Above this value, counts might become a bit more fuzzy. The
-		// maximum supported value is 40000, thresholds above this number will have the same effect as a threshold of
-		// 40000.
-		CardinalityBuilder distinctAggregationBuilder = AggregationBuilders.cardinality("distinct")
-				.field(getAggregateFieldName(attr)).precisionThreshold(40000l);
-
-		switch (attr.getDataType().getEnumType())
-		{
-			case CATEGORICAL:
-			case MREF:
-			case XREF:
-				return AggregationBuilders.nested("distinct").path(attr.getName())
-						.subAggregation(distinctAggregationBuilder);
-				// $CASES-OMITTED$
-			default:
-				return distinctAggregationBuilder;
-		}
 	}
 }

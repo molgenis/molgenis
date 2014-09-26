@@ -10,7 +10,6 @@ function($, molgenis, settingsXhr) {
 	self.getSelectedEntityMeta = getSelectedEntityMeta;
 	self.getSelectedAttributes = getSelectedAttributes; 
 	self.getEntityQuery = getEntityQuery;
-    self.getNoResultMessage = getNoResultMessage;
     self.createHeader = createHeader;
 	
 	var restApi = new molgenis.RestClient();
@@ -24,14 +23,8 @@ function($, molgenis, settingsXhr) {
 		molgenis.createAlert([{message: 'An error occurred initializing the data explorer.'}], 'error');
 	}
 	var settings = settingsXhr[0];
+	self.settings = settings;
 	
-    /**
-     * @memberOf molgenis.dataexplorer
-     */
-    function getNoResultMessage() {
-        return settings['mod.aggregates.noresults'];
-    }
-
 	/**
 	 * @memberOf molgenis.dataexplorer
 	 */

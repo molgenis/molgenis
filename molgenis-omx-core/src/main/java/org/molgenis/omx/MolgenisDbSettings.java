@@ -7,8 +7,6 @@ import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule;
-import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.core.RuntimeProperty;
@@ -87,6 +85,7 @@ public class MolgenisDbSettings implements MolgenisSettings
 	}
 
 	@Override
+	@RunAsSystem
 	public Boolean getBooleanProperty(String key)
 	{
 		String value = getProperty(key);
@@ -99,6 +98,7 @@ public class MolgenisDbSettings implements MolgenisSettings
 	}
 
 	@Override
+	@RunAsSystem
 	public boolean getBooleanProperty(String key, boolean defaultValue)
 	{
 		Boolean value = getBooleanProperty(key);
@@ -111,7 +111,6 @@ public class MolgenisDbSettings implements MolgenisSettings
 	}
 
 	@Override
-	@RunAsSystem
 	public boolean updateProperty(String key, String content)
 	{
 		if (null == content)
@@ -157,14 +156,10 @@ public class MolgenisDbSettings implements MolgenisSettings
 	public Map<String, String> getProperties(String keyStartsWith)
 	{
 		String prefix = RuntimeProperty.class.getSimpleName() + '_' + keyStartsWith;
-		QueryImpl query = new QueryImpl();
-		query.addRule(new QueryRule("identifier", Operator.LIKE, prefix));
-		Iterable<RuntimeProperty> properties = dataService.findAll(RuntimeProperty.ENTITY_NAME, query,
-				RuntimeProperty.class);
+		Iterable<RuntimeProperty> properties = dataService.findAll(RuntimeProperty.ENTITY_NAME, RuntimeProperty.class);
 		Map<String, String> result = new TreeMap<String, String>();
 		for (RuntimeProperty property : properties)
 		{
-			// LIKE does not guarantee that the prefix occurs at the start of the identifier
 			if (property.getIdentifier().startsWith(prefix))
 			{
 				result.put(property.getIdentifier().substring(prefix.length() + 1), property.getValue());

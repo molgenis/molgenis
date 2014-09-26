@@ -204,6 +204,63 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 
 	private void getAttributeSql(StringBuilder sql, AttributeMetaData att) throws MolgenisModelException
 	{
+		switch (att.getDataType().getEnumType())
+		{
+			case BOOL:
+				break;
+			case DATE:
+				break;
+			case DATE_TIME:
+				break;
+			case DECIMAL:
+				break;
+			case EMAIL:
+				break;
+			case ENUM:
+				break;
+			case FILE:
+				break;
+			case HTML:
+				break;
+			case HYPERLINK:
+				break;
+			case IMAGE:
+				break;
+			case INT:
+				break;
+			case LONG:
+				break;
+			case SCRIPT:
+				break;
+			case STRING:
+				break;
+			case TEXT:
+				break;
+
+			case COMPOUND:
+			case MREF:
+			case CATEGORICAL:
+			case XREF:
+				if (att.isLabelAttribute())
+				{
+					throw new MolgenisDataException("Attribute [" + att.getName() + "] of entity [" + getName()
+							+ "] is label attribute and of type [" + att.getDataType()
+							+ "]. Label attributes cannot be of type xref, mref, categorical or compound.");
+				}
+
+				if (att.isLookupAttribute())
+				{
+					throw new MolgenisDataException("Attribute [" + att.getName() + "] of entity [" + getName()
+							+ "] is lookup attribute and of type [" + att.getDataType()
+							+ "]. Lookup attributes cannot be of type xref, mref, categorical or compound.");
+				}
+
+				break;
+			default:
+				throw new RuntimeException("Unknown datatype [" + att.getDataType().getEnumType() + "]");
+
+		}
+
 		if (!(att.getDataType() instanceof MrefField))
 		{
 			sql.append('`').append(att.getName()).append('`').append(' ');
@@ -624,8 +681,8 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 									.getName());
 							if (repo instanceof Queryable)
 							{
-								Query refQ = new QueryImpl().like(att.getRefEntity().getLabelAttribute().getName(),
-										r.getValue());
+								Query refQ = new QueryImpl().like(att.getRefEntity().getLabelAttribute().getName(), r
+										.getValue().toString());
 								Iterator<Entity> it = ((Queryable) repo).findAll(refQ).iterator();
 								if (it.hasNext())
 								{

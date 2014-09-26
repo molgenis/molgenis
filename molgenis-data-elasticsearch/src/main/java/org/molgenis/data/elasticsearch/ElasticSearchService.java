@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 import org.elasticsearch.ElasticsearchException;
@@ -21,8 +21,6 @@ import org.elasticsearch.action.admin.indices.mapping.delete.DeleteMappingRespon
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
-import org.elasticsearch.action.bulk.BulkProcessor;
-import org.elasticsearch.action.bulk.BulkProcessor.Listener;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -57,6 +55,7 @@ import org.molgenis.data.elasticsearch.index.IndexRequestGenerator;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
 import org.molgenis.data.elasticsearch.request.SearchRequestGenerator;
 import org.molgenis.data.elasticsearch.response.ResponseParser;
+import org.molgenis.data.elasticsearch.util.BulkProcessor;
 import org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils;
 import org.molgenis.data.elasticsearch.util.Hit;
 import org.molgenis.data.elasticsearch.util.MultiSearchRequest;
@@ -77,6 +76,8 @@ import com.google.common.collect.Iterables;
 public class ElasticSearchService implements SearchService
 {
 	private static final Logger LOG = Logger.getLogger(ElasticSearchService.class);
+
+	private static BulkProcessorFactory BULK_PROCESSOR_FACTORY = new BulkProcessorFactory();
 
 	public static enum IndexingMode
 	{
@@ -160,6 +161,7 @@ public class ElasticSearchService implements SearchService
 	/*
 	 * TODO this method is only used by BiobankConnect and should be removed in the future
 	 */
+	@Override
 	@Deprecated
 	public SearchResult multiSearch(MultiSearchRequest request)
 	{
@@ -209,6 +211,7 @@ public class ElasticSearchService implements SearchService
 	 * @see org.molgenis.data.elasticsearch.SearchService#multiSearch(org.elasticsearch.action.search.SearchType,
 	 * org.elasticsearch.action.search.MultiSearchRequest)
 	 */
+	@Override
 	@Deprecated
 	public SearchResult multiSearch(SearchType searchType, MultiSearchRequest request)
 	{
@@ -672,7 +675,7 @@ public class ElasticSearchService implements SearchService
 		String entityName = entityMetaData.getName();
 		String type = sanitizeMapperType(entityName);
 
-		SynchronizedBulkProcessor bulkProcessor = new SynchronizedBulkProcessor(client);
+		BulkProcessor bulkProcessor = BULK_PROCESSOR_FACTORY.create(client);
 		try
 		{
 			for (Entity entity : entities)
@@ -684,7 +687,18 @@ public class ElasticSearchService implements SearchService
 		}
 		finally
 		{
-			bulkProcessor.close();
+			try
+			{
+				boolean isCompleted = bulkProcessor.awaitClose(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+				if (!isCompleted)
+				{
+					throw new MolgenisDataException("Failed to complete bulk delete within the given time");
+				}
+			}
+			catch (InterruptedException e)
+			{
+				throw new RuntimeException(e);
+			}
 		}
 
 		if (updateIndex == true && indexingMode == IndexingMode.UPDATE) updateReferences(entities, entityMetaData);
@@ -746,30 +760,31 @@ public class ElasticSearchService implements SearchService
 		{
 			LOG.trace("Deleting Elasticsearch '" + type + "' docs with ids [" + ids + "] ...");
 		}
-		Semaphore sem = new Semaphore(1);
+
+		BulkProcessor bulkProcessor = BULK_PROCESSOR_FACTORY.create(client);
 		try
 		{
-			sem.acquire();
-
-			SynchronizedBulkProcessor bulkProcessor = new SynchronizedBulkProcessor(client);
+			for (Object id : ids)
+			{
+				bulkProcessor.add(new DeleteRequest(indexName, type, id.toString()));
+			}
+		}
+		finally
+		{
 			try
 			{
-				for (Object id : ids)
+				boolean isCompleted = bulkProcessor.awaitClose(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+				if (!isCompleted)
 				{
-					bulkProcessor.add(new DeleteRequest(indexName, type, id.toString()));
+					throw new MolgenisDataException("Failed to complete bulk delete within the given time");
 				}
 			}
-			finally
+			catch (InterruptedException e)
 			{
-				bulkProcessor.close();
+				throw new RuntimeException(e);
 			}
+		}
 
-			sem.acquire();
-		}
-		catch (InterruptedException e)
-		{
-			throw new RuntimeException(e);
-		}
 		if (LOG.isDebugEnabled())
 		{
 			LOG.debug("Deleted Elasticsearch '" + type + "' docs with ids [" + ids + "] ...");
@@ -792,31 +807,32 @@ public class ElasticSearchService implements SearchService
 		{
 			LOG.trace("Bulk deleting Elasticsearch '" + type + "' docs ...");
 		}
-		Semaphore sem = new Semaphore(1);
+
+		BulkProcessor bulkProcessor = BULK_PROCESSOR_FACTORY.create(client);
 		try
 		{
-			sem.acquire();
-
-			SynchronizedBulkProcessor bulkProcessor = new SynchronizedBulkProcessor(client);
+			for (Entity entity : entities)
+			{
+				String elasticsearchId = toElasticsearchId(entity, entityMetaData);
+				bulkProcessor.add(new DeleteRequest(indexName, type, elasticsearchId));
+			}
+		}
+		finally
+		{
 			try
 			{
-				for (Entity entity : entities)
+				boolean isCompleted = bulkProcessor.awaitClose(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+				if (!isCompleted)
 				{
-					String elasticsearchId = toElasticsearchId(entity, entityMetaData);
-					bulkProcessor.add(new DeleteRequest(indexName, type, elasticsearchId));
+					throw new MolgenisDataException("Failed to complete bulk delete within the given time");
 				}
 			}
-			finally
+			catch (InterruptedException e)
 			{
-				bulkProcessor.close();
+				throw new RuntimeException(e);
 			}
+		}
 
-			sem.acquire();
-		}
-		catch (InterruptedException e)
-		{
-			throw new RuntimeException(e);
-		}
 		if (LOG.isDebugEnabled())
 		{
 			LOG.debug("Bulk deleted Elasticsearch '" + type + "' docs");
@@ -1096,14 +1112,21 @@ public class ElasticSearchService implements SearchService
 
 	}
 
-	static class SynchronizedBulkProcessor
+	/**
+	 * Testability, using the real Elasticsearch BulkProcessor results in infinite waits on close
+	 * 
+	 * @param bulkProcessorFactory
+	 */
+	static void setBulkProcessorFactory(BulkProcessorFactory bulkProcessorFactory)
 	{
-		private Semaphore sem;
-		private BulkProcessor bulkProcessor;
+		BULK_PROCESSOR_FACTORY = bulkProcessorFactory;
+	}
 
-		public SynchronizedBulkProcessor(Client client)
+	static class BulkProcessorFactory
+	{
+		public BulkProcessor create(Client client)
 		{
-			bulkProcessor = BulkProcessor.builder(client, new Listener()
+			return BulkProcessor.builder(client, new BulkProcessor.Listener()
 			{
 				@Override
 				public void beforeBulk(long executionId, BulkRequest request)
@@ -1121,56 +1144,14 @@ public class ElasticSearchService implements SearchService
 					{
 						LOG.trace("Executed bulk composed of " + request.numberOfActions() + " actions");
 					}
-					sem.release();
 				}
 
 				@Override
 				public void afterBulk(long executionId, BulkRequest request, Throwable failure)
 				{
 					LOG.warn("Error executing bulk", failure);
-					sem.release();
 				}
-			}).build();
-			sem = new Semaphore(1);
+			}).setConcurrentRequests(0).build();
 		}
-
-		public int hashCode()
-		{
-			return bulkProcessor.hashCode();
-		}
-
-		public boolean equals(Object obj)
-		{
-			return bulkProcessor.equals(obj);
-		}
-
-		public void close()
-		{
-			bulkProcessor.close();
-			awaitCompletion();
-		}
-
-		public BulkProcessor add(IndexRequest request)
-		{
-			return bulkProcessor.add(request);
-		}
-
-		public BulkProcessor add(DeleteRequest request)
-		{
-			return bulkProcessor.add(request);
-		}
-
-		private void awaitCompletion()
-		{
-			try
-			{
-				sem.acquire();
-			}
-			catch (InterruptedException e)
-			{
-				throw new RuntimeException(e);
-			}
-		}
-
 	}
 }

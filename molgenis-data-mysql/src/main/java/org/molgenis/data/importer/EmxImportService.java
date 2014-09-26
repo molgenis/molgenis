@@ -56,6 +56,8 @@ import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.IntField;
 import org.molgenis.fieldtypes.LongField;
+import org.molgenis.fieldtypes.MrefField;
+import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -286,9 +288,10 @@ public class EmxImportService implements ImportService
 	 */
 	private void loadAllAttributesToMap(RepositoryCollection source, Map<String, DefaultEntityMetaData> entities)
 	{
+		int i = 1;// Header
 		for (Entity attribute : source.getRepositoryByEntityName(ATTRIBUTES))
 		{
-			int i = 1;
+			i++;
 			String entityName = attribute.getString(ENTITY);
 			String attributeName = attribute.getString(NAME);
 			String attributeDataType = attribute.getString(DATA_TYPE);
@@ -332,9 +335,35 @@ public class EmxImportService implements ImportService
 			if (attributeVisible != null) defaultAttributeMetaData.setVisible(attributeVisible);
 			if (attributeAggregateable != null) defaultAttributeMetaData.setAggregateable(attributeAggregateable);
 			if (refEntityName != null) defaultAttributeMetaData.setRefEntity(entities.get(refEntityName));
-			if (lookupAttribute != null) defaultAttributeMetaData.setLookupAttribute(lookupAttribute);
-			if (labelAttribute != null) defaultAttributeMetaData.setLabelAttribute(labelAttribute);
 			if (readOnly != null) defaultAttributeMetaData.setReadOnly(readOnly);
+
+			if (lookupAttribute != null)
+			{
+				if (lookupAttribute
+						&& ((defaultAttributeMetaData.getDataType() instanceof XrefField) || (defaultAttributeMetaData
+								.getDataType() instanceof MrefField)))
+				{
+					throw new IllegalArgumentException("attributes.lookupAttribute error on line " + i + " ("
+							+ entityName + "." + attributeName + "): lookupAttribute cannot be of type "
+							+ defaultAttributeMetaData.getDataType());
+				}
+
+				defaultAttributeMetaData.setLookupAttribute(lookupAttribute);
+			}
+
+			if (labelAttribute != null)
+			{
+				if (labelAttribute
+						&& ((defaultAttributeMetaData.getDataType() instanceof XrefField) || (defaultAttributeMetaData
+								.getDataType() instanceof MrefField)))
+				{
+					throw new IllegalArgumentException("attributes.labelAttribute error on line " + i + " ("
+							+ entityName + "." + attributeName + "): labelAttribute cannot be of type "
+							+ defaultAttributeMetaData.getDataType());
+				}
+
+				defaultAttributeMetaData.setLabelAttribute(labelAttribute);
+			}
 
 			defaultAttributeMetaData.setLabel(attribute.getString(LABEL));
 			defaultAttributeMetaData.setDescription(attribute.getString(DESCRIPTION));
@@ -344,10 +373,17 @@ public class EmxImportService implements ImportService
 				List<String> enumOptions = attribute.getList(ENUM_OPTIONS);
 				if ((enumOptions == null) || enumOptions.isEmpty())
 				{
-					throw new MolgenisDataException("Missing enum options for attribute ["
+					throw new IllegalArgumentException("Missing enum options for attribute ["
 							+ defaultAttributeMetaData.getName() + "] of entity [" + entityName + "]");
 				}
 				defaultAttributeMetaData.setEnumOptions(enumOptions);
+			}
+
+			if (((defaultAttributeMetaData.getDataType() instanceof XrefField) || (defaultAttributeMetaData
+					.getDataType() instanceof MrefField)) && StringUtils.isEmpty(refEntityName))
+			{
+				throw new IllegalArgumentException("Missing refEntity on line " + i + " (" + entityName + "."
+						+ attributeName + ")");
 			}
 
 			Long rangeMin;
