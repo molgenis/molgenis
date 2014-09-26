@@ -12,7 +12,7 @@
 				<div class="row">
 					<div class="col-md-12">
 						
-						<p id="loader-title" class="box-title">Choose a catalog</p>
+						<legend>Choose a catalog</legend>
 						<#if catalogs?size == 0>
 							<p>No catalogs found</p>
 						<#else>
