@@ -4,13 +4,13 @@
 <#assign js=["select2.min.js", "datasetdeleter.js"]>
 <@header css js/>
 <div class="row">
-	<div class="col-md-12">
-		<h4>Delete dataset</h4>
+	<div class="col-md-4">
+		<div class="well">
 		
-		<div class="well" style="width: 400px; max-height:400px; overflow:auto">
+			<legend>Select a dataset</legend>	
+			
 			<form role="form" id="deletedataset-form" enctype="multipart/form-data">
 				<div class="form-group">
-					<label class="control-label" for="dataset-select">Choose a dataset:</label>
 					<select class="form-control" data-placeholder="Choose a Dataset to delete" id="dataset-select" name="dataset"></select>
 				</div>
 				
@@ -22,7 +22,11 @@
 				
 			</form>
 		</div>
-		
+	</div>
+</div>	
+
+<div class="row">
+	<div class="col-md-1">	
 		<a id="delete-button" class="btn btn-default">Delete</a>
 	</div>
 </div>
