@@ -2,7 +2,7 @@ package org.molgenis.data;
 
 import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
 
-import org.molgenis.data.support.AggregateQueryImpl;
+import org.molgenis.data.support.AggregateAnonymizerImpl;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.security.core.Permission;
 
@@ -12,6 +12,7 @@ public class IndexedCrudRepositorySecurityDecorator extends CrudRepositorySecuri
 	public static final String SETTINGS_KEY_AGGREGATE_ANONYMIZATION_THRESHOLD = "aggregate.anonymization.threshold";
 	private final IndexedCrudRepository decoratedRepository;
 	private final MolgenisSettings molgenisSettings;
+	private final AggregateAnonymizer aggregateAnonymizer = new AggregateAnonymizerImpl();
 
 	public IndexedCrudRepositorySecurityDecorator(IndexedCrudRepository decoratedRepository,
 			MolgenisSettings molgenisSettings)
@@ -27,18 +28,13 @@ public class IndexedCrudRepositorySecurityDecorator extends CrudRepositorySecuri
 		validatePermission(decoratedRepository.getName(), Permission.COUNT);
 
 		Integer threshold = molgenisSettings.getIntegerProperty(SETTINGS_KEY_AGGREGATE_ANONYMIZATION_THRESHOLD);
-		if (threshold != null)
-		{
-			if ((aggregateQuery.getAnonymizationThreshold() == null)
-					|| (threshold > aggregateQuery.getAnonymizationThreshold()))
-			{
-				aggregateQuery = new AggregateQueryImpl().anonymizationThreshold(threshold)
-						.attrDistinct(aggregateQuery.getAttributeDistinct()).attrX(aggregateQuery.getAttributeX())
-						.attrY(aggregateQuery.getAttributeY()).query(aggregateQuery.getQuery());
-			}
-		}
 
-		return decoratedRepository.aggregate(aggregateQuery);
+		AggregateResult result = decoratedRepository.aggregate(aggregateQuery);
+		if (threshold != null && threshold > 0)
+		{
+			result = aggregateAnonymizer.anonymize(result, threshold);
+		}
+		return result;
 	}
 
 	@Override
