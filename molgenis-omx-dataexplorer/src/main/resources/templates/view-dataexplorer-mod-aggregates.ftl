@@ -10,8 +10,8 @@
 	                	</div>
 	            	</div>            	
 		         	<div class="form-group" id="distinct-attr">
-                        <label class="col-md-2 control-label"for="distinct-attr-select">${i18n.dataexplorer_aggregates_distinct}</label>
-                        <div class="col-md-3">
+                        <label class="col-md-1 control-label"for="distinct-attr-select">${i18n.dataexplorer_aggregates_distinct}</label>
+                        <div class="col-md-4">
                         	<div id="distinct-attr-select"></div>                  
 						</div>
                 	</div>
