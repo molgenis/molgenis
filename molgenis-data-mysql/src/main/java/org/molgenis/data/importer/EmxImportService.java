@@ -1,7 +1,6 @@
 package org.molgenis.data.importer;
 
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.AGGREGATEABLE;
-import static org.molgenis.data.mysql.AttributeMetaDataMetaData.AUTO;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.DATA_TYPE;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.DESCRIPTION;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.ENTITY;
@@ -85,7 +84,20 @@ import com.google.common.collect.Sets;
 public class EmxImportService implements ImportService
 {
 	private static final Logger logger = Logger.getLogger(EmxImportService.class);
+
 	private static final List<String> SUPPORTED_FILE_EXTENSIONS = Arrays.asList("xls", "xlsx", "csv", "zip");
+
+	private static final List<String> SUPPORTED_ATTRIBUTE_ATTRIBUTES = Arrays.asList(AGGREGATEABLE.toLowerCase(),
+			DATA_TYPE.toLowerCase(), DESCRIPTION.toLowerCase(), ENTITY.toLowerCase(), ENUM_OPTIONS.toLowerCase(),
+			ID_ATTRIBUTE.toLowerCase(), LABEL.toLowerCase(), LABEL_ATTRIBUTE.toLowerCase(),
+			LOOKUP_ATTRIBUTE.toLowerCase(), NAME, NILLABLE.toLowerCase(), RANGE_MAX.toLowerCase(),
+			RANGE_MIN.toLowerCase(), READ_ONLY.toLowerCase(), REF_ENTITY.toLowerCase(), VISIBLE.toLowerCase());
+
+	private static final List<String> SUPPORTED_ENTITY_ATTRIBUTES = Arrays.asList(
+			org.molgenis.data.mysql.EntityMetaDataMetaData.LABEL.toLowerCase(),
+			org.molgenis.data.mysql.EntityMetaDataMetaData.DESCRIPTION.toLowerCase(),
+			org.molgenis.data.mysql.EntityMetaDataMetaData.NAME.toLowerCase(), ABSTRACT.toLowerCase(),
+			EXTENDS.toLowerCase());
 
 	// Sheet names
 	private static final String ENTITIES = EntityMetaDataMetaData.ENTITY_NAME;
@@ -288,8 +300,17 @@ public class EmxImportService implements ImportService
 	 */
 	private void loadAllAttributesToMap(RepositoryCollection source, Map<String, DefaultEntityMetaData> entities)
 	{
+		Repository attributesRepo = source.getRepositoryByEntityName(ATTRIBUTES);
+		for (AttributeMetaData attr : attributesRepo.getEntityMetaData().getAtomicAttributes())
+		{
+			if (!SUPPORTED_ATTRIBUTE_ATTRIBUTES.contains(attr.getName().toLowerCase()))
+			{
+				throw new IllegalArgumentException("Unsupported attribute metadata: attributes. " + attr.getName());
+			}
+		}
+
 		int i = 1;// Header
-		for (Entity attribute : source.getRepositoryByEntityName(ATTRIBUTES))
+		for (Entity attribute : attributesRepo)
 		{
 			i++;
 			String entityName = attribute.getString(ENTITY);
@@ -321,7 +342,6 @@ public class EmxImportService implements ImportService
 			}
 
 			Boolean attributeNillable = attribute.getBoolean(NILLABLE);
-			Boolean attributeAuto = attribute.getBoolean(AUTO);
 			Boolean attributeIdAttribute = attribute.getBoolean(ID_ATTRIBUTE);
 			Boolean attributeVisible = attribute.getBoolean(VISIBLE);
 			Boolean attributeAggregateable = attribute.getBoolean(AGGREGATEABLE);
@@ -330,7 +350,6 @@ public class EmxImportService implements ImportService
 			Boolean readOnly = attribute.getBoolean(READ_ONLY);
 
 			if (attributeNillable != null) defaultAttributeMetaData.setNillable(attributeNillable);
-			if (attributeAuto != null) defaultAttributeMetaData.setAuto(attributeAuto);
 			if (attributeIdAttribute != null) defaultAttributeMetaData.setIdAttribute(attributeIdAttribute);
 			if (attributeVisible != null) defaultAttributeMetaData.setVisible(attributeVisible);
 			if (attributeAggregateable != null) defaultAttributeMetaData.setAggregateable(attributeAggregateable);
@@ -435,13 +454,22 @@ public class EmxImportService implements ImportService
 	 */
 	private void loadAllEntitiesToMap(RepositoryCollection source, Map<String, DefaultEntityMetaData> entities)
 	{
-		if (source.getRepositoryByEntityName(ENTITIES) != null)
+		Repository entitiesRepo = source.getRepositoryByEntityName(ENTITIES);
+		if (entitiesRepo != null)
 		{
+			for (AttributeMetaData attr : entitiesRepo.getEntityMetaData().getAtomicAttributes())
+			{
+				if (!SUPPORTED_ENTITY_ATTRIBUTES.contains(attr.getName().toLowerCase()))
+				{
+					throw new IllegalArgumentException("Unsupported entity metadata: entities." + attr.getName());
+				}
+			}
+
 			int i = 1;
-			for (Entity entity : source.getRepositoryByEntityName(ENTITIES))
+			for (Entity entity : entitiesRepo)
 			{
 				i++;
-				String entityName = entity.getString(NAME);
+				String entityName = entity.getString(org.molgenis.data.mysql.EntityMetaDataMetaData.NAME);
 
 				// required
 				if (entityName == null) throw new IllegalArgumentException("entity.name is missing on line " + i);
@@ -449,8 +477,8 @@ public class EmxImportService implements ImportService
 				if (!entities.containsKey(entityName)) entities.put(entityName, new DefaultEntityMetaData(entityName));
 
 				DefaultEntityMetaData md = entities.get(entityName);
-				md.setLabel(entity.getString(LABEL));
-				md.setDescription(entity.getString(DESCRIPTION));
+				md.setLabel(entity.getString(org.molgenis.data.mysql.EntityMetaDataMetaData.LABEL));
+				md.setDescription(entity.getString(org.molgenis.data.mysql.EntityMetaDataMetaData.DESCRIPTION));
 				if (entity.getBoolean(ABSTRACT) != null) md.setAbstract(entity.getBoolean(ABSTRACT));
 
 				String extendsEntityName = entity.getString(EXTENDS);
