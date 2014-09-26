@@ -25,6 +25,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
+import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.fieldtypes.FieldType;
 import org.testng.annotations.Test;
 
@@ -139,9 +140,8 @@ public class ResponseParserTest
 	{
 		String col1 = "col1", col2 = "col2";
 		String row1 = "row1", row2 = "row2";
-		long valRow1Col1 = 1l, valRow1Col2 = 2l, valRow1Total = valRow1Col1 + valRow1Col2;
-		long valRow2Col1 = 1l, valRow2Col2 = 2l, valRow2Total = valRow2Col1 + valRow2Col2;
-		long valCol1Total = valRow1Col1 + valRow2Col1, valCol2Total = valRow1Col2 + valRow2Col2;
+		long valRow1Col1 = 1l, valRow1Col2 = 2l;
+		long valRow2Col1 = 1l, valRow2Col2 = 2l;
 		final Terms terms = mock(Terms.class);
 
 		Bucket bucketCol1 = mock(Bucket.class);
@@ -214,6 +214,11 @@ public class ResponseParserTest
 		when(response.getHits()).thenReturn(searchHits);
 
 		SearchRequest request = mock(SearchRequest.class);
+		AttributeMetaData col1Att = new DefaultAttributeMetaData("col1").setNillable(false);
+		AttributeMetaData col2Att = new DefaultAttributeMetaData("col2").setNillable(false);
+		when(request.getAggregateField1()).thenReturn(col1Att);
+		when(request.getAggregateField2()).thenReturn(col2Att);
+		when(request.getAggregateFieldDistinct()).thenReturn(null);
 		EntityMetaData entityMetaData = mock(EntityMetaData.class);
 		DataService dataService = mock(DataService.class);
 
@@ -227,10 +232,8 @@ public class ResponseParserTest
 		SearchResult searchResult = new ResponseParser().parseSearchResponse(request, response, entityMetaData,
 				dataService);
 		AggregateResult aggregateResult = searchResult.getAggregate();
-
 		assertEquals(aggregateResult.getxLabels(), Arrays.asList(col1, col2));
 		assertEquals(aggregateResult.getyLabels(), Arrays.asList(row1, row2));
-
 		List<List<Long>> matrix = aggregateResult.getMatrix();
 		assertEquals(matrix,
 				Arrays.asList(Arrays.asList(valRow1Col1, valRow2Col1), Arrays.asList(valRow1Col2, valRow2Col2)));
@@ -243,7 +246,6 @@ public class ResponseParserTest
 		String row1 = "Z_row1", row2 = "A_row2";
 		long valRow1Col1 = 1l, valRow1Col2 = 2l;
 		long valRow2Col1 = 1l, valRow2Col2 = 2l;
-		long valCol1Total = valRow1Col1 + valRow2Col1;
 		final Terms terms = mock(Terms.class);
 
 		Bucket bucketCol1 = mock(Bucket.class);
@@ -310,6 +312,11 @@ public class ResponseParserTest
 		when(response.getHits()).thenReturn(searchHits);
 
 		SearchRequest request = mock(SearchRequest.class);
+		AttributeMetaData col1Att = new DefaultAttributeMetaData("col1").setNillable(false);
+		AttributeMetaData col2Att = new DefaultAttributeMetaData("col2").setNillable(false);
+		when(request.getAggregateField1()).thenReturn(col1Att);
+		when(request.getAggregateField2()).thenReturn(col2Att);
+		when(request.getAggregateFieldDistinct()).thenReturn(null);
 		EntityMetaData entityMetaData = mock(EntityMetaData.class);
 		DataService dataService = mock(DataService.class);
 
@@ -326,8 +333,7 @@ public class ResponseParserTest
 		assertEquals(aggregateResult.getxLabels(), Arrays.asList(col2, col1));
 		assertEquals(aggregateResult.getyLabels(), Arrays.asList(row2, row1));
 		List<List<Long>> matrix = aggregateResult.getMatrix();
-		assertEquals(
-				matrix,
+		assertEquals(matrix,
 				Arrays.asList(Arrays.asList(valRow2Col2, valRow1Col2), Arrays.asList(valRow2Col1, valRow1Col1)));
 	}
 }

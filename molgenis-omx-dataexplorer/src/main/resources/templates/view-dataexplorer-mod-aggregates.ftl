@@ -28,6 +28,8 @@
     </div>                
 </div>
 <script>
+	var totalCaption = '${i18n.dataexplorer_aggregates_total?js_string?html}';
+	
 	$.when($.ajax("<@resource_href "/js/dataexplorer-aggregates.js"/>", {'cache': true}))
 		.then(function() {
 			molgenis.dataexplorer.aggregates.createAggregatesTable();
