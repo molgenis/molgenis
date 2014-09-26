@@ -132,8 +132,7 @@ public class ResponseParser
 		if (aggregations != null)
 		{
 			aggregate = aggregateResponseParser.parseAggregateResponse(request.getAggregateField1(),
-					request.getAggregateField2(), request.getAggregateFieldDistinct(), aggregations, dataService,
-					request.getAggregateAnonymizationThreshold());
+					request.getAggregateField2(), request.getAggregateFieldDistinct(), aggregations, dataService);
 		}
 
 		return new SearchResult(totalCount, searchHits, aggregate);
