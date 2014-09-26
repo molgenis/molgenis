@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
+import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
@@ -166,5 +167,18 @@ public class MolgenisDbSettings implements MolgenisSettings
 			}
 		}
 		return result;
+	}
+
+	@Override
+	@RunAsSystem
+	public Integer getIntegerProperty(String key)
+	{
+		String value = getProperty(key);
+		if (value == null)
+		{
+			return null;
+		}
+
+		return DataConverter.toInt(value);
 	}
 }
