@@ -177,6 +177,7 @@ public class QueryGenerator implements QueryPartGenerator
 						}
 						case CATEGORICAL:
 						case XREF:
+						case MREF:
 						{
 							// support both entity as entity id as value
 							Object queryIdValue = queryValue instanceof Entity ? ((Entity) queryValue).getIdValue() : queryValue;
@@ -187,13 +188,6 @@ public class QueryGenerator implements QueryPartGenerator
 							filterBuilder = FilterBuilders.nestedFilter(queryField,
 									FilterBuilders.termFilter(indexFieldName, queryIdValue));
 							break;
-						}
-						case MREF:
-						{
-							// TODO how to make sure that an mref attribute with value ref1,ref2,ref3 does not match the
-							// given value ref1,ref2?
-							throw new UnsupportedOperationException("Query with operator [" + queryOperator
-									+ "] and data type [" + dataType + "] not supported");
 						}
 						case COMPOUND:
 							throw new MolgenisQueryException("Illegal data type [" + dataType + "] for operator ["
