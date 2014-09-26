@@ -8,7 +8,7 @@
 
 <div class="row">
 	<div class="col-md-12">	
-		<h1>Entities</h1>	
+		<legend>Entities</legend>	
 		<div class="subtitle">
 			This is a listing of all datasets available in ${molgenis_ui.title?html}
 		</div>
