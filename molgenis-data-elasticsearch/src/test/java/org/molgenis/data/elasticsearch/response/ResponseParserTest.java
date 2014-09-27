@@ -18,6 +18,7 @@ import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -25,6 +26,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
 import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.fieldtypes.FieldType;
 import org.testng.annotations.Test;
 
 public class ResponseParserTest
@@ -145,12 +147,15 @@ public class ResponseParserTest
 		Bucket bucketCol1 = mock(Bucket.class);
 		Aggregations bucket1Aggregations = mock(Aggregations.class);
 		final Terms bucket1Terms = mock(Terms.class);
+
 		Bucket bucketCol1Row1 = mock(Bucket.class);
 		when(bucketCol1Row1.getKey()).thenReturn(row1);
 		when(bucketCol1Row1.getDocCount()).thenReturn(valRow1Col1);
+
 		Bucket bucketCol1Row2 = mock(Bucket.class);
 		when(bucketCol1Row2.getKey()).thenReturn(row2);
 		when(bucketCol1Row2.getDocCount()).thenReturn(valRow2Col1);
+
 		when(bucket1Terms.getBuckets()).thenReturn(Arrays.asList(bucketCol1Row1, bucketCol1Row2));
 		when(bucket1Aggregations.iterator()).thenAnswer(new Answer<Iterator<Aggregation>>()
 		{
@@ -167,12 +172,15 @@ public class ResponseParserTest
 		Bucket bucketCol2 = mock(Bucket.class);
 		Aggregations bucket2Aggregations = mock(Aggregations.class);
 		final Terms bucket2Terms = mock(Terms.class);
+
 		Bucket bucketCol2Row1 = mock(Bucket.class);
 		when(bucketCol2Row1.getKey()).thenReturn(row1);
 		when(bucketCol2Row1.getDocCount()).thenReturn(valRow1Col2);
+
 		Bucket bucketCol2Row2 = mock(Bucket.class);
 		when(bucketCol2Row2.getKey()).thenReturn(row2);
 		when(bucketCol2Row2.getDocCount()).thenReturn(valRow2Col2);
+
 		when(bucket2Terms.getBuckets()).thenReturn(Arrays.asList(bucketCol2Row1, bucketCol2Row2));
 		when(bucket2Aggregations.iterator()).thenAnswer(new Answer<Iterator<Aggregation>>()
 		{
@@ -213,6 +221,14 @@ public class ResponseParserTest
 		when(request.getAggregateFieldDistinct()).thenReturn(null);
 		EntityMetaData entityMetaData = mock(EntityMetaData.class);
 		DataService dataService = mock(DataService.class);
+
+		when(request.getAggregateField1()).thenReturn(mock(AttributeMetaData.class));
+		when(request.getAggregateField2()).thenReturn(mock(AttributeMetaData.class));
+		when(request.getAggregateField1().getDataType()).thenReturn(mock(FieldType.class));
+		when(request.getAggregateField2().getDataType()).thenReturn(mock(FieldType.class));
+		when(request.getAggregateField1().getDataType().getEnumType()).thenReturn(FieldTypeEnum.STRING);
+		when(request.getAggregateField2().getDataType().getEnumType()).thenReturn(FieldTypeEnum.STRING);
+
 		SearchResult searchResult = new ResponseParser().parseSearchResponse(request, response, entityMetaData,
 				dataService);
 		AggregateResult aggregateResult = searchResult.getAggregate();
@@ -303,6 +319,14 @@ public class ResponseParserTest
 		when(request.getAggregateFieldDistinct()).thenReturn(null);
 		EntityMetaData entityMetaData = mock(EntityMetaData.class);
 		DataService dataService = mock(DataService.class);
+
+		when(request.getAggregateField1()).thenReturn(mock(AttributeMetaData.class));
+		when(request.getAggregateField2()).thenReturn(mock(AttributeMetaData.class));
+		when(request.getAggregateField1().getDataType()).thenReturn(mock(FieldType.class));
+		when(request.getAggregateField2().getDataType()).thenReturn(mock(FieldType.class));
+		when(request.getAggregateField1().getDataType().getEnumType()).thenReturn(FieldTypeEnum.STRING);
+		when(request.getAggregateField2().getDataType().getEnumType()).thenReturn(FieldTypeEnum.STRING);
+
 		SearchResult searchResult = new ResponseParser().parseSearchResponse(request, response, entityMetaData,
 				dataService);
 		AggregateResult aggregateResult = searchResult.getAggregate();
