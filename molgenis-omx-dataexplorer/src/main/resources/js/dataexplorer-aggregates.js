@@ -132,8 +132,8 @@
                     	if (count == AGGREGATE_ANONYMIZATION_VALUE) {
                     		rowCountIsAnonimized = true;
                     		items.push('&lt;' + aggregateResult.anonymizationThreshold);
-                    		rowCount += aggregateResult.anonymizationThreshold;
-                            columnCounts[index].count += aggregateResult.anonymizationThreshold;
+                    		rowCount += aggregateResult.anonymizationThreshold - 1;
+                            columnCounts[index].count += aggregateResult.anonymizationThreshold - 1;
                             columnCounts[index].anonymized = true;
                     	} else {
                     		rowCount += count;
@@ -146,31 +146,37 @@
 					
 					items.push('<td><div class="text-center">');
 					if (rowCountIsAnonimized) {
-						items.push('&lt;');
+						items.push('&lt;' + (rowCount + 1));
+					} else {
+						items.push(rowCount);
 					}
-					items.push(rowCount + '</div></td>');
+					items.push('</div></td>');
 					items.push('</tr>');
 				});
 				
 				items.push('<tr>');
 				items.push('<th>' + totalCaption + '</th>');
 				
-				var grantTotal = {count: 0, anonymized: false};
+				var grandTotal = {count: 0, anonymized: false};
 				$.each(columnCounts, function(){
 					items.push('<td><div class="text-center">');
 					if (this.anonymized) {
 						items.push('&lt');
-						grantTotal.anonymized = true;
+						grandTotal.anonymized = true;
+						items.push(this.count + 1);
+					} else {
+						items.push(this.count);
 					}
-					
-					grantTotal.count += this.count;
-					items.push(this.count);
+					grandTotal.count += this.count;
 					items.push('</div></td>');
 				});
 				
 				items.push('<td><div class="text-center">');
-				if (grantTotal.anonymized) items.push('&lt;');
-				items.push(grantTotal.count);
+				if (grandTotal.anonymized) {
+					items.push('&lt;' + (grandTotal.count + 1));
+				} else {
+					items.push(grandTotal.count);
+				}
 				items.push('</div></td>');
 				
 				items.push('</tr>');
