@@ -20,7 +20,7 @@
 		   <div class="form-group">
 				<div class="col-md-8 col-md-offset-2">
 					<div class="btn-group pull-right">
-						<a id="cancelBtn" href="${context_url}" class="btn btn-default">Cancel</a>
+						<a id="cancelBtn" href="${context_url}" class="btn btn-default">Close</a>
 						<button id="submitBtn" type="submit" class="btn btn-default">Save</button>
 					</div>
 				</div>
