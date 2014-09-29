@@ -75,7 +75,10 @@ public class AggregateQueryGenerator
 		{
 			searchRequestBuilder.addAggregation(aggregationBuilder);
 		}
-		LOG.debug("SearchRequest: " + searchRequestBuilder);
+		if(LOG.isDebugEnabled())
+		{
+			LOG.debug("SearchRequest: " + searchRequestBuilder);
+		}
 	}
 
 	private List<AggregationBuilder<?>> createAggregations(AttributeMetaData attr, AttributeMetaData distinctAttr)

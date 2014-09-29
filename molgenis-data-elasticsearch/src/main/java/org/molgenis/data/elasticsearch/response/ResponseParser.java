@@ -41,7 +41,10 @@ public class ResponseParser
 	public SearchResult parseSearchResponse(SearchRequest request, SearchResponse response,
 			EntityMetaData entityMetaData, DataService dataService)
 	{
-		LOG.debug("Response:" + response.toString());
+		if(LOG.isDebugEnabled())
+		{
+			LOG.debug("Response:" + response.toString());
+		}
 		ShardSearchFailure[] failures = response.getShardFailures();
 		if ((failures != null) && (failures.length > 0))
 		{
