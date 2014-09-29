@@ -12,7 +12,7 @@
         			<#if content?has_content>
         		    	<textarea id="elm1" name="content" form="contentForm" rows="15">${content} <#if succes?has_content>${succes}</#if></textarea>
         		    <#else>	
-        		    	<textarea id="elm1" name="content" form="contentForm" rows="15">${content} <#if succes?has_content>${succes}</#if></textarea>
+        		    	<textarea id="elm1" name="content" form="contentForm" rows="15"></textarea>
         		    </#if>
                 </div>
            </div>
