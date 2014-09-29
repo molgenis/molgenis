@@ -2,17 +2,21 @@
 <#include "molgenis-footer.ftl">
 <@header/>
 
-<div class="row">
-	<div class="col-md-11">
-		<#if content?has_content>
+<#if content?has_content>
+	<div class="row">
+		<div class="col-md-12">
 			${content}
-		</#if>
+		</div>
 	</div>
-	<div class="col-md-1">
-		<#if isCurrentUserCanEdit?has_content && isCurrentUserCanEdit>
-			<a href="${context_url}/edit" class="btn btn-default pull-right">Edit page</a>
-		</#if>
+</#if>
+
+<#if isCurrentUserCanEdit?has_content && isCurrentUserCanEdit>
+	<div class="row">
+		<div class="col-md-12">
+			<hr></hr>
+			<a href="${context_url}/edit" class="btn btn-default pull-left">Edit page</a>
+		</div>
 	</div>
-</div>
+</#if>
 
 <@footer/>
