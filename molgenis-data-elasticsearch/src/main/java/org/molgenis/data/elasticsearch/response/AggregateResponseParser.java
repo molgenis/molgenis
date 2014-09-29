@@ -33,8 +33,7 @@ public class AggregateResponseParser
 	private static final String MISSING_VALUE_LABEL = "N/A";
 
 	public AggregateResult parseAggregateResponse(AttributeMetaData aggAttr1, AttributeMetaData aggAttr2,
-			AttributeMetaData aggAttrDistinct, Aggregations aggregations, DataService dataService,
-			Integer anonymizationThreshold)
+			AttributeMetaData aggAttrDistinct, Aggregations aggregations, DataService dataService)
 	{
 		List<List<Long>> matrix = Lists.newArrayList();
 		Set<String> xLabelsSet = Sets.newHashSet();
@@ -248,7 +247,7 @@ public class AggregateResponseParser
 			}
 		}
 
-		return new AggregateResult(matrix, xLabels, yLabels, anonymizationThreshold);
+		return new AggregateResult(matrix, xLabels, yLabels);
 	}
 
 	/**
