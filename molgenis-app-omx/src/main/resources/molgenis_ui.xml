@@ -2,13 +2,34 @@
 <molgenis label="OMX" name="omx">
 	<menu label="Home" name="main">
 		<plugin id="home" name="Home" url="home"/>
+		<plugin id="importwizard" name="Upload" url="importwizard"/>
 		<plugin id="catalogue" name="Catalogue" url="catalogue"/>
-		<plugin id="dataexplorer" name="Data Explorer" url="dataexplorer"/>	
-		<menu label="Import" name ="import">
-			<plugin id="importwizard" name="Import" url="importwizard"/>
-			<plugin id="vcfimporter" name="VCF" url="vcfimporter"/>
-		</menu>
-		<plugin id="models" name="Model registry" url="models" />
+		<plugin id="dataexplorer" name="Data Explorer" url="dataexplorer"/>
+        <menu label="Plugins" name="plugins">
+            <plugin id="background" name="Background" url="background"/>
+            <menu label="BiobankConnect" name="biobankconnect">
+                <plugin id="biobankconnect" name="BiobankConnect Wizard" url="biobankconnect"/>
+                <plugin id="mappingmanager" name="Curate mappings" url="mappingmanager"/>
+                <plugin id="ontologyindexer" name="Add Ontologies" url="ontologyindexer"/>
+                <plugin id="ontologyservice" name="Ontology Service" url="ontologyservice"/>
+                <plugin id="ontologytree" name="Ontology Tree" url="ontologytree"/>
+            </menu>
+	        <plugin id="catalogmanager" name="Catalog Manager" url="catalogmanager"/>
+            <plugin id="contact" name="Contact" url="contact"/>
+            <menu label="Custom Views" name="custom_views">
+                <plugin id="col7a1-patients" name="COL7A1-Patients" url="col7a1_patients"/>
+                <plugin id="col7a1-mutations" name="COL7A1-Mutations" url="col7a1_mutations"/>
+            </menu>
+	        <plugin id="datasetdeleter" name="Data Set Deleter" url="datasetdeleter"/>
+	        <plugin id="dataindexer" name="Data Set Indexer" url="dataindexer"/>
+            <plugin id="entityexplorer" name="Entity Explorer" url="entityexplorer"/>
+	        <plugin id="gaflistimporter" name="GAF List Importer" url="gaflistimporter"/>
+            <plugin id="models" name="Model registry" url="models" />
+            <plugin id="news" name="News" url="news"/>
+            <plugin id="references" name="References" url="references"/>
+            <plugin id="scripts" name="Scripts" url="scripts" />
+	        <plugin id="studymanager" name="Study Manager" url="studymanager"/>
+        </menu>
 		<menu label="Entities" name ="entities">
         	<plugin id="form.StudyDataRequest" name="StudyDataRequest" url="form.StudyDataRequest"/>
         	<plugin id="form.RuntimeProperty" name="RuntimeProperty" url="form.RuntimeProperty"/>
@@ -18,38 +39,15 @@
         	<plugin id="form.Script" name="Script" url="form.Script"/>
         	<plugin id="form.ScriptParameter" name="ScriptParameter" url="form.ScriptParameter"/>
 	    </menu>
-	    <menu label="BiobankConnect" name="biobankconnect">    
-		   	<plugin id="biobankconnect" name="BiobankConnect Wizard" url="biobankconnect"/>
-	        <plugin id="mappingmanager" name="Curate mappings" url="mappingmanager"/>
-	        <plugin id="ontologyindexer" name="Add Ontologies" url="ontologyindexer"/>
-	        <plugin id="ontologyservice" name="Ontology Service" url="ontologyservice"/>
-	        <plugin id="ontologytree" name="Ontology Tree" url="ontologytree"/>
-        </menu>
-        <menu label="About" name="background">    
-	        <plugin id="news" name="News" url="news"/>
-	        <plugin id="background" name="Background" url="background"/>
-	        <plugin id="references" name="References" url="references"/>
-	        <plugin id="contact" name="Contact" url="contact"/>
-        </menu>
-        <plugin id="entityexplorer" name="Entity Explorer" url="entityexplorer"/> 
         <menu label="Admin" name="admin">
-        	<plugin id="menumanager" name="Menu Manager" url="menumanager"/>
-	        <plugin id="permissionmanager" name="Permission Manager" url="permissionmanager"/>
 	        <plugin id="usermanager" name="User Manager" url="usermanager"/>
-        	<plugin id="catalogmanager" name="Catalog Manager" url="catalogmanager"/>
-			<plugin id="studymanager" name="Study Manager" url="studymanager"/>
-			<plugin id="dataindexer" name="Data Set Indexer" url="dataindexer"/>
-			<plugin id="indexmanager" name="Index manager" url="indexmanager"/>
-			<plugin id="datasetdeleter" name="Data Set Deleter" url="datasetdeleter"/>
-			<plugin id="gaflistimporter" name="GAF List Importer" url="gaflistimporter"/>
+	        <plugin id="permissionmanager" name="Permission Manager" url="permissionmanager"/>
+        	<plugin id="menumanager" name="Menu Manager" url="menumanager"/>
+        	<plugin id="indexmanager" name="Index manager" url="indexmanager"/>
 		</menu>
-		<menu label="Custom Views" name="custom_views">
-	        <plugin id="col7a1-patients" name="COL7A1-Patients" url="col7a1_patients"/>
-	        <plugin id="col7a1-mutations" name="COL7A1-Mutations" url="col7a1_mutations"/>
-		</menu>
+		<menu label="About" name="background">
+            <plugin id="feedback" name="Feedback" url="feedback"/>
+        </menu>
 		<plugin id="useraccount" name="Account" url="useraccount"/>
-		<plugin id="scripts" name="Scripts" url="scripts" />
-        <plugin id="feedback" name="Feedback" url="feedback"/>
-        <plugin id="geneticrepositorymerger" name="Merge" url="geneticrepositorymerger"/>
 	</menu>
 </molgenis>

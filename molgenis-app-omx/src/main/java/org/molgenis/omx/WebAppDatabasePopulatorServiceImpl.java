@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.IndexedCrudRepositorySecurityDecorator;
 import org.molgenis.data.annotation.impl.CaddServiceAnnotator;
 import org.molgenis.data.annotation.impl.ClinVarServiceAnnotator;
 import org.molgenis.data.annotation.impl.DbnsfpGeneServiceAnnotator;
@@ -89,6 +90,10 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		// DataExplorer hide select if dataset selected through url
 		runtimePropertyMap.put(DataExplorerController.KEY_HIDE_SELECT, String.valueOf(true));
 
+		// Aggregate anonymization threshold (default no threshold)
+		runtimePropertyMap.put(IndexedCrudRepositorySecurityDecorator.SETTINGS_KEY_AGGREGATE_ANONYMIZATION_THRESHOLD,
+				Integer.toString(0));
+
 		// Annotators include files/tools
 		String molgenisHomeDir = System.getProperty("molgenis.home");
 
@@ -119,6 +124,8 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 				String.valueOf(DataExplorerController.DEFAULT_VAL_SHOW_WIZARD_ONINIT));
 		runtimePropertyMap.put(DataExplorerController.AGGREGATES_NORESULTS_MESSAGE,
 				DataExplorerController.DEFAULT_AGGREGATES_NORESULTS_MESSAGE);
+		runtimePropertyMap.put(DataExplorerController.KEY_MOD_AGGREGATES_DISTINCT_HIDE,
+				String.valueOf(DataExplorerController.DEFAULT_VAL_AGGREGATES_DISTINCT_HIDE));
 
 		runtimePropertyMap.put(StudyManagerController.EXPORT_BTN_TITLE, "Export");
 		runtimePropertyMap.put(StudyManagerController.EXPORT_ENABLED, String.valueOf(false));

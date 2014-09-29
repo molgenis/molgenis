@@ -8,6 +8,7 @@
 	<head>
 		<title><#if molgenis_ui.title?has_content>${molgenis_ui.title?html}</#if></title>
 		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta http-equiv="X-UA-Compatible" content="chrome=1">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<link rel="icon" href="<@resource_href "/img/molgenis.ico"/>" type="image/x-icon">
@@ -37,21 +38,25 @@
 	</#if>
 	</head>
 	<body>
-		<div id="wrap">
-			<div class="container-fluid">
-				<div class="row">
-					<#if menu_id??>
-						<#if !(plugin_id??)>
-							<#assign plugin_id="NULL">
-						</#if>
-						<@topmenu molgenis_ui.getMenu() plugin_id/>
-					</#if>			
+        <#if menu_id??>
+            <#if !(plugin_id??)>
+                <#assign plugin_id="NULL">
+            </#if>
+            <@topmenu molgenis_ui.getMenu() plugin_id/>
+        </#if>
+        <div class="container-fluid">
+			<div class="row">
+			    <div class="col-md-12">
+                    <div id="login-modal-container-header"></div>		
 				</div>
-				<div id="login-modal-container-header"></div>
-				<div class="row">
-					<div class="datasetsindexerAlerts"></div>
-				</div>
-				<div class="row">
+			</div>
+			<div class="row">
+			    <div class="col-md-12">
+                    <div class="datasetsindexerAlerts"></div>
+                </div>	
+			</div>
+			<div class="row">
+                <div class="col-md-12">
 					<div class="alerts"><#if errorMessage??>
 						<#assign message = errorMessage>
 						<#assign messageType = "error"> 
@@ -68,14 +73,16 @@
 					<#if messageType??>
 						<div class="alert alert-${messageType}"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>${messageType?capitalize}!</strong> ${message}</div>
 					</#if>
-				</div>
+				   </div>
+                </div>
 			</div>
 			<div class="row">
-				<div id="plugin-container" class="container-fluid">
+                <div class="col-md-12">
+                    <div id="plugin-container">
 	</#macro>
 	<#--topmenu -->
 	<#macro topmenu menu plugin_id>
-        <nav class="navbar navbar-default navbar-static-top" role="navigation">
+        <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
 			<div class="container-fluid">
                 <#-- TODO refactor to remove depency on 'Home' -->
                 <#list menu.items as item>

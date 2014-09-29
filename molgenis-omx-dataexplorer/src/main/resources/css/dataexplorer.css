@@ -13,14 +13,6 @@
 	font-size: 15.4px;
 }
 
-#filter-wizard-btn {
-	margin-right: 10px;
-}
-
-#feature-filters {
-	margin-left: 10px;
-}
-
 #feature-selection label {
 	display: inline;
 }
@@ -96,6 +88,7 @@ body:not(.modal-open) #feature-selection .molgenis-tree {
 
 #feature-select-container{	
 	margin-bottom: 20px;
+	margin-top: 10px;
 }
 
 #filter-nav li a:hover{
@@ -216,3 +209,7 @@ ul.fancytree-container {
 .table-hover {
 	cursor: pointer;
 } 
+
+#chartCreationButtons {
+	padding-top: 10px;
+}

@@ -152,7 +152,7 @@ public class QueryImpl implements Query
 	}
 
 	@Override
-	public Query like(String field, Object value)
+	public Query like(String field, String value)
 	{
 		rules.get(this.rules.size() - 1).add(new QueryRule(field, Operator.LIKE, value));
 		return this;

@@ -681,8 +681,8 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 									.getName());
 							if (repo instanceof Queryable)
 							{
-								Query refQ = new QueryImpl().like(att.getRefEntity().getLabelAttribute().getName(),
-										r.getValue());
+								Query refQ = new QueryImpl().like(att.getRefEntity().getLabelAttribute().getName(), r
+										.getValue().toString());
 								Iterator<Entity> it = ((Queryable) repo).findAll(refQ).iterator();
 								if (it.hasNext())
 								{
