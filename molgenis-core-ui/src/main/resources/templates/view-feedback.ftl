@@ -1,7 +1,8 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
+<#assign css=['molgenis-form.css']>
 
-<@header/>
+<@header css />
 
 <#if feedbackForm??>
 	<#if feedbackForm.submitted>
