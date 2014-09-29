@@ -29,6 +29,7 @@ import org.molgenis.data.Queryable;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.support.AbstractCrudRepository;
+import org.molgenis.data.support.BatchingQueryResult;
 import org.molgenis.data.support.ConvertingIterable;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -508,6 +509,23 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 
 	@Override
 	public Iterable<Entity> findAll(Query q)
+	{
+		if ((q.getOffset() != 0) || (q.getPageSize() != 0))
+		{
+			return findAllNoBatching(q);
+		}
+
+		return new BatchingQueryResult(BATCH_SIZE, q)
+		{
+			@Override
+			protected Iterable<Entity> getBatch(Query batchQuery)
+			{
+				return findAllNoBatching(batchQuery);
+			}
+		};
+	}
+
+	private Iterable<Entity> findAllNoBatching(Query q)
 	{
 		List<Object> parameters = Lists.newArrayList();
 		String sql = getSelectSql(q, parameters);
