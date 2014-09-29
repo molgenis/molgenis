@@ -97,7 +97,7 @@
     		<div class="form-horizontal form-group">
         		<label class="col-md-5 control-label" for="dataset-select">Choose a dataset:</label>
         		<div class="col-md-7">
-        			<select class="form-control" id="dataset-select" data-placeholder="Choose an Entity (example: dataset, protocol..." id="dataset-select">
+        			<select class="form-control" id="dataset-select" data-placeholder="Choose an Entity (example: dataset, protocol...">
             		<#list entitiesMeta.iterator() as entityMeta>
                 		<option value="/api/v1/${entityMeta.name}" <#if entityMeta.name == selectedEntityName> selected</#if>><#if entityMeta.label?has_content>${entityMeta.label}<#else>${entityMeta.name}</#if></option>
                		</#list>
