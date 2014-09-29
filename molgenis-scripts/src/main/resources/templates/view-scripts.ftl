@@ -47,12 +47,12 @@
 									</td>
 								</@hasPermission>
 								<td class="name">${script.name!}</td>
-								<td>${script.type!}</td>
+								<td>${script.type.name!}</td>
 								<td>${script.resultFileExtension!}</td>
 								<td class="parameters">
 									<#if script.parameters?has_content>
 										<#list script.parameters as parameter>
-											${parameter}<#if parameter_has_next>,</#if>
+											${parameter.name}<#if parameter_has_next>,</#if>
 										</#list>
 									</#if>
 								</td>

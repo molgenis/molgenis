@@ -8,7 +8,7 @@
 			<@input.render field form.hasWritePermission form.entity form.metaData.forUpdate/>
 		<#else>
 			<@input.render field form.hasWritePermission '' form.metaData.forUpdate/>
-		</#if>Í
+		</#if>
 	</#list>
 </form>
 
