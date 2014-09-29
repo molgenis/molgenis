@@ -119,7 +119,15 @@ public class VcfRepository extends AbstractRepository
 					entity.set(REF, vcfRecord.getReferenceAllele().toString());
 					entity.set(FILTER, vcfRecord.getFilterStatus());
 					entity.set(QUAL, vcfRecord.getQuality());
-					entity.set(ID, StringUtils.join(vcfRecord.getIdentifiers(), ','));
+                    StringBuilder id = new StringBuilder();
+                    id.append(StringUtils.strip(entity.get(CHROM).toString()));
+                    id.append("_");
+                    id.append(StringUtils.strip(entity.get(POS).toString()));
+                    id.append("_");
+                    id.append(StringUtils.strip(entity.get(REF).toString()));
+                    id.append("_");
+                    id.append(StringUtils.strip(entity.get(ALT).toString()));
+					entity.set(ID, id.toString());
 					for (VcfInfo vcfInfo : vcfRecord.getInformation())
 					{
 						Object val = vcfInfo.getVal();

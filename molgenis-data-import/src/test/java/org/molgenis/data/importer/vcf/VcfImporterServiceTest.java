@@ -29,27 +29,25 @@ public class VcfImporterServiceTest
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void VcfImporterService()
     {
-        new VcfImporterService(null, null, null, null, null);
+        new VcfImporterService(null, null, null);
     }
 
     @Test(expectedExceptions = MolgenisDataException.class)
     public void importVcf_repositoryExists() throws IOException
     {
-        /**String entityName = "entity";
+        String entityName = "entity";
         DataService dataService = Mockito.mock(DataService.class);
         SearchService searchService = Mockito.mock(SearchService.class);
         Mockito.when(dataService.hasRepository(entityName)).thenReturn(true);
-        ElasticsearchEntityMetaDataRepository mysqlEntityMetaDataRepository= Mockito.mock(ElasticsearchEntityMetaDataRepository.class);
-        ElasticsearchAttributeMetaDataRepository mysqlAttributeMetaDataRepository= Mockito.mock(ElasticsearchAttributeMetaDataRepository.class);
         FileRepositoryCollectionFactory fileRepositoryCollectionFactory = Mockito.mock(FileRepositoryCollectionFactory.class);
         VcfImporterService vcfImporterService = new VcfImporterService(fileRepositoryCollectionFactory, dataService,
-                searchService, mysqlEntityMetaDataRepository, mysqlAttributeMetaDataRepository);
+                searchService);
         FileRepositoryCollection fileRepositoryCollection = Mockito.mock(FileRepositoryCollection.class);
         InputStream in_data = VcfImporterServiceTest.class.getResourceAsStream("/testdata.vcf");
         File testdata = new File(FileUtils.getTempDirectory(), "testdata.vcf");
         FileCopyUtils.copy(in_data, new FileOutputStream(testdata));
         Mockito.when(fileRepositoryCollectionFactory.createFileRepositoryCollection(testdata)).thenReturn(fileRepositoryCollection);
         Mockito.when(fileRepositoryCollection.getEntityNames()).thenReturn(Collections.singletonList(entityName));
-        vcfImporterService.importVcf(testdata); */
+        vcfImporterService.importVcf(testdata);
     }
 }

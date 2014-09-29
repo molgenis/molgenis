@@ -18,9 +18,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.GenomeConfig;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.das.RangeHandlingDataSource;
-import org.molgenis.util.ApplicationContextProvider;
 
 import uk.ac.ebi.mydas.configuration.DataSourceConfiguration;
 import uk.ac.ebi.mydas.configuration.PropertyType;
@@ -53,15 +51,6 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource i
 		this.type = dataSourceConfig.getDataSourceProperties().get("type").getValue();
 		this.mutationType = new DasType(type, null, "?", type);
 		this.method = new DasMethod("not_recorded", "not_recorded", "ECO:0000037");
-        /**<TEXT>
-        <STRING>Some static text</STRING>
-        <FONT>courier</FONT>
-        <FONTSIZE>10</FONTSIZE>
-        <FGCOLOR>purple</FGCOLOR>
-        <BGCOLOR>green</BGCOLOR>
-        <LABEL>no</LABEL>
-        <BUMP>yes</BUMP>
-        </TEXT>*/
 	}
 
 	public RepositoryRangeHandlingDataSource() throws DataSourceException
@@ -79,11 +68,13 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource i
 		String customParam;
 		String segmentId = null;
 
-		String startAttribute = null;
+		String posAttribute = null;
 		String chromosomeAttribute = null;
 		String idAttribute = null;
 		String stopAttribute = null;
 		String descriptionAttribute = null;
+        String refAttribute = null;
+        String altAttribute = null;
 
 		if (segmentParts.length > 1)
 		{
@@ -105,9 +96,9 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource i
 		Map<String, DasType> patients = new HashMap<String, DasType>();
 		for (Entity entity : entityIterable)
 		{
-			if (startAttribute == null)
+			if (posAttribute == null)
 			{
-				startAttribute = config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_START,
+				posAttribute = config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_POS,
 						entity.getEntityMetaData());
 			}
 			if (chromosomeAttribute == null)
@@ -130,6 +121,16 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource i
 				descriptionAttribute = config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_DESCRIPTION,
 						entity.getEntityMetaData());
 			}
+            if (refAttribute == null)
+            {
+                refAttribute = config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_REF,
+                        entity.getEntityMetaData());
+            }
+            if (altAttribute == null)
+            {
+                altAttribute = config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_ALT,
+                        entity.getEntityMetaData());
+            }
 
 			DasFeature feature;
 
@@ -140,10 +141,15 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource i
 			String valueName = null;
 			String valueLink = null;
 			String valuePatient = null;
+            String valueRef = null;
+            String valueAlt = null;
+
 			try
 			{
-				valueStart = entity.getInt(startAttribute);
+				valueStart = entity.getInt(posAttribute);
 				valueIdentifier = StringUtils.isNotEmpty(idAttribute)&&StringUtils.isNotEmpty(entity.getString(idAttribute))?entity.getString(idAttribute):"-";
+                valueRef = StringUtils.isNotEmpty(refAttribute)&&StringUtils.isNotEmpty(entity.getString(refAttribute))?entity.getString(refAttribute):"";
+                valueAlt = StringUtils.isNotEmpty(altAttribute)&&StringUtils.isNotEmpty(entity.getString(altAttribute))?entity.getString(altAttribute):"";
 			}
 			catch (ClassCastException e)
 			{
@@ -171,11 +177,25 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource i
 					&& ((valueStart >= start && valueStart <= stop) || (valueStop >= start && valueStop <= stop)))
 			{
 				DasType type;// used for label colours in Dalliance
-				if (patients.containsKey(valuePatient))
-				{
-					type = patients.get(valuePatient);
-				}
-				else
+                if (!StringUtils.isEmpty(valueRef)&&!StringUtils.isEmpty(valueAlt))
+                {
+                    if(valueRef.length()==1&&valueAlt.length()==1)
+                        type = new DasType(valueAlt, "", "", "");
+                    else if(valueRef.length()==1&&valueAlt.length()>1){
+                        type = new DasType("insert", "", "", "");
+                    }
+                    else if(valueRef.length()>1&&valueAlt.length()==1){
+                        type = new DasType("delete", "", "", "");
+                    }
+                    else{
+                        type = new DasType("delete", "", "", "");;
+                    }
+                }
+                else if (patients.containsKey(valuePatient))
+                {
+                    type = patients.get(valuePatient);
+                }
+                else
 				{
 					type = new DasType(score.toString(), "", "", "");
 					patients.put(valuePatient, type);
@@ -201,7 +221,7 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource i
 	}
 
 	protected DasFeature createDasFeature(Integer start, Integer stop, String identifier, String name,
-			String description, String link, DasType type, String dataSet, Double score) throws DataSourceException
+			String description, String link, DasType type, Double score) throws DataSourceException
 	{
 		// create description based on available information
 		String featureDescription = "";

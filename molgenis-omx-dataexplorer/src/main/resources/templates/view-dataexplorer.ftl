@@ -18,6 +18,7 @@
 	"moment-with-locales.min.js",
 	"bootstrap-datetimepicker.min.js",
 	"dataexplorer-filter.js",
+    "dataexplorer-data.js",
 	"dataexplorer-filter-dialog.js",
 	"dataexplorer-filter-wizard.js",
 	"jquery.fancytree.min.js",

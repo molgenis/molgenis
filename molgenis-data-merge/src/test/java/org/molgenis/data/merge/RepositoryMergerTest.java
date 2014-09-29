@@ -140,7 +140,7 @@ public class RepositoryMergerTest {
     public void mergeTest()
     {
         ElasticsearchRepository repo1 = new ElasticsearchRepository(entityMetaData1,searchService);
-        ElasticsearchRepository repo2 = new ElasticsearchRepository(entityMetaData1, searchService);
+        ElasticsearchRepository repo2 = new ElasticsearchRepository(entityMetaData2, searchService);
 
         List<Repository> repositoryList = new ArrayList<Repository>();
         repositoryList.add(repo1);
@@ -154,6 +154,6 @@ public class RepositoryMergerTest {
         RepositoryMerger repositoryMerger = new RepositoryMerger(dataService);
 
         //check metaData
-        assertEquals(repositoryMerger.mergeMetaData(repositoryList,commonAttributes,"mergedRepo").getAttributes(), entityMetaDataMerged.getAttributes());
+        assertEquals(entityMetaDataMerged.getAttributes(),repositoryMerger.mergeMetaData(repositoryList,commonAttributes,"mergedRepo").getAttributes());
     }
 }

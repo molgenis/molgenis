@@ -2,7 +2,10 @@ package org.molgenis.merge;
 
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.*;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.DataService;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.ElasticsearchRepository;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.merge.RepositoryMerger;
@@ -29,6 +32,7 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 	public static final String ID = "geneticrepositorymerger";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
+    public static final String ID_FIELD = "ID";
 	public static final DefaultAttributeMetaData CHROM = new DefaultAttributeMetaData("#CHROM",
 			MolgenisFieldTypes.FieldTypeEnum.STRING);
 	public static final DefaultAttributeMetaData POS = new DefaultAttributeMetaData("POS",
@@ -102,13 +106,9 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 		}
 		EntityMetaData mergedEntityMetaData = repositoryMerger.mergeMetaData(geneticRepositories, commonAttributes,
 				VKGL);
-		searchService.createMappings(mergedEntityMetaData);
-		ElasticsearchRepository outRepository = new ElasticsearchRepository(mergedEntityMetaData, searchService);
 		searchService.createMappings(mergedEntityMetaData, true, true, true, true);
 
-		searchService.createMappings(mergedEntityMetaData);
-
 		ElasticsearchRepository mergedRepository = new ElasticsearchRepository(mergedEntityMetaData, searchService);
-		repositoryMerger.merge(geneticRepositories, commonAttributes, mergedRepository);
+		repositoryMerger.merge(geneticRepositories, commonAttributes, mergedRepository, ID_FIELD);
 	}
 }

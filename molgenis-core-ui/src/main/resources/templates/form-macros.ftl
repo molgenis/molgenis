@@ -149,7 +149,7 @@
 	//Remote validation rules for unique fields (check if unique)
 	var remoteRules = {
 		<#list form.metaData.fields as field>
-            <#if field.isUnique()?string('true', 'false') == 'true'>
+			<#if field.isUnique()?string('true', 'false') == 'true'>
 				${field.name}: {
 					remote: {
 						url: '/api/v1/${form.metaData.name?lower_case}?q[0].operator=EQUALS&q[0].field=${field.name}',

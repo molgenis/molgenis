@@ -31,8 +31,9 @@ public class RepositoryMerger
 
 	private final static String ID = "ID";
 	private DataService dataService;
+    private String idField;
 
-	@Autowired
+    @Autowired
 	public RepositoryMerger(DataService dataService)
 	{
 		this.dataService = dataService;
@@ -53,9 +54,9 @@ public class RepositoryMerger
 	 * @return mergedRepository ElasticSearchRepository containing the merged data
 	 */
 	public CrudRepository merge(List<Repository> repositoryList, List<AttributeMetaData> commonAttributes,
-			CrudRepository mergedRepository)
+			CrudRepository mergedRepository, String idField)
 	{
-		return merge(repositoryList, commonAttributes, mergedRepository, 1000);
+		return merge(repositoryList, commonAttributes, mergedRepository, idField, 1000);
 	}
 
 	/**
@@ -74,8 +75,9 @@ public class RepositoryMerger
 	 * @return mergedRepository ElasticSearchRepository containing the merged data
 	 */
 	public CrudRepository merge(List<Repository> repositoryList, List<AttributeMetaData> commonAttributes,
-			CrudRepository mergedRepository, int batchSize)
+			CrudRepository mergedRepository, String idField, int batchSize)
 	{
+        this.idField = idField;
 		dataService.addRepository(mergedRepository);
 		mergeData(repositoryList, (CrudRepository) dataService.getRepositoryByEntityName(mergedRepository.getName()),
 				commonAttributes, batchSize);
@@ -147,8 +149,13 @@ public class RepositoryMerger
 	{
 		AbstractEntity mergedEntity;
 		mergedEntity = new MapEntity(new HashMap<String, Object>());
-		mergedEntity.set(ID, UUID.randomUUID().toString());// "CHROM"+entity.get("#CHROM")+"POS"+entity.get("POS"));
-		for (AttributeMetaData attributeMetaData : commonAttributes)
+		if(idField == null || !entity.getEntityMetaData().getAttribute(idField).isUnique()) {
+            mergedEntity.set(ID, UUID.randomUUID().toString());// "CHROM"+entity.get("#CHROM")+"POS"+entity.get("POS"));
+        }
+        else{
+            mergedEntity.set(ID, entity.getString(idField));
+        }
+        for (AttributeMetaData attributeMetaData : commonAttributes)
 		{
 			mergedEntity.set(attributeMetaData.getName(), entity.get(attributeMetaData.getName()));
 		}

@@ -36,8 +36,7 @@ public class VcfImporterService
 
 	@Autowired
 	public VcfImporterService(FileRepositoryCollectionFactory fileRepositoryCollectionFactory, DataService dataService,
-			SearchService searchService, EntityMetaDataRepositoryDecoratorFactory mysqlEntityMetaDataRepository,
-			AttributeMetaDataRepositoryDecoratorFactory mysqlAttributeMetaDataRepository)
+			SearchService searchService)
 	{
 		if (fileRepositoryCollectionFactory == null) throw new IllegalArgumentException(
 				"fileRepositoryCollectionFactory is null");

@@ -114,14 +114,13 @@
 </div>
 <script>
 	<#-- load css dependencies -->
-	if (!$('link[href="<@resource_href "/css/jquery.molgenis.table.css"/>"]').length)
+	if (!$('link[href="<@resource_href '/css/jquery.molgenis.table.css'/>"]').length)
 		$('head').append('<link rel="stylesheet" href="<@resource_href "/css/jquery.molgenis.table.css"/>" type="text/css" />');
 	<#-- load js dependencies -->
 	$.when(
 		$.ajax("<@resource_href "/js/jquery.bootstrap.pager.js"/>", {'cache': true}),
 		$.ajax("<@resource_href "/js/jquery.molgenis.table.js"/>", {'cache': true}),
-		$.ajax("<@resource_href "/js/dalliance-compiled.js"/>", {'cache': true}),
-		$.ajax("<@resource_href "/js/dataexplorer-data.js"/>", {'cache': true}))
+		$.ajax("<@resource_href "/js/dalliance-compiled.js"/>", {'cache': true}))
 		.done(function() {
 			
 			molgenis.dataexplorer.data.setGenomeBrowserAttributes('${genomebrowser_start_list}', '${genomebrowser_chrom_list}', '${genomebrowser_id_list}', '${genomebrowser_patient_list}');
