@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
@@ -20,6 +21,7 @@ import com.google.common.collect.Lists;
 
 public class AggregateQueryGenerator
 {
+	private static final Logger LOG = Logger.getLogger(AggregateQueryGenerator.class);
 	public static String AGGREGATION_MISSING_POSTFIX = "_missing";
 
 	public void generate(SearchRequestBuilder searchRequestBuilder, AttributeMetaData aggAttr1,
@@ -73,6 +75,7 @@ public class AggregateQueryGenerator
 		{
 			searchRequestBuilder.addAggregation(aggregationBuilder);
 		}
+		LOG.debug("SearchRequest: " + searchRequestBuilder);
 	}
 
 	private List<AggregationBuilder<?>> createAggregations(AttributeMetaData attr, AttributeMetaData distinctAttr)
