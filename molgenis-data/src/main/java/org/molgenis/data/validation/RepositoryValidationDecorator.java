@@ -190,8 +190,14 @@ public class RepositoryValidationDecorator extends CrudRepositoryDecorator
 			{
 				rownr++;
 				Object value = entity.get(attr.getName());
+
 				if (value != null)
 				{
+					if (value instanceof Entity)
+					{
+						value = ((Entity) value).getIdValue();
+					}
+
 					// If adding values can never contain the value; if updating check if the id's are different, if the
 					// same your updating that entity
 					Object id = values.get(value);
