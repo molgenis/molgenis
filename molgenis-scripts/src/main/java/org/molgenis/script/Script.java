@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +15,8 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.util.FileStore;
+
+import com.google.common.collect.Lists;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -52,14 +55,9 @@ public class Script extends MapEntity
 		set(NAME, name);
 	}
 
-	public String getType()
+	public ScriptType getType()
 	{
-		return getString(TYPE);
-	}
-
-	public void setType(String type)
-	{
-		set(TYPE, type);
+		return getEntity(TYPE, ScriptType.class);
 	}
 
 	public String getContent()
@@ -82,9 +80,11 @@ public class Script extends MapEntity
 		set(RESULT_FILE_EXTENSION, resultFileExtension);
 	}
 
-	public List<String> getParameters()
+	public List<ScriptParameter> getParameters()
 	{
-		return getList(PARAMETERS);
+		Iterable<ScriptParameter> params = getEntities(PARAMETERS, ScriptParameter.class);
+		if (params == null) return Collections.emptyList();
+		return Lists.newArrayList(params);
 	}
 
 	public boolean isGenerateToken()

@@ -27,17 +27,19 @@
 	"dataexplorer.js",
 	"jquery.molgenis.table.js",
 	"col7a1.js"]>	
+
 <@header css js/>
-	<div class="row">
-		<p>
-			<div class="pull-left">
-				<h3>${title}</h3>
-			</div>
-			<div class="btn-group pull-right">
-				<button id="refresh_button" type="button" class="btn btn-primary btn-large">Generate view</button>
-			</div>
-		</p>
-	</div>
-	<div class="molgenis-table-container table-striped" id="table-container">
-	</div>
+<div class="row">
+	<div class="col-md-11">
+		<legend>${title}</legend>
+	</div>	
+		
+	<div class="col-md-1">
+		<div class="btn-group pull-right">
+			<button id="refresh_button" type="button" class="btn btn-primary btn-large">Generate view</button>
+		</div>
+	</div>	
+</div>
+
+<div class="molgenis-table-container table-striped" id="table-container"></div>
 <@footer/>

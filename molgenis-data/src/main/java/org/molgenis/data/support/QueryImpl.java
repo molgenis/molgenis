@@ -96,9 +96,10 @@ public class QueryImpl implements Query
 		return pageSize;
 	}
 
-	public void setPageSize(int pageSize)
+	public QueryImpl setPageSize(int pageSize)
 	{
 		this.pageSize = pageSize;
+		return this;
 	}
 
 	@Override
@@ -107,9 +108,10 @@ public class QueryImpl implements Query
 		return offset;
 	}
 
-	public void setOffset(int offset)
+	public QueryImpl setOffset(int offset)
 	{
 		this.offset = offset;
+		return this;
 	}
 
 	@Override

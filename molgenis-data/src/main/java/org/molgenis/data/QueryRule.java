@@ -75,6 +75,22 @@ public class QueryRule
 
 		/**
 		 * 'field' equal to 'value'
+		 * 
+		 * When 'field type' is 'Mref' its results are derived from the 'Contains' behavior. <br>
+		 * Examples: <br>
+		 * 1. ref1 OR ref2 can result in:
+		 * <ul>
+		 * <li>re1</li>
+		 * <li>ref1, ref2</li>
+		 * <li>ref1, ref2, ref3;</li>
+		 * <li>ref2</li>
+		 * <li>ref2, ref3</li>
+		 * </ul>
+		 * 2. ref1 AND ref2 can result in:
+		 * <ul>
+		 * <li>ref1, ref2</li>
+		 * <li>ref1, ref2, ref3</li>
+		 * </ul>
 		 */
 		EQUALS("="),
 

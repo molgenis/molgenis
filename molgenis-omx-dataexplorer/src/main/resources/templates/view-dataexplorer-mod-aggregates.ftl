@@ -10,8 +10,8 @@
 	                	</div>
 	            	</div>            	
 		         	<div class="form-group" id="distinct-attr">
-                        <label class="col-md-2 control-label"for="distinct-attr-select">${i18n.dataexplorer_aggregates_distinct}</label>
-                        <div class="col-md-3">
+                        <label class="col-md-1 control-label"for="distinct-attr-select">${i18n.dataexplorer_aggregates_distinct}</label>
+                        <div class="col-md-4">
                         	<div id="distinct-attr-select"></div>                  
 						</div>
                 	</div>
@@ -28,6 +28,8 @@
     </div>                
 </div>
 <script>
+	var totalCaption = '${i18n.dataexplorer_aggregates_total?js_string?html}';
+	
 	$.when($.ajax("<@resource_href "/js/dataexplorer-aggregates.js"/>", {'cache': true}))
 		.then(function() {
 			molgenis.dataexplorer.aggregates.createAggregatesTable();

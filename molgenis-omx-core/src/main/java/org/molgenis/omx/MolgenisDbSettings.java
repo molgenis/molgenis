@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
+import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
@@ -85,6 +86,7 @@ public class MolgenisDbSettings implements MolgenisSettings
 	}
 
 	@Override
+	@RunAsSystem
 	public Boolean getBooleanProperty(String key)
 	{
 		String value = getProperty(key);
@@ -97,6 +99,7 @@ public class MolgenisDbSettings implements MolgenisSettings
 	}
 
 	@Override
+	@RunAsSystem
 	public boolean getBooleanProperty(String key, boolean defaultValue)
 	{
 		Boolean value = getBooleanProperty(key);
@@ -109,7 +112,6 @@ public class MolgenisDbSettings implements MolgenisSettings
 	}
 
 	@Override
-	@RunAsSystem
 	public boolean updateProperty(String key, String content)
 	{
 		if (null == content)
@@ -165,5 +167,18 @@ public class MolgenisDbSettings implements MolgenisSettings
 			}
 		}
 		return result;
+	}
+
+	@Override
+	@RunAsSystem
+	public Integer getIntegerProperty(String key)
+	{
+		String value = getProperty(key);
+		if (value == null)
+		{
+			return null;
+		}
+
+		return DataConverter.toInt(value);
 	}
 }

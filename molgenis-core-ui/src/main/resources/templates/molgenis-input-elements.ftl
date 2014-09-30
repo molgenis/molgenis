@@ -5,11 +5,13 @@
 	<#assign nillable = field.nillable>
 	
 	<div class="form-group">
-    	<label class="col-md-3 control-label" for="${fieldName}">${field.label}&nbsp;<#if !nillable>*</#if></label>
-    	<div class="col-md-9">
-    		
+		<div class="col-md-3">
+    		<label class="control-label pull-right" for="${fieldName}">${field.label}&nbsp;<#if !nillable>*</#if></label>
+    	</div>
+    	
+    	<div class="col-md-9">	
     		<#if field.dataType.enumType == 'BOOL'>
-				<input type="checkbox" name="${fieldName}" id="${fieldName}" value="true" <#if entity!='' && entity.get(fieldName)?? && entity.get(fieldName)?string("true", "false") == "true">checked</#if>  <#if field.readonly || hasWritePermission?string("true", "false") == "false" >disabled="disabled"</#if>  >
+				<input type="checkbox" name="${fieldName}" id="${fieldName}" value="true" <#if entity!='' && entity.get(fieldName)?? && entity.get(fieldName)?string("true", "false") == "true">checked</#if>  <#if field.readonly || hasWritePermission?string("true", "false") == "false" >disabled="disabled"</#if>>
 	
 			<#elseif field.dataType.enumType == 'TEXT' || field.dataType.enumType =='HTML'>
 				<textarea class="form-control" name="${fieldName}" id="${fieldName}" <#if readonly>disabled="disabled"</#if> <#if !nillable>required="required"</#if> ><#if entity!='' && entity.get(fieldName)??>${entity.get(fieldName)!?html}</#if></textarea>
@@ -65,7 +67,7 @@
 					$(document).ready(function() {
 						var xrefs = [];
 						<#if entity!='' && entity.get(fieldName)??>
-							<#list entity.getEntities(fieldName) as xrefEntity>
+							<#list entity.getEntities(fieldName).iterator() as xrefEntity>
 								xrefs.push({id:'<@formatValue field.refEntity.idAttribute.dataType.enumType xrefEntity.idValue />', text:'${xrefEntity.get(field.refEntity.labelAttribute.name)!?html}'});
 							</#list>
 						</#if>
@@ -111,8 +113,10 @@
 				
 			<#elseif field.dataType.enumType == 'DATE_TIME'>
 				<div class="group-append datetime input-group">
-					<#if field.nillable><span class='input-group-addon'>
-						<span class='glyphicon glyphicon-remove empty-date-input clear-date-time-btn'></span></span>
+					<#if field.nillable>
+						<span class='input-group-addon'>
+							<span class='glyphicon glyphicon-remove empty-date-input clear-date-time-btn'></span>
+						</span>
 					</#if>
 					<span class='input-group-addon datepickerbutton'><span class='glyp2icon-calendar glyphicon glyphicon-calendar '></span></span>
 					<input type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" 
