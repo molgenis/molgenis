@@ -41,7 +41,7 @@
 			<legend>Required</legend>
 			<#assign optionalCounter = 0 />
 			<#list form.metaData.fields as field>
-				<#if !field.nillable>
+				<#if !field.nillable && field.visible>
 					<#if form.entity??>
 						<@input.render field form.hasWritePermission form.entity form.metaData.forUpdate/>
 					<#else>
@@ -55,7 +55,7 @@
 			<#if optionalCounter gt 0>
 				<legend>Optional</legend>
 				<#list form.metaData.fields as field>
-					<#if field.nillable>
+					<#if field.nillable && field.visible>
 						<#if form.entity??>
 							<@input.render field form.hasWritePermission form.entity form.metaData.forUpdate/>
 						<#else>
