@@ -53,7 +53,7 @@ public class UserManagerController extends MolgenisPluginController
 		model.addAttribute("viewState", viewState);
 	}
 
-	@RequestMapping(value = "/activation", method = RequestMethod.POST)
+	@RequestMapping(value = "/activation", method = RequestMethod.PUT)
 	@ResponseStatus(HttpStatus.OK)
 	public @ResponseBody
 	ActivationResponse activation(@RequestBody Activation activation)
@@ -114,7 +114,7 @@ public class UserManagerController extends MolgenisPluginController
 			this.id = id;
 		}
 	}
-
+	
 	public class Activation
 	{
 		private String type;
@@ -127,44 +127,174 @@ public class UserManagerController extends MolgenisPluginController
 			this.type = type;
 			this.active = active;
 		}
-		
+
+		/**
+		 * @return the type
+		 */
 		public String getType()
 		{
 			return type;
 		}
-		
+
+		/**
+		 * @param type
+		 *            the type to set
+		 */
 		public void setType(String type)
 		{
 			this.type = type;
 		}
-		
+
+		/**
+		 * @return the id
+		 */
 		public Integer getId()
 		{
 			return id;
 		}
-		
-		public void setType(Integer id)
+
+		/**
+		 * @param id
+		 *            the id to set
+		 */
+		public void setId(Integer id)
 		{
 			this.id = id;
 		}
-		
+
+		/**
+		 * @return the active
+		 */
 		public Boolean getActive()
 		{
 			return active;
 		}
-		
-		public void setType(Boolean active)
+
+		/**
+		 * @param active
+		 *            the active to set
+		 */
+		public void setActive(Boolean active)
 		{
 			this.active = active;
 		}
 	}
 
-	@RequestMapping(value = "/changeGroupMembership/{userId}/{groupId}/{member}", method = RequestMethod.PUT)
+	@RequestMapping(value = "/changeGroupMembership", method = RequestMethod.PUT)
 	@ResponseStatus(HttpStatus.OK)
-	public void changeGroupMembership(@PathVariable Integer userId, @PathVariable Integer groupId,
-			@PathVariable Boolean member)
+	public @ResponseBody
+	GroupMembershipResponse changeGroupMembership(@RequestBody GroupMembership groupMembership)
 	{
-		if (member) this.pluginUserManagerService.addUserToGroup(groupId, userId);
-		if (!member) this.pluginUserManagerService.removeUserFromGroup(groupId, userId);
+		GroupMembershipResponse groupMembershipResponse = new GroupMembershipResponse();
+		groupMembershipResponse.setUserId(groupMembership.getUserId());
+
+		if (null != groupMembership.getMember())
+		{
+			if (groupMembership.getMember())
+			{
+				this.pluginUserManagerService.addUserToGroup(groupMembership.getGroupId(), groupMembership.getUserId());
+			}
+			else if (!groupMembership.getMember())
+			{
+				this.pluginUserManagerService
+						.removeUserFromGroup(
+						groupMembership.getGroupId(), groupMembership.getUserId());
+			}
+			
+			groupMembershipResponse.setSuccess(true);
+		}
+
+		return groupMembershipResponse;
+	}
+	
+
+	public class GroupMembership
+	{
+		/**
+		 * @return the userId
+		 */
+		public Integer getUserId()
+		{
+			return userId;
+		}
+
+		/**
+		 * @param userId
+		 *            the userId to set
+		 */
+		public void setUserId(Integer userId)
+		{
+			this.userId = userId;
+		}
+
+		/**
+		 * @return the groupId
+		 */
+		public Integer getGroupId()
+		{
+			return groupId;
+		}
+
+		/**
+		 * @param groupId
+		 *            the groupId to set
+		 */
+		public void setGroupId(Integer groupId)
+		{
+			this.groupId = groupId;
+		}
+
+		/**
+		 * @return the member
+		 */
+		public Boolean getMember()
+		{
+			return member;
+		}
+
+		/**
+		 * @param member
+		 *            the member to set
+		 */
+		public void setMember(Boolean member)
+		{
+			this.member = member;
+		}
+		Integer userId;
+		Integer groupId;
+		Boolean member;
+	}
+
+	public class GroupMembershipResponse
+	{
+		Integer userId;
+		boolean success;
+
+		public boolean isSuccess()
+		{
+			return success;
+		}
+
+		public void setSuccess(boolean success)
+		{
+			this.success = success;
+		}
+
+		/**
+		 * @return the userId
+		 */
+		public Integer getUserId()
+		{
+			return userId;
+		}
+
+		/**
+		 * @param userId
+		 *            the userId to set
+		 */
+		public void setUserId(Integer userId)
+		{
+			this.userId = userId;
+		}
 	}
 }
