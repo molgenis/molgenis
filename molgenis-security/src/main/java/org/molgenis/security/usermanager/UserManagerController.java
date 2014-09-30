@@ -8,8 +8,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
@@ -51,20 +53,110 @@ public class UserManagerController extends MolgenisPluginController
 		model.addAttribute("viewState", viewState);
 	}
 
-	@RequestMapping(value = "/setActivation/{type}/{id}/{active}", method = RequestMethod.PUT)
+	@RequestMapping(value = "/activation", method = RequestMethod.POST)
 	@ResponseStatus(HttpStatus.OK)
-	public void setActivation(@PathVariable String type, @PathVariable Integer id, @PathVariable Boolean active)
+	public @ResponseBody
+	ActivationResponse activation(@RequestBody Activation activation)
 	{
-		if ("user".equals(type))
+		ActivationResponse activationResponse = new ActivationResponse();
+		activationResponse.setId(activation.getId());
+		activationResponse.setType(activation.getType());
+		if ("user".equals(activation.getType()))
 		{
-			this.pluginUserManagerService.setActivationUser(id, active);
+			this.pluginUserManagerService.setActivationUser(activation.getId(), activation.getActive());
+			activationResponse.setSuccess(true);
 		}
-		else if ("group".equals(type))
+		else if ("group".equals(activation.getType()))
 		{
-			this.pluginUserManagerService.setActivationGroup(id, active);
+			this.pluginUserManagerService.setActivationGroup(activation.getId(), activation.getActive());
+			activationResponse.setSuccess(true);
 		}
 		else throw new RuntimeException(
-				"Trying to deactivate entity. Type may only be 'user' or 'group', however, value is: " + type);
+				"Trying to deactivate entity. Type may only be 'user' or 'group', however, value is: "
+						+ activation.getType());
+		
+		return activationResponse;
+	}
+	
+	public class ActivationResponse
+	{
+		private boolean success = false;
+		private String type;
+		private Integer id;
+
+		public boolean isSuccess()
+		{
+			return success;
+		}
+
+		public void setSuccess(boolean success)
+		{
+			this.success = success;
+		}
+
+		public String getType()
+		{
+			return type;
+		}
+
+		public void setType(String type)
+		{
+			this.type = type;
+		}
+
+		public Integer getId()
+		{
+			return id;
+		}
+
+		public void setId(Integer id)
+		{
+			this.id = id;
+		}
+	}
+
+	public class Activation
+	{
+		private String type;
+		private Integer id;
+		private Boolean active;
+
+		Activation(String type, Integer id, Boolean active)
+		{
+			this.id = id;
+			this.type = type;
+			this.active = active;
+		}
+		
+		public String getType()
+		{
+			return type;
+		}
+		
+		public void setType(String type)
+		{
+			this.type = type;
+		}
+		
+		public Integer getId()
+		{
+			return id;
+		}
+		
+		public void setType(Integer id)
+		{
+			this.id = id;
+		}
+		
+		public Boolean getActive()
+		{
+			return active;
+		}
+		
+		public void setType(Boolean active)
+		{
+			this.active = active;
+		}
 	}
 
 	@RequestMapping(value = "/changeGroupMembership/{userId}/{groupId}/{member}", method = RequestMethod.PUT)

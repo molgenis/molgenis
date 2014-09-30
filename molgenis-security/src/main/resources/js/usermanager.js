@@ -50,15 +50,31 @@
 		// type: "user" | "group"
 		var active = checkbox.checked;
 		$.ajax({
-			type : 'PUT',
-			url : molgenis.getContextUrl() + '/setActivation/' + type + '/' + id + '/' + active,
-			success : function(text) {
-				$('#groupRow' + id).addClass('success')
-				$('#userRow' + id).addClass('success');
-				setTimeout(function() {
-					$('#groupRow' + id).removeClass('success');
-					location.reload();
-				}, 1000);
+			headers: { 
+		        'Accept': 'application/json',
+		        'Content-Type': 'application/json' 
+		    },
+			type : 'POST',
+			dataType: 'json',
+			data: JSON.stringify({
+				type : type,
+				id: id,
+				active: active
+			}),
+			url : molgenis.getContextUrl() + '/activation',
+			success : function(data) {
+				console.log(data);
+				if(data.success){
+					if(data.type === "group") {
+						$('#groupRow' + data.id).addClass('success');
+						setTimeout(function() {$('#groupRow' + data.id).removeClass('success');}, 1000);
+					}
+					
+					if(data.type === "user") {
+						$('#userRow' + data.id).addClass('success');
+						setTimeout(function() {$('#userRow' + data.id).removeClass('success');}, 1000);
+					}
+				}
 			}
 		});
 	}
@@ -126,9 +142,13 @@
 
 		var submitBtn = $('#submitFormButton');
 		submitBtn.click(function(e) {
-			e.preventDefault();
-			e.stopPropagation();
 			$('#entity-form').submit();
+			return false;
+		});
+		
+		$( "#target" ).submit(function( event ) {
+			alert( "Handler for .submit() called." );
+			event.preventDefault();
 		});
 
 		$(document).on('onFormSubmitSuccess', function() {
@@ -139,8 +159,7 @@
 		$('#managerModal').keydown(function(e) {
 			// prevent modal being submitted if one presses enter
 			if (event.keyCode === 13) {
-				e.preventDefault();
-				e.stopPropagation();
+				return false;
 			}
 		});
 	});
