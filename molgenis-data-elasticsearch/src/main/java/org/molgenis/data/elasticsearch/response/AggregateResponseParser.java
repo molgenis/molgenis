@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.elasticsearch.common.collect.Sets;
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.Aggregations;
@@ -31,6 +32,7 @@ import com.google.common.collect.Lists;
 public class AggregateResponseParser
 {
 	private static final String MISSING_VALUE_LABEL = "N/A";
+	private static final Logger LOG = Logger.getLogger(AggregateResponseParser.class);
 
 	public AggregateResult parseAggregateResponse(AttributeMetaData aggAttr1, AttributeMetaData aggAttr2,
 			AttributeMetaData aggAttrDistinct, Aggregations aggregations, DataService dataService)
@@ -65,12 +67,14 @@ public class AggregateResponseParser
 			for (Bucket bucket : buckets)
 			{
 				Aggregations subAggregations = bucket.getAggregations();
+				LOG.debug("subAggregations:" + subAggregations.asList());
 				if (subAggregations != null && Iterables.size(subAggregations) > 0)
 				{
 					is2dAggregation = hasTermsAggregation(subAggregations);
 					break;
 				}
 			}
+			LOG.debug("is2dAggregation:" + is2dAggregation);
 
 			// create (sorted) labels for x-axis
 			for (Bucket bucket : buckets)
@@ -202,9 +206,10 @@ public class AggregateResponseParser
 				{
 					Aggregations distinctAggregations = bucket.getAggregations();
 					long bucketCount;
-					if (distinctAggregations != null)
+					Cardinality cardinality = getCardinalityAggregation(distinctAggregations);
+					if (cardinality != null)
 					{
-						bucketCount = getCardinalityAggregation(distinctAggregations).getValue();
+						bucketCount = cardinality.getValue();
 					}
 					else
 					{
@@ -336,10 +341,18 @@ public class AggregateResponseParser
 
 	private Cardinality getCardinalityAggregation(Aggregations aggregations)
 	{
+		if (aggregations == null)
+		{
+			return null;
+		}
 		int nrCardinalityAggregations = Iterables.size(aggregations);
 		if (nrCardinalityAggregations > 1)
 		{
 			throw new RuntimeException("Multiple aggregations [" + nrCardinalityAggregations + "] not supported");
+		}
+		if (nrCardinalityAggregations == 0)
+		{
+			return null;
 		}
 		Aggregation aggregation = aggregations.iterator().next();
 		if (aggregation instanceof ReverseNested)
@@ -360,8 +373,7 @@ public class AggregateResponseParser
 	}
 
 	/**
-	 * Convert matrix labels that contain ids to label attribute values. Keeps in mind that the last label on a axis is
-	 * "Total".
+	 * Convert matrix labels that contain ids to label attribute values.
 	 * 
 	 * @param idLabels
 	 * @param entityMetaData
@@ -387,13 +399,19 @@ public class AggregateResponseParser
 		Map<String, String> idToLabelMap = new HashMap<String, String>();
 		for (Entity entity : entities)
 		{
-			idToLabelMap.put(entity.getIdValue().toString(), entity.getLabelValue());
+			if (entity != null && entity.getIdValue() != null)
+			{
+				idToLabelMap.put(entity.getIdValue().toString(), entity.getLabelValue());
+			}
 		}
 
 		for (int i = 0; i < nrLabels; ++i)
 		{
 			String id = idLabels.get(i);
-			idLabels.set(i, idToLabelMap.get(id));
+			if (idToLabelMap.containsKey(id))
+			{
+				idLabels.set(i, idToLabelMap.get(id));
+			}
 		}
 	}
 

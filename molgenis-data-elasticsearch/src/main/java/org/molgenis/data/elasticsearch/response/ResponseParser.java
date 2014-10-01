@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.ShardSearchFailure;
 import org.elasticsearch.common.base.Joiner;
@@ -30,6 +31,7 @@ import org.molgenis.data.elasticsearch.util.SearchResult;
 public class ResponseParser
 {
 	private final AggregateResponseParser aggregateResponseParser;
+	private static final Logger LOG = Logger.getLogger(ResponseParser.class);
 
 	public ResponseParser()
 	{
@@ -39,6 +41,10 @@ public class ResponseParser
 	public SearchResult parseSearchResponse(SearchRequest request, SearchResponse response,
 			EntityMetaData entityMetaData, DataService dataService)
 	{
+		if(LOG.isDebugEnabled())
+		{
+			LOG.debug("Response:" + response.toString());
+		}
 		ShardSearchFailure[] failures = response.getShardFailures();
 		if ((failures != null) && (failures.length > 0))
 		{
