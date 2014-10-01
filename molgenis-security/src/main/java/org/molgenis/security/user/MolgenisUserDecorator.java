@@ -121,6 +121,7 @@ public class MolgenisUserDecorator extends CrudRepositoryDecorator
 			UserAuthority userAuthority = new UserAuthority();
 			userAuthority.setMolgenisUser(molgenisUser);
 			userAuthority.setRole(SecurityUtils.AUTHORITY_SU);
+
 			getUserAuthorityRepository().add(userAuthority);
 		}
 	}
@@ -199,4 +200,5 @@ public class MolgenisUserDecorator extends CrudRepositoryDecorator
 		}
 		return userAuthorityRepository;
 	}
+
 }

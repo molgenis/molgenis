@@ -7,19 +7,27 @@ import org.apache.commons.io.IOUtils;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.CrudRepositoryDecorator;
+import org.molgenis.data.DataConverter;
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.fieldtypes.FieldType;
+import org.molgenis.fieldtypes.MrefField;
+import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.util.HugeMap;
+import org.molgenis.util.HugeSet;
 
 import com.google.common.collect.Sets;
 
 public class RepositoryValidationDecorator extends CrudRepositoryDecorator
 {
 	private final EntityAttributesValidator entityAttributesValidator;
+	private final DataService dataService;
 
-	public RepositoryValidationDecorator(CrudRepository repository, EntityAttributesValidator entityAttributesValidator)
+	public RepositoryValidationDecorator(DataService dataService, CrudRepository repository,
+			EntityAttributesValidator entityAttributesValidator)
 	{
 		super(repository);
+		this.dataService = dataService;
 		this.entityAttributesValidator = entityAttributesValidator;
 	}
 
@@ -73,10 +81,25 @@ public class RepositoryValidationDecorator extends CrudRepositoryDecorator
 		{
 			if (attr.isUnique())
 			{
-				violations = checkUniques(entities, attr, true);
+				violations = checkUniques(entities, attr, forUpdate);
 				if (!violations.isEmpty())
 				{
 					throw new MolgenisValidationException(violations);
+				}
+			}
+
+			if (!getDecoratedRepository().getName().equalsIgnoreCase("UserAuthority"))// FIXME MolgenisUserDecorator
+																						// adds UserAuthority in add
+																						// method so it is not yet
+																						// indexed and can not be found
+			{
+				if (attr.getDataType() instanceof XrefField || attr.getDataType() instanceof MrefField)
+				{
+					violations = checkRefValues(entities, attr);
+					if (!violations.isEmpty())
+					{
+						throw new MolgenisValidationException(violations);
+					}
 				}
 			}
 		}
@@ -146,8 +169,8 @@ public class RepositoryValidationDecorator extends CrudRepositoryDecorator
 			{
 				if (attr.isReadonly())
 				{
-					Object newValue = entity.get(attr.getName());
-					Object oldValue = oldEntity.get(attr.getName());
+					Object newValue = attr.getDataType().convert(entity.get(attr.getName()));
+					Object oldValue = attr.getDataType().convert(oldEntity.get(attr.getName()));
 
 					if ((null == newValue && null == oldValue) || !newValue.equals(oldValue))
 					{
@@ -162,6 +185,75 @@ public class RepositoryValidationDecorator extends CrudRepositoryDecorator
 		}
 
 		return violations;
+	}
+
+	protected Set<ConstraintViolation> checkRefValues(Iterable<? extends Entity> entities, AttributeMetaData attr)
+	{
+		Set<ConstraintViolation> violations = Sets.newHashSet();
+		HugeSet<Object> refEntityIdValues = new HugeSet<Object>();
+
+		try
+		{
+			for (Entity refEntity : dataService.findAll(attr.getRefEntity().getName()))
+			{
+				refEntityIdValues.add(refEntity.getIdValue());
+			}
+
+			if (attr.getRefEntity().getName().equalsIgnoreCase(attr.getName()))// Self reference
+			{
+				for (Entity entity : entities)
+				{
+					if (entity.getIdValue() != null)
+					{
+						refEntityIdValues.add(entity.getIdValue());
+					}
+				}
+			}
+
+			long rownr = 0;
+			for (Entity entity : entities)
+			{
+				rownr++;
+				if (attr.getDataType() instanceof XrefField)
+				{
+					Entity refEntity = entity.getEntity(attr.getName());
+					if ((refEntity != null) && (refEntity.getIdValue() != null)
+							&& !refEntityIdValues.contains(refEntity.getIdValue()))
+					{
+						String message = String.format("Unknown xref value '%s' for attribute '%s' of entity '%s'.",
+								DataConverter.toString(refEntity.getIdValue()), attr.getName(), getEntityMetaData()
+										.getLabel());
+						violations.add(new ConstraintViolation(message, attr, rownr));
+						if (violations.size() > 4) break;
+					}
+				}
+				else if (attr.getDataType() instanceof MrefField)
+				{
+					Iterable<Entity> refEntities = entity.getEntities(attr.getName());
+					if (refEntities != null)
+					{
+						for (Entity refEntity : refEntities)
+						{
+							if ((refEntity.getIdValue() != null) && !refEntityIdValues.contains(refEntity.getIdValue()))
+							{
+								String message = String.format(
+										"Unknown mref value '%s' for attribute '%s' of entity '%s'.",
+										DataConverter.toString(refEntity.getIdValue()), attr.getName(),
+										getEntityMetaData().getLabel());
+								violations.add(new ConstraintViolation(message, attr, rownr));
+								if (violations.size() > 4) break;
+							}
+						}
+					}
+				}
+			}
+
+			return violations;
+		}
+		finally
+		{
+			IOUtils.closeQuietly(refEntityIdValues);
+		}
 	}
 
 	protected Set<ConstraintViolation> checkUniques(Iterable<? extends Entity> entities, AttributeMetaData attr,
@@ -179,6 +271,10 @@ public class RepositoryValidationDecorator extends CrudRepositoryDecorator
 					Object value = entity.get(attr.getName());
 					if ((value != null) && (entity.getIdValue() != null))
 					{
+						if (value instanceof Entity)
+						{
+							value = ((Entity) value).getIdValue();
+						}
 						values.put(value, entity.getIdValue());
 					}
 				}
@@ -198,13 +294,14 @@ public class RepositoryValidationDecorator extends CrudRepositoryDecorator
 						value = ((Entity) value).getIdValue();
 					}
 
-					// If adding values can never contain the value; if updating check if the id's are different, if the
-					// same your updating that entity
+					// If adding, values can never contain the value; if updating check if the id's are different, if
+					// the
+					// same, your updating that entity
 					Object id = values.get(value);
 					if (values.containsKey(value) && (!forUpdate || !entityHasId(entity, id)))
 					{
-						violations.add(new ConstraintViolation("Duplicate value [" + value + "] for unique attribute ["
-								+ attr.getName() + "] from entity [" + getName() + "]", attr, rownr));
+						violations.add(new ConstraintViolation("Duplicate value '" + value + "' for unique attribute '"
+								+ attr.getName() + "' from entity '" + getName() + "'", attr, rownr));
 						if (violations.size() > 4) break;
 					}
 					else
