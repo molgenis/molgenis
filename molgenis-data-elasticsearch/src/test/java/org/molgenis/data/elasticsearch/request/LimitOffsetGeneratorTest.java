@@ -31,7 +31,7 @@ public class LimitOffsetGeneratorTest
 	{
 		LimitOffsetGenerator gen = new LimitOffsetGenerator();
 		gen.generate(searchRequestBuilderMock, new QueryImpl(), null);
-		verify(searchRequestBuilderMock).setSize(Integer.valueOf(1000));
+		verify(searchRequestBuilderMock).setSize(Integer.valueOf(100000));
 	}
 
 	@Test

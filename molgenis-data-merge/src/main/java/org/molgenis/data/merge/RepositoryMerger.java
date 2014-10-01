@@ -132,7 +132,7 @@ public class RepositoryMerger
 				}
 				if (updatedEntities.size() > batchSize)
 				{
-					resultRepository.add(updatedEntities);
+					resultRepository.update(updatedEntities);
 					updatedEntities.clear();
 				}
 			}

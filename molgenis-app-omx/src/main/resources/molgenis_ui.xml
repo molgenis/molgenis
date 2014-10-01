@@ -4,12 +4,12 @@
 		<plugin id="home" name="Home" url="home"/>
         <menu label="Import" name ="import">
             <plugin id="importwizard" name="Upload" url="importwizard"/>
-            <plugin id="vcfimporter" name="VCF" url="vcfimporter"/>
-            <plugin id="geneticrepositorymerger" name="Merge" url="geneticrepositorymerger"/>
+            <plugin id="vcfimporter" name="Upload VCF" url="vcfimporter"/>
         </menu>
 		<plugin id="catalogue" name="Catalogue" url="catalogue"/>
 		<plugin id="dataexplorer" name="Data Explorer" url="dataexplorer"/>
         <menu label="Plugins" name="plugins">
+            <plugin id="geneticrepositorymerger" name="Merge Genetic Data" url="geneticrepositorymerger"/>
             <plugin id="background" name="Background" url="background"/>
             <menu label="BiobankConnect" name="biobankconnect">
                 <plugin id="biobankconnect" name="BiobankConnect Wizard" url="biobankconnect"/>

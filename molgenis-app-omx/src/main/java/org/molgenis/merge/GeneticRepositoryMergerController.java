@@ -36,13 +36,13 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 	public static final DefaultAttributeMetaData CHROM = new DefaultAttributeMetaData("#CHROM",
 			MolgenisFieldTypes.FieldTypeEnum.STRING);
 	public static final DefaultAttributeMetaData POS = new DefaultAttributeMetaData("POS",
-			MolgenisFieldTypes.FieldTypeEnum.STRING);
+			MolgenisFieldTypes.FieldTypeEnum.LONG);
 	public static final DefaultAttributeMetaData REF = new DefaultAttributeMetaData("REF",
 			MolgenisFieldTypes.FieldTypeEnum.STRING);
 	public static final DefaultAttributeMetaData ALT = new DefaultAttributeMetaData("ALT",
 			MolgenisFieldTypes.FieldTypeEnum.STRING);
 
-	public static final String VKGL = "VKGL";
+	public static final String VKGL = "Merged";
 
 	private final ArrayList<AttributeMetaData> commonAttributes;
 	private RepositoryMerger repositoryMerger;

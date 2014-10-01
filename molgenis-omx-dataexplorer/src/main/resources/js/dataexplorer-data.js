@@ -312,7 +312,7 @@
 			// TODO implement elegant solution for genome browser specific code
 			$.each(data.filters, function() {
 				if(this.attribute === genomebrowserStartAttribute){
-                    genomeBrowser.setLocation(genomeBrowser.chr, this.getComplexFilterElements()[0].simpleFilter.fromValue, this.getComplexFilterElements()[0].simpleFilter.toValue)
+                    genomeBrowser.setLocation(genomeBrowser.chr, parseInt(this.getComplexFilterElements()[0].simpleFilter.fromValue), parseInt(this.getComplexFilterElements()[0].simpleFilter.toValue))
                 };
 				if(this.attribute === genomebrowserChromosomeAttribute){
                     genomeBrowser.setLocation(this.getComplexFilterElements()[0].simpleFilter.getValues()[0], genomeBrowser.viewStart, genomeBrowser.viewEnd)
