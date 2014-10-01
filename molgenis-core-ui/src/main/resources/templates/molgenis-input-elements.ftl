@@ -124,7 +124,7 @@
 						class="form-control<#if field.nillable> nillable</#if>" <#if readonly>disabled="disabled"</#if>
 						<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string("yyyy-MM-dd'T'HH:mm:ssZ")}"</#if>
 						<#if !nillable>required="required"</#if> 
-						data-rule-date="true" />
+						data-rule-date-ISO="true" />
 							
   					<#if field.nillable>
 						<span class='input-group-addon'>
