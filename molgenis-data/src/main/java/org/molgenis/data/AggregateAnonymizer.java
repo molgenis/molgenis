@@ -1,7 +1,5 @@
 package org.molgenis.data;
 
-import java.util.List;
-
 /**
  * Filter counts smaller the a threshold value
  * 
@@ -11,5 +9,5 @@ public interface AggregateAnonymizer
 {
 	public static final long AGGREGATE_ANONYMIZATION_VALUE = -1;
 
-	List<List<Long>> anonymize(List<List<Long>> matrix, int threshold);
+	AnonymizedAggregateResult anonymize(AggregateResult aggregateResult, int threshold);
 }

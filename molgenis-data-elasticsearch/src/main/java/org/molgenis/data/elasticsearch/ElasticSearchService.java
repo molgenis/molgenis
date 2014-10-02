@@ -41,7 +41,6 @@ import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.SearchHit;
-import org.molgenis.data.AggregateAnonymizer;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
@@ -62,7 +61,6 @@ import org.molgenis.data.elasticsearch.util.Hit;
 import org.molgenis.data.elasticsearch.util.MultiSearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
-import org.molgenis.data.support.AggregateAnonymizerImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.util.Pair;
 
@@ -97,7 +95,6 @@ public class ElasticSearchService implements SearchService
 	private final ResponseParser responseParser = new ResponseParser();
 	private final SearchRequestGenerator generator = new SearchRequestGenerator();
 	private final EntityToSourceConverter entityToSourceConverter;
-	private final AggregateAnonymizer aggregateAnonymizer = new AggregateAnonymizerImpl();
 
 	public ElasticSearchService(Client client, String indexName, DataService dataService,
 			EntityToSourceConverter entityToSourceConverter)
@@ -1022,22 +1019,10 @@ public class ElasticSearchService implements SearchService
 		AttributeMetaData xAttr = aggregateQuery.getAttributeX();
 		AttributeMetaData yAttr = aggregateQuery.getAttributeY();
 		AttributeMetaData distinctAttr = aggregateQuery.getAttributeDistinct();
-		Integer threshold = aggregateQuery.getAnonymizationThreshold();
-
 		SearchRequest searchRequest = new SearchRequest(entityMetaData.getName(), q, Collections.<String> emptyList(),
-				xAttr, yAttr, distinctAttr, threshold);
+				xAttr, yAttr, distinctAttr);
 		SearchResult searchResults = search(searchRequest);
-		AggregateResult aggregateResult = searchResults.getAggregate();
-
-		if (aggregateQuery.getAnonymizationThreshold() != null && aggregateQuery.getAnonymizationThreshold() > 0)
-		{
-			List<List<Long>> anonymizedMatrix = aggregateAnonymizer.anonymize(aggregateResult.getMatrix(),
-					aggregateQuery.getAnonymizationThreshold());
-			aggregateResult = new AggregateResult(anonymizedMatrix, aggregateResult.getxLabels(),
-					aggregateResult.getyLabels(), aggregateResult.getAnonymizationThreshold());
-		}
-
-		return aggregateResult;
+		return searchResults.getAggregate();
 	}
 
 	/*

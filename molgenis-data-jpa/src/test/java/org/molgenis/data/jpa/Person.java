@@ -116,7 +116,7 @@ public class Person extends AbstractMetaDataEntity
 	public Iterable<String> getAttributeNames()
 	{
 		return Arrays.asList(new String[]
-		{ "firstName", "lastName", "age", "father", "children" });
+		{ "id", "firstName", "lastName", "age", "father", "children" });
 	}
 
 	@Override

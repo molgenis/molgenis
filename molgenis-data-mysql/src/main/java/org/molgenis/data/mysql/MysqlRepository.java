@@ -29,6 +29,7 @@ import org.molgenis.data.Queryable;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.support.AbstractCrudRepository;
+import org.molgenis.data.support.BatchingQueryResult;
 import org.molgenis.data.support.ConvertingIterable;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -103,18 +104,24 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		try
 		{
 			jdbcTemplate.execute(getCreateSql());
-			for (String fkeySql : getCreateFKeySql())
-				jdbcTemplate.execute(fkeySql);
 
-			// add mref tables
-			for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
+			for (AttributeMetaData attr : getEntityMetaData().getAtomicAttributes())
 			{
-				if (att.getDataType() instanceof MrefField)
+				// add mref tables
+				if (attr.getDataType() instanceof MrefField)
 				{
-					jdbcTemplate.execute(getMrefCreateSql(att));
+					jdbcTemplate.execute(getMrefCreateSql(attr));
+				}
+				else if (attr.getDataType() instanceof XrefField)
+				{
+					jdbcTemplate.execute(getCreateFKeySql(attr));
+				}
+
+				if (attr.isUnique())
+				{
+					jdbcTemplate.execute(getUniqueSql(attr));
 				}
 			}
-
 		}
 		catch (Exception e)
 		{
@@ -134,6 +141,16 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 			else
 			{
 				jdbcTemplate.execute(getAlterSql(attributeMetaData));
+			}
+
+			if (attributeMetaData.getDataType() instanceof XrefField)
+			{
+				jdbcTemplate.execute(getCreateFKeySql(attributeMetaData));
+			}
+
+			if (attributeMetaData.isUnique())
+			{
+				jdbcTemplate.execute(getUniqueSql(attributeMetaData));
 			}
 		}
 		catch (Exception e)
@@ -295,21 +312,19 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		return sql.toString();
 	}
 
-	protected List<String> getCreateFKeySql()
+	protected String getCreateFKeySql(AttributeMetaData att)
 	{
-		List<String> sql = new ArrayList<String>();
-		// foreign keys
-		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
-			if (att.getDataType() instanceof XrefField)
-			{
-				sql.add(new StringBuilder().append("ALTER TABLE ").append(getEntityMetaData().getName())
-						.append(" ADD FOREIGN KEY (").append('`').append(att.getName()).append('`')
-						.append(") REFERENCES ").append('`').append(att.getRefEntity().getName()).append('`')
-						.append('(').append('`').append(att.getRefEntity().getIdAttribute().getName()).append('`')
-						.append(")").toString());
-			}
+		return new StringBuilder().append("ALTER TABLE ").append(getEntityMetaData().getName())
+				.append(" ADD FOREIGN KEY (").append('`').append(att.getName()).append('`').append(") REFERENCES ")
+				.append('`').append(att.getRefEntity().getName()).append('`').append('(').append('`')
+				.append(att.getRefEntity().getIdAttribute().getName()).append('`').append(")").toString();
+	}
 
-		return sql;
+	protected String getUniqueSql(AttributeMetaData att)
+	{
+		return new StringBuilder().append("ALTER TABLE ").append(getEntityMetaData().getName())
+				.append(" ADD CONSTRAINT ").append('`').append(att.getName()).append("_unique").append('`')
+				.append(" UNIQUE (").append('`').append(att.getName()).append('`').append(")").toString();
 	}
 
 	@Override
@@ -508,6 +523,23 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 
 	@Override
 	public Iterable<Entity> findAll(Query q)
+	{
+		if ((q.getOffset() != 0) || (q.getPageSize() != 0))
+		{
+			return findAllNoBatching(q);
+		}
+
+		return new BatchingQueryResult(BATCH_SIZE, q)
+		{
+			@Override
+			protected Iterable<Entity> getBatch(Query batchQuery)
+			{
+				return findAllNoBatching(batchQuery);
+			}
+		};
+	}
+
+	private Iterable<Entity> findAllNoBatching(Query q)
 	{
 		List<Object> parameters = Lists.newArrayList();
 		String sql = getSelectSql(q, parameters);

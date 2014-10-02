@@ -509,7 +509,7 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Cr
 			throw new MolgenisDataException("Missing aggregate attribute");
 		}
 
-		SearchRequest request = new SearchRequest(dataSetIdentifier, q, null, xAttr, yAttr, distinctAttr, null);
+		SearchRequest request = new SearchRequest(dataSetIdentifier, q, null, xAttr, yAttr, distinctAttr);
 		SearchResult result = searchService.search(request);
 
 		return result.getAggregate();

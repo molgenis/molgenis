@@ -16,7 +16,6 @@ public class SearchRequest
 	private AttributeMetaData aggregateField1;
 	private AttributeMetaData aggregateField2;
 	private AttributeMetaData aggregateFieldDistinct;
-	private Integer aggregateAnonymizationThreshold;
 
 	public SearchRequest()
 	{
@@ -32,13 +31,12 @@ public class SearchRequest
 
 	public SearchRequest(String documentType, Query query, List<String> fieldsToReturn,
 			AttributeMetaData aggregateField1, AttributeMetaData aggregateField2,
-			AttributeMetaData aggregateFieldDistinct, Integer aggregateAnonymizationThreshold)
+			AttributeMetaData aggregateFieldDistinct)
 	{
 		this(documentType, query, fieldsToReturn);
 		this.aggregateField1 = aggregateField1;
 		this.aggregateField2 = aggregateField2;
 		this.aggregateFieldDistinct = aggregateFieldDistinct;
-		this.aggregateAnonymizationThreshold = aggregateAnonymizationThreshold;
 	}
 
 	public String getDocumentType()
@@ -76,11 +74,6 @@ public class SearchRequest
 		return aggregateFieldDistinct;
 	}
 
-	public Integer getAggregateAnonymizationThreshold()
-	{
-		return aggregateAnonymizationThreshold;
-	}
-
 	@Override
 	public String toString()
 	{
@@ -92,12 +85,10 @@ public class SearchRequest
 	{
 		final int prime = 31;
 		int result = 1;
-		result = prime * result
-				+ ((aggregateAnonymizationThreshold == null) ? 0 : aggregateAnonymizationThreshold.hashCode());
+		result = prime * result + ((documentType == null) ? 0 : documentType.hashCode());
 		result = prime * result + ((aggregateField1 == null) ? 0 : aggregateField1.hashCode());
 		result = prime * result + ((aggregateField2 == null) ? 0 : aggregateField2.hashCode());
-		result = prime * result + ((aggregateFieldDistinct == null) ? 0 : aggregateFieldDistinct.hashCode());
-		result = prime * result + ((documentType == null) ? 0 : documentType.hashCode());
+		result = prime * result + ((aggregateFieldDistinct == null) ? 0 : aggregateField2.hashCode());
 		result = prime * result + ((fieldsToReturn == null) ? 0 : fieldsToReturn.hashCode());
 		result = prime * result + ((query == null) ? 0 : query.hashCode());
 		return result;
@@ -110,11 +101,11 @@ public class SearchRequest
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
 		SearchRequest other = (SearchRequest) obj;
-		if (aggregateAnonymizationThreshold == null)
+		if (documentType == null)
 		{
-			if (other.aggregateAnonymizationThreshold != null) return false;
+			if (other.documentType != null) return false;
 		}
-		else if (!aggregateAnonymizationThreshold.equals(other.aggregateAnonymizationThreshold)) return false;
+		else if (!documentType.equals(other.documentType)) return false;
 		if (aggregateField1 == null)
 		{
 			if (other.aggregateField1 != null) return false;
@@ -130,11 +121,6 @@ public class SearchRequest
 			if (other.aggregateFieldDistinct != null) return false;
 		}
 		else if (!aggregateFieldDistinct.equals(other.aggregateFieldDistinct)) return false;
-		if (documentType == null)
-		{
-			if (other.documentType != null) return false;
-		}
-		else if (!documentType.equals(other.documentType)) return false;
 		if (fieldsToReturn == null)
 		{
 			if (other.fieldsToReturn != null) return false;

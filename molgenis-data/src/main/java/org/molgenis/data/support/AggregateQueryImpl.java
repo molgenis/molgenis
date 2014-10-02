@@ -10,7 +10,6 @@ public class AggregateQueryImpl implements AggregateQuery
 	private AttributeMetaData attrY;
 	private AttributeMetaData attrDistinct;
 	private Query q;
-	private Integer anonymizationThreshold;
 
 	public AggregateQueryImpl()
 	{
@@ -39,12 +38,6 @@ public class AggregateQueryImpl implements AggregateQuery
 	public AggregateQueryImpl attrDistinct(AttributeMetaData attrDistinct)
 	{
 		this.attrDistinct = attrDistinct;
-		return this;
-	}
-
-	public AggregateQueryImpl anonymizationThreshold(Integer anonymizationThreshold)
-	{
-		this.anonymizationThreshold = anonymizationThreshold;
 		return this;
 	}
 
@@ -99,22 +92,10 @@ public class AggregateQueryImpl implements AggregateQuery
 	}
 
 	@Override
-	public Integer getAnonymizationThreshold()
-	{
-		return anonymizationThreshold;
-	}
-
-	public void setAnonymizationThreshold(Integer anonymizationThreshold)
-	{
-		this.anonymizationThreshold = anonymizationThreshold;
-	}
-
-	@Override
 	public int hashCode()
 	{
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((anonymizationThreshold == null) ? 0 : anonymizationThreshold.hashCode());
 		result = prime * result + ((attrDistinct == null) ? 0 : attrDistinct.hashCode());
 		result = prime * result + ((attrX == null) ? 0 : attrX.hashCode());
 		result = prime * result + ((attrY == null) ? 0 : attrY.hashCode());
@@ -129,11 +110,6 @@ public class AggregateQueryImpl implements AggregateQuery
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
 		AggregateQueryImpl other = (AggregateQueryImpl) obj;
-		if (anonymizationThreshold == null)
-		{
-			if (other.anonymizationThreshold != null) return false;
-		}
-		else if (!anonymizationThreshold.equals(other.anonymizationThreshold)) return false;
 		if (attrDistinct == null)
 		{
 			if (other.attrDistinct != null) return false;
@@ -156,5 +132,4 @@ public class AggregateQueryImpl implements AggregateQuery
 		else if (!q.equals(other.q)) return false;
 		return true;
 	}
-
 }

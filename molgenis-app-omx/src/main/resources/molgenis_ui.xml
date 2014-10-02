@@ -26,7 +26,6 @@
             </menu>
 	        <plugin id="datasetdeleter" name="Data Set Deleter" url="datasetdeleter"/>
 	        <plugin id="dataindexer" name="Data Set Indexer" url="dataindexer"/>
-            <plugin id="entityexplorer" name="Entity Explorer" url="entityexplorer"/>
 	        <plugin id="gaflistimporter" name="GAF List Importer" url="gaflistimporter"/>
             <plugin id="models" name="Model registry" url="models" />
             <plugin id="news" name="News" url="news"/>

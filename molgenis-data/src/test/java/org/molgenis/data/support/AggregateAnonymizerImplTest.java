@@ -6,6 +6,8 @@ import static org.testng.Assert.assertEquals;
 import java.util.Arrays;
 import java.util.List;
 
+import org.molgenis.data.AggregateResult;
+import org.molgenis.data.AnonymizedAggregateResult;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.Lists;
@@ -23,13 +25,16 @@ public class AggregateAnonymizerImplTest
 		matrix.add(Arrays.asList(null, 1l, 90l, 100l, 17l));
 		matrix.add(Arrays.asList(11l, null, 90l, 5l, 10l));
 
-		List<List<Long>> anonymizedMatrix = new AggregateAnonymizerImpl().anonymize(matrix, threshold);
+		List<String> xLabels = Arrays.asList("x1", "x2", "x3");
+		List<String> yLabels = Arrays.asList("y1", "y2", "y3");
+		AnonymizedAggregateResult result = new AggregateAnonymizerImpl().anonymize(new AggregateResult(matrix, xLabels,
+				yLabels), threshold);
 
-		List<List<Long>> expected = Lists.newArrayList();
-		expected.add(Arrays.asList(11l, 10l, 90l, AGGREGATE_ANONYMIZATION_VALUE, AGGREGATE_ANONYMIZATION_VALUE));
-		expected.add(Arrays.asList(null, AGGREGATE_ANONYMIZATION_VALUE, 90l, 100l, 17l));
-		expected.add(Arrays.asList(11l, null, 90l, AGGREGATE_ANONYMIZATION_VALUE, 10l));
+		List<List<Long>> expectedMatrix = Lists.newArrayList();
+		expectedMatrix.add(Arrays.asList(11l, 10l, 90l, AGGREGATE_ANONYMIZATION_VALUE, AGGREGATE_ANONYMIZATION_VALUE));
+		expectedMatrix.add(Arrays.asList(null, AGGREGATE_ANONYMIZATION_VALUE, 90l, 100l, 17l));
+		expectedMatrix.add(Arrays.asList(11l, null, 90l, AGGREGATE_ANONYMIZATION_VALUE, 10l));
 
-		assertEquals(anonymizedMatrix, expected);
+		assertEquals(result, new AnonymizedAggregateResult(expectedMatrix, xLabels, yLabels, threshold));
 	}
 }

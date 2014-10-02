@@ -32,6 +32,44 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 	MysqlRepositoryCollection coll;
 
 	@Test
+	public void testFindAll()
+	{
+		DefaultEntityMetaData metaData = new DefaultEntityMetaData("IntValue");
+		metaData.addAttribute("intAttr").setDataType(MolgenisFieldTypes.INT).setIdAttribute(true).setNillable(false);
+
+		coll.dropEntityMetaData(metaData.getName());
+		MysqlRepository repo = coll.add(metaData);
+
+		int count = 2099;
+		for (int i = 0; i < count; i++)
+		{
+			Entity e = new MapEntity("intAttr");
+			e.set("intAttr", i);
+			repo.add(e);
+		}
+
+		int i = 0;
+		for (Entity e : repo)
+		{
+			assertEquals(e.getInt("intAttr"), Integer.valueOf(i++));
+		}
+
+		assertEquals(Iterables.size(repo), count);
+		assertEquals(Iterables.size(repo.findAll(new QueryImpl().ge("intAttr", 999))), 1100);
+		assertEquals(Iterables.size(repo.findAll(new QueryImpl().eq("intAttr", 999))), 1);
+		assertEquals(Iterables.size(repo.findAll(new QueryImpl().eq("intAttr", -1))), 0);
+		assertEquals(Iterables.size(repo.findAll(new QueryImpl().le("intAttr", count))), count);
+
+		Iterable<Entity> it = repo.findAll(new QueryImpl().setOffset(10).setPageSize(20));
+		assertEquals(Iterables.size(it), 20);
+		i = 10;
+		for (Entity e : it)
+		{
+			assertEquals(e.getInt("intAttr"), Integer.valueOf(i++));
+		}
+	}
+
+	@Test
 	public void testSql() throws Exception
 	{
 		// create table person(id int auto_increment primary key, firstName varchar(255), lastName varchar(255));
@@ -101,7 +139,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		repo = coll.add(metaData);
 
 		// Entity generator to monitor performance (set batch to 100000 to show up to >10,000 records/second)
-		final int SIZE = 100000;
+		final int SIZE = 1000;
 		Iterable<Entity> iterable = new Iterable<Entity>()
 		{
 			@Override

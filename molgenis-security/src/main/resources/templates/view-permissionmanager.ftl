@@ -4,8 +4,7 @@
 <#assign js=["permissionmanager.js"]>
 <@header css js/>
 	<div class="row">
-		<div class="col-md-1"></div>
-		<div class="col-md-10">
+		<div class="col-md-10 col-md-offset-1">
 			<div class="row">
                 <div class="col-md-3">
     				<ul class="nav nav-pills nav-stacked" role="tablist">
@@ -29,6 +28,5 @@
 				</div>
 			</div>
 		</div>
-		<div class="col-md-1"></div>
 	</div>
 <@footer/>
