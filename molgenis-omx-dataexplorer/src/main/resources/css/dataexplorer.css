@@ -42,6 +42,10 @@ body:not(.modal-open) #feature-selection .molgenis-tree {
 	margin-bottom: 10px;
 }
 
+#aggregate-table-container {
+	overflow: auto;	
+}
+
 #aggregate-table-container th {
 	background-color: #5B82A4;
 	color: white;
@@ -50,6 +54,7 @@ body:not(.modal-open) #feature-selection .molgenis-tree {
 #dataexplorer-aggregate-data table {
 	margin-top: 20px;
 	background: #DDDDDD;
+	
 }
 
 #dataexplorer-grid-data table {

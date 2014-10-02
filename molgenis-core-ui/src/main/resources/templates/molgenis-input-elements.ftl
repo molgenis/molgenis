@@ -114,7 +114,7 @@
 				</script>
 				
 			<#elseif field.dataType.enumType == 'DATE_TIME'>
-				<div class="input-group group-append datetime ">
+				<div class="input-group group-append date datetime">
   					<span class='input-group-addon'>
   						<span class="datepickerbutton glyp2icon-calendar glyphicon glyphicon-calendar"></span>
   					</span>
@@ -122,7 +122,7 @@
   						name="${fieldName}" 
   						id="${fieldName}" 
   						placeholder="${field.name}" 
-  						data-date-format='YYYY-MM-DD'T'HH:mm:ssZZ'
+  						data-date-format="YYYY-MM-DD'T'HH:mm:ssZZ"
 						class="form-control<#if field.nillable> nillable</#if>" <#if readonly>disabled="disabled"</#if>
 						<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string("yyyy-MM-dd'T'HH:mm:ssZ")}"</#if>
 						<#if !nillable>required="required"</#if> 
@@ -135,15 +135,15 @@
 					</#if>
 				</div>
 			<#elseif field.dataType.enumType == 'DATE'>
-				<div class="input-group group-append date">
-					<span class='input-group-addon datepickerbutton'>
-						<span class='glyp2icon-calendar glyphicon glyphicon-calendar '></span>
+				<div class="input-group group-append date dateonly">
+					<span class='input-group-addon'>
+						<span class='datepickerbutton glyp2icon-calendar glyphicon glyphicon-calendar'></span>
 					</span>
 					<input type="text" 
 						name="${fieldName}" 
 						id="${fieldName}" 
 						placeholder="${field.name}"
-						data-date-format='YYYY-MM-DD' 
+						data-date-format="YYYY-MM-DD" 
 						class="form-control<#if field.nillable> nillable</#if>" 
 						<#if readonly>readonly="readonly"</#if> 
 						<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string("yyyy-MM-dd")}"</#if> 
