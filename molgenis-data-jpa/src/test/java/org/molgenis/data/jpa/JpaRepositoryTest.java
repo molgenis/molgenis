@@ -149,8 +149,6 @@ public class JpaRepositoryTest extends BaseJpaTest
 		Person p2 = new Person("Paulus", "de Boskabouter");
 		repo.add(p2);
 
-		repo.add(Arrays.asList(p1, p2));
-
 		Iterable<Person> it = repo.findAll(Arrays.asList((Object) p1.getId(), p2.getId()), Person.class);
 		assertEquals(Iterables.size(it), 2);
 		assertTrue(Iterables.contains(it, p1));
@@ -239,7 +237,7 @@ public class JpaRepositoryTest extends BaseJpaTest
 	}
 
 	@Test
-	public void testImportAddUpdateIgnoreExisting()
+	public void testImportAddUpdateExisting()
 	{
 		Entity e = new MapEntity("id");
 		e.set("firstName", "Piet");
@@ -251,6 +249,7 @@ public class JpaRepositoryTest extends BaseJpaTest
 		assertEquals(repo.count(), 1);
 
 		Entity e1 = new MapEntity("id");
+		e1.set("id", e.getIdValue());
 		e1.set("firstName", "Piet");
 		e1.set("lastName", "XXX");
 		eis.update(repo, Arrays.asList(e1), DatabaseAction.ADD_UPDATE_EXISTING, "firstName");
@@ -278,6 +277,7 @@ public class JpaRepositoryTest extends BaseJpaTest
 		repo.add(e);
 
 		Entity e1 = new MapEntity("id");
+		e1.set("id", e.getIdValue());
 		e1.set("firstName", "Piet");
 		e1.set("lastName", "XXX");
 

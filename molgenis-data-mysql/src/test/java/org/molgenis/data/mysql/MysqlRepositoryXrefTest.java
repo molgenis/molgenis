@@ -66,7 +66,7 @@ public class MysqlRepositoryXrefTest extends MysqlRepositoryAbstractDatatypeTest
 
 		Assert.assertEquals(xrefRepo.getCreateSql(), createSql());
 
-		Assert.assertEquals(xrefRepo.getCreateFKeySql().get(0),
+		Assert.assertEquals(xrefRepo.getCreateFKeySql(getMetaData().getAttribute("stringRef")),
 				"ALTER TABLE XrefTest ADD FOREIGN KEY (`stringRef`) REFERENCES `StringTarget`(`identifier`)");
 
 		xrefRepo.drop();

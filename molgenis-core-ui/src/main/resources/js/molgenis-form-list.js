@@ -5,7 +5,7 @@
 	var restApi = new molgenis.RestClient(false);
 	var NR_ROWS_PER_PAGE = 10;
 	var currentPages = [];
-	var selectedEntityLabelValue = null;//Value of the labelAttribute of the selected entity
+	var selectedEntityId = null;
 	var search = null;
 	
 	ns.buildTableBody = function(formIndex, isPageChange) {
@@ -34,16 +34,16 @@
 			} ];
 		}
 		
-		if ((formIndex > 0) && (selectedEntityLabelValue != null)) {
+		if ((formIndex > 0) && (selectedEntityId != null)) {
 			options.q = [ {
 				field : forms[formIndex].xrefFieldName,
 				operator : 'EQUALS',
-				value : selectedEntityLabelValue
+				value : selectedEntityId
 			} ];
 		} 
 		
 		var entities = {};
-		if ((formIndex > 0) && (selectedEntityLabelValue == null)) {
+		if ((formIndex > 0) && (selectedEntityId == null)) {
 			//No selected master item, don't bother calling the api
 			entities.items = [];
 			entities.total = 0;
@@ -59,14 +59,14 @@
 			var deleteApiUrl = '/api/v1/' + forms[formIndex].meta.name + '/' +  id;
 				
 			//Select first row when table is shown and we have master/detail
-			if ((forms.length > 1) && (formIndex == 0) && (selectedEntityLabelValue == null)) {
-				selectedEntityLabelValue = labelValue;
+			if ((forms.length > 1) && (formIndex == 0) && (selectedEntityId == null)) {
+				selectedEntityId = id;
 			}
 				
-			if (labelValue && (selectedEntityLabelValue == labelValue)) {
-				items.push('<tr data-id="' + id + '" data-label="' + labelValue + '" class="info">');
+			if (id == selectedEntityId) {
+				items.push('<tr data-id="' + id + '" class="info">');
 			} else {
-				items.push('<tr data-id="' + id + '"  data-label="' + labelValue + '">');
+				items.push('<tr data-id="' + id + '">');
 			}
 				
 			items.push('<td class="edit-entity"><a href="' + editPageUrl + '"><img src="/img/editview.gif"></a></td>');
@@ -117,7 +117,7 @@
 				tr.addClass('info');
 					
 				//Update subforms
-				selectedEntityLabelValue = tr.attr('data-label');
+				selectedEntityId = tr.attr('data-id');
 				ns.updateSubForms();
 				return false;
 			});
@@ -165,7 +165,7 @@
 			ns.buildTableBody(i);
 			
 			//Update url of create buttons of subforms so xref dropdown is preselected
-			var href = forms[i].baseUri + '/create?' + forms[i].xrefFieldName + '=' + selectedEntityLabelValue + '&back=' + encodeURIComponent(CURRENT_URI);
+			var href = forms[i].baseUri + '/create?' + forms[i].xrefFieldName + '=' + selectedEntityId + '&back=' + encodeURIComponent(CURRENT_URI);
 			$('#create-' + i).attr('href', href);
 		}
 	};
@@ -218,7 +218,7 @@
 			};
 			
 			//Build master tables
-			selectedEntityLabelValue = null;
+			selectedEntityId = null;
 			ns.refresh();
 			
 			return false;
