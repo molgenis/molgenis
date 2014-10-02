@@ -145,7 +145,7 @@
                     	
                     	if (count == AGGREGATE_ANONYMIZATION_VALUE) {
                     		rowCountIsAnonimized = true;
-                    		items.push('&lt;' + aggregateResult.anonymizationThreshold);
+                    		items.push('&le;' + aggregateResult.anonymizationThreshold);
                     		rowCount += aggregateResult.anonymizationThreshold;
                             columnCounts[index].count += aggregateResult.anonymizationThreshold;
                             columnCounts[index].anonymized = true;
@@ -160,7 +160,7 @@
 					
 					items.push('<td><div class="text-center">');
 					if (rowCountIsAnonimized) {
-						items.push('&lt;');
+						items.push('&le;');
 					}
 					items.push(rowCount + '</div></td>');
 					items.push('</tr>');
@@ -169,22 +169,22 @@
 				items.push('<tr>');
 				items.push('<th>' + totalTemplate({}) + '</th>');
 				
-				var grantTotal = {count: 0, anonymized: false};
+				var grandTotal = {count: 0, anonymized: false};
 				$.each(columnCounts, function(){
 					items.push('<td><div class="text-center">');
 					if (this.anonymized) {
-						items.push('&lt');
-						grantTotal.anonymized = true;
+						items.push('&le;');
+						grandTotal.anonymized = true;
 					}
 					
-					grantTotal.count += this.count;
+					grandTotal.count += this.count;
 					items.push(this.count);
 					items.push('</div></td>');
 				});
 				
 				items.push('<td><div class="text-center">');
-				if (grantTotal.anonymized) items.push('&lt;');
-				items.push(grantTotal.count);
+				if (grandTotal.anonymized) items.push('&le;');
+				items.push(grandTotal.count);
 				items.push('</div></td>');
 				
 				items.push('</tr>');
