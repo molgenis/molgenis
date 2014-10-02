@@ -15,7 +15,7 @@
 	ns.onFormSubmit = function() {
 		ns.hideAlerts();
 		
-		$('.date.datetime').each(function() {
+		$('.datetime input').each(function() {
 			var d = $(this).val();
 			$(this).val(d.replace(/'/g,''));//Remove quotes from isodateformat
 		});
