@@ -28,12 +28,16 @@
     </div>                
 </div>
 <script>
-	var totalCaption = '${i18n.dataexplorer_aggregates_total?js_string?html}';
-	
 	$.when($.ajax("<@resource_href "/js/dataexplorer-aggregates.js"/>", {'cache': true}))
 		.then(function() {
 			molgenis.dataexplorer.aggregates.createAggregatesTable();
 		});
+</script>
+<script id="aggregates-total-template" type="text/x-handlebars-template">
+    ${i18n.dataexplorer_aggregates_total?js_string?html}
+</script>
+<script id="aggregates-missing-template" type="text/x-handlebars-template">
+    ${i18n.dataexplorer_aggregates_missing?js_string?html}
 </script>
 <script id="aggregates-no-result-message-template" type="text/x-handlebars-template">
     <br><div>${i18n.dataexplorer_aggregates_no_result_message}<div>
