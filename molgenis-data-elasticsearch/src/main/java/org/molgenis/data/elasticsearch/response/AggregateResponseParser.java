@@ -27,6 +27,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.elasticsearch.request.AggregateQueryGenerator;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 
 public class AggregateResponseParser
@@ -251,7 +252,7 @@ public class AggregateResponseParser
 
 				if (isAttr2Nillable)
 				{
-					Missing subMissing = getMissingAggregation(subAggs, aggAttr1);
+					Missing subMissing = getMissingAggregation(subAggs, aggAttr2);
 					String subKey = null;
 					Long subValue;
 
@@ -376,30 +377,43 @@ public class AggregateResponseParser
 	private void convertIdtoLabelLabels(List<String> idLabels, EntityMetaData entityMetaData, DataService dataService)
 	{
 		final int nrLabels = idLabels.size();
-
-		// Get entities for ids
-		// Use Iterables.transform to work around List<String> to Iterable<Object> cast error
-		Iterable<Entity> entities = dataService.findAll(entityMetaData.getName(),
-				Iterables.transform(idLabels, new Function<String, Object>()
-				{
-					@Override
-					public Object apply(String id)
+		if (nrLabels > 0)
+		{
+			// Get entities for ids
+			// Use Iterables.transform to work around List<String> to Iterable<Object> cast error
+			Iterable<Entity> entities = dataService.findAll(entityMetaData.getName(),
+					Iterables.transform(Iterables.filter(idLabels, new Predicate<String>()
 					{
-						return id;
-					}
-				}));
+						@Override
+						public boolean apply(String label)
+						{
+							// exclude missing value label
+							return label != null;
+						}
+					}), new Function<String, Object>()
+					{
+						@Override
+						public Object apply(String id)
+						{
+							return id;
+						}
+					}));
 
-		// Map entity ids to labels
-		Map<String, String> idToLabelMap = new HashMap<String, String>();
-		for (Entity entity : entities)
-		{
-			idToLabelMap.put(entity.getIdValue().toString(), entity.getLabelValue());
-		}
+			// Map entity ids to labels
+			Map<String, String> idToLabelMap = new HashMap<String, String>();
+			for (Entity entity : entities)
+			{
+				idToLabelMap.put(entity.getIdValue().toString(), entity.getLabelValue());
+			}
 
-		for (int i = 0; i < nrLabels; ++i)
-		{
-			String id = idLabels.get(i);
-			idLabels.set(i, idToLabelMap.get(id));
+			for (int i = 0; i < nrLabels; ++i)
+			{
+				String id = idLabels.get(i);
+				if (id != null) // missing value label
+				{
+					idLabels.set(i, idToLabelMap.get(id));
+				}
+			}
 		}
 	}
 

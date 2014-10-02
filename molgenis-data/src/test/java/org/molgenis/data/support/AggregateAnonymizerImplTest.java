@@ -31,9 +31,10 @@ public class AggregateAnonymizerImplTest
 				yLabels), threshold);
 
 		List<List<Long>> expectedMatrix = Lists.newArrayList();
-		expectedMatrix.add(Arrays.asList(11l, 10l, 90l, AGGREGATE_ANONYMIZATION_VALUE, AGGREGATE_ANONYMIZATION_VALUE));
+		expectedMatrix.add(Arrays.asList(11l, AGGREGATE_ANONYMIZATION_VALUE, 90l, AGGREGATE_ANONYMIZATION_VALUE,
+				AGGREGATE_ANONYMIZATION_VALUE));
 		expectedMatrix.add(Arrays.asList(null, AGGREGATE_ANONYMIZATION_VALUE, 90l, 100l, 17l));
-		expectedMatrix.add(Arrays.asList(11l, null, 90l, AGGREGATE_ANONYMIZATION_VALUE, 10l));
+		expectedMatrix.add(Arrays.asList(11l, null, 90l, AGGREGATE_ANONYMIZATION_VALUE, AGGREGATE_ANONYMIZATION_VALUE));
 
 		assertEquals(result, new AnonymizedAggregateResult(expectedMatrix, xLabels, yLabels, threshold));
 	}
