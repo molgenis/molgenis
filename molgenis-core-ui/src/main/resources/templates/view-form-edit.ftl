@@ -40,8 +40,8 @@
 		<div class="col-md-5">
 			<legend>Required</legend>
 			<#assign optionalCounter = 0 />
-			<#list form.metaData.fields as field>
-				<#if !field.nillable && field.visible>
+			<#list form.metaData.fields as field>	
+				<#if !field.nillable>
 					<#if form.entity??>
 						<@input.render field form.hasWritePermission form.entity form.metaData.forUpdate/>
 					<#else>

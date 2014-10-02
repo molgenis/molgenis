@@ -53,21 +53,23 @@
 	</div>
 		
 	<div class="row">
-		<div class="col-md-12">		
-			<table class="table table-striped table-bordered table-hover table-condensed">
-				<thead>
-					<tr>
-						<th class="edit-icon-holder"></th>
-						<#if form.hasWritePermission>
+		<div class="col-md-12">
+			<div id="entity-table-container">		
+				<table class="table table-striped table-bordered table-hover table-condensed">
+					<thead>
+						<tr>
 							<th class="edit-icon-holder"></th>
-						</#if>
-						<#list form.metaData.fields as field>
-							<th>${field.name}</th>
-						</#list>
-					</tr>
-				</thead>
-				<tbody id="entity-table-body-${index}"></tbody>
-			</table>
+							<#if form.hasWritePermission>
+								<th class="edit-icon-holder"></th>
+							</#if>
+							<#list form.metaData.fields as field>
+								<th>${field.name}</th>
+							</#list>
+						</tr>
+					</thead>
+					<tbody id="entity-table-body-${index}"></tbody>
+				</table>
+			</div>
 		</div>
 	</div>
 </#macro>

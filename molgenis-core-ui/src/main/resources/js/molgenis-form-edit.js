@@ -64,9 +64,15 @@
 	
 	$(function() {
 		//Enable datepickers
-		$('.datetime').datetimepicker({useSeconds : true});
+		$('.date.datetime').datetimepicker({pickTime: true, useSeconds : true});
+		$('.date.dateonly').datetimepicker({pickTime: false, useSeconds : false});
 		
-		$('.date').datetimepicker({pickTime: false});
+		// Closes other datetime pickers when opening another one
+		$('.date').on('dp.show', function() {
+	        $('.date').not($(this)).each(function() {
+	            $(this).data("DateTimePicker").hide();
+	        });
+	    });
 		
 		//If validation succeeds call onFormSubmit
 		$.validator.setDefaults({

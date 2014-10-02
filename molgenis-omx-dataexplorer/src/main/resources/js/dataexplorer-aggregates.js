@@ -20,15 +20,24 @@
 	
 	var restApi = new molgenis.RestClient();
 
+	var totalTemplate, missingTemplate, messageTemplate;
+	
 	/**
 	 * @memberOf molgenis.dataexplorer.aggregates
 	 */
 	function createAggregatesTable() {
 		var attributes = getAttributes();
 		var aggregableAttributes = $.grep(attributes, function(attribute) {
-			return attribute.aggregateable;
+			if(attribute.aggregateable) {
+				if(attribute.nillable) {
+					// see: https://github.com/molgenis/molgenis/issues/1937
+					return attribute.fieldType !== 'CATEGORICAL' && attribute.fieldType !== 'XREF' && attribute.fieldType !== 'MREF';
+				}
+				return true;
+			}
+			return false;
 		});
-
+		
 		if (aggregableAttributes.length > 0) {
 			$('#feature-select').empty();
 			createAttributeDropdown($('#feature-select'), aggregableAttributes, 'x-aggr-attribute', aggregableAttributes[0], true);
@@ -46,7 +55,11 @@
 					$('#distinct-attr-select').append($('<p>').addClass('form-control-static')
 							.text(molgenis.dataexplorer.settings['mod.aggregates.distinct.override.'+getEntity().name]));
 				} else {
-					createAttributeDropdown($('#distinct-attr-select'), attributes, 'distinct-aggr-attribute', false);
+					var distinctAttributes = $.grep(attributes, function(attribute) {
+						// see: https://github.com/molgenis/molgenis/issues/1938
+						return attribute.nillable !== true;
+					});
+					createAttributeDropdown($('#distinct-attr-select'), distinctAttributes, 'distinct-aggr-attribute', false);
 				}
 			}
 			
@@ -110,14 +123,15 @@
 				items.push('<td style="width: 18%"></td>');
 				
 				$.each(aggregateResult.yLabels, function(index, label){
-					items.push('<th><div class="text-center">' + htmlEscape(label) + '</div></th>');
+					items.push('<th><div class="text-center">' + (label === null ? missingTemplate({}) : htmlEscape(label)) + '</div></th>');
 				});
-				items.push('<th><div class="text-center">' + totalCaption + '</div></th></tr>');
+				items.push('<th><div class="text-center">' + totalTemplate({}) + '</div></th></tr>');
 				
 				var columnCounts = [];
 				$.each(aggregateResult.matrix, function(index, row) {
 					items.push('<tr>');
-					items.push('<th>' + htmlEscape(aggregateResult.xLabels[index]) + '</th>');
+					var label = aggregateResult.xLabels[index];
+					items.push('<th>' + (label === null ? missingTemplate({}) : htmlEscape(label)) + '</th>');
 					
 					var rowCount = 0;
 					var rowCountIsAnonimized = false;
@@ -131,7 +145,7 @@
                     	
                     	if (count == AGGREGATE_ANONYMIZATION_VALUE) {
                     		rowCountIsAnonimized = true;
-                    		items.push('&lt;' + aggregateResult.anonymizationThreshold);
+                    		items.push('&le;' + aggregateResult.anonymizationThreshold);
                     		rowCount += aggregateResult.anonymizationThreshold;
                             columnCounts[index].count += aggregateResult.anonymizationThreshold;
                             columnCounts[index].anonymized = true;
@@ -146,31 +160,31 @@
 					
 					items.push('<td><div class="text-center">');
 					if (rowCountIsAnonimized) {
-						items.push('&lt;');
+						items.push('&le;');
 					}
 					items.push(rowCount + '</div></td>');
 					items.push('</tr>');
 				});
 				
 				items.push('<tr>');
-				items.push('<th>' + totalCaption + '</th>');
+				items.push('<th>' + totalTemplate({}) + '</th>');
 				
-				var grantTotal = {count: 0, anonymized: false};
+				var grandTotal = {count: 0, anonymized: false};
 				$.each(columnCounts, function(){
 					items.push('<td><div class="text-center">');
 					if (this.anonymized) {
-						items.push('&lt');
-						grantTotal.anonymized = true;
+						items.push('&le;');
+						grandTotal.anonymized = true;
 					}
 					
-					grantTotal.count += this.count;
+					grandTotal.count += this.count;
 					items.push(this.count);
 					items.push('</div></td>');
 				});
 				
 				items.push('<td><div class="text-center">');
-				if (grantTotal.anonymized) items.push('&lt;');
-				items.push(grantTotal.count);
+				if (grandTotal.anonymized) items.push('&le;');
+				items.push(grandTotal.count);
 				items.push('</div></td>');
 				
 				items.push('</tr>');
@@ -178,7 +192,6 @@
 				items.push('</table>');
 				if(!countAboveZero){
                     items.length = 0;
-                    var messageTemplate = Handlebars.compile($("#aggregates-no-result-message-template").html());
                     items.push(messageTemplate({}));
                 }
 				$('#aggregate-table-container').html(items.join(''));
@@ -214,7 +227,11 @@
 		return molgenis.dataexplorer.getEntityQuery().q;
 	}
 	
-	$(function() {		
+	$(function() {
+		totalTemplate = Handlebars.compile($("#aggregates-total-template").html());
+		missingTemplate = Handlebars.compile($("#aggregates-missing-template").html());
+		messageTemplate = Handlebars.compile($("#aggregates-no-result-message-template").html());
+		
 		// bind event handlers with namespace
 		$(document).on('changeAttributeSelection.aggregates', function(e, data) {
 			molgenis.dataexplorer.aggregates.createAggregatesTable();

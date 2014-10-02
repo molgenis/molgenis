@@ -81,14 +81,6 @@ input.error {
 	margin-bottom: 8px;
 }
 
-.add-on-workaround {
-  	height:30px;
-}
-
-.add-on-workaround i {
-	margin-top: 7px;
-	cursor:pointer;
-  	display:block;
-  	height:16px;
- 	 width:16px;
+#entity-table-container {
+	overflow: auto;
 }
