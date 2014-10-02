@@ -31,7 +31,7 @@ public class LimitOffsetGenerator implements QueryPartGenerator
 		}
 		else
 		{
-			searchRequestBuilder.setSize(100000);
+			searchRequestBuilder.setSize(1000);
 		}
 	}
 }
