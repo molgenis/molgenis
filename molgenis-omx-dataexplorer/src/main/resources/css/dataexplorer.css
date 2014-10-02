@@ -213,3 +213,7 @@ ul.fancytree-container {
 #chartCreationButtons {
 	padding-top: 10px;
 }
+
+#aggregate-parent-row {
+	overflow: auto;
+}
