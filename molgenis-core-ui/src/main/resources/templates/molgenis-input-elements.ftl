@@ -112,7 +112,7 @@
 				</script>
 				
 			<#elseif field.dataType.enumType == 'DATE_TIME'>
-				<div class="input-group group-append date">
+				<div class="input-group group-append date datetime">
   					<span class='input-group-addon'>
   						<span class="datepickerbutton glyp2icon-calendar glyphicon glyphicon-calendar"></span>
   					</span>
@@ -133,7 +133,7 @@
 					</#if>
 				</div>
 			<#elseif field.dataType.enumType == 'DATE'>
-				<div class="input-group group-append date">
+				<div class="input-group group-append date dateonly">
 					<span class='input-group-addon'>
 						<span class='datepickerbutton glyp2icon-calendar glyphicon glyphicon-calendar'></span>
 					</span>
