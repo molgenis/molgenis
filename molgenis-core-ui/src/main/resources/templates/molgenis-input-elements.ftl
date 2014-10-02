@@ -114,33 +114,47 @@
 				</script>
 				
 			<#elseif field.dataType.enumType == 'DATE_TIME'>
-				<div class="group-append datetime input-group">
-					<#if field.nillable>
+				<div class="input-group group-append datetime ">
+  					<span class='input-group-addon'>
+  						<span class="datepickerbutton glyp2icon-calendar glyphicon glyphicon-calendar"></span>
+  					</span>
+  					<input type="text" 
+  						name="${fieldName}" 
+  						id="${fieldName}" 
+  						placeholder="${field.name}" 
+  						data-date-format='YYYY-MM-DD'T'HH:mm:ssZZ'
+						class="form-control<#if field.nillable> nillable</#if>" <#if readonly>disabled="disabled"</#if>
+						<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string("yyyy-MM-dd'T'HH:mm:ssZ")}"</#if>
+						<#if !nillable>required="required"</#if> 
+						data-rule-date-ISO="true" />
+							
+  					<#if field.nillable>
 						<span class='input-group-addon'>
-							<span class='glyphicon glyphicon-remove empty-date-input clear-date-time-btn'></span>
+							<span class="glyphicon glyphicon-remove empty-date-input clear-date-time-btn"></span>
 						</span>
 					</#if>
-					<span class='input-group-addon datepickerbutton'><span class='glyp2icon-calendar glyphicon glyphicon-calendar '></span></span>
-					<input type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" 
-						data-date-format='YYYY-MM-DDTHH:mm:ssZZ'
-						class="form-control<#if field.nillable> nillable</#if>" 
-						<#if readonly>disabled="disabled"</#if> 
-						<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string("yyyy-MM-dd'T'HH:mm:ssZ")}"</#if>
-						<#if !nillable>required="required"</#if> data-rule-date="true" />
 				</div>
 			<#elseif field.dataType.enumType == 'DATE'>
-				<div class="group-append date input-group">
-					<#if field.nillable><span class='input-group-addon'>
-						<span class='glyphicon glyphicon-remove empty-date-input clear-date-time-btn'></span></span>
-					</#if>
-					<span class='input-group-addon datepickerbutton'><span class='glyp2icon-calendar glyphicon glyphicon-calendar '></span></span>
-					<input type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.name}"
+				<div class="input-group group-append date">
+					<span class='input-group-addon datepickerbutton'>
+						<span class='glyp2icon-calendar glyphicon glyphicon-calendar '></span>
+					</span>
+					<input type="text" 
+						name="${fieldName}" 
+						id="${fieldName}" 
+						placeholder="${field.name}"
 						data-date-format='YYYY-MM-DD' 
 						class="form-control<#if field.nillable> nillable</#if>" 
 						<#if readonly>readonly="readonly"</#if> 
 						<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string("yyyy-MM-dd")}"</#if> 
 						<#if !nillable>required="required"</#if>
 						data-rule-date-ISO="true" />
+						
+					<#if field.nillable>
+						<span class='input-group-addon'>
+							<span class='glyphicon glyphicon-remove empty-date-input clear-date-time-btn'></span>
+						</span>
+					</#if>
 				</div>
 				
 			<#elseif field.dataType.enumType =='INT' || field.dataType.enumType = 'LONG'>
