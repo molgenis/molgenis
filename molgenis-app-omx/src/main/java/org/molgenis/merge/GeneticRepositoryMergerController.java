@@ -1,5 +1,7 @@
 package org.molgenis.merge;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
@@ -14,9 +16,9 @@ import org.molgenis.framework.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
@@ -42,8 +44,6 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 	public static final DefaultAttributeMetaData ALT = new DefaultAttributeMetaData("ALT",
 			MolgenisFieldTypes.FieldTypeEnum.STRING);
 
-	public static final String VKGL = "Merged";
-
 	private final ArrayList<AttributeMetaData> commonAttributes;
 	private RepositoryMerger repositoryMerger;
 	private DataService dataService;
@@ -68,47 +68,73 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 
 	@SuppressWarnings("unchecked")
 	@RequestMapping(method = RequestMethod.GET)
-	public String init() throws Exception
+	public String init(Model model) throws Exception
 	{
-		return "view-geneticrepositorymerger";
+        dataService.getEntityNames();
+        List<String> geneticRepositories = new ArrayList<String>();
+        for (String name : dataService.getEntityNames())
+        {
+            if (dataService.getEntityMetaData(name).getAttribute(CHROM.getName()) != null
+                    && dataService.getEntityMetaData(name).getAttribute(POS.getName()) != null
+                    && dataService.getEntityMetaData(name).getAttribute(REF.getName()) != null
+                    && dataService.getEntityMetaData(name).getAttribute(ALT.getName()) != null)
+            {
+                geneticRepositories.add(name);
+            }
+        }
+
+        Iterable<EntityMetaData> entitiesMeta = Iterables.transform(geneticRepositories,
+                new Function<String, EntityMetaData>() {
+                    @Override
+                    public EntityMetaData apply(String entityName) {
+                        return dataService.getEntityMetaData(entityName);
+                    }
+                }
+        );
+        model.addAttribute("entitiesMeta", entitiesMeta);
+
+        return "view-geneticrepositorymerger";
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "mergeRepositories")
-	@ResponseStatus(HttpStatus.OK)
-	public void merge() throws IOException
+    @ResponseBody
+	public String merge(@RequestParam("resultDataset") String resultSet, @RequestParam("datasets") String[] inputSets) throws IOException
 	{
-		if (dataService.hasRepository(VKGL))
-		{
-			if (searchService.documentTypeExists(VKGL))
-			{
-				searchService.deleteDocumentsByType(VKGL);
-				dataService.removeRepository(VKGL);
-			}
-			else
-			{
-				throw new RuntimeException("Repository " + VKGL + " is not a ElasticSearchRepository");
-			}
-		}
+        //create list of entities to merge
 		dataService.getEntityNames();
 		List<Repository> geneticRepositories = new ArrayList<Repository>();
-		for (String name : dataService.getEntityNames())
+		for (String name : inputSets)
 		{
-			if (dataService.getEntityMetaData(name).getAttribute(CHROM.getName()) != null
-					&& dataService.getEntityMetaData(name).getAttribute(POS.getName()) != null
-					&& dataService.getEntityMetaData(name).getAttribute(REF.getName()) != null
-					&& dataService.getEntityMetaData(name).getAttribute(ALT.getName()) != null)
-			{
-				if (!name.equals(VKGL))
+				if (!name.equals(resultSet))
 				{
 					geneticRepositories.add(dataService.getRepositoryByEntityName(name));
 				}
-			}
+                else
+                {
+                    throw new RuntimeException("Cannot merge Repository with itself");
+                }
 		}
+        //Delete if exists
+        if (dataService.hasRepository(resultSet))
+        {
+            if (searchService.documentTypeExists(resultSet))
+            {
+                searchService.deleteDocumentsByType(resultSet);
+                dataService.removeRepository(resultSet);
+            }
+            else
+            {
+                throw new RuntimeException("Repository " + resultSet + " is not a ElasticSearchRepository");
+            }
+        }
+
 		EntityMetaData mergedEntityMetaData = repositoryMerger.mergeMetaData(geneticRepositories, commonAttributes,
-				VKGL);
+                resultSet);
 		searchService.createMappings(mergedEntityMetaData, true, true, true, true);
 
 		ElasticsearchRepository mergedRepository = new ElasticsearchRepository(mergedEntityMetaData, searchService);
 		repositoryMerger.merge(geneticRepositories, commonAttributes, mergedRepository, ID_FIELD);
+
+        return resultSet;
 	}
 }

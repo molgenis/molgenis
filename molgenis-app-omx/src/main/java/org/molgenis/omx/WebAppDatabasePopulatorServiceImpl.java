@@ -61,9 +61,6 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 				"chr:'1',viewStart:10000000,viewEnd:10100000,cookieKey:'human',nopersist:true");
 		runtimePropertyMap.put(DataExplorerController.COORDSYSTEM,
 				"{speciesName: 'Human',taxon: 9606,auth: 'GRCh',version: '37',ucscName: 'hg19'}");
-		runtimePropertyMap
-				.put(DataExplorerController.CHAINS,
-						"{hg18ToHg19: new Chainset('http://www.derkholm.net:8080/das/hg18ToHg19/', 'NCBI36', 'GRCh37',{speciesName: 'Human',taxon: 9606,auth: 'NCBI',version: 36,ucscName: 'hg18'})}");
 		// for use of the demo dataset add to
 		// SOURCES:",{name:'molgenis mutations',uri:'http://localhost:8080/das/molgenis/',desc:'Default from WebAppDatabasePopulatorService'}"
 		runtimePropertyMap

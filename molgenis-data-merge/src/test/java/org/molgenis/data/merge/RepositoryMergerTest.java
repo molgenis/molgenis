@@ -5,28 +5,32 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.ListenableActionFuture;
 import org.elasticsearch.search.SearchHits;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.DataService;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Repository;
+import org.molgenis.data.*;
 
-import org.molgenis.data.elasticsearch.ElasticsearchRepository;
-import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.elasticsearch.*;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 
 import org.elasticsearch.client.Client;
 
+import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.QueryImpl;
 import org.springframework.stereotype.Component;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import sun.jvm.hotspot.utilities.Assert;
 
+import java.io.IOException;
 import java.util.*;
 
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
+import static org.testng.Assert.assertTrue;
 import static org.testng.AssertJUnit.assertEquals;
 
 /**
@@ -35,26 +39,23 @@ import static org.testng.AssertJUnit.assertEquals;
 @Component
 public class RepositoryMergerTest {
 
-    private SearchService searchService;
-    private DataService dataService;
 
-    private Client client;
-    private SearchRequestBuilder searchRequestBuilder;
-    private ListenableActionFuture listenableActionFuture;
-    private SearchResponse searchResponse;
-    private SearchHits searchHits;
-    private Iterator iterator;
-    private IndexRequestBuilder indexRequestBuilder;
+    private AttributeMetaData metaDataa;
+    private AttributeMetaData metaDatab;
+    private Repository repository1;
+    private CrudRepository elasticSearchRepository;
+    private DataService dataService;
     private DefaultEntityMetaData entityMetaData1;
+    private SearchService searchService;
     private DefaultEntityMetaData entityMetaData2;
     private DefaultEntityMetaData entityMetaDataMerged;
-    private DefaultAttributeMetaData metaDataa;
-    private DefaultAttributeMetaData metaDatab;
-    private IndexRequestBuilder indexRequestBuilder2;
 
     @BeforeMethod
-    public void setUp() throws Exception
+    public void setUp() throws IOException
     {
+        repository1 = mock(CrudRepository.class);
+        elasticSearchRepository = mock(ElasticsearchRepository.class);
+
         entityMetaData1 = new DefaultEntityMetaData("meta1");
         entityMetaData2 = new DefaultEntityMetaData("meta2");
         entityMetaDataMerged = new DefaultEntityMetaData("mergedRepo");
@@ -70,10 +71,12 @@ public class RepositoryMergerTest {
         entityMetaData1.addAttributeMetaData(metaDatab);
         entityMetaData1.addAttributeMetaData(metaData1c);
         entityMetaData1.addAttributeMetaData(metaData1d);
+        entityMetaData1.setIdAttribute(metaDataa.getName());
         entityMetaData2.addAttributeMetaData(metaDataa);
         entityMetaData2.addAttributeMetaData(metaDatab);
         entityMetaData2.addAttributeMetaData(metaData2c);
         entityMetaData2.addAttributeMetaData(metaData2e);
+        entityMetaData2.setIdAttribute(metaDataa.getName());
 
         //merged metadata
         DefaultAttributeMetaData idAttribute = new DefaultAttributeMetaData("ID", MolgenisFieldTypes.FieldTypeEnum.STRING);
@@ -105,29 +108,7 @@ public class RepositoryMergerTest {
         entityMetaDataMerged.addAttributeMetaData(metaData2Compound);
 
         searchService = mock(SearchService.class);
-        client = mock(Client.class);
-        searchRequestBuilder = mock(SearchRequestBuilder.class);
-        listenableActionFuture = mock(ListenableActionFuture.class);
-        searchResponse = mock(SearchResponse.class);
-        searchHits = mock(SearchHits.class);
-        iterator = mock(Iterator.class);
-        indexRequestBuilder = mock(IndexRequestBuilder.class);
-        indexRequestBuilder2 = mock(IndexRequestBuilder.class);
-
-        when(client.prepareSearch("testindex")).thenReturn(searchRequestBuilder);
-        when(searchRequestBuilder.setTypes("mergedRepo")).thenReturn(searchRequestBuilder);
-        when(searchRequestBuilder.setTypes("meta1")).thenReturn(searchRequestBuilder);
-        when(searchRequestBuilder.setTypes("meta2")).thenReturn(searchRequestBuilder);
-        when(searchRequestBuilder.setSize(Integer.MAX_VALUE)).thenReturn(searchRequestBuilder);
-        when(searchRequestBuilder.execute()).thenReturn(listenableActionFuture);
-        when(listenableActionFuture.actionGet()).thenReturn(searchResponse);
-        when(searchResponse.getHits()).thenReturn(searchHits);
-        when(searchHits.iterator()).thenReturn(iterator);
-
-        when(client.prepareIndex("testindex", "meta1")).thenReturn(indexRequestBuilder);
-        when(client.prepareIndex("testindex", "meta2")).thenReturn(indexRequestBuilder2);
-
-        when(listenableActionFuture.actionGet()).thenReturn(searchResponse);
+        dataService = mock(DataService.class);
     }
 
     @AfterMethod
@@ -137,7 +118,7 @@ public class RepositoryMergerTest {
     }
 
     @Test
-    public void mergeTest()
+    public void mergeMetaDataTest()
     {
         ElasticsearchRepository repo1 = new ElasticsearchRepository(entityMetaData1,searchService);
         ElasticsearchRepository repo2 = new ElasticsearchRepository(entityMetaData2, searchService);
@@ -155,5 +136,61 @@ public class RepositoryMergerTest {
 
         //check metaData
         assertEquals(entityMetaDataMerged.getAttributes(),repositoryMerger.mergeMetaData(repositoryList,commonAttributes,"mergedRepo").getAttributes());
+    }
+
+    @Test
+    public void mergeTest()
+    {
+        MapEntity newEntity1 = new MapEntity(entityMetaData1);
+        newEntity1.set("a","add_a1");
+        newEntity1.set("b","add_b1");
+        MapEntity newEntity2 = new MapEntity(entityMetaData1);
+        newEntity2.set("a","add_a2");
+        newEntity2.set("b","add_b2");
+        MapEntity newEntity3 = new MapEntity(entityMetaData1);
+        newEntity3.set("a","add_a3");
+        newEntity3.set("b","add_b3");
+        MapEntity existingEntity = new MapEntity(entityMetaData2);
+        existingEntity.set("a","update_a");
+        existingEntity.set("b","update_b");
+
+        Query findMergedEntityQuery = new QueryImpl();
+        findMergedEntityQuery.eq("a","update_a").and();
+        findMergedEntityQuery.eq("b","update_b");
+
+        when(elasticSearchRepository.findOne(findMergedEntityQuery)).thenReturn(new MapEntity());
+        List<Entity> entityList = new ArrayList<Entity>();
+        entityList.add(newEntity1);
+        entityList.add(newEntity1);
+        entityList.add(newEntity1);
+
+        entityList.add(existingEntity);
+        entityList.add(existingEntity);
+        entityList.add(existingEntity);
+        entityList.add(existingEntity);
+        entityList.add(existingEntity);
+        when(repository1.iterator()).thenReturn(entityList.iterator());
+        when(elasticSearchRepository.getName()).thenReturn("mergedRepo");
+        when(dataService.getRepositoryByEntityName("mergedRepo")).thenReturn(elasticSearchRepository);
+
+
+        when(repository1.getEntityMetaData()).thenReturn(entityMetaData1);
+        List<Repository> repositoryList = new ArrayList<Repository>();
+        repositoryList.add(repository1);
+        List<AttributeMetaData> commonAttributes = new ArrayList<AttributeMetaData>();
+        commonAttributes.add(metaDataa);
+        commonAttributes.add(metaDatab);
+
+        RepositoryMerger repositoryMerger = new RepositoryMerger(dataService);
+        repositoryMerger.merge(repositoryList,commonAttributes,elasticSearchRepository,null,2);
+        ArgumentCaptor<List> argument = ArgumentCaptor.forClass(List.class);
+        verify(elasticSearchRepository, times(2)).add(argument.capture());
+        assertTrue(argument.getAllValues().get(0).size() == 2);
+        assertTrue(argument.getAllValues().get(1).size() == 1);
+        argument = ArgumentCaptor.forClass(List.class);
+        verify(elasticSearchRepository, times(3)).update(argument.capture());
+        assertTrue(argument.getAllValues().get(0).size() == 2);
+        assertTrue(argument.getAllValues().get(1).size() == 2);
+        assertTrue(argument.getAllValues().get(2).size() == 1);
     }
 }

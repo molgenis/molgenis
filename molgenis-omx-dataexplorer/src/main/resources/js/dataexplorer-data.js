@@ -157,8 +157,8 @@
         });
             
         settings.registry = 'https://www.dasregistry.org/das/sources';
+        settings.prefix = 'https://www.dasregistry.org/das/sources';
         genomeBrowser = new Browser(settings);
-        genomeBrowser.realInit();
         // highlight region specified with viewStart and viewEnd
         if(showHighlight === true) {
             genomeBrowser.highlightRegion(genomeBrowser.chr, (genomeBrowser.viewStart + 9990), (genomeBrowser.viewEnd - 9990));

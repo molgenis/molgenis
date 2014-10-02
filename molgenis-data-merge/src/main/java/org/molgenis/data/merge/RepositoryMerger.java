@@ -125,15 +125,15 @@ public class RepositoryMerger
 				}
 
 				// write to repository after every 1000 entities
-				if (addedEntities.size() > batchSize)
+				if (addedEntities.size() == batchSize)
 				{
-					resultRepository.add(addedEntities);
-					addedEntities.clear();
+                    resultRepository.add(addedEntities);
+					addedEntities = new ArrayList<Entity>();
 				}
-				if (updatedEntities.size() > batchSize)
+				if (updatedEntities.size()== batchSize)
 				{
 					resultRepository.update(updatedEntities);
-					updatedEntities.clear();
+                    updatedEntities = new ArrayList<Entity>();
 				}
 			}
 			// write remaining entities to repository
