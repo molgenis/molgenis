@@ -21,7 +21,7 @@
 	</div>
     
     <div class="row">
-        <div class="col-md-12" id="aggregate-parent-row">     		
+        <div class="col-md-12">     		
 	        <div class="data-table-container form-horizontal" id="dataexplorer-aggregate-data">
 	        	<div id="aggregate-table-container"></div>
 	        </div>
