@@ -174,8 +174,8 @@ public class RepositoryValidationDecorator extends CrudRepositoryDecorator
 
 					if (attr.getDataType() instanceof XrefField)
 					{
-						newValue = ((Entity) newValue).getIdValue();
-						oldValue = ((Entity) oldValue).getIdValue();
+						if (newValue != null) newValue = ((Entity) newValue).getIdValue();
+						if (oldValue != null) oldValue = ((Entity) oldValue).getIdValue();
 					}
 
 					if ((null == newValue && null == oldValue) || !newValue.equals(oldValue))
