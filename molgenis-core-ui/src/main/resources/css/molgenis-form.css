@@ -92,3 +92,7 @@ input.error {
   	height:16px;
  	 width:16px;
 }
+
+#entity-table-container {
+	overflow: auto;
+}
