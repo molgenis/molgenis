@@ -252,7 +252,7 @@ public class AggregateResponseParser
 
 				if (isAttr2Nillable)
 				{
-					Missing subMissing = getMissingAggregation(subAggs, aggAttr1);
+					Missing subMissing = getMissingAggregation(subAggs, aggAttr2);
 					String subKey = null;
 					Long subValue;
 
