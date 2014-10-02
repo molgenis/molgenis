@@ -11,10 +11,10 @@
     	
     	<div class="col-md-9">	
     		<#if field.dataType.enumType == 'BOOL'>
-				<input type="checkbox" name="${fieldName}" id="${fieldName}" value="true" <#if entity!='' && entity.get(fieldName)?? && entity.get(fieldName)?string("true", "false") == "true">checked</#if>  <#if field.readonly || hasWritePermission?string("true", "false") == "false" >disabled="disabled"</#if>>
+				<input type="checkbox" name="${fieldName}" id="${fieldName}" value="true" <#if entity!='' && entity.get(fieldName)?? && entity.get(fieldName)?string("true", "false") == "true">checked</#if>  <#if field.readonly || hasWritePermission?string("true", "false") == "false" >readonly="readonly"</#if>>
 	
 			<#elseif field.dataType.enumType == 'TEXT' || field.dataType.enumType =='HTML'>
-				<textarea class="form-control" name="${fieldName}" id="${fieldName}" <#if readonly>disabled="disabled"</#if> <#if !nillable>required="required"</#if> ><#if entity!='' && entity.get(fieldName)??>${entity.get(fieldName)!?html}</#if></textarea>
+				<textarea class="form-control" name="${fieldName}" id="${fieldName}" <#if readonly>readonly="readonly"</#if> <#if !nillable>required="required"</#if> ><#if entity!='' && entity.get(fieldName)??>${entity.get(fieldName)!?html}</#if></textarea>
 			
 			<#elseif field.dataType.enumType == 'XREF' || field.dataType.enumType == 'CATEGORICAL'>
 				<input type="hidden" name="${fieldName}" id="${fieldName}" <#if !nillable>required="required"</#if> />
@@ -137,7 +137,7 @@
 					<input type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.name}"
 						data-date-format='YYYY-MM-DD' 
 						class="form-control<#if field.nillable> nillable</#if>" 
-						<#if readonly>disabled="disabled"</#if> 
+						<#if readonly>readonly="readonly"</#if> 
 						<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string("yyyy-MM-dd")}"</#if> 
 						<#if !nillable>required="required"</#if>
 						data-rule-date-ISO="true" />
@@ -145,7 +145,7 @@
 				
 			<#elseif field.dataType.enumType =='INT' || field.dataType.enumType = 'LONG'>
 				<input type="number" class="form-control" data-rule-digits="true" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" 
-					<#if readonly>disabled="disabled"</#if> 
+					<#if readonly>readonly="readonly"</#if> 
 					<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)?c}"</#if> 
 					<#if !nillable>required="required"</#if> />
 			
@@ -169,12 +169,12 @@
 				</script>
 			<#elseif field.dataType.enumType == 'EMAIL'>
 				<input type="email" class="form-control" data-rule-email="true" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" 
-					<#if readonly>disabled="disabled"</#if> 
+					<#if readonly>readonly="readonly"</#if> 
 					<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string?html}"</#if> 
 					<#if !nillable>data-rule-required="true" </#if>/>
 			<#else>
 					<input type="text" class="form-control" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" 
-						<#if readonly>disabled="disabled"</#if> 
+						<#if readonly>readonly="readonly"</#if> 
 						<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string?html}"</#if> 
 						<#if !nillable>required="required"</#if> 
 						<#if field.dataType.enumType == 'DECIMAL'>data-rule-number="true"</#if>
