@@ -122,7 +122,7 @@
   						name="${fieldName}" 
   						id="${fieldName}" 
   						placeholder="${field.name}" 
-  						data-date-format='YYYY-MM-DD'T'HH:mm:ssZZ'
+  						data-date-format="YYYY-MM-DD'T'HH:mm:ssZZ"
 						class="form-control<#if field.nillable> nillable</#if>" <#if readonly>disabled="disabled"</#if>
 						<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string("yyyy-MM-dd'T'HH:mm:ssZ")}"</#if>
 						<#if !nillable>required="required"</#if> 
@@ -143,7 +143,7 @@
 						name="${fieldName}" 
 						id="${fieldName}" 
 						placeholder="${field.name}"
-						data-date-format='YYYY-MM-DD' 
+						data-date-format="YYYY-MM-DD" 
 						class="form-control<#if field.nillable> nillable</#if>" 
 						<#if readonly>readonly="readonly"</#if> 
 						<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string("yyyy-MM-dd")}"</#if> 
