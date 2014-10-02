@@ -40,6 +40,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.IndexedRepository;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Range;
@@ -194,6 +195,12 @@ public class EmxImportService implements ImportService
 
 			for (String entityName : addedEntities)
 			{
+				Repository repo = dataService.getRepositoryByEntityName(entityName);
+				if (repo instanceof IndexedRepository)
+				{
+					((IndexedRepository) repo).drop();
+				}
+
 				store.dropEntityMetaData(entityName);
 			}
 
@@ -607,6 +614,7 @@ public class EmxImportService implements ImportService
 				{
 					String name = entityMetaData.getName();
 					CrudRepository crudRepository = (CrudRepository) store.getRepositoryByEntityName(name);
+
 					if (crudRepository != null)
 					{
 						Repository fileEntityRepository = source.getRepositoryByEntityName(name);
@@ -624,6 +632,7 @@ public class EmxImportService implements ImportService
 										}
 									});
 							entities = DependencyResolver.resolveSelfReferences(entities, entityMetaData);
+
 							int count = update(crudRepository, entities, dbAction);
 							report.getNrImportedEntitiesMap().put(name, count);
 						}

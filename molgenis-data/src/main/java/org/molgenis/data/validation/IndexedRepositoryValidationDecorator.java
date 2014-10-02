@@ -28,4 +28,10 @@ public class IndexedRepositoryValidationDecorator extends RepositoryValidationDe
 	{
 		decoratedRepository.rebuildIndex();
 	}
+
+	@Override
+	public void drop()
+	{
+		decoratedRepository.drop();
+	}
 }
