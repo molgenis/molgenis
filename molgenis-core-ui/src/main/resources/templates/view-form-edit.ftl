@@ -23,7 +23,6 @@
 
 <#if back??>
 	<a href="${back}" class="btn btn-default btn-xs">Back to list</a>
-	<hr></hr>
 </#if>
 
 <form role="form" class="form-horizontal" id="entity-form" method="POST" action="/api/v1/${form.metaData.name?lower_case}<#if form.primaryKey??><#if form.primaryKey?is_number>/${form.primaryKey?c}<#else>/${form.primaryKey}</#if></#if>">
@@ -39,13 +38,32 @@
 
 	<div class="form-group">
 		<div class="col-md-5">
+			<legend>Required</legend>
+			<#assign optionalCounter = 0 />
 			<#list form.metaData.fields as field>
-				<#if form.entity??>
-					<@input.render field form.hasWritePermission form.entity form.metaData.forUpdate/>
+				<#if !field.nillable && field.visible>
+					<#if form.entity??>
+						<@input.render field form.hasWritePermission form.entity form.metaData.forUpdate/>
+					<#else>
+						<@input.render field form.hasWritePermission '' form.metaData.forUpdate/>
+					</#if>
 				<#else>
-					<@input.render field form.hasWritePermission '' form.metaData.forUpdate/>
+					<#assign optionalCounter = optionalCounter + 1>
 				</#if>
 			</#list>
+			
+			<#if optionalCounter gt 0>
+				<legend>Optional</legend>
+				<#list form.metaData.fields as field>
+					<#if field.nillable && field.visible>
+						<#if form.entity??>
+							<@input.render field form.hasWritePermission form.entity form.metaData.forUpdate/>
+						<#else>
+							<@input.render field form.hasWritePermission '' form.metaData.forUpdate/>
+						</#if>
+					</#if>
+				</#list>
+			</#if>
 		</div>
 	</div>
 	

@@ -8,18 +8,20 @@
 		<form id="contentForm" method="post" role="form">
 		   
 		   <div class="form-group">
-                <div class="col-md-12">
+                <div class="col-md-8 col-md-offset-2">
         			<#if content?has_content>
         		    	<textarea id="elm1" name="content" form="contentForm" rows="15">${content} <#if succes?has_content>${succes}</#if></textarea>
+        		    <#else>	
+        		    	<textarea id="elm1" name="content" form="contentForm" rows="15"></textarea>
         		    </#if>
                 </div>
            </div>
 		   
 		   <div class="form-group">
-				<div class="col-md-9">
-					<div class="btn-group">
-						<a id="cancelBtn" href="${context_url}" class="btn btn-default">Cancel</a>
-						<button id="submitBtn" type="submit" class="btn btn-default">Save</a>
+				<div class="col-md-8 col-md-offset-2">
+					<div class="btn-group pull-right">
+						<a id="cancelBtn" href="${context_url}" class="btn btn-default">Close</a>
+						<button id="submitBtn" type="submit" class="btn btn-default">Save</button>
 					</div>
 				</div>
 			</div>
