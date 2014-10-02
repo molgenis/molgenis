@@ -1,14 +1,16 @@
 package org.molgenis.data.elasticsearch.response;
 
+import static org.molgenis.data.elasticsearch.request.AggregateQueryGenerator.AGGREGATION_DISTINCT_POSTFIX;
+import static org.molgenis.data.elasticsearch.request.AggregateQueryGenerator.AGGREGATION_MISSING_POSTFIX;
+import static org.molgenis.data.elasticsearch.request.AggregateQueryGenerator.AGGREGATION_TERMS_POSTFIX;
+
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import org.elasticsearch.common.collect.Sets;
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.missing.Missing;
@@ -17,346 +19,350 @@ import org.elasticsearch.search.aggregations.bucket.nested.ReverseNested;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
 import org.elasticsearch.search.aggregations.metrics.cardinality.Cardinality;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.elasticsearch.request.AggregateQueryGenerator;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 
 public class AggregateResponseParser
 {
-	private static final String MISSING_VALUE_LABEL = "N/A";
-
+	@SuppressWarnings("unchecked")
 	public AggregateResult parseAggregateResponse(AttributeMetaData aggAttr1, AttributeMetaData aggAttr2,
-			AttributeMetaData aggAttrDistinct, Aggregations aggregations, DataService dataService)
+			AttributeMetaData aggAttrDistinct, Aggregations aggs, DataService dataService)
 	{
-		List<List<Long>> matrix = Lists.newArrayList();
-		Set<String> xLabelsSet = Sets.newHashSet();
-		Set<String> yLabelsSet = Sets.newHashSet();
-		List<String> xLabels = new ArrayList<String>();
-		List<String> yLabels = new ArrayList<String>();
+		Map<String, Object> aggsMap = parseAggregations(aggAttr1, aggAttr2, aggAttrDistinct, aggs);
 
-		Terms terms = getTermsAggregation(aggregations);
-		Missing missingTerms;
-		if (aggAttr1.isNillable())
+		// create labels
+		Map<String, Integer> xLabelsIdx = new HashMap<String, Integer>();
+		Map<String, Integer> yLabelsIdx = aggAttr2 != null ? new HashMap<String, Integer>() : null;
+		for (Map.Entry<String, Object> entry : aggsMap.entrySet())
 		{
-			missingTerms = getMissingTermsAggregation(aggregations);
+			String xLabel = entry.getKey();
+			xLabelsIdx.put(xLabel, null);
+			if (aggAttr2 != null)
+			{
+				Map<String, Object> subAggsMap = (Map<String, Object>) entry.getValue();
+				for (Map.Entry<String, Object> subEntry : subAggsMap.entrySet())
+					yLabelsIdx.put(subEntry.getKey(), null);
+			}
 		}
-		else
+
+		List<String> xLabels = new ArrayList<String>(xLabelsIdx.keySet());
+		Collections.sort(xLabels, new AggregateLabelComparable());
+		int nrXLabels = xLabels.size();
+		for (int i = 0; i < nrXLabels; ++i)
+			xLabelsIdx.put(xLabels.get(i), i);
+
+		List<String> yLabels;
+		if (aggAttr2 != null)
 		{
-			missingTerms = null;
+			yLabels = new ArrayList<String>(yLabelsIdx.keySet());
+			Collections.sort(yLabels, new AggregateLabelComparable());
+			int nrYLabels = yLabels.size();
+			for (int i = 0; i < nrYLabels; ++i)
+				yLabelsIdx.put(yLabels.get(i), i);
+		}
+		else yLabels = Collections.emptyList();
+
+		// create value matrix
+		List<List<Long>> matrix = new ArrayList<List<Long>>(nrXLabels);
+		int nrYLabels = aggAttr2 != null ? yLabels.size() : 1;
+		for (int i = 0; i < nrXLabels; ++i)
+		{
+			List<Long> yValues = new ArrayList<Long>(nrYLabels);
+			for (int j = 0; j < nrYLabels; ++j)
+				yValues.add(0l);
+			matrix.add(yValues);
 		}
 
-		Collection<Bucket> buckets = terms.getBuckets();
-		int nrBuckets = buckets.size() + (missingTerms != null ? 1 : 0);
-		if (nrBuckets > 0)
+		for (Map.Entry<String, Object> entry : aggsMap.entrySet())
 		{
-			// create initial values
-			for (int i = 0; i < nrBuckets; ++i)
-				matrix.add(null);
+			String key = entry.getKey();
+			Integer idx = xLabelsIdx.get(key);
+			List<Long> yValues = matrix.get(idx);
 
-			// distinguish between 1D and 2D aggregation
-			boolean is2dAggregation = false;
-			for (Bucket bucket : buckets)
+			if (aggAttr2 != null)
 			{
-				Aggregations subAggregations = bucket.getAggregations();
-				if (subAggregations != null && Iterables.size(subAggregations) > 0)
+				Map<String, Long> subValues = (Map<String, Long>) entry.getValue();
+				for (Map.Entry<String, Long> subEntry : subValues.entrySet())
 				{
-					is2dAggregation = hasTermsAggregation(subAggregations);
-					break;
-				}
-			}
-
-			// create (sorted) labels for x-axis
-			for (Bucket bucket : buckets)
-			{
-				if (!xLabelsSet.contains(bucket.getKey())) xLabelsSet.add(bucket.getKey());
-			}
-
-			xLabels = new ArrayList<String>(xLabelsSet);
-			Collections.sort(xLabels);
-			if (aggAttr1.isNillable())
-			{
-				xLabels.add(MISSING_VALUE_LABEL);
-			}
-
-			int xIdx = 0;
-			Map<String, Integer> xLabelMap = new HashMap<String, Integer>();
-			for (String xLabel : xLabels)
-			{
-				xLabelMap.put(xLabel, xIdx++);
-			}
-
-			if (is2dAggregation)
-			{
-				// create labels
-				for (Bucket bucket : buckets)
-				{
-					Aggregations subAggregations = bucket.getAggregations();
-					if (subAggregations != null)
-					{
-						Terms subTerms = getTermsAggregation(subAggregations);
-
-						for (Bucket subBucket : subTerms.getBuckets())
-						{
-							yLabelsSet.add(subBucket.getKey());
-						}
-					}
-				}
-
-				yLabels = new ArrayList<String>(yLabelsSet);
-				Collections.sort(yLabels);
-				if (aggAttr2.isNillable())
-				{
-					yLabels.add(MISSING_VALUE_LABEL);
-				}
-
-				int yIdx = 0;
-				Map<String, Integer> yLabelMap = new HashMap<String, Integer>();
-				for (String yLabel : yLabels)
-				{
-					yLabelMap.put(yLabel, yIdx++);
-				}
-
-				for (Bucket bucket : buckets)
-				{
-					// create values
-					List<Long> yValues = new ArrayList<Long>();
-					for (int i = 0; i < yIdx; ++i)
-					{
-						yValues.add(0l);
-					}
-
-					Aggregations subAggregations = bucket.getAggregations();
-					if (subAggregations != null)
-					{
-						Terms subTerms = getTermsAggregation(subAggregations);
-						for (Bucket subBucket : subTerms.getBuckets())
-						{
-							Aggregations distinctAggregations = subBucket.getAggregations();
-							long bucketCount;
-							if (distinctAggregations != null && !Iterables.isEmpty(distinctAggregations))
-							{
-								bucketCount = getCardinalityAggregation(distinctAggregations).getValue();
-							}
-							else
-							{
-								bucketCount = subBucket.getDocCount();
-							}
-							yValues.set(yLabelMap.get(subBucket.getKey()), bucketCount);
-						}
-						if (aggAttr2.isNillable())
-						{
-							Missing subMissingTerms = getMissingTermsAggregation(subAggregations);
-							yValues.set(yLabelMap.get(MISSING_VALUE_LABEL), subMissingTerms.getDocCount());
-						}
-					}
-
-					matrix.set(xLabelMap.get(bucket.getKey()), yValues);
-				}
-				if (aggAttr1.isNillable())
-				{
-					// create values
-					List<Long> yValues = new ArrayList<Long>();
-					for (int i = 0; i < yIdx; ++i)
-					{
-						yValues.add(0l);
-					}
-
-					Aggregations subAggregations = missingTerms.getAggregations();
-					if (subAggregations != null)
-					{
-						Terms subTerms = getTermsAggregation(subAggregations);
-						for (Bucket subBucket : subTerms.getBuckets())
-						{
-							Aggregations distinctAggregations = subBucket.getAggregations();
-							long bucketCount;
-							if (distinctAggregations != null && !Iterables.isEmpty(distinctAggregations))
-							{
-								bucketCount = getCardinalityAggregation(distinctAggregations).getValue();
-							}
-							else
-							{
-								bucketCount = subBucket.getDocCount();
-							}
-							yValues.set(yLabelMap.get(subBucket.getKey()), bucketCount);
-						}
-						if (aggAttr2.isNillable())
-						{
-							Missing subMissingTerms = getMissingTermsAggregation(subAggregations);
-							yValues.set(yLabelMap.get(MISSING_VALUE_LABEL), subMissingTerms.getDocCount());
-						}
-					}
-
-					matrix.set(xLabelMap.get(MISSING_VALUE_LABEL), yValues);
+					String subKey = subEntry.getKey();
+					Integer subIdx = yLabelsIdx.get(subKey);
+					yValues.set(subIdx, subEntry.getValue());
 				}
 			}
 			else
 			{
-				for (Bucket bucket : buckets)
-				{
-					Aggregations distinctAggregations = bucket.getAggregations();
-					long bucketCount;
-					if (distinctAggregations != null)
-					{
-						bucketCount = getCardinalityAggregation(distinctAggregations).getValue();
-					}
-					else
-					{
-						bucketCount = bucket.getDocCount();
-					}
-					matrix.set(xLabelMap.get(bucket.getKey()), Lists.newArrayList(Long.valueOf(bucketCount)));
-				}
+				Long count = (Long) entry.getValue();
+				yValues.set(0, count);
 			}
+		}
 
-			// matrix labels are ids for categorical/xref/mref aggregates, convert to label attribute values
-			AttributeMetaData xAggregateField = aggAttr1;
-			if (xAggregateField != null)
-			{
-				FieldTypeEnum xDataType = xAggregateField.getDataType().getEnumType();
-				switch (xDataType)
-				{
-					case CATEGORICAL:
-					case MREF:
-					case XREF:
-						convertIdtoLabelLabels(xLabels, xAggregateField.getRefEntity(), dataService);
-						// $CASES-OMITTED$
-					default:
-						break;
-				}
-			}
-			AttributeMetaData yAggregateField = aggAttr2;
-			if (yAggregateField != null)
-			{
-				FieldTypeEnum yDataType = yAggregateField.getDataType().getEnumType();
-				switch (yDataType)
-				{
-					case CATEGORICAL:
-					case MREF:
-					case XREF:
-						convertIdtoLabelLabels(yLabels, yAggregateField.getRefEntity(), dataService);
-						// $CASES-OMITTED$
-					default:
-						break;
-				}
-			}
+		if (AggregateQueryGenerator.isNestedType(aggAttr1))
+		{
+			convertIdtoLabelLabels(xLabels, aggAttr1.getRefEntity(), dataService);
+		}
+		if (aggAttr2 != null && AggregateQueryGenerator.isNestedType(aggAttr2))
+		{
+			convertIdtoLabelLabels(yLabels, aggAttr2.getRefEntity(), dataService);
 		}
 
 		return new AggregateResult(matrix, xLabels, yLabels);
 	}
 
-	/**
-	 * Unwrap nesting and reverse nesting aggregations and return terms aggregation
-	 * 
-	 * @param aggregations
-	 * @return
-	 */
-	private Terms getTermsAggregation(Aggregations aggregations)
+	private Map<String, Object> parseAggregations(AttributeMetaData aggAttr1, AttributeMetaData aggAttr2,
+			AttributeMetaData aggAttrDistinct, Aggregations aggs)
 	{
-		for (Aggregation aggregation : aggregations)
+		Map<String, Object> counts = new HashMap<String, Object>();
+
+		boolean isAttr1Nested = AggregateQueryGenerator.isNestedType(aggAttr1);
+		boolean isAttr1Nillable = aggAttr1.isNillable();
+
+		if (isAttr1Nested) aggs = removeNesting(aggs);
+		Terms terms = getTermsAggregation(aggs, aggAttr1);
+
+		for (Bucket bucket : terms.getBuckets())
 		{
-			if (aggregation instanceof ReverseNested)
+			String key = bucket.getKey();
+			Object value;
+			if (aggAttr2 != null)
 			{
-				Aggregations reverseNestedAggregations = ((ReverseNested) aggregation).getAggregations();
-				return getTermsAggregation(reverseNestedAggregations);
+				Map<String, Long> subCounts = new HashMap<String, Long>();
+
+				boolean isAttr2Nested = AggregateQueryGenerator.isNestedType(aggAttr2);
+				boolean isAttr2Nillable = aggAttr2.isNillable();
+
+				Aggregations subAggs = bucket.getAggregations();
+				if (isAttr1Nested) subAggs = removeReverseNesting(subAggs);
+				if (isAttr2Nested) subAggs = removeNesting(subAggs);
+				Terms subTerms = getTermsAggregation(subAggs, aggAttr2);
+
+				for (Bucket subBucket : subTerms.getBuckets())
+				{
+					String subKey = subBucket.getKey();
+					Long subValue;
+
+					if (aggAttrDistinct != null)
+					{
+						boolean isAttrDistinctNested = AggregateQueryGenerator.isNestedType(aggAttrDistinct);
+
+						Aggregations distinctAggs = subBucket.getAggregations();
+						if (isAttr2Nested) distinctAggs = removeReverseNesting(distinctAggs);
+						if (isAttrDistinctNested) distinctAggs = removeNesting(distinctAggs);
+						Cardinality distinctAgg = getDistinctAggregation(distinctAggs, aggAttrDistinct);
+						subValue = distinctAgg.getValue();
+					}
+					else
+					{
+						subValue = subBucket.getDocCount();
+					}
+
+					subCounts.put(subKey, subValue);
+				}
+
+				if (isAttr2Nillable)
+				{
+					Missing subMissing = getMissingAggregation(subAggs, aggAttr2);
+					String subKey = null;
+					Long subValue;
+
+					if (aggAttrDistinct != null)
+					{
+						boolean isAttrDistinctNested = AggregateQueryGenerator.isNestedType(aggAttrDistinct);
+
+						Aggregations subDistinctAggs = subMissing.getAggregations();
+						if (isAttr2Nested) subDistinctAggs = removeReverseNesting(subDistinctAggs);
+						if (isAttrDistinctNested) subDistinctAggs = removeNesting(subDistinctAggs);
+						Cardinality distinctAgg = getDistinctAggregation(subDistinctAggs, aggAttrDistinct);
+						subValue = distinctAgg.getValue();
+					}
+					else
+					{
+						subValue = subMissing.getDocCount();
+					}
+					subCounts.put(subKey, subValue);
+				}
+				value = subCounts;
 			}
-			else if (aggregation instanceof Nested)
+			else
 			{
-				Aggregations nestedAggregations = ((Nested) aggregation).getAggregations();
-				return getTermsAggregation(nestedAggregations);
+				if (aggAttrDistinct != null)
+				{
+					boolean isAttrDistinctNested = AggregateQueryGenerator.isNestedType(aggAttrDistinct);
+
+					Aggregations distinctAggs = bucket.getAggregations();
+					if (isAttr1Nested) distinctAggs = removeReverseNesting(distinctAggs);
+					if (isAttrDistinctNested) distinctAggs = removeNesting(distinctAggs);
+					Cardinality distinctAgg = getDistinctAggregation(distinctAggs, aggAttrDistinct);
+					value = distinctAgg.getValue();
+				}
+				else
+				{
+					value = bucket.getDocCount();
+				}
 			}
-			else if (aggregation instanceof Terms)
-			{
-				return (Terms) aggregation;
-			}
+			counts.put(key, value);
 		}
-		throw new RuntimeException("Aggregations does not contain Terms aggregation");
+
+		if (isAttr1Nillable)
+		{
+			Missing missing = getMissingAggregation(aggs, aggAttr1);
+			String key = null;
+			Object value;
+			if (aggAttr2 != null)
+			{
+				Map<String, Long> subCounts = new HashMap<String, Long>();
+
+				boolean isAttr2Nested = AggregateQueryGenerator.isNestedType(aggAttr2);
+				boolean isAttr2Nillable = aggAttr2.isNillable();
+
+				Aggregations subAggs = missing.getAggregations();
+				if (isAttr1Nested) subAggs = removeReverseNesting(subAggs);
+				if (isAttr2Nested) subAggs = removeNesting(subAggs);
+				Terms subTerms = getTermsAggregation(subAggs, aggAttr2);
+
+				for (Bucket subBucket : subTerms.getBuckets())
+				{
+					String subKey = subBucket.getKey();
+					Long subValue;
+
+					if (aggAttrDistinct != null)
+					{
+						boolean isAttrDistinctNested = AggregateQueryGenerator.isNestedType(aggAttrDistinct);
+
+						Aggregations distinctAggs = subBucket.getAggregations();
+						if (isAttr2Nested) distinctAggs = removeReverseNesting(distinctAggs);
+						if (isAttrDistinctNested) distinctAggs = removeNesting(distinctAggs);
+						Cardinality distinctAgg = getDistinctAggregation(distinctAggs, aggAttrDistinct);
+						subValue = distinctAgg.getValue();
+					}
+					else
+					{
+						subValue = subBucket.getDocCount();
+					}
+
+					subCounts.put(subKey, subValue);
+				}
+
+				if (isAttr2Nillable)
+				{
+					Missing subMissing = getMissingAggregation(subAggs, aggAttr1);
+					String subKey = null;
+					Long subValue;
+
+					if (aggAttrDistinct != null)
+					{
+						boolean isAttrDistinctNested = AggregateQueryGenerator.isNestedType(aggAttrDistinct);
+
+						Aggregations subDistinctAggs = subMissing.getAggregations();
+						if (isAttr2Nested) subDistinctAggs = removeReverseNesting(subDistinctAggs);
+						if (isAttrDistinctNested) subDistinctAggs = removeNesting(subDistinctAggs);
+						Cardinality distinctAgg = getDistinctAggregation(subDistinctAggs, aggAttrDistinct);
+						subValue = distinctAgg.getValue();
+					}
+					else
+					{
+						subValue = subMissing.getDocCount();
+					}
+					subCounts.put(subKey, subValue);
+				}
+				value = subCounts;
+			}
+			else
+			{
+				if (aggAttrDistinct != null)
+				{
+					boolean isAttrDistinctNested = AggregateQueryGenerator.isNestedType(aggAttrDistinct);
+
+					Aggregations distinctAggs = missing.getAggregations();
+					if (isAttr1Nested) distinctAggs = removeReverseNesting(distinctAggs);
+					if (isAttrDistinctNested) distinctAggs = removeNesting(distinctAggs);
+					Cardinality distinctAgg = getDistinctAggregation(distinctAggs, aggAttrDistinct);
+					value = distinctAgg.getValue();
+				}
+				else
+				{
+					value = missing.getDocCount();
+				}
+			}
+			counts.put(key, value);
+		}
+		return counts;
 	}
 
-	/**
-	 * Unwrap nesting and reverse nesting aggregations and return missing aggregation
-	 * 
-	 * @param aggregations
-	 * @return
-	 */
-	private Missing getMissingTermsAggregation(Aggregations aggregations)
+	private Aggregations removeNesting(Aggregations aggs)
 	{
-		for (Aggregation aggregation : aggregations)
+		if (Iterables.size(aggs) != 1)
 		{
-			if (aggregation instanceof ReverseNested)
-			{
-				Aggregations reverseNestedAggregations = ((ReverseNested) aggregation).getAggregations();
-				return getMissingTermsAggregation(reverseNestedAggregations);
-			}
-			else if (aggregation instanceof Nested)
-			{
-				Aggregations nestedAggregations = ((Nested) aggregation).getAggregations();
-				return getMissingTermsAggregation(nestedAggregations);
-			}
-			else if (aggregation instanceof Missing)
-			{
-				return (Missing) aggregation;
-			}
+			throw new RuntimeException("Invalid number of aggregations");
 		}
-		throw new RuntimeException("Aggregations does not contain Missing aggregation");
+		Aggregation agg = aggs.iterator().next();
+		if (!(agg instanceof Nested))
+		{
+			throw new RuntimeException("Aggregation is not a nested aggregation");
+		}
+		return ((Nested) agg).getAggregations();
 	}
 
-	/**
-	 * Unwrap possible nested and reverse nested aggregations and check if resulting aggregation is a terms aggregation
-	 * 
-	 * @param aggregations
-	 * @return
-	 */
-	private boolean hasTermsAggregation(Aggregations aggregations)
+	private Aggregations removeReverseNesting(Aggregations aggs)
 	{
-		for (Aggregation aggregation : aggregations)
+		if (Iterables.size(aggs) != 1)
 		{
-			if (aggregation instanceof ReverseNested)
-			{
-				Aggregations reverseNestedAggregations = ((ReverseNested) aggregation).getAggregations();
-				return hasTermsAggregation(reverseNestedAggregations);
-			}
-			else if (aggregation instanceof Nested)
-			{
-				Aggregations nestedAggregations = ((Nested) aggregation).getAggregations();
-				return hasTermsAggregation(nestedAggregations);
-			}
-			else if (aggregation instanceof Terms)
-			{
-				return true;
-			}
+			throw new RuntimeException("Invalid number of aggregations");
 		}
-		return false;
+		Aggregation agg = aggs.iterator().next();
+		if (!(agg instanceof ReverseNested))
+		{
+			throw new RuntimeException("Aggregation is not a reverse nested aggregation");
+		}
+		return ((ReverseNested) agg).getAggregations();
 	}
 
-	private Cardinality getCardinalityAggregation(Aggregations aggregations)
+	private Terms getTermsAggregation(Aggregations aggs, AttributeMetaData attr)
 	{
-		int nrCardinalityAggregations = Iterables.size(aggregations);
-		if (nrCardinalityAggregations > 1)
+		Aggregation agg = aggs.get(attr.getName() + AGGREGATION_TERMS_POSTFIX);
+		if (agg == null)
 		{
-			throw new RuntimeException("Multiple aggregations [" + nrCardinalityAggregations + "] not supported");
+			throw new RuntimeException("Missing terms aggregation");
 		}
-		Aggregation aggregation = aggregations.iterator().next();
-		if (aggregation instanceof ReverseNested)
+		if (!(agg instanceof Terms))
 		{
-			Aggregations reverseNestedAggregations = ((ReverseNested) aggregation).getAggregations();
-			aggregation = reverseNestedAggregations.iterator().next();
+			throw new RuntimeException("Aggregation is not a terms aggregation");
 		}
-		if (aggregation instanceof Nested)
+		return (Terms) agg;
+	}
+
+	private Missing getMissingAggregation(Aggregations aggs, AttributeMetaData attr)
+	{
+		Aggregation agg = aggs.get(attr.getName() + AGGREGATION_MISSING_POSTFIX);
+		if (agg == null)
 		{
-			Aggregations nestedAggregations = ((Nested) aggregation).getAggregations();
-			aggregation = nestedAggregations.iterator().next();
+			throw new RuntimeException("Missing missing aggregation");
 		}
-		if (!(aggregation instanceof Cardinality))
+		if (!(agg instanceof Missing))
 		{
-			throw new RuntimeException("Aggregation of type [" + aggregation.getClass().getName() + "] not supported");
+			throw new RuntimeException("Aggregation is not a missing aggregation");
 		}
-		return (Cardinality) aggregation;
+		return (Missing) agg;
+	}
+
+	private Cardinality getDistinctAggregation(Aggregations aggs, AttributeMetaData attr)
+	{
+		Aggregation agg = aggs.get(attr.getName() + AGGREGATION_DISTINCT_POSTFIX);
+		if (agg == null)
+		{
+			throw new RuntimeException("Missing cardinality aggregation");
+		}
+		if (!(agg instanceof Cardinality))
+		{
+			throw new RuntimeException("Aggregation is not a cardinality aggregation");
+		}
+		return (Cardinality) agg;
 	}
 
 	/**
@@ -397,4 +403,12 @@ public class AggregateResponseParser
 		}
 	}
 
+	private static class AggregateLabelComparable implements Comparator<String>
+	{
+		@Override
+		public int compare(String o1, String o2)
+		{
+			return o1 == null ? 1 : (o2 == null ? -1 : o1.compareTo(o2));
+		}
+	}
 }

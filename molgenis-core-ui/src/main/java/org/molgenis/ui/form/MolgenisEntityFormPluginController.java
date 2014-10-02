@@ -180,7 +180,7 @@ public class MolgenisEntityFormPluginController extends MolgenisPluginController
 					if ((attr != null) && (attr.getDataType().getEnumType() == MolgenisFieldTypes.FieldTypeEnum.XREF))
 					{
 						Entity xref = dataService.findOne(attr.getRefEntity().getName(),
-								new QueryImpl().eq(attr.getRefEntity().getLabelAttribute().getName(), value));
+								new QueryImpl().eq(attr.getRefEntity().getIdAttribute().getName(), value));
 
 						if (xref != null)
 						{

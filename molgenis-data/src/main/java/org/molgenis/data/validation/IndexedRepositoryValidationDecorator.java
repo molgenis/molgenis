@@ -2,6 +2,7 @@ package org.molgenis.data.validation;
 
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
+import org.molgenis.data.DataService;
 import org.molgenis.data.IndexedCrudRepository;
 
 public class IndexedRepositoryValidationDecorator extends RepositoryValidationDecorator implements
@@ -9,10 +10,10 @@ public class IndexedRepositoryValidationDecorator extends RepositoryValidationDe
 {
 	private final IndexedCrudRepository decoratedRepository;
 
-	public IndexedRepositoryValidationDecorator(IndexedCrudRepository decoratedRepository,
+	public IndexedRepositoryValidationDecorator(DataService dataService, IndexedCrudRepository decoratedRepository,
 			EntityAttributesValidator entityAttributesValidator)
 	{
-		super(decoratedRepository, entityAttributesValidator);
+		super(dataService, decoratedRepository, entityAttributesValidator);
 		this.decoratedRepository = decoratedRepository;
 	}
 

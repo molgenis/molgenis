@@ -337,8 +337,8 @@ public class EntityImportService
 					}
 				}
 			}
-			Iterable<Entity> selectForUpdate = repo.findAll(q);
 
+			Iterable<Entity> selectForUpdate = repo.findAll(q);
 			// separate existing from new entities
 			for (Entity p : selectForUpdate)
 			{
@@ -350,8 +350,13 @@ public class EntityImportService
 				}
 				// copy existing from entityIndex to existingEntities
 				entityIndex.remove(combinedKeyBuilder.toString());
-				existingEntities.add(p);
+
+				Entity e = new MapEntity(repo.getEntityMetaData().getIdAttribute().getName());
+				e.set(p);
+
+				existingEntities.add(e);
 			}
+
 			// copy remaining to newEntities
 			newEntities = new ArrayList<Entity>(entityIndex.values());
 		}
@@ -362,7 +367,7 @@ public class EntityImportService
 		if (existingEntities.size() > 0
 				&& (dbAction == DatabaseAction.ADD_UPDATE_EXISTING || dbAction == DatabaseAction.UPDATE))
 		{
-			matchByNameAndUpdateFields(existingEntities, entities);
+			matchByNameAndUpdateFields(repo.getEntityMetaData(), existingEntities, entities);
 		}
 
 		switch (dbAction)
@@ -415,47 +420,36 @@ public class EntityImportService
 		}
 	}
 
-	private void matchByNameAndUpdateFields(List<? extends Entity> existingEntities, List<? extends Entity> entities)
+	private void matchByNameAndUpdateFields(EntityMetaData emd, List<? extends Entity> existingEntities,
+			List<? extends Entity> entities)
 	{
-		for (Entity entityInDb : existingEntities)
+		// check if there are any label fields otherwise check impossible
+		if (emd.getLabelAttribute() != null)
 		{
-			for (Entity newEntity : entities)
+			for (Entity entityInDb : existingEntities)
 			{
-				boolean match = false;
-				// check if there are any label fields otherwise check impossible
-				if (entityInDb.getLabelAttributeNames().size() > 0)
+				for (Entity newEntity : entities)
 				{
-					match = true;
-				}
-				for (String labelField : entityInDb.getLabelAttributeNames())
-				{
-					Object x1 = entityInDb.get(labelField);
-					Object x2 = newEntity.get(labelField);
+					Object x1 = entityInDb.get(emd.getLabelAttribute().getName());
+					Object x2 = newEntity.get(emd.getLabelAttribute().getName());
 
-					if (!x1.equals(x2))
+					if (x1.equals(x2))
 					{
-						match = false;
-						break;
-					}
-				}
-
-				if (match)
-				{
-					try
-					{
-						MapEntity mapEntity = new MapEntity();
-						for (String field : entityInDb.getAttributeNames())
+						try
 						{
-							mapEntity.set(field, newEntity.get(field));
+							MapEntity mapEntity = new MapEntity();
+							for (String field : entityInDb.getAttributeNames())
+							{
+								mapEntity.set(field, newEntity.get(field));
+							}
+							entityInDb.set(mapEntity, false);
 						}
-						entityInDb.set(mapEntity, false);
-					}
-					catch (Exception ex)
-					{
-						throw new MolgenisDataException(ex);
+						catch (Exception ex)
+						{
+							throw new MolgenisDataException(ex);
+						}
 					}
 				}
-
 			}
 		}
 	}

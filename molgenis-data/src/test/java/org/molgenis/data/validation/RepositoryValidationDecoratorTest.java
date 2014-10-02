@@ -11,6 +11,7 @@ import java.util.Set;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
+import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.testng.annotations.BeforeMethod;
@@ -25,7 +26,7 @@ public class RepositoryValidationDecoratorTest
 	public void beforeMethod()
 	{
 		decoratedRepository = mock(CrudRepository.class);
-		repositoryValidationDecorator = new RepositoryValidationDecorator(decoratedRepository,
+		repositoryValidationDecorator = new RepositoryValidationDecorator(new DataServiceImpl(), decoratedRepository,
 				new EntityAttributesValidator());
 	}
 
