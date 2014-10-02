@@ -29,7 +29,7 @@ public class BaseJpaTest
 		dataService = new DataServiceImpl();
 		fileRepositorySourceFactory.addFileRepositoryCollectionClass(ExcelRepositoryCollection.class,
 				ExcelRepositoryCollection.EXTENSIONS);
-		repo = new RepositoryValidationDecorator(new JpaRepository(entityManager, new PersonMetaData(),
+		repo = new RepositoryValidationDecorator(dataService, new JpaRepository(entityManager, new PersonMetaData(),
 				new QueryResolver(dataService)), new EntityAttributesValidator());
 		dataService.addRepository(repo);
 		entityManager.getTransaction().begin();

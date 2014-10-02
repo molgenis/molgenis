@@ -15,6 +15,7 @@ import static org.molgenis.data.mysql.AttributeMetaDataMetaData.RANGE_MAX;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.RANGE_MIN;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.READ_ONLY;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.REF_ENTITY;
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.UNIQUE;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.VISIBLE;
 import static org.molgenis.data.mysql.EntityMetaDataMetaData.ABSTRACT;
 import static org.molgenis.data.mysql.EntityMetaDataMetaData.EXTENDS;
@@ -91,7 +92,8 @@ public class EmxImportService implements ImportService
 			DATA_TYPE.toLowerCase(), DESCRIPTION.toLowerCase(), ENTITY.toLowerCase(), ENUM_OPTIONS.toLowerCase(),
 			ID_ATTRIBUTE.toLowerCase(), LABEL.toLowerCase(), LABEL_ATTRIBUTE.toLowerCase(),
 			LOOKUP_ATTRIBUTE.toLowerCase(), NAME, NILLABLE.toLowerCase(), RANGE_MAX.toLowerCase(),
-			RANGE_MIN.toLowerCase(), READ_ONLY.toLowerCase(), REF_ENTITY.toLowerCase(), VISIBLE.toLowerCase());
+			RANGE_MIN.toLowerCase(), READ_ONLY.toLowerCase(), REF_ENTITY.toLowerCase(), VISIBLE.toLowerCase(),
+			UNIQUE.toLowerCase());
 
 	private static final List<String> SUPPORTED_ENTITY_ATTRIBUTES = Arrays.asList(
 			org.molgenis.data.mysql.EntityMetaDataMetaData.LABEL.toLowerCase(),
@@ -348,6 +350,7 @@ public class EmxImportService implements ImportService
 			Boolean lookupAttribute = attribute.getBoolean(LOOKUP_ATTRIBUTE);
 			Boolean labelAttribute = attribute.getBoolean(LABEL_ATTRIBUTE);
 			Boolean readOnly = attribute.getBoolean(READ_ONLY);
+			Boolean unique = attribute.getBoolean(UNIQUE);
 
 			if (attributeNillable != null) defaultAttributeMetaData.setNillable(attributeNillable);
 			if (attributeIdAttribute != null) defaultAttributeMetaData.setIdAttribute(attributeIdAttribute);
@@ -355,6 +358,7 @@ public class EmxImportService implements ImportService
 			if (attributeAggregateable != null) defaultAttributeMetaData.setAggregateable(attributeAggregateable);
 			if (refEntityName != null) defaultAttributeMetaData.setRefEntity(entities.get(refEntityName));
 			if (readOnly != null) defaultAttributeMetaData.setReadOnly(readOnly);
+			if (unique != null) defaultAttributeMetaData.setUnique(unique);
 
 			if (lookupAttribute != null)
 			{

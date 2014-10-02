@@ -29,6 +29,7 @@ public class AttributeMetaDataMetaData extends DefaultEntityMetaData
 	public static final String RANGE_MAX = "rangeMax";
 	public static final String LABEL_ATTRIBUTE = "labelAttribute";
 	public static final String READ_ONLY = "readOnly";
+	public static final String UNIQUE = "unique";
 
 	public AttributeMetaDataMetaData()
 	{
@@ -51,6 +52,7 @@ public class AttributeMetaDataMetaData extends DefaultEntityMetaData
 		addAttribute(RANGE_MIN).setDataType(new LongField());
 		addAttribute(RANGE_MAX).setDataType(new LongField());
 		addAttribute(LABEL_ATTRIBUTE).setDataType(BOOL);
-		addAttribute(READ_ONLY).setDataType(BOOL).setDefaultValue(false);
+		addAttribute(READ_ONLY).setDataType(BOOL);
+		addAttribute(UNIQUE).setDataType(BOOL);
 	}
 }
