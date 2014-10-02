@@ -405,6 +405,16 @@ public class EmxImportService implements ImportService
 						+ attributeName + ")");
 			}
 
+			if (((defaultAttributeMetaData.getDataType() instanceof XrefField) || (defaultAttributeMetaData
+					.getDataType() instanceof MrefField))
+					&& defaultAttributeMetaData.isNillable()
+					&& defaultAttributeMetaData.isAggregateable())
+			{
+				throw new IllegalArgumentException("attributes.aggregatable error on line " + i + " (" + entityName
+						+ "." + attributeName + "): aggregatable nillable attribute cannot be of type "
+						+ defaultAttributeMetaData.getDataType());
+			}
+
 			Long rangeMin;
 			Long rangeMax;
 			try
