@@ -133,7 +133,7 @@ public class AggregateQueryGenerator
 
 				if (isNestedType(attr))
 				{
-					String reverseAggName = parentAttr.getName() + AggregateQueryGenerator.AGGREGATION_REVERSE_POSTFIX;
+					String reverseAggName = attr.getName() + AggregateQueryGenerator.AGGREGATION_REVERSE_POSTFIX;
 					ReverseNestedBuilder reverseNestedBuilder = AggregationBuilders.reverseNested(reverseAggName);
 					reverseNestedBuilder.subAggregation(nestedBuilder);
 					wrappedDistinctAgg = reverseNestedBuilder;
@@ -147,7 +147,7 @@ public class AggregateQueryGenerator
 			{
 				if (isNestedType(attr))
 				{
-					String reverseAggName = parentAttr.getName() + AggregateQueryGenerator.AGGREGATION_REVERSE_POSTFIX;
+					String reverseAggName = attr.getName() + AggregateQueryGenerator.AGGREGATION_REVERSE_POSTFIX;
 					ReverseNestedBuilder reverseNestedBuilder = AggregationBuilders.reverseNested(reverseAggName);
 					reverseNestedBuilder.subAggregation(distinctAgg);
 					wrappedDistinctAgg = reverseNestedBuilder;
