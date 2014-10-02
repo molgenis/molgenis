@@ -50,33 +50,56 @@
 		// type: "user" | "group"
 		var active = checkbox.checked;
 		$.ajax({
+			headers: { 
+		        'Accept': 'application/json',
+		        'Content-Type': 'application/json' 
+		    },
 			type : 'PUT',
-			url : molgenis.getContextUrl() + '/setActivation/' + type + '/' + id + '/' + active,
-			success : function(text) {
-				$('#groupRow' + id).addClass('success')
-				$('#userRow' + id).addClass('success');
-				setTimeout(function() {
-					$('#groupRow' + id).removeClass('success');
-					location.reload();
-				}, 1000);
-			}
+			dataType: 'json',
+			data: JSON.stringify({
+				type : type,
+				id: id,
+				active: active
+			}),
+			url : molgenis.getContextUrl() + '/activation',
+			success : function(data) {
+				var styleClass = data.success ? 'success' : 'warning'
+				if(data.type === "group") {
+					$('#groupRow' + data.id).addClass(styleClass);
+					setTimeout(function() {$('#groupRow' + data.id).removeClass('success');}, 1000);
+				}
+				
+				if(data.type === "user") {
+					$('#userRow' + data.id).addClass(styleClass);
+					setTimeout(function() {$('#userRow' + data.id).removeClass('success');}, 1000);
+				}
+		}
 		});
 	}
-
+	
 	/**
 	 * @memberOf molgenis.usermanager
 	 */
 	function changeGroupMembership(userId, groupId, checkbox) {
 		var member = checkbox.checked;
 		$.ajax({
+			headers: { 
+		        'Accept': 'application/json',
+		        'Content-Type': 'application/json' 
+		    },
 			type : 'PUT',
-			url : molgenis.getContextUrl() + '/changeGroupMembership/' + userId + '/' + groupId + '/' + member,
-			success : function(text) {
-				// $('#controlGroups').html(text);
-				$('#userRow' + userId).addClass('success');
+			dataType: 'json',
+			url : molgenis.getContextUrl() + '/changeGroupMembership',
+			data: JSON.stringify({
+				userId: userId,
+				groupId: groupId,
+				member: member
+			}),
+			success : function(data) {
+				var styleClass = data.success ? 'success' : 'warning'
+				$('#userRow' + data.userId).addClass(styleClass);
 				setTimeout(function() {
-					$('#userRow' + userId).removeClass('success');
-					location.reload();
+					$('#userRow' + data.userId).removeClass(styleClass);
 				}, 1000);
 			}
 		});
@@ -126,9 +149,13 @@
 
 		var submitBtn = $('#submitFormButton');
 		submitBtn.click(function(e) {
-			e.preventDefault();
-			e.stopPropagation();
 			$('#entity-form').submit();
+			return false;
+		});
+		
+		$( "#target" ).submit(function( event ) {
+			alert( "Handler for .submit() called." );
+			event.preventDefault();
 		});
 
 		$(document).on('onFormSubmitSuccess', function() {
@@ -139,8 +166,7 @@
 		$('#managerModal').keydown(function(e) {
 			// prevent modal being submitted if one presses enter
 			if (event.keyCode === 13) {
-				e.preventDefault();
-				e.stopPropagation();
+				return false;
 			}
 		});
 	});
