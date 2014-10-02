@@ -157,7 +157,7 @@
         });
             
         settings.registry = 'https://www.dasregistry.org/das/sources';
-        settings.prefix = 'https://www.dasregistry.org/das/sources';
+        settings.prefix = 'https://www.biodalliance.org/release-0.12/';
         genomeBrowser = new Browser(settings);
         // highlight region specified with viewStart and viewEnd
         if(showHighlight === true) {

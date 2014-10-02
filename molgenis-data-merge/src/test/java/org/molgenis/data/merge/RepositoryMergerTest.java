@@ -1,34 +1,21 @@
 package org.molgenis.data.merge;
 
-import org.elasticsearch.action.index.IndexRequestBuilder;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.ListenableActionFuture;
-import org.elasticsearch.search.SearchHits;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.*;
-
 import org.molgenis.data.elasticsearch.*;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
-
-import org.elasticsearch.client.Client;
-
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.stereotype.Component;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import sun.jvm.hotspot.utilities.Assert;
-
 import java.io.IOException;
 import java.util.*;
 
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertTrue;
 import static org.testng.AssertJUnit.assertEquals;
