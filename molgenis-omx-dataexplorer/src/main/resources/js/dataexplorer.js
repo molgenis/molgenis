@@ -375,7 +375,10 @@ function($, molgenis, settingsXhr) {
 		});
 		
 		// fire event handler
-		$('#dataset-select').change();
+		if($('#dataset-select').val() !== null) 
+		{	
+			$('#dataset-select').change();
+		}
 		
 		// restore the search term and trigger change event to filter data table
 		if(searchTerm){

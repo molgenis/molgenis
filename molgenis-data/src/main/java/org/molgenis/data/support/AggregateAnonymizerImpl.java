@@ -24,7 +24,7 @@ public class AggregateAnonymizerImpl implements AggregateAnonymizer
 				public Long apply(Long input)
 				{
 					if (input == null) return null;
-					return input < threshold ? AGGREGATE_ANONYMIZATION_VALUE : input;
+					return input <= threshold ? AGGREGATE_ANONYMIZATION_VALUE : input;
 				}
 
 			});
