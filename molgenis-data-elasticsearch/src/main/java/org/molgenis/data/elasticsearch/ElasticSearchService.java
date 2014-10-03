@@ -1239,7 +1239,7 @@ public class ElasticSearchService implements SearchService
 					}
 					else if (batchPos == batchHits.length)
 					{
-						long requestedHits = pageSize != 0 ? pageSize : totalHits;
+						long requestedHits = pageSize != 0 ? Math.min(pageSize, totalHits) : totalHits;
 						if (currentOffset + batchHits.length < requestedHits)
 						{
 							int batchOffset = currentOffset + BATCH_SIZE;
