@@ -78,7 +78,8 @@ public class VcfImporterService
 				if (sampleAttribute != null)
 				{
 					sampleRepository = new ElasticsearchRepository(sampleAttribute.getRefEntity(), searchService);
-				}
+                    searchService.createMappings(sampleAttribute.getRefEntity(), true, true, true, true);
+                }
 				Iterator<Entity> inIterator = inRepository.iterator();
 				try
 				{
