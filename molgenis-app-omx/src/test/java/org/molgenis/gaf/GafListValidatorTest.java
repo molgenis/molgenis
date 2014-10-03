@@ -53,39 +53,33 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 		reset(dataService);
 		reset(molgenisSettings);
 
-		when(
-				molgenisSettings.getProperty(GafListValidator.GAF_LIST_VALIDATOR_PREFIX
- + GAFCol.INTERNAL_SAMPLE_ID))
+		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_VALIDATOR_PREFIX + GAFCol.INTERNAL_SAMPLE_ID))
 				.thenReturn("^[0-9]+$");
-		when(
-				molgenisSettings.getProperty(GafListValidator.GAF_LIST_VALIDATOR_PREFIX
- + GAFCol.EXTERNAL_SAMPLE_ID))
+		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_VALIDATOR_PREFIX + GAFCol.EXTERNAL_SAMPLE_ID))
 				.thenReturn("^[a-zA-Z0-9_]+$");
-		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_VALIDATOR_PREFIX + GAFCol.PROJECT))
-				.thenReturn("^[a-zA-Z0-9_]+$");
-		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_VALIDATOR_PREFIX + GAFCol.SEQUENCER))
-				.thenReturn("^[a-zA-Z0-9_]+$");
+		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_VALIDATOR_PREFIX + GAFCol.PROJECT)).thenReturn(
+				"^[a-zA-Z0-9_]+$");
+		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_VALIDATOR_PREFIX + GAFCol.SEQUENCER)).thenReturn(
+				"^[a-zA-Z0-9_]+$");
 		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_VALIDATOR_PREFIX + GAFCol.CONTACT))
 				.thenReturn(
 						"^([^<>@+0-9_,]+ <[a-zA-Z0-9_\\.]+@[a-zA-Z0-9_\\.]+>, )*[^<>@+0-9_,]+ <[a-zA-Z0-9_\\.]+@[a-zA-Z0-9_\\.]+>$");
-		when(
-				molgenisSettings.getProperty(GafListValidator.GAF_LIST_VALIDATOR_PREFIX
- + GAFCol.SEQUENCING_START_DATE))
+		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_VALIDATOR_PREFIX + GAFCol.SEQUENCING_START_DATE))
 				.thenReturn("^[0-9]{6}$");
-		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_VALIDATOR_PREFIX + GAFCol.RUN))
-				.thenReturn("^[0-9]{4}$");
-		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_VALIDATOR_PREFIX + GAFCol.FLOWCELL))
-				.thenReturn("^(([AB][A-Z0-9]{7}XX)|(A[A-Z0-9]{4}))$");
-		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_VALIDATOR_PREFIX + GAFCol.LANE))
-				.thenReturn("^[1-8](,[1-8])*$");
+		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_VALIDATOR_PREFIX + GAFCol.RUN)).thenReturn(
+				"^[0-9]{4}$");
+		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_VALIDATOR_PREFIX + GAFCol.FLOWCELL)).thenReturn(
+				"^(([AB][A-Z0-9]{7}XX)|(A[A-Z0-9]{4}))$");
+		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_VALIDATOR_PREFIX + GAFCol.LANE)).thenReturn(
+				"^[1-8](,[1-8])*$");
 
-		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_VALIDATOR_PREFIX + GAFCol.BARCODE_1))
-				.thenReturn("^(None)|(((GAF)|(RPI)|(AGI)|(MON)|(RTP)|(HP8))\\s[0-9]{2}\\s([ACGT]{6})([ATCG]{2})?)$");
+		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_VALIDATOR_PREFIX + GAFCol.BARCODE_1)).thenReturn(
+				"^(None)|(((GAF)|(RPI)|(AGI)|(MON)|(RTP)|(HP8))\\s[0-9]{2}\\s([ACGT]{6})([ATCG]{2})?)$");
 
-		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_VALIDATOR_PREFIX + GAFCol.ARRAY_FILE))
-				.thenReturn("^.*[\\/\\\\]{1}[a-zA-Z0-9\\._]+$");
-		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_VALIDATOR_PREFIX + GAFCol.ARRAY_ID))
-				.thenReturn("^[1-9][0-9]*$");
+		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_VALIDATOR_PREFIX + GAFCol.ARRAY_FILE)).thenReturn(
+				"^.*[\\/\\\\]{1}[a-zA-Z0-9\\._]+$");
+		when(molgenisSettings.getProperty(GafListValidator.GAF_LIST_VALIDATOR_PREFIX + GAFCol.ARRAY_ID)).thenReturn(
+				"^[1-9][0-9]*$");
 
 		ObservableFeature feature = mock(ObservableFeature.class);
 		Category category1 = mock(Category.class);
@@ -139,7 +133,7 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 
 		return repository;
 	}
-	
+
 	/**
 	 * returns a MapEntity with valid values
 	 * 
@@ -154,7 +148,7 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 		entity0.set(GAFCol.BARCODE_1.toString(), "RPI 12 GCTAATCA");
 		return entity0;
 	}
-	
+
 	private void invalidTest(String nameColumn, String value) throws IOException
 	{
 		Repository repository = this.getDefaultValidSettingRepositoryMock();

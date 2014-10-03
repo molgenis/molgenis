@@ -21,6 +21,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Range;
 import org.molgenis.data.Repository;
+import org.molgenis.data.elasticsearch.ElasticsearchEntity;
 import org.molgenis.data.elasticsearch.util.MapperTypeSanitizer;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -91,7 +92,7 @@ public class MappingsBuilder
 	public static XContentBuilder buildMapping(Repository repository, boolean storeSource, boolean enableNorms,
 			boolean createAllIndex) throws IOException
 	{
-		return buildMapping(repository.getEntityMetaData(), storeSource, enableNorms, createAllIndex);
+		return buildMapping(repository.getEntityMetaData(), storeSource, enableNorms, createAllIndex, false);
 	}
 
 	/**
@@ -103,7 +104,7 @@ public class MappingsBuilder
 	 */
 	public static XContentBuilder buildMapping(EntityMetaData entityMetaData) throws IOException
 	{
-		return buildMapping(entityMetaData, true, true, true);
+		return buildMapping(entityMetaData, true, true, true, false);
 	}
 
 	/**
@@ -115,19 +116,28 @@ public class MappingsBuilder
 	 * @return
 	 * @throws IOException
 	 */
-	public static XContentBuilder buildMapping(EntityMetaData meta, boolean storeSource, boolean enableNorms,
-			boolean createAllIndex) throws IOException
+	public static XContentBuilder buildMapping(EntityMetaData entityMetaData, boolean storeSource, boolean enableNorms,
+			boolean createAllIndex, boolean storeFullMetadata) throws IOException
 	{
-		String documentType = MapperTypeSanitizer.sanitizeMapperType(meta.getName());
+		String documentType = MapperTypeSanitizer.sanitizeMapperType(entityMetaData.getName());
 		XContentBuilder jsonBuilder = XContentFactory.jsonBuilder().startObject().startObject(documentType)
 				.startObject("_source").field("enabled", storeSource).endObject().startObject("properties");
 
-		for (AttributeMetaData attr : meta.getAtomicAttributes())
+		for (AttributeMetaData attr : entityMetaData.getAtomicAttributes())
 		{
 			createAttributeMapping(attr, enableNorms, createAllIndex, true, jsonBuilder);
 		}
 
-		jsonBuilder.endObject().endObject().endObject();
+		jsonBuilder.endObject();
+		// create custom meta data
+		if (storeFullMetadata)
+		{
+			jsonBuilder.startObject("_meta");
+			serializeEntityMeta(entityMetaData, jsonBuilder);
+			jsonBuilder.endObject();
+		}
+
+		jsonBuilder.endObject().endObject();
 
 		return jsonBuilder;
 	}
@@ -312,24 +322,20 @@ public class MappingsBuilder
 	{
 		String docType = sanitizeMapperType(entityName);
 
-		GetMappingsResponse getMappingsResponse = client.admin().indices().prepareGetMappings("molgenis")
-				.addTypes(docType).execute().actionGet();
+		GetMappingsResponse getMappingsResponse = client.admin().indices().prepareGetMappings("molgenis").execute()
+				.actionGet();
 		ImmutableOpenMap<String, MappingMetaData> indexMappings = getMappingsResponse.getMappings().get("molgenis");
 		MappingMetaData mappingMetaData = indexMappings.get(docType);
-		Map<String, Object> metaMap = (Map<String, Object>) mappingMetaData.sourceAsMap().get("_meta");
-
+		Map<String, Object> metaMap = null;
+		// get full entitymetadata stored in elastic search
+		metaMap = (Map<String, Object>) mappingMetaData.sourceAsMap().get("_meta");
+		// get properties if full entitymetadata is not stored in elastic search
+		if (metaMap == null || metaMap.isEmpty()) metaMap = (Map<String, Object>) mappingMetaData.sourceAsMap().get(
+				"properties");
 		// create entity meta
 		String name = (String) metaMap.get(ENTITY_NAME);
-		Class<? extends Entity> entityClass;
-		try
-		{
-			entityClass = (Class<? extends Entity>) Class.forName((String) metaMap.get(ENTITY_ENTITY_CLASS));
-		}
-		catch (ClassNotFoundException e)
-		{
-			throw new RuntimeException(e);
-		}
-		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData(name, entityClass);
+
+		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData(name, ElasticsearchEntity.class);
 
 		// deserialize entity meta
 		deserializeEntityMeta(metaMap, entityMetaData, client);

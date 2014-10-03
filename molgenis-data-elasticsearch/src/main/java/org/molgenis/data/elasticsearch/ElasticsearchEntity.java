@@ -252,7 +252,7 @@ public abstract class ElasticsearchEntity implements Entity
 	@Override
 	public void set(String attributeName, Object value)
 	{
-		throw new UnsupportedOperationException("Immutable entity");
+		source.put(attributeName, value);
 	}
 
 	@Override

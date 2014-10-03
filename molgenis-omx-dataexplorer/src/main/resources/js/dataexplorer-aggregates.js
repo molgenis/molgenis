@@ -121,43 +121,48 @@
                 var items = ['<table class="table table-striped" >'];
 				items.push('<tr>');
 				items.push('<td style="width: 18%"></td>');
-				
+
 				$.each(aggregateResult.yLabels, function(index, label){
 					items.push('<th><div class="text-center">' + (label === null ? missingTemplate({}) : htmlEscape(label)) + '</div></th>');
 				});
 				items.push('<th><div class="text-center">' + totalTemplate({}) + '</div></th></tr>');
-				
+
 				var columnCounts = [];
 				$.each(aggregateResult.matrix, function(index, row) {
 					items.push('<tr>');
 					var label = aggregateResult.xLabels[index];
 					items.push('<th>' + (label === null ? missingTemplate({}) : htmlEscape(label)) + '</th>');
-					
+
 					var rowCount = 0;
 					var rowCountIsAnonimized = false;
 					$.each(row, function(index, count) {
-						countAboveZero = count > 0 || countAboveZero;						
+                        if(!countAboveZero) {
+                            countAboveZero = count > 0 || count == -1;
+                        }
 						if (!columnCounts[index]) {
 							columnCounts[index] = {count: 0, anonymized: false};
 						}
-						
-                    	items.push('<td><div class="text-center">');
-                    	
-                    	if (count == AGGREGATE_ANONYMIZATION_VALUE) {
-                    		rowCountIsAnonimized = true;
-                    		items.push('&le;' + aggregateResult.anonymizationThreshold);
-                    		rowCount += aggregateResult.anonymizationThreshold;
+                        if (count == AGGREGATE_ANONYMIZATION_VALUE) {
+                            rowCountIsAnonimized = true;
+                            rowCount += aggregateResult.anonymizationThreshold;
                             columnCounts[index].count += aggregateResult.anonymizationThreshold;
                             columnCounts[index].anonymized = true;
-                    	} else {
-                    		rowCount += count;
-                    		columnCounts[index].count += count;
-                    		items.push(count);
-                    	}
-                		
-                    	items.push('</div></td>');
+                        } else {
+                            rowCount += count;
+                            columnCounts[index].count += count;
+                        }
+
+                        if(yAttributeName!==undefined&&yAttributeName!=="") {
+                            items.push('<td><div class="text-center">');
+                            if (count == AGGREGATE_ANONYMIZATION_VALUE) {
+                                items.push('&le;' + aggregateResult.anonymizationThreshold);
+                            } else {
+                                items.push(count);
+                            }
+                            items.push('</div></td>');
+                        }
 					});
-					
+
 					items.push('<td><div class="text-center">');
 					if (rowCountIsAnonimized) {
 						items.push('&le;');
@@ -181,11 +186,13 @@
 					items.push(this.count);
 					items.push('</div></td>');
 				});
-				
-				items.push('<td><div class="text-center">');
-				if (grandTotal.anonymized) items.push('&le;');
-				items.push(grandTotal.count);
-				items.push('</div></td>');
+
+                if(yAttributeName!==undefined&&yAttributeName!=="") {
+                    items.push('<td><div class="text-center">');
+                    if (grandTotal.anonymized) items.push('&le;');
+                    items.push(grandTotal.count);
+                    items.push('</div></td>');
+                }
 				
 				items.push('</tr>');
 				

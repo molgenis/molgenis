@@ -11,13 +11,23 @@ function($, molgenis, settingsXhr) {
 	self.getSelectedAttributes = getSelectedAttributes; 
 	self.getEntityQuery = getEntityQuery;
     self.createHeader = createHeader;
-	
-	var restApi = new molgenis.RestClient();
+    self.setGenomeAttributes = setGenomeAttributes;
+    self.getPosAttribute = getPosAttribute;
+    self.getChromosomeAttribute = getChromosomeAttribute;
+    self.getIdentifierAttribute = getIdentifierAttribute;
+    self.getPatientAttribute = getPatientAttribute;
+
+    var restApi = new molgenis.RestClient();
 	var selectedEntityMetaData = null;
 	var attributeFilters = {};
 	var selectedAttributes = [];
 	var searchQuery = null;
 	var modules = [];
+
+    var posAttribute;
+    var chromosomeAttribute;
+    var identifierAttribute;
+    var patientAttribute;
 
 	if(settingsXhr[1] !== 'success') {
 		molgenis.createAlert([{message: 'An error occurred initializing the data explorer.'}], 'error');
@@ -102,11 +112,39 @@ function($, molgenis, settingsXhr) {
 		}
 	}
 
+    function getAttributeFromList(attributesString){
+        var result;
+        var attrs = getSelectedEntityMeta().attributes;
+        var list = attributesString.split(",");
+        for(var item in list){
+            result = attrs[list[item]];
+            if(result !== undefined){
+                break;
+            }
+        }
+        return result;
+    }
+
+    /**
+     * @memberOf molgenis.dataexplorer
+     */
+    function setGenomeAttributes(start, chromosome, id, patient){
+        posAttribute = getAttributeFromList(start);
+        chromosomeAttribute = getAttributeFromList(chromosome);
+        identifierAttribute = getAttributeFromList(id);
+        patientAttribute = getAttributeFromList(patient);
+    }
+
+    function getPosAttribute(){return posAttribute};
+    function getChromosomeAttribute(){return chromosomeAttribute};
+    function getIdentifierAttribute(){return identifierAttribute};
+    function getPatientAttribute(){return patientAttribute};
+
 	/**
 	 * @memberOf molgenis.dataexplorer
 	 */
 	function createEntityQuery() {
-		var entityCollectionRequest = {
+        var entityCollectionRequest = {
 			q : []
 		};
 		
@@ -127,7 +165,7 @@ function($, molgenis, settingsXhr) {
 				        	    [{
 				        	        operator: "NESTED",
 				        	        nestedRules: [{
-				        	            field: "Chr",
+				        	            field: chromosomeAttribute,
 				        	            operator: "EQUALS",
 				        	            value: chromosome
 				        	        }]
@@ -136,7 +174,7 @@ function($, molgenis, settingsXhr) {
 				        	    }, {
 				        	        operator: "NESTED",
 				        	        nestedRules: [{
-				        	            field: "Pos",
+				        	            field: posAttribute,
 				        	            operator: "EQUALS",
 				        	            value: position
 				        	        }]
@@ -160,7 +198,7 @@ function($, molgenis, settingsXhr) {
 						        nestedRules: [{
 							            operator: "NESTED",
 							            nestedRules: [{
-							                field: "Chr",
+							                field: chromosomeAttribute,
 							                operator: "EQUALS",
 							                value: chromosome
 						            }]
@@ -170,13 +208,13 @@ function($, molgenis, settingsXhr) {
 						    }, {
 						    	operator: "NESTED",
 						        nestedRules: [{
-				                    field: "Pos",
+				                    field: posAttribute,
 				                    operator: "GREATER_EQUAL",
 				                    value: startPosition
 				                }, {
 				                	operator: "AND"
 				                }, {
-				                    field: "Pos",
+				                    field: posAttribute,
 				                    operator: "LESS_EQUAL",
 				                    value: stopPosition
 				                }]
