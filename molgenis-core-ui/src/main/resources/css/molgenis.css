@@ -76,6 +76,11 @@ label.horizontal-inline.inbetween {
 	margin-bottom: -50px;
 }
 
+.drop-right {
+	position: relative;
+	/* TODO: Move the popup to the right of the parent element */
+}
+
 /* Bootstrap tooltip style */
 .tooltip {
 	position: absolute;
