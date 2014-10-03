@@ -93,11 +93,11 @@
 		</div>		
 	</div>
 	<div class="col-md-9">
-		<div class="row" id="dataset-select-container"<#if hideDatasetSelect??> style="display:none"</#if>>
+        <div id="dataset-select-container" class="pull-right" <#if hideDatasetSelect??>style="display:none"</#if>>
 			<div class="col-md-12">
 				<div class="form-horizontal form-group">
-	    			<label class="col-md-4 col-md-offset-6 control-label" for="dataset-select">Choose a dataset:</label>
-	    			<div class="col-md-2">
+	    			<label class="col-md-6 control-label" for="dataset-select">Choose a dataset:</label>
+	    			<div class="col-md-6">
 		    			<select class="form-control" id="dataset-select" data-placeholder="Choose an Entity (example: dataset, protocol...">
 		    			<#if entitiesMeta?has_content>
 		        			<#list entitiesMeta.iterator() as entityMeta>
@@ -108,12 +108,8 @@
 					</div>
 				</div>
 			</div>
-		</div>	
-		<div class="row">
-			<div class="col-md-12">
-        		<div id="module-nav"></div>
-    		</div>
-        </div>
+		</div>
+		<div id="module-nav"></div>
 	</div>
 </div>
 
