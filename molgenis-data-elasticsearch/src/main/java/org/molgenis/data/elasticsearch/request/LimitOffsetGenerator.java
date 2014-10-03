@@ -29,9 +29,5 @@ public class LimitOffsetGenerator implements QueryPartGenerator
 		{
 			searchRequestBuilder.setSize(query.getPageSize());
 		}
-		else
-		{
-			searchRequestBuilder.setSize(1000);
-		}
 	}
 }

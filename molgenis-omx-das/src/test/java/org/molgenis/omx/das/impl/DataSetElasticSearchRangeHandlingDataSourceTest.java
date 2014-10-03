@@ -111,7 +111,7 @@ public class DataSetElasticSearchRangeHandlingDataSourceTest
 
 		when(config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_CHROM, entity.getEntityMetaData()))
 				.thenReturn("CHROM");
-		when(config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_START, entity.getEntityMetaData()))
+		when(config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_POS, entity.getEntityMetaData()))
 				.thenReturn("POS");
 		when(config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_STOP, entity.getEntityMetaData()))
 				.thenReturn("STOP");

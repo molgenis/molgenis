@@ -113,8 +113,9 @@
     </div>
 </div>
 <script>
-	<#-- load css dependencies -->
-	if (!$('link[href="<@resource_href "/css/jquery.molgenis.table.css"/>"]').length)
+    molgenis.dataexplorer.setGenomeAttributes('${genomebrowser_start_list}', '${genomebrowser_chrom_list}', '${genomebrowser_id_list}', '${genomebrowser_patient_list}');
+    <#-- load css dependencies -->
+	if (!$('link[href="<@resource_href '/css/jquery.molgenis.table.css'/>"]').length)
 		$('head').append('<link rel="stylesheet" href="<@resource_href "/css/jquery.molgenis.table.css"/>" type="text/css" />');
 	<#-- load js dependencies -->
 	$.when(
@@ -123,12 +124,11 @@
 		$.ajax("<@resource_href "/js/dalliance-compiled.js"/>", {'cache': true}),
 		$.ajax("<@resource_href "/js/dataexplorer-data.js"/>", {'cache': true}))
 		.done(function() {
-			
-			molgenis.dataexplorer.data.setGenomeBrowserAttributes('${genomebrowser_start_list}', '${genomebrowser_chrom_list}', '${genomebrowser_id_list}', '${genomebrowser_patient_list}');
-			molgenis.dataexplorer.data.setGenomeBrowserSettings({
+    			molgenis.dataexplorer.data.setGenomeBrowserAttributes('${genomebrowser_start_list}', '${genomebrowser_chrom_list}', '${genomebrowser_id_list}', '${genomebrowser_patient_list}');
+
+                molgenis.dataexplorer.data.setGenomeBrowserSettings({
 			    ${initLocation},
 				coordSystem: ${coordSystem},
-				chains: ${chains},
 				sources: ${sources},
 				browserLinks: ${browserLinks}
 			});

@@ -41,6 +41,7 @@ import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AttributeMetaData;
@@ -78,6 +79,11 @@ public class ElasticSearchService implements SearchService
 	private static final Logger LOG = Logger.getLogger(ElasticSearchService.class);
 
 	private static BulkProcessorFactory BULK_PROCESSOR_FACTORY = new BulkProcessorFactory();
+
+	public EntityMetaData deserializeEntityMeta(String name) throws IOException
+	{
+		return MappingsBuilder.deserializeEntityMeta(client, name);
+	}
 
 	public static enum IndexingMode
 	{
@@ -257,11 +263,18 @@ public class ElasticSearchService implements SearchService
 		EntityMetaData entityMetaData = (request.getDocumentType() != null && dataService != null && dataService
 				.hasRepository(request.getDocumentType())) ? dataService.getEntityMetaData(request.getDocumentType()) : null;
 		String documentType = request.getDocumentType() == null ? null : sanitizeMapperType(request.getDocumentType());
-
+		if (LOG.isTraceEnabled())
+		{
+			LOG.trace("*** REQUEST\n" + builder);
+		}
 		generator.buildSearchRequest(builder, documentType, searchType, request.getQuery(),
 				request.getFieldsToReturn(), request.getAggregateField1(), request.getAggregateField2(),
 				request.getAggregateFieldDistinct(), entityMetaData);
 		SearchResponse response = builder.execute().actionGet();
+		if (LOG.isTraceEnabled())
+		{
+			LOG.trace("*** RESPONSE\n" + response);
+		}
 		return responseParser.parseSearchResponse(request, response, entityMetaData, dataService);
 	}
 
@@ -541,8 +554,21 @@ public class ElasticSearchService implements SearchService
 	public void createMappings(EntityMetaData entityMetaData, boolean storeSource, boolean enableNorms,
 			boolean createAllIndex) throws IOException
 	{
+		createMappings(entityMetaData, storeSource, enableNorms, createAllIndex, false);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.molgenis.data.elasticsearch.SearchService#createMappings(org.molgenis.data.EntityMetaData, boolean,
+	 * boolean, boolean)
+	 */
+	@Override
+	public void createMappings(EntityMetaData entityMetaData, boolean storeSource, boolean enableNorms,
+			boolean createAllIndex, boolean storeFullMetadata) throws IOException
+	{
 		XContentBuilder jsonBuilder = MappingsBuilder.buildMapping(entityMetaData, storeSource, enableNorms,
-				createAllIndex);
+				createAllIndex, storeFullMetadata);
 		if (LOG.isTraceEnabled()) LOG.trace("Creating Elasticsearch mapping [" + jsonBuilder.string() + "] ...");
 		String entityName = entityMetaData.getName();
 
@@ -954,38 +980,7 @@ public class ElasticSearchService implements SearchService
 	@Override
 	public Iterable<Entity> search(Query q, final EntityMetaData entityMetaData)
 	{
-		String entityName = entityMetaData.getName();
-		String type = sanitizeMapperType(entityName);
-		List<String> fieldsToReturn = Collections.<String> emptyList();
-
-		SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName);
-		generator.buildSearchRequest(searchRequestBuilder, type, SearchType.QUERY_AND_FETCH, q, fieldsToReturn, null,
-				null, null, entityMetaData);
-
-		if (LOG.isTraceEnabled())
-		{
-			LOG.trace("Searching Elasticsearch '" + type + "' docs using query [" + q + "] ...");
-		}
-		SearchResponse searchResponse = searchRequestBuilder.execute().actionGet();
-		if (searchResponse.getFailedShards() > 0)
-		{
-			throw new ElasticsearchException("Search failed. Returned headers:" + searchResponse.getHeaders());
-		}
-		if (LOG.isDebugEnabled())
-		{
-			LOG.debug("Searched Elasticsearch '" + type + "' docs using query [" + q + "] in "
-					+ searchResponse.getTotalShards() + "ms");
-		}
-
-		final SearchService elasticSearchService = this;
-		return Iterables.transform(searchResponse.getHits(), new Function<SearchHit, Entity>()
-		{
-			@Override
-			public Entity apply(SearchHit searchHit)
-			{
-				return new ElasticsearchSearchHitEntity(searchHit, entityMetaData, elasticSearchService);
-			}
-		});
+		return new ElasticsearchEntityIterable(q, entityMetaData, client, this, generator, indexName);
 	}
 
 	/*
@@ -1152,6 +1147,163 @@ public class ElasticSearchService implements SearchService
 					LOG.warn("Error executing bulk", failure);
 				}
 			}).setConcurrentRequests(0).build();
+		}
+	}
+
+	public GetMappingsResponse getMappings()
+	{
+		return client.admin().indices().prepareGetMappings(indexName).execute().actionGet();
+	}
+
+	public EntityMetaData getEntityMetaData(String name)
+	{
+		EntityMetaData entityMetaData = null;
+		try
+		{
+			entityMetaData = MappingsBuilder.deserializeEntityMeta(client, name);
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		return entityMetaData;
+	}
+
+	/**
+	 * Retrieve search results in batches. Note: We do not use Elasticsearch scan & scroll, because scrolling is not
+	 * intended for real time user request:
+	 * http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-request-scroll.html
+	 */
+	private static class ElasticsearchEntityIterable implements Iterable<Entity>
+	{
+		private static final int BATCH_SIZE = 1000;
+
+		private final Query q;
+		private final EntityMetaData entityMetaData;
+		private final Client client;
+		private final ElasticSearchService elasticSearchService;
+		private final SearchRequestGenerator searchRequestGenerator;
+		private final String indexName;
+
+		private final String type;
+		private final List<String> fieldsToReturn;
+		private final int offset;
+		private final int pageSize;
+
+		public ElasticsearchEntityIterable(Query q, EntityMetaData entityMetaData, Client client,
+				ElasticSearchService elasticSearchService, SearchRequestGenerator searchRequestGenerator,
+				String indexName)
+		{
+			this.client = client;
+			this.q = q;
+			this.entityMetaData = entityMetaData;
+			this.elasticSearchService = elasticSearchService;
+			this.searchRequestGenerator = searchRequestGenerator;
+			this.indexName = indexName;
+
+			this.type = sanitizeMapperType(entityMetaData.getName());
+			this.fieldsToReturn = Collections.<String> emptyList();
+			this.offset = q.getOffset();
+			this.pageSize = q.getPageSize();
+		}
+
+		@Override
+		public Iterator<Entity> iterator()
+		{
+			return new Iterator<Entity>()
+			{
+				private long totalHits;
+				private SearchHit[] batchHits;
+				private int batchPos;
+
+				private int currentOffset;
+
+				@Override
+				public boolean hasNext()
+				{
+					if (batchHits == null)
+					{
+						int batchOffset = offset;
+						int batchSize = pageSize != 0 ? Math.min(pageSize - currentOffset, BATCH_SIZE) : BATCH_SIZE;
+						doBatchSearch(batchOffset, batchSize);
+
+					}
+					if (batchHits.length == 0)
+					{
+						return false;
+					}
+
+					if (batchPos < batchHits.length)
+					{
+						return true;
+					}
+					else if (batchPos == batchHits.length)
+					{
+						long requestedHits = pageSize != 0 ? pageSize : totalHits;
+						if (currentOffset + batchHits.length < requestedHits)
+						{
+							int batchOffset = currentOffset + BATCH_SIZE;
+							int batchSize = pageSize != 0 ? Math.min(pageSize - batchOffset, BATCH_SIZE) : BATCH_SIZE;
+							doBatchSearch(batchOffset, batchSize);
+							return true;
+						}
+						else
+						{
+							return false;
+						}
+					}
+					else throw new RuntimeException();
+				}
+
+				@Override
+				public Entity next()
+				{
+					if (hasNext())
+					{
+						SearchHit hit = batchHits[batchPos];
+						++batchPos;
+						return new ElasticsearchDocumentEntity(hit.getSource(), entityMetaData, elasticSearchService);
+					}
+					else throw new ArrayIndexOutOfBoundsException();
+				}
+
+				private void doBatchSearch(int from, int size)
+				{
+					q.offset(from);
+					q.pageSize(size);
+
+					if (LOG.isTraceEnabled())
+					{
+						LOG.trace("Searching Elasticsearch '" + type + "' docs using query [" + q + "] ...");
+					}
+					SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName);
+					searchRequestGenerator.buildSearchRequest(searchRequestBuilder, type, SearchType.QUERY_AND_FETCH,
+							q, fieldsToReturn, null, null, null, entityMetaData);
+					SearchResponse searchResponse = searchRequestBuilder.execute().actionGet();
+					if (searchResponse.getFailedShards() > 0)
+					{
+						throw new ElasticsearchException("Search failed. Returned headers:"
+								+ searchResponse.getHeaders());
+					}
+					if (LOG.isDebugEnabled())
+					{
+						LOG.debug("Searched Elasticsearch '" + type + "' docs using query [" + q + "] in "
+								+ searchResponse.getTotalShards() + "ms");
+					}
+					SearchHits searchHits = searchResponse.getHits();
+					this.totalHits = searchHits.getTotalHits();
+					this.batchHits = searchHits.getHits();
+					this.batchPos = 0;
+
+					this.currentOffset = from;
+				}
+
+				@Override
+				public void remove()
+				{
+					throw new UnsupportedOperationException();
+				}
+			};
 		}
 	}
 }
