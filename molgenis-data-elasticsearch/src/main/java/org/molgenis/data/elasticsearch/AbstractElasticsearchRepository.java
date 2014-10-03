@@ -10,9 +10,9 @@ import java.util.Iterator;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Aggregateable;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.IndexedCrudRepository;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.ElasticSearchService.IndexingMode;
 import org.molgenis.data.support.ConvertingIterable;
@@ -21,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Iterables;
 
-public abstract class AbstractElasticsearchRepository implements CrudRepository, Aggregateable
+public abstract class AbstractElasticsearchRepository implements IndexedCrudRepository, Aggregateable
 {
 	public static final String BASE_URL = "elasticsearch://";
 
