@@ -25,6 +25,7 @@
 		<script src="<@resource_href "/js/bootstrap.min.js"/>"></script>
 		<script src="<@resource_href "/js/jquery.validate.min.js"/>"></script>
 		<script src="<@resource_href "/js/molgenis.js"/>"></script>
+		<<script src="<@resource_href "/js/bootstrap-hover-dropdown.min.js"/>"></script>
 	<#if context_url??>
 		<script>top.molgenis.setContextUrl('${context_url}');</script>
 	</#if>
@@ -144,39 +145,39 @@
 						<#-- Dropdown menu items -->
 						<#elseif item.type == "MENU">
 							<#assign sub_menu = item>
-							<#-- Root expansion toggle -->
+							<#-- Root dropdown toggle -->
 							<li class="dropdown">
-								<a class="dropdown-toggle" data-toggle="dropdown" href="#">
+								<a class="dropdown-toggle" data-hover="dropdown" data-delay="0" data-toggle="dropdown" href="#">
 									${item.name?html}<b class="caret"></b>
 								</a>
 								
-								<ul class="dropdown-menu" role="menu">
+								<ul class="dropdown-menu" id="first-dropdown-menu" role="menu">
 									<#list sub_menu.items as first_tier_subitem>
 										<#if first_tier_subitem.type != "MENU">
 											<li>
 												<a href="/menu/${sub_menu.id?html}/${first_tier_subitem.url?html}">${first_tier_subitem.name?html}</a>
 											</li>
 										<#elseif first_tier_subitem.type == "MENU">
-											<#-- Second expansion toggle -->
+											<#-- Second dropdown toggle -->
 											<li class="dropdown">
-												<a class="dropdown-toggle" data-toggle="dropdown" href="#">
+												<a class="dropdown-toggle" data-hover="dropdown" data-delay="200" data-toggle="dropdown" data-close-others="false" href="#">
 													${first_tier_subitem.name?html}<b class="caret"></b>
 												</a>
 												
-												<ul class="dropdown-menu" role="menu">	
+												<ul class="dropdown-menu drop-right" id="second-dropdown-menu" role="menu">	
 													<#list first_tier_subitem.items as second_tier_subitem>
 														<#if second_tier_subitem.type != "MENU">
 														<li>
 															<a tabindex="-1" href="/menu/${first_tier_subitem.id?html}/${second_tier_subitem.url?html}">${second_tier_subitem.name?html}</a>
 														<li>
 														<#elseif second_tier_subitem.type == "MENU">
-															<#-- third expansion toggle -->
+															<#-- third dropdown toggle -->
 															<li class="dropdown">
-																<a class="dropdown-toggle" data-toggle="dropdown" href="#">
+																<a class="dropdown-toggle" data-hover="dropdown" data-delay="200" data-close-others="false" data-toggle="dropdown" href="#">
 																	${second_tier_subitem.name?html}<b class="caret"></b>
 																</a>
 											
-																<ul class="dropdown-menu" role="menu">						
+																<ul class="dropdown-menu" id="third-dropdown-menu" role="menu">						
 																	<#list second_tier_subitem.items as third_tier_subitem> 
 																		<li>
 																			<a tabindex="-1" href="/menu/${second_tier_subitem.id?html}/${third_tier_subitem.url?html}">${third_tier_subitem.name?html}</a>
