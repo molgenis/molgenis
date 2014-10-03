@@ -195,12 +195,14 @@ public class EmxImportService implements ImportService
 
 			for (String entityName : addedEntities)
 			{
+				// Drop index
 				Repository repo = dataService.getRepositoryByEntityName(entityName);
 				if (repo instanceof IndexedRepository)
 				{
 					((IndexedRepository) repo).drop();
 				}
 
+				// Drop repo
 				store.dropEntityMetaData(entityName);
 			}
 
@@ -213,6 +215,22 @@ public class EmxImportService implements ImportService
 				for (String attributeName : attributes)
 				{
 					store.dropAttributeMetaData(entityName, attributeName);
+				}
+			}
+
+			// Reindex
+			Set<String> entitiesToIndex = Sets.newLinkedHashSet(source.getEntityNames());
+			entitiesToIndex.addAll(entities);
+
+			for (String entity : entitiesToIndex)
+			{
+				if (dataService.hasRepository(entity))
+				{
+					Repository repo = dataService.getRepositoryByEntityName(entity);
+					if ((repo != null) && (repo instanceof IndexedRepository))
+					{
+						((IndexedRepository) repo).rebuildIndex();
+					}
 				}
 			}
 
