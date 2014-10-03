@@ -79,6 +79,11 @@ public class ElasticSearchService implements SearchService
 
 	private static BulkProcessorFactory BULK_PROCESSOR_FACTORY = new BulkProcessorFactory();
 
+	public EntityMetaData deserializeEntityMeta(String name) throws IOException
+	{
+		return MappingsBuilder.deserializeEntityMeta(client, name);
+	}
+
 	public static enum IndexingMode
 	{
 		ADD, UPDATE
@@ -541,8 +546,21 @@ public class ElasticSearchService implements SearchService
 	public void createMappings(EntityMetaData entityMetaData, boolean storeSource, boolean enableNorms,
 			boolean createAllIndex) throws IOException
 	{
+		createMappings(entityMetaData, storeSource, enableNorms, createAllIndex, false);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.molgenis.data.elasticsearch.SearchService#createMappings(org.molgenis.data.EntityMetaData, boolean,
+	 * boolean, boolean)
+	 */
+	@Override
+	public void createMappings(EntityMetaData entityMetaData, boolean storeSource, boolean enableNorms,
+			boolean createAllIndex, boolean storeFullMetadata) throws IOException
+	{
 		XContentBuilder jsonBuilder = MappingsBuilder.buildMapping(entityMetaData, storeSource, enableNorms,
-				createAllIndex);
+				createAllIndex, storeFullMetadata);
 		if (LOG.isTraceEnabled()) LOG.trace("Creating Elasticsearch mapping [" + jsonBuilder.string() + "] ...");
 		String entityName = entityMetaData.getName();
 
@@ -1154,4 +1172,24 @@ public class ElasticSearchService implements SearchService
 			}).setConcurrentRequests(0).build();
 		}
 	}
+
+	public GetMappingsResponse getMappings()
+	{
+		return client.admin().indices().prepareGetMappings(indexName).execute().actionGet();
+	}
+
+	public EntityMetaData getEntityMetaData(String name)
+	{
+		EntityMetaData entityMetaData = null;
+		try
+		{
+			entityMetaData = MappingsBuilder.deserializeEntityMeta(client, name);
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		return entityMetaData;
+	}
+
 }

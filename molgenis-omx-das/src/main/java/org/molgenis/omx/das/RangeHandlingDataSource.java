@@ -17,7 +17,7 @@ import uk.ac.ebi.mydas.model.*;
 public abstract class RangeHandlingDataSource implements RangeHandlingAnnotationDataSource
 {
     protected DasFeature createDasFeature(Integer start, Integer stop, String identifier, String name,
-                                          String description, String link, DasType type, DasMethod method, String dataSet, String patient) throws DataSourceException
+                                          String description, String link, DasType type, DasMethod method, String dataSet, String patient, List<String> notes) throws DataSourceException
     {
         if (stop == null) stop = start;// no stop? assume length of 1;
 
@@ -31,8 +31,6 @@ public abstract class RangeHandlingDataSource implements RangeHandlingAnnotation
         {
             featureDescription = identifier;
         }
-
-        List<String> notes = new ArrayList<String>();
         notes.add("track:"+dataSet);
         notes.add("source:MOLGENIS");
         if(StringUtils.isNotEmpty(patient)){
@@ -48,12 +46,13 @@ public abstract class RangeHandlingDataSource implements RangeHandlingAnnotation
         {
         }
 
-        List<DasTarget> dasTarget = new ArrayList<DasTarget>();
-        dasTarget.add(new MolgenisDasTarget(identifier, start, stop, featureDescription));
+        List<DasTarget> dasTargets = new ArrayList<DasTarget>();
+        dasTargets.add(new MolgenisDasTarget(identifier, start, stop, featureDescription));
+
         List<String> parents = new ArrayList<String>();
         DasFeature feature = new DasFeature(identifier, featureDescription, type, method, start, stop,
                 new Double(0), DasFeatureOrientation.ORIENTATION_NOT_APPLICABLE, DasPhase.PHASE_NOT_APPLICABLE, notes,
-                linkout, dasTarget, parents, null);
+                linkout, dasTargets, parents, null);
         return feature;
     }
 

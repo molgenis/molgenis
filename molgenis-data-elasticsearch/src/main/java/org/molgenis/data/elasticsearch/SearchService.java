@@ -79,6 +79,9 @@ public interface SearchService
 	void createMappings(EntityMetaData entityMetaData, boolean storeSource, boolean enableNorms, boolean createAllIndex)
 			throws IOException;
 
+	void createMappings(EntityMetaData entityMetaData, boolean storeSource, boolean enableNorms,
+			boolean createAllIndex, boolean storeFullMetadata) throws IOException;
+
 	/**
 	 * Refresh index, making all operations performed since the last refresh available for search
 	 */

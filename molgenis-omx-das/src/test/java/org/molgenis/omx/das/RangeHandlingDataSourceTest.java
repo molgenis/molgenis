@@ -63,7 +63,7 @@ public class RangeHandlingDataSourceTest
 	{
 		DasFeature dasFeatureUnderTest = source.createDasFeature(0, 1000, "vatiant_identifier", "name",
 				"variant_description", "http://www.molgenis.org/", new DasType("0", "", "", "type"),
-				new DasMethod("not_recorded", "not_recorded", "ECO:0000037"),"","");
+				new DasMethod("not_recorded", "not_recorded", "ECO:0000037"),"","",new ArrayList<String>());
 		assertEquals(dasFeature, dasFeatureUnderTest);
 	}
 

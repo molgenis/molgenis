@@ -242,6 +242,16 @@
 		</dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-data-merge</artifactId>
+            <version>1.2.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-data-vcf</artifactId>
+            <version>1.2.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data-mysql</artifactId>
             <version>1.2.0-SNAPSHOT</version>
         </dependency>
@@ -253,6 +263,11 @@
          <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-catalogue</artifactId>
+            <version>1.2.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-data-elasticsearch</artifactId>
             <version>1.2.0-SNAPSHOT</version>
         </dependency>
 		<dependency>

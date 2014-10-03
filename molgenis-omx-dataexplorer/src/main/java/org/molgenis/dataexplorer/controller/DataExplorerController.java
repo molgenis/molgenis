@@ -222,7 +222,7 @@ public class DataExplorerController extends MolgenisPluginController
 					DEFAULT_VAL_KEY_HIGLIGHTREGION)));
 
 			model.addAttribute("genomebrowser_start_list",
-					molgenisSettings.getProperty(GenomeConfig.GENOMEBROWSER_START, "POS"));
+					molgenisSettings.getProperty(GenomeConfig.GENOMEBROWSER_POS, "POS"));
 			model.addAttribute("genomebrowser_chrom_list",
 					molgenisSettings.getProperty(GenomeConfig.GENOMEBROWSER_CHROM, "CHROM"));
 			model.addAttribute("genomebrowser_id_list",
@@ -352,7 +352,7 @@ public class DataExplorerController extends MolgenisPluginController
 	private boolean isGenomeBrowserEntity(EntityMetaData entityMetaData)
 	{
 		AttributeMetaData attributeStartPosition = genomeConfig.getAttributeMetadataForAttributeNameArray(
-				GenomeConfig.GENOMEBROWSER_START, entityMetaData);
+				GenomeConfig.GENOMEBROWSER_POS, entityMetaData);
 		AttributeMetaData attributeChromosome = genomeConfig.getAttributeMetadataForAttributeNameArray(
 				GenomeConfig.GENOMEBROWSER_CHROM, entityMetaData);
 		return attributeStartPosition != null && attributeChromosome != null;
