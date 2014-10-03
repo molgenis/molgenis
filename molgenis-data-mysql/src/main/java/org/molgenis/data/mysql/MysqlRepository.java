@@ -55,7 +55,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 	private static final Logger logger = Logger.getLogger(MysqlRepository.class);
 	private EntityMetaData metaData;
 	private final JdbcTemplate jdbcTemplate;
-	private RepositoryCollection repositoryCollection;
+	private MysqlRepositoryCollection repositoryCollection;
 
 	public MysqlRepository(DataSource dataSource)
 	{
@@ -68,7 +68,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		this.metaData = metaData;
 	}
 
-	public void setRepositoryCollection(RepositoryCollection repositoryCollection)
+	public void setRepositoryCollection(MysqlRepositoryCollection repositoryCollection)
 	{
 		this.repositoryCollection = repositoryCollection;
 	}
@@ -80,7 +80,8 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		{
 			if (att.getDataType() instanceof MrefField)
 			{
-				jdbcTemplate.execute("DROP TABLE IF EXISTS " + getEntityMetaData().getName() + "_" + att.getName());
+				jdbcTemplate.execute("DROP TABLE IF EXISTS `" + getEntityMetaData().getName() + "_" + att.getName()
+						+ "`");
 			}
 		}
 		jdbcTemplate.execute(getDropSql());
@@ -88,14 +89,14 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 
 	public void dropAttribute(String attributeName)
 	{
-		String sql = String.format("ALTER TABLE %s DROP COLUMN %s", getName(), attributeName);
+		String sql = String.format("ALTER TABLE `%s` DROP COLUMN `%s`", getName(), attributeName);
 		jdbcTemplate.execute(sql);
 
 	}
 
 	protected String getDropSql()
 	{
-		return "DROP TABLE IF EXISTS " + getEntityMetaData().getName();
+		return "DROP TABLE IF EXISTS `" + getEntityMetaData().getName() + "`";
 	}
 
 	@Override

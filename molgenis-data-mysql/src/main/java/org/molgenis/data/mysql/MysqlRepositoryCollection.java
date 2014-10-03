@@ -301,6 +301,11 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		return getDecoratedRepository(repo);
 	}
 
+	public MysqlRepository getUndecoratedRepository(String name)
+	{
+		return repositories.get(name);
+	}
+
 	public Set<EntityMetaData> getAllEntityMetaDataIncludingAbstract()
 	{
 		Map<String, EntityMetaData> metadata = Maps.newLinkedHashMap();
@@ -417,6 +422,8 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 			{
 				if (!currentAttribute.isSameAs(attr))
 				{
+					System.out.println(currentAttribute.isUnique() + ":" + attr.isUnique());
+
 					throw new MolgenisDataException(
 							"Changing existing attributes is not currently supported. You tried to alter attribute ["
 									+ attr.getName() + "] of entity [" + sourceEntityMetaData.getName()
