@@ -18,4 +18,10 @@ public class ElasticsearchRepository extends AbstractElasticsearchRepository
 	{
 		return entityMetaData;
 	}
+
+	@Override
+	public void rebuildIndex()
+	{
+		throw new UnsupportedOperationException(); // FIXME reindex from source documents
+	}
 }
