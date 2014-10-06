@@ -31,9 +31,9 @@ public class RepositoryMerger
 
 	private final static String ID = "ID";
 	private DataService dataService;
-    private String idField;
+	private String idField;
 
-    @Autowired
+	@Autowired
 	public RepositoryMerger(DataService dataService)
 	{
 		this.dataService = dataService;
@@ -77,7 +77,7 @@ public class RepositoryMerger
 	public CrudRepository merge(List<Repository> repositoryList, List<AttributeMetaData> commonAttributes,
 			CrudRepository mergedRepository, String idField, int batchSize)
 	{
-        this.idField = idField;
+		this.idField = idField;
 		dataService.addRepository(mergedRepository);
 		mergeData(repositoryList, (CrudRepository) dataService.getRepositoryByEntityName(mergedRepository.getName()),
 				commonAttributes, batchSize);
@@ -112,7 +112,7 @@ public class RepositoryMerger
 					if (!containsIgnoreCase(attributeMetaData.getName(), commonAttributes))
 					{
 						mergedEntity.set(getMergedAttributeName(repository, attributeMetaData.getName()),
-								entity.get(attributeMetaData.getName()));
+								entity.get(attributeMetaData.getName())); // word er hier een map ingedrukt?
 					}
 				}
 				if (newEntity)
@@ -127,13 +127,13 @@ public class RepositoryMerger
 				// write to repository after every 1000 entities
 				if (addedEntities.size() == batchSize)
 				{
-                    resultRepository.add(addedEntities);
+					resultRepository.add(addedEntities);
 					addedEntities = new ArrayList<Entity>();
 				}
-				if (updatedEntities.size()== batchSize)
+				if (updatedEntities.size() == batchSize)
 				{
 					resultRepository.update(updatedEntities);
-                    updatedEntities = new ArrayList<Entity>();
+					updatedEntities = new ArrayList<Entity>();
 				}
 			}
 			// write remaining entities to repository
@@ -149,13 +149,15 @@ public class RepositoryMerger
 	{
 		AbstractEntity mergedEntity;
 		mergedEntity = new MapEntity(new HashMap<String, Object>());
-		if(idField == null || !entity.getEntityMetaData().getAttribute(idField).isUnique()) {
-            mergedEntity.set(ID, UUID.randomUUID().toString());// "CHROM"+entity.get("#CHROM")+"POS"+entity.get("POS"));
-        }
-        else{
-            mergedEntity.set(ID, entity.getString(idField));
-        }
-        for (AttributeMetaData attributeMetaData : commonAttributes)
+		if (idField == null || !entity.getEntityMetaData().getAttribute(idField).isUnique())
+		{
+			mergedEntity.set(ID, UUID.randomUUID().toString());// "CHROM"+entity.get("#CHROM")+"POS"+entity.get("POS"));
+		}
+		else
+		{
+			mergedEntity.set(ID, entity.getString(idField));
+		}
+		for (AttributeMetaData attributeMetaData : commonAttributes)
 		{
 			mergedEntity.set(attributeMetaData.getName(), entity.get(attributeMetaData.getName()));
 		}
@@ -219,11 +221,15 @@ public class RepositoryMerger
 			if (!containsIgnoreCase(originalRepositoryAttributeMetaData.getName(), commonAttributes)
 					&& !originalRepositoryAttributeMetaData.getName().equalsIgnoreCase(ID))
 			{
-				DefaultAttributeMetaData attributePartMetaData = new DefaultAttributeMetaData(getMergedAttributeName(
-						repository, originalRepositoryAttributeMetaData.getName()), originalRepositoryAttributeMetaData
-						.getDataType().getEnumType());
-				attributePartMetaData.setLabel(getMergedAttributeLabel(repository,
-						originalRepositoryAttributeMetaData.getLabel()));
+				DefaultAttributeMetaData attributePartMetaData = copyAndRename(originalRepositoryAttributeMetaData,
+						getMergedAttributeName(repository, originalRepositoryAttributeMetaData.getName()),
+						getMergedAttributeLabel(repository, originalRepositoryAttributeMetaData.getLabel()));
+				// new DefaultAttributeMetaData(getMergedAttributeName(
+				// repository, originalRepositoryAttributeMetaData.getName()), originalRepositoryAttributeMetaData
+				// .getDataType().getEnumType());
+				// attributePartMetaData.setRefEntity(originalRepositoryAttributeMetaData.getRefEntity());
+				// attributePartMetaData.setLabel(getMergedAttributeLabel(repository,
+				// originalRepositoryAttributeMetaData.getLabel()));
 				if (originalRepositoryAttributeMetaData.getDataType().getEnumType()
 						.equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
 				{
@@ -288,5 +294,23 @@ public class RepositoryMerger
 	private String getMergedAttributeLabel(Repository repository, String attributeLabel)
 	{
 		return attributeLabel + "(" + repository.getName() + ")";
+	}
+
+	private DefaultAttributeMetaData copyAndRename(AttributeMetaData attributeMetaData, String name, String label)
+	{
+		DefaultAttributeMetaData result = new DefaultAttributeMetaData(name, attributeMetaData.getDataType()
+				.getEnumType());
+		result.setDescription(attributeMetaData.getDescription());
+		result.setNillable(attributeMetaData.isNillable());
+		result.setReadOnly(attributeMetaData.isReadonly());
+		result.setDefaultValue(attributeMetaData.getDefaultValue());
+		result.setLookupAttribute(attributeMetaData.isLookupAttribute());
+		result.setRefEntity(attributeMetaData.getRefEntity());
+		result.setLabel(label);
+		result.setVisible(attributeMetaData.isVisible());
+		result.setUnique(attributeMetaData.isUnique());
+		result.setAggregateable(attributeMetaData.isAggregateable());
+		result.setRange(attributeMetaData.getRange());
+		return result;
 	}
 }
