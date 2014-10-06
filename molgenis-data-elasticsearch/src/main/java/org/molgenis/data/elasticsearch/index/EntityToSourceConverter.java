@@ -55,7 +55,7 @@ public class EntityToSourceConverter
 		return doc;
 	}
 
-	private Object convertAttribute(Entity entity, AttributeMetaData attributeMetaData, final boolean nestRefs)
+	public Object convertAttribute(Entity entity, AttributeMetaData attributeMetaData, final boolean nestRefs)
 	{
 		Object value;
 

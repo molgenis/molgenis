@@ -928,7 +928,8 @@ public class ElasticSearchService implements SearchService
 		{
 			LOG.debug("Retrieved Elasticsearch '" + type + "' doc with id [" + id + "]");
 		}
-		return response.isExists() ? new ElasticsearchDocumentEntity(response.getSource(), entityMetaData, this) : null;
+		return response.isExists() ? new ElasticsearchDocumentEntity(response.getSource(), entityMetaData, this,
+				entityToSourceConverter) : null;
 	}
 
 	/*
@@ -965,7 +966,7 @@ public class ElasticSearchService implements SearchService
 				}
 				GetResponse getResponse = itemResponse.getResponse();
 				return getResponse.isExists() ? new ElasticsearchDocumentEntity(getResponse.getSource(),
-						entityMetaData, self) : null;
+						entityMetaData, self, entityToSourceConverter) : null;
 			}
 		});
 	}
@@ -980,7 +981,8 @@ public class ElasticSearchService implements SearchService
 	@Override
 	public Iterable<Entity> search(Query q, final EntityMetaData entityMetaData)
 	{
-		return new ElasticsearchEntityIterable(q, entityMetaData, client, this, generator, indexName);
+		return new ElasticsearchEntityIterable(q, entityMetaData, client, this, generator, indexName,
+				entityToSourceConverter);
 	}
 
 	/*
@@ -1189,10 +1191,11 @@ public class ElasticSearchService implements SearchService
 		private final List<String> fieldsToReturn;
 		private final int offset;
 		private final int pageSize;
+		private final EntityToSourceConverter entityToSourceConverter;
 
 		public ElasticsearchEntityIterable(Query q, EntityMetaData entityMetaData, Client client,
 				ElasticSearchService elasticSearchService, SearchRequestGenerator searchRequestGenerator,
-				String indexName)
+				String indexName, EntityToSourceConverter entityToSourceConverter)
 		{
 			this.client = client;
 			this.q = q;
@@ -1200,6 +1203,7 @@ public class ElasticSearchService implements SearchService
 			this.elasticSearchService = elasticSearchService;
 			this.searchRequestGenerator = searchRequestGenerator;
 			this.indexName = indexName;
+			this.entityToSourceConverter = entityToSourceConverter;
 
 			this.type = sanitizeMapperType(entityMetaData.getName());
 			this.fieldsToReturn = Collections.<String> emptyList();
@@ -1262,7 +1266,8 @@ public class ElasticSearchService implements SearchService
 					{
 						SearchHit hit = batchHits[batchPos];
 						++batchPos;
-						return new ElasticsearchDocumentEntity(hit.getSource(), entityMetaData, elasticSearchService);
+						return new ElasticsearchDocumentEntity(hit.getSource(), entityMetaData, elasticSearchService,
+								entityToSourceConverter);
 					}
 					else throw new ArrayIndexOutOfBoundsException();
 				}

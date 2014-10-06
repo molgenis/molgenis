@@ -9,6 +9,7 @@ import org.molgenis.data.UnknownAttributeException;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
+import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
 
 /**
  * Elasticsearch entity containing ids for referenced entities
@@ -18,9 +19,9 @@ public class ElasticsearchDocumentNestedEntity extends ElasticsearchDocumentEnti
 	private static final long serialVersionUID = 1L;
 
 	public ElasticsearchDocumentNestedEntity(Map<String, Object> source, EntityMetaData entityMetaData,
-			SearchService elasticSearchService)
+			SearchService elasticSearchService, EntityToSourceConverter entityToSourceConverter)
 	{
-		super(source, entityMetaData, elasticSearchService);
+		super(source, entityMetaData, elasticSearchService, entityToSourceConverter);
 	}
 
 	@Override
@@ -61,4 +62,15 @@ public class ElasticsearchDocumentNestedEntity extends ElasticsearchDocumentEnti
 			}
 		});
 	}
+
+    @Override
+    public void set(String attributeName, Object value) {
+        {
+            final AttributeMetaData attribute = getEntityMetaData().getAttribute(attributeName);
+            if (attribute == null) throw new UnknownAttributeException(attributeName);
+
+            Object convertedValue = entityToSourceConverter.convertAttribute(this,attribute,false);
+            getSource().put(attributeName, convertedValue);
+        }
+    }
 }

@@ -112,7 +112,7 @@ public class RepositoryMerger
 					if (!containsIgnoreCase(attributeMetaData.getName(), commonAttributes))
 					{
 						mergedEntity.set(getMergedAttributeName(repository, attributeMetaData.getName()),
-								entity.get(attributeMetaData.getName())); // word er hier een map ingedrukt?
+								entity.get(attributeMetaData.getName()));
 					}
 				}
 				if (newEntity)
@@ -218,18 +218,11 @@ public class RepositoryMerger
 		List<AttributeMetaData> attributeParts = new ArrayList<AttributeMetaData>();
 		for (AttributeMetaData originalRepositoryAttributeMetaData : originalRepositoryMetaData.getAttributes())
 		{
-			if (!containsIgnoreCase(originalRepositoryAttributeMetaData.getName(), commonAttributes)
-					&& !originalRepositoryAttributeMetaData.getName().equalsIgnoreCase(ID))
+			if (!containsIgnoreCase(originalRepositoryAttributeMetaData.getName(), commonAttributes))
 			{
 				DefaultAttributeMetaData attributePartMetaData = copyAndRename(originalRepositoryAttributeMetaData,
 						getMergedAttributeName(repository, originalRepositoryAttributeMetaData.getName()),
 						getMergedAttributeLabel(repository, originalRepositoryAttributeMetaData.getLabel()));
-				// new DefaultAttributeMetaData(getMergedAttributeName(
-				// repository, originalRepositoryAttributeMetaData.getName()), originalRepositoryAttributeMetaData
-				// .getDataType().getEnumType());
-				// attributePartMetaData.setRefEntity(originalRepositoryAttributeMetaData.getRefEntity());
-				// attributePartMetaData.setLabel(getMergedAttributeLabel(repository,
-				// originalRepositoryAttributeMetaData.getLabel()));
 				if (originalRepositoryAttributeMetaData.getDataType().getEnumType()
 						.equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
 				{

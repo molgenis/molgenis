@@ -12,6 +12,7 @@ import org.molgenis.data.UnknownAttributeException;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
+import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
 
 /**
  * Elasticsearch entity containing all referenced entities
@@ -21,13 +22,15 @@ public class ElasticsearchDocumentEntity extends ElasticsearchEntity
 	private static final long serialVersionUID = 1L;
 
 	private final SearchService elasticSearchService;
+	protected final EntityToSourceConverter entityToSourceConverter;
 
 	public ElasticsearchDocumentEntity(Map<String, Object> source, EntityMetaData entityMetaData,
-			SearchService elasticSearchService)
+			SearchService elasticSearchService, EntityToSourceConverter entityToSourceConverter)
 	{
 		super(source, entityMetaData);
 		if (elasticSearchService == null) throw new IllegalArgumentException("elasticSearchService is null");
 		this.elasticSearchService = elasticSearchService;
+		this.entityToSourceConverter = entityToSourceConverter;
 	}
 
 	@Override
@@ -46,8 +49,8 @@ public class ElasticsearchDocumentEntity extends ElasticsearchEntity
 		AttributeMetaData attribute = getEntityMetaData().getAttribute(attributeName);
 		if (attribute == null) throw new UnknownAttributeException(attributeName);
 
-		return new ElasticsearchDocumentEntity((Map<String, Object>) value, attribute.getRefEntity(),
-				elasticSearchService);
+		return new ElasticsearchDocumentNestedEntity((Map<String, Object>) value, attribute.getRefEntity(),
+				elasticSearchService, entityToSourceConverter);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -56,23 +59,16 @@ public class ElasticsearchDocumentEntity extends ElasticsearchEntity
 	{
 		Object value = getSource().get(attributeName);
 		if (value == null) return Collections.emptyList();
-        if (value instanceof Iterable) {
-            final Iterator iterator = ((Iterable) value).iterator();
-            if(iterator.hasNext()){
-                if(iterator.next() instanceof Entity)
-                    return (Iterable<Entity>) value;
-            }
-            else return Collections.emptyList();
-        }
-        final AttributeMetaData attribute = getEntityMetaData().getAttribute(attributeName);
+		final AttributeMetaData attribute = getEntityMetaData().getAttribute(attributeName);
 		if (attribute == null) throw new UnknownAttributeException(attributeName);
 
-		return Iterables.transform((List<Map<String, Object>>) value, new Function<Map<String, Object>, Entity>()
+		return Iterables.transform((Iterable<Map<String, Object>>) value, new Function<Map<String, Object>, Entity>()
 		{
 			@Override
 			public Entity apply(Map<String, Object> refSource)
 			{
-				return new ElasticsearchDocumentEntity(refSource, attribute.getRefEntity(), elasticSearchService);
+				return new ElasticsearchDocumentNestedEntity(refSource, attribute.getRefEntity(), elasticSearchService,
+						entityToSourceConverter);
 			}
 		});
 	}
@@ -80,5 +76,17 @@ public class ElasticsearchDocumentEntity extends ElasticsearchEntity
 	protected SearchService getElasticsearchService()
 	{
 		return elasticSearchService;
+	}
+
+	@Override
+	public void set(String attributeName, Object value)
+	{
+		{
+			final AttributeMetaData attribute = getEntityMetaData().getAttribute(attributeName);
+			if (attribute == null) throw new UnknownAttributeException(attributeName);
+
+			Object convertedValue = entityToSourceConverter.convertAttribute(this, attribute, true);
+			getSource().put(attributeName, convertedValue);
+		}
 	}
 }
