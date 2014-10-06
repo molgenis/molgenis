@@ -68,4 +68,9 @@ public class ElasticsearchDocumentEntity extends ElasticsearchEntity
 			}
 		});
 	}
+
+	protected SearchService getElasticsearchService()
+	{
+		return elasticSearchService;
+	}
 }
