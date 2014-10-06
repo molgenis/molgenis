@@ -3,6 +3,7 @@ package org.molgenis.data.elasticsearch;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Iterator;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
@@ -45,7 +46,7 @@ public class ElasticsearchDocumentEntity extends ElasticsearchEntity
 		AttributeMetaData attribute = getEntityMetaData().getAttribute(attributeName);
 		if (attribute == null) throw new UnknownAttributeException(attributeName);
 
-		return new ElasticsearchDocumentNestedEntity((Map<String, Object>) value, attribute.getRefEntity(),
+		return new ElasticsearchDocumentEntity((Map<String, Object>) value, attribute.getRefEntity(),
 				elasticSearchService);
 	}
 
@@ -55,8 +56,15 @@ public class ElasticsearchDocumentEntity extends ElasticsearchEntity
 	{
 		Object value = getSource().get(attributeName);
 		if (value == null) return Collections.emptyList();
-
-		final AttributeMetaData attribute = getEntityMetaData().getAttribute(attributeName);
+        if (value instanceof Iterable) {
+            final Iterator iterator = ((Iterable) value).iterator();
+            if(iterator.hasNext()){
+                if(iterator.next() instanceof Entity)
+                    return (Iterable<Entity>) value;
+            }
+            else return Collections.emptyList();
+        }
+        final AttributeMetaData attribute = getEntityMetaData().getAttribute(attributeName);
 		if (attribute == null) throw new UnknownAttributeException(attributeName);
 
 		return Iterables.transform((List<Map<String, Object>>) value, new Function<Map<String, Object>, Entity>()
@@ -64,7 +72,7 @@ public class ElasticsearchDocumentEntity extends ElasticsearchEntity
 			@Override
 			public Entity apply(Map<String, Object> refSource)
 			{
-				return new ElasticsearchDocumentNestedEntity(refSource, attribute.getRefEntity(), elasticSearchService);
+				return new ElasticsearchDocumentEntity(refSource, attribute.getRefEntity(), elasticSearchService);
 			}
 		});
 	}

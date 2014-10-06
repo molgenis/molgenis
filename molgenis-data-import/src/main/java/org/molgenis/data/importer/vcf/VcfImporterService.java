@@ -78,8 +78,8 @@ public class VcfImporterService
 				if (sampleAttribute != null)
 				{
 					sampleRepository = new ElasticsearchRepository(sampleAttribute.getRefEntity(), searchService);
-                    searchService.createMappings(sampleAttribute.getRefEntity(), true, true, true, true);
-                }
+					searchService.createMappings(sampleAttribute.getRefEntity(), true, true, true, true);
+				}
 				Iterator<Entity> inIterator = inRepository.iterator();
 				try
 				{
@@ -97,9 +97,9 @@ public class VcfImporterService
 								while (sampleIterator.hasNext())
 								{
 									sampleEntities.add(sampleIterator.next());
-									if (sampleEntities.size() > batchSize)
+									if (sampleEntities.size() == batchSize)
 									{
-										outRepository.add(sampleEntities);
+										sampleRepository.add(sampleEntities);
 										sampleEntities.clear();
 									}
 								}
@@ -107,7 +107,7 @@ public class VcfImporterService
 						}
 					}
 					outRepository.add(inRepository);
-					outRepository.add(sampleEntities);
+					if (sampleRepository != null) sampleRepository.add(sampleEntities);
 				}
 
 				finally

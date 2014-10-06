@@ -51,8 +51,8 @@ public class VcfImporterController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/import", method = POST)
-	@ResponseStatus(HttpStatus.OK)
-	public void importVcf(@RequestParam("name") String entityName, @RequestParam("file") MultipartFile multipartFile)
+	@ResponseBody
+	public String importVcf(@RequestParam("name") String entityName, @RequestParam("file") MultipartFile multipartFile)
 			throws IOException
 	{
 		String name = multipartFile.getOriginalFilename().toLowerCase();
@@ -104,6 +104,7 @@ public class VcfImporterController extends MolgenisPluginController
 				tmpDir.deleteOnExit();
 			}
 		}
+		return name;
 	}
 
 	@ExceptionHandler(MolgenisDataException.class)
