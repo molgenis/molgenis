@@ -29,9 +29,9 @@
 	<#if context_url??>
 		<script>top.molgenis.setContextUrl('${context_url}');</script>
 	</#if>
-		<#--[if lt IE 9]>
-			<script src="<@resource_href "/js/molgenis-ie8.js"/>"></script>
-		<#[endif]-->
+	<!--[if lt IE 9]>
+		<script src="<@resource_href "/js/molgenis-ie8.js"/>"></script>
+	<![endif]-->
 	<#list js as js_file_name>
 		<script src="<@resource_href "/js/${js_file_name?html}"/>"></script>
 	</#list>		
