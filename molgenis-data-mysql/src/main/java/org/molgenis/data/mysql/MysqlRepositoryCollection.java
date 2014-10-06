@@ -422,8 +422,6 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 			{
 				if (!currentAttribute.isSameAs(attr))
 				{
-					System.out.println(currentAttribute.isUnique() + ":" + attr.isUnique());
-
 					throw new MolgenisDataException(
 							"Changing existing attributes is not currently supported. You tried to alter attribute ["
 									+ attr.getName() + "] of entity [" + sourceEntityMetaData.getName()
