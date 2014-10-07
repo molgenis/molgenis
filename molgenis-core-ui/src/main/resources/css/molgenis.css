@@ -76,9 +76,9 @@ label.horizontal-inline.inbetween {
 	margin-bottom: -50px;
 }
 
-.drop-right {
-	position: relative;
-	/* TODO: Move the popup to the right of the parent element */
+.entity-dropdown ul{
+	overflow: auto;
+	height: 200px;
 }
 
 /* Bootstrap tooltip style */
