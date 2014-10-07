@@ -24,7 +24,6 @@
 		<script src="<@resource_href "/js/bootstrap.min.js"/>"></script>
 		<script src="<@resource_href "/js/jquery.validate.min.js"/>"></script>
 		<script src="<@resource_href "/js/molgenis.js"/>"></script>
-		<script src="<@resource_href "/js/bootstrap-hover-dropdown.min.js"/>"></script>
 	<#if context_url??>
 		<script>top.molgenis.setContextUrl('${context_url}');</script>
 	</#if>
