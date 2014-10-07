@@ -67,7 +67,8 @@
 					'trigger' : 'hover',
 					'title' : 'Click to look up in ontology',
 					'html' : true, 
-					'content' : (hit.columnValueMap.maxScoreField ? 'Matched based on the input field : <strong>' + hit.columnValueMap.maxScoreField + '</strong><br><br>' : '') + 
+					'content' : (hit.columnValueMap.maxScoreField ? 'Matched based on the input field : <strong>' + hit.columnValueMap.maxScoreField + '</strong><br><br>' : '') +
+						((hit.columnValueMap.maxScoreField && hit.columnValueMap[hit.columnValueMap.maxScoreField]) ? 'OntologyTerm ' + hit.columnValueMap.maxScoreField + ' is <strong>' + hit.columnValueMap[hit.columnValueMap.maxScoreField] + '</strong><br><br>' : '')+ 
 						(hit.columnValueMap.ontologyTermSynonym !== hit.columnValueMap.ontologyTerm ? 'OntologyTerm synonym is <strong>' + hit.columnValueMap.ontologyTermSynonym + '</strong>' : '') 
 				};
 				ontologyTermMatchDiv.append(newLineDiv);

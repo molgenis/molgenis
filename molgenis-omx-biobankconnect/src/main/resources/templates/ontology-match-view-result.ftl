@@ -47,7 +47,7 @@
 								</div>
 							</div>
 							<div id="match-result" class="row"></div>
-							<div class="row"><div id="pager"></div></div>
+							<div class="row"><div id="pager" style="margin-bottom:50px;"></div></div>
 						</div>
 						<div id="tree-visual-panel" class="col-md-4" style="display:none;padding-left:40px;">
 							<div class="row">
