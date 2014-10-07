@@ -35,6 +35,7 @@ public class OntologyService
 	private final SearchService searchService;
 	private static final List<String> ELASTICSEARCH_RESERVED_WORDS = Arrays.asList("or", "and", "if");
 	private static final String COMBINED_SCORE = "combinedScore";
+	private static final String INPUT_DATA = "inputData";
 	private static final String FUZZY_MATCH_SIMILARITY = "~0.8";
 	private static final String SCORE = "score";
 	private static final String NON_WORD_SEPARATOR = "[^a-zA-Z0-9]";
@@ -149,7 +150,7 @@ public class OntologyService
 	 * @param entity
 	 * @return
 	 */
-	public SearchResult searchEntity(String ontologyIri, Entity entity)
+	public OntologyServiceResult searchEntity(String ontologyIri, Entity entity)
 	{
 		List<QueryRule> allQueryRules = new ArrayList<QueryRule>();
 		List<QueryRule> rulesForOntologyTermFields = new ArrayList<QueryRule>();
@@ -177,7 +178,7 @@ public class OntologyService
 			}
 		}
 
-		if (rulesForOntologyTermFields.size() == 0) return new SearchResult(
+		if (rulesForOntologyTermFields.size() == 0) return new OntologyServiceResult(
 				"Please specify the headers of the input data!");
 
 		QueryRule nestedQueryRule = new QueryRule(rulesForOntologyTermFields);
@@ -192,7 +193,9 @@ public class OntologyService
 
 		Iterator<Hit> iterator = searchService.search(request).getSearchHits().iterator();
 
+		Map<String, Object> inputData = new HashMap<String, Object>();
 		List<ComparableHit> comparableHits = new ArrayList<ComparableHit>();
+		int count = 0;
 		while (iterator.hasNext())
 		{
 			Hit hit = iterator.next();
@@ -212,11 +215,14 @@ public class OntologyService
 						{
 							maxNgramScore = ngramScore;
 						}
+						if (count == 0) inputData.put(attributeName, entity.getString(attributeName));
 					}
 					else
 					{
 						for (String key : columnValueMap.keySet())
 						{
+							// Check if indexed ontology term contains such
+							// external database reference
 							if (attributeName.equalsIgnoreCase(key))
 							{
 								if (columnValueMap.containsKey(key)
@@ -231,17 +237,18 @@ public class OntologyService
 											maxNgramScore = ngramScore;
 										}
 									}
+									if (count == 0) inputData.put(attributeName, entity.getString(attributeName));
 								}
 							}
 						}
 					}
 				}
 			}
-
-			comparableHits.add(new ComparableHit(hit, maxNgramScore));
+			comparableHits.add(new ComparableHit(inputData, hit, maxNgramScore));
+			count++;
 		}
 		Collections.sort(comparableHits);
-		return convertResults(comparableHits);
+		return convertResults(inputData, comparableHits);
 	}
 
 	/**
@@ -253,7 +260,7 @@ public class OntologyService
 	 * @param queryString
 	 * @return
 	 */
-	public SearchResult search(String ontologyIri, String queryString)
+	public OntologyServiceResult search(String ontologyIri, String queryString)
 	{
 		Set<String> uniqueTerms = new HashSet<String>(Arrays.asList(queryString.toLowerCase().trim()
 				.split(NON_WORD_SEPARATOR)));
@@ -276,6 +283,8 @@ public class OntologyService
 				new QueryImpl(finalQuery).pageSize(MAX_NUMBER_MATCHES), null);
 		Iterator<Hit> iterator = searchService.search(request).getSearchHits().iterator();
 
+		Map<String, Object> inputData = new HashMap<String, Object>();
+		inputData.put(DEFAULT_MATCHING_NAME_FIELD, queryString);
 		List<ComparableHit> comparableHits = new ArrayList<ComparableHit>();
 		while (iterator.hasNext())
 		{
@@ -285,10 +294,10 @@ public class OntologyService
 			BigDecimal ngramScore = new BigDecimal(NGramMatchingModel.stringMatching(
 					StringUtils.join(uniqueTerms, OntologyTermQueryRepository.ILLEGAL_CHARACTERS_REPLACEMENT),
 					ontologySynonym));
-			comparableHits.add(new ComparableHit(hit, luceneScore.multiply(ngramScore)));
+			comparableHits.add(new ComparableHit(inputData, hit, luceneScore.multiply(ngramScore)));
 		}
 		Collections.sort(comparableHits);
-		return convertResults(comparableHits);
+		return convertResults(inputData, comparableHits);
 	}
 
 	private String medicalStemProxy(String queryString)
@@ -312,7 +321,7 @@ public class OntologyService
 		return stringBuilder.toString().trim();
 	}
 
-	private SearchResult convertResults(List<ComparableHit> comparableHits)
+	private OntologyServiceResult convertResults(Map<String, Object> inputData, List<ComparableHit> comparableHits)
 	{
 		List<Hit> hits = new ArrayList<Hit>();
 		Set<String> uniqueIdentifiers = new HashSet<String>();
@@ -325,19 +334,22 @@ public class OntologyService
 			Map<String, Object> columnValueMap = new HashMap<String, Object>();
 			columnValueMap.putAll(hit.getColumnValueMap());
 			columnValueMap.put(COMBINED_SCORE, comparableHit.getSimilarityScore().doubleValue());
+			columnValueMap.put(INPUT_DATA, comparableHit.getInputData());
 			Hit copyHit = new Hit(hit.getId(), hit.getDocumentType(), columnValueMap);
 			hits.add(copyHit);
 		}
-		return new SearchResult(hits.size(), hits);
+		return new OntologyServiceResult(inputData, hits, hits.size());
 	}
 
 	class ComparableHit implements Comparable<ComparableHit>
 	{
+		private final Map<String, Object> inputData;
 		private final Hit hit;
 		private final BigDecimal similarityScore;
 
-		public ComparableHit(Hit hit, BigDecimal similarityScore)
+		public ComparableHit(Map<String, Object> inputData, Hit hit, BigDecimal similarityScore)
 		{
+			this.inputData = inputData;
 			this.hit = hit;
 			this.similarityScore = similarityScore;
 		}
@@ -356,6 +368,11 @@ public class OntologyService
 		public int compareTo(ComparableHit other)
 		{
 			return similarityScore.compareTo(other.getSimilarityScore()) * (-1);
+		}
+
+		public Map<String, Object> getInputData()
+		{
+			return inputData;
 		}
 	}
 }

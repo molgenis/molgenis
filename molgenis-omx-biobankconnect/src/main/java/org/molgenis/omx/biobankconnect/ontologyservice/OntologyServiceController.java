@@ -36,7 +36,6 @@ import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.search.Hit;
-import org.molgenis.search.SearchResult;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -153,7 +152,7 @@ public class OntologyServiceController extends MolgenisPluginController
 					for (Entity entity : ontologyServiceSessionData.getSubList(sessionId, lowerBound, upperBound))
 					{
 						for (Hit hit : ontologyService.searchEntity(
-								ontologyServiceSessionData.getOntologyIriBySession(sessionId), entity))
+								ontologyServiceSessionData.getOntologyIriBySession(sessionId), entity).getSearchHits())
 						{
 							Entity row = new MapEntity();
 							row.set("InputTerm", gatherInfo(entity));
@@ -214,12 +213,12 @@ public class OntologyServiceController extends MolgenisPluginController
 
 	@RequestMapping(method = POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public SearchResult query(@RequestBody
+	public OntologyServiceResult query(@RequestBody
 	OntologyServiceRequest ontologyTermRequest)
 	{
 		String ontologyUrl = ontologyTermRequest.getOntologyIri();
 		String queryString = ontologyTermRequest.getQueryString();
-		if (ontologyUrl == null || queryString == null) return new SearchResult(0, Collections.<Hit> emptyList());
+		if (ontologyUrl == null || queryString == null) return new OntologyServiceResult("Your input cannot be null!");
 		return ontologyService.search(ontologyUrl, queryString);
 	}
 
