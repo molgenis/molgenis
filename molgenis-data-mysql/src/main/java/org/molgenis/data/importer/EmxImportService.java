@@ -615,8 +615,11 @@ public class EmxImportService implements ImportService
 						{
 							logger.debug("tyring to create: " + name);
 							addedEntities.add(name);
-							report.addNewEntity(name);
-							store.add(entityMetaData);
+							Repository repo = store.add(entityMetaData);
+							if (repo != null)
+							{
+								report.addNewEntity(name);
+							}
 						}
 						else if (!entityMetaData.isAbstract())
 						{
