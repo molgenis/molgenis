@@ -21,4 +21,10 @@ public class IndexedCrudRepositoryDecorator extends CrudRepositoryDecorator impl
 	{
 		decoratedRepository.rebuildIndex();
 	}
+
+	@Override
+	public void drop()
+	{
+		decoratedRepository.drop();
+	}
 }

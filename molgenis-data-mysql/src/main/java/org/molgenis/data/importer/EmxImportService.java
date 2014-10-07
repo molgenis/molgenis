@@ -40,6 +40,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.IndexedRepository;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Range;
@@ -194,6 +195,14 @@ public class EmxImportService implements ImportService
 
 			for (String entityName : addedEntities)
 			{
+				// Drop index
+				Repository repo = dataService.getRepositoryByEntityName(entityName);
+				if (repo instanceof IndexedRepository)
+				{
+					((IndexedRepository) repo).drop();
+				}
+
+				// Drop repo
 				store.dropEntityMetaData(entityName);
 			}
 
@@ -206,6 +215,22 @@ public class EmxImportService implements ImportService
 				for (String attributeName : attributes)
 				{
 					store.dropAttributeMetaData(entityName, attributeName);
+				}
+			}
+
+			// Reindex
+			Set<String> entitiesToIndex = Sets.newLinkedHashSet(source.getEntityNames());
+			entitiesToIndex.addAll(entities);
+
+			for (String entity : entitiesToIndex)
+			{
+				if (dataService.hasRepository(entity))
+				{
+					Repository repo = dataService.getRepositoryByEntityName(entity);
+					if ((repo != null) && (repo instanceof IndexedRepository))
+					{
+						((IndexedRepository) repo).rebuildIndex();
+					}
 				}
 			}
 
@@ -590,8 +615,11 @@ public class EmxImportService implements ImportService
 						{
 							logger.debug("tyring to create: " + name);
 							addedEntities.add(name);
-							report.addNewEntity(name);
-							store.add(entityMetaData);
+							Repository repo = store.add(entityMetaData);
+							if (repo != null)
+							{
+								report.addNewEntity(name);
+							}
 						}
 						else if (!entityMetaData.isAbstract())
 						{
@@ -617,6 +645,7 @@ public class EmxImportService implements ImportService
 				{
 					String name = entityMetaData.getName();
 					CrudRepository crudRepository = (CrudRepository) store.getRepositoryByEntityName(name);
+
 					if (crudRepository != null)
 					{
 						Repository fileEntityRepository = source.getRepositoryByEntityName(name);
@@ -634,6 +663,7 @@ public class EmxImportService implements ImportService
 										}
 									});
 							entities = DependencyResolver.resolveSelfReferences(entities, entityMetaData);
+
 							int count = update(crudRepository, entities, dbAction);
 							report.getNrImportedEntitiesMap().put(name, count);
 						}

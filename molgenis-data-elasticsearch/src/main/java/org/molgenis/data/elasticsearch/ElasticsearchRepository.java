@@ -24,4 +24,10 @@ public class ElasticsearchRepository extends AbstractElasticsearchRepository
 	{
 		throw new UnsupportedOperationException(); // FIXME reindex from source documents
 	}
+
+	@Override
+	public void drop()
+	{
+		// FIXME
+	}
 }
