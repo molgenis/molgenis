@@ -71,9 +71,10 @@ label.horizontal-inline.inbetween {
 	margin-left: 5px;
 }
 
-#form-breadcrumb {
-	padding-top: 70px;
-	margin-bottom: -50px;
+#molgenis-breadcrumb {
+	margin-bottom: -10px;
+	font-size:10px;
+	float:left;	
 }
 
 .entity-dropdown ul{
