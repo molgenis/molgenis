@@ -659,7 +659,7 @@ $(function() {
 	var mainDropDown = $('.sub-menu-1').width();
 	$('.sub-menu-2').css("top", '0');
 	$('.sub-menu-2').css("margin-top", '100px');
-	$('.sub-menu-2').css("right", "-" + mainDropDown + "px" );
+	$('.sub-menu-2').css("left", mainDropDown + "px" );
 	
 	// disable all ajax request caching
 	$.ajaxSetup({
