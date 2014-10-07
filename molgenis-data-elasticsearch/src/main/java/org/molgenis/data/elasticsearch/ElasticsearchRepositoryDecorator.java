@@ -178,4 +178,10 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	{
 		elasticSearchService.rebuildIndex(repository, getEntityMetaData());
 	}
+
+	@Override
+	public void drop()
+	{
+		elasticSearchService.delete(getEntityMetaData());
+	}
 }

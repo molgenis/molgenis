@@ -32,7 +32,6 @@
 					<div class="form-group">
 	    				<select class="form-control" id="operators">
 	    					<option id="EQUALS">EQUALS</option>
-	    					<option id="NOT">NOT EQUALS</option>
 	    					<option id="LIKE">LIKE</option>
 	    				</select>
 					</div>

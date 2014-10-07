@@ -301,6 +301,11 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		return getDecoratedRepository(repo);
 	}
 
+	public MysqlRepository getUndecoratedRepository(String name)
+	{
+		return repositories.get(name);
+	}
+
 	public Set<EntityMetaData> getAllEntityMetaDataIncludingAbstract()
 	{
 		Map<String, EntityMetaData> metadata = Maps.newLinkedHashMap();
