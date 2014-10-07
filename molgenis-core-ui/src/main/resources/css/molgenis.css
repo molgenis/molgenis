@@ -78,9 +78,16 @@ label.horizontal-inline.inbetween {
 	background: #F8FAFB;
 }
 
-.entity-dropdown ul{
-	overflow: auto;
-	height: 200px;
+.dropdown-menu{
+	overflow-y: auto;
+	overflow-x: hidden;
+	width: auto;
+	height: auto;
+	max-height: 500px;
+}
+
+.sub-menu-items {
+	padding-left: 10px;
 }
 
 /* Bootstrap tooltip style */

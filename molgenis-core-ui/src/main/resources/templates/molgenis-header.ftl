@@ -24,7 +24,7 @@
 		<script src="<@resource_href "/js/bootstrap.min.js"/>"></script>
 		<script src="<@resource_href "/js/jquery.validate.min.js"/>"></script>
 		<script src="<@resource_href "/js/molgenis.js"/>"></script>
-		<<script src="<@resource_href "/js/bootstrap-hover-dropdown.min.js"/>"></script>
+		<script src="<@resource_href "/js/bootstrap-hover-dropdown.min.js"/>"></script>
 	<#if context_url??>
 		<script>top.molgenis.setContextUrl('${context_url}');</script>
 	</#if>
@@ -148,24 +148,12 @@
 						<#-- Dropdown menu items -->
 						<#elseif item.type == "MENU">
 							<#assign sub_menu = item>
-							<#assign counter = 0>
-							<#if item.name == "Entities" && sub_menu?size gt 20>
-								<li class="dropdown entity-dropdown">
-									<a class="dropdown-toggle" data-hover="dropdown" data-toggle="dropdown" href="#">
-										${item.name?html}<b class="caret"></b>
-									</a>
-									
-									<@entitydropdown sub_menu counter />
-								</li>
-							<#else>
-								<li class="dropdown">
-									<a class="dropdown-toggle" data-hover="dropdown" data-toggle="dropdown" href="#">
-										${item.name?html}<b class="caret"></b>
-									</a>
-								
-									<@entitydropdown sub_menu counter />	
-								</li>
-							</#if>
+							<li class="dropdown">
+								<a class="dropdown-toggle" data-hover="dropdown" data-toggle="dropdown" href="#">
+									${item.name?html}<b class="caret"></b>
+								</a>
+								<@entitydropdown sub_menu />	
+							</li>
 						</#if>
 					</#list>
 				</ul>
@@ -203,23 +191,25 @@
 </#macro>
 
 <#-- dropdown for entity -->
-<#macro entitydropdown sub_menu counter>
-	<#assign new_counter = counter + 1>
-	<ul class="dropdown-menu sub-menu-${new_counter}" role="menu">
+<#macro entitydropdown sub_menu >
+	<ul class="dropdown-menu" role="menu">
 		<#list sub_menu.items as sub_item>
-			<#assign new_counter = 1>
 			<#if sub_item.type != "MENU">
-				<li class="dropdown">
+				<li>
 					<a href="/menu/${sub_menu.id?html}/${sub_item.url?html}">${sub_item.name?html}</a>
 				</li>
 			<#elseif sub_item.type == "MENU">
-				<li class="dropdown-submenu">
-					<a class="dropdown-toggle" data-toggle="dropdown" href="#">
-						${sub_item.name?html}<b class="caret"></b>
-					</a>
-					
-					<@entitydropdown sub_item new_counter />
+				<li class="divider"></li>
+				<li class="sub-menu-header">
+					<a href="#">${sub_item.name?html}</a>
 				</li>
+				
+				<#list sub_item.items as next_sub_item>
+					<li class="sub-menu-items">
+						<a href="/menu/${sub_item.id?html}/${next_sub_item.url?html}">${next_sub_item.name?html}</a>
+					</li>
+				</#list>
+				<li class="divider"></li>	
 			</#if>
 		</#list>
 	</ul>
