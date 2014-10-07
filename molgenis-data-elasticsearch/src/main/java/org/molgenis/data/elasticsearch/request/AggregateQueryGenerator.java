@@ -23,11 +23,11 @@ import org.molgenis.data.elasticsearch.index.MappingsBuilder;
 
 public class AggregateQueryGenerator
 {
-	public static String AGGREGATION_MISSING_POSTFIX = "_missing";
-	public static String AGGREGATION_REVERSE_POSTFIX = "_reverse";
-	public static String AGGREGATION_NESTED_POSTFIX = "_nested";
-	public static String AGGREGATION_DISTINCT_POSTFIX = "_distinct";
-	public static String AGGREGATION_TERMS_POSTFIX = "_terms";
+	public static final String AGGREGATION_MISSING_POSTFIX = "_missing";
+	public static final String AGGREGATION_REVERSE_POSTFIX = "_reverse";
+	public static final String AGGREGATION_NESTED_POSTFIX = "_nested";
+	public static final String AGGREGATION_DISTINCT_POSTFIX = "_distinct";
+	public static final String AGGREGATION_TERMS_POSTFIX = "_terms";
 
 	public void generate(SearchRequestBuilder searchRequestBuilder, AttributeMetaData aggAttr1,
 			AttributeMetaData aggAttr2, AttributeMetaData aggAttrDistinct)

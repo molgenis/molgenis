@@ -25,32 +25,26 @@ public class Cell
 	}
 
 	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((values == null) ? 0 : values.hashCode());
+		return result;
+	}
+
+	@Override
 	public boolean equals(Object obj)
 	{
-		if (obj == null)
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
+		Cell other = (Cell) obj;
+		if (values == null)
 		{
-			return false;
+			if (other.values != null) return false;
 		}
-
-		if (this == obj)
-		{
-			return true;
-		}
-
-		if (this.getClass() != obj.getClass())
-		{
-			return false;
-		}
-
-		final Cell cell = (Cell) obj;
-
-		List<Value> cellValues = cell.getValues();
-		for (int j = 0; j < this.values.size(); j++)
-		{
-			if(!this.values.get(j).equals(cellValues.get(j))){
-				return false;
-			}
-		}
+		else if (!values.equals(other.values)) return false;
 		return true;
 	}
 }
