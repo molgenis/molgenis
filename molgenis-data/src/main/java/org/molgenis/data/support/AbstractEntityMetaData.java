@@ -201,7 +201,7 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 			}
 			if (idAttributeMetaData == null)
 			{
-				new RuntimeException("No idAttribute specified, this attribute is required");
+				throw new RuntimeException("No idAttribute specified, this attribute is required");
 			}
 		}
 		return idAttributeMetaData;

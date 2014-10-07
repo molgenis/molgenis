@@ -142,9 +142,9 @@ public class VcfImporterService implements ImportService
 								while (sampleIterator.hasNext())
 								{
 									sampleEntities.add(sampleIterator.next());
-									if (sampleEntities.size() > batchSize)
+									if (sampleEntities.size() == batchSize)
 									{
-										outRepository.add(sampleEntities);
+										sampleRepository.add(sampleEntities);
 										sampleEntities.clear();
 									}
 								}
@@ -152,7 +152,7 @@ public class VcfImporterService implements ImportService
 						}
 					}
 					outRepository.add(inRepository);
-					outRepository.add(sampleEntities);
+					if (sampleRepository != null) sampleRepository.add(sampleEntities);
 				}
 
 				finally

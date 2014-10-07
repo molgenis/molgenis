@@ -642,6 +642,7 @@ function hideSpinner() {
 }
 
 $(function() {
+	
 	// disable all ajax request caching
 	$.ajaxSetup({
 		cache : false

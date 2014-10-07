@@ -18,33 +18,26 @@ public class Row
 	}
 
 	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((cells == null) ? 0 : cells.hashCode());
+		return result;
+	}
+
+	@Override
 	public boolean equals(Object obj)
 	{
-		if (obj == null)
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
+		Row other = (Row) obj;
+		if (cells == null)
 		{
-			return false;
+			if (other.cells != null) return false;
 		}
-
-		if (this == obj)
-		{
-			return true;
-		}
-
-		if (this.getClass() != obj.getClass())
-		{
-			return false;
-		}
-
-		final Row row = (Row) obj;
-
-		List<Cell> rowCells = row.getCells();
-		for (int j = 0; j < this.cells.size(); j++)
-		{
-			if (!this.cells.get(j).equals(rowCells.get(j)))
-			{
-				return false;
-			}
-		}
+		else if (!cells.equals(other.cells)) return false;
 		return true;
 	}
 }

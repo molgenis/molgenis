@@ -19,9 +19,12 @@
 					url : $(this).attr('action'),
 					data : new FormData($(this)[0]), // not supported in IE9 
 					contentType: false,
-		            processData: false
-				}).done(function() {
-					molgenis.createAlert([{'message' : 'VCF imported successfully'}], 'success');
+		            processData: false,
+                    success: function(name) {
+                        molgenis.createAlert([
+                            {'message': 'VCF ' + name + ' imported successfully'}
+                        ], 'success');
+                    }
 				});
 			}
 		});

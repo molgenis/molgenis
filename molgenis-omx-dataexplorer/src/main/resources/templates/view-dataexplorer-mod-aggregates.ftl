@@ -4,13 +4,13 @@
 	    <div id="feature-select-container">
 	        <div class="form-horizontal">
 	            <div class="form-group">
-	            	<label class="col-md-1 control-label" for="feature-select">${i18n.dataexplorer_aggregates_group_by}</label>
+	            	<label class="col-md-2 control-label" for="feature-select">${i18n.dataexplorer_aggregates_group_by}</label>
 	                	<div class="col-md-4">
 	                    	<div id="feature-select"></div>
 	                	</div>
 	            	</div>            	
 		         	<div class="form-group" id="distinct-attr">
-                        <label class="col-md-1 control-label"for="distinct-attr-select">${i18n.dataexplorer_aggregates_distinct}</label>
+                        <label class="col-md-2 control-label"for="distinct-attr-select">${i18n.dataexplorer_aggregates_distinct}</label>
                         <div class="col-md-4">
                         	<div id="distinct-attr-select"></div>                  
 						</div>

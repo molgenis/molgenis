@@ -38,7 +38,7 @@ public class MutationsViewController extends MolgenisPluginController
 	public static final String TITLE = "Mutations view";
 	private final DataService dataService;
 	private final MysqlViewService mysqlViewService;
-	public static List<String> HEADERS_NAMES = Arrays.asList("Mutation ID", "cDNA change", "Protein change",
+	public static final List<String> HEADERS_NAMES = Arrays.asList("Mutation ID", "cDNA change", "Protein change",
 			"Exon/Intron", "Consequence", "Inheritance", "Patient ID", "Phenotype");
 	private static final String PATH_TO_INSERT_QUERY = "/mysql/mutationview_col7a1_prototype.sql";
 	private static final String PATH_TO_NA_QUERY = "/mysql/mutationview_col7a1_prototype_update_na.sql";
