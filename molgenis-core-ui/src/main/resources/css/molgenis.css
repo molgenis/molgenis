@@ -86,10 +86,6 @@ label.horizontal-inline.inbetween {
 	max-height: 500px;
 }
 
-.sub-menu-items {
-	padding-left: 10px;
-}
-
 /* Bootstrap tooltip style */
 .tooltip {
 	position: absolute;
