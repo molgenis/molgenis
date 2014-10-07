@@ -93,21 +93,23 @@
 		</div>		
 	</div>
 	<div class="col-md-9">
-		<div class="pull-right" id="dataset-select-container"<#if hideDatasetSelect??> style="display:none"</#if>>
-    		<div class="form-horizontal form-group">
-        		<label class="col-md-5 control-label" for="dataset-select">Choose a dataset:</label>
-        		<div class="col-md-7">
-        			<select class="form-control" id="dataset-select" data-placeholder="Choose an Entity (example: dataset, protocol...">
-        			<#if entitiesMeta?has_content>
-            			<#list entitiesMeta.iterator() as entityMeta>
-                			<option value="/api/v1/${entityMeta.name}" <#if entityMeta.name == selectedEntityName> selected</#if>><#if entityMeta.label?has_content>${entityMeta.label}<#else>${entityMeta.name}</#if></option>
-               			</#list>
-               		</#if>
-            		</select>
-       			</div>
- 			</div>
+        <div id="dataset-select-container" class="pull-right" <#if hideDatasetSelect??>style="display:none"</#if>>
+			<div class="col-md-12">
+				<div class="form-horizontal form-group">
+	    			<label class="col-md-6 control-label" for="dataset-select">Choose a dataset:</label>
+	    			<div class="col-md-6">
+		    			<select class="form-control" id="dataset-select" data-placeholder="Choose an Entity (example: dataset, protocol...">
+		    			<#if entitiesMeta?has_content>
+		        			<#list entitiesMeta.iterator() as entityMeta>
+		            			<option value="/api/v1/${entityMeta.name}" <#if entityMeta.name == selectedEntityName> selected</#if>><#if entityMeta.label?has_content>${entityMeta.label}<#else>${entityMeta.name}</#if></option>
+		           			</#list>
+		           		</#if>
+		        		</select>
+					</div>
+				</div>
+			</div>
 		</div>
-        <div id="module-nav"></div>
+		<div id="module-nav"></div>
 	</div>
 </div>
 
