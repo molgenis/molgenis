@@ -250,10 +250,7 @@ public abstract class ElasticsearchEntity implements Entity
 	}
 
 	@Override
-	public void set(String attributeName, Object value)
-	{
-		source.put(attributeName, value);
-	}
+	public abstract void set(String attributeName, Object value);
 
 	@Override
 	public void set(Entity values)

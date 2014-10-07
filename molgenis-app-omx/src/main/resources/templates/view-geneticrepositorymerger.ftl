@@ -4,17 +4,19 @@
 <form id="genetic-repository-merger-form" class="form-horizontal" role="form">
     <div class="well">
         <div>
-            <legend>Merge repositories containing '#CHROM','POS','REF' and 'ALT' columns, result data is refresh if already existing</legend>
+            <legend>Merge repositories containing '#CHROM','POS','REF' and 'ALT' columns, result data is overwritten if repository already exists</legend>
         </div>
         <div class="form-group">
             <div class="col-md-10">
                 Result dataset name * <input type="text" name="resultDataset" required>
             </div>
         </div>
-        <div class="form-group">
             <div class="col-md-10">
+                <div class="form-group">
                 <legend>Select datasets to merge:</legend>
-                <table class="table table-condensed table-borderless" id="plugin-geneticerepositorymerger-table">
+                    <a href="#" class="btn btn-link pull-left select-all-btn">Select all</a>
+                    <a href="#" class="btn btn-link pull-left deselect-all-btn">Deselect all</a>
+                    <table class="table table-condensed table-borderless" id="plugin-geneticerepositorymerger-table">
                     <thead>
                         <tr>
                             <th>Dataset</th>
@@ -25,7 +27,7 @@
                         <#list entitiesMeta.iterator() as entityMeta>
                             <tr>
                                 <td><#if entityMeta.label?has_content>${entityMeta.label}<#else>${entityMeta.name}</#if></td>
-                                <td><input type="checkbox" name=datasets value="${entityMeta.name}" checked></td>
+                                <td><input type="checkbox" name="datasets" value="${entityMeta.name}" checked></td>
                             </tr>
                         </#list>
                     </tbody>
@@ -47,7 +49,12 @@
         form.submit(function (e) {
             e.preventDefault();
             e.stopPropagation();
-            if (form.valid()) {
+            if($("input[name='datasets']:checked").size() < 2){
+                molgenis.createAlert([
+                    {'message': 'Select at least 2 datasets to merge.'}
+                ], 'warning');
+            }
+            else if (form.valid()) {
                 $.ajax({
                     type: 'POST',
                     data: form.serialize(),
@@ -64,6 +71,18 @@
             e.preventDefault();
             e.stopPropagation();
             form.submit();
+        });
+
+        $('.select-all-btn').click(function(e) {
+            $("input[name='datasets']").each(function() {
+                this.checked = true;
+            });
+        });
+
+        $('.deselect-all-btn').click(function(e) {
+            $("input[name='datasets']").each(function() {
+                this.checked = false;
+            });
         });
     });
 </script>
