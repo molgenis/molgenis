@@ -101,13 +101,17 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 	public String merge(@RequestParam("resultDataset") String resultSet, @RequestParam("datasets") String[] inputSets) throws IOException
 	{
         //create list of entities to merge
-		dataService.getEntityNames();
 		List<Repository> geneticRepositories = new ArrayList<Repository>();
 		for (String name : inputSets)
 		{
 				if (!name.equals(resultSet))
 				{
-					geneticRepositories.add(dataService.getRepositoryByEntityName(name));
+                    if (dataService.hasRepository(name)) {
+                        geneticRepositories.add(dataService.getRepositoryByEntityName(name));
+                    }
+                    else{
+                        throw new RuntimeException("Cannot merge Repository: "+name+" it does not exist");
+                    }
 				}
                 else
                 {
