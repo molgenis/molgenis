@@ -24,21 +24,30 @@
 				if (q.length > 0) {
 					q.push({operator: 'OR'});
 				}
+				
 	            if (terms.length > 0) {
+	            	var rule = {
+    					operator: 'NESTED',
+    					nestedRules:[]
+    				};
+	            	
 	                $.each(terms, function(index) {
 	                    if(index > 0){
                             if(search){
-                                q.push({operator: 'AND'});
+                                rule.nestedRules.push({operator: 'AND'});
                             }else {
-                                q.push({operator: 'OR'});
+                                rule.nestedRules.push({operator: 'OR'});
                             }
 	                    }
-	                    q.push({
-	                        field: attrName,
+	                    
+	                    rule.nestedRules.push({
+	                    	field: attrName,
 	                        operator: operator,
 	                        value: terms[index]
-	                    });
+	                    })
 	                });
+	                
+	                q.push(rule);
 	            }
 			});
 			return q;
@@ -123,6 +132,7 @@
 			multiple: (attributeMetaData.fieldType === 'MREF' || attributeMetaData.fieldType === 'XREF'),
 			closeOnSelect: false,
 			query: function (options){
+				console.log(options.term);
 				var query = createQuery(lookupAttrNames, options.term.match(/[^ ]+/g),'LIKE', true);
 				if(query)
 				{

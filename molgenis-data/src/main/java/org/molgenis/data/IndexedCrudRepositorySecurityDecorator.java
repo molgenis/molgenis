@@ -43,4 +43,11 @@ public class IndexedCrudRepositorySecurityDecorator extends CrudRepositorySecuri
 		validatePermission(decoratedRepository.getName(), Permission.WRITE);
 		decoratedRepository.rebuildIndex();
 	}
+
+	@Override
+	public void drop()
+	{
+		validatePermission(decoratedRepository.getName(), Permission.WRITE);
+		decoratedRepository.drop();
+	}
 }
