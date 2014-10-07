@@ -140,7 +140,7 @@
 							<#assign sub_menu = item>
 							<#assign menu_counter = 0>
 							<li class="dropdown">
-								<a class="dropdown-toggle" data-hover="dropdown" data-toggle="dropdown" href="#">
+								<a class="dropdown-toggle" data-toggle="dropdown" href="#">
 									${item.name?html}<b class="caret"></b>
 								</a>
 								
