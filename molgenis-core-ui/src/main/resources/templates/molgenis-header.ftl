@@ -14,7 +14,6 @@
 		<link rel="icon" href="<@resource_href "/img/molgenis.ico"/>" type="image/x-icon">
 		<link rel="stylesheet" href="<@resource_href "/css/bootstrap.min.css"/>" type="text/css">
 		<link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
-		<link rel="stylesheet" href="<@resource_href "/css/bootstrap-yamm.css"/>" type="text/css">
 	<#list css as css_file_name>
 		<link rel="stylesheet" href="<@resource_href "/css/${css_file_name?html}"/>" type="text/css">
 	</#list>
@@ -40,7 +39,6 @@
 	</#if>
 	</head>
 	<body>
-	
 		<#-- Navbar menu -->
         <#if menu_id??>
             <#if !(plugin_id??)>
@@ -48,15 +46,10 @@
             </#if>
             
             <@topmenu molgenis_ui.getMenu() plugin_id/>
-            
-            <#if plugin_id?starts_with("form")>
-				<@breadcrumb molgenis_ui.getMenu(menu_id) plugin_id/>
-			</#if>	
         </#if>
         
 		<#-- Start application content -->
         <div class="container-fluid">
-        
 			<div class="row">
 			    <div class="col-md-12">
                     <div id="login-modal-container-header"></div>		
@@ -93,6 +86,16 @@
                 </div>
 			</div>
 			
+			<#if menu_id??>
+				<#if plugin_id?starts_with("form")>
+					<div class="row">
+						<div class="col-md-12	">
+							<@breadcrumb molgenis_ui.getMenu(menu_id) plugin_id/>
+						</div>
+					</div>
+				</#if>
+			</#if>
+			
 			<div class="row">
                 <div class="col-md-12">
                     <div id="plugin-container">
@@ -101,7 +104,7 @@
 
 <#-- Topmenu -->
 <#macro topmenu menu plugin_id> <#--TODO refactor to remove depency on 'Home'-->
-	<div class="navbar yamm navbar-default navbar-fixed-top" role="navigation">
+	<div class="navbar navbar-default navbar-fixed-top" role="navigation">
 		<div class="container-fluid">
 			<#-- Logo start -->
             <#list menu.items as item> 
