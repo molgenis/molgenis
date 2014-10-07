@@ -1,9 +1,7 @@
 package org.molgenis.data.elasticsearch;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
-import java.util.Iterator;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
@@ -81,12 +79,10 @@ public class ElasticsearchDocumentEntity extends ElasticsearchEntity
 	@Override
 	public void set(String attributeName, Object value)
 	{
-		{
-			final AttributeMetaData attribute = getEntityMetaData().getAttribute(attributeName);
-			if (attribute == null) throw new UnknownAttributeException(attributeName);
+		final AttributeMetaData attribute = getEntityMetaData().getAttribute(attributeName);
+		if (attribute == null) throw new UnknownAttributeException(attributeName);
 
-			Object convertedValue = entityToSourceConverter.convertAttribute(this, attribute, true);
-			getSource().put(attributeName, convertedValue);
-		}
+		Object convertedValue = entityToSourceConverter.convertAttributeValue(value, this, attribute, true);
+		getSource().put(attributeName, convertedValue);
 	}
 }
