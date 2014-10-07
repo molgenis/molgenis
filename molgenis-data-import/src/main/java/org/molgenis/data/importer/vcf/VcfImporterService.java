@@ -3,33 +3,33 @@ package org.molgenis.data.importer.vcf;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.DatabaseAction;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
 import org.molgenis.data.elasticsearch.ElasticsearchRepository;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.elasticsearch.meta.ElasticsearchAttributeMetaDataRepository;
-import org.molgenis.data.elasticsearch.meta.ElasticsearchEntityMetaDataRepository;
-import org.molgenis.data.meta.AttributeMetaDataRepository;
-import org.molgenis.data.meta.AttributeMetaDataRepositoryDecoratorFactory;
-import org.molgenis.data.meta.EntityMetaDataRepository;
-import org.molgenis.data.meta.EntityMetaDataRepositoryDecoratorFactory;
-import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.importer.EntitiesValidationReportImpl;
+import org.molgenis.data.importer.ImportService;
+import org.molgenis.framework.db.EntitiesValidationReport;
+import org.molgenis.framework.db.EntityImportReport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class VcfImporterService
+public class VcfImporterService implements ImportService
 {
+	private static final List<String> SUPPORTED_FILE_EXTENSIONS = Arrays.asList("vcf", "vcf.gz");
+
 	private final FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
 	private final DataService dataService;
 	private final SearchService searchService;
@@ -48,15 +48,59 @@ public class VcfImporterService
 		this.searchService = searchService;
 	}
 
-	public void importVcf(File vcfFile) throws IOException
+	@Override
+	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction)
 	{
-		importVcf(vcfFile, 1000);
+		if (databaseAction != DatabaseAction.ADD) throw new IllegalArgumentException("Only ADD is supported");
+		try
+		{
+			importVcf(source, 1000);
+		}
+		catch (IOException e)
+		{
+			throw new MolgenisDataException(e);
+		}
+
+		EntityImportReport report = new EntityImportReport();
+		return report;
 	}
 
-	public void importVcf(File vcfFile, int batchSize) throws IOException
+	@Override
+	public EntitiesValidationReport validateImport(File file, RepositoryCollection source)
+	{
+		EntitiesValidationReport report = new EntitiesValidationReportImpl();
+
+		for (String inEntityName : source.getEntityNames())
+		{
+			report.getSheetsImportable().put(inEntityName, !dataService.hasRepository(inEntityName));
+		}
+
+		return report;
+	}
+
+	@Override
+	public boolean canImport(File file, RepositoryCollection source)
+	{
+		for (String extension : SUPPORTED_FILE_EXTENSIONS)
+		{
+			if (file.getName().toLowerCase().endsWith(extension))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public void importVcf(File vcfFile) throws IOException
 	{
 		RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory
 				.createFileRepositoryCollection(vcfFile);
+		importVcf(repositoryCollection, 1000);
+	}
+
+	public void importVcf(RepositoryCollection repositoryCollection, int batchSize) throws IOException
+	{
 		ElasticsearchRepository sampleRepository = null;
 
 		for (String inEntityName : repositoryCollection.getEntityNames())
@@ -78,8 +122,9 @@ public class VcfImporterService
 				if (sampleAttribute != null)
 				{
 					sampleRepository = new ElasticsearchRepository(sampleAttribute.getRefEntity(), searchService);
-                    searchService.createMappings(sampleAttribute.getRefEntity(), true, true, true, true);
-                }
+					searchService.createMappings(sampleAttribute.getRefEntity(), true, true, true, true);
+				}
+
 				Iterator<Entity> inIterator = inRepository.iterator();
 				try
 				{
@@ -126,4 +171,11 @@ public class VcfImporterService
 			}
 		}
 	}
+
+	@Override
+	public int getOrder()
+	{
+		return 10;
+	}
+
 }

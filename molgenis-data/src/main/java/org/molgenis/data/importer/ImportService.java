@@ -15,4 +15,5 @@ public interface ImportService extends Ordered
 	EntitiesValidationReport validateImport(File file, RepositoryCollection source);
 
 	boolean canImport(File file, RepositoryCollection source);
+
 }
