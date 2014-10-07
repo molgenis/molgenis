@@ -245,9 +245,9 @@ public class RepositoryMerger
 		for (AttributeMetaData originalRepositorySubAttributeMetaData : originalRepositoryAttributeMetaData
 				.getAttributeParts())
 		{
-			DefaultAttributeMetaData subAttributePartMetaData = new DefaultAttributeMetaData(getMergedAttributeName(
+			DefaultAttributeMetaData subAttributePartMetaData = copyAndRename(originalRepositorySubAttributeMetaData, getMergedAttributeName(
 					repository, originalRepositorySubAttributeMetaData.getName()),
-					originalRepositorySubAttributeMetaData.getDataType().getEnumType());
+                    getMergedAttributeLabel(repository, originalRepositoryAttributeMetaData.getLabel()));
 			subAttributePartMetaData.setLabel(getMergedAttributeLabel(repository,
 					originalRepositorySubAttributeMetaData.getLabel()));
 			if (subAttributePartMetaData.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
