@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.log4j.Logger;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Aggregateable;
@@ -35,6 +36,8 @@ import com.google.common.collect.Lists;
 @Component
 public class DataServiceImpl implements DataService
 {
+	private static final Logger LOG = Logger.getLogger(DataServiceImpl.class);
+
 	private final Map<String, Repository> repositories;
 	private final Set<String> repositoryNames;
 
@@ -52,6 +55,7 @@ public class DataServiceImpl implements DataService
 		{
 			throw new MolgenisDataException("Entity [" + repositoryName + "] already registered.");
 		}
+		if (LOG.isDebugEnabled()) LOG.debug("Adding repository [" + repositoryName + "]");
 		repositoryNames.add(repositoryName);
 		repositories.put(repositoryName.toLowerCase(), newRepository);
 	}
@@ -70,6 +74,7 @@ public class DataServiceImpl implements DataService
 		}
 		else
 		{
+			if (LOG.isDebugEnabled()) LOG.debug("Removing repository [" + repositoryName + "]");
 			repositoryNames.remove(repositoryName);
 			repositories.remove(repositoryName.toLowerCase());
 		}
