@@ -148,11 +148,15 @@
 						<#-- Dropdown menu items -->
 						<#elseif item.type == "MENU">
 							<#assign sub_menu = item>
+							<#assign menu_counter = 0>
 							<li class="dropdown">
 								<a class="dropdown-toggle" data-hover="dropdown" data-toggle="dropdown" href="#">
 									${item.name?html}<b class="caret"></b>
 								</a>
-								<@entitydropdown sub_menu />	
+								
+								<ul class="dropdown-menu" role="menu">
+									<@dropdown sub_menu menu_counter />	
+								</ul>
 							</li>
 						</#if>
 					</#list>
@@ -191,27 +195,25 @@
 </#macro>
 
 <#-- dropdown for entity -->
-<#macro entitydropdown sub_menu >
-	<ul class="dropdown-menu" role="menu">
-		<#list sub_menu.items as sub_item>
-			<#if sub_item.type != "MENU">
-				<li>
-					<a href="/menu/${sub_menu.id?html}/${sub_item.url?html}">${sub_item.name?html}</a>
-				</li>
-			<#elseif sub_item.type == "MENU">
-				<li class="divider"></li>
-				
-				<li class="dropdown-header disabled" role="presentation">
-					<a href="#">${sub_item.name?html}</a>
-				</li>
-				
-				<#list sub_item.items as next_sub_item>
-					<li class="sub-menu-items">
-						<a href="/menu/${sub_item.id?html}/${next_sub_item.url?html}">${next_sub_item.name?html}</a>
-					</li>
-				</#list>
-				<li class="divider"></li>	
-			</#if>
-		</#list>
-	</ul>
+<#macro dropdown sub_menu menu_counter>
+	<#assign this_menu_counter = menu_counter + 1>
+	
+	<#list sub_menu.items as sub_item>
+		<#if sub_item.type != "MENU">
+			<li>
+				<a <#if this_menu_counter gt 1>style="margin-left: ${this_menu_counter * 12}px;"</#if> href="/menu/${sub_menu.id?html}/${sub_item.url?html}">${sub_item.name?html}</a>
+			</li>
+		<#elseif sub_item.type == "MENU">
+			<li class="dropdown-header disabled sub-menu-${this_menu_counter}" role="presentation">
+				<a <#if this_menu_counter gt 1>style="margin-left: ${this_menu_counter * 12}px;"</#if> href="#">${sub_item.name?html}</a>
+			</li>
+			
+			<@dropdown sub_item this_menu_counter />
+			<#assign this_menu_counter = this_menu_counter - 1>
+		</#if>
+	</#list>
 </#macro>
+
+
+
+
