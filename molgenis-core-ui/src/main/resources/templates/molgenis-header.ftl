@@ -86,16 +86,6 @@
                 </div>
 			</div>
 			
-			<#if menu_id??>
-				<#if plugin_id?starts_with("form")>
-					<div class="row">
-						<div class="col-md-12	">
-							<@breadcrumb molgenis_ui.getMenu(menu_id) plugin_id/>
-						</div>
-					</div>
-				</#if>
-			</#if>
-			
 			<div class="row">
                 <div class="col-md-12">
                     <div id="plugin-container">
@@ -174,24 +164,6 @@
 			
 		</div> <#-- close container -->
 	</div> <#-- close navbar div -->
-</#macro>
-
-<#-- breadcrumb -->
-<#macro breadcrumb menu plugin_id>
-	<div id="form-breadcrumb">
-		<#assign breadcrumb = menu.breadcrumb>
-		<#if (breadcrumb?size > 1)>
-			<ul id="molgenis-breadcrumb" class="breadcrumb">
-				<#list breadcrumb as menu>
-					<#if menu_has_next>
-						<li><a href="/menu/${menu.id?html}">${menu.name?html}</a> <span class="divider">/</span></li>
-					<#else>
-						<li class="active">${menu.name?html}</li>
-					</#if>	
-				</#list>
-			</ul>
-		</#if>
-	</div>
 </#macro>
 
 <#-- dropdown for entity -->

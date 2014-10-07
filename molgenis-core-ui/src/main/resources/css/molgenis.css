@@ -71,13 +71,6 @@ label.horizontal-inline.inbetween {
 	margin-left: 5px;
 }
 
-#molgenis-breadcrumb {
-	margin-bottom: -5px;
-	font-size:10px;
-	float:left;	
-	background: #F8FAFB;
-}
-
 .dropdown-menu{
 	overflow-y: auto;
 	overflow-x: hidden;
