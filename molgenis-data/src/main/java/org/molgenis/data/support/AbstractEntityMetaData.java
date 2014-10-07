@@ -3,6 +3,7 @@ package org.molgenis.data.support;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
@@ -17,6 +18,8 @@ import com.google.common.collect.TreeTraverser;
 
 public abstract class AbstractEntityMetaData implements EntityMetaData
 {
+	private static Logger LOG = Logger.getLogger(AbstractEntityMetaData.class);
+
 	private String labelAttribute;
 	private String idAttribute;
 
@@ -201,7 +204,9 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 			}
 			if (idAttributeMetaData == null)
 			{
-				throw new RuntimeException("No idAttribute specified, this attribute is required");
+				LOG.error("No idAttribute specified, this attribute is required");
+				// FIXME entity must be identifiable but in reality this is not always the case
+				// throw new RuntimeException("No idAttribute specified, this attribute is required");
 			}
 		}
 		return idAttributeMetaData;
