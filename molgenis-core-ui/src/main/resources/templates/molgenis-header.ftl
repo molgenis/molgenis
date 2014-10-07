@@ -145,54 +145,24 @@
 						<#-- Dropdown menu items -->
 						<#elseif item.type == "MENU">
 							<#assign sub_menu = item>
-							<#-- Root dropdown toggle -->
-							<li class="dropdown">
-								<a class="dropdown-toggle" data-hover="dropdown" data-delay="0" data-toggle="dropdown" href="#">
-									${item.name?html}<b class="caret"></b>
-								</a>
+							<#assign counter = 0>
+							<#if item.name == "Entities" && sub_menu?size gt 20>
+								<li class="dropdown entity-dropdown">
+									<a class="dropdown-toggle" data-hover="dropdown" data-toggle="dropdown" href="#">
+										${item.name?html}<b class="caret"></b>
+									</a>
+									
+									<@entitydropdown sub_menu counter />
+								</li>
+							<#else>
+								<li class="dropdown">
+									<a class="dropdown-toggle" data-hover="dropdown" data-toggle="dropdown" href="#">
+										${item.name?html}<b class="caret"></b>
+									</a>
 								
-								<ul class="dropdown-menu" id="first-dropdown-menu" role="menu">
-									<#list sub_menu.items as first_tier_subitem>
-										<#if first_tier_subitem.type != "MENU">
-											<li>
-												<a href="/menu/${sub_menu.id?html}/${first_tier_subitem.url?html}">${first_tier_subitem.name?html}</a>
-											</li>
-										<#elseif first_tier_subitem.type == "MENU">
-											<#-- Second dropdown toggle -->
-											<li class="dropdown">
-												<a class="dropdown-toggle" data-hover="dropdown" data-delay="200" data-toggle="dropdown" data-close-others="false" href="#">
-													${first_tier_subitem.name?html}<b class="caret"></b>
-												</a>
-												
-												<ul class="dropdown-menu drop-right" id="second-dropdown-menu" role="menu">	
-													<#list first_tier_subitem.items as second_tier_subitem>
-														<#if second_tier_subitem.type != "MENU">
-														<li>
-															<a tabindex="-1" href="/menu/${first_tier_subitem.id?html}/${second_tier_subitem.url?html}">${second_tier_subitem.name?html}</a>
-														<li>
-														<#elseif second_tier_subitem.type == "MENU">
-															<#-- third dropdown toggle -->
-															<li class="dropdown">
-																<a class="dropdown-toggle" data-hover="dropdown" data-delay="200" data-close-others="false" data-toggle="dropdown" href="#">
-																	${second_tier_subitem.name?html}<b class="caret"></b>
-																</a>
-											
-																<ul class="dropdown-menu" id="third-dropdown-menu" role="menu">						
-																	<#list second_tier_subitem.items as third_tier_subitem> 
-																		<li>
-																			<a tabindex="-1" href="/menu/${second_tier_subitem.id?html}/${third_tier_subitem.url?html}">${third_tier_subitem.name?html}</a>
-																		</li>
-																	</#list>															
-																</ul>
-															</li>
-														</#if>
-													</#list>
-												</ul>
-											</li>
-										</#if>
-									</#list>
-								</ul>
-							</li>
+									<@entitydropdown sub_menu counter />	
+								</li>
+							</#if>
 						</#if>
 					</#list>
 				</ul>
@@ -210,8 +180,9 @@
 		</div> <#-- close container -->
 	</div> <#-- close navbar div -->
 	
-	<#-- This script will active Triple level multi drop-down menus in Bootstrap 3 -->
+	
 	<script type="text/javascript">
+		<#-- This script will active Triple level multi drop-down menus in Bootstrap 3 -->
 		$('ul.dropdown-menu [data-toggle=dropdown]').on('click', function(event) {
 		    // Avoid following the href location when clicking
 		    event.preventDefault(); 
@@ -219,8 +190,15 @@
 		    event.stopPropagation(); 
 		    // Re-add .open to parent sub-menu item
 		    $(this).parent().addClass('open');
-		    $(this).parent().find("ul").parent().find("li.dropdown").addClass('open');
+		    $(this).parent().find("ul").parent().find("li.dropdown").addClass('open');		    
 		});		
+		
+		<#-- This code will calculate the width of the main dropdown and place the second dropdown -->
+		var mainDropDown = $('.sub-menu-1').width();
+		$('.sub-menu-2').css("top", '0');
+		$('.sub-menu-2').css("margin-top", '100px');
+		$('.sub-menu-2').css("right", "-" + mainDropDown + "px" );
+		
 	</script>
 </#macro>
 
@@ -240,4 +218,27 @@
 			</ul>
 		</#if>
 	</div>
+</#macro>
+
+<#-- dropdown for entity -->
+<#macro entitydropdown sub_menu counter>
+	<#assign new_counter = counter + 1>
+	<ul class="dropdown-menu sub-menu-${new_counter}" role="menu">
+		<#list sub_menu.items as sub_item>
+			<#assign new_counter = 1>
+			<#if sub_item.type != "MENU">
+				<li class="dropdown">
+					<a href="/menu/${sub_menu.id?html}/${sub_item.url?html}">${sub_item.name?html}</a>
+				</li>
+			<#elseif sub_item.type == "MENU">
+				<li class="dropdown-submenu">
+					<a class="dropdown-toggle" data-toggle="dropdown" href="#">
+						${sub_item.name?html}<b class="caret"></b>
+					</a>
+					
+					<@entitydropdown sub_item new_counter />
+				</li>
+			</#if>
+		</#list>
+	</ul>
 </#macro>
