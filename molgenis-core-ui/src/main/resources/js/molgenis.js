@@ -643,24 +643,6 @@ function hideSpinner() {
 
 $(function() {
 	
-	
-	// Script for active Triple level multi drop-down menus in Bootstrap 3 -->
-	$('ul.dropdown-menu [data-toggle=dropdown]').on('click', function(event) {
-	    // Avoid following the href location when clicking
-	    event.preventDefault(); 
-	    // Avoid having the menu to close when clicking
-	    event.stopPropagation(); 
-	    // Re-add .open to parent sub-menu item
-	    $(this).parent().addClass('open');
-	    $(this).parent().find("ul").parent().find("li.dropdown").addClass('open');		    
-	});		
-	
-	// Use main dropdown width as an offset for placing the second sub menu
-	var mainDropDown = $('.sub-menu-1').width();
-	$('.sub-menu-2').css("top", '0');
-	$('.sub-menu-2').css("margin-top", '100px');
-	$('.sub-menu-2').css("left", mainDropDown + "px" );
-	
 	// disable all ajax request caching
 	$.ajaxSetup({
 		cache : false
