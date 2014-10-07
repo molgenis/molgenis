@@ -35,7 +35,6 @@ public class OntologyService
 	private final SearchService searchService;
 	private static final List<String> ELASTICSEARCH_RESERVED_WORDS = Arrays.asList("or", "and", "if");
 	private static final String COMBINED_SCORE = "combinedScore";
-	private static final String INPUT_DATA = "inputData";
 	private static final String FUZZY_MATCH_SIMILARITY = "~0.8";
 	private static final String SCORE = "score";
 	private static final String NON_WORD_SEPARATOR = "[^a-zA-Z0-9]";
@@ -44,6 +43,7 @@ public class OntologyService
 	public static final Character DEFAULT_SEPARATOR = ';';
 	public static final String DEFAULT_MATCHING_NAME_FIELD = "name";
 	public static final String DEFAULT_MATCHING_SYNONYM_FIELD = "synonym";
+	private static final String MAX_SCORE_FIELD = "maxScoreField";
 
 	@Autowired
 	public OntologyService(SearchService searchService)
@@ -192,8 +192,8 @@ public class OntologyService
 				new QueryImpl(finalQueryRule).pageSize(MAX_NUMBER_MATCHES), null);
 
 		Iterator<Hit> iterator = searchService.search(request).getSearchHits().iterator();
-
 		Map<String, Object> inputData = new HashMap<String, Object>();
+		String maxScoreField = null;
 		List<ComparableHit> comparableHits = new ArrayList<ComparableHit>();
 		int count = 0;
 		while (iterator.hasNext())
@@ -214,6 +214,7 @@ public class OntologyService
 						if (maxNgramScore.doubleValue() < ngramScore.doubleValue())
 						{
 							maxNgramScore = ngramScore;
+							maxScoreField = attributeName;
 						}
 						if (count == 0) inputData.put(attributeName, entity.getString(attributeName));
 					}
@@ -235,6 +236,7 @@ public class OntologyService
 										if (maxNgramScore.doubleValue() < ngramScore.doubleValue())
 										{
 											maxNgramScore = ngramScore;
+											maxScoreField = attributeName;
 										}
 									}
 									if (count == 0) inputData.put(attributeName, entity.getString(attributeName));
@@ -244,7 +246,7 @@ public class OntologyService
 					}
 				}
 			}
-			comparableHits.add(new ComparableHit(inputData, hit, maxNgramScore));
+			comparableHits.add(new ComparableHit(hit, maxNgramScore, maxScoreField));
 			count++;
 		}
 		Collections.sort(comparableHits);
@@ -294,7 +296,7 @@ public class OntologyService
 			BigDecimal ngramScore = new BigDecimal(NGramMatchingModel.stringMatching(
 					StringUtils.join(uniqueTerms, OntologyTermQueryRepository.ILLEGAL_CHARACTERS_REPLACEMENT),
 					ontologySynonym));
-			comparableHits.add(new ComparableHit(inputData, hit, luceneScore.multiply(ngramScore)));
+			comparableHits.add(new ComparableHit(hit, luceneScore.multiply(ngramScore), null));
 		}
 		Collections.sort(comparableHits);
 		return convertResults(inputData, comparableHits);
@@ -334,7 +336,7 @@ public class OntologyService
 			Map<String, Object> columnValueMap = new HashMap<String, Object>();
 			columnValueMap.putAll(hit.getColumnValueMap());
 			columnValueMap.put(COMBINED_SCORE, comparableHit.getSimilarityScore().doubleValue());
-			columnValueMap.put(INPUT_DATA, comparableHit.getInputData());
+			columnValueMap.put(MAX_SCORE_FIELD, comparableHit.getMaxScoreField());
 			Hit copyHit = new Hit(hit.getId(), hit.getDocumentType(), columnValueMap);
 			hits.add(copyHit);
 		}
@@ -343,15 +345,20 @@ public class OntologyService
 
 	class ComparableHit implements Comparable<ComparableHit>
 	{
-		private final Map<String, Object> inputData;
+		private final String maxScoreField;
 		private final Hit hit;
 		private final BigDecimal similarityScore;
 
-		public ComparableHit(Map<String, Object> inputData, Hit hit, BigDecimal similarityScore)
+		public ComparableHit(Hit hit, BigDecimal similarityScore, String maxScoreField)
 		{
-			this.inputData = inputData;
 			this.hit = hit;
 			this.similarityScore = similarityScore;
+			this.maxScoreField = maxScoreField;
+		}
+
+		public String getMaxScoreField()
+		{
+			return maxScoreField;
 		}
 
 		private BigDecimal getSimilarityScore()
@@ -368,11 +375,6 @@ public class OntologyService
 		public int compareTo(ComparableHit other)
 		{
 			return similarityScore.compareTo(other.getSimilarityScore()) * (-1);
-		}
-
-		public Map<String, Object> getInputData()
-		{
-			return inputData;
 		}
 	}
 }

@@ -32,8 +32,8 @@
 							<div class="row">
 								<div class="col-md-12 well">
 									<div class="row">
-										<div class="col-md-5"><strong>Input terms</strong></div>
-										<div class="col-md-7">
+										<div class="col-md-4"><strong>Input terms</strong></div>
+										<div class="col-md-8">
 											<div class="row">
 												<div class="col-md-8 matchterm" style="margin-bottom:-10px;">
 													<strong>Matched ontologyterms</strong>
