@@ -179,27 +179,6 @@
 			
 		</div> <#-- close container -->
 	</div> <#-- close navbar div -->
-	
-	
-	<script type="text/javascript">
-		<#-- This script will active Triple level multi drop-down menus in Bootstrap 3 -->
-		$('ul.dropdown-menu [data-toggle=dropdown]').on('click', function(event) {
-		    // Avoid following the href location when clicking
-		    event.preventDefault(); 
-		    // Avoid having the menu to close when clicking
-		    event.stopPropagation(); 
-		    // Re-add .open to parent sub-menu item
-		    $(this).parent().addClass('open');
-		    $(this).parent().find("ul").parent().find("li.dropdown").addClass('open');		    
-		});		
-		
-		<#-- This code will calculate the width of the main dropdown and place the second dropdown -->
-		var mainDropDown = $('.sub-menu-1').width();
-		$('.sub-menu-2').css("top", '0');
-		$('.sub-menu-2').css("margin-top", '100px');
-		$('.sub-menu-2').css("right", "-" + mainDropDown + "px" );
-		
-	</script>
 </#macro>
 
 <#-- breadcrumb -->
