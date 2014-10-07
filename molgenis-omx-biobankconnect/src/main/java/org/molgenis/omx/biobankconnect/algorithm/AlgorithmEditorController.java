@@ -21,6 +21,7 @@ import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcher;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcherRequest;
 import org.molgenis.omx.biobankconnect.ontologyservice.OntologyService;
 import org.molgenis.omx.biobankconnect.ontologyservice.OntologyServiceRequest;
+import org.molgenis.omx.biobankconnect.ontologyservice.OntologyServiceResult;
 import org.molgenis.omx.biobankconnect.wizard.CurrentUserStatus;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
@@ -184,12 +185,12 @@ public class AlgorithmEditorController extends MolgenisPluginController
 
 	@RequestMapping(method = POST, value = "/ontologyterm", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public SearchResult query(@RequestBody
+	public OntologyServiceResult query(@RequestBody
 	OntologyServiceRequest ontologyTermRequest)
 	{
 		String ontologyIri = ontologyTermRequest.getOntologyIri();
 		String queryString = ontologyTermRequest.getQueryString();
-		if (queryString == null) return new SearchResult(0, Collections.<Hit> emptyList());
+		if (queryString == null) return new OntologyServiceResult("The query cannot be null!");
 		return ontologyService.search(ontologyIri, queryString);
 	}
 
