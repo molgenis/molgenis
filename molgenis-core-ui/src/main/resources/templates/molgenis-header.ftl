@@ -200,7 +200,8 @@
 				</li>
 			<#elseif sub_item.type == "MENU">
 				<li class="divider"></li>
-				<li class="sub-menu-header">
+				
+				<li class="dropdown-header disabled" role="presentation">
 					<a href="#">${sub_item.name?html}</a>
 				</li>
 				
