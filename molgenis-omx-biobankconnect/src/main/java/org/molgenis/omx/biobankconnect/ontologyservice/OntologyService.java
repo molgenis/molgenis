@@ -33,18 +33,16 @@ import org.tartarus.snowball.ext.PorterStemmer;
 public class OntologyService
 {
 	private final SearchService searchService;
+	private static final List<String> ELASTICSEARCH_RESERVED_WORDS = Arrays.asList("or", "and", "if");
 	private static final String COMBINED_SCORE = "combinedScore";
 	private static final String FUZZY_MATCH_SIMILARITY = "~0.8";
 	private static final String SCORE = "score";
 	private static final String NON_WORD_SEPARATOR = "[^a-zA-Z0-9]";
 	private static final int MAX_NUMBER_MATCHES = 100;
 	private static final PorterStemmer stemmer = new PorterStemmer();
-	public static final Character DEFAULT_SEPARATOR = '|';
+	public static final Character DEFAULT_SEPARATOR = ';';
 	public static final String DEFAULT_MATCHING_NAME_FIELD = "name";
 	public static final String DEFAULT_MATCHING_SYNONYM_FIELD = "synonym";
-
-	// public static final String DEFAULT_MATCHING_FIELD = Arrays.asList("name",
-	// "synonym");
 
 	@Autowired
 	public OntologyService(SearchService searchService)
@@ -164,8 +162,12 @@ public class OntologyService
 				if (DEFAULT_MATCHING_NAME_FIELD.equals(attributeName.toLowerCase())
 						|| attributeName.toLowerCase().startsWith(DEFAULT_MATCHING_SYNONYM_FIELD))
 				{
-					rulesForOntologyTermFields.add(new QueryRule(OntologyTermIndexRepository.SYNONYMS, Operator.EQUALS,
-							medicalStemProxy(entity.getString(attributeName))));
+					String medicalStemProxy = medicalStemProxy(entity.getString(attributeName));
+					if (!StringUtils.isEmpty(medicalStemProxy))
+					{
+						rulesForOntologyTermFields.add(new QueryRule(OntologyTermIndexRepository.SYNONYMS,
+								Operator.EQUALS, medicalStemProxy));
+					}
 				}
 				else if (entity.get(attributeName) != null
 						&& !StringUtils.isEmpty(entity.get(attributeName).toString()))
@@ -297,7 +299,8 @@ public class OntologyService
 		uniqueTerms.removeAll(NGramMatchingModel.STOPWORDSLIST);
 		for (String term : uniqueTerms)
 		{
-			if (!StringUtils.isEmpty(term) && !term.matches(OntologyTermQueryRepository.MULTI_WHITESPACES))
+			if (!StringUtils.isEmpty(term) && !term.matches(OntologyTermQueryRepository.MULTI_WHITESPACES)
+					&& !(ELASTICSEARCH_RESERVED_WORDS.contains(term)))
 			{
 				stemmer.setCurrent(term.replaceAll(OntologyTermQueryRepository.ILLEGAL_CHARACTERS_PATTERN,
 						StringUtils.EMPTY));
