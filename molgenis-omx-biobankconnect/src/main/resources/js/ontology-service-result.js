@@ -32,10 +32,17 @@
 		var isHidden = container.find('.termurl:eq(0)').is(':hidden');
 		container.empty();
 		$.each(entities, function(rowIndex, entity){
+			var inputData = entity.results.inputData ? entity.results.inputData : {};
 			var layoutDiv = $('<div />').addClass('row');
-			var termDiv = $('<div />').addClass('col-md-3').append(entity.term).appendTo(layoutDiv);
-			var ontologyTermMatchDiv= $('<div />').addClass('col-md-9 div-expandable').appendTo(layoutDiv);
-			
+			var termDiv = $('<div />').addClass('col-md-4').appendTo(layoutDiv);
+			if(Object.keys(inputData).length  === 0){
+				termDiv.append(entity.term);
+			}else{
+				$.map(inputData, function(val, key){
+					termDiv.append('<div>' + key + ' : ' + val + '</div>');
+				});
+			}
+			var ontologyTermMatchDiv= $('<div />').addClass('col-md-8 div-expandable').appendTo(layoutDiv);
 			//Collect all the scores from the candidate ontology term mappings
 			var scoreGroup = [];
 			$.each(entity.results.searchHits, function(index, hit){
@@ -46,24 +53,26 @@
 			//Create the html visualizations for the mappings
 			$.each(entity.results.searchHits, function(index, hit){
 				if(index >= 20) return false;
-				var ontologyTermNameDiv = $('<div />').addClass('col-md-4 matchterm show-popover').css('margin-bottom', '-6px').append(hit.columnValueMap.ontologyTerm);
-				var ontologyTermUrlDiv = $('<div />').addClass('col-md-6 termurl').css('margin-bottom', '-6px').append('<a href="' + hit.columnValueMap.ontologyTermIRI + '" target="_blank">' + hit.columnValueMap.ontologyTermIRI + '</a>');
-				var matchScoreDiv = $('<div />').addClass('col-md-1').css('margin-bottom', '-6px').append('<center>' + (hit.columnValueMap.combinedScore ? hit.columnValueMap.combinedScore.toFixed(2) :  hit.columnValueMap.score.toFixed(2)) + '%</center>');
-				
+				var ontologyTermPopover = $('<div>' + hit.columnValueMap.ontologyTerm + '</div>').addClass('show-popover').css('margin-bottom', '1px');
+				var ontologyTermNameDiv = $('<div />').addClass('col-md-8 matchterm').css('margin-bottom','8px').append(ontologyTermPopover)
+					.append('<a href="' + hit.columnValueMap.ontologyTermIRI + '" target="_blank">' + hit.columnValueMap.ontologyTermIRI + '</a>');
+				var matchScoreDiv = $('<div />').addClass('col-md-3').css('margin-bottom', '-6px').append('<center>' + (hit.columnValueMap.combinedScore ? hit.columnValueMap.combinedScore.toFixed(2) :  hit.columnValueMap.score.toFixed(2)) + '%</center>');
 				var newLineDiv = $('<div />').addClass('row').css({
 					'padding-top':'3px',
 					'padding-bottom':'3px'
-				}).append(ontologyTermNameDiv).append(ontologyTermUrlDiv).append(matchScoreDiv);
+				}).append(ontologyTermNameDiv).append(matchScoreDiv);
 				var isEqual = hit.columnValueMap.ontologyTermSynonym === hit.columnValueMap.ontologyTerm;
 				var popoverOption = {
 					'placement' : 'bottom',
 					'trigger' : 'hover',
 					'title' : 'Click to look up in ontology',
-					'html' : true,
-					'content' : 'Matched by <u>' + (isEqual ? 'lable' : 'synonym') + '</u> shown below : <br><br> <strong>' + hit.columnValueMap.ontologyTermSynonym + '</strong><br>'
+					'html' : true, 
+					'content' : (hit.columnValueMap.maxScoreField ? 'Matched based on the input field : <strong>' + hit.columnValueMap.maxScoreField + '</strong><br><br>' : '') +
+						((hit.columnValueMap.maxScoreField && hit.columnValueMap[hit.columnValueMap.maxScoreField]) ? 'OntologyTerm ' + hit.columnValueMap.maxScoreField + ' is <strong>' + hit.columnValueMap[hit.columnValueMap.maxScoreField] + '</strong><br><br>' : '')+ 
+						(hit.columnValueMap.ontologyTermSynonym !== hit.columnValueMap.ontologyTerm ? 'OntologyTerm synonym is <strong>' + hit.columnValueMap.ontologyTermSynonym + '</strong>' : '') 
 				};
 				ontologyTermMatchDiv.append(newLineDiv);
-				ontologyTermNameDiv.popover(popoverOption).click(function(){
+				ontologyTermPopover.popover(popoverOption).click(function(){
 					ontologyTree.locateTerm(hit.columnValueMap);
 				});
 				
@@ -71,10 +80,7 @@
 					var classifications = ss.jenks(scoreGroup, 3);
 					$.each(classifications, function(i, score){
 						if(i != 0 && i != classifications.length - 1 && index == scoreGroup.lastIndexOf(score)){
-							var separatLine = $('<legend />').css({
-								'padding-top':'20px',
-								'border-bottom-color':'#CC0025'
-							});
+							var separatLine = $('<legend />').css('border-bottom-color' , '#CC0025');
 							$('<div />').addClass('row').append(separatLine).appendTo(ontologyTermMatchDiv);
 						}
 					});

@@ -32,17 +32,14 @@
 							<div class="row">
 								<div class="col-md-12 well">
 									<div class="row">
-										<div class="col-md-3"><strong>Input terms</strong></div>
-										<div class="col-md-9">
+										<div class="col-md-4"><strong>Input terms</strong></div>
+										<div class="col-md-8">
 											<div class="row">
-												<div class="col-md-4 matchterm" style="margin-bottom:-10px;">
+												<div class="col-md-8 matchterm" style="margin-bottom:-10px;">
 													<strong>Matched ontologyterms</strong>
 												</div>
-												<div class="col-md-6 termurl" style="margin-bottom:-10px;">
-													<strong>Ontologyterm Url</strong>
-												</div>
-												<div class="col-md-1" style="margin-bottom:-10px;">
-													<strong>Score</strong>
+												<div class="col-md-3" style="margin-bottom:-10px;">
+													<center><strong>Score</strong></center>
 												</div>
 											</div>
 										</div>
@@ -50,7 +47,7 @@
 								</div>
 							</div>
 							<div id="match-result" class="row"></div>
-							<div class="row"><div id="pager"></div></div>
+							<div class="row"><div id="pager" style="margin-bottom:50px;"></div></div>
 						</div>
 						<div id="tree-visual-panel" class="col-md-4" style="display:none;padding-left:40px;">
 							<div class="row">

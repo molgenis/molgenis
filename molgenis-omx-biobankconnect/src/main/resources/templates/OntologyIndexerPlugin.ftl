@@ -107,7 +107,7 @@
 														Enter <strong>name</strong> of ontology (compulsory).
 													</li>
 													<li>
-														Uplaod ontology <strong>zip</strong> file (OWL/OBO).
+														Upload ontology <strong>zip</strong> file (OWL/OBO).
 													</li>
 													<li>
 														Click on <strong>'Start index'</strong> to start indexing.

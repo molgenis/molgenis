@@ -33,14 +33,17 @@ import org.tartarus.snowball.ext.PorterStemmer;
 public class OntologyService
 {
 	private final SearchService searchService;
+	private static final List<String> ELASTICSEARCH_RESERVED_WORDS = Arrays.asList("or", "and", "if");
 	private static final String COMBINED_SCORE = "combinedScore";
 	private static final String FUZZY_MATCH_SIMILARITY = "~0.8";
 	private static final String SCORE = "score";
 	private static final String NON_WORD_SEPARATOR = "[^a-zA-Z0-9]";
 	private static final int MAX_NUMBER_MATCHES = 100;
 	private static final PorterStemmer stemmer = new PorterStemmer();
-	public static final Character DEFAULT_SEPARATOR = '|';
-	public static final List<String> DEFAULT_MATCHING_FIELDS = Arrays.asList("name", "synonym");
+	public static final Character DEFAULT_SEPARATOR = ';';
+	public static final String DEFAULT_MATCHING_NAME_FIELD = "name";
+	public static final String DEFAULT_MATCHING_SYNONYM_FIELD = "synonym";
+	private static final String MAX_SCORE_FIELD = "maxScoreField";
 
 	@Autowired
 	public OntologyService(SearchService searchService)
@@ -147,7 +150,7 @@ public class OntologyService
 	 * @param entity
 	 * @return
 	 */
-	public SearchResult searchEntity(String ontologyIri, Entity entity)
+	public OntologyServiceResult searchEntity(String ontologyIri, Entity entity)
 	{
 		List<QueryRule> allQueryRules = new ArrayList<QueryRule>();
 		List<QueryRule> rulesForOntologyTermFields = new ArrayList<QueryRule>();
@@ -155,10 +158,17 @@ public class OntologyService
 		{
 			if (!StringUtils.isEmpty(entity.getString(attributeName)))
 			{
-				if (DEFAULT_MATCHING_FIELDS.contains(attributeName.toLowerCase()))
+				// The attribute name is either equal to 'Name' or starts with
+				// string 'Synonym'
+				if (DEFAULT_MATCHING_NAME_FIELD.equals(attributeName.toLowerCase())
+						|| attributeName.toLowerCase().startsWith(DEFAULT_MATCHING_SYNONYM_FIELD))
 				{
-					rulesForOntologyTermFields.add(new QueryRule(OntologyTermIndexRepository.SYNONYMS, Operator.EQUALS,
-							medicalStemProxy(entity.getString(attributeName))));
+					String medicalStemProxy = medicalStemProxy(entity.getString(attributeName));
+					if (!StringUtils.isEmpty(medicalStemProxy))
+					{
+						rulesForOntologyTermFields.add(new QueryRule(OntologyTermIndexRepository.SYNONYMS,
+								Operator.EQUALS, medicalStemProxy));
+					}
 				}
 				else if (entity.get(attributeName) != null
 						&& !StringUtils.isEmpty(entity.get(attributeName).toString()))
@@ -168,7 +178,7 @@ public class OntologyService
 			}
 		}
 
-		if (rulesForOntologyTermFields.size() == 0) return new SearchResult(
+		if (rulesForOntologyTermFields.size() == 0) return new OntologyServiceResult(
 				"Please specify the headers of the input data!");
 
 		QueryRule nestedQueryRule = new QueryRule(rulesForOntologyTermFields);
@@ -182,8 +192,10 @@ public class OntologyService
 				new QueryImpl(finalQueryRule).pageSize(MAX_NUMBER_MATCHES), null);
 
 		Iterator<Hit> iterator = searchService.search(request).getSearchHits().iterator();
-
+		Map<String, Object> inputData = new HashMap<String, Object>();
+		String maxScoreField = null;
 		List<ComparableHit> comparableHits = new ArrayList<ComparableHit>();
+		int count = 0;
 		while (iterator.hasNext())
 		{
 			Hit hit = iterator.next();
@@ -193,7 +205,8 @@ public class OntologyService
 			{
 				if (!StringUtils.isEmpty(entity.getString(attributeName)))
 				{
-					if (DEFAULT_MATCHING_FIELDS.contains(attributeName.toLowerCase()))
+					if (DEFAULT_MATCHING_NAME_FIELD.equals(attributeName.toLowerCase())
+							|| attributeName.toLowerCase().startsWith(DEFAULT_MATCHING_SYNONYM_FIELD))
 					{
 						BigDecimal ngramScore = new BigDecimal(NGramMatchingModel.stringMatching(
 								entity.getString(attributeName),
@@ -201,33 +214,43 @@ public class OntologyService
 						if (maxNgramScore.doubleValue() < ngramScore.doubleValue())
 						{
 							maxNgramScore = ngramScore;
+							maxScoreField = attributeName;
 						}
+						if (count == 0) inputData.put(attributeName, entity.getString(attributeName));
 					}
 					else
 					{
 						for (String key : columnValueMap.keySet())
 						{
+							// Check if indexed ontology term contains such
+							// external database reference
 							if (attributeName.equalsIgnoreCase(key))
 							{
-								for (Object databaseId : (List<?>) columnValueMap.get(key))
+								if (columnValueMap.containsKey(key)
+										&& !StringUtils.isEmpty(columnValueMap.get(key).toString()))
 								{
-									BigDecimal ngramScore = new BigDecimal(NGramMatchingModel.stringMatching(
-											entity.getString(attributeName), databaseId.toString()));
-									if (maxNgramScore.doubleValue() < ngramScore.doubleValue())
+									for (Object databaseId : (List<?>) columnValueMap.get(key))
 									{
-										maxNgramScore = ngramScore;
+										BigDecimal ngramScore = new BigDecimal(NGramMatchingModel.stringMatching(
+												entity.getString(attributeName), databaseId.toString()));
+										if (maxNgramScore.doubleValue() < ngramScore.doubleValue())
+										{
+											maxNgramScore = ngramScore;
+											maxScoreField = attributeName;
+										}
 									}
+									if (count == 0) inputData.put(attributeName, entity.getString(attributeName));
 								}
 							}
 						}
 					}
 				}
 			}
-
-			comparableHits.add(new ComparableHit(hit, maxNgramScore));
+			comparableHits.add(new ComparableHit(hit, maxNgramScore, maxScoreField));
+			count++;
 		}
 		Collections.sort(comparableHits);
-		return convertResults(comparableHits);
+		return convertResults(inputData, comparableHits);
 	}
 
 	/**
@@ -239,7 +262,7 @@ public class OntologyService
 	 * @param queryString
 	 * @return
 	 */
-	public SearchResult search(String ontologyIri, String queryString)
+	public OntologyServiceResult search(String ontologyIri, String queryString)
 	{
 		Set<String> uniqueTerms = new HashSet<String>(Arrays.asList(queryString.toLowerCase().trim()
 				.split(NON_WORD_SEPARATOR)));
@@ -262,6 +285,8 @@ public class OntologyService
 				new QueryImpl(finalQuery).pageSize(MAX_NUMBER_MATCHES), null);
 		Iterator<Hit> iterator = searchService.search(request).getSearchHits().iterator();
 
+		Map<String, Object> inputData = new HashMap<String, Object>();
+		inputData.put(DEFAULT_MATCHING_NAME_FIELD, queryString);
 		List<ComparableHit> comparableHits = new ArrayList<ComparableHit>();
 		while (iterator.hasNext())
 		{
@@ -271,10 +296,10 @@ public class OntologyService
 			BigDecimal ngramScore = new BigDecimal(NGramMatchingModel.stringMatching(
 					StringUtils.join(uniqueTerms, OntologyTermQueryRepository.ILLEGAL_CHARACTERS_REPLACEMENT),
 					ontologySynonym));
-			comparableHits.add(new ComparableHit(hit, luceneScore.multiply(ngramScore)));
+			comparableHits.add(new ComparableHit(hit, luceneScore.multiply(ngramScore), null));
 		}
 		Collections.sort(comparableHits);
-		return convertResults(comparableHits);
+		return convertResults(inputData, comparableHits);
 	}
 
 	private String medicalStemProxy(String queryString)
@@ -285,7 +310,8 @@ public class OntologyService
 		uniqueTerms.removeAll(NGramMatchingModel.STOPWORDSLIST);
 		for (String term : uniqueTerms)
 		{
-			if (!StringUtils.isEmpty(term) && !term.matches(OntologyTermQueryRepository.MULTI_WHITESPACES))
+			if (!StringUtils.isEmpty(term) && !term.matches(OntologyTermQueryRepository.MULTI_WHITESPACES)
+					&& !(ELASTICSEARCH_RESERVED_WORDS.contains(term)))
 			{
 				stemmer.setCurrent(term.replaceAll(OntologyTermQueryRepository.ILLEGAL_CHARACTERS_PATTERN,
 						StringUtils.EMPTY));
@@ -297,7 +323,7 @@ public class OntologyService
 		return stringBuilder.toString().trim();
 	}
 
-	private SearchResult convertResults(List<ComparableHit> comparableHits)
+	private OntologyServiceResult convertResults(Map<String, Object> inputData, List<ComparableHit> comparableHits)
 	{
 		List<Hit> hits = new ArrayList<Hit>();
 		Set<String> uniqueIdentifiers = new HashSet<String>();
@@ -310,21 +336,29 @@ public class OntologyService
 			Map<String, Object> columnValueMap = new HashMap<String, Object>();
 			columnValueMap.putAll(hit.getColumnValueMap());
 			columnValueMap.put(COMBINED_SCORE, comparableHit.getSimilarityScore().doubleValue());
+			columnValueMap.put(MAX_SCORE_FIELD, comparableHit.getMaxScoreField());
 			Hit copyHit = new Hit(hit.getId(), hit.getDocumentType(), columnValueMap);
 			hits.add(copyHit);
 		}
-		return new SearchResult(hits.size(), hits);
+		return new OntologyServiceResult(inputData, hits, hits.size());
 	}
 
 	class ComparableHit implements Comparable<ComparableHit>
 	{
+		private final String maxScoreField;
 		private final Hit hit;
 		private final BigDecimal similarityScore;
 
-		public ComparableHit(Hit hit, BigDecimal similarityScore)
+		public ComparableHit(Hit hit, BigDecimal similarityScore, String maxScoreField)
 		{
 			this.hit = hit;
 			this.similarityScore = similarityScore;
+			this.maxScoreField = maxScoreField;
+		}
+
+		public String getMaxScoreField()
+		{
+			return maxScoreField;
 		}
 
 		private BigDecimal getSimilarityScore()

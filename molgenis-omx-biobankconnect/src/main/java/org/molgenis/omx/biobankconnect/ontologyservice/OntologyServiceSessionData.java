@@ -71,7 +71,7 @@ public class OntologyServiceSessionData
 		EntityMetaData entityMetaData = sessionToCsvRepository.get(sessionId).getEntityMetaData();
 		for (AttributeMetaData attributeMetaData : entityMetaData.getAttributes())
 		{
-			if (OntologyService.DEFAULT_MATCHING_FIELDS.contains(attributeMetaData.getName().toLowerCase())) return true;
+			if (OntologyService.DEFAULT_MATCHING_NAME_FIELD.equalsIgnoreCase(attributeMetaData.getName())) return true;
 		}
 		return false;
 	}

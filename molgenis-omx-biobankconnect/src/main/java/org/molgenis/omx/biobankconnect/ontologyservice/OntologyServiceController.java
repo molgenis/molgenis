@@ -17,6 +17,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -27,8 +28,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Writable;
 import org.molgenis.data.csv.CsvRepository;
-import org.molgenis.data.elasticsearch.util.Hit;
-import org.molgenis.data.elasticsearch.util.SearchResult;
 import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.LowerCaseProcessor;
@@ -62,6 +61,7 @@ public class OntologyServiceController extends MolgenisPluginController
 	public static final String ID = "ontologyservice";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	public static final int INVALID_TOTAL_NUMBER = -1;
+	private static final String EXCEL_NEWLINE_CHAR = "\n";
 
 	public OntologyServiceController()
 	{
@@ -142,8 +142,8 @@ public class OntologyServiceController extends MolgenisPluginController
 				excelWriter.addCellProcessor(new LowerCaseProcessor(true, false));
 				int totalNumberBySession = ontologyServiceSessionData.getTotalNumberBySession(sessionId);
 				int iteration = totalNumberBySession / 1000 + 1;
-				List<String> columnHeaders = Arrays.asList("InputTerm", "OntologyTerm", "Synonym used for matching",
-						"OntologyTermUrl", "OntologyUrl", "Score");
+				List<String> columnHeaders = Arrays.asList("InputTerm", "OntologyTerm", "Synonym", "OntologyTermUrl",
+						"OntologyUrl", "Score");
 				for (int i = 0; i < iteration; i++)
 				{
 					Writable sheetWriter = excelWriter.createWritable("result" + (i + 1), columnHeaders);
@@ -152,17 +152,24 @@ public class OntologyServiceController extends MolgenisPluginController
 
 					for (Entity entity : ontologyServiceSessionData.getSubList(sessionId, lowerBound, upperBound))
 					{
-						for (Hit hit : ontologyService.searchEntity(
-								ontologyServiceSessionData.getOntologyIriBySession(sessionId), entity))
+						OntologyServiceResult searchEntity = ontologyService.searchEntity(
+								ontologyServiceSessionData.getOntologyIriBySession(sessionId), entity);
+
+						int count = 0;
+						for (Hit hit : searchEntity.getSearchHits())
 						{
 							Entity row = new MapEntity();
-							row.set("InputTerm", gatherInfo(entity));
+							if (count == 0)
+							{
+								row.set("InputTerm", gatherInfo(searchEntity.getInputData()));
+							}
 							row.set("OntologyTerm", hit.getColumnValueMap().get("ontologyTerm"));
-							row.set("Synonym used for matching", hit.getColumnValueMap().get("ontologyTermSynonym"));
+							row.set("Synonym", hit.getColumnValueMap().get("ontologyTermSynonym"));
 							row.set("OntologyTermUrl", hit.getColumnValueMap().get("ontologyTermIRI"));
 							row.set("OntologyUrl", hit.getColumnValueMap().get("ontologyIRI"));
 							row.set("Score", hit.getColumnValueMap().get("combinedScore"));
 							sheetWriter.add(row);
+							count++;
 						}
 					}
 				}
@@ -200,7 +207,7 @@ public class OntologyServiceController extends MolgenisPluginController
 					toIndex > count ? count : toIndex))
 			{
 				Map<String, Object> outputEntity = new HashMap<String, Object>();
-				outputEntity.put("term", gatherInfo(entity));
+				outputEntity.put("term", firstAttributeValue(entity));
 				outputEntity.put("results", ontologyService.searchEntity(
 						ontologyServiceSessionData.getOntologyIriBySession(sessionId), entity));
 				entities.add(outputEntity);
@@ -214,16 +221,30 @@ public class OntologyServiceController extends MolgenisPluginController
 
 	@RequestMapping(method = POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public SearchResult query(@RequestBody
+	public OntologyServiceResult query(@RequestBody
 	OntologyServiceRequest ontologyTermRequest)
 	{
 		String ontologyUrl = ontologyTermRequest.getOntologyIri();
 		String queryString = ontologyTermRequest.getQueryString();
-		if (ontologyUrl == null || queryString == null) return new SearchResult(0, Collections.<Hit> emptyList());
+		if (ontologyUrl == null || queryString == null) return new OntologyServiceResult("Your input cannot be null!");
 		return ontologyService.search(ontologyUrl, queryString);
 	}
 
-	private String gatherInfo(Entity entity)
+	private String gatherInfo(Map<String, Object> inputData)
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		for (Entry<String, Object> entry : inputData.entrySet())
+		{
+			if (stringBuilder.length() != 0)
+			{
+				stringBuilder.append(EXCEL_NEWLINE_CHAR);
+			}
+			stringBuilder.append(entry.getKey()).append(':').append(entry.getValue());
+		}
+		return stringBuilder.toString();
+	}
+
+	private String firstAttributeValue(Entity entity)
 	{
 		StringBuilder stringBuilder = new StringBuilder();
 
