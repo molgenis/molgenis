@@ -1,6 +1,7 @@
 package org.molgenis.data.importer;
 
 import java.io.File;
+import java.util.List;
 
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.RepositoryCollection;
@@ -16,4 +17,7 @@ public interface ImportService extends Ordered
 
 	boolean canImport(File file, RepositoryCollection source);
 
+	List<DatabaseAction> getSupportedDatabaseActions();
+
+	boolean getMustChangeEntityName();
 }

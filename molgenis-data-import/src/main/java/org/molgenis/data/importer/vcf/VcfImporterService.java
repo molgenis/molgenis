@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
@@ -25,11 +26,13 @@ import org.molgenis.framework.db.EntityImportReport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Lists;
+
 @Service
 public class VcfImporterService implements ImportService
 {
 	private static final List<String> SUPPORTED_FILE_EXTENSIONS = Arrays.asList("vcf", "vcf.gz");
-
+	private static final int DEFAULT_BATCH_SIZE = 1000;
 	private final FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
 	private final DataService dataService;
 	private final SearchService searchService;
@@ -52,16 +55,34 @@ public class VcfImporterService implements ImportService
 	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction)
 	{
 		if (databaseAction != DatabaseAction.ADD) throw new IllegalArgumentException("Only ADD is supported");
+
+		EntityImportReport report;
 		try
 		{
-			importVcf(source, 1000);
+
+			Iterator<String> it = source.getEntityNames().iterator();
+			if (it.hasNext())
+			{
+				Repository repo = source.getRepositoryByEntityName(it.next());
+				try
+				{
+					report = importVcf(repo, DEFAULT_BATCH_SIZE);
+				}
+				finally
+				{
+					IOUtils.closeQuietly(repo);
+				}
+			}
+			else
+			{
+				report = new EntityImportReport();
+			}
 		}
 		catch (IOException e)
 		{
 			throw new MolgenisDataException(e);
 		}
 
-		EntityImportReport report = new EntityImportReport();
 		return report;
 	}
 
@@ -69,10 +90,40 @@ public class VcfImporterService implements ImportService
 	public EntitiesValidationReport validateImport(File file, RepositoryCollection source)
 	{
 		EntitiesValidationReport report = new EntitiesValidationReportImpl();
-
-		for (String inEntityName : source.getEntityNames())
+		Iterator<String> it = source.getEntityNames().iterator();
+		if (it.hasNext())
 		{
-			report.getSheetsImportable().put(inEntityName, !dataService.hasRepository(inEntityName));
+			String entityName = it.next();
+			EntityMetaData emd = source.getRepositoryByEntityName(entityName).getEntityMetaData();
+
+			// Vcf entity
+			boolean entityExists = dataService.hasRepository(entityName);
+			report.getSheetsImportable().put(entityName, !entityExists);
+
+			// Available Attributes
+			List<String> availableAttributeNames = Lists.newArrayList();
+			for (AttributeMetaData attr : emd.getAtomicAttributes())
+			{
+				availableAttributeNames.add(attr.getName());
+			}
+			report.getFieldsImportable().put(entityName, availableAttributeNames);
+
+			// Sample entity
+			AttributeMetaData sampleAttribute = emd.getAttribute("SAMPLES");
+			if (sampleAttribute != null)
+			{
+				boolean sampleEntityExists = dataService.hasRepository(entityName);
+				String sampleEntityName = sampleAttribute.getRefEntity().getName();
+				report.getSheetsImportable().put(sampleEntityName, !sampleEntityExists);
+
+				List<String> availableSampleAttributeNames = Lists.newArrayList();
+				for (AttributeMetaData attr : sampleAttribute.getRefEntity().getAtomicAttributes())
+				{
+					availableSampleAttributeNames.add(attr.getName());
+				}
+				report.getFieldsImportable().put(sampleEntityName, availableSampleAttributeNames);
+			}
+
 		}
 
 		return report;
@@ -96,86 +147,125 @@ public class VcfImporterService implements ImportService
 	{
 		RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory
 				.createFileRepositoryCollection(vcfFile);
-		importVcf(repositoryCollection, 1000);
-	}
 
-	public void importVcf(RepositoryCollection repositoryCollection, int batchSize) throws IOException
-	{
-		ElasticsearchRepository sampleRepository = null;
-
-		for (String inEntityName : repositoryCollection.getEntityNames())
+		Iterator<String> it = repositoryCollection.getEntityNames().iterator();
+		if (it.hasNext())
 		{
-			Repository inRepository = repositoryCollection.getRepositoryByEntityName(inEntityName);
-
-			if (dataService.hasRepository(inEntityName))
-			{
-				throw new MolgenisDataException("Can't overwrite existing " + inEntityName);
-			}
-
+			Repository repo = repositoryCollection.getRepositoryByEntityName(it.next());
 			try
 			{
-				EntityMetaData entityMetaData = inRepository.getEntityMetaData();
-				ElasticsearchRepository outRepository = new ElasticsearchRepository(entityMetaData, searchService);
-				searchService.createMappings(entityMetaData, true, true, true, true);
-
-				AttributeMetaData sampleAttribute = entityMetaData.getAttribute("SAMPLES");
-				if (sampleAttribute != null)
-				{
-					sampleRepository = new ElasticsearchRepository(sampleAttribute.getRefEntity(), searchService);
-					searchService.createMappings(sampleAttribute.getRefEntity(), true, true, true, true);
-				}
-
-				Iterator<Entity> inIterator = inRepository.iterator();
-				try
-				{
-					List<Entity> sampleEntities = new ArrayList<Entity>();
-
-					while (inIterator.hasNext())
-					{
-						Entity entity = inIterator.next();
-						if (sampleRepository != null)
-						{
-							Iterable<Entity> samples = entity.getEntities("SAMPLES");
-							if (samples != null)
-							{
-								Iterator<Entity> sampleIterator = samples.iterator();
-								while (sampleIterator.hasNext())
-								{
-									sampleEntities.add(sampleIterator.next());
-									if (sampleEntities.size() == batchSize)
-									{
-										sampleRepository.add(sampleEntities);
-										sampleEntities.clear();
-									}
-								}
-							}
-						}
-					}
-					outRepository.add(inRepository);
-					if (sampleRepository != null) sampleRepository.add(sampleEntities);
-				}
-
-				finally
-				{
-					outRepository.close();
-				}
-				dataService.addRepository(outRepository);
-				if (sampleRepository != null)
-				{
-					dataService.addRepository(sampleRepository);
-				}
+				importVcf(repo, DEFAULT_BATCH_SIZE);
 			}
 			finally
 			{
-				inRepository.close();
+				IOUtils.closeQuietly(repo);
+			}
+
+		}
+	}
+
+	public EntityImportReport importVcf(Repository inRepository, int batchSize) throws IOException
+	{
+		EntityImportReport report = new EntityImportReport();
+		ElasticsearchRepository sampleRepository = null;
+		String entityName = inRepository.getName();
+
+		if (dataService.hasRepository(entityName))
+		{
+			throw new MolgenisDataException("Can't overwrite existing " + entityName);
+		}
+
+		EntityMetaData entityMetaData = inRepository.getEntityMetaData();
+		ElasticsearchRepository outRepository = new ElasticsearchRepository(entityMetaData, searchService);
+		searchService.createMappings(entityMetaData, true, true, true, true);
+
+		AttributeMetaData sampleAttribute = entityMetaData.getAttribute("SAMPLES");
+		if (sampleAttribute != null)
+		{
+			sampleRepository = new ElasticsearchRepository(sampleAttribute.getRefEntity(), searchService);
+			searchService.createMappings(sampleAttribute.getRefEntity(), true, true, true, true);
+		}
+
+		Iterator<Entity> inIterator = inRepository.iterator();
+		int vcfEntityCount = 0;
+		int sampleEntityCount = 0;
+		try
+		{
+			List<Entity> sampleEntities = new ArrayList<Entity>();
+
+			while (inIterator.hasNext())
+			{
+				Entity entity = inIterator.next();
+				vcfEntityCount++;
+
+				if (sampleRepository != null)
+				{
+					Iterable<Entity> samples = entity.getEntities("SAMPLES");
+					if (samples != null)
+					{
+						Iterator<Entity> sampleIterator = samples.iterator();
+						while (sampleIterator.hasNext())
+						{
+							sampleEntities.add(sampleIterator.next());
+
+							if (sampleEntities.size() == batchSize)
+							{
+								sampleRepository.add(sampleEntities);
+								sampleEntityCount += sampleEntities.size();
+								sampleEntities.clear();
+							}
+						}
+					}
+				}
+			}
+
+			outRepository.add(inRepository);
+
+			if (sampleRepository != null)
+			{
+				sampleRepository.add(sampleEntities);
+				sampleEntityCount += sampleEntities.size();
 			}
 		}
+		finally
+		{
+			outRepository.close();
+		}
+
+		dataService.addRepository(outRepository);
+		report.addNewEntity(entityName);
+
+		if (sampleRepository != null)
+		{
+			dataService.addRepository(sampleRepository);
+			report.addNewEntity(sampleRepository.getName());
+			if (sampleEntityCount > 0) report.addEntityCount(sampleRepository.getName(), sampleEntityCount);
+		}
+
+		if (vcfEntityCount > 0)
+		{
+			report.addEntityCount(entityName, vcfEntityCount);
+		}
+
+		return report;
 	}
 
 	@Override
 	public int getOrder()
 	{
 		return 10;
+	}
+
+	@Override
+	public List<DatabaseAction> getSupportedDatabaseActions()
+	{
+		return Lists.newArrayList(DatabaseAction.ADD);
+	}
+
+	@Override
+	public boolean getMustChangeEntityName()
+	{
+		return true;
 	}
 
 }
