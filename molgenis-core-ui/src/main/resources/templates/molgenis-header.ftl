@@ -24,7 +24,6 @@
 		<script src="<@resource_href "/js/bootstrap.min.js"/>"></script>
 		<script src="<@resource_href "/js/jquery.validate.min.js"/>"></script>
 		<script src="<@resource_href "/js/molgenis.js"/>"></script>
-		<script src="<@resource_href "/js/bootstrap-hover-dropdown.min.js"/>"></script>
 	<#if context_url??>
 		<script>top.molgenis.setContextUrl('${context_url}');</script>
 	</#if>
@@ -140,7 +139,7 @@
 							<#assign sub_menu = item>
 							<#assign menu_counter = 0>
 							<li class="dropdown">
-								<a class="dropdown-toggle" data-hover="dropdown" data-toggle="dropdown" href="#">
+								<a class="dropdown-toggle" data-toggle="dropdown" href="#">
 									${item.name?html}<b class="caret"></b>
 								</a>
 								
@@ -185,7 +184,3 @@
 		</#if>
 	</#list>
 </#macro>
-
-
-
-
