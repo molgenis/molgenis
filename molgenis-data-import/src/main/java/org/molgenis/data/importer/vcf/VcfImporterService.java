@@ -56,17 +56,17 @@ public class VcfImporterService implements ImportService
 	{
 		if (databaseAction != DatabaseAction.ADD) throw new IllegalArgumentException("Only ADD is supported");
 
+		List<EntityMetaData> addedEntities = Lists.newArrayList();
 		EntityImportReport report;
 		try
 		{
-
 			Iterator<String> it = source.getEntityNames().iterator();
 			if (it.hasNext())
 			{
 				Repository repo = source.getRepositoryByEntityName(it.next());
 				try
 				{
-					report = importVcf(repo, DEFAULT_BATCH_SIZE);
+					report = importVcf(repo, DEFAULT_BATCH_SIZE, addedEntities);
 				}
 				finally
 				{
@@ -78,8 +78,22 @@ public class VcfImporterService implements ImportService
 				report = new EntityImportReport();
 			}
 		}
-		catch (IOException e)
+		catch (Exception e)
 		{
+			// Remove created repositories
+			for (EntityMetaData emd : addedEntities)
+			{
+				if (dataService.hasRepository(emd.getName()))
+				{
+					dataService.removeRepository(emd.getName());
+				}
+
+				if (searchService.hasMapping(emd))
+				{
+					searchService.delete(emd);
+				}
+			}
+
 			throw new MolgenisDataException(e);
 		}
 
@@ -154,17 +168,17 @@ public class VcfImporterService implements ImportService
 			Repository repo = repositoryCollection.getRepositoryByEntityName(it.next());
 			try
 			{
-				importVcf(repo, DEFAULT_BATCH_SIZE);
+				importVcf(repo, DEFAULT_BATCH_SIZE, Lists.<EntityMetaData> newArrayList());
 			}
 			finally
 			{
 				IOUtils.closeQuietly(repo);
 			}
-
 		}
 	}
 
-	public EntityImportReport importVcf(Repository inRepository, int batchSize) throws IOException
+	public EntityImportReport importVcf(Repository inRepository, int batchSize, List<EntityMetaData> addedEntities)
+			throws IOException
 	{
 		EntityImportReport report = new EntityImportReport();
 		ElasticsearchRepository sampleRepository = null;
@@ -178,12 +192,14 @@ public class VcfImporterService implements ImportService
 		EntityMetaData entityMetaData = inRepository.getEntityMetaData();
 		ElasticsearchRepository outRepository = new ElasticsearchRepository(entityMetaData, searchService);
 		searchService.createMappings(entityMetaData, true, true, true, true);
+		addedEntities.add(entityMetaData);
 
 		AttributeMetaData sampleAttribute = entityMetaData.getAttribute("SAMPLES");
 		if (sampleAttribute != null)
 		{
 			sampleRepository = new ElasticsearchRepository(sampleAttribute.getRefEntity(), searchService);
 			searchService.createMappings(sampleAttribute.getRefEntity(), true, true, true, true);
+			addedEntities.add(sampleAttribute.getRefEntity());
 		}
 
 		Iterator<Entity> inIterator = inRepository.iterator();
