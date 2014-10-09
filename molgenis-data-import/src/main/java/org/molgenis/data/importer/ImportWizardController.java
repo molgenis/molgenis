@@ -17,18 +17,21 @@ public class ImportWizardController extends AbstractWizardController
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
 	private final UploadWizardPage uploadWizardPage;
+	private final OptionsWizardPage optionsWizardPage;
 	private final ValidationResultWizardPage validationResultWizardPage;
 	private final ImportResultsWizardPage importResultsWizardPage;
 
 	@Autowired
-	public ImportWizardController(UploadWizardPage uploadWizardPage,
+	public ImportWizardController(UploadWizardPage uploadWizardPage, OptionsWizardPage optionsWizardPage,
 			ValidationResultWizardPage validationResultWizardPage, ImportResultsWizardPage importResultsWizardPage)
 	{
 		super(URI, "importWizard");
 		if (uploadWizardPage == null) throw new IllegalArgumentException("UploadWizardPage is null");
+		if (optionsWizardPage == null) throw new IllegalArgumentException("OptionsWizardPage is null");
 		if (validationResultWizardPage == null) throw new IllegalArgumentException("ValidationResultWizardPage is null");
 		if (importResultsWizardPage == null) throw new IllegalArgumentException("ImportResultsWizardPage is null");
 		this.uploadWizardPage = uploadWizardPage;
+		this.optionsWizardPage = optionsWizardPage;
 		this.validationResultWizardPage = validationResultWizardPage;
 		this.importResultsWizardPage = importResultsWizardPage;
 	}
@@ -38,6 +41,7 @@ public class ImportWizardController extends AbstractWizardController
 	{
 		Wizard wizard = new ImportWizard();
 		wizard.addPage(uploadWizardPage);
+		wizard.addPage(optionsWizardPage);
 		wizard.addPage(validationResultWizardPage);
 		wizard.addPage(importResultsWizardPage);
 
