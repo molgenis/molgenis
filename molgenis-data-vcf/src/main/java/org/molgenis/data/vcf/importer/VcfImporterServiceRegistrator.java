@@ -1,4 +1,4 @@
-package org.molgenis.data.importer.vcf;
+package org.molgenis.data.vcf.importer;
 
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.springframework.beans.factory.annotation.Autowired;

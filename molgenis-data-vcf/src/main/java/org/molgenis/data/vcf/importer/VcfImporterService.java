@@ -1,4 +1,4 @@
-package org.molgenis.data.importer.vcf;
+package org.molgenis.data.vcf.importer;
 
 import java.io.File;
 import java.io.IOException;
