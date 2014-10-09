@@ -16,6 +16,7 @@ import org.molgenis.fieldtypes.EnumField;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -31,6 +32,7 @@ public class AttributeMetaDataRepositoryTest extends AbstractTestNGSpringContext
 	private MysqlEntityMetaDataRepository entityMetaDataRepository;
 
 	@BeforeMethod
+	@AfterClass
 	public void beforeMethod()
 	{
 		attributeMetaDataRepository.deleteAll();

@@ -28,7 +28,7 @@ public class ProtocolEntityMetaData extends AbstractEntityMetaData
 	}
 
 	@Override
-	public String getName()
+	public String getFullyQualifiedName()
 	{
 		return protocol.getIdentifier(); // yes, getIdentifier and not getName
 	}
