@@ -6,8 +6,8 @@ import static org.molgenis.data.mysql.EntityMetaDataMetaData.EXTENDS;
 import static org.molgenis.data.mysql.EntityMetaDataMetaData.FULL_NAME;
 import static org.molgenis.data.mysql.EntityMetaDataMetaData.ID_ATTRIBUTE;
 import static org.molgenis.data.mysql.EntityMetaDataMetaData.LABEL;
-import static org.molgenis.data.mysql.EntityMetaDataMetaData.NAME;
 import static org.molgenis.data.mysql.EntityMetaDataMetaData.PACKAGE;
+import static org.molgenis.data.mysql.EntityMetaDataMetaData.SIMPLE_NAME;
 
 import java.util.List;
 
@@ -57,7 +57,7 @@ public class MysqlEntityMetaDataRepository extends MysqlRepository implements En
 	 * @param packageName
 	 *            the name of the package
 	 */
-	public List<EntityMetaData> getEntityMetaDatas(String packageName)
+	public List<EntityMetaData> getPackageEntityMetaDatas(String packageName)
 	{
 		List<EntityMetaData> meta = Lists.newArrayList();
 		Query q = new QueryImpl().eq(EntityMetaDataMetaData.PACKAGE, packageName);
@@ -80,7 +80,7 @@ public class MysqlEntityMetaDataRepository extends MysqlRepository implements En
 	@Override
 	public EntityMetaData getEntityMetaData(String fullyQualifiedName)
 	{
-		Query q = new QueryImpl().eq(EntityMetaDataMetaData.FULL_NAME, fullyQualifiedName);
+		Query q = query().eq(FULL_NAME, fullyQualifiedName);
 		Entity entity = findOne(q);
 		if (entity == null)
 		{
@@ -88,6 +88,27 @@ public class MysqlEntityMetaDataRepository extends MysqlRepository implements En
 		}
 
 		return toEntityMetaData(entity);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.molgenis.data.mysql.EntityMetaDataRepository#addEntityMetaData(org.molgenis.data.EntityMetaData)
+	 */
+	@Override
+	public void addEntityMetaData(EntityMetaData emd)
+	{
+		Entity entityMetaDataEntity = new MapEntity();
+		entityMetaDataEntity.set(FULL_NAME, emd.getName());
+		entityMetaDataEntity.set(SIMPLE_NAME, emd.getSimpleName());
+		entityMetaDataEntity.set(PACKAGE, emd.getPackage());
+		entityMetaDataEntity.set(DESCRIPTION, emd.getDescription());
+		entityMetaDataEntity.set(ABSTRACT, emd.isAbstract());
+		if (emd.getIdAttribute() != null) entityMetaDataEntity.set(ID_ATTRIBUTE, emd.getIdAttribute().getName());
+		entityMetaDataEntity.set(LABEL, emd.getLabel());
+		if (emd.getExtends() != null) entityMetaDataEntity.set(EXTENDS, emd.getExtends().getName());
+
+		add(entityMetaDataEntity);
 	}
 
 	private DefaultEntityMetaData toEntityMetaData(Entity entity)
@@ -110,26 +131,5 @@ public class MysqlEntityMetaDataRepository extends MysqlRepository implements En
 		}
 
 		return entityMetaData;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.mysql.EntityMetaDataRepository#addEntityMetaData(org.molgenis.data.EntityMetaData)
-	 */
-	@Override
-	public void addEntityMetaData(EntityMetaData emd)
-	{
-		Entity entityMetaDataEntity = new MapEntity();
-		entityMetaDataEntity.set(FULL_NAME, emd.getFullyQualifiedName());
-		entityMetaDataEntity.set(NAME, emd.getName());
-		entityMetaDataEntity.set(PACKAGE, emd.getPackageName());
-		entityMetaDataEntity.set(DESCRIPTION, emd.getDescription());
-		entityMetaDataEntity.set(ABSTRACT, emd.isAbstract());
-		if (emd.getIdAttribute() != null) entityMetaDataEntity.set(ID_ATTRIBUTE, emd.getIdAttribute().getName());
-		entityMetaDataEntity.set(LABEL, emd.getLabel());
-		if (emd.getExtends() != null) entityMetaDataEntity.set(EXTENDS, emd.getExtends().getName());
-
-		add(entityMetaDataEntity);
 	}
 }

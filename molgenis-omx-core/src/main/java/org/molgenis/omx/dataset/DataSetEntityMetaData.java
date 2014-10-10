@@ -3,6 +3,7 @@ package org.molgenis.omx.dataset;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Package;
 import org.molgenis.data.support.AbstractEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.omx.observ.DataSet;
@@ -21,7 +22,7 @@ public class DataSetEntityMetaData extends AbstractEntityMetaData
 	}
 
 	@Override
-	public String getFullyQualifiedName()
+	public String getName()
 	{
 		return dataSet.getIdentifier(); // yes, getIdentifier and not getName
 	}
@@ -74,5 +75,19 @@ public class DataSetEntityMetaData extends AbstractEntityMetaData
 	public Class<? extends Entity> getEntityClass()
 	{
 		return MapEntity.class;
+	}
+
+	@Override
+	public Package getPackage()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getSimpleName()
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

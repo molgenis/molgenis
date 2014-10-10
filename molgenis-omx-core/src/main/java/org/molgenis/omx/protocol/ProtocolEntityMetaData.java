@@ -7,6 +7,7 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Package;
 import org.molgenis.data.support.AbstractEntityMetaData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -28,7 +29,7 @@ public class ProtocolEntityMetaData extends AbstractEntityMetaData
 	}
 
 	@Override
-	public String getFullyQualifiedName()
+	public String getName()
 	{
 		return protocol.getIdentifier(); // yes, getIdentifier and not getName
 	}
@@ -112,5 +113,19 @@ public class ProtocolEntityMetaData extends AbstractEntityMetaData
 	public Class<? extends Entity> getEntityClass()
 	{
 		return MapEntity.class;
+	}
+
+	@Override
+	public Package getPackage()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getSimpleName()
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

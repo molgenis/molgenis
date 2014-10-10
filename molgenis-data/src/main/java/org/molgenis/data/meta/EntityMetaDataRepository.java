@@ -17,7 +17,7 @@ public interface EntityMetaDataRepository
 	 * @param name
 	 * @return
 	 */
-	EntityMetaData getEntityMetaData(String name);
+	EntityMetaData getEntityMetaData(String fullyQualifiedName);
 
 	/**
 	 * Adds entity meta data for a new entity

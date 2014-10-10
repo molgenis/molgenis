@@ -11,6 +11,7 @@ import java.util.List;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Package;
 import org.molgenis.data.support.AbstractEntityMetaData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.omx.observ.Category;
@@ -35,7 +36,7 @@ public class OmxLookupTableEntityMetaData extends AbstractEntityMetaData
 	}
 
 	@Override
-	public String getFullyQualifiedName()
+	public String getName()
 	{
 		return createOmxLookupTableEntityMetaDataName(categoricalFeature.getIdentifier()); // yes, Identifier
 	}
@@ -134,5 +135,19 @@ public class OmxLookupTableEntityMetaData extends AbstractEntityMetaData
 	public Class<? extends Entity> getEntityClass()
 	{
 		return Category.class;
+	}
+
+	@Override
+	public Package getPackage()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getSimpleName()
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

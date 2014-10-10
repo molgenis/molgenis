@@ -19,6 +19,7 @@ import static org.molgenis.data.mysql.AttributeMetaDataMetaData.UNIQUE;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.VISIBLE;
 import static org.molgenis.data.mysql.EntityMetaDataMetaData.ABSTRACT;
 import static org.molgenis.data.mysql.EntityMetaDataMetaData.EXTENDS;
+import static org.molgenis.data.mysql.EntityMetaDataMetaData.PACKAGE;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -42,6 +43,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IndexedRepository;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Package;
 import org.molgenis.data.Query;
 import org.molgenis.data.Range;
 import org.molgenis.data.Repository;
@@ -49,6 +51,7 @@ import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.mysql.AttributeMetaDataMetaData;
 import org.molgenis.data.mysql.EntityMetaDataMetaData;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
+import org.molgenis.data.mysql.PackageImpl;
 import org.molgenis.data.mysql.PackageMetaData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -99,9 +102,8 @@ public class EmxImportService implements ImportService
 
 	private static final List<String> SUPPORTED_ENTITY_ATTRIBUTES = Arrays.asList(
 			org.molgenis.data.mysql.EntityMetaDataMetaData.LABEL.toLowerCase(),
-			org.molgenis.data.mysql.EntityMetaDataMetaData.DESCRIPTION.toLowerCase(),
-			org.molgenis.data.mysql.EntityMetaDataMetaData.NAME.toLowerCase(), ABSTRACT.toLowerCase(),
-			EXTENDS.toLowerCase());
+			org.molgenis.data.mysql.EntityMetaDataMetaData.DESCRIPTION.toLowerCase(), "name", ABSTRACT.toLowerCase(),
+			EXTENDS.toLowerCase(), "package");
 
 	// Sheet names
 	private static final String ENTITIES = EntityMetaDataMetaData.ENTITY_NAME;
@@ -264,7 +266,7 @@ public class EmxImportService implements ImportService
 
 		for (String sheet : source.getEntityNames())
 		{
-			if (!ENTITIES.equals(sheet) && !ATTRIBUTES.equals(sheet))
+			if (!ENTITIES.equals(sheet) && !ATTRIBUTES.equals(sheet) && !PACKAGES.equals(sheet))
 			{
 				// check if sheet is known?
 				if (metaDataMap.containsKey(sheet)) report.getSheetsImportable().put(sheet, true);
@@ -511,7 +513,7 @@ public class EmxImportService implements ImportService
 			for (Entity entity : entitiesRepo)
 			{
 				i++;
-				String entityName = entity.getString(org.molgenis.data.mysql.EntityMetaDataMetaData.NAME);
+				String entityName = entity.getString("name");
 
 				// required
 				if (entityName == null) throw new IllegalArgumentException("entity.name is missing on line " + i);
@@ -534,6 +536,12 @@ public class EmxImportService implements ImportService
 					}
 					md.setExtends(extendsEntityMeta);
 				}
+
+				String packageName = entity.getString(PACKAGE);
+				if (packageName != null)
+				{
+					md.setPackage(new PackageImpl(packageName, null));
+				}
 			}
 		}
 	}
@@ -548,24 +556,55 @@ public class EmxImportService implements ImportService
 	{
 		if (source.getRepositoryByEntityName(PACKAGES) != null)
 		{
+			Map<String, PackageImpl> packages = Maps.newHashMap();
+
+			// Collect packages
 			int i = 1;
 			for (Entity pack : source.getRepositoryByEntityName(PACKAGES))
 			{
 				i++;
-				String packageName = pack.getString(NAME);
+				String simpleName = pack.getString(NAME);
 
 				// required
-				if (packageName == null) throw new IllegalArgumentException("package.name is missing on line " + i);
+				if (simpleName == null) throw new IllegalArgumentException("package.name is missing on line " + i);
 
-				if (!entities.containsKey(packageName)) entities.put(packageName,
-						new DefaultEntityMetaData(packageName));
+				Package parentPackage = null;
+				String description = pack.getString(org.molgenis.data.mysql.PackageMetaData.DESCRIPTION);
+				String parent = pack.getString(org.molgenis.data.mysql.PackageMetaData.PARENT);
+				if (parent != null)
+				{
+					parentPackage = new PackageImpl(parent);
+				}
 
-				// Add description to package
-				DefaultEntityMetaData md = entities.get(packageName);
-				md.setDescription(pack.getString(DESCRIPTION));
-
-				// TODO read entities implementing this package
+				packages.put(simpleName, new PackageImpl(simpleName, description, parentPackage));
 			}
+
+			// Resolve parent packages
+			for (PackageImpl p : packages.values())
+			{
+				if (p.getParent() != null)
+				{
+					Package parent = packages.get(p.getParent().getSimpleName());
+					if (parent == null) throw new IllegalArgumentException("Unknown parent package '"
+							+ p.getParent().getSimpleName() + "' of package '" + p.getSimpleName() + "'");
+
+					p.setParent(parent);
+				}
+			}
+
+			// Resolve entity packages
+			for (DefaultEntityMetaData emd : entities.values())
+			{
+				if (emd.getPackage() != null)
+				{
+					Package p = packages.get(emd.getPackage().getSimpleName());
+					if (p == null) throw new IllegalArgumentException("Unknown package '"
+							+ emd.getPackage().getSimpleName() + "' of entity '" + emd.getSimpleName() + "'");
+
+					emd.setPackage(p);
+				}
+			}
+
 		}
 	}
 
@@ -642,7 +681,7 @@ public class EmxImportService implements ImportService
 				for (EntityMetaData entityMetaData : resolved)
 				{
 					String name = entityMetaData.getName();
-					if (!ENTITIES.equals(name) && !ATTRIBUTES.equals(name))
+					if (!ENTITIES.equals(name) && !ATTRIBUTES.equals(name) && !PACKAGES.equals(name))
 					{
 						Entity toMeta = store.getEntityMetaDataEntity(name);
 						if (toMeta == null)
@@ -682,7 +721,9 @@ public class EmxImportService implements ImportService
 
 					if (crudRepository != null)
 					{
-						Repository fileEntityRepository = source.getRepositoryByEntityName(name);
+						Repository fileEntityRepository = source.getRepositoryByEntityName(entityMetaData
+								.getSimpleName());
+
 						// check to prevent nullpointer when importing metadata only
 						if (fileEntityRepository != null)
 						{
@@ -891,6 +932,18 @@ public class EmxImportService implements ImportService
 	public int getOrder()
 	{
 		return Ordered.HIGHEST_PRECEDENCE;
+	}
+
+	@Override
+	public List<DatabaseAction> getSupportedDatabaseActions()
+	{
+		return Lists.newArrayList(DatabaseAction.values());
+	}
+
+	@Override
+	public boolean getMustChangeEntityName()
+	{
+		return false;
 	}
 
 }

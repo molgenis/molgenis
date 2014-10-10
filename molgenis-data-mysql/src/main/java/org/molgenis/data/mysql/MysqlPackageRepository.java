@@ -1,8 +1,5 @@
 package org.molgenis.data.mysql;
 
-import static org.molgenis.data.mysql.EntityMetaDataMetaData.DESCRIPTION;
-import static org.molgenis.data.mysql.EntityMetaDataMetaData.NAME;
-
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -11,7 +8,10 @@ import javax.sql.DataSource;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Package;
 import org.molgenis.data.PackageRepository;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.Query;
+
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 
 /**
  * Repository to add and retrieve Package entities.
@@ -70,10 +70,24 @@ public class MysqlPackageRepository extends MysqlRepository implements PackageRe
 	@Override
 	public void addPackage(Package p)
 	{
-		Entity packageEntity = new MapEntity();
-		packageEntity.set(NAME, p.getName());
-		packageEntity.set(DESCRIPTION, p.getDescription());
-		add(packageEntity);
+		add(new PackageImpl(p));
 	}
 
+	@Override
+	public Iterable<Package> getSubPackages(Package p)
+	{
+		return findPackages(query().eq(PackageMetaData.PARENT, p));
+	}
+
+	protected Iterable<Package> findPackages(Query q)
+	{
+		return Iterables.transform(findAll(q), new Function<Entity, Package>()
+		{
+			@Override
+			public Package apply(Entity entity)
+			{
+				return new PackageImpl(entity);
+			}
+		});
+	}
 }

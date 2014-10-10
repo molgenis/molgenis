@@ -2,8 +2,10 @@ package org.molgenis.data.importer;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
+import org.molgenis.data.DatabaseAction;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.ui.wizard.Wizard;
 
@@ -20,6 +22,8 @@ public class ImportWizard extends Wizard
 	private String entityImportOption;
 	private String validationMessage;
 	private Integer importRunId;
+	private List<DatabaseAction> supportedDatabaseActions;
+	private boolean mustChangeEntityName;
 
 	public File getFile()
 	{
@@ -119,6 +123,26 @@ public class ImportWizard extends Wizard
 	public void setImportRunId(Integer importRunId)
 	{
 		this.importRunId = importRunId;
+	}
+
+	public List<DatabaseAction> getSupportedDatabaseActions()
+	{
+		return supportedDatabaseActions;
+	}
+
+	public void setSupportedDatabaseActions(List<DatabaseAction> supportedDatabaseActions)
+	{
+		this.supportedDatabaseActions = supportedDatabaseActions;
+	}
+
+	public boolean getMustChangeEntityName()
+	{
+		return mustChangeEntityName;
+	}
+
+	public void setMustChangeEntityName(boolean mustChangeEntityName)
+	{
+		this.mustChangeEntityName = mustChangeEntityName;
 	}
 
 }

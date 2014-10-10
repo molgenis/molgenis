@@ -178,31 +178,22 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 	}
 
 	/**
-	 * Gets the name of the Package that this EntityMetaData resides in.
-	 * Derived from {@link #getFullyQualifiedName()}.
-	 */
-	@Override
-	public String getPackageName()
-	{
-		String fullyQualifiedName = getFullyQualifiedName();
-		int lastDotIndex = fullyQualifiedName.lastIndexOf('.');
-		if (lastDotIndex == -1)
-		{
-			return Package.DEFAULT_PACKAGE_NAME;
-		}
-		return fullyQualifiedName.substring(0, lastDotIndex);
-	}
-
-	/**
-	 * Gets the name of this EntityMetaData.
-	 * Derived from {@link #getFullyQualifiedName()}.
+	 * Gets the fully qualified name of this EntityMetaData.
 	 */
 	@Override
 	public String getName()
 	{
-		String fullyQualifiedName = getFullyQualifiedName();
-		int lastDotIndex = fullyQualifiedName.lastIndexOf('.');
-		return fullyQualifiedName.substring(lastDotIndex + 1);
+		StringBuilder sb = new StringBuilder();
+
+		Package p = getPackage();
+		if (p != null)
+		{
+			sb.append(p.getName());
+			sb.append(Package.PACKAGE_SEPARATOR);
+		}
+		sb.append(getSimpleName());
+
+		return sb.toString();
 	}
 
 	@Override
