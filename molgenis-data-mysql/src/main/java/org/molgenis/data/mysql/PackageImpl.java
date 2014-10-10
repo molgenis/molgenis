@@ -11,6 +11,11 @@ public class PackageImpl extends MapEntity implements Package, Comparable<Packag
 {
 	private static final long serialVersionUID = 1L;
 
+	public PackageImpl(final String simpleName)
+	{
+		this(simpleName, null);
+	}
+
 	public PackageImpl(final String simpleName, final String description)
 	{
 		super(PackageMetaData.FULL_NAME);
@@ -22,8 +27,7 @@ public class PackageImpl extends MapEntity implements Package, Comparable<Packag
 	public PackageImpl(final String simpleName, final String description, Package parent)
 	{
 		this(simpleName, description);
-		set(PackageMetaData.PARENT, parent);
-		set(PackageMetaData.FULL_NAME, constructFullName());
+		setParent(parent);
 	}
 
 	/**
@@ -46,6 +50,12 @@ public class PackageImpl extends MapEntity implements Package, Comparable<Packag
 	public String getSimpleName()
 	{
 		return getString(PackageMetaData.SIMPLE_NAME);
+	}
+
+	public void setParent(Package parent)
+	{
+		set(PackageMetaData.PARENT, parent);
+		set(PackageMetaData.FULL_NAME, constructFullName());
 	}
 
 	@Override

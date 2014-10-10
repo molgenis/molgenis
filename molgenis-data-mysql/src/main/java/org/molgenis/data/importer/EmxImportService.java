@@ -43,6 +43,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IndexedRepository;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Package;
 import org.molgenis.data.Query;
 import org.molgenis.data.Range;
 import org.molgenis.data.Repository;
@@ -555,23 +556,55 @@ public class EmxImportService implements ImportService
 	{
 		if (source.getRepositoryByEntityName(PACKAGES) != null)
 		{
+			Map<String, PackageImpl> packages = Maps.newHashMap();
+
+			// Collect packages
 			int i = 1;
 			for (Entity pack : source.getRepositoryByEntityName(PACKAGES))
 			{
 				i++;
-				String packageName = pack.getString(NAME);
+				String simpleName = pack.getString(NAME);
 
 				// required
-				if (packageName == null) throw new IllegalArgumentException("package.name is missing on line " + i);
-				for (DefaultEntityMetaData dem : entities.values())
+				if (simpleName == null) throw new IllegalArgumentException("package.name is missing on line " + i);
+
+				Package parentPackage = null;
+				String description = pack.getString(org.molgenis.data.mysql.PackageMetaData.DESCRIPTION);
+				String parent = pack.getString(org.molgenis.data.mysql.PackageMetaData.PARENT);
+				if (parent != null)
 				{
-					if ((dem.getPackage() != null) && dem.getPackage().getSimpleName().equalsIgnoreCase(packageName))
-					{
-						String description = pack.getString(DESCRIPTION);
-						dem.setPackage(new PackageImpl(packageName, description));
-					}
+					parentPackage = new PackageImpl(parent);
+				}
+
+				packages.put(simpleName, new PackageImpl(simpleName, description, parentPackage));
+			}
+
+			// Resolve parent packages
+			for (PackageImpl p : packages.values())
+			{
+				if (p.getParent() != null)
+				{
+					Package parent = packages.get(p.getParent().getSimpleName());
+					if (parent == null) throw new IllegalArgumentException("Unknown parent package '"
+							+ p.getParent().getSimpleName() + "' of package '" + p.getSimpleName() + "'");
+
+					p.setParent(parent);
 				}
 			}
+
+			// Resolve entity packages
+			for (DefaultEntityMetaData emd : entities.values())
+			{
+				if (emd.getPackage() != null)
+				{
+					Package p = packages.get(emd.getPackage().getSimpleName());
+					if (p == null) throw new IllegalArgumentException("Unknown package '"
+							+ emd.getPackage().getSimpleName() + "' of entity '" + emd.getSimpleName() + "'");
+
+					emd.setPackage(p);
+				}
+			}
+
 		}
 	}
 
@@ -688,7 +721,9 @@ public class EmxImportService implements ImportService
 
 					if (crudRepository != null)
 					{
-						Repository fileEntityRepository = source.getRepositoryByEntityName(name);
+						Repository fileEntityRepository = source.getRepositoryByEntityName(entityMetaData
+								.getSimpleName());
+
 						// check to prevent nullpointer when importing metadata only
 						if (fileEntityRepository != null)
 						{
