@@ -31,17 +31,17 @@
 					clearTimeout(timer);	
 				}
 			
-				if (importRun.message && importRun.message != '') {
-					$('#message').html(importRun.message);
-				}
-			
-				if (importRun.status != 'RUNNING') {
+				if (importRun.status !== 'RUNNING') {
 					$('#message-panel').removeClass('panel-info');
 					$('#message-panel').addClass(importRun.status == 'FINISHED' ? 'panel-success' : 'panel-danger');
 					$('#message-panel .panel-heading').text(importRun.status == 'FINISHED' ? 'Import success' : 'Import failed');
+					
+					if (importRun.message !== null) {
+						$('#message').html(importRun.message);
+					}
+			
 					$('.next').removeClass('disabled');
 					$('.cancel').removeClass('disabled');
-	 
 				} else {
 					timer = setTimeout(checkImportResult, 3000);
 				}

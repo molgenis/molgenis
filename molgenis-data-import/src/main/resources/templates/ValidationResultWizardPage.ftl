@@ -62,7 +62,7 @@
 				<td>
 					<a href="generated-doc/fileformat.html#${entity}_entity">${entity}</a>
 				</td>
-				<#if wizard.fieldsDetected[entity]?size gt 0>
+				<#if wizard.fieldsDetected[entity]?? && wizard.fieldsDetected[entity]?size gt 0>
 					<td class="alert alert-success">
 						<#list wizard.fieldsDetected[entity] as field>
 							${field}<#if field_has_next>, </#if>
@@ -72,7 +72,7 @@
 					<td class="alert alert-danger">No fields detected</td>
 				</#if>
 				
-				<#if wizard.fieldsRequired[entity]?size gt 0>
+				<#if wizard.fieldsRequired[entity]?? && wizard.fieldsRequired[entity]?size gt 0>
 					<td class="alert alert-danger">
 						<#list wizard.fieldsRequired[entity] as field>
 							${field}<#if field_has_next>, </#if>
@@ -83,7 +83,7 @@
 				</#if>
 			
 				
-				<#if wizard.fieldsAvailable[entity]?size gt 0>
+				<#if wizard.fieldsAvailable[entity]?? && wizard.fieldsAvailable[entity]?size gt 0>
 					<td class="alert alert-info">
 						<#list wizard.fieldsAvailable[entity] as field>
 							${field}<#if field_has_next>, </#if>
@@ -94,7 +94,7 @@
 				</#if>
 				
 				
-				<#if wizard.fieldsUnknown[entity]?size gt 0>
+				<#if wizard.fieldsUnknown[entity]?? && wizard.fieldsUnknown[entity]?size gt 0>
 					<td class="alert alert-warning">
 						<#list wizard.fieldsUnknown[entity] as field>
 							${field}<#if field_has_next>, </#if>

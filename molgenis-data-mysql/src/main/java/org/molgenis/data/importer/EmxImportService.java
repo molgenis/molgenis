@@ -899,4 +899,16 @@ public class EmxImportService implements ImportService
 		return Ordered.HIGHEST_PRECEDENCE;
 	}
 
+	@Override
+	public List<DatabaseAction> getSupportedDatabaseActions()
+	{
+		return Lists.newArrayList(DatabaseAction.values());
+	}
+
+	@Override
+	public boolean getMustChangeEntityName()
+	{
+		return false;
+	}
+
 }

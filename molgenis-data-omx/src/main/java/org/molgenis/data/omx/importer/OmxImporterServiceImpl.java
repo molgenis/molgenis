@@ -45,6 +45,7 @@ import org.springframework.core.Ordered;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 @Service
@@ -304,6 +305,18 @@ public class OmxImporterServiceImpl implements ImportService
 	public int getOrder()
 	{
 		return Ordered.LOWEST_PRECEDENCE;
+	}
+
+	@Override
+	public List<DatabaseAction> getSupportedDatabaseActions()
+	{
+		return Lists.newArrayList(DatabaseAction.values());
+	}
+
+	@Override
+	public boolean getMustChangeEntityName()
+	{
+		return false;
 	}
 
 }
