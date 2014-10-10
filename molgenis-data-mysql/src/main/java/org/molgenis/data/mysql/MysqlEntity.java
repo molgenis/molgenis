@@ -8,6 +8,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Queryable;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.MrefField;
@@ -55,8 +56,12 @@ public class MysqlEntity extends MapEntity
 
 			EntityMetaData ref = amd.getRefEntity();
 			Queryable r = repositoryCollection.getUndecoratedRepository(ref.getName());
-			return r.findOne(new QueryImpl().eq(ref.getIdAttribute().getName(), obj));
+			if (r == null)
+			{
+				throw new UnknownEntityException("Unknown entity [" + ref.getName() + "]");
+			}
 
+			return r.findOne(new QueryImpl().eq(ref.getIdAttribute().getName(), obj));
 		}
 
 		// else throw exception

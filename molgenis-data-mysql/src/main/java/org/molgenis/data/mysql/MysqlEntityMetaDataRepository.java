@@ -15,8 +15,10 @@ import javax.sql.DataSource;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.meta.EntityMetaDataRepository;
+import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 
@@ -43,7 +45,7 @@ public class MysqlEntityMetaDataRepository extends MysqlRepository implements En
 		List<EntityMetaData> meta = Lists.newArrayList();
 		for (Entity entity : this)
 		{
-			meta.add(MetaDataUtils.toEntityMetaData(entity));
+			meta.add(toEntityMetaData(entity));
 		}
 
 		return meta;
@@ -55,14 +57,14 @@ public class MysqlEntityMetaDataRepository extends MysqlRepository implements En
 	 * @param packageName
 	 *            the name of the package
 	 */
-	public List<EntityMetaData> getEntityMetaDatas(String packageName)
+	public List<EntityMetaData> getPackageEntityMetaDatas(String packageName)
 	{
 		List<EntityMetaData> meta = Lists.newArrayList();
 		Query q = new QueryImpl().eq(EntityMetaDataMetaData.PACKAGE, packageName);
 
 		for (Entity entity : findAll(q))
 		{
-			meta.add(MetaDataUtils.toEntityMetaData(entity));
+			meta.add(toEntityMetaData(entity));
 		}
 
 		return meta;
@@ -85,7 +87,7 @@ public class MysqlEntityMetaDataRepository extends MysqlRepository implements En
 			return null;
 		}
 
-		return MetaDataUtils.toEntityMetaData(entity);
+		return toEntityMetaData(entity);
 	}
 
 	/*
@@ -107,5 +109,27 @@ public class MysqlEntityMetaDataRepository extends MysqlRepository implements En
 		if (emd.getExtends() != null) entityMetaDataEntity.set(EXTENDS, emd.getExtends().getName());
 
 		add(entityMetaDataEntity);
+	}
+
+	private DefaultEntityMetaData toEntityMetaData(Entity entity)
+	{
+		String name = entity.getString(FULL_NAME);
+		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData(name);
+		entityMetaData.setAbstract(entity.getBoolean(ABSTRACT));
+		entityMetaData.setIdAttribute(entity.getString(ID_ATTRIBUTE));
+		entityMetaData.setLabel(entity.getString(LABEL));
+		entityMetaData.setDescription(entity.getString(DESCRIPTION));
+
+		// Extends
+		String extendsEntityName = entity.getString(EXTENDS);
+		if (extendsEntityName != null)
+		{
+			EntityMetaData extendsEmd = getEntityMetaData(extendsEntityName);
+			if (extendsEmd == null) throw new MolgenisDataException("Missing super entity [" + extendsEntityName
+					+ "] of entity [" + name + "]");
+			entityMetaData.setExtends(extendsEmd);
+		}
+
+		return entityMetaData;
 	}
 }

@@ -11,6 +11,7 @@ import java.util.List;
 import org.junit.BeforeClass;
 import org.molgenis.AppConfig;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Package;
 import org.molgenis.data.meta.AttributeMetaDataRepository;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,21 +91,25 @@ public class EntityMetaDataRepositoryTest extends AbstractTestNGSpringContextTes
 	@Test
 	public void getEntityMetaDatasForPackage()
 	{
-		packageRepository.addPackage(new PackageImpl("p1", "Package1"));
-		packageRepository.addPackage(new PackageImpl("p1.p2", "Package2"));
+
+		Package p1 = new PackageImpl("p1", "Package1");
+		packageRepository.addPackage(p1);
+
+		Package p2 = new PackageImpl("p2", "Package2", p1);
+		packageRepository.addPackage(p2);
 
 		DefaultEntityMetaData test = new DefaultEntityMetaData("test");
 		entityMetaDataRepository.addEntityMetaData(test);
 
-		DefaultEntityMetaData test1 = new DefaultEntityMetaData("p1.test1");
+		DefaultEntityMetaData test1 = new DefaultEntityMetaData("test1", p1);
 		entityMetaDataRepository.addEntityMetaData(test1);
 
-		DefaultEntityMetaData test2 = new DefaultEntityMetaData("p1.p2.test2");
+		DefaultEntityMetaData test2 = new DefaultEntityMetaData("test2", p2);
 		entityMetaDataRepository.addEntityMetaData(test2);
 
-		DefaultEntityMetaData test3 = new DefaultEntityMetaData("p1.p2.test3");
+		DefaultEntityMetaData test3 = new DefaultEntityMetaData("test3", p2);
 		entityMetaDataRepository.addEntityMetaData(test3);
 
-		assertEquals(Arrays.asList(test2, test3), entityMetaDataRepository.getEntityMetaDatas("p1.p2"));
+		assertEquals(entityMetaDataRepository.getPackageEntityMetaDatas("p1_p2"), Arrays.asList(test2, test3));
 	}
 }

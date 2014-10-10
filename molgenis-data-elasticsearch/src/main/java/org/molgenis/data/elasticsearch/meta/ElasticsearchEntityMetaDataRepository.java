@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Package;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.meta.EntityMetaDataRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,9 +32,9 @@ public class ElasticsearchEntityMetaDataRepository implements EntityMetaDataRepo
 	}
 
 	@Override
-	public EntityMetaData getEntityMetaData(String name, Package p)
+	public EntityMetaData getEntityMetaData(String name)
 	{
-		return entityMetaDataRepository.getEntityMetaData(name, p);
+		return entityMetaDataRepository.getEntityMetaData(name);
 	}
 
 	@Override

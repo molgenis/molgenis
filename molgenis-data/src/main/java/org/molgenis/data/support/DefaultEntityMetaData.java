@@ -27,6 +27,11 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 		this(simpleName, Entity.class);
 	}
 
+	public DefaultEntityMetaData(String simpleName, Package p)
+	{
+		this(simpleName, Entity.class, p);
+	}
+
 	public DefaultEntityMetaData(String simpleName, Class<? extends Entity> entityClass)
 	{
 		if (simpleName == null) throw new IllegalArgumentException("Name cannot be null");
@@ -217,8 +222,7 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 	{
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((pack == null) ? 0 : pack.hashCode());
-		result = prime * result + ((simpleName == null) ? 0 : simpleName.hashCode());
+		result = prime * result + ((getName() == null) ? 0 : getName().hashCode());
 		return result;
 	}
 
@@ -229,16 +233,11 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
 		DefaultEntityMetaData other = (DefaultEntityMetaData) obj;
-		if (pack == null)
+		if (getName() == null)
 		{
-			if (other.pack != null) return false;
+			if (other.getName() != null) return false;
 		}
-		else if (!pack.equals(other.pack)) return false;
-		if (simpleName == null)
-		{
-			if (other.simpleName != null) return false;
-		}
-		else if (!simpleName.equals(other.simpleName)) return false;
+		else if (!getName().equals(other.getName())) return false;
 		return true;
 	}
 
