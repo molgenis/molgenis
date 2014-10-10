@@ -7,24 +7,25 @@ package org.molgenis.data;
 public interface EntityMetaData
 {
 	/**
-	 * Every EntityMetaData has a unique name. This is the fully qualified name, including the package name. If no
-	 * package name is included, the entity resides in the default package.
-	 */
-	String getFullyQualifiedName();
-
-	/**
-	 * Gets the package name.
+	 * Gets the package.
 	 * 
 	 * @return
 	 */
-	String getPackageName();
+	Package getPackage();
 
 	/**
-	 * Gets the entity name.
+	 * Gets the fully qualified entity name.
 	 * 
 	 * @return
 	 */
 	String getName();
+
+	/**
+	 * Gets the name of the entity without the trailing packagename
+	 * 
+	 * @return
+	 */
+	String getSimpleName();
 
 	/**
 	 * Entities can be abstract (analogous an 'interface' or 'protocol'). Use is to define reusable Entity model

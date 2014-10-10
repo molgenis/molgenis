@@ -47,9 +47,16 @@ public class MysqlEntity extends MapEntity
 		AttributeMetaData amd = metaData.getAttribute(attributeName);
 		if (amd.getDataType() instanceof XrefField)
 		{
+			Object obj = get(attributeName);
+			if (obj == null)
+			{
+				return null;
+			}
+
 			EntityMetaData ref = amd.getRefEntity();
 			Queryable r = repositoryCollection.getUndecoratedRepository(ref.getName());
-			return r.findOne(new QueryImpl().eq(ref.getIdAttribute().getName(), get(attributeName)));
+			return r.findOne(new QueryImpl().eq(ref.getIdAttribute().getName(), obj));
+
 		}
 
 		// else throw exception

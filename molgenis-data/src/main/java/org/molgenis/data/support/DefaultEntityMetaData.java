@@ -8,29 +8,40 @@ import java.util.Map;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Package;
 import org.molgenis.util.CaseInsensitiveLinkedHashMap;
 
 public class DefaultEntityMetaData extends AbstractEntityMetaData
 {
-	private final String fullyQualifiedName;
+	private final String simpleName;
 	private final Map<String, AttributeMetaData> attributes = new CaseInsensitiveLinkedHashMap<AttributeMetaData>();
 	private final Class<? extends Entity> entityClass;
 	private String label;
 	private boolean abstract_ = false;
 	private String description;
 	private EntityMetaData extends_;
+	private Package pack;
 
-	public DefaultEntityMetaData(String fullyQualifiedName)
+	public DefaultEntityMetaData(String simpleName)
 	{
-		this(fullyQualifiedName, Entity.class);
+		this(simpleName, Entity.class);
 	}
 
-	public DefaultEntityMetaData(String fullyQualifiedName, Class<? extends Entity> entityClass)
+	public DefaultEntityMetaData(String simpleName, Class<? extends Entity> entityClass)
 	{
-		if (fullyQualifiedName == null) throw new IllegalArgumentException("Name cannot be null");
+		if (simpleName == null) throw new IllegalArgumentException("Name cannot be null");
 		if (entityClass == null) throw new IllegalArgumentException("EntityClass cannot be null");
-		this.fullyQualifiedName = fullyQualifiedName;
+		this.simpleName = simpleName;
 		this.entityClass = entityClass;
+	}
+
+	public DefaultEntityMetaData(String simpleName, Class<? extends Entity> entityClass, Package pack)
+	{
+		if (simpleName == null) throw new IllegalArgumentException("Name cannot be null");
+		if (entityClass == null) throw new IllegalArgumentException("EntityClass cannot be null");
+		this.simpleName = simpleName;
+		this.entityClass = entityClass;
+		this.pack = pack;
 	}
 
 	/**
@@ -40,7 +51,8 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 	 */
 	public DefaultEntityMetaData(EntityMetaData entityMetaData)
 	{
-		this.fullyQualifiedName = entityMetaData.getFullyQualifiedName();
+		this.simpleName = entityMetaData.getSimpleName();
+		this.pack = entityMetaData.getPackage();
 		this.entityClass = entityMetaData.getEntityClass();
 		this.label = entityMetaData.getLabel();
 		this.abstract_ = entityMetaData.isAbstract();
@@ -59,9 +71,21 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 	}
 
 	@Override
-	public String getFullyQualifiedName()
+	public Package getPackage()
 	{
-		return fullyQualifiedName;
+		return pack;
+	}
+
+	public DefaultEntityMetaData setPackage(Package pack)
+	{
+		this.pack = pack;
+		return this;
+	}
+
+	@Override
+	public String getSimpleName()
+	{
+		return simpleName;
 	}
 
 	public void addAttributeMetaData(AttributeMetaData attributeMetaData)
@@ -110,7 +134,7 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 	@Override
 	public String getLabel()
 	{
-		return label != null ? label : getName();
+		return label != null ? label : getSimpleName();
 	}
 
 	public DefaultEntityMetaData setLabel(String label)
@@ -135,30 +159,6 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 	public Class<? extends Entity> getEntityClass()
 	{
 		return entityClass;
-	}
-
-	@Override
-	public int hashCode()
-	{
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((fullyQualifiedName == null) ? 0 : fullyQualifiedName.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj)
-	{
-		if (this == obj) return true;
-		if (obj == null) return false;
-		if (getClass() != obj.getClass()) return false;
-		DefaultEntityMetaData other = (DefaultEntityMetaData) obj;
-		if (fullyQualifiedName == null)
-		{
-			if (other.fullyQualifiedName != null) return false;
-		}
-		else if (!fullyQualifiedName.equals(other.fullyQualifiedName)) return false;
-		return true;
 	}
 
 	public DefaultAttributeMetaData addAttribute(String name)
@@ -210,6 +210,36 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 			strBuilder.append("\n\t").append(att.toString());
 		}
 		return strBuilder.toString();
+	}
+
+	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((pack == null) ? 0 : pack.hashCode());
+		result = prime * result + ((simpleName == null) ? 0 : simpleName.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
+		DefaultEntityMetaData other = (DefaultEntityMetaData) obj;
+		if (pack == null)
+		{
+			if (other.pack != null) return false;
+		}
+		else if (!pack.equals(other.pack)) return false;
+		if (simpleName == null)
+		{
+			if (other.simpleName != null) return false;
+		}
+		else if (!simpleName.equals(other.simpleName)) return false;
+		return true;
 	}
 
 }

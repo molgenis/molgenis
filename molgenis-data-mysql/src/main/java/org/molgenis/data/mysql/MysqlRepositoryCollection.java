@@ -3,6 +3,7 @@ package org.molgenis.data.mysql;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,8 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Package;
+import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.RepositoryDecoratorFactory;
@@ -53,7 +56,8 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 			MysqlAttributeMetaDataRepository attributeMetaDataRepository)
 	{
 
-		this(ds, dataService, packageRepository, entityMetaDataRepository, attributeMetaDataRepository, null, null, null);
+		this(ds, dataService, packageRepository, entityMetaDataRepository, attributeMetaDataRepository, null, null,
+				null);
 
 	}
 
@@ -291,6 +295,25 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		// Add to entities and attributes tables, this should be done AFTER the creation of new tables because create
 		// table statements are ddl statements and when these are executed mysql does an implicit commit. So when the
 		// create table fails a rollback does not work anymore
+
+		// add packages
+		List<Package> packages = Lists.newArrayList();
+		Package p = emd.getPackage();
+		while (p != null)
+		{
+			packages.add(p);
+			p = p.getParent();
+		}
+
+		Collections.reverse(packages);
+		for (Package pack : packages)
+		{
+			if (packageRepository.getPackage(pack.getName()) == null)
+			{
+				packageRepository.addPackage(pack);
+			}
+		}
+
 		getEntityMetaDataRepository().addEntityMetaData(emd);
 
 		// add attribute metadata
@@ -370,7 +393,8 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 
 	public Entity getEntityMetaDataEntity(String name)
 	{
-		return entityMetaDataRepository.findOne(name);
+		Query q = new QueryImpl().eq(EntityMetaDataMetaData.FULL_NAME, name);
+		return entityMetaDataRepository.findOne(q);
 	}
 
 	public void drop(EntityMetaData md)
@@ -394,7 +418,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		attributeMetaDataRepository.delete(attributeMetaDataRepository.findAll(new QueryImpl().eq(
 				AttributeMetaDataMetaData.ENTITY, name)));
 		entityMetaDataRepository.delete(entityMetaDataRepository.findAll(new QueryImpl().eq(
-				EntityMetaDataMetaData.NAME, name)));
+				EntityMetaDataMetaData.FULL_NAME, name)));
 	}
 
 	public void dropAttributeMetaData(String entityName, String attributeName)

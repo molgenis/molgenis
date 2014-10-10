@@ -19,6 +19,7 @@ import static org.molgenis.data.mysql.AttributeMetaDataMetaData.UNIQUE;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.VISIBLE;
 import static org.molgenis.data.mysql.EntityMetaDataMetaData.ABSTRACT;
 import static org.molgenis.data.mysql.EntityMetaDataMetaData.EXTENDS;
+import static org.molgenis.data.mysql.EntityMetaDataMetaData.PACKAGE;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -49,6 +50,7 @@ import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.mysql.AttributeMetaDataMetaData;
 import org.molgenis.data.mysql.EntityMetaDataMetaData;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
+import org.molgenis.data.mysql.PackageImpl;
 import org.molgenis.data.mysql.PackageMetaData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -99,9 +101,8 @@ public class EmxImportService implements ImportService
 
 	private static final List<String> SUPPORTED_ENTITY_ATTRIBUTES = Arrays.asList(
 			org.molgenis.data.mysql.EntityMetaDataMetaData.LABEL.toLowerCase(),
-			org.molgenis.data.mysql.EntityMetaDataMetaData.DESCRIPTION.toLowerCase(),
-			org.molgenis.data.mysql.EntityMetaDataMetaData.NAME.toLowerCase(), ABSTRACT.toLowerCase(),
-			EXTENDS.toLowerCase());
+			org.molgenis.data.mysql.EntityMetaDataMetaData.DESCRIPTION.toLowerCase(), "name", ABSTRACT.toLowerCase(),
+			EXTENDS.toLowerCase(), "package");
 
 	// Sheet names
 	private static final String ENTITIES = EntityMetaDataMetaData.ENTITY_NAME;
@@ -264,7 +265,7 @@ public class EmxImportService implements ImportService
 
 		for (String sheet : source.getEntityNames())
 		{
-			if (!ENTITIES.equals(sheet) && !ATTRIBUTES.equals(sheet))
+			if (!ENTITIES.equals(sheet) && !ATTRIBUTES.equals(sheet) && !PACKAGES.equals(sheet))
 			{
 				// check if sheet is known?
 				if (metaDataMap.containsKey(sheet)) report.getSheetsImportable().put(sheet, true);
@@ -511,7 +512,7 @@ public class EmxImportService implements ImportService
 			for (Entity entity : entitiesRepo)
 			{
 				i++;
-				String entityName = entity.getString(org.molgenis.data.mysql.EntityMetaDataMetaData.NAME);
+				String entityName = entity.getString("name");
 
 				// required
 				if (entityName == null) throw new IllegalArgumentException("entity.name is missing on line " + i);
@@ -533,6 +534,12 @@ public class EmxImportService implements ImportService
 								+ entityName + " on line " + i);
 					}
 					md.setExtends(extendsEntityMeta);
+				}
+
+				String packageName = entity.getString(PACKAGE);
+				if (packageName != null)
+				{
+					md.setPackage(new PackageImpl(packageName, null));
 				}
 			}
 		}
@@ -556,15 +563,14 @@ public class EmxImportService implements ImportService
 
 				// required
 				if (packageName == null) throw new IllegalArgumentException("package.name is missing on line " + i);
-
-				if (!entities.containsKey(packageName)) entities.put(packageName,
-						new DefaultEntityMetaData(packageName));
-
-				// Add description to package
-				DefaultEntityMetaData md = entities.get(packageName);
-				md.setDescription(pack.getString(DESCRIPTION));
-
-				// TODO read entities implementing this package
+				for (DefaultEntityMetaData dem : entities.values())
+				{
+					if ((dem.getPackage() != null) && dem.getPackage().getSimpleName().equalsIgnoreCase(packageName))
+					{
+						String description = pack.getString(DESCRIPTION);
+						dem.setPackage(new PackageImpl(packageName, description));
+					}
+				}
 			}
 		}
 	}
@@ -642,7 +648,7 @@ public class EmxImportService implements ImportService
 				for (EntityMetaData entityMetaData : resolved)
 				{
 					String name = entityMetaData.getName();
-					if (!ENTITIES.equals(name) && !ATTRIBUTES.equals(name))
+					if (!ENTITIES.equals(name) && !ATTRIBUTES.equals(name) && !PACKAGES.equals(name))
 					{
 						Entity toMeta = store.getEntityMetaDataEntity(name);
 						if (toMeta == null)

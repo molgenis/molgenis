@@ -11,11 +11,19 @@ public class PackageImpl extends MapEntity implements Package, Comparable<Packag
 {
 	private static final long serialVersionUID = 1L;
 
-	public PackageImpl(final String name, final String description)
+	public PackageImpl(final String simpleName, final String description)
 	{
-		super();
-		set(PackageMetaData.NAME, name);
+		super(PackageMetaData.FULL_NAME);
+		set(PackageMetaData.SIMPLE_NAME, simpleName);
+		set(PackageMetaData.FULL_NAME, simpleName);
 		set(PackageMetaData.DESCRIPTION, description);
+	}
+
+	public PackageImpl(final String simpleName, final String description, Package parent)
+	{
+		this(simpleName, description);
+		set(PackageMetaData.PARENT, parent);
+		set(PackageMetaData.FULL_NAME, constructFullName());
 	}
 
 	/**
@@ -29,10 +37,33 @@ public class PackageImpl extends MapEntity implements Package, Comparable<Packag
 		super(entity);
 	}
 
+	public PackageImpl(Package p)
+	{
+		this(p.getSimpleName(), p.getDescription(), p.getParent());
+	}
+
+	@Override
+	public String getSimpleName()
+	{
+		return getString(PackageMetaData.SIMPLE_NAME);
+	}
+
+	@Override
+	public Package getParent()
+	{
+		Entity parent = getEntity(PackageMetaData.PARENT);
+		if (parent == null)
+		{
+			return null;
+		}
+
+		return new PackageImpl(parent);
+	}
+
 	@Override
 	public String getName()
 	{
-		return getString(PackageMetaData.NAME);
+		return getString(PackageMetaData.FULL_NAME);
 	}
 
 	@Override
@@ -41,14 +72,27 @@ public class PackageImpl extends MapEntity implements Package, Comparable<Packag
 		return getString(PackageMetaData.DESCRIPTION);
 	}
 
-	// TODO: add methods for the package browser. Retrieve subpackages?
+	private String constructFullName()
+	{
+		StringBuilder sb = new StringBuilder();
+
+		Package parent = getParent();
+		if (parent != null)
+		{
+			sb.append(parent.getName());
+			sb.append(PACKAGE_SEPARATOR);
+		}
+
+		sb.append(getSimpleName());
+
+		return sb.toString();
+	}
 
 	@Override
 	public int hashCode()
 	{
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((getDescription() == null) ? 0 : getDescription().hashCode());
 		result = prime * result + ((getName() == null) ? 0 : getName().hashCode());
 		return result;
 	}
@@ -60,11 +104,6 @@ public class PackageImpl extends MapEntity implements Package, Comparable<Packag
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
 		PackageImpl other = (PackageImpl) obj;
-		if (getDescription() == null)
-		{
-			if (other.getDescription() != null) return false;
-		}
-		else if (!getDescription().equals(other.getDescription())) return false;
 		if (getName() == null)
 		{
 			if (other.getName() != null) return false;
