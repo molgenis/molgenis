@@ -13,11 +13,11 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
+import org.molgenis.data.meta.MetaDataRepositories;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.mysql.meta.MysqlAttributeMetaDataRepository;
 import org.molgenis.data.mysql.meta.MysqlEntityMetaDataRepository;
-import org.molgenis.data.mysql.meta.MysqlMetaDataRepositories;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
@@ -72,7 +72,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 	PermissionSystemService permissionSystemService;
 
 	@Autowired
-	MysqlMetaDataRepositories mysqlMetaDataRepositories;
+	MetaDataRepositories mysqlMetaDataRepositories;
 
 	@BeforeMethod
 	public void beforeMethod()

@@ -121,7 +121,7 @@ public class EmxImportService implements ImportService
 	public EmxImportService(DataService dataService)
 	{
 		if (dataService == null) throw new IllegalArgumentException("dataService is null");
-		logger.debug("MEntityImportServiceImpl created");
+		logger.debug("EmxImportService created");
 		this.dataService = dataService;
 	}
 
@@ -130,8 +130,7 @@ public class EmxImportService implements ImportService
 	{
 		this.store = coll;
 		this.metaDataService = metaDataService;
-		System.out.println("MEntityImportServiceImpl created with repositories=" + metaDataService);
-		logger.debug("MEntityImportServiceImpl created with coll=" + coll);
+		logger.debug("EmxImportService created with coll=" + coll + " and metaDataService=" + metaDataService);
 	}
 
 	@Autowired

@@ -1,8 +1,5 @@
 package org.molgenis.data.mysql;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +34,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 	private Map<String, MysqlRepository> repositories;
 	// temporary workaround for module dependencies
 	private final RepositoryDecoratorFactory repositoryDecoratorFactory;
-	private final MysqlMetaDataRepositories metaDataRepositories;
+	public final MysqlMetaDataRepositories metaDataRepositories;
 
 	public MysqlRepositoryCollection(DataSource ds, DataService dataService,
 			MysqlMetaDataRepositories metaDataRepositories)
@@ -52,8 +49,9 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		this.dataService = dataService;
 		this.metaDataRepositories = metaDataRepositories;
 		this.repositoryDecoratorFactory = repositoryDecoratorFactory;
+
 		this.metaDataRepositories.setRepositoryCollection(this);
-		System.out.println("metaDataRepositories != null" + this);
+
 		refreshRepositories();
 	}
 
@@ -99,62 +97,6 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 
 			Repository repo = getRepositoryByEntityName(name);
 			dataService.addRepository(repo);
-		}
-	}
-
-	public boolean tableExists(String table)
-	{
-		Connection conn = null;
-		try
-		{
-
-			conn = ds.getConnection();
-			DatabaseMetaData dbm = conn.getMetaData();
-			ResultSet tables = dbm.getTables(null, null, table, null);
-			return tables.next();
-		}
-		catch (Exception e)
-		{
-			throw new RuntimeException(e);
-		}
-		finally
-		{
-			try
-			{
-				conn.close();
-			}
-			catch (Exception e2)
-			{
-				e2.printStackTrace();
-			}
-		}
-	}
-
-	public boolean columnExists(String table, String column)
-	{
-		Connection conn = null;
-		try
-		{
-
-			conn = ds.getConnection();
-			DatabaseMetaData dbm = conn.getMetaData();
-			ResultSet columns = dbm.getColumns(null, null, table, column);
-			return columns.next();
-		}
-		catch (Exception e)
-		{
-			throw new RuntimeException(e);
-		}
-		finally
-		{
-			try
-			{
-				conn.close();
-			}
-			catch (Exception e2)
-			{
-				e2.printStackTrace();
-			}
 		}
 	}
 

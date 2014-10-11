@@ -1,6 +1,8 @@
 package org.molgenis.data.mysql;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -56,10 +58,12 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 	private EntityMetaData metaData;
 	private final JdbcTemplate jdbcTemplate;
 	private MysqlRepositoryCollection repositoryCollection;
+	private DataSource dataSource;
 
 	public MysqlRepository(DataSource dataSource)
 	{
 		super(null);// TODO url
+		this.dataSource = dataSource;
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
@@ -1213,6 +1217,110 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 			return e;
 
 		}
+	}
+
+	public boolean tableExists()
+	{
+		Connection conn = null;
+		try
+		{
+			conn = dataSource.getConnection();
+			DatabaseMetaData dbm = conn.getMetaData();
+			ResultSet tables = dbm.getTables(null, null, getTableName(), null);
+			return tables.next();
+		}
+		catch (Exception e)
+		{
+			throw new RuntimeException(e);
+		}
+		finally
+		{
+			try
+			{
+				conn.close();
+			}
+			catch (Exception e2)
+			{
+				e2.printStackTrace();
+			}
+		}
+	}
+
+	private String getTableName()
+	{
+		return getTableName(getEntityMetaData());
+	}
+
+	private String getTableName(EntityMetaData emd)
+	{
+		// TODO: Use Package name
+		return emd.getName();
+	}
+
+	private boolean columnExists(String column)
+	{
+		Connection conn = null;
+		try
+		{
+			conn = dataSource.getConnection();
+			DatabaseMetaData dbm = conn.getMetaData();
+			ResultSet columns = dbm.getColumns(null, null, getName(), column);
+			return columns.next();
+		}
+		catch (Exception e)
+		{
+			throw new RuntimeException(e);
+		}
+		finally
+		{
+			try
+			{
+				conn.close();
+			}
+			catch (Exception e2)
+			{
+				e2.printStackTrace();
+			}
+		}
+	}
+
+	/**
+	 * Adds an attribute to the table for this entity. Looks up the type of the attribute in {@link #metaData}.
+	 * 
+	 * @param attributeName
+	 *            name of the attribute to add
+	 */
+	public void addAttributeToTable(String attributeName)
+	{
+		if (!columnExists(attributeName))
+		{
+			String sql;
+			try
+			{
+				sql = getAlterSql(metaData.getAttribute(attributeName));
+			}
+			catch (MolgenisModelException e)
+			{
+				throw new RuntimeException(e);
+			}
+
+			jdbcTemplate.execute(sql);
+		}
+	}
+
+	/**
+	 * Creates the table for this repository if it does not already exist.
+	 * 
+	 * @return boolean indicating if the table was created
+	 */
+	public boolean createTableIfNotExists()
+	{
+		if (!tableExists())
+		{
+			create();
+			return true;
+		}
+		return false;
 	}
 
 }

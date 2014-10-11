@@ -16,8 +16,6 @@ import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.model.MolgenisModelException;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -30,7 +28,6 @@ public class MysqlMetaDataRepositories implements MetaDataRepositories
 	public MysqlAttributeMetaDataRepository attributeMetaDataRepository;
 	public EntityMetaDataRepositoryDecoratorFactory entityMetaDataRepositoryDecoratorFactory;
 	public AttributeMetaDataRepositoryDecoratorFactory attributeMetaDataRepositoryDecoratorFactory;
-	private MysqlRepositoryCollection mysqlRepositoryCollection;
 
 	public MysqlMetaDataRepositories(MysqlPackageRepository packageRepository,
 			MysqlEntityMetaDataRepository entityMetaDataRepository,
@@ -54,7 +51,6 @@ public class MysqlMetaDataRepositories implements MetaDataRepositories
 
 	public void setRepositoryCollection(MysqlRepositoryCollection mysqlRepositoryCollection)
 	{
-		this.mysqlRepositoryCollection = mysqlRepositoryCollection;
 		packageRepository.setRepositoryCollection(mysqlRepositoryCollection);
 		entityMetaDataRepository.setRepositoryCollection(mysqlRepositoryCollection);
 		attributeMetaDataRepository.setRepositoryCollection(mysqlRepositoryCollection);
@@ -74,6 +70,7 @@ public class MysqlMetaDataRepositories implements MetaDataRepositories
 		attributeMetaDataRepository.create();
 	}
 
+	@Override
 	public Set<EntityMetaData> getAllEntityMetaDataIncludingAbstract()
 	{
 		Map<String, EntityMetaData> metadata = Maps.newLinkedHashMap();
@@ -139,24 +136,17 @@ public class MysqlMetaDataRepositories implements MetaDataRepositories
 
 	private void createMetaDataTables()
 	{
-		// create meta data tables
-		if (!mysqlRepositoryCollection.tableExists(PackageMetaData.ENTITY_NAME))
+		// create meta data tables if they do not yet exist
+		if (packageRepository.createTableIfNotExists())
 		{
-			packageRepository.create();
-
-			if (!mysqlRepositoryCollection.tableExists(EntityMetaDataMetaData.ENTITY_NAME))
+			if (entityMetaDataRepository.createTableIfNotExists())
 			{
-				entityMetaDataRepository.create();
-
-				if (!mysqlRepositoryCollection.tableExists(AttributeMetaDataMetaData.ENTITY_NAME))
-				{
-					attributeMetaDataRepository.create();
-				}
+				attributeMetaDataRepository.createTableIfNotExists();
 			}
 		}
 		else if (attributeMetaDataRepository.count() == 0)
 		{
-			// Update table structure to prevent errors is apps that don't use emx
+			// Update table structure to prevent errors in apps that don't use emx
 			recreateMetaDataRepositories();
 		}
 	}
@@ -164,15 +154,16 @@ public class MysqlMetaDataRepositories implements MetaDataRepositories
 	private void upgradeMetaDataTables()
 	{
 		// Update attributes table if needed
-		addAttributeToTable(AttributeMetaDataMetaData.AGGREGATEABLE);
-		addAttributeToTable(AttributeMetaDataMetaData.RANGE_MIN);
-		addAttributeToTable(AttributeMetaDataMetaData.RANGE_MAX);
-		addAttributeToTable(AttributeMetaDataMetaData.ENUM_OPTIONS);
-		addAttributeToTable(AttributeMetaDataMetaData.LABEL_ATTRIBUTE);
-		addAttributeToTable(AttributeMetaDataMetaData.READ_ONLY);
-		addAttributeToTable(AttributeMetaDataMetaData.UNIQUE);
+		attributeMetaDataRepository.addAttributeToTable(AttributeMetaDataMetaData.AGGREGATEABLE);
+		attributeMetaDataRepository.addAttributeToTable(AttributeMetaDataMetaData.RANGE_MIN);
+		attributeMetaDataRepository.addAttributeToTable(AttributeMetaDataMetaData.RANGE_MAX);
+		attributeMetaDataRepository.addAttributeToTable(AttributeMetaDataMetaData.ENUM_OPTIONS);
+		attributeMetaDataRepository.addAttributeToTable(AttributeMetaDataMetaData.LABEL_ATTRIBUTE);
+		attributeMetaDataRepository.addAttributeToTable(AttributeMetaDataMetaData.READ_ONLY);
+		attributeMetaDataRepository.addAttributeToTable(AttributeMetaDataMetaData.UNIQUE);
 	}
 
+	@Override
 	public void registerEntityMetaData(EntityMetaData emd)
 	{
 		// add packages
@@ -193,7 +184,7 @@ public class MysqlMetaDataRepositories implements MetaDataRepositories
 			}
 		}
 
-		mysqlRepositoryCollection.getEntityMetaDataRepository().addEntityMetaData(emd);
+		entityMetaDataRepository.addEntityMetaData(emd);
 
 		// add attribute metadata
 		for (AttributeMetaData att : emd.getAttributes())
@@ -203,22 +194,4 @@ public class MysqlMetaDataRepositories implements MetaDataRepositories
 		}
 	}
 
-	private void addAttributeToTable(String attributeName)
-	{
-		if (!mysqlRepositoryCollection.columnExists(attributeMetaDataRepository.getName(), attributeName))
-		{
-			String sql;
-			try
-			{
-				sql = attributeMetaDataRepository.getAlterSql(MysqlAttributeMetaDataRepository.META_DATA
-						.getAttribute(attributeName));
-			}
-			catch (MolgenisModelException e)
-			{
-				throw new RuntimeException(e);
-			}
-
-			new JdbcTemplate(mysqlRepositoryCollection.ds).execute(sql);
-		}
-	}
 }

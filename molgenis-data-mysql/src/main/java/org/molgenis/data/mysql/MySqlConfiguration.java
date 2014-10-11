@@ -90,7 +90,6 @@ public class MySqlConfiguration
 	@Bean
 	public ImportService emxImportService()
 	{
-		System.out.println("emxImportService()");
 		return new EmxImportService(dataService);
 	}
 
