@@ -11,6 +11,7 @@ import org.molgenis.data.meta.AttributeMetaDataRepositoryDecoratorFactory;
 import org.molgenis.data.meta.EntityMetaDataRepositoryDecoratorFactory;
 import org.molgenis.data.mysql.meta.MysqlAttributeMetaDataRepository;
 import org.molgenis.data.mysql.meta.MysqlEntityMetaDataRepository;
+import org.molgenis.data.mysql.meta.MysqlMetaDataRepositories;
 import org.molgenis.data.mysql.meta.MysqlPackageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -62,12 +63,18 @@ public class MySqlConfiguration
 		return new MysqlAttributeMetaDataRepository(dataSource);
 	}
 
+	public MysqlMetaDataRepositories mysqlMetaDataRepositories()
+	{
+		return new MysqlMetaDataRepositories(packageRepository(), entityMetaDataRepository(),
+				attributeMetaDataRepository(), entityMetaDataRepositoryDecoratorFactory,
+				attributeMetaDataRepositoryDecoratorFactory);
+	}
+
 	@Bean
 	public MysqlRepositoryCollection mysqlRepositoryCollection()
 	{
-		return new MysqlRepositoryCollection(dataSource, dataService, packageRepository(), entityMetaDataRepository(),
-				attributeMetaDataRepository(), repositoryDecoratorFactory, entityMetaDataRepositoryDecoratorFactory,
-				attributeMetaDataRepositoryDecoratorFactory)
+		return new MysqlRepositoryCollection(dataSource, dataService, mysqlMetaDataRepositories(),
+				repositoryDecoratorFactory)
 
 		{
 			@Override

@@ -23,14 +23,11 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.meta.AttributeMetaDataRepository;
-import org.molgenis.data.meta.AttributeMetaDataRepositoryDecoratorFactory;
 import org.molgenis.data.meta.EntityMetaDataRepository;
-import org.molgenis.data.meta.EntityMetaDataRepositoryDecoratorFactory;
 import org.molgenis.data.mysql.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.mysql.meta.EntityMetaDataMetaData;
 import org.molgenis.data.mysql.meta.MysqlAttributeMetaDataRepository;
-import org.molgenis.data.mysql.meta.MysqlEntityMetaDataRepository;
-import org.molgenis.data.mysql.meta.MysqlPackageRepository;
+import org.molgenis.data.mysql.meta.MysqlMetaDataRepositories;
 import org.molgenis.data.mysql.meta.PackageMetaData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -48,44 +45,25 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 	private final DataSource ds;
 	private final DataService dataService;
 	private Map<String, MysqlRepository> repositories;
-	private final MysqlPackageRepository packageRepository;
-	private final MysqlEntityMetaDataRepository entityMetaDataRepository;
-	private final MysqlAttributeMetaDataRepository attributeMetaDataRepository;
-
 	// temporary workaround for module dependencies
 	private final RepositoryDecoratorFactory repositoryDecoratorFactory;
-	private final EntityMetaDataRepositoryDecoratorFactory entityMetaDataRepositoryDecoratorFactory;
-	private final AttributeMetaDataRepositoryDecoratorFactory attributeMetaDataRepositoryDecoratorFactory;
+	private MysqlMetaDataRepositories metaDataRepositories;
 
-	public MysqlRepositoryCollection(DataSource ds, DataService dataService, MysqlPackageRepository packageRepository,
-			MysqlEntityMetaDataRepository entityMetaDataRepository,
-			MysqlAttributeMetaDataRepository attributeMetaDataRepository)
+	public MysqlRepositoryCollection(DataSource ds, DataService dataService,
+			MysqlMetaDataRepositories metaDataRepositories)
 	{
-
-		this(ds, dataService, packageRepository, entityMetaDataRepository, attributeMetaDataRepository, null, null,
-				null);
-
+		this(ds, dataService, metaDataRepositories, null);
 	}
 
-	public MysqlRepositoryCollection(DataSource ds, DataService dataService, MysqlPackageRepository packageRepository,
-			MysqlEntityMetaDataRepository entityMetaDataRepository,
-			MysqlAttributeMetaDataRepository attributeMetaDataRepository,
-			RepositoryDecoratorFactory repositoryDecoratorFactory,
-			EntityMetaDataRepositoryDecoratorFactory entityMetaDataRepositoryDecoratorFactory,
-			AttributeMetaDataRepositoryDecoratorFactory attributeMetaDataRepositoryDecoratorFactory)
+	public MysqlRepositoryCollection(DataSource ds, DataService dataService,
+			MysqlMetaDataRepositories metaDataRepositories, RepositoryDecoratorFactory repositoryDecoratorFactory)
 	{
 		this.ds = ds;
 		this.dataService = dataService;
-		this.packageRepository = packageRepository;
-		this.entityMetaDataRepository = entityMetaDataRepository;
-		this.attributeMetaDataRepository = attributeMetaDataRepository;
+		this.metaDataRepositories = metaDataRepositories;
 		this.repositoryDecoratorFactory = repositoryDecoratorFactory;
-		this.entityMetaDataRepositoryDecoratorFactory = entityMetaDataRepositoryDecoratorFactory;
-		this.attributeMetaDataRepositoryDecoratorFactory = attributeMetaDataRepositoryDecoratorFactory;
 
-		packageRepository.setRepositoryCollection(this);
-		entityMetaDataRepository.setRepositoryCollection(this);
-		attributeMetaDataRepository.setRepositoryCollection(this);
+		this.metaDataRepositories.setRepositoryCollection(this);
 
 		refreshRepositories();
 	}
@@ -107,19 +85,19 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		// create meta data tables
 		if (!tableExists(PackageMetaData.ENTITY_NAME))
 		{
-			packageRepository.create();
+			metaDataRepositories.packageRepository.create();
 
 			if (!tableExists(EntityMetaDataMetaData.ENTITY_NAME))
 			{
-				entityMetaDataRepository.create();
+				metaDataRepositories.entityMetaDataRepository.create();
 
 				if (!tableExists(AttributeMetaDataMetaData.ENTITY_NAME))
 				{
-					attributeMetaDataRepository.create();
+					metaDataRepositories.attributeMetaDataRepository.create();
 				}
 			}
 		}
-		else if (attributeMetaDataRepository.count() == 0)
+		else if (metaDataRepositories.attributeMetaDataRepository.count() == 0)
 		{
 			// Update table structure to prevent errors is apps that don't use emx
 			recreateMetaDataRepositories();
@@ -149,12 +127,12 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 	 */
 	public void recreateMetaDataRepositories()
 	{
-		attributeMetaDataRepository.drop();
-		entityMetaDataRepository.drop();
-		packageRepository.drop();
-		packageRepository.create();
-		entityMetaDataRepository.create();
-		attributeMetaDataRepository.create();
+		metaDataRepositories.attributeMetaDataRepository.drop();
+		metaDataRepositories.entityMetaDataRepository.drop();
+		metaDataRepositories.packageRepository.drop();
+		metaDataRepositories.packageRepository.create();
+		metaDataRepositories.entityMetaDataRepository.create();
+		metaDataRepositories.attributeMetaDataRepository.create();
 	}
 
 	public void registerMysqlRepos()
@@ -185,13 +163,13 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 
 	private void addAttributeToTable(String attributeName)
 	{
-		if (!columnExists(attributeMetaDataRepository.getName(), attributeName))
+		if (!columnExists(metaDataRepositories.attributeMetaDataRepository.getName(), attributeName))
 		{
 			String sql;
 			try
 			{
-				sql = attributeMetaDataRepository.getAlterSql(MysqlAttributeMetaDataRepository.META_DATA
-						.getAttribute(attributeName));
+				sql = metaDataRepositories.attributeMetaDataRepository
+						.getAlterSql(MysqlAttributeMetaDataRepository.META_DATA.getAttribute(attributeName));
 			}
 			catch (MolgenisModelException e)
 			{
@@ -314,9 +292,9 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		Collections.reverse(packages);
 		for (Package pack : packages)
 		{
-			if (packageRepository.getPackage(pack.getName()) == null)
+			if (metaDataRepositories.packageRepository.getPackage(pack.getName()) == null)
 			{
-				packageRepository.addPackage(pack);
+				metaDataRepositories.packageRepository.addPackage(pack);
 			}
 		}
 
@@ -326,7 +304,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		for (AttributeMetaData att : emd.getAttributes())
 		{
 			// do not use getAttributeMetaDataRepository(), actions already take place during addEntityMetaData
-			attributeMetaDataRepository.addAttributeMetaData(emd.getName(), att);
+			metaDataRepositories.attributeMetaDataRepository.addAttributeMetaData(emd.getName(), att);
 		}
 
 		return repository;
@@ -360,13 +338,13 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		Map<String, EntityMetaData> metadata = Maps.newLinkedHashMap();
 
 		// read the entity meta data
-		for (EntityMetaData entityMetaData : entityMetaDataRepository.getEntityMetaDatas())
+		for (EntityMetaData entityMetaData : metaDataRepositories.entityMetaDataRepository.getEntityMetaDatas())
 		{
 			DefaultEntityMetaData entityMetaDataWithAttributes = new DefaultEntityMetaData(entityMetaData);
 			metadata.put(entityMetaDataWithAttributes.getName(), entityMetaDataWithAttributes);
 
 			// add the attribute meta data of the entity
-			for (AttributeMetaData attributeMetaData : attributeMetaDataRepository
+			for (AttributeMetaData attributeMetaData : metaDataRepositories.attributeMetaDataRepository
 					.getEntityAttributeMetaData(entityMetaDataWithAttributes.getName()))
 			{
 				entityMetaDataWithAttributes.addAttributeMetaData(attributeMetaData);
@@ -374,7 +352,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		}
 
 		// read the refEntity
-		for (Entity attribute : attributeMetaDataRepository)
+		for (Entity attribute : metaDataRepositories.attributeMetaDataRepository)
 		{
 			if (attribute.getString(AttributeMetaDataMetaData.REF_ENTITY) != null)
 			{
@@ -400,7 +378,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 	public Entity getEntityMetaDataEntity(String name)
 	{
 		Query q = new QueryImpl().eq(EntityMetaDataMetaData.FULL_NAME, name);
-		return entityMetaDataRepository.findOne(q);
+		return metaDataRepositories.entityMetaDataRepository.findOne(q);
 	}
 
 	public void drop(EntityMetaData md)
@@ -421,10 +399,10 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		}
 
 		// delete metadata
-		attributeMetaDataRepository.delete(attributeMetaDataRepository.findAll(new QueryImpl().eq(
-				AttributeMetaDataMetaData.ENTITY, name)));
-		entityMetaDataRepository.delete(entityMetaDataRepository.findAll(new QueryImpl().eq(
-				EntityMetaDataMetaData.FULL_NAME, name)));
+		metaDataRepositories.attributeMetaDataRepository.delete(metaDataRepositories.attributeMetaDataRepository
+				.findAll(new QueryImpl().eq(AttributeMetaDataMetaData.ENTITY, name)));
+		metaDataRepositories.entityMetaDataRepository.delete(metaDataRepositories.entityMetaDataRepository
+				.findAll(new QueryImpl().eq(EntityMetaDataMetaData.FULL_NAME, name)));
 	}
 
 	public void dropAttributeMetaData(String entityName, String attributeName)
@@ -436,7 +414,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		}
 
 		// Update AttributeMetaDataRepository
-		attributeMetaDataRepository.removeAttributeMetaData(entityName, attributeName);
+		metaDataRepositories.attributeMetaDataRepository.removeAttributeMetaData(entityName, attributeName);
 
 		refreshRepositories();
 	}
@@ -514,8 +492,8 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 	 */
 	private AttributeMetaDataRepository getAttributeMetaDataRepository()
 	{
-		return attributeMetaDataRepositoryDecoratorFactory != null ? attributeMetaDataRepositoryDecoratorFactory
-				.createDecoratedRepository(attributeMetaDataRepository) : attributeMetaDataRepository;
+		return metaDataRepositories.attributeMetaDataRepositoryDecoratorFactory != null ? metaDataRepositories.attributeMetaDataRepositoryDecoratorFactory
+				.createDecoratedRepository(metaDataRepositories.attributeMetaDataRepository) : metaDataRepositories.attributeMetaDataRepository;
 	}
 
 	/**
@@ -526,7 +504,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 	 */
 	private EntityMetaDataRepository getEntityMetaDataRepository()
 	{
-		return entityMetaDataRepositoryDecoratorFactory != null ? entityMetaDataRepositoryDecoratorFactory
-				.createDecoratedRepository(entityMetaDataRepository) : entityMetaDataRepository;
+		return metaDataRepositories.entityMetaDataRepositoryDecoratorFactory != null ? metaDataRepositories.entityMetaDataRepositoryDecoratorFactory
+				.createDecoratedRepository(metaDataRepositories.entityMetaDataRepository) : metaDataRepositories.entityMetaDataRepository;
 	}
 }
