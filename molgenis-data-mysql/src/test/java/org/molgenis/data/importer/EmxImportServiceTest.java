@@ -17,6 +17,7 @@ import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.mysql.meta.MysqlAttributeMetaDataRepository;
 import org.molgenis.data.mysql.meta.MysqlEntityMetaDataRepository;
+import org.molgenis.data.mysql.meta.MysqlMetaDataRepositories;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
@@ -70,13 +71,15 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	PermissionSystemService permissionSystemService;
 
+	@Autowired
+	MysqlMetaDataRepositories mysqlMetaDataRepositories;
+
 	@BeforeMethod
 	public void beforeMethod()
 	{
 		attributeMetaDataRepository.deleteAll();
 		entityMetaDataRepository.deleteAll();
 		dataService = mock(DataService.class);
-
 	}
 
 	@Test
@@ -88,7 +91,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 
 		// create importer
 		EmxImportService importer = new EmxImportService(dataService);
-		importer.setRepositoryCollection(store);
+		importer.setRepositoryCollection(store, mysqlMetaDataRepositories);
 		importer.setPlatformTransactionManager(new SimplePlatformTransactionManager());
 		importer.setPermissionSystemService(permissionSystemService);
 
@@ -143,7 +146,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		Assert.assertNotNull(source.getRepositoryByEntityName("attributes"));
 
 		EmxImportService importer = new EmxImportService(dataService);
-		importer.setRepositoryCollection(store);
+		importer.setRepositoryCollection(store, mysqlMetaDataRepositories);
 		importer.setPlatformTransactionManager(new SimplePlatformTransactionManager());
 		importer.setPermissionSystemService(permissionSystemService);
 
@@ -189,7 +192,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
 
 		EmxImportService importer = new EmxImportService(dataService);
-		importer.setRepositoryCollection(store);
+		importer.setRepositoryCollection(store, mysqlMetaDataRepositories);
 		importer.setPlatformTransactionManager(new SimplePlatformTransactionManager());
 		importer.setPermissionSystemService(permissionSystemService);
 

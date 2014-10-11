@@ -99,6 +99,7 @@ public class AppConfig
 	@Bean
 	public MysqlMetaDataRepositories mysqlMetaDataRepositories()
 	{
+		System.out.println("AppConfig mysqlMetaDataRepositories()");
 		return new MysqlMetaDataRepositories(packageRepository(), entityMetaDataRepository(),
 				attributeMetaDataRepository());
 	}
@@ -106,6 +107,7 @@ public class AppConfig
 	@Bean
 	public MysqlRepositoryCollection mysqlRepositoryCollection()
 	{
+		System.out.println("AppConfig mysqlRepositoryCollection()");
 		return new MysqlRepositoryCollection(dataSource(), dataService(), mysqlMetaDataRepositories())
 		{
 			@Override

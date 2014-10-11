@@ -304,7 +304,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		}
 	}
 
-	protected String getAlterSql(AttributeMetaData attributeMetaData) throws MolgenisModelException
+	public String getAlterSql(AttributeMetaData attributeMetaData) throws MolgenisModelException
 	{
 		StringBuilder sql = new StringBuilder();
 		sql.append("ALTER TABLE ").append('`').append(getEntityMetaData().getName()).append('`').append(" ADD ");

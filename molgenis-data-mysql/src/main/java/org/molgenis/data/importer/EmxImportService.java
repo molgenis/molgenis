@@ -48,6 +48,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Range;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.mysql.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.mysql.meta.EntityMetaDataMetaData;
@@ -102,8 +103,8 @@ public class EmxImportService implements ImportService
 
 	private static final List<String> SUPPORTED_ENTITY_ATTRIBUTES = Arrays.asList(
 			org.molgenis.data.mysql.meta.EntityMetaDataMetaData.LABEL.toLowerCase(),
-			org.molgenis.data.mysql.meta.EntityMetaDataMetaData.DESCRIPTION.toLowerCase(), "name", ABSTRACT.toLowerCase(),
-			EXTENDS.toLowerCase(), "package");
+			org.molgenis.data.mysql.meta.EntityMetaDataMetaData.DESCRIPTION.toLowerCase(), "name",
+			ABSTRACT.toLowerCase(), EXTENDS.toLowerCase(), "package");
 
 	// Sheet names
 	private static final String ENTITIES = EntityMetaDataMetaData.ENTITY_NAME;
@@ -114,6 +115,7 @@ public class EmxImportService implements ImportService
 	private TransactionTemplate transactionTemplate;
 	private final DataService dataService;
 	private PermissionSystemService permissionSystemService;
+	private MetaDataService metaDataService;
 
 	@Autowired
 	public EmxImportService(DataService dataService)
@@ -124,9 +126,11 @@ public class EmxImportService implements ImportService
 	}
 
 	@Autowired
-	public void setRepositoryCollection(MysqlRepositoryCollection coll)
+	public void setRepositoryCollection(MysqlRepositoryCollection coll, MetaDataService metaDataService)
 	{
 		this.store = coll;
+		this.metaDataService = metaDataService;
+		System.out.println("MEntityImportServiceImpl created with repositories=" + metaDataService);
 		logger.debug("MEntityImportServiceImpl created with coll=" + coll);
 	}
 
@@ -669,7 +673,7 @@ public class EmxImportService implements ImportService
 			try
 			{
 				Set<EntityMetaData> allMetaData = Sets.newLinkedHashSet(sourceMetadata);
-				Set<EntityMetaData> existingMetaData = store.getAllEntityMetaDataIncludingAbstract();
+				Set<EntityMetaData> existingMetaData = metaDataService.getAllEntityMetaDataIncludingAbstract();
 				allMetaData.addAll(existingMetaData);
 
 				// Use all metadata for dependency resolving

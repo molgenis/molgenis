@@ -14,7 +14,6 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Package;
 import org.molgenis.data.meta.AttributeMetaDataRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
-import org.molgenis.data.mysql.meta.MysqlEntityMetaDataRepository;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -40,12 +39,15 @@ public class EntityMetaDataRepositoryTest extends AbstractTestNGSpringContextTes
 	@Autowired
 	private MysqlRepositoryCollection coll;
 
+	@Autowired
+	private MysqlMetaDataRepositories mysqlMetaDataRepositories;
+
 	@BeforeClass
 	@BeforeMethod
 	@AfterClass
 	public void reset()
 	{
-		coll.recreateMetaDataRepositories();
+		mysqlMetaDataRepositories.recreateMetaDataRepositories();
 	}
 
 	@Test
