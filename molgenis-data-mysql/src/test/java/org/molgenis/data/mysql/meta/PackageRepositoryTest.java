@@ -1,4 +1,4 @@
-package org.molgenis.data.mysql;
+package org.molgenis.data.mysql.meta;
 
 import static org.testng.Assert.assertEquals;
 
@@ -7,6 +7,8 @@ import java.util.TreeSet;
 
 import org.molgenis.AppConfig;
 import org.molgenis.data.Package;
+import org.molgenis.data.mysql.meta.MysqlAttributeMetaDataRepository;
+import org.molgenis.data.mysql.meta.MysqlEntityMetaDataRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;

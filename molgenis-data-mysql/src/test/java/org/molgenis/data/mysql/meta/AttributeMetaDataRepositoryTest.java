@@ -1,4 +1,4 @@
-package org.molgenis.data.mysql;
+package org.molgenis.data.mysql.meta;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -11,6 +11,8 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Range;
+import org.molgenis.data.mysql.meta.MysqlAttributeMetaDataRepository;
+import org.molgenis.data.mysql.meta.MysqlEntityMetaDataRepository;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.fieldtypes.EnumField;
 import org.springframework.beans.factory.annotation.Autowired;

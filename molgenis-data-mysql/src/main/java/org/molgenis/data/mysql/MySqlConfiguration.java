@@ -3,14 +3,15 @@ package org.molgenis.data.mysql;
 import javax.sql.DataSource;
 
 import org.molgenis.data.DataService;
-
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.importer.EmxImportService;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.meta.AttributeMetaDataRepositoryDecoratorFactory;
 import org.molgenis.data.meta.EntityMetaDataRepositoryDecoratorFactory;
-
+import org.molgenis.data.mysql.meta.MysqlAttributeMetaDataRepository;
+import org.molgenis.data.mysql.meta.MysqlEntityMetaDataRepository;
+import org.molgenis.data.mysql.meta.MysqlPackageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

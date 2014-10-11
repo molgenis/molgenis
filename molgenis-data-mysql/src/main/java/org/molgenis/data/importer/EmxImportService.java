@@ -1,25 +1,25 @@
 package org.molgenis.data.importer;
 
-import static org.molgenis.data.mysql.AttributeMetaDataMetaData.AGGREGATEABLE;
-import static org.molgenis.data.mysql.AttributeMetaDataMetaData.DATA_TYPE;
-import static org.molgenis.data.mysql.AttributeMetaDataMetaData.DESCRIPTION;
-import static org.molgenis.data.mysql.AttributeMetaDataMetaData.ENTITY;
-import static org.molgenis.data.mysql.AttributeMetaDataMetaData.ENUM_OPTIONS;
-import static org.molgenis.data.mysql.AttributeMetaDataMetaData.ID_ATTRIBUTE;
-import static org.molgenis.data.mysql.AttributeMetaDataMetaData.LABEL;
-import static org.molgenis.data.mysql.AttributeMetaDataMetaData.LABEL_ATTRIBUTE;
-import static org.molgenis.data.mysql.AttributeMetaDataMetaData.LOOKUP_ATTRIBUTE;
-import static org.molgenis.data.mysql.AttributeMetaDataMetaData.NAME;
-import static org.molgenis.data.mysql.AttributeMetaDataMetaData.NILLABLE;
-import static org.molgenis.data.mysql.AttributeMetaDataMetaData.RANGE_MAX;
-import static org.molgenis.data.mysql.AttributeMetaDataMetaData.RANGE_MIN;
-import static org.molgenis.data.mysql.AttributeMetaDataMetaData.READ_ONLY;
-import static org.molgenis.data.mysql.AttributeMetaDataMetaData.REF_ENTITY;
-import static org.molgenis.data.mysql.AttributeMetaDataMetaData.UNIQUE;
-import static org.molgenis.data.mysql.AttributeMetaDataMetaData.VISIBLE;
-import static org.molgenis.data.mysql.EntityMetaDataMetaData.ABSTRACT;
-import static org.molgenis.data.mysql.EntityMetaDataMetaData.EXTENDS;
-import static org.molgenis.data.mysql.EntityMetaDataMetaData.PACKAGE;
+import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.AGGREGATEABLE;
+import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.DATA_TYPE;
+import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.DESCRIPTION;
+import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.ENTITY;
+import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.ENUM_OPTIONS;
+import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.ID_ATTRIBUTE;
+import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.LABEL;
+import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.LABEL_ATTRIBUTE;
+import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.LOOKUP_ATTRIBUTE;
+import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.NAME;
+import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.NILLABLE;
+import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.RANGE_MAX;
+import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.RANGE_MIN;
+import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.READ_ONLY;
+import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.REF_ENTITY;
+import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.UNIQUE;
+import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.VISIBLE;
+import static org.molgenis.data.mysql.meta.EntityMetaDataMetaData.ABSTRACT;
+import static org.molgenis.data.mysql.meta.EntityMetaDataMetaData.EXTENDS;
+import static org.molgenis.data.mysql.meta.EntityMetaDataMetaData.PACKAGE;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -48,11 +48,11 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Range;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.mysql.AttributeMetaDataMetaData;
-import org.molgenis.data.mysql.EntityMetaDataMetaData;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
-import org.molgenis.data.mysql.PackageImpl;
-import org.molgenis.data.mysql.PackageMetaData;
+import org.molgenis.data.mysql.meta.AttributeMetaDataMetaData;
+import org.molgenis.data.mysql.meta.EntityMetaDataMetaData;
+import org.molgenis.data.mysql.meta.PackageImpl;
+import org.molgenis.data.mysql.meta.PackageMetaData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
@@ -101,8 +101,8 @@ public class EmxImportService implements ImportService
 			UNIQUE.toLowerCase());
 
 	private static final List<String> SUPPORTED_ENTITY_ATTRIBUTES = Arrays.asList(
-			org.molgenis.data.mysql.EntityMetaDataMetaData.LABEL.toLowerCase(),
-			org.molgenis.data.mysql.EntityMetaDataMetaData.DESCRIPTION.toLowerCase(), "name", ABSTRACT.toLowerCase(),
+			org.molgenis.data.mysql.meta.EntityMetaDataMetaData.LABEL.toLowerCase(),
+			org.molgenis.data.mysql.meta.EntityMetaDataMetaData.DESCRIPTION.toLowerCase(), "name", ABSTRACT.toLowerCase(),
 			EXTENDS.toLowerCase(), "package");
 
 	// Sheet names
@@ -521,8 +521,8 @@ public class EmxImportService implements ImportService
 				if (!entities.containsKey(entityName)) entities.put(entityName, new DefaultEntityMetaData(entityName));
 
 				DefaultEntityMetaData md = entities.get(entityName);
-				md.setLabel(entity.getString(org.molgenis.data.mysql.EntityMetaDataMetaData.LABEL));
-				md.setDescription(entity.getString(org.molgenis.data.mysql.EntityMetaDataMetaData.DESCRIPTION));
+				md.setLabel(entity.getString(org.molgenis.data.mysql.meta.EntityMetaDataMetaData.LABEL));
+				md.setDescription(entity.getString(org.molgenis.data.mysql.meta.EntityMetaDataMetaData.DESCRIPTION));
 				if (entity.getBoolean(ABSTRACT) != null) md.setAbstract(entity.getBoolean(ABSTRACT));
 
 				String extendsEntityName = entity.getString(EXTENDS);
@@ -569,8 +569,8 @@ public class EmxImportService implements ImportService
 				if (simpleName == null) throw new IllegalArgumentException("package.name is missing on line " + i);
 
 				Package parentPackage = null;
-				String description = pack.getString(org.molgenis.data.mysql.PackageMetaData.DESCRIPTION);
-				String parent = pack.getString(org.molgenis.data.mysql.PackageMetaData.PARENT);
+				String description = pack.getString(org.molgenis.data.mysql.meta.PackageMetaData.DESCRIPTION);
+				String parent = pack.getString(org.molgenis.data.mysql.meta.PackageMetaData.PARENT);
 				if (parent != null)
 				{
 					parentPackage = new PackageImpl(parent);

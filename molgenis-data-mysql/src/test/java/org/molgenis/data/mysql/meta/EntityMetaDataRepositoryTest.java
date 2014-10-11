@@ -1,4 +1,4 @@
-package org.molgenis.data.mysql;
+package org.molgenis.data.mysql.meta;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -13,6 +13,8 @@ import org.molgenis.AppConfig;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Package;
 import org.molgenis.data.meta.AttributeMetaDataRepository;
+import org.molgenis.data.mysql.MysqlRepositoryCollection;
+import org.molgenis.data.mysql.meta.MysqlEntityMetaDataRepository;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;

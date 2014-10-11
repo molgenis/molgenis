@@ -1,13 +1,13 @@
-package org.molgenis.data.mysql;
+package org.molgenis.data.mysql.meta;
 
-import static org.molgenis.data.mysql.EntityMetaDataMetaData.ABSTRACT;
-import static org.molgenis.data.mysql.EntityMetaDataMetaData.DESCRIPTION;
-import static org.molgenis.data.mysql.EntityMetaDataMetaData.EXTENDS;
-import static org.molgenis.data.mysql.EntityMetaDataMetaData.FULL_NAME;
-import static org.molgenis.data.mysql.EntityMetaDataMetaData.ID_ATTRIBUTE;
-import static org.molgenis.data.mysql.EntityMetaDataMetaData.LABEL;
-import static org.molgenis.data.mysql.EntityMetaDataMetaData.PACKAGE;
-import static org.molgenis.data.mysql.EntityMetaDataMetaData.SIMPLE_NAME;
+import static org.molgenis.data.mysql.meta.EntityMetaDataMetaData.ABSTRACT;
+import static org.molgenis.data.mysql.meta.EntityMetaDataMetaData.DESCRIPTION;
+import static org.molgenis.data.mysql.meta.EntityMetaDataMetaData.EXTENDS;
+import static org.molgenis.data.mysql.meta.EntityMetaDataMetaData.FULL_NAME;
+import static org.molgenis.data.mysql.meta.EntityMetaDataMetaData.ID_ATTRIBUTE;
+import static org.molgenis.data.mysql.meta.EntityMetaDataMetaData.LABEL;
+import static org.molgenis.data.mysql.meta.EntityMetaDataMetaData.PACKAGE;
+import static org.molgenis.data.mysql.meta.EntityMetaDataMetaData.SIMPLE_NAME;
 
 import java.util.List;
 
@@ -18,6 +18,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.meta.EntityMetaDataRepository;
+import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;

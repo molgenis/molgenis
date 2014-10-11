@@ -1,4 +1,4 @@
-package org.molgenis.data.mysql;
+package org.molgenis.data.mysql.meta;
 
 import java.util.Set;
 import java.util.TreeSet;
@@ -9,6 +9,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Package;
 import org.molgenis.data.PackageRepository;
 import org.molgenis.data.Query;
+import org.molgenis.data.mysql.MysqlRepository;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
