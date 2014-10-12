@@ -17,7 +17,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
-import org.molgenis.data.meta.EntityMetaDataRepository;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -25,7 +24,7 @@ import org.molgenis.data.support.QueryImpl;
 
 import com.google.common.collect.Lists;
 
-public class MysqlEntityMetaDataRepository extends MysqlRepository implements EntityMetaDataRepository
+class MysqlEntityMetaDataRepository extends MysqlRepository
 {
 	public static final EntityMetaDataMetaData META_DATA = new EntityMetaDataMetaData();
 
@@ -35,12 +34,6 @@ public class MysqlEntityMetaDataRepository extends MysqlRepository implements En
 		setMetaData(META_DATA);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.mysql.EntityMetaDataRepository#getEntityMetaDatas()
-	 */
-	@Override
 	public Iterable<EntityMetaData> getEntityMetaDatas()
 	{
 		List<EntityMetaData> meta = Lists.newArrayList();
@@ -78,7 +71,6 @@ public class MysqlEntityMetaDataRepository extends MysqlRepository implements En
 	 *            the fully qualified name of the entityMetaData
 	 * @return the EntityMetaData or null if none found
 	 */
-	@Override
 	public EntityMetaData getEntityMetaData(String fullyQualifiedName)
 	{
 		Query q = query().eq(FULL_NAME, fullyQualifiedName);
@@ -91,12 +83,6 @@ public class MysqlEntityMetaDataRepository extends MysqlRepository implements En
 		return toEntityMetaData(entity);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.mysql.EntityMetaDataRepository#addEntityMetaData(org.molgenis.data.EntityMetaData)
-	 */
-	@Override
 	public void addEntityMetaData(EntityMetaData emd)
 	{
 		Entity entityMetaDataEntity = new MapEntity();

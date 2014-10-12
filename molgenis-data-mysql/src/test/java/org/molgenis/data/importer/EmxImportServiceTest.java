@@ -13,11 +13,9 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
-import org.molgenis.data.meta.MetaDataRepositories;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
-import org.molgenis.data.mysql.meta.MysqlAttributeMetaDataRepository;
-import org.molgenis.data.mysql.meta.MysqlEntityMetaDataRepository;
+import org.molgenis.data.mysql.meta.MysqlMetaDataRepositories;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
@@ -63,22 +61,15 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 	DataService dataService;
 
 	@Autowired
-	MysqlEntityMetaDataRepository entityMetaDataRepository;
-
-	@Autowired
-	MysqlAttributeMetaDataRepository attributeMetaDataRepository;
-
-	@Autowired
 	PermissionSystemService permissionSystemService;
 
 	@Autowired
-	MetaDataRepositories mysqlMetaDataRepositories;
+	MysqlMetaDataRepositories mysqlMetaDataRepositories;
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		attributeMetaDataRepository.deleteAll();
-		entityMetaDataRepository.deleteAll();
+		mysqlMetaDataRepositories.recreateMetaDataRepositories();
 		dataService = mock(DataService.class);
 	}
 

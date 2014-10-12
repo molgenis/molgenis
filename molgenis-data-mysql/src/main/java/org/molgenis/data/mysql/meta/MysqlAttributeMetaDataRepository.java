@@ -28,7 +28,6 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Range;
-import org.molgenis.data.meta.AttributeMetaDataRepository;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -38,7 +37,7 @@ import org.molgenis.fieldtypes.EnumField;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
-public class MysqlAttributeMetaDataRepository extends MysqlRepository implements AttributeMetaDataRepository
+class MysqlAttributeMetaDataRepository extends MysqlRepository
 {
 	public static final AttributeMetaDataMetaData META_DATA = new AttributeMetaDataMetaData();
 
@@ -48,12 +47,6 @@ public class MysqlAttributeMetaDataRepository extends MysqlRepository implements
 		setMetaData(META_DATA);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.mysql.AttributeMetaDataRepository#getEntityAttributeMetaData(java.lang.String)
-	 */
-	@Override
 	public Iterable<AttributeMetaData> getEntityAttributeMetaData(String entityName)
 	{
 		List<AttributeMetaData> attributes = Lists.newArrayList();
@@ -65,13 +58,6 @@ public class MysqlAttributeMetaDataRepository extends MysqlRepository implements
 		return attributes;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.mysql.AttributeMetaDataRepository#addAttributeMetaData(java.lang.String,
-	 * org.molgenis.data.AttributeMetaData)
-	 */
-	@Override
 	public void addAttributeMetaData(String entityName, AttributeMetaData att)
 	{
 		Entity attributeMetaDataEntity = new MapEntity();
@@ -106,13 +92,6 @@ public class MysqlAttributeMetaDataRepository extends MysqlRepository implements
 		add(attributeMetaDataEntity);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.mysql.AttributeMetaDataRepository#removeAttributeMetaData(java.lang.String,
-	 * java.lang.String)
-	 */
-	@Override
 	public void removeAttributeMetaData(String entityName, String attributeName)
 	{
 		Query q = new QueryImpl().eq(AttributeMetaDataMetaData.ENTITY, entityName).and()

@@ -11,31 +11,47 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.elasticsearch.ElasticSearchService;
-import org.molgenis.data.meta.AttributeMetaDataRepository;
+import org.molgenis.data.meta.MetaDataRepositories;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class ElasticsearchAttributeMetaDataRepositoryTest
+public class IndexingMetaDataRepositoriesDecoratorTest
 {
-	private ElasticsearchAttributeMetaDataRepository elasticsearchAttributeMetaDataRepository;
-	private AttributeMetaDataRepository attributeMetaDataRepository;
+	private IndexingMetaDataRepositoriesDecorator decorator;
+	private MetaDataRepositories metaDataRepositories;
 	private DataService dataService;
 	private ElasticSearchService elasticSearchService;
 
 	@BeforeMethod
 	public void setUp()
 	{
-		attributeMetaDataRepository = mock(AttributeMetaDataRepository.class);
+		metaDataRepositories = mock(MetaDataRepositories.class);
 		dataService = mock(DataService.class);
 		elasticSearchService = mock(ElasticSearchService.class);
-		elasticsearchAttributeMetaDataRepository = new ElasticsearchAttributeMetaDataRepository(
-				attributeMetaDataRepository, dataService, elasticSearchService);
+		decorator = new IndexingMetaDataRepositoriesDecorator(metaDataRepositories, dataService, elasticSearchService);
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void ElasticsearchAttributeMetaDataRepository()
 	{
-		new ElasticsearchAttributeMetaDataRepository(null, null, null);
+		new IndexingMetaDataRepositoriesDecorator(null, null, null);
+	}
+
+	@Test
+	public void addEntityMetaData()
+	{
+		EntityMetaData entityMetaData = mock(EntityMetaData.class);
+		decorator.addEntityMetaData(entityMetaData);
+		verify(metaDataRepositories).addEntityMetaData(entityMetaData);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void getEntityMetaDatas()
+	{
+		Iterable<EntityMetaData> entityMetaDatas = mock(Iterable.class);
+		when(metaDataRepositories.getEntityMetaDatas()).thenReturn(entityMetaDatas);
+		assertEquals(decorator.getEntityMetaDatas(), entityMetaDatas);
 	}
 
 	@Test
@@ -46,8 +62,8 @@ public class ElasticsearchAttributeMetaDataRepositoryTest
 		when(dataService.getEntityMetaData(entityName)).thenReturn(entityMetaData);
 
 		AttributeMetaData attribute = mock(AttributeMetaData.class);
-		elasticsearchAttributeMetaDataRepository.addAttributeMetaData(entityName, attribute);
-		verify(attributeMetaDataRepository).addAttributeMetaData(entityName, attribute);
+		decorator.addAttributeMetaData(entityName, attribute);
+		verify(metaDataRepositories).addAttributeMetaData(entityName, attribute);
 		verify(elasticSearchService).createMappings(entityMetaData);
 	}
 
@@ -55,10 +71,10 @@ public class ElasticsearchAttributeMetaDataRepositoryTest
 	public void getEntityAttributeMetaData()
 	{
 		@SuppressWarnings("unchecked")
-		Iterable<AttributeMetaData> attributes = (Iterable<AttributeMetaData>) mock(Iterable.class);
+		Iterable<AttributeMetaData> attributes = mock(Iterable.class);
 		String entityName = "entity";
-		when(attributeMetaDataRepository.getEntityAttributeMetaData(entityName)).thenReturn(attributes);
-		assertEquals(elasticsearchAttributeMetaDataRepository.getEntityAttributeMetaData(entityName), attributes);
+		when(metaDataRepositories.getEntityAttributeMetaData(entityName)).thenReturn(attributes);
+		assertEquals(decorator.getEntityAttributeMetaData(entityName), attributes);
 	}
 
 	@Test
@@ -68,8 +84,8 @@ public class ElasticsearchAttributeMetaDataRepositoryTest
 		String entityName = "entity";
 		String attributeName = "attribute";
 		when(dataService.getEntityMetaData(entityName)).thenReturn(entityMetaData);
-		elasticsearchAttributeMetaDataRepository.removeAttributeMetaData(entityName, attributeName);
-		verify(attributeMetaDataRepository).removeAttributeMetaData(entityName, attributeName);
+		decorator.removeAttributeMetaData(entityName, attributeName);
+		verify(metaDataRepositories).removeAttributeMetaData(entityName, attributeName);
 		verify(elasticSearchService).createMappings(entityMetaData);
 	}
 }

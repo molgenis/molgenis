@@ -22,12 +22,6 @@ import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.elasticsearch.ElasticsearchRepositoryDecorator;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.elasticsearch.meta.ElasticsearchAttributeMetaDataRepository;
-import org.molgenis.data.elasticsearch.meta.ElasticsearchEntityMetaDataRepository;
-import org.molgenis.data.meta.AttributeMetaDataRepository;
-import org.molgenis.data.meta.AttributeMetaDataRepositoryDecoratorFactory;
-import org.molgenis.data.meta.EntityMetaDataRepository;
-import org.molgenis.data.meta.EntityMetaDataRepositoryDecoratorFactory;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.IndexedRepositoryValidationDecorator;
 import org.molgenis.framework.db.WebAppDatabasePopulator;
@@ -376,33 +370,4 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		};
 	}
 
-	// temporary workaround for module dependencies
-	@Bean
-	public AttributeMetaDataRepositoryDecoratorFactory attributeMetaDataRepositoryDecoratorFactory()
-	{
-		return new AttributeMetaDataRepositoryDecoratorFactory()
-		{
-			@Override
-			public AttributeMetaDataRepository createDecoratedRepository(AttributeMetaDataRepository repository)
-			{
-				// 1. indexing decorator
-				return new ElasticsearchAttributeMetaDataRepository(repository, dataService, elasticSearchService);
-			}
-		};
-	}
-
-	// temporary workaround for module dependencies
-	@Bean
-	public EntityMetaDataRepositoryDecoratorFactory entityMetaDataRepositoryDecoratorFactory()
-	{
-		return new EntityMetaDataRepositoryDecoratorFactory()
-		{
-			@Override
-			public EntityMetaDataRepository createDecoratedRepository(EntityMetaDataRepository repository)
-			{
-				// 1. indexing decorator
-				return new ElasticsearchEntityMetaDataRepository(repository, elasticSearchService);
-			}
-		};
-	}
 }

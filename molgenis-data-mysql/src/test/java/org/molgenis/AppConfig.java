@@ -6,17 +6,10 @@ import javax.sql.DataSource;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryDecoratorFactory;
-import org.molgenis.data.meta.AttributeMetaDataRepository;
-import org.molgenis.data.meta.AttributeMetaDataRepositoryDecoratorFactory;
-import org.molgenis.data.meta.EntityMetaDataRepository;
-import org.molgenis.data.meta.EntityMetaDataRepositoryDecoratorFactory;
 import org.molgenis.data.mysql.EmbeddedMysqlDatabaseBuilder;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
-import org.molgenis.data.mysql.meta.MysqlAttributeMetaDataRepository;
-import org.molgenis.data.mysql.meta.MysqlEntityMetaDataRepository;
 import org.molgenis.data.mysql.meta.MysqlMetaDataRepositories;
-import org.molgenis.data.mysql.meta.MysqlPackageRepository;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
@@ -72,35 +65,15 @@ public class AppConfig
 	}
 
 	@Bean
-	public MysqlEntityMetaDataRepository entityMetaDataRepository()
-	{
-		return new MysqlEntityMetaDataRepository(dataSource());
-	}
-
-	@Bean
-	public MysqlAttributeMetaDataRepository attributeMetaDataRepository()
-	{
-		return new MysqlAttributeMetaDataRepository(dataSource());
-	}
-
-	@Bean
 	public PermissionSystemService permissionSystemService()
 	{
 		return new PermissionSystemService(dataService());
 	}
 
 	@Bean
-	public MysqlPackageRepository packageRepository()
-	{
-		return new MysqlPackageRepository(dataSource());
-
-	}
-
-	@Bean
 	public MysqlMetaDataRepositories mysqlMetaDataRepositories()
 	{
-		return new MysqlMetaDataRepositories(packageRepository(), entityMetaDataRepository(),
-				attributeMetaDataRepository());
+		return new MysqlMetaDataRepositories(dataSource());
 	}
 
 	@Bean
@@ -109,7 +82,7 @@ public class AppConfig
 		return new MysqlRepositoryCollection(dataSource(), dataService(), mysqlMetaDataRepositories())
 		{
 			@Override
-			protected MysqlRepository createMysqlRepsitory()
+			protected MysqlRepository createMysqlRepository()
 			{
 				MysqlRepository repo = mysqlRepository();
 				repo.setRepositoryCollection(this);
@@ -138,31 +111,4 @@ public class AppConfig
 		};
 	}
 
-	// temporary workaround for module dependencies
-	@Bean
-	public AttributeMetaDataRepositoryDecoratorFactory attributeMetaDataRepositoryDecoratorFactory()
-	{
-		return new AttributeMetaDataRepositoryDecoratorFactory()
-		{
-			@Override
-			public AttributeMetaDataRepository createDecoratedRepository(AttributeMetaDataRepository repository)
-			{
-				return repository;
-			}
-		};
-	}
-
-	// temporary workaround for module dependencies
-	@Bean
-	public EntityMetaDataRepositoryDecoratorFactory entityMetaDataRepositoryDecoratorFactory()
-	{
-		return new EntityMetaDataRepositoryDecoratorFactory()
-		{
-			@Override
-			public EntityMetaDataRepository createDecoratedRepository(EntityMetaDataRepository repository)
-			{
-				return repository;
-			}
-		};
-	}
 }

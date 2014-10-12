@@ -5,12 +5,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.sql.DataSource;
+
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Package;
-import org.molgenis.data.meta.AttributeMetaDataRepositoryDecoratorFactory;
-import org.molgenis.data.meta.EntityMetaDataRepositoryDecoratorFactory;
+import org.molgenis.data.Query;
 import org.molgenis.data.meta.MetaDataRepositories;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DefaultAttributeMetaData;
@@ -23,30 +24,15 @@ import com.google.common.collect.Sets;
 
 public class MysqlMetaDataRepositories implements MetaDataRepositories
 {
-	public MysqlPackageRepository packageRepository;
-	public MysqlEntityMetaDataRepository entityMetaDataRepository;
-	public MysqlAttributeMetaDataRepository attributeMetaDataRepository;
-	public EntityMetaDataRepositoryDecoratorFactory entityMetaDataRepositoryDecoratorFactory;
-	public AttributeMetaDataRepositoryDecoratorFactory attributeMetaDataRepositoryDecoratorFactory;
+	private final MysqlPackageRepository packageRepository;
+	private final MysqlEntityMetaDataRepository entityMetaDataRepository;
+	private final MysqlAttributeMetaDataRepository attributeMetaDataRepository;
 
-	public MysqlMetaDataRepositories(MysqlPackageRepository packageRepository,
-			MysqlEntityMetaDataRepository entityMetaDataRepository,
-			MysqlAttributeMetaDataRepository attributeMetaDataRepository)
+	public MysqlMetaDataRepositories(DataSource ds)
 	{
-		this(packageRepository, entityMetaDataRepository, attributeMetaDataRepository, null, null);
-	}
-
-	public MysqlMetaDataRepositories(MysqlPackageRepository packageRepository,
-			MysqlEntityMetaDataRepository entityMetaDataRepository,
-			MysqlAttributeMetaDataRepository attributeMetaDataRepository,
-			EntityMetaDataRepositoryDecoratorFactory entityMetaDataRepositoryDecoratorFactory,
-			AttributeMetaDataRepositoryDecoratorFactory attributeMetaDataRepositoryDecoratorFactory)
-	{
-		this.packageRepository = packageRepository;
-		this.entityMetaDataRepository = entityMetaDataRepository;
-		this.attributeMetaDataRepository = attributeMetaDataRepository;
-		this.entityMetaDataRepositoryDecoratorFactory = entityMetaDataRepositoryDecoratorFactory;
-		this.attributeMetaDataRepositoryDecoratorFactory = attributeMetaDataRepositoryDecoratorFactory;
+		packageRepository = new MysqlPackageRepository(ds);
+		entityMetaDataRepository = new MysqlEntityMetaDataRepository(ds);
+		attributeMetaDataRepository = new MysqlAttributeMetaDataRepository(ds);
 	}
 
 	public void setRepositoryCollection(MysqlRepositoryCollection mysqlRepositoryCollection)
@@ -71,7 +57,7 @@ public class MysqlMetaDataRepositories implements MetaDataRepositories
 	}
 
 	@Override
-	public Set<EntityMetaData> getAllEntityMetaDataIncludingAbstract()
+	public Set<EntityMetaData> getEntityMetaDatas()
 	{
 		Map<String, EntityMetaData> metadata = Maps.newLinkedHashMap();
 
@@ -113,7 +99,8 @@ public class MysqlMetaDataRepositories implements MetaDataRepositories
 		return metadataSet;
 	}
 
-	public void dropEntityMetaData(String entityName)
+	@Override
+	public void removeEntityMetaData(String entityName)
 	{
 		// delete metadata
 		attributeMetaDataRepository.delete(attributeMetaDataRepository.findAll(new QueryImpl().eq(
@@ -122,12 +109,14 @@ public class MysqlMetaDataRepositories implements MetaDataRepositories
 				EntityMetaDataMetaData.FULL_NAME, entityName)));
 	}
 
-	public void dropAttributeMetaData(String entityName, String attributeName)
+	@Override
+	public void removeAttributeMetaData(String entityName, String attributeName)
 	{
 		// Update AttributeMetaDataRepository
 		attributeMetaDataRepository.removeAttributeMetaData(entityName, attributeName);
 	}
 
+	@Override
 	public void createAndUpgradeMetaDataTables()
 	{
 		createMetaDataTables();
@@ -164,7 +153,7 @@ public class MysqlMetaDataRepositories implements MetaDataRepositories
 	}
 
 	@Override
-	public void registerEntityMetaData(EntityMetaData emd)
+	public void addEntityMetaData(EntityMetaData emd)
 	{
 		// add packages
 		List<Package> packages = Lists.newArrayList();
@@ -189,9 +178,67 @@ public class MysqlMetaDataRepositories implements MetaDataRepositories
 		// add attribute metadata
 		for (AttributeMetaData att : emd.getAttributes())
 		{
-			// do not use getAttributeMetaDataRepository(), actions already take place during addEntityMetaData
 			attributeMetaDataRepository.addAttributeMetaData(emd.getName(), att);
 		}
+	}
+
+	@Override
+	public boolean hasEntity(EntityMetaData emd)
+	{
+		Query q = new QueryImpl().eq(EntityMetaDataMetaData.FULL_NAME, emd.getName());
+		return entityMetaDataRepository.findOne(q) != null;
+	}
+
+	@Override
+	public void addAttributeMetaData(String name, AttributeMetaData attr)
+	{
+		attributeMetaDataRepository.addAttributeMetaData(name, attr);
+	}
+
+	@Override
+	public Iterable<AttributeMetaData> getEntityAttributeMetaData(String entityName)
+	{
+		return attributeMetaDataRepository.getEntityAttributeMetaData(entityName);
+	}
+
+	@Override
+	public EntityMetaData getEntityMetaData(String fullyQualifiedName)
+	{
+		return entityMetaDataRepository.getEntityMetaData(fullyQualifiedName);
+	}
+
+	/**
+	 * For testing purposes.
+	 */
+	public void deleteAll()
+	{
+		attributeMetaDataRepository.deleteAll();
+		entityMetaDataRepository.deleteAll();
+		packageRepository.deleteAll();
+	}
+
+	@Override
+	public void addPackage(Package p)
+	{
+		packageRepository.addPackage(p);
+	}
+
+	@Override
+	public List<EntityMetaData> getPackageEntityMetaDatas(String packageName)
+	{
+		return entityMetaDataRepository.getPackageEntityMetaDatas(packageName);
+	}
+
+	@Override
+	public Package getPackage(String string)
+	{
+		return packageRepository.getPackage(string);
+	}
+
+	@Override
+	public Iterable<Package> getPackages()
+	{
+		return packageRepository.getPackages();
 	}
 
 }

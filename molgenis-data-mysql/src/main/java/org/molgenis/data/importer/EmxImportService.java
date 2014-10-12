@@ -165,6 +165,7 @@ public class EmxImportService implements ImportService
 	public EntityImportReport doImport(final RepositoryCollection source, DatabaseAction databaseAction)
 	{
 		if (store == null) throw new RuntimeException("store was not set");
+		if (metaDataService == null) throw new RuntimeException("metadataService was not set");
 
 		List<EntityMetaData> metadataList = Lists.newArrayList();
 
@@ -672,8 +673,8 @@ public class EmxImportService implements ImportService
 			try
 			{
 				Set<EntityMetaData> allMetaData = Sets.newLinkedHashSet(sourceMetadata);
-				Set<EntityMetaData> existingMetaData = metaDataService.getAllEntityMetaDataIncludingAbstract();
-				allMetaData.addAll(existingMetaData);
+				Iterable<EntityMetaData> existingMetaData = metaDataService.getEntityMetaDatas();
+				Iterables.addAll(allMetaData, existingMetaData);
 
 				// Use all metadata for dependency resolving
 				List<EntityMetaData> resolved = DependencyResolver.resolve(allMetaData);
@@ -686,8 +687,7 @@ public class EmxImportService implements ImportService
 					String name = entityMetaData.getName();
 					if (!ENTITIES.equals(name) && !ATTRIBUTES.equals(name) && !PACKAGES.equals(name))
 					{
-						Entity toMeta = store.getEntityMetaDataEntity(name);
-						if (toMeta == null)
+						if (!metaDataService.hasEntity(entityMetaData))
 						{
 							logger.debug("tyring to create: " + name);
 							addedEntities.add(name);

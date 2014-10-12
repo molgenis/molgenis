@@ -3,38 +3,32 @@ package org.molgenis.data.mysql;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.sql.DataSource;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.RepositoryDecoratorFactory;
-import org.molgenis.data.meta.AttributeMetaDataRepository;
-import org.molgenis.data.meta.EntityMetaDataRepository;
-import org.molgenis.data.mysql.meta.EntityMetaDataMetaData;
+import org.molgenis.data.meta.MetaDataRepositories;
 import org.molgenis.data.mysql.meta.MysqlMetaDataRepositories;
 import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.QueryImpl;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
 
 public abstract class MysqlRepositoryCollection implements RepositoryCollection
 {
-	public final DataSource ds;
+	private final DataSource ds;
 	private final DataService dataService;
 	private Map<String, MysqlRepository> repositories;
 	// temporary workaround for module dependencies
 	private final RepositoryDecoratorFactory repositoryDecoratorFactory;
-	public final MysqlMetaDataRepositories metaDataRepositories;
+	private final MetaDataRepositories metaDataRepositories;
 
 	public MysqlRepositoryCollection(DataSource ds, DataService dataService,
 			MysqlMetaDataRepositories metaDataRepositories)
@@ -50,7 +44,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		this.metaDataRepositories = metaDataRepositories;
 		this.repositoryDecoratorFactory = repositoryDecoratorFactory;
 
-		this.metaDataRepositories.setRepositoryCollection(this);
+		metaDataRepositories.setRepositoryCollection(this);
 
 		refreshRepositories();
 	}
@@ -63,21 +57,21 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 	/**
 	 * Return a spring managed prototype bean
 	 */
-	protected abstract MysqlRepository createMysqlRepsitory();
+	protected abstract MysqlRepository createMysqlRepository();
 
 	public void refreshRepositories()
 	{
 		repositories = new LinkedHashMap<String, MysqlRepository>();
 		metaDataRepositories.createAndUpgradeMetaDataTables();
 
-		Set<EntityMetaData> metadata = metaDataRepositories.getAllEntityMetaDataIncludingAbstract();
+		Iterable<EntityMetaData> metadata = metaDataRepositories.getEntityMetaDatas();
 
 		// instantiate the repos
 		for (EntityMetaData emd : metadata)
 		{
 			if (!emd.isAbstract())
 			{
-				MysqlRepository repo = createMysqlRepsitory();
+				MysqlRepository repo = createMysqlRepository();
 				repo.setMetaData(emd);
 				repositories.put(emd.getName(), repo);
 			}
@@ -105,7 +99,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 	{
 		MysqlRepository repository = null;
 
-		if (getEntityMetaDataEntity(emd.getName()) != null)
+		if (metaDataRepositories.hasEntity(emd))
 		{
 			if (emd.isAbstract())
 			{
@@ -132,7 +126,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		// if not abstract add to repositories
 		if (!emd.isAbstract())
 		{
-			repository = createMysqlRepsitory();
+			repository = createMysqlRepository();
 			repository.setMetaData(emd);
 			repository.create();
 
@@ -143,7 +137,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		// Add to entities and attributes tables, this should be done AFTER the creation of new tables because create
 		// table statements are ddl statements and when these are executed mysql does an implicit commit. So when the
 		// create table fails a rollback does not work anymore
-		metaDataRepositories.registerEntityMetaData(emd);
+		metaDataRepositories.addEntityMetaData(emd);
 
 		return repository;
 	}
@@ -171,12 +165,6 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		return repositories.get(name);
 	}
 
-	public Entity getEntityMetaDataEntity(String name)
-	{
-		Query q = new QueryImpl().eq(EntityMetaDataMetaData.FULL_NAME, name);
-		return metaDataRepositories.entityMetaDataRepository.findOne(q);
-	}
-
 	public void drop(EntityMetaData md)
 	{
 		assert md != null;
@@ -194,7 +182,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 			dataService.removeRepository(r.getName());
 		}
 
-		metaDataRepositories.dropEntityMetaData(name);
+		metaDataRepositories.removeEntityMetaData(name);
 	}
 
 	public void dropAttributeMetaData(String entityName, String attributeName)
@@ -205,13 +193,13 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 			r.dropAttribute(attributeName);
 		}
 
-		metaDataRepositories.dropAttributeMetaData(entityName, attributeName);
+		metaDataRepositories.removeAttributeMetaData(entityName, attributeName);
 
 		refreshRepositories();
 	}
 
 	/**
-	 * Add new AttributeMetaData to an existing EntityMetaData. Trying to edit an exiting AttributeMetaData will throw
+	 * Add new AttributeMetaData to an existing EntityMetaData. Trying to edit an existing AttributeMetaData will throw
 	 * an exception
 	 * 
 	 * @param sourceEntityMetaData
@@ -253,7 +241,8 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 			}
 			else
 			{
-				getAttributeMetaDataRepository().addAttributeMetaData(sourceEntityMetaData.getName(), attr);
+				//TODO: use decorated repository!
+				metaDataRepositories.addAttributeMetaData(sourceEntityMetaData.getName(), attr);
 				DefaultEntityMetaData defaultEntityMetaData = (DefaultEntityMetaData) repository.getEntityMetaData();
 				defaultEntityMetaData.addAttributeMetaData(attr);
 				repository.addAttribute(attr);
@@ -273,29 +262,5 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 	private Repository getDecoratedRepository(CrudRepository repository)
 	{
 		return repositoryDecoratorFactory != null ? repositoryDecoratorFactory.createDecoratedRepository(repository) : repository;
-	}
-
-	/**
-	 * Returns an optionally decorated attribute meta data repository (e.g. security, indexing, validation) for the
-	 * given repository
-	 * 
-	 * @return
-	 */
-	private AttributeMetaDataRepository getAttributeMetaDataRepository()
-	{
-		return metaDataRepositories.attributeMetaDataRepositoryDecoratorFactory != null ? metaDataRepositories.attributeMetaDataRepositoryDecoratorFactory
-				.createDecoratedRepository(metaDataRepositories.attributeMetaDataRepository) : metaDataRepositories.attributeMetaDataRepository;
-	}
-
-	/**
-	 * Returns an optionally decorated entity meta data repository (e.g. security, indexing, validation) for the given
-	 * repository
-	 * 
-	 * @return
-	 */
-	public EntityMetaDataRepository getEntityMetaDataRepository()
-	{
-		return metaDataRepositories.entityMetaDataRepositoryDecoratorFactory != null ? metaDataRepositories.entityMetaDataRepositoryDecoratorFactory
-				.createDecoratedRepository(metaDataRepositories.entityMetaDataRepository) : metaDataRepositories.entityMetaDataRepository;
 	}
 }

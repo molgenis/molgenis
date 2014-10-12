@@ -7,12 +7,7 @@ import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.importer.EmxImportService;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
-import org.molgenis.data.meta.AttributeMetaDataRepositoryDecoratorFactory;
-import org.molgenis.data.meta.EntityMetaDataRepositoryDecoratorFactory;
-import org.molgenis.data.mysql.meta.MysqlAttributeMetaDataRepository;
-import org.molgenis.data.mysql.meta.MysqlEntityMetaDataRepository;
 import org.molgenis.data.mysql.meta.MysqlMetaDataRepositories;
-import org.molgenis.data.mysql.meta.MysqlPackageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,10 +28,6 @@ public class MySqlConfiguration
 	// temporary workaround for module dependencies
 	@Autowired
 	private RepositoryDecoratorFactory repositoryDecoratorFactory;
-	@Autowired
-	private EntityMetaDataRepositoryDecoratorFactory entityMetaDataRepositoryDecoratorFactory;
-	@Autowired
-	private AttributeMetaDataRepositoryDecoratorFactory attributeMetaDataRepositoryDecoratorFactory;
 
 	@Bean
 	@Scope("prototype")
@@ -46,28 +37,9 @@ public class MySqlConfiguration
 	}
 
 	@Bean
-	public MysqlPackageRepository packageRepository()
-	{
-		return new MysqlPackageRepository(dataSource);
-	}
-
-	@Bean
-	public MysqlEntityMetaDataRepository entityMetaDataRepository()
-	{
-		return new MysqlEntityMetaDataRepository(dataSource);
-	}
-
-	@Bean
-	public MysqlAttributeMetaDataRepository attributeMetaDataRepository()
-	{
-		return new MysqlAttributeMetaDataRepository(dataSource);
-	}
-
 	public MysqlMetaDataRepositories mysqlMetaDataRepositories()
 	{
-		return new MysqlMetaDataRepositories(packageRepository(), entityMetaDataRepository(),
-				attributeMetaDataRepository(), entityMetaDataRepositoryDecoratorFactory,
-				attributeMetaDataRepositoryDecoratorFactory);
+		return new MysqlMetaDataRepositories(dataSource);
 	}
 
 	@Bean
@@ -78,7 +50,7 @@ public class MySqlConfiguration
 
 		{
 			@Override
-			protected MysqlRepository createMysqlRepsitory()
+			protected MysqlRepository createMysqlRepository()
 			{
 				MysqlRepository repo = mysqlRepository();
 				repo.setRepositoryCollection(this);
