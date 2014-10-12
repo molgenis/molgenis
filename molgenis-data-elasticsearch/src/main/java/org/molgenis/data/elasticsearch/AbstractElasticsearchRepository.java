@@ -231,7 +231,7 @@ public abstract class AbstractElasticsearchRepository implements IndexedCrudRepo
 	@Transactional
 	public void deleteAll()
 	{
-		elasticSearchService.delete(getEntityMetaData());
+		elasticSearchService.delete(getEntityMetaData().getName());
 		elasticSearchService.refresh();
 	}
 }
