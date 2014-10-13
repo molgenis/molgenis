@@ -873,9 +873,9 @@ public class ElasticSearchService implements SearchService
 	 * @see org.molgenis.data.elasticsearch.SearchService#delete(org.molgenis.data.EntityMetaData)
 	 */
 	@Override
-	public void delete(EntityMetaData entityMetaData)
+	public void delete(String entityName)
 	{
-		String type = sanitizeMapperType(entityMetaData.getName());
+		String type = sanitizeMapperType(entityName);
 		if (LOG.isTraceEnabled())
 		{
 			LOG.trace("Deleting all Elasticsearch '" + type + "' docs ...");
@@ -1030,7 +1030,7 @@ public class ElasticSearchService implements SearchService
 		{
 			if (hasMapping(entityMetaData))
 			{
-				delete(entityMetaData);
+				delete(entityMetaData.getName());
 			}
 			createMappings(entityMetaData);
 			index(entities, entityMetaData, IndexingMode.ADD);

@@ -1,4 +1,4 @@
-package org.molgenis.data.mysql;
+package org.molgenis.data.mysql.meta;
 
 import java.util.Set;
 import java.util.TreeSet;
@@ -7,8 +7,8 @@ import javax.sql.DataSource;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Package;
-import org.molgenis.data.PackageRepository;
 import org.molgenis.data.Query;
+import org.molgenis.data.mysql.MysqlRepository;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -16,7 +16,7 @@ import com.google.common.collect.Iterables;
 /**
  * Repository to add and retrieve Package entities.
  */
-public class MysqlPackageRepository extends MysqlRepository implements PackageRepository
+class MysqlPackageRepository extends MysqlRepository
 {
 	public static final PackageMetaData META_DATA = new PackageMetaData();
 
@@ -38,7 +38,6 @@ public class MysqlPackageRepository extends MysqlRepository implements PackageRe
 		addPackage(new PackageImpl(Package.DEFAULT_PACKAGE_NAME, "The default package."));
 	}
 
-	@Override
 	public Iterable<Package> getPackages()
 	{
 		Set<Package> result = new TreeSet<Package>();
@@ -50,7 +49,6 @@ public class MysqlPackageRepository extends MysqlRepository implements PackageRe
 		return result;
 	}
 
-	@Override
 	public Package getPackage(String name)
 	{
 		Entity entity = findOne(name);
@@ -67,13 +65,11 @@ public class MysqlPackageRepository extends MysqlRepository implements PackageRe
 	 * @param p
 	 *            the Package to insert
 	 */
-	@Override
 	public void addPackage(Package p)
 	{
 		add(new PackageImpl(p));
 	}
 
-	@Override
 	public Iterable<Package> getSubPackages(Package p)
 	{
 		return findPackages(query().eq(PackageMetaData.PARENT, p));

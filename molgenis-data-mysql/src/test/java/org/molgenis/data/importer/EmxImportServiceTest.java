@@ -13,10 +13,9 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
-import org.molgenis.data.mysql.MysqlAttributeMetaDataRepository;
-import org.molgenis.data.mysql.MysqlEntityMetaDataRepository;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
+import org.molgenis.data.mysql.meta.MysqlWritableMetaDataService;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
@@ -62,21 +61,16 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 	DataService dataService;
 
 	@Autowired
-	MysqlEntityMetaDataRepository entityMetaDataRepository;
-
-	@Autowired
-	MysqlAttributeMetaDataRepository attributeMetaDataRepository;
-
-	@Autowired
 	PermissionSystemService permissionSystemService;
+
+	@Autowired
+	MysqlWritableMetaDataService mysqlMetaDataRepositories;
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		attributeMetaDataRepository.deleteAll();
-		entityMetaDataRepository.deleteAll();
+		mysqlMetaDataRepositories.recreateMetaDataRepositories();
 		dataService = mock(DataService.class);
-
 	}
 
 	@Test
@@ -88,7 +82,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 
 		// create importer
 		EmxImportService importer = new EmxImportService(dataService);
-		importer.setRepositoryCollection(store);
+		importer.setRepositoryCollection(store, mysqlMetaDataRepositories);
 		importer.setPlatformTransactionManager(new SimplePlatformTransactionManager());
 		importer.setPermissionSystemService(permissionSystemService);
 
@@ -143,7 +137,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		Assert.assertNotNull(source.getRepositoryByEntityName("attributes"));
 
 		EmxImportService importer = new EmxImportService(dataService);
-		importer.setRepositoryCollection(store);
+		importer.setRepositoryCollection(store, mysqlMetaDataRepositories);
 		importer.setPlatformTransactionManager(new SimplePlatformTransactionManager());
 		importer.setPermissionSystemService(permissionSystemService);
 
@@ -189,7 +183,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
 
 		EmxImportService importer = new EmxImportService(dataService);
-		importer.setRepositoryCollection(store);
+		importer.setRepositoryCollection(store, mysqlMetaDataRepositories);
 		importer.setPlatformTransactionManager(new SimplePlatformTransactionManager());
 		importer.setPermissionSystemService(permissionSystemService);
 

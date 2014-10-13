@@ -10,6 +10,7 @@ import org.molgenis.AppConfig;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.mysql.meta.MysqlWritableMetaDataService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -32,10 +33,13 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	MysqlRepositoryCollection coll;
 
+	@Autowired
+	MysqlWritableMetaDataService metaDataRepositories;
+
 	@BeforeMethod
 	public void reset()
 	{
-		coll.recreateMetaDataRepositories();
+		metaDataRepositories.recreateMetaDataRepositories();
 	}
 
 	@Test

@@ -90,7 +90,7 @@ public class VcfImporterService implements ImportService
 
 				if (searchService.hasMapping(emd))
 				{
-					searchService.delete(emd);
+					searchService.delete(emd.getName());
 				}
 			}
 
