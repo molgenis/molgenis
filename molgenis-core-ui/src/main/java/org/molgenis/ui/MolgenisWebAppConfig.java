@@ -22,6 +22,9 @@ import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.elasticsearch.ElasticsearchRepositoryDecorator;
 import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.elasticsearch.meta.IndexingMetaDataRepositoriesDecorator;
+import org.molgenis.data.meta.MetaDataRepositories;
+import org.molgenis.data.meta.MetaDataRepositoriesDecorator;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.IndexedRepositoryValidationDecorator;
 import org.molgenis.framework.db.WebAppDatabasePopulator;
@@ -324,6 +327,22 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	// temporary workaround for module dependencies
+
+	@Bean
+	MetaDataRepositoriesDecorator metaDataRepositoriesDecorator()
+	{
+		return new MetaDataRepositoriesDecorator()
+		{
+
+			@Override
+			public MetaDataRepositories decorate(MetaDataRepositories metaDataRepositories)
+			{
+				return new IndexingMetaDataRepositoriesDecorator(metaDataRepositories, dataService,
+						elasticSearchService);
+			}
+		};
+	}
+
 	@Bean
 	public RepositoryDecoratorFactory repositoryDecoratorFactory()
 	{

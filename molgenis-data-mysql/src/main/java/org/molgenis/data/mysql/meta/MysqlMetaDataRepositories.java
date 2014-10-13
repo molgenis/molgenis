@@ -13,6 +13,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Package;
 import org.molgenis.data.Query;
 import org.molgenis.data.meta.MetaDataRepositories;
+import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -28,6 +29,12 @@ public class MysqlMetaDataRepositories implements MetaDataRepositories
 	private final MysqlEntityMetaDataRepository entityMetaDataRepository;
 	private final MysqlAttributeMetaDataRepository attributeMetaDataRepository;
 
+	/**
+	 * Creates the {@link MysqlMetaDataRepositories}
+	 * 
+	 * @param ds
+	 *            the {@link DataSource} to use
+	 */
 	public MysqlMetaDataRepositories(DataSource ds)
 	{
 		packageRepository = new MysqlPackageRepository(ds);
@@ -35,11 +42,21 @@ public class MysqlMetaDataRepositories implements MetaDataRepositories
 		attributeMetaDataRepository = new MysqlAttributeMetaDataRepository(ds);
 	}
 
+	/**
+	 * Setter for the MysqlRepositoryCollection, to be called after it's created. This resolves the circular dependency
+	 * {@link MysqlRepositoryCollection} => decorated {@link MetaDataRepositories} => {@link MysqlRepository}s for the
+	 * metadata => {@link MysqlRepositoryCollection}
+	 * 
+	 * @param mysqlRepositoryCollection
+	 */
 	public void setRepositoryCollection(MysqlRepositoryCollection mysqlRepositoryCollection)
 	{
-		packageRepository.setRepositoryCollection(mysqlRepositoryCollection);
-		entityMetaDataRepository.setRepositoryCollection(mysqlRepositoryCollection);
-		attributeMetaDataRepository.setRepositoryCollection(mysqlRepositoryCollection);
+		if (mysqlRepositoryCollection != null)
+		{
+			packageRepository.setRepositoryCollection(mysqlRepositoryCollection);
+			entityMetaDataRepository.setRepositoryCollection(mysqlRepositoryCollection);
+			attributeMetaDataRepository.setRepositoryCollection(mysqlRepositoryCollection);
+		}
 	}
 
 	/**

@@ -7,6 +7,8 @@ import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.importer.EmxImportService;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
+import org.molgenis.data.meta.MetaDataRepositories;
+import org.molgenis.data.meta.MetaDataRepositoriesDecorator;
 import org.molgenis.data.mysql.meta.MysqlMetaDataRepositories;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -29,6 +31,8 @@ public class MySqlConfiguration
 	@Autowired
 	private RepositoryDecoratorFactory repositoryDecoratorFactory;
 
+	private MysqlMetaDataRepositories mysqlMetaDataRepositories;
+
 	@Bean
 	@Scope("prototype")
 	public MysqlRepository mysqlRepository()
@@ -37,16 +41,33 @@ public class MySqlConfiguration
 	}
 
 	@Bean
-	public MysqlMetaDataRepositories mysqlMetaDataRepositories()
+	public MetaDataRepositories metaDataRepositories()
 	{
-		return new MysqlMetaDataRepositories(dataSource);
+		mysqlMetaDataRepositories = new MysqlMetaDataRepositories(dataSource);
+		return metaDataRepositoriesDecorator().decorate(mysqlMetaDataRepositories);
+	}
+
+	@Bean
+	/**
+	 * non-decorating decorator, to be overrided if you wish to decorate the MetaDataRepositories
+	 */
+	MetaDataRepositoriesDecorator metaDataRepositoriesDecorator()
+	{
+		return new MetaDataRepositoriesDecorator()
+		{
+			@Override
+			public MetaDataRepositories decorate(MetaDataRepositories metaDataRepositories)
+			{
+				return metaDataRepositories;
+			}
+		};
 	}
 
 	@Bean
 	public MysqlRepositoryCollection mysqlRepositoryCollection()
 	{
-		return new MysqlRepositoryCollection(dataSource, dataService, mysqlMetaDataRepositories(),
-				repositoryDecoratorFactory)
+		MysqlRepositoryCollection mysqlRepositoryCollection = new MysqlRepositoryCollection(dataSource, dataService,
+				metaDataRepositories(), repositoryDecoratorFactory)
 
 		{
 			@Override
@@ -57,6 +78,10 @@ public class MySqlConfiguration
 				return repo;
 			}
 		};
+
+		mysqlMetaDataRepositories.setRepositoryCollection(mysqlRepositoryCollection);
+
+		return mysqlRepositoryCollection;
 	}
 
 	@Bean

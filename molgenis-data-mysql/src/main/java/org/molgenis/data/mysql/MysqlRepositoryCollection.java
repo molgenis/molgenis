@@ -15,7 +15,6 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.meta.MetaDataRepositories;
-import org.molgenis.data.mysql.meta.MysqlMetaDataRepositories;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,22 +29,18 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 	private final RepositoryDecoratorFactory repositoryDecoratorFactory;
 	private final MetaDataRepositories metaDataRepositories;
 
-	public MysqlRepositoryCollection(DataSource ds, DataService dataService,
-			MysqlMetaDataRepositories metaDataRepositories)
+	public MysqlRepositoryCollection(DataSource ds, DataService dataService, MetaDataRepositories metaDataRepositories)
 	{
 		this(ds, dataService, metaDataRepositories, null);
 	}
 
-	public MysqlRepositoryCollection(DataSource ds, DataService dataService,
-			MysqlMetaDataRepositories metaDataRepositories, RepositoryDecoratorFactory repositoryDecoratorFactory)
+	public MysqlRepositoryCollection(DataSource ds, DataService dataService, MetaDataRepositories metaDataRepositories,
+			RepositoryDecoratorFactory repositoryDecoratorFactory)
 	{
 		this.ds = ds;
 		this.dataService = dataService;
 		this.metaDataRepositories = metaDataRepositories;
 		this.repositoryDecoratorFactory = repositoryDecoratorFactory;
-
-		metaDataRepositories.setRepositoryCollection(this);
-
 		refreshRepositories();
 	}
 
@@ -241,7 +236,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 			}
 			else
 			{
-				//TODO: use decorated repository!
+				// TODO: use decorated repository!
 				metaDataRepositories.addAttributeMetaData(sourceEntityMetaData.getName(), attr);
 				DefaultEntityMetaData defaultEntityMetaData = (DefaultEntityMetaData) repository.getEntityMetaData();
 				defaultEntityMetaData.addAttributeMetaData(attr);
