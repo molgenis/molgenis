@@ -28,8 +28,11 @@
 		}else{
 			$('body').append(this.modal);
 		}
-		this.modal.addClass('modal hide');
+		this.modal.addClass('modal');
 		this.modal.attr('id', 'annotation-modal');
+		
+		var modalDialog = $('<div />').addClass('modal-dialog');
+		var modalContent = $('<div />').addClass('modal-content');
 		
 		var header = $('<div />').css('cursor','pointer');
 		header.addClass('modal-header');
@@ -45,9 +48,11 @@
 		footer.addClass('modal-footer');
 		footer.append('<button name="annotation-btn-close" class="btn btn-default" data-dismiss="#annotation-modal" aria-hidden="true">Close</button>');
 
-		this.modal.append(header);
-		this.modal.append(body);
-		this.modal.append(footer);
+		modalContent.append(header);
+		modalContent.append(body);
+		modalContent.append(footer);
+		
+		modalDialog.append(modalContent).appendTo(this.modal);
 		
 		$('button[name="annotation-btn-close"]').click(function(){
 			$('#annotation-modal').modal('hide');
@@ -67,8 +72,11 @@
 			this.modal.empty();
 		}
 		this.modal.appendTo('body');
-		this.modal.addClass('modal hide');
+		this.modal.addClass('modal');
 		this.modal.attr('id', 'annotation-modal');
+		
+		var modalDialog = $('<div />').addClass('modal-dialog');
+		var modalContent = $('<div />').addClass('modal-content');
 		
 		var header = $('<div />').css('cursor','pointer');
 		header.addClass('modal-header');
@@ -81,10 +89,13 @@
 		var footer = $('<div />');
 		footer.addClass('modal-footer');
 		footer.append('<button name="annotation-btn-close" class="btn btn-default" data-dismiss="modal" aria-hidden="true">Close</button>');
-
-		this.modal.append(header);
-		this.modal.append(body);
-		this.modal.append(footer);
+		
+		modalContent.append(header);
+		modalContent.append(body);
+		modalContent.append(footer);
+		
+		modalDialog.append(modalContent).appendTo(this.modal);
+		
 		this.modal.modal({
 			'backdrop' : true,
 			'show' : false

@@ -74,7 +74,8 @@ public class StoreMappingRepository extends AbstractRepository
 				Integer observationId = ov.getObservationSet().getId();
 				if (storeMapping.containsKey(observationId)) entity = storeMapping.get(observationId);
 				else entity = new MapEntity();
-				entity.set(ov.getFeature().getIdentifier(), valueConverter.toCell(ov.getValue(), ov.getFeature()));
+				entity.set(ov.getFeature().getIdentifier(), valueConverter.toCell(ov.getValue(), ov.getFeature())
+						.getValue());
 				storeMapping.put(observationId, entity);
 			}
 

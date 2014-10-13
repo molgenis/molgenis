@@ -67,7 +67,7 @@
 			if(options.updatePager || options.container.find('#pager-' + options.dataSetId).length === 0){
 				options.updatePager = false;
 				var tablePager = $('<div/>').attr('id', 'pager-' + options.dataSetId);
-				options.container.find('div.pagination').remove();
+				options.container.find('.pagination').parents('div:eq(1)').remove();
 				options.container.append(tablePager);
 				tablePager.pager({
 					'nrItems' : totalHitCount,
@@ -218,16 +218,12 @@
 			contentType : 'application/json',
 			success : function(data, textStatus, request){
 				var result = [];
-				var dataMap = {};
 				$.each(data.searchHits, function(index, hit){
 					var value = hit.columnValueMap.name;
 					if($.inArray(value, result) === -1){
-						var name = hit.columnValueMap.name;
-						result.push(name);
-						dataMap[name] = hit.columnValueMap;
+						result.push(hit.columnValueMap);
 					}
 				});
-				$(document).data('dataMap', dataMap);
 				response(result);
 			}		
 		});
@@ -241,19 +237,19 @@
 			data : JSON.stringify({'queryString' : query}),
 			contentType : 'application/json',
 			success : function(data, textStatus, request){
-				var result = [];
-				var dataMap = {};
+				var results = [];
+				var uniqueOntologyTerms = [];
 				$.each(data.searchHits, function(index, hit){
 					var ontologyName = hit.columnValueMap.ontologyName;
-					var termName = hit.columnValueMap.ontologyTermSynonym;
-					termName = ontologyName === '' ? termName : ontologyName + ':' + termName;
-					if($.inArray(termName, result) === -1){					
-						result.push(termName);
-						dataMap[termName] = hit.columnValueMap;
+					var ontologyTermSynonym = hit.columnValueMap.ontologyTermSynonym;
+					var identifier = ontologyName === '' ? ontologyTermSynonym : ontologyName + ':' + ontologyTermSynonym;
+					hit.columnValueMap.identifier = identifier;
+					if($.inArray(identifier, uniqueOntologyTerms) === -1){					
+						uniqueOntologyTerms.push(identifier);
+						results.push(hit.columnValueMap);
 					}
 				});
-				$(document).data('dataMap', dataMap);
-				response(result);
+				response(results);
 			}		
 		});
 	};
