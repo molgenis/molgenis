@@ -8,9 +8,6 @@ import javax.servlet.http.Part;
 import org.apache.log4j.Logger;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.importer.ImportService;
-import org.molgenis.data.importer.ImportServiceFactory;
-import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.ui.wizard.AbstractWizardPage;
 import org.molgenis.ui.wizard.Wizard;
 import org.molgenis.util.FileUploadUtils;
@@ -24,15 +21,17 @@ public class UploadWizardPage extends AbstractWizardPage
 {
 	private static final long serialVersionUID = 1L;
 	private static final Logger logger = Logger.getLogger(UploadWizardPage.class);
-	private final transient FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
-	private final transient ImportServiceFactory importServiceFactory;
+
+	private final ImportServiceFactory importServiceFactory;
+	private final FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
 
 	@Autowired
-	public UploadWizardPage(FileRepositoryCollectionFactory fileRepositoryCollectionFactory,
-			ImportServiceFactory importServiceFactory)
+	public UploadWizardPage(ImportServiceFactory importServiceFactory,
+			FileRepositoryCollectionFactory fileRepositoryCollectionFactory)
 	{
-		this.fileRepositoryCollectionFactory = fileRepositoryCollectionFactory;
+		super();
 		this.importServiceFactory = importServiceFactory;
+		this.fileRepositoryCollectionFactory = fileRepositoryCollectionFactory;
 	}
 
 	@Override
@@ -51,9 +50,6 @@ public class UploadWizardPage extends AbstractWizardPage
 		}
 
 		ImportWizard importWizard = (ImportWizard) wizard;
-		String entityImportOption = request.getParameter("entity_option");
-
-		importWizard.setEntityImportOption(entityImportOption);
 
 		try
 		{
@@ -70,45 +66,23 @@ public class UploadWizardPage extends AbstractWizardPage
 			}
 			else
 			{
-				return validateInput(file, importWizard, result);
+				RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory
+						.createFileRepositoryCollection(file);
+				ImportService importService = importServiceFactory.getImportService(file, repositoryCollection);
+
+				importWizard.setFile(file);
+				importWizard.setSupportedDatabaseActions(importService.getSupportedDatabaseActions());
+				importWizard.setMustChangeEntityName(importService.getMustChangeEntityName());
 			}
+
 		}
 		catch (Exception e)
 		{
-			result.addError(new ObjectError("wizard", "Error validating import file: " + e.getMessage()));
-			logger.error("Exception validating import file", e);
+			result.addError(new ObjectError("wizard", "Error uploading file: " + e.getMessage()));
+			logger.error("Exception uploading file", e);
 		}
 
 		return null;
-	}
-
-	private String validateInput(File file, ImportWizard wizard, BindingResult result) throws Exception
-	{
-		// decide what importer to use...
-		RepositoryCollection source = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
-		ImportService importService = importServiceFactory.getImportService(file, source);
-		EntitiesValidationReport validationReport = importService.validateImport(file, source);
-
-		wizard.setEntitiesImportable(validationReport.getSheetsImportable());
-		// wizard.setDataImportable(validationReport.getSheetsImportable());
-		wizard.setFieldsDetected(validationReport.getFieldsImportable());
-		wizard.setFieldsRequired(validationReport.getFieldsRequired());
-		wizard.setFieldsAvailable(validationReport.getFieldsAvailable());
-		wizard.setFieldsUnknown(validationReport.getFieldsUnknown());
-
-		String msg = null;
-		if (validationReport.valid())
-		{
-			wizard.setFile(file);
-			msg = "File is validated and can be imported.";
-		}
-		else
-		{
-			wizard.setValidationMessage("File did not pass validation see results below. Please resolve the errors and try again.");
-		}
-
-		return msg;
-
 	}
 
 }

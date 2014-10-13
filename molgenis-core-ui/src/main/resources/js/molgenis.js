@@ -642,6 +642,7 @@ function hideSpinner() {
 }
 
 $(function() {
+	
 	// disable all ajax request caching
 	$.ajaxSetup({
 		cache : false
@@ -704,6 +705,13 @@ $(function() {
 	    setTimeout(function() {
 	        $('.modal-backdrop').not('.modal-stack').css('z-index', zIndex - 1).addClass('modal-stack');
 	    }, 0);
+	});
+	
+	// if modal closes, check if other modal remains open, if so, reapply the modal-open class to the body 
+	$(document).on('hidden.bs.modal', '.modal', function (event) {
+		if( $('.modal:visible').length ) {
+			$('body').addClass('modal-open');
+		}
 	});
 	
 	// focus first input on modal display

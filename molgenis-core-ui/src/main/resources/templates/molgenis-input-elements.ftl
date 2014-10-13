@@ -5,14 +5,16 @@
 	<#assign nillable = field.nillable>
 	
 	<div class="form-group">
-    	<label class="col-md-3 control-label" for="${fieldName}">${field.label}&nbsp;<#if !nillable>*</#if></label>
-    	<div class="col-md-9">
-    		
+		<div class="col-md-3">
+    		<label class="control-label pull-right" for="${fieldName}">${field.label}&nbsp;<#if !nillable>*</#if></label>
+    	</div>
+    	
+    	<div class="col-md-9">	
     		<#if field.dataType.enumType == 'BOOL'>
-				<input type="checkbox" name="${fieldName}" id="${fieldName}" value="true" <#if entity!='' && entity.get(fieldName)?? && entity.get(fieldName)?string("true", "false") == "true">checked</#if>  <#if field.readonly || hasWritePermission?string("true", "false") == "false" >disabled="disabled"</#if>  >
+				<input type="checkbox" name="${fieldName}" id="${fieldName}" value="true" <#if entity!='' && entity.get(fieldName)?? && entity.get(fieldName)?string("true", "false") == "true">checked</#if>  <#if field.readonly || hasWritePermission?string("true", "false") == "false" >readonly="readonly"</#if>>
 	
 			<#elseif field.dataType.enumType == 'TEXT' || field.dataType.enumType =='HTML'>
-				<textarea class="form-control" name="${fieldName}" id="${fieldName}" <#if readonly>disabled="disabled"</#if> <#if !nillable>required="required"</#if> ><#if entity!='' && entity.get(fieldName)??>${entity.get(fieldName)!?html}</#if></textarea>
+				<textarea class="form-control" name="${fieldName}" id="${fieldName}" <#if readonly>readonly="readonly"</#if> <#if !nillable>required="required"</#if> ><#if entity!='' && entity.get(fieldName)??>${entity.get(fieldName)!?html}</#if></textarea>
 			
 			<#elseif field.dataType.enumType == 'XREF' || field.dataType.enumType == 'CATEGORICAL'>
 				<input type="hidden" name="${fieldName}" id="${fieldName}" <#if !nillable>required="required"</#if> />
@@ -65,9 +67,11 @@
 					$(document).ready(function() {
 						var xrefs = [];
 						<#if entity!='' && entity.get(fieldName)??>
-							<#list entity.getEntities(fieldName) as xrefEntity>
-								xrefs.push({id:'<@formatValue field.refEntity.idAttribute.dataType.enumType xrefEntity.idValue />', text:'${xrefEntity.get(field.refEntity.labelAttribute.name)!?html}'});
-							</#list>
+							<#if entity.getEntities(fieldName)?has_content >
+								<#list entity.getEntities(fieldName).iterator() as xrefEntity>
+									xrefs.push({id:'<@formatValue field.refEntity.idAttribute.dataType.enumType xrefEntity.idValue />', text:'${xrefEntity.get(field.refEntity.labelAttribute.name)!?html}'});
+								</#list>
+							</#if>
 						</#if>
 								
 						$('#${fieldName}').select2({
@@ -110,36 +114,52 @@
 				</script>
 				
 			<#elseif field.dataType.enumType == 'DATE_TIME'>
-				<div class="group-append datetime input-group">
-					<#if field.nillable><span class='input-group-addon'>
-						<span class='glyphicon glyphicon-remove empty-date-input clear-date-time-btn'></span></span>
-					</#if>
-					<span class='input-group-addon datepickerbutton'><span class='glyp2icon-calendar glyphicon glyphicon-calendar '></span></span>
-					<input type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" 
-						data-date-format='YYYY-MM-DDTHH:mm:ssZZ'
-						class="form-control<#if field.nillable> nillable</#if>" 
-						<#if readonly>disabled="disabled"</#if> 
+				<div class="input-group group-append date datetime">
+  					<span class='input-group-addon'>
+  						<span class="datepickerbutton glyp2icon-calendar glyphicon glyphicon-calendar"></span>
+  					</span>
+  					<input type="text" 
+  						name="${fieldName}" 
+  						id="${fieldName}" 
+  						placeholder="${field.name}" 
+  						data-date-format="YYYY-MM-DD'T'HH:mm:ssZZ"
+						class="form-control<#if field.nillable> nillable</#if>" <#if readonly>disabled="disabled"</#if>
 						<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string("yyyy-MM-dd'T'HH:mm:ssZ")}"</#if>
-						<#if !nillable>required="required"</#if> data-rule-date="true" />
+						<#if !nillable>required="required"</#if> 
+						data-rule-date-ISO="true" />
+							
+  					<#if field.nillable>
+						<span class='input-group-addon'>
+							<span class="glyphicon glyphicon-remove empty-date-input clear-date-time-btn"></span>
+						</span>
+					</#if>
 				</div>
 			<#elseif field.dataType.enumType == 'DATE'>
-				<div class="group-append date input-group">
-					<#if field.nillable><span class='input-group-addon'>
-						<span class='glyphicon glyphicon-remove empty-date-input clear-date-time-btn'></span></span>
-					</#if>
-					<span class='input-group-addon datepickerbutton'><span class='glyp2icon-calendar glyphicon glyphicon-calendar '></span></span>
-					<input type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.name}"
-						data-date-format='YYYY-MM-DD' 
+				<div class="input-group group-append date dateonly">
+					<span class='input-group-addon'>
+						<span class='datepickerbutton glyp2icon-calendar glyphicon glyphicon-calendar'></span>
+					</span>
+					<input type="text" 
+						name="${fieldName}" 
+						id="${fieldName}" 
+						placeholder="${field.name}"
+						data-date-format="YYYY-MM-DD" 
 						class="form-control<#if field.nillable> nillable</#if>" 
-						<#if readonly>disabled="disabled"</#if> 
+						<#if readonly>readonly="readonly"</#if> 
 						<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string("yyyy-MM-dd")}"</#if> 
 						<#if !nillable>required="required"</#if>
 						data-rule-date-ISO="true" />
+						
+					<#if field.nillable>
+						<span class='input-group-addon'>
+							<span class='glyphicon glyphicon-remove empty-date-input clear-date-time-btn'></span>
+						</span>
+					</#if>
 				</div>
 				
 			<#elseif field.dataType.enumType =='INT' || field.dataType.enumType = 'LONG'>
 				<input type="number" class="form-control" data-rule-digits="true" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" 
-					<#if readonly>disabled="disabled"</#if> 
+					<#if readonly>readonly="readonly"</#if> 
 					<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)?c}"</#if> 
 					<#if !nillable>required="required"</#if> />
 			
@@ -163,12 +183,12 @@
 				</script>
 			<#elseif field.dataType.enumType == 'EMAIL'>
 				<input type="email" class="form-control" data-rule-email="true" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" 
-					<#if readonly>disabled="disabled"</#if> 
+					<#if readonly>readonly="readonly"</#if> 
 					<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string?html}"</#if> 
 					<#if !nillable>data-rule-required="true" </#if>/>
 			<#else>
 					<input type="text" class="form-control" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" 
-						<#if readonly>disabled="disabled"</#if> 
+						<#if readonly>readonly="readonly"</#if> 
 						<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string?html}"</#if> 
 						<#if !nillable>required="required"</#if> 
 						<#if field.dataType.enumType == 'DECIMAL'>data-rule-number="true"</#if>

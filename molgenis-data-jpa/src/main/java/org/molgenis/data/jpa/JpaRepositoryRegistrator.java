@@ -1,5 +1,6 @@
 package org.molgenis.data.jpa;
 
+import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
@@ -17,6 +18,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class JpaRepositoryRegistrator implements ApplicationListener<ContextRefreshedEvent>, Ordered
 {
+	private static final Logger LOG = Logger.getLogger(JpaRepositoryRegistrator.class);
+
 	private final DataService dataService;
 	private final RepositoryCollection repositoryCollection;
 	private final RepositoryDecoratorFactory repositoryDecoratorFactory;
@@ -36,13 +39,16 @@ public class JpaRepositoryRegistrator implements ApplicationListener<ContextRefr
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
+		LOG.info("Registering JPA repositories ...");
 		for (String name : repositoryCollection.getEntityNames())
 		{
+			LOG.debug("Registering JPA repository [" + name + "]");
 			Repository repository = repositoryCollection.getRepositoryByEntityName(name);
 
 			// apply repository decorators (e.g. security, indexing, validation)
 			dataService.addRepository(repositoryDecoratorFactory.createDecoratedRepository(repository));
 		}
+		LOG.info("Registered JPA repositories");
 	}
 
 	@Override

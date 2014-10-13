@@ -150,6 +150,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		addAttributeToTable(AttributeMetaDataMetaData.ENUM_OPTIONS);
 		addAttributeToTable(AttributeMetaDataMetaData.LABEL_ATTRIBUTE);
 		addAttributeToTable(AttributeMetaDataMetaData.READ_ONLY);
+		addAttributeToTable(AttributeMetaDataMetaData.UNIQUE);
 	}
 
 	private void addAttributeToTable(String attributeName)
@@ -298,6 +299,11 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 		}
 
 		return getDecoratedRepository(repo);
+	}
+
+	public MysqlRepository getUndecoratedRepository(String name)
+	{
+		return repositories.get(name);
 	}
 
 	public Set<EntityMetaData> getAllEntityMetaDataIncludingAbstract()

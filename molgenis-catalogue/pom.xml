@@ -5,7 +5,7 @@
     <parent>
         <artifactId>molgenis</artifactId>
         <groupId>org.molgenis</groupId>
-        <version>1.2.0-SNAPSHOT</version>
+        <version>1.3.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -15,17 +15,17 @@
     	<dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-core</artifactId>
-            <version>1.2.0-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-core-ui</artifactId>
-            <version>1.2.0-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data</artifactId>
-            <version>1.2.0-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>

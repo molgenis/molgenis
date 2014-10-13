@@ -28,6 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Writable;
 import org.molgenis.data.csv.CsvRepository;
+import org.molgenis.data.elasticsearch.util.Hit;
 import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.LowerCaseProcessor;

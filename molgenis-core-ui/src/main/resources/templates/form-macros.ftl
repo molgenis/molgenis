@@ -1,68 +1,76 @@
 <#macro renderList form index=0>
-<div id="list-holder" class="row">
-	<div id="list-navigation">
-		<div class="col-md-4">
-			<h3 class="pull-left">${form.title} (<span id="entity-count-${index}"></span>)</h3>
+	<div class="row">
+		<div class="col-md-4">		
+			<h3 class="pull-left">
+				${form.title} (<span id="entity-count-${index}"></span>)
+			</h3>
+			
 			<#if form.hasWritePermission>
 				<a id="create-${index}" style="margin:20px 10px" class="pull-left" href="${form.getBaseUri(context_url)}/create?back=${current_uri?url('UTF-8')}">
 					<img src="/img/new.png" />
 				</a>
 			</#if>
-		</div>
-				
-		<div class="data-table-pager-container col-md-4">
+		</div>			
+			
+		<div class="col-md-4 data-table-pager-container">
 			<div id="data-table-pager-${index}"></div>
 		</div>
 		
-		<#if index==0>
-			<form class="form-search form-inline text-center pull-right col-md-4" method="get" action="#">
-                <div class="form-group">
-    				<select class="form-control" id="query-fields">
-    					<#list form.metaData.fields as field>
-    						<#if field.dataType.enumType == 'STRING'>
-    							<option id="${field.name}">${field.name}</option>
-    						</#if>
-    					</#list>
-    				</select>
-				</div>
-				<div class="form-group">
-    				<select class="form-control" id="operators">
-    					<option id="EQUALS">EQUALS</option>
-    					<option id="NOT">NOT EQUALS</option>
-    					<option id="LIKE">LIKE</option>
-    				</select>
-				</div>
-				<div class="form-group">
-    				<div class="input-group">
-    				    <input type="search" class="col-md-8 search-query form-control" name="q" placeholder="SEARCH">
-                        <span class="input-group-btn">
-                            <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
-                        </span>
-                    </div>
-                </div>
-			</form>
-		</#if>				
+		<div class="col-md-4">
+			<#if index==0>
+				<form class="form-search form-inline text-center pull-right" method="get" action="#">
+	                <div class="form-group">
+	    				<select class="form-control" id="query-fields">
+	    					<#list form.metaData.fields as field>
+	    						<#if field.dataType.enumType == 'STRING'>
+	    							<option id="${field.name}">${field.name}</option>
+	    						</#if>
+	    					</#list>
+	    				</select>
+					</div>
+					
+					<div class="form-group">
+	    				<select class="form-control" id="operators">
+	    					<option id="EQUALS">EQUALS</option>
+	    					<option id="LIKE">LIKE</option>
+	    				</select>
+					</div>
+					
+					<div class="form-group">
+						<div class="col-md-8">	
+	    					<div class="input-group">
+	    				    	<input type="search" class="search-query form-control" name="q" placeholder="SEARCH">
+		                        <span class="input-group-btn">
+		                            <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
+		                        </span>
+	                        </div>
+	                    </div>
+	                </div>  
+				</form>
+			</#if>
+		</div>			
 	</div>
-	
-	<div class="form-list-holder">
-		<table class="table table-striped table-bordered table-hover table-condensed">
-			<thead>
-				<tr>
-					<th class="edit-icon-holder">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th><#-- Non breaking spaces are for fixing very annoying display error in chrome -->
-					<#if form.hasWritePermission>
-						<th class="edit-icon-holder">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
-					</#if>
-					<#list form.metaData.fields as field>
-						<th>${field.name}</th>
-					</#list>
-				</tr>
-			</thead>
-			<tbody id="entity-table-body-${index}">
-			</tbody>
-		</table>
+		
+	<div class="row">
+		<div class="col-md-12">
+			<div id="entity-table-container">		
+				<table class="table table-striped table-bordered table-hover table-condensed">
+					<thead>
+						<tr>
+							<th class="edit-icon-holder"></th>
+							<#if form.hasWritePermission>
+								<th class="edit-icon-holder"></th>
+							</#if>
+							<#list form.metaData.fields as field>
+								<th>${field.name}</th>
+							</#list>
+						</tr>
+					</thead>
+					<tbody id="entity-table-body-${index}"></tbody>
+				</table>
+			</div>
+		</div>
 	</div>
-	
-</div>
 </#macro>
 
 <#macro meta form index=0>

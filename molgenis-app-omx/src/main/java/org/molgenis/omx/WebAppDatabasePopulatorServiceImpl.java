@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.IndexedCrudRepositorySecurityDecorator;
 import org.molgenis.data.annotation.impl.CaddServiceAnnotator;
 import org.molgenis.data.annotation.impl.ClinVarServiceAnnotator;
 import org.molgenis.data.annotation.impl.DbnsfpGeneServiceAnnotator;
@@ -60,9 +61,6 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 				"chr:'1',viewStart:10000000,viewEnd:10100000,cookieKey:'human',nopersist:true");
 		runtimePropertyMap.put(DataExplorerController.COORDSYSTEM,
 				"{speciesName: 'Human',taxon: 9606,auth: 'GRCh',version: '37',ucscName: 'hg19'}");
-		runtimePropertyMap
-				.put(DataExplorerController.CHAINS,
-						"{hg18ToHg19: new Chainset('http://www.derkholm.net:8080/das/hg18ToHg19/', 'NCBI36', 'GRCh37',{speciesName: 'Human',taxon: 9606,auth: 'NCBI',version: 36,ucscName: 'hg18'})}");
 		// for use of the demo dataset add to
 		// SOURCES:",{name:'molgenis mutations',uri:'http://localhost:8080/das/molgenis/',desc:'Default from WebAppDatabasePopulatorService'}"
 		runtimePropertyMap
@@ -88,6 +86,10 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 
 		// DataExplorer hide select if dataset selected through url
 		runtimePropertyMap.put(DataExplorerController.KEY_HIDE_SELECT, String.valueOf(true));
+
+		// Aggregate anonymization threshold (default no threshold)
+		runtimePropertyMap.put(IndexedCrudRepositorySecurityDecorator.SETTINGS_KEY_AGGREGATE_ANONYMIZATION_THRESHOLD,
+				Integer.toString(0));
 
 		// Annotators include files/tools
 		String molgenisHomeDir = System.getProperty("molgenis.home");
@@ -127,12 +129,14 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 
 		runtimePropertyMap.put(MolgenisInterceptor.I18N_LOCALE, "en");
 
-		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_START, "POS,start_nucleotide");
-		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_STOP, "stop_pos,stop_nucleotide,end_nucleotide");
 		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_CHROM, "CHROM,#CHROM,chromosome");
+		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_POS, "POS,start_nucleotide");
+		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_REF, "REF");
+		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_ALT, "ALT");
 		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_ID, "ID,Mutation_id");
 		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_DESCRIPTION, "INFO");
 		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_PATIENT_ID, "patient_id");
+		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_STOP, "stop_pos,stop_nucleotide,end_nucleotide");
 
 		for (Entry<String, String> entry : runtimePropertyMap.entrySet())
 		{

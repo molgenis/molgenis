@@ -3,7 +3,7 @@ package org.molgenis.omx.biobankconnect.ontologyservice;
 import java.util.List;
 import java.util.Map;
 
-import org.molgenis.search.Hit;
+import org.molgenis.data.elasticsearch.util.Hit;
 
 public class OntologyServiceResult
 {

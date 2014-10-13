@@ -138,6 +138,11 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	@Override
 	public boolean isReadonly()
 	{
+		if (idAttribute)
+		{
+			readOnly = true;
+		}
+
 		return readOnly;
 	}
 
@@ -176,12 +181,6 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	public DefaultAttributeMetaData setIdAttribute(boolean idAttribute)
 	{
 		this.idAttribute = idAttribute;
-		if (idAttribute)
-		{
-			unique = true;
-			readOnly = true;
-		}
-
 		return this;
 	}
 
@@ -251,6 +250,11 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	@Override
 	public boolean isUnique()
 	{
+		if (idAttribute)
+		{
+			unique = true;
+		}
+
 		return unique;
 	}
 

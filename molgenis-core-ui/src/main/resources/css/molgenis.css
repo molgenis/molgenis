@@ -71,6 +71,14 @@ label.horizontal-inline.inbetween {
 	margin-left: 5px;
 }
 
+.dropdown-menu{
+	overflow-y: auto;
+	overflow-x: hidden;
+	width: auto;
+	height: auto;
+	max-height: 500px;
+}
+
 /* Bootstrap tooltip style */
 .tooltip {
 	position: absolute;
@@ -162,4 +170,5 @@ label.horizontal-inline.inbetween {
 	width: 0;
 	height: 0
 }
+
 /* end of Bootstrap tooltip style*/

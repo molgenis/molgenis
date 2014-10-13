@@ -222,7 +222,7 @@ public class DataExplorerController extends MolgenisPluginController
 					DEFAULT_VAL_KEY_HIGLIGHTREGION)));
 
 			model.addAttribute("genomebrowser_start_list",
-					molgenisSettings.getProperty(GenomeConfig.GENOMEBROWSER_START, "POS"));
+					molgenisSettings.getProperty(GenomeConfig.GENOMEBROWSER_POS, "POS"));
 			model.addAttribute("genomebrowser_chrom_list",
 					molgenisSettings.getProperty(GenomeConfig.GENOMEBROWSER_CHROM, "CHROM"));
 			model.addAttribute("genomebrowser_id_list",
@@ -352,7 +352,7 @@ public class DataExplorerController extends MolgenisPluginController
 	private boolean isGenomeBrowserEntity(EntityMetaData entityMetaData)
 	{
 		AttributeMetaData attributeStartPosition = genomeConfig.getAttributeMetadataForAttributeNameArray(
-				GenomeConfig.GENOMEBROWSER_START, entityMetaData);
+				GenomeConfig.GENOMEBROWSER_POS, entityMetaData);
 		AttributeMetaData attributeChromosome = genomeConfig.getAttributeMetadataForAttributeNameArray(
 				GenomeConfig.GENOMEBROWSER_CHROM, entityMetaData);
 		return attributeStartPosition != null && attributeChromosome != null;
@@ -369,7 +369,7 @@ public class DataExplorerController extends MolgenisPluginController
 		DataRequest dataRequest = new GsonHttpMessageConverter().getGson().fromJson(dataRequestStr, DataRequest.class);
 
 		String entityName = dataRequest.getEntityName();
-		String fileName = entityName + '_' + new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + ".csv";
+		String fileName = entityName + '_' + new SimpleDateFormat("yyyy-mm-dd hh:mm:ss").format(new Date()) + ".csv";
 
 		response.setContentType("text/csv");
 		response.addHeader("Content-Disposition", "attachment; filename=" + fileName);

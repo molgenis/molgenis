@@ -11,13 +11,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.naming.directory.SearchResult;
-
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.search.SearchService;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
+import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.elasticsearch.util.Hit;
+import org.molgenis.data.elasticsearch.util.SearchRequest;
+import org.molgenis.data.elasticsearch.util.SearchResult;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.biobankconnect.ontologymatcher.AsyncOntologyMatcher;

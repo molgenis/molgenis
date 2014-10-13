@@ -16,6 +16,7 @@ import static org.molgenis.data.mysql.AttributeMetaDataMetaData.RANGE_MAX;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.RANGE_MIN;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.READ_ONLY;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.REF_ENTITY;
+import static org.molgenis.data.mysql.AttributeMetaDataMetaData.UNIQUE;
 import static org.molgenis.data.mysql.AttributeMetaDataMetaData.VISIBLE;
 
 import java.util.List;
@@ -86,6 +87,7 @@ public class MysqlAttributeMetaDataRepository extends MysqlRepository implements
 		attributeMetaDataEntity.set(LOOKUP_ATTRIBUTE, att.isLookupAttribute());
 		attributeMetaDataEntity.set(LABEL_ATTRIBUTE, att.isLabelAttribute());
 		attributeMetaDataEntity.set(READ_ONLY, att.isReadonly());
+		attributeMetaDataEntity.set(UNIQUE, att.isUnique());
 
 		if (att.getDataType() instanceof EnumField)
 		{
@@ -138,6 +140,7 @@ public class MysqlAttributeMetaDataRepository extends MysqlRepository implements
 		attributeMetaData.setLabelAttribute(entity.getBoolean(LABEL_ATTRIBUTE) == null ? false : entity
 				.getBoolean(LABEL_ATTRIBUTE));
 		attributeMetaData.setReadOnly(entity.getBoolean(READ_ONLY) == null ? false : entity.getBoolean(READ_ONLY));
+		attributeMetaData.setUnique(entity.getBoolean(UNIQUE) == null ? false : entity.getBoolean(UNIQUE));
 
 		Long rangeMin = entity.getLong(RANGE_MIN);
 		Long rangeMax = entity.getLong(RANGE_MAX);

@@ -2,52 +2,75 @@ package org.molgenis.data.elasticsearch;
 
 import java.util.Map;
 
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.UnknownAttributeException;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
+import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
+
+/**
+ * Elasticsearch entity containing ids for referenced entities
+ */
 public class ElasticsearchDocumentNestedEntity extends ElasticsearchDocumentEntity
 {
 	private static final long serialVersionUID = 1L;
 
 	public ElasticsearchDocumentNestedEntity(Map<String, Object> source, EntityMetaData entityMetaData,
-			SearchService elasticSearchService)
+			SearchService elasticSearchService, EntityToSourceConverter entityToSourceConverter)
 	{
-		super(source, entityMetaData, elasticSearchService);
+		super(source, entityMetaData, elasticSearchService, entityToSourceConverter);
 	}
 
 	@Override
 	public Entity getEntity(String attributeName)
 	{
-		// FIXME
-		// Object value = refSource.get(attributeName);
-		// if (value == null) return null;
-		//
-		// elasticSearchService.getById(documentType, id)ById(documentType, id)
-		// AttributeMetaData attribute = entityMetaData.getAttribute(attributeName);
-		// if (attribute == null) throw new UnknownAttributeException(attributeName);
-		//
-		// return new ElasticsearchRefEntity((Map<String, Object>) value, attribute.getRefEntity());
-		return null;
+		Object refEntityId = getSource().get(attributeName);
+		if (refEntityId == null) return null;
+
+		AttributeMetaData attribute = getEntityMetaData().getAttribute(attributeName);
+		if (attribute == null) throw new UnknownAttributeException(attributeName);
+
+		return getElasticsearchService().get(refEntityId, attribute.getRefEntity());
 	}
 
 	@Override
 	public Iterable<Entity> getEntities(String attributeName)
 	{
-		// FIXME
-		// Object value = refSource.get(attributeName);
-		// if (value == null) return Collections.emptyList();
-		//
-		// final AttributeMetaData attribute = entityMetaData.getAttribute(attributeName);
-		// if (attribute == null) throw new UnknownAttributeException(attributeName);
-		//
-		// return Iterables.transform((List<Map<String, Object>>) value, new Function<Map<String, Object>, Entity>()
-		// {
-		// @Override
-		// public Entity apply(Map<String, Object> refSource)
-		// {
-		// return new ElasticsearchRefEntity(refSource, attribute.getRefEntity());
-		// }
-		// });
-		return null;
+		Object refEntityIdsObj = getSource().get(attributeName);
+		if (refEntityIdsObj == null) return null;
+
+		if (!(refEntityIdsObj instanceof Iterable<?>))
+		{
+			throw new RuntimeException("Expected Iterable<Object> instead of ["
+					+ refEntityIdsObj.getClass().getSimpleName() + "]");
+		}
+		@SuppressWarnings("unchecked")
+		Iterable<Object> refEntityIds = (Iterable<Object>) refEntityIdsObj;
+
+		final AttributeMetaData attribute = getEntityMetaData().getAttribute(attributeName);
+		if (attribute == null) throw new UnknownAttributeException(attributeName);
+
+		return Iterables.transform(refEntityIds, new Function<Object, Entity>()
+		{
+			@Override
+			public Entity apply(Object refEntityId)
+			{
+				return getElasticsearchService().get(refEntityId, attribute.getRefEntity());
+			}
+		});
 	}
+
+    @Override
+    public void set(String attributeName, Object value) {
+        {
+            final AttributeMetaData attribute = getEntityMetaData().getAttribute(attributeName);
+            if (attribute == null) throw new UnknownAttributeException(attributeName);
+
+            Object convertedValue = entityToSourceConverter.convertAttribute(this,attribute,false);
+            getSource().put(attributeName, convertedValue);
+        }
+    }
 }
