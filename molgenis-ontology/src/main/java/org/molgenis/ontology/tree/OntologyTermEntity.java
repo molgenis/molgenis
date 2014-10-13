@@ -1,4 +1,4 @@
-package org.molgenis.omx.biobankconnect.ontologytree;
+package org.molgenis.ontology.tree;
 
 import java.util.ArrayList;
 import java.util.List;

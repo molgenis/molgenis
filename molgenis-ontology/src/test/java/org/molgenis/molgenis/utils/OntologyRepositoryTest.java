@@ -1,4 +1,4 @@
-package org.molgenis.omx.biobankconnect.utils;
+package org.molgenis.molgenis.utils;
 
 import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;

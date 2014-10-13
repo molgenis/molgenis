@@ -9,8 +9,8 @@ import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.util.Hit;
 import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.omx.biobankconnect.ontologytree.OntologyEntity;
 import org.molgenis.ontology.service.OntologyService;
+import org.molgenis.ontology.tree.OntologyEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class OntologyQueryRepository extends AbstractOntologyQueryRepository

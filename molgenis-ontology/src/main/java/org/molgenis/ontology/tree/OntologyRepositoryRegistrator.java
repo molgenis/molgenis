@@ -1,4 +1,4 @@
-package org.molgenis.omx.biobankconnect.ontologytree;
+package org.molgenis.ontology.tree;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.elasticsearch.SearchService;

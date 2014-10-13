@@ -1,6 +1,6 @@
-package org.molgenis.omx.biobankconnect.ontologytree;
+package org.molgenis.ontology.tree;
 
-import static org.molgenis.omx.biobankconnect.ontologytree.OntologyTreeController.URI;
+import static org.molgenis.ontology.tree.OntologyTreeController.URI;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 import org.molgenis.framework.ui.MolgenisPluginController;

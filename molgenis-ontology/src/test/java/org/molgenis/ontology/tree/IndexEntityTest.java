@@ -1,4 +1,4 @@
-package org.molgenis.omx.biobankconnect.ontologytree;
+package org.molgenis.ontology.tree;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -13,6 +13,8 @@ import org.molgenis.data.elasticsearch.util.Hit;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.omx.observ.Characteristic;
+import org.molgenis.ontology.tree.AbstractOntologyEntity;
+import org.molgenis.ontology.tree.OntologyEntity;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;

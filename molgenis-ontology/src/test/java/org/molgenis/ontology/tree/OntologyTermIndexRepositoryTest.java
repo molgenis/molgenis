@@ -1,4 +1,4 @@
-package org.molgenis.omx.biobankconnect.ontologytree;
+package org.molgenis.ontology.tree;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;

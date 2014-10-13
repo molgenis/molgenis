@@ -17,8 +17,8 @@ import org.molgenis.data.elasticsearch.util.SearchResult;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.omx.biobankconnect.ontologytree.OntologyTermEntity;
 import org.molgenis.ontology.index.AsyncOntologyIndexer;
+import org.molgenis.ontology.tree.OntologyTermEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class OntologyTermQueryRepository extends AbstractOntologyQueryRepository
