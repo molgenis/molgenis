@@ -207,16 +207,6 @@ public class MysqlMetaDataRepositories implements MetaDataRepositories
 		return entityMetaDataRepository.getEntityMetaData(fullyQualifiedName);
 	}
 
-	/**
-	 * For testing purposes.
-	 */
-	public void deleteAll()
-	{
-		attributeMetaDataRepository.deleteAll();
-		entityMetaDataRepository.deleteAll();
-		packageRepository.deleteAll();
-	}
-
 	@Override
 	public void addPackage(Package p)
 	{
