@@ -2,9 +2,9 @@ package org.molgenis.ontology;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.semantic.SemanticSearchService;
 import org.molgenis.ontology.index.AsyncOntologyIndexer;
 import org.molgenis.ontology.search.SemanticSearchServiceImpl;
-import org.molgenis.ontology.search.OmxSemanticSearch;
 import org.molgenis.ontology.service.OntologyService;
 import org.molgenis.ontology.service.OntologyServiceSessionData;
 import org.molgenis.ontology.tag.AsyncOntologyAnnotator;
@@ -12,7 +12,6 @@ import org.molgenis.ontology.tag.OntologyAnnotator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.annotation.EnableAsync;
 
 @Configuration
@@ -43,10 +42,9 @@ public class OntologyConfig
 	}
 
 	@Bean
-	@Scope("prototype")
-	public OmxSemanticSearch ontologyMatcher()
+	public SemanticSearchService semanticSearchService()
 	{
-		return new SemanticSearchServiceImpl();
+		return new SemanticSearchServiceImpl(dataService, searchService);
 	}
 
 	@Bean
