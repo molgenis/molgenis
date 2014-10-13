@@ -6,12 +6,12 @@ import javax.sql.DataSource;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryDecoratorFactory;
-import org.molgenis.data.meta.MetaDataRepositories;
-import org.molgenis.data.meta.MetaDataRepositoriesDecorator;
+import org.molgenis.data.meta.WritableMetaDataService;
+import org.molgenis.data.meta.WritableMetaDataServiceDecorator;
 import org.molgenis.data.mysql.EmbeddedMysqlDatabaseBuilder;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
-import org.molgenis.data.mysql.meta.MysqlMetaDataRepositories;
+import org.molgenis.data.mysql.meta.MysqlWritableMetaDataService;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
@@ -34,7 +34,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @ComponentScan("org.molgenis.data")
 public class AppConfig
 {
-	private MysqlMetaDataRepositories mysqlMetaDataRepositories;
+	private MysqlWritableMetaDataService mysqlWritableMetaDataService;
 
 	@Bean(destroyMethod = "shutdown")
 	public DataSource dataSource()
@@ -75,24 +75,24 @@ public class AppConfig
 	}
 
 	@Bean
-	public MetaDataRepositories metaDataRepositories()
+	public WritableMetaDataService writableMetaDataService()
 	{
-		mysqlMetaDataRepositories = new MysqlMetaDataRepositories(dataSource());
-		return metaDataRepositoriesDecorator().decorate(mysqlMetaDataRepositories);
+		mysqlWritableMetaDataService = new MysqlWritableMetaDataService(dataSource());
+		return writableMetaDataServiceDecorator().decorate(mysqlWritableMetaDataService);
 	}
 
 	@Bean
 	/**
 	 * non-decorating decorator, to be overrided if you wish to decorate the MetaDataRepositories
 	 */
-	MetaDataRepositoriesDecorator metaDataRepositoriesDecorator()
+	WritableMetaDataServiceDecorator writableMetaDataServiceDecorator()
 	{
-		return new MetaDataRepositoriesDecorator()
+		return new WritableMetaDataServiceDecorator()
 		{
 			@Override
-			public MetaDataRepositories decorate(MetaDataRepositories metaDataRepositories)
+			public WritableMetaDataService decorate(WritableMetaDataService writableMetaDataService)
 			{
-				return metaDataRepositories;
+				return writableMetaDataService;
 			}
 		};
 	}
@@ -101,7 +101,7 @@ public class AppConfig
 	public MysqlRepositoryCollection mysqlRepositoryCollection()
 	{
 		MysqlRepositoryCollection mysqlRepositoryCollection = new MysqlRepositoryCollection(dataSource(),
-				dataService(), metaDataRepositories(), repositoryDecoratorFactory())
+				dataService(), writableMetaDataService(), repositoryDecoratorFactory())
 
 		{
 			@Override
@@ -113,7 +113,7 @@ public class AppConfig
 			}
 		};
 
-		mysqlMetaDataRepositories.setRepositoryCollection(mysqlRepositoryCollection);
+		mysqlWritableMetaDataService.setRepositoryCollection(mysqlRepositoryCollection);
 
 		return mysqlRepositoryCollection;
 	}

@@ -7,7 +7,7 @@ import org.molgenis.data.Package;
 /**
  * Interface for the metadata repositories. Used to change the registered metadata.
  */
-public interface MetaDataRepositories extends MetaDataService
+public interface WritableMetaDataService extends MetaDataService
 {
 	/**
 	 * Recreates the administration infrastructure.

@@ -32,7 +32,7 @@ import com.google.common.collect.Lists;
 public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired
-	private MysqlMetaDataRepositories metaDataRepositories;
+	private MysqlWritableMetaDataService metaDataRepositories;
 
 	@Autowired
 	private MysqlRepositoryCollection coll;

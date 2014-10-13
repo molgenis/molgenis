@@ -14,7 +14,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.RepositoryDecoratorFactory;
-import org.molgenis.data.meta.MetaDataRepositories;
+import org.molgenis.data.meta.WritableMetaDataService;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,14 +27,14 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 	private Map<String, MysqlRepository> repositories;
 	// temporary workaround for module dependencies
 	private final RepositoryDecoratorFactory repositoryDecoratorFactory;
-	private final MetaDataRepositories metaDataRepositories;
+	private final WritableMetaDataService metaDataRepositories;
 
-	public MysqlRepositoryCollection(DataSource ds, DataService dataService, MetaDataRepositories metaDataRepositories)
+	public MysqlRepositoryCollection(DataSource ds, DataService dataService, WritableMetaDataService metaDataRepositories)
 	{
 		this(ds, dataService, metaDataRepositories, null);
 	}
 
-	public MysqlRepositoryCollection(DataSource ds, DataService dataService, MetaDataRepositories metaDataRepositories,
+	public MysqlRepositoryCollection(DataSource ds, DataService dataService, WritableMetaDataService metaDataRepositories,
 			RepositoryDecoratorFactory repositoryDecoratorFactory)
 	{
 		this.ds = ds;

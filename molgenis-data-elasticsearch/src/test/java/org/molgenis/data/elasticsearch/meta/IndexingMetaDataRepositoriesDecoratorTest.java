@@ -11,30 +11,30 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.elasticsearch.ElasticSearchService;
-import org.molgenis.data.meta.MetaDataRepositories;
+import org.molgenis.data.meta.WritableMetaDataService;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class IndexingMetaDataRepositoriesDecoratorTest
 {
-	private IndexingMetaDataRepositoriesDecorator decorator;
-	private MetaDataRepositories metaDataRepositories;
+	private IndexingWritableMetaDataServiceDecorator decorator;
+	private WritableMetaDataService metaDataRepositories;
 	private DataService dataService;
 	private ElasticSearchService elasticSearchService;
 
 	@BeforeMethod
 	public void setUp()
 	{
-		metaDataRepositories = mock(MetaDataRepositories.class);
+		metaDataRepositories = mock(WritableMetaDataService.class);
 		dataService = mock(DataService.class);
 		elasticSearchService = mock(ElasticSearchService.class);
-		decorator = new IndexingMetaDataRepositoriesDecorator(metaDataRepositories, dataService, elasticSearchService);
+		decorator = new IndexingWritableMetaDataServiceDecorator(metaDataRepositories, dataService, elasticSearchService);
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void ElasticsearchAttributeMetaDataRepository()
 	{
-		new IndexingMetaDataRepositoriesDecorator(null, null, null);
+		new IndexingWritableMetaDataServiceDecorator(null, null, null);
 	}
 
 	@Test

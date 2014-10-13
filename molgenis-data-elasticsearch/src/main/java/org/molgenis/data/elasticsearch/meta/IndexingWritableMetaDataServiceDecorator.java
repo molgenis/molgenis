@@ -9,19 +9,19 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Package;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.meta.MetaDataRepositories;
+import org.molgenis.data.meta.WritableMetaDataService;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Meta data repository for attributes that wraps an existing repository
  */
-public class IndexingMetaDataRepositoriesDecorator implements MetaDataRepositories
+public class IndexingWritableMetaDataServiceDecorator implements WritableMetaDataService
 {
-	private final MetaDataRepositories delegate;
+	private final WritableMetaDataService delegate;
 	private final DataService dataService;
 	private final SearchService elasticSearchService;
 
-	public IndexingMetaDataRepositoriesDecorator(MetaDataRepositories delegate, DataService dataService,
+	public IndexingWritableMetaDataServiceDecorator(WritableMetaDataService delegate, DataService dataService,
 			SearchService elasticSearchService)
 	{
 		if (delegate == null) throw new IllegalArgumentException("metaDataRepositories is null");

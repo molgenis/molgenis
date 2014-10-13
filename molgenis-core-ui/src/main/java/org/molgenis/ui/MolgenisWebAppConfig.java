@@ -22,9 +22,9 @@ import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.elasticsearch.ElasticsearchRepositoryDecorator;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.elasticsearch.meta.IndexingMetaDataRepositoriesDecorator;
-import org.molgenis.data.meta.MetaDataRepositories;
-import org.molgenis.data.meta.MetaDataRepositoriesDecorator;
+import org.molgenis.data.elasticsearch.meta.IndexingWritableMetaDataServiceDecorator;
+import org.molgenis.data.meta.WritableMetaDataService;
+import org.molgenis.data.meta.WritableMetaDataServiceDecorator;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.IndexedRepositoryValidationDecorator;
 import org.molgenis.framework.db.WebAppDatabasePopulator;
@@ -329,15 +329,15 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	// temporary workaround for module dependencies
 
 	@Bean
-	MetaDataRepositoriesDecorator metaDataRepositoriesDecorator()
+	WritableMetaDataServiceDecorator writableMetaDataServiceDecorator()
 	{
-		return new MetaDataRepositoriesDecorator()
+		return new WritableMetaDataServiceDecorator()
 		{
-
 			@Override
-			public MetaDataRepositories decorate(MetaDataRepositories metaDataRepositories)
+			public WritableMetaDataService decorate(WritableMetaDataService metaDataRepositories)
 			{
-				return new IndexingMetaDataRepositoriesDecorator(metaDataRepositories, dataService,
+				System.out.println("Decorating metaDataRepositories");
+				return new IndexingWritableMetaDataServiceDecorator(metaDataRepositories, dataService,
 						elasticSearchService);
 			}
 		};

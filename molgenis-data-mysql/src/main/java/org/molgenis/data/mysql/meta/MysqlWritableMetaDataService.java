@@ -12,7 +12,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Package;
 import org.molgenis.data.Query;
-import org.molgenis.data.meta.MetaDataRepositories;
+import org.molgenis.data.meta.WritableMetaDataService;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DefaultAttributeMetaData;
@@ -23,19 +23,19 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-public class MysqlMetaDataRepositories implements MetaDataRepositories
+public class MysqlWritableMetaDataService implements WritableMetaDataService
 {
 	private final MysqlPackageRepository packageRepository;
 	private final MysqlEntityMetaDataRepository entityMetaDataRepository;
 	private final MysqlAttributeMetaDataRepository attributeMetaDataRepository;
 
 	/**
-	 * Creates the {@link MysqlMetaDataRepositories}
+	 * Creates the {@link MysqlWritableMetaDataService}
 	 * 
 	 * @param ds
 	 *            the {@link DataSource} to use
 	 */
-	public MysqlMetaDataRepositories(DataSource ds)
+	public MysqlWritableMetaDataService(DataSource ds)
 	{
 		packageRepository = new MysqlPackageRepository(ds);
 		entityMetaDataRepository = new MysqlEntityMetaDataRepository(ds);
@@ -44,7 +44,7 @@ public class MysqlMetaDataRepositories implements MetaDataRepositories
 
 	/**
 	 * Setter for the MysqlRepositoryCollection, to be called after it's created. This resolves the circular dependency
-	 * {@link MysqlRepositoryCollection} => decorated {@link MetaDataRepositories} => {@link MysqlRepository}s for the
+	 * {@link MysqlRepositoryCollection} => decorated {@link WritableMetaDataService} => {@link MysqlRepository}s for the
 	 * metadata => {@link MysqlRepositoryCollection}
 	 * 
 	 * @param mysqlRepositoryCollection

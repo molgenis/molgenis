@@ -15,7 +15,7 @@ import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
-import org.molgenis.data.mysql.meta.MysqlMetaDataRepositories;
+import org.molgenis.data.mysql.meta.MysqlWritableMetaDataService;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
@@ -64,7 +64,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 	PermissionSystemService permissionSystemService;
 
 	@Autowired
-	MysqlMetaDataRepositories mysqlMetaDataRepositories;
+	MysqlWritableMetaDataService mysqlMetaDataRepositories;
 
 	@BeforeMethod
 	public void beforeMethod()
