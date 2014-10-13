@@ -1,4 +1,4 @@
-package org.molgenis.omx.biobankconnect.ontologymatcher;
+package org.molgenis.ontology.search;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,16 +11,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.elasticsearch.common.collect.Iterables;
-import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
@@ -29,26 +27,14 @@ import org.molgenis.data.elasticsearch.util.Hit;
 import org.molgenis.data.elasticsearch.util.MultiSearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
-import org.molgenis.data.omx.OmxRepository;
+import org.molgenis.data.semantic.SemanticSearchService;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.validation.DefaultEntityValidator;
-import org.molgenis.data.validation.EntityAttributesValidator;
-import org.molgenis.omx.biobankconnect.algorithm.ApplyAlgorithms;
-import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermQueryRepository;
-import org.molgenis.omx.biobankconnect.ontologyindexer.AsyncOntologyIndexer;
-import org.molgenis.omx.biobankconnect.utils.NGramMatchingModel;
-import org.molgenis.omx.biobankconnect.utils.StoreMappingRepository;
-import org.molgenis.omx.biobankconnect.wizard.CurrentUserStatus;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
-import org.molgenis.omx.observ.ObservationSet;
-import org.molgenis.omx.observ.ObservedValue;
-import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.observ.target.OntologyTerm;
-import org.molgenis.omx.observ.value.IntValue;
-import org.molgenis.omx.observ.value.StringValue;
-import org.molgenis.security.runas.RunAsSystem;
-import org.springframework.beans.factory.InitializingBean;
+import org.molgenis.ontology.index.AsyncOntologyIndexer;
+import org.molgenis.ontology.repository.OntologyTermQueryRepository;
+import org.molgenis.ontology.utils.NGramMatchingModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.tartarus.snowball.ext.PorterStemmer;
@@ -56,9 +42,9 @@ import org.tartarus.snowball.ext.PorterStemmer;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 
-public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
+public class SemanticSearchServiceImpl implements SemanticSearchService
 {
-	private static final Logger logger = Logger.getLogger(AsyncOntologyMatcher.class);
+	private static final Logger logger = Logger.getLogger(SemanticSearchServiceImpl.class);
 	public static final String PROTOCOL_IDENTIFIER = "store_mapping";
 	public static final String STORE_MAPPING_FEATURE = "store_mapping_feature";
 	public static final String STORE_MAPPING_MAPPED_FEATURE = "store_mapping_mapped_feature";
@@ -72,7 +58,6 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	private static final String FIELD_DESCRIPTION_STOPWORDS = "descriptionStopwords";
 	private static final String FIELD_BOOST_ONTOLOGYTERM = "boostOntologyTerms";
 	private static final String ONTOLOGY_IRI = "ontologyIRI";
-	private static final String OBSERVATION_SET = "observationsetid";
 	private static final String ONTOLOGYTERM_SYNONYM = "ontologyTermSynonym";
 	private static final String ONTOLOGY_TERM = "ontologyTerm";
 	private static final String ONTOLOGY_TERM_IRI = "ontologyTermIRI";
@@ -84,49 +69,23 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	private static final int DEFAULT_RETRIEVAL_DOCUMENTS_SIZE = 50;
 	private static final String MULTIPLE_NUMBERS_PATTERN = "[0-9]+";
 	private static final String NODEPATH_SEPARATOR = "\\.";
-
-	private static final AtomicInteger runningProcesses = new AtomicInteger();
 	private static final double DEFAULT_BOOST = 10;
 
-	@Autowired
-	private DataService dataService;
+	private final DataService dataService;
+	private final SearchService searchService;
 
 	@Autowired
-	private CurrentUserStatus currentUserStatus;
-
-	private SearchService searchService;
-
-	@Autowired
-	public void setSearchService(SearchService searchService)
+	public SemanticSearchServiceImpl(DataService dataService, SearchService searchService)
 	{
+		this.dataService = dataService;
 		this.searchService = searchService;
 	}
 
 	@Override
-	public void afterPropertiesSet() throws Exception
+	public Iterable<AttributeMetaData> findAttributes(Package p, AttributeMetaData attributeMetaData)
 	{
-		if (searchService == null) throw new IllegalArgumentException("Missing bean of type SearchService");
-	}
-
-	@Override
-	public boolean isRunning()
-	{
-		if (runningProcesses.get() != 0) return true;
-		return false;
-	}
-
-	@Override
-	public Integer matchPercentage(String currentUserName)
-	{
-		return currentUserStatus.getPercentageOfProcessForUser(currentUserName);
-	}
-
-	@Override
-	@RunAsSystem
-	@Transactional
-	public void match(String userName, Integer selectedDataSetId, List<Integer> dataSetIdsToMatch, Integer featureId)
-	{
-		createMappingStore(userName, selectedDataSetId, dataSetIdsToMatch);
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	/**
@@ -134,7 +93,6 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	 * feature by using ElasticSearch based on the information from ontology
 	 * terms
 	 */
-	@Override
 	@Transactional
 	public SearchResult generateMapping(String userName, Integer featureId, Integer targetDataSetId,
 			Integer sourceDataSetId)
@@ -672,324 +630,6 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		return newList;
 	}
 
-	private void createMappingStore(String userName, Integer selectedDataSet, List<Integer> dataSetsToMatch)
-	{
-		ObservableFeature f = dataService.findOne(ObservableFeature.ENTITY_NAME,
-				new QueryImpl().eq(ObservableFeature.IDENTIFIER, STORE_MAPPING_FEATURE), ObservableFeature.class);
-
-		if (f == null)
-		{
-			List<ObservableFeature> features = new ArrayList<ObservableFeature>();
-
-			ObservableFeature feature = new ObservableFeature();
-			feature.setIdentifier(STORE_MAPPING_FEATURE);
-			feature.setDataType(MolgenisFieldTypes.FieldTypeEnum.INT.toString().toLowerCase());
-			feature.setName("Features");
-			features.add(feature);
-
-			ObservableFeature mappedFeature = new ObservableFeature();
-			mappedFeature.setIdentifier(STORE_MAPPING_MAPPED_FEATURE);
-			mappedFeature.setDataType(MolgenisFieldTypes.FieldTypeEnum.STRING.toString().toLowerCase());
-			mappedFeature.setName("Mapped features");
-			features.add(mappedFeature);
-
-			ObservableFeature mappedFeatureScore = new ObservableFeature();
-			mappedFeatureScore.setIdentifier(STORE_MAPPING_SCORE);
-			mappedFeatureScore.setDataType(MolgenisFieldTypes.FieldTypeEnum.DECIMAL.toString().toLowerCase());
-			mappedFeatureScore.setName(STORE_MAPPING_SCORE);
-			features.add(mappedFeatureScore);
-
-			ObservableFeature observationSetFeature = new ObservableFeature();
-			observationSetFeature.setIdentifier(OBSERVATION_SET);
-			observationSetFeature.setDataType(MolgenisFieldTypes.FieldTypeEnum.INT.toString().toLowerCase());
-			observationSetFeature.setName(OBSERVATION_SET);
-			features.add(observationSetFeature);
-
-			ObservableFeature algorithmScriptFeature = new ObservableFeature();
-			algorithmScriptFeature.setIdentifier(STORE_MAPPING_ALGORITHM_SCRIPT);
-			algorithmScriptFeature.setDataType(MolgenisFieldTypes.FieldTypeEnum.STRING.toString().toLowerCase());
-			algorithmScriptFeature.setName(STORE_MAPPING_ALGORITHM_SCRIPT);
-			features.add(algorithmScriptFeature);
-
-			ObservableFeature confirmMapping = new ObservableFeature();
-			confirmMapping.setIdentifier(STORE_MAPPING_CONFIRM_MAPPING);
-			confirmMapping.setDataType(MolgenisFieldTypes.FieldTypeEnum.BOOL.toString().toLowerCase());
-			confirmMapping.setName("Mapping confirmed");
-			features.add(confirmMapping);
-
-			dataService.add(ObservableFeature.ENTITY_NAME, features);
-
-			Protocol protocol = new Protocol();
-			protocol.setIdentifier(PROTOCOL_IDENTIFIER);
-			protocol.setName(PROTOCOL_IDENTIFIER);
-			protocol.setFeatures(features);
-			dataService.add(Protocol.ENTITY_NAME, protocol);
-
-			dataService.getCrudRepository(ObservableFeature.ENTITY_NAME).flush();
-		}
-
-		for (Integer dataSetId : dataSetsToMatch)
-		{
-			String identifier = createMappingDataSetIdentifier(userName, selectedDataSet, dataSetId);
-			DataSet existing = dataService.findOne(DataSet.ENTITY_NAME,
-					new QueryImpl().eq(DataSet.IDENTIFIER, identifier), DataSet.class);
-
-			if (existing == null)
-			{
-				DataSet dataSet = new DataSet();
-				dataSet.setIdentifier(identifier);
-				dataSet.setName(identifier);
-
-				Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME,
-						new QueryImpl().eq(Protocol.IDENTIFIER, PROTOCOL_IDENTIFIER), Protocol.class);
-				dataSet.setProtocolUsed(protocol);
-				dataService.add(DataSet.ENTITY_NAME, dataSet);
-				dataService.getCrudRepository(DataSet.ENTITY_NAME).flush();
-				dataService.addRepository(new OmxRepository(dataService, searchService, identifier,
-						new DefaultEntityValidator(dataService, new EntityAttributesValidator())));
-			}
-		}
-		dataService.getCrudRepository(Protocol.ENTITY_NAME).flush();
-	}
-
-	@Override
-	@RunAsSystem
-	public boolean checkExistingMappings(String dataSetIdentifier, DataService dataService)
-	{
-		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME,
-				new QueryImpl().eq(DataSet.IDENTIFIER, dataSetIdentifier), DataSet.class);
-		if (dataSet == null)
-		{
-			throw new MolgenisDataException("Unknown DataSet [" + dataSetIdentifier + "]");
-		}
-
-		Iterable<ObservationSet> listOfObservationSets = dataService.findAll(ObservationSet.ENTITY_NAME,
-				new QueryImpl().eq(ObservationSet.PARTOFDATASET, dataSet), ObservationSet.class);
-
-		return Iterables.size(listOfObservationSets) > 0;
-	}
-
-	@Override
-	@RunAsSystem
-	@Transactional
-	public Map<String, String> updateScript(String userName, OntologyMatcherRequest request)
-	{
-		Map<String, String> updateResult = new HashMap<String, String>();
-		// check if the dataset for mappings has been created
-		List<Integer> selectedDataSetIds = request.getSelectedDataSetIds();
-		Integer targetDataSetId = request.getTargetDataSetId();
-		createMappingStore(userName, targetDataSetId, selectedDataSetIds);
-
-		boolean toUpdate = false;
-		for (Integer selectedDataSetId : selectedDataSetIds)
-		{
-			// check if the mapping that needs to be updated has been created
-			String mappingDataSetIdentifier = createMappingDataSetIdentifier(userName, targetDataSetId,
-					selectedDataSetId);
-			// update the existing mappings
-			toUpdate = updateExistingMapping(mappingDataSetIdentifier, request);
-			if (!toUpdate) addNewMappingToDatabase(mappingDataSetIdentifier, request);
-		}
-
-		updateResult.put("message",
-				toUpdate ? "the script has been updated!" : "the script has been added to the database!");
-		return updateResult;
-	}
-
-	private void addNewMappingToDatabase(String mappingDataSetIdentifier, OntologyMatcherRequest request)
-	{
-		List<ObservedValue> listOfNewObservedValues = new ArrayList<ObservedValue>();
-
-		DataSet storingMappingDataSet = dataService.findOne(DataSet.ENTITY_NAME,
-				new QueryImpl().eq(DataSet.IDENTIFIER, mappingDataSetIdentifier), DataSet.class);
-		ObservationSet observationSet = new ObservationSet();
-		observationSet.setIdentifier(mappingDataSetIdentifier + "-" + request.getFeatureId());
-		observationSet.setPartOfDataSet(storingMappingDataSet);
-		dataService.add(ObservationSet.ENTITY_NAME, observationSet);
-
-		IntValue xrefForFeature = new IntValue();
-		xrefForFeature.setValue(request.getFeatureId());
-		dataService.add(IntValue.ENTITY_NAME, xrefForFeature);
-
-		ObservedValue valueForFeature = new ObservedValue();
-		valueForFeature.setObservationSet(observationSet);
-		ObservableFeature smf = dataService.findOne(ObservableFeature.ENTITY_NAME,
-				new QueryImpl().eq(ObservableFeature.IDENTIFIER, STORE_MAPPING_FEATURE), ObservableFeature.class);
-		valueForFeature.setFeature(smf);
-		valueForFeature.setValue(xrefForFeature);
-		listOfNewObservedValues.add(valueForFeature);
-
-		StringValue algorithmScriptValue = new StringValue();
-		algorithmScriptValue.setValue(request.getAlgorithmScript() == null ? StringUtils.EMPTY : request
-				.getAlgorithmScript());
-		dataService.add(StringValue.ENTITY_NAME, algorithmScriptValue);
-
-		ObservedValue algorithmScriptObservedValue = new ObservedValue();
-		algorithmScriptObservedValue.setObservationSet(observationSet);
-		ObservableFeature algorithmScriptFeature = dataService.findOne(ObservableFeature.ENTITY_NAME,
-				new QueryImpl().eq(ObservableFeature.IDENTIFIER, STORE_MAPPING_ALGORITHM_SCRIPT),
-				ObservableFeature.class);
-
-		algorithmScriptObservedValue.setFeature(algorithmScriptFeature);
-		algorithmScriptObservedValue.setValue(algorithmScriptValue);
-		listOfNewObservedValues.add(algorithmScriptObservedValue);
-
-		IntValue observationSetIntValue = new IntValue();
-		observationSetIntValue.setValue(observationSet.getId());
-		dataService.add(IntValue.ENTITY_NAME, observationSetIntValue);
-
-		ObservedValue valueForObservationSet = new ObservedValue();
-		ObservableFeature observationSetFeature = dataService.findOne(ObservableFeature.ENTITY_NAME,
-				new QueryImpl().eq(ObservableFeature.IDENTIFIER, OBSERVATION_SET), ObservableFeature.class);
-		valueForObservationSet.setFeature(observationSetFeature);
-		valueForObservationSet.setObservationSet(observationSet);
-		valueForObservationSet.setValue(observationSetIntValue);
-		listOfNewObservedValues.add(valueForObservationSet);
-
-		// Extract feature names out of algorithm script and store ids of the
-		// mapped features
-		ObservedValue valueForMappedFeatures = new ObservedValue();
-		ObservableFeature SMMF = dataService
-				.findOne(ObservableFeature.ENTITY_NAME,
-						new QueryImpl().eq(ObservableFeature.IDENTIFIER, STORE_MAPPING_MAPPED_FEATURE),
-						ObservableFeature.class);
-		StringValue mappedFeatureValues = new StringValue();
-		mappedFeatureValues.setValue(convertToFeatureIds(request));
-		dataService.add(StringValue.ENTITY_NAME, mappedFeatureValues);
-		valueForMappedFeatures.setFeature(SMMF);
-		valueForMappedFeatures.setValue(mappedFeatureValues);
-		valueForMappedFeatures.setObservationSet(observationSet);
-		listOfNewObservedValues.add(valueForMappedFeatures);
-
-		// Add observedValues to database and index those values
-		dataService.add(ObservedValue.ENTITY_NAME, listOfNewObservedValues);
-		dataService.getCrudRepository(ObservedValue.ENTITY_NAME).flush();
-		searchService.updateRepositoryIndex(new StoreMappingRepository(storingMappingDataSet, listOfNewObservedValues,
-				dataService));
-	}
-
-	private boolean updateExistingMapping(String mappingDataSetIdentifier, OntologyMatcherRequest request)
-	{
-		QueryImpl query = new QueryImpl();
-		query.pageSize(Integer.MAX_VALUE);
-		query.addRule(new QueryRule(STORE_MAPPING_FEATURE, Operator.EQUALS, request.getFeatureId()));
-		SearchResult result = searchService.search(new SearchRequest(mappingDataSetIdentifier, query, null));
-
-		if (result.getTotalHitCount() > 0)
-		{
-			Hit hit = result.getSearchHits().get(0);
-			Map<String, Object> columnValueMap = hit.getColumnValueMap();
-			ObservationSet observationSet = dataService.findOne(ObservationSet.ENTITY_NAME,
-					Integer.parseInt(columnValueMap.get(OBSERVATION_SET).toString()), ObservationSet.class);
-			if (observationSet == null) return false;
-
-			// Check if the new script is same as old script
-			Object existingScript = columnValueMap.get(STORE_MAPPING_ALGORITHM_SCRIPT);
-			String algorithmScript = request.getAlgorithmScript();
-			if (algorithmScript != null && !existingScript.toString().trim().equalsIgnoreCase(algorithmScript.trim()))
-			{
-				ObservableFeature storeMappingAlgorithmScriptFeature = dataService.findOne(
-						ObservableFeature.ENTITY_NAME,
-						new QueryImpl().eq(ObservableFeature.IDENTIFIER, STORE_MAPPING_ALGORITHM_SCRIPT),
-						ObservableFeature.class);
-
-				ObservedValue algorithmScriptObservedValue = dataService.findOne(
-						ObservedValue.ENTITY_NAME,
-						new QueryImpl().eq(ObservedValue.OBSERVATIONSET, observationSet).and()
-								.eq(ObservedValue.FEATURE, storeMappingAlgorithmScriptFeature), ObservedValue.class);
-
-				if (algorithmScriptObservedValue != null
-						&& algorithmScriptObservedValue.getValue() instanceof StringValue)
-				{
-					// Update algorithm script in database
-					StringValue algorithmScriptValue = (StringValue) algorithmScriptObservedValue.getValue();
-					algorithmScriptValue.setValue(algorithmScript);
-					dataService.update(StringValue.ENTITY_NAME, algorithmScriptValue);
-					dataService.getCrudRepository(StringValue.ENTITY_NAME).flush();
-					// Update algorithm script in index
-					searchService.updateDocumentById(mappingDataSetIdentifier, hit.getId(),
-							constructIndexUpdateScript(STORE_MAPPING_ALGORITHM_SCRIPT, algorithmScript));
-				}
-			}
-
-			Object existingMappedFeature = columnValueMap.get(STORE_MAPPING_MAPPED_FEATURE);
-			String convertToFeatureIds = convertToFeatureIds(request);
-			if (!existingMappedFeature.toString().equalsIgnoreCase(convertToFeatureIds))
-			{
-				ObservableFeature SMMF = dataService.findOne(ObservableFeature.ENTITY_NAME,
-						new QueryImpl().eq(ObservableFeature.IDENTIFIER, STORE_MAPPING_MAPPED_FEATURE),
-						ObservableFeature.class);
-				ObservedValue mappedFeaturesObservedValue = dataService.findOne(
-						ObservedValue.ENTITY_NAME,
-						new QueryImpl().eq(ObservedValue.OBSERVATIONSET, observationSet).and()
-								.eq(ObservedValue.FEATURE, SMMF), ObservedValue.class);
-				if (mappedFeaturesObservedValue != null
-						&& mappedFeaturesObservedValue.getValue() instanceof StringValue)
-				{
-					// Update mappedFeatures in database
-					StringValue mappedFeaturesValue = (StringValue) mappedFeaturesObservedValue.getValue();
-					mappedFeaturesValue.setValue(convertToFeatureIds);
-					dataService.update(StringValue.ENTITY_NAME, mappedFeaturesValue);
-					dataService.getCrudRepository(StringValue.ENTITY_NAME).flush();
-					// Update mappedFeatures in index
-					searchService.updateDocumentById(mappingDataSetIdentifier, hit.getId(),
-							constructIndexUpdateScript(STORE_MAPPING_MAPPED_FEATURE, convertToFeatureIds.toString()));
-				}
-			}
-		}
-		return result.getTotalHitCount() > 0;
-	}
-
-	/**
-	 * A help function to create ElasticSerach update script syntax
-	 * 
-	 * @param field
-	 * @param newValue
-	 * @return
-	 */
-	private String constructIndexUpdateScript(String field, String newValue)
-	{
-		StringBuilder updateScriptSyntax = new StringBuilder();
-		updateScriptSyntax.append(field).append('=').append("\"").append(newValue).append("\"");
-		return updateScriptSyntax.toString();
-	}
-
-	/**
-	 * A helper function to extract featureName from the algorithm script and
-	 * convert them to database IDs
-	 * 
-	 * @param request
-	 * @return
-	 */
-	private String convertToFeatureIds(OntologyMatcherRequest request)
-	{
-		List<Integer> featureIds = new ArrayList<Integer>();
-		if (request.getMappedFeatureIds() != null && request.getMappedFeatureIds().size() > 0)
-		{
-			return request.getMappedFeatureIds().toString();
-		}
-
-		if (!StringUtils.isEmpty(request.getAlgorithmScript()))
-		{
-			List<String> selectedFeatureNames = new ArrayList<String>();
-			for (String standardFeatureName : ApplyAlgorithms.extractFeatureName(request.getAlgorithmScript()))
-			{
-				selectedFeatureNames.add(standardFeatureName);
-			}
-
-			if (selectedFeatureNames.size() > 0)
-			{
-				Iterable<ObservableFeature> iterators = dataService.findAll(ObservableFeature.ENTITY_NAME,
-						new QueryImpl().in(ObservableFeature.NAME, selectedFeatureNames), ObservableFeature.class);
-				for (ObservableFeature feature : iterators)
-				{
-					featureIds.add(feature.getId());
-				}
-			}
-		}
-		return featureIds.size() == 0 ? StringUtils.EMPTY : featureIds.toString();
-	}
-
 	public static String createMappingDataSetIdentifier(String userName, Integer targetDataSetId,
 			Integer sourceDataSetId)
 	{
@@ -1040,9 +680,9 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			return true;
 		}
 
-		private AsyncOntologyMatcher getOuterType()
+		private SemanticSearchServiceImpl getOuterType()
 		{
-			return AsyncOntologyMatcher.this;
+			return SemanticSearchServiceImpl.this;
 		}
 
 		public String getOntologyIRI()
@@ -1066,9 +706,4 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		}
 	}
 
-	@Override
-	public void deleteDocumentByIds(String documentType, List<String> documentIds)
-	{
-
-	}
 }
