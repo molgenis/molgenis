@@ -6,15 +6,12 @@ import javax.sql.DataSource;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryDecoratorFactory;
-import org.molgenis.data.meta.AttributeMetaDataRepository;
-import org.molgenis.data.meta.AttributeMetaDataRepositoryDecoratorFactory;
-import org.molgenis.data.meta.EntityMetaDataRepository;
-import org.molgenis.data.meta.EntityMetaDataRepositoryDecoratorFactory;
+import org.molgenis.data.meta.WritableMetaDataService;
+import org.molgenis.data.meta.WritableMetaDataServiceDecorator;
 import org.molgenis.data.mysql.EmbeddedMysqlDatabaseBuilder;
-import org.molgenis.data.mysql.MysqlAttributeMetaDataRepository;
-import org.molgenis.data.mysql.MysqlEntityMetaDataRepository;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
+import org.molgenis.data.mysql.meta.MysqlWritableMetaDataService;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
@@ -37,6 +34,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @ComponentScan("org.molgenis.data")
 public class AppConfig
 {
+	private MysqlWritableMetaDataService mysqlWritableMetaDataService;
+
 	@Bean(destroyMethod = "shutdown")
 	public DataSource dataSource()
 	{
@@ -70,37 +69,53 @@ public class AppConfig
 	}
 
 	@Bean
-	public MysqlEntityMetaDataRepository entityMetaDataRepository()
-	{
-		return new MysqlEntityMetaDataRepository(dataSource());
-	}
-
-	@Bean
-	public MysqlAttributeMetaDataRepository attributeMetaDataRepository()
-	{
-		return new MysqlAttributeMetaDataRepository(dataSource());
-	}
-
-	@Bean
 	public PermissionSystemService permissionSystemService()
 	{
 		return new PermissionSystemService(dataService());
 	}
 
 	@Bean
-	public MysqlRepositoryCollection mysqlRepositoryCollection()
+	public WritableMetaDataService writableMetaDataService()
 	{
-		return new MysqlRepositoryCollection(dataSource(), dataService(), entityMetaDataRepository(),
-				attributeMetaDataRepository())
+		mysqlWritableMetaDataService = new MysqlWritableMetaDataService(dataSource());
+		return writableMetaDataServiceDecorator().decorate(mysqlWritableMetaDataService);
+	}
+
+	@Bean
+	/**
+	 * non-decorating decorator, to be overrided if you wish to decorate the MetaDataRepositories
+	 */
+	WritableMetaDataServiceDecorator writableMetaDataServiceDecorator()
+	{
+		return new WritableMetaDataServiceDecorator()
 		{
 			@Override
-			protected MysqlRepository createMysqlRepsitory()
+			public WritableMetaDataService decorate(WritableMetaDataService writableMetaDataService)
+			{
+				return writableMetaDataService;
+			}
+		};
+	}
+
+	@Bean
+	public MysqlRepositoryCollection mysqlRepositoryCollection()
+	{
+		MysqlRepositoryCollection mysqlRepositoryCollection = new MysqlRepositoryCollection(dataSource(),
+				dataService(), writableMetaDataService(), repositoryDecoratorFactory())
+
+		{
+			@Override
+			protected MysqlRepository createMysqlRepository()
 			{
 				MysqlRepository repo = mysqlRepository();
 				repo.setRepositoryCollection(this);
 				return repo;
 			}
 		};
+
+		mysqlWritableMetaDataService.setRepositoryCollection(mysqlRepositoryCollection);
+
+		return mysqlRepositoryCollection;
 	}
 
 	@Bean
@@ -123,31 +138,4 @@ public class AppConfig
 		};
 	}
 
-	// temporary workaround for module dependencies
-	@Bean
-	public AttributeMetaDataRepositoryDecoratorFactory attributeMetaDataRepositoryDecoratorFactory()
-	{
-		return new AttributeMetaDataRepositoryDecoratorFactory()
-		{
-			@Override
-			public AttributeMetaDataRepository createDecoratedRepository(AttributeMetaDataRepository repository)
-			{
-				return repository;
-			}
-		};
-	}
-
-	// temporary workaround for module dependencies
-	@Bean
-	public EntityMetaDataRepositoryDecoratorFactory entityMetaDataRepositoryDecoratorFactory()
-	{
-		return new EntityMetaDataRepositoryDecoratorFactory()
-		{
-			@Override
-			public EntityMetaDataRepository createDecoratedRepository(EntityMetaDataRepository repository)
-			{
-				return repository;
-			}
-		};
-	}
 }

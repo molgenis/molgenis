@@ -103,7 +103,7 @@ public interface SearchService
 
 	void delete(Iterable<? extends Entity> entities, EntityMetaData entityMetaData);
 
-	void delete(EntityMetaData entityMetaData);
+	void delete(String entityName);
 
 	/**
 	 * Returns entity with given id or null if entity does not exist
