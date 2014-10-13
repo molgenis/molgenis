@@ -182,6 +182,6 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	@Override
 	public void drop()
 	{
-		elasticSearchService.delete(getEntityMetaData());
+		elasticSearchService.delete(getEntityMetaData().getName());
 	}
 }

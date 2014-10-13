@@ -1,23 +1,23 @@
-package org.molgenis.data.mysql;
+package org.molgenis.data.mysql.meta;
 
-import static org.molgenis.data.mysql.AttributeMetaDataMetaData.AGGREGATEABLE;
-import static org.molgenis.data.mysql.AttributeMetaDataMetaData.AUTO;
-import static org.molgenis.data.mysql.AttributeMetaDataMetaData.DATA_TYPE;
-import static org.molgenis.data.mysql.AttributeMetaDataMetaData.DESCRIPTION;
-import static org.molgenis.data.mysql.AttributeMetaDataMetaData.ENTITY;
-import static org.molgenis.data.mysql.AttributeMetaDataMetaData.ENUM_OPTIONS;
-import static org.molgenis.data.mysql.AttributeMetaDataMetaData.ID_ATTRIBUTE;
-import static org.molgenis.data.mysql.AttributeMetaDataMetaData.LABEL;
-import static org.molgenis.data.mysql.AttributeMetaDataMetaData.LABEL_ATTRIBUTE;
-import static org.molgenis.data.mysql.AttributeMetaDataMetaData.LOOKUP_ATTRIBUTE;
-import static org.molgenis.data.mysql.AttributeMetaDataMetaData.NAME;
-import static org.molgenis.data.mysql.AttributeMetaDataMetaData.NILLABLE;
-import static org.molgenis.data.mysql.AttributeMetaDataMetaData.RANGE_MAX;
-import static org.molgenis.data.mysql.AttributeMetaDataMetaData.RANGE_MIN;
-import static org.molgenis.data.mysql.AttributeMetaDataMetaData.READ_ONLY;
-import static org.molgenis.data.mysql.AttributeMetaDataMetaData.REF_ENTITY;
-import static org.molgenis.data.mysql.AttributeMetaDataMetaData.UNIQUE;
-import static org.molgenis.data.mysql.AttributeMetaDataMetaData.VISIBLE;
+import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.AGGREGATEABLE;
+import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.AUTO;
+import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.DATA_TYPE;
+import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.DESCRIPTION;
+import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.ENTITY;
+import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.ENUM_OPTIONS;
+import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.ID_ATTRIBUTE;
+import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.LABEL;
+import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.LABEL_ATTRIBUTE;
+import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.LOOKUP_ATTRIBUTE;
+import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.NAME;
+import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.NILLABLE;
+import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.RANGE_MAX;
+import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.RANGE_MIN;
+import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.READ_ONLY;
+import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.REF_ENTITY;
+import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.UNIQUE;
+import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.VISIBLE;
 
 import java.util.List;
 
@@ -28,7 +28,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Range;
-import org.molgenis.data.meta.AttributeMetaDataRepository;
+import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -37,7 +37,7 @@ import org.molgenis.fieldtypes.EnumField;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
-public class MysqlAttributeMetaDataRepository extends MysqlRepository implements AttributeMetaDataRepository
+class MysqlAttributeMetaDataRepository extends MysqlRepository
 {
 	public static final AttributeMetaDataMetaData META_DATA = new AttributeMetaDataMetaData();
 
@@ -47,12 +47,6 @@ public class MysqlAttributeMetaDataRepository extends MysqlRepository implements
 		setMetaData(META_DATA);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.mysql.AttributeMetaDataRepository#getEntityAttributeMetaData(java.lang.String)
-	 */
-	@Override
 	public Iterable<AttributeMetaData> getEntityAttributeMetaData(String entityName)
 	{
 		List<AttributeMetaData> attributes = Lists.newArrayList();
@@ -64,13 +58,6 @@ public class MysqlAttributeMetaDataRepository extends MysqlRepository implements
 		return attributes;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.mysql.AttributeMetaDataRepository#addAttributeMetaData(java.lang.String,
-	 * org.molgenis.data.AttributeMetaData)
-	 */
-	@Override
 	public void addAttributeMetaData(String entityName, AttributeMetaData att)
 	{
 		Entity attributeMetaDataEntity = new MapEntity();
@@ -105,13 +92,6 @@ public class MysqlAttributeMetaDataRepository extends MysqlRepository implements
 		add(attributeMetaDataEntity);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.molgenis.data.mysql.AttributeMetaDataRepository#removeAttributeMetaData(java.lang.String,
-	 * java.lang.String)
-	 */
-	@Override
 	public void removeAttributeMetaData(String entityName, String attributeName)
 	{
 		Query q = new QueryImpl().eq(AttributeMetaDataMetaData.ENTITY, entityName).and()

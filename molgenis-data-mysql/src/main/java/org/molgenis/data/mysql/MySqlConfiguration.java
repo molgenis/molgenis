@@ -7,8 +7,9 @@ import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.importer.EmxImportService;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
-import org.molgenis.data.meta.AttributeMetaDataRepositoryDecoratorFactory;
-import org.molgenis.data.meta.EntityMetaDataRepositoryDecoratorFactory;
+import org.molgenis.data.meta.WritableMetaDataService;
+import org.molgenis.data.meta.WritableMetaDataServiceDecorator;
+import org.molgenis.data.mysql.meta.MysqlWritableMetaDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,10 +30,8 @@ public class MySqlConfiguration
 	// temporary workaround for module dependencies
 	@Autowired
 	private RepositoryDecoratorFactory repositoryDecoratorFactory;
-	@Autowired
-	private EntityMetaDataRepositoryDecoratorFactory entityMetaDataRepositoryDecoratorFactory;
-	@Autowired
-	private AttributeMetaDataRepositoryDecoratorFactory attributeMetaDataRepositoryDecoratorFactory;
+
+	private MysqlWritableMetaDataService writableMetaDataService;
 
 	@Bean
 	@Scope("prototype")
@@ -42,32 +41,47 @@ public class MySqlConfiguration
 	}
 
 	@Bean
-	public MysqlEntityMetaDataRepository entityMetaDataRepository()
+	public WritableMetaDataService writableMetaDataService()
 	{
-		return new MysqlEntityMetaDataRepository(dataSource);
+		writableMetaDataService = new MysqlWritableMetaDataService(dataSource);
+		return writableMetaDataServiceDecorator().decorate(writableMetaDataService);
 	}
 
 	@Bean
-	public MysqlAttributeMetaDataRepository attributeMetaDataRepository()
+	/**
+	 * non-decorating decorator, to be overrided if you wish to decorate the MetaDataRepositories
+	 */
+	WritableMetaDataServiceDecorator writableMetaDataServiceDecorator()
 	{
-		return new MysqlAttributeMetaDataRepository(dataSource);
+		return new WritableMetaDataServiceDecorator()
+		{
+			@Override
+			public WritableMetaDataService decorate(WritableMetaDataService metaDataRepositories)
+			{
+				return metaDataRepositories;
+			}
+		};
 	}
 
 	@Bean
 	public MysqlRepositoryCollection mysqlRepositoryCollection()
 	{
-		return new MysqlRepositoryCollection(dataSource, dataService, entityMetaDataRepository(),
-				attributeMetaDataRepository(), repositoryDecoratorFactory, entityMetaDataRepositoryDecoratorFactory,
-				attributeMetaDataRepositoryDecoratorFactory)
+		MysqlRepositoryCollection mysqlRepositoryCollection = new MysqlRepositoryCollection(dataSource, dataService,
+				writableMetaDataService(), repositoryDecoratorFactory)
+
 		{
 			@Override
-			protected MysqlRepository createMysqlRepsitory()
+			protected MysqlRepository createMysqlRepository()
 			{
 				MysqlRepository repo = mysqlRepository();
 				repo.setRepositoryCollection(this);
 				return repo;
 			}
 		};
+
+		writableMetaDataService.setRepositoryCollection(mysqlRepositoryCollection);
+
+		return mysqlRepositoryCollection;
 	}
 
 	@Bean
