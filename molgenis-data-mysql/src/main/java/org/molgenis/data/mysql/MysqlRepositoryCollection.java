@@ -13,6 +13,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.RepositoryCreator;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.meta.WritableMetaDataService;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -21,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
 
-public abstract class MysqlRepositoryCollection implements RepositoryCollection, InitializingBean
+public abstract class MysqlRepositoryCollection implements RepositoryCollection, InitializingBean, RepositoryCreator
 {
 	private final DataSource ds;
 	private final DataService dataService;
@@ -94,7 +95,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection,
 	}
 
 	@Transactional
-	public MysqlRepository add(EntityMetaData emd)
+	public MysqlRepository create(EntityMetaData emd)
 	{
 		MysqlRepository repository = null;
 

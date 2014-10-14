@@ -1,7 +1,6 @@
-package org.molgenis.data.mysql.meta;
+package org.molgenis.data.meta;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -9,24 +8,23 @@ import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Package;
 import org.molgenis.data.Query;
-import org.molgenis.data.mysql.MysqlRepositoryCollection;
+import org.molgenis.data.RepositoryCreator;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 
 /**
  * Repository to add and retrieve Package entities.
  */
-class MysqlPackageRepository
+class PackageRepository
 {
 	public static final PackageMetaData META_DATA = new PackageMetaData();
 
 	private CrudRepository repository;
 
-	public MysqlPackageRepository(MysqlRepositoryCollection repositoryCollection)
+	public PackageRepository(RepositoryCreator repositoryCreator)
 	{
-		repository = repositoryCollection.add(META_DATA);
+		repository = repositoryCreator.create(META_DATA);
 		addDefaultPackage();
 	}
 

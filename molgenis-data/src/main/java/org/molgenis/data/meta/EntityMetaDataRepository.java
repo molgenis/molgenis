@@ -1,14 +1,15 @@
-package org.molgenis.data.mysql.meta;
+package org.molgenis.data.meta;
 
-import static org.molgenis.data.mysql.meta.EntityMetaDataMetaData.ABSTRACT;
-import static org.molgenis.data.mysql.meta.EntityMetaDataMetaData.DESCRIPTION;
-import static org.molgenis.data.mysql.meta.EntityMetaDataMetaData.EXTENDS;
-import static org.molgenis.data.mysql.meta.EntityMetaDataMetaData.FULL_NAME;
-import static org.molgenis.data.mysql.meta.EntityMetaDataMetaData.ID_ATTRIBUTE;
-import static org.molgenis.data.mysql.meta.EntityMetaDataMetaData.LABEL;
-import static org.molgenis.data.mysql.meta.EntityMetaDataMetaData.PACKAGE;
-import static org.molgenis.data.mysql.meta.EntityMetaDataMetaData.SIMPLE_NAME;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.ABSTRACT;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.EXTENDS;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.FULL_NAME;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.ID_ATTRIBUTE;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.LABEL;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.PACKAGE;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.SIMPLE_NAME;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.molgenis.data.CrudRepository;
@@ -16,21 +17,22 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
-import org.molgenis.data.mysql.MysqlRepositoryCollection;
+import org.molgenis.data.RepositoryCreator;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.util.DependencyResolver;
 
 import com.google.common.collect.Lists;
 
-class MysqlEntityMetaDataRepository
+class EntityMetaDataRepository
 {
 	public static final EntityMetaDataMetaData META_DATA = new EntityMetaDataMetaData();
 	private CrudRepository repository;
 
-	public MysqlEntityMetaDataRepository(MysqlRepositoryCollection repositoryCollection)
+	public EntityMetaDataRepository(RepositoryCreator repositoryCreator)
 	{
-		this.repository = repositoryCollection.add(META_DATA);
+		this.repository = repositoryCreator.create(META_DATA);
 	}
 
 	public Iterable<EntityMetaData> getEntityMetaDatas()

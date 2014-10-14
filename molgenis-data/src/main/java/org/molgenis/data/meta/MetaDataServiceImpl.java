@@ -1,4 +1,4 @@
-package org.molgenis.data.mysql.meta;
+package org.molgenis.data.meta;
 
 import java.util.List;
 import java.util.Map;
@@ -8,19 +8,18 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Package;
-import org.molgenis.data.meta.WritableMetaDataService;
-import org.molgenis.data.mysql.MysqlRepositoryCollection;
+import org.molgenis.data.RepositoryCreator;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-public class MysqlWritableMetaDataService implements WritableMetaDataService
+public class MetaDataServiceImpl implements WritableMetaDataService
 {
-	private MysqlPackageRepository packageRepository;
-	private MysqlEntityMetaDataRepository entityMetaDataRepository;
-	private MysqlAttributeMetaDataRepository attributeMetaDataRepository;
+	private PackageRepository packageRepository;
+	private EntityMetaDataRepository entityMetaDataRepository;
+	private AttributeMetaDataRepository attributeMetaDataRepository;
 
 	/**
 	 * Setter for the MysqlRepositoryCollection, to be called after it's created. This resolves the circular dependency
@@ -29,13 +28,13 @@ public class MysqlWritableMetaDataService implements WritableMetaDataService
 	 * 
 	 * @param mysqlRepositoryCollection
 	 */
-	public void setRepositoryCollection(MysqlRepositoryCollection repositoryCollection)
+	public void setRepositoryCollection(RepositoryCreator repositoryCreator)
 	{
-		if (repositoryCollection != null)
+		if (repositoryCreator != null)
 		{
-			packageRepository = new MysqlPackageRepository(repositoryCollection);
-			entityMetaDataRepository = new MysqlEntityMetaDataRepository(repositoryCollection);
-			attributeMetaDataRepository = new MysqlAttributeMetaDataRepository(repositoryCollection);
+			packageRepository = new PackageRepository(repositoryCreator);
+			entityMetaDataRepository = new EntityMetaDataRepository(repositoryCreator);
+			attributeMetaDataRepository = new AttributeMetaDataRepository(repositoryCreator);
 		}
 	}
 
@@ -74,9 +73,9 @@ public class MysqlWritableMetaDataService implements WritableMetaDataService
 		}
 
 		Set<EntityMetaData> metadataSet = Sets.newLinkedHashSet();
-		metadataSet.add(MysqlPackageRepository.META_DATA);
-		metadataSet.add(MysqlEntityMetaDataRepository.META_DATA);
-		metadataSet.add(MysqlAttributeMetaDataRepository.META_DATA);
+		metadataSet.add(PackageRepository.META_DATA);
+		metadataSet.add(EntityMetaDataRepository.META_DATA);
+		metadataSet.add(AttributeMetaDataRepository.META_DATA);
 
 		for (String name : metadata.keySet())
 		{

@@ -16,6 +16,8 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Package;
 import org.molgenis.data.Range;
+import org.molgenis.data.meta.MetaDataServiceImpl;
+import org.molgenis.data.meta.PackageImpl;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.fieldtypes.EnumField;
@@ -32,7 +34,7 @@ import com.google.common.collect.Lists;
 public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired
-	private MysqlWritableMetaDataService metaDataRepositories;
+	private MetaDataServiceImpl metaDataRepositories;
 
 	@Autowired
 	private MysqlRepositoryCollection coll;
