@@ -43,7 +43,7 @@ public class MySqlConfiguration
 	@Bean
 	public WritableMetaDataService writableMetaDataService()
 	{
-		writableMetaDataService = new MysqlWritableMetaDataService(dataSource);
+		writableMetaDataService = new MysqlWritableMetaDataService();
 		return writableMetaDataServiceDecorator().decorate(writableMetaDataService);
 	}
 

@@ -55,4 +55,5 @@ public class AttributeMetaDataMetaData extends DefaultEntityMetaData
 		addAttribute(READ_ONLY).setDataType(BOOL);
 		addAttribute(UNIQUE).setDataType(BOOL);
 	}
+
 }

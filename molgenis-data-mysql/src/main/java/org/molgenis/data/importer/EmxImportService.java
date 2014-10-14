@@ -687,7 +687,7 @@ public class EmxImportService implements ImportService
 					String name = entityMetaData.getName();
 					if (!ENTITIES.equals(name) && !ATTRIBUTES.equals(name) && !PACKAGES.equals(name))
 					{
-						if (!metaDataService.hasEntity(entityMetaData))
+						if (metaDataService.getEntityMetaData(entityMetaData.getName()) == null)
 						{
 							logger.debug("tyring to create: " + name);
 							addedEntities.add(name);

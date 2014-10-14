@@ -77,7 +77,7 @@ public class AppConfig
 	@Bean
 	public WritableMetaDataService writableMetaDataService()
 	{
-		mysqlWritableMetaDataService = new MysqlWritableMetaDataService(dataSource());
+		mysqlWritableMetaDataService = new MysqlWritableMetaDataService();
 		return writableMetaDataServiceDecorator().decorate(mysqlWritableMetaDataService);
 	}
 

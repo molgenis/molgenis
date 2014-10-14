@@ -56,12 +56,4 @@ public interface MetaDataService
 	 */
 	Iterable<AttributeMetaData> getEntityAttributeMetaData(String entityName);
 
-	/**
-	 * Indicates if an entity exists.
-	 * 
-	 * @param entityMetaData
-	 * @return
-	 */
-	boolean hasEntity(EntityMetaData entityMetaData);
-
 }

@@ -16,31 +16,38 @@ import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.meta.WritableMetaDataService;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
 
-public abstract class MysqlRepositoryCollection implements RepositoryCollection
+public abstract class MysqlRepositoryCollection implements RepositoryCollection, InitializingBean
 {
 	private final DataSource ds;
 	private final DataService dataService;
-	private Map<String, MysqlRepository> repositories;
+	final private Map<String, MysqlRepository> repositories = new LinkedHashMap<String, MysqlRepository>();
 	// temporary workaround for module dependencies
 	private final RepositoryDecoratorFactory repositoryDecoratorFactory;
 	private final WritableMetaDataService metaDataRepositories;
 
-	public MysqlRepositoryCollection(DataSource ds, DataService dataService, WritableMetaDataService metaDataRepositories)
+	public MysqlRepositoryCollection(DataSource ds, DataService dataService,
+			WritableMetaDataService metaDataRepositories)
 	{
 		this(ds, dataService, metaDataRepositories, null);
 	}
 
-	public MysqlRepositoryCollection(DataSource ds, DataService dataService, WritableMetaDataService metaDataRepositories,
-			RepositoryDecoratorFactory repositoryDecoratorFactory)
+	public MysqlRepositoryCollection(DataSource ds, DataService dataService,
+			WritableMetaDataService metaDataRepositories, RepositoryDecoratorFactory repositoryDecoratorFactory)
 	{
 		this.ds = ds;
 		this.dataService = dataService;
 		this.metaDataRepositories = metaDataRepositories;
 		this.repositoryDecoratorFactory = repositoryDecoratorFactory;
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception
+	{
 		refreshRepositories();
 	}
 
@@ -56,9 +63,6 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 
 	public void refreshRepositories()
 	{
-		repositories = new LinkedHashMap<String, MysqlRepository>();
-		metaDataRepositories.createAndUpgradeMetaDataTables();
-
 		Iterable<EntityMetaData> metadata = metaDataRepositories.getEntityMetaDatas();
 
 		// instantiate the repos
@@ -94,7 +98,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection
 	{
 		MysqlRepository repository = null;
 
-		if (metaDataRepositories.hasEntity(emd))
+		if (metaDataRepositories.getEntityMetaData(emd.getName()) != null)
 		{
 			if (emd.isAbstract())
 			{
