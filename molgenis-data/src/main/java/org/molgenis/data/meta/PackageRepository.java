@@ -1,6 +1,7 @@
 package org.molgenis.data.meta;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -9,9 +10,11 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Package;
 import org.molgenis.data.Query;
 import org.molgenis.data.RepositoryCreator;
+import org.molgenis.util.DependencyResolver;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 /**
  * Repository to add and retrieve Package entities.
@@ -73,14 +76,12 @@ class PackageRepository
 
 	public void deleteAll()
 	{
-		TreeSet<String> names = new TreeSet<String>(Collections.reverseOrder());
-		for (Entity p : repository)
+		List<Entity> importOrderPackages = Lists.newLinkedList(DependencyResolver.resolveSelfReferences(repository,
+				META_DATA));
+		Collections.reverse(importOrderPackages);
+		for (Entity p : importOrderPackages)
 		{
-			names.add(p.getString(META_DATA.FULL_NAME));
-		}
-		for (String name : names)
-		{
-			repository.deleteById(name);
+			repository.delete(p);
 		}
 	}
 
@@ -91,20 +92,12 @@ class PackageRepository
 	 */
 	public void add(Package p)
 	{
-		// add packages
-		List<Package> packages = Lists.newArrayList();
-		while (p != null)
+		if (p != null)
 		{
-			packages.add(p);
-			p = p.getParent();
-		}
-
-		Collections.reverse(packages);
-		for (Package pack : packages)
-		{
-			if (getPackage(pack.getName()) == null)
+			add(p.getParent());
+			if (getPackage(p.getName()) == null)
 			{
-				repository.add(new PackageImpl(pack));
+				repository.add(new PackageImpl(p));
 			}
 		}
 	}

@@ -126,8 +126,17 @@ class EntityMetaDataRepository
 		repository.delete(repository.findAll(new QueryImpl().eq(EntityMetaDataMetaData.FULL_NAME, entityName)));
 	}
 
+	/**
+	 * Deletes all entities, in the right order
+	 */
 	public void deleteAll()
 	{
-		repository.deleteAll();
+		List<Entity> importOrderEntities = Lists.newLinkedList(DependencyResolver.resolveSelfReferences(repository,
+				META_DATA));
+		Collections.reverse(importOrderEntities);
+		for (Entity entity : importOrderEntities)
+		{
+			delete(entity.getString(EntityMetaDataMetaData.FULL_NAME));
+		}
 	}
 }
