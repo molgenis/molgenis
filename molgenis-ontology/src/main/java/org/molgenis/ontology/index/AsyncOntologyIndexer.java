@@ -32,11 +32,13 @@ import org.molgenis.data.elasticsearch.util.Hit;
 import org.molgenis.data.elasticsearch.util.MapperTypeSanitizer;
 import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
+import org.molgenis.data.semantic.OntologyService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.observ.target.Ontology;
 import org.molgenis.omx.observ.target.OntologyTerm;
 import org.molgenis.ontology.repository.OntologyIndexRepository;
+import org.molgenis.ontology.repository.OntologyQueryRepository;
 import org.molgenis.ontology.repository.OntologyTermIndexRepository;
 import org.molgenis.ontology.repository.OntologyTermQueryRepository;
 import org.molgenis.ontology.utils.OntologyLoader;
@@ -50,6 +52,7 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 	private MolgenisSettings molgenisSettings;
 	private final DataService dataService;
 	private final SearchService searchService;
+	private final OntologyService ontologyService;
 	private String indexingOntologyIri = null;
 	private boolean isCorrectOntology = true;
 	private static int BATCH_SIZE = 10000;
@@ -59,12 +62,14 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 	private final AtomicInteger runningIndexProcesses = new AtomicInteger();
 
 	@Autowired
-	public AsyncOntologyIndexer(SearchService searchService, DataService dataService)
+	public AsyncOntologyIndexer(SearchService searchService, DataService dataService, OntologyService ontologyService)
 	{
 		if (searchService == null) throw new IllegalArgumentException("SearchService is null!");
 		if (dataService == null) throw new IllegalArgumentException("DataService is null!");
+		if (ontologyService == null) throw new IllegalArgumentException("OntologyService is null!");
 		this.searchService = searchService;
 		this.dataService = dataService;
+		this.ontologyService = ontologyService;
 	}
 
 	public boolean isIndexingRunning()
@@ -90,7 +95,7 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 			indexingOntologyIri = ontologyLoader.getOntologyIRI() == null ? StringUtils.EMPTY : ontologyLoader
 					.getOntologyIRI();
 			searchService.indexRepository(new OntologyIndexRepository(ontologyLoader,
-					createOntologyDocumentType(indexingOntologyIri), searchService));
+					OntologyQueryRepository.DEFAULT_ONTOLOGY_REPO, searchService));
 			internalIndex(ontologyLoader);
 		}
 		catch (Exception e)
@@ -103,8 +108,8 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 			String ontologyName = ontologyLoader.getOntologyName();
 			if (!dataService.hasRepository(ontologyName))
 			{
-				dataService.addRepository(new OntologyTermQueryRepository(ontologyName, indexingOntologyIri,
-						searchService));
+				dataService.addRepository(new OntologyTermQueryRepository(ontologyName, searchService, dataService,
+						ontologyService));
 			}
 			runningIndexProcesses.decrementAndGet();
 			indexingOntologyIri = null;
@@ -112,8 +117,8 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 	}
 
 	/**
-	 * Created a specific indexer to index list of primitive types (string), because the standard molgenis index does
-	 * not handle List<String>
+	 * Created a specific indexer to index list of primitive types (string),
+	 * because the standard molgenis index does not handle List<String>
 	 * 
 	 * @param ontologyLoader
 	 * @throws IOException
@@ -125,7 +130,7 @@ public class AsyncOntologyIndexer implements OntologyIndexer
 		Node node = nodeBuilder().settings(settings).local(true).node();
 		Client client = node.client();
 		OntologyTermIndexRepository ontologyTermIndexRepository = new OntologyTermIndexRepository(ontologyLoader,
-				createOntologyTermDocumentType(indexingOntologyIri), searchService);
+				ontologyLoader.getOntologyName(), searchService);
 		try
 		{
 			String documentType = MapperTypeSanitizer.sanitizeMapperType(ontologyTermIndexRepository.getName());

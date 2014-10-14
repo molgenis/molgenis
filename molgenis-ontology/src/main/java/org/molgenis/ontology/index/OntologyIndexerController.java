@@ -10,8 +10,8 @@ import java.util.Map;
 
 import javax.servlet.http.Part;
 
+import org.molgenis.data.semantic.OntologyService;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.ontology.service.OntologyService;
 import org.molgenis.ontology.utils.OntologyLoader;
 import org.molgenis.ontology.utils.ZipFileUtil;
 import org.molgenis.util.FileStore;

@@ -10,7 +10,6 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.omx.observ.Characteristic;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class AbstractOntologyRepository implements Repository
@@ -56,39 +55,29 @@ public abstract class AbstractOntologyRepository implements Repository
 		if (entityMetaData == null)
 		{
 			entityMetaData = new DefaultEntityMetaData(entityName);
-			DefaultAttributeMetaData attributeId = new DefaultAttributeMetaData(Characteristic.ID);
+			DefaultAttributeMetaData attributeId = new DefaultAttributeMetaData(ID);
 			attributeId.setIdAttribute(true);
 			entityMetaData.addAttributeMetaData(attributeId);
-			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(
-					OntologyTermIndexRepository.ONTOLOGY_TERM_IRI, FieldTypeEnum.HYPERLINK));
-			DefaultAttributeMetaData attributeMetaData = new DefaultAttributeMetaData(
-					OntologyTermIndexRepository.ONTOLOGY_TERM);
+			entityMetaData
+					.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_TERM_IRI, FieldTypeEnum.HYPERLINK));
+			DefaultAttributeMetaData attributeMetaData = new DefaultAttributeMetaData(ONTOLOGY_TERM);
 			attributeMetaData.setLabelAttribute(true);
 			entityMetaData.addAttributeMetaData(attributeMetaData);
-			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermIndexRepository.SYNONYMS));
-			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermIndexRepository.ENTITY_TYPE));
-			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermIndexRepository.NODE_PATH));
-			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(
-					OntologyTermIndexRepository.PARENT_NODE_PATH));
-			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(
-					OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_IRI));
+			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(SYNONYMS));
+			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ENTITY_TYPE));
+			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(NODE_PATH));
+			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(PARENT_NODE_PATH));
+			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(PARENT_ONTOLOGY_TERM_IRI));
 			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(FIELDTYPE));
-			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermIndexRepository.LAST,
-					FieldTypeEnum.BOOL));
-			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermIndexRepository.ROOT,
-					FieldTypeEnum.BOOL));
-			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(
-					OntologyTermIndexRepository.ONTOLOGY_TERM_DEFINITION));
-			entityMetaData
-					.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermIndexRepository.ONTOLOGY_NAME));
-			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermIndexRepository.ONTOLOGY_IRI,
-					FieldTypeEnum.HYPERLINK));
+			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(LAST, FieldTypeEnum.BOOL));
+			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ROOT, FieldTypeEnum.BOOL));
+			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_TERM_DEFINITION));
+			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_NAME));
+			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_IRI, FieldTypeEnum.HYPERLINK));
 			DefaultAttributeMetaData childrenAttributeMetatData = new DefaultAttributeMetaData("attributes",
 					FieldTypeEnum.MREF);
 			childrenAttributeMetatData.setRefEntity(entityMetaData);
 			entityMetaData.addAttributeMetaData(childrenAttributeMetatData);
-			entityMetaData.setIdAttribute(Characteristic.ID);
-			entityMetaData.setIdAttribute(OntologyTermIndexRepository.ONTOLOGY_TERM);
 		}
 		return entityMetaData;
 	}

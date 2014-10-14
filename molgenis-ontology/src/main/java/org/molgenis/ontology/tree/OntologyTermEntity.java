@@ -1,70 +1,114 @@
 package org.molgenis.ontology.tree;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.elasticsearch.util.Hit;
-import org.molgenis.data.elasticsearch.util.SearchRequest;
-import org.molgenis.data.elasticsearch.util.SearchResult;
+import org.molgenis.data.semantic.Ontology;
+import org.molgenis.data.semantic.OntologyService;
+import org.molgenis.data.semantic.OntologyTerm;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.ontology.index.AsyncOntologyIndexer;
 import org.molgenis.ontology.repository.OntologyTermIndexRepository;
 import org.molgenis.ontology.repository.OntologyTermQueryRepository;
 
-public class OntologyTermEntity extends AbstractOntologyEntity
+public class OntologyTermEntity extends AbstractSemanticEntity implements OntologyTerm
 {
 	private static final long serialVersionUID = 1L;
+	private BigDecimal score = null;
 
-	public OntologyTermEntity(Hit hit, EntityMetaData entityMetaData, SearchService searchService)
+	public OntologyTermEntity(Entity entity, EntityMetaData entityMetaData, SearchService searchService,
+			DataService dataService, OntologyService ontologyService)
 	{
-		super(hit, entityMetaData, searchService);
+		super(entity, entityMetaData, searchService, dataService, ontologyService);
 	}
 
 	@Override
 	public Object get(String attributeName)
 	{
-		Map<String, Object> columnValueMap = hit.getColumnValueMap();
-
-		if (attributeName.equalsIgnoreCase(OntologyTermQueryRepository.ID))
-		{
-			return hit.getId();
-		}
-
 		if (attributeName.equalsIgnoreCase(OntologyTermQueryRepository.FIELDTYPE))
 		{
-			return Boolean.parseBoolean(columnValueMap.get(OntologyTermIndexRepository.LAST).toString()) ? MolgenisFieldTypes.STRING
-					.toString().toUpperCase() : MolgenisFieldTypes.COMPOUND.toString().toUpperCase();
+			Iterable<Entity> listOfOntologyTerms = searchService.search(new QueryImpl().eq(
+					OntologyTermQueryRepository.ENTITY_TYPE, OntologyTermQueryRepository.TYPE_ONTOLOGYTERM),
+					entityMetaData);
+			return Iterables.size(listOfOntologyTerms) == 0 ? MolgenisFieldTypes.STRING.toString().toUpperCase() : MolgenisFieldTypes.COMPOUND
+					.toString().toUpperCase();
 		}
 
 		if (attributeName.equalsIgnoreCase("attributes"))
 		{
-			List<OntologyTermEntity> refEntities = new ArrayList<OntologyTermEntity>();
-			if (!Boolean.parseBoolean(columnValueMap.get(OntologyTermIndexRepository.LAST).toString()))
+			if (!Boolean.parseBoolean(entity.getString(OntologyTermQueryRepository.LAST)))
 			{
-				String currentNodePath = columnValueMap.get(OntologyTermIndexRepository.NODE_PATH).toString();
-				String currentOntologyTermIri = columnValueMap.get(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI)
-						.toString();
-				String ontologyIri = columnValueMap.get(OntologyTermIndexRepository.ONTOLOGY_IRI).toString();
+				String currentNodePath = entity.getString(OntologyTermQueryRepository.NODE_PATH);
+				String currentOntologyTermIri = entity.getString(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI);
 				Query q = new QueryImpl().eq(OntologyTermIndexRepository.PARENT_NODE_PATH, currentNodePath).and()
 						.eq(OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_IRI, currentOntologyTermIri)
 						.pageSize(Integer.MAX_VALUE);
-				String documentType = AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyIri);
-				SearchRequest searchRequest = new SearchRequest(documentType, q, null);
-				SearchResult result = searchService.search(searchRequest);
-				for (Hit hit : result.getSearchHits())
-				{
-					refEntities.add(new OntologyTermEntity(hit, getEntityMetaData(), searchService));
-				}
+				return searchService.search(q, entityMetaData);
 			}
-
-			return refEntities;
 		}
 
-		return columnValueMap.containsKey(attributeName) ? columnValueMap.get(attributeName) : null;
+		return entity.get(attributeName);
+	}
+
+	@Override
+	public String getIRI()
+	{
+		return getValueInternal(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI);
+	}
+
+	@Override
+	public String getLabel()
+	{
+		return getValueInternal(OntologyTermQueryRepository.ONTOLOGY_TERM);
+	}
+
+	@Override
+	public String getDescription()
+	{
+		return getValueInternal(OntologyTermQueryRepository.ONTOLOGY_TERM_DEFINITION);
+	}
+
+	@Override
+	public String getTermAccession()
+	{
+		return StringUtils.EMPTY;
+	}
+
+	@Override
+	public Set<String> getSynonyms()
+	{
+		Set<String> synonyms = new HashSet<String>();
+		synonyms.add(entity.getString(OntologyTermQueryRepository.SYNONYMS));
+		Iterable<Entity> entities = searchService.search(
+				new QueryImpl().eq(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI, getIRI()), entityMetaData);
+		for (Entity entity : entities)
+		{
+			synonyms.add(entity.getString(OntologyTermQueryRepository.SYNONYMS));
+		}
+		return synonyms;
+	}
+
+	@Override
+	public Ontology getOntology()
+	{
+		return ontologyService.getOntology(getValueInternal(OntologyTermQueryRepository.ONTOLOGY_IRI));
+	}
+
+	public BigDecimal getScore()
+	{
+		return score;
+	}
+
+	public void setScore(BigDecimal score)
+	{
+		this.score = score;
 	}
 }

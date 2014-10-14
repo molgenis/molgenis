@@ -12,7 +12,6 @@ import org.molgenis.data.Countable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.ontology.search.SemanticSearchServiceImpl;
 import org.molgenis.ontology.utils.OntologyLoader;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,7 +103,7 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 				OWLClassContainer classContainer = iterator.next();
 				OWLClass cls = classContainer.getOWLClass();
 				Entity entity = new MapEntity();
-				entity.set(ID, ontologyLoader.getId(cls));
+				entity.set(ID, extractOWLClassId(cls));
 				entity.set(NODE_PATH,
 						classContainer.getNodePath().replaceAll(NODE_PATH_REPLACEMENT_PATTERN, StringUtils.EMPTY));
 				entity.set(PARENT_NODE_PATH,
@@ -136,6 +135,24 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 					}
 				}
 				return entity;
+			}
+
+			private String extractOWLClassId(OWLClass cls)
+			{
+				StringBuilder stringBuilder = new StringBuilder();
+				String clsIri = cls.getIRI().toString();
+				// Case where id is separated by #
+				String[] split = null;
+				if (clsIri.contains("#"))
+				{
+					split = clsIri.split("#");
+				}
+				else
+				{
+					split = clsIri.split("/");
+				}
+				stringBuilder.append(split[split.length - 1]);
+				return stringBuilder.toString();
 			}
 
 			@Override
@@ -177,21 +194,25 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 	 */
 	private String createAlternativeDefinitions(OWLClass cls)
 	{
+		// TODO : it`s not important at the moment, but fix it in the future!
 		StringBuilder alternativeDefinitions = new StringBuilder();
-		for (Set<OWLClass> alternativeDefinition : ontologyLoader.getAssociatedClasses(cls))
-		{
-			StringBuilder newDefinition = new StringBuilder();
-			for (OWLClass associatedClass : alternativeDefinition)
-			{
-				if (newDefinition.length() != 0) newDefinition.append(SemanticSearchServiceImpl.COMMON_SEPERATOR);
-				newDefinition.append(associatedClass.getIRI().toString());
-			}
-			if (alternativeDefinitions.length() != 0 && newDefinition.length() != 0)
-			{
-				alternativeDefinitions.append(SemanticSearchServiceImpl.ALTERNATIVE_DEFINITION_SEPERATOR);
-			}
-			alternativeDefinitions.append(newDefinition);
-		}
+		// for (Set<OWLClass> alternativeDefinition :
+		// ontologyLoader.getAssociatedClasses(cls))
+		// {
+		// StringBuilder newDefinition = new StringBuilder();
+		// for (OWLClass associatedClass : alternativeDefinition)
+		// {
+		// if (newDefinition.length() != 0)
+		// newDefinition.append(SemanticSearchServiceImpl.COMMON_SEPERATOR);
+		// newDefinition.append(associatedClass.getIRI().toString());
+		// }
+		// if (alternativeDefinitions.length() != 0 && newDefinition.length() !=
+		// 0)
+		// {
+		// alternativeDefinitions.append(SemanticSearchServiceImpl.ALTERNATIVE_DEFINITION_SEPERATOR);
+		// }
+		// alternativeDefinitions.append(newDefinition);
+		// }
 		return alternativeDefinitions.toString();
 	}
 

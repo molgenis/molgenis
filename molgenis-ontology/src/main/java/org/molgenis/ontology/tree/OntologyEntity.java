@@ -2,59 +2,52 @@ package org.molgenis.ontology.tree;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.elasticsearch.util.Hit;
-import org.molgenis.data.elasticsearch.util.SearchRequest;
-import org.molgenis.data.elasticsearch.util.SearchResult;
+import org.molgenis.data.semantic.Ontology;
+import org.molgenis.data.semantic.OntologyService;
+import org.molgenis.data.semantic.OntologyTerm;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.omx.observ.Characteristic;
-import org.molgenis.ontology.index.AsyncOntologyIndexer;
-import org.molgenis.ontology.repository.OntologyIndexRepository;
 import org.molgenis.ontology.repository.OntologyQueryRepository;
 import org.molgenis.ontology.repository.OntologyTermIndexRepository;
-import org.molgenis.ontology.service.OntologyService;
+import org.molgenis.ontology.repository.OntologyTermQueryRepository;
 
-public class OntologyEntity extends AbstractOntologyEntity
+public class OntologyEntity extends AbstractSemanticEntity implements Ontology
 {
 	private static final long serialVersionUID = 1L;
-	private final OntologyService ontologyService;
 
-	public OntologyEntity(Hit hit, EntityMetaData entityMetaData, OntologyService ontologyService,
-			SearchService searchService)
+	public OntologyEntity(Entity entity, EntityMetaData entityMetaData, OntologyService ontologyService,
+			SearchService searchService, DataService dataService)
 	{
-		super(hit, entityMetaData, searchService);
-		this.ontologyService = ontologyService;
+		super(entity, entityMetaData, searchService, dataService, ontologyService);
 	}
 
 	@Override
 	public Object get(String attributeName)
 	{
-		Map<String, Object> columnValueMap = hit.getColumnValueMap();
-
-		if (attributeName.equalsIgnoreCase(Characteristic.ID))
-		{
-			return hit.getId();
-		}
-
 		if (attributeName.equalsIgnoreCase(OntologyQueryRepository.FIELDTYPE))
 		{
-			String documentType = AsyncOntologyIndexer.createOntologyDocumentType(columnValueMap.get(
-					OntologyIndexRepository.ONTOLOGY_IRI).toString());
-			SearchResult result = searchService.search(new SearchRequest(documentType, new QueryImpl(), null));
-			return result.getTotalHitCount() == 0 ? MolgenisFieldTypes.STRING.toString().toUpperCase() : MolgenisFieldTypes.COMPOUND
+			EntityMetaData entityMetaDataIndexedOntologyTerm = dataService.getEntityMetaData(getLabel());
+			Iterable<Entity> listOfOntologyTerms = searchService.search(new QueryImpl().eq(
+					OntologyTermQueryRepository.ENTITY_TYPE, OntologyTermQueryRepository.TYPE_ONTOLOGYTERM),
+					entityMetaDataIndexedOntologyTerm);
+			return Iterables.size(listOfOntologyTerms) == 0 ? MolgenisFieldTypes.STRING.toString().toUpperCase() : MolgenisFieldTypes.COMPOUND
 					.toString().toUpperCase();
 		}
 
 		if (attributeName.equalsIgnoreCase(OntologyTermIndexRepository.LAST))
 		{
-			String documentType = AsyncOntologyIndexer.createOntologyDocumentType(columnValueMap.get(
-					OntologyIndexRepository.ONTOLOGY_IRI).toString());
-			SearchResult result = searchService.search(new SearchRequest(documentType, new QueryImpl(), null));
-			return result.getTotalHitCount() == 0;
+			EntityMetaData entityMetaDataIndexedOntologyTerm = dataService.getEntityMetaData(getLabel());
+			Iterable<Entity> listOfOntologyTerms = searchService.search(new QueryImpl().eq(
+					OntologyTermQueryRepository.ENTITY_TYPE, OntologyTermQueryRepository.TYPE_ONTOLOGYTERM),
+					entityMetaDataIndexedOntologyTerm);
+			return Iterables.size(listOfOntologyTerms) == 0;
 		}
 
 		if (attributeName.equalsIgnoreCase(OntologyTermIndexRepository.ROOT))
@@ -65,16 +58,40 @@ public class OntologyEntity extends AbstractOntologyEntity
 		if (attributeName.equalsIgnoreCase("attributes"))
 		{
 			List<OntologyTermEntity> refEntities = new ArrayList<OntologyTermEntity>();
-
-			for (Hit hit : ontologyService.getRootOntologyTerms(this.hit.getColumnValueMap()
-					.get(OntologyTermIndexRepository.ONTOLOGY_IRI).toString()))
+			for (OntologyTerm ontologyTerm : ontologyService.getRootOntologyTerms(entity
+					.getString(OntologyQueryRepository.ONTOLOGY_IRI)))
 			{
-				refEntities.add(new OntologyTermEntity(hit, getEntityMetaData(), searchService));
+				if (ontologyTerm instanceof OntologyTermEntity)
+				{
+					refEntities.add((OntologyTermEntity) ontologyTerm);
+				}
 			}
-
 			return refEntities;
 		}
+		return entity.get(attributeName);
+	}
 
-		return columnValueMap.containsKey(attributeName) ? columnValueMap.get(attributeName) : null;
+	@Override
+	public String getIri()
+	{
+		return getValueInternal(OntologyQueryRepository.ONTOLOGY_IRI);
+	}
+
+	@Override
+	public String getLabel()
+	{
+		return getValueInternal(OntologyQueryRepository.ONTOLOGY_NAME);
+	}
+
+	@Override
+	public String getDescription()
+	{
+		return StringUtils.EMPTY;
+	}
+
+	@Override
+	public String getVersion()
+	{
+		return StringUtils.EMPTY;
 	}
 }

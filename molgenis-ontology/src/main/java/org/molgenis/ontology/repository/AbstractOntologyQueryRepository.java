@@ -1,14 +1,11 @@
 package org.molgenis.ontology.repository;
 
 import java.util.Iterator;
-import java.util.List;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Queryable;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.elasticsearch.util.Hit;
-import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -20,10 +17,14 @@ public abstract class AbstractOntologyQueryRepository extends AbstractOntologyRe
 		super(entityName, searchService);
 	}
 
-	public Hit findOneInternal(String documentType, Query q)
+	public Entity findOneInternal(Query query)
 	{
-		List<Hit> searchHits = searchService.search(new SearchRequest(documentType, q, null)).getSearchHits();
-		return searchHits != null && searchHits.size() > 0 ? searchHits.get(0) : null;
+		for (Entity entity : searchService.search(query, entityMetaData))
+		{
+			return entity;
+		}
+
+		return null;
 	}
 
 	@Override

@@ -28,13 +28,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Writable;
 import org.molgenis.data.csv.CsvRepository;
-import org.molgenis.data.elasticsearch.util.Hit;
 import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.LowerCaseProcessor;
 import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.rest.EntityCollectionResponse;
 import org.molgenis.data.rest.EntityPager;
+import org.molgenis.data.semantic.OntologyServiceResult;
+import org.molgenis.data.semantic.OntologyTerm;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.util.FileStore;
@@ -51,7 +52,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class OntologyServiceController extends MolgenisPluginController
 {
 	@Autowired
-	private OntologyService ontologyService;
+	private OntologyServiceImpl ontologyService;
 
 	@Autowired
 	private OntologyServiceSessionData ontologyServiceSessionData;
@@ -91,7 +92,7 @@ public class OntologyServiceController extends MolgenisPluginController
 				sessionId,
 				ontologyIri,
 				new CsvRepository(uploadFile, Arrays.<CellProcessor> asList(new LowerCaseProcessor(),
-						new TrimProcessor()), OntologyService.DEFAULT_SEPARATOR));
+						new TrimProcessor()), OntologyServiceImpl.DEFAULT_SEPARATOR));
 
 		model.addAttribute("ontologyUrl", ontologyServiceSessionData.getOntologyIriBySession(sessionId));
 		model.addAttribute("total", ontologyServiceSessionData.getTotalNumberBySession(sessionId));
@@ -114,7 +115,7 @@ public class OntologyServiceController extends MolgenisPluginController
 					sessionId,
 					ontologyIri,
 					new CsvRepository(uploadFile, Arrays.<CellProcessor> asList(new LowerCaseProcessor(),
-							new TrimProcessor()), OntologyService.DEFAULT_SEPARATOR));
+							new TrimProcessor()), OntologyServiceImpl.DEFAULT_SEPARATOR));
 
 			model.addAttribute("ontologyUrl", ontologyServiceSessionData.getOntologyIriBySession(sessionId));
 			model.addAttribute("total", ontologyServiceSessionData.getTotalNumberBySession(sessionId));
@@ -157,18 +158,22 @@ public class OntologyServiceController extends MolgenisPluginController
 								ontologyServiceSessionData.getOntologyIriBySession(sessionId), entity);
 
 						int count = 0;
-						for (Hit hit : searchEntity.getSearchHits())
+						for (OntologyTerm ontologyTerm : searchEntity.getOntologyTerms())
 						{
 							Entity row = new MapEntity();
 							if (count == 0)
 							{
 								row.set("InputTerm", gatherInfo(searchEntity.getInputData()));
 							}
-							row.set("OntologyTerm", hit.getColumnValueMap().get("ontologyTerm"));
-							row.set("Synonym", hit.getColumnValueMap().get("ontologyTermSynonym"));
-							row.set("OntologyTermUrl", hit.getColumnValueMap().get("ontologyTermIRI"));
-							row.set("OntologyUrl", hit.getColumnValueMap().get("ontologyIRI"));
-							row.set("Score", hit.getColumnValueMap().get("combinedScore"));
+							row.set("OntologyTerm", ontologyTerm.getLabel());
+							for (String synonym : ontologyTerm.getSynonyms())
+							{
+								row.set("Synonym", synonym);
+								break;
+							}
+							row.set("OntologyTermUrl", ontologyTerm.getIRI());
+							row.set("OntologyUrl", ontologyTerm.getOntology().getIri());
+							row.set("Score", ontologyTerm.getScore().doubleValue());
 							sheetWriter.add(row);
 							count++;
 						}

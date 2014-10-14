@@ -33,13 +33,13 @@ import org.tartarus.snowball.ext.PorterStemmer;
 public class OntologyService
 {
 	private final SearchService searchService;
+	private final PorterStemmer stemmer = new PorterStemmer();
 	private static final List<String> ELASTICSEARCH_RESERVED_WORDS = Arrays.asList("or", "and", "if");
 	private static final String COMBINED_SCORE = "combinedScore";
 	private static final String FUZZY_MATCH_SIMILARITY = "~0.8";
 	private static final String SCORE = "score";
 	private static final String NON_WORD_SEPARATOR = "[^a-zA-Z0-9]";
 	private static final int MAX_NUMBER_MATCHES = 100;
-	private static final PorterStemmer stemmer = new PorterStemmer();
 	public static final Character DEFAULT_SEPARATOR = ';';
 	public static final String DEFAULT_MATCHING_NAME_FIELD = "name";
 	public static final String DEFAULT_MATCHING_SYNONYM_FIELD = "synonym";
