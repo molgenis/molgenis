@@ -6,18 +6,24 @@ import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.semantic.OntologyService;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.ontology.beans.OntologyEntity;
+import org.molgenis.ontology.beans.OntologyEntityIterable;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class OntologyQueryRepository extends AbstractOntologyQueryRepository
 {
 	public final static String DEFAULT_ONTOLOGY_REPO = "ontologyindex";
 	private final static String BASE_URL = "ontologyindex://";
+	private final OntologyService ontologyService;
+	private final DataService dataService;
 
 	@Autowired
 	public OntologyQueryRepository(String entityName, OntologyService ontologyService, SearchService searchService,
 			DataService dataService)
 	{
 		super(entityName, searchService);
+		this.ontologyService = ontologyService;
+		this.dataService = dataService;
 	}
 
 	@Override
@@ -25,7 +31,8 @@ public class OntologyQueryRepository extends AbstractOntologyQueryRepository
 	{
 		if (query.getRules().size() > 0) query.and();
 		query.eq(OntologyQueryRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY);
-		return searchService.search(query, entityMetaData);
+		return new OntologyEntityIterable(searchService.search(query, entityMetaData), entityMetaData, dataService,
+				searchService, ontologyService);
 	}
 
 	@Override
@@ -33,7 +40,8 @@ public class OntologyQueryRepository extends AbstractOntologyQueryRepository
 	{
 		if (q.getRules().size() > 0) q.and();
 		q.eq(OntologyQueryRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY);
-		return findOneInternal(q);
+		Entity entity = findOneInternal(q);
+		return entity != null ? new OntologyEntity(entity, entityMetaData, dataService, searchService, ontologyService) : null;
 	}
 
 	@Override
@@ -42,7 +50,7 @@ public class OntologyQueryRepository extends AbstractOntologyQueryRepository
 		for (Entity entity : searchService.search(new QueryImpl().eq(OntologyTermQueryRepository.ID, id),
 				entityMetaData))
 		{
-			return entity;
+			return new OntologyEntity(entity, entityMetaData, dataService, searchService, ontologyService);
 		}
 		return null;
 	}

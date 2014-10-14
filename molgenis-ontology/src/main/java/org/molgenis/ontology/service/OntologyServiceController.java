@@ -173,7 +173,8 @@ public class OntologyServiceController extends MolgenisPluginController
 							}
 							row.set("OntologyTermUrl", ontologyTerm.getIRI());
 							row.set("OntologyUrl", ontologyTerm.getOntology().getIri());
-							row.set("Score", ontologyTerm.getScore().doubleValue());
+							// row.set("Score",
+							// ontologyTerm.getScore().doubleValue());
 							sheetWriter.add(row);
 							count++;
 						}

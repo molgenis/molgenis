@@ -42,6 +42,7 @@ public class OntologyIndexRepository extends AbstractOntologyRepository implemen
 			public Entity next()
 			{
 				Entity entity = new MapEntity();
+				entity.set(ID, ontologyLoader.getOntologyName());
 				entity.set(ONTOLOGY_IRI, ontologyLoader.getOntologyIRI());
 				entity.set(ONTOLOGY_NAME, ontologyLoader.getOntologyName());
 				entity.set(ENTITY_TYPE, TYPE_ONTOLOGY);

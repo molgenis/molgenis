@@ -1,4 +1,4 @@
-package org.molgenis.ontology.repository;
+package org.molgenis.ontology.beans;
 
 import java.util.Map;
 import java.util.Set;

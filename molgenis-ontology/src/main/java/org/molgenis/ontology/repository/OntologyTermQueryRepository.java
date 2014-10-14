@@ -15,6 +15,8 @@ import org.molgenis.data.semantic.OntologyService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.ontology.beans.OntologyTermEntity;
+import org.molgenis.ontology.beans.OntologyTermEntityIterable;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class OntologyTermQueryRepository extends AbstractOntologyQueryRepository
@@ -63,7 +65,7 @@ public class OntologyTermQueryRepository extends AbstractOntologyQueryRepository
 	{
 		if (q.getRules().size() > 0) q.and();
 		q.eq(OntologyTermQueryRepository.ENTITY_TYPE, OntologyTermQueryRepository.TYPE_ONTOLOGYTERM);
-		return searchService.search(q, entityMetaData);
+		return new OntologyTermEntityIterable(searchService.search(q, entityMetaData), entityMetaData, searchService);
 	}
 
 	@Override
@@ -71,7 +73,8 @@ public class OntologyTermQueryRepository extends AbstractOntologyQueryRepository
 	{
 		if (q.getRules().size() > 0) q.and();
 		q.eq(OntologyTermIndexRepository.ENTITY_TYPE, OntologyTermIndexRepository.TYPE_ONTOLOGYTERM);
-		return findOneInternal(q);
+		Entity entity = findOneInternal(q);
+		return entity != null ? new OntologyTermEntity(entity, entityMetaData, searchService) : null;
 	}
 
 	@Override
@@ -80,7 +83,7 @@ public class OntologyTermQueryRepository extends AbstractOntologyQueryRepository
 		for (Entity entity : searchService.search(new QueryImpl().eq(OntologyTermQueryRepository.ID, id),
 				entityMetaData))
 		{
-			return entity;
+			return new OntologyTermEntity(entity, entityMetaData, searchService);
 		}
 		return null;
 	}

@@ -12,6 +12,7 @@ import org.molgenis.data.Countable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.ontology.beans.OWLClassContainer;
 import org.molgenis.ontology.utils.OntologyLoader;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.springframework.beans.factory.annotation.Autowired;

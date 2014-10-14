@@ -21,10 +21,23 @@ public interface OntologyService
 
 	/**
 	 * 
+	 * @return a list of untyped ontology entities
+	 */
+	Iterable<Entity> getAllOntologyEntities();
+
+	/**
+	 * 
 	 * @param ontologyIri
 	 * @return an ontology based on the ontologyIri
 	 */
 	Ontology getOntology(String ontologyIri);
+
+	/**
+	 * 
+	 * @param ontologyIri
+	 * @return an untyped ontology based on the ontologyIri
+	 */
+	Entity getOntologyEntity(String ontologyIri);
 
 	/**
 	 * 
@@ -45,8 +58,17 @@ public interface OntologyService
 
 	/**
 	 * 
+	 * @param ontologyTermIri
 	 * @param ontologyIri
-	 * @return a list of ontology terms from specified ontology
+	 * @return an untyped ontologyTerm entity based on specified ontologyTermIri
+	 *         in particular ontology
+	 */
+	Entity getOntologyTermEntity(String ontologyTermIri, String ontologyIri);
+
+	/**
+	 * 
+	 * @param ontologyIri
+	 * @return a list of ontologyterms from specified ontology
 	 * @throws NullPointerException
 	 *             if the ontologyIri is not known
 	 */
@@ -55,11 +77,28 @@ public interface OntologyService
 	/**
 	 * 
 	 * @param ontologyIri
-	 * @return a list of root ontology terms from specified ontology
+	 * @return a list of untyped ontologyterm entities from specified ontology
+	 */
+	Iterable<Entity> getAllOntologyTermEntities(String ontologyIri);
+
+	/**
+	 * 
+	 * @param ontologyIri
+	 * @return a list of root ontologyterms from specified ontology
 	 * @throws NullPointerException
 	 *             if the ontologyIri is not known
 	 */
 	Iterable<OntologyTerm> getRootOntologyTerms(String ontologyIri);
+
+	/**
+	 * 
+	 * @param ontologyIri
+	 * @return a list of untyped root ontologyterm entities from specified
+	 *         ontology
+	 * @throws NullPointerException
+	 *             if the ontologyIri is not known
+	 */
+	Iterable<Entity> getRootOntologyTermEntities(String ontologyIri);
 
 	/**
 	 * 
@@ -73,6 +112,19 @@ public interface OntologyService
 	 *             if the ontologyTermIri is not known
 	 */
 	Iterable<OntologyTerm> getChildOntologyTerms(String ontologyIri, String ontologyTermIri);
+
+	/**
+	 * 
+	 * @param ontologyIri
+	 * @param ontologyTerm
+	 * @return a list of untyped child ontologyTerm entities from current
+	 *         ontologyTerm in specified ontology
+	 * @throws NullPointerException
+	 *             if the ontologyIri is not known
+	 * @throws NullPointerException
+	 *             if the ontologyTermIri is not known
+	 */
+	Iterable<Entity> getChildOntologyTermEntities(String ontologyIri, String ontologyTermIri);
 
 	/**
 	 * 

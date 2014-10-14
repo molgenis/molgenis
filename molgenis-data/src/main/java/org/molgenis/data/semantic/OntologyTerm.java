@@ -1,6 +1,5 @@
 package org.molgenis.data.semantic;
 
-import java.math.BigDecimal;
 import java.util.Set;
 
 public interface OntologyTerm
@@ -22,6 +21,4 @@ public interface OntologyTerm
 	Set<String> getSynonyms();
 
 	Ontology getOntology();
-
-	BigDecimal getScore();
 }

@@ -1,4 +1,4 @@
-package org.molgenis.ontology.tree;
+package org.molgenis.ontology.beans;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -6,11 +6,9 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.semantic.OntologyService;
 import org.molgenis.data.support.AbstractEntity;
 
 public abstract class AbstractSemanticEntity extends AbstractEntity
@@ -18,17 +16,12 @@ public abstract class AbstractSemanticEntity extends AbstractEntity
 	private static final long serialVersionUID = 1L;
 	protected final EntityMetaData entityMetaData;
 	protected final SearchService searchService;
-	protected final DataService dataService;
-	protected final OntologyService ontologyService;
 	protected final Entity entity;
 
-	public AbstractSemanticEntity(Entity entity, EntityMetaData entityMetaData, SearchService searchService,
-			DataService dataService, OntologyService ontologyService)
+	public AbstractSemanticEntity(Entity entity, EntityMetaData entityMetaData, SearchService searchService)
 	{
 		this.entityMetaData = entityMetaData;
 		this.searchService = searchService;
-		this.dataService = dataService;
-		this.ontologyService = ontologyService;
 		this.entity = entity;
 	}
 

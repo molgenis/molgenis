@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -26,12 +25,15 @@ import org.molgenis.data.semantic.OntologyServiceResult;
 import org.molgenis.data.semantic.OntologyTerm;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.ontology.beans.ComparableEntity;
+import org.molgenis.ontology.beans.OntologyEntity;
+import org.molgenis.ontology.beans.OntologyImpl;
+import org.molgenis.ontology.beans.OntologyTermEntityIterable;
+import org.molgenis.ontology.beans.OntologyTermImpl;
 import org.molgenis.ontology.repository.OntologyIndexRepository;
 import org.molgenis.ontology.repository.OntologyQueryRepository;
 import org.molgenis.ontology.repository.OntologyTermIndexRepository;
 import org.molgenis.ontology.repository.OntologyTermQueryRepository;
-import org.molgenis.ontology.tree.OntologyEntity;
-import org.molgenis.ontology.tree.OntologyTermEntity;
 import org.molgenis.ontology.utils.NGramMatchingModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.tartarus.snowball.ext.PorterStemmer;
@@ -62,110 +64,124 @@ public class OntologyServiceImpl implements OntologyService
 	}
 
 	@Override
-	public Iterable<Ontology> getAllOntologies()
+	public Iterable<OntologyTerm> findOntologyTerms(String queryTerm, String ontologyIri)
+	{
+		return null;
+	}
+
+	@Override
+	public Iterable<Entity> getAllOntologyEntities()
 	{
 		Query query = new QueryImpl().eq(OntologyQueryRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY)
 				.pageSize(Integer.MAX_VALUE);
 		EntityMetaData entityMetaData = dataService.getEntityMetaData(OntologyQueryRepository.DEFAULT_ONTOLOGY_REPO);
-		List<Ontology> parseEntityToOntology = parseEntityToOntology(entityMetaData,
-				searchService.search(query, entityMetaData));
-		return parseEntityToOntology;
+		return searchService.search(query, entityMetaData);
+	}
+
+	@Override
+	public Iterable<Ontology> getAllOntologies()
+	{
+		return parseEntityToOntology(getAllOntologyEntities());
+	}
+
+	@Override
+	public Entity getOntologyEntity(String ontologyIri)
+	{
+		Query query = new QueryImpl().eq(OntologyQueryRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY)
+				.and().eq(OntologyIndexRepository.ONTOLOGY_IRI, ontologyIri).pageSize(Integer.MAX_VALUE);
+		EntityMetaData entityMetaData = dataService.getEntityMetaData(OntologyQueryRepository.DEFAULT_ONTOLOGY_REPO);
+		for (Entity entity : searchService.search(query, entityMetaData))
+		{
+			return new OntologyEntity(entity, entityMetaData, dataService, searchService, this);
+		}
+		return null;
 	}
 
 	@Override
 	public Ontology getOntology(String ontologyIri)
 	{
-		Query query = new QueryImpl().eq(OntologyQueryRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY)
-				.and().eq(OntologyIndexRepository.ONTOLOGY_IRI, ontologyIri).pageSize(Integer.MAX_VALUE);
-		EntityMetaData entityMetaData = dataService.getEntityMetaData(OntologyQueryRepository.DEFAULT_ONTOLOGY_REPO);
-		List<Ontology> parseEntityToOntology = parseEntityToOntology(entityMetaData,
-				searchService.search(query, entityMetaData));
-		return parseEntityToOntology.size() > 0 ? parseEntityToOntology.get(0) : null;
+		Entity ontologyEntity = getOntologyEntity(ontologyIri);
+		return ontologyEntity != null ? new OntologyImpl(ontologyEntity) : null;
 	}
 
 	@Override
-	public Iterable<OntologyTerm> findOntologyTerms(String queryTerm, String ontologyIri)
+	public Entity getOntologyTermEntity(String ontologyTermIri, String ontologyIri)
 	{
-		// TODO Auto-generated method stub
+		EntityMetaData entityMetaDataIndexedOntologyTerm = dataService.getEntityMetaData(getEntityName(ontologyIri));
+		Iterable<Entity> listOfOntologyTerms = searchService.search(
+				new QueryImpl()
+						.eq(OntologyTermQueryRepository.ENTITY_TYPE, OntologyTermQueryRepository.TYPE_ONTOLOGYTERM)
+						.and().eq(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI, ontologyTermIri),
+				entityMetaDataIndexedOntologyTerm);
+		for (Entity entity : listOfOntologyTerms)
+		{
+			return new OntologyEntity(entity, entityMetaDataIndexedOntologyTerm, dataService, searchService, this);
+		}
 		return null;
 	}
 
 	@Override
 	public OntologyTerm getOntologyTerm(String ontologyTermIri, String ontologyIri)
 	{
-		Ontology ontology = getOntology(ontologyIri);
-		if (ontology != null)
-		{
-			EntityMetaData entityMetaDataIndexedOntologyTerm = dataService
-					.getEntityMetaData(getEntityName(ontologyIri));
-			Iterable<Entity> listOfOntologyTerms = searchService.search(
-					new QueryImpl()
-							.eq(OntologyTermQueryRepository.ENTITY_TYPE, OntologyTermQueryRepository.TYPE_ONTOLOGYTERM)
-							.and().eq(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI, ontologyTermIri),
-					entityMetaDataIndexedOntologyTerm);
-			List<OntologyTerm> parseEntityToOntologyTerm = parseEntityToOntologyTerm(entityMetaDataIndexedOntologyTerm,
-					listOfOntologyTerms);
-			return parseEntityToOntologyTerm.size() > 0 ? parseEntityToOntologyTerm.get(0) : null;
-		}
-		return null;
+		Entity ontologyTermEntity = getOntologyTermEntity(ontologyTermIri, ontologyIri);
+		return ontologyTermEntity != null ? new OntologyTermImpl(ontologyTermEntity, this) : null;
+	}
+
+	@Override
+	public Iterable<Entity> getAllOntologyTermEntities(String ontologyIri)
+	{
+		EntityMetaData entityMetaDataIndexedOntologyTerm = dataService.getEntityMetaData(getEntityName(ontologyIri));
+		Iterable<Entity> listOfOntologyTerms = searchService.search(new QueryImpl().eq(
+				OntologyTermQueryRepository.ENTITY_TYPE, OntologyTermQueryRepository.TYPE_ONTOLOGYTERM),
+				entityMetaDataIndexedOntologyTerm);
+		return new OntologyTermEntityIterable(listOfOntologyTerms, entityMetaDataIndexedOntologyTerm, searchService);
 	}
 
 	@Override
 	public Iterable<OntologyTerm> getAllOntologyTerms(String ontologyIri)
 	{
-		Ontology ontology = getOntology(ontologyIri);
-		if (ontology != null)
-		{
-			EntityMetaData entityMetaDataIndexedOntologyTerm = dataService
-					.getEntityMetaData(getEntityName(ontologyIri));
-			Iterable<Entity> listOfOntologyTerms = searchService.search(new QueryImpl().eq(
-					OntologyTermQueryRepository.ENTITY_TYPE, OntologyTermQueryRepository.TYPE_ONTOLOGYTERM),
-					entityMetaDataIndexedOntologyTerm);
-			return parseEntityToOntologyTerm(entityMetaDataIndexedOntologyTerm, listOfOntologyTerms);
-		}
-		return Collections.emptyList();
+		return parseEntityToOntologyTerm(getAllOntologyTermEntities(ontologyIri));
 	}
 
-	private String getEntityName(String ontologyIri)
+	@Override
+	public Iterable<Entity> getRootOntologyTermEntities(String ontologyIri)
 	{
-		return getOntology(ontologyIri).getLabel();
+		EntityMetaData entityMetaDataIndexedOntologyTerm = dataService.getEntityMetaData(getEntityName(ontologyIri));
+		Iterable<Entity> entities = searchService.search(
+				new QueryImpl()
+						.eq(OntologyTermQueryRepository.ENTITY_TYPE, OntologyTermQueryRepository.TYPE_ONTOLOGYTERM)
+						.and().eq(OntologyTermIndexRepository.ROOT, true), entityMetaDataIndexedOntologyTerm);
+		return new OntologyTermEntityIterable(entities, entityMetaDataIndexedOntologyTerm, searchService);
 	}
 
 	@Override
 	public Iterable<OntologyTerm> getRootOntologyTerms(String ontologyIri)
 	{
+		return parseEntityToOntologyTerm(getRootOntologyTermEntities(ontologyIri));
+	}
+
+	@Override
+	public Iterable<Entity> getChildOntologyTermEntities(String ontologyIri, String ontologyTermIri)
+	{
 		EntityMetaData entityMetaDataIndexedOntologyTerm = dataService.getEntityMetaData(getEntityName(ontologyIri));
-		Iterable<Entity> listOfOntologyTerms = searchService.search(
-				new QueryImpl()
-						.eq(OntologyTermQueryRepository.ENTITY_TYPE, OntologyTermQueryRepository.TYPE_ONTOLOGYTERM)
-						.and().eq(OntologyTermIndexRepository.ROOT, true), entityMetaDataIndexedOntologyTerm);
-		return parseEntityToOntologyTerm(entityMetaDataIndexedOntologyTerm, listOfOntologyTerms);
+		Query query = new QueryImpl()
+				.eq(OntologyTermQueryRepository.ENTITY_TYPE, OntologyTermQueryRepository.TYPE_ONTOLOGYTERM).and()
+				.eq(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI, ontologyTermIri);
+		Iterable<Entity> entities = searchService.search(query, entityMetaDataIndexedOntologyTerm);
+
+		for (Entity entity : entities)
+		{
+			String currentNodePath = entity.getString(OntologyTermQueryRepository.NODE_PATH);
+			return new OntologyTermEntityIterable(getChildren(entityMetaDataIndexedOntologyTerm, ontologyTermIri,
+					currentNodePath), entityMetaDataIndexedOntologyTerm, searchService);
+		}
+		return Collections.emptyList();
 	}
 
 	@Override
 	public Iterable<OntologyTerm> getChildOntologyTerms(String ontologyIri, String ontologyTermIri)
 	{
-		Ontology ontology = getOntology(ontologyIri);
-		if (ontology != null)
-		{
-			EntityMetaData entityMetaDataIndexedOntologyTerm = dataService
-					.getEntityMetaData(getEntityName(ontologyIri));
-			Query query = new QueryImpl()
-					.eq(OntologyTermQueryRepository.ENTITY_TYPE, OntologyTermQueryRepository.TYPE_ONTOLOGYTERM).and()
-					.eq(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI, ontologyTermIri);
-			Iterable<Entity> listOfOntologyTerms = searchService.search(query, entityMetaDataIndexedOntologyTerm);
-
-			if (Iterables.size(listOfOntologyTerms) > 0)
-			{
-				Iterator<Entity> iterator = listOfOntologyTerms.iterator();
-				Entity entity = iterator.next();
-				String currentNodePath = entity.getString(OntologyTermQueryRepository.NODE_PATH);
-				Iterable<Entity> childEntities = getChildren(entityMetaDataIndexedOntologyTerm, ontologyTermIri,
-						currentNodePath);
-				return parseEntityToOntologyTerm(entityMetaDataIndexedOntologyTerm, childEntities);
-			}
-		}
-		return Collections.emptyList();
+		return parseEntityToOntologyTerm(getChildOntologyTermEntities(ontologyIri, ontologyTermIri));
 	}
 
 	private Iterable<Entity> getChildren(EntityMetaData entityMetaData, String parentOntologyTermIri,
@@ -281,40 +297,6 @@ public class OntologyServiceImpl implements OntologyService
 	}
 
 	/**
-	 * A helper function to parse generic entities to ontology entities
-	 * 
-	 * @param entityMetaData
-	 * @param entities
-	 * @return a list of Typed Ontology entities
-	 */
-	private List<Ontology> parseEntityToOntology(EntityMetaData entityMetaData, Iterable<Entity> entities)
-	{
-		List<Ontology> ontologies = new ArrayList<Ontology>();
-		for (Entity entity : entities)
-		{
-			ontologies.add(new OntologyEntity(entity, entityMetaData, this, searchService, dataService));
-		}
-		return ontologies;
-	}
-
-	/**
-	 * A helper function to parse generic entities to ontologyTerm entities
-	 * 
-	 * @param entityMetaData
-	 * @param entities
-	 * @return a list of Typed OntologyTerm entities
-	 */
-	private List<OntologyTerm> parseEntityToOntologyTerm(EntityMetaData entityMetaData, Iterable<Entity> entities)
-	{
-		List<OntologyTerm> ontologyTerms = new ArrayList<OntologyTerm>();
-		for (Entity entity : entities)
-		{
-			ontologyTerms.add(new OntologyTermEntity(entity, entityMetaData, searchService, dataService, this));
-		}
-		return ontologyTerms;
-	}
-
-	/**
 	 * This method is to stem the orignal queryString and then create fuzzy
 	 * match query.
 	 * 
@@ -364,7 +346,89 @@ public class OntologyServiceImpl implements OntologyService
 				entities.add(copyEntity);
 			}
 		}
-		return new OntologyServiceResult(inputData, parseEntityToOntologyTerm(entityMetaData, entities),
-				entities.size());
+		return new OntologyServiceResult(inputData, parseEntityToOntologyTerm(entities), entities.size());
+	}
+
+	/**
+	 * A helper function to parse generic entities to ontology entities
+	 * 
+	 * @param entities
+	 * @return a list of Typed Ontology entities
+	 */
+	private Iterable<Ontology> parseEntityToOntology(Iterable<Entity> entities)
+	{
+		final Iterator<Entity> iterator = entities.iterator();
+		return new Iterable<Ontology>()
+		{
+			@Override
+			public Iterator<Ontology> iterator()
+			{
+				return new Iterator<Ontology>()
+				{
+					@Override
+					public boolean hasNext()
+					{
+						return iterator.hasNext();
+					}
+
+					@Override
+					public Ontology next()
+					{
+						return new OntologyImpl(iterator.next());
+					}
+
+					@Override
+					public void remove()
+					{
+					}
+				};
+			}
+		};
+	}
+
+	/**
+	 * A helper function to parse generic entities to ontologyTerm entities
+	 * 
+	 * @param entityMetaData
+	 * @param entities
+	 * @return a list of Typed OntologyTerm entities
+	 */
+	private Iterable<OntologyTerm> parseEntityToOntologyTerm(Iterable<Entity> entities)
+	{
+		final OntologyService ontologyService = this;
+		final Iterator<Entity> iterator = entities.iterator();
+		return new Iterable<OntologyTerm>()
+		{
+			@Override
+			public Iterator<OntologyTerm> iterator()
+			{
+				return new Iterator<OntologyTerm>()
+				{
+					@Override
+					public boolean hasNext()
+					{
+						return iterator.hasNext();
+					}
+
+					@Override
+					public OntologyTerm next()
+					{
+						return new OntologyTermImpl(iterator.next(), ontologyService);
+					}
+
+					@Override
+					public void remove()
+					{
+
+					}
+				};
+			}
+		};
+
+	}
+
+	private String getEntityName(String ontologyIri)
+	{
+		return getOntology(ontologyIri).getLabel();
 	}
 }
