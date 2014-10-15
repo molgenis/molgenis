@@ -8,6 +8,7 @@
 	var LAST = "isLast";
 	var ENTITY_TYPE = "entity_type";
 	var ONTOLOGY_IRI = "ontologyIRI";
+	var ONTOLOGY_ID = "id";
 	var ONTOLOGY_NAME = "ontologyName";
 	var ONTOLOGY_TERM = "ontologyTerm";
 	var ONTOLOGY_TERM_IRI = "ontologyTermIRI";
@@ -77,7 +78,7 @@
 		}
 		
 		function searchByQuery(ontology, query){
-			var ontologyTermResult = restApi.get('/api/v1/' + ontology[ONTOLOGY_NAME], {'expand' : ['attributes'], 'q' : {
+			var ontologyTermResult = restApi.get('/api/v1/' + ontology[ONTOLOGY_ID], {'expand' : ['attributes'], 'q' : {
 				'q' : [{
 					'field' : SYNONYMS,
 					'operator' : 'EQUALS',

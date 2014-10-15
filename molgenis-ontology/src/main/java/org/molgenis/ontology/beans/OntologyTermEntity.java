@@ -26,10 +26,8 @@ public class OntologyTermEntity extends AbstractSemanticEntity
 	{
 		if (attributeName.equalsIgnoreCase(OntologyTermQueryRepository.FIELDTYPE))
 		{
-			long count = searchService.count(new QueryImpl().eq(OntologyTermQueryRepository.ENTITY_TYPE,
-					OntologyTermQueryRepository.TYPE_ONTOLOGYTERM), entityMetaData);
-			return count == 0 ? MolgenisFieldTypes.STRING.toString().toUpperCase() : MolgenisFieldTypes.COMPOUND
-					.toString().toUpperCase();
+			return Boolean.parseBoolean(entity.getString(OntologyTermIndexRepository.LAST)) ? MolgenisFieldTypes.STRING
+					.toString().toUpperCase() : MolgenisFieldTypes.COMPOUND.toString().toUpperCase();
 		}
 
 		if (attributeName.equalsIgnoreCase("attributes"))

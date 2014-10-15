@@ -5,6 +5,7 @@ import java.util.Iterator;
 import org.molgenis.data.Countable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.elasticsearch.util.MapperTypeSanitizer;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.ontology.utils.OntologyLoader;
 
@@ -42,7 +43,7 @@ public class OntologyIndexRepository extends AbstractOntologyRepository implemen
 			public Entity next()
 			{
 				Entity entity = new MapEntity();
-				entity.set(ID, ontologyLoader.getOntologyName());
+				entity.set(ID, MapperTypeSanitizer.sanitizeMapperType(ontologyLoader.getOntologyName()));
 				entity.set(ONTOLOGY_IRI, ontologyLoader.getOntologyIRI());
 				entity.set(ONTOLOGY_NAME, ontologyLoader.getOntologyName());
 				entity.set(ENTITY_TYPE, TYPE_ONTOLOGY);

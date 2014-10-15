@@ -5,41 +5,48 @@
 <@header css js/>
 <form class="form-horizontal" enctype="multipart/form-data">
 	<div class="row">
-		<legend>
-			<h3><center>Ontology View</center></h3>
-		</legend>
+		<br>
+		<div class="col-md-offset-3 col-md-6">
+			<legend>
+				<h3><center>Ontology View</center></h3>
+			</legend>
+		</div>
 	</div>
 	<#if ontologies?? && (ontologies?size > 0)>
-		<div class="row">
-			<div class="col-md-6">
-				<input id="searchField" type="text">
+	<div class="row">
+		<div class="col-md-6">
+			<div class="row">
+				<div class="col-md-5">
+					<input id="searchField" type="text" class="form-control">
+				</div>
 				<div class="btn-group">
 					<button id="searchButton" type="text" class="btn btn-primary">Search</button>
 					<button id="clearButton" type="text" class="btn btn-default">Clear</button>
 				</div>
 			</div>
-			<div class="col-md-offset-3 float-right">
-				<select id="selectOntologies">
-					<#list ontologies as ontology>
-						<option value="${ontology.ontologyIRI}">${ontology.ontologyName}</option>
-					</#list>
-				</select>
-			</div>
 		</div>
-		<br>
-		<div class="row">
-			<div class="col-md-6">
-				<div id="tree-container"></div>
-			</div>
-			<div class="col-md-6">
-				<div><strong>Ontology Term Information</strong></div></br>
-				<div id="ontology-term-info"></div>
-			</div>
+		<div class="col-md-offset-4 col-md-2">
+			<select id="selectOntologies">
+				<#list ontologies as ontology>
+					<option value="${ontology.ontologyIRI}">${ontology.ontologyName}</option>
+				</#list>
+			</select>
 		</div>
+	</div>
+	<br>
+	<div class="row">
+		<div class="col-md-6">
+			<div id="tree-container"></div>
+		</div>
+		<div class="col-md-6">
+			<div><strong>Ontology Term Information</strong></div></br>
+			<div id="ontology-term-info"></div>
+		</div>
+	</div>
 	<#else>
-		<div class="row">
-			There are not ontologies available!
-		</div>
+	<div class="row">
+		There are not ontologies available!
+	</div>
 	</#if>
 </form>
 <script type="text/javascript">
