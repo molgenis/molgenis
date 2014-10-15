@@ -10,11 +10,6 @@ import org.molgenis.data.Package;
 public interface WritableMetaDataService extends MetaDataService
 {
 	/**
-	 * Recreates the administration infrastructure.
-	 */
-	void createAndUpgradeMetaDataTables();
-
-	/**
 	 * Removes all metadata for an entity.
 	 * 
 	 * @param name

@@ -23,6 +23,9 @@ import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.elasticsearch.ElasticsearchRepositoryDecorator;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.meta.IndexingWritableMetaDataServiceDecorator;
+import org.molgenis.data.meta.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.EntityMetaDataMetaData;
+import org.molgenis.data.meta.PackageMetaData;
 import org.molgenis.data.meta.WritableMetaDataService;
 import org.molgenis.data.meta.WritableMetaDataServiceDecorator;
 import org.molgenis.data.validation.EntityAttributesValidator;
@@ -381,12 +384,20 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 					// 2. validation decorator
 					// 3. indexing decorator
 					// 4. repository
+					IndexedCrudRepository indexedRepo = new ElasticsearchRepositoryDecorator(repository,
+							elasticSearchService);
+					if (AttributeMetaDataMetaData.ENTITY_NAME.equals(entityMetaData.getName())
+							|| EntityMetaDataMetaData.ENTITY_NAME.equals(entityMetaData.getName())
+							|| PackageMetaData.ENTITY_NAME.equals(entityMetaData.getName()))
+					{
+						// TODO: help! how to prevent all sorts of nasty security warnings and String -> Xref entity
+						// conversion hiccups upon construction of the application context?
+						return indexedRepo;
+					}
 					return new IndexedCrudRepositorySecurityDecorator(new IndexedRepositoryValidationDecorator(
-							dataService, new ElasticsearchRepositoryDecorator(repository, elasticSearchService),
-							new EntityAttributesValidator()), molgenisSettings);
+							dataService, indexedRepo, new EntityAttributesValidator()), molgenisSettings);
 				}
 			}
 		};
 	}
-
 }

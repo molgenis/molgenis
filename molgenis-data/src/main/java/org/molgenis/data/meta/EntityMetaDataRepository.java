@@ -1,43 +1,44 @@
-package org.molgenis.data.mysql.meta;
+package org.molgenis.data.meta;
 
-import static org.molgenis.data.mysql.meta.EntityMetaDataMetaData.ABSTRACT;
-import static org.molgenis.data.mysql.meta.EntityMetaDataMetaData.DESCRIPTION;
-import static org.molgenis.data.mysql.meta.EntityMetaDataMetaData.EXTENDS;
-import static org.molgenis.data.mysql.meta.EntityMetaDataMetaData.FULL_NAME;
-import static org.molgenis.data.mysql.meta.EntityMetaDataMetaData.ID_ATTRIBUTE;
-import static org.molgenis.data.mysql.meta.EntityMetaDataMetaData.LABEL;
-import static org.molgenis.data.mysql.meta.EntityMetaDataMetaData.PACKAGE;
-import static org.molgenis.data.mysql.meta.EntityMetaDataMetaData.SIMPLE_NAME;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.ABSTRACT;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.EXTENDS;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.FULL_NAME;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.ID_ATTRIBUTE;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.LABEL;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.PACKAGE;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.SIMPLE_NAME;
 
+import java.util.Collections;
 import java.util.List;
 
-import javax.sql.DataSource;
-
+import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
-import org.molgenis.data.mysql.MysqlRepository;
+import org.molgenis.data.RepositoryCreator;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.util.DependencyResolver;
 
 import com.google.common.collect.Lists;
 
-class MysqlEntityMetaDataRepository extends MysqlRepository
+class EntityMetaDataRepository
 {
 	public static final EntityMetaDataMetaData META_DATA = new EntityMetaDataMetaData();
+	private CrudRepository repository;
 
-	public MysqlEntityMetaDataRepository(DataSource dataSource)
+	public EntityMetaDataRepository(RepositoryCreator repositoryCreator)
 	{
-		super(dataSource);
-		setMetaData(META_DATA);
+		this.repository = repositoryCreator.create(META_DATA);
 	}
 
 	public Iterable<EntityMetaData> getEntityMetaDatas()
 	{
 		List<EntityMetaData> meta = Lists.newArrayList();
-		for (Entity entity : this)
+		for (Entity entity : repository)
 		{
 			meta.add(toEntityMetaData(entity));
 		}
@@ -56,7 +57,7 @@ class MysqlEntityMetaDataRepository extends MysqlRepository
 		List<EntityMetaData> meta = Lists.newArrayList();
 		Query q = new QueryImpl().eq(EntityMetaDataMetaData.PACKAGE, packageName);
 
-		for (Entity entity : findAll(q))
+		for (Entity entity : repository.findAll(q))
 		{
 			meta.add(toEntityMetaData(entity));
 		}
@@ -71,10 +72,10 @@ class MysqlEntityMetaDataRepository extends MysqlRepository
 	 *            the fully qualified name of the entityMetaData
 	 * @return the EntityMetaData or null if none found
 	 */
-	public EntityMetaData getEntityMetaData(String fullyQualifiedName)
+	public EntityMetaData find(String fullyQualifiedName)
 	{
-		Query q = query().eq(FULL_NAME, fullyQualifiedName);
-		Entity entity = findOne(q);
+		Query q = repository.query().eq(FULL_NAME, fullyQualifiedName);
+		Entity entity = repository.findOne(q);
 		if (entity == null)
 		{
 			return null;
@@ -83,7 +84,7 @@ class MysqlEntityMetaDataRepository extends MysqlRepository
 		return toEntityMetaData(entity);
 	}
 
-	public void addEntityMetaData(EntityMetaData emd)
+	public void add(EntityMetaData emd)
 	{
 		Entity entityMetaDataEntity = new MapEntity();
 		entityMetaDataEntity.set(FULL_NAME, emd.getName());
@@ -95,7 +96,7 @@ class MysqlEntityMetaDataRepository extends MysqlRepository
 		entityMetaDataEntity.set(LABEL, emd.getLabel());
 		if (emd.getExtends() != null) entityMetaDataEntity.set(EXTENDS, emd.getExtends().getName());
 
-		add(entityMetaDataEntity);
+		repository.add(entityMetaDataEntity);
 	}
 
 	private DefaultEntityMetaData toEntityMetaData(Entity entity)
@@ -111,12 +112,31 @@ class MysqlEntityMetaDataRepository extends MysqlRepository
 		String extendsEntityName = entity.getString(EXTENDS);
 		if (extendsEntityName != null)
 		{
-			EntityMetaData extendsEmd = getEntityMetaData(extendsEntityName);
+			EntityMetaData extendsEmd = find(extendsEntityName);
 			if (extendsEmd == null) throw new MolgenisDataException("Missing super entity [" + extendsEntityName
 					+ "] of entity [" + name + "]");
 			entityMetaData.setExtends(extendsEmd);
 		}
 
 		return entityMetaData;
+	}
+
+	public void delete(String entityName)
+	{
+		repository.delete(repository.findAll(new QueryImpl().eq(EntityMetaDataMetaData.FULL_NAME, entityName)));
+	}
+
+	/**
+	 * Deletes all entities, in the right order
+	 */
+	public void deleteAll()
+	{
+		List<Entity> importOrderEntities = Lists.newLinkedList(DependencyResolver.resolveSelfReferences(repository,
+				META_DATA));
+		Collections.reverse(importOrderEntities);
+		for (Entity entity : importOrderEntities)
+		{
+			delete(entity.getString(EntityMetaDataMetaData.FULL_NAME));
+		}
 	}
 }
