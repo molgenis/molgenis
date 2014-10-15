@@ -1,34 +1,35 @@
-package org.molgenis.data.mysql.meta;
+package org.molgenis.data.meta;
 
-import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.AGGREGATEABLE;
-import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.AUTO;
-import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.DATA_TYPE;
-import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.DESCRIPTION;
-import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.ENTITY;
-import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.ENUM_OPTIONS;
-import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.ID_ATTRIBUTE;
-import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.LABEL;
-import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.LABEL_ATTRIBUTE;
-import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.LOOKUP_ATTRIBUTE;
-import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.NAME;
-import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.NILLABLE;
-import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.RANGE_MAX;
-import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.RANGE_MIN;
-import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.READ_ONLY;
-import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.REF_ENTITY;
-import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.UNIQUE;
-import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.VISIBLE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.AGGREGATEABLE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.AUTO;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.DATA_TYPE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.DESCRIPTION;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENTITY;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENUM_OPTIONS;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.IDENTIFIER;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.ID_ATTRIBUTE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL_ATTRIBUTE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.LOOKUP_ATTRIBUTE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.NAME;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.NILLABLE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.RANGE_MAX;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.RANGE_MIN;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.READ_ONLY;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.REF_ENTITY;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.UNIQUE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.VISIBLE;
 
 import java.util.List;
-
-import javax.sql.DataSource;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Range;
-import org.molgenis.data.mysql.MysqlRepository;
+import org.molgenis.data.RepositoryCreator;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -37,20 +38,23 @@ import org.molgenis.fieldtypes.EnumField;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
-class MysqlAttributeMetaDataRepository extends MysqlRepository
+class AttributeMetaDataRepository
 {
 	public static final AttributeMetaDataMetaData META_DATA = new AttributeMetaDataMetaData();
 
-	public MysqlAttributeMetaDataRepository(DataSource dataSource)
+	private AtomicInteger idCounter = new AtomicInteger();
+
+	private CrudRepository repository;
+
+	public AttributeMetaDataRepository(RepositoryCreator repositoryCreator)
 	{
-		super(dataSource);
-		setMetaData(META_DATA);
+		this.repository = repositoryCreator.create(META_DATA);
 	}
 
-	public Iterable<AttributeMetaData> getEntityAttributeMetaData(String entityName)
+	public Iterable<AttributeMetaData> findForEntity(String entityName)
 	{
 		List<AttributeMetaData> attributes = Lists.newArrayList();
-		for (Entity entity : findAll(new QueryImpl().eq(ENTITY, entityName)))
+		for (Entity entity : repository.findAll(new QueryImpl().eq(ENTITY, entityName)))
 		{
 			attributes.add(toAttributeMetaData(entity));
 		}
@@ -58,9 +62,11 @@ class MysqlAttributeMetaDataRepository extends MysqlRepository
 		return attributes;
 	}
 
-	public void addAttributeMetaData(String entityName, AttributeMetaData att)
+	public void add(String entityName, AttributeMetaData att)
 	{
 		Entity attributeMetaDataEntity = new MapEntity();
+		// autoid
+		attributeMetaDataEntity.set(IDENTIFIER, idCounter.incrementAndGet());
 		attributeMetaDataEntity.set(ENTITY, entityName);
 		attributeMetaDataEntity.set(NAME, att.getName());
 		attributeMetaDataEntity.set(DATA_TYPE, att.getDataType());
@@ -87,20 +93,30 @@ class MysqlAttributeMetaDataRepository extends MysqlRepository
 			attributeMetaDataEntity.set(RANGE_MAX, att.getRange().getMax());
 		}
 
-		if (att.getRefEntity() != null) attributeMetaDataEntity.set(REF_ENTITY, att.getRefEntity().getName());
+		if (att.getRefEntity() != null) attributeMetaDataEntity.set(REF_ENTITY, att.getRefEntity());
 
-		add(attributeMetaDataEntity);
+		repository.add(attributeMetaDataEntity);
 	}
 
-	public void removeAttributeMetaData(String entityName, String attributeName)
+	public void remove(String entityName, String attributeName)
 	{
 		Query q = new QueryImpl().eq(AttributeMetaDataMetaData.ENTITY, entityName).and()
 				.eq(AttributeMetaDataMetaData.NAME, attributeName);
-		Entity entity = findOne(q);
+		Entity entity = repository.findOne(q);
 		if (entity != null)
 		{
-			delete(entity);
+			repository.delete(entity);
 		}
+	}
+
+	public void deleteAllAttributes(String entityName)
+	{
+		repository.delete(repository.findAll(new QueryImpl().eq(AttributeMetaDataMetaData.ENTITY, entityName)));
+	}
+
+	public void deleteAll()
+	{
+		repository.deleteAll();
 	}
 
 	private DefaultAttributeMetaData toAttributeMetaData(Entity entity)
@@ -130,5 +146,10 @@ class MysqlAttributeMetaDataRepository extends MysqlRepository
 		}
 
 		return attributeMetaData;
+	}
+
+	Iterable<Entity> getAttributeEntities()
+	{
+		return repository;
 	}
 }

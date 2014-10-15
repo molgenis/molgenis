@@ -7,9 +7,9 @@ import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.importer.EmxImportService;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
+import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.WritableMetaDataService;
 import org.molgenis.data.meta.WritableMetaDataServiceDecorator;
-import org.molgenis.data.mysql.meta.MysqlWritableMetaDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,7 +31,7 @@ public class MySqlConfiguration
 	@Autowired
 	private RepositoryDecoratorFactory repositoryDecoratorFactory;
 
-	private MysqlWritableMetaDataService writableMetaDataService;
+	private MetaDataServiceImpl writableMetaDataService;
 
 	@Bean
 	@Scope("prototype")
@@ -43,7 +43,7 @@ public class MySqlConfiguration
 	@Bean
 	public WritableMetaDataService writableMetaDataService()
 	{
-		writableMetaDataService = new MysqlWritableMetaDataService(dataSource);
+		writableMetaDataService = new MetaDataServiceImpl();
 		return writableMetaDataServiceDecorator().decorate(writableMetaDataService);
 	}
 

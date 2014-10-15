@@ -1,4 +1,4 @@
-package org.molgenis.data.mysql.meta;
+package org.molgenis.data.meta;
 
 import static org.molgenis.MolgenisFieldTypes.BOOL;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
@@ -23,7 +23,7 @@ public class EntityMetaDataMetaData extends DefaultEntityMetaData
 		super(ENTITY_NAME);
 		addAttribute(FULL_NAME).setIdAttribute(true).setUnique(true).setNillable(false);
 		addAttribute(SIMPLE_NAME).setNillable(false);
-		addAttribute(PACKAGE).setDataType(XREF).setRefEntity(MysqlPackageRepository.META_DATA);
+		addAttribute(PACKAGE).setDataType(XREF).setRefEntity(PackageRepository.META_DATA);
 		addAttribute(ID_ATTRIBUTE);
 		addAttribute(ABSTRACT).setDataType(BOOL);
 		addAttribute(LABEL);

@@ -105,6 +105,11 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 	@Override
 	public void create()
 	{
+		if (tableExists())
+		{
+			logger.warn("Table for entity " + getName() + " already exists. Skipping creation");
+			return;
+		}
 		try
 		{
 			jdbcTemplate.execute(getCreateSql());

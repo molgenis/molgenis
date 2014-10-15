@@ -1,4 +1,4 @@
-package org.molgenis.data.mysql.meta;
+package org.molgenis.data.meta;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Package;
