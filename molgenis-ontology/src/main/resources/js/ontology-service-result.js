@@ -45,35 +45,35 @@
 			var ontologyTermMatchDiv= $('<div />').addClass('col-md-8 div-expandable').appendTo(layoutDiv);
 			//Collect all the scores from the candidate ontology term mappings
 			var scoreGroup = [];
-			$.each(entity.results.searchHits, function(index, hit){
-				var eachScore = hit.columnValueMap.combinedScore ? hit.columnValueMap.combinedScore : hit.columnValueMap.score;
+			$.each(entity.results.ontologyTerms, function(index, hit){
+				var eachScore = hit.combinedScore ? hit.combinedScore : hit.score;
 				scoreGroup.push(parseFloat(eachScore.toFixed(2)));
 			});
 			
 			//Create the html visualizations for the mappings
-			$.each(entity.results.searchHits, function(index, hit){
+			$.each(entity.results.ontologyTerms, function(index, hit){
 				if(index >= 20) return false;
-				var ontologyTermPopover = $('<div>' + hit.columnValueMap.ontologyTerm + '</div>').addClass('show-popover').css('margin-bottom', '1px');
+				var ontologyTermPopover = $('<div>' + hit.ontologyTerm + '</div>').addClass('show-popover').css('margin-bottom', '1px');
 				var ontologyTermNameDiv = $('<div />').addClass('col-md-8 matchterm').css('margin-bottom','8px').append(ontologyTermPopover)
-					.append('<a href="' + hit.columnValueMap.ontologyTermIRI + '" target="_blank">' + hit.columnValueMap.ontologyTermIRI + '</a>');
-				var matchScoreDiv = $('<div />').addClass('col-md-3').css('margin-bottom', '-6px').append('<center>' + (hit.columnValueMap.combinedScore ? hit.columnValueMap.combinedScore.toFixed(2) :  hit.columnValueMap.score.toFixed(2)) + '%</center>');
+					.append('<a href="' + hit.ontologyTermIRI + '" target="_blank">' + hit.ontologyTermIRI + '</a>');
+				var matchScoreDiv = $('<div />').addClass('col-md-3').css('margin-bottom', '-6px').append('<center>' + (hit.combinedScore ? hit.combinedScore.toFixed(2) :  hit.score.toFixed(2)) + '%</center>');
 				var newLineDiv = $('<div />').addClass('row').css({
 					'padding-top':'3px',
 					'padding-bottom':'3px'
 				}).append(ontologyTermNameDiv).append(matchScoreDiv);
-				var isEqual = hit.columnValueMap.ontologyTermSynonym === hit.columnValueMap.ontologyTerm;
+				var isEqual = hit.ontologyTermSynonym === hit.ontologyTerm;
 				var popoverOption = {
 					'placement' : 'bottom',
 					'trigger' : 'hover',
 					'title' : 'Click to look up in ontology',
 					'html' : true, 
-					'content' : (hit.columnValueMap.maxScoreField ? 'Matched based on the input field : <strong>' + hit.columnValueMap.maxScoreField + '</strong><br><br>' : '') +
-						((hit.columnValueMap.maxScoreField && hit.columnValueMap[hit.columnValueMap.maxScoreField]) ? 'OntologyTerm ' + hit.columnValueMap.maxScoreField + ' is <strong>' + hit.columnValueMap[hit.columnValueMap.maxScoreField] + '</strong><br><br>' : '')+ 
-						(hit.columnValueMap.ontologyTermSynonym !== hit.columnValueMap.ontologyTerm ? 'OntologyTerm synonym is <strong>' + hit.columnValueMap.ontologyTermSynonym + '</strong>' : '') 
+					'content' : (hit.maxScoreField ? 'Matched based on the input field : <strong>' + hit.maxScoreField + '</strong><br><br>' : '') +
+						((hit.maxScoreField && hit[hit.maxScoreField]) ? 'OntologyTerm ' + hit.maxScoreField + ' is <strong>' + hit[hit.maxScoreField] + '</strong><br><br>' : '')+ 
+						(hit.ontologyTermSynonym !== hit.ontologyTerm ? 'OntologyTerm synonym is <strong>' + hit.ontologyTermSynonym + '</strong>' : '') 
 				};
 				ontologyTermMatchDiv.append(newLineDiv);
 				ontologyTermPopover.popover(popoverOption).click(function(){
-					ontologyTree.locateTerm(hit.columnValueMap);
+					ontologyTree.locateTerm(hit);
 				});
 				
 				if(scoreGroup.length > 3){

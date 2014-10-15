@@ -21,7 +21,7 @@
 			<div class="col-md-offset-3 float-right">
 				<select id="selectOntologies">
 					<#list ontologies as ontology>
-						<option value="${ontology.identifier}">${ontology.name}</option>
+						<option value="${ontology.ontologyIRI}">${ontology.ontologyName}</option>
 					</#list>
 				</select>
 			</div>

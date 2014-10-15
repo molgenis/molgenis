@@ -35,9 +35,11 @@ import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.rest.EntityCollectionResponse;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.semantic.OntologyServiceResult;
-import org.molgenis.data.semantic.OntologyTerm;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.ontology.beans.OntologyServiceResultImpl;
+import org.molgenis.ontology.repository.OntologyTermQueryRepository;
+import org.molgenis.ontology.utils.OntologyServiceUtil;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -73,7 +75,7 @@ public class OntologyServiceController extends MolgenisPluginController
 	@RequestMapping(method = GET)
 	public String init(Model model)
 	{
-		model.addAttribute("ontologies", ontologyService.getAllOntologies());
+		model.addAttribute("ontologies", OntologyServiceUtil.getEntityAsMap(ontologyService.getAllOntologyEntities()));
 		return "ontology-match-view";
 	}
 
@@ -154,27 +156,22 @@ public class OntologyServiceController extends MolgenisPluginController
 
 					for (Entity entity : ontologyServiceSessionData.getSubList(sessionId, lowerBound, upperBound))
 					{
-						OntologyServiceResult searchEntity = ontologyService.searchEntity(
-								ontologyServiceSessionData.getOntologyIriBySession(sessionId), entity);
-
 						int count = 0;
-						for (OntologyTerm ontologyTerm : searchEntity.getOntologyTerms())
+						for (Map<String, Object> ontologyTermEntity : ontologyService.searchEntity(
+								ontologyServiceSessionData.getOntologyIriBySession(sessionId), entity)
+								.getOntologyTerms())
 						{
 							Entity row = new MapEntity();
 							if (count == 0)
 							{
-								row.set("InputTerm", gatherInfo(searchEntity.getInputData()));
+								row.set("InputTerm", gatherInfo(OntologyServiceUtil.getEntityAsMap(entity)));
 							}
-							row.set("OntologyTerm", ontologyTerm.getLabel());
-							for (String synonym : ontologyTerm.getSynonyms())
-							{
-								row.set("Synonym", synonym);
-								break;
-							}
-							row.set("OntologyTermUrl", ontologyTerm.getIRI());
-							row.set("OntologyUrl", ontologyTerm.getOntology().getIri());
-							// row.set("Score",
-							// ontologyTerm.getScore().doubleValue());
+							row.set("OntologyTerm", ontologyTermEntity.get(OntologyTermQueryRepository.ONTOLOGY_TERM));
+							row.set("Synonym", ontologyTermEntity.get(OntologyTermQueryRepository.SYNONYMS));
+							row.set("OntologyTermUrl",
+									ontologyTermEntity.get(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI));
+							row.set("OntologyUrl", ontologyTermEntity.get(OntologyTermQueryRepository.ONTOLOGY_IRI));
+							row.set("Score", ontologyTermEntity.get(OntologyServiceImpl.COMBINED_SCORE));
 							sheetWriter.add(row);
 							count++;
 						}
@@ -233,7 +230,8 @@ public class OntologyServiceController extends MolgenisPluginController
 	{
 		String ontologyUrl = ontologyTermRequest.getOntologyIri();
 		String queryString = ontologyTermRequest.getQueryString();
-		if (ontologyUrl == null || queryString == null) return new OntologyServiceResult("Your input cannot be null!");
+		if (ontologyUrl == null || queryString == null) return new OntologyServiceResultImpl(
+				"Your input cannot be null!");
 		return ontologyService.search(ontologyUrl, queryString);
 	}
 

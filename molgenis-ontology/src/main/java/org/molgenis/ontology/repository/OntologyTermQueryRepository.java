@@ -11,6 +11,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.elasticsearch.util.Hit;
+import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.semantic.OntologyService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -33,6 +35,7 @@ public class OntologyTermQueryRepository extends AbstractOntologyQueryRepository
 		dynamicEntityMetaData();
 	}
 
+	@SuppressWarnings("deprecation")
 	private void dynamicEntityMetaData()
 	{
 		EntityMetaData entityMetaData = getEntityMetaData();
@@ -44,15 +47,15 @@ public class OntologyTermQueryRepository extends AbstractOntologyQueryRepository
 			{
 				availableAttributes.add(attributeMetaData.getName().toLowerCase());
 			}
-			for (Entity entity : searchService.search(
-					new QueryImpl().eq(OntologyTermQueryRepository.ENTITY_TYPE,
-							OntologyTermQueryRepository.TYPE_ONTOLOGYTERM).pageSize(10), entityMetaData))
+			for (Hit hit : searchService.search(new SearchRequest(entityMetaData.getName(),
+					new QueryImpl().pageSize(1), null)))
 			{
-				for (String attributeName : entity.getAttributeNames())
+				for (String attributeName : hit.getColumnValueMap().keySet())
 				{
 					if (!availableAttributes.contains(attributeName.toLowerCase())
 							&& !reservedAttributeName.contains(attributeName))
 					{
+						availableAttributes.add(attributeName.toLowerCase());
 						defaultEntityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(attributeName));
 					}
 				}

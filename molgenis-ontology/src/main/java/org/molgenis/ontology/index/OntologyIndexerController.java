@@ -4,15 +4,18 @@ import static org.molgenis.ontology.index.OntologyIndexerController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.Part;
 
+import org.molgenis.data.Entity;
 import org.molgenis.data.semantic.OntologyService;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ontology.utils.OntologyLoader;
+import org.molgenis.ontology.utils.OntologyServiceUtil;
 import org.molgenis.ontology.utils.ZipFileUtil;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +62,12 @@ public class OntologyIndexerController extends MolgenisPluginController
 	public Map<String, Object> getAllOntologies()
 	{
 		Map<String, Object> results = new HashMap<String, Object>();
-		results.put("results", ontologyService.getAllOntologies());
+		List<Map<String, Object>> ontologies = new ArrayList<Map<String, Object>>();
+		for (Entity entity : ontologyService.getAllOntologyEntities())
+		{
+			ontologies.add(OntologyServiceUtil.getEntityAsMap(entity));
+		}
+		results.put("results", ontologies);
 		return results;
 	}
 

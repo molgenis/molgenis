@@ -21,8 +21,8 @@
 							<div class="radio">
 								<#list ontologies as ontology>
 									<label class="checkbox">
-										<input name="selectOntologies" type="radio" value="${ontology.identifier}" <#if (ontology_index == 0) >checked</#if>> 
-										<a href="${ontology.identifier}" target="_blank">${ontology.name}</a>
+										<input name="selectOntologies" type="radio" value="${ontology.ontologyIRI}" <#if (ontology_index == 0) >checked</#if>> 
+										<a href="${ontology.ontologyIRI}" target="_blank">${ontology.ontologyName}</a>
 									</label>
 								</#list>
 							</div>

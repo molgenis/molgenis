@@ -28,6 +28,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.beans.ComparableEntity;
 import org.molgenis.ontology.beans.OntologyEntity;
 import org.molgenis.ontology.beans.OntologyImpl;
+import org.molgenis.ontology.beans.OntologyServiceResultImpl;
 import org.molgenis.ontology.beans.OntologyTermEntityIterable;
 import org.molgenis.ontology.beans.OntologyTermImpl;
 import org.molgenis.ontology.repository.OntologyIndexRepository;
@@ -42,14 +43,15 @@ public class OntologyServiceImpl implements OntologyService
 {
 	private final PorterStemmer stemmer = new PorterStemmer();
 	private static final List<String> ELASTICSEARCH_RESERVED_WORDS = Arrays.asList("or", "and", "if");
-	private static final String COMBINED_SCORE = "combinedScore";
 	private static final String FUZZY_MATCH_SIMILARITY = "~0.8";
 	private static final String NON_WORD_SEPARATOR = "[^a-zA-Z0-9]";
 	private static final int MAX_NUMBER_MATCHES = 100;
+	public static final String COMBINED_SCORE = "combinedScore";
 	public static final Character DEFAULT_SEPARATOR = ';';
+	public static final String COMMOM_SEPARATOR = ",";
 	public static final String DEFAULT_MATCHING_NAME_FIELD = "name";
 	public static final String DEFAULT_MATCHING_SYNONYM_FIELD = "synonym";
-	private static final String MAX_SCORE_FIELD = "maxScoreField";
+	public static final String MAX_SCORE_FIELD = "maxScoreField";
 
 	private final SearchService searchService;
 	private final DataService dataService;
@@ -264,12 +266,14 @@ public class OntologyServiceImpl implements OntologyService
 							// external database reference
 							if (attributeName.equalsIgnoreCase(inputAttrName))
 							{
-								if (!StringUtils.isEmpty(entity.getString(attributeName)))
+								String listOfDatabaseIds = entity.getString(attributeName);
+								if (!StringUtils.isEmpty(listOfDatabaseIds) && listOfDatabaseIds.length() > 2)
 								{
-									for (Object databaseId : (List<?>) entity.get(attributeName))
+									for (String databaseId : listOfDatabaseIds.substring(1,
+											listOfDatabaseIds.length() - 1).split(COMMOM_SEPARATOR))
 									{
 										BigDecimal ngramScore = new BigDecimal(NGramMatchingModel.stringMatching(
-												inputEntity.getString(attributeName), databaseId.toString()));
+												inputEntity.getString(attributeName), databaseId.trim()));
 										if (maxNgramScore.doubleValue() < ngramScore.doubleValue())
 										{
 											maxNgramScore = ngramScore;
@@ -285,10 +289,8 @@ public class OntologyServiceImpl implements OntologyService
 			}
 			count++;
 			comparableEntities.add(new ComparableEntity(entity, maxNgramScore, maxScoreField));
-
 		}
-		Collections.sort(comparableEntities);
-		return convertResults(inputData, comparableEntities, entityMetaData);
+		return convertResults(comparableEntities, inputData);
 	}
 
 	public OntologyServiceResult search(String ontologyUrl, String queryString)
@@ -324,9 +326,10 @@ public class OntologyServiceImpl implements OntologyService
 		return stringBuilder.toString().trim();
 	}
 
-	private OntologyServiceResult convertResults(Map<String, Object> inputData,
-			List<ComparableEntity> comparableEntities, EntityMetaData entityMetaData)
+	private OntologyServiceResult convertResults(List<ComparableEntity> comparableEntities,
+			Map<String, Object> inputData)
 	{
+		Collections.sort(comparableEntities);
 		List<Entity> entities = new ArrayList<Entity>();
 		Set<String> uniqueIdentifiers = new HashSet<String>();
 		for (ComparableEntity comparableHit : comparableEntities)
@@ -346,7 +349,7 @@ public class OntologyServiceImpl implements OntologyService
 				entities.add(copyEntity);
 			}
 		}
-		return new OntologyServiceResult(inputData, parseEntityToOntologyTerm(entities), entities.size());
+		return new OntologyServiceResultImpl(inputData, entities, comparableEntities.size());
 	}
 
 	/**
@@ -355,7 +358,7 @@ public class OntologyServiceImpl implements OntologyService
 	 * @param entities
 	 * @return a list of Typed Ontology entities
 	 */
-	private Iterable<Ontology> parseEntityToOntology(Iterable<Entity> entities)
+	public Iterable<Ontology> parseEntityToOntology(Iterable<Entity> entities)
 	{
 		final Iterator<Entity> iterator = entities.iterator();
 		return new Iterable<Ontology>()
@@ -393,7 +396,7 @@ public class OntologyServiceImpl implements OntologyService
 	 * @param entities
 	 * @return a list of Typed OntologyTerm entities
 	 */
-	private Iterable<OntologyTerm> parseEntityToOntologyTerm(Iterable<Entity> entities)
+	public Iterable<OntologyTerm> parseEntityToOntologyTerm(Iterable<Entity> entities)
 	{
 		final OntologyService ontologyService = this;
 		final Iterator<Entity> iterator = entities.iterator();
@@ -424,7 +427,6 @@ public class OntologyServiceImpl implements OntologyService
 				};
 			}
 		};
-
 	}
 
 	private String getEntityName(String ontologyIri)

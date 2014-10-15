@@ -7,17 +7,21 @@ import org.molgenis.ontology.repository.OntologyQueryRepository;
 
 public class OntologyImpl implements Ontology
 {
+	private final String label;
+	private final String iri;
 	private final Entity entity;
 
 	public OntologyImpl(Entity entity)
 	{
 		this.entity = entity;
+		this.label = entity.getString(OntologyQueryRepository.ONTOLOGY_NAME);
+		this.iri = entity.getString(OntologyQueryRepository.ONTOLOGY_IRI);
 	}
 
 	@Override
 	public String getLabel()
 	{
-		return entity.getString(OntologyQueryRepository.ONTOLOGY_NAME);
+		return label;
 	}
 
 	@Override
@@ -29,7 +33,7 @@ public class OntologyImpl implements Ontology
 	@Override
 	public String getIri()
 	{
-		return entity.getString(OntologyQueryRepository.ONTOLOGY_IRI);
+		return iri;
 	}
 
 	@Override

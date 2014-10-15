@@ -32,6 +32,25 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 		if (loader == null) throw new IllegalArgumentException("OntologyLoader is null!");
 		ontologyLoader = loader;
 		dynamaticFields = new HashSet<String>();
+		recursivelyFindDatabaseIds(ontologyLoader.getAllclasses());
+	}
+
+	private void recursivelyFindDatabaseIds(Set<OWLClass> owlClasses)
+	{
+		if (owlClasses != null)
+		{
+			for (OWLClass cls : owlClasses)
+			{
+				Map<String, Set<String>> allDatabaseIds = ontologyLoader.getAllDatabaseIds(cls);
+				if (allDatabaseIds != null)
+				{
+					for (String databaseId : allDatabaseIds.keySet())
+					{
+						dynamaticFields.add(databaseId);
+					}
+				}
+			}
+		}
 	}
 
 	@Override
@@ -80,7 +99,6 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 				return orderedList;
 			}
 		};
-
 		return new Iterator<Entity>()
 		{
 			// Since there are multiple root classes, in order to use tree
@@ -129,10 +147,6 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 					for (Entry<String, Set<String>> entry : classContainer.getAllDatabaseIds().entrySet())
 					{
 						entity.set(entry.getKey(), entry.getValue());
-						if (!dynamaticFields.contains(entry.getKey()))
-						{
-							dynamaticFields.add(entry.getKey());
-						}
 					}
 				}
 				return entity;

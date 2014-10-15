@@ -13,8 +13,8 @@
 				if(ontologies && ontologies.length > 0){
 					var table = $('#ontology-table');
 					$.each(ontologies, function(inex, ontology){
-						var ontologyUri = ontology.ontologyURI;
-						var ontologyName = ontology.name;
+						var ontologyUri = ontology.ontologyIRI;
+						var ontologyName = ontology.ontologyName;
 						var status = "Indexed";
 						if(runningIndexUri !== null && ontologyUri === runningIndexUri){
 							status = "Being indexed ...";
