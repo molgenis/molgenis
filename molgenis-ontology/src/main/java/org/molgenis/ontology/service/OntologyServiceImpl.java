@@ -248,9 +248,7 @@ public class OntologyServiceImpl implements OntologyService
 					if (DEFAULT_MATCHING_NAME_FIELD.equals(inputAttrName.toLowerCase())
 							|| inputAttrName.toLowerCase().startsWith(DEFAULT_MATCHING_SYNONYM_FIELD))
 					{
-						BigDecimal ngramScore = new BigDecimal(NGramMatchingModel.stringMatching(
-								inputEntity.getString(inputAttrName),
-								entity.getString(OntologyTermIndexRepository.SYNONYMS)));
+						BigDecimal ngramScore = matchOntologyTerm(inputEntity.getString(inputAttrName), entity);
 						if (maxNgramScore.doubleValue() < ngramScore.doubleValue())
 						{
 							maxNgramScore = ngramScore;
@@ -272,15 +270,14 @@ public class OntologyServiceImpl implements OntologyService
 									for (String databaseId : listOfDatabaseIds.substring(1,
 											listOfDatabaseIds.length() - 1).split(COMMOM_SEPARATOR))
 									{
-										BigDecimal ngramScore = new BigDecimal(NGramMatchingModel.stringMatching(
-												inputEntity.getString(attributeName), databaseId.trim()));
-										if (maxNgramScore.doubleValue() < ngramScore.doubleValue())
+										if (databaseId.trim().equalsIgnoreCase(
+												inputEntity.getString(inputAttrName).trim()))
 										{
-											maxNgramScore = ngramScore;
+											maxNgramScore = new BigDecimal(100);
 											maxScoreField = attributeName;
 										}
 									}
-									if (count == 0) inputData.put(attributeName, inputEntity.getString(attributeName));
+									if (count == 0) inputData.put(inputAttrName, inputEntity.getString(inputAttrName));
 								}
 							}
 						}
@@ -350,6 +347,27 @@ public class OntologyServiceImpl implements OntologyService
 			}
 		}
 		return new OntologyServiceResultImpl(inputData, entities, comparableEntities.size());
+	}
+
+	private BigDecimal matchOntologyTerm(String queryString, Entity entity)
+	{
+		String ontologyTermSynonym = entity.getString(OntologyTermIndexRepository.SYNONYMS);
+		String ontologyTerm = entity.getString(OntologyTermIndexRepository.ONTOLOGY_TERM);
+
+		BigDecimal ngramScore = null;
+		if (!ontologyTerm.equalsIgnoreCase(ontologyTermSynonym))
+		{
+			double score_1 = NGramMatchingModel.stringMatching(queryString, ontologyTerm);
+			double score_2 = NGramMatchingModel.stringMatching(queryString, ontologyTermSynonym);
+
+			ngramScore = new BigDecimal(score_1 > score_2 ? score_1 : score_2);
+		}
+		else
+		{
+			ngramScore = new BigDecimal(NGramMatchingModel.stringMatching(queryString, ontologyTermSynonym));
+		}
+
+		return ngramScore;
 	}
 
 	/**
