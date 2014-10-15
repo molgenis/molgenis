@@ -86,9 +86,10 @@ class PackageRepository
 	}
 
 	/**
-	 * Adds all packages including parent packages, in the right order.
+	 * Adds a package including parent packages, in the right order.
 	 * 
-	 * @param emd
+	 * @param p
+	 *            the {@link Package} to add
 	 */
 	public void add(Package p)
 	{

@@ -43,8 +43,8 @@ public class MysqlRepositoryCountTest extends AbstractTestNGSpringContextTests
 
 		coll.dropEntityMetaData(personMD.getName());
 		coll.dropEntityMetaData(countryMD.getName());
-		MysqlRepository countries = coll.create(countryMD);
-		MysqlRepository persons = coll.create(personMD);
+		MysqlRepository countries = (MysqlRepository) coll.create(countryMD);
+		MysqlRepository persons = (MysqlRepository) coll.create(personMD);
 
 		// add country entities to repo
 		Entity c = new MapEntity();

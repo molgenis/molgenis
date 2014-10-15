@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -20,11 +21,11 @@ public class MetaDataServiceImpl implements WritableMetaDataService
 	private PackageRepository packageRepository;
 	private EntityMetaDataRepository entityMetaDataRepository;
 	private AttributeMetaDataRepository attributeMetaDataRepository;
+	private static final Logger LOG = Logger.getLogger(MetaDataServiceImpl.class);
 
 	/**
 	 * Setter for the MysqlRepositoryCollection, to be called after it's created. This resolves the circular dependency
-	 * {@link MysqlRepositoryCollection} => decorated {@link WritableMetaDataService} =>
-	 * {@link MysqlRepositoryCollection}
+	 * {@link MysqlRepositoryCollection} => decorated {@link WritableMetaDataService} => {@link RepositoryCreator}
 	 * 
 	 * @param mysqlRepositoryCollection
 	 */
@@ -114,6 +115,10 @@ public class MetaDataServiceImpl implements WritableMetaDataService
 		// add attribute metadata
 		for (AttributeMetaData att : emd.getAttributes())
 		{
+			if (LOG.isTraceEnabled())
+			{
+				LOG.trace("Adding attribute metadata for entity " + emd.getName() + ", attribute " + att.getName());
+			}
 			attributeMetaDataRepository.add(emd.getName(), att);
 		}
 	}
@@ -138,7 +143,7 @@ public class MetaDataServiceImpl implements WritableMetaDataService
 		{
 			return null;
 		}
-		return entityMetaDataRepository.getEntityMetaData(fullyQualifiedName);
+		return entityMetaDataRepository.find(fullyQualifiedName);
 	}
 
 	@Override

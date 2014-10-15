@@ -6,6 +6,7 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.DATA_TYPE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.DESCRIPTION;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENTITY;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENUM_OPTIONS;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.IDENTIFIER;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ID_ATTRIBUTE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL_ATTRIBUTE;
@@ -20,6 +21,7 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.UNIQUE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.VISIBLE;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
@@ -39,6 +41,8 @@ import com.google.common.collect.Lists;
 class AttributeMetaDataRepository
 {
 	public static final AttributeMetaDataMetaData META_DATA = new AttributeMetaDataMetaData();
+
+	private AtomicInteger idCounter = new AtomicInteger();
 
 	private CrudRepository repository;
 
@@ -61,6 +65,8 @@ class AttributeMetaDataRepository
 	public void add(String entityName, AttributeMetaData att)
 	{
 		Entity attributeMetaDataEntity = new MapEntity();
+		// autoid
+		attributeMetaDataEntity.set(IDENTIFIER, idCounter.incrementAndGet());
 		attributeMetaDataEntity.set(ENTITY, entityName);
 		attributeMetaDataEntity.set(NAME, att.getName());
 		attributeMetaDataEntity.set(DATA_TYPE, att.getDataType());
@@ -87,7 +93,7 @@ class AttributeMetaDataRepository
 			attributeMetaDataEntity.set(RANGE_MAX, att.getRange().getMax());
 		}
 
-		if (att.getRefEntity() != null) attributeMetaDataEntity.set(REF_ENTITY, att.getRefEntity().getName());
+		if (att.getRefEntity() != null) attributeMetaDataEntity.set(REF_ENTITY, att.getRefEntity());
 
 		repository.add(attributeMetaDataEntity);
 	}

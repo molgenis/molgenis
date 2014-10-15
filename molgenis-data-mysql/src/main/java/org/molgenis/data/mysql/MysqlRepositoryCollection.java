@@ -94,10 +94,11 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection,
 		}
 	}
 
+	@Override
 	@Transactional
-	public MysqlRepository create(EntityMetaData emd)
+	public CrudRepository create(EntityMetaData emd)
 	{
-		MysqlRepository repository = null;
+		CrudRepository result = null;
 
 		if (metaDataRepositories.getEntityMetaData(emd.getName()) != null)
 		{
@@ -106,16 +107,17 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection,
 				return null;
 			}
 
-			repository = repositories.get(emd.getName());
-			if (repository == null) throw new IllegalStateException("Repository [" + emd.getName()
+			result = repositories.get(emd.getName());
+			if (result == null) throw new IllegalStateException("Repository [" + emd.getName()
 					+ "] registered in entities table but missing in the MysqlRepositoryCollection");
 
+			result = (CrudRepository) getDecoratedRepository(result);
 			if (!dataService.hasRepository(emd.getName()))
 			{
-				dataService.addRepository(getDecoratedRepository(repository));
+				dataService.addRepository(result);
 			}
 
-			return repository;
+			return result;
 		}
 
 		if (dataService.hasRepository(emd.getName()))
@@ -126,12 +128,12 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection,
 		// if not abstract add to repositories
 		if (!emd.isAbstract())
 		{
-			repository = createMysqlRepository();
+			MysqlRepository repository = createMysqlRepository();
 			repository.setMetaData(emd);
 			repository.create();
-
 			repositories.put(emd.getName(), repository);
-			dataService.addRepository(getDecoratedRepository(repository));
+			result = (CrudRepository) getDecoratedRepository(repository);
+			dataService.addRepository(result);
 		}
 
 		// Add to entities and attributes tables, this should be done AFTER the creation of new tables because create
@@ -139,7 +141,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection,
 		// create table fails a rollback does not work anymore
 		metaDataRepositories.addEntityMetaData(emd);
 
-		return repository;
+		return result;
 	}
 
 	@Override

@@ -72,7 +72,7 @@ class EntityMetaDataRepository
 	 *            the fully qualified name of the entityMetaData
 	 * @return the EntityMetaData or null if none found
 	 */
-	public EntityMetaData getEntityMetaData(String fullyQualifiedName)
+	public EntityMetaData find(String fullyQualifiedName)
 	{
 		Query q = repository.query().eq(FULL_NAME, fullyQualifiedName);
 		Entity entity = repository.findOne(q);
@@ -112,7 +112,7 @@ class EntityMetaDataRepository
 		String extendsEntityName = entity.getString(EXTENDS);
 		if (extendsEntityName != null)
 		{
-			EntityMetaData extendsEmd = getEntityMetaData(extendsEntityName);
+			EntityMetaData extendsEmd = find(extendsEntityName);
 			if (extendsEmd == null) throw new MolgenisDataException("Missing super entity [" + extendsEntityName
 					+ "] of entity [" + name + "]");
 			entityMetaData.setExtends(extendsEmd);
