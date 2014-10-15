@@ -79,7 +79,7 @@ public class MySqlConfiguration
 			}
 		};
 
-		writableMetaDataService.setRepositoryCollection(mysqlRepositoryCollection);
+		writableMetaDataService.setManageableCrudRepositoryCollection(mysqlRepositoryCollection);
 
 		return mysqlRepositoryCollection;
 	}

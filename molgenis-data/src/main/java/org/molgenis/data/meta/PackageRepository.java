@@ -7,9 +7,9 @@ import java.util.TreeSet;
 
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
+import org.molgenis.data.ManageableCrudRepositoryCollection;
 import org.molgenis.data.Package;
 import org.molgenis.data.Query;
-import org.molgenis.data.RepositoryCreator;
 import org.molgenis.util.DependencyResolver;
 
 import com.google.common.base.Function;
@@ -25,9 +25,9 @@ class PackageRepository
 
 	private CrudRepository repository;
 
-	public PackageRepository(RepositoryCreator repositoryCreator)
+	public PackageRepository(ManageableCrudRepositoryCollection repositoryCreator)
 	{
-		repository = repositoryCreator.create(META_DATA);
+		repository = repositoryCreator.add(META_DATA);
 		addDefaultPackage();
 	}
 

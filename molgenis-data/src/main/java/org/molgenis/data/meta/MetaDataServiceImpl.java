@@ -8,8 +8,8 @@ import org.apache.log4j.Logger;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.ManageableCrudRepositoryCollection;
 import org.molgenis.data.Package;
-import org.molgenis.data.RepositoryCreator;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 
@@ -29,7 +29,7 @@ public class MetaDataServiceImpl implements WritableMetaDataService
 	 * 
 	 * @param mysqlRepositoryCollection
 	 */
-	public void setRepositoryCollection(RepositoryCreator repositoryCreator)
+	public void setManageableCrudRepositoryCollection(ManageableCrudRepositoryCollection repositoryCreator)
 	{
 		if (repositoryCreator != null)
 		{

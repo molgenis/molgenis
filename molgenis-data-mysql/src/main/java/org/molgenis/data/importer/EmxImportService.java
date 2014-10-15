@@ -103,15 +103,15 @@ public class EmxImportService implements ImportService
 
 	private static final List<String> SUPPORTED_ENTITY_ATTRIBUTES = Arrays.asList(
 			org.molgenis.data.meta.EntityMetaDataMetaData.LABEL.toLowerCase(),
-			org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION.toLowerCase(), "name",
-			ABSTRACT.toLowerCase(), EXTENDS.toLowerCase(), "package");
+			org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION.toLowerCase(), "name", ABSTRACT.toLowerCase(),
+			EXTENDS.toLowerCase(), "package");
 
 	// Sheet names
 	private static final String ENTITIES = EntityMetaDataMetaData.ENTITY_NAME;
 	private static final String ATTRIBUTES = AttributeMetaDataMetaData.ENTITY_NAME;
 	private static final String PACKAGES = PackageMetaData.ENTITY_NAME;
 
-	private MysqlRepositoryCollection store;
+	private MysqlRepositoryCollection targetCollection;
 	private TransactionTemplate transactionTemplate;
 	private final DataService dataService;
 	private PermissionSystemService permissionSystemService;
@@ -126,11 +126,12 @@ public class EmxImportService implements ImportService
 	}
 
 	@Autowired
-	public void setRepositoryCollection(MysqlRepositoryCollection coll, MetaDataService metaDataService)
+	public void setRepositoryCollection(MysqlRepositoryCollection targetCollection, MetaDataService metaDataService)
 	{
-		this.store = coll;
+		this.targetCollection = targetCollection;
 		this.metaDataService = metaDataService;
-		logger.debug("EmxImportService created with coll=" + coll + " and metaDataService=" + metaDataService);
+		logger.debug("EmxImportService created with targetCollection=" + targetCollection + " and metaDataService="
+				+ metaDataService);
 	}
 
 	@Autowired
@@ -154,7 +155,7 @@ public class EmxImportService implements ImportService
 			for (String entityName : source.getEntityNames())
 			{
 				if (entityName.equalsIgnoreCase(AttributeMetaDataMetaData.ENTITY_NAME)) return true;
-				if (store.getRepositoryByEntityName(entityName) != null) return true;
+				if (targetCollection.getRepositoryByEntityName(entityName) != null) return true;
 			}
 		}
 
@@ -164,7 +165,7 @@ public class EmxImportService implements ImportService
 	@Override
 	public EntityImportReport doImport(final RepositoryCollection source, DatabaseAction databaseAction)
 	{
-		if (store == null) throw new RuntimeException("store was not set");
+		if (targetCollection == null) throw new RuntimeException("targetCollection was not set");
 		if (metaDataService == null) throw new RuntimeException("metadataService was not set");
 
 		List<EntityMetaData> metadataList = Lists.newArrayList();
@@ -211,7 +212,7 @@ public class EmxImportService implements ImportService
 				}
 
 				// Drop repo
-				store.dropEntityMetaData(entityName);
+				targetCollection.dropEntityMetaData(entityName);
 			}
 
 			List<String> entities = Lists.newArrayList(addedAttributes.keySet());
@@ -222,7 +223,7 @@ public class EmxImportService implements ImportService
 				List<String> attributes = addedAttributes.get(entityName);
 				for (String attributeName : attributes)
 				{
-					store.dropAttributeMetaData(entityName, attributeName);
+					targetCollection.dropAttributeMetaData(entityName, attributeName);
 				}
 			}
 
@@ -691,7 +692,7 @@ public class EmxImportService implements ImportService
 						{
 							logger.debug("tyring to create: " + name);
 							addedEntities.add(name);
-							Repository repo = store.create(entityMetaData);
+							Repository repo = targetCollection.add(entityMetaData);
 							if (repo != null)
 							{
 								report.addNewEntity(name);
@@ -699,7 +700,15 @@ public class EmxImportService implements ImportService
 						}
 						else if (!entityMetaData.isAbstract())
 						{
-							List<String> addedEntityAttributes = store.update(entityMetaData);
+							List<String> addedEntityAttributes = Lists.transform(
+									targetCollection.update(entityMetaData), new Function<AttributeMetaData, String>()
+									{
+										@Override
+										public String apply(AttributeMetaData input)
+										{
+											return input.getName();
+										}
+									});
 							if ((addedEntityAttributes != null) && !addedEntityAttributes.isEmpty())
 							{
 								addedAttributes.put(name, addedEntityAttributes);
@@ -720,7 +729,7 @@ public class EmxImportService implements ImportService
 				for (final EntityMetaData entityMetaData : resolved)
 				{
 					String name = entityMetaData.getName();
-					CrudRepository crudRepository = (CrudRepository) store.getRepositoryByEntityName(name);
+					CrudRepository crudRepository = (CrudRepository) targetCollection.getRepositoryByEntityName(name);
 
 					if (crudRepository != null)
 					{

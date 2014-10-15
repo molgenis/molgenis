@@ -37,7 +37,7 @@ public class MysqlRepositoryCollectionTest extends AbstractTestNGSpringContextTe
 		personMD.addAttribute("active").setDataType(MolgenisFieldTypes.BOOL);
 
 		// autowired ds
-		coll.create(personMD);
+		coll.add(personMD);
 
 		// destroy and rebuild
 		Assert.assertNotNull(coll.getRepositoryByEntityName("coll_person"));
