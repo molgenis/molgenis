@@ -27,9 +27,9 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
+import org.molgenis.data.ManageableCrudRepositoryCollection;
 import org.molgenis.data.Query;
 import org.molgenis.data.Range;
-import org.molgenis.data.RepositoryCreator;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -46,9 +46,9 @@ class AttributeMetaDataRepository
 
 	private CrudRepository repository;
 
-	public AttributeMetaDataRepository(RepositoryCreator repositoryCreator)
+	public AttributeMetaDataRepository(ManageableCrudRepositoryCollection collection)
 	{
-		this.repository = repositoryCreator.create(META_DATA);
+		this.repository = collection.add(META_DATA);
 	}
 
 	public Iterable<AttributeMetaData> findForEntity(String entityName)
