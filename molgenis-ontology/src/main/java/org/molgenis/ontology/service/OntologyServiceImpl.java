@@ -29,8 +29,8 @@ import org.molgenis.ontology.beans.ComparableEntity;
 import org.molgenis.ontology.beans.OntologyEntity;
 import org.molgenis.ontology.beans.OntologyImpl;
 import org.molgenis.ontology.beans.OntologyServiceResultImpl;
-import org.molgenis.ontology.beans.OntologyTermEntityIterable;
 import org.molgenis.ontology.beans.OntologyTermImpl;
+import org.molgenis.ontology.beans.OntologyTermTransformer;
 import org.molgenis.ontology.repository.OntologyIndexRepository;
 import org.molgenis.ontology.repository.OntologyQueryRepository;
 import org.molgenis.ontology.repository.OntologyTermIndexRepository;
@@ -38,6 +38,8 @@ import org.molgenis.ontology.repository.OntologyTermQueryRepository;
 import org.molgenis.ontology.utils.NGramMatchingModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.tartarus.snowball.ext.PorterStemmer;
+
+import com.google.common.collect.Iterables;
 
 public class OntologyServiceImpl implements OntologyService
 {
@@ -136,7 +138,8 @@ public class OntologyServiceImpl implements OntologyService
 		Iterable<Entity> listOfOntologyTerms = searchService.search(new QueryImpl().eq(
 				OntologyTermQueryRepository.ENTITY_TYPE, OntologyTermQueryRepository.TYPE_ONTOLOGYTERM),
 				entityMetaDataIndexedOntologyTerm);
-		return new OntologyTermEntityIterable(listOfOntologyTerms, entityMetaDataIndexedOntologyTerm, searchService);
+		return Iterables.transform(listOfOntologyTerms, new OntologyTermTransformer(entityMetaDataIndexedOntologyTerm,
+				searchService));
 	}
 
 	@Override
@@ -153,7 +156,8 @@ public class OntologyServiceImpl implements OntologyService
 				new QueryImpl()
 						.eq(OntologyTermQueryRepository.ENTITY_TYPE, OntologyTermQueryRepository.TYPE_ONTOLOGYTERM)
 						.and().eq(OntologyTermIndexRepository.ROOT, true), entityMetaDataIndexedOntologyTerm);
-		return new OntologyTermEntityIterable(entities, entityMetaDataIndexedOntologyTerm, searchService);
+		return Iterables.transform(entities, new OntologyTermTransformer(entityMetaDataIndexedOntologyTerm,
+				searchService));
 	}
 
 	@Override
@@ -174,8 +178,9 @@ public class OntologyServiceImpl implements OntologyService
 		for (Entity entity : entities)
 		{
 			String currentNodePath = entity.getString(OntologyTermQueryRepository.NODE_PATH);
-			return new OntologyTermEntityIterable(getChildren(entityMetaDataIndexedOntologyTerm, ontologyTermIri,
-					currentNodePath), entityMetaDataIndexedOntologyTerm, searchService);
+			return Iterables.transform(
+					getChildren(entityMetaDataIndexedOntologyTerm, ontologyTermIri, currentNodePath),
+					new OntologyTermTransformer(entityMetaDataIndexedOntologyTerm, searchService));
 		}
 		return Collections.emptyList();
 	}

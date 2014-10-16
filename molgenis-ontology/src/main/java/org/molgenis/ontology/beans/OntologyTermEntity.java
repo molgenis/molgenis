@@ -11,6 +11,8 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.repository.OntologyTermIndexRepository;
 import org.molgenis.ontology.repository.OntologyTermQueryRepository;
 
+import com.google.common.collect.Iterables;
+
 public class OntologyTermEntity extends AbstractSemanticEntity
 {
 	private static final long serialVersionUID = 1L;
@@ -39,8 +41,9 @@ public class OntologyTermEntity extends AbstractSemanticEntity
 				Query q = new QueryImpl().eq(OntologyTermIndexRepository.PARENT_NODE_PATH, currentNodePath).and()
 						.eq(OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_IRI, currentOntologyTermIri)
 						.pageSize(Integer.MAX_VALUE);
-				return new OntologyTermEntityIterable(searchService.search(q, entityMetaData), entityMetaData,
-						searchService);
+
+				return Iterables.transform(searchService.search(q, entityMetaData), new OntologyTermTransformer(
+						entityMetaData, searchService));
 			}
 		}
 

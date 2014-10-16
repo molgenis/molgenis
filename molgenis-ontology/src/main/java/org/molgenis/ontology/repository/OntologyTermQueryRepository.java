@@ -18,8 +18,10 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.beans.OntologyTermEntity;
-import org.molgenis.ontology.beans.OntologyTermEntityIterable;
+import org.molgenis.ontology.beans.OntologyTermTransformer;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import com.google.common.collect.Iterables;
 
 public class OntologyTermQueryRepository extends AbstractOntologyQueryRepository
 {
@@ -68,7 +70,8 @@ public class OntologyTermQueryRepository extends AbstractOntologyQueryRepository
 	{
 		if (q.getRules().size() > 0) q.and();
 		q.eq(OntologyTermQueryRepository.ENTITY_TYPE, OntologyTermQueryRepository.TYPE_ONTOLOGYTERM);
-		return new OntologyTermEntityIterable(searchService.search(q, entityMetaData), entityMetaData, searchService);
+		return Iterables.transform(searchService.search(q, entityMetaData), new OntologyTermTransformer(entityMetaData,
+				searchService));
 	}
 
 	@Override

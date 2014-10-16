@@ -1,5 +1,7 @@
 package org.molgenis.ontology.repository;
 
+import javax.annotation.Nullable;
+
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -7,8 +9,10 @@ import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.semantic.OntologyService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.beans.OntologyEntity;
-import org.molgenis.ontology.beans.OntologyEntityIterable;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 
 public class OntologyQueryRepository extends AbstractOntologyQueryRepository
 {
@@ -31,8 +35,17 @@ public class OntologyQueryRepository extends AbstractOntologyQueryRepository
 	{
 		if (query.getRules().size() > 0) query.and();
 		query.eq(OntologyQueryRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY);
-		return new OntologyEntityIterable(searchService.search(query, entityMetaData), entityMetaData, dataService,
-				searchService, ontologyService);
+		return Iterables.transform(searchService.search(query, entityMetaData), new Function<Entity, Entity>()
+		{
+			@Override
+			@Nullable
+			public Entity apply(@Nullable
+			Entity input)
+			{
+				return new OntologyEntity(input, entityMetaData, dataService, searchService, ontologyService);
+			}
+		});
+
 	}
 
 	@Override
