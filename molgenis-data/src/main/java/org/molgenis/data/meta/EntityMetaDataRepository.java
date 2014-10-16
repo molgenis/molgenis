@@ -130,7 +130,11 @@ class EntityMetaDataRepository
 
 	public void delete(String entityName)
 	{
-		repository.delete(getEntity(entityName));
+		Entity entity = getEntity(entityName);
+		if (entity != null)
+		{
+			repository.delete(entity);
+		}
 	}
 
 	/**
