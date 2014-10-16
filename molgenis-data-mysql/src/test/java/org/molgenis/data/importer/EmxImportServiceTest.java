@@ -124,11 +124,6 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testImportReport() throws IOException, InvalidFormatException, InterruptedException
 	{
-		// cleanup
-		store.dropEntityMetaData("import_person");
-		store.dropEntityMetaData("import_city");
-		store.dropEntityMetaData("import_country");
-
 		// create test excel
 		File f = ResourceUtils.getFile(getClass(), "/example.xlsx");
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
