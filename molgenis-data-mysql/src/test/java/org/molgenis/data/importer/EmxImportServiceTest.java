@@ -91,43 +91,43 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 
 		// SheetsImportable
 		Assert.assertEquals(report.getSheetsImportable().size(), 4);
-		Assert.assertTrue(report.getSheetsImportable().get("import_person"));
-		Assert.assertTrue(report.getSheetsImportable().get("import_city"));
-		Assert.assertFalse(report.getSheetsImportable().get("unknown_entity"));
-		Assert.assertFalse(report.getSheetsImportable().get("unknown_fields"));
+		Assert.assertTrue(report.getSheetsImportable().get("importperson"));
+		Assert.assertTrue(report.getSheetsImportable().get("importcity"));
+		Assert.assertFalse(report.getSheetsImportable().get("unknownentity"));
+		Assert.assertFalse(report.getSheetsImportable().get("unknownfields"));
 
 		// FieldsAvailable
 		Assert.assertEquals(report.getFieldsAvailable().size(), 2);
-		Assert.assertEquals(report.getFieldsAvailable().get("import_person").size(), 1);
-		Assert.assertEquals(report.getFieldsAvailable().get("import_city").size(), 0);
-		Assert.assertTrue(report.getFieldsAvailable().get("import_person").contains("otherAttribute"));
+		Assert.assertEquals(report.getFieldsAvailable().get("importperson").size(), 1);
+		Assert.assertEquals(report.getFieldsAvailable().get("importcity").size(), 0);
+		Assert.assertTrue(report.getFieldsAvailable().get("importperson").contains("otherAttribute"));
 
 		// FieldsImportable
 		Assert.assertEquals(report.getFieldsImportable().size(), 2);
-		Assert.assertEquals(report.getFieldsImportable().get("import_person").size(), 6);
-		Assert.assertTrue(report.getFieldsImportable().get("import_person").contains("firstName"));
-		Assert.assertFalse(report.getFieldsImportable().get("import_person").contains("unknownField"));
+		Assert.assertEquals(report.getFieldsImportable().get("importperson").size(), 6);
+		Assert.assertTrue(report.getFieldsImportable().get("importperson").contains("firstName"));
+		Assert.assertFalse(report.getFieldsImportable().get("importperson").contains("unknownField"));
 
 		// FieldsUnknown
 		Assert.assertEquals(report.getFieldsUnknown().size(), 2);
-		Assert.assertEquals(report.getFieldsUnknown().get("import_person").size(), 1);
-		Assert.assertTrue(report.getFieldsUnknown().get("import_person").contains("unknownField"));
-		Assert.assertEquals(report.getFieldsUnknown().get("import_city").size(), 0);
+		Assert.assertEquals(report.getFieldsUnknown().get("importperson").size(), 1);
+		Assert.assertTrue(report.getFieldsUnknown().get("importperson").contains("unknownField"));
+		Assert.assertEquals(report.getFieldsUnknown().get("importcity").size(), 0);
 
 		// FieldsRequired missing
 		Assert.assertEquals(report.getFieldsRequired().size(), 2);
-		Assert.assertEquals(report.getFieldsRequired().get("import_person").size(), 1);
-		Assert.assertTrue(report.getFieldsRequired().get("import_person").contains("birthday"));
-		Assert.assertEquals(report.getFieldsRequired().get("import_city").size(), 0);
+		Assert.assertEquals(report.getFieldsRequired().get("importperson").size(), 1);
+		Assert.assertTrue(report.getFieldsRequired().get("importperson").contains("birthday"));
+		Assert.assertEquals(report.getFieldsRequired().get("importcity").size(), 0);
 	}
 
 	@Test
 	public void testImportReport() throws IOException, InvalidFormatException, InterruptedException
 	{
 		// cleanup
-		store.dropEntityMetaData("import_person");
-		store.dropEntityMetaData("import_city");
-		store.dropEntityMetaData("import_country");
+		store.dropEntityMetaData("org_molgenis_test_importperson");
+		store.dropEntityMetaData("org_molgenis_test_importcity");
+		store.dropEntityMetaData("org_molgenis_test_importcountry");
 
 		// create test excel
 		File f = ResourceUtils.getFile(getClass(), "/example.xlsx");
@@ -145,8 +145,8 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		EntityImportReport report = importer.doImport(source, DatabaseAction.ADD);
 
 		// test report
-		Assert.assertEquals(report.getNrImportedEntitiesMap().get("import_city"), new Integer(2));
-		Assert.assertEquals(report.getNrImportedEntitiesMap().get("import_person"), new Integer(3));
+		Assert.assertEquals(report.getNrImportedEntitiesMap().get("org_molgenis_test_importcity"), new Integer(2));
+		Assert.assertEquals(report.getNrImportedEntitiesMap().get("org_molgenis_test_importperson"), new Integer(3));
 
 	}
 
@@ -154,13 +154,13 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 	public void testImportReportNoMeta() throws IOException, InvalidFormatException, InterruptedException
 	{
 		MysqlRepository repositoryCity = mock(MysqlRepository.class);
-		DefaultEntityMetaData entityMetaDataCity = new DefaultEntityMetaData("import_city");
+		DefaultEntityMetaData entityMetaDataCity = new DefaultEntityMetaData("importcity");
 		entityMetaDataCity.addAttribute("name").setIdAttribute(true).setNillable(false);
-		when(dataService.getRepositoryByEntityName("import_city")).thenReturn(repositoryCity);
+		when(dataService.getRepositoryByEntityName("importcity")).thenReturn(repositoryCity);
 		when(repositoryCity.getEntityMetaData()).thenReturn(entityMetaDataCity);
 
 		MysqlRepository repositoryPerson = mock(MysqlRepository.class);
-		DefaultEntityMetaData entityMetaDataPerson = new DefaultEntityMetaData("import_person");
+		DefaultEntityMetaData entityMetaDataPerson = new DefaultEntityMetaData("importperson");
 		entityMetaDataPerson.addAttribute("firstName").setIdAttribute(true).setNillable(false);
 		entityMetaDataPerson.addAttribute("lastName");
 		entityMetaDataPerson.addAttribute("height").setDataType(MolgenisFieldTypes.INT);
@@ -170,13 +170,13 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		entityMetaDataPerson.addAttribute("birthplace").setDataType(MolgenisFieldTypes.XREF)
 				.setRefEntity(entityMetaDataCity);
 
-		when(dataService.getRepositoryByEntityName("import_person")).thenReturn(repositoryPerson);
+		when(dataService.getRepositoryByEntityName("importperson")).thenReturn(repositoryPerson);
 		when(repositoryPerson.getEntityMetaData()).thenReturn(entityMetaDataPerson);
 
 		// cleanup
-		store.dropEntityMetaData("import_person");
-		store.dropEntityMetaData("import_city");
-		store.dropEntityMetaData("import_country");
+		store.dropEntityMetaData("importperson");
+		store.dropEntityMetaData("importcity");
+		store.dropEntityMetaData("importcountry");
 
 		// create test excel
 		File f = ResourceUtils.getFile(getClass(), "/example.xlsx");
@@ -197,8 +197,8 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		// test import
 		EntityImportReport report = importer.doImport(source_no_meta, DatabaseAction.ADD);
 
-		Assert.assertEquals(report.getNrImportedEntitiesMap().get("import_city"), new Integer(4));
-		Assert.assertEquals(report.getNrImportedEntitiesMap().get("import_person"), new Integer(4));
+		Assert.assertEquals(report.getNrImportedEntitiesMap().get("importcity"), new Integer(4));
+		Assert.assertEquals(report.getNrImportedEntitiesMap().get("importperson"), new Integer(4));
 
 	}
 }
