@@ -119,14 +119,14 @@ public class MetaDataServiceImpl implements WritableMetaDataService
 			{
 				LOG.trace("Adding attribute metadata for entity " + emd.getName() + ", attribute " + att.getName());
 			}
-			attributeMetaDataRepository.add(emd.getName(), att);
+			attributeMetaDataRepository.add(emd, att);
 		}
 	}
 
 	@Override
-	public void addAttributeMetaData(String name, AttributeMetaData attr)
+	public void addAttributeMetaData(String fullyQualifiedName, AttributeMetaData attr)
 	{
-		attributeMetaDataRepository.add(name, attr);
+		attributeMetaDataRepository.add(this.getEntityMetaData(fullyQualifiedName), attr);
 	}
 
 	@Override

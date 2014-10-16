@@ -27,6 +27,7 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableCrudRepositoryCollection;
 import org.molgenis.data.Query;
 import org.molgenis.data.Range;
@@ -62,12 +63,12 @@ class AttributeMetaDataRepository
 		return attributes;
 	}
 
-	public void add(String entityName, AttributeMetaData att)
+	public void add(EntityMetaData entity, AttributeMetaData att)
 	{
 		Entity attributeMetaDataEntity = new MapEntity();
 		// autoid
 		attributeMetaDataEntity.set(IDENTIFIER, idCounter.incrementAndGet());
-		attributeMetaDataEntity.set(ENTITY, entityName);
+		attributeMetaDataEntity.set(ENTITY, entity);
 		attributeMetaDataEntity.set(NAME, att.getName());
 		attributeMetaDataEntity.set(DATA_TYPE, att.getDataType());
 		attributeMetaDataEntity.set(ID_ATTRIBUTE, att.isIdAtrribute());
