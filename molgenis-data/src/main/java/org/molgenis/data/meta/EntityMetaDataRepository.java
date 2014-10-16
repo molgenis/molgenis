@@ -17,6 +17,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableCrudRepositoryCollection;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Package;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -31,8 +32,7 @@ class EntityMetaDataRepository
 	private CrudRepository repository;
 	private PackageRepository packageRepository;
 
-	public EntityMetaDataRepository(ManageableCrudRepositoryCollection collection,
-			PackageRepository packageRepository)
+	public EntityMetaDataRepository(ManageableCrudRepositoryCollection collection, PackageRepository packageRepository)
 	{
 		this.packageRepository = packageRepository;
 		this.repository = collection.add(META_DATA);
@@ -92,8 +92,13 @@ class EntityMetaDataRepository
 		Entity entityMetaDataEntity = new MapEntity();
 		entityMetaDataEntity.set(FULL_NAME, emd.getName());
 		entityMetaDataEntity.set(SIMPLE_NAME, emd.getSimpleName());
-		
-		Entity packageEntity = packageRepository.getEntity(emd.getPackage().getName());
+
+		Package p = emd.getPackage();
+		if (p == null)
+		{
+			p = PackageImpl.getDefaultPackage();
+		}
+		Entity packageEntity = packageRepository.getEntity(p.getName());
 		entityMetaDataEntity.set(PACKAGE, packageEntity);
 		entityMetaDataEntity.set(DESCRIPTION, emd.getDescription());
 		entityMetaDataEntity.set(ABSTRACT, emd.isAbstract());
