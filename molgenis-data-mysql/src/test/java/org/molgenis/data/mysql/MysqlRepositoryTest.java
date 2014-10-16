@@ -49,7 +49,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		metaData.addAttribute("intAttr").setDataType(MolgenisFieldTypes.INT).setIdAttribute(true).setNillable(false);
 
 		coll.dropEntityMetaData(metaData.getName());
-		MysqlRepository repo = (MysqlRepository) coll.create(metaData);
+		MysqlRepository repo = (MysqlRepository) coll.add(metaData);
 
 		int count = 2099;
 		for (int i = 0; i < count; i++)
@@ -96,7 +96,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		Assert.assertEquals(metaData.getIdAttribute().getName(), "lastName");
 
 		coll.dropEntityMetaData(metaData.getName());
-		MysqlRepository repo = (MysqlRepository) coll.create(metaData);
+		MysqlRepository repo = (MysqlRepository) coll.add(metaData);
 
 		Assert.assertEquals(repo.iteratorSql(), "SELECT firstName, lastName FROM MysqlPerson");
 		Assert.assertEquals(repo.getInsertSql(), "INSERT INTO `MysqlPerson` (`firstName`, `lastName`) VALUES (?, ?)");
@@ -147,7 +147,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		Assert.assertEquals(repo.getDeleteSql(), "DELETE FROM `MysqlPerson` WHERE `lastName` = ?");
 
 		coll.dropEntityMetaData(metaData.getName());
-		repo = (MysqlRepository) coll.create(metaData);
+		repo = (MysqlRepository) coll.add(metaData);
 
 		// Entity generator to monitor performance (set batch to 100000 to show up to >10,000 records/second)
 		final int SIZE = 1000;
@@ -250,7 +250,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		idAttributeMetaData.setNillable(false);
 		entityMetaData.addAttributeMetaData(idAttributeMetaData);
 
-		MysqlRepository testRepository = (MysqlRepository) coll.create(entityMetaData);
+		MysqlRepository testRepository = (MysqlRepository) coll.add(entityMetaData);
 
 		MapEntity entity = new MapEntity();
 		entity.set(idAttributeName, exampleId);

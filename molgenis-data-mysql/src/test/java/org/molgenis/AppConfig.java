@@ -113,7 +113,7 @@ public class AppConfig
 			}
 		};
 
-		mysqlWritableMetaDataService.setRepositoryCollection(mysqlRepositoryCollection);
+		mysqlWritableMetaDataService.setManageableCrudRepositoryCollection(mysqlRepositoryCollection);
 
 		return mysqlRepositoryCollection;
 	}

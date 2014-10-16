@@ -1,5 +1,6 @@
 package org.molgenis.data.mysql;
 
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,19 +11,20 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.ManageableCrudRepositoryCollection;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.RepositoryCreator;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.meta.WritableMetaDataService;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 
-public abstract class MysqlRepositoryCollection implements RepositoryCollection, InitializingBean, RepositoryCreator
+public abstract class MysqlRepositoryCollection implements ManageableCrudRepositoryCollection, InitializingBean
 {
 	private final DataSource ds;
 	private final DataService dataService;
@@ -96,7 +98,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection,
 
 	@Override
 	@Transactional
-	public CrudRepository create(EntityMetaData emd)
+	public CrudRepository add(EntityMetaData emd)
 	{
 		CrudRepository result = null;
 
@@ -111,7 +113,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection,
 			if (result == null) throw new IllegalStateException("Repository [" + emd.getName()
 					+ "] registered in entities table but missing in the MysqlRepositoryCollection");
 
-			result = (CrudRepository) getDecoratedRepository(result);
+			result = getDecoratedRepository(result);
 			if (!dataService.hasRepository(emd.getName()))
 			{
 				dataService.addRepository(result);
@@ -132,7 +134,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection,
 			repository.setMetaData(emd);
 			repository.create();
 			repositories.put(emd.getName(), repository);
-			result = (CrudRepository) getDecoratedRepository(repository);
+			result = getDecoratedRepository(repository);
 			dataService.addRepository(result);
 		}
 
@@ -205,14 +207,15 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection,
 	 * an exception
 	 * 
 	 * @param sourceEntityMetaData
-	 * @return the names of the added AttributeMetaData
+	 * @return the added AttributeMetaData
 	 */
+	@Override
 	@Transactional
-	public List<String> update(EntityMetaData sourceEntityMetaData)
+	public List<AttributeMetaData> update(EntityMetaData sourceEntityMetaData)
 	{
 		MysqlRepository repository = repositories.get(sourceEntityMetaData.getName());
 		EntityMetaData existingEntityMetaData = repository.getEntityMetaData();
-		List<String> addedAttributes = Lists.newArrayList();
+		List<AttributeMetaData> addedAttributes = Lists.newArrayList();
 
 		for (AttributeMetaData attr : existingEntityMetaData.getAttributes())
 		{
@@ -248,7 +251,7 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection,
 				DefaultEntityMetaData defaultEntityMetaData = (DefaultEntityMetaData) repository.getEntityMetaData();
 				defaultEntityMetaData.addAttributeMetaData(attr);
 				repository.addAttribute(attr);
-				addedAttributes.add(attr.getName());
+				addedAttributes.add(attr);
 			}
 		}
 
@@ -261,8 +264,22 @@ public abstract class MysqlRepositoryCollection implements RepositoryCollection,
 	 * @param repository
 	 * @return
 	 */
-	private Repository getDecoratedRepository(CrudRepository repository)
+	private CrudRepository getDecoratedRepository(CrudRepository repository)
 	{
-		return repositoryDecoratorFactory != null ? repositoryDecoratorFactory.createDecoratedRepository(repository) : repository;
+		return repositoryDecoratorFactory != null ? (CrudRepository) repositoryDecoratorFactory
+				.createDecoratedRepository(repository) : repository;
+	}
+
+	@Override
+	public Iterator<CrudRepository> iterator()
+	{
+		return Iterators.transform(repositories.values().iterator(), new Function<MysqlRepository, CrudRepository>()
+		{
+			@Override
+			public CrudRepository apply(MysqlRepository input)
+			{
+				return input;
+			}
+		});
 	}
 }

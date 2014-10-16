@@ -15,9 +15,9 @@ import java.util.List;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.ManageableCrudRepositoryCollection;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
-import org.molgenis.data.RepositoryCreator;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -30,9 +30,9 @@ class EntityMetaDataRepository
 	public static final EntityMetaDataMetaData META_DATA = new EntityMetaDataMetaData();
 	private CrudRepository repository;
 
-	public EntityMetaDataRepository(RepositoryCreator repositoryCreator)
+	public EntityMetaDataRepository(ManageableCrudRepositoryCollection collection)
 	{
-		this.repository = repositoryCreator.create(META_DATA);
+		this.repository = collection.add(META_DATA);
 	}
 
 	public Iterable<EntityMetaData> getEntityMetaDatas()
