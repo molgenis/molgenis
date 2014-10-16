@@ -29,9 +29,12 @@ class EntityMetaDataRepository
 {
 	public static final EntityMetaDataMetaData META_DATA = new EntityMetaDataMetaData();
 	private CrudRepository repository;
+	private PackageRepository packageRepository;
 
-	public EntityMetaDataRepository(ManageableCrudRepositoryCollection collection)
+	public EntityMetaDataRepository(ManageableCrudRepositoryCollection collection,
+			PackageRepository packageRepository)
 	{
+		this.packageRepository = packageRepository;
 		this.repository = collection.add(META_DATA);
 	}
 
@@ -84,12 +87,14 @@ class EntityMetaDataRepository
 		return toEntityMetaData(entity);
 	}
 
-	public void add(EntityMetaData emd)
+	public Entity add(EntityMetaData emd)
 	{
 		Entity entityMetaDataEntity = new MapEntity();
 		entityMetaDataEntity.set(FULL_NAME, emd.getName());
 		entityMetaDataEntity.set(SIMPLE_NAME, emd.getSimpleName());
-		entityMetaDataEntity.set(PACKAGE, emd.getPackage());
+		
+		Entity packageEntity = packageRepository.getEntity(emd.getPackage().getName());
+		entityMetaDataEntity.set(PACKAGE, packageEntity);
 		entityMetaDataEntity.set(DESCRIPTION, emd.getDescription());
 		entityMetaDataEntity.set(ABSTRACT, emd.isAbstract());
 		if (emd.getIdAttribute() != null) entityMetaDataEntity.set(ID_ATTRIBUTE, emd.getIdAttribute().getName());
@@ -97,6 +102,8 @@ class EntityMetaDataRepository
 		if (emd.getExtends() != null) entityMetaDataEntity.set(EXTENDS, emd.getExtends().getName());
 
 		repository.add(entityMetaDataEntity);
+
+		return entityMetaDataEntity;
 	}
 
 	private DefaultEntityMetaData toEntityMetaData(Entity entity)
@@ -123,7 +130,7 @@ class EntityMetaDataRepository
 
 	public void delete(String entityName)
 	{
-		repository.delete(repository.findAll(new QueryImpl().eq(EntityMetaDataMetaData.FULL_NAME, entityName)));
+		repository.delete(getEntity(entityName));
 	}
 
 	/**
@@ -138,5 +145,10 @@ class EntityMetaDataRepository
 		{
 			delete(entity.getString(EntityMetaDataMetaData.FULL_NAME));
 		}
+	}
+	
+	public Entity getEntity(String fullyQualifiedName)
+	{
+		return repository.findOne(new QueryImpl().eq(EntityMetaDataMetaData.FULL_NAME, fullyQualifiedName));
 	}
 }

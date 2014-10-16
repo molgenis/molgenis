@@ -27,7 +27,6 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableCrudRepositoryCollection;
 import org.molgenis.data.Query;
 import org.molgenis.data.Range;
@@ -47,8 +46,12 @@ class AttributeMetaDataRepository
 
 	private CrudRepository repository;
 
-	public AttributeMetaDataRepository(ManageableCrudRepositoryCollection collection)
+	private EntityMetaDataRepository entityMetaDataRepository;
+
+	public AttributeMetaDataRepository(ManageableCrudRepositoryCollection collection,
+			EntityMetaDataRepository entityMetaDataRepository)
 	{
+		this.entityMetaDataRepository = entityMetaDataRepository;
 		this.repository = collection.add(META_DATA);
 	}
 
@@ -63,7 +66,7 @@ class AttributeMetaDataRepository
 		return attributes;
 	}
 
-	public void add(EntityMetaData entity, AttributeMetaData att)
+	public void add(Entity entity, AttributeMetaData att)
 	{
 		Entity attributeMetaDataEntity = new MapEntity();
 		// autoid
@@ -94,7 +97,8 @@ class AttributeMetaDataRepository
 			attributeMetaDataEntity.set(RANGE_MAX, att.getRange().getMax());
 		}
 
-		if (att.getRefEntity() != null) attributeMetaDataEntity.set(REF_ENTITY, att.getRefEntity());
+		Entity refEntity = entityMetaDataRepository.getEntity(att.getRefEntity().getName());
+		if (att.getRefEntity() != null) attributeMetaDataEntity.set(REF_ENTITY, refEntity);
 
 		repository.add(attributeMetaDataEntity);
 	}
