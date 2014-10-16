@@ -10,6 +10,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.ManageableCrudRepositoryCollection;
 import org.molgenis.data.Package;
 import org.molgenis.data.Query;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.util.DependencyResolver;
 
 import com.google.common.base.Function;
@@ -101,5 +102,10 @@ class PackageRepository
 				repository.add(new PackageImpl(p));
 			}
 		}
+	}
+	
+	public Entity getEntity(String fullyQualifiedName)
+	{
+		return repository.findOne(new QueryImpl().eq(PackageMetaData.FULL_NAME, fullyQualifiedName));
 	}
 }
