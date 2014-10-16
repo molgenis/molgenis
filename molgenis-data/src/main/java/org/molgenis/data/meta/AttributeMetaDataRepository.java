@@ -46,8 +46,12 @@ class AttributeMetaDataRepository
 
 	private CrudRepository repository;
 
-	public AttributeMetaDataRepository(ManageableCrudRepositoryCollection collection)
+	private EntityMetaDataRepository entityMetaDataRepository;
+
+	public AttributeMetaDataRepository(ManageableCrudRepositoryCollection collection,
+			EntityMetaDataRepository entityMetaDataRepository)
 	{
+		this.entityMetaDataRepository = entityMetaDataRepository;
 		this.repository = collection.add(META_DATA);
 	}
 
@@ -62,12 +66,12 @@ class AttributeMetaDataRepository
 		return attributes;
 	}
 
-	public void add(String entityName, AttributeMetaData att)
+	public void add(Entity entity, AttributeMetaData att)
 	{
 		Entity attributeMetaDataEntity = new MapEntity();
 		// autoid
 		attributeMetaDataEntity.set(IDENTIFIER, idCounter.incrementAndGet());
-		attributeMetaDataEntity.set(ENTITY, entityName);
+		attributeMetaDataEntity.set(ENTITY, entity);
 		attributeMetaDataEntity.set(NAME, att.getName());
 		attributeMetaDataEntity.set(DATA_TYPE, att.getDataType());
 		attributeMetaDataEntity.set(ID_ATTRIBUTE, att.isIdAtrribute());
@@ -93,7 +97,8 @@ class AttributeMetaDataRepository
 			attributeMetaDataEntity.set(RANGE_MAX, att.getRange().getMax());
 		}
 
-		if (att.getRefEntity() != null) attributeMetaDataEntity.set(REF_ENTITY, att.getRefEntity());
+		Entity refEntity = entityMetaDataRepository.getEntity(att.getRefEntity().getName());
+		if (att.getRefEntity() != null) attributeMetaDataEntity.set(REF_ENTITY, refEntity);
 
 		repository.add(attributeMetaDataEntity);
 	}

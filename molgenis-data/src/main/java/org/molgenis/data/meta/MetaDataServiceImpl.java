@@ -34,8 +34,8 @@ public class MetaDataServiceImpl implements WritableMetaDataService
 		if (repositoryCreator != null)
 		{
 			packageRepository = new PackageRepository(repositoryCreator);
-			entityMetaDataRepository = new EntityMetaDataRepository(repositoryCreator);
-			attributeMetaDataRepository = new AttributeMetaDataRepository(repositoryCreator);
+			entityMetaDataRepository = new EntityMetaDataRepository(repositoryCreator, packageRepository);
+			attributeMetaDataRepository = new AttributeMetaDataRepository(repositoryCreator, entityMetaDataRepository);
 		}
 	}
 
@@ -110,8 +110,8 @@ public class MetaDataServiceImpl implements WritableMetaDataService
 
 		packageRepository.add(emd.getPackage());
 
-		entityMetaDataRepository.add(emd);
-
+		Entity mdEntity = entityMetaDataRepository.add(emd);
+		
 		// add attribute metadata
 		for (AttributeMetaData att : emd.getAttributes())
 		{
@@ -119,14 +119,15 @@ public class MetaDataServiceImpl implements WritableMetaDataService
 			{
 				LOG.trace("Adding attribute metadata for entity " + emd.getName() + ", attribute " + att.getName());
 			}
-			attributeMetaDataRepository.add(emd.getName(), att);
+			attributeMetaDataRepository.add(mdEntity, att);
 		}
 	}
 
 	@Override
-	public void addAttributeMetaData(String name, AttributeMetaData attr)
+	public void addAttributeMetaData(String fullyQualifiedName, AttributeMetaData attr)
 	{
-		attributeMetaDataRepository.add(name, attr);
+		Entity entity = entityMetaDataRepository.getEntity(fullyQualifiedName);
+		attributeMetaDataRepository.add(entity, attr);
 	}
 
 	@Override
