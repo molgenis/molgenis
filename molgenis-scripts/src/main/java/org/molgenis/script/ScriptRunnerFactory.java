@@ -3,7 +3,7 @@ package org.molgenis.script;
 import java.util.Map;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.mysql.MysqlRepositoryCollection;
+import org.molgenis.data.ManageableCrudRepositoryCollection;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,12 +23,12 @@ public class ScriptRunnerFactory
 	private final DataService dataService;
 
 	@Autowired
-	public ScriptRunnerFactory(MysqlRepositoryCollection mysqlRepositoryCollection, DataService dataService)
+	public ScriptRunnerFactory(ManageableCrudRepositoryCollection collection, DataService dataService)
 	{
 		this.dataService = dataService;
-		mysqlRepositoryCollection.add(ScriptParameter.META_DATA);
-		mysqlRepositoryCollection.add(ScriptType.META_DATA);
-		mysqlRepositoryCollection.add(Script.META_DATA);
+		collection.add(ScriptParameter.META_DATA);
+		collection.add(ScriptType.META_DATA);
+		collection.add(Script.META_DATA);
 	}
 
 	@RunAsSystem

@@ -10,7 +10,7 @@ import org.molgenis.AppConfig;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
-import org.molgenis.data.mysql.meta.MysqlWritableMetaDataService;
+import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -34,7 +34,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 	MysqlRepositoryCollection coll;
 
 	@Autowired
-	MysqlWritableMetaDataService metaDataRepositories;
+	MetaDataServiceImpl metaDataRepositories;
 
 	@BeforeMethod
 	public void reset()
@@ -49,7 +49,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		metaData.addAttribute("intAttr").setDataType(MolgenisFieldTypes.INT).setIdAttribute(true).setNillable(false);
 
 		coll.dropEntityMetaData(metaData.getName());
-		MysqlRepository repo = coll.add(metaData);
+		MysqlRepository repo = (MysqlRepository) coll.add(metaData);
 
 		int count = 2099;
 		for (int i = 0; i < count; i++)
@@ -96,7 +96,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		Assert.assertEquals(metaData.getIdAttribute().getName(), "lastName");
 
 		coll.dropEntityMetaData(metaData.getName());
-		MysqlRepository repo = coll.add(metaData);
+		MysqlRepository repo = (MysqlRepository) coll.add(metaData);
 
 		Assert.assertEquals(repo.iteratorSql(), "SELECT firstName, lastName FROM MysqlPerson");
 		Assert.assertEquals(repo.getInsertSql(), "INSERT INTO `MysqlPerson` (`firstName`, `lastName`) VALUES (?, ?)");
@@ -147,7 +147,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		Assert.assertEquals(repo.getDeleteSql(), "DELETE FROM `MysqlPerson` WHERE `lastName` = ?");
 
 		coll.dropEntityMetaData(metaData.getName());
-		repo = coll.add(metaData);
+		repo = (MysqlRepository) coll.add(metaData);
 
 		// Entity generator to monitor performance (set batch to 100000 to show up to >10,000 records/second)
 		final int SIZE = 1000;
@@ -250,7 +250,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		idAttributeMetaData.setNillable(false);
 		entityMetaData.addAttributeMetaData(idAttributeMetaData);
 
-		MysqlRepository testRepository = coll.add(entityMetaData);
+		MysqlRepository testRepository = (MysqlRepository) coll.add(entityMetaData);
 
 		MapEntity entity = new MapEntity();
 		entity.set(idAttributeName, exampleId);

@@ -1,4 +1,4 @@
-package org.molgenis.data.mysql.meta;
+package org.molgenis.data.meta;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Package;
@@ -113,7 +113,7 @@ public class PackageImpl extends MapEntity implements Package, Comparable<Packag
 		if (this == obj) return true;
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
-		PackageImpl other = (PackageImpl) obj;
+		Package other = (Package) obj;
 		if (getName() == null)
 		{
 			if (other.getName() != null) return false;
@@ -126,6 +126,11 @@ public class PackageImpl extends MapEntity implements Package, Comparable<Packag
 	public int compareTo(Package o)
 	{
 		return getName().compareTo(o.getName());
+	}
+
+	public static Package getDefaultPackage()
+	{
+		return new PackageImpl(Package.DEFAULT_PACKAGE_NAME, "The default package.");
 	}
 
 }

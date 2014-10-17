@@ -6,12 +6,12 @@ import javax.sql.DataSource;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryDecoratorFactory;
+import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.WritableMetaDataService;
 import org.molgenis.data.meta.WritableMetaDataServiceDecorator;
 import org.molgenis.data.mysql.EmbeddedMysqlDatabaseBuilder;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
-import org.molgenis.data.mysql.meta.MysqlWritableMetaDataService;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
@@ -34,7 +34,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @ComponentScan("org.molgenis.data")
 public class AppConfig
 {
-	private MysqlWritableMetaDataService mysqlWritableMetaDataService;
+	private MetaDataServiceImpl mysqlWritableMetaDataService;
 
 	@Bean(destroyMethod = "shutdown")
 	public DataSource dataSource()
@@ -77,7 +77,7 @@ public class AppConfig
 	@Bean
 	public WritableMetaDataService writableMetaDataService()
 	{
-		mysqlWritableMetaDataService = new MysqlWritableMetaDataService(dataSource());
+		mysqlWritableMetaDataService = new MetaDataServiceImpl();
 		return writableMetaDataServiceDecorator().decorate(mysqlWritableMetaDataService);
 	}
 
@@ -113,7 +113,7 @@ public class AppConfig
 			}
 		};
 
-		mysqlWritableMetaDataService.setRepositoryCollection(mysqlRepositoryCollection);
+		mysqlWritableMetaDataService.setManageableCrudRepositoryCollection(mysqlRepositoryCollection);
 
 		return mysqlRepositoryCollection;
 	}

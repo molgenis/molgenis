@@ -13,9 +13,9 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
+import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
-import org.molgenis.data.mysql.meta.MysqlWritableMetaDataService;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
@@ -64,7 +64,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 	PermissionSystemService permissionSystemService;
 
 	@Autowired
-	MysqlWritableMetaDataService mysqlMetaDataRepositories;
+	MetaDataServiceImpl mysqlMetaDataRepositories;
 
 	@BeforeMethod
 	public void beforeMethod()
@@ -124,11 +124,6 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testImportReport() throws IOException, InvalidFormatException, InterruptedException
 	{
-		// cleanup
-		store.dropEntityMetaData("import_person");
-		store.dropEntityMetaData("import_city");
-		store.dropEntityMetaData("import_country");
-
 		// create test excel
 		File f = ResourceUtils.getFile(getClass(), "/example.xlsx");
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);

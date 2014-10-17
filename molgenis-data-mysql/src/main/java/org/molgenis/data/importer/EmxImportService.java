@@ -1,25 +1,25 @@
 package org.molgenis.data.importer;
 
-import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.AGGREGATEABLE;
-import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.DATA_TYPE;
-import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.DESCRIPTION;
-import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.ENTITY;
-import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.ENUM_OPTIONS;
-import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.ID_ATTRIBUTE;
-import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.LABEL;
-import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.LABEL_ATTRIBUTE;
-import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.LOOKUP_ATTRIBUTE;
-import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.NAME;
-import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.NILLABLE;
-import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.RANGE_MAX;
-import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.RANGE_MIN;
-import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.READ_ONLY;
-import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.REF_ENTITY;
-import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.UNIQUE;
-import static org.molgenis.data.mysql.meta.AttributeMetaDataMetaData.VISIBLE;
-import static org.molgenis.data.mysql.meta.EntityMetaDataMetaData.ABSTRACT;
-import static org.molgenis.data.mysql.meta.EntityMetaDataMetaData.EXTENDS;
-import static org.molgenis.data.mysql.meta.EntityMetaDataMetaData.PACKAGE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.AGGREGATEABLE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.DATA_TYPE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.DESCRIPTION;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENTITY;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENUM_OPTIONS;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.ID_ATTRIBUTE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL_ATTRIBUTE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.LOOKUP_ATTRIBUTE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.NAME;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.NILLABLE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.RANGE_MAX;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.RANGE_MIN;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.READ_ONLY;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.REF_ENTITY;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.UNIQUE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.VISIBLE;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.ABSTRACT;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.EXTENDS;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.PACKAGE;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -48,12 +48,12 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Range;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.meta.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.PackageImpl;
+import org.molgenis.data.meta.PackageMetaData;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
-import org.molgenis.data.mysql.meta.AttributeMetaDataMetaData;
-import org.molgenis.data.mysql.meta.EntityMetaDataMetaData;
-import org.molgenis.data.mysql.meta.PackageImpl;
-import org.molgenis.data.mysql.meta.PackageMetaData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
@@ -102,16 +102,16 @@ public class EmxImportService implements ImportService
 			UNIQUE.toLowerCase());
 
 	private static final List<String> SUPPORTED_ENTITY_ATTRIBUTES = Arrays.asList(
-			org.molgenis.data.mysql.meta.EntityMetaDataMetaData.LABEL.toLowerCase(),
-			org.molgenis.data.mysql.meta.EntityMetaDataMetaData.DESCRIPTION.toLowerCase(), "name",
-			ABSTRACT.toLowerCase(), EXTENDS.toLowerCase(), "package");
+			org.molgenis.data.meta.EntityMetaDataMetaData.LABEL.toLowerCase(),
+			org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION.toLowerCase(), "name", ABSTRACT.toLowerCase(),
+			EXTENDS.toLowerCase(), "package");
 
 	// Sheet names
 	private static final String ENTITIES = EntityMetaDataMetaData.ENTITY_NAME;
 	private static final String ATTRIBUTES = AttributeMetaDataMetaData.ENTITY_NAME;
 	private static final String PACKAGES = PackageMetaData.ENTITY_NAME;
 
-	private MysqlRepositoryCollection store;
+	private MysqlRepositoryCollection targetCollection;
 	private TransactionTemplate transactionTemplate;
 	private final DataService dataService;
 	private PermissionSystemService permissionSystemService;
@@ -126,11 +126,12 @@ public class EmxImportService implements ImportService
 	}
 
 	@Autowired
-	public void setRepositoryCollection(MysqlRepositoryCollection coll, MetaDataService metaDataService)
+	public void setRepositoryCollection(MysqlRepositoryCollection targetCollection, MetaDataService metaDataService)
 	{
-		this.store = coll;
+		this.targetCollection = targetCollection;
 		this.metaDataService = metaDataService;
-		logger.debug("EmxImportService created with coll=" + coll + " and metaDataService=" + metaDataService);
+		logger.debug("EmxImportService created with targetCollection=" + targetCollection + " and metaDataService="
+				+ metaDataService);
 	}
 
 	@Autowired
@@ -154,7 +155,7 @@ public class EmxImportService implements ImportService
 			for (String entityName : source.getEntityNames())
 			{
 				if (entityName.equalsIgnoreCase(AttributeMetaDataMetaData.ENTITY_NAME)) return true;
-				if (store.getRepositoryByEntityName(entityName) != null) return true;
+				if (targetCollection.getRepositoryByEntityName(entityName) != null) return true;
 			}
 		}
 
@@ -164,7 +165,7 @@ public class EmxImportService implements ImportService
 	@Override
 	public EntityImportReport doImport(final RepositoryCollection source, DatabaseAction databaseAction)
 	{
-		if (store == null) throw new RuntimeException("store was not set");
+		if (targetCollection == null) throw new RuntimeException("targetCollection was not set");
 		if (metaDataService == null) throw new RuntimeException("metadataService was not set");
 
 		List<EntityMetaData> metadataList = Lists.newArrayList();
@@ -211,7 +212,7 @@ public class EmxImportService implements ImportService
 				}
 
 				// Drop repo
-				store.dropEntityMetaData(entityName);
+				targetCollection.dropEntityMetaData(entityName);
 			}
 
 			List<String> entities = Lists.newArrayList(addedAttributes.keySet());
@@ -222,7 +223,7 @@ public class EmxImportService implements ImportService
 				List<String> attributes = addedAttributes.get(entityName);
 				for (String attributeName : attributes)
 				{
-					store.dropAttributeMetaData(entityName, attributeName);
+					targetCollection.dropAttributeMetaData(entityName, attributeName);
 				}
 			}
 
@@ -525,8 +526,8 @@ public class EmxImportService implements ImportService
 				if (!entities.containsKey(entityName)) entities.put(entityName, new DefaultEntityMetaData(entityName));
 
 				DefaultEntityMetaData md = entities.get(entityName);
-				md.setLabel(entity.getString(org.molgenis.data.mysql.meta.EntityMetaDataMetaData.LABEL));
-				md.setDescription(entity.getString(org.molgenis.data.mysql.meta.EntityMetaDataMetaData.DESCRIPTION));
+				md.setLabel(entity.getString(org.molgenis.data.meta.EntityMetaDataMetaData.LABEL));
+				md.setDescription(entity.getString(org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION));
 				if (entity.getBoolean(ABSTRACT) != null) md.setAbstract(entity.getBoolean(ABSTRACT));
 
 				String extendsEntityName = entity.getString(EXTENDS);
@@ -573,8 +574,8 @@ public class EmxImportService implements ImportService
 				if (simpleName == null) throw new IllegalArgumentException("package.name is missing on line " + i);
 
 				Package parentPackage = null;
-				String description = pack.getString(org.molgenis.data.mysql.meta.PackageMetaData.DESCRIPTION);
-				String parent = pack.getString(org.molgenis.data.mysql.meta.PackageMetaData.PARENT);
+				String description = pack.getString(org.molgenis.data.meta.PackageMetaData.DESCRIPTION);
+				String parent = pack.getString(org.molgenis.data.meta.PackageMetaData.PARENT);
 				if (parent != null)
 				{
 					parentPackage = new PackageImpl(parent);
@@ -687,11 +688,11 @@ public class EmxImportService implements ImportService
 					String name = entityMetaData.getName();
 					if (!ENTITIES.equals(name) && !ATTRIBUTES.equals(name) && !PACKAGES.equals(name))
 					{
-						if (!metaDataService.hasEntity(entityMetaData))
+						if (metaDataService.getEntityMetaData(entityMetaData.getName()) == null)
 						{
 							logger.debug("tyring to create: " + name);
 							addedEntities.add(name);
-							Repository repo = store.add(entityMetaData);
+							Repository repo = targetCollection.add(entityMetaData);
 							if (repo != null)
 							{
 								report.addNewEntity(name);
@@ -699,7 +700,15 @@ public class EmxImportService implements ImportService
 						}
 						else if (!entityMetaData.isAbstract())
 						{
-							List<String> addedEntityAttributes = store.update(entityMetaData);
+							List<String> addedEntityAttributes = Lists.transform(
+									targetCollection.update(entityMetaData), new Function<AttributeMetaData, String>()
+									{
+										@Override
+										public String apply(AttributeMetaData input)
+										{
+											return input.getName();
+										}
+									});
 							if ((addedEntityAttributes != null) && !addedEntityAttributes.isEmpty())
 							{
 								addedAttributes.put(name, addedEntityAttributes);
@@ -720,7 +729,7 @@ public class EmxImportService implements ImportService
 				for (final EntityMetaData entityMetaData : resolved)
 				{
 					String name = entityMetaData.getName();
-					CrudRepository crudRepository = (CrudRepository) store.getRepositoryByEntityName(name);
+					CrudRepository crudRepository = (CrudRepository) targetCollection.getRepositoryByEntityName(name);
 
 					if (crudRepository != null)
 					{

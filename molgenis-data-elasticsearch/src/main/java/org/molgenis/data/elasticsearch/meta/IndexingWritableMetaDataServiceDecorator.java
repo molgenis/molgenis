@@ -89,18 +89,6 @@ public class IndexingWritableMetaDataServiceDecorator implements WritableMetaDat
 	}
 
 	@Override
-	public boolean hasEntity(EntityMetaData entityMetaData)
-	{
-		return delegate.hasEntity(entityMetaData);
-	}
-
-	@Override
-	public void createAndUpgradeMetaDataTables()
-	{
-		delegate.createAndUpgradeMetaDataTables();
-	}
-
-	@Override
 	public void removeEntityMetaData(String name)
 	{
 		delegate.removeEntityMetaData(name);

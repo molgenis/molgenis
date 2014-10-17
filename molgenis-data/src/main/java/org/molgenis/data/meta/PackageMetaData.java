@@ -1,4 +1,4 @@
-package org.molgenis.data.mysql.meta;
+package org.molgenis.data.meta;
 
 import static org.molgenis.MolgenisFieldTypes.TEXT;
 import static org.molgenis.MolgenisFieldTypes.XREF;
