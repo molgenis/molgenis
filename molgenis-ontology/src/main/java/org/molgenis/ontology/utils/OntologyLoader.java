@@ -336,4 +336,9 @@ public class OntologyLoader
 	{
 		return ontology.getClassesInSignature().size();
 	}
+
+	public Set<OWLClass> getAllclasses()
+	{
+		return ontology.getClassesInSignature();
+	}
 }

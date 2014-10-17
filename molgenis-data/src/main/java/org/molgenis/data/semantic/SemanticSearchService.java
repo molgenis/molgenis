@@ -15,7 +15,7 @@ public interface SemanticSearchService
 	 * @return AttributeMetaData of resembling attributes, sorted by relevance,
 	 *         not including @attributeMetaData
 	 */
-	Iterable<AttributeMetaData> findAttributes(Package p, AttributeMetaData attributeMetaData);
+	Iterable<AttributeMetaData> findAttributes(org.molgenis.data.Package p, AttributeMetaData attributeMetaData);
 
 	// for BMB, a bit later
 	// Iterable<Object> googleSearchFindStuff(String searchTerm);

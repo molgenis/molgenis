@@ -1,59 +1,70 @@
 package org.molgenis.ontology.repository;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.annotation.Nullable;
 
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.elasticsearch.util.Hit;
-import org.molgenis.data.elasticsearch.util.SearchRequest;
+import org.molgenis.data.semantic.OntologyService;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.ontology.service.OntologyService;
-import org.molgenis.ontology.tree.OntologyEntity;
+import org.molgenis.ontology.beans.OntologyEntity;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 
 public class OntologyQueryRepository extends AbstractOntologyQueryRepository
 {
 	public final static String DEFAULT_ONTOLOGY_REPO = "ontologyindex";
 	private final static String BASE_URL = "ontologyindex://";
-	private final OntologyService ontologySerivce;
+	private final OntologyService ontologyService;
+	private final DataService dataService;
 
 	@Autowired
-	public OntologyQueryRepository(String entityName, OntologyService ontologyService, SearchService searchService)
+	public OntologyQueryRepository(String entityName, OntologyService ontologyService, SearchService searchService,
+			DataService dataService)
 	{
 		super(entityName, searchService);
-		this.ontologySerivce = ontologyService;
+		this.ontologyService = ontologyService;
+		this.dataService = dataService;
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Query q)
+	public Iterable<Entity> findAll(Query query)
 	{
-		List<Entity> entities = new ArrayList<Entity>();
-		if (q.getRules().size() > 0) q.and();
-		q.eq(OntologyIndexRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY);
-		for (Hit hit : searchService.search(new SearchRequest(null, q, null)).getSearchHits())
+		if (query.getRules().size() > 0) query.and();
+		query.eq(OntologyQueryRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY);
+		return Iterables.transform(searchService.search(query, entityMetaData), new Function<Entity, Entity>()
 		{
-			entities.add(new OntologyEntity(hit, getEntityMetaData(), ontologySerivce, searchService));
-		}
-		return entities;
+			@Override
+			@Nullable
+			public Entity apply(@Nullable
+			Entity input)
+			{
+				return new OntologyEntity(input, entityMetaData, dataService, searchService, ontologyService);
+			}
+		});
+
 	}
 
 	@Override
 	public Entity findOne(Query q)
 	{
 		if (q.getRules().size() > 0) q.and();
-		q.eq(OntologyIndexRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY);
-		Hit hit = findOneInternal(null, q);
-		if (hit != null) return new OntologyEntity(hit, getEntityMetaData(), ontologySerivce, searchService);
-		return null;
+		q.eq(OntologyQueryRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY);
+		Entity entity = findOneInternal(q);
+		return entity != null ? new OntologyEntity(entity, entityMetaData, dataService, searchService, ontologyService) : null;
 	}
 
 	@Override
 	public Entity findOne(Object id)
 	{
-		Hit hit = searchService.searchById(null, id.toString());
-		if (hit != null) return new OntologyEntity(hit, getEntityMetaData(), ontologySerivce, searchService);
+		for (Entity entity : searchService.search(new QueryImpl().eq(OntologyTermQueryRepository.ID, id),
+				entityMetaData))
+		{
+			return new OntologyEntity(entity, entityMetaData, dataService, searchService, ontologyService);
+		}
 		return null;
 	}
 
@@ -64,14 +75,14 @@ public class OntologyQueryRepository extends AbstractOntologyQueryRepository
 	}
 
 	@Override
-	public long count(Query q)
+	public long count(Query query)
 	{
-		if (q.getRules().size() > 0)
+		if (query.getRules().size() > 0)
 		{
-			q.and();
+			query.and();
 		}
-		q.eq(OntologyIndexRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY);
-		return searchService.count(null, q.pageSize(Integer.MAX_VALUE).offset(Integer.MIN_VALUE));
+		query.eq(OntologyIndexRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY);
+		return searchService.count(query.pageSize(Integer.MAX_VALUE).offset(Integer.MIN_VALUE), entityMetaData);
 	}
 
 	@Override
