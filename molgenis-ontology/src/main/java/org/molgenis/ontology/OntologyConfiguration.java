@@ -2,7 +2,7 @@ package org.molgenis.ontology;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.WritableMetaDataService;
 import org.molgenis.data.semantic.OntologyService;
 import org.molgenis.ontology.index.AsyncOntologyIndexer;
 import org.molgenis.ontology.service.OntologyServiceImpl;
@@ -14,13 +14,13 @@ import org.springframework.scheduling.annotation.EnableAsync;
 
 @Configuration
 @EnableAsync
-public class OntologyConfig
+public class OntologyConfiguration
 {
 	@Autowired
 	private SearchService searchService;
 
 	@Autowired
-	private MetaDataService metaDataService;
+	private WritableMetaDataService writableMetaDataService;
 
 	@Autowired
 	private DataService dataService;
