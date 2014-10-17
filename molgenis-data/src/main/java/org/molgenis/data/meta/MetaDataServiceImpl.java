@@ -86,6 +86,9 @@ public class MetaDataServiceImpl implements WritableMetaDataService
 		return metadataSet;
 	}
 
+	/**
+	 * Removes entity meta data if it exists.
+	 */
 	@Override
 	public void removeEntityMetaData(String entityName)
 	{

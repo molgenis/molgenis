@@ -97,8 +97,11 @@ class AttributeMetaDataRepository
 			attributeMetaDataEntity.set(RANGE_MAX, att.getRange().getMax());
 		}
 
-		Entity refEntity = entityMetaDataRepository.getEntity(att.getRefEntity().getName());
-		if (att.getRefEntity() != null) attributeMetaDataEntity.set(REF_ENTITY, refEntity);
+		if (att.getRefEntity() != null)
+		{
+			Entity refEntity = entityMetaDataRepository.getEntity(att.getRefEntity().getName());
+			attributeMetaDataEntity.set(REF_ENTITY, refEntity);
+		}
 
 		repository.add(attributeMetaDataEntity);
 	}

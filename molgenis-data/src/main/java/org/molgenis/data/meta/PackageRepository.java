@@ -34,13 +34,20 @@ class PackageRepository
 
 	public void addDefaultPackage()
 	{
-		add(new PackageImpl(Package.DEFAULT_PACKAGE_NAME, "The default package."));
+		if (!exists(PackageImpl.getDefaultPackage()))
+		{
+			add(PackageImpl.getDefaultPackage());
+		}
+	}
+
+	public boolean exists(Package p)
+	{
+		return getPackage(p.getName()) != null;
 	}
 
 	public Iterable<Package> getPackages()
 	{
 		Set<Package> result = new TreeSet<Package>();
-		// iterate over self
 		for (Entity entity : repository)
 		{
 			result.add(new PackageImpl(entity));
@@ -103,7 +110,7 @@ class PackageRepository
 			}
 		}
 	}
-	
+
 	public Entity getEntity(String fullyQualifiedName)
 	{
 		return repository.findOne(new QueryImpl().eq(PackageMetaData.FULL_NAME, fullyQualifiedName));
