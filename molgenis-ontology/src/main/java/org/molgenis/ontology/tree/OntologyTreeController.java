@@ -4,7 +4,8 @@ import static org.molgenis.ontology.tree.OntologyTreeController.URI;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.ontology.service.OntologyService;
+import org.molgenis.ontology.service.OntologyServiceImpl;
+import org.molgenis.ontology.utils.OntologyServiceUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class OntologyTreeController extends MolgenisPluginController
 {
 	@Autowired
-	private OntologyService ontologyService;
+	private OntologyServiceImpl ontologyService;
 
 	public static final String ID = "ontologytree";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
@@ -28,7 +29,7 @@ public class OntologyTreeController extends MolgenisPluginController
 	@RequestMapping(method = GET)
 	public String init(Model model)
 	{
-		model.addAttribute("ontologies", ontologyService.getAllOntologies());
+		model.addAttribute("ontologies", OntologyServiceUtil.getEntityAsMap(ontologyService.getAllOntologyEntities()));
 		return "ontology-tree-view";
 	}
 }
