@@ -1,8 +1,7 @@
 package org.molgenis.data.meta;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.molgenis.data.AttributeMetaData;
@@ -10,12 +9,13 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableCrudRepositoryCollection;
 import org.molgenis.data.Package;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-
+/**
+ * MetaData service. Administration of the {@link Package}, {@link EntityMetaData} and {@link AttributeMetaData} of the
+ * metadata of the repositories.
+ * 
+ * <img src="http://yuml.me/8870d0e4.png" alt="Metadata entities" width="640"/>
+ */
 public class MetaDataServiceImpl implements WritableMetaDataService
 {
 	private PackageRepository packageRepository;
@@ -39,53 +39,6 @@ public class MetaDataServiceImpl implements WritableMetaDataService
 		}
 	}
 
-	@Override
-	public Set<EntityMetaData> getEntityMetaDatas()
-	{
-		Map<String, EntityMetaData> metadata = Maps.newLinkedHashMap();
-
-		// read the entity meta data
-		for (EntityMetaData entityMetaData : entityMetaDataRepository.getEntityMetaDatas())
-		{
-			DefaultEntityMetaData entityMetaDataWithAttributes = new DefaultEntityMetaData(entityMetaData);
-			metadata.put(entityMetaDataWithAttributes.getName(), entityMetaDataWithAttributes);
-
-			// add the attribute meta data of the entity
-			for (AttributeMetaData attributeMetaData : attributeMetaDataRepository
-					.findForEntity(entityMetaDataWithAttributes.getName()))
-			{
-				entityMetaDataWithAttributes.addAttributeMetaData(attributeMetaData);
-			}
-		}
-
-		// read the refEntity
-		for (Entity attribute : attributeMetaDataRepository.getAttributeEntities())
-		{
-			if (attribute.getString(AttributeMetaDataMetaData.REF_ENTITY) != null)
-			{
-				EntityMetaData entityMetaData = metadata.get(attribute.getString(AttributeMetaDataMetaData.ENTITY));
-				DefaultAttributeMetaData attributeMetaData = (DefaultAttributeMetaData) entityMetaData
-						.getAttribute(attribute.getString(AttributeMetaDataMetaData.NAME));
-				EntityMetaData ref = metadata.get(attribute.getString(AttributeMetaDataMetaData.REF_ENTITY));
-				if (ref == null) throw new RuntimeException("refEntity '" + attribute.getString("refEntity")
-						+ "' missing for " + entityMetaData.getName() + "." + attributeMetaData.getName());
-				attributeMetaData.setRefEntity(ref);
-			}
-		}
-
-		Set<EntityMetaData> metadataSet = Sets.newLinkedHashSet();
-		metadataSet.add(PackageRepository.META_DATA);
-		metadataSet.add(EntityMetaDataRepository.META_DATA);
-		metadataSet.add(AttributeMetaDataRepository.META_DATA);
-
-		for (String name : metadata.keySet())
-		{
-			metadataSet.add(metadata.get(name));
-		}
-
-		return metadataSet;
-	}
-
 	/**
 	 * Removes entity meta data if it exists.
 	 */
@@ -96,6 +49,9 @@ public class MetaDataServiceImpl implements WritableMetaDataService
 		entityMetaDataRepository.delete(entityName);
 	}
 
+	/**
+	 * Removes an attribute from an entity.
+	 */
 	@Override
 	public void removeAttributeMetaData(String entityName, String attributeName)
 	{
@@ -111,10 +67,13 @@ public class MetaDataServiceImpl implements WritableMetaDataService
 			return;
 		}
 
-		packageRepository.add(emd.getPackage());
+		if (emd.getPackage() != null)
+		{
+			packageRepository.add(emd.getPackage());
+		}
 
 		Entity mdEntity = entityMetaDataRepository.add(emd);
-		
+
 		// add attribute metadata
 		for (AttributeMetaData att : emd.getAttributes())
 		{
@@ -130,13 +89,8 @@ public class MetaDataServiceImpl implements WritableMetaDataService
 	public void addAttributeMetaData(String fullyQualifiedName, AttributeMetaData attr)
 	{
 		Entity entity = entityMetaDataRepository.getEntity(fullyQualifiedName);
+		entityMetaDataRepository.get(fullyQualifiedName).addAttributeMetaData(attr);
 		attributeMetaDataRepository.add(entity, attr);
-	}
-
-	@Override
-	public Iterable<AttributeMetaData> getEntityAttributeMetaData(String entityName)
-	{
-		return attributeMetaDataRepository.findForEntity(entityName);
 	}
 
 	@Override
@@ -147,7 +101,7 @@ public class MetaDataServiceImpl implements WritableMetaDataService
 		{
 			return null;
 		}
-		return entityMetaDataRepository.find(fullyQualifiedName);
+		return entityMetaDataRepository.get(fullyQualifiedName);
 	}
 
 	@Override
@@ -157,21 +111,15 @@ public class MetaDataServiceImpl implements WritableMetaDataService
 	}
 
 	@Override
-	public List<EntityMetaData> getPackageEntityMetaDatas(String packageName)
-	{
-		return entityMetaDataRepository.getPackageEntityMetaDatas(packageName);
-	}
-
-	@Override
 	public Package getPackage(String string)
 	{
 		return packageRepository.getPackage(string);
 	}
 
 	@Override
-	public Iterable<Package> getPackages()
+	public List<Package> getRootPackages()
 	{
-		return packageRepository.getPackages();
+		return packageRepository.getRootPackages();
 	}
 
 	/**
@@ -182,6 +130,12 @@ public class MetaDataServiceImpl implements WritableMetaDataService
 		attributeMetaDataRepository.deleteAll();
 		entityMetaDataRepository.deleteAll();
 		packageRepository.deleteAll();
-		packageRepository.addDefaultPackage();
+		packageRepository.updatePackageCache();
+	}
+
+	@Override
+	public Collection<EntityMetaData> getEntityMetaDatas()
+	{
+		return entityMetaDataRepository.getMetaDatas();
 	}
 }
