@@ -6,8 +6,8 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.TreeSet;
 
 import org.molgenis.AppConfig;
 import org.molgenis.MolgenisFieldTypes;
@@ -60,8 +60,8 @@ public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTe
 				.setRange(new Range(1l, 5l));
 		metaDataRepositories.addAttributeMetaData(emd.getName(), intRangeAttr);
 
-		List<AttributeMetaData> retrieved = Lists.newArrayList(metaDataRepositories.getEntityAttributeMetaData(emd
-				.getName()));
+		List<AttributeMetaData> retrieved = Lists.newArrayList(metaDataRepositories.getEntityMetaData(emd.getName())
+				.getAttributes());
 
 		assertNotNull(retrieved);
 		assertEquals(retrieved.size(), 2);
@@ -115,7 +115,7 @@ public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTe
 
 		List<EntityMetaData> meta = Lists.newArrayList(metaDataRepositories.getEntityMetaDatas());
 		assertNotNull(meta);
-		assertEquals(meta.size(), 6);
+		assertEquals(meta.size(), 3);
 		assertTrue(meta.contains(test));
 		assertTrue(meta.contains(test1));
 		assertTrue(meta.contains(test2));
@@ -125,7 +125,7 @@ public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTe
 	public void getEntityMetaDatasForPackage()
 	{
 
-		Package p1 = new PackageImpl("p1", "Package1");
+		PackageImpl p1 = new PackageImpl("p1", "Package1", null);
 		metaDataRepositories.addPackage(p1);
 
 		Package p2 = new PackageImpl("p2", "Package2", p1);
@@ -143,7 +143,8 @@ public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTe
 		DefaultEntityMetaData test3 = new DefaultEntityMetaData("test3", p2);
 		metaDataRepositories.addEntityMetaData(test3);
 
-		assertEquals(metaDataRepositories.getPackageEntityMetaDatas("p1_p2"), Arrays.asList(test2, test3));
+		assertEquals(metaDataRepositories.getPackage("p1_p2").getEntityMetaDatas(),
+				Collections.unmodifiableList(Arrays.asList(test2, test3)));
 	}
 
 	@Test
@@ -167,8 +168,7 @@ public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTe
 
 		Package defaultPackage = metaDataRepositories.getPackage("default");
 
-		assertEquals(new TreeSet<Package>(Arrays.asList(test, defaultPackage, molgenis)),
-				metaDataRepositories.getPackages());
+		assertEquals(metaDataRepositories.getRootPackages(), Arrays.asList(defaultPackage, test, molgenis));
 	}
 
 }

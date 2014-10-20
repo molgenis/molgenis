@@ -50,9 +50,9 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
-import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.PackageImpl;
 import org.molgenis.data.meta.PackageMetaData;
+import org.molgenis.data.meta.WritableMetaDataService;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -115,7 +115,7 @@ public class EmxImportService implements ImportService
 	private TransactionTemplate transactionTemplate;
 	private final DataService dataService;
 	private PermissionSystemService permissionSystemService;
-	private MetaDataService metaDataService;
+	private WritableMetaDataService metaDataService;
 
 	@Autowired
 	public EmxImportService(DataService dataService)
@@ -126,7 +126,8 @@ public class EmxImportService implements ImportService
 	}
 
 	@Autowired
-	public void setRepositoryCollection(MysqlRepositoryCollection targetCollection, MetaDataService metaDataService)
+	public void setRepositoryCollection(MysqlRepositoryCollection targetCollection,
+			WritableMetaDataService metaDataService)
 	{
 		this.targetCollection = targetCollection;
 		this.metaDataService = metaDataService;
@@ -559,6 +560,7 @@ public class EmxImportService implements ImportService
 	 */
 	private void loadAllPackagesToMap(RepositoryCollection source, Map<String, DefaultEntityMetaData> entities)
 	{
+		// TODO: this duplicates code in PackageRepository
 		if (source.getRepositoryByEntityName(PACKAGES) != null)
 		{
 			Map<String, PackageImpl> packages = Maps.newHashMap();
@@ -573,12 +575,12 @@ public class EmxImportService implements ImportService
 				// required
 				if (simpleName == null) throw new IllegalArgumentException("package.name is missing on line " + i);
 
-				Package parentPackage = null;
+				PackageImpl parentPackage = null;
 				String description = pack.getString(org.molgenis.data.meta.PackageMetaData.DESCRIPTION);
 				String parent = pack.getString(org.molgenis.data.meta.PackageMetaData.PARENT);
 				if (parent != null)
 				{
-					parentPackage = new PackageImpl(parent);
+					parentPackage = new PackageImpl(parent, null);
 				}
 
 				packages.put(simpleName, new PackageImpl(simpleName, description, parentPackage));
@@ -589,7 +591,7 @@ public class EmxImportService implements ImportService
 			{
 				if (p.getParent() != null)
 				{
-					Package parent = packages.get(p.getParent().getSimpleName());
+					PackageImpl parent = packages.get(p.getParent().getSimpleName());
 					if (parent == null) throw new IllegalArgumentException("Unknown parent package '"
 							+ p.getParent().getSimpleName() + "' of package '" + p.getSimpleName() + "'");
 
