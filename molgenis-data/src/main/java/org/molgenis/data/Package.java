@@ -50,6 +50,6 @@ public interface Package
 	 * 
 	 * @return
 	 */
-	Iterable<EntityMetaData> getEntities();
+	Iterable<EntityMetaData> getEntityMetaDatas();
 
 }
