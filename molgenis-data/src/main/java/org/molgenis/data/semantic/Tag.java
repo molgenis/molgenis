@@ -1,13 +1,12 @@
 package org.molgenis.data.semantic;
 
-public interface Tag<SubjectType, ObjectType>
+public interface Tag<SubjectType, ObjectType, CodeSystemType>
 {
-
-	String getRelationIRI();
-
-	String getRelationLabel();
+	Relation getRelation();
 
 	SubjectType getSubject();
 
 	ObjectType getObject();
+
+	CodeSystemType getCodeSystem();
 }
