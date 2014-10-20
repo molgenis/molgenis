@@ -40,9 +40,9 @@ public class OntologyQueryRepository extends AbstractOntologyQueryRepository
 			@Override
 			@Nullable
 			public Entity apply(@Nullable
-			Entity input)
+			Entity entity)
 			{
-				return new OntologyEntity(input, entityMetaData, dataService, searchService, ontologyService);
+				return new OntologyEntity(entity, entityMetaData, dataService, searchService, ontologyService);
 			}
 		});
 
