@@ -143,7 +143,7 @@ public class MysqlMetaDataRepositoriesTest extends AbstractTestNGSpringContextTe
 		DefaultEntityMetaData test3 = new DefaultEntityMetaData("test3", p2);
 		metaDataRepositories.addEntityMetaData(test3);
 
-		assertEquals(metaDataRepositories.getPackage("p1_p2").getEntities(),
+		assertEquals(metaDataRepositories.getPackage("p1_p2").getEntityMetaDatas(),
 				Collections.unmodifiableList(Arrays.asList(test2, test3)));
 	}
 

@@ -148,7 +148,7 @@ public class PackageImpl implements Package
 	}
 
 	@Override
-	public Iterable<EntityMetaData> getEntities()
+	public Iterable<EntityMetaData> getEntityMetaDatas()
 	{
 		return Collections.<EntityMetaData> unmodifiableList(entities);
 	}
