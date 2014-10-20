@@ -1,16 +1,36 @@
 (function($, molgenis) {	
 	"use strict";
-	var restApi = new molgenis.RestClient();
-	var selectedEntity;
 	
-	function createEntityMetaTree(entityMetaData) {
-		$('#attribute-selection').tree({
-			entityMetaData: entityMetaData,
-			onAttributesSelect: function(selects) {
-				refreshShoppingCart();
+	var restApi = new molgenis.RestClient();
+	var selectedPackage;
+	var countTemplate;
+	var modelTemplate;
+	
+	function createPackageTree(selectedPackage) {	
+		$('#attribute-selection').fancytree({
+			source:{
+				url: molgenis.getContextUrl() + "/getTreeData?package=" + selectedPackage.name		
 			},
-			onAttributeClick: function(attribute) {
-				createAttributeMetadataTable(attribute);
+			'click' : function(event, data) {
+				if (data.targetType === 'title' || data.targetType === 'icon') {
+					switch(data.node.data.type) {
+					case 'package' :
+						// TODO add package data to rest controller
+						break;
+					case 'entity' :
+						restApi.getAsync(data.node.data.href, null, function(entity) {
+							createEntityMetadataTable(entity);
+						});
+						break;
+					case 'attribute' :
+						restApi.getAsync(data.node.data.href, null, function(attribute) {
+							createAttributeMetadataTable(attribute);
+						});
+						break;
+					default:
+						throw 'Unknown type';
+					}
+				}
 			}
 		});
 	}
@@ -40,8 +60,14 @@
 		});
 	}
 	
+	function createEntityMetadataTable(entityMetadata) {
+		$('#attributes-table').entityMetadataTable({
+			entityMetadata: entityMetadata
+		});
+	}
+	
 	function createHeader(entityMetaData) {
-		$('#entity-class-name').html(entityMetaData.label);
+		$('#entity-class-name').html(entityMetaData.name);
 		
 		if (entityMetaData.description) {
 			var description = $('<span data-placement="bottom"></span>');
@@ -58,7 +84,7 @@
 			return entityMetaData.attributes[name];
 	}
 	
-	function load(entityUri) {
+	function load(selectedPackageName) {
 		$.ajax({
 			url: 'catalogue/shoppingcart/clear',
 			async: false
@@ -76,6 +102,40 @@
 	}
 	
 	$(function() {
+		$('form[name=search-form]').submit(function(e) {
+			e.preventDefault();
+			$.ajax({
+				type : $(this).attr('method'),
+				url : $(this).attr('action'),
+				data : $(this).serialize(),
+				success : function(data) {
+					$('#package-search-results').empty();
+					$('#package-search-results').append(countTemplate({'count': data.total}));
+					console.log(data.packages);
+					for(var i = 0; i < data.packages.length; ++i){
+						$('#package-search-results').append(modelTemplate({'package': data.packages[i] }));
+					}
+				}
+			});
+		});
+		
+		$(document).on('click', '.details-btn', function() {
+			var id = $(this).closest('.package').data('id');
+			window.location.href='http://localhost:8080/menu/main/catalogue/package-details-explorer?package=' + id;
+			
+
+		});
+		
+		$(document).on('click', '.dataexplorer-btn', function() {
+			var id = $(this).closest('.package').data('id');
+			//TODO link id to data explorer
+			window.location.href='http://localhost:8080/menu/main/dataexplorer';
+		});
+		
+		$(document).on('click', '.import-btn', function() {
+			window.location.href='http://localhost:8080/menu/main/importwizard';
+		});
+
 		$('.entity-dropdown-item').click(function() {
 			var entityUri = $(this).attr('id');
 			load(entityUri);
@@ -109,9 +169,18 @@
 						}
 					});
 		});
+		if($("#count-template").length > 0)
+			countTemplate = Handlebars.compile($("#count-template").html());
+		if($("#model-template").length > 0)
+			modelTemplate = Handlebars.compile($("#model-template").html());
 		
-		if (selectedEntityName) {
-			load('/api/v1/' + selectedEntityName);
+		if(window.selectedPackageName) {
+			$.get(molgenis.getContextUrl() + '/getPackage?package=' + selectedPackageName, function(selectedPackage){
+				createHeader(selectedPackage);
+				createPackageTree(selectedPackage);
+			});
+		} else {
+			$('form[name=search-form]').submit();
 		}
 	});
 	
