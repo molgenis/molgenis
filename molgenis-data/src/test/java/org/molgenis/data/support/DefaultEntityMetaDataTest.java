@@ -16,6 +16,7 @@ public class DefaultEntityMetaDataTest
 		entityMetaData.setLabel("label");
 		entityMetaData.setLabelAttribute("labelAttribute");
 		entityMetaData.addAttribute("labelAttribute").setDescription("label attribute");
+		entityMetaData.addAttribute("id").setDescription("id attribute");
 		assertEquals(new DefaultEntityMetaData(entityMetaData), entityMetaData);
 	}
 }

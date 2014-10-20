@@ -25,6 +25,7 @@ public class MysqlRepositoryXrefTest extends MysqlRepositoryAbstractDatatypeTest
 		refEntity.setLabelAttribute("label");
 		refEntity.setIdAttribute("identifier");
 		refEntity.addAttribute("identifier").setNillable(false);
+		refEntity.addAttribute("label");
 
 		DefaultEntityMetaData refEntity2 = new DefaultEntityMetaData("IntTarget");
 		refEntity2.setIdAttribute("identifier");
