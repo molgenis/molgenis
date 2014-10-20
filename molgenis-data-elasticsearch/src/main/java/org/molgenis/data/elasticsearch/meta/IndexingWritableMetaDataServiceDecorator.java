@@ -1,7 +1,6 @@
 package org.molgenis.data.elasticsearch.meta;
 
 import java.io.IOException;
-import java.util.List;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -30,12 +29,6 @@ public class IndexingWritableMetaDataServiceDecorator implements WritableMetaDat
 		this.delegate = delegate;
 		this.dataService = dataService;
 		this.elasticSearchService = elasticSearchService;
-	}
-
-	@Override
-	public Iterable<AttributeMetaData> getEntityAttributeMetaData(String entityName)
-	{
-		return delegate.getEntityAttributeMetaData(entityName);
 	}
 
 	@Override
@@ -96,9 +89,9 @@ public class IndexingWritableMetaDataServiceDecorator implements WritableMetaDat
 	}
 
 	@Override
-	public Iterable<Package> getPackages()
+	public Iterable<Package> getRootPackages()
 	{
-		return delegate.getPackages();
+		return delegate.getRootPackages();
 	}
 
 	@Override
@@ -108,21 +101,15 @@ public class IndexingWritableMetaDataServiceDecorator implements WritableMetaDat
 	}
 
 	@Override
-	public List<EntityMetaData> getPackageEntityMetaDatas(String packageName)
+	public void addPackage(Package p)
 	{
-		return delegate.getPackageEntityMetaDatas(packageName);
+		delegate.addPackage(p);
 	}
 
 	@Override
 	public EntityMetaData getEntityMetaData(String name)
 	{
 		return delegate.getEntityMetaData(name);
-	}
-
-	@Override
-	public void addPackage(Package p)
-	{
-		delegate.addPackage(p);
 	}
 
 }

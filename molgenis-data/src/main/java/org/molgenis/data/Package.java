@@ -1,5 +1,6 @@
 package org.molgenis.data;
 
+
 /**
  * Package defines the structure and attributes of a Package. Attributes are unique. Other software components can use
  * this to interact with Packages and/or to configure backends and frontends, including Repository instances.
@@ -36,5 +37,19 @@ public interface Package
 	 * @return
 	 */
 	Package getParent();
+
+	/**
+	 * Gets the subpackages of this package or an empty list if this package doesnot have any subpackages.
+	 * 
+	 * @return
+	 */
+	Iterable<Package> getSubPackages();
+
+	/**
+	 * Gets the entities in this package.
+	 * 
+	 * @return
+	 */
+	Iterable<EntityMetaData> getEntities();
 
 }

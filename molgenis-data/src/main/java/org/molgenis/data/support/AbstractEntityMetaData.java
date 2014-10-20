@@ -186,7 +186,7 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 		StringBuilder sb = new StringBuilder();
 
 		Package p = getPackage();
-		if (p != null)
+		if (p != null && !Package.DEFAULT_PACKAGE_NAME.equals(p.getName()))
 		{
 			sb.append(p.getName());
 			sb.append(Package.PACKAGE_SEPARATOR);
