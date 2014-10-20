@@ -136,6 +136,7 @@ class PackageRepository
 		if (getPackage(p.getName()) == null)
 		{
 			PackageImpl pImpl = new PackageImpl(p.getSimpleName(), p.getDescription(), parent);
+			parent.addSubPackage(pImpl);
 			repository.add(pImpl.toEntity());
 			packageCache.put(p.getName(), pImpl);
 		}
