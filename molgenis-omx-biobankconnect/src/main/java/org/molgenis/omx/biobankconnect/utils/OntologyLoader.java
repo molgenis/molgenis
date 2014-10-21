@@ -11,7 +11,6 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.AddAxiom;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotation;
 import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
@@ -111,11 +110,6 @@ public class OntologyLoader
 					&& ontology.getEquivalentClassesAxioms(cls).size() == 0) listOfTopClasses.add(cls);
 		}
 		return listOfTopClasses;
-	}
-
-	public OWLClass getTopClass()
-	{
-		return factory.getOWLThing();
 	}
 
 	public List<Set<OWLClass>> getAssociatedClasses(OWLClass cls)
@@ -314,26 +308,5 @@ public class OntologyLoader
 	public void addSynonymsProperties(Set<String> synonymsProperties)
 	{
 		this.synonymsProperties.addAll(synonymsProperties);
-	}
-
-	public OWLClass createClass(String iri, Set<OWLClass> rootClasses)
-	{
-		OWLClass owlClass = factory.getOWLClass(IRI.create(iri));
-		for (OWLClass rootClass : rootClasses)
-		{
-			addClass(rootClass, owlClass);
-		}
-		return owlClass;
-	}
-
-	public void addClass(OWLClass cls, OWLClass parentClass)
-	{
-		if (parentClass == null) parentClass = factory.getOWLThing();
-		manager.applyChange(new AddAxiom(ontology, factory.getOWLSubClassOfAxiom(cls, parentClass)));
-	}
-
-	public long count()
-	{
-		return ontology.getClassesInSignature().size();
 	}
 }

@@ -5,10 +5,13 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
-import java.io.ByteArrayInputStream;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,22 +20,20 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.Writable;
 import org.molgenis.data.csv.CsvRepository;
 import org.molgenis.data.elasticsearch.util.Hit;
+import org.molgenis.data.elasticsearch.util.SearchResult;
 import org.molgenis.data.excel.ExcelWriter;
-import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.LowerCaseProcessor;
-import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.rest.EntityCollectionResponse;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.support.MapEntity;
@@ -54,15 +55,12 @@ public class OntologyServiceController extends MolgenisPluginController
 	private OntologyService ontologyService;
 
 	@Autowired
-	private OntologyServiceSessionData ontologyServiceSessionData;
-
-	@Autowired
 	private FileStore fileStore;
 
 	public static final String ID = "ontologyservice";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
-	public static final int INVALID_TOTAL_NUMBER = -1;
-	private static final String EXCEL_NEWLINE_CHAR = "\n";
+	private String ontologyUrl = null;
+	private List<String> inputLines = new ArrayList<String>();
 
 	public OntologyServiceController()
 	{
@@ -77,47 +75,31 @@ public class OntologyServiceController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = POST, value = "/match")
-	public String match(@RequestParam(value = "selectOntologies", required = true)
-	String ontologyIri, @RequestParam(value = "inputTerms", required = true)
-	String inputTerms, Model model, HttpServletRequest httpServletRequest) throws UnsupportedEncodingException,
-			IOException
+	public String match(@RequestParam(value = "selectOntologies", required = true) String ontologyUrl,
+			@RequestParam(value = "inputTerms", required = true) String inputTerms, Model model)
 	{
-		if (StringUtils.isEmpty(ontologyIri) || StringUtils.isEmpty(inputTerms)) return init(model);
-		String sessionId = httpServletRequest.getSession().getId();
 
-		File uploadFile = fileStore.store(new ByteArrayInputStream(inputTerms.getBytes("UTF8")), sessionId
-				+ "_input.txt");
-		ontologyServiceSessionData.addDataBySession(
-				sessionId,
-				ontologyIri,
-				new CsvRepository(uploadFile, Arrays.<CellProcessor> asList(new LowerCaseProcessor(),
-						new TrimProcessor()), OntologyService.DEFAULT_SEPARATOR));
+		if (StringUtils.isEmpty(ontologyUrl) || StringUtils.isEmpty(inputTerms)) return init(model);
 
-		model.addAttribute("ontologyUrl", ontologyServiceSessionData.getOntologyIriBySession(sessionId));
-		model.addAttribute("total", ontologyServiceSessionData.getTotalNumberBySession(sessionId));
-
+		this.ontologyUrl = ontologyUrl;
+		this.inputLines = Arrays.asList(inputTerms.split("\n"));
+		model.addAttribute("total", inputTerms.split("\n").length);
+		model.addAttribute("ontologyUrl", this.ontologyUrl);
 		return "ontology-match-view-result";
 	}
 
 	@RequestMapping(method = POST, value = "/match/upload", headers = "Content-Type=multipart/form-data")
-	public String upload(@RequestParam(value = "selectOntologies", required = true)
-	String ontologyIri, @RequestParam(value = "file", required = true)
-	Part file, Model model, HttpServletRequest httpServletRequest) throws IOException
+	public String upload(@RequestParam(value = "selectOntologies", required = true) String ontologyUrl,
+			@RequestParam(value = "file", required = true) Part file, Model model) throws IOException
 	{
-		if (StringUtils.isEmpty(ontologyIri) || file == null) return init(model);
-		String sessionId = httpServletRequest.getSession().getId();
+		if (StringUtils.isEmpty(ontologyUrl) || file == null) return init(model);
+		this.ontologyUrl = ontologyUrl;
 		CsvRepository reader = null;
 		try
 		{
-			File uploadFile = fileStore.store(file.getInputStream(), sessionId + "_input.txt");
-			ontologyServiceSessionData.addDataBySession(
-					sessionId,
-					ontologyIri,
-					new CsvRepository(uploadFile, Arrays.<CellProcessor> asList(new LowerCaseProcessor(),
-							new TrimProcessor()), OntologyService.DEFAULT_SEPARATOR));
-
-			model.addAttribute("ontologyUrl", ontologyServiceSessionData.getOntologyIriBySession(sessionId));
-			model.addAttribute("total", ontologyServiceSessionData.getTotalNumberBySession(sessionId));
+			File uploadFile = fileStore.store(file.getInputStream(), file.getName() + "_input.txt");
+			inputLines = collectAllLinesFromFile(uploadFile);
+			model.addAttribute("total", inputLines.size());
 		}
 		finally
 		{
@@ -127,12 +109,9 @@ public class OntologyServiceController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = GET, value = "/match/download")
-	public void download(HttpServletResponse response, Model model, HttpServletRequest httpServletRequest)
-			throws IOException
+	public void download(HttpServletResponse response, Model model) throws IOException
 	{
-		String sessionId = httpServletRequest.getSession().getId();
-		if (!StringUtils.isEmpty(ontologyServiceSessionData.getOntologyIriBySession(sessionId))
-				&& ontologyServiceSessionData.getCsvRepositoryBySession(sessionId) != null)
+		if (ontologyUrl != null && inputLines != null)
 		{
 			ExcelWriter excelWriter = null;
 			try
@@ -141,36 +120,28 @@ public class OntologyServiceController extends MolgenisPluginController
 				response.addHeader("Content-Disposition", "attachment; filename=" + getCsvFileName("match-result"));
 				excelWriter = new ExcelWriter(response.getOutputStream());
 				excelWriter.addCellProcessor(new LowerCaseProcessor(true, false));
-				int totalNumberBySession = ontologyServiceSessionData.getTotalNumberBySession(sessionId);
-				int iteration = totalNumberBySession / 1000 + 1;
-				List<String> columnHeaders = Arrays.asList("InputTerm", "OntologyTerm", "Synonym", "OntologyTermUrl",
-						"OntologyUrl", "Score");
+				int iteration = inputLines.size() / 1000 + 1;
+				List<String> columnHeaders = Arrays.asList("InputTerm", "OntologyTerm", "Synonym used for matching",
+						"OntologyTermUrl", "OntologyUrl", "CombinedScore", "LuceneScore");
 				for (int i = 0; i < iteration; i++)
 				{
 					Writable sheetWriter = excelWriter.createWritable("result" + (i + 1), columnHeaders);
 					int lowerBound = i * 1000;
-					int upperBound = (i + 1) * 1000 < totalNumberBySession ? (i + 1) * 1000 : totalNumberBySession;
+					int upperBound = (i + 1) * 1000 < inputLines.size() ? (i + 1) * 1000 : inputLines.size();
 
-					for (Entity entity : ontologyServiceSessionData.getSubList(sessionId, lowerBound, upperBound))
+					for (String term : inputLines.subList(lowerBound, upperBound))
 					{
-						OntologyServiceResult searchEntity = ontologyService.searchEntity(
-								ontologyServiceSessionData.getOntologyIriBySession(sessionId), entity);
-
-						int count = 0;
-						for (Hit hit : searchEntity.getSearchHits())
+						for (Hit hit : ontologyService.search(ontologyUrl, term).getSearchHits())
 						{
 							Entity row = new MapEntity();
-							if (count == 0)
-							{
-								row.set("InputTerm", gatherInfo(searchEntity.getInputData()));
-							}
+							row.set("InputTerm", term);
 							row.set("OntologyTerm", hit.getColumnValueMap().get("ontologyTerm"));
-							row.set("Synonym", hit.getColumnValueMap().get("ontologyTermSynonym"));
+							row.set("Synonym used for matching", hit.getColumnValueMap().get("ontologyTermSynonym"));
 							row.set("OntologyTermUrl", hit.getColumnValueMap().get("ontologyTermIRI"));
 							row.set("OntologyUrl", hit.getColumnValueMap().get("ontologyIRI"));
-							row.set("Score", hit.getColumnValueMap().get("combinedScore"));
+							row.set("CombinedScore", hit.getColumnValueMap().get("combinedScore"));
+							row.set("LuceneScore", hit.getColumnValueMap().get("score"));
 							sheetWriter.add(row);
-							count++;
 						}
 					}
 				}
@@ -184,77 +155,58 @@ public class OntologyServiceController extends MolgenisPluginController
 
 	@RequestMapping(method = POST, value = "/match/retrieve")
 	@ResponseBody
-	public EntityCollectionResponse matchResult(@RequestBody
-	EntityPager entityPager, HttpServletRequest httpServletRequest)
+	public EntityCollectionResponse matchResult(@RequestBody EntityPager entityPager)
 	{
-		String sessionId = httpServletRequest.getSession().getId();
-
-		if (StringUtils.isEmpty(ontologyServiceSessionData.getOntologyIriBySession(sessionId))) throw new RuntimeException(
-				"The ontologyUrl is empty!");
-		if (ontologyServiceSessionData.getCsvRepositoryBySession(sessionId) == null) throw new RuntimeException(
-				"The ontologyUrl is empty!");
-
+		if (inputLines == null || inputLines.isEmpty()) throw new UnknownEntityException("The inputTerms is empty!");
+		if (StringUtils.isEmpty(ontologyUrl)) throw new UnknownEntityException("The ontologyUrl is empty!");
 		List<Map<String, Object>> entities = new ArrayList<Map<String, Object>>();
 
-		if (ontologyServiceSessionData.validationAttributesBySession(sessionId)
-				&& ontologyServiceSessionData.getTotalNumberBySession(sessionId) != INVALID_TOTAL_NUMBER)
-		{
-			int count = ontologyServiceSessionData.getTotalNumberBySession(sessionId);
-			int start = entityPager.getStart();
-			int num = entityPager.getNum();
-			int toIndex = start + num;
+		int count = inputLines.size();
+		int start = entityPager.getStart();
+		int num = entityPager.getNum();
+		int toIndex = start + num;
 
-			for (Entity entity : ontologyServiceSessionData.getSubList(sessionId, start,
-					toIndex > count ? count : toIndex))
-			{
-				Map<String, Object> outputEntity = new HashMap<String, Object>();
-				outputEntity.put("term", firstAttributeValue(entity));
-				outputEntity.put("results", ontologyService.searchEntity(
-						ontologyServiceSessionData.getOntologyIriBySession(sessionId), entity));
-				entities.add(outputEntity);
-			}
-			EntityPager pager = new EntityPager(start, num, (long) count, null);
-			return new EntityCollectionResponse(pager, entities, "/match/retrieve");
+		for (String eachLine : inputLines.subList(start, toIndex > count ? count : toIndex))
+		{
+			Map<String, Object> entity = new HashMap<String, Object>();
+			entity.put("term", eachLine);
+			entity.put("results", ontologyService.search(ontologyUrl, eachLine));
+			entities.add(entity);
 		}
-		return new EntityCollectionResponse(new EntityPager(0, 0, (long) 0, null),
-				Collections.<Map<String, Object>> emptyList(), "/match/retrieve");
+		EntityPager pager = new EntityPager(start, num, (long) count, null);
+		return new EntityCollectionResponse(pager, entities, "/match/retrieve");
 	}
 
 	@RequestMapping(method = POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public OntologyServiceResult query(@RequestBody
-	OntologyServiceRequest ontologyTermRequest)
+	public SearchResult query(@RequestBody OntologyServiceRequest ontologyTermRequest)
 	{
 		String ontologyUrl = ontologyTermRequest.getOntologyIri();
 		String queryString = ontologyTermRequest.getQueryString();
-		if (ontologyUrl == null || queryString == null) return new OntologyServiceResult("Your input cannot be null!");
+		if (ontologyUrl == null || queryString == null) return new SearchResult(0, Collections.<Hit> emptyList());
 		return ontologyService.search(ontologyUrl, queryString);
 	}
 
-	private String gatherInfo(Map<String, Object> inputData)
+	private List<String> collectAllLinesFromFile(File uploadFile) throws IOException
 	{
-		StringBuilder stringBuilder = new StringBuilder();
-		for (Entry<String, Object> entry : inputData.entrySet())
+		List<String> terms = new ArrayList<String>();
+		InputStream inputStream = null;
+		BufferedReader bufferedReader = null;
+		String line = null;
+		try
 		{
-			if (stringBuilder.length() != 0)
+			inputStream = new FileInputStream(uploadFile);
+			bufferedReader = new BufferedReader(new InputStreamReader(inputStream, Charset.forName("UTF-8")));
+			while ((line = bufferedReader.readLine()) != null)
 			{
-				stringBuilder.append(EXCEL_NEWLINE_CHAR);
+				if (!StringUtils.isEmpty(line)) terms.add(line.trim());
 			}
-			stringBuilder.append(entry.getKey()).append(':').append(entry.getValue());
 		}
-		return stringBuilder.toString();
-	}
-
-	private String firstAttributeValue(Entity entity)
-	{
-		StringBuilder stringBuilder = new StringBuilder();
-
-		for (String attributeName : entity.getAttributeNames())
+		finally
 		{
-			stringBuilder.append(entity.get(attributeName));
-			break;
+			if (bufferedReader != null) bufferedReader.close();
 		}
-		return stringBuilder.toString();
+		return terms;
 	}
 
 	private String getCsvFileName(String dataSetName)
