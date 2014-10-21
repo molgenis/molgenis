@@ -242,8 +242,8 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 	{
 		if (this == obj) return true;
 		if (obj == null) return false;
-		if (getClass() != obj.getClass()) return false;
-		DefaultEntityMetaData other = (DefaultEntityMetaData) obj;
+		if (!(obj instanceof EntityMetaData)) return false;
+		EntityMetaData other = (EntityMetaData) obj;
 		if (getName() == null)
 		{
 			if (other.getName() != null) return false;
