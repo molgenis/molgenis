@@ -20,7 +20,7 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.REF_ENTITY;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.UNIQUE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.VISIBLE;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.UUID;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
@@ -46,17 +46,16 @@ class AttributeMetaDataRepository
 {
 	public static final AttributeMetaDataMetaData META_DATA = new AttributeMetaDataMetaData();
 
-	private AtomicInteger idCounter = new AtomicInteger();
+	private final CrudRepository repository;
 
-	private CrudRepository repository;
-
-	private EntityMetaDataRepository entityMetaDataRepository;
+	private final EntityMetaDataRepository entityMetaDataRepository;
 
 	public AttributeMetaDataRepository(ManageableCrudRepositoryCollection collection,
 			EntityMetaDataRepository entityMetaDataRepository)
 	{
 		this.entityMetaDataRepository = entityMetaDataRepository;
 		this.repository = collection.add(META_DATA);
+		fillAllEntityAttributes();
 	}
 
 	/**
@@ -68,8 +67,9 @@ class AttributeMetaDataRepository
 		for (Entity attributeEntity : repository)
 		{
 			AttributeMetaData attributeMetaData = toAttributeMetaData(attributeEntity);
-			DefaultEntityMetaData entityMetaData = entityMetaDataRepository.get(attributeEntity
-					.getString(AttributeMetaDataMetaData.ENTITY_NAME));
+			Entity entity = attributeEntity.getEntity(ENTITY);
+			DefaultEntityMetaData entityMetaData = entityMetaDataRepository.get(entity
+					.getString(EntityMetaDataMetaData.FULL_NAME));
 			entityMetaData.addAttributeMetaData(attributeMetaData);
 		}
 	}
@@ -87,7 +87,7 @@ class AttributeMetaDataRepository
 	{
 		Entity attributeMetaDataEntity = new MapEntity();
 		// autoid
-		attributeMetaDataEntity.set(IDENTIFIER, idCounter.incrementAndGet());
+		attributeMetaDataEntity.set(IDENTIFIER, UUID.randomUUID().toString().replaceAll("-", ""));
 		attributeMetaDataEntity.set(ENTITY, entity);
 		attributeMetaDataEntity.set(NAME, att.getName());
 		attributeMetaDataEntity.set(DATA_TYPE, att.getDataType());
