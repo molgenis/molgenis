@@ -205,14 +205,6 @@ public class EmxImportService implements ImportService
 
 			for (String entityName : addedEntities)
 			{
-				// Drop index
-				Repository repo = dataService.getRepositoryByEntityName(entityName);
-				if (repo instanceof IndexedRepository)
-				{
-					((IndexedRepository) repo).drop();
-				}
-
-				// Drop repo
 				targetCollection.dropEntityMetaData(entityName);
 			}
 
