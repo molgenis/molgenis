@@ -154,14 +154,9 @@
 			<artifactId>molgenis-omx-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<!--<dependency>
-			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-omx-biobankconnect</artifactId>
-			<version>${project.version}</version>
-		</dependency>-->
 		<dependency>
 			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-ontology</artifactId>
+			<artifactId>molgenis-omx-biobankconnect</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
