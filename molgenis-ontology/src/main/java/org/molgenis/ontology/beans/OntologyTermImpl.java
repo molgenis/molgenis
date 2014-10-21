@@ -4,9 +4,9 @@ import java.util.Collections;
 import java.util.Set;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.semantic.Ontology;
-import org.molgenis.data.semantic.OntologyService;
-import org.molgenis.data.semantic.OntologyTerm;
+import org.molgenis.ontology.Ontology;
+import org.molgenis.ontology.OntologyService;
+import org.molgenis.ontology.OntologyTerm;
 import org.molgenis.ontology.repository.OntologyTermQueryRepository;
 
 public class OntologyTermImpl implements OntologyTerm

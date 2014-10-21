@@ -2,7 +2,7 @@ package org.molgenis.ontology.beans;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
-import org.molgenis.data.semantic.Ontology;
+import org.molgenis.ontology.Ontology;
 import org.molgenis.ontology.repository.OntologyQueryRepository;
 
 public class OntologyImpl implements Ontology

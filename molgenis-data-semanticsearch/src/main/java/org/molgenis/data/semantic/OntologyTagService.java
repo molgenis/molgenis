@@ -12,6 +12,9 @@ import org.molgenis.data.Query;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.ontology.Ontology;
+import org.molgenis.ontology.OntologyService;
+import org.molgenis.ontology.OntologyTerm;
 
 /**
  * Service to tag metadata with ontology terms.
@@ -90,8 +93,14 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 		{
 			tags.add(tagEntity);
 		}
-		tags.add(tagRepository.getTagEntity(tag));
+		tags.add(getTagEntity(tag));
 		entity.set(AttributeMetaDataMetaData.TAGS, tags);
 		repository.update(entity);
+	}
+
+	public Entity getTagEntity(Tag<?, OntologyTerm, Ontology> tag)
+	{
+		return tagRepository.getTagEntity(tag.getObject().getIRI(), tag.getObject().getLabel(), tag.getRelation(), tag
+				.getCodeSystem().getIri());
 	}
 }

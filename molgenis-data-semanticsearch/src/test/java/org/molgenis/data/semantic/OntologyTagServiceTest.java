@@ -1,6 +1,8 @@
 package org.molgenis.data.semantic;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
@@ -16,6 +18,9 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.ontology.Ontology;
+import org.molgenis.ontology.OntologyService;
+import org.molgenis.ontology.OntologyTerm;
 import org.molgenis.ontology.beans.OntologyImpl;
 import org.molgenis.ontology.beans.OntologyTermImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +30,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 @WebAppConfiguration
@@ -44,6 +50,42 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 
 	@Autowired
 	private DataService dataService;
+
+	private MapEntity chromosomeNameTagEntity;
+
+	private MapEntity geneAnnotationTagEntity;
+
+	private Relation instanceOf = Relation.valueOf("instanceOf");
+
+	public static final Ontology EDAM_ONTOLOGY = new OntologyImpl("EDAM", "http://edamontology.org",
+			"The EDAM ontology.");
+
+	public static final OntologyTerm CHROMOSOME_NAME_ONTOLOGY_TERM = new OntologyTermImpl(
+			"http://edamontology.org/data_0987", "Chromosome name", "Name of a chromosome.", "data_0987", EDAM_ONTOLOGY);
+
+	public static final OntologyTerm GENE_ANNOTATION_ONTOLOGY_TERM = new OntologyTermImpl(
+			"http://edamontology.org/data_0919", "Gene annotation (chromosome)",
+			"This includes basic information. e.g. chromosome number...", "data_0919", EDAM_ONTOLOGY);
+
+	@BeforeTest
+	public void beforeTest()
+	{
+		chromosomeNameTagEntity = new MapEntity();
+		chromosomeNameTagEntity.set(TagMetaData.IDENTIFIER, "1234");
+		chromosomeNameTagEntity.set(TagMetaData.LABEL, "Chromosome name");
+		chromosomeNameTagEntity.set(TagMetaData.OBJECT_IRI, "http://edamontology.org/data_0987");
+		chromosomeNameTagEntity.set(TagMetaData.RELATION_IRI, instanceOf.getIRI());
+		chromosomeNameTagEntity.set(TagMetaData.RELATION_LABEL, instanceOf.getLabel());
+		chromosomeNameTagEntity.set(TagMetaData.CODE_SYSTEM, "http://edamontology.org");
+
+		geneAnnotationTagEntity = new MapEntity();
+		geneAnnotationTagEntity.set(TagMetaData.IDENTIFIER, "4321");
+		geneAnnotationTagEntity.set(TagMetaData.LABEL, "Gene annotation (chromosome)");
+		geneAnnotationTagEntity.set(TagMetaData.OBJECT_IRI, "http://edamontology.org/data_0919");
+		geneAnnotationTagEntity.set(TagMetaData.RELATION_IRI, instanceOf.getIRI());
+		geneAnnotationTagEntity.set(TagMetaData.RELATION_LABEL, instanceOf.getLabel());
+		geneAnnotationTagEntity.set(TagMetaData.CODE_SYSTEM, "http://edamontology.org");
+	}
 
 	@BeforeMethod
 	public void beforeMethod()
@@ -103,6 +145,93 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 
 		assertEquals(ontologyTagService.getTagsForAttribute(emd, attributeMetaData),
 				Arrays.asList(chromosomeTag, geneAnnotationTag));
+	}
+
+	@Test
+	public void testGetTagTyped()
+	{
+		MapEntity expected = new MapEntity(TagMetaData.ENTITY_NAME);
+		expected.set(TagMetaData.IDENTIFIER, "1233");
+		expected.set(TagMetaData.OBJECT_IRI, "http://edamontology.org/data_3031");
+		expected.set(TagMetaData.LABEL, "Core data");
+		expected.set(TagMetaData.RELATION_IRI, "http://molgenis.org/biobankconnect/instanceOf");
+		expected.set(TagMetaData.RELATION_LABEL, "instanceOf");
+		expected.set(TagMetaData.CODE_SYSTEM, "http://edamontology.org");
+
+		OntologyTerm coreData = mock(OntologyTerm.class);
+
+		when(coreData.getIRI()).thenReturn("http://edamontology.org/data_3031");
+		when(coreData.getLabel()).thenReturn("Core data");
+
+		Ontology edamOntology = mock(Ontology.class);
+
+		when(edamOntology.getIri()).thenReturn("http://edamontology.org");
+
+		Tag<Object, OntologyTerm, Ontology> tag = new TagImpl<Object, OntologyTerm, Ontology>(null,
+				Relation.instanceOf, coreData, edamOntology);
+		when(
+				tagRepository.getTagEntity("http://edamontology.org/data_3031", "Core data", Relation.instanceOf,
+						"http://edamontology.org")).thenReturn(expected);
+
+		assertEquals(ontologyTagService.getTagEntity(tag), expected);
+
+	}
+
+	@Test
+	public void testAddTag()
+	{
+		EntityMetaData emd = new DefaultEntityMetaData("org.molgenis.SNP");
+		AttributeMetaData attributeMetaData = new DefaultAttributeMetaData("Chr");
+
+		MapEntity attributeEntity = new MapEntity();
+		attributeEntity.set(AttributeMetaDataMetaData.TAGS, Arrays.asList(geneAnnotationTagEntity));
+
+		when(ontologyService.getOntology("http://edamontology.org")).thenReturn(EDAM_ONTOLOGY);
+		when(ontologyService.getOntologyTerm("http://edamontology.org/data_0987", "http://edamontology.org"))
+				.thenReturn(CHROMOSOME_NAME_ONTOLOGY_TERM);
+
+		Tag<AttributeMetaData, OntologyTerm, Ontology> chromosomeTag = new TagImpl<AttributeMetaData, OntologyTerm, Ontology>(
+				attributeMetaData, instanceOf, CHROMOSOME_NAME_ONTOLOGY_TERM, EDAM_ONTOLOGY);
+
+		when(
+				attributeRepository.findOne(new QueryImpl().eq(AttributeMetaDataMetaData.ENTITY, "org.molgenis.SNP")
+						.and().eq(AttributeMetaDataMetaData.NAME, "Chr"))).thenReturn(attributeEntity);
+
+		when(
+				tagRepository.getTagEntity("http://edamontology.org/data_0987", "Chromosome name", instanceOf,
+						"http://edamontology.org")).thenReturn(chromosomeNameTagEntity);
+
+		ontologyTagService.addAttributeTag(emd, chromosomeTag);
+
+		MapEntity updatedEntity = new MapEntity();
+		updatedEntity.set(AttributeMetaDataMetaData.TAGS,
+				Arrays.asList(geneAnnotationTagEntity, chromosomeNameTagEntity));
+
+		verify(attributeRepository, times(1)).update(updatedEntity);
+	}
+
+	@Test
+	public void testRemoveTag()
+	{
+		EntityMetaData emd = new DefaultEntityMetaData("org.molgenis.SNP");
+		AttributeMetaData attributeMetaData = new DefaultAttributeMetaData("Chr");
+
+		MapEntity attributeEntity = new MapEntity();
+		attributeEntity.set(AttributeMetaDataMetaData.TAGS,
+				Arrays.asList(chromosomeNameTagEntity, geneAnnotationTagEntity));
+		when(
+				attributeRepository.findOne(new QueryImpl().eq(AttributeMetaDataMetaData.ENTITY, "org.molgenis.SNP")
+						.and().eq(AttributeMetaDataMetaData.NAME, "Chr"))).thenReturn(attributeEntity);
+
+		Tag<AttributeMetaData, OntologyTerm, Ontology> geneAnnotationTag = new TagImpl<AttributeMetaData, OntologyTerm, Ontology>(
+				attributeMetaData, instanceOf, GENE_ANNOTATION_ONTOLOGY_TERM, EDAM_ONTOLOGY);
+
+		ontologyTagService.removeAttributeTag(emd, geneAnnotationTag);
+
+		MapEntity updatedEntity = new MapEntity(attributeEntity);
+		updatedEntity.set(AttributeMetaDataMetaData.TAGS, Arrays.asList(chromosomeNameTagEntity));
+
+		verify(attributeRepository, times(1)).update(updatedEntity);
 	}
 
 	@Configuration

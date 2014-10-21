@@ -27,18 +27,6 @@ class TagRepository
 	}
 
 	/**
-	 * Fetches an ontologyTerm tag from the repository. Creates a new one if it does not yet exist.
-	 * 
-	 * @param tag
-	 * @return {@link Entity} of type {@link TagMetaData}
-	 */
-	public Entity getTagEntity(Tag<?, OntologyTerm, Ontology> tag)
-	{
-		return getTagEntity(tag.getObject().getIRI(), tag.getObject().getLabel(), tag.getRelation(), tag
-				.getCodeSystem().getIri());
-	}
-
-	/**
 	 * Fetches a tag from the repository. Creates a new one if it does not yet exist.
 	 * 
 	 * @param objectIri
@@ -47,12 +35,14 @@ class TagRepository
 	 *            label of the object
 	 * @param relation
 	 *            {@link Relation} of the tag
+	 * @param codeSystemIRI
+	 *            the IRI of the code system of the tag
 	 * @return {@link Entity} of type {@link TagMetaData}
 	 */
-	public Entity getTagEntity(String objectIRI, String label, Relation relation, String codeSystem)
+	public Entity getTagEntity(String objectIRI, String label, Relation relation, String codeSystemIRI)
 	{
 		Query q = new QueryImpl().eq(TagMetaData.OBJECT_IRI, objectIRI).and()
-				.eq(TagMetaData.RELATION_IRI, relation.getIRI()).and().eq(TagMetaData.CODE_SYSTEM, codeSystem);
+				.eq(TagMetaData.RELATION_IRI, relation.getIRI()).and().eq(TagMetaData.CODE_SYSTEM, codeSystemIRI);
 		Entity result = repository.findOne(q);
 		if (result == null)
 		{
@@ -62,7 +52,7 @@ class TagRepository
 			mapEntity.set(TagMetaData.LABEL, label);
 			mapEntity.set(TagMetaData.RELATION_IRI, relation.getIRI());
 			mapEntity.set(TagMetaData.RELATION_LABEL, relation.getLabel());
-			mapEntity.set(TagMetaData.CODE_SYSTEM, codeSystem);
+			mapEntity.set(TagMetaData.CODE_SYSTEM, codeSystemIRI);
 			repository.add(mapEntity);
 			result = mapEntity;
 		}

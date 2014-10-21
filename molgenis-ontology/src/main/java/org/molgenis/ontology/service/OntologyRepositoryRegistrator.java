@@ -2,8 +2,8 @@ package org.molgenis.ontology.service;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.semantic.Ontology;
-import org.molgenis.data.semantic.OntologyService;
+import org.molgenis.ontology.Ontology;
+import org.molgenis.ontology.OntologyService;
 import org.molgenis.ontology.repository.OntologyQueryRepository;
 import org.molgenis.ontology.repository.OntologyTermQueryRepository;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -3,7 +3,7 @@ package org.molgenis.ontology.beans;
 import java.util.Map;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.semantic.OntologyServiceResult;
+import org.molgenis.ontology.OntologyServiceResult;
 import org.molgenis.ontology.utils.OntologyServiceUtil;
 
 /**
