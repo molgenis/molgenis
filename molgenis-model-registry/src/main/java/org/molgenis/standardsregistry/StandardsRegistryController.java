@@ -61,11 +61,18 @@ public class StandardsRegistryController extends MolgenisPluginController
 		PackageSearchResponse packageSearchResponse;
 		if (selectedPackageName != null && !selectedPackageName.isEmpty())
 		{
-			packageSearchResponse = new PackageSearchResponse(null, 1,
-					Collections.singletonList(getPackage(selectedPackageName)));
+			// TODO do not hardcode
+			if (selectedPackageName.equals("default"))
+			{
+				packageSearchResponse = new PackageSearchResponse(selectedPackageName, 1,
+						Collections.singletonList(getPackage(selectedPackageName)));
+			}
+			else packageSearchResponse = new PackageSearchResponse(selectedPackageName, 0,
+					Collections.<PackageResponse> emptyList());
 		}
 		else
 		{
+			// TODO paging
 			List<PackageResponse> packageResponses = Lists.newArrayList(Iterables.transform(
 					metaDataService.getRootPackages(), new Function<Package, PackageResponse>()
 					{
