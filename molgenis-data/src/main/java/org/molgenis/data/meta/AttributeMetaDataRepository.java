@@ -199,7 +199,7 @@ class AttributeMetaDataRepository
 		}
 		if (entity.getEntity(REF_ENTITY) != null)
 		{
-			final String refEntityName = entity.getEntity(REF_ENTITY).getString(EntityMetaDataMetaData.ENTITY_NAME);
+			final String refEntityName = entity.getEntity(REF_ENTITY).getString(EntityMetaDataMetaData.FULL_NAME);
 			attributeMetaData.setRefEntity(entityMetaDataRepository.get(refEntityName));
 		}
 
