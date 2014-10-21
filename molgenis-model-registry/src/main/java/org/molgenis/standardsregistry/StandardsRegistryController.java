@@ -11,6 +11,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
@@ -21,7 +25,7 @@ import org.molgenis.standardsregistry.utils.PackageTreeNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -54,25 +58,30 @@ public class StandardsRegistryController extends MolgenisPluginController
 		return VIEW_NAME;
 	}
 
-	@RequestMapping(value = "/search", method = POST, headers = "Content-Type=application/x-www-form-urlencoded")
+	@RequestMapping(value = "/search", method = POST)
 	@ResponseBody
-	public PackageSearchResponse search(@ModelAttribute(value = "packageSearch") String selectedPackageName, Model model)
+	public PackageSearchResponse search(@Valid @RequestBody PackageSearchRequest packageSearchRequest, Model model)
 	{
+		// FIXME hookup with meta data search service once implemented
+		String selectedPackageName = packageSearchRequest.getQuery();
+
 		PackageSearchResponse packageSearchResponse;
 		if (selectedPackageName != null && !selectedPackageName.isEmpty())
 		{
-			// TODO do not hardcode
-			if (selectedPackageName.equals("default"))
+			PackageResponse aPackage = getPackage(selectedPackageName);
+			if (aPackage != null)
 			{
-				packageSearchResponse = new PackageSearchResponse(selectedPackageName, 1,
-						Collections.singletonList(getPackage(selectedPackageName)));
+				packageSearchResponse = new PackageSearchResponse(selectedPackageName, 0, 1, 1,
+						Collections.singletonList(aPackage));
 			}
-			else packageSearchResponse = new PackageSearchResponse(selectedPackageName, 0,
-					Collections.<PackageResponse> emptyList());
+			else
+			{
+				packageSearchResponse = new PackageSearchResponse(selectedPackageName, 0, 0, 0,
+						Collections.<PackageResponse> emptyList());
+			}
 		}
 		else
 		{
-			// TODO paging
 			List<PackageResponse> packageResponses = Lists.newArrayList(Iterables.transform(
 					metaDataService.getRootPackages(), new Function<Package, PackageResponse>()
 					{
@@ -82,9 +91,19 @@ public class StandardsRegistryController extends MolgenisPluginController
 							return new PackageResponse(aPackage.getSimpleName(), aPackage.getDescription());
 						}
 					}));
-
-			packageSearchResponse = new PackageSearchResponse(selectedPackageName, packageResponses.size(),
-					packageResponses);
+			int total = packageResponses.size();
+			if (packageSearchRequest.getOffset() != null)
+			{
+				packageResponses = packageResponses.subList(packageSearchRequest.getOffset(),
+						packageResponses.size() - 1);
+			}
+			if (packageSearchRequest.getNum() != null && packageResponses.size() > packageSearchRequest.getNum())
+			{
+				packageResponses = packageResponses.subList(0, packageSearchRequest.getNum());
+			}
+			int offset = packageSearchRequest.getOffset() != null ? packageSearchRequest.getOffset() : 0;
+			int num = packageSearchRequest.getNum() != null ? packageSearchRequest.getNum() : packageResponses.size();
+			packageSearchResponse = new PackageSearchResponse(selectedPackageName, offset, num, total, packageResponses);
 		}
 		return packageSearchResponse;
 	}
@@ -199,13 +218,15 @@ public class StandardsRegistryController extends MolgenisPluginController
 	private static class PackageSearchResponse
 	{
 		private final String query;
-		private final int offset = 0;
-		private final int num = 10;
+		private final int offset;
+		private final int num;
 		private final int total;
 		private final List<PackageResponse> packages;
 
-		public PackageSearchResponse(String query, int total, List<PackageResponse> packages)
+		public PackageSearchResponse(String query, int offset, int num, int total, List<PackageResponse> packages)
 		{
+			this.offset = offset;
+			this.num = num;
 			this.query = query;
 			this.total = total;
 			this.packages = packages;
@@ -239,6 +260,49 @@ public class StandardsRegistryController extends MolgenisPluginController
 		public List<PackageResponse> getPackages()
 		{
 			return packages;
+		}
+	}
+
+	private static class PackageSearchRequest
+	{
+		private String query;
+		@Min(0)
+		private Integer offset;
+		@Min(0)
+		@Max(100)
+		private Integer num;
+
+		public String getQuery()
+		{
+			return query;
+		}
+
+		@SuppressWarnings("unused")
+		public void setQuery(String query)
+		{
+			this.query = query;
+		}
+
+		public Integer getOffset()
+		{
+			return offset;
+		}
+
+		@SuppressWarnings("unused")
+		public void setOffset(Integer offset)
+		{
+			this.offset = offset;
+		}
+
+		public Integer getNum()
+		{
+			return num;
+		}
+
+		@SuppressWarnings("unused")
+		public void setNum(Integer num)
+		{
+			this.num = num;
 		}
 	}
 

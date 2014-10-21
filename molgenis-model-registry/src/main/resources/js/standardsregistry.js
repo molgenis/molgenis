@@ -6,6 +6,10 @@
 	var countTemplate;
 	var modelTemplate;
 	
+	var nrResultsPerPage = 3;
+	var query;
+	var pageIndex = 0;
+	
 	function createPackageTree(selectedPackage) {	
 		$('#attribute-selection').fancytree({
 			source:{
@@ -68,29 +72,39 @@
 		container.append(countTemplate({'count': searchResults.total}));
 	}
 	
+	function search(callback) {
+		
+	}
+	
 	$(function() {
 		var searchResultsContainer = $('#package-search-results');
 		
 		$('form[name=search-form]').submit(function(e) {
-			e.preventDefault();
+			e.preventDefault();console.log(pageIndex);
 			$.ajax({
 				type : $(this).attr('method'),
 				url : $(this).attr('action'),
-				data : $(this).serialize(),
+				data : JSON.stringify({
+					query: $('#package-search').val(),
+					offset: pageIndex * nrResultsPerPage,
+					num: nrResultsPerPage
+				}),
+				contentType: 'application/json',
 				success : function(data) {
 					renderSearchResults(data, searchResultsContainer);
 					
-					// enable navigation using browser back/forward button
-					history.pushState(data, null, data.query);
+					$('#package-search-results-pager').pager({
+						'nrItems' : data.total,
+						'nrItemsPerPage' : nrResultsPerPage,
+						'page' : pageIndex + 1,
+						'onPageChange' : function(pager) {
+							pageIndex = pager.page - 1;
+							$('form[name=search-form]').submit();					
+						}
+					});
 				}
 			});
 		});
-		
-		window.onpopstate = function(event) {
-			var searchResults = event.state;
-			$('#package-search').val(searchResults.query);
-			renderSearchResults(searchResults, searchResultsContainer);
-		};
 			
 		$(document).on('click', '#search-clear-button', function() {
 			$('#package-search').val('');

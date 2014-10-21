@@ -2,7 +2,7 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=['ui.fancytree.min.css', 'jquery-ui-1.9.2.custom.min.css', 'standardsregistry.css']>
-<#assign js=['jquery-ui-1.9.2.custom.min.js', 'jquery.fancytree.min.js', 'jquery.molgenis.attributemetadata.table.js', 'standardsregistry.js', 'handlebars.min.js']>
+<#assign js=['jquery-ui-1.9.2.custom.min.js', 'jquery.fancytree.min.js', 'jquery.molgenis.entitymetadata.table.js', 'jquery.molgenis.attributemetadata.table.js', 'jquery.bootstrap.pager.js', 'standardsregistry.js', 'handlebars.min.js']>
 
 <@header css js/>
 <#-- Search box and search results -->
@@ -27,6 +27,7 @@
     <div class="row">
     	<div class="col-md-12">
     		<div id="package-search-results"></div>
+            <div id="package-search-results-pager"></div>
     	</div>
     </div>
 </div>
