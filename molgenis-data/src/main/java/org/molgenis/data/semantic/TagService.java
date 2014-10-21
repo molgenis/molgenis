@@ -3,6 +3,14 @@ package org.molgenis.data.semantic;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 
+/**
+ * Service that administrates tags on attributes, entities and packages of a particular code system.
+ * 
+ * @param <ObjectType>
+ *            the type of the tag object, for instance {@link OntologyTerm}
+ * @param <CodeSystemType>
+ *            the type of the code system, for instance {@link Ontology}
+ */
 public interface TagService<ObjectType, CodeSystemType>
 {
 	/**

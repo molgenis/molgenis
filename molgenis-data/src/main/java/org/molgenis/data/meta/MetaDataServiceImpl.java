@@ -29,13 +29,16 @@ public class MetaDataServiceImpl implements WritableMetaDataService
 	 * 
 	 * @param mysqlRepositoryCollection
 	 */
-	public void setManageableCrudRepositoryCollection(ManageableCrudRepositoryCollection repositoryCreator)
+	public void setManageableCrudRepositoryCollection(ManageableCrudRepositoryCollection repositoryCollection)
 	{
-		if (repositoryCreator != null)
+		if (repositoryCollection != null)
 		{
-			packageRepository = new PackageRepository(repositoryCreator);
-			entityMetaDataRepository = new EntityMetaDataRepository(repositoryCreator, packageRepository);
-			attributeMetaDataRepository = new AttributeMetaDataRepository(repositoryCreator, entityMetaDataRepository);
+			// Create repositories in order of dependency
+			repositoryCollection.add(new TagMetaData());
+			packageRepository = new PackageRepository(repositoryCollection);
+			entityMetaDataRepository = new EntityMetaDataRepository(repositoryCollection, packageRepository);
+			attributeMetaDataRepository = new AttributeMetaDataRepository(repositoryCollection,
+					entityMetaDataRepository);
 		}
 	}
 

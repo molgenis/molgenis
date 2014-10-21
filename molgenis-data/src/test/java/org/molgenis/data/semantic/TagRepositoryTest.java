@@ -1,4 +1,4 @@
-package org.molgenis.data.meta;
+package org.molgenis.data.semantic;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -10,12 +10,14 @@ import java.util.UUID;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
-import org.molgenis.data.ManageableCrudRepositoryCollection;
+import org.molgenis.data.DataService;
+import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.semantic.Ontology;
 import org.molgenis.data.semantic.OntologyTerm;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semantic.Tag;
 import org.molgenis.data.semantic.TagImpl;
+import org.molgenis.data.semantic.TagRepository;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,15 +46,15 @@ public class TagRepositoryTest extends AbstractTestNGSpringContextTests
 	private AttributeMetaData attributeMetaData;
 
 	@Autowired
-	private ManageableCrudRepositoryCollection manageableCrudRepositoryCollection;
+	private DataService dataService;
 
 	private UUID uuid = UUID.randomUUID();
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		when(manageableCrudRepositoryCollection.add(new TagMetaData())).thenReturn(repository);
-		tagRepository = new TagRepository(manageableCrudRepositoryCollection, idGenerator);
+		when(dataService.getCrudRepository(TagMetaData.ENTITY_NAME)).thenReturn(repository);
+		tagRepository = new TagRepository(dataService, idGenerator);
 		when(idGenerator.generateId()).thenReturn(uuid);
 	}
 
@@ -121,9 +123,9 @@ public class TagRepositoryTest extends AbstractTestNGSpringContextTests
 	public static class Config
 	{
 		@Bean
-		ManageableCrudRepositoryCollection manageableCrudRepositoryCollection()
+		DataService dataService()
 		{
-			return mock(ManageableCrudRepositoryCollection.class);
+			return mock(DataService.class);
 		}
 
 		@Bean

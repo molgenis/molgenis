@@ -1,7 +1,6 @@
 package org.molgenis.data.meta;
 
 import static org.molgenis.MolgenisFieldTypes.BOOL;
-import static org.molgenis.MolgenisFieldTypes.INT;
 import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
@@ -57,6 +56,6 @@ public class AttributeMetaDataMetaData extends DefaultEntityMetaData
 		addAttribute(LABEL_ATTRIBUTE).setDataType(BOOL);
 		addAttribute(READ_ONLY).setDataType(BOOL);
 		addAttribute(UNIQUE).setDataType(BOOL);
-		addAttribute(TAGS).setDataType(MREF).setRefEntity(TagRepository.META_DATA);
+		addAttribute(TAGS).setDataType(MREF).setRefEntity(new TagMetaData());
 	}
 }

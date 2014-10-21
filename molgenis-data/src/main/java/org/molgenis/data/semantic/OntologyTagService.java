@@ -1,4 +1,4 @@
-package org.molgenis.data.meta;
+package org.molgenis.data.semantic;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,13 +8,8 @@ import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
-import org.molgenis.data.semantic.Ontology;
-import org.molgenis.data.semantic.OntologyService;
-import org.molgenis.data.semantic.OntologyTerm;
-import org.molgenis.data.semantic.Relation;
-import org.molgenis.data.semantic.Tag;
-import org.molgenis.data.semantic.TagImpl;
-import org.molgenis.data.semantic.TagService;
+import org.molgenis.data.meta.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.support.QueryImpl;
 
 public class OntologyTagService implements TagService<OntologyTerm, Ontology>

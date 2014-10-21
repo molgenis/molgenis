@@ -1,13 +1,11 @@
-package org.molgenis.data.meta;
+package org.molgenis.data.semantic;
 
 import org.molgenis.data.CrudRepository;
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.ManageableCrudRepositoryCollection;
 import org.molgenis.data.Query;
-import org.molgenis.data.semantic.Ontology;
-import org.molgenis.data.semantic.OntologyTerm;
-import org.molgenis.data.semantic.Relation;
-import org.molgenis.data.semantic.Tag;
+import org.molgenis.data.meta.MetaDataServiceImpl;
+import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.util.IdGenerator;
@@ -15,17 +13,16 @@ import org.springframework.util.IdGenerator;
 /**
  * Helper class around the {@link TagMetaData} repository. Internal implementation class, use
  * {@link MetaDataServiceImpl} instead.
- * 
  */
 class TagRepository
 {
 	public static final TagMetaData META_DATA = new TagMetaData();
-	private CrudRepository repository;
 	private IdGenerator idGenerator;
+	private CrudRepository repository;
 
-	public TagRepository(ManageableCrudRepositoryCollection collection, IdGenerator idGenerator)
+	public TagRepository(DataService dataService, IdGenerator idGenerator)
 	{
-		this.repository = collection.add(META_DATA);
+		this.repository = dataService.getCrudRepository(TagMetaData.ENTITY_NAME);
 		this.idGenerator = idGenerator;
 	}
 
