@@ -12,7 +12,6 @@ import org.molgenis.data.Query;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.support.QueryImpl;
-import org.springframework.util.IdGenerator;
 
 /**
  * Service to tag metadata with ontology terms.
@@ -23,10 +22,10 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 	private TagRepository tagRepository;
 	private OntologyService ontologyService;
 
-	public OntologyTagService(DataService dataService, OntologyService ontologyService, IdGenerator idGenerator)
+	public OntologyTagService(DataService dataService, OntologyService ontologyService, TagRepository tagRepository)
 	{
 		this.repository = dataService.getCrudRepository(AttributeMetaDataMetaData.ENTITY_NAME);
-		this.tagRepository = new TagRepository(dataService, idGenerator);
+		this.tagRepository = tagRepository;
 		this.ontologyService = ontologyService;
 	}
 
