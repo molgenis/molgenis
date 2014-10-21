@@ -65,8 +65,6 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	public static final String STORE_MAPPING_CONFIRM_MAPPING = "store_mapping_confirm_mapping";
 	public static final String STORE_MAPPING_SCORE = "store_mapping_score";
 	public static final String STORE_MAPPING_ALGORITHM_SCRIPT = "store_mapping_algorithm_script";
-	public static final String COMMON_SEPERATOR = ",";
-	public static final String ALTERNATIVE_DEFINITION_SEPERATOR = "&&&";
 	private static final String CATALOGUE_PREFIX = "protocolTree-";
 	private static final String FEATURE_CATEGORY = "featureCategory-";
 	private static final String FIELD_DESCRIPTION_STOPWORDS = "descriptionStopwords";
@@ -81,12 +79,13 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	private static final String ENTITY_ID = "id";
 	private static final String ENTITY_TYPE = "type";
 	private static final String PATTERN_MATCH = "[^a-zA-Z0-9 ]";
+	private static final String COMMON_SEPERATOR = ",";
+	private static final String ALTERNATIVE_DEFINITION_SEPERATOR = "&&&";
 	private static final int DEFAULT_RETRIEVAL_DOCUMENTS_SIZE = 50;
 	private static final String MULTIPLE_NUMBERS_PATTERN = "[0-9]+";
 	private static final String NODEPATH_SEPARATOR = "\\.";
 
 	private static final AtomicInteger runningProcesses = new AtomicInteger();
-	private static final double DEFAULT_BOOST = 10;
 
 	@Autowired
 	private DataService dataService;
@@ -122,6 +121,12 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	}
 
 	@Override
+	public void deleteDocumentByIds(String documentType, List<String> documentIds)
+	{
+		searchService.deleteDocumentByIds(documentType, documentIds);
+	}
+
+	@Override
 	@RunAsSystem
 	@Transactional
 	public void match(String userName, Integer selectedDataSetId, List<Integer> dataSetIdsToMatch, Integer featureId)
@@ -130,9 +135,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	}
 
 	/**
-	 * This method is to generate a list of candidate mappings for the chosen
-	 * feature by using ElasticSearch based on the information from ontology
-	 * terms
+	 * This method is to generate a list of candidate mappings for the chosen feature by using ElasticSearch based on
+	 * the information from ontology terms
 	 */
 	@Override
 	@Transactional
@@ -179,17 +183,19 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 				// ElasticSearch queries
 				Collection<OntologyTermContainer> ontologyTermContainers = collectOntologyTermInfo(ontologyTermUris,
 						boostedOntologyTermUris);
-				QueryRule subQueryRules_0 = createQueryRulesForDescription(description, stemmer);
-				List<QueryRule> subQueryRules_1 = createQueryRules(description, ontologyTermContainers, stemmer);
+				List<QueryRule> subQueryRules = createQueryRules(description, ontologyTermContainers, stemmer);
 				List<QueryRule> subQueryRules_2 = getAlternativeOTs(description, ontologyTermContainers, stemmer);
 				List<QueryRule> subQueryRules_3 = getExistingMappings(feature, stemmer,
 						createMappingDataSetIdentifier(userName, targetDataSetId, sourceDataSetId));
 
 				QueryRule finalQueryRule = new QueryRule(new ArrayList<QueryRule>());
 				// Add original description of data items to the query
+				finalQueryRule.getNestedRules().add(
+						new QueryRule(FIELD_DESCRIPTION_STOPWORDS, Operator.EQUALS, removeStopWords(description)));
+				finalQueryRule.getNestedRules().add(
+						new QueryRule(ObservableFeature.DESCRIPTION, Operator.EQUALS, removeStopWords(description)));
 				finalQueryRule.setOperator(Operator.DIS_MAX);
-				finalQueryRule.getNestedRules().add(subQueryRules_0);
-				finalQueryRule.getNestedRules().addAll(subQueryRules_1);
+				finalQueryRule.getNestedRules().addAll(subQueryRules);
 				finalQueryRule.getNestedRules().addAll(subQueryRules_2);
 				finalQueryRule.getNestedRules().addAll(subQueryRules_3);
 				return searchDisMaxQuery(sourceDataSet.getProtocolUsed().getId().toString(), new QueryImpl(
@@ -199,20 +205,9 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		return new SearchResult(0, Collections.<Hit> emptyList());
 	}
 
-	private QueryRule createQueryRulesForDescription(String description, PorterStemmer stemmer)
-	{
-		QueryRule queryRule = new QueryRule(new ArrayList<QueryRule>());
-		queryRule.getNestedRules().add(
-				new QueryRule(FIELD_DESCRIPTION_STOPWORDS, Operator.EQUALS, removeStopWords(description)));
-		queryRule.getNestedRules().add(
-				new QueryRule(ObservableFeature.DESCRIPTION, Operator.EQUALS, removeStopWords(description)));
-		queryRule.setOperator(Operator.DIS_MAX);
-		return queryRule;
-	}
-
 	/**
-	 * This method is to collect existing mappings for the same desired data
-	 * element from other datasets and use them for query expansion as well
+	 * This method is to collect existing mappings for the same desired data element from other datasets and use them
+	 * for query expansion as well
 	 * 
 	 * @param description
 	 * @param desiredDataElement
@@ -276,14 +271,11 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 			}
 		}
 
-		QueryRule finalQueryRule = new QueryRule(queryRules);
-		finalQueryRule.setOperator(Operator.DIS_MAX);
-		return queryRules.size() > 0 ? Arrays.<QueryRule> asList(finalQueryRule) : Collections.<QueryRule> emptyList();
+		return queryRules;
 	}
 
 	/**
-	 * Compare whether or not the ontology annotation of feature of interest and
-	 * candidate feature are the same
+	 * Compare whether or not the ontology annotation of feature of interest and candidate feature are the same
 	 * 
 	 * @param featureId
 	 * @param sourceDataSetId
@@ -327,9 +319,8 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	}
 
 	/**
-	 * Retrieve feature information from Index based on given featureIds list.
-	 * If featureIds is empty, all of features are retrieved for particular
-	 * dataset
+	 * Retrieve feature information from Index based on given featureIds list. If featureIds is empty, all of features
+	 * are retrieved for particular dataset
 	 * 
 	 * @param protocolId
 	 * @param featureIds
@@ -374,8 +365,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	}
 
 	/**
-	 * This method is to collect ontology term information from the index, which
-	 * will be used in composing queries next
+	 * This method is to collect ontology term information from the index, which will be used in composing queries next
 	 * 
 	 * @param ontologyTermUris
 	 * @param boostedOntologyTerms
@@ -415,25 +405,18 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 				{
 					totalHits.put(ontologyIRI, new OntologyTermContainer(ontologyIRI));
 				}
-				// prevent the duplicated ontology terms from being added to the
-				// list (because one ontology term could appear mulitple times
-				// within one ontology)
-				if (!totalHits.get(ontologyIRI).getSelectedOntologyTerms().contains(ontologyTermName))
-				{
-					String alternativeDefinitions = columnValueMap.get(ALTERNATIVE_DEFINITION) == null ? StringUtils.EMPTY : columnValueMap
-							.get(ALTERNATIVE_DEFINITION).toString();
-					totalHits.get(ontologyIRI).getAllPaths().put(nodePath, boost);
-					totalHits.get(ontologyIRI).getSelectedOntologyTerms().add(ontologyTermName);
-					totalHits.get(ontologyIRI).getAlternativeDefinitions().put(nodePath, alternativeDefinitions);
-				}
+				String alternativeDefinitions = columnValueMap.get(ALTERNATIVE_DEFINITION) == null ? StringUtils.EMPTY : columnValueMap
+						.get(ALTERNATIVE_DEFINITION).toString();
+				totalHits.get(ontologyIRI).getAllPaths().put(nodePath, boost);
+				totalHits.get(ontologyIRI).getSelectedOntologyTerms().add(hit.getId());
+				totalHits.get(ontologyIRI).getAlternativeDefinitions().put(nodePath, alternativeDefinitions);
 			}
 		}
 		return totalHits.values();
 	}
 
 	/**
-	 * The method is to create ElasticSearch queries with Molgenis queryRule by
-	 * using ontology term information
+	 * The method is to create ElasticSearch queries with Molgenis queryRule by using ontology term information
 	 * 
 	 * @param description
 	 * @param ontologyTermContainers
@@ -447,12 +430,13 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		// located anywhere inside the description
 		Integer locationNotFound = -1;
 
-		List<QueryRule> disjuncQueryRules = new ArrayList<QueryRule>();
-		Map<Integer, List<QueryRule>> shouldQueryRules = new HashMap<Integer, List<QueryRule>>();
+		List<QueryRule> queryRules = new ArrayList<QueryRule>();
+		List<QueryRule> shouldQueryRules = new ArrayList<QueryRule>();
 		List<String> uniqueTokens = stemMembers(
 				Arrays.asList(description.split(OntologyTermQueryRepository.MULTI_WHITESPACES)), stemmer);
 		for (OntologyTermContainer ontologyTermContainer : ontologyTermContainers)
 		{
+			Set<String> existingQueryStrings = new HashSet<String>();
 			for (Entry<String, Boolean> entry : ontologyTermContainer.getAllPaths().entrySet())
 			{
 				String currentNodePath = entry.getKey();
@@ -473,7 +457,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 				List<QueryRule> subQueryRules = new ArrayList<QueryRule>();
 				QueryRule disJunctQuery = new QueryRule(subQueryRules);
 				disJunctQuery.setOperator(Operator.DIS_MAX);
-				disJunctQuery.setValue(entry.getValue() ? DEFAULT_BOOST : null);
+
 				// Retrieve all the ontology terms that are 'under' specific
 				// node (all descendants)
 				for (Hit hit : result.getSearchHits())
@@ -488,37 +472,54 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 						String ontologyTermSynonym = columnValueMap.get(ONTOLOGYTERM_SYNONYM).toString().trim()
 								.toLowerCase();
 
-						// Keep looking for the potential location of the
-						// ontology term synonym until it is found
-						if (finalIndexPosition == locationNotFound)
+						// Only process new ontologyTermSynonym
+						if (!existingQueryStrings.contains(ontologyTermSynonym))
 						{
-							finalIndexPosition = locateTermInDescription(uniqueTokens, ontologyTermSynonym, stemmer);
-						}
+							// Remember the synonyms that have been added to the
+							// query already
+							existingQueryStrings.add(ontologyTermSynonym);
 
-						// If the node is different from currentNode, that
-						// means the node is subclass of currentNode.
-						// Depending on number of levels down, we assign
-						// different weights
-						if (!nodePath.equals(currentNodePath))
-						{
-							matcher = pattern.matcher(ontologyTermSynonym);
-
-							if (!matcher.find() && !StringUtils.isEmpty(ontologyTermSynonym))
+							// Keep looking for the potential location of the
+							// ontology term synonym until it is found
+							if (finalIndexPosition == locationNotFound)
 							{
-								int levelDown = nodePath.split(NODEPATH_SEPARATOR).length - parentNodeLevel;
-								double boostedNumber = Math.pow(0.5, levelDown);
-								ontologyTermSynonym = createQueryWithBoost(ontologyTermSynonym, boostedNumber);
+								finalIndexPosition = locateTermInDescription(uniqueTokens, ontologyTermSynonym, stemmer);
 							}
-						}
 
-						// Add the non-empty one of the ontology term
-						// synonyms to the term collection
-						if (!StringUtils.isEmpty(ontologyTermSynonym))
-						{
-							subQueryRules.add(new QueryRule(FIELD_DESCRIPTION_STOPWORDS, Operator.EQUALS,
-									ontologyTermSynonym));
-							subQueryRules.add(new QueryRule(ObservableFeature.DESCRIPTION, Operator.EQUALS,
-									ontologyTermSynonym));
+							// If the node is different from currentNode, that
+							// means the node is subclass of currentNode.
+							// Depending on number of levels down, we assign
+							// different weights
+							if (!nodePath.equals(currentNodePath))
+							{
+								matcher = pattern.matcher(ontologyTermSynonym);
+
+								if (!matcher.find() && !StringUtils.isEmpty(ontologyTermSynonym))
+								{
+									int levelDown = nodePath.split(NODEPATH_SEPARATOR).length - parentNodeLevel;
+									double boostedNumber = Math.pow(0.5, levelDown);
+
+									StringBuilder boostedSynonym = new StringBuilder();
+									for (String eachToken : ontologyTermSynonym
+											.split(OntologyTermQueryRepository.MULTI_WHITESPACES))
+									{
+										if (eachToken.length() != 0) boostedSynonym
+												.append(OntologyTermQueryRepository.SINGLE_WHITESPACE);
+										boostedSynonym.append(eachToken).append('^').append(boostedNumber);
+									}
+									ontologyTermSynonym = boostedSynonym.toString();
+								}
+							}
+
+							// Add the non-empty one of the ontology term
+							// synonyms to the term collection
+							if (!StringUtils.isEmpty(ontologyTermSynonym))
+							{
+								subQueryRules.add(new QueryRule(FIELD_DESCRIPTION_STOPWORDS, Operator.EQUALS,
+										ontologyTermSynonym));
+								subQueryRules.add(new QueryRule(ObservableFeature.DESCRIPTION, Operator.EQUALS,
+										ontologyTermSynonym));
+							}
 						}
 					}
 				}
@@ -526,41 +527,33 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 				// therefore create Disjunction Max query
 				if (finalIndexPosition == locationNotFound)
 				{
-					disjuncQueryRules.add(disJunctQuery);
+					if (disJunctQuery.getNestedRules().size() > 0) queryRules.add(disJunctQuery);
 				}
 				else
 				{
-					if (!shouldQueryRules.containsKey(finalIndexPosition))
-					{
-						shouldQueryRules.put(finalIndexPosition, new ArrayList<QueryRule>());
-					}
-					shouldQueryRules.get(finalIndexPosition).add(disJunctQuery);
+					if (disJunctQuery.getNestedRules().size() > 0) shouldQueryRules.add(disJunctQuery);
 				}
-
 			}
 		}
 
 		// Process should queryRules
-		QueryRule combinedQuery = new QueryRule(new ArrayList<QueryRule>());
-		combinedQuery.setOperator(Operator.SHOULD);
-		for (List<QueryRule> rules : shouldQueryRules.values())
+		if (shouldQueryRules.size() > 0)
 		{
-			if (rules.size() == 1)
+			// If there are multiple rules in the shouldQueryRules list, create
+			// a Should QueryRule to hold the list
+			if (shouldQueryRules.size() != 1)
 			{
-				combinedQuery.getNestedRules().addAll(rules);
+				QueryRule combinedQuery = new QueryRule(shouldQueryRules);
+				combinedQuery.setOperator(Operator.SHOULD);
+				queryRules.add(combinedQuery);
 			}
+			// Otherwise simply add one query to the disJunctionQuery list
 			else
 			{
-				QueryRule disJuncQuery = new QueryRule(rules);
-				disJuncQuery.setOperator(Operator.DIS_MAX);
-				combinedQuery.getNestedRules().add(disJuncQuery);
+				queryRules.add(shouldQueryRules.get(0));
 			}
 		}
-
-		if (combinedQuery.getNestedRules().size() > 0) disjuncQueryRules
-				.add(combinedQuery.getNestedRules().size() == 1 ? combinedQuery.getNestedRules().get(0) : combinedQuery);
-
-		return disjuncQueryRules;
+		return queryRules;
 	}
 
 	private List<QueryRule> getAlternativeOTs(String description,
@@ -576,47 +569,18 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 				{
 					String nodePath = entry.getKey();
 					boolean isBoosted = ontologyTermContainer.getAllPaths().get(nodePath);
-					for (String alternativeDefinition : alternativeDefinitions.split(ALTERNATIVE_DEFINITION_SEPERATOR))
+					for (String definition : alternativeDefinitions.split(ALTERNATIVE_DEFINITION_SEPERATOR))
 					{
-						List<QueryRule> subQueryRules = new ArrayList<QueryRule>();
-						for (String ontologyTermUri : Arrays.asList(alternativeDefinition.split(COMMON_SEPERATOR)))
-						{
-							List<QueryRule> rules = createQueryRules(
-									description,
-									collectOntologyTermInfo(
-											Arrays.asList(ontologyTermUri),
-											isBoosted ? Arrays.asList(ontologyTermUri) : Collections
-													.<String> emptyList()), stemmer);
-							subQueryRules.addAll(rules);
-
-						}
-						if (subQueryRules.size() > 1)
-						{
-							QueryRule shouldQueryRule = new QueryRule(subQueryRules);
-							shouldQueryRule.setOperator(Operator.SHOULD);
-							queryRules.add(shouldQueryRule);
-						}
-						else
-						{
-							queryRules.addAll(subQueryRules);
-						}
+						List<String> ontologyTermUris = Arrays.asList(definition.split(COMMON_SEPERATOR));
+						queryRules.addAll(createQueryRules(
+								description,
+								collectOntologyTermInfo(ontologyTermUris,
+										isBoosted ? ontologyTermUris : Collections.<String> emptyList()), stemmer));
 					}
 				}
 			}
 		}
 		return queryRules;
-	}
-
-	private String createQueryWithBoost(String ontologyTermSynonym, double boostedNumber)
-	{
-		StringBuilder boostedSynonym = new StringBuilder();
-		for (String eachToken : ontologyTermSynonym.split(OntologyTermQueryRepository.MULTI_WHITESPACES))
-		{
-			if (boostedSynonym.length() != 0) boostedSynonym.append(OntologyTermQueryRepository.SINGLE_WHITESPACE);
-			boostedSynonym.append(eachToken).append('^').append(boostedNumber);
-		}
-		ontologyTermSynonym = boostedSynonym.toString();
-		return boostedSynonym.toString();
 	}
 
 	private String removeStopWords(String originalTerm)
@@ -955,8 +919,7 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 	}
 
 	/**
-	 * A helper function to extract featureName from the algorithm script and
-	 * convert them to database IDs
+	 * A helper function to extract featureName from the algorithm script and convert them to database IDs
 	 * 
 	 * @param request
 	 * @return
@@ -1064,11 +1027,5 @@ public class AsyncOntologyMatcher implements OntologyMatcher, InitializingBean
 		{
 			return selectedOntologyTerms;
 		}
-	}
-
-	@Override
-	public void deleteDocumentByIds(String documentType, List<String> documentIds)
-	{
-
 	}
 }

@@ -214,8 +214,7 @@ public class OntologyServiceTest
 	// @Test
 	// public void search()
 	// {
-	// OntologyServiceResult result =
-	// ontologyService.search("http://www.ontology.test", "OntologyTerm three");
+	// SearchResult result = ontologyService.search("http://www.ontology.test", "OntologyTerm three");
 	// List<Hit> searchHits = result.getSearchHits();
 	// assertEquals(searchHits.size(), 2);
 	// assertEquals(searchHits.get(0).getId(), "ontologyterm-3");

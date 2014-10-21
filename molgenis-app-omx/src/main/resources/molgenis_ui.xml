@@ -5,7 +5,6 @@
         <plugin id="importwizard" name="Upload" url="importwizard"/>
         <plugin id="catalogue" name="Catalogue" url="catalogue"/>
 		<plugin id="dataexplorer" name="Data Explorer" url="dataexplorer"/>
-		<plugin id="metadata" name="MetaExplorer" url="metadata"/>
         <menu label="Plugins" name="plugins">
             <plugin id="geneticrepositorymerger" name="Merge Genetic Data" url="geneticrepositorymerger"/>
             <plugin id="background" name="Background" url="background"/>

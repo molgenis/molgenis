@@ -113,7 +113,6 @@ public class NGramMatchingModel
 	 */
 	private static double calculateScore(Set<String> inputStringTokens, Set<String> ontologyTermTokens)
 	{
-		if (inputStringTokens.size() == 0 || ontologyTermTokens.size() == 0) return (double) 0;
 		int matchedTokens = 0;
 		double totalToken = Math.max(inputStringTokens.size(), ontologyTermTokens.size());
 		inputStringTokens.retainAll(ontologyTermTokens);
