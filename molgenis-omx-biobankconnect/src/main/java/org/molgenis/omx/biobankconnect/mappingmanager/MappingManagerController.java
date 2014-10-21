@@ -8,8 +8,8 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.omx.biobankconnect.ontologymatcher.AsyncOntologyMatcher;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcher;
 import org.molgenis.omx.biobankconnect.wizard.CurrentUserStatus;
 import org.molgenis.omx.observ.DataSet;
@@ -31,6 +31,7 @@ public class MappingManagerController extends MolgenisPluginController
 	public static final String ID = "mappingmanager";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
+	private static final String PROTOCOL_IDENTIFIER = "store_mapping";
 	private final OntologyMatcher ontologyMatcher;
 	private final DataService dataService;
 	private final UserAccountService userAccountService;
@@ -59,14 +60,11 @@ public class MappingManagerController extends MolgenisPluginController
 	String selectedDataSetId, HttpServletRequest request, Model model)
 	{
 		List<DataSet> dataSets = new ArrayList<DataSet>();
-		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME, DataSet.class);
+		Iterable<DataSet> allDataSets = dataService.findAll(DataSet.ENTITY_NAME, new QueryImpl(), DataSet.class);
 		for (DataSet dataSet : allDataSets)
 		{
-			if (dataSet.getProtocolUsed().getIdentifier().equals(AsyncOntologyMatcher.PROTOCOL_IDENTIFIER)) continue;
-			if (dataSet.getIdentifier().matches("^" + userAccountService.getCurrentUser().getUsername() + ".*derived$")) continue;
-			dataSets.add(dataSet);
+			if (!dataSet.getProtocolUsed().getIdentifier().equals(PROTOCOL_IDENTIFIER)) dataSets.add(dataSet);
 		}
-
 		model.addAttribute("dataSets", dataSets);
 		model.addAttribute("userName", SecurityUtils.getCurrentUsername());
 		if (selectedDataSetId != null) model.addAttribute("selectedDataSet", selectedDataSetId);

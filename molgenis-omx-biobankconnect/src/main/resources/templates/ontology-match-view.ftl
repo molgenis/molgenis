@@ -1,14 +1,13 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
-<#assign css=["jquery-ui-1.9.2.custom.min.css", "bootstrap-fileupload.min.css", "biobank-connect.css"]>
+<#assign css=["jquery-ui-1.9.2.custom.min.css", "bootstrap-fileupload.min.css"]>
 <#assign js=["jquery-ui-1.9.2.custom.min.js", "bootstrap-fileupload.min.js", "simple_statistics.js"]>
 <@header css js/>
 <form id="evaluationForm" class="form-horizontal" enctype="multipart/form-data">
 	<div class="row">
 		<div class="col-md-12">
-			<br>
 			<div class="row">
-				<div class="col-md-offset-3 col-md-6">
+				<div class="col-md-12">
 					<legend><center><h3>Ontology Annotator</h3></center></legend>
 				</div>
 			</div>
@@ -58,12 +57,8 @@
 			</div>
 			<div class="row">
 				<div class="col-md-offset-2 col-md-8">
-					<center><textarea name="inputTerms" style="width:100%;resize:none;" class="form-control" rows="12" placeholder="Please paste a list of terms in semicolon delimited format. The header 'Name' is compulsory whereas other headers/columns are optional! Example is shown below:
-							
-												Name;Synonym;HP;
-       												visual impairment;Reduced visual acuity;0000505;
-       												Abnormality of eye movement;Abnormal eye motility;0000496;"></textarea></center>
-				</div>	
+					<center><textarea name="inputTerms" style="width:100%;resize:none" class="form-control" rows="12" placeholder="Please paste a list of terms here. E.g. absent radius"></textarea></center>
+				</div>
 			</div>
 			<br>
 			<div class="row">
@@ -71,7 +66,6 @@
 					<button id="match-button" type="button" class="btn btn-primary">Match</button>
 				</div>
 			</div>
-			<br>
 		</div>
 	</div>
 </form>

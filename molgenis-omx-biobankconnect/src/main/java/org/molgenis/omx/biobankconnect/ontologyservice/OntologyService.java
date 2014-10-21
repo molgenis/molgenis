@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
@@ -33,17 +32,13 @@ import org.tartarus.snowball.ext.PorterStemmer;
 public class OntologyService
 {
 	private final SearchService searchService;
-	private final PorterStemmer stemmer = new PorterStemmer();
-	private static final List<String> ELASTICSEARCH_RESERVED_WORDS = Arrays.asList("or", "and", "if");
 	private static final String COMBINED_SCORE = "combinedScore";
 	private static final String FUZZY_MATCH_SIMILARITY = "~0.8";
 	private static final String SCORE = "score";
 	private static final String NON_WORD_SEPARATOR = "[^a-zA-Z0-9]";
 	private static final int MAX_NUMBER_MATCHES = 100;
-	public static final Character DEFAULT_SEPARATOR = ';';
-	public static final String DEFAULT_MATCHING_NAME_FIELD = "name";
-	public static final String DEFAULT_MATCHING_SYNONYM_FIELD = "synonym";
-	private static final String MAX_SCORE_FIELD = "maxScoreField";
+	private static final PorterStemmer stemmer = new PorterStemmer();
+	public static final Character DEFAULT_SEPARATOR = '|';
 
 	@Autowired
 	public OntologyService(SearchService searchService)
@@ -140,129 +135,7 @@ public class OntologyService
 		return ontologies;
 	}
 
-	/**
-	 * This method is to search multiple fields information collected from the
-	 * given entity. The fields 'name' and 'synonym' in the entity will be
-	 * translated into ontologyTermSynonym in ElasticSearch. However there might
-	 * be other dynamic fields involved such as OMIM
-	 * 
-	 * @param ontologyIriBySession
-	 * @param entity
-	 * @return
-	 */
-	public OntologyServiceResult searchEntity(String ontologyIri, Entity entity)
-	{
-		List<QueryRule> allQueryRules = new ArrayList<QueryRule>();
-		List<QueryRule> rulesForOntologyTermFields = new ArrayList<QueryRule>();
-		for (String attributeName : entity.getAttributeNames())
-		{
-			if (!StringUtils.isEmpty(entity.getString(attributeName)))
-			{
-				// The attribute name is either equal to 'Name' or starts with
-				// string 'Synonym'
-				if (DEFAULT_MATCHING_NAME_FIELD.equals(attributeName.toLowerCase())
-						|| attributeName.toLowerCase().startsWith(DEFAULT_MATCHING_SYNONYM_FIELD))
-				{
-					String medicalStemProxy = medicalStemProxy(entity.getString(attributeName));
-					if (!StringUtils.isEmpty(medicalStemProxy))
-					{
-						rulesForOntologyTermFields.add(new QueryRule(OntologyTermIndexRepository.SYNONYMS,
-								Operator.EQUALS, medicalStemProxy));
-					}
-				}
-				else if (entity.get(attributeName) != null
-						&& !StringUtils.isEmpty(entity.get(attributeName).toString()))
-				{
-					allQueryRules.add(new QueryRule(attributeName, Operator.EQUALS, entity.get(attributeName)));
-				}
-			}
-		}
-
-		if (rulesForOntologyTermFields.size() == 0) return new OntologyServiceResult(
-				"Please specify the headers of the input data!");
-
-		QueryRule nestedQueryRule = new QueryRule(rulesForOntologyTermFields);
-		nestedQueryRule.setOperator(Operator.DIS_MAX);
-		allQueryRules.add(nestedQueryRule);
-
-		QueryRule finalQueryRule = new QueryRule(allQueryRules);
-		finalQueryRule.setOperator(Operator.DIS_MAX);
-
-		SearchRequest request = new SearchRequest(AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyIri),
-				new QueryImpl(finalQueryRule).pageSize(MAX_NUMBER_MATCHES), null);
-
-		Iterator<Hit> iterator = searchService.search(request).getSearchHits().iterator();
-		Map<String, Object> inputData = new HashMap<String, Object>();
-		String maxScoreField = null;
-		List<ComparableHit> comparableHits = new ArrayList<ComparableHit>();
-		int count = 0;
-		while (iterator.hasNext())
-		{
-			Hit hit = iterator.next();
-			Map<String, Object> columnValueMap = hit.getColumnValueMap();
-			BigDecimal maxNgramScore = new BigDecimal(0);
-			for (String attributeName : entity.getAttributeNames())
-			{
-				if (!StringUtils.isEmpty(entity.getString(attributeName)))
-				{
-					if (DEFAULT_MATCHING_NAME_FIELD.equals(attributeName.toLowerCase())
-							|| attributeName.toLowerCase().startsWith(DEFAULT_MATCHING_SYNONYM_FIELD))
-					{
-						BigDecimal ngramScore = new BigDecimal(NGramMatchingModel.stringMatching(
-								entity.getString(attributeName),
-								columnValueMap.get(OntologyTermIndexRepository.SYNONYMS).toString()));
-						if (maxNgramScore.doubleValue() < ngramScore.doubleValue())
-						{
-							maxNgramScore = ngramScore;
-							maxScoreField = attributeName;
-						}
-						if (count == 0) inputData.put(attributeName, entity.getString(attributeName));
-					}
-					else
-					{
-						for (String key : columnValueMap.keySet())
-						{
-							// Check if indexed ontology term contains such
-							// external database reference
-							if (attributeName.equalsIgnoreCase(key))
-							{
-								if (columnValueMap.containsKey(key)
-										&& !StringUtils.isEmpty(columnValueMap.get(key).toString()))
-								{
-									for (Object databaseId : (List<?>) columnValueMap.get(key))
-									{
-										BigDecimal ngramScore = new BigDecimal(NGramMatchingModel.stringMatching(
-												entity.getString(attributeName), databaseId.toString()));
-										if (maxNgramScore.doubleValue() < ngramScore.doubleValue())
-										{
-											maxNgramScore = ngramScore;
-											maxScoreField = attributeName;
-										}
-									}
-									if (count == 0) inputData.put(attributeName, entity.getString(attributeName));
-								}
-							}
-						}
-					}
-				}
-			}
-			comparableHits.add(new ComparableHit(hit, maxNgramScore, maxScoreField));
-			count++;
-		}
-		Collections.sort(comparableHits);
-		return convertResults(inputData, comparableHits);
-	}
-
-	/**
-	 * This method is to search simple query in a specified ontology. By
-	 * default, ontology ontologyTermSynonym field is involved in the
-	 * ElasticSearch
-	 * 
-	 * @param ontologyIri
-	 * @param queryString
-	 * @return
-	 */
-	public OntologyServiceResult search(String ontologyIri, String queryString)
+	public SearchResult search(String ontologyIri, String queryString)
 	{
 		Set<String> uniqueTerms = new HashSet<String>(Arrays.asList(queryString.toLowerCase().trim()
 				.split(NON_WORD_SEPARATOR)));
@@ -285,8 +158,6 @@ public class OntologyService
 				new QueryImpl(finalQuery).pageSize(MAX_NUMBER_MATCHES), null);
 		Iterator<Hit> iterator = searchService.search(request).getSearchHits().iterator();
 
-		Map<String, Object> inputData = new HashMap<String, Object>();
-		inputData.put(DEFAULT_MATCHING_NAME_FIELD, queryString);
 		List<ComparableHit> comparableHits = new ArrayList<ComparableHit>();
 		while (iterator.hasNext())
 		{
@@ -296,34 +167,13 @@ public class OntologyService
 			BigDecimal ngramScore = new BigDecimal(NGramMatchingModel.stringMatching(
 					StringUtils.join(uniqueTerms, OntologyTermQueryRepository.ILLEGAL_CHARACTERS_REPLACEMENT),
 					ontologySynonym));
-			comparableHits.add(new ComparableHit(hit, luceneScore.multiply(ngramScore), null));
+			comparableHits.add(new ComparableHit(hit, luceneScore.multiply(ngramScore)));
 		}
 		Collections.sort(comparableHits);
-		return convertResults(inputData, comparableHits);
+		return convertResults(comparableHits);
 	}
 
-	private String medicalStemProxy(String queryString)
-	{
-		StringBuilder stringBuilder = new StringBuilder();
-		Set<String> uniqueTerms = new HashSet<String>(Arrays.asList(queryString.toLowerCase().trim()
-				.split(NON_WORD_SEPARATOR)));
-		uniqueTerms.removeAll(NGramMatchingModel.STOPWORDSLIST);
-		for (String term : uniqueTerms)
-		{
-			if (!StringUtils.isEmpty(term) && !term.matches(OntologyTermQueryRepository.MULTI_WHITESPACES)
-					&& !(ELASTICSEARCH_RESERVED_WORDS.contains(term)))
-			{
-				stemmer.setCurrent(term.replaceAll(OntologyTermQueryRepository.ILLEGAL_CHARACTERS_PATTERN,
-						StringUtils.EMPTY));
-				stemmer.stem();
-				stringBuilder.append(stemmer.getCurrent()).append(FUZZY_MATCH_SIMILARITY)
-						.append(OntologyTermQueryRepository.SINGLE_WHITESPACE);
-			}
-		}
-		return stringBuilder.toString().trim();
-	}
-
-	private OntologyServiceResult convertResults(Map<String, Object> inputData, List<ComparableHit> comparableHits)
+	private SearchResult convertResults(List<ComparableHit> comparableHits)
 	{
 		List<Hit> hits = new ArrayList<Hit>();
 		Set<String> uniqueIdentifiers = new HashSet<String>();
@@ -336,29 +186,21 @@ public class OntologyService
 			Map<String, Object> columnValueMap = new HashMap<String, Object>();
 			columnValueMap.putAll(hit.getColumnValueMap());
 			columnValueMap.put(COMBINED_SCORE, comparableHit.getSimilarityScore().doubleValue());
-			columnValueMap.put(MAX_SCORE_FIELD, comparableHit.getMaxScoreField());
 			Hit copyHit = new Hit(hit.getId(), hit.getDocumentType(), columnValueMap);
 			hits.add(copyHit);
 		}
-		return new OntologyServiceResult(inputData, hits, hits.size());
+		return new SearchResult(hits.size(), hits);
 	}
 
 	class ComparableHit implements Comparable<ComparableHit>
 	{
-		private final String maxScoreField;
 		private final Hit hit;
 		private final BigDecimal similarityScore;
 
-		public ComparableHit(Hit hit, BigDecimal similarityScore, String maxScoreField)
+		public ComparableHit(Hit hit, BigDecimal similarityScore)
 		{
 			this.hit = hit;
 			this.similarityScore = similarityScore;
-			this.maxScoreField = maxScoreField;
-		}
-
-		public String getMaxScoreField()
-		{
-			return maxScoreField;
 		}
 
 		private BigDecimal getSimilarityScore()
