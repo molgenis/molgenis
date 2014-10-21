@@ -6,6 +6,7 @@
         <plugin id="catalogue" name="Catalogue" url="catalogue"/>
 		<plugin id="dataexplorer" name="Data Explorer" url="dataexplorer"/>
         <menu label="Plugins" name="plugins">
+            <plugin id="standardsregistry" name="Standards registry" url="standardsregistry" />
             <plugin id="geneticrepositorymerger" name="Merge Genetic Data" url="geneticrepositorymerger"/>
             <plugin id="background" name="Background" url="background"/>
             <menu label="BiobankConnect" name="biobankconnect">
@@ -24,7 +25,6 @@
 	        <plugin id="datasetdeleter" name="Data Set Deleter" url="datasetdeleter"/>
 	        <plugin id="dataindexer" name="Data Set Indexer" url="dataindexer"/>
 	        <plugin id="gaflistimporter" name="GAF List Importer" url="gaflistimporter"/>
-            <plugin id="models" name="Model registry" url="models" />
             <plugin id="news" name="News" url="news"/>
             <plugin id="references" name="References" url="references"/>
             <plugin id="scripts" name="Scripts" url="scripts" />
