@@ -1,7 +1,7 @@
 package org.molgenis.data.meta;
 
 import static org.molgenis.MolgenisFieldTypes.BOOL;
-import static org.molgenis.MolgenisFieldTypes.INT;
+import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
 import static org.molgenis.MolgenisFieldTypes.XREF;
 
@@ -35,7 +35,7 @@ public class AttributeMetaDataMetaData extends DefaultEntityMetaData
 	{
 		super(ENTITY_NAME);
 
-		addAttribute(IDENTIFIER).setIdAttribute(true).setNillable(false).setDataType(INT);
+		addAttribute(IDENTIFIER).setIdAttribute(true).setNillable(false).setDataType(STRING);
 		addAttribute(ENTITY).setNillable(false).setDataType(XREF).setRefEntity(EntityMetaDataRepository.META_DATA);
 		addAttribute(NAME).setNillable(false);
 		addAttribute(DATA_TYPE);
