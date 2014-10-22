@@ -1,4 +1,4 @@
-package org.molgenis.data.semantic;
+package org.molgenis.ontology;
 
 import java.util.List;
 import java.util.Map;

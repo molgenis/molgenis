@@ -65,6 +65,7 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 		EntityMetaData extends_ = entityMetaData.getExtends();
 		this.extends_ = extends_ != null ? new DefaultEntityMetaData(extends_) : null;
 		// deep copy attributes
+		// TODO: Fails dramatically for self-referencing entities.
 		Iterable<AttributeMetaData> attributes = entityMetaData.getAttributes();
 		if (attributes != null)
 		{
@@ -72,6 +73,16 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 			{
 				addAttributeMetaData(new DefaultAttributeMetaData(attributeMetaData));
 			}
+		}
+		AttributeMetaData idAttribute = entityMetaData.getIdAttribute();
+		if (idAttribute != null)
+		{
+			setIdAttribute(idAttribute.getName());
+		}
+		AttributeMetaData labelAttribute = entityMetaData.getLabelAttribute();
+		if (labelAttribute != null)
+		{
+			setLabelAttribute(labelAttribute.getName());
 		}
 	}
 
@@ -231,8 +242,8 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 	{
 		if (this == obj) return true;
 		if (obj == null) return false;
-		if (getClass() != obj.getClass()) return false;
-		DefaultEntityMetaData other = (DefaultEntityMetaData) obj;
+		if (!(obj instanceof EntityMetaData)) return false;
+		EntityMetaData other = (EntityMetaData) obj;
 		if (getName() == null)
 		{
 			if (other.getName() != null) return false;
