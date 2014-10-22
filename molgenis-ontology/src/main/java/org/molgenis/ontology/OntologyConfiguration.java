@@ -3,7 +3,6 @@ package org.molgenis.ontology;
 import org.molgenis.data.DataService;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.meta.WritableMetaDataService;
-import org.molgenis.data.semantic.OntologyService;
 import org.molgenis.ontology.index.AsyncOntologyIndexer;
 import org.molgenis.ontology.service.OntologyServiceImpl;
 import org.molgenis.ontology.service.OntologyServiceSessionData;

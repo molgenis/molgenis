@@ -55,9 +55,7 @@
 		$('.complex-filter-container', form).each(function() {
 			filter = new self.ComplexFilter($(this).data('attribute'));
 			filter.update($(this));
-			if(!filter.isEmpty()){
-				filters[filter.attribute.href] = filter;
-			}
+			filters[filter.attribute.href] = filter;
 		});
 
 		$('.simple-filter-container', form).each(function() {
@@ -66,13 +64,7 @@
 			filters[filter.attribute.href] = filter;
 		});
 
-		return Object.keys(filters)
-			.map(function (key) {
-				return filters[key];
-				})
-			.filter(function(filter){
-				return !filter.isEmpty();
-				});
+		return filters;
 	};
 	
 	/**

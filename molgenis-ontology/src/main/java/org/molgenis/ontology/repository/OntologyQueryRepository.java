@@ -6,8 +6,8 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.semantic.OntologyService;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.ontology.OntologyService;
 import org.molgenis.ontology.beans.OntologyEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 

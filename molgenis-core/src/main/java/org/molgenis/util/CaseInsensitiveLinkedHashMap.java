@@ -72,4 +72,37 @@ public class CaseInsensitiveLinkedHashMap<V> extends LinkedHashMap<String, V>
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public boolean equals(Object o)
+	{
+		if (!(o instanceof CaseInsensitiveLinkedHashMap<?>))
+		{
+			return false;
+		}
+		CaseInsensitiveLinkedHashMap<?> other = (CaseInsensitiveLinkedHashMap<?>) o;
+		if (!keySet().equals(other.keySet()))
+		{
+			return false;
+		}
+		for (String key : keySet())
+		{
+			Object value = get(key);
+			if (value == null)
+			{
+				if (other.get(key) != null)
+				{
+					return false;
+				}
+			}
+			else
+			{
+				if (!get(key).equals(other.get(key)))
+				{
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
 }

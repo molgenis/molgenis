@@ -316,7 +316,11 @@ function($, molgenis, settingsXhr) {
 		
 		$(document).on('updateAttributeFilters', function(e, data) {
 			$.each(data.filters, function() {
-				attributeFilters[this.attribute.href] = this;
+				if(this.isEmpty()){
+					delete attributeFilters[this.attribute.href];
+				}else{
+					attributeFilters[this.attribute.href] = this;
+				}
 			});
 			self.filter.createFilterQueryUserReadableList(attributeFilters);
 			$(document).trigger('changeQuery', createEntityQuery());
