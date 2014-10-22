@@ -1,0 +1,24 @@
+#attribute-selection .molgenis-tree {
+	height: 400px;
+	overflow: auto;
+	margin-bottom: 10px;
+}
+
+#entity-class h3 {
+	display: inline;
+	margin-right: 10px;
+}
+
+#entity-select-holder {
+	margin-bottom: 18px;	
+}
+
+#package-search-results {
+    height: 600px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+#search-results-back-btn {
+	margin-bottom: 15px;
+}
