@@ -1,6 +1,7 @@
 package org.molgenis.omx.biobankconnect.ontologytree;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.validateMockitoUsage;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -10,21 +11,28 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.util.Hit;
 import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
+import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermIndexRepository;
-import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermQueryRepository;
-import org.molgenis.omx.biobankconnect.ontologyindexer.AsyncOntologyIndexer;
+import org.molgenis.ontology.OntologyService;
+import org.molgenis.ontology.repository.AbstractOntologyRepository;
+import org.molgenis.ontology.repository.OntologyTermIndexRepository;
+import org.molgenis.ontology.repository.OntologyTermQueryRepository;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class OntologyTermIndexRepositoryTest
 {
+
 	OntologyTermQueryRepository ontologyTermIndexRepository;
 	String ontologyIRI = "http://www.ontology.test";
 
@@ -32,92 +40,119 @@ public class OntologyTermIndexRepositoryTest
 	public void setUp() throws OWLOntologyCreationException
 	{
 
-		Map<String, Object> columnValueMap1 = new HashMap<String, Object>();
-		columnValueMap1.put(OntologyTermIndexRepository.ENTITY_TYPE, OntologyTermIndexRepository.TYPE_ONTOLOGYTERM);
-		columnValueMap1.put(OntologyTermIndexRepository.ONTOLOGY_IRI, ontologyIRI);
-		columnValueMap1.put(OntologyTermIndexRepository.ONTOLOGY_NAME, "test ontology");
-		columnValueMap1.put(OntologyTermIndexRepository.LAST, false);
-		columnValueMap1.put(OntologyTermIndexRepository.ROOT, true);
-		columnValueMap1.put(OntologyTermIndexRepository.NODE_PATH, "1.2");
-		columnValueMap1.put(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI, ontologyIRI + "#term1");
-		columnValueMap1.put(OntologyTermIndexRepository.ONTOLOGY_TERM, "ontology term 1");
-		columnValueMap1.put(OntologyTermIndexRepository.SYNONYMS, "OT-1");
-		Hit hit1 = mock(Hit.class);
-		when(hit1.getId()).thenReturn("ontology-1");
-		when(hit1.getColumnValueMap()).thenReturn(columnValueMap1);
+		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("test-ontology");
+		DefaultAttributeMetaData attributeId = new DefaultAttributeMetaData(AbstractOntologyRepository.ID);
+		attributeId.setIdAttribute(true);
+		entityMetaData.addAttributeMetaData(attributeId);
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(AbstractOntologyRepository.ONTOLOGY_TERM_IRI,
+				MolgenisFieldTypes.FieldTypeEnum.HYPERLINK));
+		DefaultAttributeMetaData attributeMetaData = new DefaultAttributeMetaData(
+				AbstractOntologyRepository.ONTOLOGY_TERM);
+		attributeMetaData.setLabelAttribute(true);
+		entityMetaData.addAttributeMetaData(attributeMetaData);
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(AbstractOntologyRepository.SYNONYMS));
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(AbstractOntologyRepository.ENTITY_TYPE));
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(AbstractOntologyRepository.NODE_PATH));
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(AbstractOntologyRepository.PARENT_NODE_PATH));
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(
+				AbstractOntologyRepository.PARENT_ONTOLOGY_TERM_IRI));
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(AbstractOntologyRepository.FIELDTYPE));
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(AbstractOntologyRepository.LAST,
+				MolgenisFieldTypes.FieldTypeEnum.BOOL));
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(AbstractOntologyRepository.ROOT,
+				MolgenisFieldTypes.FieldTypeEnum.BOOL));
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(
+				AbstractOntologyRepository.ONTOLOGY_TERM_DEFINITION));
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(AbstractOntologyRepository.ONTOLOGY_NAME));
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(AbstractOntologyRepository.ONTOLOGY_IRI,
+				MolgenisFieldTypes.FieldTypeEnum.HYPERLINK));
+		DefaultAttributeMetaData childrenAttributeMetaData = new DefaultAttributeMetaData("attributes",
+				MolgenisFieldTypes.FieldTypeEnum.MREF);
+		childrenAttributeMetaData.setRefEntity(entityMetaData);
+		entityMetaData.addAttributeMetaData(childrenAttributeMetaData);
 
-		Map<String, Object> columnValueMap2 = new HashMap<String, Object>();
-		columnValueMap2.put(OntologyTermIndexRepository.ENTITY_TYPE, OntologyTermIndexRepository.TYPE_ONTOLOGYTERM);
-		columnValueMap2.put(OntologyTermIndexRepository.ONTOLOGY_IRI, ontologyIRI);
-		columnValueMap2.put(OntologyTermIndexRepository.ONTOLOGY_NAME, "test ontology");
-		columnValueMap2.put(OntologyTermIndexRepository.LAST, false);
-		columnValueMap2.put(OntologyTermIndexRepository.ROOT, false);
-		columnValueMap2.put(OntologyTermIndexRepository.NODE_PATH, "1.2.3");
-		columnValueMap2.put(OntologyTermIndexRepository.PARENT_NODE_PATH, "1.2");
-		columnValueMap2.put(OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_IRI, ontologyIRI + "#term1");
-		columnValueMap2.put(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI, ontologyIRI + "#term2");
-		columnValueMap2.put(OntologyTermIndexRepository.ONTOLOGY_TERM, "ontology term 2");
-		columnValueMap2.put(OntologyTermIndexRepository.SYNONYMS, "OT-2");
-		Hit hit2 = mock(Hit.class);
-		when(hit2.getId()).thenReturn("ontology-2");
-		when(hit2.getColumnValueMap()).thenReturn(columnValueMap2);
+		MapEntity hit1 = new MapEntity();
+		hit1.set(AbstractOntologyRepository.ENTITY_TYPE, AbstractOntologyRepository.TYPE_ONTOLOGYTERM);
+		hit1.set(AbstractOntologyRepository.ONTOLOGY_IRI, ontologyIRI);
+		hit1.set(AbstractOntologyRepository.ONTOLOGY_NAME, "test ontology");
+		hit1.set(AbstractOntologyRepository.LAST, false);
+		hit1.set(AbstractOntologyRepository.ROOT, true);
+		hit1.set(AbstractOntologyRepository.NODE_PATH, "1.2");
+		hit1.set(AbstractOntologyRepository.ONTOLOGY_TERM_IRI, ontologyIRI + "#term1");
+		hit1.set(AbstractOntologyRepository.ONTOLOGY_TERM, "ontology term 1");
+		hit1.set(AbstractOntologyRepository.ID, "ontology-1");
 
-		Map<String, Object> columnValueMap3 = new HashMap<String, Object>();
-		columnValueMap3.put(OntologyTermIndexRepository.ENTITY_TYPE, OntologyTermIndexRepository.TYPE_ONTOLOGYTERM);
-		columnValueMap3.put(OntologyTermIndexRepository.ONTOLOGY_IRI, ontologyIRI);
-		columnValueMap3.put(OntologyTermIndexRepository.ONTOLOGY_NAME, "test ontology");
-		columnValueMap3.put(OntologyTermIndexRepository.LAST, false);
-		columnValueMap3.put(OntologyTermIndexRepository.ROOT, false);
-		columnValueMap3.put(OntologyTermIndexRepository.NODE_PATH, "1.2.4");
-		columnValueMap3.put(OntologyTermIndexRepository.PARENT_NODE_PATH, "1.2");
-		columnValueMap3.put(OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_IRI, ontologyIRI + "#term1");
-		columnValueMap3.put(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI, ontologyIRI + "#term3");
-		columnValueMap3.put(OntologyTermIndexRepository.ONTOLOGY_TERM, "ontology term 3");
-		columnValueMap3.put(OntologyTermIndexRepository.SYNONYMS, "OT-3");
-		Hit hit3 = mock(Hit.class);
-		when(hit3.getId()).thenReturn("ontology-3");
-		when(hit3.getColumnValueMap()).thenReturn(columnValueMap3);
+		MapEntity hit2 = new MapEntity();
+		hit2.set(AbstractOntologyRepository.ENTITY_TYPE, AbstractOntologyRepository.TYPE_ONTOLOGYTERM);
+		hit2.set(AbstractOntologyRepository.ONTOLOGY_IRI, ontologyIRI);
+		hit2.set(AbstractOntologyRepository.ONTOLOGY_NAME, "test ontology");
+		hit2.set(AbstractOntologyRepository.LAST, false);
+		hit2.set(AbstractOntologyRepository.ROOT, false);
+		hit2.set(AbstractOntologyRepository.NODE_PATH, "1.2.3");
+		hit2.set(AbstractOntologyRepository.PARENT_NODE_PATH, "1.2");
+		hit2.set(AbstractOntologyRepository.PARENT_ONTOLOGY_TERM_IRI, ontologyIRI + "#term1");
+		hit2.set(AbstractOntologyRepository.ONTOLOGY_TERM_IRI, ontologyIRI + "#term2");
+		hit2.set(AbstractOntologyRepository.ONTOLOGY_TERM, "ontology term 2");
+		hit2.set(AbstractOntologyRepository.SYNONYMS, "OT-2");
+		hit2.set(AbstractOntologyRepository.ID, "ontology-2");
+
+		MapEntity hit3 = new MapEntity();
+		hit3.set(AbstractOntologyRepository.ENTITY_TYPE, AbstractOntologyRepository.TYPE_ONTOLOGYTERM);
+		hit3.set(AbstractOntologyRepository.ONTOLOGY_IRI, ontologyIRI);
+		hit3.set(AbstractOntologyRepository.ONTOLOGY_NAME, "test ontology");
+		hit3.set(AbstractOntologyRepository.LAST, false);
+		hit3.set(AbstractOntologyRepository.ROOT, false);
+		hit3.set(AbstractOntologyRepository.NODE_PATH, "1.2.4");
+		hit3.set(AbstractOntologyRepository.PARENT_NODE_PATH, "1.2");
+		hit3.set(AbstractOntologyRepository.PARENT_ONTOLOGY_TERM_IRI, ontologyIRI + "#term1");
+		hit3.set(AbstractOntologyRepository.ONTOLOGY_TERM_IRI, ontologyIRI + "#term3");
+		hit3.set(AbstractOntologyRepository.ONTOLOGY_TERM, "ontology term 3");
+		hit3.set(AbstractOntologyRepository.SYNONYMS, "OT-3");
+		hit3.set(AbstractOntologyRepository.ID, "ontology-3");
 
 		SearchService searchService = mock(SearchService.class);
 		when(
-				searchService.search(new SearchRequest(
-						AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyIRI), new QueryImpl().eq(
-								OntologyTermIndexRepository.ENTITY_TYPE, OntologyTermIndexRepository.TYPE_ONTOLOGYTERM)
-								.pageSize(1), null))).thenReturn(new SearchResult(3, Arrays.asList(hit1)));
-
-		when(
-				searchService.search(new SearchRequest(
-						AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyIRI),
+				searchService.search(
 						new QueryImpl().eq(OntologyTermIndexRepository.ENTITY_TYPE,
-								OntologyTermIndexRepository.TYPE_ONTOLOGYTERM), null))).thenReturn(
-				new SearchResult(3, Arrays.asList(hit1, hit2, hit3)));
+								AbstractOntologyRepository.TYPE_ONTOLOGYTERM).pageSize(1), entityMetaData)).thenReturn(
+				Arrays.<org.molgenis.data.Entity> asList(hit1));
 
 		when(
-				searchService.search(new SearchRequest(
-						AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyIRI), new QueryImpl()
-								.eq(OntologyTermIndexRepository.PARENT_NODE_PATH, "1.2")
+				searchService.search(new QueryImpl().eq(AbstractOntologyRepository.ENTITY_TYPE,
+						OntologyTermIndexRepository.TYPE_ONTOLOGYTERM), entityMetaData)).thenReturn(
+				Arrays.<org.molgenis.data.Entity> asList(hit1, hit2, hit3));
+
+		when(
+				searchService.search(
+						new QueryImpl()
+								.eq(AbstractOntologyRepository.PARENT_NODE_PATH, "1.2")
 								.and()
-								.eq(OntologyTermIndexRepository.ENTITY_TYPE,
-										OntologyTermIndexRepository.TYPE_ONTOLOGYTERM), null))).thenReturn(
-				new SearchResult(2, Arrays.asList(hit2, hit3)));
+								.eq(AbstractOntologyRepository.ENTITY_TYPE,
+										AbstractOntologyRepository.TYPE_ONTOLOGYTERM), entityMetaData)).thenReturn(
+				Arrays.<org.molgenis.data.Entity> asList(hit2, hit3));
 
 		when(
-				searchService.search(new SearchRequest(
-						AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyIRI), new QueryImpl()
-								.eq(OntologyTermIndexRepository.NODE_PATH, "1.2.3")
+				searchService.search(
+						new QueryImpl()
+								.eq(AbstractOntologyRepository.NODE_PATH, "1.2.3")
 								.and()
-								.eq(OntologyTermIndexRepository.ENTITY_TYPE,
-										OntologyTermIndexRepository.TYPE_ONTOLOGYTERM), null))).thenReturn(
-				new SearchResult(1, Arrays.asList(hit2)));
+								.eq(AbstractOntologyRepository.ENTITY_TYPE,
+										AbstractOntologyRepository.TYPE_ONTOLOGYTERM), entityMetaData)).thenReturn(
+				Arrays.<org.molgenis.data.Entity> asList(hit2));
+		when(searchService.search(new QueryImpl().eq(OntologyTermQueryRepository.ID, "ontology-3"), entityMetaData))
+				.thenReturn(Arrays.<org.molgenis.data.Entity> asList(hit3));
+		when(searchService.count(new QueryImpl().pageSize(Integer.MAX_VALUE).offset(Integer.MIN_VALUE), entityMetaData))
+				.thenReturn(new Long(3));
 
-		when(
-				searchService.count(AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyIRI), new QueryImpl()
-						.pageSize(Integer.MAX_VALUE).offset(Integer.MIN_VALUE))).thenReturn(new Long(3));
+		Hit hit = mock(Hit.class);
+		when(searchService.search(new SearchRequest(entityMetaData.getName(), new QueryImpl().pageSize(1), null)))
+				.thenReturn(new SearchResult(1, Arrays.asList(hit)));
 
-		when(searchService.searchById(AsyncOntologyIndexer.createOntologyTermDocumentType(ontologyIRI), "ontology-3"))
-				.thenReturn(hit3);
+		DataService dataService = mock(DataService.class);
+		OntologyService ontologyService = mock(OntologyService.class);
 
-		ontologyTermIndexRepository = new OntologyTermQueryRepository("test-ontology", ontologyIRI, searchService);
+		ontologyTermIndexRepository = new OntologyTermQueryRepository("test-ontology", searchService, dataService,
+				ontologyService);
 	}
 
 	@Test
@@ -167,4 +202,5 @@ public class OntologyTermIndexRepositoryTest
 		assertEquals(ontologyTermIndexRepository.getUrl(),
 				"ontologytermindex://" + ontologyTermIndexRepository.getName());
 	}
+
 }

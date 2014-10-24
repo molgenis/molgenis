@@ -74,10 +74,10 @@ public abstract class AbstractOntologyRepository implements Repository
 			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_TERM_DEFINITION));
 			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_NAME));
 			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_IRI, FieldTypeEnum.HYPERLINK));
-			DefaultAttributeMetaData childrenAttributeMetatData = new DefaultAttributeMetaData("attributes",
+			DefaultAttributeMetaData childrenAttributeMetaData = new DefaultAttributeMetaData("attributes",
 					FieldTypeEnum.MREF);
-			childrenAttributeMetatData.setRefEntity(entityMetaData);
-			entityMetaData.addAttributeMetaData(childrenAttributeMetatData);
+			childrenAttributeMetaData.setRefEntity(entityMetaData);
+			entityMetaData.addAttributeMetaData(childrenAttributeMetaData);
 		}
 		return entityMetaData;
 	}

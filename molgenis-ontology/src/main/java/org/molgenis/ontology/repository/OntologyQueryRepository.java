@@ -35,7 +35,7 @@ public class OntologyQueryRepository extends AbstractOntologyQueryRepository
 	{
 		if (query.getRules().size() > 0) query.and();
 		query.eq(OntologyQueryRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY);
-		return Iterables.transform(searchService.search(query, entityMetaData), new Function<Entity, Entity>()
+		return Iterables.transform(searchService.search(query, getEntityMetaData()), new Function<Entity, Entity>()
 		{
 			@Override
 			@Nullable
@@ -61,7 +61,7 @@ public class OntologyQueryRepository extends AbstractOntologyQueryRepository
 	public Entity findOne(Object id)
 	{
 		for (Entity entity : searchService.search(new QueryImpl().eq(OntologyTermQueryRepository.ID, id),
-				entityMetaData))
+				getEntityMetaData()))
 		{
 			return new OntologyEntity(entity, entityMetaData, dataService, searchService, ontologyService);
 		}

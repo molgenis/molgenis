@@ -56,12 +56,13 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 	@Override
 	public long count()
 	{
-		return ontologyLoader.count();
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public Iterator<Entity> iterator()
 	{
+        final Set<String> processedClasses = new HashSet<String>();
 		final TreeTraverser<OWLClassContainer> traverser = new TreeTraverser<OWLClassContainer>()
 		{
 			@Override
@@ -70,7 +71,7 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 				// In order to index the synonyms, ontology term entries are
 				// duplicated for that purpose. However we only index the
 				// ontology terms that are original.
-				if (!classContainer.isOriginal()) return Collections.emptySet();
+				if (!classContainer.isLabel()) return Collections.emptySet();
 
 				int count = 0;
 				Set<OWLClassContainer> orderedList = new HashSet<OWLClassContainer>();
@@ -94,7 +95,8 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 										.size() == 0, synonym.equals(ontologyLoader.getLabel(childClass)),
 								createAlternativeDefinitions(childClass), allDatabaseIds));
 					}
-					count++;
+
+                    count++;
 				}
 				return orderedList;
 			}

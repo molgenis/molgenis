@@ -82,7 +82,7 @@ public class OWLClassContainer
 		return alternativeDefinitions == null ? StringUtils.EMPTY : alternativeDefinitions;
 	}
 
-	public boolean isOriginal()
+	public boolean isLabel()
 	{
 		return original;
 	}
@@ -91,4 +91,47 @@ public class OWLClassContainer
 	{
 		return allDatabaseIds;
 	}
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof OWLClassContainer)) return false;
+
+        OWLClassContainer that = (OWLClassContainer) o;
+
+        if (last != that.last) return false;
+        if (original != that.original) return false;
+        if (root != that.root) return false;
+        if (allDatabaseIds != null ? !allDatabaseIds.equals(that.allDatabaseIds) : that.allDatabaseIds != null)
+            return false;
+        if (alternativeDefinitions != null ? !alternativeDefinitions.equals(that.alternativeDefinitions) : that.alternativeDefinitions != null)
+            return false;
+        if (classDefinition != null ? !classDefinition.equals(that.classDefinition) : that.classDefinition != null)
+            return false;
+        if (classLabel != null ? !classLabel.equals(that.classLabel) : that.classLabel != null) return false;
+        if (nodePath != null ? !nodePath.equals(that.nodePath) : that.nodePath != null) return false;
+        if (owlClass != null ? !owlClass.equals(that.owlClass) : that.owlClass != null) return false;
+        if (parentNodePath != null ? !parentNodePath.equals(that.parentNodePath) : that.parentNodePath != null)
+            return false;
+        if (parentOntologyTermIRI != null ? !parentOntologyTermIRI.equals(that.parentOntologyTermIRI) : that.parentOntologyTermIRI != null)
+            return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = owlClass != null ? owlClass.hashCode() : 0;
+        result = 31 * result + (classLabel != null ? classLabel.hashCode() : 0);
+        result = 31 * result + (classDefinition != null ? classDefinition.hashCode() : 0);
+        result = 31 * result + (nodePath != null ? nodePath.hashCode() : 0);
+        result = 31 * result + (parentNodePath != null ? parentNodePath.hashCode() : 0);
+        result = 31 * result + (parentOntologyTermIRI != null ? parentOntologyTermIRI.hashCode() : 0);
+        result = 31 * result + (root ? 1 : 0);
+        result = 31 * result + (last ? 1 : 0);
+        result = 31 * result + (original ? 1 : 0);
+        result = 31 * result + (alternativeDefinitions != null ? alternativeDefinitions.hashCode() : 0);
+        result = 31 * result + (allDatabaseIds != null ? allDatabaseIds.hashCode() : 0);
+        return result;
+    }
 }

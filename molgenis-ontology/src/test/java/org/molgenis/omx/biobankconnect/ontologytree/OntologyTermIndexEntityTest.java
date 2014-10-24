@@ -1,6 +1,7 @@
 package org.molgenis.omx.biobankconnect.ontologytree;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.validateMockitoUsage;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -10,24 +11,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.elasticsearch.util.Hit;
-import org.molgenis.data.elasticsearch.util.SearchRequest;
-import org.molgenis.data.elasticsearch.util.SearchResult;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.omx.biobankconnect.ontology.repository.OntologyIndexRepository;
-import org.molgenis.omx.biobankconnect.ontology.repository.OntologyQueryRepository;
-import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermIndexRepository;
-import org.molgenis.omx.biobankconnect.ontologyindexer.AsyncOntologyIndexer;
-import org.molgenis.omx.observ.Characteristic;
+import org.molgenis.ontology.beans.OntologyTermEntity;
+import org.molgenis.ontology.repository.AbstractOntologyRepository;
+import org.molgenis.ontology.repository.OntologyIndexRepository;
+import org.molgenis.ontology.repository.OntologyQueryRepository;
+import org.molgenis.ontology.repository.OntologyTermIndexRepository;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class OntologyTermIndexEntityTest
 {
-
 	EntityMetaData entityMetaData;
 
 	OntologyTermEntity ontologyTermIndexEntity;
@@ -35,54 +34,47 @@ public class OntologyTermIndexEntityTest
 	@BeforeClass
 	public void setUp() throws OWLOntologyCreationException
 	{
-		Map<String, Object> columnValueMap1 = new HashMap<String, Object>();
-		columnValueMap1.put(OntologyTermIndexRepository.ROOT, true);
-		columnValueMap1.put(OntologyTermIndexRepository.LAST, false);
-		columnValueMap1.put(OntologyTermIndexRepository.NODE_PATH, "1");
-		columnValueMap1.put(OntologyIndexRepository.ONTOLOGY_IRI, "http://www.ontology.test");
-		columnValueMap1.put(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI, "http://www.ontology.test#term1");
-		Hit hit1 = mock(Hit.class);
-		when(hit1.getId()).thenReturn("forged-id");
-		when(hit1.getColumnValueMap()).thenReturn(columnValueMap1);
+		MapEntity hit1 = new MapEntity();
+		hit1.set(OntologyTermIndexRepository.ROOT, true);
+		hit1.set(OntologyTermIndexRepository.LAST, false);
+		hit1.set(OntologyTermIndexRepository.NODE_PATH, "1");
+		hit1.set(OntologyIndexRepository.ONTOLOGY_IRI, "http://www.ontology.test");
+		hit1.set(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI, "http://www.ontology.test#term1");
+		hit1.set(AbstractOntologyRepository.ID, "forged-id");
 
-		Map<String, Object> columnValueMap2 = new HashMap<String, Object>();
-		columnValueMap2.put(OntologyTermIndexRepository.ROOT, false);
-		columnValueMap2.put(OntologyTermIndexRepository.LAST, true);
-		columnValueMap2.put(OntologyTermIndexRepository.NODE_PATH, "1.2");
-		columnValueMap2.put(OntologyTermIndexRepository.PARENT_NODE_PATH, "1");
-		columnValueMap2.put(OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_IRI, "http://www.ontology.test");
-		columnValueMap2.put(OntologyIndexRepository.ONTOLOGY_IRI, "http://www.ontology.test");
-		columnValueMap2.put(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI, "http://www.ontology.test#term2");
-		Hit hit2 = mock(Hit.class);
-		when(hit2.getId()).thenReturn("forged-id-2");
-		when(hit2.getColumnValueMap()).thenReturn(columnValueMap2);
+		MapEntity hit2 = new MapEntity();
+		hit2.set(OntologyTermIndexRepository.ROOT, false);
+		hit2.set(OntologyTermIndexRepository.LAST, true);
+		hit2.set(OntologyTermIndexRepository.NODE_PATH, "1.2");
+		hit2.set(OntologyTermIndexRepository.PARENT_NODE_PATH, "1");
+		hit2.set(OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_IRI, "http://www.ontology.test");
+		hit2.set(OntologyIndexRepository.ONTOLOGY_IRI, "http://www.ontology.test");
+		hit2.set(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI, "http://www.ontology.test#term2");
+		hit2.set(AbstractOntologyRepository.ID, "forged-id-2");
 
-		Map<String, Object> columnValueMap3 = new HashMap<String, Object>();
-		columnValueMap3.put(OntologyTermIndexRepository.ROOT, false);
-		columnValueMap3.put(OntologyTermIndexRepository.LAST, true);
-		columnValueMap3.put(OntologyTermIndexRepository.NODE_PATH, "1.3");
-		columnValueMap3.put(OntologyTermIndexRepository.PARENT_NODE_PATH, "1");
-		columnValueMap3.put(OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_IRI, "http://www.ontology.test");
-		columnValueMap3.put(OntologyIndexRepository.ONTOLOGY_IRI, "http://www.ontology.test");
-		columnValueMap3.put(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI, "http://www.ontology.test#term3");
-		Hit hit3 = mock(Hit.class);
-		when(hit3.getId()).thenReturn("forged-id-3");
-		when(hit3.getColumnValueMap()).thenReturn(columnValueMap3);
+		MapEntity hit3 = new MapEntity();
+		hit3.set(OntologyTermIndexRepository.ROOT, false);
+		hit3.set(OntologyTermIndexRepository.LAST, true);
+		hit3.set(OntologyTermIndexRepository.NODE_PATH, "1.3");
+		hit3.set(OntologyTermIndexRepository.PARENT_NODE_PATH, "1");
+		hit3.set(OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_IRI, "http://www.ontology.test");
+		hit3.set(OntologyIndexRepository.ONTOLOGY_IRI, "http://www.ontology.test");
+		hit3.set(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI, "http://www.ontology.test#term3");
+		hit3.set(AbstractOntologyRepository.ID, "forged-id-3");
 
 		SearchService searchService = mock(SearchService.class);
 		when(
-				searchService.search(new SearchRequest(AsyncOntologyIndexer
-						.createOntologyTermDocumentType("http://www.ontology.test"), new QueryImpl().pageSize(10000)
-						.eq(OntologyTermIndexRepository.ROOT, true), null))).thenReturn(
-				new SearchResult(1, Arrays.asList(hit1)));
+				searchService.search(new QueryImpl().pageSize(10000).eq(OntologyTermIndexRepository.ROOT, true),
+						entityMetaData)).thenReturn(Arrays.<Entity> asList(hit1));
 
 		when(
-				searchService.search(new SearchRequest(AsyncOntologyIndexer
-						.createOntologyTermDocumentType("http://www.ontology.test"), new QueryImpl()
-						.eq(OntologyTermIndexRepository.PARENT_NODE_PATH, "1").and()
-						.eq(OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_IRI, "http://www.ontology.test#term1")
-						.pageSize(Integer.MAX_VALUE), null)))
-				.thenReturn(new SearchResult(2, Arrays.asList(hit2, hit3)));
+				searchService.search(
+						new QueryImpl()
+								.eq(OntologyTermIndexRepository.PARENT_NODE_PATH, "1")
+								.and()
+								.eq(OntologyTermIndexRepository.PARENT_ONTOLOGY_TERM_IRI,
+										"http://www.ontology.test#term1").pageSize(Integer.MAX_VALUE), null))
+				.thenReturn(Arrays.<Entity> asList(hit2, hit3));
 
 		OntologyQueryRepository ontologyIndexRepository = mock(OntologyQueryRepository.class);
 		ontologyTermIndexEntity = new OntologyTermEntity(hit1, ontologyIndexRepository.getEntityMetaData(),
@@ -92,7 +84,7 @@ public class OntologyTermIndexEntityTest
 	@Test
 	public void get()
 	{
-		assertEquals(ontologyTermIndexEntity.get(Characteristic.ID).toString(), "forged-id");
+		assertEquals(ontologyTermIndexEntity.get(OntologyTermIndexRepository.ID).toString(), "forged-id");
 		assertEquals(Boolean.parseBoolean(ontologyTermIndexEntity.get(OntologyTermIndexRepository.ROOT).toString()),
 				true);
 		Object attributes = ontologyTermIndexEntity.get("attributes");

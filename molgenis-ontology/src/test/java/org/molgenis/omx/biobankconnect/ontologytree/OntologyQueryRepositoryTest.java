@@ -12,15 +12,13 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.semantic.OntologyService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.ontology.OntologyService;
 import org.molgenis.ontology.beans.OntologyEntity;
-import org.molgenis.ontology.repository.OntologyIndexRepository;
-import org.molgenis.ontology.repository.OntologyQueryRepository;
-import org.molgenis.ontology.repository.OntologyTermIndexRepository;
-import org.molgenis.ontology.repository.OntologyTermQueryRepository;
+import org.molgenis.ontology.repository.*;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -38,42 +36,39 @@ public class OntologyQueryRepositoryTest
 
 		DefaultEntityMetaData entityMetaDataOntology = new DefaultEntityMetaData(
 				OntologyQueryRepository.DEFAULT_ONTOLOGY_REPO);
-		entityMetaDataOntology.addAttributeMetaData(new DefaultAttributeMetaData(
-				OntologyTermIndexRepository.ONTOLOGY_NAME));
-		entityMetaDataOntology.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermIndexRepository.ROOT,
+		entityMetaDataOntology
+				.addAttributeMetaData(new DefaultAttributeMetaData(OntologyQueryRepository.ONTOLOGY_NAME));
+		entityMetaDataOntology.addAttributeMetaData(new DefaultAttributeMetaData(OntologyQueryRepository.ROOT,
 				FieldTypeEnum.BOOL));
-		entityMetaDataOntology.addAttributeMetaData(new DefaultAttributeMetaData(OntologyIndexRepository.ONTOLOGY_IRI,
+		entityMetaDataOntology.addAttributeMetaData(new DefaultAttributeMetaData(OntologyQueryRepository.ONTOLOGY_IRI,
 				FieldTypeEnum.STRING));
 
 		DefaultEntityMetaData entityMetaDataOntologyTerm = new DefaultEntityMetaData("test");
-		entityMetaDataOntologyTerm.addAttributeMetaData(new DefaultAttributeMetaData(OntologyTermIndexRepository.ROOT,
+		entityMetaDataOntologyTerm.addAttributeMetaData(new DefaultAttributeMetaData(OntologyQueryRepository.ROOT,
 				FieldTypeEnum.BOOL));
 		entityMetaDataOntologyTerm.addAttributeMetaData(new DefaultAttributeMetaData(
-				OntologyIndexRepository.ONTOLOGY_IRI, FieldTypeEnum.STRING));
+				OntologyQueryRepository.ONTOLOGY_IRI, FieldTypeEnum.STRING));
 
-		Entity entity_1 = mock(Entity.class);
-		when(entity_1.get(OntologyTermIndexRepository.ROOT)).thenReturn(true);
-		when(entity_1.getString(OntologyIndexRepository.ONTOLOGY_NAME)).thenReturn("test");
-		when(entity_1.get(OntologyIndexRepository.ONTOLOGY_IRI)).thenReturn("http://www.ontology.test");
-		when(entity_1.get(OntologyTermQueryRepository.ENTITY_TYPE)).thenReturn(
-				OntologyTermQueryRepository.TYPE_ONTOLOGYTERM);
-		when(entity_1.getIdValue()).thenReturn("forged-id");
+		Entity entity_1 = new MapEntity();
+		entity_1.set(OntologyQueryRepository.ROOT, true);
+		entity_1.set(OntologyQueryRepository.ONTOLOGY_NAME, "another ontology");
+		entity_1.set(OntologyQueryRepository.ONTOLOGY_IRI, "http://www.ontology.test");
+		entity_1.set(OntologyQueryRepository.ENTITY_TYPE, OntologyQueryRepository.TYPE_ONTOLOGYTERM);
+		entity_1.set(OntologyQueryRepository.ID, "ontology");
 
-		Entity entity_2 = mock(Entity.class);
-		when(entity_2.get(OntologyTermIndexRepository.ROOT)).thenReturn(true);
-		when(entity_2.getString(OntologyIndexRepository.ONTOLOGY_NAME)).thenReturn("test2");
-		when(entity_2.get(OntologyIndexRepository.ONTOLOGY_IRI)).thenReturn("http://www.ontology2.test");
-		when(entity_2.get(OntologyTermQueryRepository.ENTITY_TYPE)).thenReturn(
-				OntologyTermQueryRepository.TYPE_ONTOLOGYTERM);
-		when(entity_2.getIdValue()).thenReturn("forged-id-2");
+		Entity entity_2 = new MapEntity();
+		entity_2.set(OntologyQueryRepository.ROOT, true);
+		entity_2.set(OntologyQueryRepository.ONTOLOGY_NAME, "final ontology");
+		entity_2.set(OntologyQueryRepository.ONTOLOGY_IRI, "http://www.ontology2.test");
+		entity_2.set(OntologyQueryRepository.ENTITY_TYPE, OntologyQueryRepository.TYPE_ONTOLOGYTERM);
+		entity_2.set(OntologyQueryRepository.ID, "ontology-2");
 
-		Entity entity_3 = mock(Entity.class);
-		when(entity_3.get(OntologyTermIndexRepository.ROOT)).thenReturn(true);
-		when(entity_3.get(OntologyIndexRepository.ONTOLOGY_NAME)).thenReturn("test3");
-		when(entity_3.get(OntologyIndexRepository.ONTOLOGY_IRI)).thenReturn("http://www.ontology3.test");
-		when(entity_3.get(OntologyTermQueryRepository.ENTITY_TYPE)).thenReturn(
-				OntologyTermQueryRepository.TYPE_ONTOLOGYTERM);
-		when(entity_3.getIdValue()).thenReturn("forged-id-3");
+		Entity entity_3 = new MapEntity();
+		entity_3.set(OntologyQueryRepository.ROOT, true);
+		entity_3.set(OntologyQueryRepository.ONTOLOGY_NAME, "test3");
+		entity_3.set(OntologyQueryRepository.ONTOLOGY_IRI, "http://www.ontology3.test");
+		entity_3.set(OntologyQueryRepository.ENTITY_TYPE, OntologyQueryRepository.TYPE_ONTOLOGYTERM);
+		entity_3.set(OntologyQueryRepository.ID, "ontology-3");
 
 		when(
 				searchService.search(
@@ -95,15 +90,33 @@ public class OntologyQueryRepositoryTest
 		when(
 				searchService.count(
 						new QueryImpl().eq(OntologyIndexRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY)
-								.pageSize(Integer.MAX_VALUE).offset(Integer.MIN_VALUE), entityMetaDataOntology))
-				.thenReturn(new Long(3));
+								.pageSize(Integer.MAX_VALUE).offset(Integer.MIN_VALUE), null)).thenReturn(new Long(3));
 
 		when(
 				searchService.count(
 						new QueryImpl().eq(OntologyIndexRepository.ONTOLOGY_IRI, "http://www.final.ontology.test")
 								.and().eq(OntologyIndexRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY)
-								.pageSize(Integer.MAX_VALUE).offset(Integer.MIN_VALUE), entityMetaDataOntology))
-				.thenReturn(new Long(1));
+								.pageSize(Integer.MAX_VALUE).offset(Integer.MIN_VALUE), null)).thenReturn(new Long(1));
+		when(
+				searchService.search(
+						new QueryImpl().eq(OntologyQueryRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY),
+						entityMetaDataOntology)).thenReturn(
+				Arrays.<Entity> asList(new OntologyEntity(entity_1, entityMetaDataOntology, dataService, searchService,
+						ontologyService)));
+
+		when(
+				searchService.search(new QueryImpl().eq(OntologyTermQueryRepository.ID, "ontology-2"),
+						entityMetaDataOntology)).thenReturn(
+				Arrays.<Entity> asList(new OntologyEntity(entity_1, entityMetaDataOntology, dataService, searchService,
+						ontologyService)));
+
+		when(
+				searchService.search(
+						new QueryImpl().eq(OntologyIndexRepository.ONTOLOGY_IRI, "http://www.final.ontology.test")
+								.and().eq(OntologyQueryRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY),
+						entityMetaDataOntology)).thenReturn(
+				Arrays.<Entity> asList(new OntologyEntity(entity_2, entityMetaDataOntology, dataService, searchService,
+						ontologyService)));
 
 		ontologyQueryRepository = new OntologyQueryRepository("ontologyindex", ontologyService, searchService,
 				dataService);
@@ -134,14 +147,15 @@ public class OntologyQueryRepositoryTest
 	{
 		Entity entity = ontologyQueryRepository.findOne(new QueryImpl().eq(OntologyIndexRepository.ONTOLOGY_IRI,
 				"http://www.final.ontology.test"));
-		assertEquals(entity.get(OntologyIndexRepository.ONTOLOGY_NAME).toString(), "final ontology");
+		assertEquals(entity.get(OntologyQueryRepository.ONTOLOGY_NAME).toString(), "final ontology");
 	}
 
 	@Test
 	public void findOneObject()
 	{
 		Entity entity = ontologyQueryRepository.findOne("ontology-2");
-		assertEquals(entity.get(OntologyIndexRepository.ONTOLOGY_NAME).toString(), "another ontology");
+		assertEquals(((OntologyEntity) entity).getEntity().get(OntologyQueryRepository.ONTOLOGY_NAME).toString(),
+				"another ontology");
 	}
 
 	@Test
