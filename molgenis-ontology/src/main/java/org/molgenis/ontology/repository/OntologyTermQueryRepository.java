@@ -13,10 +13,10 @@ import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.util.Hit;
 import org.molgenis.data.elasticsearch.util.SearchRequest;
-import org.molgenis.data.semantic.OntologyService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.ontology.OntologyService;
 import org.molgenis.ontology.beans.OntologyTermEntity;
 import org.molgenis.ontology.beans.OntologyTermTransformer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,10 +34,10 @@ public class OntologyTermQueryRepository extends AbstractOntologyQueryRepository
 			OntologyService ontologyService)
 	{
 		super(entityName, searchService);
-		dynamicEntityMetaData();
-	}
+        dynamicEntityMetaData();
+    }
 
-	@SuppressWarnings("deprecation")
+    //FIXME: please document this piece of sorcery
 	private void dynamicEntityMetaData()
 	{
 		EntityMetaData entityMetaData = getEntityMetaData();

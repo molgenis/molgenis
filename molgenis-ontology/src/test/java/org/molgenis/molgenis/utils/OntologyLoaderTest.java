@@ -5,6 +5,9 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -23,7 +26,10 @@ public class OntologyLoaderTest
 	@BeforeMethod
 	public void setUp() throws OWLOntologyCreationException
 	{
-		loader = new OntologyLoader("ontology-test", new File("src/test/resources/test-ontology-loader.owl"));
+		URL url = Thread.currentThread().getContextClassLoader().getResource("test-ontology-loader.owl");
+		File file = new File(url.getPath());
+
+		loader = new OntologyLoader("ontology-test", file);
 	}
 
 	@Test
