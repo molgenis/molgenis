@@ -69,10 +69,8 @@ import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 
 /**
- * ElasticSearch implementation of the SearchService interface. TODO use
- * scroll-scan where possible:
- * http://www.elasticsearch.org/guide/en/elasticsearch
- * /reference/current/search-request-scroll.html#scroll-scans
+ * ElasticSearch implementation of the SearchService interface. TODO use scroll-scan where possible:
+ * http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-request-scroll.html#scroll-scans
  * 
  * @author erwin
  */
@@ -157,9 +155,7 @@ public class ElasticSearchService implements SearchService
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.molgenis.data.elasticsearch.SearchService#search(org.elasticsearch
-	 * .action.search.SearchRequest)
+	 * @see org.molgenis.data.elasticsearch.SearchService#search(org.elasticsearch.action.search.SearchRequest)
 	 */
 	@Override
 	@Deprecated
@@ -169,8 +165,7 @@ public class ElasticSearchService implements SearchService
 	}
 
 	/*
-	 * TODO this method is only used by BiobankConnect and should be removed in
-	 * the future
+	 * TODO this method is only used by BiobankConnect and should be removed in the future
 	 */
 	@Override
 	@Deprecated
@@ -182,9 +177,7 @@ public class ElasticSearchService implements SearchService
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.molgenis.data.elasticsearch.SearchService#count(java.lang.String,
-	 * org.molgenis.data.Query)
+	 * @see org.molgenis.data.elasticsearch.SearchService#count(java.lang.String, org.molgenis.data.Query)
 	 */
 	@Override
 	@Deprecated
@@ -219,12 +212,9 @@ public class ElasticSearchService implements SearchService
 	}
 
 	/*
-	 * TODO this method is only used by BiobankConnect and should be removed in
-	 * the future (non-Javadoc)
+	 * TODO this method is only used by BiobankConnect and should be removed in the future (non-Javadoc)
 	 * 
-	 * @see
-	 * org.molgenis.data.elasticsearch.SearchService#multiSearch(org.elasticsearch
-	 * .action.search.SearchType,
+	 * @see org.molgenis.data.elasticsearch.SearchService#multiSearch(org.elasticsearch.action.search.SearchType,
 	 * org.elasticsearch.action.search.MultiSearchRequest)
 	 */
 	@Override
@@ -291,9 +281,7 @@ public class ElasticSearchService implements SearchService
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.molgenis.data.elasticsearch.SearchService#indexRepository(org.molgenis
-	 * .data.Repository)
+	 * @see org.molgenis.data.elasticsearch.SearchService#indexRepository(org.molgenis.data.Repository)
 	 */
 	@Override
 	@Deprecated
@@ -347,9 +335,7 @@ public class ElasticSearchService implements SearchService
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.molgenis.data.elasticsearch.SearchService#documentTypeExists(java
-	 * .lang.String)
+	 * @see org.molgenis.data.elasticsearch.SearchService#documentTypeExists(java.lang.String)
 	 */
 	@Override
 	public boolean documentTypeExists(String documentType)
@@ -363,9 +349,7 @@ public class ElasticSearchService implements SearchService
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.molgenis.data.elasticsearch.SearchService#deleteDocumentsByType(java
-	 * .lang.String)
+	 * @see org.molgenis.data.elasticsearch.SearchService#deleteDocumentsByType(java.lang.String)
 	 */
 	@Override
 	@Deprecated
@@ -393,9 +377,7 @@ public class ElasticSearchService implements SearchService
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.molgenis.data.elasticsearch.SearchService#deleteDocumentByIds(java
-	 * .lang.String, java.util.List)
+	 * @see org.molgenis.data.elasticsearch.SearchService#deleteDocumentByIds(java.lang.String, java.util.List)
 	 */
 	@Override
 	@Deprecated
@@ -422,9 +404,7 @@ public class ElasticSearchService implements SearchService
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.molgenis.data.elasticsearch.SearchService#updateRepositoryIndex(org
-	 * .molgenis.data.Repository)
+	 * @see org.molgenis.data.elasticsearch.SearchService#updateRepositoryIndex(org.molgenis.data.Repository)
 	 */
 	@Override
 	public void updateRepositoryIndex(Repository repository)
@@ -472,19 +452,16 @@ public class ElasticSearchService implements SearchService
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.molgenis.data.elasticsearch.SearchService#updateDocumentById(java
-	 * .lang.String, java.lang.String, java.lang.String)
+	 * @see org.molgenis.data.elasticsearch.SearchService#updateDocumentById(java.lang.String, java.lang.String,
+	 * java.lang.String)
 	 */
 	@Override
 	public void updateDocumentById(String documentType, String documentId, String updateScript)
 	{
-		// LOG.info("Going to update document of type [" + documentType +
-		// "] with Id : " + documentId);
+		// LOG.info("Going to update document of type [" + documentType + "] with Id : " + documentId);
 		//
 		// String documentTypeSantized = sanitizeMapperType(documentType);
-		// UpdateResponse updateResponse = client.prepareUpdate(indexName,
-		// documentTypeSantized, documentId)
+		// UpdateResponse updateResponse = client.prepareUpdate(indexName, documentTypeSantized, documentId)
 		// .setScript("ctx._source." + updateScript).execute().actionGet();
 		//
 		// if (updateResponse == null)
@@ -516,9 +493,7 @@ public class ElasticSearchService implements SearchService
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.molgenis.data.elasticsearch.SearchService#hasMapping(org.molgenis
-	 * .data.Repository)
+	 * @see org.molgenis.data.elasticsearch.SearchService#hasMapping(org.molgenis.data.Repository)
 	 */
 	@Override
 	public boolean hasMapping(Repository repository)
@@ -529,9 +504,7 @@ public class ElasticSearchService implements SearchService
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.molgenis.data.elasticsearch.SearchService#hasMapping(org.molgenis
-	 * .data.EntityMetaData)
+	 * @see org.molgenis.data.elasticsearch.SearchService#hasMapping(org.molgenis.data.EntityMetaData)
 	 */
 	@Override
 	public boolean hasMapping(EntityMetaData entityMetaData)
@@ -549,9 +522,8 @@ public class ElasticSearchService implements SearchService
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.molgenis.data.elasticsearch.SearchService#createMappings(org.molgenis
-	 * .data.Repository, boolean, boolean, boolean)
+	 * @see org.molgenis.data.elasticsearch.SearchService#createMappings(org.molgenis.data.Repository, boolean, boolean,
+	 * boolean)
 	 */
 	@Override
 	@Deprecated
@@ -564,9 +536,7 @@ public class ElasticSearchService implements SearchService
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.molgenis.data.elasticsearch.SearchService#createMappings(org.molgenis
-	 * .data.EntityMetaData)
+	 * @see org.molgenis.data.elasticsearch.SearchService#createMappings(org.molgenis.data.EntityMetaData)
 	 */
 	@Override
 	public void createMappings(EntityMetaData entityMetaData) throws IOException
@@ -577,9 +547,8 @@ public class ElasticSearchService implements SearchService
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.molgenis.data.elasticsearch.SearchService#createMappings(org.molgenis
-	 * .data.EntityMetaData, boolean, boolean, boolean)
+	 * @see org.molgenis.data.elasticsearch.SearchService#createMappings(org.molgenis.data.EntityMetaData, boolean,
+	 * boolean, boolean)
 	 */
 	@Override
 	public void createMappings(EntityMetaData entityMetaData, boolean storeSource, boolean enableNorms,
@@ -591,9 +560,8 @@ public class ElasticSearchService implements SearchService
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.molgenis.data.elasticsearch.SearchService#createMappings(org.molgenis
-	 * .data.EntityMetaData, boolean, boolean, boolean)
+	 * @see org.molgenis.data.elasticsearch.SearchService#createMappings(org.molgenis.data.EntityMetaData, boolean,
+	 * boolean, boolean)
 	 */
 	@Override
 	public void createMappings(EntityMetaData entityMetaData, boolean storeSource, boolean enableNorms,
@@ -636,9 +604,7 @@ public class ElasticSearchService implements SearchService
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.molgenis.data.elasticsearch.SearchService#count(org.molgenis.data
-	 * .EntityMetaData)
+	 * @see org.molgenis.data.elasticsearch.SearchService#count(org.molgenis.data.EntityMetaData)
 	 */
 	@Override
 	public long count(EntityMetaData entityMetaData)
@@ -649,9 +615,8 @@ public class ElasticSearchService implements SearchService
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.molgenis.data.elasticsearch.SearchService#count(org.molgenis.data
-	 * .Query, org.molgenis.data.EntityMetaData)
+	 * @see org.molgenis.data.elasticsearch.SearchService#count(org.molgenis.data.Query,
+	 * org.molgenis.data.EntityMetaData)
 	 */
 	@Override
 	public long count(Query q, EntityMetaData entityMetaData)
@@ -697,10 +662,8 @@ public class ElasticSearchService implements SearchService
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.molgenis.data.elasticsearch.SearchService#index(org.molgenis.data
-	 * .Entity, org.molgenis.data.EntityMetaData,
-	 * org.molgenis.data.elasticsearch.ElasticSearchService.IndexingMode)
+	 * @see org.molgenis.data.elasticsearch.SearchService#index(org.molgenis.data.Entity,
+	 * org.molgenis.data.EntityMetaData, org.molgenis.data.elasticsearch.ElasticSearchService.IndexingMode)
 	 */
 	@Override
 	public void index(Entity entity, EntityMetaData entityMetaData, IndexingMode indexingMode)
@@ -722,9 +685,7 @@ public class ElasticSearchService implements SearchService
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.molgenis.data.elasticsearch.SearchService#index(java.lang.Iterable,
-	 * org.molgenis.data.EntityMetaData,
+	 * @see org.molgenis.data.elasticsearch.SearchService#index(java.lang.Iterable, org.molgenis.data.EntityMetaData,
 	 * org.molgenis.data.elasticsearch.ElasticSearchService.IndexingMode)
 	 */
 	@Override
@@ -772,9 +733,8 @@ public class ElasticSearchService implements SearchService
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.molgenis.data.elasticsearch.SearchService#delete(org.molgenis.data
-	 * .Entity, org.molgenis.data.EntityMetaData)
+	 * @see org.molgenis.data.elasticsearch.SearchService#delete(org.molgenis.data.Entity,
+	 * org.molgenis.data.EntityMetaData)
 	 */
 	@Override
 	public void delete(Entity entity, EntityMetaData entityMetaData)
@@ -786,9 +746,7 @@ public class ElasticSearchService implements SearchService
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.molgenis.data.elasticsearch.SearchService#deleteById(java.lang.String
-	 * , org.molgenis.data.EntityMetaData)
+	 * @see org.molgenis.data.elasticsearch.SearchService#deleteById(java.lang.String, org.molgenis.data.EntityMetaData)
 	 */
 	@Override
 	public void deleteById(String id, EntityMetaData entityMetaData)
@@ -815,9 +773,8 @@ public class ElasticSearchService implements SearchService
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.molgenis.data.elasticsearch.SearchService#deleteById(java.lang.Iterable
-	 * , org.molgenis.data.EntityMetaData)
+	 * @see org.molgenis.data.elasticsearch.SearchService#deleteById(java.lang.Iterable,
+	 * org.molgenis.data.EntityMetaData)
 	 */
 	@Override
 	public void deleteById(Iterable<String> ids, EntityMetaData entityMetaData)
@@ -864,9 +821,7 @@ public class ElasticSearchService implements SearchService
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.molgenis.data.elasticsearch.SearchService#delete(java.lang.Iterable,
-	 * org.molgenis.data.EntityMetaData)
+	 * @see org.molgenis.data.elasticsearch.SearchService#delete(java.lang.Iterable, org.molgenis.data.EntityMetaData)
 	 */
 	@Override
 	public void delete(Iterable<? extends Entity> entities, EntityMetaData entityMetaData)
@@ -915,9 +870,7 @@ public class ElasticSearchService implements SearchService
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.molgenis.data.elasticsearch.SearchService#delete(org.molgenis.data
-	 * .EntityMetaData)
+	 * @see org.molgenis.data.elasticsearch.SearchService#delete(org.molgenis.data.EntityMetaData)
 	 */
 	@Override
 	public void delete(String entityName)
@@ -940,18 +893,15 @@ public class ElasticSearchService implements SearchService
 		}
 		// FIXME only deletes mappings?
 		// deleteMapping(request)
-		// DeleteByQueryResponse deleteByQueryResponse =
-		// client.prepareDeleteByQuery(indexName)
+		// DeleteByQueryResponse deleteByQueryResponse = client.prepareDeleteByQuery(indexName)
 		// .setQuery(new TermQueryBuilder("_type", type)).execute().actionGet();
 		//
 		// if (deleteByQueryResponse != null)
 		// {
-		// IndexDeleteByQueryResponse idbqr =
-		// deleteByQueryResponse.getIndex(indexName);
+		// IndexDeleteByQueryResponse idbqr = deleteByQueryResponse.getIndex(indexName);
 		// if (idbqr != null && idbqr.getFailedShards() > 0)
 		// {
-		// throw new ElasticsearchException("Delete failed. Returned headers:" +
-		// idbqr.getHeaders());
+		// throw new ElasticsearchException("Delete failed. Returned headers:" + idbqr.getHeaders());
 		// }
 		// }
 		refresh();
@@ -960,8 +910,7 @@ public class ElasticSearchService implements SearchService
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.molgenis.data.elasticsearch.SearchService#get(java.lang.Object,
-	 * org.molgenis.data.EntityMetaData)
+	 * @see org.molgenis.data.elasticsearch.SearchService#get(java.lang.Object, org.molgenis.data.EntityMetaData)
 	 */
 	@Override
 	public ElasticsearchDocumentEntity get(Object entityId, EntityMetaData entityMetaData)
@@ -986,9 +935,7 @@ public class ElasticSearchService implements SearchService
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.molgenis.data.elasticsearch.SearchService#get(java.lang.Iterable,
-	 * org.molgenis.data.EntityMetaData)
+	 * @see org.molgenis.data.elasticsearch.SearchService#get(java.lang.Iterable, org.molgenis.data.EntityMetaData)
 	 */
 	@Override
 	public Iterable<Entity> get(Iterable<Object> entityIds, final EntityMetaData entityMetaData)
@@ -1024,14 +971,12 @@ public class ElasticSearchService implements SearchService
 		});
 	}
 
-	// TODO replace Iterable<Entity> with EntityCollection and add
-	// EntityCollection.getTotal()
+	// TODO replace Iterable<Entity> with EntityCollection and add EntityCollection.getTotal()
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.molgenis.data.elasticsearch.SearchService#search(org.molgenis.data
-	 * .Query, org.molgenis.data.EntityMetaData)
+	 * @see org.molgenis.data.elasticsearch.SearchService#search(org.molgenis.data.Query,
+	 * org.molgenis.data.EntityMetaData)
 	 */
 	@Override
 	public Iterable<Entity> search(Query q, final EntityMetaData entityMetaData)
@@ -1043,9 +988,8 @@ public class ElasticSearchService implements SearchService
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.molgenis.data.elasticsearch.SearchService#aggregate(org.molgenis.
-	 * data.AggregateQuery, org.molgenis.data.EntityMetaData)
+	 * @see org.molgenis.data.elasticsearch.SearchService#aggregate(org.molgenis.data.AggregateQuery,
+	 * org.molgenis.data.EntityMetaData)
 	 */
 	@Override
 	public AggregateResult aggregate(AggregateQuery aggregateQuery, final EntityMetaData entityMetaData)
@@ -1076,9 +1020,8 @@ public class ElasticSearchService implements SearchService
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.molgenis.data.elasticsearch.SearchService#rebuildIndex(java.lang.
-	 * Iterable, org.molgenis.data.EntityMetaData)
+	 * @see org.molgenis.data.elasticsearch.SearchService#rebuildIndex(java.lang.Iterable,
+	 * org.molgenis.data.EntityMetaData)
 	 */
 	@Override
 	public void rebuildIndex(Iterable<? extends Entity> entities, EntityMetaData entityMetaData)
@@ -1167,8 +1110,7 @@ public class ElasticSearchService implements SearchService
 	}
 
 	/**
-	 * Testability, using the real Elasticsearch BulkProcessor results in
-	 * infinite waits on close
+	 * Testability, using the real Elasticsearch BulkProcessor results in infinite waits on close
 	 * 
 	 * @param bulkProcessorFactory
 	 */
@@ -1230,11 +1172,9 @@ public class ElasticSearchService implements SearchService
 	}
 
 	/**
-	 * Retrieve search results in batches. Note: We do not use Elasticsearch
-	 * scan & scroll, because scrolling is not intended for real time user
-	 * request:
-	 * http://www.elasticsearch.org/guide/en/elasticsearch/reference/current
-	 * /search-request-scroll.html
+	 * Retrieve search results in batches. Note: We do not use Elasticsearch scan & scroll, because scrolling is not
+	 * intended for real time user request:
+	 * http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-request-scroll.html
 	 */
 	private static class ElasticsearchEntityIterable implements Iterable<Entity>
 	{

@@ -18,12 +18,12 @@
 		function renderOptions(){
 			$('#selectedTargetDataSets').val(selectedOptions);
 			var targetCatalogues = $('#target-catalogue');
-			var dataSetDiv = $('<div />').addClass('col-md-12');
+			var dataSetDiv = $('<div />').addClass('span10');
 			targetCatalogues.css('margin-top', '20px').empty().append(dataSetDiv);
 			$.each(selectedOptions, function(index, targetDataSetId){
 				var dataSet = restApi.get('/api/v1/dataset/' + targetDataSetId);
-				var nameDiv = $('<div />').addClass('col-md-offset-1 col-md-3').append(dataSet.Name);
-				var controlDiv = $('<div />').addClass('col-md-offset-2 col-md-5');
+				var nameDiv = $('<div />').addClass('span4').append(dataSet.Name);
+				var controlDiv = $('<div />').addClass('col-md-offset-4 span4');
 				var viewCatalogue = $('<button type="btn" class="btn btn-link view-button">View</button>').click(function(){
 					if($(this).hasClass('view-button')){
 						changeDataSet(targetDataSetId);
@@ -51,16 +51,16 @@
 			});
 		}
 		
-		function switchOptions(selectDOM){
+		function switchOptions(selectedOptions){
 			var index = 0;
-			var options = $(selectDOM).find('option');
+			var options = $(selectedOptions).find('option');
 			options.attr('selected',false).each(function(){
 				if(targetDataSetId !== $(this).val()){
 					index++;
 				}else return false;
 			});
 			index = index === options.length - 1 ? 0 : index + 1;
-			selectDOM.select2('val', $(options[index]).val());
+			$(options[index]).attr('selected', true);
 		}
 	};
 	
@@ -102,31 +102,23 @@
 		function initSearchDataItems() {
 			var options = {'updatePager' : true};
 			$('#search-dataitem').typeahead({
-				  hint: true,
-				  highlight: true,
-				  minLength: 3
-			},{
-				name: selectedDataSet.Name,
-				displayKey: 'name',
-				source: function(query, cb) {
-					molgenis.dataItemsTypeahead(molgenis.hrefToId(selectedDataSet.href), query, cb);
-				}
-			});
-			$('#search-button').click(function(){
-				updateMatrix(options);
-			});
-			
-			$('#search-dataitem').on('keydown', function(e){
+				source: function(query, process) {
+					molgenis.dataItemsTypeahead(molgenis.hrefToId(selectedDataSet.href), query, process);
+				},
+				minLength : 3,
+				items : 20
+			}).on('keydown', function(e){
 			    if (e.which == 13) {
 			    	$('#search-button').click();
 			    	return false;
 			    }
-			});
-			$('#search-dataitem').on('keyup', function(e){
+			}).on('keyup', function(e){
 				if($(this).val() === ''){
-					$('#search-dataitem').val('');
 					updateMatrix(options);
 			    }
+			});
+			$('#search-button').click(function(){
+				updateMatrix(options);
 			});
 		}
 	}
@@ -163,11 +155,7 @@
 		$('#catalogue-container').hide().find('table').empty();
 	}
 	
-	$(document).ready(function(){
-		
-		//Initialize the select element using select2
-		$('#targetDataSets').select2({'width' : '200px'});
-		
+	$(function(){
 		$('#add-target-dataset').click(function(){
 			var targetDataSet = $('#targetDataSets option:selected');
 			molgenis.addTargetDataSet(targetDataSet.val());

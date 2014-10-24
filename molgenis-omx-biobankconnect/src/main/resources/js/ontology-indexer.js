@@ -23,7 +23,7 @@
 						$('<td />').append(ontologyName).appendTo(eachRow);
 						$('<td />').append('<a href="' + ontologyUri + '" target="_blank">' + ontologyUri + '</a>').appendTo(eachRow);
 						$('<td />').append(status).appendTo(eachRow);
-						var removeIcon = $('<span class="glyphicon glyphicon-remove"></span>').click(function(){
+						var removeIcon = $('<i class="icon-remove"></i>').click(function(){
 							$('input[name="ontologyUri"]').val(ontologyUri);
 							$('#ontologyindexer-form').attr({
 								'action' : molgenis.getContextUrl() + '/remove',

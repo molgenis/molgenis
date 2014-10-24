@@ -1,0 +1,14 @@
+<molgenis name="org.molgenis.omx">
+	<module name="patient" label="Patient">
+	<description>
+		Temporary solution to link mutations to patients for the genome browser.
+	</description>
+		<entity name="Patient" extends="Individual">
+			<field name="Allele1" nillable="true" type="xref" xref_entity="Variant" />
+			<field name="Allele2" nillable="true" type="xref" xref_entity="Variant" />
+			<field name="Pheno" nillable="true" />
+			<field name="PubMedID" nillable="true" />
+			<field name="Reference" nillable="true" />
+		</entity>
+	</module>
+</molgenis>

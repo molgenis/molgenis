@@ -26,33 +26,29 @@
 		modal.modal('show');
 	};
 	
-	function createFilterModal() {		
+	function createFilterModal() {
 		var modal = $('#filter-modal');
-		
-		if(modal.length === 0){
-            var filterTemplate = Handlebars.compile($("#filter-modal-template").html());
-
-            modal = $(filterTemplate({}));
-			createFilterModalControls(modal);
-		}
-		
+        var filterTemplate = Handlebars.compile($("#filter-modal-template").html());
+        modal = $(filterTemplate({}));
+		createFilterModalControls(modal);
 		return modal;
 	}
 	
 	function createFilterModalControls(modal) {
+		$('.filter-apply-btn', modal).unbind('click');
 		$('.filter-apply-btn', modal).click(function() {
 			var filters = molgenis.dataexplorer.filter.createFilters($('form', modal));
-			if (filters.length > 0) {
-				$(document).trigger('updateAttributeFilters', {
-					'filters' : filters
-				});
-			}
+			$(document).trigger('updateAttributeFilters', {
+				'filters' : filters
+			});
 		});
 		
+		$(modal).unbind('shown.bs.modal');
 		modal.on('shown.bs.modal', function () {
 			$('form input:visible:first', modal).focus();
 		});
 		
+		$(modal).unbind('keypress');
 		modal.keypress(function(e) {
 		    if(e.which == 13) {
 		    	e.preventDefault();

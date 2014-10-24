@@ -1,9 +1,8 @@
 package org.molgenis.data.annotation;
 
-import org.molgenis.data.EntityMetaData;
-import org.springframework.stereotype.Component;
-
 import java.util.List;
+
+import org.molgenis.data.EntityMetaData;
 
 /**
  * Created with IntelliJ IDEA. User: charbonb Date: 19/02/14 Time: 12:50 To change this template use File | Settings |

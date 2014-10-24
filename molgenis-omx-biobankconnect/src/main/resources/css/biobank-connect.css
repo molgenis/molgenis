@@ -1,42 +1,20 @@
-.twitter-typeahead{
-	float:left; 
-	width:100%;
+table {
+	border : 1px solid #5B82A4;
 }
 
-.table-bordered tr:first-child th:first-child{
-	border-top-left-radius:5px;
-}
-
-.table-bordered tr:first-child th:last-child{
-	border-top-right-radius:5px;
-}
-
-.table-bordered {
-	border:none;
-}
-
-.table-bordered tbody tr th:not(first-child){
-	border : none;
-	border-right:1px solid #ddd;
-}
-
-.table-bordered tbody tr:first-child th:first-child{
-	border:none;
-	border-right:1px solid #ddd;
-}
-
-.table-bordered tbody tr:first-child th:last-child{
-	border:none;
-	border-left:1px solid #ddd;
-}
-
-table thead th,th {	
-    background-color: #428bca; 
+table thead th {	
+    background-color: #5B82A4; 
+    border:2px solid #5B82A4;
     color: white;
 }
 
 tbody tr:hover,.div-hover:hover {
 	background: #CEECF5; 
+}
+
+th {	
+    background-color: #5B82A4; 
+    color: white;
 }
 
 th.text-align-center,.text-align-center{
@@ -45,8 +23,6 @@ th.text-align-center,.text-align-center{
 
 h3 {
 	color : #3079C2;
-	margin-top : -5px;
-	margin-bottom : -5px;
 }
 
 div#progress-bar-div {
@@ -82,8 +58,8 @@ dd {
 }
 
 legend {
+	margin-top : -10px;
 	padding-bottom : 10px;
-	font-size:20px;
 }
 
 .float-right {
@@ -91,18 +67,9 @@ legend {
 	margin-right : 5px;
 }
 
-.float-right-align{
-	float:right;
-}
-
-.show-popover,.glyphicon,.input-group-addon,.ui-icon{
+.show-popover {
 	cursor: hand; 
 	cursor: pointer;
-}
-
-.glyphicon-large{
-	font-size:1.2em;
-	vertical-align:middle;
 }
 
 .custom-white-well {
@@ -110,8 +77,6 @@ legend {
 	border-left:none;
 	border-right:none;
 	border-radius:10px;
-	padding-left:30px;
-	padding-right:30px;
 }
 
 .custom-purple-legend {

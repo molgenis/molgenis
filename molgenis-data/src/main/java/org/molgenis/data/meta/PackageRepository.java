@@ -1,96 +1,118 @@
 package org.molgenis.data.meta;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
 import org.molgenis.data.ManageableCrudRepositoryCollection;
 import org.molgenis.data.Package;
-import org.molgenis.data.Query;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.util.DependencyResolver;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 /**
- * Repository to add and retrieve Package entities.
+ * Helper class around the {@link PackageMetaData} repository. Caches the package metadata in {@link PackageImpl}s.
+ * Internal implementation, use {@link MetaDataService} instead.
  */
 class PackageRepository
 {
 	public static final PackageMetaData META_DATA = new PackageMetaData();
 
+	final static Logger LOG = Logger.getLogger(PackageRepository.class);
+
+	/**
+	 * The repository where the package entities are stored.
+	 */
 	private CrudRepository repository;
 
-	public PackageRepository(ManageableCrudRepositoryCollection repositoryCreator)
+	/**
+	 * In-memory cache of all packages, filled with entities and attributes.
+	 */
+	private Map<String, PackageImpl> packageCache = new HashMap<String, PackageImpl>();
+
+	/**
+	 * Creates a new PackageRepository.
+	 * 
+	 * @param coll
+	 *            {@link ManageableCrudRepositoryCollection} that will be used to store the package entities.
+	 */
+	public PackageRepository(ManageableCrudRepositoryCollection coll)
 	{
-		repository = repositoryCreator.add(META_DATA);
+		repository = coll.add(META_DATA);
+		updatePackageCache();
 		addDefaultPackage();
 	}
 
-	public void addDefaultPackage()
+	/**
+	 * Adds the default package to the repository if it does not yet exist.
+	 */
+	private void addDefaultPackage()
 	{
-		if (!exists(PackageImpl.getDefaultPackage()))
+		if (getPackage(Package.DEFAULT_PACKAGE_NAME) == null)
 		{
-			add(PackageImpl.getDefaultPackage());
+			add(PackageImpl.defaultPackage);
 		}
 	}
 
-	public boolean exists(Package p)
+	/**
+	 * Fetches the package tree from the repository.
+	 */
+	void updatePackageCache()
 	{
-		return getPackage(p.getName()) != null;
+		packageCache = createPackageTree(repository);
 	}
 
-	public Iterable<Package> getPackages()
+	/**
+	 * Gets the {@link Package}s that have no parent.
+	 * 
+	 * @return {@link List} of root {@link Package}s.
+	 */
+	public List<Package> getRootPackages()
 	{
-		Set<Package> result = new TreeSet<Package>();
-		for (Entity entity : repository)
+		List<Package> result = new ArrayList<Package>();
+		for (Package p : packageCache.values())
 		{
-			result.add(new PackageImpl(entity));
+			if (p.getParent() == null)
+			{
+				result.add(p);
+			}
 		}
 		return result;
 	}
 
+	/**
+	 * Gets a package.
+	 * 
+	 * @param name
+	 *            fully qualified name of the pacakge
+	 * @return the {@link Package} or null if not found
+	 */
 	public Package getPackage(String name)
 	{
-		Entity entity = repository.findOne(name);
-		if (entity == null)
-		{
-			return null;
-		}
-		return new PackageImpl(entity);
+		return packageCache.get(name);
 	}
 
-	public Iterable<Package> getSubPackages(Package p)
-	{
-		return findPackages(repository.query().eq(PackageMetaData.PARENT, p));
-	}
-
-	protected Iterable<Package> findPackages(Query q)
-	{
-		return Iterables.transform(repository.findAll(q), new Function<Entity, Package>()
-		{
-			@Override
-			public Package apply(Entity entity)
-			{
-				return new PackageImpl(entity);
-			}
-		});
-	}
-
+	/**
+	 * Clears the repository and empties the cache. Re-adds the default package.
+	 */
 	public void deleteAll()
 	{
 		List<Entity> importOrderPackages = Lists.newLinkedList(DependencyResolver.resolveSelfReferences(repository,
 				META_DATA));
 		Collections.reverse(importOrderPackages);
+		System.out.println(importOrderPackages);
 		for (Entity p : importOrderPackages)
 		{
+			System.out.println(p);
 			repository.delete(p);
 		}
+		packageCache.clear();
+		addDefaultPackage();
 	}
 
 	/**
@@ -101,18 +123,85 @@ class PackageRepository
 	 */
 	public void add(Package p)
 	{
-		if (p != null)
+		if (packageCache.containsKey(p.getName()))
+		{
+			return;
+		}
+		PackageImpl parent = null;
+		if (p.getParent() != null)
 		{
 			add(p.getParent());
-			if (getPackage(p.getName()) == null)
+			parent = packageCache.get(p.getParent().getName());
+		}
+		if (getPackage(p.getName()) == null)
+		{
+			PackageImpl pImpl = new PackageImpl(p.getSimpleName(), p.getDescription(), parent);
+			if (parent != null)
 			{
-				repository.add(new PackageImpl(p));
+				parent.addSubPackage(pImpl);
 			}
+			repository.add(pImpl.toEntity());
+			packageCache.put(p.getName(), pImpl);
 		}
 	}
 
-	public Entity getEntity(String fullyQualifiedName)
+	/**
+	 * Retrieves a {@link PackageMetaData} entity from the repository.
+	 * 
+	 * @param fullyQualifiedName
+	 *            fully qualified name of the package
+	 * @return Entity representing the {@link Package}
+	 */
+	Entity getEntity(String fullyQualifiedName)
 	{
-		return repository.findOne(new QueryImpl().eq(PackageMetaData.FULL_NAME, fullyQualifiedName));
+		return packageCache.get(fullyQualifiedName).toEntity();
 	}
+
+	/**
+	 * Creates a map of {@link PackageImpl}s, reconstructing the package tree from a flat list of {@link Entity}. All
+	 * {@link Package#getParent()}s have been set.
+	 * 
+	 * @param packageEntities
+	 *            List of {@link Entity}s from a {@link PackageMetaData} repository.
+	 * @return {@link Map} mapping the full names of the packages to {@link PackageImpl}s
+	 */
+	public static Map<String, PackageImpl> createPackageTree(Iterable<Entity> packageEntities)
+	{
+		Map<String, PackageImpl> result = new HashMap<String, PackageImpl>();
+
+		List<Entity> entities = new ArrayList<Entity>();
+		for (Entity entity : packageEntities)
+		{
+			entities.add(entity);
+		}
+
+		for (Entity entity : entities)
+		{
+			PackageImpl p = new PackageImpl(entity.getString(PackageMetaData.SIMPLE_NAME),
+					entity.getString(PackageMetaData.DESCRIPTION));
+			result.put(entity.getString(PackageMetaData.FULL_NAME), p);
+		}
+
+		for (Entity e : entities)
+		{
+			PackageImpl p = result.get(e.get(PackageMetaData.FULL_NAME));
+			if (e.get(PackageMetaData.PARENT) != null)
+			{
+				PackageImpl parent = result.get(e.getEntity(PackageMetaData.PARENT)
+						.getString(PackageMetaData.FULL_NAME));
+				if (parent == null)
+				{
+					LOG.error("unknown parent package" + e.get(PackageMetaData.PARENT));
+					throw new IllegalStateException("Unknown parent package" + e.get(PackageMetaData.PARENT));
+				}
+				else
+				{
+					p.setParent(parent);
+					parent.addSubPackage(p);
+				}
+			}
+		}
+		return result;
+	}
+
 }

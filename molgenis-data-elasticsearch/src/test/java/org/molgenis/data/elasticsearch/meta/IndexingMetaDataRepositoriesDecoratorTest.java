@@ -28,7 +28,8 @@ public class IndexingMetaDataRepositoriesDecoratorTest
 		metaDataRepositories = mock(WritableMetaDataService.class);
 		dataService = mock(DataService.class);
 		elasticSearchService = mock(ElasticSearchService.class);
-		decorator = new IndexingWritableMetaDataServiceDecorator(metaDataRepositories, dataService, elasticSearchService);
+		decorator = new IndexingWritableMetaDataServiceDecorator(metaDataRepositories, dataService,
+				elasticSearchService);
 	}
 
 	@Test(expectedExceptions = IllegalArgumentException.class)
@@ -65,16 +66,6 @@ public class IndexingMetaDataRepositoriesDecoratorTest
 		decorator.addAttributeMetaData(entityName, attribute);
 		verify(metaDataRepositories).addAttributeMetaData(entityName, attribute);
 		verify(elasticSearchService).createMappings(entityMetaData);
-	}
-
-	@Test
-	public void getEntityAttributeMetaData()
-	{
-		@SuppressWarnings("unchecked")
-		Iterable<AttributeMetaData> attributes = mock(Iterable.class);
-		String entityName = "entity";
-		when(metaDataRepositories.getEntityAttributeMetaData(entityName)).thenReturn(attributes);
-		assertEquals(decorator.getEntityAttributeMetaData(entityName), attributes);
 	}
 
 	@Test
