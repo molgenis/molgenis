@@ -14,7 +14,7 @@ import org.springframework.util.IdGenerator;
  * Helper class around the {@link TagMetaData} repository. Internal implementation class, use
  * {@link MetaDataServiceImpl} instead.
  */
-class TagRepository
+public class TagRepository
 {
 	public static final TagMetaData META_DATA = new TagMetaData();
 	private IdGenerator idGenerator;
