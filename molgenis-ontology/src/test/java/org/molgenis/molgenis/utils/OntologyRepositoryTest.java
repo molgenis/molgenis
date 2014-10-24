@@ -5,6 +5,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
+import java.net.URL;
 import java.util.Iterator;
 
 import org.elasticsearch.common.collect.Iterables;
@@ -24,7 +25,10 @@ public class OntologyRepositoryTest
 	@BeforeMethod
 	public void setUp() throws OWLOntologyCreationException
 	{
-		loader = new OntologyLoader("ontology-test", new File("src/test/resources/test-ontology-loader.owl"));
+		URL url = Thread.currentThread().getContextClassLoader().getResource("test-ontology-loader.owl");
+		File file = new File(url.getPath());
+
+		loader = new OntologyLoader("ontology-test", file);
 		repository = new OntologyIndexRepository(loader, "test", mock(SearchService.class));
 	}
 

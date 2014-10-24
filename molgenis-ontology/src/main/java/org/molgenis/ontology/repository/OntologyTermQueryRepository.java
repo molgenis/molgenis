@@ -34,10 +34,10 @@ public class OntologyTermQueryRepository extends AbstractOntologyQueryRepository
 			OntologyService ontologyService)
 	{
 		super(entityName, searchService);
-		dynamicEntityMetaData();
-	}
+        dynamicEntityMetaData();
+    }
 
-	@SuppressWarnings("deprecation")
+    //FIXME: please document this piece of sorcery
 	private void dynamicEntityMetaData()
 	{
 		EntityMetaData entityMetaData = getEntityMetaData();

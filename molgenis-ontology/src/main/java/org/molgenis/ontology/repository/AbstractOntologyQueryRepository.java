@@ -19,7 +19,7 @@ public abstract class AbstractOntologyQueryRepository extends AbstractOntologyRe
 
 	public Entity findOneInternal(Query query)
 	{
-		for (Entity entity : searchService.search(query, entityMetaData))
+		for (Entity entity : searchService.search(query, getEntityMetaData()))
 		{
 			return entity;
 		}
