@@ -20,6 +20,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Package;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.semantic.UntypedTagService;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.standardsregistry.utils.PackageTreeNode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,13 +44,15 @@ public class StandardsRegistryController extends MolgenisPluginController
 	private static final String VIEW_NAME = "view-standardsregistry";
 	private static final String VIEW_NAME_DETAILS = "view-standardsregistry_details";
 	private final MetaDataService metaDataService;
+	private final UntypedTagService tagService;
 
 	@Autowired
-	public StandardsRegistryController(MetaDataService metaDataService)
+	public StandardsRegistryController(MetaDataService metaDataService, UntypedTagService tagService)
 	{
 		super(URI);
 		if (metaDataService == null) throw new IllegalArgumentException("metaDataService is null");
 		this.metaDataService = metaDataService;
+		this.tagService = tagService;
 	}
 
 	@RequestMapping(method = GET)
@@ -198,6 +201,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 		Map<String, Object> data = new HashMap<String, Object>();
 		data.put("type", "attribute");
 		data.put("href", "/api/v1/" + emd.getName() + "/meta/" + amd.getName());
+		data.put("tags", tagService.getTagsForAttribute(emd, amd));
 
 		if (amd.getDataType().getEnumType() == FieldTypeEnum.COMPOUND)
 		{

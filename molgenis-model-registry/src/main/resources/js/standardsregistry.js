@@ -28,7 +28,7 @@
 						break;
 					case 'attribute' :
 						restApi.getAsync(data.node.data.href, null, function(attribute) {
-							createAttributeMetadataTable(attribute);
+							createAttributeMetadataTable(attribute, data.node.data);
 						});
 						break;
 					default:
@@ -39,10 +39,22 @@
 		});
 	}
 	
-	function createAttributeMetadataTable(attributeMetadata) {
+	function createAttributeMetadataTable(attributeMetadata, data) {
 		$('#attributes-table').attributeMetadataTable({
 			attributeMetadata: attributeMetadata
 		});
+		if(data.tags){
+			for(var i = 0; i<data.tags.length; i++){
+				var $table = $('<table>').appendTo($('#tags'));
+				var $row = $('<tr>').appendTo($table);
+				var $cell = $('<td>').appendTo($row);
+				$cell.text(data.tags[i].relation);
+				var $cell = $('<td>').appendTo($row);
+				var $anchor = $('<a>', {href: data.tags[i].object.iri}).appendTo($cell);
+				$anchor.text(data.tags[i].object.label);
+				var $cell = $('<td>').appendTo($row);
+			}
+		}
 	}
 	
 	function createEntityMetadataTable(entityMetadata) {
