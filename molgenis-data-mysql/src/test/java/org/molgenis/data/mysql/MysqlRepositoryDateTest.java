@@ -13,7 +13,8 @@ public class MysqlRepositoryDateTest extends MysqlRepositoryAbstractDatatypeTest
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		DefaultEntityMetaData varcharMD = new DefaultEntityMetaData("DateTest").setLabel("Date Test");
+		EntityMetaData varcharMD = new DefaultEntityMetaData("DateTest")
+				.setLabel("Date Test");
 		varcharMD.setIdAttribute("col1");
 		varcharMD.addAttribute("col1").setDataType(MolgenisFieldTypes.DATE).setNillable(false);
 		varcharMD.addAttribute("col2").setDataType(MolgenisFieldTypes.DATE);

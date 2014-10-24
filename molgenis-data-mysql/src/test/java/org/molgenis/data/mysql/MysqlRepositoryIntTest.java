@@ -12,7 +12,7 @@ public class MysqlRepositoryIntTest extends MysqlRepositoryAbstractDatatypeTest
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		DefaultEntityMetaData varcharMD = new DefaultEntityMetaData("IntegerTest").setLabel("Integer Test");
+		EntityMetaData varcharMD = new DefaultEntityMetaData("IntegerTest").setLabel("Integer Test");
 		varcharMD.setIdAttribute("col1");
 		varcharMD.addAttribute("col1").setDataType(MolgenisFieldTypes.INT).setNillable(false);
 		varcharMD.addAttribute("col2").setDataType(MolgenisFieldTypes.INT);

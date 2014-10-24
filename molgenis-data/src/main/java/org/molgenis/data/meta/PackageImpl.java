@@ -7,7 +7,6 @@ import java.util.List;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Package;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 
 /**
@@ -16,13 +15,13 @@ import org.molgenis.data.support.MapEntity;
 public class PackageImpl implements Package
 {
 	private List<PackageImpl> subPackages = new ArrayList<PackageImpl>();
-	private List<DefaultEntityMetaData> entities = new ArrayList<DefaultEntityMetaData>();
-	public static final PackageImpl defaultPackage = new PackageImpl(Package.DEFAULT_PACKAGE_NAME,
+	private List<EntityMetaData> entities = new ArrayList<EntityMetaData>();
+	public static final Package defaultPackage = new PackageImpl(Package.DEFAULT_PACKAGE_NAME,
 			"The default package", null);
 
 	final private String simpleName;
 	final private String description;
-	private PackageImpl parent;
+	private Package parent;
 
 	public PackageImpl(String simpleName, String description, PackageImpl parent)
 	{
@@ -117,17 +116,19 @@ public class PackageImpl implements Package
 		subPackages.add(p);
 	}
 
-	void addEntity(DefaultEntityMetaData entityMetaData)
+	void addEntity(EntityMetaData entityMetaData)
 	{
 		entities.add(entityMetaData);
 	}
 
-	public void setParent(PackageImpl parent)
+	@Override
+	public void setParent(Package parent)
 	{
 		this.parent = parent;
 	}
 
-	Entity toEntity()
+	@Override
+	public Entity toEntity()
 	{
 		Entity result = new MapEntity();
 		result.set(PackageMetaData.FULL_NAME, getName());

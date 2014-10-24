@@ -161,6 +161,36 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 			{
 				throw new UnsupportedOperationException();
 			}
+
+			@Override
+			public AttributeMetaData setDataType(FieldType bool)
+			{
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public AttributeMetaData setNillable(boolean b)
+			{
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public AttributeMetaData setRefEntity(EntityMetaData refEntity)
+			{
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public AttributeMetaData setAuto(boolean b)
+			{
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public void setDefaultValue(Object o)
+			{
+				throw new UnsupportedOperationException();
+			}
 		}).skip(1);
 	}
 

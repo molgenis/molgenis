@@ -12,11 +12,13 @@ public class MysqlRepositoryCompoundTest extends MysqlRepositoryAbstractDatatype
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		DefaultEntityMetaData compoundMD = new DefaultEntityMetaData("compound").setAbstract(true);
+		EntityMetaData compoundMD = new DefaultEntityMetaData("compound")
+				.setAbstract(true);
 		compoundMD.addAttribute("col2").setDataType(MolgenisFieldTypes.BOOL);
 		coll.add(compoundMD);
 
-		DefaultEntityMetaData rootMD = new DefaultEntityMetaData("CompoundTest").setLabel("CompoundTest");
+		EntityMetaData rootMD = new DefaultEntityMetaData("CompoundTest")
+				.setLabel("CompoundTest");
 		rootMD.setIdAttribute("col1");
 		rootMD.addAttribute("col1").setDataType(MolgenisFieldTypes.BOOL).setNillable(false);
 		rootMD.addAttribute("compound").setDataType(MolgenisFieldTypes.COMPOUND).setRefEntity(compoundMD);

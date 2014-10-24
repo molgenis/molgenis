@@ -78,10 +78,14 @@ class EntityMetaDataRepository
 				entityMetaData.setExtends(extendsEntityMetaData);
 			}
 			final Entity packageEntity = entity.getEntity(PACKAGE);
+			
 			PackageImpl p = (PackageImpl) packageRepository.getPackage(packageEntity
 					.getString(PackageMetaData.FULL_NAME));
-			entityMetaData.setPackage(p);
-			p.addEntity(entityMetaData);
+			if (null != p)
+			{
+				entityMetaData.setPackage(p);
+				p.addEntity(entityMetaData);
+			}
 		}
 	}
 

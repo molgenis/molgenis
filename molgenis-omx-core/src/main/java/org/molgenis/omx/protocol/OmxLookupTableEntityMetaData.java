@@ -150,4 +150,53 @@ public class OmxLookupTableEntityMetaData extends AbstractEntityMetaData
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public EntityMetaData setLabel(String string)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public EntityMetaData setDescription(String string)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public EntityMetaData setExtends(EntityMetaData extendsEntityMeta)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public EntityMetaData setPackage(Package packageImpl)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public EntityMetaData setAbstract(boolean boolean1)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void addAttributeMetaData(AttributeMetaData attributeMetaData)
+	{
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public AttributeMetaData addAttribute(String string)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

@@ -5,7 +5,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
+import static org.testng.AssertJUnit.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -13,6 +13,7 @@ import java.util.Collections;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
 import org.molgenis.data.ManageableCrudRepositoryCollection;
+import org.molgenis.data.Package;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +43,7 @@ public class MetaDataServiceImplTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	private CrudRepository packageRepository;
 
-	private PackageImpl defaultPackage;
+	private Package defaultPackage;
 
 	private PackageImpl molgenis;
 
@@ -90,7 +91,7 @@ public class MetaDataServiceImplTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testAddAndGetEntity()
 	{
-		PackageImpl defaultPackage = PackageImpl.defaultPackage;
+		PackageImpl defaultPackage = (PackageImpl) PackageImpl.defaultPackage;
 		DefaultEntityMetaData coderMetaData = new DefaultEntityMetaData("Coder");
 		coderMetaData.setDescription("A coder");
 		coderMetaData.setExtends(metaDataServiceImpl.getEntityMetaData("org_molgenis_Person"));

@@ -41,7 +41,7 @@ public class OntologyTermQueryRepository extends AbstractOntologyQueryRepository
 		EntityMetaData entityMetaData = getEntityMetaData();
 		if (entityMetaData instanceof DefaultEntityMetaData)
 		{
-			DefaultEntityMetaData defaultEntityMetaData = (DefaultEntityMetaData) entityMetaData;
+			EntityMetaData defaultEntityMetaData = entityMetaData;
 			Set<String> availableAttributes = new HashSet<String>();
 			for (AttributeMetaData attributeMetaData : entityMetaData.getAttributes())
 			{

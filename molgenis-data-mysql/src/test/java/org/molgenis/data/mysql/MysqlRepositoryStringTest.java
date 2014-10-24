@@ -13,7 +13,7 @@ public class MysqlRepositoryStringTest extends MysqlRepositoryAbstractDatatypeTe
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		DefaultEntityMetaData varcharMD = new DefaultEntityMetaData("VarcharTest").setLabel("Varchar Test");
+		EntityMetaData varcharMD = new DefaultEntityMetaData("VarcharTest").setLabel("Varchar Test");
 		varcharMD.setIdAttribute("col1");
 		varcharMD.addAttribute("col1").setDataType(MolgenisFieldTypes.STRING).setNillable(false);
 		varcharMD.addAttribute("col2").setDataType(MolgenisFieldTypes.STRING);

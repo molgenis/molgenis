@@ -13,7 +13,8 @@ public class MysqlRepositoryBoolTest extends MysqlRepositoryAbstractDatatypeTest
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		DefaultEntityMetaData varcharMD = new DefaultEntityMetaData("BoolTest").setLabel("Bool Test");
+		EntityMetaData varcharMD = new DefaultEntityMetaData("BoolTest")
+				.setLabel("Bool Test");
 		varcharMD.setIdAttribute("col1");
 		varcharMD.addAttribute("col1").setDataType(MolgenisFieldTypes.BOOL).setNillable(false);
 		varcharMD.addAttribute("col2").setDataType(MolgenisFieldTypes.BOOL);

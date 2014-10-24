@@ -101,4 +101,43 @@ public interface AttributeMetaData
 	List<String> getEnumOptions();
 
 	boolean isSameAs(AttributeMetaData attributeMetaData);
+
+	/**
+	 * set data Type
+	 * 
+	 * @param bool
+	 * @return
+	 */
+	AttributeMetaData setDataType(FieldType bool);
+
+	/**
+	 * set nillable
+	 * 
+	 * @param b
+	 * @return
+	 */
+	AttributeMetaData setNillable(boolean b);
+
+	/**
+	 * set ref entity
+	 * 
+	 * @param refEntity
+	 * @return
+	 */
+	AttributeMetaData setRefEntity(EntityMetaData refEntity);
+
+	/**
+	 * set auto
+	 * 
+	 * @param b
+	 * @return
+	 */
+	AttributeMetaData setAuto(boolean b);
+
+	/**
+	 * set default value
+	 * 
+	 * @param i
+	 */
+	void setDefaultValue(Object o);
 }
