@@ -20,15 +20,18 @@
 			$('#catalogue-name').empty().append('Nothing selected');
 			$('#dataitem-number').empty().append('Nothing selected');
 		}
-		
+
 		function initSearchDataItems () {
 			var options = {'updatePager' : true};
 			$('#search-dataitem').typeahead({
-				source: function(query, process) {
-					molgenis.dataItemsTypeahead(molgenis.hrefToId(selectedDataSet.href), query, process);
-				},
-				minLength : 3,
-				items : 20
+				  hint: true,
+				  highlight: true,
+				  minLength: 3
+			},{
+				displayKey: 'name',
+				source: function(query, cb) {
+					molgenis.dataItemsTypeahead(molgenis.hrefToId(selectedDataSet.href), query, cb);
+				}
 			});
 			$('#search-button').click(function(){
 				updateMatrix(options);
@@ -119,13 +122,8 @@
 		var body = modal.find('div.modal-body:eq(0)').addClass('overflow-y-visible');
 		body.append(createFeatureInfo(title, restApiFeature, callback));
 		body.append(createSearchDiv(title, restApiFeature, callback));
-		modal.css({
-			'width' : '50%',
-			'left' : '25%',
-			'top' : '30%',
-			'margin-left' : 0,
-			'margin-top' : 0
-		}).modal('show');
+		modal.find('.modal-dialog').css('width','50%');
+		modal.css('top','20%').modal('show');
 		return modal;
 		
 		function createFeatureInfo(title, restApiFeature, callback){
@@ -146,27 +144,28 @@
 					var ontologyTermAnnotations = $('<ul />');
 					var boostedOntologyTerms = hit.columnValueMap['boostOntologyTerms'] === '' ? [] : hit.columnValueMap['boostOntologyTerms'].split(',');
 					$.each(restApiFeature.definitions.items, function(index, ontologyTerm){
-						var removeIcon = $('<i class="icon-remove float-right"></i>').click(function(){
+						var removeIcon = $('<span class="glyphicon glyphicon-remove float-right"></span>').click(function(){
 							updateAnnotation(restApiFeature, molgenis.hrefToId(ontologyTerm.href), false);
 							restApi.getAsync(restApiFeature.href, {'expand': ["unit", "definitions"]}, function(updatedFeature){
 								molgenis.OntologyAnnotator.prototype.createFeatureTable(title, updatedFeature, callback);
 								if(callback !== undefined && callback !== null) callback(updatedFeature);
 							});
 						});
-						var selectBoostIcon = $('<i class="icon-star-empty float-right"></i>').popover({
+					
+						var selectBoostIcon = $('<span class="glyphicon glyphicon-star-empty float-right"></span>').popover({
 							content : 'Select as key concept and give more weight!',
 							trigger : 'hover',
 							placement : 'bottom'
 						});
-						if($.inArray(ontologyTerm.termAccession, boostedOntologyTerms) !== -1 ) selectBoostIcon.removeClass('icon-star-empty').addClass('icon-star');
+						if($.inArray(ontologyTerm.termAccession, boostedOntologyTerms) !== -1 ) selectBoostIcon.removeClass('glyphicon-star-empty').addClass('glyphicon-star');
 						selectBoostIcon.click(function(){
-							if($(this).hasClass('icon-star-empty')){
+							if($(this).hasClass('glyphicon-star-empty')){
 								updateIndex(hit, ontologyTerm, true);
-								$(this).removeClass('icon-star-empty').addClass('icon-star');
+								$(this).removeClass('glyphicon-star-empty').addClass('glyphicon-star');
 							}
 							else {
 								updateIndex(hit, ontologyTerm, false);
-								$(this).removeClass('icon-star').addClass('icon-star-empty');
+								$(this).removeClass('glyphicon-star').addClass('glyphicon-star-empty');
 							}
 						});
 						var ontologyTermLink = $('<a href="' + ontologyTerm.termAccession + '" target="_blank">' + ontologyTerm.Name + '</a>');
@@ -182,31 +181,34 @@
 	};
 	
 	function createSearchDiv(title, feature, callback){
-		var searchDiv = $('<div class="row"></div>').css('z-index', 10000);
-		var searchGroup = $('<div class="group-append col-md-4"></div>');
-		var searchField = $('<input type="text" data-provide="typeahead" />');
-		var addTermButton = $('<button class="btn btn-default" type="button">Add annotation</button>');
+		var searchDiv = $('<div />').css('z-index', 10000);
+		var searchGroup = $('<div class="input-group col-md-8"></div>');
+		var searchField = $('<input data-provide="typeahead" class="form-control" style="border-top-left-radius:5px;border-bottom-left-radius:5px;"/>');
+		var addTermButton = $('<div class="input-group-addon show-popover"><strong>Add annotation</strong></div>');
 		searchField.appendTo(searchGroup);
 		addTermButton.appendTo(searchGroup);
 		searchField.typeahead({
-			source: function(query, process) {
-				molgenis.ontologyTermTypeahead('ontologyTermSynonym', query, process);
-			},
-			minLength : 3,
-			items : 20
+			  hint: true,
+			  highlight: true,
+			  minLength: 3
+		},{
+			displayKey: 'identifier',
+			source: function(query, cb) {
+				molgenis.ontologyTermTypeahead('ontologyTermSynonym', query, cb);
+			}
+		}).on('typeahead:selected', function($e, object){
+			addTermButton.data('ontologyTermIndex', object);
+			console.log(object);
 		});
+		
 		addTermButton.click(function(){
-			var termFound = false;
-			$.each($(document).data('dataMap'), function(key, value){
-				termFound = true;
-				return false;
-			});
-			if(termFound){
-				checkOntologyTerm(searchField, feature);
+			if($(this).data('ontologyTermIndex')){
+				checkOntologyTerm($(this).data('ontologyTermIndex'), feature);
 				restApi.getAsync(feature.href, {'expand': ["unit", "definitions"]}, function(updatedFeature){
 					molgenis.OntologyAnnotator.prototype.createFeatureTable(title, updatedFeature, callback);
 					if(callback !== undefined && callback !== null) callback(updatedFeature);
 				});
+				$(this).removeData('ontologyTermIndex');
 			}
 		});
 		return searchDiv.append(searchGroup);
@@ -281,13 +283,8 @@
 		});
 	}
 
-	function checkOntologyTerm(searchField, feature){
-		var dataMap = $(document).data('dataMap');
-		var ontologyTerm = searchField.val();
-		var toCreate = true;
-		var toUpdate = false;
-		if(dataMap && ontologyTerm !== '' && dataMap[ontologyTerm]){
-			var ontologyTermFromIndex = dataMap[ontologyTerm];
+	function checkOntologyTerm(ontologyTermFromIndex, feature){
+		if(ontologyTermFromIndex){
 			var ontology = createOntology(ontologyTermFromIndex);
 			var queryRules = [];
 			queryRules.push({
@@ -300,21 +297,22 @@
 			};
 			var result = restApi.get('/api/v1/ontologyterm/', {'expand': ['ontology'], 'q' : request});
 			var ontologyTermId = null;
-			var ontologyTermRestApi = null;
 			if(result.items.length !== 0) {
-				toCreate = false;
 				ontologyTermId = molgenis.hrefToId(result.items[0].href);
-				ontologyTermRestApi = result.items[0];
-				toUpdate = (result.items[0].Name !== ontologyTermFromIndex.ontologyTermSynonym);
+				//Update the information regarding the ontology term stored in mysql database, if the ontology term name is different from ontology term synonym, we store synonym in mysql database
+				if(result.items[0].Name !== ontologyTermFromIndex.ontologyTermSynonym){
+					updateOntologyTerm(result.items[0], ontologyTermFromIndex);
+				}
+			}else{
+				ontologyTermId = createOntologyTerm(ontologyTermFromIndex);
 			}
-			if(toCreate) ontologyTermId = createOntologyTerm(dataMap[ontologyTerm]);
-			if(toUpdate) updateOntologyTerm(ontologyTermRestApi, dataMap[ontologyTerm]);
-			if(ontologyTermId != null) updateAnnotation(feature, ontologyTermId, true);
+			updateAnnotation(feature, ontologyTermId, true);
 		}
 	}
 
 	function updateAnnotation(feature, ontologyTermId, add){
 		var data = {};
+		data['__Type'] = 'ObservableFeature';
 		feature.description = molgenis.i18nDescription(feature).en;
 		$.map(feature, function(value, key){
 			if(key !== 'href'){
@@ -363,6 +361,7 @@
 		});
 		query.Name = data.ontologyName + ':' + data.ontologyTermSynonym;
 		query.definition = data.ontologyTermSynonym;
+		query.__Type = 'OntologyTerm';
 		$.ajax({
 			type : 'PUT',
 			dataType : 'json',

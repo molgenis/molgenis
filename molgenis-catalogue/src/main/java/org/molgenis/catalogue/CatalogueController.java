@@ -106,15 +106,14 @@ public class CatalogueController extends MolgenisPluginController
 	}
 
 	@RequestMapping(SHOPPINGCART_URI + "/remove")
-	public @ResponseBody
-	ShoppingCart removeFromShoppingCart(HttpSession session, @RequestParam(required = true) String attributeName)
+	public @ResponseBody ShoppingCart removeFromShoppingCart(HttpSession session,
+			@RequestParam(required = true) String attributeName)
 	{
 		return getShoppingCart(session).removeAttribute(attributeName);
 	}
 
 	@RequestMapping(SHOPPINGCART_URI + "/clear")
-	public @ResponseBody
-	ShoppingCart clearShoppingCart(HttpSession session)
+	public @ResponseBody ShoppingCart clearShoppingCart(HttpSession session)
 	{
 		return getShoppingCart(session).clear();
 	}
