@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Package;
@@ -93,7 +94,7 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 	}
 
 	@Override
-	public EntityMetaData setPackage(Package pack)
+	public EditableEntityMetaData setPackage(Package pack)
 	{
 		this.pack = pack;
 		return this;
@@ -156,7 +157,7 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 	}
 
 	@Override
-	public EntityMetaData setLabel(String label)
+	public EditableEntityMetaData setLabel(String label)
 	{
 		this.label = label;
 		return this;
@@ -169,7 +170,7 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 	}
 
 	@Override
-	public EntityMetaData setDescription(String description)
+	public EditableEntityMetaData setDescription(String description)
 	{
 		this.description = description;
 		return this;
@@ -195,7 +196,7 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 	}
 
 	@Override
-	public EntityMetaData setAbstract(boolean abstract_)
+	public EditableEntityMetaData setAbstract(boolean abstract_)
 	{
 		this.abstract_ = abstract_;
 		return this;
@@ -208,7 +209,7 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 	}
 
 	@Override
-	public EntityMetaData setExtends(EntityMetaData extends_)
+	public EditableEntityMetaData setExtends(EntityMetaData extends_)
 	{
 		this.extends_ = extends_;
 		return this;

@@ -1,6 +1,7 @@
 package org.molgenis.data.mysql;
 
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -13,7 +14,7 @@ public class MysqlRepositoryDateTest extends MysqlRepositoryAbstractDatatypeTest
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		EntityMetaData varcharMD = new DefaultEntityMetaData("DateTest")
+		EditableEntityMetaData varcharMD = new DefaultEntityMetaData("DateTest")
 				.setLabel("Date Test");
 		varcharMD.setIdAttribute("col1");
 		varcharMD.addAttribute("col1").setDataType(MolgenisFieldTypes.DATE).setNillable(false);

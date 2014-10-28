@@ -7,6 +7,7 @@ import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Package;
@@ -17,7 +18,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.TreeTraverser;
 
-public abstract class AbstractEntityMetaData implements EntityMetaData
+public abstract class AbstractEntityMetaData implements EditableEntityMetaData
 {
 	private static Logger LOG = Logger.getLogger(AbstractEntityMetaData.class);
 

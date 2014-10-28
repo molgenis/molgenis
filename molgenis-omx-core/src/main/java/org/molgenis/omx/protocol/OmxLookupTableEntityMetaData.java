@@ -9,6 +9,7 @@ import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
 import java.util.List;
 
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Package;
@@ -152,35 +153,35 @@ public class OmxLookupTableEntityMetaData extends AbstractEntityMetaData
 	}
 
 	@Override
-	public EntityMetaData setLabel(String string)
+	public EditableEntityMetaData setLabel(String string)
 	{
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public EntityMetaData setDescription(String string)
+	public EditableEntityMetaData setDescription(String string)
 	{
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public EntityMetaData setExtends(EntityMetaData extendsEntityMeta)
+	public EditableEntityMetaData setExtends(EntityMetaData extendsEntityMeta)
 	{
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public EntityMetaData setPackage(Package packageImpl)
+	public EditableEntityMetaData setPackage(Package packageImpl)
 	{
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public EntityMetaData setAbstract(boolean boolean1)
+	public EditableEntityMetaData setAbstract(boolean boolean1)
 	{
 		// TODO Auto-generated method stub
 		return null;

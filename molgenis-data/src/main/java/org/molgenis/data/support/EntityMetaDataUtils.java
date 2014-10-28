@@ -65,7 +65,7 @@ public class EntityMetaDataUtils
 	public Collection<EntityMetaData> loadOMX(RepositoryCollection omx)
 	{
 		// extract attribute metadata
-		Map<String, AttributeMetaData> attributes = new LinkedHashMap<String, AttributeMetaData>();
+		Map<String, DefaultAttributeMetaData> attributes = new LinkedHashMap<String, DefaultAttributeMetaData>();
 		for (Entity e : omx.getRepositoryByEntityName("observablefeature"))
 		{
 			logger.debug("found observablefeature: " + e);
