@@ -39,6 +39,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
+import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IndexedRepository;
@@ -173,7 +174,7 @@ public class EmxImportService implements ImportService
 
 		if (source.getRepositoryByEntityName(ATTRIBUTES) != null)
 		{
-			Map<String, DefaultEntityMetaData> metadata = getEntityMetaData(source);
+			Map<String, EditableEntityMetaData> metadata = getAllEntityMetaDataFromSource(source);
 			for (String name : metadata.keySet())
 			{
 				metadataList.add(metadata.get(name));
@@ -247,11 +248,11 @@ public class EmxImportService implements ImportService
 		EntitiesValidationReportImpl report = new EntitiesValidationReportImpl();
 
 		// compare the data sheets against metadata in store or imported file
-		Map<String, DefaultEntityMetaData> metaDataMap = new HashMap<String, DefaultEntityMetaData>();
+		Map<String, EditableEntityMetaData> metaDataMap = new HashMap<String, EditableEntityMetaData>();
 
 		if (source.getRepositoryByEntityName(ATTRIBUTES) != null)
 		{
-			metaDataMap = getEntityMetaData(source);
+			metaDataMap = getAllEntityMetaDataFromSource(source);
 		}
 		else
 		{
@@ -306,11 +307,11 @@ public class EmxImportService implements ImportService
 		return report;
 	}
 
-	public Map<String, DefaultEntityMetaData> getEntityMetaData(RepositoryCollection source)
+	public Map<String, EditableEntityMetaData> getAllEntityMetaDataFromSource(RepositoryCollection source)
 	{
 		// TODO: this task is actually a 'merge' instead of 'import'
 		// so we need to consider both new metadata as existing ...
-		Map<String, DefaultEntityMetaData> entities = new LinkedHashMap<String, DefaultEntityMetaData>();
+		Map<String, EditableEntityMetaData> entities = new LinkedHashMap<String, EditableEntityMetaData>();
 
 		// load attributes first, entities and packages are optional
 		loadAllAttributesToMap(source, entities);
@@ -328,7 +329,7 @@ public class EmxImportService implements ImportService
 	 * @param entities
 	 *            the map to add entities meta data
 	 */
-	private void loadAllAttributesToMap(RepositoryCollection source, Map<String, DefaultEntityMetaData> entities)
+	private void loadAllAttributesToMap(RepositoryCollection source, Map<String, EditableEntityMetaData> entities)
 	{
 		Repository attributesRepo = source.getRepositoryByEntityName(ATTRIBUTES);
 		for (AttributeMetaData attr : attributesRepo.getEntityMetaData().getAtomicAttributes())
@@ -354,7 +355,7 @@ public class EmxImportService implements ImportService
 
 			// create entity if not yet defined
 			if (!entities.containsKey(entityName)) entities.put(entityName, new DefaultEntityMetaData(entityName));
-			DefaultEntityMetaData defaultEntityMetaData = entities.get(entityName);
+			EditableEntityMetaData defaultEntityMetaData = entities.get(entityName);
 
 			// create attribute meta data
 			DefaultAttributeMetaData defaultAttributeMetaData = new DefaultAttributeMetaData(attributeName);
@@ -494,7 +495,7 @@ public class EmxImportService implements ImportService
 	 * @param source
 	 *            the map to add entities meta data
 	 */
-	private void loadAllEntitiesToMap(RepositoryCollection source, Map<String, DefaultEntityMetaData> entities)
+	private void loadAllEntitiesToMap(RepositoryCollection source, Map<String, EditableEntityMetaData> entities)
 	{
 		Repository entitiesRepo = source.getRepositoryByEntityName(ENTITIES);
 		if (entitiesRepo != null)
@@ -518,7 +519,7 @@ public class EmxImportService implements ImportService
 
 				if (!entities.containsKey(entityName)) entities.put(entityName, new DefaultEntityMetaData(entityName));
 
-				DefaultEntityMetaData md = entities.get(entityName);
+				EditableEntityMetaData md = entities.get(entityName);
 				md.setLabel(entity.getString(org.molgenis.data.meta.EntityMetaDataMetaData.LABEL));
 				md.setDescription(entity.getString(org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION));
 				if (entity.getBoolean(ABSTRACT) != null) md.setAbstract(entity.getBoolean(ABSTRACT));
@@ -526,7 +527,7 @@ public class EmxImportService implements ImportService
 				String extendsEntityName = entity.getString(EXTENDS);
 				if (extendsEntityName != null)
 				{
-					DefaultEntityMetaData extendsEntityMeta = entities.get(extendsEntityName);
+					EntityMetaData extendsEntityMeta = entities.get(extendsEntityName);
 					if (extendsEntityMeta == null)
 					{
 						throw new MolgenisDataException("Missing super entity " + extendsEntityName + " for entity "
@@ -550,9 +551,8 @@ public class EmxImportService implements ImportService
 	 * @param source
 	 *            the map to add package meta data
 	 */
-	private void loadAllPackagesToMap(RepositoryCollection source, Map<String, DefaultEntityMetaData> entities)
+	private void loadAllPackagesToMap(RepositoryCollection source, Map<String, EditableEntityMetaData> entities)
 	{
-		// TODO: this duplicates code in PackageRepository
 		if (source.getRepositoryByEntityName(PACKAGES) != null)
 		{
 			Map<String, PackageImpl> packages = Maps.newHashMap();
@@ -592,7 +592,7 @@ public class EmxImportService implements ImportService
 			}
 
 			// Resolve entity packages
-			for (DefaultEntityMetaData emd : entities.values())
+			for (EditableEntityMetaData emd : entities.values())
 			{
 				if (emd.getPackage() != null)
 				{
@@ -603,7 +603,15 @@ public class EmxImportService implements ImportService
 					emd.setPackage(p);
 				}
 			}
-
+			
+			 // Add packages to the packages table
+			 for (Package p : packages.values())
+			 {
+				if (p != null)
+				{
+					 metaDataService.addPackage(p);
+				}
+			 }
 		}
 	}
 
@@ -613,7 +621,7 @@ public class EmxImportService implements ImportService
 	 * @param source
 	 *            the map to add entities meta data
 	 */
-	private void reiterateToMapRefEntity(RepositoryCollection source, Map<String, DefaultEntityMetaData> entities)
+	private void reiterateToMapRefEntity(RepositoryCollection source, Map<String, EditableEntityMetaData> entities)
 	{
 		int i = 1;
 		for (Entity attribute : source.getRepositoryByEntityName(ATTRIBUTES))
@@ -624,7 +632,7 @@ public class EmxImportService implements ImportService
 			i++;
 			if (refEntityName != null)
 			{
-				DefaultEntityMetaData defaultEntityMetaData = entities.get(entityName);
+				EntityMetaData defaultEntityMetaData = entities.get(entityName);
 				DefaultAttributeMetaData defaultAttributeMetaData = (DefaultAttributeMetaData) defaultEntityMetaData
 						.getAttribute(attributeName);
 

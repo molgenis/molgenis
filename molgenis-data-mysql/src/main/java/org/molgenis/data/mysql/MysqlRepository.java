@@ -321,7 +321,8 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 
 	protected String getCreateFKeySql(AttributeMetaData att)
 	{
-		return new StringBuilder().append("ALTER TABLE ").append(getTableName()).append(" ADD FOREIGN KEY (")
+		return new StringBuilder().append("ALTER TABLE ").append('`').append(getTableName()).append('`')
+				.append(" ADD FOREIGN KEY (")
 				.append('`').append(att.getName()).append('`').append(") REFERENCES ").append('`')
 				.append(getTableName(att.getRefEntity())).append('`').append('(').append('`')
 				.append(att.getRefEntity().getIdAttribute().getName()).append('`').append(")").toString();
@@ -329,7 +330,8 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 
 	protected String getUniqueSql(AttributeMetaData att)
 	{
-		return new StringBuilder().append("ALTER TABLE ").append(getTableName()).append(" ADD CONSTRAINT ").append('`')
+		return new StringBuilder().append("ALTER TABLE ").append('`').append(getTableName()).append('`')
+				.append(" ADD CONSTRAINT ").append('`')
 				.append(att.getName()).append("_unique").append('`').append(" UNIQUE (").append('`')
 				.append(att.getName()).append('`').append(")").toString();
 	}
@@ -349,7 +351,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		}
 		if (sql.charAt(sql.length() - 1) == ' ' && sql.charAt(sql.length() - 2) == ',') sql.setLength(sql.length() - 2);
 		else sql.append('*');
-		sql.append(" FROM ").append(getTableName());
+		sql.append(" FROM ").append('`').append(getTableName()).append('`');
 
 		return sql.toString();
 	}
@@ -414,7 +416,8 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		final AttributeMetaData refEntityIdAttribute = att.getRefEntity().getIdAttribute();
 
 		StringBuilder mrefSql = new StringBuilder();
-		mrefSql.append("INSERT INTO ").append(getTableName()).append('_').append(att.getName()).append(" (")
+		mrefSql.append("INSERT INTO ").append('`').append(getTableName()).append('_').append(att.getName()).append('`')
+				.append(" (")
 				.append('`').append(idAttribute.getName()).append('`').append(',').append('`').append(att.getName())
 				.append('`').append(") VALUES (?,?)");
 
@@ -1258,7 +1261,6 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 
 	private String getTableName(EntityMetaData emd)
 	{
-		// TODO: Use Package name
 		return emd.getName();
 	}
 
