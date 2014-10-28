@@ -5,7 +5,6 @@ import java.util.Collections;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Package;
@@ -125,55 +124,6 @@ public class ProtocolEntityMetaData extends AbstractEntityMetaData
 
 	@Override
 	public String getSimpleName()
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public EditableEntityMetaData setLabel(String string)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public EditableEntityMetaData setDescription(String string)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public EditableEntityMetaData setExtends(EntityMetaData extendsEntityMeta)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public EditableEntityMetaData setPackage(Package packageImpl)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public EditableEntityMetaData setAbstract(boolean boolean1)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void addAttributeMetaData(AttributeMetaData attributeMetaData)
-	{
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public AttributeMetaData addAttribute(String string)
 	{
 		// TODO Auto-generated method stub
 		return null;

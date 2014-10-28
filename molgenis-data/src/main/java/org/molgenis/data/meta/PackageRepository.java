@@ -19,7 +19,7 @@ import com.google.common.collect.Lists;
  * Helper class around the {@link PackageMetaData} repository. Caches the package metadata in {@link PackageImpl}s.
  * Internal implementation, use {@link MetaDataService} instead.
  */
-public class PackageRepository
+class PackageRepository
 {
 	public static final PackageMetaData META_DATA = new PackageMetaData();
 
@@ -105,7 +105,6 @@ public class PackageRepository
 		List<Entity> importOrderPackages = Lists.newLinkedList(DependencyResolver.resolveSelfReferences(repository,
 				META_DATA));
 		Collections.reverse(importOrderPackages);
-		System.out.println(importOrderPackages);
 		for (Entity p : importOrderPackages)
 		{
 			repository.delete(p);

@@ -7,7 +7,6 @@ import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Package;
@@ -18,7 +17,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.TreeTraverser;
 
-public abstract class AbstractEntityMetaData implements EditableEntityMetaData
+public abstract class AbstractEntityMetaData implements EntityMetaData
 {
 	private static Logger LOG = Logger.getLogger(AbstractEntityMetaData.class);
 
@@ -159,36 +158,6 @@ public abstract class AbstractEntityMetaData implements EditableEntityMetaData
 
 			@Override
 			public boolean isSameAs(AttributeMetaData attributeMetaData)
-			{
-				throw new UnsupportedOperationException();
-			}
-
-			@Override
-			public AttributeMetaData setDataType(FieldType bool)
-			{
-				throw new UnsupportedOperationException();
-			}
-
-			@Override
-			public AttributeMetaData setNillable(boolean b)
-			{
-				throw new UnsupportedOperationException();
-			}
-
-			@Override
-			public AttributeMetaData setRefEntity(EntityMetaData refEntity)
-			{
-				throw new UnsupportedOperationException();
-			}
-
-			@Override
-			public AttributeMetaData setAuto(boolean b)
-			{
-				throw new UnsupportedOperationException();
-			}
-
-			@Override
-			public void setDefaultValue(Object o)
 			{
 				throw new UnsupportedOperationException();
 			}

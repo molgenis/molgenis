@@ -1,5 +1,6 @@
 package org.molgenis.data;
 
+import org.molgenis.data.support.DefaultAttributeMetaData;
 
 /**
  * EditableEntityMetaData defines the editable structure and attributes of an Entity.
@@ -60,5 +61,5 @@ public interface EditableEntityMetaData extends EntityMetaData
 	 * @param string
 	 * @return
 	 */
-	AttributeMetaData addAttribute(String string);
+	DefaultAttributeMetaData addAttribute(String string);
 }

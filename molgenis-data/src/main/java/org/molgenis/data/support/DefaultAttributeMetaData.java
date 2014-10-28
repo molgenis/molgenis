@@ -129,7 +129,6 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		return nillable;
 	}
 
-	@Override
 	public DefaultAttributeMetaData setNillable(boolean nillable)
 	{
 		this.nillable = nillable;
@@ -203,8 +202,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		return refEntity;
 	}
 
-	@Override
-	public AttributeMetaData setRefEntity(EntityMetaData refEntity)
+	public DefaultAttributeMetaData setRefEntity(EntityMetaData refEntity)
 	{
 		this.refEntity = refEntity;
 		return this;

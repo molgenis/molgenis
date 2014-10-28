@@ -149,39 +149,4 @@ public class ObservableFeatureAttributeMetaData implements AttributeMetaData
 	{
 		return false;
 	}
-
-	@Override
-	public AttributeMetaData setDataType(FieldType bool)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public AttributeMetaData setNillable(boolean b)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public AttributeMetaData setRefEntity(EntityMetaData refEntity)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public AttributeMetaData setAuto(boolean b)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void setDefaultValue(Object o)
-	{
-		// TODO Auto-generated method stub
-
-	}
 }
