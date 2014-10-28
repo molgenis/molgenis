@@ -10,33 +10,35 @@
 	var query;
 	var pageIndex = 0;
 	
-	function createPackageTree(selectedPackage) {	
-		$('#attribute-selection').fancytree({
-			source:{
-				url: molgenis.getContextUrl() + "/getTreeData?package=" + selectedPackage.name		
-			},
-			'click' : function(event, data) {
-				if (data.targetType === 'title' || data.targetType === 'icon') {
-					switch(data.node.data.type) {
-					case 'package' :
-						// no operation
-						break;
-					case 'entity' :
-						restApi.getAsync(data.node.data.href, null, function(entity) {
-							createEntityMetadataTable(entity);
-						});
-						break;
-					case 'attribute' :
-						restApi.getAsync(data.node.data.href, null, function(attribute) {
-							createAttributeMetadataTable(attribute);
-						});
-						break;
-					default:
-						throw 'Unknown type';
+	function createPackageTree(selectedPackage) {
+		if(selectedPackage.name){
+			$('#attribute-selection').fancytree({
+				source:{
+					url: molgenis.getContextUrl() + "/getTreeData?package=" + selectedPackage.name		
+				},
+				'click' : function(event, data) {
+					if (data.targetType === 'title' || data.targetType === 'icon') {
+						switch(data.node.data.type) {
+						case 'package' :
+							// no operation
+							break;
+						case 'entity' :
+							restApi.getAsync(data.node.data.href, null, function(entity) {
+								createEntityMetadataTable(entity);
+							});
+							break;
+						case 'attribute' :
+							restApi.getAsync(data.node.data.href, null, function(attribute) {
+								createAttributeMetadataTable(attribute);
+							});
+							break;
+						default:
+							throw 'Unknown type';
+						}
 					}
 				}
-			}
-		});
+			});
+		}
 	}
 	
 	function createAttributeMetadataTable(attributeMetadata) {
@@ -52,15 +54,17 @@
 	}
 	
 	function createHeader(entityMetaData) {
-		$('#entity-class-name').html(entityMetaData.name);
-		
-		if (entityMetaData.description) {
-			var description = $('<span data-placement="bottom"></span>');
-			description.html(abbreviate(entityMetaData.description, 180));
-			description.attr('data-title', entityMetaData.description);
-			$('#entity-class-description').html(description.tooltip());
-		} else {
-			$('#entity-class-description').html('');
+		if(entityMetaData.name != undefined){
+			$('#entity-class-name').html(entityMetaData.name);
+			
+			if (entityMetaData.description) {
+				var description = $('<span data-placement="bottom"></span>');
+				description.html(abbreviate(entityMetaData.description, 180));
+				description.attr('data-title', entityMetaData.description);
+				$('#entity-class-description').html(description.tooltip());
+			} else {
+				$('#entity-class-description').html('');
+			}
 		}
 	}
 	
