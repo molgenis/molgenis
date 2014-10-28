@@ -46,13 +46,6 @@ public interface Package
 	Iterable<EntityMetaData> getEntityMetaDatas();
 
 	/**
-	 * Sets parent package
-	 * 
-	 * @param parent
-	 */
-	void setParent(Package parent);
-
-	/**
 	 * Gets the parent package or null if this package does not have a parent package
 	 * 
 	 * @return

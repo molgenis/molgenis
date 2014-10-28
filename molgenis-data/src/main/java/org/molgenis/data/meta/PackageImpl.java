@@ -121,7 +121,6 @@ public class PackageImpl implements Package
 		entities.add(entityMetaData);
 	}
 
-	@Override
 	public void setParent(Package parent)
 	{
 		this.parent = parent;
