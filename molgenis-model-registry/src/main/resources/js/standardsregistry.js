@@ -50,8 +50,9 @@
 				var $cell = $('<td>').appendTo($row);
 				$cell.text(data.tags[i].relation);
 				var $cell = $('<td>').appendTo($row);
-				var $anchor = $('<a>', {href: data.tags[i].object.iri}).appendTo($cell);
-				$anchor.text(data.tags[i].object.label);
+				var $anchor = $('<a>', {"href": data.tags[i].object.iri}).appendTo($cell);
+				var $span = $('<span>',{"class": "label label-info"}).appendTo($anchor);
+				$span.text(data.tags[i].object.label);
 				var $cell = $('<td>').appendTo($row);
 			}
 		}
