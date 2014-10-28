@@ -94,8 +94,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 			int total = packageResponses.size();
 			if (packageSearchRequest.getOffset() != null)
 			{
-				packageResponses = packageResponses.subList(packageSearchRequest.getOffset(),
-						packageResponses.size() - 1);
+				packageResponses = packageResponses.subList(packageSearchRequest.getOffset(), packageResponses.size());
 			}
 			if (packageSearchRequest.getNum() != null && packageResponses.size() > packageSearchRequest.getNum())
 			{
