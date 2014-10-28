@@ -127,6 +127,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 	public PackageResponse getPackage(@RequestParam(value = "package") String selectedPackageName)
 	{
 		Package molgenisPackage = metaDataService.getPackage(selectedPackageName);
+		if (molgenisPackage == null) return null;
 		return new PackageResponse(molgenisPackage.getSimpleName(), molgenisPackage.getDescription());
 	}
 
