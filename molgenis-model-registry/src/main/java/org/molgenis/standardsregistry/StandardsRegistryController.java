@@ -88,7 +88,8 @@ public class StandardsRegistryController extends MolgenisPluginController
 						@Override
 						public PackageResponse apply(Package aPackage)
 						{
-							return new PackageResponse(aPackage.getSimpleName(), aPackage.getDescription());
+							return new PackageResponse(aPackage.getSimpleName(), aPackage.getDescription(),
+									getEntityNamesInPackage(aPackage.getSimpleName()));
 						}
 					}));
 			int total = packageResponses.size();
@@ -128,7 +129,8 @@ public class StandardsRegistryController extends MolgenisPluginController
 	{
 		Package molgenisPackage = metaDataService.getPackage(selectedPackageName);
 		if (molgenisPackage == null) return null;
-		return new PackageResponse(molgenisPackage.getSimpleName(), molgenisPackage.getDescription());
+		return new PackageResponse(molgenisPackage.getSimpleName(), molgenisPackage.getDescription(),
+				getEntityNamesInPackage(molgenisPackage.getSimpleName()));
 	}
 
 	/* PACKAGE TREE */
@@ -213,6 +215,16 @@ public class StandardsRegistryController extends MolgenisPluginController
 		}
 
 		return new PackageTreeNode(title, key, tooltip, folder, expanded, data, result);
+	}
+
+	private List<String> getEntityNamesInPackage(String packageName)
+	{
+		List<String> entityNamesForThisPackage = new ArrayList<String>();
+		for (EntityMetaData emd : metaDataService.getPackage(packageName).getEntityMetaDatas())
+		{
+			entityNamesForThisPackage.add(emd.getSimpleName());
+		}
+		return entityNamesForThisPackage;
 	}
 
 	private static class PackageSearchResponse
@@ -310,11 +322,13 @@ public class StandardsRegistryController extends MolgenisPluginController
 	{
 		private final String name;
 		private final String description;
+		private final List<String> entitiesInPackage;
 
-		public PackageResponse(String name, String description)
+		public PackageResponse(String name, String description, List<String> entitiesInPackage)
 		{
 			this.name = name;
 			this.description = description;
+			this.entitiesInPackage = entitiesInPackage;
 		}
 
 		@SuppressWarnings("unused")
@@ -328,5 +342,12 @@ public class StandardsRegistryController extends MolgenisPluginController
 		{
 			return description;
 		}
+
+		@SuppressWarnings("unused")
+		public List<String> getEntities()
+		{
+			return entitiesInPackage;
+		}
+
 	}
 }
