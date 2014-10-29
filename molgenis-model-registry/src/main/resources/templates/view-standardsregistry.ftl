@@ -31,9 +31,10 @@
     	</div>
     </div>
 </div>
+
 <#-- Search result details: tree etc. -->
-<div id="standards-registry-details" class="hidden">
-</div>
+<div id="standards-registry-details" class="hidden"></div>
+
 <#-- Handlebar templates -->
 <script id="count-template" type="text/x-handlebars-template">
     <div class="row">
@@ -42,14 +43,39 @@
 		</div>	
 	</div>
 </script>
+
 <script id="model-template" type="text/x-handlebars-template">
     <div class="row">
 		<div class="col-md-12">
             <div class="well">    
     			<div class="package" data-id="{{package.name}}">
-                    <div class="row">    			 
-        				<div class="col-md-4">
-        					<h3 style="margin-top: 0px;">{{package.name}} <small>{{package.description}}</small></h3>
+                    
+                    <div class="row"> 			 
+        				
+        				<div class="col-md-8">
+        					<h3 style="margin-top: 0px;">
+        						{{package.name}} <small>{{package.description}}</small>
+        					</h3>
+    					</div>
+    					
+    					<div class="col-md-4">
+        					<button class="btn btn-primary btn-block details-btn" type="button">View details</button>
+        					<div class="col-md-6">
+	                			<select class="form-control entity-select-dropdown" data-live-search="true" title="Please select an entity">
+		                			{{#each entities}}
+	        							<option value="{{this}}">{{this}}</option>
+	    							{{/each}}
+			                    </select>
+		                  	</div>
+		                  	
+		                  	<div class="col-md-6">
+    							<button class="btn btn-default btn-block dataexplorer-btn" type="button">View in dataexplorer</button>
+        					</div>  	
+        				</div>
+					</div>
+					
+					<div class="row">
+    					<div class="col-md-12">
         					<dl class="dl-horizontal">
         					   <dt>Type</dt>
         					   <dd>TODO implement</dd>
@@ -59,12 +85,8 @@
                                <dd>TODO implement</dd>
                             </dl>
         				</div>
-        				<div class="col-md-4 col-md-offset-4">
-        					<button class="btn btn-primary btn-block details-btn" type="button">View details</button>
-        					<button class="btn btn-default btn-block dataexplorer-btn" type="button">View in dataexplorer</button>
-        					<button class="btn btn-default btn-block import-btn" type="button">Import data</button>
-        				</div>
     				</div>
+    				
     			</div>
 			</div>
 		</div>
