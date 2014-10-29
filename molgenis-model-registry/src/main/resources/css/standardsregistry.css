@@ -22,3 +22,7 @@
 #search-results-back-btn {
 	margin-bottom: 15px;
 }
+
+.entity span.fancytree-icon, .entity span.fancytree-icon:hover {
+	background-position: -16px -160px !important;
+}
