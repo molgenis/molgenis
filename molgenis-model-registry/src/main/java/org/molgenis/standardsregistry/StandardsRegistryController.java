@@ -94,8 +94,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 			int total = packageResponses.size();
 			if (packageSearchRequest.getOffset() != null)
 			{
-				packageResponses = packageResponses.subList(packageSearchRequest.getOffset(),
-						packageResponses.size() - 1);
+				packageResponses = packageResponses.subList(packageSearchRequest.getOffset(), packageResponses.size());
 			}
 			if (packageSearchRequest.getNum() != null && packageResponses.size() > packageSearchRequest.getNum())
 			{
@@ -128,6 +127,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 	public PackageResponse getPackage(@RequestParam(value = "package") String selectedPackageName)
 	{
 		Package molgenisPackage = metaDataService.getPackage(selectedPackageName);
+		if (molgenisPackage == null) return null;
 		return new PackageResponse(molgenisPackage.getSimpleName(), molgenisPackage.getDescription());
 	}
 
@@ -162,7 +162,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 			result.add(createPackageTreeNode(emd));
 		}
 
-		return new PackageTreeNode(title, key, tooltip, folder, expanded, data, result);
+		return new PackageTreeNode("package", title, key, tooltip, folder, expanded, data, result);
 	}
 
 	private PackageTreeNode createPackageTreeNode(EntityMetaData emd)
@@ -183,7 +183,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 			result.add(createPackageTreeNode(amd, emd));
 		}
 
-		return new PackageTreeNode(title, key, tooltip, folder, expanded, data, result);
+		return new PackageTreeNode("entity", title, key, tooltip, folder, expanded, data, result);
 	}
 
 	private PackageTreeNode createPackageTreeNode(AttributeMetaData amd, EntityMetaData emd)
@@ -212,7 +212,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 			folder = false;
 		}
 
-		return new PackageTreeNode(title, key, tooltip, folder, expanded, data, result);
+		return new PackageTreeNode("attribute", title, key, tooltip, folder, expanded, data, result);
 	}
 
 	private static class PackageSearchResponse
