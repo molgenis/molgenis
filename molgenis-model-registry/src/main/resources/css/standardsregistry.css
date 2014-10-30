@@ -13,12 +13,6 @@
 	margin-bottom: 18px;	
 }
 
-#package-search-results {
-    height: 600px;
-    overflow-x: hidden;
-    overflow-y: auto;
-}
-
 #search-results-back-btn {
 	margin-bottom: 15px;
 }
@@ -26,3 +20,12 @@
 .entity span.fancytree-icon, .entity span.fancytree-icon:hover {
 	background-position: -16px -160px !important;
 }
+
+p.form-inline {
+	margin-top: 50px;
+}
+
+.pagination {
+	margin: 0;
+}
+
