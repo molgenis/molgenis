@@ -25,6 +25,7 @@ import org.molgenis.standardsregistry.utils.PackageTreeNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -42,6 +43,8 @@ public class StandardsRegistryController extends MolgenisPluginController
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	private static final String VIEW_NAME = "view-standardsregistry";
 	private static final String VIEW_NAME_DETAILS = "view-standardsregistry_details";
+	private static final String VIEW_NAME_DOCUMENTATION = "view-standardsregistry_docs";
+	private static final String VIEW_NAME_DOCUMENTATION_EMBED = "view-standardsregistry_docs-body";
 	private final MetaDataService metaDataService;
 
 	@Autowired
@@ -56,6 +59,23 @@ public class StandardsRegistryController extends MolgenisPluginController
 	public String init()
 	{
 		return VIEW_NAME;
+	}
+
+	@RequestMapping(value = "/documentation", method = GET)
+	public String getModelDocumentation(Model model)
+	{
+		List<Package> packages = Lists.newArrayList(metaDataService.getRootPackages());
+		model.addAttribute("packages", packages);
+		return VIEW_NAME_DOCUMENTATION;
+	}
+
+	@RequestMapping(value = "/documentation/{packageName}", method = GET)
+	public String getModelDocumentation(@PathVariable("packageName") String packageName,
+			@RequestParam(value = "embed", required = false) Boolean embed, Model model)
+	{
+		Package aPackage = metaDataService.getPackage(packageName);
+		model.addAttribute("package", aPackage);
+		return VIEW_NAME_DOCUMENTATION_EMBED;
 	}
 
 	@RequestMapping(value = "/search", method = POST)
@@ -118,6 +138,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 
 		if (selectedPackageName == null) selectedPackageName = packages.get(0).getName();
 		model.addAttribute("selectedPackageName", selectedPackageName);
+		model.addAttribute("package", metaDataService.getPackage(selectedPackageName));
 
 		return VIEW_NAME_DETAILS;
 	}

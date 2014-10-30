@@ -20,17 +20,13 @@
 					if (data.targetType === 'title' || data.targetType === 'icon') {
 						switch(data.node.data.type) {
 						case 'package' :
-							// no operation
+							document.getElementById('package-' + data.node.key).scrollIntoView();
 							break;
 						case 'entity' :
-							restApi.getAsync(data.node.data.href, null, function(entity) {
-								createEntityMetadataTable(entity);
-							});
+							document.getElementById('entity-' + data.node.key).scrollIntoView();
 							break;
 						case 'attribute' :
-							restApi.getAsync(data.node.data.href, null, function(attribute) {
-								createAttributeMetadataTable(attribute);
-							});
+							document.getElementById('attribute-' + data.node.parent.key + data.node.key).scrollIntoView();
 							break;
 						default:
 							throw 'Unknown type';
@@ -53,21 +49,6 @@
 		});
 	}
 	
-	function createHeader(entityMetaData) {
-		if(entityMetaData.name != undefined){
-			$('#entity-class-name').html(entityMetaData.name);
-			
-			if (entityMetaData.description) {
-				var description = $('<span data-placement="bottom"></span>');
-				description.html(abbreviate(entityMetaData.description, 180));
-				description.attr('data-title', entityMetaData.description);
-				$('#entity-class-description').html(description.tooltip());
-			} else {
-				$('#entity-class-description').html('');
-			}
-		}
-	}
-	
 	function renderSearchResults(searchResults, container) {
 		container.empty();
 		for(var i = 0; i < searchResults.packages.length; ++i){
@@ -84,7 +65,7 @@
 		var searchResultsContainer = $('#package-search-results');
 		
 		$('form[name=search-form]').submit(function(e) {
-			e.preventDefault();console.log(pageIndex);
+			e.preventDefault();
 			$.ajax({
 				type : $(this).attr('method'),
 				url : $(this).attr('action'),
@@ -115,17 +96,20 @@
 			$('form[name=search-form]').submit();	
 		});
 		
-		$(document).on('click', '.details-btn', function() {
-			var id = $(this).closest('.package').data('id');
+		function showPackageDetails(id) {
 			$('#standards-registry-details').load(molgenis.getContextUrl() + '/details?package=' + id, function() {
 				$.get(molgenis.getContextUrl() + '/getPackage?package=' + id, function(selectedPackage){
-					createHeader(selectedPackage);
 					createPackageTree(selectedPackage);
 				});
 				
 				$('#standards-registry-search').removeClass('show').addClass('hidden');
 				$('#standards-registry-details').removeClass('hidden').addClass('show');
 			});
+		}
+		
+		$(document).on('click', '.details-btn', function() {
+			var id = $(this).closest('.package').data('id');
+			showPackageDetails(id);	
 		});
 		
 		$(document).on('click', '#search-results-back-btn', function(){
@@ -148,6 +132,10 @@
 		countTemplate = Handlebars.compile($("#count-template").html());
 		modelTemplate = Handlebars.compile($("#model-template").html());
 		
+		if(window.location.hash) {
+			console.log(window.location.hash);
+			showPackageDetails(window.location.hash.substring(1));
+		}
 		// initially search for all models
 		$('form[name=search-form]').submit();
 	});

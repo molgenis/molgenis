@@ -26,3 +26,18 @@
 .entity span.fancytree-icon, .entity span.fancytree-icon:hover {
 	background-position: -16px -160px !important;
 }
+
+#package-doc-container {
+	height: 600px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.package-index-container ul
+{
+    list-style-type: none;
+}
+
+.package-container {
+	padding: 15px;
+}
