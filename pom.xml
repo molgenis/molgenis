@@ -576,7 +576,8 @@
     <modules>
         <module>molgenis-core</module>
         <module>molgenis-core-ui</module>
-        <module>molgenis-omx-biobankconnect</module>
+        <!-- <module>molgenis-omx-biobankconnect</module>  -->
+        <module>molgenis-ontology</module>
         <module>molgenis-omx-core</module>
         <module>molgenis-omx-das</module>
         <module>molgenis-omx-dataexplorer</module>
@@ -596,6 +597,7 @@
         <module>molgenis-data-vcf</module>
         <module>molgenis-data-rest</module>
         <module>molgenis-data-elasticsearch</module>
+        <module>molgenis-data-semanticsearch</module>
         <module>molgenis-r</module>
         <module>molgenis-charts</module>
         <module>molgenis-annotators</module>
