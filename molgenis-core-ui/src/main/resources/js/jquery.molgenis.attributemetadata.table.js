@@ -21,7 +21,7 @@
 		
 		for (var i = 0;i < ATTRIBUTE_KEYS.length; i++) {
 			var key = ATTRIBUTE_KEYS[i];
-			var value = attributeMetadata[key] || '';
+			var value = attributeMetadata[key] !== undefined ? attributeMetadata[key] : '';
 			table.append('<tr><th>' + key + '</th><td>' + value + '</td></tr>');
 		}	
 		

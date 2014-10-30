@@ -6,12 +6,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Package;
 import org.molgenis.util.CaseInsensitiveLinkedHashMap;
 
-public class DefaultEntityMetaData extends AbstractEntityMetaData
+public class DefaultEntityMetaData extends AbstractEntityMetaData implements EditableEntityMetaData
 {
 	private final String simpleName;
 	private final Map<String, AttributeMetaData> attributes = new CaseInsensitiveLinkedHashMap<AttributeMetaData>();
@@ -92,7 +93,8 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 		return pack;
 	}
 
-	public DefaultEntityMetaData setPackage(Package pack)
+	@Override
+	public EditableEntityMetaData setPackage(Package pack)
 	{
 		this.pack = pack;
 		return this;
@@ -104,6 +106,7 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 		return simpleName;
 	}
 
+	@Override
 	public void addAttributeMetaData(AttributeMetaData attributeMetaData)
 	{
 		if (attributeMetaData == null) throw new IllegalArgumentException("AttributeMetaData cannot be null");
@@ -153,7 +156,8 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 		return label != null ? label : getSimpleName();
 	}
 
-	public DefaultEntityMetaData setLabel(String label)
+	@Override
+	public EditableEntityMetaData setLabel(String label)
 	{
 		this.label = label;
 		return this;
@@ -165,7 +169,8 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 		return description;
 	}
 
-	public DefaultEntityMetaData setDescription(String description)
+	@Override
+	public EditableEntityMetaData setDescription(String description)
 	{
 		this.description = description;
 		return this;
@@ -190,7 +195,8 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 		return abstract_;
 	}
 
-	public DefaultEntityMetaData setAbstract(boolean abstract_)
+	@Override
+	public EditableEntityMetaData setAbstract(boolean abstract_)
 	{
 		this.abstract_ = abstract_;
 		return this;
@@ -202,7 +208,8 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 		return extends_;
 	}
 
-	public DefaultEntityMetaData setExtends(EntityMetaData extends_)
+	@Override
+	public EditableEntityMetaData setExtends(EntityMetaData extends_)
 	{
 		this.extends_ = extends_;
 		return this;
@@ -251,5 +258,4 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 		else if (!getName().equals(other.getName())) return false;
 		return true;
 	}
-
 }

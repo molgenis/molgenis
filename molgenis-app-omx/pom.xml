@@ -305,5 +305,10 @@
                 </exclusion>
             </exclusions>
 		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-data-semanticsearch</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 	</dependencies>
 </project>
