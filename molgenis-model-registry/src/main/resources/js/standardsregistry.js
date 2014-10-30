@@ -89,20 +89,24 @@
 		container.append(countTemplate({'count': searchResults.total}));
 	}
 	
-	function search(callback) {
-		
-	}
-	
 	$(function() {
 		var searchResultsContainer = $('#package-search-results');
 		
 		$('form[name=search-form]').submit(function(e) {
-			e.preventDefault();console.log(pageIndex);
+			e.preventDefault();
+			var q = $('#package-search').val();
+			
+			if (q != query) {
+				//New search reset pageIndex
+				pageIndex = 0;
+				query = q;
+			}
+			
 			$.ajax({
 				type : $(this).attr('method'),
 				url : $(this).attr('action'),
 				data : JSON.stringify({
-					query: $('#package-search').val(),
+					query: q,
 					offset: pageIndex * nrResultsPerPage,
 					num: nrResultsPerPage
 				}),
@@ -110,15 +114,21 @@
 				success : function(data) {
 					renderSearchResults(data, searchResultsContainer);
 					
-					$('#package-search-results-pager').pager({
-						'nrItems' : data.total,
-						'nrItemsPerPage' : nrResultsPerPage,
-						'page' : pageIndex + 1,
-						'onPageChange' : function(pager) {
-							pageIndex = pager.page - 1;
-							$('form[name=search-form]').submit();					
-						}
-					});
+					if (data.total > nrResultsPerPage) {
+						$('#package-search-results-pager').show();
+					
+						$('#package-search-results-pager').pager({
+							'nrItems' : data.total,
+							'nrItemsPerPage' : nrResultsPerPage,
+							'page' : pageIndex + 1,
+							'onPageChange' : function(pager) {
+								pageIndex = pager.page - 1;
+								$('form[name=search-form]').submit();					
+							}
+						});
+					} else {
+						$('#package-search-results-pager').hide();
+					}
 				}
 			});
 		});
@@ -147,8 +157,7 @@
 		});
 		
 		$(document).on('click', '.dataexplorer-btn', function() {
-			var id = $(this).closest('.package').data('id');
-			var selectedEntity = $('.entity-select-dropdown').val();
+			var selectedEntity = $(this).siblings('.entity-select-dropdown').val();
 			// FIXME do not hardcode URL
 			window.location.href= '/menu/main/dataexplorer?entity=' + selectedEntity;
 		});

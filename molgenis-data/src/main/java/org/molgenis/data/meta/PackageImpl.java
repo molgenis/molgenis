@@ -14,10 +14,10 @@ import org.molgenis.data.support.MapEntity;
  */
 public class PackageImpl implements Package
 {
-	private List<PackageImpl> subPackages = new ArrayList<PackageImpl>();
-	private List<EntityMetaData> entities = new ArrayList<EntityMetaData>();
-	public static final Package defaultPackage = new PackageImpl(Package.DEFAULT_PACKAGE_NAME,
-			"The default package", null);
+	private final List<PackageImpl> subPackages = new ArrayList<PackageImpl>();
+	private final List<EntityMetaData> entities = new ArrayList<EntityMetaData>();
+	public static final Package defaultPackage = new PackageImpl(Package.DEFAULT_PACKAGE_NAME, "The default package",
+			null);
 
 	final private String simpleName;
 	final private String description;
@@ -157,5 +157,19 @@ public class PackageImpl implements Package
 	public Iterable<Package> getSubPackages()
 	{
 		return Collections.<Package> unmodifiableList(subPackages);
+	}
+
+	@Override
+	public Package getRootPackage()
+	{
+		Package root = getParent();
+		if (root == null) return this;
+
+		while (root != null)
+		{
+			root = root.getParent();
+		}
+
+		return root;
 	}
 }

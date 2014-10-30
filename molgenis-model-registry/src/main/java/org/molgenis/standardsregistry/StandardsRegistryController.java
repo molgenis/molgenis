@@ -19,7 +19,9 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Package;
+import org.molgenis.data.meta.MetaDataSearchService;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.PackageSearchResultItem;
 import org.molgenis.data.semantic.UntypedTagService;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.standardsregistry.utils.PackageTreeNode;
@@ -31,8 +33,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 @Controller
@@ -44,14 +44,18 @@ public class StandardsRegistryController extends MolgenisPluginController
 	private static final String VIEW_NAME = "view-standardsregistry";
 	private static final String VIEW_NAME_DETAILS = "view-standardsregistry_details";
 	private final MetaDataService metaDataService;
+	private final MetaDataSearchService metaDataSearchService;
 	private final UntypedTagService tagService;
 
 	@Autowired
-	public StandardsRegistryController(MetaDataService metaDataService, UntypedTagService tagService)
+	public StandardsRegistryController(MetaDataService metaDataService, UntypedTagService tagService,
+			MetaDataSearchService metaDataSearchService)
 	{
 		super(URI);
 		if (metaDataService == null) throw new IllegalArgumentException("metaDataService is null");
+		if (metaDataSearchService == null) throw new IllegalArgumentException("metaDataSearchService is null");
 		this.metaDataService = metaDataService;
+		this.metaDataSearchService = metaDataSearchService;
 		this.tagService = tagService;
 	}
 
@@ -65,49 +69,37 @@ public class StandardsRegistryController extends MolgenisPluginController
 	@ResponseBody
 	public PackageSearchResponse search(@Valid @RequestBody PackageSearchRequest packageSearchRequest, Model model)
 	{
-		// FIXME hookup with meta data search service once implemented
-		String selectedPackageName = packageSearchRequest.getQuery();
+		String searchQuery = packageSearchRequest.getQuery();
+		List<PackageResponse> packageResponses = Lists.newArrayList();
 
-		PackageSearchResponse packageSearchResponse;
-		if (selectedPackageName != null && !selectedPackageName.isEmpty())
+		List<PackageSearchResultItem> searchResults = metaDataSearchService.findRootPackages(searchQuery);
+		for (PackageSearchResultItem searchResult : searchResults)
 		{
-			PackageResponse aPackage = getPackage(selectedPackageName);
-			if (aPackage != null)
-			{
-				packageSearchResponse = new PackageSearchResponse(selectedPackageName, 0, 1, 1,
-						Collections.singletonList(aPackage));
-			}
-			else
-			{
-				packageSearchResponse = new PackageSearchResponse(selectedPackageName, 0, 0, 0,
-						Collections.<PackageResponse> emptyList());
-			}
+			packageResponses.add(new PackageResponse(searchResult.getPackageFound().getSimpleName(), searchResult
+					.getPackageFound().getDescription(), searchResult.getMatchDescription(),
+					getEntitiesInPackage(searchResult.getPackageFound().getName())));
 		}
-		else
+
+		int total = packageResponses.size();
+		if (total > 0)
 		{
-			List<PackageResponse> packageResponses = Lists.newArrayList(Iterables.transform(
-					metaDataService.getRootPackages(), new Function<Package, PackageResponse>()
-					{
-						@Override
-						public PackageResponse apply(Package aPackage)
-						{
-							return new PackageResponse(aPackage.getSimpleName(), aPackage.getDescription(),
-									getEntityNamesInPackage(aPackage.getSimpleName()));
-						}
-					}));
-			int total = packageResponses.size();
 			if (packageSearchRequest.getOffset() != null)
 			{
 				packageResponses = packageResponses.subList(packageSearchRequest.getOffset(), packageResponses.size());
 			}
+
 			if (packageSearchRequest.getNum() != null && packageResponses.size() > packageSearchRequest.getNum())
 			{
 				packageResponses = packageResponses.subList(0, packageSearchRequest.getNum());
 			}
-			int offset = packageSearchRequest.getOffset() != null ? packageSearchRequest.getOffset() : 0;
-			int num = packageSearchRequest.getNum() != null ? packageSearchRequest.getNum() : packageResponses.size();
-			packageSearchResponse = new PackageSearchResponse(selectedPackageName, offset, num, total, packageResponses);
 		}
+
+		int offset = packageSearchRequest.getOffset() != null ? packageSearchRequest.getOffset() : 0;
+		int num = packageSearchRequest.getNum() != null ? packageSearchRequest.getNum() : packageResponses.size();
+
+		PackageSearchResponse packageSearchResponse = new PackageSearchResponse(searchQuery, offset, num, total,
+				packageResponses);
+
 		return packageSearchResponse;
 	}
 
@@ -132,8 +124,8 @@ public class StandardsRegistryController extends MolgenisPluginController
 	{
 		Package molgenisPackage = metaDataService.getPackage(selectedPackageName);
 		if (molgenisPackage == null) return null;
-		return new PackageResponse(molgenisPackage.getSimpleName(), molgenisPackage.getDescription(),
-				getEntityNamesInPackage(molgenisPackage.getSimpleName()));
+		return new PackageResponse(molgenisPackage.getSimpleName(), molgenisPackage.getDescription(), null,
+				getEntitiesInPackage(molgenisPackage.getName()));
 	}
 
 	/* PACKAGE TREE */
@@ -221,14 +213,15 @@ public class StandardsRegistryController extends MolgenisPluginController
 		return new PackageTreeNode("attribute", title, key, tooltip, folder, expanded, data, result);
 	}
 
-	private List<String> getEntityNamesInPackage(String packageName)
+	private List<PackageResponse.Entity> getEntitiesInPackage(String packageName)
 	{
-		List<String> entityNamesForThisPackage = new ArrayList<String>();
+		List<PackageResponse.Entity> entiesForThisPackage = new ArrayList<PackageResponse.Entity>();
 		for (EntityMetaData emd : metaDataService.getPackage(packageName).getEntityMetaDatas())
 		{
-			entityNamesForThisPackage.add(emd.getLabel());
+			entiesForThisPackage.add(new PackageResponse.Entity(emd.getName(), emd.getLabel()));
 		}
-		return entityNamesForThisPackage;
+
+		return entiesForThisPackage;
 	}
 
 	private static class PackageSearchResponse
@@ -326,12 +319,15 @@ public class StandardsRegistryController extends MolgenisPluginController
 	{
 		private final String name;
 		private final String description;
-		private final List<String> entitiesInPackage;
+		private final String matchDescription;
+		private final List<PackageResponse.Entity> entitiesInPackage;
 
-		public PackageResponse(String name, String description, List<String> entitiesInPackage)
+		public PackageResponse(String name, String description, String matchDescription,
+				List<PackageResponse.Entity> entitiesInPackage)
 		{
 			this.name = name;
 			this.description = description;
+			this.matchDescription = matchDescription;
 			this.entitiesInPackage = entitiesInPackage;
 		}
 
@@ -348,10 +344,41 @@ public class StandardsRegistryController extends MolgenisPluginController
 		}
 
 		@SuppressWarnings("unused")
-		public List<String> getEntities()
+		public String getMatchDescription()
+		{
+			return matchDescription;
+		}
+
+		@SuppressWarnings("unused")
+		public List<PackageResponse.Entity> getEntities()
 		{
 			return entitiesInPackage;
 		}
 
+		private static class Entity
+		{
+			private final String name;
+			private final String label;
+
+			public Entity(String name, String label)
+			{
+				super();
+				this.name = name;
+				this.label = label;
+			}
+
+			@SuppressWarnings("unused")
+			public String getName()
+			{
+				return name;
+			}
+
+			@SuppressWarnings("unused")
+			public String getLabel()
+			{
+				return label;
+			}
+		}
 	}
+
 }
