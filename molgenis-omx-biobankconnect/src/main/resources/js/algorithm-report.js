@@ -45,7 +45,7 @@
 					var derivedDataSet = restApi.get('/api/v1/dataset/' + response.derivedDataSetId);
 					var derivedDataSetLinkOutDiv = $('<div />').addClass('row').appendTo(infoDiv);
 					$('<div />').addClass('col-md-5').append('<strong>Link out to harmonized data :  </strong>').appendTo(derivedDataSetLinkOutDiv);
-					$('<div />').addClass('col-md-offset-2 col-md-5').append('<div class="float-right"><a href="/menu/main/dataexplorer?dataset=' + derivedDataSet.Identifier + '">' + derivedDataSet.Identifier + '</a></div>').appendTo(derivedDataSetLinkOutDiv);
+					$('<div />').addClass('col-md-offset-2 col-md-5').append('<div class="float-right"><a href="/menu/main/dataexplorer?entity=' + derivedDataSet.Identifier + '">' + derivedDataSet.Identifier + '</a></div>').appendTo(derivedDataSetLinkOutDiv);
 				}
 				//Update progressbar accordingly
 				if(response.isRunning)
@@ -55,17 +55,16 @@
 						if(response.stage === stage){
 							return false;
 						}else{
-							var innerProgressBar = currentStatus[stage].find('div.bar:eq(0)');
-							$(innerProgressBar).width('100%').parents('div:eq(0)').removeClass('active');
-							$(innerProgressBar).append('<p style="font-size:14px;padding-top:4px;">Finished!</p>');
+							var innerProgressBar = currentStatus[stage].find('div.progress-bar:eq(0)');
+							$(innerProgressBar).width('100%').removeClass('active').empty().append('Finished!')
 						}
 					});
 					var progressBar = currentStatus[response.stage].children('.progress:eq(0)');					
-					var width = $(progressBar).find('.bar:eq(0)').width();
-					var parentWidth = $(progressBar).find('.bar:eq(0)').parent().width();
+					var width = $(progressBar).find('.progress-bar:eq(0)').width();
+					var parentWidth = $(progressBar).find('.progress-bar:eq(0)').parent().width();
 					var percent = (100 * width / parentWidth) + (1 / response.totalUsers);
                     if(percent < response.matchPercentage) percent = response.matchPercentage;
-                    progressBar.find('div.bar:eq(0)').width((percent > 100 ? 100 : percent) + '%');
+                    progressBar.find('progress-bar.bar:eq(0)').width((percent > 100 ? 100 : percent) + '%');
 					
 					if(response.totalUsers > 1){
 						var warningDiv = null;
@@ -83,9 +82,8 @@
 				}else {
 					$.each(currentStatus, function(stageName, progressBar){
 						progressBar.show();
-						var innerProgressBar = progressBar.find('div.bar:eq(0)');
-						$(innerProgressBar).width('100%').parents('div:eq(0)').removeClass('active');
-						$(innerProgressBar).append('<p style="font-size:14px;padding-top:4px;">Finished!</p>');
+						var innerProgressBar = progressBar.find('div.progress-bar:eq(0)');
+						$(innerProgressBar).width('100%').removeClass('active').empty().append('Finished!');
 					});
 					$('ul.pager li').removeClass('disabled');
 				}

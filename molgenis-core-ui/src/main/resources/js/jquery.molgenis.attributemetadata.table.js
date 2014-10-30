@@ -58,7 +58,7 @@
 					});
 					
 					if (data.total > maxRows) {
-						panelBody.append('<a href="/menu/main/dataexplorer?dataset=' + refEntityMetadata.name + '">And ' + (data.total-maxRows) + ' more...</a>');
+						panelBody.append('<a href="/menu/main/dataexplorer?entity=' + refEntityMetadata.name + '">And ' + (data.total-maxRows) + ' more...</a>');
 					}
 				});
 			});

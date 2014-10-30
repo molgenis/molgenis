@@ -37,6 +37,7 @@
 			<div class="pull-right col-md-9">
 				<div class="well">
 					<div id="attributes-table"></div>
+					<div id="tags"></div>
 				</div>
 			</div>
 		</div>

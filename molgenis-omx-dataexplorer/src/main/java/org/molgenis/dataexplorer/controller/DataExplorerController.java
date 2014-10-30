@@ -152,7 +152,7 @@ public class DataExplorerController extends MolgenisPluginController
 	 * @return the view name
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(@RequestParam(value = "dataset", required = false) String selectedEntityName,
+	public String init(@RequestParam(value = "entity", required = false) String selectedEntityName,
 			@RequestParam(value = "searchTerm", required = false) String searchTerm, Model model) throws Exception
 	{
 		boolean entityExists = false;
