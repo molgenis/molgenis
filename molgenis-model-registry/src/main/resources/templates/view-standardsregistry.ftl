@@ -48,8 +48,13 @@
             <div class="well">    
     			<div class="package" data-id="{{package.name}}">
                     <div class="row">    			 
-        				<div class="col-md-4">
-        					<h3 style="margin-top: 0px;">{{package.name}} <small>{{package.description}}</small></h3>
+        				<div class="col-md-10">
+        					<h3 style="margin-top: 0px;">{{package.name}}</h3>
+        					{{package.description}}
+        					{{#if package.matchDescription}}
+        						<div class="match-description">{{package.matchDescription}}</div>
+        					{{/if}}	
+        					<!--
         					<dl class="dl-horizontal">
         					   <dt>Type</dt>
         					   <dd>TODO implement</dd>
@@ -58,13 +63,16 @@
         					   <dt>Homepage</dt>
                                <dd>TODO implement</dd>
                             </dl>
-        				</div>
-        				<div class="col-md-4 col-md-offset-4">
+                            -->
+                        </div>
+                       <div class="col-md-2">
         					<button class="btn btn-primary btn-block details-btn" type="button">View details</button>
         					<button class="btn btn-default btn-block dataexplorer-btn" type="button">View in dataexplorer</button>
         					<button class="btn btn-default btn-block import-btn" type="button">Import data</button>
         				</div>
+        				
     				</div>
+    				
     			</div>
 			</div>
 		</div>

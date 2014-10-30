@@ -28,7 +28,7 @@ class PackageRepository
 	/**
 	 * The repository where the package entities are stored.
 	 */
-	private CrudRepository repository;
+	private final CrudRepository repository;
 
 	/**
 	 * In-memory cache of all packages, filled with entities and attributes.
