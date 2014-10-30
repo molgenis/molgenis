@@ -7,8 +7,6 @@ import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.importer.EmxImportService;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
-import org.molgenis.data.meta.MetaDataSearchService;
-import org.molgenis.data.meta.MetaDataSearchServiceImpl;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.WritableMetaDataService;
 import org.molgenis.data.meta.WritableMetaDataServiceDecorator;
@@ -84,12 +82,6 @@ public class MySqlConfiguration
 		writableMetaDataService.setManageableCrudRepositoryCollection(mysqlRepositoryCollection);
 
 		return mysqlRepositoryCollection;
-	}
-
-	@Bean
-	public MetaDataSearchService metaDataSearchService()
-	{
-		return new MetaDataSearchServiceImpl(mysqlRepositoryCollection(), writableMetaDataService());
 	}
 
 	@Bean

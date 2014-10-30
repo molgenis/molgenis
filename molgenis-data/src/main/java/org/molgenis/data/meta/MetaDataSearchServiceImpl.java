@@ -4,24 +4,26 @@ import java.util.List;
 import java.util.ListIterator;
 
 import org.apache.commons.lang3.StringUtils;
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.ManageableCrudRepositoryCollection;
 import org.molgenis.data.Package;
 import org.molgenis.data.Query;
-import org.molgenis.data.Queryable;
 import org.molgenis.data.support.QueryImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
 
+@Component
 public class MetaDataSearchServiceImpl implements MetaDataSearchService
 {
-	private final ManageableCrudRepositoryCollection metaDataRepositoryCollection;
+	private final DataService dataService;
 	private final MetaDataService metaDataService;
 
-	public MetaDataSearchServiceImpl(ManageableCrudRepositoryCollection metaDataRepositoryCollection,
-			MetaDataService metaDataService)
+	@Autowired
+	public MetaDataSearchServiceImpl(DataService dataService, MetaDataService metaDataService)
 	{
-		this.metaDataRepositoryCollection = metaDataRepositoryCollection;
+		this.dataService = dataService;
 		this.metaDataService = metaDataService;
 	}
 
@@ -41,7 +43,7 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 		{
 			// Search in packages
 			Query q = new QueryImpl().search(searchTerm);
-			for (Entity packageEntity : getPackageRepo().findAll(q))
+			for (Entity packageEntity : dataService.findAll(PackageMetaData.ENTITY_NAME, q))
 			{
 				Package p = metaDataService.getPackage(packageEntity.getString(PackageMetaData.FULL_NAME));
 				if ((p != null) && (p.getParent() == null))
@@ -52,7 +54,7 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 			}
 
 			// Search in entities
-			for (Entity entityMetaData : getEntityMetaDataRepo().findAll(q))
+			for (Entity entityMetaData : dataService.findAll(EntityMetaDataMetaData.ENTITY_NAME, q))
 			{
 				Package p = getRootPackage(entityMetaData);
 				if (p != null)
@@ -65,7 +67,7 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 			}
 
 			// Search in attributes
-			for (Entity attributeMetaData : getAttributeMetaDataRepo().findAll(q))
+			for (Entity attributeMetaData : dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME, q))
 			{
 				Entity entityMetaData = attributeMetaData.getEntity(AttributeMetaDataMetaData.ENTITY);
 				if (entityMetaData != null)
@@ -117,19 +119,4 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 		return null;
 	}
 
-	private Queryable getPackageRepo()
-	{
-		return (Queryable) metaDataRepositoryCollection.getRepositoryByEntityName(PackageMetaData.ENTITY_NAME);
-	}
-
-	private Queryable getEntityMetaDataRepo()
-	{
-		return (Queryable) metaDataRepositoryCollection.getRepositoryByEntityName(EntityMetaDataMetaData.ENTITY_NAME);
-	}
-
-	private Queryable getAttributeMetaDataRepo()
-	{
-		return (Queryable) metaDataRepositoryCollection
-				.getRepositoryByEntityName(AttributeMetaDataMetaData.ENTITY_NAME);
-	}
 }
