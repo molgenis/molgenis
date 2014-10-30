@@ -22,6 +22,7 @@ import org.molgenis.data.Package;
 import org.molgenis.data.meta.MetaDataSearchService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.PackageSearchResultItem;
+import org.molgenis.data.semantic.UntypedTagService;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.standardsregistry.utils.PackageTreeNode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -346,6 +347,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 			return matchDescription;
 		}
 
+		@SuppressWarnings("unused")
 		public List<String> getEntities()
 		{
 			return entitiesInPackage;

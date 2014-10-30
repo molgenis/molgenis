@@ -50,7 +50,7 @@
             <div class="well">    
     			<div class="package" data-id="{{package.name}}">
 		      		<div class="row"> 			 
-        				<div class="col-md-10">
+        				<div class="col-md-8">
         					<h3 style="margin-top: 0px;">{{package.name}}</h3>
         					{{package.description}}
         					{{#if package.matchDescription}}
@@ -58,7 +58,7 @@
         					{{/if}}	
     					</div>
     					
-    					<div class="col-md-2">
+    					<div class="col-md-4">
         					<button class="btn btn-primary btn-block details-btn" type="button">View details</button>
         					<div class="col-md-6">
 	                			<select class="form-control entity-select-dropdown" data-live-search="true" title="Please select an entity" {{#unless entities.length}}disabled{{/unless}}>
