@@ -222,7 +222,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 		List<String> entityNamesForThisPackage = new ArrayList<String>();
 		for (EntityMetaData emd : metaDataService.getPackage(packageName).getEntityMetaDatas())
 		{
-			entityNamesForThisPackage.add(emd.getSimpleName());
+			entityNamesForThisPackage.add(emd.getLabel());
 		}
 		return entityNamesForThisPackage;
 	}
