@@ -137,7 +137,7 @@
 			var id = $(this).closest('.package').data('id');
 			var selectedEntity = $('.entity-select-dropdown').val();
 			// FIXME do not hardcode URL
-			window.location.href= '/menu/main/dataexplorer?dataset=' + selectedEntity;
+			window.location.href= '/menu/main/dataexplorer?entity=' + selectedEntity;
 		});
 		
 		countTemplate = Handlebars.compile($("#count-template").html());

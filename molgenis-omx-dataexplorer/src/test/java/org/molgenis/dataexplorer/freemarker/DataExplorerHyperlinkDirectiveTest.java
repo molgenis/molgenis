@@ -67,7 +67,7 @@ public class DataExplorerHyperlinkDirectiveTest
 				});
 
 		assertEquals(envWriter.toString(),
-				"<a href='/menu/data/dataex?dataset=thedataset' class='class1 class2' >explore data</a>");
+				"<a href='/menu/data/dataex?entity=thedataset' class='class1 class2' >explore data</a>");
 	}
 
 	@Test
