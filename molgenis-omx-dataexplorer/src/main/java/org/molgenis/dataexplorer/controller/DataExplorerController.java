@@ -28,13 +28,10 @@ import org.apache.log4j.Logger;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Aggregateable;
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.Queryable;
-import org.molgenis.data.Repository;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.support.GenomeConfig;
 import org.molgenis.data.support.QueryImpl;
@@ -491,7 +488,7 @@ public class DataExplorerController extends MolgenisPluginController
 	{
 		model.addAttribute("entity", dataService.getQueryableRepository(entityName).findOne(entityId));
 		model.addAttribute("entityMetadata", dataService.getEntityMetaData(entityName));
-		model.addAttribute("viewName",getViewName(entityName));
+		model.addAttribute("viewName", getViewName(entityName));
 		return "view-entityreport";
 	}
 
@@ -512,12 +509,11 @@ public class DataExplorerController extends MolgenisPluginController
 	private boolean viewExists(String viewName)
 	{
 		Queryable templateRepository = dataService.getQueryableRepository(FreemarkerTemplate.ENTITY_NAME);
-		return templateRepository.count(new QueryImpl().eq("Name", viewName+".ftl")) > 0;
+		return templateRepository.count(new QueryImpl().eq("Name", viewName + ".ftl")) > 0;
 	}
 
 	@RequestMapping(value = "/settings", method = RequestMethod.GET)
-	public @ResponseBody
-	Map<String, String> getSettings(@RequestParam(required = false) String keyStartsWith)
+	public @ResponseBody Map<String, String> getSettings(@RequestParam(required = false) String keyStartsWith)
 	{
 		if (keyStartsWith == null)
 		{
