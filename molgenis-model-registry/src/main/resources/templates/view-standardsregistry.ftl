@@ -61,9 +61,9 @@
     					<div class="col-md-4">
         					<button class="btn btn-primary btn-block details-btn" type="button">View details</button>
         					<div class="col-md-6">
-	                			<select class="form-control entity-select-dropdown" data-live-search="true" title="Please select an entity">
+	                			<select class="form-control entity-select-dropdown" data-live-search="true" title="Please select an entity" {{#unless entities.length}}disabled{{/unless}}>
 		                			{{#each entities}}
-	        							<option value="{{this}}">{{this}}</option>
+	        							<option value="{{this}}">{{this}}</option> <#-- this refers to each String in the entities list -->
 	    							{{/each}}
 			                    </select>
 		                  	</div>
