@@ -6,20 +6,23 @@ import java.util.Map;
 
 public class PackageTreeNode
 {
-	private String title;
-	private String key;
-	private boolean folder;
+	private final String title;
+	private final String key;
+	private final boolean folder;
 	private List<PackageTreeNode> children = null;
 	private String tooltip;
 	private boolean expanded;
 	private Map<String, Object> data;
+	private final String extraClasses;
 
-	public PackageTreeNode(String title, String key, String tooltip, boolean folder, boolean expanded, Map<String, Object> data)
+	public PackageTreeNode(String extraClasses, String title, String key, String tooltip, boolean folder,
+			boolean expanded, Map<String, Object> data)
 	{
-		this(title, key, tooltip, folder, expanded, data, null);
+		this(extraClasses, title, key, tooltip, folder, expanded, data, null);
 	}
 
-	public PackageTreeNode(String title, String key, String tooltip, boolean folder, boolean expanded, Map<String, Object> data, List<PackageTreeNode> children)
+	public PackageTreeNode(String extraClasses, String title, String key, String tooltip, boolean folder,
+			boolean expanded, Map<String, Object> data, List<PackageTreeNode> children)
 	{
 		this.title = title;
 		this.key = key;
@@ -28,6 +31,7 @@ public class PackageTreeNode
 		this.expanded = expanded;
 		this.data = data;
 		this.children = children;
+		this.extraClasses = extraClasses;
 	}
 
 	public Map<String, Object> getData()
@@ -64,7 +68,7 @@ public class PackageTreeNode
 	{
 		return folder;
 	}
-	
+
 	public List<PackageTreeNode> getChildren()
 	{
 		return children;
@@ -88,6 +92,11 @@ public class PackageTreeNode
 	public void setTooltip(String tooltip)
 	{
 		this.tooltip = tooltip;
+	}
+
+	public String getExtraClasses()
+	{
+		return extraClasses;
 	}
 
 }

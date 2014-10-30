@@ -164,7 +164,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 			result.add(createPackageTreeNode(emd));
 		}
 
-		return new PackageTreeNode(title, key, tooltip, folder, expanded, data, result);
+		return new PackageTreeNode("package", title, key, tooltip, folder, expanded, data, result);
 	}
 
 	private PackageTreeNode createPackageTreeNode(EntityMetaData emd)
@@ -185,7 +185,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 			result.add(createPackageTreeNode(amd, emd));
 		}
 
-		return new PackageTreeNode(title, key, tooltip, folder, expanded, data, result);
+		return new PackageTreeNode("entity", title, key, tooltip, folder, expanded, data, result);
 	}
 
 	private PackageTreeNode createPackageTreeNode(AttributeMetaData amd, EntityMetaData emd)
@@ -214,7 +214,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 			folder = false;
 		}
 
-		return new PackageTreeNode(title, key, tooltip, folder, expanded, data, result);
+		return new PackageTreeNode("attribute", title, key, tooltip, folder, expanded, data, result);
 	}
 
 	private List<String> getEntityNamesInPackage(String packageName)
