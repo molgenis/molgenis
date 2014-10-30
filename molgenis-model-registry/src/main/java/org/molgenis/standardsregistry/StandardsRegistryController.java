@@ -20,6 +20,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Package;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.semantic.UntypedTagService;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.standardsregistry.utils.PackageTreeNode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,13 +44,15 @@ public class StandardsRegistryController extends MolgenisPluginController
 	private static final String VIEW_NAME = "view-standardsregistry";
 	private static final String VIEW_NAME_DETAILS = "view-standardsregistry_details";
 	private final MetaDataService metaDataService;
+	private final UntypedTagService tagService;
 
 	@Autowired
-	public StandardsRegistryController(MetaDataService metaDataService)
+	public StandardsRegistryController(MetaDataService metaDataService, UntypedTagService tagService)
 	{
 		super(URI);
 		if (metaDataService == null) throw new IllegalArgumentException("metaDataService is null");
 		this.metaDataService = metaDataService;
+		this.tagService = tagService;
 	}
 
 	@RequestMapping(method = GET)
@@ -88,7 +91,8 @@ public class StandardsRegistryController extends MolgenisPluginController
 						@Override
 						public PackageResponse apply(Package aPackage)
 						{
-							return new PackageResponse(aPackage.getSimpleName(), aPackage.getDescription());
+							return new PackageResponse(aPackage.getSimpleName(), aPackage.getDescription(),
+									getEntityNamesInPackage(aPackage.getSimpleName()));
 						}
 					}));
 			int total = packageResponses.size();
@@ -128,7 +132,8 @@ public class StandardsRegistryController extends MolgenisPluginController
 	{
 		Package molgenisPackage = metaDataService.getPackage(selectedPackageName);
 		if (molgenisPackage == null) return null;
-		return new PackageResponse(molgenisPackage.getSimpleName(), molgenisPackage.getDescription());
+		return new PackageResponse(molgenisPackage.getSimpleName(), molgenisPackage.getDescription(),
+				getEntityNamesInPackage(molgenisPackage.getSimpleName()));
 	}
 
 	/* PACKAGE TREE */
@@ -162,7 +167,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 			result.add(createPackageTreeNode(emd));
 		}
 
-		return new PackageTreeNode(title, key, tooltip, folder, expanded, data, result);
+		return new PackageTreeNode("package", title, key, tooltip, folder, expanded, data, result);
 	}
 
 	private PackageTreeNode createPackageTreeNode(EntityMetaData emd)
@@ -183,7 +188,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 			result.add(createPackageTreeNode(amd, emd));
 		}
 
-		return new PackageTreeNode(title, key, tooltip, folder, expanded, data, result);
+		return new PackageTreeNode("entity", title, key, tooltip, folder, expanded, data, result);
 	}
 
 	private PackageTreeNode createPackageTreeNode(AttributeMetaData amd, EntityMetaData emd)
@@ -198,6 +203,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 		Map<String, Object> data = new HashMap<String, Object>();
 		data.put("type", "attribute");
 		data.put("href", "/api/v1/" + emd.getName() + "/meta/" + amd.getName());
+		data.put("tags", tagService.getTagsForAttribute(emd, amd));
 
 		if (amd.getDataType().getEnumType() == FieldTypeEnum.COMPOUND)
 		{
@@ -212,7 +218,17 @@ public class StandardsRegistryController extends MolgenisPluginController
 			folder = false;
 		}
 
-		return new PackageTreeNode(title, key, tooltip, folder, expanded, data, result);
+		return new PackageTreeNode("attribute", title, key, tooltip, folder, expanded, data, result);
+	}
+
+	private List<String> getEntityNamesInPackage(String packageName)
+	{
+		List<String> entityNamesForThisPackage = new ArrayList<String>();
+		for (EntityMetaData emd : metaDataService.getPackage(packageName).getEntityMetaDatas())
+		{
+			entityNamesForThisPackage.add(emd.getLabel());
+		}
+		return entityNamesForThisPackage;
 	}
 
 	private static class PackageSearchResponse
@@ -310,11 +326,13 @@ public class StandardsRegistryController extends MolgenisPluginController
 	{
 		private final String name;
 		private final String description;
+		private final List<String> entitiesInPackage;
 
-		public PackageResponse(String name, String description)
+		public PackageResponse(String name, String description, List<String> entitiesInPackage)
 		{
 			this.name = name;
 			this.description = description;
+			this.entitiesInPackage = entitiesInPackage;
 		}
 
 		@SuppressWarnings("unused")
@@ -328,5 +346,12 @@ public class StandardsRegistryController extends MolgenisPluginController
 		{
 			return description;
 		}
+
+		@SuppressWarnings("unused")
+		public List<String> getEntities()
+		{
+			return entitiesInPackage;
+		}
+
 	}
 }

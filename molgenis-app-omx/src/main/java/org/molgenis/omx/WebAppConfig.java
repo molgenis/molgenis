@@ -2,11 +2,14 @@ package org.molgenis.omx;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.UUID;
 
 import org.molgenis.DatabaseConfig;
 import org.molgenis.catalogmanager.CatalogManagerService;
 import org.molgenis.data.DataService;
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
+import org.molgenis.data.semantic.TagRepository;
+import org.molgenis.data.semantic.UntypedTagService;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
 import org.molgenis.omx.catalogmanager.OmxCatalogManagerService;
 import org.molgenis.omx.config.DataExplorerConfig;
@@ -23,6 +26,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.util.IdGenerator;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
@@ -72,5 +76,25 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		// Look up unknown templates in the FreemarkerTemplate repository
 		result.setPostTemplateLoaders(new RepositoryTemplateLoader(freemarkerTemplateRepository));
 		return result;
+	}
+
+	@Bean
+	TagRepository tagRepository()
+	{
+		return new TagRepository(dataService, new IdGenerator()
+		{
+			@Override
+			public UUID generateId()
+			{
+				// TODO: use flake id?
+				return UUID.randomUUID();
+			}
+		});
+	}
+
+	@Bean
+	public UntypedTagService tagService()
+	{
+		return new UntypedTagService(dataService, tagRepository());
 	}
 }

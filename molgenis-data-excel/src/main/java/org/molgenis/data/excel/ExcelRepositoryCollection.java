@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Set;
 
@@ -12,6 +13,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.molgenis.data.Repository;
+import org.molgenis.data.Writable;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.support.FileRepositoryCollection;
@@ -94,6 +96,17 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 		}
 
 		return new ExcelRepository(name, poiSheet, cellProcessors);
+	}
+
+	public Writable createWritable(String entityName, List<String> attributeNames)
+	{
+		Sheet sheet = workbook.createSheet(entityName);
+		return new ExcelSheetWriter(sheet, attributeNames, cellProcessors);
+	}
+
+	public void save(OutputStream out) throws IOException
+	{
+		workbook.write(out);
 	}
 
 }
