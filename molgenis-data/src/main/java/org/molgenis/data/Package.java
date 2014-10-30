@@ -32,13 +32,6 @@ public interface Package
 	String getDescription();
 
 	/**
-	 * Gets the parent package or null if this package does not have a parent package
-	 * 
-	 * @return
-	 */
-	Package getParent();
-
-	/**
 	 * Gets the subpackages of this package or an empty list if this package doesnot have any subpackages.
 	 * 
 	 * @return
@@ -51,5 +44,19 @@ public interface Package
 	 * @return
 	 */
 	Iterable<EntityMetaData> getEntityMetaDatas();
+
+	/**
+	 * Gets the parent package or null if this package does not have a parent package
+	 * 
+	 * @return
+	 */
+	Package getParent();
+
+	/**
+	 * Return a the package entity
+	 * 
+	 * @return
+	 */
+	Entity toEntity();
 
 }

@@ -1,6 +1,7 @@
 package org.molgenis.data.mysql;
 
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -12,11 +13,13 @@ public class MysqlRepositoryCompoundTest extends MysqlRepositoryAbstractDatatype
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		DefaultEntityMetaData compoundMD = new DefaultEntityMetaData("compound").setAbstract(true);
+		EditableEntityMetaData compoundMD = new DefaultEntityMetaData("compound")
+				.setAbstract(true);
 		compoundMD.addAttribute("col2").setDataType(MolgenisFieldTypes.BOOL);
 		coll.add(compoundMD);
 
-		DefaultEntityMetaData rootMD = new DefaultEntityMetaData("CompoundTest").setLabel("CompoundTest");
+		EditableEntityMetaData rootMD = new DefaultEntityMetaData("CompoundTest")
+				.setLabel("CompoundTest");
 		rootMD.setIdAttribute("col1");
 		rootMD.addAttribute("col1").setDataType(MolgenisFieldTypes.BOOL).setNillable(false);
 		rootMD.addAttribute("compound").setDataType(MolgenisFieldTypes.COMPOUND).setRefEntity(compoundMD);

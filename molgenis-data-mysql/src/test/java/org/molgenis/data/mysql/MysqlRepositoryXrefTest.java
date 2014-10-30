@@ -1,6 +1,7 @@
 package org.molgenis.data.mysql;
 
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -31,7 +32,7 @@ public class MysqlRepositoryXrefTest extends MysqlRepositoryAbstractDatatypeTest
 		refEntity2.setIdAttribute("identifier");
 		refEntity2.addAttribute("identifier").setDataType(MolgenisFieldTypes.INT).setNillable(false);
 
-		DefaultEntityMetaData xrefEntity = new DefaultEntityMetaData("XrefTest").setLabel("Xref Test");
+		EditableEntityMetaData xrefEntity = new DefaultEntityMetaData("XrefTest").setLabel("Xref Test");
 		xrefEntity.setIdAttribute("identifier");
 		xrefEntity.addAttribute("identifier").setNillable(false);
 		xrefEntity.addAttribute("stringRef").setDataType(MolgenisFieldTypes.XREF).setRefEntity(refEntity)
@@ -68,7 +69,7 @@ public class MysqlRepositoryXrefTest extends MysqlRepositoryAbstractDatatypeTest
 		Assert.assertEquals(xrefRepo.getCreateSql(), createSql());
 
 		Assert.assertEquals(xrefRepo.getCreateFKeySql(getMetaData().getAttribute("stringRef")),
-				"ALTER TABLE XrefTest ADD FOREIGN KEY (`stringRef`) REFERENCES `StringTarget`(`identifier`)");
+				"ALTER TABLE `XrefTest` ADD FOREIGN KEY (`stringRef`) REFERENCES `StringTarget`(`identifier`)");
 
 		xrefRepo.drop();
 		stringRepo.drop();

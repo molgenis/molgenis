@@ -98,14 +98,14 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		coll.dropEntityMetaData(metaData.getName());
 		MysqlRepository repo = (MysqlRepository) coll.add(metaData);
 
-		Assert.assertEquals(repo.iteratorSql(), "SELECT firstName, lastName FROM MysqlPerson");
+		Assert.assertEquals(repo.iteratorSql(), "SELECT firstName, lastName FROM `MysqlPerson`");
 		Assert.assertEquals(repo.getInsertSql(), "INSERT INTO `MysqlPerson` (`firstName`, `lastName`) VALUES (?, ?)");
 		Assert.assertEquals(
 				repo.getCreateSql(),
 				"CREATE TABLE IF NOT EXISTS `MysqlPerson`(`firstName` VARCHAR(255) NOT NULL, `lastName` VARCHAR(255) NOT NULL, PRIMARY KEY (`lastName`)) ENGINE=InnoDB;");
 
 		metaData.addAttributeMetaData(new DefaultAttributeMetaData("age", MolgenisFieldTypes.FieldTypeEnum.INT));
-		Assert.assertEquals(repo.iteratorSql(), "SELECT firstName, lastName, age FROM MysqlPerson");
+		Assert.assertEquals(repo.iteratorSql(), "SELECT firstName, lastName, age FROM `MysqlPerson`");
 		Assert.assertEquals(repo.getInsertSql(),
 				"INSERT INTO `MysqlPerson` (`firstName`, `lastName`, `age`) VALUES (?, ?, ?)");
 		Assert.assertEquals(

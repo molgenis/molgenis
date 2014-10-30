@@ -105,10 +105,8 @@ class PackageRepository
 		List<Entity> importOrderPackages = Lists.newLinkedList(DependencyResolver.resolveSelfReferences(repository,
 				META_DATA));
 		Collections.reverse(importOrderPackages);
-		System.out.println(importOrderPackages);
 		for (Entity p : importOrderPackages)
 		{
-			System.out.println(p);
 			repository.delete(p);
 		}
 		packageCache.clear();

@@ -1,6 +1,7 @@
 package org.molgenis.data.mysql;
 
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -12,7 +13,8 @@ public class MysqlRepositoryDecimalTest extends MysqlRepositoryAbstractDatatypeT
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		DefaultEntityMetaData varcharMD = new DefaultEntityMetaData("DecimalTest").setLabel("Decimal Test");
+		EditableEntityMetaData varcharMD = new DefaultEntityMetaData("DecimalTest")
+				.setLabel("Decimal Test");
 		varcharMD.setIdAttribute("col1");
 		varcharMD.addAttribute("col1").setDataType(MolgenisFieldTypes.DECIMAL).setNillable(false);
 		varcharMD.addAttribute("col2").setDataType(MolgenisFieldTypes.DECIMAL);
