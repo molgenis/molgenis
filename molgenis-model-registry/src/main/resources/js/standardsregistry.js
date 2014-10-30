@@ -157,8 +157,7 @@
 		});
 		
 		$(document).on('click', '.dataexplorer-btn', function() {
-			var id = $(this).closest('.package').data('id');
-			var selectedEntity = $('.entity-select-dropdown').val();
+			var selectedEntity = $(this).siblings('.entity-select-dropdown').val();
 			// FIXME do not hardcode URL
 			window.location.href= '/menu/main/dataexplorer?entity=' + selectedEntity;
 		});

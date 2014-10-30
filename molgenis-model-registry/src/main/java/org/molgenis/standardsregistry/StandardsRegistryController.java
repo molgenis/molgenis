@@ -77,7 +77,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 		{
 			packageResponses.add(new PackageResponse(searchResult.getPackageFound().getSimpleName(), searchResult
 					.getPackageFound().getDescription(), searchResult.getMatchDescription(),
-					getEntityNamesInPackage(searchResult.getPackageFound().getName())));
+					getEntitiesInPackage(searchResult.getPackageFound().getName())));
 		}
 
 		int total = packageResponses.size();
@@ -125,7 +125,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 		Package molgenisPackage = metaDataService.getPackage(selectedPackageName);
 		if (molgenisPackage == null) return null;
 		return new PackageResponse(molgenisPackage.getSimpleName(), molgenisPackage.getDescription(), null,
-				getEntityNamesInPackage(molgenisPackage.getName()));
+				getEntitiesInPackage(molgenisPackage.getName()));
 	}
 
 	/* PACKAGE TREE */
@@ -213,14 +213,15 @@ public class StandardsRegistryController extends MolgenisPluginController
 		return new PackageTreeNode("attribute", title, key, tooltip, folder, expanded, data, result);
 	}
 
-	private List<String> getEntityNamesInPackage(String packageName)
+	private List<PackageResponse.Entity> getEntitiesInPackage(String packageName)
 	{
-		List<String> entityNamesForThisPackage = new ArrayList<String>();
+		List<PackageResponse.Entity> entiesForThisPackage = new ArrayList<PackageResponse.Entity>();
 		for (EntityMetaData emd : metaDataService.getPackage(packageName).getEntityMetaDatas())
 		{
-			entityNamesForThisPackage.add(emd.getLabel());
+			entiesForThisPackage.add(new PackageResponse.Entity(emd.getName(), emd.getLabel()));
 		}
-		return entityNamesForThisPackage;
+
+		return entiesForThisPackage;
 	}
 
 	private static class PackageSearchResponse
@@ -319,9 +320,10 @@ public class StandardsRegistryController extends MolgenisPluginController
 		private final String name;
 		private final String description;
 		private final String matchDescription;
-		private final List<String> entitiesInPackage;
+		private final List<PackageResponse.Entity> entitiesInPackage;
 
-		public PackageResponse(String name, String description, String matchDescription, List<String> entitiesInPackage)
+		public PackageResponse(String name, String description, String matchDescription,
+				List<PackageResponse.Entity> entitiesInPackage)
 		{
 			this.name = name;
 			this.description = description;
@@ -348,10 +350,35 @@ public class StandardsRegistryController extends MolgenisPluginController
 		}
 
 		@SuppressWarnings("unused")
-		public List<String> getEntities()
+		public List<PackageResponse.Entity> getEntities()
 		{
 			return entitiesInPackage;
 		}
 
+		private static class Entity
+		{
+			private final String name;
+			private final String label;
+
+			public Entity(String name, String label)
+			{
+				super();
+				this.name = name;
+				this.label = label;
+			}
+
+			@SuppressWarnings("unused")
+			public String getName()
+			{
+				return name;
+			}
+
+			@SuppressWarnings("unused")
+			public String getLabel()
+			{
+				return label;
+			}
+		}
 	}
+
 }

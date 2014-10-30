@@ -8,7 +8,7 @@
 <#-- Search box and search results -->
 <div id="standards-registry-search">
     <div class="row">
-    	<div class="col-md-6">
+    	<div class="col-md-4">
     		<form class="form-horizontal" name="search-form" action="${context_url}/search" method="post">
     			<div class="form-group">
                 	<div class="col-md-12">
@@ -23,11 +23,13 @@
             	</div>
     		</form>
     	</div>
+    	<div class="col-md-4">
+    		<div id="package-search-results-pager"></div>
+    	</div>
     </div>
     <div class="row">
     	<div class="col-md-12">
-    		<div id="package-search-results"></div>
-            <div id="package-search-results-pager"></div>
+    		<div id="package-search-results"></div>  
     	</div>
     </div>
 </div>
@@ -45,37 +47,22 @@
 </script>
 
 <script id="model-template" type="text/x-handlebars-template">
-    <div class="row">
-		<div class="col-md-12">
-            <div class="well">    
-    			<div class="package" data-id="{{package.name}}">
-		      		<div class="row"> 			 
-        				<div class="col-md-8">
-        					<h3 style="margin-top: 0px;">{{package.name}}</h3>
-        					{{package.description}}
-        					{{#if package.matchDescription}}
-        						<div class="match-description">{{package.matchDescription}}</div>
-        					{{/if}}	
-    					</div>
-    					
-    					<div class="col-md-4">
-        					<button class="btn btn-primary btn-block details-btn" type="button">View details</button>
-        					<div class="col-md-6">
-	                			<select class="form-control entity-select-dropdown" data-live-search="true" title="Please select an entity" {{#unless entities.length}}disabled{{/unless}}>
-		                			{{#each entities}}
-	        							<option value="{{this}}">{{this}}</option> <#-- this refers to each String in the entities list -->
-	    							{{/each}}
-			                    </select>
-		                  	</div>
-		                  	
-		                  	<div class="col-md-6">
-    							<button class="btn btn-default btn-block dataexplorer-btn" type="button">View in dataexplorer</button>
-        					</div>  	
-        				</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+	<div class="well package" data-id="{{package.name}}">
+  		<h3 style="margin-top: 0px;">{{package.name}}</h3>
+  		<p>{{package.description}}</p>
+  		{{#if package.matchDescription}}
+        	<p><b>{{package.matchDescription}}</b></p>
+        {{/if}}
+        <p class="form-inline">
+        	<a class="btn btn-primary details-btn" href="#" role="button">View details</a>
+        	<a class="btn btn-primary dataexplorer-btn" href="#" role="button">View in dataexplorer</a> 
+        	<select class="form-control entity-select-dropdown" data-live-search="true" title="Please select an entity" {{#unless entities.length}}disabled{{/unless}}>
+		    	{{#each entities}}
+	        		<option value="{{this.name}}">{{this.label}}</option>
+	    		{{/each}}
+			</select>
+        </p>
+  	</div>
 </script>
+
 <@footer />

@@ -13,12 +13,6 @@
 	margin-bottom: 18px;	
 }
 
-#package-search-results {
-    height: 600px;
-    overflow-x: hidden;
-    overflow-y: auto;
-}
-
 #search-results-back-btn {
 	margin-bottom: 15px;
 }
@@ -27,6 +21,11 @@
 	background-position: -16px -160px !important;
 }
 
-.match-description {
-	font-weight: bold;
+p.form-inline {
+	margin-top: 50px;
 }
+
+.pagination {
+	margin: 0;
+}
+
