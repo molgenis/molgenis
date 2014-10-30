@@ -45,7 +45,7 @@
 					var derivedDataSet = restApi.get('/api/v1/dataset/' + response.derivedDataSetId);
 					var derivedDataSetLinkOutDiv = $('<div />').addClass('row').appendTo(infoDiv);
 					$('<div />').addClass('col-md-5').append('<strong>Link out to harmonized data :  </strong>').appendTo(derivedDataSetLinkOutDiv);
-					$('<div />').addClass('col-md-offset-2 col-md-5').append('<div class="float-right"><a href="/menu/main/dataexplorer?dataset=' + derivedDataSet.Identifier + '">' + derivedDataSet.Identifier + '</a></div>').appendTo(derivedDataSetLinkOutDiv);
+					$('<div />').addClass('col-md-offset-2 col-md-5').append('<div class="float-right"><a href="/menu/main/dataexplorer?entity=' + derivedDataSet.Identifier + '">' + derivedDataSet.Identifier + '</a></div>').appendTo(derivedDataSetLinkOutDiv);
 				}
 				//Update progressbar accordingly
 				if(response.isRunning)

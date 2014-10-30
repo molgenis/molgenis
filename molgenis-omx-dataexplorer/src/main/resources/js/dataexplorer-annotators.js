@@ -106,7 +106,7 @@
                     data: form.serialize(),
                     contentType: 'application/x-www-form-urlencoded',
                     success: function (name) {
-                        molgenis.createAlert([{'message': 'Annotation completed. <a href=/menu/main/dataexplorer?dataset='+name+'>Show result</a>'}], 'success');
+                        molgenis.createAlert([{'message': 'Annotation completed. <a href=/menu/main/dataexplorer?entity='+name+'>Show result</a>'}], 'success');
                     }
                 });
             }

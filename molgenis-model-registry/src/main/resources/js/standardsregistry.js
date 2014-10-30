@@ -83,8 +83,8 @@
 	
 	function renderSearchResults(searchResults, container) {
 		container.empty();
-		for(var i = 0; i < searchResults.packages.length; ++i){
-			container.append(modelTemplate({'package': searchResults.packages[i] }));
+		for(var i = 0; i < searchResults.packages.length; ++i){			
+			container.append(modelTemplate({'package': searchResults.packages[i], 'entities' : searchResults.packages[i].entitiesInPackage}));
 		}
 		container.append(countTemplate({'count': searchResults.total}));
 	}
@@ -148,14 +148,9 @@
 		
 		$(document).on('click', '.dataexplorer-btn', function() {
 			var id = $(this).closest('.package').data('id');
-			// TODO link id to data explorer
+			var selectedEntity = $('.entity-select-dropdown').val();
 			// FIXME do not hardcode URL
-			window.location.href= '/menu/main/dataexplorer';
-		});
-		
-		$(document).on('click', '.import-btn', function() {
-			// FIXME do not hardcode URL
-			window.location.href= '/menu/main/importwizard';
+			window.location.href= '/menu/main/dataexplorer?entity=' + selectedEntity;
 		});
 		
 		countTemplate = Handlebars.compile($("#count-template").html());
