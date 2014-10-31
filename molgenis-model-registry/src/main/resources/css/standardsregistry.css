@@ -22,10 +22,41 @@
 }
 
 p.form-inline {
-	margin-top: 50px;
+	margin-top: 25px;
 }
 
 .pagination {
 	margin: 0;
 }
 
+
+#package-doc-container {
+	height: 600px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.package-index-container ul
+{
+    list-style-type: none;
+}
+
+.package-container {
+	padding: 15px;
+}
+
+.entity-select-control {
+	width: 400px;
+}
+
+.entity-select-dropdown {
+    width: 300px;	
+}
+
+.details-btn {
+	margin-right: 10px;
+}
+
+.search-result-match {
+	margin-top: 10px;
+}
