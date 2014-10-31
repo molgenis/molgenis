@@ -237,12 +237,25 @@ public class StandardsRegistryController extends MolgenisPluginController
 	private List<PackageResponse.Entity> getEntitiesInPackage(String packageName)
 	{
 		List<PackageResponse.Entity> entiesForThisPackage = new ArrayList<PackageResponse.Entity>();
-		for (EntityMetaData emd : metaDataService.getPackage(packageName).getEntityMetaDatas())
+		Package aPackage = metaDataService.getPackage(packageName);
+		getEntitiesInPackageRec(aPackage, entiesForThisPackage);
+		return entiesForThisPackage;
+	}
+
+	private void getEntitiesInPackageRec(Package aPackage, List<PackageResponse.Entity> entiesForThisPackage)
+	{
+		for (EntityMetaData emd : aPackage.getEntityMetaDatas())
 		{
 			entiesForThisPackage.add(new PackageResponse.Entity(emd.getName(), emd.getLabel()));
 		}
-
-		return entiesForThisPackage;
+		Iterable<Package> subPackages = aPackage.getSubPackages();
+		if (subPackages != null)
+		{
+			for (Package subPackage : subPackages)
+			{
+				getEntitiesInPackageRec(subPackage, entiesForThisPackage);
+			}
+		}
 	}
 
 	private static class PackageSearchResponse

@@ -22,7 +22,7 @@
 }
 
 p.form-inline {
-	margin-top: 50px;
+	margin-top: 25px;
 }
 
 .pagination {
@@ -43,4 +43,20 @@ p.form-inline {
 
 .package-container {
 	padding: 15px;
+}
+
+.entity-select-control {
+	width: 400px;
+}
+
+.entity-select-dropdown {
+    width: 300px;	
+}
+
+.details-btn {
+	margin-right: 10px;
+}
+
+.search-result-match {
+	margin-top: 10px;
 }
