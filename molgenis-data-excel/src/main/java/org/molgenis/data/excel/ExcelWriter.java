@@ -62,7 +62,6 @@ public class ExcelWriter implements WritableFactory
 	@Override
 	public ExcelSheetWriter createWritable(String entityName, List<String> attributeNames)
 	{
-        System.out.println(entityName);
 		Sheet poiSheet = workbook.createSheet(entityName);
 		return new ExcelSheetWriter(poiSheet, attributeNames, cellProcessors);
 	}
