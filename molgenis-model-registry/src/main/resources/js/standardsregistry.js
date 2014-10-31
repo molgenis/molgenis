@@ -41,10 +41,23 @@
 		}
 	}
 	
-	function createAttributeMetadataTable(attributeMetadata) {
+	function createAttributeMetadataTable(attributeMetadata, data) {
 		$('#attributes-table').attributeMetadataTable({
 			attributeMetadata: attributeMetadata
 		});
+		if(data.tags){
+			for(var i = 0; i<data.tags.length; i++){
+				var $table = $('<table>').appendTo($('#tags'));
+				var $row = $('<tr>').appendTo($table);
+				var $cell = $('<td>').appendTo($row);
+				$cell.text(data.tags[i].relation);
+				var $cell = $('<td>').appendTo($row);
+				var $anchor = $('<a>', {"href": data.tags[i].object.iri}).appendTo($cell);
+				var $span = $('<span>',{"class": "label label-info"}).appendTo($anchor);
+				$span.text(data.tags[i].object.label);
+				var $cell = $('<td>').appendTo($row);
+			}
+		}
 	}
 	
 	function createEntityMetadataTable(entityMetadata) {
@@ -70,26 +83,30 @@
 	
 	function renderSearchResults(searchResults, container) {
 		container.empty();
-		for(var i = 0; i < searchResults.packages.length; ++i){
-			container.append(modelTemplate({'package': searchResults.packages[i] }));
+		for(var i = 0; i < searchResults.packages.length; ++i){			
+			container.append(modelTemplate({'package': searchResults.packages[i], 'entities' : searchResults.packages[i].entitiesInPackage}));
 		}
 		container.append(countTemplate({'count': searchResults.total}));
-	}
-	
-	function search(callback) {
-		
 	}
 	
 	$(function() {
 		var searchResultsContainer = $('#package-search-results');
 		
 		$('form[name=search-form]').submit(function(e) {
-			e.preventDefault();console.log(pageIndex);
+			e.preventDefault();
+			var q = $('#package-search').val();
+			
+			if (q != query) {
+				//New search reset pageIndex
+				pageIndex = 0;
+				query = q;
+			}
+			
 			$.ajax({
 				type : $(this).attr('method'),
 				url : $(this).attr('action'),
 				data : JSON.stringify({
-					query: $('#package-search').val(),
+					query: q,
 					offset: pageIndex * nrResultsPerPage,
 					num: nrResultsPerPage
 				}),
@@ -97,15 +114,21 @@
 				success : function(data) {
 					renderSearchResults(data, searchResultsContainer);
 					
-					$('#package-search-results-pager').pager({
-						'nrItems' : data.total,
-						'nrItemsPerPage' : nrResultsPerPage,
-						'page' : pageIndex + 1,
-						'onPageChange' : function(pager) {
-							pageIndex = pager.page - 1;
-							$('form[name=search-form]').submit();					
-						}
-					});
+					if (data.total > nrResultsPerPage) {
+						$('#package-search-results-pager').show();
+					
+						$('#package-search-results-pager').pager({
+							'nrItems' : data.total,
+							'nrItemsPerPage' : nrResultsPerPage,
+							'page' : pageIndex + 1,
+							'onPageChange' : function(pager) {
+								pageIndex = pager.page - 1;
+								$('form[name=search-form]').submit();					
+							}
+						});
+					} else {
+						$('#package-search-results-pager').hide();
+					}
 				}
 			});
 		});
@@ -134,15 +157,9 @@
 		});
 		
 		$(document).on('click', '.dataexplorer-btn', function() {
-			var id = $(this).closest('.package').data('id');
-			// TODO link id to data explorer
+			var selectedEntity = $(this).siblings('.entity-select-dropdown').val();
 			// FIXME do not hardcode URL
-			window.location.href= '/menu/main/dataexplorer';
-		});
-		
-		$(document).on('click', '.import-btn', function() {
-			// FIXME do not hardcode URL
-			window.location.href= '/menu/main/importwizard';
+			window.location.href= '/menu/main/dataexplorer?entity=' + selectedEntity;
 		});
 		
 		countTemplate = Handlebars.compile($("#count-template").html());

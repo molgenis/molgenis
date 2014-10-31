@@ -1,6 +1,7 @@
 package org.molgenis.data.meta;
 
 import static org.molgenis.MolgenisFieldTypes.BOOL;
+import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
 import static org.molgenis.MolgenisFieldTypes.XREF;
@@ -30,6 +31,7 @@ public class AttributeMetaDataMetaData extends DefaultEntityMetaData
 	public static final String LABEL_ATTRIBUTE = "labelAttribute";
 	public static final String READ_ONLY = "readOnly";
 	public static final String UNIQUE = "unique";
+	public static final String TAGS = "tags";
 
 	public AttributeMetaDataMetaData()
 	{
@@ -40,20 +42,20 @@ public class AttributeMetaDataMetaData extends DefaultEntityMetaData
 		addAttribute(NAME).setNillable(false);
 		addAttribute(DATA_TYPE);
 		addAttribute(REF_ENTITY).setDataType(XREF).setRefEntity(EntityMetaDataRepository.META_DATA);
-		addAttribute(NILLABLE).setDataType(BOOL);
-		addAttribute(AUTO).setDataType(BOOL);
-		addAttribute(ID_ATTRIBUTE).setDataType(BOOL);
-		addAttribute(LOOKUP_ATTRIBUTE).setDataType(BOOL);
-		addAttribute(VISIBLE).setDataType(BOOL);
+		addAttribute(NILLABLE).setDataType(BOOL).setNillable(false);
+		addAttribute(AUTO).setDataType(BOOL).setNillable(false);
+		addAttribute(ID_ATTRIBUTE).setDataType(BOOL).setNillable(false);
+		addAttribute(LOOKUP_ATTRIBUTE).setDataType(BOOL).setNillable(false);
+		addAttribute(VISIBLE).setDataType(BOOL).setNillable(false);
 		addAttribute(LABEL);
 		addAttribute(DESCRIPTION).setDataType(TEXT);
-		addAttribute(AGGREGATEABLE).setDataType(BOOL);
+		addAttribute(AGGREGATEABLE).setDataType(BOOL).setNillable(false);
 		addAttribute(ENUM_OPTIONS).setDataType(TEXT);
 		addAttribute(RANGE_MIN).setDataType(new LongField());
 		addAttribute(RANGE_MAX).setDataType(new LongField());
-		addAttribute(LABEL_ATTRIBUTE).setDataType(BOOL);
-		addAttribute(READ_ONLY).setDataType(BOOL);
-		addAttribute(UNIQUE).setDataType(BOOL);
+		addAttribute(LABEL_ATTRIBUTE).setDataType(BOOL).setNillable(false);
+		addAttribute(READ_ONLY).setDataType(BOOL).setNillable(false);
+		addAttribute(UNIQUE).setDataType(BOOL).setNillable(false);
+		addAttribute(TAGS).setDataType(MREF).setRefEntity(new TagMetaData());
 	}
-
 }
