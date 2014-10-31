@@ -150,7 +150,7 @@
 			case 'DECIMAL':
 			case 'INT':
 			case 'LONG':
-				return htmlEscape('(' + (filter.fromValue ? 'from ' + filter.fromValue : '') + (filter.toValue ? ' to ' + filter.toValue : '') + ')');
+				return htmlEscape('(' + (filter.fromValue ? filter.fromValue : '') + (filter.toValue ? '-' + filter.toValue : '') + ')');
 			case 'EMAIL':
 			case 'HTML':
 			case 'HYPERLINK':
@@ -525,9 +525,8 @@
 			case 'XREF':
 			case 'MREF':
 				var operator = simpleFilter ? simpleFilter.operator : 'OR';
-				var container = $('<div class="row">');
+				var container = $('<div class="row xrefmrefsearch">');
 				$controls.append(container);
-				container.addClass('xrefmrefsearch');
 				container.xrefmrefsearch({
 					attribute : attribute,
 					values : values,
