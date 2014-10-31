@@ -350,8 +350,9 @@ public class EmxImportService implements ImportService
 			String refEntityName = attribute.getString(REF_ENTITY);
 
 			// required
-			if (entityName == null) throw new IllegalArgumentException("attributes.entity is missing");
-			if (attributeName == null) throw new IllegalArgumentException("attributes.name is missing");
+			if (attributeName == null) throw new IllegalArgumentException("attributes.name is missing on line " + i);
+			if (entityName == null) throw new IllegalArgumentException(
+					"attributes.entity is missing for attrubute named: " + attributeName + " on line " + i);
 
 			// create entity if not yet defined
 			if (!entities.containsKey(entityName)) entities.put(entityName, new DefaultEntityMetaData(entityName));

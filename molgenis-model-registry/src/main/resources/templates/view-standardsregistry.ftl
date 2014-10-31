@@ -8,7 +8,7 @@
 <#-- Search box and search results -->
 <div id="standards-registry-search">
     <div class="row">
-    	<div class="col-md-6">
+    	<div class="col-md-4">
     		<form class="form-horizontal" name="search-form" action="${context_url}/search" method="post">
     			<div class="form-group">
                 	<div class="col-md-12">
@@ -23,17 +23,20 @@
             	</div>
     		</form>
     	</div>
+    	<div class="col-md-4">
+    		<div id="package-search-results-pager"></div>
+    	</div>
     </div>
     <div class="row">
     	<div class="col-md-12">
-    		<div id="package-search-results"></div>
-            <div id="package-search-results-pager"></div>
+    		<div id="package-search-results"></div>  
     	</div>
     </div>
 </div>
+
 <#-- Search result details: tree etc. -->
-<div id="standards-registry-details" class="hidden">
-</div>
+<div id="standards-registry-details" class="hidden"></div>
+
 <#-- Handlebar templates -->
 <script id="count-template" type="text/x-handlebars-template">
     <div class="row">
@@ -42,32 +45,24 @@
 		</div>	
 	</div>
 </script>
+
 <script id="model-template" type="text/x-handlebars-template">
-    <div class="row">
-		<div class="col-md-12">
-            <div class="well">    
-    			<div class="package" data-id="{{package.name}}">
-                    <div class="row">    			 
-        				<div class="col-md-4">
-        					<h3 style="margin-top: 0px;">{{package.name}} <small>{{package.description}}</small></h3>
-        					<dl class="dl-horizontal">
-        					   <dt>Type</dt>
-        					   <dd>TODO implement</dd>
-        					   <dt>Tags</dt>
-        					   <dd>TODO implement</dd>
-        					   <dt>Homepage</dt>
-                               <dd>TODO implement</dd>
-                            </dl>
-        				</div>
-        				<div class="col-md-4 col-md-offset-4">
-        					<button class="btn btn-primary btn-block details-btn" type="button">View details</button>
-        					<button class="btn btn-default btn-block dataexplorer-btn" type="button">View in dataexplorer</button>
-        					<button class="btn btn-default btn-block import-btn" type="button">Import data</button>
-        				</div>
-    				</div>
-    			</div>
-			</div>
-		</div>
-	</div>
+	<div class="well package" data-id="{{package.name}}">
+  		<h3 style="margin-top: 0px;">{{package.name}}</h3>
+  		<p>{{package.description}}</p>
+  		{{#if package.matchDescription}}
+        	<p><b>{{package.matchDescription}}</b></p>
+        {{/if}}
+        <p class="form-inline">
+        	<a class="btn btn-primary details-btn" href="#" role="button">View details</a>
+        	<a class="btn btn-primary dataexplorer-btn" href="#" role="button">View in dataexplorer</a> 
+        	<select class="form-control entity-select-dropdown" data-live-search="true" title="Please select an entity" {{#unless entities.length}}disabled{{/unless}}>
+		    	{{#each entities}}
+	        		<option value="{{this.name}}">{{this.label}}</option>
+	    		{{/each}}
+			</select>
+        </p>
+  	</div>
 </script>
+
 <@footer />

@@ -1,6 +1,5 @@
 package org.molgenis.data;
 
-
 /**
  * Package defines the structure and attributes of a Package. Attributes are unique. Other software components can use
  * this to interact with Packages and/or to configure backends and frontends, including Repository instances.
@@ -59,4 +58,10 @@ public interface Package
 	 */
 	Entity toEntity();
 
+	/**
+	 * Get the root of this package, or itsels if this is a root package
+	 * 
+	 * @return
+	 */
+	Package getRootPackage();
 }

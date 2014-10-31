@@ -23,23 +23,31 @@
 		function initSearchDataItems() {
 			var options = {'updatePager' : true};
 			$('#search-dataitem').typeahead({
-				source: function(query, process) {
-					molgenis.dataItemsTypeahead(molgenis.hrefToId(selectedDataSet.href), query, process);
-				},
-				minLength : 3,
-				items : 20
-			}).on('keydown', function(e){
+				  hint: true,
+				  highlight: true,
+				  minLength: 3
+			},{
+				name: selectedDataSet.Name,
+				displayKey: 'name',
+				source: function(query, cb) {
+					molgenis.dataItemsTypeahead(molgenis.hrefToId(selectedDataSet.href), query, cb);
+				}
+			});
+			$('#search-button').click(function(){
+				updateMatrix(options);
+			});
+			
+			$('#search-dataitem').on('keydown', function(e){
 			    if (e.which == 13) {
 			    	$('#search-button').click();
 			    	return false;
 			    }
-			}).on('keyup', function(e){
+			});
+			$('#search-dataitem').on('keyup', function(e){
 				if($(this).val() === ''){
+					$('#search-dataitem').val('');
 					updateMatrix(options);
 			    }
-			});
-			$('#search-button').click(function(){
-				updateMatrix(options);
 			});
 		}
 	};

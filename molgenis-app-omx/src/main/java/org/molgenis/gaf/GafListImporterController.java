@@ -149,7 +149,7 @@ public class GafListImporterController extends MolgenisPluginController
 			if (!report.getValidRunIds().isEmpty())
 			{
 				messages.add("Successfully imported GAF list named: <b><a href="
- + "/menu/main/dataexplorer?dataset="
+ + "/menu/main/dataexplorer?entity="
 						+ report.getDataSetIdentifier() + ">"
 						+ report.getDataSetName() + "</a></b>");
 

@@ -61,7 +61,7 @@
                     contentType: 'application/x-www-form-urlencoded',
                     url: '${context_url}/mergeRepositories',
                     success: function (name) {
-                        molgenis.createAlert([{'message': 'Merge completed. <a href=/menu/main/dataexplorer?dataset='+name+'>Show result</a>'}], 'success');
+                        molgenis.createAlert([{'message': 'Merge completed. <a href=/menu/main/dataexplorer?entity='+name+'>Show result</a>'}], 'success');
                     }
                 });
             }

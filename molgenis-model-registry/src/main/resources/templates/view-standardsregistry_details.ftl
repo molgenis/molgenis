@@ -5,6 +5,14 @@
     </div>
 </div>
 <div class="row">
+    <div class="col-md-12">        
+        <div id="entity-class" class="well clearfix">
+        	<h3 id="entity-class-name"></h3>
+        	<span id="entity-class-description"></span>
+        </div>
+    </div>
+</div>
+<div class="row">
 	<div class="col-md-12">
 		<ul class="nav nav-tabs" role="tablist">
 		  <li class="active"><a href="#tree" role="tab" data-toggle="tab">Tree</a></li>
@@ -33,7 +41,7 @@
                 <@renderPackage package/>
                     </div>
                 </div>
-			</div>
+			</div>               
 		</div>
 	</div>
 	<div class="tab-pane" id="uml">TODO implement</div>

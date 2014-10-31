@@ -4,6 +4,7 @@
 <script src="<@resource_href "/js/common-component.js"/>"></script>
 <script src="<@resource_href "/js/biobank-connect.js"/>"></script>
 <script src="<@resource_href "/js/ontology-matcher.js"/>"></script>
+<script src="<@resource_href "/js/bootstrap-select/bootstrap-select.js"/>"></script>
 <link rel="stylesheet" href="<@resource_href "/css/jquery-ui-1.9.2.custom.min.css"/>" type="text/css">
 <link rel="stylesheet" href="<@resource_href "/css/biobank-connect.css"/>" type="text/css">
 <link rel="stylesheet" href="<@resource_href "/css/ontology-matcher.css"/>" type="text/css">
@@ -19,7 +20,7 @@
 							</legend>
 							<div class="row">
 								<div class="col-md-4">
-									<select id="targetDataSets" name="targetDataSets">
+									<select id="targetDataSets" name="targetDataSets" class="selectpicker">
 										<#list wizard.dataSets as dataset>
 											<#if dataset.id?c != wizard.selectedDataSet.id?c>
 												<option value="${dataset.id?c}"<#if dataset.id?c == wizard.selectedDataSet.id?c> selected</#if>>${dataset.name}</option>
@@ -28,7 +29,7 @@
 									</select>
 									<input type="hidden" id="selectedTargetDataSets" name="selectedTargetDataSets">
 								</div>
-								<div class="btn-group col-md-offset-2 col-md-3">
+								<div class="btn-group col-md-offset-2 col-md-4">
 									<button id="add-target-dataset" class="btn btn-info" type="btn">Select</button>
 									<button id="add-target-all-datasets" class="btn btn-primary" type="btn">Select all</button>
 									<button id="remove-target-all-datasets" class="btn btn-default" type="btn">Remove all</button>
