@@ -15,6 +15,7 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.RANGE_MAX;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.RANGE_MIN;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.READ_ONLY;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.REF_ENTITY;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.TAGS;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.UNIQUE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.VISIBLE;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ABSTRACT;
@@ -100,7 +101,7 @@ public class EmxImportService implements ImportService
 			ID_ATTRIBUTE.toLowerCase(), LABEL.toLowerCase(), LABEL_ATTRIBUTE.toLowerCase(),
 			LOOKUP_ATTRIBUTE.toLowerCase(), NAME, NILLABLE.toLowerCase(), RANGE_MAX.toLowerCase(),
 			RANGE_MIN.toLowerCase(), READ_ONLY.toLowerCase(), REF_ENTITY.toLowerCase(), VISIBLE.toLowerCase(),
-			UNIQUE.toLowerCase());
+			UNIQUE.toLowerCase(), TAGS.toLowerCase());
 
 	private static final List<String> SUPPORTED_ENTITY_ATTRIBUTES = Arrays.asList(
 			org.molgenis.data.meta.EntityMetaDataMetaData.LABEL.toLowerCase(),
@@ -604,15 +605,15 @@ public class EmxImportService implements ImportService
 					emd.setPackage(p);
 				}
 			}
-			
-			 // Add packages to the packages table
-			 for (Package p : packages.values())
-			 {
+
+			// Add packages to the packages table
+			for (Package p : packages.values())
+			{
 				if (p != null)
 				{
-					 metaDataService.addPackage(p);
+					metaDataService.addPackage(p);
 				}
-			 }
+			}
 		}
 	}
 
