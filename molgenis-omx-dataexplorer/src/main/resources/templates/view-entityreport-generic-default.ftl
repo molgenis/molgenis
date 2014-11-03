@@ -12,7 +12,7 @@
 		<table class="table">
 			<tbody>
 				<tr>
-					<#list entity.getAttributeNames() as key>
+					<#list entity.getAttributeNames().iterator() as key>
 						
 						<#if counter == 3>
 							</tr>

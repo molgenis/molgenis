@@ -1,14 +1,7 @@
+<#include "view-standardsregistry_docs-macros.ftl">
 <div class="row">
     <div class="col-md-12">
         <button id="search-results-back-btn" class="btn btn-default"><span class="glyphicon glyphicon-chevron-left"></span> Back to search results</button>
-    </div>
-</div>
-<div class="row">
-    <div class="col-md-12">        
-        <div id="entity-class" class="well clearfix">
-        	<h3 id="entity-class-name"></h3>
-        	<span id="entity-class-description"></span>
-        </div>
     </div>
 </div>
 <div class="row">
@@ -34,12 +27,13 @@
 		    		</div>
 		    	</div>
 			</div>
-			<div class="pull-right col-md-9">
-				<div class="well">
-					<div id="attributes-table"></div>
-					<div id="tags"></div>
-				</div>
-			</div>
+			<div class="col-md-9">
+                <div id="package-doc-container">
+                    <div id="package-index"><#-- for back-to-top -->
+                <@renderPackage package/>
+                    </div>
+                </div>
+			</div>               
 		</div>
 	</div>
 	<div class="tab-pane" id="uml"><div id="paper"></div></div>

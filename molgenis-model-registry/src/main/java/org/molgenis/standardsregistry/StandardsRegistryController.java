@@ -31,6 +31,7 @@ import org.molgenis.standardsregistry.utils.PackageTreeNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -46,6 +47,8 @@ public class StandardsRegistryController extends MolgenisPluginController
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	private static final String VIEW_NAME = "view-standardsregistry";
 	private static final String VIEW_NAME_DETAILS = "view-standardsregistry_details";
+	private static final String VIEW_NAME_DOCUMENTATION = "view-standardsregistry_docs";
+	private static final String VIEW_NAME_DOCUMENTATION_EMBED = "view-standardsregistry_docs-body";
 	private final MetaDataService metaDataService;
 	private final MetaDataSearchService metaDataSearchService;
 	private final UntypedTagService tagService;
@@ -71,6 +74,23 @@ public class StandardsRegistryController extends MolgenisPluginController
 		}
 
 		return VIEW_NAME;
+	}
+
+	@RequestMapping(value = "/documentation", method = GET)
+	public String getModelDocumentation(Model model)
+	{
+		List<Package> packages = Lists.newArrayList(metaDataService.getRootPackages());
+		model.addAttribute("packages", packages);
+		return VIEW_NAME_DOCUMENTATION;
+	}
+
+	@RequestMapping(value = "/documentation/{packageName}", method = GET)
+	public String getModelDocumentation(@PathVariable("packageName") String packageName,
+			@RequestParam(value = "embed", required = false) Boolean embed, Model model)
+	{
+		Package aPackage = metaDataService.getPackage(packageName);
+		model.addAttribute("package", aPackage);
+		return VIEW_NAME_DOCUMENTATION_EMBED;
 	}
 
 	@RequestMapping(value = "/search", method = POST)
@@ -122,6 +142,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 			selectedPackageName = packages.get(0).getName();
 		}
 		model.addAttribute("selectedPackageName", selectedPackageName);
+		model.addAttribute("package", metaDataService.getPackage(selectedPackageName));
 
 		return VIEW_NAME_DETAILS;
 	}
@@ -240,12 +261,25 @@ public class StandardsRegistryController extends MolgenisPluginController
 	private List<PackageResponse.Entity> getEntitiesInPackage(String packageName)
 	{
 		List<PackageResponse.Entity> entiesForThisPackage = new ArrayList<PackageResponse.Entity>();
-		for (EntityMetaData emd : metaDataService.getPackage(packageName).getEntityMetaDatas())
+		Package aPackage = metaDataService.getPackage(packageName);
+		getEntitiesInPackageRec(aPackage, entiesForThisPackage);
+		return entiesForThisPackage;
+	}
+
+	private void getEntitiesInPackageRec(Package aPackage, List<PackageResponse.Entity> entiesForThisPackage)
+	{
+		for (EntityMetaData emd : aPackage.getEntityMetaDatas())
 		{
 			entiesForThisPackage.add(new PackageResponse.Entity(emd.getName(), emd.getLabel()));
 		}
-
-		return entiesForThisPackage;
+		Iterable<Package> subPackages = aPackage.getSubPackages();
+		if (subPackages != null)
+		{
+			for (Package subPackage : subPackages)
+			{
+				getEntitiesInPackageRec(subPackage, entiesForThisPackage);
+			}
+		}
 	}
 
 	private static class PackageSearchResponse

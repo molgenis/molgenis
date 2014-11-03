@@ -1,8 +1,8 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 
-<#assign css=['ui.fancytree.min.css', 'jquery-ui-1.9.2.custom.min.css', 'joint.min.css','standardsregistry.css']>
-<#assign js=['jquery-ui-1.9.2.custom.min.js', 'jquery.fancytree.min.js', 'jquery.molgenis.entitymetadata.table.js', 'jquery.molgenis.attributemetadata.table.js', 'jquery.bootstrap.pager.js', 'lodash.js', 'backbone-min.js', 'geometry.min.js', 'vectorizer.min.js', 'joint.clean.min.js','joint.shapes.uml.min.js', 'joint.layout.DirectedGraph.min.js', 'standardsregistry.js', 'handlebars.min.js']>
+<#assign css=['ui.fancytree.min.css', 'jquery-ui-1.9.2.custom.min.css', 'select2.css', 'standardsregistry.css']>
+<#assign js=['jquery-ui-1.9.2.custom.min.js', 'jquery.fancytree.min.js', 'select2.min.js', 'jquery.bootstrap.pager.js', 'standardsregistry.js', 'handlebars.min.js']>
 
 <@header css js/>
 <#-- Search box and search results -->
@@ -50,18 +50,29 @@
 	<div class="well package" data-id="{{package.name}}">
   		<h3 style="margin-top: 0px;">{{package.name}}</h3>
   		<p>{{package.description}}</p>
-  		{{#if package.matchDescription}}
-        	<p><b>{{package.matchDescription}}</b></p>
-        {{/if}}
-        <p class="form-inline">
-        	<a class="btn btn-primary details-btn" href="#" role="button">View details</a>
-        	<a class="btn btn-primary dataexplorer-btn" href="#" role="button">View in dataexplorer</a> 
-        	<select class="form-control entity-select-dropdown" data-live-search="true" title="Please select an entity" {{#unless entities.length}}disabled{{/unless}}>
-		    	{{#each entities}}
-	        		<option value="{{this.name}}">{{this.label}}</option>
-	    		{{/each}}
-			</select>
-        </p>
+        <form class="form-inline">
+            <div class="form-group">
+        	   <a class="btn btn-primary details-btn" href="#" role="button">View Model Details</a>
+        	</div>
+            <div class="form-group{{#unless entities.length}} hidden{{/unless}}">
+                <div class="input-group select2-bootstrap-append entity-select-control">
+                    <select id="select2-input-group-append" class="form-control select2 entity-select-dropdown" data-placeholder="Select an entity">
+                        <option></option>
+        		    	{{#each entities}}
+        	        		<option value="{{this.name}}">{{this.label}}</option>
+        	    		{{/each}}
+        			</select>
+        			<span class="input-group-btn">
+                        <button class="btn btn-default dataexplorer-btn" type="button" data-select2-open="select2-input-group-append">View Model Data</button>
+                    </span>
+    			</div>
+			</div>
+        </form>
+        <div class="search-result-match">
+            {{#if package.matchDescription}}
+                <p class="bg-info">{{package.matchDescription}}</p>
+            {{/if}}
+        </div>
   	</div>
 </script>
 
