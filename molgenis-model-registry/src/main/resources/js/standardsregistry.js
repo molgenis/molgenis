@@ -2,7 +2,7 @@
 	"use strict";
 	
 	var restApi = new molgenis.RestClient();
-	var selectedPackage;
+	var detailsPackageName;
 	var countTemplate;
 	var modelTemplate;
 	
@@ -103,6 +103,8 @@
 		});
 		
 		function showPackageDetails(id) {
+			detailsPackageName = id;
+			
 			$('#standards-registry-details').load(molgenis.getContextUrl() + '/details?package=' + id, function() {
 				$.get(molgenis.getContextUrl() + '/getPackage?package=' + id, function(selectedPackage){
 					createPackageTree(selectedPackage);
@@ -129,6 +131,10 @@
 				// FIXME do not hardcode URL
 				window.location.href= '/menu/main/dataexplorer?entity=' + selectedEntity;
 			}
+		});
+		
+		$(document).on('click', '#uml-tab', function() {
+			$.getScript(molgenis.getContextUrl() + '/uml?package=' + detailsPackageName);
 		});
 		
 		countTemplate = Handlebars.compile($("#count-template").html());

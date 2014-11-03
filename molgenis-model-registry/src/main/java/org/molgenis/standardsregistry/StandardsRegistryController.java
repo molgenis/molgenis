@@ -15,7 +15,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
-import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
@@ -66,13 +65,8 @@ public class StandardsRegistryController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = GET)
-	public String init(@RequestParam(value = "package", required = false) String selectedPackageName, Model model)
+	public String init()
 	{
-		if (StringUtils.isNotBlank(selectedPackageName))
-		{
-			model.addAttribute("selectedPackageName", selectedPackageName);
-		}
-
 		return VIEW_NAME;
 	}
 
@@ -148,7 +142,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/uml", method = GET)
-	public String getUml(@RequestParam(value = "package", required = false) String selectedPackageName, Model model)
+	public String getUml(@RequestParam(value = "package", required = true) String selectedPackageName, Model model)
 	{
 		Package molgenisPackage = metaDataService.getPackage(selectedPackageName);
 
