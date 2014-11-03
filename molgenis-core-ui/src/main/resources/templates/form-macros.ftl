@@ -31,6 +31,7 @@
 					
 					<div class="form-group">
 	    				<select class="form-control" id="operators">
+                            <option id="SEARCH">SEARCH</option>
 	    					<option id="EQUALS">EQUALS</option>
 	    					<option id="LIKE">LIKE</option>
 	    				</select>
