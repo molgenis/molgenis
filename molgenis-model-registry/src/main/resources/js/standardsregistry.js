@@ -5,14 +5,32 @@
 	var selectedPackage;
 	var countTemplate;
 	var modelTemplate;
-	
 	var nrResultsPerPage = 3;
 	var query;
 	var pageIndex = 0;
 	
-	function createPackageTree(selectedPackage) {
-		if(selectedPackage.name){
-			$('#attribute-selection').fancytree({
+	function createUml() {
+		var graph = new joint.dia.Graph;
+		var uml = joint.shapes.uml;
+		var paper = new joint.dia.Paper({
+		    el: $('#paper'),
+		    width: 1200,
+		    height: 600,
+		    gridSize: 1,
+		    model: graph
+		});
+
+
+		graph.addCell(new uml.Class({
+	        position: { x:200  , y: 500 },
+	        size: { width: 180, height: 50 },
+	        name: selectedPackage.name
+	    }));
+		
+	}
+	
+	function createPackageTree() {
+		$('#attribute-selection').fancytree({
 				source:{
 					url: molgenis.getContextUrl() + "/getTreeData?package=" + selectedPackage.name		
 				},
@@ -38,26 +56,12 @@
 					}
 				}
 			});
-		}
 	}
 	
-	function createAttributeMetadataTable(attributeMetadata, data) {
+	function createAttributeMetadataTable(attributeMetadata) {
 		$('#attributes-table').attributeMetadataTable({
 			attributeMetadata: attributeMetadata
 		});
-		if(data.tags){
-			for(var i = 0; i<data.tags.length; i++){
-				var $table = $('<table>').appendTo($('#tags'));
-				var $row = $('<tr>').appendTo($table);
-				var $cell = $('<td>').appendTo($row);
-				$cell.text(data.tags[i].relation);
-				var $cell = $('<td>').appendTo($row);
-				var $anchor = $('<a>', {"href": data.tags[i].object.iri}).appendTo($cell);
-				var $span = $('<span>',{"class": "label label-info"}).appendTo($anchor);
-				$span.text(data.tags[i].object.label);
-				var $cell = $('<td>').appendTo($row);
-			}
-		}
 	}
 	
 	function createEntityMetadataTable(entityMetadata) {
@@ -66,14 +70,14 @@
 		});
 	}
 	
-	function createHeader(entityMetaData) {
-		if(entityMetaData.name != undefined){
-			$('#entity-class-name').html(entityMetaData.name);
+	function createHeader() {
+		if(selectedPackage.name != undefined){
+			$('#entity-class-name').html(selectedPackage.name);
 			
-			if (entityMetaData.description) {
+			if (selectedPackage.description) {
 				var description = $('<span data-placement="bottom"></span>');
-				description.html(abbreviate(entityMetaData.description, 180));
-				description.attr('data-title', entityMetaData.description);
+				description.html(abbreviate(selectedPackage.description, 180));
+				description.attr('data-title', selectedPackage.description);
 				$('#entity-class-description').html(description.tooltip());
 			} else {
 				$('#entity-class-description').html('');
@@ -87,6 +91,19 @@
 			container.append(modelTemplate({'package': searchResults.packages[i], 'entities' : searchResults.packages[i].entitiesInPackage}));
 		}
 		container.append(countTemplate({'count': searchResults.total}));
+	}
+	
+	function showDetails(packageName) {
+		$('#standards-registry-details').load(molgenis.getContextUrl() + '/details?package=' + packageName, function() {
+			$.get(molgenis.getContextUrl() + '/getPackage?package=' + packageName, function(p){
+				selectedPackage = p;
+				createHeader();
+				createPackageTree();
+			});
+		});
+		
+		$('#standards-registry-search').removeClass('show').addClass('hidden');
+		$('#standards-registry-details').removeClass('hidden').addClass('show');
 	}
 	
 	$(function() {
@@ -132,7 +149,7 @@
 				}
 			});
 		});
-			
+		
 		$(document).on('click', '#search-clear-button', function() {
 			$('#package-search').val('');
 			$('form[name=search-form]').submit();	
@@ -140,15 +157,7 @@
 		
 		$(document).on('click', '.details-btn', function() {
 			var id = $(this).closest('.package').data('id');
-			$('#standards-registry-details').load(molgenis.getContextUrl() + '/details?package=' + id, function() {
-				$.get(molgenis.getContextUrl() + '/getPackage?package=' + id, function(selectedPackage){
-					createHeader(selectedPackage);
-					createPackageTree(selectedPackage);
-				});
-				
-				$('#standards-registry-search').removeClass('show').addClass('hidden');
-				$('#standards-registry-details').removeClass('hidden').addClass('show');
-			});
+			showDetails(id);
 		});
 		
 		$(document).on('click', '#search-results-back-btn', function(){
@@ -162,11 +171,19 @@
 			window.location.href= '/menu/main/dataexplorer?entity=' + selectedEntity;
 		});
 		
+		$(document).on('click', '#uml-tab', function() {
+			$.getScript(molgenis.getContextUrl() + '/uml?package=' + selectedPackage.name);
+		});
+		
 		countTemplate = Handlebars.compile($("#count-template").html());
 		modelTemplate = Handlebars.compile($("#model-template").html());
 		
-		// initially search for all models
-		$('form[name=search-form]').submit();
+		if (selectedPackageName) {
+			showDetails(selectedPackageName);
+		} else {
+			// initially search for all models
+			$('form[name=search-form]').submit();
+		}
 	});
 	
 }($, window.top.molgenis = window.top.molgenis || {}));

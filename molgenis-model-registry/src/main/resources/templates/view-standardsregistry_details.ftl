@@ -15,7 +15,7 @@
 	<div class="col-md-12">
 		<ul class="nav nav-tabs" role="tablist">
 		  <li class="active"><a href="#tree" role="tab" data-toggle="tab">Tree</a></li>
-		  <li><a href="#uml" role="tab" data-toggle="tab">UML</a></li>
+		  <li><a href="#uml" id="uml-tab" role="tab" data-toggle="tab">UML</a></li>
 		</ul>
 	</div>
 </div>
@@ -42,8 +42,5 @@
 			</div>
 		</div>
 	</div>
-	<div class="tab-pane" id="uml">TODO implement</div>
+	<div class="tab-pane" id="uml"><div id="paper"></div></div>
 </div>
-<#if selectedPackageName??>
-<script>var selectedPackageName='${selectedPackageName}';</script>
-</#if>
