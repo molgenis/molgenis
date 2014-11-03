@@ -103,6 +103,8 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	public void registerUser_activationModeUser() throws Exception
 	{
 		when(accountService.getActivationMode()).thenReturn(ActivationMode.USER);
+		when(accountService.isSelfRegistrationEnabled()).thenReturn(true);
+
 		this.mockMvc
 				.perform(
 						post("/account/register").param("username", "admin").param("password", "adminpw-invalid")
@@ -120,6 +122,8 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	public void registerUser_activationModeAdmin() throws Exception
 	{
 		when(accountService.getActivationMode()).thenReturn(ActivationMode.ADMIN);
+		when(accountService.isSelfRegistrationEnabled()).thenReturn(true);
+
 		this.mockMvc
 				.perform(
 						post("/account/register").param("username", "admin").param("password", "adminpw-invalid")
@@ -136,6 +140,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void registerUser_invalidRegisterRequest() throws Exception
 	{
+		when(accountService.isSelfRegistrationEnabled()).thenReturn(true);
 		this.mockMvc.perform(
 				post("/account/register").param("username", "admin").param("password", "adminpw-invalid")
 						.param("confirmPassword", "adminpw-invalid").param("lastname", "min").param("firstname", "ad")
@@ -147,6 +152,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void registerUser_passwordNotEqualsConfirmPassword() throws Exception
 	{
+		when(accountService.isSelfRegistrationEnabled()).thenReturn(true);
 		this.mockMvc.perform(
 				post("/account/register").param("username", "admin").param("password", "adminpw-invalid")
 						.param("confirmPassword", "adminpw-invalid-typo").param("email", "admin@molgenis.org")
@@ -158,6 +164,8 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void registerUser_invalidCaptcha() throws Exception
 	{
+		when(accountService.isSelfRegistrationEnabled()).thenReturn(true);
+
 		this.mockMvc.perform(
 				post("/account/register").param("username", "admin").param("password", "adminpw-invalid")
 						.param("confirmPassword", "adminpw-invalid").param("email", "admin@molgenis.org")
