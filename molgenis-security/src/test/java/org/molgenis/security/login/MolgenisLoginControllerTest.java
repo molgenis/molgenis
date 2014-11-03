@@ -6,6 +6,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
+import org.molgenis.Molgenis;
+import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.security.login.MolgenisLoginControllerTest.Config;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.ResourceFingerprintRegistry;
@@ -64,5 +66,12 @@ public class MolgenisLoginControllerTest extends AbstractTestNGSpringContextTest
 		{
 			return mock(ResourceFingerprintRegistry.class);
 		}
+
+		@Bean
+		public MolgenisSettings molgenisSettings()
+		{
+			return mock(MolgenisSettings.class);
+		}
+
 	}
 }
