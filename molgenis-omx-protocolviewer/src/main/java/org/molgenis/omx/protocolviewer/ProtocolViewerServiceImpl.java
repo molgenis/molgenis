@@ -211,24 +211,17 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 		File variablesFile = fileStore.store(variablesIs, variablesFileName);
 
 		// send order confirmation to user and admin
-		try
-		{
-			MolgenisUser molgenisUser = molgenisUserService.getUser(SecurityUtils.getCurrentUsername());
-			MimeMessage message = mailSender.createMimeMessage();
-			MimeMessageHelper helper = new MimeMessageHelper(message, true);
-			helper.setTo(molgenisUser.getEmail());
-			helper.setBcc(molgenisUserService.getSuEmailAddresses().toArray(new String[]
-			{}));
-			helper.setSubject("Submission confirmation from " + appName);
-			helper.setText(createOrderConfirmationEmailText(appName));
-			helper.addAttachment(fileName, new FileSystemResource(orderFile));
-			helper.addAttachment(variablesFileName, new FileSystemResource(variablesFile));
-			mailSender.send(message);
-		}
-		catch (Throwable t)
-		{
-			// FIXME remove temporary hack
-		}
+		MolgenisUser molgenisUser = molgenisUserService.getUser(SecurityUtils.getCurrentUsername());
+		MimeMessage message = mailSender.createMimeMessage();
+		MimeMessageHelper helper = new MimeMessageHelper(message, true);
+		helper.setTo(molgenisUser.getEmail());
+		helper.setBcc(molgenisUserService.getSuEmailAddresses().toArray(new String[]
+		{}));
+		helper.setSubject("Submission confirmation from " + appName);
+		helper.setText(createOrderConfirmationEmailText(appName));
+		helper.addAttachment(fileName, new FileSystemResource(orderFile));
+		helper.addAttachment(variablesFileName, new FileSystemResource(variablesFile));
+		mailSender.send(message);
 	}
 
 	@Override
