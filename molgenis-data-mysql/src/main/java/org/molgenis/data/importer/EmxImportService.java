@@ -53,6 +53,7 @@ import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.PackageImpl;
 import org.molgenis.data.meta.PackageMetaData;
+import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.meta.WritableMetaDataService;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DefaultAttributeMetaData;
@@ -100,7 +101,7 @@ public class EmxImportService implements ImportService
 			ID_ATTRIBUTE.toLowerCase(), LABEL.toLowerCase(), LABEL_ATTRIBUTE.toLowerCase(),
 			LOOKUP_ATTRIBUTE.toLowerCase(), NAME, NILLABLE.toLowerCase(), RANGE_MAX.toLowerCase(),
 			RANGE_MIN.toLowerCase(), READ_ONLY.toLowerCase(), REF_ENTITY.toLowerCase(), VISIBLE.toLowerCase(),
-			UNIQUE.toLowerCase());
+			UNIQUE.toLowerCase(), org.molgenis.data.meta.AttributeMetaDataMetaData.TAGS.toLowerCase());
 
 	private static final List<String> SUPPORTED_ENTITY_ATTRIBUTES = Arrays.asList(
 			org.molgenis.data.meta.EntityMetaDataMetaData.LABEL.toLowerCase(),
@@ -111,12 +112,15 @@ public class EmxImportService implements ImportService
 	private static final String ENTITIES = EntityMetaDataMetaData.ENTITY_NAME;
 	private static final String ATTRIBUTES = AttributeMetaDataMetaData.ENTITY_NAME;
 	private static final String PACKAGES = PackageMetaData.ENTITY_NAME;
+	private static final String TAGS = TagMetaData.ENTITY_NAME;
 
 	private MysqlRepositoryCollection targetCollection;
 	private TransactionTemplate transactionTemplate;
 	private final DataService dataService;
 	private PermissionSystemService permissionSystemService;
 	private WritableMetaDataService metaDataService;
+
+	// private UntypedTagService untypedTagService;
 
 	@Autowired
 	public EmxImportService(DataService dataService)
@@ -265,7 +269,7 @@ public class EmxImportService implements ImportService
 
 		for (String sheet : source.getEntityNames())
 		{
-			if (!ENTITIES.equals(sheet) && !ATTRIBUTES.equals(sheet) && !PACKAGES.equals(sheet))
+			if (!ENTITIES.equals(sheet) && !ATTRIBUTES.equals(sheet) && !PACKAGES.equals(sheet) && !TAGS.equals(sheet))
 			{
 				// check if sheet is known?
 				if (metaDataMap.containsKey(sheet)) report.getSheetsImportable().put(sheet, true);
@@ -603,15 +607,15 @@ public class EmxImportService implements ImportService
 					emd.setPackage(p);
 				}
 			}
-			
-			 // Add packages to the packages table
-			 for (Package p : packages.values())
-			 {
+
+			// Add packages to the packages table
+			for (Package p : packages.values())
+			{
 				if (p != null)
 				{
-					 metaDataService.addPackage(p);
+					metaDataService.addPackage(p);
 				}
-			 }
+			}
 		}
 	}
 

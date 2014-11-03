@@ -9,7 +9,6 @@ import static org.testng.Assert.assertEquals;
 import java.util.Arrays;
 
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
@@ -43,9 +42,6 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 	private TagRepository tagRepository;
 
 	@Autowired
-	private CrudRepository attributeRepository;
-
-	@Autowired
 	private OntologyService ontologyService;
 
 	@Autowired
@@ -55,7 +51,7 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 
 	private MapEntity geneAnnotationTagEntity;
 
-	private Relation instanceOf = Relation.valueOf("instanceOf");
+	private final Relation instanceOf = Relation.valueOf("instanceOf");
 
 	public static final Ontology EDAM_ONTOLOGY = new OntologyImpl("EDAM", "http://edamontology.org",
 			"The EDAM ontology.");
@@ -90,7 +86,6 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		when(dataService.getCrudRepository(AttributeMetaDataMetaData.ENTITY_NAME)).thenReturn(attributeRepository);
 		ontologyTagService = new OntologyTagService(dataService, ontologyService, tagRepository);
 	}
 
@@ -122,8 +117,10 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 		attributeEntity.set(AttributeMetaDataMetaData.TAGS,
 				Arrays.asList(chromosomeNameTagEntity, geneAnnotationTagEntity));
 		when(
-				attributeRepository.findOne(new QueryImpl().eq(AttributeMetaDataMetaData.ENTITY, "org.molgenis.SNP")
-						.and().eq(AttributeMetaDataMetaData.NAME, "Chr"))).thenReturn(attributeEntity);
+				dataService.findOne(
+						AttributeMetaDataMetaData.ENTITY_NAME,
+						new QueryImpl().eq(AttributeMetaDataMetaData.ENTITY, "org.molgenis.SNP").and()
+								.eq(AttributeMetaDataMetaData.NAME, "Chr"))).thenReturn(attributeEntity);
 
 		Ontology edamOntology = new OntologyImpl("EDAM", "http://edamontology.org", "The EDAM ontology.");
 		OntologyTerm chromosomeName = new OntologyTermImpl("http://edamontology.org/data_0987", "Chromosome name",
@@ -194,8 +191,10 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 				attributeMetaData, instanceOf, CHROMOSOME_NAME_ONTOLOGY_TERM, EDAM_ONTOLOGY);
 
 		when(
-				attributeRepository.findOne(new QueryImpl().eq(AttributeMetaDataMetaData.ENTITY, "org.molgenis.SNP")
-						.and().eq(AttributeMetaDataMetaData.NAME, "Chr"))).thenReturn(attributeEntity);
+				dataService.findOne(
+						AttributeMetaDataMetaData.ENTITY_NAME,
+						new QueryImpl().eq(AttributeMetaDataMetaData.ENTITY, "org.molgenis.SNP").and()
+								.eq(AttributeMetaDataMetaData.NAME, "Chr"))).thenReturn(attributeEntity);
 
 		when(
 				tagRepository.getTagEntity("http://edamontology.org/data_0987", "Chromosome name", instanceOf,
@@ -207,7 +206,7 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 		updatedEntity.set(AttributeMetaDataMetaData.TAGS,
 				Arrays.asList(geneAnnotationTagEntity, chromosomeNameTagEntity));
 
-		verify(attributeRepository, times(1)).update(updatedEntity);
+		verify(dataService, times(1)).update(AttributeMetaDataMetaData.ENTITY_NAME, updatedEntity);
 	}
 
 	@Test
@@ -220,8 +219,10 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 		attributeEntity.set(AttributeMetaDataMetaData.TAGS,
 				Arrays.asList(chromosomeNameTagEntity, geneAnnotationTagEntity));
 		when(
-				attributeRepository.findOne(new QueryImpl().eq(AttributeMetaDataMetaData.ENTITY, "org.molgenis.SNP")
-						.and().eq(AttributeMetaDataMetaData.NAME, "Chr"))).thenReturn(attributeEntity);
+				dataService.findOne(
+						AttributeMetaDataMetaData.ENTITY_NAME,
+						new QueryImpl().eq(AttributeMetaDataMetaData.ENTITY, "org.molgenis.SNP").and()
+								.eq(AttributeMetaDataMetaData.NAME, "Chr"))).thenReturn(attributeEntity);
 
 		Tag<AttributeMetaData, OntologyTerm, Ontology> geneAnnotationTag = new TagImpl<AttributeMetaData, OntologyTerm, Ontology>(
 				attributeMetaData, instanceOf, GENE_ANNOTATION_ONTOLOGY_TERM, EDAM_ONTOLOGY);
@@ -231,18 +232,12 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 		MapEntity updatedEntity = new MapEntity(attributeEntity);
 		updatedEntity.set(AttributeMetaDataMetaData.TAGS, Arrays.asList(chromosomeNameTagEntity));
 
-		verify(attributeRepository, times(1)).update(updatedEntity);
+		verify(dataService, times(1)).update(AttributeMetaDataMetaData.ENTITY_NAME, updatedEntity);
 	}
 
 	@Configuration
 	public static class Config
 	{
-		@Bean
-		CrudRepository attributeRepository()
-		{
-			return mock(CrudRepository.class);
-		}
-
 		@Bean
 		DataService dataService()
 		{
