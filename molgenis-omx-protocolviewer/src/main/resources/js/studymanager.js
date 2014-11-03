@@ -197,6 +197,7 @@
 				success : function(entities) {
 					molgenis.createAlert([{'message': 'Updated study definition [' + selectedStudyDefinitionId + ']'}], 'success');
 					selectedStudyDefinitionState = currentStudyDefinitionState;
+					selectedStudyDefinitionState === 'APPROVED' ? exportStudyDefinitionBtn.show() : exportStudyDefinitionBtn.hide();
 					updateStudyDefinitionEditor();
 					updateStudyDefinitionTable(false);
 				},
