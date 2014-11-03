@@ -28,7 +28,8 @@ public class AccountService
 	private static final Logger logger = Logger.getLogger(AccountService.class);
 
 	public static final String KEY_PLUGIN_AUTH_ACTIVATIONMODE = "plugin.auth.activation_mode";
-	public static final String ALL_USER_GROUP = "All Users";
+    public static final String KEY_PLUGIN_AUTH_ENABLE_SELFREGISTRATION = "plugin.auth.enable_self_registration";
+    public static final String ALL_USER_GROUP = "All Users";
 	private static final String KEY_APP_NAME = "app.name";
 	private static final ActivationMode DEFAULT_ACTIVATION_MODE = ActivationMode.ADMIN;
 	private static final String DEFAULT_APP_NAME = "MOLGENIS";
@@ -224,4 +225,8 @@ public class AccountService
 			return defaultActivationMode;
 		}
 	}
+
+	public boolean isSelfRegistrationEnabled(){
+        return molgenisSettings.getBooleanProperty(KEY_PLUGIN_AUTH_ENABLE_SELFREGISTRATION, true);
+    }
 }
