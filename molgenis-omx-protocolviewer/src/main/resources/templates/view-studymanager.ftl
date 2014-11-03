@@ -24,6 +24,7 @@
 							</div>
 							<div class="row-fluid">
 								<div id="resultsTable">
+								    <span id="noSearchResultsMsg" class="hide">Your search did not match any study definitions.</span>
 									<table id="studyDefinitionList" class="table table-striped table-hover listtable selection-table">
 										<thead>
 											<tr>
