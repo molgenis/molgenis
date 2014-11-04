@@ -17,6 +17,7 @@ public class StudyDefinitionImpl implements StudyDefinition
 	private String authorEmail;
 	private Iterable<CatalogItem> items;
 	private String requestForm;
+	private String externalId;
 
 	public StudyDefinitionImpl()
 	{
@@ -35,6 +36,7 @@ public class StudyDefinitionImpl implements StudyDefinition
 		setAuthorEmail(studyDefinition.getAuthorEmail());
 		setItems(studyDefinition.getItems());
 		setRequestForm(studyDefinition.getRequestProposalForm());
+		setExternalId(studyDefinition.getExternalId());
 	}
 
 	@Override
@@ -160,5 +162,17 @@ public class StudyDefinitionImpl implements StudyDefinition
 	public void setRequestProposalForm(String fileName)
 	{
 		this.requestForm = fileName;
+	}
+
+	@Override
+	public String getExternalId()
+	{
+		return externalId;
+	}
+
+	@Override
+	public void setExternalId(String externalId)
+	{
+		this.externalId = externalId;
 	}
 }

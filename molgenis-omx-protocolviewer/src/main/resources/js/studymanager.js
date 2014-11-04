@@ -79,6 +79,7 @@
 						    items.push('<td>' + studyDefinition.name + '</td>');
 						    items.push('<td>' + (studyDefinition.email ? studyDefinition.email : '') + '</td>');
 						    items.push('<td>' + (studyDefinition.date ? studyDefinition.date : '') + '</td>');
+						    items.push('<td>' + (studyDefinition.externalId ? studyDefinition.externalId : '') + '</td>');
 						    items.push('</tr>');
 						});
 						table.html(items.join(''));
@@ -126,6 +127,49 @@
 	     * @memberOf molgenis.studymanager
 	     */
 		function updateStudyDefinitionEditor() {
+				function updateStudyDefinitionEditorStateSelect(currentState) {
+					var nextStates;
+					var enableStateSelect;
+					switch(currentState) {
+						case 'DRAFT':
+							nextStates = ['DRAFT'];
+							enableStateSelect = false;
+							break;
+						case 'SUBMITTED':
+							nextStates = ['SUBMITTED', 'APPROVED', 'REJECTED'];
+							enableStateSelect = true;
+							break;
+						case 'APPROVED':
+							nextStates = ['SUBMITTED', 'APPROVED', 'EXPORTED'];
+							enableStateSelect = true;
+							break;
+						case 'REJECTED':
+							nextStates = ['SUBMITTED', 'REJECTED'];
+							enableStateSelect = true;
+							break;
+						case 'EXPORTED':
+							nextStates = ['SUBMITTED', 'EXPORTED'];
+							enableStateSelect = true;
+							break;
+						default:
+							throw 'unknown study definition state [' + currentState + ']';
+					}
+					
+					// update state select
+					var items = [];
+					for(var i = 0; i < nextStates.length; ++i) {
+						var state = nextStates[i];
+						items.push('<option value="' + state + '"' + (state === currentState ? ' selected' : '') + '>' + state + '</option>');
+					}
+					editStateSelect.html(items.join(''));
+					
+					if (enableStateSelect) {
+						editStateSelect.removeProp('disabled');
+					} else {
+						editStateSelect.prop('disabled', 'disabled');
+					}
+				}
+				
                 // clear previous tree
                 if (editTreeContainer.children('ul').length > 0)
                     editTreeContainer.dynatree('destroy');
@@ -142,7 +186,7 @@
                         editInfoContainer.html(createCatalogInfo(result.catalog));
                         editTreeContainer.empty();
                         editTreeContainer.dynatree({'minExpandLevel': 2, 'children': createDynatreeConfig(result.catalog), 'selectMode': 3, 'debugLevel': 0, 'checkbox': checkbox});
-                        editStateSelect.val(result.status);
+                        updateStudyDefinitionEditorStateSelect(result.status);
                     },
                     error: function (xhr) {
                         editTreeContainer.empty();

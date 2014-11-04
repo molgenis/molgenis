@@ -42,6 +42,10 @@ public interface StudyDefinition
 
 	void setRequestProposalForm(String fileName);
 
+	String getExternalId();
+
+	void setExternalId(String externalId);
+
 	public enum Status
 	{
 		DRAFT, SUBMITTED, APPROVED, REJECTED, EXPORTED
