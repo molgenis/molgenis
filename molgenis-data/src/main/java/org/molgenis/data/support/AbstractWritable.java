@@ -7,12 +7,15 @@ public abstract class AbstractWritable implements Writable
 {
 
 	@Override
-	public void add(Iterable<? extends Entity> entities)
+	public Integer add(Iterable<? extends Entity> entities)
 	{
+        Integer count = 0;
 		for (Entity entity : entities)
 		{
 			add(entity);
+            count++;
 		}
+        return count;
 	}
 
 }

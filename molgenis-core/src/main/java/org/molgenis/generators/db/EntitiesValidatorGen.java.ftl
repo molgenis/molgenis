@@ -28,8 +28,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataService;
-import org.molgenis.data.RepositorySource;
+import org.molgenis.data.FileRepositoryCollectionFactory;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.Repository;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntitiesValidator;
@@ -63,13 +63,13 @@ public class EntitiesValidatorImpl implements EntitiesValidator
 	</#list>
 	}
 	
-	private final DataService dataService;
+	private final FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
 
 	@Autowired
-	public EntitiesValidatorImpl(DataService dataService)
+	public EntitiesValidatorImpl(FileRepositoryCollectionFactory fileRepositoryCollectionFactory)
 	{
-		if (dataService == null) throw new IllegalArgumentException("dataService is null");
-		this.dataService = dataService;
+		if (fileRepositoryCollectionFactory == null) throw new IllegalArgumentException("fileRepositoryCollectionFactory is null");
+		this.fileRepositoryCollectionFactory = fileRepositoryCollectionFactory;
 	}
 	
 	@Override
@@ -77,21 +77,23 @@ public class EntitiesValidatorImpl implements EntitiesValidator
 	{
 		EntitiesValidationReport validationReport = new EntitiesValidationReportImpl();
 
-		RepositorySource repositorySource = dataService.createFileRepositorySource(file);
+		RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 		try
 		{
-			for (Repository repository : repositorySource.getRepositories())
+			for (String name : repositoryCollection.getEntityNames())
 			{
+				Repository repository = repositoryCollection.getRepositoryByEntityName(name);
+			
 				try
 				{
-					boolean isImportableEntity = ENTITIES_IMPORTABLE.containsKey(repository.getName().toLowerCase());
+					String nameLowerCase = name.toLowerCase();
+					boolean isImportableEntity = ENTITIES_IMPORTABLE.containsKey(nameLowerCase);
 					if (isImportableEntity)
 					{
-						Class<? extends Entity> entityClazz = ENTITIES_IMPORTABLE.get(repository.getName()
-								.toLowerCase());
-						validateTable(repository.getName(), repository, entityClazz, validationReport);
+						Class<? extends Entity> entityClazz = ENTITIES_IMPORTABLE.get(nameLowerCase);
+						validateTable(name, repository, entityClazz, validationReport);
 					}
-					validationReport.getSheetsImportable().put(repository.getName(), isImportableEntity);
+					validationReport.getSheetsImportable().put(name, isImportableEntity);
 				}
 				finally
 				{
@@ -147,7 +149,7 @@ public class EntitiesValidatorImpl implements EntitiesValidator
 		// collect
 		List<String> detectedFieldNames = new ArrayList<String>();
 		List<String> unknownFieldNames = new ArrayList<String>();
-		for (AttributeMetaData attr : repository.getAttributes())
+		for (AttributeMetaData attr : repository.getEntityMetaData().getAttributes())
 		{
 			String attrName = attr.getName();
 			if (attrName == null || attrName.isEmpty()) continue;
@@ -272,5 +274,24 @@ public class EntitiesValidatorImpl implements EntitiesValidator
 		{
 			return importOrder;
 		}
+
+        @Override
+        public boolean valid()
+        {// determine if validation succeeded
+            boolean ok = true;
+            if (sheetsImportable != null)
+            {
+                for (Boolean b : sheetsImportable.values())
+                {
+                    ok = ok & b;
+                }
+
+                for (Collection<String> fields : getFieldsRequired().values())
+                {
+                    ok = ok & (fields == null || fields.isEmpty());
+                }
+            }
+            return ok;
+        }
 	}
 }

@@ -1,8 +1,10 @@
 package org.molgenis.omx.biobankconnect.utils;
 
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 import org.tartarus.snowball.ext.PorterStemmer;
@@ -59,10 +61,17 @@ public class NGramMatchingModel
 				"your", "yours", "yourself", "yourselves", "many", ")", "("));
 	}
 
-	public static double stringMatching(String queryOne, String queryTwo, boolean whetherRemoveStopWords)
+	public static double stringMatching(String queryOne, String queryTwo)
 	{
-		double similarityScore = calculateScore(createNGrams(queryOne.toLowerCase().trim(), whetherRemoveStopWords),
-				createNGrams(queryTwo.toLowerCase().trim(), whetherRemoveStopWords));
+		double similarityScore = calculateScore(createNGrams(queryOne.toLowerCase().trim(), true),
+				createNGrams(queryTwo.toLowerCase().trim(), true));
+		return similarityScore;
+	}
+
+	public static double stringMatching(String queryOne, String queryTwo, boolean removeStopWords)
+	{
+		double similarityScore = calculateScore(createNGrams(queryOne.toLowerCase().trim(), removeStopWords),
+				createNGrams(queryTwo.toLowerCase().trim(), removeStopWords));
 		return similarityScore;
 	}
 
@@ -77,7 +86,7 @@ public class NGramMatchingModel
 	{
 		Set<String> wordsInString = new HashSet<String>(Arrays.asList(inputQuery.trim().split(" ")));
 		Set<String> tokens = new HashSet<String>();
-		wordsInString.removeAll(STOPWORDSLIST);
+		if (removeStopWords) wordsInString.removeAll(STOPWORDSLIST);
 		// Padding the string
 		for (String singleWord : wordsInString)
 		{
@@ -104,11 +113,12 @@ public class NGramMatchingModel
 	 */
 	private static double calculateScore(Set<String> inputStringTokens, Set<String> ontologyTermTokens)
 	{
+		if (inputStringTokens.size() == 0 || ontologyTermTokens.size() == 0) return (double) 0;
 		int matchedTokens = 0;
 		double totalToken = Math.max(inputStringTokens.size(), ontologyTermTokens.size());
 		inputStringTokens.retainAll(ontologyTermTokens);
 		matchedTokens = inputStringTokens.size();
-		DecimalFormat df = new DecimalFormat("#0.000");
+		DecimalFormat df = new DecimalFormat("##.###", new DecimalFormatSymbols(Locale.ENGLISH));
 		return Double.parseDouble(df.format(matchedTokens / totalToken * 100));
 	}
 

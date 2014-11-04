@@ -117,4 +117,10 @@ public class MrefField extends FieldType
 		return FieldTypeEnum.MREF;
 	}
 
+	@Override
+	public Object convert(Object value)
+	{
+		return value;
+	}
+
 }

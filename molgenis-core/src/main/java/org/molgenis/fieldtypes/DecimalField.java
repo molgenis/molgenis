@@ -1,5 +1,6 @@
 package org.molgenis.fieldtypes;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
@@ -33,7 +34,7 @@ public class DecimalField extends FieldType
 	@Override
 	public String getMysqlType() throws MolgenisModelException
 	{
-		return "DECIMAL(65,30)";
+		return "DOUBLE";
 	}
 
 	@Override
@@ -75,7 +76,7 @@ public class DecimalField extends FieldType
 	@Override
 	public Class<?> getJavaType()
 	{
-		return Double.class;
+		return BigDecimal.class;
 	}
 
 	@Override
@@ -94,5 +95,14 @@ public class DecimalField extends FieldType
 	public List<String> getAllowedOperators()
 	{
 		return Arrays.asList("EQUALS", "NOT EQUALS", "LESS", "GREATER");
+	}
+
+	@Override
+	public Object convert(Object value)
+	{
+		if (value == null) return null;
+		else if (value instanceof Double) return value;
+		else if (value instanceof String || value instanceof Integer) return Double.parseDouble(value.toString());
+		throw new RuntimeException("DecimalField.convert(" + value + ") failed");
 	}
 }

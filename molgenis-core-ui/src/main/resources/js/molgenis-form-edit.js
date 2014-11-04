@@ -3,18 +3,19 @@
 	
 	var ns = molgenis.form = molgenis.form || {};
 	var restApi = new molgenis.RestClient();
+	var successHandler;
 	
 	ns.quoteIsoDateT = function() {
-		$('.date input').each(function() {
+		$('.datetime input').each(function() {
 			var d = $(this).val();
 			$(this).val(d.replace(/T/,"'T'"));//Put quotes around T
 		});
-	}
+	};
 	
 	ns.onFormSubmit = function() {
 		ns.hideAlerts();
 		
-		$('.date input').each(function() {
+		$('.datetime input').each(function() {
 			var d = $(this).val();
 			$(this).val(d.replace(/'/g,''));//Remove quotes from isodateformat
 		});
@@ -28,6 +29,7 @@
 			contentType: 'application/x-www-form-urlencoded',
 			async: false,
 			success: function(data, textStatus, response) {
+			
 				//Add quotes to dateformat again
 				ns.quoteIsoDateT();
 				
@@ -38,6 +40,8 @@
 					$('input[name=_method]').val('PUT');
 				}
 				$('#success-message').show();
+				
+				$(document).trigger('onFormSubmitSuccess');
 			},
 			error: function(xhr) {
 				ns.quoteIsoDateT();
@@ -51,20 +55,24 @@
 			}
 		});
 		
-	}
+	};
 	
 	ns.hideAlerts = function() {
 		$('#success-message').hide();
 		$('#error-message').hide();
-	}
+	};
 	
 	$(function() {
 		//Enable datepickers
-		$('.date').datetimepicker({
-			format: "yyyy-MM-dd'T'hh:mm:ss" + getCurrentTimezoneOffset(),
-			language: 'en',
-		    pickTime: true
-		});
+		$('.date.datetime').datetimepicker({pickTime: true, useSeconds : true});
+		$('.date.dateonly').datetimepicker({pickTime: false, useSeconds : false});
+		
+		// Closes other datetime pickers when opening another one
+		$('.date').on('dp.show', function() {
+	        $('.date').not($(this)).each(function() {
+	            $(this).data("DateTimePicker").hide();
+	        });
+	    });
 		
 		//If validation succeeds call onFormSubmit
 		$.validator.setDefaults({

@@ -1,9 +1,10 @@
 package org.molgenis.data.rest;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 
@@ -11,10 +12,89 @@ import com.google.common.collect.ImmutableMap;
 
 public class EntityMetaDataResponse
 {
+	private final String href;
 	private final String name;
 	private final String label;
 	private final String description;
-	private final Map<String, AttributeMetaDataResponse> attributes = new LinkedHashMap<String, AttributeMetaDataResponse>();
+	private final Map<String, Object> attributes;
+	private final String labelAttribute;
+	private final String idAttribute;
+
+	/**
+	 * 
+	 * @param meta
+	 * @param attributesSet
+	 *            set of lowercase attribute names to include in response
+	 * @param attributeExpandsSet
+	 *            set of lowercase attribute names to expand in response
+	 */
+	public EntityMetaDataResponse(EntityMetaData meta, Set<String> attributesSet,
+			Map<String, Set<String>> attributeExpandsSet)
+	{
+		String name = meta.getName();
+		this.href = String.format("%s/%s/meta", RestController.BASE_URI, name);
+
+		if (attributesSet == null || attributesSet.contains("name".toLowerCase()))
+		{
+			this.name = name;
+		}
+		else this.name = null;
+
+		if (attributesSet == null || attributesSet.contains("description".toLowerCase()))
+		{
+			this.description = meta.getDescription();
+		}
+		else this.description = null;
+
+		if (attributesSet == null || attributesSet.contains("label".toLowerCase()))
+		{
+			label = meta.getLabel();
+		}
+		else this.label = null;
+
+		if (attributesSet == null || attributesSet.contains("attributes".toLowerCase()))
+		{
+			this.attributes = new LinkedHashMap<String, Object>();
+
+			for (AttributeMetaData attr : meta.getAttributes())
+			{
+				if (attr.isVisible() && !attr.getName().equals("__Type"))
+				{
+					if (attributeExpandsSet != null && attributeExpandsSet.containsKey("attributes".toLowerCase()))
+					{
+						Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
+						this.attributes.put(attr.getName(), new AttributeMetaDataResponse(name, attr, subAttributesSet,
+								null));
+					}
+					else
+					{
+						String attrHref = String.format("%s/%s/meta/%s", RestController.BASE_URI, name, attr.getName());
+						this.attributes.put(attr.getName(), Collections.singletonMap("href", attrHref));
+					}
+				}
+			}
+		}
+		else this.attributes = null;
+
+		if (attributesSet == null || attributesSet.contains("labelAttribute".toLowerCase()))
+		{
+			AttributeMetaData labelAttribute = meta.getLabelAttribute();
+			this.labelAttribute = labelAttribute != null ? labelAttribute.getName() : null;
+		}
+		else this.labelAttribute = null;
+
+		if (attributesSet == null || attributesSet.contains("idAttribute".toLowerCase()))
+		{
+			AttributeMetaData idAttribute = meta.getIdAttribute();
+			this.idAttribute = idAttribute != null ? idAttribute.getName() : null;
+		}
+		else this.idAttribute = null;
+	}
+
+	public String getHref()
+	{
+		return href;
+	}
 
 	public String getName()
 	{
@@ -31,125 +111,18 @@ public class EntityMetaDataResponse
 		return description;
 	}
 
-	public Map<String, AttributeMetaDataResponse> getAttributes()
+	public String getIdAttribute()
+	{
+		return idAttribute;
+	}
+
+	public Map<String, Object> getAttributes()
 	{
 		return ImmutableMap.copyOf(attributes);
 	}
 
-	public EntityMetaDataResponse(EntityMetaData meta)
+	public String getLabelAttribute()
 	{
-		name = meta.getName();
-		description = meta.getDescription();
-		label = meta.getLabel();
-
-		for (AttributeMetaData attr : meta.getAttributes())
-		{
-			if (attr.isVisible() && !attr.getName().equals("__Type"))
-			{
-				attributes.put(attr.getName(), new AttributeMetaDataResponse(attr));
-			}
-		}
-	}
-
-	public static class AttributeMetaDataResponse
-	{
-		private final FieldTypeEnum fieldType;
-		private String description = null;
-		private boolean nillable = true;
-		private boolean readOnly = false;
-		private Object defaultValue = null;
-		private boolean idAttribute = false;
-		private boolean labelAttribute = false;
-		private Href refEntity = null;
-		private String label = null;
-		private boolean unique = false;
-
-		public AttributeMetaDataResponse(AttributeMetaData attr)
-		{
-			fieldType = attr.getDataType().getEnumType();
-			description = attr.getDescription();
-			nillable = attr.isNillable();
-			readOnly = attr.isReadonly();
-			defaultValue = attr.getDefaultValue();
-			idAttribute = attr.isIdAtrribute();
-			labelAttribute = attr.isLabelAttribute();
-
-			if (attr.getRefEntity() != null)
-			{
-				String href = String.format("%s/%s/meta", RestController.BASE_URI, attr.getRefEntity().getName());
-				refEntity = new Href(href);
-			}
-
-			label = attr.getLabel();
-			unique = attr.isUnique();
-		}
-
-		public FieldTypeEnum getFieldType()
-		{
-			return fieldType;
-		}
-
-		public String getDescription()
-		{
-			return description;
-		}
-
-		public boolean isNillable()
-		{
-			return nillable;
-		}
-
-		public boolean isReadOnly()
-		{
-			return readOnly;
-		}
-
-		public Object getDefaultValue()
-		{
-			return defaultValue;
-		}
-
-		public boolean isIdAttribute()
-		{
-			return idAttribute;
-		}
-
-		public boolean isLabelAttribute()
-		{
-			return labelAttribute;
-		}
-
-		public Href getRefEntity()
-		{
-			return refEntity;
-		}
-
-		public String getLabel()
-		{
-			return label;
-		}
-
-		public boolean isUnique()
-		{
-			return unique;
-		}
-
-	}
-
-	public static class Href
-	{
-		private final String href;
-
-		public Href(String href)
-		{
-			super();
-			this.href = href;
-		}
-
-		public String getHref()
-		{
-			return href;
-		}
-
+		return labelAttribute;
 	}
 }

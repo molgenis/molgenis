@@ -11,7 +11,7 @@ public class EntityForm implements Form
 {
 	private final EntityMetaData entityMetaData;
 	private Entity entity;
-	private Integer primaryKey;
+	private Object primaryKey;
 	private boolean unique;
 	private final boolean hasWritePermission;
 	private final List<SubEntityForm> subForms = new ArrayList<SubEntityForm>();
@@ -29,7 +29,7 @@ public class EntityForm implements Form
 		this.entity = entity;
 	}
 
-	public EntityForm(EntityMetaData entityMetaData, Entity entity, Integer primaryKey, boolean hasWritePermission)
+	public EntityForm(EntityMetaData entityMetaData, Entity entity, Object primaryKey, boolean hasWritePermission)
 	{
 		this.entityMetaData = entityMetaData;
 		this.primaryKey = primaryKey;
@@ -46,11 +46,11 @@ public class EntityForm implements Form
 	@Override
 	public FormMetaData getMetaData()
 	{
-		return new EntityFormMetaData(entityMetaData);
+		return new EntityFormMetaData(entityMetaData, primaryKey != null);
 	}
 
 	@Override
-	public Integer getPrimaryKey()
+	public Object getPrimaryKey()
 	{
 		return primaryKey;
 	}

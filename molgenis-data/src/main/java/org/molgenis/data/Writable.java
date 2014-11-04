@@ -7,15 +7,11 @@ import java.io.Closeable;
  */
 public interface Writable extends Closeable
 {
-	/**
-	 * Add one entity
-	 * 
-	 * @return the id of the added entity
-	 */
-	Integer add(Entity entity);
+	/** Add one entity */
+	void add(Entity entity);
 
 	/** Stream add multiple entities */
-	void add(Iterable<? extends Entity> entities);
+	Integer add(Iterable<? extends Entity> entities);
 
 	void flush();
 

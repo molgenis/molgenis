@@ -10,6 +10,7 @@ import javax.validation.constraints.NotNull;
 import org.apache.log4j.Logger;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,14 +26,23 @@ public class MolgenisMenuController
 	public static final String URI = "/menu";
 
 	static final String KEY_MENU_ID = "menu_id";
+	static final String KEY_MOLGENIS_VERSION = "molgenis_version";
+	static final String KEY_MOLGENIS_BUILD_DATE = "molgenis_build_date";
 
 	private final MolgenisUi molgenisUi;
+	private final String molgenisVersion;
+	private final String molgenisBuildData;
 
 	@Autowired
-	public MolgenisMenuController(MolgenisUi molgenisUi)
+	public MolgenisMenuController(MolgenisUi molgenisUi, @Value("${molgenis.version}") String molgenisVersion,
+			@Value("${molgenis.build.date}") String molgenisBuildData)
 	{
 		if (molgenisUi == null) throw new IllegalArgumentException("molgenisUi is null");
+		if (molgenisVersion == null) throw new IllegalArgumentException("molgenisVersion is null");
+		if (molgenisBuildData == null) throw new IllegalArgumentException("molgenisBuildDate is null");
 		this.molgenisUi = molgenisUi;
+		this.molgenisVersion = molgenisVersion;
+		this.molgenisBuildData = molgenisBuildData;
 	}
 
 	@RequestMapping
@@ -44,11 +54,17 @@ public class MolgenisMenuController
 		model.addAttribute(KEY_MENU_ID, menuId);
 
 		MolgenisUiMenuItem activeItem = menu.getActiveItem();
-		if (activeItem == null) logger.warn("main menu does not contain any (accessible) items");
-		String pluginId = activeItem != null ? activeItem.getId() : VoidPluginController.ID;
+		if (activeItem == null)
+		{
+			logger.warn("main menu does not contain any (accessible) items");
+			return "forward:/login";
+		}
+		String pluginId = activeItem.getId();
 
 		String contextUri = new StringBuilder(URI).append('/').append(menuId).append('/').append(pluginId).toString();
 		model.addAttribute(KEY_CONTEXT_URL, contextUri);
+		model.addAttribute(KEY_MOLGENIS_VERSION, molgenisVersion);
+		model.addAttribute(KEY_MOLGENIS_BUILD_DATE, molgenisBuildData);
 		return getForwardPluginUri(pluginId, null);
 	}
 
@@ -64,6 +80,8 @@ public class MolgenisMenuController
 
 		String contextUri = new StringBuilder(URI).append('/').append(menuId).append('/').append(pluginId).toString();
 		model.addAttribute(KEY_CONTEXT_URL, contextUri);
+		model.addAttribute(KEY_MOLGENIS_VERSION, molgenisVersion);
+		model.addAttribute(KEY_MOLGENIS_BUILD_DATE, molgenisBuildData);
 		return getForwardPluginUri(pluginId, null);
 	}
 
@@ -76,6 +94,8 @@ public class MolgenisMenuController
 		String remainder = mappingUri.substring(contextUri.length());
 
 		model.addAttribute(KEY_CONTEXT_URL, contextUri);
+		model.addAttribute(KEY_MOLGENIS_VERSION, molgenisVersion);
+		model.addAttribute(KEY_MOLGENIS_BUILD_DATE, molgenisBuildData);
 		model.addAttribute(KEY_MENU_ID, menuId);
 		return getForwardPluginUri(pluginId, remainder);
 	}

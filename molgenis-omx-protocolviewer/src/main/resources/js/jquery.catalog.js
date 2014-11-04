@@ -2,20 +2,19 @@
 	"use strict";
 
 	var restApi = new molgenis.RestClient();
-	var searchApi = new molgenis.SearchClient();
 	var maxItems = 10000;
-	
+
 	function createTreeConfig(settings, callback) {
 		function createTreeNodes(tree, subTrees, treeConfig, callback) {
 			function createTreeNodesRec(tree, selectedNodes, parentNode) {
 				$.each(tree, function(protocolId, subTree) {
 					var protocolUri = restApi.getHref('protocol', protocolId);
-					var protocol = restApi.get(protocolUri, subTree ? ['features'] : []);
+					var protocol = restApi.get(protocolUri, {'expand': subTree ? ['features'] : []});
 					
 					// create protocol node
 					var node = {
 						key : protocolUri,
-						title : protocol.name,
+						title : protocol.Name,
 						folder : true,
 						lazy: subTree === null,
 						expanded: !settings.displaySiblings
@@ -27,27 +26,6 @@
 					if(subTree) {
 						node.children = [];
 						
-						var features = {};
-						if(protocol.features.items) {
-							$.each(protocol.features.items, function() {
-								features[parseInt(restApi.getPrimaryKeyFromHref(this.href))] = this;
-							});
-						}
-						// create feature nodes
-						$.each(subTree, function(key, val) {
-							if(key.charAt(0) === 'F') {
-								var feature = features[key.substring(1)];
-								var featureNode = {
-									key : feature.href,
-									title : feature.name,
-									folder : false,
-									selected: selectedNodes.hasOwnProperty(feature.href)
-								};
-								if (feature.description)
-									featureNode.tooltip = molgenis.i18n.get(feature.description);
-								node.children.push(featureNode);
-							}
-						});
 						// recurse for subprotocols
 						$.each(subTree, function(key, val) {
 							if(key.charAt(0) !== 'F') {
@@ -56,6 +34,36 @@
 								createTreeNodesRec(subTree, selectedNodes, node.children);
 							}
 						});
+						if (settings.sort)
+							node.children.sort(settings.sort);
+						
+						// create feature nodes
+						var features = {};
+						if(protocol.Features.items) {
+							$.each(protocol.Features.items, function() {
+								features[parseInt(restApi.getPrimaryKeyFromHref(this.href))] = this;
+							});
+						}
+						
+						var featureNodes = [];
+						$.each(subTree, function(key, val) {
+							if(key.charAt(0) === 'F') {
+								var feature = features[key.substring(1)];
+								var featureNode = {
+									key : feature.href.toLowerCase(),
+									title : feature.Name,
+									folder : false,
+									selected: selectedNodes.hasOwnProperty(feature.href.toLowerCase())
+								};
+								if (feature.description)
+									featureNode.tooltip = molgenis.i18n.get(feature.description);
+								featureNodes.push(featureNode);
+							}
+						});
+						if (settings.sort)
+							featureNodes.sort(settings.sort);
+						node.children = node.children.concat(featureNodes);
+						
 					}
 					
 					// append protocol node
@@ -68,7 +76,6 @@
 			$.each(settings.selectedItems, function() {
 				selectedNodes[this] = null;
 			});
-			
 			createTreeNodesRec(tree, selectedNodes, nodes);
 			// disable checkboxes of root nodes
 			$.each(nodes, function(i, node) {
@@ -92,43 +99,47 @@
 			lazyload : function (e, data) {
 				var node = data.node;
 				data.result = $.Deferred(function (dfd) {
-					restApi.getAsync(node.key + '/subprotocols?num=' + maxItems, null, null, function(subprotocols) {
+					restApi.getAsync(node.key + '/subprotocols?num=' + maxItems, null, function(subprotocols) {
 						var children = [];
 						if(subprotocols.total > subprotocols.num) {
 							molgenis.createAlert([ {
 								'message' : 'Protocol contains more than ' + subprotocols.num + ' subprotocols'
 							} ], 'error');
 						}
-						if (settings.sort)
-							subprotocols.items.sort(settings.sort);
+						
+						var protocolNodes = [];
 						$.each(subprotocols.items, function() {
-							children.push({
-								key : this.href,
-								title : this.name,
+							protocolNodes.push({
+								key : this.href.toLowerCase(),
+								title : this.Name,
 								tooltip : molgenis.i18n.get(this.description),
 								folder : true,
 								lazy : true,
 								selected: node.selected
 							});
 						});
+						if (settings.sort)
+							protocolNodes.sort(settings.sort);
+						children = children.concat(protocolNodes);
 						
-						restApi.getAsync(node.key + '/features?num=' + maxItems, null, null, function(features) {
+						restApi.getAsync(node.key + '/features?num=' + maxItems, null, function(features) {
 							if(features.total > features.num) {
 								molgenis.createAlert([ {
 									'message' : 'Protocol contains more than ' + features.num + ' features'
 								} ], 'error');
 							}
-							if (settings.sort)
-								features.items.sort(settings.sort);
+							var featureNodes = [];
 							$.each(features.items, function() {
-								children.push({
-									key : this.href,
-									title : this.name,
+								featureNodes.push({
+									key : this.href.toLowerCase(),
+									title : this.Name,
 									tooltip : molgenis.i18n.get(this.description),
 									selected: node.selected
 								});
 							});
-							
+							if (settings.sort)
+								featureNodes.sort(settings.sort);
+							children = children.concat(featureNodes);
 							dfd.resolve(children);
 						});
 					});
@@ -173,30 +184,14 @@
 		         // displaySiblings: yes
                  // displaySiblings: no
 		if(settings.displayedItems.length > 0) {
+            $('.no-results-message').hide();
 			// FIXME search API does not support IN query
-			var searchRequest = {
-				'documentType' : 'protocolTree-' + settings.protocolId,
-				'query' : {
-					'rules' :	(function() {
-							var queryRules = [];
-							$.each(settings.displayedItems, function(i, item) {
-								if (i > 0) {
-									queryRules.push({
-										operator : 'OR'
-									});
-								}
-								queryRules.push({
-									field : 'id',
-									operator : 'EQUALS',
-									value : parseInt(restApi.getPrimaryKeyFromHref(item))
-								});
-							});
-							return [queryRules];
-						}()),
-					'pageSize' : 1000000
-				}
-			};
-			searchApi.search(searchRequest, function(searchResponse) {				
+			var items = [];
+			$.each(settings.displayedItems, function(i, item) {
+				items.push(restApi.getPrimaryKeyFromHref(item));
+			});
+
+			getDataItemsByIds(settings.protocolId, items, function(searchResponse) {				
 				var tree = {};
 				var subTrees = {};
 				$.each(searchResponse.searchHits, function() {
@@ -221,7 +216,7 @@
 							} ],
 							num : maxItems
 						};
-						restApi.getAsync(restApi.getHref('protocol'), [ 'features', 'subprotocols' ], q, function(protocols) {
+						restApi.getAsync(restApi.getHref('protocol'), {'expand': [ 'features', 'subprotocols' ], 'q': q}, function(protocols) {
 							if(protocols.total > protocols.num) {
 								molgenis.createAlert([ {
 									'message' : 'Maximum number of protocols reached (' + protocols.num + ')'
@@ -230,7 +225,7 @@
 							
 							$.each(protocols.items, function(i, protocol) {
 								var subTree = subTrees[parseInt(restApi.getPrimaryKeyFromHref(protocol.href))];
-								$.each(protocol.features.items, function(i, feature) {
+								$.each(protocol.Features.items, function(i, feature) {
 									if(!subTree['F' + restApi.getPrimaryKeyFromHref(feature.href)])
 										subTree['F' + restApi.getPrimaryKeyFromHref(feature.href)] = null;
 								});
@@ -248,33 +243,41 @@
 					createTreeNodes(tree, subTrees, treeConfig, callback);
 				}
 			});
-		}		
+		}
+        else{
+            $('.catalog-search-tree').hide();
+            $('.catalog-tree').hide();
+            $('.no-results-message').show();
+        }
 	};
+	
+	function getDataItemsByIds(catalogId, items, callback){
+		$.ajax({
+			type : 'POST',
+			url : molgenis.getContextUrl() + '/items',
+			data : JSON.stringify({'catalogId' : catalogId, 'items' : items}),
+			contentType : 'application/json',
+			success : function(searchResponse) {
+				callback(searchResponse);
+			}
+		});
+	}
+	
+	function searchItems(catalogId, queryString, callback){
+		$.ajax({
+			type : 'POST',
+			url : molgenis.getContextUrl() + '/search',
+			data : JSON.stringify({'catalogId' : catalogId, 'queryString' : queryString}),
+			contentType : 'application/json',
+			success : function(searchResponse) {
+				callback(searchResponse);
+			}
+		});
+	}
 	
 	function createSearchTreeConfig(query, settings, treeContainer, callback) {		
 		if (query) {
-			var searchRequest;
-			
-			var queryRules = [];
-			//FIXME move tokenization to search API
-			$.each($.trim(query).split(' '), function(i, term) {
-				if(i > 0) queryRules.push({operator : 'AND'});
-				queryRules.push({
-					operator : 'SEARCH',
-					value : term
-				});
-			});
-
-			searchRequest = {
-				documentType : 'protocolTree-' + settings.protocolId,
-				query : {
-					'rules' : [queryRules],
-					//FIXME get unlimited number of search results
-					'pageSize' : 1000000
-				}
-			};
-			
-			searchApi.search(searchRequest, function(searchResponse){
+			searchItems(settings.protocolId, query, function(searchResponse){
 				var visibleItems = {};
 				$.each(searchResponse.searchHits, function() {
 					visibleItems[this.columnValueMap.id] = null;
@@ -284,7 +287,7 @@
 					displayedItems : $.map(Object.keys(visibleItems), function(visibleItem) {
 						return restApi.getHref('protocol', visibleItem);
 					}),
-					displaySiblings : false,
+					displaySiblings : false
 				});
 				createTreeConfig(treeSettings, callback);
 			});
@@ -303,16 +306,23 @@
 			else if (args.length === 1)
 				return container.data('catalog')[options](args[0]);
 		}
-
+		
 		// create catalog controls
 		var items = [];
-		items.push('<div class="input-append">');
-		items.push('<input class="catalog-search-text" type="text" title="Enter your search term">');
-		items.push('<button class="catalog-search-btn btn" type="button"><i class="icon-large icon-search"></i></button>');
-		items.push('<button class="catalog-search-clear-btn btn" type="button"><i class="icon-large icon-remove"></i></button>');
+		items.push('<form id="model-search-form" role="form">');
+		items.push('<div class="form-group">');
+		items.push('<div class="col-md-9 input-group">');
+		items.push('<input class="catalog-search-text form-control" type="text" placeholder="Search" autofocus="autofocus">');
+		items.push('<span class="input-group-btn">');
+		items.push('<button class="catalog-search-clear-btn btn btn-default" type="button"><span class="glyphicon glyphicon-remove"></span></button>');
+		items.push('<button class="catalog-search-btn btn btn-default" type="button"><span class="glyphicon glyphicon-search"></span></button>');
+		items.push('</span>');
 		items.push('</div>');
+		items.push('</div>');
+		items.push('</form>');
 		items.push('<div id="catalog-tree" class="catalog-tree"></div>');
 		items.push('<div id="catalog-search-tree" class="catalog-search-tree"></div>');
+        items.push('<div id="no-results-message" class="no-results-message">no matching items</div>');
 		$('.catalog-tree', container).fancytree('destroy'); // cleanup
 		container.html(items.join(''));
 
@@ -321,6 +331,7 @@
 		
 		var catalogTree = $('.catalog-tree', container);
 		var catalogSearchTree = $('.catalog-search-tree', container);
+        var noResultsMessage = $('.no-results-message', container);
 		var searchText = $('.catalog-search-text', container);
 		var searchBtn = $('.catalog-search-btn', container);
 		var searchClearBtn = $('.catalog-search-clear-btn', container);
@@ -385,7 +396,7 @@
 				onItemSelect : selectNode
 			});
 			
-			createSearchTreeConfig(searchText.val(), treeSettings, container, function(treeConfig) {				
+			createSearchTreeConfig(searchText.val(), treeSettings, container, function(treeConfig) {
 				if(!catalogSearchTree.is(':empty')) {
 					catalogSearchTree.fancytree('destroy');
 					catalogSearchTree.empty();
@@ -402,9 +413,10 @@
 				if(catalogSearchTree.is(':visible')) catalogSearchTree.hide();
 				catalogSearchTree.fancytree('destroy');
 				catalogSearchTree.empty();
-				searchText.val('');
-				if(catalogTree.is(':hidden')) catalogTree.show();
 			}
+            searchText.val('');
+            if(catalogTree.is(':hidden')) catalogTree.show();
+            noResultsMessage.hide();
 		});
 		
 		// create tree

@@ -16,16 +16,8 @@ import uk.ac.ebi.mydas.model.*;
 
 public abstract class RangeHandlingDataSource implements RangeHandlingAnnotationDataSource
 {
-    public static final String MUTATION_STOP_POSITION = "stop_nucleotide";
-    public static final String MUTATION_LINK = "linkout";
-    public static final String MUTATION_NAME = "mutation_name";
-    public static final String MUTATION_DESCRIPTION = "description";
-    public static final String MUTATION_START_POSITION = "start_nucleotide";
-    public static final String MUTATION_ID = "mutation_id";
-    public static final String MUTATION_CHROMOSOME = "chromosome";
-
     protected DasFeature createDasFeature(Integer start, Integer stop, String identifier, String name,
-                                          String description, String link, DasType mutationType, DasMethod method) throws DataSourceException
+                                          String description, String link, DasType type, DasMethod method, String dataSet, String patient, List<String> notes) throws DataSourceException
     {
         if (stop == null) stop = start;// no stop? assume length of 1;
 
@@ -39,8 +31,11 @@ public abstract class RangeHandlingDataSource implements RangeHandlingAnnotation
         {
             featureDescription = identifier;
         }
-
-        List<String> notes = new ArrayList<String>();
+        notes.add("track:"+dataSet);
+        notes.add("source:MOLGENIS");
+        if(StringUtils.isNotEmpty(patient)){
+            notes.add("patient:"+patient);
+        }
 
         Map<URL, String> linkout = new HashMap<URL, String>();
         try
@@ -51,13 +46,13 @@ public abstract class RangeHandlingDataSource implements RangeHandlingAnnotation
         {
         }
 
-        List<DasTarget> dasTarget = new ArrayList<DasTarget>();
-        dasTarget.add(new MolgenisDasTarget(identifier, start, stop, featureDescription));
+        List<DasTarget> dasTargets = new ArrayList<DasTarget>();
+        dasTargets.add(new MolgenisDasTarget(identifier, start, stop, featureDescription));
 
         List<String> parents = new ArrayList<String>();
-        DasFeature feature = new DasFeature(identifier, featureDescription, mutationType, method, start, stop,
+        DasFeature feature = new DasFeature(identifier, featureDescription, type, method, start, stop,
                 new Double(0), DasFeatureOrientation.ORIENTATION_NOT_APPLICABLE, DasPhase.PHASE_NOT_APPLICABLE, notes,
-                linkout, dasTarget, parents, null);
+                linkout, dasTargets, parents, null);
         return feature;
     }
 

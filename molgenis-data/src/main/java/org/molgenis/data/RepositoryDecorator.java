@@ -1,5 +1,7 @@
 package org.molgenis.data;
 
+import org.springframework.util.ClassUtils;
+
 import java.io.IOException;
 import java.util.Iterator;
 
@@ -9,7 +11,7 @@ public class RepositoryDecorator implements Repository
 
 	public RepositoryDecorator(Repository decoratedRepository)
 	{
-		if (decoratedRepository == null) throw new IllegalArgumentException("decoratedRepsitory is null");
+		if (decoratedRepository == null) throw new IllegalArgumentException("decoratedRepository is null");
 		this.decoratedRepository = decoratedRepository;
 	}
 
@@ -20,39 +22,9 @@ public class RepositoryDecorator implements Repository
 	}
 
 	@Override
-	public String getLabel()
+	public EntityMetaData getEntityMetaData()
 	{
-		return decoratedRepository.getLabel();
-	}
-
-	@Override
-	public String getDescription()
-	{
-		return decoratedRepository.getDescription();
-	}
-
-	@Override
-	public Iterable<AttributeMetaData> getAttributes()
-	{
-		return decoratedRepository.getAttributes();
-	}
-
-	@Override
-	public AttributeMetaData getIdAttribute()
-	{
-		return decoratedRepository.getIdAttribute();
-	}
-
-	@Override
-	public AttributeMetaData getLabelAttribute()
-	{
-		return decoratedRepository.getLabelAttribute();
-	}
-
-	@Override
-	public AttributeMetaData getAttribute(String attributeName)
-	{
-		return decoratedRepository.getAttribute(attributeName);
+		return decoratedRepository.getEntityMetaData();
 	}
 
 	@Override
@@ -68,12 +40,6 @@ public class RepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Class<? extends Entity> getEntityClass()
-	{
-		return decoratedRepository.getEntityClass();
-	}
-
-	@Override
 	public <E extends Entity> Iterable<E> iterator(Class<E> clazz)
 	{
 		return decoratedRepository.iterator(clazz);
@@ -85,4 +51,8 @@ public class RepositoryDecorator implements Repository
 		return decoratedRepository.getUrl();
 	}
 
+	public String getRepositoryClass()
+	{
+		return ClassUtils.getShortName(decoratedRepository.getClass().getSimpleName());
+	}
 }

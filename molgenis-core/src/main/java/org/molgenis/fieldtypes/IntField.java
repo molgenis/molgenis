@@ -101,4 +101,14 @@ public class IntField extends FieldType
 	{
 		return Arrays.asList("EQUALS", "NOT EQUALS", "LESS", "GREATER");
 	}
+
+	@Override
+	public Object convert(Object value)
+	{
+		if (value == null) return null;
+		if (value instanceof Integer) return value;
+		if (value instanceof String) return Integer.parseInt(value.toString());
+		if (value instanceof Number) return ((Number) value).intValue();
+		throw new RuntimeException("IntField.convert(" + value + ") failed");
+	}
 }

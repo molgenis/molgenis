@@ -15,10 +15,10 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.RepositorySource;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.Writable;
 import org.molgenis.data.WritableFactory;
-import org.molgenis.data.excel.ExcelRepositorySource;
+import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.support.MapEntity;
@@ -34,12 +34,14 @@ public class SampleTabOmxConverter
 		this.submissionID = submissionID;
 		this.unitOntologyTermsForFeatures = new HashMap<String, String>();
 
-		RepositorySource repositorySource = new ExcelRepositorySource(new File(inputFilePath), new TrimProcessor());
+		RepositoryCollection repositorySource = new ExcelRepositoryCollection(new File(inputFilePath),
+				new TrimProcessor());
+
 		WritableFactory writableFactory = new ExcelWriter(new File(inputFilePath + ".Omx.xls"));
 
 		try
 		{
-			Repository repo = repositorySource.getRepository(sheetName);
+			Repository repo = repositorySource.getRepositoryByEntityName(sheetName);
 			try
 			{
 				// Collect headers as features to be imported in Omx-format
@@ -61,6 +63,7 @@ public class SampleTabOmxConverter
 		{
 			writableFactory.close();
 		}
+
 	}
 
 	private void addOntologyTermTab(WritableFactory writableFactory) throws IOException
@@ -208,7 +211,7 @@ public class SampleTabOmxConverter
 	private List<String> collectColumns(Repository repo) throws IOException
 	{
 		List<String> listOfFeatures = new ArrayList<String>();
-		for (AttributeMetaData attr : repo.getAttributes())
+		for (AttributeMetaData attr : repo.getEntityMetaData().getAttributes())
 		{
 			listOfFeatures.add(attr.getName());
 		}

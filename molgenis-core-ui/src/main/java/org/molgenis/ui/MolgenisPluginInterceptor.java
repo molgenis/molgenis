@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.security.SecurityUtils;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
@@ -67,7 +67,8 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 		Object bean = ((HandlerMethod) handler).getBean();
 		if (!(bean instanceof MolgenisPluginController))
 		{
-			throw new RuntimeException("controller does not implement " + MolgenisPluginController.class.getSimpleName());
+			throw new RuntimeException("controller does not implement "
+					+ MolgenisPluginController.class.getSimpleName());
 		}
 		return (MolgenisPluginController) bean;
 	}

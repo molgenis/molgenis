@@ -1,165 +1,186 @@
 <#-- write HTML header and plugin menu -->
 <#--   css (optional) list of additional stylesheets to include -->
 <#--   js  (optional) list of additional js files to include -->
+<#include "resource-macros.ftl">
 <#macro header css=[] js=[]>
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>${molgenis_ui.title?html}</title>
+		<title><#if molgenis_ui.title?has_content>${molgenis_ui.title?html}</#if></title>
 		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta http-equiv="X-UA-Compatible" content="chrome=1">
-		<link rel="icon" href="/img/molgenis.ico" type="image/x-icon">
-		<link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css">
-		<link rel="stylesheet" href="/css/molgenis.css" type="text/css">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="icon" href="<@resource_href "/img/molgenis.ico"/>" type="image/x-icon">
+		<link rel="stylesheet" href="<@resource_href "/css/bootstrap.min.css"/>" type="text/css">
+		<link rel="stylesheet" href="<@resource_href "/css/molgenis.css"/>" type="text/css">
 	<#list css as css_file_name>
-		<link rel="stylesheet" href="/css/${css_file_name?html}" type="text/css">
+		<link rel="stylesheet" href="<@resource_href "/css/${css_file_name?html}"/>" type="text/css">
 	</#list>
 	<#if molgenis_ui.hrefCss?has_content>
-		<link rel="stylesheet" href="/css/${molgenis_ui.hrefCss?html}" type="text/css">
+		<link rel="stylesheet" href="<@resource_href "/css/${molgenis_ui.hrefCss?html}"/>" type="text/css">
 	</#if>
-		<script src="/js/jquery-1.8.3.min.js"></script>
-		<script src="/js/bootstrap.min.js"></script>
-		<script src="/js/jquery.validate.min.js"></script>
-		<script src="/js/molgenis.js"></script>
+		<script src="<@resource_href "/js/jquery-1.8.3.min.js"/>"></script>
+		<script src="<@resource_href "/js/bootstrap.min.js"/>"></script>
+		<script src="<@resource_href "/js/jquery.validate.min.js"/>"></script>
+		<script src="<@resource_href "/js/molgenis.js"/>"></script>
 	<#if context_url??>
 		<script>top.molgenis.setContextUrl('${context_url}');</script>
 	</#if>
-		<!--[if lt IE 9]>
-			<script src="/js/molgenis-ie8.js"></script>
-		<![endif]-->
+	<!--[if lt IE 9]>
+		<script src="<@resource_href "/js/molgenis-ie8.js"/>"></script>
+	<![endif]-->
 	<#list js as js_file_name>
-		<script src="/js/${js_file_name?html}"></script>
+		<script src="<@resource_href "/js/${js_file_name?html}"/>"></script>
 	</#list>		
 	<#if molgenis_ui.hrefJs?has_content>
-		<script src="/js/${molgenis_ui.hrefJs?html}"></script>
+		<script src="<@resource_href "/js/${molgenis_ui.hrefJs?html}"/>"></script>
 	</#if>
 	</head>
 	<body>
+		<#-- Navbar menu -->
+        <#if menu_id??>
+            <#if !(plugin_id??)>
+                <#assign plugin_id="NULL">
+            </#if>
+            
+            <@topmenu molgenis_ui.getMenu() plugin_id/>
+        </#if>
+        
+		<#-- Start application content -->
+        <div class="container-fluid">
+			<div class="row">
+			    <div class="col-md-12">
+                    <div id="login-modal-container-header"></div>		
+				</div>
+			</div>
+			
+			<div class="row">
+			    <div class="col-md-12">
+                    <div class="datasetsindexerAlerts"></div>
+                </div>	
+			</div>
+			
+			<div class="row">
+                <div class="col-md-12">
+					<div class="alerts">
+						<#if errorMessage??>
+							<#assign message = errorMessage>
+							<#assign messageType = "error"> 
+						<#elseif warningMessage??>
+							<#assign message = warningMessage>
+							<#assign messageType = "warning">
+						<#elseif successMessage??>
+							<#assign message = successMessage>
+							<#assign messageType = "success">
+						<#elseif infoMessage??>
+							<#assign message = infoMessage>
+							<#assign messageType = "info">
+						</#if>
+						
+						<#if messageType??>
+							<div class="alert alert-${messageType}"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>${messageType?capitalize}!</strong> ${message}</div>
+						</#if>
+				   </div>
+                </div>
+			</div>
+			
+			<div class="row">
+                <div class="col-md-12">
+                    <div id="plugin-container">
+</#macro>
+
+
+<#-- Topmenu -->
+<#macro topmenu menu plugin_id> <#--TODO refactor to remove depency on 'Home'-->
+	<div class="navbar navbar-default navbar-fixed-top" role="navigation">
 		<div class="container-fluid">
-			<div class="row-fluid">
-				<#if menu_id??>
-					<#if !(plugin_id??)>
-						<#assign plugin_id="NULL">
-					</#if>
-						<@topmenu molgenis_ui.getMenu() plugin_id/>
-					<#if plugin_id?starts_with("form")>
-						<@submenu molgenis_ui.getMenu(menu_id) plugin_id/>
-					</#if>	
-				</#if>			
-			</div>
-			<div id="login-modal-container-header"></div>
-			<div class="row-fluid">
-				<div class="datasetsindexerAlerts"></div>
-			</div>
-			<div class="row-fluid">
-				<div class="alerts"><#if errorMessage??>
-					<#assign message = errorMessage>
-					<#assign messageType = "error"> 
-				<#elseif warningMessage??>
-					<#assign message = warningMessage>
-					<#assign messageType = "warning">
-				<#elseif successMessage??>
-					<#assign message = successMessage>
-					<#assign messageType = "success">
-				<#elseif infoMessage??>
-					<#assign message = infoMessage>
-					<#assign messageType = "info">
-				</#if>
-				<#if messageType??>
-					<div class="alert alert-${messageType}"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>${messageType?capitalize}!</strong> ${message}</div>
-				</#if>
-			</div>
-		</div>
-		<div class="row-fluid">
-			<div id="plugin-container" class="container-fluid">
-	</#macro>
-	<#--topmenu -->
-	<#macro topmenu menu plugin_id>
-		<#--TODO: put navbar-fixed-top back-->
-		<div class="navbar"> 
-			<div class="navbar navbar-inner"> 	
-				<ul class="nav">
+			<#-- Logo start -->
+            <#list menu.items as item> 
+                <#if item.type != "MENU" && item.name == "Home"> 
+					<div class="navbar-header">
+						<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-molgenis-navbar">
+		                    <span class="sr-only">Toggle navigation</span>
+		                    <span class="icon-bar"></span>
+        					<span class="icon-bar"></span>
+        					<span class="icon-bar"></span>
+		                </button>
+		                <a class="navbar-brand" href="/menu/${menu.id?html}/${item.url?html}">
+		                	<img class="img-responsive" 
+	                			src="<#if molgenis_ui.hrefLogo?has_content>${molgenis_ui.hrefLogo?html}<#else><@resource_href "/img/logo_molgenis_small.png"/></#if>" 
+	                			alt="<#if molgenis_ui.title?has_content>${molgenis_ui.title?html}</#if>">
+                		</a>
+					</div>
+        		</#if>
+    		</#list>
+    		<#-- Logo end -->
+    		
+    		<#-- Navbar items start -->
+        	<div class="navbar-collapse collapse" id="bs-molgenis-navbar">
+				<ul class="nav navbar-nav">
 					<#list menu.items as item>
-						<#if item.type != "MENU">
-							<#if item.name=="Home">
-								<li><a href="/menu/${menu.id?html}/${item.url?html}"><img src="${molgenis_ui.hrefLogo?html}"></img></a></li>
-							<#else>
+						
+						<#-- Single menu items -->
+						<#if item.type != "MENU">	
+							<#if item.name != "Home">
 								<#if item.id == plugin_id>
-									<li class="active"><a href="#">${item.name?html}</a></li>
+									<li class="active">
+										<a href="#">${item.name?html}</a>
+									</li>
 								<#else>
-									<li><a href="/menu/${menu.id?html}/${item.url?html}">${item.name?html}</a></li>
+									<li>
+										<a href="/menu/${menu.id?html}/${item.url?html}">${item.name?html}</a>
+									</li>
 								</#if>
 							</#if>
+							
+						<#-- Dropdown menu items -->
 						<#elseif item.type == "MENU">
 							<#assign sub_menu = item>
+							<#assign menu_counter = 0>
 							<li class="dropdown">
-								<a class="dropdown-toggle" data-toggle="dropdown" href="#">${item.name?html}<b class="caret"></b></a>
-								<ul class="dropdown-menu">
-									<#list sub_menu.items as subitem>
-										<#if subitem.type != "MENU">
-											<li><a href="/menu/${sub_menu.id?html}/${subitem.url?html}">${subitem.name?html}</a></li>
-										<#elseif subitem.type == "MENU">
-											<li>
-												<a tabindex="-1" href="/menu/${subitem.id?html}">${subitem.name?html}</a>
-											</li>
-										</#if>
-									</#list>
+								<a class="dropdown-toggle" data-toggle="dropdown" href="#">
+									${item.name?html}<b class="caret"></b>
+								</a>
+								
+								<ul class="dropdown-menu" role="menu">
+									<@dropdown sub_menu menu_counter />	
 								</ul>
 							</li>
 						</#if>
 					</#list>
 				</ul>
+				
 				<#if authenticated?? && authenticated>
-				<form class="navbar-form pull-right" method="post" action="/logout">
-					<button type="submit" class="btn btn-inverse btn-link">Sign out</button>
-				</form>
+					<form class="navbar-form navbar-right" method="post" action="/logout">
+						<button type="submit" class="btn btn-inverse btn-link">Sign out</button>
+					</form>
 				<#else>
-				<a class="modal-href pull-right btn btn-inverse btn-link" href="/account/login" data-target="login-modal-container-header">Sign in</a>
+					<a class="modal-href btn btn-default navbar-btn navbar-right" href="/account/login" data-target="login-modal-container-header">Sign in</a>
 				</#if>
 			</div>
-		</div>
-	</#macro>
-<#--submenu -->
-	<#macro submenu menu plugin_id>
-	<div id="submenu">
-		<ul id="submenu-menu" class="nav nav-tabs">
-			<#list menu.items as item>	
-				<#if item.type != "MENU">
-					<#if item.id == plugin_id>
-						<li class="active"><a href="#">${item.name?html}</a></li>
-					<#else>
-						<li><a href="/menu/${menu.id?html}/${item.url?html}">${item.name?html}</a></li>
-					</#if>
-				<#elseif item.type == "MENU">
-					<#assign sub_menu = item>
-					<li class="dropdown">
-						<a class="dropdown-toggle" data-toggle="dropdown" href="#">${item.name?html}<b class="caret"></b></a>
-						<ul class="dropdown-menu">
-							<#list sub_menu.items as item>
-								<#if item.type != "MENU">
-									<li><a href="/menu/${sub_menu.id?html}/${item.url?html}">${item.name?html}</a></li>
-								<#elseif item.type == "MENU">
-									<a tabindex="-1" href="/menu/${item.id?html}">${item.name?html}</a>
-								</#if>
-							</#list>
-						</ul>
-					</li>
-				</#if>
-			</#list>
-		</ul>
-	<#assign breadcrumb = menu.breadcrumb>
-		<#if (breadcrumb?size > 1)>
-			<ul id="molgenis-breadcrumb" class="breadcrumb">
-				<#list breadcrumb as menu>
-					<#if menu_has_next>
-						<li><a href="/menu/${menu.id?html}">${menu.name?html}</a> <span class="divider">/</span></li>
-					<#else>
-						<li class="active">${menu.name?html}</li>
-					</#if>	
-				</#list>
-			</ul>
-		</#if>
-	</div>
+			<#-- Navbar items end -->
+			
+		</div> <#-- close container -->
+	</div> <#-- close navbar div -->
 </#macro>
 
-
+<#-- dropdown for entity -->
+<#macro dropdown sub_menu menu_counter>
+	<#assign this_menu_counter = menu_counter + 1>
+	
+	<#list sub_menu.items as sub_item>
+		<#if sub_item.type != "MENU">
+			<li>
+				<a <#if this_menu_counter gt 1>style="margin-left: ${this_menu_counter * 12}px;"</#if> href="/menu/${sub_menu.id?html}/${sub_item.url?html}">${sub_item.name?html}</a>
+			</li>
+		<#elseif sub_item.type == "MENU">
+			<li class="dropdown-header disabled sub-menu-${this_menu_counter}" role="presentation">
+				<a <#if this_menu_counter gt 1>style="margin-left: ${this_menu_counter * 12}px;"</#if> href="#">${sub_item.name?html}</a>
+			</li>
+			
+			<@dropdown sub_item this_menu_counter />
+			<#assign this_menu_counter = this_menu_counter - 1>
+		</#if>
+	</#list>
+</#macro>

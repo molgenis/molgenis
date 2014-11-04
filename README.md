@@ -41,6 +41,8 @@ Now install the plugins. Click: Help -> Eclipse marketplace. Add the following (
 * JBoss Tools (ONLY SELECT THE 'FreeMarker IDE feature' later in the wizard!)
 * testng
 
+Search for updates and install if they exist
+
 ## 4. Import the molgenis project into eclipse
    
 Start Eclipse and select your workspace location (e.g. ~/eclipse/workspace).

@@ -6,15 +6,22 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
 import org.molgenis.data.QueryRule;
+import org.springframework.data.domain.Sort;
 
 public class EntityCollectionRequest
 {
+	public static final int MAX_ROWS = 10000;
+	public static final int DEFAULT_ROW_COUNT = 100;
 	private List<QueryRule> q;
+	private Sort sort;
+	private String[] attributes;
+	private String[] expand;
+	
 	@Min(0)
 	private int start = 0;
 	@Min(0)
-	@Max(10000)
-	private int num = 100;
+	@Max(MAX_ROWS)
+	private int num = DEFAULT_ROW_COUNT;
 
 	public int getStart()
 	{
@@ -44,5 +51,35 @@ public class EntityCollectionRequest
 	public void setQ(List<QueryRule> q)
 	{
 		this.q = q;
+	}
+
+	public Sort getSort()
+	{
+		return sort;
+	}
+
+	public void setSort(Sort sort)
+	{
+		this.sort = sort;
+	}
+
+	public String[] getAttributes()
+	{
+		return attributes;
+	}
+
+	public void setAttributes(String[] attributes)
+	{
+		this.attributes = attributes;
+	}
+
+	public String[] getExpand()
+	{
+		return expand;
+	}
+
+	public void setExpand(String[] expand)
+	{
+		this.expand = expand;
 	}
 }

@@ -1,26 +1,31 @@
-<#macro render field hasWritePermission entity=''>
+<#macro render field hasWritePermission entity='' forUpdate=true>
 
-	<#assign fieldName=field.name?uncap_first/>
+	<#assign fieldName=field.name/>
+	<#assign readonly = (forUpdate && field.readonly) || !hasWritePermission>
+	<#assign nillable = field.nillable>
 	
-	<div class="control-group">
-    	<label class="control-label" for="${fieldName}">${field.name} <#if field.nillable?string('true', 'false') == 'false'>*</#if></label>
-    	<div class="controls">
-    		
+	<div class="form-group">
+		<div class="col-md-3">
+    		<label class="control-label pull-right" for="${fieldName}">${field.label}&nbsp;<#if !nillable>*</#if></label>
+    	</div>
+    	
+    	<div class="col-md-9">	
     		<#if field.dataType.enumType == 'BOOL'>
-				<input type="checkbox" name="${fieldName}" id="${fieldName}" value="true" <#if entity!='' && entity.get(fieldName)?? && entity.get(fieldName)?string("true", "false") == "true">checked</#if>  <#if field.readonly || hasWritePermission?string("true", "false") == "false" >disabled="disabled"</#if>  >
+				<input type="checkbox" name="${fieldName}" id="${fieldName}" value="true" <#if entity!='' && entity.get(fieldName)?? && entity.get(fieldName)?string("true", "false") == "true">checked</#if>  <#if field.readonly || hasWritePermission?string("true", "false") == "false" >readonly="readonly"</#if>>
 	
 			<#elseif field.dataType.enumType == 'TEXT' || field.dataType.enumType =='HTML'>
-				<textarea name="${fieldName}" id="${fieldName}" <#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <@validationOptions field /> ><#if entity!='' && entity.get(fieldName)??>${entity.get(fieldName)!?html}</#if></textarea>
-	
-			<#elseif field.dataType.enumType == 'XREF'>
-				<input type="hidden" name="${fieldName}" id="${fieldName}" <@validationOptions field />>
+				<textarea class="form-control" name="${fieldName}" id="${fieldName}" <#if readonly>readonly="readonly"</#if> <#if !nillable>required="required"</#if> ><#if entity!='' && entity.get(fieldName)??>${entity.get(fieldName)!?html}</#if></textarea>
+			
+			<#elseif field.dataType.enumType == 'XREF' || field.dataType.enumType == 'CATEGORICAL'>
+				<input type="hidden" name="${fieldName}" id="${fieldName}" <#if !nillable>required="required"</#if> />
 				<script>
 					$(document).ready(function() {
 						$('#${fieldName}').select2({
+							width: '60%',
 							placeholder: 'Select ${field.refEntity.name!}',
 							allowClear: ${field.nillable?string('true', 'false')},
 							query: function (query) {
-								var queryResult = {more:false, results:[<#if field.nillable?string('true', 'false') == 'true'>{id:'', text:''}</#if>]};
+								var queryResult = {more:false, results:[<#if nillable>{id:'', text:''}</#if>]};
 								
 								//Get posible xref values
 								var restApi = new window.top.molgenis.RestClient(); 
@@ -29,45 +34,48 @@
 								
 								//When user first clicks in dropdown term is empty, then when user types we get called with the term, create query for it
 								if (query.term.length > 0) {
-									q = {q:[{field:'${field.refEntity.labelAttribute.name!?uncap_first}',operator:'LIKE',value:query.term}]};
+									q = {q:[{field:'${field.refEntity.labelAttribute.name!}',operator:'LIKE',value:query.term}]};
 								}
 								
-								restApi.getAsync(url, null, q, function(entities) {
+								restApi.getAsync(url, {q: q}, function(entities) {
 									$.each(entities.items, function(index, entity) {
-										queryResult.results.push({id:restApi.getPrimaryKeyFromHref(entity.href), text:entity['${field.refEntity.labelAttribute.name!?uncap_first}']});
+										queryResult.results.push({id:restApi.getPrimaryKeyFromHref(entity.href), text:entity['${field.refEntity.labelAttribute.name!}']});
 									});
 									query.callback(queryResult);
 								});
 							},
 							<#if entity!='' && entity.get(fieldName)??>
 							initSelection: function (element, callback) {
-								callback({id:'<@formatValue field.refEntity.idAttribute.dataType.enumType entity.get(fieldName).idValue />', text: '${entity.get(fieldName).get(field.refEntity.labelAttribute.name)!?html}'});
+								callback({id:'<@formatValue field.refEntity.idAttribute.dataType.enumType entity.getEntity(fieldName).idValue />', text: '${entity.getEntity(fieldName).get(field.refEntity.labelAttribute.name)!?html}'});
 							}
 							</#if>
 						});
 						
 						<#if entity!='' && entity.get(fieldName)??>
-							$('#${fieldName}').select2('val', '<@formatValue field.refEntity.idAttribute.dataType.enumType entity.get(fieldName).idValue />');
+							$('#${fieldName}').select2('val', '<@formatValue field.refEntity.idAttribute.dataType.enumType entity.getEntity(fieldName).idValue />');
 						</#if>
 						
-						<#if field.readonly || hasWritePermission?string("true", "false") == "false">
+						<#if readonly>
 							$('#${fieldName}').select2('readonly', true);
 						</#if>
 					});
 					
 				</script>
 			<#elseif field.dataType.enumType == 'MREF'>
-				<input type="hidden" name="${fieldName}" id="${fieldName}" <@validationOptions field />>
+				<input type="hidden" name="${fieldName}" id="${fieldName}" <#if !nillable>required="required"</#if>>
 				<script>
 					$(document).ready(function() {
 						var xrefs = [];
 						<#if entity!='' && entity.get(fieldName)??>
-							<#list entity.get(fieldName) as xrefEntity>
-								xrefs.push({id:'<@formatValue field.refEntity.idAttribute.dataType.enumType xrefEntity.idValue />', text:'${xrefEntity.get(field.refEntity.labelAttribute.name)!?html}'});
-							</#list>
+							<#if entity.getEntities(fieldName)?has_content >
+								<#list entity.getEntities(fieldName).iterator() as xrefEntity>
+									xrefs.push({id:'<@formatValue field.refEntity.idAttribute.dataType.enumType xrefEntity.idValue />', text:'${xrefEntity.get(field.refEntity.labelAttribute.name)!?html}'});
+								</#list>
+							</#if>
 						</#if>
 								
 						$('#${fieldName}').select2({
+							width: '60%',
 							placeholder: 'Select ${field.refEntity.name!}',
 							allowClear: ${field.nillable?string('true', 'false')},
 							multiple: true,
@@ -81,12 +89,12 @@
 								
 								//When user first clicks in dropdown term is empty, then when user types we get called with the term, create query for it
 								if (query.term.length > 0) {
-									q = {q:[{field:'${field.refEntity.labelAttribute.name!?uncap_first}',operator:'LIKE',value:query.term}]};
+									q = {q:[{field:'${field.refEntity.labelAttribute.name!}',operator:'LIKE',value:query.term}]};
 								}
 								
-								restApi.getAsync(url, null, q, function(entities) {
+								restApi.getAsync(url, {q: q}, function(entities) {
 									$.each(entities.items, function(index, entity) {
-										queryResult.results.push({id:restApi.getPrimaryKeyFromHref(entity.href), text:entity['${field.refEntity.labelAttribute.name!?uncap_first}']});
+										queryResult.results.push({id:restApi.getPrimaryKeyFromHref(entity.href), text:entity['${field.refEntity.labelAttribute.name!}']});
 									});
 									query.callback(queryResult);
 								});
@@ -98,57 +106,96 @@
 						
 						$('#${fieldName}').select2('val', xrefs);
 							
-						<#if field.readonly || hasWritePermission?string("true", "false") == "false">
-							$('#${name}').select2('readonly', true);
+						<#if readonly>
+							$('#${fieldName}').select2('readonly', true);
 						</#if>
 					});
 					
 				</script>
 				
-			<#elseif field.dataType.enumType == 'DATE_TIME' || field.dataType.enumType == 'DATE'>
-				<div class="input-append date">
-					<input readonly type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" <#if field.nillable>class="nillable"</#if> <#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string("yyyy-MM-dd'''T'''HH:mm:ssZ")}"</#if> <@validationOptions field /> >
-					<#if field.nillable><span class="add-on-workaround"><i class="icon-remove empty-date-input"></i></span></#if> <span class="add-on"><i></i></span>
+			<#elseif field.dataType.enumType == 'DATE_TIME'>
+				<div class="input-group group-append date datetime">
+  					<span class='input-group-addon'>
+  						<span class="datepickerbutton glyp2icon-calendar glyphicon glyphicon-calendar"></span>
+  					</span>
+  					<input type="text" 
+  						name="${fieldName}" 
+  						id="${fieldName}" 
+  						placeholder="${field.name}" 
+  						data-date-format="YYYY-MM-DD'T'HH:mm:ssZZ"
+						class="form-control<#if field.nillable> nillable</#if>" <#if readonly>disabled="disabled"</#if>
+						<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string("yyyy-MM-dd'T'HH:mm:ssZ")}"</#if>
+						<#if !nillable>required="required"</#if> 
+						data-rule-date-ISO="true" />
+							
+  					<#if field.nillable>
+						<span class='input-group-addon'>
+							<span class="glyphicon glyphicon-remove empty-date-input clear-date-time-btn"></span>
+						</span>
+					</#if>
+				</div>
+			<#elseif field.dataType.enumType == 'DATE'>
+				<div class="input-group group-append date dateonly">
+					<span class='input-group-addon'>
+						<span class='datepickerbutton glyp2icon-calendar glyphicon glyphicon-calendar'></span>
+					</span>
+					<input type="text" 
+						name="${fieldName}" 
+						id="${fieldName}" 
+						placeholder="${field.name}"
+						data-date-format="YYYY-MM-DD" 
+						class="form-control<#if field.nillable> nillable</#if>" 
+						<#if readonly>readonly="readonly"</#if> 
+						<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string("yyyy-MM-dd")}"</#if> 
+						<#if !nillable>required="required"</#if>
+						data-rule-date-ISO="true" />
+						
+					<#if field.nillable>
+						<span class='input-group-addon'>
+							<span class='glyphicon glyphicon-remove empty-date-input clear-date-time-btn'></span>
+						</span>
+					</#if>
 				</div>
 				
 			<#elseif field.dataType.enumType =='INT' || field.dataType.enumType = 'LONG'>
-				<input type="number" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" <#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)}"</#if> <@validationOptions field /> >
-	
+				<input type="number" class="form-control" data-rule-digits="true" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" 
+					<#if readonly>readonly="readonly"</#if> 
+					<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)?c}"</#if> 
+					<#if !nillable>required="required"</#if> />
+			
+			<#elseif field.dataType.enumType == 'SCRIPT'>
+				<div style="width: 100%; height:250px" class="uneditable-input" id="${fieldName}-editor"></div>
+				<#if entity!='' && entity.get(fieldName)??>
+					<textarea class="form-control" name="${fieldName}" id="${fieldName}-textarea" <#if !nillable>required="required"</#if>>${entity.get(fieldName)!?html}</textarea>
+				<#else>
+					<textarea class="form-control" name="${fieldName}" id="${fieldName}-textarea" <#if !nillable>required="required"</#if>></textarea>
+				</#if>
+				<script>
+					var editor = ace.edit("${fieldName}-editor");
+					editor.setTheme("ace/theme/eclipse");
+    				editor.getSession().setMode("ace/mode/r");
+    					
+    				var textarea = $("#${fieldName}-textarea").hide();
+					editor.getSession().setValue(textarea.val());
+					editor.getSession().on('change', function(){
+  						textarea.val(editor.getSession().getValue());
+					});	
+				</script>
+			<#elseif field.dataType.enumType == 'EMAIL'>
+				<input type="email" class="form-control" data-rule-email="true" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" 
+					<#if readonly>readonly="readonly"</#if> 
+					<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string?html}"</#if> 
+					<#if !nillable>data-rule-required="true" </#if>/>
 			<#else>
-				<input type="text" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" <#if field.readonly || hasWritePermission?string("true", "false") == "false">disabled="disabled"</#if> <#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string?html}"</#if> <@validationOptions field /> >
-	
+					<input type="text" class="form-control" name="${fieldName}" id="${fieldName}" placeholder="${field.name}" 
+						<#if readonly>readonly="readonly"</#if> 
+						<#if entity!='' && entity.get(fieldName)??>value="${entity.get(fieldName)!?string?html}"</#if> 
+						<#if !nillable>required="required"</#if> 
+						<#if field.dataType.enumType == 'DECIMAL'>data-rule-number="true"</#if>
+						<#if field.dataType.enumType == 'HYPERLINK'>data-rule-url="true"</#if> />
 			</#if>
 		</div>
 	</div>
-	
-</#macro>
-
-<#macro validationOptions field>
-	<#assign validations = []>
-    
-    <#if field.nillable?string('true', 'false') == 'false'>
-    	<#assign validations = validations + ['required']>
-    </#if>
-    
-    <#if field.dataType.enumType == 'INT' || field.dataType.enumType == 'LONG'>
-    	<#assign validations = validations + ['digits']>
-    </#if>
-    
-    <#if field.dataType.enumType == 'DECIMAL'>
-    	<#assign validations = validations + ['number']>
-    </#if>
-    
-    <#if field.dataType.enumType == 'EMAIL'>
-    	<#assign validations = validations + ['email']>
-    </#if>
-    
-    <#if field.dataType.enumType == 'HYPERLINK'>
-    	<#assign validations = validations + ['url']>
-    </#if>
-    
-    <#if validations?size &gt; 0>
-    	class="<#list validations as validation>${validation} </#list>"
-   	</#if>
 </#macro>
 
 <#macro formatValue fieldEnumType value>

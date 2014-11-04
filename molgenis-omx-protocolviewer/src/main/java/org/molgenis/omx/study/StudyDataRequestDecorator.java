@@ -1,17 +1,16 @@
 package org.molgenis.omx.study;
 
 import java.util.Iterator;
-import java.util.List;
 
+import org.molgenis.data.CrudRepository;
 import org.molgenis.data.CrudRepositoryDecorator;
-import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.ConvertingIterable;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.security.SecurityUtils;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.context.ApplicationContext;
@@ -23,7 +22,7 @@ import org.springframework.context.ApplicationContextException;
  */
 public class StudyDataRequestDecorator extends CrudRepositoryDecorator
 {
-	public StudyDataRequestDecorator(CrudRepositoryDecorator crudRepositoryDecorator)
+	public StudyDataRequestDecorator(CrudRepository crudRepositoryDecorator)
 	{
 		super(crudRepositoryDecorator);
 	}
@@ -42,20 +41,20 @@ public class StudyDataRequestDecorator extends CrudRepositoryDecorator
 	}
 
 	@Override
-	public Integer add(Entity entity)
+	public void add(Entity entity)
 	{
 		checkEntitiesPermission(entity);
-		return super.add(entity);
+		super.add(entity);
 	}
 
 	@Override
-	public void add(Iterable<? extends Entity> entities)
+	public Integer add(Iterable<? extends Entity> entities)
 	{
 		for (Entity entity : entities)
 		{
 			checkEntitiesPermission(entity);
 		}
-		super.add(entities);
+		return super.add(entities);
 	}
 
 	@Override
@@ -73,16 +72,6 @@ public class StudyDataRequestDecorator extends CrudRepositoryDecorator
 			checkEntitiesPermission(entity);
 		}
 		super.update(entities);
-	}
-
-	@Override
-	public void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
-	{
-		for (Entity entity : entities)
-		{
-			checkEntitiesPermission(entity);
-		}
-		super.update(entities, dbAction, keyName);
 	}
 
 	@Override
@@ -118,7 +107,7 @@ public class StudyDataRequestDecorator extends CrudRepositoryDecorator
 	}
 
 	@Override
-	public void deleteById(Integer id)
+	public void deleteById(Object id)
 	{
 		Entity entity = super.findOne(id);
 		checkEntitiesPermission(entity);
@@ -133,7 +122,7 @@ public class StudyDataRequestDecorator extends CrudRepositoryDecorator
 	}
 
 	@Override
-	public Entity findOne(Integer id)
+	public Entity findOne(Object id)
 	{
 		Entity entity = super.findOne(id);
 		checkEntitiesPermission(entity);
@@ -142,7 +131,7 @@ public class StudyDataRequestDecorator extends CrudRepositoryDecorator
 	}
 
 	@Override
-	public void deleteById(Iterable<Integer> ids)
+	public void deleteById(Iterable<Object> ids)
 	{
 		for (Entity entity : super.findAll(ids))
 		{
@@ -153,7 +142,7 @@ public class StudyDataRequestDecorator extends CrudRepositoryDecorator
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Integer> ids)
+	public Iterable<Entity> findAll(Iterable<Object> ids)
 	{
 		Iterable<Entity> entities = super.findAll(ids);
 		for (Entity entity : entities)
@@ -183,7 +172,7 @@ public class StudyDataRequestDecorator extends CrudRepositoryDecorator
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> findAll(Iterable<Integer> ids, Class<E> clazz)
+	public <E extends Entity> Iterable<E> findAll(Iterable<Object> ids, Class<E> clazz)
 	{
 		return new ConvertingIterable<E>(clazz, findAll(ids));
 	}

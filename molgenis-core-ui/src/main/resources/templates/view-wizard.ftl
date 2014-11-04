@@ -2,34 +2,31 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 <#assign css=['bwizard.min.css', 'molgenis-wizard.css'] + stylesheets>
-<#assign js=['molgenis-wizard.js'] + javascripts>
+<#assign js=['molgenis-wizard.js', 'bootstrap.file-input.js'] + javascripts>
 
 <@header css js/>
-	<div class="row-fluid">
+<div class="row">
+    <div class="col-md-12">
 		<div id="wizard">
 			<ol class="bwizard-steps clearfix" role="tablist">
 				<#list wizard.pages as wizardPage>
 					<#if wizardPage == wizard.currentPage>
 						<li role="tab" class="active">
-							<span class="label badge-inverse">${wizardPage_index + 1}</span> ${wizardPage.title}
+							<span class="badge inverse">${wizardPage_index + 1}</span> ${wizardPage.title}
 						</li>
 					<#else>
 						<li role="tab">
-							<span class="label">${wizardPage_index + 1}</span> ${wizardPage.title}
+							<span class="badge">${wizardPage_index + 1}</span> ${wizardPage.title}
 						</li>
 					</#if>
 				</#list>
-			</ol> 
-				
-			<#if successMessage! != "" >
-				<div class="alert alert-block alert-success">${successMessage!}</div>
-			</#if>
+			</ol>
 				
 			<@spring.bind "wizard" />	
 			<#if spring.status.error>
-  				<#list spring.status.errorMessages as error>
-                	<div class="alert alert-block alert-error">${error}</div>
-            	</#list>
+				<script>
+  					molgenis.createAlert([{'message': '<#list spring.status.errorMessages as error>${error?js_string}</#list>'}], 'error');
+            	</script>
 			</#if>
 				
 			<#list wizard.pages as wizardPage>
@@ -53,4 +50,5 @@
 			</ul>
 		</div>
 	</div>
+</div>
 <@footer/>

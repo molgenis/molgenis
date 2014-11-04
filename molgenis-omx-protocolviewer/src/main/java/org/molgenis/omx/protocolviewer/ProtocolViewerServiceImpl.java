@@ -35,12 +35,13 @@ import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.utils.ProtocolUtils;
-import org.molgenis.security.SecurityUtils;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.study.StudyDefinition;
 import org.molgenis.study.UnknownStudyDefinitionException;
 import org.molgenis.studymanager.StudyManagerService;
 import org.molgenis.util.FileStore;
+import org.molgenis.util.FileUploadUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.FileSystemResource;
@@ -49,6 +50,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -103,30 +105,36 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 	@Transactional(readOnly = true)
 	public StudyDefinition getStudyDefinitionDraftForCurrentUser(String catalogId) throws UnknownCatalogException
 	{
-		List<StudyDefinition> studyDefinitions = studyManagerService.getStudyDefinitions(
-				SecurityUtils.getCurrentUsername(), StudyDefinition.Status.DRAFT);
+		List<StudyDefinition> studyDefinitions = studyManagerService.getStudyDefinitions(SecurityUtils
+				.getCurrentUsername());
+
 		for (StudyDefinition studyDefinition : studyDefinitions)
 		{
-			Catalog catalogOfStudyDefinition;
-			try
+			if (studyDefinition.getStatus() == StudyDefinition.Status.DRAFT)
 			{
-				catalogOfStudyDefinition = catalogService.getCatalogOfStudyDefinition(studyDefinition.getId());
-			}
-			catch (UnknownCatalogException e)
-			{
-				logger.error("", e);
-				throw new RuntimeException(e);
-			}
-			catch (UnknownStudyDefinitionException e)
-			{
-				logger.error("", e);
-				throw new RuntimeException(e);
-			}
-			if (catalogOfStudyDefinition.getId().equals(catalogId))
-			{
-				return studyDefinition;
+				Catalog catalogOfStudyDefinition;
+				try
+				{
+					catalogOfStudyDefinition = catalogService.getCatalogOfStudyDefinition(studyDefinition.getId());
+				}
+				catch (UnknownCatalogException e)
+				{
+					logger.error("", e);
+					throw new RuntimeException(e);
+				}
+				catch (UnknownStudyDefinitionException e)
+				{
+					logger.error("", e);
+					throw new RuntimeException(e);
+				}
+
+				if (catalogOfStudyDefinition.getId().equals(catalogId))
+				{
+					return studyDefinition;
+				}
 			}
 		}
+
 		return null;
 	}
 
@@ -143,13 +151,8 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 	@Transactional(readOnly = true)
 	public List<StudyDefinition> getStudyDefinitionsForCurrentUser()
 	{
-		List<StudyDefinition> studyDefinitions = new ArrayList<StudyDefinition>();
 		String username = SecurityUtils.getCurrentUsername();
-		for (StudyDefinition.Status status : StudyDefinition.Status.values())
-		{
-			studyDefinitions.addAll(studyManagerService.getStudyDefinitions(username, status));
-		}
-		return studyDefinitions;
+		return studyManagerService.getStudyDefinitions(username);
 	}
 
 	@Override
@@ -159,7 +162,8 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 	{
 		MolgenisUser user = molgenisUserService.getUser(SecurityUtils.getCurrentUsername());
 		StudyDefinition studyDefinition = studyManagerService.getStudyDefinition(id.toString());
-		if (!studyDefinition.getAuthorEmail().equals(user.getEmail()))
+
+		if (!studyDefinition.getAuthorEmail().endsWith(user.getEmail()))
 		{
 			throw new MolgenisDataAccessException("Access denied to study definition [" + id + "]");
 		}
@@ -185,18 +189,23 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 			throw new IllegalArgumentException("feature list is null or empty");
 		}
 
+		String appName = molgenisSettings.getProperty("app.name", "MOLGENIS");
+		long timestamp = System.currentTimeMillis();
+
+		String originalFileName = FileUploadUtils.getOriginalFileName(requestForm);
+		String extension = StringUtils.getFilenameExtension(originalFileName);
+		String fileName = appName + "-request_" + timestamp + "." + extension;
+		File orderFile = fileStore.store(requestForm.getInputStream(), fileName);
+
 		// update study definition
 		studyDefinition.setName(studyName);
+		studyDefinition.setRequestProposalForm(fileName);
 		studyManagerService.updateStudyDefinition(studyDefinition);
 
 		// submit study definition
 		studyManagerService.submitStudyDefinition(studyDefinition.getId(), catalogId);
 
 		// create excel attachment for study data request
-		String appName = molgenisSettings.getProperty("app.name", "MOLGENIS");
-		long timestamp = System.currentTimeMillis();
-		String fileName = appName + "-request_" + timestamp + ".doc";
-		File orderFile = fileStore.store(requestForm.getInputStream(), fileName);
 		String variablesFileName = appName + "-request_" + timestamp + "-variables.xls";
 		InputStream variablesIs = createStudyDefinitionXlsStream(studyDefinition);
 		File variablesFile = fileStore.store(variablesIs, variablesFileName);
@@ -285,7 +294,14 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 
 		try
 		{
-			studyManagerService.updateStudyDefinition(studyDefinition);
+			if (Iterables.isEmpty(newCatalogItems))
+			{
+				// TOD remove StudyDefinition, empty item list is invalid according to the xsd
+			}
+			else
+			{
+				studyManagerService.updateStudyDefinition(studyDefinition);
+			}
 		}
 		catch (UnknownStudyDefinitionException e)
 		{

@@ -21,6 +21,7 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.observ.Category;
+import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.utils.I18nTools;
 
@@ -80,12 +81,6 @@ public class CategoryRepository extends AbstractRepository implements Countable
 	}
 
 	@Override
-	public Class<? extends Entity> getEntityClass()
-	{
-		return MapEntity.class;
-	}
-
-	@Override
 	public Iterator<Entity> iterator()
 	{
 		List<Entity> entities = new ArrayList<Entity>();
@@ -103,7 +98,7 @@ public class CategoryRepository extends AbstractRepository implements Countable
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("featureCategory-" + id);
+		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("featureCategory-" + id, MapEntity.class);
 
 		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(FIELD_TYPE, FieldTypeEnum.STRING));
 		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(FIELD_ID, FieldTypeEnum.STRING));
@@ -127,10 +122,14 @@ public class CategoryRepository extends AbstractRepository implements Countable
 		}
 		else
 		{
-			Iterable<Category> categories = dataService.findAll(Category.ENTITY_NAME,
-					new QueryImpl().in(Category.OBSERVABLEFEATURE, protocol.getFeatures()), Category.class);
+			List<ObservableFeature> features = protocol.getFeatures();
+			if (features != null && !features.isEmpty())
+			{
+				Iterable<Category> categories = dataService.findAll(Category.ENTITY_NAME,
+						new QueryImpl().in(Category.OBSERVABLEFEATURE, features), Category.class);
 
-			count.addAndGet(Iterables.size(categories));
+				count.addAndGet(Iterables.size(categories));
+			}
 		}
 	}
 
@@ -146,25 +145,29 @@ public class CategoryRepository extends AbstractRepository implements Countable
 		}
 		else
 		{
-			Iterable<Category> categories = dataService.findAll(Category.ENTITY_NAME,
-					new QueryImpl().in(Category.OBSERVABLEFEATURE, protocol.getFeatures()), Category.class);
-
-			for (Category c : categories)
+			List<ObservableFeature> features = protocol.getFeatures();
+			if (features != null && !features.isEmpty())
 			{
-				String name = c.getIdentifier();
-				String description = c.getName() == null ? StringUtils.EMPTY : I18nTools.get(c.getName())
-						.replaceAll("[^a-zA-Z0-9 ]", " ").toLowerCase();
+				Iterable<Category> categories = dataService.findAll(Category.ENTITY_NAME,
+						new QueryImpl().in(Category.OBSERVABLEFEATURE, features), Category.class);
 
-				Set<String> descriptionStopWords = new HashSet<String>(Arrays.asList(description.split(" +")));
-				descriptionStopWords.removeAll(STOPWORDSLIST);
+				for (Category c : categories)
+				{
+					String name = c.getIdentifier();
+					String description = c.getName() == null ? StringUtils.EMPTY : I18nTools.get(c.getName())
+							.replaceAll("[^a-zA-Z0-9 ]", " ").toLowerCase();
 
-				Entity entity = new MapEntity();
-				entity.set(FIELD_TYPE, Category.class.getSimpleName().toLowerCase());
-				entity.set(FIELD_ID, c.getObservableFeature().getId());
-				entity.set(FIELD_NAME, name);
-				entity.set(FIELD_DESCRIPTION, name);
-				entity.set(FIELD_DESCRIPTION_STOPWORDS, StringUtils.join(descriptionStopWords.toArray(), ' '));
-				entities.add(entity);
+					Set<String> descriptionStopWords = new HashSet<String>(Arrays.asList(description.split(" +")));
+					descriptionStopWords.removeAll(STOPWORDSLIST);
+
+					Entity entity = new MapEntity();
+					entity.set(FIELD_TYPE, Category.class.getSimpleName().toLowerCase());
+					entity.set(FIELD_ID, c.getObservableFeature().getId());
+					entity.set(FIELD_NAME, name);
+					entity.set(FIELD_DESCRIPTION, description);
+					entity.set(FIELD_DESCRIPTION_STOPWORDS, StringUtils.join(descriptionStopWords.toArray(), ' '));
+					entities.add(entity);
+				}
 			}
 		}
 

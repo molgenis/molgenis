@@ -5,7 +5,7 @@
 	var restApi = new molgenis.RestClient(false);
 	var NR_ROWS_PER_PAGE = 10;
 	var currentPages = [];
-	var selectedEntityId = null;//Id of the selected entity in the master list
+	var selectedEntityId = null;
 	var search = null;
 	
 	ns.buildTableBody = function(formIndex, isPageChange) {
@@ -20,14 +20,26 @@
 			}
 		});
 		
-		var uri = '/api/v1/' + forms[formIndex].meta.name + '?num=' + NR_ROWS_PER_PAGE + '&start=' + (currentPage-1) * NR_ROWS_PER_PAGE;
-		
+		var uri = '/api/v1/' + forms[formIndex].meta.name;
+		var options = {
+			start: (currentPage-1) * NR_ROWS_PER_PAGE,
+			num: NR_ROWS_PER_PAGE,
+			expand: expands
+		};
 		if ((formIndex == 0) && (search != null) && (search.value != '')) {
-			uri += '&q[0].field=' + search.field + '&q[0].operator=' + search.operator + '&q[0].value=' + encodeURIComponent(search.value);
+			options.q = [ {
+				field : search.field,
+				operator : search.operator,
+				value : search.value
+			} ];
 		}
 		
 		if ((formIndex > 0) && (selectedEntityId != null)) {
-			uri += '&q[0].field=' + forms[formIndex].xrefFieldName + '&q[0].operator=EQUALS&q[0].value=' + selectedEntityId;
+			options.q = [ {
+				field : forms[formIndex].xrefFieldName,
+				operator : 'EQUALS',
+				value : selectedEntityId
+			} ];
 		} 
 		
 		var entities = {};
@@ -36,12 +48,13 @@
 			entities.items = [];
 			entities.total = 0;
 		} else {
-			entities = restApi.get(uri, expands, null);
+			entities = restApi.get(uri, options);
 		}
 		
 		var items = [];
 		$.each(entities.items, function(index, entity) {
 			var id = restApi.getPrimaryKeyFromHref(entity.href);
+			var labelValue = entity[forms[formIndex].meta.labelFieldName];
 			var editPageUrl = forms[formIndex].baseUri + '/' + id + '?back=' + encodeURIComponent(CURRENT_URI);
 			var deleteApiUrl = '/api/v1/' + forms[formIndex].meta.name + '/' +  id;
 				
@@ -50,7 +63,7 @@
 				selectedEntityId = id;
 			}
 				
-			if (selectedEntityId == id) {
+			if (id == selectedEntityId) {
 				items.push('<tr data-id="' + id + '" class="info">');
 			} else {
 				items.push('<tr data-id="' + id + '">');

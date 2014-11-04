@@ -10,6 +10,7 @@ import org.springframework.context.ApplicationContextAware;
  * @author erwin
  * 
  */
+@edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD", justification = "Intented static write from instance")
 public class ApplicationContextProvider implements ApplicationContextAware
 {
 	private static ApplicationContext ctx = null;

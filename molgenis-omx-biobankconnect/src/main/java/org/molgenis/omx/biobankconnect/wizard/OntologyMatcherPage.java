@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcher;
 import org.molgenis.ui.wizard.AbstractWizardPage;
 import org.molgenis.ui.wizard.Wizard;
@@ -35,9 +36,13 @@ public class OntologyMatcherPage extends AbstractWizardPage
 			Integer selectedDataSetId = ((BiobankConnectWizard) wizard).getSelectedDataSet().getId();
 			List<Integer> selectedTargetDataSetIds = new ArrayList<Integer>();
 
-			for (String id : request.getParameter("selectedTargetDataSets").split(","))
+			String parameter = request.getParameter("selectedTargetDataSets");
+			if (!StringUtils.isEmpty(parameter))
 			{
-				selectedTargetDataSetIds.add(Integer.parseInt(id));
+				for (String id : parameter.split(","))
+				{
+					selectedTargetDataSetIds.add(Integer.parseInt(id));
+				}
 			}
 			biobankConnectWizard.setSelectedBiobanks(selectedTargetDataSetIds);
 

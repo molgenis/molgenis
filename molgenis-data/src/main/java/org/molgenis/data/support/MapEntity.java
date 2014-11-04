@@ -1,12 +1,16 @@
 package org.molgenis.data.support;
 
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.util.CaseInsensitiveLinkedHashMap;
+
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 
 /**
  * Simple Entity implementation based on a Map
@@ -14,7 +18,8 @@ import org.molgenis.data.EntityMetaData;
 public class MapEntity extends AbstractEntity
 {
 	private static final long serialVersionUID = -8283375007931769373L;
-	private Map<String, Object> values = new LinkedHashMap<String, Object>();
+	private EntityMetaData entityMetaData;
+	private Map<String, Object> values = new CaseInsensitiveLinkedHashMap<Object>();
 	private String idAttributeName = null;
 
 	public MapEntity()
@@ -41,16 +46,16 @@ public class MapEntity extends AbstractEntity
 		values.put(attributeName, value);
 	}
 
+	public MapEntity(EntityMetaData metaData)
+	{
+		this.entityMetaData = metaData;
+		this.idAttributeName = entityMetaData.getIdAttribute().getName();
+	}
+
 	@Override
 	public Object get(String attributeName)
 	{
-		Object value = values.get(attributeName);
-		if (value == null)
-		{
-			value = values.get(attributeName.toLowerCase());
-		}
-
-		return value;
+		return values.get(attributeName);
 	}
 
 	@Override
@@ -60,7 +65,7 @@ public class MapEntity extends AbstractEntity
 	}
 
 	@Override
-	public void set(Entity other)
+	public void set(Entity other, boolean strict)
 	{
 		for (String attributeName : other.getAttributeNames())
 		{
@@ -69,14 +74,14 @@ public class MapEntity extends AbstractEntity
 	}
 
 	@Override
-	public Integer getIdValue()
+	public Object getIdValue()
 	{
-		if (idAttributeName == null)
+		if (getIdAttributeName() == null)
 		{
 			return null;
 		}
 
-		return (Integer) get(idAttributeName);
+		return get(getIdAttributeName());
 	}
 
 	@Override
@@ -91,15 +96,32 @@ public class MapEntity extends AbstractEntity
 	}
 
 	@Override
-	public String toString()
+	public Iterable<String> getAttributeNames()
 	{
-		return values.toString();
+		if (entityMetaData != null)
+		{
+			return Iterables.transform(entityMetaData.getAttributes(), new Function<AttributeMetaData, String>()
+			{
+				@Override
+				public String apply(AttributeMetaData input)
+				{
+					return input.getName();
+				}
+			});
+		}
+		return values.keySet();
 	}
 
 	@Override
-	public Iterable<String> getAttributeNames()
+	public List<String> getLabelAttributeNames()
 	{
-		return values.keySet();
+		return Collections.singletonList(entityMetaData.getLabelAttribute().getName());
+	}
+
+	@Override
+	public EntityMetaData getEntityMetaData()
+	{
+		return entityMetaData;
 	}
 
 	@Override
@@ -107,8 +129,8 @@ public class MapEntity extends AbstractEntity
 	{
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((entityMetaData == null) ? 0 : entityMetaData.hashCode());
 		result = prime * result + ((idAttributeName == null) ? 0 : idAttributeName.hashCode());
-		result = prime * result + ((values == null) ? 0 : values.hashCode());
 		return result;
 	}
 
@@ -119,6 +141,11 @@ public class MapEntity extends AbstractEntity
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
 		MapEntity other = (MapEntity) obj;
+		if (entityMetaData == null)
+		{
+			if (other.entityMetaData != null) return false;
+		}
+		else if (!entityMetaData.equals(other.entityMetaData)) return false;
 		if (idAttributeName == null)
 		{
 			if (other.idAttributeName != null) return false;
@@ -130,24 +157,6 @@ public class MapEntity extends AbstractEntity
 		}
 		else if (!values.equals(other.values)) return false;
 		return true;
-	}
-
-	@Override
-	public List<String> getLabelAttributeNames()
-	{
-		return Collections.emptyList();
-	}
-
-	@Override
-	public void set(Entity entity, boolean strict)
-	{
-		set(entity);
-	}
-
-	@Override
-	public EntityMetaData getEntityMetaData()
-	{
-		return null;
 	}
 
 }

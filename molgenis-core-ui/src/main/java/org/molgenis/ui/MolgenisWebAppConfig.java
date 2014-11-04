@@ -1,22 +1,58 @@
 package org.molgenis.ui;
 
+import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_CSS;
+import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_FONTS;
+import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_IMG;
+import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_JS;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
+import org.molgenis.data.DataService;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.IndexedCrudRepository;
+import org.molgenis.data.IndexedCrudRepositorySecurityDecorator;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
+import org.molgenis.data.elasticsearch.ElasticsearchRepositoryDecorator;
+import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.elasticsearch.meta.IndexingWritableMetaDataServiceDecorator;
+import org.molgenis.data.meta.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.EntityMetaDataMetaData;
+import org.molgenis.data.meta.PackageMetaData;
+import org.molgenis.data.meta.WritableMetaDataService;
+import org.molgenis.data.meta.WritableMetaDataServiceDecorator;
+import org.molgenis.data.validation.EntityAttributesValidator;
+import org.molgenis.data.validation.IndexedRepositoryValidationDecorator;
 import org.molgenis.framework.db.WebAppDatabasePopulator;
 import org.molgenis.framework.db.WebAppDatabasePopulatorService;
-import org.molgenis.framework.server.MolgenisPermissionService;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
+import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
+import org.molgenis.messageconverter.CsvHttpMessageConverter;
+import org.molgenis.security.CorsInterceptor;
+import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.freemarker.HasPermissionDirective;
+import org.molgenis.security.freemarker.NotHasPermissionDirective;
+import org.molgenis.ui.freemarker.FormLinkDirective;
+import org.molgenis.ui.freemarker.LimitMethod;
+import org.molgenis.ui.menu.MenuMolgenisUi;
+import org.molgenis.ui.menu.MenuReaderService;
+import org.molgenis.ui.menu.MenuReaderServiceImpl;
+import org.molgenis.ui.menumanager.MenuManagerService;
+import org.molgenis.ui.menumanager.MenuManagerServiceImpl;
+import org.molgenis.ui.security.MolgenisUiPermissionDecorator;
 import org.molgenis.util.ApplicationContextProvider;
-import org.molgenis.util.AsyncJavaMailSender;
 import org.molgenis.util.FileStore;
 import org.molgenis.util.GsonHttpMessageConverter;
+import org.molgenis.util.ResourceFingerprintRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
@@ -29,6 +65,7 @@ import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.BufferedImageHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.ViewResolver;
@@ -37,6 +74,10 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
+
+import com.google.common.collect.Maps;
+
+import freemarker.template.TemplateException;
 
 public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 {
@@ -49,28 +90,45 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Autowired
 	private WebAppDatabasePopulatorService webAppDatabasePopulatorService;
 
+	// temporary workaround for module dependencies
+	@Autowired
+	private DataService dataService;
+	@Autowired
+	private SearchService elasticSearchService;
+
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry)
 	{
-		registry.addResourceHandler("/css/**").addResourceLocations("/css/", "classpath:/css/").setCachePeriod(3600);
-		registry.addResourceHandler("/img/**").addResourceLocations("/img/", "classpath:/img/").setCachePeriod(3600);
-		registry.addResourceHandler("/js/**").addResourceLocations("/js/", "classpath:/js/").setCachePeriod(3600);
+		final int aYear = 31536000;
+		registry.addResourceHandler(PATTERN_CSS).addResourceLocations("/css/", "classpath:/css/").setCachePeriod(aYear);
+		registry.addResourceHandler(PATTERN_IMG).addResourceLocations("/img/", "classpath:/img/").setCachePeriod(aYear);
+		registry.addResourceHandler(PATTERN_JS).addResourceLocations("/js/", "classpath:/js/").setCachePeriod(aYear);
+		registry.addResourceHandler(PATTERN_FONTS).addResourceLocations("/fonts/", "classpath:/fonts/")
+				.setCachePeriod(aYear);
 		registry.addResourceHandler("/generated-doc/**").addResourceLocations("/generated-doc/").setCachePeriod(3600);
 		registry.addResourceHandler("/html/**").addResourceLocations("/html/", "classpath:/html/").setCachePeriod(3600);
 	}
 
+	@Value("${molgenis.build.profile}")
+	private String molgenisBuildProfile;
+
 	@Override
 	public void configureMessageConverters(List<HttpMessageConverter<?>> converters)
 	{
-		converters.add(new GsonHttpMessageConverter());
+		boolean prettyPrinting = molgenisBuildProfile != null && molgenisBuildProfile.equals("dev");
+		converters.add(new GsonHttpMessageConverter(prettyPrinting));
 		converters.add(new BufferedImageHttpMessageConverter());
+		converters.add(new CsvHttpMessageConverter());
 	}
 
 	@Override
 	public void addInterceptors(InterceptorRegistry registry)
 	{
 		String pluginInterceptPattern = MolgenisPluginController.PLUGIN_URI_PREFIX + "**";
+		String corsInterceptPattern = "/api/**";
+		registry.addInterceptor(molgenisInterceptor());
 		registry.addInterceptor(molgenisPluginInterceptor()).addPathPatterns(pluginInterceptPattern);
+		registry.addInterceptor(corsInterceptor()).addPathPatterns(corsInterceptPattern);
 	}
 
 	@Override
@@ -78,6 +136,18 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	{
 		registry.addConverter(new DateToStringConverter());
 		registry.addConverter(new StringToDateConverter());
+	}
+
+	@Bean
+	public ResourceFingerprintRegistry resourceFingerprintRegistry()
+	{
+		return new ResourceFingerprintRegistry();
+	}
+
+	@Bean
+	public MolgenisInterceptor molgenisInterceptor()
+	{
+		return new MolgenisInterceptor(resourceFingerprintRegistry(), molgenisSettings);
 	}
 
 	@Bean
@@ -127,7 +197,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Bean
 	public JavaMailSender mailSender()
 	{
-		AsyncJavaMailSender mailSender = new AsyncJavaMailSender();
+		JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
 		mailSender.setHost(mailHost);
 		mailSender.setPort(mailPort);
 		mailSender.setProtocol(mailProtocol);
@@ -150,14 +220,14 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		{
 			throw new IllegalArgumentException("missing required java system property 'molgenis.home'");
 		}
-		if (!molgenisHomeDir.endsWith("/")) molgenisHomeDir = molgenisHomeDir + '/';
+		if (!molgenisHomeDir.endsWith(File.separator)) molgenisHomeDir = molgenisHomeDir + File.separator;
 
 		// create molgenis store directory in molgenis data directory if not exists
-		String molgenisFileStoreDirStr = molgenisHomeDir + "data/filestore";
+		String molgenisFileStoreDirStr = molgenisHomeDir + "data" + File.separator + "filestore";
 		File molgenisDataDir = new File(molgenisFileStoreDirStr);
 		if (!molgenisDataDir.exists())
 		{
-			if (!molgenisDataDir.mkdir())
+			if (!molgenisDataDir.mkdirs())
 			{
 				throw new RuntimeException("failed to create directory: " + molgenisFileStoreDirStr);
 			}
@@ -192,15 +262,33 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 	/**
 	 * Configure freemarker. All freemarker templates should be on the classpath in a package called 'freemarker'
+	 * 
+	 * @throws TemplateException
+	 * @throws IOException
 	 */
 	@Bean
-	public FreeMarkerConfigurer freeMarkerConfigurer()
+	public FreeMarkerConfigurer freeMarkerConfigurer() throws IOException, TemplateException
 	{
 		FreeMarkerConfigurer result = new FreeMarkerConfigurer();
 		result.setPreferFileSystemAccess(false);
 		result.setTemplateLoaderPath("classpath:/templates/");
 		result.setDefaultEncoding("UTF-8");
+
+		Map<String, Object> freemarkerVariables = Maps.newHashMap();
+		freemarkerVariables.put("limit", new LimitMethod());
+		freemarkerVariables.put("hasPermission", new HasPermissionDirective(molgenisPermissionService));
+		freemarkerVariables.put("notHasPermission", new NotHasPermissionDirective(molgenisPermissionService));
+		freemarkerVariables.put("formLink", new FormLinkDirective());
+		addFreemarkerVariables(freemarkerVariables);
+
+		result.setFreemarkerVariables(freemarkerVariables);
+
 		return result;
+	}
+
+	// Override in subclass if you need more freemarker variables
+	protected void addFreemarkerVariables(Map<String, Object> freemarkerVariables)
+	{
 
 	}
 
@@ -211,21 +299,105 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	}
 
 	@Bean
+	public MenuReaderService menuReaderService()
+	{
+		return new MenuReaderServiceImpl(molgenisSettings);
+	}
+
+	@Bean
+	public MenuManagerService menuManagerService()
+	{
+		return new MenuManagerServiceImpl(menuReaderService(), molgenisSettings, molgenisPluginRegistry());
+	}
+
+	@Bean
 	public MolgenisUi molgenisUi()
 	{
-		try
-		{
-			return new XmlMolgenisUi(new XmlMolgenisUiLoader(), molgenisSettings, molgenisPermissionService);
-		}
-		catch (IOException e)
-		{
-			throw new RuntimeException(e);
-		}
+		MolgenisUi molgenisUi = new MenuMolgenisUi(molgenisSettings, menuReaderService());
+		return new MolgenisUiPermissionDecorator(molgenisUi, molgenisPermissionService, molgenisSettings);
 	}
 
 	@Bean
 	public MolgenisPluginRegistry molgenisPluginRegistry()
 	{
-		return new MolgenisUiPluginRegistry(molgenisUi());
+		return new MolgenisPluginRegistryImpl();
+	}
+
+	@Bean
+	public CorsInterceptor corsInterceptor()
+	{
+		return new CorsInterceptor();
+	}
+
+	// temporary workaround for module dependencies
+
+	@Bean
+	WritableMetaDataServiceDecorator writableMetaDataServiceDecorator()
+	{
+		return new WritableMetaDataServiceDecorator()
+		{
+			@Override
+			public WritableMetaDataService decorate(WritableMetaDataService metaDataRepositories)
+			{
+				System.out.println("Decorating metaDataRepositories");
+				return new IndexingWritableMetaDataServiceDecorator(metaDataRepositories, dataService,
+						elasticSearchService);
+			}
+		};
+	}
+
+	@Bean
+	public RepositoryDecoratorFactory repositoryDecoratorFactory()
+	{
+		return new RepositoryDecoratorFactory()
+		{
+			@Override
+			public Repository createDecoratedRepository(Repository repository)
+			{
+				// do not index an indexed repository
+				if (repository instanceof IndexedCrudRepository)
+				{
+					// 1. security decorator
+					// 2. validation decorator
+					// 3. indexed repository
+					return new IndexedCrudRepositorySecurityDecorator(new IndexedRepositoryValidationDecorator(
+							dataService, (IndexedCrudRepository) repository, new EntityAttributesValidator()),
+							molgenisSettings);
+				}
+				else
+				{
+					// create indexing meta data if meta data does not exist
+					EntityMetaData entityMetaData = repository.getEntityMetaData();
+					if (!elasticSearchService.hasMapping(entityMetaData))
+					{
+						try
+						{
+							elasticSearchService.createMappings(entityMetaData);
+						}
+						catch (IOException e)
+						{
+							throw new MolgenisDataException(e);
+						}
+					}
+
+					// 1. security decorator
+					// 2. validation decorator
+					// 3. indexing decorator
+					// 4. repository
+					IndexedCrudRepository indexedRepo = new ElasticsearchRepositoryDecorator(repository,
+							elasticSearchService);
+					if (AttributeMetaDataMetaData.ENTITY_NAME.equals(entityMetaData.getName())
+							|| EntityMetaDataMetaData.ENTITY_NAME.equals(entityMetaData.getName())
+							|| PackageMetaData.ENTITY_NAME.equals(entityMetaData.getName()))
+					{
+						// TODO: help! how to prevent all sorts of nasty security warnings and String -> Xref entity
+						// conversion hiccups upon construction of the application context?
+						return indexedRepo;
+					}
+					return new IndexedCrudRepositorySecurityDecorator(new IndexedRepositoryValidationDecorator(
+							dataService, indexedRepo, new EntityAttributesValidator()), molgenisSettings);
+				}
+			}
+		};
 	}
 }

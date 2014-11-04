@@ -7,7 +7,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.omx.controller.ContentControllersTest.Config;
+import org.molgenis.ui.controller.StaticContentService;
 import org.molgenis.util.FileStore;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -227,6 +229,12 @@ public class ContentControllersTest extends AbstractTestNGSpringContextTests
 		public FileStore fileStore()
 		{
 			return mock(FileStore.class);
+		}
+
+		@Bean
+		public MolgenisPluginRegistry molgenisPluginRegistry()
+		{
+			return mock(MolgenisPluginRegistry.class);
 		}
 
 		@Bean

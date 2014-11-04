@@ -87,4 +87,11 @@ public class HyperlinkField extends FieldType
 	{
 		return FieldTypeEnum.HYPERLINK;
 	}
+
+    @Override
+    public Object convert(Object value)
+    {
+        if (value == null) return null;
+        return value.toString();
+    }
 }

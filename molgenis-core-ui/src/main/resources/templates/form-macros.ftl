@@ -1,60 +1,77 @@
 <#macro renderList form index=0>
-<div id="list-holder" class="row-fluid">
-	<div id="list-navigation">
-		<div class="span4">
-			<h3 class="pull-left">${form.title} (<span id="entity-count-${index}"></span>)</h3>
+	<div class="row">
+		<div class="col-md-4">		
+			<h3 class="pull-left">
+				${form.title} (<span id="entity-count-${index}"></span>)
+			</h3>
+			
 			<#if form.hasWritePermission>
-				<a id="create-${index}" style="margin:30px 10px" class="pull-left" href="${form.getBaseUri(context_url)}/create?back=${current_uri?url('UTF-8')}">
+				<a id="create-${index}" style="margin:20px 10px" class="pull-left" href="${form.getBaseUri(context_url)}/create?back=${current_uri?url('UTF-8')}">
 					<img src="/img/new.png" />
 				</a>
 			</#if>
-		</div>
-				
-		<div class="data-table-pager-container span4">
-			<div id="data-table-pager-${index}" class="pagination pagination-centered"></div>
+		</div>			
+			
+		<div class="col-md-4 data-table-pager-container">
+			<div id="data-table-pager-${index}"></div>
 		</div>
 		
-		<#if index==0>
-			<form class="form-search text-center pull-right" method="get" action="#">
-				<select id="query-fields">
-					<#list form.metaData.fields as field>
-						<#if field.dataType.enumType == 'STRING'>
-							<option id="${field.name}">${field.name}</option>
-						</#if>
-					</#list>
-				</select>
-				<select id="operators">
-					<option id="EQUALS">EQUALS</option>
-					<option id="NOT">NOT EQUALS</option>
-					<option id="LIKE">LIKE</option>
-				</select>
-				<div class="input-append">
-    				<input type="search" class="span8 search-query" name="q" placeholder="SEARCH">
-    				<button type="submit" class="btn"><i class="icon-search icon-large"></i> </button>
-  				</div>
-			</form>
-		</#if>				
+		<div class="col-md-4">
+			<#if index==0>
+				<form class="form-search form-inline text-center pull-right" method="get" action="#">
+	                <div class="form-group">
+	    				<select class="form-control" id="query-fields">
+	    					<#list form.metaData.fields as field>
+	    						<#if field.dataType.enumType == 'STRING'>
+	    							<option id="${field.name}">${field.name}</option>
+	    						</#if>
+	    					</#list>
+	    				</select>
+					</div>
+					
+					<div class="form-group">
+	    				<select class="form-control" id="operators">
+                            <option id="SEARCH">SEARCH</option>
+	    					<option id="EQUALS">EQUALS</option>
+	    					<option id="LIKE">LIKE</option>
+	    				</select>
+					</div>
+					
+					<div class="form-group">
+						<div class="col-md-8">	
+	    					<div class="input-group">
+	    				    	<input type="search" class="search-query form-control" name="q" placeholder="SEARCH">
+		                        <span class="input-group-btn">
+		                            <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
+		                        </span>
+	                        </div>
+	                    </div>
+	                </div>  
+				</form>
+			</#if>
+		</div>			
 	</div>
-	
-	<div class="form-list-holder">
-		<table class="table table-striped table-bordered table-hover table-condensed">
-			<thead>
-				<tr>
-					<th class="edit-icon-holder">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th><#-- Non breaking spaces are for fixing very annoying display error in chrome -->
-					<#if form.hasWritePermission>
-						<th class="edit-icon-holder">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
-					</#if>
-					<#list form.metaData.fields as field>
-						<th>${field.name}</th>
-					</#list>
-				</tr>
-			</thead>
-			<tbody id="entity-table-body-${index}">
-			</tbody>
-		</table>
+		
+	<div class="row">
+		<div class="col-md-12">
+			<div id="entity-table-container">		
+				<table class="table table-striped table-bordered table-hover table-condensed">
+					<thead>
+						<tr>
+							<th class="edit-icon-holder"></th>
+							<#if form.hasWritePermission>
+								<th class="edit-icon-holder"></th>
+							</#if>
+							<#list form.metaData.fields as field>
+								<th>${field.name}</th>
+							</#list>
+						</tr>
+					</thead>
+					<tbody id="entity-table-body-${index}"></tbody>
+				</table>
+			</div>
+		</div>
 	</div>
-	
-</div>
 </#macro>
 
 <#macro meta form index=0>
@@ -66,7 +83,7 @@
 			primaryKey: '${form.primaryKey}',
 		</#if>
 		<#if form.xrefFieldName??>
-			xrefFieldName: '${form.xrefFieldName?uncap_first}',
+			xrefFieldName: '${form.xrefFieldName}',
 		</#if>
 		baseUri: '${form.getBaseUri(context_url)}'
 	}
@@ -79,21 +96,28 @@
 	//The fieldnames of the entity
 	forms[${index}].meta.fields = [<#list form.metaData.fields as field>
 					{
-						name:'${field.name?uncap_first}', 
-						xref:${(field.dataType.enumType == 'XREF')?string('true', 'false')},
+						name:'${field.name}', 
+						xref:${(field.dataType.enumType == 'XREF' || field.dataType.enumType == 'CATEGORICAL')?string('true', 'false')},
 						mref:${(field.dataType.enumType == 'MREF')?string('true', 'false')},
 						type:'${field.dataType.enumType}',
 						readOnly:${field.isReadonly()?string('true', 'false')},
 						unique:false,
 						<#if field.refEntity??>
-						xrefLabelName: '${field.refEntity.labelAttribute.name?uncap_first}',
+							<#if field.refEntity.labelAttribute??>
+								xrefLabelName: '${field.refEntity.labelAttribute.name}',
+							</#if>
 						xrefLabel: '${field.refEntity.name}',
 						xrefEntityName: '${field.refEntity.name?lower_case}'
 						</#if>
 					}
 					<#if field_has_next>,</#if>
 				</#list>];
-			
+				
+	//Get the label attribute
+	<#if form.metaData.labelAttribute??>
+		forms[${index}].meta.labelFieldName = '${form.metaData.labelAttribute.name}';
+	</#if>
+	
 	//Get a field by name				
 	forms[${index}].meta.getField = function(name) {
 		for (var i = 0; i < form${index}.meta.fields.length; i++) {
@@ -135,13 +159,13 @@
 	var remoteRules = {
 		<#list form.metaData.fields as field>
 			<#if field.isUnique()?string('true', 'false') == 'true'>
-				${field.name?uncap_first}: {
+				${field.name}: {
 					remote: {
-						url: '/api/v1/${form.metaData.name?lower_case}?q[0].operator=EQUALS&q[0].field=${field.name?uncap_first}',
+						url: '/api/v1/${form.metaData.name?lower_case}?q[0].operator=EQUALS&q[0].field=${field.name}',
 						async: false,
 						data: {
 							'q[0].value': function() {//Bit cheesy, but it works, is appended to the url
-								return $('#${field.name?uncap_first}').val();
+								return $('#${field.name}').val();
 							}
 						},
 						dataFilter: function(data) {
@@ -152,14 +176,21 @@
 							}
 								
 							<#if form.primaryKey??>
-							if (apiResponse.items[0].href.endsWith('${form.primaryKey?c}')) {
+							if (apiResponse.items[0].href.endsWith('<#if form.primaryKey?is_number>${form.primaryKey?c}<#else>${form.primaryKey}</#if>')) {
 								return 'true'; //Update
 							}
 							</#if>
 								
 							return 'false';
 						}
-					}
+					},
+					<#if field.range??>
+						range: [${field.range.min?c},${field.range.max?c}]
+					</#if>
+				},
+			<#elseif field.range??>
+				${field.name}: {
+					range: [${field.range.min?c},${field.range.max?c}]
 				},
 			</#if>
 		</#list>
@@ -168,8 +199,8 @@
 	var remoteMessages = {
 		<#list form.metaData.fields as field>
 			<#if field.isUnique()?string('true', 'false') == 'true'>
-				${field.name?uncap_first}: {
-					remote: "This ${field.name?uncap_first} already exists. It must be unique"
+				${field.name}: {
+					remote: "This ${field.name} already exists. It must be unique"
 				},
 			</#if>
 		</#list>

@@ -5,6 +5,7 @@ import java.util.Iterator;
 import org.molgenis.data.Countable;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.MapEntity;
@@ -28,6 +29,7 @@ import org.molgenis.omx.observ.value.Value;
 public class DataSetMatrixRepository extends AbstractDataSetMatrixRepository implements Countable
 {
 	public static final String BASE_URL = "dataset://";
+	public static final String ENTITY_ID_COLUMN_NAME = "observationsetid";
 
 	public DataSetMatrixRepository(DataService dataService, String dataSetIdentifier)
 	{
@@ -43,6 +45,7 @@ public class DataSetMatrixRepository extends AbstractDataSetMatrixRepository imp
 			private final Iterable<ObservationSet> observationSets = dataService.findAll(ObservationSet.ENTITY_NAME,
 					new QueryImpl().eq(ObservationSet.PARTOFDATASET, getDataSet()), ObservationSet.class);
 			private final Iterator<ObservationSet> it = observationSets.iterator();
+			private final EntityMetaData meta = getEntityMetaData();
 
 			@Override
 			public boolean hasNext()
@@ -55,7 +58,7 @@ public class DataSetMatrixRepository extends AbstractDataSetMatrixRepository imp
 			{
 				ObservationSet currentRowToGet = it.next();
 
-				Entity entity = new MapEntity("id", currentRowToGet.getId());
+				Entity entity = new MapEntity(ENTITY_ID_COLUMN_NAME, currentRowToGet.getId());
 
 				try
 				{
@@ -67,7 +70,7 @@ public class DataSetMatrixRepository extends AbstractDataSetMatrixRepository imp
 					{
 						ObservableFeature feature = v.getFeature();
 						Value value = v.getValue();
-						entity.set(feature.getIdentifier(), valueConverter.toCell(value));
+						entity.set(feature.getIdentifier(), valueConverter.toCell(value, feature));
 					}
 					entity.set("partOfDataset", currentRowToGet.getPartOfDataSet().getIdentifier());
 				}
@@ -94,5 +97,4 @@ public class DataSetMatrixRepository extends AbstractDataSetMatrixRepository imp
 		return dataService.count(ObservationSet.ENTITY_NAME,
 				new QueryImpl().eq(ObservationSet.PARTOFDATASET, getDataSet()));
 	}
-
 }

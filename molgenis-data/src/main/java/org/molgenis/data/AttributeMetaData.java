@@ -1,5 +1,7 @@
 package org.molgenis.data;
 
+import java.util.List;
+
 import org.molgenis.fieldtypes.FieldType;
 
 /**
@@ -63,8 +65,40 @@ public interface AttributeMetaData
 	boolean isLabelAttribute();
 
 	/**
+	 * Wether this attribute must be searched in case of xref/mref search
+	 */
+	boolean isLookupAttribute();
+
+	/**
+	 * When true the attribute is automatically assigned a value when persisted (for example the current date)
+	 */
+	boolean isAuto();
+
+	/**
 	 * When getDataType=xref/mref, get other end of xref
 	 */
 	EntityMetaData getRefEntity();
 
+	/**
+	 * Get compound attribute parts
+	 */
+	Iterable<AttributeMetaData> getAttributeParts();
+
+	/**
+	 * Wether this attribute can be used to aggregate on. Default only attributes of type 'BOOL', 'XREF' and
+	 * 'CATEGORICAL' are aggregateable.
+	 */
+	boolean isAggregateable();
+
+	/**
+	 * For int and long fields, the value must be between min and max (included) of the range
+	 **/
+	Range getRange();
+
+	/**
+	 * For enum fields returns the posible enum values
+	 */
+	List<String> getEnumOptions();
+
+	boolean isSameAs(AttributeMetaData attributeMetaData);
 }

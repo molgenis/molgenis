@@ -1,75 +1,69 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
-<#assign css=["ui.dynatree.css", "catalogmanager.css"]>
-<#assign js=["jquery-ui-1.9.2.custom.min.js", "jquery.dynatree.min.js", "catalogmanager.js"]>
+<#assign css=["ui.fancytree.min.css", "catalogmanager.css"]>
+<#assign js=["jquery-ui-1.9.2.custom.min.js", "jquery.fancytree.min.js", "catalogmanager.js"]>
 <@header css js/>
-	<div class="row-fluid">
-		<div class="span8 offset2">
+
+<div class="row">
+	<div class="col-md-8 col-md-offset-2">
+		
 		<#if catalogs??>	
 			<div class="well">
-				<div class="row-fluid">
-					<p id="loader-title" class="box-title">Choose a catalog to load</p>
-				<#if catalogs?size == 0>
-					<p>No catalogs found</p>
-				<#else>
-					<form id="catalogForm" name="catalogForm" method="post" action="${context_url}/load">
-						<div class="row-fluid">
-							<div class="span6">	
-								<div id="resultsTable">
-									<table class="table table-striped table-hover listtable selection-table">
-										<thead>
-											<tr>
-												<th></th>
-												<th>Id</th>
-												<th>Name</th>
-											</tr>
-										</thead>
-									<#assign foundCatalog = false>
-										<tbody>
-									<#list catalogs as catalog>
-										<tr>
-											<td class="listEntryRadio">
-												<input id="catalog_${catalog.id}" type="radio" name="id" value="${catalog.id}" data-loaded="<#if catalog.loaded>true<#else>false</#if>" <#if !foundCatalog>checked<#assign foundCatalog = true></#if> >
-											</td>
-											<td class="listEntryId">
-												<label for="catalog_${catalog.id}">${catalog.id}</label>
-											</td>
-											<td>
-												<label for="catalog_${catalog.id}">${catalog.name}<#if catalog.loaded><p class="text-success pull-right">Loaded</p></#if></label>
-											</td>
-										</tr>
-									</#list>
-										</tbody>
-									</table>
-								</div>
-							</div>
-							<div class="span6">
-								<div id="catalog-preview">
-									<div id="catalog-preview-info">
+				<div class="row">
+					<div class="col-md-12">
+						
+						<legend>Choose a catalog</legend>
+						<#if catalogs?size == 0>
+							<p>No catalogs found</p>
+						<#else>
+							<form id="catalogForm" name="catalogForm" method="post" action="${context_url}/activation">
+								<div class="row">
+									<div class="col-md-6">	
+										<div id="resultsTable">
+											<table class="table table-striped table-hover listtable selection-table">
+												<thead>
+													<tr>
+														<th></th>
+														<th>Id</th>
+														<th>Name</th>
+													</tr>
+												</thead>
+											<#assign foundCatalog = false>
+												<tbody>
+													<#list catalogs as catalog>
+														<tr>
+															<td class="listEntryRadio">
+																<input id="catalog_${catalog.id}" type="radio" name="id" value="${catalog.id}" data-activated="<#if catalog.activated>true<#else>false</#if>"<#if !foundCatalog> checked<#assign foundCatalog = true></#if>>
+															</td>
+															<td class="listEntryId">
+																<label for="catalog_${catalog.id}">${catalog.id}</label>
+															</td>
+															<td>
+																<label for="catalog_${catalog.id}">${catalog.name}</label><#if catalog.activated><span class="text-success pull-right">Activated</span><#else><p class="text-error pull-right">Deactivated</span></#if>
+															</td>
+														</tr>
+													</#list>
+												</tbody>
+											</table>
+										</div>
 									</div>
-									<div id="catalog-preview-tree">
+									
+									<div class="col-md-6">
+										<div id="catalog-preview">
+											<div id="catalog-preview-info"></div>
+											<div id="catalog-preview-tree"></div>
+										</div>
 									</div>
 								</div>
-							</div>
-						</div>
-					<#if foundCatalog>
-						<input id="loadButton" type="submit" name="load" class="btn pull-right" value="Load" />
-					</#if>
-					</form>
-				</#if>
+								<#if foundCatalog>
+									<input id="activationButton" type="submit" name="activate" class="btn pull-right btn-primary" value="Activate" />
+								</#if>
+							</form>
+						</#if>
+					</div>
 				</div>
 			</div>
 		</#if>
-		</div>
 	</div>
-	<script>
-	$(function() {
-		parent.hideSpinner();
-		
-		$('#catalogForm').submit(function() {
-			parent.showSpinner(); 
-			return true;
-		});
-	});
-	</script>
+</div>		
 <@footer/>

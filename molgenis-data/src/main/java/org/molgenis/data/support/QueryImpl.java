@@ -3,26 +3,35 @@ package org.molgenis.data.support;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
+import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.Queryable;
 import org.springframework.data.domain.Sort;
 
 public class QueryImpl implements Query
 {
 	private final List<List<QueryRule>> rules = new ArrayList<List<QueryRule>>();
-	private final List<QueryRule> order = new ArrayList<QueryRule>();
 
 	private int pageSize;
 	private int offset;
 	private Sort sort;
+	private Queryable repository;
 
 	public QueryImpl()
 	{
 		this.rules.add(new ArrayList<QueryRule>());
+	}
+
+	public QueryImpl(Queryable repository)
+	{
+		this();
+		this.repository = repository;
 	}
 
 	public QueryImpl(Query q)
@@ -53,6 +62,20 @@ public class QueryImpl implements Query
 	}
 
 	@Override
+	public Long count()
+	{
+		if (repository == null) throw new RuntimeException("Query failed: repository not set");
+		return repository.count(this);
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> findAll(Class<E> klazz)
+	{
+		if (repository == null) throw new RuntimeException("Query failed: repository not set");
+		return repository.findAll(this, klazz);
+	}
+
+	@Override
 	public List<QueryRule> getRules()
 	{
 		if (this.rules.size() > 1) throw new MolgenisDataException(
@@ -67,15 +90,16 @@ public class QueryImpl implements Query
 		else return Collections.emptyList();
 	}
 
-	public void setPageSize(int pageSize)
-	{
-		this.pageSize = pageSize;
-	}
-
 	@Override
 	public int getPageSize()
 	{
 		return pageSize;
+	}
+
+	public QueryImpl setPageSize(int pageSize)
+	{
+		this.pageSize = pageSize;
+		return this;
 	}
 
 	@Override
@@ -84,14 +108,10 @@ public class QueryImpl implements Query
 		return offset;
 	}
 
-	public void setOffset(int offset)
+	public QueryImpl setOffset(int offset)
 	{
 		this.offset = offset;
-	}
-
-	public void setSort(Sort sort)
-	{
-		this.sort = sort;
+		return this;
 	}
 
 	@Override
@@ -100,10 +120,22 @@ public class QueryImpl implements Query
 		return sort;
 	}
 
+	public void setSort(Sort sort)
+	{
+		this.sort = sort;
+	}
+
 	@Override
 	public Query search(String searchTerms)
 	{
 		rules.get(this.rules.size() - 1).add(new QueryRule(Operator.SEARCH, searchTerms));
+		return this;
+	}
+
+	@Override
+	public Query search(String field, String searchTerms)
+	{
+		rules.get(this.rules.size() - 1).add(new QueryRule(field, Operator.SEARCH, searchTerms));
 		return this;
 	}
 
@@ -117,11 +149,12 @@ public class QueryImpl implements Query
 	@Override
 	public Query and()
 	{
+		rules.get(this.rules.size() - 1).add(new QueryRule(Operator.AND));
 		return this;
 	}
 
 	@Override
-	public Query like(String field, Object value)
+	public Query like(String field, String value)
 	{
 		rules.get(this.rules.size() - 1).add(new QueryRule(field, Operator.LIKE, value));
 		return this;
@@ -222,6 +255,13 @@ public class QueryImpl implements Query
 	}
 
 	@Override
+	public Query sort(Sort.Direction direction, String... fields)
+	{
+		this.sort(new Sort(direction, fields));
+		return this;
+	}
+
+	@Override
 	public Query sort(Sort sort)
 	{
 		setSort(sort);
@@ -231,8 +271,8 @@ public class QueryImpl implements Query
 	@Override
 	public String toString()
 	{
-		return "QueryImpl [rules=" + getRules() + ", order=" + order + ", pageSize=" + pageSize + ", offset=" + offset
-				+ ", sort=" + sort + "]";
+		return "QueryImpl [rules=" + getRules() + ", pageSize=" + pageSize + ", offset=" + offset + ", sort=" + sort
+				+ "]";
 	}
 
 	@Override
@@ -241,7 +281,6 @@ public class QueryImpl implements Query
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + offset;
-		result = prime * result + ((order == null) ? 0 : order.hashCode());
 		result = prime * result + pageSize;
 		result = prime * result + ((rules == null) ? 0 : rules.hashCode());
 		result = prime * result + ((sort == null) ? 0 : sort.hashCode());
@@ -256,11 +295,6 @@ public class QueryImpl implements Query
 		if (getClass() != obj.getClass()) return false;
 		QueryImpl other = (QueryImpl) obj;
 		if (offset != other.offset) return false;
-		if (order == null)
-		{
-			if (other.order != null) return false;
-		}
-		else if (!order.equals(other.order)) return false;
 		if (pageSize != other.pageSize) return false;
 		if (rules == null)
 		{
@@ -273,5 +307,12 @@ public class QueryImpl implements Query
 		}
 		else if (!sort.equals(other.sort)) return false;
 		return true;
+	}
+
+	@Override
+	public Iterator<Entity> iterator()
+	{
+		if (repository == null) throw new RuntimeException("Query failed: repository not set");
+		return repository.findAll(this).iterator();
 	}
 }

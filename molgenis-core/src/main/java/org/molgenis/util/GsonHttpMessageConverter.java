@@ -20,17 +20,18 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.lang.reflect.Type;
-import java.nio.charset.Charset;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -45,9 +46,9 @@ import com.google.gson.JsonSyntaxException;
  * @author Roy Clarkson
  * @since 1.0
  */
-public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Object>
+public class GsonHttpMessageConverter extends BaseHttpMessageConverter<Object>
 {
-	private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+
 	private static final Logger LOG = Logger.getLogger(GsonHttpMessageConverter.class);
 	private final Gson gson;
 	private Type type = null;
@@ -58,11 +59,20 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 	 */
 	public GsonHttpMessageConverter()
 	{
-		super(new MediaType("application", "json", DEFAULT_CHARSET));
+		this(false);
+	}
+
+	/**
+	 * Construct a new {@code GsonHttpMessageConverter} with a default {@link Gson#Gson() Gson}.
+	 */
+	public GsonHttpMessageConverter(boolean prettyPrinting)
+	{
+		super(new MediaType("application", "json", DEFAULT_CHARSET), new MediaType("application", "javascript",
+				DEFAULT_CHARSET));
 
 		GsonBuilder builder = new GsonBuilder().setDateFormat(MolgenisDateFormat.DATEFORMAT_DATETIME)
 				.disableHtmlEscaping();
-		if (LOG.isTraceEnabled())
+		if (prettyPrinting)
 		{
 			builder = builder.setPrettyPrinting();
 		}
@@ -78,7 +88,8 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 	 */
 	public GsonHttpMessageConverter(Gson gson)
 	{
-		super(new MediaType("application", "json", DEFAULT_CHARSET));
+		super(new MediaType("application", "json", DEFAULT_CHARSET), new MediaType("application", "javascript",
+				DEFAULT_CHARSET));
 		this.gson = gson;
 	}
 
@@ -184,6 +195,13 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 		OutputStreamWriter writer = new OutputStreamWriter(outputMessage.getBody(),
 				getCharset(outputMessage.getHeaders()));
 
+		String callback = getCallbackParam();
+		if (callback != null)
+		{
+			// this is a JSONP (JSON with padding) request
+			writer.append(callback).append('(');
+		}
+
 		try
 		{
 			Type typeOfSrc = getType();
@@ -224,6 +242,12 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 					this.gson.toJson(o, writer);
 				}
 			}
+
+			if (callback != null)
+			{
+				// this is a JSONP (JSON with padding) request
+				writer.append(')');
+			}
 		}
 		catch (JsonIOException ex)
 		{
@@ -238,13 +262,11 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 
 	// helpers
 
-	private Charset getCharset(HttpHeaders headers)
+	private String getCallbackParam()
 	{
-		if (headers != null && headers.getContentType() != null && headers.getContentType().getCharSet() != null)
-		{
-			return headers.getContentType().getCharSet();
-		}
-		return DEFAULT_CHARSET;
+		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+				.getRequest();
+		return request.getParameter("callback");
 	}
 
 }

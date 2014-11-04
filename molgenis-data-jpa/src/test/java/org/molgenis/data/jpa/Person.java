@@ -3,21 +3,34 @@ package org.molgenis.data.jpa;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.persistence.GeneratedValue;
+
+import org.eclipse.persistence.annotations.UuidGenerator;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.AbstractMetaDataEntity;
 
+import com.google.common.collect.Lists;
+
 @javax.persistence.Entity
 @javax.xml.bind.annotation.XmlAccessorType(javax.xml.bind.annotation.XmlAccessType.FIELD)
+@UuidGenerator(name = "PERSON_ID_GEN")
 public class Person extends AbstractMetaDataEntity
 {
 	private static final long serialVersionUID = 1L;
 
 	@javax.persistence.Id
-	@javax.persistence.GeneratedValue(strategy = javax.persistence.GenerationType.AUTO)
-	private Integer id;
+	@GeneratedValue(generator = "PERSON_ID_GEN")
+	private String id;
 	private String firstName;
 	private String lastName;
+	private Integer age;
+
+	@javax.persistence.ManyToOne
+	private Person father;
+
+	@javax.persistence.ManyToMany
+	private List<Person> children = Lists.newArrayList();
 
 	public Person()
 	{
@@ -29,6 +42,14 @@ public class Person extends AbstractMetaDataEntity
 		this();
 		this.firstName = firstName;
 		this.lastName = lastName;
+	}
+
+	public Person(String firstName, String lastName, Integer age)
+	{
+		this();
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.age = age;
 	}
 
 	public String getFirstName()
@@ -51,21 +72,51 @@ public class Person extends AbstractMetaDataEntity
 		this.lastName = lastName;
 	}
 
-	public Integer getId()
+	public Integer getAge()
+	{
+		return age;
+	}
+
+	public void setAge(Integer age)
+	{
+		this.age = age;
+	}
+
+	public String getId()
 	{
 		return id;
 	}
 
-	public void setId(Integer id)
+	public void setId(String id)
 	{
 		this.id = id;
+	}
+
+	public Person getFather()
+	{
+		return father;
+	}
+
+	public void setFather(Person father)
+	{
+		this.father = father;
+	}
+
+	public List<Person> getChildren()
+	{
+		return children;
+	}
+
+	public void setChildren(List<Person> children)
+	{
+		this.children = children;
 	}
 
 	@Override
 	public Iterable<String> getAttributeNames()
 	{
 		return Arrays.asList(new String[]
-		{ "firstName", "lastName" });
+		{ "id", "firstName", "lastName", "age", "father", "children" });
 	}
 
 	@Override
@@ -74,20 +125,26 @@ public class Person extends AbstractMetaDataEntity
 		if ("id".equalsIgnoreCase(attributeName)) return getId();
 		if ("firstName".equalsIgnoreCase(attributeName)) return getFirstName();
 		if ("lastName".equalsIgnoreCase(attributeName)) return getLastName();
+		if ("age".equalsIgnoreCase(attributeName)) return getAge();
+		if ("father".equalsIgnoreCase(attributeName)) return getFather();
+		if ("children".equalsIgnoreCase(attributeName)) return getChildren();
 		return null;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void set(String attributeName, Object value)
 	{
-		if ("id".equalsIgnoreCase(attributeName)) setFirstName(DataConverter.toString(value));
+		if ("id".equalsIgnoreCase(attributeName)) setId(DataConverter.toString(value));
 		else if ("firstName".equalsIgnoreCase(attributeName)) setFirstName(DataConverter.toString(value));
 		else if ("lastName".equalsIgnoreCase(attributeName)) setLastName(DataConverter.toString(value));
-		else throw new RuntimeException("attribute '" + attributeName + "'+ not known");
+		else if ("age".equalsIgnoreCase(attributeName)) setAge(DataConverter.toInt(value));
+		else if ("father".equalsIgnoreCase(attributeName)) setFather((Person) value);
+		else if ("children".equalsIgnoreCase(attributeName)) setChildren((List<Person>) value);
 	}
 
 	@Override
-	public void set(Entity values)
+	public void set(Entity values, boolean strict)
 	{
 		for (String attributeName : values.getAttributeNames())
 		{
@@ -96,7 +153,7 @@ public class Person extends AbstractMetaDataEntity
 	}
 
 	@Override
-	public Integer getIdValue()
+	public Object getIdValue()
 	{
 		return getId();
 	}

@@ -72,13 +72,6 @@
 </#if></#list>
 </table>
 </p>
-
-<#assign example = helper.renderExampleData(entity.name + ".txt")>
-<#if example != ""><p>Example:<br>
-<pre>
-${example}
-</pre>
-</p></#if>
 </#macro>	
 
 <html>

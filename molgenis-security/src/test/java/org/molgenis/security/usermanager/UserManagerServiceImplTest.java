@@ -14,7 +14,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisGroupMember;
 import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.security.SecurityUtils;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserDetailsService;
 import org.molgenis.security.usermanager.UserManagerServiceImplTest.Config;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +23,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -78,6 +79,14 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		public AuthenticationManager authenticationManagerBean() throws Exception
 		{
 			return super.authenticationManagerBean();
+		}
+		
+		@Autowired
+		@Override
+		public void configure(AuthenticationManagerBuilder auth) throws Exception {
+		    auth
+		        .inMemoryAuthentication()
+		            .withUser("user").password("password").authorities("ROLE_USER");
 		}
 	}
 

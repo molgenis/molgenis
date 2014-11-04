@@ -58,13 +58,14 @@ public class EntityToXrefValueConverter implements EntityToValueConverter<XrefVa
 	}
 
 	@Override
-	public Cell<String> toCell(Value value) throws ValueConverterException
+	public Cell<String> toCell(Value value, ObservableFeature feature) throws ValueConverterException
 	{
 		if (!(value instanceof XrefValue))
 		{
 			throw new ValueConverterException("value is not a " + XrefValue.class.getSimpleName());
 		}
 		Characteristic xrefCharacteristic = ((XrefValue) value).getValue();
-		return new ValueCell<String>(xrefCharacteristic.getIdentifier(), xrefCharacteristic.getName());
+		return new ValueCell<String>(xrefCharacteristic.getId(), xrefCharacteristic.getIdentifier(),
+				xrefCharacteristic.getIdentifier());
 	}
 }

@@ -20,7 +20,7 @@ import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisGroupMember;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.UserAuthority;
-import org.molgenis.security.SecurityUtils;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.PermissionManagerServiceImplTest.Config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -171,7 +171,8 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 		when(plugin2.getName()).thenReturn("plugin2");
 		plugin3 = when(mock(MolgenisPlugin.class).getId()).thenReturn("3").getMock();
 		when(plugin3.getName()).thenReturn("plugin3n");
-		when(molgenisPluginRegistry.getPlugins()).thenReturn(Arrays.<MolgenisPlugin> asList(plugin1, plugin2, plugin3));
+		when(molgenisPluginRegistry.iterator()).thenReturn(
+				Arrays.<MolgenisPlugin> asList(plugin1, plugin2, plugin3).iterator());
 
 		when(dataService.getEntityNames()).thenReturn(Lists.<String> newArrayList());
 	}

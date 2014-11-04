@@ -9,18 +9,24 @@
 		var settings = $.extend({}, $.fn.pager.defaults, options);
 
 		// pager html
-		this.addClass("pagination pagination-centered");
-		updatePager(this, 1, settings, false);
+//		this.addClass("pagination pagination-centered");
+		updatePager(this, settings.page, settings, false);
 		
 		// pager events
 		this.off('click', '**');
-		this.on('click', 'li.page-prev', $.proxy(function(){
+		this.on('click', 'li.page-prev', $.proxy(function(e){
+			e.preventDefault();
+			e.stopPropagation();
 			updatePager(this, this.data('page') - 1, settings, true);
 		}, this));
 		this.on('click', 'li.page', $.proxy(function(e){
+			e.preventDefault();
+			e.stopPropagation();
 			updatePager(this, parseInt($(e.target).html(), 10), settings, true);
 		}, this));
-		this.on('click', 'li.page-next', $.proxy(function(){
+		this.on('click', 'li.page-next', $.proxy(function(e){
+			e.preventDefault();
+			e.stopPropagation();
 			updatePager(this, this.data('page') + 1, settings, true);
 		}, this));
 		
@@ -38,6 +44,7 @@
 	$.fn.pager.defaults = {
 		'nrItems' : 0,
 		'nrItemsPerPage' : 20,
+		'page' : 1,
 		'onPageChange' : null
 	};
 	
@@ -59,7 +66,8 @@
 	var renderPager = function(pager, page, nrPages) {
 		pager.empty();
 		var items = [];
-		items.push('<ul>');
+		items.push('<div class="text-center">');
+		items.push('<ul class="pagination">');
 		
 		// previous page
 		if(page === 1) {
@@ -89,6 +97,7 @@
 			items.push('<li class="page-next"><a href="#">&raquo;</a></li>');
 		
 		items.push('</ul>');
+		items.push('</div>');
 		pager.html(items.join(''));
 	};
 }($));

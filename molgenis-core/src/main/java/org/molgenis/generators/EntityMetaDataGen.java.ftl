@@ -19,8 +19,9 @@ public class ${JavaName(entity)}MetaData extends DefaultEntityMetaData
 {
 	public ${JavaName(entity)}MetaData()
 	{
-		super("${JavaName(entity)}");
+		super("${JavaName(entity)}", ${JavaName(entity)}.class);
 		setLabel("${entity.label}");
+		setDescription("${entity.description?j_string}");
 		
 <#list entity.allFields as f>
 		DefaultAttributeMetaData ${name(f)} = new DefaultAttributeMetaData("${f.name}", ${f.type.enumType});
@@ -33,6 +34,9 @@ public class ${JavaName(entity)}MetaData extends DefaultEntityMetaData
 		${name(f)}.setDefaultValue(${f.defaultValue});
 			</#if>
 		</#if>
+		<#if f.label??>
+		${name(f)}.setLabel("${f.label!}");
+		</#if>
 		<#if f.description??>
 		${name(f)}.setDescription("${f.description!}");
 		</#if>
@@ -40,6 +44,7 @@ public class ${JavaName(entity)}MetaData extends DefaultEntityMetaData
 		${name(f)}.setNillable(${f.nillable?string('true', 'false')});
 		${name(f)}.setReadOnly(${f.readOnly?string('true', 'false')});
 		${name(f)}.setUnique(${f.unique?string('true', 'false')});
+		${name(f)}.setAuto(${f.auto?string('true', 'false')});
 		<#if f.isXRef()>
 			<#if f.xrefEntity.name == entity.name>
 		${name(f)}.setRefEntity(this);	
@@ -51,11 +56,21 @@ public class ${JavaName(entity)}MetaData extends DefaultEntityMetaData
 			<#if xrefLabel == f.name>
 		${name(f)}.setLabelAttribute(true);
 			</#if>
+		</#list>
+		<#list entity.getXrefLookupFields() as xrefLookup>
+			<#if xrefLookup == f.name>
+		${name(f)}.setLookupAttribute(true);
+			</#if>
 		</#list>	
 		<#if f.hidden || f.system>
 		${name(f)}.setVisible(false);
 		</#if>
-		
+		${name(f)}.setAggregateable(${f.aggregateable?string('true', 'false')});
+		<#if f.minRange?? || f.maxRange??>
+		Long ${name(f)}Min = <#if f.minRange??>${f.minRange?c}l<#else>null</#if>;
+		Long ${name(f)}Max = <#if f.maxRange??>${f.maxRange?c}l<#else>null</#if>;
+		${name(f)}.setRange(new org.molgenis.data.Range(${name(f)}Min, ${name(f)}Max));
+		</#if>
 		addAttributeMetaData(${name(f)});	
 </#list>
 		

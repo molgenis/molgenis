@@ -1,9 +1,12 @@
 package org.molgenis.fieldtypes;
 
 import java.text.ParseException;
+import java.util.List;
+import java.util.Vector;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.model.MolgenisModelException;
+import org.molgenis.model.elements.Field;
 
 public class EnumField extends FieldType
 {
@@ -86,5 +89,36 @@ public class EnumField extends FieldType
 	public FieldTypeEnum getEnumType()
 	{
 		return FieldTypeEnum.ENUM;
+	}
+
+	@Override
+	public Object convert(Object value)
+	{
+		if (value == null) return null;
+		return value.toString();
+	}
+
+	public void setEnumOptions(List<String> enumOptions)
+	{
+		Vector<String> v = enumOptions == null ? null : new Vector<String>(enumOptions);
+		if (f == null) f = new Field(null, null, this);
+		f.setEnumOptions(v);
+	}
+
+	public List<String> getEnumOptions()
+	{
+		if (f == null)
+		{
+			return null;
+		}
+
+		try
+		{
+			return f.getEnumOptions();
+		}
+		catch (MolgenisModelException e)
+		{
+			throw new RuntimeException(e);
+		}
 	}
 }

@@ -1,6 +1,10 @@
 package org.molgenis.omx;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import org.apache.log4j.Logger;
+import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
@@ -82,6 +86,7 @@ public class MolgenisDbSettings implements MolgenisSettings
 	}
 
 	@Override
+	@RunAsSystem
 	public Boolean getBooleanProperty(String key)
 	{
 		String value = getProperty(key);
@@ -94,6 +99,7 @@ public class MolgenisDbSettings implements MolgenisSettings
 	}
 
 	@Override
+	@RunAsSystem
 	public boolean getBooleanProperty(String key, boolean defaultValue)
 	{
 		Boolean value = getBooleanProperty(key);
@@ -106,7 +112,6 @@ public class MolgenisDbSettings implements MolgenisSettings
 	}
 
 	@Override
-	@RunAsSystem
 	public boolean updateProperty(String key, String content)
 	{
 		if (null == content)
@@ -134,6 +139,7 @@ public class MolgenisDbSettings implements MolgenisSettings
 	}
 
 	@Override
+	@RunAsSystem
 	public boolean propertyExists(String key)
 	{
 		long count = dataService.count(RuntimeProperty.ENTITY_NAME,
@@ -144,5 +150,35 @@ public class MolgenisDbSettings implements MolgenisSettings
 		}
 
 		return false;
+	}
+
+	@Override
+	@RunAsSystem
+	public Map<String, String> getProperties(String keyStartsWith)
+	{
+		String prefix = RuntimeProperty.class.getSimpleName() + '_' + keyStartsWith;
+		Iterable<RuntimeProperty> properties = dataService.findAll(RuntimeProperty.ENTITY_NAME, RuntimeProperty.class);
+		Map<String, String> result = new TreeMap<String, String>();
+		for (RuntimeProperty property : properties)
+		{
+			if (property.getIdentifier().startsWith(prefix))
+			{
+				result.put(property.getIdentifier().substring(prefix.length() + 1), property.getValue());
+			}
+		}
+		return result;
+	}
+
+	@Override
+	@RunAsSystem
+	public Integer getIntegerProperty(String key)
+	{
+		String value = getProperty(key);
+		if (value == null)
+		{
+			return null;
+		}
+
+		return DataConverter.toInt(value);
 	}
 }

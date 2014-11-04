@@ -7,6 +7,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Collections;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -22,16 +24,21 @@ import org.molgenis.charts.highcharts.basic.Options;
 import org.molgenis.charts.requests.BoxPlotChartRequest;
 import org.molgenis.charts.requests.HeatMapRequest;
 import org.molgenis.charts.requests.XYDataChartRequest;
+import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import freemarker.template.TemplateException;
 
@@ -64,48 +71,49 @@ public class ChartController
 	public String test(HttpServletRequest request, Model model)
 	{
 		model.addAttribute("queryString", request.getQueryString());
-		return "test"; //TODO
+		return "test"; // TODO
 	}
 
 	@RequestMapping(value = "/xydatachart", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Options renderXYDataChart(@Valid @RequestBody XYDataChartRequest request, Model model)
-	{		
-		XYDataChart xYDataChart = chartDataService.getXYDataChart(
-				request.getEntity(),
-				request.getX(),
-				request.getY(),
-				request.getSplit(),
-				request.getQuery().getRules());
-		
+	public Options renderXYDataChart(@Valid
+	@RequestBody
+	XYDataChartRequest request, Model model)
+	{
+		Query query = request.getQuery();
+		XYDataChart xYDataChart = chartDataService.getXYDataChart(request.getEntity(), request.getX(), request.getY(),
+				request.getSplit(), query != null ? query.getRules() : Collections.<QueryRule> emptyList());
+
 		xYDataChart.setTitle(request.getTitle());
 		xYDataChart.setHeight(request.getHeight());
 		xYDataChart.setWidth(request.getWidth());
 		xYDataChart.setType(MolgenisChartType.valueOf(request.getType()));
 		xYDataChart.setxAxisLabel(request.getxAxisLabel());
 		xYDataChart.setyAxisLabel(request.getyAxisLabel());
-		
-		ChartVisualizationService service = chartVisualizationServiceFactory.getVisualizationService(MolgenisChartType.valueOf(request.getType()));
-		
+
+		ChartVisualizationService service = chartVisualizationServiceFactory.getVisualizationService(MolgenisChartType
+				.valueOf(request.getType()));
+
 		return (Options) service.renderChart(xYDataChart, model);
 	}
-	
+
 	@RequestMapping(value = "/boxplot", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Options renderPlotBoxChart(@Valid @RequestBody BoxPlotChartRequest request, Model model)
+	public Options renderPlotBoxChart(@Valid
+	@RequestBody
+	BoxPlotChartRequest request, Model model)
 	{
-		BoxPlotChart chart = chartDataService.getBoxPlotChart(
-				request.getEntity(), 
-				request.getObservableFeature(), 
-				request.getQuery().getRules(), 
-				request.getSplit(),
+		Query query = request.getQuery();
+		BoxPlotChart chart = chartDataService.getBoxPlotChart(request.getEntity(), request.getObservableFeature(),
+				query != null ? query.getRules() : Collections.<QueryRule> emptyList(), request.getSplit(),
 				request.getScale());
-		
+
 		chart.setHeight(request.getHeight());
 		chart.setWidth(request.getWidth());
 		chart.setTitle(request.getTitle());
-		
-		ChartVisualizationService service = chartVisualizationServiceFactory.getVisualizationService(MolgenisChartType.BOXPLOT_CHART);
+
+		ChartVisualizationService service = chartVisualizationServiceFactory
+				.getVisualizationService(MolgenisChartType.BOXPLOT_CHART);
 		return (Options) service.renderChart(chart, model);
 	}
 
@@ -125,7 +133,7 @@ public class ChartController
 	@RequestMapping("/get/{name}.{extension}")
 	public void getFile(OutputStream out, @PathVariable("name")
 	String name, @PathVariable("extension")
-	String extension,  HttpServletResponse response) throws IOException
+	String extension, HttpServletResponse response) throws IOException
 	{
 		File f = fileStore.getFile(name + "." + extension);
 		if (!f.exists())
@@ -152,12 +160,15 @@ public class ChartController
 	 * @return
 	 * @throws IOException
 	 * @throws TemplateException
-	 * @throws FactoryConfigurationError 
-	 * @throws XMLStreamException 
+	 * @throws FactoryConfigurationError
+	 * @throws XMLStreamException
 	 */
 	@RequestMapping(value = "/heatmap", method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public String renderHeatMap(@Valid @RequestBody HeatMapRequest request, Model model) throws IOException, TemplateException, XMLStreamException, FactoryConfigurationError
+	public String renderHeatMap(@Valid
+	@RequestBody
+	HeatMapRequest request, Model model) throws IOException, TemplateException, XMLStreamException,
+			FactoryConfigurationError
 	{
 		DataMatrix matrix = chartDataService.getDataMatrix(request.getEntity(), request.getX(), request.getY(),
 				request.getQueryRules());
@@ -169,9 +180,20 @@ public class ChartController
 		chart.setxLabel(request.getxLabel());
 		chart.setyLabel(request.getyLabel());
 		chart.setScale(request.getScale());
-		
-		ChartVisualizationService service = chartVisualizationServiceFactory.getVisualizationService(MolgenisChartType.HEAT_MAP);
+
+		ChartVisualizationService service = chartVisualizationServiceFactory
+				.getVisualizationService(MolgenisChartType.HEAT_MAP);
 
 		return (String) service.renderChart(chart, model);
+	}
+
+	@ExceptionHandler(RuntimeException.class)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+	public Map<String, String> handleRuntimeException(RuntimeException e)
+	{
+		logger.error(null, e);
+		return Collections.singletonMap("errorMessage",
+				"An error occurred. Please contact the administrator.<br />Message:" + e.getMessage());
 	}
 }

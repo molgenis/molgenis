@@ -22,11 +22,20 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.csv.CsvRepository;
+import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.elasticsearch.util.Hit;
+import org.molgenis.data.elasticsearch.util.SearchRequest;
+import org.molgenis.data.elasticsearch.util.SearchResult;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.LowerCaseProcessor;
 import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.omx.biobankconnect.ontology.repository.OntologyIndexRepository;
+import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermIndexRepository;
+import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermQueryRepository;
+import org.molgenis.omx.biobankconnect.ontologyindexer.AsyncOntologyIndexer;
 import org.molgenis.omx.biobankconnect.utils.NGramMatchingModel;
+import org.molgenis.omx.biobankconnect.utils.TermComparison;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
@@ -34,10 +43,6 @@ import org.molgenis.omx.observ.target.Ontology;
 import org.molgenis.omx.observ.target.OntologyTerm;
 import org.molgenis.omx.protocol.CategoryRepository;
 import org.molgenis.omx.protocol.ProtocolTreeRepository;
-import org.molgenis.search.Hit;
-import org.molgenis.search.SearchRequest;
-import org.molgenis.search.SearchResult;
-import org.molgenis.search.SearchService;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,6 +57,9 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 
 	private static final AtomicInteger runningProcesses = new AtomicInteger();
 	private static final Logger logger = Logger.getLogger(AsyncOntologyAnnotator.class);
+	private static final String PROTOCOLTREE_PREFIX = "protocolTree-";
+	private static final String PROTOCOLTREE_TYPE_FIELD = "type";
+	private static final int SIZE_OF_ANNOTATION = 100;
 	private boolean complete = false;
 
 	@Autowired
@@ -102,7 +110,8 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			csvRepository = new CsvRepository(uploadFile, cellProcessors);
 			List<String> requiredColumns = new ArrayList<String>(Arrays.asList(ObservableFeature.NAME.toLowerCase(),
 					ObservableFeature.DESCRIPTION));
-			Iterator<AttributeMetaData> columnNamesIterator = csvRepository.getAttributes().iterator();
+			Iterator<AttributeMetaData> columnNamesIterator = csvRepository.getEntityMetaData().getAttributes()
+					.iterator();
 			while (columnNamesIterator.hasNext())
 			{
 				requiredColumns.remove(columnNamesIterator.next().getName());
@@ -143,23 +152,19 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			dataService.add(ObservableFeature.ENTITY_NAME, fList);
 			dataService.add(Protocol.ENTITY_NAME, prot);
 			dataService.add(DataSet.ENTITY_NAME, dataSet);
+			dataService.getCrudRepository(ObservableFeature.ENTITY_NAME).flush();
 
 			searchService.indexRepository(new ProtocolTreeRepository(dataSet.getProtocolUsed(), dataService,
-					"protocolTree-" + dataSet.getId()));
+					PROTOCOLTREE_PREFIX + dataSet.getProtocolUsed().getId()));
 			searchService.indexRepository(new CategoryRepository(dataSet.getProtocolUsed(), dataSet.getId(),
 					dataService));
-		}
-		catch (IOException e)
-		{
-			logger.error("Failed to read CSV file!");
-			return "Failed to import the features, please check your file again.";
 		}
 		finally
 		{
 			if (csvRepository != null) csvRepository.close();
 		}
 
-		return "";
+		return StringUtils.EMPTY;
 	}
 
 	private List<String> checkExistingFeatures(List<String> featureIdentifiers)
@@ -186,10 +191,10 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME, dataSetId, DataSet.class);
 
 		QueryImpl q = new QueryImpl();
-		q.pageSize(100000);
-		q.addRule(new QueryRule("type", Operator.SEARCH, "observablefeature"));
+		q.pageSize(Integer.MAX_VALUE);
+		q.addRule(new QueryRule(PROTOCOLTREE_TYPE_FIELD, Operator.EQUALS, ObservableFeature.ENTITY_NAME.toLowerCase()));
 
-		SearchRequest request = new SearchRequest("protocolTree-" + dataSet.getId(), q, null);
+		SearchRequest request = new SearchRequest(PROTOCOLTREE_PREFIX + dataSet.getProtocolUsed().getId(), q, null);
 		SearchResult result = searchService.search(request);
 
 		List<Integer> listOfFeatureIds = new ArrayList<Integer>();
@@ -198,7 +203,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		{
 			Hit hit = iterator.next();
 			Map<String, Object> columnMapValues = hit.getColumnValueMap();
-			Integer featureId = Integer.parseInt(columnMapValues.get("id").toString());
+			Integer featureId = Integer.parseInt(columnMapValues.get(OntologyTermIndexRepository.ID).toString());
 			listOfFeatureIds.add(featureId);
 		}
 		List<ObservableFeature> featuresToUpdate = new ArrayList<ObservableFeature>();
@@ -236,6 +241,7 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 	}
 
 	@Override
+	@Transactional
 	public void annotate(Integer dataSetId, List<String> documentTypes)
 	{
 		runningProcesses.incrementAndGet();
@@ -243,12 +249,16 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		{
 			if (documentTypes == null) documentTypes = searchAllOntologies();
 
+			DataSet dataSet = dataService.findOne(DataSet.ENTITY_NAME, dataSetId, DataSet.class);
+
 			PorterStemmer stemmer = new PorterStemmer();
 
 			QueryImpl q = new QueryImpl();
-			q.pageSize(100000);
-			q.addRule(new QueryRule("type", Operator.SEARCH, "observablefeature"));
-			SearchRequest request = new SearchRequest("protocolTree-" + dataSetId, q, null);
+			q.pageSize(Integer.MAX_VALUE);
+
+			q.addRule(new QueryRule(PROTOCOLTREE_TYPE_FIELD, Operator.EQUALS, ObservableFeature.ENTITY_NAME
+					.toLowerCase()));
+			SearchRequest request = new SearchRequest(PROTOCOLTREE_PREFIX + dataSet.getProtocolUsed().getId(), q, null);
 			SearchResult result = searchService.search(request);
 
 			List<ObservableFeature> featuresToUpdate = new ArrayList<ObservableFeature>();
@@ -257,23 +267,32 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 			while (iterator.hasNext())
 			{
 				Hit hit = iterator.next();
-				Integer featureId = Integer.parseInt(hit.getColumnValueMap().get("id").toString());
+				Integer featureId = Integer.parseInt(hit.getColumnValueMap().get(ObservableFeature.ID).toString());
 
 				ObservableFeature f = dataService.findOne(ObservableFeature.ENTITY_NAME, featureId,
 						ObservableFeature.class);
 				ObservableFeature feature = toObservableFeature(f);
 
-				String name = hit.getColumnValueMap().get("name").toString().toLowerCase()
-						.replaceAll("[^(a-zA-Z0-9\\s)]", "").trim();
-				String description = hit.getColumnValueMap().get("description").toString().toLowerCase()
-						.replaceAll("[^(a-zA-Z0-9\\s)]", "").trim();
+				String name = hit
+						.getColumnValueMap()
+						.get(ObservableFeature.NAME.toLowerCase())
+						.toString()
+						.toLowerCase()
+						.replaceAll(OntologyTermQueryRepository.ILLEGAL_CHARACTERS_PATTERN,
+								OntologyTermQueryRepository.ILLEGAL_CHARACTERS_REPLACEMENT).trim();
+				String description = hit
+						.getColumnValueMap()
+						.get(ObservableFeature.DESCRIPTION.toLowerCase())
+						.toString()
+						.toLowerCase()
+						.replaceAll(OntologyTermQueryRepository.ILLEGAL_CHARACTERS_PATTERN,
+								OntologyTermQueryRepository.ILLEGAL_CHARACTERS_REPLACEMENT).trim();
 				List<OntologyTerm> definitions = new ArrayList<OntologyTerm>();
 
 				for (String documentType : documentTypes)
 				{
-					addIfNotExists(definitions, (annotateDataItem(dataService, documentType, feature, name, stemmer)));
-					addIfNotExists(definitions,
-							(annotateDataItem(dataService, documentType, feature, description, stemmer)));
+					addIfNotExists(definitions, (annotateDataItem(documentType, feature, name, stemmer)));
+					addIfNotExists(definitions, (annotateDataItem(documentType, feature, description, stemmer)));
 				}
 				addIfNotExists(definitions, feature.getDefinitions());
 
@@ -317,16 +336,13 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 	{
 		List<String> ontologyUris = new ArrayList<String>();
 
-		QueryImpl q = new QueryImpl();
-		q.pageSize(100000);
-		q.addRule(new QueryRule("entity_type", Operator.SEARCH, "indexedOntology"));
-
-		SearchResult result = searchService.search(new SearchRequest(null, q, null));
+		SearchResult result = searchService.search(new SearchRequest(null, new QueryImpl().pageSize(Integer.MAX_VALUE)
+				.eq(OntologyTermIndexRepository.ENTITY_TYPE, OntologyIndexRepository.TYPE_ONTOLOGY), null));
 		for (Hit hit : result.getSearchHits())
 		{
 			Map<String, Object> columnValueMap = hit.getColumnValueMap();
-			if (columnValueMap.containsKey("url")) ontologyUris.add("ontologyTerm-"
-					+ columnValueMap.get("url").toString());
+			if (columnValueMap.containsKey("url")) ontologyUris.add(AsyncOntologyIndexer
+					.createOntologyTermDocumentType(columnValueMap.get("url").toString()));
 		}
 		return ontologyUris;
 	}
@@ -355,11 +371,11 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		return newFeature;
 	}
 
-	public List<OntologyTerm> annotateDataItem(DataService dataService, String documentType, ObservableFeature feature,
-			String description, PorterStemmer stemmer)
+	public List<OntologyTerm> annotateDataItem(String documentType, ObservableFeature feature, String description,
+			PorterStemmer stemmer)
 	{
 		Set<String> uniqueTerms = new HashSet<String>();
-		for (String eachTerm : Arrays.asList(description.split(" +")))
+		for (String eachTerm : Arrays.asList(description.split(OntologyTermQueryRepository.MULTI_WHITESPACES)))
 		{
 			eachTerm = eachTerm.toLowerCase();
 			if (!NGramMatchingModel.STOPWORDSLIST.contains(eachTerm) && !uniqueTerms.contains(eachTerm)) uniqueTerms
@@ -367,19 +383,21 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		}
 
 		QueryImpl q = new QueryImpl();
-		q.pageSize(100);
+
+		q.pageSize(SIZE_OF_ANNOTATION);
 
 		boolean first = true;
 		for (String term : uniqueTerms)
 		{
-			if (!term.isEmpty() && !term.matches(" +"))
+			if (!StringUtils.isEmpty(term) && !term.matches(OntologyTermQueryRepository.MULTI_WHITESPACES))
 			{
 				if (!first)
 				{
 					q.addRule(new QueryRule(Operator.OR));
 				}
-				term = term.replaceAll("[^(a-zA-Z0-9 )]", "");
-				q.addRule(new QueryRule("ontologyTermSynonym", Operator.SEARCH, term));
+				term = term.replaceAll(OntologyTermQueryRepository.ILLEGAL_CHARACTERS_PATTERN,
+						OntologyTermQueryRepository.ILLEGAL_CHARACTERS_REPLACEMENT);
+				q.addRule(new QueryRule(OntologyTermIndexRepository.SYNONYMS, Operator.SEARCH, term));
 				first = false;
 			}
 		}
@@ -403,17 +421,19 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		for (TermComparison termComparision : listOfHits)
 		{
 			Hit hit = termComparision.getHit();
-			Map<String, Object> data = hit.getColumnValueMap();
-			String ontologyTermSynonym = data.get("ontologyTermSynonym").toString().toLowerCase();
-			String ontologyTerm = data.get("ontologyTerm").toString().toLowerCase();
+			Map<String, Object> columnValueMap = hit.getColumnValueMap();
+			String ontologyTermSynonym = columnValueMap.get(OntologyTermIndexRepository.SYNONYMS).toString()
+					.toLowerCase();
+			String ontologyTerm = columnValueMap.get(OntologyTermIndexRepository.ONTOLOGY_TERM).toString()
+					.toLowerCase();
 			if (ontologyTerm.equals(ontologyTermSynonym) || !addedCandidates.contains(ontologyTermSynonym))
 			{
 				if (validateOntologyTerm(uniqueTerms, ontologyTermSynonym, stemmer, positionFilter))
 				{
-					String uri = data.get("ontologyTermIRI").toString();
-					String ontologyLabel = data.get("ontologyLabel").toString();
-					String termIdentifier = ontologyLabel == null ? uri : ontologyLabel + ":" + uri;
-					mapUriTerm.put(termIdentifier, data);
+					String uri = columnValueMap.get(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI).toString();
+					String ontologyName = columnValueMap.get(OntologyTermIndexRepository.ONTOLOGY_NAME).toString();
+					String termIdentifier = ontologyName == null ? uri : ontologyName + ":" + uri;
+					mapUriTerm.put(termIdentifier, columnValueMap);
 					addedCandidates.add(ontologyTermSynonym);
 				}
 			}
@@ -453,17 +473,14 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 
 		for (Map<String, Object> data : mapUriTerm.values())
 		{
-			String uri = data.get("ontologyTermIRI").toString();
-			String ontologyUri = data.get("ontologyIRI").toString();
-			String ontologyName = data.get("ontologyName").toString();
-			ontologyInfo.put(ontologyUri, ontologyName);
-
-			String ontologyLabel = data.get("ontologyLabel") == null ? StringUtils.EMPTY : data.get("ontologyLabel")
-					.toString();
-			String ontologyTermSynonym = data.get("ontologyTermSynonym").toString();
-			String term = ontologyLabel.isEmpty() ? ontologyTermSynonym.toLowerCase() : ontologyLabel + ":"
+			String uri = data.get(OntologyTermIndexRepository.ONTOLOGY_TERM_IRI).toString();
+			String ontologyUri = data.get(OntologyTermIndexRepository.ONTOLOGY_IRI).toString();
+			String ontologyName = data.get(OntologyTermIndexRepository.ONTOLOGY_NAME) == null ? StringUtils.EMPTY : data
+					.get(OntologyTermIndexRepository.ONTOLOGY_NAME).toString();
+			String ontologyTermSynonym = data.get(OntologyTermIndexRepository.SYNONYMS).toString();
+			String term = StringUtils.isEmpty(ontologyName) ? ontologyTermSynonym.toLowerCase() : ontologyName + ":"
 					+ ontologyTermSynonym.toLowerCase();
-			String termIdentifier = ontologyLabel.isEmpty() ? uri : ontologyLabel + ":" + uri;
+			String termIdentifier = StringUtils.isEmpty(ontologyName) ? uri : ontologyName + ":" + uri;
 			OntologyTerm ot = new OntologyTerm();
 			ot.setIdentifier(termIdentifier);
 			ot.setTermAccession(uri);
@@ -474,11 +491,16 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 					new QueryImpl().eq(Ontology.IDENTIFIER, ontologyUri), Ontology.class);
 
 			ot.setOntology(ontology);
-
 			listOfOntologyTerms.add(ot);
+			ontologyInfo.put(ontologyUri, ontologyName);
 		}
-		if (listOfOntologyTerms.size() > 0) addOntologies(ontologyInfo);
-		if (listOfOntologyTerms.size() > 0) dataService.add(OntologyTerm.ENTITY_NAME, listOfOntologyTerms);
+
+		if (listOfOntologyTerms.size() > 0)
+		{
+			addOntologies(ontologyInfo);
+			dataService.add(OntologyTerm.ENTITY_NAME, listOfOntologyTerms);
+			dataService.getCrudRepository(OntologyTerm.ENTITY_NAME).flush();
+		}
 
 		if (identifiers.isEmpty()) return Collections.emptyList();
 		Iterable<OntologyTerm> definitions = dataService.findAll(OntologyTerm.ENTITY_NAME,
@@ -514,13 +536,18 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 				listOfOntologies.add(ontology);
 			}
 		}
-		if (listOfOntologies.size() != 0) dataService.add(Ontology.ENTITY_NAME, listOfOntologies);
+		if (listOfOntologies.size() != 0)
+		{
+			dataService.add(Ontology.ENTITY_NAME, listOfOntologies);
+			dataService.getCrudRepository(Ontology.ENTITY_NAME).flush();
+		}
 	}
 
 	private boolean validateOntologyTerm(Set<String> uniqueSets, String ontologyTermSynonym, PorterStemmer stemmer,
 			Set<String> positionFilter)
 	{
-		Set<String> termsFromDescription = stemMembers(Arrays.asList(ontologyTermSynonym.split(" +")), stemmer);
+		Set<String> termsFromDescription = stemMembers(
+				Arrays.asList(ontologyTermSynonym.split(OntologyTermQueryRepository.MULTI_WHITESPACES)), stemmer);
 		for (String eachTerm : termsFromDescription)
 		{
 			if (!uniqueSets.contains(eachTerm)) return false;
@@ -552,48 +579,6 @@ public class AsyncOntologyAnnotator implements OntologyAnnotator, InitializingBe
 		QueryRule[] nestedQuery = new QueryRule[rules.size()];
 		rules.toArray(nestedQuery);
 		return nestedQuery;
-	}
-
-	class TermComparison implements Comparable<TermComparison>
-	{
-		private final Hit hit;
-		private final Integer synonymLength;
-		private final Integer termLength;
-
-		public TermComparison(Hit hit)
-		{
-			Map<String, Object> data = hit.getColumnValueMap();
-			String ontologyTermSynonym = data.get("ontologyTermSynonym").toString().toLowerCase();
-			String ontologyTerm = data.get("ontologyTerm").toString().toLowerCase();
-			this.hit = hit;
-			this.synonymLength = ontologyTermSynonym.split(" +").length;
-			this.termLength = ontologyTerm.split(" +").length;
-		}
-
-		private Integer getSynonymLength()
-		{
-			return synonymLength;
-		}
-
-		private Integer getTermLength()
-		{
-			return termLength;
-		}
-
-		public Hit getHit()
-		{
-			return hit;
-		}
-
-		@Override
-		public int compareTo(TermComparison other)
-		{
-			if (synonymLength.compareTo(other.getSynonymLength()) == 0)
-			{
-				return this.termLength.compareTo(other.getTermLength());
-			}
-			else return this.synonymLength.compareTo(other.getSynonymLength()) * (-1);
-		}
 	}
 
 	@Override

@@ -89,7 +89,7 @@ public class ValueConverter
 		return converter.updateFromEntity(entity, attributeName, feature, value);
 	}
 
-	public Cell<?> toCell(Value value) throws ValueConverterException
+	public Cell<?> toCell(Value value, ObservableFeature feature) throws ValueConverterException
 	{
 		if (value == null) return null;
 
@@ -99,7 +99,7 @@ public class ValueConverter
 			throw new ValueConverterException("unknown value type [" + value.getClass().getSimpleName() + "]");
 		}
 		EntityToValueConverter<? extends Value, ?> valueConverter = getTupleConverter(fieldTypeEnum);
-		return valueConverter.toCell(value);
+		return valueConverter.toCell(value, feature);
 	}
 
 	private EntityToValueConverter<? extends Value, ?> getTupleConverter(FieldTypeEnum fieldTypeEnum)

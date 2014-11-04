@@ -14,4 +14,8 @@ public interface FormMetaData
 	 * @return
 	 */
 	List<AttributeMetaData> getFields();
+
+	AttributeMetaData getLabelAttribute();
+
+	boolean isForUpdate();
 }

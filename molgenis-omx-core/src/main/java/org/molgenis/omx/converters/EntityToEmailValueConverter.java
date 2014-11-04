@@ -33,7 +33,7 @@ public class EntityToEmailValueConverter implements EntityToValueConverter<Email
 	}
 
 	@Override
-	public Cell<String> toCell(Value value) throws ValueConverterException
+	public Cell<String> toCell(Value value, ObservableFeature feature) throws ValueConverterException
 	{
 		if (!(value instanceof EmailValue))
 		{

@@ -5,49 +5,47 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.IndexedCrudRepositorySecurityDecorator;
+import org.molgenis.data.annotation.impl.CaddServiceAnnotator;
+import org.molgenis.data.annotation.impl.ClinVarServiceAnnotator;
+import org.molgenis.data.annotation.impl.DbnsfpGeneServiceAnnotator;
+import org.molgenis.data.annotation.impl.DbnsfpVariantServiceAnnotator;
+import org.molgenis.data.annotation.provider.CgdDataProvider;
+import org.molgenis.data.support.GenomeConfig;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.framework.db.WebAppDatabasePopulatorService;
-import org.molgenis.genomebrowser.controller.GenomebrowserController;
-import org.molgenis.omx.auth.GroupAuthority;
-import org.molgenis.omx.auth.MolgenisGroup;
-import org.molgenis.omx.auth.MolgenisGroupMember;
 import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.omx.auth.UserAuthority;
 import org.molgenis.omx.controller.HomeController;
 import org.molgenis.omx.core.RuntimeProperty;
-import org.molgenis.security.SecurityUtils;
+import org.molgenis.security.MolgenisSecurityWebAppDatabasePopulatorService;
 import org.molgenis.security.account.AccountService;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.runas.RunAsSystem;
+import org.molgenis.studymanager.StudyManagerController;
+import org.molgenis.ui.MolgenisInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-//import org.molgenis.genomebrowser.controller.GenomebrowserController;
 
 @Service
 public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulatorService
 {
-	private static final String USERNAME_ADMIN = "admin";
-	private static final String USERNAME_USER = "user";
-
 	private final DataService dataService;
-
-	@Value("${admin.password:@null}")
-	private String adminPassword;
-	@Value("${admin.email:molgenis+admin@gmail.com}")
-	private String adminEmail;
-	@Value("${user.password:@null}")
-	private String userPassword;
-	@Value("${user.email:molgenis+user@gmail.com}")
-	private String userEmail;
+	private final MolgenisSecurityWebAppDatabasePopulatorService molgenisSecurityWebAppDatabasePopulatorService;
 
 	@Autowired
-	public WebAppDatabasePopulatorServiceImpl(DataService dataService)
+	public WebAppDatabasePopulatorServiceImpl(DataService dataService,
+			MolgenisSecurityWebAppDatabasePopulatorService molgenisSecurityWebAppDatabasePopulatorService)
 	{
 		if (dataService == null) throw new IllegalArgumentException("DataService is null");
 		this.dataService = dataService;
+
+		if (molgenisSecurityWebAppDatabasePopulatorService == null) throw new IllegalArgumentException(
+				"MolgenisSecurityWebAppDatabasePopulator is null");
+		this.molgenisSecurityWebAppDatabasePopulatorService = molgenisSecurityWebAppDatabasePopulatorService;
+
 	}
 
 	@Override
@@ -55,87 +53,93 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 	@RunAsSystem
 	public void populateDatabase()
 	{
-		if (adminPassword == null) throw new RuntimeException(
-				"please configure the admin.password property in your molgenis-server.properties");
-		if (userPassword == null) throw new RuntimeException(
-				"please configure the user.password property in your molgenis-server.properties");
-
-		String firstName = "John";
-		String lastName = "Doe";
-
-		MolgenisUser userAdmin = new MolgenisUser();
-		userAdmin.setUsername(USERNAME_ADMIN);
-		userAdmin.setPassword(new BCryptPasswordEncoder().encode(adminPassword));
-		userAdmin.setEmail(adminEmail);
-		userAdmin.setFirstName(firstName);
-		userAdmin.setLastName(lastName);
-		userAdmin.setActive(true);
-		userAdmin.setSuperuser(true);
-		userAdmin.setFirstName(USERNAME_ADMIN);
-		userAdmin.setLastName(USERNAME_ADMIN);
-		dataService.add(MolgenisUser.ENTITY_NAME, userAdmin);
-
-		MolgenisUser userUser = new MolgenisUser();
-		userUser.setUsername(USERNAME_USER);
-		userUser.setPassword(new BCryptPasswordEncoder().encode(userPassword));
-		userUser.setEmail(userEmail);
-		userUser.setFirstName(firstName);
-		userUser.setLastName(lastName);
-		userUser.setActive(true);
-		userUser.setSuperuser(false);
-		userUser.setFirstName(USERNAME_USER);
-		userUser.setLastName(USERNAME_USER);
-		dataService.add(MolgenisUser.ENTITY_NAME, userUser);
-
-		MolgenisGroup usersGroup = new MolgenisGroup();
-		usersGroup.setName(AccountService.ALL_USER_GROUP);
-		dataService.add(MolgenisGroup.ENTITY_NAME, usersGroup);
-		usersGroup.setName(AccountService.ALL_USER_GROUP);
-
-		GroupAuthority usersGroupHomeAuthority = new GroupAuthority();
-		usersGroupHomeAuthority.setMolgenisGroup(usersGroup);
-		usersGroupHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + HomeController.ID.toUpperCase());
-		dataService.add(GroupAuthority.ENTITY_NAME, usersGroupHomeAuthority);
-
-		MolgenisGroupMember molgenisGroupMember1 = new MolgenisGroupMember();
-		molgenisGroupMember1.setMolgenisGroup(usersGroup);
-		molgenisGroupMember1.setMolgenisUser(userUser);
-		dataService.add(MolgenisGroupMember.ENTITY_NAME, molgenisGroupMember1);
-
-		for (String entityName : dataService.getEntityNames())
-		{
-			GroupAuthority entityAuthority = new GroupAuthority();
-			entityAuthority.setMolgenisGroup(usersGroup);
-			entityAuthority.setRole(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + entityName.toUpperCase());
-			dataService.add(GroupAuthority.ENTITY_NAME, entityAuthority);
-		}
+		molgenisSecurityWebAppDatabasePopulatorService.populateDatabase(this.dataService, HomeController.ID);
 
 		// Genomebrowser stuff
 		Map<String, String> runtimePropertyMap = new HashMap<String, String>();
 
-		runtimePropertyMap.put(GenomebrowserController.INITLOCATION,
-				"chr:'3', viewStart:48560000,viewEnd:48600000,cookieKey:'human'");
-		runtimePropertyMap.put(GenomebrowserController.COORDSYSTEM,
-				"{speciesName: 'Human',taxon: 9606,auth: 'GRCh',version: '37'}");
-		runtimePropertyMap
-				.put(GenomebrowserController.CHAINS,
-						"{hg18ToHg19: new Chainset('http://www.derkholm.net:8080/das/hg18ToHg19/', 'NCBI36', 'GRCh37',{speciesName: 'Human',taxon: 9606,auth: 'NCBI',version: 36})}");
+		runtimePropertyMap.put(DataExplorerController.INITLOCATION,
+				"chr:'1',viewStart:10000000,viewEnd:10100000,cookieKey:'human',nopersist:true");
+		runtimePropertyMap.put(DataExplorerController.COORDSYSTEM,
+				"{speciesName: 'Human',taxon: 9606,auth: 'GRCh',version: '37',ucscName: 'hg19'}");
 		// for use of the demo dataset add to
 		// SOURCES:",{name:'molgenis mutations',uri:'http://localhost:8080/das/molgenis/',desc:'Default from WebAppDatabasePopulatorService'}"
 		runtimePropertyMap
-				.put(GenomebrowserController.SOURCES,
-						"[{name:'Genome',uri:'http://www.derkholm.net:8080/das/hg19comp/',desc:'Human reference genome build GRCh37',tier_type:'sequence',provides_entrypoints: true},{name:'Genes',desc:'Gene structures from Ensembl 59 (GENCODE 4)',uri:'http://www.derkholm.net:8080/das/hsa_59_37d/',collapseSuperGroups:true,provides_karyotype:true,provides_search:true}]");
+				.put(DataExplorerController.SOURCES,
+						"[{name:'Genome',twoBitURI:'//www.biodalliance.org/datasets/hg19.2bit',tier_type: 'sequence'},{name: 'Genes',desc: 'Gene structures from GENCODE 19',bwgURI: '//www.biodalliance.org/datasets/gencode.bb',stylesheet_uri: '//www.biodalliance.org/stylesheets/gencode.xml',collapseSuperGroups: true,trixURI:'//www.biodalliance.org/datasets/geneIndex.ix'},{name: 'Repeats',desc: 'Repeat annotation from Ensembl 59',bwgURI: '//www.biodalliance.org/datasets/repeats.bb',stylesheet_uri: '//www.biodalliance.org/stylesheets/bb-repeats.xml'},{name: 'Conservation',desc: 'Conservation',bwgURI: '//www.biodalliance.org/datasets/phastCons46way.bw',noDownsample: true}]");
 		runtimePropertyMap
-				.put(GenomebrowserController.BROWSERLINKS,
+				.put(DataExplorerController.BROWSERLINKS,
 						"{Ensembl: 'http://www.ensembl.org/Homo_sapiens/Location/View?r=${chr}:${start}-${end}',UCSC: 'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr${chr}:${start}-${end}',Sequence: 'http://www.derkholm.net:8080/das/hg19comp/sequence?segment=${chr}:${start},${end}'}");
-		runtimePropertyMap.put(GenomebrowserController.SEARCHENDPOINT,
-				"new DASSource('http://www.derkholm.net:8080/das/hsa_59_37d/')");
-		runtimePropertyMap.put(GenomebrowserController.KARYOTYPEENDPOINT,
-				"new DASSource('http://www.derkholm.net:8080/das/hsa_59_37d/')");
 
-		// Charts include/exclude charts
-		runtimePropertyMap.put(DataExplorerController.KEY_APP_INCLUDE_CHARTS,
-				DataExplorerController.INCLUDE_CHARTS_MODULE + "");
+		// include/exclude dataexplorer mods
+		runtimePropertyMap.put(DataExplorerController.KEY_MOD_AGGREGATES, String.valueOf(true));
+		runtimePropertyMap.put(DataExplorerController.KEY_MOD_CHARTS, String.valueOf(true));
+		runtimePropertyMap.put(DataExplorerController.KEY_MOD_DATA, String.valueOf(true));
+		runtimePropertyMap.put(DataExplorerController.KEY_MOD_DISEASEMATCHER, String.valueOf(false));
+		runtimePropertyMap.put(DataExplorerController.KEY_MOD_ANNOTATORS, String.valueOf(false));
+
+		// DataExplorer table editable yes/no
+		runtimePropertyMap.put(DataExplorerController.KEY_DATAEXPLORER_EDITABLE, String.valueOf(false));
+		runtimePropertyMap.put(DataExplorerController.KEY_GALAXY_ENABLED, String.valueOf(false));
+
+		// DataExplorer rows clickable yes / no
+		runtimePropertyMap.put(DataExplorerController.KEY_DATAEXPLORER_ROW_CLICKABLE, String.valueOf(false));
+
+		// DataExplorer hide select if dataset selected through url
+		runtimePropertyMap.put(DataExplorerController.KEY_HIDE_SELECT, String.valueOf(true));
+
+		// Aggregate anonymization threshold (default no threshold)
+		runtimePropertyMap.put(IndexedCrudRepositorySecurityDecorator.SETTINGS_KEY_AGGREGATE_ANONYMIZATION_THRESHOLD,
+				Integer.toString(0));
+
+		// Annotators include files/tools
+		String molgenisHomeDir = System.getProperty("molgenis.home");
+
+		if (molgenisHomeDir == null)
+		{
+			throw new IllegalArgumentException("missing required java system property 'molgenis.home'");
+		}
+
+		if (!molgenisHomeDir.endsWith("/")) molgenisHomeDir = molgenisHomeDir + '/';
+		String molgenisHomeDirAnnotationResources = molgenisHomeDir + "data/annotation_resources";
+
+		runtimePropertyMap.put(CaddServiceAnnotator.CADD_FILE_LOCATION_PROPERTY, molgenisHomeDirAnnotationResources
+				+ "/CADD/1000G.vcf.gz");
+		runtimePropertyMap.put(CgdDataProvider.CGD_FILE_LOCATION_PROPERTY, molgenisHomeDirAnnotationResources
+				+ "/CGD/CGD.txt");
+		runtimePropertyMap.put(DbnsfpGeneServiceAnnotator.GENE_FILE_LOCATION_PROPERTY,
+				molgenisHomeDirAnnotationResources + "/dbnsfp/dbNSFP2.3_gene");
+		runtimePropertyMap.put(DbnsfpVariantServiceAnnotator.CHROMOSOME_FILE_LOCATION_PROPERTY,
+				molgenisHomeDirAnnotationResources + "/dbnsfp/dbNSFP2.3_variant.chr");
+		runtimePropertyMap.put(ClinVarServiceAnnotator.CLINVAR_FILE_LOCATION_PROPERTY,
+				molgenisHomeDirAnnotationResources + "/Clinvar/variant_summary.txt");
+
+		runtimePropertyMap.put(DataExplorerController.KEY_HIDE_SEARCH_BOX, String.valueOf(false));
+		runtimePropertyMap.put(DataExplorerController.KEY_HIDE_ITEM_SELECTION, String.valueOf(false));
+		runtimePropertyMap.put(DataExplorerController.KEY_HEADER_ABBREVIATE,
+				DataExplorerController.DEFAULT_VAL_HEADER_ABBREVIATE);
+		runtimePropertyMap.put(DataExplorerController.KEY_SHOW_WIZARD_ONINIT,
+				String.valueOf(DataExplorerController.DEFAULT_VAL_SHOW_WIZARD_ONINIT));
+		runtimePropertyMap.put(DataExplorerController.AGGREGATES_NORESULTS_MESSAGE,
+				DataExplorerController.DEFAULT_AGGREGATES_NORESULTS_MESSAGE);
+		runtimePropertyMap.put(DataExplorerController.KEY_MOD_AGGREGATES_DISTINCT_HIDE,
+				String.valueOf(DataExplorerController.DEFAULT_VAL_AGGREGATES_DISTINCT_HIDE));
+
+		runtimePropertyMap.put(StudyManagerController.EXPORT_BTN_TITLE, "Export");
+		runtimePropertyMap.put(StudyManagerController.EXPORT_ENABLED, String.valueOf(false));
+
+		runtimePropertyMap.put(MolgenisInterceptor.I18N_LOCALE, "en");
+
+		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_CHROM, "CHROM,#CHROM,chromosome");
+		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_POS, "POS,start_nucleotide");
+		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_REF, "REF");
+		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_ALT, "ALT");
+		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_ID, "ID,Mutation_id");
+		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_DESCRIPTION, "INFO");
+		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_PATIENT_ID, "patient_id");
+		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_STOP, "stop_pos,stop_nucleotide,end_nucleotide");
+
+		runtimePropertyMap.put(AccountService.KEY_PLUGIN_AUTH_ENABLE_SELFREGISTRATION, String.valueOf(true));
 
 		for (Entry<String, String> entry : runtimePropertyMap.entrySet())
 		{
@@ -146,6 +150,12 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 			runtimeProperty.setValue(entry.getValue());
 			dataService.add(RuntimeProperty.ENTITY_NAME, runtimeProperty);
 		}
+
+		MolgenisUser anonymousUser = molgenisSecurityWebAppDatabasePopulatorService.getAnonymousUser();
+		UserAuthority anonymousHomeAuthority = new UserAuthority();
+		anonymousHomeAuthority.setMolgenisUser(anonymousUser);
+		anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX + HomeController.ID.toUpperCase());
+		dataService.add(UserAuthority.ENTITY_NAME, anonymousHomeAuthority);
 	}
 
 	@Override

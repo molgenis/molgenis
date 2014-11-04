@@ -1,14 +1,3 @@
-#loader-title {
-	text-align: center;
-}
-
-.box-title {
-	font-size: 10pt;
-	font-weight: bold;
-	padding: 2px;
-	background-color: #BDCDDA;
-}
-
 .listEntryRadio {
 	width: 20px;
 	color: #468847;
@@ -36,4 +25,8 @@
 
 .table-borderless th, .table-borderless td {
 	border-top: none;
+}
+
+.input-group>.form-control {
+	width: 180px !important;
 }

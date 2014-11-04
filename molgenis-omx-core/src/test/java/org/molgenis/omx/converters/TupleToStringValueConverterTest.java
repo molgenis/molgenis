@@ -14,7 +14,7 @@ public class TupleToStringValueConverterTest
 	{
 		StringValue value = new StringValue();
 		value.setValue("value");
-		assertEquals(new EntityToStringValueConverter().toCell(value).getValue(), "value");
+		assertEquals(new EntityToStringValueConverter().toCell(value, null).getValue(), "value");
 	}
 
 	@Test

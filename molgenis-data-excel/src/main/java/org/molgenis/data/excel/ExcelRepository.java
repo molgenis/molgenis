@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,6 +19,7 @@ import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.util.CaseInsensitiveLinkedHashMap;
 
 /**
  * ExcelSheet {@link org.molgenis.data.Repository} implementation
@@ -106,7 +106,7 @@ public class ExcelRepository extends AbstractRepository
 	{
 		if (entityMetaData == null)
 		{
-			entityMetaData = new DefaultEntityMetaData(sheet.getSheetName());
+			entityMetaData = new DefaultEntityMetaData(sheet.getSheetName(), ExcelEntity.class);
 
 			if (colNamesMap == null)
 			{
@@ -135,14 +135,14 @@ public class ExcelRepository extends AbstractRepository
 	{
 		if (headerRow == null) return null;
 
-		Map<String, Integer> columnIdx = new LinkedHashMap<String, Integer>();
+		Map<String, Integer> columnIdx = new CaseInsensitiveLinkedHashMap<Integer>();
 		int i = 0;
 		for (Iterator<Cell> it = headerRow.cellIterator(); it.hasNext();)
 		{
 			try
 			{
-				String header = AbstractCellProcessor.processCell(it.next().getStringCellValue(), true, cellProcessors);
-				columnIdx.put(header, i++);
+				String header = AbstractCellProcessor.processCell(ExcelUtils.toValue(it.next()), true, cellProcessors);
+				if(null != header) columnIdx.put(header, i++);
 			}
 			catch (final IllegalStateException ex)
 			{
@@ -159,11 +159,5 @@ public class ExcelRepository extends AbstractRepository
 	public void close() throws IOException
 	{
 		// Nothing
-	}
-
-	@Override
-	public Class<? extends Entity> getEntityClass()
-	{
-		return ExcelEntity.class;
 	}
 }

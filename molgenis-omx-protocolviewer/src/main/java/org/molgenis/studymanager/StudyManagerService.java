@@ -22,13 +22,29 @@ public interface StudyManagerService
 	List<StudyDefinition> getStudyDefinitions();
 
 	/**
-	 * Find all study definition with the given status for a user
+	 * Find all study definition with the given status
 	 * 
-	 * @param username
 	 * @param status
 	 * @return
 	 */
-	List<StudyDefinition> getStudyDefinitions(String username, StudyDefinition.Status status);
+	List<StudyDefinition> getStudyDefinitions(StudyDefinition.Status status);
+
+	/**
+	 * Search study definitions
+	 * 
+	 * @param status
+	 * @param search
+	 * @return
+	 */
+	List<StudyDefinition> findStudyDefinitions(StudyDefinition.Status status, String search);
+
+	/**
+	 * Find all studydefinitions of a user
+	 * 
+	 * @param username
+	 * @return
+	 */
+	List<StudyDefinition> getStudyDefinitions(String username);
 
 	/**
 	 * Find the study definition with the given id
@@ -67,6 +83,17 @@ public interface StudyManagerService
 	boolean isStudyDataLoaded(String id) throws UnknownStudyDefinitionException;
 
 	/**
+	 * Returns whether study definition data is loaded
+	 * 
+	 * @param id
+	 *            study definition id
+	 * @return
+	 * @throws UnknownStudyDefinitionException
+	 * @throws UnknownCatalogException
+	 */
+	boolean isStudyDataActivated(String id) throws UnknownStudyDefinitionException, UnknownCatalogException;
+
+	/**
 	 * Creates a new study definition for the given user based on a catalog
 	 * 
 	 * @param username
@@ -92,4 +119,14 @@ public interface StudyManagerService
 	 */
 	void submitStudyDefinition(String id, String catalogId) throws UnknownStudyDefinitionException,
 			UnknownCatalogException;
+
+    /**
+     * Submit the draft study definition for the given catalog
+     *
+     * @param id
+     *            study definition id
+     * @throws UnknownStudyDefinitionException
+     */
+    void exportStudyDefinition(String id, String catalogId) throws UnknownStudyDefinitionException,
+            UnknownCatalogException;
 }

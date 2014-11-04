@@ -1,8 +1,12 @@
 package org.molgenis.ui;
 
-import org.molgenis.framework.server.MolgenisPermissionService;
-import org.molgenis.framework.server.MolgenisPermissionService.Permission;
+import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.Permission;
 
+/**
+ * @deprecated use {@link org.molgenis.ui.menu.MenuItemToMolgenisUiMenuItemAdapter} instead
+ */
+@Deprecated
 public class XmlMolgenisUiPlugin implements MolgenisUiMenuItem
 {
 	private final PluginType pluginType;

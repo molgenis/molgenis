@@ -1,17 +1,17 @@
 package org.molgenis.data.omx;
 
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.elasticsearch.util.Hit;
+import org.molgenis.data.elasticsearch.util.SearchRequest;
+import org.molgenis.data.elasticsearch.util.SearchResult;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.search.Hit;
-import org.molgenis.search.SearchRequest;
-import org.molgenis.search.SearchResult;
-import org.molgenis.search.SearchService;
 
 /**
  * Executes a search query and adapts the resulting hit iterator to an entity iterator
@@ -20,28 +20,41 @@ import org.molgenis.search.SearchService;
  */
 public class OmxRepositoryIterator implements Iterator<Entity>
 {
-	private static final int BATCH_SIZE = 1000;
+	static final int BATCH_SIZE = 1000;
 
 	private final String dataSetIdentifier;
 	private final SearchService searchService;
-	private Iterator<Hit> hits;
+	private final DataService dataService;
 	private final Set<String> attributeNames;
-	private final long pageSize;
-	private int count;
+	private long pageSize;
 	private final Query query;
 
-	public OmxRepositoryIterator(String dataSetIdentifier, SearchService searchService, Query q,
-			Set<String> attributeNames)
+	private int count;
+	private Iterator<Hit> hits;
+
+	private transient EntityMetaData cachedEntityMetaData;
+
+	public OmxRepositoryIterator(String dataSetIdentifier, SearchService searchService, DataService dataService,
+			Query q, Set<String> attributeNames)
 	{
 		this.dataSetIdentifier = dataSetIdentifier;
 		this.searchService = searchService;
+		this.dataService = dataService;
 		this.attributeNames = attributeNames;
 
 		query = q.getPageSize() == 0 ? new QueryImpl(q).pageSize(BATCH_SIZE) : q;
 		SearchRequest request = new SearchRequest(dataSetIdentifier, query, null);
 
 		SearchResult result = searchService.search(request);
-		pageSize = q.getPageSize() == 0 ? result.getTotalHitCount() : q.getPageSize();
+		long maxHitCount = result.getTotalHitCount() - q.getOffset();
+		if (q.getPageSize() == 0)
+		{
+			pageSize = maxHitCount;
+		}
+		else
+		{
+			pageSize = maxHitCount < q.getPageSize() ? maxHitCount : q.getPageSize();
+		}
 
 		hits = result.iterator();
 	}
@@ -66,7 +79,11 @@ public class OmxRepositoryIterator implements Iterator<Entity>
 		Hit hit = hits.next();
 		count++;
 
-		return hitToEntity(hit);
+		if (cachedEntityMetaData == null)
+		{
+			cachedEntityMetaData = dataService.getEntityMetaData(dataSetIdentifier);
+		}
+		return new HitEntity(hit, attributeNames, cachedEntityMetaData, dataService);
 	}
 
 	@Override
@@ -75,20 +92,4 @@ public class OmxRepositoryIterator implements Iterator<Entity>
 		throw new UnsupportedOperationException("Remove not supported");
 	}
 
-	private Entity hitToEntity(Hit hit)
-	{
-		MapEntity entity = new MapEntity("id");
-		Map<String, Object> values = hit.getColumnValueMap();
-
-		for (Map.Entry<String, Object> entry : values.entrySet())
-		{
-			String attr = entry.getKey();
-			if (attributeNames.contains(attr))
-			{
-				entity.set(attr.toLowerCase(), entry.getValue());
-			}
-		}
-
-		return entity;
-	}
 }

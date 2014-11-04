@@ -5,12 +5,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
+import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.omx.dataset.DataSetMatrixRepository;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.protocol.CategoryRepository;
 import org.molgenis.omx.protocol.ProtocolTreeRepository;
-import org.molgenis.search.SearchService;
 import org.molgenis.security.runas.RunAsSystem;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,22 +80,9 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 	}
 
 	@Override
-	@Async
 	@RunAsSystem
-	public void indexDataSets(List<Integer> dataSetIds)
+	public void indexDataSets(List<Object> dataSetIds)
 	{
-		while (isIndexingRunning())
-		{
-			try
-			{
-				Thread.sleep(5000);
-			}
-			catch (InterruptedException e)
-			{
-				throw new RuntimeException(e);
-			}
-		}
-
 		runningIndexProcesses.incrementAndGet();
 		try
 		{
@@ -123,7 +110,14 @@ public class AsyncDataSetsIndexer implements DataSetsIndexer, InitializingBean
 	@Override
 	@Async
 	@RunAsSystem
-	public void indexProtocols(List<Integer> protocolIds)
+	public void indexProtocols(List<Object> protocolIds)
+	{
+		indexProtocolsSynced(protocolIds);
+	}
+
+	@Override
+	@RunAsSystem
+	public void indexProtocolsSynced(List<Object> protocolIds)
 	{
 		while (isIndexingRunning())
 		{

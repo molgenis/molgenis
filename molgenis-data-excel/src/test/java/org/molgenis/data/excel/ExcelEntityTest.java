@@ -41,7 +41,8 @@ public class ExcelEntityTest
 		colNamesMap = new LinkedHashMap<String, Integer>();
 		colNamesMap.put("attr1", 0);
 
-		excelEntity = new ExcelEntity(row, colNamesMap, cellProcessors, new DefaultEntityMetaData("Entity1"));
+		excelEntity = new ExcelEntity(row, colNamesMap, cellProcessors, new DefaultEntityMetaData("Entity1",
+				ExcelEntity.class));
 	}
 
 	@Test

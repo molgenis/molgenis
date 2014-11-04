@@ -82,13 +82,23 @@ public class GoogleSpreadsheetRepositoryTest
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void GoogleSpreadsheetRepository() throws IOException, ServiceException
 	{
-		new GoogleSpreadsheetRepository(null, null, null);
+		GoogleSpreadsheetRepository repo = null;
+		try
+		{
+			repo = new GoogleSpreadsheetRepository(null, null, null);
+		}
+		finally
+		{
+			if (repo != null) repo.close();
+		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void getEntityClass() throws IOException, ServiceException
 	{
-		assertEquals(MapEntity.class, spreadsheetRepository.getEntityClass());
+		when(spreadsheetService.getFeed(any(URL.class), (Class<CellFeed>) any(Class.class))).thenReturn(cellFeed);
+		assertEquals(MapEntity.class, spreadsheetRepository.getEntityMetaData().getEntityClass());
 	}
 
 	@SuppressWarnings("unchecked")

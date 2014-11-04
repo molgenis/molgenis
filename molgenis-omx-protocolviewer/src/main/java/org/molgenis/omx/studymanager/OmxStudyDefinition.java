@@ -85,7 +85,7 @@ public class OmxStudyDefinition implements StudyDefinition
 			@Override
 			public CatalogItem apply(ObservableFeature observableFeature)
 			{
-				return new OmxStudyDefinitionItem(observableFeature);
+				return new OmxStudyDefinitionItem(observableFeature, studyDataRequest.getProtocol().getId());
 			}
 		});
 	}
@@ -97,10 +97,10 @@ public class OmxStudyDefinition implements StudyDefinition
 		if (items.iterator().hasNext())
 		{
 			Iterable<ObservableFeature> featuresIterable = dataService.findAll(ObservableFeature.ENTITY_NAME,
-					Iterables.transform(items, new Function<CatalogItem, Integer>()
+					Iterables.transform(items, new Function<CatalogItem, Object>()
 					{
 						@Override
-						public Integer apply(CatalogItem catalogItem)
+						public Object apply(CatalogItem catalogItem)
 						{
 							return Integer.valueOf(catalogItem.getId());
 						}
@@ -134,6 +134,12 @@ public class OmxStudyDefinition implements StudyDefinition
 	}
 
 	@Override
+	public void setRequestProposalForm(String path)
+	{
+		studyDataRequest.setRequestForm(path);
+	}
+
+	@Override
 	public boolean containsItem(CatalogItem anItem)
 	{
 		boolean contains = false;
@@ -152,4 +158,5 @@ public class OmxStudyDefinition implements StudyDefinition
 	{
 		return studyDataRequest;
 	}
+
 }

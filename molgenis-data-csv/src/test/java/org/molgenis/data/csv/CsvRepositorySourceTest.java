@@ -14,6 +14,8 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.springframework.util.FileCopyUtils;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.Iterables;
+
 public class CsvRepositorySourceTest
 {
 
@@ -24,12 +26,14 @@ public class CsvRepositorySourceTest
 		File csvFile = new File(FileUtils.getTempDirectory(), "testdata.csv");
 		FileCopyUtils.copy(in, new FileOutputStream(csvFile));
 
-		CsvRepositorySource repo = new CsvRepositorySource(csvFile);
-		assertNotNull(repo.getRepositories());
-		assertEquals(repo.getRepositories().size(), 1);
-		assertEquals(repo.getRepositories().get(0).getName(), "testdata");
+		CsvRepositoryCollection repo = new CsvRepositoryCollection(csvFile);
+		assertNotNull(repo.getEntityNames());
+		assertEquals(Iterables.size(repo.getEntityNames()), 1);
+		assertEquals(Iterables.get(repo.getEntityNames(), 0), "testdata");
+
 	}
 
+	@Test
 	public void getRepositoriesZip() throws IOException, InvalidFormatException
 	{
 		File zip = File.createTempFile("file", ".zip");
@@ -76,11 +80,12 @@ public class CsvRepositorySourceTest
 			fos.close();
 		}
 
-		CsvRepositorySource repo = new CsvRepositorySource(zip);
-		assertNotNull(repo.getRepositories());
-		assertEquals(repo.getRepositories().size(), 3);
-		assertNotNull(repo.getRepository("0"));
-		assertNotNull(repo.getRepository("1"));
-		assertNotNull(repo.getRepository("2"));
+		CsvRepositoryCollection repo = new CsvRepositoryCollection(zip);
+		assertNotNull(repo.getEntityNames());
+		assertEquals(Iterables.size(repo.getEntityNames()), 3);
+		assertNotNull(repo.getRepositoryByEntityName("0"));
+		assertNotNull(repo.getRepositoryByEntityName("1"));
+		// ??assertNotNull(repo.getRepository("2"));
+
 	}
 }

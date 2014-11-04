@@ -6,11 +6,13 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -25,11 +27,18 @@ import org.molgenis.catalog.CatalogItem;
 import org.molgenis.catalog.UnknownCatalogException;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.QueryRule;
+import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.elasticsearch.util.SearchRequest;
+import org.molgenis.data.elasticsearch.util.SearchResult;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.utils.I18nTools;
-import org.molgenis.security.SecurityUtils;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.study.StudyDefinition;
+import org.molgenis.study.StudyDefinition.Status;
 import org.molgenis.study.UnknownStudyDefinitionException;
 import org.molgenis.util.ErrorMessageResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,15 +73,19 @@ public class ProtocolViewerController extends MolgenisPluginController
 	private static final boolean DEFAULT_KEY_ACTION_ORDER = true;
 	private final ProtocolViewerService protocolViewerService;
 	private final MolgenisSettings molgenisSettings;
+	private final SearchService searchService;
 
 	@Autowired
-	public ProtocolViewerController(ProtocolViewerService protocolViewerService, MolgenisSettings molgenisSettings)
+	public ProtocolViewerController(ProtocolViewerService protocolViewerService, MolgenisSettings molgenisSettings,
+			SearchService searchService)
 	{
 		super(URI);
 		if (protocolViewerService == null) throw new IllegalArgumentException("ProtocolViewerService is null");
 		if (molgenisSettings == null) throw new IllegalArgumentException("MolgenisSettings is null");
+		if (searchService == null) throw new IllegalArgumentException("SearchService is null");
 		this.protocolViewerService = protocolViewerService;
 		this.molgenisSettings = molgenisSettings;
+		this.searchService = searchService;
 	}
 
 	@RequestMapping(method = GET)
@@ -110,7 +123,16 @@ public class ProtocolViewerController extends MolgenisPluginController
 				// exclude specific items
 				if (excludedItems != null)
 				{
-					final Set<String> excludedItemsSet = new HashSet<String>(Arrays.asList(excludedItems));
+					List<String> idList = Lists.transform(Arrays.asList(excludedItems), new Function<String, String>()
+					{
+						@Override
+						public String apply(String id)
+						{
+							return id.substring(id.lastIndexOf('/') + 1);
+						}
+					});
+
+					final Set<String> excludedItemsSet = new HashSet<String>(idList);
 					catalogItems = Lists.newArrayList(Iterables.filter(catalogItems, new Predicate<CatalogItem>()
 					{
 						@Override
@@ -197,8 +219,10 @@ public class ProtocolViewerController extends MolgenisPluginController
 			throws UnknownCatalogException, UnknownStudyDefinitionException
 	{
 		if (!getEnableOrderAction()) throw new MolgenisDataAccessException("Action not allowed");
-		protocolViewerService
-				.addToStudyDefinitionDraftForCurrentUser(cartUpdateRequest.getHref(), catalogId.toString());
+		for (String item : cartUpdateRequest.getHref())
+		{
+			protocolViewerService.addToStudyDefinitionDraftForCurrentUser(item, catalogId.toString());
+		}
 	}
 
 	@RequestMapping(value = "/cart/remove/{catalogId}", method = RequestMethod.POST)
@@ -207,9 +231,12 @@ public class ProtocolViewerController extends MolgenisPluginController
 			throws UnknownCatalogException, UnknownStudyDefinitionException
 	{
 		if (!getEnableOrderAction()) throw new MolgenisDataAccessException("Action not allowed");
-		logger.info("remove from cart: " + cartUpdateRequest.getHref());
-		protocolViewerService.removeFromStudyDefinitionDraftForCurrentUser(cartUpdateRequest.getHref(),
-				catalogId.toString());
+		logger.debug("remove from cart: " + cartUpdateRequest.getHref());
+		for (String item : cartUpdateRequest.getHref())
+		{
+			protocolViewerService.removeFromStudyDefinitionDraftForCurrentUser(item, catalogId.toString());
+
+		}
 	}
 
 	@RequestMapping(value = "/order", method = RequestMethod.GET)
@@ -235,6 +262,7 @@ public class ProtocolViewerController extends MolgenisPluginController
 	public StudyDefinitionsResponse getOrders()
 	{
 		if (!getEnableOrderAction()) throw new MolgenisDataAccessException("Action not allowed");
+
 		Iterable<StudyDefinitionResponse> ordersIterable = Iterables.transform(
 				protocolViewerService.getStudyDefinitionsForCurrentUser(),
 				new Function<StudyDefinition, StudyDefinitionResponse>()
@@ -243,9 +271,11 @@ public class ProtocolViewerController extends MolgenisPluginController
 					@Nullable
 					public StudyDefinitionResponse apply(@Nullable StudyDefinition studyDefinition)
 					{
-						return studyDefinition != null ? new StudyDefinitionResponse(studyDefinition) : null;
+						return studyDefinition != null ? (studyDefinition.getStatus() != Status.DRAFT ? new StudyDefinitionResponse(
+								studyDefinition) : null) : null;
 					}
 				});
+
 		return new StudyDefinitionsResponse(Lists.newArrayList(ordersIterable));
 	}
 
@@ -277,9 +307,49 @@ public class ProtocolViewerController extends MolgenisPluginController
 	@ResponseBody
 	public ErrorMessageResponse handleException(Exception e)
 	{
-		logger.error("", e);
+		e.printStackTrace();
+		logger.error("Error", e);
 		return new ErrorMessageResponse(
 				Collections.singletonList(new ErrorMessageResponse.ErrorMessage(e.getMessage())));
+	}
+
+	@RequestMapping(value = "/items", method = RequestMethod.POST)
+	@ResponseBody
+	public SearchResult getItemsFromIndex(@RequestBody Map<String, Object> request)
+	{
+		Object catalogId = request.get("catalogId");
+		Object draftItems = request.get("items");
+		if (catalogId == null) return new SearchResult("The catalogID cannot be null");
+		if (draftItems == null) return new SearchResult("The selected items cannot be null");
+		List<QueryRule> rules = new ArrayList<QueryRule>();
+		if (draftItems instanceof List<?>)
+		{
+			for (Object item : (List<?>) draftItems)
+			{
+				if (rules.size() > 0) rules.add(new QueryRule(Operator.OR));
+				rules.add(new QueryRule("id", Operator.EQUALS, item.toString()));
+			}
+		}
+		return searchService.search(new SearchRequest("protocolTree-" + catalogId.toString(), new QueryImpl(rules)
+				.pageSize(Integer.MAX_VALUE), null));
+	}
+
+	@RequestMapping(value = "/search", method = RequestMethod.POST)
+	@ResponseBody
+	public SearchResult searchItems(@RequestBody Map<String, Object> request)
+	{
+		Object catalogId = request.get("catalogId");
+		Object queryString = request.get("queryString");
+		if (catalogId == null) return new SearchResult("The catalogID cannot be null");
+		if (queryString == null) return new SearchResult("The queryString items cannot be null");
+		List<QueryRule> rules = new ArrayList<QueryRule>();
+		for (String term : queryString.toString().split("\\s*"))
+		{
+			if (rules.size() > 0) rules.add(new QueryRule(Operator.AND));
+			rules.add(new QueryRule(Operator.SEARCH, term));
+		}
+		return searchService.search(new SearchRequest("protocolTree-" + catalogId.toString(), new QueryImpl(rules)
+				.pageSize(Integer.MAX_VALUE), null));
 	}
 
 	private boolean getEnableDownloadAction()
@@ -312,14 +382,17 @@ public class ProtocolViewerController extends MolgenisPluginController
 	{
 		private final Integer id;
 		private final String name;
-		private final String orderDate;
+		private String orderDate;
 		private final String orderStatus;
 
 		public StudyDefinitionResponse(StudyDefinition studyDefinition)
 		{
 			this.id = Integer.valueOf(studyDefinition.getId());
 			this.name = studyDefinition.getName();
-			this.orderDate = new SimpleDateFormat("yyyy-MM-dd").format(studyDefinition.getDateCreated());
+			if (studyDefinition.getDateCreated() != null)
+			{
+				this.orderDate = new SimpleDateFormat("yyyy-MM-dd").format(studyDefinition.getDateCreated());
+			}
 			this.orderStatus = studyDefinition.getStatus().toString().toLowerCase();
 		}
 
@@ -415,17 +488,17 @@ public class ProtocolViewerController extends MolgenisPluginController
 	private static final class CartUpdateRequest
 	{
 		@NotNull
-		private String href;
+		private List<String> features;
 
-		public String getHref()
+		public List<String> getHref()
 		{
-			return href;
+			return features;
 		}
 
 		@SuppressWarnings("unused")
-		public void setHref(String href)
+		public void setHref(List<String> features)
 		{
-			this.href = href;
+			this.features = features;
 		}
 	}
 }

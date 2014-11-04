@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -14,9 +15,9 @@ import org.apache.commons.io.IOUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.RepositorySource;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.csv.CsvRepository;
-import org.molgenis.data.excel.ExcelRepositorySource;
+import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.processor.TrimProcessor;
 
 /**
@@ -32,12 +33,22 @@ public class Validator
 			InvalidFormatException
 	{
 		ValidationFile excelfile = new ValidationFile();
-		RepositorySource excelReaderReferenceFile = new ExcelRepositorySource(new File(excelFile1), new TrimProcessor());
-		Repository excelSheetReaderReferenceFile = excelReaderReferenceFile.getRepository("dataset_celiac_sprue");
-		excelfile.readFile(excelSheetReaderReferenceFile, IDENTIFIER, IDENTIFIER2);
+		RepositoryCollection excelReaderReferenceFile = new ExcelRepositoryCollection(new File(excelFile1),
+				new TrimProcessor());
+
+		Repository excelSheetReaderReferenceFile = excelReaderReferenceFile
+				.getRepositoryByEntityName("dataset_celiac_sprue");
+		try
+		{
+			excelfile.readFile(excelSheetReaderReferenceFile, IDENTIFIER, IDENTIFIER2);
+		}
+		finally
+		{
+			excelSheetReaderReferenceFile.close();
+		}
 
 		ValidationFile csvFile = new ValidationFile();
-		Repository csvReaderFileToCompare = new CsvRepository(new File(file2), null);
+		Repository csvReaderFileToCompare = new CsvRepository(new File(file2), "", null);
 
 		csvFile.readFile(csvReaderFileToCompare, IDENTIFIER, IDENTIFIER2);
 		boolean noUniqueColums = false;
@@ -187,7 +198,8 @@ public class Validator
 			return;
 		}
 		Validator vc = new Validator();
-		BufferedWriter logger = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(args[2])));
+		BufferedWriter logger = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(args[2]),
+				Charset.forName("UTF-8")));
 		try
 		{
 			logger.write("file1: " + args[0] + "\nfile2: " + args[1]);

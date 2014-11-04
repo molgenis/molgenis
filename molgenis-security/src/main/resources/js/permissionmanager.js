@@ -11,6 +11,7 @@
 						items.push('<td>' + (idx == 0 ? entityName : '') + '</td>');
 						items.push('<td><input type="radio" name="radio-' + entityId + '" value="write"' + (perm.type === "write" ? ' checked' : '') + '></td>');
 						items.push('<td><input type="radio" name="radio-' + entityId + '" value="read"' + (perm.type === "read" ? ' checked' : '') + '></td>');
+						items.push('<td><input type="radio" name="radio-' + entityId + '" value="count"' + (perm.type === "count" ? ' checked' : '') + '></td>');
 						items.push('<td><input type="radio" name="radio-' + entityId + '" value="none"' + (perm.type ? '' : ' checked') + '></td>');
 						items.push('</tr>');						
 					});
@@ -19,6 +20,7 @@
 					items.push('<td>' + entityName + '</td>');
 					items.push('<td><input type="radio" name="radio-' + entityId + '" value="write"></td>');
 					items.push('<td><input type="radio" name="radio-' + entityId + '" value="read"></td>');
+					items.push('<td><input type="radio" name="radio-' + entityId + '" value="count"></td>');
 					items.push('<td><input type="radio" name="radio-' + entityId + '" value="none" checked></td>');
 					items.push('</tr>');
 				}
@@ -28,6 +30,7 @@
 						items.push('<td><span class="muted inherited-permission">inherited from hierarchy</span></td>');
 						items.push('<td><input type="radio"' + (perm.type === "write" ? ' checked' : '') + ' disabled></td>');
 						items.push('<td><input type="radio"' + (perm.type === "read" ? ' checked' : '') + ' disabled></td>');
+						items.push('<td><input type="radio"' + (perm.type === "count" ? ' checked' : '') + ' disabled></td>');
 						items.push('<td><input type="radio"' + (perm.type ? '' : ' checked') + ' disabled></td>');
 						items.push('</tr>');					
 					});
@@ -46,6 +49,7 @@
 						items.push('<td>' + (idx == 0 ? entityName : '') + '</td>');
 						items.push('<td><input type="radio" name="radio-' + entityId + '" value="write"' + (perm.type === "write" ? ' checked' : '') + '></td>');
 						items.push('<td><input type="radio" name="radio-' + entityId + '" value="read"' + (perm.type === "read" ? ' checked' : '') + '></td>');
+						items.push('<td><input type="radio" name="radio-' + entityId + '" value="count"' + (perm.type === "count" ? ' checked' : '') + '></td>');
 						items.push('<td><input type="radio" name="radio-' + entityId + '" value="none"' + (perm.type ? '' : ' checked') + '></td>');
 					});
 				} else {
@@ -53,6 +57,7 @@
 					items.push('<td>' + entityName + '</td>');
 					items.push('<td><input type="radio" name="radio-' + entityId + '" value="write"></td>');
 					items.push('<td><input type="radio" name="radio-' + entityId + '" value="read"></td>');
+					items.push('<td><input type="radio" name="radio-' + entityId + '" value="count"></td>');
 					items.push('<td><input type="radio" name="radio-' + entityId + '" value="none" checked></td>');
 					items.push('</tr>');
 				}
@@ -62,6 +67,7 @@
 						items.push('<td><span class="muted inherited-permission">inherited from group: ' + perm.group + '</span></td>');
 						items.push('<td><input type="radio"' + (perm.type === "write" ? ' checked' : '') + ' disabled></td>');
 						items.push('<td><input type="radio"' + (perm.type === "read" ? ' checked' : '') + ' disabled></td>');
+						items.push('<td><input type="radio"' + (perm.type === "count" ? ' checked' : '') + ' disabled></td>');
 						items.push('<td><input type="radio"' + (perm.type ? '' : ' checked') + ' disabled></td>');
 						items.push('</tr>');						
 					});
@@ -105,21 +111,21 @@
 				error: function (xhr, textStatus, errorThrown) {
 					var errorMessage = JSON.parse(xhr.responseText).errorMessage;
 					$('#plugin-container .alert').remove();
-					$('#plugin-container').prepend('<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> ' + errorMessage + '</div>');
+					$('#plugin-container').prepend('<div class="alert alert-danger"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>Error!</strong> ' + errorMessage + '</div>');
 				}
 			});
 		});
 
-		$('a[data-toggle="tab"][href="#plugin-group-permission-manager"]').on('show', function (e) {
+		$('a[data-toggle="tab"][href="#plugin-group-permission-manager"]').on('show.bs.tab', function (e) {
 			$('#plugin-group-select').change();
 		});
-		$('a[data-toggle="tab"][href="#plugin-user-permission-manager"]').on('show', function (e) {
+		$('a[data-toggle="tab"][href="#plugin-user-permission-manager"]').on('show.bs.tab', function (e) {
 			$('#plugin-user-select').change();
 		});
-		$('a[data-toggle="tab"][href="#entity-class-group-permission-manager"]').on('show', function (e) {
+		$('a[data-toggle="tab"][href="#entity-class-group-permission-manager"]').on('show.bs.tab', function (e) {
 			$('#entity-class-group-select').change();
 		});
-		$('a[data-toggle="tab"][href="#entity-class-user-permission-manager"]').on('show', function (e) {
+		$('a[data-toggle="tab"][href="#entity-class-user-permission-manager"]').on('show.bs.tab', function (e) {
 			$('#entity-class-user-select').change();
 		});
 		

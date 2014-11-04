@@ -12,7 +12,7 @@ import org.molgenis.omx.auth.MolgenisGroup;
 import org.molgenis.omx.auth.MolgenisGroupMember;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.omx.auth.UserAuthority;
-import org.molgenis.security.SecurityUtils;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -88,7 +88,6 @@ public class MolgenisUserDetailsService implements UserDetailsService
 		}
 		catch (Throwable e)
 		{
-			e.printStackTrace();
 			throw new RuntimeException(e);
 		}
 	}

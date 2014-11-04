@@ -6,6 +6,8 @@ import java.text.ParseException;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.model.MolgenisModelException;
 
+@Deprecated
+// TODO: discuss for remove
 public class FileField extends FieldType
 {
 	private static final long serialVersionUID = 1L;
@@ -95,5 +97,11 @@ public class FileField extends FieldType
 	public FieldTypeEnum getEnumType()
 	{
 		return FieldTypeEnum.FILE;
+	}
+
+	@Override
+	public Object convert(Object value)
+	{
+		throw new UnsupportedOperationException();
 	}
 }

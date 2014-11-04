@@ -9,10 +9,10 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.processor.AbstractCellProcessor;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractWritable;
-import org.molgenis.util.ListEscapeUtils;
 
 /**
  * Writable implementation for an excel sheet
@@ -44,7 +44,7 @@ public class ExcelSheetWriter extends AbstractWritable
 	 * Add a new row to the sheet
 	 */
 	@Override
-	public Integer add(Entity entity)
+	public void add(Entity entity)
 	{
 		if (entity == null) throw new IllegalArgumentException("Entity cannot be null");
 		if (cachedAttributeNames == null) throw new MolgenisDataException(
@@ -58,7 +58,7 @@ public class ExcelSheetWriter extends AbstractWritable
 			cell.setCellValue(toValue(entity.get(attributeName)));
 		}
 
-		return entity.getIdValue();
+		entity.getIdValue();
 	}
 
 	/**
@@ -102,9 +102,24 @@ public class ExcelSheetWriter extends AbstractWritable
 		{
 			value = null;
 		}
+		else if (obj instanceof java.util.Date)
+		{
+			value = new DateToStringConverter().convert((java.util.Date) obj);
+		}
+		else if (obj instanceof Entity)
+		{
+			value = ((Entity) obj).getLabelValue();
+		}
 		else if (obj instanceof List<?>)
 		{
-			value = ListEscapeUtils.toString((List<?>) obj);
+			StringBuilder strBuilder = new StringBuilder();
+			for (Object listItem : (List<?>) obj)
+			{
+				if (strBuilder.length() > 0) strBuilder.append(',');
+				strBuilder.append(toValue(listItem));
+			}
+			// TODO apply cell processors to list elements?
+			value = strBuilder.toString();
 		}
 		else
 		{

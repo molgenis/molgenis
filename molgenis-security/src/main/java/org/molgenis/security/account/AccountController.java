@@ -3,16 +3,20 @@ package org.molgenis.security.account;
 import static org.molgenis.security.account.AccountController.URI;
 import static org.molgenis.security.user.UserAccountController.MIN_PASSWORD_LENGTH;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
+import javax.naming.NoPermissionException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import org.apache.log4j.Logger;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.captcha.CaptchaException;
 import org.molgenis.security.captcha.CaptchaRequest;
@@ -23,7 +27,9 @@ import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.RedirectStrategy;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
@@ -43,10 +49,12 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 public class AccountController
 {
 	public static final String URI = "/account";
+	private static final String CHANGE_PASSWORD_RELATIVE_URI = "/password/change";
+	public static final String CHANGE_PASSWORD_URI = URI + CHANGE_PASSWORD_RELATIVE_URI;
 
 	private static final Logger logger = Logger.getLogger(AccountController.class);
 
-	static final String REGISTRATION_SUCCESS_MESSAGE_USER = "You have successfully registered, an activation e-mail has been send to your email.";
+	static final String REGISTRATION_SUCCESS_MESSAGE_USER = "You have successfully registered, an activation e-mail has been sent to your email.";
 	static final String REGISTRATION_SUCCESS_MESSAGE_ADMIN = "You have successfully registered, your request has been forwarded to the administrator.";
 
 	@Autowired
@@ -56,12 +64,19 @@ public class AccountController
 	private CaptchaService captchaService;
 
 	@Autowired
-	private PasswordEncoder passwordEncoder;
+	private RedirectStrategy redirectStrategy;
+
+	@Autowired
+	private MolgenisSettings molgenisSettings;
 
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
-	public String getLoginForm()
+	public ModelAndView getLoginForm()
 	{
-		return "login-modal";
+		ModelAndView model = new ModelAndView("login-modal");
+		model.addObject("enable_self_registration",
+				molgenisSettings.getBooleanProperty(AccountService.KEY_PLUGIN_AUTH_ENABLE_SELFREGISTRATION, true));
+
+		return model;
 	}
 
 	@RequestMapping(value = "/register", method = RequestMethod.GET)
@@ -79,46 +94,82 @@ public class AccountController
 		return "resetpassword-modal";
 	}
 
+	@RequestMapping(value = CHANGE_PASSWORD_RELATIVE_URI, method = RequestMethod.GET)
+	public String getChangePasswordForm()
+	{
+		return "view-change-password";
+	}
+
+	@RequestMapping(value = CHANGE_PASSWORD_RELATIVE_URI, method = RequestMethod.POST)
+	public void changePassword(@Valid ChangePasswordForm form, HttpServletRequest request, HttpServletResponse response)
+			throws IOException
+	{
+		try
+		{
+			// Change password of current user
+			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+			if (authentication != null)
+			{
+				accountService.changePassword(authentication.getName(), form.getPassword1());
+			}
+
+			// Redirect to homepage
+			redirectStrategy.sendRedirect(request, response, "/");
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+
 	// Spring's FormHttpMessageConverter cannot bind target classes (as ModelAttribute can)
 	@RequestMapping(value = "/register", method = RequestMethod.POST, headers = "Content-Type=application/x-www-form-urlencoded")
 	@ResponseBody
 	public Map<String, String> registerUser(@Valid @ModelAttribute RegisterRequest registerRequest,
-			@Valid @ModelAttribute CaptchaRequest captchaRequest, HttpServletRequest request) throws CaptchaException, BindException
+			@Valid @ModelAttribute CaptchaRequest captchaRequest, HttpServletRequest request) throws CaptchaException,
+			BindException, NoPermissionException
 	{
-		if (!captchaService.validateCaptcha(captchaRequest.getCaptcha()))
+		if (accountService.isSelfRegistrationEnabled())
 		{
-			throw new CaptchaException("invalid captcha answer");
-		}
-		if (!registerRequest.getPassword().equals(registerRequest.getConfirmPassword()))
-		{
-			throw new BindException(RegisterRequest.class, "password does not match confirm password");
-		}
-		MolgenisUser molgenisUser = toMolgenisUser(registerRequest);
-		String activationUri = null;
-		if (StringUtils.isEmpty(request.getHeader("X-Forwarded-Host")))
-		{
-			activationUri = ServletUriComponentsBuilder.fromCurrentRequest().path(URI + "/activate").build()
-					.toUriString();
+			if (!registerRequest.getPassword().equals(registerRequest.getConfirmPassword()))
+			{
+				throw new BindException(RegisterRequest.class, "password does not match confirm password");
+			}
+			if (!captchaService.consumeCaptcha(captchaRequest.getCaptcha()))
+			{
+				throw new CaptchaException("invalid captcha answer");
+			}
+			MolgenisUser molgenisUser = toMolgenisUser(registerRequest);
+			String activationUri = null;
+			if (StringUtils.isEmpty(request.getHeader("X-Forwarded-Host")))
+			{
+				activationUri = ServletUriComponentsBuilder.fromCurrentRequest().replacePath(URI + "/activate").build()
+						.toUriString();
+			}
+			else
+			{
+				activationUri = request.getScheme() + "://" + request.getHeader("X-Forwarded-Host") + URI + "/activate";
+			}
+			accountService.createUser(molgenisUser, activationUri);
+
+			String successMessage;
+			switch (accountService.getActivationMode())
+			{
+				case ADMIN:
+					successMessage = REGISTRATION_SUCCESS_MESSAGE_ADMIN;
+					break;
+				case USER:
+					successMessage = REGISTRATION_SUCCESS_MESSAGE_USER;
+					break;
+				default:
+					throw new RuntimeException("Unknown activation mode " + accountService.getActivationMode());
+			}
+			return Collections.singletonMap("message", successMessage);
 		}
 		else
 		{
-			activationUri = request.getScheme() + "://" + request.getHeader("X-Forwarded-Host") + URI + "/activate";
+			throw new NoPermissionException("Self registration is disabled");
 		}
-		accountService.createUser(molgenisUser, activationUri);
-
-		String successMessage;
-		switch (accountService.getActivationMode())
-		{
-			case ADMIN:
-				successMessage = REGISTRATION_SUCCESS_MESSAGE_ADMIN;
-				break;
-			case USER:
-				successMessage = REGISTRATION_SUCCESS_MESSAGE_USER;
-				break;
-			default:
-				throw new RuntimeException("Unknown activation mode " + accountService.getActivationMode());
-		}
-		return Collections.singletonMap("message", successMessage);
 	}
 
 	@RequestMapping(value = "/activate/{activationCode}", method = RequestMethod.GET)
@@ -187,7 +238,7 @@ public class AccountController
 	{
 		MolgenisUser user = new MolgenisUser();
 		user.setUsername(request.getUsername());
-		user.setPassword(passwordEncoder.encode(request.getPassword()));
+		user.setPassword(request.getPassword());
 		user.setEmail(request.getEmail());
 		user.setPhone(request.getPhone());
 		user.setFax(request.getFax());
@@ -199,6 +250,7 @@ public class AccountController
 		user.setDepartment(request.getDepartment());
 		user.setCity(request.getCity());
 		user.setCountry(CountryCodes.get(request.getCountry()));
+		user.setChangePassword(false);
 		return user;
 	}
 }

@@ -13,6 +13,9 @@ import org.molgenis.study.UnknownStudyDefinitionException;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 
+import java.util.Collections;
+import java.util.UUID;
+
 public class OmxCatalogManagerService implements CatalogManagerService
 {
 	private final DataService dataService;
@@ -47,7 +50,13 @@ public class OmxCatalogManagerService implements CatalogManagerService
 		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.ID, id),
 				Protocol.class);
 		if (protocol == null) throw new UnknownCatalogException("Catalog [" + id + "] does not exist");
-		return new OmxCatalog(protocol, dataService);
+        //workaround for getting the rendering correct in the catalog manager, without breaking the studymanager
+        Protocol root = new Protocol();
+        root.setName(protocol.getName());
+        root.setId(-1);
+        root.setIdentifier(UUID.randomUUID().toString());
+        root.setSubprotocols(Collections.singletonList(protocol));
+		return new OmxCatalog(root, dataService);
 	}
 
 	@Override
@@ -83,6 +92,15 @@ public class OmxCatalogManagerService implements CatalogManagerService
 
 	@Override
 	public boolean isCatalogLoaded(String id) throws UnknownCatalogException
+	{
+		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.ID, id),
+				Protocol.class);
+		if (protocol == null) throw new UnknownCatalogException("Catalog [" + id + "] does not exist");
+		return protocol.getActive();
+	}
+
+	@Override
+	public boolean isCatalogActivated(String id) throws UnknownCatalogException
 	{
 		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.ID, id),
 				Protocol.class);
@@ -135,5 +153,23 @@ public class OmxCatalogManagerService implements CatalogManagerService
 	{
 		protocol.setActive(active);
 		dataService.update(Protocol.ENTITY_NAME, protocol);
+	}
+
+	@Override
+	public void deactivateCatalog(String id) throws UnknownCatalogException
+	{
+		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.ID, id),
+				Protocol.class);
+		if (protocol == null) throw new UnknownCatalogException("Catalog [" + id + "] does not exist");
+		setProtocolActive(protocol, false);
+	}
+
+	@Override
+	public void activateCatalog(String id) throws UnknownCatalogException
+	{
+		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.ID, id),
+				Protocol.class);
+		if (protocol == null) throw new UnknownCatalogException("Catalog [" + id + "] does not exist");
+		setProtocolActive(protocol, true);
 	}
 }

@@ -12,7 +12,6 @@ import java.util.List;
 
 import org.mockito.ArgumentCaptor;
 import org.molgenis.data.CrudRepositoryDecorator;
-import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.Query;
@@ -46,8 +45,8 @@ public class StudyDataRequestDecoratorTest
 	private MolgenisUser userUser, adminUser;
 	private StudyDataRequest userStudyDataRequest, adminStudyDataRequest;
 	private QueryRule exampleRule;
-	private Integer exampleUserId, exampleAdminId;
-	private List<Integer> exampleUserIds, exampleAdminIds, exampleUserAdminIds;
+	private Object exampleUserId, exampleAdminId;
+	private List<Object> exampleUserIds, exampleAdminIds, exampleUserAdminIds;
 
 	@BeforeClass
 	public void setUpBeforeClass()
@@ -291,45 +290,6 @@ public class StudyDataRequestDecoratorTest
 		when(authentication.getPrincipal()).thenReturn(USERNAME_ADMIN);
 		studyDataRequestDecorator.update(Collections.singletonList(userStudyDataRequest));
 		verify(crudRepositoryDecorator).update(Collections.singletonList(userStudyDataRequest));
-	}
-
-	@Test
-	public void updateList_User()
-	{
-		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
-		studyDataRequestDecorator.update(Collections.singletonList(userStudyDataRequest), DatabaseAction.UPDATE);
-		verify(crudRepositoryDecorator).update(Collections.singletonList(userStudyDataRequest), DatabaseAction.UPDATE);
-	}
-
-	@Test(expectedExceptions = MolgenisDataAccessException.class)
-	public void updateList_UserNotAllowed()
-	{
-		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
-		studyDataRequestDecorator.update(Collections.singletonList(adminStudyDataRequest), DatabaseAction.UPDATE);
-	}
-
-	@Test(expectedExceptions = MolgenisDataAccessException.class)
-	public void updateList_UserNotAllowedSome()
-	{
-		when(authentication.getPrincipal()).thenReturn(USERNAME_USER);
-		studyDataRequestDecorator.update(Arrays.asList(userStudyDataRequest, adminStudyDataRequest),
-				DatabaseAction.UPDATE);
-	}
-
-	@Test
-	public void updateList_Admin()
-	{
-		when(authentication.getPrincipal()).thenReturn(USERNAME_ADMIN);
-		studyDataRequestDecorator.update(Collections.singletonList(adminStudyDataRequest), DatabaseAction.UPDATE);
-		verify(crudRepositoryDecorator).update(Collections.singletonList(adminStudyDataRequest), DatabaseAction.UPDATE);
-	}
-
-	@Test
-	public void updateList_AdminAsUser()
-	{
-		when(authentication.getPrincipal()).thenReturn(USERNAME_ADMIN);
-		studyDataRequestDecorator.update(Collections.singletonList(userStudyDataRequest), DatabaseAction.UPDATE);
-		verify(crudRepositoryDecorator).update(Collections.singletonList(userStudyDataRequest), DatabaseAction.UPDATE);
 	}
 
 	@Test

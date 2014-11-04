@@ -36,11 +36,9 @@ import org.molgenis.generators.EntityMetaDataGen;
 import org.molgenis.generators.Generator;
 import org.molgenis.generators.JpaRepositoryGen;
 import org.molgenis.generators.JpaRepositorySourceGen;
-import org.molgenis.generators.db.CrudRepositorySecurityDecoratorGen;
 import org.molgenis.generators.db.DatabaseConfigGen;
 import org.molgenis.generators.db.EntitiesImporterGen;
 import org.molgenis.generators.db.EntitiesValidatorGen;
-import org.molgenis.generators.db.EntityImporterGen;
 import org.molgenis.generators.db.JDBCMetaDatabaseGen;
 import org.molgenis.generators.db.PersistenceGen;
 import org.molgenis.generators.doc.DotDocGen;
@@ -171,8 +169,8 @@ public class Molgenis
 		this.options = options;
 
 		Logger.getLogger("freemarker.cache").setLevel(Level.INFO);
-		logger.info("\nMOLGENIS version " + org.molgenis.Version.convertToString());
-		logger.info("working dir: " + System.getProperty("user.dir"));
+		logger.debug("\nMOLGENIS version " + org.molgenis.Version.convertToString());
+		logger.debug("working dir: " + System.getProperty("user.dir"));
 
 		// clean options
 		if (outputPath != null)
@@ -212,7 +210,7 @@ public class Molgenis
 		}
 		else
 		{
-			logger.info("Skipping documentation ....");
+			logger.debug("Skipping documentation ....");
 		}
 
 		if (options.generate_jpa)
@@ -225,19 +223,11 @@ public class Molgenis
 			generators.add(new DataTypeGen());
 			generators.add(new EntityMetaDataGen());
 			generators.add(new JpaRepositoryGen());
-			generators.add(new EntityImporterGen());
 			generators.add(new JDBCMetaDatabaseGen());
 
 			if (options.generate_persistence)
 			{
 				generators.add(new PersistenceGen());
-			}
-
-			// decorators
-			if (options.generate_decorators)
-			{
-				// authorization
-				generators.add(new CrudRepositorySecurityDecoratorGen());
 			}
 
 			if (options.generate_jpa_repository_source)
@@ -247,7 +237,7 @@ public class Molgenis
 		}
 		else
 		{
-			logger.info("SEVERE: Skipping ALL SQL ....");
+			logger.warn("SEVERE: Skipping ALL SQL ....");
 		}
 
 		if (options.generate_entityio)
@@ -304,13 +294,13 @@ public class Molgenis
 	 */
 	public void generate() throws Exception
 	{
-		logger.info("generating ....");
-		logger.info("\nUsing options:\n" + options.toString());
+		logger.info("Generating ...");
+		logger.debug("\nUsing options:\n" + options.toString());
 
 		File generatedFolder = new File(options.output_dir);
 		if (generatedFolder.exists() && options.delete_generated_folder)
 		{
-			logger.info("removing previous generated folder " + generatedFolder);
+			logger.debug("removing previous generated folder " + generatedFolder);
 			deleteContentOfDirectory(generatedFolder);
 			deleteContentOfDirectory(new File(options.output_src));
 			deleteContentOfDirectory(new File(options.output_sql));
@@ -324,8 +314,7 @@ public class Molgenis
 			{
 				@Override
 				@Nullable
-				public Callable<Boolean> apply(@Nullable
-				final Generator generator)
+				public Callable<Boolean> apply(@Nullable final Generator generator)
 				{
 					return generator != null ? new Callable<Boolean>()
 					{

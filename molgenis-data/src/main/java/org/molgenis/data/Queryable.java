@@ -5,6 +5,8 @@ package org.molgenis.data;
  */
 public interface Queryable extends Countable
 {
+	Query query();
+
 	/**
 	 * return number of entities matched by query
 	 **/
@@ -12,11 +14,15 @@ public interface Queryable extends Countable
 
 	/**
 	 * type-safe find entities that match a query
+	 * 
+	 * @return (empty) Iterable, never null
 	 */
 	Iterable<Entity> findAll(Query q);
 
 	/**
 	 * type-safe find entities that match a query
+	 * 
+	 * @return (empty) Iterable, never null
 	 */
 	<E extends Entity> Iterable<E> findAll(Query q, Class<E> clazz);
 
@@ -32,19 +38,26 @@ public interface Queryable extends Countable
 	/**
 	 * type-safe find one entity based on id. Returns null if not exists
 	 */
-	Entity findOne(Integer id);
+	Entity findOne(Object id);
 
 	/**
 	 * find entities based on a stream of ids
+	 * 
+	 * @return (empty) Iterable, never null
 	 */
-	Iterable<Entity> findAll(Iterable<Integer> ids);
+	Iterable<Entity> findAll(Iterable<Object> ids);
 
 	/**
 	 * type-safe find entities that match a stream of ids
+	 * 
+	 * @return (empty) Iterable, never null
 	 */
-	<E extends Entity> Iterable<E> findAll(Iterable<Integer> ids, Class<E> clazz);
+	<E extends Entity> Iterable<E> findAll(Iterable<Object> ids, Class<E> clazz);
 
-	<E extends Entity> E findOne(Integer id, Class<E> clazz);
+	/**
+	 * type-safe find one entity based on id. Returns null if not exists
+	 */
+	<E extends Entity> E findOne(Object id, Class<E> clazz);
 
 	/**
 	 * type-save find an entity by it's id

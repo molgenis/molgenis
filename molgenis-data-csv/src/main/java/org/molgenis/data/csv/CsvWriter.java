@@ -11,12 +11,16 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.processor.AbstractCellProcessor;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractWritable;
-import org.molgenis.util.ListEscapeUtils;
+
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 public class CsvWriter extends AbstractWritable
 {
@@ -75,7 +79,7 @@ public class CsvWriter extends AbstractWritable
 	}
 
 	@Override
-	public Integer add(Entity entity)
+	public void add(Entity entity)
 	{
 		if (cachedAttributeNames == null) throw new MolgenisDataException(
 				"No attribute names defined call writeAttributeNames first");
@@ -89,11 +93,41 @@ public class CsvWriter extends AbstractWritable
 
 		csvWriter.writeNext(values);
 		if (csvWriter.checkError()) throw new MolgenisDataException("An exception occured writing the csv file");
-
-		return entity.getIdValue();
 	}
 
 	public void writeAttributeNames(Iterable<String> attributeNames) throws IOException
+	{
+		writeAttributes(attributeNames, attributeNames);
+	}
+
+	/**
+	 * Use attribute labels as column names
+	 * 
+	 * @param attributes
+	 * @throws IOException
+	 */
+	public void writeAttributes(Iterable<AttributeMetaData> attributes) throws IOException
+	{
+		List<String> attributeNames = Lists.newArrayList();
+		List<String> attributeLabels = Lists.newArrayList();
+
+		for (AttributeMetaData attr : attributes)
+		{
+			attributeNames.add(attr.getName());
+			if (attr.getLabel() != null)
+			{
+				attributeLabels.add(attr.getLabel());
+			}
+			else
+			{
+				attributeLabels.add(attr.getName());
+			}
+		}
+
+		writeAttributes(attributeNames, attributeLabels);
+	}
+
+	public void writeAttributes(Iterable<String> attributeNames, Iterable<String> attributeLabels) throws IOException
 	{
 		if (cachedAttributeNames == null)
 		{
@@ -105,12 +139,13 @@ public class CsvWriter extends AbstractWritable
 				processedAttributeNames.add(processedColName);
 			}
 
-			// write column names
-			this.csvWriter.writeNext(processedAttributeNames.toArray(new String[0]));
-			if (this.csvWriter.checkError()) throw new IOException();
-
 			// store filtered column names
 			cachedAttributeNames = processedAttributeNames;
+
+			// write column labels
+			this.csvWriter.writeNext(Iterables.toArray(attributeLabels, String.class));
+			if (this.csvWriter.checkError()) throw new IOException();
+
 		}
 	}
 
@@ -127,10 +162,24 @@ public class CsvWriter extends AbstractWritable
 		{
 			value = null;
 		}
+		else if (obj instanceof java.util.Date)
+		{
+			value = new DateToStringConverter().convert((java.util.Date) obj);
+		}
+		else if (obj instanceof Entity)
+		{
+			value = ((Entity) obj).getLabelValue();
+		}
 		else if (obj instanceof List<?>)
 		{
+			StringBuilder strBuilder = new StringBuilder();
+			for (Object listItem : (List<?>) obj)
+			{
+				if (strBuilder.length() > 0) strBuilder.append(',');
+				strBuilder.append(toValue(listItem));
+			}
 			// TODO apply cell processors to list elements?
-			value = ListEscapeUtils.toString((List<?>) obj);
+			value = strBuilder.toString();
 		}
 		else
 		{

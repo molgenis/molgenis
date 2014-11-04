@@ -22,34 +22,28 @@
 			url : molgenis.getContextUrl() + '/selection/' + catalogId,
 			success : function(selection) {
 				updateCatalog(catalogId, selection);
-			},
-			error : function(xhr) {
-				molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 			}
 		});
 	};
 
 	var updateCatalog = function(catalogId, selection) {
+		
 		catalogContainer.catalog({
 			'selection' : Catalog.getEnableSelection(),
 			'protocolId' : catalogId,
-			'selectedItems' : selection.items ? $.map(selection.items, function(selectedItem) { return selectedItem.feature; }) : null, // FIXME catalog requires group info
-			'sort' : molgenis.naturalSort,
+			'selectedItems' : selection.items ? $.map(selection.items, function(selectedItem) { return selectedItem.feature.toLowerCase(); }) : null, // FIXME catalog requires group info
+			'sort' : function(a,b) {return molgenis.naturalSort(a.title, b.title);},
 			'onItemClick' : function(featureUri) {
 				updateFeatureDetails(featureUri);
 			},
 			'onItemSelect' : function(featureUri, select) {
-				showSpinner();
 				updateShoppingCart(featureUri, select, catalogId, function() {
 					updateFeatureSelection(catalogId);
-					hideSpinner();
 				});
 			},
 			'onFolderSelect' : function(protocolUri, select) {
-				showSpinner();
 				updateShoppingCart(protocolUri, select, catalogId, function() {
 					updateFeatureSelection(catalogId);
-					hideSpinner();
 				});
 			},
 			'onInit' : function() {
@@ -66,14 +60,14 @@
 			getFeature(featureUri, function(feature) {
 				var table = $('<table />');
 
-				table.append('<tr><td>' + "Name:" + '</td><td>' + feature.name + '</td></tr>');
-				table.append('<tr><td>' + "Identifier:" + '</td><td>' + feature.identifier + '</td></tr>');
+				table.append('<tr><td>' + "Name:" + '</td><td>' + feature.Name + '</td></tr>');
+				table.append('<tr><td>' + "Identifier:" + '</td><td>' + feature.Identifier + '</td></tr>');
 				$.each(molgenis.i18n.getAll(feature.description), function(key, val) {
 					table.append('<tr><td>' + "Description (" + key + "):" + '</td><td>' + val + '</td></tr>');
 				});
 				table.append('<tr><td>' + "Data type:" + '</td><td>' + (feature.dataType ? feature.dataType : '') + '</td></tr>');
 				if (feature.unit)
-					table.append('<tr><td>' + "Unit:" + '</td><td>' + (feature.unit.name ? feature.unit.name : '') + '</td></tr>');
+					table.append('<tr><td>' + "Unit:" + '</td><td>' + (feature.unit.Name ? feature.unit.Name : '') + '</td></tr>');
 
 				table.addClass('listtable feature-table');
 				table.find('td:first-child').addClass('feature-table-col1');
@@ -88,7 +82,7 @@
 					$.each(feature.categories, function(i, category) {
 						var row = $('<tr />');
 						$('<td />').text(category.valueCode).appendTo(row);
-						$('<td />').text(category.name).appendTo(row);
+						$('<td />').text(category.Name).appendTo(row);
 						$('<td />').text(category.description).appendTo(row);
 						row.appendTo(categoryTable);
 					});
@@ -106,9 +100,9 @@
 			url : '/api/v1/category?_method=GET',
 			data : JSON.stringify({
 				q : [ {
-					"field" : "observableFeature_Identifier",
+					"field" : "observableFeature",
 					"operator" : "EQUALS",
-					"value" : data.identifier
+					"value" : data.Identifier
 				} ],
 				num : maxItems
 			}),
@@ -125,9 +119,6 @@
 					categories.push($(this)[0]);
 				});
 				data["categories"] = categories;
-			},
-			error : function(xhr) {
-				molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 			}
 		});
 		callback(data);
@@ -153,11 +144,15 @@
 					} else {
 						$('#orderdata-href-btn').removeClass('disabled');
 						if(page === undefined) {
-							selectionTablePager.pager({
-								'nrItems' : selection.total,
-								'nrItemsPerPage' : nrItemsPerPage,
-								'onPageChange' : updateFeatureSelectionContainer
-							});	
+							if (selection.total <= nrItemsPerPage) {
+								selectionTablePager.empty();
+							} else {							
+								selectionTablePager.pager({
+									'nrItems' : selection.total,
+									'nrItemsPerPage' : nrItemsPerPage,
+									'onPageChange' : updateFeatureSelectionContainer
+								});
+							}
 						}
 						
 						var catalogItems = selection.items;
@@ -176,7 +171,7 @@
 							} ],
 							num : maxItems
 						};
-						restApi.getAsync('/api/v1/observablefeature', null, q, function(features) {
+						restApi.getAsync('/api/v1/observablefeature', {'q': q}, function(features) {
 							if (features.total > maxItems) { 
 								molgenis.createAlert([ {
 									'message' : 'Maximum number of selected items reached (' + maxItems + ')'
@@ -197,7 +192,7 @@
 									num : maxItems
 								};
 							// TODO deal with multiple entity pages
-							restApi.getAsync('/api/v1/protocol', null, q, function(protocols) {
+							restApi.getAsync('/api/v1/protocol', {'q': q}, function(protocols) {
 								if (protocols.total > maxItems) { 
 									molgenis.createAlert([ {
 										'message' : 'Maximum number of protocols reached (' + maxItems + ')'
@@ -205,33 +200,33 @@
 								}
 								var featureMap = {};
 								$.each(features.items, function() {
-									featureMap[this.href] = this;
+									featureMap[this.href.toLowerCase()] = this;
 								});
 								var protocolMap = {};
 								$.each(protocols.items, function() {
-									protocolMap[this.href] = this;
+									protocolMap[this.href.toLowerCase()] = this;
 								});
 								var table = $('<table id="feature-selection-table" class="table table-striped table-condensed table-hover" />');
 								$('<thead />').append('<th>Group</th><th>Variable Name</th><th>Variable Identifier</th><th>Description</th><th>Remove</th>').appendTo(table);
 								$.each(catalogItems, function() {
-									var feature = featureMap[this.feature];
+									var feature = featureMap[this.feature.toLowerCase()];
 									var protocol = protocolMap[this.path[this.path.length - 1]];
-									
-									var protocolName = protocol.name;
-									var name = feature.name;
-									var identifier = feature.identifier;
+									var protocolName = protocol.Name;
+									var name = feature.Name;
+									var identifier = feature.Identifier;
 									var description = molgenis.i18n.get(feature.description);
 									var row = $('<tr />').data('key', this);
 									$('<td />').text(typeof protocolName !== 'undefined' ? protocolName : "").appendTo(row);
 									$('<td />').text(typeof name !== 'undefined' ? name : "").appendTo(row);
 									$('<td />').text(typeof identifier !== 'undefined' ? identifier : "").appendTo(row);
 									$('<td />').text(typeof description !== 'undefined' ? description : "").appendTo(row);
-									var deleteButton = $('<i class="icon-remove"></i>');
+									var deleteButton = $('<span class="glyphicon glyphicon-remove"></span>');
+									
 									deleteButton.click(function() {
 										var item = $(this).closest('tr').data('key');
 										catalogContainer.catalog('selectItem', {
 											'feature' : item.feature,
-											'path' : item.path,
+											'path' : $.map(item.path, function(pathPart){return pathPart.toLowerCase()}),
 											'select' : false
 										});
 										return false; // TODO do we need this?
@@ -245,9 +240,6 @@
 							});
 						});
 					}
-				},
-				error : function(xhr) {
-					molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 				}
 			});
 		};
@@ -260,7 +252,7 @@
 		$.ajax({
 			type : 'POST',
 			url : molgenis.getContextUrl() + '/cart/' + (select ? 'add' : 'remove') + '/' + catalogId,
-			data : JSON.stringify({'href' : resourceUri}),
+			data : JSON.stringify({'features' : [resourceUri]}),
 			contentType : 'application/json',
 			success: function() {
 				callback();

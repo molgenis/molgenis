@@ -2,6 +2,7 @@ target/
 .settings/
 .project
 .classpath
+.idea
 *.iml
 *.ipr
 *.iws
@@ -18,3 +19,6 @@ molgenis-app-omx/data
 molgenis-app-ngs/data
 test-output/
 derby.log
+
+.RData
+.RHistory

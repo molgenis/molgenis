@@ -48,6 +48,26 @@ public class UserManagerServiceImpl implements UserManagerService
 
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
+	@Transactional
+	public void setActivationUser(Integer userId, Boolean active)
+	{
+		MolgenisUser mu = this.dataService.findOne(MolgenisUser.ENTITY_NAME, userId, MolgenisUser.class);
+		mu.setActive(active);
+		this.dataService.update(MolgenisUser.ENTITY_NAME, mu);
+	}
+
+	@Override
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
+	@Transactional
+	public void setActivationGroup(Integer groupId, Boolean active)
+	{
+		MolgenisGroup mg = this.dataService.findOne(MolgenisGroup.ENTITY_NAME, groupId, MolgenisGroup.class);
+		mg.setActive(active);
+		this.dataService.update(MolgenisGroup.ENTITY_NAME, mg);
+	}
+
+	@Override
+	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@Transactional(readOnly = true)
 	public List<MolgenisGroup> getAllMolgenisGroups()
 	{
@@ -253,7 +273,7 @@ public class UserManagerServiceImpl implements UserManagerService
 		@Override
 		public boolean apply(MolgenisGroup item)
 		{
-			Integer id = item.getId();
+			Object id = item.getId();
 			for (MolgenisGroup toFilterItem : toFilterItemList)
 			{
 				if (toFilterItem.getId().equals(id)) return false;
@@ -265,10 +285,11 @@ public class UserManagerServiceImpl implements UserManagerService
 
 	private List<MolgenisUserViewData> parseToMolgenisUserViewData(Iterable<MolgenisUser> users)
 	{
+
 		List<MolgenisUserViewData> results = new ArrayList<MolgenisUserViewData>();
 		for (MolgenisUser user : users)
 		{
-			results.add(new MolgenisUserViewData(user.getId(), user.getUsername()));
+			results.add(new MolgenisUserViewData(user, getMolgenisGroups(user.getId())));
 		}
 		return results;
 	}

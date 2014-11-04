@@ -20,7 +20,6 @@ import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -29,7 +28,8 @@ public class AccountService
 	private static final Logger logger = Logger.getLogger(AccountService.class);
 
 	public static final String KEY_PLUGIN_AUTH_ACTIVATIONMODE = "plugin.auth.activation_mode";
-	public static final String ALL_USER_GROUP = "All Users";
+    public static final String KEY_PLUGIN_AUTH_ENABLE_SELFREGISTRATION = "plugin.auth.enable_self_registration";
+    public static final String ALL_USER_GROUP = "All Users";
 	private static final String KEY_APP_NAME = "app.name";
 	private static final ActivationMode DEFAULT_ACTIVATION_MODE = ActivationMode.ADMIN;
 	private static final String DEFAULT_APP_NAME = "MOLGENIS";
@@ -45,9 +45,6 @@ public class AccountService
 
 	@Autowired
 	private MolgenisUserService molgenisUserService;
-
-	@Autowired
-	private PasswordEncoder passwordEncoder;
 
 	@RunAsSystem
 	public void createUser(MolgenisUser molgenisUser, String baseActivationUri)
@@ -133,6 +130,24 @@ public class AccountService
 	}
 
 	@RunAsSystem
+	public void changePassword(String username, String newPassword)
+	{
+		MolgenisUser molgenisUser = dataService.findOne(MolgenisUser.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisUser.USERNAME, username), MolgenisUser.class);
+
+		if (molgenisUser == null)
+		{
+			throw new MolgenisUserException("Unknown user [" + username + "]");
+		}
+
+		molgenisUser.setPassword(newPassword);
+		molgenisUser.setChangePassword(false);
+		dataService.update(MolgenisUser.ENTITY_NAME, molgenisUser);
+
+		logger.info("Changed password of user [" + username + "]");
+	}
+
+	@RunAsSystem
 	public void resetPassword(String userEmail)
 	{
 		MolgenisUser molgenisUser = dataService.findOne(MolgenisUser.ENTITY_NAME,
@@ -142,7 +157,6 @@ public class AccountService
 		{
 			String newPassword = UUID.randomUUID().toString().substring(0, 8);
 			molgenisUser.setPassword(newPassword);
-			molgenisUser.setPassword(passwordEncoder.encode(newPassword));
 			dataService.update(MolgenisUser.ENTITY_NAME, molgenisUser);
 
 			// send password reseted email to user
@@ -211,4 +225,8 @@ public class AccountService
 			return defaultActivationMode;
 		}
 	}
+
+	public boolean isSelfRegistrationEnabled(){
+        return molgenisSettings.getBooleanProperty(KEY_PLUGIN_AUTH_ENABLE_SELFREGISTRATION, true);
+    }
 }

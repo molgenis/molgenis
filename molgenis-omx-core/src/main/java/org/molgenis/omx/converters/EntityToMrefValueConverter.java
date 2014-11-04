@@ -1,7 +1,6 @@
 package org.molgenis.omx.converters;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.molgenis.data.Entity;
@@ -63,6 +62,11 @@ public class EntityToMrefValueConverter implements EntityToValueConverter<MrefVa
 		{
 			for (String identifier : xrefIdentifiersPreTrim)
 			{
+				// Check on doubles
+				if (xrefIdentifiers.contains(identifier))
+				{
+					throw new ValueConverterException("Duplicate identifier '" + identifier + "'");
+				}
 
 				xrefIdentifiers.add(identifier.trim());
 			}
@@ -72,14 +76,20 @@ public class EntityToMrefValueConverter implements EntityToValueConverter<MrefVa
 		MrefValue mrefValue = (MrefValue) value;
 		try
 		{
+			// EclipseLink sometimes fails on com.google.common.collect.Lists$TransformingRandomAccessList, so keep in
+			// ArrayList
+			List<Characteristic> characteristics = Lists.newArrayList();
+
 			if (xrefIdentifiers.size() == 1)
 			{
-				mrefValue.setValue(Arrays.asList(characteristicLoader.findCharacteristic(xrefIdentifiers.get(0))));
+				characteristics.add(characteristicLoader.findCharacteristic(xrefIdentifiers.get(0)));
 			}
 			else
 			{
-				mrefValue.setValue(characteristicLoader.findCharacteristics(xrefIdentifiers));
+				characteristics.addAll(characteristicLoader.findCharacteristics(xrefIdentifiers));
 			}
+
+			mrefValue.setValue(characteristics);
 		}
 		catch (MolgenisDataException e)
 		{
@@ -89,7 +99,7 @@ public class EntityToMrefValueConverter implements EntityToValueConverter<MrefVa
 	}
 
 	@Override
-	public Cell<List<Cell<String>>> toCell(Value value) throws ValueConverterException
+	public Cell<List<Cell<String>>> toCell(Value value, ObservableFeature feature) throws ValueConverterException
 	{
 		if (!(value instanceof MrefValue))
 		{
@@ -101,7 +111,8 @@ public class EntityToMrefValueConverter implements EntityToValueConverter<MrefVa
 					@Override
 					public Cell<String> apply(Characteristic characteristic)
 					{
-						return new ValueCell<String>(characteristic.getIdentifier(), characteristic.getName());
+						return new ValueCell<String>(characteristic.getId(), characteristic.getIdentifier(),
+								characteristic.getIdentifier());
 					}
 				});
 		return new ValueCell<List<Cell<String>>>(mrefList);

@@ -1,7 +1,6 @@
 package org.molgenis.omx.converters;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 
 import org.molgenis.data.Entity;
 import org.molgenis.omx.observ.ObservableFeature;
@@ -9,11 +8,10 @@ import org.molgenis.omx.observ.value.DateValue;
 import org.molgenis.omx.observ.value.Value;
 import org.molgenis.omx.utils.ValueCell;
 import org.molgenis.util.Cell;
+import org.molgenis.util.MolgenisDateFormat;
 
 public class EntityToDateValueConverter implements EntityToValueConverter<DateValue, String>
 {
-	private static final String DATEFORMAT_DATE = "yyyy-MM-dd";
-
 	@Override
 	public DateValue fromEntity(Entity entity, String attributeName, ObservableFeature feature)
 			throws ValueConverterException
@@ -32,11 +30,10 @@ public class EntityToDateValueConverter implements EntityToValueConverter<DateVa
 		String dateStr = entity.getString(attributeName);
 		if (dateStr == null) return null;
 
-		SimpleDateFormat iso8601DateFormat = new SimpleDateFormat(DATEFORMAT_DATE);
 		DateValue dateValue = (DateValue) value;
 		try
 		{
-			dateValue.setValue(iso8601DateFormat.parse(dateStr));
+			dateValue.setValue(MolgenisDateFormat.getDateFormat().parse(dateStr));
 		}
 		catch (ParseException e)
 		{
@@ -46,13 +43,12 @@ public class EntityToDateValueConverter implements EntityToValueConverter<DateVa
 	}
 
 	@Override
-	public Cell<String> toCell(Value value) throws ValueConverterException
+	public Cell<String> toCell(Value value, ObservableFeature feature) throws ValueConverterException
 	{
 		if (!(value instanceof DateValue))
 		{
 			throw new ValueConverterException("value is not a " + DateValue.class.getSimpleName());
 		}
-		SimpleDateFormat iso8601DateFormat = new SimpleDateFormat(DATEFORMAT_DATE);
-		return new ValueCell<String>(iso8601DateFormat.format(((DateValue) value).getValue()));
+		return new ValueCell<String>(MolgenisDateFormat.getDateFormat().format(((DateValue) value).getValue()));
 	}
 }

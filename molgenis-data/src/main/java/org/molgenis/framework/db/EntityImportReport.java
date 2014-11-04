@@ -1,95 +1,62 @@
 package org.molgenis.framework.db;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
+
+import com.google.common.collect.Lists;
 
 public class EntityImportReport implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
-	private List<String> progressLog;
-	private Map<String, AtomicInteger> nrImportedEntitiesMap;
-	private String errorItem;
-	private int nrImported;
+	private final Map<String, Integer> nrImportedEntitiesMap;
+	private final List<String> newEntities = Lists.newArrayList();
 
 	public EntityImportReport()
 	{
-		progressLog = new ArrayList<String>();
-		nrImportedEntitiesMap = new HashMap<String, AtomicInteger>();
-		errorItem = "no error found";
-		nrImported = 0;
-	}
-
-	public List<String> getProgressLog()
-	{
-		return progressLog;
-	}
-
-	public void setProgressLog(List<String> progressLog)
-	{
-		this.progressLog = progressLog;
+		nrImportedEntitiesMap = new HashMap<String, Integer>();
 	}
 
 	public void addEntityCount(String entityName, int count)
 	{
-		AtomicInteger entityCount = nrImportedEntitiesMap.get(entityName);
+		Integer entityCount = nrImportedEntitiesMap.get(entityName);
 		if (entityCount == null)
 		{
-			entityCount = new AtomicInteger(0);
+			entityCount = 0;
 			nrImportedEntitiesMap.put(entityName, entityCount);
 		}
-		entityCount.addAndGet(count);
+		nrImportedEntitiesMap.put(entityName, entityCount + count);
 	}
 
-	public Map<String, AtomicInteger> getNrImportedEntitiesMap()
+	public Map<String, Integer> getNrImportedEntitiesMap()
 	{
 		return nrImportedEntitiesMap;
 	}
 
-	public void setNrImportedEntitiesMap(Map<String, AtomicInteger> nrImportedEntitiesMap)
+	public void addNewEntity(String entityName)
 	{
-		this.nrImportedEntitiesMap = nrImportedEntitiesMap;
+		newEntities.add(entityName);
 	}
 
-	public String getErrorItem()
+	public List<String> getNewEntities()
 	{
-		return errorItem;
+		return newEntities;
 	}
 
-	public void setErrorItem(String errorItem)
+	@Override
+	public String toString()
 	{
-		this.errorItem = errorItem;
-	}
+		StringBuilder sb = new StringBuilder();
 
-	public int getNrImported()
-	{
-		return nrImported;
-	}
-
-	public void addNrImported(int nrImported)
-	{
-		this.nrImported += nrImported;
-	}
-
-	public void addEntityImportReport(EntityImportReport entityImportReport)
-	{
-		progressLog.addAll(entityImportReport.getProgressLog());
-		for (Map.Entry<String, AtomicInteger> entry : entityImportReport.getNrImportedEntitiesMap().entrySet())
+		for (String entity : nrImportedEntitiesMap.keySet())
 		{
-			String entityName = entry.getKey();
-			AtomicInteger entityCount = nrImportedEntitiesMap.get(entityName);
-			if (entityCount == null)
-			{
-				entityCount = new AtomicInteger(0);
-				nrImportedEntitiesMap.put(entityName, entityCount);
-			}
-			entityCount.addAndGet(entry.getValue().get());
+			sb.append("Imported ").append(nrImportedEntitiesMap.get(entity)).append(" ").append(entity)
+					.append(" entities.<br />");
 		}
-		errorItem = entityImportReport.getErrorItem();
-		nrImported += entityImportReport.getNrImported();
+
+		return sb.toString();
 	}
+
 }

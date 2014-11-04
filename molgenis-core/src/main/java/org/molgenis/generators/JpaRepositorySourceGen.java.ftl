@@ -4,24 +4,22 @@
  */
 package org.molgenis.data.jpa;
 
-import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.Repository;
 import org.molgenis.data.CrudRepository;
-import org.molgenis.data.RepositorySource;
+import org.molgenis.data.RepositoryCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-@Component("JpaRepositorySource")
-public class JpaRepositorySource implements RepositorySource
+@Component("JpaRepositoryCollection")
+public class JpaRepositoryCollection implements RepositoryCollection
 {
 	private final Map<String, Repository> repositories = Maps.newLinkedHashMap();
-
+     
 	<#list model.entities as entity>
 	<#if !entity.abstract>
 	@Autowired
@@ -31,24 +29,23 @@ public class JpaRepositorySource implements RepositorySource
 		<#if disable_decorators>
 		repositories.put("${entity.name}", ${name(entity)}Repository);
 		<#elseif entity.decorator?exists>
-		repositories.put("${entity.name}", new ${entity.decorator}(new ${entity.namespace}.db.${JavaName(entity)}SecurityDecorator(${name(entity)}Repository)));	
+		repositories.put("${entity.name}", new ${entity.decorator}(${name(entity)}Repository));	
 		<#else>
-		repositories.put("${entity.name}", new ${entity.namespace}.db.${JavaName(entity)}SecurityDecorator(${name(entity)}Repository));	
+		repositories.put("${entity.name}", ${name(entity)}Repository);	
 		</#if>
 	}
 	</#if>
 	</#list>
 	
 	@Override
-	public List<Repository> getRepositories()
+	public Iterable<String> getEntityNames()
 	{
-		return Lists.newArrayList(repositories.values());
+		return repositories.keySet();
 	}
 
 	@Override
-	public Repository getRepository(String name)
+	public Repository getRepositoryByEntityName(String name)
 	{
 		return repositories.get(name);
 	}
-
 }
