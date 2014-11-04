@@ -1,5 +1,7 @@
 package org.molgenis.security.login;
 
+import org.molgenis.framework.server.MolgenisSettings;
+import org.molgenis.security.account.AccountService;
 import org.molgenis.util.ResourceFingerprintRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -14,6 +16,9 @@ public class MolgenisLoginController
 	private final ResourceFingerprintRegistry resourceFingerprintRegistry;
 
 	@Autowired
+	private MolgenisSettings molgenisSettings;
+
+	@Autowired
 	public MolgenisLoginController(ResourceFingerprintRegistry resourceFingerprintRegistry)
 	{
 		if (resourceFingerprintRegistry == null) throw new IllegalArgumentException(
@@ -25,6 +30,9 @@ public class MolgenisLoginController
 	public String getLoginPage(Model model)
 	{
 		model.addAttribute("resource_fingerprint_registry", resourceFingerprintRegistry);
+		model.addAttribute("enable_self_registration",
+				molgenisSettings.getBooleanProperty(AccountService.KEY_PLUGIN_AUTH_ENABLE_SELFREGISTRATION, true));
+
 		return "view-login";
 	}
 
@@ -33,6 +41,9 @@ public class MolgenisLoginController
 	{
 		model.addAttribute("resource_fingerprint_registry", resourceFingerprintRegistry);
 		model.addAttribute("errorMessage", "The username or password you entered is incorrect.");
+		model.addAttribute("enable_self_registration",
+				molgenisSettings.getBooleanProperty(AccountService.KEY_PLUGIN_AUTH_ENABLE_SELFREGISTRATION, true));
+
 		return "view-login";
 	}
 }

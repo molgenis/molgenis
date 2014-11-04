@@ -1,6 +1,7 @@
 package org.molgenis.data.semantic;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.molgenis.data.AttributeMetaData;
@@ -62,6 +63,8 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 			EntityMetaData entityMetaData, AttributeMetaData attributeMetaData)
 	{
 		Entity entity = findAttributeEntity(entityMetaData.getName(), attributeMetaData.getName());
+		if (entity == null) return Collections.<Tag<AttributeMetaData, LabeledResource, LabeledResource>> emptyList();
+
 		List<Tag<AttributeMetaData, LabeledResource, LabeledResource>> tags = new ArrayList<Tag<AttributeMetaData, LabeledResource, LabeledResource>>();
 		for (Entity tagEntity : entity.getEntities(AttributeMetaDataMetaData.TAGS))
 		{

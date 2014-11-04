@@ -34,7 +34,9 @@
                     </div>
                 </div>
                 <#-- links to other modals -->
-                <p><a class="modal-href" href="/account/register" data-target="register-modal-container"><small>Sign up</small></a></p>
+                <#if enable_self_registration == true>
+                    <p><a class="modal-href" href="/account/register" data-target="register-modal-container"><small>Sign up</small></a></p>
+                </#if>
                 <p><a class="modal-href" href="/account/password/reset" data-target="resetpassword-modal-container"><small>Forgot password?</small></a></p>
             </div>
         </div>
