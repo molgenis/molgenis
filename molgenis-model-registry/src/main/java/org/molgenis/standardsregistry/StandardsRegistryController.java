@@ -99,8 +99,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 		{
 			Package p = searchResult.getPackageFound();
 			PackageResponse pr = new PackageResponse(p.getSimpleName(), p.getDescription(),
-					searchResult.getMatchDescription(), getEntitiesInPackage(p.getName()),
-					tagService.getTagsForPackage(p));
+					searchResult.getMatchDescription(), getEntitiesInPackage(p.getName()), getTagsForPackage(p));
 			packageResponses.add(pr);
 		}
 
@@ -162,7 +161,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 		if (molgenisPackage == null) return null;
 
 		return new PackageResponse(molgenisPackage.getName(), molgenisPackage.getDescription(), null,
-				getEntitiesInPackage(molgenisPackage.getName()), tagService.getTagsForPackage(molgenisPackage));
+				getEntitiesInPackage(molgenisPackage.getName()), getTagsForPackage(molgenisPackage));
 	}
 
 	/* PACKAGE TREE */
@@ -250,6 +249,18 @@ public class StandardsRegistryController extends MolgenisPluginController
 		}
 
 		return new PackageTreeNode("attribute", title, key, tooltip, folder, expanded, data, result);
+	}
+
+	private List<PackageResponse.Tag> getTagsForPackage(Package p)
+	{
+		List<PackageResponse.Tag> tags = Lists.newArrayList();
+
+		for (Tag<Package, LabeledResource, LabeledResource> tag : tagService.getTagsForPackage(p))
+		{
+			tags.add(new PackageResponse.Tag(tag.getObject().getLabel(), tag.getRelation().toString()));
+		}
+
+		return tags;
 	}
 
 	private List<PackageResponse.Entity> getEntitiesInPackage(String packageName)
@@ -373,11 +384,10 @@ public class StandardsRegistryController extends MolgenisPluginController
 		private final String description;
 		private final String matchDescription;
 		private final List<PackageResponse.Entity> entitiesInPackage;
-		private final Iterable<Tag<Package, LabeledResource, LabeledResource>> tags;
+		private final List<Tag> tags;
 
 		public PackageResponse(String name, String description, String matchDescription,
-				List<PackageResponse.Entity> entitiesInPackage,
-				Iterable<Tag<Package, LabeledResource, LabeledResource>> tags)
+				List<PackageResponse.Entity> entitiesInPackage, List<Tag> tags)
 		{
 			this.name = name;
 			this.description = description;
@@ -411,7 +421,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 		}
 
 		@SuppressWarnings("unused")
-		public Iterable<Tag<Package, LabeledResource, LabeledResource>> getTags()
+		public Iterable<Tag> getTags()
 		{
 			return tags;
 		}
@@ -439,6 +449,32 @@ public class StandardsRegistryController extends MolgenisPluginController
 			{
 				return label;
 			}
+		}
+
+		private static class Tag
+		{
+			private final String label;
+			private final String relation;
+
+			public Tag(String label, String relation)
+			{
+				super();
+				this.label = label;
+				this.relation = relation;
+			}
+
+			@SuppressWarnings("unused")
+			public String getLabel()
+			{
+				return label;
+			}
+
+			@SuppressWarnings("unused")
+			public String getRelation()
+			{
+				return relation;
+			}
+
 		}
 	}
 

@@ -50,6 +50,19 @@
 	<div class="well package" data-id="{{package.name}}">
   		<h3 style="margin-top: 0px;">{{package.name}}</h3>
   		<p>{{package.description}}</p>
+  		<p>
+  			{{#each tags}}
+  				{{#equal this.relation 'link'}}
+  					<span class="label label-primary"><a href='{{this.label}}' target="_blank">{{this.label}}</a></span>
+  				{{/equal}}
+  				{{#notequal this.relation 'link'}}
+  					<span class="label label-primary">{{this.label}}</span>
+  				{{/notequal}}
+  			{{/each}}
+  		</p>
+  		{{#if package.matchDescription}}
+        	<p><span class="label label-default">{{package.matchDescription}}</span></p>
+        {{/if}}
         <form class="form-inline">
             <div class="form-group">
         	   <a class="btn btn-primary details-btn" href="#" role="button">View Model Details</a>
@@ -68,11 +81,6 @@
     			</div>
 			</div>
         </form>
-        <div class="search-result-match">
-            {{#if package.matchDescription}}
-                <p class="bg-info">{{package.matchDescription}}</p>
-            {{/if}}
-        </div>
   	</div>
 </script>
 <@footer />

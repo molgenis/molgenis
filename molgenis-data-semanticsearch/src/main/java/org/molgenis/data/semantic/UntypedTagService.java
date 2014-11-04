@@ -12,7 +12,6 @@ import org.molgenis.data.Query;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.PackageMetaData;
-import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.support.QueryImpl;
 
 import com.google.common.collect.Lists;
@@ -48,7 +47,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 		List<Entity> tags = new ArrayList<Entity>();
 		for (Entity tagEntity : attributeEntity.getEntities(AttributeMetaDataMetaData.TAGS))
 		{
-			Tag<AttributeMetaData, LabeledResource, LabeledResource> tag = asTag(attributeMetaData, tagEntity);
+			Tag<AttributeMetaData, LabeledResource, LabeledResource> tag = TagImpl.asTag(attributeMetaData, tagEntity);
 			if (!removeTag.equals(tag))
 			{
 				tags.add(tagEntity);
@@ -66,7 +65,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 		List<Tag<AttributeMetaData, LabeledResource, LabeledResource>> tags = new ArrayList<Tag<AttributeMetaData, LabeledResource, LabeledResource>>();
 		for (Entity tagEntity : entity.getEntities(AttributeMetaDataMetaData.TAGS))
 		{
-			tags.add(asTag(attributeMetaData, tagEntity));
+			tags.add(TagImpl.asTag(attributeMetaData, tagEntity));
 		}
 		return tags;
 	}
@@ -106,21 +105,9 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 		List<Tag<Package, LabeledResource, LabeledResource>> tags = Lists.newArrayList();
 		for (Entity tagEntity : packageEntity.getEntities(PackageMetaData.TAGS))
 		{
-			tags.add(asTag(p, tagEntity));
+			tags.add(TagImpl.asTag(p, tagEntity));
 		}
 
 		return tags;
-	}
-
-	private <SubjectType> TagImpl<SubjectType, LabeledResource, LabeledResource> asTag(SubjectType subjectType,
-			Entity tagEntity)
-	{
-		Relation relation = Relation.forIRI(tagEntity.getString(TagMetaData.RELATION_IRI));
-		LabeledResource codeSystem = new LabeledResource(tagEntity.getString(TagMetaData.CODE_SYSTEM));
-		LabeledResource objectResource = new LabeledResource(tagEntity.getString(TagMetaData.OBJECT_IRI),
-				tagEntity.getString(TagMetaData.LABEL));
-
-		return new TagImpl<SubjectType, LabeledResource, LabeledResource>(subjectType, relation, objectResource,
-				codeSystem);
 	}
 }

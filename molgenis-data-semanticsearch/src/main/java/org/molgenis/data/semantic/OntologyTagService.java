@@ -98,12 +98,14 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 
 	private <SubjectType> TagImpl<SubjectType, OntologyTerm, Ontology> asTag(SubjectType subjectType, Entity tagEntity)
 	{
+		String identifier = tagEntity.getString(TagMetaData.IDENTIFIER);
 		Relation relation = Relation.forIRI(tagEntity.getString(TagMetaData.RELATION_IRI));
 		Ontology ontology = ontologyService.getOntology(tagEntity.getString(TagMetaData.CODE_SYSTEM));
 		OntologyTerm ontologyTerm = ontologyService.getOntologyTerm(tagEntity.getString(TagMetaData.OBJECT_IRI),
 				ontology.getIri());
 
-		return new TagImpl<SubjectType, OntologyTerm, Ontology>(subjectType, relation, ontologyTerm, ontology);
+		return new TagImpl<SubjectType, OntologyTerm, Ontology>(identifier, subjectType, relation, ontologyTerm,
+				ontology);
 	}
 
 	@Override

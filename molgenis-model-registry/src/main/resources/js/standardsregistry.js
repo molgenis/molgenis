@@ -46,7 +46,7 @@
 	function renderSearchResults(searchResults, container) {
 		container.empty();
 		for(var i = 0; i < searchResults.packages.length; ++i){			
-			container.append(modelTemplate({'package': searchResults.packages[i], 'entities' : searchResults.packages[i].entitiesInPackage}));
+			container.append(modelTemplate({'package': searchResults.packages[i], 'entities' : searchResults.packages[i].entitiesInPackage, 'tags' : searchResults.packages[i].tags}));
 		}
 		container.append(countTemplate({'count': searchResults.total}));
 		$('.select2').select2({width: 300});
@@ -135,6 +135,26 @@
 		
 		$(document).on('click', '#uml-tab', function() {
 			$.getScript(molgenis.getContextUrl() + '/uml?package=' + detailsPackageName);
+		});
+		
+		Handlebars.registerHelper('notequal', function(lvalue, rvalue, options) {
+		    if (arguments.length < 3)
+		        throw new Error("Handlebars Helper equal needs 2 parameters");
+		    if (lvalue != rvalue) {
+		    	 return options.fn(this);
+		    } else {
+		    	 return options.inverse(this);
+		    }
+		});
+		
+		Handlebars.registerHelper('equal', function(lvalue, rvalue, options) {
+		    if (arguments.length < 3)
+		        throw new Error("Handlebars Helper equal needs 2 parameters");
+		    if (lvalue != rvalue) {
+		        return options.inverse(this);
+		    } else {
+		        return options.fn(this);
+		    }
 		});
 		
 		countTemplate = Handlebars.compile($("#count-template").html());

@@ -136,9 +136,9 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 				.thenReturn(geneAnnotation);
 
 		Tag<AttributeMetaData, OntologyTerm, Ontology> chromosomeTag = new TagImpl<AttributeMetaData, OntologyTerm, Ontology>(
-				attributeMetaData, instanceOf, chromosomeName, edamOntology);
+				"1234", attributeMetaData, instanceOf, chromosomeName, edamOntology);
 		Tag<AttributeMetaData, OntologyTerm, Ontology> geneAnnotationTag = new TagImpl<AttributeMetaData, OntologyTerm, Ontology>(
-				attributeMetaData, instanceOf, geneAnnotation, edamOntology);
+				"4321", attributeMetaData, instanceOf, geneAnnotation, edamOntology);
 
 		assertEquals(ontologyTagService.getTagsForAttribute(emd, attributeMetaData),
 				Arrays.asList(chromosomeTag, geneAnnotationTag));
@@ -164,7 +164,7 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 
 		when(edamOntology.getIri()).thenReturn("http://edamontology.org");
 
-		Tag<Object, OntologyTerm, Ontology> tag = new TagImpl<Object, OntologyTerm, Ontology>(null,
+		Tag<Object, OntologyTerm, Ontology> tag = new TagImpl<Object, OntologyTerm, Ontology>("1233", null,
 				Relation.instanceOf, coreData, edamOntology);
 		when(
 				tagRepository.getTagEntity("http://edamontology.org/data_3031", "Core data", Relation.instanceOf,
@@ -188,7 +188,7 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 				.thenReturn(CHROMOSOME_NAME_ONTOLOGY_TERM);
 
 		Tag<AttributeMetaData, OntologyTerm, Ontology> chromosomeTag = new TagImpl<AttributeMetaData, OntologyTerm, Ontology>(
-				attributeMetaData, instanceOf, CHROMOSOME_NAME_ONTOLOGY_TERM, EDAM_ONTOLOGY);
+				"1233", attributeMetaData, instanceOf, CHROMOSOME_NAME_ONTOLOGY_TERM, EDAM_ONTOLOGY);
 
 		when(
 				dataService.findOne(
@@ -225,7 +225,7 @@ public class OntologyTagServiceTest extends AbstractTestNGSpringContextTests
 								.eq(AttributeMetaDataMetaData.NAME, "Chr"))).thenReturn(attributeEntity);
 
 		Tag<AttributeMetaData, OntologyTerm, Ontology> geneAnnotationTag = new TagImpl<AttributeMetaData, OntologyTerm, Ontology>(
-				attributeMetaData, instanceOf, GENE_ANNOTATION_ONTOLOGY_TERM, EDAM_ONTOLOGY);
+				"4321", attributeMetaData, instanceOf, GENE_ANNOTATION_ONTOLOGY_TERM, EDAM_ONTOLOGY);
 
 		ontologyTagService.removeAttributeTag(emd, geneAnnotationTag);
 

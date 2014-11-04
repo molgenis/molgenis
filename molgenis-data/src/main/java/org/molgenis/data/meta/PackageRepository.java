@@ -11,6 +11,9 @@ import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
 import org.molgenis.data.ManageableCrudRepositoryCollection;
 import org.molgenis.data.Package;
+import org.molgenis.data.semantic.LabeledResource;
+import org.molgenis.data.semantic.Tag;
+import org.molgenis.data.semantic.TagImpl;
 import org.molgenis.util.DependencyResolver;
 
 import com.google.common.collect.Lists;
@@ -138,6 +141,15 @@ class PackageRepository
 			{
 				parent.addSubPackage(pImpl);
 			}
+
+			if (p.getTags() != null)
+			{
+				for (Tag<Package, LabeledResource, LabeledResource> tag : p.getTags())
+				{
+					pImpl.addTag(tag);
+				}
+			}
+
 			repository.add(pImpl.toEntity());
 			packageCache.put(p.getName(), pImpl);
 		}
@@ -177,6 +189,16 @@ class PackageRepository
 		{
 			PackageImpl p = new PackageImpl(entity.getString(PackageMetaData.SIMPLE_NAME),
 					entity.getString(PackageMetaData.DESCRIPTION));
+
+			Iterable<Entity> tags = entity.getEntities(PackageMetaData.TAGS);
+			if (tags != null)
+			{
+				for (Entity tagEntity : tags)
+				{
+					p.addTag(TagImpl.<Package> asTag(p, tagEntity));
+				}
+			}
+
 			result.put(entity.getString(PackageMetaData.FULL_NAME), p);
 		}
 
@@ -201,5 +223,4 @@ class PackageRepository
 		}
 		return result;
 	}
-
 }

@@ -49,6 +49,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Range;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.PackageImpl;
@@ -56,6 +57,8 @@ import org.molgenis.data.meta.PackageMetaData;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.meta.WritableMetaDataService;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
+import org.molgenis.data.semantic.TagImpl;
+import org.molgenis.data.semantic.UntypedTagService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
@@ -119,8 +122,7 @@ public class EmxImportService implements ImportService
 	private final DataService dataService;
 	private PermissionSystemService permissionSystemService;
 	private WritableMetaDataService metaDataService;
-
-	// private UntypedTagService untypedTagService;
+	private UntypedTagService untypedTagService;
 
 	@Autowired
 	public EmxImportService(DataService dataService)
@@ -150,6 +152,12 @@ public class EmxImportService implements ImportService
 	public void setPermissionSystemService(PermissionSystemService permissionSystemService)
 	{
 		this.permissionSystemService = permissionSystemService;
+	}
+
+	@Autowired
+	public void setUntypedTagService(UntypedTagService untypedTagService)
+	{
+		this.untypedTagService = untypedTagService;
 	}
 
 	@Override
@@ -320,7 +328,7 @@ public class EmxImportService implements ImportService
 		// load attributes first, entities and packages are optional
 		loadAllAttributesToMap(source, entities);
 		loadAllEntitiesToMap(source, entities);
-		loadAllPackagesToMap(source, entities);
+		loadEntityPackagesToMap(source, entities);
 		reiterateToMapRefEntity(source, entities);
 
 		return entities;
@@ -550,74 +558,120 @@ public class EmxImportService implements ImportService
 		}
 	}
 
+	private Map<String, PackageImpl> loadAllPackagesToMap(RepositoryCollection source)
+	{
+		Map<String, PackageImpl> packages = Maps.newHashMap();
+		Repository repo = null;
+		try
+		{
+			repo = source.getRepositoryByEntityName(PACKAGES);
+		}
+		catch (UnknownEntityException e)
+		{
+			// No packages
+			return packages;
+		}
+
+		// Collect packages
+		int i = 1;
+		for (Entity pack : repo)
+		{
+			i++;
+			String simpleName = pack.getString(NAME);
+
+			// required
+			if (simpleName == null) throw new IllegalArgumentException("package.name is missing on line " + i);
+
+			PackageImpl parentPackage = null;
+			String description = pack.getString(org.molgenis.data.meta.PackageMetaData.DESCRIPTION);
+			String parent = pack.getString(org.molgenis.data.meta.PackageMetaData.PARENT);
+			if (parent != null)
+			{
+				parentPackage = new PackageImpl(parent, null);
+			}
+			Iterable<String> tagIdentifiers = pack.getList(org.molgenis.data.meta.PackageMetaData.TAGS);
+			PackageImpl p = new PackageImpl(simpleName, description, parentPackage);
+
+			// Tags
+			try
+			{
+				Repository tagsRepo = source.getRepositoryByEntityName(TagMetaData.ENTITY_NAME);
+
+				for (String tagIdentifier : tagIdentifiers)
+				{
+					Entity tagEntity = getTagFromSource(tagIdentifier, tagsRepo);
+					if (tagEntity == null)
+					{
+						throw new IllegalArgumentException("Unknown tag '" + tagIdentifier + "'");
+					}
+					p.addTag(TagImpl.<Package> asTag(p, tagEntity));
+				}
+			}
+			catch (UnknownEntityException e)
+			{
+				// No tags tab
+				if (tagIdentifiers != null && !Iterables.isEmpty(tagIdentifiers))
+				{
+					throw new IllegalArgumentException("Missing tags");
+				}
+			}
+
+			packages.put(simpleName, p);
+		}
+
+		// Resolve parent packages
+		for (PackageImpl p : packages.values())
+		{
+			if (p.getParent() != null)
+			{
+				PackageImpl parent = packages.get(p.getParent().getSimpleName());
+				if (parent == null) throw new IllegalArgumentException("Unknown parent package '"
+						+ p.getParent().getSimpleName() + "' of package '" + p.getSimpleName() + "'");
+
+				p.setParent(parent);
+			}
+		}
+
+		return packages;
+	}
+
 	/**
-	 * Load all packages (optional)
+	 * Load entity packages (optional)
 	 * 
 	 * @param source
 	 *            the map to add package meta data
 	 */
-	private void loadAllPackagesToMap(RepositoryCollection source, Map<String, EditableEntityMetaData> entities)
+	private void loadEntityPackagesToMap(RepositoryCollection source, Map<String, EditableEntityMetaData> entities)
 	{
-		if (source.getRepositoryByEntityName(PACKAGES) != null)
+		Map<String, PackageImpl> packages = loadAllPackagesToMap(source);
+
+		// Resolve entity packages
+		for (EditableEntityMetaData emd : entities.values())
 		{
-			Map<String, PackageImpl> packages = Maps.newHashMap();
-
-			// Collect packages
-			int i = 1;
-			for (Entity pack : source.getRepositoryByEntityName(PACKAGES))
+			if (emd.getPackage() != null)
 			{
-				i++;
-				String simpleName = pack.getString(NAME);
+				Package p = packages.get(emd.getPackage().getSimpleName());
+				if (p == null) throw new IllegalArgumentException("Unknown package '"
+						+ emd.getPackage().getSimpleName() + "' of entity '" + emd.getSimpleName() + "'");
 
-				// required
-				if (simpleName == null) throw new IllegalArgumentException("package.name is missing on line " + i);
-
-				PackageImpl parentPackage = null;
-				String description = pack.getString(org.molgenis.data.meta.PackageMetaData.DESCRIPTION);
-				String parent = pack.getString(org.molgenis.data.meta.PackageMetaData.PARENT);
-				if (parent != null)
-				{
-					parentPackage = new PackageImpl(parent, null);
-				}
-
-				packages.put(simpleName, new PackageImpl(simpleName, description, parentPackage));
-			}
-
-			// Resolve parent packages
-			for (PackageImpl p : packages.values())
-			{
-				if (p.getParent() != null)
-				{
-					PackageImpl parent = packages.get(p.getParent().getSimpleName());
-					if (parent == null) throw new IllegalArgumentException("Unknown parent package '"
-							+ p.getParent().getSimpleName() + "' of package '" + p.getSimpleName() + "'");
-
-					p.setParent(parent);
-				}
-			}
-
-			// Resolve entity packages
-			for (EditableEntityMetaData emd : entities.values())
-			{
-				if (emd.getPackage() != null)
-				{
-					Package p = packages.get(emd.getPackage().getSimpleName());
-					if (p == null) throw new IllegalArgumentException("Unknown package '"
-							+ emd.getPackage().getSimpleName() + "' of entity '" + emd.getSimpleName() + "'");
-
-					emd.setPackage(p);
-				}
-			}
-
-			// Add packages to the packages table
-			for (Package p : packages.values())
-			{
-				if (p != null)
-				{
-					metaDataService.addPackage(p);
-				}
+				emd.setPackage(p);
 			}
 		}
+
+	}
+
+	private Entity getTagFromSource(String identifier, Repository source)
+	{
+		for (Entity tag : source)
+		{
+			String id = tag.getString(TagMetaData.IDENTIFIER);
+			if ((id != null) && id.equals(identifier))
+			{
+				return tag;
+			}
+		}
+
+		return null;
 	}
 
 	/**
@@ -680,6 +734,39 @@ public class EmxImportService implements ImportService
 
 			try
 			{
+				// Import tags
+				// Tags
+				try
+				{
+					for (Entity tag : source.getRepositoryByEntityName(TagMetaData.ENTITY_NAME))
+					{
+						Entity tagEntity = dataService.findOne(TagMetaData.ENTITY_NAME,
+								tag.getString(TagMetaData.IDENTIFIER));
+						if (tagEntity == null)
+						{
+							dataService.add(TagMetaData.ENTITY_NAME, tag);
+						}
+						else
+						{
+							dataService.update(TagMetaData.ENTITY_NAME, tag);
+						}
+					}
+				}
+				catch (UnknownEntityException e)
+				{
+					// No tags tab
+				}
+
+				// Import packages
+				Map<String, PackageImpl> packages = loadAllPackagesToMap(source);
+				for (Package p : packages.values())
+				{
+					if (p != null)
+					{
+						metaDataService.addPackage(p);
+					}
+				}
+
 				Set<EntityMetaData> allMetaData = Sets.newLinkedHashSet(sourceMetadata);
 				Iterable<EntityMetaData> existingMetaData = metaDataService.getEntityMetaDatas();
 				Iterables.addAll(allMetaData, existingMetaData);
@@ -693,7 +780,8 @@ public class EmxImportService implements ImportService
 				for (EntityMetaData entityMetaData : resolved)
 				{
 					String name = entityMetaData.getName();
-					if (!ENTITIES.equals(name) && !ATTRIBUTES.equals(name) && !PACKAGES.equals(name))
+					if (!ENTITIES.equals(name) && !ATTRIBUTES.equals(name) && !PACKAGES.equals(name)
+							&& !TAGS.equals(name))
 					{
 						if (metaDataService.getEntityMetaData(entityMetaData.getName()) == null)
 						{
