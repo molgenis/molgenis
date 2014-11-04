@@ -339,7 +339,6 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 			@Override
 			public WritableMetaDataService decorate(WritableMetaDataService metaDataRepositories)
 			{
-				System.out.println("Decorating metaDataRepositories");
 				return new IndexingWritableMetaDataServiceDecorator(metaDataRepositories, dataService,
 						elasticSearchService);
 			}
