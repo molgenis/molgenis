@@ -1,6 +1,7 @@
 package org.molgenis.data.mysql;
 
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -12,7 +13,7 @@ public class MysqlRepositoryTextTest extends MysqlRepositoryAbstractDatatypeTest
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		DefaultEntityMetaData varcharMD = new DefaultEntityMetaData("TextTest").setLabel("Text Test");
+		EditableEntityMetaData varcharMD = new DefaultEntityMetaData("TextTest").setLabel("Text Test");
 		varcharMD.setIdAttribute("identifier");
 		varcharMD.addAttribute("identifier").setDataType(MolgenisFieldTypes.INT).setAuto(true).setNillable(false);
 		varcharMD.addAttribute("col1").setDataType(MolgenisFieldTypes.TEXT).setNillable(false);

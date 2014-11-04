@@ -1,7 +1,5 @@
 package org.molgenis.omx.das.impl;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -18,9 +16,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.GenomeConfig;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.das.RangeHandlingDataSource;
-import org.molgenis.util.ApplicationContextProvider;
 
 import uk.ac.ebi.mydas.configuration.DataSourceConfiguration;
 import uk.ac.ebi.mydas.configuration.PropertyType;
@@ -29,10 +25,7 @@ import uk.ac.ebi.mydas.exceptions.BadReferenceObjectException;
 import uk.ac.ebi.mydas.exceptions.DataSourceException;
 import uk.ac.ebi.mydas.model.DasAnnotatedSegment;
 import uk.ac.ebi.mydas.model.DasFeature;
-import uk.ac.ebi.mydas.model.DasFeatureOrientation;
 import uk.ac.ebi.mydas.model.DasMethod;
-import uk.ac.ebi.mydas.model.DasPhase;
-import uk.ac.ebi.mydas.model.DasTarget;
 import uk.ac.ebi.mydas.model.DasType;
 
 import static org.molgenis.util.ApplicationContextProvider.*;
@@ -70,11 +63,16 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource i
 		String customParam;
 		String segmentId = null;
 
-		String startAttribute = null;
+		String posAttribute = null;
 		String chromosomeAttribute = null;
 		String idAttribute = null;
 		String stopAttribute = null;
-		String descriptionAttribute = null;
+        String refAttribute = null;
+        String altAttribute = null;
+        String descriptionAttribute = null;
+        String nameAttribute = null;
+        String linkAttribute = null;
+        String patientAttribute = null;
 
 		if (segmentParts.length > 1)
 		{
@@ -96,46 +94,34 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource i
 		Map<String, DasType> patients = new HashMap<String, DasType>();
 		for (Entity entity : entityIterable)
 		{
-			if (startAttribute == null)
-			{
-				startAttribute = config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_START,
-						entity.getEntityMetaData());
-			}
-			if (chromosomeAttribute == null)
-			{
-				chromosomeAttribute = config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_CHROM,
-						entity.getEntityMetaData());
-			}
-			if (idAttribute == null)
-			{
-				idAttribute = config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_ID,
-						entity.getEntityMetaData());
-			}
-			if (stopAttribute == null)
-			{
-				stopAttribute = config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_STOP,
-						entity.getEntityMetaData());
-			}
-			if (descriptionAttribute == null)
-			{
-				descriptionAttribute = config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_DESCRIPTION,
-						entity.getEntityMetaData());
-			}
+            DasFeature feature;
 
-			DasFeature feature;
+            Integer valueStart = null;
+            Integer valueStop = null;
+            String valueDescription = null;
+            String valueIdentifier = null;
+            String valueName = null;
+            String valueLink = null;
+            String valuePatient = null;
+            String valueRef = null;
+            String valueAlt = null;
 
-			Integer valueStart = null;
-			Integer valueStop = null;
-			String valueDescription = null;
-			String valueIdentifier = null;
-			String valueName = null;
-			String valueLink = null;
-			String valuePatient = null;
+            posAttribute = getAttributeName(posAttribute, config.GENOMEBROWSER_POS, entity);
+            chromosomeAttribute = getAttributeName(chromosomeAttribute, config.GENOMEBROWSER_CHROM, entity);
+            idAttribute = getAttributeName(idAttribute, config.GENOMEBROWSER_ID, entity);
+            stopAttribute = getAttributeName(stopAttribute, config.GENOMEBROWSER_STOP, entity);
+            descriptionAttribute = getAttributeName(descriptionAttribute, config.GENOMEBROWSER_DESCRIPTION, entity);
+            refAttribute = getAttributeName(refAttribute, config.GENOMEBROWSER_REF, entity);
+            altAttribute = getAttributeName(altAttribute, config.GENOMEBROWSER_ALT, entity);
+            nameAttribute = getAttributeName(nameAttribute, config.GENOMEBROWSER_NAME, entity);
+            linkAttribute = getAttributeName(linkAttribute, config.GENOMEBROWSER_LINK, entity);
+            patientAttribute = getAttributeName(patientAttribute, config.GENOMEBROWSER_PATIENT_ID , entity);
+
 			try
 			{
-				valueStart = entity.getInt(startAttribute);
-				valueIdentifier = StringUtils.isNotEmpty(idAttribute)?entity.getString(idAttribute):"-";
-			}
+				valueStart = entity.getInt(posAttribute);
+				valueIdentifier = StringUtils.isNotEmpty(idAttribute)&&StringUtils.isNotEmpty(entity.getString(idAttribute))?entity.getString(idAttribute):"-";
+            }
 			catch (ClassCastException e)
 			{
 				// start of identifier not correctly specified? exclude this mutation fore it can not be plotted
@@ -145,28 +131,42 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource i
 			Iterable<String> attributes = entity.getAttributeNames();
 
 			valueStop = Iterables.contains(attributes, stopAttribute) ? entity.getInt(stopAttribute) : valueStart;
-
-			valueDescription = Iterables.contains(attributes, descriptionAttribute) ? entity
+            valueDescription = Iterables.contains(attributes, descriptionAttribute) ? entity
 					.getString(descriptionAttribute) : "";
-			String name = config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_NAME,
-					entity.getEntityMetaData());
-			String link = config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_LINK,
-					entity.getEntityMetaData());
-			String patient = config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_PATIENT_ID,
-					entity.getEntityMetaData());
-			valueName = Iterables.contains(attributes, name) ? entity.getString(name) : "";
-			valueLink = Iterables.contains(attributes, link) ? entity.getString(link) : "";
-			valuePatient = Iterables.contains(attributes, patient) ? entity.getString(patient) : "";
+            valueName = Iterables.contains(attributes, nameAttribute) ? entity.getString(nameAttribute) : "";
+			valueLink = Iterables.contains(attributes, linkAttribute) ? entity.getString(linkAttribute) : "";
+			valuePatient = Iterables.contains(attributes, patientAttribute) ? entity.getString(patientAttribute) : "";
 
-			if (valueStart != null
+            valueRef = StringUtils.isNotEmpty(refAttribute)&&StringUtils.isNotEmpty(entity.getString(refAttribute))?entity.getString(refAttribute):"";
+            valueAlt = StringUtils.isNotEmpty(altAttribute)&&StringUtils.isNotEmpty(entity.getString(altAttribute))?entity.getString(altAttribute):"";
+
+            List<String> notes = new ArrayList<String>();
+            if(StringUtils.isNotEmpty(valueRef)) notes.add(refAttribute+"~"+valueRef);
+            if(StringUtils.isNotEmpty(valueAlt)) notes.add(altAttribute+"~"+valueAlt);
+
+            if (valueStart != null
 					&& ((valueStart >= start && valueStart <= stop) || (valueStop >= start && valueStop <= stop)))
 			{
 				DasType type;// used for label colours in Dalliance
-				if (patients.containsKey(valuePatient))
-				{
-					type = patients.get(valuePatient);
-				}
-				else
+                if (!StringUtils.isEmpty(valueRef)&&!StringUtils.isEmpty(valueAlt))
+                {
+                    if(valueRef.length()==1&&valueAlt.length()==1)
+                        type = new DasType(valueAlt, "", "", "");
+                    else if(valueRef.length()==1&&valueAlt.length()>1){
+                        type = new DasType("insert", "", "", "");
+                    }
+                    else if(valueRef.length()>1&&valueAlt.length()==1){
+                        type = new DasType("delete", "", "", "");
+                    }
+                    else{
+                        type = new DasType("delete", "", "", "");;
+                    }
+                }
+                else if (patients.containsKey(valuePatient))
+                {
+                    type = patients.get(valuePatient);
+                }
+                else
 				{
 					type = new DasType(score.toString(), "", "", "");
 					patients.put(valuePatient, type);
@@ -174,7 +174,7 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource i
 				}
 
 				feature = createDasFeature(valueStart, valueStop, valueIdentifier, valueName, valueDescription,
-						valueLink, type, method, dataSet, valuePatient);
+						valueLink, type, method, dataSet, valuePatient, notes);
 				features.add(feature);
 			}
 		}
@@ -182,48 +182,22 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource i
 		return segment;
 	}
 
-	protected Iterable<Entity> queryDataSet(String segmentId, String dataSet, int maxbins)
+    public String getAttributeName(String attribute, String fieldName, Entity entity) {
+        if (attribute == null)
+        {
+            attribute = config.getAttributeNameForAttributeNameArray(fieldName,
+                    entity.getEntityMetaData());
+        }
+        return attribute;
+    }
+
+    protected Iterable<Entity> queryDataSet(String segmentId, String dataSet, int maxbins)
 	{
 		String chromosomeAttribute = config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_CHROM,
 				dataService.getEntityMetaData(dataSet));
 		Query q = new QueryImpl().eq(chromosomeAttribute, segmentId);
 		q.pageSize(maxbins);
 		return dataService.findAll(dataSet, q);
-	}
-
-	protected DasFeature createDasFeature(Integer start, Integer stop, String identifier, String name,
-			String description, String link, DasType type, String dataSet, Double score) throws DataSourceException
-	{
-		// create description based on available information
-		String featureDescription = "";
-		if (StringUtils.isNotEmpty(description))
-		{
-			featureDescription = StringUtils.isNotEmpty(name) ? name + "," + description : description;
-		}
-		else
-		{
-			featureDescription = identifier;
-		}
-
-		List<String> notes = new ArrayList<String>();
-
-		Map<URL, String> linkout = new HashMap<URL, String>();
-		try
-		{
-			linkout.put(new URL(link), "Link");
-		}
-		catch (MalformedURLException e)
-		{
-		}
-
-		List<DasTarget> dasTarget = new ArrayList<DasTarget>();
-		dasTarget.add(new MolgenisDasTarget(identifier, start, stop, featureDescription));
-
-		List<String> parents = new ArrayList<String>();
-		DasFeature feature = new DasFeature(identifier, featureDescription, type, method, start, stop, score,
-				DasFeatureOrientation.ORIENTATION_NOT_APPLICABLE, DasPhase.PHASE_NOT_APPLICABLE, notes, linkout,
-				dasTarget, parents, null);
-		return feature;
 	}
 
 	@Override

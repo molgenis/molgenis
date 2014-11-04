@@ -48,7 +48,7 @@ public class DataExplorerHyperlinkDirective implements TemplateDirectiveModel
 		if (dataService.hasRepository(dataset) && (dataexplorer != null))
 		{
 			String cssClass = DataConverter.toString(params.get("class"));
-			String dataexplorerPageUri = String.format("%s?dataset=%s", dataexplorer.getFullUri(),
+			String dataexplorerPageUri = String.format("%s?entity=%s", dataexplorer.getFullUri(),
 					URLEncoder.encode(dataset, "UTF-8"));
 
 			w.write("<a href='");

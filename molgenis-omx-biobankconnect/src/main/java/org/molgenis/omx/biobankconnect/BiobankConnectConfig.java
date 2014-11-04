@@ -1,6 +1,7 @@
 package org.molgenis.omx.biobankconnect;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.omx.biobankconnect.algorithm.AlgorithmGenerator;
 import org.molgenis.omx.biobankconnect.algorithm.AlgorithmScriptLibrary;
 import org.molgenis.omx.biobankconnect.algorithm.AlgorithmUnitConverter;
@@ -11,8 +12,8 @@ import org.molgenis.omx.biobankconnect.ontologyindexer.AsyncOntologyIndexer;
 import org.molgenis.omx.biobankconnect.ontologymatcher.AsyncOntologyMatcher;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcher;
 import org.molgenis.omx.biobankconnect.ontologyservice.OntologyService;
+import org.molgenis.omx.biobankconnect.ontologyservice.OntologyServiceSessionData;
 import org.molgenis.omx.biobankconnect.wizard.CurrentUserStatus;
-import org.molgenis.search.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -87,5 +88,11 @@ public class BiobankConnectConfig
 	public CurrentUserStatus currentUserStatus()
 	{
 		return new CurrentUserStatus();
+	}
+
+	@Bean
+	public OntologyServiceSessionData ontologyServiceSessionData()
+	{
+		return new OntologyServiceSessionData();
 	}
 }

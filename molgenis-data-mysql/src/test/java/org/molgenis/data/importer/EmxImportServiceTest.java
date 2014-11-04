@@ -13,13 +13,13 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
-import org.molgenis.data.mysql.MysqlAttributeMetaDataRepository;
-import org.molgenis.data.mysql.MysqlEntityMetaDataRepository;
+import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
+import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -61,16 +61,15 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 	DataService dataService;
 
 	@Autowired
-	MysqlEntityMetaDataRepository entityMetaDataRepository;
+	PermissionSystemService permissionSystemService;
 
 	@Autowired
-	MysqlAttributeMetaDataRepository attributeMetaDataRepository;
+	MetaDataServiceImpl mysqlMetaDataRepositories;
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		attributeMetaDataRepository.deleteAll();
-		entityMetaDataRepository.deleteAll();
+		mysqlMetaDataRepositories.recreateMetaDataRepositories();
 		dataService = mock(DataService.class);
 	}
 
@@ -82,12 +81,13 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
 
 		// create importer
-		EmxImportServiceImpl importer = new EmxImportServiceImpl(dataService);
-		importer.setRepositoryCollection(store);
+		EmxImportService importer = new EmxImportService(dataService);
+		importer.setRepositoryCollection(store, mysqlMetaDataRepositories);
 		importer.setPlatformTransactionManager(new SimplePlatformTransactionManager());
+		importer.setPermissionSystemService(permissionSystemService);
 
 		// generate report
-		EntitiesValidationReport report = importer.validateImport(source);
+		EntitiesValidationReport report = importer.validateImport(f, source);
 
 		// SheetsImportable
 		Assert.assertEquals(report.getSheetsImportable().size(), 4);
@@ -124,11 +124,6 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testImportReport() throws IOException, InvalidFormatException, InterruptedException
 	{
-		// cleanup
-		store.dropEntityMetaData("import_person");
-		store.dropEntityMetaData("import_city");
-		store.dropEntityMetaData("import_country");
-
 		// create test excel
 		File f = ResourceUtils.getFile(getClass(), "/example.xlsx");
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
@@ -136,9 +131,10 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		Assert.assertEquals(source.getNumberOfSheets(), 4);
 		Assert.assertNotNull(source.getRepositoryByEntityName("attributes"));
 
-		EmxImportServiceImpl importer = new EmxImportServiceImpl(dataService);
-		importer.setRepositoryCollection(store);
+		EmxImportService importer = new EmxImportService(dataService);
+		importer.setRepositoryCollection(store, mysqlMetaDataRepositories);
 		importer.setPlatformTransactionManager(new SimplePlatformTransactionManager());
+		importer.setPermissionSystemService(permissionSystemService);
 
 		// test import
 		EntityImportReport report = importer.doImport(source, DatabaseAction.ADD);
@@ -181,9 +177,10 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		File f = ResourceUtils.getFile(getClass(), "/example.xlsx");
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
 
-		EmxImportServiceImpl importer = new EmxImportServiceImpl(dataService);
-		importer.setRepositoryCollection(store);
+		EmxImportService importer = new EmxImportService(dataService);
+		importer.setRepositoryCollection(store, mysqlMetaDataRepositories);
 		importer.setPlatformTransactionManager(new SimplePlatformTransactionManager());
+		importer.setPermissionSystemService(permissionSystemService);
 
 		// test import
 		importer.doImport(source, DatabaseAction.ADD);

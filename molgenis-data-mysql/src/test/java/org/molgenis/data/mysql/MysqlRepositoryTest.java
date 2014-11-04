@@ -2,16 +2,15 @@ package org.molgenis.data.mysql;
 
 import static org.testng.Assert.assertEquals;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import org.molgenis.AppConfig;
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -21,6 +20,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.Iterables;
@@ -33,32 +33,51 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	MysqlRepositoryCollection coll;
 
-	@Test
-	public void testAggregates()
+	@Autowired
+	MetaDataServiceImpl metaDataRepositories;
+
+	@BeforeMethod
+	public void reset()
 	{
-		coll.dropEntityMetaData("fruit");
+		metaDataRepositories.recreateMetaDataRepositories();
+	}
 
-		DefaultEntityMetaData meta = new DefaultEntityMetaData("Fruit");
-		meta.addAttribute("name").setIdAttribute(true).setNillable(false);
-		meta.addAttribute("type").setAggregateable(true);
-		MysqlRepository repo = coll.add(meta);
+	@Test
+	public void testFindAll()
+	{
+		DefaultEntityMetaData metaData = new DefaultEntityMetaData("IntValue");
+		metaData.addAttribute("intAttr").setDataType(MolgenisFieldTypes.INT).setIdAttribute(true).setNillable(false);
 
-		Entity elstar = new MapEntity("name", "Elstar");
-		elstar.set("type", "Apple");
-		repo.add(elstar);
+		coll.dropEntityMetaData(metaData.getName());
+		MysqlRepository repo = (MysqlRepository) coll.add(metaData);
 
-		Entity jonagold = new MapEntity("name", "Jonagold");
-		jonagold.set("type", "Apple");
-		repo.add(jonagold);
+		int count = 2099;
+		for (int i = 0; i < count; i++)
+		{
+			Entity e = new MapEntity("intAttr");
+			e.set("intAttr", i);
+			repo.add(e);
+		}
 
-		Entity conference = new MapEntity("name", "Conference");
-		conference.set("type", "Pear");
-		repo.add(conference);
+		int i = 0;
+		for (Entity e : repo)
+		{
+			assertEquals(e.getInt("intAttr"), Integer.valueOf(i++));
+		}
 
-		AggregateResult result = repo.aggregate(meta.getAttribute("type"), null, new QueryImpl());
-		Assert.assertEquals(result.getxLabels(), Arrays.asList("Pear", "Apple", "Total"));
-		Assert.assertEquals(result.getyLabels(), Arrays.asList("Count"));
-		Assert.assertEquals(result.getMatrix(), Arrays.asList(Arrays.asList(1l), Arrays.asList(2l), Arrays.asList(3l)));
+		assertEquals(Iterables.size(repo), count);
+		assertEquals(Iterables.size(repo.findAll(new QueryImpl().ge("intAttr", 999))), 1100);
+		assertEquals(Iterables.size(repo.findAll(new QueryImpl().eq("intAttr", 999))), 1);
+		assertEquals(Iterables.size(repo.findAll(new QueryImpl().eq("intAttr", -1))), 0);
+		assertEquals(Iterables.size(repo.findAll(new QueryImpl().le("intAttr", count))), count);
+
+		Iterable<Entity> it = repo.findAll(new QueryImpl().setOffset(10).setPageSize(20));
+		assertEquals(Iterables.size(it), 20);
+		i = 10;
+		for (Entity e : it)
+		{
+			assertEquals(e.getInt("intAttr"), Integer.valueOf(i++));
+		}
 	}
 
 	@Test
@@ -77,16 +96,16 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		Assert.assertEquals(metaData.getIdAttribute().getName(), "lastName");
 
 		coll.dropEntityMetaData(metaData.getName());
-		MysqlRepository repo = coll.add(metaData);
+		MysqlRepository repo = (MysqlRepository) coll.add(metaData);
 
-		Assert.assertEquals(repo.iteratorSql(), "SELECT firstName, lastName FROM MysqlPerson");
+		Assert.assertEquals(repo.iteratorSql(), "SELECT firstName, lastName FROM `MysqlPerson`");
 		Assert.assertEquals(repo.getInsertSql(), "INSERT INTO `MysqlPerson` (`firstName`, `lastName`) VALUES (?, ?)");
 		Assert.assertEquals(
 				repo.getCreateSql(),
 				"CREATE TABLE IF NOT EXISTS `MysqlPerson`(`firstName` VARCHAR(255) NOT NULL, `lastName` VARCHAR(255) NOT NULL, PRIMARY KEY (`lastName`)) ENGINE=InnoDB;");
 
 		metaData.addAttributeMetaData(new DefaultAttributeMetaData("age", MolgenisFieldTypes.FieldTypeEnum.INT));
-		Assert.assertEquals(repo.iteratorSql(), "SELECT firstName, lastName, age FROM MysqlPerson");
+		Assert.assertEquals(repo.iteratorSql(), "SELECT firstName, lastName, age FROM `MysqlPerson`");
 		Assert.assertEquals(repo.getInsertSql(),
 				"INSERT INTO `MysqlPerson` (`firstName`, `lastName`, `age`) VALUES (?, ?, ?)");
 		Assert.assertEquals(
@@ -128,10 +147,10 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		Assert.assertEquals(repo.getDeleteSql(), "DELETE FROM `MysqlPerson` WHERE `lastName` = ?");
 
 		coll.dropEntityMetaData(metaData.getName());
-		repo = coll.add(metaData);
+		repo = (MysqlRepository) coll.add(metaData);
 
 		// Entity generator to monitor performance (set batch to 100000 to show up to >10,000 records/second)
-		final int SIZE = 100000;
+		final int SIZE = 1000;
 		Iterable<Entity> iterable = new Iterable<Entity>()
 		{
 			@Override
@@ -220,7 +239,8 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		String idAttributeName = "id";
 		final String exampleId = "id123";
 
-		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("test");
+		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("testje");
+
 		entityMetaData.setIdAttribute(idAttributeName);
 		entityMetaData.setLabelAttribute(idAttributeName);
 		DefaultAttributeMetaData idAttributeMetaData = new DefaultAttributeMetaData(idAttributeName);
@@ -230,7 +250,7 @@ public class MysqlRepositoryTest extends AbstractTestNGSpringContextTests
 		idAttributeMetaData.setNillable(false);
 		entityMetaData.addAttributeMetaData(idAttributeMetaData);
 
-		MysqlRepository testRepository = coll.add(entityMetaData);
+		MysqlRepository testRepository = (MysqlRepository) coll.add(entityMetaData);
 
 		MapEntity entity = new MapEntity();
 		entity.set(idAttributeName, exampleId);

@@ -1,0 +1,62 @@
+#attribute-selection .molgenis-tree {
+	height: 400px;
+	overflow: auto;
+	margin-bottom: 10px;
+}
+
+#entity-class h3 {
+	display: inline;
+	margin-right: 10px;
+}
+
+#entity-select-holder {
+	margin-bottom: 18px;	
+}
+
+#search-results-back-btn {
+	margin-bottom: 15px;
+}
+
+.entity span.fancytree-icon, .entity span.fancytree-icon:hover {
+	background-position: -16px -160px !important;
+}
+
+p.form-inline {
+	margin-top: 25px;
+}
+
+.pagination {
+	margin: 0;
+}
+
+
+#package-doc-container {
+	height: 600px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.package-index-container ul
+{
+    list-style-type: none;
+}
+
+.package-container {
+	padding: 15px;
+}
+
+.entity-select-control {
+	width: 400px;
+}
+
+.entity-select-dropdown {
+    width: 300px;	
+}
+
+.details-btn {
+	margin-right: 10px;
+}
+
+.search-result-match {
+	margin-top: 10px;
+}

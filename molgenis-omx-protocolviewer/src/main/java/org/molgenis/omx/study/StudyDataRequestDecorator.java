@@ -1,10 +1,9 @@
 package org.molgenis.omx.study;
 
 import java.util.Iterator;
-import java.util.List;
 
+import org.molgenis.data.CrudRepository;
 import org.molgenis.data.CrudRepositoryDecorator;
-import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.Query;
@@ -23,7 +22,7 @@ import org.springframework.context.ApplicationContextException;
  */
 public class StudyDataRequestDecorator extends CrudRepositoryDecorator
 {
-	public StudyDataRequestDecorator(CrudRepositoryDecorator crudRepositoryDecorator)
+	public StudyDataRequestDecorator(CrudRepository crudRepositoryDecorator)
 	{
 		super(crudRepositoryDecorator);
 	}
@@ -73,16 +72,6 @@ public class StudyDataRequestDecorator extends CrudRepositoryDecorator
 			checkEntitiesPermission(entity);
 		}
 		super.update(entities);
-	}
-
-	@Override
-	public void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
-	{
-		for (Entity entity : entities)
-		{
-			checkEntitiesPermission(entity);
-		}
-		super.update(entities, dbAction, keyName);
 	}
 
 	@Override

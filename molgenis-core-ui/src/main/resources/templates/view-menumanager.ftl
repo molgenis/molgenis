@@ -3,44 +3,69 @@
 <#assign css=["select2.css", "jquery-sortable.css", "menumanager.css"]>
 <#assign js=["handlebars.min.js","select2.min.js","jquery-sortable-min.js", "menumanager.js"]>
 <@header css js/>
-	<div class="row col-md-offset-2 col-md-8">
-		<p>Drag and drop menu items to update menu, press Save to store the menu. Each menu should contain at least one item.</p>
+
+<div class="row">
+	<div class="col-md-offset-2 col-md-8">
+		<p>
+			Drag and drop menu items to update menu, press Save to store the menu. Each menu should contain at least one item.
+		</p>
+		
 		<div class="row" id="menu-editor-container">
-			<div class="row">
-				<div class="col-md-7">
-					<div id="menu-editor-tree">
-						<@create_menu_list molgenis_ui.menu true/>
-					</div>
-				</div>
-				<div class="col-md-5">
-					<legend>Create Menu</legend>
-					<form name="add-menu-group-form" class="form-horizontal" role="form">
-						<@create_edit_menu_inputs/>
-						<div class="form-group">
-							<div class="col-md-9 col-md-offset-3">
-								<button type="submit" class="btn btn-default">Create</button>
-							</div>
-						</div>
-					</form>
-					<legend>Create Menu Item</legend>
-					<form name="add-menu-item-form" class="form-horizontal" role="form">
-						<@create_edit_item_inputs false/>
-						<div class="form-group">
-							<div class="col-md-9 col-md-offset-3">
-								<button type="submit" class="btn btn-default">Create</button>
-							</div>
-						</div>
-					</form>
+			<div class="col-md-7">
+				<div id="menu-editor-tree">
+					<@create_menu_list molgenis_ui.menu true/>
 				</div>
 			</div>
-			<div class="row">
+				
+			<div class="col-md-5">
+				<legend>Create Menu</legend>
+				<form name="add-menu-group-form" class="form-horizontal" role="form">
+					<@create_edit_menu_inputs/>
+					<div class="form-group">
+						<div class="col-md-9 col-md-offset-3">
+							<button type="submit" class="btn btn-default">Create</button>
+						</div>
+					</div>
+				</form>
+					
+				<legend>Create Menu Item</legend>
+				<form name="add-menu-item-form" class="form-horizontal" role="form">
+					<@create_edit_item_inputs false/>
+					<div class="form-group">
+						<div class="col-md-9 col-md-offset-3">
+							<button type="submit" class="btn btn-default">Create</button>
+						</div>
+					</div>
+				</form>
+					
+				<legend>Upload logo</legend>
+				<form name="upload-new-logo" class="form-horizontal" role="form" action="${context_url}/upload-logo" method="POST" enctype="multipart/form-data">
+					<@upload_new_logo />
+					<div class="form-group">
+						<div class="col-md-9 col-md-offset-3">
+							<input type="submit" value="Upload logo" class="btn btn-default" />	
+						</div>
+					</div>
+				
+				</form>
+			</div>
+		</div>
+		
+		<hr></hr>
+
+		<div class="row">
+			<div class="col-md-2 col-md-offset-10">
 				<form name="save-menu-form" action="${context_url}/save" method="POST">
 					<button type="submit" class="btn btn-primary pull-right">Save</button>
 				</form>
 			</div>
 		</div>
+			
 	</div>
+</div>
+
 <@footer/>
+
 <form name="edit-menu-form" class="form-horizontal" role="form">
     <div class="modal" id="edit-menu-modal" tabindex="-1" role="dialog" aria-labelledby="edit-menu-modal-label" aria-hidden="true">
 		<div class="modal-dialog">
@@ -62,6 +87,7 @@
 		</div>
 	</div>
 </form>
+
 <form name="edit-item-form" class="form-horizontal">
     <div class="modal" id="edit-item-modal" tabindex="-1" role="dialog" aria-labelledby="edit-item-modal-label" aria-hidden="true">
 		<div class="modal-dialog">
@@ -83,44 +109,64 @@
 		</div>
 	</div>
 </form>
+
 <#macro create_edit_menu_inputs>
-<div class="form-group">
-	<label class="col-md-3 control-label" for="menu-id">Id *</label>
-	<div class="col-md-9">
-		<input type="text" class="form-control" name="menu-id" required disabled>
+	<div class="form-group">
+		<div class="col-md-3">	
+			<label class="control-label pull-right" for="menu-id">Id *</label>
+		</div>
+		
+		<div class="col-md-9">
+			<input type="text" class="form-control" name="menu-id" required disabled>
+		</div>
 	</div>
-</div>
-<div class="form-group">
-	<label class="col-md-3 control-label" for="menu-name">Name *</label>
-	<div class="col-md-9">
-		<input type="text" class="form-control" name="menu-name" required>
+	
+	<div class="form-group">
+		<div class="col-md-3">
+			<label class="control-label pull-right" for="menu-name">Name *</label>
+		</div>
+		<div class="col-md-9">
+			<input type="text" class="form-control" name="menu-name" required>
+		</div>
 	</div>
-</div>
 </#macro>
+
 <#macro create_edit_item_inputs is_edit>
-<div class="form-group">
-	<label class="col-md-3 control-label" for="menu-item">Plugin *</label>
-	<div class="col-md-9">
-		<select class="form-control" name="menu-item-select" required<#if is_edit> disabled</#if>>
-		<#list plugins as plugin>
-			<option value="${plugin.id}">${plugin.id}</option>
-		</#list>
-		</select>
+	<div class="form-group">
+		<div class="col-md-3">
+			<label class="control-label pull-right" for="menu-item">Plugin *</label>
+		</div>
+		
+		<div class="col-md-9">
+			<select class="form-control" name="menu-item-select" required<#if is_edit> disabled</#if>>
+			<#list plugins as plugin>
+				<option value="${plugin.id}">${plugin.id}</option>
+			</#list>
+			</select>
+		</div>
 	</div>
-</div>
-<div class="form-group">
-	<label class="col-md-3 control-label" for="menu-item-name">Name *</label>
-	<div class="col-md-9">
-		<input type="text" class="form-control" name="menu-item-name" required>
+	
+	<div class="form-group">
+		<div class="col-md-3">
+			<label class="control-label pull-right" for="menu-item-name">Name *</label>
+		</div>
+		
+		<div class="col-md-9">
+			<input type="text" class="form-control" name="menu-item-name" required>
+		</div>
 	</div>
-</div>
-<div class="form-group">
-	<label class="col-md-3 control-label" for="menu-item-params">Query string</label>
-	<div class="col-md-9">
-		<input type="text" class="form-control" name="menu-item-params">
+	
+	<div class="form-group">
+		<div class="col-md-3">
+			<label class="control-label pull-right" for="menu-item-params">Query string</label>
+		</div>
+			
+		<div class="col-md-9">
+			<input type="text" class="form-control" name="menu-item-params">
+		</div>
 	</div>
-</div>
 </#macro>
+
 <#macro create_menu_list menu is_root>
 	<#if is_root>
 	<ol class="vertical root">
@@ -156,10 +202,24 @@
 	</#list>
 			</ol>
 		</li>
-<#if is_root>
-	</ol>
-</#if>
+	<#if is_root>
+		</ol>
+	</#if>
+
 </#macro>
+
+<#macro upload_new_logo>
+	<div class="form-group">
+		<div class="col-md-3">
+			<label class="control-label pull-right" for="menu-id">Choose file</label>
+		</div>
+		
+		<div class="col-md-9">
+			<input type="file" name="logo" data-filename-placement="inside" title="Select a file...">
+		</div>
+	</div>
+</#macro>
+
 <script id="menu-template" type="text/x-handlebars-template">
 	<li class="node highlight" data-id="{{id}}" data-label="{{label}}">
 		<span class="glyphicon glyphicon-move"></span>
@@ -171,6 +231,7 @@
 		<ol><ol>
 	</li>
 </script>
+
 <script id="item-template" type="text/x-handlebars-template">
 	<li class="node" data-id="{{id}}" data-label="{{label}}" data-params="{{params}}">
 		<span class="glyphicon glyphicon-move"></span>

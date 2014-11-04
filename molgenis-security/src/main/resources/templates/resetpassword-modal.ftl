@@ -51,7 +51,7 @@
 		            data: form.serialize(),
 		            global: false, // do not trigger default molgenis error handler
 		            success: function () {
-		            	$(document).trigger('molgenis-passwordresetted', 'Password resetted, an email has been send to you');
+		            	$(document).trigger('molgenis-passwordresetted', 'Password reset, an email has been sent to you');
 		        		modal.modal('hide');
 		            },
 		            error: function(xhr) {

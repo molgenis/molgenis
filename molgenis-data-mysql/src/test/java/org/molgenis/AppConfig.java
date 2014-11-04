@@ -1,20 +1,21 @@
 package org.molgenis;
 
-import static org.mockito.Mockito.mock;
-
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryDecoratorFactory;
+import org.molgenis.data.meta.MetaDataServiceImpl;
+import org.molgenis.data.meta.WritableMetaDataService;
+import org.molgenis.data.meta.WritableMetaDataServiceDecorator;
 import org.molgenis.data.mysql.EmbeddedMysqlDatabaseBuilder;
-import org.molgenis.data.mysql.MysqlAttributeMetaDataRepository;
-import org.molgenis.data.mysql.MysqlEntityMetaDataRepository;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.elasticsearch.ElasticSearchService;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
+import org.molgenis.security.permission.PermissionSystemService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -33,6 +34,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @ComponentScan("org.molgenis.data")
 public class AppConfig
 {
+	private MetaDataServiceImpl mysqlWritableMetaDataService;
+
 	@Bean(destroyMethod = "shutdown")
 	public DataSource dataSource()
 	{
@@ -66,37 +69,53 @@ public class AppConfig
 	}
 
 	@Bean
-	public MysqlEntityMetaDataRepository entityMetaDataRepository()
+	public PermissionSystemService permissionSystemService()
 	{
-		return new MysqlEntityMetaDataRepository(dataSource());
+		return new PermissionSystemService(dataService());
 	}
 
 	@Bean
-	public MysqlAttributeMetaDataRepository attributeMetaDataRepository()
+	public WritableMetaDataService writableMetaDataService()
 	{
-		return new MysqlAttributeMetaDataRepository(dataSource());
+		mysqlWritableMetaDataService = new MetaDataServiceImpl();
+		return writableMetaDataServiceDecorator().decorate(mysqlWritableMetaDataService);
+	}
+
+	@Bean
+	/**
+	 * non-decorating decorator, to be overrided if you wish to decorate the MetaDataRepositories
+	 */
+	WritableMetaDataServiceDecorator writableMetaDataServiceDecorator()
+	{
+		return new WritableMetaDataServiceDecorator()
+		{
+			@Override
+			public WritableMetaDataService decorate(WritableMetaDataService writableMetaDataService)
+			{
+				return writableMetaDataService;
+			}
+		};
 	}
 
 	@Bean
 	public MysqlRepositoryCollection mysqlRepositoryCollection()
 	{
-		return new MysqlRepositoryCollection(dataSource(), dataService(), entityMetaDataRepository(),
-				attributeMetaDataRepository())
+		MysqlRepositoryCollection mysqlRepositoryCollection = new MysqlRepositoryCollection(dataSource(),
+				dataService(), writableMetaDataService(), repositoryDecoratorFactory())
+
 		{
 			@Override
-			protected MysqlRepository createMysqlRepsitory()
+			protected MysqlRepository createMysqlRepository()
 			{
 				MysqlRepository repo = mysqlRepository();
 				repo.setRepositoryCollection(this);
 				return repo;
 			}
 		};
-	}
 
-	@Bean
-	public ElasticSearchService elasticsearchService()
-	{
-		return mock(ElasticSearchService.class);
+		mysqlWritableMetaDataService.setManageableCrudRepositoryCollection(mysqlRepositoryCollection);
+
+		return mysqlRepositoryCollection;
 	}
 
 	@Bean
@@ -104,4 +123,19 @@ public class AppConfig
 	{
 		return new MolgenisPluginRegistryImpl();
 	}
+
+	// temporary workaround for module dependencies
+	@Bean
+	public RepositoryDecoratorFactory repositoryDecoratorFactory()
+	{
+		return new RepositoryDecoratorFactory()
+		{
+			@Override
+			public Repository createDecoratedRepository(Repository repository)
+			{
+				return repository;
+			}
+		};
+	}
+
 }

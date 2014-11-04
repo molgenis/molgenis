@@ -4,7 +4,6 @@ import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
 
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.List;
 
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.Permission;
@@ -184,13 +183,6 @@ public class CrudRepositorySecurityDecorator extends CrudRepositoryDecorator
 	}
 
 	@Override
-	public void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
-	{
-		validatePermission(decoratedRepository.getName(), Permission.WRITE);
-		decoratedRepository.update(entities, dbAction, keyName);
-	}
-
-	@Override
 	public void add(Entity entity)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.WRITE);
@@ -202,13 +194,6 @@ public class CrudRepositorySecurityDecorator extends CrudRepositoryDecorator
 	{
 		validatePermission(decoratedRepository.getName(), Permission.WRITE);
 		return decoratedRepository.add(entities);
-	}
-
-	@Override
-	public AggregateResult aggregate(AttributeMetaData xAttr, AttributeMetaData yAttr, Query q)
-	{
-		validatePermission(getName(), Permission.COUNT);
-		return decoratedRepository.aggregate(xAttr, yAttr, q);
 	}
 
 	@Override

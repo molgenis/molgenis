@@ -1,5 +1,5 @@
 /**
- * An autocomplete search dropdown for xref and mref values for use in the filterdialog
+ * An autocomplete search dropdown for xref and mref values
  * 
  * usage: 
  * 
@@ -24,21 +24,30 @@
 				if (q.length > 0) {
 					q.push({operator: 'OR'});
 				}
+				
 	            if (terms.length > 0) {
+	            	var rule = {
+    					operator: 'NESTED',
+    					nestedRules:[]
+    				};
+	            	
 	                $.each(terms, function(index) {
 	                    if(index > 0){
                             if(search){
-                                q.push({operator: 'AND'});
+                                rule.nestedRules.push({operator: 'AND'});
                             }else {
-                                q.push({operator: 'OR'});
+                                rule.nestedRules.push({operator: 'OR'});
                             }
 	                    }
-	                    q.push({
-	                        field: attrName,
+	                    
+	                    rule.nestedRules.push({
+	                    	field: attrName,
 	                        operator: operator,
 	                        value: terms[index]
-	                    });
+	                    })
 	                });
+	                
+	                q.push(rule);
 	            }
 			});
 			return q;
@@ -77,7 +86,7 @@
 			$.each(lookupAttributeNames, function(index, attrName) {
 				var attrLabel = entityMetaData.attributes[attrName].label || attrName;
 				var attrValue = entity[attrName] == undefined ?  '' :  entity[attrName];
-				items.push('<div class="col-md-' + width + '">');
+				items.push('<div class="col-md-' + width + '">'); // FIXME wtf?! dit kan natuurlijk niet
 				items.push(attrLabel + ': <b>' + htmlEscape(attrValue) + '</b>');
 				items.push('</div>');
 			});
@@ -114,7 +123,7 @@
 				.not('[data-filter=ignore]');
 
 		$hiddenInput.data('labels', options.labels);
-		
+
 		var width = options.width ? options.width : 'resolve';
 		
 		$hiddenInput.select2({
@@ -123,7 +132,8 @@
 			multiple: (attributeMetaData.fieldType === 'MREF' || attributeMetaData.fieldType === 'XREF'),
 			closeOnSelect: false,
 			query: function (options){
-				var query = createQuery(lookupAttrNames, options.term.match(/[^ ]+/g),'SEARCH', true);
+				console.log(options.term);
+				var query = createQuery(lookupAttrNames, options.term.match(/[^ ]+/g),'LIKE', true);
 				if(query)
 				{
 					restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {num: 1000, q: query}}, function(data) {
@@ -146,11 +156,9 @@
 				return formatResult(entity, refEntityMetaData, lookupAttrNames);
 			},
 			formatSelection: function(entity) {
-				if($('.select2-choices .select2-search-choice', $container).length > 0 && !$('.dropdown-toggle', $container).is(':visible')){
-					$('.dropdown-toggle', $container).show();
+				if($('.select2-choices .select2-search-choice', $container).length > 0 && !$('.dropdown-toggle-container', $container).is(':visible')){
 					var $select2Container = $('.select2-container.select2-container-multi', $container);
-					$select2Container.css('width', ($select2Container.width() - 56) + 'px');
-					$('.dropdown-toggle', $container).show();
+					$container.closest('.xrefmrefsearch').find('.dropdown-toggle-container').show();
 				}
 				return formatSelection(entity, refEntityMetaData);
 			},
@@ -164,12 +172,12 @@
 			if (!labels) labels = [];
 			
 			if (event.added) {
-				labels.push(event.added.label);
+				labels.push(event.added[refEntityMetaData.labelAttribute]);
 			}
 			
 			if (event.removed) {
 				labels = labels.filter(function (label){
-					return label !== event.removed.label;
+					return label !== event.removed[refEntityMetaData.labelAttribute];
 				});
 			}
 			
@@ -179,12 +187,10 @@
 		
 		$hiddenInput.on('select2-removed', function(e) {
 			if($('.select2-choices .select2-search-choice', $container).length < 2){
-				$('.dropdown-toggle', $container).hide();
-				$('.select2-container.select2-container-multi', $container).css('width', width);
+				$container.closest('.xrefmrefsearch').find('.dropdown-toggle-container').hide();
 			}
 		});
-
-		$('.dropdown-toggle', $container).hide();
+		$container.closest('.xrefmrefsearch').find('.dropdown-toggle-container').hide();
 		
 		if(!lookupAttrNames.length){
 			$container.append($('<label>lookup attribute is not defined.</label>'));
@@ -202,11 +208,11 @@
 			var $operatorInput = $('<input type="hidden" data-filter="xrefmref-operator" value="' + options.operator + '" />');
 
 			if(attributeMetaData.fieldType === 'MREF') {
-				var $dropdown = $('<div class="btn-group"><div>');
+				var $dropdown = $('<div class="col-md-2 dropdown-toggle-container">');
 				var orValue = 'OR&nbsp;&nbsp;';
 				var andValue = 'AND';
 				$dropdown.append($operatorInput);
-				$dropdown.append($('<a class="btn dropdown-toggle add-on-left" data-toggle="dropdown" style="display:inline-block;padding:4px 5px;width:43px" href="#">' + (options.operator === 'AND' ? andValue : orValue) + ' <b class="caret"></a>'));
+				$dropdown.append($('<a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="#">' + (options.operator === 'AND' ? andValue : orValue) + ' <b class="caret"></a>'));
 				$dropdown.append($('<ul class="dropdown-menu"><li><a data-value="OR">' + orValue + '</a></li><li><a data-value="AND">' + andValue + '</a></li></ul>'));
 	
 				$.each($dropdown.find('.dropdown-menu li a'), function(index, element){
@@ -224,14 +230,16 @@
 			}
 			else if (attributeMetaData.fieldType === 'XREF') {
 				$operatorInput.val('OR');
-				$container.append($('<div class="dropdown-toggle" style="display:inline-block;padding: 4px 10px 4px 5px;width:38px">' + 'OR' + '</div>'));
+				$container.append($('<div class="col-md-2 dropdown-toggle-container" style="display:inline-block;width:38px"><p class="form-control-static">OR</div>'));
 				$container.append($operatorInput);
 			}
 		}
 
 		var element = createInput(attributeMetaData, attrs, options.values);
-		$container.append(element);
-		createSelect2($container, attributeMetaData, options);
+		
+		var select2Container = $('<div class="col-md-10">').appendTo($container);
+		select2Container.append(element);
+		createSelect2(select2Container, attributeMetaData, options);
 	}
 
 	/**

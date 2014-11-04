@@ -16,9 +16,9 @@
 		switch(attribute.fieldType) {
 			case 'BOOL':
 			case 'CATEGORICAL':
+				return self.createSimpleFilter(attribute, filter, wizard, false);
 			case 'XREF':
-				return self.createSimpleFilter(attribute, filter, wizard);
-				break;
+				return self.createSimpleFilter(attribute, filter, wizard, true);
 			case 'DATE':
 			case 'DATE_TIME':
 			case 'DECIMAL':
@@ -55,9 +55,7 @@
 		$('.complex-filter-container', form).each(function() {
 			filter = new self.ComplexFilter($(this).data('attribute'));
 			filter.update($(this));
-			if(!filter.isEmpty()){
-				filters[filter.attribute.href] = filter;
-			}
+			filters[filter.attribute.href] = filter;
 		});
 
 		$('.simple-filter-container', form).each(function() {
@@ -65,14 +63,8 @@
 			filter.update($(this));
 			filters[filter.attribute.href] = filter;
 		});
-		
-		return Object.keys(filters)
-			.map(function (key) {
-				return filters[key];
-				})
-			.filter(function(filter){
-				return !filter.isEmpty();
-				});
+
+		return filters;
 	};
 	
 	/**
@@ -238,8 +230,13 @@
 		// The complex filter element container
 		var $complexElementContainer = $('<div class="form-group complex-element-container" data-filter="complex-element-container"></div>');
 		
-		// Complex element containing the simple filter and the operator
-		var $complexElement = $('<div class="controls complex-element" data-filter="complex-element"></div>');
+		if(wizard){
+			// Complex element containing the simple filter and the operator
+			var $complexElement = $('<div class="controls complex-element col-md-9" data-filter="complex-element"></div>');
+		} else{
+			// if its for a single attribute 
+			var $complexElement = $('<div class="controls complex-element col-md-12" data-filter="complex-element"></div>');
+		}
 		
 		// Make complex filter element label
 		var $complexElementLabel = self.createFilterLabel(attribute, isFirstElement, wizard);
@@ -251,6 +248,7 @@
 		var $controlGroupSimpleFilter = self.createSimpleFilterControls(attribute, simpleFilter);
 		$controlGroupSimpleFilter.attr('data-filter', 'complex-simplefilter');
 		$controlGroupSimpleFilter.addClass('complex-simplefilter');
+		$controlGroupSimpleFilter.css('display', 'inline-block');
 		
 		// Remove complex filter element button container
 		var $removeButtonContainer = $('<div class="controls complex-removebutton-container" data-filter="complex-removebutton-container"></div>');
@@ -334,7 +332,11 @@
 		var label = attribute.label || attribute.name;
 		if(isFirstElement && wizard) 
 		{
-			return $('<label class="col-md-3 control-label" data-placement="right" data-title="' + attribute.description + '">' + label + '</label>').tooltip();
+            var labelHtml = $('<label class="col-md-3 control-label" data-placement="right" data-title="' + attribute.description + '">' + label + '</label>');
+            if(attribute.description !== undefined){
+                labelHtml.tooltip()
+            }
+			return labelHtml;
 		}
 		else if (!isFirstElement && wizard) 
 		{
@@ -358,7 +360,7 @@
 	 */
 	self.createComplexFilterAddButton = function($container, attribute, complexFilterOperator, wizard, useFixedOperator)
 	{
-		return ($('<button class="btn btn-default btn-xs" type="button" data-filter=complex-addbutton><span class="glyphicon glyphicon-plus"></span></button>').click(function(){
+		return ($('<button class="btn btn-default btn-xs" type="button" data-filter=complex-addbutton><i class="glyphicon glyphicon-plus"></i></button>').click(function(){
 					if($('[data-filter=complex-removebutton]', $container).length === 0)
 					{
 						$('[data-filter=complex-removebutton-container]', $container).append(self.createRemoveButtonFirstComplexElement($container));
@@ -372,7 +374,7 @@
 	 * Create remove button to remove complex elements that are not the first
 	 */
 	self.createRemoveButtonComplexElementFilter = function($complexElementContainer){
-		return $('<button class="btn btn-default btn-xs" type="button" data-filter=complex-removebutton><i class="icon-minus"></i></button>').click(function(){
+		return $('<button class="btn btn-default btn-xs" type="button" data-filter=complex-removebutton><i class="glyphicon glyphicon-minus"></i></button>').click(function(){
 					var $container = $complexElementContainer.parent();
 					var $addButton = $('[data-filter=complex-addbutton]', $container);
 					
@@ -394,16 +396,16 @@
 	 * Create remove button to remove the first element in a complex filter
 	 */
 	self.createRemoveButtonFirstComplexElement = function($container){
-		return $('<button class="btn btn-default btn-xs" type="button" data-filter=complex-removebutton><i class="icon-minus"></i></button>').click(function(){
-					var $firstElement = $('[data-filter=complex-element]', $container)[0];
-					var $secondElement = $('[data-filter=complex-element]', $container)[1];
+		return $('<button class="btn btn-default btn-xs" type="button" data-filter=complex-removebutton><i class="glyphicon glyphicon-minus"></i></button>').click(function(){
+					var $firstElement = $($('[data-filter=complex-element]', $container)[0]);
+					var $secondElement = $($('[data-filter=complex-element]', $container)[1]);
 					var $simpleFilterFirstElement = $('[data-filter=complex-simplefilter]', $firstElement);
 					var $simpleFilterSecondElement = $('[data-filter=complex-simplefilter]', $secondElement);
 					var $simpleFilterSecondElementButton = $('[data-filter=complex-addbutton]', $secondElement);
 					var $simpleFilterSecondElementContainer = $('[data-filter=complex-element-container]', $container).eq(1);
-					
-					$simpleFilterFirstElement.empty();
-					$simpleFilterFirstElement.append($simpleFilterSecondElement);
+									
+					$simpleFilterFirstElement.remove();
+					$firstElement.append($simpleFilterSecondElement);
 					$('[data-filter=complex-addbutton-container]', $firstElement).append($simpleFilterSecondElementButton);
 					
 					$simpleFilterSecondElementContainer.remove();
@@ -416,12 +418,17 @@
 	/**
 	 * Create simple filter
 	 */
-	self.createSimpleFilter = function(attribute, filter, wizard) {
+	self.createSimpleFilter = function(attribute, filter, wizard, wrap) {
 		var $container = $('<div class="simple-filter-container form-group"></div>');
 		var $label = self.createFilterLabel(attribute, true, wizard);
 		$container.append($label);
 		$container.append(self.createSimpleFilterControls(attribute, filter));
 		$container.data('attribute', attribute);
+		if( wrap ) {
+			var $wrapper = $('<div>').addClass('col-md-9');
+			$container.children('.col-md-9').wrap($wrapper);
+			return $container;
+		}
 		return $container;
 	}
 	
@@ -429,7 +436,8 @@
 	 * Create simple filter controls
 	 */
 	self.createSimpleFilterControls = function(attribute, simpleFilter) {
-		var $controls = $('<div class="col-md-9">').width('384px');
+		var $controls = $('<div>');
+		$controls.addClass('col-md-9');
 		var name = 'input-' + attribute.name + '-' + new Date().getTime();
 		var values = simpleFilter ? simpleFilter.getValues() : null;
 		var fromValue = simpleFilter ? simpleFilter.fromValue : null;
@@ -441,7 +449,7 @@
 				var attrsFalse = values && values[0] === 'false' ? $.extend({}, attrs, {'checked': 'checked'}) : attrs;
 				var inputTrue = createInput(attribute, attrsTrue, true);
 				var inputFalse = createInput(attribute, attrsFalse, false);
-				$controls.append(inputTrue.addClass('inline')).append(inputFalse.addClass('inline'));
+				$controls.append(inputTrue.addClass('radio-inline')).append(inputFalse.addClass('radio-inline'));
 				break;
 			case 'CATEGORICAL':
 				var restApi = new molgenis.RestClient();
@@ -469,8 +477,8 @@
 				var nameFrom = name + '-from', nameTo = name + '-to';
 				var valFrom = fromValue ? fromValue : undefined;
 				var valTo = toValue ? toValue : undefined;
-				var inputFrom = createInput(attribute, {'name': nameFrom, 'placeholder': 'Start date', 'style' : 'width: 315px'}, valFrom);
-				var inputTo = createInput(attribute, {'name': nameTo, 'placeholder': 'End date', 'style' : 'width: 315px'}, valTo);
+				var inputFrom = createInput(attribute, {'name': nameFrom, 'placeholder': 'Start date'}, valFrom);
+				var inputTo = createInput(attribute, {'name': nameTo, 'placeholder': 'End date'}, valTo);
 				$controls.append($('<div class="form-group">').append(inputFrom)).append($('<div class="form-group">').append(inputTo));
 				break;
 			case 'DECIMAL':
@@ -485,6 +493,15 @@
 						bounds: {min: attribute.range.min, max: attribute.range.max},
 						defaultValues: {min: min, max: max},
 						type: 'number'
+					});
+					$controls.addClass('range-container');
+					if (fromValue || toValue){
+						// Values differ from range min and max
+						$controls.data('dirty', true);
+					}
+					slider.bind("userValuesChanged", function(e, data){
+						// User changed slider values
+						$controls.data('dirty', true);
 					});
 					$controls.append(slider);
 				} else {
@@ -503,20 +520,21 @@
 			case 'TEXT':
 			case 'ENUM':
 			case 'SCRIPT':
-				$controls.append(createInput(attribute, {'name': name, 'id': name, 'style' : 'width: 370px'}, values ? values[0] : undefined));
+				$controls.append(createInput(attribute, {'name': name, 'id': name, 'style' : 'width: 400px'}, values ? values[0] : undefined));
 				break;
 			case 'XREF':
 			case 'MREF':
 				var operator = simpleFilter ? simpleFilter.operator : 'OR';
-				$controls.addClass('xrefmrefsearch');
-				$controls.xrefmrefsearch({
+				var container = $('<div class="row">');
+				$controls.append(container);
+				container.addClass('xrefmrefsearch');
+				container.xrefmrefsearch({
 					attribute : attribute,
 					values : values,
 					labels : simpleFilter ? simpleFilter.getLabels() : null,
 					operator : operator,
 					autofocus : 'autofocus',
-					isfilter : true,
-					width : '384px'
+					isfilter : true
 				});
 				break;
 			case 'COMPOUND' :
@@ -641,15 +659,18 @@
 									|| attribute.fieldType === 'DATE'
 										|| attribute.fieldType === 'DATE_TIME'
 								){
-							
-							// Add toValue
-							if(name && (name.match(/-to$/g) || name === 'sliderright')){
-								toValue = value;
-							}
-							
-							// Add fromValue
-							if(name && (name.match(/-from$/g) || name === 'sliderleft')){
-								fromValue = value;
+						
+							if($domElement.closest('.range-container').data('dirty') || !attribute.range)
+							{
+								// Add toValue
+								if(name && (name.match(/-to$/g) || name === 'sliderright')){
+									toValue = value;
+								}
+								
+								// Add fromValue
+								if(name && (name.match(/-from$/g) || name === 'sliderleft')){
+									fromValue = value;
+								}
 							}
 						}
 						else

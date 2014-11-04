@@ -1,149 +1,147 @@
 <DASSTYLE>
 	<STYLESHEET>
-        <TYPE id="1"><GLYPH><BOX><BGCOLOR>AliceBlue </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="2"><GLYPH><BOX><BGCOLOR>AntiqueWhite </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="3"><GLYPH><BOX><BGCOLOR>Aqua </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="4"><GLYPH><BOX><BGCOLOR>Aquamarine </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="5"><GLYPH><BOX><BGCOLOR>Azure </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="6"><GLYPH><BOX><BGCOLOR>Beige </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="7"><GLYPH><BOX><BGCOLOR>Bisque </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="8"><GLYPH><BOX><BGCOLOR>Black </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="9"><GLYPH><BOX><BGCOLOR>BlanchedAlmond </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="10"><GLYPH><BOX><BGCOLOR>Blue </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="11"><GLYPH><BOX><BGCOLOR>BlueViolet </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="12"><GLYPH><BOX><BGCOLOR>Brown </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="13"><GLYPH><BOX><BGCOLOR>BurlyWood </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="14"><GLYPH><BOX><BGCOLOR>CadetBlue </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="15"><GLYPH><BOX><BGCOLOR>Chartreuse </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="16"><GLYPH><BOX><BGCOLOR>Chocolate </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="17"><GLYPH><BOX><BGCOLOR>Coral </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="18"><GLYPH><BOX><BGCOLOR>CornflowerBlue </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="19"><GLYPH><BOX><BGCOLOR>Cornsilk </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="20"><GLYPH><BOX><BGCOLOR>Crimson </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="21"><GLYPH><BOX><BGCOLOR>Cyan </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="22"><GLYPH><BOX><BGCOLOR>DarkBlue </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="23"><GLYPH><BOX><BGCOLOR>DarkCyan </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="24"><GLYPH><BOX><BGCOLOR>DarkGoldenRod </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="25"><GLYPH><BOX><BGCOLOR>DarkGray </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="26"><GLYPH><BOX><BGCOLOR>DarkGreen </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="27"><GLYPH><BOX><BGCOLOR>DarkKhaki </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="28"><GLYPH><BOX><BGCOLOR>DarkMagenta </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="29"><GLYPH><BOX><BGCOLOR>DarkOliveGreen </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="30"><GLYPH><BOX><BGCOLOR>DarkOrange </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="31"><GLYPH><BOX><BGCOLOR>DarkOrchid </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="32"><GLYPH><BOX><BGCOLOR>DarkRed </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="33"><GLYPH><BOX><BGCOLOR>DarkSalmon </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="34"><GLYPH><BOX><BGCOLOR>DarkSeaGreen </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="35"><GLYPH><BOX><BGCOLOR>DarkSlateBlue </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="36"><GLYPH><BOX><BGCOLOR>DarkSlateGray </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="37"><GLYPH><BOX><BGCOLOR>DarkTurquoise </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="38"><GLYPH><BOX><BGCOLOR>DarkViolet </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="39"><GLYPH><BOX><BGCOLOR>DeepPink </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="40"><GLYPH><BOX><BGCOLOR>DeepSkyBlue </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="41"><GLYPH><BOX><BGCOLOR>DimGray </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="42"><GLYPH><BOX><BGCOLOR>DodgerBlue </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="43"><GLYPH><BOX><BGCOLOR>FireBrick </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="44"><GLYPH><BOX><BGCOLOR>FloralWhite </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="45"><GLYPH><BOX><BGCOLOR>ForestGreen </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="46"><GLYPH><BOX><BGCOLOR>Fuchsia </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="47"><GLYPH><BOX><BGCOLOR>Gainsboro </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="48"><GLYPH><BOX><BGCOLOR>GhostWhite </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="49"><GLYPH><BOX><BGCOLOR>Gold </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="50"><GLYPH><BOX><BGCOLOR>GoldenRod </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="51"><GLYPH><BOX><BGCOLOR>Gray </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="52"><GLYPH><BOX><BGCOLOR>Green </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="53"><GLYPH><BOX><BGCOLOR>GreenYellow </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="54"><GLYPH><BOX><BGCOLOR>HoneyDew </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="55"><GLYPH><BOX><BGCOLOR>HotPink </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="56"><GLYPH><BOX><BGCOLOR>IndianRed  </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="57"><GLYPH><BOX><BGCOLOR>Indigo  </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="58"><GLYPH><BOX><BGCOLOR>Ivory </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="59"><GLYPH><BOX><BGCOLOR>Khaki </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="60"><GLYPH><BOX><BGCOLOR>Lavender </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="61"><GLYPH><BOX><BGCOLOR>LavenderBlush </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="62"><GLYPH><BOX><BGCOLOR>LawnGreen </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="63"><GLYPH><BOX><BGCOLOR>LemonChiffon </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="64"><GLYPH><BOX><BGCOLOR>LightBlue </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="65"><GLYPH><BOX><BGCOLOR>LightCoral </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="66"><GLYPH><BOX><BGCOLOR>LightCyan </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="67"><GLYPH><BOX><BGCOLOR>LightGoldenRodYellow </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="68"><GLYPH><BOX><BGCOLOR>LightGray </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="69"><GLYPH><BOX><BGCOLOR>LightGreen </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="70"><GLYPH><BOX><BGCOLOR>LightPink </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="71"><GLYPH><BOX><BGCOLOR>LightSalmon </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="72"><GLYPH><BOX><BGCOLOR>LightSeaGreen </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="73"><GLYPH><BOX><BGCOLOR>LightSkyBlue </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="74"><GLYPH><BOX><BGCOLOR>LightSlateGray </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="75"><GLYPH><BOX><BGCOLOR>LightSteelBlue </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="76"><GLYPH><BOX><BGCOLOR>LightYellow </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="77"><GLYPH><BOX><BGCOLOR>Lime </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="78"><GLYPH><BOX><BGCOLOR>LimeGreen </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="79"><GLYPH><BOX><BGCOLOR>Linen </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="80"><GLYPH><BOX><BGCOLOR>Magenta </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="81"><GLYPH><BOX><BGCOLOR>Maroon </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="82"><GLYPH><BOX><BGCOLOR>MediumAquaMarine </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="83"><GLYPH><BOX><BGCOLOR>MediumBlue </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="84"><GLYPH><BOX><BGCOLOR>MediumOrchid </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="85"><GLYPH><BOX><BGCOLOR>MediumPurple </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="86"><GLYPH><BOX><BGCOLOR>MediumSeaGreen </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="87"><GLYPH><BOX><BGCOLOR>MediumSlateBlue </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="88"><GLYPH><BOX><BGCOLOR>MediumSpringGreen </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="89"><GLYPH><BOX><BGCOLOR>MediumTurquoise </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="90"><GLYPH><BOX><BGCOLOR>MediumVioletRed </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="91"><GLYPH><BOX><BGCOLOR>MidnightBlue </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="92"><GLYPH><BOX><BGCOLOR>MintCream </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="93"><GLYPH><BOX><BGCOLOR>MistyRose </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="94"><GLYPH><BOX><BGCOLOR>Moccasin </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="95"><GLYPH><BOX><BGCOLOR>NavajoWhite </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="96"><GLYPH><BOX><BGCOLOR>Navy </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="97"><GLYPH><BOX><BGCOLOR>OldLace </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="98"><GLYPH><BOX><BGCOLOR>Olive </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="99"><GLYPH><BOX><BGCOLOR>OliveDrab </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="100"><GLYPH><BOX><BGCOLOR>Orange </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="101"><GLYPH><BOX><BGCOLOR>OrangeRed </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="102"><GLYPH><BOX><BGCOLOR>Orchid </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="103"><GLYPH><BOX><BGCOLOR>PaleGoldenRod </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="104"><GLYPH><BOX><BGCOLOR>PaleGreen </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="105"><GLYPH><BOX><BGCOLOR>PaleTurquoise </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="106"><GLYPH><BOX><BGCOLOR>PaleVioletRed </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="107"><GLYPH><BOX><BGCOLOR>PapayaWhip </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="108"><GLYPH><BOX><BGCOLOR>PeachPuff </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="109"><GLYPH><BOX><BGCOLOR>Peru </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="110"><GLYPH><BOX><BGCOLOR>Pink </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="111"><GLYPH><BOX><BGCOLOR>Plum </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="112"><GLYPH><BOX><BGCOLOR>PowderBlue </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="113"><GLYPH><BOX><BGCOLOR>Purple </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="114"><GLYPH><BOX><BGCOLOR>Red </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="115"><GLYPH><BOX><BGCOLOR>RosyBrown </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="116"><GLYPH><BOX><BGCOLOR>RoyalBlue </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="117"><GLYPH><BOX><BGCOLOR>SaddleBrown </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="118"><GLYPH><BOX><BGCOLOR>Salmon </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="119"><GLYPH><BOX><BGCOLOR>SandyBrown </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="120"><GLYPH><BOX><BGCOLOR>SeaGreen </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="121"><GLYPH><BOX><BGCOLOR>SeaShell </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="122"><GLYPH><BOX><BGCOLOR>Sienna </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="123"><GLYPH><BOX><BGCOLOR>Silver </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="124"><GLYPH><BOX><BGCOLOR>SkyBlue </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="125"><GLYPH><BOX><BGCOLOR>SlateBlue </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="126"><GLYPH><BOX><BGCOLOR>SlateGray </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="127"><GLYPH><BOX><BGCOLOR>Snow </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="128"><GLYPH><BOX><BGCOLOR>SpringGreen </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="129"><GLYPH><BOX><BGCOLOR>SteelBlue </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="130"><GLYPH><BOX><BGCOLOR>Tan </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="131"><GLYPH><BOX><BGCOLOR>Teal </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="132"><GLYPH><BOX><BGCOLOR>Thistle </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="133"><GLYPH><BOX><BGCOLOR>Tomato </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="134"><GLYPH><BOX><BGCOLOR>Turquoise </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="135"><GLYPH><BOX><BGCOLOR>Violet </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="136"><GLYPH><BOX><BGCOLOR>Wheat </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="137"><GLYPH><BOX><BGCOLOR>White </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="138"><GLYPH><BOX><BGCOLOR>WhiteSmoke </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="139"><GLYPH><BOX><BGCOLOR>Yellow </BGCOLOR></BOX></GLYPH></TYPE>
-        <TYPE id="140"><GLYPH><BOX><BGCOLOR>YellowGreen </BGCOLOR></BOX></GLYPH></TYPE>
-            <TYPE id="default">
+        <TYPE id="C">
+            <GLYPH zoom="high">
+            <TEXT>
+                <STRING>C</STRING>
+                <FONT>courier</FONT>
+                <FONTSIZE>10</FONTSIZE>
+                <FGCOLOR>blue</FGCOLOR>
+                <BGCOLOR>green</BGCOLOR>
+                <LABEL>no</LABEL>
+                <BUMP>yes</BUMP>
+            </TEXT>
+            </GLYPH>
+            <GLYPH zoom="medium">
+                <BOX>
+                    <BGCOLOR>blue</BGCOLOR>
+                </BOX>
+            </GLYPH>
+            <GLYPH zoom="low">
+                <BOX>
+                    <BGCOLOR>blue</BGCOLOR>
+                </BOX>
+            </GLYPH>
+        </TYPE>
+        <TYPE id="G">
+            <GLYPH zoom="high">
+            <TEXT>
+                <STRING>G</STRING>
+                <FONT>courier</FONT>
+                <FONTSIZE>10</FONTSIZE>
+                <FGCOLOR>black</FGCOLOR>
+                <BGCOLOR>green</BGCOLOR>
+                <LABEL>no</LABEL>
+                <BUMP>yes</BUMP>
+            </TEXT>
+            </GLYPH>
+            <GLYPH zoom="medium">
+                <BOX>
+                    <BGCOLOR>black</BGCOLOR>
+                </BOX>
+            </GLYPH>
+            <GLYPH zoom="low">
+                <BOX>
+                    <BGCOLOR>black</BGCOLOR>
+                </BOX>
+            </GLYPH>
+        </TYPE>
+        <TYPE id="A">
+            <GLYPH zoom="high">
+            <TEXT>
+                <STRING>A</STRING>
+                <FONT>courier</FONT>
+                <FONTSIZE>10</FONTSIZE>
+                <FGCOLOR>green</FGCOLOR>
+                <BGCOLOR>green</BGCOLOR>
+                <LABEL>no</LABEL>
+                <BUMP>yes</BUMP>
+            </TEXT>
+        </GLYPH>
+            <GLYPH zoom="medium">
+                <BOX>
+                    <BGCOLOR>green</BGCOLOR>
+                </BOX>
+            </GLYPH>
+            <GLYPH zoom="low">
+                <BOX>
+                    <BGCOLOR>green</BGCOLOR>
+                </BOX>
+            </GLYPH>
+        </TYPE>
+        <TYPE id="T">
+            <GLYPH zoom="high">
+                <TEXT>
+                    <STRING>T</STRING>
+                    <FONT>courier</FONT>
+                    <FONTSIZE>10</FONTSIZE>
+                    <FGCOLOR>red</FGCOLOR>
+                    <BGCOLOR>green</BGCOLOR>
+                    <LABEL>no</LABEL>
+                    <BUMP>yes</BUMP>
+                </TEXT>
+            </GLYPH>
+            <GLYPH zoom="medium">
+                <BOX>
+                    <BGCOLOR>red</BGCOLOR>
+                </BOX>
+            </GLYPH>
+            <GLYPH zoom="low">
+                <BOX>
+                    <BGCOLOR>red</BGCOLOR>
+                </BOX>
+            </GLYPH>
+        </TYPE>
+        <TYPE id="insert">
+            <GLYPH zoom="high">
+                <TEXT>
+                    <STRING>I</STRING>
+                    <FONT>courier</FONT>
+                    <FONTSIZE>10</FONTSIZE>
+                    <FGCOLOR>orange</FGCOLOR>
+                    <BGCOLOR>green</BGCOLOR>
+                    <LABEL>no</LABEL>
+                    <BUMP>yes</BUMP>
+                </TEXT>
+            </GLYPH>
+            <GLYPH zoom="medium">
+                <BOX>
+                    <BGCOLOR>orange</BGCOLOR>
+                </BOX>
+            </GLYPH>
+            <GLYPH zoom="low">
+                <BOX>
+                    <BGCOLOR>orange</BGCOLOR>
+                </BOX>
+            </GLYPH>
+        </TYPE>
+        <TYPE id="delete">
+            <GLYPH zoom="high">
+            <TEXT>
+                <STRING>D</STRING>
+                <FONT>courier</FONT>
+                <FONTSIZE>10</FONTSIZE>
+                <FGCOLOR>purple</FGCOLOR>
+                <BGCOLOR>green</BGCOLOR>
+                <LABEL>no</LABEL>
+                <BUMP>yes</BUMP>
+            </TEXT>
+            </GLYPH>
+            <GLYPH zoom="medium">
+                <BOX>
+                    <BGCOLOR>purple</BGCOLOR>
+                </BOX>
+            </GLYPH>
+            <GLYPH zoom="low">
+                <BOX>
+                    <BGCOLOR>purple</BGCOLOR>
+                </BOX>
+            </GLYPH>
+        </TYPE>
+        <TYPE id="default">
                 <GLYPH>
                     <BOX>
-                        <BGCOLOR>purple</BGCOLOR>
+                        <BGCOLOR>DarkCyan</BGCOLOR>
                     </BOX>
                 </GLYPH>
             </TYPE>

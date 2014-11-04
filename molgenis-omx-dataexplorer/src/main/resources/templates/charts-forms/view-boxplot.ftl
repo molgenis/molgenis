@@ -38,7 +38,7 @@
                 </div>
         		<div class="modal-footer">
         			<div class="form-group">
-        				<div class="col-md-9">
+        				<div class="col-md-12">
         					<input id="boxplot-designer-modal-create-button" class="btn btn-default" type="button" value="Create Chart" data-dismiss="modal" aria-hidden="true">
         				</div>
         			</div>

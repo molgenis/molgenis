@@ -14,6 +14,10 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
+import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.elasticsearch.util.Hit;
+import org.molgenis.data.elasticsearch.util.SearchRequest;
+import org.molgenis.data.elasticsearch.util.SearchResult;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.omx.biobankconnect.ontologymatcher.AsyncOntologyMatcher;
@@ -21,14 +25,11 @@ import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcher;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcherRequest;
 import org.molgenis.omx.biobankconnect.ontologyservice.OntologyService;
 import org.molgenis.omx.biobankconnect.ontologyservice.OntologyServiceRequest;
+import org.molgenis.omx.biobankconnect.ontologyservice.OntologyServiceResult;
 import org.molgenis.omx.biobankconnect.wizard.CurrentUserStatus;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.ObservationSet;
-import org.molgenis.search.Hit;
-import org.molgenis.search.SearchRequest;
-import org.molgenis.search.SearchResult;
-import org.molgenis.search.SearchService;
 import org.molgenis.security.user.UserAccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -184,12 +185,12 @@ public class AlgorithmEditorController extends MolgenisPluginController
 
 	@RequestMapping(method = POST, value = "/ontologyterm", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public SearchResult query(@RequestBody
+	public OntologyServiceResult query(@RequestBody
 	OntologyServiceRequest ontologyTermRequest)
 	{
 		String ontologyIri = ontologyTermRequest.getOntologyIri();
 		String queryString = ontologyTermRequest.getQueryString();
-		if (queryString == null) return new SearchResult(0, Collections.<Hit> emptyList());
+		if (queryString == null) return new OntologyServiceResult("The query cannot be null!");
 		return ontologyService.search(ontologyIri, queryString);
 	}
 

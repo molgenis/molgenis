@@ -3,11 +3,13 @@ package org.molgenis.data.support;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Package;
 import org.molgenis.data.Range;
 import org.molgenis.fieldtypes.FieldType;
 
@@ -17,6 +19,8 @@ import com.google.common.collect.TreeTraverser;
 
 public abstract class AbstractEntityMetaData implements EntityMetaData
 {
+	private static Logger LOG = Logger.getLogger(AbstractEntityMetaData.class);
+
 	private String labelAttribute;
 	private String idAttribute;
 
@@ -173,6 +177,25 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 		});
 	}
 
+	/**
+	 * Gets the fully qualified name of this EntityMetaData.
+	 */
+	@Override
+	public String getName()
+	{
+		StringBuilder sb = new StringBuilder();
+
+		Package p = getPackage();
+		if (p != null && !Package.DEFAULT_PACKAGE_NAME.equals(p.getName()))
+		{
+			sb.append(p.getName());
+			sb.append(Package.PACKAGE_SEPARATOR);
+		}
+		sb.append(getSimpleName());
+
+		return sb.toString();
+	}
+
 	@Override
 	public AttributeMetaData getIdAttribute()
 	{
@@ -201,7 +224,9 @@ public abstract class AbstractEntityMetaData implements EntityMetaData
 			}
 			if (idAttributeMetaData == null)
 			{
-				new RuntimeException("No idAttribute specified, this attribute is required");
+				LOG.error("No idAttribute specified, this attribute is required");
+				// FIXME entity must be identifiable but in reality this is not always the case
+				// throw new RuntimeException("No idAttribute specified, this attribute is required");
 			}
 		}
 		return idAttributeMetaData;

@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -29,12 +30,13 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 		refEntity.setLabelAttribute("label");
 		refEntity.setIdAttribute("identifier");
 		refEntity.addAttribute("identifier").setNillable(false);
+		refEntity.addAttribute("label");
 
 		DefaultEntityMetaData refEntity2 = new DefaultEntityMetaData("IntTarget2");
 		refEntity2.setIdAttribute("identifier");
 		refEntity2.addAttribute("identifier").setDataType(MolgenisFieldTypes.INT).setNillable(false);
 
-		DefaultEntityMetaData varcharMD = new DefaultEntityMetaData("MrefTest").setLabel("ref Test");
+		EditableEntityMetaData varcharMD = new DefaultEntityMetaData("MrefTest").setLabel("ref Test");
 		varcharMD.setIdAttribute("identifier");
 		varcharMD.addAttribute("identifier").setNillable(false);
 		varcharMD.addAttribute("stringRef").setDataType(MolgenisFieldTypes.MREF).setRefEntity(refEntity)
@@ -64,9 +66,9 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 		coll.dropEntityMetaData(getMetaData().getAttribute("intRef").getRefEntity().getName());
 
 		// create
-		MysqlRepository stringRepo = coll.add(getMetaData().getAttribute("stringRef").getRefEntity());
-		MysqlRepository intRepo = coll.add(getMetaData().getAttribute("intRef").getRefEntity());
-		MysqlRepository mrefRepo = coll.add(getMetaData());
+		MysqlRepository stringRepo = (MysqlRepository) coll.add(getMetaData().getAttribute("stringRef").getRefEntity());
+		MysqlRepository intRepo = (MysqlRepository) coll.add(getMetaData().getAttribute("intRef").getRefEntity());
+		MysqlRepository mrefRepo = (MysqlRepository) coll.add(getMetaData());
 
 		Assert.assertEquals(stringRepo.count(), 0);
 		Assert.assertEquals(intRepo.count(), 0);

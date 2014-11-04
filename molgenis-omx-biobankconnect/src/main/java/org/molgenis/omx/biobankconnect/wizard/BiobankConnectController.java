@@ -23,6 +23,9 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Writable;
 import org.molgenis.data.csv.CsvWriter;
+import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.elasticsearch.util.Hit;
+import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
@@ -36,9 +39,6 @@ import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcher;
 import org.molgenis.omx.biobankconnect.ontologymatcher.OntologyMatcherRequest;
 import org.molgenis.omx.observ.DataSet;
 import org.molgenis.omx.observ.ObservableFeature;
-import org.molgenis.search.Hit;
-import org.molgenis.search.SearchRequest;
-import org.molgenis.search.SearchService;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.wizard.AbstractWizardController;
 import org.molgenis.ui.wizard.Wizard;
@@ -145,10 +145,9 @@ public class BiobankConnectController extends AbstractWizardController
 	}
 
 	@RequestMapping(value = "/uploadfeatures", method = RequestMethod.POST, headers = "Content-Type=multipart/form-data")
-	public String importFeatures(@RequestParam
-	String dataSetName, @RequestParam
-	Part file, @ModelAttribute("wizard")
-	BiobankConnectWizard biobankConnectWizard, HttpServletRequest request, Model model) throws IOException
+	public String importFeatures(@RequestParam String dataSetName, @RequestParam Part file,
+			@ModelAttribute("wizard") BiobankConnectWizard biobankConnectWizard, HttpServletRequest request, Model model)
+			throws IOException
 	{
 		File uploadFile = FileUploadUtils.saveToTempFolder(file);
 		String message = ontologyAnnotator.uploadFeatures(uploadFile, dataSetName);
@@ -190,16 +189,14 @@ public class BiobankConnectController extends AbstractWizardController
 
 	@RequestMapping(method = RequestMethod.POST, value = "/annotate/update", consumes = APPLICATION_JSON_VALUE)
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void updateDocument(@RequestBody
-	UpdateIndexRequest request)
+	public void updateDocument(@RequestBody UpdateIndexRequest request)
 	{
 		ontologyAnnotator.updateIndex(request);
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/rematch", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public AlgorithmGenerateResponse rematch(@RequestBody
-	OntologyMatcherRequest request)
+	public AlgorithmGenerateResponse rematch(@RequestBody OntologyMatcherRequest request)
 	{
 		String userName = userAccountService.getCurrentUser().getUsername();
 		ontologyMatcher.match(userName, request.getTargetDataSetId(), request.getSelectedDataSetIds(),
@@ -244,8 +241,8 @@ public class BiobankConnectController extends AbstractWizardController
 	}
 
 	@RequestMapping(value = "/download", method = RequestMethod.POST)
-	public void download(@RequestParam("request")
-	String requestString, HttpServletResponse response) throws IOException
+	public void download(@RequestParam("request") String requestString, HttpServletResponse response)
+			throws IOException
 	{
 		requestString = URLDecoder.decode(requestString, "UTF-8");
 		UpdateIndexRequest request = new GsonHttpMessageConverter().getGson().fromJson(requestString,

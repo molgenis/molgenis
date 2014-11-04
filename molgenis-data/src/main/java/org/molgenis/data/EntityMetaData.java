@@ -1,5 +1,9 @@
 package org.molgenis.data;
 
+
+
+
+
 /**
  * EntityMetaData defines the structure and attributes of an Entity. Attributes are unique. Other software components
  * can use this to interact with Entity and/or to configure backends and frontends, including Repository instances.
@@ -7,9 +11,25 @@ package org.molgenis.data;
 public interface EntityMetaData
 {
 	/**
-	 * Every EntityMetaData has a unique name
+	 * Gets the package.
+	 * 
+	 * @return
+	 */
+	Package getPackage();
+
+	/**
+	 * Gets the fully qualified entity name.
+	 * 
+	 * @return
 	 */
 	String getName();
+
+	/**
+	 * Gets the name of the entity without the trailing packagename
+	 * 
+	 * @return
+	 */
+	String getSimpleName();
 
 	/**
 	 * Entities can be abstract (analogous an 'interface' or 'protocol'). Use is to define reusable Entity model
@@ -60,4 +80,5 @@ public interface EntityMetaData
 	public EntityMetaData getExtends();
 
 	Class<? extends Entity> getEntityClass();
+
 }

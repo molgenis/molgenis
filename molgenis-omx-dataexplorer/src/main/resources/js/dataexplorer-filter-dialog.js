@@ -26,54 +26,29 @@
 		modal.modal('show');
 	};
 	
-	function createFilterModal() {		
+	function createFilterModal() {
 		var modal = $('#filter-modal');
-		if(!modal.length) {
-			var items = [];
-			items.push('<div id="filter-modal" class="modal" tabindex="-1" aria-labelledby="filter-modal-label" aria-hidden="true">');
-			items.push('<div class="modal-dialog">');
-			items.push('<div class="modal-content">');
-			items.push('<div class="modal-header">');
-			items.push('<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>');
-			items.push('<h4 class="modal-title filter-title" id="filter-modal-label"></h4>');
-			items.push('</div>');
-			items.push('<div class="modal-body">');
-			items.push('<legend>Description</legend>');
-			items.push('<p class="filter-description"></p>');
-			items.push('<legend>Filter</legend>');
-			items.push('<form class="form-horizontal"></form>');
-			items.push('</div>');
-			items.push('<div class="modal-footer">');
-			items.push('<a href="#" class="btn btn-default" data-dismiss="modal">Cancel</a>');
-			items.push('<a href="#" class="btn btn-primary filter-apply-btn" data-dismiss="modal">Apply</a>');
-			items.push('</div>');
-			items.push('</div>');
-			items.push('</div>');
-			items.push('</div>');
-			
-			modal = $(items.join(''));
-			
-			modal.modal({'show': false});
-			
-			createFilterModalControls(modal);
-		}
+        var filterTemplate = Handlebars.compile($("#filter-modal-template").html());
+        modal = $(filterTemplate({}));
+		createFilterModalControls(modal);
 		return modal;
 	}
 	
 	function createFilterModalControls(modal) {
+		$('.filter-apply-btn', modal).unbind('click');
 		$('.filter-apply-btn', modal).click(function() {
 			var filters = molgenis.dataexplorer.filter.createFilters($('form', modal));
-			if (filters.length > 0) {
-				$(document).trigger('updateAttributeFilters', {
-					'filters' : filters
-				});
-			}
+			$(document).trigger('updateAttributeFilters', {
+				'filters' : filters
+			});
 		});
 		
+		$(modal).unbind('shown.bs.modal');
 		modal.on('shown.bs.modal', function () {
 			$('form input:visible:first', modal).focus();
 		});
 		
+		$(modal).unbind('keypress');
 		modal.keypress(function(e) {
 		    if(e.which == 13) {
 		    	e.preventDefault();

@@ -9,17 +9,17 @@ import org.springframework.data.domain.Sort;
  */
 public interface Query extends Iterable<Entity>
 {
-    /**
-     * Count entities matching query
-     *
-     * @return count or Exception of not bound to repository
-     */
-    Long count();
+	/**
+	 * Count entities matching query
+	 *
+	 * @return count or Exception of not bound to repository
+	 */
+	Long count();
 
-    <E extends Entity> Iterable<E> findAll(Class<E> klazz);
+	<E extends Entity> Iterable<E> findAll(Class<E> klazz);
 
 	/**
-	 * Filtering rules
+	 * Filtering rules, seperated by QueryRule.AND and QueryRule.OR clauses
 	 */
 	List<QueryRule> getRules();
 
@@ -43,18 +43,40 @@ public interface Query extends Iterable<Entity>
 	 */
 	Query search(String searchTerms);
 
+	/**
+	 * Search field
+	 */
+	Query search(String field, String searchTerms);
+
 	Query or();
 
 	Query and();
 
-	Query like(String field, Object value);
+	/**
+	 * 
+	 * @param field
+	 * @param value
+	 * @return
+	 */
+	Query like(String field, String value);
 
 	/**
-	 * Equals
+	 * 
+	 * @param field
+	 * @param value
+	 *            categorical/xref: entity or entity id; mref: entity iterable or id iterable; else: value
+	 * @return
 	 */
 	Query eq(String field, Object value);
 
-	Query in(String field, Iterable<?> objectIterator);
+	/**
+	 * 
+	 * @param field
+	 * @param values
+	 *            ids or entities
+	 * @return
+	 */
+	Query in(String field, Iterable<?> values);
 
 	/**
 	 * Greater than
@@ -97,7 +119,7 @@ public interface Query extends Iterable<Entity>
 
 	Query offset(int offset);
 
-    Query sort(Sort.Direction direction, String ... fields);
+	Query sort(Sort.Direction direction, String... fields);
 
 	Query sort(Sort sort);
 }

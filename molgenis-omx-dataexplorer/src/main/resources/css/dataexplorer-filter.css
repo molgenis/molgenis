@@ -1,16 +1,13 @@
-#filter-wizard-modal .modal-body {
-	min-height: 500px;
-	max-height: 500px;
-	padding-bottom: 0;
-}
-
 #filter-wizard-modal .well {
 	overflow: auto;
+	min-height: 490px;
 	margin-bottom: 10px;
+	max-width: 100%;
+    overflow-x: hidden;
 }
 
 .filter-wizard-fixed-height {
-	height: 365px;
+	min-height: 365px;
 }
 
 #filter-wizard-modal .pager {
@@ -26,25 +23,18 @@
 	position: static;
 }
 
-#filter-wizard-modal .controls.xrefmrefsearch.complex-simplefilter,
-#filter-modal .controls.xrefmrefsearch.complex-simplefilter{
-	width: 384px;
-}
-
-#filter-wizard-modal .form-horizontal .control-label{
-	width:20%;
+#filter-wizard-modal-label {
+	display: inline-block;
 }
 
 #filter-modal .modal-body {
 	min-height: 250px;
-	max-height: 500px;
 	padding-bottom: 0;
 }
 
 #filter-modal .form-horizontal .form-group .select2-choices{
 	position: static;
 }
-
 
 #filter-wizard-modal .controls.complex-removebutton-container, 
 #filter-wizard-modal .controls.complex-addbutton-container, 
@@ -78,10 +68,10 @@
 	margin-left: 5px;
 }
 
-#filter-modal .form-horizontal {
-	margin-bottom: 60px;
+.controls complex-element {
+	width: 500px;
 }
 
-.simple-filter-container{
-	padding-bottom: 10px;
+.ui-rangeSlider-label-value {
+	color: black;
 }

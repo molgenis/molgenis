@@ -1,6 +1,5 @@
 package org.molgenis.omx.protocol;
 
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.*;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.BOOL;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.INT;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
@@ -12,6 +11,7 @@ import java.util.List;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Package;
 import org.molgenis.data.support.AbstractEntityMetaData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.omx.observ.Category;
@@ -29,7 +29,7 @@ public class OmxLookupTableEntityMetaData extends AbstractEntityMetaData
 		if (categoricalFeature == null) throw new IllegalArgumentException("categoricalFeature is null");
 		this.categoricalFeature = categoricalFeature;
 	}
-	
+
 	public static final String createOmxLookupTableEntityMetaDataName(String categoricalFeatureIdentifier)
 	{
 		return categoricalFeatureIdentifier + POSTFIX_OMXLOOKUPTABLE_NAME; // yes, Identifier
@@ -135,5 +135,19 @@ public class OmxLookupTableEntityMetaData extends AbstractEntityMetaData
 	public Class<? extends Entity> getEntityClass()
 	{
 		return Category.class;
+	}
+
+	@Override
+	public Package getPackage()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getSimpleName()
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

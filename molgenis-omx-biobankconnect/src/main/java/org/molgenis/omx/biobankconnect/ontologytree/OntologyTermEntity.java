@@ -7,14 +7,14 @@ import java.util.Map;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
+import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.elasticsearch.util.Hit;
+import org.molgenis.data.elasticsearch.util.SearchRequest;
+import org.molgenis.data.elasticsearch.util.SearchResult;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermIndexRepository;
 import org.molgenis.omx.biobankconnect.ontology.repository.OntologyTermQueryRepository;
 import org.molgenis.omx.biobankconnect.ontologyindexer.AsyncOntologyIndexer;
-import org.molgenis.search.Hit;
-import org.molgenis.search.SearchRequest;
-import org.molgenis.search.SearchResult;
-import org.molgenis.search.SearchService;
 
 public class OntologyTermEntity extends AbstractOntologyEntity
 {

@@ -138,6 +138,11 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	@Override
 	public boolean isReadonly()
 	{
+		if (idAttribute)
+		{
+			readOnly = true;
+		}
+
 		return readOnly;
 	}
 
@@ -245,6 +250,11 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	@Override
 	public boolean isUnique()
 	{
+		if (idAttribute)
+		{
+			unique = true;
+		}
+
 		return unique;
 	}
 

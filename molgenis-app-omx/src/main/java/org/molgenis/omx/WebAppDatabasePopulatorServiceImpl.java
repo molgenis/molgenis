@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.IndexedCrudRepositorySecurityDecorator;
 import org.molgenis.data.annotation.impl.CaddServiceAnnotator;
 import org.molgenis.data.annotation.impl.ClinVarServiceAnnotator;
 import org.molgenis.data.annotation.impl.DbnsfpGeneServiceAnnotator;
@@ -19,6 +20,7 @@ import org.molgenis.omx.auth.UserAuthority;
 import org.molgenis.omx.controller.HomeController;
 import org.molgenis.omx.core.RuntimeProperty;
 import org.molgenis.security.MolgenisSecurityWebAppDatabasePopulatorService;
+import org.molgenis.security.account.AccountService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.runas.RunAsSystem;
 import org.molgenis.studymanager.StudyManagerController;
@@ -60,9 +62,6 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 				"chr:'1',viewStart:10000000,viewEnd:10100000,cookieKey:'human',nopersist:true");
 		runtimePropertyMap.put(DataExplorerController.COORDSYSTEM,
 				"{speciesName: 'Human',taxon: 9606,auth: 'GRCh',version: '37',ucscName: 'hg19'}");
-		runtimePropertyMap
-				.put(DataExplorerController.CHAINS,
-						"{hg18ToHg19: new Chainset('http://www.derkholm.net:8080/das/hg18ToHg19/', 'NCBI36', 'GRCh37',{speciesName: 'Human',taxon: 9606,auth: 'NCBI',version: 36,ucscName: 'hg18'})}");
 		// for use of the demo dataset add to
 		// SOURCES:",{name:'molgenis mutations',uri:'http://localhost:8080/das/molgenis/',desc:'Default from WebAppDatabasePopulatorService'}"
 		runtimePropertyMap
@@ -88,6 +87,10 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 
 		// DataExplorer hide select if dataset selected through url
 		runtimePropertyMap.put(DataExplorerController.KEY_HIDE_SELECT, String.valueOf(true));
+
+		// Aggregate anonymization threshold (default no threshold)
+		runtimePropertyMap.put(IndexedCrudRepositorySecurityDecorator.SETTINGS_KEY_AGGREGATE_ANONYMIZATION_THRESHOLD,
+				Integer.toString(0));
 
 		// Annotators include files/tools
 		String molgenisHomeDir = System.getProperty("molgenis.home");
@@ -119,18 +122,24 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 				String.valueOf(DataExplorerController.DEFAULT_VAL_SHOW_WIZARD_ONINIT));
 		runtimePropertyMap.put(DataExplorerController.AGGREGATES_NORESULTS_MESSAGE,
 				DataExplorerController.DEFAULT_AGGREGATES_NORESULTS_MESSAGE);
+		runtimePropertyMap.put(DataExplorerController.KEY_MOD_AGGREGATES_DISTINCT_HIDE,
+				String.valueOf(DataExplorerController.DEFAULT_VAL_AGGREGATES_DISTINCT_HIDE));
 
 		runtimePropertyMap.put(StudyManagerController.EXPORT_BTN_TITLE, "Export");
 		runtimePropertyMap.put(StudyManagerController.EXPORT_ENABLED, String.valueOf(false));
 
 		runtimePropertyMap.put(MolgenisInterceptor.I18N_LOCALE, "en");
 
-		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_START, "POS,start_nucleotide");
-		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_STOP, "stop_pos,stop_nucleotide,end_nucleotide");
 		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_CHROM, "CHROM,#CHROM,chromosome");
+		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_POS, "POS,start_nucleotide");
+		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_REF, "REF");
+		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_ALT, "ALT");
 		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_ID, "ID,Mutation_id");
 		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_DESCRIPTION, "INFO");
 		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_PATIENT_ID, "patient_id");
+		runtimePropertyMap.put(GenomeConfig.GENOMEBROWSER_STOP, "stop_pos,stop_nucleotide,end_nucleotide");
+
+		runtimePropertyMap.put(AccountService.KEY_PLUGIN_AUTH_ENABLE_SELFREGISTRATION, String.valueOf(true));
 
 		for (Entry<String, String> entry : runtimePropertyMap.entrySet())
 		{

@@ -13,16 +13,18 @@ import static org.molgenis.util.ApplicationContextProvider.getApplicationContext
 @Component
 public class GenomeConfig
 {
-	public static final String GENOMEBROWSER_START = "genomebrowser.data.start";
-	public static final String GENOMEBROWSER_STOP = "genomebrowser.data.stop";
+	public static final String GENOMEBROWSER_POS = "genomebrowser.data.start";
 	public static final String GENOMEBROWSER_CHROM = "genomebrowser.data.chromosome";
-	public static final String GENOMEBROWSER_ID = "genomebrowser.data.id";
-	public static final String GENOMEBROWSER_DESCRIPTION = "genomebrowser.data.desc";
-	public static final String GENOMEBROWSER_LINK = "genomebrowser.data.linkout";
-	public static final String GENOMEBROWSER_NAME = "genomebrowser.data.name";
-	public static final String GENOMEBROWSER_PATIENT_ID = "genomebrowser.data.patient";
+    public static final String GENOMEBROWSER_REF = "genomebrowser.data.ref";
+    public static final String GENOMEBROWSER_ALT = "genomebrowser.data.alt";
+    public static final String GENOMEBROWSER_ID = "genomebrowser.data.id";
+    public static final String GENOMEBROWSER_STOP = "genomebrowser.data.stop";
+    public static final String GENOMEBROWSER_DESCRIPTION = "genomebrowser.data.desc";
+    public static final String GENOMEBROWSER_LINK = "genomebrowser.data.linkout";
+    public static final String GENOMEBROWSER_NAME = "genomebrowser.data.name";
+    public static final String GENOMEBROWSER_PATIENT_ID = "genomebrowser.data.patient";
 
-	private MolgenisSettings settings;
+    private MolgenisSettings settings;
 
 	public AttributeMetaData getAttributeMetadataForAttributeNameArray(String propertyName, EntityMetaData metadata)
 	{

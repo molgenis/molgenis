@@ -8,39 +8,34 @@
 	var restApi = new molgenis.RestClient();
 
 	self.openFilterWizardModal = function(entityMetaData, attributeFilters) {
-		var modal = createFilterWizardModal();
+		var modal = createFilterWizardModal(attributeFilters);
 		createFilterWizardContent(entityMetaData, attributeFilters, modal);
 		modal.modal('show');
 	};
 	
-	function createFilterWizardModal() {		
+	function createFilterWizardModal(attributeFilters) {
 		var modal = $('#filter-wizard-modal');
-
-		if(modal.length === 0){
-            var wizardTemplate = Handlebars.compile($("#filter-wizard-modal-template").html());
-
-            modal = $(wizardTemplate({}));
-			createFilterModalControls(modal);
-		}
-		
+        var wizardTemplate = Handlebars.compile($("#filter-wizard-modal-template").html());
+        modal = $(wizardTemplate({}));
+		createFilterModalControls(modal, attributeFilters);
 		return modal;
 	}
 	
-	function createFilterModalControls(modal) {
+	function createFilterModalControls(modal, attributeFilters) {
+		$('.filter-wizard-apply-btn', modal).unbind('click');
 		$('.filter-wizard-apply-btn', modal).click(function() {
 			var filters = molgenis.dataexplorer.filter.createFilters($('form', modal));
-
-			if (filters.length > 0) {
-				$(document).trigger('updateAttributeFilters', {
-					'filters' : filters
-				});
-			}
+			$(document).trigger('updateAttributeFilters', {
+				'filters' : filters
+			});
 		});
 		
+		modal.unbind('shown.bs.modal');
 		modal.on('shown.bs.modal', function () {
 			$('form input:visible:first', modal).focus();
 		});
 		
+		modal.unbind('keypress');
 		modal.keypress(function(e) {
 		    if(e.which == 13) {
 		    	e.preventDefault();

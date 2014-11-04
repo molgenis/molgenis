@@ -6,11 +6,9 @@ package org.molgenis.data;
 public interface Aggregateable
 {
 	/**
-	 * Creates counts off all possible combinations of xAttr and yAttr attributes
 	 * 
-	 * @param xAttr
-	 * @param yAttr
+	 * @param aggregateQuery
 	 * @return
 	 */
-	AggregateResult aggregate(AttributeMetaData xAttr, AttributeMetaData yAttr, Query q);
+	AggregateResult aggregate(AggregateQuery aggregateQuery);
 }

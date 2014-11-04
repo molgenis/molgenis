@@ -111,9 +111,21 @@ public class LazyReferenceEntity implements Entity
 		return getEntity().getEntity(attributeName);
 	}
 
+	@Override
+	public <E extends Entity> E getEntity(String attributeName, Class<E> clazz)
+	{
+		return getEntity().getEntity(attributeName, clazz);
+	}
+
 	public Iterable<Entity> getEntities(String attributeName)
 	{
 		return getEntity().getEntities(attributeName);
+	}
+
+	@Override
+	public <E extends Entity> Iterable<E> getEntities(String attributeName, Class<E> clazz)
+	{
+		return getEntity().getEntities(attributeName, clazz);
 	}
 
 	public List<String> getList(String attributeName)

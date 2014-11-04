@@ -8,7 +8,7 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Queryable;
-import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.MrefField;
@@ -21,9 +21,9 @@ public class MysqlEntity extends MapEntity
 	private static final Logger logger = Logger.getLogger(MysqlEntity.class);
 
 	private final EntityMetaData metaData;
-	private final RepositoryCollection repositoryCollection;
+	private final MysqlRepositoryCollection repositoryCollection;
 
-	public MysqlEntity(EntityMetaData metaData, RepositoryCollection repositoryCollection)
+	public MysqlEntity(EntityMetaData metaData, MysqlRepositoryCollection repositoryCollection)
 	{
 		assert metaData != null;
 		assert repositoryCollection != null;
@@ -48,9 +48,20 @@ public class MysqlEntity extends MapEntity
 		AttributeMetaData amd = metaData.getAttribute(attributeName);
 		if (amd.getDataType() instanceof XrefField)
 		{
+			Object obj = get(attributeName);
+			if (obj == null)
+			{
+				return null;
+			}
+
 			EntityMetaData ref = amd.getRefEntity();
-			Queryable r = (Queryable) repositoryCollection.getRepositoryByEntityName(ref.getName());
-			return r.findOne(new QueryImpl().eq(ref.getIdAttribute().getName(), get(attributeName)));
+			Queryable r = repositoryCollection.getUndecoratedRepository(ref.getName());
+			if (r == null)
+			{
+				throw new UnknownEntityException("Unknown entity [" + ref.getName() + "]");
+			}
+
+			return r.findOne(new QueryImpl().eq(ref.getIdAttribute().getName(), obj));
 		}
 
 		// else throw exception
@@ -69,7 +80,7 @@ public class MysqlEntity extends MapEntity
 		if (get(attributeName) != null && amd.getDataType() instanceof MrefField)
 		{
 			EntityMetaData ref = amd.getRefEntity();
-			Queryable r = (Queryable) repositoryCollection.getRepositoryByEntityName(ref.getName());
+			Queryable r = repositoryCollection.getUndecoratedRepository(ref.getName());
 			return r.findAll(new QueryImpl().in(ref.getIdAttribute().getName(), getList(attributeName)));
 		}
 		List<Entity> result = new ArrayList<Entity>();

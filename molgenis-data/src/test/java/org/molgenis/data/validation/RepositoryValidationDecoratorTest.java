@@ -11,6 +11,7 @@ import java.util.Set;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
+import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.testng.annotations.BeforeMethod;
@@ -25,7 +26,7 @@ public class RepositoryValidationDecoratorTest
 	public void beforeMethod()
 	{
 		decoratedRepository = mock(CrudRepository.class);
-		repositoryValidationDecorator = new RepositoryValidationDecorator(decoratedRepository,
+		repositoryValidationDecorator = new RepositoryValidationDecorator(new DataServiceImpl(), decoratedRepository,
 				new EntityAttributesValidator());
 	}
 
@@ -57,6 +58,37 @@ public class RepositoryValidationDecoratorTest
 		violations = repositoryValidationDecorator.checkNillable(Arrays.asList(e2));
 		assertTrue(violations.isEmpty());
 
+	}
+
+	@Test
+	public void checkReadonly()
+	{
+		Entity e1 = new MapEntity("id");
+		e1.set("id", Integer.valueOf(1));
+		e1.set("name", "e1");
+		e1.set("readonly", "readonly");
+
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("test");
+		emd.addAttribute("id").setIdAttribute(true).setDataType(MolgenisFieldTypes.INT).setReadOnly(true);
+		emd.addAttribute("readonly").setReadOnly(true);
+		emd.setLabelAttribute("name");
+		when(decoratedRepository.getEntityMetaData()).thenReturn(emd);
+
+		when(repositoryValidationDecorator.findOne(Integer.valueOf(1))).thenReturn(e1);
+
+		Entity e2 = new MapEntity("id");
+		e2.set("id", Integer.valueOf(1));
+		e2.set("readonly", "readonly");
+		e2.set("name", "e2");
+		Set<ConstraintViolation> violations = repositoryValidationDecorator.checkReadonlyByUpdate(Arrays.asList(e2));
+		assertTrue(violations.isEmpty());
+
+		Entity e3 = new MapEntity("id");
+		e3.set("id", Integer.valueOf(1));
+		e3.set("readonly", "readonlyNEW");
+		e3.set("name", "e3");
+		violations = repositoryValidationDecorator.checkReadonlyByUpdate(Arrays.asList(e3));
+		assertEquals(violations.size(), 1);
 	}
 
 	@SuppressWarnings("unchecked")

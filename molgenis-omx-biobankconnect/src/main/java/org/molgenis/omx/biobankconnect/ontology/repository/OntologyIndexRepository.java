@@ -4,9 +4,9 @@ import java.util.Iterator;
 
 import org.molgenis.data.Countable;
 import org.molgenis.data.Entity;
+import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.omx.biobankconnect.utils.OntologyLoader;
-import org.molgenis.search.SearchService;
 
 public class OntologyIndexRepository extends AbstractOntologyRepository implements Countable
 {

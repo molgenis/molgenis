@@ -17,18 +17,25 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.molgenis.data.*;
+import org.molgenis.data.AggregateResult;
+import org.molgenis.data.Aggregateable;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.DataService;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.Queryable;
 import org.molgenis.data.csv.CsvWriter;
+import org.molgenis.data.support.AggregateQueryImpl;
 import org.molgenis.data.support.GenomeConfig;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataRequest.ColNames;
@@ -61,7 +68,6 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-import org.springframework.web.servlet.ModelAndView;
 
 /**
  * Controller class for the data explorer.
@@ -89,6 +95,8 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String KEY_HEADER_ABBREVIATE = "plugin.dataexplorer.header.abbreviate";
 	public static final String KEY_HIDE_SEARCH_BOX = "plugin.dataexplorer.hide.searchbox";
 	public static final String KEY_HIDE_ITEM_SELECTION = "plugin.dataexplorer.hide.itemselection";
+	public static final String KEY_MOD_AGGREGATES_DISTINCT_HIDE = KEY_MOD_AGGREGATES + ".distinct.hide";
+	public static final String KEY_MOD_AGGREGATES_DISTINCT_OVERRIDE = KEY_MOD_AGGREGATES + ".distinct.override";
 
 	private static final boolean DEFAULT_VAL_MOD_AGGREGATES = true;
 	private static final boolean DEFAULT_VAL_MOD_ANNOTATORS = false;
@@ -97,6 +105,7 @@ public class DataExplorerController extends MolgenisPluginController
 	private static final boolean DEFAULT_VAL_MOD_DISEASEMATCHER = false;
 	private static final boolean DEFAULT_VAL_GALAXY_ENABLED = false;
 	public static final boolean DEFAULT_VAL_SHOW_WIZARD_ONINIT = false;
+	public static final boolean DEFAULT_VAL_AGGREGATES_DISTINCT_HIDE = false;
 	public static final String DEFAULT_VAL_HEADER_ABBREVIATE = "180";
 	public static final String DEFAULT_AGGREGATES_NORESULTS_MESSAGE = "No results found";
 
@@ -109,6 +118,7 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String SOURCES = "genomebrowser.init.sources";
 	public static final String BROWSERLINKS = "genomebrowser.init.browserLinks";
 	public static final String AGGREGATES_NORESULTS_MESSAGE = "plugin.dataexplorer.mod.aggregates.noresults";
+	public static final String HIGHLIGHTREGION = "genomebrowser.init.highlightRegion";
 
 	public static final String KEY_DATAEXPLORER_EDITABLE = "plugin.dataexplorer.editable";
 	public static final String KEY_DATAEXPLORER_ROW_CLICKABLE = "plugin.dataexplorer.rowClickable";
@@ -116,6 +126,7 @@ public class DataExplorerController extends MolgenisPluginController
 	private static final boolean DEFAULT_VAL_DATAEXPLORER_EDITABLE = false;
 	private static final boolean DEFAULT_VAL_DATAEXPLORER_ROW_CLICKABLE = false;
 	private static final boolean DEFAULT_VAL_KEY_HIDE_SELECT = true;
+	private static final boolean DEFAULT_VAL_KEY_HIGLIGHTREGION = false;
 
 	@Autowired
 	private DataService dataService;
@@ -141,7 +152,7 @@ public class DataExplorerController extends MolgenisPluginController
 	 * @return the view name
 	 */
 	@RequestMapping(method = RequestMethod.GET)
-	public String init(@RequestParam(value = "dataset", required = false) String selectedEntityName,
+	public String init(@RequestParam(value = "entity", required = false) String selectedEntityName,
 			@RequestParam(value = "searchTerm", required = false) String searchTerm, Model model) throws Exception
 	{
 		boolean entityExists = false;
@@ -172,12 +183,13 @@ public class DataExplorerController extends MolgenisPluginController
 		{
 			if (selectedEntityName != null)
 			{
-                StringBuilder message = new StringBuilder("Entity does not exist or you do not have permission on this entity");
-                if(!SecurityUtils.currentUserIsAuthenticated()){
-                      message.append(", log in to view more entities");
-                }
-                model.addAttribute("warningMessage",
-						message.toString());
+				StringBuilder message = new StringBuilder(
+						"Entity does not exist or you do not have permission on this entity");
+				if (!SecurityUtils.currentUserIsAuthenticated())
+				{
+					message.append(", log in to view more entities");
+				}
+				model.addAttribute("warningMessage", message.toString());
 			}
 			Iterator<EntityMetaData> entitiesIterator = entitiesMeta.iterator();
 			if (entitiesIterator.hasNext())
@@ -206,9 +218,11 @@ public class DataExplorerController extends MolgenisPluginController
 			model.addAttribute("chains", molgenisSettings.getProperty(CHAINS));
 			model.addAttribute("sources", molgenisSettings.getProperty(SOURCES));
 			model.addAttribute("browserLinks", molgenisSettings.getProperty(BROWSERLINKS));
+			model.addAttribute("showHighlight", String.valueOf(molgenisSettings.getBooleanProperty(HIGHLIGHTREGION,
+					DEFAULT_VAL_KEY_HIGLIGHTREGION)));
 
 			model.addAttribute("genomebrowser_start_list",
-					molgenisSettings.getProperty(GenomeConfig.GENOMEBROWSER_START, "POS"));
+					molgenisSettings.getProperty(GenomeConfig.GENOMEBROWSER_POS, "POS"));
 			model.addAttribute("genomebrowser_chrom_list",
 					molgenisSettings.getProperty(GenomeConfig.GENOMEBROWSER_CHROM, "CHROM"));
 			model.addAttribute("genomebrowser_id_list",
@@ -338,7 +352,7 @@ public class DataExplorerController extends MolgenisPluginController
 	private boolean isGenomeBrowserEntity(EntityMetaData entityMetaData)
 	{
 		AttributeMetaData attributeStartPosition = genomeConfig.getAttributeMetadataForAttributeNameArray(
-				GenomeConfig.GENOMEBROWSER_START, entityMetaData);
+				GenomeConfig.GENOMEBROWSER_POS, entityMetaData);
 		AttributeMetaData attributeChromosome = genomeConfig.getAttributeMetadataForAttributeNameArray(
 				GenomeConfig.GENOMEBROWSER_CHROM, entityMetaData);
 		return attributeStartPosition != null && attributeChromosome != null;
@@ -355,7 +369,7 @@ public class DataExplorerController extends MolgenisPluginController
 		DataRequest dataRequest = new GsonHttpMessageConverter().getGson().fromJson(dataRequestStr, DataRequest.class);
 
 		String entityName = dataRequest.getEntityName();
-		String fileName = entityName + '_' + new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + ".csv";
+		String fileName = entityName + '_' + new SimpleDateFormat("yyyy-mm-dd hh:mm:ss").format(new Date()) + ".csv";
 
 		response.setContentType("text/csv");
 		response.addHeader("Content-Disposition", "attachment; filename=" + fileName);
@@ -443,6 +457,7 @@ public class DataExplorerController extends MolgenisPluginController
 		String entityName = request.getEntityName();
 		String xAttributeName = request.getXAxisAttributeName();
 		String yAttributeName = request.getYAxisAttributeName();
+		String distinctAttributeName = getDistinctAttributeName(request);
 
 		if (StringUtils.isBlank(xAttributeName) && StringUtils.isBlank(yAttributeName))
 		{
@@ -469,7 +484,6 @@ public class DataExplorerController extends MolgenisPluginController
 		AttributeMetaData yAttributeMeta = null;
 		if (StringUtils.isNotBlank(yAttributeName))
 		{
-
 			yAttributeMeta = entityMeta.getAttribute(yAttributeName);
 			if (yAttributeMeta == null)
 			{
@@ -481,8 +495,49 @@ public class DataExplorerController extends MolgenisPluginController
 				throw new InputValidationException("Attribute '" + yAttributeName + "' is not aggregateable");
 			}
 		}
+		AttributeMetaData distinctAttributeMeta = null;
+		if (StringUtils.isNotBlank(distinctAttributeName))
+		{
+			distinctAttributeMeta = entityMeta.getAttribute(distinctAttributeName);
+			if (distinctAttributeName == null)
+			{
+				throw new InputValidationException("Unknow attribute '" + distinctAttributeName + "'");
+			}
+		}
 
-		return dataService.aggregate(entityName, xAttributeMeta, yAttributeMeta, new QueryImpl(request.getQ()));
+		AggregateQueryImpl aggregateQuery = new AggregateQueryImpl().attrX(xAttributeMeta).attrY(yAttributeMeta)
+				.attrDistinct(distinctAttributeMeta).query(new QueryImpl(request.getQ()));
+		return dataService.aggregate(entityName, aggregateQuery);
+	}
+
+	/**
+	 * Retrieves the distinct attribute from the request, overriding it if the runtime property is set.
+	 * 
+	 * @param request
+	 *            the {@link AggregateRequest}
+	 * @return the name of the distinct attribute
+	 */
+	private String getDistinctAttributeName(AggregateRequest request)
+	{
+		String rtpKey = KEY_MOD_AGGREGATES_DISTINCT_OVERRIDE + '.' + request.getEntityName();
+		String overrideDistinctAttributeName = molgenisSettings.getProperty(rtpKey);
+		String distinctAttributeName = request.getDistinctAttributeName();
+		if (overrideDistinctAttributeName != null)
+		{
+			if (distinctAttributeName != null)
+			{
+				logger.info("[mod-aggregate] Overriding distinct attribute from request! Request specifies "
+						+ distinctAttributeName + ", runtime property " + rtpKey + " specifies "
+						+ overrideDistinctAttributeName);
+			}
+			else
+			{
+				logger.debug("[mod-aggregate] Using distinct attribute " + overrideDistinctAttributeName
+						+ " from runtime property " + rtpKey);
+			}
+			return overrideDistinctAttributeName;
+		}
+		return distinctAttributeName;
 	}
 
 	/**
@@ -527,8 +582,7 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/settings", method = RequestMethod.GET)
-	public @ResponseBody
-	Map<String, String> getSettings(@RequestParam(required = false) String keyStartsWith)
+	public @ResponseBody Map<String, String> getSettings(@RequestParam(required = false) String keyStartsWith)
 	{
 		if (keyStartsWith == null)
 		{

@@ -17,6 +17,11 @@ public class EntityFormMetaData implements FormMetaData
 		this.forUpdate = forUpdate;
 	}
 
+	public boolean isForUpdate()
+	{
+		return this.forUpdate;
+	}
+
 	@Override
 	public List<AttributeMetaData> getFields()
 	{

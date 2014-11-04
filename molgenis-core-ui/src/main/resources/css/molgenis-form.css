@@ -8,11 +8,6 @@ h3 {
 	margin: 20px 20px;
 }
 
-.form-list-holder {
-	width:100%; 
-	overflow:auto;
-}
-
 .edit-icon-holder {
 	width: 22px;
 }
@@ -31,16 +26,6 @@ h3 {
 
 .form-search .group-append {
 	width: 150px;
-}
-
-#list-holder {
-	margin-bottom: 40px;	
-}
-
-#list-navigation {
-	border: 1px solid #CCCCC; 
-	background-color: #EEEEEE; 
-	height:80px;
 }
 
 /* edit form */
@@ -90,21 +75,12 @@ input.error {
 .back-text {
 	color: #5B82A4; 
 	font-size: 18px;
-	margin-left: 8px;
 }
 
 #data-table-pager {
 	margin-bottom: 8px;
 }
 
-.add-on-workaround {
-  	height:30px;
-}
-
-.add-on-workaround i {
-	margin-top: 7px;
-	cursor:pointer;
-  	display:block;
-  	height:16px;
- 	 width:16px;
+#entity-table-container {
+	overflow: auto;
 }

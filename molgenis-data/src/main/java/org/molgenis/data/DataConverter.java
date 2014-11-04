@@ -9,6 +9,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
+import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.ListEscapeUtils;
 import org.springframework.core.convert.ConversionService;
@@ -82,6 +83,7 @@ public class DataConverter
 		if (source == null) return null;
 		if (source instanceof String) return (String) source;
 		if (conversionService == null) return source.toString();
+		if (source instanceof FieldType) return source.toString();
 
 		return convert(source, String.class);
 	}

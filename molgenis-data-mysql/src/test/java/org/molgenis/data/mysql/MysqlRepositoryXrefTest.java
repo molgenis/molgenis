@@ -1,6 +1,7 @@
 package org.molgenis.data.mysql;
 
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -25,12 +26,13 @@ public class MysqlRepositoryXrefTest extends MysqlRepositoryAbstractDatatypeTest
 		refEntity.setLabelAttribute("label");
 		refEntity.setIdAttribute("identifier");
 		refEntity.addAttribute("identifier").setNillable(false);
+		refEntity.addAttribute("label");
 
 		DefaultEntityMetaData refEntity2 = new DefaultEntityMetaData("IntTarget");
 		refEntity2.setIdAttribute("identifier");
 		refEntity2.addAttribute("identifier").setDataType(MolgenisFieldTypes.INT).setNillable(false);
 
-		DefaultEntityMetaData xrefEntity = new DefaultEntityMetaData("XrefTest").setLabel("Xref Test");
+		EditableEntityMetaData xrefEntity = new DefaultEntityMetaData("XrefTest").setLabel("Xref Test");
 		xrefEntity.setIdAttribute("identifier");
 		xrefEntity.addAttribute("identifier").setNillable(false);
 		xrefEntity.addAttribute("stringRef").setDataType(MolgenisFieldTypes.XREF).setRefEntity(refEntity)
@@ -60,14 +62,14 @@ public class MysqlRepositoryXrefTest extends MysqlRepositoryAbstractDatatypeTest
 		coll.dropEntityMetaData(getMetaData().getAttribute("intRef").getRefEntity().getName());
 
 		// create
-		MysqlRepository stringRepo = coll.add(getMetaData().getAttribute("stringRef").getRefEntity());
-		MysqlRepository intRepo = coll.add(getMetaData().getAttribute("intRef").getRefEntity());
-		MysqlRepository xrefRepo = coll.add(getMetaData());
+		MysqlRepository stringRepo = (MysqlRepository) coll.add(getMetaData().getAttribute("stringRef").getRefEntity());
+		MysqlRepository intRepo = (MysqlRepository) coll.add(getMetaData().getAttribute("intRef").getRefEntity());
+		MysqlRepository xrefRepo = (MysqlRepository) coll.add(getMetaData());
 
 		Assert.assertEquals(xrefRepo.getCreateSql(), createSql());
 
-		Assert.assertEquals(xrefRepo.getCreateFKeySql().get(0),
-				"ALTER TABLE XrefTest ADD FOREIGN KEY (`stringRef`) REFERENCES `StringTarget`(`identifier`)");
+		Assert.assertEquals(xrefRepo.getCreateFKeySql(getMetaData().getAttribute("stringRef")),
+				"ALTER TABLE `XrefTest` ADD FOREIGN KEY (`stringRef`) REFERENCES `StringTarget`(`identifier`)");
 
 		xrefRepo.drop();
 		stringRepo.drop();

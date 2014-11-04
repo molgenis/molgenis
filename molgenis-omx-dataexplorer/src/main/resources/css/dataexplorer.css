@@ -1,3 +1,13 @@
+.modal-xxl
+{
+    width: 90%;
+}
+
+.modal-xxl .modal-body
+{
+	overflow: auto;
+}
+
 #dataset-select-label {
 	margin-right: 10px;
 	font-size: 15.4px;
@@ -26,10 +36,14 @@
 	vertical-align: middle;
 }
 
-#feature-selection .molgenis-tree {
+body:not(.modal-open) #feature-selection .molgenis-tree {
 	height: 400px;
 	overflow: auto;
 	margin-bottom: 10px;
+}
+
+#aggregate-table-container {
+	overflow: auto;	
 }
 
 #aggregate-table-container th {
@@ -40,6 +54,7 @@
 #dataexplorer-aggregate-data table {
 	margin-top: 20px;
 	background: #DDDDDD;
+	
 }
 
 #dataexplorer-grid-data table {
@@ -78,6 +93,7 @@
 
 #feature-select-container{	
 	margin-bottom: 20px;
+	margin-top: 10px;
 }
 
 #filter-nav li a:hover{
@@ -182,11 +198,6 @@ ul.fancytree-container {
 	width: 4em;
 }
 
-input[name="ColNames"] {
-  margin-top: -1px;
-  vertical-align: middle;
-}
-
 #entity-class h3 {
 	display: inline;
 	margin-right: 10px;
@@ -198,9 +209,12 @@ input[name="ColNames"] {
 */
 .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
 	background-color: #7CBAD1;
-	
 }
 
 .table-hover {
 	cursor: pointer;
 } 
+
+#chartCreationButtons {
+	padding-top: 10px;
+}

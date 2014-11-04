@@ -96,9 +96,10 @@ public class QueryImpl implements Query
 		return pageSize;
 	}
 
-	public void setPageSize(int pageSize)
+	public QueryImpl setPageSize(int pageSize)
 	{
 		this.pageSize = pageSize;
+		return this;
 	}
 
 	@Override
@@ -107,9 +108,10 @@ public class QueryImpl implements Query
 		return offset;
 	}
 
-	public void setOffset(int offset)
+	public QueryImpl setOffset(int offset)
 	{
 		this.offset = offset;
+		return this;
 	}
 
 	@Override
@@ -131,6 +133,13 @@ public class QueryImpl implements Query
 	}
 
 	@Override
+	public Query search(String field, String searchTerms)
+	{
+		rules.get(this.rules.size() - 1).add(new QueryRule(field, Operator.SEARCH, searchTerms));
+		return this;
+	}
+
+	@Override
 	public Query or()
 	{
 		rules.get(this.rules.size() - 1).add(new QueryRule(Operator.OR));
@@ -145,7 +154,7 @@ public class QueryImpl implements Query
 	}
 
 	@Override
-	public Query like(String field, Object value)
+	public Query like(String field, String value)
 	{
 		rules.get(this.rules.size() - 1).add(new QueryRule(field, Operator.LIKE, value));
 		return this;
