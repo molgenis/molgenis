@@ -263,15 +263,20 @@ public class EmxImportService implements ImportService
 			}
 		}
 
+		// "-" is not allowed because of bug: https://github.com/molgenis/molgenis/issues/2055
+		// FIXME remove this line once this bug is fixed
+		for (String entityName : metaDataMap.keySet())
+		{
+			if (entityName.contains("-"))
+			{
+				throw new IllegalArgumentException("'-' is not allowed in an entity name (" + entityName + ")");
+			}
+		}
+
 		for (String sheet : source.getEntityNames())
 		{
 			if (!ENTITIES.equals(sheet) && !ATTRIBUTES.equals(sheet) && !PACKAGES.equals(sheet))
 			{
-				// "-" is not allowed because of bug: https://github.com/molgenis/molgenis/issues/2055
-				// FIXME remove this line once this bug is fixed
-				if (sheet.contains("-")) throw new IllegalArgumentException("'-' is not allowed in an entity name ("
-						+ sheet + ")");
-
 				// check if sheet is known?
 				if (metaDataMap.containsKey(sheet)) report.getSheetsImportable().put(sheet, true);
 				else report.getSheetsImportable().put(sheet, false);
@@ -693,11 +698,6 @@ public class EmxImportService implements ImportService
 
 				for (EntityMetaData entityMetaData : resolved)
 				{
-					// "-" is not allowed because of bug: https://github.com/molgenis/molgenis/issues/2055
-					// FIXME remove this line once this bug is fixed
-					if (entityMetaData.getName().contains("-")) throw new IllegalArgumentException(
-							"'-' is not allowed in an entity name (" + entityMetaData.getName() + ")");
-
 					String name = entityMetaData.getName();
 					if (!ENTITIES.equals(name) && !ATTRIBUTES.equals(name) && !PACKAGES.equals(name))
 					{
