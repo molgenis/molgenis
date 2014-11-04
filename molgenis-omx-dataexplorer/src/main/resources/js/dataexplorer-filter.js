@@ -150,7 +150,15 @@
 			case 'DECIMAL':
 			case 'INT':
 			case 'LONG':
-				return htmlEscape('(' + (filter.fromValue ? filter.fromValue : '') + (filter.toValue ? '-' + filter.toValue : '') + ')');
+				if(filter.fromValue && filter.toValue){
+					return '(' + htmlEscape(filter.fromValue)  + ' &le; x &le; ' + htmlEscape(filter.toValue) + ')';
+				}else if (filter.fromValue){
+					return '(' + htmlEscape(filter.fromValue) + ' &le; x)';
+				}else if (filter.toValue){
+					return '(x &le; ' + htmlEscape(filter.toValue) + ')';
+				}else{
+					return '';
+				}
 			case 'EMAIL':
 			case 'HTML':
 			case 'HYPERLINK':
