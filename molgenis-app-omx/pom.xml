@@ -88,10 +88,10 @@
 				<artifactId>maven-war-plugin</artifactId>
 				<configuration>
 					<webResources>
-            			<resource>
-              				<directory>target/generated-sources/molgenis/doc</directory>
-            			</resource>
-          			</webResources>
+						<resource>
+							<directory>target/generated-sources/molgenis/doc</directory>
+						</resource>
+					</webResources>
 				</configuration>
 			</plugin>
 			<!-- web server -->
@@ -100,20 +100,42 @@
 				<artifactId>jetty-maven-plugin</artifactId>
 				<configuration>
 					<systemProperties>
-				      <systemProperty>
-				         <name>molgenis.home</name>
-				         <value>${user.home}${file.separator}.molgenis${file.separator}omx</value>
-				      </systemProperty>
-				      <systemProperty>
-				         <name>log4j.configuration</name>
-				         <value>log4j-molgenis.properties</value>
-				       </systemProperty>
-				    </systemProperties>
+						<systemProperty>
+							<name>molgenis.home</name>
+							<value>${user.home}${file.separator}.molgenis${file.separator}omx</value>
+						</systemProperty>
+						<systemProperty>
+							<name>log4j.configuration</name>
+							<value>log4j-molgenis.properties</value>
+						</systemProperty>
+					</systemProperties>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.jvnet.jax-ws-commons</groupId>
+				<artifactId>jaxws-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>wsimport-wikiPathways</id>
+						<goals>
+							<goal>wsimport</goal>
+						</goals>
+						<configuration>
+							<verbose>true</verbose>
+							<extension>true</extension>
+							<wsdlUrls>
+								<wsdlUrl>http://www.wikipathways.org/wpi/webservice/webservice.php?wsdl</wsdlUrl>
+							</wsdlUrls>
+							<packageName>org.molgenis.dataWikiPathways</packageName>
+							<!-- for JDK 6 compilation compatibility -->
+							<xnocompile>false</xnocompile>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
-	
+
 	<dependencies>
 		<dependency>
 			<groupId>org.molgenis</groupId>
@@ -182,11 +204,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-omx-mobile</artifactId>
-			<version>1.2.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-data-excel</artifactId>
 			<version>1.2.0-SNAPSHOT</version>
 		</dependency>
@@ -215,7 +232,7 @@
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-data-jpa</artifactId>
 			<version>1.2.0-SNAPSHOT</version>
-		</dependency>		
+		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-data-omx</artifactId>
@@ -251,18 +268,18 @@
 			<artifactId>molgenis-data-rest</artifactId>
 			<version>1.2.0-SNAPSHOT</version>
 		</dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-mysql</artifactId>
-            <version>1.2.0-SNAPSHOT</version>
-        </dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-data-mysql</artifactId>
+			<version>1.2.0-SNAPSHOT</version>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-aop</artifactId>
 		</dependency>
 		<dependency>
-		    <groupId>org.springframework</groupId>
-		    <artifactId>spring-context-support</artifactId>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context-support</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -290,11 +307,11 @@
 			<version>2.33.0</version>
 			<scope>test</scope>
 			<exclusions>
-                <exclusion>
-                    <groupId>org.seleniumhq.selenium</groupId>
-                    <artifactId>selenium-remote-driver</artifactId>
-                </exclusion>
-            </exclusions>
+				<exclusion>
+					<groupId>org.seleniumhq.selenium</groupId>
+					<artifactId>selenium-remote-driver</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 	</dependencies>
 </project>
