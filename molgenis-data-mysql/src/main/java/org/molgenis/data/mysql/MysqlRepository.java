@@ -322,18 +322,16 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 	protected String getCreateFKeySql(AttributeMetaData att)
 	{
 		return new StringBuilder().append("ALTER TABLE ").append('`').append(getTableName()).append('`')
-				.append(" ADD FOREIGN KEY (")
-				.append('`').append(att.getName()).append('`').append(") REFERENCES ").append('`')
-				.append(getTableName(att.getRefEntity())).append('`').append('(').append('`')
+				.append(" ADD FOREIGN KEY (").append('`').append(att.getName()).append('`').append(") REFERENCES ")
+				.append('`').append(getTableName(att.getRefEntity())).append('`').append('(').append('`')
 				.append(att.getRefEntity().getIdAttribute().getName()).append('`').append(")").toString();
 	}
 
 	protected String getUniqueSql(AttributeMetaData att)
 	{
 		return new StringBuilder().append("ALTER TABLE ").append('`').append(getTableName()).append('`')
-				.append(" ADD CONSTRAINT ").append('`')
-				.append(att.getName()).append("_unique").append('`').append(" UNIQUE (").append('`')
-				.append(att.getName()).append('`').append(")").toString();
+				.append(" ADD CONSTRAINT ").append('`').append(att.getName()).append("_unique").append('`')
+				.append(" UNIQUE (").append('`').append(att.getName()).append('`').append(")").toString();
 	}
 
 	@Override
@@ -417,9 +415,8 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 
 		StringBuilder mrefSql = new StringBuilder();
 		mrefSql.append("INSERT INTO ").append('`').append(getTableName()).append('_').append(att.getName()).append('`')
-				.append(" (")
-				.append('`').append(idAttribute.getName()).append('`').append(',').append('`').append(att.getName())
-				.append('`').append(") VALUES (?,?)");
+				.append(" (").append('`').append(idAttribute.getName()).append('`').append(',').append('`')
+				.append(att.getName()).append('`').append(") VALUES (?,?)");
 
 		jdbcTemplate.batchUpdate(mrefSql.toString(), new BatchPreparedStatementSetter()
 		{
@@ -1115,12 +1112,19 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 					if (att.getDataType() instanceof MrefField)
 					{
 						if (mrefs.get(att.getName()) == null) mrefs.put(att.getName(), new ArrayList<Entity>());
-						if (e.get(att.getName()) != null) for (Object val : e.getList(att.getName()))
+						if (e.get(att.getName()) != null)
 						{
-							Entity mref = new MapEntity();
-							mref.set(idAttribute.getName(), idValue);
-							mref.set(att.getName(), val);
-							mrefs.get(att.getName()).add(mref);
+							List<String> vals = e.getList(att.getName());
+							if (vals != null)
+							{
+								for (Object val : vals)
+								{
+									Entity mref = new MapEntity();
+									mref.set(idAttribute.getName(), idValue);
+									mref.set(att.getName(), val);
+									mrefs.get(att.getName()).add(mref);
+								}
+							}
 						}
 					}
 					else
