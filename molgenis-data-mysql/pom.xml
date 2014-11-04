@@ -24,11 +24,6 @@
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-semanticsearch</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-         <dependency>
-            <groupId>org.molgenis</groupId>
             <artifactId>molgenis-security</artifactId>
             <version>${project.version}</version>
             <exclusions>

@@ -58,7 +58,6 @@ import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.meta.WritableMetaDataService;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.semantic.TagImpl;
-import org.molgenis.data.semantic.UntypedTagService;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
@@ -122,7 +121,6 @@ public class EmxImportService implements ImportService
 	private final DataService dataService;
 	private PermissionSystemService permissionSystemService;
 	private WritableMetaDataService metaDataService;
-	private UntypedTagService untypedTagService;
 
 	@Autowired
 	public EmxImportService(DataService dataService)
@@ -152,12 +150,6 @@ public class EmxImportService implements ImportService
 	public void setPermissionSystemService(PermissionSystemService permissionSystemService)
 	{
 		this.permissionSystemService = permissionSystemService;
-	}
-
-	@Autowired
-	public void setUntypedTagService(UntypedTagService untypedTagService)
-	{
-		this.untypedTagService = untypedTagService;
 	}
 
 	@Override
@@ -561,16 +553,8 @@ public class EmxImportService implements ImportService
 	private Map<String, PackageImpl> loadAllPackagesToMap(RepositoryCollection source)
 	{
 		Map<String, PackageImpl> packages = Maps.newHashMap();
-		Repository repo = null;
-		try
-		{
-			repo = source.getRepositoryByEntityName(PACKAGES);
-		}
-		catch (UnknownEntityException e)
-		{
-			// No packages
-			return packages;
-		}
+		Repository repo = source.getRepositoryByEntityName(PACKAGES);
+		if (repo == null) return packages;
 
 		// Collect packages
 		int i = 1;
@@ -736,9 +720,10 @@ public class EmxImportService implements ImportService
 			{
 				// Import tags
 				// Tags
-				try
+				Repository tagRepo = source.getRepositoryByEntityName(TagMetaData.ENTITY_NAME);
+				if (tagRepo != null)
 				{
-					for (Entity tag : source.getRepositoryByEntityName(TagMetaData.ENTITY_NAME))
+					for (Entity tag : tagRepo)
 					{
 						Entity tagEntity = dataService.findOne(TagMetaData.ENTITY_NAME,
 								tag.getString(TagMetaData.IDENTIFIER));
@@ -751,10 +736,6 @@ public class EmxImportService implements ImportService
 							dataService.update(TagMetaData.ENTITY_NAME, tag);
 						}
 					}
-				}
-				catch (UnknownEntityException e)
-				{
-					// No tags tab
 				}
 
 				// Import packages
