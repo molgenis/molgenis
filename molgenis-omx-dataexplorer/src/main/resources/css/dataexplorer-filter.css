@@ -72,9 +72,10 @@
 #filter-wizard-modal div.checkbox,
 #filter-modal div.checkbox,
 #filter-wizard-modal div.filter-radio-inline-container,
-#filter-modal div.filter-radio-inline-container
+#filter-modal div.filter-radio-inline-container,
 #filter-wizard-modal div.controls.complex-element,
-#filter-modal div.controls.complex-element
+#filter-modal div.controls.complex-element,
+#filter-modal div.xrefmrefsearch
 {
 	padding-top: 0px;
 	padding-right: 15px;
