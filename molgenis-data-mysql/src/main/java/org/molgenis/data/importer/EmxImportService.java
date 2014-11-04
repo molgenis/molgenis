@@ -725,15 +725,17 @@ public class EmxImportService implements ImportService
 				{
 					for (Entity tag : tagRepo)
 					{
-						Entity tagEntity = dataService.findOne(TagMetaData.ENTITY_NAME,
+						Entity transformed = new TransformedEntity(tag, new TagMetaData(), dataService);
+						Entity existingTag = dataService.findOne(TagMetaData.ENTITY_NAME,
 								tag.getString(TagMetaData.IDENTIFIER));
-						if (tagEntity == null)
+
+						if (existingTag == null)
 						{
-							dataService.add(TagMetaData.ENTITY_NAME, tag);
+							dataService.add(TagMetaData.ENTITY_NAME, transformed);
 						}
 						else
 						{
-							dataService.update(TagMetaData.ENTITY_NAME, tag);
+							dataService.update(TagMetaData.ENTITY_NAME, transformed);
 						}
 					}
 				}
