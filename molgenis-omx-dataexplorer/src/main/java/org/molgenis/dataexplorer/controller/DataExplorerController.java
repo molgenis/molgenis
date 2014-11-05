@@ -48,6 +48,7 @@ import org.molgenis.omx.core.FreemarkerTemplate;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.ui.MolgenisInterceptor;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.util.GsonHttpMessageConverter;
@@ -279,9 +280,12 @@ public class DataExplorerController extends MolgenisPluginController
 
 		ModulesConfigResponse modulesConfig = new ModulesConfigResponse();
 
-		Locale locale = new Locale("molgenis", "molgenis");
-		ResourceBundle i18n = ResourceBundle.getBundle("i18n", locale);
-		String aggregatesTitle = i18n.getString("dataexplorer_aggregates_title");
+        String i18nLocale = molgenisSettings.getProperty(MolgenisInterceptor.I18N_LOCALE, "en");
+
+        Locale locale = new Locale(i18nLocale, i18nLocale);
+        ResourceBundle i18n = ResourceBundle.getBundle("i18n", locale);
+
+        String aggregatesTitle = i18n.getString("dataexplorer_aggregates_title");
 
 		if (pluginPermission != null)
 		{
