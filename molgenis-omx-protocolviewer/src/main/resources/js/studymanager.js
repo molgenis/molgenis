@@ -12,7 +12,6 @@
 		var editTreeContainer = $('#study-definition-editor-tree');
         var editStateSelect = $('#edit-state-select');
 		var updateStudyDefinitionBtn = $('#update-study-definition-btn');
-        var exportStudyDefinitionBtn = $('#export-study-definition-btn');
 		
 		function createDynatreeConfig(catalog) {
 			function createDynatreeConfigRec(node, dynaNode) {
@@ -75,7 +74,6 @@
 						    else
 						    	items.push('<input id="catalog_' + studyDefinition.id + '" type="radio" name="id" value="' + studyDefinition.id + '">');
 						    items.push('</td>');
-						    items.push('<td class="listEntryId">' + studyDefinition.id + '</td>');
 						    items.push('<td>' + studyDefinition.name + '</td>');
 						    items.push('<td>' + (studyDefinition.email ? studyDefinition.email : '') + '</td>');
 						    items.push('<td>' + (studyDefinition.date ? studyDefinition.date : '') + '</td>');
@@ -241,7 +239,7 @@
 				success : function(entities) {
 					molgenis.createAlert([{'message': 'Updated study definition [' + selectedStudyDefinitionId + ']'}], 'success');
 					selectedStudyDefinitionState = currentStudyDefinitionState;
-					selectedStudyDefinitionState === 'APPROVED' ? exportStudyDefinitionBtn.show() : exportStudyDefinitionBtn.hide();
+					$('#state-select').val(selectedStudyDefinitionState);
 					updateStudyDefinitionEditor();
 					updateStudyDefinitionTable(false);
 				},
@@ -250,35 +248,9 @@
 				}
 			});
         });
-
-        exportStudyDefinitionBtn.click(function() {
-        	exportStudyDefinitionBtn.prop('disabled', true);
-            $.ajax({
-                type : 'POST',
-                url : molgenis.getContextUrl() + '/export/' + selectedStudyDefinitionId,
-                contentType : 'application/json',
-                success : function(entities) {
-                    molgenis.createAlert([{'message': 'Exported study definition [' + selectedStudyDefinitionId + ']'}], 'success');
-                    updateStudyDefinitionTable(false);
-                },
-				complete: function() {
-					exportStudyDefinitionBtn.prop('disabled', false);
-				}
-            });
-        });
 		
 		$('#state-select').change(function(){
 			selectedStudyDefinitionState = $('#state-select').val();
-            if(exportStudyDefinitionBtn !== undefined){
-                if(selectedStudyDefinitionState === 'APPROVED')
-                {
-                    exportStudyDefinitionBtn.show();
-                }
-                else
-                {
-                    exportStudyDefinitionBtn.hide();
-                }
-            }
 			updateStudyDefinitionTable();
 		});
 

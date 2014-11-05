@@ -15,10 +15,6 @@
 	font-family: Consolas,"Liberation Mono",Courier,monospace;
 }
 
-.listEntryId {
-	width: 30px;
-}
-
 #resultsTable {
 	max-height: 450px;
 	overflow: auto;
