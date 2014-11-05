@@ -29,10 +29,12 @@
 										<thead>
 											<tr>
 												<th></th>
-												<th>Id</th>
 												<th>Name</th>
 												<th>Email</th>
 												<th>Date</th>
+                                            <#if exportEnabled>
+												<th>Exported Id</th>
+											</#if>
 											</tr>
 										</thead>
 										<tbody>
@@ -60,9 +62,7 @@
 										</div>
 									</div>
 									<button id="download-study-definition-btn" class="btn pull-right" type="button">Download</button>
-                                    <#if exportEnabled>
-                                        <input id="export-study-definition-btn" type="button" class="btn pull-right" value="${exportTitle}" />
-                                    </#if>
+                                    
 							    </div>
 							    <div class="tab-pane" id="study-definition-editor">
 							    	<div id="study-definition-editor-container">
@@ -70,9 +70,6 @@
 										</div>
                                         <div id="study-definition-state-select">
                                             <select id="edit-state-select" name="edit-state-select">
-                                                <#list studyDefinitionUpdateStates as studyDefinitionState>
-                                                    <option value="${studyDefinitionState}">${studyDefinitionState}</option>
-                                                </#list>
                                             </select>
                                         </div>
 										<div id="study-definition-editor-tree">
@@ -87,4 +84,5 @@
 			</div>
 		</div>
 	</div>
+    <script>molgenis.studymanager.setExportEnabled(${exportEnabled?string('true', 'false')});</script>
 <@footer/>

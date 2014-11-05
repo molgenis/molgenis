@@ -159,4 +159,15 @@ public class OmxStudyDefinition implements StudyDefinition
 		return studyDataRequest;
 	}
 
+	@Override
+	public String getExternalId()
+	{
+		return studyDataRequest.getExternalId();
+	}
+
+	@Override
+	public void setExternalId(String externalId)
+	{
+		studyDataRequest.setExternalId(externalId);
+	}
 }
