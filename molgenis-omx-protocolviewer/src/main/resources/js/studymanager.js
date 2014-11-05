@@ -191,14 +191,29 @@
                 editTreeContainer.html('Loading editor ...');
                 
                 // create new tree
-                var checkbox = selectedStudyDefinitionState !== 'APPROVED' && selectedStudyDefinitionState !== 'EXPORTED';
+                
+                var editable;
+                switch(selectedStudyDefinitionState) {
+	                case 'APPROVED':
+	                case 'REJECTED':
+	                case 'EXPORTED':
+	                	editable = false;
+	                	break;
+	                default:
+	                	editable = true;
+	            	break;
+                }
                 $.ajax({
                     type : 'GET',
                     url : molgenis.getContextUrl() + '/edit/' + selectedStudyDefinitionId,
                     success : function(result) {
                         editInfoContainer.html(createCatalogInfo(result.catalog));
                         editTreeContainer.empty();
-                        editTreeContainer.dynatree({'minExpandLevel': 2, 'children': createDynatreeConfig(result.catalog), 'selectMode': 3, 'debugLevel': 0, 'checkbox': checkbox});
+                        editTreeContainer.dynatree({'minExpandLevel': 2, 'children': createDynatreeConfig(result.catalog), 'selectMode': 3, 'debugLevel': 0, 'checkbox': true});
+                        if(editable)
+                        	editTreeContainer.show();
+                        else 
+                        	editTreeContainer.hide();
                         updateStudyDefinitionEditorStateSelect(result.status);
                     },
                     error: function (xhr) {
@@ -269,6 +284,21 @@
 			updateStudyDefinitionTable();
 		});
 
+		editStateSelect.change(function(){
+			switch(selectedStudyDefinitionState) {
+	            case 'APPROVED':
+	            case 'REJECTED':
+	            case 'EXPORTED':
+	            	var ok = window.confirm('Are you sure you want to update a ' + selectedStudyDefinitionState + ' study definition?');
+	            	if(ok === false) {
+	            		editStateSelect.val(selectedStudyDefinitionState);
+	            	}
+	            	break;
+	            default:
+	            	break;
+			}
+		});
+		
 		$('#state-select').change();
 		
 		$('#search-button').on('click', function(){
