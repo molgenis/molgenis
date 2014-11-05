@@ -105,7 +105,7 @@ public class EntityToSourceConverter
 					}
 					else
 					{
-						value = convertAttribute(xrefEntity, xrefEntityMetaData.getLabelAttribute(), false);
+						value = convertAttribute(xrefEntity, xrefEntityMetaData.getIdAttribute(), false);
 					}
 				}
 				else
@@ -131,7 +131,7 @@ public class EntityToSourceConverter
 							}
 							else
 							{
-								return convertAttribute(refEntity, refEntityMetaData.getLabelAttribute(), false);
+								return convertAttribute(refEntity, refEntityMetaData.getIdAttribute(), false);
 							}
 						}
 					}));

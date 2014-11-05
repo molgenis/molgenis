@@ -9,10 +9,15 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableCrudRepositoryCollection;
 import org.molgenis.data.Package;
+import org.molgenis.data.semantic.LabeledResource;
+import org.molgenis.data.semantic.Tag;
+import org.molgenis.data.semantic.TagImpl;
 import org.molgenis.util.DependencyResolver;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 /**
@@ -121,26 +126,46 @@ class PackageRepository
 	 */
 	public void add(Package p)
 	{
-		if (packageCache.containsKey(p.getName()))
-		{
-			return;
-		}
 		PackageImpl parent = null;
 		if (p.getParent() != null)
 		{
 			add(p.getParent());
 			parent = packageCache.get(p.getParent().getName());
 		}
-		if (getPackage(p.getName()) == null)
+
+		PackageImpl pImpl = new PackageImpl(p.getSimpleName(), p.getDescription(), parent);
+		if (parent != null)
 		{
-			PackageImpl pImpl = new PackageImpl(p.getSimpleName(), p.getDescription(), parent);
-			if (parent != null)
-			{
-				parent.addSubPackage(pImpl);
-			}
-			repository.add(pImpl.toEntity());
-			packageCache.put(p.getName(), pImpl);
+			parent.addSubPackage(pImpl);
 		}
+
+		if (p.getTags() != null)
+		{
+			for (Tag<Package, LabeledResource, LabeledResource> tag : p.getTags())
+			{
+				pImpl.addTag(tag);
+			}
+		}
+
+		Package existing = getPackage(p.getName());
+		if (existing == null)
+		{
+			repository.add(pImpl.toEntity());
+		}
+		else
+		{
+			for (EntityMetaData emd : existing.getEntityMetaDatas())
+			{
+				if (!Iterables.contains(pImpl.getEntityMetaDatas(), emd))
+				{
+					pImpl.addEntity(emd);
+				}
+			}
+
+			repository.update(pImpl.toEntity());
+		}
+
+		packageCache.put(p.getName(), pImpl);
 	}
 
 	/**
@@ -177,6 +202,16 @@ class PackageRepository
 		{
 			PackageImpl p = new PackageImpl(entity.getString(PackageMetaData.SIMPLE_NAME),
 					entity.getString(PackageMetaData.DESCRIPTION));
+
+			Iterable<Entity> tags = entity.getEntities(PackageMetaData.TAGS);
+			if (tags != null)
+			{
+				for (Entity tagEntity : tags)
+				{
+					p.addTag(TagImpl.<Package> asTag(p, tagEntity));
+				}
+			}
+
 			result.put(entity.getString(PackageMetaData.FULL_NAME), p);
 		}
 
@@ -201,5 +236,4 @@ class PackageRepository
 		}
 		return result;
 	}
-
 }
