@@ -32,7 +32,9 @@
 												<th>Name</th>
 												<th>Email</th>
 												<th>Date</th>
+                                            <#if exportEnabled>
 												<th>Exported Id</th>
+											</#if>
 											</tr>
 										</thead>
 										<tbody>
@@ -82,4 +84,5 @@
 			</div>
 		</div>
 	</div>
+    <script>molgenis.studymanager.setExportEnabled(${exportEnabled?string('true', 'false')});</script>
 <@footer/>

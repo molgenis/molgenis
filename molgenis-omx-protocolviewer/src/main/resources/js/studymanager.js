@@ -1,8 +1,16 @@
 (function($, molgenis) {
 	"use strict";
 	
+	var self = molgenis.studymanager = molgenis.studymanager || {};
+	self.setExportEnabled = setExportEnabled;
+	
+	var exportEnabled = false;
 	var selectedStudyDefinitionId;
 	var selectedStudyDefinitionState;
+	
+	function setExportEnabled(doEnableExport) {
+		exportEnabled = doEnableExport;
+	}
 	
 	// on document ready
 	$(function() {
@@ -138,7 +146,10 @@
 							enableStateSelect = true;
 							break;
 						case 'APPROVED':
-							nextStates = ['SUBMITTED', 'APPROVED', 'EXPORTED'];
+							if(exportEnabled)
+								nextStates = ['SUBMITTED', 'APPROVED', 'EXPORTED'];
+							else
+								nextStates = ['SUBMITTED', 'APPROVED'];
 							enableStateSelect = true;
 							break;
 						case 'REJECTED':
@@ -146,8 +157,12 @@
 							enableStateSelect = true;
 							break;
 						case 'EXPORTED':
-							nextStates = ['SUBMITTED', 'EXPORTED'];
-							enableStateSelect = true;
+							if(exportEnabled) {
+								nextStates = ['SUBMITTED', 'EXPORTED'];
+								enableStateSelect = true;
+							} else {
+								throw 'unknown study definition state [' + currentState + ']';
+							}
 							break;
 						default:
 							throw 'unknown study definition state [' + currentState + ']';

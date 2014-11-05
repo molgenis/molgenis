@@ -113,7 +113,6 @@ public class StudyManagerController extends MolgenisPluginController
 		model.addAttribute("exportedStudyDefinitionState", StudyDefinition.Status.EXPORTED);
 		model.addAttribute("writePermission",
 				molgenisPermissionService.hasPermissionOnEntity(StudyDataRequest.ENTITY_NAME, Permission.WRITE));
-		model.addAttribute("exportTitle", molgenisSettings.getProperty(EXPORT_BTN_TITLE, "Export"));
 		model.addAttribute("exportEnabled", molgenisSettings.getBooleanProperty(EXPORT_ENABLED, false));
 		return VIEW_NAME;
 	}
