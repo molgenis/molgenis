@@ -22,7 +22,7 @@
             <artifactId>molgenis-data-excel</artifactId>
             <version>${project.version}</version>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-security</artifactId>
             <version>${project.version}</version>

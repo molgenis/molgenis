@@ -22,6 +22,8 @@ import org.molgenis.data.Package;
 import org.molgenis.data.meta.MetaDataSearchService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.PackageSearchResultItem;
+import org.molgenis.data.semantic.LabeledResource;
+import org.molgenis.data.semantic.Tag;
 import org.molgenis.data.semantic.UntypedTagService;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.standardsregistry.utils.PackageTreeNode;
@@ -95,9 +97,10 @@ public class StandardsRegistryController extends MolgenisPluginController
 		List<PackageSearchResultItem> searchResults = metaDataSearchService.findRootPackages(searchQuery);
 		for (PackageSearchResultItem searchResult : searchResults)
 		{
-			packageResponses.add(new PackageResponse(searchResult.getPackageFound().getSimpleName(), searchResult
-					.getPackageFound().getDescription(), searchResult.getMatchDescription(),
-					getEntitiesInPackage(searchResult.getPackageFound().getName())));
+			Package p = searchResult.getPackageFound();
+			PackageResponse pr = new PackageResponse(p.getSimpleName(), p.getDescription(),
+					searchResult.getMatchDescription(), getEntitiesInPackage(p.getName()), getTagsForPackage(p));
+			packageResponses.add(pr);
 		}
 
 		int total = packageResponses.size();
@@ -126,27 +129,39 @@ public class StandardsRegistryController extends MolgenisPluginController
 	@RequestMapping(value = "/details", method = GET)
 	public String showView(@RequestParam(value = "package", required = false) String selectedPackageName, Model model)
 	{
-		boolean showPackageSelect = (selectedPackageName == null);
-		List<Package> packages = Lists.newArrayList(metaDataService.getRootPackages());
-
-		model.addAttribute("showPackageSelect", showPackageSelect);
-		model.addAttribute("packages", packages);
-
-		if (selectedPackageName == null) selectedPackageName = packages.get(0).getName();
+		if (selectedPackageName == null)
+		{
+			List<Package> packages = Lists.newArrayList(metaDataService.getRootPackages());
+			selectedPackageName = packages.get(0).getName();
+		}
 		model.addAttribute("selectedPackageName", selectedPackageName);
 		model.addAttribute("package", metaDataService.getPackage(selectedPackageName));
 
 		return VIEW_NAME_DETAILS;
 	}
 
-	@RequestMapping(value = "/getPackage", method = GET)
-	@ResponseBody
-	public PackageResponse getPackage(@RequestParam(value = "package") String selectedPackageName)
+	@RequestMapping(value = "/uml", method = GET)
+	public String getUml(@RequestParam(value = "package", required = true) String selectedPackageName, Model model)
 	{
 		Package molgenisPackage = metaDataService.getPackage(selectedPackageName);
+
+		if (molgenisPackage != null)
+		{
+			model.addAttribute("molgenisPackage", molgenisPackage);
+		}
+
+		return "view-standardsregistry_uml";
+	}
+
+	@RequestMapping(value = "/getPackage", method = GET)
+	@ResponseBody
+	public PackageResponse getPackage(@RequestParam(value = "package") String packageName)
+	{
+		Package molgenisPackage = metaDataService.getPackage(packageName);
 		if (molgenisPackage == null) return null;
-		return new PackageResponse(molgenisPackage.getSimpleName(), molgenisPackage.getDescription(), null,
-				getEntitiesInPackage(molgenisPackage.getName()));
+
+		return new PackageResponse(molgenisPackage.getName(), molgenisPackage.getDescription(), null,
+				getEntitiesInPackage(molgenisPackage.getName()), getTagsForPackage(molgenisPackage));
 	}
 
 	/* PACKAGE TREE */
@@ -154,8 +169,10 @@ public class StandardsRegistryController extends MolgenisPluginController
 	@ResponseBody
 	public Collection<PackageTreeNode> getTree(@RequestParam(value = "package") String packageName)
 	{
-		Package selectedPackage = metaDataService.getPackage(packageName);
-		return Collections.singletonList(createPackageTreeNode(selectedPackage));
+		Package molgenisPackage = metaDataService.getPackage(packageName);
+		if (molgenisPackage == null) return null;
+
+		return Collections.singletonList(createPackageTreeNode(molgenisPackage));
 	}
 
 	private PackageTreeNode createPackageTreeNode(Package selectedPackage)
@@ -232,6 +249,18 @@ public class StandardsRegistryController extends MolgenisPluginController
 		}
 
 		return new PackageTreeNode("attribute", title, key, tooltip, folder, expanded, data, result);
+	}
+
+	private List<PackageResponse.Tag> getTagsForPackage(Package p)
+	{
+		List<PackageResponse.Tag> tags = Lists.newArrayList();
+
+		for (Tag<Package, LabeledResource, LabeledResource> tag : tagService.getTagsForPackage(p))
+		{
+			tags.add(new PackageResponse.Tag(tag.getObject().getLabel(), tag.getRelation().toString()));
+		}
+
+		return tags;
 	}
 
 	private List<PackageResponse.Entity> getEntitiesInPackage(String packageName)
@@ -355,14 +384,16 @@ public class StandardsRegistryController extends MolgenisPluginController
 		private final String description;
 		private final String matchDescription;
 		private final List<PackageResponse.Entity> entitiesInPackage;
+		private final List<Tag> tags;
 
 		public PackageResponse(String name, String description, String matchDescription,
-				List<PackageResponse.Entity> entitiesInPackage)
+				List<PackageResponse.Entity> entitiesInPackage, List<Tag> tags)
 		{
 			this.name = name;
 			this.description = description;
 			this.matchDescription = matchDescription;
 			this.entitiesInPackage = entitiesInPackage;
+			this.tags = tags;
 		}
 
 		@SuppressWarnings("unused")
@@ -389,6 +420,12 @@ public class StandardsRegistryController extends MolgenisPluginController
 			return entitiesInPackage;
 		}
 
+		@SuppressWarnings("unused")
+		public Iterable<Tag> getTags()
+		{
+			return tags;
+		}
+
 		private static class Entity
 		{
 			private final String name;
@@ -412,6 +449,32 @@ public class StandardsRegistryController extends MolgenisPluginController
 			{
 				return label;
 			}
+		}
+
+		private static class Tag
+		{
+			private final String label;
+			private final String relation;
+
+			public Tag(String label, String relation)
+			{
+				super();
+				this.label = label;
+				this.relation = relation;
+			}
+
+			@SuppressWarnings("unused")
+			public String getLabel()
+			{
+				return label;
+			}
+
+			@SuppressWarnings("unused")
+			public String getRelation()
+			{
+				return relation;
+			}
+
 		}
 	}
 

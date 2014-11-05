@@ -2,7 +2,7 @@ package org.molgenis.data.semantic;
 
 public enum Relation
 {
-	instanceOf("http://molgenis.org/biobankconnect/instanceOf");
+	instanceOf("http://molgenis.org/biobankconnect/instanceOf"), link("http://molgenis.org/biobankconnect/link");
 
 	private String iri;
 

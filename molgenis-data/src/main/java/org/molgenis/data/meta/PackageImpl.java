@@ -7,7 +7,11 @@ import java.util.List;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Package;
+import org.molgenis.data.semantic.LabeledResource;
+import org.molgenis.data.semantic.Tag;
 import org.molgenis.data.support.MapEntity;
+
+import com.google.common.collect.Lists;
 
 /**
  * Instance of a Package.
@@ -16,6 +20,7 @@ public class PackageImpl implements Package
 {
 	private final List<PackageImpl> subPackages = new ArrayList<PackageImpl>();
 	private final List<EntityMetaData> entities = new ArrayList<EntityMetaData>();
+	private final List<Tag<Package, LabeledResource, LabeledResource>> tags = new ArrayList<Tag<Package, LabeledResource, LabeledResource>>();
 	public static final Package defaultPackage = new PackageImpl(Package.DEFAULT_PACKAGE_NAME, "The default package",
 			null);
 
@@ -73,6 +78,7 @@ public class PackageImpl implements Package
 		result = prime * result + ((parent == null) ? 0 : parent.hashCode());
 		result = prime * result + ((simpleName == null) ? 0 : simpleName.hashCode());
 		result = prime * result + ((subPackages == null) ? 0 : subPackages.hashCode());
+
 		return result;
 	}
 
@@ -121,6 +127,11 @@ public class PackageImpl implements Package
 		entities.add(entityMetaData);
 	}
 
+	public void addTag(Tag<Package, LabeledResource, LabeledResource> tag)
+	{
+		tags.add(tag);
+	}
+
 	public void setParent(Package parent)
 	{
 		this.parent = parent;
@@ -129,10 +140,29 @@ public class PackageImpl implements Package
 	@Override
 	public Entity toEntity()
 	{
-		Entity result = new MapEntity();
+		Entity result = new MapEntity(PackageMetaData.FULL_NAME);
 		result.set(PackageMetaData.FULL_NAME, getName());
 		result.set(PackageMetaData.SIMPLE_NAME, simpleName);
 		result.set(PackageMetaData.DESCRIPTION, description);
+
+		if (!tags.isEmpty())
+		{
+			List<Entity> tagEntities = Lists.newArrayList();
+			for (Tag<Package, LabeledResource, LabeledResource> tag : tags)
+			{
+				Entity tagEntity = new MapEntity(TagMetaData.IDENTIFIER);
+				tagEntity.set(TagMetaData.CODE_SYSTEM, tag.getCodeSystem().getIri());
+				tagEntity.set(TagMetaData.IDENTIFIER, tag.getIdentifier());
+				tagEntity.set(TagMetaData.LABEL, tag.getObject().getLabel());
+				tagEntity.set(TagMetaData.OBJECT_IRI, tag.getObject().getIri());
+				tagEntity.set(TagMetaData.RELATION_IRI, tag.getRelation().getIRI());
+				tagEntity.set(TagMetaData.RELATION_LABEL, tag.getRelation().getLabel());
+				tagEntities.add(tagEntity);
+			}
+
+			result.set(PackageMetaData.TAGS, tagEntities);
+		}
+
 		if (parent != null)
 		{
 			result.set(PackageMetaData.PARENT, parent.toEntity());
@@ -144,7 +174,8 @@ public class PackageImpl implements Package
 	public String toString()
 	{
 		return "PackageImpl [subPackages=" + subPackages + ", entities=" + entities + ", simpleName=" + simpleName
-				+ ", description=" + description + ", parent=" + (parent == null ? "null" : parent.getName()) + "]";
+				+ ", description=" + description + ", parent=" + (parent == null ? "null" : parent.getName())
+				+ ", tags=" + tags + "]";
 	}
 
 	@Override
@@ -171,5 +202,11 @@ public class PackageImpl implements Package
 		}
 
 		return root;
+	}
+
+	@Override
+	public Iterable<Tag<Package, LabeledResource, LabeledResource>> getTags()
+	{
+		return Collections.<Tag<Package, LabeledResource, LabeledResource>> unmodifiableList(tags);
 	}
 }

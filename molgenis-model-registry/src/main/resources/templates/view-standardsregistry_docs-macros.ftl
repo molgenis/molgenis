@@ -2,6 +2,13 @@
     <h2 id="package-${package.name}" class="page-header">${package.simpleName} <small>(${package.name})</small></h2>
     <div class="package-container">
         <p><#if package.description?has_content>${package.description}</#if></p>
+        <#list package.tags as tag>
+        	<#if tag.relation == 'link'>
+        		<span class="label label-primary"><a href='${tag.object.label}' target="_blank">${tag.object.label}</a></span>
+        	<#else>
+        		<span class="label label-primary">${tag.object.label}</span>
+        	</#if>
+        </#list>
         
         <#-- Subpackages -->
         <#if package.subPackages?has_content>

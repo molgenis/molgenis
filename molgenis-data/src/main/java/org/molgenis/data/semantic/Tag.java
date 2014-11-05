@@ -1,5 +1,6 @@
 package org.molgenis.data.semantic;
 
+
 public interface Tag<SubjectType, ObjectType, CodeSystemType>
 {
 	Relation getRelation();
@@ -9,4 +10,6 @@ public interface Tag<SubjectType, ObjectType, CodeSystemType>
 	ObjectType getObject();
 
 	CodeSystemType getCodeSystem();
+
+	String getIdentifier();
 }

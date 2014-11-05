@@ -1,8 +1,8 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 
-<#assign css=['ui.fancytree.min.css', 'jquery-ui-1.9.2.custom.min.css', 'select2.css', 'standardsregistry.css']>
-<#assign js=['jquery-ui-1.9.2.custom.min.js', 'jquery.fancytree.min.js', 'select2.min.js', 'jquery.bootstrap.pager.js', 'standardsregistry.js', 'handlebars.min.js']>
+<#assign css=['ui.fancytree.min.css', 'jquery-ui-1.9.2.custom.min.css', 'select2.css', 'joint.min.css','standardsregistry.css']>
+<#assign js=['jquery-ui-1.9.2.custom.min.js', 'jquery.fancytree.min.js', 'select2.min.js', 'jquery.molgenis.entitymetadata.table.js', 'jquery.molgenis.attributemetadata.table.js', 'jquery.bootstrap.pager.js', 'lodash.js', 'backbone-min.js', 'geometry.min.js', 'vectorizer.min.js', 'joint.clean.min.js','joint.shapes.uml.min.js', 'joint.layout.DirectedGraph.min.js', 'standardsregistry.js', 'handlebars.min.js']>
 
 <@header css js/>
 <#-- Search box and search results -->
@@ -50,6 +50,19 @@
 	<div class="well package" data-id="{{package.name}}">
   		<h3 style="margin-top: 0px;">{{package.name}}</h3>
   		<p>{{package.description}}</p>
+  		<p>
+  			{{#each tags}}
+  				{{#equal this.relation 'link'}}
+  					<span class="label label-primary"><a href='{{this.label}}' target="_blank">{{this.label}}</a></span>
+  				{{/equal}}
+  				{{#notequal this.relation 'link'}}
+  					<span class="label label-primary">{{this.label}}</span>
+  				{{/notequal}}
+  			{{/each}}
+  		</p>
+  		{{#if package.matchDescription}}
+        	<p><span class="label label-default">{{package.matchDescription}}</span></p>
+        {{/if}}
         <form class="form-inline">
             <div class="form-group">
         	   <a class="btn btn-primary details-btn" href="#" role="button">View Model Details</a>
@@ -68,11 +81,6 @@
     			</div>
 			</div>
         </form>
-        <div class="search-result-match">
-            {{#if package.matchDescription}}
-                <p class="bg-info">{{package.matchDescription}}</p>
-            {{/if}}
-        </div>
   	</div>
 </script>
 <@footer />

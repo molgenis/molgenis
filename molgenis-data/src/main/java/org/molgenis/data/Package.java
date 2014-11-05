@@ -1,5 +1,8 @@
 package org.molgenis.data;
 
+import org.molgenis.data.semantic.LabeledResource;
+import org.molgenis.data.semantic.Tag;
+
 /**
  * Package defines the structure and attributes of a Package. Attributes are unique. Other software components can use
  * this to interact with Packages and/or to configure backends and frontends, including Repository instances.
@@ -64,4 +67,11 @@ public interface Package
 	 * @return
 	 */
 	Package getRootPackage();
+
+	/**
+	 * Get all tags for this package
+	 * 
+	 * @return
+	 */
+	Iterable<Tag<Package, LabeledResource, LabeledResource>> getTags();
 }

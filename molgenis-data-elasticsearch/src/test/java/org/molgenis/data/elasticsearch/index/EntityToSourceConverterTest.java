@@ -15,7 +15,6 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -154,7 +153,7 @@ public class EntityToSourceConverterTest
 		Map<String, Object> expectedRefEntity1Value = new HashMap<String, Object>();
 		expectedRefEntity1Value.put(idAttributeName, refIdValue1);
 		expectedRefEntity1Value.put(refLabelAttributeName, refLabelValue1);
-		expectedRefEntity1Value.put(refMrefAttributeName, Arrays.asList(refLabelValue0, refLabelValue1));
+		expectedRefEntity1Value.put(refMrefAttributeName, Arrays.asList(refIdValue0, refIdValue1));
 
 		DataService dataService = mock(DataService.class);
 		when(dataService.getEntityMetaData(entityName)).thenReturn(entityMetaData);

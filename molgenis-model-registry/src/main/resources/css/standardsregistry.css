@@ -57,6 +57,14 @@ p.form-inline {
 	margin-right: 10px;
 }
 
-.search-result-match {
-	margin-top: 10px;
+.label a {
+	color: white;
+}
+
+.package form {
+	margin-top: 40px;
+}
+
+.page-header {
+	margin-top: 0;
 }
