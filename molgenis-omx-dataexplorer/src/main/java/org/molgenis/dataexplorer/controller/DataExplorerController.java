@@ -280,12 +280,12 @@ public class DataExplorerController extends MolgenisPluginController
 
 		ModulesConfigResponse modulesConfig = new ModulesConfigResponse();
 
-        String i18nLocale = molgenisSettings.getProperty(MolgenisInterceptor.I18N_LOCALE, "en");
+		String i18nLocale = molgenisSettings.getProperty(MolgenisInterceptor.I18N_LOCALE, "en");
 
-        Locale locale = new Locale(i18nLocale, i18nLocale);
-        ResourceBundle i18n = ResourceBundle.getBundle("i18n", locale);
+		Locale locale = new Locale(i18nLocale, i18nLocale);
+		ResourceBundle i18n = ResourceBundle.getBundle("i18n", locale);
 
-        String aggregatesTitle = i18n.getString("dataexplorer_aggregates_title");
+		String aggregatesTitle = i18n.getString("dataexplorer_aggregates_title");
 
 		if (pluginPermission != null)
 		{
@@ -586,7 +586,8 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/settings", method = RequestMethod.GET)
-	public @ResponseBody Map<String, String> getSettings(@RequestParam(required = false) String keyStartsWith)
+	public @ResponseBody
+	Map<String, String> getSettings(@RequestParam(required = false) String keyStartsWith)
 	{
 		if (keyStartsWith == null)
 		{
