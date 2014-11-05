@@ -139,13 +139,6 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData implements Edi
 	public List<AttributeMetaData> getAttributes()
 	{
 		List<AttributeMetaData> result = new ArrayList<AttributeMetaData>();
-		if (this.getExtends() != null)
-		{
-			for (AttributeMetaData att : getExtends().getAttributes())
-			{
-				result.add(att);
-			}
-		}
 		result.addAll(attributes.values());
 		return Collections.unmodifiableList(result);
 	}
