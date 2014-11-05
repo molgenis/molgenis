@@ -46,7 +46,7 @@
                     	<div class="form-group">
                         	<div class="col-md-12">
                             	<div class="input-group" <#if hideSearchBox == true> style="display:none"</#if>>
-                                	<input type="text" class="form-control" id="observationset-search" placeholder="Search data values" autofocus="autofocus"<#if searchTerm??> value="${searchTerm}"</#if>>
+                                	<input type="text" class="form-control" id="observationset-search" placeholder="Search data values" autofocus="autofocus"<#if searchTerm??> value="${searchTerm}"</#if> />
                                 	<span class="input-group-btn">
                                     	<button id="search-clear-button" class="btn btn-default" type="button"><span class="glyphicon glyphicon-remove"></span></button>
                                     	<button id="search-button" class="btn btn-default" type="button"><span class="glyphicon glyphicon-search"></span></button>
@@ -95,16 +95,18 @@
 	<div class="col-md-9">
         <div id="dataset-select-container" class="pull-right" <#if hideDatasetSelect??>style="display:none"</#if>>
 			<div class="col-md-12">
-				<div class="form-horizontal form-group">
-	    			<label class="col-md-6 control-label" for="dataset-select">Choose a dataset:</label>
-	    			<div class="col-md-6">
-		    			<select class="form-control" id="dataset-select" data-placeholder="Choose an Entity (example: dataset, protocol...">
-		    			<#if entitiesMeta?has_content>
-		        			<#list entitiesMeta.iterator() as entityMeta>
-		            			<option value="/api/v1/${entityMeta.name}" <#if entityMeta.name == selectedEntityName> selected</#if>><#if entityMeta.label?has_content>${entityMeta.label}<#else>${entityMeta.name}</#if></option>
-		           			</#list>
-		           		</#if>
-		        		</select>
+				<div class="form-horizontal">
+					<div class="form-group">
+		    			<label class="col-md-6 control-label" for="dataset-select">Choose a dataset:</label>
+		    			<div class="col-md-6">
+			    			<select class="form-control" id="dataset-select" data-placeholder="Choose an Entity (example: dataset, protocol...">
+			    			<#if entitiesMeta?has_content>
+			        			<#list entitiesMeta.iterator() as entityMeta>
+			            			<option value="/api/v1/${entityMeta.name}" <#if entityMeta.name == selectedEntityName> selected</#if>><#if entityMeta.label?has_content>${entityMeta.label}<#else>${entityMeta.name}</#if></option>
+			           			</#list>
+			           		</#if>
+			        		</select>
+						</div>
 					</div>
 				</div>
 			</div>
