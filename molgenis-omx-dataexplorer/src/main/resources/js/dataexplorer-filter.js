@@ -150,7 +150,15 @@
 			case 'DECIMAL':
 			case 'INT':
 			case 'LONG':
-				return htmlEscape('(' + (filter.fromValue ? 'from ' + filter.fromValue : '') + (filter.toValue ? ' to ' + filter.toValue : '') + ')');
+				if(filter.fromValue && filter.toValue){
+					return '(' + htmlEscape(filter.fromValue)  + ' &le; x &le; ' + htmlEscape(filter.toValue) + ')';
+				}else if (filter.fromValue){
+					return '(' + htmlEscape(filter.fromValue) + ' &le; x)';
+				}else if (filter.toValue){
+					return '(x &le; ' + htmlEscape(filter.toValue) + ')';
+				}else{
+					return '';
+				}
 			case 'EMAIL':
 			case 'HTML':
 			case 'HYPERLINK':
@@ -245,7 +253,7 @@
 		$complexElementContainer.append($complexElementLabel);
 		
 		// Simple filter
-		var $controlGroupSimpleFilter = self.createSimpleFilterControls(attribute, simpleFilter);
+		var $controlGroupSimpleFilter = self.createSimpleFilterControls(attribute, simpleFilter, wizard);
 		$controlGroupSimpleFilter.attr('data-filter', 'complex-simplefilter');
 		$controlGroupSimpleFilter.addClass('complex-simplefilter');
 		$controlGroupSimpleFilter.css('display', 'inline-block');
@@ -268,7 +276,7 @@
 			}
 		}else{
 			// Add select complex filter operator
-			var $complexOperatorControlGroup = self.createComplexFilterSelectOperator(complexFilterOperator, useFixedOperator);
+			var $complexOperatorControlGroup = self.createComplexFilterSelectOperator(complexFilterOperator, useFixedOperator, wizard);
 			
 			// Add operator
 			$complexElement.append($complexOperatorControlGroup);	
@@ -294,8 +302,8 @@
 	 * 
 	 * Options: OR, AND
 	 */
-	self.createComplexFilterSelectOperator = function (complexOperator, useFixedOperator){
-		var $controlGroup = $('<div class="col-md-9">');
+	self.createComplexFilterSelectOperator = function (complexOperator, useFixedOperator, wizard){
+		var $controlGroup = $('<div class="' + (wizard ? 'col-md-9' : 'col-md-10') + '">');
 		var operator = (complexOperator === 'AND' ? 'AND' : 'OR');
 		var orLabel= 'OR&nbsp;&nbsp;';
 		var andLabel = 'AND';
@@ -304,7 +312,7 @@
 		$controlGroup.append($operatorInput);
 		var $dropdown;
 		if(useFixedOperator === false){
-			$dropdown = $('<div class="btn-group" data-filter="complex-operator-container" style="margin-left: 154px"><div>');
+			$dropdown = $('<div class="btn-group" data-filter="complex-operator-container" style="margin-left:45%;"><div>');
 			$dropdown.append($('<a class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" href="#">' + operatorLabel + ' <b class="caret"></a>'));
 			$dropdown.append($('<ul class="dropdown-menu"><li><a data-value="OR">' + orLabel + '</a></li><li><a data-value="AND">' + andLabel + '</a></li></ul>'));
 			$.each($dropdown.find('.dropdown-menu li a'), function(index, element){
@@ -318,7 +326,7 @@
 			$dropdown.find('div:first').remove();//This is a workaround FIX
 			
 		}else{
-			$dropdown = $('<div data-filter="complex-operator-container" style="margin-left: 160px">' + operator + '<div>');
+			$dropdown = $('<div data-filter="complex-operator-container" style="width:5%; margin: 0 auto;">' + operator + '<div>');
 		}
 
 		return $('<div class="form-group">').append($controlGroup.append($dropdown));
@@ -422,22 +430,21 @@
 		var $container = $('<div class="simple-filter-container form-group"></div>');
 		var $label = self.createFilterLabel(attribute, true, wizard);
 		$container.append($label);
-		$container.append(self.createSimpleFilterControls(attribute, filter));
+		$container.append(self.createSimpleFilterControls(attribute, filter, wizard));
 		$container.data('attribute', attribute);
 		if( wrap ) {
-			var $wrapper = $('<div>').addClass('col-md-9');
+			var $wrapper = $('<div>').addClass((wizard ? 'col-md-9' : 'col-md-10'));
 			$container.children('.col-md-9').wrap($wrapper);
-			return $container;
 		}
-		return $container;
+		return $('<div class="form-group">').append($container);
 	}
 	
 	/**
 	 * Create simple filter controls
 	 */
-	self.createSimpleFilterControls = function(attribute, simpleFilter) {
+	self.createSimpleFilterControls = function(attribute, simpleFilter, wizard) {
 		var $controls = $('<div>');
-		$controls.addClass('col-md-9');
+		$controls.addClass((wizard ? 'col-md-9' : 'col-md-10'));
 		var name = 'input-' + attribute.name + '-' + new Date().getTime();
 		var values = simpleFilter ? simpleFilter.getValues() : null;
 		var fromValue = simpleFilter ? simpleFilter.fromValue : null;
@@ -449,7 +456,7 @@
 				var attrsFalse = values && values[0] === 'false' ? $.extend({}, attrs, {'checked': 'checked'}) : attrs;
 				var inputTrue = createInput(attribute, attrsTrue, true);
 				var inputFalse = createInput(attribute, attrsFalse, false);
-				$controls.append(inputTrue.addClass('radio-inline')).append(inputFalse.addClass('radio-inline'));
+				$controls.append($('<div class="filter-radio-inline-container">').append(inputTrue.addClass('radio-inline')).append(inputFalse.addClass('radio-inline')));
 				break;
 			case 'CATEGORICAL':
 				var restApi = new molgenis.RestClient();
@@ -485,7 +492,7 @@
 			case 'INT':
 			case 'LONG':
 				if (attribute.range) {
-					var slider = $('<div id="slider" class="form-group"></div>').width('334px');
+					var slider = $('<div id="slider" class="form-group"></div>');
 					var min = fromValue ? fromValue : attribute.range.min;
 					var max = toValue ? toValue : attribute.range.max;
 					slider.editRangeSlider({
@@ -508,8 +515,8 @@
 					var nameFrom = name + '-from', nameTo = name + '-to';
 					var labelFrom = $('<label class="horizontal-inline" for="' + nameFrom + '">From</label>');
 					var labelTo = $('<label class="horizontal-inline inbetween" for="' + nameTo + '">To</label>');
-					var inputFrom = createInput(attribute, {'name': nameFrom, 'id': nameFrom, 'style' : 'width: 146px'}, values ? fromValue : undefined).addClass('input-small');
-					var inputTo = createInput(attribute, {'name': nameTo, 'id': nameTo, 'style' : 'width: 146px'}, values ? toValue : undefined).addClass('input-small');
+					var inputFrom = createInput(attribute, {'name': nameFrom, 'id': nameFrom, 'style' : 'width: 189px'}, values ? fromValue : undefined).addClass('input-small');
+					var inputTo = createInput(attribute, {'name': nameTo, 'id': nameTo, 'style' : 'width: 189px'}, values ? toValue : undefined).addClass('input-small');
 					$controls.addClass('form-inline').append(labelFrom).append(inputFrom).append(labelTo).append(inputTo);
 				}
 				break;
@@ -520,15 +527,15 @@
 			case 'TEXT':
 			case 'ENUM':
 			case 'SCRIPT':
-				$controls.append(createInput(attribute, {'name': name, 'id': name, 'style' : 'width: 400px'}, values ? values[0] : undefined));
+				$controls.append(createInput(attribute, {'name': name, 'id': name}, values ? values[0] : undefined));
 				break;
 			case 'XREF':
 			case 'MREF':
 				var operator = simpleFilter ? simpleFilter.operator : 'OR';
-				var container = $('<div class="row">');
+				var container = $('<div class="xrefmrefsearch">');
 				$controls.append(container);
-				container.addClass('xrefmrefsearch');
 				container.xrefmrefsearch({
+					width: '100%',
 					attribute : attribute,
 					values : values,
 					labels : simpleFilter ? simpleFilter.getLabels() : null,
