@@ -263,6 +263,16 @@ public class EmxImportService implements ImportService
 			}
 		}
 
+		// "-" is not allowed because of bug: https://github.com/molgenis/molgenis/issues/2055
+		// FIXME remove this line once this bug is fixed
+		for (String entityName : metaDataMap.keySet())
+		{
+			if (entityName.contains("-"))
+			{
+				throw new IllegalArgumentException("'-' is not allowed in an entity name (" + entityName + ")");
+			}
+		}
+
 		for (String sheet : source.getEntityNames())
 		{
 			if (!ENTITIES.equals(sheet) && !ATTRIBUTES.equals(sheet) && !PACKAGES.equals(sheet))
@@ -604,15 +614,15 @@ public class EmxImportService implements ImportService
 					emd.setPackage(p);
 				}
 			}
-			
-			 // Add packages to the packages table
-			 for (Package p : packages.values())
-			 {
+
+			// Add packages to the packages table
+			for (Package p : packages.values())
+			{
 				if (p != null)
 				{
-					 metaDataService.addPackage(p);
+					metaDataService.addPackage(p);
 				}
-			 }
+			}
 		}
 	}
 
