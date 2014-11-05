@@ -287,6 +287,13 @@
 		editStateSelect.change(function(){
 			switch(selectedStudyDefinitionState) {
 	            case 'APPROVED':
+	            	if(editStateSelect.val() !== 'EXPORTED') {
+		            	var ok = window.confirm('Are you sure you want to update a ' + selectedStudyDefinitionState + ' study definition?');
+		            	if(ok === false) {
+		            		editStateSelect.val(selectedStudyDefinitionState);
+		            	}
+	            	}
+	            	break;
 	            case 'REJECTED':
 	            case 'EXPORTED':
 	            	var ok = window.confirm('Are you sure you want to update a ' + selectedStudyDefinitionState + ' study definition?');
