@@ -2,6 +2,7 @@ package org.molgenis.data.semantic;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Package;
 
 /**
  * Service that administrates tags on attributes, entities and packages of a particular code system.
@@ -24,9 +25,15 @@ public interface TagService<ObjectType, CodeSystemType>
 	Iterable<Tag<AttributeMetaData, ObjectType, CodeSystemType>> getTagsForAttribute(EntityMetaData entityMetaData,
 			AttributeMetaData attributeMetaData);
 
-	// void getTagsForEntity();
+	/**
+	 * Retrieves all tags for a package
+	 * 
+	 * @param p
+	 * @return
+	 */
+	Iterable<Tag<Package, ObjectType, CodeSystemType>> getTagsForPackage(Package p);
 
-	// void getTagsForPackage();
+	// void getTagsForEntity();
 
 	/**
 	 * Tags an attribute.

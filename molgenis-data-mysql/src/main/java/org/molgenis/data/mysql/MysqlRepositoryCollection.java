@@ -184,9 +184,8 @@ public abstract class MysqlRepositoryCollection implements ManageableCrudReposit
 			r.drop();
 			repositories.remove(name);
 			dataService.removeRepository(r.getName());
+			metaDataRepositories.removeEntityMetaData(name);
 		}
-
-		metaDataRepositories.removeEntityMetaData(name);
 	}
 
 	public void dropAttributeMetaData(String entityName, String attributeName)
@@ -195,10 +194,8 @@ public abstract class MysqlRepositoryCollection implements ManageableCrudReposit
 		if (r != null)
 		{
 			r.dropAttribute(attributeName);
+			metaDataRepositories.removeAttributeMetaData(entityName, attributeName);
 		}
-
-		metaDataRepositories.removeAttributeMetaData(entityName, attributeName);
-
 		refreshRepositories();
 	}
 
@@ -282,4 +279,5 @@ public abstract class MysqlRepositoryCollection implements ManageableCrudReposit
 			}
 		});
 	}
+
 }

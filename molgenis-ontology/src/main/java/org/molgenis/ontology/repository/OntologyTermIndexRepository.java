@@ -62,7 +62,6 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 	@Override
 	public Iterator<Entity> iterator()
 	{
-        final Set<String> processedClasses = new HashSet<String>();
 		final TreeTraverser<OWLClassContainer> traverser = new TreeTraverser<OWLClassContainer>()
 		{
 			@Override
@@ -96,7 +95,7 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 								createAlternativeDefinitions(childClass), allDatabaseIds));
 					}
 
-                    count++;
+					count++;
 				}
 				return orderedList;
 			}
@@ -181,11 +180,9 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 	}
 
 	/**
-	 * A helper function to construct the nodePath with a pattern which is
-	 * started with the position of current node compared to its siblings and
-	 * followed by the depth of the tree such as 2[1]. Moreover it the parent
-	 * node is prepended to the current node to construct complete path such as
-	 * 0[0].2[1]
+	 * A helper function to construct the nodePath with a pattern which is started with the position of current node
+	 * compared to its siblings and followed by the depth of the tree such as 2[1]. Moreover it the parent node is
+	 * prepended to the current node to construct complete path such as 0[0].2[1]
 	 * 
 	 * @param parentNodePath
 	 * @return
@@ -203,8 +200,7 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 	}
 
 	/**
-	 * A helper function to create alternative definitions stored in string for
-	 * ontology terms.
+	 * A helper function to create alternative definitions stored in string for ontology terms.
 	 * 
 	 * @param cls
 	 * @return

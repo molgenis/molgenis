@@ -1,9 +1,5 @@
 package org.molgenis.data;
 
-
-
-
-
 /**
  * EntityMetaData defines the structure and attributes of an Entity. Attributes are unique. Other software components
  * can use this to interact with Entity and/or to configure backends and frontends, including Repository instances.
@@ -50,12 +46,16 @@ public interface EntityMetaData
 	/**
 	 * Returns all attributes. In case of compound attributes (attributes consisting of multiple atomic attributes) only
 	 * the compound attribute is returned. This attribute can be used to retrieve parts of the compound attribute.
+	 * 
+	 * In case EntityMetaData extends other EntityMetaData then only the attributes of this EntityMetaData are returned.
 	 */
 	Iterable<AttributeMetaData> getAttributes();
 
 	/**
 	 * Returns all atomic attributes. In case of compound attributes (attributes consisting of multiple atomic
 	 * attributes) only the descendant atomic attributes are returned. The compound attribute itself is not returned.
+	 * 
+	 * In case EntityMetaData extends other EntityMetaData then only the attributes of this EntityMetaData are returned.
 	 */
 	Iterable<AttributeMetaData> getAtomicAttributes();
 

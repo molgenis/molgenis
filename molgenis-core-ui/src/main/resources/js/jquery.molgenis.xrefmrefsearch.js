@@ -117,15 +117,13 @@
 		var refEntityMetaData = restApi.get(attributeMetaData.refEntity.href, {expand: ['attributes']});
 		var lookupAttrNames = getLookupAttributeNames(refEntityMetaData);
 		var uniqueAttrNames = getUniqueAttributeNames(refEntityMetaData);
-		
+		var width = options.width ? options.width : 'resolve';
 		var $hiddenInput = $(':input[type=hidden]',$container)
 				.not('[data-filter=xrefmref-operator]')
 				.not('[data-filter=ignore]');
 
 		$hiddenInput.data('labels', options.labels);
 
-		var width = options.width ? options.width : 'resolve';
-		
 		$hiddenInput.select2({
 			width: width,
 			minimumInputLength: 1,
@@ -158,6 +156,7 @@
 			formatSelection: function(entity) {
 				if($('.select2-choices .select2-search-choice', $container).length > 0 && !$('.dropdown-toggle-container', $container).is(':visible')){
 					var $select2Container = $('.select2-container.select2-container-multi', $container);
+					$container.addClass('input-group');
 					$container.closest('.xrefmrefsearch').find('.dropdown-toggle-container').show();
 				}
 				return formatSelection(entity, refEntityMetaData);
@@ -187,9 +186,11 @@
 		
 		$hiddenInput.on('select2-removed', function(e) {
 			if($('.select2-choices .select2-search-choice', $container).length < 2){
+				$container.removeClass('input-group');
 				$container.closest('.xrefmrefsearch').find('.dropdown-toggle-container').hide();
 			}
 		});
+		$container.removeClass('input-group');
 		$container.closest('.xrefmrefsearch').find('.dropdown-toggle-container').hide();
 		
 		if(!lookupAttrNames.length){
@@ -208,38 +209,41 @@
 			var $operatorInput = $('<input type="hidden" data-filter="xrefmref-operator" value="' + options.operator + '" />');
 
 			if(attributeMetaData.fieldType === 'MREF') {
-				var $dropdown = $('<div class="col-md-2 dropdown-toggle-container">');
+				var $dropdown = $('<div class="input-group-addon dropdown dropdown-toggle-container">');
 				var orValue = 'OR&nbsp;&nbsp;';
 				var andValue = 'AND';
 				$dropdown.append($operatorInput);
-				$dropdown.append($('<a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="#">' + (options.operator === 'AND' ? andValue : orValue) + ' <b class="caret"></a>'));
-				$dropdown.append($('<ul class="dropdown-menu"><li><a data-value="OR">' + orValue + '</a></li><li><a data-value="AND">' + andValue + '</a></li></ul>'));
+				$dropdown.append($('<button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">' + (options.operator === 'AND' ? andValue : orValue) + ' <b class="caret"></button>'));
+				$dropdown.append($('<ul class="dropdown-menu" role="menu">'
+						+ '<li role="presentation"><a  role="menuitem" data-value="OR" tabindex="-1" href="#">' + orValue + '</a></li>'
+						+ '<li role="presentation"><a  role="menuitem" data-value="AND" tabindex="-1" href="#">' + andValue + '</a></li>'
+					+ '</ul>'));
 	
 				$.each($dropdown.find('.dropdown-menu li a'), function(index, element){
 					$(element).click(function(){
 						var dataValue = $(this).attr('data-value');
 						$operatorInput.val(dataValue);
-						$dropdown.find('a:first').html((dataValue === 'AND' ? andValue : orValue) + ' <b class="caret"></b>');
-						$dropdown.find('a:first').val(dataValue);
+						$dropdown.find('button:first').html((dataValue === 'AND' ? andValue : orValue) + ' <b class="caret"></b>');
+						$dropdown.find('button:first').val(dataValue);
 					});
 				});
 				
 				$dropdown.find('div:first').remove();//This is a workaround FIX
 			
+				$container.addClass("select2-bootstrap-prepend");
 				$container.prepend($dropdown);
 			}
 			else if (attributeMetaData.fieldType === 'XREF') {
 				$operatorInput.val('OR');
-				$container.append($('<div class="col-md-2 dropdown-toggle-container" style="display:inline-block;width:38px"><p class="form-control-static">OR</div>'));
+				$container.append($('<div class="input-group-addon dropdown-toggle-container"><button class="btn btn-default" type="button" disabled>OR</button></div>'));
 				$container.append($operatorInput);
 			}
 		}
 
 		var element = createInput(attributeMetaData, attrs, options.values);
 		
-		var select2Container = $('<div class="col-md-10">').appendTo($container);
-		select2Container.append(element);
-		createSelect2(select2Container, attributeMetaData, options);
+		$container.addClass("input-group select2-bootstrap-prepend");
+		$container.append(element);
 	}
 
 	/**
@@ -260,6 +264,7 @@
 		var attributeUri = options.attributeUri ? options.attributeUri : options.attribute.href;
 		restApi.getAsync(attributeUri, {attributes:['refEntity', 'fieldType'], expand:['refEntity']}, function(attributeMetaData) {
 			    addQueryPartSelect(container, attributeMetaData, options);
+				createSelect2(container, attributeMetaData, options);
 		});
 
 		return container;
