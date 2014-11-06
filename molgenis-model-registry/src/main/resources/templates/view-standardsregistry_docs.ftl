@@ -16,6 +16,7 @@
         <#--<script src="<@resource_href "/js/jquery-1.8.3.min.js"/>"></script>-->
         <#--<script src="<@resource_href "/js/bootstrap.min.js"/>"></script>-->
         <script src="/js/jquery-1.8.3.min.js"></script>
+        <script src="/js/bootstrap.min.js"></script>
         <script src="/js/standardsregistry-doc.js"></script>
     </head>
     <body>
