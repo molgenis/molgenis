@@ -86,7 +86,7 @@
             <#if attribute.nillable><#assign constraints = constraints + [ "nillable" ] /></#if>
        		<#if attribute.readonly><#assign constraints = constraints + [ "read-only" ] /></#if>
         	<#if attribute.unique><#assign constraints = constraints + [ "unique" ] /></#if>
-        	<#if attribute.visible><#assign constraints = constraints + [ "hidden" ] /></#if>
+        	<#if !attribute.visible><#assign constraints = constraints + [ "hidden" ] /></#if>
         	<#if attribute.auto><#assign constraints = constraints + [ "auto" ] /></#if>
             <#if attribute.aggregateable><#assign constraints = constraints + [ "aggregates" ] /></#if>
         	<#if attribute.range?has_content>

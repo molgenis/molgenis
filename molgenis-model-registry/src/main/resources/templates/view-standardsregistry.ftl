@@ -61,14 +61,14 @@
   			{{/each}}
   		</p>
   		{{#if package.matchDescription}}
-			<p><span class="label label-default">{{package.matchDescription}}</span></p>
-		{{/if}}
-		<form class="form-inline">
-			<div class="form-group{{#unless entities.length}} hidden{{/unless}}">
-                <div class="input-group input-group-md select2-bootstrap-append select2-bootstrap-prepend entity-select-control">
-					<span class="input-group-btn">
-						<button class="btn btn-primary details-btn" type="button" role="button">View Model Details</button>
-					</span>
+        	<p><span class="label label-default">{{package.matchDescription}}</span></p>
+        {{/if}}
+        <form class="form-inline">
+            <div class="form-group">
+        	   <a class="btn btn-primary details-btn" href="#" role="button">View Model Details</a>
+        	</div>
+            <div class="form-group{{#unless entities.length}} hidden{{/unless}}">
+                <div class="input-group select2-bootstrap-append entity-select-control">
                     <select id="select2-input-group-append" class="form-control select2 entity-select-dropdown" data-placeholder="Select an entity">
                         <option></option>
         		    	{{#each entities}}
@@ -76,7 +76,7 @@
         	    		{{/each}}
         			</select>
         			<span class="input-group-btn">
-                        <button class="btn btn-default dataexplorer-btn" type="button" data-select2-open="select2-input-group-append">View Data</button>
+                        <button class="btn btn-default dataexplorer-btn" type="button" data-select2-open="select2-input-group-append">View Model Data</button>
                     </span>
     			</div>
 			</div>
