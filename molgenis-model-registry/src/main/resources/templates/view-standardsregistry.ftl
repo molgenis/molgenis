@@ -76,7 +76,7 @@
         	    		{{/each}}
         			</select>
         			<span class="input-group-btn">
-                        <button class="btn btn-default dataexplorer-btn" type="button" data-select2-open="select2-input-group-append">View Model Data</button>
+                        <button class="btn btn-default dataexplorer-btn" type="button" data-select2-open="select2-input-group-append">View Data</button>
                     </span>
     			</div>
 			</div>
