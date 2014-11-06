@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -259,7 +258,8 @@ public class DiseaseMappingPreProcessor
 			csvReaderAll = new CSVReader(new BufferedReader(new InputStreamReader(new FileInputStream(allFile),
 					CHARSET_UTF8)), '\t');
 
-			csvWriter = new CsvWriter(new BufferedWriter(new FileWriter(outFile)), '\t');
+			csvWriter = new CsvWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFile),
+					CHARSET_UTF8)), '\t');
 
 			// write header
 			csvWriter.writeAttributeNames(Arrays.asList("identifier", "diseaseId", "geneSymbol", "geneId", "HPOId",
