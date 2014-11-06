@@ -41,7 +41,7 @@
                 </div>
                 <div class="panel-body">
             
-                    <p><#if entity.description?has_content>${entity.description}</#if></p>
+                    <p><#if entity.description?has_content>${entity.description}<#else>No description available</#if></p>
                     
                     <#-- Entity attributes -->
                     <table class="table">
