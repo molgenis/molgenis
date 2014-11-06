@@ -16,6 +16,7 @@ public abstract class LocusAnnotator extends AbstractRepositoryAnnotator impleme
 {
 
 	public static final String CHROMOSOME = "chrom";
+	public static final String VCF_CHROMOSOME = "#chrom";  //eurghh..
 	public static final String POSITION = "pos";
 
 	// TODO: needs genome build and possible organism !?
