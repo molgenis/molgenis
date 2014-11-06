@@ -77,7 +77,7 @@ public class OptionsWizardPage extends AbstractWizardPage
 			{
 				String fileName = tmpFile.getName();
 
-				int index = fileName.indexOf('.');
+				int index = fileName.lastIndexOf('.');
 				String extension = (index > -1) ? fileName.substring(index) : "";
 
 				File file = new File(tmpFile.getParent(), userGivenName + extension);
