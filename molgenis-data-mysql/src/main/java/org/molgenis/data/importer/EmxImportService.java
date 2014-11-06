@@ -49,7 +49,6 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Range;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.PackageImpl;
@@ -586,8 +585,7 @@ public class EmxImportService implements ImportService
 			Iterable<String> tagIdentifiers = pack.getList(org.molgenis.data.meta.PackageMetaData.TAGS);
 			PackageImpl p = new PackageImpl(simpleName, description, parentPackage);
 
-			// Tags
-			try
+			if (tagIdentifiers != null && !Iterables.isEmpty(tagIdentifiers))
 			{
 				Repository tagsRepo = source.getRepositoryByEntityName(TagMetaData.ENTITY_NAME);
 
@@ -600,14 +598,7 @@ public class EmxImportService implements ImportService
 					}
 					p.addTag(TagImpl.<Package> asTag(p, tagEntity));
 				}
-			}
-			catch (UnknownEntityException e)
-			{
-				// No tags tab
-				if (tagIdentifiers != null && !Iterables.isEmpty(tagIdentifiers))
-				{
-					throw new IllegalArgumentException("Missing tags");
-				}
+
 			}
 
 			packages.put(simpleName, p);
