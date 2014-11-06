@@ -5,10 +5,10 @@
     </div>
 </div>
 
-<div class="row">	
-	<div class="col-md-3">
+<div class="row">
+	<div class="col-md-3" >
 		<div class="well">
-			<div class="panel">
+			<div id="package-tree-container" class="panel">
 		    	<div class="panel-heading">
 		        	<h4 class="panel-title clearfix">Data item selection</h4>
 		        </div>
