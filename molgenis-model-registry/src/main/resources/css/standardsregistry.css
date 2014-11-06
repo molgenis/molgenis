@@ -13,8 +13,16 @@
 	margin-bottom: 18px;	
 }
 
-#search-results-back-btn {
+#search-results-back-btn{
 	margin-bottom: 15px;
+}
+
+#print-btn {
+	margin-bottom: 15px;
+}
+
+#print-doc-btn {
+	margin: 30px;
 }
 
 .entity span.fancytree-icon, .entity span.fancytree-icon:hover {

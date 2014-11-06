@@ -137,6 +137,10 @@
 			$.getScript(molgenis.getContextUrl() + '/uml?package=' + detailsPackageName);
 		});
 		
+		$(document).on('click', '#print-btn', function() {
+			window.print();
+		});
+		
 		Handlebars.registerHelper('notequal', function(lvalue, rvalue, options) {
 		    if (arguments.length < 3)
 		        throw new Error("Handlebars Helper equal needs 2 parameters");
