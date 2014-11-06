@@ -588,6 +588,7 @@ public class EmxImportService implements ImportService
 			if (tagIdentifiers != null && !Iterables.isEmpty(tagIdentifiers))
 			{
 				Repository tagsRepo = source.getRepositoryByEntityName(TagMetaData.ENTITY_NAME);
+				if (tagsRepo == null) throw new IllegalArgumentException("Missing 'tags'");
 
 				for (String tagIdentifier : tagIdentifiers)
 				{

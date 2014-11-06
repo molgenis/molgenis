@@ -17,9 +17,13 @@
         <#--<script src="<@resource_href "/js/bootstrap.min.js"/>"></script>-->
         <script src="/js/jquery-1.8.3.min.js"></script>
         <script src="/js/bootstrap.min.js"></script>
+        <script src="/js/standardsregistry-doc.js"></script>
     </head>
     <body>
 <#include "view-standardsregistry_docs-macros.ftl">
+	    <div class="col-md-12 hidden-print">
+	        <button id="print-doc-btn" class="btn btn-default btn-md pull-right"><span class="glyphicon glyphicon-print"></span></button>
+	    </div>
         <div class="row">
             <div class="col-md-8 col-md-offset-2">
                 <div class="package-index-container">
