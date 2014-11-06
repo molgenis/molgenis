@@ -58,7 +58,7 @@
 		/**
 	     * @memberOf molgenis.studymanager
 	     */
-		function updateStudyDefinitionTable(selectStudyDefinition) {
+		function updateStudyDefinitionTable(selectStudyDefinition, callback) {
 			$.ajax({
 				type : 'POST',
 				url : molgenis.getContextUrl() + '/list',
@@ -99,6 +99,8 @@
 						studyDefinitionRadio.attr('checked', 'checked');
 						studyDefinitionRadio.change();
 					}
+					if (callback)
+						callback();
 				}
 			});
 		}
@@ -271,7 +273,9 @@
 					selectedStudyDefinitionState = currentStudyDefinitionState;
 					$('#state-select').val(selectedStudyDefinitionState);
 					updateStudyDefinitionEditor();
-					updateStudyDefinitionTable(false);
+					updateStudyDefinitionTable(false, function() {
+						$('#catalog_' + selectedStudyDefinitionId).prop('checked', true);
+					});
 				},
 				complete: function() {
 					updateStudyDefinitionBtn.prop('disabled', false);

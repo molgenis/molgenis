@@ -35,6 +35,7 @@
                         	if(order){
 	                            var clazz;
 	                            if (order.orderStatus === 'approved') clazz = 'success';
+	                            else if (order.orderStatus === 'exported') clazz = 'success';
 	                            else if (order.orderStatus === 'draft') clazz = 'warning';
 	                            else if (order.orderStatus === 'submitted') clazz = 'warning';
 	                            else if (order.orderStatus === 'rejected') clazz = 'error';
