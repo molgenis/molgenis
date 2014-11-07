@@ -66,7 +66,7 @@ public class CaddServiceAnnotator extends VariantAnnotator
 		tr = new TabixReader(molgenisSettings.getProperty(CADD_FILE_LOCATION_PROPERTY));
 	}
 
-	public CaddServiceAnnotator(File caddTsvGzFile, File inputVcfFile, File outputVCFFile, boolean errorOnMissing)
+	public CaddServiceAnnotator(File caddTsvGzFile, File inputVcfFile, File outputVCFFile)
 			throws Exception
 	{
 
@@ -130,10 +130,12 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	{
 		List<Entity> results = new ArrayList<Entity>();
 
-		String chromosome = entity.getString(VCF_CHROMOSOME);
-		Long position = entity.getLong(POSITION);
-		String reference = entity.getString(REFERENCE);
-		String alternative = entity.getString(ALTERNATIVE);
+		//FIXME need to solve this! duplicate notation for CHROM in VcfRepository.CHROM and LocusAnnotator.CHROMOSOME
+		String chromosome = entity.getString(VcfRepository.CHROM) != null ? entity.getString(VcfRepository.CHROM) : entity.getString(CHROMOSOME);
+		
+		Long position = entity.getLong(POSITION); //FIXME use VcfRepository.POS ?
+		String reference = entity.getString(REFERENCE); //FIXME use VcfRepository.REF ?
+		String alternative = entity.getString(ALTERNATIVE); //FIXME use VcfRepository.ALT ?
 
 		String caddAbs = null;
 		String caddScaled = null;
@@ -189,53 +191,6 @@ public class CaddServiceAnnotator extends VariantAnnotator
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(CADD_SCALED, FieldTypeEnum.DECIMAL));
 
 		return metadata;
-	}
-
-	public static void main(String[] args) throws Exception
-	{
-
-		if (args.length != 4)
-		{
-			throw new Exception(
-					"Usage: java -Xmx4g -jar CADD.jar [CADD *.tsv.gz file] [input VCF] [output VCF] [error on missing CADD score T/F].\n");
-		}
-
-		File caddTsvGzFile = new File(args[0]);
-		if (!caddTsvGzFile.exists())
-		{
-			throw new Exception("CADD *.tsv.gz file not found at " + caddTsvGzFile);
-		}
-		if (caddTsvGzFile.isDirectory())
-		{
-			throw new Exception("CADD *.tsv.gz file is a directory, not a file!");
-		}
-
-		File inputVcfFile = new File(args[1]);
-		if (!inputVcfFile.exists())
-		{
-			throw new Exception("Input VCF file not found at " + inputVcfFile);
-		}
-		if (inputVcfFile.isDirectory())
-		{
-			throw new Exception("Input VCF file is a directory, not a file!");
-		}
-
-		File outputVCFFile = new File(args[2]);
-		if (outputVCFFile.exists())
-		{
-			throw new Exception("Output VCF file already exists at " + outputVCFFile.getAbsolutePath());
-		}
-
-		String errorOnMissing = new String(args[3]);
-		if (!errorOnMissing.matches("T|F"))
-		{
-			throw new Exception("Error on missing must match T or F.");
-		}
-		boolean errorOnMissingBool = errorOnMissing.equals("T") ? true : false;
-
-		// engage!
-		new CaddServiceAnnotator(caddTsvGzFile, inputVcfFile, outputVCFFile, errorOnMissingBool);
-
 	}
 
 }

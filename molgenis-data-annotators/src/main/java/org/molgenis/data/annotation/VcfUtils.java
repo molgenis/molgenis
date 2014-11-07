@@ -6,15 +6,45 @@ import java.util.List;
 import java.util.Scanner;
 
 import org.molgenis.data.Entity;
+import org.molgenis.data.vcf.VcfRepository;
 
 public class VcfUtils {
 	
 	public static String convertToVCF(Entity e)
 	{
+		StringBuilder vcfRecord = new StringBuilder();
 		
-		return null;
+		vcfRecord.append(e.getString(LocusAnnotator.CHROMOSOME) + "\t");
+		vcfRecord.append(e.getString(LocusAnnotator.POSITION) + "\t");
+		vcfRecord.append(e.getString(VcfRepository.ID) + "\t");
+		vcfRecord.append(e.getString(VariantAnnotator.REFERENCE) + "\t");
+		vcfRecord.append(e.getString(VariantAnnotator.ALTERNATIVE) + "\t");
+		//etc
+		
+		//TODO
+	//	vcfRecord.append(e.getString(VcfRepository.CHROM) + "\t");
+	//	vcfRecord.append(e.getString(VcfRepository.POS) + "\t");
+	//	vcfRecord.append(e.getString(VcfRepository.ID) + "\t");
+	//	vcfRecord.append(e.getString(VcfRepository.REF) + "\t");
+	//	vcfRecord.append(e.getString(VcfRepository.ALT) + "\t");
+	//	etc
+		
+		return vcfRecord.toString();
+	//	FIXME: why not return (VcfRecord(e)).toString(); ???
 	}
 	
+	/**
+	 * Sensitive checks for previous annotations
+	 * 
+	 * @param inputVcfFile
+	 * @param outputVCFFile
+	 * @param inputVcfFileScanner
+	 * @param outputVCFWriter
+	 * @param infoFields
+	 * @param checkAnnotatedBeforeValue
+	 * @return
+	 * @throws Exception
+	 */
 	public static boolean checkInput(File inputVcfFile, File outputVCFFile, Scanner inputVcfFileScanner, PrintWriter outputVCFWriter, List<String> infoFields, String checkAnnotatedBeforeValue) throws Exception
 	{
 		boolean annotatedBefore = false;

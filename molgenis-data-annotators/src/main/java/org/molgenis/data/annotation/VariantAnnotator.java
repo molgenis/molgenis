@@ -5,11 +5,12 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.vcf.VcfRepository;
 
 public abstract class VariantAnnotator extends LocusAnnotator
 {
-	public static final String REFERENCE = "ref";
-	public static final String ALTERNATIVE = "alt";
+	public static final String REFERENCE = "ref"; //FIXME same as VcfRepository.REF
+	public static final String ALTERNATIVE = "alt"; //FIXME same as VcfRepository.ALT
 
 	@Override
 	public EntityMetaData getInputMetaData()

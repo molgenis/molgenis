@@ -5,6 +5,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.vcf.VcfRepository;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 
@@ -15,9 +16,8 @@ public abstract class LocusAnnotator extends AbstractRepositoryAnnotator impleme
 		ApplicationListener<ContextRefreshedEvent>
 {
 
-	public static final String CHROMOSOME = "chrom";
-	public static final String VCF_CHROMOSOME = "#chrom";  //eurghh..
-	public static final String POSITION = "pos";
+	public static final String CHROMOSOME = "chrom"; //FIXME how can we relate to VcfRepository.CHROM ? 
+	public static final String POSITION = "pos"; // FIXME same as VcfRepository.POS ?
 
 	// TODO: needs genome build and possible organism !?
 
