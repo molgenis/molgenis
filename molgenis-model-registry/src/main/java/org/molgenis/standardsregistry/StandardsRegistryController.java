@@ -62,8 +62,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 
 	@Autowired
 	public StandardsRegistryController(DataService dataService, MetaDataService metaDataService,
-			MolgenisPermissionService molgenisPermissionService,
-			UntypedTagService tagService,
+			MolgenisPermissionService molgenisPermissionService, UntypedTagService tagService,
 			MetaDataSearchService metaDataSearchService)
 	{
 		super(URI);
@@ -113,12 +112,14 @@ public class StandardsRegistryController extends MolgenisPluginController
 		{
 			Package p = searchResult.getPackageFound();
 			List<PackageResponse.Entity> entitiesInPackageUnfiltered = getEntitiesInPackage(p.getName());
-			List<PackageResponse.Entity> entitiesInPackageFilterd = Lists.newArrayList(Iterables.filter(entitiesInPackageUnfiltered,
-					new Predicate<PackageResponse.Entity>()
+			List<PackageResponse.Entity> entitiesInPackageFilterd = Lists.newArrayList(Iterables.filter(
+					entitiesInPackageUnfiltered, new Predicate<PackageResponse.Entity>()
 					{
 						@Override
 						public boolean apply(PackageResponse.Entity entity)
 						{
+							if (entity.isAbtract()) return false;
+
 							String entityName = entity.getName();
 
 							// Check read permission
@@ -130,7 +131,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 							return true;
 						}
 					}));
-			
+
 			PackageResponse pr = new PackageResponse(p.getSimpleName(), p.getDescription(),
 					searchResult.getMatchDescription(), entitiesInPackageFilterd, getTagsForPackage(p));
 			packageResponses.add(pr);
@@ -308,7 +309,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 	{
 		for (EntityMetaData emd : aPackage.getEntityMetaDatas())
 		{
-			entiesForThisPackage.add(new PackageResponse.Entity(emd.getName(), emd.getLabel()));
+			entiesForThisPackage.add(new PackageResponse.Entity(emd.getName(), emd.getLabel(), emd.isAbstract()));
 		}
 		Iterable<Package> subPackages = aPackage.getSubPackages();
 		if (subPackages != null)
@@ -463,15 +464,16 @@ public class StandardsRegistryController extends MolgenisPluginController
 		{
 			private final String name;
 			private final String label;
+			private final boolean abstr;
 
-			public Entity(String name, String label)
+			public Entity(String name, String label, boolean abstr)
 			{
 				super();
 				this.name = name;
 				this.label = label;
+				this.abstr = abstr;
 			}
 
-			@SuppressWarnings("unused")
 			public String getName()
 			{
 				return name;
@@ -481,6 +483,11 @@ public class StandardsRegistryController extends MolgenisPluginController
 			public String getLabel()
 			{
 				return label;
+			}
+
+			public boolean isAbtract()
+			{
+				return abstr;
 			}
 		}
 

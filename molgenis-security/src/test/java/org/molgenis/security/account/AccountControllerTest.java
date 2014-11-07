@@ -2,18 +2,20 @@ package org.molgenis.security.account;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.times;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import static org.testng.Assert.assertEquals;
 
 import java.util.Collections;
 
+import org.mockito.ArgumentCaptor;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
@@ -97,6 +99,51 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	{
 		this.mockMvc.perform(get("/account/activate/123")).andExpect(view().name("forward:/"));
 		verify(accountService).activateUser("123");
+	}
+
+	@Test
+	public void registerUser_activationModeUserProxy() throws Exception
+	{
+		when(accountService.getActivationMode()).thenReturn(ActivationMode.USER);
+		when(accountService.isSelfRegistrationEnabled()).thenReturn(true);
+
+		this.mockMvc
+				.perform(
+						post("/account/register").header("X-Forwarded-Host", "website.com").param("username", "admin")
+								.param("password", "adminpw-invalid").param("confirmPassword", "adminpw-invalid")
+								.param("email", "admin@molgenis.org").param("lastname", "min").param("firstname", "ad")
+								.param("captcha", "validCaptcha").contentType(MediaType.APPLICATION_FORM_URLENCODED))
+				.andExpect(status().isOk())
+				.andExpect(
+						content().string(
+								"{\"message\":\"" + AccountController.REGISTRATION_SUCCESS_MESSAGE_USER + "\"}"));
+		ArgumentCaptor<MolgenisUser> molgenisUserCaptor = ArgumentCaptor.forClass(MolgenisUser.class);
+		ArgumentCaptor<String> baseActivationUriCaptor = ArgumentCaptor.forClass(String.class);
+		verify(accountService).createUser(molgenisUserCaptor.capture(), baseActivationUriCaptor.capture());
+		assertEquals(baseActivationUriCaptor.getValue(), "http://website.com/account/activate");
+	}
+
+	@Test
+	public void registerUser_activationModeUserProxyWithScheme() throws Exception
+	{
+		when(accountService.getActivationMode()).thenReturn(ActivationMode.USER);
+		when(accountService.isSelfRegistrationEnabled()).thenReturn(true);
+
+		this.mockMvc
+				.perform(
+						post("/account/register").header("X-Forwarded-Proto", "https")
+								.header("X-Forwarded-Host", "website.com").param("username", "admin")
+								.param("password", "adminpw-invalid").param("confirmPassword", "adminpw-invalid")
+								.param("email", "admin@molgenis.org").param("lastname", "min").param("firstname", "ad")
+								.param("captcha", "validCaptcha").contentType(MediaType.APPLICATION_FORM_URLENCODED))
+				.andExpect(status().isOk())
+				.andExpect(
+						content().string(
+								"{\"message\":\"" + AccountController.REGISTRATION_SUCCESS_MESSAGE_USER + "\"}"));
+		ArgumentCaptor<MolgenisUser> molgenisUserCaptor = ArgumentCaptor.forClass(MolgenisUser.class);
+		ArgumentCaptor<String> baseActivationUriCaptor = ArgumentCaptor.forClass(String.class);
+		verify(accountService).createUser(molgenisUserCaptor.capture(), baseActivationUriCaptor.capture());
+		assertEquals(baseActivationUriCaptor.getValue(), "https://website.com/account/activate");
 	}
 
 	@Test
