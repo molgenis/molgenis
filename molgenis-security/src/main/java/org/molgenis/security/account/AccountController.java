@@ -137,7 +137,9 @@ public class AccountController
 		}
 		else
 		{
-			activationUri = request.getScheme() + "://" + request.getHeader("X-Forwarded-Host") + URI + "/activate";
+			String scheme = request.getHeader("X-Forwarded-Proto");
+			if (scheme == null) scheme = request.getScheme();
+			activationUri = scheme + "://" + request.getHeader("X-Forwarded-Host") + URI + "/activate";
 		}
 		accountService.createUser(molgenisUser, activationUri);
 
