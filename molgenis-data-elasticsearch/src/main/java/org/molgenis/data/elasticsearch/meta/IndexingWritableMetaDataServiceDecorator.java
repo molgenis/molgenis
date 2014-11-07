@@ -112,4 +112,10 @@ public class IndexingWritableMetaDataServiceDecorator implements WritableMetaDat
 		return delegate.getEntityMetaData(name);
 	}
 
+	@Override
+	public void refreshCaches()
+	{
+		delegate.refreshCaches();
+	}
+
 }

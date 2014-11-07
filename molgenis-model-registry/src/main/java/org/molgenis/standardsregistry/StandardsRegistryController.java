@@ -17,6 +17,7 @@ import javax.validation.constraints.Min;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Package;
 import org.molgenis.data.meta.MetaDataSearchService;
@@ -25,7 +26,10 @@ import org.molgenis.data.meta.PackageSearchResultItem;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Tag;
 import org.molgenis.data.semantic.UntypedTagService;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.Permission;
 import org.molgenis.standardsregistry.utils.PackageTreeNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -36,6 +40,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 @Controller
@@ -49,17 +55,24 @@ public class StandardsRegistryController extends MolgenisPluginController
 	private static final String VIEW_NAME_DOCUMENTATION = "view-standardsregistry_docs";
 	private static final String VIEW_NAME_DOCUMENTATION_EMBED = "view-standardsregistry_docs-body";
 	private final MetaDataService metaDataService;
+	private final DataService dataService;
 	private final MetaDataSearchService metaDataSearchService;
+	private final MolgenisPermissionService molgenisPermissionService;
 	private final UntypedTagService tagService;
 
 	@Autowired
-	public StandardsRegistryController(MetaDataService metaDataService, UntypedTagService tagService,
+	public StandardsRegistryController(DataService dataService, MetaDataService metaDataService,
+			MolgenisPermissionService molgenisPermissionService, UntypedTagService tagService,
 			MetaDataSearchService metaDataSearchService)
 	{
 		super(URI);
+		if (dataService == null) throw new IllegalArgumentException("dataService is null");
+		if (molgenisPermissionService == null) throw new IllegalArgumentException("molgenisPermissionService is null");
 		if (metaDataService == null) throw new IllegalArgumentException("metaDataService is null");
 		if (metaDataSearchService == null) throw new IllegalArgumentException("metaDataSearchService is null");
+		this.dataService = dataService;
 		this.metaDataService = metaDataService;
+		this.molgenisPermissionService = molgenisPermissionService;
 		this.metaDataSearchService = metaDataSearchService;
 		this.tagService = tagService;
 	}
@@ -98,8 +111,29 @@ public class StandardsRegistryController extends MolgenisPluginController
 		for (PackageSearchResultItem searchResult : searchResults)
 		{
 			Package p = searchResult.getPackageFound();
+			List<PackageResponse.Entity> entitiesInPackageUnfiltered = getEntitiesInPackage(p.getName());
+			List<PackageResponse.Entity> entitiesInPackageFilterd = Lists.newArrayList(Iterables.filter(
+					entitiesInPackageUnfiltered, new Predicate<PackageResponse.Entity>()
+					{
+						@Override
+						public boolean apply(PackageResponse.Entity entity)
+						{
+							if (entity.isAbtract()) return false;
+
+							String entityName = entity.getName();
+
+							// Check read permission
+							if (!molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.READ)) return false;
+
+							// Check has data
+							if (dataService.count(entityName, new QueryImpl()) == 0) return false;
+
+							return true;
+						}
+					}));
+
 			PackageResponse pr = new PackageResponse(p.getSimpleName(), p.getDescription(),
-					searchResult.getMatchDescription(), getEntitiesInPackage(p.getName()), getTagsForPackage(p));
+					searchResult.getMatchDescription(), entitiesInPackageFilterd, getTagsForPackage(p));
 			packageResponses.add(pr);
 		}
 
@@ -275,7 +309,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 	{
 		for (EntityMetaData emd : aPackage.getEntityMetaDatas())
 		{
-			entiesForThisPackage.add(new PackageResponse.Entity(emd.getName(), emd.getLabel()));
+			entiesForThisPackage.add(new PackageResponse.Entity(emd.getName(), emd.getLabel(), emd.isAbstract()));
 		}
 		Iterable<Package> subPackages = aPackage.getSubPackages();
 		if (subPackages != null)
@@ -430,15 +464,16 @@ public class StandardsRegistryController extends MolgenisPluginController
 		{
 			private final String name;
 			private final String label;
+			private final boolean abstr;
 
-			public Entity(String name, String label)
+			public Entity(String name, String label, boolean abstr)
 			{
 				super();
 				this.name = name;
 				this.label = label;
+				this.abstr = abstr;
 			}
 
-			@SuppressWarnings("unused")
 			public String getName()
 			{
 				return name;
@@ -448,6 +483,11 @@ public class StandardsRegistryController extends MolgenisPluginController
 			public String getLabel()
 			{
 				return label;
+			}
+
+			public boolean isAbtract()
+			{
+				return abstr;
 			}
 		}
 

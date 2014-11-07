@@ -47,7 +47,8 @@ public interface EntityMetaData
 	 * Returns all attributes. In case of compound attributes (attributes consisting of multiple atomic attributes) only
 	 * the compound attribute is returned. This attribute can be used to retrieve parts of the compound attribute.
 	 * 
-	 * In case EntityMetaData extends other EntityMetaData then only the attributes of this EntityMetaData are returned.
+	 * In case EntityMetaData extends other EntityMetaData then the attributes of this EntityMetaData as well as its
+	 * parent class are returned.
 	 */
 	Iterable<AttributeMetaData> getAttributes();
 
@@ -55,7 +56,8 @@ public interface EntityMetaData
 	 * Returns all atomic attributes. In case of compound attributes (attributes consisting of multiple atomic
 	 * attributes) only the descendant atomic attributes are returned. The compound attribute itself is not returned.
 	 * 
-	 * In case EntityMetaData extends other EntityMetaData then only the attributes of this EntityMetaData are returned.
+	 * In case EntityMetaData extends other EntityMetaData then the attributes of this EntityMetaData as well as its
+	 * parent class are returned.
 	 */
 	Iterable<AttributeMetaData> getAtomicAttributes();
 

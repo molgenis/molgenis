@@ -30,4 +30,9 @@ public interface MetaDataService
 	 */
 	EntityMetaData getEntityMetaData(String name);
 
+	/**
+	 * Rebuilds all meta data chaches
+	 * 
+	 */
+	void refreshCaches();
 }
