@@ -1,9 +1,11 @@
 package org.molgenis.data.support;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
-import java.util.Collections;
+import java.util.List;
 
+import org.molgenis.data.AttributeMetaData;
 import org.testng.annotations.Test;
 
 public class DefaultEntityMetaDataTest
@@ -30,8 +32,11 @@ public class DefaultEntityMetaDataTest
 		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("entity");
 		DefaultAttributeMetaData attr = entityMetaData.addAttribute("attr");
 		DefaultEntityMetaData baseEntityMetaData = new DefaultEntityMetaData("baseEntity");
-		baseEntityMetaData.addAttribute("baseAttr");
+		DefaultAttributeMetaData baseAttr = baseEntityMetaData.addAttribute("baseAttr");
 		entityMetaData.setExtends(baseEntityMetaData);
-		assertEquals(entityMetaData.getAttributes(), Collections.singletonList(attr));
+		List<AttributeMetaData> attrs = entityMetaData.getAttributes();
+		assertEquals(2, attrs.size());
+		assertTrue(attrs.contains(attr));
+		assertTrue(attrs.contains(baseAttr));
 	}
 }
