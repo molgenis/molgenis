@@ -242,6 +242,10 @@ public class EmxImportService implements ImportService
 
 			throw e;
 		}
+		finally
+		{
+			metaDataService.refreshCaches();
+		}
 
 	}
 
