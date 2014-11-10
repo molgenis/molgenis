@@ -39,11 +39,8 @@
 		});
 		
 		if (aggregableAttributes.length > 0) {
-			$('#feature-select').empty();
-			createAttributeDropdown($('#feature-select'), aggregableAttributes, 'x-aggr-attribute', aggregableAttributes[0], true);
-			$('#feature-select').append(' x ');
-			if(aggregableAttributes.length > 1) createAttributeDropdown($('#feature-select'), aggregableAttributes, 'y-aggr-attribute', aggregableAttributes[1]);
-			else createAttributeDropdown($('#feature-select'), aggregableAttributes, 'y-aggr-attribute', false);
+			createAttributeDropdown($('#x-aggr-div'), aggregableAttributes, 'x-aggr-attribute', aggregableAttributes[0], true);
+			createAttributeDropdown($('#y-aggr-div'), aggregableAttributes, 'y-aggr-attribute', aggregableAttributes.length > 1 ? aggregableAttributes[1] : false);
 			$('#distinct-attr-select').empty();
 			if( molgenis.dataexplorer.settings && (molgenis.dataexplorer.settings['mod.aggregates.distinct.hide']==='true') ){
 				$('#distinct-attr').hide();
@@ -79,6 +76,7 @@
 	}
 	
 	function createAttributeDropdown(parent, aggregableAttributes, id, defaultValue, hasDefault) {
+		parent.empty();
         if(defaultValue && hasDefault){
             var attributeSelect = $('<select id="' + id + '" class="attribute-dropdown"/>');
         }
@@ -92,7 +90,7 @@
 		});
 		
 		parent.append(attributeSelect);
-		attributeSelect.select2();
+		attributeSelect.select2({ width: '100%' });
 	}
 	
 	/**
