@@ -1,7 +1,9 @@
 <#-- Bootstrap login modal -->
-<div id="login-modal" class="modal hide" tabindex="-1">
+<div id="login-modal" class="modal hide"<#if disableClose?? && disableClose == "true"><#else> tabindex="-1"</#if>>
   <div class="modal-header">
+<#if disableClose?? && disableClose == "true"><#else>
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+</#if>
     <h3>Sign in</h3>
   </div>
   <div class="modal-body">
@@ -53,6 +55,8 @@
 	  		e.preventDefault();
 	        modal.modal('hide');
 	    });
+<#if disableClose?? && disableClose == "true">
+<#else>	    
 	    modal.keyup(function(e) {<#-- workaround: Bootstrap closes the whole stack of modals when closing one modal -->
 	    	if(e.which == 27) {
 		    	e.preventDefault();
@@ -68,7 +72,7 @@
 			    }
 	    	}
 	    });
-	    
+</#if>
   		<#-- form events -->
   		form.submit(function(e) {
 	    	if(!form.valid()) {
