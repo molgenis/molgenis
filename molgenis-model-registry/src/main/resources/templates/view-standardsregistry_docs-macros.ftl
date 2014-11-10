@@ -37,7 +37,7 @@
             <#list package.entityMetaDatas as entity>
             <div class="panel" id="entity-${entity.name}">
                 <div class="panel-heading">
-                    <h3 id="entity-${entity.name}" class="panel-title">${entity.label}<small><#if entity.extends?has_content> extends ${entity.extends.label}</#if><#if entity.abstract> (abstract)</#if></small></h3>
+                    <h3 id="entity-${entity.name}" class="panel-title">${entity.label}<small class="panel-title"><#if entity.extends?has_content> extends ${entity.extends.label}</#if><#if entity.abstract> (abstract)</#if></small></h3>
                 </div>
                 <div class="panel-body">
             
