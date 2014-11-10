@@ -141,4 +141,12 @@ public class MetaDataServiceImpl implements WritableMetaDataService
 	{
 		return entityMetaDataRepository.getMetaDatas();
 	}
+
+	@Override
+	public void refreshCaches()
+	{
+		packageRepository.updatePackageCache();
+		entityMetaDataRepository.fillEntityMetaDataCache();
+		attributeMetaDataRepository.fillAllEntityAttributes();
+	}
 }
