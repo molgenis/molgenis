@@ -1,9 +1,11 @@
 <#-- Bootstrap login modal -->
-<div id="login-modal" class="modal" tabindex="-1" aria-labelledby="login-modal-label" aria-hidden="true">
+<div id="login-modal" class="modal"<#if disableClose?? && disableClose == "true"><#else> tabindex="-1"</#if> aria-labelledby="login-modal-label" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
+            <#if disableClose?? && disableClose == "true"><#else>
                 <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </#if>
                 <h4 class="modal-title" id="login-modal-label">Sign in</h4>
             </div>
             <div class="modal-body">
