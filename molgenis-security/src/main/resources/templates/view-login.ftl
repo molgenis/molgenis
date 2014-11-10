@@ -13,10 +13,11 @@
 		<script src="<@resource_href "/js/molgenis.js"/>"></script>
 	</head>
 	<body>
+	<#assign disableClose="true">
 	<#include "/login-modal.ftl">
 		<script type="text/javascript">
 			$(function() {
-		  		$('#login-modal').modal();
+		  		$('#login-modal').modal({backdrop: 'static'});
 		  	<#if errorMessage??>
 		  		$('#loginPassword').after($('<p class="text-error">${errorMessage}</p>'));
 		  	</#if>
