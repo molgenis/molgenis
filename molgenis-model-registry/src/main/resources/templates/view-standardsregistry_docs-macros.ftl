@@ -104,7 +104,7 @@
             </#if>
             <#list constraints as constraint>${constraint}<#if constraint_has_next>, </#if></#list>
     	</td>
-    	<td style="word-break:break-all;"><#if attribute.description?has_content>${attribute.description}</#if></td>
+    	<td class="description-column"><#if attribute.description?has_content>${attribute.description}</#if></td>
 	</tr>
     <#if attribute.dataType.enumType == "COMPOUND">
         <#list attribute.attributeParts as attributePart>

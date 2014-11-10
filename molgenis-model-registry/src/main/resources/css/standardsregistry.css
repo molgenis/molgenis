@@ -76,3 +76,7 @@ p.form-inline {
 .page-header {
 	margin-top: 0;
 }
+
+.description-column {
+	word-break:break-all;
+}
