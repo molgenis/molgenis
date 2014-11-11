@@ -704,6 +704,7 @@ public class EmxImportService implements ImportService
 		private final Map<String, List<String>> addedAttributes;// Attributes per entity
 		private final DatabaseAction dbAction;
 		private final PermissionSystemService permissionSystemService;
+		private final EntityImportReport report = new EntityImportReport();
 
 		private EmxImportTransactionCallback(DatabaseAction dbAction, RepositoryCollection source,
 				List<EntityMetaData> metadata, List<String> addedEntities, Map<String, List<String>> addedAttributes,
@@ -720,127 +721,14 @@ public class EmxImportService implements ImportService
 		@Override
 		public EntityImportReport doInTransaction(TransactionStatus status)
 		{
-			EntityImportReport report = new EntityImportReport();
-
 			try
 			{
-				// Import tags
-				// Tags
-				Repository tagRepo = source.getRepositoryByEntityName(TagMetaData.ENTITY_NAME);
-				if (tagRepo != null)
-				{
-					for (Entity tag : tagRepo)
-					{
-						Entity transformed = new TransformedEntity(tag, new TagMetaData(), dataService);
-						Entity existingTag = dataService.findOne(TagMetaData.ENTITY_NAME,
-								tag.getString(TagMetaData.IDENTIFIER));
-
-						if (existingTag == null)
-						{
-							dataService.add(TagMetaData.ENTITY_NAME, transformed);
-						}
-						else
-						{
-							dataService.update(TagMetaData.ENTITY_NAME, transformed);
-						}
-					}
-				}
-
-				// Import packages
-				Map<String, PackageImpl> packages = loadAllPackagesToMap(source);
-				for (Package p : packages.values())
-				{
-					if (p != null)
-					{
-						metaDataService.addPackage(p);
-					}
-				}
-
-				Set<EntityMetaData> allMetaData = Sets.newLinkedHashSet(sourceMetadata);
-				Iterable<EntityMetaData> existingMetaData = metaDataService.getEntityMetaDatas();
-				Iterables.addAll(allMetaData, existingMetaData);
-
-				// Use all metadata for dependency resolving
-				List<EntityMetaData> resolved = DependencyResolver.resolve(allMetaData);
-
-				// Only import source
-				resolved.retainAll(sourceMetadata);
-
-				for (EntityMetaData entityMetaData : resolved)
-				{
-					String name = entityMetaData.getName();
-					if (!ENTITIES.equals(name) && !ATTRIBUTES.equals(name) && !PACKAGES.equals(name)
-							&& !TAGS.equals(name))
-					{
-						if (metaDataService.getEntityMetaData(entityMetaData.getName()) == null)
-						{
-							logger.debug("tyring to create: " + name);
-							addedEntities.add(name);
-							Repository repo = targetCollection.add(entityMetaData);
-							if (repo != null)
-							{
-								report.addNewEntity(name);
-							}
-						}
-						else if (!entityMetaData.isAbstract())
-						{
-							List<String> addedEntityAttributes = Lists.transform(
-									targetCollection.update(entityMetaData), new Function<AttributeMetaData, String>()
-									{
-										@Override
-										public String apply(AttributeMetaData input)
-										{
-											return input.getName();
-										}
-									});
-							if ((addedEntityAttributes != null) && !addedEntityAttributes.isEmpty())
-							{
-								addedAttributes.put(name, addedEntityAttributes);
-							}
-						}
-					}
-				}
-
-				// Give user permission to see and edit his imported entities (not if user is admin, admins can do that
-				// anyway)
-				if (!SecurityUtils.currentUserIsSu())
-				{
-					permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
-							addedEntities);
-				}
-
-				// import data
-				for (final EntityMetaData entityMetaData : resolved)
-				{
-					String name = entityMetaData.getName();
-					CrudRepository crudRepository = (CrudRepository) targetCollection.getRepositoryByEntityName(name);
-
-					if (crudRepository != null)
-					{
-						Repository fileEntityRepository = source.getRepositoryByEntityName(entityMetaData
-								.getSimpleName());
-
-						// check to prevent nullpointer when importing metadata only
-						if (fileEntityRepository != null)
-						{
-							// transforms entities so that they match the entity meta data of the output repository
-							Iterable<Entity> entities = Iterables.transform(fileEntityRepository,
-									new Function<Entity, Entity>()
-									{
-										@Override
-										public Entity apply(Entity entity)
-										{
-											return new TransformedEntity(entity, entityMetaData, dataService);
-										}
-									});
-							entities = DependencyResolver.resolveSelfReferences(entities, entityMetaData);
-
-							int count = update(crudRepository, entities, dbAction);
-							report.getNrImportedEntitiesMap().put(name, count);
-						}
-					}
-				}
-
+				importTags();
+				importPackages();
+				List<EntityMetaData> resolved = resolveEntityDependencies();
+				addEntityMetaData(resolved);
+				addEntityPermissions();
+				importData(resolved);
 				return report;
 			}
 			catch (Exception e)
@@ -848,6 +736,136 @@ public class EmxImportService implements ImportService
 				logger.info("Error in import transaction, setRollbackOnly", e);
 				status.setRollbackOnly();
 				throw e;
+			}
+		}
+
+		private void importData(List<EntityMetaData> resolved)
+		{
+			for (final EntityMetaData entityMetaData : resolved)
+			{
+				String name = entityMetaData.getName();
+				CrudRepository crudRepository = (CrudRepository) targetCollection.getRepositoryByEntityName(name);
+
+				if (crudRepository != null)
+				{
+					Repository fileEntityRepository = source.getRepositoryByEntityName(entityMetaData.getSimpleName());
+
+					// check to prevent nullpointer when importing metadata only
+					if (fileEntityRepository != null)
+					{
+						// transforms entities so that they match the entity meta data of the output repository
+						Iterable<Entity> entities = Iterables.transform(fileEntityRepository,
+								new Function<Entity, Entity>()
+								{
+									@Override
+									public Entity apply(Entity entity)
+									{
+										return new TransformedEntity(entity, entityMetaData, dataService);
+									}
+								});
+						entities = DependencyResolver.resolveSelfReferences(entities, entityMetaData);
+
+						int count = update(crudRepository, entities, dbAction);
+						report.getNrImportedEntitiesMap().put(name, count);
+					}
+				}
+			}
+		}
+
+		private void addEntityPermissions()
+		{
+			// Give user permission to see and edit his imported entities (not if user is admin, admins can do that
+			// anyway)
+			if (!SecurityUtils.currentUserIsSu())
+			{
+				permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
+						addedEntities);
+			}
+		}
+
+		private void addEntityMetaData(List<EntityMetaData> resolved)
+		{
+			for (EntityMetaData entityMetaData : resolved)
+			{
+				String name = entityMetaData.getName();
+				if (!ENTITIES.equals(name) && !ATTRIBUTES.equals(name) && !PACKAGES.equals(name) && !TAGS.equals(name))
+				{
+					if (metaDataService.getEntityMetaData(entityMetaData.getName()) == null)
+					{
+						logger.debug("tyring to create: " + name);
+						addedEntities.add(name);
+						Repository repo = targetCollection.add(entityMetaData);
+						if (repo != null)
+						{
+							report.addNewEntity(name);
+						}
+					}
+					else if (!entityMetaData.isAbstract())
+					{
+						List<String> addedEntityAttributes = Lists.transform(targetCollection.update(entityMetaData),
+								new Function<AttributeMetaData, String>()
+								{
+									@Override
+									public String apply(AttributeMetaData input)
+									{
+										return input.getName();
+									}
+								});
+						if ((addedEntityAttributes != null) && !addedEntityAttributes.isEmpty())
+						{
+							addedAttributes.put(name, addedEntityAttributes);
+						}
+					}
+				}
+			}
+		}
+
+		private List<EntityMetaData> resolveEntityDependencies()
+		{
+			Set<EntityMetaData> allMetaData = Sets.newLinkedHashSet(sourceMetadata);
+			Iterable<EntityMetaData> existingMetaData = metaDataService.getEntityMetaDatas();
+			Iterables.addAll(allMetaData, existingMetaData);
+
+			// Use all metadata for dependency resolving
+			List<EntityMetaData> resolved = DependencyResolver.resolve(allMetaData);
+
+			// Only import source
+			resolved.retainAll(sourceMetadata);
+			return resolved;
+		}
+
+		private void importPackages()
+		{
+			Map<String, PackageImpl> packages = loadAllPackagesToMap(source);
+			for (Package p : packages.values())
+			{
+				if (p != null)
+				{
+					metaDataService.addPackage(p);
+				}
+			}
+		}
+
+		private void importTags()
+		{
+			Repository tagRepo = source.getRepositoryByEntityName(TagMetaData.ENTITY_NAME);
+			if (tagRepo != null)
+			{
+				for (Entity tag : tagRepo)
+				{
+					Entity transformed = new TransformedEntity(tag, new TagMetaData(), dataService);
+					Entity existingTag = dataService.findOne(TagMetaData.ENTITY_NAME,
+							tag.getString(TagMetaData.IDENTIFIER));
+
+					if (existingTag == null)
+					{
+						dataService.add(TagMetaData.ENTITY_NAME, transformed);
+					}
+					else
+					{
+						dataService.update(TagMetaData.ENTITY_NAME, transformed);
+					}
+				}
 			}
 		}
 
