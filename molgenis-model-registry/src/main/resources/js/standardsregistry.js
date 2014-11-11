@@ -52,6 +52,18 @@
 		$('.select2').select2({width: 300});
 	}
 	
+	function zoomIn() {
+		scale += 0.1;
+		paper.setDimensions(bbox.width*scale, bbox.height*scale);
+		paper.scale(scale, scale);
+	}
+	
+	function zoomOut() {
+		scale -= 0.1;
+		paper.setDimensions(bbox.width*scale, bbox.height*scale);
+		paper.scale(scale, scale);
+	}
+	
 	$(function() {
 		var searchResultsContainer = $('#package-search-results');
 		
@@ -133,12 +145,16 @@
 			}
 		});
 		
-		$(document).on('click', '#uml-tab', function() {
-			$.getScript(molgenis.getContextUrl() + '/uml?package=' + detailsPackageName);
-		});
-		
 		$(document).on('click', '#print-btn', function() {
 			window.print();
+		});
+		
+		$(document).on('click', '#uml-tab', function() {
+			showSpinner();
+			setTimeout(function() {
+				$.getScript(molgenis.getContextUrl() + '/uml?package=' + detailsPackageName);
+				hideSpinner();
+			}, 500);
 		});
 		
 		Handlebars.registerHelper('notequal', function(lvalue, rvalue, options) {
@@ -167,6 +183,15 @@
 		if(window.location.hash) {
 			showPackageDetails(window.location.hash.substring(1));
 		}
+		
+		$(document).on('click', '#zoom-in', function() {
+			zoomIn();
+		});
+		
+		$(document).on('click', '#zoom-out', function() {
+			zoomOut();
+		});
+		
 		// initially search for all models
 		$('form[name=search-form]').submit();
 	});

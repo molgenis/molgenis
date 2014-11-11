@@ -76,3 +76,22 @@ p.form-inline {
 .page-header {
 	margin-top: 0;
 }
+
+.tab-pane {
+	margin-top: 20px;
+}
+
+.paper-holder {
+	width: 1200px; 
+	height: 600px; 
+	overflow: scroll;
+}
+
+.svg-title {
+	color:red;	
+}
+
+/* Prevent detaching of relationship vertices in jointjs */
+.marker-arrowheads { display: none } 
+.tool-remove { display: none }
+.tool-options { display: none }
