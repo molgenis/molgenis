@@ -37,28 +37,30 @@
             <#list package.entityMetaDatas as entity>
             <div class="panel" id="entity-${entity.name}">
                 <div class="panel-heading">
-                    <h3 id="entity-${entity.name}" class="panel-title">${entity.label}<small><#if entity.extends?has_content> extends ${entity.extends.label}</#if><#if entity.abstract> (abstract)</#if></small></h3>
+                    <h3 id="entity-${entity.name}" class="panel-title">${entity.label}<small class="panel-title"><#if entity.extends?has_content> extends ${entity.extends.label}</#if><#if entity.abstract> (abstract)</#if></small></h3>
                 </div>
                 <div class="panel-body">
             
                     <p><#if entity.description?has_content>${entity.description}<#else>No description available</#if></p>
                     
                     <#-- Entity attributes -->
-                    <table class="table">
-                        <thead>
-                            <th>Attribute</th>
-                            <th>Default</th>
-                            <th>Type</th>
-                            <th>Constraints</th>
-                            <th>Description</th>
-                        </thead>
-                        <tbody>
-                            <#assign depth = []/>
-                            <#list entity.attributes as attribute>
-                                <@renderAttribute attribute entity depth/>
-                            </#list>
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+	                    <table class="table table-condensed">
+	                        <thead>
+	                            <th>Attribute</th>
+	                            <th>Default</th>
+	                            <th>Type</th>
+	                            <th>Constraints</th>
+	                            <th>Description</th>
+	                        </thead>
+	                        <tbody>
+	                            <#assign depth = []/>
+	                            <#list entity.attributes as attribute>
+	                                <@renderAttribute attribute entity depth/>
+	                            </#list>
+	                        </tbody>
+	                    </table>
+	                </div>
                     <a href="#entities-${package.name}"><small>back to entities</small></a>
                 </div>
             </div>
@@ -102,7 +104,7 @@
             </#if>
             <#list constraints as constraint>${constraint}<#if constraint_has_next>, </#if></#list>
     	</td>
-    	<td><#if attribute.description?has_content>${attribute.description}</#if></td>
+    	<td class="description-column"><#if attribute.description?has_content>${attribute.description}</#if></td>
 	</tr>
     <#if attribute.dataType.enumType == "COMPOUND">
         <#list attribute.attributeParts as attributePart>
