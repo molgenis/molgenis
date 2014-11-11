@@ -61,12 +61,21 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 	private MysqlRepositoryCollection repositoryCollection;
 	private DataSource dataSource;
 
-	public MysqlRepository(DataSource dataSource)
+	/**
+	 * Creates a new MysqlRepository.
+	 * 
+	 * @param dataSource
+	 *            the datasource to use to execute statements on the Mysql database
+	 * @param asyncJdbcTemplate
+	 *            {@link AsyncJdbcTemplate} to use to execute DDL statements in an isolated transaction on the Mysql
+	 *            database
+	 */
+	public MysqlRepository(DataSource dataSource, AsyncJdbcTemplate asyncJdbcTemplate)
 	{
 		super(null);// TODO url
 		this.dataSource = dataSource;
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
-		this.asyncJdbcTemplate = new AsyncJdbcTemplate(jdbcTemplate);
+		this.asyncJdbcTemplate = asyncJdbcTemplate;
 	}
 
 	public void setMetaData(EntityMetaData metaData)
