@@ -130,7 +130,7 @@
 			var nrItemsPerPage = 20;
 			var start = page ? page.start : 0;
 			var end = page ? page.end : nrItemsPerPage;
-			
+
 			$.ajax({
 				url: molgenis.getContextUrl() + '/selection/' + catalogId + '?start=' + start + '&end=' + end,
 				success : function(selection) {
@@ -247,6 +247,7 @@
 	};
 	
 	var updateShoppingCart = function(resourceUri, select, catalogId, callback) {
+        $('.catalog-tree').fancytree("disable");
 		$.ajax({
 			type : 'POST',
 			url : molgenis.getContextUrl() + '/cart/' + (select ? 'add' : 'remove') + '/' + catalogId,
@@ -254,10 +255,12 @@
 			contentType : 'application/json',
 			success: function() {
 				callback();
+                $('.catalog-tree').fancytree("enable");
 			},
 			error : function(xhr) {
 				molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 				callback();
+                $('.catalog-tree').fancytree("enable");
 			}
 		});
 	};
