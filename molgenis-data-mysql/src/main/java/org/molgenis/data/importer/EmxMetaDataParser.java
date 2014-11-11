@@ -21,6 +21,7 @@ import static org.molgenis.data.meta.EntityMetaDataMetaData.ABSTRACT;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.EXTENDS;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.PACKAGE;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -53,6 +54,7 @@ import org.molgenis.fieldtypes.IntField;
 import org.molgenis.fieldtypes.LongField;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
+import org.molgenis.framework.db.EntitiesValidationReport;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.util.StringUtils;
 
@@ -93,12 +95,11 @@ public class EmxMetaDataParser
 	{
 		// TODO: this task is actually a 'merge' instead of 'import'
 		// so we need to consider both new metadata and existing ...
-		Map<String, EditableEntityMetaData> entities = new LinkedHashMap<String, EditableEntityMetaData>();
 
 		// load attributes first, entities and packages are optional
-		loadAllAttributesToMap(source, entities);
-		loadAllEntitiesToMap(source, entities);
-		loadEntityPackagesToMap(source, entities);
+		Map<String, EditableEntityMetaData> entities = parseAttributesSheet(source);
+		parseEntitiesSheet(source, entities);
+		parsePackagesSheetToEntityMap(source, entities);
 		reiterateToMapRefEntity(source, entities);
 
 		return Collections.<String, EntityMetaData> unmodifiableMap(entities);
@@ -108,11 +109,11 @@ public class EmxMetaDataParser
 	 * Load all attributes
 	 * 
 	 * @param source
-	 * @param entities
-	 *            the map to add entities meta data
 	 */
-	private void loadAllAttributesToMap(RepositoryCollection source, Map<String, EditableEntityMetaData> entities)
+	private Map<String, EditableEntityMetaData> parseAttributesSheet(RepositoryCollection source)
 	{
+		Map<String, EditableEntityMetaData> entities = new LinkedHashMap<String, EditableEntityMetaData>();
+
 		Repository attributesRepo = source.getRepositoryByEntityName(EmxMetaDataParser.ATTRIBUTES);
 		for (AttributeMetaData attr : attributesRepo.getEntityMetaData().getAtomicAttributes())
 		{
@@ -270,6 +271,7 @@ public class EmxMetaDataParser
 
 			defaultEntityMetaData.addAttributeMetaData(defaultAttributeMetaData);
 		}
+		return entities;
 	}
 
 	/**
@@ -280,7 +282,7 @@ public class EmxMetaDataParser
 	 * @param entities
 	 *            TODO
 	 */
-	private void loadAllEntitiesToMap(RepositoryCollection source, Map<String, EditableEntityMetaData> entities)
+	private void parseEntitiesSheet(RepositoryCollection source, Map<String, EditableEntityMetaData> entities)
 	{
 		Repository entitiesRepo = source.getRepositoryByEntityName(EmxMetaDataParser.ENTITIES);
 		if (entitiesRepo != null)
@@ -330,7 +332,7 @@ public class EmxMetaDataParser
 		}
 	}
 
-	Map<String, PackageImpl> loadAllPackagesToMap(RepositoryCollection source)
+	Map<String, PackageImpl> parsePackagesSheet(RepositoryCollection source)
 	{
 		Map<String, PackageImpl> packages = Maps.newHashMap();
 		Repository repo = source.getRepositoryByEntityName(EmxMetaDataParser.PACKAGES);
@@ -358,7 +360,7 @@ public class EmxMetaDataParser
 
 			if (tagIdentifiers != null && !Iterables.isEmpty(tagIdentifiers))
 			{
-				Repository tagsRepo = source.getRepositoryByEntityName(TagMetaData.ENTITY_NAME);
+				Repository tagsRepo = source.getRepositoryByEntityName(TAGS);
 				if (tagsRepo == null) throw new IllegalArgumentException("Missing 'tags'");
 
 				for (String tagIdentifier : tagIdentifiers)
@@ -416,9 +418,9 @@ public class EmxMetaDataParser
 	 * @param entities
 	 *            TODO
 	 */
-	private void loadEntityPackagesToMap(RepositoryCollection source, Map<String, EditableEntityMetaData> entities)
+	private void parsePackagesSheetToEntityMap(RepositoryCollection source, Map<String, EditableEntityMetaData> entities)
 	{
-		Map<String, PackageImpl> packages = loadAllPackagesToMap(source);
+		Map<String, PackageImpl> packages = parsePackagesSheet(source);
 
 		// Resolve entity packages
 		for (EditableEntityMetaData emd : entities.values())
@@ -491,7 +493,7 @@ public class EmxMetaDataParser
 		return metadataList;
 	}
 
-	Map<String, EntityMetaData> combineMetaDataToMap(DataService dataService, RepositoryCollection source)
+	private Map<String, EntityMetaData> combineMetaDataToMap(DataService dataService, RepositoryCollection source)
 	{
 		// compare the data sheets against metadata in store or imported file
 		if (source.getRepositoryByEntityName(EmxMetaDataParser.ATTRIBUTES) != null)
@@ -507,6 +509,66 @@ public class EmxMetaDataParser
 			}
 			return metaDataMap;
 		}
+	}
+
+	public EntitiesValidationReport validateInput(DataService dataService, RepositoryCollection source)
+	{
+		EntitiesValidationReportImpl report = new EntitiesValidationReportImpl();
+
+		Map<String, EntityMetaData> metaDataMap = combineMetaDataToMap(dataService, source);
+
+		// "-" is not allowed because of bug: https://github.com/molgenis/molgenis/issues/2055
+		// FIXME remove this line once this bug is fixed
+		for (String entityName : metaDataMap.keySet())
+		{
+			if (entityName.contains("-"))
+			{
+				throw new IllegalArgumentException("'-' is not allowed in an entity name (" + entityName + ")");
+			}
+		}
+
+		for (String sheet : source.getEntityNames())
+		{
+			if (!ENTITIES.equals(sheet) && !ATTRIBUTES.equals(sheet) && !PACKAGES.equals(sheet) && !TAGS.equals(sheet))
+			{
+				// check if sheet is known?
+				if (metaDataMap.containsKey(sheet)) report.getSheetsImportable().put(sheet, true);
+				else report.getSheetsImportable().put(sheet, false);
+
+				// check the fields
+				Repository s = source.getRepositoryByEntityName(sheet);
+				EntityMetaData target = metaDataMap.get(sheet);
+
+				if (target != null)
+				{
+					List<String> fieldsAvailable = new ArrayList<String>();
+					List<String> fieldsImportable = new ArrayList<String>();
+					List<String> fieldsRequired = new ArrayList<String>();
+					List<String> fieldsUnknown = new ArrayList<String>();
+
+					for (AttributeMetaData att : s.getEntityMetaData().getAttributes())
+					{
+						if (target.getAttribute(att.getName()) == null) fieldsUnknown.add(att.getName());
+						else fieldsImportable.add(att.getName());
+					}
+					for (AttributeMetaData att : target.getAttributes())
+					{
+						if (!att.isAuto() && !fieldsImportable.contains(att.getName()))
+						{
+							if (!att.isNillable()) fieldsRequired.add(att.getName());
+							else fieldsAvailable.add(att.getName());
+						}
+					}
+
+					report.getFieldsAvailable().put(sheet, fieldsAvailable);
+					report.getFieldsRequired().put(sheet, fieldsRequired);
+					report.getFieldsUnknown().put(sheet, fieldsUnknown);
+					report.getFieldsImportable().put(sheet, fieldsImportable);
+				}
+			}
+		}
+
+		return report;
 	}
 
 }

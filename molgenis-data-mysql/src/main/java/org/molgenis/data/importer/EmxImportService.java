@@ -1,7 +1,6 @@
 package org.molgenis.data.importer;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -61,11 +60,11 @@ public class EmxImportService implements ImportService
 
 	private MysqlRepositoryCollection targetCollection;
 	private TransactionTemplate transactionTemplate;
-	final DataService dataService;
+	private final DataService dataService;
 	private PermissionSystemService permissionSystemService;
 	private WritableMetaDataService metaDataService;
 
-	final EmxMetaDataParser parser = new EmxMetaDataParser();
+	private final EmxMetaDataParser parser = new EmxMetaDataParser();
 
 	@Autowired
 	public EmxImportService(DataService dataService)
@@ -124,7 +123,6 @@ public class EmxImportService implements ImportService
 		List<String> addedEntities = Lists.newArrayList();
 		Map<String, List<String>> addedAttributes = Maps.newLinkedHashMap();
 		// TODO altered entities (merge, see getEntityMetaData)
-
 		try
 		{
 			return transactionTemplate.execute(new EmxImportTransactionCallback(databaseAction, source, metadataList,
@@ -132,44 +130,7 @@ public class EmxImportService implements ImportService
 		}
 		catch (Exception e)
 		{
-			logger.info("Error during import, rollback.", e);
-
-			// Rollback metadata, create table statements cannot be rolled back, we have to do it ourselfs
-			Collections.reverse(addedEntities);
-
-			for (String entityName : addedEntities)
-			{
-				targetCollection.dropEntityMetaData(entityName);
-			}
-
-			List<String> entities = Lists.newArrayList(addedAttributes.keySet());
-			Collections.reverse(entities);
-
-			for (String entityName : entities)
-			{
-				List<String> attributes = addedAttributes.get(entityName);
-				for (String attributeName : attributes)
-				{
-					targetCollection.dropAttributeMetaData(entityName, attributeName);
-				}
-			}
-
-			// Reindex
-			Set<String> entitiesToIndex = Sets.newLinkedHashSet(source.getEntityNames());
-			entitiesToIndex.addAll(entities);
-
-			for (String entity : entitiesToIndex)
-			{
-				if (dataService.hasRepository(entity))
-				{
-					Repository repo = dataService.getRepositoryByEntityName(entity);
-					if ((repo != null) && (repo instanceof IndexedRepository))
-					{
-						((IndexedRepository) repo).rebuildIndex();
-					}
-				}
-			}
-
+			rollbackSchemaChanges(source, addedEntities, addedAttributes);
 			throw e;
 		}
 		finally
@@ -179,66 +140,68 @@ public class EmxImportService implements ImportService
 
 	}
 
-	@Override
-	public EntitiesValidationReport validateImport(File file, RepositoryCollection source)
+	private void rollbackSchemaChanges(final RepositoryCollection source, List<String> addedEntities,
+			Map<String, List<String>> addedAttributes)
 	{
-		EntitiesValidationReportImpl report = new EntitiesValidationReportImpl();
+		logger.info("Rolling back changes.");
 
-		Map<String, EntityMetaData> metaDataMap = parser.combineMetaDataToMap(dataService, source);
+		dropAddedEntities(addedEntities);
 
-		// "-" is not allowed because of bug: https://github.com/molgenis/molgenis/issues/2055
-		// FIXME remove this line once this bug is fixed
-		for (String entityName : metaDataMap.keySet())
+		List<String> entities = dropAddedAttributes(addedAttributes);
+
+		// Reindex
+		Set<String> entitiesToIndex = Sets.newLinkedHashSet(source.getEntityNames());
+		entitiesToIndex.addAll(entities);
+
+		reindex(entitiesToIndex);
+	}
+
+	private void reindex(Set<String> entitiesToIndex)
+	{
+		for (String entity : entitiesToIndex)
 		{
-			if (entityName.contains("-"))
+			if (dataService.hasRepository(entity))
 			{
-				throw new IllegalArgumentException("'-' is not allowed in an entity name (" + entityName + ")");
-			}
-		}
-
-		for (String sheet : source.getEntityNames())
-		{
-			if (!EmxMetaDataParser.ENTITIES.equals(sheet) && !EmxMetaDataParser.ATTRIBUTES.equals(sheet)
-					&& !EmxMetaDataParser.PACKAGES.equals(sheet) && !EmxMetaDataParser.TAGS.equals(sheet))
-			{
-				// check if sheet is known?
-				if (metaDataMap.containsKey(sheet)) report.getSheetsImportable().put(sheet, true);
-				else report.getSheetsImportable().put(sheet, false);
-
-				// check the fields
-				Repository s = source.getRepositoryByEntityName(sheet);
-				EntityMetaData target = metaDataMap.get(sheet);
-
-				if (target != null)
+				Repository repo = dataService.getRepositoryByEntityName(entity);
+				if ((repo != null) && (repo instanceof IndexedRepository))
 				{
-					List<String> fieldsAvailable = new ArrayList<String>();
-					List<String> fieldsImportable = new ArrayList<String>();
-					List<String> fieldsRequired = new ArrayList<String>();
-					List<String> fieldsUnknown = new ArrayList<String>();
-
-					for (AttributeMetaData att : s.getEntityMetaData().getAttributes())
-					{
-						if (target.getAttribute(att.getName()) == null) fieldsUnknown.add(att.getName());
-						else fieldsImportable.add(att.getName());
-					}
-					for (AttributeMetaData att : target.getAttributes())
-					{
-						if (!att.isAuto() && !fieldsImportable.contains(att.getName()))
-						{
-							if (!att.isNillable()) fieldsRequired.add(att.getName());
-							else fieldsAvailable.add(att.getName());
-						}
-					}
-
-					report.getFieldsAvailable().put(sheet, fieldsAvailable);
-					report.getFieldsRequired().put(sheet, fieldsRequired);
-					report.getFieldsUnknown().put(sheet, fieldsUnknown);
-					report.getFieldsImportable().put(sheet, fieldsImportable);
+					((IndexedRepository) repo).rebuildIndex();
 				}
 			}
 		}
+	}
 
-		return report;
+	private List<String> dropAddedAttributes(Map<String, List<String>> addedAttributes)
+	{
+		List<String> entities = Lists.newArrayList(addedAttributes.keySet());
+		Collections.reverse(entities);
+
+		for (String entityName : entities)
+		{
+			List<String> attributes = addedAttributes.get(entityName);
+			for (String attributeName : attributes)
+			{
+				targetCollection.dropAttributeMetaData(entityName, attributeName);
+			}
+		}
+		return entities;
+	}
+
+	private void dropAddedEntities(List<String> addedEntities)
+	{
+		// Rollback metadata, create table statements cannot be rolled back, we have to do it ourselfs
+		Collections.reverse(addedEntities);
+
+		for (String entityName : addedEntities)
+		{
+			targetCollection.dropEntityMetaData(entityName);
+		}
+	}
+
+	@Override
+	public EntitiesValidationReport validateImport(File file, RepositoryCollection source)
+	{
+		return parser.validateInput(dataService, source);
 	}
 
 	private final class EmxImportTransactionCallback implements TransactionCallback<EntityImportReport>
@@ -317,10 +280,12 @@ public class EmxImportService implements ImportService
 			}
 		}
 
+		/**
+		 * Gives the user permission to see and edit his imported entities, unless the user is admin since admins can do
+		 * that anyways.
+		 */
 		private void addEntityPermissions()
 		{
-			// Give user permission to see and edit his imported entities (not if user is admin, admins can do that
-			// anyway)
 			if (!SecurityUtils.currentUserIsSu())
 			{
 				permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
@@ -382,7 +347,7 @@ public class EmxImportService implements ImportService
 
 		private void importPackages()
 		{
-			Map<String, PackageImpl> packages = parser.loadAllPackagesToMap(source);
+			Map<String, PackageImpl> packages = parser.parsePackagesSheet(source);
 			for (Package p : packages.values())
 			{
 				if (p != null)
