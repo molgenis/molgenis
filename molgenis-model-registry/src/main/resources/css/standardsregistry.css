@@ -87,11 +87,13 @@ p.form-inline {
 	overflow: scroll;
 }
 
-.svg-title {
-	color:red;	
-}
 
 /* Prevent detaching of relationship vertices in jointjs */
 .marker-arrowheads { display: none } 
 .tool-remove { display: none }
 .tool-options { display: none }
+
+.description-column {
+	word-break: break-all;
+}
+
