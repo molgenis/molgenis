@@ -231,10 +231,10 @@ public class EmxImportService implements ImportService
 		{
 			try
 			{
-				importTags();
-				importPackages();
 				List<EntityMetaData> resolved = resolveEntityDependencies();
+				importTags();
 				addEntityMetaData(resolved);
+				importPackages();
 				addEntityPermissions();
 				importData(resolved);
 				return report;
