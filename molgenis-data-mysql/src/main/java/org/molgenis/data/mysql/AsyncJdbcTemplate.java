@@ -13,11 +13,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * JdbcTemplate implementation that calls {@link #execute(String)} on a different thread.
- * 
  */
 public class AsyncJdbcTemplate
 {
-	private final ExecutorService executors = Executors.newFixedThreadPool(1);
+	private final ExecutorService executors = Executors.newCachedThreadPool();
 	private JdbcTemplate jdbcTemplate;
 
 	private final static Logger LOG = Logger.getLogger(AsyncJdbcTemplate.class);
