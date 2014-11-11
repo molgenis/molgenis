@@ -57,6 +57,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 	private static final Logger logger = Logger.getLogger(MysqlRepository.class);
 	private EntityMetaData metaData;
 	private final JdbcTemplate jdbcTemplate;
+	private final AsyncJdbcTemplate asyncJdbcTemplate;
 	private MysqlRepositoryCollection repositoryCollection;
 	private DataSource dataSource;
 
@@ -65,6 +66,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		super(null);// TODO url
 		this.dataSource = dataSource;
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
+		this.asyncJdbcTemplate = new AsyncJdbcTemplate(jdbcTemplate);
 	}
 
 	public void setMetaData(EntityMetaData metaData)
@@ -84,16 +86,16 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		{
 			if (att.getDataType() instanceof MrefField)
 			{
-				jdbcTemplate.execute("DROP TABLE IF EXISTS `" + getTableName() + "_" + att.getName() + "`");
+				asyncJdbcTemplate.execute("DROP TABLE IF EXISTS `" + getTableName() + "_" + att.getName() + "`");
 			}
 		}
-		jdbcTemplate.execute(getDropSql());
+		asyncJdbcTemplate.execute(getDropSql());
 	}
 
 	public void dropAttribute(String attributeName)
 	{
 		String sql = String.format("ALTER TABLE `%s` DROP COLUMN `%s`", getTableName(), attributeName);
-		jdbcTemplate.execute(sql);
+		asyncJdbcTemplate.execute(sql);
 
 	}
 
@@ -112,23 +114,23 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		}
 		try
 		{
-			jdbcTemplate.execute(getCreateSql());
+			asyncJdbcTemplate.execute(getCreateSql());
 
 			for (AttributeMetaData attr : getEntityMetaData().getAtomicAttributes())
 			{
 				// add mref tables
 				if (attr.getDataType() instanceof MrefField)
 				{
-					jdbcTemplate.execute(getMrefCreateSql(attr));
+					asyncJdbcTemplate.execute(getMrefCreateSql(attr));
 				}
 				else if (attr.getDataType() instanceof XrefField)
 				{
-					jdbcTemplate.execute(getCreateFKeySql(attr));
+					asyncJdbcTemplate.execute(getCreateFKeySql(attr));
 				}
 
 				if (attr.isUnique())
 				{
-					jdbcTemplate.execute(getUniqueSql(attr));
+					asyncJdbcTemplate.execute(getUniqueSql(attr));
 				}
 			}
 		}
@@ -145,21 +147,21 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		{
 			if (attributeMetaData.getDataType() instanceof MrefField)
 			{
-				jdbcTemplate.execute(getMrefCreateSql(attributeMetaData));
+				asyncJdbcTemplate.execute(getMrefCreateSql(attributeMetaData));
 			}
 			else
 			{
-				jdbcTemplate.execute(getAlterSql(attributeMetaData));
+				asyncJdbcTemplate.execute(getAlterSql(attributeMetaData));
 			}
 
 			if (attributeMetaData.getDataType() instanceof XrefField)
 			{
-				jdbcTemplate.execute(getCreateFKeySql(attributeMetaData));
+				asyncJdbcTemplate.execute(getCreateFKeySql(attributeMetaData));
 			}
 
 			if (attributeMetaData.isUnique())
 			{
-				jdbcTemplate.execute(getUniqueSql(attributeMetaData));
+				asyncJdbcTemplate.execute(getUniqueSql(attributeMetaData));
 			}
 		}
 		catch (Exception e)
@@ -1315,7 +1317,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 				throw new RuntimeException(e);
 			}
 
-			jdbcTemplate.execute(sql);
+			asyncJdbcTemplate.execute(sql);
 		}
 	}
 
