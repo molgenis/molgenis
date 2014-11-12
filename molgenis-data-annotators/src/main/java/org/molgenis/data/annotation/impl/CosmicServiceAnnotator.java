@@ -138,7 +138,7 @@ public class CosmicServiceAnnotator extends AbstractRepositoryAnnotator implemen
 
 	private List<Entity> parseResult(Entity entity, String json) throws IOException
 	{
-		List<Entity> result = new ArrayList<Entity>();
+		List<Entity> results = new ArrayList<Entity>();
 		if (!"".equals(json))
 		{
 			Collection<CosmicData> resultCollection = jsonStringToCollection(json);
@@ -154,13 +154,10 @@ public class CosmicServiceAnnotator extends AbstractRepositoryAnnotator implemen
                 resultMap.put(STRAND, data.getStrand());
                 resultMap.put(START, data.getStart());
                 resultMap.put(ENSEMBLE_ID, entity.get(ENSEMBLE_ID));
-                List<Entity> results = new ArrayList<Entity>();
                 results.add(getAnnotatedEntity(entity, resultMap));
-
-
             }
 		}
-		return result;
+		return results;
 	}
 
 	private static Collection<CosmicData> jsonStringToCollection(String result) throws IOException
