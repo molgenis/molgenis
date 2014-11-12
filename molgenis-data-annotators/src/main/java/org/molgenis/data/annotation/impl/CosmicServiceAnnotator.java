@@ -5,9 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -22,6 +20,7 @@ import org.molgenis.data.annotation.impl.datastructures.CosmicData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.ui.ObjectFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -124,7 +123,7 @@ public class CosmicServiceAnnotator extends AbstractRepositoryAnnotator implemen
 				throw new RuntimeException(e);
 			}
 		}
-		return resultEntities;
+       return resultEntities;
 	}
 
 	private String getServiceUri(Entity entity)
@@ -145,18 +144,21 @@ public class CosmicServiceAnnotator extends AbstractRepositoryAnnotator implemen
 			Collection<CosmicData> resultCollection = jsonStringToCollection(json);
 			for (CosmicData data : resultCollection)
 			{
-				Entity resultEntity = new MapEntity();
-				resultEntity.set(ID, data.getID());
-				resultEntity.set(FEATURE_TYPE, data.getFeature_type());
-				resultEntity.set(ALT_ALLELES, data.getAlt_alleles()[0] + "," + data.getAlt_alleles()[1]);
-				resultEntity.set(END, data.getEnd());
-				resultEntity.set(SEQ_REGION_NAME, data.getSeq_region_name());
-				resultEntity.set(CONSEQUENCE_TYPE, data.getConsequence_type());
-				resultEntity.set(STRAND, data.getStrand());
-				resultEntity.set(START, data.getStart());
-				resultEntity.set(ENSEMBLE_ID, entity.get(ENSEMBLE_ID));
-				result.add(resultEntity);
-			}
+				Map<String, Object> resultMap = new HashMap<>();
+                resultMap.put(ID, data.getID());
+                resultMap.put(FEATURE_TYPE, data.getFeature_type());
+                resultMap.put(ALT_ALLELES, data.getAlt_alleles()[0] + "," + data.getAlt_alleles()[1]);
+                resultMap.put(END, data.getEnd());
+                resultMap.put(SEQ_REGION_NAME, data.getSeq_region_name());
+                resultMap.put(CONSEQUENCE_TYPE, data.getConsequence_type());
+                resultMap.put(STRAND, data.getStrand());
+                resultMap.put(START, data.getStart());
+                resultMap.put(ENSEMBLE_ID, entity.get(ENSEMBLE_ID));
+                List<Entity> results = new ArrayList<Entity>();
+                results.add(getAnnotatedEntity(entity, resultMap));
+
+
+            }
 		}
 		return result;
 	}

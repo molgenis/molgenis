@@ -119,13 +119,11 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 				resultMap.put(CHROMOSOME, chromosome);
 				resultMap.put(POSITION, position);
 
-				results.add(new MapEntity(resultMap));
+                results.add(getAnnotatedEntity(entity, resultMap));
 			}
 			else
 			{
-				resultMap.put(CHROMOSOME, chromosome);
-				resultMap.put(POSITION, position);
-				results.add(new MapEntity(resultMap));
+                results.add(getAnnotatedEntity(entity, resultMap));
 			}
 		}
 		catch (Exception e)

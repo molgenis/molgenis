@@ -4,10 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -91,7 +88,7 @@ public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements 
 	public List<Entity> annotateEntity(Entity entity)
 	{
 		HttpGet httpGet = new HttpGet(getServiceUri(entity));
-		Entity resultEntity = new MapEntity();
+        List<Entity> resultEntities = new ArrayList<>();
 
 		if (!annotatedInput.contains(entity.get(UNIPROT_ID)))
 		{
@@ -109,7 +106,7 @@ public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements 
 				{
 					result.append(output);
 				}
-				resultEntity = parseResult(entity, result.toString());
+                resultEntities = parseResult(entity, result.toString());
 			}
 			catch (Exception e)
 			{
@@ -118,7 +115,7 @@ public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements 
 				throw new RuntimeException(e);
 			}
 		}
-		return Collections.singletonList(resultEntity);
+		return resultEntities;
 	}
 
 	private String getServiceUri(Entity entity)
@@ -131,17 +128,16 @@ public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements 
 		return uriStringBuilder.toString();
 	}
 
-	private Entity parseResult(Entity entity, String json) throws IOException
+	private List<Entity> parseResult(Entity entity, String json) throws IOException
 	{
-		Entity result = new MapEntity();
-		if (!"".equals(json))
+        Map<String, Object> resultMap = new HashMap<>();
+        if (!"".equals(json))
 		{
 			Map<String, Object> rootMap = jsonStringToMap(json);
-			Map<String, Object> resultMap = (Map<String, Object>) rootMap.get("target");
+			resultMap = (Map<String, Object>) rootMap.get("target");
 			resultMap.put(UNIPROT_ID, entity.get(UNIPROT_ID));
-			result = new MapEntity(resultMap);
 		}
-		return result;
+		return getAnnotatedEntity(entity, resultMap);
 	}
 
 	private static Map<String, Object> jsonStringToMap(String result) throws IOException

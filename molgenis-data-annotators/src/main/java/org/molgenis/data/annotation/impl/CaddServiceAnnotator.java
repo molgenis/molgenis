@@ -126,9 +126,9 @@ public class CaddServiceAnnotator extends VariantAnnotator
 		resultMap.put(ALTERNATIVE, alternative);
 		resultMap.put(REFERENCE, reference);
 
-		results.add(new MapEntity(resultMap));
+        results.add(getAnnotatedEntity(entity, resultMap));
 
-		return results;
+        return results;
 	}
 
 	@Override

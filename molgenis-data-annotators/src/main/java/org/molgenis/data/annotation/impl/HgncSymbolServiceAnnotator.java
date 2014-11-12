@@ -17,7 +17,6 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 @Component("hgncSymbolService")
@@ -29,17 +28,11 @@ public class HgncSymbolServiceAnnotator extends LocusAnnotator
 	static final String HGNC_SYMBOL = "HGNC_SYMBOL";
 	private static final String NAME = "HGNC-Symbol";
 
-	@Autowired
+    @Autowired
 	public HgncSymbolServiceAnnotator(AnnotationService annotatorService, HgncLocationsProvider hgncLocationsProvider)
 	{
 		this.annotatorService = annotatorService;
 		this.hgncLocationsProvider = hgncLocationsProvider;
-	}
-
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		annotatorService.addAnnotator(this);
 	}
 
 	@Override
@@ -51,33 +44,27 @@ public class HgncSymbolServiceAnnotator extends LocusAnnotator
 	@Override
 	protected boolean annotationDataExists()
 	{
-		// TODO Check if web service is available
+		// FIXME Check if web service is available
 		return true;
 	}
 
 	@Override
 	public List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException
 	{
-		List<Entity> results = new ArrayList<Entity>();
-
 		String chromosome = entity.getString(CHROMOSOME);
 		Long position = entity.getLong(POSITION);
-
 		Locus locus = new Locus(chromosome, position);
-		String hgncSymbol = HgncLocationsUtils.locationToHgcn(hgncLocationsProvider.getHgncLocations(), locus).get(0);
 
-		HashMap<String, Object> resultMap = new HashMap<String, Object>();
+        HashMap<String, Object> resultMap = new HashMap<>();
+        resultMap.put(HGNC_SYMBOL, HgncLocationsUtils.locationToHgcn(hgncLocationsProvider.getHgncLocations(), locus).get(0));
 
-		resultMap.put(HGNC_SYMBOL, hgncSymbol);
-		resultMap.put(CHROMOSOME, chromosome);
-		resultMap.put(POSITION, position);
+        List<Entity> results = new ArrayList<Entity>();
+        results.add(getAnnotatedEntity(entity, resultMap));
 
-		results.add(new MapEntity(resultMap));
-
-		return results;
+        return results;
 	}
 
-	@Override
+    @Override
 	public EntityMetaData getOutputMetaData()
 	{
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
