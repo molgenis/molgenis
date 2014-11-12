@@ -11,6 +11,7 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL_ATTRIBUTE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.LOOKUP_ATTRIBUTE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.NAME;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.NILLABLE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.PART_OF_ATTRIBUTE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.RANGE_MAX;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.RANGE_MIN;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.READ_ONLY;
@@ -26,10 +27,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EditableEntityMetaData;
@@ -48,6 +52,7 @@ import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.semantic.TagImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.fieldtypes.CompoundField;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.IntField;
@@ -80,9 +85,10 @@ public class EmxMetaDataParser
 	static final List<String> SUPPORTED_ATTRIBUTE_ATTRIBUTES = Arrays.asList(AGGREGATEABLE.toLowerCase(),
 			DATA_TYPE.toLowerCase(), DESCRIPTION.toLowerCase(), ENTITY.toLowerCase(), ENUM_OPTIONS.toLowerCase(),
 			ID_ATTRIBUTE.toLowerCase(), LABEL.toLowerCase(), LABEL_ATTRIBUTE.toLowerCase(),
-			LOOKUP_ATTRIBUTE.toLowerCase(), NAME, NILLABLE.toLowerCase(), RANGE_MAX.toLowerCase(),
-			RANGE_MIN.toLowerCase(), READ_ONLY.toLowerCase(), REF_ENTITY.toLowerCase(), VISIBLE.toLowerCase(),
-			UNIQUE.toLowerCase(), org.molgenis.data.meta.AttributeMetaDataMetaData.TAGS.toLowerCase());
+			LOOKUP_ATTRIBUTE.toLowerCase(), NAME, NILLABLE.toLowerCase(), PART_OF_ATTRIBUTE.toLowerCase(),
+			RANGE_MAX.toLowerCase(), RANGE_MIN.toLowerCase(), READ_ONLY.toLowerCase(), REF_ENTITY.toLowerCase(),
+			VISIBLE.toLowerCase(), UNIQUE.toLowerCase(),
+			org.molgenis.data.meta.AttributeMetaDataMetaData.TAGS.toLowerCase());
 
 	/**
 	 * Parses metadata from a collection of repositories and creates a list of EntityMetaData
@@ -114,163 +120,245 @@ public class EmxMetaDataParser
 	{
 		Map<String, EditableEntityMetaData> entities = new LinkedHashMap<String, EditableEntityMetaData>();
 
-		Repository attributesRepo = source.getRepositoryByEntityName(EmxMetaDataParser.ATTRIBUTES);
+		Repository attributesRepo = source.getRepositoryByEntityName(ATTRIBUTES);
 		for (AttributeMetaData attr : attributesRepo.getEntityMetaData().getAtomicAttributes())
 		{
-			if (!EmxMetaDataParser.SUPPORTED_ATTRIBUTE_ATTRIBUTES.contains(attr.getName().toLowerCase()))
+			if (!SUPPORTED_ATTRIBUTE_ATTRIBUTES.contains(attr.getName().toLowerCase()))
 			{
 				throw new IllegalArgumentException("Unsupported attribute metadata: attributes. " + attr.getName());
 			}
 		}
 
+		Map<String, Map<String, DefaultAttributeMetaData>> attributesMap = new LinkedHashMap<String, Map<String, DefaultAttributeMetaData>>();
+
+		// 1st pass: create attribute stubs
 		int i = 1;// Header
-		for (Entity attribute : attributesRepo)
+		for (Entity attributeEntity : attributesRepo)
 		{
 			i++;
-			String entityName = attribute.getString(ENTITY);
-			String attributeName = attribute.getString(NAME);
-			String attributeDataType = attribute.getString(DATA_TYPE);
-			String refEntityName = attribute.getString(REF_ENTITY);
 
-			// required
+			String attributeName = attributeEntity.getString(NAME);
 			if (attributeName == null) throw new IllegalArgumentException("attributes.name is missing on line " + i);
+
+			String entityName = attributeEntity.getString(ENTITY);
 			if (entityName == null) throw new IllegalArgumentException(
-					"attributes.entity is missing for attrubute named: " + attributeName + " on line " + i);
+					"attributes.entity is missing for attribute named: " + attributeName + " on line " + i);
 
-			// create entity if not yet defined
-			if (!entities.containsKey(entityName)) entities.put(entityName, new DefaultEntityMetaData(entityName));
-			EditableEntityMetaData defaultEntityMetaData = entities.get(entityName);
+			// create attribute
+			DefaultAttributeMetaData attribute = new DefaultAttributeMetaData(attributeName);
 
-			// create attribute meta data
-			DefaultAttributeMetaData defaultAttributeMetaData = new DefaultAttributeMetaData(attributeName);
+			Map<String, DefaultAttributeMetaData> entitiesMap = attributesMap.get(entityName);
+			if (entitiesMap == null)
+			{
+				entitiesMap = new LinkedHashMap<String, DefaultAttributeMetaData>();
+				attributesMap.put(entityName, entitiesMap);
+			}
+			entitiesMap.put(attributeName, attribute);
+		}
+
+		// 2nd pass: set all properties on attribute stubs except for attribute relations
+		i = 1;// Header
+		for (Entity attributeEntity : attributesRepo)
+		{
+			i++;
+
+			String entityName = attributeEntity.getString(ENTITY);
+			Map<String, DefaultAttributeMetaData> entityMap = attributesMap.get(entityName);
+
+			String attributeName = attributeEntity.getString(NAME);
+			DefaultAttributeMetaData attribute = entityMap.get(attributeName);
+
+			String attributeDataType = attributeEntity.getString(DATA_TYPE);
+			String refEntityName = attributeEntity.getString(REF_ENTITY);
 
 			if (attributeDataType != null)
 			{
 				FieldType t = MolgenisFieldTypes.getType(attributeDataType);
 				if (t == null) throw new IllegalArgumentException("attributes.dataType error on line " + i + ": "
 						+ attributeDataType + " unknown data type");
-				defaultAttributeMetaData.setDataType(t);
+				attribute.setDataType(t);
 			}
 			else
 			{
-				defaultAttributeMetaData.setDataType(MolgenisFieldTypes.STRING);
+				attribute.setDataType(MolgenisFieldTypes.STRING);
 			}
 
-			Boolean attributeNillable = attribute.getBoolean(NILLABLE);
-			Boolean attributeIdAttribute = attribute.getBoolean(ID_ATTRIBUTE);
-			Boolean attributeVisible = attribute.getBoolean(VISIBLE);
-			Boolean attributeAggregateable = attribute.getBoolean(AGGREGATEABLE);
-			Boolean lookupAttribute = attribute.getBoolean(LOOKUP_ATTRIBUTE);
-			Boolean labelAttribute = attribute.getBoolean(LABEL_ATTRIBUTE);
-			Boolean readOnly = attribute.getBoolean(READ_ONLY);
-			Boolean unique = attribute.getBoolean(UNIQUE);
+			Boolean attributeNillable = attributeEntity.getBoolean(NILLABLE);
+			Boolean attributeIdAttribute = attributeEntity.getBoolean(ID_ATTRIBUTE);
+			Boolean attributeVisible = attributeEntity.getBoolean(VISIBLE);
+			Boolean attributeAggregateable = attributeEntity.getBoolean(AGGREGATEABLE);
+			Boolean lookupAttribute = attributeEntity.getBoolean(LOOKUP_ATTRIBUTE);
+			Boolean labelAttribute = attributeEntity.getBoolean(LABEL_ATTRIBUTE);
+			Boolean readOnly = attributeEntity.getBoolean(READ_ONLY);
+			Boolean unique = attributeEntity.getBoolean(UNIQUE);
 
-			if (attributeNillable != null) defaultAttributeMetaData.setNillable(attributeNillable);
-			if (attributeIdAttribute != null) defaultAttributeMetaData.setIdAttribute(attributeIdAttribute);
-			if (attributeVisible != null) defaultAttributeMetaData.setVisible(attributeVisible);
-			if (attributeAggregateable != null) defaultAttributeMetaData.setAggregateable(attributeAggregateable);
-			if (refEntityName != null) defaultAttributeMetaData.setRefEntity(entities.get(refEntityName));
-			if (readOnly != null) defaultAttributeMetaData.setReadOnly(readOnly);
-			if (unique != null) defaultAttributeMetaData.setUnique(unique);
+			if (attributeNillable != null) attribute.setNillable(attributeNillable);
+			if (attributeIdAttribute != null) attribute.setIdAttribute(attributeIdAttribute);
+			if (attributeVisible != null) attribute.setVisible(attributeVisible);
+			if (attributeAggregateable != null) attribute.setAggregateable(attributeAggregateable);
+			if (refEntityName != null) attribute.setRefEntity(entities.get(refEntityName));
+			if (readOnly != null) attribute.setReadOnly(readOnly);
+			if (unique != null) attribute.setUnique(unique);
 
 			if (lookupAttribute != null)
 			{
 				if (lookupAttribute
-						&& ((defaultAttributeMetaData.getDataType() instanceof XrefField) || (defaultAttributeMetaData
-								.getDataType() instanceof MrefField)))
+						&& ((attribute.getDataType() instanceof XrefField) || (attribute.getDataType() instanceof MrefField)))
 				{
 					throw new IllegalArgumentException("attributes.lookupAttribute error on line " + i + " ("
 							+ entityName + "." + attributeName + "): lookupAttribute cannot be of type "
-							+ defaultAttributeMetaData.getDataType());
+							+ attribute.getDataType());
 				}
 
-				defaultAttributeMetaData.setLookupAttribute(lookupAttribute);
+				attribute.setLookupAttribute(lookupAttribute);
 			}
 
 			if (labelAttribute != null)
 			{
 				if (labelAttribute
-						&& ((defaultAttributeMetaData.getDataType() instanceof XrefField) || (defaultAttributeMetaData
-								.getDataType() instanceof MrefField)))
+						&& ((attribute.getDataType() instanceof XrefField) || (attribute.getDataType() instanceof MrefField)))
 				{
 					throw new IllegalArgumentException("attributes.labelAttribute error on line " + i + " ("
 							+ entityName + "." + attributeName + "): labelAttribute cannot be of type "
-							+ defaultAttributeMetaData.getDataType());
+							+ attribute.getDataType());
 				}
 
-				defaultAttributeMetaData.setLabelAttribute(labelAttribute);
+				attribute.setLabelAttribute(labelAttribute);
 			}
 
-			defaultAttributeMetaData.setLabel(attribute.getString(LABEL));
-			defaultAttributeMetaData.setDescription(attribute.getString(DESCRIPTION));
+			attribute.setLabel(attributeEntity.getString(LABEL));
+			attribute.setDescription(attributeEntity.getString(DESCRIPTION));
 
-			if (defaultAttributeMetaData.getDataType() instanceof EnumField)
+			if (attribute.getDataType() instanceof EnumField)
 			{
-				List<String> enumOptions = attribute.getList(ENUM_OPTIONS);
+				List<String> enumOptions = attributeEntity.getList(ENUM_OPTIONS);
 				if ((enumOptions == null) || enumOptions.isEmpty())
 				{
-					throw new IllegalArgumentException("Missing enum options for attribute ["
-							+ defaultAttributeMetaData.getName() + "] of entity [" + entityName + "]");
+					throw new IllegalArgumentException("Missing enum options for attribute [" + attribute.getName()
+							+ "] of entity [" + entityName + "]");
 				}
-				defaultAttributeMetaData.setEnumOptions(enumOptions);
+				attribute.setEnumOptions(enumOptions);
 			}
 
-			if (((defaultAttributeMetaData.getDataType() instanceof XrefField) || (defaultAttributeMetaData
-					.getDataType() instanceof MrefField)) && StringUtils.isEmpty(refEntityName))
+			if (((attribute.getDataType() instanceof XrefField) || (attribute.getDataType() instanceof MrefField))
+					&& StringUtils.isEmpty(refEntityName))
 			{
 				throw new IllegalArgumentException("Missing refEntity on line " + i + " (" + entityName + "."
 						+ attributeName + ")");
 			}
 
-			if (((defaultAttributeMetaData.getDataType() instanceof XrefField) || (defaultAttributeMetaData
-					.getDataType() instanceof MrefField))
-					&& defaultAttributeMetaData.isNillable()
-					&& defaultAttributeMetaData.isAggregateable())
+			if (((attribute.getDataType() instanceof XrefField) || (attribute.getDataType() instanceof MrefField))
+					&& attribute.isNillable() && attribute.isAggregateable())
 			{
 				throw new IllegalArgumentException("attributes.aggregatable error on line " + i + " (" + entityName
 						+ "." + attributeName + "): aggregatable nillable attribute cannot be of type "
-						+ defaultAttributeMetaData.getDataType());
+						+ attribute.getDataType());
 			}
 
 			Long rangeMin;
 			Long rangeMax;
 			try
 			{
-				rangeMin = attribute.getLong(RANGE_MIN);
+				rangeMin = attributeEntity.getLong(RANGE_MIN);
 			}
 			catch (ConversionFailedException e)
 			{
-				throw new MolgenisDataException("Invalid range rangeMin [" + attribute.getString(RANGE_MIN)
+				throw new MolgenisDataException("Invalid range rangeMin [" + attributeEntity.getString(RANGE_MIN)
 						+ "] value for attribute [" + attributeName + "] of entity [" + entityName
 						+ "], should be a long");
 			}
 
 			try
 			{
-				rangeMax = attribute.getLong(RANGE_MAX);
+				rangeMax = attributeEntity.getLong(RANGE_MAX);
 			}
 			catch (ConversionFailedException e)
 			{
-				throw new MolgenisDataException("Invalid rangeMax value [" + attribute.getString(RANGE_MAX)
+				throw new MolgenisDataException("Invalid rangeMax value [" + attributeEntity.getString(RANGE_MAX)
 						+ "] for attribute [" + attributeName + "] of entity [" + entityName + "], should be a long");
 			}
 
 			if ((rangeMin != null) || (rangeMax != null))
 			{
-				if (!(defaultAttributeMetaData.getDataType() instanceof IntField)
-						&& !(defaultAttributeMetaData.getDataType() instanceof LongField))
+				if (!(attribute.getDataType() instanceof IntField) && !(attribute.getDataType() instanceof LongField))
 				{
-					throw new MolgenisDataException("Range not supported for ["
-							+ defaultAttributeMetaData.getDataType().getEnumType()
-							+ "] fields only int and long are supported. (attribute ["
-							+ defaultAttributeMetaData.getName() + "] of entity [" + entityName + "])");
+					throw new MolgenisDataException("Range not supported for [" + attribute.getDataType().getEnumType()
+							+ "] fields only int and long are supported. (attribute [" + attribute.getName()
+							+ "] of entity [" + entityName + "])");
 				}
 
-				defaultAttributeMetaData.setRange(new Range(rangeMin, rangeMax));
+				attribute.setRange(new Range(rangeMin, rangeMax));
+			}
+		}
+
+		// 3rd pass: validate and create attribute relationships
+		Map<String, Set<String>> rootAttributes = new LinkedHashMap<String, Set<String>>();
+		i = 1;// Header
+		for (Entity attributeEntity : attributesRepo)
+		{
+			i++;
+
+			String entityName = attributeEntity.getString(ENTITY);
+			Map<String, DefaultAttributeMetaData> entityMap = attributesMap.get(entityName);
+
+			String attributeName = attributeEntity.getString(NAME);
+			DefaultAttributeMetaData attribute = entityMap.get(attributeName);
+
+			// register attribute parent-children relations for compound attributes
+			String partOfAttribute = attributeEntity.getString(PART_OF_ATTRIBUTE);
+			if (partOfAttribute != null && !partOfAttribute.isEmpty())
+			{
+				DefaultAttributeMetaData compoundAttribute = entityMap.get(partOfAttribute);
+
+				if (compoundAttribute.getDataType().getEnumType() != FieldTypeEnum.COMPOUND)
+				{
+					throw new IllegalArgumentException("partOfAttribute [" + partOfAttribute + "] of attribute ["
+							+ attributeName + "] of entity [" + entityName + "] must refer to a attribute of type ["
+							+ FieldTypeEnum.COMPOUND + "] on line " + i);
+				}
+
+				compoundAttribute.addAttributePart(attribute);
+			}
+			else
+			{
+				Set<String> entityRootAttributes = rootAttributes.get(entityName);
+				if (entityRootAttributes == null)
+				{
+					entityRootAttributes = new LinkedHashSet<String>();
+					rootAttributes.put(entityName, entityRootAttributes);
+				}
+				entityRootAttributes.add(attributeName);
+			}
+		}
+
+		// store attributes with entities
+		for (Map.Entry<String, Map<String, DefaultAttributeMetaData>> entry : attributesMap.entrySet())
+		{
+			String entityName = entry.getKey();
+			Map<String, DefaultAttributeMetaData> attributes = entry.getValue();
+
+			// create entity if not yet defined
+			EditableEntityMetaData editableEntityMetaData = entities.get(entityName);
+			if (editableEntityMetaData == null)
+			{
+				editableEntityMetaData = new DefaultEntityMetaData(entityName);
+				entities.put(entityName, editableEntityMetaData);
 			}
 
-			defaultEntityMetaData.addAttributeMetaData(defaultAttributeMetaData);
+			// add root attributes to entity
+			Set<String> entityAttributeNames = rootAttributes.get(entityName);
+			if (entityAttributeNames != null)
+			{
+				for (DefaultAttributeMetaData attribute : attributes.values())
+				{
+					if (entityAttributeNames.contains(attribute.getName()))
+					{
+						editableEntityMetaData.addAttributeMetaData(attribute);
+					}
+				}
+			}
 		}
+
 		return entities;
 	}
 
@@ -553,10 +641,13 @@ public class EmxMetaDataParser
 					}
 					for (AttributeMetaData att : target.getAttributes())
 					{
-						if (!att.isAuto() && !fieldsImportable.contains(att.getName()))
+						if (!(att.getDataType() instanceof CompoundField))
 						{
-							if (!att.isNillable()) fieldsRequired.add(att.getName());
-							else fieldsAvailable.add(att.getName());
+							if (!att.isAuto() && !fieldsImportable.contains(att.getName()))
+							{
+								if (!att.isNillable()) fieldsRequired.add(att.getName());
+								else fieldsAvailable.add(att.getName());
+							}
 						}
 					}
 
