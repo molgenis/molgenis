@@ -1055,7 +1055,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 					}
 				}
 
-				logger.info("Added " + count.get() + " " + getTableName() + " entities.");
+				logger.debug("Added " + count.get() + " " + getTableName() + " entities.");
 				batch.clear();
 			}
 		}
