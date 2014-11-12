@@ -1066,7 +1066,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 					}
 				}
 
-				logger.info("Added " + count.get() + " " + getTableName() + " entities.");
+				logger.debug("Added " + count.get() + " " + getTableName() + " entities.");
 				batch.clear();
 			}
 		}
@@ -1125,14 +1125,14 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 						if (mrefs.get(att.getName()) == null) mrefs.put(att.getName(), new ArrayList<Entity>());
 						if (e.get(att.getName()) != null)
 						{
-							List<String> vals = e.getList(att.getName());
+							List<Entity> vals = Lists.newArrayList(e.getEntities(att.getName()));
 							if (vals != null)
 							{
-								for (Object val : vals)
+								for (Entity val : vals)
 								{
 									Entity mref = new MapEntity();
 									mref.set(idAttribute.getName(), idValue);
-									mref.set(att.getName(), val);
+									mref.set(att.getName(), val.get(att.getRefEntity().getIdAttribute().getName()));
 									mrefs.get(att.getName()).add(mref);
 								}
 							}
