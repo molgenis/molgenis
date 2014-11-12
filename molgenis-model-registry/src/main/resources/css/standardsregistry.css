@@ -82,11 +82,12 @@ p.form-inline {
 }
 
 .paper-holder {
-	width: 1200px; 
-	height: 600px; 
+	width: 1250px; 
+	height: 625px; 
+	margin-left: auto;
+	margin-right: auto;
 	overflow: scroll;
 }
-
 
 /* Prevent detaching of relationship vertices in jointjs */
 .marker-arrowheads { display: none } 

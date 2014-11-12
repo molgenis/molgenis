@@ -6,7 +6,7 @@
     </div>
 </div>
 <div class="row">
-	<div class="col-md-12">
+	<div class="col-md-12 hidden-print">
 		<ul class="nav nav-tabs" role="tablist">
 		  <li class="active"><a href="#tree" id="tree-tab" role="tab" data-toggle="tab">Tree</a></li>
 		  <li><a href="#uml" id="uml-tab" role="tab" data-toggle="tab">UML</a></li>
@@ -38,14 +38,14 @@
 		</div>
 	</div>
 	<div class="tab-pane" id="uml">
-		<p>
+		<div class="btn-group hidden-print">
   			<button type="button" id="zoom-in" class="btn btn-default btn-sm" data-toggle="tooltip" data-placement="bottom" title="Zoom in">
   				<span class="glyphicon glyphicon-zoom-in"></span>
   			</button>
   			<button type="button" id="zoom-out" class="btn btn-default btn-sm" data-toggle="tooltip" data-placement="bottom" title="Zoom out">
   				<span class="glyphicon glyphicon-zoom-out"></span>
   			</button>
-		</p>
+		</div>
 			
 		<div class="paper-holder">
 			<div id="paper"></div>
