@@ -14,6 +14,9 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
+
 public class MysqlEntity extends MapEntity
 {
 	private static final long serialVersionUID = 1L;
@@ -30,6 +33,40 @@ public class MysqlEntity extends MapEntity
 
 		this.metaData = metaData;
 		this.repositoryCollection = repositoryCollection;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public void set(String attributeName, Object value)
+	{
+		final AttributeMetaData amd = metaData.getAttribute(attributeName);
+		if (amd.getDataType() instanceof XrefField && value instanceof Entity)
+		{
+			Entity e = (Entity) value;
+			super.set(attributeName, e.get(amd.getRefEntity().getIdAttribute().getName()));
+		}
+		else if (amd.getDataType() instanceof MrefField && value instanceof Iterable<?>)
+		{
+			super.set(attributeName, Iterables.transform((Iterable<Entity>) value, new Function<Object, Object>()
+			{
+				@Override
+				public Object apply(Object input)
+				{
+					if (input instanceof Entity)
+					{
+						return ((Entity) input).get(amd.getRefEntity().getIdAttribute().getName());
+					}
+					else
+					{
+						return input;
+					}
+				}
+			}));
+		}
+		else
+		{
+			super.set(attributeName, value);
+		}
 	}
 
 	@Override

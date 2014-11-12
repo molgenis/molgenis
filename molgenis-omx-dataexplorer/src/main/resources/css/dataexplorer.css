@@ -42,6 +42,10 @@ body:not(.modal-open) #feature-selection .molgenis-tree {
 	margin-bottom: 10px;
 }
 
+#aggregatesContainer {
+	clear: both;
+}
+
 #aggregate-table-container {
 	overflow: auto;	
 }
@@ -91,17 +95,12 @@ body:not(.modal-open) #feature-selection .molgenis-tree {
 	margin-top: 25px;
 }
 
-#feature-select-container{	
-	margin-bottom: 20px;
+#feature-select-container .row {	
 	margin-top: 10px;
 }
 
 #filter-nav li a:hover{
 	cursor: default
-}
-
-#feature-select {
-	position:absolute;
 }
 
 #feature-selection .fancytree-ico-e span.fancytree-icon

@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 @Configuration
 public class MySqlConfiguration
@@ -34,10 +35,16 @@ public class MySqlConfiguration
 	private MetaDataServiceImpl writableMetaDataService;
 
 	@Bean
+	public AsyncJdbcTemplate asyncJdbcTemplate()
+	{
+		return new AsyncJdbcTemplate(new JdbcTemplate(dataSource));
+	}
+
+	@Bean
 	@Scope("prototype")
 	public MysqlRepository mysqlRepository()
 	{
-		return new MysqlRepository(dataSource);
+		return new MysqlRepository(dataSource, asyncJdbcTemplate());
 	}
 
 	@Bean
