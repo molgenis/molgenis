@@ -16,6 +16,7 @@ public class AttributeMetaDataMetaData extends DefaultEntityMetaData
 	public static final String ENTITY = "entity";
 	public static final String NAME = "name";
 	public static final String DATA_TYPE = "dataType";
+	public static final String PART_OF_ATTRIBUTE = "partOfAttribute";
 	public static final String REF_ENTITY = "refEntity";
 	public static final String NILLABLE = "nillable";
 	public static final String AUTO = "auto";
@@ -41,6 +42,7 @@ public class AttributeMetaDataMetaData extends DefaultEntityMetaData
 		addAttribute(ENTITY).setNillable(false).setDataType(XREF).setRefEntity(EntityMetaDataRepository.META_DATA);
 		addAttribute(NAME).setNillable(false);
 		addAttribute(DATA_TYPE);
+		addAttribute(PART_OF_ATTRIBUTE).setDataType(STRING);
 		addAttribute(REF_ENTITY).setDataType(XREF).setRefEntity(EntityMetaDataRepository.META_DATA);
 		addAttribute(NILLABLE).setDataType(BOOL).setNillable(false);
 		addAttribute(AUTO).setDataType(BOOL).setNillable(false);
