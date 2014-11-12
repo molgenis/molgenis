@@ -7,6 +7,7 @@ import java.nio.charset.Charset;
 import java.util.*;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -52,13 +53,18 @@ public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements 
 	public static final String UNIPROT_ID = "uniprot_id";
 
 	public static final String NAME = "EBI-CHeMBL";
-	private final DefaultHttpClient httpClient;
+	private final HttpClient httpClient;
 	private final List<Object> annotatedInput = new ArrayList<Object>();
 
 	public EbiServiceAnnotator()
 	{
 		httpClient = new DefaultHttpClient();
 	}
+
+    public EbiServiceAnnotator(HttpClient client)
+    {
+        httpClient = client;
+    }
 
 	@Override
 	public String getName()
@@ -137,7 +143,7 @@ public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements 
 			resultMap = (Map<String, Object>) rootMap.get("target");
 			resultMap.put(UNIPROT_ID, entity.get(UNIPROT_ID));
 		}
-		return getAnnotatedEntity(entity, resultMap);
+		return Collections.singletonList(getAnnotatedEntity(entity, resultMap));
 	}
 
 	private static Map<String, Object> jsonStringToMap(String result) throws IOException
