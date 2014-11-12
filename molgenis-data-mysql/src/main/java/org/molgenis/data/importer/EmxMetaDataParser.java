@@ -63,7 +63,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 /**
- * Parser for the EMX metadata.
+ * Parser for the EMX metadata. This class is stateless.
  */
 public class EmxMetaDataParser
 {
