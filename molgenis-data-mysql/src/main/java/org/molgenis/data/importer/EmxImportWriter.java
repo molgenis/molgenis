@@ -59,24 +59,39 @@ final class EmxImportWriter implements TransactionCallback<Void>
 	private final DataService dataService;
 	private final WritableMetaDataService metaDataService;
 	private final TransactionTemplate transactionTemplate;
+	/**
+	 * resolved list of entities, in the order in which they should be imported
+	 */
 	private final List<EntityMetaData> resolved;
 
 	private final static Logger logger = Logger.getLogger(EmxImportWriter.class);
 
+	/**
+	 * Creates an {@link EmxImportWriter}
+	 * 
+	 * @param emxImportService
+	 * @param dbAction
+	 * @param source
+	 * @param sourceMetadata
+	 * @param permissionSystemService
+	 */
 	EmxImportWriter(EmxImportService emxImportService, DatabaseAction dbAction, RepositoryCollection source,
-			List<EntityMetaData> metadata, PermissionSystemService permissionSystemService)
+			List<EntityMetaData> sourceMetadata, PermissionSystemService permissionSystemService)
 	{
 		this.permissionSystemService = permissionSystemService;
 		this.dbAction = dbAction;
 		this.source = source;
-		this.sourceMetadata = metadata;
+		this.sourceMetadata = sourceMetadata;
 		this.targetCollection = emxImportService.targetCollection;
 		this.dataService = emxImportService.dataService;
 		this.metaDataService = emxImportService.metaDataService;
-		this.transactionTemplate = new TransactionTemplate(emxImportService.platformTransactionManager);
+		this.transactionTemplate = emxImportService.transactionTemplate;
 		resolved = resolveEntityDependencies();
 	}
 
+	/**
+	 * Does the transactional bit of the import. Rolls back everything but the DDL statements if something goes wrong.
+	 */
 	@Override
 	public Void doInTransaction(TransactionStatus status)
 	{
@@ -97,6 +112,9 @@ final class EmxImportWriter implements TransactionCallback<Void>
 		}
 	}
 
+	/**
+	 * Imports entity data for all entities in {@link #resolved} from {@link #source} to {@link #targetCollection}
+	 */
 	private void importData()
 	{
 		for (final EntityMetaData entityMetaData : resolved)
@@ -142,6 +160,9 @@ final class EmxImportWriter implements TransactionCallback<Void>
 		}
 	}
 
+	/**
+	 * Adds the {@link #resolved} {@link EntityMetaData}, creating new repositories where necessary.
+	 */
 	private void addEntityMetaData()
 	{
 		for (EntityMetaData entityMetaData : resolved)
@@ -180,6 +201,10 @@ final class EmxImportWriter implements TransactionCallback<Void>
 		}
 	}
 
+	/**
+	 * Determines in which order the {@link #sourceMetadata} entities should be imported.
+	 * 
+	 */
 	private List<EntityMetaData> resolveEntityDependencies()
 	{
 		Set<EntityMetaData> allMetaData = Sets.newLinkedHashSet(sourceMetadata);
@@ -194,6 +219,9 @@ final class EmxImportWriter implements TransactionCallback<Void>
 		return resolved;
 	}
 
+	/**
+	 * Adds the packages from the packages sheet to the {@link #metaDataService}.
+	 */
 	private void importPackages()
 	{
 		Map<String, PackageImpl> packages = new EmxMetaDataParser().parsePackagesSheet(source);
@@ -206,6 +234,9 @@ final class EmxImportWriter implements TransactionCallback<Void>
 		}
 	}
 
+	/**
+	 * Imports the tags from the tag sheet.
+	 */
 	private void importTags()
 	{
 		Repository tagRepo = source.getRepositoryByEntityName(TagMetaData.ENTITY_NAME);
@@ -229,11 +260,14 @@ final class EmxImportWriter implements TransactionCallback<Void>
 		}
 	}
 
+	/**
+	 * Drops entities and added attributes and reindexes the entities whose attributes were modified.
+	 */
 	private void rollbackSchemaChanges()
 	{
 		logger.info("Rolling back changes.");
-		dropAddedEntities(addedEntities);
-		List<String> entities = dropAddedAttributes(addedAttributes);
+		dropAddedEntities();
+		List<String> entities = dropAddedAttributes();
 
 		// Reindex
 		Set<String> entitiesToIndex = Sets.newLinkedHashSet(source.getEntityNames());
@@ -246,6 +280,12 @@ final class EmxImportWriter implements TransactionCallback<Void>
 		reindex(entitiesToIndex);
 	}
 
+	/**
+	 * Reindexes entities
+	 * 
+	 * @param entitiesToIndex
+	 *            Set of entity names
+	 */
 	private void reindex(Set<String> entitiesToIndex)
 	{
 		for (String entity : entitiesToIndex)
@@ -261,7 +301,10 @@ final class EmxImportWriter implements TransactionCallback<Void>
 		}
 	}
 
-	private List<String> dropAddedAttributes(Map<String, List<String>> addedAttributes)
+	/**
+	 * Drops attributes from entities
+	 */
+	private List<String> dropAddedAttributes()
 	{
 		List<String> entities = Lists.newArrayList(addedAttributes.keySet());
 		Collections.reverse(entities);
@@ -277,7 +320,10 @@ final class EmxImportWriter implements TransactionCallback<Void>
 		return entities;
 	}
 
-	private void dropAddedEntities(List<String> addedEntities)
+	/**
+	 * Drops added entities in the reverse order in which they were created.
+	 */
+	private void dropAddedEntities()
 	{
 		// Rollback metadata, create table statements cannot be rolled back, we have to do it ourselfs
 		Collections.reverse(addedEntities);
@@ -288,6 +334,17 @@ final class EmxImportWriter implements TransactionCallback<Void>
 		}
 	}
 
+	/**
+	 * Updates a repository with entities.
+	 * 
+	 * @param repo
+	 *            the {@link Repository} to update
+	 * @param entities
+	 *            the entities to
+	 * @param dbAction
+	 *            {@link DatabaseAction} describing how to merge the existing entities
+	 * @return number of updated entities
+	 */
 	public int update(CrudRepository repo, Iterable<? extends Entity> entities, DatabaseAction dbAction)
 	{
 		if (entities == null) return 0;
@@ -460,6 +517,12 @@ final class EmxImportWriter implements TransactionCallback<Void>
 		}
 	}
 
+	/**
+	 * Does the import in a transaction. Manually rolls back schema changes if something goes wrong. Refreshes the
+	 * metadata.
+	 * 
+	 * @return {@link EntityImportReport} describing what happened
+	 */
 	public EntityImportReport doImport()
 	{
 		try
