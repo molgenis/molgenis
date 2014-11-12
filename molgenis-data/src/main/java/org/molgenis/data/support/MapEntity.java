@@ -67,9 +67,9 @@ public class MapEntity extends AbstractEntity
 	@Override
 	public void set(Entity other, boolean strict)
 	{
-		for (String attributeName : other.getAttributeNames())
+		for (AttributeMetaData attribute : other.getEntityMetaData().getAtomicAttributes())
 		{
-			set(attributeName, other.get(attributeName));
+			set(attribute.getName(), other.get(attribute.getName()));
 		}
 	}
 
