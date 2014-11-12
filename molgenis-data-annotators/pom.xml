@@ -11,11 +11,6 @@
 	<dependencies>
 		<dependency>
             <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-omx-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -25,11 +20,6 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-omx</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-core</artifactId>
 			<version>${project.version}</version>
