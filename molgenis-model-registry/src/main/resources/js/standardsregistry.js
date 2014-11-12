@@ -29,7 +29,13 @@
 							document.getElementById('entity-' + data.node.key).scrollIntoView();
 							break;
 						case 'attribute' :
-							document.getElementById('attribute-' + data.node.parent.key + data.node.key).scrollIntoView();
+							var parent = data.node.parent;
+							while (parent.extraClasses != 'entity') {
+								//Compound attr
+								parent = parent.parent;
+							}
+							
+							document.getElementById('attribute-' + parent.key + data.node.key).scrollIntoView();
 							break;
 						default:
 							throw 'Unknown type';
