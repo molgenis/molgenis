@@ -183,7 +183,7 @@ public class OmimHpoAnnotator extends LocusAnnotator
 					resultMap.put(HPO_DISEASE_DATABASE_ENTRY, HPODiseaseDatabaseEntries);
 					resultMap.put(HPO_ENTREZ_ID, HPOEntrezIdentifiers);
 
-                    results.add(getAnnotatedEntity(entity, resultMap));
+					results.add(getAnnotatedEntity(entity, resultMap));
 				}
 			}
 		}

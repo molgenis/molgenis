@@ -158,7 +158,7 @@ public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 								}
 
 							}
-                            results.add(getAnnotatedEntity(entity, resultMap));
+							results.add(getAnnotatedEntity(entity, resultMap));
 						}
 					}
 				}

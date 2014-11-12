@@ -123,7 +123,7 @@ public class CosmicServiceAnnotator extends AbstractRepositoryAnnotator implemen
 				throw new RuntimeException(e);
 			}
 		}
-       return resultEntities;
+		return resultEntities;
 	}
 
 	private String getServiceUri(Entity entity)
@@ -145,17 +145,17 @@ public class CosmicServiceAnnotator extends AbstractRepositoryAnnotator implemen
 			for (CosmicData data : resultCollection)
 			{
 				Map<String, Object> resultMap = new HashMap<>();
-                resultMap.put(ID, data.getID());
-                resultMap.put(FEATURE_TYPE, data.getFeature_type());
-                resultMap.put(ALT_ALLELES, data.getAlt_alleles()[0] + "," + data.getAlt_alleles()[1]);
-                resultMap.put(END, data.getEnd());
-                resultMap.put(SEQ_REGION_NAME, data.getSeq_region_name());
-                resultMap.put(CONSEQUENCE_TYPE, data.getConsequence_type());
-                resultMap.put(STRAND, data.getStrand());
-                resultMap.put(START, data.getStart());
-                resultMap.put(ENSEMBLE_ID, entity.get(ENSEMBLE_ID));
-                results.add(getAnnotatedEntity(entity, resultMap));
-            }
+				resultMap.put(ID, data.getID());
+				resultMap.put(FEATURE_TYPE, data.getFeature_type());
+				resultMap.put(ALT_ALLELES, data.getAlt_alleles()[0] + "," + data.getAlt_alleles()[1]);
+				resultMap.put(END, data.getEnd());
+				resultMap.put(SEQ_REGION_NAME, data.getSeq_region_name());
+				resultMap.put(CONSEQUENCE_TYPE, data.getConsequence_type());
+				resultMap.put(STRAND, data.getStrand());
+				resultMap.put(START, data.getStart());
+				resultMap.put(ENSEMBLE_ID, entity.get(ENSEMBLE_ID));
+				results.add(getAnnotatedEntity(entity, resultMap));
+			}
 		}
 		return results;
 	}

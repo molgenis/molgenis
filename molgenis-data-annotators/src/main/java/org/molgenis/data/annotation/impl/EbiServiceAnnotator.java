@@ -61,10 +61,10 @@ public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements 
 		httpClient = new DefaultHttpClient();
 	}
 
-    public EbiServiceAnnotator(HttpClient client)
-    {
-        httpClient = client;
-    }
+	public EbiServiceAnnotator(HttpClient client)
+	{
+		httpClient = client;
+	}
 
 	@Override
 	public String getName()
@@ -94,7 +94,7 @@ public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements 
 	public List<Entity> annotateEntity(Entity entity)
 	{
 		HttpGet httpGet = new HttpGet(getServiceUri(entity));
-        List<Entity> resultEntities = new ArrayList<>();
+		List<Entity> resultEntities = new ArrayList<>();
 
 		if (!annotatedInput.contains(entity.get(UNIPROT_ID)))
 		{
@@ -112,7 +112,7 @@ public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements 
 				{
 					result.append(output);
 				}
-                resultEntities = parseResult(entity, result.toString());
+				resultEntities = parseResult(entity, result.toString());
 			}
 			catch (Exception e)
 			{
@@ -136,8 +136,8 @@ public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements 
 
 	private List<Entity> parseResult(Entity entity, String json) throws IOException
 	{
-        Map<String, Object> resultMap = new HashMap<>();
-        if (!"".equals(json))
+		Map<String, Object> resultMap = new HashMap<>();
+		if (!"".equals(json))
 		{
 			Map<String, Object> rootMap = jsonStringToMap(json);
 			resultMap = (Map<String, Object>) rootMap.get("target");

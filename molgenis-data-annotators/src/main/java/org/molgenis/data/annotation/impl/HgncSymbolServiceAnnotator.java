@@ -28,7 +28,7 @@ public class HgncSymbolServiceAnnotator extends LocusAnnotator
 	static final String HGNC_SYMBOL = "HGNC_SYMBOL";
 	private static final String NAME = "HGNC-Symbol";
 
-    @Autowired
+	@Autowired
 	public HgncSymbolServiceAnnotator(AnnotationService annotatorService, HgncLocationsProvider hgncLocationsProvider)
 	{
 		this.annotatorService = annotatorService;
@@ -55,16 +55,17 @@ public class HgncSymbolServiceAnnotator extends LocusAnnotator
 		Long position = entity.getLong(POSITION);
 		Locus locus = new Locus(chromosome, position);
 
-        HashMap<String, Object> resultMap = new HashMap<>();
-        resultMap.put(HGNC_SYMBOL, HgncLocationsUtils.locationToHgcn(hgncLocationsProvider.getHgncLocations(), locus).get(0));
+		HashMap<String, Object> resultMap = new HashMap<>();
+		resultMap.put(HGNC_SYMBOL, HgncLocationsUtils.locationToHgcn(hgncLocationsProvider.getHgncLocations(), locus)
+				.get(0));
 
-        List<Entity> results = new ArrayList<Entity>();
-        results.add(getAnnotatedEntity(entity, resultMap));
+		List<Entity> results = new ArrayList<Entity>();
+		results.add(getAnnotatedEntity(entity, resultMap));
 
-        return results;
+		return results;
 	}
 
-    @Override
+	@Override
 	public EntityMetaData getOutputMetaData()
 	{
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);

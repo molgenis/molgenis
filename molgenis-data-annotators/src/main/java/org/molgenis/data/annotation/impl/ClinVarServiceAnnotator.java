@@ -142,8 +142,8 @@ public class ClinVarServiceAnnotator extends LocusAnnotator
 								resultMap.put(GUIDELINES, split[22]);
 								resultMap.put(OTHERIDS, split[23]);
 
-                                results.add(getAnnotatedEntity(entity, resultMap));
-                            }
+								results.add(getAnnotatedEntity(entity, resultMap));
+							}
 						}
 					}
 				}
@@ -151,9 +151,9 @@ public class ClinVarServiceAnnotator extends LocusAnnotator
 			else
 			{
 				HashMap<String, Object> resultMap = new HashMap<String, Object>();
-                results.add(getAnnotatedEntity(entity, resultMap));
+				results.add(getAnnotatedEntity(entity, resultMap));
 
-            }
+			}
 		}
 		catch (Exception e)
 		{
