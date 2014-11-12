@@ -9,6 +9,7 @@ import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.WritableMetaDataService;
 import org.molgenis.data.meta.WritableMetaDataServiceDecorator;
+import org.molgenis.data.mysql.AsyncJdbcTemplate;
 import org.molgenis.data.mysql.EmbeddedMysqlDatabaseBuilder;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
@@ -20,6 +21,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -62,10 +64,16 @@ public class AppConfig
 	}
 
 	@Bean
+	public AsyncJdbcTemplate asyncJdbcTemplate()
+	{
+		return new AsyncJdbcTemplate(new JdbcTemplate(dataSource()));
+	}
+
+	@Bean
 	@Scope("prototype")
 	public MysqlRepository mysqlRepository()
 	{
-		return new MysqlRepository(dataSource());
+		return new MysqlRepository(dataSource(), asyncJdbcTemplate());
 	}
 
 	@Bean
