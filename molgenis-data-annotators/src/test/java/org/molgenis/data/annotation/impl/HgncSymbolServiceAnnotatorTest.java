@@ -41,8 +41,15 @@ public class HgncSymbolServiceAnnotatorTest
 	@BeforeMethod
 	public void beforeMethod() throws IOException
 	{
+		HgncLocationsProvider hgncLocationsProvider = mock(HgncLocationsProvider.class);
+		Map<String, HGNCLocations> hgncLocations = Collections.singletonMap("BRCA1", new HGNCLocations("BRCA1",
+				41196312l - 10, 41277500l + 10, "17"));
+		when(hgncLocationsProvider.getHgncLocations()).thenReturn(hgncLocations);
+
+		annotator = new HgncSymbolServiceAnnotator(null, hgncLocationsProvider);
+
 		metaDataCanAnnotate = mock(EntityMetaData.class);
-		
+
 		attributeMetaDataChrom = mock(AttributeMetaData.class);
 		attributeMetaDataPos = mock(AttributeMetaData.class);
 
@@ -83,16 +90,14 @@ public class HgncSymbolServiceAnnotatorTest
 
 		when(entity.getString(HgncSymbolServiceAnnotator.CHROMOSOME)).thenReturn("17");
 		when(entity.getLong(HgncSymbolServiceAnnotator.POSITION)).thenReturn(new Long(41196312));
+		when(entity.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
+
+		when(metaDataCanAnnotate.getSimpleName()).thenReturn(annotator.getName());
+		when(metaDataCanAnnotate.getAtomicAttributes()).thenReturn(annotator.getOutputMetaData().getAtomicAttributes());
 
 		input = new ArrayList<Entity>();
 		input.add(entity);
 
-		HgncLocationsProvider hgncLocationsProvider = mock(HgncLocationsProvider.class);
-		Map<String, HGNCLocations> hgncLocations = Collections.singletonMap("BRCA1", new HGNCLocations("BRCA1",
-				41196312l - 10, 41277500l + 10, "17"));
-		when(hgncLocationsProvider.getHgncLocations()).thenReturn(hgncLocations);
-		
-		annotator = new HgncSymbolServiceAnnotator(null, hgncLocationsProvider);
 	}
 
 	@Test

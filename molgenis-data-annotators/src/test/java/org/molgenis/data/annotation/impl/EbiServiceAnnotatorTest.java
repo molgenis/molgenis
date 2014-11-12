@@ -47,8 +47,8 @@ public class EbiServiceAnnotatorTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-        this.httpClient = mock(HttpClient.class);
-        annotator = new EbiServiceAnnotator(httpClient);
+		this.httpClient = mock(HttpClient.class);
+		annotator = new EbiServiceAnnotator(httpClient);
 
 		metaDataCanAnnotate = mock(EntityMetaData.class);
 		attributeMetaDataCanAnnotate = mock(AttributeMetaData.class);
@@ -75,11 +75,10 @@ public class EbiServiceAnnotatorTest
 		input = new ArrayList<Entity>();
 		input.add(entity);
 
-        when(entity.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
+		when(entity.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
 
-        when(metaDataCanAnnotate.getSimpleName()).thenReturn(annotator.getName());
-        when(metaDataCanAnnotate.getAtomicAttributes()).thenReturn(annotator.getOutputMetaData().getAtomicAttributes());
-
+		when(metaDataCanAnnotate.getSimpleName()).thenReturn(annotator.getName());
+		when(metaDataCanAnnotate.getAtomicAttributes()).thenReturn(annotator.getOutputMetaData().getAtomicAttributes());
 
 		SERVICE_RESPONSE = "{\"target\": {\"targetType\": \"SINGLE PROTEIN\", \"chemblId\": \"CHEMBL1940\", \"geneNames\": \"Unspecified\", \"description\": \"Voltage-gated L-type calcium channel alpha-1C subunit\", \"compoundCount\": 171, \"bioactivityCount\": 239, \"proteinAccession\": \"Q13936\", \"synonyms\": \"CCHL1A1,CACNL1A1,Calcium channel, L type, alpha-1 polypeptide, isoform 1, cardiac muscle,Voltage-gated calcium channel subunit alpha Cav1.2,CACNA1C,CACN2,CACH2 ,Voltage-dependent L-type calcium channel subunit alpha-1C\", \"organism\": \"Homo sapiens\", \"preferredName\": \"Voltage-gated L-type calcium channel alpha-1C subunit\"}}";
 	}

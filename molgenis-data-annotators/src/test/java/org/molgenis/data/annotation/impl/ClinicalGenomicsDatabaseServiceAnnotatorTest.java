@@ -46,7 +46,8 @@ public class ClinicalGenomicsDatabaseServiceAnnotatorTest
 	{
 		MolgenisSettings settings = mock(MolgenisSettings.class);
 
-		when(settings.getProperty(CgdDataProvider.CGD_FILE_LOCATION_PROPERTY)).thenReturn(ResourceUtils.getFile(getClass(), "/cgd_example.txt").getPath());
+		when(settings.getProperty(CgdDataProvider.CGD_FILE_LOCATION_PROPERTY)).thenReturn(
+				ResourceUtils.getFile(getClass(), "/cgd_example.txt").getPath());
 
 		metaDataCanAnnotate = mock(EntityMetaData.class);
 		attributeMetaDataChrom = mock(AttributeMetaData.class);
@@ -123,6 +124,12 @@ public class ClinicalGenomicsDatabaseServiceAnnotatorTest
 
 		annotator = new ClinicalGenomicsDatabaseServiceAnnotator(settings, annotationService, hgncLocationsProvider,
 				cgdDataProvider);
+
+		when(entity.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
+
+		when(metaDataCanAnnotate.getSimpleName()).thenReturn(annotator.getName());
+		when(metaDataCanAnnotate.getAtomicAttributes()).thenReturn(annotator.getOutputMetaData().getAtomicAttributes());
+
 	}
 
 	@Test

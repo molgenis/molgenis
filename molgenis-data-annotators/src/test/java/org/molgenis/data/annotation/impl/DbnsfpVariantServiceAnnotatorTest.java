@@ -121,7 +121,11 @@ public class DbnsfpVariantServiceAnnotatorTest
 		input = new ArrayList<Entity>();
 		input.add(entity);
 
+		when(entity.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
+
 		annotator = new DbnsfpVariantServiceAnnotator(settings, null);
+		when(metaDataCanAnnotate.getSimpleName()).thenReturn(annotator.getName());
+		when(metaDataCanAnnotate.getAtomicAttributes()).thenReturn(annotator.getOutputMetaData().getAtomicAttributes());
 	}
 
 	@Test

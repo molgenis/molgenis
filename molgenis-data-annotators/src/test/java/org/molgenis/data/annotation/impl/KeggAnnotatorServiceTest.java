@@ -100,6 +100,10 @@ public class KeggAnnotatorServiceTest
 				58453844l - 10, 58453844l + 10, "2"));
 		when(hgncLocationsProvider.getHgncLocations()).thenReturn(locationsMap);
 		annotator = new KeggServiceAnnotator(annotationService, hgncLocationsProvider, keggDataProvider);
+		when(entity.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
+
+		when(metaDataCanAnnotate.getSimpleName()).thenReturn(annotator.getName());
+		when(metaDataCanAnnotate.getAtomicAttributes()).thenReturn(annotator.getOutputMetaData().getAtomicAttributes());
 	}
 
 	@Test

@@ -142,6 +142,10 @@ public class OmimHpoAnnotatorTest
 
 		annotator = new OmimHpoAnnotator(annotationService, omimMorbidMapProvider, hgncLocationsProvider,
 				hpoMappingProvider);
+		when(entity.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
+
+		when(metaDataCanAnnotate.getSimpleName()).thenReturn(annotator.getName());
+		when(metaDataCanAnnotate.getAtomicAttributes()).thenReturn(annotator.getOutputMetaData().getAtomicAttributes());
 	}
 
 	@Test

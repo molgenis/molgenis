@@ -47,6 +47,9 @@ public class CosmicServiceAnnotatorTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
+		this.httpClient = mock(HttpClient.class);
+
+		annotator = new CosmicServiceAnnotator(this.httpClient);
 
 		metaDataCanAnnotate = mock(EntityMetaData.class);
 		attributeMetaDataCanAnnotate = mock(AttributeMetaData.class);
@@ -72,10 +75,10 @@ public class CosmicServiceAnnotatorTest
 		when(entity.get("ensemblId")).thenReturn("ENSG00000186092");
 		input = new ArrayList<Entity>();
 		input.add(entity);
+		when(entity.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
 
-		this.httpClient = mock(HttpClient.class);
-
-		annotator = new CosmicServiceAnnotator(this.httpClient);
+		when(metaDataCanAnnotate.getSimpleName()).thenReturn(annotator.getName());
+		when(metaDataCanAnnotate.getAtomicAttributes()).thenReturn(annotator.getOutputMetaData().getAtomicAttributes());
 
 		SERVICE_RESPONSE = "[{\"ID\":\"COSM911918\",\"feature_type\":\"somatic_variation\",\"alt_alleles\":[\"C\",\"A\"],\"end\":69345,\"seq_region_name\":\"1\",\"consequence_type\":\"synonymous_variant\",\"strand\":1,\"start\":69345},{\"ID\":\"COSM426644\",\"feature_type\":\"somatic_variation\",\"alt_alleles\":[\"G\",\"T\"],\"end\":69523,\"seq_region_name\":\"1\",\"consequence_type\":\"missense_variant\",\"strand\":1,\"start\":69523},{\"ID\":\"COSM75742\",\"feature_type\":\"somatic_variation\",\"alt_alleles\":[\"G\",\"A\"],\"end\":69538,\"seq_region_name\":\"1\",\"consequence_type\":\"missense_variant\",\"strand\":1,\"start\":69538}]";
 	}
@@ -154,8 +157,6 @@ public class CosmicServiceAnnotatorTest
 
 		Entity resultEntity = results.next();
 		assertEquals(resultEntity.get(CosmicServiceAnnotator.ID), expectedEntity1.get(CosmicServiceAnnotator.ID));
-		assertEquals(resultEntity.get(CosmicServiceAnnotator.ENSEMBLE_ID),
-				expectedEntity1.get(CosmicServiceAnnotator.ENSEMBLE_ID));
 		assertEquals(resultEntity.get(CosmicServiceAnnotator.NAME), expectedEntity1.get(CosmicServiceAnnotator.NAME));
 		assertEquals(resultEntity.get(CosmicServiceAnnotator.SEQ_REGION_NAME),
 				expectedEntity1.get(CosmicServiceAnnotator.SEQ_REGION_NAME));
@@ -171,8 +172,6 @@ public class CosmicServiceAnnotatorTest
 				expectedEntity1.get(CosmicServiceAnnotator.STRAND));
 		resultEntity = results.next();
 		assertEquals(resultEntity.get(CosmicServiceAnnotator.ID), expectedEntity2.get(CosmicServiceAnnotator.ID));
-		assertEquals(resultEntity.get(CosmicServiceAnnotator.ENSEMBLE_ID),
-				expectedEntity2.get(CosmicServiceAnnotator.ENSEMBLE_ID));
 		assertEquals(resultEntity.get(CosmicServiceAnnotator.NAME), expectedEntity2.get(CosmicServiceAnnotator.NAME));
 		assertEquals(resultEntity.get(CosmicServiceAnnotator.SEQ_REGION_NAME),
 				expectedEntity2.get(CosmicServiceAnnotator.SEQ_REGION_NAME));
@@ -188,8 +187,6 @@ public class CosmicServiceAnnotatorTest
 				expectedEntity2.get(CosmicServiceAnnotator.STRAND));
 		resultEntity = results.next();
 		assertEquals(resultEntity.get(CosmicServiceAnnotator.ID), expectedEntity3.get(CosmicServiceAnnotator.ID));
-		assertEquals(resultEntity.get(CosmicServiceAnnotator.ENSEMBLE_ID),
-				expectedEntity3.get(CosmicServiceAnnotator.ENSEMBLE_ID));
 		assertEquals(resultEntity.get(CosmicServiceAnnotator.NAME), expectedEntity3.get(CosmicServiceAnnotator.NAME));
 		assertEquals(resultEntity.get(CosmicServiceAnnotator.SEQ_REGION_NAME),
 				expectedEntity3.get(CosmicServiceAnnotator.SEQ_REGION_NAME));

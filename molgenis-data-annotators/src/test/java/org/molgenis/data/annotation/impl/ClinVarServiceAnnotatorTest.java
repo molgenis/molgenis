@@ -97,6 +97,10 @@ public class ClinVarServiceAnnotatorTest
 				19207830l, 19207900l, "11"));
 		when(hgncLocationsProvider.getHgncLocations()).thenReturn(locationsMap);
 		annotator = new ClinVarServiceAnnotator(settings, annotationService, hgncLocationsProvider);
+		when(entity.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
+
+		when(metaDataCanAnnotate.getSimpleName()).thenReturn(annotator.getName());
+		when(metaDataCanAnnotate.getAtomicAttributes()).thenReturn(annotator.getOutputMetaData().getAtomicAttributes());
 	}
 
 	@Test
