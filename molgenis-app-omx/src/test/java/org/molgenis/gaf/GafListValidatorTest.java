@@ -96,7 +96,7 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 		MapEntity entity0 = getDefaultValidMapEntityMock();
 		when(repository.iterator()).thenReturn(Arrays.<Entity> asList(entity0).iterator());
 		gafListValidator.validate(report, repository, columns);
-		assertFalse(report.hasErrors());
+		assertFalse(report.hasRunIdsErrors());
 	}
 
 	@Test
@@ -197,7 +197,7 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 
 		when(repository.iterator()).thenReturn(Arrays.<Entity> asList(entity0).iterator());
 		gafListValidator.validate(report, repository, columns);
-		assertTrue(report.hasErrors());
+		assertTrue(report.hasRunIdsErrors());
 	}
 
 	@Configuration

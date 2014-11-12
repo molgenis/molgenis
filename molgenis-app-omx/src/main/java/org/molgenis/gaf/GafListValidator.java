@@ -19,6 +19,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionFailedException;
@@ -56,53 +57,60 @@ public class GafListValidator
 			throws IOException
 	{
 		final String gaflistEntityName = molgenisSettings.getProperty(GafListFileRepository.GAFLIST_ENTITYNAME);
+		EntityMetaData entityMetaData = metaDataService.getEntityMetaData(gaflistEntityName);
 		
-		// retrieve validation patterns
-		Map<String, Pattern> patternMap = new HashMap<String, Pattern>();
-		for (String colName : columns)
+		if (null == entityMetaData)
 		{
-			String pattern = molgenisSettings.getProperty(GAF_LIST_VALIDATOR_PREFIX + colName);
-			if (pattern != null) patternMap.put(colName, Pattern.compile(pattern));
+			report.addGlobalErrorMessage("Please contact the administrator, the metadata is not loaded correctly");
 		}
-
-		// retrieve validation examples
-		Map<String, String> patternExampleMap = new HashMap<String, String>();
-		for (String colName : columns)
+		else
 		{
-			String example = molgenisSettings.getProperty(GAF_LIST_VALIDATOR_EXAMPLE_PREFIX + colName);
-			if (example != null) patternExampleMap.put(colName, example);
-		}
-
-		// retrieve look up lists
-		Map<String, List<String>> lookupLists = new HashMap<String, List<String>>();
-		for (String colName : columns)
-		{
-			EntityMetaData entityMetaData = metaDataService.getEntityMetaData(gaflistEntityName);
-			AttributeMetaData attributeMetaData = entityMetaData.getAttribute(colName);
-
-			if (MolgenisFieldTypes.FieldTypeEnum.ENUM.equals(attributeMetaData.getDataType().getEnumType()))
+			// retrieve validation patterns
+			Map<String, Pattern> patternMap = new HashMap<String, Pattern>();
+			for (String colName : columns)
 			{
-				List<String> enumList = attributeMetaData.getEnumOptions();
-				lookupLists.put(colName, enumList);
+				String pattern = molgenisSettings.getProperty(GAF_LIST_VALIDATOR_PREFIX + colName);
+				if (pattern != null) patternMap.put(colName, Pattern.compile(pattern));
 			}
-		}
 
-		List<Entity> entities = new ArrayList<Entity>();
-		Iterable<AttributeMetaData> attributes = repository.getEntityMetaData().getAttributes();
-		
-		Iterator<Entity> it = repository.iterator();
-		while (it.hasNext())
-		{
-			Entity entity = it.next();
-			String runId = entity.getString(GAFCol.RUN.toString());
-			report.getAllRunIds().add(runId);
-			entities.add(entity);
-		}
+			// retrieve validation examples
+			Map<String, String> patternExampleMap = new HashMap<String, String>();
+			for (String colName : columns)
+			{
+				String example = molgenisSettings.getProperty(GAF_LIST_VALIDATOR_EXAMPLE_PREFIX + colName);
+				if (example != null) patternExampleMap.put(colName, example);
+			}
 
-		validateCellValues(entities, attributes, patternMap, patternExampleMap, lookupLists, report);
-		validateInternalSampleIdIncremental(entities, report);
-		validateRun(entities, report);
-		report.populateStatusImportedRuns();
+			// retrieve look up lists
+			Map<String, List<String>> lookupLists = new HashMap<String, List<String>>();
+			for (String colName : columns)
+			{
+				AttributeMetaData attributeMetaData = entityMetaData.getAttribute(colName);
+
+				if (MolgenisFieldTypes.FieldTypeEnum.ENUM.equals(attributeMetaData.getDataType().getEnumType()))
+				{
+					List<String> enumList = attributeMetaData.getEnumOptions();
+					lookupLists.put(colName, enumList);
+				}
+			}
+
+			List<Entity> entities = new ArrayList<Entity>();
+			Iterable<AttributeMetaData> attributes = repository.getEntityMetaData().getAttributes();
+
+			Iterator<Entity> it = repository.iterator();
+			while (it.hasNext())
+			{
+				Entity entity = it.next();
+				String runId = entity.getString(GAFCol.RUN.toString());
+				report.getAllRunIds().add(runId);
+				entities.add(entity);
+			}
+
+			validateCellValues(entities, attributes, patternMap, patternExampleMap, lookupLists, report);
+			validateInternalSampleIdIncremental(entities, report);
+			validateRun(entities, report);
+			report.populateStatusImportedRuns();
+		}
 		
 		return report;
 	}
@@ -142,6 +150,8 @@ public class GafListValidator
 	 */
 	private void validateInternalSampleIdIncremental(List<Entity> entities, GafListValidationReport report)
 	{
+		final String gaflistEntityName = molgenisSettings.getProperty(GafListFileRepository.GAFLIST_ENTITYNAME);
+
 		int row = 2;
 		for (Entity entity : entities)
 		{
@@ -151,12 +161,20 @@ public class GafListValidator
 			Integer internalSampleId = null;
 			try{
 				internalSampleId = entity.getInt(GAFCol.INTERNAL_SAMPLE_ID.toString());
+
 				if (internalSampleId == null)
 				{
 					// internal sample id can not be null
 					report.addEntry(runId, new GafListValidationError(row, GAFCol.INTERNAL_SAMPLE_ID.toString(),
 							null,
 							"value undefined"));
+				}
+
+				if (internalSampleIdExists(gaflistEntityName, internalSampleId))
+				{
+					// internal sample id already exists
+					report.addEntry(runId, new GafListValidationError(row, GAFCol.INTERNAL_SAMPLE_ID.toString(),
+							internalSampleId.toString(), "Internal sample id " + internalSampleId + " already exists"));
 				}
 			}
 			catch (ConversionFailedException cfe)
@@ -167,6 +185,20 @@ public class GafListValidator
 			
 			row++;
 		}
+	}
+	
+	/**
+	 * Check if internalSampleId already exists in the GAF list entity
+	 * 
+	 * @param gaflistEntityName
+	 * @param internalSampleId
+	 * @return
+	 */
+	private boolean internalSampleIdExists(String gaflistEntityName, Integer internalSampleId)
+	{
+		QueryImpl q = new QueryImpl();
+		q.eq(GAFCol.INTERNAL_SAMPLE_ID.toString(), internalSampleId);
+		return (null != dataService.findOne(gaflistEntityName, q));
 	}
 
 	/**

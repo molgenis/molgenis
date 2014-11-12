@@ -24,7 +24,7 @@
             </menu>
 	        <plugin id="datasetdeleter" name="Data Set Deleter" url="datasetdeleter"/>
 	        <plugin id="dataindexer" name="Data Set Indexer" url="dataindexer"/>
-	        <plugin id="gaflistimporter" name="GAF-list Importer" url="gaflistimporter"/>
+	        <plugin id="gaflistimporter" name="GAF List Importer" url="gaflistimporter"/>
             <plugin id="news" name="News" url="news"/>
             <plugin id="references" name="References" url="references"/>
             <plugin id="scripts" name="Scripts" url="scripts" />
