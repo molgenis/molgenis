@@ -17,7 +17,11 @@
             		</div>
 					<input type="hidden" value="" id="dataset-identifier" name="dataset-identifier">
 					<button id="annotate-dataset-button" class="btn btn-default">Run annotation</button>
-					<input type="checkbox" name="createCopy"> Copy before annotating	
+					<!--
+					Annotating to a new repository is currently not possible pending story:
+                    #2983: As annotator use I'd like to write annotate results to a new repository
+					-->
+                    <!--<input type="checkbox" name="createCopy"> Copy before annotating-->
             	</form>
             </div>
     </div>
