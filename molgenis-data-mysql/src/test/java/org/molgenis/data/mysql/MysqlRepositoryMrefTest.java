@@ -41,7 +41,8 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 		varcharMD.addAttribute("identifier").setNillable(false);
 		varcharMD.addAttribute("stringRef").setDataType(MolgenisFieldTypes.MREF).setRefEntity(refEntity)
 				.setNillable(false);
-		varcharMD.addAttribute("intRef").setDataType(MolgenisFieldTypes.MREF).setRefEntity(refEntity2);
+		varcharMD.addAttribute("intRef").setDataType(MolgenisFieldTypes.MREF).setRefEntity(refEntity2)
+				.setNillable(true);
 		return varcharMD;
 	}
 
@@ -94,10 +95,23 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 		intRepo.add(entity);
 
 		entity.set("identifier", "one");
-		entity.set("stringRef", Arrays.asList(new String[]
-		{ "ref1", "ref2" }));
-		entity.set("intRef", Arrays.asList(new Integer[]
-		{ 1, 2 }));
+
+		Entity ref1 = new MapEntity();
+		ref1.set("identifier", "ref1");
+
+		Entity ref2 = new MapEntity();
+		ref2.set("identifier", "ref2");
+
+		entity.set("stringRef", Arrays.asList(ref1, ref2));
+
+		Entity intRef1 = new MapEntity();
+		intRef1.set("identifier", 1);
+
+		Entity intRef2 = new MapEntity();
+		intRef2.set("identifier", 2);
+
+		entity.set("intRef", Arrays.asList(intRef1, intRef2));
+
 		logger.debug("mref: " + entity);
 		mrefRepo.add(entity);
 
@@ -119,7 +133,7 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 			logger.info("found: " + e);
 			Assert.assertEquals(e.getList("stringRef"), Arrays.asList(new String[]
 			{ "ref1", "ref2" }));
-			Assert.assertEquals(e.getList("intRef"), Arrays.asList(new Integer[]
+			Assert.assertEquals(e.getIntList("intRef"), Arrays.asList(new Integer[]
 			{ 1, 2 }));
 
 			List<Entity> result = new ArrayList<Entity>();
@@ -135,7 +149,7 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 		for (Entity e : mrefRepo.findAll(new QueryImpl().eq("stringRef", "ref3")))
 		{
 			logger.debug("found: " + e);
-			Assert.assertEquals(e.get("stringRef"), Arrays.asList(new String[]
+			Assert.assertEquals(e.getList("stringRef"), Arrays.asList(new String[]
 			{ "ref3" }));
 		}
 
@@ -144,8 +158,8 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 		{
 			logger.debug("found: " + e);
 			Object obj = e.get("stringRef");
-			assertTrue(obj instanceof List<?>);
-			Assert.assertEquals(Sets.newHashSet((List<?>) obj), Sets.newHashSet(new String[]
+			assertTrue(obj instanceof Iterable<?>);
+			Assert.assertEquals(Sets.newHashSet((Iterable<?>) obj), Sets.newHashSet(new String[]
 			{ "ref1", "ref2" }));
 		}
 
@@ -153,7 +167,7 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 		for (Entity e : mrefRepo.findAll(new QueryImpl().gt("intRef", 1)))
 		{
 			logger.debug("found: " + e);
-			Assert.assertEquals(e.get("intRef"), Arrays.asList(new Integer[]
+			Assert.assertEquals(e.getIntList("intRef"), Arrays.asList(new Integer[]
 			{ 1, 2 }));
 		}
 
@@ -165,7 +179,15 @@ public class MysqlRepositoryMrefTest extends MysqlRepositoryAbstractDatatypeTest
 		// update
 
 		Entity e = mrefRepo.findOne("one");
-		e.set("stringRef", "ref2,ref3");
+
+		ref2 = new MapEntity();
+		ref2.set("identifier", "ref2");
+
+		Entity ref3 = new MapEntity();
+		ref3.set("identifier", "ref3");
+
+		e.set("stringRef", Arrays.asList(ref2, ref3));
+
 		mrefRepo.update(e);
 
 		e = mrefRepo.findOne("one");
