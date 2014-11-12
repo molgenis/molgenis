@@ -3,6 +3,7 @@ package org.molgenis.data.annotation;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
@@ -10,8 +11,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA. User: charbonb Date: 21/02/14 Time: 11:24 To change this template use File | Settings |
@@ -128,4 +128,14 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 	}
 
 	public abstract List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException;
+
+    public Entity getAnnotatedEntity(Entity entity, Map<String, Object> resultMap) {
+        DefaultEntityMetaData resultEntityMetadata = new DefaultEntityMetaData(entity.getEntityMetaData());
+        MapEntity resultEntity = new MapEntity(entity);
+        for(AttributeMetaData attributeMetaData : getOutputMetaData().getAtomicAttributes()) {
+            resultEntityMetadata.addAttributeMetaData(attributeMetaData);
+            resultEntity.set(attributeMetaData.getName(), resultMap.get(attributeMetaData.getName()));
+        }
+        return resultEntity;
+    }
 }
