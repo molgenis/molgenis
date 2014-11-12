@@ -31,7 +31,13 @@
 			<div class="col-md-9">
    				<div id="package-doc-container">
     				<div id="package-index"><#-- for back-to-top -->
-       					<@renderPackage package/>
+    					<#if package??>
+       						<@renderPackage package/>
+       					<#else>
+							<script language="javascript"> 
+								window.location = molgenis.getContextUrl() + '?showPackageNotFound=true'; 
+							</script>        						
+       					</#if>
         			</div>
     			</div>
    			</div>               

@@ -78,8 +78,14 @@ public class StandardsRegistryController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = GET)
-	public String init()
+	public String init(@RequestParam(value = "showPackageNotFound", required = false) String showPackageNotFound,
+			Model model)
 	{
+		if (showPackageNotFound != null && showPackageNotFound.equalsIgnoreCase("true"))
+		{
+			model.addAttribute("warningMessage", "Model not found");
+		}
+
 		return VIEW_NAME;
 	}
 
