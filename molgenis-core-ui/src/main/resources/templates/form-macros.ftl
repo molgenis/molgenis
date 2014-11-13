@@ -21,10 +21,9 @@
 				<form class="form-search form-inline text-center pull-right" method="get" action="#">
 	                <div class="form-group">
 	    				<select class="form-control" id="query-fields">
+                                    <option value="" selected></option>
 	    					<#list form.metaData.fields as field>
-	    						<#if field.dataType.enumType == 'STRING'>
 	    							<option id="${field.name}">${field.name}</option>
-	    						</#if>
 	    					</#list>
 	    				</select>
 					</div>
