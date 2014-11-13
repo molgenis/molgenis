@@ -3,10 +3,10 @@ package org.molgenis.gaf;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 import java.util.UUID;
 
 import javax.annotation.PreDestroy;
@@ -39,19 +39,21 @@ public class GafListValidationReport
 
 	public GafListValidationReport()
 	{
-		validationErrorsPerRunId = new LinkedHashMap<String, List<GafListValidationError>>();
+		validationErrorsPerRunId = new TreeMap<String, List<GafListValidationError>>();
 		validationGlobalErrorMessages = new ArrayList<String>();
 	}
 
+	@SuppressWarnings("unchecked")
 	public void addEntry(String runId, GafListValidationError validationError)
 	{
-		List<GafListValidationError> runEntries = validationErrorsPerRunId.get(runId);
-		if (runEntries == null)
+		List<GafListValidationError> gafListValidationErrorList = validationErrorsPerRunId.get(runId);
+		if (gafListValidationErrorList == null)
 		{
-			runEntries = new ArrayList<GafListValidationError>();
-			validationErrorsPerRunId.put(runId, runEntries);
+			gafListValidationErrorList = new ArrayList<GafListValidationError>();
+			validationErrorsPerRunId.put(runId, gafListValidationErrorList);
 		}
-		runEntries.add(validationError);
+		gafListValidationErrorList.add(validationError);
+		Collections.<GafListValidationError> sort(gafListValidationErrorList);
 	}
 
 	public void addGlobalErrorMessage(String globalErrorMessage)
