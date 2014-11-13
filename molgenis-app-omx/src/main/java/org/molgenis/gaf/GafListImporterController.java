@@ -29,9 +29,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.google.gdata.util.ServiceException;
-
-
 @Controller
 @RequestMapping(URI)
 @Scope("request")
@@ -82,7 +79,7 @@ public class GafListImporterController extends MolgenisPluginController
 	@RequestMapping(method = RequestMethod.POST, value = "/validate")
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	public String validateGAFList(HttpServletRequest request, @RequestParam("csvFile") MultipartFile csvFile,
-			Model model) throws IOException, ServiceException, ValueConverterException, MessagingException, Exception
+			Model model) throws IOException, ValueConverterException, MessagingException, Exception
 	{
 		boolean submitState = false;
 		String action = "/validate";
@@ -142,8 +139,8 @@ public class GafListImporterController extends MolgenisPluginController
 
 	@RequestMapping(method = RequestMethod.POST, value = "/import")
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
-	public String importGAFList(HttpServletRequest request, Model model) throws IOException, ServiceException,
-			ValueConverterException, MessagingException, Exception
+	public String importGAFList(HttpServletRequest request, Model model) throws IOException, ValueConverterException,
+			MessagingException, Exception
 	{
 		final List<String> messages = new ArrayList<String>();
 		try
@@ -152,10 +149,8 @@ public class GafListImporterController extends MolgenisPluginController
 
 			if (!report.getValidRunIds().isEmpty())
 			{
-				messages.add("Successfully imported GAF list named: <b><a href="
- + "/menu/main/dataexplorer?entity="
-						+ report.getDataSetIdentifier() + ">"
-						+ report.getDataSetName() + "</a></b>");
+				messages.add("Successfully imported GAF list named: <b><a href=" + "/menu/main/dataexplorer?entity="
+						+ report.getDataSetIdentifier() + ">" + report.getDataSetName() + "</a></b>");
 
 				messages.add("Imported run id's: <b>" + report.getValidRunIds() + "</b>");
 			}

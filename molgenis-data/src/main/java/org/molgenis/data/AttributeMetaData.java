@@ -80,7 +80,9 @@ public interface AttributeMetaData
 	EntityMetaData getRefEntity();
 
 	/**
-	 * Get compound attribute parts
+	 * When getDataType=compound, get compound attribute parts
+	 * 
+	 * @return Iterable of attributes or empty Iterable if no attribute parts exist
 	 */
 	Iterable<AttributeMetaData> getAttributeParts();
 

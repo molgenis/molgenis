@@ -22,7 +22,7 @@
 </div>
 
 <#if back??>
-	<a href="${back}" class="btn btn-default btn-xs">Back to list</a>
+	<a href="${back}" class="btn btn-default btn-md"><span class="glyphicon glyphicon-chevron-left"></span> Back to list</a>
 </#if>
 
 <form role="form" class="form-horizontal" id="entity-form" method="POST" action="/api/v1/${form.metaData.name?lower_case}<#if form.primaryKey??><#if form.primaryKey?is_number>/${form.primaryKey?c}<#else>/${form.primaryKey}</#if></#if>">
