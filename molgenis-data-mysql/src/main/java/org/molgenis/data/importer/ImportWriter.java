@@ -1,13 +1,15 @@
 package org.molgenis.data.importer;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
@@ -34,6 +36,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.base.Function;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -178,12 +181,11 @@ public class ImportWriter
 	}
 
 	private void rollbackSchemaChanges(RepositoryCollection source,
-			ManageableCrudRepositoryCollection targetCollection, List<String> addedEntities,
-			Map<String, List<String>> addedAttributes)
+			ManageableCrudRepositoryCollection targetCollection, MetaDataChanges metaDataChanges)
 	{
 		logger.info("Rolling back changes.");
-		dropAddedEntities(targetCollection, addedEntities);
-		List<String> entities = dropAddedAttributes(targetCollection, addedAttributes);
+		dropAddedEntities(targetCollection, metaDataChanges.getAddedEntities());
+		List<String> entities = dropAddedAttributes(targetCollection, metaDataChanges.getAddedAttributes());
 
 		// Reindex
 		Set<String> entitiesToIndex = Sets.newLinkedHashSet(source.getEntityNames());
@@ -212,17 +214,16 @@ public class ImportWriter
 	}
 
 	private List<String> dropAddedAttributes(ManageableCrudRepositoryCollection targetCollection,
-			Map<String, List<String>> addedAttributes)
+			ImmutableMap<String, Collection<AttributeMetaData>> addedAttributes)
 	{
 		List<String> entities = Lists.newArrayList(addedAttributes.keySet());
 		Collections.reverse(entities);
 
 		for (String entityName : entities)
 		{
-			List<String> attributes = addedAttributes.get(entityName);
-			for (String attributeName : attributes)
+			for (AttributeMetaData attribute : addedAttributes.get(entityName))
 			{
-				targetCollection.dropAttributeMetaData(entityName, attributeName);
+				targetCollection.dropAttributeMetaData(entityName, attribute.getName());
 			}
 		}
 		return entities;
@@ -231,9 +232,10 @@ public class ImportWriter
 	private void dropAddedEntities(ManageableCrudRepositoryCollection targetCollection, List<String> addedEntities)
 	{
 		// Rollback metadata, create table statements cannot be rolled back, we have to do it ourselves
-		Collections.reverse(addedEntities);
+		ArrayList<String> reversedEntities = new ArrayList<String>(addedEntities);
+		Collections.reverse(reversedEntities);
 
-		for (String entityName : addedEntities)
+		for (String entityName : reversedEntities)
 		{
 			targetCollection.dropEntityMetaData(entityName);
 		}
@@ -419,7 +421,7 @@ public class ImportWriter
 		}
 		catch (Exception e)
 		{
-			rollbackSchemaChanges(job.source, job.target, null, null);
+			rollbackSchemaChanges(job.source, job.target, job.metaDataChanges);
 			throw e;
 		}
 		finally
