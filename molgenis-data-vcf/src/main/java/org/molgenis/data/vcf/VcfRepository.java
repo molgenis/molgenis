@@ -119,14 +119,14 @@ public class VcfRepository extends AbstractRepository
 					entity.set(REF, vcfRecord.getReferenceAllele().toString());
 					entity.set(FILTER, vcfRecord.getFilterStatus());
 					entity.set(QUAL, vcfRecord.getQuality());
-                    StringBuilder id = new StringBuilder();
-                    id.append(StringUtils.strip(entity.get(CHROM).toString()));
-                    id.append("_");
-                    id.append(StringUtils.strip(entity.get(POS).toString()));
-                    id.append("_");
-                    id.append(StringUtils.strip(entity.get(REF).toString()));
-                    id.append("_");
-                    id.append(StringUtils.strip(entity.get(ALT).toString()));
+					StringBuilder id = new StringBuilder();
+					id.append(StringUtils.strip(entity.get(CHROM).toString()));
+					id.append("_");
+					id.append(StringUtils.strip(entity.get(POS).toString()));
+					id.append("_");
+					id.append(StringUtils.strip(entity.get(REF).toString()));
+					id.append("_");
+					id.append(StringUtils.strip(entity.get(ALT).toString()));
 					entity.set(ID, id.toString());
 					for (VcfInfo vcfInfo : vcfRecord.getInformation())
 					{
@@ -202,19 +202,19 @@ public class VcfRepository extends AbstractRepository
 					if (vcfReader != null) vcfReader.close();
 				}
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(CHROM,
-						MolgenisFieldTypes.FieldTypeEnum.STRING));
+						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ALT,
-						MolgenisFieldTypes.FieldTypeEnum.STRING));
+						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(POS,
-						MolgenisFieldTypes.FieldTypeEnum.LONG));
+						MolgenisFieldTypes.FieldTypeEnum.LONG).setAggregateable(true));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(REF,
-						MolgenisFieldTypes.FieldTypeEnum.STRING));
+						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(FILTER,
-						MolgenisFieldTypes.FieldTypeEnum.STRING));
+						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(QUAL,
-						MolgenisFieldTypes.FieldTypeEnum.STRING));
+						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true));
 				DefaultAttributeMetaData idAttributeMetaData = new DefaultAttributeMetaData(ID,
-						MolgenisFieldTypes.FieldTypeEnum.STRING);
+						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true);
 				idAttributeMetaData.setIdAttribute(true);
 				entityMetaData.addAttributeMetaData(idAttributeMetaData);
 				DefaultAttributeMetaData infoMetaData = new DefaultAttributeMetaData(INFO,
@@ -223,7 +223,7 @@ public class VcfRepository extends AbstractRepository
 				for (VcfMetaInfo info : vcfMeta.getInfoMeta())
 				{
 					DefaultAttributeMetaData attributeMetaData = new DefaultAttributeMetaData(info.getId(),
-							vcfReaderFormatToMolgenisType(info));
+							vcfReaderFormatToMolgenisType(info)).setAggregateable(true);
 					attributeMetaData.setDescription(info.getDescription());
 					metadataInfoField.add(attributeMetaData);
 				}
@@ -254,18 +254,18 @@ public class VcfRepository extends AbstractRepository
 		{
 			sampleEntityMetaData = new DefaultEntityMetaData(entityName + "_Sample");
 			DefaultAttributeMetaData idAttributeMetaData = new DefaultAttributeMetaData(ID,
-					MolgenisFieldTypes.FieldTypeEnum.STRING);
+					MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true);
 			idAttributeMetaData.setIdAttribute(true);
 			idAttributeMetaData.setVisible(false);
 			sampleEntityMetaData.addAttributeMetaData(idAttributeMetaData);
 			DefaultAttributeMetaData nameAttributeMetaData = new DefaultAttributeMetaData(NAME,
-					MolgenisFieldTypes.FieldTypeEnum.STRING);
+					MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true);
 			nameAttributeMetaData.setLabelAttribute(true);
 			sampleEntityMetaData.addAttributeMetaData(nameAttributeMetaData);
 			for (VcfMetaFormat meta : formatMetaData)
 			{
 				AttributeMetaData attributeMetaData = new DefaultAttributeMetaData(meta.getId(),
-						vcfFieldTypeToMolgenisFieldType(meta));
+						vcfFieldTypeToMolgenisFieldType(meta)).setAggregateable(true);
 				sampleEntityMetaData.addAttributeMetaData(attributeMetaData);
 			}
 		}

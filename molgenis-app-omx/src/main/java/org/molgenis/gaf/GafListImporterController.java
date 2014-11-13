@@ -94,7 +94,7 @@ public class GafListImporterController extends MolgenisPluginController
 			try
 			{
 				this.gafListFileImporterService.validateGAFList(report, csvFile);
-				model.addAttribute("hasValidationError", report.hasErrors());
+				model.addAttribute("hasValidationError", (report.hasGlobalErrors() || report.hasRunIdsErrors()));
 				model.addAttribute("validationReport", report.toStringHtml());
 
 				if (!report.getValidRunIds().isEmpty())
@@ -110,10 +110,14 @@ public class GafListImporterController extends MolgenisPluginController
 					messages.add("Validation for all runs failed");
 				}
 
-				if (report.hasErrors())
+				if (report.hasGlobalErrors())
 				{
-					messages.add("Run id's: <b>" + report.getInvalidRunIds()
-							+ "</b> cannot be imported");
+					messages.addAll(report.getValidationGlobalErrorMessages());
+				}
+
+				if (report.hasRunIdsErrors())
+				{
+					messages.add("Run id's: <b>" + report.getInvalidRunIds() + "</b> cannot be imported");
 				}
 			}
 			catch (Exception e)
@@ -156,7 +160,7 @@ public class GafListImporterController extends MolgenisPluginController
 				messages.add("Imported run id's: <b>" + report.getValidRunIds() + "</b>");
 			}
 
-			if (report.hasErrors())
+			if (report.hasRunIdsErrors())
 			{
 				messages.add("Not imported run id's: <b>" + report.getInvalidRunIds() + "</b>");
 			}

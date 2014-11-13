@@ -12,14 +12,15 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.omx.observ.Category;
-import org.molgenis.omx.observ.ObservableFeature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.stereotype.Component;
@@ -39,7 +40,7 @@ public class GafListValidator
 	 */
 	public static final String GAF_LIST_VALIDATOR_EXAMPLE_PREFIX = "gafList.validator.example.";
 
-	private static final List<String> COLUMNS = GAFCol.getAllColumnsNames();
+	public static final List<String> COLUMNS = GAFCol.getAllColumnsNames();
 
 	static final String BARCODE_NONE = "None";
 
@@ -47,67 +48,76 @@ public class GafListValidator
 	private DataService dataService;
 
 	@Autowired
+	private MetaDataService metaDataService;
+
+	@Autowired
 	private MolgenisSettings molgenisSettings;
 
-	public GafListValidationReport validate(GafListValidationReport report, Repository repository) throws IOException
+	public GafListValidationReport validate(GafListValidationReport report, Repository repository, List<String> columns)
+			throws IOException
 	{
-		// retrieve validation patterns
-		Map<String, Pattern> patternMap = new HashMap<String, Pattern>();
-		for (String colName : COLUMNS)
-		{
-			String pattern = molgenisSettings.getProperty(GAF_LIST_VALIDATOR_PREFIX + colName);
-			if (pattern != null) patternMap.put(colName, Pattern.compile(pattern));
-		}
-
-		// retrieve validation patterns
-		Map<String, String> patternExampleMap = new HashMap<String, String>();
-		for (String colName : COLUMNS)
-		{
-			String example = molgenisSettings.getProperty(GAF_LIST_VALIDATOR_EXAMPLE_PREFIX + colName);
-			if (example != null) patternExampleMap.put(colName, example);
-		}
-
-		// retrieve look up lists
-		Map<String, Set<String>> lookupLists = new HashMap<String, Set<String>>();
-		for (String colName : COLUMNS)
-		{
-			ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME,
-					new QueryImpl().eq(ObservableFeature.IDENTIFIER, colName), ObservableFeature.class);
-
-			Iterable<Category> categories = dataService.findAll(Category.ENTITY_NAME,
-					new QueryImpl().eq(Category.OBSERVABLEFEATURE, feature), Category.class);
-			if (categories != null)
-			{
-				Set<String> lookupList = new HashSet<String>();
-				for (Category category : categories)
-					lookupList.add(category.getValueCode());
-				lookupLists.put(colName, lookupList);
-			}
-		}
-
-		List<Entity> entities = new ArrayList<Entity>();
-		Iterable<AttributeMetaData> attributes = repository.getEntityMetaData().getAttributes();
+		final String gaflistEntityName = molgenisSettings.getProperty(GafListFileRepository.GAFLIST_ENTITYNAME);
+		EntityMetaData entityMetaData = metaDataService.getEntityMetaData(gaflistEntityName);
 		
-		Iterator<Entity> it = repository.iterator();
-		while (it.hasNext())
+		if (null == entityMetaData)
 		{
-			Entity entity = it.next();
-			String runId = entity.getString(GAFCol.RUN.toString());
-			report.getAllRunIds().add(runId);
-			entities.add(entity);
+			report.addGlobalErrorMessage("Please contact the administrator, the metadata is not loaded correctly");
 		}
+		else
+		{
+			// retrieve validation patterns
+			Map<String, Pattern> patternMap = new HashMap<String, Pattern>();
+			for (String colName : columns)
+			{
+				String pattern = molgenisSettings.getProperty(GAF_LIST_VALIDATOR_PREFIX + colName);
+				if (pattern != null) patternMap.put(colName, Pattern.compile(pattern));
+			}
 
-		validateCellValues(entities, attributes, patternMap, patternExampleMap, lookupLists, report);
-		validateInternalSampleIdIncremental(entities, report);
-		validateRun(entities, report);
-		report.populateStatusImportedRuns();
+			// retrieve validation examples
+			Map<String, String> patternExampleMap = new HashMap<String, String>();
+			for (String colName : columns)
+			{
+				String example = molgenisSettings.getProperty(GAF_LIST_VALIDATOR_EXAMPLE_PREFIX + colName);
+				if (example != null) patternExampleMap.put(colName, example);
+			}
+
+			// retrieve look up lists
+			Map<String, List<String>> lookupLists = new HashMap<String, List<String>>();
+			for (String colName : columns)
+			{
+				AttributeMetaData attributeMetaData = entityMetaData.getAttribute(colName);
+
+				if (MolgenisFieldTypes.FieldTypeEnum.ENUM.equals(attributeMetaData.getDataType().getEnumType()))
+				{
+					List<String> enumList = attributeMetaData.getEnumOptions();
+					lookupLists.put(colName, enumList);
+				}
+			}
+
+			List<Entity> entities = new ArrayList<Entity>();
+			Iterable<AttributeMetaData> attributes = repository.getEntityMetaData().getAttributes();
+
+			Iterator<Entity> it = repository.iterator();
+			while (it.hasNext())
+			{
+				Entity entity = it.next();
+				String runId = entity.getString(GAFCol.RUN.toString());
+				report.getAllRunIds().add(runId);
+				entities.add(entity);
+			}
+
+			validateCellValues(entities, attributes, patternMap, patternExampleMap, lookupLists, report);
+			validateInternalSampleIdIncremental(entities, report);
+			validateRun(entities, report);
+			report.populateStatusImportedRuns();
+		}
 		
 		return report;
 	}
 
 	private void validateCellValues(List<Entity> entities, Iterable<AttributeMetaData> attributes,
 			Map<String, Pattern> patternMap, Map<String, String> patternExampleMap,
-			Map<String, Set<String>> lookupLists, GafListValidationReport report)
+			Map<String, List<String>> lookupLists, GafListValidationReport report)
 	{
 		int row = 2;
 		for (Entity entity : entities)
@@ -140,6 +150,8 @@ public class GafListValidator
 	 */
 	private void validateInternalSampleIdIncremental(List<Entity> entities, GafListValidationReport report)
 	{
+		final String gaflistEntityName = molgenisSettings.getProperty(GafListFileRepository.GAFLIST_ENTITYNAME);
+
 		int row = 2;
 		for (Entity entity : entities)
 		{
@@ -149,12 +161,20 @@ public class GafListValidator
 			Integer internalSampleId = null;
 			try{
 				internalSampleId = entity.getInt(GAFCol.INTERNAL_SAMPLE_ID.toString());
+
 				if (internalSampleId == null)
 				{
 					// internal sample id can not be null
 					report.addEntry(runId, new GafListValidationError(row, GAFCol.INTERNAL_SAMPLE_ID.toString(),
 							null,
 							"value undefined"));
+				}
+
+				if (internalSampleIdExists(gaflistEntityName, internalSampleId))
+				{
+					// internal sample id already exists
+					report.addEntry(runId, new GafListValidationError(row, GAFCol.INTERNAL_SAMPLE_ID.toString(),
+							internalSampleId.toString(), "Internal sample id " + internalSampleId + " already exists"));
 				}
 			}
 			catch (ConversionFailedException cfe)
@@ -165,6 +185,20 @@ public class GafListValidator
 			
 			row++;
 		}
+	}
+	
+	/**
+	 * Check if internalSampleId already exists in the GAF list entity
+	 * 
+	 * @param gaflistEntityName
+	 * @param internalSampleId
+	 * @return
+	 */
+	private boolean internalSampleIdExists(String gaflistEntityName, Integer internalSampleId)
+	{
+		QueryImpl q = new QueryImpl();
+		q.eq(GAFCol.INTERNAL_SAMPLE_ID.toString(), internalSampleId);
+		return (null != dataService.findOne(gaflistEntityName, q));
 	}
 
 	/**
@@ -338,7 +372,7 @@ public class GafListValidator
 
 	private void validateCell(String runId, int row, String colName, String value, Map<String, Pattern> patterns,
 			Map<String, String> patternExampleMap,
-			Map<String, Set<String>> lookupLists, GafListValidationReport report)
+ Map<String, List<String>> lookupLists, GafListValidationReport report)
 	{
 		// validate
 		if (colName.equalsIgnoreCase(GAFCol.INTERNAL_SAMPLE_ID.toString()))
@@ -487,10 +521,10 @@ public class GafListValidator
 	}
 
 	private void validateCellWithLookupList(String runId, int row, String colName, String value,
-			Map<String, Set<String>> lookupLists, boolean isRequired, GafListValidationReport report,
+			Map<String, List<String>> lookupLists, boolean isRequired, GafListValidationReport report,
 			Map<String, String> patternExampleMap)
 	{
-		Set<String> lookupList = lookupLists.get(colName);
+		List<String> lookupList = lookupLists.get(colName);
 		if (isRequired)
 		{
 			if (StringUtils.isEmpty(value) || !lookupList.contains(value))

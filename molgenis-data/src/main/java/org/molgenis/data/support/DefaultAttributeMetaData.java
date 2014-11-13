@@ -305,9 +305,10 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		return this.aggregateable;
 	}
 
-	public void setAggregateable(boolean aggregateable)
+	public DefaultAttributeMetaData setAggregateable(boolean aggregateable)
 	{
 		this.aggregateable = aggregateable;
+		return this;
 	}
 
 	@Override
