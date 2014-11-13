@@ -35,7 +35,6 @@ public class EmxImportService implements ImportService
 	final DataService dataService;
 	private PermissionSystemService permissionSystemService;
 	WritableMetaDataService metaDataService;
-	PlatformTransactionManager platformTransactionManager;
 
 	final EmxMetaDataParser parser = new EmxMetaDataParser();
 
@@ -60,7 +59,7 @@ public class EmxImportService implements ImportService
 	@Autowired
 	public void setPlatformTransactionManager(PlatformTransactionManager transactionManager)
 	{
-		this.platformTransactionManager = transactionManager;
+		this.transactionTemplate = new TransactionTemplate(transactionManager);
 	}
 
 	@Autowired
