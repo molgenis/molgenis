@@ -3,10 +3,10 @@ package org.molgenis.gaf;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.TreeMap;
 import java.util.UUID;
 
 import javax.annotation.PreDestroy;
@@ -39,7 +39,7 @@ public class GafListValidationReport
 
 	public GafListValidationReport()
 	{
-		validationErrorsPerRunId = new TreeMap<String, List<GafListValidationError>>();
+		validationErrorsPerRunId = new LinkedHashMap<String, List<GafListValidationError>>();
 		validationGlobalErrorMessages = new ArrayList<String>();
 	}
 
