@@ -55,9 +55,9 @@
 		$.each(entities.items, function(index, entity) {
 			var id = restApi.getPrimaryKeyFromHref(entity.href);
 			var labelValue = entity[forms[formIndex].meta.labelFieldName];
-			var editPageUrl = forms[formIndex].baseUri + '/' + id + '?back=' + encodeURIComponent(CURRENT_URI);
+			var editPageUrl = forms[formIndex].baseUri + '/' + id + '?' + createBackQueryStringParam(currentPage);
 			var deleteApiUrl = '/api/v1/' + forms[formIndex].meta.name + '/' +  id;
-				
+			
 			//Select first row when table is shown and we have master/detail
 			if ((forms.length > 1) && (formIndex == 0) && (selectedEntityId == null)) {
 				selectedEntityId = id;
@@ -131,7 +131,7 @@
 			
 		$('#entity-count-' + formIndex).html(entities.total);
 		if(!isPageChange) {
-			ns.updatePager(formIndex, entities.total, NR_ROWS_PER_PAGE);
+			ns.updatePager(currentPage, formIndex, entities.total, NR_ROWS_PER_PAGE);
 		}
 	};
 	
@@ -175,10 +175,11 @@
 		$('#error-message').hide();
 	};
 	
-	ns.updatePager = function(formIndex, nrRows, nrRowsPerPage) {
-		currentPages[formIndex] = 1;
+	ns.updatePager = function(pageNr, formIndex, nrRows, nrRowsPerPage) {
+		currentPages[formIndex] = pageNr;
 		$('#data-table-pager-' + formIndex).pager({
 			'nrItems' : nrRows,
+			'page' : pageNr,
 			'nrItemsPerPage': nrRowsPerPage,
 			'onPageChange' : function(data) {
 				currentPages[formIndex] = data.page;
@@ -189,7 +190,9 @@
 	
 	ns.refresh = function() {
 		//Build master tables
-		currentPages[0] = 1;
+		var pageNr = parseInt(getParameterByName('page') || '1');
+		
+		currentPages[0] = pageNr;
 		ns.buildTableBody(0);
 		
 		//Build subforms if available
@@ -197,6 +200,24 @@
 			ns.updateSubForms();
 		}
 	};
+	
+	function createBackQueryStringParam(page) {
+		var oldPage = getParameterByName('page');
+		
+		if (oldPage) {
+			CURRENT_URI = CURRENT_URI.replace('page=' + oldPage, '');
+			if (CURRENT_URI.endsWith('?') || CURRENT_URI.endsWith('&')) {
+				CURRENT_URI = CURRENT_URI.substring(0, CURRENT_URI.length-1);
+			}
+		}
+		
+		return 'back=' + encodeURIComponent(CURRENT_URI + (CURRENT_URI.indexOf('?') > -1 ? '&' : '?') + 'page=' + page);
+	}
+	
+	function getParameterByName(name) {
+	    var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+	    return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+	}
 	
 	$(function() {
 
