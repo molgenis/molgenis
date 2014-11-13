@@ -71,9 +71,25 @@ public abstract class ImmutableEntitiesValidationReport implements EntitiesValid
 	 */
 	public ImmutableEntitiesValidationReport addEntity(String entityName, boolean importable)
 	{
-		return new AutoValue_ImmutableEntitiesValidationReport(addToMap(getSheetsImportable(), entityName, importable),
-				getFieldsImportable(), getFieldsUnknown(), getFieldsRequired(), getFieldsAvailable(), add(
-						getImportOrder(), entityName), valid() && importable);
+		if (importable)
+		{
+			// add empty sheets for this entity
+			return new AutoValue_ImmutableEntitiesValidationReport(addToMap(getSheetsImportable(), entityName, importable), addEmptyList(getFieldsImportable(), entityName), addEmptyList(getFieldsUnknown(), entityName),
+					addEmptyList(getFieldsRequired(), entityName), addEmptyList(getFieldsAvailable(), entityName), add(getImportOrder(), entityName), valid() && importable);
+		}
+		else
+		{
+			return new AutoValue_ImmutableEntitiesValidationReport(addToMap(getSheetsImportable(), entityName, importable),
+					getFieldsImportable(), getFieldsUnknown(), getFieldsRequired(), getFieldsAvailable(), add(
+							getImportOrder(), entityName), valid() && importable);
+		}
+	}
+
+	private static ImmutableMap<String, Collection<String>> addEmptyList(
+			ImmutableMap<String, Collection<String>> immutableMap, String entityName)
+	{
+		return ImmutableMap.<String, Collection<String>> builder().putAll(immutableMap)
+				.put(entityName, ImmutableList.<String> of()).build();
 	}
 
 	/**
@@ -142,6 +158,22 @@ public abstract class ImmutableEntitiesValidationReport implements EntitiesValid
 	{
 		Map<K, Collection<V>> map = new LinkedHashMap<K, Collection<V>>(original);
 		map.put(key, add(original.get(key), value));
+		return ImmutableMap.<K, Collection<V>> copyOf(map);
+	}
+
+	/**
+	 * Utility method to add a value to create an empty immutable sheet list.
+	 * 
+	 * @param original
+	 *            Map to add to
+	 * @param key
+	 *            key of the collection to create
+	 * @return {@link ImmutableMap} with a new empty collection for {@key}.
+	 */
+	public static <K, V> ImmutableMap<K, Collection<V>> add(Map<K, Collection<V>> original, K key)
+	{
+		Map<K, Collection<V>> map = new LinkedHashMap<K, Collection<V>>(original);
+		map.put(key, ImmutableList.<V> of());
 		return ImmutableMap.<K, Collection<V>> copyOf(map);
 	}
 
