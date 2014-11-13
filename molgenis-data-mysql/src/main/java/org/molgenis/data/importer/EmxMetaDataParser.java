@@ -21,7 +21,6 @@ import static org.molgenis.data.meta.EntityMetaDataMetaData.ABSTRACT;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.EXTENDS;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.PACKAGE;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -40,6 +39,7 @@ import org.molgenis.data.Package;
 import org.molgenis.data.Range;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.importer.ImmutableEntitiesValidationReport.AttributeState;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.PackageImpl;
@@ -515,7 +515,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	@Override
 	public EntitiesValidationReport validate(DataService dataService, RepositoryCollection source)
 	{
-		EntitiesValidationReportImpl report = new EntitiesValidationReportImpl();
+		ImmutableEntitiesValidationReport report = ImmutableEntitiesValidationReport.createNew();
 
 		Map<String, EntityMetaData> metaDataMap = combineMetaDataToMap(dataService, source);
 
@@ -533,9 +533,8 @@ public class EmxMetaDataParser implements MetaDataParser
 		{
 			if (!ENTITIES.equals(sheet) && !ATTRIBUTES.equals(sheet) && !PACKAGES.equals(sheet) && !TAGS.equals(sheet))
 			{
-				// check if sheet is known?
-				if (metaDataMap.containsKey(sheet)) report.getSheetsImportable().put(sheet, true);
-				else report.getSheetsImportable().put(sheet, false);
+				// check if sheet is known
+				report = report.addEntity(sheet, metaDataMap.containsKey(sheet));
 
 				// check the fields
 				Repository s = source.getRepositoryByEntityName(sheet);
@@ -543,29 +542,21 @@ public class EmxMetaDataParser implements MetaDataParser
 
 				if (target != null)
 				{
-					List<String> fieldsAvailable = new ArrayList<String>();
-					List<String> fieldsImportable = new ArrayList<String>();
-					List<String> fieldsRequired = new ArrayList<String>();
-					List<String> fieldsUnknown = new ArrayList<String>();
-
 					for (AttributeMetaData att : s.getEntityMetaData().getAttributes())
 					{
-						if (target.getAttribute(att.getName()) == null) fieldsUnknown.add(att.getName());
-						else fieldsImportable.add(att.getName());
+						boolean known = target.getAttribute(att.getName()) != null;
+						report = report.addAttribute(att.getName(),
+								known ? AttributeState.IMPORTABLE : AttributeState.UNKNOWN);
 					}
 					for (AttributeMetaData att : target.getAttributes())
 					{
-						if (!att.isAuto() && !fieldsImportable.contains(att.getName()))
+						if (!att.isAuto() && !report.getFieldsImportable().get(sheet).contains(att.getName()))
 						{
-							if (!att.isNillable()) fieldsRequired.add(att.getName());
-							else fieldsAvailable.add(att.getName());
+							boolean required = !att.isNillable();
+							report = report.addAttribute(att.getName(),
+									required ? AttributeState.REQUIRED : AttributeState.AVAILABLE);
 						}
 					}
-
-					report.getFieldsAvailable().put(sheet, fieldsAvailable);
-					report.getFieldsRequired().put(sheet, fieldsRequired);
-					report.getFieldsUnknown().put(sheet, fieldsUnknown);
-					report.getFieldsImportable().put(sheet, fieldsImportable);
 				}
 			}
 		}
