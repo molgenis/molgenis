@@ -37,6 +37,7 @@
 	paper.scale(scale, scale);
 	
 	//Add titles to the uml classes
+	
 	$('.Class').each(function(index, el) {
 		var $titleEl = $('[id="' + el.id + '"] .uml-class-name-text');
 		var title = document.createElementNS("http://www.w3.org/2000/svg","title");
@@ -69,17 +70,21 @@
 	function drawEllipsisIfTextTooLong(textObj, width){
 		var textString = textObj.textContent;
 		
-		//ellipsis is needed
-    	if (textObj.getSubStringLength(0, textString.length) >= width){
-        	for (var x = textString.length-1; x > 0; x -= 1){
-            	if (textObj.getSubStringLength(0, x+3) <= width){
-                	textObj.textContent = textString.substring(0, x) + "...";
-                	return;
-            	}
-        	}
-        	textObj.textContent = "..."; //can't place at all
+		
+		if (textObj.getComputedTextLength() > 0)  {
+	
+			//ellipsis is needed
+			if (textObj.getSubStringLength(0, textString.length) >= width) {
+    			for (var x = textString.length-1; x > 0; x -= 1){
+            		if (textObj.getSubStringLength(0, x+3) <= width){
+                		textObj.textContent = textString.substring(0, x) + "...";
+                		return;
+            		}
+        		}
+        		textObj.textContent = "..."; //can't place at all
+    		}
     	}
-	}
+    }
 </#if>
 
 <#macro addVertices package>
