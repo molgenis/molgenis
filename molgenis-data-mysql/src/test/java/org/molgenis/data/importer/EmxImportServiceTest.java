@@ -81,7 +81,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
 
 		// create importer
-		EmxImportService importer = new EmxImportService(dataService);
+		EmxImportService importer = new EmxImportService(dataService, new EmxMetaDataParser());
 		importer.setRepositoryCollection(store, mysqlMetaDataRepositories);
 		importer.setPlatformTransactionManager(new SimplePlatformTransactionManager());
 		importer.setPermissionSystemService(permissionSystemService);
@@ -131,7 +131,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		Assert.assertEquals(source.getNumberOfSheets(), 4);
 		Assert.assertNotNull(source.getRepositoryByEntityName("attributes"));
 
-		EmxImportService importer = new EmxImportService(dataService);
+		EmxImportService importer = new EmxImportService(dataService, new EmxMetaDataParser());
 		importer.setRepositoryCollection(store, mysqlMetaDataRepositories);
 		importer.setPlatformTransactionManager(new SimplePlatformTransactionManager());
 		importer.setPermissionSystemService(permissionSystemService);
@@ -177,7 +177,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		File f = ResourceUtils.getFile(getClass(), "/example.xlsx");
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
 
-		EmxImportService importer = new EmxImportService(dataService);
+		EmxImportService importer = new EmxImportService(dataService, new EmxMetaDataParser());
 		importer.setRepositoryCollection(store, mysqlMetaDataRepositories);
 		importer.setPlatformTransactionManager(new SimplePlatformTransactionManager());
 		importer.setPermissionSystemService(permissionSystemService);

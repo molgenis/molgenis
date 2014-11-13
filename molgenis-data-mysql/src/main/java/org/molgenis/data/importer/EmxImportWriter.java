@@ -15,15 +15,14 @@ import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IndexedRepository;
+import org.molgenis.data.ManageableCrudRepositoryCollection;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Package;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.meta.PackageImpl;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.meta.WritableMetaDataService;
-import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.TransformedEntity;
 import org.molgenis.fieldtypes.FieldType;
@@ -49,13 +48,13 @@ import com.google.common.collect.Sets;
 final class EmxImportWriter implements TransactionCallback<Void>
 {
 	private final RepositoryCollection source;
-	private final List<EntityMetaData> sourceMetadata;
+	private final ParsedMetaData parsedMetaData;
 	private final List<String> addedEntities = Lists.newArrayList();
 	private final Map<String, List<String>> addedAttributes = Maps.newLinkedHashMap();;// Attributes per entity
 	private final DatabaseAction dbAction;
 	private final PermissionSystemService permissionSystemService;
 	private final EntityImportReport report = new EntityImportReport();
-	private final MysqlRepositoryCollection targetCollection;
+	private final ManageableCrudRepositoryCollection targetCollection;
 	private final DataService dataService;
 	private final WritableMetaDataService metaDataService;
 	private final TransactionTemplate transactionTemplate;
@@ -63,17 +62,19 @@ final class EmxImportWriter implements TransactionCallback<Void>
 
 	private final static Logger logger = Logger.getLogger(EmxImportWriter.class);
 
-	EmxImportWriter(EmxImportService emxImportService, DatabaseAction dbAction, RepositoryCollection source,
-			List<EntityMetaData> metadata, PermissionSystemService permissionSystemService)
+	EmxImportWriter(DatabaseAction dbAction, RepositoryCollection source, ParsedMetaData parsedMetaData,
+			ManageableCrudRepositoryCollection target, DataService dataService,
+			WritableMetaDataService metaDataService, TransactionTemplate transactionTemplate,
+			PermissionSystemService permissionSystemService)
 	{
 		this.permissionSystemService = permissionSystemService;
 		this.dbAction = dbAction;
 		this.source = source;
-		this.sourceMetadata = metadata;
-		this.targetCollection = emxImportService.targetCollection;
-		this.dataService = emxImportService.dataService;
-		this.metaDataService = emxImportService.metaDataService;
-		this.transactionTemplate = new TransactionTemplate(emxImportService.platformTransactionManager);
+		this.parsedMetaData = parsedMetaData;
+		this.targetCollection = target;
+		this.dataService = dataService;
+		this.metaDataService = metaDataService;
+		this.transactionTemplate = transactionTemplate;
 		resolved = resolveEntityDependencies();
 	}
 
@@ -182,7 +183,7 @@ final class EmxImportWriter implements TransactionCallback<Void>
 
 	private List<EntityMetaData> resolveEntityDependencies()
 	{
-		Set<EntityMetaData> allMetaData = Sets.newLinkedHashSet(sourceMetadata);
+		Set<EntityMetaData> allMetaData = Sets.newLinkedHashSet(parsedMetaData.getEntities());
 		Iterable<EntityMetaData> existingMetaData = metaDataService.getEntityMetaDatas();
 		Iterables.addAll(allMetaData, existingMetaData);
 
@@ -190,14 +191,13 @@ final class EmxImportWriter implements TransactionCallback<Void>
 		List<EntityMetaData> resolved = DependencyResolver.resolve(allMetaData);
 
 		// Only import source
-		resolved.retainAll(sourceMetadata);
+		resolved.retainAll(parsedMetaData.getEntities());
 		return resolved;
 	}
 
 	private void importPackages()
 	{
-		Map<String, PackageImpl> packages = new EmxMetaDataParser().parsePackagesSheet(source);
-		for (Package p : packages.values())
+		for (Package p : parsedMetaData.getPackages().values())
 		{
 			if (p != null)
 			{

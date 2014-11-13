@@ -5,8 +5,10 @@ import javax.sql.DataSource;
 import org.molgenis.data.DataService;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.importer.EmxImportService;
+import org.molgenis.data.importer.EmxMetaDataParser;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
+import org.molgenis.data.importer.MetaDataParser;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.WritableMetaDataService;
 import org.molgenis.data.meta.WritableMetaDataServiceDecorator;
@@ -94,7 +96,13 @@ public class MySqlConfiguration
 	@Bean
 	public ImportService emxImportService()
 	{
-		return new EmxImportService(dataService);
+		return new EmxImportService(dataService, emxMetaDataParser());
+	}
+
+	@Bean
+	public MetaDataParser emxMetaDataParser()
+	{
+		return new EmxMetaDataParser();
 	}
 
 	@Bean

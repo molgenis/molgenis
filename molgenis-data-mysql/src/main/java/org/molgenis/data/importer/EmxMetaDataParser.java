@@ -65,7 +65,7 @@ import com.google.common.collect.Maps;
 /**
  * Parser for the EMX metadata.
  */
-public class EmxMetaDataParser
+public class EmxMetaDataParser implements MetaDataParser
 {
 
 	static final String PACKAGES = PackageMetaData.ENTITY_NAME;
@@ -332,7 +332,7 @@ public class EmxMetaDataParser
 		}
 	}
 
-	Map<String, PackageImpl> parsePackagesSheet(RepositoryCollection source)
+	private Map<String, ? extends org.molgenis.data.Package> parsePackagesSheet(RepositoryCollection source)
 	{
 		Map<String, PackageImpl> packages = Maps.newHashMap();
 		Repository repo = source.getRepositoryByEntityName(EmxMetaDataParser.PACKAGES);
@@ -420,7 +420,7 @@ public class EmxMetaDataParser
 	 */
 	private void parsePackagesSheetToEntityMap(RepositoryCollection source, Map<String, EditableEntityMetaData> entities)
 	{
-		Map<String, PackageImpl> packages = parsePackagesSheet(source);
+		Map<String, ? extends Package> packages = parsePackagesSheet(source);
 
 		// Resolve entity packages
 		for (EditableEntityMetaData emd : entities.values())
@@ -471,7 +471,8 @@ public class EmxMetaDataParser
 		}
 	}
 
-	List<EntityMetaData> combineMetaDataToList(DataService dataService, final RepositoryCollection source)
+	@Override
+	public ParsedMetaData parse(DataService dataService, final RepositoryCollection source)
 	{
 		List<EntityMetaData> metadataList = Lists.newArrayList();
 
@@ -490,7 +491,7 @@ public class EmxMetaDataParser
 				metadataList.add(dataService.getRepositoryByEntityName(name).getEntityMetaData());
 			}
 		}
-		return metadataList;
+		return ParsedMetaData.create(metadataList, parsePackagesSheet(source));
 	}
 
 	private Map<String, EntityMetaData> combineMetaDataToMap(DataService dataService, RepositoryCollection source)
@@ -511,7 +512,8 @@ public class EmxMetaDataParser
 		}
 	}
 
-	public EntitiesValidationReport validateInput(DataService dataService, RepositoryCollection source)
+	@Override
+	public EntitiesValidationReport validate(DataService dataService, RepositoryCollection source)
 	{
 		EntitiesValidationReportImpl report = new EntitiesValidationReportImpl();
 

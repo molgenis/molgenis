@@ -7,7 +7,6 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.WritableMetaDataService;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
@@ -36,15 +35,15 @@ public class EmxImportService implements ImportService
 	private PermissionSystemService permissionSystemService;
 	WritableMetaDataService metaDataService;
 	PlatformTransactionManager platformTransactionManager;
-
-	final EmxMetaDataParser parser = new EmxMetaDataParser();
+	final MetaDataParser parser;
 
 	@Autowired
-	public EmxImportService(DataService dataService)
+	public EmxImportService(DataService dataService, MetaDataParser parser)
 	{
 		if (dataService == null) throw new IllegalArgumentException("dataService is null");
 		logger.debug("EmxImportService created");
 		this.dataService = dataService;
+		this.parser = parser;
 	}
 
 	@Autowired
@@ -91,11 +90,11 @@ public class EmxImportService implements ImportService
 		if (targetCollection == null) throw new RuntimeException("targetCollection was not set");
 		if (metaDataService == null) throw new RuntimeException("metadataService was not set");
 
-		List<EntityMetaData> metadataList = parser.combineMetaDataToList(dataService, source);
+		ParsedMetaData parsedMetaData = parser.parse(dataService, source);
 
 		// TODO altered entities (merge, see getEntityMetaData)
-		EmxImportWriter writer = new EmxImportWriter(this, databaseAction, source, metadataList,
-				permissionSystemService);
+		EmxImportWriter writer = new EmxImportWriter(databaseAction, source, parsedMetaData, targetCollection,
+				dataService, metaDataService, transactionTemplate, permissionSystemService);
 		return writer.doImport();
 
 	}
@@ -103,7 +102,7 @@ public class EmxImportService implements ImportService
 	@Override
 	public EntitiesValidationReport validateImport(File file, RepositoryCollection source)
 	{
-		return parser.validateInput(dataService, source);
+		return parser.validate(dataService, source);
 	}
 
 	@Override
