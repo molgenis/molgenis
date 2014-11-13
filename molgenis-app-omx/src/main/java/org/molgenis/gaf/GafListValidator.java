@@ -151,6 +151,7 @@ public class GafListValidator
 	private void validateInternalSampleIdIncremental(List<Entity> entities, GafListValidationReport report)
 	{
 		final String gaflistEntityName = molgenisSettings.getProperty(GafListFileRepository.GAFLIST_ENTITYNAME);
+		Map<Integer, Integer> toImportInternalSampleIds = new HashMap<Integer, Integer>();
 
 		int row = 2;
 		for (Entity entity : entities)
@@ -173,8 +174,25 @@ public class GafListValidator
 				if (internalSampleIdExists(gaflistEntityName, internalSampleId))
 				{
 					// internal sample id already exists
-					report.addEntry(runId, new GafListValidationError(row, GAFCol.INTERNAL_SAMPLE_ID.toString(),
-							internalSampleId.toString(), "Internal sample id " + internalSampleId + " already exists"));
+					report.addEntry(
+							runId,
+							new GafListValidationError(row, GAFCol.INTERNAL_SAMPLE_ID.toString(), internalSampleId
+									.toString(), "Internal sample id " + internalSampleId + " already imported"));
+				}
+				else
+				{
+					if (toImportInternalSampleIds.containsKey(internalSampleId))
+					{
+						// internal sample id already exists
+						report.addEntry(runId, new GafListValidationError(row, GAFCol.INTERNAL_SAMPLE_ID.toString(),
+								internalSampleId.toString(), "Duplicate internal sample id " + internalSampleId
+										+ ". First encountered on row "
+										+ toImportInternalSampleIds.get(internalSampleId) + " in this file"));
+					}
+					else
+					{
+						toImportInternalSampleIds.put(internalSampleId, new Integer(row));
+					}
 				}
 			}
 			catch (ConversionFailedException cfe)

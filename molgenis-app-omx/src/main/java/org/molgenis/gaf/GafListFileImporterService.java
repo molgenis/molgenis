@@ -16,8 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.google.gdata.util.ServiceException;
-
 @Service
 public class GafListFileImporterService
 {
@@ -45,7 +43,7 @@ public class GafListFileImporterService
 	FileStore fileStore;
 
 	public GafListValidationReport validateGAFList(GafListValidationReport report, MultipartFile csvFile)
-			throws IOException, ServiceException, Exception
+			throws IOException, Exception
 	{
 		report.uploadCsvFile(csvFile);
 		GafListFileRepository repo = new GafListFileRepository(report.getTempFile(), null, null, null);
@@ -54,8 +52,7 @@ public class GafListFileImporterService
 		return report;
 	}
 
-	public void importGAFList(GafListValidationReport report, String key_gaf_list_protocol_name) throws IOException,
-			ServiceException
+	public void importGAFList(GafListValidationReport report, String key_gaf_list_protocol_name) throws IOException
 	{
 		File tmpFile = fileStore.getFile(report.getTempFileName());
 

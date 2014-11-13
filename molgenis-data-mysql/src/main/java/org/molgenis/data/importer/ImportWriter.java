@@ -53,6 +53,12 @@ public class ImportWriter
 
 	private final static Logger logger = Logger.getLogger(ImportWriter.class);
 
+	/**
+	 * Creates the ImportWriter
+	 * @param dataService {@link DataService} to 
+	 * @param metaDataService {@link WritableMetaDataService} to add and update {@link EntityMetaData}
+	 * @param permissionSystemService {@link PermissionSystemService} to give permissions on uploaded entities
+	 */
 	public ImportWriter(DataService dataService, WritableMetaDataService metaDataService,
 			PermissionSystemService permissionSystemService)
 	{
@@ -72,6 +78,9 @@ public class ImportWriter
 		return job.report;
 	}
 
+	/**
+	 * Imports entity data for all entities in {@link #resolved} from {@link #source} to {@link #targetCollection}
+	 */
 	private void importData(EntityImportReport report, List<EntityMetaData> resolved, RepositoryCollection source,
 			RepositoryCollection targetCollection, DatabaseAction dbAction)
 	{
@@ -83,6 +92,9 @@ public class ImportWriter
 			if (crudRepository != null)
 			{
 				Repository fileEntityRepository = source.getRepositoryByEntityName(entityMetaData.getSimpleName());
+
+				// Try fully qualified name
+				fileEntityRepository = source.getRepositoryByEntityName(entityMetaData.getName());
 
 				// check to prevent nullpointer when importing metadata only
 				if (fileEntityRepository != null)
@@ -119,6 +131,9 @@ public class ImportWriter
 		}
 	}
 
+	/**
+	 * Adds the parsed {@link ParsedMetaData}, creating new repositories where necessary.
+	 */
 	private void addEntityMetaData(ParsedMetaData parsedMetaData, EntityImportReport report,
 			MetaDataChanges metaDataChanges, ManageableCrudRepositoryCollection targetCollection)
 	{
@@ -146,6 +161,9 @@ public class ImportWriter
 		}
 	}
 
+	/**
+	 * Adds the packages from the packages sheet to the {@link #metaDataService}.
+	 */
 	private void importPackages(ParsedMetaData parsedMetaData)
 	{
 		for (Package p : parsedMetaData.getPackages().values())
@@ -157,6 +175,9 @@ public class ImportWriter
 		}
 	}
 
+	/**
+	 * Imports the tags from the tag sheet.
+	 */
 	private void importTags(RepositoryCollection source)
 	{
 		Repository tagRepo = source.getRepositoryByEntityName(TagMetaData.ENTITY_NAME);
@@ -180,6 +201,9 @@ public class ImportWriter
 		}
 	}
 
+	/**
+	 * Drops entities and added attributes and reindexes the entities whose attributes were modified.
+	 */
 	private void rollbackSchemaChanges(RepositoryCollection source,
 			ManageableCrudRepositoryCollection targetCollection, MetaDataChanges metaDataChanges)
 	{
@@ -198,6 +222,12 @@ public class ImportWriter
 		reindex(entitiesToIndex);
 	}
 
+	/**
+	 * Reindexes entities
+	 * 
+	 * @param entitiesToIndex
+	 *            Set of entity names
+	 */
 	private void reindex(Set<String> entitiesToIndex)
 	{
 		for (String entity : entitiesToIndex)
@@ -213,6 +243,9 @@ public class ImportWriter
 		}
 	}
 
+	/**
+	 * Drops attributes from entities
+	 */
 	private List<String> dropAddedAttributes(ManageableCrudRepositoryCollection targetCollection,
 			ImmutableMap<String, Collection<AttributeMetaData>> addedAttributes)
 	{
@@ -229,6 +262,9 @@ public class ImportWriter
 		return entities;
 	}
 
+	/**
+	 * Drops added entities in the reverse order in which they were created.
+	 */
 	private void dropAddedEntities(ManageableCrudRepositoryCollection targetCollection, List<String> addedEntities)
 	{
 		// Rollback metadata, create table statements cannot be rolled back, we have to do it ourselves
@@ -241,6 +277,17 @@ public class ImportWriter
 		}
 	}
 
+	/**
+	 * Updates a repository with entities.
+	 * 
+	 * @param repo
+	 *            the {@link Repository} to update
+	 * @param entities
+	 *            the entities to
+	 * @param dbAction
+	 *            {@link DatabaseAction} describing how to merge the existing entities
+	 * @return number of updated entities
+	 */
 	public int update(CrudRepository repo, Iterable<? extends Entity> entities, DatabaseAction dbAction)
 	{
 		if (entities == null) return 0;
@@ -413,6 +460,12 @@ public class ImportWriter
 		}
 	}
 
+	/**
+	 * Does the import in a transaction. Manually rolls back schema changes if something goes wrong. Refreshes the
+	 * metadata.
+	 * 
+	 * @return {@link EntityImportReport} describing what happened
+	 */
 	public EntityImportReport doImport(EmxImportJob job)
 	{
 		try

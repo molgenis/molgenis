@@ -4,6 +4,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.persistence.QueryTimeoutException;
 
@@ -35,17 +37,17 @@ public class AsyncJdbcTemplate
 			public void run()
 			{
 				jdbcTemplate.execute(sql);
-				LOG.info("Executed " + sql);
+				LOG.debug("Executed " + sql);
 			}
 		});
 
 		try
 		{
-			result.get();
+			result.get(30, TimeUnit.SECONDS);
 		}
-		catch (InterruptedException e)
+		catch (InterruptedException | TimeoutException e)
 		{
-			LOG.warn("Interrupted awaiting SQL statement", e);
+			LOG.warn("Interrupted awaiting SQL statement: " + sql, e);
 			throw new QueryTimeoutException(e);
 		}
 		catch (ExecutionException e)

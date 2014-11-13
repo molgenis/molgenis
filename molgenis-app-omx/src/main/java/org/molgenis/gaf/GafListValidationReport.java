@@ -43,15 +43,17 @@ public class GafListValidationReport
 		validationGlobalErrorMessages = new ArrayList<String>();
 	}
 
+	@SuppressWarnings("unchecked")
 	public void addEntry(String runId, GafListValidationError validationError)
 	{
-		List<GafListValidationError> runEntries = validationErrorsPerRunId.get(runId);
-		if (runEntries == null)
+		List<GafListValidationError> gafListValidationErrorList = validationErrorsPerRunId.get(runId);
+		if (gafListValidationErrorList == null)
 		{
-			runEntries = new ArrayList<GafListValidationError>();
-			validationErrorsPerRunId.put(runId, runEntries);
+			gafListValidationErrorList = new ArrayList<GafListValidationError>();
+			validationErrorsPerRunId.put(runId, gafListValidationErrorList);
 		}
-		runEntries.add(validationError);
+		gafListValidationErrorList.add(validationError);
+		Collections.<GafListValidationError> sort(gafListValidationErrorList);
 	}
 
 	public void addGlobalErrorMessage(String globalErrorMessage)
