@@ -186,7 +186,8 @@ public class GafListValidator
 						// internal sample id already exists
 						report.addEntry(runId, new GafListValidationError(row, GAFCol.INTERNAL_SAMPLE_ID.toString(),
 								internalSampleId.toString(), "Duplicate internal sample id " + internalSampleId
-										+ ". First encountered on row " + row + " in this file"));
+										+ ". First encountered on row "
+										+ toImportInternalSampleIds.get(internalSampleId) + " in this file"));
 					}
 					else
 					{
