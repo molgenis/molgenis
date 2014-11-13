@@ -12,11 +12,9 @@ import org.molgenis.data.meta.WritableMetaDataService;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
-import org.molgenis.security.permission.PermissionSystemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.StringUtils;
 
@@ -32,18 +30,20 @@ public class EmxImportService implements ImportService
 	MysqlRepositoryCollection targetCollection;
 	TransactionTemplate transactionTemplate;
 	final DataService dataService;
-	private PermissionSystemService permissionSystemService;
 	WritableMetaDataService metaDataService;
-	PlatformTransactionManager platformTransactionManager;
 	final MetaDataParser parser;
+	final ImportWriter writer;
 
 	@Autowired
-	public EmxImportService(DataService dataService, MetaDataParser parser)
+	public EmxImportService(DataService dataService, MetaDataParser parser, ImportWriter writer)
 	{
 		if (dataService == null) throw new IllegalArgumentException("dataService is null");
+		if (parser == null) throw new IllegalArgumentException("parser is null");
+		if (writer == null) throw new IllegalArgumentException("writer is null");
 		logger.debug("EmxImportService created");
 		this.dataService = dataService;
 		this.parser = parser;
+		this.writer = writer;
 	}
 
 	@Autowired
@@ -54,18 +54,6 @@ public class EmxImportService implements ImportService
 		this.metaDataService = metaDataService;
 		logger.debug("EmxImportService created with targetCollection=" + targetCollection + " and metaDataService="
 				+ metaDataService);
-	}
-
-	@Autowired
-	public void setPlatformTransactionManager(PlatformTransactionManager transactionManager)
-	{
-		this.platformTransactionManager = transactionManager;
-	}
-
-	@Autowired
-	public void setPermissionSystemService(PermissionSystemService permissionSystemService)
-	{
-		this.permissionSystemService = permissionSystemService;
 	}
 
 	@Override
@@ -93,9 +81,7 @@ public class EmxImportService implements ImportService
 		ParsedMetaData parsedMetaData = parser.parse(dataService, source);
 
 		// TODO altered entities (merge, see getEntityMetaData)
-		EmxImportWriter writer = new EmxImportWriter(databaseAction, source, parsedMetaData, targetCollection,
-				dataService, metaDataService, transactionTemplate, permissionSystemService);
-		return writer.doImport();
+		return writer.doImport(new EmxImportJob(databaseAction, source, parsedMetaData, targetCollection));
 
 	}
 

@@ -24,11 +24,6 @@ import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionException;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.SimpleTransactionStatus;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -36,25 +31,6 @@ import org.testng.annotations.Test;
 @ContextConfiguration(classes = AppConfig.class)
 public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 {
-	private static class SimplePlatformTransactionManager implements PlatformTransactionManager
-	{
-		@Override
-		public TransactionStatus getTransaction(TransactionDefinition definition) throws TransactionException
-		{
-			return new SimpleTransactionStatus();
-		}
-
-		@Override
-		public void commit(TransactionStatus status) throws TransactionException
-		{
-		}
-
-		@Override
-		public void rollback(TransactionStatus status) throws TransactionException
-		{
-		}
-	}
-
 	@Autowired
 	MysqlRepositoryCollection store;
 
@@ -81,10 +57,9 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
 
 		// create importer
-		EmxImportService importer = new EmxImportService(dataService, new EmxMetaDataParser());
+		EmxImportService importer = new EmxImportService(dataService, new EmxMetaDataParser(mysqlMetaDataRepositories),
+				new ImportWriter(dataService, mysqlMetaDataRepositories, permissionSystemService));
 		importer.setRepositoryCollection(store, mysqlMetaDataRepositories);
-		importer.setPlatformTransactionManager(new SimplePlatformTransactionManager());
-		importer.setPermissionSystemService(permissionSystemService);
 
 		// generate report
 		EntitiesValidationReport report = importer.validateImport(f, source);
@@ -131,10 +106,9 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		Assert.assertEquals(source.getNumberOfSheets(), 4);
 		Assert.assertNotNull(source.getRepositoryByEntityName("attributes"));
 
-		EmxImportService importer = new EmxImportService(dataService, new EmxMetaDataParser());
+		EmxImportService importer = new EmxImportService(dataService, new EmxMetaDataParser(mysqlMetaDataRepositories),
+				new ImportWriter(dataService, mysqlMetaDataRepositories, permissionSystemService));
 		importer.setRepositoryCollection(store, mysqlMetaDataRepositories);
-		importer.setPlatformTransactionManager(new SimplePlatformTransactionManager());
-		importer.setPermissionSystemService(permissionSystemService);
 
 		// test import
 		EntityImportReport report = importer.doImport(source, DatabaseAction.ADD);
@@ -177,10 +151,9 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		File f = ResourceUtils.getFile(getClass(), "/example.xlsx");
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
 
-		EmxImportService importer = new EmxImportService(dataService, new EmxMetaDataParser());
+		EmxImportService importer = new EmxImportService(dataService, new EmxMetaDataParser(mysqlMetaDataRepositories),
+				new ImportWriter(dataService, mysqlMetaDataRepositories, permissionSystemService));
 		importer.setRepositoryCollection(store, mysqlMetaDataRepositories);
-		importer.setPlatformTransactionManager(new SimplePlatformTransactionManager());
-		importer.setPermissionSystemService(permissionSystemService);
 
 		// test import
 		importer.doImport(source, DatabaseAction.ADD);

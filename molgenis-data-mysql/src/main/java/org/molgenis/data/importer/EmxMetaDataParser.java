@@ -22,11 +22,11 @@ import static org.molgenis.data.meta.EntityMetaDataMetaData.EXTENDS;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.PACKAGE;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
@@ -42,6 +42,7 @@ import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.importer.ImmutableEntitiesValidationReport.AttributeState;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.PackageImpl;
 import org.molgenis.data.meta.PackageMetaData;
 import org.molgenis.data.meta.TagMetaData;
@@ -55,12 +56,15 @@ import org.molgenis.fieldtypes.LongField;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.framework.db.EntitiesValidationReport;
+import org.molgenis.util.DependencyResolver;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.util.StringUtils;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 /**
  * Parser for the EMX metadata.
@@ -84,6 +88,13 @@ public class EmxMetaDataParser implements MetaDataParser
 			RANGE_MIN.toLowerCase(), READ_ONLY.toLowerCase(), REF_ENTITY.toLowerCase(), VISIBLE.toLowerCase(),
 			UNIQUE.toLowerCase(), org.molgenis.data.meta.AttributeMetaDataMetaData.TAGS.toLowerCase());
 
+	private final MetaDataService metaDataService;
+
+	public EmxMetaDataParser(MetaDataService metaDataService)
+	{
+		this.metaDataService = metaDataService;
+	}
+
 	/**
 	 * Parses metadata from a collection of repositories and creates a list of EntityMetaData
 	 * 
@@ -102,7 +113,7 @@ public class EmxMetaDataParser implements MetaDataParser
 		parsePackagesSheetToEntityMap(source, entities);
 		reiterateToMapRefEntity(source, entities);
 
-		return Collections.<String, EntityMetaData> unmodifiableMap(entities);
+		return ImmutableMap.<String, EntityMetaData> copyOf(entities);
 	}
 
 	/**
@@ -491,7 +502,22 @@ public class EmxMetaDataParser implements MetaDataParser
 				metadataList.add(dataService.getRepositoryByEntityName(name).getEntityMetaData());
 			}
 		}
-		return ParsedMetaData.create(metadataList, parsePackagesSheet(source));
+
+		return ParsedMetaData.create(resolveEntityDependencies(metadataList), parsePackagesSheet(source));
+	}
+
+	private List<EntityMetaData> resolveEntityDependencies(List<EntityMetaData> metaDataList)
+	{
+		Set<EntityMetaData> allMetaData = Sets.newLinkedHashSet(metaDataList);
+		Iterable<EntityMetaData> existingMetaData = metaDataService.getEntityMetaDatas();
+		Iterables.addAll(allMetaData, existingMetaData);
+
+		// Use all metadata for dependency resolving
+		List<EntityMetaData> resolved = DependencyResolver.resolve(allMetaData);
+
+		// Only import source
+		resolved.retainAll(metaDataList);
+		return resolved;
 	}
 
 	private Map<String, EntityMetaData> combineMetaDataToMap(DataService dataService, RepositoryCollection source)

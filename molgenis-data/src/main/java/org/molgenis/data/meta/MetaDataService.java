@@ -35,4 +35,6 @@ public interface MetaDataService
 	 * 
 	 */
 	void refreshCaches();
+
+	Iterable<EntityMetaData> getEntityMetaDatas();
 }

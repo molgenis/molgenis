@@ -22,10 +22,27 @@ public abstract class ParsedMetaData
 		return new AutoValue_ParsedMetaData(ImmutableList.copyOf(entities), ImmutableMap.copyOf(map));
 	}
 
+	/**
+	 * Gets the entities, in resolved order.
+	 * 
+	 * @return
+	 */
 	public abstract ImmutableList<EntityMetaData> getEntities();
 
+	/**
+	 * Gets the packages
+	 * 
+	 * @return
+	 */
 	public abstract ImmutableMap<String, org.molgenis.data.Package> getPackages();
 
+	/**
+	 * Gets a specific package
+	 * 
+	 * @param name
+	 *            the name of the package
+	 * @return
+	 */
 	public org.molgenis.data.Package getPackage(String name)
 	{
 		return getPackages().get(name);

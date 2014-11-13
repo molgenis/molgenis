@@ -8,7 +8,6 @@ import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
@@ -32,73 +31,46 @@ import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.DependencyResolver;
 import org.molgenis.util.HugeSet;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 /**
- * Writes the imported metadata and data to target {@link RepositoryCollection}
+ * Writes the imported metadata and data to target {@link RepositoryCollection}.
  */
-final class EmxImportWriter implements TransactionCallback<Void>
+public class ImportWriter
 {
-	private final RepositoryCollection source;
-	private final ParsedMetaData parsedMetaData;
-	private final List<String> addedEntities = Lists.newArrayList();
-	private final Map<String, List<String>> addedAttributes = Maps.newLinkedHashMap();;// Attributes per entity
-	private final DatabaseAction dbAction;
 	private final PermissionSystemService permissionSystemService;
-	private final EntityImportReport report = new EntityImportReport();
-	private final ManageableCrudRepositoryCollection targetCollection;
+
 	private final DataService dataService;
 	private final WritableMetaDataService metaDataService;
-	private final TransactionTemplate transactionTemplate;
-	private final List<EntityMetaData> resolved;
 
-	private final static Logger logger = Logger.getLogger(EmxImportWriter.class);
+	private final static Logger logger = Logger.getLogger(ImportWriter.class);
 
-	EmxImportWriter(DatabaseAction dbAction, RepositoryCollection source, ParsedMetaData parsedMetaData,
-			ManageableCrudRepositoryCollection target, DataService dataService,
-			WritableMetaDataService metaDataService, TransactionTemplate transactionTemplate,
+	public ImportWriter(DataService dataService, WritableMetaDataService metaDataService,
 			PermissionSystemService permissionSystemService)
 	{
 		this.permissionSystemService = permissionSystemService;
-		this.dbAction = dbAction;
-		this.source = source;
-		this.parsedMetaData = parsedMetaData;
-		this.targetCollection = target;
 		this.dataService = dataService;
 		this.metaDataService = metaDataService;
-		this.transactionTemplate = transactionTemplate;
-		resolved = resolveEntityDependencies();
 	}
 
-	@Override
-	public Void doInTransaction(TransactionStatus status)
+	@Transactional
+	public EntityImportReport doTransactionalImport(EmxImportJob job)
 	{
-		try
-		{
-			importTags();
-			importPackages();
-			addEntityMetaData();
-			addEntityPermissions();
-			importData();
-			return null;
-		}
-		catch (Exception e)
-		{
-			EmxImportService.logger.info("Error in import transaction, setRollbackOnly", e);
-			status.setRollbackOnly();
-			throw e;
-		}
+		importTags(job.source);
+		importPackages(job.parsedMetaData);
+		addEntityMetaData(job.parsedMetaData, job.report, job.metaDataChanges, job.target);
+		addEntityPermissions(job.metaDataChanges);
+		importData(job.report, job.parsedMetaData.getEntities(), job.source, job.target, job.dbAction);
+		return job.report;
 	}
 
-	private void importData()
+	private void importData(EntityImportReport report, List<EntityMetaData> resolved, RepositoryCollection source,
+			RepositoryCollection targetCollection, DatabaseAction dbAction)
 	{
 		for (final EntityMetaData entityMetaData : resolved)
 		{
@@ -125,7 +97,7 @@ final class EmxImportWriter implements TransactionCallback<Void>
 					entities = DependencyResolver.resolveSelfReferences(entities, entityMetaData);
 
 					int count = update(crudRepository, entities, dbAction);
-					report.getNrImportedEntitiesMap().put(name, count);
+					report.addEntityCount(name, count);
 				}
 			}
 		}
@@ -135,17 +107,19 @@ final class EmxImportWriter implements TransactionCallback<Void>
 	 * Gives the user permission to see and edit his imported entities, unless the user is admin since admins can do
 	 * that anyways.
 	 */
-	private void addEntityPermissions()
+	private void addEntityPermissions(MetaDataChanges metaDataChanges)
 	{
 		if (!SecurityUtils.currentUserIsSu())
 		{
-			permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(), addedEntities);
+			permissionSystemService.giveUserEntityAndMenuPermissions(SecurityContextHolder.getContext(),
+					metaDataChanges.getAddedEntities());
 		}
 	}
 
-	private void addEntityMetaData()
+	private void addEntityMetaData(ParsedMetaData parsedMetaData, EntityImportReport report,
+			MetaDataChanges metaDataChanges, ManageableCrudRepositoryCollection targetCollection)
 	{
-		for (EntityMetaData entityMetaData : resolved)
+		for (EntityMetaData entityMetaData : parsedMetaData.getEntities())
 		{
 			String name = entityMetaData.getName();
 			if (!EmxMetaDataParser.ENTITIES.equals(name) && !EmxMetaDataParser.ATTRIBUTES.equals(name)
@@ -153,8 +127,8 @@ final class EmxImportWriter implements TransactionCallback<Void>
 			{
 				if (metaDataService.getEntityMetaData(entityMetaData.getName()) == null)
 				{
-					EmxImportService.logger.debug("tyring to create: " + name);
-					addedEntities.add(name);
+					logger.debug("tyring to create: " + name);
+					metaDataChanges.addEntity(name);
 					Repository repo = targetCollection.add(entityMetaData);
 					if (repo != null)
 					{
@@ -163,39 +137,13 @@ final class EmxImportWriter implements TransactionCallback<Void>
 				}
 				else if (!entityMetaData.isAbstract())
 				{
-					List<String> addedEntityAttributes = Lists.transform(targetCollection.update(entityMetaData),
-							new Function<AttributeMetaData, String>()
-							{
-								@Override
-								public String apply(AttributeMetaData input)
-								{
-									return input.getName();
-								}
-							});
-					if ((addedEntityAttributes != null) && !addedEntityAttributes.isEmpty())
-					{
-						addedAttributes.put(name, addedEntityAttributes);
-					}
+					metaDataChanges.addAttributes(name, targetCollection.update(entityMetaData));
 				}
 			}
 		}
 	}
 
-	private List<EntityMetaData> resolveEntityDependencies()
-	{
-		Set<EntityMetaData> allMetaData = Sets.newLinkedHashSet(parsedMetaData.getEntities());
-		Iterable<EntityMetaData> existingMetaData = metaDataService.getEntityMetaDatas();
-		Iterables.addAll(allMetaData, existingMetaData);
-
-		// Use all metadata for dependency resolving
-		List<EntityMetaData> resolved = DependencyResolver.resolve(allMetaData);
-
-		// Only import source
-		resolved.retainAll(parsedMetaData.getEntities());
-		return resolved;
-	}
-
-	private void importPackages()
+	private void importPackages(ParsedMetaData parsedMetaData)
 	{
 		for (Package p : parsedMetaData.getPackages().values())
 		{
@@ -206,7 +154,7 @@ final class EmxImportWriter implements TransactionCallback<Void>
 		}
 	}
 
-	private void importTags()
+	private void importTags(RepositoryCollection source)
 	{
 		Repository tagRepo = source.getRepositoryByEntityName(TagMetaData.ENTITY_NAME);
 		if (tagRepo != null)
@@ -229,11 +177,13 @@ final class EmxImportWriter implements TransactionCallback<Void>
 		}
 	}
 
-	private void rollbackSchemaChanges()
+	private void rollbackSchemaChanges(RepositoryCollection source,
+			ManageableCrudRepositoryCollection targetCollection, List<String> addedEntities,
+			Map<String, List<String>> addedAttributes)
 	{
 		logger.info("Rolling back changes.");
-		dropAddedEntities(addedEntities);
-		List<String> entities = dropAddedAttributes(addedAttributes);
+		dropAddedEntities(targetCollection, addedEntities);
+		List<String> entities = dropAddedAttributes(targetCollection, addedAttributes);
 
 		// Reindex
 		Set<String> entitiesToIndex = Sets.newLinkedHashSet(source.getEntityNames());
@@ -261,7 +211,8 @@ final class EmxImportWriter implements TransactionCallback<Void>
 		}
 	}
 
-	private List<String> dropAddedAttributes(Map<String, List<String>> addedAttributes)
+	private List<String> dropAddedAttributes(ManageableCrudRepositoryCollection targetCollection,
+			Map<String, List<String>> addedAttributes)
 	{
 		List<String> entities = Lists.newArrayList(addedAttributes.keySet());
 		Collections.reverse(entities);
@@ -277,9 +228,9 @@ final class EmxImportWriter implements TransactionCallback<Void>
 		return entities;
 	}
 
-	private void dropAddedEntities(List<String> addedEntities)
+	private void dropAddedEntities(ManageableCrudRepositoryCollection targetCollection, List<String> addedEntities)
 	{
-		// Rollback metadata, create table statements cannot be rolled back, we have to do it ourselfs
+		// Rollback metadata, create table statements cannot be rolled back, we have to do it ourselves
 		Collections.reverse(addedEntities);
 
 		for (String entityName : addedEntities)
@@ -460,16 +411,15 @@ final class EmxImportWriter implements TransactionCallback<Void>
 		}
 	}
 
-	public EntityImportReport doImport()
+	public EntityImportReport doImport(EmxImportJob job)
 	{
 		try
 		{
-			transactionTemplate.execute(this);
-			return report;
+			return doTransactionalImport(job);
 		}
 		catch (Exception e)
 		{
-			rollbackSchemaChanges();
+			rollbackSchemaChanges(job.source, job.target, null, null);
 			throw e;
 		}
 		finally

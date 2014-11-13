@@ -11,7 +11,7 @@
 
     <artifactId>molgenis-data-mysql</artifactId>
 
-	<build>
+	<!-- <build>
 		<plugins>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -32,7 +32,7 @@
 				</executions>
 			</plugin>
 		</plugins>
-	</build>
+	</build> -->
 
     <dependencies>
         <dependency>
