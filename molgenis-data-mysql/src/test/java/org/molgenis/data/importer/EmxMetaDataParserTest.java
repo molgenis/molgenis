@@ -17,7 +17,7 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
-import org.molgenis.data.importer.ImmutableEntitiesValidationReport.AttributeState;
+import org.molgenis.data.importer.MyEntitiesValidationReport.AttributeState;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -58,10 +58,10 @@ public class EmxMetaDataParserTest extends AbstractTestNGSpringContextTests
 		EntitiesValidationReport report = parser.validate(dataService, source);
 		// test report
 		assertTrue(report.valid());
-		EntitiesValidationReport expected = ImmutableEntitiesValidationReport.createNew()
-				.addEntity("import_person", true).addAttribute("firstName").addAttribute("lastName")
-				.addAttribute("height").addAttribute("active").addAttribute("children").addAttribute("birthplace")
-				.addEntity("import_city", true).addAttribute("name");
+		EntitiesValidationReport expected = new MyEntitiesValidationReport().addEntity("import_person", true)
+				.addAttribute("firstName").addAttribute("lastName").addAttribute("height").addAttribute("active")
+				.addAttribute("children").addAttribute("birthplace").addEntity("import_city", true)
+				.addAttribute("name");
 		assertEquals(report, expected);
 	}
 
@@ -77,10 +77,10 @@ public class EmxMetaDataParserTest extends AbstractTestNGSpringContextTests
 		EntitiesValidationReport report = parser.validate(dataService, source);
 		// test report
 		assertFalse(report.valid());
-		EntitiesValidationReport expected = ImmutableEntitiesValidationReport.createNew()
-				.addEntity("import_person", true).addAttribute("firstName").addAttribute("lastName")
-				.addAttribute("height").addAttribute("active").addAttribute("children").addAttribute("birthplace")
-				.addAttribute("birthday", AttributeState.REQUIRED).addAttribute("unknownField", AttributeState.UNKNOWN)
+		EntitiesValidationReport expected = new MyEntitiesValidationReport().addEntity("import_person", true)
+				.addAttribute("firstName").addAttribute("lastName").addAttribute("height").addAttribute("active")
+				.addAttribute("children").addAttribute("birthplace").addAttribute("birthday", AttributeState.REQUIRED)
+				.addAttribute("unknownField", AttributeState.UNKNOWN)
 				.addAttribute("otherAttribute", AttributeState.AVAILABLE).addEntity("import_city", true)
 				.addAttribute("name").addEntity("unknown_entity", false).addEntity("unknown_fields", false);
 		assertEquals(report, expected);
@@ -116,9 +116,9 @@ public class EmxMetaDataParserTest extends AbstractTestNGSpringContextTests
 
 		// test import
 		EntitiesValidationReport report = parser.validate(dataService, source_no_meta);
-		EntitiesValidationReport expected = ImmutableEntitiesValidationReport.createNew()
-				.addEntity("import_person", true).addAttribute("firstName").addAttribute("lastName")
-				.addAttribute("height").addAttribute("active").addAttribute("children").addAttribute("birthplace")
+		EntitiesValidationReport expected = new MyEntitiesValidationReport().addEntity("import_person", true)
+				.addAttribute("firstName").addAttribute("lastName").addAttribute("height").addAttribute("active")
+				.addAttribute("children").addAttribute("birthplace")
 				.addAttribute("otherAttribute", AttributeState.AVAILABLE).addEntity("import_city", true)
 				.addAttribute("name");
 		assertEquals(report, expected);

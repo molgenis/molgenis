@@ -42,7 +42,7 @@ import org.molgenis.data.Package;
 import org.molgenis.data.Range;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.importer.ImmutableEntitiesValidationReport.AttributeState;
+import org.molgenis.data.importer.MyEntitiesValidationReport.AttributeState;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
@@ -628,7 +628,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	@Override
 	public EntitiesValidationReport validate(DataService dataService, RepositoryCollection source)
 	{
-		ImmutableEntitiesValidationReport report = ImmutableEntitiesValidationReport.createNew();
+		MyEntitiesValidationReport report = new MyEntitiesValidationReport();
 
 		Map<String, EntityMetaData> metaDataMap = combineMetaDataToMap(dataService, source);
 

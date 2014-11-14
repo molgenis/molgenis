@@ -55,9 +55,13 @@ public class ImportWriter
 
 	/**
 	 * Creates the ImportWriter
-	 * @param dataService {@link DataService} to 
-	 * @param metaDataService {@link WritableMetaDataService} to add and update {@link EntityMetaData}
-	 * @param permissionSystemService {@link PermissionSystemService} to give permissions on uploaded entities
+	 * 
+	 * @param dataService
+	 *            {@link DataService} to
+	 * @param metaDataService
+	 *            {@link WritableMetaDataService} to add and update {@link EntityMetaData}
+	 * @param permissionSystemService
+	 *            {@link PermissionSystemService} to give permissions on uploaded entities
 	 */
 	public ImportWriter(DataService dataService, WritableMetaDataService metaDataService,
 			PermissionSystemService permissionSystemService)
@@ -145,7 +149,7 @@ public class ImportWriter
 			{
 				if (metaDataService.getEntityMetaData(entityMetaData.getName()) == null)
 				{
-					logger.debug("tyring to create: " + name);
+					logger.debug("trying to create: " + name);
 					metaDataChanges.addEntity(name);
 					Repository repo = targetCollection.add(entityMetaData);
 					if (repo != null)
