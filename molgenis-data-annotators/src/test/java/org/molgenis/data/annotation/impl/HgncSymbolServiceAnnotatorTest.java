@@ -62,11 +62,11 @@ public class HgncSymbolServiceAnnotatorTest
 		when(attributeMetaDataPos.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.LONG.toString().toLowerCase()));
 
-        metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom);
-        metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);
-        metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom.getName());
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom);
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);
+		metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom.getName());
 
-        metaDataCantAnnotate = mock(EntityMetaData.class);
+		metaDataCantAnnotate = mock(EntityMetaData.class);
 
 		attributeMetaDataCantAnnotateFeature = mock(AttributeMetaData.class);
 		when(attributeMetaDataCantAnnotateFeature.getName()).thenReturn("otherID");

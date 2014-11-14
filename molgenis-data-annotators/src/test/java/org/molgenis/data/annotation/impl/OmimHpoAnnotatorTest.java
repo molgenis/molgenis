@@ -49,9 +49,9 @@ public class OmimHpoAnnotatorTest
 	{
 		AnnotationService annotationService = mock(AnnotationService.class);
 
-        metaDataCanAnnotate = new org.molgenis.data.support.DefaultEntityMetaData("test");
+		metaDataCanAnnotate = new org.molgenis.data.support.DefaultEntityMetaData("test");
 
-        attributeMetaDataChrom = mock(AttributeMetaData.class);
+		attributeMetaDataChrom = mock(AttributeMetaData.class);
 		attributeMetaDataPos = mock(AttributeMetaData.class);
 
 		when(attributeMetaDataChrom.getName()).thenReturn(OmimHpoAnnotator.CHROMOSOME);
@@ -62,11 +62,11 @@ public class OmimHpoAnnotatorTest
 		when(attributeMetaDataPos.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.LONG.toString().toLowerCase()));
 
-        metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom);
-        metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);
-        metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom.getName());
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom);
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);
+		metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom.getName());
 
-        metaDataCantAnnotate = mock(EntityMetaData.class);
+		metaDataCantAnnotate = mock(EntityMetaData.class);
 		attributeMetaDataCantAnnotateFeature = mock(AttributeMetaData.class);
 
 		when(attributeMetaDataCantAnnotateFeature.getName()).thenReturn("otherID");

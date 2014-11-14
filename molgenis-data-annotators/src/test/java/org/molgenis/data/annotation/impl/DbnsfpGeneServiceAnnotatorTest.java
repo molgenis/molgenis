@@ -53,21 +53,21 @@ public class DbnsfpGeneServiceAnnotatorTest
 		when(hgncLocationsProvider.getHgncLocations()).thenReturn(locationsMap);
 		annotator = new DbnsfpGeneServiceAnnotator(settings, annotationService, hgncLocationsProvider);
 
-        attributeMetaDataChrom = mock(AttributeMetaData.class);
-        attributeMetaDataPos = mock(AttributeMetaData.class);
-        when(attributeMetaDataChrom.getName()).thenReturn(DbnsfpGeneServiceAnnotator.CHROMOSOME);
-        when(attributeMetaDataPos.getName()).thenReturn(DbnsfpGeneServiceAnnotator.POSITION);
+		attributeMetaDataChrom = mock(AttributeMetaData.class);
+		attributeMetaDataPos = mock(AttributeMetaData.class);
+		when(attributeMetaDataChrom.getName()).thenReturn(DbnsfpGeneServiceAnnotator.CHROMOSOME);
+		when(attributeMetaDataPos.getName()).thenReturn(DbnsfpGeneServiceAnnotator.POSITION);
 
-        when(attributeMetaDataChrom.getDataType()).thenReturn(
-                MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
-        when(attributeMetaDataPos.getDataType()).thenReturn(
-                MolgenisFieldTypes.getType(FieldTypeEnum.LONG.toString().toLowerCase()));
+		when(attributeMetaDataChrom.getDataType()).thenReturn(
+				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
+		when(attributeMetaDataPos.getDataType()).thenReturn(
+				MolgenisFieldTypes.getType(FieldTypeEnum.LONG.toString().toLowerCase()));
 
-        metaDataCanAnnotate = new DefaultEntityMetaData("test");
-        metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom);
-        metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);
-        metaDataCanAnnotate.setIdAttribute(DbnsfpGeneServiceAnnotator.POSITION);
-        metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom.getName());
+		metaDataCanAnnotate = new DefaultEntityMetaData("test");
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom);
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);
+		metaDataCanAnnotate.setIdAttribute(DbnsfpGeneServiceAnnotator.POSITION);
+		metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom.getName());
 
 		metaDataCantAnnotate = mock(EntityMetaData.class);
 		attributeMetaDataCantAnnotateFeature = mock(AttributeMetaData.class);

@@ -57,8 +57,8 @@ public class EbiServiceAnnotatorTest
 		when(attributeMetaDataCanAnnotate.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
 
-        metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataCanAnnotate);
-        metaDataCanAnnotate.setIdAttribute(attributeMetaDataCanAnnotate.getName());
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataCanAnnotate);
+		metaDataCanAnnotate.setIdAttribute(attributeMetaDataCanAnnotate.getName());
 		metaDataCantAnnotate = mock(EntityMetaData.class);
 		attributeMetaDataCantAnnotate = mock(AttributeMetaData.class);
 		when(attributeMetaDataCantAnnotate.getName()).thenReturn("otherID");

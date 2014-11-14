@@ -72,10 +72,10 @@ public class CaddServiceAnnotatorTest
 				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
 
 		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom);
-        metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);
-        metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataRef);
-        metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataAlt);
-        metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom.getName());
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataRef);
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataAlt);
+		metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom.getName());
 		metaDataCantAnnotate = mock(EntityMetaData.class);
 
 		attributeMetaDataCantAnnotateFeature = mock(AttributeMetaData.class);

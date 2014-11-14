@@ -51,14 +51,13 @@ public class CosmicServiceAnnotatorTest
 		this.httpClient = mock(HttpClient.class);
 		annotator = new CosmicServiceAnnotator(this.httpClient);
 
-        attributeMetaDataCanAnnotate = mock(AttributeMetaData.class);
-        when(attributeMetaDataCanAnnotate.getName()).thenReturn("ensemblId");
-        when(attributeMetaDataCanAnnotate.getDataType()).thenReturn(
-                MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
-        metaDataCanAnnotate = new DefaultEntityMetaData("test");
-        metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataCanAnnotate);
-        metaDataCanAnnotate.setIdAttribute("ensemblId");
-
+		attributeMetaDataCanAnnotate = mock(AttributeMetaData.class);
+		when(attributeMetaDataCanAnnotate.getName()).thenReturn("ensemblId");
+		when(attributeMetaDataCanAnnotate.getDataType()).thenReturn(
+				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
+		metaDataCanAnnotate = new DefaultEntityMetaData("test");
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataCanAnnotate);
+		metaDataCanAnnotate.setIdAttribute("ensemblId");
 
 		metaDataCantAnnotate = mock(EntityMetaData.class);
 		attributeMetaDataCantAnnotate = mock(AttributeMetaData.class);

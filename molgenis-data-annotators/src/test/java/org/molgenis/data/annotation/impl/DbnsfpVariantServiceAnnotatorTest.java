@@ -47,9 +47,9 @@ public class DbnsfpVariantServiceAnnotatorTest
 		when(settings.getProperty(DbnsfpVariantServiceAnnotator.CHROMOSOME_FILE_LOCATION_PROPERTY)).thenReturn(
 				ResourceUtils.getFile(getClass(), "/dbNSFP_variant_example_chr").getPath());
 
-        metaDataCanAnnotate = new DefaultEntityMetaData("test");
+		metaDataCanAnnotate = new DefaultEntityMetaData("test");
 
-        attributeMetaDataChrom = mock(AttributeMetaData.class);
+		attributeMetaDataChrom = mock(AttributeMetaData.class);
 		attributeMetaDataPos = mock(AttributeMetaData.class);
 		attributeMetaDataRef = mock(AttributeMetaData.class);
 		attributeMetaDataAlt = mock(AttributeMetaData.class);
@@ -68,13 +68,11 @@ public class DbnsfpVariantServiceAnnotatorTest
 		when(attributeMetaDataAlt.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
 
-        metaDataCanAnnotate.addAttributeMetaData(
-				attributeMetaDataChrom);
-        metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);
-        metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataRef);
-        metaDataCanAnnotate.addAttributeMetaData(
-				attributeMetaDataAlt);
-        metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom.getName());
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom);
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataRef);
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataAlt);
+		metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom.getName());
 		metaDataCantAnnotate = mock(EntityMetaData.class);
 
 		attributeMetaDataCantAnnotateFeature = mock(AttributeMetaData.class);
