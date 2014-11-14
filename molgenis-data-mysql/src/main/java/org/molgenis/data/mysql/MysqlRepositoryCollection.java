@@ -248,13 +248,17 @@ public abstract class MysqlRepositoryCollection implements ManageableCrudReposit
 				metaDataRepositories.addAttributeMetaData(sourceEntityMetaData.getName(), attr);
 				DefaultEntityMetaData defaultEntityMetaData = (DefaultEntityMetaData) repository.getEntityMetaData();
 				defaultEntityMetaData.addAttributeMetaData(attr);
-				if(attr.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND)) {
-                    for (AttributeMetaData attrPart : attr.getAttributeParts()){
-                        repository.addAttribute(attrPart);
-                    }
-                }else{
-                    repository.addAttribute(attr);
-                }
+				if (attr.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
+				{
+					for (AttributeMetaData attrPart : attr.getAttributeParts())
+					{
+						repository.addAttribute(attrPart);
+					}
+				}
+				else
+				{
+					repository.addAttribute(attr);
+				}
 				addedAttributes.add(attr);
 			}
 		}
