@@ -6,7 +6,13 @@ import java.util.UUID;
 
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.*;
+
+import org.molgenis.data.CrudRepository;
+import org.molgenis.data.Repository;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.EditableEntityMetaData;
+import org.molgenis.data.Entity;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -66,12 +72,8 @@ public class CrudRepositoryAnnotator
         while (entityIterator.hasNext())
 		{
 			Entity entity = entityIterator.next();
+            crudRepository.update(entity);
 
-            try {
-                crudRepository.update(entity);
-            }catch(Exception e){
-                e.printStackTrace();
-            }
 		}
 
 		return crudRepository;
