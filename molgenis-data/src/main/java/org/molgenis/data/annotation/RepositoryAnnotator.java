@@ -19,14 +19,14 @@ public interface RepositoryAnnotator
 	 * 
 	 * @return ouputMetadata
 	 */
-    EntityMetaData getOutputMetaData();
+	EntityMetaData getOutputMetaData();
 
 	/**
 	 * Returns a entityMetaData containing the attributes needed for the annotator to work
 	 * 
 	 * @return inputMetaData;
 	 */
-    EntityMetaData getInputMetaData();
+	EntityMetaData getInputMetaData();
 
 	/**
 	 * Returns if the annotator will work for the given metadata

@@ -120,9 +120,9 @@ public class VcfRepository extends AbstractRepository
 					entity.set(REF, vcfRecord.getReferenceAllele().toString());
 					entity.set(FILTER, vcfRecord.getFilterStatus());
 					entity.set(QUAL, vcfRecord.getQuality());
-                    entity.set(ID, StringUtils.join(vcfRecord.getIdentifiers(), ','));
+					entity.set(ID, StringUtils.join(vcfRecord.getIdentifiers(), ','));
 
-                    StringBuilder id = new StringBuilder();
+					StringBuilder id = new StringBuilder();
 					id.append(StringUtils.strip(entity.get(CHROM).toString()));
 					id.append("_");
 					id.append(StringUtils.strip(entity.get(POS).toString()));
@@ -216,7 +216,7 @@ public class VcfRepository extends AbstractRepository
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(FILTER,
 						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(QUAL,
-                        MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true));
+						MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true));
 				entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ID,
 						MolgenisFieldTypes.FieldTypeEnum.STRING));
 				DefaultAttributeMetaData idAttributeMetaData = new DefaultAttributeMetaData(INTERNAL_ID,
