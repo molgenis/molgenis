@@ -8,6 +8,46 @@
 	</parent>
 	<artifactId>molgenis-app-omx</artifactId>
 	<packaging>war</packaging>
+
+	<repositories>
+		<repository>
+			<id>uoft-releases</id>
+			<name>UofT Releases repository</name>
+			<url>http://nexus.cs.toronto.edu/nexus/content/repositories/releases/</url>
+			<releases>
+				<enabled>true</enabled>
+				<checksumPolicy>fail</checksumPolicy>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+				<checksumPolicy>fail</checksumPolicy>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>uoft-snapshots</id>
+			<name>UofT Releases repository</name>
+			<url>http://nexus.cs.toronto.edu/nexus/content/repositories/snapshots/</url>
+			<releases>
+				<enabled>false</enabled>
+				<checksumPolicy>fail</checksumPolicy>
+			</releases>
+			<snapshots>
+				<checksumPolicy>fail</checksumPolicy>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>uoft-externals</id>
+			<name>UofT external repositories mirror</name>
+			<url>http://nexus.cs.toronto.edu/nexus/content/groups/public/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
 	<build>
 		<resources>
 			<resource>
@@ -19,6 +59,9 @@
 				</excludes>
 			</resource>
 		</resources>
+
+
+
 		<plugins>
 			<!-- make molgenis server properties available in pom.xml -->
 			<plugin>
@@ -111,28 +154,6 @@
 					</systemProperties>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.jvnet.jax-ws-commons</groupId>
-				<artifactId>jaxws-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>wsimport-wikiPathways</id>
-						<goals>
-							<goal>wsimport</goal>
-						</goals>
-						<configuration>
-							<verbose>true</verbose>
-							<extension>true</extension>
-							<wsdlUrls>
-								<wsdlUrl>http://www.wikipathways.org/wpi/webservice/webservice.php?wsdl</wsdlUrl>
-							</wsdlUrls>
-							<packageName>org.molgenis.dataWikiPathways</packageName>
-							<!-- for JDK 6 compilation compatibility -->
-							<xnocompile>false</xnocompile>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 		<pluginManagement>
 			<plugins>
@@ -205,6 +226,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-pathways</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-omx-protocolviewer</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -238,7 +264,7 @@
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-data-jpa</artifactId>
 			<version>${project.version}</version>
-		</dependency>		
+		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-data-omx</artifactId>
@@ -274,36 +300,36 @@
 			<artifactId>molgenis-data-rest</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-merge</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-vcf</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-mysql</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-         <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-import</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-         <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-catalogue</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-data-elasticsearch</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-data-merge</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-data-vcf</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-data-mysql</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-data-import</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-catalogue</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-data-elasticsearch</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-aop</artifactId>
