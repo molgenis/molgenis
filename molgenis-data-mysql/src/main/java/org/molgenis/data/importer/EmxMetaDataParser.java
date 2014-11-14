@@ -23,6 +23,7 @@ import static org.molgenis.data.meta.EntityMetaDataMetaData.EXTENDS;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.PACKAGE;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -64,7 +65,6 @@ import org.molgenis.util.DependencyResolver;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.util.StringUtils;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -118,7 +118,7 @@ public class EmxMetaDataParser implements MetaDataParser
 		parsePackagesSheetToEntityMap(source, entities);
 		reiterateToMapRefEntity(source, entities);
 
-		return ImmutableMap.<String, EntityMetaData> copyOf(entities);
+		return Collections.<String, EntityMetaData> unmodifiableMap(entities);
 	}
 
 	/**
