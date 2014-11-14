@@ -184,7 +184,7 @@ public abstract class AbstractElasticsearchRepository implements IndexedCrudRepo
 	public void update(Entity entity)
 	{
 		elasticSearchService.index(entity, getEntityMetaData(), IndexingMode.UPDATE);
-		elasticSearchService.refresh();
+        elasticSearchService.refresh();
 	}
 
 	@Override

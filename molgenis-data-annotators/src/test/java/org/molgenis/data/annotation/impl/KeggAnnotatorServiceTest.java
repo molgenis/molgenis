@@ -22,13 +22,14 @@ import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
 import org.molgenis.data.annotation.provider.KeggDataProvider;
+import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class KeggAnnotatorServiceTest
 {
-	private EntityMetaData metaDataCanAnnotate;
+	private DefaultEntityMetaData metaDataCanAnnotate;
 	private EntityMetaData metaDataCantAnnotate;
 	private KeggServiceAnnotator annotator;
 	private AttributeMetaData attributeMetaDataChrom;
@@ -42,8 +43,8 @@ public class KeggAnnotatorServiceTest
 	@BeforeMethod
 	public void beforeMethod() throws IOException
 	{
-		metaDataCanAnnotate = mock(EntityMetaData.class);
-		attributeMetaDataChrom = mock(AttributeMetaData.class);
+        metaDataCanAnnotate = new org.molgenis.data.support.DefaultEntityMetaData("test");
+        attributeMetaDataChrom = mock(AttributeMetaData.class);
 		attributeMetaDataPos = mock(AttributeMetaData.class);
 
 		AnnotationService annotationService = mock(AnnotationService.class);
@@ -55,10 +56,11 @@ public class KeggAnnotatorServiceTest
 		when(attributeMetaDataPos.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.LONG.toString().toLowerCase()));
 
-		when(metaDataCanAnnotate.getAttribute(KeggServiceAnnotator.CHROMOSOME)).thenReturn(attributeMetaDataChrom);
-		when(metaDataCanAnnotate.getAttribute(KeggServiceAnnotator.POSITION)).thenReturn(attributeMetaDataPos);
+        metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom);
+        metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);
+        metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom.getName());
 
-		metaDataCantAnnotate = mock(EntityMetaData.class);
+        metaDataCantAnnotate = mock(EntityMetaData.class);
 
 		attributeMetaDataCantAnnotateFeature = mock(AttributeMetaData.class);
 		when(attributeMetaDataCantAnnotateFeature.getName()).thenReturn("otherID");
@@ -101,9 +103,6 @@ public class KeggAnnotatorServiceTest
 		when(hgncLocationsProvider.getHgncLocations()).thenReturn(locationsMap);
 		annotator = new KeggServiceAnnotator(annotationService, hgncLocationsProvider, keggDataProvider);
 		when(entity.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
-
-		when(metaDataCanAnnotate.getSimpleName()).thenReturn(annotator.getName());
-		when(metaDataCanAnnotate.getAtomicAttributes()).thenReturn(annotator.getOutputMetaData().getAtomicAttributes());
 	}
 
 	@Test

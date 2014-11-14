@@ -17,6 +17,8 @@ import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.CrudRepositoryAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.meta.WritableMetaDataService;
+import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +61,11 @@ public class AnnotatorController
 	@Autowired
 	EntityValidator entityValidator;
 
-	/**
+    @Autowired
+    MysqlRepositoryCollection mysqlRepositoryCollection;
+
+
+    /**
 	 * Gets a map of all available annotators.
 	 * 
 	 * @param dataSetName
@@ -90,7 +96,7 @@ public class AnnotatorController
 			@RequestParam("dataset-identifier") String dataSetIdentifier,
 			@RequestParam(value = "createCopy", required = false) boolean createCopy)
 	{
-		CrudRepositoryAnnotator crudRepositoryAnnotator = new CrudRepositoryAnnotator();
+		CrudRepositoryAnnotator crudRepositoryAnnotator = new CrudRepositoryAnnotator(mysqlRepositoryCollection);
 		Repository repository = dataService.getRepositoryByEntityName(dataSetIdentifier);
 		String name = dataSetIdentifier;
 

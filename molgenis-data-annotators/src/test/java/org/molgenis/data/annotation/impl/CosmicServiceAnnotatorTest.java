@@ -27,13 +27,14 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class CosmicServiceAnnotatorTest
 {
-	private EntityMetaData metaDataCanAnnotate;
+	private DefaultEntityMetaData metaDataCanAnnotate;
 	private EntityMetaData metaDataCantAnnotate;
 	private CosmicServiceAnnotator annotator;
 	private AttributeMetaData attributeMetaDataCanAnnotate;
@@ -48,16 +49,16 @@ public class CosmicServiceAnnotatorTest
 	public void beforeMethod()
 	{
 		this.httpClient = mock(HttpClient.class);
-
 		annotator = new CosmicServiceAnnotator(this.httpClient);
 
-		metaDataCanAnnotate = mock(EntityMetaData.class);
-		attributeMetaDataCanAnnotate = mock(AttributeMetaData.class);
-		when(attributeMetaDataCanAnnotate.getName()).thenReturn("ensemblId");
-		when(attributeMetaDataCanAnnotate.getDataType()).thenReturn(
-				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
+        attributeMetaDataCanAnnotate = mock(AttributeMetaData.class);
+        when(attributeMetaDataCanAnnotate.getName()).thenReturn("ensemblId");
+        when(attributeMetaDataCanAnnotate.getDataType()).thenReturn(
+                MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
+        metaDataCanAnnotate = new DefaultEntityMetaData("test");
+        metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataCanAnnotate);
+        metaDataCanAnnotate.setIdAttribute("ensemblId");
 
-		when(metaDataCanAnnotate.getAttribute("ensemblId")).thenReturn(attributeMetaDataCanAnnotate);
 
 		metaDataCantAnnotate = mock(EntityMetaData.class);
 		attributeMetaDataCantAnnotate = mock(AttributeMetaData.class);
@@ -76,9 +77,6 @@ public class CosmicServiceAnnotatorTest
 		input = new ArrayList<Entity>();
 		input.add(entity);
 		when(entity.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
-
-		when(metaDataCanAnnotate.getSimpleName()).thenReturn(annotator.getName());
-		when(metaDataCanAnnotate.getAtomicAttributes()).thenReturn(annotator.getOutputMetaData().getAtomicAttributes());
 
 		SERVICE_RESPONSE = "[{\"ID\":\"COSM911918\",\"feature_type\":\"somatic_variation\",\"alt_alleles\":[\"C\",\"A\"],\"end\":69345,\"seq_region_name\":\"1\",\"consequence_type\":\"synonymous_variant\",\"strand\":1,\"start\":69345},{\"ID\":\"COSM426644\",\"feature_type\":\"somatic_variation\",\"alt_alleles\":[\"G\",\"T\"],\"end\":69523,\"seq_region_name\":\"1\",\"consequence_type\":\"missense_variant\",\"strand\":1,\"start\":69523},{\"ID\":\"COSM75742\",\"feature_type\":\"somatic_variation\",\"alt_alleles\":[\"G\",\"A\"],\"end\":69538,\"seq_region_name\":\"1\",\"consequence_type\":\"missense_variant\",\"strand\":1,\"start\":69538}]";
 	}

@@ -22,6 +22,7 @@ import org.molgenis.data.annotation.impl.datastructures.CgdData;
 import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
 import org.molgenis.data.annotation.provider.CgdDataProvider;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
+import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ResourceUtils;
@@ -30,7 +31,7 @@ import org.testng.annotations.Test;
 
 public class ClinicalGenomicsDatabaseServiceAnnotatorTest
 {
-	private EntityMetaData metaDataCanAnnotate;
+	private DefaultEntityMetaData metaDataCanAnnotate;
 	private EntityMetaData metaDataCantAnnotate;
 	private ClinicalGenomicsDatabaseServiceAnnotator annotator;
 	private AttributeMetaData attributeMetaDataChrom;
@@ -49,7 +50,7 @@ public class ClinicalGenomicsDatabaseServiceAnnotatorTest
 		when(settings.getProperty(CgdDataProvider.CGD_FILE_LOCATION_PROPERTY)).thenReturn(
 				ResourceUtils.getFile(getClass(), "/cgd_example.txt").getPath());
 
-		metaDataCanAnnotate = mock(EntityMetaData.class);
+		metaDataCanAnnotate = new DefaultEntityMetaData("test");
 		attributeMetaDataChrom = mock(AttributeMetaData.class);
 		attributeMetaDataPos = mock(AttributeMetaData.class);
 
@@ -60,11 +61,11 @@ public class ClinicalGenomicsDatabaseServiceAnnotatorTest
 		when(attributeMetaDataPos.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.LONG.toString().toLowerCase()));
 
-		when(metaDataCanAnnotate.getAttribute(ClinicalGenomicsDatabaseServiceAnnotator.CHROMOSOME)).thenReturn(
+        metaDataCanAnnotate.addAttributeMetaData(
 				attributeMetaDataChrom);
-		when(metaDataCanAnnotate.getAttribute(ClinicalGenomicsDatabaseServiceAnnotator.POSITION)).thenReturn(
+        metaDataCanAnnotate.addAttributeMetaData(
 				attributeMetaDataPos);
-
+        metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom.getName());
 		metaDataCantAnnotate = mock(EntityMetaData.class);
 
 		attributeMetaDataCantAnnotateFeature = mock(AttributeMetaData.class);
@@ -126,10 +127,6 @@ public class ClinicalGenomicsDatabaseServiceAnnotatorTest
 				cgdDataProvider);
 
 		when(entity.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
-
-		when(metaDataCanAnnotate.getSimpleName()).thenReturn(annotator.getName());
-		when(metaDataCanAnnotate.getAtomicAttributes()).thenReturn(annotator.getOutputMetaData().getAtomicAttributes());
-
 	}
 
 	@Test

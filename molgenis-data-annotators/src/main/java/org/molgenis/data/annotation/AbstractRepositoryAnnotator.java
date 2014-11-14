@@ -86,13 +86,15 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 			@Override
 			public Entity next()
 			{
+                Entity sourceEntity = null;
 				if (current >= size)
 				{
 					if (source.hasNext())
 					{
 						try
 						{
-							results = annotateEntity(source.next());
+                            sourceEntity = source.next();
+							results = annotateEntity(sourceEntity);
 						}
 						catch (IOException e)
 						{
@@ -113,7 +115,7 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 				}
 				else
 				{
-					result = new MapEntity();
+					result = sourceEntity;
 				}
 				++current;
 				return result;
@@ -131,7 +133,7 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 
     public Entity getAnnotatedEntity(Entity entity, Map<String, Object> resultMap) {
         DefaultEntityMetaData resultEntityMetadata = new DefaultEntityMetaData(entity.getEntityMetaData());
-        MapEntity resultEntity = new MapEntity(entity);
+        MapEntity resultEntity = new MapEntity(entity, resultEntityMetadata);
         for(AttributeMetaData attributeMetaData : getOutputMetaData().getAtomicAttributes()) {
             resultEntityMetadata.addAttributeMetaData(attributeMetaData);
             resultEntity.set(attributeMetaData.getName(), resultMap.get(attributeMetaData.getName()));

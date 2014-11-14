@@ -16,6 +16,7 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ResourceUtils;
@@ -24,7 +25,7 @@ import org.testng.annotations.Test;
 
 public class CaddServiceAnnotatorTest
 {
-	private EntityMetaData metaDataCanAnnotate;
+	private DefaultEntityMetaData metaDataCanAnnotate;
 	private EntityMetaData metaDataCantAnnotate;
 	private CaddServiceAnnotator annotator;
 	private AttributeMetaData attributeMetaDataChrom;
@@ -44,7 +45,7 @@ public class CaddServiceAnnotatorTest
 	@BeforeMethod
 	public void beforeMethod() throws IOException
 	{
-		metaDataCanAnnotate = mock(EntityMetaData.class);
+		metaDataCanAnnotate = new DefaultEntityMetaData("test");
 
 		MolgenisSettings settings = mock(MolgenisSettings.class);
 
@@ -70,11 +71,11 @@ public class CaddServiceAnnotatorTest
 		when(attributeMetaDataAlt.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
 
-		when(metaDataCanAnnotate.getAttribute(CaddServiceAnnotator.CHROMOSOME)).thenReturn(attributeMetaDataChrom);
-		when(metaDataCanAnnotate.getAttribute(CaddServiceAnnotator.POSITION)).thenReturn(attributeMetaDataPos);
-		when(metaDataCanAnnotate.getAttribute(CaddServiceAnnotator.REFERENCE)).thenReturn(attributeMetaDataRef);
-		when(metaDataCanAnnotate.getAttribute(CaddServiceAnnotator.ALTERNATIVE)).thenReturn(attributeMetaDataAlt);
-
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom);
+        metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);
+        metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataRef);
+        metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataAlt);
+        metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom.getName());
 		metaDataCantAnnotate = mock(EntityMetaData.class);
 
 		attributeMetaDataCantAnnotateFeature = mock(AttributeMetaData.class);
@@ -134,8 +135,6 @@ public class CaddServiceAnnotatorTest
 		annotator = new CaddServiceAnnotator(settings, null);
 
 		when(entity2.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
-		when(metaDataCanAnnotate.getSimpleName()).thenReturn(annotator.getName());
-		when(metaDataCanAnnotate.getAtomicAttributes()).thenReturn(annotator.getOutputMetaData().getAtomicAttributes());
 	}
 
 	@Test

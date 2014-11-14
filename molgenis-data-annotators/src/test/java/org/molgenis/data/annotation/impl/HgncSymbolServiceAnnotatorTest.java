@@ -20,6 +20,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
+import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.testng.annotations.BeforeMethod;
@@ -27,7 +28,7 @@ import org.testng.annotations.Test;
 
 public class HgncSymbolServiceAnnotatorTest
 {
-	private EntityMetaData metaDataCanAnnotate;
+	private DefaultEntityMetaData metaDataCanAnnotate;
 	private EntityMetaData metaDataCantAnnotate;
 	private HgncSymbolServiceAnnotator annotator;
 	private AttributeMetaData attributeMetaDataChrom;
@@ -48,7 +49,7 @@ public class HgncSymbolServiceAnnotatorTest
 
 		annotator = new HgncSymbolServiceAnnotator(null, hgncLocationsProvider);
 
-		metaDataCanAnnotate = mock(EntityMetaData.class);
+		metaDataCanAnnotate = new DefaultEntityMetaData("test");
 
 		attributeMetaDataChrom = mock(AttributeMetaData.class);
 		attributeMetaDataPos = mock(AttributeMetaData.class);
@@ -61,11 +62,11 @@ public class HgncSymbolServiceAnnotatorTest
 		when(attributeMetaDataPos.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.LONG.toString().toLowerCase()));
 
-		when(metaDataCanAnnotate.getAttribute(HgncSymbolServiceAnnotator.CHROMOSOME))
-				.thenReturn(attributeMetaDataChrom);
-		when(metaDataCanAnnotate.getAttribute(HgncSymbolServiceAnnotator.POSITION)).thenReturn(attributeMetaDataPos);
+        metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom);
+        metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);
+        metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom.getName());
 
-		metaDataCantAnnotate = mock(EntityMetaData.class);
+        metaDataCantAnnotate = mock(EntityMetaData.class);
 
 		attributeMetaDataCantAnnotateFeature = mock(AttributeMetaData.class);
 		when(attributeMetaDataCantAnnotateFeature.getName()).thenReturn("otherID");
@@ -91,9 +92,6 @@ public class HgncSymbolServiceAnnotatorTest
 		when(entity.getString(HgncSymbolServiceAnnotator.CHROMOSOME)).thenReturn("17");
 		when(entity.getLong(HgncSymbolServiceAnnotator.POSITION)).thenReturn(new Long(41196312));
 		when(entity.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
-
-		when(metaDataCanAnnotate.getSimpleName()).thenReturn(annotator.getName());
-		when(metaDataCanAnnotate.getAtomicAttributes()).thenReturn(annotator.getOutputMetaData().getAtomicAttributes());
 
 		input = new ArrayList<Entity>();
 		input.add(entity);
