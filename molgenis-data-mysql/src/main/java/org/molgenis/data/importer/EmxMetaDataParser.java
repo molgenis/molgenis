@@ -590,7 +590,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			}
 		}
 
-		return ParsedMetaData.create(resolveEntityDependencies(metadataList), parsePackagesSheet(source));
+		return new ParsedMetaData(resolveEntityDependencies(metadataList), parsePackagesSheet(source));
 	}
 
 	private List<EntityMetaData> resolveEntityDependencies(List<EntityMetaData> metaDataList)

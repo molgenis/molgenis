@@ -11,29 +11,6 @@
 
     <artifactId>molgenis-data-mysql</artifactId>
 
-	<!-- <build>
-		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>add-source</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>add-source</goal>
-						</goals>
-						<configuration>
-							<sources>
-								<source>${project.build.directory}/generated-sources/annotations/</source>
-							</sources>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build> -->
-
     <dependencies>
         <dependency>
             <groupId>org.molgenis</groupId>
@@ -66,11 +43,5 @@
       		<version>5.0.12</version>
       		<scope>test</scope>
     	</dependency>
-    	<dependency>
-			<groupId>com.google.auto.value</groupId>
-			<artifactId>auto-value</artifactId>
-			<version>1.0-rc1</version>
-			<scope>provided</scope>
-		</dependency>
     </dependencies>
 </project>
