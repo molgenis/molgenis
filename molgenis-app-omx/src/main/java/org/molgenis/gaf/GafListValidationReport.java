@@ -23,7 +23,8 @@ import org.springframework.web.multipart.MultipartFile;
 public class GafListValidationReport
 {
 	private static final Logger logger = Logger.getLogger(GafListValidationReport.class);
-	private final Map<String, List<GafListValidationError>> validationErrors;
+	private final Map<String, List<GafListValidationError>> validationErrorsPerRunId;
+	private final List<String> validationGlobalErrorMessages;
 	private final List<String> validRunIds = new ArrayList<String>();
 	private final List<String> invalidRunIds = new ArrayList<String>();
 	private List<String> allRunIds = new ArrayList<String>();
@@ -38,40 +39,59 @@ public class GafListValidationReport
 
 	public GafListValidationReport()
 	{
-		validationErrors = new LinkedHashMap<String, List<GafListValidationError>>();
+		validationErrorsPerRunId = new LinkedHashMap<String, List<GafListValidationError>>();
+		validationGlobalErrorMessages = new ArrayList<String>();
 	}
 
+	@SuppressWarnings("unchecked")
 	public void addEntry(String runId, GafListValidationError validationError)
 	{
-		List<GafListValidationError> runEntries = validationErrors.get(runId);
-		if (runEntries == null)
+		List<GafListValidationError> gafListValidationErrorList = validationErrorsPerRunId.get(runId);
+		if (gafListValidationErrorList == null)
 		{
-			runEntries = new ArrayList<GafListValidationError>();
-			validationErrors.put(runId, runEntries);
+			gafListValidationErrorList = new ArrayList<GafListValidationError>();
+			validationErrorsPerRunId.put(runId, gafListValidationErrorList);
 		}
-		runEntries.add(validationError);
+		gafListValidationErrorList.add(validationError);
+		Collections.<GafListValidationError> sort(gafListValidationErrorList);
+	}
+
+	public void addGlobalErrorMessage(String globalErrorMessage)
+	{
+		validationGlobalErrorMessages.add(globalErrorMessage);
 	}
 
 	public Map<String, List<GafListValidationError>> getEntries()
 	{
-		return Collections.unmodifiableMap(validationErrors);
+		return Collections.unmodifiableMap(validationErrorsPerRunId);
 	}
 
-	public boolean hasErrors()
+	public boolean hasRunIdsErrors()
 	{
-		return !validationErrors.isEmpty();
+		return !validationErrorsPerRunId.isEmpty();
+	}
+
+	public boolean hasGlobalErrors()
+	{
+		return !validationGlobalErrorMessages.isEmpty();
 	}
 
 	public boolean hasErrors(String runId)
 	{
-		return validationErrors.containsKey(runId);
+		return validationErrorsPerRunId.containsKey(runId);
 	}
 
 	@Override
 	public String toString()
 	{
 		StringBuilder strBuilder = new StringBuilder();
-		for (Entry<String, List<GafListValidationError>> reportEntry : validationErrors.entrySet())
+		
+		for (String error : validationGlobalErrorMessages)
+		{
+			strBuilder.append('\t').append(error).append('\n');
+		}
+		
+		for (Entry<String, List<GafListValidationError>> reportEntry : validationErrorsPerRunId.entrySet())
 		{
 			String runId = reportEntry.getKey();
 			if (runId == null) runId = "<undefined>";
@@ -87,7 +107,8 @@ public class GafListValidationReport
 	public String toStringHtml()
 	{
 		StringBuilder strBuilder = new StringBuilder();
-		for (Entry<String, List<GafListValidationError>> reportEntry : validationErrors.entrySet())
+
+		for (Entry<String, List<GafListValidationError>> reportEntry : validationErrorsPerRunId.entrySet())
 		{
 			String runId = reportEntry.getKey();
 			if (runId == null) runId = "NO RUN ID!";
@@ -200,7 +221,8 @@ public class GafListValidationReport
 			}
 		}
 
-		this.validationErrors.clear();
+		this.validationErrorsPerRunId.clear();
+		this.validationGlobalErrorMessages.clear();
 		this.validRunIds.clear();
 		this.invalidRunIds.clear();
 		this.allRunIds.clear();
@@ -240,5 +262,14 @@ public class GafListValidationReport
 	{
 		this.dataSetIdentifier = dataSetIdentifier;
 	}
+
+	/**
+	 * @return the validationGlobalErrorMessages
+	 */
+	public List<String> getValidationGlobalErrorMessages()
+	{
+		return validationGlobalErrorMessages;
+	}
+
 }
 

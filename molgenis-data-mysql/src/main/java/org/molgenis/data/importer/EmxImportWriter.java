@@ -126,6 +126,9 @@ final class EmxImportWriter implements TransactionCallback<Void>
 			{
 				Repository fileEntityRepository = source.getRepositoryByEntityName(entityMetaData.getSimpleName());
 
+				// Try fully qualified name
+				fileEntityRepository = source.getRepositoryByEntityName(entityMetaData.getName());
+
 				// check to prevent nullpointer when importing metadata only
 				if (fileEntityRepository != null)
 				{

@@ -78,7 +78,9 @@
 				if (settings.onInit)
 					settings.onInit();
 				
-				data.tree.getFirstChild().setActive(true);
+				if (data.tree.getFirstChild()) {
+					data.tree.getFirstChild().setActive(true);
+				}
 			},
 			'lazyload' : function (e, data) {
 				var node = data.node;
