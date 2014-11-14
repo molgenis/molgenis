@@ -5,9 +5,11 @@
             	<form id="annotate-dataset-form" role="form">
                     <div class="well">
                     <legend>Annotators available</legend>
-                        <div>
-                            <a href="#" class="btn btn-link pull-left select-all-btn">Select all</a>
-                            <a href="#" class="btn btn-link pull-left deselect-all-btn">Deselect all</a>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <a href="#" class="btn btn-link pull-left select-all-btn">Select all</a>
+                                <a href="#" class="btn btn-link pull-left deselect-all-btn">Deselect all</a>
+                            </div>
                         </div>
                         <div id="annotator-checkboxes-enabled"></div>
             		<legend>Annotations not available
