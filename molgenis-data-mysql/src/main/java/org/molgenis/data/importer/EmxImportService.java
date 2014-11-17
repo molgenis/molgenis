@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.WritableMetaDataService;
@@ -26,20 +25,17 @@ public class EmxImportService implements ImportService
 
 	private static final List<String> SUPPORTED_FILE_EXTENSIONS = Arrays.asList("xls", "xlsx", "csv", "zip");
 
-	private final DataService dataService;
 	private final MetaDataParser parser;
 	private final ImportWriter writer;
 	private MysqlRepositoryCollection targetCollection;
 	private WritableMetaDataService metaDataService;
 
 	@Autowired
-	public EmxImportService(DataService dataService, MetaDataParser parser, ImportWriter writer)
+	public EmxImportService(MetaDataParser parser, ImportWriter writer)
 	{
-		if (dataService == null) throw new IllegalArgumentException("dataService is null");
 		if (parser == null) throw new IllegalArgumentException("parser is null");
 		if (writer == null) throw new IllegalArgumentException("writer is null");
 		logger.debug("EmxImportService created");
-		this.dataService = dataService;
 		this.parser = parser;
 		this.writer = writer;
 	}
