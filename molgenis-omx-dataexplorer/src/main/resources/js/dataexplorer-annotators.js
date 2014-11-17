@@ -11,6 +11,7 @@
 	
 	molgenis.dataexplorer = molgenis.dataexplorer || {};
 	
+	var annotatorTemplate;
 	var self = molgenis.dataexplorer.annotators = molgenis.dataexplorer.annotators || {};
 
 	// module api
@@ -21,6 +22,9 @@
 	function getAnnotatorSelectBoxes() {
 		// reset
 		var entity = getEntity();
+		var enabledAnnotatorContainer = $('#enabled-annotator-selection-container');
+		var disabledAnnotatorContainer = $('#disabled-annotator-selection-container');
+		
 		restApi.getAsync(entity.href, null, function(dataset) {		
 			$.ajax({
 				type : 'POST',
@@ -28,24 +32,28 @@
 				data : JSON.stringify(dataset.name),
 				contentType : 'application/json',
 				success : function(resultMap) {
-					var enabledAnnotators = [];
-					var disabledAnnotators = [];
-					
 					for(var key in resultMap){
-						if(resultMap[key]['canAnnotate'] === true){
-							enabledAnnotators.push('<label class="checkbox">');
-							enabledAnnotators.push('<input type="checkbox" class="checkbox" name="annotatorNames" value="' + key + '">' + key+ ' <a id="disabled-tooltip" class="darktooltip" data-toggle="tooltip" title="Input:\t'+resultMap[key]["inputMetadata"].toString()+'\nOutput:\t'+resultMap[key]["outputMetadata"].toString()+'"><span class="glyphicon glyphicon-info-sign"></span></span></a>');
-							enabledAnnotators.push('</label>');
-							
-						}else{
-							disabledAnnotators.push('<label class="checkbox">');
-							disabledAnnotators.push(key + ' <a id="disabled-tooltip" class="darktooltip" data-toggle="tooltip" title="Input:\t'+resultMap[key]["inputMetadata"].toString()+'\nOutput:\t'+resultMap[key]["outputMetadata"].toString()+'"><span class="glyphicon glyphicon-info-sign"></span></a>');
-							disabledAnnotators.push('</label>');
+						var enabled = resultMap[key]['canAnnotate'].toString();
+						var inputMetaData = resultMap[key]["inputMetadata"].toString();
+						var outputMetaData = resultMap[key]["outputMetadata"].toString();
+						
+						if(enabled === 'true') {
+							enabledAnnotatorContainer.append(annotatorTemplate({
+								'enabled' : enabled,
+								'annotatorName' : key, 
+								'inputMetaData' : inputMetaData, 
+								'outputMetaData' : outputMetaData
+							}));
+						} else {
+							disabledAnnotatorContainer.append(annotatorTemplate({
+								'enabled' : enabled,
+								'annotatorName' : key, 
+								'inputMetaData' : inputMetaData, 
+								'outputMetaData' : outputMetaData
+							}));
 						}
 					}
 					
-					$('#annotator-checkboxes-enabled').html(enabledAnnotators.join(""));
-					$('#annotator-checkboxes-disabled').html(disabledAnnotators.join(""));
 					$('#selected-dataset-name').html(dataset.name);
 					$('#dataset-identifier').val(dataset.name);
                     $('.darktooltip').tooltip({placement: 'right'});
@@ -84,12 +92,13 @@
 	
 	// on document ready
 	$(function() {
-			
 		$("#disabled-tooltip").tooltip();
 
         var submitBtn = $('#annotate-dataset-button');
         var form = $('#annotate-dataset-form');
- 
+        
+        annotatorTemplate = Handlebars.compile($("#annotator-template").html());
+        
         submitBtn.click(function (e) {
             e.preventDefault();
             e.stopPropagation();
