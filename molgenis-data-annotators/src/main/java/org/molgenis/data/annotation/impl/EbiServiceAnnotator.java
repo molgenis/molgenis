@@ -4,12 +4,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.Collections;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -55,12 +57,17 @@ public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements 
 	public static final String UNIPROT_ID = "uniprot_id";
 
 	public static final String NAME = "EBI-CHeMBL";
-	private final DefaultHttpClient httpClient;
+	private final HttpClient httpClient;
 	private final List<Object> annotatedInput = new ArrayList<Object>();
 
 	public EbiServiceAnnotator()
 	{
 		httpClient = new DefaultHttpClient();
+	}
+
+	public EbiServiceAnnotator(HttpClient client)
+	{
+		httpClient = client;
 	}
 
 	@Override
@@ -91,7 +98,7 @@ public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements 
 	public List<Entity> annotateEntity(Entity entity)
 	{
 		HttpGet httpGet = new HttpGet(getServiceUri(entity));
-		Entity resultEntity = new MapEntity();
+		List<Entity> resultEntities = new ArrayList<>();
 
 		if (!annotatedInput.contains(entity.get(UNIPROT_ID)))
 		{
@@ -109,7 +116,7 @@ public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements 
 				{
 					result.append(output);
 				}
-				resultEntity = parseResult(entity, result.toString());
+				resultEntities = parseResult(entity, result.toString());
 			}
 			catch (Exception e)
 			{
@@ -118,7 +125,7 @@ public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements 
 				throw new RuntimeException(e);
 			}
 		}
-		return Collections.singletonList(resultEntity);
+		return resultEntities;
 	}
 
 	private String getServiceUri(Entity entity)
@@ -131,17 +138,16 @@ public class EbiServiceAnnotator extends AbstractRepositoryAnnotator implements 
 		return uriStringBuilder.toString();
 	}
 
-	private Entity parseResult(Entity entity, String json) throws IOException
+	private List<Entity> parseResult(Entity entity, String json) throws IOException
 	{
-		Entity result = new MapEntity();
+		Map<String, Object> resultMap = new HashMap<>();
 		if (!"".equals(json))
 		{
 			Map<String, Object> rootMap = jsonStringToMap(json);
-			Map<String, Object> resultMap = (Map<String, Object>) rootMap.get("target");
+			resultMap = (Map<String, Object>) rootMap.get("target");
 			resultMap.put(UNIPROT_ID, entity.get(UNIPROT_ID));
-			result = new MapEntity(resultMap);
 		}
-		return result;
+		return Collections.singletonList(getAnnotatedEntity(entity, resultMap));
 	}
 
 	private static Map<String, Object> jsonStringToMap(String result) throws IOException
