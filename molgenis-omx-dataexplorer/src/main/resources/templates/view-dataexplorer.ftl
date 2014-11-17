@@ -28,8 +28,7 @@
 	"jquery.molgenis.xrefmrefsearch.js",
 	"dataexplorer.js",
 	"jquery.molgenis.table.js",
-	"handlebars.min.js",
-	"handlebars-block-helpers.js"]>
+	"handlebars.min.js"]>
 
 <@header css js/>
 
