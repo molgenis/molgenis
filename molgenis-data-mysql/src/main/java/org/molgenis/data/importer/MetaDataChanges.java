@@ -7,10 +7,17 @@ import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.framework.db.EntityImportReport;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
+/**
+ * MetaDataChanges keeps track of which entities were added and which attributes. Used by the {@link ImportWriter} to
+ * rollback table changes.
+ * 
+ * TODO this has fairly high overlap with {@link EntityImportReport}
+ */
 public class MetaDataChanges
 {
 	private List<String> addedEntities = new ArrayList<String>();

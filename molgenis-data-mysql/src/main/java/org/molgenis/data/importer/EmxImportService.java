@@ -15,7 +15,6 @@ import org.molgenis.framework.db.EntityImportReport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Lists;
@@ -27,12 +26,11 @@ public class EmxImportService implements ImportService
 
 	private static final List<String> SUPPORTED_FILE_EXTENSIONS = Arrays.asList("xls", "xlsx", "csv", "zip");
 
-	MysqlRepositoryCollection targetCollection;
-	TransactionTemplate transactionTemplate;
-	final DataService dataService;
-	WritableMetaDataService metaDataService;
-	final MetaDataParser parser;
-	final ImportWriter writer;
+	private final DataService dataService;
+	private final MetaDataParser parser;
+	private final ImportWriter writer;
+	private MysqlRepositoryCollection targetCollection;
+	private WritableMetaDataService metaDataService;
 
 	@Autowired
 	public EmxImportService(DataService dataService, MetaDataParser parser, ImportWriter writer)
@@ -78,7 +76,7 @@ public class EmxImportService implements ImportService
 		if (targetCollection == null) throw new RuntimeException("targetCollection was not set");
 		if (metaDataService == null) throw new RuntimeException("metadataService was not set");
 
-		ParsedMetaData parsedMetaData = parser.parse(dataService, source);
+		ParsedMetaData parsedMetaData = parser.parse(source);
 
 		// TODO altered entities (merge, see getEntityMetaData)
 		return writer.doImport(new EmxImportJob(databaseAction, source, parsedMetaData, targetCollection));
@@ -88,7 +86,7 @@ public class EmxImportService implements ImportService
 	@Override
 	public EntitiesValidationReport validateImport(File file, RepositoryCollection source)
 	{
-		return parser.validate(dataService, source);
+		return parser.validate(source);
 	}
 
 	@Override

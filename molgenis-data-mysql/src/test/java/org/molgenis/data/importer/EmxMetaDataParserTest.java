@@ -30,6 +30,9 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableList;
 
+/**
+ * Parser specific tests.
+ */
 @ContextConfiguration(classes = AppConfig.class)
 public class EmxMetaDataParserTest extends AbstractTestNGSpringContextTests
 {
@@ -42,7 +45,7 @@ public class EmxMetaDataParserTest extends AbstractTestNGSpringContextTests
 	{
 		dataService = mock(DataService.class);
 		metaDataService = mock(MetaDataService.class);
-		parser = new EmxMetaDataParser(metaDataService);
+		parser = new EmxMetaDataParser(dataService, metaDataService);
 		when(metaDataService.getEntityMetaDatas()).thenReturn(ImmutableList.<EntityMetaData> of());
 	}
 
@@ -55,7 +58,7 @@ public class EmxMetaDataParserTest extends AbstractTestNGSpringContextTests
 		assertEquals(source.getNumberOfSheets(), 4);
 		assertNotNull(source.getRepositoryByEntityName("attributes"));
 
-		EntitiesValidationReport report = parser.validate(dataService, source);
+		EntitiesValidationReport report = parser.validate(source);
 		// test report
 		assertTrue(report.valid());
 		EntitiesValidationReport expected = new MyEntitiesValidationReport().addEntity("import_person", true)
@@ -74,7 +77,7 @@ public class EmxMetaDataParserTest extends AbstractTestNGSpringContextTests
 		assertEquals(source.getNumberOfSheets(), 6);
 		assertNotNull(source.getRepositoryByEntityName("attributes"));
 
-		EntitiesValidationReport report = parser.validate(dataService, source);
+		EntitiesValidationReport report = parser.validate(source);
 		// test report
 		assertFalse(report.valid());
 		EntitiesValidationReport expected = new MyEntitiesValidationReport().addEntity("import_person", true)
@@ -115,7 +118,7 @@ public class EmxMetaDataParserTest extends AbstractTestNGSpringContextTests
 		ExcelRepositoryCollection source_no_meta = new ExcelRepositoryCollection(file_no_meta);
 
 		// test import
-		EntitiesValidationReport report = parser.validate(dataService, source_no_meta);
+		EntitiesValidationReport report = parser.validate(source_no_meta);
 		EntitiesValidationReport expected = new MyEntitiesValidationReport().addEntity("import_person", true)
 				.addAttribute("firstName").addAttribute("lastName").addAttribute("height").addAttribute("active")
 				.addAttribute("children").addAttribute("birthplace")

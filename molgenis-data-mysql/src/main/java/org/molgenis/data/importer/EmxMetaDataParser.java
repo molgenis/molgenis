@@ -93,10 +93,12 @@ public class EmxMetaDataParser implements MetaDataParser
 			VISIBLE.toLowerCase(), UNIQUE.toLowerCase(),
 			org.molgenis.data.meta.AttributeMetaDataMetaData.TAGS.toLowerCase());
 
+	private final DataService dataService;
 	private final MetaDataService metaDataService;
 
-	public EmxMetaDataParser(MetaDataService metaDataService)
+	public EmxMetaDataParser(DataService dataService, MetaDataService metaDataService)
 	{
+		this.dataService = dataService;
 		this.metaDataService = metaDataService;
 	}
 
@@ -570,7 +572,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	}
 
 	@Override
-	public ParsedMetaData parse(DataService dataService, final RepositoryCollection source)
+	public ParsedMetaData parse(final RepositoryCollection source)
 	{
 		List<EntityMetaData> metadataList = Lists.newArrayList();
 
@@ -626,7 +628,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	}
 
 	@Override
-	public EntitiesValidationReport validate(DataService dataService, RepositoryCollection source)
+	public EntitiesValidationReport validate(RepositoryCollection source)
 	{
 		MyEntitiesValidationReport report = new MyEntitiesValidationReport();
 

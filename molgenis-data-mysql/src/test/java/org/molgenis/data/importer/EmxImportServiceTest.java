@@ -28,6 +28,9 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+/**
+ * Integration tests for the entire EMX importer.
+ */
 @ContextConfiguration(classes = AppConfig.class)
 public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 {
@@ -40,12 +43,12 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 	PermissionSystemService permissionSystemService;
 
 	@Autowired
-	MetaDataServiceImpl mysqlMetaDataRepositories;
+	MetaDataServiceImpl metaDataService;
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		mysqlMetaDataRepositories.recreateMetaDataRepositories();
+		metaDataService.recreateMetaDataRepositories();
 		dataService = mock(DataService.class);
 	}
 
@@ -57,9 +60,10 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
 
 		// create importer
-		EmxImportService importer = new EmxImportService(dataService, new EmxMetaDataParser(mysqlMetaDataRepositories),
-				new ImportWriter(dataService, mysqlMetaDataRepositories, permissionSystemService));
-		importer.setRepositoryCollection(store, mysqlMetaDataRepositories);
+		EmxImportService importer = new EmxImportService(dataService, new EmxMetaDataParser(dataService,
+				metaDataService), new ImportWriter(dataService, metaDataService,
+				permissionSystemService));
+		importer.setRepositoryCollection(store, metaDataService);
 
 		// generate report
 		EntitiesValidationReport report = importer.validateImport(f, source);
@@ -106,9 +110,10 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		Assert.assertEquals(source.getNumberOfSheets(), 4);
 		Assert.assertNotNull(source.getRepositoryByEntityName("attributes"));
 
-		EmxImportService importer = new EmxImportService(dataService, new EmxMetaDataParser(mysqlMetaDataRepositories),
-				new ImportWriter(dataService, mysqlMetaDataRepositories, permissionSystemService));
-		importer.setRepositoryCollection(store, mysqlMetaDataRepositories);
+		EmxImportService importer = new EmxImportService(dataService, new EmxMetaDataParser(dataService,
+				metaDataService), new ImportWriter(dataService, metaDataService,
+				permissionSystemService));
+		importer.setRepositoryCollection(store, metaDataService);
 
 		// test import
 		EntityImportReport report = importer.doImport(source, DatabaseAction.ADD);
@@ -151,9 +156,10 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		File f = ResourceUtils.getFile(getClass(), "/example.xlsx");
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
 
-		EmxImportService importer = new EmxImportService(dataService, new EmxMetaDataParser(mysqlMetaDataRepositories),
-				new ImportWriter(dataService, mysqlMetaDataRepositories, permissionSystemService));
-		importer.setRepositoryCollection(store, mysqlMetaDataRepositories);
+		EmxImportService importer = new EmxImportService(dataService, new EmxMetaDataParser(dataService,
+				metaDataService), new ImportWriter(dataService, metaDataService,
+				permissionSystemService));
+		importer.setRepositoryCollection(store, metaDataService);
 
 		// test import
 		importer.doImport(source, DatabaseAction.ADD);

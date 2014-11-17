@@ -113,7 +113,7 @@ public class MySqlConfiguration
 	@Bean
 	public MetaDataParser emxMetaDataParser()
 	{
-		return new EmxMetaDataParser(writableMetaDataService);
+		return new EmxMetaDataParser(dataService, writableMetaDataService);
 	}
 
 	@Bean

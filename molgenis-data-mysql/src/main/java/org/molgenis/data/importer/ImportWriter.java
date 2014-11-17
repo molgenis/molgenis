@@ -46,10 +46,9 @@ import com.google.common.collect.Sets;
  */
 public class ImportWriter
 {
-	private final PermissionSystemService permissionSystemService;
-
 	private final DataService dataService;
 	private final WritableMetaDataService metaDataService;
+	private final PermissionSystemService permissionSystemService;
 
 	private final static Logger logger = Logger.getLogger(ImportWriter.class);
 
@@ -57,7 +56,7 @@ public class ImportWriter
 	 * Creates the ImportWriter
 	 * 
 	 * @param dataService
-	 *            {@link DataService} to
+	 *            {@link DataService} to query existing repositories and transform entities
 	 * @param metaDataService
 	 *            {@link WritableMetaDataService} to add and update {@link EntityMetaData}
 	 * @param permissionSystemService
@@ -66,14 +65,15 @@ public class ImportWriter
 	public ImportWriter(DataService dataService, WritableMetaDataService metaDataService,
 			PermissionSystemService permissionSystemService)
 	{
-		this.permissionSystemService = permissionSystemService;
 		this.dataService = dataService;
 		this.metaDataService = metaDataService;
+		this.permissionSystemService = permissionSystemService;
 	}
 
 	@Transactional
-	public EntityImportReport doTransactionalImport(EmxImportJob job)
+	private EntityImportReport doTransactionalImport(EmxImportJob job)
 	{
+		// TODO: parse the tags in the parser and put them in the parsedMetaData
 		importTags(job.source);
 		importPackages(job.parsedMetaData);
 		addEntityMetaData(job.parsedMetaData, job.report, job.metaDataChanges, job.target);
@@ -97,8 +97,11 @@ public class ImportWriter
 			{
 				Repository fileEntityRepository = source.getRepositoryByEntityName(entityMetaData.getSimpleName());
 
-				// Try fully qualified name
-				fileEntityRepository = source.getRepositoryByEntityName(entityMetaData.getName());
+				if (fileEntityRepository == null)
+				{
+					// Try fully qualified name
+					fileEntityRepository = source.getRepositoryByEntityName(entityMetaData.getName());
+				}
 
 				// check to prevent nullpointer when importing metadata only
 				if (fileEntityRepository != null)
@@ -208,15 +211,14 @@ public class ImportWriter
 	/**
 	 * Drops entities and added attributes and reindexes the entities whose attributes were modified.
 	 */
-	private void rollbackSchemaChanges(RepositoryCollection source,
-			ManageableCrudRepositoryCollection targetCollection, MetaDataChanges metaDataChanges)
+	private void rollbackSchemaChanges(EmxImportJob job)
 	{
 		logger.info("Rolling back changes.");
-		dropAddedEntities(targetCollection, metaDataChanges.getAddedEntities());
-		List<String> entities = dropAddedAttributes(targetCollection, metaDataChanges.getAddedAttributes());
+		dropAddedEntities(job.target, job.metaDataChanges.getAddedEntities());
+		List<String> entities = dropAddedAttributes(job.target, job.metaDataChanges.getAddedAttributes());
 
 		// Reindex
-		Set<String> entitiesToIndex = Sets.newLinkedHashSet(source.getEntityNames());
+		Set<String> entitiesToIndex = Sets.newLinkedHashSet(job.source.getEntityNames());
 		entitiesToIndex.addAll(entities);
 		entitiesToIndex.add("tags");
 		entitiesToIndex.add("packages");
@@ -478,7 +480,8 @@ public class ImportWriter
 		}
 		catch (Exception e)
 		{
-			rollbackSchemaChanges(job.source, job.target, job.metaDataChanges);
+			System.out.println(e);
+			rollbackSchemaChanges(job);
 			throw e;
 		}
 		finally
