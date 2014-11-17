@@ -101,7 +101,7 @@ public class MySqlConfiguration
 	@Bean
 	public ImportService emxImportService()
 	{
-		return new EmxImportService(dataService, emxMetaDataParser(), importWriter());
+		return new EmxImportService(emxMetaDataParser(), importWriter());
 	}
 
 	@Bean

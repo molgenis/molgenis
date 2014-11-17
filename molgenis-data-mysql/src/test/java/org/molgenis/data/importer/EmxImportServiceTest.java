@@ -60,9 +60,8 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
 
 		// create importer
-		EmxImportService importer = new EmxImportService(dataService, new EmxMetaDataParser(dataService,
-				metaDataService), new ImportWriter(dataService, metaDataService,
-				permissionSystemService));
+		EmxImportService importer = new EmxImportService(new EmxMetaDataParser(dataService, metaDataService),
+				new ImportWriter(dataService, metaDataService, permissionSystemService));
 		importer.setRepositoryCollection(store, metaDataService);
 
 		// generate report
@@ -110,9 +109,8 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		Assert.assertEquals(source.getNumberOfSheets(), 4);
 		Assert.assertNotNull(source.getRepositoryByEntityName("attributes"));
 
-		EmxImportService importer = new EmxImportService(dataService, new EmxMetaDataParser(dataService,
-				metaDataService), new ImportWriter(dataService, metaDataService,
-				permissionSystemService));
+		EmxImportService importer = new EmxImportService(new EmxMetaDataParser(dataService, metaDataService),
+				new ImportWriter(dataService, metaDataService, permissionSystemService));
 		importer.setRepositoryCollection(store, metaDataService);
 
 		// test import
@@ -156,9 +154,8 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		File f = ResourceUtils.getFile(getClass(), "/example.xlsx");
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
 
-		EmxImportService importer = new EmxImportService(dataService, new EmxMetaDataParser(dataService,
-				metaDataService), new ImportWriter(dataService, metaDataService,
-				permissionSystemService));
+		EmxImportService importer = new EmxImportService(new EmxMetaDataParser(dataService, metaDataService),
+				new ImportWriter(dataService, metaDataService, permissionSystemService));
 		importer.setRepositoryCollection(store, metaDataService);
 
 		// test import
