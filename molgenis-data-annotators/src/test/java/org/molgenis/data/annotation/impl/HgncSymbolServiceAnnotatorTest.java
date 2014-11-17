@@ -20,6 +20,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
+import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.testng.annotations.BeforeMethod;
@@ -27,7 +28,7 @@ import org.testng.annotations.Test;
 
 public class HgncSymbolServiceAnnotatorTest
 {
-	private EntityMetaData metaDataCanAnnotate;
+	private DefaultEntityMetaData metaDataCanAnnotate;
 	private EntityMetaData metaDataCantAnnotate;
 	private HgncSymbolServiceAnnotator annotator;
 	private AttributeMetaData attributeMetaDataChrom;
@@ -41,8 +42,15 @@ public class HgncSymbolServiceAnnotatorTest
 	@BeforeMethod
 	public void beforeMethod() throws IOException
 	{
-		metaDataCanAnnotate = mock(EntityMetaData.class);
-		
+		HgncLocationsProvider hgncLocationsProvider = mock(HgncLocationsProvider.class);
+		Map<String, HGNCLocations> hgncLocations = Collections.singletonMap("BRCA1", new HGNCLocations("BRCA1",
+				41196312l - 10, 41277500l + 10, "17"));
+		when(hgncLocationsProvider.getHgncLocations()).thenReturn(hgncLocations);
+
+		annotator = new HgncSymbolServiceAnnotator(null, hgncLocationsProvider);
+
+		metaDataCanAnnotate = new DefaultEntityMetaData("test");
+
 		attributeMetaDataChrom = mock(AttributeMetaData.class);
 		attributeMetaDataPos = mock(AttributeMetaData.class);
 
@@ -54,9 +62,9 @@ public class HgncSymbolServiceAnnotatorTest
 		when(attributeMetaDataPos.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.LONG.toString().toLowerCase()));
 
-		when(metaDataCanAnnotate.getAttribute(HgncSymbolServiceAnnotator.CHROMOSOME))
-				.thenReturn(attributeMetaDataChrom);
-		when(metaDataCanAnnotate.getAttribute(HgncSymbolServiceAnnotator.POSITION)).thenReturn(attributeMetaDataPos);
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom);
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);
+		metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom.getName());
 
 		metaDataCantAnnotate = mock(EntityMetaData.class);
 
@@ -83,16 +91,11 @@ public class HgncSymbolServiceAnnotatorTest
 
 		when(entity.getString(HgncSymbolServiceAnnotator.CHROMOSOME)).thenReturn("17");
 		when(entity.getLong(HgncSymbolServiceAnnotator.POSITION)).thenReturn(new Long(41196312));
+		when(entity.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
 
 		input = new ArrayList<Entity>();
 		input.add(entity);
 
-		HgncLocationsProvider hgncLocationsProvider = mock(HgncLocationsProvider.class);
-		Map<String, HGNCLocations> hgncLocations = Collections.singletonMap("BRCA1", new HGNCLocations("BRCA1",
-				41196312l - 10, 41277500l + 10, "17"));
-		when(hgncLocationsProvider.getHgncLocations()).thenReturn(hgncLocations);
-		
-		annotator = new HgncSymbolServiceAnnotator(null, hgncLocationsProvider);
 	}
 
 	@Test
