@@ -53,6 +53,7 @@
 									key : feature.href.toLowerCase(),
 									title : feature.Name,
 									folder : false,
+									hideCheckbox: settings.hideDocumentCheckbox,
 									selected: selectedNodes.hasOwnProperty(feature.href.toLowerCase())
 								};
 								if (feature.description)
@@ -427,6 +428,7 @@
 		'protocolId' : null,
 		'selection' : false,
 		'selectedItems' : null,
+		'hideDocumentCheckbox' : true, // a document is a non-folder
 		'sort' : null,
 		'onInit' : null,
 		'onFolderClick' : null,

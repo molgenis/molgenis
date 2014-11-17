@@ -10,9 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -52,7 +50,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -227,12 +224,10 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 	@Override
 	@PreAuthorize("isAuthenticated() and hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_WRITE_PROTOCOLVIEWER')")
 	@Transactional(rollbackFor = UnknownCatalogException.class)
-	public void addToStudyDefinitionDraftForCurrentUser(String resourceUri, String catalogId)
+	public void addToStudyDefinitionDraftForCurrentUser(String protocolId, String catalogId)
 			throws UnknownCatalogException
 	{
 		final Catalog catalog = catalogService.getCatalog(catalogId);
-
-		List<String> catalogItemIds = getCatalogItemIds(resourceUri);
 
 		StudyDefinition studyDefinition = getStudyDefinitionDraftForCurrentUser(catalogId);
 		if (studyDefinition == null)
@@ -240,15 +235,13 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 			studyDefinition = createStudyDefinitionDraftForCurrentUser(catalogId);
 		}
 
-		Iterable<CatalogItem> catalogItems = Iterables.transform(catalogItemIds, new Function<String, CatalogItem>()
+		CatalogItem catalogItem = catalog.findItem(protocolId);
+		if (catalogItem == null)
 		{
-			@Override
-			public CatalogItem apply(String catalogItemId)
-			{
-				return catalog.findItem(catalogItemId);
-			}
-		});
-		studyDefinition.setItems(Iterables.concat(studyDefinition.getItems(), catalogItems));
+			throw new UnknownCatalogException("Unknown catalog item [" + protocolId + "]");
+		}
+
+		studyDefinition.setItems(Iterables.concat(studyDefinition.getItems(), Arrays.asList(catalogItem)));
 
 		try
 		{
@@ -264,12 +257,10 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 	@Override
 	@PreAuthorize("isAuthenticated() and hasAnyRole('ROLE_SU', 'ROLE_PLUGIN_WRITE_PROTOCOLVIEWER')")
 	@Transactional(rollbackFor = UnknownCatalogException.class)
-	public void removeFromStudyDefinitionDraftForCurrentUser(String resourceUri, String catalogId)
+	public void removeFromStudyDefinitionDraftForCurrentUser(final String protocolId, String catalogId)
 			throws UnknownCatalogException
 	{
 		final Catalog catalog = catalogService.getCatalog(catalogId);
-
-		final Set<String> catalogItemIds = new HashSet<String>(getCatalogItemIds(resourceUri));
 
 		StudyDefinition studyDefinition = getStudyDefinitionDraftForCurrentUser(catalogId);
 		if (studyDefinition == null)
@@ -277,9 +268,12 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 			studyDefinition = createStudyDefinitionDraftForCurrentUser(catalogId);
 		}
 
-		// verify that items to remove are part of this catalog
-		for (String catalogItemId : catalogItemIds)
-			catalog.findItem(catalogItemId);
+		// verify that item to remove is part of this catalog
+		CatalogItem catalogItem = catalog.findItem(protocolId);
+		if (catalogItem == null)
+		{
+			throw new UnknownCatalogException("Unknown catalog item [" + protocolId + "]");
+		}
 
 		Iterable<CatalogItem> newCatalogItems = Iterables.filter(studyDefinition.getItems(),
 				new Predicate<CatalogItem>()
@@ -287,7 +281,7 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 					@Override
 					public boolean apply(CatalogItem catalogItem)
 					{
-						return !catalogItemIds.contains(catalogItem.getId());
+						return catalogItem.getId().equals(protocolId);
 					}
 				});
 		studyDefinition.setItems(newCatalogItems);
@@ -296,7 +290,7 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 		{
 			if (Iterables.isEmpty(newCatalogItems))
 			{
-				// TOD remove StudyDefinition, empty item list is invalid according to the xsd
+				// TODO remove StudyDefinition, empty item list is invalid according to the xsd
 			}
 			else
 			{

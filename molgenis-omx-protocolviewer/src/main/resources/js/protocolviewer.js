@@ -31,15 +31,10 @@
 		catalogContainer.catalog({
 			'selection' : Catalog.getEnableSelection(),
 			'protocolId' : catalogId,
-			'selectedItems' : selection.items ? $.map(selection.items, function(selectedItem) { return selectedItem.feature.toLowerCase(); }) : null, // FIXME catalog requires group info
+			'selectedItems' : selection.items ? $.map(selection.items, function(selectedItem) { return selectedItem.protocol.toLowerCase(); }) : null, // FIXME catalog requires group info
 			'sort' : function(a,b) {return molgenis.naturalSort(a.title, b.title);},
 			'onItemClick' : function(featureUri) {
 				updateFeatureDetails(featureUri);
-			},
-			'onItemSelect' : function(featureUri, select) {
-				updateShoppingCart(featureUri, select, catalogId, function() {
-					updateFeatureSelection(catalogId);
-				});
 			},
 			'onFolderSelect' : function(protocolUri, select) {
 				updateShoppingCart(protocolUri, select, catalogId, function() {
@@ -153,89 +148,58 @@
 						
 						var catalogItems = selection.items;
 						
-						// get features
+						// get protocols
 						var q = {
 							q : [ {
 								field : 'id',
 								operator : 'IN',
 								value : $.map(catalogItems, function(catalogItem) {
-									// TODO code duplication from jquery.catalog.js hrefToId
-									var href = catalogItem.feature;
-	//								var href = catalogItem.item;
-									return href.substring(href.lastIndexOf('/') + 1); 
+									return restApi.getPrimaryKeyFromHref(catalogItem.protocol); 
 								})
 							} ],
 							num : maxItems
 						};
-						restApi.getAsync('/api/v1/observablefeature', {'q': q}, function(features) {
-							if (features.total > maxItems) { 
+						restApi.getAsync('/api/v1/protocol', {'q': q}, function(protocols) {
+							if (protocols.total > maxItems) { 
 								molgenis.createAlert([ {
 									'message' : 'Maximum number of selected items reached (' + maxItems + ')'
 								} ], 'error');
 							}
-							// get feature protocols
-							q = {
-									q : [ {
-										field : 'id',
-										operator : 'IN',
-										value : $.map(catalogItems, function(catalogItem) { // FIXME dedup
-											// TODO code duplication from jquery.catalog.js hrefToId
-											var href = catalogItem.path[catalogItem.path.length - 1];
-	//										var href = catalogItem.parent;
-											return href.substring(href.lastIndexOf('/') + 1); 
-										})
-									} ],
-									num : maxItems
-								};
-							// TODO deal with multiple entity pages
-							restApi.getAsync('/api/v1/protocol', {'q': q}, function(protocols) {
-								if (protocols.total > maxItems) { 
-									molgenis.createAlert([ {
-										'message' : 'Maximum number of protocols reached (' + maxItems + ')'
-									} ], 'error');
-								}
-								var featureMap = {};
-								$.each(features.items, function() {
-									featureMap[this.href.toLowerCase()] = this;
-								});
-								var protocolMap = {};
-								$.each(protocols.items, function() {
-									protocolMap[this.href.toLowerCase()] = this;
-								});
-								var table = $('<table id="feature-selection-table" class="table table-striped table-condensed table-hover" />');
-								$('<thead />').append('<th>Group</th><th>Variable Name</th><th>Variable Identifier</th><th>Description</th><th>Remove</th>').appendTo(table);
-								$.each(catalogItems, function() {
-									var feature = featureMap[this.feature.toLowerCase()];
-									var protocol = protocolMap[this.path[this.path.length - 1]];
-									var protocolName = protocol.Name;
-									var name = feature.Name;
-									var identifier = feature.Identifier;
-									var description = molgenis.i18n.get(feature.description);
-									var row = $('<tr />').data('key', this);
-									$('<td />').text(typeof protocolName !== 'undefined' ? protocolName : "").appendTo(row);
-									$('<td />').text(typeof name !== 'undefined' ? name : "").appendTo(row);
-									$('<td />').text(typeof identifier !== 'undefined' ? identifier : "").appendTo(row);
-									$('<td />').text(typeof description !== 'undefined' ? description : "").appendTo(row);
-									var deleteButton = $('<i class="icon-remove"></i>');
-									
-									
-									
-									deleteButton.click(function() {
-										var item = $(this).closest('tr').data('key');
-										catalogContainer.catalog('selectItem', {
-											'feature' : item.feature,
-											'path' : $.map(item.path, function(pathPart){return pathPart.toLowerCase()}),
-											'select' : false
-										});
-										return false; // TODO do we need this?
-									});
-									$('<td class="center" />').append(deleteButton).appendTo(row);
-			
-									row.appendTo(table);
-								});
-								table.addClass('listtable selection-table');
-								selectionTable.html(table);
+							
+							var protocolMap = {};
+							$.each(protocols.items, function() {
+								protocolMap[this.href.toLowerCase()] = this;
 							});
+							var table = $('<table id="feature-selection-table" class="table table-striped table-condensed table-hover" />');
+							$('<thead />').append('<th>Variable Name</th><th>Variable Identifier</th><th>Description</th><th>Remove</th>').appendTo(table);
+							$.each(catalogItems, function() {
+								var protocol = protocolMap[this.path[this.path.length - 1]];
+								var protocolName = protocol.Name;
+								var protocolIdentifier = protocol.Identifier;
+								var description = molgenis.i18n.get(feature.description);
+								var row = $('<tr />').data('key', this);
+								$('<td />').text(typeof protocolName !== 'undefined' ? protocolName : "").appendTo(row);
+								$('<td />').text(typeof identifier !== 'undefined' ? protocolIdentifier : "").appendTo(row);
+								$('<td />').text(typeof description !== 'undefined' ? description : "").appendTo(row);
+								var deleteButton = $('<i class="icon-remove"></i>');
+								
+								
+								
+								deleteButton.click(function() {
+									var item = $(this).closest('tr').data('key');
+									catalogContainer.catalog('selectItem', {
+										'feature' : item.protocol,
+										'path' : $.map(item.path, function(pathPart){return pathPart.toLowerCase()}),
+										'select' : false
+									});
+									return false; // TODO do we need this?
+								});
+								$('<td class="center" />').append(deleteButton).appendTo(row);
+		
+								row.appendTo(table);
+							});
+							table.addClass('listtable selection-table');
+							selectionTable.html(table);
 						});
 					}
 				}
@@ -246,21 +210,24 @@
 		updateFeatureSelectionContainer();
 	};
 	
-	var updateShoppingCart = function(resourceUri, select, catalogId, callback) {
-        $('.catalog-tree').fancytree("disable");
+	var updateShoppingCart = function(protocolUri, select, catalogId, callback) {
+		var protocolId = restApi.getPrimaryKeyFromHref(protocolUri);
+		
+        $('.catalog-tree').fancytree('disable');
 		$.ajax({
 			type : 'POST',
 			url : molgenis.getContextUrl() + '/cart/' + (select ? 'add' : 'remove') + '/' + catalogId,
-			data : JSON.stringify({'features' : [resourceUri]}),
+			data : JSON.stringify({'protocolId' : protocolId}),
 			contentType : 'application/json',
 			success: function() {
 				callback();
-                $('.catalog-tree').fancytree("enable");
 			},
 			error : function(xhr) {
 				molgenis.createAlert(JSON.parse(xhr.responseText).errors);
 				callback();
-                $('.catalog-tree').fancytree("enable");
+			},
+			complete : function() {
+				$('.catalog-tree').fancytree('enable');
 			}
 		});
 	};
