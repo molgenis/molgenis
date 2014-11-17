@@ -166,26 +166,6 @@
 			}, 500);
 		});
 		
-		Handlebars.registerHelper('notequal', function(lvalue, rvalue, options) {
-		    if (arguments.length < 3)
-		        throw new Error("Handlebars Helper equal needs 2 parameters");
-		    if (lvalue != rvalue) {
-		    	 return options.fn(this);
-		    } else {
-		    	 return options.inverse(this);
-		    }
-		});
-		
-		Handlebars.registerHelper('equal', function(lvalue, rvalue, options) {
-		    if (arguments.length < 3)
-		        throw new Error("Handlebars Helper equal needs 2 parameters");
-		    if (lvalue != rvalue) {
-		        return options.inverse(this);
-		    } else {
-		        return options.fn(this);
-		    }
-		});
-		
 		countTemplate = Handlebars.compile($("#count-template").html());
 		modelTemplate = Handlebars.compile($("#model-template").html());
 		
