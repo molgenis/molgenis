@@ -644,7 +644,7 @@ function hideSpinner() {
 /**
  * Helper block function container
  */
-function handleBarHelperBlocks() {
+function handleBarHelperBlocks(Handlebars) {
 	Handlebars.registerHelper('equal', function(lvalue, rvalue, options) {
 	    if (arguments.length < 3)
 	        throw new Error("Handlebars Helper equal needs 2 parameters");
@@ -690,9 +690,6 @@ function handleBarHelperBlocks() {
 }
 
 $(function() {
-	
-	handleBarHelperBlocks();
-	
 	// disable all ajax request caching
 	$.ajaxSetup({
 		cache : false
@@ -817,6 +814,9 @@ $(function() {
 		});
 		return o;
 	};
+	
+	// Call handleBarHelperBlock function to set helper blocks for entire application
+	handleBarHelperBlocks(Handlebars);
 	
 	// clear datetimepicker on pressing cancel button
 	$(document).on('click', '.clear-date-time-btn', function(e) {
