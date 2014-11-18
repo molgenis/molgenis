@@ -151,22 +151,12 @@
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-omx-core</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-ontology</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-omx-dataexplorer</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-omx-protocolviewer</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -200,11 +190,6 @@
 			<artifactId>molgenis-data-jpa</artifactId>
 			<version>${project.version}</version>
 		</dependency>		
-		<dependency>
-			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-data-omx</artifactId>
-			<version>${project.version}</version>
-		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-r</artifactId>

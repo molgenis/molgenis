@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.log4j.Logger;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.omx.converters.ValueConverterException;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +78,7 @@ public class GafListImporterController extends MolgenisPluginController
 	@RequestMapping(method = RequestMethod.POST, value = "/validate")
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	public String validateGAFList(HttpServletRequest request, @RequestParam("csvFile") MultipartFile csvFile,
-			Model model) throws IOException, ValueConverterException, MessagingException, Exception
+			Model model) throws IOException, MessagingException, Exception
 	{
 		boolean submitState = false;
 		String action = "/validate";
@@ -139,8 +138,7 @@ public class GafListImporterController extends MolgenisPluginController
 
 	@RequestMapping(method = RequestMethod.POST, value = "/import")
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
-	public String importGAFList(HttpServletRequest request, Model model) throws IOException, ValueConverterException,
-			MessagingException, Exception
+	public String importGAFList(HttpServletRequest request, Model model) throws Exception
 	{
 		final List<String> messages = new ArrayList<String>();
 		try

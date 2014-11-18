@@ -23,7 +23,6 @@ import org.molgenis.security.MolgenisSecurityWebAppDatabasePopulatorService;
 import org.molgenis.security.account.AccountService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.runas.RunAsSystem;
-import org.molgenis.studymanager.StudyManagerController;
 import org.molgenis.ui.MolgenisInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -124,9 +123,6 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 				DataExplorerController.DEFAULT_AGGREGATES_NORESULTS_MESSAGE);
 		runtimePropertyMap.put(DataExplorerController.KEY_MOD_AGGREGATES_DISTINCT_HIDE,
 				String.valueOf(DataExplorerController.DEFAULT_VAL_AGGREGATES_DISTINCT_HIDE));
-
-		runtimePropertyMap.put(StudyManagerController.EXPORT_BTN_TITLE, "Export");
-		runtimePropertyMap.put(StudyManagerController.EXPORT_ENABLED, String.valueOf(false));
 
 		runtimePropertyMap.put(MolgenisInterceptor.I18N_LOCALE, "en");
 

@@ -5,21 +5,16 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.molgenis.DatabaseConfig;
-import org.molgenis.catalogmanager.CatalogManagerService;
 import org.molgenis.data.DataService;
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.data.semantic.TagRepository;
 import org.molgenis.data.semantic.UntypedTagService;
+import org.molgenis.data.system.RepositoryTemplateLoader;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
-import org.molgenis.omx.catalogmanager.OmxCatalogManagerService;
-import org.molgenis.omx.config.DataExplorerConfig;
 import org.molgenis.omx.core.FreemarkerTemplateRepository;
-import org.molgenis.omx.studymanager.OmxStudyManagerService;
 import org.molgenis.security.user.MolgenisUserService;
-import org.molgenis.studymanager.StudyManagerService;
 import org.molgenis.ui.MolgenisWebAppConfig;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -38,8 +33,7 @@ import freemarker.template.TemplateException;
 @EnableAsync
 @ComponentScan("org.molgenis")
 @Import(
-{ WebAppSecurityConfig.class, DatabaseConfig.class, OmxConfig.class, EmbeddedElasticSearchConfig.class,
-		DataExplorerConfig.class })
+{ WebAppSecurityConfig.class, DatabaseConfig.class, EmbeddedElasticSearchConfig.class })
 public class WebAppConfig extends MolgenisWebAppConfig
 {
 	@Autowired
@@ -48,19 +42,6 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	private MolgenisUserService molgenisUserService;
 	@Autowired
 	private FreemarkerTemplateRepository freemarkerTemplateRepository;
-
-	@Bean
-	@Qualifier("catalogService")
-	public CatalogManagerService catalogManagerService()
-	{
-		return new OmxCatalogManagerService(dataService);
-	}
-
-	@Bean
-	public StudyManagerService studyDefinitionManagerService()
-	{
-		return new OmxStudyManagerService(dataService, molgenisUserService);
-	}
 
 	@Override
 	protected void addFreemarkerVariables(Map<String, Object> freemarkerVariables)
