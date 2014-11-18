@@ -18,7 +18,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.framework.db.WebAppDatabasePopulatorService;
 import org.molgenis.omx.controller.HomeController;
-import org.molgenis.omx.core.RuntimeProperty;
+import org.molgenis.system.core.RuntimeProperty;
 import org.molgenis.security.MolgenisSecurityWebAppDatabasePopulatorService;
 import org.molgenis.security.account.AccountService;
 import org.molgenis.security.core.utils.SecurityUtils;

@@ -14,7 +14,7 @@ import org.apache.commons.io.IOUtils;
 import org.mockito.Mockito;
 import org.molgenis.data.Queryable;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.omx.core.FreemarkerTemplate;
+import org.molgenis.system.core.FreemarkerTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

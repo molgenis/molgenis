@@ -7,7 +7,7 @@ import java.io.StringReader;
 import org.apache.log4j.Logger;
 import org.molgenis.data.Queryable;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.omx.core.FreemarkerTemplate;
+import org.molgenis.system.core.FreemarkerTemplate;
 
 import freemarker.cache.TemplateLoader;
 

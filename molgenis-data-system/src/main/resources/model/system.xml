@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<molgenis name="org.molgenis.omx">
+<molgenis name="org.molgenis.system">
 	<module name="core">
 		<entity name="Autoid" abstract="true" system="true">
 			<description>This interface assigns an automatic 'id'.

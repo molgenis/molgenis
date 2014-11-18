@@ -10,8 +10,8 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.omx.core.RuntimeProperty;
 import org.molgenis.security.runas.RunAsSystem;
+import org.molgenis.system.core.RuntimeProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
