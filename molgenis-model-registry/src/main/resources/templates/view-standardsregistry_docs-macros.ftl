@@ -30,6 +30,7 @@
                         <li class="list-group-item"><a href="#entity-${entity.name?replace(" ", "_")}">${entity.label}</a></li>
             </#list>
                     </ul>
+		            <a href="#package-index"><small>back to top</small></a>
                 </div>
             </div>
         
