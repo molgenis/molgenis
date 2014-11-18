@@ -622,8 +622,55 @@ function hideSpinner() {
 	}
 }
 
-$(function() {
+/**
+ * Helper block function container
+ */
+function handleBarHelperBlocks(Handlebars) {
+	Handlebars.registerHelper('equal', function(lvalue, rvalue, options) {
+	    if (arguments.length < 3)
+	        throw new Error("Handlebars Helper equal needs 2 parameters");
+	    if (lvalue != rvalue) {
+	        return options.inverse(this);
+	    } else {
+	        return options.fn(this);
+	    }
+	});
 	
+	Handlebars.registerHelper('notequal', function(lvalue, rvalue, options) {
+	    if (arguments.length < 3)
+	        throw new Error("Handlebars Helper equal needs 2 parameters");
+	    if (lvalue != rvalue) {
+	    	 return options.fn(this);
+	    } else {
+	    	 return options.inverse(this);
+	    }
+	});
+	
+	Handlebars.registerHelper('ifCond', function (v1, operator, v2, options) {
+	    switch (operator) {
+	        case '==':
+	            return (v1 == v2) ? options.fn(this) : options.inverse(this);
+	        case '===':
+	            return (v1 === v2) ? options.fn(this) : options.inverse(this);
+	        case '<':
+	            return (v1 < v2) ? options.fn(this) : options.inverse(this);
+	        case '<=':
+	            return (v1 <= v2) ? options.fn(this) : options.inverse(this);
+	        case '>':
+	            return (v1 > v2) ? options.fn(this) : options.inverse(this);
+	        case '>=':
+	            return (v1 >= v2) ? options.fn(this) : options.inverse(this);
+	        case '&&':
+	            return (v1 && v2) ? options.fn(this) : options.inverse(this);
+	        case '||':
+	            return (v1 || v2) ? options.fn(this) : options.inverse(this);
+	        default:
+	            return options.inverse(this);
+	    }
+	});
+}
+
+$(function() {
 	// disable all ajax request caching
 	$.ajaxSetup({
 		cache : false
@@ -748,6 +795,9 @@ $(function() {
 		});
 		return o;
 	};
+	
+	// Call handleBarHelperBlock function to set helper blocks for entire application
+	handleBarHelperBlocks(Handlebars);
 	
 	// clear datetimepicker on pressing cancel button
 	$(document).on('click', '.clear-date-time-btn', function(e) {

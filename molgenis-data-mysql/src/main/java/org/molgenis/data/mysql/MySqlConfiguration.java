@@ -5,11 +5,15 @@ import javax.sql.DataSource;
 import org.molgenis.data.DataService;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.importer.EmxImportService;
+import org.molgenis.data.importer.EmxMetaDataParser;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
+import org.molgenis.data.importer.ImportWriter;
+import org.molgenis.data.importer.MetaDataParser;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.WritableMetaDataService;
 import org.molgenis.data.meta.WritableMetaDataServiceDecorator;
+import org.molgenis.security.permission.PermissionSystemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,6 +37,9 @@ public class MySqlConfiguration
 	private RepositoryDecoratorFactory repositoryDecoratorFactory;
 
 	private MetaDataServiceImpl writableMetaDataService;
+
+	@Autowired
+	private PermissionSystemService permissionSystemService;
 
 	@Bean
 	public AsyncJdbcTemplate asyncJdbcTemplate()
@@ -94,7 +101,19 @@ public class MySqlConfiguration
 	@Bean
 	public ImportService emxImportService()
 	{
-		return new EmxImportService(dataService);
+		return new EmxImportService(emxMetaDataParser(), importWriter());
+	}
+
+	@Bean
+	public ImportWriter importWriter()
+	{
+		return new ImportWriter(dataService, writableMetaDataService, permissionSystemService);
+	}
+
+	@Bean
+	public MetaDataParser emxMetaDataParser()
+	{
+		return new EmxMetaDataParser(dataService, writableMetaDataService);
 	}
 
 	@Bean

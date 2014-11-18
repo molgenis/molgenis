@@ -48,8 +48,21 @@ public class CsvWriter extends AbstractWritable
 
 	public CsvWriter(Writer writer, char separator)
 	{
+		this(writer, separator, false);
+	}
+
+	public CsvWriter(Writer writer, char separator, boolean noQuotes)
+	{
 		if (writer == null) throw new IllegalArgumentException("writer is null");
-		this.csvWriter = new au.com.bytecode.opencsv.CSVWriter(writer, separator);
+		if (noQuotes)
+		{
+			this.csvWriter = new au.com.bytecode.opencsv.CSVWriter(writer, separator,
+					au.com.bytecode.opencsv.CSVWriter.NO_QUOTE_CHARACTER);
+		}
+		else
+		{
+			this.csvWriter = new au.com.bytecode.opencsv.CSVWriter(writer, separator);
+		}
 	}
 
 	public CsvWriter(OutputStream os)
@@ -60,6 +73,11 @@ public class CsvWriter extends AbstractWritable
 	public CsvWriter(OutputStream os, char separator)
 	{
 		this(new OutputStreamWriter(os, DEFAULT_CHARSET), separator);
+	}
+
+	public CsvWriter(OutputStream os, char separator, boolean noQuotes)
+	{
+		this(new OutputStreamWriter(os, DEFAULT_CHARSET), separator, noQuotes);
 	}
 
 	public CsvWriter(File file) throws FileNotFoundException
