@@ -1,12 +1,8 @@
 package org.molgenis.ontology.matching;
 
 import org.apache.log4j.Logger;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.DataService;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -17,7 +13,6 @@ import org.springframework.stereotype.Component;
 public class MatchingTaskEntityRegistrator implements ApplicationListener<ContextRefreshedEvent>, Ordered
 {
 	private static final Logger logger = Logger.getLogger(MatchingTaskEntityRegistrator.class);
-	private final static String MATCHING_TASK_ENTITY_NAME = "MatchingTask";
 	private final DataService dataService;
 	private final MysqlRepositoryCollection mysqlRepositoryCollection;
 
@@ -39,29 +34,14 @@ public class MatchingTaskEntityRegistrator implements ApplicationListener<Contex
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
-		if (!dataService.hasRepository(MATCHING_TASK_ENTITY_NAME))
+		if (!dataService.hasRepository(MatchingTaskEntity.MATCHING_TASK_ENTITY_NAME))
 		{
-			logger.info("Created table " + MATCHING_TASK_ENTITY_NAME);
-			mysqlRepositoryCollection.add(getEntityMetaData());
+			logger.info("Created table " + MatchingTaskEntity.MATCHING_TASK_ENTITY_NAME);
+			mysqlRepositoryCollection.add(MatchingTaskEntity.getEntityMetaData());
 		}
-	}
-
-	private EntityMetaData getEntityMetaData()
-	{
-		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData(MATCHING_TASK_ENTITY_NAME);
-		DefaultAttributeMetaData identifierAttr = new DefaultAttributeMetaData("Identifier");
-		identifierAttr.setIdAttribute(true);
-		identifierAttr.setNillable(false);
-		entityMetaData.addAttributeMetaData(identifierAttr);
-		DefaultAttributeMetaData dataCreatedAttr = new DefaultAttributeMetaData("Data_created", FieldTypeEnum.DATE_TIME);
-		dataCreatedAttr.setNillable(false);
-		entityMetaData.addAttributeMetaData(dataCreatedAttr);
-		DefaultAttributeMetaData molgenisUserAttr = new DefaultAttributeMetaData("Molgenis_user");
-		molgenisUserAttr.setNillable(false);
-		entityMetaData.addAttributeMetaData(molgenisUserAttr);
-		DefaultAttributeMetaData codeSystemAttr = new DefaultAttributeMetaData("Code_system");
-		codeSystemAttr.setNillable(false);
-		entityMetaData.addAttributeMetaData(codeSystemAttr);
-		return entityMetaData;
+		else
+		{
+			logger.info("Table " + MatchingTaskEntity.MATCHING_TASK_ENTITY_NAME + " existed");
+		}
 	}
 }
