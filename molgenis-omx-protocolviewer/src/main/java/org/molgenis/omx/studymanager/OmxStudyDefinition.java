@@ -7,7 +7,7 @@ import java.util.List;
 import org.molgenis.catalog.CatalogItem;
 import org.molgenis.data.DataService;
 import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.study.StudyDataRequest;
 import org.molgenis.study.StudyDefinition;
 
@@ -80,12 +80,12 @@ public class OmxStudyDefinition implements StudyDefinition
 	@Override
 	public Iterable<CatalogItem> getItems()
 	{
-		return Lists.transform(studyDataRequest.getFeatures(), new Function<ObservableFeature, CatalogItem>()
+		return Lists.transform(studyDataRequest.getProtocols(), new Function<Protocol, CatalogItem>()
 		{
 			@Override
-			public CatalogItem apply(ObservableFeature observableFeature)
+			public CatalogItem apply(Protocol protocol)
 			{
-				return new OmxStudyDefinitionItem(observableFeature, studyDataRequest.getProtocol().getId());
+				return new OmxStudyDefinitionItem(protocol, studyDataRequest.getProtocol().getId());
 			}
 		});
 	}
@@ -93,10 +93,10 @@ public class OmxStudyDefinition implements StudyDefinition
 	@Override
 	public void setItems(Iterable<CatalogItem> items)
 	{
-		List<ObservableFeature> features;
+		List<Protocol> protocols;
 		if (items.iterator().hasNext())
 		{
-			Iterable<ObservableFeature> featuresIterable = dataService.findAll(ObservableFeature.ENTITY_NAME,
+			Iterable<Protocol> protocolIterable = dataService.findAll(Protocol.ENTITY_NAME,
 					Iterables.transform(items, new Function<CatalogItem, Object>()
 					{
 						@Override
@@ -104,14 +104,14 @@ public class OmxStudyDefinition implements StudyDefinition
 						{
 							return Integer.valueOf(catalogItem.getId());
 						}
-					}), ObservableFeature.class);
-			features = Lists.newArrayList(featuresIterable);
+					}), Protocol.class);
+			protocols = Lists.newArrayList(protocolIterable);
 		}
 		else
 		{
-			features = Collections.emptyList();
+			protocols = Collections.emptyList();
 		}
-		studyDataRequest.setFeatures(features);
+		studyDataRequest.setProtocols(protocols);
 	}
 
 	@Override

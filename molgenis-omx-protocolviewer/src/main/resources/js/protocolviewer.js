@@ -12,7 +12,7 @@
 		Catalog.enableSelection = enableSelection;
 	};
 	
-	Catalog.getFeature = function(featureUri) {
+	Catalog.getProtocol = function(featureUri) {
 		return restApi.get(featureUri);
 	};
 	
@@ -176,14 +176,12 @@
 								var protocol = protocolMap[this.path[this.path.length - 1]];
 								var protocolName = protocol.Name;
 								var protocolIdentifier = protocol.Identifier;
-								var description = molgenis.i18n.get(feature.description);
+								var description = molgenis.i18n.get(protocol.description);
 								var row = $('<tr />').data('key', this);
 								$('<td />').text(typeof protocolName !== 'undefined' ? protocolName : "").appendTo(row);
-								$('<td />').text(typeof identifier !== 'undefined' ? protocolIdentifier : "").appendTo(row);
+								$('<td />').text(typeof protocolIdentifier !== 'undefined' ? protocolIdentifier : "").appendTo(row);
 								$('<td />').text(typeof description !== 'undefined' ? description : "").appendTo(row);
 								var deleteButton = $('<i class="icon-remove"></i>');
-								
-								
 								
 								deleteButton.click(function() {
 									var item = $(this).closest('tr').data('key');

@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -30,9 +29,6 @@ import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.omx.observ.ObservableFeature;
-import org.molgenis.omx.observ.Protocol;
-import org.molgenis.omx.utils.ProtocolUtils;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.study.StudyDefinition;
@@ -281,7 +277,7 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 					@Override
 					public boolean apply(CatalogItem catalogItem)
 					{
-						return catalogItem.getId().equals(protocolId);
+						return !catalogItem.getId().equals(protocolId);
 					}
 				});
 		studyDefinition.setItems(newCatalogItems);
@@ -389,39 +385,6 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 		finally
 		{
 			excelWriter.close();
-		}
-	}
-
-	/**
-	 * 
-	 * @param resourceUri
-	 *            e.g. /api/v1/protocol/123
-	 * @return
-	 */
-	private List<String> getCatalogItemIds(String resourceUri)
-	{
-		String[] tokens = resourceUri.split("/");
-		String entityName = tokens[tokens.length - 2];
-		String entityId = tokens[tokens.length - 1];
-		if (ObservableFeature.ENTITY_NAME.equalsIgnoreCase(entityName))
-		{
-			return Arrays.<String> asList(entityId);
-		}
-		else if (Protocol.ENTITY_NAME.equalsIgnoreCase(entityName))
-		{
-			Protocol rootProtocol = dataService
-					.findOne(Protocol.ENTITY_NAME, Integer.valueOf(entityId), Protocol.class);
-			List<String> featureIds = new ArrayList<String>();
-			for (Protocol protocol : ProtocolUtils.getProtocolDescendants(rootProtocol))
-			{
-				for (ObservableFeature feature : protocol.getFeatures())
-					featureIds.add(feature.getId().toString());
-			}
-			return featureIds;
-		}
-		else
-		{
-			throw new IllegalArgumentException("invalid entity name [" + entityName + "]");
 		}
 	}
 }
