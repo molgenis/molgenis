@@ -1,4 +1,4 @@
-package org.molgenis.omx.das.impl;
+package org.molgenis.das.impl;
 
 import java.io.IOException;
 

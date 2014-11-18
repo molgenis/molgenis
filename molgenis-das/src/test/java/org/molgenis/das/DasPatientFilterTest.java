@@ -1,4 +1,4 @@
-package org.molgenis.omx.das;
+package org.molgenis.das;
 
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mockito.ArgumentCaptor;
-import org.molgenis.omx.das.impl.DasURLFilter;
+import org.molgenis.das.impl.DasURLFilter;
 import org.molgenis.util.HandleRequestDelegationException;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;

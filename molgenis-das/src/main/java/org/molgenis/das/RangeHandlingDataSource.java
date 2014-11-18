@@ -1,4 +1,4 @@
-package org.molgenis.omx.das;
+package org.molgenis.das;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.omx.das.impl.MolgenisDasTarget;
+import org.molgenis.das.impl.MolgenisDasTarget;
 
 import uk.ac.ebi.mydas.datasource.RangeHandlingAnnotationDataSource;
 import uk.ac.ebi.mydas.exceptions.BadReferenceObjectException;

@@ -1,4 +1,4 @@
-package org.molgenis.omx.das;
+package org.molgenis.das;
 
 import uk.ac.ebi.mydas.configuration.DataSourceConfiguration;
 import uk.ac.ebi.mydas.configuration.PropertyType;
@@ -9,6 +9,9 @@ import uk.ac.ebi.mydas.model.DasAnnotatedSegment;
 import uk.ac.ebi.mydas.model.DasType;
 
 import javax.servlet.ServletContext;
+
+import org.molgenis.das.RangeHandlingDataSource;
+
 import java.util.Collection;
 import java.util.Map;
 

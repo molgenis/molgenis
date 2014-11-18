@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.mockito.Mockito;
+import org.molgenis.das.impl.MolgenisDasTarget;
+import org.molgenis.das.impl.RepositoryRangeHandlingDataSource;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;

@@ -1,4 +1,4 @@
-package org.molgenis.omx.das;
+package org.molgenis.das;
 
 import static org.mockito.Mockito.mock;
 import static org.testng.AssertJUnit.assertEquals;
@@ -10,8 +10,9 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.mockito.Mockito;
+import org.molgenis.das.RangeHandlingDataSource;
+import org.molgenis.das.impl.MolgenisDasTarget;
 import org.molgenis.data.DataService;
-import org.molgenis.omx.das.impl.MolgenisDasTarget;
 import org.molgenis.util.HandleRequestDelegationException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;

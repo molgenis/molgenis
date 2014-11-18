@@ -1,4 +1,4 @@
-package org.molgenis.omx.das.impl;
+package org.molgenis.das.impl;
 
 import uk.ac.ebi.mydas.exceptions.DataSourceException;
 import uk.ac.ebi.mydas.model.DasTarget;
