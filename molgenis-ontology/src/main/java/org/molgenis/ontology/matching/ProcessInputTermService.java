@@ -59,32 +59,34 @@ public class ProcessInputTermService
 
 		// Match input terms with code
 		Iterable<Entity> findAll = dataService.findAll(entityName);
-		for (Entity entity : findAll)
+		try
 		{
-			OntologyServiceResult searchEntity = ontologyService.searchEntity(ontologyIri, entity);
-			for (Map<String, Object> ontologyTerm : searchEntity.getOntologyTerms())
+			for (Entity entity : findAll)
 			{
-				Double score = Double.parseDouble(ontologyTerm.get(OntologyServiceImpl.COMBINED_SCORE).toString());
-				MapEntity matchingTaskContentEntity = new MapEntity();
-				matchingTaskContentEntity.set(MathcingTaskContentEntity.IDENTIFIER,
-						entityName + ":" + entity.getIdValue());
-				matchingTaskContentEntity.set(MathcingTaskContentEntity.INPUT_TERM, entity.getIdValue());
-				matchingTaskContentEntity.set(MathcingTaskContentEntity.MATCHED_TERM,
-						ontologyTerm.get(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI));
-				matchingTaskContentEntity.set(MathcingTaskContentEntity.SCORE, score);
-				matchingTaskContentEntity.set(MathcingTaskContentEntity.VALIDATED, score.intValue() >= threshold);
-				try
+				OntologyServiceResult searchEntity = ontologyService.searchEntity(ontologyIri, entity);
+				for (Map<String, Object> ontologyTerm : searchEntity.getOntologyTerms())
 				{
+					Double score = Double.parseDouble(ontologyTerm.get(OntologyServiceImpl.COMBINED_SCORE).toString());
+					MapEntity matchingTaskContentEntity = new MapEntity();
+					matchingTaskContentEntity.set(MathcingTaskContentEntity.IDENTIFIER,
+							entityName + ":" + entity.getIdValue());
+					matchingTaskContentEntity.set(MathcingTaskContentEntity.INPUT_TERM, entity.getIdValue());
+					matchingTaskContentEntity.set(MathcingTaskContentEntity.REF_ENTITY, entityName);
+					matchingTaskContentEntity.set(MathcingTaskContentEntity.MATCHED_TERM,
+							ontologyTerm.get(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI));
+					matchingTaskContentEntity.set(MathcingTaskContentEntity.SCORE, score);
+					matchingTaskContentEntity.set(MathcingTaskContentEntity.VALIDATED, score.intValue() >= threshold);
+
 					dataService.add(MathcingTaskContentEntity.ENTITY_NAME, matchingTaskContentEntity);
+					break;
 				}
-				catch (Exception e)
-				{
-					// throw new RuntimeException(e.getMessage());
-					e.printStackTrace();
-				}
-				break;
 			}
 		}
+		catch (Exception e)
+		{
+			throw new RuntimeException(e.getMessage());
+		}
+
 		dataService.getCrudRepository(MathcingTaskContentEntity.ENTITY_NAME).flush();
 
 		uploadProgress.removeUser(userName);

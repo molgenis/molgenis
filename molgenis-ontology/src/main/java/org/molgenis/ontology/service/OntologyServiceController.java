@@ -25,8 +25,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.csv.CsvRepository;
-import org.molgenis.data.importer.EmxImportService;
-import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.LowerCaseProcessor;
 import org.molgenis.data.processor.TrimProcessor;
@@ -36,13 +34,16 @@ import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ontology.OntologyServiceResult;
 import org.molgenis.ontology.beans.OntologyServiceResultImpl;
 import org.molgenis.ontology.matching.AdaptedCsvRepository;
+import org.molgenis.ontology.matching.MatchingTaskEntity;
 import org.molgenis.ontology.matching.ProcessInputTermService;
+import org.molgenis.ontology.matching.UploadProgress;
 import org.molgenis.ontology.utils.OntologyServiceUtil;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -52,12 +53,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping(URI)
 public class OntologyServiceController extends MolgenisPluginController
 {
-	@Autowired
-	private EmxImportService emxImportService;
-
-	@Autowired
-	private MysqlRepositoryCollection mysqlRepositoryCollection;
-
 	@Autowired
 	private UserAccountService userAccountService;
 
@@ -71,12 +66,17 @@ public class OntologyServiceController extends MolgenisPluginController
 	private ProcessInputTermService processInputTermService;
 
 	@Autowired
+	private UploadProgress uploadProgress;
+
+	@Autowired
 	private FileStore fileStore;
 
 	public static final String ID = "ontologyservice";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	public static final int INVALID_TOTAL_NUMBER = -1;
 	private static final String EXCEL_NEWLINE_CHAR = "\n";
+	private static final String ILLEGAL_PATTERN = "[^0-9a-zA-Z_]";
+	private static final String ILLEGAL_PATTERN_REPLACEMENT = "_";
 
 	public OntologyServiceController()
 	{
@@ -86,7 +86,24 @@ public class OntologyServiceController extends MolgenisPluginController
 	@RequestMapping(method = GET)
 	public String init(Model model)
 	{
+		model.addAttribute("existingTasks",
+				OntologyServiceUtil.getEntityAsMap(dataService.findAll(MatchingTaskEntity.ENTITY_NAME)));
+		return "ontology-match-view";
+	}
+
+	@RequestMapping(method = GET, value = "/newtask")
+	public String matchTask(Model model)
+	{
 		model.addAttribute("ontologies", OntologyServiceUtil.getEntityAsMap(ontologyService.getAllOntologyEntities()));
+		return "ontology-match-view";
+	}
+
+	@RequestMapping(method = GET, value = "/result/{entityName}")
+	public String matchResult(@PathVariable
+	String entityName, Model model)
+	{
+		model.addAttribute("isRunning", uploadProgress.isUserExists(userAccountService.getCurrentUser().getUsername()));
+		model.addAttribute("entityName", entityName);
 		return "ontology-match-view";
 	}
 
@@ -115,7 +132,7 @@ public class OntologyServiceController extends MolgenisPluginController
 		// model.addAttribute("total",
 		// ontologyServiceSessionData.getTotalNumberBySession(sessionId));
 
-		return "ontology-match-view-result";
+		return init(model);
 	}
 
 	@RequestMapping(method = POST, value = "/match/upload", headers = "Content-Type=multipart/form-data")
@@ -125,6 +142,7 @@ public class OntologyServiceController extends MolgenisPluginController
 	Part file, Model model, HttpServletRequest httpServletRequest) throws Exception
 	{
 		if (StringUtils.isEmpty(ontologyIri) || file == null) return init(model);
+		entityName = entityName.replaceAll(ILLEGAL_PATTERN, ILLEGAL_PATTERN_REPLACEMENT);
 		if (dataService.hasRepository(entityName))
 		{
 			model.addAttribute("message", "The task name has existed!");
@@ -135,13 +153,12 @@ public class OntologyServiceController extends MolgenisPluginController
 		File uploadFile = fileStore.store(file.getInputStream(), sessionId + "_input.csv");
 		RepositoryCollection repositoryCollection = getRepositoryCollection(entityName, uploadFile);
 
-		processInputTermService.process(userAccountService.getCurrentUser().getUsername(), entityName, ontologyIri,
-				uploadFile, repositoryCollection);
+		String userName = userAccountService.getCurrentUser().getUsername();
+		uploadProgress.registerUser(userName, 0);
+		processInputTermService.process(userName, entityName, ontologyIri, uploadFile, repositoryCollection);
+		model.addAttribute("isRunning", uploadProgress.isUserExists(userName));
 
-		model.addAttribute("ontologyUrl", ontologyIri);
-		model.addAttribute("total", 1);
-
-		return "ontology-match-view-result";
+		return matchResult(entityName, model);
 	}
 
 	@RequestMapping(method = GET, value = "/match/download")
