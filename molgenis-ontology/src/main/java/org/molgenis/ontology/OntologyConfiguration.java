@@ -4,6 +4,8 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.meta.WritableMetaDataService;
 import org.molgenis.ontology.index.AsyncOntologyIndexer;
+import org.molgenis.ontology.matching.ProcessInputTermService;
+import org.molgenis.ontology.matching.UploadProgress;
 import org.molgenis.ontology.service.OntologyServiceImpl;
 import org.molgenis.ontology.service.OntologyServiceSessionData;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,5 +47,17 @@ public class OntologyConfiguration
 	public OntologyServiceSessionData ontologyServiceSessionData()
 	{
 		return new OntologyServiceSessionData();
+	}
+
+	@Bean
+	public ProcessInputTermService processInputTermService()
+	{
+		return new ProcessInputTermService();
+	}
+
+	@Bean
+	public UploadProgress uploadProgress()
+	{
+		return new UploadProgress();
 	}
 }

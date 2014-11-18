@@ -7,15 +7,16 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 
 public class MatchingTaskEntity
 {
-	public final static String MATCHING_TASK_ENTITY_NAME = "MatchingTask";
+	public final static String ENTITY_NAME = "MatchingTask";
 	public final static String IDENTIFIER = "Identifier";
 	public final static String DATA_CREATED = "Data_created";
 	public final static String MOLGENIS_USER = "Molgenis_user";
 	public final static String CODE_SYSTEM = "Code_system";
+	public final static String THRESHOLD = "Threshold";
 
 	public static EntityMetaData getEntityMetaData()
 	{
-		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData(MATCHING_TASK_ENTITY_NAME);
+		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData(ENTITY_NAME);
 		DefaultAttributeMetaData identifierAttr = new DefaultAttributeMetaData(IDENTIFIER);
 		identifierAttr.setIdAttribute(true);
 		identifierAttr.setNillable(false);
@@ -29,6 +30,9 @@ public class MatchingTaskEntity
 		DefaultAttributeMetaData codeSystemAttr = new DefaultAttributeMetaData(CODE_SYSTEM);
 		codeSystemAttr.setNillable(false);
 		entityMetaData.addAttributeMetaData(codeSystemAttr);
+		DefaultAttributeMetaData thresholdAttr = new DefaultAttributeMetaData(THRESHOLD, FieldTypeEnum.INT);
+		thresholdAttr.setNillable(false);
+		entityMetaData.addAttributeMetaData(thresholdAttr);
 		return entityMetaData;
 	}
 }
