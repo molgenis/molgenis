@@ -6,29 +6,29 @@
 		var infoContainer = $('#catalog-preview-info');
 		var treeContainer = $('#catalog-preview-tree');
 		
-		function createDynatreeConfig(catalog) {
-			function createDynatreeConfigRec(node, dynaNode) {
-				var dynaChild = {key: node.id, title: node.name, select: node.selected, isFolder: true, children:[]};
-				dynaNode.push(dynaChild);
+		function createTreeConfig(catalog) {
+			function createTreeConfigRec(node, treeNode, expanded) {
+				var treeChild = {key: node.id, title: node.name, expanded: expanded, selected: node.selected, folder: true, children:[]};
+				treeNode.push(treeChild);
 				if(node.children) {
 					$.each(node.children, function(idx, child) {
-						createDynatreeConfigRec(child, dynaChild.children);
+						createTreeConfigRec(child, treeChild.children, false);
 					});
 				}
 				if(node.items) {
 					$.each(node.items, function(idx, item) {
-						dynaChild.children.push({key: item.id, title: item.name, select: item.selected});
+						treeChild.children.push({key: item.id, title: item.name, selected: item.selected});
 					});
 				}
 			}
 			
-			var dynaNodes = [];
+			var treeNodes = [];
 			if(catalog.children) {
 				$.each(catalog.children, function(idx, child) {
-					createDynatreeConfigRec(child, dynaNodes);
+					createTreeConfigRec(child, treeNodes, true);
 				});
 			}
-			return dynaNodes;
+			return treeNodes;
 		}
 		
 		$('#catalogForm input[type="radio"]').change(function() {
@@ -45,7 +45,7 @@
 			
 			// clear previous tree
 			if (treeContainer.children('ul').length > 0)
-				treeContainer.dynatree('destroy');
+				treeContainer.fancytree('destroy');
 			infoContainer.empty();
 			treeContainer.empty();
 			infoContainer.html('Loading preview ...');
@@ -66,9 +66,11 @@
 					
 					// create new tree
 					treeContainer.empty();
-					treeContainer.dynatree({'minExpandLevel': 2, 'children': createDynatreeConfig(catalog), 'debugLevel': 0});
-					treeContainer.dynatree('getRoot').sortChildren(function(a, b) {
-						return molgenis.naturalSort(a.data.title, b.data.title);
+					treeContainer.fancytree({'minExpandLevel': 2, 'source': createTreeConfig(catalog), 'debugLevel': 0});
+					treeContainer.fancytree('getTree').getRootNode().sortChildren(function(a, b) { 
+						if(a.folder && !b.folder) return -1;
+						else if(!a.folder && b.folder) return 1;
+						else return molgenis.naturalSort(a.title, b.title);
 					}, true);
 					
 					$('#activationButton').removeAttr('disabled');

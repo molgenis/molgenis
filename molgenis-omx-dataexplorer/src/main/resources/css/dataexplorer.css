@@ -1,14 +1,6 @@
-.well {
-	padding: 10px;
-}
-
 #dataset-select-label {
 	margin-right: 10px;
 	font-size: 15.4px;
-}
-
-.icon-filter {
-	margin-left: 10px;
 }
 
 #feature-selection label {
@@ -22,25 +14,6 @@
 #observationset-search-container {
 	text-align: center;
 	padding-bottom: 15px;
-}
-
-.accordion-group {
-	background-color: #5B82A4;
-}
-
-.accordion-toggle {
-	color: white;
-}
-
-a.accordion-toggle:hover,a.accordion-toggle:focus,a.accordion-toggle:active
-	{
-	color: white;
-	text-decoration: none;
-	cursor: default;
-}
-
-.accordion-body {
-	background-color: white;
 }
 
 .feature-filter-remove {
@@ -218,11 +191,11 @@ input[name="ColNames"] {
 	display: inline;
 	margin-right: 10px;
 }
-
+/*
 #module-nav .nav {
 	margin-left: 2.1277%;
 }
-
+*/
 .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
 	background-color: #7CBAD1;
 	

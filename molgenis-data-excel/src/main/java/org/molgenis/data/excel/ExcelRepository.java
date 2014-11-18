@@ -142,7 +142,7 @@ public class ExcelRepository extends AbstractRepository
 			try
 			{
 				String header = AbstractCellProcessor.processCell(ExcelUtils.toValue(it.next()), true, cellProcessors);
-				columnIdx.put(header, i++);
+				if(null != header) columnIdx.put(header, i++);
 			}
 			catch (final IllegalStateException ex)
 			{

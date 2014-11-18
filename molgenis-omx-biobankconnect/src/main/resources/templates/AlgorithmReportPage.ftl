@@ -16,38 +16,38 @@
 <link rel="stylesheet" href="<@resource_href "/css/jquery-ui-1.9.2.custom.min.css"/>" type="text/css">
 <link rel="stylesheet" href="<@resource_href "/css/biobank-connect.css"/>" type="text/css">
 <form id="wizardForm" name="wizardForm" method="post" class="form-horizontal" action="">
-	<div class="row-fluid">
-		<div class="span12 well custom-white-well" style="min-height:500px;">
-			<div class="row-fluid">
-				<div class="offset3 span6 text-align-center">
+	<div class="row">
+		<div class="col-md-12 well custom-white-well" style="min-height:500px;">
+			<div class="row">
+				<div class="col-md-offset-3 col-md-6 text-align-center">
 					<legend class="custom-purple-legend"><strong>Report for harmonization</strong></legend>
 				</div>
 			</div>
-			<div class="row-fluid">
-				<div id="info-div" class="offset3 span6 well">
+			<div class="row">
+				<div id="info-div" class="col-md-offset-3 col-md-6 well">
 				</div>
 			</div>
-			<div id="delete-mapping" class="row-fluid progress-bar-hidden">
-				<div class="offset2 span10">
+			<div id="delete-mapping" class="row progress-bar-hidden">
+				<div class="col-md-offset-2 col-md-10">
 					Deleting existing mappings
 				</div>
-				<div class="progress progress-striped progress-warning active offset2 span8">
+				<div class="progress progress-striped progress-warning active col-md-offset-2 col-md-8">
 					<div class="bar text-align-center"></div>
 				</div>
 			</div>
-			<div id="create-mapping" class="row-fluid progress-bar-hidden">
-				<div class="offset2 span10">
+			<div id="create-mapping" class="row progress-bar-hidden">
+				<div class="col-md-offset-2 col-md-10">
 					Create mappings
 				</div>
-				<div class="progress progress-striped active offset2 span8">
+				<div class="progress progress-striped active col-md-offset-2 col-md-8">
 					<div class="bar text-align-center"></div>
 				</div>
 			</div>
-			<div id="store-mapping" class="row-fluid progress-bar-hidden">
-				<div class="offset2 span10">
+			<div id="store-mapping" class="row progress-bar-hidden">
+				<div class="col-md-offset-2 col-md-10">
 					Store mappings
 				</div>
-				<div class="progress progress-striped progress-success active offset2 span8">
+				<div class="progress progress-striped progress-success active col-md-offset-2 col-md-8">
 					<div class="bar text-align-center"></div>
 				</div>
 			</div>

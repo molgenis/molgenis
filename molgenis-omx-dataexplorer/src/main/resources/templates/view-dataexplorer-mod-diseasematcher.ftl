@@ -1,10 +1,11 @@
 <#include "resource-macros.ftl">
 <!--DISEASE MATCHER / PHENOVIEWER -->
-<div class="row-fluid">	
-	<div class="span12" id="disease-matcher">
+<div class="row">	
+	<div class="col-md-12" id="disease-matcher">
 	
 		<#-- ANALYSIS ZONE -->
-		<div class="span9">
+
+		<div class="col-md-9">
 			<div class="well" id="diseasematcher-infopanel">
 				<div class="span12" id="diseasematcher-variant-panel"></div>
 				<div class="row-fluid">
@@ -15,24 +16,25 @@
 				</div>
 			</div>
 			<div class="well" id="diseasematcher-patientpanel" style="display: none;">
-
+				<div class="well" id ="diseasematcher-filtered-variants"></div>
+				<button id="diseasematcher-download-button" class="btn btn-primary" style="display: none;">Download</button>
 				<legend>Phenotips</legend>
 				<label for="hpoTerms">HPO terms:</label>
-				<textarea id="hpoTermsInput" name="hpoTerms" rows="3" cols="30">HP:0012111,HP:0001943,HP:0000818,HP:0001939</textarea>
+				<textarea id="hpoTermsInput" name="hpoTerms" rows="3" cols="30">HP%3A0000252,HP%3A0004322,HP%3A0009900,HP%3A0001263,HP%3A0007369,HP%3A0001272,HP%3A0002011</textarea>
 				<br/>
-				<button type="button" id="btn-get-phenotips">DISEASES GET</button>
-				<button type="button" id="btn-filter-phenotips">FILTER</button>
+				<button type="button" id="btn-filter-phenotips-complete">Match PhenoTips Predictions</button>
 
 				<div id="diseasematcher-phenotips-output"></div>
+				<div id="diseasematcher-phenotips-hiddenoutput"></div>
 
 			</div>
 		</div>
 		
 		<#-- DISEASE ZONE-->
-		<div class="span3">
+		<div class="col-md-3">
 			<div class="well">
-				<div class="navbar" id="diseasematcher-selection-navbar">
-					<div class="navbar-inner">
+				<div class="navbar-nav" id="diseasematcher-selection-navbar-nav">
+					<div class="navbar-nav-inner">
 						<ul class="nav">
 							<li><a href="#" id="diseasematcher-genes-select-button">Genes</a></li>
 							<li><a href="#" id="diseasematcher-diseases-select-button">Diseases</a></li>
@@ -43,14 +45,9 @@
 					</div>
 				</div>
 		
-				<div class="row-fluid">
-					<div class="input-append span12" id="disease-search-container">
-						<input class="span10" id="diseasematcher-selection-search" type="text" placeholder="">
-						<button class="btn" type="button" id="disease-search-button"><i class="icon-large icon-search"></i></button>
-					</div>					
-				</div>
+				<div class="row"></div>
 				
-				<div class="row-fluid">
+				<div class="row">
 					<div class="accordion" id="disease-selection-container">
                         <div class="accordion-group">
                             <div class="accordion-heading">
@@ -59,7 +56,7 @@
                     
                             <div class="accordion-body collapse in">
                                 <div class="accordion-inner">
-                                    <div class="row-fluid" id="disease-selection">
+                                    <div class="row" id="disease-selection">
                                     	
                                     	<ul class="nav nav-tabs nav-stacked" id="diseasematcher-selection-list"></ul>
                                     	<div class="pagination pagination-centered" id="diseasematcher-selection-pager"></div>

@@ -4,47 +4,47 @@
 <#assign js=["jquery-ui-1.9.2.custom.min.js", "bootstrap-fileupload.min.js", "ontology-indexer.js"]>
 <@header css js/>
 	<#if isCorrectOntology?? && !isCorrectOntology> 
-		<div class="row-fluid">
-			<div class="alert alert-error">
+		<div class="row">
+			<div class="alert alert-danger">
 				<button type="button" class="close" data-dismiss="alert">&times;</button>
 		  		<p class="text-error"><strong>Warning!</strong> The file you uploaded is not in OWL or OBO format!</p>
 			</div>
 		</div>
 	<#elseif isIndexRunning?? && isIndexRunning>
-		<div class="row-fluid">
+		<div class="row">
 			<div class="alert alert-info">
 				<button type="button" class="close" data-dismiss="alert">&times;</button>
 		  		<strong>Message : </strong> ontology is being processed, please be patient. Click on refresh to check the status of index.
 			</div>
 		</div>
 	<#elseif isCorrectZipFile?? && !isCorrectZipFile>
-		<div class="row-fluid">
-			<div class="alert alert-error">
+		<div class="row">
+			<div class="alert alert-danger">
 				<button type="button" class="close" data-dismiss="alert">&times;</button>
 		  		<p class="text-error"><strong>Message : </strong> ${message}</p>
 			</div>
 		</div>
 	<#elseif removeSuccess??>
-		<div class="row-fluid">
-			<div <#if removeSuccess>class="alert alert-info"<#else>class="alert alert-error</#if>">
+		<div class="row">
+			<div <#if removeSuccess>class="alert alert-info"<#else>class="alert alert-danger</#if>">
 				<button type="button" class="close" data-dismiss="alert">&times;</button>
 		  		<p><strong>Message : </strong> ${message}</p>
 			</div>
 		</div>
 	</#if>
 	<form id="ontologyindexer-form" class="form-horizontal" enctype="multipart/form-data">
-		<div class="row-fluid">
-			<div class="span12">
+		<div class="row">
+			<div class="col-md-12">
 				<legend>Add new ontologies</legend>
 			</div>
 		</div>
-		<div class="row-fluid">
-			<div class="span12">
+		<div class="row">
+			<div class="col-md-12">
 				<input type="hidden" name="ontologyUri"/>
-				<div class="row-fluid">
-					<div id="div-index-ontology" class="span8 well">
-						<div class="row-fluid">
-							<div class="span12">
+				<div class="row">
+					<div id="div-index-ontology" class="col-md-8 well">
+						<div class="row">
+							<div class="col-md-12">
 								<table id="ontology-table" class="table table-striped table-bordered">
 									<tr>
 										<th>
@@ -63,8 +63,8 @@
 								</table>
 							</div>
 						</div>
-						<div id="div-new-ontology" class="row-fluid">
-							<div class="span12">
+						<div id="div-new-ontology" class="row">
+							<div class="col-md-12">
 								<div>
 									<p><strong>1. Please name the ontology</strong></p>
 									<input id="ontologyName" name="ontologyName" type="text" />
@@ -72,7 +72,7 @@
 								</div>
 								<p><strong>2. Please upload ontology file</strong></p>
 								<div class="fileupload fileupload-new" data-provides="fileupload">
-									<div class="input-append">
+									<div class="group-append">
 										<div class="uneditable-input">
 											<i class="icon-file fileupload-exists"></i>
 											<span class="fileupload-preview"></span>
@@ -87,12 +87,12 @@
 								</div>
 								<div class="btn-group">
 									<button class="btn btn-primary" id="index-button" type="button">Start index</button>
-									<button class="btn" id="refresh-button" type="button">Refresh</button>
+									<button class="btn btn-default" id="refresh-button" type="button">Refresh</button>
 								</div>
 							</div>
 						</div>
 					</div>
-					<div class="span4">
+					<div class="col-md-4">
 						<div class="accordion-group">
 						    <div class="accordion-heading">
 								<h5 class="text-left text-info">Actions</h5>	

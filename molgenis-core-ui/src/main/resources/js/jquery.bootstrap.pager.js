@@ -9,7 +9,7 @@
 		var settings = $.extend({}, $.fn.pager.defaults, options);
 
 		// pager html
-		this.addClass("pagination pagination-centered");
+//		this.addClass("pagination pagination-centered");
 		updatePager(this, settings.page, settings, false);
 		
 		// pager events
@@ -66,7 +66,8 @@
 	var renderPager = function(pager, page, nrPages) {
 		pager.empty();
 		var items = [];
-		items.push('<ul>');
+		items.push('<div class="text-center">');
+		items.push('<ul class="pagination">');
 		
 		// previous page
 		if(page === 1) {
@@ -96,6 +97,7 @@
 			items.push('<li class="page-next"><a href="#">&raquo;</a></li>');
 		
 		items.push('</ul>');
+		items.push('</div>');
 		pager.html(items.join(''));
 	};
 }($));

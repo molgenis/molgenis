@@ -17,7 +17,7 @@ import com.google.common.collect.Lists;
 public class PhenotipsService
 {
 	public static final String FORMAT = "html";
-	public static final int LIMIT = 1000;
+	public static final int LIMIT = 500;
 	public static final int Q = 1;
 	public static final String URL = "http://playground.phenotips.org/bin/get/PhenoTips/OmimPredictService";
 

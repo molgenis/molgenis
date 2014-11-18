@@ -3,7 +3,7 @@
 <#assign css=["bwizard.min.css", "importwizard.css"]>
 <#assign js=["bwizard.min.js"]>
 <@header css js/>
-	<div class="row-fluid">
+	<div class="row">
 				<div id="wizard">
 				<ol>
 					<#list wizard.pages as wizardPage>
@@ -16,10 +16,10 @@
 						<p>			
 							<#if wizardPage == wizard.currentPage && wizardPage.viewTemplate! != "">
 								<#if wizard.errorMessage! != "" >
-									<div class="alert alert-block alert-error">${wizard.errorMessage!}</div>
+									<div class="alert alert-block alert-danger">${wizard.errorMessage!}</div>
 								</#if>	
 								<#if wizard.validationMessage! != "" >
-									<div class="alert alert-block alert-error">${wizard.validationMessage!}</div>
+									<div class="alert alert-block alert-danger">${wizard.validationMessage!}</div>
 								</#if>	
 								<#if wizard.successMessage! != "" >
 									<div class="alert alert-block alert-success">${wizard.successMessage!}</div>

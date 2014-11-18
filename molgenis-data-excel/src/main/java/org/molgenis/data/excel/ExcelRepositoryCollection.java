@@ -13,6 +13,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.molgenis.data.Repository;
 import org.molgenis.data.processor.CellProcessor;
+import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.support.FileRepositoryCollection;
 
 import com.google.common.collect.ImmutableSet;
@@ -31,10 +32,11 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 
 	public ExcelRepositoryCollection(File file) throws InvalidFormatException, IOException
 	{
-		this(file, (CellProcessor[]) null);
+		this(file, new TrimProcessor());
 	}
 
-	public ExcelRepositoryCollection(File file, CellProcessor... cellProcessors) throws InvalidFormatException, IOException
+	public ExcelRepositoryCollection(File file, CellProcessor... cellProcessors) throws InvalidFormatException,
+			IOException
 	{
 		this(file.getName(), new FileInputStream(file), cellProcessors);
 	}

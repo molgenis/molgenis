@@ -216,9 +216,7 @@
 									$('<td />').text(typeof name !== 'undefined' ? name : "").appendTo(row);
 									$('<td />').text(typeof identifier !== 'undefined' ? identifier : "").appendTo(row);
 									$('<td />').text(typeof description !== 'undefined' ? description : "").appendTo(row);
-									var deleteButton = $('<i class="icon-remove"></i>');
-									
-									
+									var deleteButton = $('<span class="glyphicon glyphicon-remove"></span>');
 									
 									deleteButton.click(function() {
 										var item = $(this).closest('tr').data('key');

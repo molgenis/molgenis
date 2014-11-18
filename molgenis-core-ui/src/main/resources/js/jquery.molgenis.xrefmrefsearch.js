@@ -69,7 +69,7 @@
 
 	function formatResult(entity, entityMetaData, lookupAttributeNames) {
 		var items = [];
-		items.push('<div class="row-fluid">');
+		items.push('<div class="row">');
 
 		if (lookupAttributeNames.length > 0) {
 			var width = Math.round(12 / lookupAttributeNames.length);// 12 is full width in px
@@ -77,7 +77,7 @@
 			$.each(lookupAttributeNames, function(index, attrName) {
 				var attrLabel = entityMetaData.attributes[attrName].label || attrName;
 				var attrValue = entity[attrName] == undefined ?  '' :  entity[attrName];
-				items.push('<div class="span' + width + '">');
+				items.push('<div class="col-md-' + width + '">');
 				items.push(attrLabel + ': <b>' + htmlEscape(attrValue) + '</b>');
 				items.push('</div>');
 			});

@@ -1,37 +1,47 @@
 <#-- Bootstrap login modal -->
-<div id="login-modal" class="modal hide" tabindex="-1">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-    <h3>Sign in</h3>
-  </div>
-  <div class="modal-body">
-	<#-- login form -->
-	<form id="login-form" class="form-horizontal" method="POST" action="/login">
-	  <div class="control-group">
-	    <label class="control-label" for="loginUsername">Username</label>
-	    <div class="controls">
-	      <input type="text" id="loginUsername" name="username" required>
-	    </div>
-	  </div>
-	  <div class="control-group">
-	    <label class="control-label" for="loginPassword">Password</label>
-	    <div class="controls">
-	      <input type="password" id="loginPassword" name="password" required>
-	    </div>
-	  </div>
-	  <div class="control-group">
-	    <div class="controls">
-	      <button id="login-btn" type="submit" class="btn btn-primary">Sign in</button>
-	    </div>
-	  </div>
-	</form>
-	<#-- links to other modals -->
-	<div id="register-modal-container"></div>
-	<p><a class="modal-href" href="/account/register" data-target="register-modal-container"><small>Sign up</small></a></p>
-	<div id="resetpassword-modal-container"></div>
-	<p><a class="modal-href" href="/account/password/reset" data-target="resetpassword-modal-container"><small>Forgot password?</small></a></p>
-  </div>
+<div id="login-modal" class="modal" tabindex="-1" aria-labelledby="login-modal-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="login-modal-label">Sign in</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-8 col-md-offset-2">
+                        <div class="row">
+                            <#-- login form -->
+                            <form id="login-form" class="form-horizontal" role="form" method="POST" action="/login">
+                                <div class="form-group">
+                                    <label class="col-md-3 control-label" for="loginUsername">Username</label>
+                                    <div class="col-md-9">
+                                        <input type="text" class="form-control" id="loginUsername" name="username" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-md-3 control-label" for="loginPassword">Password</label>
+                                    <div class="col-md-9">
+                                        <input type="password" class="form-control" id="loginPassword" name="password" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-md-offset-3 col-md-9">
+                                        <button id="login-btn" type="submit" class="btn btn-primary">Sign in</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <#-- links to other modals -->
+                <p><a class="modal-href" href="/account/register" data-target="register-modal-container"><small>Sign up</small></a></p>
+                <p><a class="modal-href" href="/account/password/reset" data-target="resetpassword-modal-container"><small>Forgot password?</small></a></p>
+            </div>
+        </div>
+    </div>
 </div>
+<div id="register-modal-container"></div>
+<div id="resetpassword-modal-container"></div>
 <script type="text/javascript">
   	$(function() {
   		var modal = $('#login-modal');
@@ -40,35 +50,13 @@
   		form.validate();
   		
   		<#-- modal events -->
-  		modal.on('shown', function () {
-	  		form.find('input:visible:first').focus();
-  		});
-  		modal.on('hide', function (e) {
+  		modal.on('hide.bs.modal', function (e) {
   			e.stopPropagation();
 	  		form[0].reset();
 	  		$('.text-error', modal).remove();
 	  		$('.alert', modal).remove();
   		});
-  		$('.close', modal).click(function(e) {<#-- workaround: Bootstrap closes the whole stack of modals when closing one modal -->
-	  		e.preventDefault();
-	        modal.modal('hide');
-	    });
-	    modal.keyup(function(e) {<#-- workaround: Bootstrap closes the whole stack of modals when closing one modal -->
-	    	if(e.which == 27) {
-		    	e.preventDefault();
-			    e.stopPropagation();
-	    	}
-	    });
-	    modal.keydown(function(e) {<#-- workaround: Bootstrap closes the whole stack of modals when closing one modal -->
-	    	if(e.which == 27) {
-			    if(modal.data('modal').isShown) {
-				    e.preventDefault();
-				    e.stopPropagation();
-			    	modal.modal('hide');
-			    }
-	    	}
-	    });
-	    
+  		
   		<#-- form events -->
   		form.submit(function(e) {
 	    	if(!form.valid()) {

@@ -22,7 +22,7 @@
 	margin-bottom: 10px
 }
 
-#filter-wizard-modal .form-horizontal .control-group .select2-choices{
+#filter-wizard-modal .form-horizontal .form-group .select2-choices{
 	position: static;
 }
 
@@ -41,7 +41,7 @@
 	padding-bottom: 0;
 }
 
-#filter-modal .form-horizontal .control-group .select2-choices{
+#filter-modal .form-horizontal .form-group .select2-choices{
 	position: static;
 }
 

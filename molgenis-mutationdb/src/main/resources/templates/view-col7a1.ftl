@@ -28,7 +28,7 @@
 	"jquery.molgenis.table.js",
 	"col7a1.js"]>	
 <@header css js/>
-	<div class="row-fluid">
+	<div class="row">
 		<p>
 			<div class="pull-left">
 				<h3>${title}</h3>
