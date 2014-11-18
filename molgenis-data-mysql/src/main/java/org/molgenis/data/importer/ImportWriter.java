@@ -480,7 +480,6 @@ public class ImportWriter
 		}
 		catch (Exception e)
 		{
-			System.out.println(e);
 			rollbackSchemaChanges(job);
 			throw e;
 		}
