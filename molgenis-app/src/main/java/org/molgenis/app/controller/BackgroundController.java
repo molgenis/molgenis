@@ -1,6 +1,6 @@
-package org.molgenis.omx.controller;
+package org.molgenis.app.controller;
 
-import static org.molgenis.omx.controller.ReferencesController.URI;
+import static org.molgenis.app.controller.BackgroundController.URI;
 
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ui.controller.AbstractStaticContentController;
@@ -8,17 +8,16 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
- * Controller that handles references page requests
+ * Controller that handles contact page requests
  */
 @Controller
 @RequestMapping(URI)
-public class ReferencesController extends AbstractStaticContentController
+public class BackgroundController extends AbstractStaticContentController
 {
-	public static final String ID = "references";
+	public static final String ID = "background";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 	
-	public ReferencesController()
-
+	public BackgroundController()
 	{
 		super(ID, URI);
 	}

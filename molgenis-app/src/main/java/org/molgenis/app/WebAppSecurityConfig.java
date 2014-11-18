@@ -1,4 +1,4 @@
-package org.molgenis.omx;
+package org.molgenis.app;
 
 import static org.molgenis.security.core.utils.SecurityUtils.getPluginReadAuthority;
 

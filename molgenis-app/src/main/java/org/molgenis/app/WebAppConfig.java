@@ -1,4 +1,4 @@
-package org.molgenis.omx;
+package org.molgenis.app;
 
 import java.io.IOException;
 import java.util.Map;

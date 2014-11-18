@@ -1,6 +1,6 @@
-package org.molgenis.omx.controller;
+package org.molgenis.app.controller;
 
-import static org.molgenis.omx.controller.CbmToOmxConverterController.URI;
+import static org.molgenis.app.controller.CbmToOmxConverterController.URI;
 
 import java.io.BufferedInputStream;
 import java.io.File;

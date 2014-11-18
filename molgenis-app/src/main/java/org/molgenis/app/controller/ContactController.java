@@ -1,6 +1,6 @@
-package org.molgenis.omx.controller;
+package org.molgenis.app.controller;
 
-import static org.molgenis.omx.controller.HomeController.URI;
+import static org.molgenis.app.controller.ContactController.URI;
 
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ui.controller.AbstractStaticContentController;
@@ -8,16 +8,16 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
- * Controller that handles home page requests
+ * Controller that handles contact page requests
  */
 @Controller
 @RequestMapping(URI)
-public class HomeController extends AbstractStaticContentController
+public class ContactController extends AbstractStaticContentController
 {
-	public static final String ID = "home";
+	public static final String ID = "contact";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
-
-	public HomeController()
+	
+	public ContactController()
 	{
 		super(ID, URI);
 	}

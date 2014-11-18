@@ -6,6 +6,11 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
+import org.molgenis.app.controller.BackgroundController;
+import org.molgenis.app.controller.ContactController;
+import org.molgenis.app.controller.HomeController;
+import org.molgenis.app.controller.NewsController;
+import org.molgenis.app.controller.ReferencesController;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.omx.controller.ContentControllersTest.Config;

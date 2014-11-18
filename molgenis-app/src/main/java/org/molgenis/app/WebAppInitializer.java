@@ -1,4 +1,4 @@
-package org.molgenis.omx;
+package org.molgenis.app;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
