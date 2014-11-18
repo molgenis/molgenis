@@ -32,17 +32,16 @@ public class MolgenisDbSettings implements MolgenisSettings
 
 	@Override
 	@RunAsSystem
-	public String getProperty(String key)
+	public String getProperty(String name)
 	{
-		return getProperty(key, null);
+		return getProperty(name, null);
 	}
 
 	@Override
 	@RunAsSystem
-	public String getProperty(String key, String defaultValue)
+	public String getProperty(String name, String defaultValue)
 	{
-		Query propertyRule = new QueryImpl().eq(RuntimeProperty.IDENTIFIER, RuntimeProperty.class.getSimpleName() + '_'
-				+ key);
+		Query propertyRule = new QueryImpl().eq(RuntimeProperty.NAME, name);
 
 		RuntimeProperty property;
 		try
@@ -57,7 +56,7 @@ public class MolgenisDbSettings implements MolgenisSettings
 
 		if (property == null)
 		{
-			logger.debug(RuntimeProperty.class.getSimpleName() + " '" + key + "' is null");
+			logger.debug(RuntimeProperty.class.getSimpleName() + " '" + name + "' is null");
 			return defaultValue;
 		}
 
@@ -65,18 +64,15 @@ public class MolgenisDbSettings implements MolgenisSettings
 	}
 
 	@Override
-	public void setProperty(String key, String value)
+	public void setProperty(String name, String value)
 	{
-		String identifier = RuntimeProperty.class.getSimpleName() + '_' + key;
-
 		RuntimeProperty property = dataService.findOne(RuntimeProperty.ENTITY_NAME,
-				new QueryImpl().eq(RuntimeProperty.IDENTIFIER, identifier), RuntimeProperty.class);
+				new QueryImpl().eq(RuntimeProperty.NAME, name), RuntimeProperty.class);
 
 		if (property == null)
 		{
 			property = new RuntimeProperty();
-			property.setIdentifier(identifier);
-			property.setName(key);
+			property.setName(name);
 			property.setValue(value);
 			dataService.add(RuntimeProperty.ENTITY_NAME, property);
 		}
@@ -114,20 +110,20 @@ public class MolgenisDbSettings implements MolgenisSettings
 	}
 
 	@Override
-	public boolean updateProperty(String key, String content)
+	public boolean updateProperty(String name, String value)
 	{
-		if (null == content)
+		if (null == value)
 		{
 			throw new IllegalArgumentException("content is null");
 		}
 
-		Query query = new QueryImpl().eq(RuntimeProperty.IDENTIFIER, RuntimeProperty.class.getSimpleName() + '_' + key);
+		Query query = new QueryImpl().eq(RuntimeProperty.NAME, value);
 		try
 		{
 			RuntimeProperty property = dataService.findOne(RuntimeProperty.ENTITY_NAME, query, RuntimeProperty.class);
 			if (property != null)
 			{
-				property.setValue(content);
+				property.setValue(value);
 				dataService.update(RuntimeProperty.ENTITY_NAME, property);
 				return true;
 			}
@@ -142,10 +138,9 @@ public class MolgenisDbSettings implements MolgenisSettings
 
 	@Override
 	@RunAsSystem
-	public boolean propertyExists(String key)
+	public boolean propertyExists(String name)
 	{
-		long count = dataService.count(RuntimeProperty.ENTITY_NAME,
-				new QueryImpl().eq(RuntimeProperty.IDENTIFIER, RuntimeProperty.class.getSimpleName() + '_' + key));
+		long count = dataService.count(RuntimeProperty.ENTITY_NAME, new QueryImpl().eq(RuntimeProperty.NAME, name));
 		if (count > 0)
 		{
 			return true;
@@ -156,16 +151,16 @@ public class MolgenisDbSettings implements MolgenisSettings
 
 	@Override
 	@RunAsSystem
-	public Map<String, String> getProperties(String keyStartsWith)
+	public Map<String, String> getProperties(String prefix)
 	{
-		String prefix = RuntimeProperty.class.getSimpleName() + '_' + keyStartsWith;
+
 		Iterable<RuntimeProperty> properties = dataService.findAll(RuntimeProperty.ENTITY_NAME, RuntimeProperty.class);
 		Map<String, String> result = new TreeMap<String, String>();
 		for (RuntimeProperty property : properties)
 		{
-			if (property.getIdentifier().startsWith(prefix))
+			if (property.getName().startsWith(prefix))
 			{
-				result.put(property.getIdentifier().substring(prefix.length() + 1), property.getValue());
+				result.put(property.getName().substring(prefix.length() + 1), property.getValue());
 			}
 		}
 		return result;

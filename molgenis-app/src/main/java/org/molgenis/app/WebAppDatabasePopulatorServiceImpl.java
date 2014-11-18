@@ -18,11 +18,11 @@ import org.molgenis.data.support.GenomeConfig;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.framework.db.WebAppDatabasePopulatorService;
-import org.molgenis.system.core.RuntimeProperty;
 import org.molgenis.security.MolgenisSecurityWebAppDatabasePopulatorService;
 import org.molgenis.security.account.AccountService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.runas.RunAsSystem;
+import org.molgenis.system.core.RuntimeProperty;
 import org.molgenis.ui.MolgenisInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -141,7 +141,6 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		{
 			RuntimeProperty runtimeProperty = new RuntimeProperty();
 			String propertyKey = entry.getKey();
-			runtimeProperty.setIdentifier(RuntimeProperty.class.getSimpleName() + '_' + propertyKey);
 			runtimeProperty.setName(propertyKey);
 			runtimeProperty.setValue(entry.getValue());
 			dataService.add(RuntimeProperty.ENTITY_NAME, runtimeProperty);
