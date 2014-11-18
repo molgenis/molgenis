@@ -158,11 +158,7 @@ public class DbnsfpGeneServiceAnnotator extends LocusAnnotator
 								}
 
 							}
-
-							resultMap.put(CHROMOSOME, chromosome);
-							resultMap.put(POSITION, position);
-
-							results.add(new MapEntity(resultMap));
+							results.add(getAnnotatedEntity(entity, resultMap));
 						}
 					}
 				}

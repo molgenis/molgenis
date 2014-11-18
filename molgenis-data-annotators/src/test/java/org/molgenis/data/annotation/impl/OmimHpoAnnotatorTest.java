@@ -26,13 +26,14 @@ import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
 import org.molgenis.data.annotation.provider.HpoMappingProvider;
 import org.molgenis.data.annotation.provider.OmimMorbidMapProvider;
+import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class OmimHpoAnnotatorTest
 {
-	private EntityMetaData metaDataCanAnnotate;
+	private DefaultEntityMetaData metaDataCanAnnotate;
 	private EntityMetaData metaDataCantAnnotate;
 	private OmimHpoAnnotator annotator;
 	private AttributeMetaData attributeMetaDataChrom;
@@ -48,7 +49,7 @@ public class OmimHpoAnnotatorTest
 	{
 		AnnotationService annotationService = mock(AnnotationService.class);
 
-		metaDataCanAnnotate = mock(EntityMetaData.class);
+		metaDataCanAnnotate = new org.molgenis.data.support.DefaultEntityMetaData("test");
 
 		attributeMetaDataChrom = mock(AttributeMetaData.class);
 		attributeMetaDataPos = mock(AttributeMetaData.class);
@@ -61,8 +62,9 @@ public class OmimHpoAnnotatorTest
 		when(attributeMetaDataPos.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.LONG.toString().toLowerCase()));
 
-		when(metaDataCanAnnotate.getAttribute(OmimHpoAnnotator.CHROMOSOME)).thenReturn(attributeMetaDataChrom);
-		when(metaDataCanAnnotate.getAttribute(OmimHpoAnnotator.POSITION)).thenReturn(attributeMetaDataPos);
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom);
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);
+		metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom.getName());
 
 		metaDataCantAnnotate = mock(EntityMetaData.class);
 		attributeMetaDataCantAnnotateFeature = mock(AttributeMetaData.class);
@@ -142,6 +144,7 @@ public class OmimHpoAnnotatorTest
 
 		annotator = new OmimHpoAnnotator(annotationService, omimMorbidMapProvider, hgncLocationsProvider,
 				hpoMappingProvider);
+		when(entity.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
 	}
 
 	@Test

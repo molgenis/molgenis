@@ -130,7 +130,7 @@ public class KeggServiceAnnotator extends LocusAnnotator
 						// no genes for this pathway, do nothing
 					}
 
-					results.add(new MapEntity(resultMap));
+					results.add(getAnnotatedEntity(entity, resultMap));
 				}
 			}
 		}

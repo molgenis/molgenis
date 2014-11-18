@@ -151,7 +151,7 @@ public class RepositoryMerger
 		mergedEntity = new MapEntity(new HashMap<String, Object>());
 		if (idField == null || !entity.getEntityMetaData().getAttribute(idField).isUnique())
 		{
-			mergedEntity.set(ID, UUID.randomUUID().toString());// "CHROM"+entity.get("#CHROM")+"POS"+entity.get("POS"));
+			mergedEntity.set(ID, UUID.randomUUID().toString());
 		}
 		else
 		{
