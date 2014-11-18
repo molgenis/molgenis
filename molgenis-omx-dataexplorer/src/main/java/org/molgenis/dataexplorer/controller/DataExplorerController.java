@@ -190,6 +190,10 @@ public class DataExplorerController extends MolgenisPluginController
 				{
 					message.append(", log in to view more entities");
 				}
+				else
+				{
+					message.append(", please specify the fully qualified entity name");
+				}
 				model.addAttribute("warningMessage", message.toString());
 			}
 			Iterator<EntityMetaData> entitiesIterator = entitiesMeta.iterator();
@@ -591,8 +595,7 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/settings", method = RequestMethod.GET)
-	public @ResponseBody
-	Map<String, String> getSettings(@RequestParam(required = false) String keyStartsWith)
+	public @ResponseBody Map<String, String> getSettings(@RequestParam(required = false) String keyStartsWith)
 	{
 		if (keyStartsWith == null)
 		{
