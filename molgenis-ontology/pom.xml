@@ -86,6 +86,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-data-mysql</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-omx-dataexplorer</artifactId>
 			<version>${project.version}</version>
 		</dependency>
