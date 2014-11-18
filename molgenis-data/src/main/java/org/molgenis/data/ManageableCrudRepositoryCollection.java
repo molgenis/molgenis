@@ -18,4 +18,8 @@ public interface ManageableCrudRepositoryCollection extends RepositoryCollection
 	 * @return The newly added AttributeMetaData's
 	 */
 	List<AttributeMetaData> update(EntityMetaData entityMetaData);
+
+	void dropAttributeMetaData(String entityName, String attributeName);
+
+	void dropEntityMetaData(String entityName);
 }
