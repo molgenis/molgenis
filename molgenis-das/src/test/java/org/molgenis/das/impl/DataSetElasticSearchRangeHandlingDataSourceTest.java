@@ -1,4 +1,4 @@
-package org.molgenis.omx.das.impl;
+package org.molgenis.das.impl;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
