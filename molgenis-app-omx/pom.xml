@@ -156,7 +156,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-omx-dataexplorer</artifactId>
+			<artifactId>molgenis-dataexplorer</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -264,7 +264,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-omx-das</artifactId>
+			<artifactId>molgenis-das</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

@@ -577,8 +577,8 @@
         <module>molgenis-core</module>
         <module>molgenis-core-ui</module>
         <module>molgenis-ontology</module>
-        <module>molgenis-omx-das</module>
-        <module>molgenis-omx-dataexplorer</module>
+        <module>molgenis-das</module>
+        <module>molgenis-dataexplorer</module>
         <module>molgenis-app-omx</module>
         <module>molgenis-security</module>
         <module>molgenis-security-core</module>

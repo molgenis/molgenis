@@ -76,7 +76,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-omx-dataexplorer</artifactId>
+			<artifactId>molgenis-dataexplorer</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
