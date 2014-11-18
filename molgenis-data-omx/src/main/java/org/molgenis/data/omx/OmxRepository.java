@@ -1,11 +1,11 @@
 package org.molgenis.data.omx;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Aggregateable;
 import org.molgenis.data.AttributeMetaData;
@@ -16,6 +16,9 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
+import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.elasticsearch.util.SearchRequest;
+import org.molgenis.data.elasticsearch.util.SearchResult;
 import org.molgenis.data.support.ConvertingIterable;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
@@ -40,9 +43,6 @@ import org.molgenis.omx.observ.value.LongValue;
 import org.molgenis.omx.observ.value.StringValue;
 import org.molgenis.omx.observ.value.TextValue;
 import org.molgenis.omx.observ.value.Value;
-import org.molgenis.search.SearchRequest;
-import org.molgenis.search.SearchResult;
-import org.molgenis.search.SearchService;
 import org.molgenis.util.EntityUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.transaction.annotation.Transactional;
@@ -352,7 +352,7 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Cr
 		for (ObservedValue observedValue : observedValues)
 		{
 			Value value = observedValue.getValue();
-			
+
 			// update for every value type (boolean, string, integer etc..) except dateTime, xref, mref and categorical
 			if (value instanceof BoolValue)
 			{
@@ -365,90 +365,97 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Cr
 
 				// Update ES
 				searchService.updateDocumentById(dataSetIdentifier, documentId, attrName + "=" + boolValue.getValue());
-			
+
 			}
-			else if(value instanceof StringValue)
+			else if (value instanceof StringValue)
 			{
 				String attrName = observedValue.getFeature().getIdentifier();
 				StringValue stringValue = (StringValue) value;
 				stringValue.setValue(entity.getString(attrName));
-				
+
 				dataService.update(StringValue.ENTITY_NAME, stringValue);
-				searchService.updateDocumentById(dataSetIdentifier, documentId, attrName + "='" + stringValue.getValue() + "'");
-				
+				searchService.updateDocumentById(dataSetIdentifier, documentId,
+						attrName + "='" + stringValue.getValue() + "'");
+
 			}
-			else if(value instanceof TextValue)
+			else if (value instanceof TextValue)
 			{
 				String attrName = observedValue.getFeature().getIdentifier();
 				TextValue textValue = (TextValue) value;
 				textValue.setValue(entity.getString(attrName));
-				
+
 				dataService.update(TextValue.ENTITY_NAME, textValue);
-				searchService.updateDocumentById(dataSetIdentifier, documentId, attrName + "='" + textValue.getValue() + "'");
+				searchService.updateDocumentById(dataSetIdentifier, documentId, attrName + "='" + textValue.getValue()
+						+ "'");
 			}
-			else if(value instanceof LongValue)
+			else if (value instanceof LongValue)
 			{
 				String attrName = observedValue.getFeature().getIdentifier();
 				LongValue longValue = (LongValue) value;
 				longValue.setValue(Long.parseLong(entity.getString(attrName)));
-				
+
 				dataService.update(LongValue.ENTITY_NAME, longValue);
 				searchService.updateDocumentById(dataSetIdentifier, documentId, attrName + "=" + longValue.getValue());
 			}
-			else if(value instanceof IntValue)
+			else if (value instanceof IntValue)
 			{
 				String attrName = observedValue.getFeature().getIdentifier();
 				IntValue intValue = (IntValue) value;
 				intValue.setValue(Integer.parseInt(entity.getString(attrName)));
-				
+
 				dataService.update(IntValue.ENTITY_NAME, intValue);
 				searchService.updateDocumentById(dataSetIdentifier, documentId, attrName + "=" + intValue.getValue());
-				
+
 			}
-			else if(value instanceof DecimalValue)
+			else if (value instanceof DecimalValue)
 			{
 				String attrName = observedValue.getFeature().getIdentifier();
 				DecimalValue decimalValue = (DecimalValue) value;
 				decimalValue.setValue(Double.parseDouble(entity.getString(attrName)));
-				
+
 				dataService.update(DecimalValue.ENTITY_NAME, decimalValue);
-				searchService.updateDocumentById(dataSetIdentifier, documentId, attrName + "=" + decimalValue.getValue());
+				searchService.updateDocumentById(dataSetIdentifier, documentId,
+						attrName + "=" + decimalValue.getValue());
 			}
-			else if(value instanceof HtmlValue)
+			else if (value instanceof HtmlValue)
 			{
 				String attrName = observedValue.getFeature().getIdentifier();
 				HtmlValue htmlValue = (HtmlValue) value;
 				htmlValue.setValue(entity.getString(attrName));
 
 				dataService.update(HtmlValue.ENTITY_NAME, htmlValue);
-				searchService.updateDocumentById(dataSetIdentifier, documentId, attrName + "='" + htmlValue.getValue() + "'");
+				searchService.updateDocumentById(dataSetIdentifier, documentId, attrName + "='" + htmlValue.getValue()
+						+ "'");
 			}
-			else if(value instanceof HyperlinkValue)
+			else if (value instanceof HyperlinkValue)
 			{
 				String attrName = observedValue.getFeature().getIdentifier();
 				HyperlinkValue hyperlinkValue = (HyperlinkValue) value;
 				hyperlinkValue.setValue(entity.getString(attrName));
-				
+
 				dataService.update(HyperlinkValue.ENTITY_NAME, hyperlinkValue);
-				searchService.updateDocumentById(dataSetIdentifier, documentId, attrName + "='" + hyperlinkValue.getValue() + "'");
+				searchService.updateDocumentById(dataSetIdentifier, documentId,
+						attrName + "='" + hyperlinkValue.getValue() + "'");
 			}
-			else if(value instanceof EmailValue)
+			else if (value instanceof EmailValue)
 			{
 				String attrName = observedValue.getFeature().getIdentifier();
 				EmailValue emailValue = (EmailValue) value;
 				emailValue.setValue(entity.getString(attrName));
 
 				dataService.update(EmailValue.ENTITY_NAME, emailValue);
-				searchService.updateDocumentById(dataSetIdentifier, documentId, attrName + "='" + emailValue.getValue() + "'");
+				searchService.updateDocumentById(dataSetIdentifier, documentId, attrName + "='" + emailValue.getValue()
+						+ "'");
 			}
-			else if(value instanceof DateValue)
+			else if (value instanceof DateValue)
 			{
 				String attrName = observedValue.getFeature().getIdentifier();
 				DateValue dateValue = (DateValue) value;
 				dateValue.setValue(entity.getDate(attrName));
-				
+
 				dataService.update(DateValue.ENTITY_NAME, dateValue);
-				searchService.updateDocumentById(dataSetIdentifier, documentId, attrName + "='" + dateValue.getValue() + "'");
+				searchService.updateDocumentById(dataSetIdentifier, documentId, attrName + "='" + dateValue.getValue()
+						+ "'");
 			}
 		}
 	}
@@ -490,20 +497,19 @@ public class OmxRepository extends AbstractDataSetMatrixRepository implements Cr
 	}
 
 	@Override
-	public void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
+	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
-		throw new UnsupportedOperationException();
-	}
+		Query q = aggregateQuery.getQuery();
+		AttributeMetaData xAttr = aggregateQuery.getAttributeX();
+		AttributeMetaData yAttr = aggregateQuery.getAttributeY();
+		AttributeMetaData distinctAttr = aggregateQuery.getAttributeDistinct();
 
-	@Override
-	public AggregateResult aggregate(AttributeMetaData xAttr, AttributeMetaData yAttr, Query q)
-	{
 		if ((xAttr == null) && (yAttr == null))
 		{
 			throw new MolgenisDataException("Missing aggregate attribute");
 		}
 
-		SearchRequest request = new SearchRequest(dataSetIdentifier, q, null, xAttr, yAttr);
+		SearchRequest request = new SearchRequest(dataSetIdentifier, q, null, xAttr, yAttr, distinctAttr);
 		SearchResult result = searchService.search(request);
 
 		return result.getAggregate();

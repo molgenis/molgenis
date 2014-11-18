@@ -9,9 +9,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.log4j.Logger;
+import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Aggregateable;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -35,6 +36,8 @@ import com.google.common.collect.Lists;
 @Component
 public class DataServiceImpl implements DataService
 {
+	private static final Logger LOG = Logger.getLogger(DataServiceImpl.class);
+
 	private final Map<String, Repository> repositories;
 	private final Set<String> repositoryNames;
 
@@ -52,6 +55,7 @@ public class DataServiceImpl implements DataService
 		{
 			throw new MolgenisDataException("Entity [" + repositoryName + "] already registered.");
 		}
+		if (LOG.isDebugEnabled()) LOG.debug("Adding repository [" + repositoryName + "]");
 		repositoryNames.add(repositoryName);
 		repositories.put(repositoryName.toLowerCase(), newRepository);
 	}
@@ -70,6 +74,7 @@ public class DataServiceImpl implements DataService
 		}
 		else
 		{
+			if (LOG.isDebugEnabled()) LOG.debug("Removing repository [" + repositoryName + "]");
 			repositoryNames.remove(repositoryName);
 			repositories.remove(repositoryName.toLowerCase());
 		}
@@ -109,7 +114,6 @@ public class DataServiceImpl implements DataService
 	public boolean hasRepository(String entityName)
 	{
 		return repositories.containsKey(entityName.toLowerCase());
-
 	}
 
 	@Override
@@ -316,7 +320,7 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public AggregateResult aggregate(String entityName, AttributeMetaData xAttr, AttributeMetaData yAttr, Query q)
+	public AggregateResult aggregate(String entityName, AggregateQuery aggregateQuery)
 	{
 		Repository repo = getRepositoryByEntityName(entityName);
 		if (!(repo instanceof Aggregateable))
@@ -324,6 +328,6 @@ public class DataServiceImpl implements DataService
 			throw new MolgenisDataException("Repository of [" + entityName + "] isn't aggregateable");
 		}
 
-		return ((Aggregateable) repo).aggregate(xAttr, yAttr, q);
+		return ((Aggregateable) repo).aggregate(aggregateQuery);
 	}
 }

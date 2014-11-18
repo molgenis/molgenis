@@ -1,22 +1,30 @@
 package org.molgenis;
 
+import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.mysql.AttributeMetaDataRepository;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryDecoratorFactory;
+import org.molgenis.data.meta.MetaDataServiceImpl;
+import org.molgenis.data.meta.WritableMetaDataService;
+import org.molgenis.data.meta.WritableMetaDataServiceDecorator;
+import org.molgenis.data.mysql.AsyncJdbcTemplate;
 import org.molgenis.data.mysql.EmbeddedMysqlDatabaseBuilder;
-import org.molgenis.data.mysql.EntityMetaDataRepository;
-import org.molgenis.data.mysql.MysqlEntityValidator;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.validation.DefaultEntityValidator;
-import org.molgenis.data.validation.EntityAttributesValidator;
+import org.molgenis.framework.ui.MolgenisPluginRegistry;
+import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
+import org.molgenis.security.permission.PermissionSystemService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -28,10 +36,19 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @ComponentScan("org.molgenis.data")
 public class AppConfig
 {
+	private MetaDataServiceImpl mysqlWritableMetaDataService;
+
 	@Bean(destroyMethod = "shutdown")
 	public DataSource dataSource()
 	{
 		return new EmbeddedMysqlDatabaseBuilder().build();
+	}
+
+	@PostConstruct
+	public void login()
+	{
+		SecurityContextHolder.getContext().setAuthentication(
+				new TestingAuthenticationToken("admin", "admin", "ROLE_SYSTEM"));
 	}
 
 	@Bean
@@ -47,40 +64,86 @@ public class AppConfig
 	}
 
 	@Bean
+	public AsyncJdbcTemplate asyncJdbcTemplate()
+	{
+		return new AsyncJdbcTemplate(new JdbcTemplate(dataSource()));
+	}
+
+	@Bean
 	@Scope("prototype")
 	public MysqlRepository mysqlRepository()
 	{
-		return new MysqlRepository(dataSource(), new DefaultEntityValidator(dataService(),
-				new EntityAttributesValidator()));
+		return new MysqlRepository(dataSource(), asyncJdbcTemplate());
 	}
 
 	@Bean
-	public EntityMetaDataRepository entityMetaDataRepository()
+	public PermissionSystemService permissionSystemService()
 	{
-		return new EntityMetaDataRepository(dataSource(), new MysqlEntityValidator(dataService(),
-				new EntityAttributesValidator()));
+		return new PermissionSystemService(dataService());
 	}
 
 	@Bean
-	public AttributeMetaDataRepository attributeMetaDataRepository()
+	public WritableMetaDataService writableMetaDataService()
 	{
-		return new AttributeMetaDataRepository(dataSource(), new MysqlEntityValidator(dataService(),
-				new EntityAttributesValidator()));
+		mysqlWritableMetaDataService = new MetaDataServiceImpl();
+		return writableMetaDataServiceDecorator().decorate(mysqlWritableMetaDataService);
+	}
+
+	@Bean
+	/**
+	 * non-decorating decorator, to be overrided if you wish to decorate the MetaDataRepositories
+	 */
+	WritableMetaDataServiceDecorator writableMetaDataServiceDecorator()
+	{
+		return new WritableMetaDataServiceDecorator()
+		{
+			@Override
+			public WritableMetaDataService decorate(WritableMetaDataService writableMetaDataService)
+			{
+				return writableMetaDataService;
+			}
+		};
 	}
 
 	@Bean
 	public MysqlRepositoryCollection mysqlRepositoryCollection()
 	{
-		return new MysqlRepositoryCollection(dataSource(), dataService(), entityMetaDataRepository(),
-				attributeMetaDataRepository())
+		MysqlRepositoryCollection mysqlRepositoryCollection = new MysqlRepositoryCollection(dataSource(),
+				dataService(), writableMetaDataService(), repositoryDecoratorFactory())
+
 		{
 			@Override
-			protected MysqlRepository createMysqlRepsitory()
+			protected MysqlRepository createMysqlRepository()
 			{
 				MysqlRepository repo = mysqlRepository();
 				repo.setRepositoryCollection(this);
 				return repo;
 			}
 		};
+
+		mysqlWritableMetaDataService.setManageableCrudRepositoryCollection(mysqlRepositoryCollection);
+
+		return mysqlRepositoryCollection;
 	}
+
+	@Bean
+	public MolgenisPluginRegistry molgenisPluginRegistry()
+	{
+		return new MolgenisPluginRegistryImpl();
+	}
+
+	// temporary workaround for module dependencies
+	@Bean
+	public RepositoryDecoratorFactory repositoryDecoratorFactory()
+	{
+		return new RepositoryDecoratorFactory()
+		{
+			@Override
+			public Repository createDecoratedRepository(Repository repository)
+			{
+				return repository;
+			}
+		};
+	}
+
 }

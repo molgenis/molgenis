@@ -27,13 +27,14 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class EbiServiceAnnotatorTest
 {
-	private EntityMetaData metaDataCanAnnotate;
+	private DefaultEntityMetaData metaDataCanAnnotate;
 	private EntityMetaData metaDataCantAnnotate;
 	private EbiServiceAnnotator annotator;
 	private AttributeMetaData attributeMetaDataCanAnnotate;
@@ -47,16 +48,17 @@ public class EbiServiceAnnotatorTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		annotator = new EbiServiceAnnotator();
+		this.httpClient = mock(HttpClient.class);
+		annotator = new EbiServiceAnnotator(httpClient);
 
-		metaDataCanAnnotate = mock(EntityMetaData.class);
+		metaDataCanAnnotate = new DefaultEntityMetaData("test");
 		attributeMetaDataCanAnnotate = mock(AttributeMetaData.class);
 		when(attributeMetaDataCanAnnotate.getName()).thenReturn("uniprot_id");
 		when(attributeMetaDataCanAnnotate.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
 
-		when(metaDataCanAnnotate.getAttribute("uniprot_id")).thenReturn(attributeMetaDataCanAnnotate);
-
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataCanAnnotate);
+		metaDataCanAnnotate.setIdAttribute(attributeMetaDataCanAnnotate.getName());
 		metaDataCantAnnotate = mock(EntityMetaData.class);
 		attributeMetaDataCantAnnotate = mock(AttributeMetaData.class);
 		when(attributeMetaDataCantAnnotate.getName()).thenReturn("otherID");
@@ -74,7 +76,7 @@ public class EbiServiceAnnotatorTest
 		input = new ArrayList<Entity>();
 		input.add(entity);
 
-		this.httpClient = mock(HttpClient.class);
+		when(entity.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
 
 		SERVICE_RESPONSE = "{\"target\": {\"targetType\": \"SINGLE PROTEIN\", \"chemblId\": \"CHEMBL1940\", \"geneNames\": \"Unspecified\", \"description\": \"Voltage-gated L-type calcium channel alpha-1C subunit\", \"compoundCount\": 171, \"bioactivityCount\": 239, \"proteinAccession\": \"Q13936\", \"synonyms\": \"CCHL1A1,CACNL1A1,Calcium channel, L type, alpha-1 polypeptide, isoform 1, cardiac muscle,Voltage-gated calcium channel subunit alpha Cav1.2,CACNA1C,CACN2,CACH2 ,Voltage-dependent L-type calcium channel subunit alpha-1C\", \"organism\": \"Homo sapiens\", \"preferredName\": \"Voltage-gated L-type calcium channel alpha-1C subunit\"}}";
 	}
@@ -125,7 +127,7 @@ public class EbiServiceAnnotatorTest
 
 		Iterator<Entity> results = annotator.annotate(input.iterator());
 
-		assertEquals(results.next().getString("uniprot_id"), expectedEntity.getString("uniprot_id"));
+		assertEquals(results.next().getString("chemblId"), expectedEntity.getString("chemblId"));
 	}
 
 	@Test

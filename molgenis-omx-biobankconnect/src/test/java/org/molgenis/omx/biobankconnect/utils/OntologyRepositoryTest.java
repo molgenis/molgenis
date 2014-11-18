@@ -9,8 +9,8 @@ import java.util.Iterator;
 
 import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.data.Entity;
+import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.omx.biobankconnect.ontology.repository.OntologyIndexRepository;
-import org.molgenis.search.SearchService;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

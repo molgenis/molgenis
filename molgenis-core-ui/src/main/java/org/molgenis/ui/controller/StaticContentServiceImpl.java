@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class StaticContentServiceImpl implements StaticContentService
 {
-	public static final String DEFAULT_CONTENT = "<p>Place some content!</p>";
 	public static final String PREFIX_KEY = "app.";
 
 	private final MolgenisSettings molgenisSettings;
@@ -60,13 +59,6 @@ public class StaticContentServiceImpl implements StaticContentService
 	@Override
 	public String getContent(final String uniqueReference)
 	{
-		String content = this.molgenisSettings.getProperty(PREFIX_KEY + uniqueReference, DEFAULT_CONTENT);
-
-		if (null == content)
-		{
-			throw new MolgenisDataException("Content is null");
-		}
-
-		return content;
+		return this.molgenisSettings.getProperty(PREFIX_KEY + uniqueReference);
 	}
 }

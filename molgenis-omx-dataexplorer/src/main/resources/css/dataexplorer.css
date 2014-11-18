@@ -1,3 +1,13 @@
+.modal-xxl
+{
+    width: 90%;
+}
+
+.modal-xxl .modal-body
+{
+	overflow: auto;
+}
+
 #dataset-select-label {
 	margin-right: 10px;
 	font-size: 15.4px;
@@ -26,10 +36,18 @@
 	vertical-align: middle;
 }
 
-#feature-selection .molgenis-tree {
+body:not(.modal-open) #feature-selection .molgenis-tree {
 	height: 400px;
 	overflow: auto;
 	margin-bottom: 10px;
+}
+
+#aggregatesContainer {
+	clear: both;
+}
+
+#aggregate-table-container {
+	overflow: auto;	
 }
 
 #aggregate-table-container th {
@@ -40,6 +58,7 @@
 #dataexplorer-aggregate-data table {
 	margin-top: 20px;
 	background: #DDDDDD;
+	
 }
 
 #dataexplorer-grid-data table {
@@ -76,16 +95,12 @@
 	margin-top: 25px;
 }
 
-#feature-select-container{	
-	margin-bottom: 20px;
+#feature-select-container .row {	
+	margin-top: 10px;
 }
 
 #filter-nav li a:hover{
 	cursor: default
-}
-
-#feature-select {
-	position:absolute;
 }
 
 #feature-selection .fancytree-ico-e span.fancytree-icon
@@ -169,7 +184,7 @@ ul.fancytree-container {
 
 .form-horizontal .controls {
 	display: inline-block;
-	padding-left: 20px;
+	padding-left: 15px;
 	margin-left: 0px;
 	vertical-align: top;
 }
@@ -180,11 +195,6 @@ ul.fancytree-container {
 
 .ui-editRangeSlider-inputValue {
 	width: 4em;
-}
-
-input[name="ColNames"] {
-  margin-top: -1px;
-  vertical-align: middle;
 }
 
 #entity-class h3 {
@@ -198,9 +208,12 @@ input[name="ColNames"] {
 */
 .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
 	background-color: #7CBAD1;
-	
 }
 
 .table-hover {
 	cursor: pointer;
 } 
+
+#chartCreationButtons {
+	padding-top: 10px;
+}

@@ -29,9 +29,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.google.gdata.util.ServiceException;
-
-
 @Controller
 @RequestMapping(URI)
 @Scope("request")
@@ -82,7 +79,7 @@ public class GafListImporterController extends MolgenisPluginController
 	@RequestMapping(method = RequestMethod.POST, value = "/validate")
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	public String validateGAFList(HttpServletRequest request, @RequestParam("csvFile") MultipartFile csvFile,
-			Model model) throws IOException, ServiceException, ValueConverterException, MessagingException, Exception
+			Model model) throws IOException, ValueConverterException, MessagingException, Exception
 	{
 		boolean submitState = false;
 		String action = "/validate";
@@ -94,7 +91,7 @@ public class GafListImporterController extends MolgenisPluginController
 			try
 			{
 				this.gafListFileImporterService.validateGAFList(report, csvFile);
-				model.addAttribute("hasValidationError", report.hasErrors());
+				model.addAttribute("hasValidationError", (report.hasGlobalErrors() || report.hasRunIdsErrors()));
 				model.addAttribute("validationReport", report.toStringHtml());
 
 				if (!report.getValidRunIds().isEmpty())
@@ -110,10 +107,14 @@ public class GafListImporterController extends MolgenisPluginController
 					messages.add("Validation for all runs failed");
 				}
 
-				if (report.hasErrors())
+				if (report.hasGlobalErrors())
 				{
-					messages.add("Run id's: <b>" + report.getInvalidRunIds()
-							+ "</b> cannot be imported");
+					messages.addAll(report.getValidationGlobalErrorMessages());
+				}
+
+				if (report.hasRunIdsErrors())
+				{
+					messages.add("Run id's: <b>" + report.getInvalidRunIds() + "</b> cannot be imported");
 				}
 			}
 			catch (Exception e)
@@ -138,8 +139,8 @@ public class GafListImporterController extends MolgenisPluginController
 
 	@RequestMapping(method = RequestMethod.POST, value = "/import")
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
-	public String importGAFList(HttpServletRequest request, Model model) throws IOException, ServiceException,
-			ValueConverterException, MessagingException, Exception
+	public String importGAFList(HttpServletRequest request, Model model) throws IOException, ValueConverterException,
+			MessagingException, Exception
 	{
 		final List<String> messages = new ArrayList<String>();
 		try
@@ -148,15 +149,13 @@ public class GafListImporterController extends MolgenisPluginController
 
 			if (!report.getValidRunIds().isEmpty())
 			{
-				messages.add("Successfully imported GAF list named: <b><a href="
- + "/menu/main/dataexplorer?dataset="
-						+ report.getDataSetIdentifier() + ">"
-						+ report.getDataSetName() + "</a></b>");
+				messages.add("Successfully imported GAF list named: <b><a href=" + "/menu/main/dataexplorer?entity="
+						+ report.getDataSetIdentifier() + ">" + report.getDataSetName() + "</a></b>");
 
 				messages.add("Imported run id's: <b>" + report.getValidRunIds() + "</b>");
 			}
 
-			if (report.hasErrors())
+			if (report.hasRunIdsErrors())
 			{
 				messages.add("Not imported run id's: <b>" + report.getInvalidRunIds() + "</b>");
 			}

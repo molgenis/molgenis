@@ -236,7 +236,7 @@ public class DbnsfpVariantServiceAnnotator extends VariantAnnotator
 								resultMap.put(REFERENCE, reference);
 								resultMap.put(ALTERNATIVE, alternative);
 
-								results.add(new MapEntity(resultMap));
+								results.add(getAnnotatedEntity(entity, resultMap));
 							}
 							else
 							{

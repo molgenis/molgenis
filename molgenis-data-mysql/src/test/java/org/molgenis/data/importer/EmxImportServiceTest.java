@@ -13,11 +13,13 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
+import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
+import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -28,6 +30,7 @@ import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.SimpleTransactionStatus;
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = AppConfig.class)
@@ -57,21 +60,34 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 
 	DataService dataService;
 
+	@Autowired
+	PermissionSystemService permissionSystemService;
+
+	@Autowired
+	MetaDataServiceImpl mysqlMetaDataRepositories;
+
+	@BeforeMethod
+	public void beforeMethod()
+	{
+		mysqlMetaDataRepositories.recreateMetaDataRepositories();
+		dataService = mock(DataService.class);
+	}
+
 	@Test
 	public void testValidationReport() throws IOException, InvalidFormatException, URISyntaxException
 	{
 		// open test source
 		File f = ResourceUtils.getFile(getClass(), "/example_invalid.xlsx");
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
-		dataService = mock(DataService.class);
 
 		// create importer
-		EmxImportServiceImpl importer = new EmxImportServiceImpl(dataService);
-		importer.setRepositoryCollection(store);
+		EmxImportService importer = new EmxImportService(dataService);
+		importer.setRepositoryCollection(store, mysqlMetaDataRepositories);
 		importer.setPlatformTransactionManager(new SimplePlatformTransactionManager());
+		importer.setPermissionSystemService(permissionSystemService);
 
 		// generate report
-		EntitiesValidationReport report = importer.validateImport(source);
+		EntitiesValidationReport report = importer.validateImport(f, source);
 
 		// SheetsImportable
 		Assert.assertEquals(report.getSheetsImportable().size(), 4);
@@ -108,23 +124,17 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testImportReport() throws IOException, InvalidFormatException, InterruptedException
 	{
-		// cleanup
-		store.drop("import_person");
-		store.drop("import_city");
-		store.drop("import_country");
-
 		// create test excel
 		File f = ResourceUtils.getFile(getClass(), "/example.xlsx");
-		// TODO add good example to repo
-
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
 
 		Assert.assertEquals(source.getNumberOfSheets(), 4);
 		Assert.assertNotNull(source.getRepositoryByEntityName("attributes"));
 
-		EmxImportServiceImpl importer = new EmxImportServiceImpl(dataService);
-		importer.setRepositoryCollection(store);
+		EmxImportService importer = new EmxImportService(dataService);
+		importer.setRepositoryCollection(store, mysqlMetaDataRepositories);
 		importer.setPlatformTransactionManager(new SimplePlatformTransactionManager());
+		importer.setPermissionSystemService(permissionSystemService);
 
 		// test import
 		EntityImportReport report = importer.doImport(source, DatabaseAction.ADD);
@@ -133,15 +143,11 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		Assert.assertEquals(report.getNrImportedEntitiesMap().get("import_city"), new Integer(2));
 		Assert.assertEquals(report.getNrImportedEntitiesMap().get("import_person"), new Integer(3));
 
-		// wait to make sure logger has outputted
-		Thread.sleep(1000);
 	}
 
 	@Test
 	public void testImportReportNoMeta() throws IOException, InvalidFormatException, InterruptedException
 	{
-		dataService = mock(DataService.class);
-
 		MysqlRepository repositoryCity = mock(MysqlRepository.class);
 		DefaultEntityMetaData entityMetaDataCity = new DefaultEntityMetaData("import_city");
 		entityMetaDataCity.addAttribute("name").setIdAttribute(true).setNillable(false);
@@ -163,32 +169,25 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		when(repositoryPerson.getEntityMetaData()).thenReturn(entityMetaDataPerson);
 
 		// cleanup
-		store.drop("import_person");
-		store.drop("import_city");
-		store.drop("import_country");
+		store.dropEntityMetaData("import_person");
+		store.dropEntityMetaData("import_city");
+		store.dropEntityMetaData("import_country");
 
 		// create test excel
-
 		File f = ResourceUtils.getFile(getClass(), "/example.xlsx");
-		// TODO add good example to repo
-
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
 
-		EmxImportServiceImpl importer = new EmxImportServiceImpl(dataService);
-		importer.setRepositoryCollection(store);
+		EmxImportService importer = new EmxImportService(dataService);
+		importer.setRepositoryCollection(store, mysqlMetaDataRepositories);
 		importer.setPlatformTransactionManager(new SimplePlatformTransactionManager());
+		importer.setPermissionSystemService(permissionSystemService);
 
 		// test import
 		importer.doImport(source, DatabaseAction.ADD);
-		// wait to make sure logger has outputted
-		Thread.sleep(1000);
 
 		// create test excel
 		File file_no_meta = ResourceUtils.getFile(getClass(), "/example_no_meta.xlsx");
 		ExcelRepositoryCollection source_no_meta = new ExcelRepositoryCollection(file_no_meta);
-
-		importer.setRepositoryCollection(store);
-		importer.setPlatformTransactionManager(new SimplePlatformTransactionManager());
 
 		// test import
 		EntityImportReport report = importer.doImport(source_no_meta, DatabaseAction.ADD);
@@ -196,7 +195,5 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		Assert.assertEquals(report.getNrImportedEntitiesMap().get("import_city"), new Integer(4));
 		Assert.assertEquals(report.getNrImportedEntitiesMap().get("import_person"), new Integer(4));
 
-		// wait to make sure logger has outputted
-		Thread.sleep(1000);
 	}
 }

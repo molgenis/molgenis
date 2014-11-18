@@ -80,7 +80,9 @@ public interface AttributeMetaData
 	EntityMetaData getRefEntity();
 
 	/**
-	 * Get compound attribute parts
+	 * When getDataType=compound, get compound attribute parts
+	 * 
+	 * @return Iterable of attributes or empty Iterable if no attribute parts exist
 	 */
 	Iterable<AttributeMetaData> getAttributeParts();
 
@@ -99,4 +101,6 @@ public interface AttributeMetaData
 	 * For enum fields returns the posible enum values
 	 */
 	List<String> getEnumOptions();
+
+	boolean isSameAs(AttributeMetaData attributeMetaData);
 }

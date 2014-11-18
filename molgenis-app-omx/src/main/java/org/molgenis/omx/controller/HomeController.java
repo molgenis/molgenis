@@ -16,7 +16,7 @@ public class HomeController extends AbstractStaticContentController
 {
 	public static final String ID = "home";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
-	
+
 	public HomeController()
 	{
 		super(ID, URI);

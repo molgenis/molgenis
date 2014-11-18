@@ -1,21 +1,14 @@
 package org.molgenis.data.jpa;
 
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.BOOL;
-
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
-import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaBuilder.In;
@@ -31,7 +24,6 @@ import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
-import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
@@ -39,12 +31,10 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.support.AbstractAggregateableCrudRepository;
+import org.molgenis.data.support.AbstractCrudRepository;
 import org.molgenis.data.support.ConvertingIterable;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.QueryResolver;
-import org.molgenis.data.validation.EntityValidator;
 import org.molgenis.generators.GeneratorHelper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Sort;
@@ -55,7 +45,7 @@ import com.google.common.collect.Lists;
 /**
  * Repository implementation for (generated) jpa entities
  */
-public class JpaRepository extends AbstractAggregateableCrudRepository
+public class JpaRepository extends AbstractCrudRepository
 {
 	public static final String BASE_URL = "jpa://";
 	private final EntityMetaData entityMetaData;
@@ -64,17 +54,16 @@ public class JpaRepository extends AbstractAggregateableCrudRepository
 	@PersistenceContext
 	private EntityManager entityManager;
 
-	public JpaRepository(EntityMetaData entityMetaData, EntityValidator entityValidator, QueryResolver queryResolver)
+	public JpaRepository(EntityMetaData entityMetaData, QueryResolver queryResolver)
 	{
-		super(BASE_URL + entityMetaData.getEntityClass().getName(), entityValidator);
+		super(BASE_URL + entityMetaData.getEntityClass().getName());
 		this.entityMetaData = entityMetaData;
 		this.queryResolver = queryResolver;
 	}
 
-	public JpaRepository(EntityManager entityManager, EntityMetaData entityMetaData, EntityValidator entityValidator,
-			QueryResolver queryResolver)
+	public JpaRepository(EntityManager entityManager, EntityMetaData entityMetaData, QueryResolver queryResolver)
 	{
-		this(entityMetaData, entityValidator, queryResolver);
+		this(entityMetaData, queryResolver);
 		this.entityManager = entityManager;
 	}
 
@@ -95,7 +84,8 @@ public class JpaRepository extends AbstractAggregateableCrudRepository
 	}
 
 	@Override
-	protected void addInternal(Entity entity)
+	@Transactional
+	public void add(Entity entity)
 	{
 		Entity jpaEntity = getTypedEntity(entity);
 
@@ -108,12 +98,13 @@ public class JpaRepository extends AbstractAggregateableCrudRepository
 	}
 
 	@Override
-	protected Integer addInternal(Iterable<? extends Entity> entities)
+	@Transactional
+	public Integer add(Iterable<? extends Entity> entities)
 	{
 		Integer count = 0;
 		for (Entity e : entities)
 		{
-			addInternal(e);
+			add(e);
 			count++;
 		}
 		return count;
@@ -242,7 +233,8 @@ public class JpaRepository extends AbstractAggregateableCrudRepository
 	}
 
 	@Override
-	protected void updateInternal(Entity entity)
+	@Transactional
+	public void update(Entity entity)
 	{
 		EntityManager em = getEntityManager();
 
@@ -255,7 +247,8 @@ public class JpaRepository extends AbstractAggregateableCrudRepository
 	}
 
 	@Override
-	protected void updateInternal(Iterable<? extends Entity> entities)
+	@Transactional
+	public void update(Iterable<? extends Entity> entities)
 	{
 		EntityManager em = getEntityManager();
 		int batchSize = 500;
@@ -284,288 +277,6 @@ public class JpaRepository extends AbstractAggregateableCrudRepository
 	}
 
 	@Override
-	protected void updateInternal(List<? extends Entity> entities, DatabaseAction dbAction, String... keyNames)
-	{
-		if (keyNames.length == 0) throw new MolgenisDataException("At least one key must be provided, e.g. 'name'");
-
-		// nothing todo?
-		if (entities.size() == 0) return;
-
-		// retrieve entity class and name
-		String entityName = getEntityClass().getSimpleName();
-
-		// create maps to store key values and entities
-		// key is a concat of all key values for an entity
-		Map<String, Entity> entityIndex = new LinkedHashMap<String, Entity>();
-		// list of all keys, each list item a map of a (composite) key for one
-		// entity e.g. investigation_name + name
-		List<Map<String, Object>> keyIndex = new ArrayList<Map<String, Object>>();
-
-		// select existing for update, only works if one (composit key allows
-		// for nulls) the key values are set
-		// otherwise skipped
-		boolean keysMissing = false;
-		for (Entity entity : entities)
-		{
-			// get all the value of all keys (composite key)
-			// use an index to hash the entities
-			StringBuilder combinedKeyBuilder = new StringBuilder();
-
-			// extract its key values and put in map
-			Map<String, Object> keyValues = new LinkedHashMap<String, Object>();
-			boolean incompleteKey = true;
-
-			// note: we can expect null values in composite keys but need at
-			// least one key value.
-			for (String key : keyNames)
-			{
-				// create a hash that concats all key values into one string
-				combinedKeyBuilder.append(';');
-
-				if (entity.get(key) != null)
-				{
-					combinedKeyBuilder.append(entity.get(key));
-					incompleteKey = false;
-					keyValues.put(key, entity.get(key));
-				}
-			}
-			// check if we have missing key
-			if (incompleteKey) keysMissing = true;
-
-			// add the keys to the index, if exists
-			if (!keysMissing)
-			{
-				keyIndex.add(keyValues);
-				// create the entity index using the hash
-				entityIndex.put(combinedKeyBuilder.toString(), entity);
-			}
-			else
-			{
-				if ((dbAction.equals(DatabaseAction.ADD) || dbAction.equals(DatabaseAction.ADD_IGNORE_EXISTING) || dbAction
-						.equals(DatabaseAction.ADD_UPDATE_EXISTING))
-						&& keyNames.length == 1
-						&& keyNames[0].equals(getEntityMetaData().getIdAttribute().getName()))
-				{
-					// don't complain is 'id' field is emptyr
-				}
-				else
-				{
-					throw new MolgenisDataException("keys are missing: " + getEntityClass().getSimpleName() + "."
-							+ Arrays.asList(keyNames));
-				}
-			}
-		}
-
-		// split lists in new and existing entities, but only if keys are set
-		List<? extends Entity> newEntities = entities;
-		List<Entity> existingEntities = new ArrayList<Entity>();
-		if (!keysMissing && keyIndex.size() > 0)
-		{
-			newEntities = new ArrayList<Entity>();
-			QueryImpl q = new QueryImpl();
-
-			// in case of one field key, simply query
-			if (keyNames.length == 1)
-			{
-				List<Object> values = new ArrayList<Object>();
-				for (Map<String, Object> keyValues : keyIndex)
-				{
-					values.add(keyValues.get(keyNames[0]));
-				}
-				q.in(keyNames[0], values);
-			}
-			// in case of composite key make massive 'OR' query
-			// form (key1 = x AND key2 = X) OR (key1=y AND key2=y)
-			else
-			{
-				// very expensive!
-				for (Map<String, Object> keyValues : keyIndex)
-				{
-					for (int i = 0; i < keyNames.length; i++)
-					{
-						if (i > 0) q.or();
-						q.eq(keyNames[i], keyValues.get(keyNames[i]));
-					}
-				}
-			}
-			Iterable<Entity> selectForUpdate = findAll(q);
-
-			// separate existing from new entities
-			for (Entity p : selectForUpdate)
-			{
-				// reconstruct composite key so we can use the entityIndex
-				StringBuilder combinedKeyBuilder = new StringBuilder();
-				for (String key : keyNames)
-				{
-					combinedKeyBuilder.append(';').append(p.get(key));
-				}
-				// copy existing from entityIndex to existingEntities
-				entityIndex.remove(combinedKeyBuilder.toString());
-				existingEntities.add(p);
-			}
-			// copy remaining to newEntities
-			newEntities = new ArrayList<Entity>(entityIndex.values());
-		}
-
-		// if existingEntities are going to be updated, they will need to
-		// receive new values from 'entities' in addition to be mapped to the
-		// database as is the case at this point
-		if (existingEntities.size() > 0
-				&& (dbAction == DatabaseAction.ADD_UPDATE_EXISTING || dbAction == DatabaseAction.UPDATE || dbAction == DatabaseAction.UPDATE_IGNORE_MISSING))
-		{
-			if (logger.isDebugEnabled()) logger.debug("existingEntities[0] before: "
-					+ existingEntities.get(0).toString());
-
-			matchByNameAndUpdateFields(existingEntities, entities);
-
-			if (logger.isDebugEnabled()) logger.debug("existingEntities[0] after: "
-					+ existingEntities.get(0).toString());
-		}
-
-		switch (dbAction)
-		{
-
-		// will test for existing entities before add
-		// (so only add if existingEntities.size == 0).
-			case ADD:
-				if (existingEntities.size() == 0)
-				{
-					addInternal(newEntities);
-				}
-				else
-				{
-					throw new MolgenisDataException("Tried to add existing "
-							+ entityName
-							+ " elements as new insert: "
-							+ Arrays.asList(keyNames)
-							+ "="
-							+ existingEntities.subList(0, Math.min(5, existingEntities.size()))
-							+ (existingEntities.size() > 5 ? " and " + (existingEntities.size() - 5) + "more" : ""
-									+ existingEntities));
-				}
-				break;
-
-			// will not test for existing entities before add
-			// (so will ignore existingEntities)
-			case ADD_IGNORE_EXISTING:
-				if (logger.isDebugEnabled()) logger.debug("updateByName(List<" + entityName + "," + dbAction
-						+ ">) will skip " + existingEntities.size() + " existing entities");
-				addInternal(newEntities);
-				break;
-
-			// will try to update(existingEntities) entities and
-			// add(missingEntities)
-			// so allows user to be sloppy in adding/updating
-			case ADD_UPDATE_EXISTING:
-				if (logger.isDebugEnabled()) logger.debug("updateByName(List<" + entityName + "," + dbAction
-						+ ">)  will try to update " + existingEntities.size() + " existing entities and add "
-						+ newEntities.size() + " new entities");
-				addInternal(newEntities);
-				update(existingEntities);
-				break;
-
-			// update while testing for newEntities.size == 0
-			case UPDATE:
-				if (newEntities.size() == 0)
-				{
-					updateInternal(existingEntities);
-				}
-				else
-				{
-					throw new MolgenisDataException("Tried to update non-existing " + entityName + "elements "
-							+ Arrays.asList(keyNames) + "=" + entityIndex.values());
-				}
-				break;
-
-			// update that doesn't test for newEntities but just ignores
-			// those
-			// (so only updates exsiting)
-			case UPDATE_IGNORE_MISSING:
-				if (logger.isDebugEnabled()) logger.debug("updateByName(List<" + entityName + "," + dbAction
-						+ ">) will try to update " + existingEntities.size() + " existing entities and skip "
-						+ newEntities.size() + " new entities");
-				updateInternal(existingEntities);
-				break;
-
-			// remove all elements in list, test if no elements are missing
-			// (so test for newEntities == 0)
-			case REMOVE:
-				if (newEntities.size() == 0)
-				{
-					if (logger.isDebugEnabled()) logger.debug("updateByName(List<" + entityName + "," + dbAction
-							+ ">) will try to remove " + existingEntities.size() + " existing entities");
-					delete(existingEntities);
-				}
-				else
-				{
-					throw new MolgenisDataException("Tried to remove non-existing " + entityName + " elements "
-							+ Arrays.asList(keyNames) + "=" + entityIndex.values());
-
-				}
-				break;
-
-			// remove entities that are in the list, ignore if they don't
-			// exist in database
-			// (so don't check the newEntities.size == 0)
-			case REMOVE_IGNORE_MISSING:
-				if (logger.isDebugEnabled()) logger.debug("updateByName(List<" + entityName + "," + dbAction
-						+ ">) will try to remove " + existingEntities.size() + " existing entities and skip "
-						+ newEntities.size() + " new entities");
-				delete(existingEntities);
-				break;
-
-			// unexpected error
-			default:
-				throw new MolgenisDataException("updateByName failed because of unknown dbAction " + dbAction);
-		}
-	}
-
-	private void matchByNameAndUpdateFields(List<? extends Entity> existingEntities, List<? extends Entity> entities)
-	{
-		for (Entity entityInDb : existingEntities)
-		{
-			for (Entity newEntity : entities)
-			{
-				boolean match = false;
-				// check if there are any label fields otherwise check impossible
-				if (entityInDb.getLabelAttributeNames().size() > 0)
-				{
-					match = true;
-				}
-				for (String labelField : entityInDb.getLabelAttributeNames())
-				{
-					Object x1 = entityInDb.get(labelField);
-					Object x2 = newEntity.get(labelField);
-
-					if (!x1.equals(x2))
-					{
-						match = false;
-						break;
-					}
-				}
-
-				if (match)
-				{
-					try
-					{
-						MapEntity mapEntity = new MapEntity();
-						for (String field : entityInDb.getAttributeNames())
-						{
-							mapEntity.set(field, newEntity.get(field));
-						}
-						entityInDb.set(mapEntity, false);
-					}
-					catch (Exception ex)
-					{
-						throw new MolgenisDataException(ex);
-					}
-				}
-
-			}
-		}
-	}
-
-	@Override
 	@Transactional
 	public void deleteById(Object id)
 	{
@@ -591,7 +302,7 @@ public class JpaRepository extends AbstractAggregateableCrudRepository
 			logger.debug("removing " + getEntityClass().getSimpleName() + " [" + entity.getIdValue() + "]");
 		}
 
-		em.remove(getTypedEntity(entity));
+		em.remove(findOne(entity.getIdValue()));
 		if (logger.isDebugEnabled()) logger.debug("flushing entity manager");
 		em.flush();
 	}
@@ -604,7 +315,7 @@ public class JpaRepository extends AbstractAggregateableCrudRepository
 
 		for (Entity r : entities)
 		{
-			em.remove(getTypedEntity(r));
+			em.remove(findOne(r.getIdValue()));
 			if (logger.isDebugEnabled())
 			{
 				logger.debug("removing " + getEntityClass().getSimpleName() + " [" + r.getIdValue() + "]");
@@ -904,74 +615,6 @@ public class JpaRepository extends AbstractAggregateableCrudRepository
 		return e;
 	}
 
-	@Override
-	protected void addAggregateValuesAndLabels(AttributeMetaData attr, List<Object> values, Set<String> labels)
-	{
-		if (attr.getDataType().getEnumType() == BOOL)
-		{
-			values.add(Boolean.TRUE);
-			values.add(Boolean.FALSE);
-			labels.add(attr.getName() + ": true");
-			labels.add(attr.getName() + ": false");
-		}
-		else if (attr.getRefEntity() != null)
-		{
-			EntityMetaData refEntityMeta = attr.getRefEntity();
-			String refEntityLblAttr = refEntityMeta.getLabelAttribute().getName();
-
-			for (Entity refEntity : findAll(refEntityMeta.getEntityClass()))
-			{
-				labels.add(refEntity.getString(refEntityLblAttr));
-				values.add(refEntity.get(refEntityLblAttr));
-			}
-		}
-		else
-		{
-			for (Object value : getDistinctValues(attr))
-			{
-				String valueStr = DataConverter.toString(value);
-				labels.add(valueStr);
-				values.add(valueStr);
-			}
-		}
-	}
-
-	// Get all distinct values of an attribute
-	private List<?> getDistinctValues(AttributeMetaData attr)
-	{
-		EntityManager em = getEntityManager();
-		CriteriaBuilder cb = em.getCriteriaBuilder();
-		CriteriaQuery<Tuple> cq = cb.createTupleQuery();
-
-		String attrName = attr.getName().substring(0, 1).toLowerCase() + attr.getName().substring(1);
-		Root<? extends Entity> root = cq.from(getEntityClass());
-		cq.distinct(true).multiselect(root.get(attrName));
-
-		TypedQuery<Tuple> tq = em.createQuery(cq);
-		List<Tuple> tuples = tq.getResultList();
-
-		List<Object> result = Lists.newArrayList();
-		for (Tuple tuple : tuples)
-		{
-			result.add(tuple.get(0));
-		}
-
-		return result;
-	}
-
-	// Find all instances of an jpa entity
-	private List<? extends Entity> findAll(Class<? extends Entity> entityClass)
-	{
-		EntityManager em = getEntityManager();
-		CriteriaBuilder cb = em.getCriteriaBuilder();
-
-		@SuppressWarnings("unchecked")
-		CriteriaQuery<Entity> cq = (CriteriaQuery<Entity>) cb.createQuery(entityClass);
-		TypedQuery<Entity> tq = em.createQuery(cq.select(cq.from(entityClass)));
-
-		return tq.getResultList();
-	}
-
 	/*
 	 * Convert a search query to a list of QueryRule, creates for every attribute a QueryRule and 'OR's them
 	 * 
@@ -1050,7 +693,7 @@ public class JpaRepository extends AbstractAggregateableCrudRepository
 									|| fieldType == FieldTypeEnum.TEXT || fieldType == FieldTypeEnum.HTML
 									|| fieldType == FieldTypeEnum.HYPERLINK || fieldType == FieldTypeEnum.EMAIL)
 							{
-								Query q = new QueryImpl().like(refAttr.getName(), searchValue);
+								Query q = new QueryImpl().like(refAttr.getName(), searchValue.toString());
 								EntityManager em = getEntityManager();
 								CriteriaBuilder cb = em.getCriteriaBuilder();
 

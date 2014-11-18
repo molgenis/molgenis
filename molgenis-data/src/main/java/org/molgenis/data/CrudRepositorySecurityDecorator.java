@@ -4,7 +4,6 @@ import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
 
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.List;
 
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.Permission;
@@ -181,13 +180,6 @@ public class CrudRepositorySecurityDecorator extends CrudRepositoryDecorator
 	{
 		validatePermission(decoratedRepository.getName(), Permission.WRITE);
 		decoratedRepository.deleteAll();
-	}
-
-	@Override
-	public void update(List<? extends Entity> entities, DatabaseAction dbAction, String... keyName)
-	{
-		validatePermission(decoratedRepository.getName(), Permission.WRITE);
-		decoratedRepository.update(entities, dbAction, keyName);
 	}
 
 	@Override

@@ -1,7 +1,8 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
+<#assign css=['molgenis-form.css']>
 
-<@header/>
+<@header css />
 
 <#if feedbackForm??>
 	<#if feedbackForm.submitted>
@@ -15,50 +16,117 @@
 		</div>
 	</#if>
 <#elseif adminEmails?has_content>
-	<#if isCurrentUserCanEdit?has_content && isCurrentUserCanEdit>
-	<div class="row">
-        <a href="${context_url}/edit" class="btn btn-default pull-right">Edit page header</a>
-	</div>
+	<#if isCurrentUserCanEdit?has_content && isCurrentUserCanEdit>	
+		<div class="row">
+			<div class="col-md-12">
+        		<a href="${context_url}/edit" class="btn btn-default pull-right">Edit page header</a>
+        	</div>
+		</div>
 	</#if>
+
 	<#if content?has_content>
-	<div class="page-header">
-		${content}
-	</div>
-	</#if>
-	<div class="container">
-		<form accept-charset="UTF-8" role="form" method="post" action="feedback" id="feedbackForm">
-			<#assign adminEmailsString = "" />
-			<#list adminEmails as adminEmail>
-				<#assign adminEmailsString = adminEmailsString + adminEmail/>
-				<#if adminEmail_has_next>
-					<#assign adminEmailsString = adminEmailsString + ', '/>
-				</#if>
-			</#list>
-			<p>
-				Feel free to email us at <a href='mailto:${adminEmailsString}'>${adminEmailsString}</a>
-			</p>
-			<div class="form-group">
-				<label class="col-md-3 control-label" for="form_name">Name</label>
-                <input class="form-control" name="name" size="30" id="form_name" <#if userName??>value="${userName}"</#if> type="text" />
+		<div class="row">
+			<div class="col-md-12">
+				${content}
 			</div>
-			<div class="form-group">
-				<label class="col-md-3 control-label" for="form_email">Email</label>
+		</div>
+	</#if>
+
+	<#assign adminEmailsString = "" />
+	<#list adminEmails as adminEmail>
+		<#assign adminEmailsString = adminEmailsString + adminEmail/>
+		<#if adminEmail_has_next>
+			<#assign adminEmailsString = adminEmailsString + ', '/>
+		</#if>
+	</#list>
+
+	<div class="row">
+		<div class="col-md-10 col-md-offset-1">	
+			<p>Feel free to email us at <a href='mailto:${adminEmailsString}'>${adminEmailsString}</a></p>
+		</div>
+	</div>
+		
+	<form accept-charset="UTF-8" role="form" method="post" action="feedback" id="feedbackForm" class="form-horizontal" role="form">
+		<div class="form-group">
+			<div class="col-md-1">
+				<label class="control-label pull-right" for="form_name">Name</label>
+			</div>
+			
+			<div class="col-md-4">
+            	<input class="form-control" name="name" size="30" id="form_name" <#if userName??>value="${userName}"</#if> type="text" />
+            </div>
+		</div>
+
+		<div class="form-group">
+			<div class="col-md-1">
+				<label class="control-label pull-right" for="form_email">Email</label>
+			</div>	
+			
+			<div class="col-md-4">
 				<input class="form-control" name="email" id="form_email" size="30" type="email" <#if userEmail??>value="${userEmail}"</#if>/>
 			</div>
-			<div class="form-group">
-				<label class="col-md-3 control-label" for="form_subject">Subject</label>
+		</div>
+		
+		<div class="form-group">
+			<div class="col-md-1">
+				<label class="control-label pull-right" for="form_subject">Subject</label>
+			</div>
+			
+			<div class="col-md-4">
 				<input class="form-control" maxlength="72" name="subject" id="form_subject" size="72" type="text" />
 			</div>
-			<div class="form-group">
-			    <label class="col-md-3 control-label" for="form_feedback">Body</label>
-			    <textarea class="form-control" name="feedback" id="form_feedback" required="true" rows="8"></textarea>
+		</div>
+		
+		<div class="form-group">
+			<div class="col-md-1">
+		    	<label class="control-label pull-right" for="form_feedback">Body</label>
+	    	</div>
+	    	
+		    <div class="col-md-4">
+		    	<textarea class="form-control" name="feedback" id="form_feedback" required="true" rows="8"></textarea>
+		    </div>
+        </div>
+ 
+        <legend>Code validation</legend>
+        <div class="form-group">
+        	<div class="col-md-10 col-md-offset-1">
+                <a href="#" id="captcha-href"><img id="captcha-img" src="/captcha"></a>
             </div>
-			<button type="submit" class="btn btn-success">Send</button>
-		</form>
-		<script>
-			$("#feedbackForm").validate();
-		</script>
-	</div>
+        </div>
+        
+        <div class="form-group">
+            <div class="col-md-1">
+            	<label class="control-label pull-right" for="reg-captcha">Code</label>
+            </div>
+            
+            <div class="col-md-4">
+                <input type="text" class="form-control" id="reg-captcha" name="captcha">
+            </div>
+        </div>
+             
+        <div class="form-group">
+            <div class="col-md-1 col-md-offset-1">
+				<button type="submit" class="btn btn-success">Send</button>
+			</div>
+		</div>
+	</form>
+		
+	<script>
+		$("#feedbackForm").validate();
+		$('#reg-captcha').rules('add', {
+	        required: true,
+	        remote: {
+	            url: '/captcha',
+	            type: 'POST'
+	        }
+	    });
+	    $('#captcha-href').click(function(e){
+	        e.preventDefault();
+	        $('#captcha-img').attr('src', '/captcha?_=' + Date.now());
+	        $('captcha').val('');
+	    });
+	</script>
+
 <#else>
 	<p>Admin email addresses not known.</p>
 </#if>

@@ -3,10 +3,13 @@ package org.molgenis.diseasematcher.data.preprocess;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.nio.file.NotDirectoryException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,6 +46,8 @@ import au.com.bytecode.opencsv.CSVReader;
  */
 public class DiseaseMappingPreProcessor
 {
+	private static final Charset CHARSET_UTF8 = Charset.forName("UTF-8");
+
 	private static final String DISEASEMAPPING_FILENAME = "DiseaseMapping.tsv";
 	private static final String DISEASE_FILENAME = "Disease.tsv";
 	private static final String ZIP_FILENAME = "DiseaseMapping.zip";
@@ -166,8 +171,10 @@ public class DiseaseMappingPreProcessor
 
 		try
 		{
-			csvReader = new CSVReader(new BufferedReader(new FileReader(morbidmapFile)), '|');
-			csvWriter = new CsvWriter(new BufferedWriter(new FileWriter(outFile)), '\t');
+			csvReader = new CSVReader(new BufferedReader(new InputStreamReader(new FileInputStream(morbidmapFile),
+					CHARSET_UTF8)), '|');
+			csvWriter = new CsvWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFile),
+					CHARSET_UTF8)), '\t');
 
 			// write header
 			csvWriter.writeAttributeNames(Arrays.asList("identifier", "diseaseId", "diseaseName", "mappingMethod"));
@@ -246,10 +253,13 @@ public class DiseaseMappingPreProcessor
 		try
 		{
 			// instantiate readers and writers
-			csvReaderTypical = new CSVReader(new BufferedReader(new FileReader(typicalFile)), '\t');
-			csvReaderAll = new CSVReader(new BufferedReader(new FileReader(allFile)), '\t');
+			csvReaderTypical = new CSVReader(new BufferedReader(new InputStreamReader(new FileInputStream(typicalFile),
+					CHARSET_UTF8)), '\t');
+			csvReaderAll = new CSVReader(new BufferedReader(new InputStreamReader(new FileInputStream(allFile),
+					CHARSET_UTF8)), '\t');
 
-			csvWriter = new CsvWriter(new BufferedWriter(new FileWriter(outFile)), '\t');
+			csvWriter = new CsvWriter(new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outFile),
+					CHARSET_UTF8)), '\t');
 
 			// write header
 			csvWriter.writeAttributeNames(Arrays.asList("identifier", "diseaseId", "geneSymbol", "geneId", "HPOId",

@@ -167,4 +167,10 @@ public class ProtocolAttributeMetaData implements AttributeMetaData
 	{
 		return null;
 	}
+
+	@Override
+	public boolean isSameAs(AttributeMetaData attributeMetaData)
+	{
+		return false;
+	}
 }

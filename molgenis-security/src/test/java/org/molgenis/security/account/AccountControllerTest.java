@@ -2,6 +2,7 @@ package org.molgenis.security.account;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -10,9 +11,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import static org.testng.Assert.assertEquals;
 
 import java.util.Collections;
 
+import org.mockito.ArgumentCaptor;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
@@ -65,7 +68,9 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 		mockMvc = MockMvcBuilders.standaloneSetup(authenticationController)
 				.setMessageConverters(new FormHttpMessageConverter(), new GsonHttpMessageConverter()).build();
 
+		reset(captchaService);
 		when(captchaService.validateCaptcha("validCaptcha")).thenReturn(true);
+		when(captchaService.consumeCaptcha("validCaptcha")).thenReturn(true);
 		reset(accountService); // mocks in the config class are not resetted after each test
 	}
 
@@ -97,9 +102,56 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
+	public void registerUser_activationModeUserProxy() throws Exception
+	{
+		when(accountService.getActivationMode()).thenReturn(ActivationMode.USER);
+		when(accountService.isSelfRegistrationEnabled()).thenReturn(true);
+
+		this.mockMvc
+				.perform(
+						post("/account/register").header("X-Forwarded-Host", "website.com").param("username", "admin")
+								.param("password", "adminpw-invalid").param("confirmPassword", "adminpw-invalid")
+								.param("email", "admin@molgenis.org").param("lastname", "min").param("firstname", "ad")
+								.param("captcha", "validCaptcha").contentType(MediaType.APPLICATION_FORM_URLENCODED))
+				.andExpect(status().isOk())
+				.andExpect(
+						content().string(
+								"{\"message\":\"" + AccountController.REGISTRATION_SUCCESS_MESSAGE_USER + "\"}"));
+		ArgumentCaptor<MolgenisUser> molgenisUserCaptor = ArgumentCaptor.forClass(MolgenisUser.class);
+		ArgumentCaptor<String> baseActivationUriCaptor = ArgumentCaptor.forClass(String.class);
+		verify(accountService).createUser(molgenisUserCaptor.capture(), baseActivationUriCaptor.capture());
+		assertEquals(baseActivationUriCaptor.getValue(), "http://website.com/account/activate");
+	}
+
+	@Test
+	public void registerUser_activationModeUserProxyWithScheme() throws Exception
+	{
+		when(accountService.getActivationMode()).thenReturn(ActivationMode.USER);
+		when(accountService.isSelfRegistrationEnabled()).thenReturn(true);
+
+		this.mockMvc
+				.perform(
+						post("/account/register").header("X-Forwarded-Proto", "https")
+								.header("X-Forwarded-Host", "website.com").param("username", "admin")
+								.param("password", "adminpw-invalid").param("confirmPassword", "adminpw-invalid")
+								.param("email", "admin@molgenis.org").param("lastname", "min").param("firstname", "ad")
+								.param("captcha", "validCaptcha").contentType(MediaType.APPLICATION_FORM_URLENCODED))
+				.andExpect(status().isOk())
+				.andExpect(
+						content().string(
+								"{\"message\":\"" + AccountController.REGISTRATION_SUCCESS_MESSAGE_USER + "\"}"));
+		ArgumentCaptor<MolgenisUser> molgenisUserCaptor = ArgumentCaptor.forClass(MolgenisUser.class);
+		ArgumentCaptor<String> baseActivationUriCaptor = ArgumentCaptor.forClass(String.class);
+		verify(accountService).createUser(molgenisUserCaptor.capture(), baseActivationUriCaptor.capture());
+		assertEquals(baseActivationUriCaptor.getValue(), "https://website.com/account/activate");
+	}
+
+	@Test
 	public void registerUser_activationModeUser() throws Exception
 	{
 		when(accountService.getActivationMode()).thenReturn(ActivationMode.USER);
+		when(accountService.isSelfRegistrationEnabled()).thenReturn(true);
+
 		this.mockMvc
 				.perform(
 						post("/account/register").param("username", "admin").param("password", "adminpw-invalid")
@@ -110,12 +162,15 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 				.andExpect(
 						content().string(
 								"{\"message\":\"" + AccountController.REGISTRATION_SUCCESS_MESSAGE_USER + "\"}"));
+		verify(captchaService).consumeCaptcha("validCaptcha");
 	}
 
 	@Test
 	public void registerUser_activationModeAdmin() throws Exception
 	{
 		when(accountService.getActivationMode()).thenReturn(ActivationMode.ADMIN);
+		when(accountService.isSelfRegistrationEnabled()).thenReturn(true);
+
 		this.mockMvc
 				.perform(
 						post("/account/register").param("username", "admin").param("password", "adminpw-invalid")
@@ -126,31 +181,38 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 				.andExpect(
 						content().string(
 								"{\"message\":\"" + AccountController.REGISTRATION_SUCCESS_MESSAGE_ADMIN + "\"}"));
+		verify(captchaService).consumeCaptcha("validCaptcha");
 	}
 
 	@Test
 	public void registerUser_invalidRegisterRequest() throws Exception
 	{
+		when(accountService.isSelfRegistrationEnabled()).thenReturn(true);
 		this.mockMvc.perform(
 				post("/account/register").param("username", "admin").param("password", "adminpw-invalid")
 						.param("confirmPassword", "adminpw-invalid").param("lastname", "min").param("firstname", "ad")
 						.param("captcha", "validCaptcha").contentType(MediaType.APPLICATION_FORM_URLENCODED))
 				.andExpect(status().isBadRequest());
+		verify(captchaService, times(0)).consumeCaptcha("validCaptcha");
 	}
 
 	@Test
 	public void registerUser_passwordNotEqualsConfirmPassword() throws Exception
 	{
+		when(accountService.isSelfRegistrationEnabled()).thenReturn(true);
 		this.mockMvc.perform(
 				post("/account/register").param("username", "admin").param("password", "adminpw-invalid")
 						.param("confirmPassword", "adminpw-invalid-typo").param("email", "admin@molgenis.org")
 						.param("lastname", "min").param("firstname", "ad").param("captcha", "validCaptcha")
 						.contentType(MediaType.APPLICATION_FORM_URLENCODED)).andExpect(status().isBadRequest());
+		verify(captchaService, times(0)).consumeCaptcha("validCaptcha");
 	}
 
 	@Test
 	public void registerUser_invalidCaptcha() throws Exception
 	{
+		when(accountService.isSelfRegistrationEnabled()).thenReturn(true);
+
 		this.mockMvc.perform(
 				post("/account/register").param("username", "admin").param("password", "adminpw-invalid")
 						.param("confirmPassword", "adminpw-invalid").param("email", "admin@molgenis.org")

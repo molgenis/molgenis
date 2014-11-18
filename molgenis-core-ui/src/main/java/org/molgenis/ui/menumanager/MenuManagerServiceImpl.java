@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
+import org.molgenis.security.runas.RunAsSystem;
 import org.molgenis.ui.MenuType;
 import org.molgenis.ui.Molgenis;
 import org.molgenis.ui.PluginType;
@@ -47,7 +48,7 @@ public class MenuManagerServiceImpl implements MenuManagerService, ApplicationLi
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU, ROLE_PLUGIN_READ_MENUMANAGER')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSTEM, ROLE_SU, ROLE_PLUGIN_READ_MENUMANAGER')")
 	@Transactional(readOnly = true)
 	public Menu getMenu()
 	{
@@ -55,7 +56,7 @@ public class MenuManagerServiceImpl implements MenuManagerService, ApplicationLi
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU, ROLE_PLUGIN_READ_MENUMANAGER')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSTEM, ROLE_SU, ROLE_PLUGIN_READ_MENUMANAGER')")
 	@Transactional(readOnly = true)
 	public Iterable<MolgenisPlugin> getPlugins()
 	{
@@ -63,7 +64,7 @@ public class MenuManagerServiceImpl implements MenuManagerService, ApplicationLi
 	}
 
 	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SU, ROLE_PLUGIN_WRITE_MENUMANAGER')")
+	@PreAuthorize("hasAnyRole('ROLE_SYSTEM, ROLE_SU, ROLE_PLUGIN_WRITE_MENUMANAGER')")
 	@Transactional
 	public void saveMenu(Menu molgenisMenu)
 	{
@@ -77,6 +78,7 @@ public class MenuManagerServiceImpl implements MenuManagerService, ApplicationLi
 	 * @param event
 	 */
 	@Override
+	@RunAsSystem
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
 		if (!molgenisSettings.propertyExists(KEY_MOLGENIS_MENU))

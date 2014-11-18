@@ -2,43 +2,111 @@ package org.molgenis.data.support;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Package;
+import org.molgenis.util.CaseInsensitiveLinkedHashMap;
 
-public class DefaultEntityMetaData extends AbstractEntityMetaData
+public class DefaultEntityMetaData extends AbstractEntityMetaData implements EditableEntityMetaData
 {
-	private final String name;
-	private final Map<String, AttributeMetaData> attributes = new LinkedHashMap<String, AttributeMetaData>();
+	private final String simpleName;
+	private final Map<String, AttributeMetaData> attributes = new CaseInsensitiveLinkedHashMap<AttributeMetaData>();
 	private final Class<? extends Entity> entityClass;
 	private String label;
 	private boolean abstract_ = false;
 	private String description;
 	private EntityMetaData extends_;
+	private Package pack;
 
-	public DefaultEntityMetaData(String name)
+	public DefaultEntityMetaData(String simpleName)
 	{
-		this(name, Entity.class);
+		this(simpleName, Entity.class);
 	}
 
-	public DefaultEntityMetaData(String name, Class<? extends Entity> entityClass)
+	public DefaultEntityMetaData(String simpleName, Package p)
 	{
-		if (name == null) throw new IllegalArgumentException("Name cannot be null");
+		this(simpleName, Entity.class, p);
+	}
+
+	public DefaultEntityMetaData(String simpleName, Class<? extends Entity> entityClass)
+	{
+		if (simpleName == null) throw new IllegalArgumentException("Name cannot be null");
 		if (entityClass == null) throw new IllegalArgumentException("EntityClass cannot be null");
-		this.name = name;
+		this.simpleName = simpleName;
 		this.entityClass = entityClass;
 	}
 
-	@Override
-	public String getName()
+	public DefaultEntityMetaData(String simpleName, Class<? extends Entity> entityClass, Package pack)
 	{
-		return name;
+		if (simpleName == null) throw new IllegalArgumentException("Name cannot be null");
+		if (entityClass == null) throw new IllegalArgumentException("EntityClass cannot be null");
+		this.simpleName = simpleName;
+		this.entityClass = entityClass;
+		this.pack = pack;
 	}
 
+	/**
+	 * Copy-constructor
+	 * 
+	 * @param entityMetaData
+	 */
+	public DefaultEntityMetaData(EntityMetaData entityMetaData)
+	{
+		this.simpleName = entityMetaData.getSimpleName();
+		this.pack = entityMetaData.getPackage();
+		this.entityClass = entityMetaData.getEntityClass();
+		this.label = entityMetaData.getLabel();
+		this.abstract_ = entityMetaData.isAbstract();
+		this.description = entityMetaData.getDescription();
+		EntityMetaData extends_ = entityMetaData.getExtends();
+		this.extends_ = extends_ != null ? new DefaultEntityMetaData(extends_) : null;
+		// deep copy attributes
+		// TODO: Fails dramatically for self-referencing entities.
+		Iterable<AttributeMetaData> attributes = entityMetaData.getAttributes();
+		if (attributes != null)
+		{
+			for (AttributeMetaData attributeMetaData : attributes)
+			{
+				addAttributeMetaData(new DefaultAttributeMetaData(attributeMetaData));
+			}
+		}
+		AttributeMetaData idAttribute = entityMetaData.getIdAttribute();
+		if (idAttribute != null)
+		{
+			setIdAttribute(idAttribute.getName());
+		}
+		AttributeMetaData labelAttribute = entityMetaData.getLabelAttribute();
+		if (labelAttribute != null)
+		{
+			setLabelAttribute(labelAttribute.getName());
+		}
+	}
+
+	@Override
+	public Package getPackage()
+	{
+		return pack;
+	}
+
+	@Override
+	public EditableEntityMetaData setPackage(Package pack)
+	{
+		this.pack = pack;
+		return this;
+	}
+
+	@Override
+	public String getSimpleName()
+	{
+		return simpleName;
+	}
+
+	@Override
 	public void addAttributeMetaData(AttributeMetaData attributeMetaData)
 	{
 		if (attributeMetaData == null) throw new IllegalArgumentException("AttributeMetaData cannot be null");
@@ -85,10 +153,11 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 	@Override
 	public String getLabel()
 	{
-		return label != null ? label : name;
+		return label != null ? label : getSimpleName();
 	}
 
-	public DefaultEntityMetaData setLabel(String label)
+	@Override
+	public EditableEntityMetaData setLabel(String label)
 	{
 		this.label = label;
 		return this;
@@ -100,7 +169,8 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 		return description;
 	}
 
-	public DefaultEntityMetaData setDescription(String description)
+	@Override
+	public EditableEntityMetaData setDescription(String description)
 	{
 		this.description = description;
 		return this;
@@ -110,30 +180,6 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 	public Class<? extends Entity> getEntityClass()
 	{
 		return entityClass;
-	}
-
-	@Override
-	public int hashCode()
-	{
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj)
-	{
-		if (this == obj) return true;
-		if (obj == null) return false;
-		if (getClass() != obj.getClass()) return false;
-		DefaultEntityMetaData other = (DefaultEntityMetaData) obj;
-		if (name == null)
-		{
-			if (other.name != null) return false;
-		}
-		else if (!name.equals(other.name)) return false;
-		return true;
 	}
 
 	public DefaultAttributeMetaData addAttribute(String name)
@@ -149,7 +195,8 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 		return abstract_;
 	}
 
-	public DefaultEntityMetaData setAbstract(boolean abstract_)
+	@Override
+	public EditableEntityMetaData setAbstract(boolean abstract_)
 	{
 		this.abstract_ = abstract_;
 		return this;
@@ -161,7 +208,8 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 		return extends_;
 	}
 
-	public DefaultEntityMetaData setExtends(EntityMetaData extends_)
+	@Override
+	public EditableEntityMetaData setExtends(EntityMetaData extends_)
 	{
 		this.extends_ = extends_;
 		return this;
@@ -185,5 +233,29 @@ public class DefaultEntityMetaData extends AbstractEntityMetaData
 			strBuilder.append("\n\t").append(att.toString());
 		}
 		return strBuilder.toString();
+	}
+
+	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((getName() == null) ? 0 : getName().hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (!(obj instanceof EntityMetaData)) return false;
+		EntityMetaData other = (EntityMetaData) obj;
+		if (getName() == null)
+		{
+			if (other.getName() != null) return false;
+		}
+		else if (!getName().equals(other.getName())) return false;
+		return true;
 	}
 }

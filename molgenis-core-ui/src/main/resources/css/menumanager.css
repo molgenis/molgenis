@@ -13,10 +13,6 @@
 	font-weight:normal; 
 }
 
-#menu-editor-container col-md- {
-	padding-left: 5px;
-}
-
 #menu-editor-tree {
 	max-height: 600px;
 	overflow: auto;

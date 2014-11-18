@@ -1,16 +1,13 @@
-#filter-wizard-modal .modal-body {
-	min-height: 500px;
-	max-height: 500px;
-	padding-bottom: 0;
-}
-
 #filter-wizard-modal .well {
 	overflow: auto;
+	min-height: 490px;
 	margin-bottom: 10px;
+	max-width: 100%;
+    overflow-x: hidden;
 }
 
 .filter-wizard-fixed-height {
-	height: 365px;
+	min-height: 365px;
 }
 
 #filter-wizard-modal .pager {
@@ -26,18 +23,12 @@
 	position: static;
 }
 
-#filter-wizard-modal .controls.xrefmrefsearch.complex-simplefilter,
-#filter-modal .controls.xrefmrefsearch.complex-simplefilter{
-	width: 384px;
-}
-
-#filter-wizard-modal .form-horizontal .control-label{
-	width:20%;
+#filter-wizard-modal-label {
+	display: inline-block;
 }
 
 #filter-modal .modal-body {
 	min-height: 250px;
-	max-height: 500px;
 	padding-bottom: 0;
 }
 
@@ -45,13 +36,10 @@
 	position: static;
 }
 
-
 #filter-wizard-modal .controls.complex-removebutton-container, 
 #filter-wizard-modal .controls.complex-addbutton-container, 
-#filter-wizard-modal .controls.complex-simplefilter,
 #filter-modal .controls.complex-removebutton-container, 
-#filter-modal .controls.complex-addbutton-container, 
-#filter-modal .controls.complex-simplefilter{
+#filter-modal .controls.complex-addbutton-container{
 	padding-left:0px;
 }
 
@@ -61,8 +49,14 @@
 	padding-top: 3px !important;
 }
 
-#filter-wizard-modal .xrefmrefsearch .btn.add-on-left,
-#filter-modal .xrefmrefsearch .btn.add-on-left{
+#filter-wizard-modal .xrefmrefsearch div.input-group-addon,
+#filter-modal .xrefmrefsearch div.input-group-addon{
+	padding: 0px;
+	border:0px;
+}
+
+#filter-wizard-modal .xrefmrefsearch div.input-group-addon>button,
+#filter-modal .xrefmrefsearch div.input-group-addon>button{
 	border-bottom-left-radius:4px !important;
 	-webkit-border-bottom-left-radius: 4px !important;
 	border-top-left-radius:4px !important;
@@ -73,15 +67,27 @@
 	-webkit-border-top-right-radius: 0px !important;
 }
 
+#filter-wizard-modal div.group-append.date.input-group,
+#filter-modal div.group-append.date.input-group,
+#filter-wizard-modal div.checkbox,
+#filter-modal div.checkbox,
+#filter-wizard-modal div.filter-radio-inline-container,
+#filter-modal div.filter-radio-inline-container,
+#filter-wizard-modal div.controls.complex-element,
+#filter-modal div.controls.complex-element,
+#filter-modal div.xrefmrefsearch
+{
+	padding-top: 0px;
+	padding-right: 15px;
+	padding-bottom: 0px;
+	padding-left: 15px;
+}
+
 .complex-addbutton-container>button, 
 .complex-removebutton-container>button{
 	margin-left: 5px;
 }
 
-#filter-modal .form-horizontal {
-	margin-bottom: 60px;
-}
-
-.simple-filter-container{
-	padding-bottom: 10px;
+.ui-rangeSlider-label-value {
+	color: black;
 }

@@ -17,12 +17,12 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
+import org.molgenis.data.elasticsearch.util.Hit;
+import org.molgenis.data.elasticsearch.util.SearchResult;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.GenomeConfig;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.search.Hit;
-import org.molgenis.search.SearchResult;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.HandleRequestDelegationException;
 import org.springframework.context.ApplicationContext;
@@ -111,7 +111,7 @@ public class DataSetElasticSearchRangeHandlingDataSourceTest
 
 		when(config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_CHROM, entity.getEntityMetaData()))
 				.thenReturn("CHROM");
-		when(config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_START, entity.getEntityMetaData()))
+		when(config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_POS, entity.getEntityMetaData()))
 				.thenReturn("POS");
 		when(config.getAttributeNameForAttributeNameArray(config.GENOMEBROWSER_STOP, entity.getEntityMetaData()))
 				.thenReturn("STOP");

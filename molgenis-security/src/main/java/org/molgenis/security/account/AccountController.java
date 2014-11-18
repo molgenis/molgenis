@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
+import javax.naming.NoPermissionException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -15,6 +16,7 @@ import javax.validation.constraints.NotNull;
 import org.apache.log4j.Logger;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.captcha.CaptchaException;
 import org.molgenis.security.captcha.CaptchaRequest;
@@ -52,7 +54,7 @@ public class AccountController
 
 	private static final Logger logger = Logger.getLogger(AccountController.class);
 
-	static final String REGISTRATION_SUCCESS_MESSAGE_USER = "You have successfully registered, an activation e-mail has been send to your email.";
+	static final String REGISTRATION_SUCCESS_MESSAGE_USER = "You have successfully registered, an activation e-mail has been sent to your email.";
 	static final String REGISTRATION_SUCCESS_MESSAGE_ADMIN = "You have successfully registered, your request has been forwarded to the administrator.";
 
 	@Autowired
@@ -64,10 +66,17 @@ public class AccountController
 	@Autowired
 	private RedirectStrategy redirectStrategy;
 
+	@Autowired
+	private MolgenisSettings molgenisSettings;
+
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
-	public String getLoginForm()
+	public ModelAndView getLoginForm()
 	{
-		return "login-modal";
+		ModelAndView model = new ModelAndView("login-modal");
+		model.addObject("enable_self_registration",
+				molgenisSettings.getBooleanProperty(AccountService.KEY_PLUGIN_AUTH_ENABLE_SELFREGISTRATION, true));
+
+		return model;
 	}
 
 	@RequestMapping(value = "/register", method = RequestMethod.GET)
@@ -118,42 +127,51 @@ public class AccountController
 	@ResponseBody
 	public Map<String, String> registerUser(@Valid @ModelAttribute RegisterRequest registerRequest,
 			@Valid @ModelAttribute CaptchaRequest captchaRequest, HttpServletRequest request) throws CaptchaException,
-			BindException
+			BindException, NoPermissionException
 	{
-		if (!captchaService.validateCaptcha(captchaRequest.getCaptcha()))
+		if (accountService.isSelfRegistrationEnabled())
 		{
-			throw new CaptchaException("invalid captcha answer");
-		}
-		if (!registerRequest.getPassword().equals(registerRequest.getConfirmPassword()))
-		{
-			throw new BindException(RegisterRequest.class, "password does not match confirm password");
-		}
-		MolgenisUser molgenisUser = toMolgenisUser(registerRequest);
-		String activationUri = null;
-		if (StringUtils.isEmpty(request.getHeader("X-Forwarded-Host")))
-		{
-			activationUri = ServletUriComponentsBuilder.fromCurrentRequest().replacePath(URI + "/activate").build()
-					.toUriString();
+			if (!registerRequest.getPassword().equals(registerRequest.getConfirmPassword()))
+			{
+				throw new BindException(RegisterRequest.class, "password does not match confirm password");
+			}
+			if (!captchaService.consumeCaptcha(captchaRequest.getCaptcha()))
+			{
+				throw new CaptchaException("invalid captcha answer");
+			}
+			MolgenisUser molgenisUser = toMolgenisUser(registerRequest);
+			String activationUri = null;
+			if (StringUtils.isEmpty(request.getHeader("X-Forwarded-Host")))
+			{
+				activationUri = ServletUriComponentsBuilder.fromCurrentRequest().replacePath(URI + "/activate").build()
+						.toUriString();
+			}
+			else
+			{
+				String scheme = request.getHeader("X-Forwarded-Proto");
+				if (scheme == null) scheme = request.getScheme();
+				activationUri = scheme + "://" + request.getHeader("X-Forwarded-Host") + URI + "/activate";
+			}
+			accountService.createUser(molgenisUser, activationUri);
+
+			String successMessage;
+			switch (accountService.getActivationMode())
+			{
+				case ADMIN:
+					successMessage = REGISTRATION_SUCCESS_MESSAGE_ADMIN;
+					break;
+				case USER:
+					successMessage = REGISTRATION_SUCCESS_MESSAGE_USER;
+					break;
+				default:
+					throw new RuntimeException("Unknown activation mode " + accountService.getActivationMode());
+			}
+			return Collections.singletonMap("message", successMessage);
 		}
 		else
 		{
-			activationUri = request.getScheme() + "://" + request.getHeader("X-Forwarded-Host") + URI + "/activate";
+			throw new NoPermissionException("Self registration is disabled");
 		}
-		accountService.createUser(molgenisUser, activationUri);
-
-		String successMessage;
-		switch (accountService.getActivationMode())
-		{
-			case ADMIN:
-				successMessage = REGISTRATION_SUCCESS_MESSAGE_ADMIN;
-				break;
-			case USER:
-				successMessage = REGISTRATION_SUCCESS_MESSAGE_USER;
-				break;
-			default:
-				throw new RuntimeException("Unknown activation mode " + accountService.getActivationMode());
-		}
-		return Collections.singletonMap("message", successMessage);
 	}
 
 	@RequestMapping(value = "/activate/{activationCode}", method = RequestMethod.GET)

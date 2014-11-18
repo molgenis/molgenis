@@ -5,29 +5,29 @@
 	<#assign type_label = f.getType().toString()>
 	<#if f.type == "mref">
 		//set ${JavaName(f)}
-		if( entity.get("${f.name}") != null || entity.get("${f.name?lower_case}") != null ) 
+		if( entity.getEntities("${f.name}", ${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)}.class) != null || entity.getEntities("${f.name?lower_case}", ${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)}.class) != null ) 
 		{
-			Object mrefs = entity.get("${f.name}");
-			if(mrefs == null) mrefs = entity.get("${f.name?lower_case}");
-			if(entity.get("${entity.name?lower_case}_${f.name?lower_case}")!= null) mrefs = entity.get("${entity.name?lower_case}_${f.name?lower_case}");
-			else if(entity.get("${entity.name}_${f.name}")!= null) mrefs = entity.get("${entity.name}_${f.name}");									
-			this.set${JavaName(f)}((java.util.List<${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)}>) mrefs );
+			java.lang.Iterable<${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)}> mrefs = entity.getEntities("${f.name}", ${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)}.class);
+			if(mrefs == null) mrefs = entity.getEntities("${f.name?lower_case}", ${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)}.class);
+			if(entity.getEntities("${entity.name?lower_case}_${f.name?lower_case}", ${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)}.class)!= null) mrefs = entity.getEntities("${entity.name?lower_case}_${f.name?lower_case}", ${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)}.class);
+			else if(entity.getEntities("${entity.name}_${f.name}", ${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)}.class)!= null) mrefs = entity.getEntities("${entity.name}_${f.name}", ${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)}.class);									
+			this.set${JavaName(f)}(mrefs != null ? com.google.common.collect.Lists.newArrayList(mrefs) : null);
 		}				
 	<#else>
 		//set ${JavaName(f)}
 		// query formal name, else lowercase name
 		<#if f.type == "xref" || f.type == "categorical">
-		if( entity.get("${f.name}") != null) { 
-			this.set${JavaName(f)}((${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)})entity.get("${f.name}"));				
+		if( entity.getEntity("${f.name}", ${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)}.class) != null) { 
+			this.set${JavaName(f)}(entity.getEntity("${f.name}", ${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)}.class));				
 		}
-		else if( entity.get("${f.name?lower_case}") != null) { 
-			this.set${JavaName(f)}((${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)})entity.get("${f.name?lower_case}"));				
+		else if( entity.getEntity("${f.name?lower_case}", ${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)}.class) != null) { 
+			this.set${JavaName(f)}(entity.getEntity("${f.name?lower_case}", ${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)}.class));				
 		}
-		else if( entity.get("${entity.name}_${f.name}") != null) { 
-			this.set${JavaName(f)}((${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)})entity.get("${entity.name}_${f.name}"));				
+		else if( entity.getEntity("${entity.name}_${f.name}", ${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)}.class) != null) { 
+			this.set${JavaName(f)}(entity.getEntity("${entity.name}_${f.name}", ${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)}.class));				
 		}
-		else if( entity.get("${entity.name?lower_case}_${f.name?lower_case}") != null) { 
-			this.set${JavaName(f)}((${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)})entity.get("${entity.name}_${f.name}"));				
+		else if( entity.getEntity("${entity.name?lower_case}_${f.name?lower_case}", ${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)}.class) != null) { 
+			this.set${JavaName(f)}(entity.getEntity("${entity.name}_${f.name}", ${f.xrefEntity.namespace}.${JavaName(f.xrefEntity)}.class));				
 		}
 		<#else>
 		if(entity.get${settertype(f)}("${f.name?lower_case}") != null) this.set${JavaName(f)}(entity.get${settertype(f)}("${f.name?lower_case}"));

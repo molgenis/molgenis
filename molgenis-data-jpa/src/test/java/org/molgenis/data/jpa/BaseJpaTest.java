@@ -3,13 +3,14 @@ package org.molgenis.data.jpa;
 import javax.persistence.EntityManager;
 import javax.persistence.Persistence;
 
+import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.QueryResolver;
-import org.molgenis.data.validation.DefaultEntityValidator;
 import org.molgenis.data.validation.EntityAttributesValidator;
+import org.molgenis.data.validation.RepositoryValidationDecorator;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
@@ -17,7 +18,7 @@ public class BaseJpaTest
 {
 	protected DataService dataService;
 	private EntityManager entityManager;
-	protected JpaRepository repo;
+	protected CrudRepository repo;
 	protected FileRepositoryCollectionFactory fileRepositorySourceFactory;
 
 	@BeforeMethod
@@ -28,8 +29,8 @@ public class BaseJpaTest
 		dataService = new DataServiceImpl();
 		fileRepositorySourceFactory.addFileRepositoryCollectionClass(ExcelRepositoryCollection.class,
 				ExcelRepositoryCollection.EXTENSIONS);
-		repo = new JpaRepository(entityManager, new PersonMetaData(), new DefaultEntityValidator(dataService,
-				new EntityAttributesValidator()), new QueryResolver(dataService));
+		repo = new RepositoryValidationDecorator(dataService, new JpaRepository(entityManager, new PersonMetaData(),
+				new QueryResolver(dataService)), new EntityAttributesValidator());
 		dataService.addRepository(repo);
 		entityManager.getTransaction().begin();
 	}

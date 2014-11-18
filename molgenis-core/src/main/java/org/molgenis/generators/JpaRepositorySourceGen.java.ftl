@@ -8,7 +8,6 @@ import java.util.Map;
 
 import org.molgenis.data.Repository;
 import org.molgenis.data.CrudRepository;
-import org.molgenis.data.AggregateableCrudRepositorySecurityDecorator;
 import org.molgenis.data.RepositoryCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -20,7 +19,7 @@ import com.google.common.collect.Maps;
 public class JpaRepositoryCollection implements RepositoryCollection
 {
 	private final Map<String, Repository> repositories = Maps.newLinkedHashMap();
-
+     
 	<#list model.entities as entity>
 	<#if !entity.abstract>
 	@Autowired
@@ -30,9 +29,9 @@ public class JpaRepositoryCollection implements RepositoryCollection
 		<#if disable_decorators>
 		repositories.put("${entity.name}", ${name(entity)}Repository);
 		<#elseif entity.decorator?exists>
-		repositories.put("${entity.name}", new ${entity.decorator}(new AggregateableCrudRepositorySecurityDecorator(${name(entity)}Repository)));	
+		repositories.put("${entity.name}", new ${entity.decorator}(${name(entity)}Repository));	
 		<#else>
-		repositories.put("${entity.name}", new AggregateableCrudRepositorySecurityDecorator(${name(entity)}Repository));	
+		repositories.put("${entity.name}", ${name(entity)}Repository);	
 		</#if>
 	}
 	</#if>

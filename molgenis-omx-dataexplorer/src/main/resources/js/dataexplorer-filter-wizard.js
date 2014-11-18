@@ -6,75 +6,36 @@
 	var self = molgenis.dataexplorer.filter.wizard = molgenis.dataexplorer.filter.wizard || {};
 
 	var restApi = new molgenis.RestClient();
-	var wizardTitle = "";
-
-    self.setWizardTitle = function setWizardTitle(title) {
-        if(title !== undefined) {
-            wizardTitle = title;
-        }
-    };
 
 	self.openFilterWizardModal = function(entityMetaData, attributeFilters) {
-		var modal = createFilterWizardModal();
+		var modal = createFilterWizardModal(attributeFilters);
 		createFilterWizardContent(entityMetaData, attributeFilters, modal);
 		modal.modal('show');
 	};
 	
-	function createFilterWizardModal() {		
+	function createFilterWizardModal(attributeFilters) {
 		var modal = $('#filter-wizard-modal');
-
-		if(modal.length === 0){
-			var items = [];
-			items.push('<div class="modal" id="filter-wizard-modal" tabindex="-1" role="dialog" aria-labelledby="filter-wizard-modal-label" aria-hidden="true">');
-			items.push('<div class="modal-dialog modal-lg">');
-			items.push('<div class="modal-content">');
-			items.push('<div class="modal-header">');
-			items.push('<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>');
-			items.push('<h4 class="modal-title" id="filter-wizard-modal-label">');
-			items.push(wizardTitle);
-	        items.push('</h4>');
-			items.push('</div>');
-			items.push('<div class="modal-body">');
-			items.push('<div class="filter-wizard">');
-			items.push('<form class="form-horizontal">');
-			items.push('<ul class="wizard-steps"></ul>');
-			items.push('<div class="tab-content wizard-page "></div>');
-			items.push('<ul class="pager wizard">');
-			items.push('<li class="previous"><a href="#">Previous</a></li><li class="next"><a href="#">Next</a></li>');
-			items.push('</ul>');
-			items.push('</form>');
-			items.push('</div>');
-			items.push('</div>');
-			items.push('<div class="modal-footer">');
-			items.push('<a href="#" class="btn btn-default" data-dismiss="modal">Cancel</a>');
-			items.push('<a href="#" class="btn btn-primary filter-wizard-apply-btn" data-dismiss="modal">Apply</a>');
-			items.push('</div>');
-			items.push('</div>');
-			items.push('</div>');
-			items.push('</div>');
-	
-			modal = $(items.join(''));
-			createFilterModalControls(modal);
-		}
-		
+        var wizardTemplate = Handlebars.compile($("#filter-wizard-modal-template").html());
+        modal = $(wizardTemplate({}));
+		createFilterModalControls(modal, attributeFilters);
 		return modal;
 	}
 	
-	function createFilterModalControls(modal) {
+	function createFilterModalControls(modal, attributeFilters) {
+		$('.filter-wizard-apply-btn', modal).unbind('click');
 		$('.filter-wizard-apply-btn', modal).click(function() {
 			var filters = molgenis.dataexplorer.filter.createFilters($('form', modal));
-
-			if (filters.length > 0) {
-				$(document).trigger('updateAttributeFilters', {
-					'filters' : filters
-				});
-			}
+			$(document).trigger('updateAttributeFilters', {
+				'filters' : filters
+			});
 		});
 		
+		modal.unbind('shown.bs.modal');
 		modal.on('shown.bs.modal', function () {
 			$('form input:visible:first', modal).focus();
 		});
 		
+		modal.unbind('keypress');
 		modal.keypress(function(e) {
 		    if(e.which == 13) {
 		    	e.preventDefault();

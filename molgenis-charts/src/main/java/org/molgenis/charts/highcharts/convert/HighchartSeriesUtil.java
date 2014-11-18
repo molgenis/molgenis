@@ -26,8 +26,8 @@ import org.springframework.stereotype.Component;
 public class HighchartSeriesUtil
 {
 	/**
-	 * Parse the xyDataSeries objects list to a Series objects list.
-	 * The new series object can be used for xy data charts (like scatter plot)
+	 * Parse the xyDataSeries objects list to a Series objects list. The new series object can be used for xy data
+	 * charts (like scatter plot)
 	 * 
 	 * @param xYDataSeries
 	 * @return Series
@@ -43,8 +43,8 @@ public class HighchartSeriesUtil
 	}
 
 	/**
-	 * Parse the boxPlotSeries objects list to a Series objects list.
-	 * The new series object can be used only for BoxPlotSeries
+	 * Parse the boxPlotSeries objects list to a Series objects list. The new series object can be used only for
+	 * BoxPlotSeries
 	 * 
 	 * @param boxPlotSeries
 	 * @return series
@@ -74,8 +74,9 @@ public class HighchartSeriesUtil
 				xYDataSerie.getAttributeYFieldTypeEnum()));
 
 		if (MolgenisSerieType.SCATTER.equals(xYDataSerie.getType())
-				&& (FieldTypeEnum.DATE.equals(xYDataSerie.getAttributeXFieldTypeEnum()) || FieldTypeEnum.DATE_TIME.equals(xYDataSerie.getAttributeXFieldTypeEnum())))
-		{	
+				&& (FieldTypeEnum.DATE.equals(xYDataSerie.getAttributeXFieldTypeEnum()) || FieldTypeEnum.DATE_TIME
+						.equals(xYDataSerie.getAttributeXFieldTypeEnum())))
+		{
 			series.setLineWidth(0);
 			series.setMarker(new Marker(true, 4));
 			series.setType(SeriesType.getSeriesType(MolgenisSerieType.LINE));
@@ -83,7 +84,6 @@ public class HighchartSeriesUtil
 		return series;
 	}
 
-	
 	/**
 	 * Parse the boxPlotSerie to a Series object computable with the Highcharts box plot series standard
 	 * 
@@ -97,7 +97,7 @@ public class HighchartSeriesUtil
 		series.setData(new ArrayList<Object>(boxPlotSerie.getData()));
 		return series;
 	}
-	
+
 	/**
 	 * Parse the x and y data-objects to object computable with the Highcharts scatter plot standard.
 	 * 
@@ -106,7 +106,8 @@ public class HighchartSeriesUtil
 	 * @param yValueFieldTypeEnum
 	 * @return List<Object>
 	 */
-	public List<Object> parseXYDataToList(List<XYData> xydata, FieldTypeEnum xValueFieldTypeEnum, FieldTypeEnum yValueFieldTypeEnum)
+	public List<Object> parseXYDataToList(List<XYData> xydata, FieldTypeEnum xValueFieldTypeEnum,
+			FieldTypeEnum yValueFieldTypeEnum)
 	{
 		List<Object> data = new ArrayList<Object>();
 		for (XYData xYData : xydata)
@@ -120,7 +121,7 @@ public class HighchartSeriesUtil
 	}
 
 	/**
-	 * Convert values to match the Highcharts demand when using json 
+	 * Convert values to match the Highcharts demand when using json
 	 * 
 	 * @param fieldTypeEnum
 	 * @param value
@@ -130,11 +131,11 @@ public class HighchartSeriesUtil
 	{
 		if (FieldTypeEnum.DATE_TIME.equals(fieldTypeEnum))
 		{
-			return (Long) (convertDateTimeToMilliseconds((Date) value));
+			return (convertDateTimeToMilliseconds((Date) value));
 		}
 		else if (FieldTypeEnum.DATE.equals(fieldTypeEnum))
 		{
-			return (Long) (convertDateToMilliseconds((Date) value));
+			return (convertDateToMilliseconds((Date) value));
 		}
 		else
 		{
@@ -153,6 +154,7 @@ public class HighchartSeriesUtil
 	 */
 	public Long convertDateToMilliseconds(Date date)
 	{
+		if (date == null) return null;
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		Calendar calendarConverted = Calendar.getInstance(TimeZone.getTimeZone("GMT"), Locale.ENGLISH);
@@ -169,8 +171,9 @@ public class HighchartSeriesUtil
 	 * This can be a problem when accepting JavaSript to create a JavaScript Date object not knowing the time zone and
 	 * ..
 	 */
-	public long convertDateTimeToMilliseconds(Date date)
+	public Long convertDateTimeToMilliseconds(Date date)
 	{
+		if (date == null) return null;
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 

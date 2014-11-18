@@ -5,7 +5,7 @@ package org.molgenis.data;
  */
 public interface Queryable extends Countable
 {
-    Query query();
+	Query query();
 
 	/**
 	 * return number of entities matched by query
@@ -14,11 +14,15 @@ public interface Queryable extends Countable
 
 	/**
 	 * type-safe find entities that match a query
+	 * 
+	 * @return (empty) Iterable, never null
 	 */
 	Iterable<Entity> findAll(Query q);
 
 	/**
 	 * type-safe find entities that match a query
+	 * 
+	 * @return (empty) Iterable, never null
 	 */
 	<E extends Entity> Iterable<E> findAll(Query q, Class<E> clazz);
 
@@ -38,14 +42,21 @@ public interface Queryable extends Countable
 
 	/**
 	 * find entities based on a stream of ids
+	 * 
+	 * @return (empty) Iterable, never null
 	 */
 	Iterable<Entity> findAll(Iterable<Object> ids);
 
 	/**
 	 * type-safe find entities that match a stream of ids
+	 * 
+	 * @return (empty) Iterable, never null
 	 */
 	<E extends Entity> Iterable<E> findAll(Iterable<Object> ids, Class<E> clazz);
 
+	/**
+	 * type-safe find one entity based on id. Returns null if not exists
+	 */
 	<E extends Entity> E findOne(Object id, Class<E> clazz);
 
 	/**

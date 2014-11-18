@@ -33,13 +33,13 @@
 					
 					for(var key in resultMap){
 						if(resultMap[key]['canAnnotate'] === true){
-							enabledAnnotators.push('<label class="checkbox">\n');
-							enabledAnnotators.push('<input type="checkbox" class="checkbox" name="annotatorNames" value="' + key + '">' + key+ ' <a id="disabled-tooltip" class="darktooltip" data-toggle="tooltip" title="Input:\t'+resultMap[key]["inputMetadata"].toString()+'\nOutput:\t'+resultMap[key]["outputMetadata"].toString()+'"><span class="glyphicon glyphicon-remove"></span></span></a>');
+							enabledAnnotators.push('<label class="checkbox">');
+							enabledAnnotators.push('<input type="checkbox" class="checkbox" name="annotatorNames" value="' + key + '">' + key+ ' <a id="disabled-tooltip" class="darktooltip" data-toggle="tooltip" title="Input:\t'+resultMap[key]["inputMetadata"].toString()+'\nOutput:\t'+resultMap[key]["outputMetadata"].toString()+'"><span class="glyphicon glyphicon-info-sign"></span></span></a>');
 							enabledAnnotators.push('</label>');
 							
 						}else{
-							disabledAnnotators.push('<label class="checkbox">\n');
-							disabledAnnotators.push('<input type="checkbox" class="checkbox" name="annotatorNames" disabled value="' + key + '">' + key + ' <a id="disabled-tooltip" class="darktooltip" data-toggle="tooltip" title="Input:\t'+resultMap[key]["inputMetadata"].toString()+'\nOutput:\t'+resultMap[key]["outputMetadata"].toString()+'"><span class="glyphicon glyphicon-info-sign"></span></a>');
+							disabledAnnotators.push('<label class="checkbox">');
+							disabledAnnotators.push(key + ' <a id="disabled-tooltip" class="darktooltip" data-toggle="tooltip" title="Input:\t'+resultMap[key]["inputMetadata"].toString()+'\nOutput:\t'+resultMap[key]["outputMetadata"].toString()+'"><span class="glyphicon glyphicon-info-sign"></span></a>');
 							disabledAnnotators.push('</label>');
 						}
 					}
@@ -106,7 +106,7 @@
                     data: form.serialize(),
                     contentType: 'application/x-www-form-urlencoded',
                     success: function (name) {
-                        molgenis.createAlert([{'message': 'Annotation completed. <a href=/menu/main/dataexplorer?dataset='+name+'>Show result</a>'}], 'success');
+                        molgenis.createAlert([{'message': 'Annotation completed. <a href=/menu/main/dataexplorer?entity='+name+'>Show result</a>'}], 'success');
                     }
                 });
             }

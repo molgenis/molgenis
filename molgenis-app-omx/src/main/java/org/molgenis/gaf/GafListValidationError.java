@@ -1,6 +1,6 @@
 package org.molgenis.gaf;
 
-public class GafListValidationError
+public class GafListValidationError implements Comparable
 {
 	private final int row;
 	private final String colName;
@@ -45,5 +45,27 @@ public class GafListValidationError
 	{
 		return "<tr><td>" + row + "</td><td>" + colName + "</td><td>" + value + "</td><td>" + (msg != null ? msg : "")
 				+ "</td></tr>";
+	}
+
+	@Override
+	public int compareTo(Object o) {
+		final int comparison;
+		GafListValidationError other = (GafListValidationError) o; 
+		int thisRow = this.getRow();
+		int otherRow = other.getRow();
+
+		if (thisRow < otherRow)
+		{
+			comparison = -1;
+		}
+		else if (thisRow > otherRow)
+		{
+			comparison = 1;
+		}
+		else{
+			comparison = 0;
+		}
+
+		return comparison;
 	}
 }

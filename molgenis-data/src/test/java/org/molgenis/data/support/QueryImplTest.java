@@ -1,8 +1,10 @@
 package org.molgenis.data.support;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotEquals;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
@@ -53,5 +55,33 @@ public class QueryImplTest
 		QueryRule expectedRule2 = new QueryRule(Arrays.asList(expectedRule1a, new QueryRule(Operator.AND),
 				expectedRule1b));
 		assertEquals(q.getRules(), Arrays.asList(expectedRule1, new QueryRule(Operator.OR), expectedRule2));
+	}
+
+	@Test
+	public void equals()
+	{
+		QueryImpl q1 = new QueryImpl();
+		{
+			QueryRule geRule = new QueryRule("jaar", Operator.GREATER_EQUAL, "1995");
+			QueryRule andRule = new QueryRule(Operator.AND);
+			QueryRule leRule = new QueryRule("jaar", Operator.LESS_EQUAL, "1995");
+			List<QueryRule> subSubNestedRules = Arrays.asList(geRule, andRule, leRule);
+			List<QueryRule> subNestedRules = Arrays.asList(new QueryRule(subSubNestedRules));
+			List<QueryRule> nestedRules = Arrays.asList(new QueryRule(subNestedRules));
+			QueryRule rule = new QueryRule(nestedRules);
+			q1.addRule(rule);
+		}
+		QueryImpl q2 = new QueryImpl();
+		{
+			QueryRule geRule = new QueryRule("jaar", Operator.GREATER_EQUAL, "1996");
+			QueryRule andRule = new QueryRule(Operator.AND);
+			QueryRule leRule = new QueryRule("jaar", Operator.LESS_EQUAL, "1996");
+			List<QueryRule> subSubNestedRules = Arrays.asList(geRule, andRule, leRule);
+			List<QueryRule> subNestedRules = Arrays.asList(new QueryRule(subSubNestedRules));
+			List<QueryRule> nestedRules = Arrays.asList(new QueryRule(subNestedRules));
+			QueryRule rule = new QueryRule(nestedRules);
+			q2.addRule(rule);
+		}
+		assertNotEquals(q1, q2);
 	}
 }
