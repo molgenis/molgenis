@@ -143,8 +143,8 @@ public class CaddServiceAnnotatorTest
 		List<Entity> expectedList = new ArrayList<Entity>();
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
 
-		resultMap.put(CaddServiceAnnotator.CADD_ABS, "0.180916");
-		resultMap.put(CaddServiceAnnotator.CADD_SCALED, "4.974");
+		resultMap.put(CaddServiceAnnotator.CADD_ABS, 0.180916);
+		resultMap.put(CaddServiceAnnotator.CADD_SCALED, 4.974);
 
 		Entity expectedEntity = new MapEntity(resultMap);
 
@@ -165,8 +165,8 @@ public class CaddServiceAnnotatorTest
 		List<Entity> expectedList = new ArrayList<Entity>();
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
 
-		resultMap.put(CaddServiceAnnotator.CADD_ABS, "0.18026");
-		resultMap.put(CaddServiceAnnotator.CADD_SCALED, "5.974");
+		resultMap.put(CaddServiceAnnotator.CADD_ABS, 0.18026);
+		resultMap.put(CaddServiceAnnotator.CADD_SCALED, 5.974);
 
 		Entity expectedEntity = new MapEntity(resultMap);
 
