@@ -632,59 +632,57 @@
 			var toValue = this.toValue;
 			var operator = this.operator;
 			
+			// Add operator
+			var operator = $(':input[data-filter=xrefmref-operator]',$domElement).val();
+			
 			$(':input',$domElement).not('[type=radio]:not(:checked)')
 					.not('[type=checkbox]:not(:checked)')
 					.not('[data-filter=complex-operator]')
+					.not('[data-filter=xrefmref-operator]')
+					.not('button.btn.btn-default.dropdown-toggle')
+					.not('.select2-input')
 					.not('.exclude').each(function(){
 				var value = $(this).val();
 				var name =  $(this).attr('name');
 				
 				if(value) {
-					// Add operator
-					if ($(this).attr('data-filter') === 'xrefmref-operator') {
-						operator = value;
-					} 
-					
 					// Add values
-					else 
-					{
-						if(attribute.fieldType === 'MREF' || attribute.fieldType === 'XREF'){
-							var mrefValues = value.split(',');
-							$(mrefValues).each(function(i){
-								values.push(mrefValues[i]);
-							});
-							
-							labels = $(this).data('labels');
-						} 
-						else if(attribute.fieldType == 'CATEGORICAL') {
-							labels.push($(this).parent().text());
-							values[values.length] = value;
-						}
-						else if(attribute.fieldType === 'INT'
-							|| attribute.fieldType === 'LONG'
-								|| attribute.fieldType === 'DECIMAL'
-									|| attribute.fieldType === 'DATE'
-										|| attribute.fieldType === 'DATE_TIME'
-								){
+					if(attribute.fieldType === 'MREF' || attribute.fieldType === 'XREF'){
+						var mrefValues = value.split(',');
+						$(mrefValues).each(function(i){
+							values.push(mrefValues[i]);
+						});
 						
-							if($domElement.closest('.range-container').data('dirty') || !attribute.range)
-							{
-								// Add toValue
-								if(name && (name.match(/-to$/g) || name === 'sliderright')){
-									toValue = value;
-								}
-								
-								// Add fromValue
-								if(name && (name.match(/-from$/g) || name === 'sliderleft')){
-									fromValue = value;
-								}
+						labels = $(this).data('labels');
+					} 
+					else if(attribute.fieldType == 'CATEGORICAL') {
+						labels.push($(this).parent().text());
+						values[values.length] = value;
+					}
+					else if(attribute.fieldType === 'INT'
+						|| attribute.fieldType === 'LONG'
+							|| attribute.fieldType === 'DECIMAL'
+								|| attribute.fieldType === 'DATE'
+									|| attribute.fieldType === 'DATE_TIME'
+							){
+					
+						if($domElement.closest('.range-container').data('dirty') || !attribute.range)
+						{
+							// Add toValue
+							if(name && (name.match(/-to$/g) || name === 'sliderright')){
+								toValue = value;
+							}
+							
+							// Add fromValue
+							if(name && (name.match(/-from$/g) || name === 'sliderleft')){
+								fromValue = value;
 							}
 						}
-						else
-						{
-							values[values.length] = value;
-							labels[values.length] = value;
-						}
+					}
+					else
+					{
+						values[values.length] = value;
+						labels[values.length] = value;
 					}
 				}
 			});

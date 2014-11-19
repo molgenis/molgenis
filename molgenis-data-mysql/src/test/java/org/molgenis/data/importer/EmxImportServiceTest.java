@@ -24,37 +24,16 @@ import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionException;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.SimpleTransactionStatus;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+/**
+ * Integration tests for the entire EMX importer.
+ */
 @ContextConfiguration(classes = AppConfig.class)
 public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 {
-	private static class SimplePlatformTransactionManager implements PlatformTransactionManager
-	{
-		@Override
-		public TransactionStatus getTransaction(TransactionDefinition definition) throws TransactionException
-		{
-			return new SimpleTransactionStatus();
-		}
-
-		@Override
-		public void commit(TransactionStatus status) throws TransactionException
-		{
-		}
-
-		@Override
-		public void rollback(TransactionStatus status) throws TransactionException
-		{
-		}
-	}
-
 	@Autowired
 	MysqlRepositoryCollection store;
 
@@ -64,12 +43,12 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 	PermissionSystemService permissionSystemService;
 
 	@Autowired
-	MetaDataServiceImpl mysqlMetaDataRepositories;
+	MetaDataServiceImpl metaDataService;
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		mysqlMetaDataRepositories.recreateMetaDataRepositories();
+		metaDataService.recreateMetaDataRepositories();
 		dataService = mock(DataService.class);
 	}
 
@@ -81,10 +60,9 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
 
 		// create importer
-		EmxImportService importer = new EmxImportService(dataService);
-		importer.setRepositoryCollection(store, mysqlMetaDataRepositories);
-		importer.setPlatformTransactionManager(new SimplePlatformTransactionManager());
-		importer.setPermissionSystemService(permissionSystemService);
+		EmxImportService importer = new EmxImportService(new EmxMetaDataParser(dataService, metaDataService),
+				new ImportWriter(dataService, metaDataService, permissionSystemService));
+		importer.setRepositoryCollection(store, metaDataService);
 
 		// generate report
 		EntitiesValidationReport report = importer.validateImport(f, source);
@@ -131,10 +109,9 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		Assert.assertEquals(source.getNumberOfSheets(), 4);
 		Assert.assertNotNull(source.getRepositoryByEntityName("attributes"));
 
-		EmxImportService importer = new EmxImportService(dataService);
-		importer.setRepositoryCollection(store, mysqlMetaDataRepositories);
-		importer.setPlatformTransactionManager(new SimplePlatformTransactionManager());
-		importer.setPermissionSystemService(permissionSystemService);
+		EmxImportService importer = new EmxImportService(new EmxMetaDataParser(dataService, metaDataService),
+				new ImportWriter(dataService, metaDataService, permissionSystemService));
+		importer.setRepositoryCollection(store, metaDataService);
 
 		// test import
 		EntityImportReport report = importer.doImport(source, DatabaseAction.ADD);
@@ -177,10 +154,9 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		File f = ResourceUtils.getFile(getClass(), "/example.xlsx");
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
 
-		EmxImportService importer = new EmxImportService(dataService);
-		importer.setRepositoryCollection(store, mysqlMetaDataRepositories);
-		importer.setPlatformTransactionManager(new SimplePlatformTransactionManager());
-		importer.setPermissionSystemService(permissionSystemService);
+		EmxImportService importer = new EmxImportService(new EmxMetaDataParser(dataService, metaDataService),
+				new ImportWriter(dataService, metaDataService, permissionSystemService));
+		importer.setRepositoryCollection(store, metaDataService);
 
 		// test import
 		importer.doImport(source, DatabaseAction.ADD);

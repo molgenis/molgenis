@@ -343,7 +343,6 @@
 		$('#downloadModal').modal('hide');
 	}
 	
-	
 	/**
 	 * 
 	 */

@@ -25,7 +25,7 @@ public class PackageTreeNode
 			boolean expanded, Map<String, Object> data, List<PackageTreeNode> children)
 	{
 		this.title = title;
-		this.key = key;
+		this.key = key.replace(' ', '_');
 		this.tooltip = tooltip;
 		this.folder = folder;
 		this.expanded = expanded;

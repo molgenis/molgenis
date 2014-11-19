@@ -42,6 +42,4 @@ public interface WritableMetaDataService extends MetaDataService
 
 	void addPackage(Package p);
 
-	Iterable<EntityMetaData> getEntityMetaDatas();
-
 }
