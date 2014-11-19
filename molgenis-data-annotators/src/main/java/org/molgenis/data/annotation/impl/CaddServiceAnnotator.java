@@ -84,37 +84,34 @@ public class CaddServiceAnnotator extends VariantAnnotator
 		String reference = entity.getString(REFERENCE);
 		String alternative = entity.getString(ALTERNATIVE);
 
-		String caddAbs = "";
-		String caddScaled = "";
+		Double caddAbs = 0.0;
+		Double caddScaled = 0.0;
+		String[] split = null;
 
 		TabixReader txr = new TabixReader(caddFile);
 		String line = txr.query(chromosome + ":" + position).next();
 
-		String[] split = null;
-
+		System.out.println(line);
+		
 		if (line != null)
 		{
 			split = line.split("\t");
 
 			if (split[2].equals(reference) && split[3].equals(alternative))
 			{
-				caddAbs = split[4];
-				caddScaled = split[5];
+				caddAbs = Double.parseDouble(split[4]);
+				caddScaled = Double.parseDouble(split[5]);
 			}
+			
 			// In some cases, the ref and alt are swapped. If this is the case, the initial if statement above will
 			// fail, we can just check whether such a swapping has occured
 			else if (split[3].equals(reference) && split[2].equals(alternative))
 			{
-				caddAbs = split[4];
-				caddScaled = split[5];
+				caddAbs = Double.parseDouble(split[4]);
+				caddScaled = Double.parseDouble(split[5]);
 			}
-			// If both matchings are incorrect, there is something really wrong with the source files,
-			// which we cant do anything about.
-			else
-			{
-				caddAbs = "0";
-				caddScaled = "0";
-			}
+		}else{
+			throw new RuntimeException("Something went wrong with the CADD annotator");
 		}
 
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
