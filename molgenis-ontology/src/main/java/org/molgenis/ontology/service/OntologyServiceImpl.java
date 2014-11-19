@@ -49,7 +49,7 @@ public class OntologyServiceImpl implements OntologyService
 	private static final String FUZZY_MATCH_SIMILARITY = "~0.8";
 	private static final String NON_WORD_SEPARATOR = "[^a-zA-Z0-9]";
 	private static final int MAX_NUMBER_MATCHES = 500;
-	public static final String SCORE = "score";
+	public static final String SCORE = "Score";
 	public static final Character DEFAULT_SEPARATOR = ';';
 	public static final String COMMOM_SEPARATOR = ",";
 	public static final String DEFAULT_MATCHING_NAME_FIELD = "name";

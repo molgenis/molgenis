@@ -3,7 +3,7 @@
 	
 	var ontologyServiceRequest = null;
 	var result_container = null;
-	var reserved_field = 'Identifier';
+	var reserved_identifier_field = 'Identifier';
 	
 	molgenis.OntologySerivce = function OntologySerivce(container, request){
 		result_container = container;
@@ -54,7 +54,7 @@
 					type : 'POST',
 					url : molgenis.getContextUrl() + '/match/entity',
 					async : false,
-					data : JSON.stringify({'identifier': entity.inputTerm.Identifier, 'entityName' : ontologyServiceRequest.entityName}),
+					data : JSON.stringify({'Identifier' : entity.inputTerm.Identifier, 'entityName' : ontologyServiceRequest.entityName}),
 					contentType : 'application/json',
 					success : function(data) {
 						createTableForCandidateMappings(entity.inputTerm, data, row);
@@ -69,7 +69,7 @@
 		var container = $('<div class="row"></div>').css({'margin-bottom':'20px'});
 		row.parents('table:eq(0)').hide();
 		row.parents('div:eq(0)').append(container);
-		if(data.ontologyTerms.length > 0){
+		if(data.ontologyTerms && data.ontologyTerms.length > 0){
 			var backButton = $('<button type="button" class="btn btn-default">Go back</button>').css({'margin-bottom':'10px','float':'right'});
 			var hintInformation = $('<center><p style="font-size:15px;">The candidate ontology terms are sorted based on similarity score, please select one of them by clicking <span class="glyphicon glyphicon-ok"></span> button</p></center>');
 			var table = $('<table class="table"></table>').append('<tr><th style="width:40%;">Input Term</th><th style="width:40%;">Candidate mapping</th><th style="width:10%;">Score</th><th>Select</th></tr>');
@@ -79,14 +79,14 @@
 				var row = $('<tr />').appendTo(table);
 				row.append(count == 0 ? gatherInputInfoHelper(inputEntity) : '<td></td>');
 				row.append(gatherOntologyInfoHelper(inputEntity, ontologyTerm));
-				row.append('<td>' + ontologyTerm.score.toFixed(2) + '%</td>');
+				row.append('<td>' + ontologyTerm.Score.toFixed(2) + '%</td>');
 				row.append('<td><button type="button" class="btn btn-default"><span class="glyphicon glyphicon-ok"></span></button></td>');
 				row.find('button:eq(0)').click(function(){
 					$.ajax({
 						type : 'POST',
 						url : molgenis.getContextUrl() + '/match/validate',
 						async : false,
-						data : JSON.stringify({'identifier': entity.inputTerm.Identifier, 'entityName' : ontologyServiceRequest.entityName, 'ontologyTermIri' : ontologyTerm.ontologyTermIri,'score' : ontologyTerm.score}),
+						data : JSON.stringify({'Identifier' : inputEntity.Identifier, 'entityName' : ontologyServiceRequest.entityName, 'ontologyTermIRI' : ontologyTerm.ontologyTermIRI, 'Score' : ontologyTerm.Score}),
 						contentType : 'application/json',
 						success : function(data) {
 							container.parents('form:eq(0)').attr({
@@ -111,7 +111,7 @@
 	function gatherInputInfoHelper(inputTerm){
 		var inputTermTd = $('<td />');
 		$.map(inputTerm ? inputTerm : {}, function(val, key){
-			if(key !== reserved_field) inputTermTd.append('<div>' + key + ' : ' + val + '</div>');
+			if(key !== reserved_identifier_field) inputTermTd.append('<div>' + key + ' : ' + val + '</div>');
 		});
 		return inputTermTd;
 	}
@@ -120,7 +120,7 @@
 		var ontologyTermTd = $('<td />').append('<div>Name : <a href="' + ontologyTerm.ontologyTermIRI + '" target="_blank">' + 
 				ontologyTerm.ontologyTerm + '</a></div>').append('<div>Synonym : ' + (ontologyTerm.ontologyTermSynonym !== ontologyTerm.ontologyTerm ? ontologyTerm.ontologyTermSynonym : 'N/A') + '</div>');
 		$.each(Object.keys(inputEntity), function(index, key){
-			if(key.toLowerCase() !== 'name' && key.toLowerCase().search('synonym') === -1 && key.toLowerCase() !== reserved_field.toLowerCase()){
+			if(key.toLowerCase() !== 'name' && key.toLowerCase().search('synonym') === -1 && key.toLowerCase() !== reserved_identifier_field.toLowerCase()){
 				ontologyTermTd.append('<div>' + key + ' : ' + (ontologyTerm[key] ? ontologyTerm[key] : 'N/A')  + '</div>');
 			}
 		});

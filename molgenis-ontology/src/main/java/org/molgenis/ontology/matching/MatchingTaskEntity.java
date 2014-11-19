@@ -9,7 +9,7 @@ public class MatchingTaskEntity
 {
 	public final static String ENTITY_NAME = "MatchingTask";
 	public final static String IDENTIFIER = "Identifier";
-	public final static String DATA_CREATED = "Data_created";
+	public final static String DATA_CREATED = "Date_created";
 	public final static String MOLGENIS_USER = "Molgenis_user";
 	public final static String CODE_SYSTEM = "Code_system";
 	public final static String THRESHOLD = "Threshold";

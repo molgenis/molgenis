@@ -49,7 +49,7 @@ public class ProcessInputTermService
 			RepositoryCollection repositoryCollection) throws Exception
 	{
 		String userName = molgenisUser.getUsername();
-		uploadProgress.registerUser(userName, 0);
+		uploadProgress.registerUser(userName, entityName);
 		// Add the original input dataset to database
 		mysqlRepositoryCollection.add(repositoryCollection.getRepositoryByEntityName(entityName).getEntityMetaData());
 		emxImportService.doImport(repositoryCollection, DatabaseAction.ADD);
@@ -72,8 +72,7 @@ public class ProcessInputTermService
 		mapEntity.set(MatchingTaskEntity.THRESHOLD, threshold);
 		dataService.add(MatchingTaskEntity.ENTITY_NAME, mapEntity);
 		dataService.getCrudRepository(MatchingTaskEntity.ENTITY_NAME).flush();
-
-		uploadProgress.registerUser(userName, (int) dataService.count(entityName, new QueryImpl()));
+		uploadProgress.registerUser(userName, entityName, (int) dataService.count(entityName, new QueryImpl()));
 
 		// Match input terms with code
 		Iterable<Entity> findAll = dataService.findAll(entityName);

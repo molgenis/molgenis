@@ -88,9 +88,13 @@ public class OntologyServiceController extends MolgenisPluginController
 	@RequestMapping(method = GET)
 	public String init(Model model)
 	{
-		model.addAttribute("existingTasks",
-				OntologyServiceUtil.getEntityAsMap(dataService.findAll(MatchingTaskEntity.ENTITY_NAME, new QueryImpl()
-						.eq(MatchingTaskEntity.MOLGENIS_USER, userAccountService.getCurrentUser().getUsername()))));
+		String username = userAccountService.getCurrentUser().getUsername();
+
+		if (uploadProgress.isUserExists(username)) return matchResult(uploadProgress.getCurrentJob(username), model);
+		model.addAttribute(
+				"existingTasks",
+				OntologyServiceUtil.getEntityAsMap(dataService.findAll(MatchingTaskEntity.ENTITY_NAME,
+						new QueryImpl().eq(MatchingTaskEntity.MOLGENIS_USER, username))));
 		return "ontology-match-view";
 	}
 
@@ -146,7 +150,7 @@ public class OntologyServiceController extends MolgenisPluginController
 
 		RepositoryCollection repositoryCollection = getRepositoryCollection(entityName, uploadFile);
 
-		uploadProgress.registerUser(userAccountService.getCurrentUser().getUsername(), 0);
+		uploadProgress.registerUser(userAccountService.getCurrentUser().getUsername(), entityName);
 		processInputTermService.process(userAccountService.getCurrentUser(), entityName, ontologyIri, uploadFile,
 				repositoryCollection);
 
@@ -171,7 +175,7 @@ public class OntologyServiceController extends MolgenisPluginController
 		File uploadFile = fileStore.store(file.getInputStream(), sessionId + "_input.csv");
 		RepositoryCollection repositoryCollection = getRepositoryCollection(entityName, uploadFile);
 
-		uploadProgress.registerUser(userAccountService.getCurrentUser().getUsername(), 0);
+		uploadProgress.registerUser(userAccountService.getCurrentUser().getUsername(), entityName);
 		processInputTermService.process(userAccountService.getCurrentUser(), entityName, ontologyIri, uploadFile,
 				repositoryCollection);
 
@@ -227,11 +231,11 @@ public class OntologyServiceController extends MolgenisPluginController
 	Map<String, Object> request, HttpServletRequest httpServletRequest)
 	{
 		if (request.containsKey("entityName") && !StringUtils.isEmpty(request.get("entityName").toString())
-				&& request.containsKey(MathcingTaskContentEntity.IDENTIFIER.toLowerCase())
-				&& !StringUtils.isEmpty(request.get(MathcingTaskContentEntity.IDENTIFIER.toLowerCase()).toString()))
+				&& request.containsKey(MathcingTaskContentEntity.IDENTIFIER)
+				&& !StringUtils.isEmpty(request.get(MathcingTaskContentEntity.IDENTIFIER).toString()))
 		{
 			String entityName = request.get("entityName").toString();
-			String inputTermIdentifier = request.get(MathcingTaskContentEntity.IDENTIFIER.toLowerCase()).toString();
+			String inputTermIdentifier = request.get(MathcingTaskContentEntity.IDENTIFIER).toString();
 			Entity matchingTaskEntity = dataService.findOne(MatchingTaskEntity.ENTITY_NAME,
 					new QueryImpl().eq(MatchingTaskEntity.IDENTIFIER, entityName));
 			Entity entity = dataService.findOne(entityName,
@@ -251,16 +255,22 @@ public class OntologyServiceController extends MolgenisPluginController
 	Map<String, Object> request, Model model)
 	{
 		if (request.containsKey("entityName") && !StringUtils.isEmpty(request.get("entityName").toString())
-				&& request.containsKey(MathcingTaskContentEntity.IDENTIFIER.toLowerCase())
-				&& !StringUtils.isEmpty(request.get(MathcingTaskContentEntity.IDENTIFIER.toLowerCase()).toString()))
+				&& request.containsKey(MathcingTaskContentEntity.IDENTIFIER)
+				&& !StringUtils.isEmpty(request.get(MathcingTaskContentEntity.IDENTIFIER).toString())
+				&& request.containsKey(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI)
+				&& !StringUtils.isEmpty(request.get(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI).toString())
+				&& request.containsKey(MathcingTaskContentEntity.SCORE)
+				&& !StringUtils.isEmpty(request.get(MathcingTaskContentEntity.SCORE).toString()))
 		{
 			String entityName = request.get("entityName").toString();
-			String rowIdentifier = request.get(MathcingTaskContentEntity.IDENTIFIER.toLowerCase()).toString();
+			String rowIdentifier = request.get(MathcingTaskContentEntity.IDENTIFIER).toString();
 			String ontologyTermIri = request.get(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI).toString();
 			Double score = Double.parseDouble(request.get(MathcingTaskContentEntity.SCORE).toString());
 
-			Entity entity = dataService.findOne(MathcingTaskContentEntity.ENTITY_NAME,
-					new QueryImpl().eq(MathcingTaskContentEntity.IDENTIFIER, rowIdentifier));
+			Entity entity = dataService.findOne(
+					MathcingTaskContentEntity.ENTITY_NAME,
+					new QueryImpl().eq(MathcingTaskContentEntity.INPUT_TERM, rowIdentifier).and()
+							.eq(MathcingTaskContentEntity.REF_ENTITY, entityName));
 			entity.set(MathcingTaskContentEntity.MATCHED_TERM, ontologyTermIri);
 			entity.set(MathcingTaskContentEntity.SCORE, score);
 			entity.set(MathcingTaskContentEntity.VALIDATED, true);

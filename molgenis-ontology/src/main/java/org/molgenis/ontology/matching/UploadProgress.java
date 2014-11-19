@@ -5,9 +5,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class UploadProgress
 {
 	private final Set<String> currentUsers;
+	private final Map<String, String> currentJobs;
 	private final Map<String, Integer> userTotalNumber;
 	private final Map<String, Integer> userFinishedNumber;
 	private final Map<String, Integer> userThreshold;
@@ -17,6 +20,7 @@ public class UploadProgress
 	public UploadProgress()
 	{
 		currentUsers = new HashSet<String>();
+		currentJobs = new HashMap<String, String>();
 		userThreshold = new HashMap<String, Integer>();
 		userTotalNumber = new HashMap<String, Integer>();
 		userFinishedNumber = new HashMap<String, Integer>();
@@ -45,6 +49,11 @@ public class UploadProgress
 		return currentUsers.contains(userName);
 	}
 
+	public String getCurrentJob(String userName)
+	{
+		return currentJobs.containsKey(userName) ? currentJobs.get(userName) : StringUtils.EMPTY;
+	}
+
 	public void incrementProgress(String userName)
 	{
 		if (userFinishedNumber.containsKey(userName))
@@ -58,12 +67,18 @@ public class UploadProgress
 		userThreshold.put(userName, threshold);
 	}
 
-	public void registerUser(String userName, Integer totalNumber)
+	public void registerUser(String userName, String currentJob, Integer totalNumber)
 	{
 		currentUsers.add(userName);
 		userTotalNumber.put(userName, totalNumber);
+		currentJobs.put(userName, currentJob);
 		userFinishedNumber.put(userName, ILLEGAL_DENOMINATOR);
 		userThreshold.put(userName, DEFAULT_THRESHOLD);
+	}
+
+	public void registerUser(String userName, String currentJob)
+	{
+		registerUser(userName, currentJob, ILLEGAL_DENOMINATOR);
 	}
 
 	public void removeUser(String userName)
@@ -72,5 +87,6 @@ public class UploadProgress
 		userTotalNumber.remove(userName);
 		userFinishedNumber.remove(userName);
 		userThreshold.remove(userName);
+		currentJobs.remove(userName);
 	}
 }
