@@ -31,6 +31,7 @@ import org.molgenis.ontology.beans.OntologyImpl;
 import org.molgenis.ontology.beans.OntologyServiceResultImpl;
 import org.molgenis.ontology.beans.OntologyTermImpl;
 import org.molgenis.ontology.beans.OntologyTermTransformer;
+import org.molgenis.ontology.matching.AdaptedCsvRepository;
 import org.molgenis.ontology.repository.OntologyIndexRepository;
 import org.molgenis.ontology.repository.OntologyQueryRepository;
 import org.molgenis.ontology.repository.OntologyTermIndexRepository;
@@ -47,8 +48,8 @@ public class OntologyServiceImpl implements OntologyService
 	private static final List<String> ELASTICSEARCH_RESERVED_WORDS = Arrays.asList("or", "and", "if");
 	private static final String FUZZY_MATCH_SIMILARITY = "~0.8";
 	private static final String NON_WORD_SEPARATOR = "[^a-zA-Z0-9]";
-	private static final int MAX_NUMBER_MATCHES = 100;
-	public static final String COMBINED_SCORE = "combinedScore";
+	private static final int MAX_NUMBER_MATCHES = 500;
+	public static final String SCORE = "score";
 	public static final Character DEFAULT_SEPARATOR = ';';
 	public static final String COMMOM_SEPARATOR = ",";
 	public static final String DEFAULT_MATCHING_NAME_FIELD = "name";
@@ -208,7 +209,8 @@ public class OntologyServiceImpl implements OntologyService
 		List<QueryRule> rulesForOntologyTermFields = new ArrayList<QueryRule>();
 		for (String attributeName : inputEntity.getAttributeNames())
 		{
-			if (!StringUtils.isEmpty(inputEntity.getString(attributeName)))
+			if (!StringUtils.isEmpty(inputEntity.getString(attributeName))
+					&& !attributeName.equalsIgnoreCase(AdaptedCsvRepository.ALLOWED_IDENTIFIER))
 			{
 				// The attribute name is either equal to 'Name' or starts
 				// with string 'Synonym'
@@ -346,7 +348,7 @@ public class OntologyServiceImpl implements OntologyService
 				{
 					copyEntity.set(attributeName, entity.get(attributeName));
 				}
-				copyEntity.set(COMBINED_SCORE, comparableHit.getSimilarityScore().doubleValue());
+				copyEntity.set(SCORE, comparableHit.getSimilarityScore().doubleValue());
 				copyEntity.set(MAX_SCORE_FIELD, comparableHit.getMaxScoreField());
 				entities.add(copyEntity);
 			}

@@ -27,7 +27,7 @@ public class UploadProgress
 		if (userTotalNumber.containsKey(userName) && userFinishedNumber.containsKey(userName)
 				&& userTotalNumber.get(userName) != ILLEGAL_DENOMINATOR)
 		{
-			return userFinishedNumber.get(userName).floatValue() / userTotalNumber.get(userName).floatValue();
+			return userFinishedNumber.get(userName).floatValue() / userTotalNumber.get(userName).floatValue() * 100;
 		}
 
 		return 0;

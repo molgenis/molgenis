@@ -8,7 +8,18 @@
 					<center>
 						The data is being processed now, please be patient...
 					</center>
-				</div>		
+					<br><br>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-offset-2 col-md-8">
+					<div class="progress">
+						<div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width:${progress}%;">
+							<span class="sr-only">${progress}% Complete</span>
+						</div>
+					</div>
+					<br><br>
+				</div>
 			</div>
 			<script type="text/javascript">
 				$(document).ready(function(){
@@ -17,7 +28,7 @@
 							'action' : molgenis.getContextUrl() + '/result/${entityName}',
 							'method' : 'GET'
 						}).submit();
-					}, 5000);
+					}, 3000);
 				});
 			</script>
 			<#elseif entityName?? & numberOfMatched?? & numberOfMatched??>

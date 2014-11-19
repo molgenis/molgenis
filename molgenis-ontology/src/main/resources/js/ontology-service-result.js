@@ -11,6 +11,7 @@
 	};
 	
 	molgenis.OntologySerivce.prototype.updatePageFunction = function(page){
+		
 		ontologyServiceRequest['entityPager'] = {
 			'start' : page.start,
 			'num' : page.end - page.start
@@ -21,7 +22,7 @@
 			async : false,
 			data : JSON.stringify(ontologyServiceRequest),
 			contentType : 'application/json',
-			success : function(data, textStatus, request) {
+			success : function(data) {
 				result_container.empty();
 				if(data.items.length > 0){
 					var slimDiv = $('<div style="width:96%;margin-left:2%;"></div>').appendTo(result_container);
@@ -34,27 +35,14 @@
 				}else{
 					result_container.append('<center>There are not results!</center>');
 				}
-			},
-			error : function(request, textStatus, error){
-				console.log(error);
-			} 
+			}
 		});
 	};
 	
 	function createRowForMatchedTerm(entity, validated){
 		var row = $('<tr />');
-		var inputTermTd = $('<td />').appendTo(row);
-		$.map(entity.inputTerm ? entity.inputTerm : {}, function(val, key){
-			if(key !== reserved_field) inputTermTd.append('<div>' + key + ' : ' + val + '</div>');
-		});
-		var ontologyTerm = entity.ontologyTerm;
-		var ontologyTermTd = $('<td />').append('<div>Name : <a href="' + ontologyTerm.ontologyTermIRI + '" target="_blank">' + 
-				ontologyTerm.ontologyTerm + '</a></div>').append('<div>Synonym : ' + (ontologyTerm.ontologyTermSynonym !== ontologyTerm.ontologyTerm ? ontologyTerm.ontologyTermSynonym : 'N/A') + '</div>').appendTo(row);
-		$.each(Object.keys(entity.inputTerm), function(index, key){
-			if(key.toLowerCase() !== 'name' && key.toLowerCase().search('synonym') === -1 && key.toLowerCase() !== reserved_field.toLowerCase()){
-				ontologyTermTd.append('<div>' + key + ' : ' + (ontologyTerm[key] ? ontologyTerm[key] : 'N/A')  + '</div>');
-			}
-		});
+		row.append(gatherInputInfoHelper(entity.inputTerm));
+		row.append(gatherOntologyInfoHelper(entity.inputTerm, entity.ontologyTerm));
 		$('<td />').append(entity.matchedTerm.Score.toFixed(2) + '%').appendTo(row);
 		if(validated){
 			$('<td />').append('<span class="glyphicon glyphicon-ok"></span>').appendTo(row);
@@ -62,50 +50,81 @@
 			var button = $('<button class="btn btn-default" type="button">Validate</button>');
 			$('<td />').append(button).appendTo(row);
 			button.click(function(){
-				console.log("Validate button is clicked!");
-			});
-		}
-		
-		
-//		var isEqual = hit.ontologyTermSynonym === hit.ontologyTerm;
-//		var popoverOption = {
-//			'placement' : 'bottom',
-//			'trigger' : 'hover',
-//			'title' : 'Click to look up in ontology',
-//			'html' : true, 
-//			'content' : (hit.maxScoreField ? 'Matched based on the input field : <strong>' + hit.maxScoreField + '</strong><br><br>' : '') +
-//				((hit.maxScoreField && hit[hit.maxScoreField]) ? 'OntologyTerm ' + hit.maxScoreField + ' is <strong>' + hit[hit.maxScoreField] + '</strong><br><br>' : '')+ 
-//				(hit.ontologyTermSynonym !== hit.ontologyTerm ? 'OntologyTerm synonym is <strong>' + hit.ontologyTermSynonym + '</strong>' : '') 
-//		};
-		
-//			if(scoreGroup.length > 3){
-//				var classifications = ss.jenks(scoreGroup, 3);
-//				$.each(classifications, function(i, score){
-//					if(i != 0 && i != classifications.length - 1 && index == scoreGroup.lastIndexOf(score)){
-//						var separatLine = $('<legend />').css('border-bottom-color' , '#CC0025');
-//						$('<div />').addClass('row').append(separatLine).appendTo(ontologyTermMatchDiv);
-//					}
-//				});
-//			}
-			
-		return row;
-	}	
-	
-	function initToggle(){
-		$('div.div-expandable').each(function(index, element){
-			if($(element).children().length > 1){
-				$(element).children('div:gt(0)').hide();
-				$(element).find('.glyphicon-plus:eq(0)').click(function(){
-					if($(this).hasClass('glyphicon-plus')){
-						$(element).children().show();
-						$(this).removeClass('glyphicon-plus').addClass('glyphicon-minus');
-					}else{
-						$(element).children('div:gt(0)').hide();
-						$(this).removeClass('glyphicon-minus').addClass('glyphicon-plus');
+				$.ajax({
+					type : 'POST',
+					url : molgenis.getContextUrl() + '/match/entity',
+					async : false,
+					data : JSON.stringify({'identifier': entity.inputTerm.Identifier, 'entityName' : ontologyServiceRequest.entityName}),
+					contentType : 'application/json',
+					success : function(data) {
+						createTableForCandidateMappings(entity.inputTerm, data, row);
 					}
 				});
+			});
+		}
+		return row;
+	}
+	
+	function createTableForCandidateMappings(inputEntity, data, row){
+		var container = $('<div class="row"></div>').css({'margin-bottom':'20px'});
+		row.parents('table:eq(0)').hide();
+		row.parents('div:eq(0)').append(container);
+		if(data.ontologyTerms.length > 0){
+			var backButton = $('<button type="button" class="btn btn-default">Go back</button>').css({'margin-bottom':'10px','float':'right'});
+			var hintInformation = $('<center><p style="font-size:15px;">The candidate ontology terms are sorted based on similarity score, please select one of them by clicking <span class="glyphicon glyphicon-ok"></span> button</p></center>');
+			var table = $('<table class="table"></table>').append('<tr><th style="width:40%;">Input Term</th><th style="width:40%;">Candidate mapping</th><th style="width:10%;">Score</th><th>Select</th></tr>');
+			var count = 0;
+			$.each(data.ontologyTerms, function(index, ontologyTerm){
+				if(count >= 10) return;
+				var row = $('<tr />').appendTo(table);
+				row.append(count == 0 ? gatherInputInfoHelper(inputEntity) : '<td></td>');
+				row.append(gatherOntologyInfoHelper(inputEntity, ontologyTerm));
+				row.append('<td>' + ontologyTerm.score.toFixed(2) + '%</td>');
+				row.append('<td><button type="button" class="btn btn-default"><span class="glyphicon glyphicon-ok"></span></button></td>');
+				row.find('button:eq(0)').click(function(){
+					$.ajax({
+						type : 'POST',
+						url : molgenis.getContextUrl() + '/match/validate',
+						async : false,
+						data : JSON.stringify({'identifier': entity.inputTerm.Identifier, 'entityName' : ontologyServiceRequest.entityName, 'ontologyTermIri' : ontologyTerm.ontologyTermIri,'score' : ontologyTerm.score}),
+						contentType : 'application/json',
+						success : function(data) {
+							container.parents('form:eq(0)').attr({
+								'action' : molgenis.getContextUrl() + '/result/' + ontologyServiceRequest.entityName,
+								'method' : 'GET'
+							}).submit();
+						}
+					});
+				});
+				count++;
+			});
+			backButton.click(function(){
+				container.remove();
+				row.parents('table:eq(0)').show();
+			});
+			$('<div class="col-md-12"></div>').append(hintInformation).append(backButton).append(table).appendTo(container);
+		}else{
+			container.append('<center>There are no candidate mappings for this input term!</center>');
+		}
+	}
+	
+	function gatherInputInfoHelper(inputTerm){
+		var inputTermTd = $('<td />');
+		$.map(inputTerm ? inputTerm : {}, function(val, key){
+			if(key !== reserved_field) inputTermTd.append('<div>' + key + ' : ' + val + '</div>');
+		});
+		return inputTermTd;
+	}
+	
+	function gatherOntologyInfoHelper(inputEntity, ontologyTerm){
+		var ontologyTermTd = $('<td />').append('<div>Name : <a href="' + ontologyTerm.ontologyTermIRI + '" target="_blank">' + 
+				ontologyTerm.ontologyTerm + '</a></div>').append('<div>Synonym : ' + (ontologyTerm.ontologyTermSynonym !== ontologyTerm.ontologyTerm ? ontologyTerm.ontologyTermSynonym : 'N/A') + '</div>');
+		$.each(Object.keys(inputEntity), function(index, key){
+			if(key.toLowerCase() !== 'name' && key.toLowerCase().search('synonym') === -1 && key.toLowerCase() !== reserved_field.toLowerCase()){
+				ontologyTermTd.append('<div>' + key + ' : ' + (ontologyTerm[key] ? ontologyTerm[key] : 'N/A')  + '</div>');
 			}
 		});
+		return ontologyTermTd;
 	}
 	
 }($, window.top.molgenis = window.top.molgenis || {}));
