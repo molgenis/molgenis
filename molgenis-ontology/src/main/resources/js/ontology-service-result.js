@@ -47,8 +47,14 @@
 		$.map(entity.inputTerm ? entity.inputTerm : {}, function(val, key){
 			if(key !== reserved_field) inputTermTd.append('<div>' + key + ' : ' + val + '</div>');
 		});
-		
-		$('<td />').append('<div>' + entity.ontologyTerm.ontologyTerm + '</div><div><a href="' + entity.ontologyTerm.ontologyTermIRI + '" target="_blank">' + entity.ontologyTerm.ontologyTermIRI + '</a></div>').appendTo(row);
+		var ontologyTerm = entity.ontologyTerm;
+		var ontologyTermTd = $('<td />').append('<div>Name : <a href="' + ontologyTerm.ontologyTermIRI + '" target="_blank">' + 
+				ontologyTerm.ontologyTerm + '</a></div>').append('<div>Synonym : ' + (ontologyTerm.ontologyTermSynonym !== ontologyTerm.ontologyTerm ? ontologyTerm.ontologyTermSynonym : 'N/A') + '</div>').appendTo(row);
+		$.each(Object.keys(entity.inputTerm), function(index, key){
+			if(key.toLowerCase() !== 'name' && key.toLowerCase().search('synonym') === -1 && key.toLowerCase() !== reserved_field.toLowerCase()){
+				ontologyTermTd.append('<div>' + key + ' : ' + (ontologyTerm[key] ? ontologyTerm[key] : 'N/A')  + '</div>');
+			}
+		});
 		$('<td />').append(entity.matchedTerm.Score.toFixed(2) + '%').appendTo(row);
 		if(validated){
 			$('<td />').append('<span class="glyphicon glyphicon-ok"></span>').appendTo(row);
