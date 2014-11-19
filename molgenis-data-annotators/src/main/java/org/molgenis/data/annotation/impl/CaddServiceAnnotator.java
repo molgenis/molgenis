@@ -90,8 +90,6 @@ public class CaddServiceAnnotator extends VariantAnnotator
 
 		TabixReader txr = new TabixReader(caddFile);
 		String line = txr.query(chromosome + ":" + position).next();
-
-		System.out.println(line);
 		
 		if (line != null)
 		{
