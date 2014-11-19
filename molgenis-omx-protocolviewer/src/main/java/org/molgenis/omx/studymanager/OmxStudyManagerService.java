@@ -11,7 +11,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.study.StudyDataRequest;
 import org.molgenis.security.user.MolgenisUserService;
@@ -167,22 +166,22 @@ public class OmxStudyManagerService implements StudyManagerService
 		}
 
 		studyDataRequest.setName(studyDataRequest.getName());
-		studyDataRequest.setFeatures(Lists.newArrayList(Iterables.transform(studyDefinition.getItems(),
-				new Function<CatalogItem, ObservableFeature>()
+		studyDataRequest.setProtocols(Lists.newArrayList(Iterables.transform(studyDefinition.getItems(),
+				new Function<CatalogItem, Protocol>()
 				{
 
 					@Override
-					public ObservableFeature apply(CatalogItem catalogItem)
+					public Protocol apply(CatalogItem catalogItem)
 					{
 						String id = catalogItem.getId();
-						ObservableFeature feature = dataService.findOne(ObservableFeature.ENTITY_NAME,
-								new QueryImpl().eq(ObservableFeature.ID, id), ObservableFeature.class);
-						if (feature == null)
+						Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME,
+								new QueryImpl().eq(Protocol.ID, id), Protocol.class);
+						if (protocol == null)
 						{
-							throw new RuntimeException("Observable feature does not exist identifier: " + id);
+							throw new RuntimeException("Protocol does not exist identifier: " + id);
 						}
 
-						return feature;
+						return protocol;
 					}
 				})));
 		studyDataRequest.setRequestStatus(studyDefinition.getStatus().toString().toLowerCase());

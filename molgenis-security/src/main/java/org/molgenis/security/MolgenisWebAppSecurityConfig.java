@@ -46,6 +46,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.DefaultRedirectStrategy;
 import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.switchuser.SwitchUserFilter;
 import org.springframework.security.web.header.writers.CacheControlHeadersWriter;
 import org.springframework.security.web.header.writers.DelegatingRequestMatcherHeaderWriter;
@@ -126,6 +127,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 		.antMatchers("/scripts/**/run").authenticated()
 
 		.anyRequest().denyAll().and()
+
+		.httpBasic().authenticationEntryPoint(authenticationEntryPoint()).and()
 
 		.formLogin().loginPage("/login").failureUrl("/login?error").and()
 
@@ -257,5 +260,11 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	public MolgenisPermissionService molgenisPermissionService()
 	{
 		return new MolgenisPermissionServiceImpl();
+	}
+
+	@Bean
+	public LoginUrlAuthenticationEntryPoint authenticationEntryPoint()
+	{
+		return new AjaxAwareLoginUrlAuthenticationEntryPoint("/login");
 	}
 }

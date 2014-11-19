@@ -87,15 +87,15 @@
 	                        var body = $('<tbody>');
 	
 	                        $.each(selection.items, function (i, item) {
-	                        	var feature = molgenis.Catalog.getFeature(item.feature);
+	                        	var protocol = molgenis.Catalog.getProtocol(item.protocol);
 	                            var row = $('<tr>');
-	                            row.append('<td>' + feature.Name + '</td>');
-	                            row.append('<td>' + (feature.description ? molgenis.i18n.get(feature.description) : '') + '</td>');
+	                            row.append('<td>' + protocol.Name + '</td>');
+	                            row.append('<td>' + (protocol.description ? molgenis.i18n.get(protocol.description) : '') + '</td>');
 	
 	                            var deleteCol = $('<td class="center">');
 	                            var deleteBtn = $('<i class="icon-remove"></i>');
 	                            deleteBtn.click(function () {
-	                                pendingDeletes.push(feature.href);
+	                                pendingDeletes.push(protocol.href);
 	                                updateFeatureSelectionContainer();
 	                                // restore focus
 	                                form.find('input:visible:first').focus();

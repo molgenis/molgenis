@@ -2,71 +2,59 @@ package org.molgenis.omx.catalogmanager;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.molgenis.catalog.CatalogItem;
-import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
-import org.molgenis.omx.observ.target.Ontology;
-import org.molgenis.omx.observ.target.OntologyTerm;
 
 import com.google.common.collect.Lists;
 
 public class OmxCatalogItem implements CatalogItem
 {
-	private final ObservableFeature observableFeature;
+	private final Protocol protocol;
 
-	public OmxCatalogItem(ObservableFeature observableFeature)
+	public OmxCatalogItem(Protocol protocol)
 	{
-		if (observableFeature == null) throw new IllegalArgumentException("Observable feature is null");
-		this.observableFeature = observableFeature;
+		if (protocol == null) throw new IllegalArgumentException("Protocol is null");
+		this.protocol = protocol;
 	}
 
 	@Override
 	public String getId()
 	{
-		return observableFeature.getId().toString();
+		return protocol.getId().toString();
 	}
 
 	@Override
 	public String getName()
 	{
-		return observableFeature.getName();
+		return protocol.getName();
 	}
 
 	@Override
 	public String getDescription()
 	{
-		return observableFeature.getDescription();
+		return protocol.getDescription();
 	}
 
 	@Override
 	public String getCode()
 	{
-		List<OntologyTerm> ontologyTerm = observableFeature.getDefinitions();
-		if (ontologyTerm == null || ontologyTerm.isEmpty()) return null;
-		else if (ontologyTerm.size() > 1) throw new RuntimeException("Multiple ontology terms are not supported");
-		else return ontologyTerm.get(0).getTermAccession();
+		return null;
 	}
 
 	@Override
 	public String getCodeSystem()
 	{
-		List<OntologyTerm> ontologyTerm = observableFeature.getDefinitions();
-		if (ontologyTerm == null || ontologyTerm.isEmpty()) return null;
-		else if (ontologyTerm.size() > 1) throw new RuntimeException("Multiple ontology terms are not supported");
-		else
-		{
-			Ontology ontology = ontologyTerm.get(0).getOntology();
-			return ontology != null ? ontology.getOntologyAccession() : null;
-		}
+		return null;
 	}
 
 	@Override
 	public Iterable<String> getPath()
 	{
 		List<String> protocolPath = new ArrayList<String>();
-		Collection<Protocol> protocols = observableFeature.getFeaturesProtocolCollection();
+		Collection<Protocol> protocols = Collections.singletonList(protocol);
 		while (protocols != null && !protocols.isEmpty())
 		{
 			if (protocols.size() != 1)

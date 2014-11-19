@@ -67,15 +67,15 @@ public interface ProtocolViewerService
 			throws MessagingException, IOException, UnknownCatalogException, UnknownStudyDefinitionException;
 
 	/**
-	 * Add a catalog item or catalog group (implies all items in a group) to the study definition draft
+	 * Add a catalog item group (Protocol) to the study definition draft
 	 * 
 	 * @param resourceUri
 	 * @param catalogId
 	 */
-	void addToStudyDefinitionDraftForCurrentUser(String resourceUri, String catalogId) throws UnknownCatalogException;
+	void addToStudyDefinitionDraftForCurrentUser(String protocolId, String catalogId) throws UnknownCatalogException;
 
 	/**
-	 * Remove a catalog item or catalog group (implies all items in a group) from the study definition draft
+	 * Remove a catalog item group (Protocol) from the study definition draft
 	 * 
 	 * @param resourceUri
 	 * @param catalogId

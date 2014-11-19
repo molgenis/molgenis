@@ -7,7 +7,6 @@ import org.molgenis.catalog.Catalog;
 import org.molgenis.catalog.CatalogItem;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
 
 public class OmxCatalog extends OmxCatalogFolder implements Catalog
@@ -44,9 +43,9 @@ public class OmxCatalog extends OmxCatalogFolder implements Catalog
 	{
 		// TODO verify that the catalog item is part of this catalog.
 		// this check was removed because of bad performance (worst case the full protocol tree needs to be pruned).
-		ObservableFeature observableFeature = dataService.findOne(ObservableFeature.ENTITY_NAME,
-				new QueryImpl().eq(ObservableFeature.ID, catalogItemId), ObservableFeature.class);
-		if (observableFeature == null) throw new IllegalArgumentException("catalogItemId does not exist");
-		return new OmxCatalogItem(observableFeature);
+		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.ID, catalogItemId),
+				Protocol.class);
+		if (protocol == null) throw new IllegalArgumentException("catalogItemId does not exist");
+		return new OmxCatalogItem(protocol);
 	}
 }

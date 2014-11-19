@@ -655,6 +655,9 @@ $(function() {
 	$(document)
 			.ajaxError(
 					function(event, xhr, settings, e) {
+						if(xhr.status === 401){
+							document.location= "/login";
+						}
 						try {
 							molgenis
 									.createAlert(JSON.parse(xhr.responseText).errors);

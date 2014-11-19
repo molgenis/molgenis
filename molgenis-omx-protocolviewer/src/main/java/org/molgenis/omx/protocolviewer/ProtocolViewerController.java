@@ -150,7 +150,7 @@ public class ProtocolViewerController extends MolgenisPluginController
 							@Override
 							public SelectedItemResponse apply(CatalogItem catalogItem)
 							{
-								String featureUri = "/api/v1/observablefeature/" + catalogItem.getId();
+								String protocolUri = "/api/v1/protocol/" + catalogItem.getId();
 								List<String> protocolUris = Lists.newArrayList(Iterables.transform(
 										catalogItem.getPath(), new Function<String, String>()
 										{
@@ -162,7 +162,7 @@ public class ProtocolViewerController extends MolgenisPluginController
 
 										}));
 
-								return new SelectedItemResponse(featureUri, protocolUris);
+								return new SelectedItemResponse(protocolUri, protocolUris);
 							}
 						}));
 
@@ -219,10 +219,9 @@ public class ProtocolViewerController extends MolgenisPluginController
 			throws UnknownCatalogException, UnknownStudyDefinitionException
 	{
 		if (!getEnableOrderAction()) throw new MolgenisDataAccessException("Action not allowed");
-		for (String item : cartUpdateRequest.getHref())
-		{
-			protocolViewerService.addToStudyDefinitionDraftForCurrentUser(item, catalogId.toString());
-		}
+		String protocolId = cartUpdateRequest.getProtocolId();
+		logger.debug("add to cart: " + protocolId);
+		protocolViewerService.addToStudyDefinitionDraftForCurrentUser(protocolId, catalogId.toString());
 	}
 
 	@RequestMapping(value = "/cart/remove/{catalogId}", method = RequestMethod.POST)
@@ -231,12 +230,9 @@ public class ProtocolViewerController extends MolgenisPluginController
 			throws UnknownCatalogException, UnknownStudyDefinitionException
 	{
 		if (!getEnableOrderAction()) throw new MolgenisDataAccessException("Action not allowed");
-		logger.debug("remove from cart: " + cartUpdateRequest.getHref());
-		for (String item : cartUpdateRequest.getHref())
-		{
-			protocolViewerService.removeFromStudyDefinitionDraftForCurrentUser(item, catalogId.toString());
-
-		}
+		String protocolId = cartUpdateRequest.getProtocolId();
+		logger.debug("remove from cart: " + protocolId);
+		protocolViewerService.removeFromStudyDefinitionDraftForCurrentUser(protocolId, catalogId.toString());
 	}
 
 	@RequestMapping(value = "/order", method = RequestMethod.GET)
@@ -463,19 +459,19 @@ public class ProtocolViewerController extends MolgenisPluginController
 
 	private static class SelectedItemResponse
 	{
-		private final String feature;
+		private final String protocol;
 		private final List<String> path;
 
-		public SelectedItemResponse(String feature, List<String> path)
+		public SelectedItemResponse(String protocol, List<String> path)
 		{
-			this.feature = feature;
+			this.protocol = protocol;
 			this.path = path;
 		}
 
 		@SuppressWarnings("unused")
-		public String getFeature()
+		public String getProtocol()
 		{
-			return feature;
+			return protocol;
 		}
 
 		@SuppressWarnings("unused")
@@ -488,17 +484,17 @@ public class ProtocolViewerController extends MolgenisPluginController
 	private static final class CartUpdateRequest
 	{
 		@NotNull
-		private List<String> features;
+		private String protocolId;
 
-		public List<String> getHref()
+		public String getProtocolId()
 		{
-			return features;
+			return protocolId;
 		}
 
 		@SuppressWarnings("unused")
-		public void setHref(List<String> features)
+		public void setProtocolId(String protocolId)
 		{
-			this.features = features;
+			this.protocolId = protocolId;
 		}
 	}
 }

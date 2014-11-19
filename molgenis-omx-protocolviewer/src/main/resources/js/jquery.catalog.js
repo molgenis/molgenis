@@ -6,10 +6,12 @@
 
 	function createTreeConfig(settings, callback) {
 		function createTreeNodes(tree, subTrees, treeConfig, callback) {
-			function createTreeNodesRec(tree, selectedNodes, parentNode) {
+			function createTreeNodesRec(tree, selectedNodes, parentNode, parentSelected, depth) {
 				$.each(tree, function(protocolId, subTree) {
 					var protocolUri = restApi.getHref('protocol', protocolId);
 					var protocol = restApi.get(protocolUri, {'expand': subTree ? ['features'] : []});
+					
+					var selected = parentSelected || selectedNodes.hasOwnProperty(protocol.href.toLowerCase());
 					
 					// create protocol node
 					var node = {
@@ -17,11 +19,13 @@
 						title : protocol.Name,
 						folder : true,
 						lazy: subTree === null,
-						expanded: !settings.displaySiblings
+						expanded: !settings.displaySiblings,
+						hideCheckbox: depth <= settings.disableSelectDepth,
+						selected: selected
 					};
 					if (protocol.description)
 						node.tooltip = molgenis.i18n.get(protocol.description);
-					
+
 					// determine whether node is lazy or not
 					if(subTree) {
 						node.children = [];
@@ -31,7 +35,7 @@
 							if(key.charAt(0) !== 'F') {
 								var subTree = {};
 								subTree[key] = subTrees.hasOwnProperty(key) ? subTrees[key] : null;
-								createTreeNodesRec(subTree, selectedNodes, node.children);
+								createTreeNodesRec(subTree, selectedNodes, node.children, selected, depth + 1);
 							}
 						});
 						if (settings.sort)
@@ -53,7 +57,8 @@
 									key : feature.href.toLowerCase(),
 									title : feature.Name,
 									folder : false,
-									selected: selectedNodes.hasOwnProperty(feature.href.toLowerCase())
+									hideCheckbox: settings.hideDocumentCheckbox,
+									selected: selected
 								};
 								if (feature.description)
 									featureNode.tooltip = molgenis.i18n.get(feature.description);
@@ -63,7 +68,6 @@
 						if (settings.sort)
 							featureNodes.sort(settings.sort);
 						node.children = node.children.concat(featureNodes);
-						
 					}
 					
 					// append protocol node
@@ -76,7 +80,7 @@
 			$.each(settings.selectedItems, function() {
 				selectedNodes[this] = null;
 			});
-			createTreeNodesRec(tree, selectedNodes, nodes);
+			createTreeNodesRec(tree, selectedNodes, nodes, false, 0);
 			// disable checkboxes of root nodes
 			$.each(nodes, function(i, node) {
 				node.hideCheckbox = true;
@@ -115,6 +119,7 @@
 								tooltip : molgenis.i18n.get(this.description),
 								folder : true,
 								lazy : true,
+								hideCheckbox: node.getLevel() <= settings.disableSelectDepth,
 								selected: node.selected
 							});
 						});
@@ -133,6 +138,8 @@
 								featureNodes.push({
 									key : this.href.toLowerCase(),
 									title : this.Name,
+									folder : false,
+									hideCheckbox: settings.hideDocumentCheckbox,
 									tooltip : molgenis.i18n.get(this.description),
 									selected: node.selected
 								});
@@ -191,7 +198,7 @@
 				items.push(restApi.getPrimaryKeyFromHref(item));
 			});
 
-			getDataItemsByIds(settings.protocolId, items, function(searchResponse) {				
+			getDataItemsByIds(settings.protocolId, items, function(searchResponse) {
 				var tree = {};
 				var subTrees = {};
 				$.each(searchResponse.searchHits, function() {
@@ -432,6 +439,8 @@
 		'onFolderClick' : null,
 		'onItemClick' : null,
 		'onFolderSelect' : null,
-		'onItemSelect' : null
+		'onItemSelect' : null,
+		'hideDocumentCheckbox' : true, // a document is a non-folder
+		'disableSelectDepth': 2 // do not show checkboxes for the first x levels
 	};
-}($, window.top.molgenis = window.top.molgenis || {}));
+}($, window.top.molgenis = window.top.molgenis || {})); 

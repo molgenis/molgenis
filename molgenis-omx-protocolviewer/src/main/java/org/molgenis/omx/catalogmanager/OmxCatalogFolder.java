@@ -1,10 +1,10 @@
 package org.molgenis.omx.catalogmanager;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.molgenis.catalog.CatalogFolder;
 import org.molgenis.catalog.CatalogItem;
-import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
 
 import com.google.common.base.Function;
@@ -55,14 +55,16 @@ public class OmxCatalogFolder implements CatalogFolder
 	@Override
 	public List<CatalogItem> getItems()
 	{
-		List<ObservableFeature> features = protocol.getFeatures();
-		return features != null ? Lists.transform(features, new Function<ObservableFeature, CatalogItem>()
-		{
-			@Override
-			public CatalogItem apply(ObservableFeature observableFeature)
-			{
-				return new OmxCatalogItem(observableFeature);
-			}
-		}) : null;
+		// FIXME
+		return Collections.emptyList();
+		// List<ObservableFeature> features = protocol.getFeatures();
+		// return features != null ? Lists.transform(features, new Function<ObservableFeature, CatalogItem>()
+		// {
+		// @Override
+		// public CatalogItem apply(ObservableFeature observableFeature)
+		// {
+		// return new OmxCatalogItem(observableFeature);
+		// }
+		// }) : null;
 	}
 }
