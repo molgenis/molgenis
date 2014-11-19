@@ -17,7 +17,7 @@ public class AdaptedCsvRepository implements Repository
 {
 	private final CsvRepository csvRepository;
 	private final String entityName;
-	private static final String ALLOWED_IDENTIFIER = "Identifier";
+	public static final String ALLOWED_IDENTIFIER = "Identifier";
 
 	public AdaptedCsvRepository(String entityName, CsvRepository csvRepository)
 	{

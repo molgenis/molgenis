@@ -1,7 +1,6 @@
 package org.molgenis.ontology.service;
 
 import static org.molgenis.ontology.service.OntologyServiceController.URI;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
@@ -9,9 +8,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -30,11 +31,11 @@ import org.molgenis.data.processor.LowerCaseProcessor;
 import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.rest.EntityCollectionResponse;
 import org.molgenis.data.rest.EntityPager;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.ontology.OntologyServiceResult;
-import org.molgenis.ontology.beans.OntologyServiceResultImpl;
 import org.molgenis.ontology.matching.AdaptedCsvRepository;
 import org.molgenis.ontology.matching.MatchingTaskEntity;
+import org.molgenis.ontology.matching.MathcingTaskContentEntity;
 import org.molgenis.ontology.matching.ProcessInputTermService;
 import org.molgenis.ontology.matching.UploadProgress;
 import org.molgenis.ontology.utils.OntologyServiceUtil;
@@ -102,8 +103,30 @@ public class OntologyServiceController extends MolgenisPluginController
 	public String matchResult(@PathVariable
 	String entityName, Model model)
 	{
-		model.addAttribute("isRunning", uploadProgress.isUserExists(userAccountService.getCurrentUser().getUsername()));
-		model.addAttribute("entityName", entityName);
+		String userName = userAccountService.getCurrentUser().getUsername();
+		model.addAttribute("isRunning", uploadProgress.isUserExists(userName));
+
+		if (dataService.hasRepository(entityName) && !uploadProgress.isUserExists(userName))
+		{
+			Entity entity = dataService.findOne(MatchingTaskEntity.ENTITY_NAME,
+					new QueryImpl().eq(MatchingTaskEntity.IDENTIFIER, entityName));
+
+			model.addAttribute("entityName", entityName);
+			model.addAttribute("threshold", entity.get(MatchingTaskEntity.THRESHOLD));
+			model.addAttribute("ontologyIri", entity.get(MatchingTaskEntity.CODE_SYSTEM));
+			model.addAttribute(
+					"numberOfMatched",
+					dataService.count(
+							MathcingTaskContentEntity.ENTITY_NAME,
+							new QueryImpl().eq(MathcingTaskContentEntity.REF_ENTITY, entityName).and()
+									.eq(MathcingTaskContentEntity.VALIDATED, true)));
+			model.addAttribute(
+					"numberOfUnmatched",
+					dataService.count(
+							MathcingTaskContentEntity.ENTITY_NAME,
+							new QueryImpl().eq(MathcingTaskContentEntity.REF_ENTITY, entityName).and()
+									.eq(MathcingTaskContentEntity.VALIDATED, false)));
+		}
 		return "ontology-match-view";
 	}
 
@@ -235,61 +258,43 @@ public class OntologyServiceController extends MolgenisPluginController
 	@RequestMapping(method = POST, value = "/match/retrieve")
 	@ResponseBody
 	public EntityCollectionResponse matchResult(@RequestBody
-	EntityPager entityPager, HttpServletRequest httpServletRequest)
+	OntologyServiceRequest ontologyServiceRequest, HttpServletRequest httpServletRequest)
 	{
-		// String sessionId = httpServletRequest.getSession().getId();
-		//
-		// if
-		// (StringUtils.isEmpty(ontologyServiceSessionData.getOntologyIriBySession(sessionId)))
-		// throw new RuntimeException(
-		// "The ontologyUrl is empty!");
-		// if (ontologyServiceSessionData.getCsvRepositoryBySession(sessionId)
-		// == null) throw new RuntimeException(
-		// "The ontologyUrl is empty!");
-		//
-		// List<Map<String, Object>> entities = new ArrayList<Map<String,
-		// Object>>();
-		//
-		// if
-		// (ontologyServiceSessionData.validationAttributesBySession(sessionId)
-		// && ontologyServiceSessionData.getTotalNumberBySession(sessionId) !=
-		// INVALID_TOTAL_NUMBER)
-		// {
-		// int count =
-		// ontologyServiceSessionData.getTotalNumberBySession(sessionId);
-		// int start = entityPager.getStart();
-		// int num = entityPager.getNum();
-		// int toIndex = start + num;
-		//
-		// for (Entity entity : ontologyServiceSessionData.getSubList(sessionId,
-		// start,
-		// toIndex > count ? count : toIndex))
-		// {
-		// Map<String, Object> outputEntity = new HashMap<String, Object>();
-		// outputEntity.put("term", firstAttributeValue(entity));
-		// outputEntity.put("results", ontologyService.searchEntity(
-		// ontologyServiceSessionData.getOntologyIriBySession(sessionId),
-		// entity));
-		// entities.add(outputEntity);
-		// }
-		// EntityPager pager = new EntityPager(start, num, (long) count, null);
-		// return new EntityCollectionResponse(pager, entities,
-		// "/match/retrieve");
-		// }
-		return new EntityCollectionResponse(new EntityPager(0, 0, (long) 0, null),
-				Collections.<Map<String, Object>> emptyList(), "/match/retrieve");
-	}
+		List<Map<String, Object>> entityMaps = new ArrayList<Map<String, Object>>();
+		String entityName = ontologyServiceRequest.getEntityName();
+		String ontologyIri = ontologyServiceRequest.getOntologyIri();
+		EntityPager entityPager = ontologyServiceRequest.getEntityPager();
+		boolean isMatched = ontologyServiceRequest.isMatched();
 
-	@RequestMapping(method = POST, consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public OntologyServiceResult query(@RequestBody
-	OntologyServiceRequest ontologyTermRequest)
-	{
-		String ontologyUrl = ontologyTermRequest.getOntologyIri();
-		String queryString = ontologyTermRequest.getQueryString();
-		if (ontologyUrl == null || queryString == null) return new OntologyServiceResultImpl(
-				"Your input cannot be null!");
-		return ontologyService.search(ontologyUrl, queryString);
+		long count = dataService.count(
+				MathcingTaskContentEntity.ENTITY_NAME,
+				new QueryImpl().eq(MathcingTaskContentEntity.REF_ENTITY, entityName).and()
+						.eq(MathcingTaskContentEntity.VALIDATED, isMatched));
+
+		int start = entityPager.getStart();
+		int num = entityPager.getNum();
+
+		Iterable<Entity> entities = dataService.findAll(
+				MathcingTaskContentEntity.ENTITY_NAME,
+				new QueryImpl().eq(MathcingTaskContentEntity.REF_ENTITY, entityName).and()
+						.eq(MathcingTaskContentEntity.VALIDATED, isMatched).offset(start).pageSize(num));
+		for (Entity entity : entities)
+		{
+			Entity RefEntity = dataService.findOne(
+					entityName,
+					new QueryImpl().eq(AdaptedCsvRepository.ALLOWED_IDENTIFIER,
+							entity.getString(MathcingTaskContentEntity.INPUT_TERM)));
+			Map<String, Object> outputEntity = new HashMap<String, Object>();
+			outputEntity.put("inputTerm", OntologyServiceUtil.getEntityAsMap(RefEntity));
+			outputEntity.put("matchedTerm", OntologyServiceUtil.getEntityAsMap(entity));
+			outputEntity.put(
+					"ontologyTerm",
+					OntologyServiceUtil.getEntityAsMap(ontologyService.getOntologyTermEntity(
+							entity.getString(MathcingTaskContentEntity.MATCHED_TERM), ontologyIri)));
+			entityMaps.add(outputEntity);
+		}
+		EntityPager pager = new EntityPager(start, num, (long) count, null);
+		return new EntityCollectionResponse(pager, entityMaps, "/match/retrieve");
 	}
 
 	private RepositoryCollection getRepositoryCollection(final String name, final File file)
@@ -340,19 +345,6 @@ public class OntologyServiceController extends MolgenisPluginController
 		}
 		return stringBuilder.toString();
 	}
-
-	//
-	// private boolean containsId(EntityMetaData entityMetaData)
-	// {
-	// for (AttributeMetaData attribute : entityMetaData.getAttributes())
-	// {
-	// if (ALLOWED_IDENTIFIERS.contains(attribute.getName().toLowerCase()))
-	// {
-	// return true;
-	// }
-	// }
-	// return false;
-	// }
 
 	private String getCsvFileName(String dataSetName)
 	{
