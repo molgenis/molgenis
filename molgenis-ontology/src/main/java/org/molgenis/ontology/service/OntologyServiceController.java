@@ -105,13 +105,12 @@ public class OntologyServiceController extends MolgenisPluginController
 	{
 		String userName = userAccountService.getCurrentUser().getUsername();
 		model.addAttribute("isRunning", uploadProgress.isUserExists(userName));
+		model.addAttribute("entityName", entityName);
 
 		if (dataService.hasRepository(entityName) && !uploadProgress.isUserExists(userName))
 		{
 			Entity entity = dataService.findOne(MatchingTaskEntity.ENTITY_NAME,
 					new QueryImpl().eq(MatchingTaskEntity.IDENTIFIER, entityName));
-
-			model.addAttribute("entityName", entityName);
 			model.addAttribute("threshold", entity.get(MatchingTaskEntity.THRESHOLD));
 			model.addAttribute("ontologyIri", entity.get(MatchingTaskEntity.CODE_SYSTEM));
 			model.addAttribute(
@@ -179,7 +178,6 @@ public class OntologyServiceController extends MolgenisPluginController
 		String userName = userAccountService.getCurrentUser().getUsername();
 		uploadProgress.registerUser(userName, 0);
 		processInputTermService.process(userName, entityName, ontologyIri, uploadFile, repositoryCollection);
-		model.addAttribute("isRunning", uploadProgress.isUserExists(userName));
 
 		return matchResult(entityName, model);
 	}

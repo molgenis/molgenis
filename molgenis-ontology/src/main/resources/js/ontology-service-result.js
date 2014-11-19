@@ -1,14 +1,9 @@
 (function($, molgenis) {
 	"use strict";
 	
-//	var ontologyTree = null;
 	var ontologyServiceRequest = null;
 	var result_container = null;
 	var reserved_field = 'Identifier';
-	
-//	molgenis.OntologySerivce = function OntologySerivce(ontologyTreeObject){
-//		ontologyTree = ontologyTreeObject;
-//	};
 	
 	molgenis.OntologySerivce = function OntologySerivce(container, request){
 		result_container = container;
@@ -28,18 +23,17 @@
 			contentType : 'application/json',
 			success : function(data, textStatus, request) {
 				result_container.empty();
-				$.each(data.items, function(index, entity){
-					var inputData = entity.inputTerm ? entity.inputTerm : {};
-					var layoutDiv = $('<div />').addClass('row');
-					var termDiv = $('<div />').addClass('col-md-4').appendTo(layoutDiv);
-					$.map(inputData, function(val, key){
-						if(key !== reserved_field) termDiv.append('<div>' + key + ' : ' + val + '</div>');
+				if(data.items.length > 0){
+					var slimDiv = $('<div style="width:96%;margin-left:2%;"></div>').appendTo(result_container);
+					slimDiv.append('<p style="font-size:20px;margin-top:-20px;"><strong>' + (ontologyServiceRequest.matched ? 'Matched result' : 'Unmatched result') + '</strong></p>');
+					var table = $('<table align="center"></table>').addClass('table').appendTo(slimDiv);
+					$('<tr />').append('<th style="width:40%;">Input term</th><th style="width:40%;">Matched term</th><th style="width:10%;">Score</th><th>Validate</th>').appendTo(table);
+					$.each(data.items, function(index, entity){
+						table.append(createRowForMatchedTerm(entity, ontologyServiceRequest.matched));
 					});
-					layoutDiv.append(createInfoForMatchedTerm([entity]));
-
-					$('<div />').addClass('col-md-12 well div-hover').append(layoutDiv).appendTo(result_container);
-				});
-				initToggle();
+				}else{
+					result_container.append('<center>There are not results!</center>');
+				}
 			},
 			error : function(request, textStatus, error){
 				console.log(error);
@@ -47,33 +41,37 @@
 		});
 	};
 	
-	function createInfoForMatchedTerm(entities){
-		var ontologyTermMatchDiv= $('<div />').addClass('col-md-8 div-expandable');
-		//Create the html visualizations for the mappings
-		$.each(entities, function(index, entity){
-			if(index >= 20) return false;
-			var hit = entity.ontologyTerm;
-			var matchedTerm = entity.matchedTerm;
-			var ontologyTermPopover = $('<div>' + hit.ontologyTerm + '</div>').addClass('show-popover').css('margin-bottom', '1px');
-			var ontologyTermNameDiv = $('<div />').addClass('col-md-8 matchterm').css('margin-bottom','8px').append(ontologyTermPopover)
-				.append('<a href="' + hit.ontologyTermIRI + '" target="_blank">' + hit.ontologyTermIRI + '</a>');
-			var matchScoreDiv = $('<div />').addClass('col-md-3').css('margin-bottom', '-6px').append('<center>' + matchedTerm.Score.toFixed(2) + '%</center>');
-			var newLineDiv = $('<div />').addClass('row').css({
-				'padding-top':'3px',
-				'padding-bottom':'3px'
-			}).append(ontologyTermNameDiv).append(matchScoreDiv);
-			var isEqual = hit.ontologyTermSynonym === hit.ontologyTerm;
-			var popoverOption = {
-				'placement' : 'bottom',
-				'trigger' : 'hover',
-				'title' : 'Click to look up in ontology',
-				'html' : true, 
-				'content' : (hit.maxScoreField ? 'Matched based on the input field : <strong>' + hit.maxScoreField + '</strong><br><br>' : '') +
-					((hit.maxScoreField && hit[hit.maxScoreField]) ? 'OntologyTerm ' + hit.maxScoreField + ' is <strong>' + hit[hit.maxScoreField] + '</strong><br><br>' : '')+ 
-					(hit.ontologyTermSynonym !== hit.ontologyTerm ? 'OntologyTerm synonym is <strong>' + hit.ontologyTermSynonym + '</strong>' : '') 
-			};
-			ontologyTermMatchDiv.append(newLineDiv);
-			
+	function createRowForMatchedTerm(entity, validated){
+		var row = $('<tr />');
+		var inputTermTd = $('<td />').appendTo(row);
+		$.map(entity.inputTerm ? entity.inputTerm : {}, function(val, key){
+			if(key !== reserved_field) inputTermTd.append('<div>' + key + ' : ' + val + '</div>');
+		});
+		
+		$('<td />').append('<div>' + entity.ontologyTerm.ontologyTerm + '</div><div><a href="' + entity.ontologyTerm.ontologyTermIRI + '" target="_blank">' + entity.ontologyTerm.ontologyTermIRI + '</a></div>').appendTo(row);
+		$('<td />').append(entity.matchedTerm.Score.toFixed(2) + '%').appendTo(row);
+		if(validated){
+			$('<td />').append('<span class="glyphicon glyphicon-ok"></span>').appendTo(row);
+		}else{
+			var button = $('<button class="btn btn-default" type="button">Validate</button>');
+			$('<td />').append(button).appendTo(row);
+			button.click(function(){
+				console.log("Validate button is clicked!");
+			});
+		}
+		
+		
+//		var isEqual = hit.ontologyTermSynonym === hit.ontologyTerm;
+//		var popoverOption = {
+//			'placement' : 'bottom',
+//			'trigger' : 'hover',
+//			'title' : 'Click to look up in ontology',
+//			'html' : true, 
+//			'content' : (hit.maxScoreField ? 'Matched based on the input field : <strong>' + hit.maxScoreField + '</strong><br><br>' : '') +
+//				((hit.maxScoreField && hit[hit.maxScoreField]) ? 'OntologyTerm ' + hit.maxScoreField + ' is <strong>' + hit[hit.maxScoreField] + '</strong><br><br>' : '')+ 
+//				(hit.ontologyTermSynonym !== hit.ontologyTerm ? 'OntologyTerm synonym is <strong>' + hit.ontologyTermSynonym + '</strong>' : '') 
+//		};
+		
 //			if(scoreGroup.length > 3){
 //				var classifications = ss.jenks(scoreGroup, 3);
 //				$.each(classifications, function(i, score){
@@ -84,12 +82,7 @@
 //				});
 //			}
 			
-			//Only add plus icon to the first matched candidate
-			if(index === 0){
-				$('<div />').addClass('col-md-1').append('<span class="glyphicon glyphicon-plus"></span>').appendTo(newLineDiv);
-			}
-		});
-		return ontologyTermMatchDiv;
+		return row;
 	}	
 	
 	function initToggle(){

@@ -63,10 +63,9 @@
 					</div>
 				</div>
 			</div>
+			<div id="pager" class="row"></div>
 			<div class="row">
 				<div id="match-result-container" class="col-md-12"></div>
-			</div>
-			<div id="pager" class="row">
 			</div>
 			<script>
 				$(document).ready(function(){
@@ -78,7 +77,7 @@
 					$('#unmatched-result-button').click(function(){
 						request['matched'] = false;
 						initEventHelper(request, ${numberOfUnmatched?c});
-					});
+					}).click();
 					
 					$('#matched-result-button').click(function(){
 						request['matched'] = true;
