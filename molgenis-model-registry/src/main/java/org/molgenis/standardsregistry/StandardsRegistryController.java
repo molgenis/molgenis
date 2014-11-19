@@ -297,7 +297,8 @@ public class StandardsRegistryController extends MolgenisPluginController
 
 		for (Tag<Package, LabeledResource, LabeledResource> tag : tagService.getTagsForPackage(p))
 		{
-			tags.add(new PackageResponse.Tag(tag.getObject().getLabel(), tag.getRelation().toString()));
+			tags.add(new PackageResponse.Tag(tag.getObject().getLabel(), tag.getObject().getIri(), tag.getRelation()
+					.toString()));
 		}
 
 		return tags;
@@ -501,11 +502,13 @@ public class StandardsRegistryController extends MolgenisPluginController
 		{
 			private final String label;
 			private final String relation;
+			private final String iri;
 
-			public Tag(String label, String relation)
+			public Tag(String label, String iri, String relation)
 			{
 				super();
 				this.label = label;
+				this.iri = iri;
 				this.relation = relation;
 			}
 
@@ -513,6 +516,12 @@ public class StandardsRegistryController extends MolgenisPluginController
 			public String getLabel()
 			{
 				return label;
+			}
+
+			@SuppressWarnings("unused")
+			public String getIri()
+			{
+				return iri;
 			}
 
 			@SuppressWarnings("unused")

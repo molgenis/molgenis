@@ -53,7 +53,7 @@
   		<p>
   			{{#each tags}}
   				{{#equal this.relation 'link'}}
-  					<span class="label label-primary"><a href='{{this.label}}' target="_blank">{{this.label}}</a></span>
+  					<span class="label label-primary"><a href='{{this.iri}}' target="_blank">{{this.label}}</a></span>
   				{{/equal}}
   				{{#notequal this.relation 'link'}}
   					<span class="label label-primary">{{this.label}}</span>
