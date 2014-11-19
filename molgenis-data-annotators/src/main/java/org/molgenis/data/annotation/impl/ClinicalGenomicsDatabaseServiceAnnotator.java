@@ -46,7 +46,7 @@ public class ClinicalGenomicsDatabaseServiceAnnotator extends LocusAnnotator
 	public static final String INHERITANCE = "INHERITANCE";
 	public static final String CONDITION = "CONDITION";
 	public static final String ENTREZ_GENE_ID = "ENTREZ GENE ID";
-	public static final String GENE = "GENE";
+	public static final String GENE = "geneSymbol";
 	public static final String HGNC_ID = "HGNC ID";
 
 	@Autowired
