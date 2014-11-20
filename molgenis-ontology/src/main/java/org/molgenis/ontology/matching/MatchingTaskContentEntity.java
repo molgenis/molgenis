@@ -5,7 +5,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 
-public class MathcingTaskContentEntity
+public class MatchingTaskContentEntity
 {
 	public final static String ENTITY_NAME = "MatchingTaskContent";
 	public final static String IDENTIFIER = "Identifier";

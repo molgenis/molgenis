@@ -85,16 +85,16 @@ public class ProcessInputTermService
 				{
 					Double score = Double.parseDouble(ontologyTerm.get(OntologyServiceImpl.SCORE).toString());
 					MapEntity matchingTaskContentEntity = new MapEntity();
-					matchingTaskContentEntity.set(MathcingTaskContentEntity.IDENTIFIER,
+					matchingTaskContentEntity.set(MatchingTaskContentEntity.IDENTIFIER,
 							entityName + ":" + entity.getIdValue());
-					matchingTaskContentEntity.set(MathcingTaskContentEntity.INPUT_TERM, entity.getIdValue());
-					matchingTaskContentEntity.set(MathcingTaskContentEntity.REF_ENTITY, entityName);
-					matchingTaskContentEntity.set(MathcingTaskContentEntity.MATCHED_TERM,
+					matchingTaskContentEntity.set(MatchingTaskContentEntity.INPUT_TERM, entity.getIdValue());
+					matchingTaskContentEntity.set(MatchingTaskContentEntity.REF_ENTITY, entityName);
+					matchingTaskContentEntity.set(MatchingTaskContentEntity.MATCHED_TERM,
 							ontologyTerm.get(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI));
-					matchingTaskContentEntity.set(MathcingTaskContentEntity.SCORE, score);
-					matchingTaskContentEntity.set(MathcingTaskContentEntity.VALIDATED, score.intValue() >= threshold);
+					matchingTaskContentEntity.set(MatchingTaskContentEntity.SCORE, score);
+					matchingTaskContentEntity.set(MatchingTaskContentEntity.VALIDATED, false);
 
-					dataService.add(MathcingTaskContentEntity.ENTITY_NAME, matchingTaskContentEntity);
+					dataService.add(MatchingTaskContentEntity.ENTITY_NAME, matchingTaskContentEntity);
 					break;
 				}
 				uploadProgress.incrementProgress(userName);
@@ -105,7 +105,7 @@ public class ProcessInputTermService
 			throw new RuntimeException(e.getMessage());
 		}
 
-		dataService.getCrudRepository(MathcingTaskContentEntity.ENTITY_NAME).flush();
+		dataService.getCrudRepository(MatchingTaskContentEntity.ENTITY_NAME).flush();
 
 		uploadProgress.removeUser(userName);
 	}

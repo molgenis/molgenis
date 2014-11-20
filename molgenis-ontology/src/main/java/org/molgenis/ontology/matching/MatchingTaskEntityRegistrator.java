@@ -44,14 +44,14 @@ public class MatchingTaskEntityRegistrator implements ApplicationListener<Contex
 			logger.info("Table " + MatchingTaskEntity.ENTITY_NAME + " existed");
 		}
 
-		if (!dataService.hasRepository(MathcingTaskContentEntity.ENTITY_NAME))
+		if (!dataService.hasRepository(MatchingTaskContentEntity.ENTITY_NAME))
 		{
-			logger.info("Created table " + MathcingTaskContentEntity.ENTITY_NAME);
-			mysqlRepositoryCollection.add(MathcingTaskContentEntity.getEntityMetaData());
+			logger.info("Created table " + MatchingTaskContentEntity.ENTITY_NAME);
+			mysqlRepositoryCollection.add(MatchingTaskContentEntity.getEntityMetaData());
 		}
 		else
 		{
-			logger.info("Table " + MathcingTaskContentEntity.ENTITY_NAME + " existed");
+			logger.info("Table " + MatchingTaskContentEntity.ENTITY_NAME + " existed");
 		}
 	}
 }

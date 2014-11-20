@@ -8,7 +8,7 @@
 				<table class="table">
 					<tr><th>Name</th><th>Date created</th><th>Code system</th><th>Retrieve</th></tr>
 					<#list existingTasks as task>
-					<tr><td>${task.Identifier}</td><td>${task.Data_created}</td><td>${task.Code_system}</td><td><button type="button" class="btn btn-default retrieve-button-class">Retrieve</button></td></tr>
+					<tr><td>${task.Identifier}</td><td>${task.Date_created}</td><td>${task.Code_system}</td><td><button type="button" class="btn btn-default retrieve-button-class">Retrieve</button></td></tr>
 					</#list>
 				</table>
 			</div>
