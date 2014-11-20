@@ -110,7 +110,7 @@ public class ProcessInputTermService
 					Double score = Double.parseDouble(ontologyTerm.get(OntologyServiceImpl.SCORE).toString());
 					MapEntity matchingTaskContentEntity = new MapEntity();
 					matchingTaskContentEntity.set(MatchingTaskContentEntity.IDENTIFIER,
-							entityName + ":" + entity.getIdValue());
+							entityName + "_" + entity.getIdValue());
 					matchingTaskContentEntity.set(MatchingTaskContentEntity.INPUT_TERM, entity.getIdValue());
 					matchingTaskContentEntity.set(MatchingTaskContentEntity.REF_ENTITY, entityName);
 					matchingTaskContentEntity.set(MatchingTaskContentEntity.MATCHED_TERM,

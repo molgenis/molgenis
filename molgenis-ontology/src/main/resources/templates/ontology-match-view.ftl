@@ -17,10 +17,27 @@
 			</div>
 			<#if existingTasks??>
 				<@listTasks />
-			<#elseif ontologies??>
-				<@ontologyMatchNewTask />
 			<#else>
-				<@ontologyMatchResult />
+			<div class="row">
+				<div class="col-md-offset-2 col-md-2">
+					<button id="back-button" type="button" class="btn btn-primary">Go back</button>
+				</div>
+			</div>
+			<script>
+				$(document).ready(function(){
+					$('#back-button').click(function(){
+						$('#ontology-match').attr({
+							'action' : molgenis.getContextUrl(),
+							'method' : 'GET'
+						}).submit();
+					});
+				});
+			</script>
+				<#if ontologies??>
+					<@ontologyMatchNewTask />
+				<#else>
+					<@ontologyMatchResult />
+				</#if>
 			</#if>
 		</div>
 	</div>

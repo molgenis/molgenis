@@ -228,6 +228,16 @@ public class OntologyServiceController extends MolgenisPluginController
 	{
 		if (StringUtils.isEmpty(ontologyIri) || StringUtils.isEmpty(inputTerms)) return init(model);
 		entityName = entityName.replaceAll(ILLEGAL_PATTERN, ILLEGAL_PATTERN_REPLACEMENT);
+		if (dataService.hasRepository(entityName))
+		{
+			Entity matchingTaskEntity = dataService.findOne(MatchingTaskEntity.ENTITY_NAME,
+					new QueryImpl().eq(MatchingTaskEntity.IDENTIFIER, entityName));
+			model.addAttribute(
+					"message",
+					"The task name has existed and created by user : "
+							+ matchingTaskEntity.get(MatchingTaskEntity.MOLGENIS_USER));
+			return init(model);
+		}
 		String sessionId = httpServletRequest.getSession().getId();
 		File uploadFile = fileStore.store(new ByteArrayInputStream(inputTerms.getBytes("UTF8")), sessionId
 				+ "_input.txt");
@@ -251,7 +261,12 @@ public class OntologyServiceController extends MolgenisPluginController
 		entityName = entityName.replaceAll(ILLEGAL_PATTERN, ILLEGAL_PATTERN_REPLACEMENT);
 		if (dataService.hasRepository(entityName))
 		{
-			model.addAttribute("message", "The task name has existed!");
+			Entity matchingTaskEntity = dataService.findOne(MatchingTaskEntity.ENTITY_NAME,
+					new QueryImpl().eq(MatchingTaskEntity.IDENTIFIER, entityName));
+			model.addAttribute(
+					"message",
+					"The task name has existed and created by user : "
+							+ matchingTaskEntity.get(MatchingTaskEntity.MOLGENIS_USER));
 			return init(model);
 		}
 
@@ -288,38 +303,6 @@ public class OntologyServiceController extends MolgenisPluginController
 			return ontologyService.searchEntity(matchingTaskEntity.getString(MatchingTaskEntity.CODE_SYSTEM), entity);
 		}
 		return new OntologyServiceResultImpl("Please check entityName, inputTermIdentifier exist in input!");
-	}
-
-	@RequestMapping(method = POST, value = "/match/validate")
-	@ResponseBody
-	public String validate(@RequestBody
-	Map<String, Object> request, Model model)
-	{
-		if (request.containsKey("entityName") && !StringUtils.isEmpty(request.get("entityName").toString())
-				&& request.containsKey(MatchingTaskContentEntity.IDENTIFIER)
-				&& !StringUtils.isEmpty(request.get(MatchingTaskContentEntity.IDENTIFIER).toString())
-				&& request.containsKey(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI)
-				&& !StringUtils.isEmpty(request.get(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI).toString())
-				&& request.containsKey(MatchingTaskContentEntity.SCORE)
-				&& !StringUtils.isEmpty(request.get(MatchingTaskContentEntity.SCORE).toString()))
-		{
-			String entityName = request.get("entityName").toString();
-			String rowIdentifier = request.get(MatchingTaskContentEntity.IDENTIFIER).toString();
-			String ontologyTermIri = request.get(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI).toString();
-			Double score = Double.parseDouble(request.get(MatchingTaskContentEntity.SCORE).toString());
-
-			Entity entity = dataService.findOne(
-					MatchingTaskContentEntity.ENTITY_NAME,
-					new QueryImpl().eq(MatchingTaskContentEntity.INPUT_TERM, rowIdentifier).and()
-							.eq(MatchingTaskContentEntity.REF_ENTITY, entityName));
-			entity.set(MatchingTaskContentEntity.MATCHED_TERM, ontologyTermIri);
-			entity.set(MatchingTaskContentEntity.SCORE, score);
-			entity.set(MatchingTaskContentEntity.VALIDATED, true);
-			dataService.update(MatchingTaskContentEntity.ENTITY_NAME, entity);
-			dataService.getCrudRepository(MatchingTaskContentEntity.ENTITY_NAME).flush();
-			return matchResult(entityName, model);
-		}
-		return matchResult(null, model);
 	}
 
 	@RequestMapping(method = GET, value = "/match/download/{entityName}")

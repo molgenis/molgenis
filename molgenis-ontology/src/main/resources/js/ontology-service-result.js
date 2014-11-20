@@ -1,6 +1,7 @@
 (function($, molgenis) {
 	"use strict";
 	
+	var restApi = new molgenis.RestClient();
 	var ontologyServiceRequest = null;
 	var result_container = null;
 	var reserved_identifier_field = 'Identifier';
@@ -27,7 +28,7 @@
 					var slimDiv = $('<div style="width:96%;margin-left:2%;"></div>').appendTo(result_container);
 					slimDiv.append('<p style="font-size:20px;margin-top:-20px;"><strong>' + (ontologyServiceRequest.matched ? 'Matched result' : 'Unmatched result') + '</strong></p>');
 					var table = $('<table align="center"></table>').addClass('table').appendTo(slimDiv);
-					$('<tr />').append('<th style="width:40%;">Input term</th><th style="width:40%;">Matched term</th><th style="width:10%;">Score</th><th>Validate</th>').appendTo(table);
+					$('<tr />').append('<th style="width:40%;">Input term</th><th style="width:40%;">Matched term</th><th style="width:10%;">Score</th><th>Validate</th>' + (ontologyServiceRequest.matched ? '<th>Remove</th>' : '')).appendTo(table);
 					$.each(data.items, function(index, entity){
 						table.append(createRowForMatchedTerm(entity, ontologyServiceRequest.matched));
 					});
@@ -38,13 +39,25 @@
 		});
 	};
 	
-	function createRowForMatchedTerm(entity, validated){
+	function createRowForMatchedTerm(entity, matched){
 		var row = $('<tr />');
 		row.append(gatherInputInfoHelper(entity.inputTerm));
 		row.append(gatherOntologyInfoHelper(entity.inputTerm, entity.ontologyTerm));
 		$('<td />').append(entity.matchedTerm.Score.toFixed(2) + '%').appendTo(row);
-		if(validated){
+		if(matched){
 			$('<td />').append('<span class="glyphicon ' + (entity.matchedTerm.Validated ? 'glyphicon-ok' : 'glyphicon-remove') + '"></span>').appendTo(row);
+			$('<td />').append('<button type="button" class="btn btn-default"><span class="glyphicon glyphicon-trash"</span></button>').appendTo(row);
+			row.find('button:eq(0)').click(function(){
+				var mappedEntity = entity.matchedTerm;
+				var href = '/api/v1/MatchingTaskContent/' + mappedEntity.Identifier;
+				var updatedMappedEntity = {};
+				$.map(mappedEntity, function(val, key){
+					if(key !== 'Identifier') updatedMappedEntity[key] = val;
+					if(key === 'Validated') updatedMappedEntity[key] = false;
+				});
+				restApi.update(href, updatedMappedEntity);
+				location.reload();
+			});
 		}else{
 			var button = $('<button class="btn btn-default" type="button">Validate</button>');
 			$('<td />').append(button).appendTo(row);
@@ -81,17 +94,27 @@
 				row.append('<td>' + ontologyTerm.Score.toFixed(2) + '%</td>');
 				row.append('<td><button type="button" class="btn btn-default"><span class="glyphicon glyphicon-ok"></span></button></td>');
 				row.find('button:eq(0)').click(function(){
-					$.ajax({
-						type : 'POST',
-						url : molgenis.getContextUrl() + '/match/validate',
-						async : false,
-						data : JSON.stringify({'Identifier' : inputEntity.Identifier, 'entityName' : ontologyServiceRequest.entityName, 'ontologyTermIRI' : ontologyTerm.ontologyTermIRI, 'Score' : ontologyTerm.Score}),
-						contentType : 'application/json',
-						success : function(data) {
-							container.parents('form:eq(0)').attr({
-								'action' : molgenis.getContextUrl() + '/result/' + ontologyServiceRequest.entityName,
-								'method' : 'GET'
-							}).submit();
+					var mappedEntity = restApi.getAsync('/api/v1/MatchingTaskContent/', {
+						'q' : [{
+							'field' : 'Input_term',
+							'operator' : 'EQUALS',
+							'value' : inputEntity.Identifier
+						},{'operator' : 'AND'},{
+							'field' : 'Ref_entity',
+							'operator' : 'EQUALS',
+							'value' : ontologyServiceRequest.entityName
+						}]
+					}, function(data){
+						if(data.items.length > 0){
+							var mappedEntity = data.items[0];
+							var href = '/api/v1/MatchingTaskContent/' + mappedEntity.Identifier;
+							var updatedMappedEntity = {};
+							$.map(mappedEntity, function(val, key){
+								if(key !== 'Identifier') updatedMappedEntity[key] = val;
+								if(key === 'Validated') updatedMappedEntity[key] = true;
+							});
+							restApi.update(href, updatedMappedEntity);
+							location.reload();
 						}
 					});
 				});
