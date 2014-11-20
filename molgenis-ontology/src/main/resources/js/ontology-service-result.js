@@ -11,7 +11,6 @@
 	};
 	
 	molgenis.OntologySerivce.prototype.updatePageFunction = function(page){
-		
 		ontologyServiceRequest['entityPager'] = {
 			'start' : page.start,
 			'num' : page.end - page.start
@@ -45,7 +44,7 @@
 		row.append(gatherOntologyInfoHelper(entity.inputTerm, entity.ontologyTerm));
 		$('<td />').append(entity.matchedTerm.Score.toFixed(2) + '%').appendTo(row);
 		if(validated){
-			$('<td />').append('<span class="glyphicon glyphicon-ok"></span>').appendTo(row);
+			$('<td />').append('<span class="glyphicon ' + (entity.matchedTerm.Validated ? 'glyphicon-ok' : 'glyphicon-remove') + '"></span>').appendTo(row);
 		}else{
 			var button = $('<button class="btn btn-default" type="button">Validate</button>');
 			$('<td />').append(button).appendTo(row);

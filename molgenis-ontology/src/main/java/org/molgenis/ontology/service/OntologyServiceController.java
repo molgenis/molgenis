@@ -19,24 +19,30 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.csv.CsvRepository;
+import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.LowerCaseProcessor;
 import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.rest.EntityCollectionResponse;
 import org.molgenis.data.rest.EntityPager;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ontology.OntologyServiceResult;
 import org.molgenis.ontology.beans.OntologyServiceResultImpl;
 import org.molgenis.ontology.matching.AdaptedCsvRepository;
+import org.molgenis.ontology.matching.MatchingTaskContentEntity;
 import org.molgenis.ontology.matching.MatchingTaskEntity;
-import org.molgenis.ontology.matching.MathcingTaskContentEntity;
 import org.molgenis.ontology.matching.ProcessInputTermService;
 import org.molgenis.ontology.matching.UploadProgress;
 import org.molgenis.ontology.repository.OntologyTermQueryRepository;
@@ -44,6 +50,8 @@ import org.molgenis.ontology.utils.OntologyServiceUtil;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -76,6 +84,7 @@ public class OntologyServiceController extends MolgenisPluginController
 
 	public static final String ID = "ontologyservice";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
+	public static final Logger logger = Logger.getLogger(OntologyServiceController.class);
 	public static final int INVALID_TOTAL_NUMBER = -1;
 	private static final String ILLEGAL_PATTERN = "[^0-9a-zA-Z_]";
 	private static final String ILLEGAL_PATTERN_REPLACEMENT = "_";
@@ -105,6 +114,31 @@ public class OntologyServiceController extends MolgenisPluginController
 		return "ontology-match-view";
 	}
 
+	@RequestMapping(method = POST, value = "/threshold/{entityName}")
+	public String updateThreshold(@RequestParam(value = "threshold", required = true)
+	String threshold, @PathVariable
+	String entityName, Model model)
+	{
+		if (!StringUtils.isEmpty(threshold))
+		{
+			Entity entity = dataService.findOne(MatchingTaskEntity.ENTITY_NAME,
+					new QueryImpl().eq(MatchingTaskEntity.IDENTIFIER, entityName));
+			try
+			{
+				Double threshold_value = Double.parseDouble(threshold);
+				entity.set(MatchingTaskEntity.THRESHOLD, threshold_value);
+				dataService.update(MatchingTaskEntity.ENTITY_NAME, entity);
+				dataService.getCrudRepository(MatchingTaskEntity.ENTITY_NAME).flush();
+			}
+			catch (Exception e)
+			{
+				logger.error(threshold + " is illegal threshold value!");
+			}
+		}
+
+		return matchResult(entityName, model);
+	}
+
 	@RequestMapping(method = GET, value = "/result/{entityName}")
 	public String matchResult(@PathVariable
 	String entityName, Model model)
@@ -123,17 +157,67 @@ public class OntologyServiceController extends MolgenisPluginController
 			model.addAttribute(
 					"numberOfMatched",
 					dataService.count(
-							MathcingTaskContentEntity.ENTITY_NAME,
-							new QueryImpl().eq(MathcingTaskContentEntity.REF_ENTITY, entityName).and()
-									.eq(MathcingTaskContentEntity.VALIDATED, true)));
+							MatchingTaskContentEntity.ENTITY_NAME,
+							new QueryImpl().eq(MatchingTaskContentEntity.REF_ENTITY, entityName).and().nest()
+									.eq(MatchingTaskContentEntity.VALIDATED, true).or()
+									.ge(MatchingTaskContentEntity.SCORE, entity.get(MatchingTaskEntity.THRESHOLD))
+									.unnest()));
 			model.addAttribute(
 					"numberOfUnmatched",
 					dataService.count(
-							MathcingTaskContentEntity.ENTITY_NAME,
-							new QueryImpl().eq(MathcingTaskContentEntity.REF_ENTITY, entityName).and()
-									.eq(MathcingTaskContentEntity.VALIDATED, false)));
+							MatchingTaskContentEntity.ENTITY_NAME,
+							new QueryImpl().eq(MatchingTaskContentEntity.REF_ENTITY, entityName).and().nest()
+									.eq(MatchingTaskContentEntity.VALIDATED, false).and()
+									.lt(MatchingTaskContentEntity.SCORE, entity.get(MatchingTaskEntity.THRESHOLD))
+									.unnest()));
 		}
+
 		return "ontology-match-view";
+	}
+
+	@RequestMapping(method = POST, value = "/match/retrieve")
+	@ResponseBody
+	public EntityCollectionResponse matchResult(@RequestBody
+	OntologyServiceRequest ontologyServiceRequest, HttpServletRequest httpServletRequest)
+	{
+		List<Map<String, Object>> entityMaps = new ArrayList<Map<String, Object>>();
+		String entityName = ontologyServiceRequest.getEntityName();
+		String ontologyIri = ontologyServiceRequest.getOntologyIri();
+		EntityPager entityPager = ontologyServiceRequest.getEntityPager();
+		boolean isMatched = ontologyServiceRequest.isMatched();
+		Entity entity = dataService.findOne(MatchingTaskEntity.ENTITY_NAME,
+				new QueryImpl().eq(MatchingTaskEntity.IDENTIFIER, entityName));
+
+		Query query = new QueryImpl().eq(MatchingTaskContentEntity.REF_ENTITY, entityName).and().nest()
+				.eq(MatchingTaskContentEntity.VALIDATED, isMatched);
+		Double threshold = Double.parseDouble(entity.get(MatchingTaskEntity.THRESHOLD).toString());
+		if (isMatched) query.or().ge(MatchingTaskContentEntity.SCORE, threshold).unnest();
+		else query.and().lt(MatchingTaskContentEntity.SCORE, threshold).unnest();
+
+		long count = dataService.count(MatchingTaskContentEntity.ENTITY_NAME, query);
+		int start = entityPager.getStart();
+		int num = entityPager.getNum();
+
+		for (Entity mappingEntity : dataService.findAll(
+				MatchingTaskContentEntity.ENTITY_NAME,
+				query.offset(start).pageSize(num)
+						.sort(Direction.DESC, MatchingTaskContentEntity.VALIDATED, MatchingTaskContentEntity.SCORE)))
+		{
+			Entity RefEntity = dataService.findOne(
+					entityName,
+					new QueryImpl().eq(AdaptedCsvRepository.ALLOWED_IDENTIFIER,
+							mappingEntity.getString(MatchingTaskContentEntity.INPUT_TERM)));
+			Map<String, Object> outputEntity = new HashMap<String, Object>();
+			outputEntity.put("inputTerm", OntologyServiceUtil.getEntityAsMap(RefEntity));
+			outputEntity.put("matchedTerm", OntologyServiceUtil.getEntityAsMap(mappingEntity));
+			outputEntity.put(
+					"ontologyTerm",
+					OntologyServiceUtil.getEntityAsMap(ontologyService.getOntologyTermEntity(
+							mappingEntity.getString(MatchingTaskContentEntity.MATCHED_TERM), ontologyIri)));
+			entityMaps.add(outputEntity);
+		}
+		EntityPager pager = new EntityPager(start, num, (long) count, null);
+		return new EntityCollectionResponse(pager, entityMaps, "/match/retrieve");
 	}
 
 	@RequestMapping(method = POST, value = "/match")
@@ -151,8 +235,8 @@ public class OntologyServiceController extends MolgenisPluginController
 		RepositoryCollection repositoryCollection = getRepositoryCollection(entityName, uploadFile);
 
 		uploadProgress.registerUser(userAccountService.getCurrentUser().getUsername(), entityName);
-		processInputTermService.process(userAccountService.getCurrentUser(), entityName, ontologyIri, uploadFile,
-				repositoryCollection);
+		processInputTermService.process(SecurityContextHolder.getContext(), userAccountService.getCurrentUser(),
+				entityName, ontologyIri, uploadFile, repositoryCollection);
 
 		return matchResult(entityName, model);
 	}
@@ -176,53 +260,10 @@ public class OntologyServiceController extends MolgenisPluginController
 		RepositoryCollection repositoryCollection = getRepositoryCollection(entityName, uploadFile);
 
 		uploadProgress.registerUser(userAccountService.getCurrentUser().getUsername(), entityName);
-		processInputTermService.process(userAccountService.getCurrentUser(), entityName, ontologyIri, uploadFile,
-				repositoryCollection);
+		processInputTermService.process(SecurityContextHolder.getContext(), userAccountService.getCurrentUser(),
+				entityName, ontologyIri, uploadFile, repositoryCollection);
 
 		return matchResult(entityName, model);
-	}
-
-	@RequestMapping(method = POST, value = "/match/retrieve")
-	@ResponseBody
-	public EntityCollectionResponse matchResult(@RequestBody
-	OntologyServiceRequest ontologyServiceRequest, HttpServletRequest httpServletRequest)
-	{
-		List<Map<String, Object>> entityMaps = new ArrayList<Map<String, Object>>();
-		String entityName = ontologyServiceRequest.getEntityName();
-		String ontologyIri = ontologyServiceRequest.getOntologyIri();
-		EntityPager entityPager = ontologyServiceRequest.getEntityPager();
-		boolean isMatched = ontologyServiceRequest.isMatched();
-
-		long count = dataService.count(
-				MathcingTaskContentEntity.ENTITY_NAME,
-				new QueryImpl().eq(MathcingTaskContentEntity.REF_ENTITY, entityName).and()
-						.eq(MathcingTaskContentEntity.VALIDATED, isMatched));
-
-		int start = entityPager.getStart();
-		int num = entityPager.getNum();
-
-		Iterable<Entity> entities = dataService.findAll(
-				MathcingTaskContentEntity.ENTITY_NAME,
-				new QueryImpl().eq(MathcingTaskContentEntity.REF_ENTITY, entityName).and()
-						.eq(MathcingTaskContentEntity.VALIDATED, isMatched).offset(start).pageSize(num));
-
-		for (Entity entity : entities)
-		{
-			Entity RefEntity = dataService.findOne(
-					entityName,
-					new QueryImpl().eq(AdaptedCsvRepository.ALLOWED_IDENTIFIER,
-							entity.getString(MathcingTaskContentEntity.INPUT_TERM)));
-			Map<String, Object> outputEntity = new HashMap<String, Object>();
-			outputEntity.put("inputTerm", OntologyServiceUtil.getEntityAsMap(RefEntity));
-			outputEntity.put("matchedTerm", OntologyServiceUtil.getEntityAsMap(entity));
-			outputEntity.put(
-					"ontologyTerm",
-					OntologyServiceUtil.getEntityAsMap(ontologyService.getOntologyTermEntity(
-							entity.getString(MathcingTaskContentEntity.MATCHED_TERM), ontologyIri)));
-			entityMaps.add(outputEntity);
-		}
-		EntityPager pager = new EntityPager(start, num, (long) count, null);
-		return new EntityCollectionResponse(pager, entityMaps, "/match/retrieve");
 	}
 
 	@RequestMapping(method = POST, value = "/match/entity")
@@ -231,15 +272,15 @@ public class OntologyServiceController extends MolgenisPluginController
 	Map<String, Object> request, HttpServletRequest httpServletRequest)
 	{
 		if (request.containsKey("entityName") && !StringUtils.isEmpty(request.get("entityName").toString())
-				&& request.containsKey(MathcingTaskContentEntity.IDENTIFIER)
-				&& !StringUtils.isEmpty(request.get(MathcingTaskContentEntity.IDENTIFIER).toString()))
+				&& request.containsKey(MatchingTaskContentEntity.IDENTIFIER)
+				&& !StringUtils.isEmpty(request.get(MatchingTaskContentEntity.IDENTIFIER).toString()))
 		{
 			String entityName = request.get("entityName").toString();
-			String inputTermIdentifier = request.get(MathcingTaskContentEntity.IDENTIFIER).toString();
+			String inputTermIdentifier = request.get(MatchingTaskContentEntity.IDENTIFIER).toString();
 			Entity matchingTaskEntity = dataService.findOne(MatchingTaskEntity.ENTITY_NAME,
 					new QueryImpl().eq(MatchingTaskEntity.IDENTIFIER, entityName));
 			Entity entity = dataService.findOne(entityName,
-					new QueryImpl().eq(MathcingTaskContentEntity.IDENTIFIER, inputTermIdentifier));
+					new QueryImpl().eq(MatchingTaskContentEntity.IDENTIFIER, inputTermIdentifier));
 
 			if (matchingTaskEntity == null || entity == null) return new OntologyServiceResultImpl(
 					"entityName or inputTermIdentifier is invalid!");
@@ -255,101 +296,85 @@ public class OntologyServiceController extends MolgenisPluginController
 	Map<String, Object> request, Model model)
 	{
 		if (request.containsKey("entityName") && !StringUtils.isEmpty(request.get("entityName").toString())
-				&& request.containsKey(MathcingTaskContentEntity.IDENTIFIER)
-				&& !StringUtils.isEmpty(request.get(MathcingTaskContentEntity.IDENTIFIER).toString())
+				&& request.containsKey(MatchingTaskContentEntity.IDENTIFIER)
+				&& !StringUtils.isEmpty(request.get(MatchingTaskContentEntity.IDENTIFIER).toString())
 				&& request.containsKey(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI)
 				&& !StringUtils.isEmpty(request.get(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI).toString())
-				&& request.containsKey(MathcingTaskContentEntity.SCORE)
-				&& !StringUtils.isEmpty(request.get(MathcingTaskContentEntity.SCORE).toString()))
+				&& request.containsKey(MatchingTaskContentEntity.SCORE)
+				&& !StringUtils.isEmpty(request.get(MatchingTaskContentEntity.SCORE).toString()))
 		{
 			String entityName = request.get("entityName").toString();
-			String rowIdentifier = request.get(MathcingTaskContentEntity.IDENTIFIER).toString();
+			String rowIdentifier = request.get(MatchingTaskContentEntity.IDENTIFIER).toString();
 			String ontologyTermIri = request.get(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI).toString();
-			Double score = Double.parseDouble(request.get(MathcingTaskContentEntity.SCORE).toString());
+			Double score = Double.parseDouble(request.get(MatchingTaskContentEntity.SCORE).toString());
 
 			Entity entity = dataService.findOne(
-					MathcingTaskContentEntity.ENTITY_NAME,
-					new QueryImpl().eq(MathcingTaskContentEntity.INPUT_TERM, rowIdentifier).and()
-							.eq(MathcingTaskContentEntity.REF_ENTITY, entityName));
-			entity.set(MathcingTaskContentEntity.MATCHED_TERM, ontologyTermIri);
-			entity.set(MathcingTaskContentEntity.SCORE, score);
-			entity.set(MathcingTaskContentEntity.VALIDATED, true);
-			dataService.update(MathcingTaskContentEntity.ENTITY_NAME, entity);
-			dataService.getCrudRepository(MathcingTaskContentEntity.ENTITY_NAME).flush();
+					MatchingTaskContentEntity.ENTITY_NAME,
+					new QueryImpl().eq(MatchingTaskContentEntity.INPUT_TERM, rowIdentifier).and()
+							.eq(MatchingTaskContentEntity.REF_ENTITY, entityName));
+			entity.set(MatchingTaskContentEntity.MATCHED_TERM, ontologyTermIri);
+			entity.set(MatchingTaskContentEntity.SCORE, score);
+			entity.set(MatchingTaskContentEntity.VALIDATED, true);
+			dataService.update(MatchingTaskContentEntity.ENTITY_NAME, entity);
+			dataService.getCrudRepository(MatchingTaskContentEntity.ENTITY_NAME).flush();
 			return matchResult(entityName, model);
 		}
 		return matchResult(null, model);
 	}
 
-	@RequestMapping(method = GET, value = "/match/download")
-	public void download(HttpServletResponse response, Model model, HttpServletRequest httpServletRequest)
-			throws IOException
+	@RequestMapping(method = GET, value = "/match/download/{entityName}")
+	public void download(@PathVariable
+	String entityName, HttpServletResponse response, Model model) throws IOException
 	{
-		// String sessionId = httpServletRequest.getSession().getId();
-		// if
-		// (!StringUtils.isEmpty(ontologyServiceSessionData.getOntologyIriBySession(sessionId))
-		// && ontologyServiceSessionData.getCsvRepositoryBySession(sessionId) !=
-		// null)
-		// {
-		// ExcelWriter excelWriter = null;
-		// try
-		// {
-		// response.setContentType("application/vnd.ms-excel");
-		// response.addHeader("Content-Disposition", "attachment; filename=" +
-		// getCsvFileName("match-result"));
-		// excelWriter = new ExcelWriter(response.getOutputStream());
-		// excelWriter.addCellProcessor(new LowerCaseProcessor(true, false));
-		// int totalNumberBySession =
-		// ontologyServiceSessionData.getTotalNumberBySession(sessionId);
-		// int iteration = totalNumberBySession / 1000 + 1;
-		// List<String> columnHeaders = Arrays.asList("InputTerm",
-		// "OntologyTerm", "Synonym", "OntologyTermUrl",
-		// "OntologyUrl", "Score");
-		// for (int i = 0; i < iteration; i++)
-		// {
-		// Writable sheetWriter = excelWriter.createWritable("result" + (i + 1),
-		// columnHeaders);
-		// int lowerBound = i * 1000;
-		// int upperBound = (i + 1) * 1000 < totalNumberBySession ? (i + 1) *
-		// 1000 : totalNumberBySession;
-		//
-		// for (Entity entity : ontologyServiceSessionData.getSubList(sessionId,
-		// lowerBound, upperBound))
-		// {
-		// int count = 0;
-		// for (Map<String, Object> ontologyTermEntity :
-		// ontologyService.searchEntity(
-		// ontologyServiceSessionData.getOntologyIriBySession(sessionId),
-		// entity)
-		// .getOntologyTerms())
-		// {
-		// Entity row = new MapEntity();
-		// if (count == 0)
-		// {
-		// row.set("InputTerm",
-		// gatherInfo(OntologyServiceUtil.getEntityAsMap(entity)));
-		// }
-		// row.set("OntologyTerm",
-		// ontologyTermEntity.get(OntologyTermQueryRepository.ONTOLOGY_TERM));
-		// row.set("Synonym",
-		// ontologyTermEntity.get(OntologyTermQueryRepository.SYNONYMS));
-		// row.set("OntologyTermUrl",
-		// ontologyTermEntity.get(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI));
-		// row.set("OntologyUrl",
-		// ontologyTermEntity.get(OntologyTermQueryRepository.ONTOLOGY_IRI));
-		// row.set("Score",
-		// ontologyTermEntity.get(OntologyServiceImpl.COMBINED_SCORE));
-		// sheetWriter.add(row);
-		// count++;
-		// }
-		// }
-		// }
-		// }
-		// finally
-		// {
-		// if (excelWriter != null) IOUtils.closeQuietly(excelWriter);
-		// }
-		// }
+		CsvWriter csvWriter = null;
+		try
+		{
+			response.setContentType("text/csv");
+			response.addHeader("Content-Disposition", "attachment; filename=" + getCsvFileName("match-result"));
+			csvWriter = new CsvWriter(response.getOutputStream(), OntologyServiceImpl.DEFAULT_SEPARATOR);
+			List<String> columnHeaders = new ArrayList<String>();
+			for (AttributeMetaData attributeMetaData : dataService.getEntityMetaData(entityName).getAttributes())
+			{
+				if (!attributeMetaData.getName().equalsIgnoreCase(MatchingTaskEntity.IDENTIFIER)) columnHeaders
+						.add(attributeMetaData.getName());
+			}
+			columnHeaders.addAll(Arrays.asList(OntologyTermQueryRepository.ONTOLOGY_TERM,
+					OntologyTermQueryRepository.ONTOLOGY_TERM_IRI, MatchingTaskContentEntity.SCORE,
+					MatchingTaskContentEntity.VALIDATED));
+			csvWriter.writeAttributeNames(columnHeaders);
+
+			Entity matchingTaskEntity = dataService.findOne(MatchingTaskEntity.ENTITY_NAME,
+					new QueryImpl().eq(MatchingTaskEntity.IDENTIFIER, entityName));
+
+			for (Entity mappingEntity : dataService.findAll(MatchingTaskContentEntity.ENTITY_NAME,
+					new QueryImpl().eq(MatchingTaskContentEntity.REF_ENTITY, entityName)))
+			{
+				Entity inputEntity = dataService.findOne(
+						entityName,
+						new QueryImpl().eq(MatchingTaskEntity.IDENTIFIER,
+								mappingEntity.getString(MatchingTaskContentEntity.INPUT_TERM)));
+				Entity ontologyTermEntity = ontologyService.getOntologyTermEntity(
+						mappingEntity.getString(MatchingTaskContentEntity.MATCHED_TERM),
+						matchingTaskEntity.getString(MatchingTaskEntity.CODE_SYSTEM));
+				Entity row = new MapEntity();
+				for (String attributeName : inputEntity.getAttributeNames())
+				{
+					if (!attributeName.equals(MatchingTaskEntity.IDENTIFIER)) row.set(attributeName,
+							inputEntity.get(attributeName));
+				}
+				row.set(OntologyTermQueryRepository.ONTOLOGY_TERM,
+						ontologyTermEntity.get(OntologyTermQueryRepository.ONTOLOGY_TERM));
+				row.set(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI,
+						ontologyTermEntity.get(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI));
+				row.set(MatchingTaskContentEntity.VALIDATED, mappingEntity.get(MatchingTaskContentEntity.VALIDATED));
+				row.set(MatchingTaskContentEntity.SCORE, mappingEntity.get(MatchingTaskContentEntity.SCORE));
+				csvWriter.add(row);
+			}
+		}
+		finally
+		{
+			if (csvWriter != null) IOUtils.closeQuietly(csvWriter);
+		}
 	}
 
 	private RepositoryCollection getRepositoryCollection(final String name, final File file)
@@ -378,6 +403,6 @@ public class OntologyServiceController extends MolgenisPluginController
 	private String getCsvFileName(String dataSetName)
 	{
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		return dataSetName + "_" + dateFormat.format(new Date()) + ".xls";
+		return dataSetName + "_" + dateFormat.format(new Date()) + ".csv";
 	}
 }

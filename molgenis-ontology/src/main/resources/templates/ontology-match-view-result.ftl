@@ -94,7 +94,20 @@
 						request['matched'] = true;
 						initEventHelper(request, ${numberOfMatched?c});
 					});
-
+					
+					$('#update-threshold-button').click(function(){
+						$(this).parents('form:eq(0)').attr({
+							'action' : molgenis.getContextUrl() + '/threshold/${entityName}',
+							'method' : 'POST'
+						}).submit();
+					});
+					
+					$('#download-button').click(function(){
+						$(this).parents('form:eq(0)').attr({
+							'action' : molgenis.getContextUrl() + '/match/download/${entityName}',
+							'method' : 'GET'
+						}).submit();
+					});
 				});
 				function initEventHelper(request, totalNumber){
 					var ontologyService = new molgenis.OntologySerivce($('#match-result-container'), request);

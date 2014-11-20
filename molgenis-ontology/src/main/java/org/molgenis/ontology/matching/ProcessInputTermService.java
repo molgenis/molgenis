@@ -2,6 +2,7 @@ package org.molgenis.ontology.matching;
 
 import java.io.File;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.DataService;
@@ -17,11 +18,20 @@ import org.molgenis.omx.auth.UserAuthority;
 import org.molgenis.ontology.OntologyServiceResult;
 import org.molgenis.ontology.repository.OntologyTermQueryRepository;
 import org.molgenis.ontology.service.OntologyServiceImpl;
+import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.security.permission.PermissionManagerService;
+import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.security.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+
+import com.google.common.collect.Lists;
 
 public class ProcessInputTermService
 {
@@ -32,7 +42,10 @@ public class ProcessInputTermService
 	private MysqlRepositoryCollection mysqlRepositoryCollection;
 
 	@Autowired
-	private AuthenticationManager authenticationManager;
+	private PermissionManagerService permissionManagerService;
+
+	@Autowired
+	private PermissionSystemService permissionSystemService;
 
 	@Autowired
 	private DataService dataService;
@@ -45,22 +58,33 @@ public class ProcessInputTermService
 
 	@Async
 	@RunAsSystem
-	public void process(MolgenisUser molgenisUser, String entityName, String ontologyIri, File uploadFile,
-			RepositoryCollection repositoryCollection) throws Exception
+	public void process(SecurityContext securityContext, MolgenisUser molgenisUser, String entityName,
+			String ontologyIri, File uploadFile, RepositoryCollection repositoryCollection) throws Exception
 	{
 		String userName = molgenisUser.getUsername();
 		uploadProgress.registerUser(userName, entityName);
 		// Add the original input dataset to database
 		mysqlRepositoryCollection.add(repositoryCollection.getRepositoryByEntityName(entityName).getEntityMetaData());
+
 		emxImportService.doImport(repositoryCollection, DatabaseAction.ADD);
 
 		// FIXME : temporary work around to assign write permissions to the
 		// users who create the entities.
-		UserAuthority userAuthority = new UserAuthority();
-		userAuthority.setMolgenisUser(molgenisUser);
-		userAuthority.setRole(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + entityName.toUpperCase());
-		dataService.add(UserAuthority.ENTITY_NAME, userAuthority);
+		Authentication auth = securityContext.getAuthentication();
+		List<GrantedAuthority> roles = Lists.newArrayList(auth.getAuthorities());
+		for (Permission permiossion : Permission.values())
+		{
+			UserAuthority userAuthority = new UserAuthority();
+			userAuthority.setMolgenisUser(molgenisUser);
+			String role = SecurityUtils.AUTHORITY_ENTITY_PREFIX + permiossion.toString() + "_"
+					+ entityName.toUpperCase();
+			userAuthority.setRole(role);
+			roles.add(new SimpleGrantedAuthority(role));
+			dataService.add(UserAuthority.ENTITY_NAME, userAuthority);
+		}
 		dataService.getCrudRepository(UserAuthority.ENTITY_NAME).flush();
+		auth = new UsernamePasswordAuthenticationToken(auth.getPrincipal(), null, roles);
+		securityContext.setAuthentication(auth);
 
 		// Add a new entry in MatchingTask table for this new matching job
 		int threshold = uploadProgress.getThreshold(userName);
