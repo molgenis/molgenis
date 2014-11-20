@@ -75,8 +75,31 @@ public class EmxImportService implements ImportService
 		ParsedMetaData parsedMetaData = parser.parse(source);
 
 		// TODO altered entities (merge, see getEntityMetaData)
-		return writer.doImport(new EmxImportJob(databaseAction, source, parsedMetaData, targetCollection));
+		return doImport(new EmxImportJob(databaseAction, source, parsedMetaData, targetCollection));
 
+	}
+
+	/**
+	 * Does the import in a transaction. Manually rolls back schema changes if something goes wrong. Refreshes the
+	 * metadata.
+	 * 
+	 * @return {@link EntityImportReport} describing what happened
+	 */
+	public EntityImportReport doImport(EmxImportJob job)
+	{
+		try
+		{
+			return writer.doImport(job);
+		}
+		catch (Exception e)
+		{
+			writer.rollbackSchemaChanges(job);
+			throw e;
+		}
+		finally
+		{
+			metaDataService.refreshCaches();
+		}
 	}
 
 	@Override
