@@ -87,7 +87,7 @@
     }
 </#if>
 
-<#macro multiplicity amd><#if amd.nillable>0..</#if><#if amd.dataType == 'xref' >1<#else>*</#if></#macro>
+<#macro multiplicity amd><#if amd.nillable><#if amd.dataType == 'xref'>0..1<#else>*</#if><#else><#if amd.dataType != 'xref' >1..*</#if></#if></#macro>
 
 <#macro addVertices package>
 	<#list package.entityMetaDatas as emd>
@@ -103,7 +103,9 @@
         		  	myUML.createEdge("${amd.label?js_string}", 
         		  	{ id: classes.<@entityName emd />.id }, 
         		  	{ id: classes.<@entityName amd.refEntity />.id }, 
-        		  	{name: '<@multiplicity amd />', navigable: true}, 
+        		  	{lowerBound : '<#if amd.nillable>0<#else>1</#if>',
+        		  	 upperBound: '<#if amd.dataType == 'xref'>1<#else>*</#if>',
+        		  	 navigable: true}, 
         		  	{name: '', navigable: false}));
 				}
 			</#if>
@@ -122,13 +124,13 @@
 			<@entityName emd />: new uml.Abstract({
 	      	 	size: { width: RECT_WIDTH, height: ${(50 + 12 * emd.attributes?size)?c} },
 	        	name: '${emd.simpleName}',
-	       		attributes: [<#list emd.attributes as amd>'${amd.label?js_string}: ${amd.dataType}'<#if amd_has_next>,</#if></#list>]
+	       		attributes: [<#list emd.attributes as amd>'${amd.name?js_string}: ${amd.dataType}'<#if amd_has_next>,</#if></#list>]
 	    	}),
 	    <#else>
 			<@entityName emd />: new uml.Class({
 	      	 	size: { width: RECT_WIDTH, height: ${(50 + 12 * emd.attributes?size)?c} },
 	        	name: '${emd.simpleName}',
-	       	 	attributes: [<#list emd.attributes as amd>'${amd.label?js_string}: ${amd.dataType}'<#if amd_has_next>,</#if></#list>]
+	       	 	attributes: [<#list emd.attributes as amd>'${amd.name?js_string}: ${amd.dataType}'<#if amd_has_next>,</#if></#list>]
 	    	}),
 	    </#if>
 	</#list>

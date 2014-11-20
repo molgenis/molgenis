@@ -53,8 +53,14 @@ myUML.multiplicity = function( end) {
 	var u = end.upperBound;
 	if ( l == null ) l="";
 	if ( u == null ) u="";
+	if( l == 0 && u == '*'){
+		return '*';
+	}
+	if( l == 1 && u == 1){
+		return '';
+	}
 	if ( l!="" && u!="") {
-		return l+","+u;
+		return l+".."+u;
 	}  else {
 		return l+u
 	}
@@ -130,7 +136,7 @@ myUML.createEdge = function( name, sourceNode, targetNode, sourceEnd,targetEnd) 
 		target : {
 			id : targetNode.id
 		},
-		smooth: true
+		smooth: false
 	})	
 
 	edge.attr('.marker-source', myUML.decorate( targetEnd));
