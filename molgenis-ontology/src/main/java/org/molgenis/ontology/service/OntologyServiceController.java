@@ -139,13 +139,31 @@ public class OntologyServiceController extends MolgenisPluginController
 		return matchResult(entityName, model);
 	}
 
+	// @RequestMapping(method = GET, value = "/result/{entityName}/{isMatched}")
+	// public String matchAndShowResult(@PathVariable("entityName")
+	// String entityName, @PathVariable("isMatched")
+	// String matched, Model model)
+	// {
+	// Boolean isMatched;
+	// try
+	// {
+	// isMatched = Boolean.parseBoolean(matched);
+	// }
+	// catch (Exception e)
+	// {
+	// isMatched = false;
+	// }
+	// return matchResult(entityName, model);
+	// }
+
 	@RequestMapping(method = GET, value = "/result/{entityName}")
-	public String matchResult(@PathVariable
+	public String matchResult(@PathVariable("entityName")
 	String entityName, Model model)
 	{
 		String userName = userAccountService.getCurrentUser().getUsername();
 		model.addAttribute("isRunning", uploadProgress.isUserExists(userName));
 		model.addAttribute("progress", uploadProgress.getPercentage(userName));
+		model.addAttribute("isMatched", uploadProgress.getUserClickMode(userName));
 		model.addAttribute("entityName", entityName);
 
 		if (dataService.hasRepository(entityName) && !uploadProgress.isUserExists(userName))
@@ -218,6 +236,8 @@ public class OntologyServiceController extends MolgenisPluginController
 			}
 			entityMaps.add(outputEntity);
 		}
+
+		uploadProgress.setUserClickMode(userAccountService.getCurrentUser().getUsername(), isMatched);
 		EntityPager pager = new EntityPager(start, num, (long) count, null);
 		return new EntityCollectionResponse(pager, entityMaps, "/match/retrieve");
 	}

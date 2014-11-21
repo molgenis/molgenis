@@ -14,6 +14,7 @@ public class UploadProgress
 	private final Map<String, Integer> userTotalNumber;
 	private final Map<String, Integer> userFinishedNumber;
 	private final Map<String, Integer> userThreshold;
+	private final Map<String, Boolean> userClickMode;
 	private final static Integer ILLEGAL_DENOMINATOR = 0;
 	private final static Integer DEFAULT_THRESHOLD = 80;
 
@@ -21,6 +22,7 @@ public class UploadProgress
 	{
 		currentUsers = new HashSet<String>();
 		currentJobs = new HashMap<String, String>();
+		userClickMode = new HashMap<String, Boolean>();
 		userThreshold = new HashMap<String, Integer>();
 		userTotalNumber = new HashMap<String, Integer>();
 		userFinishedNumber = new HashMap<String, Integer>();
@@ -67,11 +69,22 @@ public class UploadProgress
 		userThreshold.put(userName, threshold);
 	}
 
+	public void setUserClickMode(String userName, Boolean mode)
+	{
+		userClickMode.put(userName, mode);
+	}
+
+	public Boolean getUserClickMode(String userName)
+	{
+		return userClickMode.containsKey(userName) ? userClickMode.get(userName) : false;
+	}
+
 	public void registerUser(String userName, String currentJob, Integer totalNumber)
 	{
 		currentUsers.add(userName);
 		userTotalNumber.put(userName, totalNumber);
 		currentJobs.put(userName, currentJob);
+		userClickMode.put(userName, false);
 		userFinishedNumber.put(userName, ILLEGAL_DENOMINATOR);
 		userThreshold.put(userName, DEFAULT_THRESHOLD);
 	}
@@ -88,5 +101,6 @@ public class UploadProgress
 		userFinishedNumber.remove(userName);
 		userThreshold.remove(userName);
 		currentJobs.remove(userName);
+		userClickMode.remove(userName);
 	}
 }

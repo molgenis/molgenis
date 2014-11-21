@@ -88,12 +88,18 @@
 					$('#unmatched-result-button').click(function(){
 						request['matched'] = false;
 						initEventHelper(request, ${numberOfUnmatched?c});
-					}).click();
+					});
 					
 					$('#matched-result-button').click(function(){
 						request['matched'] = true;
 						initEventHelper(request, ${numberOfMatched?c});
 					});
+					
+					<#if isMatched?? && isMatched>
+					$('#matched-result-button').click();
+					<#else>
+					$('#unmatched-result-button').click();
+					</#if>
 					
 					$('#update-threshold-button').click(function(){
 						$(this).parents('form:eq(0)').attr({
