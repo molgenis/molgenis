@@ -210,10 +210,12 @@ public class OntologyServiceController extends MolgenisPluginController
 			Map<String, Object> outputEntity = new HashMap<String, Object>();
 			outputEntity.put("inputTerm", OntologyServiceUtil.getEntityAsMap(RefEntity));
 			outputEntity.put("matchedTerm", OntologyServiceUtil.getEntityAsMap(mappingEntity));
-			outputEntity.put(
-					"ontologyTerm",
-					OntologyServiceUtil.getEntityAsMap(ontologyService.getOntologyTermEntity(
-							mappingEntity.getString(MatchingTaskContentEntity.MATCHED_TERM), ontologyIri)));
+			Object matchedTerm = mappingEntity.get(MatchingTaskContentEntity.MATCHED_TERM);
+			if (matchedTerm != null)
+			{
+				outputEntity.put("ontologyTerm", OntologyServiceUtil.getEntityAsMap(ontologyService
+						.getOntologyTermEntity(matchedTerm.toString(), ontologyIri)));
+			}
 			entityMaps.add(outputEntity);
 		}
 		EntityPager pager = new EntityPager(start, num, (long) count, null);

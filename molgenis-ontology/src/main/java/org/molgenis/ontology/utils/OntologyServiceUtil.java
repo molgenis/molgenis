@@ -1,6 +1,7 @@
 package org.molgenis.ontology.utils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,7 @@ public class OntologyServiceUtil
 
 	public static Map<String, Object> getEntityAsMap(Entity entity)
 	{
+		if (entity == null) return Collections.emptyMap();
 		Map<String, Object> doc = new LinkedHashMap<String, Object>();
 		for (String attrName : entity.getAttributeNames())
 		{

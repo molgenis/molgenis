@@ -32,11 +32,11 @@ public class MatchingTaskContentEntity
 		defaultEntityMetaData.addAttributeMetaData(refEntityAttr);
 
 		DefaultAttributeMetaData matchedTermAttr = new DefaultAttributeMetaData(MATCHED_TERM);
-		matchedTermAttr.setNillable(false);
+		matchedTermAttr.setNillable(true);
 		defaultEntityMetaData.addAttributeMetaData(matchedTermAttr);
 
 		DefaultAttributeMetaData scoreAttr = new DefaultAttributeMetaData(SCORE, FieldTypeEnum.DECIMAL);
-		scoreAttr.setNillable(false);
+		scoreAttr.setNillable(true);
 		defaultEntityMetaData.addAttributeMetaData(scoreAttr);
 		DefaultAttributeMetaData validatedAttr = new DefaultAttributeMetaData(VALIDATED, FieldTypeEnum.BOOL);
 		validatedAttr.setNillable(false);

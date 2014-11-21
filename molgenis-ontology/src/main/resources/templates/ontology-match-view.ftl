@@ -20,7 +20,7 @@
 			<#else>
 			<div class="row">
 				<div class="col-md-offset-2 col-md-2">
-					<button id="back-button" type="button" class="btn btn-primary">Go back</button>
+					<button id="back-button" type="button" class="btn btn-primary">Restart</button>
 				</div>
 			</div>
 			<script>
