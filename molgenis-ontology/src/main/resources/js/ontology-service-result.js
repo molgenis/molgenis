@@ -177,8 +177,21 @@
 	function gatherOntologyInfoHelper(inputEntity, ontologyTerm){
 		var ontologyTermTd = $('<td />');
 		if(inputEntity && ontologyTerm){
-			ontologyTermTd.append('<div>Name : <a href="' + ontologyTerm.ontologyTermIRI + '" target="_blank">' + 
-					ontologyTerm.ontologyTerm + '</a></div>').append('<div>Synonym : ' + (ontologyTerm.ontologyTermSynonym !== ontologyTerm.ontologyTerm ? ontologyTerm.ontologyTermSynonym : no_match_info) + '</div>');
+			var synonymDiv = $('<div>Synonym : </div>');
+			var synonyms = getOntologyTermSynonyms(ontologyTerm);
+			if(synonyms.length == 0){
+				synonymDiv.append(no_match_info);
+			}else if(synonyms.length == 1){
+				synonymDiv.append(synonyms.join());		
+			}else{
+				synonymDiv.addClass('show-popover').append('<strong>' + synonyms.length + ' synonyms, see more details</strong>').popover({
+					'content' : synonyms.join('<br><br>'),
+					'placement' : 'auto',
+					'trigger': 'hover',
+					'html' : true
+				});
+			}
+			ontologyTermTd.append('<div>Name : <a href="' + ontologyTerm.ontologyTermIRI + '" target="_blank">' + ontologyTerm.ontologyTerm + '</a></div>').append(synonymDiv);
 			$.each(Object.keys(inputEntity), function(index, key){
 				if(key.toLowerCase() !== 'name' && key.toLowerCase().search('synonym') === -1 && key.toLowerCase() !== reserved_identifier_field.toLowerCase()){
 					ontologyTermTd.append('<div>' + key + ' : ' + (ontologyTerm[key] ? ontologyTerm[key] : 'N/A')  + '</div>');
@@ -188,6 +201,32 @@
 			ontologyTermTd.append(no_match_info);
 		}
 		return ontologyTermTd;
+	}
+	
+	function getOntologyTermSynonyms(ontologyTerm){
+		var synonyms = [];
+		var ontologyCollection = restApi.get('/api/v1/ontologyindex/', {
+			'q' : [{
+				'field' : 'ontologyIRI',
+				'operator' : 'EQUALS',
+				'value' : ontologyTerm.ontologyIRI
+			}]
+		});
+		if(ontologyCollection.items.length > 0){
+			var ontologyTermCollection = restApi.get('/api/v1/' + ontologyCollection.items[0].ontologyName, {
+				'q' : [{
+					'field' : 'ontologyTermIRI',
+					'operator' : 'EQUALS',
+					'value' : ontologyTerm.ontologyTermIRI
+				}]
+			});
+			$.each(ontologyTermCollection.items, function(index, ontologyTerm){
+				if(ontologyTerm.ontologyTerm !== ontologyTerm.ontologyTermSynonym && $.inArray(ontologyTerm.ontologyTermSynonym, synonyms) === -1){
+					synonyms.push(ontologyTerm.ontologyTermSynonym);
+				}
+			});
+		}
+		return synonyms;
 	}
 	
 }($, window.top.molgenis = window.top.molgenis || {}));

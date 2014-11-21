@@ -139,23 +139,6 @@ public class OntologyServiceController extends MolgenisPluginController
 		return matchResult(entityName, model);
 	}
 
-	// @RequestMapping(method = GET, value = "/result/{entityName}/{isMatched}")
-	// public String matchAndShowResult(@PathVariable("entityName")
-	// String entityName, @PathVariable("isMatched")
-	// String matched, Model model)
-	// {
-	// Boolean isMatched;
-	// try
-	// {
-	// isMatched = Boolean.parseBoolean(matched);
-	// }
-	// catch (Exception e)
-	// {
-	// isMatched = false;
-	// }
-	// return matchResult(entityName, model);
-	// }
-
 	@RequestMapping(method = GET, value = "/result/{entityName}")
 	public String matchResult(@PathVariable("entityName")
 	String entityName, Model model)
