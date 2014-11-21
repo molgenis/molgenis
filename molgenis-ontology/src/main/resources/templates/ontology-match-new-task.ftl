@@ -53,9 +53,9 @@
 	<div class="col-md-offset-2 col-md-8">
 		<center><textarea name="inputTerms" style="width:100%;resize:none;" class="form-control" rows="12" placeholder="Please paste a list of terms in semicolon delimited format. The header 'Name' is compulsory whereas other headers/columns are optional! Example is shown below:
 				
-									Name;Synonym;HP;
-										visual impairment;Reduced visual acuity;0000505;
-										Abnormality of eye movement;Abnormal eye motility;0000496;"></textarea></center>
+										Name;Synonym;HP
+										visual impairment;Reduced visual acuity;0000505
+										Abnormality of eye movement;Abnormal eye motility;0000496"></textarea></center>
 	</div>	
 </div>
 <br>
@@ -68,6 +68,11 @@
 <script type="text/javascript">
 	$(document).ready(function(){
 		var molgenis = window.top.molgenis;
+		<#if message??>
+		molgenis.createAlert([ {
+			'message' : '${message}'
+		}], 'error');
+		</#if>
 		$('#match-button').click(function(){
 			if($('[name="selectOntologies"]').length === 0) {
 				molgenis.createAlert([{'message':'There are not ontologies avaiable!'}], 'error');

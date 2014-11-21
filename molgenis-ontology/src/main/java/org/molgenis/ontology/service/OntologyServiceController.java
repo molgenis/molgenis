@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -232,28 +233,10 @@ public class OntologyServiceController extends MolgenisPluginController
 	String inputTerms, Model model, HttpServletRequest httpServletRequest) throws Exception
 	{
 		if (StringUtils.isEmpty(ontologyIri) || StringUtils.isEmpty(inputTerms)) return init(model);
-		entityName = entityName.replaceAll(ILLEGAL_PATTERN, ILLEGAL_PATTERN_REPLACEMENT);
-		if (dataService.hasRepository(entityName))
-		{
-			Entity matchingTaskEntity = dataService.findOne(MatchingTaskEntity.ENTITY_NAME,
-					new QueryImpl().eq(MatchingTaskEntity.IDENTIFIER, entityName));
-			model.addAttribute(
-					"message",
-					"The task name has existed and created by user : "
-							+ matchingTaskEntity.get(MatchingTaskEntity.MOLGENIS_USER));
-			return init(model);
-		}
 		String sessionId = httpServletRequest.getSession().getId();
 		File uploadFile = fileStore.store(new ByteArrayInputStream(inputTerms.getBytes("UTF8")), sessionId
 				+ "_input.txt");
-
-		RepositoryCollection repositoryCollection = getRepositoryCollection(entityName, uploadFile);
-
-		uploadProgress.registerUser(userAccountService.getCurrentUser().getUsername(), entityName);
-		processInputTermService.process(SecurityContextHolder.getContext(), userAccountService.getCurrentUser(),
-				entityName, ontologyIri, uploadFile, repositoryCollection);
-
-		return matchResult(entityName, model);
+		return startMatchJob(entityName, ontologyIri, uploadFile, model);
 	}
 
 	@RequestMapping(method = POST, value = "/match/upload", headers = "Content-Type=multipart/form-data")
@@ -263,27 +246,9 @@ public class OntologyServiceController extends MolgenisPluginController
 	Part file, Model model, HttpServletRequest httpServletRequest) throws Exception
 	{
 		if (StringUtils.isEmpty(ontologyIri) || file == null) return init(model);
-		entityName = entityName.replaceAll(ILLEGAL_PATTERN, ILLEGAL_PATTERN_REPLACEMENT);
-		if (dataService.hasRepository(entityName))
-		{
-			Entity matchingTaskEntity = dataService.findOne(MatchingTaskEntity.ENTITY_NAME,
-					new QueryImpl().eq(MatchingTaskEntity.IDENTIFIER, entityName));
-			model.addAttribute(
-					"message",
-					"The task name has existed and created by user : "
-							+ matchingTaskEntity.get(MatchingTaskEntity.MOLGENIS_USER));
-			return init(model);
-		}
-
 		String sessionId = httpServletRequest.getSession().getId();
 		File uploadFile = fileStore.store(file.getInputStream(), sessionId + "_input.csv");
-		RepositoryCollection repositoryCollection = getRepositoryCollection(entityName, uploadFile);
-
-		uploadProgress.registerUser(userAccountService.getCurrentUser().getUsername(), entityName);
-		processInputTermService.process(SecurityContextHolder.getContext(), userAccountService.getCurrentUser(),
-				entityName, ontologyIri, uploadFile, repositoryCollection);
-
-		return matchResult(entityName, model);
+		return startMatchJob(entityName, ontologyIri, uploadFile, model);
 	}
 
 	@RequestMapping(method = POST, value = "/match/entity")
@@ -365,6 +330,49 @@ public class OntologyServiceController extends MolgenisPluginController
 		}
 	}
 
+	@SuppressWarnings("resource")
+	private String startMatchJob(String entityName, String ontologyIri, File uploadFile, Model model)
+	{
+		entityName = entityName.replaceAll(ILLEGAL_PATTERN, ILLEGAL_PATTERN_REPLACEMENT);
+		if (dataService.hasRepository(entityName))
+		{
+			Entity matchingTaskEntity = dataService.findOne(MatchingTaskEntity.ENTITY_NAME,
+					new QueryImpl().eq(MatchingTaskEntity.IDENTIFIER, entityName));
+			model.addAttribute(
+					"message",
+					"The task name has existed and created by user : "
+							+ matchingTaskEntity.get(MatchingTaskEntity.MOLGENIS_USER));
+			return init(model);
+		}
+
+		CsvRepository csvRepository = new CsvRepository(uploadFile, null, OntologyServiceImpl.DEFAULT_SEPARATOR);
+
+		if (!validateFileHeader(csvRepository))
+		{
+			model.addAttribute("message", "The Name header is missing!");
+			return matchTask(model);
+		}
+
+		if (!validateEmptyFileHeader(csvRepository))
+		{
+			model.addAttribute("message", "The empty header is not allowed!");
+			return matchTask(model);
+		}
+
+		if (!validateInputFileContent(csvRepository))
+		{
+			model.addAttribute("message", "The content of input is empty!");
+			return matchTask(model);
+		}
+
+		RepositoryCollection repositoryCollection = getRepositoryCollection(entityName, uploadFile);
+		uploadProgress.registerUser(userAccountService.getCurrentUser().getUsername(), entityName);
+		processInputTermService.process(SecurityContextHolder.getContext(), userAccountService.getCurrentUser(),
+				entityName, ontologyIri, uploadFile, repositoryCollection);
+
+		return matchResult(entityName, model);
+	}
+
 	private RepositoryCollection getRepositoryCollection(final String name, final File file)
 	{
 		return new RepositoryCollection()
@@ -392,5 +400,30 @@ public class OntologyServiceController extends MolgenisPluginController
 	{
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		return dataSetName + "_" + dateFormat.format(new Date()) + ".csv";
+	}
+
+	private boolean validateFileHeader(CsvRepository csvRepository)
+	{
+		boolean containsName = false;
+		for (AttributeMetaData atomicAttributes : csvRepository.getEntityMetaData().getAtomicAttributes())
+		{
+			if (atomicAttributes.getName().equalsIgnoreCase(OntologyServiceImpl.DEFAULT_MATCHING_NAME_FIELD)) containsName = true;
+		}
+		return containsName;
+	}
+
+	private boolean validateEmptyFileHeader(CsvRepository csvRepository)
+	{
+		for (AttributeMetaData atomicAttributes : csvRepository.getEntityMetaData().getAtomicAttributes())
+		{
+			if (StringUtils.isEmpty(atomicAttributes.getName())) return false;
+		}
+		return true;
+	}
+
+	private boolean validateInputFileContent(CsvRepository csvRepository)
+	{
+		Iterator<Entity> iterator = csvRepository.iterator();
+		return iterator.hasNext();
 	}
 }

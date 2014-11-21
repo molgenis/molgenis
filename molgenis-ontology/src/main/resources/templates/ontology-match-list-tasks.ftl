@@ -41,7 +41,6 @@
 		});
 		<#if message??>
 		var molgenis = window.top.molgenis;
-		var matchingTask = 	
 		molgenis.createAlert([ {
 			'message' : '${message}'
 		}], 'error');

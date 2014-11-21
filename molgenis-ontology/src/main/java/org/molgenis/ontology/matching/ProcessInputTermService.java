@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
@@ -30,6 +31,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
 
@@ -56,10 +58,13 @@ public class ProcessInputTermService
 	@Autowired
 	private OntologyServiceImpl ontologyService;
 
+	private static final Logger logger = Logger.getLogger(ProcessInputTermService.class);
+
 	@Async
 	@RunAsSystem
+	@Transactional
 	public void process(SecurityContext securityContext, MolgenisUser molgenisUser, String entityName,
-			String ontologyIri, File uploadFile, RepositoryCollection repositoryCollection) throws Exception
+			String ontologyIri, File uploadFile, RepositoryCollection repositoryCollection)
 	{
 		String userName = molgenisUser.getUsername();
 		uploadProgress.registerUser(userName, entityName);
@@ -117,20 +122,21 @@ public class ProcessInputTermService
 							ontologyTerm.get(OntologyTermQueryRepository.ONTOLOGY_TERM_IRI));
 					matchingTaskContentEntity.set(MatchingTaskContentEntity.SCORE, score);
 					matchingTaskContentEntity.set(MatchingTaskContentEntity.VALIDATED, false);
-
 					dataService.add(MatchingTaskContentEntity.ENTITY_NAME, matchingTaskContentEntity);
 					break;
 				}
 				uploadProgress.incrementProgress(userName);
 			}
+
+			dataService.getCrudRepository(MatchingTaskContentEntity.ENTITY_NAME).flush();
 		}
 		catch (Exception e)
 		{
-			throw new RuntimeException(e.getMessage());
+			logger.error(e.getMessage());
 		}
-
-		dataService.getCrudRepository(MatchingTaskContentEntity.ENTITY_NAME).flush();
-
-		uploadProgress.removeUser(userName);
+		finally
+		{
+			uploadProgress.removeUser(userName);
+		}
 	}
 }
