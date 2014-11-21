@@ -72,6 +72,7 @@ import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 
@@ -121,14 +122,25 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		converters.add(new CsvHttpMessageConverter());
 	}
 
+	@Bean
+	public MappedInterceptor mappedCorsInterceptor()
+	{
+		/*
+		 * This way, the cors interceptor is added to the resource handlers as well, if the patterns overlap.
+		 * 
+		 * See https://jira.spring.io/browse/SPR-10655
+		 */
+		String corsInterceptPattern = "/api/**";
+		return new MappedInterceptor(new String[]
+		{ corsInterceptPattern }, corsInterceptor());
+	}
+
 	@Override
 	public void addInterceptors(InterceptorRegistry registry)
 	{
 		String pluginInterceptPattern = MolgenisPluginController.PLUGIN_URI_PREFIX + "**";
-		String corsInterceptPattern = "/api/**";
 		registry.addInterceptor(molgenisInterceptor());
 		registry.addInterceptor(molgenisPluginInterceptor()).addPathPatterns(pluginInterceptPattern);
-		registry.addInterceptor(corsInterceptor()).addPathPatterns(corsInterceptPattern);
 	}
 
 	@Override
