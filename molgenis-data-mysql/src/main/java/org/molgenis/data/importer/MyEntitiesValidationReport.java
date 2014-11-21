@@ -109,7 +109,7 @@ public class MyEntitiesValidationReport implements EntitiesValidationReport
 			throw new IllegalStateException("Must add entity first");
 		}
 		String entityName = getImportOrder().get(getImportOrder().size() - 1);
-		valid &= state.isValid();
+		valid = valid && state.isValid();
 		switch (state)
 		{
 			case IMPORTABLE:
