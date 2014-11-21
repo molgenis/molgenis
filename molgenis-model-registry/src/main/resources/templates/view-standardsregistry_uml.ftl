@@ -87,8 +87,6 @@
     }
 </#if>
 
-<#macro multiplicity amd><#if amd.nillable><#if amd.dataType == 'xref'>0..1<#else>*</#if><#else><#if amd.dataType != 'xref' >1..*</#if></#if></#macro>
-
 <#macro addVertices package>
 	<#list package.entityMetaDatas as emd>
 		<#if emd.extends??>
