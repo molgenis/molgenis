@@ -85,7 +85,7 @@ public class ImportWriter
 	/**
 	 * Imports entity data for all entities in {@link #resolved} from {@link #source} to {@link #targetCollection}
 	 */
-	private void importData(EntityImportReport report, List<EntityMetaData> resolved, RepositoryCollection source,
+	private void importData(EntityImportReport report, Iterable<EntityMetaData> resolved, RepositoryCollection source,
 			RepositoryCollection targetCollection, DatabaseAction dbAction)
 	{
 		for (final EntityMetaData entityMetaData : resolved)

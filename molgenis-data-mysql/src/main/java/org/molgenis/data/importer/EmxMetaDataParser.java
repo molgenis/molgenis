@@ -610,7 +610,7 @@ public class EmxMetaDataParser implements MetaDataParser
 		{
 			IntermediateParseResults parsedMetaData = getEntityMetaDataFromSource(source);
 			return new ParsedMetaData(resolveEntityDependencies(parsedMetaData.getEntities()),
-					parsedMetaData.getPackages());
+					parsedMetaData.getPackages(), parsedMetaData.getAttributeTags(), parsedMetaData.getEntityTags());
 		}
 		else
 		{
@@ -621,7 +621,8 @@ public class EmxMetaDataParser implements MetaDataParser
 			}
 			IntermediateParseResults parsedMetaData = parseTagsSheet(source.getRepositoryByEntityName(TAGS));
 			parsePackagesSheet(source.getRepositoryByEntityName(PACKAGES), parsedMetaData);
-			return new ParsedMetaData(resolveEntityDependencies(metadataList), parsedMetaData.getPackages());
+			return new ParsedMetaData(resolveEntityDependencies(metadataList), parsedMetaData.getPackages(),
+					parsedMetaData.getAttributeTags(), parsedMetaData.getEntityTags());
 		}
 
 	}

@@ -28,7 +28,7 @@ public final class IntermediateParseResults
 	 */
 	private final Map<String, DefaultEntityMetaData> entities;
 	/**
-	 * Maps simple name to PackageImpl with tags
+	 * Maps simple name to PackageImpl (with tags)
 	 */
 	private final Map<String, PackageImpl> packages;
 	/**
@@ -77,6 +77,13 @@ public final class IntermediateParseResults
 		return entities.get(simpleEntityName);
 	}
 
+	/**
+	 * Checks if it knows entity with given simple name.
+	 * 
+	 * @param name
+	 *            simple name of the entity
+	 * @return true if entity with simple name name is known, false otherwise
+	 */
 	public boolean knowsEntity(String name)
 	{
 		return entities.containsKey(name);
