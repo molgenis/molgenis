@@ -2,7 +2,7 @@
 <#include "molgenis-footer.ftl">
 
 <#assign css=['ui.fancytree.min.css', 'jquery-ui-1.9.2.custom.min.css', 'select2.css', 'joint.min.css','standardsregistry.css']>
-<#assign js=['jquery-ui-1.9.2.custom.min.js', 'jquery.fancytree.min.js', 'select2.min.js', 'jquery.molgenis.entitymetadata.table.js', 'jquery.molgenis.attributemetadata.table.js', 'jquery.bootstrap.pager.js', 'lodash.js', 'backbone-min.js', 'geometry.min.js', 'vectorizer.min.js', 'joint.clean.min.js','joint.shapes.uml.min.js', 'joint.layout.DirectedGraph.min.js', 'standardsregistry.js', 'handlebars.min.js']>
+<#assign js=['jquery-ui-1.9.2.custom.min.js', 'jquery.fancytree.min.js', 'select2.min.js', 'jquery.molgenis.entitymetadata.table.js', 'jquery.molgenis.attributemetadata.table.js', 'jquery.bootstrap.pager.js', 'lodash.js', 'backbone-min.js', 'geometry.min.js', 'vectorizer.min.js', 'joint.clean.min.js','joint.shapes.uml.min.js', 'joint.layout.DirectedGraph.min.js', 'jquery.scrollTo.min.js', 'standardsregistry.js']>
 
 <@header css js/>
 <#-- Search box and search results -->
@@ -53,7 +53,7 @@
   		<p>
   			{{#each tags}}
   				{{#equal this.relation 'link'}}
-  					<span class="label label-primary"><a href='{{this.label}}' target="_blank">{{this.label}}</a></span>
+  					<span class="label label-primary"><a href='{{this.iri}}' target="_blank">{{this.label}}</a></span>
   				{{/equal}}
   				{{#notequal this.relation 'link'}}
   					<span class="label label-primary">{{this.label}}</span>

@@ -18,12 +18,12 @@ import javax.mail.internet.MimeMessage;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
+import org.molgenis.auth.MolgenisGroup;
+import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.omx.auth.MolgenisGroup;
-import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;

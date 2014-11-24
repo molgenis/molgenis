@@ -23,10 +23,10 @@
 					if (data.targetType === 'title' || data.targetType === 'icon') {
 						switch(data.node.data.type) {
 						case 'package' :
-							document.getElementById('package-' + data.node.key).scrollIntoView();
+							$('#package-doc-container').scrollTo('#package-' + data.node.key);
 							break;
 						case 'entity' :
-							document.getElementById('entity-' + data.node.key).scrollIntoView();
+							$('#package-doc-container').scrollTo('#entity-' + data.node.key);
 							break;
 						case 'attribute' :
 							var parent = data.node.parent;
@@ -34,8 +34,7 @@
 								//Compound attr
 								parent = parent.parent;
 							}
-							
-							document.getElementById('attribute-' + parent.key + data.node.key).scrollIntoView();
+							$('#package-doc-container').scrollTo('#attribute-' + parent.key + data.node.key);
 							break;
 						default:
 							throw 'Unknown type';
@@ -164,26 +163,6 @@
 				$.getScript(molgenis.getContextUrl() + '/uml?package=' + detailsPackageName);
 				hideSpinner();
 			}, 500);
-		});
-		
-		Handlebars.registerHelper('notequal', function(lvalue, rvalue, options) {
-		    if (arguments.length < 3)
-		        throw new Error("Handlebars Helper equal needs 2 parameters");
-		    if (lvalue != rvalue) {
-		    	 return options.fn(this);
-		    } else {
-		    	 return options.inverse(this);
-		    }
-		});
-		
-		Handlebars.registerHelper('equal', function(lvalue, rvalue, options) {
-		    if (arguments.length < 3)
-		        throw new Error("Handlebars Helper equal needs 2 parameters");
-		    if (lvalue != rvalue) {
-		        return options.inverse(this);
-		    } else {
-		        return options.fn(this);
-		    }
 		});
 		
 		countTemplate = Handlebars.compile($("#count-template").html());

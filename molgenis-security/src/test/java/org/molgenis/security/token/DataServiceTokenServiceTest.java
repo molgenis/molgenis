@@ -9,9 +9,9 @@ import java.util.Arrays;
 import java.util.Date;
 
 import org.apache.commons.lang3.time.DateUtils;
+import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.omx.auth.MolgenisUser;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;

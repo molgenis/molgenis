@@ -14,10 +14,10 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import org.apache.log4j.Logger;
+import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.captcha.CaptchaException;
 import org.molgenis.security.captcha.CaptchaRequest;
 import org.molgenis.security.captcha.CaptchaService;

@@ -22,7 +22,6 @@ import static org.molgenis.data.meta.EntityMetaDataMetaData.ABSTRACT;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.EXTENDS;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.PACKAGE;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -44,8 +43,10 @@ import org.molgenis.data.Package;
 import org.molgenis.data.Range;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.importer.MyEntitiesValidationReport.AttributeState;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.PackageImpl;
 import org.molgenis.data.meta.PackageMetaData;
 import org.molgenis.data.meta.TagMetaData;
@@ -60,17 +61,19 @@ import org.molgenis.fieldtypes.LongField;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.framework.db.EntitiesValidationReport;
+import org.molgenis.util.DependencyResolver;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 /**
  * Parser for the EMX metadata. This class is stateless.
  */
-public class EmxMetaDataParser
+public class EmxMetaDataParser implements MetaDataParser
 {
 
 	static final String PACKAGES = PackageMetaData.ENTITY_NAME;
@@ -89,6 +92,15 @@ public class EmxMetaDataParser
 			RANGE_MAX.toLowerCase(), RANGE_MIN.toLowerCase(), READ_ONLY.toLowerCase(), REF_ENTITY.toLowerCase(),
 			VISIBLE.toLowerCase(), UNIQUE.toLowerCase(),
 			org.molgenis.data.meta.AttributeMetaDataMetaData.TAGS.toLowerCase());
+
+	private final DataService dataService;
+	private final MetaDataService metaDataService;
+
+	public EmxMetaDataParser(DataService dataService, MetaDataService metaDataService)
+	{
+		this.dataService = dataService;
+		this.metaDataService = metaDataService;
+	}
 
 	/**
 	 * Parses metadata from a collection of repositories and creates a list of EntityMetaData
@@ -420,7 +432,7 @@ public class EmxMetaDataParser
 		}
 	}
 
-	Map<String, PackageImpl> parsePackagesSheet(RepositoryCollection source)
+	private Map<String, ? extends org.molgenis.data.Package> parsePackagesSheet(RepositoryCollection source)
 	{
 		Map<String, PackageImpl> packages = Maps.newHashMap();
 		Repository repo = source.getRepositoryByEntityName(EmxMetaDataParser.PACKAGES);
@@ -508,7 +520,7 @@ public class EmxMetaDataParser
 	 */
 	private void parsePackagesSheetToEntityMap(RepositoryCollection source, Map<String, EditableEntityMetaData> entities)
 	{
-		Map<String, PackageImpl> packages = parsePackagesSheet(source);
+		Map<String, ? extends Package> packages = parsePackagesSheet(source);
 
 		// Resolve entity packages
 		for (EditableEntityMetaData emd : entities.values())
@@ -559,7 +571,8 @@ public class EmxMetaDataParser
 		}
 	}
 
-	List<EntityMetaData> combineMetaDataToList(DataService dataService, final RepositoryCollection source)
+	@Override
+	public ParsedMetaData parse(final RepositoryCollection source)
 	{
 		List<EntityMetaData> metadataList = Lists.newArrayList();
 
@@ -578,7 +591,22 @@ public class EmxMetaDataParser
 				metadataList.add(dataService.getRepositoryByEntityName(name).getEntityMetaData());
 			}
 		}
-		return metadataList;
+
+		return new ParsedMetaData(resolveEntityDependencies(metadataList), parsePackagesSheet(source));
+	}
+
+	private List<EntityMetaData> resolveEntityDependencies(List<EntityMetaData> metaDataList)
+	{
+		Set<EntityMetaData> allMetaData = Sets.newLinkedHashSet(metaDataList);
+		Iterable<EntityMetaData> existingMetaData = metaDataService.getEntityMetaDatas();
+		Iterables.addAll(allMetaData, existingMetaData);
+
+		// Use all metadata for dependency resolving
+		List<EntityMetaData> resolved = DependencyResolver.resolve(allMetaData);
+
+		// Only import source
+		resolved.retainAll(metaDataList);
+		return resolved;
 	}
 
 	private Map<String, EntityMetaData> combineMetaDataToMap(DataService dataService, RepositoryCollection source)
@@ -599,9 +627,10 @@ public class EmxMetaDataParser
 		}
 	}
 
-	public EntitiesValidationReport validateInput(DataService dataService, RepositoryCollection source)
+	@Override
+	public EntitiesValidationReport validate(RepositoryCollection source)
 	{
-		EntitiesValidationReportImpl report = new EntitiesValidationReportImpl();
+		MyEntitiesValidationReport report = new MyEntitiesValidationReport();
 
 		Map<String, EntityMetaData> metaDataMap = combineMetaDataToMap(dataService, source);
 
@@ -619,9 +648,8 @@ public class EmxMetaDataParser
 		{
 			if (!ENTITIES.equals(sheet) && !ATTRIBUTES.equals(sheet) && !PACKAGES.equals(sheet) && !TAGS.equals(sheet))
 			{
-				// check if sheet is known?
-				if (metaDataMap.containsKey(sheet)) report.getSheetsImportable().put(sheet, true);
-				else report.getSheetsImportable().put(sheet, false);
+				// check if sheet is known
+				report = report.addEntity(sheet, metaDataMap.containsKey(sheet));
 
 				// check the fields
 				Repository s = source.getRepositoryByEntityName(sheet);
@@ -629,32 +657,24 @@ public class EmxMetaDataParser
 
 				if (target != null)
 				{
-					List<String> fieldsAvailable = new ArrayList<String>();
-					List<String> fieldsImportable = new ArrayList<String>();
-					List<String> fieldsRequired = new ArrayList<String>();
-					List<String> fieldsUnknown = new ArrayList<String>();
-
 					for (AttributeMetaData att : s.getEntityMetaData().getAttributes())
 					{
-						if (target.getAttribute(att.getName()) == null) fieldsUnknown.add(att.getName());
-						else fieldsImportable.add(att.getName());
+						boolean known = target.getAttribute(att.getName()) != null;
+						report = report.addAttribute(att.getName(),
+								known ? AttributeState.IMPORTABLE : AttributeState.UNKNOWN);
 					}
 					for (AttributeMetaData att : target.getAttributes())
 					{
 						if (!(att.getDataType() instanceof CompoundField))
 						{
-							if (!att.isAuto() && !fieldsImportable.contains(att.getName()))
+							if (!att.isAuto() && !report.getFieldsImportable().get(sheet).contains(att.getName()))
 							{
-								if (!att.isNillable()) fieldsRequired.add(att.getName());
-								else fieldsAvailable.add(att.getName());
+								boolean required = !att.isNillable();
+								report = report.addAttribute(att.getName(),
+										required ? AttributeState.REQUIRED : AttributeState.AVAILABLE);
 							}
 						}
 					}
-
-					report.getFieldsAvailable().put(sheet, fieldsAvailable);
-					report.getFieldsRequired().put(sheet, fieldsRequired);
-					report.getFieldsUnknown().put(sheet, fieldsUnknown);
-					report.getFieldsImportable().put(sheet, fieldsImportable);
 				}
 			}
 		}

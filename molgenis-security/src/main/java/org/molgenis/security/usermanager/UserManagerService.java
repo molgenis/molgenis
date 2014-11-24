@@ -2,7 +2,7 @@ package org.molgenis.security.usermanager;
 
 import java.util.List;
 
-import org.molgenis.omx.auth.MolgenisGroup;
+import org.molgenis.auth.MolgenisGroup;
 
 public interface UserManagerService
 {

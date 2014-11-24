@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.UserAuthority;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
@@ -14,15 +16,11 @@ import org.molgenis.data.importer.EmxImportService;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.omx.auth.UserAuthority;
 import org.molgenis.ontology.OntologyServiceResult;
 import org.molgenis.ontology.repository.OntologyTermQueryRepository;
 import org.molgenis.ontology.service.OntologyServiceImpl;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.security.permission.PermissionManagerService;
-import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.security.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
@@ -42,12 +40,6 @@ public class ProcessInputTermService
 
 	@Autowired
 	private MysqlRepositoryCollection mysqlRepositoryCollection;
-
-	@Autowired
-	private PermissionManagerService permissionManagerService;
-
-	@Autowired
-	private PermissionSystemService permissionSystemService;
 
 	@Autowired
 	private DataService dataService;
