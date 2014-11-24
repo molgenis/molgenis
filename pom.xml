@@ -576,21 +576,18 @@
     <modules>
         <module>molgenis-core</module>
         <module>molgenis-core-ui</module>
-        <!-- <module>molgenis-omx-biobankconnect</module>  -->
         <module>molgenis-ontology</module>
-        <module>molgenis-omx-core</module>
-        <module>molgenis-omx-das</module>
-        <module>molgenis-omx-dataexplorer</module>
-        <module>molgenis-omx-protocolviewer</module>
-        <module>molgenis-app-omx</module>
+        <module>molgenis-das</module>
+        <module>molgenis-dataexplorer</module>
+        <module>molgenis-app</module>
         <module>molgenis-security</module>
         <module>molgenis-security-core</module>
         <module>molgenis-data-annotators</module>
         <module>molgenis-data-excel</module>
         <module>molgenis-data-csv</module>
         <module>molgenis-data-googlespreadsheet</module>
-        <module>molgenis-data-omx</module>
         <module>molgenis-data</module>
+        <module>molgenis-data-system</module>
         <module>molgenis-data-jpa</module>
         <module>molgenis-data-merge</module>
         <module>molgenis-data-mysql</module>

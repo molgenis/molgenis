@@ -1,12 +1,12 @@
 package org.molgenis.security.user;
 
+import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.UserAuthority;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.CrudRepositoryDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.omx.auth.UserAuthority;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.context.ApplicationContext;

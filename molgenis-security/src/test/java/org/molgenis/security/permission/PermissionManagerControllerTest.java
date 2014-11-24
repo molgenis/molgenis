@@ -10,11 +10,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Arrays;
 
+import org.molgenis.auth.MolgenisGroup;
+import org.molgenis.auth.MolgenisUser;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
-import org.molgenis.omx.auth.MolgenisGroup;
-import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.security.permission.PermissionManagerControllerTest.Config;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;

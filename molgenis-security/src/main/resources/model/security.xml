@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<molgenis name="org.molgenis.omx">
+<molgenis name="org.molgenis">
 	<module name="auth">
 		<entity name="MolgenisUser" system="true" xref_lookup="username,Email,LastName" decorator="org.molgenis.security.user.MolgenisUserDecorator">
 			<description>Anyone who can login</description>

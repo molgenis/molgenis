@@ -42,7 +42,7 @@ import com.google.common.collect.Sets;
 public class EntityImportService
 {
 	private static final long MAX_CACHE_ITEMS = 100000;
-	private static int BATCH_SIZE = 100;
+	private static int BATCH_SIZE = 1000;
 	private DataService dataService;
 	private LoadingCache<CacheKey, Iterable<Entity>> refLoadingCache;
 
