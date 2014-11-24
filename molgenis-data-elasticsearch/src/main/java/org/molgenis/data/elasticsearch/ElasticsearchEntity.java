@@ -15,9 +15,12 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.support.ConvertingIterable;
+import org.molgenis.fieldtypes.MrefField;
+import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.util.MolgenisDateFormat;
 
 import com.google.common.base.Function;
+import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 
@@ -147,6 +150,28 @@ public abstract class ElasticsearchEntity implements Entity
 	@Override
 	public String getString(String attributeName)
 	{
+		AttributeMetaData attribute = entityMetaData.getAttribute(attributeName);
+		if (attribute != null)
+		{
+			if (attribute.getDataType() instanceof XrefField)
+			{
+				return getEntity(attributeName).getLabelValue();
+			}
+
+			if (attribute.getDataType() instanceof MrefField)
+			{
+				return Joiner.on(",").join(
+						Iterables.transform(getEntities(attributeName), new Function<Entity, String>()
+						{
+							@Override
+							public String apply(Entity entity)
+							{
+								return entity.getLabelValue();
+							}
+						}));
+			}
+		}
+
 		return DataConverter.toString(source.get(attributeName));
 	}
 
