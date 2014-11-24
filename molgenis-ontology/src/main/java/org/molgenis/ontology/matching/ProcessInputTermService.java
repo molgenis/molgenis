@@ -16,6 +16,7 @@ import org.molgenis.data.importer.EmxImportService;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.ontology.OntologyService;
 import org.molgenis.ontology.OntologyServiceResult;
 import org.molgenis.ontology.repository.OntologyTermQueryRepository;
 import org.molgenis.ontology.service.OntologyServiceImpl;
@@ -35,22 +36,29 @@ import com.google.common.collect.Lists;
 
 public class ProcessInputTermService
 {
-	@Autowired
-	private EmxImportService emxImportService;
+	private final EmxImportService emxImportService;
 
-	@Autowired
-	private MysqlRepositoryCollection mysqlRepositoryCollection;
+	private final MysqlRepositoryCollection mysqlRepositoryCollection;
 
-	@Autowired
-	private DataService dataService;
+	private final DataService dataService;
 
-	@Autowired
-	private UploadProgress uploadProgress;
+	private final UploadProgress uploadProgress;
 
-	@Autowired
-	private OntologyServiceImpl ontologyService;
+	private final OntologyService ontologyService;
 
 	private static final Logger logger = Logger.getLogger(ProcessInputTermService.class);
+
+	@Autowired
+	public ProcessInputTermService(EmxImportService emxImportService,
+			MysqlRepositoryCollection mysqlRepositoryCollection, DataService dataService,
+			UploadProgress uploadProgress, OntologyService ontologyService)
+	{
+		this.emxImportService = emxImportService;
+		this.mysqlRepositoryCollection = mysqlRepositoryCollection;
+		this.dataService = dataService;
+		this.uploadProgress = uploadProgress;
+		this.ontologyService = ontologyService;
+	}
 
 	@Async
 	@RunAsSystem
