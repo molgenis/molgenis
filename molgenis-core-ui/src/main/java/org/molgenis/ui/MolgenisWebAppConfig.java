@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.molgenis.data.CrudRepository;
+import org.molgenis.data.CrudRepositorySecurityDecorator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IndexedCrudRepository;
@@ -30,6 +32,7 @@ import org.molgenis.data.meta.WritableMetaDataService;
 import org.molgenis.data.meta.WritableMetaDataServiceDecorator;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.IndexedRepositoryValidationDecorator;
+import org.molgenis.data.validation.RepositoryValidationDecorator;
 import org.molgenis.framework.db.WebAppDatabasePopulator;
 import org.molgenis.framework.db.WebAppDatabasePopulatorService;
 import org.molgenis.framework.server.MolgenisSettings;
@@ -41,6 +44,7 @@ import org.molgenis.security.CorsInterceptor;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.freemarker.HasPermissionDirective;
 import org.molgenis.security.freemarker.NotHasPermissionDirective;
+import org.molgenis.system.core.RuntimeProperty;
 import org.molgenis.ui.freemarker.FormLinkDirective;
 import org.molgenis.ui.freemarker.LimitMethod;
 import org.molgenis.ui.menu.MenuMolgenisUi;
@@ -377,8 +381,18 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 				}
 				else
 				{
-					// create indexing meta data if meta data does not exist
 					EntityMetaData entityMetaData = repository.getEntityMetaData();
+
+					if (RuntimeProperty.ENTITY_NAME.equalsIgnoreCase(entityMetaData.getName()))
+					{
+						// Do not index RuntimeProperty, because lucene term has a max of 32766 bytes and the content of
+						// a RuntimeProperty can exceed this (for example the menu structure in JSON and the static
+						// plugin contents are stored in a RuntimeProperty)
+						return new CrudRepositorySecurityDecorator(new RepositoryValidationDecorator(dataService,
+								(CrudRepository) repository, new EntityAttributesValidator()));
+					}
+
+					// create indexing meta data if meta data does not exist
 					if (!elasticSearchService.hasMapping(entityMetaData))
 					{
 						try
@@ -405,6 +419,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 						// conversion hiccups upon construction of the application context?
 						return indexedRepo;
 					}
+
 					return new IndexedCrudRepositorySecurityDecorator(new IndexedRepositoryValidationDecorator(
 							dataService, indexedRepo, new EntityAttributesValidator()), molgenisSettings);
 				}

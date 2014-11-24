@@ -65,29 +65,6 @@
 		return i18nObj;
 	};
 
-	/*
-	 * Create a datasets indexer alert when indexer is running.
-	 */
-	molgenis.createDatasetsindexerAlert = function() {
-		$.get("/dataindexerstatus", function(response) {
-			if (response && response.isRunning === true) {
-				showDatasetsindexerStatusMessage();
-			}
-		});
-
-		function showDatasetsindexerStatusMessage() {
-			$.get("/dataindexerstatus", function(response) {
-				$('.datasetsindexerAlerts').empty();
-				if (response.isRunning === true) {
-					setTimeout(showDatasetsindexerStatusMessage, 3000);
-				}
-				molgenis.createAlert([ {
-					'message' : response.message
-				} ], response.type, $('.datasetsindexerAlerts'));
-			});
-		}
-	};
-
 	/**
 	 * Returns all atomic attributes. In case of compound attributes (attributes
 	 * consisting of multiple atomic attributes) only the descendant atomic
@@ -593,6 +570,7 @@ function createInput(attr, attrs, val, lbl) {
 
 function showSpinner(callback) {
 	var spinner = $('#spinner');
+	
 	if (spinner.length === 0) {
 		// do not add fade effect on modal: http://stackoverflow.com/a/22101894
 		var items = [];
@@ -607,11 +585,14 @@ function showSpinner(callback) {
 		$('body').append(items.join(''));
 		spinner = $('#spinner');
 		spinner.data('count', 0);
-        spinner.modal({backdrop: 'static'});
+		spinner.modal({
+			backdrop: 'static',
+			show: false
+		});
 	}
-
+	
 	if (callback) {
-		spinner.on('shown.bs.modal', function() {
+		spinner.on('shown.bs.modal', function(e) {
 			callback();
 		});
 	}

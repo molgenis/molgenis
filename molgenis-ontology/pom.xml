@@ -34,11 +34,6 @@
 		    <artifactId>owlapi-apibinding</artifactId>
 		    <version>3.4.5</version>
 		</dependency>
-		<dependency>
-        	<groupId>org.molgenis</groupId>
-            <artifactId>molgenis-omx-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-core</artifactId>
@@ -76,17 +71,12 @@
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-data-omx</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-data-excel</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-omx-dataexplorer</artifactId>
+			<artifactId>molgenis-dataexplorer</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

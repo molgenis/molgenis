@@ -1,10 +1,10 @@
 package org.molgenis.security;
 
+import org.molgenis.auth.GroupAuthority;
+import org.molgenis.auth.MolgenisGroup;
+import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.UserAuthority;
 import org.molgenis.data.DataService;
-import org.molgenis.omx.auth.GroupAuthority;
-import org.molgenis.omx.auth.MolgenisGroup;
-import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.omx.auth.UserAuthority;
 import org.molgenis.security.account.AccountService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.runas.RunAsSystem;

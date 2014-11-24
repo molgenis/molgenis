@@ -9,8 +9,8 @@ import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.molgenis.auth.MolgenisUser;
 import org.molgenis.framework.ui.MolgenisPluginController;
-import org.molgenis.omx.auth.MolgenisUser;
 import org.molgenis.util.CountryCodes;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;

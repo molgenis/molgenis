@@ -6,13 +6,13 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.UserAuthority;
+import org.molgenis.auth.UserAuthorityRepository;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.omx.auth.UserAuthority;
-import org.molgenis.omx.auth.UserAuthorityRepository;
 import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.context.ApplicationContext;
 import org.springframework.security.crypto.password.PasswordEncoder;
