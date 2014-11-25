@@ -150,10 +150,10 @@ public class EmxMetaDataParser implements MetaDataParser
 	 * 
 	 * @param source
 	 *            Repository for the attributes
-	 * @param parsedMetaData
+	 * @param intermediateResults
 	 *            {@link IntermediateParseResults} with the tags already parsed
 	 */
-	private void parseAttributesSheet(Repository attributesRepo, IntermediateParseResults parsedMetaData)
+	private void parseAttributesSheet(Repository attributesRepo, IntermediateParseResults intermediateResults)
 	{
 		for (AttributeMetaData attr : attributesRepo.getEntityMetaData().getAtomicAttributes())
 		{
@@ -329,14 +329,15 @@ public class EmxMetaDataParser implements MetaDataParser
 			{
 				for (String tagId : tagIds)
 				{
-					Entity tagEntity = parsedMetaData.getTagEntity(tagId);
+					Entity tagEntity = intermediateResults.getTagEntity(tagId);
 					if (tagEntity == null)
 					{
 						throw new MolgenisDataException("Unknown tag: " + tagId + " for attribute ["
 								+ attribute.getName() + "] of entity [" + entityName + "]). Please specify on the "
 								+ TAGS + " sheet.");
 					}
-					parsedMetaData.addAttributeTag(entityName, TagImpl.<AttributeMetaData> asTag(attribute, tagEntity));
+					intermediateResults.addAttributeTag(entityName,
+							TagImpl.<AttributeMetaData> asTag(attribute, tagEntity));
 				}
 			}
 
@@ -401,7 +402,7 @@ public class EmxMetaDataParser implements MetaDataParser
 					}
 				}
 			}
-			parsedMetaData.addAttributes(entityName, editableEntityMetaData);
+			intermediateResults.addAttributes(entityName, editableEntityMetaData);
 		}
 	}
 
@@ -410,10 +411,10 @@ public class EmxMetaDataParser implements MetaDataParser
 	 * 
 	 * @param entitiesRepo
 	 *            the Repository for the entities
-	 * @param parsedMetaData
-	 *            ParsedMetaData containing the attributes already parsed
+	 * @param intermediateResults
+	 *            {@link IntermediateParseResults} containing the attributes already parsed
 	 */
-	private void parseEntitiesSheet(Repository entitiesRepo, IntermediateParseResults parsedMetaData)
+	private void parseEntitiesSheet(Repository entitiesRepo, IntermediateParseResults intermediateResults)
 	{
 		if (entitiesRepo != null)
 		{
@@ -434,7 +435,7 @@ public class EmxMetaDataParser implements MetaDataParser
 				// required
 				if (entityName == null) throw new IllegalArgumentException("entity.name is missing on line " + i);
 
-				EditableEntityMetaData md = parsedMetaData.getEntityMetaData(entityName);
+				EditableEntityMetaData md = intermediateResults.getEntityMetaData(entityName);
 				md.setLabel(entity.getString(org.molgenis.data.meta.EntityMetaDataMetaData.LABEL));
 				md.setDescription(entity.getString(org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION));
 				if (entity.getBoolean(ABSTRACT) != null) md.setAbstract(entity.getBoolean(ABSTRACT));
@@ -443,9 +444,9 @@ public class EmxMetaDataParser implements MetaDataParser
 				String extendsEntityName = entity.getString(EXTENDS);
 				if (extendsEntityName != null)
 				{
-					if (parsedMetaData.knowsEntity(extendsEntityName))
+					if (intermediateResults.knowsEntity(extendsEntityName))
 					{
-						EntityMetaData extendsEntityMeta = parsedMetaData.getEntityMetaData(extendsEntityName);
+						EntityMetaData extendsEntityMeta = intermediateResults.getEntityMetaData(extendsEntityName);
 						md.setExtends(extendsEntityMeta);
 					}
 					else
@@ -465,13 +466,13 @@ public class EmxMetaDataParser implements MetaDataParser
 				{
 					for (String tagId : tagIds)
 					{
-						Entity tagEntity = parsedMetaData.getTagEntity(tagId);
+						Entity tagEntity = intermediateResults.getTagEntity(tagId);
 						if (tagEntity == null)
 						{
 							throw new MolgenisDataException("Unknown tag: " + tagId + " for entity [" + entityName
 									+ "]). Please specify on the " + TAGS + " sheet.");
 						}
-						parsedMetaData.addEntityTag(TagImpl.<EntityMetaData> asTag(md, tagEntity));
+						intermediateResults.addEntityTag(TagImpl.<EntityMetaData> asTag(md, tagEntity));
 					}
 				}
 			}
@@ -483,10 +484,10 @@ public class EmxMetaDataParser implements MetaDataParser
 	 * 
 	 * @param repo
 	 *            {@link Repository} for the packages
-	 * @param parsedMetaData
-	 *            ParsedMetaData containing the parsed tag entities
+	 * @param intermediateResults
+	 *            {@link IntermediateParseResults} containing the parsed tag entities
 	 */
-	private void parsePackagesSheet(Repository repo, IntermediateParseResults parsedMetaData)
+	private void parsePackagesSheet(Repository repo, IntermediateParseResults intermediateResults)
 	{
 		if (repo == null) return;
 
@@ -514,7 +515,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			{
 				for (String tagIdentifier : tagIdentifiers)
 				{
-					Entity tagEntity = parsedMetaData.getTagEntity(tagIdentifier);
+					Entity tagEntity = intermediateResults.getTagEntity(tagIdentifier);
 					if (tagEntity == null)
 					{
 						throw new IllegalArgumentException("Unknown tag '" + tagIdentifier + "'");
@@ -524,15 +525,15 @@ public class EmxMetaDataParser implements MetaDataParser
 
 			}
 
-			parsedMetaData.addPackage(simpleName, p);
+			intermediateResults.addPackage(simpleName, p);
 		}
 
 		// Resolve parent packages
-		for (PackageImpl p : parsedMetaData.getPackages().values())
+		for (PackageImpl p : intermediateResults.getPackages().values())
 		{
 			if (p.getParent() != null)
 			{
-				PackageImpl parent = parsedMetaData.getPackage(p.getParent().getSimpleName());
+				PackageImpl parent = intermediateResults.getPackage(p.getParent().getSimpleName());
 				if (parent == null) throw new IllegalArgumentException("Unknown parent package '"
 						+ p.getParent().getSimpleName() + "' of package '" + p.getSimpleName() + "'");
 
@@ -546,19 +547,19 @@ public class EmxMetaDataParser implements MetaDataParser
 	 * 
 	 * @param packageRepo
 	 *            {@link Repository} containing the packages
-	 * @param parsedMetaData
+	 * @param intermediateResults
 	 *            {@link IntermediateParseResults} containing the already parsed entities
 	 */
-	private void parsePackagesSheetToEntityMap(Repository packageRepo, IntermediateParseResults parsedMetaData)
+	private void parsePackagesSheetToEntityMap(Repository packageRepo, IntermediateParseResults intermediateResults)
 	{
-		parsePackagesSheet(packageRepo, parsedMetaData);
+		parsePackagesSheet(packageRepo, intermediateResults);
 
 		// Resolve entity packages
-		for (EditableEntityMetaData emd : parsedMetaData.getEntities())
+		for (EditableEntityMetaData emd : intermediateResults.getEntities())
 		{
 			if (emd.getPackage() != null)
 			{
-				Package p = parsedMetaData.getPackage(emd.getPackage().getSimpleName());
+				Package p = intermediateResults.getPackage(emd.getPackage().getSimpleName());
 				if (p == null) throw new IllegalArgumentException("Unknown package '"
 						+ emd.getPackage().getSimpleName() + "' of entity '" + emd.getSimpleName() + "'");
 
@@ -573,10 +574,10 @@ public class EmxMetaDataParser implements MetaDataParser
 	 * 
 	 * @param attributeRepo
 	 *            the attributes {@link Repository}
-	 * @param parsedMetaData
+	 * @param intermediateResults
 	 *            {@link ParsedMetaData} to add the ref entities to
 	 */
-	private void reiterateToMapRefEntity(Repository attributeRepo, IntermediateParseResults parsedMetaData)
+	private void reiterateToMapRefEntity(Repository attributeRepo, IntermediateParseResults intermediateResults)
 	{
 		int i = 1;
 		for (Entity attribute : attributeRepo)
@@ -587,17 +588,17 @@ public class EmxMetaDataParser implements MetaDataParser
 			i++;
 			if (refEntityName != null)
 			{
-				EntityMetaData defaultEntityMetaData = parsedMetaData.getEntityMetaData(entityName);
+				EntityMetaData defaultEntityMetaData = intermediateResults.getEntityMetaData(entityName);
 				DefaultAttributeMetaData defaultAttributeMetaData = (DefaultAttributeMetaData) defaultEntityMetaData
 						.getAttribute(attributeName);
 
-				if (!parsedMetaData.knowsEntity(refEntityName))
+				if (!intermediateResults.knowsEntity(refEntityName))
 				{
 					throw new IllegalArgumentException("attributes.refEntity error on line " + i + ": " + refEntityName
 							+ " unknown");
 				}
 
-				defaultAttributeMetaData.setRefEntity(parsedMetaData.getEntityMetaData(refEntityName));
+				defaultAttributeMetaData.setRefEntity(intermediateResults.getEntityMetaData(refEntityName));
 			}
 		}
 	}
@@ -607,9 +608,9 @@ public class EmxMetaDataParser implements MetaDataParser
 	{
 		if (source.getRepositoryByEntityName(EmxMetaDataParser.ATTRIBUTES) != null)
 		{
-			IntermediateParseResults parsedMetaData = getEntityMetaDataFromSource(source);
-			return new ParsedMetaData(resolveEntityDependencies(parsedMetaData.getEntities()),
-					parsedMetaData.getPackages(), parsedMetaData.getAttributeTags(), parsedMetaData.getEntityTags());
+			IntermediateParseResults intermediateResults = getEntityMetaDataFromSource(source);
+			return new ParsedMetaData(resolveEntityDependencies(intermediateResults.getEntities()),
+					intermediateResults.getPackages(), intermediateResults.getAttributeTags(), intermediateResults.getEntityTags());
 		}
 		else
 		{
@@ -618,10 +619,10 @@ public class EmxMetaDataParser implements MetaDataParser
 			{
 				metadataList.add(dataService.getRepositoryByEntityName(name).getEntityMetaData());
 			}
-			IntermediateParseResults parsedMetaData = parseTagsSheet(source.getRepositoryByEntityName(TAGS));
-			parsePackagesSheet(source.getRepositoryByEntityName(PACKAGES), parsedMetaData);
-			return new ParsedMetaData(resolveEntityDependencies(metadataList), parsedMetaData.getPackages(),
-					parsedMetaData.getAttributeTags(), parsedMetaData.getEntityTags());
+			IntermediateParseResults intermediateResults = parseTagsSheet(source.getRepositoryByEntityName(TAGS));
+			parsePackagesSheet(source.getRepositoryByEntityName(PACKAGES), intermediateResults);
+			return new ParsedMetaData(resolveEntityDependencies(metadataList), intermediateResults.getPackages(),
+					intermediateResults.getAttributeTags(), intermediateResults.getEntityTags());
 		}
 
 	}
