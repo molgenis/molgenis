@@ -98,6 +98,7 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String KEY_HIDE_ITEM_SELECTION = "plugin.dataexplorer.hide.itemselection";
 	public static final String KEY_MOD_AGGREGATES_DISTINCT_HIDE = KEY_MOD_AGGREGATES + ".distinct.hide";
 	public static final String KEY_MOD_AGGREGATES_DISTINCT_OVERRIDE = KEY_MOD_AGGREGATES + ".distinct.override";
+	public static final String KEY_MOD_ENTITIESREPORT = "plugin.dataexplorer.mod.entitiesreport";
 
 	private static final boolean DEFAULT_VAL_MOD_AGGREGATES = true;
 	private static final boolean DEFAULT_VAL_MOD_ANNOTATORS = false;
@@ -211,7 +212,8 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/module/{moduleId}", method = GET)
-	public String getModule(@PathVariable("moduleId") String moduleId, Model model)
+	public String getModule(@PathVariable("moduleId") String moduleId, @RequestParam("entity") String entityName,
+			Model model)
 	{
 		if (moduleId.equals("data"))
 		{
@@ -249,6 +251,10 @@ public class DataExplorerController extends MolgenisPluginController
 			model.addAttribute("tableEditable", isTableEditable());
 			model.addAttribute("rowClickable", isRowClickable());
 		}
+		else if (moduleId.equals("entitiesreport"))
+		{
+			model.addAttribute("viewName", parseEntitiesReportRuntimeProperty(entityName));
+		}
 		return "view-dataexplorer-mod-" + moduleId; // TODO bad request in case of invalid module id
 	}
 
@@ -269,6 +275,8 @@ public class DataExplorerController extends MolgenisPluginController
 		boolean modAnnotators = molgenisSettings.getBooleanProperty(KEY_MOD_ANNOTATORS, DEFAULT_VAL_MOD_ANNOTATORS);
 		boolean modDiseasematcher = molgenisSettings.getBooleanProperty(KEY_MOD_DISEASEMATCHER,
 				DEFAULT_VAL_MOD_DISEASEMATCHER);
+
+		String modEntitiesReportName = parseEntitiesReportRuntimeProperty(entityName);
 
 		if (modAggregates)
 		{
@@ -323,6 +331,10 @@ public class DataExplorerController extends MolgenisPluginController
 					{
 						modulesConfig.add(new ModuleConfig("diseasematcher", "Disease Matcher",
 								"diseasematcher-icon.png"));
+					}
+					if (modEntitiesReportName != null)
+					{
+						modulesConfig.add(new ModuleConfig("entitiesreport", modEntitiesReportName, "report-icon.png"));
 					}
 
 					break;
@@ -595,7 +607,8 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/settings", method = RequestMethod.GET)
-	public @ResponseBody Map<String, String> getSettings(@RequestParam(required = false) String keyStartsWith)
+	public @ResponseBody
+	Map<String, String> getSettings(@RequestParam(required = false) String keyStartsWith)
 	{
 		if (keyStartsWith == null)
 		{
@@ -633,5 +646,22 @@ public class DataExplorerController extends MolgenisPluginController
 	{
 		return molgenisSettings.getBooleanProperty(KEY_DATAEXPLORER_ROW_CLICKABLE,
 				DEFAULT_VAL_DATAEXPLORER_ROW_CLICKABLE);
+	}
+
+	private String parseEntitiesReportRuntimeProperty(String entityName)
+	{
+		String modEntitiesReportRTP = molgenisSettings.getProperty(KEY_MOD_ENTITIESREPORT, null);
+        if(modEntitiesReportRTP != null) {
+            String[] entitiesReports = modEntitiesReportRTP.split(",");
+            for (String entitiesReport : entitiesReports) {
+                String[] entitiesReportParts = entitiesReport.split(":");
+                if (entitiesReportParts.length == 2) {
+                    if (entitiesReportParts[0].equals(entityName)) {
+                        return entitiesReportParts[1];
+                    }
+                }
+            }
+        }
+		return null;
 	}
 }
