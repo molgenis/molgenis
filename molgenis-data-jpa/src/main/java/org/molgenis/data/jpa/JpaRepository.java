@@ -647,6 +647,7 @@ public class JpaRepository extends AbstractAggregateableCrudRepository
 		while (it.hasNext())
 		{
 			QueryRule r = it.next();
+			AttributeMetaData meta = getEntityMetaData().getAttribute(r.getField());
 
 			switch (r.getOperator())
 			{
@@ -687,11 +688,20 @@ public class JpaRepository extends AbstractAggregateableCrudRepository
 					andPredicates.clear();
 					break;
 				case EQUALS:
-					andPredicates.add(cb.equal(from.get(r.getJpaAttribute()), r.getValue()));
+					// If attr is datetime but query value has no time part check date part
+					if ((meta.getDataType().getEnumType() == FieldTypeEnum.DATE_TIME)
+							&& (r.getValue() instanceof java.sql.Date))
+					{
+						System.out.println("DATE ONLY");
+						andPredicates.add(cb.equal(cb.function("Date", Date.class, from.get(r.getJpaAttribute())),
+								r.getValue()));
+					}
+					else
+					{
+						andPredicates.add(cb.equal(from.get(r.getJpaAttribute()), r.getValue()));
+					}
 					break;
 				case IN:
-					AttributeMetaData meta = getEntityMetaData().getAttribute(r.getField());
-
 					In<Object> in;
 					if (meta.getDataType().getEnumType() == FieldTypeEnum.MREF
 							|| meta.getDataType().getEnumType() == FieldTypeEnum.CATEGORICAL)
@@ -1009,10 +1019,17 @@ public class JpaRepository extends AbstractAggregateableCrudRepository
 					}
 					break;
 				case DATE_TIME:
-					if (DataConverter.canConvert(searchValue, java.util.Date.class))
+					if ((searchValue instanceof String) && ((String) searchValue).matches("\\d{4}-\\d{2}-\\d{2}")
+							&& DataConverter.canConvert(searchValue, java.sql.Date.class))
+					{
+						// Query based on date part only
+						rule = new QueryRule(attr.getName(), Operator.EQUALS, DataConverter.toDate(searchValue));
+					}
+					else if (DataConverter.canConvert(searchValue, java.util.Date.class))
 					{
 						rule = new QueryRule(attr.getName(), Operator.EQUALS, DataConverter.toUtilDate(searchValue));
 					}
+
 					break;
 				case DECIMAL:
 					if (DataConverter.canConvert(searchValue, Double.class))
