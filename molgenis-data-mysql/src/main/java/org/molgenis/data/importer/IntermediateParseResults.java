@@ -22,7 +22,8 @@ import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.SetMultimap;
 
 /**
- * Mutable bean to store intermediate parse results.
+ * Mutable bean to store intermediate parse results. Uses lookup tables to map simple names to the parsed objects. Is
+ * used by the {@link EmxMetaDataParser}
  */
 public final class IntermediateParseResults
 {

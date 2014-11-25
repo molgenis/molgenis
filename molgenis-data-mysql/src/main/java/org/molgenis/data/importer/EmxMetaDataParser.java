@@ -111,14 +111,14 @@ public class EmxMetaDataParser implements MetaDataParser
 		// TODO: this task is actually a 'merge' instead of 'import'
 		// so we need to consider both new metadata and existing ...
 
-		IntermediateParseResults parsedMetaData = parseTagsSheet(source.getRepositoryByEntityName(TAGS));
+		IntermediateParseResults intermediateResults = parseTagsSheet(source.getRepositoryByEntityName(TAGS));
 		// load attributes first, entities and packages are optional
-		parseAttributesSheet(source.getRepositoryByEntityName(ATTRIBUTES), parsedMetaData);
-		parseEntitiesSheet(source.getRepositoryByEntityName(ENTITIES), parsedMetaData);
-		parsePackagesSheetToEntityMap(source.getRepositoryByEntityName(EmxMetaDataParser.PACKAGES), parsedMetaData);
-		reiterateToMapRefEntity(source.getRepositoryByEntityName(ATTRIBUTES), parsedMetaData);
+		parseAttributesSheet(source.getRepositoryByEntityName(ATTRIBUTES), intermediateResults);
+		parseEntitiesSheet(source.getRepositoryByEntityName(ENTITIES), intermediateResults);
+		parsePackagesSheetToEntityMap(source.getRepositoryByEntityName(PACKAGES), intermediateResults);
+		reiterateToMapRefEntity(source.getRepositoryByEntityName(ATTRIBUTES), intermediateResults);
 
-		return parsedMetaData;
+		return intermediateResults;
 	}
 
 	/**

@@ -13,8 +13,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 /**
- * MetaDataChanges keeps track of which entities were added and which attributes. Used by the {@link ImportWriter} to
- * rollback table changes.
+ * MetaDataChanges keeps track of which entities and attributes have been added by the {@link ImportWriter}. Used to
+ * manually rollback DDL changes.
  * 
  * TODO this has fairly high overlap with {@link EntityImportReport}
  */
