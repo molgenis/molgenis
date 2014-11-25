@@ -1,6 +1,7 @@
 package org.molgenis.data.meta;
 
 import static org.molgenis.MolgenisFieldTypes.BOOL;
+import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
 import static org.molgenis.MolgenisFieldTypes.XREF;
 
@@ -32,7 +33,7 @@ public class EntityMetaDataMetaData extends DefaultEntityMetaData
 		addAttribute(LABEL);
 		addAttribute(EXTENDS).setDataType(XREF).setRefEntity(this);
 		addAttribute(DESCRIPTION).setDataType(TEXT);
-		addAttribute(TAGS).setDataType(XREF).setRefEntity(new TagMetaData());
+		addAttribute(TAGS).setDataType(MREF).setRefEntity(new TagMetaData());
 	}
 
 }
