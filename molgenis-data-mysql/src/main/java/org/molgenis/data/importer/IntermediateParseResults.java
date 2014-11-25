@@ -17,6 +17,9 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSetMultimap;
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.SetMultimap;
 
 /**
  * Mutable bean to store intermediate parse results.
@@ -34,7 +37,7 @@ public final class IntermediateParseResults
 	/**
 	 * Contains all Attribute tags
 	 */
-	private final List<Tag<AttributeMetaData, LabeledResource, LabeledResource>> attributeTags;
+	private final SetMultimap<String, Tag<AttributeMetaData, LabeledResource, LabeledResource>> attributeTags;
 	/**
 	 * Contains all Entity tags
 	 */
@@ -49,7 +52,8 @@ public final class IntermediateParseResults
 		this.tags = new LinkedHashMap<String, Entity>();
 		this.entities = new LinkedHashMap<String, DefaultEntityMetaData>();
 		this.packages = new LinkedHashMap<String, PackageImpl>();
-		this.attributeTags = new ArrayList<Tag<AttributeMetaData, LabeledResource, LabeledResource>>();
+		this.attributeTags = LinkedHashMultimap
+				.<String, Tag<AttributeMetaData, LabeledResource, LabeledResource>> create();
 		this.entityTags = new ArrayList<Tag<EntityMetaData, LabeledResource, LabeledResource>>();
 	}
 
@@ -109,9 +113,9 @@ public final class IntermediateParseResults
 		return ImmutableMap.copyOf(packages);
 	}
 
-	public ImmutableList<Tag<AttributeMetaData, LabeledResource, LabeledResource>> getAttributeTags()
+	public ImmutableSetMultimap<String, Tag<AttributeMetaData, LabeledResource, LabeledResource>> getAttributeTags()
 	{
-		return ImmutableList.copyOf(attributeTags);
+		return ImmutableSetMultimap.copyOf(attributeTags);
 	}
 
 	public ImmutableList<Tag<EntityMetaData, LabeledResource, LabeledResource>> getEntityTags()
@@ -190,9 +194,9 @@ public final class IntermediateParseResults
 		entityTags.add(tag);
 	}
 
-	public void addAttributeTag(TagImpl<AttributeMetaData, LabeledResource, LabeledResource> tag)
+	public void addAttributeTag(String entityName, TagImpl<AttributeMetaData, LabeledResource, LabeledResource> tag)
 	{
-		attributeTags.add(tag);
+		attributeTags.put(entityName, tag);
 	}
 
 }

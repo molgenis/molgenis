@@ -12,16 +12,21 @@ import org.molgenis.data.semantic.Tag;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSetMultimap;
+import com.google.common.collect.SetMultimap;
 
+/**
+ * Value object to store the result of parsing a source.
+ */
 public final class ParsedMetaData
 {
 	private final ImmutableMap<String, EntityMetaData> entities;
 	private final ImmutableMap<String, Package> packages;
-	private ImmutableList<Tag<AttributeMetaData, LabeledResource, LabeledResource>> attributeTags;
+	private ImmutableSetMultimap<EntityMetaData, Tag<AttributeMetaData, LabeledResource, LabeledResource>> attributeTags;
 	private ImmutableList<Tag<EntityMetaData, LabeledResource, LabeledResource>> entityTags;
 
 	public ParsedMetaData(List<? extends EntityMetaData> entities, Map<String, ? extends Package> packages,
-			List<Tag<AttributeMetaData, LabeledResource, LabeledResource>> attributeTags,
+			SetMultimap<String, Tag<AttributeMetaData, LabeledResource, LabeledResource>> attributeTags,
 			List<Tag<EntityMetaData, LabeledResource, LabeledResource>> entityTags)
 	{
 		if (entities == null)
@@ -40,7 +45,17 @@ public final class ParsedMetaData
 			throw new NullPointerException("Null packages");
 		}
 		this.packages = ImmutableMap.copyOf(packages);
-		this.attributeTags = ImmutableList.copyOf(attributeTags);
+		ImmutableSetMultimap.Builder<EntityMetaData, Tag<AttributeMetaData, LabeledResource, LabeledResource>> attrTagBuilder = ImmutableSetMultimap
+				.<EntityMetaData, Tag<AttributeMetaData, LabeledResource, LabeledResource>> builder();
+		for (String simpleEntityName : attributeTags.keys())
+		{
+			EntityMetaData emd = this.entities.get(simpleEntityName);
+			for (Tag<AttributeMetaData, LabeledResource, LabeledResource> tag : attributeTags.get(simpleEntityName))
+			{
+				attrTagBuilder.put(emd, tag);
+			}
+		}
+		this.attributeTags = attrTagBuilder.build();
 		this.entityTags = ImmutableList.copyOf(entityTags);
 	}
 
@@ -59,7 +74,7 @@ public final class ParsedMetaData
 		return packages;
 	}
 
-	public ImmutableList<Tag<AttributeMetaData, LabeledResource, LabeledResource>> getAttributeTags()
+	public SetMultimap<EntityMetaData, Tag<AttributeMetaData, LabeledResource, LabeledResource>> getAttributeTags()
 	{
 		return attributeTags;
 	}

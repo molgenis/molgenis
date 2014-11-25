@@ -336,7 +336,7 @@ public class EmxMetaDataParser implements MetaDataParser
 								+ attribute.getName() + "] of entity [" + entityName + "]). Please specify on the "
 								+ TAGS + " sheet.");
 					}
-					parsedMetaData.addAttributeTag(TagImpl.<AttributeMetaData> asTag(attribute, tagEntity));
+					parsedMetaData.addAttributeTag(entityName, TagImpl.<AttributeMetaData> asTag(attribute, tagEntity));
 				}
 			}
 
