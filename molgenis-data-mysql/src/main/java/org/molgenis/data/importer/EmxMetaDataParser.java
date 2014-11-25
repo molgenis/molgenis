@@ -82,14 +82,13 @@ public class EmxMetaDataParser implements MetaDataParser
 	static final List<String> SUPPORTED_ENTITY_ATTRIBUTES = Arrays.asList(
 			org.molgenis.data.meta.EntityMetaDataMetaData.LABEL.toLowerCase(),
 			org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION.toLowerCase(), "name", ABSTRACT.toLowerCase(),
-			EXTENDS.toLowerCase(), "package");
+			EXTENDS.toLowerCase(), "package", EntityMetaDataMetaData.TAGS);
 	static final List<String> SUPPORTED_ATTRIBUTE_ATTRIBUTES = Arrays.asList(AGGREGATEABLE.toLowerCase(),
 			DATA_TYPE.toLowerCase(), DESCRIPTION.toLowerCase(), ENTITY.toLowerCase(), ENUM_OPTIONS.toLowerCase(),
 			ID_ATTRIBUTE.toLowerCase(), LABEL.toLowerCase(), LABEL_ATTRIBUTE.toLowerCase(),
 			LOOKUP_ATTRIBUTE.toLowerCase(), NAME, NILLABLE.toLowerCase(), PART_OF_ATTRIBUTE.toLowerCase(),
 			RANGE_MAX.toLowerCase(), RANGE_MIN.toLowerCase(), READ_ONLY.toLowerCase(), REF_ENTITY.toLowerCase(),
-			VISIBLE.toLowerCase(), UNIQUE.toLowerCase(),
-			org.molgenis.data.meta.AttributeMetaDataMetaData.TAGS.toLowerCase());
+			VISIBLE.toLowerCase(), UNIQUE.toLowerCase(), org.molgenis.data.meta.AttributeMetaDataMetaData.TAGS);
 
 	private final DataService dataService;
 	private final MetaDataService metaDataService;
