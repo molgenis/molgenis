@@ -24,6 +24,9 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.meta.WritableMetaDataService;
+import org.molgenis.data.semantic.LabeledResource;
+import org.molgenis.data.semantic.Tag;
+import org.molgenis.data.semantic.UntypedTagService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.TransformedEntity;
 import org.molgenis.fieldtypes.FieldType;
@@ -49,6 +52,7 @@ public class ImportWriter
 	private final DataService dataService;
 	private final WritableMetaDataService metaDataService;
 	private final PermissionSystemService permissionSystemService;
+	private final UntypedTagService tagService;
 
 	private final static Logger logger = Logger.getLogger(ImportWriter.class);
 
@@ -63,23 +67,41 @@ public class ImportWriter
 	 *            {@link PermissionSystemService} to give permissions on uploaded entities
 	 */
 	public ImportWriter(DataService dataService, WritableMetaDataService metaDataService,
-			PermissionSystemService permissionSystemService)
+			PermissionSystemService permissionSystemService, UntypedTagService tagService)
 	{
 		this.dataService = dataService;
 		this.metaDataService = metaDataService;
 		this.permissionSystemService = permissionSystemService;
+		this.tagService = tagService;
 	}
 
 	@Transactional
 	public EntityImportReport doImport(EmxImportJob job)
 	{
-		// TODO: parse the tags in the parser and put them in the parsedMetaData
 		importTags(job.source);
 		importPackages(job.parsedMetaData);
 		addEntityMetaData(job.parsedMetaData, job.report, job.metaDataChanges, job.target);
 		addEntityPermissions(job.metaDataChanges);
+		importEntityAndAttributeTags(job.parsedMetaData);
 		importData(job.report, job.parsedMetaData.getEntities(), job.source, job.target, job.dbAction);
 		return job.report;
+	}
+
+	private void importEntityAndAttributeTags(ParsedMetaData parsedMetaData)
+	{
+		for (Tag<EntityMetaData, LabeledResource, LabeledResource> tag : parsedMetaData.getEntityTags())
+		{
+			tagService.addEntityTag(tag);
+		}
+
+		for (EntityMetaData emd : parsedMetaData.getAttributeTags().keySet())
+		{
+			for (Tag<AttributeMetaData, LabeledResource, LabeledResource> tag : parsedMetaData.getAttributeTags().get(
+					emd))
+			{
+				tagService.addAttributeTag(emd, tag);
+			}
+		}
 	}
 
 	/**

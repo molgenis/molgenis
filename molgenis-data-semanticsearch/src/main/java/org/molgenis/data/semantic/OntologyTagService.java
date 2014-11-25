@@ -128,4 +128,26 @@ public class OntologyTagService implements TagService<OntologyTerm, Ontology>
 				.getCodeSystem().getIri());
 	}
 
+	@Override
+	public void addEntityTag(Tag<EntityMetaData, OntologyTerm, Ontology> tag)
+	{
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void removeEntityTag(Tag<EntityMetaData, OntologyTerm, Ontology> tag)
+	{
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public Iterable<Tag<EntityMetaData, LabeledResource, LabeledResource>> getTagsForEntity(
+			EntityMetaData entityMetaData)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
