@@ -588,6 +588,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			final String refEntityName = (String) attribute.get(REF_ENTITY);
 			final String entityName = attribute.getString(ENTITY);
 			final String attributeName = attribute.getString(NAME);
+			final String expression = attribute.getString(EXPRESSION);
 			i++;
 			if (refEntityName != null)
 			{
@@ -595,13 +596,22 @@ public class EmxMetaDataParser implements MetaDataParser
 				DefaultAttributeMetaData defaultAttributeMetaData = (DefaultAttributeMetaData) defaultEntityMetaData
 						.getAttribute(attributeName);
 
-				if (!intermediateResults.knowsEntity(refEntityName))
+				if (intermediateResults.knowsEntity(refEntityName))
 				{
-					throw new IllegalArgumentException("attributes.refEntity error on line " + i + ": " + refEntityName
-							+ " unknown");
+					defaultAttributeMetaData.setRefEntity(intermediateResults.getEntityMetaData(refEntityName));
+				}
+				else
+				{
+					EntityMetaData refEntityMeta = dataService.getEntityMetaData(refEntityName);
+					if (expression == null || refEntityMeta == null)
+					{
+						throw new IllegalArgumentException("attributes.refEntity error on line " + i + ": "
+								+ refEntityName + " unknown");
+					}
+					// allow computed xref attributes to refer to pre-existing entities
+					defaultAttributeMetaData.setRefEntity(refEntityMeta);
 				}
 
-				defaultAttributeMetaData.setRefEntity(intermediateResults.getEntityMetaData(refEntityName));
 			}
 		}
 	}
