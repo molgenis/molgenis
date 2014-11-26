@@ -692,7 +692,6 @@ public class JpaRepository extends AbstractAggregateableCrudRepository
 					if ((meta.getDataType().getEnumType() == FieldTypeEnum.DATE_TIME)
 							&& (r.getValue() instanceof java.sql.Date))
 					{
-						System.out.println("DATE ONLY");
 						andPredicates.add(cb.equal(cb.function("Date", Date.class, from.get(r.getJpaAttribute())),
 								r.getValue()));
 					}
