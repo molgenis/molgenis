@@ -8,7 +8,7 @@ import java.util.Arrays;
 
 import org.molgenis.data.DataService;
 import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.omx.observ.ObservableFeature;
+import org.molgenis.omx.observ.Protocol;
 import org.molgenis.omx.studymanager.OmxStudyDefinition;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -30,11 +30,9 @@ public class OmxStudyDefinitionTest
 		MolgenisUser molgenisUser = when(mock(MolgenisUser.class).getEmail()).thenReturn("a@b.c").getMock();
 		studyDataRequest.setMolgenisUser(molgenisUser);
 
-		ObservableFeature feature1 = when(mock(ObservableFeature.class).getIdentifier()).thenReturn("feature1")
-				.getMock();
-		ObservableFeature feature2 = when(mock(ObservableFeature.class).getIdentifier()).thenReturn("feature2")
-				.getMock();
-		studyDataRequest.setFeatures(Arrays.asList(feature1, feature2));
+		Protocol protocol1 = when(mock(Protocol.class).getIdentifier()).thenReturn("feature1").getMock();
+		Protocol protocol2 = when(mock(Protocol.class).getIdentifier()).thenReturn("feature2").getMock();
+		studyDataRequest.setProtocols(Arrays.asList(protocol1, protocol2));
 		dataService = mock(DataService.class);
 	}
 
