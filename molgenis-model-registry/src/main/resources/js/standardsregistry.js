@@ -184,11 +184,11 @@
 			zoomOut();
 		});
 		
-		var data = $("#package-search-results[data-results]").attr("data-results");
+		var data = $("#package-search-results[data-package-search-results]").attr("data-package-search-results");
 		if(data){
 			// Initial setting when data-results is set.
 			renderSearchResultsBySucces(JSON.parse(data));
-			$("#package-search-results[data-results]").remove("data-results");
+			$("#package-search-results[data-package-search-results]").removeAttr("data-package-search-results");
 		}else{
 			// initially search for all models
 			$('form[name=search-form]').submit();

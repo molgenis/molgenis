@@ -29,7 +29,7 @@
     </div>
     <div class="row">
     	<div class="col-md-12">
-    		<div id="package-search-results" <#if packageSearchResponse?has_content>data-results='${packageSearchResponse}'</#if>></div>  
+    		<div id="package-search-results" <#if packageSearchResponse?has_content>data-package-search-results='${packageSearchResponse}'</#if>></div>  
     	</div>
     </div>
 </div>
