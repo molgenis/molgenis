@@ -21,7 +21,8 @@
 						lazy: subTree === null,
 						expanded: !settings.displaySiblings,
 						hideCheckbox: depth <= settings.disableSelectDepth,
-						selected: selected
+						selected: selected,
+						extraClasses: protocol.active ? '' : 'inactive'
 					};
 					if (protocol.description)
 						node.tooltip = molgenis.i18n.get(protocol.description);
@@ -116,11 +117,12 @@
 							protocolNodes.push({
 								key : this.href.toLowerCase(),
 								title : this.Name,
-								tooltip : molgenis.i18n.get(this.description),
+								tooltip : this.active ? molgenis.i18n.get(this.description) : 'Not (yet) available',
 								folder : true,
 								lazy : true,
 								hideCheckbox: node.getLevel() <= settings.disableSelectDepth,
-								selected: node.selected
+								selected: node.selected,
+								extraClasses: this.active ? '' : 'inactive'
 							});
 						});
 						if (settings.sort)
@@ -167,7 +169,9 @@
 			select : function(e, data) {
 				var node = data.node;
 				if (node.folder) {
-					if (settings.onFolderSelect)
+					if (node.extraClasses == 'inactive')
+						node.setSelected(false);//You can't select inactive nodes
+					else if (settings.onFolderSelect)
 						settings.onFolderSelect(node.key, node.selected, node.getKeyPath());
 				} else {
 					if (settings.onItemSelect)
