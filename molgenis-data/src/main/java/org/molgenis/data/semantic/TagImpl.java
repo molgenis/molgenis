@@ -19,7 +19,7 @@ public class TagImpl<SubjectType, ObjectType, CodeSystemType> implements Tag<Sub
 		Relation relation = Relation.forIRI(relationIri);
 		if (relation == null)
 		{
-			throw new IllegalArgumentException("Unknown ralation iri [" + relationIri + "]");
+			throw new IllegalArgumentException("Unknown relation iri [" + relationIri + "]");
 		}
 
 		LabeledResource codeSystem = new LabeledResource(tagEntity.getString(TagMetaData.CODE_SYSTEM));
