@@ -5,6 +5,7 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.DATA_TYPE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.DESCRIPTION;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENTITY;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENUM_OPTIONS;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.EXPRESSION;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ID_ATTRIBUTE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL_ATTRIBUTE;
@@ -88,7 +89,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			ID_ATTRIBUTE.toLowerCase(), LABEL.toLowerCase(), LABEL_ATTRIBUTE.toLowerCase(),
 			LOOKUP_ATTRIBUTE.toLowerCase(), NAME, NILLABLE.toLowerCase(), PART_OF_ATTRIBUTE.toLowerCase(),
 			RANGE_MAX.toLowerCase(), RANGE_MIN.toLowerCase(), READ_ONLY.toLowerCase(), REF_ENTITY.toLowerCase(),
-			VISIBLE.toLowerCase(), UNIQUE.toLowerCase(), org.molgenis.data.meta.AttributeMetaDataMetaData.TAGS);
+			VISIBLE.toLowerCase(), UNIQUE.toLowerCase(), TAGS.toLowerCase(), EXPRESSION.toLowerCase());
 
 	private final DataService dataService;
 	private final MetaDataService metaDataService;
@@ -225,6 +226,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			Boolean labelAttribute = attributeEntity.getBoolean(LABEL_ATTRIBUTE);
 			Boolean readOnly = attributeEntity.getBoolean(READ_ONLY);
 			Boolean unique = attributeEntity.getBoolean(UNIQUE);
+			String expression = attributeEntity.getString(EXPRESSION);
 			List<String> tagIds = attributeEntity.getList(TAGS);
 
 			if (attributeNillable != null) attribute.setNillable(attributeNillable);
@@ -234,6 +236,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			// cannot update ref entities yet, will do so later on
 			if (readOnly != null) attribute.setReadOnly(readOnly);
 			if (unique != null) attribute.setUnique(unique);
+			if (expression != null) attribute.setExpression(expression);
 
 			if (lookupAttribute != null)
 			{
@@ -610,7 +613,8 @@ public class EmxMetaDataParser implements MetaDataParser
 		{
 			IntermediateParseResults intermediateResults = getEntityMetaDataFromSource(source);
 			return new ParsedMetaData(resolveEntityDependencies(intermediateResults.getEntities()),
-					intermediateResults.getPackages(), intermediateResults.getAttributeTags(), intermediateResults.getEntityTags());
+					intermediateResults.getPackages(), intermediateResults.getAttributeTags(),
+					intermediateResults.getEntityTags());
 		}
 		else
 		{
