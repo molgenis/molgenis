@@ -165,7 +165,7 @@ public class OmxStudyManagerService implements StudyManagerService
 			throw new UnknownStudyDefinitionException("Study definition [" + id + "] does not exist");
 		}
 
-		studyDataRequest.setName(studyDataRequest.getName());
+		studyDataRequest.setName(studyDefinition.getName());
 		studyDataRequest.setProtocols(Lists.newArrayList(Iterables.transform(studyDefinition.getItems(),
 				new Function<CatalogItem, Protocol>()
 				{

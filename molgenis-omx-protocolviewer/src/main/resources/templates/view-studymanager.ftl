@@ -1,7 +1,7 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 <#assign css=["ui.dynatree.css", "studymanager.css"]>
-<#assign js=["jquery-ui-1.9.2.custom.min.js", "jquery.dynatree.min.js", "studymanager.js"]>
+<#assign js=["jquery-ui-1.9.2.custom.min.js", "jquery.dynatree.min.js", "studymanager.js", "jquery.validate.min.js"]>
 <@header css js/>
 	<div class="span10 offset1">
 		<div class="row-fluid">	
@@ -68,7 +68,12 @@
 							    	<div id="study-definition-editor-container">
 								    	<div id="study-definition-editor-info">
 										</div>
+										<div id="study-definition-edit-name">
+											<label for="name">Name:</label>
+											<input type="text" id="name" name="name" required />
+										</div>
                                         <div id="study-definition-state-select">
+                                        	<label for="edit-state-select">Status:</label>
                                             <select id="edit-state-select" name="edit-state-select">
                                             </select>
                                         </div>
