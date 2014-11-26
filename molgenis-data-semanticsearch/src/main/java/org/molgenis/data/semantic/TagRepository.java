@@ -1,7 +1,6 @@
 package org.molgenis.data.semantic;
 
 import org.molgenis.data.CrudRepository;
-import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.meta.MetaDataServiceImpl;
@@ -20,9 +19,9 @@ public class TagRepository
 	private IdGenerator idGenerator;
 	private CrudRepository repository;
 
-	public TagRepository(DataService dataService, IdGenerator idGenerator)
+	public TagRepository(CrudRepository repository, IdGenerator idGenerator)
 	{
-		this.repository = dataService.getCrudRepository(TagMetaData.ENTITY_NAME);
+		this.repository = repository;
 		this.idGenerator = idGenerator;
 	}
 
@@ -47,7 +46,7 @@ public class TagRepository
 		if (result == null)
 		{
 			MapEntity mapEntity = new MapEntity(TagMetaData.ENTITY_NAME);
-			mapEntity.set(TagMetaData.IDENTIFIER, idGenerator.generateId());
+			mapEntity.set(TagMetaData.IDENTIFIER, idGenerator.generateId().toString());
 			mapEntity.set(TagMetaData.OBJECT_IRI, objectIRI);
 			mapEntity.set(TagMetaData.LABEL, label);
 			mapEntity.set(TagMetaData.RELATION_IRI, relation.getIRI());

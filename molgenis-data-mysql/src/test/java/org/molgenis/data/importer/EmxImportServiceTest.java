@@ -16,6 +16,7 @@ import org.molgenis.data.excel.ExcelRepositoryCollection;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.mysql.MysqlRepository;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
+import org.molgenis.data.semantic.UntypedTagService;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
@@ -45,6 +46,9 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	MetaDataServiceImpl metaDataService;
 
+	@Autowired
+	UntypedTagService tagService;
+
 	@BeforeMethod
 	public void beforeMethod()
 	{
@@ -61,7 +65,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 
 		// create importer
 		EmxImportService importer = new EmxImportService(new EmxMetaDataParser(dataService, metaDataService),
-				new ImportWriter(dataService, metaDataService, permissionSystemService));
+				new ImportWriter(dataService, metaDataService, permissionSystemService, tagService));
 		importer.setRepositoryCollection(store, metaDataService);
 
 		// generate report
@@ -110,7 +114,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		Assert.assertNotNull(source.getRepositoryByEntityName("attributes"));
 
 		EmxImportService importer = new EmxImportService(new EmxMetaDataParser(dataService, metaDataService),
-				new ImportWriter(dataService, metaDataService, permissionSystemService));
+				new ImportWriter(dataService, metaDataService, permissionSystemService, tagService));
 		importer.setRepositoryCollection(store, metaDataService);
 
 		// test import
@@ -155,7 +159,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
 
 		EmxImportService importer = new EmxImportService(new EmxMetaDataParser(dataService, metaDataService),
-				new ImportWriter(dataService, metaDataService, permissionSystemService));
+				new ImportWriter(dataService, metaDataService, permissionSystemService, tagService));
 		importer.setRepositoryCollection(store, metaDataService);
 
 		// test import

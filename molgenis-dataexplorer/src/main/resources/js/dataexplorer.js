@@ -63,7 +63,9 @@ function($, molgenis, settingsXhr) {
 		var items = [];
 		items.push('<ul class="nav nav-tabs pull-left" role="tablist">');
 		$.each(modules, function() {
-			var href = molgenis.getContextUrl() + '/module/' + this.id;
+			var href = molgenis.getContextUrl() + '/module/' + this.id+'?entity=' + selectedEntityMetaData.name;
+
+
 			items.push('<li data-id="' + this.id + '"><a href="' + href + '" data-target="#tab-' + this.id + '" role="tab" data-toggle="tab"><img src="/img/' + this.icon + '"> ' + this.label + '</a></li>');
 		});
 		items.push('</ul>');
