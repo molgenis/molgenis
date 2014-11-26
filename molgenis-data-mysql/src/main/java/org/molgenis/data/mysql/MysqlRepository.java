@@ -156,6 +156,11 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 
 			for (AttributeMetaData attr : getEntityMetaData().getAtomicAttributes())
 			{
+				if (attr.getExpression() != null)
+				{
+					// computed attributes are not persisted
+					continue;
+				}
 				// add mref tables
 				if (attr.getDataType() instanceof MrefField)
 				{
@@ -190,6 +195,11 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 	{
 		try
 		{
+			if (attributeMetaData.getExpression() != null)
+			{
+				// computed attributes are not persisted
+				return;
+			}
 			if (attributeMetaData.getDataType() instanceof MrefField)
 			{
 				asyncJdbcTemplate.execute(getMrefCreateSql(attributeMetaData));
@@ -243,7 +253,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 		{
 			getAttributeSql(sql, att);
-			if (!(att.getDataType() instanceof MrefField))
+			if (att.getExpression() == null && !(att.getDataType() instanceof MrefField))
 			{
 				sql.append(", ");
 			}
@@ -275,6 +285,10 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 
 	private void getAttributeSql(StringBuilder sql, AttributeMetaData att) throws MolgenisModelException
 	{
+		if (att.getExpression() != null)
+		{
+			return;
+		}
 		switch (att.getDataType().getEnumType())
 		{
 			case BOOL:
