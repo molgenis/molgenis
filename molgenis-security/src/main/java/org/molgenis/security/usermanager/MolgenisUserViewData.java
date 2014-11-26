@@ -3,8 +3,8 @@ package org.molgenis.security.usermanager;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.molgenis.omx.auth.MolgenisGroup;
-import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.auth.MolgenisGroup;
+import org.molgenis.auth.MolgenisUser;
 
 public class MolgenisUserViewData
 {

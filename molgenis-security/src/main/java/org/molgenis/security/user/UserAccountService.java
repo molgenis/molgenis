@@ -1,7 +1,7 @@
 package org.molgenis.security.user;
 
-import org.molgenis.omx.auth.MolgenisGroup;
-import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.auth.MolgenisGroup;
+import org.molgenis.auth.MolgenisUser;
 
 /**
  * Manage account of the current user

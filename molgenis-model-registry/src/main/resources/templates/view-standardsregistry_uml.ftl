@@ -91,7 +91,7 @@
 	<#list package.entityMetaDatas as emd>
 		<#if emd.extends??>
 			if (classes['<@entityName emd.extends />']) {
-				graph.addCell(new uml.Generalization({ source: { id: classes.<@entityName emd />.id }, target: { id: classes.<@entityName emd.extends />.id }}));	  
+				graph.addCell(new uml.Generalization({ source: { id: classes['<@entityName emd />'].id }, target: { id: classes['<@entityName emd.extends />'].id }}));	  
 			}
 		</#if>
 		<#list emd.attributes as amd>
@@ -99,8 +99,8 @@
 				if (classes['<@entityName amd.refEntity />']) {
         		  graph.addCell(
         		  	myUML.createEdge("${amd.label?js_string}", 
-        		  	{ id: classes.<@entityName emd />.id }, 
-        		  	{ id: classes.<@entityName amd.refEntity />.id }, 
+        		  	{ id: classes['<@entityName emd />'].id }, 
+        		  	{ id: classes['<@entityName amd.refEntity />'].id }, 
         		  	{lowerBound : '<#if amd.nillable>0<#else>1</#if>',
         		  	 upperBound: '<#if amd.dataType == 'xref'>1<#else>*</#if>',
         		  	 navigable: true}, 
@@ -119,13 +119,13 @@
 <#macro listClasses package classes=[]>
 	<#list package.entityMetaDatas as emd>
 		<#if emd.abstract == true >
-			<@entityName emd />: new uml.Abstract({
+			'<@entityName emd />': new uml.Abstract({
 	      	 	size: { width: RECT_WIDTH, height: ${(50 + 12 * emd.attributes?size)?c} },
 	        	name: '${emd.simpleName}',
 	       		attributes: [<#list emd.attributes as amd>'${amd.name?js_string}: ${amd.dataType}'<#if amd_has_next>,</#if></#list>]
 	    	}),
 	    <#else>
-			<@entityName emd />: new uml.Class({
+			'<@entityName emd />': new uml.Class({
 	      	 	size: { width: RECT_WIDTH, height: ${(50 + 12 * emd.attributes?size)?c} },
 	        	name: '${emd.simpleName}',
 	       	 	attributes: [<#list emd.attributes as amd>'${amd.name?js_string}: ${amd.dataType}'<#if amd_has_next>,</#if></#list>]

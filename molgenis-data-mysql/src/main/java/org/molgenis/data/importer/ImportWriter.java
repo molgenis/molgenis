@@ -71,7 +71,7 @@ public class ImportWriter
 	}
 
 	@Transactional
-	private EntityImportReport doTransactionalImport(EmxImportJob job)
+	public EntityImportReport doImport(EmxImportJob job)
 	{
 		// TODO: parse the tags in the parser and put them in the parsedMetaData
 		importTags(job.source);
@@ -211,7 +211,7 @@ public class ImportWriter
 	/**
 	 * Drops entities and added attributes and reindexes the entities whose attributes were modified.
 	 */
-	private void rollbackSchemaChanges(EmxImportJob job)
+	public void rollbackSchemaChanges(EmxImportJob job)
 	{
 		logger.info("Rolling back changes.");
 		dropAddedEntities(job.target, job.metaDataChanges.getAddedEntities());
@@ -466,26 +466,4 @@ public class ImportWriter
 		}
 	}
 
-	/**
-	 * Does the import in a transaction. Manually rolls back schema changes if something goes wrong. Refreshes the
-	 * metadata.
-	 * 
-	 * @return {@link EntityImportReport} describing what happened
-	 */
-	public EntityImportReport doImport(EmxImportJob job)
-	{
-		try
-		{
-			return doTransactionalImport(job);
-		}
-		catch (Exception e)
-		{
-			rollbackSchemaChanges(job);
-			throw e;
-		}
-		finally
-		{
-			metaDataService.refreshCaches();
-		}
-	}
 }

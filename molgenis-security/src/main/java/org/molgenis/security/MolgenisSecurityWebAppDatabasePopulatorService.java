@@ -1,8 +1,8 @@
 package org.molgenis.security;
 
+import org.molgenis.auth.MolgenisGroup;
+import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
-import org.molgenis.omx.auth.MolgenisGroup;
-import org.molgenis.omx.auth.MolgenisUser;
 
 public interface MolgenisSecurityWebAppDatabasePopulatorService
 {

@@ -6,6 +6,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
+import org.molgenis.data.DataConverter;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.processor.AbstractCellProcessor;
 import org.molgenis.data.processor.CellProcessor;
@@ -30,7 +31,10 @@ public class ExcelUtils
 				value = cell.getStringCellValue();
 				break;
 			case Cell.CELL_TYPE_NUMERIC:
-				if (DateUtil.isCellDateFormatted(cell)) value = cell.getDateCellValue().toString();
+				if (DateUtil.isCellDateFormatted(cell))
+				{
+					value = DataConverter.toString(cell.getDateCellValue());
+				}
 				else
 				{
 					// excel stores integer values as double values
@@ -54,13 +58,20 @@ public class ExcelUtils
 						value = String.valueOf(cellValue.getBooleanValue());
 						break;
 					case Cell.CELL_TYPE_NUMERIC:
-						// excel stores integer values as double values
-						// read an integer if the double value equals the
-						// integer value
-						double x = cellValue.getNumberValue();
-						if (x == Math.rint(x) && !Double.isNaN(x) && !Double.isInfinite(x)) value = String
-								.valueOf((int) x);
-						else value = String.valueOf(x);
+						if (DateUtil.isCellDateFormatted(cell))
+						{
+							value = DataConverter.toString(DateUtil.getJavaDate(cellValue.getNumberValue(), false));
+						}
+						else
+						{
+							// excel stores integer values as double values
+							// read an integer if the double value equals the
+							// integer value
+							double x = cellValue.getNumberValue();
+							if (x == Math.rint(x) && !Double.isNaN(x) && !Double.isInfinite(x)) value = String
+									.valueOf((int) x);
+							else value = String.valueOf(x);
+						}
 						break;
 					case Cell.CELL_TYPE_STRING:
 						value = cellValue.getStringValue();
@@ -78,5 +89,4 @@ public class ExcelUtils
 
 		return AbstractCellProcessor.processCell(value, false, cellProcessors);
 	}
-
 }

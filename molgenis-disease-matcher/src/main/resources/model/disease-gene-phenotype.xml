@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<molgenis name="org.molgenis.omx">
+<molgenis name="org.molgenis">
 	<module name="diseasemapping">
 		<entity name="DiseaseMapping"  xref_lookup="diseaseId, geneSymbol, geneId, HPOId">
 			<description>Mapping of OMIM/ORPHANET diseases to HGNC genes to HPO terms.</description>
