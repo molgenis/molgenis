@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
+import com.google.gson.Gson;
 
 /**
  * Converts entities to Elasticsearch documents
@@ -57,6 +58,47 @@ public class EntityToSourceConverter
 
 	public Object convertAttribute(Entity entity, AttributeMetaData attributeMetaData, final boolean nestRefs)
 	{
+		if (attributeMetaData.getExpression() != null)
+		{
+			Gson gson = new Gson();
+			Object expression = gson.fromJson(attributeMetaData.getExpression(), Object.class);
+			if (expression instanceof String)
+			{
+				// TODO: better typing!
+				return entity.get((String) expression);
+			}
+			else
+			{
+				if (expression instanceof Map<?, ?>)
+				{
+					Map<String, Object> attributeExpressions = (Map<String, Object>) expression;
+					EntityMetaData refEntity = attributeMetaData.getRefEntity();
+					Map<String, Object> result = new HashMap<String, Object>();
+					for (AttributeMetaData targetAttribute : refEntity.getAtomicAttributes())
+					{
+						String attributeName = targetAttribute.getName();
+						if (attributeExpressions.containsKey(attributeName))
+						{
+							Object attributeExpression = attributeExpressions.get(attributeName);
+							if (attributeExpression instanceof String)
+							{
+								result.put(attributeName, entity.get((String) attributeExpression));
+							}
+							else
+							{
+								// TODO!
+							}
+						}
+					}
+					return result;
+				}
+				else
+				{
+					return null;
+				}
+			}
+		}
+
 		Object value;
 
 		String attrName = attributeMetaData.getName();
@@ -158,7 +200,6 @@ public class EntityToSourceConverter
 	{
 		Object value;
 
-		String attrName = attributeMetaData.getName();
 		FieldTypeEnum dataType = attributeMetaData.getDataType().getEnumType();
 		switch (dataType)
 		{
