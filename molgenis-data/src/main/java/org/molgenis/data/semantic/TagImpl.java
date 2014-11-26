@@ -22,7 +22,13 @@ public class TagImpl<SubjectType, ObjectType, CodeSystemType> implements Tag<Sub
 			throw new IllegalArgumentException("Unknown relation iri [" + relationIri + "]");
 		}
 
-		LabeledResource codeSystem = new LabeledResource(tagEntity.getString(TagMetaData.CODE_SYSTEM));
+		LabeledResource codeSystem = null;
+		if (tagEntity.getString(TagMetaData.CODE_SYSTEM) != null)
+		{
+			codeSystem = new LabeledResource(tagEntity.getString(TagMetaData.CODE_SYSTEM),
+					tagEntity.getString(TagMetaData.CODE_SYSTEM));
+		}
+
 		LabeledResource objectResource = new LabeledResource(tagEntity.getString(TagMetaData.OBJECT_IRI),
 				tagEntity.getString(TagMetaData.LABEL));
 

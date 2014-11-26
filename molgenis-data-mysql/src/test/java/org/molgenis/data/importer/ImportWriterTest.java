@@ -17,7 +17,7 @@ import org.hamcrest.Description;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.molgenis.AppConfig;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
@@ -27,21 +27,25 @@ import org.molgenis.data.ManageableCrudRepositoryCollection;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.PackageImpl;
 import org.molgenis.data.meta.WritableMetaDataService;
+import org.molgenis.data.semantic.LabeledResource;
+import org.molgenis.data.semantic.Relation;
+import org.molgenis.data.semantic.Tag;
+import org.molgenis.data.semantic.TagImpl;
+import org.molgenis.data.semantic.UntypedTagService;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.security.permission.PermissionSystemService;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Lists;
 
 /**
  * Writer-specific tests.
  */
-@ContextConfiguration(classes = AppConfig.class)
-public class ImportWriterTest extends AbstractTestNGSpringContextTests
+public class ImportWriterTest
 {
 	private DataService dataService;
 	private WritableMetaDataService metaDataService;
@@ -49,6 +53,7 @@ public class ImportWriterTest extends AbstractTestNGSpringContextTests
 	private RepositoryCollection source;
 	private ManageableCrudRepositoryCollection target;
 	private ImportWriter writer;
+	private UntypedTagService tagService;
 
 	@BeforeMethod
 	public void beforeMethod()
@@ -58,7 +63,8 @@ public class ImportWriterTest extends AbstractTestNGSpringContextTests
 		permissionSystemService = mock(PermissionSystemService.class);
 		source = mock(RepositoryCollection.class);
 		target = mock(ManageableCrudRepositoryCollection.class);
-		writer = new ImportWriter(dataService, metaDataService, permissionSystemService);
+		tagService = mock(UntypedTagService.class);
+		writer = new ImportWriter(dataService, metaDataService, permissionSystemService, tagService);
 	}
 
 	@Test
@@ -73,7 +79,12 @@ public class ImportWriterTest extends AbstractTestNGSpringContextTests
 		emd.addAttribute("name");
 		emd.setPackage(p);
 
-		ParsedMetaData parsedMetaData = new ParsedMetaData(Collections.<EntityMetaData> singletonList(emd), packages);
+		Tag<EntityMetaData, LabeledResource, LabeledResource> entityTag = new TagImpl<EntityMetaData, LabeledResource, LabeledResource>(
+				"entityTag", emd, Relation.instanceOf, new LabeledResource("EntityTag!"), null);
+
+		ParsedMetaData parsedMetaData = new ParsedMetaData(Collections.<EntityMetaData> singletonList(emd), packages,
+				ImmutableSetMultimap.<String, Tag<AttributeMetaData, LabeledResource, LabeledResource>> of(),
+				ImmutableList.<Tag<EntityMetaData, LabeledResource, LabeledResource>> of(entityTag));
 		EmxImportJob job = new EmxImportJob(DatabaseAction.ADD, source, parsedMetaData, target);
 
 		CrudRepository targetRepo = mock(CrudRepository.class);
@@ -126,5 +137,6 @@ public class ImportWriterTest extends AbstractTestNGSpringContextTests
 		verify(target).add(emd);
 		// once for the IDs, once for the update
 		verify(sourceRepo, Mockito.atMost(2)).iterator();
+		verify(tagService).addEntityTag(entityTag);
 	}
 }

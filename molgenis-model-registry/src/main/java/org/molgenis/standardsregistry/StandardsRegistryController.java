@@ -94,6 +94,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 	{
 		List<Package> packages = Lists.newArrayList(metaDataService.getRootPackages());
 		model.addAttribute("packages", packages);
+		model.addAttribute("tagService", tagService);
 		return VIEW_NAME_DOCUMENTATION;
 	}
 
@@ -103,6 +104,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 	{
 		Package aPackage = metaDataService.getPackage(packageName);
 		model.addAttribute("package", aPackage);
+		model.addAttribute("tagService", tagService);
 		return VIEW_NAME_DOCUMENTATION_EMBED;
 	}
 
@@ -118,7 +120,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 		{
 			Package p = searchResult.getPackageFound();
 			List<PackageResponse.Entity> entitiesInPackageUnfiltered = getEntitiesInPackage(p.getName());
-			List<PackageResponse.Entity> entitiesInPackageFilterd = Lists.newArrayList(Iterables.filter(
+			List<PackageResponse.Entity> entitiesInPackageFiltered = Lists.newArrayList(Iterables.filter(
 					entitiesInPackageUnfiltered, new Predicate<PackageResponse.Entity>()
 					{
 						@Override
@@ -139,7 +141,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 					}));
 
 			PackageResponse pr = new PackageResponse(p.getSimpleName(), p.getDescription(),
-					searchResult.getMatchDescription(), entitiesInPackageFilterd, getTagsForPackage(p));
+					searchResult.getMatchDescription(), entitiesInPackageFiltered, getTagsForPackage(p));
 			packageResponses.add(pr);
 		}
 
@@ -174,6 +176,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 			List<Package> packages = Lists.newArrayList(metaDataService.getRootPackages());
 			selectedPackageName = packages.get(0).getName();
 		}
+		model.addAttribute("tagService", tagService);
 		model.addAttribute("selectedPackageName", selectedPackageName);
 		model.addAttribute("package", metaDataService.getPackage(selectedPackageName));
 

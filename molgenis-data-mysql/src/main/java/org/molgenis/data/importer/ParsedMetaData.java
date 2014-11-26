@@ -3,33 +3,68 @@ package org.molgenis.data.importer;
 import java.util.List;
 import java.util.Map;
 
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Package;
+import org.molgenis.data.semantic.LabeledResource;
+import org.molgenis.data.semantic.Tag;
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSetMultimap;
+import com.google.common.collect.SetMultimap;
 
+/**
+ * Value object to store the result of parsing a source.
+ */
 public final class ParsedMetaData
 {
-	private final ImmutableList<EntityMetaData> entities;
+	private final ImmutableMap<String, EntityMetaData> entities;
 	private final ImmutableMap<String, Package> packages;
+	private ImmutableSetMultimap<EntityMetaData, Tag<AttributeMetaData, LabeledResource, LabeledResource>> attributeTags;
+	private ImmutableList<Tag<EntityMetaData, LabeledResource, LabeledResource>> entityTags;
 
-	public ParsedMetaData(List<? extends EntityMetaData> entities, Map<String, ? extends Package> packages)
+	public ParsedMetaData(List<? extends EntityMetaData> entities, Map<String, ? extends Package> packages,
+			SetMultimap<String, Tag<AttributeMetaData, LabeledResource, LabeledResource>> attributeTags,
+			List<Tag<EntityMetaData, LabeledResource, LabeledResource>> entityTags)
 	{
 		if (entities == null)
 		{
 			throw new NullPointerException("Null entities");
 		}
 
-		this.entities = ImmutableList.copyOf(entities);
+		ImmutableMap.Builder<String, EntityMetaData> builder = ImmutableMap.<String, EntityMetaData> builder();
+		for (EntityMetaData emd : entities)
+		{
+			builder.put(emd.getName(), emd);
+		}
+		this.entities = builder.build();
 		if (packages == null)
 		{
 			throw new NullPointerException("Null packages");
 		}
 		this.packages = ImmutableMap.copyOf(packages);
+		ImmutableSetMultimap.Builder<EntityMetaData, Tag<AttributeMetaData, LabeledResource, LabeledResource>> attrTagBuilder = ImmutableSetMultimap
+				.<EntityMetaData, Tag<AttributeMetaData, LabeledResource, LabeledResource>> builder();
+		for (String simpleEntityName : attributeTags.keys())
+		{
+			EntityMetaData emd = this.entities.get(simpleEntityName);
+			for (Tag<AttributeMetaData, LabeledResource, LabeledResource> tag : attributeTags.get(simpleEntityName))
+			{
+				attrTagBuilder.put(emd, tag);
+			}
+		}
+		this.attributeTags = attrTagBuilder.build();
+		this.entityTags = ImmutableList.copyOf(entityTags);
 	}
 
-	public ImmutableList<EntityMetaData> getEntities()
+	public ImmutableCollection<EntityMetaData> getEntities()
+	{
+		return entities.values();
+	}
+
+	public ImmutableMap<String, EntityMetaData> getEntityMap()
 	{
 		return entities;
 	}
@@ -39,36 +74,63 @@ public final class ParsedMetaData
 		return packages;
 	}
 
-	@Override
-	public String toString()
+	public SetMultimap<EntityMetaData, Tag<AttributeMetaData, LabeledResource, LabeledResource>> getAttributeTags()
 	{
-		return "ParsedMetaData{" + "getEntities=" + entities + ", getPackages=" + packages + "}";
+		return attributeTags;
+	}
+
+	public ImmutableList<Tag<EntityMetaData, LabeledResource, LabeledResource>> getEntityTags()
+	{
+		return entityTags;
 	}
 
 	@Override
-	public boolean equals(Object o)
+	public String toString()
 	{
-		if (o == this)
-		{
-			return true;
-		}
-		if (o instanceof ParsedMetaData)
-		{
-			ParsedMetaData that = (ParsedMetaData) o;
-			return (this.entities.equals(that.getEntities())) && (this.packages.equals(that.getPackages()));
-		}
-		return false;
+		return "ParsedMetaData [entities=" + entities + ", packages=" + packages + ", attributeTags=" + attributeTags
+				+ ", entityTags=" + entityTags + "]";
 	}
 
 	@Override
 	public int hashCode()
 	{
-		int h = 1;
-		h *= 1000003;
-		h ^= entities.hashCode();
-		h *= 1000003;
-		h ^= packages.hashCode();
-		return h;
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((attributeTags == null) ? 0 : attributeTags.hashCode());
+		result = prime * result + ((entities == null) ? 0 : entities.hashCode());
+		result = prime * result + ((entityTags == null) ? 0 : entityTags.hashCode());
+		result = prime * result + ((packages == null) ? 0 : packages.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
+		ParsedMetaData other = (ParsedMetaData) obj;
+		if (attributeTags == null)
+		{
+			if (other.attributeTags != null) return false;
+		}
+		else if (!attributeTags.equals(other.attributeTags)) return false;
+		if (entities == null)
+		{
+			if (other.entities != null) return false;
+		}
+		else if (!entities.equals(other.entities)) return false;
+		if (entityTags == null)
+		{
+			if (other.entityTags != null) return false;
+		}
+		else if (!entityTags.equals(other.entityTags)) return false;
+		if (packages == null)
+		{
+			if (other.packages != null) return false;
+		}
+		else if (!packages.equals(other.packages)) return false;
+		return true;
 	}
 
 	/**
