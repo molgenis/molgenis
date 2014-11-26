@@ -211,31 +211,40 @@ public class StudyManagerController extends MolgenisPluginController
 			// get study definition and catalog used to create study definition
 			StudyDefinition studyDefinition = studyDefinitionManagerService.getStudyDefinition(id);
 
-			final Catalog catalog = catalogManagerService.getCatalogOfStudyDefinition(studyDefinition.getId());
-
-			// create updated study definition
-			StudyDefinitionImpl updatedStudyDefinition = new StudyDefinitionImpl(studyDefinition);
-			updatedStudyDefinition.setItems(Lists.transform(updateRequest.getCatalogItemIds(),
-					new Function<String, CatalogItem>()
-					{
-						@Override
-						public CatalogItem apply(String catalogItemId)
-						{
-							CatalogItem catalogItem = catalog.findItem(catalogItemId);
-							if (catalogItem == null) throw new RuntimeException("unknown catalog item id: "
-									+ catalogItemId);
-							return catalogItem;
-						}
-					}));
-			updatedStudyDefinition.setStatus(status);
-
-			if (StringUtils.isNotBlank(updateRequest.getName()))
+			Status previousStatus = studyDefinition.getStatus();
+			if (previousStatus != null && previousStatus == Status.EXPORTED && status != null
+					&& status == Status.SUBMITTED)
 			{
-				updatedStudyDefinition.setName(updateRequest.getName());
+				studyDefinitionManagerService.withdrawStudyDefinition(id);
 			}
+			else
+			{
+				final Catalog catalog = catalogManagerService.getCatalogOfStudyDefinition(studyDefinition.getId());
 
-			// update study definition
-			studyDefinitionManagerService.updateStudyDefinition(updatedStudyDefinition);
+				// create updated study definition
+				StudyDefinitionImpl updatedStudyDefinition = new StudyDefinitionImpl(studyDefinition);
+				updatedStudyDefinition.setItems(Lists.transform(updateRequest.getCatalogItemIds(),
+						new Function<String, CatalogItem>()
+						{
+							@Override
+							public CatalogItem apply(String catalogItemId)
+							{
+								CatalogItem catalogItem = catalog.findItem(catalogItemId);
+								if (catalogItem == null) throw new RuntimeException("unknown catalog item id: "
+										+ catalogItemId);
+								return catalogItem;
+							}
+						}));
+				updatedStudyDefinition.setStatus(status);
+
+				if (StringUtils.isNotBlank(updateRequest.getName()))
+				{
+					updatedStudyDefinition.setName(updateRequest.getName());
+				}
+
+				// update study definition
+				studyDefinitionManagerService.updateStudyDefinition(updatedStudyDefinition);
+			}
 		}
 	}
 

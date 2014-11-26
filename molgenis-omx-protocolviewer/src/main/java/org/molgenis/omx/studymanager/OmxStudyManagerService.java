@@ -218,6 +218,26 @@ public class OmxStudyManagerService implements StudyManagerService
 	}
 
 	@Override
+	public void withdrawStudyDefinition(String id) throws UnknownStudyDefinitionException
+	{
+		Query q = new QueryImpl().eq(StudyDataRequest.ID, id);
+		StudyDataRequest studyDataRequest = dataService
+				.findOne(StudyDataRequest.ENTITY_NAME, q, StudyDataRequest.class);
+		if (studyDataRequest == null)
+		{
+			throw new UnknownStudyDefinitionException("Study definition [" + id + "] does not exist");
+		}
+
+		if (!studyDataRequest.getRequestStatus().equalsIgnoreCase(Status.EXPORTED.toString()))
+		{
+			throw new RuntimeException("Study data request with status '" + studyDataRequest.getRequestStatus()
+					+ "' can not be withdrawn");
+		}
+		studyDataRequest.setRequestStatus(Status.SUBMITTED.toString().toLowerCase());
+		dataService.update(StudyDataRequest.ENTITY_NAME, studyDataRequest);
+	}
+
+	@Override
 	public List<StudyDefinition> findStudyDefinitions(Status status, String search)
 	{
 		Query q = new QueryImpl().eq(StudyDataRequest.REQUESTSTATUS, status.toString().toLowerCase());
