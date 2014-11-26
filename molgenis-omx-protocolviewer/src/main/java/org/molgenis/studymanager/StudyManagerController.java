@@ -15,6 +15,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.catalog.Catalog;
 import org.molgenis.catalog.CatalogItem;
@@ -190,6 +191,7 @@ public class StudyManagerController extends MolgenisPluginController
 		Catalog catalog = catalogManagerService.getCatalogOfStudyDefinition(studyDefinition.getId());
 		map.put("catalog", CatalogModelBuilder.create(catalog, studyDefinition, false));
 		map.put("status", studyDefinition.getStatus());
+		map.put("name", studyDefinition.getName());
 		return map;
 	}
 
@@ -226,6 +228,11 @@ public class StudyManagerController extends MolgenisPluginController
 						}
 					}));
 			updatedStudyDefinition.setStatus(status);
+
+			if (StringUtils.isNotBlank(updateRequest.getName()))
+			{
+				updatedStudyDefinition.setName(updateRequest.getName());
+			}
 
 			// update study definition
 			studyDefinitionManagerService.updateStudyDefinition(updatedStudyDefinition);
@@ -350,6 +357,7 @@ public class StudyManagerController extends MolgenisPluginController
 		private StudyDefinition.Status status;
 		@NotNull
 		private List<String> catalogItemIds;
+		private String name;
 
 		public List<String> getCatalogItemIds()
 		{
@@ -369,6 +377,16 @@ public class StudyManagerController extends MolgenisPluginController
 		public void setStatus(StudyDefinition.Status status)
 		{
 			this.status = status;
+		}
+
+		public String getName()
+		{
+			return name;
+		}
+
+		public void setName(String name)
+		{
+			this.name = name;
 		}
 	}
 

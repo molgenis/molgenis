@@ -20,6 +20,7 @@
 		var editTreeContainer = $('#study-definition-editor-tree');
         var editStateSelect = $('#edit-state-select');
 		var updateStudyDefinitionBtn = $('#update-study-definition-btn');
+		var studyDefinitionEditor = $('#study-definition-editor');
 		
 		function createDynatreeConfig(catalog) {
 			function createDynatreeConfigRec(node, dynaNode) {
@@ -212,10 +213,20 @@
                         editInfoContainer.html(createCatalogInfo(result.catalog));
                         editTreeContainer.empty();
                         editTreeContainer.dynatree({'minExpandLevel': 2, 'children': createDynatreeConfig(result.catalog), 'selectMode': 3, 'debugLevel': 0, 'checkbox': true});
-                        if(editable)
+                      
+                        if (selectedStudyDefinitionState == 'SUBMITTED') {
+                        	$('#study-definition-edit-name').show();
+                        	$('#study-definition-edit-name #name').val(result.name);
+                        } else {
+                        	$('#study-definition-edit-name #name').val('');
+                        	$('#study-definition-edit-name').hide();
+                        }
+                     	 
+                        if(editable) {
                         	editTreeContainer.show();
-                        else 
+                        } else {
                         	editTreeContainer.hide();
+                        }
                         updateStudyDefinitionEditorStateSelect(result.status);
                     },
                     error: function (xhr) {
@@ -243,6 +254,11 @@
 		});
 		
 		updateStudyDefinitionBtn.click(function() {
+			if (!$('#studyDefinitionForm').valid())
+			{
+				return;
+			}
+			
 			updateStudyDefinitionBtn.prop('disabled', true);
 
             // get selected nodes
@@ -265,7 +281,8 @@
 				url : molgenis.getContextUrl() + '/update/' + selectedStudyDefinitionId,
 				data : JSON.stringify({
                     'status': currentStudyDefinitionState,
-					'catalogItemIds': uniquecatalogItemIds
+					'catalogItemIds': uniquecatalogItemIds,
+					'name': $('#study-definition-edit-name #name').val()
 				}),
 				contentType : 'application/json',
 				success : function(entities) {
