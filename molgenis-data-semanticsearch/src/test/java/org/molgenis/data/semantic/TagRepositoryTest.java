@@ -10,7 +10,6 @@ import java.util.UUID;
 
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
-import org.molgenis.data.DataService;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -39,16 +38,12 @@ public class TagRepositoryTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	private AttributeMetaData attributeMetaData;
 
-	@Autowired
-	private DataService dataService;
-
 	private UUID uuid = UUID.randomUUID();
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		when(dataService.getCrudRepository(TagMetaData.ENTITY_NAME)).thenReturn(repository);
-		tagRepository = new TagRepository(dataService, idGenerator);
+		tagRepository = new TagRepository(repository, idGenerator);
 		when(idGenerator.generateId()).thenReturn(uuid);
 	}
 
@@ -57,7 +52,7 @@ public class TagRepositoryTest extends AbstractTestNGSpringContextTests
 	{
 
 		MapEntity expected = new MapEntity(TagMetaData.ENTITY_NAME);
-		expected.set(TagMetaData.IDENTIFIER, uuid);
+		expected.set(TagMetaData.IDENTIFIER, uuid.toString());
 		expected.set(TagMetaData.OBJECT_IRI, "http://edamontology.org/data_3031");
 		expected.set(TagMetaData.LABEL, "Core data");
 		expected.set(TagMetaData.RELATION_IRI, "http://molgenis.org/biobankconnect/instanceOf");
@@ -81,12 +76,6 @@ public class TagRepositoryTest extends AbstractTestNGSpringContextTests
 	@Configuration
 	public static class Config
 	{
-		@Bean
-		DataService dataService()
-		{
-			return mock(DataService.class);
-		}
-
 		@Bean
 		CrudRepository repository()
 		{

@@ -52,12 +52,11 @@
   		<p>{{package.description}}</p>
   		<p>
   			{{#each tags}}
-  				{{#equal this.relation 'link'}}
+  				{{#if this.iri}}
   					<span class="label label-primary"><a href='{{this.iri}}' target="_blank">{{this.label}}</a></span>
-  				{{/equal}}
-  				{{#notequal this.relation 'link'}}
+  				{{else}}
   					<span class="label label-primary">{{this.label}}</span>
-  				{{/notequal}}
+  				{{/if}}
   			{{/each}}
   		</p>
   		{{#if package.matchDescription}}
