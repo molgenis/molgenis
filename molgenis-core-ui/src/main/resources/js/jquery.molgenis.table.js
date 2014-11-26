@@ -89,6 +89,9 @@
 			return attribute.name;
 		});
 		var expandAttributeNames = $.map(settings.colAttributes, function(attribute) {
+			if(attribute.expression){
+				return attribute.name;
+			}
 			if(attribute.fieldType === 'XREF' || attribute.fieldType === 'CATEGORICAL' ||attribute.fieldType === 'MREF') {
 				// partially expand reference entities (only request label attribute)
 				var refEntity = settings.refEntitiesMeta[attribute.refEntity.href];
