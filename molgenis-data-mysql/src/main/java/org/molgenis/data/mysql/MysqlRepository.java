@@ -50,6 +50,7 @@ import org.springframework.jdbc.core.RowMapper;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.gson.Gson;
 
 public class MysqlRepository extends AbstractCrudRepository implements Manageable
 {
@@ -432,11 +433,17 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		sql.append("INSERT INTO ").append('`').append(getTableName()).append('`').append(" (");
 		StringBuilder params = new StringBuilder();
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
+		{
+			if (att.getExpression() != null)
+			{
+				continue;
+			}
 			if (!(att.getDataType() instanceof MrefField))
 			{
 				sql.append('`').append(att.getName()).append('`').append(", ");
 				params.append("?, ");
 			}
+		}
 		if (sql.charAt(sql.length() - 1) == ' ' && sql.charAt(sql.length() - 2) == ',')
 		{
 			sql.setLength(sql.length() - 2);
@@ -1075,6 +1082,10 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 							}
 							else
 							{
+								if (att.getExpression() != null)
+								{
+									continue;
+								}
 								// default value, if any
 								if (batch.get(rowIndex).get(att.getName()) == null)
 								{
@@ -1263,6 +1274,10 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 
 			for (AttributeMetaData att : entityMetaData.getAtomicAttributes())
 			{
+				if (att.getExpression() != null)
+				{
+					continue;
+				}
 				if (att.getDataType() instanceof MrefField)
 				{
 					// TODO: convert to typed lists (or arrays?)
@@ -1287,6 +1302,24 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 					e.set(att.getName(), att.getDataType().convert(resultSet.getObject(att.getName())));
 				}
 			}
+			for (AttributeMetaData att : entityMetaData.getAtomicAttributes())
+			{
+				if (att.getExpression() != null)
+				{
+					// computed attribute
+					Gson gson = new Gson();
+					Object expression = gson.fromJson(att.getExpression(), Object.class);
+					if (expression instanceof String)
+					{
+						e.set(att.getName(), e.get(att.getExpression()));
+					}
+					else
+					{
+						System.out.println("expression:" + expression + " instanceof " + expression.getClass());
+					}
+				}
+			}
+
 			return e;
 
 		}
