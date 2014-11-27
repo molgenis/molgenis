@@ -117,7 +117,7 @@ public class MolgenisDbSettings implements MolgenisSettings
 			throw new IllegalArgumentException("content is null");
 		}
 
-		Query query = new QueryImpl().eq(RuntimeProperty.NAME, value);
+		Query query = new QueryImpl().eq(RuntimeProperty.NAME, name);
 		try
 		{
 			RuntimeProperty property = dataService.findOne(RuntimeProperty.ENTITY_NAME, query, RuntimeProperty.class);
