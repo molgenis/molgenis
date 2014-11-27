@@ -80,3 +80,7 @@ i:hover {
 	max-height: 300px;
 	overflow: auto;
 }
+
+span.inactive span.fancytree-checkbox, span.inactive span.fancytree-checkbox:hover {
+	background-position: -16px -112px;
+}

@@ -2,6 +2,7 @@ package org.molgenis.omx.catalogmanager;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.ListIterator;
 
 import org.molgenis.catalog.CatalogFolder;
 import org.molgenis.catalog.CatalogItem;
@@ -42,6 +43,18 @@ public class OmxCatalogFolder implements CatalogFolder
 	public List<CatalogFolder> getChildren()
 	{
 		List<Protocol> subProtocols = protocol.getSubprotocols();
+
+		// Remove inactive protocols
+		ListIterator<Protocol> it = subProtocols.listIterator();
+		while (it.hasNext())
+		{
+			Protocol prod = it.next();
+			if ((prod.getActive() != null) && !prod.getActive().booleanValue())
+			{
+				it.remove();
+			}
+		}
+
 		return subProtocols != null ? Lists.transform(subProtocols, new Function<Protocol, CatalogFolder>()
 		{
 			@Override
