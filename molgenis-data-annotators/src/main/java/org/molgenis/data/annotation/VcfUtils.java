@@ -45,12 +45,13 @@ public class VcfUtils {
 	 * @return
 	 * @throws Exception
 	 */
-	public static boolean checkInput(File inputVcfFile, File outputVCFFile, Scanner inputVcfFileScanner, PrintWriter outputVCFWriter, List<String> infoFields, String checkAnnotatedBeforeValue) throws Exception
+	public static boolean checkInput(File inputVcfFile, PrintWriter outputVCFWriter, List<String> infoFields, String checkAnnotatedBeforeValue) throws Exception
 	{
 		boolean annotatedBefore = false;
-		
+	
 		System.out.println("Detecting VCF column header...");
-
+		
+		Scanner inputVcfFileScanner = new Scanner(inputVcfFile);
         String line = inputVcfFileScanner.nextLine();
         
         //if first line does not start with ##, we dont trust this file as VCF
@@ -80,6 +81,7 @@ public class VcfUtils {
         	if(!line.startsWith("#CHROM"))
         	{
         		outputVCFWriter.close();
+        		inputVcfFileScanner.close();
         		throw new Exception("Header does not start with #CHROM, are you sure it is a VCF file?");
         	}
         	
@@ -98,10 +100,11 @@ public class VcfUtils {
         else
         {
         	outputVCFWriter.close();
+        	inputVcfFileScanner.close();
         	throw new Exception("Did not find ## on the first line, are you sure it is a VCF file?");
         }
         
-        System.out.println("Now starting to process the data.");
+        inputVcfFileScanner.close();
         return annotatedBefore;
 	}
 

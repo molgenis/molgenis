@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -12,9 +13,9 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.VcfUtils;
 import org.molgenis.data.annotation.TabixReader;
 import org.molgenis.data.annotation.VariantAnnotator;
+import org.molgenis.data.annotation.VcfUtils;
 import org.molgenis.data.support.AnnotationServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -22,7 +23,7 @@ import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.MolgenisSimpleSettings;
-import org.molgenis.vcf.VcfRecord;
+import org.molgenis.vcf.VcfReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -48,10 +49,16 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	private final AnnotationService annotatorService;
 
 	// the cadd service returns these two values
-	static final String CADD_SCALED = "CADD_SCALED";
-	static final String CADD_ABS = "CADD_ABS";
+	// must be compatible with VCF format, ie no funny characters
+	static final String CADD_SCALED = "CADDSCALED";
+	static final String CADD_ABS = "CADDABS";
 
 	private static final String NAME = "CADD";
+	
+	final List<String> infoFields = Arrays.asList(new String[]{
+			"##INFO=<ID="+CADD_SCALED+",Number=1,Type=Float,Description=\"CADD scaled C score, ie. phred-like. See Kircher et al. 2014 (http://www.ncbi.nlm.nih.gov/pubmed/24487276) or CADD website (http://cadd.gs.washington.edu/) for more information.\">",
+			"##INFO=<ID="+CADD_ABS+",Number=1,Type=Float,Description=\"CADD absolute C score, ie. unscaled SVM output. Useful as  reference when the scaled score may be unexpected.\">"
+	});
 
 	public static final String CADD_FILE_LOCATION_PROPERTY = "cadd_location";
 	TabixReader tr;
@@ -81,11 +88,25 @@ public class CaddServiceAnnotator extends VariantAnnotator
 
 		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
 		Iterator<Entity> vcfIter = vcfRepo.iterator();
+		
+		//VcfReader vcfReader= new VcfReader();
+		
+		
+		VcfUtils.checkInput(inputVcfFile, outputVCFWriter, infoFields, CADD_SCALED);
+		
+        System.out.println("Now starting to process the data.");
+		
 		while (vcfIter.hasNext())
 		{
 			Entity record = vcfIter.next();
+			
+		//	System.out.println("record, before:");
+		//	System.out.println(record.toString());
 
 			List<Entity> annotatedRecord = annotateEntity(record);
+			
+		//	System.out.println("record, annotated:");
+		//	System.out.println(annotatedRecord.toString());
 
 			if (annotatedRecord.size() > 1)
 			{
