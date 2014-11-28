@@ -227,8 +227,6 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 	public void addToStudyDefinitionDraftForCurrentUser(String protocolId, String catalogId)
 			throws UnknownCatalogException
 	{
-		final Catalog catalog = catalogService.getCatalog(catalogId);
-
 		StudyDefinition studyDefinition = getStudyDefinitionDraftForCurrentUser(catalogId);
 		if (studyDefinition == null)
 		{
