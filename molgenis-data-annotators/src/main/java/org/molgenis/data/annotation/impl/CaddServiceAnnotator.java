@@ -111,6 +111,7 @@ public class CaddServiceAnnotator extends VariantAnnotator
 				{
 					caddAbs = Double.parseDouble(split[4]);
 					caddScaled = Double.parseDouble(split[5]);
+                    done = true;
 				}
 				// In some cases, the ref and alt are swapped. If this is the case, the initial if statement above will
 				// fail, we can just check whether such a swapping has occured
@@ -118,6 +119,7 @@ public class CaddServiceAnnotator extends VariantAnnotator
 				{
 					caddAbs = Double.parseDouble(split[4]);
 					caddScaled = Double.parseDouble(split[5]);
+                    done = true;
 				}
 			}
 			else
@@ -128,6 +130,10 @@ public class CaddServiceAnnotator extends VariantAnnotator
 				}
 				done = true;
 			}
+		}
+		if (caddAbs == 0.0 && caddScaled == 0.0)
+		{
+			throw new RuntimeException("Something went wrong with the CADD annotator");
 		}
 
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
