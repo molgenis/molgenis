@@ -1,65 +1,75 @@
+<#macro renderTags tags>
+	<#if tags?has_content>
+		<#list tags as tag>
+			<#if tag.object.iri?has_content>
+				<span class="label label-primary"><a href='${tag.object.iri}' target="_blank">${tag.object.label}</a></span>
+			<#else>
+				<span class="label label-primary">${tag.object.label}</span>
+			</#if>
+		</#list>
+	</#if>
+</#macro>
+
 <#macro renderPackage package>
-    <h2 id="package-${package.name}" class="page-header">${package.simpleName} <small>(${package.name})</small></h2>
+    <h2 id="package-${package.name?replace(" ", "_")}" class="page-header">${package.simpleName} <small>(${package.name})</small></h2>
     <div class="package-container">
         <p><#if package.description?has_content>${package.description}</#if></p>
-        <#list package.tags as tag>
-        	<#if tag.relation == 'link'>
-        		<span class="label label-primary"><a href='${tag.object.label}' target="_blank">${tag.object.label}</a></span>
-        	<#else>
-        		<span class="label label-primary">${tag.object.label}</span>
-        	</#if>
-        </#list>
+        <@renderTags tags=package.tags/>
         
         <#-- Subpackages -->
         <#if package.subPackages?has_content>
             <h4>Packages</h4>
             <ul class="list-group">
                 <#list package.subPackages as subPackage>
-                    <li class="list-group-item"><a href="#package-${subPackage.name}">${subPackage.name}</a></li>
+                    <li class="list-group-item"><a href="#package-${subPackage.name?replace(" ", "_")}">${subPackage.name}</a></li>
                 </#list>
             </ul>    
         </#if>
     
         <#-- Entities index -->
         <#if package.entityMetaDatas?has_content>
-            <h4 id="entities-${package.name}">Entities</h4>
+            <h4 id="entities-${package.name?replace(" ", "_")}">Entities</h4>
             <div class="row">
                 <div class="col-md-4">
                     <ul class="list-group">
             <#list package.entityMetaDatas as entity>
-                        <li class="list-group-item"><a href="#entity-${entity.name}">${entity.label}</a></li>
+                        <li class="list-group-item"><a href="#entity-${entity.name?replace(" ", "_")}">${entity.label}</a></li>
             </#list>
                     </ul>
+		            <a href="#package-index"><small>back to top</small></a>
                 </div>
             </div>
         
             <#-- Entities -->
             <#list package.entityMetaDatas as entity>
-            <div class="panel" id="entity-${entity.name}">
+            <div class="panel" id="entity-${entity.name?replace(" ", "_")}">
                 <div class="panel-heading">
-                    <h3 id="entity-${entity.name}" class="panel-title">${entity.label}<small><#if entity.extends?has_content> extends ${entity.extends.label}</#if><#if entity.abstract> (abstract)</#if></small></h3>
+                    <h3 class="panel-title">${entity.label}<small class="panel-title"><#if entity.extends?has_content> extends ${entity.extends.label}</#if><#if entity.abstract> (abstract)</#if></small></h3>
                 </div>
                 <div class="panel-body">
             
                     <p><#if entity.description?has_content>${entity.description}<#else>No description available</#if></p>
+                    <@renderTags tags=tagService.getTagsForEntity(entity)/>
                     
                     <#-- Entity attributes -->
-                    <table class="table">
-                        <thead>
-                            <th>Attribute</th>
-                            <th>Default</th>
-                            <th>Type</th>
-                            <th>Constraints</th>
-                            <th>Description</th>
-                        </thead>
-                        <tbody>
-                            <#assign depth = []/>
-                            <#list entity.attributes as attribute>
-                                <@renderAttribute attribute entity depth/>
-                            </#list>
-                        </tbody>
-                    </table>
-                    <a href="#entities-${package.name}"><small>back to entities</small></a>
+                    <div class="table-responsive">
+	                    <table class="table table-condensed">
+	                        <thead>
+	                            <th>Attribute</th>
+	                            <th>Default</th>
+	                            <th>Type</th>
+	                            <th>Constraints</th>
+	                            <th>Description</th>
+	                        </thead>
+	                        <tbody>
+	                            <#assign depth = []/>
+	                            <#list entity.attributes as attribute>
+	                                <@renderAttribute attribute entity depth/>
+	                            </#list>
+	                        </tbody>
+	                    </table>
+	                </div>
+                    <a href="#entities-${package.name?replace(" ", "_")}"><small>back to entities</small></a>
                 </div>
             </div>
             </#list>
@@ -77,10 +87,10 @@
 <#macro renderAttribute attribute entity depth>
     <#assign nextDepth = depth + ["x"]/>
     <#assign dataType=attribute.dataType.enumType>
-	<tr id="attribute-${entity.name}${attribute.name}">
+	<tr id="attribute-${entity.name?replace(" ", "_")}${attribute.name?replace(" ", "_")}">
         <td><#list depth as lvl>&nbsp;</#list>${attribute.label}<#if attribute.idAtrribute> <em>(id attribute)</em></#if><#if attribute.labelAttribute> <em>(label attribute)</em></#if><#if attribute.lookupAttribute> <em>(lookup attribute)</em></#if></td>
     	<td><#if attribute.defaultValue?has_content><#if dataType == "BOOL">${attribute.defaultValue?string("true", "false")}<#else>${attribute.defaultValue}</#if></#if></td>
-    	<td>${dataType}<#if dataType == "CATEGORICAL" || dataType == "MREF" || dataType == "XREF"> (<a href="#entity-${attribute.refEntity.name}">${attribute.refEntity.label}</a>)</#if></td>
+    	<td>${dataType}<#if dataType == "CATEGORICAL" || dataType == "MREF" || dataType == "XREF"> (<a href="#entity-${attribute.refEntity.name?replace(" ", "_")}">${attribute.refEntity.label}</a>)</#if></td>
     	<td>
     	    <#assign constraints = []>
             <#if attribute.nillable><#assign constraints = constraints + [ "nillable" ] /></#if>
@@ -102,7 +112,7 @@
             </#if>
             <#list constraints as constraint>${constraint}<#if constraint_has_next>, </#if></#list>
     	</td>
-    	<td><#if attribute.description?has_content>${attribute.description}</#if></td>
+    	<td class="description-column"><#if attribute.description?has_content>${attribute.description}</#if></td>
 	</tr>
     <#if attribute.dataType.enumType == "COMPOUND">
         <#list attribute.attributeParts as attributePart>
@@ -113,7 +123,7 @@
 </#macro>
 
 <#macro createPackageListItem package>
-    <li><a href="#package-${package.name}">${package.name}</a></li>
+    <li><a href="#package-${package.name?replace(" ", "_")}">${package.name}</a></li>
     <#if package.subPackages?has_content>
         <li>
             <ul>

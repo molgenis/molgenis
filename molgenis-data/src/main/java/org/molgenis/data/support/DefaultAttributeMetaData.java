@@ -1,6 +1,7 @@
 package org.molgenis.data.support;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes;
@@ -37,7 +38,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	private boolean visible = true; // remove?
 	private boolean unique = false;
 	private boolean auto = false;
-	private Iterable<AttributeMetaData> attributesMetaData;
+	private List<AttributeMetaData> attributesMetaData;
 	private boolean aggregateable = false;
 	private Range range;
 
@@ -211,16 +212,21 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 	@Override
 	public Iterable<AttributeMetaData> getAttributeParts()
 	{
-		if (this.attributesMetaData == null && this.getRefEntity() != null)
-		{
-			return this.refEntity.getAttributes();
-		}
-		return attributesMetaData;
+		return this.attributesMetaData != null ? this.attributesMetaData : Collections.<AttributeMetaData> emptyList();
 	}
 
-	public void setAttributesMetaData(Iterable<AttributeMetaData> attributesMetaData)
+	public void addAttributePart(AttributeMetaData attributePart)
 	{
-		this.attributesMetaData = attributesMetaData;
+		if (this.attributesMetaData == null)
+		{
+			this.attributesMetaData = new ArrayList<AttributeMetaData>();
+		}
+		this.attributesMetaData.add(attributePart);
+	}
+
+	public void setAttributesMetaData(Iterable<AttributeMetaData> attributeParts)
+	{
+		this.attributesMetaData = Lists.newArrayList(attributeParts);
 	}
 
 	@Override
@@ -305,9 +311,10 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		return this.aggregateable;
 	}
 
-	public void setAggregateable(boolean aggregateable)
+	public DefaultAttributeMetaData setAggregateable(boolean aggregateable)
 	{
 		this.aggregateable = aggregateable;
+		return this;
 	}
 
 	@Override

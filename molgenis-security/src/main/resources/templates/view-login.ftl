@@ -11,13 +11,15 @@
 		<script src="<@resource_href "/js/jquery-1.8.3.min.js"/>"></script>
 		<script src="<@resource_href "/js/bootstrap.min.js"/>"></script>
 		<script src="<@resource_href "/js/jquery.validate.min.js"/>"></script>
+		<script src="<@resource_href "/js/handlebars.min.js"/>"></script>
 		<script src="<@resource_href "/js/molgenis.js"/>"></script>
 	</head>
 	<body>
+    <#assign disableClose="true">
 	<#include "/login-modal.ftl">
 		<script type="text/javascript">
 			$(function() {
-		  		$('#login-modal').modal();
+		  		$('#login-modal').modal({backdrop: 'static'});
 		  	<#if errorMessage??>
 		  		$('#loginPassword').after($('<p class="text-error">${errorMessage}</p>'));
 		  	</#if>

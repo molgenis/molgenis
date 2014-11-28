@@ -14,11 +14,12 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.AnnotationService;
+import org.molgenis.data.annotation.CrudRepositoryAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.omx.annotation.OmxDataSetAnnotator;
+import org.molgenis.data.meta.WritableMetaDataService;
+import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.validation.EntityValidator;
-import org.molgenis.omx.search.DataSetsIndexer;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -58,12 +59,13 @@ public class AnnotatorController
 	AnnotationService annotationService;
 
 	@Autowired
-	DataSetsIndexer indexer;
-
-	@Autowired
 	EntityValidator entityValidator;
 
-	/**
+    @Autowired
+    MysqlRepositoryCollection mysqlRepositoryCollection;
+
+
+    /**
 	 * Gets a map of all available annotators.
 	 * 
 	 * @param dataSetName
@@ -83,8 +85,7 @@ public class AnnotatorController
 	 * option is ticked by the user.
 	 * 
 	 * @param annotatorNames
-	 * @param dataset
-	 *            identifier
+	 * @param dataSetIdentifier
 	 * @param createCopy
 	 * @return repositoryName
 	 * 
@@ -92,11 +93,10 @@ public class AnnotatorController
 	@RequestMapping(value = "/annotate-data", method = RequestMethod.POST)
 	@ResponseBody
 	public String annotateData(@RequestParam(value = "annotatorNames", required = false) String[] annotatorNames,
-			Model model, @RequestParam("dataset-identifier") String dataSetIdentifier,
+			@RequestParam("dataset-identifier") String dataSetIdentifier,
 			@RequestParam(value = "createCopy", required = false) boolean createCopy)
 	{
-		OmxDataSetAnnotator omxDataSetAnnotator = new OmxDataSetAnnotator(dataService, searchService, indexer,
-				entityValidator);
+		CrudRepositoryAnnotator crudRepositoryAnnotator = new CrudRepositoryAnnotator(mysqlRepositoryCollection);
 		Repository repository = dataService.getRepositoryByEntityName(dataSetIdentifier);
 		String name = dataSetIdentifier;
 
@@ -107,14 +107,10 @@ public class AnnotatorController
 				RepositoryAnnotator annotator = annotationService.getAnnotatorByName(annotatorName);
 				if (annotator != null)
 				{
-					// FIXME do something about this indexer problem, indexing while annotator is running breaks the
 					// running annotator
-					while (indexer.isIndexingRunning())
-					{
-					}
 					Repository repo = dataService.getRepositoryByEntityName(name);
 
-					repository = omxDataSetAnnotator.annotate(annotator, repo, createCopy);
+					repository = crudRepositoryAnnotator.annotate(annotator, repo, createCopy);
 					name = repository.getName();
 					createCopy = false;
 				}
@@ -155,7 +151,7 @@ public class AnnotatorController
 	/**
 	 * Transforms metadata to a List of strings
 	 * 
-	 * @param metadata
+	 * @param metaData
 	 * @return result
 	 * */
 	private List<String> metaDataToStringList(EntityMetaData metaData)
@@ -173,7 +169,7 @@ public class AnnotatorController
 	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	public Map<String, String> handleRuntimeException(RuntimeException e)
 	{
-		logger.error(null, e);
+		logger.error(e.getMessage(), e);
 		return Collections.singletonMap("errorMessage",
 				"An error occured. Please contact the administrator.<br />Message:" + e.getMessage());
 	}

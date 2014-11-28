@@ -12,7 +12,6 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.omx.observ.Characteristic;
 import org.molgenis.ontology.beans.AbstractSemanticEntity;
 import org.molgenis.ontology.beans.OntologyEntity;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
@@ -30,15 +29,15 @@ public class IndexEntityTest
 	public void setUp() throws OWLOntologyCreationException
 	{
 		entityMetaData = new DefaultEntityMetaData("indexEntity");
-		DefaultAttributeMetaData attributeMetaData = new DefaultAttributeMetaData(Characteristic.ID);
+		DefaultAttributeMetaData attributeMetaData = new DefaultAttributeMetaData("id");
 		attributeMetaData.setIdAttribute(true);
 		entityMetaData.addAttributeMetaData(attributeMetaData);
-		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(Characteristic.NAME));
-		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(Characteristic.DESCRIPTION));
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData("name"));
+		entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData("description"));
 		DefaultAttributeMetaData attributeMetaData_2 = new DefaultAttributeMetaData("attributes");
 		attributeMetaData_2.setDataType(MolgenisFieldTypes.MREF);
 		entityMetaData.addAttributeMetaData(attributeMetaData_2);
-		entityMetaData.setIdAttribute(Characteristic.ID);
+		entityMetaData.setIdAttribute("id");
 
 		Entity entity = mock(Entity.class);
 		when(entity.getIdValue()).thenReturn("forged-ID");
@@ -49,8 +48,7 @@ public class IndexEntityTest
 	public void getAttributeNames()
 	{
 		assertEquals(Iterables.size(indexEntity.getAttributeNames()), 4);
-		List<String> attributeNames = Arrays.asList(Characteristic.ID, Characteristic.NAME, Characteristic.DESCRIPTION,
-				"attributes");
+		List<String> attributeNames = Arrays.asList("id", "name", "description", "attributes");
 		for (String name : indexEntity.getAttributeNames())
 		{
 			assertTrue(attributeNames.contains(name));
@@ -76,7 +74,7 @@ public class IndexEntityTest
 
 		for (String name : indexEntity.getLabelAttributeNames())
 		{
-			assertEquals(name, Characteristic.ID);
+			assertEquals(name, "id");
 		}
 	}
 }

@@ -42,6 +42,7 @@ import org.molgenis.fieldtypes.StringField;
 import org.molgenis.fieldtypes.TextField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.model.MolgenisModelException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -57,14 +58,25 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 	private static final Logger logger = Logger.getLogger(MysqlRepository.class);
 	private EntityMetaData metaData;
 	private final JdbcTemplate jdbcTemplate;
+	private final AsyncJdbcTemplate asyncJdbcTemplate;
 	private MysqlRepositoryCollection repositoryCollection;
 	private DataSource dataSource;
 
-	public MysqlRepository(DataSource dataSource)
+	/**
+	 * Creates a new MysqlRepository.
+	 * 
+	 * @param dataSource
+	 *            the datasource to use to execute statements on the Mysql database
+	 * @param asyncJdbcTemplate
+	 *            {@link AsyncJdbcTemplate} to use to execute DDL statements in an isolated transaction on the Mysql
+	 *            database
+	 */
+	public MysqlRepository(DataSource dataSource, AsyncJdbcTemplate asyncJdbcTemplate)
 	{
 		super(null);// TODO url
 		this.dataSource = dataSource;
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
+		this.asyncJdbcTemplate = asyncJdbcTemplate;
 	}
 
 	public void setMetaData(EntityMetaData metaData)
@@ -80,20 +92,48 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 	@Override
 	public void drop()
 	{
+		DataAccessException remembered = null;
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 		{
 			if (att.getDataType() instanceof MrefField)
 			{
-				jdbcTemplate.execute("DROP TABLE IF EXISTS `" + getTableName() + "_" + att.getName() + "`");
+				DataAccessException e = tryExecute("DROP TABLE IF EXISTS `" + getTableName() + "_" + att.getName()
+						+ "`");
+				remembered = remembered != null ? remembered : e;
 			}
 		}
-		jdbcTemplate.execute(getDropSql());
+		DataAccessException e = tryExecute(getDropSql());
+		remembered = remembered != null ? remembered : e;
+		if (remembered != null)
+		{
+			throw remembered;
+		}
+	}
+
+	/**
+	 * Tries to execute a piece of SQL.
+	 * 
+	 * @param sql
+	 *            the SQL to execute
+	 * @return Exception if one was caught, or null if all went well
+	 */
+	private DataAccessException tryExecute(String sql)
+	{
+		try
+		{
+			asyncJdbcTemplate.execute(sql);
+			return null;
+		}
+		catch (DataAccessException caught)
+		{
+			return caught;
+		}
 	}
 
 	public void dropAttribute(String attributeName)
 	{
 		String sql = String.format("ALTER TABLE `%s` DROP COLUMN `%s`", getTableName(), attributeName);
-		jdbcTemplate.execute(sql);
+		asyncJdbcTemplate.execute(sql);
 
 	}
 
@@ -112,29 +152,36 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		}
 		try
 		{
-			jdbcTemplate.execute(getCreateSql());
+			asyncJdbcTemplate.execute(getCreateSql());
 
 			for (AttributeMetaData attr : getEntityMetaData().getAtomicAttributes())
 			{
 				// add mref tables
 				if (attr.getDataType() instanceof MrefField)
 				{
-					jdbcTemplate.execute(getMrefCreateSql(attr));
+					asyncJdbcTemplate.execute(getMrefCreateSql(attr));
 				}
 				else if (attr.getDataType() instanceof XrefField)
 				{
-					jdbcTemplate.execute(getCreateFKeySql(attr));
+					asyncJdbcTemplate.execute(getCreateFKeySql(attr));
 				}
 
 				if (attr.isUnique())
 				{
-					jdbcTemplate.execute(getUniqueSql(attr));
+					asyncJdbcTemplate.execute(getUniqueSql(attr));
 				}
 			}
 		}
 		catch (Exception e)
 		{
 			logger.error("Exception creating MysqlRepository.", e);
+			try
+			{
+				drop();
+			}
+			catch (Exception ignored)
+			{
+			}
 			throw new MolgenisDataException(e);
 		}
 	}
@@ -145,21 +192,21 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		{
 			if (attributeMetaData.getDataType() instanceof MrefField)
 			{
-				jdbcTemplate.execute(getMrefCreateSql(attributeMetaData));
+				asyncJdbcTemplate.execute(getMrefCreateSql(attributeMetaData));
 			}
 			else
 			{
-				jdbcTemplate.execute(getAlterSql(attributeMetaData));
+				asyncJdbcTemplate.execute(getAlterSql(attributeMetaData));
 			}
 
 			if (attributeMetaData.getDataType() instanceof XrefField)
 			{
-				jdbcTemplate.execute(getCreateFKeySql(attributeMetaData));
+				asyncJdbcTemplate.execute(getCreateFKeySql(attributeMetaData));
 			}
 
 			if (attributeMetaData.isUnique())
 			{
-				jdbcTemplate.execute(getUniqueSql(attributeMetaData));
+				asyncJdbcTemplate.execute(getUniqueSql(attributeMetaData));
 			}
 		}
 		catch (Exception e)
@@ -1055,7 +1102,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 					}
 				}
 
-				logger.info("Added " + count.get() + " " + getTableName() + " entities.");
+				logger.debug("Added " + count.get() + " " + getTableName() + " entities.");
 				batch.clear();
 			}
 		}
@@ -1114,14 +1161,14 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 						if (mrefs.get(att.getName()) == null) mrefs.put(att.getName(), new ArrayList<Entity>());
 						if (e.get(att.getName()) != null)
 						{
-							List<String> vals = e.getList(att.getName());
+							List<Entity> vals = Lists.newArrayList(e.getEntities(att.getName()));
 							if (vals != null)
 							{
-								for (Object val : vals)
+								for (Entity val : vals)
 								{
 									Entity mref = new MapEntity();
 									mref.set(idAttribute.getName(), idValue);
-									mref.set(att.getName(), val);
+									mref.set(att.getName(), val.get(att.getRefEntity().getIdAttribute().getName()));
 									mrefs.get(att.getName()).add(mref);
 								}
 							}
@@ -1315,7 +1362,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 				throw new RuntimeException(e);
 			}
 
-			jdbcTemplate.execute(sql);
+			asyncJdbcTemplate.execute(sql);
 		}
 	}
 

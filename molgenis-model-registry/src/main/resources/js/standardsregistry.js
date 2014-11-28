@@ -23,13 +23,18 @@
 					if (data.targetType === 'title' || data.targetType === 'icon') {
 						switch(data.node.data.type) {
 						case 'package' :
-							document.getElementById('package-' + data.node.key).scrollIntoView();
+							$('#package-doc-container').scrollTo('#package-' + data.node.key);
 							break;
 						case 'entity' :
-							document.getElementById('entity-' + data.node.key).scrollIntoView();
+							$('#package-doc-container').scrollTo('#entity-' + data.node.key);
 							break;
 						case 'attribute' :
-							document.getElementById('attribute-' + data.node.parent.key + data.node.key).scrollIntoView();
+							var parent = data.node.parent;
+							while (parent.extraClasses != 'entity') {
+								//Compound attr
+								parent = parent.parent;
+							}
+							$('#package-doc-container').scrollTo('#attribute-' + parent.key + data.node.key);
 							break;
 						default:
 							throw 'Unknown type';
@@ -50,6 +55,18 @@
 		}
 		container.append(countTemplate({'count': searchResults.total}));
 		$('.select2').select2({width: 300});
+	}
+	
+	function zoomIn() {
+		scale += 0.1;
+		paper.setDimensions(bbox.width*scale, bbox.height*scale);
+		paper.scale(scale, scale);
+	}
+	
+	function zoomOut() {
+		scale -= 0.1;
+		paper.setDimensions(bbox.width*scale, bbox.height*scale);
+		paper.scale(scale, scale);
 	}
 	
 	$(function() {
@@ -133,32 +150,19 @@
 			}
 		});
 		
-		$(document).on('click', '#uml-tab', function() {
-			$.getScript(molgenis.getContextUrl() + '/uml?package=' + detailsPackageName);
-		});
-		
 		$(document).on('click', '#print-btn', function() {
+			var width = $('#package-doc-container').outerWidth();
+			$('#package-doc-container').css('height', '100%').css('width', '21cm').css("overflow", "hidden");
 			window.print();
+			$('#package-doc-container').css('height', '600px').css("overflow-x", "hidden").css("overflow-y", "auto").css('width', width);
 		});
 		
-		Handlebars.registerHelper('notequal', function(lvalue, rvalue, options) {
-		    if (arguments.length < 3)
-		        throw new Error("Handlebars Helper equal needs 2 parameters");
-		    if (lvalue != rvalue) {
-		    	 return options.fn(this);
-		    } else {
-		    	 return options.inverse(this);
-		    }
-		});
-		
-		Handlebars.registerHelper('equal', function(lvalue, rvalue, options) {
-		    if (arguments.length < 3)
-		        throw new Error("Handlebars Helper equal needs 2 parameters");
-		    if (lvalue != rvalue) {
-		        return options.inverse(this);
-		    } else {
-		        return options.fn(this);
-		    }
+		$(document).on('click', '#uml-tab', function() {
+			showSpinner();
+			setTimeout(function() {
+				$.getScript(molgenis.getContextUrl() + '/uml?package=' + detailsPackageName);
+				hideSpinner();
+			}, 500);
 		});
 		
 		countTemplate = Handlebars.compile($("#count-template").html());
@@ -167,6 +171,15 @@
 		if(window.location.hash) {
 			showPackageDetails(window.location.hash.substring(1));
 		}
+		
+		$(document).on('click', '#zoom-in', function() {
+			zoomIn();
+		});
+		
+		$(document).on('click', '#zoom-out', function() {
+			zoomOut();
+		});
+		
 		// initially search for all models
 		$('form[name=search-form]').submit();
 	});

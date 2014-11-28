@@ -27,16 +27,16 @@ import org.testng.annotations.Test;
 
 @ContextConfiguration
 public class HighchartSeriesUtilTest
-{	
+{
 	@Autowired
 	private HighchartSeriesUtil highchartSeriesUtil;
-	
+
 	@BeforeMethod
 	public void setUp()
 	{
 		highchartSeriesUtil = new HighchartSeriesUtil();
 	}
-	
+
 	@Test
 	public void convertDateTimeToMilliseconds()
 	{
@@ -45,10 +45,10 @@ public class HighchartSeriesUtilTest
 		calendar.set(2014, 1, 1, 1, 1, 1);
 		final TimeZone timeZone = calendar.getTimeZone();
 		long offset = timeZone.getOffset(calendar.getTime().getTime());
-		long correctResult = offset + calendar.getTime().getTime();
+		Long correctResult = offset + calendar.getTime().getTime();
 		assertEquals(highchartSeriesUtil.convertDateTimeToMilliseconds(calendar.getTime()), correctResult);
 	}
-	
+
 	@Test
 	public void convertDateToMilliseconds()
 	{
@@ -62,39 +62,44 @@ public class HighchartSeriesUtilTest
 		assertNotEquals(highchartSeriesUtil.convertDateToMilliseconds(calendar.getTime()), notCorrectResult);
 		assertEquals(highchartSeriesUtil.convertDateToMilliseconds(calendar.getTime()), correctResult);
 	}
-	
+
 	@Test
-	public void convertValueDateTime() {
+	public void convertValueDateTime()
+	{
 		FieldTypeEnum fieldTypeEnum = FieldTypeEnum.DATE_TIME;
 		Date value = mock(Date.class);
 		assertTrue(highchartSeriesUtil.convertValue(fieldTypeEnum, value) instanceof Long);
 	}
-	
+
 	@Test
-	public void convertValueDate() {
+	public void convertValueDate()
+	{
 		FieldTypeEnum fieldTypeEnum = FieldTypeEnum.DATE;
 		Date value = mock(Date.class);
 		assertTrue(highchartSeriesUtil.convertValue(fieldTypeEnum, value) instanceof Long);
 	}
-	
+
 	@Test
-	public void convertValueString() {
+	public void convertValueString()
+	{
 		FieldTypeEnum fieldTypeEnum = FieldTypeEnum.STRING;
 		String value = "test";
 		assertTrue(highchartSeriesUtil.convertValue(fieldTypeEnum, value) instanceof String);
 		assertEquals(highchartSeriesUtil.convertValue(fieldTypeEnum, value), value);
 	}
-	
+
 	@Test
-	public void convertValueInt() {
+	public void convertValueInt()
+	{
 		FieldTypeEnum fieldTypeEnum = FieldTypeEnum.INT;
 		Integer value = Integer.valueOf("1");
 		assertTrue(highchartSeriesUtil.convertValue(fieldTypeEnum, value) instanceof Integer);
 		assertEquals(highchartSeriesUtil.convertValue(fieldTypeEnum, value), value);
 	}
-	
+
 	@Test
-	public void parseXYDataToList() {
+	public void parseXYDataToList()
+	{
 		FieldTypeEnum xValueFieldTypeEnum = FieldTypeEnum.DECIMAL;
 		FieldTypeEnum yValueFieldTypeEnum = FieldTypeEnum.DECIMAL;
 		Double xvalue = Double.valueOf("1.1");
@@ -105,11 +110,13 @@ public class HighchartSeriesUtilTest
 		assertTrue(list.size() == 1);
 		assertTrue(((List<Object>) list.get(0)).size() == 2);
 	}
-	
+
 	@Test
-	public void parseBoxPlotSerieToSeries() {
+	public void parseBoxPlotSerieToSeries()
+	{
 		final String name = "test";
-		final List<Double[]> listOfDoubleArrays = Arrays.<Double[]>asList(new Double[]{0d,0d,0d,0d,0d});
+		final List<Double[]> listOfDoubleArrays = Arrays.<Double[]> asList(new Double[]
+		{ 0d, 0d, 0d, 0d, 0d });
 		BoxPlotSerie boxPlotSerie = mock(BoxPlotSerie.class);
 		when(boxPlotSerie.getName()).thenReturn(name);
 		when(boxPlotSerie.getData()).thenReturn(listOfDoubleArrays);
@@ -119,7 +126,8 @@ public class HighchartSeriesUtilTest
 	}
 
 	@Test
-	public void parsexYDataSerieToSeries() {
+	public void parsexYDataSerieToSeries()
+	{
 		final String name = "test";
 		final MolgenisSerieType molgenisSerieType = MolgenisSerieType.SCATTER;
 		XYDataSerie xYDataSerie = mock(XYDataSerie.class);
@@ -133,5 +141,5 @@ public class HighchartSeriesUtilTest
 		assertNull(series.getMarker());
 		assertNull(series.getLineWidth());
 	}
-	
+
 }

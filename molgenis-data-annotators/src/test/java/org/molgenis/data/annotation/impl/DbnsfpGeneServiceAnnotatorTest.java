@@ -19,6 +19,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
+import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ResourceUtils;
@@ -27,7 +28,7 @@ import org.testng.annotations.Test;
 
 public class DbnsfpGeneServiceAnnotatorTest
 {
-	private EntityMetaData metaDataCanAnnotate;
+	private DefaultEntityMetaData metaDataCanAnnotate;
 	private EntityMetaData metaDataCantAnnotate;
 	private DbnsfpGeneServiceAnnotator annotator;
 	private AttributeMetaData attributeMetaDataChrom;
@@ -41,15 +42,19 @@ public class DbnsfpGeneServiceAnnotatorTest
 	@BeforeMethod
 	public void beforeMethod() throws IOException
 	{
-		metaDataCanAnnotate = mock(EntityMetaData.class);
-
 		MolgenisSettings settings = mock(MolgenisSettings.class);
 		when(settings.getProperty(DbnsfpGeneServiceAnnotator.GENE_FILE_LOCATION_PROPERTY)).thenReturn(
 				ResourceUtils.getFile(getClass(), "/dbNSFP_gene_example.txt").getPath());
 
+		AnnotationService annotationService = mock(AnnotationService.class);
+		HgncLocationsProvider hgncLocationsProvider = mock(HgncLocationsProvider.class);
+		Map<String, HGNCLocations> locationsMap = Collections.singletonMap("USP5", new HGNCLocations("USP5", 6961292l,
+				6975796l, "12"));
+		when(hgncLocationsProvider.getHgncLocations()).thenReturn(locationsMap);
+		annotator = new DbnsfpGeneServiceAnnotator(settings, annotationService, hgncLocationsProvider);
+
 		attributeMetaDataChrom = mock(AttributeMetaData.class);
 		attributeMetaDataPos = mock(AttributeMetaData.class);
-
 		when(attributeMetaDataChrom.getName()).thenReturn(DbnsfpGeneServiceAnnotator.CHROMOSOME);
 		when(attributeMetaDataPos.getName()).thenReturn(DbnsfpGeneServiceAnnotator.POSITION);
 
@@ -58,9 +63,11 @@ public class DbnsfpGeneServiceAnnotatorTest
 		when(attributeMetaDataPos.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.LONG.toString().toLowerCase()));
 
-		when(metaDataCanAnnotate.getAttribute(DbnsfpGeneServiceAnnotator.CHROMOSOME))
-				.thenReturn(attributeMetaDataChrom);
-		when(metaDataCanAnnotate.getAttribute(DbnsfpGeneServiceAnnotator.POSITION)).thenReturn(attributeMetaDataPos);
+		metaDataCanAnnotate = new DefaultEntityMetaData("test");
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom);
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);
+		metaDataCanAnnotate.setIdAttribute(DbnsfpGeneServiceAnnotator.POSITION);
+		metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom.getName());
 
 		metaDataCantAnnotate = mock(EntityMetaData.class);
 		attributeMetaDataCantAnnotateFeature = mock(AttributeMetaData.class);
@@ -92,12 +99,7 @@ public class DbnsfpGeneServiceAnnotatorTest
 		input = new ArrayList<Entity>();
 		input.add(entity);
 
-		AnnotationService annotationService = mock(AnnotationService.class);
-		HgncLocationsProvider hgncLocationsProvider = mock(HgncLocationsProvider.class);
-		Map<String, HGNCLocations> locationsMap = Collections.singletonMap("USP5", new HGNCLocations("USP5", 6961292l,
-				6975796l, "12"));
-		when(hgncLocationsProvider.getHgncLocations()).thenReturn(locationsMap);
-		annotator = new DbnsfpGeneServiceAnnotator(settings, annotationService, hgncLocationsProvider);
+		when(entity.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
 	}
 
 	@Test

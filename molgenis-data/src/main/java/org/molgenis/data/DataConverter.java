@@ -15,6 +15,10 @@ import org.molgenis.util.ListEscapeUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "NP_BOOLEAN_RETURN_NULL", justification = "We want to return Boolean.TRUE, Boolean.FALSE or null")
 public class DataConverter
 {
@@ -84,6 +88,7 @@ public class DataConverter
 		if (source instanceof String) return (String) source;
 		if (conversionService == null) return source.toString();
 		if (source instanceof FieldType) return source.toString();
+		if (source instanceof Entity) return ((Entity) source).getLabelValue();
 
 		return convert(source, String.class);
 	}
@@ -159,6 +164,19 @@ public class DataConverter
 	{
 		if (source == null) return null;
 		else if (source instanceof List<?>) return (List<String>) source;
+		else if (source instanceof Iterable<?>)
+		{
+			return Lists.newArrayList(Iterables.transform((Iterable<Object>) source, new Function<Object, String>()
+			{
+
+				@Override
+				public String apply(Object input)
+				{
+					return DataConverter.toString(input);
+				}
+
+			}));
+		}
 		else if (source instanceof String) return ListEscapeUtils.toList((String) source);
 		else return ListEscapeUtils.toList(source.toString());
 	}
@@ -197,11 +215,10 @@ public class DataConverter
 
 			return intList;
 		}
-		else if (source instanceof List<?>)
+		else if (source instanceof Iterable<?>)
 		{
-			// it seems we need explicit cast to Int sometimes
 			ArrayList<Integer> intList = new ArrayList<Integer>();
-			for (Object o : (List<?>) source)
+			for (Object o : (Iterable<?>) source)
 			{
 				intList.add(toInt(o));
 			}
