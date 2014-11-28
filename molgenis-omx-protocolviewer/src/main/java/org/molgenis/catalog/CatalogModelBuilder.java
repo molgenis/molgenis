@@ -47,7 +47,7 @@ public class CatalogModelBuilder
 		{
 			for (CatalogItem item : items)
 			{
-				boolean selected = studyDefinition != null && studyDefinition.containsItem(item);
+				boolean selected = false; // studyDefinition != null && studyDefinition.containsItem(item); FIXME
 				if (!selectedOnly || (selectedOnly && selected))
 				{
 					catalogModelFolder.addItem(new CatalogModelItem(item.getId(), item.getName(), selected));

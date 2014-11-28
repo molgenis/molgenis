@@ -23,6 +23,7 @@
 		var studyDefinitionEditor = $('#study-definition-editor');
 		
 		function createDynatreeConfig(catalog) {
+			console.log(catalog);
 			function createDynatreeConfigRec(node, dynaNode) {
 				var dynaChild = {key: node.id, title: node.name, select: node.selected, isFolder: true, children:[]};
 				dynaNode.push(dynaChild);
@@ -121,10 +122,28 @@
 			$.ajax({
 				type : 'GET',
 				url : molgenis.getContextUrl() + '/view/' + selectedStudyDefinitionId,
-				success : function(result) {
-					viewInfoContainer.html(createCatalogInfo(result.catalog));
+				success : function(data) {
+					var items = [];
+					items.push('<table class="table table-striped table-condensed">');
+					items.push('<thead><th>Name</th><th>Group</th></thead>')
+					items.push('<tbody>');
+					for(var i = 0; i < data.items.length; ++i) {
+						var item = data.items[i];
+						items.push('<tr>');
+						items.push('<td>' + (item.name || '') + '</td>');
+						items.push('<td>');
+						for(var j = 0; j < item.path.length; ++j) {
+							items.push(item.path[j]);
+							if (j < item.path.length - 1)
+								items.push(' &rarr; ');
+						}
+						items.push('</td>');
+						items.push('</tr>');
+					}
+					items.push('</tbody>');
+					items.push('</table>');
+					viewInfoContainer.html(items.join(''));
 					viewTreeContainer.empty();
-					viewTreeContainer.dynatree({'minExpandLevel': 2, 'children': createDynatreeConfig(result.catalog), 'selectMode': 3, 'debugLevel': 0});
 				},
 				error: function (xhr) {
 					viewTreeContainer.empty();

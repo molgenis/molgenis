@@ -10,5 +10,5 @@ public interface Catalog extends CatalogFolder
 
 	String getAuthorEmail();
 
-	CatalogItem findItem(String catalogItemId);
+	CatalogFolder findItem(String catalogItemId);
 }

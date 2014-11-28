@@ -2,14 +2,8 @@ package org.molgenis.catalog;
 
 import java.util.List;
 
-public interface CatalogFolder
+public interface CatalogFolder extends CatalogItem
 {
-	String getId();
-
-	String getName();
-
-	String getDescription();
-
 	List<CatalogFolder> getChildren();
 
 	List<CatalogItem> getItems();

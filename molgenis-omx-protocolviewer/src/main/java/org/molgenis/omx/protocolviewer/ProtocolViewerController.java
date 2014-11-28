@@ -23,6 +23,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import org.apache.log4j.Logger;
+import org.molgenis.catalog.CatalogFolder;
 import org.molgenis.catalog.CatalogItem;
 import org.molgenis.catalog.UnknownCatalogException;
 import org.molgenis.data.MolgenisDataAccessException;
@@ -118,7 +119,7 @@ public class ProtocolViewerController extends MolgenisPluginController
 
 			if (studyDefinition != null)
 			{
-				Iterable<CatalogItem> catalogItems = studyDefinition.getItems();
+				Iterable<CatalogFolder> catalogItems = studyDefinition.getItems();
 
 				// exclude specific items
 				if (excludedItems != null)
@@ -133,10 +134,10 @@ public class ProtocolViewerController extends MolgenisPluginController
 					});
 
 					final Set<String> excludedItemsSet = new HashSet<String>(idList);
-					catalogItems = Lists.newArrayList(Iterables.filter(catalogItems, new Predicate<CatalogItem>()
+					catalogItems = Lists.newArrayList(Iterables.filter(catalogItems, new Predicate<CatalogFolder>()
 					{
 						@Override
-						public boolean apply(CatalogItem catalogItem)
+						public boolean apply(CatalogFolder catalogItem)
 						{
 							return !excludedItemsSet.contains(catalogItem.getId());
 						}
@@ -152,12 +153,12 @@ public class ProtocolViewerController extends MolgenisPluginController
 							{
 								String protocolUri = "/api/v1/protocol/" + catalogItem.getId();
 								List<String> protocolUris = Lists.newArrayList(Iterables.transform(
-										catalogItem.getPath(), new Function<String, String>()
+										catalogItem.getPath(), new Function<CatalogFolder, String>()
 										{
 											@Override
-											public String apply(String pathElement)
+											public String apply(CatalogFolder catalogFolder)
 											{
-												return "/api/v1/protocol/" + pathElement;
+												return "/api/v1/protocol/" + catalogFolder.getId();
 											}
 
 										}));

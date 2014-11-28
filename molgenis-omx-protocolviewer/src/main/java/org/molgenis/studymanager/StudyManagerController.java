@@ -18,6 +18,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.catalog.Catalog;
+import org.molgenis.catalog.CatalogFolder;
 import org.molgenis.catalog.CatalogItem;
 import org.molgenis.catalog.CatalogModelBuilder;
 import org.molgenis.catalog.UnknownCatalogException;
@@ -51,6 +52,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 @Controller
@@ -168,16 +170,15 @@ public class StudyManagerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/view/{id}", method = RequestMethod.GET)
 	@ResponseBody
-	public Map<String, Object> getStudyDefinitionAsCatalog(@PathVariable String id) throws UnknownCatalogException,
+	public StudyDefinitionResponse getStudyDefinitionAsCatalog(@PathVariable String id) throws UnknownCatalogException,
 			UnknownStudyDefinitionException
 	{
 		Map<String, Object> map = new HashMap<String, Object>();
 		// get study definition and catalog used to create study definition
 		StudyDefinition studyDefinition = studyDefinitionManagerService.getStudyDefinition(id);
-		Catalog catalog = catalogManagerService.getCatalogOfStudyDefinition(studyDefinition.getId());
-		map.put("catalog", CatalogModelBuilder.create(catalog, studyDefinition, true));
+		map.put("studyDefinition", studyDefinition);
 		map.put("status", studyDefinition.getStatus());
-		return map;
+		return new StudyDefinitionResponse(studyDefinition);
 	}
 
 	@RequestMapping(value = "/edit/{id}", method = RequestMethod.GET)
@@ -224,12 +225,12 @@ public class StudyManagerController extends MolgenisPluginController
 				// create updated study definition
 				StudyDefinitionImpl updatedStudyDefinition = new StudyDefinitionImpl(studyDefinition);
 				updatedStudyDefinition.setItems(Lists.transform(updateRequest.getCatalogItemIds(),
-						new Function<String, CatalogItem>()
+						new Function<String, CatalogFolder>()
 						{
 							@Override
-							public CatalogItem apply(String catalogItemId)
+							public CatalogFolder apply(String catalogItemId)
 							{
-								CatalogItem catalogItem = catalog.findItem(catalogItemId);
+								CatalogFolder catalogItem = catalog.findItem(catalogItemId);
 								if (catalogItem == null) throw new RuntimeException("unknown catalog item id: "
 										+ catalogItemId);
 								return catalogItem;
@@ -319,7 +320,7 @@ public class StudyManagerController extends MolgenisPluginController
 		// TODO remove code duplication (see ProtocolViewerController)
 		// write excel file
 		List<String> header = Arrays.asList("Id", "Variable", "Description");
-		List<CatalogItem> catalogItems = Lists.newArrayList(studyDefinition.getItems());
+		List<CatalogFolder> catalogItems = Lists.newArrayList(studyDefinition.getItems());
 		if (catalogItems != null)
 		{
 			Collections.sort(catalogItems, new Comparator<CatalogItem>()
@@ -411,6 +412,167 @@ public class StudyManagerController extends MolgenisPluginController
 		public void setStudyDefinitions(List<StudyDefinitionMetaModel> studyDefinitions)
 		{
 			this.studyDefinitions = studyDefinitions;
+		}
+	}
+
+	private static class StudyDefinitionResponse
+	{
+		private String id;
+		private String name;
+		private String description;
+		private Date dateCreated;
+		private Status status;
+		private List<StudyDefinitionItemResponse> items;
+
+		public StudyDefinitionResponse(StudyDefinition studyDefinition)
+		{
+			setId(studyDefinition.getId());
+			setName(studyDefinition.getName());
+			setDescription(studyDefinition.getDescription());
+			setDateCreated(studyDefinition.getDateCreated());
+			setStatus(studyDefinition.getStatus());
+			setItems(Lists.newArrayList(Iterables.transform(studyDefinition.getItems(),
+					new Function<CatalogFolder, StudyDefinitionItemResponse>()
+					{
+						@Override
+						public StudyDefinitionItemResponse apply(CatalogFolder catalogFolder)
+						{
+							return new StudyDefinitionItemResponse(catalogFolder);
+						}
+					})));
+		}
+
+		@SuppressWarnings("unused")
+		public String getId()
+		{
+			return id;
+		}
+
+		public void setId(String id)
+		{
+			this.id = id;
+		}
+
+		@SuppressWarnings("unused")
+		public String getName()
+		{
+			return name;
+		}
+
+		public void setName(String name)
+		{
+			this.name = name;
+		}
+
+		@SuppressWarnings("unused")
+		public String getDescription()
+		{
+			return description;
+		}
+
+		public void setDescription(String description)
+		{
+			this.description = description;
+		}
+
+		@SuppressWarnings("unused")
+		public Date getDateCreated()
+		{
+			return dateCreated;
+		}
+
+		public void setDateCreated(Date dateCreated)
+		{
+			this.dateCreated = dateCreated;
+		}
+
+		@SuppressWarnings("unused")
+		public Status getStatus()
+		{
+			return status;
+		}
+
+		public void setStatus(Status status)
+		{
+			this.status = status;
+		}
+
+		@SuppressWarnings("unused")
+		public List<StudyDefinitionItemResponse> getItems()
+		{
+			return items;
+		}
+
+		public void setItems(List<StudyDefinitionItemResponse> items)
+		{
+			this.items = items;
+		}
+	}
+
+	private static class StudyDefinitionItemResponse
+	{
+		private String id;
+		private String name;
+		private String description;
+		private List<String> path;
+
+		public StudyDefinitionItemResponse(CatalogFolder catalogFolder)
+		{
+			setId(catalogFolder.getId());
+			setName(catalogFolder.getName());
+			setDescription(catalogFolder.getDescription());
+			setPath(Lists.newArrayList(Iterables.transform(catalogFolder.getPath(),
+					new Function<CatalogFolder, String>()
+					{
+						@Override
+						public String apply(CatalogFolder catalogFolder)
+						{
+							return catalogFolder.getName();
+						}
+					})));
+		}
+
+		@SuppressWarnings("unused")
+		public String getId()
+		{
+			return id;
+		}
+
+		public void setId(String id)
+		{
+			this.id = id;
+		}
+
+		@SuppressWarnings("unused")
+		public String getName()
+		{
+			return name;
+		}
+
+		public void setName(String name)
+		{
+			this.name = name;
+		}
+
+		@SuppressWarnings("unused")
+		public String getDescription()
+		{
+			return description;
+		}
+
+		public void setDescription(String description)
+		{
+			this.description = description;
+		}
+
+		public List<String> getPath()
+		{
+			return path;
+		}
+
+		public void setPath(List<String> path)
+		{
+			this.path = path;
 		}
 	}
 

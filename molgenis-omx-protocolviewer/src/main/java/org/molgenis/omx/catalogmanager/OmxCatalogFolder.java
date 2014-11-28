@@ -1,16 +1,17 @@
 package org.molgenis.omx.catalogmanager;
 
-import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
 
 import org.molgenis.catalog.CatalogFolder;
 import org.molgenis.catalog.CatalogItem;
+import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 
-public class OmxCatalogFolder implements CatalogFolder
+public class OmxCatalogFolder extends AbstractOmxCatalogItem implements CatalogFolder
 {
 	private final Protocol protocol;
 
@@ -55,16 +56,40 @@ public class OmxCatalogFolder implements CatalogFolder
 	@Override
 	public List<CatalogItem> getItems()
 	{
-		// FIXME
-		return Collections.emptyList();
-		// List<ObservableFeature> features = protocol.getFeatures();
-		// return features != null ? Lists.transform(features, new Function<ObservableFeature, CatalogItem>()
-		// {
-		// @Override
-		// public CatalogItem apply(ObservableFeature observableFeature)
-		// {
-		// return new OmxCatalogItem(observableFeature);
-		// }
-		// }) : null;
+		List<ObservableFeature> features = protocol.getFeatures();
+		return features != null ? Lists.transform(features, new Function<ObservableFeature, CatalogItem>()
+		{
+			@Override
+			public CatalogItem apply(ObservableFeature observableFeature)
+			{
+				return new OmxCatalogItem(observableFeature);
+			}
+		}) : null;
+	}
+
+	@Override
+	public String getCode()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getCodeSystem()
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Iterable<CatalogFolder> getPath()
+	{
+		Collection<Protocol> parentProtocols = protocol.getSubprotocolsProtocolCollection();
+		if (parentProtocols == null || parentProtocols.size() != 1)
+		{
+			throw new RuntimeException("Catalog item (group) must belong to one catalog (instead of "
+					+ parentProtocols.size() + ')');
+		}
+		return getPath(parentProtocols.iterator().next());
 	}
 }

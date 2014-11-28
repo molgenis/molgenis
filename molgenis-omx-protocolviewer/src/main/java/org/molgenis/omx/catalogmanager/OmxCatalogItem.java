@@ -1,41 +1,37 @@
 package org.molgenis.omx.catalogmanager;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
-import org.molgenis.catalog.CatalogItem;
+import org.molgenis.catalog.CatalogFolder;
+import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
 
-import com.google.common.collect.Lists;
-
-public class OmxCatalogItem implements CatalogItem
+public class OmxCatalogItem extends AbstractOmxCatalogItem
 {
-	private final Protocol protocol;
+	private final ObservableFeature observableFeature;
 
-	public OmxCatalogItem(Protocol protocol)
+	public OmxCatalogItem(ObservableFeature observableFeature)
 	{
-		if (protocol == null) throw new IllegalArgumentException("Protocol is null");
-		this.protocol = protocol;
+		if (observableFeature == null) throw new IllegalArgumentException("Observable feature is null");
+		this.observableFeature = observableFeature;
 	}
 
 	@Override
 	public String getId()
 	{
-		return protocol.getId().toString();
+		return observableFeature.getId().toString();
 	}
 
 	@Override
 	public String getName()
 	{
-		return protocol.getName();
+		return observableFeature.getName();
 	}
 
 	@Override
 	public String getDescription()
 	{
-		return protocol.getDescription();
+		return observableFeature.getDescription();
 	}
 
 	@Override
@@ -51,21 +47,13 @@ public class OmxCatalogItem implements CatalogItem
 	}
 
 	@Override
-	public Iterable<String> getPath()
+	public Iterable<CatalogFolder> getPath()
 	{
-		List<String> protocolPath = new ArrayList<String>();
-		Collection<Protocol> protocols = Collections.singletonList(protocol);
-		while (protocols != null && !protocols.isEmpty())
+		Collection<Protocol> protocols = observableFeature.getFeaturesProtocolCollection();
+		if (protocols == null || protocols.size() != 1)
 		{
-			if (protocols.size() != 1)
-			{
-				throw new RuntimeException("Catalog item (group) must belong to one catalog (instead of "
-						+ protocols.size() + ')');
-			}
-			Protocol protocol = protocols.iterator().next();
-			protocolPath.add(protocol.getId().toString());
-			protocols = protocol.getSubprotocolsProtocolCollection();
+			throw new RuntimeException("ObservableFeature must belong to exactly one protocol");
 		}
-		return Lists.reverse(protocolPath);
+		return getPath(protocols.iterator().next());
 	}
 }

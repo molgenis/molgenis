@@ -17,6 +17,7 @@ import javax.servlet.http.Part;
 
 import org.apache.log4j.Logger;
 import org.molgenis.catalog.Catalog;
+import org.molgenis.catalog.CatalogFolder;
 import org.molgenis.catalog.CatalogItem;
 import org.molgenis.catalog.CatalogMeta;
 import org.molgenis.catalog.CatalogService;
@@ -176,7 +177,7 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 		StudyDefinition studyDefinition = getStudyDefinitionDraftForCurrentUser(catalogId);
 		if (studyDefinition == null) throw new UnknownStudyDefinitionException("no study definition draft for user");
 
-		Iterable<CatalogItem> catalogItems = studyDefinition.getItems();
+		Iterable<CatalogFolder> catalogItems = studyDefinition.getItems();
 		if (catalogItems == null || !catalogItems.iterator().hasNext())
 		{
 			throw new IllegalArgumentException("feature list is null or empty");
@@ -232,12 +233,13 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 		}
 
 		CatalogItem catalogItem = catalog.findItem(protocolId);
-		if (catalogItem == null)
+		if (catalogItem == null || !(catalogItem instanceof CatalogFolder))
 		{
 			throw new UnknownCatalogException("Unknown catalog item [" + protocolId + "]");
 		}
+		CatalogFolder catalogFolder = (CatalogFolder) catalogItem;
 
-		studyDefinition.setItems(Iterables.concat(studyDefinition.getItems(), Arrays.asList(catalogItem)));
+		studyDefinition.setItems(Iterables.concat(studyDefinition.getItems(), Arrays.asList(catalogFolder)));
 
 		try
 		{
@@ -271,11 +273,11 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 			throw new UnknownCatalogException("Unknown catalog item [" + protocolId + "]");
 		}
 
-		Iterable<CatalogItem> newCatalogItems = Iterables.filter(studyDefinition.getItems(),
-				new Predicate<CatalogItem>()
+		Iterable<CatalogFolder> newCatalogItems = Iterables.filter(studyDefinition.getItems(),
+				new Predicate<CatalogFolder>()
 				{
 					@Override
-					public boolean apply(CatalogItem catalogItem)
+					public boolean apply(CatalogFolder catalogItem)
 					{
 						return !catalogItem.getId().equals(protocolId);
 					}
@@ -346,13 +348,13 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 		// write excel file
 		List<String> header = Arrays.asList("Id", "Variable", "Description");
 
-		List<CatalogItem> catalogItems = Lists.newArrayList(studyDefinition.getItems());
+		List<CatalogFolder> catalogItems = Lists.newArrayList(studyDefinition.getItems());
 		if (catalogItems != null)
 		{
-			Collections.sort(catalogItems, new Comparator<CatalogItem>()
+			Collections.sort(catalogItems, new Comparator<CatalogFolder>()
 			{
 				@Override
-				public int compare(CatalogItem feature1, CatalogItem feature2)
+				public int compare(CatalogFolder feature1, CatalogFolder feature2)
 				{
 					return feature1.getId().compareTo(feature2.getId());
 				}
