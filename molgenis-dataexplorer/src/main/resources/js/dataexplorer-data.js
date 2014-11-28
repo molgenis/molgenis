@@ -362,16 +362,4 @@
 			setDallianceFilter();
 		});
 	});
-
-    $(document).on('show.bs.tab', function(e, query) {
-        if(e.target.id==="data") {
-            $("#export-button-container").show();
-        }else{
-            $("#export-button-container").hide();
-        }
-    });
-
-    //show export button if dataexplorer is initialized at data tab.
-    $("#export-button-container").show();
-
 })($, window.top.molgenis = window.top.molgenis || {});

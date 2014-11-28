@@ -207,10 +207,6 @@ public class DataExplorerController extends MolgenisPluginController
 		model.addAttribute("searchTerm", searchTerm);
 		model.addAttribute("hideSearchBox", molgenisSettings.getBooleanProperty(KEY_HIDE_SEARCH_BOX, false));
 		model.addAttribute("hideDataItemSelect", molgenisSettings.getBooleanProperty(KEY_HIDE_ITEM_SELECTION, false));
-		model.addAttribute("galaxyEnabled",
-				molgenisSettings.getBooleanProperty(KEY_GALAXY_ENABLED, DEFAULT_VAL_GALAXY_ENABLED));
-		String galaxyUrl = molgenisSettings.getProperty(KEY_GALAXY_URL);
-		if (galaxyUrl != null) model.addAttribute(ATTR_GALAXY_URL, galaxyUrl);
 
 		return "view-dataexplorer";
 	}
@@ -244,7 +240,11 @@ public class DataExplorerController extends MolgenisPluginController
 					molgenisSettings.getProperty(GenomeConfig.GENOMEBROWSER_PATIENT_ID, "patient_id"));
 
 			model.addAttribute("tableEditable", isTableEditable());
+			model.addAttribute("galaxyEnabled",
+					molgenisSettings.getBooleanProperty(KEY_GALAXY_ENABLED, DEFAULT_VAL_GALAXY_ENABLED));
+			String galaxyUrl = molgenisSettings.getProperty(KEY_GALAXY_URL);
 			model.addAttribute("rowClickable", isRowClickable());
+			if (galaxyUrl != null) model.addAttribute(ATTR_GALAXY_URL, galaxyUrl);
 		}
 		else if (moduleId.equals("diseasematcher"))
 		{
@@ -651,21 +651,17 @@ public class DataExplorerController extends MolgenisPluginController
 	private String parseEntitiesReportRuntimeProperty(String entityName)
 	{
 		String modEntitiesReportRTP = molgenisSettings.getProperty(KEY_MOD_ENTITIESREPORT, null);
-		if (modEntitiesReportRTP != null)
-		{
-			String[] entitiesReports = modEntitiesReportRTP.split(",");
-			for (String entitiesReport : entitiesReports)
-			{
-				String[] entitiesReportParts = entitiesReport.split(":");
-				if (entitiesReportParts.length == 2)
-				{
-					if (entitiesReportParts[0].equals(entityName))
-					{
-						return entitiesReportParts[1];
-					}
-				}
-			}
-		}
+        if(modEntitiesReportRTP != null) {
+            String[] entitiesReports = modEntitiesReportRTP.split(",");
+            for (String entitiesReport : entitiesReports) {
+                String[] entitiesReportParts = entitiesReport.split(":");
+                if (entitiesReportParts.length == 2) {
+                    if (entitiesReportParts[0].equals(entityName)) {
+                        return entitiesReportParts[1];
+                    }
+                }
+            }
+        }
 		return null;
 	}
 }
