@@ -35,7 +35,7 @@
 	<h3 id="entity-class-name"></h3>
 	<span id="entity-class-description"></span>
 </div>
-     
+
 <div class="row">
 	<div class="col-md-3">
 		<div class="well well-sm">
@@ -114,7 +114,7 @@
 	</div>
 </div>
 
-<script id="filter-wizard-modal-template" type="text/x-handlebars-template">   
+<script id="filter-wizard-modal-template" type="text/x-handlebars-template">
     <div class="modal" id="filter-wizard-modal" tabindex="-1" role="dialog" aria-labelledby="filter-wizard-modal-label" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
