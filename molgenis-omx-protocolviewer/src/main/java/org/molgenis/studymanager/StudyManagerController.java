@@ -565,6 +565,7 @@ public class StudyManagerController extends MolgenisPluginController
 			this.description = description;
 		}
 
+		@SuppressWarnings("unused")
 		public List<String> getPath()
 		{
 			return path;

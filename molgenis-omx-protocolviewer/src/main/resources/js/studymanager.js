@@ -23,7 +23,6 @@
 		var studyDefinitionEditor = $('#study-definition-editor');
 		
 		function createDynatreeConfig(catalog) {
-			console.log(catalog);
 			function createDynatreeConfigRec(node, dynaNode) {
 				var dynaChild = {key: node.id, title: node.name, select: node.selected, isFolder: true, children:[]};
 				dynaNode.push(dynaChild);
@@ -34,7 +33,8 @@
 				}
 				if(node.items) {
 					$.each(node.items, function(idx, item) {
-						dynaChild.children.push({key: item.id, title: item.name, select: item.selected});
+						// use selected state of parent node
+						dynaChild.children.push({key: item.id, title: item.name, select: node.selected, hideCheckbox: true});
 					});
 				}
 			}
@@ -282,7 +282,7 @@
 
             // get selected nodes
             var catalogItemIds = $.map(editTreeContainer.dynatree('getTree').getSelectedNodes(), function (node) {
-                if (!node.data.isFolder) {
+                if (node.data.isFolder) {
                     return node.data.key;
                 }
                 return null;

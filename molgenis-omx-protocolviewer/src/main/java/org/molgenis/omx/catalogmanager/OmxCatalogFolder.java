@@ -1,6 +1,5 @@
 package org.molgenis.omx.catalogmanager;
 
-import java.util.Collection;
 import java.util.List;
 
 import org.molgenis.catalog.CatalogFolder;
@@ -84,12 +83,12 @@ public class OmxCatalogFolder extends AbstractOmxCatalogItem implements CatalogF
 	@Override
 	public Iterable<CatalogFolder> getPath()
 	{
-		Collection<Protocol> parentProtocols = protocol.getSubprotocolsProtocolCollection();
-		if (parentProtocols == null || parentProtocols.size() != 1)
-		{
-			throw new RuntimeException("Catalog item (group) must belong to one catalog (instead of "
-					+ parentProtocols.size() + ')');
-		}
-		return getPath(parentProtocols.iterator().next());
+		return getPath(protocol);
+	}
+
+	@Override
+	public String getExternalId()
+	{
+		return protocol.getIdentifier();
 	}
 }

@@ -47,11 +47,7 @@ public class CatalogModelBuilder
 		{
 			for (CatalogItem item : items)
 			{
-				boolean selected = false; // studyDefinition != null && studyDefinition.containsItem(item); FIXME
-				if (!selectedOnly || (selectedOnly && selected))
-				{
-					catalogModelFolder.addItem(new CatalogModelItem(item.getId(), item.getName(), selected));
-				}
+				catalogModelFolder.addItem(new CatalogModelItem(item.getId(), item.getName()));
 			}
 		}
 
@@ -62,10 +58,11 @@ public class CatalogModelBuilder
 			{
 				CatalogModelFolder childCatalogModelFolder = new CatalogModelFolder();
 				createCatalogModelRec(childCatalogModelFolder, childFolder, studyDefinition, selectedOnly);
-				if (!selectedOnly || (selectedOnly && hasDescendantItems(childCatalogModelFolder)))
+				if (studyDefinition != null && studyDefinition.containsItem(childFolder))
 				{
-					catalogModelFolder.addChild(childCatalogModelFolder);
+					childCatalogModelFolder.setSelected(true);
 				}
+				catalogModelFolder.addChild(childCatalogModelFolder);
 			}
 		}
 
