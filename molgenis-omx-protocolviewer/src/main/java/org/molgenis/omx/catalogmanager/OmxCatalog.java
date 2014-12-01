@@ -43,12 +43,9 @@ public class OmxCatalog extends OmxCatalogFolder implements Catalog
 	{
 		// TODO verify that the catalog item is part of this catalog.
 		// this check was removed because of bad performance (worst case the full protocol tree needs to be pruned).
-		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.ID, catalogItemId),
-				Protocol.class);
-		if (protocol == null)
-		{
-			throw new IllegalArgumentException("Catalog item [" + catalogItemId + "] does not exist");
-		}
+		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.ID, catalogItemId)
+				.and().eq(Protocol.ACTIVE, true), Protocol.class);
+		if (protocol == null) throw new IllegalArgumentException("catalogItemId does not exist");
 		return new OmxCatalogFolder(protocol);
 	}
 }
