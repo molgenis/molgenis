@@ -82,14 +82,14 @@ public class OmxCatalogFolder extends AbstractOmxCatalogItem implements CatalogF
 	@Override
 	public String getCode()
 	{
-		// TODO Auto-generated method stub
+		// TODO remove method
 		return null;
 	}
 
 	@Override
 	public String getCodeSystem()
 	{
-		// TODO Auto-generated method stub
+		// TODO remove method
 		return null;
 	}
 

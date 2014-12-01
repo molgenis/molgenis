@@ -4,7 +4,7 @@ import java.util.List;
 
 public interface CatalogFolder extends CatalogItem
 {
-	String getExternalId(); // FIXME continue here
+	String getExternalId();
 
 	List<CatalogFolder> getChildren();
 
