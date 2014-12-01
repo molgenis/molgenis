@@ -104,4 +104,28 @@ public class OmxCatalogFolder extends AbstractOmxCatalogItem implements CatalogF
 	{
 		return protocol.getIdentifier();
 	}
+
+	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((protocol == null) ? 0 : protocol.getId());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
+		OmxCatalogFolder other = (OmxCatalogFolder) obj;
+		if (protocol == null)
+		{
+			if (other.protocol != null) return false;
+		}
+		else if (!protocol.getId().equals(other.protocol.getId())) return false;
+		return true;
+	}
 }

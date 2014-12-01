@@ -7,8 +7,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -23,12 +25,14 @@ import org.molgenis.catalog.CatalogItem;
 import org.molgenis.catalog.CatalogModelBuilder;
 import org.molgenis.catalog.UnknownCatalogException;
 import org.molgenis.catalogmanager.CatalogManagerService;
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Writable;
 import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.framework.ui.MolgenisPluginController;
+import org.molgenis.omx.protocolviewer.ProtocolViewerUtils;
 import org.molgenis.omx.study.StudyDataRequest;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
@@ -71,6 +75,9 @@ public class StudyManagerController extends MolgenisPluginController
 
 	public static final String EXPORT_BTN_TITLE = "plugin.studymanager.export.title";
 	public static final String EXPORT_ENABLED = "plugin.studymanager.export.enabled";
+
+	@Autowired
+	private DataService dataService;
 
 	@Autowired
 	private MolgenisSettings molgenisSettings;
@@ -224,18 +231,16 @@ public class StudyManagerController extends MolgenisPluginController
 
 				// create updated study definition
 				StudyDefinitionImpl updatedStudyDefinition = new StudyDefinitionImpl(studyDefinition);
-				updatedStudyDefinition.setItems(Lists.transform(updateRequest.getCatalogItemIds(),
-						new Function<String, CatalogFolder>()
-						{
-							@Override
-							public CatalogFolder apply(String catalogItemId)
-							{
-								CatalogFolder catalogItem = catalog.findItem(catalogItemId);
-								if (catalogItem == null) throw new RuntimeException("unknown catalog item id: "
-										+ catalogItemId);
-								return catalogItem;
-							}
-						}));
+
+				Set<CatalogFolder> catalogFolders = new LinkedHashSet<CatalogFolder>();
+				for (String catalogItemId : updateRequest.getCatalogItemIds())
+				{
+					List<CatalogFolder> orderableItems = ProtocolViewerUtils.findOrderableItems(catalogItemId,
+							dataService);
+					catalogFolders.addAll(orderableItems);
+				}
+
+				updatedStudyDefinition.setItems(catalogFolders);
 				updatedStudyDefinition.setStatus(status);
 
 				if (StringUtils.isNotBlank(updateRequest.getName()))
