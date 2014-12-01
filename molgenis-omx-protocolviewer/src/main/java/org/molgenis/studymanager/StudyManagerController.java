@@ -515,6 +515,7 @@ public class StudyManagerController extends MolgenisPluginController
 		private String name;
 		private String description;
 		private List<String> path;
+		private String externalId;
 
 		public StudyDefinitionItemResponse(CatalogFolder catalogFolder)
 		{
@@ -530,6 +531,7 @@ public class StudyManagerController extends MolgenisPluginController
 							return catalogFolder.getName();
 						}
 					})));
+			setExternalId(catalogFolder.getExternalId());
 		}
 
 		@SuppressWarnings("unused")
@@ -574,6 +576,17 @@ public class StudyManagerController extends MolgenisPluginController
 		public void setPath(List<String> path)
 		{
 			this.path = path;
+		}
+
+		@SuppressWarnings("unused")
+		public String getExternalId()
+		{
+			return externalId;
+		}
+
+		public void setExternalId(String externalId)
+		{
+			this.externalId = externalId;
 		}
 	}
 
