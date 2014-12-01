@@ -21,6 +21,7 @@ import javax.mail.internet.MimeMessage;
 import javax.servlet.http.Part;
 
 import org.molgenis.catalog.Catalog;
+import org.molgenis.catalog.CatalogFolder;
 import org.molgenis.catalog.CatalogItem;
 import org.molgenis.catalog.CatalogMeta;
 import org.molgenis.catalog.CatalogService;
@@ -130,7 +131,7 @@ public class ProtocolViewerServiceImplTest extends AbstractTestNGSpringContextTe
 
 	private Catalog catalog0, catalog1;
 
-	private CatalogItem catalogItem0, catalogItem1, catalogItem2;
+	private CatalogFolder catalogItem0, catalogItem1, catalogItem2;
 
 	private CatalogMeta catalogMeta0, catalogMeta1, catalogMeta2;
 
