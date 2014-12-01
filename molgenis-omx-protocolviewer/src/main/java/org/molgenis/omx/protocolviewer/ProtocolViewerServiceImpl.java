@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -28,8 +29,11 @@ import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.Writable;
 import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.omx.catalogmanager.OmxCatalogFolder;
+import org.molgenis.omx.observ.Protocol;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserService;
 import org.molgenis.study.StudyDefinition;
@@ -224,22 +228,14 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 	public void addToStudyDefinitionDraftForCurrentUser(String protocolId, String catalogId)
 			throws UnknownCatalogException
 	{
-		final Catalog catalog = catalogService.getCatalog(catalogId);
-
 		StudyDefinition studyDefinition = getStudyDefinitionDraftForCurrentUser(catalogId);
 		if (studyDefinition == null)
 		{
 			studyDefinition = createStudyDefinitionDraftForCurrentUser(catalogId);
 		}
 
-		CatalogItem catalogItem = catalog.findItem(protocolId);
-		if (catalogItem == null || !(catalogItem instanceof CatalogFolder))
-		{
-			throw new UnknownCatalogException("Unknown catalog item [" + protocolId + "]");
-		}
-		CatalogFolder catalogFolder = (CatalogFolder) catalogItem;
-
-		studyDefinition.setItems(Iterables.concat(studyDefinition.getItems(), Arrays.asList(catalogFolder)));
+		List<OmxCatalogFolder> orderableItems = this.findOrderableItems(protocolId);
+		studyDefinition.setItems(Iterables.concat(studyDefinition.getItems(), orderableItems));
 
 		try
 		{
@@ -258,28 +254,33 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 	public void removeFromStudyDefinitionDraftForCurrentUser(final String protocolId, String catalogId)
 			throws UnknownCatalogException
 	{
-		final Catalog catalog = catalogService.getCatalog(catalogId);
-
-		StudyDefinition studyDefinition = getStudyDefinitionDraftForCurrentUser(catalogId);
-		if (studyDefinition == null)
+		StudyDefinition studyDefinitionDraftForCurrentUser = getStudyDefinitionDraftForCurrentUser(catalogId);
+		final StudyDefinition studyDefinition;
+		if (studyDefinitionDraftForCurrentUser == null)
 		{
 			studyDefinition = createStudyDefinitionDraftForCurrentUser(catalogId);
 		}
-
-		// verify that item to remove is part of this catalog
-		CatalogItem catalogItem = catalog.findItem(protocolId);
-		if (catalogItem == null)
+		else
 		{
-			throw new UnknownCatalogException("Unknown catalog item [" + protocolId + "]");
+			studyDefinition = studyDefinitionDraftForCurrentUser;
 		}
 
+		// verify that item to remove is part of this catalog
+		final List<OmxCatalogFolder> catalogItems = this.findOrderableItems(protocolId);
 		Iterable<CatalogFolder> newCatalogItems = Iterables.filter(studyDefinition.getItems(),
 				new Predicate<CatalogFolder>()
 				{
 					@Override
 					public boolean apply(CatalogFolder catalogItem)
 					{
-						return !catalogItem.getId().equals(protocolId);
+						for (OmxCatalogFolder omxCatalogItem : catalogItems)
+						{
+							if (catalogItem.getId().equals(omxCatalogItem.getId()))
+							{
+								return false;
+							}
+						}
+						return true;
 					}
 				});
 		studyDefinition.setItems(newCatalogItems);
@@ -387,6 +388,52 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 		finally
 		{
 			excelWriter.close();
+		}
+	}
+
+	/**
+	 * Returns a list of OMX catalog items that can be ordered
+	 * 
+	 * @param catalogFolderId
+	 *            the id of the protocol that is being used as root to find orderable folders. The catalogFolderId
+	 *            itself can be a orderable folder
+	 * @return List<OmxCatalogItem>
+	 * @throws UnknownCatalogException
+	 */
+	private List<OmxCatalogFolder> findOrderableItems(String catalogFolderId) throws UnknownCatalogException
+	{
+		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.ID, catalogFolderId)
+				.and().eq(Protocol.ACTIVE, true), Protocol.class);
+
+		if (protocol == null)
+		{
+			throw new UnknownCatalogException("Unknown catalog item [" + catalogFolderId + "]");
+		}
+
+		List<OmxCatalogFolder> orderableItems = new ArrayList<OmxCatalogFolder>();
+		this.addProtocolToOrderableItems(protocol, orderableItems);
+
+		return orderableItems;
+	}
+
+	/**
+	 * Add groups (catalog folders) to the orderableCatalogFolders list A group: is a protocol that has features and is
+	 * active.
+	 * 
+	 * @param protocol
+	 *            : omx protocol
+	 * @param orderableCatalogFolders
+	 *            : catalog folders that include items that can be ordered.
+	 */
+	private void addProtocolToOrderableItems(Protocol protocol, List<OmxCatalogFolder> orderableCatalogFolders)
+	{
+		if (!protocol.getFeatures().isEmpty() && true == protocol.getActive())
+		{
+			orderableCatalogFolders.add(new OmxCatalogFolder(protocol));
+		}
+		for (Protocol subProtocol : protocol.getSubprotocols())
+		{
+			addProtocolToOrderableItems(subProtocol, orderableCatalogFolders);
 		}
 	}
 }
