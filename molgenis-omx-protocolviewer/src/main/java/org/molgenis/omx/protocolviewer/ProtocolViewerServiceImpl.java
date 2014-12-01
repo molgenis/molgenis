@@ -18,6 +18,7 @@ import javax.servlet.http.Part;
 
 import org.apache.log4j.Logger;
 import org.molgenis.catalog.Catalog;
+import org.molgenis.catalog.CatalogFolder;
 import org.molgenis.catalog.CatalogItem;
 import org.molgenis.catalog.CatalogMeta;
 import org.molgenis.catalog.CatalogService;
@@ -31,7 +32,7 @@ import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.omx.auth.MolgenisUser;
-import org.molgenis.omx.catalogmanager.OmxCatalogItem;
+import org.molgenis.omx.catalogmanager.OmxCatalogFolder;
 import org.molgenis.omx.observ.Protocol;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserService;
@@ -180,7 +181,7 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 		StudyDefinition studyDefinition = getStudyDefinitionDraftForCurrentUser(catalogId);
 		if (studyDefinition == null) throw new UnknownStudyDefinitionException("no study definition draft for user");
 
-		Iterable<CatalogItem> catalogItems = studyDefinition.getItems();
+		Iterable<CatalogFolder> catalogItems = studyDefinition.getItems();
 		if (catalogItems == null || !catalogItems.iterator().hasNext())
 		{
 			throw new IllegalArgumentException("feature list is null or empty");
@@ -233,7 +234,7 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 			studyDefinition = createStudyDefinitionDraftForCurrentUser(catalogId);
 		}
 
-		List<OmxCatalogItem> orderableItems = this.findOrderableItems(protocolId);
+		List<OmxCatalogFolder> orderableItems = this.findOrderableItems(protocolId);
 		studyDefinition.setItems(Iterables.concat(studyDefinition.getItems(), orderableItems));
 
 		try
@@ -258,20 +259,24 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 		if (studyDefinitionDraftForCurrentUser == null)
 		{
 			studyDefinition = createStudyDefinitionDraftForCurrentUser(catalogId);
-		}else{
+		}
+		else
+		{
 			studyDefinition = studyDefinitionDraftForCurrentUser;
 		}
-		
+
 		// verify that item to remove is part of this catalog
-		final List<OmxCatalogItem> catalogItems = this.findOrderableItems(protocolId);
-		Iterable<CatalogItem> newCatalogItems = Iterables.filter(studyDefinition.getItems(),
-				new Predicate<CatalogItem>()
+		final List<OmxCatalogFolder> catalogItems = this.findOrderableItems(protocolId);
+		Iterable<CatalogFolder> newCatalogItems = Iterables.filter(studyDefinition.getItems(),
+				new Predicate<CatalogFolder>()
 				{
 					@Override
-					public boolean apply(CatalogItem catalogItem)
+					public boolean apply(CatalogFolder catalogItem)
 					{
-						for(OmxCatalogItem omxCatalogItem :catalogItems){
-							if(catalogItem.getId().equals(omxCatalogItem.getId())){
+						for (OmxCatalogFolder omxCatalogItem : catalogItems)
+						{
+							if (catalogItem.getId().equals(omxCatalogItem.getId()))
+							{
 								return false;
 							}
 						}
@@ -344,13 +349,13 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 		// write excel file
 		List<String> header = Arrays.asList("Id", "Variable", "Description");
 
-		List<CatalogItem> catalogItems = Lists.newArrayList(studyDefinition.getItems());
+		List<CatalogFolder> catalogItems = Lists.newArrayList(studyDefinition.getItems());
 		if (catalogItems != null)
 		{
-			Collections.sort(catalogItems, new Comparator<CatalogItem>()
+			Collections.sort(catalogItems, new Comparator<CatalogFolder>()
 			{
 				@Override
-				public int compare(CatalogItem feature1, CatalogItem feature2)
+				public int compare(CatalogFolder feature1, CatalogFolder feature2)
 				{
 					return feature1.getId().compareTo(feature2.getId());
 				}
@@ -385,40 +390,49 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 			excelWriter.close();
 		}
 	}
-	
+
 	/**
-	 * Returns a list of OMX catalog items that can be ordered 
+	 * Returns a list of OMX catalog items that can be ordered
 	 * 
-	 * @param catalogFolderId the id of the protocol that is being used as root to find orderable folders.
-	 * The catalogFolderId itself can be a orderable folder
+	 * @param catalogFolderId
+	 *            the id of the protocol that is being used as root to find orderable folders. The catalogFolderId
+	 *            itself can be a orderable folder
 	 * @return List<OmxCatalogItem>
 	 * @throws UnknownCatalogException
 	 */
-	private List<OmxCatalogItem> findOrderableItems(String catalogFolderId) throws UnknownCatalogException
+	private List<OmxCatalogFolder> findOrderableItems(String catalogFolderId) throws UnknownCatalogException
 	{
 		Protocol protocol = dataService.findOne(Protocol.ENTITY_NAME, new QueryImpl().eq(Protocol.ID, catalogFolderId)
 				.and().eq(Protocol.ACTIVE, true), Protocol.class);
-		
-		if (protocol == null) {
+
+		if (protocol == null)
+		{
 			throw new UnknownCatalogException("Unknown catalog item [" + catalogFolderId + "]");
 		}
-		
-		List<OmxCatalogItem> orderableItems = new ArrayList<OmxCatalogItem>();
+
+		List<OmxCatalogFolder> orderableItems = new ArrayList<OmxCatalogFolder>();
 		this.addProtocolToOrderableItems(protocol, orderableItems);
-		
+
 		return orderableItems;
 	}
-	
+
 	/**
-	 * Add groups (catalog folders) to the orderableCatalogFolders list
-	 * A group: is a protocol that has features and is active.
+	 * Add groups (catalog folders) to the orderableCatalogFolders list A group: is a protocol that has features and is
+	 * active.
 	 * 
-	 * @param protocol: omx protocol
-	 * @param orderableCatalogFolders: catalog folders that include items that can be ordered.
+	 * @param protocol
+	 *            : omx protocol
+	 * @param orderableCatalogFolders
+	 *            : catalog folders that include items that can be ordered.
 	 */
-	private void addProtocolToOrderableItems(Protocol protocol, List<OmxCatalogItem> orderableCatalogFolders){
-		if(!protocol.getFeatures().isEmpty() && true == protocol.getActive()) {orderableCatalogFolders.add(new OmxCatalogItem(protocol));}
-		for (Protocol subProtocol :protocol.getSubprotocols()){
+	private void addProtocolToOrderableItems(Protocol protocol, List<OmxCatalogFolder> orderableCatalogFolders)
+	{
+		if (!protocol.getFeatures().isEmpty() && true == protocol.getActive())
+		{
+			orderableCatalogFolders.add(new OmxCatalogFolder(protocol));
+		}
+		for (Protocol subProtocol : protocol.getSubprotocols())
+		{
 			addProtocolToOrderableItems(subProtocol, orderableCatalogFolders);
 		}
 	}

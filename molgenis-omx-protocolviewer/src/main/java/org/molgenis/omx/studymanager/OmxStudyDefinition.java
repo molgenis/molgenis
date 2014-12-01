@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import org.molgenis.catalog.CatalogFolder;
 import org.molgenis.catalog.CatalogItem;
 import org.molgenis.data.DataService;
 import org.molgenis.omx.auth.MolgenisUser;
@@ -78,12 +79,12 @@ public class OmxStudyDefinition implements StudyDefinition
 	}
 
 	@Override
-	public Iterable<CatalogItem> getItems()
+	public Iterable<CatalogFolder> getItems()
 	{
-		return Lists.transform(studyDataRequest.getProtocols(), new Function<Protocol, CatalogItem>()
+		return Lists.transform(studyDataRequest.getProtocols(), new Function<Protocol, CatalogFolder>()
 		{
 			@Override
-			public CatalogItem apply(Protocol protocol)
+			public CatalogFolder apply(Protocol protocol)
 			{
 				return new OmxStudyDefinitionItem(protocol, studyDataRequest.getProtocol().getId());
 			}
@@ -91,7 +92,7 @@ public class OmxStudyDefinition implements StudyDefinition
 	}
 
 	@Override
-	public void setItems(Iterable<CatalogItem> items)
+	public void setItems(Iterable<CatalogFolder> items)
 	{
 		List<Protocol> protocols;
 		if (items.iterator().hasNext())
@@ -140,7 +141,7 @@ public class OmxStudyDefinition implements StudyDefinition
 	}
 
 	@Override
-	public boolean containsItem(CatalogItem anItem)
+	public boolean containsItem(CatalogFolder anItem)
 	{
 		boolean contains = false;
 		for (CatalogItem item : getItems())

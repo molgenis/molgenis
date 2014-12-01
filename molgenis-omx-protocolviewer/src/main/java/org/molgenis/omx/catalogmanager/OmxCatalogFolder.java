@@ -1,17 +1,17 @@
 package org.molgenis.omx.catalogmanager;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 
 import org.molgenis.catalog.CatalogFolder;
 import org.molgenis.catalog.CatalogItem;
+import org.molgenis.omx.observ.ObservableFeature;
 import org.molgenis.omx.observ.Protocol;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 
-public class OmxCatalogFolder implements CatalogFolder
+public class OmxCatalogFolder extends AbstractOmxCatalogItem implements CatalogFolder
 {
 	private final Protocol protocol;
 
@@ -68,16 +68,40 @@ public class OmxCatalogFolder implements CatalogFolder
 	@Override
 	public List<CatalogItem> getItems()
 	{
-		// FIXME
-		return Collections.emptyList();
-		// List<ObservableFeature> features = protocol.getFeatures();
-		// return features != null ? Lists.transform(features, new Function<ObservableFeature, CatalogItem>()
-		// {
-		// @Override
-		// public CatalogItem apply(ObservableFeature observableFeature)
-		// {
-		// return new OmxCatalogItem(observableFeature);
-		// }
-		// }) : null;
+		List<ObservableFeature> features = protocol.getFeatures();
+		return features != null ? Lists.transform(features, new Function<ObservableFeature, CatalogItem>()
+		{
+			@Override
+			public CatalogItem apply(ObservableFeature observableFeature)
+			{
+				return new OmxCatalogItem(observableFeature);
+			}
+		}) : null;
+	}
+
+	@Override
+	public String getCode()
+	{
+		// TODO remove method
+		return null;
+	}
+
+	@Override
+	public String getCodeSystem()
+	{
+		// TODO remove method
+		return null;
+	}
+
+	@Override
+	public Iterable<CatalogFolder> getPath()
+	{
+		return getPath(protocol);
+	}
+
+	@Override
+	public String getExternalId()
+	{
+		return protocol.getIdentifier();
 	}
 }

@@ -3,7 +3,7 @@ package org.molgenis.study;
 import java.util.Date;
 import java.util.List;
 
-import org.molgenis.catalog.CatalogItem;
+import org.molgenis.catalog.CatalogFolder;
 
 public interface StudyDefinition
 {
@@ -23,11 +23,11 @@ public interface StudyDefinition
 
 	Status getStatus();
 
-	Iterable<CatalogItem> getItems();
+	Iterable<CatalogFolder> getItems();
 
-	void setItems(Iterable<CatalogItem> items);
+	void setItems(Iterable<CatalogFolder> items);
 
-	boolean containsItem(CatalogItem item);
+	boolean containsItem(CatalogFolder item);
 
 	List<String> getAuthors();
 
