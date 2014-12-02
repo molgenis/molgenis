@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -26,6 +27,7 @@ import org.molgenis.framework.server.MolgenisSimpleSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 /**
  * <p>
@@ -44,6 +46,8 @@ import org.springframework.stereotype.Component;
 @Component("caddService")
 public class CaddServiceAnnotator extends VariantAnnotator
 {
+	private static final Logger logger = Logger.getLogger(CaddServiceAnnotator.class);
+
 	private final MolgenisSettings molgenisSettings;
 	private final AnnotationService annotatorService;
 
@@ -156,29 +160,60 @@ public class CaddServiceAnnotator extends VariantAnnotator
 		String reference = entity.getString(REFERENCE); //FIXME use VcfRepository.REF ?
 		String alternative = entity.getString(ALTERNATIVE); //FIXME use VcfRepository.ALT ?
 
-		Double caddAbs = null;
-		Double caddScaled = null;
-
 		String next;
-		TabixReader.Iterator caddIterator = tr.query(chromosome + ":" + position + "-" + position);
-		while (caddIterator != null && (next = caddIterator.next()) != null)
-		{
-			String[] split = next.split("\t", -1);
 
-			if (split[2].equals(reference) && split[3].equals(alternative))
+		//TODO: check if result is correctly written to db/file, or do we need Double...
+		double caddAbs = 0.0;
+		double caddScaled = 0.0;
+
+		TabixReader.Iterator tabixIterator = tr.query(chromosome + ":" + position);
+
+		// TabixReaderIterator does not have a hasNext();
+		boolean done = false;
+		
+		while (done == false)
+		{
+			String line = tabixIterator.next();
+			int i = 0;
+			
+			if (line != null)
 			{
-				caddAbs = Double.parseDouble(split[4]);
-				caddScaled = Double.parseDouble(split[5]);
+				String[] split = null;
+				i++;
+				split = line.split("\t");
+				if(split.length != 6){
+					logger.error("bad CADD output for CHROM: "+chromosome + " POS: "+ position  + " REF: "+ reference + " ALT: "+ alternative + " LINE: " + line);
+					continue;
+				}
+				if (split[2].equals(reference) && split[3].equals(alternative))
+				{
+					caddAbs = Double.parseDouble(split[4]);
+					caddScaled = Double.parseDouble(split[5]);
+                    done = true;
+				}
+				// In some cases, the ref and alt are swapped. If this is the case, the initial if statement above will
+				// fail, we can just check whether such a swapping has occured
+				else if (split[3].equals(reference) && split[2].equals(alternative))
+				{
+					caddAbs = Double.parseDouble(split[4]);
+					caddScaled = Double.parseDouble(split[5]);
+                    done = true;
+				}
+				else
+				{
+					if (i > 3)
+					{
+						logger.warn("More than 3 hits in the CADD file! for CHROM: "+chromosome + " POS: "+ position  + " REF: "+ reference + " ALT: "+ alternative);
+					}
+					done = true;
+				}
+				if (caddAbs == 0.0 && caddScaled == 0.0)
+				{
+					logger.warn("No hit found in CADD file for CHROM: "+chromosome + " POS: "+ position  + " REF: "+ reference + " ALT: "+ alternative);
+				}
+			}else{
+				done = true;
 			}
-			// In some cases, the ref and alt are swapped. If this is the case,
-			// the initial if statement above will
-			// fail, we can just check whether such a swapping has occured
-			else if (split[3].equals(reference) && split[2].equals(alternative))
-			{
-				caddAbs = Double.parseDouble(split[4]);
-				caddScaled = Double.parseDouble(split[5]);
-			}
-			//FIXME: throw exception if above does not result in a cadd score.
 		}
 
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
