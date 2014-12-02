@@ -43,6 +43,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.gson.Gson;
 
 @Controller
 @RequestMapping(URI)
@@ -106,6 +107,24 @@ public class StandardsRegistryController extends MolgenisPluginController
 		model.addAttribute("package", aPackage);
 		model.addAttribute("tagService", tagService);
 		return VIEW_NAME_DOCUMENTATION_EMBED;
+	}
+
+	@RequestMapping(value = "/search", method = GET)
+	public String search(@RequestParam("packageSearchValue") String packageSearchValue, Model model)
+	{
+		Gson gson = new Gson();
+		PackageSearchRequest packageSearchRequest = new PackageSearchRequest();
+		packageSearchRequest.setQuery(packageSearchValue);
+		packageSearchRequest.setOffset(0);
+		packageSearchRequest.setNum(3);
+		
+		PackageSearchResponse packageSearchResponse = search(packageSearchRequest, model);
+		if (packageSearchRequest != null)
+		{
+			model.addAttribute("packageSearchResponse", gson.toJson(packageSearchResponse));
+		}
+
+		return VIEW_NAME;
 	}
 
 	@RequestMapping(value = "/search", method = POST)

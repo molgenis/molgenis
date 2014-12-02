@@ -40,18 +40,18 @@
 <#-- CSV download modal -->
 <div class="modal" id="downloadModal" tabindex="-1" role="dialog" aria-labelledby="download-modal-label" aria-hidden="true">
 	<div class="modal-dialog">
-		<div class="modal-content">				
-	      	
+		<div class="modal-content">
+
 	      	<div class="modal-header">
 	        	<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
 	        	<h4 class="modal-title" id="download-modal-label">Download as csv</h4>
 	     	</div>
-	      	
+
 	      	<div class="modal-body">
 	      		<div class="form-group form-horizontal">
 		      		<div class="row">
 						<div class="control-group">
-							<label class="col-md-3 control-label">As column names I want:</label>	
+							<label class="col-md-3 control-label">As column names I want:</label>
 							<div class="controls col-md-9">
 								<label class="radio">
 		  							<input type="radio" name="colNames" value="ATTRIBUTE_LABELS" checked> Attribute Labels
@@ -64,12 +64,12 @@
 					</div>
 				</div>
 			</div>
-	      	
+
 	      	<div class="modal-footer">
 	        	<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
 	        	<button id="download-button" class="btn btn-primary">Download</button>
 	      	</div>
-	      	
+
 	    </div>
 	</div>
 </div>
@@ -79,7 +79,7 @@
 
 <#if galaxyEnabled?? && galaxyEnabled == true>
 <#-- Galaxy export modal -->
-<form name="galaxy-export-form" class="form-horizontal" action="${context_url}/galaxy/export" method="POST">				
+<form name="galaxy-export-form" class="form-horizontal" action="${context_url}/galaxy/export" method="POST">
 	<div class="modal" id="galaxy-export-modal" tabindex="-1" role="dialog" aria-labelledby="galaxy-export-modal-label" aria-hidden="true">
 		<div class="modal-dialog modal-lg">
 			<div class="modal-content">
@@ -149,7 +149,7 @@
 			if (tableEditable) {
 				tableEditable = molgenis.hasWritePermission(molgenis.dataexplorer.getSelectedEntityMeta().name);
 			}
-			molgenis.dataexplorer.data.createDataTable(tableEditable, rowClickable);    	
+			molgenis.dataexplorer.data.createDataTable(tableEditable, rowClickable);
 		})
 		.fail(function() {
 			molgenis.createAlert([{'message': 'An error occured. Please contact the administrator.'}], 'error');
