@@ -125,12 +125,13 @@
 				success : function(data) {
 					var items = [];
 					items.push('<table class="table table-striped table-condensed">');
-					items.push('<thead><th>Name</th><th>Group</th></thead>')
+					items.push('<thead><th>Name</th><th>Id</th><th>Group</th></thead>')
 					items.push('<tbody>');
 					for(var i = 0; i < data.items.length; ++i) {
 						var item = data.items[i];
 						items.push('<tr>');
 						items.push('<td>' + (item.name || '') + '</td>');
+						items.push('<td>' + (item.externalId || '') + '</td>');
 						items.push('<td>');
 						for(var j = 0; j < item.path.length; ++j) {
 							items.push(item.path[j]);
