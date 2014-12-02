@@ -1,0 +1,256 @@
+package org.molgenis.data.importer;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.molgenis.framework.db.EntitiesValidationReport;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
+
+/**
+ * Value object to store the {@link EntitiesValidationReport}.
+ */
+public class MyEntitiesValidationReport implements EntitiesValidationReport
+{
+	public enum AttributeState
+	{
+		/**
+		 * Present in the source, known in the target.
+		 */
+		IMPORTABLE(true),
+		/**
+		 * Present in the source, unknown in the target
+		 */
+		UNKNOWN(false),
+		/**
+		 * Required in the target, missing in the source
+		 */
+		REQUIRED(false),
+		/**
+		 * Available in the target, missing in the source
+		 */
+		AVAILABLE(true);
+
+		private boolean valid;
+
+		private AttributeState(boolean valid)
+		{
+			this.valid = valid;
+		}
+
+		public boolean isValid()
+		{
+			return valid;
+		}
+	}
+
+	private final Map<String, Boolean> sheetsImportable = new LinkedHashMap<String, Boolean>();
+	private final Map<String, Collection<String>> fieldsImportable = new LinkedHashMap<String, Collection<String>>();
+	private final Map<String, Collection<String>> fieldsUnknown = new LinkedHashMap<String, Collection<String>>();
+	private final Map<String, Collection<String>> fieldsRequired = new LinkedHashMap<String, Collection<String>>();
+	private final Map<String, Collection<String>> fieldsAvailable = new LinkedHashMap<String, Collection<String>>();
+	private final List<String> importOrder = new ArrayList<String>();
+	private boolean valid = true;
+
+	/**
+	 * Creates a new report, with an entity added to it.
+	 * 
+	 * @param entityName
+	 *            name of the entity
+	 * @param importable
+	 *            true if the entity is importable
+	 * @return this report
+	 */
+	public MyEntitiesValidationReport addEntity(String entityName, boolean importable)
+	{
+		sheetsImportable.put(entityName, importable);
+		valid = valid && importable;
+		if (importable)
+		{
+			fieldsImportable.put(entityName, new ArrayList<String>());
+			fieldsUnknown.put(entityName, new ArrayList<String>());
+			fieldsRequired.put(entityName, new ArrayList<String>());
+			fieldsAvailable.put(entityName, new ArrayList<String>());
+			importOrder.add(entityName);
+		}
+		return this;
+	}
+
+	/**
+	 * Creates a new report, with an attribute with state {@value AttributeState#IMPORTABLE} added to the last added
+	 * entity;
+	 * 
+	 * @param attributeName
+	 * @return new {@link MyEntitiesValidationReport} with attribute added.
+	 */
+	public MyEntitiesValidationReport addAttribute(String attributeName)
+	{
+		return addAttribute(attributeName, AttributeState.IMPORTABLE);
+	}
+
+	/**
+	 * Creates a new report, with an attribute added to the last added entity;
+	 * 
+	 * @param attributeName
+	 *            name of the attribute to add
+	 * @param state
+	 *            state of the attribute to add
+	 * @return this report
+	 */
+	public MyEntitiesValidationReport addAttribute(String attributeName, AttributeState state)
+	{
+		if (getImportOrder().size() == 0)
+		{
+			throw new IllegalStateException("Must add entity first");
+		}
+		String entityName = getImportOrder().get(getImportOrder().size() - 1);
+		valid = valid && state.isValid();
+		switch (state)
+		{
+			case IMPORTABLE:
+				addField(fieldsImportable, entityName, attributeName);
+				break;
+			case UNKNOWN:
+				addField(fieldsUnknown, entityName, attributeName);
+				break;
+			case AVAILABLE:
+				addField(fieldsAvailable, entityName, attributeName);
+				break;
+			case REQUIRED:
+				addField(fieldsRequired, entityName, attributeName);
+				break;
+			default:
+				throw new IllegalArgumentException();
+		}
+		return this;
+	}
+
+	private void addField(Map<String, Collection<String>> sheets, String entityName, String attributeName)
+	{
+		if (!sheets.containsKey(entityName))
+		{
+			sheets.put(entityName, new ArrayList<String>());
+		}
+		sheets.get(entityName).add(attributeName);
+	}
+
+	/** Returns true for importable sheets and false for unimportable sheets */
+	@Override
+	public ImmutableMap<String, Boolean> getSheetsImportable()
+	{
+		return ImmutableMap.<String, Boolean> copyOf(sheetsImportable);
+	}
+
+	private static ImmutableMap<String, Collection<String>> getImmutableCopy(Map<String, Collection<String>> map)
+	{
+		Builder<String, Collection<String>> builder = ImmutableMap.<String, Collection<String>> builder();
+		for (String key : map.keySet())
+		{
+			builder.put(key, ImmutableList.<String> copyOf(map.get(key)));
+		}
+		return builder.build();
+	}
+
+	/** lists per entity what fields can be imported */
+	@Override
+	public ImmutableMap<String, Collection<String>> getFieldsImportable()
+	{
+		return getImmutableCopy(fieldsImportable);
+	}
+
+	/** lists per entity what fields cannot be imported */
+	@Override
+	public ImmutableMap<String, Collection<String>> getFieldsUnknown()
+	{
+		return getImmutableCopy(fieldsUnknown);
+	}
+
+	/** lists per entity what fields should have been filled in */
+	@Override
+	public ImmutableMap<String, Collection<String>> getFieldsRequired()
+	{
+		return getImmutableCopy(fieldsRequired);
+	}
+
+	/** lists per entity what fields could have been filled in but were not provided */
+	@Override
+	public ImmutableMap<String, Collection<String>> getFieldsAvailable()
+	{
+		return getImmutableCopy(fieldsAvailable);
+	}
+
+	/** provides import order based on dependency */
+	@Override
+	public ImmutableList<String> getImportOrder()
+	{
+		return ImmutableList.<String> copyOf(importOrder);
+	}
+
+	@Override
+	public boolean valid()
+	{
+		return valid;
+	}
+
+	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((fieldsAvailable == null) ? 0 : fieldsAvailable.hashCode());
+		result = prime * result + ((fieldsImportable == null) ? 0 : fieldsImportable.hashCode());
+		result = prime * result + ((fieldsRequired == null) ? 0 : fieldsRequired.hashCode());
+		result = prime * result + ((fieldsUnknown == null) ? 0 : fieldsUnknown.hashCode());
+		result = prime * result + ((importOrder == null) ? 0 : importOrder.hashCode());
+		result = prime * result + ((sheetsImportable == null) ? 0 : sheetsImportable.hashCode());
+		result = prime * result + (valid ? 1231 : 1237);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
+		MyEntitiesValidationReport other = (MyEntitiesValidationReport) obj;
+		if (fieldsAvailable == null)
+		{
+			if (other.fieldsAvailable != null) return false;
+		}
+		else if (!fieldsAvailable.equals(other.fieldsAvailable)) return false;
+		if (fieldsImportable == null)
+		{
+			if (other.fieldsImportable != null) return false;
+		}
+		else if (!fieldsImportable.equals(other.fieldsImportable)) return false;
+		if (fieldsRequired == null)
+		{
+			if (other.fieldsRequired != null) return false;
+		}
+		else if (!fieldsRequired.equals(other.fieldsRequired)) return false;
+		if (fieldsUnknown == null)
+		{
+			if (other.fieldsUnknown != null) return false;
+		}
+		else if (!fieldsUnknown.equals(other.fieldsUnknown)) return false;
+		if (importOrder == null)
+		{
+			if (other.importOrder != null) return false;
+		}
+		else if (!importOrder.equals(other.importOrder)) return false;
+		if (sheetsImportable == null)
+		{
+			if (other.sheetsImportable != null) return false;
+		}
+		else if (!sheetsImportable.equals(other.sheetsImportable)) return false;
+		if (valid != other.valid) return false;
+		return true;
+	}
+
+}

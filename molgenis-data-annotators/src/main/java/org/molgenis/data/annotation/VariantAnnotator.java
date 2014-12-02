@@ -9,8 +9,9 @@ import org.molgenis.data.vcf.VcfRepository;
 
 public abstract class VariantAnnotator extends LocusAnnotator
 {
-	public static final String REFERENCE = "ref"; //FIXME same as VcfRepository.REF
-	public static final String ALTERNATIVE = "alt"; //FIXME same as VcfRepository.ALT
+
+	public static final String REFERENCE = "REF";
+	public static final String ALTERNATIVE = "ALT";
 
 	@Override
 	public EntityMetaData getInputMetaData()

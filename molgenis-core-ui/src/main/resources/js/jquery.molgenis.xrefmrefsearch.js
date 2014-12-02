@@ -130,7 +130,6 @@
 			multiple: (attributeMetaData.fieldType === 'MREF' || attributeMetaData.fieldType === 'XREF'),
 			closeOnSelect: false,
 			query: function (options){
-				console.log(options.term);
 				var query = createQuery(lookupAttrNames, options.term.match(/[^ ]+/g),'LIKE', true);
 				if(query)
 				{

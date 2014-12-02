@@ -22,13 +22,14 @@ import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
 import org.molgenis.data.annotation.provider.KeggDataProvider;
+import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class KeggAnnotatorServiceTest
 {
-	private EntityMetaData metaDataCanAnnotate;
+	private DefaultEntityMetaData metaDataCanAnnotate;
 	private EntityMetaData metaDataCantAnnotate;
 	private KeggServiceAnnotator annotator;
 	private AttributeMetaData attributeMetaDataChrom;
@@ -42,7 +43,7 @@ public class KeggAnnotatorServiceTest
 	@BeforeMethod
 	public void beforeMethod() throws IOException
 	{
-		metaDataCanAnnotate = mock(EntityMetaData.class);
+		metaDataCanAnnotate = new org.molgenis.data.support.DefaultEntityMetaData("test");
 		attributeMetaDataChrom = mock(AttributeMetaData.class);
 		attributeMetaDataPos = mock(AttributeMetaData.class);
 
@@ -55,8 +56,9 @@ public class KeggAnnotatorServiceTest
 		when(attributeMetaDataPos.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.LONG.toString().toLowerCase()));
 
-		when(metaDataCanAnnotate.getAttribute(KeggServiceAnnotator.CHROMOSOME)).thenReturn(attributeMetaDataChrom);
-		when(metaDataCanAnnotate.getAttribute(KeggServiceAnnotator.POSITION)).thenReturn(attributeMetaDataPos);
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom);
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);
+		metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom.getName());
 
 		metaDataCantAnnotate = mock(EntityMetaData.class);
 
@@ -100,6 +102,7 @@ public class KeggAnnotatorServiceTest
 				58453844l - 10, 58453844l + 10, "2"));
 		when(hgncLocationsProvider.getHgncLocations()).thenReturn(locationsMap);
 		annotator = new KeggServiceAnnotator(annotationService, hgncLocationsProvider, keggDataProvider);
+		when(entity.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
 	}
 
 	@Test

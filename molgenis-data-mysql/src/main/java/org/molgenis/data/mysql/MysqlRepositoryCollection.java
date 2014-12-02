@@ -7,6 +7,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
@@ -247,7 +248,17 @@ public abstract class MysqlRepositoryCollection implements ManageableCrudReposit
 				metaDataRepositories.addAttributeMetaData(sourceEntityMetaData.getName(), attr);
 				DefaultEntityMetaData defaultEntityMetaData = (DefaultEntityMetaData) repository.getEntityMetaData();
 				defaultEntityMetaData.addAttributeMetaData(attr);
-				repository.addAttribute(attr);
+				if (attr.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
+				{
+					for (AttributeMetaData attrPart : attr.getAttributeParts())
+					{
+						repository.addAttribute(attrPart);
+					}
+				}
+				else
+				{
+					repository.addAttribute(attr);
+				}
 				addedAttributes.add(attr);
 			}
 		}

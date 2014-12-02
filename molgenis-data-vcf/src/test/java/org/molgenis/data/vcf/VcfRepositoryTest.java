@@ -65,7 +65,8 @@ public class VcfRepositoryTest
 			testAttribute(it.next(), VcfRepository.QUAL, MolgenisFieldTypes.STRING);
 			assertTrue(it.hasNext());
 			testAttribute(it.next(), VcfRepository.ID, MolgenisFieldTypes.STRING);
-
+			assertTrue(it.hasNext());
+			testAttribute(it.next(), VcfRepository.INTERNAL_ID, MolgenisFieldTypes.STRING);
 			assertTrue(it.hasNext());
 			testAttribute(it.next(), VcfRepository.INFO, MolgenisFieldTypes.COMPOUND);
 			assertTrue(it.hasNext());

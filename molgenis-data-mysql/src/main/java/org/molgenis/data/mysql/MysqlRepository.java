@@ -42,6 +42,7 @@ import org.molgenis.fieldtypes.StringField;
 import org.molgenis.fieldtypes.TextField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.model.MolgenisModelException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -91,14 +92,42 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 	@Override
 	public void drop()
 	{
+		DataAccessException remembered = null;
 		for (AttributeMetaData att : getEntityMetaData().getAtomicAttributes())
 		{
 			if (att.getDataType() instanceof MrefField)
 			{
-				asyncJdbcTemplate.execute("DROP TABLE IF EXISTS `" + getTableName() + "_" + att.getName() + "`");
+				DataAccessException e = tryExecute("DROP TABLE IF EXISTS `" + getTableName() + "_" + att.getName()
+						+ "`");
+				remembered = remembered != null ? remembered : e;
 			}
 		}
-		asyncJdbcTemplate.execute(getDropSql());
+		DataAccessException e = tryExecute(getDropSql());
+		remembered = remembered != null ? remembered : e;
+		if (remembered != null)
+		{
+			throw remembered;
+		}
+	}
+
+	/**
+	 * Tries to execute a piece of SQL.
+	 * 
+	 * @param sql
+	 *            the SQL to execute
+	 * @return Exception if one was caught, or null if all went well
+	 */
+	private DataAccessException tryExecute(String sql)
+	{
+		try
+		{
+			asyncJdbcTemplate.execute(sql);
+			return null;
+		}
+		catch (DataAccessException caught)
+		{
+			return caught;
+		}
 	}
 
 	public void dropAttribute(String attributeName)
@@ -146,6 +175,13 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 		catch (Exception e)
 		{
 			logger.error("Exception creating MysqlRepository.", e);
+			try
+			{
+				drop();
+			}
+			catch (Exception ignored)
+			{
+			}
 			throw new MolgenisDataException(e);
 		}
 	}
@@ -1066,7 +1102,7 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 					}
 				}
 
-				logger.info("Added " + count.get() + " " + getTableName() + " entities.");
+				logger.debug("Added " + count.get() + " " + getTableName() + " entities.");
 				batch.clear();
 			}
 		}

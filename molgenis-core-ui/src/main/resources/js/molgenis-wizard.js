@@ -1,7 +1,6 @@
 $(function() {
 	$('ul.pager a').on('click', function(e) {
 		e.preventDefault();
-		
 		if (!$(this).parent().hasClass('disabled')) {
 			var a = $(this);
 			showSpinner(function() {
@@ -17,7 +16,4 @@ $(function() {
 	// Call bootstrap js to give input buttons of type file a nice bootstrap look
    	$('input[type=file]').bootstrapFileInput();
    	$('.file-inputs').bootstrapFileInput();
-	
-	//Getting the indexer error alert!
-	molgenis.createDatasetsindexerAlert();
 });

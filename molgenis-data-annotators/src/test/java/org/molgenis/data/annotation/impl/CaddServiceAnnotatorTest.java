@@ -16,6 +16,7 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.server.MolgenisSettings;
 import org.molgenis.util.ResourceUtils;
@@ -24,7 +25,7 @@ import org.testng.annotations.Test;
 
 public class CaddServiceAnnotatorTest
 {
-	private EntityMetaData metaDataCanAnnotate;
+	private DefaultEntityMetaData metaDataCanAnnotate;
 	private EntityMetaData metaDataCantAnnotate;
 	private CaddServiceAnnotator annotator;
 	private AttributeMetaData attributeMetaDataChrom;
@@ -39,16 +40,17 @@ public class CaddServiceAnnotatorTest
 	private Entity entity;
 	private ArrayList<Entity> input1;
 	private ArrayList<Entity> input2;
+	private Entity entity2;
 
 	@BeforeMethod
 	public void beforeMethod() throws IOException
 	{
-		metaDataCanAnnotate = mock(EntityMetaData.class);
+		metaDataCanAnnotate = new DefaultEntityMetaData("test");
 
 		MolgenisSettings settings = mock(MolgenisSettings.class);
 
-		when(settings.getProperty(CaddServiceAnnotator.CADD_FILE_LOCATION_PROPERTY))
-				.thenReturn(ResourceUtils.getFile(getClass(), "/1000G.vcf.gz").getPath());
+		when(settings.getProperty(CaddServiceAnnotator.CADD_FILE_LOCATION_PROPERTY)).thenReturn(
+				ResourceUtils.getFile(getClass(), "/1000G.vcf.gz").getPath());
 
 		attributeMetaDataChrom = mock(AttributeMetaData.class);
 		attributeMetaDataPos = mock(AttributeMetaData.class);
@@ -69,11 +71,11 @@ public class CaddServiceAnnotatorTest
 		when(attributeMetaDataAlt.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.STRING.toString().toLowerCase()));
 
-		when(metaDataCanAnnotate.getAttribute(CaddServiceAnnotator.CHROMOSOME)).thenReturn(attributeMetaDataChrom);
-		when(metaDataCanAnnotate.getAttribute(CaddServiceAnnotator.POSITION)).thenReturn(attributeMetaDataPos);
-		when(metaDataCanAnnotate.getAttribute(CaddServiceAnnotator.REFERENCE)).thenReturn(attributeMetaDataRef);
-		when(metaDataCanAnnotate.getAttribute(CaddServiceAnnotator.ALTERNATIVE)).thenReturn(attributeMetaDataAlt);
-
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom);
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataRef);
+		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataAlt);
+		metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom.getName());
 		metaDataCantAnnotate = mock(EntityMetaData.class);
 
 		attributeMetaDataCantAnnotateFeature = mock(AttributeMetaData.class);
@@ -118,18 +120,21 @@ public class CaddServiceAnnotatorTest
 
 		input1 = new ArrayList<Entity>();
 		input1.add(entity);
-		
-		entity = mock(Entity.class);
-				
-		when(entity.getString(CaddServiceAnnotator.CHROMOSOME)).thenReturn("2");
-		when(entity.getLong(CaddServiceAnnotator.POSITION)).thenReturn(new Long(19207841));
-		when(entity.getString(CaddServiceAnnotator.REFERENCE)).thenReturn("C");
-		when(entity.getString(CaddServiceAnnotator.ALTERNATIVE)).thenReturn("T");
-		
+		when(entity.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
+
+		entity2 = mock(Entity.class);
+
+		when(entity2.getString(CaddServiceAnnotator.CHROMOSOME)).thenReturn("2");
+		when(entity2.getLong(CaddServiceAnnotator.POSITION)).thenReturn(new Long(19207841));
+		when(entity2.getString(CaddServiceAnnotator.REFERENCE)).thenReturn("C");
+		when(entity2.getString(CaddServiceAnnotator.ALTERNATIVE)).thenReturn("T");
+
 		input2 = new ArrayList<Entity>();
-		input2.add(entity);
+		input2.add(entity2);
 
 		annotator = new CaddServiceAnnotator(settings, null);
+
+		when(entity2.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
 	}
 
 	@Test
@@ -137,9 +142,9 @@ public class CaddServiceAnnotatorTest
 	{
 		List<Entity> expectedList = new ArrayList<Entity>();
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
-	
-		resultMap.put(CaddServiceAnnotator.CADD_ABS, "0.180916");
-		resultMap.put(CaddServiceAnnotator.CADD_SCALED, "4.974");
+
+		resultMap.put(CaddServiceAnnotator.CADD_ABS, 0.180916);
+		resultMap.put(CaddServiceAnnotator.CADD_SCALED, 4.974);
 
 		Entity expectedEntity = new MapEntity(resultMap);
 
@@ -153,16 +158,16 @@ public class CaddServiceAnnotatorTest
 		assertEquals(resultEntity.get(CaddServiceAnnotator.CADD_SCALED),
 				expectedEntity.get(CaddServiceAnnotator.CADD_SCALED));
 	}
-	
+
 	@Test
 	public void annotateTestLineTwo()
 	{
 		List<Entity> expectedList = new ArrayList<Entity>();
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
 
-		resultMap.put(CaddServiceAnnotator.CADD_ABS, "0.18026");
-		resultMap.put(CaddServiceAnnotator.CADD_SCALED, "5.974");
-		
+		resultMap.put(CaddServiceAnnotator.CADD_ABS, 0.18026);
+		resultMap.put(CaddServiceAnnotator.CADD_SCALED, 5.974);
+
 		Entity expectedEntity = new MapEntity(resultMap);
 
 		expectedList.add(expectedEntity);

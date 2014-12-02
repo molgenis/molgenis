@@ -2,8 +2,8 @@ package org.molgenis.security.user;
 
 import java.util.List;
 
-import org.molgenis.omx.auth.MolgenisGroup;
-import org.molgenis.omx.auth.MolgenisUser;
+import org.molgenis.auth.MolgenisGroup;
+import org.molgenis.auth.MolgenisUser;
 
 public interface MolgenisUserService
 {

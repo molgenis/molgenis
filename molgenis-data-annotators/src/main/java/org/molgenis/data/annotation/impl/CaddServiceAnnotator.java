@@ -22,8 +22,7 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.framework.server.MolgenisSettings;
-import org.molgenis.omx.MolgenisSimpleSettings;
-import org.molgenis.vcf.VcfReader;
+import org.molgenis.framework.server.MolgenisSimpleSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -150,7 +149,6 @@ public class CaddServiceAnnotator extends VariantAnnotator
 	public List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException
 	{
 		List<Entity> results = new ArrayList<Entity>();
-
 		//FIXME need to solve this! duplicate notation for CHROM in VcfRepository.CHROM and LocusAnnotator.CHROMOSOME
 		String chromosome = entity.getString(VcfRepository.CHROM) != null ? entity.getString(VcfRepository.CHROM) : entity.getString(CHROMOSOME);
 		
@@ -158,8 +156,8 @@ public class CaddServiceAnnotator extends VariantAnnotator
 		String reference = entity.getString(REFERENCE); //FIXME use VcfRepository.REF ?
 		String alternative = entity.getString(ALTERNATIVE); //FIXME use VcfRepository.ALT ?
 
-		String caddAbs = null;
-		String caddScaled = null;
+		Double caddAbs = null;
+		Double caddScaled = null;
 
 		String next;
 		TabixReader.Iterator caddIterator = tr.query(chromosome + ":" + position + "-" + position);
@@ -169,24 +167,18 @@ public class CaddServiceAnnotator extends VariantAnnotator
 
 			if (split[2].equals(reference) && split[3].equals(alternative))
 			{
-				caddAbs = split[4];
-				caddScaled = split[5];
+				caddAbs = Double.parseDouble(split[4]);
+				caddScaled = Double.parseDouble(split[5]);
 			}
 			// In some cases, the ref and alt are swapped. If this is the case,
 			// the initial if statement above will
 			// fail, we can just check whether such a swapping has occured
 			else if (split[3].equals(reference) && split[2].equals(alternative))
 			{
-				caddAbs = split[4];
-				caddScaled = split[5];
+				caddAbs = Double.parseDouble(split[4]);
+				caddScaled = Double.parseDouble(split[5]);
 			}
-			// If both matchings are incorrect, there is something really wrong
-			// with the source files,
-			// which we cant do anything about.
-			else
-			{
-				//
-			}
+			//FIXME: throw exception if above does not result in a cadd score.
 		}
 
 		HashMap<String, Object> resultMap = new HashMap<String, Object>();
@@ -198,7 +190,7 @@ public class CaddServiceAnnotator extends VariantAnnotator
 		resultMap.put(ALTERNATIVE, alternative);
 		resultMap.put(REFERENCE, reference);
 
-		results.add(new MapEntity(resultMap));
+		results.add(getAnnotatedEntity(entity, resultMap));
 
 		return results;
 	}

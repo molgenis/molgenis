@@ -5,9 +5,9 @@ public class LabeledResource
 	private final String iri;
 	private final String label;
 
-	public LabeledResource(String iri)
+	public LabeledResource(String label)
 	{
-		this(iri, iri);
+		this(null, label);
 	}
 
 	public LabeledResource(String iri, String label)

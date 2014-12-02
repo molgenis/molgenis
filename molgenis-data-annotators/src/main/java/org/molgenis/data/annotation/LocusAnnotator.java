@@ -16,8 +16,8 @@ public abstract class LocusAnnotator extends AbstractRepositoryAnnotator impleme
 		ApplicationListener<ContextRefreshedEvent>
 {
 
-	public static final String CHROMOSOME = "chrom"; //FIXME how can we relate to VcfRepository.CHROM ? 
-	public static final String POSITION = "pos"; // FIXME same as VcfRepository.POS ?
+	public static final String CHROMOSOME = "#CHROM";
+	public static final String POSITION = "POS";
 
 	// TODO: needs genome build and possible organism !?
 

@@ -65,29 +65,6 @@
 		return i18nObj;
 	};
 
-	/*
-	 * Create a datasets indexer alert when indexer is running.
-	 */
-	molgenis.createDatasetsindexerAlert = function() {
-		$.get("/dataindexerstatus", function(response) {
-			if (response && response.isRunning === true) {
-				showDatasetsindexerStatusMessage();
-			}
-		});
-
-		function showDatasetsindexerStatusMessage() {
-			$.get("/dataindexerstatus", function(response) {
-				$('.datasetsindexerAlerts').empty();
-				if (response.isRunning === true) {
-					setTimeout(showDatasetsindexerStatusMessage, 3000);
-				}
-				molgenis.createAlert([ {
-					'message' : response.message
-				} ], response.type, $('.datasetsindexerAlerts'));
-			});
-		}
-	};
-
 	/**
 	 * Returns all atomic attributes. In case of compound attributes (attributes
 	 * consisting of multiple atomic attributes) only the descendant atomic
@@ -593,6 +570,7 @@ function createInput(attr, attrs, val, lbl) {
 
 function showSpinner(callback) {
 	var spinner = $('#spinner');
+	
 	if (spinner.length === 0) {
 		// do not add fade effect on modal: http://stackoverflow.com/a/22101894
 		var items = [];
@@ -607,11 +585,14 @@ function showSpinner(callback) {
 		$('body').append(items.join(''));
 		spinner = $('#spinner');
 		spinner.data('count', 0);
-        spinner.modal({backdrop: 'static'});
+		spinner.modal({
+			backdrop: 'static',
+			show: false
+		});
 	}
-
+	
 	if (callback) {
-		spinner.on('shown.bs.modal', function() {
+		spinner.on('shown.bs.modal', function(e) {
 			callback();
 		});
 	}
@@ -641,8 +622,55 @@ function hideSpinner() {
 	}
 }
 
-$(function() {
+/**
+ * Helper block function container
+ */
+function handleBarHelperBlocks(Handlebars) {
+	Handlebars.registerHelper('equal', function(lvalue, rvalue, options) {
+	    if (arguments.length < 3)
+	        throw new Error("Handlebars Helper equal needs 2 parameters");
+	    if (lvalue != rvalue) {
+	        return options.inverse(this);
+	    } else {
+	        return options.fn(this);
+	    }
+	});
 	
+	Handlebars.registerHelper('notequal', function(lvalue, rvalue, options) {
+	    if (arguments.length < 3)
+	        throw new Error("Handlebars Helper equal needs 2 parameters");
+	    if (lvalue != rvalue) {
+	    	 return options.fn(this);
+	    } else {
+	    	 return options.inverse(this);
+	    }
+	});
+	
+	Handlebars.registerHelper('ifCond', function (v1, operator, v2, options) {
+	    switch (operator) {
+	        case '==':
+	            return (v1 == v2) ? options.fn(this) : options.inverse(this);
+	        case '===':
+	            return (v1 === v2) ? options.fn(this) : options.inverse(this);
+	        case '<':
+	            return (v1 < v2) ? options.fn(this) : options.inverse(this);
+	        case '<=':
+	            return (v1 <= v2) ? options.fn(this) : options.inverse(this);
+	        case '>':
+	            return (v1 > v2) ? options.fn(this) : options.inverse(this);
+	        case '>=':
+	            return (v1 >= v2) ? options.fn(this) : options.inverse(this);
+	        case '&&':
+	            return (v1 && v2) ? options.fn(this) : options.inverse(this);
+	        case '||':
+	            return (v1 || v2) ? options.fn(this) : options.inverse(this);
+	        default:
+	            return options.inverse(this);
+	    }
+	});
+}
+
+$(function() {
 	// disable all ajax request caching
 	$.ajaxSetup({
 		cache : false
@@ -767,6 +795,9 @@ $(function() {
 		});
 		return o;
 	};
+	
+	// Call handleBarHelperBlock function to set helper blocks for entire application
+	handleBarHelperBlocks(Handlebars);
 	
 	// clear datetimepicker on pressing cancel button
 	$(document).on('click', '.clear-date-time-btn', function(e) {

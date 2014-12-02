@@ -23,10 +23,10 @@
 					if (data.targetType === 'title' || data.targetType === 'icon') {
 						switch(data.node.data.type) {
 						case 'package' :
-							document.getElementById('package-' + data.node.key).scrollIntoView();
+							$('#package-doc-container').scrollTo('#package-' + data.node.key);
 							break;
 						case 'entity' :
-							document.getElementById('entity-' + data.node.key).scrollIntoView();
+							$('#package-doc-container').scrollTo('#entity-' + data.node.key);
 							break;
 						case 'attribute' :
 							var parent = data.node.parent;
@@ -34,8 +34,7 @@
 								//Compound attr
 								parent = parent.parent;
 							}
-							
-							document.getElementById('attribute-' + parent.key + data.node.key).scrollIntoView();
+							$('#package-doc-container').scrollTo('#attribute-' + parent.key + data.node.key);
 							break;
 						default:
 							throw 'Unknown type';
@@ -94,26 +93,30 @@
 				}),
 				contentType: 'application/json',
 				success : function(data) {
-					renderSearchResults(data, searchResultsContainer);
-					
-					if (data.total > nrResultsPerPage) {
-						$('#package-search-results-pager').show();
-					
-						$('#package-search-results-pager').pager({
-							'nrItems' : data.total,
-							'nrItemsPerPage' : nrResultsPerPage,
-							'page' : pageIndex + 1,
-							'onPageChange' : function(pager) {
-								pageIndex = pager.page - 1;
-								$('form[name=search-form]').submit();					
-							}
-						});
-					} else {
-						$('#package-search-results-pager').hide();
-					}
+					renderSearchResultsBySucces(data);
 				}
 			});
 		});
+		
+		function renderSearchResultsBySucces(data){
+			renderSearchResults(data, searchResultsContainer);
+			
+			if (data.total > nrResultsPerPage) {
+				$('#package-search-results-pager').show();
+			
+				$('#package-search-results-pager').pager({
+					'nrItems' : data.total,
+					'nrItemsPerPage' : nrResultsPerPage,
+					'page' : pageIndex + 1,
+					'onPageChange' : function(pager) {
+						pageIndex = pager.page - 1;
+						$('form[name=search-form]').submit();					
+					}
+				});
+			} else {
+				$('#package-search-results-pager').hide();
+			}
+		}
 			
 		$(document).on('click', '#search-clear-button', function() {
 			$('#package-search').val('');
@@ -166,26 +169,6 @@
 			}, 500);
 		});
 		
-		Handlebars.registerHelper('notequal', function(lvalue, rvalue, options) {
-		    if (arguments.length < 3)
-		        throw new Error("Handlebars Helper equal needs 2 parameters");
-		    if (lvalue != rvalue) {
-		    	 return options.fn(this);
-		    } else {
-		    	 return options.inverse(this);
-		    }
-		});
-		
-		Handlebars.registerHelper('equal', function(lvalue, rvalue, options) {
-		    if (arguments.length < 3)
-		        throw new Error("Handlebars Helper equal needs 2 parameters");
-		    if (lvalue != rvalue) {
-		        return options.inverse(this);
-		    } else {
-		        return options.fn(this);
-		    }
-		});
-		
 		countTemplate = Handlebars.compile($("#count-template").html());
 		modelTemplate = Handlebars.compile($("#model-template").html());
 		
@@ -201,8 +184,15 @@
 			zoomOut();
 		});
 		
-		// initially search for all models
-		$('form[name=search-form]').submit();
+		var data = $("#package-search-results[data-package-search-results]").attr("data-package-search-results");
+		if(data){
+			// Initial setting when data-results is set.
+			renderSearchResultsBySucces(JSON.parse(data));
+			$("#package-search-results[data-package-search-results]").removeAttr("data-package-search-results");
+		}else{
+			// initially search for all models
+			$('form[name=search-form]').submit();
+		}
 	});
 	
 }($, window.top.molgenis = window.top.molgenis || {}));
