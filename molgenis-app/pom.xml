@@ -295,5 +295,10 @@
 			<artifactId>molgenis-data-semanticsearch</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-vkgl</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 	</dependencies>
 </project>
