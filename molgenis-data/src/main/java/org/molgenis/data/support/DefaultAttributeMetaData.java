@@ -217,7 +217,7 @@ public class DefaultAttributeMetaData implements AttributeMetaData
 		return expression;
 	}
 
-	public AttributeMetaData setExpression(String expression)
+	public DefaultAttributeMetaData setExpression(String expression)
 	{
 		this.expression = expression;
 		return this;

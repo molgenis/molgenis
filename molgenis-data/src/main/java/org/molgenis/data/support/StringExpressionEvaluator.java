@@ -31,8 +31,8 @@ public class StringExpressionEvaluator implements ExpressionEvaluator
 		sourceAttributeMetaData = entityMetaData.getAttribute(attributeName);
 		if (sourceAttributeMetaData == null)
 		{
-			throw new IllegalArgumentException("String attribute expression " + attributeName
-					+ " references non-existant attribute.");
+			throw new IllegalArgumentException("Expression for attribute '" + attributeMetaData.getName()
+					+ "' references non-existant attribute '" + attributeName + "'.");
 		}
 	}
 

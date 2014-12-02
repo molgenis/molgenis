@@ -53,7 +53,7 @@ public class StringExpressionEvaluatorTest
 	}
 
 	@Test
-	public void testStringEvaluatorConstructorChecksIfExpressionIsString()
+	public void testStringEvaluatorConstructorChecksIfExpressionIsMap()
 	{
 		AttributeMetaData amd = new DefaultAttributeMetaData("#CHROM").setDataType(new StringField()).setExpression(
 				"{}");
