@@ -1,14 +1,20 @@
+<#macro renderTags tags>
+	<#if tags?has_content>
+		<#list tags as tag>
+			<#if tag.object.iri?has_content>
+				<span class="label label-primary"><a href='${tag.object.iri}' target="_blank">${tag.object.label}</a></span>
+			<#else>
+				<span class="label label-primary">${tag.object.label}</span>
+			</#if>
+		</#list>
+	</#if>
+</#macro>
+
 <#macro renderPackage package>
     <h2 id="package-${package.name?replace(" ", "_")}" class="page-header">${package.simpleName} <small>(${package.name})</small></h2>
     <div class="package-container">
         <p><#if package.description?has_content>${package.description}</#if></p>
-        <#list package.tags as tag>
-        	<#if tag.relation == 'link'>
-        		<span class="label label-primary"><a href='${tag.object.iri}' target="_blank">${tag.object.label}</a></span>
-        	<#else>
-        		<span class="label label-primary">${tag.object.label}</span>
-        	</#if>
-        </#list>
+        <@renderTags tags=package.tags/>
         
         <#-- Subpackages -->
         <#if package.subPackages?has_content>
@@ -43,6 +49,7 @@
                 <div class="panel-body">
             
                     <p><#if entity.description?has_content>${entity.description}<#else>No description available</#if></p>
+                    <@renderTags tags=tagService.getTagsForEntity(entity)/>
                     
                     <#-- Entity attributes -->
                     <div class="table-responsive">

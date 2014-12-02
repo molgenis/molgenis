@@ -32,80 +32,95 @@ public class LazyReferenceEntity implements Entity
 		this.dataService = dataService;
 	}
 
+	@Override
 	public EntityMetaData getEntityMetaData()
 	{
 		return getEntity().getEntityMetaData();
 	}
 
+	@Override
 	public Iterable<String> getAttributeNames()
 	{
 		return getEntity().getAttributeNames();
 	}
 
+	@Override
 	public Object getIdValue()
 	{
-		return id;
+		return entityMetaData.getIdAttribute().getDataType().convert(id);
 	}
 
+	@Override
 	public String getLabelValue()
 	{
 		return getEntity().getLabelValue();
 	}
 
+	@Override
 	public List<String> getLabelAttributeNames()
 	{
 		return getEntity().getLabelAttributeNames();
 	}
 
+	@Override
 	public Object get(String attributeName)
 	{
 		if (entityMetaData.getIdAttribute().getName().equals(attributeName))
 		{
-			return id;
+			return getIdValue();
 		}
 		return getEntity().get(attributeName);
 	}
 
+	@Override
 	public String getString(String attributeName)
 	{
 		return getEntity().getString(attributeName);
 	}
 
+	@Override
 	public Integer getInt(String attributeName)
 	{
 		return getEntity().getInt(attributeName);
 	}
 
+	@Override
 	public Long getLong(String attributeName)
 	{
 		return getEntity().getLong(attributeName);
 	}
 
+	@Override
 	public Boolean getBoolean(String attributeName)
 	{
 		return getEntity().getBoolean(attributeName);
 	}
 
+	@Override
 	public Double getDouble(String attributeName)
 	{
 		return getEntity().getDouble(attributeName);
 	}
 
+	@Override
 	public Date getDate(String attributeName)
 	{
 		return getEntity().getDate(attributeName);
 	}
 
+	@Override
 	public java.util.Date getUtilDate(String attributeName)
 	{
 		return getEntity().getUtilDate(attributeName);
 	}
 
+	@Override
 	public Timestamp getTimestamp(String attributeName)
 	{
 		return getEntity().getTimestamp(attributeName);
 	}
 
+	@Override
 	public Entity getEntity(String attributeName)
 	{
 		return getEntity().getEntity(attributeName);
@@ -117,6 +132,7 @@ public class LazyReferenceEntity implements Entity
 		return getEntity().getEntity(attributeName, clazz);
 	}
 
+	@Override
 	public Iterable<Entity> getEntities(String attributeName)
 	{
 		return getEntity().getEntities(attributeName);
@@ -128,26 +144,31 @@ public class LazyReferenceEntity implements Entity
 		return getEntity().getEntities(attributeName, clazz);
 	}
 
+	@Override
 	public List<String> getList(String attributeName)
 	{
 		return getEntity().getList(attributeName);
 	}
 
+	@Override
 	public List<Integer> getIntList(String attributeName)
 	{
 		return getEntity().getIntList(attributeName);
 	}
 
+	@Override
 	public void set(String attributeName, Object value)
 	{
 		getEntity().set(attributeName, value);
 	}
 
+	@Override
 	public void set(Entity values)
 	{
 		getEntity().set(values);
 	}
 
+	@Override
 	public void set(Entity entity, boolean strict)
 	{
 		getEntity().set(entity, strict);

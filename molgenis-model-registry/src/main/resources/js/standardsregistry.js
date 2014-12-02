@@ -93,26 +93,30 @@
 				}),
 				contentType: 'application/json',
 				success : function(data) {
-					renderSearchResults(data, searchResultsContainer);
-					
-					if (data.total > nrResultsPerPage) {
-						$('#package-search-results-pager').show();
-					
-						$('#package-search-results-pager').pager({
-							'nrItems' : data.total,
-							'nrItemsPerPage' : nrResultsPerPage,
-							'page' : pageIndex + 1,
-							'onPageChange' : function(pager) {
-								pageIndex = pager.page - 1;
-								$('form[name=search-form]').submit();					
-							}
-						});
-					} else {
-						$('#package-search-results-pager').hide();
-					}
+					renderSearchResultsBySucces(data);
 				}
 			});
 		});
+		
+		function renderSearchResultsBySucces(data){
+			renderSearchResults(data, searchResultsContainer);
+			
+			if (data.total > nrResultsPerPage) {
+				$('#package-search-results-pager').show();
+			
+				$('#package-search-results-pager').pager({
+					'nrItems' : data.total,
+					'nrItemsPerPage' : nrResultsPerPage,
+					'page' : pageIndex + 1,
+					'onPageChange' : function(pager) {
+						pageIndex = pager.page - 1;
+						$('form[name=search-form]').submit();					
+					}
+				});
+			} else {
+				$('#package-search-results-pager').hide();
+			}
+		}
 			
 		$(document).on('click', '#search-clear-button', function() {
 			$('#package-search').val('');
@@ -180,8 +184,15 @@
 			zoomOut();
 		});
 		
-		// initially search for all models
-		$('form[name=search-form]').submit();
+		var data = $("#package-search-results[data-package-search-results]").attr("data-package-search-results");
+		if(data){
+			// Initial setting when data-results is set.
+			renderSearchResultsBySucces(JSON.parse(data));
+			$("#package-search-results[data-package-search-results]").removeAttr("data-package-search-results");
+		}else{
+			// initially search for all models
+			$('form[name=search-form]').submit();
+		}
 	});
 	
 }($, window.top.molgenis = window.top.molgenis || {}));

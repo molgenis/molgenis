@@ -1,7 +1,10 @@
 package org.molgenis.data.mysql;
 
+import java.util.UUID;
+
 import javax.sql.DataSource;
 
+import org.molgenis.data.CrudRepository;
 import org.molgenis.data.DataService;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.importer.EmxImportService;
@@ -11,14 +14,18 @@ import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.importer.ImportWriter;
 import org.molgenis.data.importer.MetaDataParser;
 import org.molgenis.data.meta.MetaDataServiceImpl;
+import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.meta.WritableMetaDataService;
 import org.molgenis.data.meta.WritableMetaDataServiceDecorator;
+import org.molgenis.data.semantic.TagRepository;
+import org.molgenis.data.semantic.UntypedTagService;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.util.IdGenerator;
 
 @Configuration
 public class MySqlConfiguration
@@ -40,6 +47,28 @@ public class MySqlConfiguration
 
 	@Autowired
 	private PermissionSystemService permissionSystemService;
+
+	@Bean
+	TagRepository tagRepository()
+	{
+		CrudRepository repo = (CrudRepository) mysqlRepositoryCollection().getRepositoryByEntityName(
+				TagMetaData.ENTITY_NAME);
+		return new TagRepository(repo, new IdGenerator()
+		{
+
+			@Override
+			public UUID generateId()
+			{
+				return UUID.randomUUID();
+			}
+		});
+	}
+
+	@Bean
+	public UntypedTagService tagService()
+	{
+		return new UntypedTagService(dataService, tagRepository());
+	}
 
 	@Bean
 	public AsyncJdbcTemplate asyncJdbcTemplate()
@@ -107,7 +136,7 @@ public class MySqlConfiguration
 	@Bean
 	public ImportWriter importWriter()
 	{
-		return new ImportWriter(dataService, writableMetaDataService, permissionSystemService);
+		return new ImportWriter(dataService, writableMetaDataService, permissionSystemService, tagService());
 	}
 
 	@Bean

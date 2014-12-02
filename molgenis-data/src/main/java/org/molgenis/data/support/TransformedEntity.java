@@ -92,7 +92,7 @@ public class TransformedEntity implements Entity
 	@Override
 	public Object getIdValue()
 	{
-		return entity.get(entityMetaData.getIdAttribute().getName());
+		return get(entityMetaData.getIdAttribute().getName());
 	}
 
 	@Override
