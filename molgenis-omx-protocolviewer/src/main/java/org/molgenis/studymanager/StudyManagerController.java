@@ -21,7 +21,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.molgenis.catalog.Catalog;
 import org.molgenis.catalog.CatalogFolder;
-import org.molgenis.catalog.CatalogItem;
 import org.molgenis.catalog.CatalogModelBuilder;
 import org.molgenis.catalog.UnknownCatalogException;
 import org.molgenis.catalogmanager.CatalogManagerService;
@@ -328,12 +327,12 @@ public class StudyManagerController extends MolgenisPluginController
 		List<CatalogFolder> catalogItems = Lists.newArrayList(studyDefinition.getItems());
 		if (catalogItems != null)
 		{
-			Collections.sort(catalogItems, new Comparator<CatalogItem>()
+			Collections.sort(catalogItems, new Comparator<CatalogFolder>()
 			{
 				@Override
-				public int compare(CatalogItem catalogItem1, CatalogItem catalogItem2)
+				public int compare(CatalogFolder catalogItem1, CatalogFolder catalogItem2)
 				{
-					return catalogItem1.getId().compareTo(catalogItem2.getId());
+					return catalogItem1.getExternalId().compareTo(catalogItem2.getExternalId());
 				}
 			});
 		}
@@ -345,10 +344,10 @@ public class StudyManagerController extends MolgenisPluginController
 			{
 				if (catalogItems != null)
 				{
-					for (CatalogItem catalogItem : catalogItems)
+					for (CatalogFolder catalogItem : catalogItems)
 					{
 						Entity entity = new MapEntity();
-						entity.set(header.get(0), catalogItem.getId());
+						entity.set(header.get(0), catalogItem.getExternalId());
 						entity.set(header.get(1), catalogItem.getName());
 						entity.set(header.get(2), catalogItem.getDescription());
 						sheetWriter.add(entity);
