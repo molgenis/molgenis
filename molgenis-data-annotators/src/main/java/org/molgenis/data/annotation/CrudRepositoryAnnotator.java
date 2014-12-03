@@ -11,14 +11,10 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Iterators;
 
 public class CrudRepositoryAnnotator
 {
@@ -64,6 +60,10 @@ public class CrudRepositoryAnnotator
 		{
 			throw new UnsupportedOperationException("Currently only CrudRepositories can be annotated");
 		}
+		
+		logger.info("Starting annotator " + annotator.getName());
+		if(createCopy) logger.info("Creating a copy of " + sourceRepo.getName() + " repository");
+		if(!createCopy) logger.info("Annotating " + sourceRepo.getName() + " repository");
 
 		EntityMetaData entityMetaData = sourceRepo.getEntityMetaData();
 		DefaultAttributeMetaData compoundAttributeMetaData = getCompoundResultAttribute(annotator, getAttributeName(entityMetaData, annotator));
