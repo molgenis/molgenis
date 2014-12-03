@@ -288,6 +288,9 @@
                         <reload>manual</reload>
                         <webAppConfig>
                             <contextPath>/</contextPath>
+							<baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
+								<resourcesAsCSV>${basedir}/src/main/resources</resourcesAsCSV>
+							</baseResource>
                             <webInfIncludeJarPattern>.*/molgenis-[^/]*\.jar$|.*spring-[^/]*\.jar$
                             </webInfIncludeJarPattern>
                         </webAppConfig>
