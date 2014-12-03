@@ -7,8 +7,6 @@ import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.ontology.index.AsyncOntologyIndexer;
 import org.molgenis.ontology.matching.ProcessInputTermService;
 import org.molgenis.ontology.matching.UploadProgress;
-import org.molgenis.ontology.service.OntologyServiceImpl;
-import org.molgenis.ontology.service.OntologyServiceSessionData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,11 +28,8 @@ public class OntologyConfiguration
 	@Autowired
 	private DataService dataService;
 
-	@Bean
-	public OntologyService ontologyService()
-	{
-		return new OntologyServiceImpl(searchService, dataService);
-	}
+	@Autowired
+	private OntologyService ontologyService;
 
 	/**
 	 * Get a reference to a HarmonizationIndexer.
@@ -44,20 +39,14 @@ public class OntologyConfiguration
 	@Bean
 	public AsyncOntologyIndexer harmonizationIndexer()
 	{
-		return new AsyncOntologyIndexer(searchService, dataService, ontologyService());
-	}
-
-	@Bean
-	public OntologyServiceSessionData ontologyServiceSessionData()
-	{
-		return new OntologyServiceSessionData();
+		return new AsyncOntologyIndexer(searchService, dataService, ontologyService);
 	}
 
 	@Bean
 	public ProcessInputTermService processInputTermService()
 	{
 		return new ProcessInputTermService(emxImportService, mysqlRepositoryCollection, dataService, uploadProgress(),
-				ontologyService());
+				ontologyService);
 	}
 
 	@Bean

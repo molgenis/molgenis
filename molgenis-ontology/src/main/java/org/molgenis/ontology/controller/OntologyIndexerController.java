@@ -1,6 +1,6 @@
-package org.molgenis.ontology.index;
+package org.molgenis.ontology.controller;
 
-import static org.molgenis.ontology.index.OntologyIndexerController.URI;
+import static org.molgenis.ontology.controller.OntologyIndexerController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import java.io.File;
@@ -14,6 +14,7 @@ import javax.servlet.http.Part;
 import org.molgenis.data.Entity;
 import org.molgenis.framework.ui.MolgenisPluginController;
 import org.molgenis.ontology.OntologyService;
+import org.molgenis.ontology.index.OntologyIndexer;
 import org.molgenis.ontology.utils.OntologyLoader;
 import org.molgenis.ontology.utils.OntologyServiceUtil;
 import org.molgenis.ontology.utils.ZipFileUtil;

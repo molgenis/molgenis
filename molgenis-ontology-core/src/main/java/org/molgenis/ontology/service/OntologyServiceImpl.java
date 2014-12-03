@@ -31,7 +31,6 @@ import org.molgenis.ontology.beans.OntologyImpl;
 import org.molgenis.ontology.beans.OntologyServiceResultImpl;
 import org.molgenis.ontology.beans.OntologyTermImpl;
 import org.molgenis.ontology.beans.OntologyTermTransformer;
-import org.molgenis.ontology.matching.AdaptedCsvRepository;
 import org.molgenis.ontology.repository.OntologyIndexRepository;
 import org.molgenis.ontology.repository.OntologyQueryRepository;
 import org.molgenis.ontology.repository.OntologyTermIndexRepository;
@@ -55,6 +54,7 @@ public class OntologyServiceImpl implements OntologyService
 	public static final String DEFAULT_MATCHING_NAME_FIELD = "name";
 	public static final String DEFAULT_MATCHING_SYNONYM_FIELD = "synonym";
 	public static final String MAX_SCORE_FIELD = "maxScoreField";
+	public static final String ALLOWED_IDENTIFIER = "Identifier";
 
 	private final SearchService searchService;
 	private final DataService dataService;
@@ -210,7 +210,7 @@ public class OntologyServiceImpl implements OntologyService
 		for (String attributeName : inputEntity.getAttributeNames())
 		{
 			if (!StringUtils.isEmpty(inputEntity.getString(attributeName))
-					&& !attributeName.equalsIgnoreCase(AdaptedCsvRepository.ALLOWED_IDENTIFIER))
+					&& !attributeName.equalsIgnoreCase(ALLOWED_IDENTIFIER))
 			{
 				// The attribute name is either equal to 'Name' or starts
 				// with string 'Synonym'
@@ -303,8 +303,7 @@ public class OntologyServiceImpl implements OntologyService
 	}
 
 	/**
-	 * This method is to stem the orignal queryString and then create fuzzy
-	 * match query.
+	 * This method is to stem the orignal queryString and then create fuzzy match query.
 	 * 
 	 * @param queryString
 	 * @return a fuzzymatch query for elasticsearch

@@ -1,4 +1,4 @@
-package org.molgenis.ontology.service;
+package org.molgenis.ontology.request;
 
 import org.molgenis.data.rest.EntityPager;
 

@@ -1,6 +1,6 @@
-package org.molgenis.ontology.service;
+package org.molgenis.ontology.controller;
 
-import static org.molgenis.ontology.service.OntologyServiceController.URI;
+import static org.molgenis.ontology.controller.OntologyServiceController.URI;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
@@ -47,6 +47,8 @@ import org.molgenis.ontology.matching.MatchingTaskEntity;
 import org.molgenis.ontology.matching.ProcessInputTermService;
 import org.molgenis.ontology.matching.UploadProgress;
 import org.molgenis.ontology.repository.OntologyTermQueryRepository;
+import org.molgenis.ontology.request.OntologyServiceRequest;
+import org.molgenis.ontology.service.OntologyServiceImpl;
 import org.molgenis.ontology.utils.OntologyServiceUtil;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.FileStore;
