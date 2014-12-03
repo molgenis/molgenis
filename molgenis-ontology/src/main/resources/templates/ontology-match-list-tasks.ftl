@@ -4,11 +4,11 @@
 		<div class="row" style="min-height:300px;">
 			<#if existingTasks?? & (existingTasks?size > 0)>
 			<div class="col-md-12">
-				<br><span class="font-size-medium-center">There are ${existingTasks?size} existing matching tasks available, you can retrieve them by clicking <strong>Retrieve</strong> button</span><br>
+				<br><span class="font-size-medium-center">There are ${existingTasks?size?html} existing matching tasks available, you can retrieve them by clicking <strong>Retrieve</strong> button</span><br>
 				<table class="table">
 					<tr><th>Name</th><th>Date created</th><th>Code system</th><th>Retrieve</th><th>Delete</th></tr>
 					<#list existingTasks as task>
-					<tr><td>${task.Identifier}</td><td>${task.Date_created}</td><td>${task.Code_system}</td>
+					<tr><td>${task.Identifier?html}</td><td>${task.Date_created?html}</td><td>${task.Code_system?html}</td>
 						<td><button type="button" class="btn btn-default retrieve-button-class">Retrieve</button></td>
 						<td><button type="button" class="btn btn-danger remove-button-class">Delete</button></td>
 					</tr>
@@ -61,7 +61,7 @@
 		<#if message??>
 		var molgenis = window.top.molgenis;
 		molgenis.createAlert([ {
-			'message' : '${message}'
+			'message' : '${message?js_string}'
 		}], 'error');
 		</#if>
 	});

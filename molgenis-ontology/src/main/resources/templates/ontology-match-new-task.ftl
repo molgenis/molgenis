@@ -14,15 +14,15 @@
 				<div class="radio">
 					<#list ontologies as ontology>
 						<label class="checkbox">
-							<input name="selectOntologies" type="radio" value="${ontology.ontologyIRI}" <#if (ontology_index == 0) >checked</#if>> 
-							<a href="${ontology.ontologyIRI}" target="_blank">${ontology.ontologyName}</a>
+							<input name="selectOntologies" type="radio" value="${ontology.ontologyIRI?html}" <#if (ontology_index == 0) >checked</#if>> 
+							<a href="${ontology.ontologyIRI?html}" target="_blank">${ontology.ontologyName?html}</a>
 						</label>
 					</#list>
 				</div>
 				<#else>
 					<center>
 						<span>There are no ontologies avaiable!</span>
-						<a href="${context_url?replace("ontologyservice","ontologyindexer")}" target="_blank">Please upload new ontologies!</a>
+						<a href="${context_url?replace("ontologyservice","ontologyindexer")?html}" target="_blank">Please upload new ontologies!</a>
 					</center>
 				</#if>
 			</div>
@@ -70,7 +70,7 @@
 		var molgenis = window.top.molgenis;
 		<#if message??>
 		molgenis.createAlert([ {
-			'message' : '${message}'
+			'message' : '${message?js_string}'
 		}], 'error');
 		</#if>
 		$('#match-button').click(function(){
