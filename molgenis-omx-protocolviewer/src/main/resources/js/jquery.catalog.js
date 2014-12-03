@@ -21,7 +21,7 @@
 						lazy: subTree === null,
 						expanded: !settings.displaySiblings,
 						hideCheckbox: depth <= settings.disableSelectDepth,
-						selected: selected,
+						selected: false,
 						extraClasses: protocol.active ? '' : 'inactive'
 					};
 					if (protocol.description)
@@ -169,13 +169,12 @@
 			select : function(e, data) {
 				var node = data.node;
 				if (node.folder) {
-					if (node.extraClasses == 'inactive')
+					if (node.extraClasses == 'inactive'){
 						node.setSelected(false);//You can't select inactive nodes
-					else if (settings.onFolderSelect)
-						settings.onFolderSelect(node.key, node.selected, node.getKeyPath());
-				} else {
-					if (settings.onItemSelect)
-						settings.onItemSelect(node.key, node.selected, node.getKeyPath());
+					}
+					else if (settings.onFolderSelect){
+						settings.onFolderSelect(node.key, node.selected);
+					}
 				}
 			}
 		};
@@ -257,7 +256,7 @@
 		}
         else{
             $('.catalog-search-tree').hide();
-            $('.catalog-tree').hide();
+            $('#catalog-tree').hide();
             $('.no-results-message').show();
         }
 	};
@@ -306,16 +305,12 @@
 	};
 	
 	// default pager settings
-	$.fn.catalog = function(options) {
+	$.fn.catalog = function(functionName, options) {
 		var container = this;
 		
-		// call pager method
-		if (typeof options == 'string') {
-			var args = Array.prototype.slice.call(arguments, 1);
-			if (args.length === 0)
-				return container.data('catalog')[options]();
-			else if (args.length === 1)
-				return container.data('catalog')[options](args[0]);
+		if(functionName){
+			container.data('catalog')[functionName](options);
+			return false;
 		}
 
 		// create catalog controls
@@ -325,16 +320,16 @@
 		items.push('<button class="catalog-search-btn btn" type="button"><i class="icon-large icon-search"></i></button>');
 		items.push('<button class="catalog-search-clear-btn btn" type="button"><i class="icon-large icon-remove"></i></button>');
 		items.push('</div>');
-		items.push('<div id="catalog-tree" class="catalog-tree"></div>');
+		items.push('<div id="catalog-tree"></div>');
 		items.push('<div id="catalog-search-tree" class="catalog-search-tree"></div>');
         items.push('<div id="no-results-message" class="no-results-message">no matching items</div>');
-		$('.catalog-tree', container).fancytree('destroy'); // cleanup
+		$('#catalog-tree', container).fancytree('destroy'); // cleanup
 		container.html(items.join(''));
 
 		// create catalog
 		var settings = $.extend({}, $.fn.catalog.defaults, options);
 		
-		var catalogTree = $('.catalog-tree', container);
+		var catalogTree = $('#catalog-tree', container);
 		var catalogSearchTree = $('.catalog-search-tree', container);
         var noResultsMessage = $('.no-results-message', container);
 		var searchText = $('.catalog-search-text', container);
@@ -349,8 +344,10 @@
 			selectItem : function(options) {
 				// (de)select item in catalog tree
 				var node = catalogTree.fancytree('getTree').getNodeByKey(options.feature);
-				if(node)
+				if(node) {
+					if(options.select === node.isSelected()) node.selected = !options.select; // workaround for partially selected folders
 					node.setSelected(options.select);
+				}
 				else {
 					// load (de)selected item
 					var keyPath = options.path.join('|') + '|' + options.feature;
