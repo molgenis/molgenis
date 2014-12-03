@@ -72,6 +72,9 @@ public class CrudRepositoryAnnotator
 				compoundAttributeMetaData);
 
 		CrudRepository crudRepository = iterateOverEntitiesAndAnnotate(createCopy, sourceRepo, targetRepo, annotator);
+		
+		logger.info("Finished annotating");
+		
 		return crudRepository;
 	}
 
