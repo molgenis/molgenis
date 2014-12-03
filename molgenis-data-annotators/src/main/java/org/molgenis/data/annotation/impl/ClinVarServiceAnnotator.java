@@ -15,6 +15,7 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.HgncLocationsUtils;
 import org.molgenis.data.annotation.LocusAnnotator;
+import org.molgenis.data.annotation.VariantAnnotator;
 import org.molgenis.data.annotation.impl.datastructures.Locus;
 import org.molgenis.data.annotation.provider.HgncLocationsProvider;
 import org.molgenis.data.support.DefaultAttributeMetaData;
@@ -26,7 +27,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 @Component("clinvarService")
-public class ClinVarServiceAnnotator extends LocusAnnotator
+public class ClinVarServiceAnnotator extends VariantAnnotator
 {
 	private final MolgenisSettings molgenisSettings;
 	private final AnnotationService annotatorService;
@@ -59,6 +60,7 @@ public class ClinVarServiceAnnotator extends LocusAnnotator
 	public final static String LASTEVALUATED = "LastEvaluated";
 	public final static String GUIDELINES = "Guidelines";
 	public final static String OTHERIDS = "OtherIDs";
+	public final static String VARIANTIDS = "VariantID";
 
 	@Autowired
 	public ClinVarServiceAnnotator(MolgenisSettings molgenisSettings, AnnotationService annotatorService,
@@ -94,6 +96,8 @@ public class ClinVarServiceAnnotator extends LocusAnnotator
 
 		String chromosome = entity.getString(CHROMOSOME);
 		Long position = entity.getLong(POSITION);
+		String referenceAllele = entity.getString(REFERENCE);
+		String alternativeAllele = entity.getString(ALTERNATIVE);
 
 		List<String> geneSymbols = HgncLocationsUtils.locationToHgcn(hgncLocationsProvider.getHgncLocations(),
 				new Locus(chromosome, position));
@@ -113,36 +117,50 @@ public class ClinVarServiceAnnotator extends LocusAnnotator
 						for (String gene : geneSymbols)
 						{
 							if (gene.equals(split[4]))
-
 							{
-								HashMap<String, Object> resultMap = new HashMap<String, Object>();
+								if (split[1].equals("single nucleotide variant"))
+								{
+									HashMap<String, Object> resultMap = new HashMap<String, Object>();
+									if (position.equals(Long.parseLong(split[14])))
+									{
+										String[] hgvs = split[2].split(">");
+										String hgvsRef = hgvs[0].substring(hgvs[0].length() - 1);
+										String hgvsAlt = hgvs[1].substring(0, 1);
 
-								resultMap.put(ALLELEID, split[0]);
-								resultMap.put(TYPE, split[1]);
-								resultMap.put(GENE_NAME, split[2]);
-								resultMap.put(GENEID, split[3]);
-								resultMap.put(GENESYMBOL, split[4]);
-								resultMap.put(CLINICALSIGNIFICANCE, split[5]);
-								resultMap.put(RS_DBSNP, split[6]);
-								resultMap.put(NSV_DBVAR, split[7]);
-								resultMap.put(RCVACCESSION, split[8]);
-								resultMap.put(TESTEDINGTR, split[9]);
-								resultMap.put(PHENOTYPEIDS, split[10]);
-								resultMap.put(ORIGIN, split[11]);
-								resultMap.put(ASSEMBLY, split[12]);
-								resultMap.put(CLINVAR_CHROMOSOME, split[13]);
-								resultMap.put(START, split[14]);
-								resultMap.put(STOP, split[15]);
-								resultMap.put(CYTOGENETIC, split[16]);
-								resultMap.put(REVIEWSTATUS, split[17]);
-								resultMap.put(HGVS_C, split[18]);
-								resultMap.put(HGVS_P, split[19]);
-								resultMap.put(NUMBERSUBMITTERS, split[20]);
-								resultMap.put(LASTEVALUATED, split[21]);
-								resultMap.put(GUIDELINES, split[22]);
-								resultMap.put(OTHERIDS, split[23]);
+										// Check if ref and alt allele match, and check for reverse strand annotation
+										if ((referenceAllele.equals(hgvsRef) && alternativeAllele.equals(hgvsAlt))
+												|| (alternativeAllele.equals(hgvsRef) && referenceAllele.equals(hgvsAlt)))
+										{
+											resultMap.put(ALLELEID, split[0]);
+											resultMap.put(TYPE, split[1]);
+											resultMap.put(GENE_NAME, split[2]);
+											resultMap.put(GENEID, split[3]);
+											resultMap.put(GENESYMBOL, split[4]);
+											resultMap.put(CLINICALSIGNIFICANCE, split[5]);
+											resultMap.put(RS_DBSNP, split[6]);
+											resultMap.put(NSV_DBVAR, split[7]);
+											resultMap.put(RCVACCESSION, split[8]);
+											resultMap.put(TESTEDINGTR, split[9]);
+											resultMap.put(PHENOTYPEIDS, split[10]);
+											resultMap.put(ORIGIN, split[11]);
+											resultMap.put(ASSEMBLY, split[12]);
+											resultMap.put(CLINVAR_CHROMOSOME, split[13]);
+											resultMap.put(START, split[14]);
+											resultMap.put(STOP, split[15]);
+											resultMap.put(CYTOGENETIC, split[16]);
+											resultMap.put(REVIEWSTATUS, split[17]);
+											resultMap.put(HGVS_C, split[18]);
+											resultMap.put(HGVS_P, split[19]);
+											resultMap.put(NUMBERSUBMITTERS, split[20]);
+											resultMap.put(LASTEVALUATED, split[21]);
+											resultMap.put(GUIDELINES, split[22]);
+											resultMap.put(OTHERIDS, split[23]);
+											resultMap.put(VARIANTIDS, split[24]);
 
-								results.add(getAnnotatedEntity(entity, resultMap));
+											results.add(getAnnotatedEntity(entity, resultMap));
+										}
+									}
+								}
 							}
 						}
 					}
@@ -152,7 +170,6 @@ public class ClinVarServiceAnnotator extends LocusAnnotator
 			{
 				HashMap<String, Object> resultMap = new HashMap<String, Object>();
 				results.add(getAnnotatedEntity(entity, resultMap));
-
 			}
 		}
 		catch (Exception e)
@@ -175,7 +192,7 @@ public class ClinVarServiceAnnotator extends LocusAnnotator
 	{
 		DefaultEntityMetaData metadata = new DefaultEntityMetaData(this.getClass().getName(), MapEntity.class);
 
-		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ALLELEID, FieldTypeEnum.TEXT));
+		metadata.addAttributeMetaData(new DefaultAttributeMetaData(ALLELEID, FieldTypeEnum.STRING));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(TYPE, FieldTypeEnum.TEXT));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(GENE_NAME, FieldTypeEnum.TEXT));
 		metadata.addAttributeMetaData(new DefaultAttributeMetaData(GENEID, FieldTypeEnum.TEXT));
