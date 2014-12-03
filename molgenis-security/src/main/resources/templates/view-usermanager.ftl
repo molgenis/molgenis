@@ -33,19 +33,19 @@
 								<th>Active</th>
 								<th>Username</th>
 								<th>Full name</th>
-								<#list groups as g><#if g.active><th>${g.name}</th></#if></#list>
+								<#list groups as g><#if g.active><th>${g.name?html}</th></#if></#list>
 							</tr>
 						</thead>
 				
 						<tbody>
 							<#if users?has_content>
 								<#list users as user>
-									<tr id="userRow${user.id?c}">
-										<td><a href="#" class="edit-user-btn" data-toggle="modal" data-target="#managerModal" data-id="${user.id?c}"><img src="/img/editview.gif"></a></td>
-										<td><input type="checkbox" class="activate-user-checkbox" data-id="${user.id?c}" <#if user.isActive()>checked</#if> <#if user.isSuperuser()>disabled</#if>></td>
-										<td>${user.getUsername()?if_exists}</td>
-										<td>${user.getFullName()?if_exists}</td>
-										<#list groups as g><#if g.active><td><input type="checkbox" class="change-group-membership-checkbox" data-uid="${user.id?c}" data-gid="${g.id?c}"  <#if user.isGroupMember(g.id)>checked</#if>></td></#if></#list>
+									<tr id="userRow${user.id?c?html}">
+										<td><a href="#" class="edit-user-btn" data-toggle="modal" data-target="#managerModal" data-id="${user.id?c?html}"><img src="/img/editview.gif"></a></td>
+										<td><input type="checkbox" class="activate-user-checkbox" data-id="${user.id?c?html}" <#if user.isActive()>checked</#if> <#if user.isSuperuser()>disabled</#if>></td>
+										<td>${user.getUsername()!?html}</td>
+										<td>${user.getFullName()!?html}</td>
+										<#list groups as g><#if g.active><td><input type="checkbox" class="change-group-membership-checkbox" data-uid="${user.id?c?html}" data-gid="${g.id?c?html}"  <#if user.isGroupMember(g.id)>checked</#if>></td></#if></#list>
 									</tr>
 								</#list>
 							</#if>
@@ -74,21 +74,21 @@
 						<tbody>
 							<#if groups?has_content>
 								<#list groups as g>
-									<tr id="groupRow${g.id?c}">
+									<tr id="groupRow${g.id?c?html}">
 										<td>
-											<a href="#" class="edit-group-btn" data-toggle="modal" data-target="#managerModal" data-id="${g.id?c}"><img src="/img/editview.gif"></a>
+											<a href="#" class="edit-group-btn" data-toggle="modal" data-target="#managerModal" data-id="${g.id?c?html}"><img src="/img/editview.gif"></a>
 										</td>
 										<td>
-											<input type="checkbox" class="activate-group-checkbox" data-id="${g.id?c}" <#if g.active>checked</#if>>
+											<input type="checkbox" class="activate-group-checkbox" data-id="${g.id?c?html}" <#if g.active>checked</#if>>
 										</td>
-										<td>${g.getName()?if_exists}</td>
+										<td>${g.getName()!?html}</td>
 										<td>
 											<#if users?has_content>
 												<#assign setComma = false>
 												<#list users as user>
 													<#if user.isGroupMember(g.id)>
 														<#if setComma>, </#if>
-														${user.getUsername()?if_exists}
+														${user.getUsername()!?html}
 														<#assign setComma = true>
 													</#if>
 												</#list>

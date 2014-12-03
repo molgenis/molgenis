@@ -4,7 +4,7 @@
 	<div id="feature-select-container">
 		<div class="row">
 			<div id="feature-select" class="col-md-12">
-				<label class="col-md-1 control-label" for="feature-select" style="white-space: nowrap;">${i18n.dataexplorer_aggregates_group_by}</label>
+				<label class="col-md-1 control-label" for="feature-select" style="white-space: nowrap;">${i18n.dataexplorer_aggregates_group_by?html}</label>
 		    	<div class="col-md-3" id="x-aggr-div"></div>
 		    	<div class="pull-left" class="col-md-1">
 		    		<p class="form-control-static">x</p>
@@ -14,7 +14,7 @@
 		</div>
 		<div class="row">
 			<div id="distinct-attr" class="col-md-12">
-				<label class="col-md-1 control-label"for="distinct-attr-select">${i18n.dataexplorer_aggregates_distinct}</label>
+				<label class="col-md-1 control-label"for="distinct-attr-select">${i18n.dataexplorer_aggregates_distinct?html}</label>
 				<div class="col-md-3" id="distinct-attr-select"></div>
 			</div>
 		</div>
@@ -34,12 +34,12 @@
 		});
 </script>
 <script id="aggregates-total-template" type="text/x-handlebars-template">
-    ${i18n.dataexplorer_aggregates_total?js_string?html}
+    ${i18n.dataexplorer_aggregates_total?html}
 </script>
 <script id="aggregates-missing-template" type="text/x-handlebars-template">
-    ${i18n.dataexplorer_aggregates_missing?js_string?html}
+    ${i18n.dataexplorer_aggregates_missing?html}
 </script>
 <script id="aggregates-no-result-message-template" type="text/x-handlebars-template">
-    <br><div>${i18n.dataexplorer_aggregates_no_result_message}<div>
+    <br><div>${i18n.dataexplorer_aggregates_no_result_message?html}<div>
 </script>
 

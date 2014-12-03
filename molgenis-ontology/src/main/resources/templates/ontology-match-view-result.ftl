@@ -15,10 +15,10 @@
 			<#if (total > 0)>
 			<div class="row">
 				<div class="col-md-1">
-					<a id="back-button" href="${context_url}" type="button" class="btn btn-info">Back</a>
+					<a id="back-button" href="${context_url?html}" type="button" class="btn btn-info">Back</a>
 				</div>
 				<div class="col-md-2">
-					<a id="download-button" href="${context_url}/match/download" type="button" class="btn btn-primary">Download</a>
+					<a id="download-button" href="${context_url?html}/match/download" type="button" class="btn btn-primary">Download</a>
 				</div>
 				<div class="col-md-9">
 					<a id="show-tree-button" type="button" class="btn float-right-align">Show tree</a>
@@ -69,7 +69,7 @@
 			<#else>
 				<div class="row">
 					<div class="col-md-offset-3 col-md-4">
-						<a id="back-button" href="${context_url}" type="button" class="btn btn-info">Back</a>
+						<a id="back-button" href="${context_url?html}" type="button" class="btn btn-info">Back</a>
 					</div>
 				</div>
 				<div class="error-report-panel"><center>
@@ -86,18 +86,18 @@
 <script type="text/javascript">
 	$(document).ready(function(){
 		var ontologyTree = new molgenis.OntologyTree("tree-container");
-		ontologyTree.updateOntologyTree('${ontologyUrl}');
+		ontologyTree.updateOntologyTree('${ontologyUrl?js_string}');
 		var ontologyService = new molgenis.OntologySerivce(ontologyTree);
 		var itermsPerPage = 5;
 		$('#pager').pager({
-			'nrItems' : ${total?c},
+			'nrItems' : ${total?c?js_string},
 			'nrItemsPerPage' : itermsPerPage,
 			'onPageChange' : ontologyService.updatePageFunction
 		});
 		ontologyService.updatePageFunction({
 			'page' : 0,
 			'start' : 0,
-			'end' : ${total?c} < itermsPerPage ? ${total?c} : itermsPerPage
+			'end' : ${total?c?js_string} < itermsPerPage ? ${total?c?js_string} : itermsPerPage
 		});
 		
 		$('#show-tree-button').click(function(){
