@@ -253,7 +253,7 @@ public class CatalogManagerControllerTest extends AbstractTestNGSpringContextTes
 		when(catalog.getChildren()).thenReturn(Collections.singletonList(catalogRootFolder));
 		when(catalog.getVersion()).thenReturn("1");
 
-		String expectedContent = "{\"title\":\"catalog\",\"version\":\"1\",\"authors\":[],\"name\":\"catalog\",\"selected\":false,\"children\":[{\"id\":\"2\",\"name\":\"root\",\"selected\":false,\"children\":[{\"id\":\"3\",\"name\":\"root\",\"selected\":false,\"items\":[{\"id\":\"4\",\"name\":\"item1\",\"selected\":false},{\"id\":\"5\",\"name\":\"item2\",\"selected\":false}]}]}]}";
+		String expectedContent = "{\"title\":\"catalog\",\"version\":\"1\",\"authors\":[],\"name\":\"catalog\",\"selected\":false,\"children\":[{\"id\":\"2\",\"name\":\"root\",\"selected\":false,\"children\":[{\"id\":\"3\",\"name\":\"root\",\"selected\":false,\"items\":[{\"id\":\"4\",\"name\":\"item1\"},{\"id\":\"5\",\"name\":\"item2\"}]}]}]}";
 		when(catalogManagerService.getCatalog(catalogId)).thenReturn(catalog);
 		this.mockMvc.perform(get(CatalogManagerController.URI + "/view/1")).andExpect(status().isOk())
 				.andExpect(content().string(expectedContent));
