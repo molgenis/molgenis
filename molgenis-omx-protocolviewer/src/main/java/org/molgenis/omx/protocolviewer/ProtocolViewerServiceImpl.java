@@ -18,7 +18,6 @@ import javax.servlet.http.Part;
 import org.apache.log4j.Logger;
 import org.molgenis.catalog.Catalog;
 import org.molgenis.catalog.CatalogFolder;
-import org.molgenis.catalog.CatalogItem;
 import org.molgenis.catalog.CatalogMeta;
 import org.molgenis.catalog.CatalogService;
 import org.molgenis.catalog.UnknownCatalogException;
@@ -353,7 +352,7 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 				@Override
 				public int compare(CatalogFolder feature1, CatalogFolder feature2)
 				{
-					return feature1.getId().compareTo(feature2.getId());
+					return feature1.getExternalId().compareTo(feature2.getExternalId());
 				}
 			});
 		}
@@ -366,10 +365,10 @@ public class ProtocolViewerServiceImpl implements ProtocolViewerService
 			{
 				if (catalogItems != null)
 				{
-					for (CatalogItem catalogItem : catalogItems)
+					for (CatalogFolder catalogItem : catalogItems)
 					{
 						Entity entity = new MapEntity();
-						entity.set(header.get(0), catalogItem.getId());
+						entity.set(header.get(0), catalogItem.getExternalId());
 						entity.set(header.get(1), catalogItem.getName());
 						entity.set(header.get(2), catalogItem.getDescription());
 						writable.add(entity);

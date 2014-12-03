@@ -22,7 +22,6 @@ import javax.servlet.http.Part;
 
 import org.molgenis.catalog.Catalog;
 import org.molgenis.catalog.CatalogFolder;
-import org.molgenis.catalog.CatalogItem;
 import org.molgenis.catalog.CatalogMeta;
 import org.molgenis.catalog.CatalogService;
 import org.molgenis.catalog.UnknownCatalogException;
@@ -207,9 +206,9 @@ public class ProtocolViewerServiceImplTest extends AbstractTestNGSpringContextTe
 		when(catalogService.getCatalogOfStudyDefinition(studyDefinition1Id)).thenReturn(catalog1);
 
 		String catalogItem0Id = "0", catalogItem1Id = "1", catalogItem2Id = "2";
-		catalogItem0 = when(mock(CatalogItem.class).getId()).thenReturn(catalogItem0Id).getMock();
-		catalogItem1 = when(mock(CatalogItem.class).getId()).thenReturn(catalogItem1Id).getMock();
-		catalogItem2 = when(mock(CatalogItem.class).getId()).thenReturn(catalogItem2Id).getMock();
+		catalogItem0 = when(mock(CatalogFolder.class).getExternalId()).thenReturn(catalogItem0Id).getMock();
+		catalogItem1 = when(mock(CatalogFolder.class).getExternalId()).thenReturn(catalogItem1Id).getMock();
+		catalogItem2 = when(mock(CatalogFolder.class).getExternalId()).thenReturn(catalogItem2Id).getMock();
 		when(catalog0.findItem(catalogItem0Id)).thenReturn(catalogItem0);
 		when(catalog0.findItem(catalogItem1Id)).thenReturn(catalogItem1);
 		when(catalog0.findItem(catalogItem2Id)).thenReturn(catalogItem2);
