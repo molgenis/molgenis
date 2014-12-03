@@ -5,13 +5,13 @@
 					</ul>
 					<div class="tab-content">
 					    <div class="tab-pane active" id="plugin-group-permission-manager">
-							<form class="form-horizontal" id="plugin-group-permission-form" method="post" action="${context_url}/update/plugin/group" role="form">
+							<form class="form-horizontal" id="plugin-group-permission-form" method="post" action="${context_url?html}/update/plugin/group" role="form">
 								<div class="form-group">
     								<label class="col-md-3 control-label" for="plugin-group-select">Select Group:</label>
     				    			<div class="col-md-4">
     									<select class="form-control" name="groupId" id="plugin-group-select">
     								<#list groups as group>
-    										<option value="${group.id?c}"<#if group_index == 0> selected</#if>>${group.name}</option>
+    										<option value="${group.id?c?html}"<#if group_index == 0> selected</#if>>${group.name?html}</option>
     								</#list>
     									</select>
     								</div>
@@ -39,13 +39,13 @@
 							</form>
 					    </div>
 					    <div class="tab-pane" id="plugin-user-permission-manager">
-							<form class="form-horizontal" id="plugin-user-permission-form" method="post" action="${context_url}/update/plugin/user" role="form">
+							<form class="form-horizontal" id="plugin-user-permission-form" method="post" action="${context_url?html}/update/plugin/user" role="form">
                                 <div class="form-group">
     								<label class="col-md-3 control-label" for="plugin-user-select">Select User:</label>
     				    			<div class="col-md-4">
     									<select class="form-control" name="userId" id="plugin-user-select">
     								<#list users as user>
-    										<option value="${user.id?c}"<#if user_index == 0> selected</#if>>${user.username}</option>
+    										<option value="${user.id?c?html}"<#if user_index == 0> selected</#if>>${user.username?html}</option>
     								</#list>
     									</select>
     								</div>

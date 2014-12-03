@@ -26,7 +26,7 @@
 		<script src="<@resource_href "/js/handlebars.min.js"/>"></script>
 		<script src="<@resource_href "/js/molgenis.js"/>"></script>
 	<#if context_url??>
-		<script>top.molgenis.setContextUrl('${context_url}');</script>
+		<script>top.molgenis.setContextUrl('${context_url?js_string}');</script>
 	</#if>
 	<!--[if lt IE 9]>
 		<script src="<@resource_href "/js/molgenis-ie8.js"/>"></script>
@@ -80,7 +80,7 @@
 						</#if>
 						
 						<#if messageType??>
-							<div class="alert alert-${messageType}"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>${messageType?capitalize}!</strong> ${message}</div>
+							<div class="alert alert-${messageType}"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>${messageType?capitalize}!</strong> ${message?html}</div>
 						</#if>
 				   </div>
                 </div>

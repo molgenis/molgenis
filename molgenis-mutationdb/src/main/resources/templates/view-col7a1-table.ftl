@@ -3,7 +3,7 @@
 		<tr>
 			<#if headers?? == true>
 				<#list headers as header>
-					<th>${header}</th>
+					<th>${header?html}</th>
 				</#list>
 			</#if>
 		</tr>
@@ -17,7 +17,7 @@
 							<td>
 								<#if (cell.values)?? == true>
 									<#list cell.values as value>
-										<div>${value.value}</br></div>
+										<div>${value.value?html}</br></div>
 									</#list>
 								</#if>
 							</td>

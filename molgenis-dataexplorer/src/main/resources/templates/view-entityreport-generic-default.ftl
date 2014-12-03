@@ -1,7 +1,7 @@
 <#-- modal header -->			
 <div class="modal-header">
 	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-	<h4 class="modal-title">DataSet: ${entityMetadata.getLabel()}</h4>
+	<h4 class="modal-title">DataSet: ${entityMetadata.getLabel()?html}</h4>
 </div>
 
 <#-- modal body -->
@@ -20,7 +20,7 @@
 							<#assign counter = 0>
 						</#if>
 							
-						<th>${key}</th>
+						<th>${key?html}</th>
 						<#if entity.get(key)??>
 							<#if entity.get(key)?is_sequence>
 								<td>
