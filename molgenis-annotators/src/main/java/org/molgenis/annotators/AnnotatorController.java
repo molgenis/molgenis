@@ -94,9 +94,7 @@ public class AnnotatorController
 	public String annotateData(@RequestParam(value = "annotatorNames", required = false) String[] annotatorNames,
 			@RequestParam("dataset-identifier") String entityName,
 			@RequestParam(value = "createCopy", required = false) boolean createCopy)
-	{
-		createCopy = true;
-		
+	{		
 		Repository repository = dataService.getRepositoryByEntityName(entityName);
 		if (annotatorNames != null && repository != null)
 		{
