@@ -5,6 +5,7 @@
 <#if content?has_content>
 	<div class="row">
 		<div class="col-md-12">
+            <#-- Do *not* HTML escape content -->		
 			${content}
 		</div>
 	</div>
@@ -14,7 +15,7 @@
 	<div class="row">
 		<div class="col-md-12">
 			<hr></hr>
-			<a href="${context_url}/edit" class="btn btn-default pull-left">Edit page</a>
+			<a href="${context_url?html}/edit" class="btn btn-default pull-left">Edit page</a>
 		</div>
 	</div>
 </#if>

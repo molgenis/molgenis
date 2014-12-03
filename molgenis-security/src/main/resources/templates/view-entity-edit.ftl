@@ -4,7 +4,7 @@
 
 <div class="row">
 	<div class="col-md-12">
-		<form class="form-horizontal" id="entity-form" role="form" method="POST" action="/api/v1/${entityName}<#if form.primaryKey?is_number>/${form.primaryKey?c}<#else>/${form.primaryKey}</#if>?_method=PUT">
+		<form class="form-horizontal" id="entity-form" role="form" method="POST" action="/api/v1/${entityName?html}<#if form.primaryKey?is_number>/${form.primaryKey?c?html}<#else>/${form.primaryKey?html}</#if>?_method=PUT">
 			<#list form.metaData.fields as field>
 				<#if form.entity??>
 					<@input.render field form.hasWritePermission form.entity form.metaData.forUpdate/>
