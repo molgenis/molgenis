@@ -31,7 +31,7 @@
 <@header css js/>
 <div class="row">
 	<div class="col-md-11">
-		<legend>${title}</legend>
+		<legend>${title?html}</legend>
 	</div>	
 		
 	<div class="col-md-1">

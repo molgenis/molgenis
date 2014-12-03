@@ -9,7 +9,7 @@
 
 <script>
 	var forms = [];
-	var CURRENT_URI = '${current_uri}';
+	var CURRENT_URI = '${current_uri?html}';
 </script>
 
 <div id="success-message" class="alert alert-success" style="display: none">

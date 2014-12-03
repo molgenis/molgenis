@@ -3,20 +3,20 @@
 <@header/>
 <div class="row">
 	<div class="col-md-8 col-md-offset-2">
-		<form id="account-form" class="form-horizontal" role="form" action="${context_url}/update" method="POST">
+		<form id="account-form" class="form-horizontal" role="form" action="${context_url?html}/update" method="POST">
 			<legend>Account information</legend>
 			<div class="row">
 				<div class="col-md-6">
 			        <div class="form-group">
 						<label class="col-md-4 control-label" for="username">Username</label>
 						<div class="col-md-5">
-                            <input type="text" class="form-control" name="username" value="${user.username!}" disabled>
+                            <input type="text" class="form-control" name="username" value="${user.username?html}" disabled>
 						</div>
 					</div>
 					<div class="form-group">
 						<label class="col-md-4 control-label" for="emailaddress">Email address</label>
 						<div class="col-md-5">
-                            <input type="email" class="form-control" name="emailaddress" value="${user.email!}" disabled>
+                            <input type="email" class="form-control" name="emailaddress" value="${user.email?html}" disabled>
 						</div>
 					</div>
 				</div>
@@ -47,49 +47,49 @@
 					<div class="form-group">
 						<label class="col-md-4 control-label" for="phone">Phone</label>
 						<div class="col-md-5">
-                            <input type="text" class="form-control" name="phone"<#if user.phone??> value="${user.phone}"</#if>>
+                            <input type="text" class="form-control" name="phone"<#if user.phone??> value="${user.phone?html}"</#if>>
 						</div>
 					</div>
 					<div class="form-group">
 						<label class="col-md-4 control-label" for="phone">Fax</label>
 						<div class="col-md-5">
-                            <input type="text" class="form-control" name="fax"<#if user.fax??> value="${user.fax}"</#if>>
+                            <input type="text" class="form-control" name="fax"<#if user.fax??> value="${user.fax?html}"</#if>>
 						</div>
 					</div>
 					<div class="form-group">
 						<label class="col-md-4 control-label" for="tollFreePhone">Toll-free phone</label>
 						<div class="col-md-5">
-                            <input type="text" class="form-control" name="tollFreePhone"<#if user.tollFreePhone??> value="${user.tollFreePhone}"</#if>>
+                            <input type="text" class="form-control" name="tollFreePhone"<#if user.tollFreePhone??> value="${user.tollFreePhone?html}"</#if>>
 						</div>
 					</div>
 					<div class="form-group">
 						<label class="col-md-4 control-label" for="address">Address</label>
 						<div class="col-md-5">
-                            <input type="text" class="form-control" name="address"<#if user.address??> value="${user.address}"</#if>>
+                            <input type="text" class="form-control" name="address"<#if user.address??> value="${user.address?html}"</#if>>
 						</div>
 					</div>
 					<div class="form-group">
 						<label class="col-md-4 control-label" for="title">Title</label>
 						<div class="col-md-5">
-                            <input type="text" class="form-control" name="title"<#if user.title??> value="${user.title}"</#if>>
+                            <input type="text" class="form-control" name="title"<#if user.title??> value="${user.title?html}"</#if>>
 						</div>
 					</div>
 					<div class="form-group">
 						<label class="col-md-4 control-label" for="firstname">First name</label>
 						<div class="col-md-5">
-                            <input type="text" class="form-control" name="firstname"<#if user.firstname??> value="${user.firstname}"</#if>>
+                            <input type="text" class="form-control" name="firstname"<#if user.firstname??> value="${user.firstname?html}"</#if>>
 						</div>
 					</div>
 					<div class="form-group">
 						<label class="col-md-4 control-label" for="firstname">Middle names</label>
 						<div class="col-md-5">
-                            <input type="text" class="form-control" name="middleNames"<#if user.middleNames??> value="${user.middleNames}"</#if>>
+                            <input type="text" class="form-control" name="middleNames"<#if user.middleNames??> value="${user.middleNames?html}"</#if>>
 						</div>
 					</div>
 					<div class="form-group">
 						<label class="col-md-4 control-label" for="lastname">Last name</label>
 						<div class="col-md-5">
-                            <input type="text" class="form-control" name="lastname"<#if user.lastname??> value="${user.lastname}"</#if>>
+                            <input type="text" class="form-control" name="lastname"<#if user.lastname??> value="${user.lastname?html}"</#if>>
 						</div>
 					</div>
 				</div>
@@ -97,25 +97,25 @@
 					<div class="form-group">
 						<label class="col-md-4 control-label" for="institute">Institute</label>
 						<div class="col-md-5">
-                            <input type="text" class="form-control" name="institute"<#if user.affiliation??> value="${user.affiliation}"</#if>>
+                            <input type="text" class="form-control" name="institute"<#if user.affiliation??> value="${user.affiliation?html}"</#if>>
 						</div>
 					</div>
 					<div class="form-group">
 						<label class="col-md-4 control-label" for="department">Department</label>
 						<div class="col-md-5">
-                            <input type="text" class="form-control" name="department"<#if user.department??> value="${user.department}"</#if>>
+                            <input type="text" class="form-control" name="department"<#if user.department??> value="${user.department?html}"</#if>>
 						</div>
 					</div>
 					<div class="form-group">
 						<label class="col-md-4 control-label" for="position">Position</label>
 						<div class="col-md-5">
-                            <input type="text" class="form-control" name="position"<#if user.role??> value="${user.role}"</#if>>
+                            <input type="text" class="form-control" name="position"<#if user.role??> value="${user.role?html}"</#if>>
 						</div>
 					</div>
 					<div class="form-group">
 						<label class="col-md-4 control-label" for="city">City</label>
 						<div class="col-md-5">
-                            <input type="text" class="form-control" name="city"<#if user.city??> value="${user.city}"</#if>>
+                            <input type="text" class="form-control" name="city"<#if user.city??> value="${user.city?html}"</#if>>
 						</div>
 					</div>
 					<div class="form-group">
@@ -126,7 +126,7 @@
 								<option value="" disabled selected>Please Select</option>
 							</#if>
 							<#list countries?keys as countryCode>
-								<option value="${countryCode}"<#if user.country?? && user.country == countries[countryCode]> selected</#if>>${countries[countryCode]}</option>
+								<option value="${countryCode?html}"<#if user.country?? && user.country == countries[countryCode]> selected</#if>>${countries[countryCode]?html}</option>
 							</#list>
 							</select>
 						</div>
@@ -154,7 +154,7 @@
 			<div class="col-md-4">
 				<ul id="groups" class="inline">
 					<#list groups as group>
-						<li>${group.name}</li>
+						<li>${group.name?html}</li>
 					</#list>
 				</ul>
 			</div>
@@ -169,7 +169,7 @@
   		form.validate();
 	    
 	    $('#reg-password').rules('add', {
-			minlength: ${min_password_length}
+			minlength: ${min_password_length?js_string}
 		});
 		$('#reg-password-confirm').rules('add', {
 			equalTo: '#reg-password'

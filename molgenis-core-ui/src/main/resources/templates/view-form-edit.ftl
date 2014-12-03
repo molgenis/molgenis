@@ -16,16 +16,16 @@
 	<div class="col-md-12">
 		<div class="alert alert-success">
 			<button type="button" class="close">&times;</button>
-			<strong>${form.title} saved.</strong>
+			<strong>${form.title?html} saved.</strong>
 		</div>
 	</div>
 </div>
 
 <#if back??>
-	<a href="${back}" class="btn btn-default btn-md"><span class="glyphicon glyphicon-chevron-left"></span> Back to list</a>
+	<a href="${back?html}" class="btn btn-default btn-md"><span class="glyphicon glyphicon-chevron-left"></span> Back to list</a>
 </#if>
 
-<form role="form" class="form-horizontal" id="entity-form" method="POST" action="/api/v1/${form.metaData.name?lower_case}<#if form.primaryKey??><#if form.primaryKey?is_number>/${form.primaryKey?c}<#else>/${form.primaryKey}</#if></#if>">
+<form role="form" class="form-horizontal" id="entity-form" method="POST" action="/api/v1/${form.metaData.name?lower_case?html}<#if form.primaryKey??><#if form.primaryKey?is_number>/${form.primaryKey?c?html}<#else>/${form.primaryKey?html}</#if></#if>">
 	<div class="form-group">
 		<div class="col-md-3">
 			<#if form.primaryKey??>

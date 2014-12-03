@@ -18,7 +18,7 @@
             <ul class="dropdown-menu scrollable-menu" role="menu" aria-labelledby="dropdown-menu-entities">
                 <#list entitiesMeta as entityMeta>
                     <li role="presentation">
-                        <a role="menuitem" tabindex="-1" href="#" id="/api/v1/${entityMeta.name}" class="entity-dropdown-item">${entityMeta.label}</a>
+                        <a role="menuitem" tabindex="-1" href="#" id="/api/v1/${entityMeta.name?html}" class="entity-dropdown-item">${entityMeta.label?html}</a>
                     </li>
                 </#list>
             </ul>
@@ -54,7 +54,7 @@
 <div class="modal" id="cart-modal"></div>
 
 <#if selectedEntityName??>
-<script>var selectedEntityName='${selectedEntityName}';</script>
+<script>var selectedEntityName='${selectedEntityName?js_string}';</script>
 </#if>
 
 <@footer/>
