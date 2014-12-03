@@ -6,9 +6,12 @@
 			<div class="col-md-12">
 				<br><span class="font-size-medium-center">There are ${existingTasks?size} existing matching tasks available, you can retrieve them by clicking <strong>Retrieve</strong> button</span><br>
 				<table class="table">
-					<tr><th>Name</th><th>Date created</th><th>Code system</th><th>Retrieve</th></tr>
+					<tr><th>Name</th><th>Date created</th><th>Code system</th><th>Retrieve</th><th>Delete</th></tr>
 					<#list existingTasks as task>
-					<tr><td>${task.Identifier}</td><td>${task.Date_created}</td><td>${task.Code_system}</td><td><button type="button" class="btn btn-default retrieve-button-class">Retrieve</button></td></tr>
+					<tr><td>${task.Identifier}</td><td>${task.Date_created}</td><td>${task.Code_system}</td>
+						<td><button type="button" class="btn btn-default retrieve-button-class">Retrieve</button></td>
+						<td><button type="button" class="btn btn-danger remove-button-class">Delete</button></td>
+					</tr>
 					</#list>
 				</table>
 			</div>
@@ -37,6 +40,22 @@
 					'action' : molgenis.getContextUrl() + '/result/' + $(this).parents('tr:eq(0)').children('td:eq(0)').html(),
 					'method' : 'GET'
 				}).submit();
+			});
+		});
+		$.each($('.remove-button-class'), function(index, button){
+			$(button).click(function(){
+				var deleteButton = $('<button type="button" class="btn btn-primary">Confirm</button>').click(function(){
+					var ontologyService = new molgenis.OntologyService();
+					var entityName = $(button).parents('tr:eq(0)').children('td:eq(0)').html();					
+					ontologyService.deleteMatchingTask(entityName, function(){
+						location.reload();
+					})
+				});
+				var modal = molgenis.createModalCallback('Delete task', {
+					'body' : $('<div />').append('Are you sure you want to delete this task?'),
+					'footer' : deleteButton
+				});
+				modal.modal('show');
 			});
 		});
 		<#if message??>

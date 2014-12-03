@@ -31,6 +31,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.csv.CsvRepository;
 import org.molgenis.data.csv.CsvWriter;
+import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.LowerCaseProcessor;
 import org.molgenis.data.processor.TrimProcessor;
@@ -54,6 +55,7 @@ import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -62,6 +64,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Controller
 @RequestMapping(URI)
@@ -78,6 +81,9 @@ public class OntologyServiceController extends MolgenisPluginController
 
 	@Autowired
 	private ProcessInputTermService processInputTermService;
+
+	@Autowired
+	private MysqlRepositoryCollection mysqlRepositoryCollection;
 
 	@Autowired
 	private UploadProgress uploadProgress;
@@ -118,9 +124,8 @@ public class OntologyServiceController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = POST, value = "/threshold/{entityName}")
-	public String updateThreshold(@RequestParam(value = "threshold", required = true)
-	String threshold, @PathVariable
-	String entityName, Model model)
+	public String updateThreshold(@RequestParam(value = "threshold", required = true) String threshold,
+			@PathVariable String entityName, Model model)
 	{
 		if (!StringUtils.isEmpty(threshold))
 		{
@@ -143,8 +148,7 @@ public class OntologyServiceController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = GET, value = "/result/{entityName}")
-	public String matchResult(@PathVariable("entityName")
-	String entityName, Model model)
+	public String matchResult(@PathVariable("entityName") String entityName, Model model)
 	{
 		String userName = userAccountService.getCurrentUser().getUsername();
 		model.addAttribute("isRunning", uploadProgress.isUserExists(userName));
@@ -179,10 +183,35 @@ public class OntologyServiceController extends MolgenisPluginController
 		return "ontology-match-view";
 	}
 
+	@RequestMapping(method = POST, value = "/delete")
+	@ResponseStatus(value = HttpStatus.OK)
+	public void deleteResult(@RequestBody String entityName)
+	{
+		String userName = userAccountService.getCurrentUser().getUsername();
+
+		if (dataService.hasRepository(entityName) && !uploadProgress.isUserExists(userName))
+		{
+			// Remove all the matching terms from MatchingTaskContentEntity table
+			Iterable<Entity> iterableMatchingEntities = dataService.findAll(MatchingTaskContentEntity.ENTITY_NAME,
+					new QueryImpl().eq(MatchingTaskContentEntity.REF_ENTITY, entityName));
+			dataService.delete(MatchingTaskContentEntity.ENTITY_NAME, iterableMatchingEntities);
+
+			// Remove the matching task meta information from MatchingTaskEntity table
+			Entity matchingSummaryEntity = dataService.findOne(MatchingTaskEntity.ENTITY_NAME,
+					new QueryImpl().eq(MatchingTaskEntity.IDENTIFIER, entityName));
+			dataService.delete(MatchingTaskEntity.ENTITY_NAME, matchingSummaryEntity);
+
+			// Drop the table that contains the information for raw data (input terms)
+			mysqlRepositoryCollection.dropEntityMetaData(entityName);
+
+			dataService.getCrudRepository(MatchingTaskEntity.ENTITY_NAME).flush();
+		}
+	}
+
 	@RequestMapping(method = POST, value = "/match/retrieve")
 	@ResponseBody
-	public EntityCollectionResponse matchResult(@RequestBody
-	OntologyServiceRequest ontologyServiceRequest, HttpServletRequest httpServletRequest)
+	public EntityCollectionResponse matchResult(@RequestBody OntologyServiceRequest ontologyServiceRequest,
+			HttpServletRequest httpServletRequest)
 	{
 		List<Map<String, Object>> entityMaps = new ArrayList<Map<String, Object>>();
 		String entityName = ontologyServiceRequest.getEntityName();
@@ -229,10 +258,10 @@ public class OntologyServiceController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = POST, value = "/match")
-	public String match(@RequestParam(value = "taskName", required = true)
-	String entityName, @RequestParam(value = "selectOntologies", required = true)
-	String ontologyIri, @RequestParam(value = "inputTerms", required = true)
-	String inputTerms, Model model, HttpServletRequest httpServletRequest) throws Exception
+	public String match(@RequestParam(value = "taskName", required = true) String entityName,
+			@RequestParam(value = "selectOntologies", required = true) String ontologyIri,
+			@RequestParam(value = "inputTerms", required = true) String inputTerms, Model model,
+			HttpServletRequest httpServletRequest) throws Exception
 	{
 		if (StringUtils.isEmpty(ontologyIri) || StringUtils.isEmpty(inputTerms)) return init(model);
 		String sessionId = httpServletRequest.getSession().getId();
@@ -242,10 +271,10 @@ public class OntologyServiceController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = POST, value = "/match/upload", headers = "Content-Type=multipart/form-data")
-	public String upload(@RequestParam(value = "taskName", required = true)
-	String entityName, @RequestParam(value = "selectOntologies", required = true)
-	String ontologyIri, @RequestParam(value = "file", required = true)
-	Part file, Model model, HttpServletRequest httpServletRequest) throws Exception
+	public String upload(@RequestParam(value = "taskName", required = true) String entityName,
+			@RequestParam(value = "selectOntologies", required = true) String ontologyIri,
+			@RequestParam(value = "file", required = true) Part file, Model model, HttpServletRequest httpServletRequest)
+			throws Exception
 	{
 		if (StringUtils.isEmpty(ontologyIri) || file == null) return init(model);
 		String sessionId = httpServletRequest.getSession().getId();
@@ -255,8 +284,8 @@ public class OntologyServiceController extends MolgenisPluginController
 
 	@RequestMapping(method = POST, value = "/match/entity")
 	@ResponseBody
-	public OntologyServiceResult matchResult(@RequestBody
-	Map<String, Object> request, HttpServletRequest httpServletRequest)
+	public OntologyServiceResult matchResult(@RequestBody Map<String, Object> request,
+			HttpServletRequest httpServletRequest)
 	{
 		if (request.containsKey("entityName") && !StringUtils.isEmpty(request.get("entityName").toString())
 				&& request.containsKey(MatchingTaskContentEntity.IDENTIFIER)
@@ -278,8 +307,7 @@ public class OntologyServiceController extends MolgenisPluginController
 	}
 
 	@RequestMapping(method = GET, value = "/match/download/{entityName}")
-	public void download(@PathVariable
-	String entityName, HttpServletResponse response, Model model) throws IOException
+	public void download(@PathVariable String entityName, HttpServletResponse response, Model model) throws IOException
 	{
 		CsvWriter csvWriter = null;
 		try
@@ -335,7 +363,7 @@ public class OntologyServiceController extends MolgenisPluginController
 	@SuppressWarnings("resource")
 	private String startMatchJob(String entityName, String ontologyIri, File uploadFile, Model model)
 	{
-		entityName = entityName.replaceAll(ILLEGAL_PATTERN, ILLEGAL_PATTERN_REPLACEMENT);
+		entityName = entityName.replaceAll(ILLEGAL_PATTERN, ILLEGAL_PATTERN_REPLACEMENT).toLowerCase();
 		if (dataService.hasRepository(entityName))
 		{
 			Entity matchingTaskEntity = dataService.findOne(MatchingTaskEntity.ENTITY_NAME,

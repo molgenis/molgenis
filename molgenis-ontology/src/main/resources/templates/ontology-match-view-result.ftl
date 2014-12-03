@@ -116,7 +116,7 @@
 					});
 				});
 				function initEventHelper(request, totalNumber){
-					var ontologyService = new molgenis.OntologySerivce($('#match-result-container'), request);
+					var ontologyService = new molgenis.OntologyService($('#match-result-container'), request);
 					var itermsPerPage = 5;
 					$('#pager').pager({
 						'nrItems' : totalNumber,
