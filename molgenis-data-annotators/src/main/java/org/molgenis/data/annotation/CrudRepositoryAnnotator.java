@@ -73,7 +73,7 @@ public class CrudRepositoryAnnotator
 
 		CrudRepository crudRepository = iterateOverEntitiesAndAnnotate(createCopy, sourceRepo, targetRepo, annotator);
 		
-		logger.info("Finished annotating");
+		logger.info("Finished annotating with " + annotator.getName());
 		
 		return crudRepository;
 	}
