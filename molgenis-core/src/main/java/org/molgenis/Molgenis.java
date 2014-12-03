@@ -41,11 +41,6 @@ import org.molgenis.generators.db.EntitiesImporterGen;
 import org.molgenis.generators.db.EntitiesValidatorGen;
 import org.molgenis.generators.db.JDBCMetaDatabaseGen;
 import org.molgenis.generators.db.PersistenceGen;
-import org.molgenis.generators.doc.DotDocGen;
-import org.molgenis.generators.doc.DotDocMinimalGen;
-import org.molgenis.generators.doc.DotDocModuleDependencyGen;
-import org.molgenis.generators.doc.FileFormatDocGen;
-import org.molgenis.generators.doc.ObjectModelDocGen;
 import org.molgenis.model.MolgenisModel;
 import org.molgenis.model.elements.Model;
 
@@ -189,29 +184,6 @@ public class Molgenis
 		if (!options.output_web.endsWith("/")) options.output_web = options.output_web + "/";
 		options.output_doc = outputPath != null ? outputPath + options.output_doc : options.output_doc;
 		if (!options.output_doc.endsWith("/")) options.output_doc = options.output_doc + "/";
-
-		// DOCUMENTATION
-		if (options.generate_doc)
-		{
-			generators.add(new FileFormatDocGen());
-			// check if dot is available to prevent error lists in the build logs
-			try
-			{
-				Runtime.getRuntime().exec("dot -?");
-				generators.add(new DotDocGen());
-				generators.add(new DotDocMinimalGen());
-			}
-			catch (Exception e)
-			{
-				// dot not available
-			}
-			generators.add(new ObjectModelDocGen());
-			generators.add(new DotDocModuleDependencyGen());
-		}
-		else
-		{
-			logger.debug("Skipping documentation ....");
-		}
 
 		if (options.generate_jpa)
 		{
