@@ -1,4 +1,4 @@
-package org.molgenis.ontology.service;
+package org.molgenis.ontology.response;
 
 import org.molgenis.data.elasticsearch.util.SearchResult;
 

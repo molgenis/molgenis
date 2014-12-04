@@ -10,24 +10,19 @@ import java.util.Set;
 import org.tartarus.snowball.ext.PorterStemmer;
 
 /**
- * This class has implemented Levenshtein distance algorithm so a similarity
- * score could be calculated between two sequences. The two input strings would
- * be tokenized depending on what nGrams we have specified. The default ngram is
- * 2 which can be changed in the constructor. The two groups of tokens will be
- * further used to work out the similarity score. In addition, by default a list
- * of stop words has been defined, in the method stringMatching(), one of the
- * parameters "removeStopWords" indicates whether the stop words will be used to
- * remove the useless or meaningless words from the String. This the stop words
- * could be customized by setStopWords(List<String> stopWords) or
+ * This class has implemented Levenshtein distance algorithm so a similarity score could be calculated between two
+ * sequences. The two input strings would be tokenized depending on what nGrams we have specified. The default ngram is
+ * 2 which can be changed in the constructor. The two groups of tokens will be further used to work out the similarity
+ * score. In addition, by default a list of stop words has been defined, in the method stringMatching(), one of the
+ * parameters "removeStopWords" indicates whether the stop words will be used to remove the useless or meaningless words
+ * from the String. This the stop words could be customized by setStopWords(List<String> stopWords) or
  * setStopWords(String[] stopWords).
  * 
- * How to use? LevenShteinDistanceModel model = new LevenShteinDistanceModel(2);
- * double similarityScore = model.stringMatching("Smoking", "Smoker", false);
- * System.out.println(similarityScore);
+ * How to use? LevenShteinDistanceModel model = new LevenShteinDistanceModel(2); double similarityScore =
+ * model.stringMatching("Smoking", "Smoker", false); System.out.println(similarityScore);
  * 
- * The other way List<String> tokens_1 = model.createNGrams("Smoking", false);
- * List<String> tokens_2 = model.createNGrams("Have you smoked last year?",
- * true); //remove stop words! double similarityScore =
+ * The other way List<String> tokens_1 = model.createNGrams("Smoking", false); List<String> tokens_2 =
+ * model.createNGrams("Have you smoked last year?", true); //remove stop words! double similarityScore =
  * model.calculateScore(tokens_1, tokens_2);
  * 
  * 
@@ -122,7 +117,7 @@ public class NGramMatchingModel
 		return Double.parseDouble(df.format(matchedTokens / totalToken * 100));
 	}
 
-	private static String stemmerString(String originalString)
+	private static synchronized String stemmerString(String originalString)
 	{
 		stemmer.setCurrent(originalString.trim());
 		stemmer.stem();

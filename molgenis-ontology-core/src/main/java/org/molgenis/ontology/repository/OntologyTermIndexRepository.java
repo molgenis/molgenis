@@ -137,10 +137,7 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 				entity.set(ONTOLOGY_TERM_DEFINITION, classContainer.getClassDefinition());
 				entity.set(ONTOLOGY_TERM_IRI, cls.getIRI().toString());
 				entity.set(ENTITY_TYPE, TYPE_ONTOLOGYTERM);
-				entity.set(
-						SYNONYMS,
-						classContainer.getClassLabel().replaceAll(ILLEGAL_CHARACTERS_PATTERN,
-								ILLEGAL_CHARACTERS_REPLACEMENT));
+				entity.set(SYNONYMS, classContainer.getClassLabel());
 				entity.set(ALTERNATIVE_DEFINITION, classContainer.getAssociatedClasses());
 
 				if (classContainer.getAllDatabaseIds() != null)
@@ -180,9 +177,11 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 	}
 
 	/**
-	 * A helper function to construct the nodePath with a pattern which is started with the position of current node
-	 * compared to its siblings and followed by the depth of the tree such as 2[1]. Moreover it the parent node is
-	 * prepended to the current node to construct complete path such as 0[0].2[1]
+	 * A helper function to construct the nodePath with a pattern which is
+	 * started with the position of current node compared to its siblings and
+	 * followed by the depth of the tree such as 2[1]. Moreover it the parent
+	 * node is prepended to the current node to construct complete path such as
+	 * 0[0].2[1]
 	 * 
 	 * @param parentNodePath
 	 * @return
@@ -200,7 +199,8 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 	}
 
 	/**
-	 * A helper function to create alternative definitions stored in string for ontology terms.
+	 * A helper function to create alternative definitions stored in string for
+	 * ontology terms.
 	 * 
 	 * @param cls
 	 * @return
