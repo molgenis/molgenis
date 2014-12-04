@@ -299,7 +299,6 @@
 					}),
 					displaySiblings : false
 				});
-				console.log('treeSettings', treeSettings);
 				createTreeConfig(treeSettings, callback);
 			});
 		}
