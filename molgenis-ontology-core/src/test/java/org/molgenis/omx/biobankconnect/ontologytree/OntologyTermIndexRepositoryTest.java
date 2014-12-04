@@ -1,23 +1,17 @@
 package org.molgenis.omx.biobankconnect.ontologytree;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.validateMockitoUsage;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.elasticsearch.util.Hit;
-import org.molgenis.data.elasticsearch.util.SearchRequest;
-import org.molgenis.data.elasticsearch.util.SearchResult;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
@@ -144,9 +138,9 @@ public class OntologyTermIndexRepositoryTest
 		when(searchService.count(new QueryImpl().pageSize(Integer.MAX_VALUE).offset(Integer.MIN_VALUE), entityMetaData))
 				.thenReturn(new Long(3));
 
-		Hit hit = mock(Hit.class);
-		when(searchService.search(new SearchRequest(entityMetaData.getName(), new QueryImpl().pageSize(1), null)))
-				.thenReturn(new SearchResult(1, Arrays.asList(hit)));
+		Entity hit = mock(Entity.class);
+		when(hit.getAttributeNames()).thenReturn(Arrays.asList("OMIM", "HPO"));
+		when(searchService.search(new QueryImpl().pageSize(1), entityMetaData)).thenReturn(Arrays.asList(hit));
 
 		DataService dataService = mock(DataService.class);
 		OntologyService ontologyService = mock(OntologyService.class);
