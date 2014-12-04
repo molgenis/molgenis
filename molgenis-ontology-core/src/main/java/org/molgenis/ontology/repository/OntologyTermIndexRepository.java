@@ -8,7 +8,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.data.Countable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.support.MapEntity;
@@ -19,7 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.collect.TreeTraverser;
 
-public class OntologyTermIndexRepository extends AbstractOntologyRepository implements Countable
+public class OntologyTermIndexRepository extends AbstractOntologyRepository
 {
 	private final static String PSEUDO_ROOT_CLASS_LABEL = "top";
 	private final OntologyLoader ontologyLoader;
@@ -51,12 +50,6 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 				}
 			}
 		}
-	}
-
-	@Override
-	public long count()
-	{
-		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -177,11 +170,9 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 	}
 
 	/**
-	 * A helper function to construct the nodePath with a pattern which is
-	 * started with the position of current node compared to its siblings and
-	 * followed by the depth of the tree such as 2[1]. Moreover it the parent
-	 * node is prepended to the current node to construct complete path such as
-	 * 0[0].2[1]
+	 * A helper function to construct the nodePath with a pattern which is started with the position of current node
+	 * compared to its siblings and followed by the depth of the tree such as 2[1]. Moreover it the parent node is
+	 * prepended to the current node to construct complete path such as 0[0].2[1]
 	 * 
 	 * @param parentNodePath
 	 * @return
@@ -199,8 +190,7 @@ public class OntologyTermIndexRepository extends AbstractOntologyRepository impl
 	}
 
 	/**
-	 * A helper function to create alternative definitions stored in string for
-	 * ontology terms.
+	 * A helper function to create alternative definitions stored in string for ontology terms.
 	 * 
 	 * @param cls
 	 * @return
