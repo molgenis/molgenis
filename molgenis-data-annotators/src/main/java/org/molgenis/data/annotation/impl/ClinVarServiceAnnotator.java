@@ -109,6 +109,7 @@ public class ClinVarServiceAnnotator extends VariantAnnotator
 				List<String> fileLines = IOUtils.readLines(new InputStreamReader(new FileInputStream(new File(
 						molgenisSettings.getProperty(CLINVAR_FILE_LOCATION_PROPERTY))), "UTF-8"));
 
+				HashMap<String, Object> resultMap = new HashMap<String, Object>();
 				for (String line : fileLines)
 				{
 					if (!line.startsWith("#"))
@@ -116,20 +117,22 @@ public class ClinVarServiceAnnotator extends VariantAnnotator
 						String[] split = line.split("\t");
 						for (String gene : geneSymbols)
 						{
-							if (gene.equals(split[4]))
+							if (split[1].equals("single nucleotide variant"))
 							{
-								if (split[1].equals("single nucleotide variant"))
+								String[] hgvs = split[2].split(">");
+								if (hgvs.length > 1)
 								{
-									HashMap<String, Object> resultMap = new HashMap<String, Object>();
-									if (position.equals(Long.parseLong(split[14])))
-									{
-										String[] hgvs = split[2].split(">");
-										String hgvsRef = hgvs[0].substring(hgvs[0].length() - 1);
-										String hgvsAlt = hgvs[1].substring(0, 1);
+									String hgvsRef = hgvs[0].substring(hgvs[0].length() - 1);
+									String hgvsAlt = hgvs[1].substring(0, 1);
 
-										// Check if ref and alt allele match, and check for reverse strand annotation
-										if ((referenceAllele.equals(hgvsRef) && alternativeAllele.equals(hgvsAlt))
-												|| (alternativeAllele.equals(hgvsRef) && referenceAllele.equals(hgvsAlt)))
+									if (split[14].length() > 0)
+									{
+										if ((gene.equals(split[4]))
+												&& (position.equals(Long.parseLong(split[14])))
+												&& (referenceAllele.equals(hgvsRef) && alternativeAllele
+														.equals(hgvsAlt))
+												|| (alternativeAllele.equals(hgvsRef) && referenceAllele
+														.equals(hgvsAlt)))
 										{
 											resultMap.put(ALLELEID, split[0]);
 											resultMap.put(TYPE, split[1]);
@@ -156,14 +159,16 @@ public class ClinVarServiceAnnotator extends VariantAnnotator
 											resultMap.put(GUIDELINES, split[22]);
 											resultMap.put(OTHERIDS, split[23]);
 											resultMap.put(VARIANTIDS, split[24]);
-
-											results.add(getAnnotatedEntity(entity, resultMap));
 										}
 									}
 								}
 							}
 						}
 					}
+				}
+				if (resultMap.size() < 1)
+				{
+					results.add(getAnnotatedEntity(entity, resultMap));
 				}
 			}
 			else
