@@ -4,7 +4,7 @@
 <#assign js=["indexmanager.js"]>
 <@header css js/>
 <#if entities?has_content>
-    <form id="reindex-form" method="post" name="reindex-form" action="${context_url}/reindex" role="form">
+    <form id="reindex-form" method="post" name="reindex-form" action="${context_url?html}/reindex" role="form">
     <#list entities as entity>
         <div class="radio">
             <label>
