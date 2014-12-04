@@ -6,6 +6,7 @@ import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -18,8 +19,8 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.impl.datastructures.HGNCLocations;
-import org.molgenis.data.annotation.provider.HgncLocationsProvider;
+import org.molgenis.data.annotation.impl.datastructures.ClinvarData;
+import org.molgenis.data.annotation.provider.ClinvarDataProvider;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.framework.server.MolgenisSettings;
@@ -98,8 +99,8 @@ public class ClinVarServiceAnnotatorTest
 				MolgenisFieldTypes.getType(FieldTypeEnum.INT.toString().toLowerCase()));
 
 		attributeMetaDataCantAnnotateAlt = mock(AttributeMetaData.class);
-		when(attributeMetaDataCantAnnotateRef.getName()).thenReturn(ClinVarServiceAnnotator.ALTERNATIVE);
-		when(attributeMetaDataCantAnnotateRef.getDataType()).thenReturn(
+		when(attributeMetaDataCantAnnotateAlt.getName()).thenReturn(ClinVarServiceAnnotator.ALTERNATIVE);
+		when(attributeMetaDataCantAnnotateAlt.getDataType()).thenReturn(
 				MolgenisFieldTypes.getType(FieldTypeEnum.INT.toString().toLowerCase()));
 
 		when(metaDataCantAnnotate.getAttribute(ClinVarServiceAnnotator.CHROMOSOME)).thenReturn(attributeMetaDataChrom);
@@ -122,12 +123,19 @@ public class ClinVarServiceAnnotatorTest
 		input = new ArrayList<Entity>();
 		input.add(entity);
 
+		ClinvarDataProvider clinvarDataProvider = mock(ClinvarDataProvider.class);
 		AnnotationService annotationService = mock(AnnotationService.class);
-		HgncLocationsProvider hgncLocationsProvider = mock(HgncLocationsProvider.class);
-		Map<String, HGNCLocations> locationsMap = Collections.singletonMap("KIF5A", new HGNCLocations("KIF5A",
-				57966300l, 57966800l, "12"));
-		when(hgncLocationsProvider.getHgncLocations()).thenReturn(locationsMap);
-		annotator = new ClinVarServiceAnnotator(settings, annotationService, hgncLocationsProvider);
+
+		Map<List<String>, ClinvarData> clinvarDataMap = Collections.singletonMap(Arrays.asList("12", "57966471", "G",
+				"A"), new ClinvarData("82492", "single nucleotide variant", "KIF5A:c.1678G>A (p.Glu560Lys)", "3798",
+				"KIF5A", "not provided", "142701108", "-", "RCV000062571", "N", "MedGen:C0025202,SNOMED CT:2092003",
+				"somatic", "GRCh37", "12", "57966471", "57966471", "12q13.3", "not classified by submitter",
+				"NM_004984.2:c.1678G>A", "NP_004975.2:p.Glu560Lys", "1", "-", "-", "ClinVar:NM_004984.2:c.1678G>A",
+				"71601"));
+
+		when(clinvarDataProvider.getClinvarData()).thenReturn(clinvarDataMap);
+		
+		annotator = new ClinVarServiceAnnotator(settings, annotationService, clinvarDataProvider);
 		when(entity.getEntityMetaData()).thenReturn(metaDataCanAnnotate);
 	}
 
