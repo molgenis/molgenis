@@ -169,7 +169,7 @@
 			select : function(e, data) {
 				var node = data.node;
 				if (node.folder) {
-					if (node.extraClasses == 'inactive'){
+					if (node.extraClasses === 'inactive'){
 						node.setSelected(false);//You can't select inactive nodes
 					}
 					else if (settings.onFolderSelect){
