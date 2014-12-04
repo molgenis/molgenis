@@ -48,9 +48,8 @@ public class CrudRepositoryAnnotator
 	 * @param createCopy
 	 * 
 	 *            FIXME: currently the annotators have to have knowledge about mySQL to add the annotated attributes
-	 *            FIXME: "createCopy" functionality should be implemented FIXME: annotators only work for MySQL and
-	 *            Repositories that update their metadata when an Repository.update(Entity) is called. (like the
-	 *            workaround in the elasticSearchRepository)
+	 *            FIXME: annotators only work for MySQL and Repositories that update their metadata when an
+	 *            Repository.update(Entity) is called. (like the workaround in the elasticSearchRepository)
 	 * 
 	 * */
 	@Transactional
@@ -60,21 +59,24 @@ public class CrudRepositoryAnnotator
 		{
 			throw new UnsupportedOperationException("Currently only CrudRepositories can be annotated");
 		}
-		
-		logger.info("Starting annotator " + annotator.getName());
-		if(createCopy) logger.info("Creating a copy of " + sourceRepo.getName() + " repository");
-		if(!createCopy) logger.info("Annotating " + sourceRepo.getName() + " repository");
+
+		if (createCopy) logger.info("Creating a copy of " + sourceRepo.getName() + " repository, which will be called "
+				+ newRepositoryName);
+
+		if (!createCopy) logger.info("Annotating " + sourceRepo.getName() + " repository with the "
+				+ annotator.getName() + " annotator");
 
 		EntityMetaData entityMetaData = sourceRepo.getEntityMetaData();
-		DefaultAttributeMetaData compoundAttributeMetaData = getCompoundResultAttribute(annotator, getAttributeName(entityMetaData, annotator));
+		DefaultAttributeMetaData compoundAttributeMetaData = getCompoundResultAttribute(annotator,
+				getAttributeName(entityMetaData, annotator));
 
 		CrudRepository targetRepo = addAnnotatorMetadataToRepositories(entityMetaData, createCopy,
 				compoundAttributeMetaData);
 
 		CrudRepository crudRepository = iterateOverEntitiesAndAnnotate(createCopy, sourceRepo, targetRepo, annotator);
-		
-		logger.info("Finished annotating with " + annotator.getName());
-		
+
+		logger.info("Finished annotating " + sourceRepo.getName() + " with the " + annotator.getName() + " annotator");
+
 		return crudRepository;
 	}
 
@@ -116,10 +118,9 @@ public class CrudRepositoryAnnotator
 
 	/**
 	 * Adds a new compound attribute to an existing mysql CrudRepository which is part of the
+	 * {@link #mysqlRepositoryCollection} or an existing CrudRepository which is not part of
 	 * {@link #mysqlRepositoryCollection}.
 	 * 
-	 * @param annotator
-	 *            the {@link RepositoryAnnotator} that is used to determine the name of the compound attribute to add
 	 * @param metadata
 	 *            {@link EntityMetaData} for the existing repository
 	 * @param createCopy
@@ -128,33 +129,33 @@ public class CrudRepositoryAnnotator
 	public CrudRepository addAnnotatorMetadataToRepositories(EntityMetaData metadata, boolean createCopy,
 			DefaultAttributeMetaData compoundAttributeMetaData)
 	{
-		if (mysqlRepositoryCollection.getRepositoryByEntityName(metadata.getName()) != null)
+		if (createCopy)
 		{
-			if (createCopy)
-			{
-				DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(newRepositoryName, metadata);
-				newEntityMetaData.addAttributeMetaData(compoundAttributeMetaData);
-				newEntityMetaData.setLabel(newRepositoryName);
-				return mysqlRepositoryCollection.add(newEntityMetaData);
-			}
-			else
+			DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(newRepositoryName, metadata);
+			newEntityMetaData.addAttributeMetaData(compoundAttributeMetaData);
+			newEntityMetaData.setLabel(newRepositoryName);
+			return mysqlRepositoryCollection.add(newEntityMetaData);
+		}
+		else
+		{
+			if (mysqlRepositoryCollection.getRepositoryByEntityName(metadata.getName()) != null)
 			{
 				DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(metadata);
 				newEntityMetaData.addAttributeMetaData(compoundAttributeMetaData);
 				mysqlRepositoryCollection.update(newEntityMetaData);
 				return null;
 			}
-		}
-		else
-		{
-			if (!(metadata instanceof EditableEntityMetaData))
+			else
 			{
-				throw new UnsupportedOperationException("EntityMetadata should be editable to make annotation possible");
+				if (!(metadata instanceof EditableEntityMetaData))
+				{
+					throw new UnsupportedOperationException(
+							"EntityMetadata should be editable to make annotation possible");
+				}
+				EditableEntityMetaData editableMetadata = (EditableEntityMetaData) metadata;
+				editableMetadata.addAttributeMetaData(compoundAttributeMetaData);
+				return null;
 			}
-			EditableEntityMetaData editableMetadata = (EditableEntityMetaData) metadata;
-			editableMetadata.addAttributeMetaData(compoundAttributeMetaData);
-
-			return null;
 		}
 	}
 
