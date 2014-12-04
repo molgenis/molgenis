@@ -230,7 +230,7 @@ public class FeedbackControllerTest extends AbstractTestNGSpringContextTests
 								"feedbackForm",
 								hasProperty("errorMessage",
 										equalTo("Unfortunately, we were unable to send the mail containing "
-												+ "your feedback.<br/>Please contact the administrator."))));
+												+ "your feedback. Please contact the administrator."))));
 		verify(captchaService, times(1)).consumeCaptcha("validCaptcha");
 	}
 
