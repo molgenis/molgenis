@@ -1,11 +1,14 @@
 package org.molgenis.data.annotation;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.CrudRepository;
 import org.molgenis.data.Repository;
 import org.molgenis.data.EntityMetaData;
@@ -68,7 +71,7 @@ public class CrudRepositoryAnnotator
 
 		EntityMetaData entityMetaData = sourceRepo.getEntityMetaData();
 		DefaultAttributeMetaData compoundAttributeMetaData = getCompoundResultAttribute(annotator,
-				getAttributeName(entityMetaData, annotator));
+				getAttributeName(entityMetaData, annotator), entityMetaData);
 
 		CrudRepository targetRepo = addAnnotatorMetadataToRepositories(entityMetaData, createCopy,
 				compoundAttributeMetaData);
@@ -159,15 +162,33 @@ public class CrudRepositoryAnnotator
 		}
 	}
 
-	public DefaultAttributeMetaData getCompoundResultAttribute(RepositoryAnnotator annotator, String attributeName)
+	public DefaultAttributeMetaData getCompoundResultAttribute(RepositoryAnnotator annotator, String attributeName,
+			EntityMetaData entityMetaData)
 	{
 		DefaultAttributeMetaData compoundAttributeMetaData = new DefaultAttributeMetaData(attributeName,
 				MolgenisFieldTypes.FieldTypeEnum.COMPOUND);
 		compoundAttributeMetaData.setLabel(annotator.getName());
 
-		// FIXME #2187
-		// change the outputMetaData attribute name so we dont get duplicate column name errors from mysql
-		compoundAttributeMetaData.setAttributesMetaData(annotator.getOutputMetaData().getAtomicAttributes());
+		Iterator<AttributeMetaData> amdIterator = annotator.getOutputMetaData().getAtomicAttributes().iterator();
+
+		while (amdIterator.hasNext())
+		{
+			AttributeMetaData currentAmd = amdIterator.next();
+			String currentAttributeName = currentAmd.getName();
+			if (entityMetaData.getAttribute(currentAttributeName) != null)
+			{
+				String date = new SimpleDateFormat("yyMMddhhmmss").format(new Date());
+				String newName = annotator.getName() + "_" + currentAttributeName + "_" + date;
+				DefaultAttributeMetaData amd = new DefaultAttributeMetaData(newName, currentAmd);
+				amd.setLabel(newName);
+				compoundAttributeMetaData.addAttributePart(amd);
+			}
+			else
+			{
+				compoundAttributeMetaData.addAttributePart(currentAmd);
+			}
+		}
+
 		return compoundAttributeMetaData;
 	}
 
