@@ -370,9 +370,10 @@ public class OntologyServiceController extends MolgenisPluginController
 					new QueryImpl().eq(MatchingTaskEntity.IDENTIFIER, entityName));
 			model.addAttribute(
 					"message",
-					"The task name should be case insensitive, the task name <strong>" + entityName
-							+ "</strong> has existed and created by user : " + matchingTaskEntity != null ? matchingTaskEntity
-							.get(MatchingTaskEntity.MOLGENIS_USER) : StringUtils.EMPTY);
+					"The task name should be case insensitive, the task name <strong>"
+							+ entityName
+							+ "</strong> has existed and created by user : "
+							+ (matchingTaskEntity != null ? matchingTaskEntity.get(MatchingTaskEntity.MOLGENIS_USER) : StringUtils.EMPTY));
 			return init(model);
 		}
 
