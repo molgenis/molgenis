@@ -11,7 +11,7 @@
 					var protocolUri = restApi.getHref('protocol', protocolId);
 					var protocol = restApi.get(protocolUri, {'expand': subTree ? ['features'] : []});
 					
-					var selected = parentSelected || selectedNodes.hasOwnProperty(protocol.href.toLowerCase());
+					var selected = selectedNodes.hasOwnProperty(protocol.href.toLowerCase());
 					
 					// create protocol node
 					var node = {
@@ -21,7 +21,7 @@
 						lazy: subTree === null,
 						expanded: !settings.displaySiblings,
 						hideCheckbox: depth <= settings.disableSelectDepth,
-						selected: false,
+						selected: selected,
 						extraClasses: protocol.active ? '' : 'inactive'
 					};
 					if (protocol.description)
@@ -173,6 +173,7 @@
 						node.setSelected(false);//You can't select inactive nodes
 					}
 					else if (settings.onFolderSelect){
+						if(node.parent.childeren.length) {}
 						settings.onFolderSelect(node.key, node.selected);
 					}
 				}
