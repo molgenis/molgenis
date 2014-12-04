@@ -70,8 +70,8 @@ public class ProcessInputTermService
 		uploadProgress.registerUser(userName, entityName);
 		// Add the original input dataset to database
 		mysqlRepositoryCollection.add(repositoryCollection.getRepositoryByEntityName(entityName).getEntityMetaData());
-
 		emxImportService.doImport(repositoryCollection, DatabaseAction.ADD);
+		dataService.getCrudRepository(entityName).flush();
 
 		// Add a new entry in MatchingTask table for this new matching job
 		int threshold = uploadProgress.getThreshold(userName);
