@@ -68,11 +68,6 @@
 <script type="text/javascript">
 	$(document).ready(function(){
 		var molgenis = window.top.molgenis;
-		<#if message??>
-		molgenis.createAlert([ {
-			'message' : '${message?js_string}'
-		}], 'error');
-		</#if>
 		$('#match-button').click(function(){
 			if($('[name="selectOntologies"]').length === 0) {
 				molgenis.createAlert([{'message':'There are not ontologies avaiable!'}], 'error');

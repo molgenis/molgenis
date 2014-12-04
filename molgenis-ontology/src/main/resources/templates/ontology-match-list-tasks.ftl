@@ -58,12 +58,6 @@
 				modal.modal('show');
 			});
 		});
-		<#if message??>
-		var molgenis = window.top.molgenis;
-		molgenis.createAlert([ {
-			'message' : '${message?js_string}'
-		}], 'error');
-		</#if>
 	});
 </script>
 </#macro>

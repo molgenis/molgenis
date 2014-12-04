@@ -140,7 +140,7 @@ public class OntologyServiceController extends MolgenisPluginController
 			}
 			catch (Exception e)
 			{
-				logger.error(threshold + " is illegal threshold value!");
+				model.addAttribute("message", threshold + " is illegal threshold value!");
 			}
 		}
 
@@ -370,7 +370,8 @@ public class OntologyServiceController extends MolgenisPluginController
 					new QueryImpl().eq(MatchingTaskEntity.IDENTIFIER, entityName));
 			model.addAttribute(
 					"message",
-					"The task name has existed and created by user : "
+					"The task name should be case insensitive, the task name <strong>" + entityName
+							+ "</strong> has existed and created by user : "
 							+ matchingTaskEntity.get(MatchingTaskEntity.MOLGENIS_USER));
 			return init(model);
 		}

@@ -28,7 +28,7 @@ public class UploadProgress
 		userFinishedNumber = new HashMap<String, Integer>();
 	}
 
-	public float getPercentage(String userName)
+	public synchronized float getPercentage(String userName)
 	{
 		if (userTotalNumber.containsKey(userName) && userFinishedNumber.containsKey(userName)
 				&& userTotalNumber.get(userName) != ILLEGAL_DENOMINATOR)
@@ -39,24 +39,24 @@ public class UploadProgress
 		return 0;
 	}
 
-	public int getThreshold(String userName)
+	public synchronized int getThreshold(String userName)
 	{
 		if (userThreshold.containsKey(userName)) return userThreshold.get(userName);
 
 		return 0;
 	}
 
-	public boolean isUserExists(String userName)
+	public synchronized boolean isUserExists(String userName)
 	{
 		return currentUsers.contains(userName);
 	}
 
-	public String getCurrentJob(String userName)
+	public synchronized String getCurrentJob(String userName)
 	{
 		return currentJobs.containsKey(userName) ? currentJobs.get(userName) : StringUtils.EMPTY;
 	}
 
-	public void incrementProgress(String userName)
+	public synchronized void incrementProgress(String userName)
 	{
 		if (userFinishedNumber.containsKey(userName))
 		{
@@ -64,22 +64,22 @@ public class UploadProgress
 		}
 	}
 
-	public void resetUserThreshold(String userName, Integer threshold)
+	public synchronized void resetUserThreshold(String userName, Integer threshold)
 	{
 		userThreshold.put(userName, threshold);
 	}
 
-	public void setUserClickMode(String userName, Boolean mode)
+	public synchronized void setUserClickMode(String userName, Boolean mode)
 	{
 		userClickMode.put(userName, mode);
 	}
 
-	public Boolean getUserClickMode(String userName)
+	public synchronized Boolean getUserClickMode(String userName)
 	{
 		return userClickMode.containsKey(userName) ? userClickMode.get(userName) : false;
 	}
 
-	public void registerUser(String userName, String currentJob, Integer totalNumber)
+	public synchronized void registerUser(String userName, String currentJob, Integer totalNumber)
 	{
 		currentUsers.add(userName);
 		userTotalNumber.put(userName, totalNumber);
@@ -89,12 +89,12 @@ public class UploadProgress
 		userThreshold.put(userName, DEFAULT_THRESHOLD);
 	}
 
-	public void registerUser(String userName, String currentJob)
+	public synchronized void registerUser(String userName, String currentJob)
 	{
 		registerUser(userName, currentJob, ILLEGAL_DENOMINATOR);
 	}
 
-	public void removeUser(String userName)
+	public synchronized void removeUser(String userName)
 	{
 		currentUsers.remove(userName);
 		userTotalNumber.remove(userName);

@@ -77,7 +77,7 @@ public class AdaptedCsvRepository implements Repository
 			@Override
 			public void remove()
 			{
-
+				throw new UnsupportedOperationException();
 			}
 		};
 	}
@@ -85,7 +85,7 @@ public class AdaptedCsvRepository implements Repository
 	@Override
 	public void close() throws IOException
 	{
-
+		csvRepository.close();
 	}
 
 	@Override
