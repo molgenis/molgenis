@@ -16,7 +16,7 @@
 	};
 
 	var updateCatalog = function(catalogId, selection) {
-		$('#catalog-container').catalog(null, {
+		$('#catalog-container').catalog({
 			'selection' : Catalog.getEnableSelection(),
 			'protocolId' : catalogId,
 			'selectedItems' : selection.items ? $.map(selection.items, function(selectedItem) { return selectedItem.protocol.toLowerCase(); }) : null, // FIXME catalog requires group info

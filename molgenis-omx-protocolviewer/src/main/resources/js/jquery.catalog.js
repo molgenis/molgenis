@@ -173,7 +173,6 @@
 						node.setSelected(false);//You can't select inactive nodes
 					}
 					else if (settings.onFolderSelect){
-						if(node.parent.childeren.length) {}
 						settings.onFolderSelect(node.key, node.selected);
 					}
 				}
@@ -306,12 +305,16 @@
 	};
 	
 	// default pager settings
-	$.fn.catalog = function(functionName, options) {
+	$.fn.catalog = function(options) {
 		var container = this;
 		
-		if(functionName){
-			container.data('catalog')[functionName](options);
-			return false;
+		// call pager method
+		if (typeof options == 'string') {
+			var args = Array.prototype.slice.call(arguments, 1);
+			if (args.length === 0)
+				return container.data('catalog')[options]();
+			else if (args.length === 1)
+				return container.data('catalog')[options](args[0]);
 		}
 
 		// create catalog controls
