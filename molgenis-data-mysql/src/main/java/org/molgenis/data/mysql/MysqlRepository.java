@@ -33,6 +33,7 @@ import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.support.AbstractCrudRepository;
 import org.molgenis.data.support.BatchingQueryResult;
 import org.molgenis.data.support.ConvertingIterable;
+import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.FieldType;
@@ -1306,20 +1307,10 @@ public class MysqlRepository extends AbstractCrudRepository implements Manageabl
 			{
 				if (att.getExpression() != null)
 				{
-					// computed attribute
-					Gson gson = new Gson();
-					Object expression = gson.fromJson(att.getExpression(), Object.class);
-					if (expression instanceof String)
-					{
-						e.set(att.getName(), e.get(att.getExpression()));
-					}
-					else
-					{
-						System.out.println("expression:" + expression + " instanceof " + expression.getClass());
-					}
+					// at least one attribute is computed
+					return new EntityWithComputedAttributes(e);
 				}
 			}
-
 			return e;
 
 		}

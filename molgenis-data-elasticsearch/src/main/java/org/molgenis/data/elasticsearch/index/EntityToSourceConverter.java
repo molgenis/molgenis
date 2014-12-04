@@ -10,12 +10,12 @@ import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
-import com.google.gson.Gson;
 
 /**
  * Converts entities to Elasticsearch documents
@@ -60,43 +60,7 @@ public class EntityToSourceConverter
 	{
 		if (attributeMetaData.getExpression() != null)
 		{
-			Gson gson = new Gson();
-			Object expression = gson.fromJson(attributeMetaData.getExpression(), Object.class);
-			if (expression instanceof String)
-			{
-				// TODO: better typing!
-				return entity.get((String) expression);
-			}
-			else
-			{
-				if (expression instanceof Map<?, ?>)
-				{
-					Map<String, Object> attributeExpressions = (Map<String, Object>) expression;
-					EntityMetaData refEntity = attributeMetaData.getRefEntity();
-					Map<String, Object> result = new HashMap<String, Object>();
-					for (AttributeMetaData targetAttribute : refEntity.getAtomicAttributes())
-					{
-						String attributeName = targetAttribute.getName();
-						if (attributeExpressions.containsKey(attributeName))
-						{
-							Object attributeExpression = attributeExpressions.get(attributeName);
-							if (attributeExpression instanceof String)
-							{
-								result.put(attributeName, entity.get((String) attributeExpression));
-							}
-							else
-							{
-								// TODO!
-							}
-						}
-					}
-					return result;
-				}
-				else
-				{
-					return null;
-				}
-			}
+			entity = new EntityWithComputedAttributes(entity);
 		}
 
 		Object value;
