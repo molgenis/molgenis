@@ -132,7 +132,7 @@
 					editor.setTheme("ace/theme/eclipse");
     				editor.getSession().setMode("ace/mode/r");
     					
-    				var textarea = $("#${fieldName?htextarea").hide();
+    				var textarea = $("#${fieldName?html}-textarea").hide();
 					editor.getSession().setValue(textarea.val());
 					editor.getSession().on('change', function(){
   						textarea.val(editor.getSession().getValue());

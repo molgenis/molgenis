@@ -173,7 +173,7 @@
 						node.setSelected(false);//You can't select inactive nodes
 					}
 					else if (settings.onFolderSelect){
-						settings.onFolderSelect(node.key, node.selected);
+						settings.onFolderSelect(node.key, node.selected, node.getKeyPath());
 					}
 				}
 			}
@@ -299,6 +299,7 @@
 					}),
 					displaySiblings : false
 				});
+				console.log('treeSettings', treeSettings);
 				createTreeConfig(treeSettings, callback);
 			});
 		}
