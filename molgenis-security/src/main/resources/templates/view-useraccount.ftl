@@ -10,13 +10,13 @@
 				        <div class="control-group">
 							<label class="control-label" for="username">Username</label>
 							<div class="controls">
-								<input type="text" name="username" value="${user.username!}" disabled>
+								<input type="text" name="username" value="${user.username!?html}" disabled>
 							</div>
 						</div>
 						<div class="control-group">
 							<label class="control-label" for="emailaddress">Email address</label>
 							<div class="controls">
-								<input type="email" name="emailaddress" value="${user.email!}" disabled>
+								<input type="email" name="emailaddress" value="${user.email!?html}" disabled>
 							</div>
 						</div>
 					</div>
@@ -47,49 +47,49 @@
 						<div class="control-group">
 							<label class="control-label" for="phone">Phone</label>
 							<div class="controls">
-								<input type="text" name="phone"<#if user.phone??> value="${user.phone}"</#if>>
+								<input type="text" name="phone"<#if user.phone??> value="${user.phone?html}"</#if>>
 							</div>
 						</div>
 						<div class="control-group">
 							<label class="control-label" for="phone">Fax</label>
 							<div class="controls">
-								<input type="text" name="fax"<#if user.fax??> value="${user.fax}"</#if>>
+								<input type="text" name="fax"<#if user.fax??> value="${user.fax?html}"</#if>>
 							</div>
 						</div>
 						<div class="control-group">
 							<label class="control-label" for="tollFreePhone">Toll-free phone</label>
 							<div class="controls">
-								<input type="text" name="tollFreePhone"<#if user.tollFreePhone??> value="${user.tollFreePhone}"</#if>>
+								<input type="text" name="tollFreePhone"<#if user.tollFreePhone??> value="${user.tollFreePhone?html}"</#if>>
 							</div>
 						</div>
 						<div class="control-group">
 							<label class="control-label" for="address">Address</label>
 							<div class="controls">
-								<input type="text" name="address"<#if user.address??> value="${user.address}"</#if>>
+								<input type="text" name="address"<#if user.address??> value="${user.address?html}"</#if>>
 							</div>
 						</div>
 						<div class="control-group">
 							<label class="control-label" for="title">Title</label>
 							<div class="controls">
-								<input type="text" name="title"<#if user.title??> value="${user.title}"</#if>>
+								<input type="text" name="title"<#if user.title??> value="${user.title?html}"</#if>>
 							</div>
 						</div>
 						<div class="control-group">
 							<label class="control-label" for="firstname">First name</label>
 							<div class="controls">
-								<input type="text" name="firstname"<#if user.firstname??> value="${user.firstname}"</#if>>
+								<input type="text" name="firstname"<#if user.firstname??> value="${user.firstname?html}"</#if>>
 							</div>
 						</div>
 						<div class="control-group">
 							<label class="control-label" for="firstname">Middle names</label>
 							<div class="controls">
-								<input type="text" name="middleNames"<#if user.middleNames??> value="${user.middleNames}"</#if>>
+								<input type="text" name="middleNames"<#if user.middleNames??> value="${user.middleNames?html}"</#if>>
 							</div>
 						</div>
 						<div class="control-group">
 							<label class="control-label" for="lastname">Last name</label>
 							<div class="controls">
-								<input type="text" name="lastname"<#if user.lastname??> value="${user.lastname}"</#if>>
+								<input type="text" name="lastname"<#if user.lastname??> value="${user.lastname?html}"</#if>>
 							</div>
 						</div>
 					</div>
@@ -97,25 +97,25 @@
 						<div class="control-group">
 							<label class="control-label" for="institute">Institute</label>
 							<div class="controls">
-								<input type="text" name="institute"<#if user.affiliation??> value="${user.affiliation}"</#if>>
+								<input type="text" name="institute"<#if user.affiliation??> value="${user.affiliation?html}"</#if>>
 							</div>
 						</div>
 						<div class="control-group">
 							<label class="control-label" for="department">Department</label>
 							<div class="controls">
-								<input type="text" name="department"<#if user.department??> value="${user.department}"</#if>>
+								<input type="text" name="department"<#if user.department??> value="${user.department?html}"</#if>>
 							</div>
 						</div>
 						<div class="control-group">
 							<label class="control-label" for="position">Position</label>
 							<div class="controls">
-								<input type="text" name="position"<#if user.role??> value="${user.role}"</#if>>
+								<input type="text" name="position"<#if user.role??> value="${user.role?html}"</#if>>
 							</div>
 						</div>
 						<div class="control-group">
 							<label class="control-label" for="city">City</label>
 							<div class="controls">
-								<input type="text" name="city"<#if user.city??> value="${user.city}"</#if>>
+								<input type="text" name="city"<#if user.city??> value="${user.city?html}"</#if>>
 							</div>
 						</div>
 						<div class="control-group">
@@ -126,7 +126,7 @@
 									<option value="" disabled selected>Please Select</option>
 								</#if>
 								<#list countries?keys as countryCode>
-									<option value="${countryCode}"<#if user.country?? && user.country == countries[countryCode]> selected</#if>>${countries[countryCode]}</option>
+									<option value="${countryCode?html}"<#if user.country?? && user.country == countries[countryCode]> selected</#if>>${countries[countryCode]?html}</option>
 								</#list>
 								</select>
 							</div>
@@ -154,7 +154,7 @@
 			<div class="span4">
 				<ul id="groups" class="inline">
 					<#list groups as group>
-						<li>${group.name}</li>
+						<li>${group.name?html}</li>
 					</#list>
 				</ul>
 			</div>

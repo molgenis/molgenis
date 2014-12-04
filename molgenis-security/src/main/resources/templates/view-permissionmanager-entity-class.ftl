@@ -10,7 +10,7 @@
 				    			<div class="controls">
 									<select name="groupId" id="entity-class-group-select">
 								<#list groups as group>
-										<option value="${group.id?c}"<#if group_index == 0> selected</#if>>${group.name}</option>
+										<option value="${group.id?c?html}"<#if group_index == 0> selected</#if>>${group.name?html}</option>
 								</#list>
 									</select>
 								</div>
@@ -38,7 +38,7 @@
 				    			<div class="controls">
 									<select name="userId" id="entity-class-user-select">
 								<#list users as user>
-										<option value="${user.id?c}"<#if user_index == 0> selected</#if>>${user.username}</option>
+										<option value="${user.id?c?html}"<#if user_index == 0> selected</#if>>${user.username?html}</option>
 								</#list>
 									</select>
 								</div>

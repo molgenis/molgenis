@@ -68,7 +68,7 @@
 						<#assign messageType = "info">
 					</#if>
 					<#if messageType??>
-						<div class="alert alert-${messageType}"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>${messageType?capitalize}!</strong> ${message}</div>
+						<div class="alert alert-${messageType}"><button type="button" class="close" data-dismiss="alert">&times;</button><strong>${messageType?capitalize}!</strong> ${message?html}</div>
 					</#if>
 				</div>
 			</div>

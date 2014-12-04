@@ -93,7 +93,7 @@
 	      <select id="reg-country" name="country">
 	      	<option value="" disabled selected>Please Select</option>
 	      <#list countries?keys as countryCode>
-			<option value="${countryCode}">${countries[countryCode]}</option>
+			<option value="${countryCode?html}">${countries[countryCode]?html}</option>
 		  </#list>
 		  </select>
 	    </div>

@@ -11,7 +11,7 @@
 		</div>
 	<#else>
 		<div class="alert alert-error">
-			<strong>Error!</strong><br/>${feedbackForm.errorMessage}
+			<strong>Error!</strong><br/>${feedbackForm.errorMessage?html}
 		</div>
 	</#if>
 <#elseif adminEmails?has_content>
@@ -44,15 +44,15 @@
    					</#if>
 				</#list>
 				<p>
-					Feel free to email us at <a href='mailto:${adminEmailsString}'>${adminEmailsString}</a>
+					Feel free to email us at <a href='mailto:${adminEmailsString?html}'>${adminEmailsString?html}</a>
 				</p>
 				<label class="control-label" for="form_name">Name</label>
 				<input
-					class="input-xlarge" name="name" size="30" id="form_name" <#if userName??>value="${userName}"</#if>
+					class="input-xlarge" name="name" size="30" id="form_name" <#if userName??>value="${userName?html}"</#if>
 					type="text" />
 				<label class="control-label" for="form_email">Email</label>
 				<input class="input-xlarge" name="email" id="form_email"
-					size="30" type="email" <#if userEmail??>value="${userEmail}"</#if>/>
+					size="30" type="email" <#if userEmail??>value="${userEmail?html}"</#if>/>
 				<label class="control-label"
 					for="form_subject">Subject</label>
 				<input class="input-xxlarge"
