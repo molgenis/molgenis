@@ -5,18 +5,8 @@
 	    <artifactId>molgenis</artifactId>
 	    <version>1.4.0-SNAPSHOT</version>
 	</parent>
-	<artifactId>molgenis-ontology</artifactId>
+	<artifactId>molgenis-ontology-core</artifactId>
 	<packaging>jar</packaging>
-
-	<build>
-		<plugins>
-			<!-- minify css/js -->
-			<plugin>
-				<groupId>com.samaxes.maven</groupId>
-				<artifactId>minify-maven-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</build>
 	
   	<dependencies>
   		<dependency>
@@ -72,16 +62,6 @@
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-data-excel</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-data-mysql</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-ontology-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
