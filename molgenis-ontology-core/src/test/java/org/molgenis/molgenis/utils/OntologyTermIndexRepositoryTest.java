@@ -15,7 +15,6 @@ import org.molgenis.ontology.repository.OntologyTermIndexRepository;
 import org.molgenis.ontology.utils.OntologyLoader;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.ExpectedExceptions;
 import org.testng.annotations.Test;
 
 public class OntologyTermIndexRepositoryTest
@@ -37,13 +36,6 @@ public class OntologyTermIndexRepositoryTest
 	public void getAttributes()
 	{
 		assertEquals(Iterables.size(repository.getEntityMetaData().getAttributes()), 15);
-	}
-
-	@Test
-	@ExpectedExceptions(UnsupportedOperationException.class)
-	public void count()
-	{
-		repository.count();
 	}
 
 	@Test
